@@ -53,7 +53,7 @@ jobs:
           npm ci
           npm run build:sb
           mkdir -p compiled-storybook
-          mv dist/storybook-static compiled-storybook/
+          mv dist/storybook-static/* compiled-storybook/
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ strategy.job-index }}
