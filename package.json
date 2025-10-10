@@ -1,35 +1,97 @@
 {
-  "name": "@tehik-ee/tedi-design-system",
-  "version": "0.0.0",
-  "main": "dist/index.js",
+  "name": "@tedi-design-system/angular",
+  "version": "0.0.0-semantic-version",
+  "type": "module",
+  "main": "community.mjs",
+  "module": "community.mjs",
+  "exports": {
+    "./index.css": {
+      "default": "./index.css"
+    }
+  },
   "scripts": {
     "prepare": "husky",
-    "install:all": "npm install && cd libs/react-components && npm install && cd ../angular-components && npm install && cd ../tedi-core && npm install",
-    "install:react": "npm install && cd libs/react-components && npm install && cd ../tedi-core && npm install",
-    "install:angular": "npm install && cd libs/angular-components && npm install && cd ../tedi-core && npm install",
-    "start:react": "cd libs/react-components && npm run start",
-    "start:angular": "cd libs/angular-components && npm run start"
+    "start": "ng run angular-components:storybook",
+    "build": "ng build angular-components --configuration production && sass --load-path=node_modules src/styles/index.scss dist/index.css --style=compressed --no-source-map && replace-in-file //fonts//g \"./fonts/\" dist/index.css --isRegex && mkdir -p dist/fonts && cp -a node_modules/@tedi-design-system/core/fonts/* dist/fonts/",
+    "build:sb": "ng run angular-components:build-storybook && replace-in-file //fonts//g \"./fonts/\" dist/storybook-static/main.css --isRegex",
+    "lint": "ng lint angular-components --fix",
+    "test": "jest --passWithNoTests",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --config ./jest.config.ts --coverage",
+    "install:clean": "rm -rf node_modules && npm install",
+    "release": "npx semantic-release",
+    "chromatic": "npx chromatic --project-token=$CHROMATIC_PROJECT_TOKEN --build-script-name=build:sb --baseline-branch=rc --include=\"tedi/**/*.stories.*\""
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/TEHIK-EE/tedi-design-system.git"
+  "peerDependencies": {
+    "@angular/animations": "^18.0.0 || ^19.0.0",
+    "@angular/cdk": "^18.0.0 || ^19.0.0",
+    "@angular/common": "^18.0.0 || ^19.0.0",
+    "@angular/core": "^18.0.0 || ^19.0.0",
+    "@angular/forms": "^18.0.0 || ^19.0.0",
+    "@angular/platform-browser": "^18.0.0 || ^19.0.0",
+    "ngx-float-ui": "^19.0.1"
   },
-  "engines": {
-    "npm": ">=8.0.0",
-    "node": ">=18.0.0"
+  "dependencies": {
+    "@tedi-design-system/core": "^2.0.0"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.1.0",
-    "@commitlint/config-conventional": "^20.0.0",
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.0",
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/npm": "^12.0.1",
     "husky": "^9.0.11",
-    "lint-staged": "^16.2.3",
-    "semantic-release": "^24.2.9",
-    "semantic-release-monorepo": "^8.0.2",
-    "typescript": "5.9.3"
+    "lint-staged": "^16.1.6",
+    "semantic-release": "^24.2.7",
+    "@angular-devkit/core": "^19.2.14",
+    "@angular-devkit/schematics": "^19.2.14",
+    "@angular-eslint/builder": "^19.7.0",
+    "@angular-eslint/eslint-plugin": "^19.7.0",
+    "@angular-eslint/eslint-plugin-template": "^19.7.0",
+    "@angular-eslint/schematics": "^19.7.0",
+    "@angular-eslint/template-parser": "^19.7.0",
+    "@angular/cli": "^19.2.14",
+    "@angular/compiler-cli": "^19.2.14",
+    "@angular/forms": "^19.2.14",
+    "@angular/language-service": "^19.2.14",
+    "@angular/platform-browser-dynamic": "^19.2.14",
+    "@angular/router": "^19.2.14",
+    "@compodoc/compodoc": "^1.1.26",
+    "@etchteam/storybook-addon-status": "^5.0.0",
+    "@schematics/angular": "^19.2.14",
+    "@storybook/addon-a11y": "^8.6.8",
+    "@storybook/addon-docs": "^8.6.8",
+    "@storybook/addon-essentials": "^8.6.8",
+    "@storybook/addon-interactions": "^8.6.8",
+    "@storybook/addon-onboarding": "^8.6.8",
+    "@storybook/angular": "^8.6.12",
+    "@storybook/blocks": "^8.6.8",
+    "@storybook/manager-api": "^8.6.8",
+    "@storybook/test": "^8.6.8",
+    "@storybook/theming": "^8.6.8",
+    "@testing-library/angular": "^17.3.7",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.5",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "angular-eslint": "^19.4.0",
+    "chokidar": "^4.0.3",
+    "chromatic": "^11.27.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-preset-angular": "^14.5.3",
+    "ng-packagr": "^19.2.0",
+    "prettier": "^3.4.2",
+    "readdirp": "3.6.0",
+    "replace-in-file": "^8.3.0",
+    "sass": "^1.86.1",
+    "storybook": "^8.4.7",
+    "storybook-addon-angular-router": "^1.10.1",
+    "storybook-addon-pseudo-states": "^4.0.3",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.5.0",
+    "typescript": "5.8"
   },
   "commitlint": {
     "extends": "@commitlint/config-conventional",
@@ -51,13 +113,18 @@
     }
   },
   "lint-staged": {
-    "libs/react-components/**/*.{css,scss}": [
-      "stylelint --fix",
+    "src/**/*.{css,scss}": [
       "prettier --write"
     ],
-    "libs/react-components/**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
+    "src/**/*.{ts,html}": [
       "prettier --write"
     ]
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TEDI-Design-System/angular.git"
   }
 }
