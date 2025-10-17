@@ -1,0 +1,40 @@
+@if (withArrows()) {
+  <button
+    tedi-button
+    type="button"
+    variant="neutral"
+    aria-label="Liigu tagasi"
+    (click)="handlePrev()"
+  >
+    <tedi-icon name="arrow_back" [size]="18" />
+  </button>
+}
+
+@if (variant() === "dots") {
+  @for (indicator of indicatorsArray(); track indicator.index) {
+    <button
+      type="button"
+      class="tedi-carousel__indicator"
+      [attr.aria-label]="'Vaata slaidi nr. ' + (indicator.index + 1)"
+      [ngClass]="indicator.active ? 'tedi-carousel__indicator--active' : null"
+      (click)="handleIndicatorClick(indicator.index)"
+    ></button>
+  }
+} @else if (activeSlideNumber()) {
+  <div>
+    <b tedi-text color="brand">{{ activeSlideNumber() }}</b>
+    <span tedi-text color="tertiary"> / {{ indicatorsArray().length }}</span>
+  </div>
+}
+
+@if (withArrows()) {
+  <button
+    tedi-button
+    type="button"
+    variant="neutral"
+    aria-label="Liigu edasi"
+    (click)="handleNext()"
+  >
+    <tedi-icon name="arrow_forward" [size]="18" />
+  </button>
+}

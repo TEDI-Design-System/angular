@@ -1,0 +1,9 @@
+@use "@tedi-design-system/core/mixins";
+
+tedi-carousel-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  @include mixins.responsive-styles(gap, layout-grid-gutters-16);
+}

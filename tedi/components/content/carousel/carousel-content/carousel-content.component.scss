@@ -1,0 +1,27 @@
+tedi-carousel-content {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+
+  .tedi-carousel__viewport {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+    cursor: grab;
+  }
+
+  .tedi-carousel__viewport:active {
+    cursor: grabbing;
+  }
+
+  .tedi-carousel__track {
+    display: flex;
+    will-change: transform;
+  }
+
+  .tedi-carousel__slide {
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+}
