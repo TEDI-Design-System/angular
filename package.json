@@ -61,7 +61,7 @@
     "@etchteam/storybook-addon-status": "^5.0.0",
     "@schematics/angular": "^19.2.14",
     "@storybook/addon-a11y": "^8.6.8",
-    "@storybook/addon-docs": "^8.6.8",
+    "@storybook/addon-docs": "^9.1.13",
     "@storybook/addon-essentials": "^8.6.8",
     "@storybook/addon-interactions": "^8.6.8",
     "@storybook/addon-onboarding": "^8.6.8",
