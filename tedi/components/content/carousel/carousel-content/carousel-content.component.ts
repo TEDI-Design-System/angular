@@ -52,8 +52,11 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     { transform: (v: BreakpointInput<number>) => breakpointInput(v) },
   );
 
-  /** Should fade at the end of carousel? Great to use when slidesPerView is fractional (peeking effect) */
+  /** Should carousel have fade? In mobile both left and right, in desktop only right. */
   readonly fade = input(false);
+
+  /** Transition duration in ms */
+  readonly transitionMs = input(400);
 
   readonly translationService = inject(TediTranslationService);
   private readonly breakpointService = inject(BreakpointService);
@@ -65,6 +68,7 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   readonly trackIndex = signal(0);
   readonly animate = signal(false);
   private readonly windowBase = signal(0);
+  private readonly viewportWidth = signal(0);
 
   readonly currentSlidesPerView = computed(() => {
     if (
@@ -175,8 +179,15 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   readonly trackStyle = computed(() => {
     const slidesPerView = this.currentSlidesPerView();
     const gap = this.currentGap();
-    const viewportWidth =
-      this.viewportWidth || this.host.nativeElement.clientWidth;
+    const viewportWidth = this.viewportWidth();
+
+    if (!viewportWidth) {
+      return {
+        gap: `${gap}px`,
+        transform: "translate3d(0,0,0)",
+        transition: "none",
+      };
+    }
 
     const totalGapWidth = gap * (slidesPerView - 1);
     const slideWidth = (viewportWidth - totalGapWidth) / slidesPerView;
@@ -186,11 +197,9 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
 
     return {
       gap: `${gap}px`,
-      transform: viewportWidth
-        ? `translate3d(${translateX}px, 0, 0)`
-        : "translate3d(0, 0, 0)",
+      transform: `translate3d(${translateX}px, 0, 0)`,
       transition: this.animate()
-        ? `transform ${this.transitionMs}ms ease`
+        ? `transform ${this.transitionMs()}ms ease`
         : "none",
     };
   });
@@ -199,8 +208,6 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   private dragging = false;
   private startX = 0;
   private startIndex = 0;
-  private viewportWidth = 0;
-  private readonly transitionMs = 400;
   private ro?: ResizeObserver;
   private wheelTimeout?: ReturnType<typeof setTimeout>;
   private scrollDelta = 0;
@@ -227,7 +234,7 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     event.preventDefault();
 
     const cellWidth =
-      (this.viewportWidth -
+      (this.viewportWidth() -
         this.currentGap() * (this.currentSlidesPerView() - 1)) /
         this.currentSlidesPerView() +
       this.currentGap();
@@ -328,7 +335,7 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
 
     const dx = ev.clientX - this.startX;
     const cellWidth =
-      (this.viewportWidth -
+      (this.viewportWidth() -
         this.currentGap() * (this.currentSlidesPerView() - 1)) /
         this.currentSlidesPerView() +
       this.currentGap();
@@ -362,14 +369,10 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     const viewport = this.host.nativeElement;
-    this.viewportWidth = viewport.clientWidth;
+    this.viewportWidth.set(viewport.clientWidth);
 
-    this.ro = new ResizeObserver((entries) => {
-      for (const e of entries) {
-        if (e.target === viewport) {
-          this.viewportWidth = viewport.clientWidth;
-        }
-      }
+    this.ro = new ResizeObserver(() => {
+      this.viewportWidth.set(viewport.clientWidth);
     });
 
     this.ro.observe(viewport);
@@ -428,6 +431,6 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
 
   private lockNavigation() {
     this.locked = true;
-    setTimeout(() => (this.locked = false), this.transitionMs);
+    setTimeout(() => (this.locked = false), this.transitionMs());
   }
 }

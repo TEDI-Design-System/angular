@@ -15,5 +15,5 @@ import { CarouselContentComponent } from "./carousel-content/carousel-content.co
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CarouselComponent {
-  carouselContent = contentChild(CarouselContentComponent);
+  carouselContent = contentChild.required(CarouselContentComponent);
 }

@@ -64,7 +64,7 @@ export default {
     },
     fade: {
       description:
-        "Should fade at the end of carousel? Great to use when slidesPerView is fractional (peeking effect)",
+        "Should carousel have fade? In mobile both left and right, in desktop only right.",
       control: {
         type: "boolean",
       },
@@ -76,6 +76,19 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    transitionMs: {
+      description: "Transition duration in ms",
+      control: {
+        type: "number",
+      },
+      table: {
+        category: "Carousel Content",
+        type: {
+          summary: "number",
+        },
+        defaultValue: { summary: "400" },
+      },
+    },
   },
 } as Meta<CarouselComponent>;
 
@@ -83,6 +96,7 @@ type CarouselType = CarouselComponent & {
   slidesPerView: BreakpointInput<number>;
   gap: BreakpointInput<number>;
   fade: boolean;
+  transitionMs: number;
 };
 
 export const Default: StoryObj<CarouselType> = {
@@ -90,6 +104,7 @@ export const Default: StoryObj<CarouselType> = {
     slidesPerView: { xs: 1 },
     gap: { xs: 16 },
     fade: false,
+    transitionMs: 400,
   },
   render: (args) => ({
     props: args,
@@ -103,7 +118,7 @@ export const Default: StoryObj<CarouselType> = {
           <tedi-carousel-navigation />
         </tedi-carousel-header>
         <tedi-carousel-content [slidesPerView]="slidesPerView" [gap]="gap" [fade]="fade">
-          @for (i of [0, 1, 2, 3, 4]; track $index) {
+         @for (i of [0, 1, 2, 3, 4]; track $index) {
             <ng-template tediCarouselSlide>
               <div style="display: flex; gap: 1rem;">
                 @for (j of [0, 1, 2]; track $index) {
@@ -111,7 +126,7 @@ export const Default: StoryObj<CarouselType> = {
                     style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
                   >
                     <tedi-icon name="spa" [size]="36" color="tertiary" />
-                    <div tedi-text color="secondary">Replace with your own content</div>
+                    <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
                   </div>
                 }
               </div>
@@ -146,9 +161,9 @@ export const TopPaginationArrowsOnly: StoryObj<CarouselType> = {
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
-            </ng-template>
+              </ng-template>
           }
         </tedi-carousel-content>
       </tedi-carousel>
@@ -175,7 +190,7 @@ export const SeparatedBottomPaginationHasDots: StoryObj<CarouselType> = {
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
             </ng-template>
           }
@@ -210,7 +225,7 @@ export const SeparatedBottomPaginationHasNumbers: StoryObj<CarouselType> = {
                     style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
                   >
                     <tedi-icon name="spa" [size]="36" color="tertiary" />
-                    <div tedi-text color="secondary">Replace with your own content</div>
+                    <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
                   </div>
                 }
               </div>
@@ -245,7 +260,7 @@ export const CenteredBottomPaginationHasDots: StoryObj<CarouselType> = {
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
             </ng-template>
           }
@@ -277,7 +292,7 @@ export const CenteredBottomPaginationHasNumbers: StoryObj<CarouselType> = {
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
             </ng-template>
           }
@@ -310,7 +325,7 @@ export const CombinationsTopNavigationBottomDots: StoryObj<CarouselType> = {
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
             </ng-template>
           }
@@ -342,7 +357,7 @@ export const CenteredHasDots: StoryObj<CarouselType> = {
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
             </ng-template>
           }
@@ -368,13 +383,13 @@ export const CenteredHasNumbers: StoryObj<CarouselType> = {
           <h2 tedi-text modifiers="h1">Title</h2>
         </tedi-carousel-header>
         <tedi-carousel-content [slidesPerView]="slidesPerView">
-         @for (i of [0, 1, 2]; track $index) {
+          @for (i of [0, 1, 2]; track $index) {
             <ng-template tediCarouselSlide>
               <div
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
             </ng-template>
           }
@@ -406,7 +421,7 @@ export const SeparatedHasDots: StoryObj<CarouselType> = {
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
             </ng-template>
           }
@@ -439,7 +454,7 @@ export const SeparatedHasNumbers: StoryObj<CarouselType> = {
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
             </ng-template>
           }
@@ -473,7 +488,7 @@ export const Combination: StoryObj<CarouselType> = {
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
             </ng-template>
           }
@@ -509,7 +524,7 @@ export const Fade: StoryObj<CarouselType> = {
                     style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
                   >
                     <tedi-icon name="spa" [size]="36" color="tertiary" />
-                    <div tedi-text color="secondary">Replace with your own content</div>
+                    <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
                   </div>
                 }
               </div>
@@ -524,14 +539,12 @@ export const Fade: StoryObj<CarouselType> = {
       <tedi-carousel style="max-width: 400px;">
         <tedi-carousel-content [slidesPerView]="slidesPerView" [fade]="fade">
           @for (i of [0, 1, 2, 3, 4, 5]; track $index) {
-            <ng-template tediCarouselSlide>
               <div
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
-            </ng-template>
           }
         </tedi-carousel-content>
         <tedi-carousel-footer style="justify-content: center;">
@@ -563,7 +576,7 @@ export const WithTopNavigation: StoryObj<CarouselType> = {
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
             </ng-template>
           }
@@ -596,7 +609,7 @@ export const WithTopAction: StoryObj<CarouselType> = {
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
             </ng-template>
           }
@@ -636,15 +649,11 @@ export const WithDescription: StoryObj<CarouselType> = {
                 style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem; flex: 1;"
               >
                 <tedi-icon name="spa" [size]="36" color="tertiary" />
-                <div tedi-text color="secondary">Replace with your own content</div>
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
               </div>
             </ng-template>
           }
         </tedi-carousel-content>
-        <tedi-carousel-footer>
-          <tedi-carousel-indicators />
-          <tedi-carousel-navigation />
-        </tedi-carousel-footer>
       </tedi-carousel>
     `,
   }),

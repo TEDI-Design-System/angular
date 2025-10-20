@@ -20,13 +20,13 @@ import { TediTranslationService } from "../../../../services";
 })
 export class CarouselNavigationComponent {
   readonly translationService = inject(TediTranslationService);
-  carousel = inject(CarouselComponent);
+  private readonly carousel = inject(CarouselComponent);
 
   handleNext() {
-    this.carousel.carouselContent()?.next();
+    this.carousel.carouselContent().next();
   }
 
   handlePrev() {
-    this.carousel.carouselContent()?.prev();
+    this.carousel.carouselContent().prev();
   }
 }

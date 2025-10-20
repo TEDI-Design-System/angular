@@ -31,38 +31,32 @@ export class CarouselIndicatorsComponent {
   /** Variant of indicators (dots and numbers) */
   readonly variant = input<CarouselIndicatorsVariant>("dots");
 
-  translationService = inject(TediTranslationService);
-  carousel = inject(CarouselComponent);
+  readonly translationService = inject(TediTranslationService);
+  readonly carousel = inject(CarouselComponent);
 
   readonly indicatorsArray = computed(() =>
     Array.from(
-      { length: this.carousel.carouselContent()?.slides().length ?? 0 },
+      { length: this.carousel.carouselContent().slides().length },
       (_, i) => ({
         index: i,
-        active: this.carousel.carouselContent()?.slideIndex() === i,
+        active: this.carousel.carouselContent().slideIndex() === i,
       }),
     ),
   );
 
-  readonly activeSlideNumber = computed(() => {
-    const currentIndex = this.carousel.carouselContent()?.slideIndex();
-
-    if (currentIndex !== undefined) {
-      return currentIndex + 1;
-    }
-
-    return 0;
-  });
+  readonly activeSlideNumber = computed(
+    () => this.carousel.carouselContent().slideIndex() + 1,
+  );
 
   handleNext() {
-    this.carousel.carouselContent()?.next();
+    this.carousel.carouselContent().next();
   }
 
   handlePrev() {
-    this.carousel.carouselContent()?.prev();
+    this.carousel.carouselContent().prev();
   }
 
   handleIndicatorClick(index: number) {
-    this.carousel.carouselContent()?.goToIndex(index);
+    this.carousel.carouselContent().goToIndex(index);
   }
 }
