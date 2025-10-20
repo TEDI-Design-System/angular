@@ -11,6 +11,7 @@ import { NgClass } from "@angular/common";
 import { ButtonComponent } from "../../../buttons/button/button.component";
 import { IconComponent } from "../../../base/icon/icon.component";
 import { TextComponent } from "../../../base/text/text.component";
+import { TediTranslationService } from "../../../../services";
 
 export type CarouselIndicatorsVariant = "dots" | "numbers";
 
@@ -30,6 +31,7 @@ export class CarouselIndicatorsComponent {
   /** Variant of indicators (dots and numbers) */
   readonly variant = input<CarouselIndicatorsVariant>("dots");
 
+  translationService = inject(TediTranslationService);
   carousel = inject(CarouselComponent);
 
   readonly indicatorsArray = computed(() =>

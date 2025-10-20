@@ -1,27 +1,37 @@
-tedi-carousel-content {
+.tedi-carousel__content {
   width: 100%;
   position: relative;
   overflow: hidden;
+  touch-action: pan-y;
+  cursor: grab;
 
-  .tedi-carousel__viewport {
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-    touch-action: pan-y;
-    cursor: grab;
+  &:focus-visible {
+    outline: var(--borders-02) solid var(--primary-500);
+    outline-offset: calc(-1 * var(--borders-03));
   }
 
-  .tedi-carousel__viewport:active {
+  &:active {
     cursor: grabbing;
   }
 
-  .tedi-carousel__track {
-    display: flex;
-    will-change: transform;
+  &--fade-right {
+    mask-image: linear-gradient(to right, black 90%, transparent 100%);
   }
 
-  .tedi-carousel__slide {
-    user-select: none;
-    -webkit-user-drag: none;
+  &--fade-x {
+    mask-image:
+      linear-gradient(to right, black 85%, transparent 100%),
+      linear-gradient(to left, black 85%, transparent 100%);
+    mask-composite: intersect;
   }
+}
+
+.tedi-carousel__track {
+  display: flex;
+  will-change: transform;
+}
+
+.tedi-carousel__slide {
+  user-select: none;
+  -webkit-user-drag: none;
 }

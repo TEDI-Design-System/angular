@@ -2,7 +2,7 @@
   tedi-button
   type="button"
   variant="secondary"
-  aria-label="Liigu tagasi"
+  [attr.aria-label]="translationService.track('carousel.moveBack')()"
   (click)="handlePrev()"
 >
   <tedi-icon name="arrow_back" [size]="18" />
@@ -11,7 +11,7 @@
   tedi-button
   type="button"
   variant="secondary"
-  aria-label="Liigu edasi"
+  [attr.aria-label]="translationService.track('carousel.moveForward')()"
   (click)="handleNext()"
 >
   <tedi-icon name="arrow_forward" [size]="18" />

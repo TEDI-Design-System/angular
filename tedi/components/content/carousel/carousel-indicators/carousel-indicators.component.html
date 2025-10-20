@@ -3,7 +3,7 @@
     tedi-button
     type="button"
     variant="neutral"
-    aria-label="Liigu tagasi"
+    [attr.aria-label]="translationService.track('carousel.moveBack')()"
     (click)="handlePrev()"
   >
     <tedi-icon name="arrow_back" [size]="18" />
@@ -15,7 +15,9 @@
     <button
       type="button"
       class="tedi-carousel__indicator"
-      [attr.aria-label]="'Vaata slaidi nr. ' + (indicator.index + 1)"
+      [attr.aria-label]="
+        translationService.track('carousel.showSlide', indicator.index + 1)()
+      "
       [ngClass]="indicator.active ? 'tedi-carousel__indicator--active' : null"
       (click)="handleIndicatorClick(indicator.index)"
     ></button>
@@ -32,7 +34,7 @@
     tedi-button
     type="button"
     variant="neutral"
-    aria-label="Liigu edasi"
+    [attr.aria-label]="translationService.track('carousel.moveForward')()"
     (click)="handleNext()"
   >
     <tedi-icon name="arrow_forward" [size]="18" />

@@ -7,6 +7,7 @@ import {
 import { ButtonComponent } from "../../../buttons";
 import { IconComponent } from "../../../base";
 import { CarouselComponent } from "../carousel.component";
+import { TediTranslationService } from "../../../../services";
 
 @Component({
   standalone: true,
@@ -18,6 +19,7 @@ import { CarouselComponent } from "../carousel.component";
   imports: [ButtonComponent, IconComponent],
 })
 export class CarouselNavigationComponent {
+  readonly translationService = inject(TediTranslationService);
   carousel = inject(CarouselComponent);
 
   handleNext() {

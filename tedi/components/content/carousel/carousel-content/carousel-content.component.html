@@ -1,23 +1,21 @@
 <div
-  #viewport
-  class="tedi-carousel__viewport"
-  (pointerdown)="onPointerDown($event)"
-  (pointermove)="onPointerMove($event)"
-  (pointerup)="onPointerUp()"
-  (pointercancel)="onPointerUp()"
-  (lostpointercapture)="onPointerUp()"
+  #track
+  class="tedi-carousel__track"
+  [style]="trackStyle()"
+  (transitionend)="onTransitionEnd($event)"
 >
-  <div
-    #track
-    class="tedi-carousel__track"
-    [style.transform]="transform()"
-    [style.transition]="transitionStyle()"
-    (transitionend)="onTransitionEnd($event)"
-  >
-    @for (idx of renderedIndices(); track $index) {
-      <div class="tedi-carousel__slide" [style.flex]="slideFlex()">
-        <ng-container *ngTemplateOutlet="slides()[idx].template"></ng-container>
-      </div>
-    }
-  </div>
+  @for (idx of renderedIndices(); track $index) {
+    <div
+      class="tedi-carousel__slide"
+      role="group"
+      aria-roledescription="slide"
+      [attr.aria-label]="
+        translationService.track('carousel.slide', idx + 1, slides().length)()
+      "
+      [attr.aria-current]="idx === slideIndex() ? 'true' : null"
+      [style.flex]="slideFlex()"
+    >
+      <ng-container *ngTemplateOutlet="slides()[idx].template"></ng-container>
+    </div>
+  }
 </div>

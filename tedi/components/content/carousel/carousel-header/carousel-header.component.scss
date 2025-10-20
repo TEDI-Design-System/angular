@@ -6,4 +6,5 @@ tedi-carousel-header {
   justify-content: space-between;
 
   @include mixins.responsive-styles(gap, layout-grid-gutters-16);
+  @include mixins.responsive-styles(padding-bottom, layout-grid-gutters-08);
 }
