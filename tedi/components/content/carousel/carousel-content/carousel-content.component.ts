@@ -129,7 +129,7 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     }
   });
 
-  private readonly buffer = computed(() => this.slides().length);
+  readonly buffer = computed(() => this.slides().length);
 
   readonly slideIndex = computed(() => {
     const slidesCount = this.slides().length;
