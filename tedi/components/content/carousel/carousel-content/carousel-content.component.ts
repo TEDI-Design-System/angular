@@ -67,8 +67,8 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
 
   readonly trackIndex = signal(0);
   readonly animate = signal(false);
+  readonly viewportWidth = signal(0);
   private readonly windowBase = signal(0);
-  private readonly viewportWidth = signal(0);
 
   readonly currentSlidesPerView = computed(() => {
     if (
@@ -204,8 +204,8 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     };
   });
 
-  private locked = false;
-  private dragging = false;
+  locked = false;
+  dragging = false;
   private startX = 0;
   private startIndex = 0;
   private ro?: ResizeObserver;
@@ -429,7 +429,7 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     this.windowBase.set(Math.floor(this.trackIndex()));
   }
 
-  private lockNavigation() {
+  lockNavigation() {
     this.locked = true;
     setTimeout(() => (this.locked = false), this.transitionMs());
   }
