@@ -73,27 +73,27 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   readonly currentSlidesPerView = computed(() => {
     if (
       this.slidesPerView().xxl &&
-      this.breakpointService.isAboveBreakpoint("xxl")
+      this.breakpointService.isAboveBreakpoint("xxl")()
     ) {
       return this.slidesPerView().xxl as number;
     } else if (
       this.slidesPerView().xl &&
-      this.breakpointService.isAboveBreakpoint("xl")
+      this.breakpointService.isAboveBreakpoint("xl")()
     ) {
       return this.slidesPerView().xl as number;
     } else if (
       this.slidesPerView().lg &&
-      this.breakpointService.isAboveBreakpoint("lg")
+      this.breakpointService.isAboveBreakpoint("lg")()
     ) {
       return this.slidesPerView().lg as number;
     } else if (
       this.slidesPerView().md &&
-      this.breakpointService.isAboveBreakpoint("md")
+      this.breakpointService.isAboveBreakpoint("md")()
     ) {
       return this.slidesPerView().md as number;
     } else if (
       this.slidesPerView().sm &&
-      this.breakpointService.isAboveBreakpoint("sm")
+      this.breakpointService.isAboveBreakpoint("sm")()
     ) {
       return this.slidesPerView().sm as number;
     } else {
@@ -102,26 +102,26 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   });
 
   readonly currentGap = computed(() => {
-    if (this.gap().xxl && this.breakpointService.isAboveBreakpoint("xxl")) {
+    if (this.gap().xxl && this.breakpointService.isAboveBreakpoint("xxl")()) {
       return this.gap().xxl as number;
     } else if (
       this.gap().xl &&
-      this.breakpointService.isAboveBreakpoint("xl")
+      this.breakpointService.isAboveBreakpoint("xl")()
     ) {
       return this.gap().xl as number;
     } else if (
       this.gap().lg &&
-      this.breakpointService.isAboveBreakpoint("lg")
+      this.breakpointService.isAboveBreakpoint("lg")()
     ) {
       return this.gap().lg as number;
     } else if (
       this.gap().md &&
-      this.breakpointService.isAboveBreakpoint("md")
+      this.breakpointService.isAboveBreakpoint("md")()
     ) {
       return this.gap().md as number;
     } else if (
       this.gap().sm &&
-      this.breakpointService.isAboveBreakpoint("sm")
+      this.breakpointService.isAboveBreakpoint("sm")()
     ) {
       return this.gap().sm as number;
     } else {
