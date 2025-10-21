@@ -1,4 +1,4 @@
-import { Component, ElementRef } from "@angular/core";
+import { Component, ElementRef, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { CarouselContentComponent } from "./carousel-content/carousel-content.component";
@@ -32,7 +32,9 @@ describe("CarouselContentComponent", () => {
   let component: CarouselContentComponent;
   let hostElement: HTMLElement;
 
-  let mockBreakpointService: { isAboveBreakpoint: jest.Mock };
+  let mockBreakpointService: {
+    isAboveBreakpoint: () => ReturnType<typeof signal>;
+  };
   let mockTranslationService: { track: jest.Mock };
   let fakeViewport: HTMLDivElement;
 
@@ -54,7 +56,7 @@ describe("CarouselContentComponent", () => {
     fakeViewport.style.width = "1000px";
 
     mockBreakpointService = {
-      isAboveBreakpoint: jest.fn().mockReturnValue(false),
+      isAboveBreakpoint: () => signal(false),
     };
 
     mockTranslationService = {
@@ -316,8 +318,8 @@ describe("CarouselContentComponent", () => {
 
     const breakpoints = Object.keys(slidesPerView) as Breakpoint[];
     breakpoints.forEach((bp) => {
-      mockBreakpointService.isAboveBreakpoint.mockReturnValueOnce(true);
       fixture.whenStable().then(() => {
+        mockBreakpointService.isAboveBreakpoint().set(true);
         expect(component.currentSlidesPerView()).toBe(slidesPerView[bp]);
       });
     });
@@ -337,7 +339,7 @@ describe("CarouselContentComponent", () => {
 
     const breakpoints = Object.keys(gaps) as Breakpoint[];
     breakpoints.forEach((bp) => {
-      mockBreakpointService.isAboveBreakpoint.mockReturnValueOnce(true);
+      mockBreakpointService.isAboveBreakpoint().set(true);
       fixture.whenStable().then(() => {
         expect(component.currentGap()).toBe(gaps[bp]);
       });
