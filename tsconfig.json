@@ -16,8 +16,7 @@
       "@tedi-design-system/angular/tedi": ["./tedi/index.ts"]
     }
   },
-  "files": [],
-  "include": [],
+  "include": ["src/**/*.ts", "tedi/**/*.ts", "community/**/*.ts"],
   "references": [
     { "path": "./tsconfig.lib.json" },
     { "path": "./tsconfig.spec.json" },
