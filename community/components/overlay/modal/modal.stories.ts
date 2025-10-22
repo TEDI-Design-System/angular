@@ -48,14 +48,14 @@ class ModalOpenComponent {
       />
 
       <label tedi-label [for]="selectOneId">Label</label>
-      <tedi-select [id]="selectOneId" state="default">
+      <tedi-select [inputId]="selectOneId" state="default">
         @for (option of options; track option.value) {
           <tedi-select-option [value]="option.value" [label]="option.label" />
         }
       </tedi-select>
 
       <label tedi-label [for]="selectTwoId">Label</label>
-      <tedi-select [id]="selectTwoId" state="default">
+      <tedi-select [inputId]="selectTwoId" state="default">
         @for (option of options; track option.value) {
           <tedi-select-option [value]="option.value" [label]="option.label" />
         }
