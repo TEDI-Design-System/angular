@@ -1,3 +1,10 @@
+# [3.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-3.0.0-rc.2...angular-3.0.0-rc.3) (2025-10-23)
+
+
+### Features
+
+* **general:** angular 20 support [#163](https://github.com/TEDI-Design-System/angular/issues/163) ([#165](https://github.com/TEDI-Design-System/angular/issues/165)) ([2e262be](https://github.com/TEDI-Design-System/angular/commit/2e262be2678f43aae366a676e43414034b658b60))
+
 # [3.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-3.0.0-rc.1...angular-3.0.0-rc.2) (2025-10-21)
 
 
