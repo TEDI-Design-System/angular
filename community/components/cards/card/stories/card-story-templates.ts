@@ -313,13 +313,15 @@ export const renderNestedCardsStory = () => {
 
 export const renderCardPaddingsStory = () => {
   return {
-    template: `<tedi-card [padding]="{ left: 'none' }">
-    <tedi-card-header>
-    Header
-    </tedi-card-header>
-    <tedi-card-content background="secondary"
-      >Card left side has no padding</tedi-card-content
-    ></tedi-card
+    template: `
+    <tedi-card [padding]="{left:'xs', right: 'none', top: 'none'}">
+      <tedi-card-header [padding]="{top: 'lg'}">
+        Top LG
+      </tedi-card-header>
+      <tedi-card-content background="secondary">
+        Parent has left XS, right NONE, Top NONE.
+      </tedi-card-content>
+    </tedi-card
   >`,
   };
 };
