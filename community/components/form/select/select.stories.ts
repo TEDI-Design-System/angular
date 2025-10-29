@@ -346,3 +346,63 @@ export const singleSelectGroupedOptions: Story = {
     },
   }),
 };
+
+export const dropdownWidthAuto: Story = {
+  render: (args) => ({
+    template: `
+      <tedi-select
+        [inputId]="inputId"
+        [placeholder]="placeholder"
+        [label]="label"
+        [feedbackText]="feedbackText"
+        [required]="required"
+        [disabled]="disabled"
+        [state]="state"
+        [size]="size"
+        [clearable]="clearable"
+        [dropdownWidthRef]="null"
+      >
+        <tedi-select-option value="option1" label="Option 1" group="Group 1"/>
+        <tedi-select-option value="option2" label="Option 2" group="Group 1"/>
+        <tedi-select-option value="option3" label="Option 3" group="Group 1"/>
+        <tedi-select-option value="option4" label="Option 4" group="Group 2"/>
+        <tedi-select-option value="option5" label="Option 5" group="Group 2"/>
+      </tedi-select>
+    `,
+    props: {
+      ...args,
+    },
+  }),
+};
+
+export const dropdownWidthCustomElement: Story = {
+  render: (args) => ({
+    template: `
+      <div #customWidthElement style="width: 400px; border: 1px solid black; padding: 8px; margin-bottom: 16px;">
+        This div sets the dropdown width to 400px
+      </div>
+      <tedi-select
+        [inputId]="inputId"
+        [placeholder]="placeholder"
+        [label]="label"
+        [feedbackText]="feedbackText"
+        [required]="required"
+        [disabled]="disabled"
+        [state]="state"
+        [size]="size"
+        [clearable]="clearable"
+        [dropdownWidthRef]="getElementRef(customWidthElement)"
+      >
+        <tedi-select-option value="option1" label="Option 1" group="Group 1"/>
+        <tedi-select-option value="option2" label="Option 2" group="Group 1"/>
+        <tedi-select-option value="option3" label="Option 3" group="Group 1"/>
+        <tedi-select-option value="option4" label="Option 4" group="Group 2"/>
+        <tedi-select-option value="option5" label="Option 5" group="Group 2"/>
+      </tedi-select>
+    `,
+    props: {
+      ...args,
+      getElementRef: (element: HTMLElement) => ({ nativeElement: element }),
+    },
+  }),
+};

@@ -50,8 +50,6 @@
 
   &__dropdown {
     box-shadow: 0px 1px 5px 0px var(--alpha-20);
-    max-height: 300px;
-    overflow-y: auto;
 
     @include mixins.responsive-styles(margin-top, form-field-outer-spacing);
     @include mixins.responsive-styles(margin-bottom, form-field-outer-spacing);
@@ -60,6 +58,8 @@
   &__options {
     margin: 0;
     padding: 0;
+    max-height: 300px;
+    overflow-y: auto;
 
     &:focus .cdk-option-active {
       background: var(--dropdown-item-hover-background);
