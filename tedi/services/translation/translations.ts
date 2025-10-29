@@ -493,7 +493,7 @@ export const translationsMap = {
   "pagination.page-size": {
     description: "Label of page size select",
     components: ["Table", "Pagination"],
-    et: "Lehe suurus",
+    et: "Kuva korraga",
     en: "Page size",
     ru: "Размер страницы",
   },

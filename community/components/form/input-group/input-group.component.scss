@@ -157,6 +157,11 @@
   &:empty {
     display: none;
   }
+
+  .tedi-select__arrow {
+    margin: 0;
+    padding: 0;
+  }
 }
 
 .tedi-input-group__prefix {

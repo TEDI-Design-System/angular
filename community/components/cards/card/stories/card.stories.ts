@@ -33,6 +33,14 @@ export default {
     spacing: "md",
   },
   argTypes: {
+    border: {
+      description: "Changes border color for card.",
+    },
+    padding: {
+      description: "Changes padding for card.",
+      control: "radio",
+      options: ["xs", "sm", "md", "lg", "none"],
+    },
     borderless: {
       description: "Removes border from card.",
       control: "boolean",
