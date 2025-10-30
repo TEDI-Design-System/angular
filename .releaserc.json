@@ -5,6 +5,10 @@
     {
       "name": "rc",
       "prerelease": true
+    },
+    {
+      "name": "tmp-main",
+      "prerelease": true
     }
   ],
   "plugins": [
