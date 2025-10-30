@@ -136,6 +136,13 @@ export class MultiselectComponent
    * @default true
    */
   clearable = input<boolean>(true);
+  /**
+   * Optional element reference to calculate dropdown width from.
+   * If provided but null, dropdown will use auto width.
+   * If not provided, defaults to the host element width.
+   * @default undefined
+   */
+  dropdownWidthRef = input<ElementRef | null>();
   feedbackText = input<ComponentInputs<FeedbackTextComponent>>();
 
   readonly specialOptionControls = specialOptionControls;
@@ -146,7 +153,7 @@ export class MultiselectComponent
   triggerRef = viewChild(CdkOverlayOrigin, { read: ElementRef });
   hostRef = inject(ElementRef);
   options = contentChildren(SelectOptionComponent);
-  dropdownWidth = signal(0);
+  dropdownWidth = signal<number | null>(0);
   disabled = signal(false);
 
   optionGroups = computed(() => {
@@ -220,8 +227,14 @@ export class MultiselectComponent
   }
 
   private setDropdownWidth(): void {
-    const computedWidth =
-      this.hostRef?.nativeElement?.getBoundingClientRect()?.width ?? 0;
+    const widthRef = this.dropdownWidthRef();
+    if (widthRef === null) {
+      this.dropdownWidth.set(null);
+      return;
+    }
+
+    const element = widthRef?.nativeElement ?? this.hostRef?.nativeElement;
+    const computedWidth = element?.getBoundingClientRect()?.width ?? 0;
     this.dropdownWidth.set(computedWidth);
   }
 
