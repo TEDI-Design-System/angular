@@ -1,59 +1,40 @@
 # [3.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-3.0.0...angular-3.1.0-rc.1) (2025-10-30)
 
-
 ### Features
 
-* **carousel:** add carousel [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([21b872f](https://github.com/TEDI-Design-System/angular/commit/21b872f3cc9d55b62bd0b7d6d1e65c98f2b016c3))
-* **carousel:** add carousel component [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([fe193a9](https://github.com/TEDI-Design-System/angular/commit/fe193a97bf566b94f127aefd38ea870cbef11245))
-* **carousel:** add figma link to story file [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([e138f9a](https://github.com/TEDI-Design-System/angular/commit/e138f9ace9fcb2f6107ef3d067fbc8ce51357c4d))
-* **carousel:** add more tests [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([0e0f539](https://github.com/TEDI-Design-System/angular/commit/0e0f53968b5f280443d666b2e10ffc3047c83499))
-* **carousel:** add tests [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([d5dbabb](https://github.com/TEDI-Design-System/angular/commit/d5dbabb785af16bc083372b9e00e4dc9a07be434))
-* **carousel:** code improvement [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([9fea3e3](https://github.com/TEDI-Design-System/angular/commit/9fea3e3df392c71115326c9b3845e78197f35b47))
-* **carousel:** fix test [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([4bad166](https://github.com/TEDI-Design-System/angular/commit/4bad166cd6bf90aee43c3f092a45c4f656590641))
-* **carousel:** story improvements [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([61ebe4d](https://github.com/TEDI-Design-System/angular/commit/61ebe4d78104a0530aaf5d1dc38ae05ab7cc5699))
+- **carousel:** add carousel [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([21b872f](https://github.com/TEDI-Design-System/angular/commit/21b872f3cc9d55b62bd0b7d6d1e65c98f2b016c3))
+- **carousel:** add carousel component [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([fe193a9](https://github.com/TEDI-Design-System/angular/commit/fe193a97bf566b94f127aefd38ea870cbef11245))
+- **carousel:** add figma link to story file [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([e138f9a](https://github.com/TEDI-Design-System/angular/commit/e138f9ace9fcb2f6107ef3d067fbc8ce51357c4d))
+- **carousel:** add more tests [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([0e0f539](https://github.com/TEDI-Design-System/angular/commit/0e0f53968b5f280443d666b2e10ffc3047c83499))
+- **carousel:** add tests [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([d5dbabb](https://github.com/TEDI-Design-System/angular/commit/d5dbabb785af16bc083372b9e00e4dc9a07be434))
+- **carousel:** code improvement [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([9fea3e3](https://github.com/TEDI-Design-System/angular/commit/9fea3e3df392c71115326c9b3845e78197f35b47))
+- **carousel:** fix test [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([4bad166](https://github.com/TEDI-Design-System/angular/commit/4bad166cd6bf90aee43c3f092a45c4f656590641))
+- **carousel:** story improvements [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([61ebe4d](https://github.com/TEDI-Design-System/angular/commit/61ebe4d78104a0530aaf5d1dc38ae05ab7cc5699))
 
-# [3.1.0-tmp-main.1](https://github.com/TEDI-Design-System/angular/compare/angular-3.0.0...angular-3.1.0-tmp-main.1) (2025-10-30)
-
-
-### Features
-
-* **carousel:** add carousel [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([21b872f](https://github.com/TEDI-Design-System/angular/commit/21b872f3cc9d55b62bd0b7d6d1e65c98f2b016c3))
-* **carousel:** add carousel component [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([fe193a9](https://github.com/TEDI-Design-System/angular/commit/fe193a97bf566b94f127aefd38ea870cbef11245))
-* **carousel:** add figma link to story file [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([e138f9a](https://github.com/TEDI-Design-System/angular/commit/e138f9ace9fcb2f6107ef3d067fbc8ce51357c4d))
-* **carousel:** add more tests [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([0e0f539](https://github.com/TEDI-Design-System/angular/commit/0e0f53968b5f280443d666b2e10ffc3047c83499))
-* **carousel:** add tests [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([d5dbabb](https://github.com/TEDI-Design-System/angular/commit/d5dbabb785af16bc083372b9e00e4dc9a07be434))
-* **carousel:** code improvement [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([9fea3e3](https://github.com/TEDI-Design-System/angular/commit/9fea3e3df392c71115326c9b3845e78197f35b47))
-* **carousel:** fix test [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([4bad166](https://github.com/TEDI-Design-System/angular/commit/4bad166cd6bf90aee43c3f092a45c4f656590641))
-* **carousel:** story improvements [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([61ebe4d](https://github.com/TEDI-Design-System/angular/commit/61ebe4d78104a0530aaf5d1dc38ae05ab7cc5699))
-
-# [3.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-2.4.0...angular-3.0.0) (2025-10-10)
-
+# [3.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-2.5.0-rc.2...angular-3.0.0-rc.1) (2025-10-10)
 
 ### Bug Fixes
 
-* **alert,toast:** enhance accessibility, add titleElement prop to override default heading element, better Toast stories, add documentation [#1009](https://github.com/TEDI-Design-System/angular/issues/1009) ([#1126](https://github.com/TEDI-Design-System/angular/issues/1126)) ([f922907](https://github.com/TEDI-Design-System/angular/commit/f92290772259b8b3ff19a2cc5a1f1d9e9b24d610))
-* **file-dropzone:** better error message [#860](https://github.com/TEDI-Design-System/angular/issues/860) ([90638d8](https://github.com/TEDI-Design-System/angular/commit/90638d8177485e52a0f8b0a1f61e9f53ab52fb12))
-* **select:** fix label and placeholder accessibility [#1014](https://github.com/TEDI-Design-System/angular/issues/1014) ([#1130](https://github.com/TEDI-Design-System/angular/issues/1130)) ([649b52b](https://github.com/TEDI-Design-System/angular/commit/649b52b8b221293c7a9d5ad26695b4777e1bb94e))
-* **separator:** fix stories for 9.1.4.10 criteria [#1007](https://github.com/TEDI-Design-System/angular/issues/1007) ([#1125](https://github.com/TEDI-Design-System/angular/issues/1125)) ([80d9ac8](https://github.com/TEDI-Design-System/angular/commit/80d9ac82ebb75418e1f2debd236b3ad5cedbf1d6))
-* **textfield:** fix input param passing [#1132](https://github.com/TEDI-Design-System/angular/issues/1132) ([#1166](https://github.com/TEDI-Design-System/angular/issues/1166)) ([6380a9a](https://github.com/TEDI-Design-System/angular/commit/6380a9a82637ea360c4d0622799cc7591ef3486d))
-
+- **alert,toast:** enhance accessibility, add titleElement prop to override default heading element, better Toast stories, add documentation [#1009](https://github.com/TEDI-Design-System/angular/issues/1009) ([#1126](https://github.com/TEDI-Design-System/angular/issues/1126)) ([f922907](https://github.com/TEDI-Design-System/angular/commit/f92290772259b8b3ff19a2cc5a1f1d9e9b24d610))
+- **file-dropzone:** better error message [#860](https://github.com/TEDI-Design-System/angular/issues/860) ([90638d8](https://github.com/TEDI-Design-System/angular/commit/90638d8177485e52a0f8b0a1f61e9f53ab52fb12))
+- **select:** fix label and placeholder accessibility [#1014](https://github.com/TEDI-Design-System/angular/issues/1014) ([#1130](https://github.com/TEDI-Design-System/angular/issues/1130)) ([649b52b](https://github.com/TEDI-Design-System/angular/commit/649b52b8b221293c7a9d5ad26695b4777e1bb94e))
+- **separator:** fix stories for 9.1.4.10 criteria [#1007](https://github.com/TEDI-Design-System/angular/issues/1007) ([#1125](https://github.com/TEDI-Design-System/angular/issues/1125)) ([80d9ac8](https://github.com/TEDI-Design-System/angular/commit/80d9ac82ebb75418e1f2debd236b3ad5cedbf1d6))
+- **textfield:** fix input param passing [#1132](https://github.com/TEDI-Design-System/angular/issues/1132) ([#1166](https://github.com/TEDI-Design-System/angular/issues/1166)) ([6380a9a](https://github.com/TEDI-Design-System/angular/commit/6380a9a82637ea360c4d0622799cc7591ef3486d))
 
 ### Code Refactoring
 
-* **angular:** move Angular to standalone repo [#148](https://github.com/TEDI-Design-System/angular/issues/148) ([ce0dcfd](https://github.com/TEDI-Design-System/angular/commit/ce0dcfd02df7b88c389f7d1afe752545d5b63377))
-
+- **angular:** move Angular to standalone repo [#148](https://github.com/TEDI-Design-System/angular/issues/148) ([ce0dcfd](https://github.com/TEDI-Design-System/angular/commit/ce0dcfd02df7b88c389f7d1afe752545d5b63377))
 
 ### Features
 
-* **file-dropzone:** add toggle for SI and IEC standards of showing filesize fix filesize [#860](https://github.com/TEDI-Design-System/angular/issues/860) ([162cae1](https://github.com/TEDI-Design-System/angular/commit/162cae130dabd4c9967165331d46c3fe36512a84))
-* **timeline:** TEDI-Ready component [#1094](https://github.com/TEDI-Design-System/angular/issues/1094) ([#1122](https://github.com/TEDI-Design-System/angular/issues/1122)) ([c6e9fb4](https://github.com/TEDI-Design-System/angular/commit/c6e9fb44653b04dee705a9ffd2718045bc3d22ec))
-* **vertical-stepper:** design changes and additional slot for info components [#512](https://github.com/TEDI-Design-System/angular/issues/512) ([#1131](https://github.com/TEDI-Design-System/angular/issues/1131)) ([1d4f0da](https://github.com/TEDI-Design-System/angular/commit/1d4f0da901e5810de64c4acaa4e566a445d4af18))
-
+- **file-dropzone:** add toggle for SI and IEC standards of showing filesize fix filesize [#860](https://github.com/TEDI-Design-System/angular/issues/860) ([162cae1](https://github.com/TEDI-Design-System/angular/commit/162cae130dabd4c9967165331d46c3fe36512a84))
+- **timeline:** TEDI-Ready component [#1094](https://github.com/TEDI-Design-System/angular/issues/1094) ([#1122](https://github.com/TEDI-Design-System/angular/issues/1122)) ([c6e9fb4](https://github.com/TEDI-Design-System/angular/commit/c6e9fb44653b04dee705a9ffd2718045bc3d22ec))
+- **vertical-stepper:** design changes and additional slot for info components [#512](https://github.com/TEDI-Design-System/angular/issues/512) ([#1131](https://github.com/TEDI-Design-System/angular/issues/1131)) ([1d4f0da](https://github.com/TEDI-Design-System/angular/commit/1d4f0da901e5810de64c4acaa4e566a445d4af18))
 
 ### BREAKING CHANGES
 
-* **angular:** the package name has changed.
-Update all imports and dependencies to use the new package name.
+- **angular:** the package name has changed.
+  Update all imports and dependencies to use the new package name.
 
 # [3.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-2.5.0-rc.2...angular-3.0.0-rc.1) (2025-10-10)
 

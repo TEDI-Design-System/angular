@@ -2,8 +2,8 @@
 name: Angular TEDI-READY component issue
 about: Use this template if the issue is on the Angular TEDI-READY side, bug, enhancement
   etc
-title: "[Component name]:"
-labels: Angular, tedi-ready
+title: "[Component_name]:"
+labels: tedi-ready
 assignees: mart-sessman
 
 ---
@@ -13,3 +13,5 @@ assignees: mart-sessman
 ## Solution
 
 ## Examples and information
+
+## Project
