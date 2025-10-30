@@ -1,3 +1,17 @@
+# [3.1.0-tmp-main.1](https://github.com/TEDI-Design-System/angular/compare/angular-3.0.0...angular-3.1.0-tmp-main.1) (2025-10-30)
+
+
+### Features
+
+* **carousel:** add carousel [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([21b872f](https://github.com/TEDI-Design-System/angular/commit/21b872f3cc9d55b62bd0b7d6d1e65c98f2b016c3))
+* **carousel:** add carousel component [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([fe193a9](https://github.com/TEDI-Design-System/angular/commit/fe193a97bf566b94f127aefd38ea870cbef11245))
+* **carousel:** add figma link to story file [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([e138f9a](https://github.com/TEDI-Design-System/angular/commit/e138f9ace9fcb2f6107ef3d067fbc8ce51357c4d))
+* **carousel:** add more tests [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([0e0f539](https://github.com/TEDI-Design-System/angular/commit/0e0f53968b5f280443d666b2e10ffc3047c83499))
+* **carousel:** add tests [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([d5dbabb](https://github.com/TEDI-Design-System/angular/commit/d5dbabb785af16bc083372b9e00e4dc9a07be434))
+* **carousel:** code improvement [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([9fea3e3](https://github.com/TEDI-Design-System/angular/commit/9fea3e3df392c71115326c9b3845e78197f35b47))
+* **carousel:** fix test [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([4bad166](https://github.com/TEDI-Design-System/angular/commit/4bad166cd6bf90aee43c3f092a45c4f656590641))
+* **carousel:** story improvements [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([61ebe4d](https://github.com/TEDI-Design-System/angular/commit/61ebe4d78104a0530aaf5d1dc38ae05ab7cc5699))
+
 # [3.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-2.4.0...angular-3.0.0) (2025-10-10)
 
 
