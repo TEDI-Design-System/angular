@@ -5,7 +5,6 @@ on:
     branches:
       - rc
       - main
-      - tmp-main
 
 jobs:
   lint:
