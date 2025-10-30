@@ -2,8 +2,8 @@
   <a [href]="href()">
     <ng-container *ngTemplateOutlet="content"></ng-container>
   </a>
-} @else if (routerLink()) {
-  <a [routerLink]="routerLink()">
+} @else if (route()) {
+  <a [routerLink]="route()">
     <ng-container *ngTemplateOutlet="content"></ng-container>
   </a>
 } @else {

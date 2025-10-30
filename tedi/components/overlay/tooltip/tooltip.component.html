@@ -1,4 +1,18 @@
-<ng-content select="tedi-tooltip-trigger" />
-<ng-template cdkPortal>
+<div
+  applyClass="float-ui-container-tooltip"
+  ariaRole="tooltip"
+  ariaHidden="true"
+  style="display: contents"
+  looseTrigger="none"
+  [floatUiLoose]="floatUiComponent"
+  [loosePlacement]="position()"
+  [preventOverflow]="position().includes('auto') ? false : preventOverflow()"
+  [disableAnimation]="true"
+  [targetElement]="tooltipTrigger().host.nativeElement"
+  [appendTo]="appendTo()"
+>
+  <ng-content select="tedi-tooltip-trigger" />
+</div>
+<float-ui-content #floatUiComponent [style.display]="floatUiDisplay()">
   <ng-content select="tedi-tooltip-content" />
-</ng-template>
+</float-ui-content>
