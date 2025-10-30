@@ -1,3 +1,17 @@
+# [3.0.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-3.0.0-rc.4...angular-3.0.0-rc.5) (2025-10-30)
+
+
+### Bug Fixes
+
+* **tooltip:** fix merge conflicts [#22](https://github.com/TEDI-Design-System/angular/issues/22) ([0fb5eda](https://github.com/TEDI-Design-System/angular/commit/0fb5eda8ef645e32f0f3b79474788f4ffd2709f9))
+* **tooltip:** fix tooltip positioning [#22](https://github.com/TEDI-Design-System/angular/issues/22) ([ac9c70f](https://github.com/TEDI-Design-System/angular/commit/ac9c70fadd1341a4be9a14b1e3bb8314259d21f4))
+
+
+### BREAKING CHANGES
+
+* **tooltip:** tooltip-content position props moved to tooltip parent component
+* **tooltip:** sidenav item routerLink prop renamed to route
+
 # [3.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-3.0.0-rc.3...angular-3.0.0-rc.4) (2025-10-30)
 
 
