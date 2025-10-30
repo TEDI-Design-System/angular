@@ -493,7 +493,7 @@ export const translationsMap = {
   "pagination.page-size": {
     description: "Label of page size select",
     components: ["Table", "Pagination"],
-    et: "Lehe suurus",
+    et: "Kuva korraga",
     en: "Page size",
     ru: "Размер страницы",
   },
@@ -574,6 +574,44 @@ export const translationsMap = {
     et: (isOpen: boolean) => (isOpen ? "Sulge menüü" : "Ava menüü"),
     en: (isOpen: boolean) => (isOpen ? "Close menu" : "Open menu"),
     ru: (isOpen: boolean) => (isOpen ? "Закрыть меню" : "Открыть меню"),
+  },
+  carousel: {
+    description: "Label for carousel",
+    components: ["CarouselContent"],
+    et: "Karussell",
+    en: "Carousel",
+    ru: "Карусель",
+  },
+  "carousel.slide": {
+    description: "Label for carousel slide",
+    components: ["CarouselContent"],
+    et: (slideNumber: number, totalNumber: number) =>
+      `Slaid ${slideNumber} / ${totalNumber}`,
+    en: (slideNumber: number, totalNumber: number) =>
+      `Slide ${slideNumber} of ${totalNumber}`,
+    ru: (slideNumber: number, totalNumber: number) =>
+      `Слайд ${slideNumber} из ${totalNumber}`,
+  },
+  "carousel.moveForward": {
+    description: "Label for carousel next button",
+    components: ["CarouselIndicators", "CarouselNavigation"],
+    et: "Liigu edasi",
+    en: "Move forward",
+    ru: "Двигаться вперед",
+  },
+  "carousel.moveBack": {
+    description: "Label for carousel previous button",
+    components: ["CarouselIndicators", "CarouselNavigation"],
+    et: "Liigu tagasi",
+    en: "Move back",
+    ru: "Двигаться назад",
+  },
+  "carousel.showSlide": {
+    description: "Label for carousel slide indicator",
+    components: ["CarouselIndicators"],
+    et: (slideNumber: number) => `Vaata slaidi ${slideNumber}`,
+    en: (slideNumber: number) => `Show slide ${slideNumber}`,
+    ru: (slideNumber: number) => `Показать слайд ${slideNumber}`,
   },
 };
 

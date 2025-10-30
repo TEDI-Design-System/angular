@@ -1,0 +1,42 @@
+@if (withArrows()) {
+  <button
+    tedi-button
+    type="button"
+    variant="neutral"
+    [attr.aria-label]="translationService.track('carousel.moveBack')()"
+    (click)="handlePrev()"
+  >
+    <tedi-icon name="arrow_back" [size]="18" />
+  </button>
+}
+
+@if (variant() === "dots") {
+  @for (indicator of indicatorsArray(); track indicator.index) {
+    <button
+      type="button"
+      class="tedi-carousel__indicator"
+      [attr.aria-label]="
+        translationService.track('carousel.showSlide', indicator.index + 1)()
+      "
+      [ngClass]="indicator.active ? 'tedi-carousel__indicator--active' : null"
+      (click)="handleIndicatorClick(indicator.index)"
+    ></button>
+  }
+} @else if (activeSlideNumber()) {
+  <div>
+    <b tedi-text color="brand">{{ activeSlideNumber() }}</b>
+    <span tedi-text color="tertiary"> / {{ indicatorsArray().length }}</span>
+  </div>
+}
+
+@if (withArrows()) {
+  <button
+    tedi-button
+    type="button"
+    variant="neutral"
+    [attr.aria-label]="translationService.track('carousel.moveForward')()"
+    (click)="handleNext()"
+  >
+    <tedi-icon name="arrow_forward" [size]="18" />
+  </button>
+}

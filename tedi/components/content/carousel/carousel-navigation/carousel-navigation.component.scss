@@ -1,0 +1,8 @@
+@use "@tedi-design-system/core/mixins";
+
+tedi-carousel-navigation {
+  display: flex;
+  align-items: center;
+
+  @include mixins.responsive-styles(gap, layout-grid-gutters-08);
+}

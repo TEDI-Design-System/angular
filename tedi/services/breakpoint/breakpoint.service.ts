@@ -1,4 +1,10 @@
-import { computed, Injectable, InputSignal, Signal, signal } from "@angular/core";
+import {
+  computed,
+  Injectable,
+  InputSignal,
+  Signal,
+  signal,
+} from "@angular/core";
 import { BreakpointObserver } from "@angular/cdk/layout";
 
 export const BREAKPOINTS = {
@@ -20,6 +26,11 @@ export type BreakpointInputs<TInputs> = {
 
 export type BreakpointInputsWithoutSignals<TInputs> = TInputs &
   Partial<Record<Breakpoint, TInputs>>;
+
+export type BreakpointObject<T> = { xs: T } & Partial<
+  Record<Exclude<Breakpoint, "xs">, T>
+>;
+export type BreakpointInput<T> = T | BreakpointObject<T>;
 
 @Injectable({
   providedIn: "root",
@@ -117,4 +128,14 @@ export class BreakpointService {
       return currentIndex >= targetIndex;
     });
   }
+}
+
+export function breakpointInput<T>(
+  input: BreakpointInput<T>,
+): BreakpointObject<T> {
+  if (typeof input === "object" && input !== null && "xs" in input) {
+    return input;
+  }
+
+  return { xs: input };
 }

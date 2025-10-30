@@ -7,13 +7,79 @@ $tooltip-max-width: (
   "large": 30rem,
 );
 
-.tedi-tooltip-trigger__text {
-  text-decoration: underline dashed var(--general-border-secondary);
-  text-underline-offset: 0.5em;
+tedi-tooltip {
+  display: contents;
+}
+
+float-ui-content {
+  .float-ui-container-tooltip {
+    padding: 0;
+    border: 0;
+    box-shadow: 0px 1px 5px 0px var(--alpha-20, rgba(0, 0, 0, 0.2));
+    z-index: var(--z-index-tooltip);
+
+    @include mixins.responsive-styles(border-radius, popover-radius-rounded);
+
+    .float-ui-arrow {
+      width: 8px;
+      height: 8px;
+      background: var(--tooltip-background);
+      clip-path: inset(0px -5px -5px 0px);
+    }
+
+    &[data-float-ui-placement="top"] {
+      transform: translateY(-4px);
+
+      .float-ui-arrow {
+        transform: rotate(-135deg);
+      }
+    }
+
+    &[data-float-ui-placement="bottom"] {
+      transform: translateY(4px);
+
+      .float-ui-arrow {
+        transform: rotate(-135deg);
+      }
+    }
+
+    &[data-float-ui-placement="left"] {
+      transform: translateX(-4px);
+
+      .float-ui-arrow {
+        transform: rotate(-45deg);
+      }
+    }
+
+    &[data-float-ui-placement="right"] {
+      transform: translateX(4px);
+
+      .float-ui-arrow {
+        transform: rotate(135deg);
+      }
+    }
+  }
+}
+
+tedi-tooltip-trigger {
+  display: inline-flex;
+
+  .tedi-tooltip-trigger--focus {
+    &:focus-visible {
+      outline: 2px solid var(--primary-500);
+      outline-offset: 2px;
+    }
+  }
+
+  .tedi-tooltip-trigger__text {
+    text-decoration: underline dashed var(--general-border-secondary);
+    text-underline-offset: 0.5em;
+  }
 }
 
 .tedi-tooltip-content {
   position: relative;
+  display: block;
   background: var(--tooltip-background);
   color: var(--tooltip-text);
   box-shadow: 0px 1px 5px 0px var(--alpha-20, rgba(0, 0, 0, 0.2));
@@ -25,46 +91,9 @@ $tooltip-max-width: (
   );
   @include mixins.responsive-styles(border-radius, tooltip-radius);
 
-  &::after {
-    content: "";
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    background: var(--tooltip-background);
-    transform: rotate(45deg);
-  }
-
   @each $name, $width in $tooltip-max-width {
     &--#{$name} {
       max-width: $width;
-    }
-  }
-
-  &__arrow--top {
-    .tedi-tooltip-content::after {
-      top: calc(100% - 7px);
-      left: calc(50% - 7px);
-    }
-  }
-
-  &__arrow--bottom {
-    .tedi-tooltip-content::after {
-      bottom: calc(100% - 7px);
-      left: calc(50% - 7px);
-    }
-  }
-
-  &__arrow--left {
-    .tedi-tooltip-content::after {
-      top: calc(50% - 7px);
-      right: calc(100% - 7px);
-    }
-  }
-
-  &__arrow--right {
-    .tedi-tooltip-content::after {
-      top: calc(50% - 7px);
-      left: calc(100% - 7px);
     }
   }
 }

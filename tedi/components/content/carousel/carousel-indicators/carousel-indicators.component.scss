@@ -1,0 +1,36 @@
+@use "@tedi-design-system/core/mixins";
+
+tedi-carousel-indicators {
+  display: flex;
+  align-items: center;
+  min-height: 24px;
+
+  @include mixins.responsive-styles(gap, layout-grid-gutters-04);
+}
+
+.tedi-carousel__indicator {
+  width: 22px;
+  height: 8px;
+  border-radius: 100px;
+  border: 1px solid var(--primary-600);
+  background-color: transparent;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--primary-700);
+  }
+
+  &:active {
+    border-color: var(--primary-800);
+    background-color: var(--primary-800);
+  }
+
+  &:focus-visible {
+    outline: var(--borders-02) solid var(--primary-500);
+    outline-offset: var(--borders-01);
+  }
+
+  &--active {
+    background-color: var(--primary-600);
+  }
+}

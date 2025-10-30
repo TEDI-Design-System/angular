@@ -1,22 +1,18 @@
 @if (sidenavService.isMobile()) {
   @if (sidenavService.isMobileItemOpen() && dropdown?.open()) {
-    <ng-container *ngIf="!href() && !routerLink(); else mobileLink">
+    <ng-container *ngIf="!href() && !route(); else mobileLink">
       <tedi-sidenav-group-title>
         <ng-container *ngTemplateOutlet="content"></ng-container>
       </tedi-sidenav-group-title>
     </ng-container>
     <ng-template #mobileLink>
-      <ng-container *ngIf="routerLink(); else mobileHref">
-        <a
-          class="tedi-sidenav-item__link"
-          [routerLink]="routerLink()"
-          tabindex="0"
-        >
+      <ng-container *ngIf="route(); else mobileHref">
+        <a class="tedi-sidenav-item__link" [routerLink]="route()">
           <ng-container *ngTemplateOutlet="content"></ng-container>
         </a>
       </ng-container>
       <ng-template #mobileHref>
-        <a class="tedi-sidenav-item__link" [href]="href()" tabindex="0">
+        <a class="tedi-sidenav-item__link" [href]="href()">
           <ng-container *ngTemplateOutlet="content"></ng-container>
         </a>
       </ng-template>
@@ -26,26 +22,24 @@
       <ng-container *ngTemplateOutlet="buttonOrLink"></ng-container>
     </div>
   }
-} @else {
-  <tedi-tooltip>
-      <tedi-tooltip-trigger>
-        <div class="tedi-sidenav-item__trigger">
-          <ng-container *ngTemplateOutlet="buttonOrLink"></ng-container>
-        </div>
-      </tedi-tooltip-trigger>
-      <tedi-tooltip-content position="right" [style]="{ 'display': sidenavService.tooltipEnabled() ? 'block' : 'none' }">
-        {{ textContent() }}
-      </tedi-tooltip-content>
+} @else if (sidenavService.tooltipEnabled()) {
+  <tedi-tooltip position="right">
+    <tedi-tooltip-trigger class="tedi-sidenav-item__trigger">
+      <ng-container *ngTemplateOutlet="buttonOrLink"></ng-container>
+    </tedi-tooltip-trigger>
+    <tedi-tooltip-content position="right">
+      {{ textContent() }}
+    </tedi-tooltip-content>
   </tedi-tooltip>
+} @else {
+  <div class="tedi-sidenav-item__trigger">
+    <ng-container *ngTemplateOutlet="buttonOrLink"></ng-container>
+  </div>
 }
 
 <ng-template #buttonOrLink>
-  <ng-container *ngIf="!href() && !routerLink(); else hasLink">
-    <button
-      class="tedi-sidenav-item__title"
-      (click)="toggleDropdown()"
-      tabindex="0"
-    >
+  <ng-container *ngIf="!href() && !route(); else hasLink">
+    <button class="tedi-sidenav-item__title" (click)="toggleDropdown()">
       <ng-container *ngTemplateOutlet="content"></ng-container>
       @if (dropdown) {
         <tedi-icon
@@ -65,11 +59,7 @@
         else plainLink
       "
     >
-      <button
-        class="tedi-sidenav-item__title"
-        (click)="toggleDropdown()"
-        tabindex="0"
-      >
+      <button class="tedi-sidenav-item__title" (click)="toggleDropdown()">
         <ng-container *ngTemplateOutlet="content"></ng-container>
         <tedi-icon
           name="expand_more"
@@ -80,17 +70,13 @@
       </button>
     </ng-container>
     <ng-template #plainLink>
-      <ng-container *ngIf="routerLink(); else normalHref">
-        <a
-          class="tedi-sidenav-item__title"
-          [routerLink]="routerLink()"
-          tabindex="0"
-        >
+      <ng-container *ngIf="route(); else normalHref">
+        <a class="tedi-sidenav-item__title" [routerLink]="route()">
           <ng-container *ngTemplateOutlet="content"></ng-container>
         </a>
       </ng-container>
       <ng-template #normalHref>
-        <a class="tedi-sidenav-item__title" [href]="href()" tabindex="0">
+        <a class="tedi-sidenav-item__title" [href]="href()">
           <ng-container *ngTemplateOutlet="content"></ng-container>
         </a>
       </ng-template>
@@ -98,7 +84,6 @@
         <button
           class="tedi-sidenav-item__caret-button"
           (click)="toggleDropdown()"
-          tabindex="0"
         >
           <div class="tedi-sidenav-item__caret-container">
             <tedi-icon

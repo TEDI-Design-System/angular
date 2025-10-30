@@ -370,3 +370,62 @@ export const multiselectNoOptions: Story = {
     },
   }),
 };
+
+export const multiselectAutoWidthDropdown: Story = {
+  render: (args) => ({
+    template: `
+      <tedi-multiselect
+        [inputId]="inputId"
+        [placeholder]="placeholder"
+        [label]="label"
+        [feedbackText]="feedbackText"
+        [required]="required"
+        [state]="state"
+        [size]="size"
+        [multiRow]="multiRow"
+        [clearableTags]="clearableTags"
+        [selectAll]="selectAll"
+        [selectableGroups]="selectableGroups"
+        [clearable]="clearable"
+        [dropdownWidthRef]="null"
+        [disabled]="disabled"
+      >
+        <tedi-select-option value="option1" label="Option 1" />
+        <tedi-select-option value="option2" label="Option 2" />
+        <tedi-select-option value="option3" label="Option 3" />
+        <tedi-select-option value="option4" label="Option 4" />
+        <tedi-select-option value="option5" label="Option 5" />
+      </tedi-multiselect>
+    `,
+    props: {
+      ...args,
+    },
+  }),
+};
+
+export const multiselectCustomWidthDropdown: Story = {
+  render: (args) => ({
+    template: `
+      <div #customWidthElement style="width: 400px; border: 1px solid black; padding: 8px; margin-bottom: 16px;">
+        This div sets the dropdown width to 400px
+      </div>
+      <tedi-multiselect
+        [inputId]="inputId"
+        [placeholder]="placeholder"
+        [label]="label"
+        [feedbackText]="feedbackText"
+        [dropdownWidthRef]="getElementRef(customWidthElement)"
+      >
+        <tedi-select-option value="option1" label="Option 1" />
+        <tedi-select-option value="option2" label="Option 2" />
+        <tedi-select-option value="option3" label="Option 3" />
+        <tedi-select-option value="option4" label="Option 4" />
+        <tedi-select-option value="option5" label="Option 5" />
+      </tedi-multiselect>
+    `,
+    props: {
+      ...args,
+      getElementRef: (element: HTMLElement) => ({ nativeElement: element }),
+    },
+  }),
+};
