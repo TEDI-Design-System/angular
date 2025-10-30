@@ -74,6 +74,44 @@
 * **tooltip:** tooltip-content position props moved to tooltip parent component
 * **tooltip:** sidenav item routerLink prop renamed to route
 
+# [4.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-3.0.0...angular-4.0.0-rc.1) (2025-10-30)
+
+
+### Bug Fixes
+
+* **publish:** run npm i to fix npm ci to fix publish ([ba87f80](https://github.com/TEDI-Design-System/angular/commit/ba87f807440759c6268b34a9763f1af463c69151))
+* **tooltip:** fix merge conflicts [#22](https://github.com/TEDI-Design-System/angular/issues/22) ([0fb5eda](https://github.com/TEDI-Design-System/angular/commit/0fb5eda8ef645e32f0f3b79474788f4ffd2709f9))
+* **tooltip:** fix tooltip positioning [#22](https://github.com/TEDI-Design-System/angular/issues/22) ([ac9c70f](https://github.com/TEDI-Design-System/angular/commit/ac9c70fadd1341a4be9a14b1e3bb8314259d21f4))
+
+
+### Features
+
+* **carousel:** add carousel [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([21b872f](https://github.com/TEDI-Design-System/angular/commit/21b872f3cc9d55b62bd0b7d6d1e65c98f2b016c3))
+* **carousel:** add carousel component [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([fe193a9](https://github.com/TEDI-Design-System/angular/commit/fe193a97bf566b94f127aefd38ea870cbef11245))
+* **carousel:** add figma link to story file [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([e138f9a](https://github.com/TEDI-Design-System/angular/commit/e138f9ace9fcb2f6107ef3d067fbc8ce51357c4d))
+* **carousel:** add more tests [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([0e0f539](https://github.com/TEDI-Design-System/angular/commit/0e0f53968b5f280443d666b2e10ffc3047c83499))
+* **carousel:** add tests [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([d5dbabb](https://github.com/TEDI-Design-System/angular/commit/d5dbabb785af16bc083372b9e00e4dc9a07be434))
+* **carousel:** code improvement [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([9fea3e3](https://github.com/TEDI-Design-System/angular/commit/9fea3e3df392c71115326c9b3845e78197f35b47))
+* **carousel:** fix test [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([4bad166](https://github.com/TEDI-Design-System/angular/commit/4bad166cd6bf90aee43c3f092a45c4f656590641))
+* **carousel:** story improvements [#151](https://github.com/TEDI-Design-System/angular/issues/151) ([61ebe4d](https://github.com/TEDI-Design-System/angular/commit/61ebe4d78104a0530aaf5d1dc38ae05ab7cc5699))
+* **community-modal:** npm install -> Fix modal stories, add inputId to select [#640](https://github.com/TEDI-Design-System/angular/issues/640) ([f466269](https://github.com/TEDI-Design-System/angular/commit/f466269ab9b708ccc050a090f5fe8106cae3e59e))
+* **community-select:** Add possibility to direct dropdown width with elementRef or null [#640](https://github.com/TEDI-Design-System/angular/issues/640) ([829cba4](https://github.com/TEDI-Design-System/angular/commit/829cba49e954017e2941c5d02e936f6df2ef0e1b))
+* **community-select:** npm i + Fix dropdown opening with wrong scrollTop [#640](https://github.com/TEDI-Design-System/angular/issues/640) ([caea228](https://github.com/TEDI-Design-System/angular/commit/caea228c8503376048b3676a8849734a35358c7e))
+* **community-select:** npm install again [#640](https://github.com/TEDI-Design-System/angular/issues/640) ([d26fbe2](https://github.com/TEDI-Design-System/angular/commit/d26fbe29eaeb66fc484b68eac277c718775f4112))
+* **community-select:** Revert package-lock (seems to be bug after npm i) [#640](https://github.com/TEDI-Design-System/angular/issues/640) ([c863745](https://github.com/TEDI-Design-System/angular/commit/c8637455ca0e0f7fe03c83ccae14c5ee4d7e5525))
+* **general:** angular 20 support [#163](https://github.com/TEDI-Design-System/angular/issues/163) ([#165](https://github.com/TEDI-Design-System/angular/issues/165)) ([2e262be](https://github.com/TEDI-Design-System/angular/commit/2e262be2678f43aae366a676e43414034b658b60))
+* **various-changes:** add missing exports from file-dropzone ([e701aa6](https://github.com/TEDI-Design-System/angular/commit/e701aa697ab7521df913834260b37bcb90641db6))
+* **various-changes:** better template for card padding story ([dee2ff7](https://github.com/TEDI-Design-System/angular/commit/dee2ff7605811a5cf5d95106c74b08042344d135))
+* **various-changes:** change translation Lehe suurus -> Kuva Korraga ([274343d](https://github.com/TEDI-Design-System/angular/commit/274343d0fa5342bd1d346e46be368dbc95b77189))
+* **various-changes:** fix card body not listening to padding inputs from parent element + storybook for the case ([f4f1317](https://github.com/TEDI-Design-System/angular/commit/f4f1317f8061524ae69f98067b4fb0b3bb89b6c0))
+* **various-changes:** remove padding and margin around the arrow for input group ([5022e3b](https://github.com/TEDI-Design-System/angular/commit/5022e3bad4e4138198336e89b6ea94f6636fc140))
+
+
+### BREAKING CHANGES
+
+* **tooltip:** tooltip-content position props moved to tooltip parent component
+* **tooltip:** sidenav item routerLink prop renamed to route
+
 # [4.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-3.1.0-rc.3...angular-4.0.0-rc.1) (2025-10-30)
 
 
