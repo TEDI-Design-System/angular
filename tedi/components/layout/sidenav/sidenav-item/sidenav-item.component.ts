@@ -21,8 +21,8 @@ import { SideNavDropdownComponent } from "../sidenav-dropdown/sidenav-dropdown.c
 import { SideNavGroupTitleComponent } from "../sidenav-group-title/sidenav-group-title.component";
 import { SideNavService } from "../../../../services/sidenav/sidenav.service";
 import { TooltipComponent } from "../../../overlay/tooltip/tooltip.component";
-import { TooltipContentComponent } from "../../../overlay/tooltip/tooltip-content.component";
-import { TooltipTriggerComponent } from "../../../overlay/tooltip/tooltip-trigger.component";
+import { TooltipContentComponent } from "../../../overlay/tooltip/tooltip-content/tooltip-content.component";
+import { TooltipTriggerComponent } from "../../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
 
 @Component({
   selector: "tedi-sidenav-item",
@@ -62,9 +62,10 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
   /**
    * Router link
    */
-  routerLink = input<string>();
+  route = input<string>();
 
-  @ContentChild(forwardRef(() => SideNavDropdownComponent)) dropdown?: SideNavDropdownComponent;
+  @ContentChild(forwardRef(() => SideNavDropdownComponent))
+  dropdown?: SideNavDropdownComponent;
 
   textContent = signal("");
 

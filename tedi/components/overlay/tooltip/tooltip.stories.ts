@@ -1,26 +1,39 @@
 import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
-import { TooltipComponent } from "./tooltip.component";
+import { TooltipComponent, TooltipPosition } from "./tooltip.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { VerticalSpacingItemDirective } from "../../../directives/vertical-spacing/vertical-spacing-item.directive";
 import { TextComponent } from "../../base/text/text.component";
-import { TooltipTriggerComponent } from "./tooltip-trigger.component";
+import { TooltipTriggerComponent } from "./tooltip-trigger/tooltip-trigger.component";
 import {
   TooltipContentComponent,
-  TooltipPosition,
   TooltipWidth,
-} from "./tooltip-content.component";
+} from "./tooltip-content/tooltip-content.component";
 
 const MAXWIDTH = ["none", "small", "medium", "large"];
+const POSITIONS: TooltipPosition[] = [
+  "auto",
+  "auto-start",
+  "auto-end",
+  "top",
+  "top-start",
+  "top-end",
+  "bottom",
+  "bottom-start",
+  "bottom-end",
+  "right",
+  "right-start",
+  "right-end",
+  "left",
+  "left-start",
+  "left-end",
+];
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=5797-117363&amp;m=dev" target="_blank">Figma ↗</a><br>
  * <a href="https://tedi.tehik.ee/1ee8444b7/p/035e20-tooltip" target="_blank">Zeroheight ↗</a>
- * <hr>
- * TooltipComponent is a component that displays a Tooltip when the user hovers over or clicks on an element.<br>
- * It uses the Angular CDK Overlay module to create a flexible connected overlay that can be positioned relative to the trigger element.<br>
  */
 
 export default {
@@ -42,34 +55,61 @@ export default {
     }),
   ],
   argTypes: {
-    openWith: {
-      control: "select",
-      options: ["click", "hover"],
-      description: "The event that triggers the tooltip.",
-      table: {
-        category: "tooltip inputs",
-        type: {
-          summary: "TooltipOpenWith",
-          detail: "click \nhover",
-        },
-        defaultValue: {
-          summary: "hover",
-        },
-      },
-    },
     position: {
       control: "select",
       description:
-        "The position of the tooltip relative to the trigger element. ",
-      options: ["top", "bottom", "left", "right"],
+        "The position of the tooltip relative to the trigger element.",
+      options: POSITIONS,
       table: {
-        category: "tooltip-content inputs",
+        category: "tooltip",
         type: {
           summary: "TooltipPosition",
-          detail: "top \nbottom \nleft \nright",
+          detail: `${POSITIONS.join(" \n")}`,
         },
         defaultValue: {
           summary: "top",
+        },
+      },
+    },
+    preventOverflow: {
+      control: "boolean",
+      description:
+        "Should position to opposite direction when overflowing screen?",
+      table: {
+        category: "tooltip",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: {
+          summary: "true",
+        },
+      },
+    },
+    appendTo: {
+      control: "text",
+      description:
+        "Append floating element to given selector. Use 'body' to append at the end of DOM or empty string to append next to trigger element.",
+      table: {
+        category: "tooltip",
+        type: {
+          summary: "string",
+        },
+        defaultValue: {
+          summary: "body",
+        },
+      },
+    },
+    timeoutDelay: {
+      control: "number",
+      description:
+        "Delay time (in ms) for closing tooltip when not hovering trigger or content.",
+      table: {
+        category: "tooltip",
+        type: {
+          summary: "number",
+        },
+        defaultValue: {
+          summary: "100",
         },
       },
     },
@@ -93,28 +133,26 @@ export default {
 
 type Story = StoryObj<
   TooltipComponent & {
-    position: TooltipPosition;
     maxWidth: TooltipWidth;
   }
 >;
 
 export const Default: Story = {
   args: {
-    openWith: "hover",
     position: "top",
+    preventOverflow: true,
+    appendTo: "body",
+    timeoutDelay: 100,
     maxWidth: "medium",
-  },
-  parameters: {
-    layout: "centered",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-tooltip [openWith]="openWith">
+      <tedi-tooltip [position]="position" [timeoutDelay]="timeoutDelay" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
         <tedi-tooltip-trigger>
           <button tedi-info-button></button>
         </tedi-tooltip-trigger>
-        <tedi-tooltip-content [position]="position" [maxWidth]="maxWidth">
+        <tedi-tooltip-content [maxWidth]="maxWidth">
           This is tooltip content. The quick brown fox jumps over the lazy dog.
         </tedi-tooltip-content>
       </tedi-tooltip>
@@ -125,66 +163,25 @@ export const Default: Story = {
 export const Positions: Story = {
   name: "Tooltip positions",
   render: (args) => ({
-    props: args,
+    props: {
+      ...args,
+      positions: POSITIONS,
+    },
     template: `
-      <tedi-row [cols]="2" [gapY]="2" justifyItems="center">
-        <tedi-col>
-          <tedi-tooltip>
-            <tedi-tooltip-trigger>
-              Top
-            </tedi-tooltip-trigger>
-            <tedi-tooltip-content position="top">
-              Tooltip content
-            </tedi-tooltip-content>
-          </tedi-tooltip>
-        </tedi-col>
-        <tedi-col>
-          <tedi-tooltip>
-            <tedi-tooltip-trigger>
-              Left
-            </tedi-tooltip-trigger>
-            <tedi-tooltip-content position="left">
-              Tooltip content
-            </tedi-tooltip-content>
-          </tedi-tooltip>
-        </tedi-col>
-        <tedi-col>
-          <tedi-tooltip>
-            <tedi-tooltip-trigger>
-              Bottom
-            </tedi-tooltip-trigger>
-            <tedi-tooltip-content position="bottom">
-              Tooltip content
-            </tedi-tooltip-content>
-          </tedi-tooltip>
-        </tedi-col>
-        <tedi-col>
-          <tedi-tooltip>
-            <tedi-tooltip-trigger>
-              Right
-            </tedi-tooltip-trigger>
-            <tedi-tooltip-content position="right">
-              Tooltip content
-            </tedi-tooltip-content>
-          </tedi-tooltip>
-        </tedi-col>
+      <tedi-row [cols]="3" [gapY]="3" justifyItems="center">
+        @for (pos of positions; track pos) {
+          <tedi-col>
+            <tedi-tooltip [position]="pos">
+              <tedi-tooltip-trigger>
+                {{ pos.charAt(0).toUpperCase() + pos.slice(1) }}
+              </tedi-tooltip-trigger>
+              <tedi-tooltip-content>
+                Tooltip content
+              </tedi-tooltip-content>
+            </tedi-tooltip>
+          </tedi-col>
+        }
       </tedi-row>
-    `,
-  }),
-};
-
-export const OpenWithClick: Story = {
-  render: (args) => ({
-    props: args,
-    template: `
-      <tedi-tooltip openWith="click">
-        <tedi-tooltip-trigger>
-          <button tedi-info-button></button>
-        </tedi-tooltip-trigger>
-        <tedi-tooltip-content>
-          Tooltip content
-        </tedi-tooltip-content>
-      </tedi-tooltip>
     `,
   }),
 };

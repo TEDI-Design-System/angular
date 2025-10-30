@@ -48,12 +48,15 @@
           {{ file.label ?? file.name }}
 
           @if (file && validateIndividually() && file.helper; as helper) {
-            <tedi-tooltip [className]="tooltipClasses(file)">
+            <tedi-tooltip
+              [className]="tooltipClasses(file)"
+              [position]="helper?.position || 'top'"
+            >
               <tedi-tooltip-trigger>
                 <button tedi-info-button [disabled]="file.disabled"></button>
               </tedi-tooltip-trigger>
 
-              <tedi-tooltip-content [position]="helper?.position || 'top'">
+              <tedi-tooltip-content>
                 {{ helper.text }}
               </tedi-tooltip-content>
             </tedi-tooltip>

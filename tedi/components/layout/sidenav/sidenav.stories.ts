@@ -114,8 +114,8 @@ export default {
         type: { summary: "string" },
       },
     },
-    itemRouterLink: {
-      name: "routerLink",
+    itemRoute: {
+      name: "route",
       description: "Router link",
       control: "text",
       table: {
@@ -142,8 +142,8 @@ export default {
         type: { summary: "string" },
       },
     },
-    dropdownItemRouterLink: {
-      name: "routerLink",
+    dropdownItemRoute: {
+      name: "route",
       description: "Router link",
       control: "text",
       table: {
@@ -180,13 +180,13 @@ export const Default: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="child_care" href="#" [selected]="true">
             Children
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="edit" routerLink="#">
+          <tedi-sidenav-item icon="edit" route="#">
             Some very long text that wraps to new line
           </tedi-sidenav-item>
           <tedi-sidenav-item icon="assignment" href="#">
             Assignments
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="payments" routerLink="#">
+          <tedi-sidenav-item icon="payments" route="#">
             Payments
           </tedi-sidenav-item>
         </nav>
@@ -214,7 +214,7 @@ export const SecondLevelMenuItems: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="dashboard" href="#">
             Dashboard
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="people" routerLink="#">
+          <tedi-sidenav-item icon="people" route="#">
             Patient Records
           </tedi-sidenav-item>
           <tedi-sidenav-item icon="medical_services">
@@ -237,16 +237,16 @@ export const SecondLevelMenuItems: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="admin_panel_settings">
             Administration
             <tedi-sidenav-dropdown>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Staff Management
               </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Scheduling
               </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 System Settings
               </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Reports & Analytics
               </tedi-sidenav-dropdown-item>
             </tedi-sidenav-dropdown>
@@ -254,7 +254,7 @@ export const SecondLevelMenuItems: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="inventory" href="#">
             Inventory Management
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="payments" routerLink="#">
+          <tedi-sidenav-item icon="payments" route="#">
             Billing & Finance
           </tedi-sidenav-item>
         </nav>
@@ -282,7 +282,7 @@ export const SecondLevelMenuItemsParentsAreLinks: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="dashboard" href="#">
             Dashboard
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="people" routerLink="#">
+          <tedi-sidenav-item icon="people" route="#">
             Patient Records
           </tedi-sidenav-item>
           <tedi-sidenav-item icon="medical_services" href="#">
@@ -302,19 +302,19 @@ export const SecondLevelMenuItemsParentsAreLinks: StoryObj<SideNavComponent> = {
               </tedi-sidenav-dropdown-item>
             </tedi-sidenav-dropdown>
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="admin_panel_settings" routerLink="#">
+          <tedi-sidenav-item icon="admin_panel_settings" route="#">
             Administration
             <tedi-sidenav-dropdown>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Staff Management
               </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Scheduling
               </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 System Settings
               </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Reports & Analytics
               </tedi-sidenav-dropdown-item>
             </tedi-sidenav-dropdown>
@@ -322,7 +322,7 @@ export const SecondLevelMenuItemsParentsAreLinks: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="inventory" href="#">
             Inventory Management
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="payments" routerLink="#">
+          <tedi-sidenav-item icon="payments" route="#">
             Billing & Finance
           </tedi-sidenav-item>
         </nav>
@@ -350,7 +350,7 @@ export const ThirdLevelMenuItems: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="dashboard" href="#">
             Dashboard
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="people" routerLink="#">
+          <tedi-sidenav-item icon="people" route="#">
             Patient Records
           </tedi-sidenav-item>
           <tedi-sidenav-item icon="medical_services">
@@ -402,20 +402,20 @@ export const ThirdLevelMenuItems: StoryObj<SideNavComponent> = {
             Administration
             <tedi-sidenav-dropdown>
               <tedi-sidenav-dropdown-group>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   Staff Management
                 </tedi-sidenav-dropdown-item>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   Scheduling
                 </tedi-sidenav-dropdown-item>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   System Settings
                 </tedi-sidenav-dropdown-item>
               </tedi-sidenav-dropdown-group>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Reports & Analytics
               </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Statistics
               </tedi-sidenav-dropdown-item>
             </tedi-sidenav-dropdown>
@@ -423,7 +423,7 @@ export const ThirdLevelMenuItems: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="inventory" href="#">
             Inventory Management
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="payments" routerLink="#">
+          <tedi-sidenav-item icon="payments" route="#">
             Billing & Finance
           </tedi-sidenav-item>
         </nav>
@@ -451,7 +451,7 @@ export const ThirdLevelMenuItemsParentsAreLinks: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="dashboard" href="#">
             Dashboard
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="people" routerLink="#">
+          <tedi-sidenav-item icon="people" route="#">
             Patient Records
           </tedi-sidenav-item>
           <tedi-sidenav-item icon="medical_services" href="#">
@@ -499,24 +499,24 @@ export const ThirdLevelMenuItemsParentsAreLinks: StoryObj<SideNavComponent> = {
               </tedi-sidenav-dropdown-group>
             </tedi-sidenav-dropdown>
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="admin_panel_settings" routerLink="#">
+          <tedi-sidenav-item icon="admin_panel_settings" route="#">
             Administration
             <tedi-sidenav-dropdown>
               <tedi-sidenav-dropdown-group>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   Staff Management
                 </tedi-sidenav-dropdown-item>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   Scheduling
                 </tedi-sidenav-dropdown-item>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   System Settings
                 </tedi-sidenav-dropdown-item>
               </tedi-sidenav-dropdown-group>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Reports & Analytics
               </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Statistics
               </tedi-sidenav-dropdown-item>
             </tedi-sidenav-dropdown>
@@ -524,7 +524,7 @@ export const ThirdLevelMenuItemsParentsAreLinks: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="inventory" href="#">
             Inventory Management
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="payments" routerLink="#">
+          <tedi-sidenav-item icon="payments" route="#">
             Billing & Finance
           </tedi-sidenav-item>
         </nav>
@@ -552,7 +552,7 @@ export const CollapsibleToggle: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="dashboard" href="#">
             Dashboard
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="people" routerLink="#">
+          <tedi-sidenav-item icon="people">
             Patient Records
           </tedi-sidenav-item>
           <tedi-sidenav-item icon="medical_services" href="#">
@@ -604,20 +604,20 @@ export const CollapsibleToggle: StoryObj<SideNavComponent> = {
             Administration
             <tedi-sidenav-dropdown>
               <tedi-sidenav-dropdown-group>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   Staff Management
                 </tedi-sidenav-dropdown-item>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   Scheduling
                 </tedi-sidenav-dropdown-item>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   System Settings
                 </tedi-sidenav-dropdown-item>
               </tedi-sidenav-dropdown-group>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Reports & Analytics
               </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Statistics
               </tedi-sidenav-dropdown-item>
             </tedi-sidenav-dropdown>
@@ -625,7 +625,7 @@ export const CollapsibleToggle: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="inventory" href="#">
             Inventory Management
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="payments" routerLink="#">
+          <tedi-sidenav-item icon="payments" route="#">
             Billing & Finance
           </tedi-sidenav-item>
         </nav>
@@ -653,7 +653,7 @@ export const MediumSidenavItems: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="dashboard" href="#">
             Dashboard
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="people" routerLink="#">
+          <tedi-sidenav-item icon="people" route="#">
             Patient Records
           </tedi-sidenav-item>
           <tedi-sidenav-item icon="medical_services" href="#">
@@ -705,20 +705,20 @@ export const MediumSidenavItems: StoryObj<SideNavComponent> = {
             Administration
             <tedi-sidenav-dropdown>
               <tedi-sidenav-dropdown-group>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   Staff Management
                 </tedi-sidenav-dropdown-item>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   Scheduling
                 </tedi-sidenav-dropdown-item>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   System Settings
                 </tedi-sidenav-dropdown-item>
               </tedi-sidenav-dropdown-group>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Reports & Analytics
               </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Statistics
               </tedi-sidenav-dropdown-item>
             </tedi-sidenav-dropdown>
@@ -726,7 +726,7 @@ export const MediumSidenavItems: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="inventory" href="#">
             Inventory Management
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="payments" routerLink="#">
+          <tedi-sidenav-item icon="payments" route="#">
             Billing & Finance
           </tedi-sidenav-item>
         </nav>
@@ -754,7 +754,7 @@ export const SmallSidenavItems: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="dashboard" href="#">
             Dashboard
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="people" routerLink="#">
+          <tedi-sidenav-item icon="people" route="#">
             Patient Records
           </tedi-sidenav-item>
           <tedi-sidenav-item icon="medical_services" href="#">
@@ -806,20 +806,20 @@ export const SmallSidenavItems: StoryObj<SideNavComponent> = {
             Administration
             <tedi-sidenav-dropdown>
               <tedi-sidenav-dropdown-group>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   Staff Management
                 </tedi-sidenav-dropdown-item>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   Scheduling
                 </tedi-sidenav-dropdown-item>
-                <tedi-sidenav-dropdown-item routerLink="#">
+                <tedi-sidenav-dropdown-item route="#">
                   System Settings
                 </tedi-sidenav-dropdown-item>
               </tedi-sidenav-dropdown-group>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Reports & Analytics
               </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item routerLink="#">
+              <tedi-sidenav-dropdown-item route="#">
                 Statistics
               </tedi-sidenav-dropdown-item>
             </tedi-sidenav-dropdown>
@@ -827,7 +827,7 @@ export const SmallSidenavItems: StoryObj<SideNavComponent> = {
           <tedi-sidenav-item icon="inventory" href="#">
             Inventory Management
           </tedi-sidenav-item>
-          <tedi-sidenav-item icon="payments" routerLink="#">
+          <tedi-sidenav-item icon="payments" route="#">
             Billing & Finance
           </tedi-sidenav-item>
         </nav>
