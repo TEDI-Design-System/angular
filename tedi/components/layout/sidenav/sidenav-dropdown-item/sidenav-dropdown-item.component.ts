@@ -33,7 +33,7 @@ export class SideNavDropdownItemComponent {
   /**
    * Router link
    */
-  routerLink = input<string>();
+  route = input<string>();
 
   classes = computed(() => {
     const classList = ["tedi-sidenav-dropdown-item"];
