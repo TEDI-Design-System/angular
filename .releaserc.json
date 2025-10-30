@@ -8,7 +8,7 @@
     },
     {
       "name": "tmp-main",
-      "prerelease": true
+      "prerelease": "rc"
     }
   ],
   "plugins": [
