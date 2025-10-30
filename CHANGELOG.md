@@ -1,3 +1,24 @@
+# [3.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-3.0.0-rc.3...angular-3.0.0-rc.4) (2025-10-30)
+
+
+### Bug Fixes
+
+* **publish:** run npm i to fix npm ci to fix publish ([ba87f80](https://github.com/TEDI-Design-System/angular/commit/ba87f807440759c6268b34a9763f1af463c69151))
+
+
+### Features
+
+* **community-modal:** npm install -> Fix modal stories, add inputId to select [#640](https://github.com/TEDI-Design-System/angular/issues/640) ([f466269](https://github.com/TEDI-Design-System/angular/commit/f466269ab9b708ccc050a090f5fe8106cae3e59e))
+* **community-select:** Add possibility to direct dropdown width with elementRef or null [#640](https://github.com/TEDI-Design-System/angular/issues/640) ([829cba4](https://github.com/TEDI-Design-System/angular/commit/829cba49e954017e2941c5d02e936f6df2ef0e1b))
+* **community-select:** npm i + Fix dropdown opening with wrong scrollTop [#640](https://github.com/TEDI-Design-System/angular/issues/640) ([caea228](https://github.com/TEDI-Design-System/angular/commit/caea228c8503376048b3676a8849734a35358c7e))
+* **community-select:** npm install again [#640](https://github.com/TEDI-Design-System/angular/issues/640) ([d26fbe2](https://github.com/TEDI-Design-System/angular/commit/d26fbe29eaeb66fc484b68eac277c718775f4112))
+* **community-select:** Revert package-lock (seems to be bug after npm i) [#640](https://github.com/TEDI-Design-System/angular/issues/640) ([c863745](https://github.com/TEDI-Design-System/angular/commit/c8637455ca0e0f7fe03c83ccae14c5ee4d7e5525))
+* **various-changes:** add missing exports from file-dropzone ([e701aa6](https://github.com/TEDI-Design-System/angular/commit/e701aa697ab7521df913834260b37bcb90641db6))
+* **various-changes:** better template for card padding story ([dee2ff7](https://github.com/TEDI-Design-System/angular/commit/dee2ff7605811a5cf5d95106c74b08042344d135))
+* **various-changes:** change translation Lehe suurus -> Kuva Korraga ([274343d](https://github.com/TEDI-Design-System/angular/commit/274343d0fa5342bd1d346e46be368dbc95b77189))
+* **various-changes:** fix card body not listening to padding inputs from parent element + storybook for the case ([f4f1317](https://github.com/TEDI-Design-System/angular/commit/f4f1317f8061524ae69f98067b4fb0b3bb89b6c0))
+* **various-changes:** remove padding and margin around the arrow for input group ([5022e3b](https://github.com/TEDI-Design-System/angular/commit/5022e3bad4e4138198336e89b6ea94f6636fc140))
+
 # [3.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-3.0.0-rc.2...angular-3.0.0-rc.3) (2025-10-23)
 
 

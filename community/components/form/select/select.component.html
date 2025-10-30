@@ -77,14 +77,13 @@
   <tedi-card
     class="tedi-select__dropdown"
     spacing="none"
-    [style.width.px]="dropdownWidth()"
+    [style.width]="!!dropdownWidth() ? dropdownWidth() + 'px' : 'auto'"
   >
     <tedi-card-content>
       <ul
         [id]="listboxId"
         class="tedi-select__options"
         cdkListbox
-        cdkListboxUseActiveDescendant
         [cdkListboxValue]="selectedOptions()"
         (cdkListboxValueChange)="handleValueChange($event)"
       >
