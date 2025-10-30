@@ -3,10 +3,6 @@
   "branches": [
     "main",
     {
-      "name": "rc",
-      "prerelease": true
-    },
-    {
       "name": "tmp-main",
       "prerelease": "rc"
     }
