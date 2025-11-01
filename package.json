@@ -84,7 +84,7 @@
     "jest-preset-angular": "^14.5.3",
     "lint-staged": "^16.1.6",
     "ng-packagr": "^19.2.0",
-    "ngx-float-ui": "19.0.1",
+    "ngx-float-ui": "20.0.0",
     "prettier": "^3.4.2",
     "readdirp": "4.1.2",
     "replace-in-file": "^8.3.0",
