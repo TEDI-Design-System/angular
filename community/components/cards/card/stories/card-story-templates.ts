@@ -318,8 +318,17 @@ export const renderCardPaddingsStory = () => {
       <tedi-card-header [padding]="{top: 'lg'}">
         Top LG
       </tedi-card-header>
+
+      <tedi-card-header [padding]="'xs'">
+        Full XS padding
+      </tedi-card-header>
+
       <tedi-card-content background="secondary">
         Parent has left XS, right NONE, Top NONE.
+      </tedi-card-content>
+
+      <tedi-card-content background="secondary" [padding]="'md'">
+        Full MD padding.
       </tedi-card-content>
     </tedi-card
   >`,
