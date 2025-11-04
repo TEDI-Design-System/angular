@@ -1,3 +1,10 @@
+## [4.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-4.0.0...angular-4.0.1-rc.1) (2025-11-04)
+
+
+### Bug Fixes
+
+* **tooltip:** add openWith input, fix tooltip opening [#182](https://github.com/TEDI-Design-System/angular/issues/182) ([0c0469e](https://github.com/TEDI-Design-System/angular/commit/0c0469ead42d4e5e86389298d28c5d7207a69538))
+
 # [4.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-3.0.0...angular-4.0.0) (2025-10-30)
 
 ### Bug Fixes
