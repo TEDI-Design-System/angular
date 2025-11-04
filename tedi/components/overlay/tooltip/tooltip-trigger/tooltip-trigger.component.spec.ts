@@ -12,6 +12,7 @@ class MockTooltipComponent {
   showTooltip = jest.fn();
   hideTooltip = jest.fn();
   toggleTooltip = jest.fn();
+  openWith = jest.fn(() => "both" as "hover" | "click" | "both");
 }
 
 @Component({
@@ -52,30 +53,127 @@ describe("TooltipTriggerComponent", () => {
   });
 
   describe("Event listeners", () => {
-    it("should call toggleTooltip on click", () => {
-      hostEl.click();
-      expect(tooltip.toggleTooltip).toHaveBeenCalled();
+    describe("click", () => {
+      it("should call toggleTooltip when openWith is 'click'", () => {
+        tooltip.openWith = jest.fn(() => "click");
+        hostEl.click();
+        expect(tooltip.toggleTooltip).toHaveBeenCalled();
+      });
+
+      it("should call toggleTooltip when openWith is 'both'", () => {
+        tooltip.openWith = jest.fn(() => "both");
+        hostEl.click();
+        expect(tooltip.toggleTooltip).toHaveBeenCalled();
+      });
+
+      it("should not call toggleTooltip when openWith is 'hover'", () => {
+        tooltip.openWith = jest.fn(() => "hover");
+        hostEl.click();
+        expect(tooltip.toggleTooltip).not.toHaveBeenCalled();
+      });
     });
 
-    it("should call showTooltip on mouseenter", () => {
-      hostEl.dispatchEvent(new Event("mouseenter"));
-      expect(tooltip.showTooltip).toHaveBeenCalled();
+    describe("mouseenter", () => {
+      it("should call showTooltip when openWith is 'hover'", () => {
+        tooltip.openWith = jest.fn(() => "hover");
+        hostEl.dispatchEvent(new Event("mouseenter"));
+        expect(tooltip.showTooltip).toHaveBeenCalled();
+      });
+
+      it("should call showTooltip when openWith is 'both'", () => {
+        tooltip.openWith = jest.fn(() => "both");
+        hostEl.dispatchEvent(new Event("mouseenter"));
+        expect(tooltip.showTooltip).toHaveBeenCalled();
+      });
+
+      it("should not call showTooltip when openWith is 'click'", () => {
+        tooltip.openWith = jest.fn(() => "click");
+        hostEl.dispatchEvent(new Event("mouseenter"));
+        expect(tooltip.showTooltip).not.toHaveBeenCalled();
+      });
     });
 
-    it("should call showTooltip on focusin", () => {
-      hostEl.dispatchEvent(new Event("focusin"));
-      expect(tooltip.showTooltip).toHaveBeenCalled();
+    describe("mouseleave", () => {
+      beforeEach(() => {
+        jest.useFakeTimers();
+      });
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it("should call hideTooltip after delay when openWith is 'hover'", () => {
+        tooltip.openWith = jest.fn(() => "hover");
+        hostEl.dispatchEvent(new Event("mouseleave"));
+
+        expect(tooltip.hideTooltip).not.toHaveBeenCalled();
+        jest.advanceTimersByTime(100);
+        expect(tooltip.hideTooltip).toHaveBeenCalled();
+      });
+
+      it("should call hideTooltip after delay when openWith is 'both'", () => {
+        tooltip.openWith = jest.fn(() => "both");
+        hostEl.dispatchEvent(new Event("mouseleave"));
+
+        expect(tooltip.hideTooltip).not.toHaveBeenCalled();
+        jest.advanceTimersByTime(100);
+        expect(tooltip.hideTooltip).toHaveBeenCalled();
+      });
+
+      it("should not call hideTooltip when openWith is 'click'", () => {
+        tooltip.openWith = jest.fn(() => "click");
+        hostEl.dispatchEvent(new Event("mouseleave"));
+
+        jest.advanceTimersByTime(100);
+        expect(tooltip.hideTooltip).not.toHaveBeenCalled();
+      });
     });
 
-    it("should call hideTooltip on focusout when not hovering content", () => {
-      hostEl.dispatchEvent(new Event("focusout"));
-      expect(tooltip.hideTooltip).toHaveBeenCalled();
+    describe("focusin", () => {
+      it("should call showTooltip when openWith is 'hover'", () => {
+        tooltip.openWith = jest.fn(() => "hover");
+        hostEl.dispatchEvent(new Event("focusin"));
+        expect(tooltip.showTooltip).toHaveBeenCalled();
+      });
+
+      it("should call showTooltip when openWith is 'both'", () => {
+        tooltip.openWith = jest.fn(() => "both");
+        hostEl.dispatchEvent(new Event("focusin"));
+        expect(tooltip.showTooltip).toHaveBeenCalled();
+      });
+
+      it("should not call showTooltip when openWith is 'click'", () => {
+        tooltip.openWith = jest.fn(() => "click");
+        hostEl.dispatchEvent(new Event("focusin"));
+        expect(tooltip.showTooltip).not.toHaveBeenCalled();
+      });
     });
 
-    it("should not hideTooltip on focusout when content is hovered", () => {
-      tooltip.isContentHovered = jest.fn(() => true);
-      hostEl.dispatchEvent(new Event("focusout"));
-      expect(tooltip.hideTooltip).not.toHaveBeenCalled();
+    describe("focusout", () => {
+      it("should call hideTooltip on focusout when not hovering content and openWith is 'hover'", () => {
+        tooltip.openWith = jest.fn(() => "hover");
+        hostEl.dispatchEvent(new Event("focusout"));
+        expect(tooltip.hideTooltip).toHaveBeenCalled();
+      });
+
+      it("should call hideTooltip on focusout when not hovering content and openWith is 'both'", () => {
+        tooltip.openWith = jest.fn(() => "both");
+        hostEl.dispatchEvent(new Event("focusout"));
+        expect(tooltip.hideTooltip).toHaveBeenCalled();
+      });
+
+      it("should not call hideTooltip on focusout when openWith is 'click'", () => {
+        tooltip.openWith = jest.fn(() => "click");
+        hostEl.dispatchEvent(new Event("focusout"));
+        expect(tooltip.hideTooltip).not.toHaveBeenCalled();
+      });
+
+      it("should not hideTooltip on focusout when content is hovered", () => {
+        tooltip.openWith = jest.fn(() => "hover");
+        tooltip.isContentHovered = jest.fn(() => true);
+        hostEl.dispatchEvent(new Event("focusout"));
+        expect(tooltip.hideTooltip).not.toHaveBeenCalled();
+      });
     });
   });
 
