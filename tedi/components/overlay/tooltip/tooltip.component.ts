@@ -16,6 +16,7 @@ import {
 import { TooltipTriggerComponent } from "./tooltip-trigger/tooltip-trigger.component";
 
 export type TooltipPosition = `${NgxFloatUiPlacements}`;
+export type TooltipOpenWith = "hover" | "click" | "both";
 
 @Component({
   standalone: true,
@@ -38,6 +39,12 @@ export class TooltipComponent implements AfterContentChecked {
    * @default true
    */
   readonly preventOverflow = input(true);
+
+  /**
+   * How tooltip can opened?
+   * @default both
+   */
+  readonly openWith = input<TooltipOpenWith>("both");
 
   /**
    * Append floating element to given selector.
