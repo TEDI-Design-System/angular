@@ -1,3 +1,10 @@
+## [4.0.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-4.0.1-rc.1...angular-4.0.1-rc.2) (2025-11-04)
+
+
+### Bug Fixes
+
+* **card:** fix overall padding not functioning [#184](https://github.com/TEDI-Design-System/angular/issues/184) ([f2213b3](https://github.com/TEDI-Design-System/angular/commit/f2213b37a74f158ce926208edd1f6da9f73df6cb))
+
 ## [4.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-4.0.0...angular-4.0.1-rc.1) (2025-11-04)
 
 
