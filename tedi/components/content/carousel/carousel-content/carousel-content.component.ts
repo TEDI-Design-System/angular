@@ -58,6 +58,9 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   /** Transition duration in ms */
   readonly transitionMs = input(400);
 
+  /** How much fraction needed to go to next slide (0..1) */
+  readonly threshold = input(0.3);
+
   readonly translationService = inject(TediTranslationService);
   private readonly breakpointService = inject(BreakpointService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -364,7 +367,25 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
 
     this.dragging = false;
     this.animate.set(true);
-    this.trackIndex.set(Math.round(this.trackIndex()));
+
+    const delta = this.trackIndex() - this.startIndex;
+    const base = Math.round(this.startIndex);
+    let snap = base;
+
+    if (delta > 0) {
+      const whole = Math.floor(delta);
+      const frac = delta - whole;
+      const step = whole + (frac >= this.threshold() ? 1 : 0);
+      snap = base + step;
+    } else if (delta < 0) {
+      const ad = -delta;
+      const whole = Math.floor(ad);
+      const frac = ad - whole;
+      const step = whole + (frac >= this.threshold() ? 1 : 0);
+      snap = base - step;
+    }
+
+    this.trackIndex.set(snap);
   }
 
   ngAfterViewInit(): void {
