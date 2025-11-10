@@ -7,6 +7,7 @@ import {
 } from "@angular/core";
 
 export type LabelSize = "small" | "default";
+export type LabelColor = "primary" | "secondary";
 
 @Component({
   selector: "label[tedi-label]",
@@ -30,9 +31,14 @@ export class LabelComponent {
    * @default false
    */
   required = input<boolean>(false);
+  /**
+   * Color of the label.
+   * @default secondary
+   */
+  color = input<LabelColor>("secondary");
 
   classes = computed(() => {
-    const classList = ["tedi-label"];
+    const classList = ["tedi-label", `tedi-label--${this.color()}`];
 
     if (this.size() === "small") {
       classList.push("tedi-label--small");

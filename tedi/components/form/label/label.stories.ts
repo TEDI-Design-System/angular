@@ -63,6 +63,19 @@ export default {
         },
       },
     },
+    color: {
+      control: "radio",
+      description: "Color of the label",
+      options: ["primary", "secondary"],
+      table: {
+        category: "inputs",
+        type: {
+          summary: "LabelColor",
+          detail: "primary \nsecondary",
+        },
+        defaultValue: { summary: "secondary" },
+      },
+    },
   },
 } as Meta<LabelComponent>;
 
@@ -72,6 +85,7 @@ export const Default: LabelStory = {
   args: {
     ngContent: "Label",
     size: "default",
+    color: "secondary",
   },
   render: ({ ngContent, ...args }) => ({
     props: args,
