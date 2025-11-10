@@ -1,0 +1,102 @@
+@use "@tedi-design-system/core/mixins";
+@use "@tedi-design-system/core/bootstrap-utility/breakpoints";
+
+input[tedi-checkbox][type="checkbox"] {
+  --_checkbox-icon-size: 1.125rem;
+
+  appearance: none;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid var(--form-checkbox-radio-default-border-default);
+  background-color: var(--form-checkbox-radio-default-background-default);
+  vertical-align: middle;
+  padding: 0;
+  margin: 0;
+
+  @include mixins.responsive-styles(width, form-checkbox-radio-size-responsive);
+  @include mixins.responsive-styles(
+    height,
+    form-checkbox-radio-size-responsive
+  );
+  @include mixins.responsive-styles(
+    border-radius,
+    form-checkbox-radio-indicator-radius-checkbox
+  );
+
+  @include breakpoints.media-breakpoint-up(sm) {
+    --_checkbox-icon-size: 1rem;
+  }
+
+  &:not(:disabled):hover {
+    border-color: var(--form-checkbox-radio-default-border-hover);
+    box-shadow: 0 0 0 1px var(--form-checkbox-radio-default-border-hover);
+  }
+
+  &:not(:checked):disabled {
+    cursor: not-allowed;
+    border-color: var(--form-general-border-disabled);
+    background-color: var(--form-general-background-disabled);
+  }
+
+  &:checked,
+  &:indeterminate {
+    border-color: var(--form-checkbox-radio-default-border-selected);
+    background-color: var(--form-checkbox-radio-default-background-selected);
+
+    &:disabled {
+      cursor: not-allowed;
+      border-color: var(--form-checkbox-radio-default-border-selected-disabled);
+      background-color: var(
+        --form-checkbox-radio-default-background-selected-disabled
+      );
+    }
+
+    &::before {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      content: "check";
+      font-size: var(--_checkbox-icon-size);
+      font-family: "Material Symbols Outlined", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: var(--form-checkbox-radio-default-check-indicator-default);
+      line-height: 1;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  &:checked {
+    &::before {
+      content: "check";
+    }
+  }
+
+  &:indeterminate {
+    &::before {
+      content: "remove";
+    }
+  }
+
+  &:focus-visible {
+    outline-width: 2px;
+    outline-offset: 2px;
+    outline-style: solid;
+  }
+
+  &:not(:checked):not(:disabled).tedi-checkbox--invalid,
+  &:user-invalid,
+  &.ng-invalid.ng-touched {
+    border-color: var(--form-general-feedback-error-border);
+
+    &:hover {
+      border-color: var(--form-checkbox-radio-default-border-hover);
+    }
+  }
+
+  &.tedi-checkbox--large {
+    --_checkbox-icon-size: 1.125rem;
+
+    @include mixins.responsive-styles(width, form-checkbox-radio-size-large);
+    @include mixins.responsive-styles(height, form-checkbox-radio-size-large);
+  }
+}
