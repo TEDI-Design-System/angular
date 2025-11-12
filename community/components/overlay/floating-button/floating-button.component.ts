@@ -1,4 +1,4 @@
-import { Component, computed, input } from "@angular/core";
+import { computed, Directive, input } from "@angular/core";
 
 export type FloatingButtonAxis = "horizontal" | "vertical";
 export type FloatingButtonColor = "primary" | "secondary";
@@ -14,15 +14,13 @@ export type FloatingButtonOffset = {
   right?: number | string;
 };
 
-@Component({
+@Directive({
   selector: "[tedi-floating-button]",
-  template: "<ng-content />",
-  styleUrl: "./floating-button.component.scss",
   host: {
     "[class]": "classes()",
   },
 })
-export class FloatingButtonComponent {
+export class FloatingButtonDirective {
   /**
    * Button axis
    * @default horizontal
@@ -37,31 +35,39 @@ export class FloatingButtonComponent {
    * Button size
    * @default medium
    */
-  size?: FloatingButtonSize;
+  size = input<FloatingButtonSize>("medium");
   /**
-   * Button position
+   * Button positionwu
    * @default fixed
    */
   position = input<string>("fixed");
   /**
    * Button placement
+   * @default { vertical: 'bottom', horizontal: 'right' }
    */
-  placement?: FloatingButtonPlacement;
+  placement = input<FloatingButtonPlacement>({
+    vertical: "bottom",
+    horizontal: "right",
+  });
   /**
    * Button offset
+   * @default { bottom: '1.5rem', right: '1.5rem' }
    */
-  offset?: FloatingButtonOffset;
+  offset = input<FloatingButtonOffset>({
+    bottom: "1.5rem",
+    right: "1.5rem",
+  });
 
   classes = computed(() => {
     const classes = ["tedi-floating-button"];
     if (this.axis()) {
-      classes.push(`tedi-floating-button--axis--${this.axis()}`);
+      classes.push(`tedi-floating-button--${this.axis()}`);
     }
     if (this.visualType()) {
-      classes.push(`tedi-floating-button--visual-type--${this.visualType()}`);
+      classes.push(`tedi-floating-button--${this.visualType()}`);
     }
     if (this.size) {
-      classes.push(`tedi-floating-button--size--${this.size}`);
+      classes.push(`tedi-floating-button--${this.size()}`);
     }
     return classes.join(" ");
   });
