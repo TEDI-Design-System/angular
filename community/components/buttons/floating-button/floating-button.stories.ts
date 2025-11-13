@@ -1,6 +1,6 @@
 import { Meta, moduleMetadata, StoryObj } from "@storybook/angular";
 import { FloatingButtonComponent } from "./floating-button.component";
-import { NgFor } from "@angular/common";
+import { IconComponent } from "tedi/components";
 
 const buttonSizeArray = ["medium", "large"];
 const buttonStateArray = ["Default", "Hover", "Active", "Focus"];
@@ -11,7 +11,7 @@ const meta: Meta<FloatingButtonComponent> = {
 
   decorators: [
     moduleMetadata({
-      imports: [FloatingButtonComponent, NgFor],
+      imports: [FloatingButtonComponent, IconComponent],
     }),
   ],
 };
@@ -38,9 +38,18 @@ export const sizesVertical: Story = {
   render: (args) => ({
     props: { ...args, buttonSizeArray },
     template: `
-    <div style="display: flex; gap: 1rem; margin: 1rem">
+    <div style="display: flex; flex-direction: column; gap: 8rem; margin: 2rem">
       @for(size of buttonSizeArray; track size) {
-        {{size}}<tedi-floating-button axis="vertical" [size]="size">Floating Button</tedi-floating-button>
+        <div>
+          <p>{{size}}</p>
+          <tedi-floating-button axis="vertical" [size]="size">Floating Button</tedi-floating-button>
+          <tedi-floating-button axis="vertical" [size]="size">Floating Button <tedi-icon name="arrow_upward" /></tedi-floating-button>
+          <tedi-floating-button axis="vertical" [size]="size"><tedi-icon name="arrow_upward" /></tedi-floating-button>
+
+          <tedi-floating-button axis="vertical" variant="secondary" [size]="size">Floating Button</tedi-floating-button>
+          <tedi-floating-button axis="vertical" variant="secondary" [size]="size">Floating Button <tedi-icon name="arrow_upward" /></tedi-floating-button>
+          <tedi-floating-button axis="vertical" variant="secondary" [size]="size"><tedi-icon name="arrow_upward" /></tedi-floating-button>
+        </div>
       }
     </div>`,
   }),
@@ -51,9 +60,16 @@ export const statesVertical: Story = {
   render: (args) => ({
     props: { ...args, buttonStateArray },
     template: `
-    <div style="display: flex; gap: 1rem; margin: 2rem">
+    <div style="display: flex; flex-direction: column; gap: 8rem; margin: 2rem">
       @for(state of buttonStateArray; track state) {
-        {{state}}<tedi-floating-button axis="vertical" [id]="state">Floating Button</tedi-floating-button>
+        <div>
+          <p>{{state}}</p>
+          <tedi-floating-button axis="vertical" [id]="state">Floating Button</tedi-floating-button>
+          <tedi-floating-button axis="vertical" [id]="state"><tedi-icon name="arrow_upward" /></tedi-floating-button>
+
+          <tedi-floating-button axis="vertical" variant="secondary" [id]="state">Floating Button</tedi-floating-button>
+          <tedi-floating-button axis="vertical" variant="secondary" [id]="state">Floating Button <tedi-icon name="arrow_upward" /></tedi-floating-button>
+        </div>
       }
     </div>`,
   }),
@@ -64,9 +80,15 @@ export const sizesHorizontal: Story = {
   render: (args) => ({
     props: { ...args, buttonSizeArray },
     template: `
-    <div style="display: flex; gap: 1rem; margin: 1rem">
+    <div style="display: flex; flex-direction: column; gap: 8rem; margin: 2rem">
       @for(size of buttonSizeArray; track size) {
-        {{size}}<tedi-floating-button axis="horizontal" [size]="size">Floating Button</tedi-floating-button>
+        <div>
+          {{size}}
+          <tedi-floating-button axis="horizontal" [size]="size">Floating Button</tedi-floating-button>
+          <tedi-floating-button axis="horizontal" variant="secondary" [size]="size">Floating Button</tedi-floating-button>
+          <tedi-floating-button axis="horizontal" variant="secondary" [size]="size">Floating Button <tedi-icon name="arrow_upward" /></tedi-floating-button>
+          <tedi-floating-button axis="horizontal" variant="secondary" [size]="size"><tedi-icon name="arrow_upward" /></tedi-floating-button>
+        </div>
       }
     </div>`,
   }),
@@ -77,7 +99,7 @@ export const statesHorizontal: Story = {
   render: (args) => ({
     props: { ...args, buttonStateArray },
     template: `
-    <div style="display: flex; gap: 1rem; margin: 1rem">
+    <div style="display: flex; gap: 1rem; margin: 2rem">
     @for(state of buttonStateArray; track state) {
       {{state}}<tedi-floating-button axis="horizontal" [id]="state">Floating Button</tedi-floating-button>
     }
