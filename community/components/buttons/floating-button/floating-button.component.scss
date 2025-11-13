@@ -107,7 +107,6 @@ button.tedi-floating-button {
 
   &--medium {
     height: auto;
-    min-height: $btn-height;
 
     @include breakpoints.media-breakpoint-up(md) {
       min-height: $btn-height-small;
@@ -118,7 +117,7 @@ button.tedi-floating-button {
       button-md-padding-y button-md-padding-x
     );
 
-    &.tedi-floating-button--icon-only {
+    &.tedi-button--icon-only {
       @include mixins.responsive-styles(width, button-md-icon-size);
       @include mixins.responsive-styles(height, button-md-icon-size);
       @include mixins.responsive-styles(padding, button-md-icon-padding);
@@ -134,14 +133,14 @@ button.tedi-floating-button {
       button-xl-padding-y button-xl-padding-x
     );
 
-    &.tedi-floating-button--icon-only {
+    &.tedi-button--icon-only {
       @include mixins.responsive-styles(width, button-xl-icon-size);
       @include mixins.responsive-styles(height, button-xl-icon-size);
       @include mixins.responsive-styles(padding, button-xl-icon-padding);
     }
   }
 
-  &:not(&--icon-only) {
+  &:not(.tedi-button--icon-only) {
     @include mixins.responsive-styles(min-width, button-width-min);
     @include mixins.responsive-styles(max-width, button-width-max);
   }
