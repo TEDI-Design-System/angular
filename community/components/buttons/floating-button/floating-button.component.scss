@@ -43,6 +43,14 @@ $btn-height-large: 3rem;
   --_btn-focus-outline: $border-focus;
 }
 
+:host {
+  display: contents;
+}
+
+.test {
+  display: contents;
+}
+
 button.tedi-floating-button {
   box-sizing: border-box;
   text-wrap: wrap;
@@ -65,8 +73,7 @@ button.tedi-floating-button {
     );
     @include mixins.responsive-styles(border-top-left-radius, button-radius-sm);
   }
-tedi-floating-button--vertical
-  &.tedi-floating-button--primary {
+  tedi-floating-button--vertical &.tedi-floating-button--primary {
     @include button-variant(
       var(--button-floating-primary-background-default),
       var(--button-floating-primary-border-default),
