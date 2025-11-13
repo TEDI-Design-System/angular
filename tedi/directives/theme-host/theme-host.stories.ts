@@ -1,7 +1,7 @@
 import { Meta, moduleMetadata, StoryObj } from '@storybook/angular';
 import { ThemeHostDirective } from './theme-host.directive';
 
-import ThemeProviderDocs from './theme-host.docs.mdx';
+import ThemeHostDocs from './theme-host.docs.mdx';
 import { ButtonComponent, ColComponent, RowComponent, TextComponent } from '../../components';
 
 const meta: Meta<ThemeHostDirective> = {
@@ -19,7 +19,7 @@ const meta: Meta<ThemeHostDirective> = {
   ],
   parameters: {
     docs: {
-      page: ThemeProviderDocs,
+      page: ThemeHostDocs,
     },
   },
 };
