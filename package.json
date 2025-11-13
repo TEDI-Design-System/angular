@@ -32,7 +32,7 @@
     "ngx-float-ui": "^19.0.1 || ^20.0.0"
   },
   "dependencies": {
-    "@tedi-design-system/core": "^2.0.0"
+    "@tedi-design-system/core": "^2.1.0"
   },
   "devDependencies": {
     "@angular-devkit/core": "19.2.15",
