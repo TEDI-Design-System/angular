@@ -1,8 +1,9 @@
-import { computed, Directive, input } from "@angular/core";
+import { Component, computed, input, ViewEncapsulation } from "@angular/core";
+import { ButtonComponent, ButtonVariant } from "tedi/components";
 
 export type FloatingButtonAxis = "horizontal" | "vertical";
 export type FloatingButtonColor = "primary" | "secondary";
-export type FloatingButtonSize = "medium" | "large";
+export type FloatingButtonSize = "small" | "medium" | "large";
 export type FloatingButtonPlacement = {
   vertical: "top" | "bottom" | "center";
   horizontal: "left" | "right" | "center";
@@ -14,14 +15,21 @@ export type FloatingButtonOffset = {
   right?: number | string;
 };
 
-@Directive({
-  selector: "[tedi-floating-button]",
-  host: {
-    "[class]": "classes()",
-    "[style]": "positioning()",
-  },
+@Component({
+  selector: "tedi-floating-button",
+  template: `<button tedi-button [id]="id()" [className]="classes()">
+    <ng-content />
+  </button>`,
+  imports: [ButtonComponent],
+  encapsulation: ViewEncapsulation.None,
 })
-export class FloatingButtonDirective {
+export class FloatingButtonComponent {
+  id = input<string>();
+  /**
+   * Specifies the color theme of the button. The color should meet accessibility standards for color contrast.
+   * @default primary
+   */
+  variant = input<ButtonVariant>("primary");
   /**
    * Button axis
    * @default horizontal
@@ -37,27 +45,6 @@ export class FloatingButtonDirective {
    * @default medium
    */
   size = input<FloatingButtonSize>("medium");
-  /**
-   * Button positionwu
-   * @default fixed
-   */
-  position = input<string>("fixed");
-  /**
-   * Button placement
-   * @default { vertical: 'bottom', horizontal: 'right' }
-   */
-  placement = input<FloatingButtonPlacement>({
-    vertical: "bottom",
-    horizontal: "right",
-  });
-  /**
-   * Button offset
-   * @default { bottom: '1.5rem', right: '1.5rem' }
-   */
-  offset = input<FloatingButtonOffset>({
-    bottom: "1.5rem",
-    right: "1.5rem",
-  });
 
   classes = computed(() => {
     const classes = ["tedi-floating-button"];
@@ -67,43 +54,7 @@ export class FloatingButtonDirective {
     if (this.visualType()) {
       classes.push(`tedi-floating-button--${this.visualType()}`);
     }
-    if (this.size) {
-      classes.push(`tedi-floating-button--${this.size()}`);
-    }
+    classes.push(`tedi-floating-button--${this.size() ?? "medium"}`);
     return classes.join(" ");
-  });
-
-  positioning = computed(() => {
-    const styles: { [key: string]: string } = {};
-    const placement = this.placement();
-    const offset = this.offset();
-    if (!placement || !offset) {
-      return "";
-    }
-    if (placement.vertical === "top") {
-      styles["top"] = offset.top ? offset.top.toString() : "1.5rem";
-    }
-    if (placement.vertical === "bottom") {
-      styles["bottom"] = offset.bottom ? offset.bottom.toString() : "1.5rem";
-    }
-    if (placement.vertical === "center") {
-      styles["top"] = "50%";
-      styles["transform"] = "translateY(-50%)";
-    }
-    if (placement.horizontal === "left") {
-      styles["left"] = offset.left ? offset.left.toString() : "0";
-    }
-    if (placement.horizontal === "right") {
-      styles["right"] = offset.right ? offset.right.toString() : "0";
-    }
-    if (placement.horizontal === "center") {
-      styles["left"] = "50%";
-      styles["transform"] = styles["transform"]
-        ? styles["transform"] + " translateX(-50%)"
-        : "translateX(-50%)";
-    }
-    console.log(styles, JSON.stringify(styles));
-
-    return JSON.stringify(styles);
   });
 }
