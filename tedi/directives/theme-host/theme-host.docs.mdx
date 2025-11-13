@@ -1,0 +1,209 @@
+import {
+  Meta,
+  Title,
+  Subtitle,
+  Canvas,
+  Story,
+  Controls,
+  ArgsTable,
+} from "@storybook/blocks";
+import * as ThemeHostStories from "./theme-host.stories.ts";
+
+<Title />
+
+The `tediThemeHost` directive enables theme management across your Angular app
+by applying the correct theme class (`.tedi-theme--*`) to the host element and
+syncing with `ThemeService`.
+
+## Features
+
+- **Automatic persistence** - Themes are saved to localStorage and restored on page load
+- **SSR compatible** - Browser-specific logic is skipped on the server
+- **Multiple themes** - Supports 'default', 'dark', and 'rit' themes out of the box
+- **Reactive updates** - All components using the service stay in sync
+
+## Usage
+
+### Directive Example
+
+Use the tediThemeHost directive on any container:
+
+<Canvas>
+  <Story name="Default Theme" of={ThemeHostStories.Default} />
+</Canvas>
+
+### Basic Template Usage
+
+Apply the directive with a static theme:
+
+```angular
+<div tediThemeHost="dark">
+  <your-content></your-content>
+</div>
+```
+
+Or bind to a component property for dynamic themes:
+
+```angular
+<div [tediThemeHost]="currentTheme">
+  <your-app></your-app>
+</div>
+```
+
+### Complete App Integration Example
+
+Here's how to properly integrate the theme system in your Angular app:
+
+**app.component.ts**
+
+```typescript
+import { Component, inject } from "@angular/core";
+import {
+  ThemeService,
+  Theme,
+  ThemeHostDirective,
+} from "@tedi-design-system/angular/tedi";
+
+@Component({
+  selector: "app-root",
+  standalone: true,
+  imports: [ThemeHostDirective],
+  template: ` <div
+    [tediThemeHost]="themeService.getTheme()"
+    class="app-container"
+  >
+    <h1>My App</h1>
+    <app-theme-switcher></app-theme-switcher>
+    <!-- Your app content -->
+  </div>`,
+})
+export class AppComponent {
+  themeService = inject(ThemeService);
+}
+```
+
+### Theme Switcher Component example
+
+Create a theme switcher that persists user preferences:
+
+**theme-switcher.component.ts**
+
+```typescript
+import { Component } from "@angular/core";
+import { ThemeService, Theme } from "@tedi-design-system/angular/tedi";
+
+@Component({
+  selector: "app-theme-switcher",
+  template: `html
+    <div class="theme-switcher">
+      <button
+        (click)="setTheme('default')"
+        [class.active]="currentTheme === 'default'"
+      >
+        Default
+      </button>
+      <button
+        (click)="setTheme('dark')"
+        [class.active]="currentTheme === 'dark'"
+      >
+        Dark
+      </button>
+    </div> `,
+})
+export class ThemeSwitcherComponent {
+  currentTheme: Theme;
+
+  constructor(private themeService: ThemeService) {
+    // Initialize with current theme from service
+    this.currentTheme = this.themeService.getTheme();
+
+    // Subscribe to theme changes
+    this.themeService.themeChanges$.subscribe((theme) => {
+      this.currentTheme = theme;
+    });
+  }
+
+  setTheme(theme: Theme): void {
+    this.themeService.setTheme(theme);
+  }
+}
+```
+
+### Manual Theme Control
+
+For advanced use cases, you can control themes programmatically:
+
+```typescript
+import { Component, inject } from "@angular/core";
+import { ThemeService, Theme } from "@tedi-design-system/angular/tedi";
+
+@Component({
+  selector: "app-theme-manager",
+  template: `html
+    <button (click)="toggleTheme()">
+      Switch to {{ currentTheme === "dark" ? "Default" : "Dark" }}
+    </button>
+    <p>Current theme: {{ currentTheme }}</p> `,
+})
+export class ThemeManagerComponent {
+  private themeService = inject(ThemeService);
+  currentTheme: Theme = this.themeService.getTheme();
+
+  constructor() {
+    this.themeService.themeChanges$.subscribe((theme) => {
+      this.currentTheme = theme;
+    });
+  }
+
+  toggleTheme() {
+    const newTheme: Theme = this.currentTheme === "dark" ? "default" : "dark";
+    this.themeService.setTheme(newTheme);
+  }
+
+  // Set specific theme
+  setDarkTheme() {
+    this.themeService.setTheme("dark");
+  }
+
+  // Check current theme
+  isDarkTheme(): boolean {
+    return this.themeService.getTheme() === "dark";
+  }
+}
+```
+
+## Persistence Behavior
+
+The theme system automatically persists user preferences:
+
+- **Automatic Save**: Theme choices are automatically saved to `localStorage`
+- **Automatic Load**: Saved theme is restored on app initialization
+- **Key**: Uses `tedi-theme` as the storage key
+- **No Setup**: Works out of the box with no additional configuration
+
+### Optional Cookie Support
+
+For advanced use cases (SSR, cross-subdomain), you can enable cookie persistence:
+
+```typescript
+export class AppComponent implements OnInit {
+  themeService = inject(ThemeService);
+
+  ngOnInit() {
+    // Enable cookie persistence alongside localStorage
+    this.themeService.enableCookies(true);
+  }
+}
+```
+
+## Browser vs SSR
+
+**Client-side only apps**: Works automatically with DOM and localStorage. Themes persist across sessions.
+
+**Server-side rendering (SSR)**:
+
+- Browser-specific logic is skipped on the server
+- Theme applies when hydration completes in the browser
+- Persistence works seamlessly once client takes over
+
+<Controls />
