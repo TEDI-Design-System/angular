@@ -107,6 +107,7 @@ button.tedi-floating-button {
 
   &--medium {
     height: auto;
+    min-height: $btn-height;
 
     @include breakpoints.media-breakpoint-up(md) {
       min-height: $btn-height-small;
