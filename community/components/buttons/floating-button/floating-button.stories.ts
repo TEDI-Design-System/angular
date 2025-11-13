@@ -7,7 +7,7 @@ const buttonSizeArray = ["medium", "large"];
 const buttonStateArray = ["Default", "Hover", "Active", "Focus"];
 
 const meta: Meta<FloatingButtonDirective> = {
-  title: "Components/Overlay/Floating Button",
+  title: "Community/Buttons/Floating Button",
   component: FloatingButtonDirective,
 
   decorators: [
