@@ -43,14 +43,6 @@ $btn-height-large: 3rem;
   --_btn-focus-outline: $border-focus;
 }
 
-:host {
-  display: contents;
-}
-
-.test {
-  display: contents;
-}
-
 button.tedi-floating-button {
   box-sizing: border-box;
   text-wrap: wrap;
