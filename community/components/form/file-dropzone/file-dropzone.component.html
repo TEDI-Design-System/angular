@@ -32,47 +32,49 @@
   }
 </ng-content>
 
-@for (file of files(); track file.name) {
-  <div class="tedi-file-dropzone__file-list" [tediVerticalSpacing]="0.5">
-    <tedi-card
-      [className]="fileClasses(file)"
-      padding="none"
-      [background]="
-        file.fileStatus && file.fileStatus == 'invalid'
-          ? 'danger-primary'
-          : 'tertiary'
-      "
-    >
-      <tedi-card-content class="tedi-file-dropzone__card" padding="xs">
-        <div class="tedi-file-dropzone__file-name">
-          {{ file.label ?? file.name }}
+<ng-content select="[file-list]">
+  @for (file of files(); track file.name) {
+    <div class="tedi-file-dropzone__file-list" [tediVerticalSpacing]="0.5">
+      <tedi-card
+        [className]="fileClasses(file)"
+        padding="none"
+        [background]="
+          file.fileStatus && file.fileStatus == 'invalid'
+            ? 'danger-primary'
+            : 'tertiary'
+        "
+      >
+        <tedi-card-content class="tedi-file-dropzone__card" padding="xs">
+          <div class="tedi-file-dropzone__file-name">
+            {{ file.label ?? file.name }}
 
-          @if (file && validateIndividually() && file.helper; as helper) {
-            <tedi-tooltip
-              [className]="tooltipClasses(file)"
-              [position]="helper?.position || 'top'"
-            >
-              <tedi-tooltip-trigger>
-                <button tedi-info-button [disabled]="file.disabled"></button>
-              </tedi-tooltip-trigger>
+            @if (file && validateIndividually() && file.helper; as helper) {
+              <tedi-tooltip
+                [className]="tooltipClasses(file)"
+                [position]="helper?.position || 'top'"
+              >
+                <tedi-tooltip-trigger>
+                  <button tedi-info-button [disabled]="file.disabled"></button>
+                </tedi-tooltip-trigger>
 
-              <tedi-tooltip-content>
-                {{ helper.text }}
-              </tedi-tooltip-content>
-            </tedi-tooltip>
-          }
-        </div>
-        <button
-          tedi-closing-button
-          [title]="'clear' | tediTranslate"
-          [iconSize]="18"
-          (click)="removeFile(file)"
-          size="small"
-        ></button>
-      </tedi-card-content>
-    </tedi-card>
-  </div>
-}
+                <tedi-tooltip-content>
+                  {{ helper.text }}
+                </tedi-tooltip-content>
+              </tedi-tooltip>
+            }
+          </div>
+          <button
+            tedi-closing-button
+            [title]="'clear' | tediTranslate"
+            [iconSize]="18"
+            (click)="removeFile(file)"
+            size="small"
+          ></button>
+        </tedi-card-content>
+      </tedi-card>
+    </div>
+  }
+</ng-content>
 
 <ng-content select="[error-text]">
   @if (this.uploadError(); as message) {
