@@ -26,14 +26,12 @@ const meta: Meta<StoryFloatingButtonArgs> = {
     }),
   ],
   args: {
-    id: "",
     variant: "primary",
     axis: "horizontal",
     size: "medium",
     textOffset: "30px",
   },
   argTypes: {
-    id: { control: "text" },
     variant: {
       control: "select",
       description: "Specifies the color theme of the button.",

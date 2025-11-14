@@ -2,7 +2,7 @@ import { Component, computed, input, ViewEncapsulation } from "@angular/core";
 import { ButtonComponent, ButtonVariant } from "tedi/components";
 
 export type FloatingButtonAxis = "horizontal" | "vertical";
-export type FloatingButtonSize = "small" | "medium" | "large";
+export type FloatingButtonSize = "default" | "small" | "medium" | "large";
 
 @Component({
   selector: "tedi-floating-button",
@@ -14,7 +14,6 @@ export type FloatingButtonSize = "small" | "medium" | "large";
   encapsulation: ViewEncapsulation.None,
 })
 export class FloatingButtonComponent {
-  id = input<string>();
   /**
    * Specifies the color theme of the button. The color should meet accessibility standards for color contrast.
    * @default primary
@@ -26,10 +25,10 @@ export class FloatingButtonComponent {
    */
   axis = input<FloatingButtonAxis>("horizontal");
   /**
-   * Button size
+   * Defines the size of the button
    * @default medium
    */
-  size = input<FloatingButtonSize>("medium");
+  size = input<FloatingButtonSize>("default");
 
   classes = computed(() => {
     const classes = ["tedi-floating-button"];
