@@ -1,0 +1,33 @@
+@use "@tedi-design-system/core/mixins";
+@use "@tedi-design-system/core/bootstrap-utility/breakpoints";
+@forward "../../../../tedi/components/buttons/button/button.component.scss";
+@use "../../../../tedi/components/buttons/button/button.component.scss" as
+  buttonMixins;
+
+button.tedi-floating-button {
+  &--horizontal {
+    @include mixins.responsive-styles(border-radius, button-radius-default);
+  }
+
+  &--vertical {
+    min-width: max-content;
+    white-space: nowrap;
+    border-radius: 0;
+    transform: rotate(-90deg);
+    transform-origin: center;
+
+    @include mixins.responsive-styles(
+      border-top-right-radius,
+      button-radius-sm
+    );
+    @include mixins.responsive-styles(border-top-left-radius, button-radius-sm);
+  }
+
+  &.tedi-floating-button--secondary {
+    @include buttonMixins.button-variant-color-vars(
+      "secondary",
+      false,
+      "floating"
+    );
+  }
+}

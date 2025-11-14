@@ -20,7 +20,7 @@ export type ButtonVariant =
   | "secondary-inverted"
   | "neutral-inverted";
 
-export type ButtonSize = "default" | "small";
+export type ButtonSize = "default" | "small" | "large";
 
 @Component({
   selector: "[tedi-button]",
@@ -57,7 +57,7 @@ export class ButtonComponent implements AfterContentChecked {
       .map((node, index) => ({ node, index }))
       .filter(x => x.node.nodeType === Node.ELEMENT_NODE && x.node.nodeName === "TEDI-ICON")
       .map(x => x.index);
-    
+
     const iconCount = iconIndexes.length;
     this.iconOnly.set(nodeCount === 1 && iconCount === 1);
     this.iconFirst.set(iconIndexes.includes(0));
