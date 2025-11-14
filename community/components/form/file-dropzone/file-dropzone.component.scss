@@ -17,3 +17,7 @@
 .tedi-file-dropzone__tooltip--error .tedi-info-button {
   --button-main-neutral-text-default: var(--red-700);
 }
+
+.tedi-file-dropzone__file-name {
+  display: flex;
+}
