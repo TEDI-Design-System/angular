@@ -3,46 +3,53 @@
 
 $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 
-@mixin button-variant-color-vars($variant, $icon-only: false) {
+@mixin button-variant-color-vars($variant, $icon-only: false, $affix: main) {
   & {
     @if $icon-only {
-      --_btn-bg: var(--button-main-#{$variant}-icon-only-background-default);
+      --_btn-bg: var(
+        --button-#{$affix}-#{$variant}-icon-only-background-default
+      );
     } @else {
-      --_btn-bg: var(--button-main-#{$variant}-background-default);
+      --_btn-bg: var(--button-#{$affix}-#{$variant}-background-default);
     }
 
-    --_btn-border: var(--button-main-#{$variant}-border-default);
-    --_btn-text: var(--button-main-#{$variant}-text-default);
+    --_btn-border: var(--button-#{$affix}-#{$variant}-border-default);
+    --_btn-text: var(--button-#{$affix}-#{$variant}-text-default);
     --_btn-outline: var(--primary-500);
 
-    @include button-state-color-vars($variant, "hover", $icon-only);
-    @include button-state-color-vars($variant, "focus", $icon-only);
-    @include button-state-color-vars($variant, "active", $icon-only);
+    @include button-state-color-vars($variant, "hover", $icon-only, $affix);
+    @include button-state-color-vars($variant, "focus", $icon-only, $affix);
+    @include button-state-color-vars($variant, "active", $icon-only, $affix);
     @include button-disabled-color-vars($variant);
   }
 }
 
-@mixin button-state-color-vars($variant, $state, $icon-only: false) {
+@mixin button-state-color-vars(
+  $variant,
+  $state,
+  $icon-only: false,
+  $affix: main
+) {
   & {
     @if $icon-only {
       --_btn-#{$state}-bg: var(
-        --button-main-#{$variant}-icon-only-background-#{$state},
-        var(--button-main-#{$variant}-icon-only-background-default)
+        --button-#{$affix}-#{$variant}-icon-only-background-#{$state},
+        var(--button-#{$affix}-#{$variant}-icon-only-background-default)
       );
     } @else {
       --_btn-#{$state}-bg: var(
-        --button-main-#{$variant}-background-#{$state},
-        var(--button-main-#{$variant}-background-default)
+        --button-#{$affix}-#{$variant}-background-#{$state},
+        var(--button-#{$affix}-#{$variant}-background-default)
       );
     }
 
     --_btn-#{$state}-border: var(
-      --button-main-#{$variant}-border-#{$state},
-      var(--button-main-#{$variant}-border-default)
+      --button-#{$affix}-#{$variant}-border-#{$state},
+      var(--button-#{$affix}-#{$variant}-border-default)
     );
     --_btn-#{$state}-text: var(
-      --button-main-#{$variant}-text-#{$state},
-      var(--button-main-#{$variant}-text-default)
+      --button-#{$affix}-#{$variant}-text-#{$state},
+      var(--button-#{$affix}-#{$variant}-text-default)
     );
   }
 }
@@ -133,6 +140,11 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 
   &--default {
     @include button-size-vars("md");
+    @include mixins.responsive-styles(font-size, button-text-size-default);
+  }
+
+  &--large {
+    @include button-size-vars("lg");
     @include mixins.responsive-styles(font-size, button-text-size-default);
   }
 

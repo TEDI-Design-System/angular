@@ -7,7 +7,7 @@ import {
 import { FloatingButtonComponent } from "./floating-button.component";
 import { IconComponent } from "tedi/components";
 
-const buttonSizeArray = ["small", "large"];
+const buttonSizeArray = ["default", "large"];
 const buttonStateArray = ["Default", "Hover", "Active", "Focus"];
 
 interface StoryArgs {
@@ -28,7 +28,6 @@ const meta: Meta<StoryFloatingButtonArgs> = {
   args: {
     variant: "primary",
     axis: "horizontal",
-    size: "medium",
     textOffset: "30px",
   },
   argTypes: {
@@ -45,7 +44,7 @@ const meta: Meta<StoryFloatingButtonArgs> = {
     size: {
       control: "radio",
       description: "Button size.",
-      options: ["small", "medium", "large"],
+      options: ["small", "default", "large"],
     },
     // not meant to be user-editable or seen
     textOffset: {
@@ -73,7 +72,7 @@ export const Default: Story = {
     props: { ...args, debug: () => console.log("floating button clicked!") },
     template: `
     <div style="margin: 2rem;">
-      <tedi-floating-button ${argsToTemplate(args)} (click)="debug()">floating button</tedi-floating-button>
+      <button tedi-floating-button ${argsToTemplate(args)} (click)="debug()">floating button</button>
     </div>
     `,
   }),
@@ -91,13 +90,13 @@ export const sizesVertical: Story = {
       @for(size of buttonSizeArray; track size) {
         <div>
           <div style="transform: translateY({{textOffset}});">{{size}}</div>
-          <tedi-floating-button [axis]="[axis]" [size]="size">Floating Button</tedi-floating-button>
-          <tedi-floating-button [axis]="[axis]" [size]="size">Floating Button <tedi-icon name="arrow_upward" /></tedi-floating-button>
-          <tedi-floating-button [axis]="[axis]" [size]="size"><tedi-icon name="arrow_upward" /></tedi-floating-button>
+          <button tedi-floating-button [axis]="[axis]" [size]="size">Floating Button</button>
+          <button tedi-floating-button [axis]="[axis]" [size]="size">Floating Button <tedi-icon name="arrow_upward" /></button>
+          <button tedi-floating-button [axis]="[axis]" [size]="size"><tedi-icon name="arrow_upward" /></button>
 
-          <tedi-floating-button [axis]="[axis]" variant="secondary" [size]="size">Floating Button</tedi-floating-button>
-          <tedi-floating-button [axis]="[axis]" variant="secondary" [size]="size">Floating Button <tedi-icon name="arrow_upward" /></tedi-floating-button>
-          <tedi-floating-button [axis]="[axis]" variant="secondary" [size]="size"><tedi-icon name="arrow_upward"/></tedi-floating-button>
+          <button tedi-floating-button [axis]="[axis]" variant="secondary" [size]="size">Floating Button</button>
+          <button tedi-floating-button [axis]="[axis]" variant="secondary" [size]="size">Floating Button <tedi-icon name="arrow_upward" /></button>
+          <button tedi-floating-button [axis]="[axis]" variant="secondary" [size]="size"><tedi-icon name="arrow_upward"/></button>
         </div>
       }
     </div>`,
@@ -116,13 +115,13 @@ export const statesVertical: Story = {
       @for(state of buttonStateArray; track state) {
         <div>
           <div style="transform: translateY({{textOffset}});">{{state}}</div>
-          <tedi-floating-button [axis]="[axis]" [id]="state">Floating Button</tedi-floating-button>
-          <tedi-floating-button [axis]="[axis]" [id]="state">Floating Button <tedi-icon name="arrow_upward" /></tedi-floating-button>
-          <tedi-floating-button [axis]="[axis]" [id]="state"><tedi-icon name="arrow_upward" /></tedi-floating-button>
+          <button tedi-floating-button [axis]="[axis]" [id]="state">Floating Button</button>
+          <button tedi-floating-button [axis]="[axis]" [id]="state">Floating Button <tedi-icon name="arrow_upward" /></button>
+          <button tedi-floating-button [axis]="[axis]" [id]="state"><tedi-icon name="arrow_upward" /></button>
 
-          <tedi-floating-button [axis]="[axis]" [id]="state" variant="secondary">Floating Button</tedi-floating-button>
-          <tedi-floating-button [axis]="[axis]" [id]="state" variant="secondary">Floating Button <tedi-icon name="arrow_upward" /></tedi-floating-button>
-          <tedi-floating-button [axis]="[axis]" [id]="state" variant="secondary"><tedi-icon name="arrow_upward"/></tedi-floating-button>
+          <button tedi-floating-button [axis]="[axis]" [id]="state" variant="secondary">Floating Button</button>
+          <button tedi-floating-button [axis]="[axis]" [id]="state" variant="secondary">Floating Button <tedi-icon name="arrow_upward" /></button>
+          <button tedi-floating-button [axis]="[axis]" [id]="state" variant="secondary"><tedi-icon name="arrow_upward"/></button>
         </div>
       }
     </div>`,

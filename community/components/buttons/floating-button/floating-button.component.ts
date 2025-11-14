@@ -1,40 +1,29 @@
 import { Component, computed, input, ViewEncapsulation } from "@angular/core";
-import { ButtonComponent, ButtonVariant } from "tedi/components";
+import { ButtonComponent } from "tedi/components";
 
 export type FloatingButtonAxis = "horizontal" | "vertical";
-export type FloatingButtonSize = "default" | "small" | "medium" | "large";
 
 @Component({
-  selector: "tedi-floating-button",
-  template: `<button tedi-button [id]="id()" [className]="classes()">
-    <ng-content />
-  </button>`,
+  selector: "[tedi-floating-button]",
+  template: `<ng-content />`,
   styleUrl: "./floating-button.component.scss",
-  imports: [ButtonComponent],
   encapsulation: ViewEncapsulation.None,
+  host: {
+    "[class]": "floatClasses()",
+  },
 })
-export class FloatingButtonComponent {
-  /**
-   * Specifies the color theme of the button. The color should meet accessibility standards for color contrast.
-   * @default primary
-   */
-  variant = input<ButtonVariant>("primary");
+export class FloatingButtonComponent extends ButtonComponent {
   /**
    * Button axis
    * @default horizontal
    */
   axis = input<FloatingButtonAxis>("horizontal");
-  /**
-   * Defines the size of the button
-   * @default medium
-   */
-  size = input<FloatingButtonSize>("default");
 
-  classes = computed(() => {
+  floatClasses = computed(() => {
     const classes = ["tedi-floating-button"];
     classes.push(`tedi-floating-button--${this.axis() ?? "horizontal"}`);
-    classes.push(`tedi-floating-button--${this.size() ?? "medium"}`);
     classes.push(`tedi-floating-button--${this.variant() ?? "primary"}`);
-    return classes.join(" ");
+
+    return `${classes.join(" ")} ${this.classes()}`;
   });
 }
