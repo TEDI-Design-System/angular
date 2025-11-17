@@ -1,5 +1,5 @@
-import { Preview, StoryContext } from '@storybook/angular';
-import { ThemeService, Theme } from '../tedi/services/themes/themes.service';
+import { Preview, StoryContext } from "@storybook/angular";
+import { Theme } from "../tedi/services/theme/theme.service";
 import {
   Controls,
   Description,
@@ -11,14 +11,14 @@ import {
 
 export const globalTypes = {
   theme: {
-    name: 'Theme',
-    description: 'Global theme for components',
-    defaultValue: 'default',
+    name: "Theme",
+    description: "Global theme for components",
+    defaultValue: "default",
     toolbar: {
-      icon: 'paintbrush',
+      icon: "paintbrush",
       items: [
-        { value: 'default', title: 'Default' },
-        { value: 'dark', title: 'Dark' },
+        { value: "default", title: "Default" },
+        { value: "dark", title: "Dark" },
       ],
       showName: true,
     },
@@ -26,26 +26,26 @@ export const globalTypes = {
 };
 
 const themeDecorator = (storyFn: any, context: StoryContext) => {
-  const theme = (context.globals['theme'] as Theme) ?? 'default';
+  const theme = (context.globals["theme"] as Theme) ?? "default";
 
   const applyTheme = (newTheme: Theme) => {
     const html = document.documentElement;
-    const prefix = 'tedi-theme--';
-    const currentClass = Array.from(html.classList).find(cls => 
-      cls.startsWith(prefix)
+    const prefix = "tedi-theme--";
+    const currentClass = Array.from(html.classList).find((cls) =>
+      cls.startsWith(prefix),
     );
-    
+
     if (currentClass) {
       html.classList.replace(currentClass, `${prefix}${newTheme}`);
     } else {
       html.classList.add(`${prefix}${newTheme}`);
     }
 
-    const bg = newTheme === 'dark' ? 'var(--color-bg-inverted, #1a1a1a)' : '';
-    const selectors = '.sb-show-main, .docs-story > div';
+    const bg = newTheme === "dark" ? "var(--color-bg-inverted, #1a1a1a)" : "";
+    const selectors = ".sb-show-main, .docs-story > div";
 
     requestAnimationFrame(() => {
-      document.querySelectorAll<HTMLElement>(selectors).forEach(el => {
+      document.querySelectorAll<HTMLElement>(selectors).forEach((el) => {
         el.style.backgroundColor = bg;
       });
     });
@@ -79,14 +79,27 @@ const preview: Preview = {
     },
     status: {
       statuses: {
-        devComponent: { background: '#ff8000', color: '#fff', description: 'Dev only' },
-        breakpointSupport: { background: '#308653', color: '#fff', description: 'Breakpoint support' },
-        internalComponent: { background: '#fff', color: '#000', description: 'Internal only' },
-        existsInTediReady: { background: '#005aa3', color: '#fff', description: 'TEDI-ready' },
+        devComponent: {
+          background: "#ff8000",
+          color: "#fff",
+          description: "Dev only",
+        },
+        breakpointSupport: {
+          background: "#308653",
+          color: "#fff",
+          description: "Breakpoint support",
+        },
+        internalComponent: {
+          background: "#fff",
+          color: "#000",
+          description: "Internal only",
+        },
+        existsInTediReady: {
+          background: "#005aa3",
+          color: "#fff",
+          description: "TEDI-ready",
+        },
       },
-    },
-    injector: {
-      get: (token: any) => (token === ThemeService ? new ThemeService({} as any) : null),
     },
   },
 };
