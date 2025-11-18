@@ -104,7 +104,20 @@ class StorybookModalComponent implements OnInit {
  *
  * It is also possible to re-use **ModalFooterComponent** and **ModalHeaderComponent** in your own components
  * with custom arguments, or modified inside the modal component's slots.
- * For convenience, you can supply args to all modal components via the `args` input in cdk dialog's `open()` function's option object.
+ * For convenience, you can supply args to all modal components via the `args` input in cdk dialog's `open()` function's option object, which you can consume in
+ *
+ Keep in mind, **ModalComponent** will not work on it's own, it's intended for the user to create their own wrapper for it that makes use of **ModalHeaderComponent**,
+ * **ModalFooterComponent** and **ModalComponent** in a separate component, that you will provide into the `this.dialog.open()` call
+ *
+ * Example usage:
+ *
+ *  ``
+ *import { Dialog } from "@angular/cdk/dialog";
+ * // Inside your component
+ * dialog = inject(Dialog);
+ * this.dialog.open(MyModalComponent, {data})
+ *``
+ *
  */
 const meta: Meta<DialogData> = {
   title: "Community/Overlay/Modal",
