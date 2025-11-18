@@ -111,12 +111,97 @@ class StorybookModalComponent implements OnInit {
  *
  * Example usage:
  *
- *  ``
+ *```ts
+ *@Component({
+ *  selector: "storybook-open-modal",
+ *  template: '<button tedi-button (click)="openDialog()">
+ *    Open Select modal
+ *  </button> ',
+ *  imports: [ButtonComponent],
+ *})
+ *class ModalOpenComponent {
+ *  args = input<DialogData>();
+ *  dialog = inject(Dialog);
+ *
+ *  openDialog() {
+ *    this.dialog.open(StorybookModalComponent, {
+ *      data: this.args(),
+ *    });
+ *  }
+ *}
+ *```
+ *
+ *```ts
+ *@Component({
+ *  selector: "storybook-modal",
+ *  template: '
+ *    <tedi-modal [maxWidth]="args()?.maxWidth" [variant]="args()?.variant">
+ *      <tedi-modal-header
+ *        [title]="args()?.title"
+ *        [feedback]="args()?.feedback"
+ *        [closeButton]="args()?.closeButton"
+ *      />
+ *
+ *      <label tedi-label [for]="selectOneId">Label</label>
+ *      <tedi-select [inputId]="selectOneId" state="default">
+ *        @for (option of options; track option.value) {
+ *          <tedi-select-option [value]="option.value" [label]="option.label" />
+ *        }
+ *      </tedi-select>
+ *
+ *      <label tedi-label [for]="selectTwoId">Label</label>
+ *      <tedi-select [inputId]="selectTwoId" state="default">
+ *        @for (option of options; track option.value) {
+ *          <tedi-select-option [value]="option.value" [label]="option.label" />
+ *        }
+ *      </tedi-select>
+ *
+ *      <tedi-modal-footer
+ *        footer-slot
+ *        [buttons]="args()?.buttons"
+ *        [align]="args()?.align"
+ *      />
+ *    </tedi-modal>
+ *  ',
+ *  imports: [
+ *    SelectComponent,
+ *    SelectOptionComponent,
+ *    ModalComponent,
+ *    ModalHeaderComponent,
+ *    ModalFooterComponent,
+ *    FeedbackTextComponent,
+ *    LabelComponent,
+ *  ],
+ *})
+ *class StorybookModalComponent implements OnInit {
+ *  readonly options = [
+ *    { value: "1", label: "Option 1" },
+ *    { value: "2", label: "Option 2" },
+ *    { value: "3", label: "Option 3" },
+ *    { value: "4", label: "Option 4" },
+ *    { value: "5", label: "Option 5" },
+ *  ];
+ *
+ *  readonly args = model<DialogData>();
+ *
+ *  selectOneId?: string;
+ *  selectTwoId?: string;
+ *
+ *  ngOnInit(): void {
+ *    this.selectOneId = indexId("select-one");
+ *    this.selectTwoId = indexId("select-two");
+ *  }
+ *}
+ *```
+ *
+ *
+ *```ts
  *import { Dialog } from "@angular/cdk/dialog";
  * // Inside your component
  * dialog = inject(Dialog);
  * this.dialog.open(MyModalComponent, {data})
- *``
+ *```
+ *
  *
  */
 const meta: Meta<DialogData> = {
