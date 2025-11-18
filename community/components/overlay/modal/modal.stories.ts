@@ -106,7 +106,7 @@ class StorybookModalComponent implements OnInit {
  * with custom arguments, or modified inside the modal component's slots.
  * For convenience, you can supply args to all modal components via the `args` input in cdk dialog's `open()` function's option object, which you can consume in
  *
- Keep in mind, **ModalComponent** will not work on it's own, it's intended for the user to create their own wrapper for it that makes use of **ModalHeaderComponent**,
+ * Keep in mind, **ModalComponent** will not work on it's own, it's intended for the user to create their own wrapper for it that makes use of **ModalHeaderComponent**,
  * **ModalFooterComponent** and **ModalComponent** in a separate component, that you will provide into the `this.dialog.open()` call
  *
  *<details>
