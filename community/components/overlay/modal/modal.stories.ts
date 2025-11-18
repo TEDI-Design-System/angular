@@ -109,8 +109,8 @@ class StorybookModalComponent implements OnInit {
  Keep in mind, **ModalComponent** will not work on it's own, it's intended for the user to create their own wrapper for it that makes use of **ModalHeaderComponent**,
  * **ModalFooterComponent** and **ModalComponent** in a separate component, that you will provide into the `this.dialog.open()` call
  *
- * Example usage:
- *
+ *<details>
+ *<summary>Example opening button</summary>
  *```ts
  *@Component({
  *  selector: "storybook-open-modal",
@@ -131,6 +131,11 @@ class StorybookModalComponent implements OnInit {
  *}
  *```
  *
+ *</details>
+ *
+ *
+ *<details>
+ *<summary>Example complete modal</summary>
  *```ts
  *@Component({
  *  selector: "storybook-modal",
@@ -193,8 +198,10 @@ class StorybookModalComponent implements OnInit {
  *  }
  *}
  *```
+ *</details>
  *
- *
+ *<details>
+ *<summary>Example opening action</summary>
  *```ts
  *import { Dialog } from "@angular/cdk/dialog";
  * // Inside your component
@@ -202,6 +209,7 @@ class StorybookModalComponent implements OnInit {
  * this.dialog.open(MyModalComponent, {data})
  *```
  *
+ *</details>
  *
  */
 const meta: Meta<DialogData> = {
