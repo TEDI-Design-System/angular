@@ -33,6 +33,7 @@ const meta: Meta<StoryFloatingButtonArgs> = {
     variant: "primary",
     axis: "horizontal",
     textOffset: "30px",
+    size: "default",
   },
   argTypes: {
     variant: {
