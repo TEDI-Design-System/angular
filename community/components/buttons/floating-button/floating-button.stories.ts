@@ -6,6 +6,7 @@ import {
 } from "@storybook/angular";
 import { FloatingButtonComponent } from "./floating-button.component";
 import { IconComponent } from "tedi/components";
+import { BaseButtonDirective } from "tedi/components/buttons/button/base-button.directive";
 
 const buttonSizeArray = ["default", "large"];
 const buttonStateArray = ["Default", "Hover", "Active", "Focus"];
@@ -14,7 +15,9 @@ interface StoryArgs {
   textOffset: string;
 }
 
-type StoryFloatingButtonArgs = FloatingButtonComponent & StoryArgs;
+type StoryFloatingButtonArgs = FloatingButtonComponent &
+  StoryArgs &
+  BaseButtonDirective;
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.15.23?node-id=4515-65391&t=PIbEsGEGsONqRIrN-0" target="_BLANK">Figma ↗</a><br/>
