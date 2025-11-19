@@ -1,4 +1,11 @@
-import { Component, computed, input, ViewEncapsulation } from "@angular/core";
+import {
+  Component,
+  computed,
+  input,
+  ViewEncapsulation,
+  OnInit,
+  inject,
+} from "@angular/core";
 import { BaseButtonDirective } from "tedi/components";
 
 export type FloatingButtonVariant = "primary" | "secondary";
@@ -20,7 +27,7 @@ export type FloatingButtonAxis = "horizontal" | "vertical";
     "[class]": "floatClasses()",
   },
 })
-export class FloatingButtonComponent {
+export class FloatingButtonComponent implements OnInit {
   /**
    * Specifies the color theme of the button. The color should meet accessibility standards for color contrast.
    * @default primary
@@ -37,11 +44,18 @@ export class FloatingButtonComponent {
    */
   axis = input<FloatingButtonAxis>("horizontal");
 
+  buttonDirective = inject(BaseButtonDirective);
+
+  ngOnInit() {
+    this.buttonDirective.classNamePrefix.set("tedi-floating-button");
+    console.log("set", this.buttonDirective);
+  }
+
   floatClasses = computed(() => {
     const classes = [
       "tedi-floating-button",
-      `tedi-button--${this.variant() ?? "primary"}`,
-      `tedi-button--${this.size() ?? "default"}`,
+      `tedi-floating-button--${this.variant() ?? "primary"}`,
+      `tedi-floating-button--${this.size() ?? "default"}`,
       `tedi-floating-button--${this.axis() ?? "horizontal"}`,
     ];
     return classes.join(" ");

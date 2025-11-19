@@ -1,10 +1,10 @@
 @use "@tedi-design-system/core/mixins";
 @use "@tedi-design-system/core/bootstrap-utility/breakpoints";
-@forward "../../../../tedi/components/buttons/button/button.component.scss";
 @use "../../../../tedi/components/buttons/button/button.component.scss" as
   buttonMixins;
 
 button.tedi-floating-button {
+  @include buttonMixins.button-main-styles();
   box-shadow: 0 4px 10px 0 var(--alpha-14);
 
   &--vertical {
@@ -35,5 +35,13 @@ button.tedi-floating-button {
       false,
       "floating"
     );
+  }
+
+  &--default {
+    @include buttonMixins.button-size("md");
+  }
+
+  &--large {
+    @include buttonMixins.button-size("lg");
   }
 }

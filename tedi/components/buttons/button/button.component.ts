@@ -1,4 +1,4 @@
-import { Component, input, ViewEncapsulation } from "@angular/core";
+import { Component, computed, input, ViewEncapsulation } from "@angular/core";
 import { BaseButtonDirective } from "./base-button.directive";
 
 export type ButtonVariant =
@@ -25,6 +25,9 @@ export type ButtonSize = "default" | "small";
       directive: BaseButtonDirective,
     },
   ],
+  host: {
+    "[class]": "classes()",
+  },
 })
 export class ButtonComponent {
   /**
@@ -37,4 +40,13 @@ export class ButtonComponent {
    * @default default
    */
   size = input<ButtonSize>("default");
+
+  classes = computed(() => {
+    const classList = [
+      "tedi-button",
+      `tedi-button--${this.variant()}`,
+      `tedi-button--${this.size()}`,
+    ];
+    return classList.join(" ");
+  });
 }

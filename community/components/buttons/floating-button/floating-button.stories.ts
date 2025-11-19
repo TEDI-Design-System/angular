@@ -39,7 +39,7 @@ const meta: Meta<StoryFloatingButtonArgs> = {
     variant: {
       control: "select",
       description: "Specifies the color theme of the button.",
-      options: ["primary", "secondary"],
+      options: ["primary", "secondary", "neutral", "success"],
     },
     axis: {
       control: "radio",
@@ -49,7 +49,7 @@ const meta: Meta<StoryFloatingButtonArgs> = {
     size: {
       control: "radio",
       description: "Button size.",
-      options: ["small", "default", "large"],
+      options: ["default", "large"],
     },
     // not meant to be user-editable or seen
     textOffset: {

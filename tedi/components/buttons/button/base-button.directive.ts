@@ -13,6 +13,11 @@ import {
   },
 })
 export class BaseButtonDirective implements AfterContentChecked {
+  /**
+   * CSS class name affix the directive should provide
+   */
+  classNamePrefix = signal("tedi-button");
+
   private host = inject(ElementRef);
   iconOnly = signal(false);
   iconFirst = signal(false);
@@ -42,18 +47,18 @@ export class BaseButtonDirective implements AfterContentChecked {
   }
 
   classes = computed(() => {
-    const classList = ["tedi-button"];
+    const classList = [this.classNamePrefix()];
 
     if (this.iconOnly()) {
-      classList.push("tedi-button--icon-only");
+      classList.push(`${this.classNamePrefix()}--icon-only`);
     }
 
     if (!this.iconFirst()) {
-      classList.push("tedi-button--pl");
+      classList.push(`${this.classNamePrefix()}--pl`);
     }
 
     if (!this.iconLast()) {
-      classList.push("tedi-button--pr");
+      classList.push(`${this.classNamePrefix()}--pr`);
     }
 
     return classList.join(" ");

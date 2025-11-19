@@ -110,7 +110,7 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
   }
 }
 
-.tedi-button {
+@mixin button-main-styles {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -133,82 +133,10 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
   @include mixins.responsive-styles(line-height, body-bold-line-height);
   @include mixins.responsive-styles(border-radius, button-radius-default);
 
-  &--small {
-    @include button-size-vars("sm");
-    @include mixins.responsive-styles(font-size, button-text-size-sm);
-  }
-
-  &--default {
-    @include button-size-vars("md");
-    @include mixins.responsive-styles(font-size, button-text-size-default);
-  }
-
-  &--large {
-    @include button-size-vars("lg");
-    @include mixins.responsive-styles(font-size, button-text-size-default);
-  }
-
-  &--primary {
-    @include button-variant-color-vars("primary");
-  }
-
-  &--secondary {
-    @include button-variant-color-vars("secondary");
-  }
-
-  &--neutral {
-    @include button-variant-color-vars("neutral");
-    @include neutral-button-padding-overrides;
-  }
-
-  &--success {
-    @include button-variant-color-vars("success");
-  }
-
-  &--danger {
-    @include button-variant-color-vars("danger");
-  }
-
-  &--danger-neutral {
-    @include neutral-button-padding-overrides;
-    @include button-variant-color-vars("danger-neutral");
-  }
-
-  &--primary-inverted {
-    @include button-variant-color-vars("primary-inverted");
-  }
-
-  &--secondary-inverted {
-    @include button-variant-color-vars("secondary-inverted");
-  }
-
-  &--neutral-inverted {
-    @include button-variant-color-vars("neutral-inverted");
-    @include neutral-button-padding-overrides;
-  }
-
   &--icon-only {
     @include mixins.responsive-styles(width, button-md-icon-size);
     @include mixins.responsive-styles(height, button-md-icon-size);
     @include mixins.responsive-styles(padding, button-md-icon-padding);
-
-    &.tedi-button--neutral {
-      @include button-variant-color-vars("neutral", true);
-    }
-
-    &.tedi-button--neutral-inverted {
-      @include button-variant-color-vars("neutral-inverted", true);
-    }
-
-    &.tedi-button--danger-neutral {
-      @include button-variant-color-vars("danger-neutral", true);
-    }
-
-    &.tedi-button--small {
-      @include mixins.responsive-styles(width, button-sm-icon-size);
-      @include mixins.responsive-styles(height, button-sm-icon-size);
-      @include mixins.responsive-styles(padding, button-sm-icon-padding);
-    }
   }
 
   &--pl {
@@ -261,5 +189,82 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
   tedi-icon {
     color: inherit;
     font-size: inherit;
+  }
+}
+
+@mixin button-size($size) {
+  @include button-size-vars(#{$size});
+  @include mixins.responsive-styles(font-size, button-text-size-#{$size});
+}
+
+.tedi-button {
+  @include button-main-styles();
+
+  &--small {
+    @include button-size("sm");
+  }
+
+  &--default {
+    @include button-size("md");
+  }
+
+
+  &--primary {
+    @include button-variant-color-vars("primary");
+  }
+
+  &--secondary {
+    @include button-variant-color-vars("secondary");
+  }
+
+  &--neutral {
+    @include button-variant-color-vars("neutral");
+    @include neutral-button-padding-overrides;
+  }
+
+  &--success {
+    @include button-variant-color-vars("success");
+  }
+
+  &--danger {
+    @include button-variant-color-vars("danger");
+  }
+
+  &--danger-neutral {
+    @include neutral-button-padding-overrides;
+    @include button-variant-color-vars("danger-neutral");
+  }
+
+  &--primary-inverted {
+    @include button-variant-color-vars("primary-inverted");
+  }
+
+  &--secondary-inverted {
+    @include button-variant-color-vars("secondary-inverted");
+  }
+
+  &--neutral-inverted {
+    @include button-variant-color-vars("neutral-inverted");
+    @include neutral-button-padding-overrides;
+  }
+
+  &--icon-only {
+    &.tedi-button--neutral {
+      @include button-variant-color-vars("neutral", true);
+    }
+
+    &.tedi-button--neutral-inverted {
+      @include button-variant-color-vars("neutral-inverted", true);
+    }
+
+    &.tedi-button--danger-neutral {
+      @include button-variant-color-vars("danger-neutral", true);
+    }
+
+    &.tedi-button--small {
+      @include mixins.responsive-styles(width, button-sm-icon-size);
+      @include mixins.responsive-styles(height, button-sm-icon-size);
+      @include mixins.responsive-styles(padding, button-sm-icon-padding);
+    }
   }
 }
