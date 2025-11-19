@@ -22,7 +22,6 @@ export class FloatingButtonComponent extends ButtonComponent {
   floatClasses = computed(() => {
     const classes = ["tedi-floating-button"];
     classes.push(`tedi-floating-button--${this.axis() ?? "horizontal"}`);
-    // classes.push(`tedi-floating-button--${this.variant() ?? "primary"}`);
 
     return classes.join(" ");
   });
