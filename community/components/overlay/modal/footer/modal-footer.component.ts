@@ -2,14 +2,12 @@ import { NgStyle } from "@angular/common";
 import { Component, inject, model, OnInit } from "@angular/core";
 import {
   ButtonComponent,
+  ButtonSize,
+  ButtonVariant,
   IconComponent,
 } from "@tedi-design-system/angular/tedi";
 import { DialogData } from "../modal.component";
 import { DIALOG_DATA } from "@angular/cdk/dialog";
-import {
-  ButtonSize,
-  ButtonVariant,
-} from "tedi/components/buttons/button/base-button.directive";
 
 export interface ModalFooterButton {
   label: string;

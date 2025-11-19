@@ -21,6 +21,14 @@ button.tedi-floating-button {
     @include mixins.responsive-styles(border-top-left-radius, button-radius-sm);
   }
 
+  &.tedi-floating-button--primary {
+    @include buttonMixins.button-variant-color-vars(
+      "primary",
+      false,
+      "floating"
+    );
+  }
+
   &.tedi-floating-button--secondary {
     @include buttonMixins.button-variant-color-vars(
       "secondary",

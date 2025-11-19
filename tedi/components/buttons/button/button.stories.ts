@@ -81,9 +81,7 @@ export default {
   },
 } as Meta<ButtonType>;
 
-type StoryButtonType = ButtonComponent & BaseButtonDirective;
-
-type ButtonType = StoryButtonType & { ngContent: string };
+type ButtonType = ButtonComponent & { ngContent: string };
 
 export const Default: StoryObj<ButtonType> = {
   args: {
@@ -95,7 +93,7 @@ export const Default: StoryObj<ButtonType> = {
   }),
 };
 
-type TemplateType = StoryButtonType &
+type TemplateType = ButtonType &
   BaseButtonDirective & { titleColor?: TextColor };
 
 const ButtonTemplate: StoryFn<TemplateType> = ({
@@ -151,7 +149,7 @@ const ButtonTemplate: StoryFn<TemplateType> = ({
   `,
 });
 
-type ButtonStory = StoryObj<StoryButtonType & { disabled: boolean }>;
+type ButtonStory = StoryObj<ButtonType & { disabled: boolean }>;
 
 export const Primary: StoryObj<TemplateType> = {
   parameters: {

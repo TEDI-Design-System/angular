@@ -2,24 +2,10 @@ import {
   Directive,
   AfterContentChecked,
   signal,
-  input,
   inject,
   ElementRef,
   computed,
 } from "@angular/core";
-
-export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "neutral"
-  | "success"
-  | "danger"
-  | "danger-neutral"
-  | "primary-inverted"
-  | "secondary-inverted"
-  | "neutral-inverted";
-
-export type ButtonSize = "default" | "small" | "large";
 
 @Directive({
   host: {
@@ -27,17 +13,6 @@ export type ButtonSize = "default" | "small" | "large";
   },
 })
 export class BaseButtonDirective implements AfterContentChecked {
-  /**
-   * Specifies the color theme of the button. The color should meet accessibility standards for color contrast.
-   * @default primary
-   */
-  variant = input<ButtonVariant>("primary");
-  /**
-   * Defines the size of the button.
-   * @default default
-   */
-  size = input<ButtonSize>("default");
-
   private host = inject(ElementRef);
   iconOnly = signal(false);
   iconFirst = signal(false);
@@ -67,11 +42,7 @@ export class BaseButtonDirective implements AfterContentChecked {
   }
 
   classes = computed(() => {
-    const classList = [
-      "tedi-button",
-      `tedi-button--${this.variant()}`,
-      `tedi-button--${this.size()}`,
-    ];
+    const classList = ["tedi-button"];
 
     if (this.iconOnly()) {
       classList.push("tedi-button--icon-only");
