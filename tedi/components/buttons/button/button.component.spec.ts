@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ButtonComponent, ButtonSize, ButtonVariant } from "./button.component";
 import { IconComponent } from "../../base/icon/icon.component";
+import { ButtonSize, ButtonVariant } from "./base-button.directive";
+import { ButtonComponent } from "./button.component";
 
 describe("ButtonComponent", () => {
   let fixture: ComponentFixture<ButtonComponent>;
