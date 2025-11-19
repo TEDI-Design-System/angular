@@ -1,11 +1,12 @@
-import { Component, input } from "@angular/core";
-import { ButtonComponent } from "tedi/components";
+import { Component, input, signal } from "@angular/core";
+import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-contents-item.component";
+import { CardComponent, CardContentComponent } from "community/components/cards";
 
 @Component({
   selector: "tedi-table-of-contents",
   templateUrl: "./table-of-contents.component.html",
   styleUrl: "./table-of-contents.component.scss",
-  imports: [ButtonComponent],
+  imports: [TableOfContentsItemComponent, CardComponent, CardContentComponent],
 })
 export class TableOfContentsComponent {
   /**
@@ -36,4 +37,5 @@ export class TableOfContentsComponent {
    * Show icons before items
    * @default false
    */
+  active = signal<string>("");
 }

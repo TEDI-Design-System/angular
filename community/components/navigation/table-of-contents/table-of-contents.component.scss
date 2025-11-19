@@ -1,1 +1,5 @@
-
+.table-of-contents {
+  display: flex;
+  flex-direction: column;
+  // border: 1px solid var(--tedi-color-border-secondary);
+}

@@ -1,6 +1,10 @@
-<div>
-  <h1>{{ heading() }}</h1>
-  @for (item of items(); track item) {
-    <button tedi-button>{{ item }}</button>
-  }
-</div>
+<tedi-card>
+  <tedi-card-content class="table-of-contents">
+    <h1>{{ heading() }}</h1>
+    <ng-content>
+      @for (item of items(); track item) {
+        <tedi-table-of-contents-item>{{ item }}</tedi-table-of-contents-item>
+      }
+    </ng-content>
+  </tedi-card-content>
+</tedi-card>
