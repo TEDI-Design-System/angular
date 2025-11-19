@@ -1,10 +1,14 @@
-<tedi-card>
-  <tedi-card-content class="table-of-contents">
-    <h1>{{ heading() }}</h1>
-    <ng-content>
-      @for (item of items(); track item) {
-        <tedi-table-of-contents-item>{{ item }}</tedi-table-of-contents-item>
-      }
-    </ng-content>
+<tedi-card class="table-of-contents">
+  <tedi-card-content class="table-of-contents__content">
+    <h1 tedi-text modifiers="h4" class="table-of-contents__header">
+      {{ heading() }}
+    </h1>
+    <div class="table-of-contents__items">
+      <ng-content>
+        @for (item of items(); track item) {
+          <tedi-table-of-contents-item>{{ item }}</tedi-table-of-contents-item>
+        }
+      </ng-content>
+    </div>
   </tedi-card-content>
 </tedi-card>

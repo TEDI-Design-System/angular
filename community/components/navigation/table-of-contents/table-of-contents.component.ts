@@ -1,12 +1,13 @@
 import { Component, input, signal } from "@angular/core";
 import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-contents-item.component";
 import { CardComponent, CardContentComponent } from "community/components/cards";
+import { TextComponent } from "tedi/components";
 
 @Component({
   selector: "tedi-table-of-contents",
   templateUrl: "./table-of-contents.component.html",
   styleUrl: "./table-of-contents.component.scss",
-  imports: [TableOfContentsItemComponent, CardComponent, CardContentComponent],
+  imports: [TableOfContentsItemComponent, CardComponent, CardContentComponent, TextComponent],
 })
 export class TableOfContentsComponent {
   /**

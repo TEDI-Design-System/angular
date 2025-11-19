@@ -6,7 +6,7 @@ const meta: Meta<TableOfContentsComponent> = {
   title: "Community/Navigation/Table of Contents",
   args: {
     items: ["Introduction", "Getting Started", "Components", "API Reference"],
-    heading: "Contents",
+    heading: "Table of Contents",
   },
 };
 
@@ -17,6 +17,10 @@ type Story = StoryObj<TableOfContentsComponent>;
 export const Default: Story = {
   render: (args) => ({
     props: args,
-    template: `<tedi-table-of-contents ${argsToTemplate(args)}></tedi-table-of-contents>`,
+    template: `
+    <div>
+      <tedi-table-of-contents ${argsToTemplate(args)}></tedi-table-of-contents>
+    </div>
+    `,
   }),
 };

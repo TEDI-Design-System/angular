@@ -1,5 +1,16 @@
 .table-of-contents {
-  display: flex;
-  flex-direction: column;
-  // border: 1px solid var(--tedi-color-border-secondary);
+  &__content {
+    padding: 0;
+    padding-bottom: var(--dimensions-10);
+  }
+
+  &__header {
+    padding: var(--dimensions-10);
+  }
+
+  &__items {
+    gap: var(--dimensions-05);
+    display: flex;
+    flex-direction: column;
+  }
 }
