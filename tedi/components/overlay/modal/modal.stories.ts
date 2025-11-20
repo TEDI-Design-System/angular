@@ -9,6 +9,30 @@ import { SelectComponent } from "community/components/form/select/select.compone
 import { SelectOptionComponent } from "community/components/form/select/select-option.component";
 import { IconComponent } from "../../base/icon/icon.component";
 
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.23.38?node-id=4626-89579&m=dev" target="_blank">Figma ↗</a><br>
+ * <a href="https://tedi.tehik.ee/1ee8444b7/p/31221b-modal" target="_blank">Zeroheight ↗</a>
+ *
+ * ---
+ *
+ * The modal can be opened or closed using the `open` input (set it to `true` or `false`).
+ * You can also control it programmatically using `viewChild`:
+ *
+ * ```ts
+ * modal = viewChild(ModalComponent);
+ *
+ * toggleModal() {
+ *   this.modal.open.update(prev => !prev);
+ * }
+ * ```
+ *
+ * The modal layout is composed of the following subcomponents:
+ *
+ * - ModalHeaderComponent
+ * - ModalContentComponent
+ * - ModalFooterComponent
+ */
+
 export default {
   title: "TEDI-Ready/Components/Overlay/Modal",
   component: ModalComponent,
