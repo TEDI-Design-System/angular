@@ -1,0 +1,113 @@
+<div class="tedi-date-picker">
+  <div class="tedi-date-picker__header">
+    @if (showControls()) {
+      <button
+        tedi-button
+        variant="neutral"
+        size="small"
+        class="tedi-date-picker__nav"
+        [attr.aria-label]="
+          translationService.track('date-picker.go-prev-month')()
+        "
+        (click)="prevMonth()"
+        [disabled]="!canGoPrev()"
+      >
+        <tedi-icon name="arrow_back" />
+      </button>
+    }
+
+    <div class="tedi-date-picker__controls">
+      @if (showMonthDropdown()) {
+        <div class="tedi-date-picker__select-wrapper">
+          <select
+            class="tedi-date-picker__select"
+            [value]="selectedMonth()"
+            (change)="onMonthSelect($event)"
+            [attr.aria-label]="
+              translationService.track('date-picker.select-month')()
+            "
+          >
+            @for (month of months; track i; let i = $index) {
+              <option [value]="i" [selected]="i === selectedMonth()">
+                {{ month() }}
+              </option>
+            }
+          </select>
+          <tedi-icon
+            name="arrow_drop_down"
+            class="tedi-date-picker__select-arrow"
+            size="inherit"
+          />
+        </div>
+      }
+      @if (showYearDropdown()) {
+        <div class="tedi-date-picker__select-wrapper">
+          <select
+            class="tedi-date-picker__select"
+            [value]="selectedYear()"
+            (change)="onYearSelect($event)"
+            [attr.aria-label]="
+              translationService.track('date-picker.select-year')()
+            "
+          >
+            @for (year of years(); track $index) {
+              <option [value]="year" [selected]="year === selectedYear()">
+                {{ year }}
+              </option>
+            }
+          </select>
+          <tedi-icon
+            name="arrow_drop_down"
+            class="tedi-date-picker__select-arrow"
+            size="inherit"
+          />
+        </div>
+      }
+    </div>
+
+    @if (showControls()) {
+      <button
+        tedi-button
+        variant="neutral"
+        size="small"
+        class="tedi-date-picker__nav"
+        [attr.aria-label]="
+          translationService.track('date-picker.go-next-month')()
+        "
+        (click)="nextMonth()"
+        [disabled]="!canGoNext()"
+      >
+        <tedi-icon name="arrow_forward" />
+      </button>
+    }
+  </div>
+
+  <div class="tedi-date-picker__weekdays">
+    @for (wd of weekDays; track wd()) {
+      <div class="tedi-date-picker__weekday">
+        {{ wd() }}
+      </div>
+    }
+  </div>
+
+  <div class="tedi-date-picker__grid">
+    @for (day of days(); track day) {
+      <button
+        type="button"
+        class="tedi-date-picker__day"
+        [class.tedi-date-picker__day--other-month]="!day.inCurrentMonth"
+        [class.tedi-date-picker__day--selected]="isSelected(day.date)"
+        [disabled]="day.disabled"
+        (click)="selectDay(day)"
+      >
+        @if (isToday(day.date)) {
+          <div class="tedi-date-picker__today">
+            {{ day.date.getDate() }}
+          </div>
+        } @else {
+          {{ day.date.getDate() }}
+        }
+      </button>
+    }
+  </div>
+</div>
