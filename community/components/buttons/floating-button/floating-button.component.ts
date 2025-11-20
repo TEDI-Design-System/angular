@@ -48,7 +48,6 @@ export class FloatingButtonComponent implements OnInit {
 
   ngOnInit() {
     this.buttonDirective.classNamePrefix.set("tedi-floating-button");
-    console.log("set", this.buttonDirective);
   }
 
   floatClasses = computed(() => {
