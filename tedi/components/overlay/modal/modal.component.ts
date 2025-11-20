@@ -88,9 +88,12 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) return;
 
     const element = this.host.nativeElement;
+
     if (element.parentNode) {
       element.parentNode.removeChild(element);
     }
+
+    this.document.removeEventListener("keydown", this.handleKeydown);
   }
 
   private onOpen() {

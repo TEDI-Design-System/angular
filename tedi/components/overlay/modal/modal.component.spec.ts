@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ModalComponent } from "./modal.component";
 import { DOCUMENT } from "@angular/common";
+import { PLATFORM_ID } from "@angular/core";
 
 describe("ModalComponent", () => {
   let fixture: ComponentFixture<ModalComponent>;
@@ -94,5 +95,44 @@ describe("ModalComponent", () => {
     expect(documentRef.activeElement).toBe(button);
 
     button.remove();
+  });
+});
+
+describe("ModalComponent (server platform)", () => {
+  let fixture: ComponentFixture<ModalComponent>;
+  let component: ModalComponent;
+  let documentRef: Document;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [ModalComponent],
+      providers: [{ provide: PLATFORM_ID, useValue: "server" }],
+    });
+
+    fixture = TestBed.createComponent(ModalComponent);
+    component = fixture.componentInstance;
+    documentRef = TestBed.inject(DOCUMENT);
+
+    fixture.detectChanges();
+  });
+
+  it("should NOT run browser-only effect in constructor", () => {
+    expect(documentRef.body.style.overflow).toBe("");
+  });
+
+  it("should NOT append modal to body in ngAfterViewInit on server", () => {
+    const initialChildren = documentRef.body.childElementCount;
+    component.ngAfterViewInit();
+    expect(documentRef.body.childElementCount).toBe(initialChildren);
+  });
+
+  it("should NOT remove element from body in ngOnDestroy on server", () => {
+    const el = fixture.nativeElement;
+    documentRef.body.appendChild(el);
+
+    const initialChildren = documentRef.body.childElementCount;
+    component.ngOnDestroy();
+    expect(documentRef.body.childElementCount).toBe(initialChildren);
+    el.remove();
   });
 });
