@@ -1,4 +1,8 @@
 .table-of-contents {
+  &--position-fixed {
+    position: fixed;
+  }
+
   &__content {
     padding: 0;
     padding-bottom: var(--dimensions-10);

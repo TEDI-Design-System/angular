@@ -1,3 +1,8 @@
-<button class="table-of-contents__item" tedi-button variant="neutral">
-  <ng-content></ng-content>
-</button>
+<a
+  tedi-button
+  variant="neutral"
+  [class]="classes()"
+  (click)="itemClick()"
+>
+  <ng-content />
+</a>

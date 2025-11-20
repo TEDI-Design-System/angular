@@ -1,5 +1,6 @@
-import { Component, input } from "@angular/core";
+import { Component, computed, inject, input } from "@angular/core";
 import { ButtonComponent } from "tedi/components";
+import { TableOfContentsService } from "../table-of-contents.service";
 
 @Component({
   selector: "tedi-table-of-contents-item",
@@ -8,5 +9,25 @@ import { ButtonComponent } from "tedi/components";
   imports: [ButtonComponent],
 })
 export class TableOfContentsItemComponent {
-  active = input<boolean>(false);
+  idTo = input.required<string>();
+
+  private tableContentsService = inject(TableOfContentsService, {
+    optional: true,
+  });
+
+  classes = computed(() => {
+    const classes = ["table-of-contents__item"];
+    if (this.tableContentsService?.active() === this.idTo()) {
+      classes.push("table-of-contents__item--active");
+    }
+    return classes.join(" ");
+  });
+
+  itemClick() {
+    if (!this.tableContentsService) {
+      return;
+    }
+    this.tableContentsService.setActive(this.idTo());
+    this.tableContentsService.seekTo(this.idTo());
+  }
 }

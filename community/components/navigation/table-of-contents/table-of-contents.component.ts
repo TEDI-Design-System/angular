@@ -1,22 +1,23 @@
-import { Component, input, signal } from "@angular/core";
-import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-contents-item.component";
-import { CardComponent, CardContentComponent } from "community/components/cards";
+import { Component, computed, effect, inject, input } from "@angular/core";
+import {
+  CardComponent,
+  CardContentComponent,
+} from "community/components/cards";
 import { TextComponent } from "tedi/components";
+import { TableOfContentsService } from "./table-of-contents.service";
+
+type TableOfContentsPosition = "default" | "fixed";
 
 @Component({
   selector: "tedi-table-of-contents",
   templateUrl: "./table-of-contents.component.html",
   styleUrl: "./table-of-contents.component.scss",
-  imports: [TableOfContentsItemComponent, CardComponent, CardContentComponent, TextComponent],
+  imports: [CardComponent, CardContentComponent, TextComponent],
+  providers: [TableOfContentsService],
 })
 export class TableOfContentsComponent {
   /**
-   * List of items to be shown in the table of contents
-   */
-  items = input.required<string[]>();
-  /**
    * Heading of the table of contents
-   * @default Value from LabelProvider
    */
   heading = input.required<string>();
   /**
@@ -30,13 +31,38 @@ export class TableOfContentsComponent {
    */
   open?: boolean;
   /**
+   * Should child table of contents elements when clicked scroll
+   */
+  scrollOnClick = input<boolean>(true);
+  /**
    * Callback when component is toggled.
    * Use to handle state outside of component, should use with open prop.
    */
   onToggle?: (open: boolean) => void;
+
   /**
-   * Show icons before items
-   * @default false
+   * Position strategy of the table of contents
+   * @default default
    */
-  active = signal<string>("");
+  position = input<TableOfContentsPosition>("default");
+
+  ariaLabel = input<string>("Table of contents");
+
+  private tableContentsService = inject(TableOfContentsService);
+
+  constructor() {
+    effect(() => {
+      this.tableContentsService.scrollOnClick = this.scrollOnClick();
+    });
+  }
+
+  classes = computed(() => {
+    const classes = ["table-of-contents"];
+    classes.push(`table-of-contents--position-${this.position() ?? "default"}`);
+    return classes.join(" ");
+  });
+
+  getActive() {
+    return this.tableContentsService.active();
+  }
 }

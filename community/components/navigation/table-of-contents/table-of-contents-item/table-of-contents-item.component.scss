@@ -1,3 +1,22 @@
 .table-of-contents__item {
-  padding: 0 var(--dimensions-05);
+  // we're inset into the card border by 1 pixel
+  padding: 0 calc(var(--dimensions-10) - 1px);
+  border: 0;
+  // invisible border so once we're active we won't change layout
+  border-left: 3px solid transparent;
+  border-radius: 0;
+  margin-left: -1px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &--active {
+    border-color: var(--link-primary-default);
+    color: var(--link-primary-active);
+
+    &:hover {
+      border-color: var(--link-primary-active);
+    }
+  }
 }
