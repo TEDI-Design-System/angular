@@ -4,8 +4,9 @@
   buttonMixins;
 
 button.tedi-floating-button {
-  @include buttonMixins.button-main-styles();
   box-shadow: 0 4px 10px 0 var(--alpha-14);
+
+  @include buttonMixins.button-main-styles();
 
   &--vertical {
     min-width: max-content;
