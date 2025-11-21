@@ -16,35 +16,36 @@ export default {
   ],
   argTypes: {
     selected: {
-      description:
-        "Currently selected date. Supports two-way binding using Angular model().",
+      description: "Selected date",
       control: { type: "date" },
       table: {
         category: "inputs",
         type: { summary: "Date | null" },
+        defaultValue: { summary: "null" },
       },
     },
-
-    min: {
-      description:
-        "Minimum allowed date. All dates earlier than this are disabled, including navigation to months before the limit.",
+    month: {
+      description: "Currently shown month",
       control: { type: "date" },
       table: {
         category: "inputs",
         type: { summary: "Date | null" },
+        defaultValue: { summary: "new Date()" },
       },
     },
-
-    max: {
-      description:
-        "Maximum allowed date. All dates after this are disabled, including navigation to months after the limit.",
-      control: { type: "date" },
+    disabled: {
+      description: " Disabled dates that cannot be selected.",
+      control: { type: "object" },
       table: {
         category: "inputs",
-        type: { summary: "Date | null" },
+        type: {
+          summary: "DatePickerMatcher | DatePickerMatcher[] | null",
+          detail: `Date \n| Date[] \n| { before: Date } \n| { after: Date } \n| { from: Date; to?: Date } \n| ((date: Date) => boolean)
+          `,
+        },
+        defaultValue: { summary: "null" },
       },
     },
-
     showControls: {
       description:
         "Shows or hides the calendar navigation controls (previous/next month buttons).",
@@ -55,10 +56,9 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
-
     showMonthDropdown: {
       description:
-        "Toggle visibility of the month selection dropdown inside the header.",
+        "Toggle visibility of the month selection dropdown in the header.",
       control: { type: "boolean" },
       table: {
         category: "inputs",
@@ -66,10 +66,9 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
-
     showYearDropdown: {
       description:
-        "Toggle visibility of the year selection dropdown inside the header.",
+        "Toggle visibility of the year selection dropdown in the header.",
       control: { type: "boolean" },
       table: {
         category: "inputs",
@@ -77,10 +76,9 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
-
     startYear: {
       description:
-        "Explicit starting year for the year dropdown list. If null, a dynamic fallback range is used.",
+        "Explicit starting year for the year dropdown list. If null, a dynamic fallback range (current year - 100) is used.",
       control: { type: "number" },
       table: {
         category: "inputs",
@@ -88,10 +86,9 @@ export default {
         defaultValue: { summary: "null" },
       },
     },
-
     endYear: {
       description:
-        "Explicit ending year for the year dropdown list. If null, a dynamic fallback range is used.",
+        "Explicit ending year for the year dropdown list. If null, a dynamic fallback range (current year + 20) is used.",
       control: { type: "number" },
       table: {
         category: "inputs",
@@ -102,14 +99,30 @@ export default {
   },
 } as Meta<DatePickerComponent>;
 
+const today = new Date();
+const inTwoDays = new Date(today);
+inTwoDays.setDate(today.getDate() + 2);
+
 export const Default: StoryObj<DatePickerComponent> = {
-  args: {
-    showControls: true,
-    showMonthDropdown: true,
-    showYearDropdown: true,
-  },
+  args: (() => {
+    const today = new Date();
+    const next = new Date(today);
+    next.setDate(today.getDate() + 1);
+
+    return {
+      selected: next,
+      month: today,
+      showControls: true,
+      showMonthDropdown: true,
+      showYearDropdown: true,
+    };
+  })(),
   render: (args) => ({
-    props: args,
+    props: {
+      ...args,
+      selected: args.selected ? new Date(args.selected) : null,
+      month: args.month ? new Date(args.month) : null,
+    },
     template: `
       <tedi-date-picker ${argsToTemplate(args)} />
     `,

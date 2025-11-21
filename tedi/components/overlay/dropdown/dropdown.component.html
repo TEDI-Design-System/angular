@@ -1,0 +1,18 @@
+<div
+  applyClass="float-ui-container-dropdown"
+  style="display: contents"
+  looseTrigger="none"
+  ariaRole="presentation"
+  [hideOnClickOutside]="true"
+  [floatUiLoose]="floatUiComponent"
+  [loosePlacement]="position()"
+  [preventOverflow]="position().includes('auto') ? false : preventOverflow()"
+  [disableAnimation]="true"
+  [targetElement]="dropdownTrigger().host.nativeElement"
+  [appendTo]="appendTo()"
+>
+  <ng-content select="[tedi-dropdown-trigger]" />
+</div>
+<float-ui-content #floatUiComponent [style.display]="floatUiDisplay()">
+  <ng-content select="tedi-dropdown-content" />
+</float-ui-content>

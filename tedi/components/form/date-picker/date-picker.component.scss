@@ -1,10 +1,51 @@
+tedi-date-picker {
+  display: block;
+}
+
 .tedi-date-picker {
-  width: fit-content;
-  border-radius: var(--card-radius-rounded);
-  border: var(--borders-01) solid var(--card-border-primary);
-  background: var(--card-background-primary);
-  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.2);
-  user-select: none;
+  &__input-wrapper {
+    display: flex;
+    min-height: var(--form-field-height);
+    gap: var(--form-field-inner-spacing);
+    align-self: stretch;
+    border-radius: var(--form-field-radius);
+    border: 1px solid var(--form-input-border-default);
+    background: var(--form-input-background-default);
+    padding-right: var(--form-field-padding-x-md-default);
+  }
+
+  &__input {
+    flex: 1;
+    padding: var(--form-field-padding-y-md-has-button)
+      var(--form-field-padding-x-md-default);
+    padding-right: 0;
+    color: var(--form-input-text-filled);
+    font-size: var(--body-regular-size);
+    border: 0;
+  }
+
+  &__input-buttons {
+    align-self: center;
+    display: flex;
+    align-items: center;
+    gap: var(--layout-grid-gutters-04);
+  }
+
+  &__toggle {
+    width: var(--button-xs-icon-size, 24px) !important;
+    border-radius: var(--button-radius-sm) !important;
+    min-height: var(--form-field-button-height-sm) !important;
+    max-height: var(--form-field-button-height-sm, 24px) !important;
+    padding: var(--button-sm-icon-padding) !important;
+  }
+
+  &__calendar {
+    width: fit-content;
+    display: block;
+    border-radius: var(--card-radius-rounded);
+    background: var(--card-background-primary);
+    user-select: none;
+  }
 
   &__header {
     display: flex;
@@ -22,51 +63,58 @@
     margin: 0 auto;
   }
 
-  &__select-wrapper {
-    position: relative;
+  &__dropdown-trigger {
     display: inline-flex;
     align-items: center;
-
-    padding: 0 var(--layout-grid-gutters-04);
+    gap: var(--layout-grid-gutters-02);
+    padding: 0;
+    padding-left: var(--layout-grid-gutters-04);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--general-text-primary);
+    background: transparent;
+    border: 0;
     border-radius: var(--button-radius-sm);
+    cursor: pointer;
 
-    &:has(.tedi-date-picker__select:hover) {
+    &:hover {
+      color: var(--button-main-neutral-text-hover);
       background: var(--button-main-neutral-icon-only-background-hover);
 
-      .tedi-date-picker__select-arrow {
+      tedi-icon {
         color: var(--button-main-neutral-text-hover);
       }
     }
 
-    &:has(.tedi-date-picker__select:active) {
+    &:active {
+      color: var(--button-main-neutral-text-active);
       background: var(--button-main-neutral-icon-only-background-active);
 
-      .tedi-date-picker__select-arrow {
-        color: var(--button-main-neutral-text-hover);
+      tedi-icon {
+        color: var(--button-main-neutral-text-active);
       }
     }
 
-    &:has(.tedi-date-picker__select:focus-visible) {
+    &:focus-visible {
       outline: var(--borders-02) solid var(--primary-500);
       outline-offset: var(--borders-01);
     }
 
-    .tedi-date-picker__select {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      background: transparent;
-
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--general-text-primary);
-      border: 0;
-      cursor: pointer;
-    }
-
-    .tedi-date-picker__select-arrow {
+    tedi-icon {
       font-size: 2rem;
       color: var(--general-icon-tertiary);
+    }
+  }
+
+  &__dropdown-content {
+    max-height: 15rem;
+
+    &--month {
+      width: 10rem;
+    }
+
+    &--year {
+      width: 8.75rem;
     }
   }
 

@@ -24,13 +24,15 @@ float-ui-content {
 
     @include mixins.responsive-styles(border-radius, popover-radius-rounded);
 
-    .float-ui-arrow {
-      width: 24px;
-      height: 24px;
-      background: var(--popover-background);
-      filter: drop-shadow(0 0 5px var(--alpha-20));
-      clip-path: inset(0px -5px -5px 0px);
-      z-index: var(--z-index-dropdown);
+    &--arrow {
+      .float-ui-arrow {
+        width: 24px;
+        height: 24px;
+        background: var(--popover-background);
+        filter: drop-shadow(0 0 5px var(--alpha-20));
+        clip-path: inset(0px -5px -5px 0px);
+        z-index: var(--z-index-dropdown);
+      }
     }
 
     &--border {

@@ -55,6 +55,10 @@ export class PopoverComponent {
    */
   withBorder = input(false);
   /**
+   * Should show arrow?
+   */
+  withArrow = input(true);
+  /**
    * Lock scrolling on rest of the page?
    * @default false
    */
@@ -81,6 +85,10 @@ export class PopoverComponent {
 
     if (this.withBorder()) {
       classList.push("float-ui-container-popover--border");
+    }
+
+    if (this.withArrow()) {
+      classList.push("float-ui-container-popover--arrow");
     }
 
     return classList.join(",");
