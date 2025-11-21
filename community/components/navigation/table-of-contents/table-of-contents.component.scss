@@ -1,6 +1,12 @@
 .table-of-contents {
-  &--position-fixed {
-    position: fixed;
+  &--position {
+    &-sticky {
+      position: sticky;
+      top: var(--dimensions-10);
+    }
+    &-fixed {
+      position: fixed;
+    }
   }
 
   &__content {

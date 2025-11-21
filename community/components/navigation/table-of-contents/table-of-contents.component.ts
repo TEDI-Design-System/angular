@@ -6,7 +6,7 @@ import {
 import { TextComponent } from "tedi/components";
 import { TableOfContentsService } from "./table-of-contents.service";
 
-type TableOfContentsPosition = "default" | "fixed";
+type TableOfContentsPosition = "default" | "fixed" | "sticky";
 
 @Component({
   selector: "tedi-table-of-contents",
