@@ -7,29 +7,31 @@ import {
   input,
   inject,
   signal,
+  OnInit,
+  viewChild,
+  ElementRef,
 } from "@angular/core";
-import {
-  ButtonComponent,
-  ClosingButtonComponent,
-} from "tedi/components/buttons";
-import { IconComponent } from "tedi/components/base";
-import { TediTranslationService } from "tedi/services";
+import { ButtonComponent } from "../../buttons/button/button.component";
+import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
+import { IconComponent } from "../../base/icon/icon.component";
+import { TediTranslationService } from "../../../services/translation/translation.service";
 import { DropdownComponent } from "../../overlay/dropdown/dropdown.component";
 import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-content/dropdown-content.component";
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
-import { SeparatorComponent } from "tedi/components/helpers";
-import {
-  PopoverComponent,
-  PopoverTriggerComponent,
-  PopoverContentComponent,
-} from "tedi/components/overlay";
+import { SeparatorComponent } from "../../helpers/separator/separator.component";
+import { PopoverComponent } from "../../overlay/popover/popover.component";
+import { PopoverTriggerComponent } from "../../overlay/popover/popover-trigger/popover-trigger.component";
+import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
 
 export interface DatePickerDay {
   date: Date;
   disabled: boolean;
   inCurrentMonth: boolean;
 }
+
+export type DatePickerInputState = "default" | "error" | "valid";
+export type DatePickerInputSize = "default" | "small";
 
 export type DatePickerMatcher =
   | Date
@@ -62,7 +64,7 @@ let datePickerId = 0;
     PopoverContentComponent,
   ],
 })
-export class DatePickerComponent {
+export class DatePickerComponent implements OnInit {
   private readonly today = new Date();
   readonly uniqueId = `tedi-date-picker-id-${datePickerId++}`;
 
@@ -92,17 +94,31 @@ export class DatePickerComponent {
   /** Explicit ending year for the year dropdown list. If null, a dynamic fallback range (current year + 20) is used. */
   readonly endYear = input<number | null>(null);
 
+  /** Input id */
+  readonly inputId = input<string>();
+
   /** Input placeholder */
-  readonly placeholder = input<string>();
+  readonly inputPlaceholder = input<string>();
 
-  readonly inputValue = computed(() => {
-    const selected = this.selected();
-    if (!selected) return "";
+  /** Input state */
+  readonly inputState = input<DatePickerInputState>("default");
 
-    return this.format(selected);
-  });
+  /** Input size */
+  readonly inputSize = input<DatePickerInputSize>("default");
 
-  readonly isCalendarOpen = signal(false);
+  /** Is input disabled? */
+  readonly inputDisabled = input(false);
+
+  readonly inputValue = signal("");
+
+  /** Keyboard active date (what receives keyboard focus) */
+  readonly activeDate = signal<Date | null>(null);
+
+  readonly inputElement =
+    viewChild.required<ElementRef<HTMLInputElement>>("inputElement");
+  readonly gridElement =
+    viewChild.required<ElementRef<HTMLDivElement>>("gridElement");
+  readonly popover = viewChild.required(PopoverComponent);
 
   readonly translationService = inject(TediTranslationService);
 
@@ -202,6 +218,17 @@ export class DatePickerComponent {
     return cells;
   });
 
+  readonly weekRows = computed(() => {
+    const cells = this.days();
+    const rows: DatePickerDay[][] = [];
+
+    for (let i = 0; i < cells.length; i += 7) {
+      rows.push(cells.slice(i, i + 7));
+    }
+
+    return rows;
+  });
+
   readonly canGoPrev = computed(() => {
     const current = this.month();
     const year = current.getFullYear();
@@ -226,6 +253,17 @@ export class DatePickerComponent {
     return this.getFirstEnabledDayOfMonth(nextYear, finalNextMonth) !== null;
   });
 
+  ngOnInit(): void {
+    const selected = this.selected();
+    this.inputValue.set(selected ? this.format(selected) : "");
+    this.activeDate.set(selected ?? this.today);
+  }
+
+  getTabIndex(date: Date): number {
+    const active = this.activeDate();
+    return active && date.toDateString() === active.toDateString() ? 0 : -1;
+  }
+
   prevMonth() {
     const date = new Date(this.month());
     date.setMonth(date.getMonth() - 1);
@@ -242,6 +280,7 @@ export class DatePickerComponent {
     if (day.disabled) return;
 
     this.selected.set(day.date);
+    this.inputValue.set(this.format(day.date));
   }
 
   isDisabled(date: Date): boolean {
@@ -277,32 +316,136 @@ export class DatePickerComponent {
     this.month.set(updated);
   }
 
-  toggleCalendar() {
-    this.isCalendarOpen.update((v) => !v);
-  }
+  onDayKeydown(event: KeyboardEvent, current: Date) {
+    let target: Date | null = null;
 
-  private rawInput = "";
+    switch (event.key) {
+      case "ArrowLeft":
+        target = new Date(current);
+        target.setDate(current.getDate() - 1);
+        break;
+
+      case "ArrowRight":
+        target = new Date(current);
+        target.setDate(current.getDate() + 1);
+        break;
+
+      case "ArrowUp":
+        target = new Date(current);
+        target.setDate(current.getDate() - 7);
+        break;
+
+      case "ArrowDown":
+        target = new Date(current);
+        target.setDate(current.getDate() + 7);
+        break;
+
+      case "Home":
+        target = new Date(current);
+        target.setDate(current.getDate() - ((current.getDay() + 6) % 7));
+        break;
+
+      case "End":
+        target = new Date(current);
+        target.setDate(current.getDate() + (6 - ((current.getDay() + 6) % 7)));
+        break;
+
+      case "PageUp":
+        target = new Date(current);
+        target.setMonth(current.getMonth() - 1);
+        break;
+
+      case "PageDown":
+        target = new Date(current);
+        target.setMonth(current.getMonth() + 1);
+        break;
+
+      case "Enter":
+      case " ":
+        event.preventDefault();
+        this.selectDay({
+          date: current,
+          disabled: false,
+          inCurrentMonth: true,
+        });
+        return;
+
+      case "Escape":
+        this.popover().floatUiComponent().hide();
+        this.inputElement().nativeElement.focus();
+        return;
+
+      default:
+        return;
+    }
+
+    if (target) {
+      event.preventDefault();
+      this.focusDate(target);
+    }
+  }
 
   onInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
-    this.rawInput = value;
+    this.inputValue.set(value);
+
+    if (value === "") {
+      this.selected.set(null);
+    }
   }
 
   onInputBlur() {
     const selected = this.selected();
-    const parsed = this.parseDate(this.rawInput);
+    const parsed = this.parseDate(this.inputValue());
 
     if (parsed) {
       this.selected.set(parsed);
       this.month.set(parsed);
     } else {
-      this.rawInput = selected ? this.format(selected) : "";
+      this.inputValue.set(selected ? this.format(selected) : "");
     }
   }
 
   clearInput() {
+    this.inputValue.set("");
     this.selected.set(null);
-    this.rawInput = "";
+  }
+
+  openCalendar() {
+    const active = this.selected() ?? this.today;
+    this.activeDate.set(active);
+    setTimeout(() => this.focusDate(active));
+  }
+
+  private focusDate(date: Date) {
+    this.activeDate.set(date);
+    const currentMonth = this.month();
+
+    if (
+      currentMonth.getFullYear() !== date.getFullYear() ||
+      currentMonth.getMonth() !== date.getMonth()
+    ) {
+      this.month.set(new Date(date));
+    }
+
+    setTimeout(() => {
+      const container = this.gridElement().nativeElement;
+      if (!container) return;
+
+      const key = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate(),
+      ).getTime();
+
+      const btn = container.querySelector<HTMLButtonElement>(
+        `[data-date-key="${key}"]`,
+      );
+
+      if (btn && document.activeElement !== btn) {
+        btn.focus();
+      }
+    });
   }
 
   private parseDate(str: string): Date | null {

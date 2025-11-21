@@ -20,9 +20,9 @@ float-ui-content {
   .float-ui-container-popover {
     padding: 0;
     border: var(--borders-01) solid var(--popover-border);
+    border-radius: var(--popover-radius-rounded);
     box-shadow: 0px 1px 5px 0px var(--alpha-20, rgba(0, 0, 0, 0.2));
-
-    @include mixins.responsive-styles(border-radius, popover-radius-rounded);
+    z-index: var(--z-index-dropdown);
 
     &--arrow {
       .float-ui-arrow {
@@ -120,11 +120,10 @@ float-ui-content {
   flex-direction: column;
   background: var(--popover-background);
   color: var(--popover-text);
-  z-index: var(--z-index-dropdown);
+  border-radius: var(--popover-radius-rounded);
 
   @include mixins.responsive-styles(gap, layout-grid-gutters-08);
   @include mixins.responsive-styles(padding, popover-padding-sm);
-  @include mixins.responsive-styles(border-radius, popover-radius-rounded);
 
   @each $name, $width in $popover-max-width {
     &--#{$name} {

@@ -6,6 +6,11 @@ import {
 } from "@storybook/angular";
 import { DatePickerComponent } from "./date-picker.component";
 
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.23.39?node-id=9938-87564&m=dev" target="_blank">Figma ↗</a><br>
+ * <a href="https://tedi.tehik.ee/1ee8444b7/p/78211a-date-and-time-picker" target="_blank">Zeroheight ↗</a>
+ */
+
 export default {
   title: "TEDI-Ready/Components/Form/DatePicker",
   component: DatePickerComponent,
@@ -96,6 +101,54 @@ export default {
         defaultValue: { summary: "null" },
       },
     },
+    inputId: {
+      description: "Input id",
+      control: { type: "text" },
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+      },
+    },
+    inputPlaceholder: {
+      description: "Input placeholder",
+      control: { type: "text" },
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+      },
+    },
+    inputState: {
+      control: "radio",
+      options: ["default", "error", "valid"],
+      description: "Input state",
+      table: {
+        category: "inputs",
+        type: {
+          summary: "DatePickerInputState",
+          detail: `"default" | "error" | "valid"`,
+        },
+        defaultValue: { summary: "default" },
+      },
+    },
+    inputSize: {
+      control: "radio",
+      options: ["default", "small"],
+      description: "Input size",
+      table: {
+        category: "inputs",
+        type: { summary: "DatePickerInputSize", detail: `"default" | "small"` },
+        defaultValue: { summary: "default" },
+      },
+    },
+    inputDisabled: {
+      description: "Is input disabled?",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
   },
 } as Meta<DatePickerComponent>;
 
@@ -115,6 +168,14 @@ export const Default: StoryObj<DatePickerComponent> = {
       showControls: true,
       showMonthDropdown: true,
       showYearDropdown: true,
+      disabled: null,
+      startYear: null,
+      endYear: null,
+      inputId: "date-picker-id-1",
+      inputPlaceholder: "Enter date...",
+      inputState: "default",
+      inputSize: "default",
+      inputDisabled: false,
     };
   })(),
   render: (args) => ({

@@ -1,42 +1,89 @@
 tedi-date-picker {
-  display: block;
+  display: flex;
+  min-height: var(--form-field-height);
+  gap: var(--form-field-inner-spacing);
+  align-self: stretch;
+  border-radius: var(--form-field-radius);
+  border: var(--borders-01) solid var(--form-input-border-default);
+  background: var(--form-input-background-default);
+  padding-right: var(--form-field-padding-x-md-default);
+
+  &:has(.tedi-date-picker__input:hover):not(
+      :has(.tedi-date-picker__input:disabled)
+    ) {
+    border-color: var(--form-input-border-hover);
+  }
+
+  &:has(.tedi-date-picker__input:active):not(
+      :has(.tedi-date-picker__input:disabled)
+    ),
+  &:has(.tedi-date-picker__input:focus):not(
+      :has(.tedi-date-picker__input:disabled)
+    ) {
+    border-color: var(--form-input-border-active);
+    box-shadow: 0 0 0 1px var(--form-input-border-active);
+  }
+
+  &:has(.tedi-date-picker__input:disabled) {
+    border-color: var(--form-input-border-disabled);
+    background: var(--form-input-background-disabled);
+    cursor: not-allowed;
+  }
+
+  &:has(.tedi-date-picker__input--valid) {
+    border-color: var(--form-general-feedback-success-border);
+  }
+
+  &:has(.tedi-date-picker__input--error) {
+    border-color: var(--form-general-feedback-error-border);
+  }
+
+  &:has(.tedi-date-picker__input--small) {
+    min-height: var(--form-field-height-sm);
+  }
 }
 
 .tedi-date-picker {
-  &__input-wrapper {
-    display: flex;
-    min-height: var(--form-field-height);
-    gap: var(--form-field-inner-spacing);
-    align-self: stretch;
-    border-radius: var(--form-field-radius);
-    border: 1px solid var(--form-input-border-default);
-    background: var(--form-input-background-default);
-    padding-right: var(--form-field-padding-x-md-default);
-  }
-
   &__input {
     flex: 1;
-    padding: var(--form-field-padding-y-md-has-button)
-      var(--form-field-padding-x-md-default);
-    padding-right: 0;
+    padding-left: var(--form-field-padding-x-md-default);
     color: var(--form-input-text-filled);
     font-size: var(--body-regular-size);
     border: 0;
+    border-radius: var(--form-field-radius);
+
+    &::placeholder {
+      color: var(--form-input-text-placeholder);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
   }
 
   &__input-buttons {
     align-self: center;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: var(--layout-grid-gutters-04);
   }
 
+  &__clear {
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
   &__toggle {
-    width: var(--button-xs-icon-size, 24px) !important;
+    width: var(--button-xs-icon-size) !important;
+    height: var(--form-field-button-height-sm) !important;
     border-radius: var(--button-radius-sm) !important;
-    min-height: var(--form-field-button-height-sm) !important;
-    max-height: var(--form-field-button-height-sm, 24px) !important;
-    padding: var(--button-sm-icon-padding) !important;
+    font-size: 1.125rem !important;
+
+    &:disabled {
+      cursor: not-allowed;
+    }
   }
 
   &__calendar {
@@ -142,10 +189,16 @@ tedi-date-picker {
   }
 
   &__grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    display: flex;
+    flex-direction: column;
+    gap: 0;
     padding: 0 var(--card-padding-md-default) var(--card-padding-md-default)
       var(--card-padding-md-default);
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
   }
 
   &__day {

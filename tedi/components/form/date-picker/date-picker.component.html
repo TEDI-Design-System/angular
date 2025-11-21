@@ -1,184 +1,210 @@
-<div class="tedi-date-picker__input-wrapper">
-  <input
-    class="tedi-date-picker__input"
-    type="text"
-    [value]="inputValue()"
-    (input)="onInput($event)"
-    (blur)="onInputBlur()"
-    [attr.placeholder]="placeholder()"
-  />
-  <div class="tedi-date-picker__input-buttons">
-    @if (selected()) {
+<input
+  #inputElement
+  type="text"
+  class="tedi-date-picker__input"
+  role="combobox"
+  aria-autocomplete="none"
+  aria-haspopup="dialog"
+  [class.tedi-date-picker__input--small]="inputSize() === 'small'"
+  [class.tedi-date-picker__input--valid]="inputState() === 'valid'"
+  [class.tedi-date-picker__input--error]="inputState() === 'error'"
+  [attr.id]="inputId()"
+  [attr.placeholder]="inputPlaceholder()"
+  [attr.aria-expanded]="!inputDisabled() && popover().floatUiComponent().state"
+  [attr.aria-controls]="uniqueId"
+  [value]="inputValue()"
+  [disabled]="inputDisabled()"
+  (input)="onInput($event)"
+  (blur)="onInputBlur()"
+/>
+<div class="tedi-date-picker__input-buttons">
+  @if (selected()) {
+    <button
+      tedi-closing-button
+      type="button"
+      size="small"
+      class="tedi-date-picker__clear"
+      [iconSize]="18"
+      [attr.aria-label]="translationService.track('date-picker.clear-date')()"
+      [disabled]="inputDisabled()"
+      (click)="clearInput()"
+    ></button>
+    <tedi-separator axis="vertical" size="1rem" />
+  }
+  <tedi-popover
+    style="display: flex; align-items: center"
+    position="bottom-end"
+    [withArrow]="false"
+  >
+    <tedi-popover-trigger>
       <button
-        tedi-closing-button
+        tedi-button
         type="button"
+        variant="neutral"
         size="small"
-        [iconSize]="18"
-        class="tedi-date-picker__clear"
-        aria-label="Clear date"
-        (click)="clearInput()"
-      ></button>
-      <tedi-separator axis="vertical" size="24px" />
-    }
-    <tedi-popover position="bottom-end" [withArrow]="false">
-      <tedi-popover-trigger>
-        <button
-          tedi-button
-          type="button"
-          variant="neutral"
-          size="small"
-          class="tedi-date-picker__toggle"
-          aria-label="Open calendar"
-          (click)="toggleCalendar()"
-        >
-          <tedi-icon name="calendar_today" size="inherit" />
-        </button>
-      </tedi-popover-trigger>
-      <tedi-popover-content maxWidth="none" style="padding: 0">
-        <div class="tedi-date-picker__calendar">
-          <div class="tedi-date-picker__header">
-            @if (showControls()) {
-              <button
-                tedi-button
-                variant="neutral"
-                size="small"
-                class="tedi-date-picker__nav"
-                [attr.aria-label]="
-                  translationService.track('date-picker.go-prev-month')()
-                "
-                [attr.aria-controls]="uniqueId"
-                (click)="prevMonth()"
-                [disabled]="!canGoPrev()"
+        class="tedi-date-picker__toggle"
+        [attr.aria-label]="
+          translationService.track('date-picker.open-calendar')()
+        "
+        [disabled]="inputDisabled()"
+        (click)="openCalendar()"
+      >
+        <tedi-icon name="calendar_today" size="inherit" />
+      </button>
+    </tedi-popover-trigger>
+    <tedi-popover-content maxWidth="none" style="padding: 0">
+      <div class="tedi-date-picker__calendar">
+        <div class="tedi-date-picker__header">
+          @if (showControls()) {
+            <button
+              tedi-button
+              variant="neutral"
+              size="small"
+              class="tedi-date-picker__nav"
+              [attr.aria-label]="
+                translationService.track('date-picker.go-prev-month')()
+              "
+              [attr.aria-controls]="uniqueId"
+              (click)="prevMonth()"
+              [disabled]="!canGoPrev()"
+            >
+              <tedi-icon name="arrow_back" />
+            </button>
+          }
+          <div class="tedi-date-picker__controls">
+            @if (showMonthDropdown()) {
+              <tedi-dropdown
+                [value]="month().getMonth().toString()"
+                (valueChange)="onMonthSelect($event)"
               >
-                <tedi-icon name="arrow_back" />
-              </button>
+                <button
+                  tedi-dropdown-trigger
+                  ariaHaspopup="listbox"
+                  class="tedi-date-picker__dropdown-trigger"
+                  [attr.aria-label]="
+                    translationService.track('date-picker.select-month')()
+                  "
+                >
+                  {{ months[month().getMonth()]() }}
+                  <tedi-icon
+                    name="arrow_drop_down"
+                    class="tedi-date-picker__dropdown-arrow"
+                    size="inherit"
+                  />
+                </button>
+                <tedi-dropdown-content
+                  dropdownRole="listbox"
+                  class="tedi-date-picker__dropdown-content tedi-date-picker__dropdown-content--month"
+                >
+                  @for (month of months; track i; let i = $index) {
+                    <li tedi-dropdown-item [value]="i.toString()">
+                      {{ month() }}
+                    </li>
+                  }
+                </tedi-dropdown-content>
+              </tedi-dropdown>
             }
-            <div class="tedi-date-picker__controls">
-              @if (showMonthDropdown()) {
-                <tedi-dropdown
-                  [value]="month().getMonth().toString()"
-                  (valueChange)="onMonthSelect($event)"
+            @if (showYearDropdown()) {
+              <tedi-dropdown
+                position="bottom-end"
+                [value]="selectedYear().toString()"
+                (valueChange)="onYearSelect($event)"
+              >
+                <button
+                  tedi-dropdown-trigger
+                  ariaHaspopup="listbox"
+                  class="tedi-date-picker__dropdown-trigger"
+                  [attr.aria-label]="
+                    translationService.track('date-picker.select-year')()
+                  "
                 >
-                  <button
-                    tedi-dropdown-trigger
-                    ariaHaspopup="listbox"
-                    class="tedi-date-picker__dropdown-trigger"
-                    [attr.aria-label]="
-                      translationService.track('date-picker.select-month')()
-                    "
-                  >
-                    {{ months[month().getMonth()]() }}
-                    <tedi-icon
-                      name="arrow_drop_down"
-                      class="tedi-date-picker__dropdown-arrow"
-                      size="inherit"
-                    />
-                  </button>
-                  <tedi-dropdown-content
-                    dropdownRole="listbox"
-                    class="tedi-date-picker__dropdown-content tedi-date-picker__dropdown-content--month"
-                  >
-                    @for (month of months; track i; let i = $index) {
-                      <li tedi-dropdown-item [value]="i.toString()">
-                        {{ month() }}
-                      </li>
-                    }
-                  </tedi-dropdown-content>
-                </tedi-dropdown>
-              }
-              @if (showYearDropdown()) {
-                <tedi-dropdown
-                  position="bottom-end"
-                  [value]="selectedYear().toString()"
-                  (valueChange)="onYearSelect($event)"
+                  {{ selectedYear() }}
+                  <tedi-icon
+                    name="arrow_drop_down"
+                    class="tedi-date-picker__dropdown-arrow"
+                    size="inherit"
+                  />
+                </button>
+                <tedi-dropdown-content
+                  dropdownRole="listbox"
+                  class="tedi-date-picker__dropdown-content tedi-date-picker__dropdown-content--year"
                 >
-                  <button
-                    tedi-dropdown-trigger
-                    ariaHaspopup="listbox"
-                    class="tedi-date-picker__dropdown-trigger"
-                    [attr.aria-label]="
-                      translationService.track('date-picker.select-year')()
-                    "
-                  >
-                    {{ selectedYear() }}
-                    <tedi-icon
-                      name="arrow_drop_down"
-                      class="tedi-date-picker__dropdown-arrow"
-                      size="inherit"
-                    />
-                  </button>
-                  <tedi-dropdown-content
-                    dropdownRole="listbox"
-                    class="tedi-date-picker__dropdown-content tedi-date-picker__dropdown-content--year"
-                  >
-                    @for (year of years(); track year) {
-                      <li tedi-dropdown-item [value]="year.toString()">
-                        {{ year }}
-                      </li>
-                    }
-                  </tedi-dropdown-content>
-                </tedi-dropdown>
+                  @for (year of years(); track year) {
+                    <li tedi-dropdown-item [value]="year.toString()">
+                      {{ year }}
+                    </li>
+                  }
+                </tedi-dropdown-content>
+              </tedi-dropdown>
+            }
+          </div>
+
+          @if (showControls()) {
+            <button
+              tedi-button
+              variant="neutral"
+              size="small"
+              class="tedi-date-picker__nav"
+              [attr.aria-label]="
+                translationService.track('date-picker.go-next-month')()
+              "
+              [attr.aria-controls]="uniqueId"
+              (click)="nextMonth()"
+              [disabled]="!canGoNext()"
+            >
+              <tedi-icon name="arrow_forward" />
+            </button>
+          }
+        </div>
+
+        <div class="tedi-date-picker__weekdays" role="row">
+          @for (wd of weekDays; track $index; let i = $index) {
+            <div class="tedi-date-picker__weekday" role="columnheader">
+              {{ wd() }}
+            </div>
+          }
+        </div>
+
+        <div
+          #gridElement
+          class="tedi-date-picker__grid"
+          role="grid"
+          [attr.id]="uniqueId"
+          aria-readonly="true"
+        >
+          @for (week of weekRows(); track $index) {
+            <div class="tedi-date-picker__row" role="row">
+              @for (day of week; track day.date) {
+                <button
+                  type="button"
+                  role="gridcell"
+                  class="tedi-date-picker__day"
+                  [class.tedi-date-picker__day--other-month]="
+                    !day.inCurrentMonth
+                  "
+                  [class.tedi-date-picker__day--selected]="isSelected(day.date)"
+                  [disabled]="day.disabled"
+                  [attr.aria-selected]="isSelected(day.date) ? 'true' : null"
+                  [attr.aria-disabled]="day.disabled ? 'true' : null"
+                  [attr.aria-current]="isToday(day.date) ? 'date' : null"
+                  [attr.tabindex]="getTabIndex(day.date)"
+                  [attr.data-date-key]="day.date.getTime()"
+                  (keydown)="onDayKeydown($event, day.date)"
+                  (click)="selectDay(day)"
+                >
+                  @if (isToday(day.date)) {
+                    <div class="tedi-date-picker__today">
+                      {{ day.date.getDate() }}
+                    </div>
+                  } @else {
+                    {{ day.date.getDate() }}
+                  }
+                </button>
               }
             </div>
-
-            @if (showControls()) {
-              <button
-                tedi-button
-                variant="neutral"
-                size="small"
-                class="tedi-date-picker__nav"
-                [attr.aria-label]="
-                  translationService.track('date-picker.go-next-month')()
-                "
-                [attr.aria-controls]="uniqueId"
-                (click)="nextMonth()"
-                [disabled]="!canGoNext()"
-              >
-                <tedi-icon name="arrow_forward" />
-              </button>
-            }
-          </div>
-
-          <div class="tedi-date-picker__weekdays" role="row">
-            @for (wd of weekDays; track wd()) {
-              <div class="tedi-date-picker__weekday" role="columnheader">
-                {{ wd() }}
-              </div>
-            }
-          </div>
-
-          <div
-            class="tedi-date-picker__grid"
-            role="grid"
-            [attr.id]="uniqueId"
-            aria-readonly="true"
-          >
-            @for (day of days(); track day) {
-              <button
-                type="button"
-                role="gridcell"
-                class="tedi-date-picker__day"
-                [class.tedi-date-picker__day--other-month]="!day.inCurrentMonth"
-                [class.tedi-date-picker__day--selected]="isSelected(day.date)"
-                [disabled]="day.disabled"
-                [attr.aria-selected]="isSelected(day.date) ? 'true' : null"
-                [attr.aria-disabled]="day.disabled ? 'true' : null"
-                [attr.aria-current]="isToday(day.date) ? 'date' : null"
-                tabindex="-1"
-                (click)="selectDay(day)"
-              >
-                @if (isToday(day.date)) {
-                  <div class="tedi-date-picker__today">
-                    {{ day.date.getDate() }}
-                  </div>
-                } @else {
-                  {{ day.date.getDate() }}
-                }
-              </button>
-            }
-          </div>
+          }
         </div>
-      </tedi-popover-content>
-    </tedi-popover>
-  </div>
+      </div>
+    </tedi-popover-content>
+  </tedi-popover>
 </div>

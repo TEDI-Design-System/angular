@@ -4,10 +4,10 @@ import {
   ViewEncapsulation,
   ChangeDetectionStrategy,
   input,
-  ViewChild,
   inject,
   Renderer2,
   computed,
+  viewChild,
 } from "@angular/core";
 import {
   NgxFloatUiContentComponent,
@@ -64,7 +64,7 @@ export class PopoverComponent {
    */
   lockScroll = input(false);
 
-  @ViewChild("floatUiComponent") floatUiComponent!: NgxFloatUiContentComponent;
+  readonly floatUiComponent = viewChild.required(NgxFloatUiContentComponent);
   private readonly document = inject(DOCUMENT);
   private readonly renderer = inject(Renderer2);
 

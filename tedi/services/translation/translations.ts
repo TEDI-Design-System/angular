@@ -823,6 +823,21 @@ export const translationsMap = {
     en: "Select year",
     ru: "Выберите год",
   },
+  "date-picker.clear-date": {
+    description:
+      "Label for the button that clears the selected date from the input field.",
+    components: ["DatePicker"],
+    et: "Tühjenda kuupäev",
+    en: "Clear date",
+    ru: "Очистить дату",
+  },
+  "date-picker.open-calendar": {
+    description: "Label for the button that opens the date picker calendar.",
+    components: ["DatePicker"],
+    et: "Ava kalender",
+    en: "Open calendar",
+    ru: "Открыть календарь",
+  },
 };
 
 export type TediTranslationsMap<L extends Language> = {
