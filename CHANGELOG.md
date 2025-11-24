@@ -1,3 +1,15 @@
+# [4.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-4.0.1-rc.2...angular-4.1.0-rc.1) (2025-11-14)
+
+
+### Bug Fixes
+
+* **file-dropzone:** fix aligment of info button in file-dropzone [#186](https://github.com/TEDI-Design-System/angular/issues/186) ([bb94cb1](https://github.com/TEDI-Design-System/angular/commit/bb94cb14e411506deb0df6fd6272be5ea75a8572))
+
+
+### Features
+
+* **file-dropzone:** add ng-content for file list [#186](https://github.com/TEDI-Design-System/angular/issues/186) ([8dd9c81](https://github.com/TEDI-Design-System/angular/commit/8dd9c81224ae75360a979ec6ec2d47589bcef338))
+
 ## [4.0.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-4.0.1-rc.1...angular-4.0.1-rc.2) (2025-11-04)
 
 

@@ -27,7 +27,7 @@ $modal-breapoints: (xs, sm, md, lg, xl);
 }
 
 .tedi-modal {
-  --_modal-border: var(--borders-01) solid var(--modal-border);
+  --_modal-border: var(--borders-01) solid var(--modal-border-outer);
   --_modal-padding: var(--dimensions-13);
 
   overflow: auto;
