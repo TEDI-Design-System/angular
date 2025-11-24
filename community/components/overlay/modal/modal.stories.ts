@@ -114,11 +114,6 @@ const meta: Meta<DialogData> = {
       imports: [ModalOpenComponent, StorybookModalComponent],
     }),
   ],
-  parameters: {
-    status: {
-      type: ["existsInTediReady"],
-    },
-  },
   argTypes: {
     maxWidth: {
       control: {

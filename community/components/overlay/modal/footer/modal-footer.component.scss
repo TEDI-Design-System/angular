@@ -4,7 +4,7 @@
   --_modal-footer-gap: 0.5rem;
   display: flex;
   gap: var(--_modal-footer-gap);
-  border-top: var(--borders-01) solid var(--modal-border-inner);
+  border-top: var(--_modal-border);
 
   padding: var(--_tedi-modal-footer-padding-y)
     var(--_tedi-modal-footer-padding-x);

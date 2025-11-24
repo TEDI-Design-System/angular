@@ -1,7 +1,7 @@
 @use "@tedi-design-system/core/mixins";
 
 .tedi-modal-header {
-  border-bottom: var(--borders-01) solid var(--modal-border-inner);
+  border-bottom: var(--_modal-border);
   padding: var(--_tedi-modal-heading-padding-y)
     var(--_tedi-modal-heading-padding-x);
 
