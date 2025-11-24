@@ -1,3 +1,13 @@
+# [4.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0-rc.1...angular-4.1.0-rc.2) (2025-11-24)
+
+
+### Features
+
+* **modal:** add tedi ready modal [#189](https://github.com/TEDI-Design-System/angular/issues/189) ([391ea0f](https://github.com/TEDI-Design-System/angular/commit/391ea0f3c238bf526ac991a8c21a0e155b41092d))
+* **modal:** add tests [#189](https://github.com/TEDI-Design-System/angular/issues/189) ([2e0e9aa](https://github.com/TEDI-Design-System/angular/commit/2e0e9aa4f95b614ea0e85fb079bb6f520a714e55))
+* **modal:** update stories [#189](https://github.com/TEDI-Design-System/angular/issues/189) ([70df5a6](https://github.com/TEDI-Design-System/angular/commit/70df5a682f3497c36f7d7571dd2afe2641f51d94))
+* **modal:** update tedi core version [#189](https://github.com/TEDI-Design-System/angular/issues/189) ([ef9b99c](https://github.com/TEDI-Design-System/angular/commit/ef9b99c109c87c64c8b2bbac8c485a25c0869947))
+
 # [4.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-4.0.1-rc.2...angular-4.1.0-rc.1) (2025-11-14)
 
 
