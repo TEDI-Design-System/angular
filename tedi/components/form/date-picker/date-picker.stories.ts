@@ -61,24 +61,30 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
-    showMonthDropdown: {
-      description:
-        "Toggle visibility of the month selection dropdown in the header.",
-      control: { type: "boolean" },
+    monthMode: {
+      description: "Month selector mode: none | label | grid | dropdown",
+      control: "radio",
+      options: ["none", "label", "grid", "dropdown"],
       table: {
         category: "inputs",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "true" },
+        type: {
+          summary: "DatePickerSelectorMode",
+          detail: "none | label | grid | dropdown",
+        },
+        defaultValue: { summary: "dropdown" },
       },
     },
-    showYearDropdown: {
-      description:
-        "Toggle visibility of the year selection dropdown in the header.",
-      control: { type: "boolean" },
+    yearMode: {
+      description: "Year selector mode: none | label | grid | dropdown",
+      control: "radio",
+      options: ["none", "label", "grid", "dropdown"],
       table: {
         category: "inputs",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "true" },
+        type: {
+          summary: "DatePickerSelectorMode",
+          detail: "none | label | grid | dropdown",
+        },
+        defaultValue: { summary: "dropdown" },
       },
     },
     startYear: {
@@ -149,6 +155,24 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    allowManualInput: {
+      description: "Is manual typing into input allowed?",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    showWeekNumbers: {
+      description: "Should show week numbers before calendar grid?",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
   },
 } as Meta<DatePickerComponent>;
 
@@ -166,8 +190,8 @@ export const Default: StoryObj<DatePickerComponent> = {
       selected: next,
       month: today,
       showControls: true,
-      showMonthDropdown: true,
-      showYearDropdown: true,
+      monthMode: "dropdown",
+      yearMode: "dropdown",
       disabled: null,
       startYear: null,
       endYear: null,
@@ -176,6 +200,8 @@ export const Default: StoryObj<DatePickerComponent> = {
       inputState: "default",
       inputSize: "default",
       inputDisabled: false,
+      allowManualInput: true,
+      showWeekNumbers: false,
     };
   })(),
   render: (args) => ({

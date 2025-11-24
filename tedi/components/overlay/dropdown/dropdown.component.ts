@@ -51,7 +51,7 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
   /**
    * Append floating element to given selector.
    * Use 'body' to append at the end of DOM or empty string to append next to trigger element.
-   * @default body
+   * @default ""
    */
   readonly appendTo = input("");
 

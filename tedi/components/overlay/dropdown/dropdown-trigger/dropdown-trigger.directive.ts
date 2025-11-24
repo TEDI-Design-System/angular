@@ -7,6 +7,8 @@ import {
 } from "@angular/core";
 import { DropdownComponent } from "../dropdown.component";
 
+export type DropdownTriggerAriaHasPopup = "menu" | "listbox" | "true";
+
 @Directive({
   standalone: true,
   selector: "[tedi-dropdown-trigger]",
@@ -20,7 +22,8 @@ import { DropdownComponent } from "../dropdown.component";
   },
 })
 export class DropdownTriggerDirective {
-  readonly ariaHaspopup = input<"menu" | "listbox" | "true">("menu");
+  /** Defines the aria-haspopup attribute for the trigger, informing assistive technologies whether it opens a menu or listbox. Improves accessibility by describing the type of popup. */
+  readonly ariaHaspopup = input<DropdownTriggerAriaHasPopup>("menu");
 
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly dropdown = inject(DropdownComponent);

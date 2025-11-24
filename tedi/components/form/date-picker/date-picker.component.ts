@@ -32,6 +32,8 @@ export interface DatePickerDay {
 
 export type DatePickerInputState = "default" | "error" | "valid";
 export type DatePickerInputSize = "default" | "small";
+export type DatePickerSelectorMode = "none" | "label" | "grid" | "dropdown";
+export type DatePickerView = "month-grid" | "year-grid" | "calendar-grid";
 
 export type DatePickerMatcher =
   | Date
@@ -80,13 +82,13 @@ export class DatePickerComponent implements OnInit {
   );
 
   /** Shows or hides the calendar navigation controls (previous/next month buttons). */
-  readonly showControls = input(true);
+  readonly showNavigation = input(true);
 
-  /** Toggle visibility of the month selection dropdown in the header. */
-  readonly showMonthDropdown = input(true);
+  /** Month selector mode: none | label | grid | dropdown */
+  readonly monthMode = input<DatePickerSelectorMode>("dropdown");
 
-  /** Toggle visibility of the year selection dropdown in the header. */
-  readonly showYearDropdown = input(true);
+  /** Year selector mode: none | label | grid | dropdown */
+  readonly yearMode = input<DatePickerSelectorMode>("dropdown");
 
   /** Explicit starting year for the year dropdown list. If null, a dynamic fallback range (current year - 100) is used. */
   readonly startYear = input<number | null>(null);
@@ -109,44 +111,23 @@ export class DatePickerComponent implements OnInit {
   /** Is input disabled? */
   readonly inputDisabled = input(false);
 
+  /** Is manual typing into input allowed? */
+  readonly allowManualInput = input(true);
+
+  /** Should show week numbers before calendar grid? */
+  readonly showWeekNumbers = input(false);
+
+  /** Current view of datepicker (months grid, years grid or calendar grid) */
+  readonly currentView = signal<DatePickerView>("calendar-grid");
+
+  /** Shown input value */
   readonly inputValue = signal("");
 
   /** Keyboard active date (what receives keyboard focus) */
   readonly activeDate = signal<Date | null>(null);
 
-  readonly inputElement =
-    viewChild.required<ElementRef<HTMLInputElement>>("inputElement");
-  readonly gridElement =
-    viewChild.required<ElementRef<HTMLDivElement>>("gridElement");
-  readonly popover = viewChild.required(PopoverComponent);
-
-  readonly translationService = inject(TediTranslationService);
-
-  readonly weekDays = [
-    this.translationService.track("date-picker.monday-short"),
-    this.translationService.track("date-picker.tuesday-short"),
-    this.translationService.track("date-picker.wednesday-short"),
-    this.translationService.track("date-picker.thursday-short"),
-    this.translationService.track("date-picker.friday-short"),
-    this.translationService.track("date-picker.saturday-short"),
-    this.translationService.track("date-picker.sunday-short"),
-  ];
-
-  readonly months = [
-    this.translationService.track("date-picker.january"),
-    this.translationService.track("date-picker.february"),
-    this.translationService.track("date-picker.march"),
-    this.translationService.track("date-picker.april"),
-    this.translationService.track("date-picker.may"),
-    this.translationService.track("date-picker.june"),
-    this.translationService.track("date-picker.july"),
-    this.translationService.track("date-picker.august"),
-    this.translationService.track("date-picker.september"),
-    this.translationService.track("date-picker.october"),
-    this.translationService.track("date-picker.november"),
-    this.translationService.track("date-picker.december"),
-  ];
-
+  private readonly YEARS_PER_PAGE = 12;
+  readonly yearPageIndex = signal(0);
   readonly selectedYear = computed(() => this.month().getFullYear());
 
   readonly years = computed(() => {
@@ -162,6 +143,59 @@ export class DatePickerComponent implements OnInit {
       { length: safeEnd - safeStart + 1 },
       (_, i) => safeStart + i,
     );
+  });
+
+  readonly pagedYears = computed(() => {
+    const start = this.yearPageIndex() * this.YEARS_PER_PAGE;
+    return this.years().slice(start, start + this.YEARS_PER_PAGE);
+  });
+
+  readonly hasPrevYearPage = computed(() => {
+    return this.yearPageIndex() > 0;
+  });
+
+  readonly hasNextYearPage = computed(() => {
+    const all = this.years().length;
+    return (this.yearPageIndex() + 1) * this.YEARS_PER_PAGE < all;
+  });
+
+  readonly weekRows = computed(() => {
+    const cells = this.days();
+    const rows: DatePickerDay[][] = [];
+
+    for (let i = 0; i < cells.length; i += 7) {
+      rows.push(cells.slice(i, i + 7));
+    }
+
+    return rows;
+  });
+
+  readonly weekNumbers = computed(() => {
+    return this.weekRows().map((week) => this.getISOWeek(week[0].date));
+  });
+
+  readonly canGoPrev = computed(() => {
+    const current = this.month();
+    const year = current.getFullYear();
+    const month = current.getMonth();
+
+    const prevMonth = month - 1;
+    const prevYear = prevMonth < 0 ? year - 1 : year;
+    const finalPrevMonth = (prevMonth + 12) % 12;
+
+    return this.getFirstEnabledDayOfMonth(prevYear, finalPrevMonth) !== null;
+  });
+
+  readonly canGoNext = computed(() => {
+    const current = this.month();
+    const year = current.getFullYear();
+    const month = current.getMonth();
+
+    const nextMonth = month + 1;
+    const nextYear = nextMonth > 11 ? year + 1 : year;
+    const finalNextMonth = nextMonth % 12;
+
+    return this.getFirstEnabledDayOfMonth(nextYear, finalNextMonth) !== null;
   });
 
   readonly days = computed<DatePickerDay[]>(() => {
@@ -218,40 +252,53 @@ export class DatePickerComponent implements OnInit {
     return cells;
   });
 
-  readonly weekRows = computed(() => {
-    const cells = this.days();
-    const rows: DatePickerDay[][] = [];
+  readonly inputElement =
+    viewChild.required<ElementRef<HTMLInputElement>>("inputElement");
+  readonly gridElement =
+    viewChild.required<ElementRef<HTMLDivElement>>("gridElement");
+  readonly popover = viewChild.required(PopoverComponent);
 
-    for (let i = 0; i < cells.length; i += 7) {
-      rows.push(cells.slice(i, i + 7));
-    }
+  readonly translationService = inject(TediTranslationService);
 
-    return rows;
-  });
+  readonly weekDays = [
+    this.translationService.track("date-picker.monday-short"),
+    this.translationService.track("date-picker.tuesday-short"),
+    this.translationService.track("date-picker.wednesday-short"),
+    this.translationService.track("date-picker.thursday-short"),
+    this.translationService.track("date-picker.friday-short"),
+    this.translationService.track("date-picker.saturday-short"),
+    this.translationService.track("date-picker.sunday-short"),
+  ];
 
-  readonly canGoPrev = computed(() => {
-    const current = this.month();
-    const year = current.getFullYear();
-    const month = current.getMonth();
+  readonly monthShortNames = [
+    this.translationService.track("date-picker.january-short"),
+    this.translationService.track("date-picker.february-short"),
+    this.translationService.track("date-picker.march-short"),
+    this.translationService.track("date-picker.april-short"),
+    this.translationService.track("date-picker.may-short"),
+    this.translationService.track("date-picker.june-short"),
+    this.translationService.track("date-picker.july-short"),
+    this.translationService.track("date-picker.august-short"),
+    this.translationService.track("date-picker.september-short"),
+    this.translationService.track("date-picker.october-short"),
+    this.translationService.track("date-picker.november-short"),
+    this.translationService.track("date-picker.december-short"),
+  ];
 
-    const prevMonth = month - 1;
-    const prevYear = prevMonth < 0 ? year - 1 : year;
-    const finalPrevMonth = (prevMonth + 12) % 12;
-
-    return this.getFirstEnabledDayOfMonth(prevYear, finalPrevMonth) !== null;
-  });
-
-  readonly canGoNext = computed(() => {
-    const current = this.month();
-    const year = current.getFullYear();
-    const month = current.getMonth();
-
-    const nextMonth = month + 1;
-    const nextYear = nextMonth > 11 ? year + 1 : year;
-    const finalNextMonth = nextMonth % 12;
-
-    return this.getFirstEnabledDayOfMonth(nextYear, finalNextMonth) !== null;
-  });
+  readonly monthNames = [
+    this.translationService.track("date-picker.january"),
+    this.translationService.track("date-picker.february"),
+    this.translationService.track("date-picker.march"),
+    this.translationService.track("date-picker.april"),
+    this.translationService.track("date-picker.may"),
+    this.translationService.track("date-picker.june"),
+    this.translationService.track("date-picker.july"),
+    this.translationService.track("date-picker.august"),
+    this.translationService.track("date-picker.september"),
+    this.translationService.track("date-picker.october"),
+    this.translationService.track("date-picker.november"),
+    this.translationService.track("date-picker.december"),
+  ];
 
   ngOnInit(): void {
     const selected = this.selected();
@@ -276,19 +323,23 @@ export class DatePickerComponent implements OnInit {
     this.month.set(date);
   }
 
+  prevYearPage() {
+    if (this.hasPrevYearPage()) {
+      this.yearPageIndex.set(this.yearPageIndex() - 1);
+    }
+  }
+
+  nextYearPage() {
+    if (this.hasNextYearPage()) {
+      this.yearPageIndex.set(this.yearPageIndex() + 1);
+    }
+  }
+
   selectDay(day: DatePickerDay) {
     if (day.disabled) return;
 
     this.selected.set(day.date);
     this.inputValue.set(this.format(day.date));
-  }
-
-  isDisabled(date: Date): boolean {
-    const rules = this.disabled();
-    if (!rules) return false;
-
-    const matchers = Array.isArray(rules) ? rules : [rules];
-    return matchers.some((m) => this.matches(m, date));
   }
 
   isSelected(date: Date): boolean {
@@ -302,18 +353,45 @@ export class DatePickerComponent implements OnInit {
     return date.toDateString() === this.today.toDateString();
   }
 
+  isDisabled(date: Date): boolean {
+    const rules = this.disabled();
+    if (!rules) return false;
+
+    const matchers = Array.isArray(rules) ? rules : [rules];
+    return matchers.some((m) => this.matches(m, date));
+  }
+
+  onMonthClick() {
+    this.currentView.set("month-grid");
+  }
+
   onMonthSelect(index?: string) {
     if (!index) return;
 
     const updated = new Date(this.month());
     updated.setMonth(Number(index));
     this.month.set(updated);
+
+    if (this.currentView() === "month-grid") {
+      this.currentView.set("calendar-grid");
+    }
+  }
+
+  onYearClick() {
+    const selected = this.month().getFullYear();
+    const index = this.years().indexOf(selected);
+    this.yearPageIndex.set(Math.floor(index / this.YEARS_PER_PAGE));
+    this.currentView.set("year-grid");
   }
 
   onYearSelect(index?: string) {
     const updated = new Date(this.month());
     updated.setFullYear(Number(index));
     this.month.set(updated);
+
+    if (this.currentView() === "year-grid") {
+      this.currentView.set("calendar-grid");
+    }
   }
 
   onDayKeydown(event: KeyboardEvent, current: Date) {
@@ -385,7 +463,22 @@ export class DatePickerComponent implements OnInit {
     }
   }
 
+  onCalendarKeyDown(event: KeyboardEvent) {
+    if (this.currentView() === "calendar-grid") return;
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+
+      this.currentView.set("calendar-grid");
+      const active = this.selected() ?? this.today;
+      setTimeout(() => this.focusDate(active));
+    }
+  }
+
   onInput(event: Event) {
+    if (!this.allowManualInput()) return;
+
     const value = (event.target as HTMLInputElement).value;
     this.inputValue.set(value);
 
@@ -395,6 +488,8 @@ export class DatePickerComponent implements OnInit {
   }
 
   onInputBlur() {
+    if (!this.allowManualInput()) return;
+
     const selected = this.selected();
     const parsed = this.parseDate(this.inputValue());
 
@@ -403,6 +498,18 @@ export class DatePickerComponent implements OnInit {
       this.month.set(parsed);
     } else {
       this.inputValue.set(selected ? this.format(selected) : "");
+    }
+  }
+
+  onInputClick() {
+    if (this.allowManualInput()) return;
+
+    if (this.popover().floatUiComponent().state) {
+      this.popover().floatUiComponent().hide();
+      this.inputElement().nativeElement.focus();
+    } else {
+      this.popover().floatUiComponent().show();
+      this.openCalendar();
     }
   }
 
@@ -443,7 +550,7 @@ export class DatePickerComponent implements OnInit {
       );
 
       if (btn && document.activeElement !== btn) {
-        btn.focus();
+        btn.focus({ preventScroll: true });
       }
     });
   }
@@ -526,5 +633,21 @@ export class DatePickerComponent implements OnInit {
     }
 
     return null;
+  }
+
+  private getISOWeek(date: Date): number {
+    const target = new Date(date);
+    target.setHours(0, 0, 0, 0);
+
+    const day = target.getDay();
+    const isoDay = day === 0 ? 7 : day;
+
+    target.setDate(target.getDate() + (4 - isoDay));
+    const yearStart = new Date(target.getFullYear(), 0, 1);
+
+    const diffInDays = Math.floor(
+      (target.getTime() - yearStart.getTime()) / 86400000,
+    );
+    return Math.floor(diffInDays / 7) + 1;
   }
 }
