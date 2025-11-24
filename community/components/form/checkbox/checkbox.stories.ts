@@ -14,6 +14,11 @@ import { CheckboxCardGroupComponent } from "./checkbox-card-group/checkbox-card-
 export default {
   title: "Community/Form/Checkbox",
   component: CheckboxComponent,
+  parameters: {
+    status: {
+      type: ["existsInTediReady"],
+    },
+  },
   args: {
     size: "default",
     disabled: false,
