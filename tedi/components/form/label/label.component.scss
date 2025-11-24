@@ -1,8 +1,6 @@
 @use "@tedi-design-system/core/mixins";
 
 .tedi-label {
-  color: var(--general-text-secondary);
-
   @include mixins.responsive-styles(
     font-size,
     body-regular-size,
@@ -27,5 +25,18 @@
       content: " *";
       color: var(--form-general-feedback-error-border);
     }
+  }
+
+  &--primary {
+    color: var(--general-text-primary);
+  }
+
+  &--secondary {
+    color: var(--general-text-secondary);
+  }
+
+  &:has(input[disabled]),
+  &[for]:has(+ input[disabled]) {
+    color: var(--general-text-disabled);
   }
 }

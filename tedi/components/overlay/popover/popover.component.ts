@@ -4,10 +4,10 @@ import {
   ViewEncapsulation,
   ChangeDetectionStrategy,
   input,
-  ViewChild,
   inject,
   Renderer2,
   computed,
+  viewChild,
 } from "@angular/core";
 import {
   NgxFloatUiContentComponent,
@@ -55,12 +55,16 @@ export class PopoverComponent {
    */
   withBorder = input(false);
   /**
+   * Should show arrow?
+   */
+  withArrow = input(true);
+  /**
    * Lock scrolling on rest of the page?
    * @default false
    */
   lockScroll = input(false);
 
-  @ViewChild("floatUiComponent") floatUiComponent!: NgxFloatUiContentComponent;
+  readonly floatUiComponent = viewChild.required(NgxFloatUiContentComponent);
   private readonly document = inject(DOCUMENT);
   private readonly renderer = inject(Renderer2);
 
@@ -81,6 +85,10 @@ export class PopoverComponent {
 
     if (this.withBorder()) {
       classList.push("float-ui-container-popover--border");
+    }
+
+    if (this.withArrow()) {
+      classList.push("float-ui-container-popover--arrow");
     }
 
     return classList.join(",");
