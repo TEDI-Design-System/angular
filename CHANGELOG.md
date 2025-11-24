@@ -1,3 +1,10 @@
+# [4.1.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0-rc.2...angular-4.1.0-rc.3) (2025-11-24)
+
+
+### Features
+
+* **checkbox:** add TEDI-Ready checkbox component [#74](https://github.com/TEDI-Design-System/angular/issues/74) ([637b9c0](https://github.com/TEDI-Design-System/angular/commit/637b9c04b25be4d85084cb0da74d02d59cc474fc))
+
 # [4.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0-rc.1...angular-4.1.0-rc.2) (2025-11-24)
 
 
