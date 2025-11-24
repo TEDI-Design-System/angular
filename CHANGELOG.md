@@ -1,3 +1,15 @@
+# [4.1.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0-rc.3...angular-4.1.0-rc.4) (2025-11-24)
+
+
+### Features
+
+* **date-picker:** add date-picker component [#190](https://github.com/TEDI-Design-System/angular/issues/190) ([adb97a0](https://github.com/TEDI-Design-System/angular/commit/adb97a01b31096d51a5669dee25e95a82a110cf1))
+* **date-picker:** add date-picker tests, dropdown tests [#190](https://github.com/TEDI-Design-System/angular/issues/190) ([f4f2b53](https://github.com/TEDI-Design-System/angular/commit/f4f2b53ff6fcc76d37fbec550c9f182d48656334))
+* **date-picker:** add dropdown, change popover [#190](https://github.com/TEDI-Design-System/angular/issues/190) ([dd694bc](https://github.com/TEDI-Design-System/angular/commit/dd694bc2e93b2645d027689e272b33087391d512))
+* **date-picker:** fix conflicts [#190](https://github.com/TEDI-Design-System/angular/issues/190) ([f72ea2c](https://github.com/TEDI-Design-System/angular/commit/f72ea2c115cf8ca1f72083ffbdcd0ff9538e2ff8))
+* **date-picker:** wcag improvements [#190](https://github.com/TEDI-Design-System/angular/issues/190) ([3ebe215](https://github.com/TEDI-Design-System/angular/commit/3ebe2153ca3625c9ee7ba101e75b65926d2c89d0))
+* **dropdown:** add missing tests [#190](https://github.com/TEDI-Design-System/angular/issues/190) ([184187b](https://github.com/TEDI-Design-System/angular/commit/184187b3ebd06ad7fb2316c51ebbedcbb6014ee0))
+
 # [4.1.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0-rc.2...angular-4.1.0-rc.3) (2025-11-24)
 
 
