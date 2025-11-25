@@ -3,6 +3,7 @@ import { Component } from "@angular/core";
 import { ModalHeaderComponent } from "./modal-header.component";
 import { ModalComponent } from "../modal.component";
 import { viewChild } from "@angular/core";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
 
 class MockModalComponent {
   open = {
@@ -36,7 +37,10 @@ describe("ModalHeaderComponent", () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [TestHostComponent],
-      providers: [{ provide: ModalComponent, useClass: MockModalComponent }],
+      providers: [
+        { provide: ModalComponent, useClass: MockModalComponent },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
     });
 
     fixture = TestBed.createComponent(TestHostComponent);

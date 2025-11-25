@@ -7,6 +7,7 @@ import {
 } from "./popover-content.component";
 import { PopoverComponent } from "../popover.component";
 import { NgxFloatUiContentComponent } from "ngx-float-ui";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
 
 @Component({
   template: `
@@ -45,7 +46,10 @@ describe("PopoverContentComponent", () => {
     };
 
     TestBed.configureTestingModule({
-      providers: [{ provide: PopoverComponent, useValue: popoverMock }],
+      providers: [
+        { provide: PopoverComponent, useValue: popoverMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
       imports: [TestHostComponent],
     });
 

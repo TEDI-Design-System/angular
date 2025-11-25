@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { AlertComponent, AlertRole, AlertType } from "./alert.component";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 describe("AlertComponent", () => {
   let component: AlertComponent;
@@ -10,6 +11,7 @@ describe("AlertComponent", () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [AlertComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AlertComponent);
