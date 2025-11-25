@@ -1,3 +1,10 @@
+# [4.1.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0-rc.4...angular-4.1.0-rc.5) (2025-11-25)
+
+
+### Features
+
+* **theme-provider:** add global themes support [#191](https://github.com/TEDI-Design-System/angular/issues/191) ([#197](https://github.com/TEDI-Design-System/angular/issues/197)) ([e4c1ecf](https://github.com/TEDI-Design-System/angular/commit/e4c1ecfa9f69157dab3f66c84d4536ce2f3a3883))
+
 # [4.1.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0-rc.3...angular-4.1.0-rc.4) (2025-11-24)
 
 
