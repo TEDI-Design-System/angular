@@ -22,21 +22,21 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-### 3. Add Tedi Provider (Theme + Language)
+### 3. Add TEDI Provider (Theme + Language)
 
-Tedi provides theming and language resolution out of the box using cookies and server/browser detection.
+TEDI provides theming and language resolution out of the box using cookies and server/browser detection.
 
 Add the provider to your app.config.ts:
 
 ```ts
-import { provideTedi } from "@tedi-design-system/angular";
+import { provideTedi } from "@tedi-design-system/angular/tedi";
 
 export const appConfig: ApplicationConfig = {
   providers: [...yourOtherProviders, provideAnimations(), provideTedi()],
 };
 ```
 
-Optional: Configure default theme or language
+Optional: Configure default theme or language. By default TEDI uses **"default"** theme and **"et"** language.
 
 ```ts
 provideTedi({
@@ -84,7 +84,7 @@ export class ExampleComponent {}
 
 # Theming
 
-The Tedi Design System uses a theme class applied directly to the `<html>` element.
+TEDI uses a theme class applied directly to the `<html>` element. Theme value is stored in **"tedi-theme"** cookie.
 
 Available themes:
 
@@ -102,19 +102,21 @@ Theme switching with ThemeService
 
 ```ts
 import { Component } from "@angular/core";
-import { ThemeService, Theme } from "@tedi-design-system/angular";
+import { ThemeService, Theme } from "@tedi-design-system/angular/tedi";
 
 @Component({
-selector: "app-theme-toggle",
-template: <button (click)="setTheme('default')">Default</button>
+  selector: "app-theme-toggle",
+  template: `
+    <button (click)="setTheme('default')">Default</button>
     <button (click)="setTheme('dark')">Dark</button>
-    <button (click)="setTheme('rit')">Rit</button>,
+    <button (click)="setTheme('rit')">Rit</button>
+  `,
 })
 export class ThemeToggleComponent {
-  constructor(private themeService: ThemeService) {}
+  readonly themeService = inject(ThemeService);
 
   setTheme(theme: Theme) {
-    this.themeService.setTheme(theme);
+    this.themeService.theme.set(theme);
   }
 }
 ```
@@ -122,7 +124,7 @@ export class ThemeToggleComponent {
 This will automatically:
 
 - Update the `<html>` theme class
-- Save theme to cookie (tedi-theme)
+- Save theme to cookie
 - Persist across refreshes
 - Work during SSR
 
@@ -130,23 +132,17 @@ This will automatically:
 
 # Language
 
-Language resolution works just like theming.
+Language resolution works just like theming. Language value is stored in **"tedi-lang"** cookie.
+
 Available languages are defined in your translation service, e.g.:
 
 - `et`
 - `en`
 - `ru`
 
-A cookie stores the value (tedi-language by default).
-If you want to customize the default:
+---
 
-```ts
-provideTedi({
-  language: "et",
-});
-```
-
-Example: Full ApplicationConfig
+# Example of full ApplicationConfig
 
 ```ts
 import { ApplicationConfig } from "@angular/core";

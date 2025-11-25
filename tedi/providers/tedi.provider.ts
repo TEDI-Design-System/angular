@@ -2,79 +2,48 @@ import {
   EnvironmentProviders,
   inject,
   makeEnvironmentProviders,
-  PLATFORM_ID,
-  REQUEST,
+  provideAppInitializer,
 } from "@angular/core";
 import { TEDI_THEME_DEFAULT_TOKEN } from "../tokens/theme.token";
 import {
   AVAILABLE_THEMES,
   Theme,
-  THEME_COOKIE_NAME,
+  THEME_CLASS_PREFIX,
+  THEME_FALLBACK_VALUE,
 } from "../services/theme/theme.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../tokens/translation.token";
-import {
-  AVAILABLE_LANGUAGES,
-  Language,
-  LANGUAGE_COOKIE_NAME,
-} from "../services/translation/translation.service";
-import { DOCUMENT, isPlatformServer } from "@angular/common";
+import { Language } from "../services/translation/translation.service";
+import { DOCUMENT } from "@angular/common";
 
 export interface TediConfig {
-  theme?: Theme | (() => Theme);
-  language?: Language | (() => Language);
+  theme?: Theme;
+  language?: Language;
 }
 
-function readCookie(name: string) {
-  const platformId = inject(PLATFORM_ID);
+function applyInitialTheme() {
+  return () => {
+    const document = inject(DOCUMENT);
+    const defaultTheme = inject(TEDI_THEME_DEFAULT_TOKEN);
+    const html = document.documentElement;
 
-  if (isPlatformServer(platformId)) {
-    const req = inject(REQUEST, { optional: true });
-    const cookieHeader = req?.headers.get("cookie") || "";
-    return cookieHeader
-      .split("; ")
-      .find((c) => c.startsWith(name + "="))
-      ?.split("=")[1];
-  }
+    for (const t of AVAILABLE_THEMES) {
+      html.classList.remove(`${THEME_CLASS_PREFIX}${t}`);
+    }
 
-  const document = inject(DOCUMENT);
-  return document.cookie
-    ?.split("; ")
-    .find((c) => c.startsWith(name + "="))
-    ?.split("=")[1];
-}
-
-function resolveValue<T extends string>(
-  value: T | (() => T) | undefined,
-  cookie: T | undefined,
-  allowed: readonly T[],
-  fallback: T,
-): T {
-  if (value !== undefined) {
-    return typeof value === "function" ? value() : value;
-  }
-
-  if (cookie && allowed.includes(cookie)) {
-    return cookie;
-  }
-
-  return fallback;
+    html.classList.add(`${THEME_CLASS_PREFIX}${defaultTheme}`);
+  };
 }
 
 export function provideTedi(config: TediConfig = {}): EnvironmentProviders {
   return makeEnvironmentProviders([
     {
       provide: TEDI_THEME_DEFAULT_TOKEN,
-      useFactory: () => {
-        const cookie = readCookie(THEME_COOKIE_NAME) as Theme | undefined;
-        return resolveValue(config.theme, cookie, AVAILABLE_THEMES, "default");
-      },
+      useValue: config.theme ?? THEME_FALLBACK_VALUE,
     },
     {
       provide: TEDI_TRANSLATION_DEFAULT_TOKEN,
-      useFactory: () => {
-        const cookie = readCookie(LANGUAGE_COOKIE_NAME) as Language | undefined;
-        return resolveValue(config.language, cookie, AVAILABLE_LANGUAGES, "et");
-      },
+      useValue: config.language ?? "et",
     },
+    provideAppInitializer(applyInitialTheme()),
   ]);
 }

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ClosingButtonComponent } from "./closing-button.component";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 describe("ClosingButtonComponent", () => {
   let fixture: ComponentFixture<ClosingButtonComponent>;
@@ -9,6 +10,7 @@ describe("ClosingButtonComponent", () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [ClosingButtonComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
     });
 
     fixture = TestBed.createComponent(ClosingButtonComponent);
