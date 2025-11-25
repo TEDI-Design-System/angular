@@ -1,5 +1,14 @@
+import {
+  AsyncValidatorFn,
+  ValidationErrors,
+  ValidatorFn,
+} from "@angular/forms";
 import { IECFileSize, SIFileSize } from "./constants";
-import { FileDropzone, SizeDisplayStandard } from "./types";
+import {
+  DropzoneValidatorFunction,
+  FileDropzone,
+  SizeDisplayStandard,
+} from "./types";
 
 export function formatBytes(
   bytes: number,
@@ -112,4 +121,31 @@ export function validateFileType(
     }
   }
   return undefined;
+}
+
+export function validatorWrapper(
+  validator: DropzoneValidatorFunction,
+  maxSize: number,
+  acceptFileTypes: string,
+  file: FileDropzone[],
+  standard: SizeDisplayStandard,
+  translate: (key: string, ...args: unknown[]) => string
+): AsyncValidatorFn {
+  const errors: ValidationErrors = {};
+  file.forEach((file) => {
+    const error = validator(
+      maxSize,
+      acceptFileTypes,
+      file,
+      standard,
+      translate
+    );
+    console.log("validating", maxSize, acceptFileTypes, file, standard);
+
+    if (error) {
+      errors[validator.name] = error;
+    }
+  });
+
+  return async () => (Object.keys(errors).length > 0 ? errors : null);
 }

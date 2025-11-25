@@ -145,7 +145,12 @@ export const Default: Story = {
     });
 
     const logValue = () => {
-      console.log(form.get("files")?.value);
+      console.log(
+        form.get("files")?.value,
+        form.controls.files,
+        form.controls,
+        form.controls.files.errors
+      );
     };
     return {
       template: `${Template(args)} <button tedi-button (click)="logValue()">Log Form Value</button>`,
