@@ -1,5 +1,3 @@
-@use "@tedi-design-system/core/mixins";
-
 :root {
   --_sidenav-tree-container: 24px;
   --_sidenav-tree-trunk-width: 2px;
@@ -27,11 +25,10 @@
   flex-direction: column;
   max-width: 100%;
   min-height: 100%;
-  background-color: var(--side-navigation-item-background-default);
+  background-color: var(--navigation-vertical-item-background-default);
   transition: all var(--_sidenav-transition-duration) ease;
   z-index: var(--z-index-sidenav);
-
-  @include mixins.responsive-styles(width, side-navigation-item-width-default);
+  width: var(--navigation-vertical-item-width-default);
 
   &__collapse {
     position: absolute;
@@ -45,12 +42,11 @@
     background: var(--button-floating-secondary-background-default);
     z-index: var(--z-index-sidenav);
     cursor: pointer;
-
-    @include mixins.responsive-styles(top, side-navigation-item-padding-y);
-    @include mixins.responsive-styles(width, button-sm-height);
-    @include mixins.responsive-styles(height, button-sm-height);
-    @include mixins.responsive-styles(padding, button-md-icon-padding);
-    @include mixins.responsive-styles(border-radius, button-radius-default);
+    top: var(--navigation-vertical-item-padding-y);
+    width: var(--button-sm-height);
+    height: var(--button-sm-height);
+    padding: var(--button-md-icon-padding);
+    border-radius: var(--button-radius-default);
 
     &:hover {
       color: var(--button-floating-secondary-text-hover);
@@ -67,7 +63,7 @@
     }
 
     &:focus-visible {
-      outline: var(--borders-02) solid var(--primary-500);
+      outline: var(--borders-02) solid var(--tedi-primary-500);
       outline-offset: var(--borders-01);
     }
   }
@@ -77,124 +73,63 @@
   }
 
   &--large {
-    --_sidenav-dropdown-item-height: var(--_sidenav-dropdown-item-large-height);
-
-    @include mixins.responsive-styles(
-      --_sidenav-item-min-height,
-      side-navigation-item-min-height
+    --_sidenav-dropdown-item-height: var(--navigation-vertical-dropdown-item);
+    --_sidenav-item-min-height: var(
+      --navigation-vertical-item-min-height-large
     );
-    @include mixins.responsive-styles(
-      --_sidenav-item-font-size,
-      side-navigation-text-size
+    --_sidenav-item-font-size: var(--navigation-vertical-text-size);
+    --_sidenav-item-line-height: var(--body-regular-line-height);
+    --_sidenav-item-padding-y: var(--navigation-vertical-item-padding-y);
+    --_sidenav-item-padding-right: var(
+      --navigation-vertical-item-padding-right
     );
-    @include mixins.responsive-styles(
-      --_sidenav-item-line-height,
-      body-regular-line-height,
-      $exclude: tablet
+    --_sidenav-item-padding-left: var(
+      --navigation-vertical-item-padding-left-level-1
     );
-    @include mixins.responsive-styles(
-      --_sidenav-item-padding-y,
-      side-navigation-item-padding-y
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-padding-right,
-      side-navigation-item-padding-right
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-padding-left,
-      side-navigation-item-padding-left-level-1
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-icon-size,
-      side-navigation-item-icon
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-caret-size,
-      side-navigation-item-icon
-    );
+    --_sidenav-item-icon-size: var(--navigation-vertical-item-icon);
+    --_sidenav-item-caret-size: var(--navigation-vertical-item-icon);
   }
 
   &--medium {
-    --_sidenav-dropdown-item-height: var(
-      --_sidenav-dropdown-item-medium-height
+    --_sidenav-dropdown-item-height: var(--navigation-vertical-dropdown-item);
+    --_sidenav-item-min-height: var(
+      --navigation-vertical-item-min-height-medium
     );
-
-    @include mixins.responsive-styles(
-      --_sidenav-item-min-height,
-      side-navigation-item-min-height-medium
+    --_sidenav-item-font-size: var(--navigation-vertical-text-size-sm);
+    --_sidenav-item-line-height: var(--body-small-regular-line-height);
+    --_sidenav-item-padding-y: var(--navigation-vertical-item-padding-y-md);
+    --_sidenav-item-padding-right: var(
+      --navigation-vertical-item-padding-right
     );
-    @include mixins.responsive-styles(
-      --_sidenav-item-font-size,
-      side-navigation-text-size-sm
+    --_sidenav-item-padding-left: var(
+      --navigation-vertical-item-padding-left-level-1
     );
-    @include mixins.responsive-styles(
-      --_sidenav-item-line-height,
-      body-small-regular-line-height,
-      $exclude: tablet
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-padding-y,
-      side-navigation-item-padding-y-md
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-padding-right,
-      side-navigation-item-padding-right
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-padding-left,
-      side-navigation-item-padding-left-level-1
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-icon-size,
-      side-navigation-item-icon-md
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-caret-size,
-      side-navigation-item-icon-md
-    );
+    --_sidenav-item-icon-size: var(--navigation-vertical-item-icon-md);
+    --_sidenav-item-caret-size: var(--navigation-vertical-item-icon-md);
   }
 
   &--small {
-    --_sidenav-dropdown-item-height: var(--_sidenav-dropdown-item-small-height);
-
-    @include mixins.responsive-styles(
-      --_sidenav-item-min-height,
-      side-navigation-item-min-height-small
+    --_sidenav-dropdown-item-height: var(--navigation-vertical-dropdown-item);
+    --_sidenav-item-min-height: var(
+      --navigation-vertical-item-min-height-small
     );
-    @include mixins.responsive-styles(
-      --_sidenav-item-font-size,
-      side-navigation-text-size-sm
+    --_sidenav-item-font-size: var(--navigation-vertical-text-size-sm);
+    --_sidenav-item-line-height: var(--body-small-regular-line-height);
+    --_sidenav-item-padding-y: var(--navigation-vertical-item-padding-y-sm);
+    --_sidenav-item-padding-right: var(
+      --navigation-vertical-item-padding-right
     );
-    @include mixins.responsive-styles(
-      --_sidenav-item-line-height,
-      body-small-regular-line-height,
-      $exclude: tablet
+    --_sidenav-item-padding-left: var(
+      --navigation-vertical-item-padding-left-level-1
     );
-    @include mixins.responsive-styles(
-      --_sidenav-item-padding-y,
-      side-navigation-item-padding-y-sm
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-padding-right,
-      side-navigation-item-padding-right
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-padding-left,
-      side-navigation-item-padding-left-level-1
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-icon-size,
-      side-navigation-item-icon-sm
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-caret-size,
-      side-navigation-item-icon-sm
-    );
+    --_sidenav-item-icon-size: var(--navigation-vertical-item-icon-sm);
+    --_sidenav-item-caret-size: var(--navigation-vertical-item-icon-sm);
   }
 
   &--dividers {
     .tedi-sidenav-item {
-      border-bottom: var(--borders-01) solid var(--side-navigation-item-border);
+      border-bottom: var(--borders-01) solid
+        var(--navigation-vertical-item-border);
 
       &:last-of-type {
         border-bottom: 0;
@@ -233,40 +168,20 @@
     --_sidenav-dropdown-item-height: var(
       --_sidenav-dropdown-item-collapsed-height
     );
+    --_sidenav-item-icon-size: var(--navigation-vertical-item-icon);
+    --_sidenav-item-caret-size: var(--navigation-vertical-item-icon-sm);
 
-    @include mixins.responsive-styles(
-      --_sidenav-item-icon-size,
-      side-navigation-item-icon
-    );
-    @include mixins.responsive-styles(
-      --_sidenav-item-caret-size,
-      side-navigation-item-icon-sm
-    );
-
-    @include mixins.responsive-styles(
-      width,
-      side-navigation-item-width-collapsed
-    );
+    width: var(--navigation-vertical-item-width-collapsed);
 
     .tedi-sidenav-item {
-      @include mixins.responsive-styles(
-        --_sidenav-item-font-size,
-        side-navigation-text-size-sm
-      );
+      --_sidenav-item-font-size: var(--navigation-vertical-text-size-sm);
 
       .tedi-sidenav-item__title {
         flex-direction: column;
         text-align: center;
-
-        @include mixins.responsive-styles(
-          min-height,
-          side-navigation-item-min-height-large
-        );
-
-        @include mixins.responsive-styles(
-          padding,
-          side-navigation-item-padding-y side-navigation-item-padding-x-sm
-        );
+        min-height: var(--navigation-vertical-item-min-height-large);
+        padding: var(--navigation-vertical-item-padding-y)
+          var(--navigation-vertical-item-padding-x-sm);
       }
 
       .tedi-sidenav-item__caret {
@@ -289,7 +204,7 @@
 
     .tedi-sidenav-group-title {
       border-bottom: var(--borders-01) solid
-        var(--side-navigation-group-title-text);
+        var(--navigation-vertical-group-title-text);
 
       .tedi-sidenav-group-title__text {
         display: none;
@@ -303,11 +218,10 @@
       left: calc(100% + var(--_sidenav-dropdown-collapsed-left));
       background: var(--dropdown-item-default-background);
       border: var(--borders-01) solid var(--card-border-primary);
-      box-shadow: 0px 1px 5px 0px var(--alpha-20);
+      box-shadow: 0px 1px 5px 0px var(--tedi-alpha-20);
       transition: none;
       visibility: hidden;
-
-      @include mixins.responsive-styles(border-radius, form-select-area-radius);
+      border-radius: var(--form-select-area-radius);
 
       &--open {
         visibility: visible;
@@ -321,32 +235,19 @@
           color: var(--general-text-tertiary);
           font-size: 14px;
           line-height: 20px;
-
-          @include mixins.responsive-styles(
-            padding,
-            dropdown-group-label-padding-y dropdown-group-label-padding-x
-              layout-grid-gutters-04 dropdown-group-label-padding-x
-          );
+          padding: var(--dropdown-group-label-padding-y)
+            var(--dropdown-group-label-padding-x) var(--layout-grid-gutters-04)
+            var(--dropdown-group-label-padding-x);
         }
       }
     }
 
     .tedi-sidenav-dropdown-item {
-      color: var(--dropdown-item-default-text);
+      --_gap: var(--dropdown-item-inner-spacing);
 
-      @include mixins.responsive-styles(padding-top, dropdown-item-padding-y);
-      @include mixins.responsive-styles(
-        padding-bottom,
-        dropdown-item-padding-y
-      );
-      @include mixins.responsive-styles(padding-right, dropdown-item-padding-x);
-      @include mixins.responsive-styles(padding-left, dropdown-item-padding-x);
-      @include mixins.responsive-styles(--_gap, dropdown-item-inner-spacing);
-      @include mixins.responsive-styles(
-        font-size,
-        body-regular-size,
-        $exclude: tablet
-      );
+      color: var(--dropdown-item-default-text);
+      padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
+      font-size: var(--body-regular-size);
 
       &.tedi-sidenav-dropdown-item--selected,
       &:hover {
@@ -364,12 +265,8 @@
     .tedi-sidenav-dropdown-group {
       .tedi-sidenav-dropdown-item {
         padding-left: calc(
-          var(--_padding-left) + var(--_sidenav-tree-container) + var(--_gap)
-        );
-
-        @include mixins.responsive-styles(
-          --_padding-left,
-          dropdown-item-padding-x
+          var(--dropdown-item-padding-x) + var(--_sidenav-tree-container) +
+            var(--_gap)
         );
 
         &::after {
@@ -377,20 +274,17 @@
           height: var(--_sidenav-tree-trunk-width);
           top: 50%;
           transform: translateY(-50%);
-          background-color: var(--side-navigation-tree-neutral-default);
+          background-color: var(--navigation-vertical-tree-neutral-default);
         }
 
         &::before {
           height: 100%;
           width: var(--_sidenav-tree-trunk-width);
-          background-color: var(--side-navigation-tree-neutral-default);
+          background-color: var(--navigation-vertical-tree-neutral-default);
         }
 
         &:first-of-type {
-          @include mixins.responsive-styles(
-            padding-left,
-            dropdown-item-padding-x
-          );
+          padding-left: var(--dropdown-item-padding-x);
 
           &::after {
             width: 0;
@@ -421,20 +315,21 @@
     line-height: var(--_sidenav-item-line-height);
     padding: var(--_sidenav-item-padding-y) var(--_sidenav-item-padding-right)
       var(--_sidenav-item-padding-y) var(--_sidenav-item-padding-left);
-    color: var(--side-navigation-item-text);
+    color: var(--navigation-vertical-item-text);
     text-align: start;
     border: 0;
-    border-bottom: var(--borders-01) solid var(--side-navigation-item-border);
+    border-bottom: var(--borders-01) solid
+      var(--navigation-vertical-item-border);
     background: transparent;
     font-size: inherit;
     cursor: pointer;
 
     &:hover {
-      background: var(--side-navigation-item-background-hover);
+      background: var(--navigation-vertical-item-background-hover);
     }
 
     tedi-icon {
-      font-size: var(--_sidenav-item-icon-size);
+      font-size: var(--navigation-vertical-item-icon);
     }
   }
 }

@@ -1,30 +1,17 @@
-@use "@tedi-design-system/core/mixins";
-
 .tedi-radio {
   --_radio-bg: var(--form-checkbox-radio-default-background-default);
   --_radio-border: var(--form-checkbox-radio-default-border-default);
   --_radio-label-color: var(--general-text-primary);
   --_radio-dot-bg: var(--_radio-border);
   --_radio-dot-size: 12px;
+  --_radio-inner-spacing: var(--form-checkbox-radio-inner-spacing);
+  --_radio-size: var(--form-checkbox-radio-size-responsive);
+  --_label-size: var(--body-regular-size);
 
   display: grid;
   grid-template-areas: "input-area label" ". feedback";
   grid-template-columns: auto 1fr;
   align-items: center;
-
-  @include mixins.responsive-styles(
-    --_radio-inner-spacing,
-    form-checkbox-radio-inner-spacing
-  );
-  @include mixins.responsive-styles(
-    --_radio-size,
-    form-checkbox-radio-size-responsive
-  );
-  @include mixins.responsive-styles(
-    --_label-size,
-    body-regular-size,
-    $exclude: tablet
-  );
 
   &__input-area {
     position: relative;
@@ -69,12 +56,7 @@
     color: var(--_radio-label-color);
     font-size: var(--_label-size);
     grid-area: label;
-
-    @include mixins.responsive-styles(
-      font-family,
-      family-primary,
-      $exclude: tablet
-    );
+    font-family: var(--family-default);
   }
 
   &:has(input:checked) {
@@ -118,10 +100,7 @@
 
   &--large {
     --_radio-dot-size: 16px;
-    @include mixins.responsive-styles(
-      --_radio-size,
-      form-checkbox-radio-size-large
-    );
+    --_radio-size: var(--form-checkbox-radio-size-large);
   }
 
   .tedi-feedback-text {
