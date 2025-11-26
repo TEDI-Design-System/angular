@@ -1,4 +1,4 @@
-import { Preview, StoryContext } from "@storybook/angular";
+import { applicationConfig, Preview, StoryContext } from "@storybook/angular";
 import { Theme } from "../tedi/services/theme/theme.service";
 import {
   Controls,
@@ -8,6 +8,7 @@ import {
   Subtitle,
   Title,
 } from "@storybook/blocks";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../tedi/tokens/translation.token";
 
 export const globalTypes = {
   theme: {
@@ -58,7 +59,12 @@ const themeDecorator = (storyFn: any, context: StoryContext) => {
 };
 
 const preview: Preview = {
-  decorators: [themeDecorator],
+  decorators: [
+    themeDecorator,
+    applicationConfig({
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    }),
+  ],
   parameters: {
     viewMode: "docs",
     backgrounds: {
