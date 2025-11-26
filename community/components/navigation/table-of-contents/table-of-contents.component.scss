@@ -1,4 +1,17 @@
+@use "sass:map";
+@use "@tedi-design-system/core/mixins";
+@use "@tedi-design-system/core/bootstrap-utility/breakpoints";
+
+$breakpoints: (
+  mobile: sm,
+  tablet: md,
+  desktop: lg,
+);
+
 .table-of-contents {
+  // display: none;
+  max-height: 100vh;
+
   &--position {
     &-sticky {
       position: sticky;
@@ -16,11 +29,43 @@
 
   &__header {
     padding: var(--dimensions-10);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   &__items {
     gap: var(--dimensions-05);
     display: flex;
     flex-direction: column;
+  }
+
+  &--modal-active {
+    display: none;
+  }
+
+  @each $breakpoint-name, $breakpoint-value in $breakpoints {
+    &--modal-breakpoint-#{$breakpoint-name} {
+      @include breakpoints.media-breakpoint-up($breakpoint-value) {
+        display: initial;
+      }
+    }
+  }
+
+  &__footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: aliceblue;
+    z-index: var(--z-index-fixed);
+
+    @each $breakpoint-name, $breakpoint-value in $breakpoints {
+      &--modal-breakpoint-#{$breakpoint-name} {
+        @include breakpoints.media-breakpoint-up($breakpoint-value) {
+          display: none;
+        }
+      }
+    }
   }
 }

@@ -1,6 +1,6 @@
 .table-of-contents__item {
   display: flex;
-  justify-content: flex-start;
+  align-items: flex-start;
   flex-direction: column;
   // we're inset into the card border by 1 pixel
   padding: 0 calc(var(--dimensions-10) - 1px);

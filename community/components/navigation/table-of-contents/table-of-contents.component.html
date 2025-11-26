@@ -1,12 +1,31 @@
-<nav [attr.aria-label]="ariaLabel()" [class]="classes()">
-  <tedi-card>
-    <tedi-card-content class="table-of-contents__content">
-      <h1 tedi-text modifiers="h4" class="table-of-contents__header">
-        {{ heading() }}
-      </h1>
-      <div class="table-of-contents__items">
-        <ng-content />
-      </div>
-    </tedi-card-content>
-  </tedi-card>
-</nav>
+<ng-template #items><ng-content /></ng-template>
+
+<ng-template #defaultTemplate>
+  <nav [attr.aria-label]="ariaLabel()" [class]="classes()">
+    <tedi-card>
+      <tedi-card-content class="table-of-contents__content">
+        <h1 tedi-text modifiers="h4" class="table-of-contents__header">
+          {{ heading() }}
+        </h1>
+        <div class="table-of-contents__items">
+          <ng-container *ngTemplateOutlet="items" />
+        </div>
+      </tedi-card-content>
+    </tedi-card>
+  </nav>
+</ng-template>
+
+@if (!isOpen()) {
+  <ng-container *ngTemplateOutlet="defaultTemplate" />
+
+  <div [classList]="footerClasses()">
+    <h1 tedi-text modifiers="h4" class="table-of-contents__header">
+      {{ heading() }}
+
+      <button tedi-button variant="neutral" (click)="openMobileModal()">
+        Button
+        <tedi-icon name="expand_more" />
+      </button>
+    </h1>
+  </div>
+}

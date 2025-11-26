@@ -84,3 +84,7 @@ $modal-breapoints: (xs, sm, md, lg, xl);
 
   @include mixins.responsive-styles(border-radius, modal-radius);
 }
+
+.tedi-bottom-dialog {
+  bottom: 20%;
+}

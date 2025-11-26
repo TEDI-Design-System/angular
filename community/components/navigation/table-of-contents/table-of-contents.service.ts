@@ -18,6 +18,9 @@ export class TableOfContentsService {
   }
 
   seekTo(id: string) {
+    if (!this.scrollOnClick) {
+      return;
+    }
     if (!id) {
       this.router.navigate([], {
         fragment: undefined,
@@ -25,13 +28,11 @@ export class TableOfContentsService {
       });
       return;
     }
-    if (this.scrollOnClick) {
-      const targetElement = document.getElementById(id);
-      targetElement?.scrollIntoView({ behavior: "smooth" });
-      this.router.navigate([], {
-        fragment: id,
-        queryParamsHandling: "preserve",
-      });
-    }
+    const targetElement = document.getElementById(id);
+    targetElement?.scrollIntoView({ behavior: "smooth" });
+    this.router.navigate([], {
+      fragment: id,
+      queryParamsHandling: "preserve",
+    });
   }
 }

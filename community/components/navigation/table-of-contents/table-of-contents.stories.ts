@@ -35,15 +35,20 @@ export default meta;
 
 type Story = StoryObj<StoryTableOfContentsComponent>;
 
+const affix = (items: string[], name: string) =>
+  (items as string[]).map((item) => `${item}_${name}`);
+
 export const Default: Story = {
-  render: ({ items, ...args }) => ({
-    props: { items, ...args },
-    template: `
+  render: ({ items, ...args }) => {
+    const modifiedItems = affix(items as string[], "default");
+    return {
+      props: { items, modifiedItems, ...args },
+      template: `
     <div>
       <tedi-table-of-contents ${argsToTemplate(args)}>
-        @for(item of items; track item) {
+        @for(item of items; track item; let i = $index) {
           <tedi-table-of-contents-item
-            [idTo]="item"
+            [idTo]="modifiedItems[i]"
           >
             {{ item }}
           </tedi-table-of-contents-item>
@@ -51,23 +56,25 @@ export const Default: Story = {
       </tedi-table-of-contents>
     </div>
     `,
-  }),
+    };
+  },
 };
 
 export const Seeking: Story = {
   args: {
     position: "sticky",
   },
-  render: ({ items, ...args }) => ({
-    props: { items, ...args },
-    template: `
+  render: ({ items, ...args }) => {
+    const modifiedItems = affix(items as string[], "seeking");
+    return {
+      props: { items, modifiedItems, ...args },
+      template: `
     <div style="display: flex">
-
       <div style="margin-bottom: 1000px;">
-        @for(item of items; track item) {
-          <div id="{{ item }}" style="margin-top: 100px;">
+        @for(item of items; track item; let i = $index) {
+          <div id="{{ modifiedItems[i] }}" style="margin-top: 100px;">
             <h2>{{ item }}</h2>
-            <p style="max-width:40rem">
+            <p style="max-width: 40rem">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
               euismod, nunc ut aliquam aliquam, nunc nisl aliquet nunc, euismod
               aliquam nisl nunc euismod nunc.
@@ -78,9 +85,9 @@ export const Seeking: Story = {
 
       <div>
         <tedi-table-of-contents ${argsToTemplate(args)}>
-          @for(item of items; track item) {
+          @for(item of items; track item; let i = $index) {
             <tedi-table-of-contents-item
-              [idTo]="item"
+              [idTo]="modifiedItems[i]"
             >
               {{ item }}
             </tedi-table-of-contents-item>
@@ -89,7 +96,8 @@ export const Seeking: Story = {
       </div>
     </div>
     `,
-  }),
+    };
+  },
 };
 
 export const NestedItems: Story = {
