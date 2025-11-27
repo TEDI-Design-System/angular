@@ -1,3 +1,10 @@
+# [4.1.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0-rc.5...angular-4.1.0-rc.6) (2025-11-27)
+
+
+### Bug Fixes
+
+* **modal-storybook:** add extra description for modal storybook [#203](https://github.com/TEDI-Design-System/angular/issues/203) ([#204](https://github.com/TEDI-Design-System/angular/issues/204)) ([1e08d16](https://github.com/TEDI-Design-System/angular/commit/1e08d16b0af924d125dbd0caeb1b07932758caa1))
+
 # [4.1.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0-rc.4...angular-4.1.0-rc.5) (2025-11-25)
 
 
