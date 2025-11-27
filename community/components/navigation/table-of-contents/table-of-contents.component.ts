@@ -7,16 +7,17 @@ import {
   signal,
   TemplateRef,
   viewChild,
+  contentChildren,
 } from "@angular/core";
 import {
   CardComponent,
   CardContentComponent,
 } from "community/components/cards";
 import { TextComponent, IconComponent, ButtonComponent } from "tedi/components";
-import { TableOfContentsService } from "./table-of-contents.service";
 import { Dialog } from "@angular/cdk/dialog";
 import { NgTemplateOutlet } from "@angular/common";
-import { ModalComponent } from "community/components/overlay";
+import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-contents-item.component";
+import { Router } from "@angular/router";
 
 export type TableOfContentsPosition = "default" | "fixed" | "sticky";
 export type TableOfContentsBreakpoint =
@@ -36,9 +37,7 @@ export type TableOfContentsBreakpoint =
     ButtonComponent,
     IconComponent,
     NgTemplateOutlet,
-    ModalComponent,
   ],
-  providers: [TableOfContentsService],
 })
 export class TableOfContentsComponent {
   /**
@@ -86,12 +85,32 @@ export class TableOfContentsComponent {
 
   templateRef = viewChild<TemplateRef<unknown>>("defaultTemplate");
 
-  private tableContentsService = inject(TableOfContentsService);
+  private tableItems = contentChildren(TableOfContentsItemComponent);
+  private router = inject(Router);
+
+  activeId = computed(() =>
+    this.tableItems()
+      .find((item) => item.selected())
+      ?.idTo()
+  );
+
   private dialog = inject(Dialog);
 
   constructor() {
     effect(() => {
-      this.tableContentsService.scrollOnClick = this.scrollOnClick();
+      const items = this.tableItems();
+      items.forEach((item) => {
+        item.itemSelected.subscribe(() => {
+          this.isOpen.set(false);
+          item.selected.set(true);
+          items.forEach((other) => {
+            if (other !== item) {
+              other.selected.set(false);
+            }
+          });
+          this.seekTo(item.idTo());
+        });
+      });
     });
   }
 
@@ -117,9 +136,9 @@ export class TableOfContentsComponent {
     return classes.join(" ");
   });
 
-  getActive() {
-    return this.tableContentsService.active();
-  }
+  // getActive() {
+  //   return this.activeId();
+  // }
 
   openMobileModal() {
     const templateRef = this.templateRef();
@@ -132,6 +151,25 @@ export class TableOfContentsComponent {
 
     ref.closed.subscribe(() => {
       this.isOpen.set(false);
+    });
+  }
+
+  seekTo(id: string) {
+    if (!this.scrollOnClick) {
+      return;
+    }
+    if (!id) {
+      this.router.navigate([], {
+        fragment: undefined,
+        queryParamsHandling: "preserve",
+      });
+      return;
+    }
+    const targetElement = document.getElementById(id);
+    targetElement?.scrollIntoView({ behavior: "smooth" });
+    this.router.navigate([], {
+      fragment: id,
+      queryParamsHandling: "preserve",
     });
   }
 }

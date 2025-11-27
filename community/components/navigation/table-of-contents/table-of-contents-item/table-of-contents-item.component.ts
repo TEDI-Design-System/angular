@@ -1,6 +1,11 @@
-import { Component, computed, inject, input } from "@angular/core";
+import {
+  Component,
+  computed,
+  input,
+  signal,
+  EventEmitter,
+} from "@angular/core";
 import { ButtonComponent } from "tedi/components";
-import { TableOfContentsService } from "../table-of-contents.service";
 
 @Component({
   selector: "tedi-table-of-contents-item",
@@ -11,13 +16,13 @@ import { TableOfContentsService } from "../table-of-contents.service";
 export class TableOfContentsItemComponent {
   idTo = input.required<string>();
 
-  private tableContentsService = inject(TableOfContentsService, {
-    optional: true,
-  });
+  selected = signal(false);
+
+  itemSelected = new EventEmitter<void>();
 
   classes = computed(() => {
     const classes = ["table-of-contents__item"];
-    if (this.tableContentsService?.active() === this.idTo()) {
+    if (this.selected()) {
       classes.push("table-of-contents__item--active");
     }
     return classes.join(" ");
@@ -25,17 +30,13 @@ export class TableOfContentsItemComponent {
 
   anchorClasses = computed(() => {
     const classes = ["table-of-contents__item-anchor"];
-    if (this.tableContentsService?.active() === this.idTo()) {
+    if (this.selected()) {
       classes.push("table-of-contents__item-anchor--active");
     }
     return classes.join(" ");
   });
 
   itemClick() {
-    if (!this.tableContentsService) {
-      return;
-    }
-    this.tableContentsService.setActive(this.idTo());
-    this.tableContentsService.seekTo(this.idTo());
+    this.itemSelected.emit();
   }
 }
