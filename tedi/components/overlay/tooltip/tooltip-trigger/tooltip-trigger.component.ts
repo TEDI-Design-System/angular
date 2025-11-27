@@ -29,26 +29,46 @@ export class TooltipTriggerComponent implements AfterContentChecked {
 
   @HostListener("click")
   onClick() {
-    this.tooltip.toggleTooltip();
+    if (
+      this.tooltip.openWith() === "both" ||
+      this.tooltip.openWith() === "click"
+    ) {
+      this.tooltip.toggleTooltip();
+    }
   }
 
   @HostListener("mouseenter")
   onMouseEnter() {
-    this.tooltip.showTooltip();
+    if (
+      this.tooltip.openWith() === "both" ||
+      this.tooltip.openWith() === "hover"
+    ) {
+      this.tooltip.showTooltip();
+    }
   }
 
   @HostListener("mouseleave")
   onMouseLeave() {
-    clearTimeout(this.tooltip.hideTimeout);
+    if (
+      this.tooltip.openWith() === "both" ||
+      this.tooltip.openWith() === "hover"
+    ) {
+      clearTimeout(this.tooltip.hideTimeout);
 
-    this.tooltip.hideTimeout = setTimeout(() => {
-      this.tooltip.hideTooltip();
-    }, this.tooltip.timeoutDelay());
+      this.tooltip.hideTimeout = setTimeout(() => {
+        this.tooltip.hideTooltip();
+      }, this.tooltip.timeoutDelay());
+    }
   }
 
   @HostListener("focusin")
   onFocusIn() {
-    this.tooltip.showTooltip();
+    if (
+      this.tooltip.openWith() === "both" ||
+      this.tooltip.openWith() === "hover"
+    ) {
+      this.tooltip.showTooltip();
+    }
   }
 
   @HostListener("focusout")
@@ -57,7 +77,12 @@ export class TooltipTriggerComponent implements AfterContentChecked {
       return;
     }
 
-    this.tooltip.hideTooltip();
+    if (
+      this.tooltip.openWith() === "both" ||
+      this.tooltip.openWith() === "hover"
+    ) {
+      this.tooltip.hideTooltip();
+    }
   }
 
   ngAfterContentChecked(): void {

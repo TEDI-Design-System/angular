@@ -110,11 +110,9 @@ $accent-border-colors: (
   }
 
   @each $spacing in $card-spacings {
-    &--padding-#{$spacing} {
-      @include card-spacing-value($spacing);
-    }
     @each $direction in $spacing-directions {
-      &--padding-#{$direction}-#{$spacing} {
+      &--padding-#{$direction}-#{$spacing},
+      &--padding-#{$spacing} {
         @include card-spacing-value($spacing, $direction);
       }
     }

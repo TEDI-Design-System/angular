@@ -1,4 +1,5 @@
-import { Preview } from "@storybook/angular";
+import { applicationConfig, Preview, StoryContext } from "@storybook/angular";
+import { Theme } from "../tedi/services/theme/theme.service";
 import {
   Controls,
   Description,
@@ -7,8 +8,63 @@ import {
   Subtitle,
   Title,
 } from "@storybook/blocks";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../tedi/tokens/translation.token";
+
+export const globalTypes = {
+  theme: {
+    name: "Theme",
+    description: "Global theme for components",
+    defaultValue: "default",
+    toolbar: {
+      icon: "paintbrush",
+      items: [
+        { value: "default", title: "Default" },
+        { value: "dark", title: "Dark" },
+      ],
+      showName: true,
+    },
+  },
+};
+
+const themeDecorator = (storyFn: any, context: StoryContext) => {
+  const theme = (context.globals["theme"] as Theme) ?? "default";
+
+  const applyTheme = (newTheme: Theme) => {
+    const html = document.documentElement;
+    const prefix = "tedi-theme--";
+    const currentClass = Array.from(html.classList).find((cls) =>
+      cls.startsWith(prefix),
+    );
+
+    if (currentClass) {
+      html.classList.replace(currentClass, `${prefix}${newTheme}`);
+    } else {
+      html.classList.add(`${prefix}${newTheme}`);
+    }
+
+    const bg = newTheme === "dark" ? "var(--color-bg-inverted, #1a1a1a)" : "";
+    const selectors = ".sb-show-main, .docs-story > div";
+
+    requestAnimationFrame(() => {
+      document.querySelectorAll<HTMLElement>(selectors).forEach((el) => {
+        el.style.backgroundColor = bg;
+      });
+    });
+  };
+
+  applyTheme(theme);
+
+  const story = storyFn();
+  return story;
+};
 
 const preview: Preview = {
+  decorators: [
+    themeDecorator,
+    applicationConfig({
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    }),
+  ],
   parameters: {
     viewMode: "docs",
     backgrounds: {
@@ -31,24 +87,23 @@ const preview: Preview = {
       statuses: {
         devComponent: {
           background: "#ff8000",
-          color: "#ffffff",
-          description: "This component is dev only and not found in Figma",
+          color: "#fff",
+          description: "Dev only",
         },
         breakpointSupport: {
           background: "#308653",
-          color: "#ffffff",
-          description: "This component has breakpoint support",
+          color: "#fff",
+          description: "Breakpoint support",
         },
         internalComponent: {
           background: "#fff",
           color: "#000",
-          description:
-            "This component is only used to build other components and not being exported from library",
+          description: "Internal only",
         },
         existsInTediReady: {
           background: "#005aa3",
           color: "#fff",
-          description: "This component has been migrated to TEDI-Ready",
+          description: "TEDI-ready",
         },
       },
     },

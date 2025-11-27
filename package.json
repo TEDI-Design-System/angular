@@ -32,7 +32,7 @@
     "ngx-float-ui": "^19.0.1 || ^20.0.0"
   },
   "dependencies": {
-    "@tedi-design-system/core": "^2.0.0"
+    "@tedi-design-system/core": "^2.4.0"
   },
   "devDependencies": {
     "@angular-devkit/core": "19.2.15",
@@ -76,7 +76,7 @@
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "angular-eslint": "^20.4.0",
     "chokidar": "^4.0.3",
-    "chromatic": "^13.3.2",
+    "chromatic": "^13.3.3",
     "eslint-plugin-prettier": "^5.2.1",
     "husky": "^9.0.11",
     "identity-obj-proxy": "^3.0.0",

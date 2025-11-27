@@ -30,6 +30,7 @@ const POSITIONS: TooltipPosition[] = [
   "left-start",
   "left-end",
 ];
+const OPEN_WITH = ["hover", "click", "both"];
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=5797-117363&amp;m=dev" target="_blank">Figma ↗</a><br>
@@ -68,6 +69,21 @@ export default {
         },
         defaultValue: {
           summary: "top",
+        },
+      },
+    },
+    openWith: {
+      control: "radio",
+      description: "How tooltip can opened?",
+      options: OPEN_WITH,
+      table: {
+        category: "tooltip",
+        type: {
+          summary: "TooltipOpenWith",
+          detail: "hover \nclick \nboth",
+        },
+        defaultValue: {
+          summary: "both",
         },
       },
     },
@@ -144,11 +160,12 @@ export const Default: Story = {
     appendTo: "body",
     timeoutDelay: 100,
     maxWidth: "medium",
+    openWith: "both",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-tooltip [position]="position" [timeoutDelay]="timeoutDelay" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+      <tedi-tooltip [position]="position" [timeoutDelay]="timeoutDelay" [preventOverflow]="preventOverflow" [appendTo]="appendTo" [openWith]="openWith">
         <tedi-tooltip-trigger>
           <button tedi-info-button></button>
         </tedi-tooltip-trigger>

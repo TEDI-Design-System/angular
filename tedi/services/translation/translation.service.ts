@@ -1,15 +1,32 @@
-import { computed, Injectable, isSignal, signal, Signal } from "@angular/core";
+import {
+  computed,
+  inject,
+  Injectable,
+  isSignal,
+  signal,
+  Signal,
+} from "@angular/core";
 import {
   translationsMap,
   TranslationMap,
   TediTranslationsMap,
 } from "./translations";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../tokens/translation.token";
+import { cookieSignal } from "../../utils/cookies.util";
 
 export type Language = "en" | "et" | "ru";
+export const LANGUAGE_COOKIE_NAME = "tedi-lang";
+export const AVAILABLE_LANGUAGES: Language[] = ["et", "en", "ru"];
+export const LANGUAGE_FALLBACK_VALUE: Language = "et";
 
 @Injectable({ providedIn: "root" })
 export class TediTranslationService {
-  private currentLang = signal<Language>("et");
+  private readonly defaultLang = inject(TEDI_TRANSLATION_DEFAULT_TOKEN);
+
+  private readonly currentLang = cookieSignal(
+    LANGUAGE_COOKIE_NAME,
+    this.defaultLang,
+  );
   private translations = signal<TranslationMap>(translationsMap);
 
   getLanguage = this.currentLang.asReadonly();
