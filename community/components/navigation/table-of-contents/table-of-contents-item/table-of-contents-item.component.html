@@ -1,3 +1,12 @@
-<a tedi-button variant="neutral" [class]="classes()" (click)="itemClick()">
-  <ng-content />
-</a>
+<div [class]="classes()">
+  <a
+    tedi-button
+    variant="neutral"
+    [class]="anchorClasses()"
+    (click)="itemClick()"
+  >
+    <ng-content />
+  </a>
+
+  <ng-content select="tedi-table-of-contents-item" />
+</div>

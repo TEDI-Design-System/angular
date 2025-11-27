@@ -18,14 +18,21 @@
 @if (!isOpen()) {
   <ng-container *ngTemplateOutlet="defaultTemplate" />
 
-  <div [classList]="footerClasses()">
-    <h1 tedi-text modifiers="h4" class="table-of-contents__header">
-      {{ heading() }}
+  <tedi-card [class]="footerClasses()">
+    <tedi-card-content>
+      <button
+        class="table-of-contents__footer-trigger"
+        (click)="openMobileModal()"
+      >
+        <h1 tedi-text modifiers="normal" class="table-of-contents__header">
+          {{ heading() }}
 
-      <button tedi-button variant="neutral" (click)="openMobileModal()">
-        Button
-        <tedi-icon name="expand_more" />
+          <div tedi-button variant="neutral">
+            Button
+            <tedi-icon name="expand_more" />
+          </div>
+        </h1>
       </button>
-    </h1>
-  </div>
+    </tedi-card-content>
+  </tedi-card>
 }

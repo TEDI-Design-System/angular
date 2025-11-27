@@ -1,7 +1,6 @@
 import {
   Component,
   computed,
-  contentChild,
   effect,
   inject,
   input,
@@ -17,6 +16,7 @@ import { TextComponent, IconComponent, ButtonComponent } from "tedi/components";
 import { TableOfContentsService } from "./table-of-contents.service";
 import { Dialog } from "@angular/cdk/dialog";
 import { NgTemplateOutlet } from "@angular/common";
+import { ModalComponent } from "community/components/overlay";
 
 export type TableOfContentsPosition = "default" | "fixed" | "sticky";
 export type TableOfContentsBreakpoint =
@@ -36,6 +36,7 @@ export type TableOfContentsBreakpoint =
     ButtonComponent,
     IconComponent,
     NgTemplateOutlet,
+    ModalComponent,
   ],
   providers: [TableOfContentsService],
 })
@@ -101,6 +102,9 @@ export class TableOfContentsComponent {
       classes.push(
         `table-of-contents--modal-breakpoint-${this.modalBreakpoint()}`
       );
+    }
+    if (this.isOpen()) {
+      classes.push("table-of-contents--modal-active");
     }
     return classes.join(" ");
   });

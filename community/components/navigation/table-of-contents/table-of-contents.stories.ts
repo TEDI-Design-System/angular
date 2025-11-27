@@ -123,28 +123,43 @@ export const NestedItems: Story = {
               euismod, nunc ut aliquam aliquam, nunc nisl aliquet nunc, euismod
               aliquam nisl nunc euismod nunc.
             </p>
+
+          @if(items[item]?.length) {
+            @for(subItem of items[item]; track subItem) {
+              <div id="{{ subItem }}" style="margin-top: 50px; margin-left: 2rem;">
+                <h4>{{ subItem }}</h4>
+                <p style="max-width:40rem">
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
+                  euismod, nunc ut aliquam aliquam, nunc nisl aliquet nunc, euismod
+                  aliquam nisl nunc euismod nunc.
+                </p>
+              </div>
+            }
+          }
           </div>
         }
       </div>
 
       <tedi-table-of-contents ${argsToTemplate(args)}>
-        @for(item of Object.keys(items); track item) {
-          <tedi-table-of-contents-item
-            [idTo]="item"
-          >
-            {{ item }}
-            @if(items[item]?.length) {
-              @for(subItem of items[item]; track subItem) {
-                <tedi-table-of-contents-item
-                  [idTo]="subItem"
-                  style="margin-left: 1rem;"
-                >
-                  {{ subItem }}
-                </tedi-table-of-contents-item>
-              }
+          @for(item of Object.keys(items); track item) {
+            <tedi-table-of-contents-item
+              [idTo]="item"
+            >
+              <div>{{ item }}</div>
+
+              <ng-container ngProjectAs="tedi-table-of-contents-item"> <!-- workaround for https://github.com/angular/angular/issues/57345 -->
+                @if(items[item]?.length) {
+                  @for(subItem of items[item]; track subItem) {
+                    <tedi-table-of-contents-item
+                      [idTo]="subItem"
+                    >
+                      {{ subItem }}
+                    </tedi-table-of-contents-item>
+                  }
+                }
+              </ng-container>
+            </tedi-table-of-contents-item>
             }
-          </tedi-table-of-contents-item>
-        }
       </tedi-table-of-contents>
     </div>
     `,

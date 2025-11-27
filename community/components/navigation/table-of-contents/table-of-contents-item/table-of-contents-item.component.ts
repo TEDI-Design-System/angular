@@ -23,6 +23,14 @@ export class TableOfContentsItemComponent {
     return classes.join(" ");
   });
 
+  anchorClasses = computed(() => {
+    const classes = ["table-of-contents__item-anchor"];
+    if (this.tableContentsService?.active() === this.idTo()) {
+      classes.push("table-of-contents__item-anchor--active");
+    }
+    return classes.join(" ");
+  });
+
   itemClick() {
     if (!this.tableContentsService) {
       return;
