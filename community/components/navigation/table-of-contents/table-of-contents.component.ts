@@ -16,7 +16,7 @@ import {
   CardContentComponent,
 } from "community/components/cards";
 import { TextComponent, IconComponent, ButtonComponent } from "tedi/components";
-import { Dialog } from "@angular/cdk/dialog";
+import { Dialog, DialogRef } from "@angular/cdk/dialog";
 import { NgTemplateOutlet } from "@angular/common";
 import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-contents-item.component";
 import { Router } from "@angular/router";
@@ -91,6 +91,7 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
 
   isSeeking = false;
   seekingTimeout: NodeJS.Timeout | undefined;
+  dialogRef?: DialogRef;
 
   isOpen = signal(false);
 
@@ -158,11 +159,12 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
     if (!templateRef) {
       return;
     }
-    const ref = this.dialog.open(templateRef);
+    this.dialogRef = this.dialog.open(templateRef);
     this.isOpen.set(true);
 
-    ref.closed.subscribe(() => {
+    this.dialogRef.closed.subscribe(() => {
       this.isOpen.set(false);
+      this.dialogRef = undefined;
     });
   }
 
@@ -197,8 +199,8 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   private hookItems(items: readonly TableOfContentsItemComponent[]) {
     items.forEach((item) => {
       const sub = item.itemSelected.subscribe(() => {
-        this.isOpen.set(false);
         item.selected.set(true);
+        this.dialogRef?.close();
 
         items.forEach((other) => {
           if (other !== item) {
