@@ -84,6 +84,14 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
    */
   modalBreakpoint = input<TableOfContentsBreakpoint>("mobile");
 
+  /**
+   * Should the component track scroll and update active item
+   */
+  scrollAware = input<boolean>(true);
+
+  isSeeking = signal(false);
+  seekingTimeout: NodeJS.Timeout | undefined;
+
   isOpen = signal(false);
 
   templateRef = viewChild<TemplateRef<unknown>>("defaultTemplate");
@@ -125,19 +133,18 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
     return classes.join(" ");
   });
 
-  ngAfterContentInit(): void {
-    const items = this.tableItems();
-    this.cleanupObservers();
-    this.hookObservers(items);
-  }
-
   constructor() {
     effect(() => {
-      console.log("effect ran");
       const items = this.tableItems();
       this.cleanupItemSubscriptions();
       this.hookItems(items);
     });
+  }
+
+  ngAfterContentInit(): void {
+    const items = this.tableItems();
+    this.cleanupObservers();
+    this.hookObservers(items);
   }
 
   ngOnDestroy(): void {
@@ -163,6 +170,14 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
     if (!this.scrollOnClick) {
       return;
     }
+
+    this.isSeeking.set(true);
+
+    clearTimeout(this.seekingTimeout);
+    this.seekingTimeout = setTimeout(() => {
+      this.isSeeking.set(false);
+    }, 500);
+
     if (!id) {
       this.router.navigate([], {
         fragment: undefined,
@@ -172,6 +187,7 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
     }
     const targetElement = document.getElementById(id);
     targetElement?.scrollIntoView({ behavior: "smooth" });
+
     this.router.navigate([], {
       fragment: id,
       queryParamsHandling: "preserve",
@@ -216,6 +232,9 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   }
 
   observerCallback() {
+    if (!this.scrollAware() || this.isSeeking()) {
+      return;
+    }
     const items = [...this.tableItems()];
 
     // select the topmost screen item
