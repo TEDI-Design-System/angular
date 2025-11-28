@@ -89,7 +89,7 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
    */
   scrollAware = input<boolean>(true);
 
-  isSeeking = signal(false);
+  isSeeking = false;
   seekingTimeout: NodeJS.Timeout | undefined;
 
   isOpen = signal(false);
@@ -171,11 +171,11 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
       return;
     }
 
-    this.isSeeking.set(true);
+    this.isSeeking = true;
 
     clearTimeout(this.seekingTimeout);
     this.seekingTimeout = setTimeout(() => {
-      this.isSeeking.set(false);
+      this.isSeeking = false;
     }, 500);
 
     if (!id) {
@@ -213,7 +213,9 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   }
 
   private hookObservers(items: readonly TableOfContentsItemComponent[]) {
-    const observer = new IntersectionObserver(() => this.observerCallback());
+    const observer = new IntersectionObserver(() => this.observerCallback(), {
+      rootMargin: "0px 0px 0px 0px",
+    });
 
     items.forEach((item) => {
       const id = item.idTo();
@@ -232,7 +234,7 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   }
 
   observerCallback() {
-    if (!this.scrollAware() || this.isSeeking()) {
+    if (!this.scrollAware() || this.isSeeking) {
       return;
     }
     const items = [...this.tableItems()];
@@ -255,7 +257,10 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
         continue;
       }
       const rect = element.getBoundingClientRect();
-      if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
+      const top = rect.top;
+      const bottom = rect.bottom;
+
+      if (top >= 0 && bottom <= window.innerHeight) {
         this.activeElement()?.selected.set(false);
         item.selected.set(true);
         break;
