@@ -6,6 +6,7 @@ import {
 } from "@storybook/angular";
 import { TableOfContentsComponent } from "./table-of-contents.component";
 import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-contents-item.component";
+import { TableOfContentsNestedWrapperComponent } from "./table-of-contents-nested-wrapper.component";
 
 type StoryTableOfContentsComponent = TableOfContentsComponent & {
   items: Array<string> | Record<string, string[]>;
@@ -22,7 +23,11 @@ const meta: Meta<StoryTableOfContentsComponent> = {
   component: TableOfContentsComponent,
   decorators: [
     moduleMetadata({
-      imports: [TableOfContentsComponent, TableOfContentsItemComponent],
+      imports: [
+        TableOfContentsComponent,
+        TableOfContentsItemComponent,
+        TableOfContentsNestedWrapperComponent,
+      ],
     }),
   ],
   args: {
@@ -147,7 +152,7 @@ export const NestedItems: Story = {
             >
               <div>{{ item }}</div>
 
-              <ng-container ngProjectAs="tedi-table-of-contents-item"> <!-- workaround for https://github.com/angular/angular/issues/57345 -->
+              <tedi-table-of-contents-nested-wrapper>
                 @if(items[item]?.length) {
                   @for(subItem of items[item]; track subItem) {
                     <tedi-table-of-contents-item
@@ -157,7 +162,7 @@ export const NestedItems: Story = {
                     </tedi-table-of-contents-item>
                   }
                 }
-              </ng-container>
+              </tedi-table-of-contents-nested-wrapper>
             </tedi-table-of-contents-item>
             }
       </tedi-table-of-contents>

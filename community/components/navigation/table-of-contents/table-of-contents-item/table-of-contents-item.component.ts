@@ -18,7 +18,7 @@ export class TableOfContentsItemComponent {
 
   selected = signal(false);
 
-  itemSelected = new EventEmitter<void>();
+  itemSelected = new EventEmitter<string>();
 
   classes = computed(() => {
     const classes = ["table-of-contents__item"];
@@ -37,6 +37,6 @@ export class TableOfContentsItemComponent {
   });
 
   itemClick() {
-    this.itemSelected.emit();
+    this.itemSelected.emit(this.idTo());
   }
 }

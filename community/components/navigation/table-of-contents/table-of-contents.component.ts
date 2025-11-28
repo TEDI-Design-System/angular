@@ -85,7 +85,9 @@ export class TableOfContentsComponent {
 
   templateRef = viewChild<TemplateRef<unknown>>("defaultTemplate");
 
-  private tableItems = contentChildren(TableOfContentsItemComponent);
+  private tableItems = contentChildren(TableOfContentsItemComponent, {
+    descendants: true,
+  });
   private router = inject(Router);
 
   activeId = computed(() =>
