@@ -1,3 +1,44 @@
+# [4.1.0](https://github.com/TEDI-Design-System/angular/compare/angular-4.0.0...angular-4.1.0) (2025-11-27)
+
+
+### Bug Fixes
+
+* **card:** fix overall padding not functioning [#184](https://github.com/TEDI-Design-System/angular/issues/184) ([f2213b3](https://github.com/TEDI-Design-System/angular/commit/f2213b37a74f158ce926208edd1f6da9f73df6cb))
+* **file-dropzone:** fix aligment of info button in file-dropzone [#186](https://github.com/TEDI-Design-System/angular/issues/186) ([bb94cb1](https://github.com/TEDI-Design-System/angular/commit/bb94cb14e411506deb0df6fd6272be5ea75a8572))
+* **modal-storybook:** add extra description for modal storybook [#203](https://github.com/TEDI-Design-System/angular/issues/203) ([#204](https://github.com/TEDI-Design-System/angular/issues/204)) ([1e08d16](https://github.com/TEDI-Design-System/angular/commit/1e08d16b0af924d125dbd0caeb1b07932758caa1))
+* **tooltip:** add openWith input, fix tooltip opening [#182](https://github.com/TEDI-Design-System/angular/issues/182) ([0c0469e](https://github.com/TEDI-Design-System/angular/commit/0c0469ead42d4e5e86389298d28c5d7207a69538))
+
+
+### Features
+
+* **checkbox:** add TEDI-Ready checkbox component [#74](https://github.com/TEDI-Design-System/angular/issues/74) ([637b9c0](https://github.com/TEDI-Design-System/angular/commit/637b9c04b25be4d85084cb0da74d02d59cc474fc))
+* **date-picker:** add date-picker component [#190](https://github.com/TEDI-Design-System/angular/issues/190) ([adb97a0](https://github.com/TEDI-Design-System/angular/commit/adb97a01b31096d51a5669dee25e95a82a110cf1))
+* **date-picker:** add date-picker tests, dropdown tests [#190](https://github.com/TEDI-Design-System/angular/issues/190) ([f4f2b53](https://github.com/TEDI-Design-System/angular/commit/f4f2b53ff6fcc76d37fbec550c9f182d48656334))
+* **date-picker:** add dropdown, change popover [#190](https://github.com/TEDI-Design-System/angular/issues/190) ([dd694bc](https://github.com/TEDI-Design-System/angular/commit/dd694bc2e93b2645d027689e272b33087391d512))
+* **date-picker:** fix conflicts [#190](https://github.com/TEDI-Design-System/angular/issues/190) ([f72ea2c](https://github.com/TEDI-Design-System/angular/commit/f72ea2c115cf8ca1f72083ffbdcd0ff9538e2ff8))
+* **date-picker:** wcag improvements [#190](https://github.com/TEDI-Design-System/angular/issues/190) ([3ebe215](https://github.com/TEDI-Design-System/angular/commit/3ebe2153ca3625c9ee7ba101e75b65926d2c89d0))
+* **dropdown:** add missing tests [#190](https://github.com/TEDI-Design-System/angular/issues/190) ([184187b](https://github.com/TEDI-Design-System/angular/commit/184187b3ebd06ad7fb2316c51ebbedcbb6014ee0))
+* **file-dropzone:** add ng-content for file list [#186](https://github.com/TEDI-Design-System/angular/issues/186) ([8dd9c81](https://github.com/TEDI-Design-System/angular/commit/8dd9c81224ae75360a979ec6ec2d47589bcef338))
+* **modal:** add tedi ready modal [#189](https://github.com/TEDI-Design-System/angular/issues/189) ([391ea0f](https://github.com/TEDI-Design-System/angular/commit/391ea0f3c238bf526ac991a8c21a0e155b41092d))
+* **modal:** add tests [#189](https://github.com/TEDI-Design-System/angular/issues/189) ([2e0e9aa](https://github.com/TEDI-Design-System/angular/commit/2e0e9aa4f95b614ea0e85fb079bb6f520a714e55))
+* **modal:** update stories [#189](https://github.com/TEDI-Design-System/angular/issues/189) ([70df5a6](https://github.com/TEDI-Design-System/angular/commit/70df5a682f3497c36f7d7571dd2afe2641f51d94))
+* **modal:** update tedi core version [#189](https://github.com/TEDI-Design-System/angular/issues/189) ([ef9b99c](https://github.com/TEDI-Design-System/angular/commit/ef9b99c109c87c64c8b2bbac8c485a25c0869947))
+* **theme-provider:** add global themes support [#191](https://github.com/TEDI-Design-System/angular/issues/191) ([#197](https://github.com/TEDI-Design-System/angular/issues/197)) ([e4c1ecf](https://github.com/TEDI-Design-System/angular/commit/e4c1ecfa9f69157dab3f66c84d4536ce2f3a3883))
+
+# [4.1.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0-rc.5...angular-4.1.0-rc.6) (2025-11-27)
+
+
+### Bug Fixes
+
+* **modal-storybook:** add extra description for modal storybook [#203](https://github.com/TEDI-Design-System/angular/issues/203) ([#204](https://github.com/TEDI-Design-System/angular/issues/204)) ([1e08d16](https://github.com/TEDI-Design-System/angular/commit/1e08d16b0af924d125dbd0caeb1b07932758caa1))
+
+# [4.1.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0-rc.4...angular-4.1.0-rc.5) (2025-11-25)
+
+
+### Features
+
+* **theme-provider:** add global themes support [#191](https://github.com/TEDI-Design-System/angular/issues/191) ([#197](https://github.com/TEDI-Design-System/angular/issues/197)) ([e4c1ecf](https://github.com/TEDI-Design-System/angular/commit/e4c1ecfa9f69157dab3f66c84d4536ce2f3a3883))
+
 # [4.1.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0-rc.3...angular-4.1.0-rc.4) (2025-11-24)
 
 
