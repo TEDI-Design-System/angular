@@ -39,4 +39,5 @@ export class TableOfContentsItemComponent {
   itemClick() {
     this.itemSelected.emit(this.idTo());
   }
+
 }

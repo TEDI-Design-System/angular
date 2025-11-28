@@ -121,8 +121,8 @@ export const NestedItems: Story = {
     <div style="display: flex">
       <div style="margin-bottom: 1000px;">
         @for(item of Object.keys(items); track item) {
-          <div id="{{ item }}" style="margin-top: 100px;">
-            <h2>{{ item }}</h2>
+          <div style="margin-top: 200px;">
+            <h2 id="{{ item }}">{{ item }}</h2>
             <p style="max-width:40rem">
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
               euismod, nunc ut aliquam aliquam, nunc nisl aliquet nunc, euismod
@@ -131,8 +131,8 @@ export const NestedItems: Story = {
 
           @if(items[item]?.length) {
             @for(subItem of items[item]; track subItem) {
-              <div id="{{ subItem }}" style="margin-top: 50px; margin-left: 2rem;">
-                <h4>{{ subItem }}</h4>
+              <div style="margin-top: 200px; margin-left: 2rem;">
+                <h4 id="{{ subItem }}">{{ subItem }}</h4>
                 <p style="max-width:40rem">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
                   euismod, nunc ut aliquam aliquam, nunc nisl aliquet nunc, euismod

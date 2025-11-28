@@ -8,6 +8,8 @@ import {
   TemplateRef,
   viewChild,
   contentChildren,
+  OnDestroy,
+  AfterContentInit,
 } from "@angular/core";
 import {
   CardComponent,
@@ -18,6 +20,7 @@ import { Dialog } from "@angular/cdk/dialog";
 import { NgTemplateOutlet } from "@angular/common";
 import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-contents-item.component";
 import { Router } from "@angular/router";
+import { Subscription } from "rxjs";
 
 export type TableOfContentsPosition = "default" | "fixed" | "sticky";
 export type TableOfContentsBreakpoint =
@@ -39,7 +42,7 @@ export type TableOfContentsBreakpoint =
     NgTemplateOutlet,
   ],
 })
-export class TableOfContentsComponent {
+export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   /**
    * Heading of the table of contents
    */
@@ -85,36 +88,20 @@ export class TableOfContentsComponent {
 
   templateRef = viewChild<TemplateRef<unknown>>("defaultTemplate");
 
+  private intersectionObservers: IntersectionObserver[] = [];
+  private itemSubscriptions: Subscription[] = [];
+
   private tableItems = contentChildren(TableOfContentsItemComponent, {
     descendants: true,
   });
   private router = inject(Router);
-
-  activeId = computed(() =>
-    this.tableItems()
-      .find((item) => item.selected())
-      ?.idTo()
-  );
-
   private dialog = inject(Dialog);
 
-  constructor() {
-    effect(() => {
-      const items = this.tableItems();
-      items.forEach((item) => {
-        item.itemSelected.subscribe(() => {
-          this.isOpen.set(false);
-          item.selected.set(true);
-          items.forEach((other) => {
-            if (other !== item) {
-              other.selected.set(false);
-            }
-          });
-          this.seekTo(item.idTo());
-        });
-      });
-    });
-  }
+  activeElement = computed(() =>
+    this.tableItems().find((item) => item.selected())
+  );
+
+  activeId = computed(() => this.activeElement()?.idTo());
 
   classes = computed(() => {
     const classes = ["table-of-contents"];
@@ -138,9 +125,25 @@ export class TableOfContentsComponent {
     return classes.join(" ");
   });
 
-  // getActive() {
-  //   return this.activeId();
-  // }
+  ngAfterContentInit(): void {
+    const items = this.tableItems();
+    this.cleanupObservers();
+    this.hookObservers(items);
+  }
+
+  constructor() {
+    effect(() => {
+      console.log("effect ran");
+      const items = this.tableItems();
+      this.cleanupItemSubscriptions();
+      this.hookItems(items);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.cleanupObservers();
+    this.cleanupItemSubscriptions();
+  }
 
   openMobileModal() {
     const templateRef = this.templateRef();
@@ -173,5 +176,81 @@ export class TableOfContentsComponent {
       fragment: id,
       queryParamsHandling: "preserve",
     });
+  }
+
+  private hookItems(items: readonly TableOfContentsItemComponent[]) {
+    items.forEach((item) => {
+      const sub = item.itemSelected.subscribe(() => {
+        this.isOpen.set(false);
+        item.selected.set(true);
+
+        items.forEach((other) => {
+          if (other !== item) {
+            other.selected.set(false);
+          }
+        });
+        this.seekTo(item.idTo());
+      });
+
+      this.itemSubscriptions.push(sub);
+    });
+  }
+
+  private hookObservers(items: readonly TableOfContentsItemComponent[]) {
+    const observer = new IntersectionObserver(() => this.observerCallback());
+
+    items.forEach((item) => {
+      const id = item.idTo();
+      if (!id) {
+        return;
+      }
+      const element = document.getElementById(id);
+      if (!element) {
+        return;
+      }
+
+      observer.observe(element);
+    });
+
+    this.intersectionObservers.push(observer);
+  }
+
+  observerCallback() {
+    const items = [...this.tableItems()];
+
+    // select the topmost screen item
+    items.sort((a, b) => {
+      const aElement = document.getElementById(a.idTo());
+      const bElement = document.getElementById(b.idTo());
+      if (!aElement || !bElement) {
+        return 0;
+      }
+      const aRect = aElement.getBoundingClientRect();
+      const bRect = bElement.getBoundingClientRect();
+      return aRect.top - bRect.top;
+    });
+
+    for (const item of items) {
+      const element = document.getElementById(item.idTo());
+      if (!element) {
+        continue;
+      }
+      const rect = element.getBoundingClientRect();
+      if (rect.top >= 0 && rect.bottom <= window.innerHeight) {
+        this.activeElement()?.selected.set(false);
+        item.selected.set(true);
+        break;
+      }
+    }
+  }
+
+  private cleanupItemSubscriptions() {
+    this.itemSubscriptions.forEach((sub) => sub.unsubscribe());
+    this.itemSubscriptions = [];
+  }
+
+  private cleanupObservers() {
+    this.intersectionObservers.forEach((obs) => obs.disconnect());
+    this.intersectionObservers = [];
   }
 }
