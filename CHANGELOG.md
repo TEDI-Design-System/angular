@@ -1,3 +1,11 @@
+## [4.1.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0...angular-4.1.1-rc.1) (2025-12-02)
+
+
+### Bug Fixes
+
+* **checkbox:** fix indeterminate state + add storybook inputs [#227](https://github.com/TEDI-Design-System/angular/issues/227) ([d8a9a8c](https://github.com/TEDI-Design-System/angular/commit/d8a9a8c2b07b5ea06e5424ee7b05321dbd53d3c9))
+* **checkbox:** undo debug storybook defaults [#227](https://github.com/TEDI-Design-System/angular/issues/227) ([68a883c](https://github.com/TEDI-Design-System/angular/commit/68a883c20da974a85424a9b4c2ce137ffda8233d))
+
 # [4.1.0](https://github.com/TEDI-Design-System/angular/compare/angular-4.0.0...angular-4.1.0) (2025-11-27)
 
 
