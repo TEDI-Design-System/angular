@@ -27,7 +27,7 @@ export default {
     size: "default",
     disabled: false,
     hasError: false,
-    indeterminate: true,
+    indeterminate: false,
   },
   argTypes: {
     size: {

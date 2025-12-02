@@ -87,23 +87,21 @@ export default {
   },
 } as Meta<StoryCheckboxComponent>;
 
-export const Default: StoryObj<
-  StoryCheckboxComponent & { disabled: boolean; checked: boolean }
-> = {
-  args: {
-    checked: true,
-    size: "default",
-    invalid: false,
-    disabled: false,
-    indeterminate: false,
-  },
-  render: (args) => ({
-    props: args,
-    template: `
+export const Default: StoryObj<StoryCheckboxComponent & { disabled: boolean }> =
+  {
+    args: {
+      size: "default",
+      invalid: false,
+      disabled: false,
+      indeterminate: false,
+    },
+    render: (args) => ({
+      props: args,
+      template: `
       <input tedi-checkbox type="checkbox" ${argsToTemplate(args)} />
     `,
-  }),
-};
+    }),
+  };
 
 export const Size: StoryObj<CheckboxComponent> = {
   render: (args) => ({
