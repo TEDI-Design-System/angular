@@ -76,7 +76,7 @@
     );
   }
 
-  &:has(input:checked) {
+  &:has(input:checked, input:indeterminate) {
     --_checkbox-bg: var(--form-checkbox-radio-default-background-selected);
     --_checkbox-border: var(--form-checkbox-radio-default-border-selected);
   }

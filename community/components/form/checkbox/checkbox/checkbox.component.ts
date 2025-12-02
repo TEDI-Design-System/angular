@@ -56,7 +56,7 @@ export class CheckboxComponent implements ControlValueAccessor, OnInit {
   /*
    * Whether checkbox is indeterminate.
    */
-  indeterminate = input<boolean>();
+  indeterminate = model<boolean>();
   /*
    * Checkbox value. For use in checkbox card group
    */
@@ -141,6 +141,7 @@ export class CheckboxComponent implements ControlValueAccessor, OnInit {
     this._onChange(checked);
     this.checked.set(checked);
     this.checkboxCardGroup?.onCheckboxChange(checked, this.value()!);
+    this.indeterminate.set(false);
   }
 
   ngOnInit() {
