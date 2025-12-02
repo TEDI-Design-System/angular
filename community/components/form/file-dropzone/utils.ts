@@ -1,14 +1,5 @@
-import {
-  AsyncValidatorFn,
-  ValidationErrors,
-  ValidatorFn,
-} from "@angular/forms";
 import { IECFileSize, SIFileSize } from "./constants";
-import {
-  DropzoneValidatorFunction,
-  FileDropzone,
-  SizeDisplayStandard,
-} from "./types";
+import { FileDropzone, SizeDisplayStandard } from "./types";
 
 export function formatBytes(
   bytes: number,
@@ -94,6 +85,8 @@ export function validateFileType(
   standard: SizeDisplayStandard,
   translate: (key: string, ...args: unknown[]) => string
 ) {
+  console.log("validating filetype", acceptFileTypes, file.type);
+
   if (acceptFileTypes) {
     const validTypes = acceptFileTypes
       .split(",")
@@ -114,7 +107,7 @@ export function validateFileType(
 
     if (!matches) {
       return translate(
-        `file-upload.extension-rejected-extended`,
+        "file-upload.extension-rejected-extended",
         file.name,
         acceptFileTypes
       );
@@ -123,29 +116,19 @@ export function validateFileType(
   return undefined;
 }
 
-export function validatorWrapper(
-  validator: DropzoneValidatorFunction,
-  maxSize: number,
-  acceptFileTypes: string,
-  file: FileDropzone[],
-  standard: SizeDisplayStandard,
-  translate: (key: string, ...args: unknown[]) => string
-): AsyncValidatorFn {
-  const errors: ValidationErrors = {};
-  file.forEach((file) => {
-    const error = validator(
-      maxSize,
-      acceptFileTypes,
-      file,
-      standard,
-      translate
-    );
-    console.log("validating", maxSize, acceptFileTypes, file, standard);
+// export function validatorWrapper(
+//   validator: DropzoneValidatorFunction,
+//   maxSize: number,
+//   acceptFileTypes: string,
+//   file: FileDropzone[],
+//   standard: SizeDisplayStandard,
+//   translate: (key: string, ...args: unknown[]) => string
+// ): ValidationErrors | null {
+//   if (!file?.length) {
+//     return [];
+//   }
 
-    if (error) {
-      errors[validator.name] = error;
-    }
-  });
-
-  return async () => (Object.keys(errors).length > 0 ? errors : null);
-}
+//   return file.map((file) =>
+//     validator(maxSize, acceptFileTypes, file, standard, translate)
+//   );
+// }

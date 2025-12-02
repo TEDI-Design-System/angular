@@ -60,6 +60,7 @@ const meta: Meta<FileDropzoneComponent> = {
     accept: {
       description: `Specifies the allowed file types (e.g., "image/png, image/jpeg").
       Does not validate the contents of the file, only the file extension.
+      .txt will not work, use .txt instead.
       https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/accept`,
     },
     maxSize: {

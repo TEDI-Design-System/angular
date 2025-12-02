@@ -10,14 +10,11 @@ import {
   OnInit,
   output,
   Self,
-  SimpleChange,
   SimpleChanges,
-  effect,
   OnChanges,
 } from "@angular/core";
 import {
   AbstractControl,
-  AsyncValidatorFn,
   ControlValueAccessor,
   NgControl,
   ReactiveFormsModule,
@@ -49,7 +46,6 @@ import {
   getDefaultHelpers,
   validateFileSize,
   validateFileType,
-  validatorWrapper,
 } from "./utils";
 import { FileService } from "./file.service";
 
@@ -153,6 +149,7 @@ export class FileDropzoneComponent
   /**
    * Validation functions that can be used to validate files.
    * Each function should return a string error message if validation fails, or undefined if it passes
+   * Validators are only added once during component initialization, otherwise use addAsyncValidators on the FormControl.
    */
   validators = input<DropzoneValidatorFunction[]>([
     validateFileSize,
@@ -236,18 +233,11 @@ export class FileDropzoneComponent
   ngOnInit(): void {
     this.addFiles(this.defaultFiles());
     this._fileService.mode = this.mode;
-
-    const asyncValidators: AsyncValidatorFn[] = this.validators().map(
-      (validator) => this.validateWrapper(validator)
-    );
-    this._ngControl.control?.addAsyncValidators(asyncValidators);
-    this._ngControl.control?.updateValueAndValidity();
+    this._ngControl.control?.addAsyncValidators(this.runValidators);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    // check on changes of validators, accept, maxSize, sizeDisplayStandard
     if (
-      changes["validators"] ||
       changes["accept"] ||
       changes["maxSize"] ||
       changes["sizeDisplayStandard"]
@@ -258,39 +248,39 @@ export class FileDropzoneComponent
 
   translateService = inject(TediTranslationService);
 
-  validateWrapper =
-    (validator: DropzoneValidatorFunction) =>
-    async (
-      control: AbstractControl<FileDropzone[]>
-    ): Promise<ValidationErrors | null> => {
-      return validatorWrapper(
-        validator,
-        this.maxSize(),
-        this.accept(),
-        control.value,
-        this.sizeDisplayStandard(),
-        this.translateService.translate.bind(this.translateService)
-      );
-    };
+  runValidators = async (
+    control: AbstractControl<FileDropzone[]>
+  ): Promise<ValidationErrors | null> => {
+    console.log("running validators", this.validators());
 
-  // validateWrapper = async (
-  //   control: AbstractControl<FileDropzone[]>
-  // ): Promise<ValidationErrors | null> => {
-  //   const errors: string[] = [];
-  //   control.value.forEach((file) => {
+    const errors: ValidationErrors = {};
+    const controlFiles = control.value;
+    controlFiles.forEach((file) => {
+      this.validators().forEach((validator) => {
+        const error = validator(
+          this.maxSize(),
+          this.accept(),
+          file,
+          this.sizeDisplayStandard(),
+          this.translateService.translate.bind(this.translateService)
+        );
 
-  //     if (error) {
-  //       errors.push(error);
-  //     }
-  //   });
+        if (error) {
+          if (!errors[file.name]) {
+            errors[file.name] = [];
+          }
+          errors[file.name].push(error);
+        }
+      });
+    });
 
-  //   const error = errors.length ? errors.join(", ") : null;
+    if (Object.keys(errors).length === 0) {
+      return null;
+    }
 
-  //   if (error) {
-  //     return { fileSizeError: true };
-  //   }
-  //   return null;
-  // };
+    console.log(errors);
+    return errors;
+  };
 
   fileClasses = (file: FileDropzone): string => {
     const classList = ["tedi-file-dropzone__file-item"];
