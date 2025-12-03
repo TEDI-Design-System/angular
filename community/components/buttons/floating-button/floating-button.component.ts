@@ -6,7 +6,7 @@ import {
   OnInit,
   inject,
 } from "@angular/core";
-import { BaseButtonDirective } from "tedi/components";
+import { BaseButtonDirective } from "@tedi-design-system/angular/tedi";
 
 export type FloatingButtonVariant = "primary" | "secondary";
 
