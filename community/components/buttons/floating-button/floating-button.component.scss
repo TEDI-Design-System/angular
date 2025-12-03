@@ -14,12 +14,8 @@ button.tedi-floating-button {
     border-radius: 0;
     transform: rotate(-90deg);
     transform-origin: center;
-
-    @include mixins.responsive-styles(
-      border-top-right-radius,
-      button-radius-sm
-    );
-    @include mixins.responsive-styles(border-top-left-radius, button-radius-sm);
+    border-top-right-radius: var(--button-radius-sm);
+    border-top-left-radius: var(--button-radius-sm);
   }
 
   &.tedi-floating-button--primary {

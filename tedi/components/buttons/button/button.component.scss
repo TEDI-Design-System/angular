@@ -71,42 +71,19 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 @mixin button-size-vars($size) {
   --_btn-padding: calc(var(--_btn-padding-y) - 1px)
     calc(var(--_btn-padding-x) - 1px);
-  @include mixins.responsive-styles(
-    --_btn-inner-spacing,
-    button-#{$size}-inner-spacing
-  );
-  @include mixins.responsive-styles(
-    --_btn-padding-y,
-    button-#{$size}-padding-y
-  );
-  @include mixins.responsive-styles(
-    --_btn-padding-x,
-    button-#{$size}-padding-x
-  );
+  --_btn-inner-spacing: var(--button-#{$size}-inner-spacing);
+  --_btn-padding-y: var(--button-#{$size}-padding-y);
+  --_btn-padding-x: var(--button-#{$size}-padding-x);
 }
 
 @mixin neutral-button-padding-overrides {
   &:where(.tedi-button--small) {
-    @include mixins.responsive-styles(
-      --_btn-padding-y,
-      button-sm-neutral-padding-y
-    );
-    @include mixins.responsive-styles(
-      --_btn-padding-x,
-      button-sm-neutral-padding-x
-    );
-    // @include mixins.responsive-styles(--_btn-padding, button-sm-neutral-padding-y button-sm-neutral-padding-x);
+    --_btn-padding-y: var(--button-sm-neutral-padding-y);
+    --_btn-padding-x: var(--button-sm-neutral-padding-x);
   }
   &:where(.tedi-button--default) {
-    @include mixins.responsive-styles(
-      --_btn-padding-y,
-      button-md-neutral-padding-y
-    );
-    @include mixins.responsive-styles(
-      --_btn-padding-x,
-      button-md-neutral-padding-x
-    );
-    // @include mixins.responsive-styles(--_btn-padding, button-md-neutral-padding-y button-md-neutral-padding-x);
+    --_btn-padding-y: var(--button-md-neutral-padding-y);
+    --_btn-padding-x: var(--button-md-neutral-padding-x);
   }
 }
 
@@ -124,20 +101,15 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     transition: 150ms ease;
     transition-property: background-color, border-color;
     cursor: pointer;
-
-    @include mixins.responsive-styles(
-      font-family,
-      family-primary,
-      $exclude: tablet
-    );
-    @include mixins.responsive-styles(font-weight, body-regular-weight);
-    @include mixins.responsive-styles(line-height, body-bold-line-height);
-    @include mixins.responsive-styles(border-radius, button-radius-default);
+    font-family: var(--family-default);
+    font-weight: var(--body-regular-weight);
+    line-height: var(--body-bold-line-height);
+    border-radius: var(--button-radius-default);
 
     &--icon-only {
-      @include mixins.responsive-styles(width, button-md-icon-size);
-      @include mixins.responsive-styles(height, button-md-icon-size);
-      @include mixins.responsive-styles(padding, button-md-icon-padding);
+      width: var(--button-md-icon-size);
+      height: var(--button-md-icon-size);
+      padding: var(--button-md-icon-padding);
     }
 
     &--pl {
@@ -196,8 +168,8 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 
 @mixin button-size($size) {
   & {
+    font-size: var(--button-text-size-#{$size});
     @include button-size-vars(#{$size});
-    @include mixins.responsive-styles(font-size, button-text-size-#{$size});
   }
 }
 
@@ -265,9 +237,9 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     }
 
     &.tedi-button--small {
-      @include mixins.responsive-styles(width, button-sm-icon-size);
-      @include mixins.responsive-styles(height, button-sm-icon-size);
-      @include mixins.responsive-styles(padding, button-sm-icon-padding);
+      width: var(--button-sm-icon-size);
+      height: var(--button-sm-icon-size);
+      padding: var(--button-sm-icon-padding);
     }
   }
 }
