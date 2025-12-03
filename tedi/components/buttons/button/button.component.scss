@@ -15,7 +15,7 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 
     --_btn-border: var(--button-#{$affix}-#{$variant}-border-default);
     --_btn-text: var(--button-#{$affix}-#{$variant}-text-default);
-    --_btn-outline: var(--primary-500);
+    --_btn-outline: var(--tedi-primary-500);
 
     @include button-state-color-vars($variant, "hover", $icon-only, $affix);
     @include button-state-color-vars($variant, "focus", $icon-only, $affix);
