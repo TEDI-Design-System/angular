@@ -10,6 +10,7 @@ import { TextColor, TextComponent } from "../../base/text/text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { IconComponent } from "../../base/icon/icon.component";
+import { BaseButtonDirective } from "./base-button.directive";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus", "Disabled"];
 
@@ -78,7 +79,7 @@ export default {
       },
     },
   },
-} as Meta<ButtonComponent>;
+} as Meta<ButtonType>;
 
 type ButtonType = ButtonComponent & { ngContent: string };
 
@@ -92,7 +93,8 @@ export const Default: StoryObj<ButtonType> = {
   }),
 };
 
-type TemplateType = ButtonComponent & { titleColor?: TextColor };
+type TemplateType = ButtonType &
+  BaseButtonDirective & { titleColor?: TextColor };
 
 const ButtonTemplate: StoryFn<TemplateType> = ({
   titleColor = "primary",
@@ -147,7 +149,7 @@ const ButtonTemplate: StoryFn<TemplateType> = ({
   `,
 });
 
-type ButtonStory = StoryObj<ButtonComponent & { disabled: boolean }>;
+type ButtonStory = StoryObj<ButtonType & { disabled: boolean }>;
 
 export const Primary: StoryObj<TemplateType> = {
   parameters: {
