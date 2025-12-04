@@ -1,3 +1,10 @@
+## [4.1.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.1-rc.1...angular-4.1.1-rc.2) (2025-12-04)
+
+
+### Bug Fixes
+
+* **variables:** remove responsive-style mixins [#209](https://github.com/TEDI-Design-System/angular/issues/209) ([#214](https://github.com/TEDI-Design-System/angular/issues/214)) ([3f44f41](https://github.com/TEDI-Design-System/angular/commit/3f44f41f98efce7a7fa7e0c6bec1a949f114c28a))
+
 ## [4.1.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0...angular-4.1.1-rc.1) (2025-12-02)
 
 

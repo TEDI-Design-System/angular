@@ -1,4 +1,3 @@
-@use "@tedi-design-system/core/mixins";
 @use "@tedi-design-system/core/bootstrap-utility/breakpoints";
 
 input[tedi-checkbox][type="checkbox"] {
@@ -12,16 +11,9 @@ input[tedi-checkbox][type="checkbox"] {
   vertical-align: middle;
   padding: 0;
   margin: 0;
-
-  @include mixins.responsive-styles(width, form-checkbox-radio-size-responsive);
-  @include mixins.responsive-styles(
-    height,
-    form-checkbox-radio-size-responsive
-  );
-  @include mixins.responsive-styles(
-    border-radius,
-    form-checkbox-radio-indicator-radius-checkbox
-  );
+  width: var(--form-checkbox-radio-size-responsive);
+  height: var(--form-checkbox-radio-size-responsive);
+  border-radius: var(--form-checkbox-radio-indicator-radius-checkbox);
 
   @include breakpoints.media-breakpoint-up(sm) {
     --_checkbox-icon-size: 1rem;
@@ -96,7 +88,7 @@ input[tedi-checkbox][type="checkbox"] {
   &.tedi-checkbox--large {
     --_checkbox-icon-size: 1.125rem;
 
-    @include mixins.responsive-styles(width, form-checkbox-radio-size-large);
-    @include mixins.responsive-styles(height, form-checkbox-radio-size-large);
+    width: var(--form-checkbox-radio-size-large);
+    height: var(--form-checkbox-radio-size-large);
   }
 }

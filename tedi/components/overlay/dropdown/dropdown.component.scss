@@ -7,7 +7,7 @@ float-ui-content {
     padding: 0;
     border: 0;
     border-radius: var(--dropdown-item-radius);
-    box-shadow: 0px 1px 5px 0px var(--alpha-20, rgba(0, 0, 0, 0.2));
+    box-shadow: 0px 1px 5px 0px var(--tedi-alpha-20, rgba(0, 0, 0, 0.2));
     z-index: var(--z-index-dropdown);
   }
 }

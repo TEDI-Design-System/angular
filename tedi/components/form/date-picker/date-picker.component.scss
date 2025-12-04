@@ -143,7 +143,7 @@ tedi-date-picker {
     }
 
     &:focus-visible {
-      outline: var(--borders-02) solid var(--primary-500);
+      outline: var(--borders-02) solid var(--tedi-primary-500);
       outline-offset: var(--borders-01);
     }
 
@@ -253,7 +253,7 @@ tedi-date-picker {
     }
 
     &:focus-visible {
-      outline: var(--borders-02) solid var(--primary-500);
+      outline: var(--borders-02) solid var(--tedi-primary-500);
       outline-offset: var(--borders-01);
     }
 
@@ -314,7 +314,7 @@ tedi-date-picker {
     }
 
     &:focus-visible {
-      outline: var(--borders-02) solid var(--primary-500);
+      outline: var(--borders-02) solid var(--tedi-primary-500);
       outline-offset: var(--borders-01);
     }
 
