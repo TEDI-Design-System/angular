@@ -1,5 +1,3 @@
-@use "@tedi-design-system/core/mixins";
-
 tedi-header-login {
   display: flex;
   align-items: center;
@@ -15,26 +13,19 @@ tedi-header-login {
       gap: 0;
       border: 0;
       border-radius: 0;
-      font-size: 12px;
-      line-height: 16px;
-
-      @include mixins.responsive-styles(
-        min-width,
-        layout-header-mobile-button-size
-      );
-      @include mixins.responsive-styles(
-        min-height,
-        layout-header-mobile-button-size
-      );
-      @include mixins.responsive-styles(padding, layout-grid-gutters-08);
+      font-size: var(--body-extra-small-size);
+      line-height: var(--body-regular-line-height);
+      min-width: var(--layout-header-mobile-button-size);
+      min-height: var(--layout-header-mobile-button-size);
+      padding: var(--layout-grid-gutters-08);
 
       &:focus-visible {
-        outline: var(--borders-02) solid var(--primary-500);
+        outline: var(--borders-02) solid var(--tedi-primary-500);
         outline-offset: calc(-1 * var(--borders-02));
       }
 
       tedi-icon {
-        @include mixins.responsive-styles(font-size, icon-05);
+        font-size: var(--icon-05);
       }
     }
   }

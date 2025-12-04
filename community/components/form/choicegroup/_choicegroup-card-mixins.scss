@@ -1,5 +1,3 @@
-@use "@tedi-design-system/core/mixins";
-
 @mixin padding-variables {
   --_choicegroup-card-padding-top: var(--_choicegroup-card-padding-vertical);
   --_choicegroup-card-padding-bottom: var(--_choicegroup-card-padding-vertical);
@@ -11,42 +9,36 @@
     var(--_choicegroup-card-padding-right)
     var(--_choicegroup-card-padding-bottom)
     var(--_choicegroup-card-padding-left);
-
-  @include mixins.responsive-styles(
-    --_choicegroup-card-radius,
-    form-checkbox-radio-card-radius
+  --_choicegroup-card-radius: var(--form-checkbox-radio-card-radius);
+  --_choicegroup-card-padding-horizontal: var(
+    --form-checkbox-radio-card-checkbox-padding-x
   );
-  @include mixins.responsive-styles(
-    --_choicegroup-card-padding-horizontal,
-    form-checkbox-radio-card-checkbox-padding-x
-  );
-  @include mixins.responsive-styles(
-    --_choicegroup-card-padding-vertical,
-    form-checkbox-radio-card-checkbox-padding-y
+  --_choicegroup-card-padding-vertical: var(
+    --form-checkbox-radio-card-checkbox-padding-y
   );
 }
 
 @mixin color-variables($variant) {
   :is(.tedi-radio, .tedi-checkbox) {
     --_choicegroup-card-bg: var(
-      --form-checkbox-radio-card-#{$variant}-inactive-background
+      --form-checkbox-radio-card-#{$variant}-default-background
     );
     --_radio-label-color: var(
-      --form-checkbox-radio-card-#{$variant}-inactive-text
+      --form-checkbox-radio-card-#{$variant}-default-text
     );
     --_checkbox-label-color: var(
-      --form-checkbox-radio-card-#{$variant}-inactive-text
+      --form-checkbox-radio-card-#{$variant}-default-text
     );
 
     &:has(input:checked) {
       --_choicegroup-card-bg: var(
-        --form-checkbox-radio-card-#{$variant}-active-background
+        --form-checkbox-radio-card-#{$variant}-selected-background
       );
       --_radio-label-color: var(
-        --form-checkbox-radio-card-#{$variant}-active-text
+        --form-checkbox-radio-card-#{$variant}-selected-text
       );
       --_checkbox-label-color: var(
-        --form-checkbox-radio-card-#{$variant}-active-text
+        --form-checkbox-radio-card-#{$variant}-selected-text
       );
     }
 
@@ -79,12 +71,12 @@
 @mixin border-colors($variant, $border-type) {
   :is(.tedi-radio, .tedi-checkbox) {
     --_choicegroup-card-border: var(
-      --form-checkbox-radio-card-#{$variant}-inactive-#{$border-type}
+      --form-checkbox-radio-card-#{$variant}-default-#{$border-type}
     );
 
     &:has(input:checked) {
       --_choicegroup-card-border: var(
-        --form-checkbox-radio-card-#{$variant}-active-#{$border-type}
+        --form-checkbox-radio-card-#{$variant}-selected-#{$border-type}
       );
     }
 

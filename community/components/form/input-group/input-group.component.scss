@@ -28,13 +28,16 @@
 
   --_input-group-input-border-radius: var(0);
 
-  --_input-group-disabled-border-color: var(--neutral-350);
-  --_input-group-disabled-background-color: var(--neutral-300);
-  --_input-group-text-disabled-color: var(--neutral-450);
+  --_input-group-disabled-border-color: var(--tedi-neutral-350);
+  --_input-group-disabled-background-color: var(--tedi-neutral-300);
+  --_input-group-text-disabled-color: var(--tedi-neutral-450);
 
   --_input-group-select-padding: 0;
   --_input-group-select-border: 0;
   --_input-group-share-border-size: 0;
+
+  --_input-group-padding-x: var(--form-field-padding-x-md-default);
+  --_input-group-padding-y: var(--form-field-padding-y-md-default);
 
   display: flex;
   background-color: transparent;
@@ -42,15 +45,6 @@
   color: var(--_input-group-text-color);
   min-height: var(--_input-group-min-height);
   overflow: hidden;
-
-  @include mixins.responsive-styles(
-    --_input-group-padding-x,
-    form-field-padding-x-md-default
-  );
-  @include mixins.responsive-styles(
-    --_input-group-padding-y,
-    form-field-padding-y-md-default
-  );
 
   input.tedi-input {
     // borders are handled by prefix/suffix
