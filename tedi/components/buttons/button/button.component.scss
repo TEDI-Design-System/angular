@@ -2,46 +2,53 @@
 
 $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 
-@mixin button-variant-color-vars($variant, $icon-only: false) {
+@mixin button-variant-color-vars($variant, $icon-only: false, $affix: main) {
   & {
     @if $icon-only {
-      --_btn-bg: var(--button-main-#{$variant}-icon-only-background-default);
+      --_btn-bg: var(
+        --button-#{$affix}-#{$variant}-icon-only-background-default
+      );
     } @else {
-      --_btn-bg: var(--button-main-#{$variant}-background-default);
+      --_btn-bg: var(--button-#{$affix}-#{$variant}-background-default);
     }
 
-    --_btn-border: var(--button-main-#{$variant}-border-default);
-    --_btn-text: var(--button-main-#{$variant}-text-default);
+    --_btn-border: var(--button-#{$affix}-#{$variant}-border-default);
+    --_btn-text: var(--button-#{$affix}-#{$variant}-text-default);
     --_btn-outline: var(--tedi-primary-500);
 
-    @include button-state-color-vars($variant, "hover", $icon-only);
-    @include button-state-color-vars($variant, "focus", $icon-only);
-    @include button-state-color-vars($variant, "active", $icon-only);
+    @include button-state-color-vars($variant, "hover", $icon-only, $affix);
+    @include button-state-color-vars($variant, "focus", $icon-only, $affix);
+    @include button-state-color-vars($variant, "active", $icon-only, $affix);
     @include button-disabled-color-vars($variant);
   }
 }
 
-@mixin button-state-color-vars($variant, $state, $icon-only: false) {
+@mixin button-state-color-vars(
+  $variant,
+  $state,
+  $icon-only: false,
+  $affix: main
+) {
   & {
     @if $icon-only {
       --_btn-#{$state}-bg: var(
-        --button-main-#{$variant}-icon-only-background-#{$state},
-        var(--button-main-#{$variant}-icon-only-background-default)
+        --button-#{$affix}-#{$variant}-icon-only-background-#{$state},
+        var(--button-#{$affix}-#{$variant}-icon-only-background-default)
       );
     } @else {
       --_btn-#{$state}-bg: var(
-        --button-main-#{$variant}-background-#{$state},
-        var(--button-main-#{$variant}-background-default)
+        --button-#{$affix}-#{$variant}-background-#{$state},
+        var(--button-#{$affix}-#{$variant}-background-default)
       );
     }
 
     --_btn-#{$state}-border: var(
-      --button-main-#{$variant}-border-#{$state},
-      var(--button-main-#{$variant}-border-default)
+      --button-#{$affix}-#{$variant}-border-#{$state},
+      var(--button-#{$affix}-#{$variant}-border-default)
     );
     --_btn-#{$state}-text: var(
-      --button-main-#{$variant}-text-#{$state},
-      var(--button-main-#{$variant}-text-default)
+      --button-#{$affix}-#{$variant}-text-#{$state},
+      var(--button-#{$affix}-#{$variant}-text-default)
     );
   }
 }
@@ -79,32 +86,101 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
   }
 }
 
+@mixin button-main-styles {
+  & {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--_btn-inner-spacing);
+    text-decoration: none;
+    background: var(--_btn-bg);
+    color: var(--_btn-text);
+    border: var(--borders-01) solid var(--_btn-border);
+    padding: var(--_btn-padding);
+    transition: 150ms ease;
+    transition-property: background-color, border-color;
+    cursor: pointer;
+    font-family: var(--family-default);
+    font-weight: var(--body-regular-weight);
+    line-height: var(--body-bold-line-height);
+    border-radius: var(--button-radius-default);
+
+    &--icon-only {
+      width: var(--button-md-icon-size);
+      height: var(--button-md-icon-size);
+      padding: var(--button-md-icon-padding);
+    }
+
+    &--pl {
+      &:not(.tedi-button--neutral):not(.tedi-button--danger-neutral):not(
+          .tedi-button--neutral-inverted
+        ) {
+        padding-left: calc(
+          var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px
+        );
+      }
+    }
+
+    &--pr {
+      &:not(.tedi-button--neutral):not(.tedi-button--danger-neutral):not(
+          .tedi-button--neutral-inverted
+        ) {
+        padding-right: calc(
+          var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px
+        );
+      }
+    }
+
+    &:hover {
+      background: var(--_btn-hover-bg);
+      border-color: var(--_btn-hover-border);
+      color: var(--_btn-hover-text);
+    }
+
+    &:active {
+      background: var(--_btn-active-bg);
+      border-color: var(--_btn-active-border);
+      color: var(--_btn-active-text);
+    }
+
+    &:focus-visible {
+      background: var(--_btn-focus-bg);
+      border-color: var(--_btn-focus-border);
+      color: var(--_btn-focus-text);
+      outline: 2px solid var(--_btn-outline);
+      outline-offset: 1px;
+    }
+
+    &:disabled {
+      background: var(--_btn-disabled-bg);
+      border-color: var(--_btn-disabled-border);
+      color: var(--_btn-disabled-text);
+      cursor: not-allowed;
+    }
+
+    tedi-icon {
+      color: inherit;
+      font-size: inherit;
+    }
+  }
+}
+
+@mixin button-size($size) {
+  & {
+    font-size: var(--button-text-size-#{$size});
+    @include button-size-vars(#{$size});
+  }
+}
+
 .tedi-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--_btn-inner-spacing);
-  text-decoration: none;
-  background: var(--_btn-bg);
-  color: var(--_btn-text);
-  border: var(--borders-01) solid var(--_btn-border);
-  padding: var(--_btn-padding);
-  transition: 150ms ease;
-  transition-property: background-color, border-color;
-  cursor: pointer;
-  font-family: var(--font-default);
-  font-weight: var(--body-regular-weight);
-  line-height: var(--body-bold-line-height);
-  border-radius: var(--button-radius-default);
+  @include button-main-styles();
 
   &--small {
-    @include button-size-vars("sm");
-    font-size: var(--button-text-size-sm);
+    @include button-size("sm");
   }
 
   &--default {
-    @include button-size-vars("md");
-    font-size: var(--button-text-size-default);
+    @include button-size("md");
   }
 
   &--primary {
@@ -147,10 +223,6 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
   }
 
   &--icon-only {
-    width: var(--button-md-icon-size);
-    height: var(--button-md-icon-size);
-    padding: var(--button-md-icon-padding);
-
     &.tedi-button--neutral {
       @include button-variant-color-vars("neutral", true);
     }
@@ -168,57 +240,5 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
       height: var(--button-sm-icon-size);
       padding: var(--button-sm-icon-padding);
     }
-  }
-
-  &--pl {
-    &:not(.tedi-button--neutral):not(.tedi-button--danger-neutral):not(
-        .tedi-button--neutral-inverted
-      ) {
-      padding-left: calc(
-        var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px
-      );
-    }
-  }
-
-  &--pr {
-    &:not(.tedi-button--neutral):not(.tedi-button--danger-neutral):not(
-        .tedi-button--neutral-inverted
-      ) {
-      padding-right: calc(
-        var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px
-      );
-    }
-  }
-
-  &:hover {
-    background: var(--_btn-hover-bg);
-    border-color: var(--_btn-hover-border);
-    color: var(--_btn-hover-text);
-  }
-
-  &:active {
-    background: var(--_btn-active-bg);
-    border-color: var(--_btn-active-border);
-    color: var(--_btn-active-text);
-  }
-
-  &:focus-visible {
-    background: var(--_btn-focus-bg);
-    border-color: var(--_btn-focus-border);
-    color: var(--_btn-focus-text);
-    outline: 2px solid var(--_btn-outline);
-    outline-offset: 1px;
-  }
-
-  &:disabled {
-    background: var(--_btn-disabled-bg);
-    border-color: var(--_btn-disabled-border);
-    color: var(--_btn-disabled-text);
-    cursor: not-allowed;
-  }
-
-  tedi-icon {
-    color: inherit;
-    font-size: inherit;
   }
 }
