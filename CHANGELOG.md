@@ -1,3 +1,37 @@
+# [4.2.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.1-rc.2...angular-4.2.0-rc.1) (2025-12-05)
+
+
+### Features
+
+* **floating-button:** add barrel index eports [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([0e80438](https://github.com/TEDI-Design-System/angular/commit/0e80438c77ad53fc79b5e3bc746f665e001b96cb))
+* **floating-button:** ensure to not use non encapsulated styles in floating button [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([0b65dd8](https://github.com/TEDI-Design-System/angular/commit/0b65dd878ffcf5df5ac1eff0f74f09e18430c943))
+* **floating-button:** export base-button directive in index file [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([094fb59](https://github.com/TEDI-Design-System/angular/commit/094fb594f86ca42518a7ede03224a11918445a6f))
+* **floating-button:** finishing touches on story to fix text aligment + args [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([4537ea8](https://github.com/TEDI-Design-System/angular/commit/4537ea8f3848a9bffb0b0c487efc8d6763fbbdf7))
+* **floating-button:** fix button css variable [#229](https://github.com/TEDI-Design-System/angular/issues/229) ([edbfbee](https://github.com/TEDI-Design-System/angular/commit/edbfbeefe43b40b61cb359080c2f8515ee604fa7))
+* **floating-button:** fix css variable name [#229](https://github.com/TEDI-Design-System/angular/issues/229) ([0419a13](https://github.com/TEDI-Design-System/angular/commit/0419a13a84653bda54e57867e43ee0b0c7587e6d))
+* **floating-button:** fix icon only [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([439f455](https://github.com/TEDI-Design-System/angular/commit/439f45576e5c12e4b5bbc16bf41f8804524b927d))
+* **floating-button:** fix import [#229](https://github.com/TEDI-Design-System/angular/issues/229) ([bc3786b](https://github.com/TEDI-Design-System/angular/commit/bc3786bb166c082b05321c34094cec4bcf0e72bc))
+* **floating-button:** fix scss build warning [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([4b37b13](https://github.com/TEDI-Design-System/angular/commit/4b37b131db7325f0168c97ff9edb658a0f174e15))
+* **floating-button:** fix tesst [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([e0229be](https://github.com/TEDI-Design-System/angular/commit/e0229be9625fb96b928d3475d6902549d74afba2))
+* **floating-button:** initial commit - create floating-button component [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([7a8aaa8](https://github.com/TEDI-Design-System/angular/commit/7a8aaa8c7ca0b3b88862624fe0f28fe553b7d651))
+* **floating-button:** keep min-height [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([4f80011](https://github.com/TEDI-Design-System/angular/commit/4f8001133e96421b42fd24537de36b9def7824b6))
+* **floating-button:** more style/storybook changes [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([7b0b1ca](https://github.com/TEDI-Design-System/angular/commit/7b0b1caa26a44c31bb379847104b2386cddf84c2))
+* **floating-button:** move button implementation to directive to use as shared [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([eed60d1](https://github.com/TEDI-Design-System/angular/commit/eed60d14d84b0cc47f3dd5b38be120dbf309276f))
+* **floating-button:** move inputs into button and floating button comp + narrower types [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([09e98d6](https://github.com/TEDI-Design-System/angular/commit/09e98d68a963693ff2d76752a2fbed8c6ebda307))
+* **floating-button:** move to correct folder [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([bb12938](https://github.com/TEDI-Design-System/angular/commit/bb12938a8f58e66f47c2c8d031ec657f9c4aab2c))
+* **floating-button:** prepare storybook + move styles to button.component.css [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([d9d6a07](https://github.com/TEDI-Design-System/angular/commit/d9d6a07b6f6014d5795534186e90a300cfde8565))
+* **floating-button:** re-add box-shadow + add links to storybook [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([0b0a15e](https://github.com/TEDI-Design-System/angular/commit/0b0a15eb7983daa09b04eca7cb1322f54f06d469))
+* **floating-button:** refactor into selector component + trim styles [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([266e82a](https://github.com/TEDI-Design-System/angular/commit/266e82ab2adaee575a4c36fd30f9003120949131))
+* **floating-button:** remove debug css [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([e7ec55c](https://github.com/TEDI-Design-System/angular/commit/e7ec55c8c6a08373b2e61d9acf981356ca73d304))
+* **floating-button:** remove debug log [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([7f3c5b3](https://github.com/TEDI-Design-System/angular/commit/7f3c5b3b6777f00fc4e0f2c68bcaa8f59109c636))
+* **floating-button:** remove id [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([f962835](https://github.com/TEDI-Design-System/angular/commit/f962835132f33b4d4630a1c268e92280f770abbe))
+* **floating-button:** remove unused commented code [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([881ee6d](https://github.com/TEDI-Design-System/angular/commit/881ee6da87b1de014c35b9f42a124842c8c48fff))
+* **floating-button:** replace responsive-styles mixin [#229](https://github.com/TEDI-Design-System/angular/issues/229) ([14aa03c](https://github.com/TEDI-Design-System/angular/commit/14aa03c6b21e400c9f312fc2f089cf02666ba4d1))
+* **floating-button:** resolve conflicts [#229](https://github.com/TEDI-Design-System/angular/issues/229) ([54c8a52](https://github.com/TEDI-Design-System/angular/commit/54c8a52d1a974c3139f209365eca0bd380e499c6))
+* **floating-button:** storybook polishing [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([c5c8dea](https://github.com/TEDI-Design-System/angular/commit/c5c8dea378900304ea5daa003d686a71e8b7f932))
+* **floating-button:** use component instead of directive, move styles to floating button [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([60926d3](https://github.com/TEDI-Design-System/angular/commit/60926d3cd3c30c0756c5d1386bdcfa4dad9eb912))
+* **floating-button:** use default size by default in storybook [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([4b3715f](https://github.com/TEDI-Design-System/angular/commit/4b3715f29cc4d37375de4e23dc4fe48cb55f12b9))
+
 ## [4.1.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.1-rc.1...angular-4.1.1-rc.2) (2025-12-04)
 
 
