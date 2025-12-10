@@ -17,10 +17,11 @@ const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=4514-63815&m=dev" target="_BLANK">Figma ↗</a><br/>
- * <a href="https://tedi.tehik.ee/1ee8444b7/p/30df1b-closing-button" target="_BLANK">Zeroheight ↗</a>
- *
+ * <a href="https://www.tedi.ee/1ee8444b7/p/30df1b-closing-button" target="_BLANK">Zeroheight ↗</a>
+
  * A closing button component used for dismissing content or dialogs. It's typically displayed as an 'X' icon and can be used in various scenarios such as closing modals, popovers, or panels.
  */
+
 export default {
   title: "TEDI-Ready/Components/Buttons/ClosingButton",
   component: ClosingButtonComponent,
@@ -53,12 +54,6 @@ export default {
     },
   },
   parameters: {
-    docs: {
-      description: {
-        component:
-          "A button component used for closing or dismissing UI elements such as modals, popovers, or panels.",
-      },
-    },
     status: {
       type: ["breakpointSupport"],
     },

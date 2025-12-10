@@ -15,15 +15,15 @@ import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/t
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 
-/**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.21.30?node-id=6149-138033&m=dev" target="_blank">Figma ↗</a><br />
- * <a href="https://tedi.tehik.ee/1ee8444b7/p/796203-checkbox" target="_blank">Zeroheight ↗</a>
- */
 
 type StoryCheckboxComponent = CheckboxComponent & {
   indeterminate: boolean;
 };
 
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.21.30?node-id=6149-138033&m=dev" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.tedi.ee/1ee8444b7/p/796203-checkbox" target="_blank">Zeroheight ↗</a>
+ */
 export default {
   title: "TEDI-Ready/Components/Form/Checkbox",
   component: CheckboxComponent,
