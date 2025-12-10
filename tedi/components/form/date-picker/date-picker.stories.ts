@@ -8,7 +8,7 @@ import { DatePickerComponent } from "./date-picker.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.23.39?node-id=9938-87564&m=dev" target="_blank">Figma ↗</a><br>
- * <a href="https://tedi.tehik.ee/1ee8444b7/p/78211a-date-and-time-picker" target="_blank">Zeroheight ↗</a>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/15bd6e-date-field" target="_blank">Zeroheight ↗</a>
  */
 
 export default {

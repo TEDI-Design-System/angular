@@ -25,7 +25,7 @@ import { SeparatorComponent } from "../../helpers/separator/separator.component"
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.13.19?node-id=2137-19318&m=dev&focus-id=6380-53060" target="_BLANK">Figma ↗</a><br/>
- * <a href="https://tedi.zeroheight.com/styleguide/s/118912/p/68343d-header" target="_BLANK">Zeroheight ↗</a>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/68343d-header" target="_BLANK">Zeroheight ↗</a>
  *
  * To test the mobile layout, either resize your browser window or use Storybook's built-in viewport tools.
  * The header component is used to display the header at the top of the page. It can contain SideNav menu toggle, logo, content links, language select, role select, profile menu, login and logout buttons and more.
