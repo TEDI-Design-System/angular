@@ -1,3 +1,5 @@
+@use "@tedi-design-system/core/mixins";
+
 .table-of-contents__item {
   display: flex;
   flex-direction: column;
@@ -7,13 +9,22 @@
     display: flex;
     align-items: flex-start;
     flex-direction: column;
+
+    --_table-of-contents-inset: 1px;
     // we're inset into the card border by 1 pixel
-    padding: 0 calc(var(--dimensions-10) - 1px);
+    padding: 0
+      calc(
+        var(--table-of-contents-padding-left-level-1) - var(
+            --_table-of-contents-inset
+          )
+      );
+
     border: 0;
     // invisible border so once we're active we won't change layout
-    border-left: 3px solid transparent;
+    border-left: var(--table-of-contents-active-item-border-width) solid
+      transparent;
     border-radius: 0;
-    margin-left: -1px;
+    margin-left: var(--_table-of-contents-inset);
 
     &:hover {
       text-decoration: underline;
@@ -30,6 +41,6 @@
   }
 
   .table-of-contents__item .table-of-contents__item-anchor {
-    padding-left: var(--dimensions-14);
+    padding-left: var(--table-of-contents-padding-left-level-2);
   }
 }
