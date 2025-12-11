@@ -1,5 +1,3 @@
-@use "@tedi-design-system/core/mixins";
-
 @mixin toggle-style($variant, $type) {
   @if $type == "filled" {
     background-color: var(--form-toggl-#{$variant}-inactive-default);
@@ -193,34 +191,28 @@
 .tedi-toggle {
   position: relative;
   display: block;
-  @include mixins.responsive-styles(--_toggle-padding, form-toggl-padding);
 
   &--size {
+    --_toggle-indicator: var(--form-toggl-default-indicator);
+
     &-default {
-      @include mixins.responsive-styles(width, form-toggl-default-width);
-      @include mixins.responsive-styles(height, form-toggl-default-height);
-      @include mixins.responsive-styles(
-        --_toggle-indicator,
-        form-toggl-default-indicator
-      );
+      width: var(--form-toggl-default-width);
+      height: var(--form-toggl-default-height);
 
       .tedi-toggle__slider {
-        @include mixins.responsive-styles(width, form-toggl-default-indicator);
-        @include mixins.responsive-styles(height, form-toggl-default-indicator);
+        width: var(--form-toggl-default-indicator);
+        height: var(--form-toggl-default-indicator);
       }
     }
 
     &-large {
-      @include mixins.responsive-styles(width, form-toggl-large-width);
-      @include mixins.responsive-styles(height, form-toggl-large-height);
-      @include mixins.responsive-styles(
-        --_toggle-indicator,
-        form-toggl-large-indicator
-      );
+      --_toggle-indicator: var(--form-toggl-large-indicator);
+      width: var(--form-toggl-large-width);
+      height: var(--form-toggl-large-height);
 
       .tedi-toggle__slider {
-        @include mixins.responsive-styles(width, form-toggl-large-indicator);
-        @include mixins.responsive-styles(height, form-toggl-large-indicator);
+        width: var(--form-toggl-large-indicator);
+        height: var(--form-toggl-large-indicator);
       }
     }
   }
@@ -259,12 +251,11 @@
     appearance: none;
     cursor: pointer;
     margin: 0;
-
-    @include mixins.responsive-styles(border-radius, form-toggl-radius);
+    border-radius: var(--form-toggl-radius);
 
     &:checked + .tedi-toggle__slider {
       transform: translateY(-50%);
-      left: calc(100% - var(--_toggle-indicator) - var(--_toggle-padding));
+      left: calc(100% - var(--_toggle-indicator) - var(--form-toggl-padding));
     }
   }
 
@@ -278,7 +269,6 @@
     border-radius: 50%;
     transition: left 0.17s ease-out;
     pointer-events: none;
-
-    @include mixins.responsive-styles(left, form-toggl-padding);
+    left: var(--form-toggl-padding);
   }
 }

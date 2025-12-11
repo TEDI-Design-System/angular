@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { CollapseComponent } from "./collapse.component";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 jest.mock("../../../helpers/generate-uuid", () => ({
   generateUUID: () => "mocked-random-uuid",
@@ -12,6 +13,7 @@ describe("CollapseComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CollapseComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CollapseComponent);

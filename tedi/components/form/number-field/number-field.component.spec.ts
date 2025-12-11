@@ -5,180 +5,186 @@ import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 describe("NumberFieldComponent", () => {
-    let fixture: ComponentFixture<NumberFieldComponent>;
-    let component: NumberFieldComponent;
-    let el: HTMLElement;
+  let fixture: ComponentFixture<NumberFieldComponent>;
+  let component: NumberFieldComponent;
+  let el: HTMLElement;
 
-    beforeEach(() => {
-        TestBed.configureTestingModule({
-            imports: [
-                NumberFieldComponent,
-                LabelComponent,
-                ButtonComponent,
-                IconComponent,
-                TextComponent,
-                FeedbackTextComponent,
-            ],
-        });
-
-        fixture = TestBed.createComponent(NumberFieldComponent);
-        fixture.componentRef.setInput("id", "test-id");
-        component = fixture.componentInstance;
-        el = fixture.nativeElement;
-        fixture.detectChanges();
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        NumberFieldComponent,
+        LabelComponent,
+        ButtonComponent,
+        IconComponent,
+        TextComponent,
+        FeedbackTextComponent,
+      ],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
     });
 
-    it("should create component", () => {
-        expect(component).toBeTruthy();
-    });
+    fixture = TestBed.createComponent(NumberFieldComponent);
+    fixture.componentRef.setInput("id", "test-id");
+    component = fixture.componentInstance;
+    el = fixture.nativeElement;
+    fixture.detectChanges();
+  });
 
-    it("should initialize with default value (0)", () => {
-        expect(component.value()).toBe(0);
-    });
+  it("should create component", () => {
+    expect(component).toBeTruthy();
+  });
 
-    it("should increment the value on increment button click", () => {
-        const onChange = jest.fn<number, [number]>();
-        const onTouched = jest.fn();
-        component.registerOnChange(onChange);
-        component.registerOnTouched(onTouched);
+  it("should initialize with default value (0)", () => {
+    expect(component.value()).toBe(0);
+  });
 
-        const buttons = el.querySelectorAll("button");
-        const incrementBtn = buttons[1] as HTMLButtonElement;
+  it("should increment the value on increment button click", () => {
+    const onChange = jest.fn<number, [number]>();
+    const onTouched = jest.fn();
+    component.registerOnChange(onChange);
+    component.registerOnTouched(onTouched);
 
-        incrementBtn.click();
-        fixture.detectChanges();
+    const buttons = el.querySelectorAll("button");
+    const incrementBtn = buttons[1] as HTMLButtonElement;
 
-        expect(component.value()).toBe(1);
-        expect(onChange).toHaveBeenCalledWith(1);
-        expect(onTouched).toHaveBeenCalled();
-    });
+    incrementBtn.click();
+    fixture.detectChanges();
 
-    it("should decrement the value on decrement button click", () => {
-        component.writeValue(5);
-        fixture.detectChanges();
+    expect(component.value()).toBe(1);
+    expect(onChange).toHaveBeenCalledWith(1);
+    expect(onTouched).toHaveBeenCalled();
+  });
 
-        const onChange = jest.fn<number, [number]>();
-        component.registerOnChange(onChange);
+  it("should decrement the value on decrement button click", () => {
+    component.writeValue(5);
+    fixture.detectChanges();
 
-        const buttons = el.querySelectorAll("button");
-        const decrementBtn = buttons[0] as HTMLButtonElement;
+    const onChange = jest.fn<number, [number]>();
+    component.registerOnChange(onChange);
 
-        decrementBtn.click();
-        fixture.detectChanges();
+    const buttons = el.querySelectorAll("button");
+    const decrementBtn = buttons[0] as HTMLButtonElement;
 
-        expect(component.value()).toBe(4);
-        expect(onChange).toHaveBeenCalledWith(4);
-    });
+    decrementBtn.click();
+    fixture.detectChanges();
 
-    it("should disable decrement button when value === min", () => {
-        component.writeValue(3);
-        fixture.componentRef.setInput("min", 3);
-        fixture.detectChanges();
+    expect(component.value()).toBe(4);
+    expect(onChange).toHaveBeenCalledWith(4);
+  });
 
-        const decrementBtn = el.querySelector("button") as HTMLButtonElement;
-        expect(decrementBtn.disabled).toBeTruthy();
-    });
+  it("should disable decrement button when value === min", () => {
+    component.writeValue(3);
+    fixture.componentRef.setInput("min", 3);
+    fixture.detectChanges();
 
-    it("should disable increment button when value === max", () => {
-        component.writeValue(2);
-        fixture.componentRef.setInput("max", 2);
-        fixture.detectChanges();
+    const decrementBtn = el.querySelector("button") as HTMLButtonElement;
+    expect(decrementBtn.disabled).toBeTruthy();
+  });
 
-        const buttons = el.querySelectorAll("button");
-        const incrementBtn = buttons[1] as HTMLButtonElement;
-        expect(incrementBtn.disabled).toBeTruthy();
-    });
+  it("should disable increment button when value === max", () => {
+    component.writeValue(2);
+    fixture.componentRef.setInput("max", 2);
+    fixture.detectChanges();
 
-    it("should call onChange when input is changed", () => {
-        const onChange = jest.fn<number, [number]>();
-        component.registerOnChange(onChange);
+    const buttons = el.querySelectorAll("button");
+    const incrementBtn = buttons[1] as HTMLButtonElement;
+    expect(incrementBtn.disabled).toBeTruthy();
+  });
 
-        const inputEl = el.querySelector("input") as HTMLInputElement;
-        inputEl.value = "10";
-        inputEl.dispatchEvent(new Event("input"));
-        fixture.detectChanges();
+  it("should call onChange when input is changed", () => {
+    const onChange = jest.fn<number, [number]>();
+    component.registerOnChange(onChange);
 
-        expect(component.value()).toBe(10);
-        expect(onChange).toHaveBeenCalledWith(10);
-    });
+    const inputEl = el.querySelector("input") as HTMLInputElement;
+    inputEl.value = "10";
+    inputEl.dispatchEvent(new Event("input"));
+    fixture.detectChanges();
 
-    it("should call onTouched when input is blurred", () => {
-        const onTouched = jest.fn();
-        component.registerOnTouched(onTouched);
+    expect(component.value()).toBe(10);
+    expect(onChange).toHaveBeenCalledWith(10);
+  });
 
-        const inputEl = el.querySelector("input") as HTMLInputElement;
-        inputEl.dispatchEvent(new Event("blur"));
-        fixture.detectChanges();
+  it("should call onTouched when input is blurred", () => {
+    const onTouched = jest.fn();
+    component.registerOnTouched(onTouched);
 
-        expect(onTouched).toHaveBeenCalled();
-    });
+    const inputEl = el.querySelector("input") as HTMLInputElement;
+    inputEl.dispatchEvent(new Event("blur"));
+    fixture.detectChanges();
 
-    it("should respect disabled input and disable all controls", () => {
-        fixture.componentRef.setInput("disabled", true);
-        fixture.detectChanges();
+    expect(onTouched).toHaveBeenCalled();
+  });
 
-        const inputEl = el.querySelector("input") as HTMLInputElement;
-        const buttons = Array.from(el.querySelectorAll("button")) as HTMLButtonElement[];
+  it("should respect disabled input and disable all controls", () => {
+    fixture.componentRef.setInput("disabled", true);
+    fixture.detectChanges();
 
-        expect(component.isDisabled()).toBeTruthy();
-        expect(inputEl.disabled).toBeTruthy();
-        buttons.forEach(btn => expect(btn.disabled).toBeTruthy());
-    });
+    const inputEl = el.querySelector("input") as HTMLInputElement;
+    const buttons = Array.from(
+      el.querySelectorAll("button"),
+    ) as HTMLButtonElement[];
 
-    it("writeValue() should default to 0 when given null or undefined", () => {
-        component.writeValue(undefined);
-        expect(component.value()).toBe(0);
-    });
+    expect(component.isDisabled()).toBeTruthy();
+    expect(inputEl.disabled).toBeTruthy();
+    buttons.forEach((btn) => expect(btn.disabled).toBeTruthy());
+  });
 
-    it("writeValue() should set the passed-in value", () => {
-        component.writeValue(42);
-        expect(component.value()).toBe(42);
-    });
+  it("writeValue() should default to 0 when given null or undefined", () => {
+    component.writeValue(undefined);
+    expect(component.value()).toBe(0);
+  });
 
-    it("setDisabledState() should toggle formDisabled and disable input & buttons", () => {
-        component.setDisabledState(false);
-        fixture.detectChanges();
+  it("writeValue() should set the passed-in value", () => {
+    component.writeValue(42);
+    expect(component.value()).toBe(42);
+  });
 
-        let inputEl = el.querySelector("input") as HTMLInputElement;
-        let buttons = Array.from(el.querySelectorAll("button")) as HTMLButtonElement[];
+  it("setDisabledState() should toggle formDisabled and disable input & buttons", () => {
+    component.setDisabledState(false);
+    fixture.detectChanges();
 
-        expect(component.isDisabled()).toBeFalsy();
-        expect(inputEl.disabled).toBeFalsy();
-        buttons.forEach(btn => expect(btn.disabled).toBeFalsy());
+    let inputEl = el.querySelector("input") as HTMLInputElement;
+    let buttons = Array.from(
+      el.querySelectorAll("button"),
+    ) as HTMLButtonElement[];
 
-        component.setDisabledState(true);
-        fixture.detectChanges();
+    expect(component.isDisabled()).toBeFalsy();
+    expect(inputEl.disabled).toBeFalsy();
+    buttons.forEach((btn) => expect(btn.disabled).toBeFalsy());
 
-        inputEl = el.querySelector("input") as HTMLInputElement;
-        buttons = Array.from(el.querySelectorAll("button")) as HTMLButtonElement[];
+    component.setDisabledState(true);
+    fixture.detectChanges();
 
-        expect(component.isDisabled()).toBeTruthy();
-        expect(inputEl.disabled).toBeTruthy();
-        buttons.forEach(btn => expect(btn.disabled).toBeTruthy());
-    });
+    inputEl = el.querySelector("input") as HTMLInputElement;
+    buttons = Array.from(el.querySelectorAll("button")) as HTMLButtonElement[];
 
-    it("focus() should call focus() on the native input element", () => {
-        fixture.detectChanges();
-        const inputEl = component.inputRef.nativeElement;
-        const spy = jest.spyOn(inputEl, "focus");
+    expect(component.isDisabled()).toBeTruthy();
+    expect(inputEl.disabled).toBeTruthy();
+    buttons.forEach((btn) => expect(btn.disabled).toBeTruthy());
+  });
 
-        component.focus();
+  it("focus() should call focus() on the native input element", () => {
+    fixture.detectChanges();
+    const inputEl = component.inputRef.nativeElement;
+    const spy = jest.spyOn(inputEl, "focus");
 
-        expect(spy).toHaveBeenCalled();
-    });
+    component.focus();
 
-    it("blur() should call blur() on the native input element and mark touched", () => {
-        fixture.detectChanges();
-        const inputEl = component.inputRef.nativeElement;
-        const blurSpy = jest.spyOn(inputEl, "blur");
-        const onTouched = jest.fn();
-        component.registerOnTouched(onTouched);
+    expect(spy).toHaveBeenCalled();
+  });
 
-        component.blur();
+  it("blur() should call blur() on the native input element and mark touched", () => {
+    fixture.detectChanges();
+    const inputEl = component.inputRef.nativeElement;
+    const blurSpy = jest.spyOn(inputEl, "blur");
+    const onTouched = jest.fn();
+    component.registerOnTouched(onTouched);
 
-        expect(blurSpy).toHaveBeenCalled();
-        expect(onTouched).toHaveBeenCalled();
-    });
+    component.blur();
+
+    expect(blurSpy).toHaveBeenCalled();
+    expect(onTouched).toHaveBeenCalled();
+  });
 });

@@ -1,5 +1,4 @@
 @use "@tedi-design-system/core/bootstrap-utility/breakpoints";
-@use "@tedi-design-system/core/mixins";
 
 .tedi-tabs {
   --_tab-list-background: var(--tab-background);
@@ -46,7 +45,7 @@
       --_tab-background: var(--dropdown-item-active-background);
       --_tab-color: var(--dropdown-item-active-text);
 
-      @include mixins.responsive-styles(font-weight, body-regular-weight);
+      font-weight: var(--body-regular-weight);
 
       &::after {
         display: none;

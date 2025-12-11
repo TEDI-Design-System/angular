@@ -1,4 +1,3 @@
-@use "@tedi-design-system/core/mixins";
 @use "sass:map";
 
 $card-colors: (
@@ -84,10 +83,7 @@ $accent-border-colors: (
     #{$private-var-name}: 0;
   } @else {
     $tedi-var-name: if($spacing== "md", "md-default", $spacing);
-    @include mixins.responsive-styles(
-      #{$private-var-name},
-      card-padding-#{$tedi-var-name}
-    );
+    #{$private-var-name}: var(--card-padding-#{$tedi-var-name});
   }
 }
 

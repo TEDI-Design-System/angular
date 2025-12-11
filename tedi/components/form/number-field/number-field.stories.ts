@@ -11,7 +11,7 @@ import { FeedbackTextComponent } from "../feedback-text/feedback-text.component"
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=4536-78765&m=dev" target="_blank">Figma ↗</a><br />
- * <a href="https://tedi.tehik.ee/1ee8444b7/p/90c693-number-field" target="_blank">Zeroheight ↗</a>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/90c693-number-field" target="_blank">Zeroheight ↗</a>
  * Can be used with <a href="https://angular.dev/guide/forms/reactive-forms" target="_blank">Reactive forms</a> and with <a href="https://angular.dev/guide/forms/template-driven-forms" target="_blank">Template-driven forms</a>
  */
 

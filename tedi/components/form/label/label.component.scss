@@ -1,25 +1,9 @@
-@use "@tedi-design-system/core/mixins";
-
 .tedi-label {
-  color: var(--general-text-secondary);
-
-  @include mixins.responsive-styles(
-    font-size,
-    body-regular-size,
-    $exclude: tablet
-  );
-  @include mixins.responsive-styles(
-    font-family,
-    family-primary,
-    $exclude: tablet
-  );
+  font-size: var(--body-regular-size);
+  font-family: var(--family-default);
 
   &--small {
-    @include mixins.responsive-styles(
-      font-size,
-      body-small-regular-size,
-      $exclude: tablet
-    );
+    font-size: var(--body-small-regular-size);
   }
 
   &--required {
@@ -27,5 +11,18 @@
       content: " *";
       color: var(--form-general-feedback-error-border);
     }
+  }
+
+  &--primary {
+    color: var(--general-text-primary);
+  }
+
+  &--secondary {
+    color: var(--general-text-secondary);
+  }
+
+  &:has(input[disabled]),
+  &[for]:has(+ input[disabled]) {
+    color: var(--general-text-disabled);
   }
 }

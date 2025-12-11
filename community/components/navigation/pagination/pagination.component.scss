@@ -1,4 +1,3 @@
-@use "@tedi-design-system/core/mixins";
 @use "@tedi-design-system/core/bootstrap-utility/breakpoints";
 
 .tedi-pagination {
@@ -7,6 +6,9 @@
   --_pagination-page-background: transparent;
   --_pagination-page-text: var(--general-text-secondary, #4b4e62);
   --_pagination-layout: "results page-size-options" "pager pager";
+  --_pagination-padding-y: var(--pagination-padding-y);
+  --_pagination-padding-x: var(--pagination-padding-x);
+  --_pagination-button-size: var(--pagination-button-size);
 
   border-top: 1px solid var(--_pagination-border);
   background: var(--_pagination-background);
@@ -14,20 +16,8 @@
   display: grid;
   align-items: center;
   grid-template-areas: var(--_pagination-layout);
+  gap: var(--layout-grid-gutters-04);
 
-  @include mixins.responsive-styles(
-    --_pagination-padding-y,
-    pagination-padding-y
-  );
-  @include mixins.responsive-styles(
-    --_pagination-padding-x,
-    pagination-padding-x
-  );
-  @include mixins.responsive-styles(
-    --_pagination-button-size,
-    pagination-button-size
-  );
-  @include mixins.responsive-styles(gap, layout-grid-gutters-04);
   @include breakpoints.media-breakpoint-up(md) {
     --_pagination-layout: "results pager page-size-options";
     grid-template-columns: repeat(3, 1fr);
@@ -48,8 +38,7 @@
     align-items: center;
     list-style: none;
     margin: 0;
-
-    @include mixins.responsive-styles(gap, layout-grid-gutters-08);
+    gap: var(--layout-grid-gutters-08);
   }
 
   &__page {
@@ -110,13 +99,12 @@
     display: flex;
     align-items: center;
     justify-self: flex-end;
-
-    @include mixins.responsive-styles(gap, form-field-inner-spacing);
+    gap: var(--form-field-inner-spacing);
   }
 
   &__dropdown {
     border: 1px solid var(--form-input-border-default, #838494);
-    @include mixins.responsive-styles(border-radius, form-field-radius);
-    @include mixins.responsive-styles(min-height, form-field-height-sm);
+    border-radius: var(--form-field-radius);
+    min-height: var(--form-field-height-sm);
   }
 }

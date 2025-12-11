@@ -14,7 +14,7 @@ import { ButtonComponent } from "tedi/components";
  * FileDropzoneComponent is a component that allows users to drag and drop files or select them through a file input.
  *
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.13.19?node-id=12457-128384&m=dev" target="_BLANK">Figma ↗</a><br />
- * <a href="https://tedi.tehik.ee/1ee8444b7/p/70876f-file-dropzone" target="_BLANK">Zeroheight ↗</a>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/70876f-file-dropzone" target="_BLANK">Zeroheight ↗</a>
  */
 
 const meta: Meta<FileDropzoneComponent> = {

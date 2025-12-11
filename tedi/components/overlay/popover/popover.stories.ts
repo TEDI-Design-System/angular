@@ -32,6 +32,11 @@ const POSITIONS: PopoverPosition[] = [
   "left-end",
 ];
 
+/**
+ * <a href="https://www.figma.com/design/TUjrgIdS28srN08U3J2lFe/Floating-button-adjustments?node-id=3225-21915&t=uEOTNpiJPbNICJKk-4" target="_blank">Figma ↗</a><br>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/72a3ed-popover" target="_blank">Zeroheight ↗</a>
+ */
+
 export default {
   title: "TEDI-Ready/Components/Overlay/Popover",
   component: PopoverComponent,

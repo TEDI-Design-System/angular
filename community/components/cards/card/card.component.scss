@@ -1,4 +1,3 @@
-@use "@tedi-design-system/core/mixins";
 @use "./card-mixins";
 
 .tedi-card {
@@ -6,13 +5,13 @@
   --_card-selected-border: var(--card-border-selected);
   --_card-bg: var(--card-background-primary);
   --_card-timeline-color: var(--general-border-accent);
+  --_card-radius: var(--card-radius-rounded);
 
   border-radius: var(--_card-radius);
   display: flex;
   flex-direction: column;
   position: relative;
 
-  @include mixins.responsive-styles(--_card-radius, card-radius-rounded);
   @include card-mixins.card-color-classes;
   @include card-mixins.card-spacings;
   @include card-mixins.card-padding-overrides;

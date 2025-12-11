@@ -14,7 +14,7 @@ import { InfoButtonComponent } from "../../buttons/info-button/info-button.compo
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=2137-19322&m=dev" target="_blank">Figma ↗</a><br />
- * <a href="https://tedi.tehik.ee/1ee8444b7/p/64479c-label" target="_blank">Zeroheight ↗</a>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/64479c-label" target="_blank">Zeroheight ↗</a>
  */
 
 export default {
@@ -63,6 +63,19 @@ export default {
         },
       },
     },
+    color: {
+      control: "radio",
+      description: "Color of the label",
+      options: ["primary", "secondary"],
+      table: {
+        category: "inputs",
+        type: {
+          summary: "LabelColor",
+          detail: "primary \nsecondary",
+        },
+        defaultValue: { summary: "secondary" },
+      },
+    },
   },
 } as Meta<LabelComponent>;
 
@@ -72,6 +85,7 @@ export const Default: LabelStory = {
   args: {
     ngContent: "Label",
     size: "default",
+    color: "secondary",
   },
   render: ({ ngContent, ...args }) => ({
     props: args,

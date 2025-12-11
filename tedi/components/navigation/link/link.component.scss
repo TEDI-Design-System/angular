@@ -1,5 +1,3 @@
-@use "@tedi-design-system/core/mixins";
-
 @mixin link-variant($color, $color-hover, $color-active, $color-focus) {
   color: $color;
 
@@ -53,11 +51,7 @@
   }
 
   &--small {
-    @include mixins.responsive-styles(
-      font-size,
-      body-small-regular-size,
-      $exclude: tablet
-    );
+    font-size: var(--body-small-regular-size);
   }
 
   &:not(.tedi-link--no-underline) {
@@ -77,9 +71,8 @@
     font-size: 16px;
     color: inherit;
     line-height: inherit;
-
-    @include mixins.responsive-styles(margin-left, button-sm-inner-spacing);
-    @include mixins.responsive-styles(margin-right, button-sm-inner-spacing);
+    margin-left: var(--button-sm-inner-spacing);
+    margin-right: var(--button-sm-inner-spacing);
 
     &:first-child {
       margin-left: 0;

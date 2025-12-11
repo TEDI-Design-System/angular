@@ -15,7 +15,7 @@ import { SideNavOverlayComponent } from "./sidenav-overlay/sidenav-overlay.compo
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.8.9--work-in-progress-?node-id=6367-171750&m=dev" target="_BLANK">Figma ↗</a><br/>
- * <a href="#" target="_BLANK">Zeroheight ↗</a>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/136091-side-navigation" target="_BLANK">Zeroheight ↗</a>
  *
  * To test the mobile layout, either resize your browser window or use Storybook's built-in viewport tools.
  * The sidenav component is used to display the side navigation at the left side of the page. It can contain external links, router links, dropdowns, and more.

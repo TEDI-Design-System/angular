@@ -12,7 +12,6 @@ import { IconComponent } from "../../base/icon/icon.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.17.25?node-id=136-14995&m=dev&focus-id=25945-119670" target="_BLANK">Figma ↗</a><br/>
- * <a href="" target="_BLANK">Zeroheight ↗</a>
  * <hr />
  * This component is responsive and adapts to mobile layout when below LG (992px) breakpoint.<br />
  * Timeline consists of several sub-components:

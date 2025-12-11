@@ -32,7 +32,7 @@
     "ngx-float-ui": "^19.0.1 || ^20.0.0"
   },
   "dependencies": {
-    "@tedi-design-system/core": "^2.0.0"
+    "@tedi-design-system/core": "^2.5.0"
   },
   "devDependencies": {
     "@angular-devkit/core": "19.2.15",
@@ -54,7 +54,7 @@
     "@angular/platform-browser-dynamic": "19.2.15",
     "@angular/router": "19.2.15",
     "@commitlint/cli": "^19.8.1",
-    "@commitlint/config-conventional": "^19.8.1",
+    "@commitlint/config-conventional": "^20.0.0",
     "@compodoc/compodoc": "^1.1.26",
     "@etchteam/storybook-addon-status": "^5.0.0",
     "@schematics/angular": "19.2.15",
@@ -74,7 +74,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.5",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
-    "angular-eslint": "^20.4.0",
+    "angular-eslint": "^21.0.1",
     "chokidar": "^4.0.3",
     "chromatic": "^13.3.3",
     "eslint-plugin-prettier": "^5.2.1",

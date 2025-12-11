@@ -8,7 +8,7 @@ import {
 import { FeedbackTextComponent } from "./feedback-text.component";
 
 /**
- * <a href="https://tedi.tehik.ee/1ee8444b7/p/67d4de-formhelper" target="_blank">Zeroheight ↗</a>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/67d4de-feedbacktext" target="_blank">Zeroheight ↗</a>
  */
 
 export default {

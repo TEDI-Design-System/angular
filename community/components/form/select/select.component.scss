@@ -1,10 +1,6 @@
-@use "@tedi-design-system/core/mixins";
-
 .tedi-select {
   display: block;
   width: 100%;
-
-  @include mixins.responsive-styles(--_inner-gap, form-field-inner-spacing);
 
   &__trigger {
     display: flex;
@@ -43,16 +39,14 @@
   &__arrow {
     flex-grow: 0;
     cursor: default;
-
-    @include mixins.responsive-styles(padding-left, form-field-inner-spacing);
-    @include mixins.responsive-styles(margin-left, form-field-inner-spacing);
+    padding-left: var(--form-field-inner-spacing);
+    margin-left: var(--form-field-inner-spacing);
   }
 
   &__dropdown {
-    box-shadow: 0px 1px 5px 0px var(--alpha-20);
-
-    @include mixins.responsive-styles(margin-top, form-field-outer-spacing);
-    @include mixins.responsive-styles(margin-bottom, form-field-outer-spacing);
+    box-shadow: 0px 1px 5px 0px var(--tedi-alpha-20);
+    margin-top: var(--form-field-outer-spacing);
+    margin-bottom: var(--form-field-outer-spacing);
   }
 
   &__options {
@@ -82,23 +76,13 @@
     text-transform: uppercase;
     letter-spacing: 0px;
     padding: 8px 12px 4px; // variables didn't work here (not defined)
-
-    @include mixins.responsive-styles(
-      font-weight,
-      heading-subtitle-small-weight
-    );
-    @include mixins.responsive-styles(font-size, heading-subtitle-small-size);
-    @include mixins.responsive-styles(
-      line-height,
-      heading-subtitle-small-line-height
-    );
+    font-weight: var(--heading-subtitle-small-weight);
+    font-size: var(--heading-subtitle-small-size);
+    line-height: var(--heading-subtitle-small-line-height);
 
     &--selectable {
       & ~ .tedi-dropdown-item:not(.tedi-select__group-name) {
-        @include mixins.responsive-styles(
-          padding-left,
-          form-checkbox-radio-subitem-padding-left
-        );
+        padding-left: var(--form-checkbox-radio-subitem-padding-left);
       }
     }
   }
@@ -112,7 +96,7 @@
   &__multiselect-container {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--_inner-gap);
+    gap: var(--form-field-inner-spacing);
 
     &--single-row {
       overflow: hidden;

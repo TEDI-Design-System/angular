@@ -11,13 +11,23 @@ import { CheckboxComponent } from "./checkbox/checkbox.component";
 import { CheckboxGroupComponent } from "./checkbox-group/checkbox-group.component";
 import { CheckboxCardGroupComponent } from "./checkbox-card-group/checkbox-card-group.component";
 
+type StoryCheckboxComponent = CheckboxComponent & {
+  indeterminate: boolean;
+};
+
 export default {
   title: "Community/Form/Checkbox",
   component: CheckboxComponent,
+  parameters: {
+    status: {
+      type: ["existsInTediReady"],
+    },
+  },
   args: {
     size: "default",
     disabled: false,
     hasError: false,
+    indeterminate: false,
   },
   argTypes: {
     size: {
@@ -46,6 +56,11 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    indeterminate: {
+      control: { type: "boolean" },
+      description:
+        "Renders a alternate checked state, with a slash, which is neither toggled on or off, interacting with the checkbox will dismiss the indeterminate state.",
+    },
   },
   decorators: [
     moduleMetadata({
@@ -59,13 +74,16 @@ export default {
       ],
     }),
   ],
-} as Meta<CheckboxComponent>;
+} as Meta<StoryCheckboxComponent>;
 
 type CheckboxStory = StoryObj<CheckboxComponent>;
 
 export const Default: CheckboxStory = {
   render: (args) => {
-    const control = new FormControl({ value: true, disabled: !!args.disabled });
+    const control = new FormControl({
+      value: false,
+      disabled: !!args.disabled,
+    });
     return {
       props: { ...args, control },
       template: `
