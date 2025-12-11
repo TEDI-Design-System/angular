@@ -20,7 +20,7 @@ import { Dialog, DialogRef } from "@angular/cdk/dialog";
 import { NgTemplateOutlet } from "@angular/common";
 import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-contents-item.component";
 import { Router } from "@angular/router";
-import { Subscription } from "rxjs";
+import { Subject, takeUntil } from "rxjs";
 
 export type TableOfContentsPosition = "default" | "fixed" | "sticky";
 export type TableOfContentsBreakpoint =
@@ -98,13 +98,15 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   templateRef = viewChild<TemplateRef<unknown>>("defaultTemplate");
 
   private intersectionObservers: IntersectionObserver[] = [];
-  private itemSubscriptions: Subscription[] = [];
 
   private tableItems = contentChildren(TableOfContentsItemComponent, {
     descendants: true,
   });
   private router = inject(Router);
   private dialog = inject(Dialog);
+
+  private destroy$ = new Subject<void>();
+  private itemsChanged$ = new Subject<void>();
 
   activeElement = computed(() =>
     this.tableItems().find((item) => item.selected())
@@ -137,20 +139,21 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   constructor() {
     effect(() => {
       const items = this.tableItems();
-      this.cleanupItemSubscriptions();
+      this.itemsChanged$.next();
       this.hookItems(items);
     });
   }
 
   ngAfterContentInit(): void {
     const items = this.tableItems();
-    this.cleanupObservers();
     this.hookObservers(items);
   }
 
   ngOnDestroy(): void {
     this.cleanupObservers();
-    this.cleanupItemSubscriptions();
+
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   openMobileModal() {
@@ -198,19 +201,20 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
 
   private hookItems(items: readonly TableOfContentsItemComponent[]) {
     items.forEach((item) => {
-      const sub = item.itemSelected.subscribe(() => {
-        item.selected.set(true);
-        this.dialogRef?.close();
+      item.itemSelected
+        .pipe(takeUntil(this.destroy$), takeUntil(this.itemsChanged$))
+        .subscribe(() => {
+          item.selected.set(true);
+          this.dialogRef?.close();
 
-        items.forEach((other) => {
-          if (other !== item) {
-            other.selected.set(false);
-          }
+          items.forEach((other) => {
+            if (other !== item) {
+              other.selected.set(false);
+            }
+          });
+
+          this.seekTo(item.idTo());
         });
-        this.seekTo(item.idTo());
-      });
-
-      this.itemSubscriptions.push(sub);
     });
   }
 
@@ -268,11 +272,6 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
         break;
       }
     }
-  }
-
-  private cleanupItemSubscriptions() {
-    this.itemSubscriptions.forEach((sub) => sub.unsubscribe());
-    this.itemSubscriptions = [];
   }
 
   private cleanupObservers() {
