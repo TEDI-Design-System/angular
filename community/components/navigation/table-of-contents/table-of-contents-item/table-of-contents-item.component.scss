@@ -24,7 +24,7 @@
     border-left: var(--table-of-contents-active-item-border-width) solid
       transparent;
     border-radius: 0;
-    margin-left: var(--_table-of-contents-inset);
+    margin-left: - var(--_table-of-contents-inset);
 
     &:hover {
       text-decoration: underline;
