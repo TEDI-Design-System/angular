@@ -154,6 +154,7 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
 
     this.destroy$.next();
     this.destroy$.complete();
+    this.itemsChanged$.complete();
   }
 
   openMobileModal() {
