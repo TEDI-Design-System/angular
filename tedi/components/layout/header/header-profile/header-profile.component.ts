@@ -27,7 +27,7 @@ import {
 } from "../../../../services/breakpoint/breakpoint.service";
 import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
 import { PopoverTriggerDirective } from "../../../overlay/popover/popover-trigger/popover-trigger.directive";
-import { TediTranslationService } from "tedi/services";
+import { TediTranslationService } from "../../../../services/translation/translation.service";
 
 @Component({
   selector: "tedi-header-profile",
