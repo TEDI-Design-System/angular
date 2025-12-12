@@ -27,6 +27,7 @@ import {
 } from "../../../../services/breakpoint/breakpoint.service";
 import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
 import { PopoverTriggerDirective } from "../../../overlay/popover/popover-trigger/popover-trigger.directive";
+import { TediTranslationService } from "tedi/services";
 
 @Component({
   selector: "tedi-header-profile",
@@ -54,6 +55,7 @@ export class HeaderProfileComponent implements AfterContentInit {
   showDropdown = input<Breakpoint>();
 
   readonly breakpointService = inject(BreakpointService);
+  readonly translationService = inject(TediTranslationService);
   private readonly document = inject(DOCUMENT);
   private readonly host = inject(ElementRef);
   private readonly renderer = inject(Renderer2);

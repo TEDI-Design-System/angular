@@ -5,6 +5,11 @@
       [attr.data-open]="modalOpen()"
       [class]="buttonClass()"
       [variant]="buttonVariant()"
+      [attr.aria-label]="
+        breakpointService.isBelowBreakpoint('sm')() || !name()
+          ? translationService.track('header.profile')
+          : null
+      "
       (click)="handleModalOpen()"
     >
       @if (breakpointService.isBelowBreakpoint("sm")()) {
