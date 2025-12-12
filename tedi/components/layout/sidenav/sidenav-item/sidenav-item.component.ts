@@ -42,6 +42,7 @@ import { TooltipTriggerComponent } from "../../../overlay/tooltip/tooltip-trigge
     TooltipContentComponent,
   ],
   host: {
+    role: "menuitem",
     "[class]": "classes()",
   },
 })
