@@ -5,6 +5,19 @@
   flex-direction: column;
   gap: var(--dimensions-05);
 
+  &--active .table-of-contents__item-anchor {
+    border-color: var(--link-primary-default);
+    color: var(--link-primary-active);
+
+    &:hover {
+      border-color: var(--link-primary-active);
+    }
+  }
+
+  .table-of-contents__item .table-of-contents__item-anchor {
+    padding-left: var(--table-of-contents-padding-left-level-2);
+  }
+
   &-anchor {
     display: flex;
     align-items: flex-start;
@@ -29,18 +42,5 @@
     &:hover {
       text-decoration: underline;
     }
-
-    &--active {
-      border-color: var(--link-primary-default);
-      color: var(--link-primary-active);
-
-      &:hover {
-        border-color: var(--link-primary-active);
-      }
-    }
-  }
-
-  .table-of-contents__item .table-of-contents__item-anchor {
-    padding-left: var(--table-of-contents-padding-left-level-2);
   }
 }

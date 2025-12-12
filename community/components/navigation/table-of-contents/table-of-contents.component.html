@@ -25,10 +25,10 @@
         <h1 tedi-text modifiers="normal" class="table-of-contents__header">
           {{ heading() }}
 
-          <button tedi-button variant="neutral">
-            Button
+          <div tedi-button variant="neutral">
+            {{ "open" | tediTranslate }}
             <tedi-icon name="expand_more" />
-          </button>
+          </div>
         </h1>
       </button>
     </tedi-card-content>

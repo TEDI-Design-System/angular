@@ -28,16 +28,7 @@ export class TableOfContentsItemComponent {
     return classes.join(" ");
   });
 
-  anchorClasses = computed(() => {
-    const classes = ["table-of-contents__item-anchor"];
-    if (this.selected()) {
-      classes.push("table-of-contents__item-anchor--active");
-    }
-    return classes.join(" ");
-  });
-
   itemClick() {
     this.itemSelected.emit(this.idTo());
   }
-
 }

@@ -21,6 +21,7 @@ import { NgTemplateOutlet } from "@angular/common";
 import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-contents-item.component";
 import { Router } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
+import { TediTranslationPipe } from "tedi/services";
 
 export type TableOfContentsPosition = "default" | "fixed" | "sticky";
 export type TableOfContentsBreakpoint =
@@ -39,6 +40,7 @@ export type TableOfContentsBreakpoint =
     TextComponent,
     ButtonComponent,
     IconComponent,
+    TediTranslationPipe,
     NgTemplateOutlet,
   ],
 })
@@ -105,7 +107,7 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   private router = inject(Router);
   private dialog = inject(Dialog);
 
-  private destroy$ = new Subject<void>();
+  private update$ = new Subject<void>();
   private itemsChanged$ = new Subject<void>();
 
   activeElement = computed(() =>
@@ -152,9 +154,8 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   ngOnDestroy(): void {
     this.cleanupObservers();
 
-    this.destroy$.next();
-    this.destroy$.complete();
-    this.itemsChanged$.complete();
+    this.update$.next();
+    this.update$.complete();
   }
 
   openMobileModal() {
@@ -202,20 +203,18 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
 
   private hookItems(items: readonly TableOfContentsItemComponent[]) {
     items.forEach((item) => {
-      item.itemSelected
-        .pipe(takeUntil(this.destroy$), takeUntil(this.itemsChanged$))
-        .subscribe(() => {
-          item.selected.set(true);
-          this.dialogRef?.close();
+      item.itemSelected.pipe(takeUntil(this.update$)).subscribe(() => {
+        item.selected.set(true);
+        this.dialogRef?.close();
 
-          items.forEach((other) => {
-            if (other !== item) {
-              other.selected.set(false);
-            }
-          });
-
-          this.seekTo(item.idTo());
+        items.forEach((other) => {
+          if (other !== item) {
+            other.selected.set(false);
+          }
         });
+
+        this.seekTo(item.idTo());
+      });
     });
   }
 
