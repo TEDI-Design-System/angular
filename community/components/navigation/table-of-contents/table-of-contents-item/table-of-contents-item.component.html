@@ -1,0 +1,14 @@
+<div [class]="classes()">
+  <a
+    tedi-button
+    variant="neutral"
+    class="table-of-contents__item-anchor"
+    (click)="itemClick()"
+  >
+    <ng-content />
+  </a>
+
+  <ng-content
+    select="tedi-table-of-contents-item,tedi-table-of-contents-nested-wrapper"
+  />
+</div>

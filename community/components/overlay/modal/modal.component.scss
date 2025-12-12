@@ -68,3 +68,7 @@ $modal-breapoints: (xs, sm, md, lg, xl);
   border: var(--_modal-border);
   border-radius: var(--modal-radius);
 }
+
+.tedi-bottom-dialog {
+  bottom: 20%;
+}
