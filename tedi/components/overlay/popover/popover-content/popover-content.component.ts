@@ -24,8 +24,6 @@ let popoverTitleId = 0;
   imports: [NgTemplateOutlet, ClosingButtonComponent],
   host: {
     "[class]": "classes()",
-    role: "dialog",
-    "[attr.aria-labelledby]": "title() ? titleId : null",
   },
 })
 export class PopoverContentComponent {
@@ -44,7 +42,7 @@ export class PopoverContentComponent {
    */
   showClose = input(false);
 
-  private popover = inject(PopoverComponent, { optional: true });
+  private readonly popover = inject(PopoverComponent);
   titleId = `popover-title-${popoverTitleId++}`;
 
   classes = computed(() => {
@@ -56,6 +54,6 @@ export class PopoverContentComponent {
   });
 
   handleClose() {
-    this.popover?.floatUiComponent().hide();
+    this.popover.hidePopover(true);
   }
 }

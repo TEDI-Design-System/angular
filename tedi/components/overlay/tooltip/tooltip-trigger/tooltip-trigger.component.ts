@@ -25,7 +25,7 @@ import { TooltipComponent } from "../tooltip.component";
 export class TooltipTriggerComponent implements AfterContentChecked {
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private renderer = inject(Renderer2);
-  private tooltip = inject(TooltipComponent);
+  readonly tooltip = inject(TooltipComponent);
 
   @HostListener("click")
   onClick() {

@@ -9,9 +9,13 @@ tedi-popover {
   display: block;
 }
 
-tedi-popover-trigger {
-  display: inline-flex;
+[tedi-popover-trigger] {
   cursor: pointer;
+
+  &:focus-visible {
+    outline: var(--borders-02) solid var(--primary-500);
+    outline-offset: var(--borders-01);
+  }
 }
 
 float-ui-content {

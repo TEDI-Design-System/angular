@@ -21,8 +21,8 @@ import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-conten
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { PopoverComponent } from "../../overlay/popover/popover.component";
-import { PopoverTriggerComponent } from "../../overlay/popover/popover-trigger/popover-trigger.component";
 import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
+import { PopoverTriggerDirective } from "../../overlay/popover/popover-trigger/popover-trigger.directive";
 
 export interface DatePickerDay {
   date: Date;
@@ -62,7 +62,7 @@ let datePickerId = 0;
     ClosingButtonComponent,
     SeparatorComponent,
     PopoverComponent,
-    PopoverTriggerComponent,
+    PopoverTriggerDirective,
     PopoverContentComponent,
   ],
 })
