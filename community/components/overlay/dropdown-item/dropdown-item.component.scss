@@ -1,8 +1,7 @@
-@use "@tedi-design-system/core/mixins";
-
 .tedi-dropdown-item {
   --_background-color: var(--dropdown-item-default-background);
   --_color: var(--dropdown-item-default-text);
+  --_form-select-item-radius: var(--form-select-item-radius);
 
   display: block;
   width: 100%;
@@ -12,19 +11,11 @@
   text-align: left;
   border: none;
   border-radius: 0;
-
-  @include mixins.responsive-styles(font-family, family-primary);
-  @include mixins.responsive-styles(font-weight, body-regular-weight);
-  @include mixins.responsive-styles(font-size, body-regular-size);
-  @include mixins.responsive-styles(line-height, body-regular-line-height);
-  @include mixins.responsive-styles(
-    padding,
-    form-select-item-padding-y form-select-item-padding-x
-  );
-  @include mixins.responsive-styles(
-    --_form-select-item-radius,
-    form-select-item-radius
-  );
+  font-family: var(--family-default);
+  font-weight: var(--body-regular-weight);
+  font-size: var(--body-regular-size);
+  line-height: var(--body-regular-line-height);
+  padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
 
   &--active {
     &,

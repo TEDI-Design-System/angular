@@ -67,7 +67,7 @@ const statusToIconMap: Partial<Record<StatusBadgeStatus, string>> = {
  * The badge can be styled with different colors and variants, and it can optionally include an icon.
  *
  * <a href="https://www.figma.com/file/jWiRIXhHRxwVdMSimKX2FF/TEDI-Design-System-(draft)?type=design&node-id=2385-24154&m=dev" target="_BLANK">Figma ↗</a><br/>
- * <a href="https://tedi.tehik.ee/1ee8444b7/p/764a67-status-badge" target="_BLANK">ZeroHeight ↗</a>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/764a67-status-badge" target="_BLANK">ZeroHeight ↗</a>
  */
 
 const meta: Meta<StatusBadgeComponent> = {

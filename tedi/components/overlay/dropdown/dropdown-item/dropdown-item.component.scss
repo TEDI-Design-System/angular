@@ -1,0 +1,37 @@
+li[tedi-dropdown-item] {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: var(--dropdown-item-inner-spacing);
+  color: var(--dropdown-item-default-text);
+  background: var(--dropdown-item-default-background);
+  padding: var(--dropdown-item-padding-y, 8px) var(--dropdown-item-padding-x);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--dropdown-item-hover-text);
+    background: var(--dropdown-item-hover-background);
+  }
+
+  &:focus-visible {
+    outline: var(--borders-02) solid var(--tedi-primary-500);
+    outline-offset: calc(-1 * var(--borders-02));
+  }
+
+  &[aria-selected="true"] {
+    color: var(--dropdown-item-active-text);
+    background: var(--dropdown-item-active-background);
+
+    &:focus-visible {
+      color: var(--dropdown-item-default-text);
+      background: var(--dropdown-item-default-background);
+    }
+  }
+
+  &[aria-disabled="true"] {
+    color: var(--general-text-disabled);
+    background: var(--dropdown-item-disabled-background);
+    cursor: not-allowed;
+  }
+}

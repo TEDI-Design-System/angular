@@ -3,3 +3,5 @@ export * from "./directives";
 export * from "./services";
 export * from "./types";
 export * from "./helpers";
+export * from "./providers";
+export * from "./tokens";

@@ -4,13 +4,15 @@ import { Meta } from "@storybook/blocks";
 
 # Get started with @tehik-design-system/angular
 
+---
+
 ### 1. Installation
 
 ```bash
 npm install @tedi-design-system/angular
 ```
 
-### 2. Add angular animations provider.
+### 2. Add Angular animations provider
 
 ```ts
 import { provideAnimations } from "@angular/platform-browser/animations";
@@ -20,24 +22,140 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-### 3. Add our styles to your angular.json file.
+### 3. Add TEDI Provider (Theme + Language)
 
-```json
-"styles": ["node_modules/@tedi-design-system/angular/index.css"]
+TEDI provides theming and language resolution out of the box using cookies and server/browser detection.
+
+Add the provider to your app.config.ts:
+
+```ts
+import { provideTedi } from "@tedi-design-system/angular/tedi";
+
+export const appConfig: ApplicationConfig = {
+  providers: [...yourOtherProviders, provideAnimations(), provideTedi()],
+};
 ```
 
-### 4. Import component from "tedi" or "community" folder.
+Optional: Configure default theme or language. By default TEDI uses **"default"** theme and **"et"** language.
+
+```ts
+provideTedi({
+  theme: "dark",
+  language: "en",
+});
+```
+
+This will:
+
+- Resolve theme and language from cookies
+- Fall back to provided defaults
+- Apply correct values during SSR and browser hydration
+
+### 4. Add styles to angular.json
+
+```json
+"styles": [
+  "node_modules/@tedi-design-system/angular/index.css"
+]
+```
+
+### 5. Import components from the design system
+
+Components come from the tedi or community folders:
 
 ```ts
 import { SomeComponent } from "@tedi-design-system/angular/tedi";
-
 import { SomeComponent } from "@tedi-design-system/angular/community";
 ```
 
-### 5. Add import to your component and start using it.
+### 6. Use the imported components in your standalone components
 
 ```ts
 @Component({
-    imports: [SomeComponent]
+  selector: "app-example",
+  imports: [SomeComponent],
+  template: <SomeComponent />
 })
+
+export class ExampleComponent {}
+```
+
+---
+
+# Theming
+
+TEDI uses a theme class applied directly to the `<html>` element. Theme value is stored in **"tedi-theme"** cookie.
+
+Available themes:
+
+- `default`
+- `dark`
+- `rit`
+
+Classes applied:
+
+- `tedi-theme--default`
+- `tedi-theme--dark`
+- `tedi-theme--rit`
+
+Theme switching with ThemeService
+
+```ts
+import { Component } from "@angular/core";
+import { ThemeService, Theme } from "@tedi-design-system/angular/tedi";
+
+@Component({
+  selector: "app-theme-toggle",
+  template: `
+    <button (click)="setTheme('default')">Default</button>
+    <button (click)="setTheme('dark')">Dark</button>
+    <button (click)="setTheme('rit')">Rit</button>
+  `,
+})
+export class ThemeToggleComponent {
+  readonly themeService = inject(ThemeService);
+
+  setTheme(theme: Theme) {
+    this.themeService.theme.set(theme);
+  }
+}
+```
+
+This will automatically:
+
+- Update the `<html>` theme class
+- Save theme to cookie
+- Persist across refreshes
+- Work during SSR
+
+---
+
+# Language
+
+Language resolution works just like theming. Language value is stored in **"tedi-lang"** cookie.
+
+Available languages are defined in your translation service, e.g.:
+
+- `et`
+- `en`
+- `ru`
+
+---
+
+# Example of full ApplicationConfig
+
+```ts
+import { ApplicationConfig } from "@angular/core";
+import { provideAnimations } from "@angular/platform-browser/animations";
+import { provideTedi } from "@tedi-design-system/angular";
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideAnimations(),
+    provideTedi({
+      theme: "dark",
+      language: "en",
+    }),
+  ],
+};
 ```

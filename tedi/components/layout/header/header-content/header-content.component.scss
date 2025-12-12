@@ -1,10 +1,7 @@
-@use "@tedi-design-system/core/mixins";
-
 tedi-header-content {
   display: flex;
   align-items: center;
-
-  @include mixins.responsive-styles(gap, layout-header-items-center-gutter-x);
+  gap: var(--layout-header-items-center-gutter-x);
 
   a,
   .tedi-link {
@@ -19,7 +16,7 @@ tedi-header-content {
     }
 
     &:focus-visible {
-      outline: var(--borders-02) solid var(--primary-500);
+      outline: var(--borders-02) solid var(--tedi-primary-500);
       outline-offset: var(--borders-01);
     }
   }

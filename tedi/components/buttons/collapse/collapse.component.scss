@@ -10,9 +10,9 @@ $transition-duration: 300ms;
   display: flex;
   align-items: center;
   cursor: pointer;
+  gap: var(--link-inner-spacing-x);
 
   @include mixins.button-reset;
-  @include mixins.responsive-styles(gap, link-inner-spacing-x);
 
   &--text {
     text-decoration: underline;
@@ -30,9 +30,8 @@ $transition-duration: 300ms;
   justify-content: center;
   border: var(--borders-01) solid var(--button-main-secondary-border-default);
   border-radius: 100%;
-
-  @include mixins.responsive-styles(width, button-sm-icon-size);
-  @include mixins.responsive-styles(height, button-sm-icon-size);
+  width: var(--button-sm-icon-size);
+  height: var(--button-sm-icon-size);
 }
 
 .collapse__icon {

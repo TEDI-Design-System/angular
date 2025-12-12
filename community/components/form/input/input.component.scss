@@ -1,5 +1,3 @@
-@use "@tedi-design-system/core/mixins";
-
 @mixin textfield-focus($border-color: null) {
   @if $border-color {
     &:focus,
@@ -20,6 +18,12 @@
   --_color: var(--form-input-text-filled);
   --_background-color: var(--form-input-background-default);
   --_placeholder-color: var(--form-input-text-placeholder);
+  --_border-radius: var(--form-field-radius);
+  --_font-size: var(--body-regular-size);
+  --_line-height: var(--body-regular-line-height);
+  --_padding-y: var(--form-field-padding-y-md-default);
+  --_padding-x: var(--form-field-padding-x-md-default);
+  --_form-field-outer-gap: var(--form-field-outer-spacing);
 
   padding: var(--_padding-y) var(--_padding-x);
   border-radius: var(--_border-radius);
@@ -30,35 +34,8 @@
   color: var(--_color);
   background-color: var(--_background-color);
   margin-bottom: var(--_form-field-outer-gap);
+  font-family: var(--family-default);
 
-  @include mixins.responsive-styles(
-    font-family,
-    family-primary,
-    $exclude: tablet
-  );
-  @include mixins.responsive-styles(--_border-radius, form-field-radius);
-  @include mixins.responsive-styles(
-    --_font-size,
-    body-regular-size,
-    $exclude: tablet
-  );
-  @include mixins.responsive-styles(
-    --_line-height,
-    body-regular-line-height,
-    $exclude: tablet
-  );
-  @include mixins.responsive-styles(
-    --_padding-y,
-    form-field-padding-y-md-default
-  );
-  @include mixins.responsive-styles(
-    --_padding-x,
-    form-field-padding-x-md-default
-  );
-  @include mixins.responsive-styles(
-    --_form-field-outer-gap,
-    form-field-outer-spacing
-  );
   @include textfield-focus(var(--form-input-border-hover));
 
   &:hover {
@@ -87,7 +64,7 @@
     @include textfield-focus(var(--form-general-feedback-success-border));
   }
   &--small {
-    @include mixins.responsive-styles(--_padding-y, form-field-padding-y-sm);
+    --_padding-y: var(--form-field-padding-y-sm);
     // small padding X is same as default
   }
 }

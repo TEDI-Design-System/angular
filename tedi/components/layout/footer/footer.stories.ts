@@ -15,7 +15,7 @@ import { LinkComponent } from "@tedi-design-system/angular/tedi";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.12.16--work-in-progress-?node-id=6459-181755&m=dev" target="_BLANK">Figma ↗</a><br/>
- * <a href="https://tedi.tehik.ee/1ee8444b7/p/512563-footer" target="_BLANK">Zeroheight ↗</a>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/512563-footer" target="_BLANK">Zeroheight ↗</a>
  *
  * The footer component is used to display the footer of the page. It can contain links, logos, and other content. The footer is responsive and adapts to different screen sizes.
  * It can be customized with different headings, icons, and link colors.

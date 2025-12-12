@@ -1,5 +1,3 @@
-@use "@tedi-design-system/core/mixins";
-
 .tedi-table-styles {
   --_table-bg: var(--table-default);
   --_table-border: var(--table-border);
@@ -8,30 +6,17 @@
   --_table-hover: var(--table-hover);
   --_table-color: var(--general-text-primary);
   --_table-header-color: var(--general-text-tertiary);
+  --_table-radius: var(--table-radius);
+  --_table-header-padding-y: var(--table-header-padding-y);
+  --_table-header-padding-x: var(--table-header-padding-x);
+  --_table-data-padding-y: var(--table-data-padding-y);
+  --_table-data-padding-x: var(--table-data-padding-x);
 
   display: block;
   background: var(--_table-bg);
   border-radius: var(--_table-radius);
   border: 1px solid var(--_table-border);
   overflow: hidden;
-
-  @include mixins.responsive-styles(--_table-radius, table-radius);
-  @include mixins.responsive-styles(
-    --_table-header-padding-y,
-    table-header-padding-y
-  );
-  @include mixins.responsive-styles(
-    --_table-header-padding-x,
-    table-header-padding-x
-  );
-  @include mixins.responsive-styles(
-    --_table-data-padding-y,
-    table-data-padding-y
-  );
-  @include mixins.responsive-styles(
-    --_table-data-padding-x,
-    table-data-padding-x
-  );
 
   table {
     border-collapse: collapse;
@@ -44,11 +29,10 @@
   th,
   td {
     text-align: left;
-
-    @include mixins.responsive-styles(font-family, family-primary);
-    @include mixins.responsive-styles(font-weight, body-regular-weight);
-    @include mixins.responsive-styles(font-size, body-regular-size);
-    @include mixins.responsive-styles(line-height, body-regular-line-height);
+    font-family: var(--family-default);
+    font-weight: var(--body-regular-weight);
+    font-size: var(--body-regular-size);
+    line-height: var(--body-regular-line-height);
   }
 
   th {
@@ -101,21 +85,9 @@
   }
 
   &--sm {
-    @include mixins.responsive-styles(
-      --_table-header-padding-y,
-      table-header-padding-y-sm
-    );
-    @include mixins.responsive-styles(
-      --_table-header-padding-x,
-      table-header-padding-x-sm
-    );
-    @include mixins.responsive-styles(
-      --_table-data-padding-y,
-      table-data-padding-y-sm
-    );
-    @include mixins.responsive-styles(
-      --_table-data-padding-x,
-      table-data-padding-x-sm
-    );
+    --_table-header-padding-y: var(--table-header-padding-y-sm)
+      --_table-header-padding-x: var(--table-header-padding-x-sm);
+    --_table-data-padding-y: var(--table-data-padding-y-sm);
+    --_table-data-padding-x: var(--table-data-padding-x-sm);
   }
 }

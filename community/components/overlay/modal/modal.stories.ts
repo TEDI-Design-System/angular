@@ -104,7 +104,113 @@ class StorybookModalComponent implements OnInit {
  *
  * It is also possible to re-use **ModalFooterComponent** and **ModalHeaderComponent** in your own components
  * with custom arguments, or modified inside the modal component's slots.
- * For convenience, you can supply args to all modal components via the `args` input in cdk dialog's `open()` function's option object.
+ * For convenience, you can supply args to all modal components via the `args` input in cdk dialog's `open()` function's option object, which you can consume in
+ *
+ * Keep in mind, **ModalComponent** will not work on it's own, it's intended for the user to create their own wrapper for it that makes use of **ModalHeaderComponent**,
+ * **ModalFooterComponent** and **ModalComponent** in a separate component, that you will provide into the `this.dialog.open()` call
+ *
+ *<details>
+ *<summary>Example opening button</summary>
+ *```ts
+ *@Component({
+ *  selector: "storybook-open-modal",
+ *  template: '<button tedi-button (click)="openDialog()">
+ *    Open Select modal
+ *  </button> ',
+ *  imports: [ButtonComponent],
+ *})
+ *class ModalOpenComponent {
+ *  args = input<DialogData>();
+ *  dialog = inject(Dialog);
+ *
+ *  openDialog() {
+ *    this.dialog.open(StorybookModalComponent, {
+ *      data: this.args(),
+ *    });
+ *  }
+ *}
+ *```
+ *
+ *</details>
+ *
+ *
+ *<details>
+ *<summary>Example complete modal</summary>
+ *```ts
+ *@Component({
+ *  selector: "storybook-modal",
+ *  template: '
+ *    <tedi-modal [maxWidth]="args()?.maxWidth" [variant]="args()?.variant">
+ *      <tedi-modal-header
+ *        [title]="args()?.title"
+ *        [feedback]="args()?.feedback"
+ *        [closeButton]="args()?.closeButton"
+ *      />
+ *
+ *      <label tedi-label [for]="selectOneId">Label</label>
+ *      <tedi-select [inputId]="selectOneId" state="default">
+ *        @for (option of options; track option.value) {
+ *          <tedi-select-option [value]="option.value" [label]="option.label" />
+ *        }
+ *      </tedi-select>
+ *
+ *      <label tedi-label [for]="selectTwoId">Label</label>
+ *      <tedi-select [inputId]="selectTwoId" state="default">
+ *        @for (option of options; track option.value) {
+ *          <tedi-select-option [value]="option.value" [label]="option.label" />
+ *        }
+ *      </tedi-select>
+ *
+ *      <tedi-modal-footer
+ *        footer-slot
+ *        [buttons]="args()?.buttons"
+ *        [align]="args()?.align"
+ *      />
+ *    </tedi-modal>
+ *  ',
+ *  imports: [
+ *    SelectComponent,
+ *    SelectOptionComponent,
+ *    ModalComponent,
+ *    ModalHeaderComponent,
+ *    ModalFooterComponent,
+ *    FeedbackTextComponent,
+ *    LabelComponent,
+ *  ],
+ *})
+ *class StorybookModalComponent implements OnInit {
+ *  readonly options = [
+ *    { value: "1", label: "Option 1" },
+ *    { value: "2", label: "Option 2" },
+ *    { value: "3", label: "Option 3" },
+ *    { value: "4", label: "Option 4" },
+ *    { value: "5", label: "Option 5" },
+ *  ];
+ *
+ *  readonly args = model<DialogData>();
+ *
+ *  selectOneId?: string;
+ *  selectTwoId?: string;
+ *
+ *  ngOnInit(): void {
+ *    this.selectOneId = indexId("select-one");
+ *    this.selectTwoId = indexId("select-two");
+ *  }
+ *}
+ *```
+ *</details>
+ *
+ *<details>
+ *<summary>Example opening action</summary>
+ *```ts
+ *import { Dialog } from "@angular/cdk/dialog";
+ * // Inside your component
+ * dialog = inject(Dialog);
+ * this.dialog.open(MyModalComponent, {data})
+ *```
+ *
+ *</details>
+ *
  */
 const meta: Meta<DialogData> = {
   title: "Community/Overlay/Modal",
@@ -114,6 +220,11 @@ const meta: Meta<DialogData> = {
       imports: [ModalOpenComponent, StorybookModalComponent],
     }),
   ],
+  parameters: {
+    status: {
+      type: ["existsInTediReady"],
+    },
+  },
   argTypes: {
     maxWidth: {
       control: {

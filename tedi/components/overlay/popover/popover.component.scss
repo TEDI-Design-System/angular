@@ -1,5 +1,3 @@
-@use "@tedi-design-system/core/mixins";
-
 $popover-max-width: (
   "none": none,
   "small": 240px,
@@ -20,21 +18,23 @@ float-ui-content {
   .float-ui-container-popover {
     padding: 0;
     border: var(--borders-01) solid var(--popover-border);
-    box-shadow: 0px 1px 5px 0px var(--alpha-20, rgba(0, 0, 0, 0.2));
+    border-radius: var(--popover-radius-rounded);
+    box-shadow: 0px 1px 5px 0px var(--tedi-alpha-20, rgba(0, 0, 0, 0.2));
+    z-index: var(--z-index-dropdown);
 
-    @include mixins.responsive-styles(border-radius, popover-radius-rounded);
-
-    .float-ui-arrow {
-      width: 24px;
-      height: 24px;
-      background: var(--popover-background);
-      filter: drop-shadow(0 0 5px var(--alpha-20));
-      clip-path: inset(0px -5px -5px 0px);
-      z-index: var(--z-index-dropdown);
+    &--arrow {
+      .float-ui-arrow {
+        width: 24px;
+        height: 24px;
+        background: var(--popover-background);
+        filter: drop-shadow(0 0 5px var(--tedi-alpha-20));
+        clip-path: inset(0px -5px -5px 0px);
+        z-index: var(--z-index-dropdown);
+      }
     }
 
     &--border {
-      @include mixins.responsive-styles(border-radius, popover-radius-rounded);
+      border-radius: var(--popover-radius-rounded);
 
       .float-ui-arrow {
         width: 18px;
@@ -118,11 +118,9 @@ float-ui-content {
   flex-direction: column;
   background: var(--popover-background);
   color: var(--popover-text);
-  z-index: var(--z-index-dropdown);
-
-  @include mixins.responsive-styles(gap, layout-grid-gutters-08);
-  @include mixins.responsive-styles(padding, popover-padding-sm);
-  @include mixins.responsive-styles(border-radius, popover-radius-rounded);
+  border-radius: var(--popover-radius-rounded);
+  gap: var(--layout-grid-gutters-08);
+  padding: var(--popover-padding-sm);
 
   @each $name, $width in $popover-max-width {
     &--#{$name} {
@@ -133,16 +131,14 @@ float-ui-content {
   &__head {
     display: flex;
     justify-content: space-between;
-
-    @include mixins.responsive-styles(gap, layout-grid-gutters-08);
+    gap: var(--layout-grid-gutters-08);
 
     > div {
       display: flex;
       flex-direction: column;
       flex: 1 1 0;
       min-width: 0;
-
-      @include mixins.responsive-styles(gap, layout-grid-gutters-08);
+      gap: var(--layout-grid-gutters-08);
     }
   }
 

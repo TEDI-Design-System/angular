@@ -1,5 +1,3 @@
-@use "@tedi-design-system/core/mixins";
-
 @mixin textfield-focus($border-color: null) {
   @if $border-color {
     &:focus,
@@ -17,11 +15,9 @@
 
 .tedi-search {
   --_border-color: var(--form-input-border-default);
-
-  @include mixins.responsive-styles(
-    --_form-field-outer-gap,
-    form-field-outer-spacing
-  );
+  --_form-field-outer-gap: var(--form-field-outer-spacing);
+  --_border-radius: var(--form-field-radius);
+  --_padding: var(--form-field-padding-y-md-default);
 
   &__container {
     display: flex;
@@ -30,13 +26,7 @@
     border-color: var(--_border-color);
     border-radius: var(--_border-radius);
     margin-bottom: var(--_form-field-outer-gap);
-
-    @include mixins.responsive-styles(--_border-radius, form-field-radius);
-    @include mixins.responsive-styles(gap, form-field-inner-spacing);
-    @include mixins.responsive-styles(
-      --_padding,
-      form-field-padding-y-md-default
-    );
+    gap: var(--form-field-inner-spacing);
 
     &:hover {
       --_border-color: var(--form-input-border-hover);
@@ -84,20 +74,19 @@
     border-radius: var(--_border-radius);
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
-    letter-spacing: 0px;
-
-    @include mixins.responsive-styles(font-weight, body-regular-weight);
-    @include mixins.responsive-styles(font-size, body-regular-size);
-    @include mixins.responsive-styles(line-height, body-regular-line-height);
+    letter-spacing: 0;
+    font-weight: var(--body-regular-weight);
+    font-size: var(--body-regular-size);
+    line-height: var(--body-regular-line-height);
   }
 
   &__trigger.tedi-button {
+    --_border-radius: var(--button-radius-sm);
+
     border-radius: var(--_border-radius);
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     align-self: stretch;
-
-    @include mixins.responsive-styles(--_border-radius, button-radius-sm);
   }
 
   &__suffix {
@@ -105,8 +94,7 @@
     align-self: stretch;
     align-items: center;
     padding: 0 var(--_padding);
-
-    @include mixins.responsive-styles(gap, layout-grid-gutters-04);
+    gap: var(--layout-grid-gutters-04);
 
     .tedi-search--with-button & {
       padding: 0;
@@ -120,14 +108,11 @@
   }
 
   &__panel {
+    --_form-outer-gap: var(--form-field-outer-spacing);
+
     margin: var(--_form-outer-gap) 0;
     max-height: 300px;
     overflow-y: auto;
-
-    @include mixins.responsive-styles(
-      --_form-outer-gap,
-      form-field-outer-spacing
-    );
   }
 
   &__footer-content:empty {
@@ -135,7 +120,7 @@
   }
 
   &--small .tedi-search__container {
-    @include mixins.responsive-styles(--_padding, form-field-padding-y-sm);
+    --_padding: var(--form-field-padding-y-sm);
   }
 
   &--large {
@@ -147,13 +132,13 @@
         // .material-symbols is overriding this
         // and the icon is size "normal" instead 24
         .tedi-icon--size-24 {
-          font-size: var(--icon-05-desktop);
+          font-size: var(--icon-05);
         }
       }
     }
 
     & .tedi-search__container {
-      @include mixins.responsive-styles(--_padding, form-field-padding-y-lg);
+      --_padding: var(--form-field-padding-y-lg);
     }
   }
 

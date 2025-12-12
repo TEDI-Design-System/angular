@@ -1,14 +1,7 @@
-@use "@tedi-design-system/core/mixins";
-
 .tedi-feedback-text {
   display: block;
   color: var(--general-text-tertiary);
-
-  @include mixins.responsive-styles(
-    font-size,
-    body-small-regular-size,
-    $exclude: tablet
-  );
+  font-size: var(--body-small-regular-size);
 
   &--valid {
     color: var(--general-status-success-text);
