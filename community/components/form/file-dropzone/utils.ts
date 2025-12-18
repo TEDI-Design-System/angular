@@ -1,5 +1,10 @@
 import { IECFileSize, SIFileSize } from "./constants";
-import { FileDropzone, SizeDisplayStandard } from "./types";
+import {
+  FileDropzone,
+  FileDropzoneError,
+  FileDropzoneErrorCode,
+  SizeDisplayStandard,
+} from "./types";
 
 export function formatBytes(
   bytes: number,
@@ -66,14 +71,18 @@ export function validateFileSize(
   file: FileDropzone,
   standard: SizeDisplayStandard,
   translate: (key: string, ...args: unknown[]) => string
-) {
+): FileDropzoneError | undefined {
   if (maxSize && file.size > maxSize) {
     const maxSizeMB = formatBytes(maxSize, standard);
-    return translate(
-      `file-upload.size-rejected-extended`,
-      file.name,
-      maxSizeMB
-    );
+    return {
+      code: FileDropzoneErrorCode.FILE_TOO_LARGE,
+      fileName: file.name,
+      message: translate(
+        `file-upload.size-rejected-extended`,
+        file.name,
+        maxSizeMB
+      ),
+    };
   }
   return undefined;
 }
@@ -84,16 +93,14 @@ export function validateFileType(
   file: FileDropzone,
   standard: SizeDisplayStandard,
   translate: (key: string, ...args: unknown[]) => string
-) {
-  console.log("validating filetype", acceptFileTypes, file.type);
-
+): FileDropzoneError | undefined {
   if (acceptFileTypes) {
     const validTypes = acceptFileTypes
       .split(",")
       .map((type) => type.trim().toLowerCase());
 
     const fileType = file.type.toLowerCase();
-    const fileName = file.name.toLowerCase() || "";
+    const fileName = file.name.toLowerCase();
 
     const matches = validTypes.some((type) => {
       if (type.startsWith(".")) {
@@ -106,29 +113,16 @@ export function validateFileType(
     });
 
     if (!matches) {
-      return translate(
-        "file-upload.extension-rejected-extended",
-        file.name,
-        acceptFileTypes
-      );
+      return {
+        code: FileDropzoneErrorCode.INVALID_FILE_TYPE,
+        fileName: file.name,
+        message: translate(
+          "file-upload.extension-rejected-extended",
+          file.name,
+          acceptFileTypes
+        ),
+      };
     }
   }
   return undefined;
 }
-
-// export function validatorWrapper(
-//   validator: DropzoneValidatorFunction,
-//   maxSize: number,
-//   acceptFileTypes: string,
-//   file: FileDropzone[],
-//   standard: SizeDisplayStandard,
-//   translate: (key: string, ...args: unknown[]) => string
-// ): ValidationErrors | null {
-//   if (!file?.length) {
-//     return [];
-//   }
-
-//   return file.map((file) =>
-//     validator(maxSize, acceptFileTypes, file, standard, translate)
-//   );
-// }
