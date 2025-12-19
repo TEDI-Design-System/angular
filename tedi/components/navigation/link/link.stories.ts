@@ -73,6 +73,14 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
+    target: {
+      description: "Target attribute for the link",
+      control: "text",
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+      },
+    },
     ...createBreakpointArgTypes("LinkInputs"),
   },
 } as Meta<LinkComponent>;

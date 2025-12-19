@@ -13,6 +13,7 @@ import {
   BreakpointInputs,
   BreakpointService,
 } from "../../../services/breakpoint/breakpoint.service";
+import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 
 export type LinkVariant = "default" | "inverted";
 export type LinkSize = "default" | "small";
@@ -32,6 +33,10 @@ export type LinkInputs = {
    * @default true
    */
   underline: boolean;
+  /**
+   * Target attribute for the link (e.g., "_blank", "_self", "_parent", "_top").
+   */
+  target?: string;
 };
 
 @Component({
@@ -41,6 +46,7 @@ export type LinkInputs = {
   styleUrl: "./link.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  imports: [TediTranslationPipe],
   host: {
     "[class]": "classes()",
     "[attr.tabIndex]": "0",
@@ -52,6 +58,7 @@ export class LinkComponent
   variant = input<LinkVariant>("default");
   size = input<LinkSize>("default");
   underline = input<boolean>(true);
+  target = input<string | undefined>();
 
   xs = input<LinkInputs>();
   sm = input<LinkInputs>();
