@@ -53,7 +53,7 @@
       var(--_sidenav-item-padding-y) var(--_sidenav-item-padding-left);
 
     &:focus-visible {
-      outline: var(--borders-01) solid var(--neutral-100);
+      outline: var(--borders-01) solid var(--tedi-neutral-100);
       outline-offset: -2px;
     }
 
@@ -92,7 +92,7 @@
 
     &:focus-visible {
       .tedi-sidenav-item__caret-container {
-        outline: var(--borders-02) solid var(--neutral-100);
+        outline: var(--borders-02) solid var(--tedi-neutral-100);
         outline-offset: var(--borders-01);
       }
     }
