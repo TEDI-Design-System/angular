@@ -13,7 +13,7 @@ import { PopoverComponent } from "../popover.component";
   host: {
     tabindex: "0",
     role: "button",
-    "aria-haspopuo": "dialog",
+    "aria-haspopup": "dialog",
     "[id]": "popover.containerId() + '_trigger'",
     "[attr.aria-expanded]": "popover.floatUiComponent().state",
     "[attr.aria-controls]": "popover.containerId()",

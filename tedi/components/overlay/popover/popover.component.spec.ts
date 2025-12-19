@@ -79,7 +79,7 @@ describe("PopoverComponent", () => {
 
   it('should render trigger with aria-haspopup="dialog"', () => {
     const trigger = hostEl.querySelector("[tedi-popover-trigger]");
-    expect(trigger?.getAttribute("aria-haspopuo")).toBe("dialog");
+    expect(trigger?.getAttribute("aria-haspopup")).toBe("dialog");
   });
 
   it('should have appendTo="body" on float-ui-content', () => {

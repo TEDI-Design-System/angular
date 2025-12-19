@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { NO_ERRORS_SCHEMA } from "@angular/core";
+import { NO_ERRORS_SCHEMA, signal } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 import { HeaderProfileComponent } from "./header-profile.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
@@ -64,5 +64,38 @@ describe("HeaderProfileComponent", () => {
     documentMock.body.dispatchEvent(outsideEvent);
 
     expect(component.modalOpen()).toBe(false);
+  });
+
+  describe("buttonVariant", () => {
+    it("should return 'neutral' when below 'sm' breakpoint", () => {
+      const mockSignal = signal(true);
+      jest
+        .spyOn(component.breakpointService, "isBelowBreakpoint")
+        .mockReturnValue(mockSignal);
+
+      expect(component.buttonVariant()).toBe("neutral");
+    });
+
+    it("should return 'neutral' when name is empty", () => {
+      const mockSignal = signal(false);
+      jest
+        .spyOn(component.breakpointService, "isBelowBreakpoint")
+        .mockReturnValue(mockSignal);
+      fixture.componentRef.setInput("name", "");
+      fixture.detectChanges();
+
+      expect(component.buttonVariant()).toBe("neutral");
+    });
+
+    it("should return 'secondary' when above 'sm' breakpoint and name is provided", () => {
+      const mockSignal = signal(false);
+      jest
+        .spyOn(component.breakpointService, "isBelowBreakpoint")
+        .mockReturnValue(mockSignal);
+      fixture.componentRef.setInput("name", "John Doe");
+      fixture.detectChanges();
+
+      expect(component.buttonVariant()).toBe("secondary");
+    });
   });
 });
