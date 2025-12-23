@@ -27,10 +27,19 @@ describe("DatePickerComponent", () => {
     component = fixture.componentInstance;
     el = fixture.nativeElement;
 
+    const mockFloatUiElement = document.createElement("div");
+    const mockContainer = document.createElement("div");
+    mockContainer.className = "float-ui-container-popover";
+    mockContainer.id = "mock-popover-container";
+    mockFloatUiElement.appendChild(mockContainer);
+
     jest.spyOn(component.popover(), "floatUiComponent").mockReturnValue({
       state: false,
       show: jest.fn(),
       hide: jest.fn(),
+      elRef: {
+        nativeElement: mockFloatUiElement,
+      },
     } as unknown as NgxFloatUiContentComponent);
 
     fixture.detectChanges();

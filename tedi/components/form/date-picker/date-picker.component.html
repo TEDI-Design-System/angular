@@ -39,22 +39,21 @@
     position="bottom-end"
     [withArrow]="false"
   >
-    <tedi-popover-trigger>
-      <button
-        tedi-button
-        type="button"
-        variant="neutral"
-        size="small"
-        class="tedi-date-picker__toggle"
-        [attr.aria-label]="
-          translationService.track('date-picker.open-calendar')()
-        "
-        [disabled]="inputDisabled()"
-        (click)="openCalendar()"
-      >
-        <tedi-icon name="calendar_today" size="inherit" />
-      </button>
-    </tedi-popover-trigger>
+    <button
+      tedi-button
+      tedi-popover-trigger
+      type="button"
+      variant="neutral"
+      size="small"
+      class="tedi-date-picker__toggle"
+      [attr.aria-label]="
+        translationService.track('date-picker.open-calendar')()
+      "
+      [disabled]="inputDisabled()"
+      (click)="openCalendar()"
+    >
+      <tedi-icon name="calendar_today" size="inherit" />
+    </button>
     <tedi-popover-content maxWidth="none" style="padding: 0">
       <div
         class="tedi-date-picker__calendar"

@@ -32,15 +32,16 @@ describe("PopoverContentComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let hostDE: DebugElement;
   let popoverMock: Partial<PopoverComponent>;
-  let hideSpy: jest.Mock;
+  let hidePopoverSpy: jest.Mock;
 
   beforeEach(() => {
-    hideSpy = jest.fn();
+    hidePopoverSpy = jest.fn();
 
     popoverMock = {
+      hidePopover: hidePopoverSpy,
       floatUiComponent: (() =>
         ({
-          hide: hideSpy,
+          hide: jest.fn(),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }) as unknown as NgxFloatUiContentComponent) as any,
     };
@@ -61,10 +62,6 @@ describe("PopoverContentComponent", () => {
   it("should create component", () => {
     const comp = hostDE.componentInstance as PopoverContentComponent;
     expect(comp).toBeTruthy();
-  });
-
-  it('should have role="dialog" on host', () => {
-    expect(hostDE.attributes["role"]).toBe("dialog");
   });
 
   it("should apply default classes (small)", () => {
@@ -100,9 +97,9 @@ describe("PopoverContentComponent", () => {
       const h4 = hostDE.query(By.css("h4"));
       expect(h4).toBeTruthy();
       expect(h4.nativeElement.textContent).toBe("My Title");
-      // aria-labelledby should match id
       const id = h4.attributes["id"];
-      expect(hostDE.attributes["aria-labelledby"]).toBe(id);
+      expect(id).toBeTruthy();
+      expect(id).toMatch(/^popover-title-\d+$/);
       // no button
       expect(hostDE.query(By.css("button"))).toBeNull();
     });
@@ -138,13 +135,13 @@ describe("PopoverContentComponent", () => {
     });
   });
 
-  it("should call popover.floatUiComponent.hide() on close click", () => {
+  it("should call popover.hidePopover(true) on close click", () => {
     fixture.componentInstance.showClose = true;
     fixture.detectChanges();
 
     const btnDe = hostDE.query(By.css("button"));
     btnDe.triggerEventHandler("click", {});
 
-    expect(hideSpy).toHaveBeenCalled();
+    expect(hidePopoverSpy).toHaveBeenCalledWith(true);
   });
 });

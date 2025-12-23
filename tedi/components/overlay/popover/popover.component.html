@@ -1,19 +1,14 @@
-<div
+<ng-content select="[tedi-popover-trigger]" />
+<float-ui-content
+  #floatUiComponent
+  looseTrigger="none"
+  ariaRole="dialog"
+  appendTo="body"
   [floatUiLoose]="floatUiComponent"
+  [targetElement]="popoverTrigger().host.nativeElement"
   [loosePlacement]="position()"
-  [looseTrigger]="openWith()"
-  [hideOnClickOutside]="dismissible()"
-  [hideOnScroll]="hideOnScroll()"
   [applyClass]="floatUiContainerClass()"
   [disableAnimation]="true"
-  appendTo="body"
-  aria-haspopup="dialog"
-  style="display: inline-flex"
-  (onHidden)="onHide()"
-  (onShown)="onOpen()"
 >
-  <ng-content select="tedi-popover-trigger" />
-</div>
-<float-ui-content #floatUiComponent>
   <ng-content select="tedi-popover-content" />
 </float-ui-content>
