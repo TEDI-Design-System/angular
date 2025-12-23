@@ -15,13 +15,17 @@ import {
   CardComponent,
   CardContentComponent,
 } from "community/components/cards";
-import { TextComponent, IconComponent, ButtonComponent } from "tedi/components";
+import {
+  TextComponent,
+  IconComponent,
+  ButtonComponent,
+  TediTranslationPipe,
+} from "@tedi-design-system/angular/tedi";
 import { Dialog, DialogRef } from "@angular/cdk/dialog";
 import { NgTemplateOutlet } from "@angular/common";
 import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-contents-item.component";
 import { Router } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
-import { TediTranslationPipe } from "tedi/services";
 
 export type TableOfContentsPosition = "default" | "fixed" | "sticky";
 export type TableOfContentsBreakpoint =
@@ -111,7 +115,7 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   private itemsChanged$ = new Subject<void>();
 
   activeElement = computed(() =>
-    this.tableItems().find((item) => item.selected())
+    this.tableItems().find((item) => item.selected()),
   );
 
   activeId = computed(() => this.activeElement()?.idTo());
@@ -121,7 +125,7 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
     classes.push(`table-of-contents--position-${this.position() ?? "default"}`);
     if (this.modalBreakpoint() !== "never") {
       classes.push(
-        `table-of-contents--modal-breakpoint-${this.modalBreakpoint()}`
+        `table-of-contents--modal-breakpoint-${this.modalBreakpoint()}`,
       );
     }
     if (this.isOpen()) {
@@ -133,7 +137,7 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   footerClasses = computed(() => {
     const classes = ["table-of-contents__footer"];
     classes.push(
-      `table-of-contents__footer--modal-breakpoint-${this.modalBreakpoint()}`
+      `table-of-contents__footer--modal-breakpoint-${this.modalBreakpoint()}`,
     );
     return classes.join(" ");
   });

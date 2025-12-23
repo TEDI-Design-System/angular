@@ -5,7 +5,7 @@ import {
   signal,
   EventEmitter,
 } from "@angular/core";
-import { ButtonComponent } from "tedi/components";
+import { ButtonComponent } from "@tedi-design-system/angular/tedi";
 
 @Component({
   selector: "tedi-table-of-contents-item",
