@@ -1,3 +1,26 @@
+# [5.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-4.2.0-rc.1...angular-5.0.0-rc.1) (2025-12-23)
+
+
+### Bug Fixes
+
+* **base-colors:** fix story with new css variables [#240](https://github.com/TEDI-Design-System/angular/issues/240) ([01312c8](https://github.com/TEDI-Design-System/angular/commit/01312c8304fe558def3a0b29a8119c40d427792b))
+* **header-profile:** add aria-label to button [#206](https://github.com/TEDI-Design-System/angular/issues/206) ([e9d4585](https://github.com/TEDI-Design-System/angular/commit/e9d458594f02cd16bdb7f7a7e898c25d5687e41f))
+* **header-profile:** fix imports and tests [#206](https://github.com/TEDI-Design-System/angular/issues/206) ([f2d0694](https://github.com/TEDI-Design-System/angular/commit/f2d0694e742a8e9b674f4b67d2131cc7b703741d))
+* **header,popover:** fix typo and tests [#206](https://github.com/TEDI-Design-System/angular/issues/206) ([5e012c6](https://github.com/TEDI-Design-System/angular/commit/5e012c6b0bff982e1b54de335d274cd86f1714f6))
+* **popover, header, datepicker:** fix popover and related components [#206](https://github.com/TEDI-Design-System/angular/issues/206) ([e1257fa](https://github.com/TEDI-Design-System/angular/commit/e1257fae9596c27546630b829eeca58d700431f9))
+* **table-of-contents:** fix import paths [#240](https://github.com/TEDI-Design-System/angular/issues/240) ([ea7bb5f](https://github.com/TEDI-Design-System/angular/commit/ea7bb5fac1ed6bb1d1bfb6131f4f2c803a1aa88c))
+
+
+### Features
+
+* **colors:** update tedi-core version [#240](https://github.com/TEDI-Design-System/angular/issues/240) ([3043816](https://github.com/TEDI-Design-System/angular/commit/3043816efc241a2c8bd0497352dde7949601e16b))
+* **table-of-contents:** add community table of contents ([#215](https://github.com/TEDI-Design-System/angular/issues/215)) ([fec3f5c](https://github.com/TEDI-Design-System/angular/commit/fec3f5c48122e2493d16d9b9ebb1cba53f5c8b05)), closes [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200)
+
+
+### BREAKING CHANGES
+
+* **popover, header, datepicker:** replace popover trigger component with popover trigger directive
+
 # [4.2.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.1-rc.2...angular-4.2.0-rc.1) (2025-12-05)
 
 
