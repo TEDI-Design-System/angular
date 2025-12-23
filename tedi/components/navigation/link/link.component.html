@@ -1,1 +1,4 @@
 <ng-content></ng-content>
+@if (target() === "_blank") {
+  <span class="sr-only">{{ "anchor.new-tab" | tediTranslate }}</span>
+}
