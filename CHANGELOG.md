@@ -1,3 +1,11 @@
+# [5.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.0-rc.2...angular-5.0.0-rc.3) (2025-12-23)
+
+
+### Bug Fixes
+
+* **sidenav:** fix css variable [#52](https://github.com/TEDI-Design-System/angular/issues/52) ([46de96b](https://github.com/TEDI-Design-System/angular/commit/46de96b79206c4ff8dc7982819a44f9aaeaac4ab))
+* **sidenav:** fix wcag issues [#52](https://github.com/TEDI-Design-System/angular/issues/52) ([c252b7c](https://github.com/TEDI-Design-System/angular/commit/c252b7c18f76e2212c4777d440af7ed8003e85cf))
+
 # [5.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.0-rc.1...angular-5.0.0-rc.2) (2025-12-23)
 
 
