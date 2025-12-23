@@ -1,3 +1,10 @@
+# [5.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.0-rc.1...angular-5.0.0-rc.2) (2025-12-23)
+
+
+### Bug Fixes
+
+* **link:** add screen reader text [#244](https://github.com/TEDI-Design-System/angular/issues/244) ([d9e1941](https://github.com/TEDI-Design-System/angular/commit/d9e194175e13969a987069df744629cae912a62d))
+
 # [5.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-4.2.0-rc.1...angular-5.0.0-rc.1) (2025-12-23)
 
 
