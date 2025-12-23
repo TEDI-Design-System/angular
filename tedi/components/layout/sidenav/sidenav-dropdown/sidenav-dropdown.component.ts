@@ -22,6 +22,7 @@ import { SideNavService } from "../../../../services/sidenav/sidenav.service";
   encapsulation: ViewEncapsulation.None,
   imports: [SideNavDropdownItemComponent],
   host: {
+    role: "menubar",
     "[class]": "classes()",
   },
 })
@@ -33,7 +34,7 @@ export class SideNavDropdownComponent implements AfterViewInit {
   sidenavService = inject(SideNavService);
   sidenavItem = inject(
     forwardRef(() => SideNavItemComponent),
-    { host: true, optional: true }
+    { host: true, optional: true },
   );
 
   ngAfterViewInit(): void {
