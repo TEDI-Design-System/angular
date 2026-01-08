@@ -1,12 +1,11 @@
 @use "@angular/cdk" as cdk;
-@use "@tedi-design-system/core/mixins";
 @include cdk.overlay();
 
 @mixin pane-max-width($size) {
   .cdk-overlay-pane:has(.tedi-modal--width-#{$size}),
   .tedi-modal--width-#{$size} {
     width: 100%;
-    @include mixins.responsive-styles(max-width, modal-max-width-#{$size});
+    max-width: var(--modal-max-width-#{$size});
   }
 }
 
@@ -29,6 +28,10 @@ $modal-breapoints: (xs, sm, md, lg, xl);
 .tedi-modal {
   --_modal-border: var(--borders-01) solid var(--modal-border-outer);
   --_modal-padding: var(--dimensions-13);
+  --_tedi-modal-heading-padding-x: var(--modal-heading-padding-x);
+  --_tedi-modal-heading-padding-y: var(--modal-heading-padding-y);
+  --_tedi-modal-footer-padding-x: var(--modal-footer-padding-x);
+  --_tedi-modal-footer-padding-y: var(--modal-footer-padding-y);
 
   overflow: auto;
 
@@ -36,24 +39,6 @@ $modal-breapoints: (xs, sm, md, lg, xl);
     var(--dimensions-10),
     var(--dimensions-05),
     --_tedi-modal-heading-padding-x
-  );
-
-  @include mixins.responsive-styles(
-    --_tedi-modal-heading-padding-x,
-    modal-heading-padding-x
-  );
-  @include mixins.responsive-styles(
-    --_tedi-modal-heading-padding-y,
-    modal-heading-padding-y
-  );
-
-  @include mixins.responsive-styles(
-    --_tedi-modal-footer-padding-x,
-    modal-footer-padding-x
-  );
-  @include mixins.responsive-styles(
-    --_tedi-modal-footer-padding-y,
-    modal-footer-padding-y
   );
 
   &--padding-small {
@@ -81,6 +66,9 @@ $modal-breapoints: (xs, sm, md, lg, xl);
   max-height: 95dvh;
   background-color: var(--modal-background);
   border: var(--_modal-border);
+  border-radius: var(--modal-radius);
+}
 
-  @include mixins.responsive-styles(border-radius, modal-radius);
+.tedi-bottom-dialog {
+  bottom: 20%;
 }

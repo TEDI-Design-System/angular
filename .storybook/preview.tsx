@@ -68,7 +68,7 @@ const preview: Preview = {
   parameters: {
     viewMode: "docs",
     backgrounds: {
-      values: [{ name: "brand", value: "var(--primary-600)" }],
+      values: [{ name: "brand", value: "var(--tedi-primary-600)" }],
     },
     docs: {
       toc: true,

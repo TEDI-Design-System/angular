@@ -1,34 +1,17 @@
-@use "@tedi-design-system/core/mixins";
-
 .tedi-checkbox {
   --_checkbox-bg: var(--form-checkbox-radio-default-background-default);
   --_checkbox-border: var(--form-checkbox-radio-default-border-default);
   --_checkbox-label-color: var(--general-text-primary);
   --_checkbox-check-color: var(--_checkbox-border);
+  --_checkbox-inner-spacing: var(--form-checkbox-radio-inner-spacing);
+  --_checkbox-size: var(--form-checkbox-radio-size-responsive);
+  --_checkbox-radius: var(--form-checkbox-radio-indicator-radius-checkbox);
+  --_label-size: var(--body-regular-size);
 
   display: grid;
   grid-template-areas: "input-area label" ". feedback";
   grid-template-columns: auto 1fr;
   align-items: center;
-
-  @include mixins.responsive-styles(
-    --_checkbox-inner-spacing,
-    form-checkbox-radio-inner-spacing
-  );
-  @include mixins.responsive-styles(
-    --_checkbox-size,
-    form-checkbox-radio-size-responsive
-  );
-  @include mixins.responsive-styles(
-    --_checkbox-radius,
-    form-checkbox-radio-indicator-radius-checkbox
-  );
-
-  @include mixins.responsive-styles(
-    --_label-size,
-    body-regular-size,
-    $exclude: tablet
-  );
 
   tedi-icon {
     user-select: none;
@@ -68,15 +51,10 @@
     color: var(--_checkbox-label-color);
     font-size: var(--_label-size);
     grid-area: label;
-
-    @include mixins.responsive-styles(
-      font-family,
-      family-primary,
-      $exclude: tablet
-    );
+    font-family: var(--family-default);
   }
 
-  &:has(input:checked) {
+  &:has(input:checked, input:indeterminate) {
     --_checkbox-bg: var(--form-checkbox-radio-default-background-selected);
     --_checkbox-border: var(--form-checkbox-radio-default-border-selected);
   }
@@ -115,10 +93,7 @@
   }
 
   &--large {
-    @include mixins.responsive-styles(
-      --_checkbox-size,
-      form-checkbox-radio-size-large
-    );
+    --_checkbox-size: var(--form-checkbox-radio-size-large);
   }
 
   .tedi-feedback-text {

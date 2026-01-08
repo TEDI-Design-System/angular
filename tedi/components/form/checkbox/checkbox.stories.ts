@@ -15,11 +15,15 @@ import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/t
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 
+
+type StoryCheckboxComponent = CheckboxComponent & {
+  indeterminate: boolean;
+};
+
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.21.30?node-id=6149-138033&m=dev" target="_blank">Figma ↗</a><br />
- * <a href="https://tedi.tehik.ee/1ee8444b7/p/796203-checkbox" target="_blank">Zeroheight ↗</a>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/796203-checkbox" target="_blank">Zeroheight ↗</a>
  */
-
 export default {
   title: "TEDI-Ready/Components/Form/Checkbox",
   component: CheckboxComponent,
@@ -75,22 +79,29 @@ export default {
         },
       },
     },
+    indeterminate: {
+      control: "boolean",
+      description:
+        "Renders a alternate checked state, with a slash, which is neither toggled on or off, interacting with the checkbox will dismiss the indeterminate state.",
+    },
   },
-} as Meta<CheckboxComponent>;
+} as Meta<StoryCheckboxComponent>;
 
-export const Default: StoryObj<CheckboxComponent & { disabled: boolean }> = {
-  args: {
-    size: "default",
-    invalid: false,
-    disabled: false,
-  },
-  render: (args) => ({
-    props: args,
-    template: `
+export const Default: StoryObj<StoryCheckboxComponent & { disabled: boolean }> =
+  {
+    args: {
+      size: "default",
+      invalid: false,
+      disabled: false,
+      indeterminate: false,
+    },
+    render: (args) => ({
+      props: args,
+      template: `
       <input tedi-checkbox type="checkbox" ${argsToTemplate(args)} />
     `,
-  }),
-};
+    }),
+  };
 
 export const Size: StoryObj<CheckboxComponent> = {
   render: (args) => ({
@@ -156,10 +167,10 @@ export const VerticalTree: StoryObj<CheckboxComponent> = {
   render: (args) => {
     setTimeout(() => {
       const parent = document.querySelector(
-        "#parentCB input",
+        "#parentCB input"
       ) as HTMLInputElement;
       const children = Array.from(
-        document.querySelectorAll("#childrenCB input"),
+        document.querySelectorAll("#childrenCB input")
       ) as HTMLInputElement[];
 
       function updateParent() {

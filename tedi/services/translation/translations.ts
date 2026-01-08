@@ -18,7 +18,7 @@ export const translationsMap = {
   },
   open: {
     description: "Used for opening",
-    components: ["Collapse"],
+    components: ["Collapse", "TableOfContents"],
     et: "Ava",
     en: "Open",
     ru: "Открыть",

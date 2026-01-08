@@ -1,5 +1,4 @@
 @use "@tedi-design-system/core/bootstrap-utility/breakpoints";
-@use "@tedi-design-system/core/mixins";
 
 .tedi-number-field {
   display: flex;
@@ -14,9 +13,8 @@
   .tedi-number-field__button {
     --general-icon-primary: currentcolor;
     border: var(--borders-01) solid var(--form-input-border-default);
-
-    @include mixins.responsive-styles(height, form-field-height);
-    @include mixins.responsive-styles(width, form-field-height);
+    width: var(--form-field-height);
+    height: var(--form-field-height);
 
     &:disabled {
       background-color: var(--form-input-background-disabled);
@@ -28,32 +26,20 @@
       z-index: 2;
       margin-right: calc(-1 * var(--borders-01));
       border-radius: 0;
-      @include mixins.responsive-styles(
-        border-top-left-radius,
-        button-radius-sm
-      );
-      @include mixins.responsive-styles(
-        border-bottom-left-radius,
-        button-radius-sm
-      );
+      border-top-left-radius: var(--button-radius-sm);
+      border-bottom-left-radius: var(--button-radius-sm);
     }
 
     &--increment {
       margin-left: calc(-1 * var(--borders-01));
       border-radius: 0;
-      @include mixins.responsive-styles(
-        border-top-right-radius,
-        button-radius-sm
-      );
-      @include mixins.responsive-styles(
-        border-bottom-right-radius,
-        button-radius-sm
-      );
+      border-top-right-radius: var(--button-radius-sm);
+      border-bottom-right-radius: var(--button-radius-sm);
     }
 
     &--small {
-      @include mixins.responsive-styles(height, form-field-height-sm);
-      @include mixins.responsive-styles(width, form-field-height-sm);
+      width: var(--form-field-height-sm);
+      height: var(--form-field-height-sm);
     }
   }
 
@@ -104,26 +90,18 @@
   align-items: stretch;
   background-color: var(--form-input-background-default);
   border: var(--borders-01) solid var(--form-input-border-default);
-
-  @include mixins.responsive-styles(width, form-number-input-min-width);
-  @include mixins.responsive-styles(height, form-field-height);
-  @include mixins.responsive-styles(
-    padding-left,
-    form-field-padding-y-3-default
-  );
-  @include mixins.responsive-styles(
-    padding-right,
-    form-field-padding-y-3-default
-  );
-  @include mixins.responsive-styles(gap, form-field-inner-spacing-sm);
+  width: var(--form-number-input-min-width);
+  height: var(--form-field-height);
+  padding-left: var(--form-field-padding-y-3-default);
+  padding-right: var(--form-field-padding-y-3-default);
+  gap: var(--form-field-inner-spacing-sm);
 
   &:focus-within {
     z-index: 2;
     border-color: var(--form-input-border-active);
     outline: calc(2 * var(--borders-01)) solid var(--form-input-border-active);
     outline-offset: var(--borders-01);
-
-    @include mixins.responsive-styles(border-radius, button-radius-sm);
+    border-radius: var(--button-radius-sm);
   }
 
   &:active:not(.tedi-number-field__input-wrapper--disabled) {
@@ -134,7 +112,7 @@
   }
 
   &--small {
-    @include mixins.responsive-styles(height, form-field-height-sm);
+    height: var(--form-field-height-sm);
   }
 
   &--with-suffix {
@@ -163,8 +141,7 @@
   border: 0;
   border-radius: 0;
   outline: none;
-
-  @include mixins.responsive-styles(font-size, heading-h6-size);
+  font-size: var(--heading-h6-size);
 
   //  /* Chrome, Safari, Edge, Opera */
   &::-webkit-outer-spin-button,

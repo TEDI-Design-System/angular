@@ -1,9 +1,9 @@
-import { NgFor, NgIf, NgStyle } from "@angular/common";
-import { Component, Input } from "@angular/core";
+import { Component, computed, input } from "@angular/core";
 
 interface Color {
   name: string;
   value: string;
+  group: string;
   main?: boolean;
 }
 
@@ -17,7 +17,6 @@ interface ColorStoryData {
 }
 
 @Component({
-  imports: [NgFor, NgStyle, NgIf],
   selector: "app-color-story",
   styles: `
     code {
@@ -30,52 +29,57 @@ interface ColorStoryData {
     }
   `,
   template: `
-    <div *ngFor="let group of groupedColorsArray">
-      <div style="margin-bottom: 20px;">
-        <h3
-          class="text-capitalize"
-          style="margin-bottom: 10px; font-weight: 700; font-size: 20px;"
-        >
-          {{ group.key }}
-        </h3>
-        <div class="display-flex flex-wrap align-items-start gap-4">
-          <div *ngFor="let color of group.colors">
-            <div
-              class="color-card"
-              [ngStyle]="{ 'background-color': color.value }"
-            ></div>
-            <p>
-              <strong>--{{ color.name }}</strong>
-            </p>
-            <p *ngIf="color.main">
-              <code>Main</code>
-            </p>
+    @for (group of groupedColorsArray(); track group.key) {
+      <div>
+        <div style="margin-bottom: 20px;">
+          <h3
+            class="text-capitalize"
+            style="margin-bottom: 10px; font-weight: 700; font-size: 20px;"
+          >
+            {{ group.key }}
+          </h3>
+          <div class="display-flex flex-wrap align-items-start gap-4">
+            @for (color of group.colors; track color.name) {
+              <div>
+                <div
+                  class="color-card"
+                  [style]="{ 'background-color': color.value }"
+                ></div>
+                <p>
+                  <strong>--{{ color.name }}</strong>
+                </p>
+                @if (color.main) {
+                  <code>Main</code>
+                }
+              </div>
+            }
           </div>
         </div>
       </div>
-    </div>
+    }
   `,
 })
 export class ColorStoryComponent {
-  @Input() data: ColorStoryData[] = [];
+  readonly data = input<ColorStoryData[]>([]);
 
-  get groupedColors(): GroupedColors {
-    return this.data.reduce((acc: GroupedColors, item) => {
+  readonly groupedColors = computed<GroupedColors>(() => {
+    return this.data().reduce((acc: GroupedColors, item) => {
       item.color.forEach((color: Color) => {
-        const baseName = color.name.split("-")[0];
-        if (!acc[baseName]) {
-          acc[baseName] = [];
+        if (!acc[color.group]) {
+          acc[color.group] = [];
         }
-        acc[baseName].push(color);
+        acc[color.group].push(color);
       });
       return acc;
     }, {});
-  }
+  });
 
-  get groupedColorsArray(): { key: string; colors: Color[] }[] {
-    return Object.entries(this.groupedColors).map(([key, colors]) => ({
-      key,
-      colors,
-    }));
-  }
+  readonly groupedColorsArray = computed<{ key: string; colors: Color[] }[]>(
+    () => {
+      return Object.entries(this.groupedColors()).map(([key, colors]) => ({
+        key,
+        colors,
+      }));
+    },
+  );
 }

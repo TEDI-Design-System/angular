@@ -13,13 +13,13 @@ import {
 import { IconComponent } from "../../../base/icon/icon.component";
 import { TextComponent } from "../../../base/text/text.component";
 import { PopoverComponent } from "../../../overlay/popover/popover.component";
-import { PopoverTriggerComponent } from "../../../overlay/popover/popover-trigger/popover-trigger.component";
 import { PopoverContentComponent } from "../../../overlay/popover/popover-content/popover-content.component";
 import {
   TediTranslationService,
   Language,
 } from "../../../../services/translation/translation.service";
 import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
+import { PopoverTriggerDirective } from "../../../overlay/popover/popover-trigger/popover-trigger.directive";
 
 export type HeaderLanguage = {
   [L in Language]?: string;
@@ -33,7 +33,7 @@ export type HeaderLanguage = {
     IconComponent,
     TextComponent,
     PopoverComponent,
-    PopoverTriggerComponent,
+    PopoverTriggerDirective,
     PopoverContentComponent,
     TediTranslationPipe,
   ],

@@ -1,6 +1,6 @@
 import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
 import { PopoverComponent, PopoverPosition } from "./popover.component";
-import { PopoverTriggerComponent } from "./popover-trigger/popover-trigger.component";
+import { PopoverTriggerDirective } from "./popover-trigger/popover-trigger.directive";
 import {
   PopoverContentComponent,
   PopoverWidth,
@@ -13,7 +13,6 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 
 const MAXWIDTH = ["none", "small", "medium", "large"];
-const OPENWITH = ["click", "hover", "mousedown", "none"];
 const POSITIONS: PopoverPosition[] = [
   "auto",
   "auto-start",
@@ -32,6 +31,11 @@ const POSITIONS: PopoverPosition[] = [
   "left-end",
 ];
 
+/**
+ * <a href="https://www.figma.com/design/TUjrgIdS28srN08U3J2lFe/Floating-button-adjustments?node-id=3225-21915&t=uEOTNpiJPbNICJKk-4" target="_blank">Figma ↗</a><br>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/72a3ed-popover" target="_blank">Zeroheight ↗</a>
+ */
+
 export default {
   title: "TEDI-Ready/Components/Overlay/Popover",
   component: PopoverComponent,
@@ -39,7 +43,7 @@ export default {
     moduleMetadata({
       imports: [
         PopoverComponent,
-        PopoverTriggerComponent,
+        PopoverTriggerDirective,
         PopoverContentComponent,
         ButtonComponent,
         LinkComponent,
@@ -51,21 +55,6 @@ export default {
     }),
   ],
   argTypes: {
-    openWith: {
-      control: "radio",
-      options: OPENWITH,
-      description: "The trigger event that opens the popover.",
-      table: {
-        category: "popover inputs",
-        type: {
-          summary: "PopoverOpenWith",
-          detail: OPENWITH.join("\n"),
-        },
-        defaultValue: {
-          summary: "click",
-        },
-      },
-    },
     position: {
       control: "select",
       description:
@@ -134,6 +123,20 @@ export default {
         },
       },
     },
+    timeoutDelay: {
+      control: "number",
+      description:
+        "Delay time (in ms) for closing popover when not hovering trigger or content.",
+      table: {
+        category: "popover inputs",
+        type: {
+          summary: "number",
+        },
+        defaultValue: {
+          summary: "100",
+        },
+      },
+    },
     maxWidth: {
       control: "select",
       options: MAXWIDTH,
@@ -172,6 +175,18 @@ export default {
         },
       },
     },
+    underline: {
+      description: "Should add underline class to trigger element?",
+      defaultValue: {
+        summary: "false",
+      },
+      table: {
+        category: "popover-trigger inputs",
+        type: {
+          summary: "boolean",
+        },
+      },
+    },
   },
 } as Meta<PopoverComponent>;
 
@@ -185,12 +200,12 @@ type Story = StoryObj<
 
 export const Default: Story = {
   args: {
-    openWith: "click",
     position: "top",
     dismissible: true,
     hideOnScroll: false,
     withBorder: false,
     lockScroll: false,
+    timeoutDelay: 100,
     maxWidth: "small",
     title: "Heading",
     showClose: true,
@@ -198,17 +213,15 @@ export const Default: Story = {
   render: (args) => ({
     props: args,
     template: `
-        <tedi-popover [openWith]="openWith" [position]="position" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [lockScroll]="lockScroll">
-            <tedi-popover-trigger>
-                <button tedi-button>
-                    Popover Trigger
-                </button>
-            </tedi-popover-trigger>
-            <tedi-popover-content [maxWidth]="maxWidth" [title]="title" [showClose]="showClose">
-                The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.
-            </tedi-popover-content>
-        </tedi-popover>
-        `,
+      <tedi-popover [position]="position" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay">
+        <button tedi-button tedi-popover-trigger>
+          Popover Trigger
+        </button>
+        <tedi-popover-content [maxWidth]="maxWidth" [title]="title" [showClose]="showClose">
+            The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.
+        </tedi-popover-content>
+      </tedi-popover>
+    `,
   }),
 };
 
@@ -219,11 +232,9 @@ export const ContentExamples: Story = {
       <tedi-row [gap]="3">
         <tedi-col>
           <tedi-popover>
-            <tedi-popover-trigger>
-              <button tedi-button>
-                Buttons & heading
-              </button>
-            </tedi-popover-trigger>
+            <button tedi-button tedi-popover-trigger>
+              Buttons & heading
+            </button>
             <tedi-popover-content title="Heading" [showClose]="true">
               <p>The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.</p>
               <div style="display: flex; gap: 0.5rem;">
@@ -235,11 +246,9 @@ export const ContentExamples: Story = {
         </tedi-col>
         <tedi-col>
           <tedi-popover>
-            <tedi-popover-trigger>
-              <button tedi-button>
-                Buttons
-              </button>
-            </tedi-popover-trigger>
+            <button tedi-button tedi-popover-trigger>
+              Buttons
+            </button>
             <tedi-popover-content [showClose]="true">
               <p>The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.</p>
               <div style="display: flex; gap: 0.5rem;">
@@ -251,11 +260,9 @@ export const ContentExamples: Story = {
         </tedi-col>
         <tedi-col>
           <tedi-popover>
-            <tedi-popover-trigger>
-              <button tedi-button>
-                Link
-              </button>
-            </tedi-popover-trigger>
+            <button tedi-button tedi-popover-trigger>
+              Link
+            </button>
             <tedi-popover-content>
               <p>The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.</p>
               <a tedi-link style="margin-left: auto;">
@@ -267,11 +274,9 @@ export const ContentExamples: Story = {
         </tedi-col>
         <tedi-col>
           <tedi-popover>
-            <tedi-popover-trigger>
-              <button tedi-button>
-                Text
-              </button>
-            </tedi-popover-trigger>
+            <button tedi-button tedi-popover-trigger>
+              Text
+            </button>
             <tedi-popover-content>
               The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.
             </tedi-popover-content>
@@ -289,11 +294,9 @@ export const Heading: Story = {
       <tedi-row [gap]="3">
         <tedi-col>
           <tedi-popover>
-            <tedi-popover-trigger>
-              <button tedi-button variant="secondary">
-                Heading & close
-              </button>
-            </tedi-popover-trigger>
+            <button tedi-button tedi-popover-trigger variant="secondary">
+              Heading & close
+            </button>
             <tedi-popover-content position="top" maxWidth="medium" title="Heading" [showClose]="true">
               <p>This popover is with title and close button.</p>
               <div style="margin-left: auto; display: flex; gap: 0.5rem;">
@@ -305,11 +308,9 @@ export const Heading: Story = {
         </tedi-col>
         <tedi-col>
           <tedi-popover>
-            <tedi-popover-trigger>
-              <button tedi-button variant="secondary">
-                Heading
-              </button>
-            </tedi-popover-trigger>
+            <button tedi-button tedi-popover-trigger variant="secondary">
+              Heading
+            </button>
             <tedi-popover-content position="top" maxWidth="medium" title="Heading">
               <p>This popover is with title.</p>
               <div style="margin-left: auto; display: flex; gap: 0.5rem;">
@@ -321,11 +322,9 @@ export const Heading: Story = {
         </tedi-col>
         <tedi-col>
           <tedi-popover>
-            <tedi-popover-trigger>
-              <button tedi-button variant="secondary">
-                Content & close
-              </button>
-            </tedi-popover-trigger>
+            <button tedi-button tedi-popover-trigger variant="secondary">
+              Content & close
+            </button>
             <tedi-popover-content position="top" maxWidth="medium" [showClose]="true">
               <p>This popover is with content and close button.</p>
               <div style="margin-left: auto; display: flex; gap: 0.5rem;">
@@ -337,11 +336,9 @@ export const Heading: Story = {
         </tedi-col>
         <tedi-col>
           <tedi-popover>
-            <tedi-popover-trigger>
-              <button tedi-button variant="secondary">
-                Only ontent
-              </button>
-            </tedi-popover-trigger>
+            <button tedi-button tedi-popover-trigger variant="secondary">
+              Only content
+            </button>
             <tedi-popover-content position="top" maxWidth="medium">
               <p>This popover is with content only.</p>
               <div style="margin-left: auto; display: flex; gap: 0.5rem;">
@@ -363,11 +360,9 @@ export const Trigger: Story = {
       <tedi-row [gap]="3">
         <tedi-col>
           <tedi-popover>
-            <tedi-popover-trigger>
-              <button tedi-button variant="secondary">
-                Button Trigger
-              </button>
-            </tedi-popover-trigger>
+            <button tedi-button tedi-popover-trigger variant="secondary">
+              Button Trigger
+            </button>
             <tedi-popover-content>
               This popover is triggered by button.
             </tedi-popover-content>
@@ -375,9 +370,7 @@ export const Trigger: Story = {
         </tedi-col>
         <tedi-col>
           <tedi-popover>
-            <tedi-popover-trigger>
-              <button tedi-info-button></button>
-            </tedi-popover-trigger>
+            <button tedi-info-button tedi-popover-trigger></button>
             <tedi-popover-content>
               This popover is triggered by info button.
             </tedi-popover-content>
@@ -385,9 +378,9 @@ export const Trigger: Story = {
         </tedi-col>
         <tedi-col>
           <tedi-popover>
-            <tedi-popover-trigger>
+            <span tedi-popover-trigger [underline]="true">
               Text Trigger
-            </tedi-popover-trigger>
+            </span>
             <tedi-popover-content>
               This popover is triggered by text. By default text has dashed underline.
             </tedi-popover-content>
@@ -408,9 +401,9 @@ export const ArrowPosition: Story = {
       <tedi-row [cols]="3" [gap]="3">
         <tedi-col *ngFor="let pos of positions;" style="display: flex; justify-content: center;">
           <tedi-popover [position]="pos">
-            <tedi-popover-trigger>
+            <span tedi-popover-trigger [underline]="true">
               {{ pos.charAt(0).toUpperCase() + pos.slice(1) }}
-            </tedi-popover-trigger>
+            </span>
             <tedi-popover-content>
               The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.
             </tedi-popover-content>
@@ -431,9 +424,9 @@ export const Size: Story = {
       <tedi-row [gap]="3">
         <tedi-col *ngFor="let width of widths;" style="display: flex; justify-content: center;">
           <tedi-popover>
-            <tedi-popover-trigger>
+            <span tedi-popover-trigger [underline]="true">
               {{ width.charAt(0).toUpperCase() + width.slice(1) }}
-            </tedi-popover-trigger>
+            </span>
             <tedi-popover-content [maxWidth]="width">
               The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.
             </tedi-popover-content>
