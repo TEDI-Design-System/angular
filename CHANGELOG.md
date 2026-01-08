@@ -1,3 +1,60 @@
+# [5.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0...angular-5.0.0) (2026-01-08)
+
+
+### Bug Fixes
+
+* **base-colors:** fix story with new css variables [#240](https://github.com/TEDI-Design-System/angular/issues/240) ([01312c8](https://github.com/TEDI-Design-System/angular/commit/01312c8304fe558def3a0b29a8119c40d427792b))
+* **checkbox:** fix indeterminate state + add storybook inputs [#227](https://github.com/TEDI-Design-System/angular/issues/227) ([d8a9a8c](https://github.com/TEDI-Design-System/angular/commit/d8a9a8c2b07b5ea06e5424ee7b05321dbd53d3c9))
+* **checkbox:** undo debug storybook defaults [#227](https://github.com/TEDI-Design-System/angular/issues/227) ([68a883c](https://github.com/TEDI-Design-System/angular/commit/68a883c20da974a85424a9b4c2ce137ffda8233d))
+* **header-profile:** add aria-label to button [#206](https://github.com/TEDI-Design-System/angular/issues/206) ([e9d4585](https://github.com/TEDI-Design-System/angular/commit/e9d458594f02cd16bdb7f7a7e898c25d5687e41f))
+* **header-profile:** fix imports and tests [#206](https://github.com/TEDI-Design-System/angular/issues/206) ([f2d0694](https://github.com/TEDI-Design-System/angular/commit/f2d0694e742a8e9b674f4b67d2131cc7b703741d))
+* **header,popover:** fix typo and tests [#206](https://github.com/TEDI-Design-System/angular/issues/206) ([5e012c6](https://github.com/TEDI-Design-System/angular/commit/5e012c6b0bff982e1b54de335d274cd86f1714f6))
+* **link:** add screen reader text [#244](https://github.com/TEDI-Design-System/angular/issues/244) ([d9e1941](https://github.com/TEDI-Design-System/angular/commit/d9e194175e13969a987069df744629cae912a62d))
+* **popover, header, datepicker:** fix popover and related components [#206](https://github.com/TEDI-Design-System/angular/issues/206) ([e1257fa](https://github.com/TEDI-Design-System/angular/commit/e1257fae9596c27546630b829eeca58d700431f9))
+* **sidenav:** fix css variable [#52](https://github.com/TEDI-Design-System/angular/issues/52) ([46de96b](https://github.com/TEDI-Design-System/angular/commit/46de96b79206c4ff8dc7982819a44f9aaeaac4ab))
+* **sidenav:** fix wcag issues [#52](https://github.com/TEDI-Design-System/angular/issues/52) ([c252b7c](https://github.com/TEDI-Design-System/angular/commit/c252b7c18f76e2212c4777d440af7ed8003e85cf))
+* **table-of-contents:** fix import paths [#240](https://github.com/TEDI-Design-System/angular/issues/240) ([ea7bb5f](https://github.com/TEDI-Design-System/angular/commit/ea7bb5fac1ed6bb1d1bfb6131f4f2c803a1aa88c))
+* **variables:** remove responsive-style mixins [#209](https://github.com/TEDI-Design-System/angular/issues/209) ([#214](https://github.com/TEDI-Design-System/angular/issues/214)) ([3f44f41](https://github.com/TEDI-Design-System/angular/commit/3f44f41f98efce7a7fa7e0c6bec1a949f114c28a))
+
+
+### Features
+
+* **colors:** update tedi-core version [#240](https://github.com/TEDI-Design-System/angular/issues/240) ([3043816](https://github.com/TEDI-Design-System/angular/commit/3043816efc241a2c8bd0497352dde7949601e16b))
+* **floating-button:** add barrel index eports [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([0e80438](https://github.com/TEDI-Design-System/angular/commit/0e80438c77ad53fc79b5e3bc746f665e001b96cb))
+* **floating-button:** ensure to not use non encapsulated styles in floating button [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([0b65dd8](https://github.com/TEDI-Design-System/angular/commit/0b65dd878ffcf5df5ac1eff0f74f09e18430c943))
+* **floating-button:** export base-button directive in index file [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([094fb59](https://github.com/TEDI-Design-System/angular/commit/094fb594f86ca42518a7ede03224a11918445a6f))
+* **floating-button:** finishing touches on story to fix text aligment + args [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([4537ea8](https://github.com/TEDI-Design-System/angular/commit/4537ea8f3848a9bffb0b0c487efc8d6763fbbdf7))
+* **floating-button:** fix button css variable [#229](https://github.com/TEDI-Design-System/angular/issues/229) ([edbfbee](https://github.com/TEDI-Design-System/angular/commit/edbfbeefe43b40b61cb359080c2f8515ee604fa7))
+* **floating-button:** fix css variable name [#229](https://github.com/TEDI-Design-System/angular/issues/229) ([0419a13](https://github.com/TEDI-Design-System/angular/commit/0419a13a84653bda54e57867e43ee0b0c7587e6d))
+* **floating-button:** fix icon only [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([439f455](https://github.com/TEDI-Design-System/angular/commit/439f45576e5c12e4b5bbc16bf41f8804524b927d))
+* **floating-button:** fix import [#229](https://github.com/TEDI-Design-System/angular/issues/229) ([bc3786b](https://github.com/TEDI-Design-System/angular/commit/bc3786bb166c082b05321c34094cec4bcf0e72bc))
+* **floating-button:** fix scss build warning [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([4b37b13](https://github.com/TEDI-Design-System/angular/commit/4b37b131db7325f0168c97ff9edb658a0f174e15))
+* **floating-button:** fix tesst [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([e0229be](https://github.com/TEDI-Design-System/angular/commit/e0229be9625fb96b928d3475d6902549d74afba2))
+* **floating-button:** initial commit - create floating-button component [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([7a8aaa8](https://github.com/TEDI-Design-System/angular/commit/7a8aaa8c7ca0b3b88862624fe0f28fe553b7d651))
+* **floating-button:** keep min-height [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([4f80011](https://github.com/TEDI-Design-System/angular/commit/4f8001133e96421b42fd24537de36b9def7824b6))
+* **floating-button:** more style/storybook changes [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([7b0b1ca](https://github.com/TEDI-Design-System/angular/commit/7b0b1caa26a44c31bb379847104b2386cddf84c2))
+* **floating-button:** move button implementation to directive to use as shared [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([eed60d1](https://github.com/TEDI-Design-System/angular/commit/eed60d14d84b0cc47f3dd5b38be120dbf309276f))
+* **floating-button:** move inputs into button and floating button comp + narrower types [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([09e98d6](https://github.com/TEDI-Design-System/angular/commit/09e98d68a963693ff2d76752a2fbed8c6ebda307))
+* **floating-button:** move to correct folder [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([bb12938](https://github.com/TEDI-Design-System/angular/commit/bb12938a8f58e66f47c2c8d031ec657f9c4aab2c))
+* **floating-button:** prepare storybook + move styles to button.component.css [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([d9d6a07](https://github.com/TEDI-Design-System/angular/commit/d9d6a07b6f6014d5795534186e90a300cfde8565))
+* **floating-button:** re-add box-shadow + add links to storybook [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([0b0a15e](https://github.com/TEDI-Design-System/angular/commit/0b0a15eb7983daa09b04eca7cb1322f54f06d469))
+* **floating-button:** refactor into selector component + trim styles [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([266e82a](https://github.com/TEDI-Design-System/angular/commit/266e82ab2adaee575a4c36fd30f9003120949131))
+* **floating-button:** remove debug css [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([e7ec55c](https://github.com/TEDI-Design-System/angular/commit/e7ec55c8c6a08373b2e61d9acf981356ca73d304))
+* **floating-button:** remove debug log [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([7f3c5b3](https://github.com/TEDI-Design-System/angular/commit/7f3c5b3b6777f00fc4e0f2c68bcaa8f59109c636))
+* **floating-button:** remove id [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([f962835](https://github.com/TEDI-Design-System/angular/commit/f962835132f33b4d4630a1c268e92280f770abbe))
+* **floating-button:** remove unused commented code [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([881ee6d](https://github.com/TEDI-Design-System/angular/commit/881ee6da87b1de014c35b9f42a124842c8c48fff))
+* **floating-button:** replace responsive-styles mixin [#229](https://github.com/TEDI-Design-System/angular/issues/229) ([14aa03c](https://github.com/TEDI-Design-System/angular/commit/14aa03c6b21e400c9f312fc2f089cf02666ba4d1))
+* **floating-button:** resolve conflicts [#229](https://github.com/TEDI-Design-System/angular/issues/229) ([54c8a52](https://github.com/TEDI-Design-System/angular/commit/54c8a52d1a974c3139f209365eca0bd380e499c6))
+* **floating-button:** storybook polishing [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([c5c8dea](https://github.com/TEDI-Design-System/angular/commit/c5c8dea378900304ea5daa003d686a71e8b7f932))
+* **floating-button:** use component instead of directive, move styles to floating button [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([60926d3](https://github.com/TEDI-Design-System/angular/commit/60926d3cd3c30c0756c5d1386bdcfa4dad9eb912))
+* **floating-button:** use default size by default in storybook [#195](https://github.com/TEDI-Design-System/angular/issues/195) ([4b3715f](https://github.com/TEDI-Design-System/angular/commit/4b3715f29cc4d37375de4e23dc4fe48cb55f12b9))
+* **table-of-contents:** add community table of contents ([#215](https://github.com/TEDI-Design-System/angular/issues/215)) ([fec3f5c](https://github.com/TEDI-Design-System/angular/commit/fec3f5c48122e2493d16d9b9ebb1cba53f5c8b05)), closes [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200) [#200](https://github.com/TEDI-Design-System/angular/issues/200)
+
+
+### BREAKING CHANGES
+
+* **popover, header, datepicker:** replace popover trigger component with popover trigger directive
+
 # [5.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.0-rc.2...angular-5.0.0-rc.3) (2025-12-23)
 
 
