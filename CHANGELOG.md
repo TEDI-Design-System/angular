@@ -1,3 +1,10 @@
+## [5.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.0...angular-5.0.1-rc.1) (2026-01-13)
+
+
+### Bug Fixes
+
+* **toggle:** fixed handle position of active state for default size [#256](https://github.com/TEDI-Design-System/angular/issues/256) ([#257](https://github.com/TEDI-Design-System/angular/issues/257)) ([8357069](https://github.com/TEDI-Design-System/angular/commit/83570693315923d8beb3b69f44f15f5899a905b9))
+
 # [5.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-4.1.0...angular-5.0.0) (2026-01-08)
 
 
