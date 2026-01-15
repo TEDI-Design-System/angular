@@ -39,7 +39,7 @@ export class ToggleComponent implements ControlValueAccessor {
   /**
    * The unique identifier for the input element that is associated with label.
    */
-  id = input.required<string>();
+  inputId = input.required<string>();
   /**
    * Is toggle checked? Supports two-way binding, use with form controls.
    */
@@ -76,8 +76,8 @@ export class ToggleComponent implements ControlValueAccessor {
   icon = input<boolean>(false);
 
   @ViewChild('inputElement') inputRef!: ElementRef<HTMLInputElement>;
-  private onChange: (checked: boolean) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (checked: boolean) => void = () => { };
+  private onTouched: () => void = () => { };
 
   writeValue(checked: boolean): void {
     this.checked.set(checked);
@@ -121,7 +121,7 @@ export class ToggleComponent implements ControlValueAccessor {
 
     switch (this.variant()) {
       case "primary":
-        return this.checked() ? "brand": "tertiary";
+        return this.checked() ? "brand" : "tertiary";
       case "colored":
         return this.checked() ? "success" : "danger";
     }

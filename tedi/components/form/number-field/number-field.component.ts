@@ -48,7 +48,7 @@ export class NumberFieldComponent implements ControlValueAccessor {
   /**
    * The unique identifier for the input element that this label is associated with. This ID should match the input element's id attribute to ensure accessibility.
    */
-  id = input.required<string>();
+  inputId = input.required<string>();
   /**
    * The text content of the label that describes the input field.
    */
@@ -107,8 +107,8 @@ export class NumberFieldComponent implements ControlValueAccessor {
   @ViewChild("inputElement") inputRef!: ElementRef<HTMLInputElement>;
 
   private formDisabled = signal(false);
-  private onChange: (value: number) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: number) => void = () => { };
+  private onTouched: () => void = () => { };
 
   readonly isInvalid = computed(() => {
     const min = this.min();

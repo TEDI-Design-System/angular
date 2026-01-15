@@ -26,7 +26,7 @@ describe("NumberFieldComponent", () => {
     });
 
     fixture = TestBed.createComponent(NumberFieldComponent);
-    fixture.componentRef.setInput("id", "test-id");
+    fixture.componentRef.setInput("inputId", "test-id");
     component = fixture.componentInstance;
     el = fixture.nativeElement;
     fixture.detectChanges();
