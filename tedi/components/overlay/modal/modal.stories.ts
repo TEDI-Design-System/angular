@@ -5,8 +5,7 @@ import { ModalContentComponent } from "./modal-content/modal-content.component";
 import { ModalFooterComponent } from "./modal-footer/modal-footer.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { LabelComponent } from "../../form/label/label.component";
-import { SelectComponent } from "community/components/form/select/select.component";
-import { SelectOptionComponent } from "community/components/form/select/select-option.component";
+import { SelectComponent, SelectOptionComponent } from "@tedi-design-system/angular/community";
 import { IconComponent } from "../../base/icon/icon.component";
 
 /**
