@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation } from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject, input, ViewEncapsulation } from "@angular/core";
 import { IconComponent } from "../../base/icon/icon.component";
+import { TediTranslationService } from "@tedi-design-system/angular/tedi";
 
 @Component({
   standalone: true,
@@ -11,6 +12,16 @@ import { IconComponent } from "../../base/icon/icon.component";
   encapsulation: ViewEncapsulation.None,
   host: {
     "class": "tedi-info-button",
+    "[attr.aria-label]": "ariaLabel() || _defaultLabel()"
   }
 })
-export class InfoButtonComponent {}
+export class InfoButtonComponent {
+  readonly translationService = inject(TediTranslationService);
+
+  /**
+   * InfoButton ARIA label
+   */
+  readonly ariaLabel = input<string>(undefined, { alias: 'aria-label' });
+
+  private readonly _defaultLabel = this.translationService.track('info-button.label');
+}

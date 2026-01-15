@@ -450,6 +450,13 @@ export const translationsMap = {
     en: "Show tooltip",
     ru: "Показать подсказку",
   },
+  "info-button.label": {
+    description: "Info button default label",
+    components: ["InfoButton"],
+    et: "Lisainfo",
+    en: "More information",
+    ru: "Дополнительная информация",
+  },
   "pagination.title": {
     description: "Label of the pagination",
     components: ["Table", "Pagination"],
