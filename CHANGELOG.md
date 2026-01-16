@@ -1,3 +1,10 @@
+## [5.0.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.1...angular-5.0.1-rc.2) (2026-01-16)
+
+
+### Bug Fixes
+
+* **modal, table-of-contents:** fix import paths [#243](https://github.com/TEDI-Design-System/angular/issues/243) ([#264](https://github.com/TEDI-Design-System/angular/issues/264)) ([2b95a3f](https://github.com/TEDI-Design-System/angular/commit/2b95a3f68d8def6ebb04c4072e6112711361df7b))
+
 ## [5.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.0...angular-5.0.1-rc.1) (2026-01-13)
 
 
