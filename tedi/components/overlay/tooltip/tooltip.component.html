@@ -13,6 +13,9 @@
 >
   <ng-content select="tedi-tooltip-trigger" />
 </div>
-<float-ui-content #floatUiComponent [style.display]="floatUiDisplay()">
+@if (contentText()) {
+  <span [id]="descriptionId" class="sr-only">{{ contentText() }}</span>
+}
+<float-ui-content #floatUiComponent [style.display]="floatUiDisplay()" aria-hidden="true">
   <ng-content select="tedi-tooltip-content" />
 </float-ui-content>

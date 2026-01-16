@@ -5,7 +5,8 @@ import { Component, viewChild } from "@angular/core";
 import { Renderer2 } from "@angular/core";
 
 class MockTooltipComponent {
-  containerId = jest.fn(() => "mockContainer");
+  descriptionId = "mock-tooltip-id";
+  isOpen = jest.fn(() => false);
   isContentHovered = jest.fn(() => false);
   timeoutDelay = jest.fn(() => 100);
   hideTimeout?: ReturnType<typeof setTimeout>;
@@ -175,6 +176,13 @@ describe("TooltipTriggerComponent", () => {
         expect(tooltip.hideTooltip).not.toHaveBeenCalled();
       });
     });
+
+    describe("keydown.escape", () => {
+      it("should call hideTooltip when Escape key is pressed", () => {
+        hostEl.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+        expect(tooltip.hideTooltip).toHaveBeenCalled();
+      });
+    });
   });
 
   describe("ngAfterContentChecked", () => {
@@ -217,6 +225,27 @@ describe("TooltipTriggerComponent", () => {
       const btn = hostEl.querySelector("button")!;
       component.ngAfterContentChecked();
       expect(btn.getAttribute("tabindex")).toBe("2");
+    });
+
+    it("should set ARIA attributes on interactive element when closed", () => {
+      hostEl.innerHTML = `<button>Click me</button>`;
+      const btn = hostEl.querySelector("button")!;
+      component.ngAfterContentChecked();
+      fixture.detectChanges();
+
+      expect(btn.getAttribute("aria-describedby")).toBe("mock-tooltip-id");
+      expect(btn.getAttribute("aria-expanded")).toBe("false");
+    });
+
+    it("should set aria-expanded to true when tooltip is open", () => {
+      tooltip.isOpen = jest.fn(() => true);
+      hostEl.innerHTML = `<button>Click me</button>`;
+      const btn = hostEl.querySelector("button")!;
+      component.ngAfterContentChecked();
+      fixture.detectChanges();
+
+      expect(btn.getAttribute("aria-describedby")).toBe("mock-tooltip-id");
+      expect(btn.getAttribute("aria-expanded")).toBe("true");
     });
   });
 });

@@ -2,10 +2,12 @@ import {
   AfterContentChecked,
   ChangeDetectionStrategy,
   Component,
+  effect,
   ElementRef,
   HostListener,
   inject,
   Renderer2,
+  signal,
   ViewEncapsulation,
 } from "@angular/core";
 import { TooltipComponent } from "../tooltip.component";
@@ -16,16 +18,26 @@ import { TooltipComponent } from "../tooltip.component";
   template: "<ng-content />",
   styleUrl: "../tooltip.component.scss",
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  host: {
-    "[id]": "tooltip.containerId() + '_trigger'",
-    "[attr.aria-controls]": "tooltip.containerId()",
-  },
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TooltipTriggerComponent implements AfterContentChecked {
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private renderer = inject(Renderer2);
   readonly tooltip = inject(TooltipComponent);
+  private interactiveElement = signal<HTMLElement | null>(null);
+
+  constructor() {
+    effect(() => {
+      const element = this.interactiveElement();
+      if (!element) return;
+
+      const descriptionId = this.tooltip.descriptionId;
+      const isOpen = this.tooltip.isOpen();
+
+      element.setAttribute("aria-describedby", descriptionId);
+      element.setAttribute("aria-expanded", String(isOpen));
+    });
+  }
 
   @HostListener("click")
   onClick() {
@@ -85,6 +97,11 @@ export class TooltipTriggerComponent implements AfterContentChecked {
     }
   }
 
+  @HostListener("keydown.escape")
+  onEscape() {
+    this.tooltip.hideTooltip();
+  }
+
   ngAfterContentChecked(): void {
     const element = this.host.nativeElement as HTMLElement;
     const firstChild = element.firstChild as HTMLElement | null;
@@ -103,6 +120,7 @@ export class TooltipTriggerComponent implements AfterContentChecked {
       this.renderer.setAttribute(span, "tabindex", "0");
       this.renderer.insertBefore(element, span, firstChild);
       this.renderer.appendChild(span, firstChild);
+      this.interactiveElement.set(span);
       return;
     }
 
@@ -111,5 +129,7 @@ export class TooltipTriggerComponent implements AfterContentChecked {
     if (!firstChild.getAttribute("tabindex")) {
       this.renderer.setAttribute(firstChild, "tabindex", "0");
     }
+
+    this.interactiveElement.set(firstChild);
   }
 }
