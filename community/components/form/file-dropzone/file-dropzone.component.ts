@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  DestroyRef,
   HostListener,
   inject,
   input,
@@ -9,12 +10,15 @@ import {
   ElementRef,
   OnInit,
   output,
-  forwardRef,
+  Self,
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
+  AbstractControl,
   ControlValueAccessor,
-  NG_VALUE_ACCESSOR,
+  NgControl,
   ReactiveFormsModule,
+  ValidationErrors,
 } from "@angular/forms";
 import {
   ClosingButtonComponent,
@@ -33,8 +37,10 @@ import {
   DropzoneValidatorFunction,
   FeedbackTextProps,
   FileDropzone,
+  FileDropzoneErrors,
   FileInputMode,
   SizeDisplayStandard,
+  ValidationState,
 } from "./types";
 import {
   formatBytes,
@@ -62,14 +68,7 @@ import { FileService } from "./file.service";
     VerticalSpacingDirective,
     TediTranslationPipe,
   ],
-  providers: [
-    FileService,
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => FileDropzoneComponent),
-      multi: true,
-    },
-  ],
+  providers: [FileService],
 })
 export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
   /**
@@ -149,6 +148,7 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
   /**
    * Validation functions that can be used to validate files.
    * Each function should return a string error message if validation fails, or undefined if it passes
+   * Validators are only added once during component initialization, otherwise use addAsyncValidators on the FormControl.
    */
   validators = input<DropzoneValidatorFunction[]>([
     validateFileSize,
@@ -169,24 +169,25 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
    **/
   fileDelete = output<FileDropzone>();
 
+  private _onChange = (_: FileDropzone[]) => {};
+  private _onTouched = () => {};
+
+  private _translationService = inject(TediTranslationService);
+  private _fileService = inject(FileService);
+  private _destroyRef = inject(DestroyRef);
+
   fileInputElement =
     viewChild.required<ElementRef<HTMLInputElement>>("fileInput");
 
   formatBytes = (bytes: number): string =>
     formatBytes(bytes, this.sizeDisplayStandard());
 
-  private _uploadState = computed(() => this._fileService.uploadState());
-
-  private _onChange = (_: FileDropzone[]) => {};
-  private _onTouched = () => {};
-
-  private _translationService = inject(TediTranslationService);
-  private _fileService = inject(FileService);
+  uploadState = signal<ValidationState>("none");
 
   isDragActive = signal<boolean>(false);
   disabled = signal<boolean>(false);
 
-  uploadError = signal<string | null>(null);
+  uploadError = signal<string | undefined>(undefined);
   files = this._fileService.files;
 
   classes = computed(() => {
@@ -197,8 +198,8 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
     }
     if (this.hasError()) {
       classList.push("tedi-file-dropzone--invalid");
-    } else if (this._uploadState() !== "none") {
-      classList.push(`tedi-file-dropzone--${this._uploadState()}`);
+    } else if (this.uploadState() !== "none") {
+      classList.push(`tedi-file-dropzone--${this.uploadState()}`);
     }
     if (this.isDragActive()) {
       classList.push("tedi-file-dropzone--drop-over");
@@ -221,13 +222,71 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
     position: "left",
   }));
 
+  constructor(@Self() public _ngControl: NgControl) {
+    this._ngControl.valueAccessor = this;
+  }
+
   ngOnInit(): void {
     this.addFiles(this.defaultFiles());
-    this._fileService.maxSize = this.maxSize;
-    this._fileService.accept = this.accept;
     this._fileService.mode = this.mode;
-    this._fileService.validators = this.validators;
-    this._fileService.sizeDisplayStandard = this.sizeDisplayStandard;
+    const control = this._ngControl.control;
+    control?.addAsyncValidators(this.runValidators);
+
+    this._ngControl.control?.statusChanges
+      ?.pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(this.formChanges.bind(this));
+  }
+
+  formChanges() {
+    this.uploadError.set(this._currentErrorState());
+    this.uploadState.set(this._getNewState());
+  }
+
+  runValidators = async (
+    control: AbstractControl<FileDropzone[]>
+  ): Promise<ValidationErrors | null> => {
+    const controlFiles = control.value;
+    console.log("running validators");
+
+    if (!controlFiles || !controlFiles.length) {
+      return null;
+    }
+
+    const issues = this.validateFiles(controlFiles);
+
+    return issues.length
+      ? {
+          tediFileDropzone: [...issues],
+        }
+      : null;
+  };
+
+  validateFiles(files: FileDropzone[]): FileDropzoneErrors {
+    const issues: FileDropzoneErrors = [];
+    files.forEach((file) => {
+      this.validators().forEach((validator) => {
+        const error = validator(
+          this.maxSize(),
+          this.accept(),
+          file,
+          this.sizeDisplayStandard(),
+          this._translationService.translate.bind(this._translationService)
+        );
+
+        if (error && error.code) {
+          issues.push(error);
+          file.fileStatus = "invalid";
+          file.helper = {
+            text: error.message,
+            type: "error",
+          };
+        } else if (!issues.find((issue) => issue.fileName === file.name)) {
+          file.fileStatus = "valid";
+          file.helper = undefined;
+        }
+      });
+    });
+    return issues;
   }
 
   fileClasses = (file: FileDropzone): string => {
@@ -301,33 +360,40 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
       return;
     }
 
-    const error = await this._fileService.addFiles(files);
-    const normalizedFiles = this._fileService.normalizeFiles(files);
-
-    this._updateErrorState(error);
+    await this._fileService.addFiles(files);
 
     this._onChange(this._fileService.files());
-    this.fileChange.emit(normalizedFiles);
+    this.fileChange.emit(this._fileService.files());
   }
 
-  removeFile(file: FileDropzone) {
-    const error = this._fileService.removeFiles([file]);
-    this._updateErrorState(error);
+  async removeFile(file: FileDropzone) {
+    await this._fileService.removeFiles([file]);
 
     this._onChange(this._fileService.files());
     this.fileDelete.emit(file);
+    this._ngControl.control?.markAsTouched();
   }
 
-  private _updateErrorState(error: string[]) {
-    if (
-      this._uploadState() === "invalid" &&
-      !this.validateIndividually() &&
-      error.length
-    ) {
-      this.uploadError.set(error[0]);
-    } else {
-      this.uploadError.set("");
+  private _currentErrorState(): string | undefined {
+    const errors = this._ngControl.control?.errors?.["tediFileDropzone"];
+
+    if (errors && !this.validateIndividually()) {
+      const dropzoneErrors: FileDropzoneErrors = errors;
+      return dropzoneErrors.map((error) => error.message).join(" ");
     }
+    return undefined;
+  }
+
+  private _getNewState(): ValidationState {
+    const errors: FileDropzoneErrors =
+      this._ngControl.control?.errors?.["tediFileDropzone"];
+    if (this._ngControl.control?.touched) {
+      return "none";
+    }
+    if (errors?.length) {
+      return "invalid";
+    }
+    return this.files().length > 0 ? "valid" : "none";
   }
 
   onContainerClick() {
