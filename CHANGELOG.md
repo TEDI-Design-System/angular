@@ -1,3 +1,10 @@
+## [5.0.1-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.2...angular-5.0.1-rc.3) (2026-01-16)
+
+
+### Bug Fixes
+
+* **file-dropzone:** make file dropzone update forms on deletion, and use form validation instead of it's own internal implementation ([#239](https://github.com/TEDI-Design-System/angular/issues/239)) ([86ebc6f](https://github.com/TEDI-Design-System/angular/commit/86ebc6ffe7c674f8859410f9dccca92db270641b)), closes [#66](https://github.com/TEDI-Design-System/angular/issues/66) [#66](https://github.com/TEDI-Design-System/angular/issues/66) [#66](https://github.com/TEDI-Design-System/angular/issues/66) [#66](https://github.com/TEDI-Design-System/angular/issues/66) [#66](https://github.com/TEDI-Design-System/angular/issues/66)
+
 ## [5.0.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.1...angular-5.0.1-rc.2) (2026-01-16)
 
 
