@@ -173,6 +173,15 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    closeOnSelect: {
+      description: "Close calendar popover after date selection",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
   },
 } as Meta<DatePickerComponent>;
 
@@ -202,6 +211,7 @@ export const Default: StoryObj<DatePickerComponent> = {
       inputDisabled: false,
       allowManualInput: true,
       showWeekNumbers: false,
+      closeOnSelect: true,
     };
   })(),
   render: (args) => ({

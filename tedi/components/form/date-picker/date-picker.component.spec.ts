@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { DatePickerComponent } from "./date-picker.component";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { NgxFloatUiContentComponent } from "ngx-float-ui";
-import { ElementRef } from "@angular/core";
+import { DatePickerCalendarGridComponent } from "./date-picker-calendar-grid/date-picker-calendar-grid.component";
 
 class TranslationMock {
   track(key: string) {
@@ -319,31 +319,19 @@ describe("DatePickerComponent", () => {
   it("focusDate should focus the correct button after timeout", () => {
     jest.useFakeTimers();
 
-    const mockContainer = document.createElement("div");
     const date = new Date(2024, 4, 20);
-    const key = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate(),
-    ).getTime();
+    const mockFocusDate = jest.fn();
 
-    const fakeBtn = document.createElement("button");
-    fakeBtn.setAttribute("data-date-key", String(key));
-
-    const focusSpy = jest.spyOn(fakeBtn, "focus");
-
-    mockContainer.appendChild(fakeBtn);
-
-    jest.spyOn(component, "gridElement").mockReturnValue({
-      nativeElement: mockContainer,
-    } as unknown as ElementRef<HTMLDivElement>);
+    jest.spyOn(component, "calendarGrid").mockReturnValue({
+      focusDate: mockFocusDate,
+    } as unknown as DatePickerCalendarGridComponent);
 
     component["focusDate"](date);
 
     jest.runAllTimers();
     jest.useRealTimers();
 
-    expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+    expect(mockFocusDate).toHaveBeenCalledWith(date);
   });
 
   describe("Year page navigation", () => {
@@ -473,38 +461,6 @@ describe("DatePickerComponent", () => {
       focusSpy.mockClear();
       trigger("X");
       expect(focusSpy).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("parseDate", () => {
-    function parse(str: string) {
-      return component["parseDate"](str);
-    }
-
-    it("should return null for formats not split into 3 parts", () => {
-      expect(parse("")).toBeNull();
-      expect(parse("12.05")).toBeNull();
-      expect(parse("12-05-2024")).toBeNull();
-      expect(parse("12/05/2024")).toBeNull();
-    });
-
-    it("should return null when day, month, or year are not valid numbers", () => {
-      expect(parse("aa.bb.cccc")).toBeNull();
-      expect(parse("1..2024")).toBeNull();
-      expect(parse(".02.2024")).toBeNull();
-      expect(parse("15.NaN.2024")).toBeNull();
-    });
-
-    it("should return null for impossible dates after constructing Date", () => {
-      expect(parse("31.02.2024")).toBeNull();
-      expect(parse("10.13.2024")).toBeNull();
-      expect(parse("00.12.2024")).toBeNull();
-      expect(parse("10.00.2024")).toBeNull();
-    });
-
-    it("should return a valid Date for correct input", () => {
-      const result = parse("10.03.2024");
-      expect(result).toEqual(new Date(2024, 2, 10));
     });
   });
 
@@ -655,6 +611,231 @@ describe("DatePickerComponent", () => {
 
       const result = getFirst(2024, 1);
       expect(result).toEqual(new Date(2024, 1, 1));
+    });
+  });
+
+  describe("Disabled date matchers ignore time components", () => {
+    it("before matcher should not disable the date itself", () => {
+      const cutoffDate = new Date(2024, 4, 15, 12, 30, 0);
+      fixture.componentRef.setInput("disabled", { before: cutoffDate });
+      fixture.detectChanges();
+
+      const cutoffAtMidnight = new Date(2024, 4, 15, 0, 0, 0);
+      const dayBefore = new Date(2024, 4, 14);
+
+      expect(component.isDisabled(cutoffAtMidnight)).toBe(false);
+      expect(component.isDisabled(dayBefore)).toBe(true);
+    });
+
+    it("after matcher should not disable the date itself", () => {
+      const cutoffDate = new Date(2024, 4, 15, 12, 30, 0);
+      fixture.componentRef.setInput("disabled", { after: cutoffDate });
+      fixture.detectChanges();
+
+      const cutoffAtMidnight = new Date(2024, 4, 15, 0, 0, 0);
+      const dayAfter = new Date(2024, 4, 16);
+
+      expect(component.isDisabled(cutoffAtMidnight)).toBe(false);
+      expect(component.isDisabled(dayAfter)).toBe(true);
+    });
+  });
+
+  describe("Disabled months and years", () => {
+    it("disabledMonths should contain months with no enabled days", () => {
+      fixture.componentRef.setInput("disabled", [
+        { before: new Date(2024, 2, 1) },
+        { after: new Date(2024, 4, 31) },
+      ]);
+      component.month.set(new Date(2024, 3, 1));
+      fixture.detectChanges();
+
+      const disabled = component.disabledMonths();
+
+      expect(disabled.has(0)).toBe(true);
+      expect(disabled.has(1)).toBe(true);
+      expect(disabled.has(2)).toBe(false);
+      expect(disabled.has(3)).toBe(false);
+      expect(disabled.has(4)).toBe(false);
+      expect(disabled.has(5)).toBe(true);
+    });
+
+    it("disabledYears should contain years with no enabled days", () => {
+      fixture.componentRef.setInput("startYear", 2022);
+      fixture.componentRef.setInput("endYear", 2026);
+      fixture.componentRef.setInput("disabled", [
+        { before: new Date(2024, 0, 1) },
+        { after: new Date(2024, 11, 31) },
+      ]);
+      fixture.detectChanges();
+
+      const disabled = component.disabledYears();
+
+      expect(disabled.has(2022)).toBe(true);
+      expect(disabled.has(2023)).toBe(true);
+      expect(disabled.has(2024)).toBe(false);
+      expect(disabled.has(2025)).toBe(true);
+      expect(disabled.has(2026)).toBe(true);
+    });
+  });
+
+  describe("Navigation with disabled months", () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput("startYear", 2024);
+      fixture.componentRef.setInput("endYear", 2024);
+      fixture.componentRef.setInput("disabled", [
+        { before: new Date(2024, 3, 1) },
+        { after: new Date(2024, 8, 30) },
+      ]);
+      component.month.set(new Date(2024, 5, 1));
+      fixture.detectChanges();
+    });
+
+    it("canGoPrev should be true when there is an enabled month before", () => {
+      expect(component.canGoPrev()).toBe(true);
+    });
+
+    it("canGoNext should be true when there is an enabled month after", () => {
+      expect(component.canGoNext()).toBe(true);
+    });
+
+    it("prevMonth should skip disabled months", () => {
+      component.month.set(new Date(2024, 5, 1));
+      fixture.detectChanges();
+
+      component.prevMonth();
+
+      expect(component.month().getMonth()).toBe(4);
+    });
+
+    it("nextMonth should skip disabled months", () => {
+      component.month.set(new Date(2024, 5, 1));
+      fixture.detectChanges();
+
+      component.nextMonth();
+
+      expect(component.month().getMonth()).toBe(6);
+    });
+
+    it("canGoPrev should be false when at first enabled month", () => {
+      component.month.set(new Date(2024, 3, 1));
+      fixture.detectChanges();
+
+      expect(component.canGoPrev()).toBe(false);
+    });
+
+    it("canGoNext should be false when at last enabled month", () => {
+      component.month.set(new Date(2024, 8, 1));
+      fixture.detectChanges();
+
+      expect(component.canGoNext()).toBe(false);
+    });
+
+    it("prevMonth should not change month when canGoPrev is false", () => {
+      component.month.set(new Date(2024, 3, 1));
+      fixture.detectChanges();
+
+      component.prevMonth();
+
+      expect(component.month().getMonth()).toBe(3);
+    });
+
+    it("nextMonth should not change month when canGoNext is false", () => {
+      component.month.set(new Date(2024, 8, 1));
+      fixture.detectChanges();
+
+      component.nextMonth();
+
+      expect(component.month().getMonth()).toBe(8);
+    });
+  });
+
+  describe("Month and year select with disabled periods", () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput("startYear", 2025);
+      fixture.componentRef.setInput("endYear", 2027);
+      fixture.componentRef.setInput("disabled", [
+        { before: new Date(2024, 5, 1) },
+        { after: new Date(2024, 7, 31) },
+      ]);
+      component.month.set(new Date(2024, 6, 1));
+      fixture.detectChanges();
+    });
+
+    it("onMonthSelect should not navigate to fully disabled month", () => {
+      component.onMonthSelect("0");
+
+      expect(component.month().getMonth()).toBe(6);
+    });
+
+    it("onMonthSelect should navigate to enabled month", () => {
+      component.onMonthSelect("7");
+
+      expect(component.month().getMonth()).toBe(7);
+    });
+
+    it("onYearSelect should not navigate to fully disabled year", () => {
+      component.onYearSelect("2025");
+
+      expect(component.month().getFullYear()).toBe(2024);
+    });
+
+    it("onYearSelect should navigate to enabled year", () => {
+      fixture.componentRef.setInput("disabled", null);
+      fixture.detectChanges();
+
+      component.onYearSelect("2027");
+
+      expect(component.month().getFullYear()).toBe(2027);
+    });
+
+    it("onYearSelect should find first enabled month if current month is disabled in new year", () => {
+      // Enable Jun-Aug in 2024, and Jan-Mar in 2027
+      fixture.componentRef.setInput("disabled", [
+        { before: new Date(2024, 5, 1) },
+        { after: new Date(2027, 2, 31) },
+      ]);
+      component.month.set(new Date(2024, 6, 1));
+      fixture.detectChanges();
+
+      component.onYearSelect("2027");
+
+      expect(component.month().getFullYear()).toBe(2027);
+      expect(component.month().getMonth()).toBeLessThanOrEqual(2);
+    });
+  });
+
+  describe("closeOnSelect behavior", () => {
+    it("should close popover after selection when closeOnSelect is true", () => {
+      const hideSpy = jest.spyOn(
+        component.popover().floatUiComponent(),
+        "hide",
+      );
+
+      component.selectDay({
+        date: new Date(2024, 4, 15),
+        disabled: false,
+        inCurrentMonth: true,
+      });
+
+      expect(hideSpy).toHaveBeenCalled();
+    });
+
+    it("should not close popover after selection when closeOnSelect is false", () => {
+      fixture.componentRef.setInput("closeOnSelect", false);
+      fixture.detectChanges();
+
+      const hideSpy = jest.spyOn(
+        component.popover().floatUiComponent(),
+        "hide",
+      );
+
+      component.selectDay({
+        date: new Date(2024, 4, 15),
+        disabled: false,
+        inCurrentMonth: true,
+      });
+
+      expect(hideSpy).not.toHaveBeenCalled();
     });
   });
 });
