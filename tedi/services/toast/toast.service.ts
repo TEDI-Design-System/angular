@@ -7,17 +7,11 @@ import {
 import { Overlay, OverlayRef, OverlayConfig } from "@angular/cdk/overlay";
 import { ComponentPortal } from "@angular/cdk/portal";
 import { ToastContainerComponent, ToastItem } from "../../components/notifications/toast/toast-container.component";
-import { ToastPosition, ToastConfig, ToastRole } from "../../components/notifications/toast/toast.component";
+import { ToastConfig, ToastRole, TOAST_DEFAULT_DURATION } from "../../components/notifications/toast/toast.component";
 import { ToastAnnouncerService } from "./toast-announcer.service";
 
-export interface ToastOptions extends ToastConfig {
-  position?: ToastPosition;
-  id?: string;
-}
+type ToastMethodOptions = Partial<Omit<ToastConfig, "title" | "content" | "type">>;
 
-type ToastMethodOptions = Partial<Omit<ToastOptions, "title" | "content" | "type">>;
-
-const DEFAULT_DURATION = 6000;
 const ANIMATION_DURATION = 300;
 
 let toastId = 0;
@@ -114,12 +108,12 @@ export class ToastService {
   /**
    * Show a toast notification with full configuration.
    */
-  show(options: ToastOptions): string {
+  show(options: ToastConfig): string {
     this.assertContainerExists();
 
     const id = options.id || this.generateId();
     const position = options.position || "bottom-right";
-    const duration = options.duration ?? DEFAULT_DURATION;
+    const duration = options.duration ?? TOAST_DEFAULT_DURATION;
     const role = options.role ?? "status";
     const showProgressBar = options.showProgressBar ?? false;
     const pauseOnHover = options.pauseOnHover ?? true;

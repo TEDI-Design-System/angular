@@ -7,6 +7,8 @@ import {
 } from "@angular/core";
 import { AlertComponent, AlertType, AlertRole } from "../alert/alert.component";
 
+export const TOAST_DEFAULT_DURATION = 6000;
+
 export type ToastType = AlertType;
 export type ToastRole = AlertRole;
 export type ToastPosition =
@@ -16,9 +18,22 @@ export type ToastPosition =
   | "bottom-right";
 
 export interface ToastConfig {
+  /**
+   * Title of the toast notification.
+   */
   title: string;
+  /**
+   * Toast text content.
+   */
   content?: string;
+  /**
+   * Type of the toast notification determining its color scheme.
+   * @default info
+   */
   type?: ToastType;
+  /**
+   * Specifies an optional icon to display in the toast notification, providing quick visual context.
+   */
   icon?: string;
   /**
    * Toast duration in milliseconds. Set to 0 for persistent toast.
@@ -42,6 +57,20 @@ export interface ToastConfig {
    * @default status
    */
   role?: ToastRole;
+  /**
+   * The position of toast container.
+   * Possible values:
+   * - 'top-left'
+   * - 'top-right'
+   * - 'bottom-left'
+   * - 'bottom-right'
+   * @default bottom-right
+   */
+  position?: ToastPosition;
+  /**
+   * Unique identifier of given toast. Id is automatically generated if not provided by client
+   */
+  id?: string;
 }
 
 @Component({
@@ -81,9 +110,9 @@ export class ToastComponent {
 
   /**
    * Duration in milliseconds for auto-close.
-   * @default 0
+   * @default 6000
    */
-  readonly duration = input<number>(0);
+  readonly duration = input<number>(TOAST_DEFAULT_DURATION);
 
   /**
    * Whether to show the progress bar.
