@@ -3,16 +3,16 @@ tedi-header-profile {
 
   .tedi-header-profile--mobile {
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
     gap: 0;
-    border: 0;
-    border-radius: 0;
-    font-size: 12px;
-    line-height: 16px;
+    align-items: center;
+    justify-content: center;
     min-width: var(--layout-header-mobile-button-size);
     min-height: var(--layout-header-mobile-button-size);
     padding: var(--layout-grid-gutters-08);
+    font-size: 12px;
+    line-height: 16px;
+    border: 0;
+    border-radius: 0;
 
     &:focus-visible {
       outline: var(--borders-02) solid var(--tedi-primary-500);
@@ -30,26 +30,26 @@ tedi-header-profile {
 
   .tedi-header-profile__overlay {
     position: absolute;
-    left: 0;
     top: var(--layout-header-min-height);
+    left: 0;
+    z-index: calc(var(--z-index-header) - 1);
     width: 100%;
     min-height: calc(100dvh - var(--layout-header-min-height));
     background: rgb(0 0 0 / 25%);
-    z-index: calc(var(--z-index-header) - 1);
   }
 
   .tedi-header-profile__modal {
-    min-height: calc(100dvh - var(--layout-header-min-height));
-    max-height: 100%;
     position: absolute;
-    right: 0;
     top: var(--layout-header-min-height);
-    overflow-y: auto;
+    right: 0;
+    z-index: var(--z-index-header);
     display: flex;
     flex-direction: column;
-    background: var(--general-surface-primary);
-    z-index: var(--z-index-header);
     width: var(--navigation-vertical-item-width-default);
+    min-height: calc(100dvh - var(--layout-header-min-height));
+    max-height: 100%;
+    overflow-y: auto;
+    background: var(--general-surface-primary);
 
     > * {
       padding: var(--layout-header-modal-item-padding);
@@ -65,9 +65,9 @@ tedi-header-profile {
 
     .tedi-header-logout--mobile {
       flex-direction: row;
+      gap: var(--link-inner-spacing-x);
       justify-content: flex-start;
       font-size: var(--body-regular-size);
-      gap: var(--link-inner-spacing-x);
 
       tedi-icon {
         font-size: inherit !important;

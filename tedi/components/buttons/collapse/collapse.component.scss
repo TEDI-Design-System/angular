@@ -7,12 +7,11 @@ $transition-duration: 300ms;
 }
 
 .tedi-collapse {
-
   &__button {
     display: flex;
+    gap: var(--link-inner-spacing-x);
     align-items: center;
     cursor: pointer;
-    gap: var(--link-inner-spacing-x);
 
     @include mixins.button-reset;
 
@@ -27,38 +26,39 @@ $transition-duration: 300ms;
   }
 
   &__icon {
-    transition: transform $transition-duration ease;
     color: var(--button-main-neutral-text-default);
+    transition: transform $transition-duration ease;
 
     &--wrapper {
       display: flex;
       align-items: center;
       justify-content: center;
-      border: var(--borders-01) solid var(--button-main-secondary-border-default);
-      border-radius: 100%;
       width: var(--button-sm-icon-size);
       height: var(--button-sm-icon-size);
+      border: var(--borders-01) solid
+        var(--button-main-secondary-border-default);
+      border-radius: 100%;
     }
 
-    .tedi-collapse--open>.tedi-collapse__button & {
+    .tedi-collapse--open > .tedi-collapse__button & {
       transform: rotate(180deg);
     }
   }
 
   &__extender {
+    visibility: hidden;
     min-height: 0;
     transition: visibility $transition-duration;
-    visibility: hidden;
   }
 
   &__content {
-    margin-top: var(--dimensions-05);
     display: grid;
     grid-template-rows: 0fr;
+    margin-top: var(--dimensions-05);
     overflow: hidden;
     transition: grid-template-rows $transition-duration;
 
-    .tedi-collapse--open>& {
+    .tedi-collapse--open > & {
       grid-template-rows: 1fr;
 
       .tedi-collapse__extender {

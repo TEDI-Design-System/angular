@@ -8,11 +8,11 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  border: 1px solid;
-  font-size: var(--body-regular-size);
-  border-radius: var(--alert-radius);
-  padding: var(--alert-default-padding-y) var(--alert-default-padding-x);
   gap: var(--layout-grid-gutters-04);
+  padding: var(--alert-default-padding-y) var(--alert-default-padding-x);
+  font-size: var(--body-regular-size);
+  border: 1px solid;
+  border-radius: var(--alert-radius);
 
   @include alert-variant(
     var(--alert-default-background-info),
@@ -21,8 +21,8 @@
 
   &__head {
     display: flex;
-    align-items: center;
     gap: var(--layout-grid-gutters-04);
+    align-items: center;
   }
 
   &__close {
@@ -33,8 +33,8 @@
 
   &__content {
     display: flex;
-    align-items: flex-start;
     gap: var(--layout-grid-gutters-08);
+    align-items: flex-start;
 
     .tedi-alert__content-icon {
       line-height: var(--body-regular-line-height);

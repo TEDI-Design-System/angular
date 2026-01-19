@@ -1,12 +1,12 @@
 tedi-timeline-title {
   display: flex;
-  align-items: center;
-  color: var(--general-text-secondary);
-  min-height: var(--timeline-text-min-height);
   gap: var(--layout-grid-gutters-04);
+  align-items: center;
+  min-height: var(--timeline-text-min-height);
   font-size: var(--body-small-bold-size);
-  line-height: var(--body-small-bold-line-height);
   font-weight: var(--body-bold-weight);
+  line-height: var(--body-small-bold-line-height);
+  color: var(--general-text-secondary);
 
   > * {
     font-size: inherit;
