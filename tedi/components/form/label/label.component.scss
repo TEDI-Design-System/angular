@@ -7,10 +7,7 @@
   }
 
   &--required {
-    &::after {
-      content: " *";
-      color: var(--form-general-feedback-error-border);
-    }
+    color: var(--form-general-feedback-error-border);
   }
 
   &--primary {
