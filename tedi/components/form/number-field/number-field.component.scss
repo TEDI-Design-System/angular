@@ -12,9 +12,10 @@
 
   .tedi-number-field__button {
     --general-icon-primary: currentcolor;
-    border: var(--borders-01) solid var(--form-input-border-default);
+
     width: var(--form-field-height);
     height: var(--form-field-height);
+    border: var(--borders-01) solid var(--form-input-border-default);
 
     &:disabled {
       background-color: var(--form-input-background-disabled);
@@ -58,9 +59,9 @@
 
       &:active {
         z-index: 2;
+        outline: none;
         border-color: var(--form-general-feedback-error-border);
         border-radius: 0;
-        outline: none;
       }
     }
   }
@@ -87,28 +88,28 @@
 .tedi-number-field__input-wrapper {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  gap: var(--form-field-inner-spacing-sm);
   align-items: stretch;
-  background-color: var(--form-input-background-default);
-  border: var(--borders-01) solid var(--form-input-border-default);
   width: var(--form-number-input-min-width);
   height: var(--form-field-height);
-  padding-left: var(--form-field-padding-y-3-default);
   padding-right: var(--form-field-padding-y-3-default);
-  gap: var(--form-field-inner-spacing-sm);
+  padding-left: var(--form-field-padding-y-3-default);
+  background-color: var(--form-input-background-default);
+  border: var(--borders-01) solid var(--form-input-border-default);
 
   &:focus-within {
     z-index: 2;
-    border-color: var(--form-input-border-active);
     outline: calc(2 * var(--borders-01)) solid var(--form-input-border-active);
     outline-offset: var(--borders-01);
+    border-color: var(--form-input-border-active);
     border-radius: var(--button-radius-sm);
   }
 
   &:active:not(.tedi-number-field__input-wrapper--disabled) {
     z-index: 2;
+    outline: none;
     border-color: var(--form-input-border-active);
     border-radius: 0;
-    outline: none;
   }
 
   &--small {
@@ -134,14 +135,14 @@
 }
 
 .tedi-number-field__input {
-  width: 100%;
   grid-column: span 2;
+  width: 100%;
+  font-size: var(--heading-h6-size);
   text-align: center;
+  outline: none;
   background-color: var(--form-input-background-default);
   border: 0;
   border-radius: 0;
-  outline: none;
-  font-size: var(--heading-h6-size);
 
   //  /* Chrome, Safari, Edge, Opera */
   &::-webkit-outer-spin-button,

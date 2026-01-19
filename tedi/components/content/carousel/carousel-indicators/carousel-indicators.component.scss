@@ -1,28 +1,28 @@
 tedi-carousel-indicators {
   display: flex;
+  gap: var(--layout-grid-gutters-04);
   align-items: center;
   min-height: 24px;
-  gap: var(--layout-grid-gutters-04);
 }
 
 .tedi-carousel__indicator {
+  position: relative;
   width: 24px;
   height: 24px;
   cursor: pointer;
-  position: relative;
-  border: none;
   background: none;
+  border: none;
 
   &::after {
-    content: "";
     position: absolute;
     top: 50%;
     left: 50%;
     width: 22px;
     height: 8px;
-    border-radius: 100px;
-    border: 1px solid var(--tedi-primary-600);
+    content: "";
     background-color: transparent;
+    border: 1px solid var(--tedi-primary-600);
+    border-radius: 100px;
     transform: translate(-50%, -50%);
   }
 
@@ -31,8 +31,8 @@ tedi-carousel-indicators {
   }
 
   &:active::after {
-    border-color: var(--tedi-primary-800);
     background-color: var(--tedi-primary-800);
+    border-color: var(--tedi-primary-800);
   }
 
   &:focus-visible::after {

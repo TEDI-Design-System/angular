@@ -19,8 +19,8 @@ $bullet-colors: (
 }
 
 ul.tedi-list {
-  list-style: none;
   padding-left: var(--list-padding-left-level-1);
+  list-style: none;
 
   li {
     position: relative;
@@ -30,11 +30,11 @@ ul.tedi-list {
       position: absolute;
       top: 0.5em;
       left: 0;
+      width: var(--list-icon-size);
+      height: var(--list-icon-size);
       content: "";
       border: 2px solid var(--general-icon-brand);
       border-radius: 50%;
-      width: var(--list-icon-size);
-      height: var(--list-icon-size);
     }
 
     ul.tedi-list li::before {
@@ -74,8 +74,8 @@ ol.tedi-list {
   counter-reset: item;
 
   li {
-    counter-increment: item;
     padding-left: var(--list-padding-left-level-1);
+    counter-increment: item;
 
     &::before {
       content: counters(item, ".") ". ";

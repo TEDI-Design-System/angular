@@ -1,8 +1,8 @@
 .tedi-sidenav-dropdown {
   display: grid;
+  visibility: hidden;
   grid-template-rows: 0fr;
   overflow: hidden;
-  visibility: hidden;
   transition: grid-template-rows var(--_sidenav-transition-duration) ease;
 
   &--open {
@@ -15,8 +15,8 @@
   }
 
   &__items {
+    visibility: hidden;
     min-height: 0;
     transition: visibility var(--_sidenav-transition-duration) ease;
-    visibility: hidden;
   }
 }

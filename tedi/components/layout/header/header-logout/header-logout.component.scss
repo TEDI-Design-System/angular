@@ -1,11 +1,11 @@
 .tedi-header-logout {
   display: flex;
-  align-items: center;
-  background: transparent;
-  padding: 0;
-  border: 0;
-  font-size: var(--body-regular-size);
   gap: var(--link-inner-spacing-x);
+  align-items: center;
+  padding: 0;
+  font-size: var(--body-regular-size);
+  background: transparent;
+  border: 0;
 
   &:hover {
     span {
@@ -15,16 +15,16 @@
 
   &--mobile {
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
     gap: 0;
-    border: 0;
-    border-radius: 0;
-    font-size: var(--body-extra-small-size);
-    line-height: var(--body-regular-line-height);
+    align-items: center;
+    justify-content: center;
     min-width: var(--layout-header-mobile-button-size);
     min-height: var(--layout-header-mobile-button-size);
     padding: var(--layout-grid-gutters-08);
+    font-size: var(--body-extra-small-size);
+    line-height: var(--body-regular-line-height);
+    border: 0;
+    border-radius: 0;
 
     &:focus-visible {
       outline: var(--borders-02) solid var(--tedi-primary-500);
@@ -32,9 +32,9 @@
     }
 
     tedi-icon {
-      font-size: var(--icon-05) !important;
       margin: 0 !important;
       margin-bottom: 4px !important;
+      font-size: var(--icon-05) !important;
     }
   }
 

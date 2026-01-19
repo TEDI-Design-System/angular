@@ -1,6 +1,6 @@
 .tedi-label {
-  font-size: var(--body-regular-size);
   font-family: var(--family-default);
+  font-size: var(--body-regular-size);
 
   &--small {
     font-size: var(--body-small-regular-size);
@@ -8,8 +8,8 @@
 
   &--required {
     &::after {
-      content: " *";
       color: var(--form-general-feedback-error-border);
+      content: " *";
     }
   }
 

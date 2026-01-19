@@ -21,11 +21,12 @@
 
   &__trigger {
     --_gap: var(--navigation-vertical-item-inner-spacing);
-    width: 100%;
+
     position: relative;
     display: flex;
-    cursor: pointer;
     gap: var(--_gap);
+    width: 100%;
+    cursor: pointer;
 
     &:hover {
       background: var(--navigation-vertical-item-background-hover);
@@ -37,20 +38,20 @@
   }
 
   &__title {
+    display: flex;
+    gap: var(--_gap);
+    align-items: center;
     width: 100%;
     min-height: var(--_sidenav-item-min-height);
-    display: flex;
-    align-items: center;
-    gap: var(--_gap);
-    text-decoration: none;
-    text-align: start;
-    border: 0;
-    background: transparent;
-    font-size: inherit;
-    cursor: pointer;
-    color: var(--navigation-vertical-item-text);
     padding: var(--_sidenav-item-padding-y) var(--_sidenav-item-padding-right)
       var(--_sidenav-item-padding-y) var(--_sidenav-item-padding-left);
+    font-size: inherit;
+    color: var(--navigation-vertical-item-text);
+    text-align: start;
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
 
     &:focus-visible {
       outline: var(--borders-01) solid var(--tedi-neutral-100);
@@ -72,15 +73,14 @@
   }
 
   &__caret-button {
-    min-height: var(--_sidenav-item-min-height);
     display: flex;
-    align-items: center;
-    justify-items: center;
-    border: 0;
-    background: transparent;
+    place-items: center center;
+    min-height: var(--_sidenav-item-min-height);
+    padding: 0;
     font-size: inherit;
     cursor: pointer;
-    padding: 0;
+    background: transparent;
+    border: 0;
 
     &:hover {
       .tedi-sidenav-item__caret-container {
@@ -104,17 +104,17 @@
 
   &__caret-container {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     width: fit-content;
     height: fit-content;
     border-radius: var(--button-radius-sm);
   }
 
   &__caret {
+    margin-left: auto;
     font-size: var(--_sidenav-item-caret-size) !important;
     transition: transform var(--_sidenav-transition-duration) ease;
-    margin-left: auto;
 
     &[data-open="true"] {
       transform: rotate(180deg);
@@ -122,17 +122,17 @@
   }
 
   &__text {
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
     animation: enable-wrap 0s var(--_sidenav-transition-duration) forwards;
   }
 
   &__link {
-    text-decoration: none;
-    color: var(--navigation-vertical-item-text);
     padding: var(--_sidenav-item-padding-y) var(--_sidenav-item-padding-right)
       var(--_sidenav-item-padding-y) var(--_sidenav-item-padding-left);
+    color: var(--navigation-vertical-item-text);
+    text-decoration: none;
 
     &:hover {
       background: var(--navigation-vertical-item-background-hover);
@@ -146,7 +146,7 @@
 
 @keyframes enable-wrap {
   to {
-    white-space: normal;
     max-width: none;
+    white-space: normal;
   }
 }
