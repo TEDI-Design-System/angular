@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, ViewEncapsulation } from "@angular/core";
 import { IconComponent } from "../../base/icon/icon.component";
-import { TediTranslationService } from "@tedi-design-system/angular/tedi";
+import { TediTranslationService } from "../../../services";
 
 @Component({
   standalone: true,
