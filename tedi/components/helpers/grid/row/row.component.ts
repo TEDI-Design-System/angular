@@ -114,16 +114,16 @@ export class RowComponent implements BreakpointInputs<RowInputs> {
   });
 
   classes = computed(() => {
-    const classList = ["row", `row--cols-${this.breakpointInputs().cols}`];
+    const classList = ["tedi-row", `tedi-row--cols-${this.breakpointInputs().cols}`];
 
     if (this.breakpointInputs().justifyItems) {
       classList.push(
-        `row--justify-items-${this.breakpointInputs().justifyItems}`,
+        `tedi-row--justify-items-${this.breakpointInputs().justifyItems}`,
       );
     }
 
     if (this.breakpointInputs().alignItems) {
-      classList.push(`row--align-items-${this.breakpointInputs().alignItems}`);
+      classList.push(`tedi-row--align-items-${this.breakpointInputs().alignItems}`);
     }
 
     if (this.breakpointInputs().gap !== undefined) {
