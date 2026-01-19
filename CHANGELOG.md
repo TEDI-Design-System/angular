@@ -1,3 +1,13 @@
+## [5.0.1-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.3...angular-5.0.1-rc.4) (2026-01-19)
+
+
+### Bug Fixes
+
+* **carousel:** carousel wcag fixes [#241](https://github.com/TEDI-Design-System/angular/issues/241) ([#263](https://github.com/TEDI-Design-System/angular/issues/263)) ([91b6913](https://github.com/TEDI-Design-System/angular/commit/91b69136e3267524b718e8c7e8f709a71765ed54))
+* **info-button:** added default aria-label [#46](https://github.com/TEDI-Design-System/angular/issues/46) ([#265](https://github.com/TEDI-Design-System/angular/issues/265)) ([a76084f](https://github.com/TEDI-Design-System/angular/commit/a76084f91704075637b6e0e19508c1c0851f94d4))
+* **info-button:** fixed circular service import [#46](https://github.com/TEDI-Design-System/angular/issues/46) ([cf49aad](https://github.com/TEDI-Design-System/angular/commit/cf49aade10399a386db6c2d4b45c1aee9a35a239))
+* **tooltip:** wcag improvements [#45](https://github.com/TEDI-Design-System/angular/issues/45) ([#267](https://github.com/TEDI-Design-System/angular/issues/267)) ([a860c06](https://github.com/TEDI-Design-System/angular/commit/a860c06e60d3d2df6cf2e6441a3e63d1ca7f5044))
+
 ## [5.0.1-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.2...angular-5.0.1-rc.3) (2026-01-16)
 
 
