@@ -48,7 +48,7 @@ const POSITIONS: ToastPosition[] = [
             <tedi-toast
               [title]="toast.title"
               [type]="toast.type ?? 'info'"
-              [icon]="toast.icon"
+              [icon]="toast.icon ?? ''"
               [role]="toast.role ?? 'status'"
               [duration]="toast.duration ?? 0"
               [showProgressBar]="toast.showProgressBar ?? false"

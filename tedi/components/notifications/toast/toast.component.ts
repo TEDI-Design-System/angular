@@ -97,7 +97,7 @@ export class ToastComponent {
   /**
    * Icon name. Only shown when provided.
    */
-  readonly icon = input<string>();
+  readonly icon = input<string>("");
 
   /**
    * The ARIA role of the toast, informing screen readers about the notification's priority.
