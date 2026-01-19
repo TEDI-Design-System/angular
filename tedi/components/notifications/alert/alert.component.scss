@@ -5,6 +5,7 @@
 }
 
 .tedi-alert {
+  position: relative;
   display: flex;
   flex-direction: column;
   border: 1px solid;
@@ -25,7 +26,9 @@
   }
 
   &__close {
-    margin-left: auto;
+    position: absolute;
+    top: var(--alert-default-padding-y);
+    right: var(--alert-default-padding-x);
   }
 
   &__content {
