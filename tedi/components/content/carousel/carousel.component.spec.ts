@@ -286,8 +286,18 @@ describe("CarouselContentComponent", () => {
 
     component.trackIndex.set(5);
     const index = component.slideIndex();
-    expect(index).toBeGreaterThanOrEqual(0);
-    expect(index).toBeLessThan(3);
+    expect(index).toEqual(2);
+  });
+
+  it("should compute renderedActiveIndex properly when slides exist", () => {
+    Object.defineProperty(component, "slides", {
+      configurable: true,
+      value: () => [{}, {}, {}],
+    });
+
+    component.trackIndex.set(5);
+    const index = component.renderedActiveIndex();
+    expect(index).toEqual(8);
   });
 
   it("should apply fade-right class when fade true and slidesPerView > 1", () => {
@@ -474,7 +484,7 @@ describe("CarouselIndicatorsComponent", () => {
   imports: [CarouselNavigationComponent],
   template: ` <tedi-carousel-navigation></tedi-carousel-navigation> `,
 })
-class TestNavigationHostComponent {}
+class TestNavigationHostComponent { }
 
 describe("CarouselNavigationComponent", () => {
   let fixture: ComponentFixture<TestNavigationHostComponent>;
