@@ -14,6 +14,11 @@ import { DatePickerComponent } from "./date-picker.component";
 export default {
   title: "TEDI-Ready/Components/Form/DatePicker",
   component: DatePickerComponent,
+  parameters: {
+    status: {
+      type: ["partiallyTediReady"],
+    },
+  },
   decorators: [
     moduleMetadata({
       imports: [DatePickerComponent],
@@ -51,7 +56,7 @@ export default {
         defaultValue: { summary: "null" },
       },
     },
-    showControls: {
+    showNavigation: {
       description:
         "Shows or hides the calendar navigation controls (previous/next month buttons).",
       control: { type: "boolean" },
@@ -198,7 +203,7 @@ export const Default: StoryObj<DatePickerComponent> = {
     return {
       selected: next,
       month: today,
-      showControls: true,
+      showNavigation: true,
       monthMode: "dropdown",
       yearMode: "dropdown",
       disabled: null,

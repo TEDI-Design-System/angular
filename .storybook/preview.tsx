@@ -105,6 +105,12 @@ const preview: Preview = {
           color: "#fff",
           description: "TEDI-ready",
         },
+        partiallyTediReady: {
+          background: '#9bbb5f',
+          color: '#fff',
+          description:
+            'This component lacks some TEDI-Ready functionality, e.g it may rely on another component that has not yet been developed',
+        },
       },
     },
   },
