@@ -1,3 +1,15 @@
+# [6.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.8...angular-6.0.0-rc.1) (2026-01-20)
+
+
+### Bug Fixes
+
+* **toggle, number-field:** renamed id to inputId [#24](https://github.com/TEDI-Design-System/angular/issues/24) ([#266](https://github.com/TEDI-Design-System/angular/issues/266)) ([d451a56](https://github.com/TEDI-Design-System/angular/commit/d451a56a8836159e8975a78e4eba3437486c92e5))
+
+
+### BREAKING CHANGES
+
+* **toggle, number-field:** toggle and number-field components must switch to inputId input
+
 ## [5.0.1-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.7...angular-5.0.1-rc.8) (2026-01-20)
 
 
