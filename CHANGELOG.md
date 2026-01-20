@@ -1,3 +1,10 @@
+## [5.0.1-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.4...angular-5.0.1-rc.5) (2026-01-20)
+
+
+### Bug Fixes
+
+* **row, col, collapse:** added tedi-prefix to class names [#251](https://github.com/TEDI-Design-System/angular/issues/251) ([#274](https://github.com/TEDI-Design-System/angular/issues/274)) ([3064c28](https://github.com/TEDI-Design-System/angular/commit/3064c28ed9442daf824ea8fd574b4b86fe2bb5b8))
+
 ## [5.0.1-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.3...angular-5.0.1-rc.4) (2026-01-19)
 
 
