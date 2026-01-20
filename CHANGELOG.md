@@ -1,3 +1,10 @@
+## [5.0.1-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.6...angular-5.0.1-rc.7) (2026-01-20)
+
+
+### Bug Fixes
+
+* **label:** wcag-compliant required label handling [#50](https://github.com/TEDI-Design-System/angular/issues/50) ([#277](https://github.com/TEDI-Design-System/angular/issues/277)) ([ebfdd96](https://github.com/TEDI-Design-System/angular/commit/ebfdd96edc2dd915d5724cff0e4e711307e0cf77))
+
 ## [5.0.1-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.5...angular-5.0.1-rc.6) (2026-01-20)
 
 
