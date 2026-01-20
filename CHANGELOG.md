@@ -1,3 +1,10 @@
+## [5.0.1-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.7...angular-5.0.1-rc.8) (2026-01-20)
+
+
+### Bug Fixes
+
+* **button:** added correct focus-visible style [#47](https://github.com/TEDI-Design-System/angular/issues/47) ([#279](https://github.com/TEDI-Design-System/angular/issues/279)) ([431eda9](https://github.com/TEDI-Design-System/angular/commit/431eda90c112fd55ca5cdf957186fd60ea6a3ec7))
+
 ## [5.0.1-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.6...angular-5.0.1-rc.7) (2026-01-20)
 
 
