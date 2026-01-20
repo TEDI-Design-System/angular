@@ -1,3 +1,10 @@
+## [5.0.1-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.5...angular-5.0.1-rc.6) (2026-01-20)
+
+
+### Bug Fixes
+
+* **alert:** changed DOM order of alert elements [#44](https://github.com/TEDI-Design-System/angular/issues/44) ([#278](https://github.com/TEDI-Design-System/angular/issues/278)) ([d5974e3](https://github.com/TEDI-Design-System/angular/commit/d5974e323489110e25b52e6090953ca2665ae85c))
+
 ## [5.0.1-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.4...angular-5.0.1-rc.5) (2026-01-20)
 
 
