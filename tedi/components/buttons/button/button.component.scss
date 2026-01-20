@@ -80,6 +80,7 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     --_btn-padding-y: var(--button-sm-neutral-padding-y);
     --_btn-padding-x: var(--button-sm-neutral-padding-x);
   }
+
   &:where(.tedi-button--default) {
     --_btn-padding-y: var(--button-md-neutral-padding-y);
     --_btn-padding-x: var(--button-md-neutral-padding-x);
@@ -89,21 +90,21 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 @mixin button-main-styles {
   & {
     display: inline-flex;
+    gap: var(--_btn-inner-spacing);
     align-items: center;
     justify-content: center;
-    gap: var(--_btn-inner-spacing);
-    text-decoration: none;
-    background: var(--_btn-bg);
-    color: var(--_btn-text);
-    border: var(--borders-01) solid var(--_btn-border);
     padding: var(--_btn-padding);
-    transition: 150ms ease;
-    transition-property: background-color, border-color;
-    cursor: pointer;
     font-family: var(--family-default);
     font-weight: var(--body-regular-weight);
     line-height: var(--body-bold-line-height);
+    color: var(--_btn-text);
+    text-decoration: none;
+    cursor: pointer;
+    background: var(--_btn-bg);
+    border: var(--borders-01) solid var(--_btn-border);
     border-radius: var(--button-radius-default);
+    transition: 150ms ease;
+    transition-property: background-color, border-color;
 
     &--icon-only {
       width: var(--button-md-icon-size);
@@ -112,9 +113,11 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     }
 
     &--pl {
-      &:not(.tedi-button--neutral):not(.tedi-button--danger-neutral):not(
-          .tedi-button--neutral-inverted
-        ) {
+      &:not(
+        .tedi-button--neutral,
+        .tedi-button--danger-neutral,
+        .tedi-button--neutral-inverted
+      ) {
         padding-left: calc(
           var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px
         );
@@ -122,9 +125,11 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     }
 
     &--pr {
-      &:not(.tedi-button--neutral):not(.tedi-button--danger-neutral):not(
-          .tedi-button--neutral-inverted
-        ) {
+      &:not(
+        .tedi-button--neutral,
+        .tedi-button--danger-neutral,
+        .tedi-button--neutral-inverted
+      ) {
         padding-right: calc(
           var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px
         );
@@ -132,35 +137,35 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     }
 
     &:hover {
+      color: var(--_btn-hover-text);
       background: var(--_btn-hover-bg);
       border-color: var(--_btn-hover-border);
-      color: var(--_btn-hover-text);
     }
 
     &:active {
+      color: var(--_btn-active-text);
       background: var(--_btn-active-bg);
       border-color: var(--_btn-active-border);
-      color: var(--_btn-active-text);
     }
 
     &:focus-visible {
-      background: var(--_btn-focus-bg);
-      border-color: var(--_btn-focus-border);
       color: var(--_btn-focus-text);
       outline: 2px solid var(--_btn-outline);
       outline-offset: 1px;
+      background: var(--_btn-focus-bg);
+      border-color: var(--_btn-focus-border);
     }
 
     &:disabled {
-      background: var(--_btn-disabled-bg);
-      border-color: var(--_btn-disabled-border);
       color: var(--_btn-disabled-text);
       cursor: not-allowed;
+      background: var(--_btn-disabled-bg);
+      border-color: var(--_btn-disabled-border);
     }
 
     tedi-icon {
-      color: inherit;
       font-size: inherit;
+      color: inherit;
     }
   }
 }
@@ -168,12 +173,13 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 @mixin button-size($size) {
   & {
     font-size: var(--button-text-size-#{$size});
+
     @include button-size-vars(#{$size});
   }
 }
 
 .tedi-button {
-  @include button-main-styles();
+  @include button-main-styles;
 
   &--small {
     @include button-size("sm");

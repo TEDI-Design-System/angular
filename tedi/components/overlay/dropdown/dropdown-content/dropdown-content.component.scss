@@ -1,12 +1,12 @@
 tedi-dropdown-content {
-  width: max-content;
-  min-width: var(--_tedi-dropdown-trigger-width);
   display: flex;
   flex-direction: column;
-  border-radius: var(--form-select-area-radius);
-  border: 1px solid var(--card-border-primary);
-  box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.2);
+  width: max-content;
+  min-width: var(--_tedi-dropdown-trigger-width);
   overflow: auto;
+  border: 1px solid var(--card-border-primary);
+  border-radius: var(--form-select-area-radius);
+  box-shadow: 0 1px 5px 0 rgb(0 0 0 / 20%);
 
   ul {
     margin: 0;

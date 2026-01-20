@@ -3,10 +3,10 @@
     &:first-of-type {
       &::before {
         top: 50%;
-        transform: translateY(-50%) translateX(calc(-50% + var(--borders-01)));
         width: var(--_sidenav-tree-bullet-size);
         height: var(--_sidenav-tree-bullet-size);
         border-radius: 50%;
+        transform: translateY(-50%) translateX(calc(-50% + var(--borders-01)));
       }
 
       &::after {

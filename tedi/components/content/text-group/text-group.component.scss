@@ -12,12 +12,12 @@ tedi-text-group {
 
 tedi-text-group-label {
   display: flex;
-  width: var(--_label-width);
   flex-shrink: 0;
+  width: var(--_label-width);
 }
 
 tedi-text-group-value {
   display: flex;
-  align-items: center;
   gap: var(--text-group-value-inner-spacing);
+  align-items: center;
 }

@@ -1,6 +1,6 @@
 $spinner-colors: (
-  'primary': 'loader-spinner-color-primary',
-  'secondary': 'loader-spinner-color-secondary',
+  "primary": "loader-spinner-color-primary",
+  "secondary": "loader-spinner-color-secondary",
 );
 $spinner-sizes: (10 16 48);
 
@@ -9,10 +9,11 @@ $spinner-sizes: (10 16 48);
   animation: 1.4s linear 0s infinite normal none running tedi-spinner-outer;
 
   &--inner {
+    stroke-width: 4px;
     stroke-dasharray: 80px, 200px;
     stroke-dashoffset: 0;
-    stroke-width: 4px;
-    animation: 1.4s ease-in-out 0s infinite normal none running tedi-spinner-inner;
+    animation: 1.4s ease-in-out 0s infinite normal none running
+      tedi-spinner-inner;
 
     @media (prefers-reduced-motion: reduce) {
       animation: none;
