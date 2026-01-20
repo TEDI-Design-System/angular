@@ -1,5 +1,5 @@
 @if (label()) {
-  <label tedi-label [for]="id()" [required]="required()" [size]="size()">
+  <label tedi-label [for]="inputId()" [required]="required()" [size]="size()">
     {{ label() }}
   </label>
 }
@@ -40,7 +40,7 @@
   >
     <input
       #inputElement
-      [id]="id()"
+      [id]="inputId()"
       type="number"
       inputmode="numeric"
       class="tedi-number-field__input"
