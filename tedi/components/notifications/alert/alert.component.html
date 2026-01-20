@@ -4,15 +4,6 @@
       <tedi-icon [name]="icon()" [size]="18" />
     }
     <ng-container *ngTemplateOutlet="heading"></ng-container>
-    @if (showClose()) {
-      <button
-        tedi-closing-button
-        class="tedi-alert__close"
-        size="small"
-        [iconSize]="18"
-        (click)="handleClose()"
-      ></button>
-    }
   </div>
   <ng-container *ngTemplateOutlet="content"></ng-container>
 } @else {
@@ -21,16 +12,16 @@
       <tedi-icon [name]="icon()" [size]="18" class="tedi-alert__content-icon" />
     }
     <ng-container *ngTemplateOutlet="content"></ng-container>
-    @if (showClose()) {
-      <button
-        tedi-closing-button
-        class="tedi-alert__close"
-        size="small"
-        [iconSize]="18"
-        (click)="handleClose()"
-      ></button>
-    }
   </div>
+}
+@if (showClose()) {
+  <button
+    tedi-closing-button
+    class="tedi-alert__close"
+    size="small"
+    [iconSize]="18"
+    (click)="handleClose()"
+  ></button>
 }
 
 <ng-template #heading>
