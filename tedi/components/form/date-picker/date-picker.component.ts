@@ -15,14 +15,15 @@ import { ButtonComponent } from "../../buttons/button/button.component";
 import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { TediTranslationService } from "../../../services/translation/translation.service";
-import { DropdownComponent } from "../../overlay/dropdown/dropdown.component";
-import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
-import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-content/dropdown-content.component";
-import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { PopoverComponent } from "../../overlay/popover/popover.component";
 import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
 import { PopoverTriggerDirective } from "../../overlay/popover/popover-trigger/popover-trigger.directive";
+import { DatePickerHeaderComponent } from "./date-picker-header/date-picker-header.component";
+import { DatePickerCalendarGridComponent } from "./date-picker-calendar-grid/date-picker-calendar-grid.component";
+import { DatePickerMonthGridComponent } from "./date-picker-month-grid/date-picker-month-grid.component";
+import { DatePickerYearGridComponent } from "./date-picker-year-grid/date-picker-year-grid.component";
+import { formatDate, parseDate, isSameDay, isBeforeDay, isAfterDay, getISOWeek } from "../../../utils/date.util";
 
 export interface DatePickerDay {
   date: Date;
@@ -55,19 +56,19 @@ let datePickerId = 0;
   imports: [
     ButtonComponent,
     IconComponent,
-    DropdownComponent,
-    DropdownTriggerDirective,
-    DropdownContentComponent,
-    DropdownItemComponent,
     ClosingButtonComponent,
     SeparatorComponent,
     PopoverComponent,
     PopoverTriggerDirective,
     PopoverContentComponent,
+    DatePickerHeaderComponent,
+    DatePickerCalendarGridComponent,
+    DatePickerMonthGridComponent,
+    DatePickerYearGridComponent,
   ],
 })
 export class DatePickerComponent implements OnInit {
-  private readonly today = new Date();
+  readonly today = new Date();
   readonly uniqueId = `tedi-date-picker-id-${datePickerId++}`;
 
   /** Selected date */
@@ -117,6 +118,9 @@ export class DatePickerComponent implements OnInit {
   /** Should show week numbers before calendar grid? */
   readonly showWeekNumbers = input(false);
 
+  /** Close calendar popover after date selection, default true */
+  readonly closeOnSelect = input(true);
+
   /** Current view of datepicker (months grid, years grid or calendar grid) */
   readonly currentView = signal<DatePickerView>("calendar-grid");
 
@@ -159,6 +163,31 @@ export class DatePickerComponent implements OnInit {
     return (this.yearPageIndex() + 1) * this.YEARS_PER_PAGE < all;
   });
 
+  readonly disabledMonths = computed(() => {
+    const year = this.month().getFullYear();
+    const disabled = new Set<number>();
+
+    for (let month = 0; month < 12; month++) {
+      if (this.getFirstEnabledDayOfMonth(year, month) === null) {
+        disabled.add(month);
+      }
+    }
+
+    return disabled;
+  });
+
+  readonly disabledYears = computed(() => {
+    const disabled = new Set<number>();
+
+    for (const year of this.years()) {
+      if (this.isYearDisabled(year)) {
+        disabled.add(year);
+      }
+    }
+
+    return disabled;
+  });
+
   readonly weekRows = computed(() => {
     const cells = this.days();
     const rows: DatePickerDay[][] = [];
@@ -171,31 +200,15 @@ export class DatePickerComponent implements OnInit {
   });
 
   readonly weekNumbers = computed(() => {
-    return this.weekRows().map((week) => this.getISOWeek(week[0].date));
+    return this.weekRows().map((week) => getISOWeek(week[0].date));
   });
 
   readonly canGoPrev = computed(() => {
-    const current = this.month();
-    const year = current.getFullYear();
-    const month = current.getMonth();
-
-    const prevMonth = month - 1;
-    const prevYear = prevMonth < 0 ? year - 1 : year;
-    const finalPrevMonth = (prevMonth + 12) % 12;
-
-    return this.getFirstEnabledDayOfMonth(prevYear, finalPrevMonth) !== null;
+    return this.findPrevEnabledMonth() !== null;
   });
 
   readonly canGoNext = computed(() => {
-    const current = this.month();
-    const year = current.getFullYear();
-    const month = current.getMonth();
-
-    const nextMonth = month + 1;
-    const nextYear = nextMonth > 11 ? year + 1 : year;
-    const finalNextMonth = nextMonth % 12;
-
-    return this.getFirstEnabledDayOfMonth(nextYear, finalNextMonth) !== null;
+    return this.findNextEnabledMonth() !== null;
   });
 
   readonly days = computed<DatePickerDay[]>(() => {
@@ -254,56 +267,29 @@ export class DatePickerComponent implements OnInit {
 
   readonly inputElement =
     viewChild.required<ElementRef<HTMLInputElement>>("inputElement");
-  readonly gridElement =
-    viewChild.required<ElementRef<HTMLDivElement>>("gridElement");
+  readonly calendarGrid = viewChild<DatePickerCalendarGridComponent>("gridElement");
   readonly popover = viewChild.required(PopoverComponent);
 
   readonly translationService = inject(TediTranslationService);
 
-  readonly weekDays = [
-    this.translationService.track("date-picker.monday-short"),
-    this.translationService.track("date-picker.tuesday-short"),
-    this.translationService.track("date-picker.wednesday-short"),
-    this.translationService.track("date-picker.thursday-short"),
-    this.translationService.track("date-picker.friday-short"),
-    this.translationService.track("date-picker.saturday-short"),
-    this.translationService.track("date-picker.sunday-short"),
-  ];
-
-  readonly monthShortNames = [
-    this.translationService.track("date-picker.january-short"),
-    this.translationService.track("date-picker.february-short"),
-    this.translationService.track("date-picker.march-short"),
-    this.translationService.track("date-picker.april-short"),
-    this.translationService.track("date-picker.may-short"),
-    this.translationService.track("date-picker.june-short"),
-    this.translationService.track("date-picker.july-short"),
-    this.translationService.track("date-picker.august-short"),
-    this.translationService.track("date-picker.september-short"),
-    this.translationService.track("date-picker.october-short"),
-    this.translationService.track("date-picker.november-short"),
-    this.translationService.track("date-picker.december-short"),
-  ];
-
-  readonly monthNames = [
-    this.translationService.track("date-picker.january"),
-    this.translationService.track("date-picker.february"),
-    this.translationService.track("date-picker.march"),
-    this.translationService.track("date-picker.april"),
-    this.translationService.track("date-picker.may"),
-    this.translationService.track("date-picker.june"),
-    this.translationService.track("date-picker.july"),
-    this.translationService.track("date-picker.august"),
-    this.translationService.track("date-picker.september"),
-    this.translationService.track("date-picker.october"),
-    this.translationService.track("date-picker.november"),
-    this.translationService.track("date-picker.december"),
-  ];
-
   ngOnInit(): void {
     const selected = this.selected();
-    this.inputValue.set(selected ? this.format(selected) : "");
-    this.activeDate.set(selected ?? this.today);
+    this.inputValue.set(selected ? formatDate(selected) : "");
+
+    let active = selected ?? this.today;
+
+    // If the initial active date is disabled, find the first enabled date
+    if (this.isDisabled(active)) {
+      const firstEnabled = this.getFirstEnabledDayOfMonth(
+        active.getFullYear(),
+        active.getMonth(),
+      );
+      if (firstEnabled) {
+        active = firstEnabled;
+      }
+    }
+
+    this.activeDate.set(active);
   }
 
   getTabIndex(date: Date): number {
@@ -312,15 +298,19 @@ export class DatePickerComponent implements OnInit {
   }
 
   prevMonth() {
-    const date = new Date(this.month());
-    date.setMonth(date.getMonth() - 1);
-    this.month.set(date);
+    const prev = this.findPrevEnabledMonth();
+    if (prev) {
+      this.month.set(prev);
+      this.updateActiveDateForMonth(prev.getFullYear(), prev.getMonth());
+    }
   }
 
   nextMonth() {
-    const date = new Date(this.month());
-    date.setMonth(date.getMonth() + 1);
-    this.month.set(date);
+    const next = this.findNextEnabledMonth();
+    if (next) {
+      this.month.set(next);
+      this.updateActiveDateForMonth(next.getFullYear(), next.getMonth());
+    }
   }
 
   prevYearPage() {
@@ -339,7 +329,11 @@ export class DatePickerComponent implements OnInit {
     if (day.disabled) return;
 
     this.selected.set(day.date);
-    this.inputValue.set(this.format(day.date));
+    this.inputValue.set(formatDate(day.date));
+
+    if (this.closeOnSelect()) {
+      this.closeCalendar();
+    }
   }
 
   isSelected(date: Date): boolean {
@@ -365,12 +359,20 @@ export class DatePickerComponent implements OnInit {
     this.currentView.set("month-grid");
   }
 
-  onMonthSelect(index?: string) {
-    if (!index) return;
+  onMonthSelect(value?: string | number) {
+    if (value === undefined || value === null) return;
+
+    const monthIndex = typeof value === "number" ? value : Number(value);
+    const year = this.month().getFullYear();
+
+    if (this.getFirstEnabledDayOfMonth(year, monthIndex) === null) {
+      return;
+    }
 
     const updated = new Date(this.month());
-    updated.setMonth(Number(index));
+    updated.setMonth(monthIndex);
     this.month.set(updated);
+    this.updateActiveDateForMonth(year, monthIndex);
 
     if (this.currentView() === "month-grid") {
       this.currentView.set("calendar-grid");
@@ -384,10 +386,32 @@ export class DatePickerComponent implements OnInit {
     this.currentView.set("year-grid");
   }
 
-  onYearSelect(index?: string) {
+  onYearSelect(value?: string | number) {
+    if (value === undefined || value === null) return;
+
+    const year = typeof value === "number" ? value : Number(value);
+
+    if (this.isYearDisabled(year)) {
+      return;
+    }
+
     const updated = new Date(this.month());
-    updated.setFullYear(Number(index));
+    updated.setFullYear(year);
+
+    // If the current month is disabled in the new year, find the first enabled month
+    let targetMonth = updated.getMonth();
+    if (this.getFirstEnabledDayOfMonth(year, targetMonth) === null) {
+      for (let month = 0; month < 12; month++) {
+        if (this.getFirstEnabledDayOfMonth(year, month) !== null) {
+          targetMonth = month;
+          updated.setMonth(month);
+          break;
+        }
+      }
+    }
+
     this.month.set(updated);
+    this.updateActiveDateForMonth(year, targetMonth);
 
     if (this.currentView() === "year-grid") {
       this.currentView.set("calendar-grid");
@@ -395,84 +419,113 @@ export class DatePickerComponent implements OnInit {
   }
 
   onDayKeydown(event: KeyboardEvent, current: Date) {
-    let target: Date | null = null;
-
-    switch (event.key) {
-      case "ArrowLeft":
-        target = new Date(current);
-        target.setDate(current.getDate() - 1);
-        break;
-
-      case "ArrowRight":
-        target = new Date(current);
-        target.setDate(current.getDate() + 1);
-        break;
-
-      case "ArrowUp":
-        target = new Date(current);
-        target.setDate(current.getDate() - 7);
-        break;
-
-      case "ArrowDown":
-        target = new Date(current);
-        target.setDate(current.getDate() + 7);
-        break;
-
-      case "Home":
-        target = new Date(current);
-        target.setDate(current.getDate() - ((current.getDay() + 6) % 7));
-        break;
-
-      case "End":
-        target = new Date(current);
-        target.setDate(current.getDate() + (6 - ((current.getDay() + 6) % 7)));
-        break;
-
-      case "PageUp":
-        target = new Date(current);
-        target.setMonth(current.getMonth() - 1);
-        break;
-
-      case "PageDown":
-        target = new Date(current);
-        target.setMonth(current.getMonth() + 1);
-        break;
-
-      case "Enter":
-      case " ":
-        event.preventDefault();
-        this.selectDay({
-          date: current,
-          disabled: false,
-          inCurrentMonth: true,
-        });
-        return;
-
-      case "Escape":
-        this.popover().floatUiComponent().hide();
-        this.inputElement().nativeElement.focus();
-        return;
-
-      default:
-        return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      this.selectDay({ date: current, disabled: false, inCurrentMonth: true });
+      return;
     }
 
+    if (event.key === "Escape") {
+      this.closeCalendar();
+      return;
+    }
+
+    const target = this.handleDayNavigation(event.key, current);
     if (target) {
       event.preventDefault();
       this.focusDate(target);
     }
   }
 
-  onCalendarKeyDown(event: KeyboardEvent) {
-    if (this.currentView() === "calendar-grid") return;
+  private handleDayNavigation(key: string, current: Date): Date | null {
+    const arrowSteps: Record<string, number> = {
+      ArrowLeft: -1,
+      ArrowRight: 1,
+      ArrowUp: -7,
+      ArrowDown: 7,
+    };
 
-    if (event.key === "Escape") {
+    if (key in arrowSteps) {
+      return this.findNextEnabledDate(current, arrowSteps[key]);
+    }
+
+    if (key === "Home") {
+      const target = new Date(current);
+      target.setDate(current.getDate() - ((current.getDay() + 6) % 7));
+      return this.isDisabled(target)
+        ? this.findNextEnabledDate(target, 1)
+        : target;
+    }
+
+    if (key === "End") {
+      const target = new Date(current);
+      target.setDate(current.getDate() + (6 - ((current.getDay() + 6) % 7)));
+      return this.isDisabled(target)
+        ? this.findNextEnabledDate(target, -1)
+        : target;
+    }
+
+    if (key === "PageUp") {
+      const target = new Date(current);
+      target.setMonth(current.getMonth() - 1);
+      return this.isDisabled(target)
+        ? (this.findNextEnabledDate(target, 1) ??
+          this.findNextEnabledDate(target, -1))
+        : target;
+    }
+
+    if (key === "PageDown") {
+      const target = new Date(current);
+      target.setMonth(current.getMonth() + 1);
+      return this.isDisabled(target)
+        ? (this.findNextEnabledDate(target, -1) ??
+          this.findNextEnabledDate(target, 1))
+        : target;
+    }
+
+    return null;
+  }
+
+  onCalendarKeyDown(event: KeyboardEvent) {
+    if (this.currentView() !== "calendar-grid" && event.key === "Escape") {
       event.preventDefault();
       event.stopPropagation();
 
       this.currentView.set("calendar-grid");
       const active = this.selected() ?? this.today;
       setTimeout(() => this.focusDate(active));
+      return;
+    }
+
+    if (event.key === "Tab") {
+      this.handleFocusTrap(event);
+    }
+  }
+
+  private handleFocusTrap(event: KeyboardEvent) {
+    const container = (event.target as HTMLElement).closest(
+      ".tedi-date-picker__calendar",
+    );
+    if (!container) return;
+
+    const focusableSelector = 'button:not([disabled]):not([tabindex="-1"]), [tabindex="0"]:not([disabled])';
+    const focusableElements = Array.from(
+      container.querySelectorAll<HTMLElement>(focusableSelector),
+    );
+
+    if (!focusableElements.length) return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    if (event.shiftKey) {
+      if (document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      }
+    } else if (document.activeElement === lastElement) {
+      event.preventDefault();
+      firstElement.focus();
     }
   }
 
@@ -491,13 +544,13 @@ export class DatePickerComponent implements OnInit {
     if (!this.allowManualInput()) return;
 
     const selected = this.selected();
-    const parsed = this.parseDate(this.inputValue());
+    const parsed = parseDate(this.inputValue());
 
     if (parsed) {
       this.selected.set(parsed);
       this.month.set(parsed);
     } else {
-      this.inputValue.set(selected ? this.format(selected) : "");
+      this.inputValue.set(selected ? formatDate(selected) : "");
     }
   }
 
@@ -518,8 +571,26 @@ export class DatePickerComponent implements OnInit {
     this.selected.set(null);
   }
 
+  closeCalendar() {
+    this.popover().floatUiComponent().hide();
+    this.inputElement().nativeElement.focus();
+  }
+
   openCalendar() {
-    const active = this.selected() ?? this.today;
+    let active = this.selected() ?? this.today;
+
+    // If active date is disabled, find the first enabled date
+    if (this.isDisabled(active)) {
+      const currentMonth = this.month();
+      const firstEnabled = this.getFirstEnabledDayOfMonth(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth(),
+      );
+      if (firstEnabled) {
+        active = firstEnabled;
+      }
+    }
+
     this.activeDate.set(active);
     setTimeout(() => this.focusDate(active));
   }
@@ -536,67 +607,17 @@ export class DatePickerComponent implements OnInit {
     }
 
     setTimeout(() => {
-      const container = this.gridElement().nativeElement;
-      if (!container) return;
-
-      const key = new Date(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-      ).getTime();
-
-      const btn = container.querySelector<HTMLButtonElement>(
-        `[data-date-key="${key}"]`,
-      );
-
-      if (btn && document.activeElement !== btn) {
-        btn.focus({ preventScroll: true });
-      }
+      this.calendarGrid()?.focusDate(date);
     });
-  }
-
-  private parseDate(str: string): Date | null {
-    const parts = str.trim().split(".");
-    if (parts.length !== 3) return null;
-
-    const [dd, mm, yyyy] = parts.map(Number);
-    if (!dd || !mm || !yyyy) return null;
-
-    const date = new Date(yyyy, mm - 1, dd);
-
-    if (
-      date.getFullYear() !== yyyy ||
-      date.getMonth() !== mm - 1 ||
-      date.getDate() !== dd
-    ) {
-      return null;
-    }
-
-    return date;
-  }
-
-  private format(date: Date): string {
-    const d = String(date.getDate()).padStart(2, "0");
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const y = date.getFullYear();
-    return `${d}.${m}.${y}`;
-  }
-
-  private isSameDay(a: Date, b: Date): boolean {
-    return (
-      a.getDate() === b.getDate() &&
-      a.getMonth() === b.getMonth() &&
-      a.getFullYear() === b.getFullYear()
-    );
   }
 
   private matches(m: DatePickerMatcher, date: Date): boolean {
     if (m instanceof Date) {
-      return this.isSameDay(m, date);
+      return isSameDay(m, date);
     }
 
     if (Array.isArray(m)) {
-      return m.some((d) => this.isSameDay(d, date));
+      return m.some((d) => isSameDay(d, date));
     }
 
     if (typeof m === "function") {
@@ -604,21 +625,48 @@ export class DatePickerComponent implements OnInit {
     }
 
     if ("before" in m) {
-      return date < m.before;
+      return isBeforeDay(date, m.before);
     }
 
     if ("after" in m) {
-      return date > m.after;
+      return isAfterDay(date, m.after);
     }
 
     if ("from" in m) {
       const { from, to } = m;
-      if (to) return date >= from && date <= to;
+      if (to) {
+        return (isSameDay(date, from) || isAfterDay(date, from)) &&
+          (isSameDay(date, to) || isBeforeDay(date, to));
+      }
 
-      return date >= from;
+      return isSameDay(date, from) || isAfterDay(date, from);
     }
 
     return false;
+  }
+
+  /**
+   * Updates activeDate to the selected date if it's in the given month,
+   * otherwise to the first enabled date in the month.
+   * Needed for correct WCAG focus handling
+   */
+  private updateActiveDateForMonth(year: number, month: number) {
+    const selected = this.selected();
+
+    if (
+      selected &&
+      selected.getFullYear() === year &&
+      selected.getMonth() === month &&
+      !this.isDisabled(selected)
+    ) {
+      this.activeDate.set(selected);
+      return;
+    }
+
+    const firstEnabled = this.getFirstEnabledDayOfMonth(year, month);
+    if (firstEnabled) {
+      this.activeDate.set(firstEnabled);
+    }
   }
 
   private getFirstEnabledDayOfMonth(year: number, month: number): Date | null {
@@ -635,19 +683,85 @@ export class DatePickerComponent implements OnInit {
     return null;
   }
 
-  private getISOWeek(date: Date): number {
-    const target = new Date(date);
-    target.setHours(0, 0, 0, 0);
+  private isYearDisabled(year: number): boolean {
+    for (let month = 0; month < 12; month++) {
+      if (this.getFirstEnabledDayOfMonth(year, month) !== null) {
+        return false;
+      }
+    }
 
-    const day = target.getDay();
-    const isoDay = day === 0 ? 7 : day;
+    return true;
+  }
 
-    target.setDate(target.getDate() + (4 - isoDay));
-    const yearStart = new Date(target.getFullYear(), 0, 1);
+  private findPrevEnabledMonth(): Date | null {
+    const current = this.month();
+    const years = this.years();
+    const minYear = years.length > 0 ? years[0] : current.getFullYear() - 100;
 
-    const diffInDays = Math.floor(
-      (target.getTime() - yearStart.getTime()) / 86400000,
-    );
-    return Math.floor(diffInDays / 7) + 1;
+    let year = current.getFullYear();
+    let month = current.getMonth() - 1;
+
+    while (year >= minYear) {
+      if (month < 0) {
+        month = 11;
+        year--;
+      }
+
+      if (year < minYear) break;
+
+      if (this.getFirstEnabledDayOfMonth(year, month) !== null) {
+        return new Date(year, month, 1);
+      }
+
+      month--;
+    }
+
+    return null;
+  }
+
+  private findNextEnabledMonth(): Date | null {
+    const current = this.month();
+    const years = this.years();
+    const maxYear = years.length > 0 ? years[years.length - 1] : current.getFullYear() + 20;
+
+    let year = current.getFullYear();
+    let month = current.getMonth() + 1;
+
+    while (year <= maxYear) {
+      if (month > 11) {
+        month = 0;
+        year++;
+      }
+
+      if (year > maxYear) break;
+
+      if (this.getFirstEnabledDayOfMonth(year, month) !== null) {
+        return new Date(year, month, 1);
+      }
+
+      month++;
+    }
+
+    return null;
+  }
+
+  /**
+   * Finds the next enabled date starting from the given date, moving by the given step.
+   * Returns null if no enabled date is found within a reasonable range.
+   * Needed for correct WCAG arrow movement handling
+   */
+  private findNextEnabledDate(from: Date, step: number): Date | null {
+    const maxIterations = 365;
+    const target = new Date(from);
+
+    for (let i = 0; i < maxIterations; i++) {
+      target.setDate(target.getDate() + step);
+
+      if (!this.isDisabled(target)) {
+        return new Date(target);
+      }
+    }
+
+    return null;
   }
 }
