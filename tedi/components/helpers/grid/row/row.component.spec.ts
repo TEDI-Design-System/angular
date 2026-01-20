@@ -26,8 +26,8 @@ describe("RowComponent", () => {
   });
 
   it("should apply default cols class", () => {
-    expect(rowElement.classList).toContain("row");
-    expect(rowElement.classList).toContain("row--cols-auto");
+    expect(rowElement.classList).toContain("tedi-row");
+    expect(rowElement.classList).toContain("tedi-row--cols-auto");
   });
 
   it("should apply different column values", () => {
@@ -37,7 +37,7 @@ describe("RowComponent", () => {
       fixture.componentRef.setInput("cols", col);
       fixture.detectChanges();
 
-      expect(rowElement.classList).toContain(`row--cols-${col}`);
+      expect(rowElement.classList).toContain(`tedi-row--cols-${col}`);
     }
   });
 
@@ -48,7 +48,7 @@ describe("RowComponent", () => {
       fixture.componentRef.setInput("justifyItems", justifyItems);
       fixture.detectChanges();
 
-      expect(rowElement.classList).toContain(`row--justify-items-${justifyItems}`);
+      expect(rowElement.classList).toContain(`tedi-row--justify-items-${justifyItems}`);
     }
   });
 
@@ -59,7 +59,7 @@ describe("RowComponent", () => {
       fixture.componentRef.setInput("alignItems", alignItems);
       fixture.detectChanges();
 
-      expect(rowElement.classList).toContain(`row--align-items-${alignItems}`);
+      expect(rowElement.classList).toContain(`tedi-row--align-items-${alignItems}`);
     }
   });
 

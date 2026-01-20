@@ -9,10 +9,20 @@ $gaps: (
   5: $spacer * 3,
 );
 
-$justify-items: ("start", "end", "center", "stretch");
-$align-items: ("start", "end", "center", "stretch");
+$justify-items: (
+  "start",
+  "end",
+  "center",
+  "stretch"
+);
+$align-items: (
+  "start",
+  "end",
+  "center",
+  "stretch"
+);
 
-.row {
+.tedi-row {
   display: grid;
 
   &--cols-auto {
