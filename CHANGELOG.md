@@ -1,3 +1,10 @@
+# [6.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.1...angular-6.0.0-rc.2) (2026-01-20)
+
+
+### Bug Fixes
+
+* **date-picker:** fixed Date object comparison, fixed WCAG problems [#259](https://github.com/TEDI-Design-System/angular/issues/259) ([#269](https://github.com/TEDI-Design-System/angular/issues/269)) ([0a8277f](https://github.com/TEDI-Design-System/angular/commit/0a8277f2cd6b0304c0ae6a8e9980393ed7fae701))
+
 # [6.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.1-rc.8...angular-6.0.0-rc.1) (2026-01-20)
 
 
