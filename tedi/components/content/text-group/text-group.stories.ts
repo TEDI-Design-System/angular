@@ -14,6 +14,7 @@ import {
   VerticalSpacingDirective,
 } from "@tedi-design-system/angular/tedi";
 import { createBreakpointArgTypes } from "../../../../src/dev-tools/createBreakpointArgTypes";
+import { StatusBadgeComponent } from "@tedi-design-system/angular/community";
 
 /**
  * <a href="https://www.figma.com/file/jWiRIXhHRxwVdMSimKX2FF/TEDI-Design-System-(draft)?type=design&node-id=45-30752&mode=dev" target="_BLANK">Figma ↗</a><br/>
@@ -40,6 +41,7 @@ export default {
         TextGroupValueComponent,
         IconComponent,
         RowComponent,
+        StatusBadgeComponent
       ],
     }),
   ],
@@ -92,6 +94,12 @@ export const Types: Story = {
         type: "vertical",
         label: "Accessibility",
         value: "Visible to doctor and representative",
+        statusBadge: 'Submitted'
+      },
+      {
+        type: "vertical",
+        label: "Accessibility",
+        value: "Visible to doctor and representative",
         icon: { size: 16, name: "lock_open", color: "tertiary" },
         valueModifiers: "inline-block",
       },
@@ -139,11 +147,16 @@ export const Types: Story = {
                 [name]="group.icon.name"
                 [color]="group.icon.color"
               />
-              @if (group.valueModifiers === "bold") {
-                <b>{{ group.value }}</b>
-              } @else {
-                {{ group.value }}
-              }
+              <div class="flex flex-column align-items-start">
+                @if (group.valueModifiers === "bold") {
+                  <b>{{ group.value }}</b>
+                } @else {
+                  {{ group.value }}
+                }
+                @if (group.statusBadge) {
+                  <span tedi-status-badge color="brand" status="none">{{ group.statusBadge }}</span>
+                }
+              </div>
             </tedi-text-group-value>
           </tedi-text-group>
         </div>
