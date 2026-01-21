@@ -5,6 +5,8 @@
 }
 
 .tedi-alert {
+  --_close-button-size: 18px;
+
   position: relative;
   display: flex;
   flex-direction: column;
@@ -23,6 +25,13 @@
     display: flex;
     gap: var(--layout-grid-gutters-04);
     align-items: center;
+  }
+
+  &:has(&__close) {
+    padding-right: calc(
+      var(--layout-grid-gutters-04) + var(--_close-button-size) +
+        var(--alert-default-padding-x)
+    );
   }
 
   &__close {
