@@ -17,7 +17,7 @@
 </ng-template>
 
 <div class="tedi-vertical-stepper-item__indicator">
-  @if(!selected() && compact()) { @if (completed()) {
+  @if(!selected() && compact() && !subItem()) { @if (completed()) {
   <tedi-icon name="check" color="white" [size]="16" />
   } @else if (error()) {
   <tedi-icon name="exclamation" color="white" [size]="16" />
@@ -40,7 +40,12 @@
   } @else {
   <ng-content select="[item-title]">
     @if (link()) {
-    <a [routerLink]="link()">{{ title() }}</a>
+    <a
+      [routerLink]="link()"
+      routerLinkActive
+      (isActiveChange)="routerLinkActiveChange($event)"
+      >{{ title() }}</a
+    >
     } @else {
     <button (click)="itemSelect.emit()">{{ title() }}</button>
     }

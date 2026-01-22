@@ -107,7 +107,7 @@
     transition: transform 0.3s;
     &--opened {
       transform: rotateX(180deg);
-    } 
+    }
   }
 
   &__status-icon {
@@ -184,8 +184,10 @@
       content: none;
     }
 
-    &#{$host-class}--enumerated #{$host-class}__title :is(a, button)::before {
-      content: counter(step-number)".";
+    &#{$host-class}--enumerated:not(#{$host-class}--sub-item)
+      > #{$host-class}__title
+      :is(a, button)::before {
+      content: counter(step-number) ".";
       display: inline-block;
     }
   }
@@ -256,7 +258,7 @@
       #9293a4
     );
     --_step-indicator-border: var(--stepper-step-disabled-border, #9293a4);
-    --_step-title-color: var(--stepper-item-vertical-text-disabled, #9293A4);
+    --_step-title-color: var(--stepper-item-vertical-text-disabled, #9293a4);
     #{$host-class}__title {
       pointer-events: none;
     }

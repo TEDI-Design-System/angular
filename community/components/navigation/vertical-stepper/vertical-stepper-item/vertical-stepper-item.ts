@@ -13,13 +13,13 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { VerticalStepperComponent } from "../vertical-stepper";
-import { RouterLink } from "@angular/router";
+import { RouterLink, RouterLinkActive } from "@angular/router";
 import { NgTemplateOutlet } from "@angular/common";
 import { IconComponent } from "@tedi-design-system/angular/tedi";
 
 @Component({
   selector: "tedi-vertical-stepper-item",
-  imports: [IconComponent, RouterLink, NgTemplateOutlet],
+  imports: [IconComponent, RouterLink, RouterLinkActive, NgTemplateOutlet],
   templateUrl: "./vertical-stepper-item.html",
   styleUrl: "./vertical-stepper-item.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,7 +48,7 @@ export class VerticalStepperItemComponent {
   private stepperContext = inject(VerticalStepperComponent, { optional: true });
   subItems = contentChildren(VerticalStepperItemComponent);
   compact = computed(() => this.stepperContext?.compact());
-  enumerated = computed(() => this.stepperContext?.compact());
+  enumerated = computed(() => this.stepperContext?.enumerated());
   hasSubItems = computed(() => !!this.subItems().length);
 
   itemSelect = output();
@@ -66,5 +66,11 @@ export class VerticalStepperItemComponent {
 
   toggleOpen() {
     this.opened.update((previouslyOpened) => !previouslyOpened);
+  }
+
+  routerLinkActiveChange(isActive: boolean) {
+    if (isActive) {
+      this.itemSelect.emit();
+    }
   }
 }
