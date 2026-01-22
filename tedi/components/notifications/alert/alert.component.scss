@@ -5,6 +5,8 @@
 }
 
 .tedi-alert {
+  --_close-button-size: 18px;
+
   position: relative;
   display: flex;
   flex-direction: column;
@@ -14,15 +16,17 @@
   border: 1px solid;
   border-radius: var(--alert-radius);
 
-  @include alert-variant(
-    var(--alert-default-background-info),
-    var(--alert-default-border-info)
-  );
+  @include alert-variant(var(--alert-default-background-info),
+    var(--alert-default-border-info));
 
   &__head {
     display: flex;
     gap: var(--layout-grid-gutters-04);
     align-items: center;
+  }
+
+  &:has(&__close) {
+    padding-right: calc(var(--layout-grid-gutters-04) + var(--_close-button-size) + var(--alert-default-padding-x));
   }
 
   &__close {
@@ -48,31 +52,23 @@
   }
 
   &--info {
-    @include alert-variant(
-      var(--alert-default-background-info),
-      var(--alert-default-border-info)
-    );
+    @include alert-variant(var(--alert-default-background-info),
+      var(--alert-default-border-info));
   }
 
   &--success {
-    @include alert-variant(
-      var(--alert-default-background-success),
-      var(--alert-default-border-success)
-    );
+    @include alert-variant(var(--alert-default-background-success),
+      var(--alert-default-border-success));
   }
 
   &--warning {
-    @include alert-variant(
-      var(--alert-default-background-warning),
-      var(--alert-default-border-warning)
-    );
+    @include alert-variant(var(--alert-default-background-warning),
+      var(--alert-default-border-warning));
   }
 
   &--danger {
-    @include alert-variant(
-      var(--alert-default-background-danger),
-      var(--alert-default-border-danger)
-    );
+    @include alert-variant(var(--alert-default-background-danger),
+      var(--alert-default-border-danger));
   }
 
   &--global {
