@@ -1,0 +1,56 @@
+<ng-template #statusIcon>
+  @if(subItem() || !compact()) { @if (completed()) {
+  <tedi-icon
+    name="check"
+    color="success"
+    [size]="16"
+    class="tedi-vertical-stepper-item__status-icon"
+  />
+  } @else if (error()) {
+  <tedi-icon
+    name="error"
+    color="danger"
+    [size]="16"
+    class="tedi-vertical-stepper-item__status-icon"
+  />
+  } }
+</ng-template>
+
+<div class="tedi-vertical-stepper-item__indicator">
+  @if(!selected() && compact()) { @if (completed()) {
+  <tedi-icon name="check" color="white" [size]="16" />
+  } @else if (error()) {
+  <tedi-icon name="exclamation" color="white" [size]="16" />
+  } }
+</div>
+<div class="tedi-vertical-stepper-item__line"></div>
+<div class="tedi-vertical-stepper-item__title">
+  @if (hasSubItems()) {
+  <button (click)="toggleOpen()" class="tedi-vertical-stepper-item__toggle">
+    <span>{{ title() }}</span
+    ><ng-container *ngTemplateOutlet="statusIcon"></ng-container
+    ><tedi-icon
+      name="keyboard_arrow_down"
+      [color]="disabled() ? 'tertiary' : 'secondary'"
+      class="tedi-vertical-stepper-item__toggle-icon"
+      [class.tedi-vertical-stepper-item__toggle-icon--opened]="opened()"
+      ;
+    />
+  </button>
+  } @else {
+  <ng-content select="[item-title]">
+    @if (link()) {
+    <a [routerLink]="link()">{{ title() }}</a>
+    } @else {
+    <button (click)="itemSelect.emit()">{{ title() }}</button>
+    }
+  </ng-content>
+  <ng-container *ngTemplateOutlet="statusIcon"></ng-container>
+  }
+</div>
+<div class="tedi-vertical-stepper-item__description">
+  <ng-content select="[item-description]" />
+</div>
+@if(opened()) {
+<ng-content select="tedi-vertical-stepper-item" />
+}
