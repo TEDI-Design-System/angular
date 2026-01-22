@@ -1,8 +1,8 @@
-<dl [class]="classes()" [style.--_label-width]="labelWidth()" role="group">
-  <dt>
-    <label>
+<dl [class]="classes()" [style.--_label-width]="labelWidth()">
+  <dt [attr.aria-label]="labelText()">
+    <span tedi-label aria-hidden="true">
       <ng-content select="tedi-text-group-label"></ng-content>
-    </label>
+    </span>
   </dt>
   <dd>
     <ng-content select="tedi-text-group-value"></ng-content>

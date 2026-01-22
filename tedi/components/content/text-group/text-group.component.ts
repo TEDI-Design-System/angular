@@ -1,15 +1,21 @@
 import {
+  AfterContentChecked,
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChild,
+  ElementRef,
   inject,
   input,
+  signal,
   ViewEncapsulation,
 } from "@angular/core";
 import {
   BreakpointInputs,
   BreakpointService,
 } from "../../../services/breakpoint/breakpoint.service";
+import { LabelComponent } from "../../../components/form";
+import { TextGroupLabelComponent } from "./text-group-label.component";
 
 export type TextGroupType = "vertical" | "horizontal";
 
@@ -29,13 +35,19 @@ export type TextGroupInputs = {
   selector: "tedi-text-group",
   templateUrl: "./text-group.component.html",
   styleUrl: "./text-group.component.scss",
+  imports: [
+    LabelComponent
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class TextGroupComponent implements BreakpointInputs<TextGroupInputs> {
+export class TextGroupComponent implements BreakpointInputs<TextGroupInputs>, AfterContentChecked {
   type = input<TextGroupType>("horizontal");
   labelWidth = input<string>();
   breakpointService = inject(BreakpointService);
+
+  readonly textGroupLabel = contentChild(TextGroupLabelComponent, { read: ElementRef });
+  readonly labelText = signal<string | null>(null);
 
   xs = input<TextGroupInputs>();
   sm = input<TextGroupInputs>();
@@ -62,4 +74,14 @@ export class TextGroupComponent implements BreakpointInputs<TextGroupInputs> {
     const classList = [`tedi-text-group--${this.breakpointInputs().type}`];
     return classList.join(" ");
   });
+
+  ngAfterContentChecked(): void {
+    const labelEl = this.textGroupLabel()?.nativeElement as HTMLElement;
+    if (labelEl) {
+      const text = labelEl.textContent?.trim() || null;
+      if (text !== this.labelText()) {
+        this.labelText.set(text);
+      }
+    }
+  }
 }

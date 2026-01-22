@@ -11,7 +11,7 @@ export type LabelSize = "small" | "default";
 export type LabelColor = "primary" | "secondary";
 
 @Component({
-  selector: "label[tedi-label]",
+  selector: "[tedi-label]",
   templateUrl: "./label.component.html",
   styleUrl: "./label.component.scss",
   standalone: true,
