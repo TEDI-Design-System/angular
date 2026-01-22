@@ -1,3 +1,12 @@
+# [6.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.2...angular-6.0.0-rc.3) (2026-01-22)
+
+
+### Bug Fixes
+
+* **alert:** fixed close button overlapping text [#282](https://github.com/TEDI-Design-System/angular/issues/282) ([#287](https://github.com/TEDI-Design-System/angular/issues/287)) ([d2c8e1b](https://github.com/TEDI-Design-System/angular/commit/d2c8e1ba86e4b4dff85b093770c8ab699f26b8b8))
+* **number-field:** wcag fixes [#43](https://github.com/TEDI-Design-System/angular/issues/43) ([#286](https://github.com/TEDI-Design-System/angular/issues/286)) ([b24368f](https://github.com/TEDI-Design-System/angular/commit/b24368f2a47520fc0f1158e37d3f6b502e16abad))
+* **text-group, label:** improved SR accessibility, extended tedi-label usage [#49](https://github.com/TEDI-Design-System/angular/issues/49) ([3900e16](https://github.com/TEDI-Design-System/angular/commit/3900e167cac639b5ac3ab6fd4b7698d4bbd4c6f4))
+
 # [6.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.1...angular-6.0.0-rc.2) (2026-01-20)
 
 
