@@ -4,6 +4,19 @@ import { SideNavService } from "../../../services/sidenav/sidenav.service";
 import { signal } from "@angular/core";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
+const mockCallbackHolder: { callback: (() => void) | null } = { callback: null };
+
+jest.mock("@angular/core", () => {
+  const actual = jest.requireActual("@angular/core");
+  return {
+    ...actual,
+    afterNextRender: jest.fn((callback: () => void, _options?: unknown) => {
+      mockCallbackHolder.callback = callback;
+      return { destroy: jest.fn() };
+    }),
+  };
+});
+
 describe("SideNavComponent", () => {
   let fixture: ComponentFixture<SideNavComponent>;
   let sidenavElement: HTMLElement;
@@ -111,5 +124,66 @@ describe("SideNavComponent", () => {
     expect(sidenavElement.classList.contains(`tedi-sidenav--hidden`)).toBe(
       true,
     );
+  });
+
+  describe("handleBackToMainMenu", () => {
+    afterEach(() => {
+      mockCallbackHolder.callback = null;
+    });
+
+    it("should call service.handleGoToMainMenu", () => {
+      fixture.componentInstance.handleBackToMainMenu();
+      expect(sidenavService.handleGoToMainMenu).toHaveBeenCalled();
+    });
+
+    it("should find the open item before closing", () => {
+      const openSignal = signal(true);
+      const mockItem = {
+        dropdown: { open: openSignal },
+        host: { nativeElement: document.createElement("div") },
+      };
+
+      sidenavService.items.set([mockItem as never]);
+
+      fixture.componentInstance.handleBackToMainMenu();
+      expect(sidenavService.handleGoToMainMenu).toHaveBeenCalled();
+    });
+
+    it("should focus the trigger of the previously open item after closing", () => {
+      const openSignal = signal(true);
+      const mockHostEl = document.createElement("div");
+      const mockTriggerBtn = document.createElement("button");
+      mockTriggerBtn.className = "tedi-sidenav-item__title";
+      mockHostEl.appendChild(mockTriggerBtn);
+
+      const focusSpy = jest.spyOn(mockTriggerBtn, "focus");
+
+      const mockItem = {
+        dropdown: { open: openSignal },
+        host: { nativeElement: mockHostEl },
+      };
+
+      sidenavService.items.set([mockItem as never]);
+
+      fixture.componentInstance.handleBackToMainMenu();
+
+      if (mockCallbackHolder.callback) {
+        mockCallbackHolder.callback();
+      }
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should not throw when no item is open", () => {
+      sidenavService.items.set([]);
+
+      fixture.componentInstance.handleBackToMainMenu();
+
+      if (mockCallbackHolder.callback) {
+        mockCallbackHolder.callback();
+      }
+
+      expect(sidenavService.handleGoToMainMenu).toHaveBeenCalled();
+    });
   });
 });

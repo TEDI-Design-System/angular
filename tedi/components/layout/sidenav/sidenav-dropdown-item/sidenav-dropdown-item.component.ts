@@ -1,9 +1,13 @@
 import { NgTemplateOutlet } from "@angular/common";
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
+  inject,
   input,
+  signal,
   ViewEncapsulation,
 } from "@angular/core";
 import { RouterLink } from "@angular/router";
@@ -17,11 +21,10 @@ import { RouterLink } from "@angular/router";
   encapsulation: ViewEncapsulation.None,
   imports: [RouterLink, NgTemplateOutlet],
   host: {
-    role: "menuitem",
-    "[class]": "classes()",
+    "style": "display: contents",
   },
 })
-export class SideNavDropdownItemComponent {
+export class SideNavDropdownItemComponent implements AfterViewInit {
   /**
    * Is navigation item selected
    * @default false
@@ -35,6 +38,19 @@ export class SideNavDropdownItemComponent {
    * Router link
    */
   route = input<string>();
+
+  textContent = signal("");
+
+  private readonly host = inject(ElementRef);
+
+  ngAfterViewInit(): void {
+    if (this.host.nativeElement) {
+      const text = this.host.nativeElement.textContent?.trim();
+      if (text) {
+        this.textContent.set(text);
+      }
+    }
+  }
 
   classes = computed(() => {
     const classList = ["tedi-sidenav-dropdown-item"];
