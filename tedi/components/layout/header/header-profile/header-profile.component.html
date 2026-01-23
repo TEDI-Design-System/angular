@@ -7,7 +7,7 @@
       [variant]="buttonVariant()"
       [attr.aria-label]="
         breakpointService.isBelowBreakpoint('sm')() || !name()
-          ? translationService.track('header.profile')
+          ? translationService.track('header.profile')()
           : null
       "
       (click)="handleModalOpen()"
