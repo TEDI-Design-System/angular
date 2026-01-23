@@ -1,3 +1,10 @@
+# [6.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.3...angular-6.0.0-rc.4) (2026-01-23)
+
+
+### Bug Fixes
+
+* **file-dropzone:** remove single console.log [#66](https://github.com/TEDI-Design-System/angular/issues/66) ([#288](https://github.com/TEDI-Design-System/angular/issues/288)) ([3abde8d](https://github.com/TEDI-Design-System/angular/commit/3abde8d9da916cc6d17035f8879d834fd1372800))
+
 # [6.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.2...angular-6.0.0-rc.3) (2026-01-22)
 
 
