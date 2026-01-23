@@ -1,6 +1,7 @@
 <ng-template #statusIcon>
   @if(subItem() || !compact()) { @if (completed()) {
   <tedi-icon
+    [attr.aria-label]="'vertical-stepper.completed' | tediTranslate"
     name="check"
     color="success"
     [size]="16"
@@ -8,6 +9,7 @@
   />
   } @else if (error()) {
   <tedi-icon
+    [attr.aria-label]="'vertical-stepper.error' | tediTranslate"
     name="error"
     color="danger"
     [size]="16"
@@ -26,7 +28,12 @@
 <div class="tedi-vertical-stepper-item__line"></div>
 <div class="tedi-vertical-stepper-item__title">
   @if (hasSubItems()) {
-  <button (click)="toggleOpen()" class="tedi-vertical-stepper-item__toggle">
+  <button
+    [disabled]="disabled()"
+    (click)="toggleOpen()"
+    class="tedi-vertical-stepper-item__toggle"
+    [attr.aria-expanded]="opened()"
+  >
     <span>{{ title() }}</span
     ><ng-container *ngTemplateOutlet="statusIcon"></ng-container
     ><tedi-icon
@@ -41,13 +48,15 @@
   <ng-content select="[item-title]">
     @if (link()) {
     <a
-      [routerLink]="link()"
+      [routerLink]="disabled() ? undefined : link()"
       routerLinkActive
       (isActiveChange)="routerLinkActiveChange($event)"
       >{{ title() }}</a
     >
     } @else {
-    <button (click)="itemSelect.emit()">{{ title() }}</button>
+    <button [disabled]="disabled()" (click)="itemSelect.emit()">
+      {{ title() }}
+    </button>
     }
   </ng-content>
   <ng-container *ngTemplateOutlet="statusIcon"></ng-container>

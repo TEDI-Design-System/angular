@@ -15,11 +15,20 @@ import {
 import { VerticalStepperComponent } from "../vertical-stepper";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { NgTemplateOutlet } from "@angular/common";
-import { IconComponent } from "@tedi-design-system/angular/tedi";
+import {
+  IconComponent,
+  TediTranslationPipe,
+} from "@tedi-design-system/angular/tedi";
 
 @Component({
   selector: "tedi-vertical-stepper-item",
-  imports: [IconComponent, RouterLink, RouterLinkActive, NgTemplateOutlet],
+  imports: [
+    IconComponent,
+    RouterLink,
+    RouterLinkActive,
+    NgTemplateOutlet,
+    TediTranslationPipe,
+  ],
   templateUrl: "./vertical-stepper-item.html",
   styleUrl: "./vertical-stepper-item.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,9 +39,12 @@ import { IconComponent } from "@tedi-design-system/angular/tedi";
     "[class.tedi-vertical-stepper-item--error]": "error()",
     "[class.tedi-vertical-stepper-item--selected]": "selected()",
     "[class.tedi-vertical-stepper-item--disabled]": "disabled()",
+    "[class.tedi-vertical-stepper-item--informative]": "informative()",
     "[class.tedi-vertical-stepper-item--sub-item]": "subItem()",
     "[class.tedi-vertical-stepper-item--compact]": "compact()",
     "[class.tedi-vertical-stepper-item--enumerated]": "enumerated()",
+    "[attr.role]": "'treeitem'",
+    "[attr.aria-selected]": "selected()",
   },
 })
 export class VerticalStepperItemComponent {
@@ -40,6 +52,7 @@ export class VerticalStepperItemComponent {
   error = input(false, { transform: booleanAttribute });
   selected = input(false, { transform: booleanAttribute });
   disabled = input(false, { transform: booleanAttribute });
+  informative = input(false, { transform: booleanAttribute });
   title = input.required<string>();
   link = input<RouterLink["routerLink"]>(undefined);
   opened = model<boolean>(false); // for items with children

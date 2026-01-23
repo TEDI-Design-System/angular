@@ -263,4 +263,13 @@
       pointer-events: none;
     }
   }
+
+  &--informative {
+    --_step-indicator-background: var(--stepper-step-disabled-bg, #d2d3d8);
+    --_step-indicator-border: var(--stepper-step-disabled-border, #9293a4);
+    --_step-title-color: var(--general-text-tertiary, #5d6071);
+    #{$host-class}__title {
+      pointer-events: none;
+    }
+  }
 }

@@ -1,4 +1,10 @@
-import { booleanAttribute, ChangeDetectionStrategy, Component, input, ViewEncapsulation } from "@angular/core";
+import {
+  booleanAttribute,
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  ViewEncapsulation,
+} from "@angular/core";
 
 @Component({
   selector: "tedi-vertical-stepper",
@@ -13,8 +19,7 @@ import { booleanAttribute, ChangeDetectionStrategy, Component, input, ViewEncaps
   },
 })
 export class VerticalStepperComponent {
-
+  ariaLabel = input<string>();
   compact = input(false, { transform: booleanAttribute });
   enumerated = input(false, { transform: booleanAttribute });
-
 }
