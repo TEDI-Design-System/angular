@@ -216,7 +216,7 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
       this.accept(),
       this.maxSize(),
       this.sizeDisplayStandard(),
-      this._translationService.translate.bind(this._translationService)
+      this._translationService.translate.bind(this._translationService),
     ),
     type: "hint",
     position: "left",
@@ -243,10 +243,9 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
   }
 
   runValidators = async (
-    control: AbstractControl<FileDropzone[]>
+    control: AbstractControl<FileDropzone[]>,
   ): Promise<ValidationErrors | null> => {
     const controlFiles = control.value;
-    console.log("running validators");
 
     if (!controlFiles || !controlFiles.length) {
       return null;
@@ -270,7 +269,7 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
           this.accept(),
           file,
           this.sizeDisplayStandard(),
-          this._translationService.translate.bind(this._translationService)
+          this._translationService.translate.bind(this._translationService),
         );
 
         if (error && error.code) {
