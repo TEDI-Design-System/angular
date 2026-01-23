@@ -3,7 +3,23 @@ import { signal } from "@angular/core";
 import { SideNavItemComponent } from "./sidenav-item.component";
 import { SideNavService } from "../../../../services/sidenav/sidenav.service";
 
+const mockCallbackHolder: { callback: (() => void) | null } = { callback: null };
+
+jest.mock("@angular/core", () => {
+  const actual = jest.requireActual("@angular/core");
+  return {
+    ...actual,
+    afterNextRender: jest.fn((callback: () => void, _options?: unknown) => {
+      mockCallbackHolder.callback = callback;
+      return { destroy: jest.fn() };
+    }),
+  };
+});
+
 describe("SideNavItemComponent", () => {
+  afterEach(() => {
+    mockCallbackHolder.callback = null;
+  });
   let fixture: ComponentFixture<SideNavItemComponent>;
   let itemElement: HTMLElement;
   let sidenavService: {
@@ -143,15 +159,18 @@ describe("SideNavItemComponent", () => {
     expect(() => fixture.componentInstance.toggleDropdown()).not.toThrow();
   });
 
-  it("toggleDropdown should trigger focus management when collapsed", async () => {
+  it("toggleDropdown should focus first dropdown item when opening in collapsed mode", () => {
     const openSignal = signal(false);
     const mockDropdownEl = document.createElement("div");
     const mockUl = document.createElement("ul");
     mockUl.className = "tedi-sidenav-dropdown";
     const mockTrigger = document.createElement("a");
     mockTrigger.className = "tedi-sidenav-dropdown-item__trigger";
+    Object.defineProperty(mockTrigger, "offsetParent", { value: document.body, configurable: true });
+    const focusSpy = jest.spyOn(mockTrigger, "focus");
     mockUl.appendChild(mockTrigger);
     mockDropdownEl.appendChild(mockUl);
+    document.body.appendChild(mockDropdownEl);
 
     const dropdownStub = {
       open: openSignal,
@@ -164,11 +183,45 @@ describe("SideNavItemComponent", () => {
     fixture.detectChanges();
 
     fixture.componentInstance.toggleDropdown();
-
     expect(openSignal()).toBe(true);
+
+    // run afterNextRender
+    if (mockCallbackHolder.callback) {
+      mockCallbackHolder.callback();
+    }
+
+    expect(focusSpy).toHaveBeenCalled();
+    document.body.removeChild(mockDropdownEl);
   });
 
-  it("toggleDropdown should trigger focus management when mobile", async () => {
+  it("toggleDropdown should focus trigger when closing in collapsed mode", () => {
+    const openSignal = signal(true);
+    const mockDropdownEl = document.createElement("div");
+
+    const dropdownStub = {
+      open: openSignal,
+      element: () => mockDropdownEl,
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fixture.componentInstance.dropdown = dropdownStub as any;
+
+    sidenavService.isCollapsed.set(true);
+    fixture.detectChanges();
+
+    const actualTriggerBtn = fixture.nativeElement.querySelector(".tedi-sidenav-item__title") as HTMLElement;
+    const focusSpy = jest.spyOn(actualTriggerBtn, "focus");
+
+    fixture.componentInstance.toggleDropdown();
+    expect(openSignal()).toBe(false);
+
+    if (mockCallbackHolder.callback) {
+      mockCallbackHolder.callback();
+    }
+
+    expect(focusSpy).toHaveBeenCalled();
+  });
+
+  it("toggleDropdown should trigger focus management when mobile", () => {
     const openSignal = signal(false);
     const mockDropdownEl = document.createElement("div");
 
@@ -185,5 +238,37 @@ describe("SideNavItemComponent", () => {
     fixture.componentInstance.toggleDropdown();
 
     expect(openSignal()).toBe(true);
+    expect(mockCallbackHolder.callback).not.toBeNull();
+  });
+
+  it("Escape key handler should focus trigger after closing", () => {
+    jest.useFakeTimers();
+
+    const openSignal = signal(true);
+    const mockDropdownEl = document.createElement("div");
+
+    const dropdownStub = {
+      open: openSignal,
+      element: () => mockDropdownEl,
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fixture.componentInstance.dropdown = dropdownStub as any;
+    fixture.componentInstance.ngAfterViewInit();
+
+    sidenavService.isCollapsed.set(true);
+    fixture.detectChanges();
+
+    const actualTriggerBtn = fixture.nativeElement.querySelector(".tedi-sidenav-item__title") as HTMLElement;
+    const focusSpy = jest.spyOn(actualTriggerBtn, "focus");
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+    expect(openSignal()).toBe(false);
+
+    jest.runAllTimers();
+
+    expect(focusSpy).toHaveBeenCalled();
+
+    jest.useRealTimers();
   });
 });
