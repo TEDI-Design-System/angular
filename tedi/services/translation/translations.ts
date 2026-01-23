@@ -582,6 +582,13 @@ export const translationsMap = {
     en: (isOpen: boolean) => (isOpen ? "Close menu" : "Open menu"),
     ru: (isOpen: boolean) => (isOpen ? "Закрыть меню" : "Открыть меню"),
   },
+  "sidenav.toggleSubmenu": {
+    description: "Label for sidenav submenu toggle",
+    components: ["Sidenav"],
+    et: (value: string, isOpen: boolean) => (`${isOpen ? 'Sulge' : 'Ava'} ${value} alammenüü`),
+    en: (value: string, isOpen: boolean) => (`${isOpen ? 'Close' : 'Open'} ${value} submenu`),
+    ru: (value: string, isOpen: boolean) => (`${isOpen ? 'Закрыть' : 'Открыть'} ${value} подменю`),
+  },
   carousel: {
     description: "Label for carousel",
     components: ["CarouselContent"],

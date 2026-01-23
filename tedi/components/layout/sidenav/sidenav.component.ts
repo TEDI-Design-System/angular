@@ -1,8 +1,11 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   effect,
+  inject,
+  Injector,
   input,
   ViewEncapsulation,
 } from "@angular/core";
@@ -47,10 +50,27 @@ export class SideNavComponent {
    */
   desktopBreakpoint = input<Breakpoint>("lg");
 
+  private readonly injector = inject(Injector);
+
   constructor(public sidenavService: SideNavService) {
     effect(() => {
       this.sidenavService.desktopBreakpoint.set(this.desktopBreakpoint())
     })
+  }
+
+  handleBackToMainMenu() {
+    // Find the parent menu item to focus on
+    const openItem = this.sidenavService.items().find(item => item.dropdown?.open());
+
+    this.sidenavService.handleGoToMainMenu();
+
+    afterNextRender(() => {
+      if (openItem) {
+        const itemEl = openItem['host']?.nativeElement as HTMLElement;
+        const trigger = itemEl?.querySelector('.tedi-sidenav-item__title') as HTMLElement | null;
+        trigger?.focus();
+      }
+    }, { injector: this.injector });
   }
 
   classes = computed(() => {

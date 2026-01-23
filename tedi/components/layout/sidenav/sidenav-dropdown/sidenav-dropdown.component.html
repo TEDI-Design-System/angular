@@ -1,4 +1,4 @@
-<div class="tedi-sidenav-dropdown__items">
+<ul [class]="classes()">
   @if (sidenavService.isCollapsed() && !!sidenavItem.href()) {
     <tedi-sidenav-dropdown-item
       class="tedi-sidenav-dropdown-item--parent"
@@ -15,4 +15,4 @@
     </tedi-sidenav-dropdown-item>
   }
   <ng-content></ng-content>
-</div>
+</ul>

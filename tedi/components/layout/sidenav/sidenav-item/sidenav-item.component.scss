@@ -54,8 +54,11 @@
     border: 0;
 
     &:focus-visible {
-      outline: var(--borders-01) solid var(--tedi-neutral-100);
-      outline-offset: -2px;
+      position: relative;
+      z-index: 1;
+      outline: none;
+      background: var(--navigation-vertical-item-background-focus);
+      box-shadow: var(--_sidenav-focus-ring);
     }
 
     &:not(:only-child) {
@@ -91,9 +94,12 @@
     }
 
     &:focus-visible {
+      position: relative;
+      z-index: 1;
+      outline: none;
+
       .tedi-sidenav-item__caret-container {
-        outline: var(--borders-02) solid var(--tedi-neutral-100);
-        outline-offset: var(--borders-01);
+        box-shadow: var(--_sidenav-focus-ring);
       }
     }
 
@@ -136,6 +142,14 @@
 
     &:hover {
       background: var(--navigation-vertical-item-background-hover);
+    }
+
+    &:focus-visible {
+      position: relative;
+      z-index: 1;
+      outline: none;
+      background: var(--navigation-vertical-item-background-focus);
+      box-shadow: var(--_sidenav-focus-ring);
     }
 
     .tedi-sidenav-item__text {

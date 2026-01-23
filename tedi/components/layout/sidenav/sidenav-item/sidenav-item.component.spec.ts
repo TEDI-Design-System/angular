@@ -21,16 +21,16 @@ describe("SideNavItemComponent", () => {
 
   beforeEach(() => {
     sidenavService = {
-        items: signal([]),
-        isCollapsed: signal(false),
-        isMobile: signal(false),
-        isMobileItemOpen: signal(false),
-        isMobileOpen: signal(false),
-        tooltipEnabled: signal(false),
-        registerItem: jest.fn(),
-        unregisterItem: jest.fn(),
-        handleGoToMainMenu: jest.fn(),
-        handleCollapse: jest.fn()
+      items: signal([]),
+      isCollapsed: signal(false),
+      isMobile: signal(false),
+      isMobileItemOpen: signal(false),
+      isMobileOpen: signal(false),
+      tooltipEnabled: signal(false),
+      registerItem: jest.fn(),
+      unregisterItem: jest.fn(),
+      handleGoToMainMenu: jest.fn(),
+      handleCollapse: jest.fn()
     };
 
     TestBed.configureTestingModule({
@@ -41,8 +41,8 @@ describe("SideNavItemComponent", () => {
     });
 
     fixture = TestBed.createComponent(SideNavItemComponent);
-    itemElement = fixture.nativeElement;
     fixture.detectChanges();
+    itemElement = fixture.nativeElement.querySelector("li");
   });
 
   it("should register on init and unregister on destroy", () => {
@@ -51,12 +51,15 @@ describe("SideNavItemComponent", () => {
     expect(sidenavService.unregisterItem).toHaveBeenCalledWith(fixture.componentInstance);
   });
 
-  it("should always have base class", () => {
+  it("should always have base class on li element", () => {
     expect(itemElement.classList.contains("tedi-sidenav-item")).toBe(true);
   });
 
   it("should read textContent in ngAfterViewInit", () => {
-    itemElement.innerHTML = `<span class="tedi-sidenav-item__text">Item Text</span>`;
+    const textSpan = itemElement.querySelector(".tedi-sidenav-item__text");
+    if (textSpan) {
+      textSpan.textContent = "Item Text";
+    }
     fixture.componentInstance.ngAfterViewInit();
     expect(fixture.componentInstance.textContent()).toBe("Item Text");
   });
@@ -64,12 +67,14 @@ describe("SideNavItemComponent", () => {
   it("should add selected class when selected input is true", () => {
     fixture.componentRef.setInput("selected", true);
     fixture.detectChanges();
+    itemElement = fixture.nativeElement.querySelector("li");
     expect(itemElement.classList.contains("tedi-sidenav-item--selected")).toBe(true);
   });
 
   it("should add hidden class when mobile item open and no dropdown open", () => {
     sidenavService.isMobileItemOpen.set(true);
     fixture.detectChanges();
+    itemElement = fixture.nativeElement.querySelector("li");
     expect(itemElement.classList.contains("tedi-sidenav-item--hidden")).toBe(true);
   });
 
@@ -79,6 +84,7 @@ describe("SideNavItemComponent", () => {
     fixture.componentInstance.dropdown = dropdownStub as any;
     sidenavService.isMobileItemOpen.set(true);
     fixture.detectChanges();
+    itemElement = fixture.nativeElement.querySelector("li");
     expect(itemElement.classList.contains("tedi-sidenav-item--hidden")).toBe(false);
   });
 
@@ -112,5 +118,72 @@ describe("SideNavItemComponent", () => {
 
     document.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(dropdownStub.open()).toBe(false);
+  });
+
+  it("Escape key should close dropdown and focus trigger when collapsed", async () => {
+    const dropdownStub = {
+      open: signal(true),
+      element: () => document.createElement("div"),
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fixture.componentInstance.dropdown = dropdownStub as any;
+    fixture.componentInstance.ngAfterViewInit();
+
+    sidenavService.isCollapsed.set(true);
+    fixture.detectChanges();
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+    expect(dropdownStub.open()).toBe(false);
+  });
+
+
+  it("toggleDropdown should do nothing when no dropdown", () => {
+    fixture.componentInstance.dropdown = undefined;
+    expect(() => fixture.componentInstance.toggleDropdown()).not.toThrow();
+  });
+
+  it("toggleDropdown should trigger focus management when collapsed", async () => {
+    const openSignal = signal(false);
+    const mockDropdownEl = document.createElement("div");
+    const mockUl = document.createElement("ul");
+    mockUl.className = "tedi-sidenav-dropdown";
+    const mockTrigger = document.createElement("a");
+    mockTrigger.className = "tedi-sidenav-dropdown-item__trigger";
+    mockUl.appendChild(mockTrigger);
+    mockDropdownEl.appendChild(mockUl);
+
+    const dropdownStub = {
+      open: openSignal,
+      element: () => mockDropdownEl,
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fixture.componentInstance.dropdown = dropdownStub as any;
+
+    sidenavService.isCollapsed.set(true);
+    fixture.detectChanges();
+
+    fixture.componentInstance.toggleDropdown();
+
+    expect(openSignal()).toBe(true);
+  });
+
+  it("toggleDropdown should trigger focus management when mobile", async () => {
+    const openSignal = signal(false);
+    const mockDropdownEl = document.createElement("div");
+
+    const dropdownStub = {
+      open: openSignal,
+      element: () => mockDropdownEl,
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fixture.componentInstance.dropdown = dropdownStub as any;
+
+    sidenavService.isMobile.set(true);
+    fixture.detectChanges();
+
+    fixture.componentInstance.toggleDropdown();
+
+    expect(openSignal()).toBe(true);
   });
 });

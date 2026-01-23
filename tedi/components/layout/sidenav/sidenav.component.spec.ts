@@ -112,4 +112,24 @@ describe("SideNavComponent", () => {
       true,
     );
   });
+
+  describe("handleBackToMainMenu", () => {
+    it("should call service.handleGoToMainMenu", () => {
+      fixture.componentInstance.handleBackToMainMenu();
+      expect(sidenavService.handleGoToMainMenu).toHaveBeenCalled();
+    });
+
+    it("should find the open item before closing", () => {
+      const openSignal = signal(true);
+      const mockItem = {
+        dropdown: { open: openSignal },
+        host: { nativeElement: document.createElement("div") },
+      };
+
+      sidenavService.items.set([mockItem as never]);
+
+      fixture.componentInstance.handleBackToMainMenu();
+      expect(sidenavService.handleGoToMainMenu).toHaveBeenCalled();
+    });
+  });
 });

@@ -3,7 +3,7 @@ import { SideNavDropdownItemComponent } from "./sidenav-dropdown-item.component"
 
 describe("SideNavDropdownItemComponent", () => {
   let fixture: ComponentFixture<SideNavDropdownItemComponent>;
-  let dropdownItemEl: HTMLElement;
+  let liElement: HTMLLIElement;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -11,21 +11,21 @@ describe("SideNavDropdownItemComponent", () => {
     });
 
     fixture = TestBed.createComponent(SideNavDropdownItemComponent);
-    dropdownItemEl = fixture.nativeElement;
     fixture.detectChanges();
+    liElement = fixture.nativeElement.querySelector("li");
   });
 
   it("should create the component", () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it("should have the base CSS class", () => {
-    expect(dropdownItemEl.classList.contains("tedi-sidenav-dropdown-item")).toBe(true);
+  it("should have the base CSS class on li element", () => {
+    expect(liElement.classList.contains("tedi-sidenav-dropdown-item")).toBe(true);
   });
 
   it("should add selected class when `selected` input is true", () => {
     fixture.componentRef.setInput("selected", true);
     fixture.detectChanges();
-    expect(dropdownItemEl.classList.contains("tedi-sidenav-dropdown-item--selected")).toBe(true);
+    expect(liElement.classList.contains("tedi-sidenav-dropdown-item--selected")).toBe(true);
   });
 });

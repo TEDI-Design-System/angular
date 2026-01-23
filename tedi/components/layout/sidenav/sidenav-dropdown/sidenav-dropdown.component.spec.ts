@@ -51,15 +51,19 @@ describe("SideNavDropdownComponent", () => {
     });
 
     fixture = TestBed.createComponent(SideNavDropdownComponent);
-    dropdownElement = fixture.nativeElement;
     fixture.detectChanges();
+    dropdownElement = fixture.nativeElement.querySelector("ul");
   });
 
   it("should create the component", () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it("should have the base CSS class", () => {
+  it("should have wrapper class on host element", () => {
+    expect(fixture.nativeElement.classList.contains("tedi-sidenav-dropdown-wrapper")).toBe(true);
+  });
+
+  it("should have the base CSS class on ul element", () => {
     expect(dropdownElement.classList.contains("tedi-sidenav-dropdown")).toBe(true);
   });
 
@@ -72,6 +76,6 @@ describe("SideNavDropdownComponent", () => {
   it("ngAfterViewInit should set the `element` signal to the host element", () => {
     fixture.componentInstance.element.set(null);
     fixture.componentInstance.ngAfterViewInit();
-    expect(fixture.componentInstance.element()).toBe(dropdownElement);
+    expect(fixture.componentInstance.element()).toBe(fixture.nativeElement);
   });
 });
