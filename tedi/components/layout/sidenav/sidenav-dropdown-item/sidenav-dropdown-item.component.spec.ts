@@ -28,4 +28,13 @@ describe("SideNavDropdownItemComponent", () => {
     fixture.detectChanges();
     expect(liElement.classList.contains("tedi-sidenav-dropdown-item--selected")).toBe(true);
   });
+
+  it("should set textContent value in ngAfterViewInit when text exists", () => {
+    fixture.nativeElement.textContent = "Test Item Text";
+
+    fixture.componentInstance.ngAfterViewInit();
+
+    expect(fixture.componentInstance.textContent()).toBe("Test Item Text");
+  });
+
 });
