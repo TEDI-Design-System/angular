@@ -1,3 +1,10 @@
+# [6.0.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.5...angular-6.0.0-rc.6) (2026-01-23)
+
+
+### Bug Fixes
+
+* **header:** fixed header-profile aria-label being read as js code [#291](https://github.com/TEDI-Design-System/angular/issues/291) ([#292](https://github.com/TEDI-Design-System/angular/issues/292)) ([5b626fe](https://github.com/TEDI-Design-System/angular/commit/5b626fea88c6f199f1fd783e28ad868415d88e61))
+
 # [6.0.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.4...angular-6.0.0-rc.5) (2026-01-23)
 
 
