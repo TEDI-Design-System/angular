@@ -1,3 +1,10 @@
+# [6.0.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.6...angular-6.0.0-rc.7) (2026-01-26)
+
+
+### Features
+
+* **toast:** toast tedi-ready component [#270](https://github.com/TEDI-Design-System/angular/issues/270) ([#271](https://github.com/TEDI-Design-System/angular/issues/271)) ([d5e7954](https://github.com/TEDI-Design-System/angular/commit/d5e7954567050b3c7d431b80cda15fd290a0958f))
+
 # [6.0.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.5...angular-6.0.0-rc.6) (2026-01-23)
 
 
