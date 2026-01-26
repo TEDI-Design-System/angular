@@ -111,6 +111,12 @@ const preview: Preview = {
           description:
             'This component lacks some TEDI-Ready functionality, e.g it may rely on another component that has not yet been developed',
         },
+        mobileViewDifference: {
+          background: '#99BDDA',
+          color: '#000',
+          description:
+            'This component has a different layout on mobile. Use the mobile breakpoint or resize the browser window to review the mobile design.',
+        },
       },
     },
   },
