@@ -8,18 +8,23 @@ tedi-toast {
 
 .tedi-toast__wrapper {
   position: relative;
-  box-shadow: 0px 1px 5px 0px var(--tedi-alpha-20, rgba(0, 0, 0, 0.2));
+  padding: var(--toast-outer-spacing, 4px);
+
+  tedi-alert {
+    box-shadow: 0 4px 10px 0 var(--tedi-alpha-14, rgba(0, 0, 0, 0.14));
+  }
 }
 
 .tedi-toast__progress {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
+  bottom: var(--toast-outer-spacing);
+  left: var(--toast-outer-spacing);
+  width: calc(100% - var(--toast-outer-spacing) * 2);
   height: 4px;
   background: var(--toast-progress-color);
   transform-origin: left;
   animation: toast-progress linear forwards;
+  border-radius: 0 var(--alert-radius) 0 var(--alert-radius);
 
   &--success {
     --toast-progress-color: var(--alert-default-border-success);
@@ -54,7 +59,7 @@ tedi-toast {
     flex-direction: column;
     gap: var(--dimensions-05);
     max-height: calc(100vh - calc(var(--toast-margin-bottom) * 2));
-    overflow: hidden;
+    overflow: visible;
 
     >* {
       pointer-events: auto;
@@ -62,7 +67,7 @@ tedi-toast {
 
     &--top-left {
       top: var(--toast-margin-bottom);
-      left: var(--toast-margin-left);
+      left: var(--toast-margin-right);
       align-items: flex-start;
 
       tedi-toast {
@@ -90,7 +95,7 @@ tedi-toast {
 
     &--bottom-left {
       bottom: var(--toast-margin-bottom);
-      left: var(--toast-margin-left);
+      left: var(--toast-margin-right);
       align-items: flex-start;
       flex-direction: column-reverse;
 

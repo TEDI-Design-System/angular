@@ -119,7 +119,7 @@ type Story = StoryObj<ToastComponent>;
   standalone: true,
   imports: [ButtonComponent, RowComponent, ColComponent, VerticalSpacingDirective],
   template: `
-    <div [tediVerticalSpacing]="1">
+    <div [tediVerticalSpacing]="0.5">
       <tedi-row>
         <tedi-col [lg]="12">
           <button tedi-button (click)="showSuccess()">Show success toast</button>
@@ -235,16 +235,14 @@ export const WithIcon: Story = {
   standalone: true,
   imports: [ButtonComponent, RowComponent, ColComponent, VerticalSpacingDirective],
   template: `
-    <div [tediVerticalSpacing]="1">
-      <tedi-row>
-        <tedi-col>
-          <button tedi-button (click)="show(2)">Auto close in 2s</button>
-        </tedi-col>
-        <tedi-col>
-          <button tedi-button (click)="show(10)">Auto close in 10s</button>
-        </tedi-col>
-      </tedi-row>
-    </div>
+    <tedi-row gap="2">
+      <tedi-col>
+        <button tedi-button (click)="show(2)">Auto close in 2s</button>
+      </tedi-col>
+      <tedi-col>
+        <button tedi-button (click)="show(10)">Auto close in 10s</button>
+      </tedi-col>
+    </tedi-row>
   `,
 })
 class ToastTimerDemoComponent {
@@ -337,8 +335,8 @@ export const PersistentToast: Story = {
   standalone: true,
   imports: [ButtonComponent, RowComponent, ColComponent, VerticalSpacingDirective],
   template: `
-    <div [tediVerticalSpacing]="1">
-      <tedi-row>
+    <div [tediVerticalSpacing]="0.5">
+      <tedi-row gap="2">
         <tedi-col>
           <button tedi-button variant="secondary" (click)="showTopLeft()">
             Top Left
@@ -350,7 +348,7 @@ export const PersistentToast: Story = {
           </button>
         </tedi-col>
       </tedi-row>
-      <tedi-row>
+      <tedi-row gap="2">
         <tedi-col>
           <button tedi-button variant="secondary" (click)="showBottomLeft()">
             Bottom Left
@@ -395,6 +393,7 @@ class ToastPositionDemoComponent {
 
 /**
  * Toast notifications at different screen positions.
+ * Default and also recommended value is "bottom-right"
  */
 export const Positions: Story = {
   decorators: [
@@ -426,7 +425,7 @@ this.toastService.info("Bottom Right", "Message", { position: "bottom-right" });
   standalone: true,
   imports: [ButtonComponent, RowComponent, ColComponent],
   template: `
-    <tedi-row>
+    <tedi-row gap="2">
       <tedi-col>
         <button tedi-button (click)="showPauseOnHover()">
           Pause on hover
@@ -494,7 +493,7 @@ this.toastService.danger("No Pause", "Closes even if hovered", {
   standalone: true,
   imports: [ButtonComponent, RowComponent, ColComponent],
   template: `
-    <tedi-row>
+    <tedi-row gap="2">
       <tedi-col>
         <button tedi-button (click)="showStatus()">
           Success (role=status)
