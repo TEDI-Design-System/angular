@@ -1,0 +1,24 @@
+<div
+  class="tedi-toast__wrapper"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+>
+  <tedi-alert
+    [title]="title()"
+    [type]="type()"
+    [icon]="icon()"
+    [showClose]="true"
+    [closeDelay]="300"
+    [role]="role()"
+    (closeClick)="handleClose()"
+  >
+    <ng-content></ng-content>
+  </tedi-alert>
+  @if (showProgressBar() && duration() > 0) {
+    <div
+      class="tedi-toast__progress tedi-toast__progress--{{ type() }}"
+      [class.tedi-toast__progress--paused]="paused()"
+      [style.animation-duration.ms]="duration()"
+    ></div>
+  }
+</div>

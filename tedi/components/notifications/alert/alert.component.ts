@@ -3,6 +3,7 @@ import {
   computed,
   input,
   model,
+  output,
   ChangeDetectionStrategy,
   ViewEncapsulation,
 } from "@angular/core";
@@ -78,6 +79,17 @@ export class AlertComponent {
    */
   open = model(true);
 
+  /**
+   * Delay in milliseconds before setting "open" to false when close is triggered.
+   * @default 0
+   */
+  closeDelay = input(0);
+
+  /**
+   * Close click output
+   */
+  readonly closeClick = output<void>();
+
   getAriaLive = computed(() => {
     switch (this.role()) {
       case "alert":
@@ -106,6 +118,12 @@ export class AlertComponent {
   });
 
   handleClose() {
-    this.open.set(false);
+    this.closeClick.emit();
+    const delay = this.closeDelay();
+    if (delay > 0) {
+      setTimeout(() => this.open.set(false), delay);
+    } else {
+      this.open.set(false);
+    }
   }
 }
