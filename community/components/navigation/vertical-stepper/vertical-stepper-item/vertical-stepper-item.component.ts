@@ -12,7 +12,7 @@ import {
   signal,
   ViewEncapsulation,
 } from "@angular/core";
-import { VerticalStepperComponent } from "../vertical-stepper";
+import { VerticalStepperComponent } from "../vertical-stepper.component";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { NgTemplateOutlet } from "@angular/common";
 import {
@@ -29,8 +29,8 @@ import {
     NgTemplateOutlet,
     TediTranslationPipe,
   ],
-  templateUrl: "./vertical-stepper-item.html",
-  styleUrl: "./vertical-stepper-item.scss",
+  templateUrl: "./vertical-stepper-item.component.html",
+  styleUrl: "./vertical-stepper-item.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
@@ -54,17 +54,17 @@ export class VerticalStepperItemComponent {
   disabled = input(false, { transform: booleanAttribute });
   informative = input(false, { transform: booleanAttribute });
   title = input.required<string>();
-  link = input<RouterLink["routerLink"]>(undefined);
+  route = input<RouterLink["routerLink"]>(undefined);
   opened = model<boolean>(false); // for items with children
-  subItem = signal<boolean>(false);
+
+  itemSelect = output();
 
   private stepperContext = inject(VerticalStepperComponent, { optional: true });
+  subItem = signal<boolean>(false);
   subItems = contentChildren(VerticalStepperItemComponent);
   compact = computed(() => this.stepperContext?.compact());
   enumerated = computed(() => this.stepperContext?.enumerated());
   hasSubItems = computed(() => !!this.subItems().length);
-
-  itemSelect = output();
 
   onSubItemSelect = effect(() => {
     const subItemSelected = this.subItems().some((item) => item.selected());

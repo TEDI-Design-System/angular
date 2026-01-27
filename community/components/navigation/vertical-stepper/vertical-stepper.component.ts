@@ -9,8 +9,8 @@ import {
 @Component({
   selector: "tedi-vertical-stepper",
   imports: [],
-  templateUrl: "./vertical-stepper.html",
-  styleUrl: "./vertical-stepper.scss",
+  templateUrl: "./vertical-stepper.component.html",
+  styleUrl: "./vertical-stepper.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {

@@ -1,3 +1,7 @@
 .tedi-vertical-stepper {
   counter-reset: step-number;
+
+  ol {
+    margin: 0;
+  }
 }
