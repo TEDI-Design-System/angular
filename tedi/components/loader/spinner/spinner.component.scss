@@ -2,18 +2,26 @@ $spinner-colors: (
   "primary": "loader-spinner-color-primary",
   "secondary": "loader-spinner-color-secondary",
 );
-$spinner-sizes: (10 16 48);
+$spinner-viewbox: 44;
+$spinner-sizes: (
+  10: 1,
+  16: 2,
+  48: 4,
+);
 
 .tedi-spinner {
   display: flex;
+  width: calc(var(--tedi-spinner-size, 16) * 1rem / 16);
+  height: calc(var(--tedi-spinner-size, 16) * 1rem / 16);
   animation: 1.4s linear 0s infinite normal none running tedi-spinner-outer;
 
   &--inner {
-    stroke-width: 4px;
-    stroke-dasharray: 80px, 200px;
+    // Convert stroke size in px to viewBox units: stroke px × (viewbox / size px)
+    stroke-width: calc(var(--tedi-spinner-stroke, 2) * #{$spinner-viewbox} / var(--tedi-spinner-size, 16));
+    r: calc(#{$spinner-viewbox / 2} - var(--tedi-spinner-stroke, 2) * #{$spinner-viewbox} / var(--tedi-spinner-size, 16) / 2);
+    stroke-dasharray: 80, 200;
     stroke-dashoffset: 0;
-    animation: 1.4s ease-in-out 0s infinite normal none running
-      tedi-spinner-inner;
+    animation: 1.4s ease-in-out 0s infinite normal none running tedi-spinner-inner;
 
     @media (prefers-reduced-motion: reduce) {
       animation: none;
@@ -26,10 +34,10 @@ $spinner-sizes: (10 16 48);
     }
   }
 
-  @each $size in $spinner-sizes {
+  @each $size, $stroke in $spinner-sizes {
     &--size-#{$size} {
-      width: #{$size}px;
-      height: #{$size}px;
+      --tedi-spinner-size: #{$size};
+      --tedi-spinner-stroke: #{$stroke};
     }
   }
 
@@ -50,17 +58,17 @@ $spinner-sizes: (10 16 48);
 
 @keyframes tedi-spinner-inner {
   0% {
-    stroke-dasharray: 1px, 200px;
+    stroke-dasharray: 1, 200;
     stroke-dashoffset: 0;
   }
 
   50% {
-    stroke-dasharray: 100px, 200px;
-    stroke-dashoffset: -15px;
+    stroke-dasharray: 100, 200;
+    stroke-dashoffset: -15;
   }
 
   100% {
-    stroke-dasharray: 100px, 200px;
-    stroke-dashoffset: -125px;
+    stroke-dasharray: 100, 200;
+    stroke-dashoffset: -125;
   }
 }
