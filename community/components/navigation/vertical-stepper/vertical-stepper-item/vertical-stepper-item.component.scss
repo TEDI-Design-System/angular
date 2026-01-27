@@ -14,7 +14,6 @@
   --_step-indicator-background: var(--stepper-step-default-bg, #fff);
   --_step-indicator-background-hover: var(--stepper-step-default-bg, #fff);
 
-  --_step-min-height: var(--stepper-item-vertical-lg-min-height, 40px);
   --_step-padding: var(--stepper-item-vertical-lg-padding-top, 8px);
   --_step-inner-spacing: var(--stepper-item-vertical-lg-inner-spacing, 8px);
   --_step-line-color: var(--stepper-item-vertical-line, #9293a4);
@@ -67,7 +66,6 @@
 
   &__title {
     grid-area: title;
-    // min-height: var(--_step-min-height);
     padding: var(--_step-padding) 0;
 
     a,
@@ -173,7 +171,6 @@
 
   &--compact {
     --_step-indicator-size: var(--stepper-item-vertical-step-size-md, 16px);
-    --_step-min-height: var(--stepper-item-vertical-compact-min-height, 32px);
     --_step-padding: var(--stepper-item-vertical-compact-padding-top, 3px);
     --_step-inner-spacing: var(
       --stepper-item-vertical-compact-inner-spacing,
@@ -196,7 +193,6 @@
     grid-column: 1 / span 2;
     grid-template-columns: subgrid;
     --_step-indicator-size: var(--stepper-item-vertical-step-size-sm, 9px);
-    --_step-min-height: var(--stepper-item-vertical-compact-min-height, 32px);
     --_step-padding: var(--stepper-item-vertical-padding-y-sm, 2px);
 
     #{$host-class}__indicator::before {

@@ -52,12 +52,18 @@
       @if (route()) {
         <a
           [routerLink]="disabled() ? undefined : route()"
+          [attr.aria-disabled]="disabled()"
+          [attr.aria-current]="selected() ? 'step' : undefined"
           routerLinkActive
           (isActiveChange)="routerLinkActiveChange($event)"
           >{{ title() }}</a
         >
       } @else {
-        <button [disabled]="disabled()" (click)="itemSelect.emit()">
+        <button
+          [disabled]="disabled()"
+          (click)="itemSelect.emit()"
+          [attr.aria-current]="selected() ? 'step' : undefined"
+        >
           {{ title() }}
         </button>
       }
