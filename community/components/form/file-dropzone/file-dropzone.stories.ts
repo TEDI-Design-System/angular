@@ -7,7 +7,12 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { validateFileSize, validateFileType } from "./utils";
-import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from "@angular/forms";
 import { ButtonComponent } from "tedi/components";
 
 /**
@@ -142,7 +147,9 @@ const Template = (args: StoryArgs) => `
 export const Default: Story = {
   render: (args) => {
     const form = new FormGroup({
-      files: new FormControl(null),
+      files: new FormControl(null, {
+        validators: [Validators.maxLength(1)],
+      }),
     });
 
     const logValue = () => {
@@ -150,7 +157,7 @@ export const Default: Story = {
         form.get("files")?.value,
         form.controls.files,
         form.controls,
-        form.controls.files.errors
+        form.controls.files.errors,
       );
     };
     return {
@@ -162,6 +169,11 @@ export const Default: Story = {
     inputId: "file-dropzone-form-control",
     name: "file-form-control",
   },
+};
+
+export const MaxFileAmount: Story = {
+  ...Default,
+  
 };
 
 /** Replaces any same-name files, when usually it indexes them. */

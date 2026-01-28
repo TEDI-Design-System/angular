@@ -37,10 +37,11 @@ import {
   DropzoneValidatorFunction,
   FeedbackTextProps,
   FileDropzone,
-  FileDropzoneErrors,
   FileInputMode,
+  FormControlErrors,
   SizeDisplayStandard,
   ValidationState,
+  ValidatorError,
 } from "./types";
 import {
   formatBytes,
@@ -224,6 +225,7 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
 
   constructor(@Self() public _ngControl: NgControl) {
     this._ngControl.valueAccessor = this;
+    console.log("loggin");
   }
 
   ngOnInit(): void {
@@ -253,15 +255,20 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
 
     const issues = this.validateFiles(controlFiles);
 
-    return issues.length
-      ? {
-          tediFileDropzone: [...issues],
-        }
-      : null;
+    if (!issues.length) {
+      return null;
+    }
+
+    const output: FormControlErrors = {};
+    issues.forEach((issue) => {
+      output[issue.errorKey] = issue.value;
+    });
+
+    return output;
   };
 
-  validateFiles(files: FileDropzone[]): FileDropzoneErrors {
-    const issues: FileDropzoneErrors = [];
+  validateFiles(files: FileDropzone[]): ValidatorError[] {
+    const issues: ValidatorError[] = [];
     files.forEach((file) => {
       this.validators().forEach((validator) => {
         const error = validator(
@@ -272,14 +279,17 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
           this._translationService.translate.bind(this._translationService),
         );
 
-        if (error && error.code) {
+        if (error?.value) {
           issues.push(error);
           file.fileStatus = "invalid";
+          const message = error.value.message;
           file.helper = {
-            text: error.message,
+            text: message,
             type: "error",
           };
-        } else if (!issues.find((issue) => issue.fileName === file.name)) {
+        } else if (
+          !issues.find((issue) => issue.value.fileName === file.name)
+        ) {
           file.fileStatus = "valid";
           file.helper = undefined;
         }
@@ -287,17 +297,6 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
     });
     return issues;
   }
-
-  fileClasses = (file: FileDropzone): string => {
-    const classList = ["tedi-file-dropzone__file-item"];
-    if (file.className) {
-      classList.push(...file.className);
-    }
-    if (file.fileStatus != "none") {
-      classList.push(`tedi-file-dropzone__file-item--${file.fileStatus}`);
-    }
-    return classList.join(" ");
-  };
 
   tooltipClasses = (file: FileDropzone): string => {
     const classes = ["tedi-file-dropzone__tooltip"];
@@ -374,17 +373,18 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
   }
 
   private _currentErrorState(): string | undefined {
-    const errors = this._ngControl.control?.errors?.["tediFileDropzone"];
+    const errors: FormControlErrors[] =
+      this._ngControl.control?.errors?.["tediFileDropzone"];
 
     if (errors && !this.validateIndividually()) {
-      const dropzoneErrors: FileDropzoneErrors = errors;
+      const dropzoneErrors = errors;
       return dropzoneErrors.map((error) => error.message).join(" ");
     }
     return undefined;
   }
 
   private _getNewState(): ValidationState {
-    const errors: FileDropzoneErrors =
+    const errors: FormControlErrors[] =
       this._ngControl.control?.errors?.["tediFileDropzone"];
     if (this._ngControl.control?.touched) {
       return "none";

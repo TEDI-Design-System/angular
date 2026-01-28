@@ -37,7 +37,6 @@
     <div class="tedi-file-dropzone__file-list" [tediVerticalSpacing]="0.5">
       <tedi-card
         padding="none"
-        [className]="fileClasses(file)"
         [background]="
           file.fileStatus && file.fileStatus == 'invalid'
             ? 'danger-primary'
@@ -46,7 +45,7 @@
       >
         <tedi-card-content class="tedi-file-dropzone__card" padding="xs">
           <div class="tedi-file-dropzone__file-name">
-            {{ file.label ?? file.name }}
+            {{ file.label || file.name }}
 
             @if (file && validateIndividually() && file.helper; as helper) {
               <tedi-tooltip

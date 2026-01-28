@@ -1,14 +1,14 @@
 import { IECFileSize, SIFileSize } from "./constants";
 import {
+  DropzoneValidatorFunction,
   FileDropzone,
-  FileDropzoneError,
   FileDropzoneErrorCode,
   SizeDisplayStandard,
 } from "./types";
 
 export function formatBytes(
   bytes: number,
-  standard: SizeDisplayStandard
+  standard: SizeDisplayStandard,
 ): string {
   let kB: number = 0;
   let MB: number = 0;
@@ -45,55 +45,58 @@ export function getDefaultHelpers(
   accept: string,
   maxSize: number,
   standard: SizeDisplayStandard,
-  translate?: (key: string, ...args: unknown[]) => string
+  translate?: (key: string, ...args: unknown[]) => string,
 ): string {
   if (!translate)
     throw new Error(
-      "Translate function is required to generate default helpers."
+      "Translate function is required to generate default helpers.",
     );
   const textArray = [];
   if (accept) {
     textArray.push(
-      `${translate("file-upload.accept")} ${accept.replaceAll(",", ", ")}`
+      `${translate("file-upload.accept")} ${accept.replaceAll(",", ", ")}`,
     );
   }
   if (maxSize) {
     textArray.push(
-      `${translate("file-upload.max-size")} ${formatBytes(maxSize, standard)}`
+      `${translate("file-upload.max-size")} ${formatBytes(maxSize, standard)}`,
     );
   }
   return textArray.filter(Boolean).join(". ");
 }
 
-export function validateFileSize(
+export const validateFileSize: DropzoneValidatorFunction = (
   maxSize: number,
   acceptFileTypes: string,
   file: FileDropzone,
   standard: SizeDisplayStandard,
-  translate: (key: string, ...args: unknown[]) => string
-): FileDropzoneError | undefined {
+  translate: (key: string, ...args: unknown[]) => string,
+) => {
   if (maxSize && file.size > maxSize) {
     const maxSizeMB = formatBytes(maxSize, standard);
     return {
-      code: FileDropzoneErrorCode.FILE_TOO_LARGE,
-      fileName: file.name,
-      message: translate(
-        `file-upload.size-rejected-extended`,
-        file.name,
-        maxSizeMB
-      ),
+      errorKey: "file-too-large",
+      value: {
+        code: FileDropzoneErrorCode.FILE_TOO_LARGE,
+        fileName: file.name,
+        message: translate(
+          `file-upload.size-rejected-extended`,
+          file.name,
+          maxSizeMB,
+        ),
+      },
     };
   }
   return undefined;
-}
+};
 
-export function validateFileType(
+export const validateFileType: DropzoneValidatorFunction = (
   maxSize: number,
   acceptFileTypes: string,
   file: FileDropzone,
   standard: SizeDisplayStandard,
-  translate: (key: string, ...args: unknown[]) => string
-): FileDropzoneError | undefined {
+  translate: (key: string, ...args: unknown[]) => string,
+) => {
   if (acceptFileTypes) {
     const validTypes = acceptFileTypes
       .split(",")
@@ -114,15 +117,18 @@ export function validateFileType(
 
     if (!matches) {
       return {
-        code: FileDropzoneErrorCode.INVALID_FILE_TYPE,
-        fileName: file.name,
-        message: translate(
-          "file-upload.extension-rejected-extended",
-          file.name,
-          acceptFileTypes
-        ),
+        errorKey: "invalid-file-type",
+        value: {
+          code: FileDropzoneErrorCode.INVALID_FILE_TYPE,
+          fileName: file.name,
+          message: translate(
+            "file-upload.extension-rejected-extended",
+            file.name,
+            acceptFileTypes,
+          ),
+        },
       };
     }
   }
   return undefined;
-}
+};
