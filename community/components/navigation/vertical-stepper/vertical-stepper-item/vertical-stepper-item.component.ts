@@ -43,6 +43,7 @@ import {
     "[class.tedi-vertical-stepper-item--sub-item]": "subItem()",
     "[class.tedi-vertical-stepper-item--compact]": "compact()",
     "[class.tedi-vertical-stepper-item--enumerated]": "enumerated()",
+    "[attr.role]": "'listitem'",
   },
 })
 export class VerticalStepperItemComponent {
