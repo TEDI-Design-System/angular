@@ -45,6 +45,7 @@
     .tedi-closing-button {
       margin-block: -1px;
       margin-right: -1px;
+      border-radius: 0 var(--button-radius-sm) var(--button-radius-sm) 0;
     }
   }
 

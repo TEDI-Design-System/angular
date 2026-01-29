@@ -30,7 +30,7 @@ export default {
     type: "primary",
     loading: false,
     closable: false,
-    content: "Tag Content",
+    content: "Tag",
   },
   argTypes: {
     loading: {
