@@ -1,3 +1,10 @@
+# [6.0.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.8...angular-6.0.0-rc.9) (2026-01-29)
+
+
+### Bug Fixes
+
+* **sidenav:** added presentation role to list item components [#303](https://github.com/TEDI-Design-System/angular/issues/303) ([#304](https://github.com/TEDI-Design-System/angular/issues/304)) ([1713ac9](https://github.com/TEDI-Design-System/angular/commit/1713ac9bd11b16b0e2872b5c4d15781cc2abd704))
+
 # [6.0.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.7...angular-6.0.0-rc.8) (2026-01-29)
 
 
