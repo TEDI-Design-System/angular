@@ -174,7 +174,7 @@ export const Default: DefaultStory = {
             </tedi-select>
           </div>
         </tedi-modal-content>
-        <tedi-modal-footer style="justify-content: flex-end;">
+        <tedi-modal-footer>
           <button tedi-button variant="secondary" (click)="open = false">Cancel</button>
           <button tedi-button (click)="open = false">Continue</button>
         </tedi-modal-footer>
@@ -224,7 +224,7 @@ export const Size: StoryObj<ModalComponent> = {
             </tedi-select>
           </div>
         </tedi-modal-content>
-        <tedi-modal-footer style="justify-content: flex-end;">
+        <tedi-modal-footer>
           <button tedi-button variant="secondary" (click)="openSmall = false">Cancel</button>
           <button tedi-button (click)="openSmall = false">Continue</button>
         </tedi-modal-footer>
@@ -251,7 +251,7 @@ export const Size: StoryObj<ModalComponent> = {
             </tedi-select>
           </div>
         </tedi-modal-content>
-        <tedi-modal-footer style="justify-content: flex-end;">
+        <tedi-modal-footer>
           <button tedi-button variant="secondary" (click)="openDefault = false">Cancel</button>
           <button tedi-button (click)="openDefault = false">Continue</button>
         </tedi-modal-footer>
@@ -305,7 +305,7 @@ export const FooterVariants: StoryObj<ModalComponent> = {
             </tedi-select>
           </div>
         </tedi-modal-content>
-        <tedi-modal-footer style="justify-content: flex-end;">
+        <tedi-modal-footer>
           <button tedi-button variant="secondary" (click)="openDefault = false">Cancel</button>
           <button tedi-button (click)="openDefault = false">Continue</button>
         </tedi-modal-footer>
