@@ -1,3 +1,10 @@
+# [6.0.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.7...angular-6.0.0-rc.8) (2026-01-29)
+
+
+### Bug Fixes
+
+* **modal:** use correct z-index variable, default footer align to flex-end [#301](https://github.com/TEDI-Design-System/angular/issues/301) ([#302](https://github.com/TEDI-Design-System/angular/issues/302)) ([c590b0a](https://github.com/TEDI-Design-System/angular/commit/c590b0aa99f776e9d849ccd773197e6305842e1e))
+
 # [6.0.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.6...angular-6.0.0-rc.7) (2026-01-26)
 
 
