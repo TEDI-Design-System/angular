@@ -1,3 +1,10 @@
+# [6.0.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.10...angular-6.0.0-rc.11) (2026-01-29)
+
+
+### Bug Fixes
+
+* **breadcrumbs:** migrated from ngFor to new [@for](https://github.com/for) loop with proper item tracking [#305](https://github.com/TEDI-Design-System/angular/issues/305) ([#306](https://github.com/TEDI-Design-System/angular/issues/306)) ([c3916b3](https://github.com/TEDI-Design-System/angular/commit/c3916b3496548d2018947a19d19f819f8d26b64a))
+
 # [6.0.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.9...angular-6.0.0-rc.10) (2026-01-29)
 
 
