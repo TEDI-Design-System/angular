@@ -1,3 +1,10 @@
+## [6.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0...angular-6.0.1-rc.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* **vertical-stepper:** add missing export [#254](https://github.com/TEDI-Design-System/angular/issues/254) ([#309](https://github.com/TEDI-Design-System/angular/issues/309)) ([5355844](https://github.com/TEDI-Design-System/angular/commit/53558446861cf960f94918ac4cec5113019b2982))
+
 # [6.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-5.0.0...angular-6.0.0) (2026-01-29)
 
 
