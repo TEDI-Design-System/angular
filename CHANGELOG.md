@@ -1,3 +1,10 @@
+# [6.0.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.9...angular-6.0.0-rc.10) (2026-01-29)
+
+
+### Features
+
+* **vertical-stepper:** add community vertical stepper [#254](https://github.com/TEDI-Design-System/angular/issues/254) ([#296](https://github.com/TEDI-Design-System/angular/issues/296)) ([a5d9e82](https://github.com/TEDI-Design-System/angular/commit/a5d9e829ab4b5640168befc555c8ece38dd02b52))
+
 # [6.0.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0-rc.8...angular-6.0.0-rc.9) (2026-01-29)
 
 
