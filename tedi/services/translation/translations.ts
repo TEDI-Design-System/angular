@@ -950,6 +950,22 @@ export const translationsMap = {
     en: "Next years",
     ru: "Следующие годы",
   },
+  "vertical-stepper.completed": {
+    description:
+      "Label for screen-reader that this step is completed (visually hidden)",
+    components: ["VerticalStepper"],
+    et: "Lõpetatud",
+    en: "Completed",
+    ru: "Завершено",
+  },
+  "vertical-stepper.error": {
+    description:
+      "Label for screen-reader that this step has error (visually hidden)",
+    components: ["VerticalStepper"],
+    et: "Puudulik",
+    en: "Error",
+    ru: "Oшибка",
+  },
 };
 
 export type TediTranslationsMap<L extends Language> = {
