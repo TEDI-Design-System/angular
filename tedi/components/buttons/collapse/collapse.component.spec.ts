@@ -60,7 +60,7 @@ describe("CollapseComponent", () => {
     component.isOpen.set(false);
 
     const buttonText = fixture.nativeElement
-      .querySelector(".collapse__button--text")
+      .querySelector(".tedi-collapse__button--text")
       .textContent.trim();
 
     fixture.whenStable().then(() => {
@@ -74,7 +74,7 @@ describe("CollapseComponent", () => {
     component.isOpen.set(true);
 
     const buttonText = fixture.nativeElement
-      .querySelector(".collapse__button--text")
+      .querySelector(".tedi-collapse__button--text")
       .textContent.trim();
 
     fixture.whenStable().then(() => {
@@ -86,7 +86,7 @@ describe("CollapseComponent", () => {
     fixture.componentRef.setInput("hideCollapseText", true);
     fixture.detectChanges();
     const buttonText = fixture.nativeElement.querySelector(
-      ".collapse__button--text",
+      ".tedi-collapse__button--text",
     );
     expect(buttonText).toBeNull();
   });
@@ -95,7 +95,7 @@ describe("CollapseComponent", () => {
     fixture.componentRef.setInput("arrowType", "secondary");
     fixture.detectChanges();
     const iconWrapper = fixture.nativeElement.querySelector(
-      ".collapse__icon--wrapper",
+      ".tedi-collapse__icon--wrapper",
     );
     expect(iconWrapper).toBeTruthy();
   });
@@ -104,7 +104,7 @@ describe("CollapseComponent", () => {
     fixture.componentRef.setInput("arrowType", "default");
     fixture.detectChanges();
     const iconWrapper = fixture.nativeElement.querySelector(
-      ".collapse__icon--wrapper",
+      ".tedi-collapse__icon--wrapper",
     );
     expect(iconWrapper).toBeNull();
   });

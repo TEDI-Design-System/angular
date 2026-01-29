@@ -13,7 +13,8 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "@tedi-design-system/angular/tedi": ["./tedi/index.ts"]
+      "@tedi-design-system/angular/tedi": ["./tedi/index.ts"],
+      "@tedi-design-system/angular/community": ["./community/index.ts"]
     }
   },
   "include": ["src/**/*.ts", "tedi/**/*.ts", "community/**/*.ts"],

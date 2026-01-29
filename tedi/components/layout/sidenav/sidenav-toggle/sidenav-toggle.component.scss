@@ -1,15 +1,15 @@
 .tedi-sidenav-toggle {
   position: relative;
+  z-index: var(--z-index-sidenav);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 3.5rem;
   height: 3.5rem;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
+  cursor: pointer;
   background: var(--button-main-primary-background-default);
   border: 0;
   border-radius: 0;
-  cursor: pointer;
-  z-index: var(--z-index-sidenav);
 
   &--hidden {
     display: none;

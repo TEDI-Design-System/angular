@@ -3,16 +3,16 @@
 input[tedi-checkbox][type="checkbox"] {
   --_checkbox-icon-size: 1.125rem;
 
-  appearance: none;
   position: relative;
-  cursor: pointer;
-  border: 1px solid var(--form-checkbox-radio-default-border-default);
-  background-color: var(--form-checkbox-radio-default-background-default);
-  vertical-align: middle;
-  padding: 0;
-  margin: 0;
   width: var(--form-checkbox-radio-size-responsive);
   height: var(--form-checkbox-radio-size-responsive);
+  padding: 0;
+  margin: 0;
+  vertical-align: middle;
+  appearance: none;
+  cursor: pointer;
+  background-color: var(--form-checkbox-radio-default-background-default);
+  border: 1px solid var(--form-checkbox-radio-default-border-default);
   border-radius: var(--form-checkbox-radio-indicator-radius-checkbox);
 
   @include breakpoints.media-breakpoint-up(sm) {
@@ -26,34 +26,34 @@ input[tedi-checkbox][type="checkbox"] {
 
   &:not(:checked):disabled {
     cursor: not-allowed;
-    border-color: var(--form-general-border-disabled);
     background-color: var(--form-general-background-disabled);
+    border-color: var(--form-general-border-disabled);
   }
 
   &:checked,
   &:indeterminate {
-    border-color: var(--form-checkbox-radio-default-border-selected);
     background-color: var(--form-checkbox-radio-default-background-selected);
+    border-color: var(--form-checkbox-radio-default-border-selected);
 
     &:disabled {
       cursor: not-allowed;
-      border-color: var(--form-checkbox-radio-default-border-selected-disabled);
       background-color: var(
         --form-checkbox-radio-default-background-selected-disabled
       );
+      border-color: var(--form-checkbox-radio-default-border-selected-disabled);
     }
 
     &::before {
       position: absolute;
       top: 50%;
       left: 50%;
-      content: "check";
-      font-size: var(--_checkbox-icon-size);
       font-family: "Material Symbols Outlined", sans-serif;
-      -webkit-font-smoothing: antialiased;
-      color: var(--form-checkbox-radio-default-check-indicator-default);
+      font-size: var(--_checkbox-icon-size);
       line-height: 1;
+      color: var(--form-checkbox-radio-default-check-indicator-default);
+      content: "check";
       transform: translate(-50%, -50%);
+      -webkit-font-smoothing: antialiased;
     }
   }
 
@@ -71,11 +71,11 @@ input[tedi-checkbox][type="checkbox"] {
 
   &:focus-visible {
     outline-width: 2px;
-    outline-offset: 2px;
     outline-style: solid;
+    outline-offset: 2px;
   }
 
-  &:not(:checked):not(:disabled).tedi-checkbox--invalid,
+  &:not(:checked, :disabled).tedi-checkbox--invalid,
   &:user-invalid,
   &.ng-invalid.ng-touched {
     border-color: var(--form-general-feedback-error-border);

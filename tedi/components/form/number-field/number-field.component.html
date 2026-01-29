@@ -1,5 +1,5 @@
 @if (label()) {
-  <label tedi-label [for]="id()" [required]="required()" [size]="size()">
+  <label tedi-label [for]="inputId()" [required]="required()" [size]="size()">
     {{ label() }}
   </label>
 }
@@ -20,13 +20,10 @@
       'tedi-number-field__button--small': size() === 'small',
     }"
     [disabled]="decrementDisabled()"
+    [attr.aria-label]="'numberField.decrement' | tediTranslate: step()"
     (click)="handleButtonClick('decrement')"
   >
-    <tedi-icon
-      name="remove"
-      [size]="18"
-      [label]="'numberField.decrement' | tediTranslate: step()"
-    />
+    <tedi-icon name="remove" [size]="18" />
   </button>
   <div
     [class]="{
@@ -40,7 +37,7 @@
   >
     <input
       #inputElement
-      [id]="id()"
+      [id]="inputId()"
       type="number"
       inputmode="numeric"
       class="tedi-number-field__input"
@@ -51,6 +48,7 @@
       [attr.max]="max()"
       [attr.step]="step()"
       [attr.aria-invalid]="isInvalid()"
+      [attr.aria-describedby]="feedbackId()"
       (input)="handleInputChange($event)"
       (blur)="handleBlur()"
     />
@@ -70,17 +68,15 @@
       'tedi-number-field__button--small': size() === 'small',
     }"
     [disabled]="incrementDisabled()"
+    [attr.aria-label]="'numberField.increment' | tediTranslate: step()"
     (click)="handleButtonClick('increment')"
   >
-    <tedi-icon
-      name="add"
-      [size]="18"
-      [label]="'numberField.increment' | tediTranslate: step()"
-    />
+    <tedi-icon name="add" [size]="18" />
   </button>
 </div>
 @if (feedbackText(); as feedback) {
   <tedi-feedback-text
+    [attr.id]="feedbackId()"
     [text]="feedback.text"
     [type]="feedback.type"
     [position]="feedback.position"

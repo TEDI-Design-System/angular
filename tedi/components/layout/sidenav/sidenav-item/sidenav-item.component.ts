@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
@@ -7,6 +8,7 @@ import {
   ElementRef,
   forwardRef,
   inject,
+  Injector,
   input,
   OnDestroy,
   OnInit,
@@ -23,6 +25,7 @@ import { SideNavService } from "../../../../services/sidenav/sidenav.service";
 import { TooltipComponent } from "../../../overlay/tooltip/tooltip.component";
 import { TooltipContentComponent } from "../../../overlay/tooltip/tooltip-content/tooltip-content.component";
 import { TooltipTriggerComponent } from "../../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
+import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
 
 @Component({
   selector: "tedi-sidenav-item",
@@ -40,10 +43,11 @@ import { TooltipTriggerComponent } from "../../../overlay/tooltip/tooltip-trigge
     TooltipComponent,
     TooltipTriggerComponent,
     TooltipContentComponent,
+    TediTranslationPipe,
   ],
   host: {
-    role: "menuitem",
-    "[class]": "classes()",
+    "role": "presentation",
+    "style": "display: contents",
   },
 })
 export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
@@ -68,11 +72,12 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
   @ContentChild(forwardRef(() => SideNavDropdownComponent))
   dropdown?: SideNavDropdownComponent;
 
-  textContent = signal("");
+  textContent = signal('');
 
   sidenavService = inject(SideNavService);
   private readonly host = inject(ElementRef);
   private readonly renderer = inject(Renderer2);
+  private readonly injector = inject(Injector);
   private readonly eventListeners: (() => void)[] = [];
 
   ngOnInit() {
@@ -81,6 +86,7 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.sidenavService.unregisterItem(this);
+    this.eventListeners.forEach((unlisten) => unlisten());
   }
 
   ngAfterViewInit(): void {
@@ -112,6 +118,19 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
         }
       }),
     );
+
+    this.eventListeners.push(
+      this.renderer.listen("document", "keydown", (event: KeyboardEvent) => {
+        if (event.key === "Escape" && this.sidenavService.isCollapsed() && dropdown.open()) {
+          dropdown.open.set(false);
+          setTimeout(() => {
+            const hostEl = this.host.nativeElement as HTMLElement;
+            const trigger = hostEl.querySelector('.tedi-sidenav-item__title') as HTMLElement | null;
+            trigger?.focus();
+          }, 0);
+        }
+      }),
+    );
   }
 
   classes = computed(() => {
@@ -133,6 +152,29 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
       return;
     }
 
+    const wasOpen = this.dropdown.open();
+    const dropdown = this.dropdown;
+
     this.dropdown.open.update((prev) => !prev);
+
+    if (this.sidenavService.isCollapsed() || this.sidenavService.isMobile()) {
+      afterNextRender(() => {
+        if (!wasOpen) {
+          // Opening - focus first item in dropdown
+          const dropdownEl = dropdown.element();
+          const openDropdown = dropdownEl?.querySelector('ul.tedi-sidenav-dropdown');
+          const allTriggers = openDropdown?.querySelectorAll('.tedi-sidenav-dropdown-item__trigger');
+          const firstFocusable = Array.from(allTriggers ?? []).find(
+            (el) => (el as HTMLElement).offsetParent !== null
+          ) as HTMLElement | null;
+          firstFocusable?.focus();
+        } else {
+          // Closing - focus on parent item
+          const hostEl = this.host.nativeElement as HTMLElement;
+          const trigger = hostEl.querySelector('.tedi-sidenav-item__title') as HTMLElement | null;
+          trigger?.focus();
+        }
+      }, { injector: this.injector });
+    }
   }
 }

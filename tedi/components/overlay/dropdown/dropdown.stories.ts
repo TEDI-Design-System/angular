@@ -150,7 +150,7 @@ export const Default: Story = {
     props: args,
     template: `
       <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
-        <button tedi-button tedi-dropdown-trigger [ariaHasPopuo]="ariaHasPopup">
+        <button tedi-button tedi-dropdown-trigger [ariaHasPopup]="ariaHasPopup">
           Trigger
         </button>
         <tedi-dropdown-content [dropdownRole]="dropdownRole">

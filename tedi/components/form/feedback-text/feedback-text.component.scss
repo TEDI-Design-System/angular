@@ -1,7 +1,7 @@
 .tedi-feedback-text {
   display: block;
-  color: var(--general-text-tertiary);
   font-size: var(--body-small-regular-size);
+  color: var(--general-text-tertiary);
 
   &--valid {
     color: var(--general-status-success-text);

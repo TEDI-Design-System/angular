@@ -450,6 +450,13 @@ export const translationsMap = {
     en: "Show tooltip",
     ru: "Показать подсказку",
   },
+  "info-button.label": {
+    description: "Info button default label",
+    components: ["InfoButton"],
+    et: "Lisainfo",
+    en: "More information",
+    ru: "Дополнительная информация",
+  },
   "pagination.title": {
     description: "Label of the pagination",
     components: ["Table", "Pagination"],
@@ -574,6 +581,13 @@ export const translationsMap = {
     et: (isOpen: boolean) => (isOpen ? "Sulge menüü" : "Ava menüü"),
     en: (isOpen: boolean) => (isOpen ? "Close menu" : "Open menu"),
     ru: (isOpen: boolean) => (isOpen ? "Закрыть меню" : "Открыть меню"),
+  },
+  "sidenav.toggleSubmenu": {
+    description: "Label for sidenav submenu toggle",
+    components: ["Sidenav"],
+    et: (value: string, isOpen: boolean) => (`${isOpen ? 'Sulge' : 'Ava'} ${value} alammenüü`),
+    en: (value: string, isOpen: boolean) => (`${isOpen ? 'Close' : 'Open'} ${value} submenu`),
+    ru: (value: string, isOpen: boolean) => (`${isOpen ? 'Закрыть' : 'Открыть'} ${value} подменю`),
   },
   carousel: {
     description: "Label for carousel",
@@ -935,6 +949,22 @@ export const translationsMap = {
     et: "Järgmised aastad",
     en: "Next years",
     ru: "Следующие годы",
+  },
+  "vertical-stepper.completed": {
+    description:
+      "Label for screen-reader that this step is completed (visually hidden)",
+    components: ["VerticalStepper"],
+    et: "Lõpetatud",
+    en: "Completed",
+    ru: "Завершено",
+  },
+  "vertical-stepper.error": {
+    description:
+      "Label for screen-reader that this step has error (visually hidden)",
+    components: ["VerticalStepper"],
+    et: "Puudulik",
+    en: "Error",
+    ru: "Oшибка",
   },
 };
 

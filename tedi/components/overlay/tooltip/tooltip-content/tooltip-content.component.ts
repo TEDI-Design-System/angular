@@ -20,7 +20,7 @@ export type TooltipWidth = "none" | "small" | "medium" | "large";
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     "[class]": "classes()",
-    role: "tooltip",
+    "aria-hidden": "true"
   },
 })
 export class TooltipContentComponent {

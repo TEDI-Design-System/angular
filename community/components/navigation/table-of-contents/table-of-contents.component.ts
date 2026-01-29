@@ -14,7 +14,7 @@ import {
 import {
   CardComponent,
   CardContentComponent,
-} from "community/components/cards";
+} from "../../cards/card";
 import {
   TextComponent,
   IconComponent,

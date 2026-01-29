@@ -15,12 +15,12 @@ $sizes: (
 );
 
 .tedi-separator {
-  display: block;
   position: relative;
+  display: block;
   margin: 0;
   border: 0;
-  border-top-width: 1px;
   border-style: solid;
+  border-top-width: 1px;
 
   @include mixins.print-grayscale;
 
@@ -55,12 +55,12 @@ $sizes: (
   &::before {
     position: absolute;
     top: 1.25rem;
+    width: var(--separator-dotted-dot-lg);
+    height: var(--separator-dotted-dot-lg);
     content: "";
     background-color: var(--general-border-primary);
     border-radius: 100%;
     transform: translateX(-8px);
-    width: var(--separator-dotted-dot-lg);
-    height: var(--separator-dotted-dot-lg);
 
     @include mixins.print-grayscale;
   }
@@ -76,9 +76,9 @@ $sizes: (
 
 .tedi-separator--dotted-small::before {
   top: 1.5rem;
-  transform: translateX(-5px);
   width: var(--separator-dotted-dot-md);
   height: var(--separator-dotted-dot-md);
+  transform: translateX(-5px);
 }
 
 @each $size, $value in $sizes {
@@ -138,10 +138,10 @@ $thicknesses: (
   &::before {
     position: relative;
     display: block;
-    content: "";
-    border-radius: 100%;
     width: var(--separator-dotted-dot-sm);
     height: var(--separator-dotted-dot-sm);
+    content: "";
+    border-radius: 100%;
 
     @include mixins.print-grayscale;
   }

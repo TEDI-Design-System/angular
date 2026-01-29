@@ -5,8 +5,7 @@ import { ModalContentComponent } from "./modal-content/modal-content.component";
 import { ModalFooterComponent } from "./modal-footer/modal-footer.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { LabelComponent } from "../../form/label/label.component";
-import { SelectComponent } from "community/components/form/select/select.component";
-import { SelectOptionComponent } from "community/components/form/select/select-option.component";
+import { SelectComponent, SelectOptionComponent } from "@tedi-design-system/angular/community";
 import { IconComponent } from "../../base/icon/icon.component";
 
 /**
@@ -175,7 +174,7 @@ export const Default: DefaultStory = {
             </tedi-select>
           </div>
         </tedi-modal-content>
-        <tedi-modal-footer style="justify-content: flex-end;">
+        <tedi-modal-footer>
           <button tedi-button variant="secondary" (click)="open = false">Cancel</button>
           <button tedi-button (click)="open = false">Continue</button>
         </tedi-modal-footer>
@@ -225,7 +224,7 @@ export const Size: StoryObj<ModalComponent> = {
             </tedi-select>
           </div>
         </tedi-modal-content>
-        <tedi-modal-footer style="justify-content: flex-end;">
+        <tedi-modal-footer>
           <button tedi-button variant="secondary" (click)="openSmall = false">Cancel</button>
           <button tedi-button (click)="openSmall = false">Continue</button>
         </tedi-modal-footer>
@@ -252,7 +251,7 @@ export const Size: StoryObj<ModalComponent> = {
             </tedi-select>
           </div>
         </tedi-modal-content>
-        <tedi-modal-footer style="justify-content: flex-end;">
+        <tedi-modal-footer>
           <button tedi-button variant="secondary" (click)="openDefault = false">Cancel</button>
           <button tedi-button (click)="openDefault = false">Continue</button>
         </tedi-modal-footer>
@@ -306,7 +305,7 @@ export const FooterVariants: StoryObj<ModalComponent> = {
             </tedi-select>
           </div>
         </tedi-modal-content>
-        <tedi-modal-footer style="justify-content: flex-end;">
+        <tedi-modal-footer>
           <button tedi-button variant="secondary" (click)="openDefault = false">Cancel</button>
           <button tedi-button (click)="openDefault = false">Continue</button>
         </tedi-modal-footer>

@@ -1,6 +1,6 @@
 <input
   #inputElement
-  [id]="id()"
+  [id]="inputId()"
   [checked]="checked()"
   [disabled]="disabled()"
   [required]="required()"
@@ -12,9 +12,9 @@
 />
 <span class="tedi-toggle__slider" aria-hidden="true">
   @if (icon() && size() === 'large') {
-    <tedi-icon 
-      [name]="checked() ? 'lock_open_right' : 'lock'" 
-      [color]="iconColor()" 
+    <tedi-icon
+      [name]="checked() ? 'lock_open_right' : 'lock'"
+      [color]="iconColor()"
       [size]="16"
       class="tedi-toggle__icon"
     />

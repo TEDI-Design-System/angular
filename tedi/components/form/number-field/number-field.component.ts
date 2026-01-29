@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   model,
   ViewEncapsulation,
@@ -10,8 +11,10 @@ import {
   signal,
   ViewChild,
 } from "@angular/core";
+import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
+import { TediTranslationService } from "../../../services/translation/translation.service";
 import { ComponentInputs } from "../../../types/inputs.type";
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
@@ -48,7 +51,7 @@ export class NumberFieldComponent implements ControlValueAccessor {
   /**
    * The unique identifier for the input element that this label is associated with. This ID should match the input element's id attribute to ensure accessibility.
    */
-  id = input.required<string>();
+  inputId = input.required<string>();
   /**
    * The text content of the label that describes the input field.
    */
@@ -107,8 +110,10 @@ export class NumberFieldComponent implements ControlValueAccessor {
   @ViewChild("inputElement") inputRef!: ElementRef<HTMLInputElement>;
 
   private formDisabled = signal(false);
-  private onChange: (value: number) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: number) => void = () => { };
+  private onTouched: () => void = () => { };
+  private translationService = inject(TediTranslationService);
+  private liveAnnouncer = inject(LiveAnnouncer);
 
   readonly isInvalid = computed(() => {
     const min = this.min();
@@ -134,6 +139,10 @@ export class NumberFieldComponent implements ControlValueAccessor {
 
     return this.isDisabled() || (max !== undefined && this.value() >= max);
   });
+
+  readonly feedbackId = computed(() =>
+    this.feedbackText() ? `${this.inputId()}-feedback` : null
+  );
 
   writeValue(value?: number): void {
     this.value.set(value ? (isNaN(value) ? 0 : value) : 0);
@@ -166,13 +175,23 @@ export class NumberFieldComponent implements ControlValueAccessor {
     this.value.set(nextValue);
     this.onChange(nextValue);
     this.onTouched();
+    this.announceValue(nextValue);
+  }
+
+  announceValue(value: number) {
+    this.liveAnnouncer.announce(
+      this.translationService.translate("numberField.quantityUpdated", value),
+      "polite"
+    );
   }
 
   handleInputChange(event: Event) {
     const input = event.target as HTMLInputElement;
     const value = isNaN(input.valueAsNumber) ? 0 : input.valueAsNumber;
-    this.value.set(value);
-    this.onChange(value);
+    if (value !== this.value()) {
+      this.value.set(value);
+      this.onChange(value);
+    }
   }
 
   handleBlur() {

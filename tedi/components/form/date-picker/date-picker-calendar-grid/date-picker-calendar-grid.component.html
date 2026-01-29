@@ -1,0 +1,65 @@
+<div
+  class="tedi-date-picker__weekdays"
+  [class.tedi-date-picker__weekdays--numbered]="showWeekNumbers()"
+  role="row"
+>
+  @if (showWeekNumbers()) {
+    <div role="columnheader"></div>
+  }
+  @for (wd of weekDays; track $index) {
+    <div class="tedi-date-picker__weekday" role="columnheader">
+      {{ wd() }}
+    </div>
+  }
+</div>
+
+<div
+  #gridElement
+  class="tedi-date-picker__grid"
+  role="grid"
+  [attr.id]="gridId()"
+  aria-readonly="true"
+>
+  @for (week of weekRows(); track row; let row = $index) {
+    <div
+      class="tedi-date-picker__row"
+      [class.tedi-date-picker__row--numbered]="showWeekNumbers()"
+      role="row"
+    >
+      @if (showWeekNumbers()) {
+        <div
+          class="tedi-date-picker__weeknumber"
+          role="gridcell"
+          aria-readonly="true"
+        >
+          {{ weekNumbers()[row] }}
+        </div>
+      }
+      @for (day of week; track day.date) {
+        <button
+          type="button"
+          role="gridcell"
+          class="tedi-date-picker__day"
+          [class.tedi-date-picker__day--other-month]="!day.inCurrentMonth"
+          [class.tedi-date-picker__day--selected]="isSelected(day.date)"
+          [disabled]="day.disabled"
+          [attr.aria-selected]="isSelected(day.date) ? 'true' : null"
+          [attr.aria-disabled]="day.disabled ? 'true' : null"
+          [attr.aria-current]="isToday(day.date) ? 'date' : null"
+          [attr.tabindex]="getTabIndex(day.date)"
+          [attr.data-date-key]="day.date.getTime()"
+          (keydown)="onDayKeydown($event, day.date)"
+          (click)="onDayClick(day)"
+        >
+          @if (isToday(day.date)) {
+            <div class="tedi-date-picker__today">
+              {{ day.date.getDate() }}
+            </div>
+          } @else {
+            {{ day.date.getDate() }}
+          }
+        </button>
+      }
+    </div>
+  }
+</div>

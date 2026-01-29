@@ -1,32 +1,17 @@
-import { inject, Injectable, Signal, signal } from "@angular/core";
-import {
-  DropzoneValidatorFunction,
-  FileDropzone,
-  FileInputMode,
-  SizeDisplayStandard,
-  ValidationState,
-} from "./types";
-import { TediTranslationService } from "@tedi-design-system/angular/tedi";
+import { Injectable, Signal, signal } from "@angular/core";
+import { FileDropzone, FileInputMode } from "./types";
 
 @Injectable()
 export class FileService {
-  maxSize = signal(0).asReadonly();
-  accept = signal("").asReadonly();
   mode = signal<FileInputMode>("append").asReadonly();
-  validators = signal<DropzoneValidatorFunction[]>([]).asReadonly();
-  sizeDisplayStandard = signal<SizeDisplayStandard>("IEC").asReadonly();
-
-  uploadState = signal<ValidationState>("none");
 
   protected _files = signal<FileDropzone[]>([]);
-
-  private _translateService = inject(TediTranslationService);
 
   get files(): Signal<FileDropzone[]> {
     return this._files.asReadonly();
   }
 
-  public async addFiles(files: FileDropzone[] | File[]): Promise<string[]> {
+  public async addFiles(files: FileDropzone[] | File[]): Promise<void> {
     let newFiles = this.normalizeFiles(files);
     const currentFiles = this.files();
 
@@ -55,19 +40,9 @@ export class FileService {
     newFiles.push(...currentFiles);
 
     // remove old invalid files, fileStatus will not yet be set for new files
-    if (this.uploadState() === "invalid") {
-      newFiles = newFiles.filter((file) => file.fileStatus !== "invalid");
-    }
-    const error = this._checkErrorState(newFiles);
-    this._files.set(newFiles);
-    this.uploadState.set(this._getNewState(!!error.length));
-    return error;
-  }
+    newFiles = newFiles.filter((file) => file.fileStatus !== "invalid");
 
-  public reValidateFiles() {
-    const files = this.files();
-    const error = this._checkErrorState(files);
-    this.uploadState.set(this._getNewState(!!error.length));
+    this._files.set(newFiles);
   }
 
   public normalizeFiles(files: FileDropzone[] | File[]): FileDropzone[] {
@@ -86,55 +61,12 @@ export class FileService {
     return newFiles;
   }
 
-  public removeFiles(files: FileDropzone[]): string[] {
+  public async removeFiles(files: FileDropzone[]): Promise<void> {
     if (!files || files.length === 0) {
-      return [];
+      return;
     }
     const newFiles = this.files().filter((file) => !files.includes(file));
     this._files.set(newFiles);
-    const errors = this._checkErrorState(newFiles);
-    if (errors.length) {
-      this.uploadState.set("invalid");
-    } else {
-      this.uploadState.set(this._files.length > 0 ? "valid" : "none");
-    }
-
-    return errors;
-  }
-
-  private _getNewState(error: boolean): ValidationState {
-    if (error) {
-      return "invalid";
-    }
-    return this._files().length > 0 ? "valid" : "none";
-  }
-
-  private _checkErrorState(files: FileDropzone[]): string[] {
-    const errors: string[] = [];
-    for (const file of files) {
-      file.helper = undefined;
-      const error = this.validators()
-        .map((validator) =>
-          validator(
-            this.maxSize(),
-            this.accept(),
-            file,
-            this.sizeDisplayStandard(),
-            this._translateService.translate.bind(this._translateService)
-          )
-        )
-        .filter((err) => err !== undefined);
-
-      if (error.length) {
-        errors.push(...error);
-        file.helper = {
-          type: "error",
-          text: error.join(", "),
-        };
-      }
-      file.fileStatus = error.length ? "invalid" : "valid";
-    }
-    return errors;
   }
 
   private async _renameDuplicates(

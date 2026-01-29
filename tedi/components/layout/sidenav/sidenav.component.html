@@ -15,12 +15,12 @@
 @if (sidenavService.isMobileItemOpen()) {
   <button
     class="tedi-sidenav-back"
-    (click)="sidenavService.handleGoToMainMenu()"
+    (click)="handleBackToMainMenu()"
   >
     <tedi-icon name="arrow_back" color="white" />
     {{ "sidenav.backToMainMenu" | tediTranslate }}
   </button>
 }
-<div role="menubar">
+<ul class="tedi-sidenav__list">
   <ng-content></ng-content>
-</div>
+</ul>

@@ -1,0 +1,14 @@
+<div class="tedi-date-picker__month-year-grid" role="group">
+  @for (monthName of monthShortNames; track i; let i = $index) {
+    <button
+      type="button"
+      class="tedi-date-picker__month-year-button"
+      [class.tedi-date-picker__month-year-button--selected]="
+        currentMonth().getMonth() === i
+      "
+      (click)="onMonthClick(i)"
+    >
+      {{ monthName() }}
+    </button>
+  }
+</div>

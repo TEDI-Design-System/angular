@@ -1,0 +1,66 @@
+{
+  "extends": [
+    "stylelint-config-standard-scss",
+    "stylelint-config-recess-order",
+    "stylelint-config-prettier-scss"
+  ],
+  "rules": {
+    "selector-class-pattern": [
+      "^(tedi-[a-z][a-z0-9]*(?:-[a-z0-9]+)*(?:__[a-z][a-z0-9]*(?:-[a-z0-9]+)*)*(?:--[a-z][a-z0-9]+(?:-[a-z0-9]+)*)?|ng-[a-z]+(?:-[a-z]+)*|float-ui-[a-z]+(?:-[a-z]+)*)$",
+      {
+        "message": "Class selector must start with 'tedi-' prefix and follow BEM naming (e.g., .tedi-button, .tedi-button__icon, .tedi-button--primary). Selector: \"%s\"",
+        "resolveNestedSelectors": true
+      }
+    ],
+    "selector-pseudo-element-no-unknown": [
+      true,
+      {
+        "ignorePseudoElements": [
+          "ng-deep"
+        ]
+      }
+    ],
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": [
+          "host",
+          "host-context"
+        ]
+      }
+    ],
+    "max-nesting-depth": [
+      4,
+      {
+        "ignore": [
+          "blockless-at-rules",
+          "pseudo-classes"
+        ],
+        "ignoreAtRules": [
+          "/include/"
+        ]
+      }
+    ],
+    "scss/no-global-function-names": null,
+    "scss/comment-no-empty": null,
+    "scss/at-if-no-null": null,
+    "custom-property-pattern": null,
+    "no-invalid-position-at-import-rule": null,
+    "no-descending-specificity": null,
+    "scss/operator-no-newline-after": null,
+    "lightness-notation": null,
+    "scss/operator-no-unspaced": null,
+    "block-no-redundant-nested-style-rules": null,
+    "rule-empty-line-before": null
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/**/*.scss"
+      ],
+      "rules": {
+        "selector-class-pattern": null
+      }
+    }
+  ]
+}

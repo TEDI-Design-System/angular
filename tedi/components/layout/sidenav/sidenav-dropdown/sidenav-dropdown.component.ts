@@ -22,8 +22,7 @@ import { SideNavService } from "../../../../services/sidenav/sidenav.service";
   encapsulation: ViewEncapsulation.None,
   imports: [SideNavDropdownItemComponent],
   host: {
-    role: "menubar",
-    "[class]": "classes()",
+    "class": "tedi-sidenav-dropdown-wrapper",
   },
 })
 export class SideNavDropdownComponent implements AfterViewInit {

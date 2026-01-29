@@ -60,6 +60,7 @@ const meta: Meta<FileDropzoneComponent> = {
     accept: {
       description: `Specifies the allowed file types (e.g., "image/png, image/jpeg").
       Does not validate the contents of the file, only the file extension.
+      txt will not work, use .txt instead, the . is required.
       https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/accept`,
     },
     maxSize: {
@@ -145,7 +146,12 @@ export const Default: Story = {
     });
 
     const logValue = () => {
-      console.log(form.get("files")?.value);
+      console.log(
+        form.get("files")?.value,
+        form.controls.files,
+        form.controls,
+        form.controls.files.errors
+      );
     };
     return {
       template: `${Template(args)} <button tedi-button (click)="logValue()">Log Form Value</button>`,

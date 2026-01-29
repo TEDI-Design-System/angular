@@ -1,5 +1,4 @@
 import { Component, computed, inject, input } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { RouterLink } from "@angular/router";
 import {
   IconComponent,
@@ -45,7 +44,6 @@ export type Breadcrumbs = {
   selector: "tedi-breadcrumbs",
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
     LinkComponent,
     IconComponent,

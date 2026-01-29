@@ -119,9 +119,23 @@ describe("TextGroupComponent", () => {
       ).toBe("50%");
     });
 
-    it("should have appropriate role attribute", () => {
-      const dl = fixture.debugElement.query(By.css("dl")).nativeElement;
-      expect(dl.getAttribute("role")).toBe("group");
+    it("should set aria-label on dt from label content", () => {
+      const dt = fixture.debugElement.query(By.css("dt")).nativeElement;
+      expect(dt.getAttribute("aria-label")).toBe("Test Label");
+    });
+
+    it("should hide label content from screen readers", () => {
+      const labelSpan = fixture.debugElement.query(
+        By.css("dt > span[aria-hidden]"),
+      ).nativeElement;
+      expect(labelSpan.getAttribute("aria-hidden")).toBe("true");
+    });
+
+    it("should update aria-label when label content changes", () => {
+      fixture.componentInstance.label = "Updated Label";
+      fixture.detectChanges();
+      const dt = fixture.debugElement.query(By.css("dt")).nativeElement;
+      expect(dt.getAttribute("aria-label")).toBe("Updated Label");
     });
   });
 

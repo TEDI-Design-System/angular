@@ -7,12 +7,12 @@
 
   > * {
     display: flex;
-    height: 100%;
     align-items: center;
+    height: 100%;
 
     &:not(:first-child) {
-      border-left: var(--borders-01) solid var(--general-border-primary);
       padding-left: var(--layout-header-items-right-gutter-x);
+      border-left: var(--borders-01) solid var(--general-border-primary);
     }
 
     &:not(:last-child) {

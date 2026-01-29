@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { LabelComponent } from "./label.component";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 describe("LabelComponent", () => {
   let fixture: ComponentFixture<LabelComponent>;
@@ -8,6 +9,7 @@ describe("LabelComponent", () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [LabelComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
     });
 
     fixture = TestBed.createComponent(LabelComponent);
@@ -35,6 +37,11 @@ describe("LabelComponent", () => {
     fixture.componentRef.setInput("required", true);
     fixture.detectChanges();
 
-    expect(element.classList).toContain("tedi-label--required");
+    const requiredSpan = element.querySelector(".tedi-label--required");
+    expect(requiredSpan).toBeTruthy();
+    expect(requiredSpan?.getAttribute("aria-hidden")).toBe("true");
+
+    const srOnlySpan = element.querySelector(".sr-only");
+    expect(srOnlySpan).toBeTruthy();
   });
 });

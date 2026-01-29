@@ -36,8 +36,8 @@
   @for (file of files(); track file.name) {
     <div class="tedi-file-dropzone__file-list" [tediVerticalSpacing]="0.5">
       <tedi-card
-        [className]="fileClasses(file)"
         padding="none"
+        [className]="fileClasses(file)"
         [background]="
           file.fileStatus && file.fileStatus == 'invalid'
             ? 'danger-primary'
