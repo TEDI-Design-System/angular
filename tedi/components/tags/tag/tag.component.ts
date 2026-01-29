@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
   ViewEncapsulation,
@@ -10,6 +11,7 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { SpinnerComponent } from "../../loader/spinner/spinner.component";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
+import { _IdGenerator } from '@angular/cdk/a11y';
 
 export type TagType = "primary" | "secondary" | "danger";
 
@@ -28,6 +30,8 @@ export type TagType = "primary" | "secondary" | "danger";
   },
 })
 export class TagComponent {
+  readonly idGenerator = inject(_IdGenerator);
+  readonly uniqueId = this.idGenerator.getId('tedi-tag');
   /**
    * Whether the tag is in loading state.
    * When true, a spinner will be displayed inside the tag.

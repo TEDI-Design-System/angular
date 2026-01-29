@@ -4,7 +4,7 @@
   </span>
 }
 
-<span class="tedi-tag__content">
+<span class="tedi-tag__content" [attr.id]="uniqueId">
   <ng-content />
 </span>
 
@@ -19,6 +19,8 @@
     size="small"
     [iconSize]="18"
     (click)="handleClose($event)"
+    [attr.aria-describedby]="uniqueId"
+    [ariaLabel]="'remove' | tediTranslate"
   >
   </button>
 }
