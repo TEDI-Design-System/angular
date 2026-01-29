@@ -26,7 +26,7 @@ export default {
     }),
   ],
   argTypes: {
-    id: {
+    inputId: {
       description:
         "The unique identifier for the input element that is associated with label.",
       control: {
@@ -124,14 +124,16 @@ export default {
 
 export const Default: StoryObj<ToggleComponent> = {
   args: {
-    id: "example-toggle-1",
+    inputId: "example-toggle-1",
     variant: "primary",
     type: "filled",
     size: "default",
   },
   render: (args) => ({
     props: args,
-    template: `<tedi-toggle ${argsToTemplate(args)} />`,
+    template: `
+      <label for="example-toggle-1" class="sr-only">Default toggle</label>
+      <tedi-toggle ${argsToTemplate(args)} />`,
   }),
 };
 
@@ -141,9 +143,11 @@ export const Size: StoryObj<ToggleComponent> = {
     template: `
       <tedi-row [cols]="2" [gapY]="3">
         <b>Default</b>
-        <tedi-toggle id="example-toggle-2.1" />
+        <label for="example-toggle-2.1" class="sr-only">Default size</label>
+        <tedi-toggle inputId="example-toggle-2.1" />
         <b>Large</b>
-        <tedi-toggle id="example-toggle-2.2" size="large" />
+        <label for="example-toggle-2.2" class="sr-only">Large size</label>
+        <tedi-toggle inputId="example-toggle-2.2" size="large" />
       </tedi-row>
     `,
   }),
@@ -156,10 +160,10 @@ export const LabelPosition: StoryObj<ToggleComponent> = {
       <tedi-row [cols]="1" [gapY]="3">
         <div style="display: flex; align-items: center; gap: 8px;">
           <label tedi-label for="example-toggle-3.1">Toggle button</label>
-          <tedi-toggle [id]="'example-toggle-3.1'" />
+          <tedi-toggle inputId="example-toggle-3.1" />
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <tedi-toggle [id]="'example-toggle-3.2'" />
+          <tedi-toggle inputId="example-toggle-3.2" />
           <label tedi-label for="example-toggle-3.2">Toggle button</label>
         </div>
       </tedi-row>
@@ -175,16 +179,16 @@ const Template: StoryFn<ToggleComponent> = (args) => ({
         <b>{{ state }}</b>
         <tedi-col [width]="3" style="display: flex; flex-wrap: wrap; align-items: center; column-gap: 2rem; row-gap: 0.75rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [id]="state" />
-            <tedi-toggle ${argsToTemplate(args)} [id]="state" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" [checked]="true" />
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [id]="state" size="large" />
-            <tedi-toggle ${argsToTemplate(args)} [id]="state" size="large" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [checked]="true" />
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [id]="state" size="large" [icon]="true" />
-            <tedi-toggle ${argsToTemplate(args)} [id]="state" size="large" [icon]="true" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" [checked]="true" />
           </div>
         </tedi-col>
       </tedi-row>

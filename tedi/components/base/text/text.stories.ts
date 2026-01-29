@@ -27,6 +27,11 @@ export default {
       ],
     }),
   ],
+  parameters: {
+    status: {
+      type: ["mobileViewDifference"],
+    },
+  },
   argTypes: {
     ngContent: {
       name: "ng-content",
@@ -124,58 +129,25 @@ export const Default: StoryObj<TextComponent & { ngContent: string }> = {
 export const Headings: StoryObj<TextComponent> = {
   render: (args) => ({
     props: args,
-    styles: [
-      `
-        h1.mobile {
-          font-size: var(--heading-h1-size-mobile);
-        }
-        h2.mobile {
-          font-size: var(--heading-h2-size-mobile);
-        }
-        h3.mobile {
-          font-size: var(--heading-h3-size-mobile);
-        }
-        h4.mobile {
-          font-size: var(--heading-h4-size-mobile);
-        }
-        h5.mobile {
-          font-size: var(--heading-h5-size-mobile);
-        }
-        h6.mobile {
-          font-size: var(--heading-h6-size-mobile);
-        }
-      }
-    `,
-    ],
     template: `
       <div class="example-list">
-        <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom border-bottom--3x'">
-          <b>Desktop</b>
-          <b>Mobile</b>
-        </tedi-row>
         <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
           <h1 tedi-text>Heading H1</h1>
-          <h1 tedi-text class="mobile">Heading H1</h1>
         </tedi-row>
         <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
           <h2 tedi-text>Heading H2</h2>
-          <h2 tedi-text class="mobile">Heading H2</h2>
         </tedi-row>
         <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
           <h3 tedi-text>Heading H3</h3>
-          <h3 tedi-text class="mobile">Heading H3</h3>
         </tedi-row>
         <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
           <h4 tedi-text>Heading H4</h4>
-          <h4 tedi-text class="mobile">Heading H4</h4>
         </tedi-row>
         <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
           <h5 tedi-text>Heading H5</h5>
-          <h5 tedi-text class="mobile">Heading H5</h5>
         </tedi-row>
-        <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
+        <tedi-row [cols]="2" [class]="'padding-14-16'">
           <h6 tedi-text>Heading H6</h6>
-          <h6 tedi-text class="mobile">Heading H6</h6>
         </tedi-row>
       </div>
     `,
@@ -187,25 +159,17 @@ export const Subtitles: StoryObj<TextComponent> = {
     props: args,
     template: `
       <div class="example-list">
-        <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom border-bottom--3x'">
-          <b>Desktop</b>
-          <b>Mobile</b>
-        </tedi-row>
         <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
           <p tedi-text modifiers="subtitle">Subtitle</p>
-          <p tedi-text modifiers="subtitle" class="mobile">Subtitle</p>
         </tedi-row>
         <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
           <p tedi-text [modifiers]="['small', 'subtitle']">Subtitle small</p>
-          <p tedi-text [modifiers]="['small', 'subtitle']" class="mobile">Subtitle small</p>
         </tedi-row>
         <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
           <label tedi-text>Label</label>
-          <label tedi-text class="mobile">Label</label>
         </tedi-row>
-        <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
+        <tedi-row [cols]="2" [class]="'padding-14-16'">
           <label tedi-text modifiers="bold">Label bold</label>
-          <label tedi-text modifiers="bold" class="mobile">Label bold</label>
         </tedi-row>
       </div>
     `,

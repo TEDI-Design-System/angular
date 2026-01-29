@@ -20,6 +20,15 @@ const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 
 export default {
   title: "TEDI-Ready/Components/Buttons/InfoButton",
+  argTypes: {
+    "aria-label": {
+      control: "text",
+      description: "ARIA label",
+    },
+  },
+  args: {
+    "aria-label": undefined
+  },
   component: InfoButtonComponent,
   decorators: [
     moduleMetadata({

@@ -142,6 +142,11 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     return ((i % slidesCount) + slidesCount) % slidesCount;
   });
 
+
+  readonly renderedActiveIndex = computed(() => {
+    return this.trackIndex() - this.windowBase() + this.buffer();
+  });
+
   readonly renderedIndices = computed(() => {
     const slidesCount = this.slides().length;
 
@@ -236,7 +241,7 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     const cellWidth =
       (this.viewportWidth() -
         this.currentGap() * (this.currentSlidesPerView() - 1)) /
-        this.currentSlidesPerView() +
+      this.currentSlidesPerView() +
       this.currentGap();
 
     if (!cellWidth) {
@@ -337,7 +342,7 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     const cellWidth =
       (this.viewportWidth() -
         this.currentGap() * (this.currentSlidesPerView() - 1)) /
-        this.currentSlidesPerView() +
+      this.currentSlidesPerView() +
       this.currentGap();
 
     if (!cellWidth) {

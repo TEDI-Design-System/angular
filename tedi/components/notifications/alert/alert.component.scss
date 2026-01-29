@@ -5,33 +5,40 @@
 }
 
 .tedi-alert {
+  --_close-button-size: 18px;
+
+  position: relative;
   display: flex;
   flex-direction: column;
-  border: 1px solid;
-  font-size: var(--body-regular-size);
-  border-radius: var(--alert-radius);
-  padding: var(--alert-default-padding-y) var(--alert-default-padding-x);
   gap: var(--layout-grid-gutters-04);
+  padding: var(--alert-default-padding-y) var(--alert-default-padding-x);
+  font-size: var(--body-regular-size);
+  border: 1px solid;
+  border-radius: var(--alert-radius);
 
-  @include alert-variant(
-    var(--alert-default-background-info),
-    var(--alert-default-border-info)
-  );
+  @include alert-variant(var(--alert-default-background-info),
+    var(--alert-default-border-info));
 
   &__head {
     display: flex;
-    align-items: center;
     gap: var(--layout-grid-gutters-04);
+    align-items: center;
+  }
+
+  &:has(&__close) {
+    padding-right: calc(var(--layout-grid-gutters-04) + var(--_close-button-size) + var(--alert-default-padding-x));
   }
 
   &__close {
-    margin-left: auto;
+    position: absolute;
+    top: var(--alert-default-padding-y);
+    right: var(--alert-default-padding-x);
   }
 
   &__content {
     display: flex;
-    align-items: flex-start;
     gap: var(--layout-grid-gutters-08);
+    align-items: flex-start;
 
     .tedi-alert__content-icon {
       line-height: var(--body-regular-line-height);
@@ -45,31 +52,23 @@
   }
 
   &--info {
-    @include alert-variant(
-      var(--alert-default-background-info),
-      var(--alert-default-border-info)
-    );
+    @include alert-variant(var(--alert-default-background-info),
+      var(--alert-default-border-info));
   }
 
   &--success {
-    @include alert-variant(
-      var(--alert-default-background-success),
-      var(--alert-default-border-success)
-    );
+    @include alert-variant(var(--alert-default-background-success),
+      var(--alert-default-border-success));
   }
 
   &--warning {
-    @include alert-variant(
-      var(--alert-default-background-warning),
-      var(--alert-default-border-warning)
-    );
+    @include alert-variant(var(--alert-default-background-warning),
+      var(--alert-default-border-warning));
   }
 
   &--danger {
-    @include alert-variant(
-      var(--alert-default-background-danger),
-      var(--alert-default-border-danger)
-    );
+    @include alert-variant(var(--alert-default-background-danger),
+      var(--alert-default-border-danger));
   }
 
   &--global {

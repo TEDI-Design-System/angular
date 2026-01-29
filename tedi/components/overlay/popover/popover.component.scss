@@ -20,20 +20,20 @@ tedi-popover {
 
 float-ui-content {
   .float-ui-container-popover {
+    z-index: var(--z-index-dropdown);
     padding: 0;
     border: var(--borders-01) solid var(--popover-border);
     border-radius: var(--popover-radius-rounded);
-    box-shadow: 0px 1px 5px 0px var(--tedi-alpha-20, rgba(0, 0, 0, 0.2));
-    z-index: var(--z-index-dropdown);
+    box-shadow: 0 1px 5px 0 var(--tedi-alpha-20, rgb(0 0 0 / 20%));
 
     &--arrow {
       .float-ui-arrow {
+        z-index: var(--z-index-dropdown);
         width: 24px;
         height: 24px;
         background: var(--popover-background);
         filter: drop-shadow(0 0 5px var(--tedi-alpha-20));
-        clip-path: inset(0px -5px -5px 0px);
-        z-index: var(--z-index-dropdown);
+        clip-path: inset(0 -5px -5px 0);
       }
     }
 
@@ -43,8 +43,8 @@ float-ui-content {
       .float-ui-arrow {
         width: 18px;
         height: 18px;
-        border-bottom: 4px solid var(--header-popover-border-top);
         border-right: 4px solid var(--header-popover-border-top);
+        border-bottom: 4px solid var(--header-popover-border-top);
       }
 
       &[data-float-ui-placement="top"] {
@@ -117,14 +117,14 @@ float-ui-content {
 
 .tedi-popover-content {
   position: relative;
-  max-width: calc(100dvw - 1rem);
   display: flex;
   flex-direction: column;
-  background: var(--popover-background);
-  color: var(--popover-text);
-  border-radius: var(--popover-radius-rounded);
   gap: var(--layout-grid-gutters-08);
+  max-width: calc(100dvw - 1rem);
   padding: var(--popover-padding-sm);
+  color: var(--popover-text);
+  background: var(--popover-background);
+  border-radius: var(--popover-radius-rounded);
 
   @each $name, $width in $popover-max-width {
     &--#{$name} {
@@ -134,15 +134,15 @@ float-ui-content {
 
   &__head {
     display: flex;
-    justify-content: space-between;
     gap: var(--layout-grid-gutters-08);
+    justify-content: space-between;
 
     > div {
       display: flex;
-      flex-direction: column;
       flex: 1 1 0;
-      min-width: 0;
+      flex-direction: column;
       gap: var(--layout-grid-gutters-08);
+      min-width: 0;
     }
   }
 

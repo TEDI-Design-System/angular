@@ -25,10 +25,10 @@ export default {
   ],
   render: (args) => ({
     props: args,
-    template: `<tedi-number-field id="example-id" label="Label" />`,
+    template: `<tedi-number-field inputId="example-id" label="Label" />`,
   }),
   argTypes: {
-    id: {
+    inputId: {
       description:
         "The unique identifier for the input element that this label is associated with. This ID should match the input element's id attribute to ensure accessibility.",
       control: {
@@ -166,7 +166,7 @@ export default {
 
 export const Default: StoryObj<NumberFieldComponent> = {
   args: {
-    id: "example-id",
+    inputId: "example-id",
     label: "Label",
   },
   render: (args) => ({
@@ -182,11 +182,11 @@ export const Sizes: StoryObj<NumberFieldComponent> = {
       <tedi-row class="example-list" cols="1" gapY="3">
         <tedi-row cols="2" alignItems="center" class="padding-14-16 border-bottom">
           <b>Default</b>
-          <tedi-number-field label="Label" id="size-default" />
+          <tedi-number-field label="Label" inputId="size-default" />
         </tedi-row>
         <tedi-row cols="2" alignItems="center" class="padding-14-16">
           <b>Small</b>
-          <tedi-number-field label="Label" id="size-small" size="small" />
+          <tedi-number-field label="Label" inputId="size-small" size="small" />
         </tedi-row>
       </tedi-row>
     `,
@@ -200,23 +200,23 @@ export const States: StoryObj<NumberFieldComponent> = {
       <tedi-row cols="1" gapY="3">
         <tedi-row cols="2" alignItems="center">
           <b>Default</b>
-          <tedi-number-field label="Label" id="default" />
+          <tedi-number-field label="Label" inputId="default" />
         </tedi-row>
         <tedi-row cols="2" alignItems="center">
           <b>Min value</b>
-          <tedi-number-field label="Label" id="min-value" [min]="01" [value]="1" />
+          <tedi-number-field label="Label" inputId="min-value" [min]="01" [value]="1" />
         </tedi-row>
         <tedi-row cols="2" alignItems="center">
           <b>Max value</b>
-          <tedi-number-field label="Label" id="max-value" [max]="1" [value]="1" />
+          <tedi-number-field label="Label" inputId="max-value" [max]="1" [value]="1" />
         </tedi-row>
         <tedi-row cols="2" alignItems="center">
           <b>Disabled</b>
-          <tedi-number-field label="Label" id="disabled" [value]="1" [disabled]="true" />
+          <tedi-number-field label="Label" inputId="disabled" [value]="1" [disabled]="true" />
         </tedi-row>
         <tedi-row cols="2" alignItems="center">
           <b>Error</b>
-          <tedi-number-field label="Label" id="error" [value]="1" [invalid]="true" [feedbackText]="{ text: 'Feedback text', type: 'error', position: 'left' }" />
+          <tedi-number-field label="Label" inputId="error" [value]="1" [invalid]="true" [feedbackText]="{ text: 'Feedback text', type: 'error', position: 'left' }" />
         </tedi-row>
       </tedi-row>
     `,
@@ -225,7 +225,7 @@ export const States: StoryObj<NumberFieldComponent> = {
 
 export const WithHint: StoryObj<NumberFieldComponent> = {
   args: {
-    id: "example-hint",
+    inputId: "example-hint",
     label: "Label",
     feedbackText: {
       text: "Hint text",
@@ -241,7 +241,7 @@ export const WithHint: StoryObj<NumberFieldComponent> = {
 
 export const Decimal: StoryObj<NumberFieldComponent> = {
   args: {
-    id: "example-decimal",
+    inputId: "example-decimal",
     label: "Label",
     value: 1.5,
   },
@@ -253,7 +253,7 @@ export const Decimal: StoryObj<NumberFieldComponent> = {
 
 export const WithUnit: StoryObj<NumberFieldComponent> = {
   args: {
-    id: "example-unit",
+    inputId: "example-unit",
     label: "Label",
     suffix: "unit",
     value: 2,
@@ -266,7 +266,7 @@ export const WithUnit: StoryObj<NumberFieldComponent> = {
 
 export const FullWidth: StoryObj<NumberFieldComponent> = {
   args: {
-    id: "example-full-width",
+    inputId: "example-full-width",
     label: "Label",
     suffix: "unit",
     fullWidth: true,
@@ -279,7 +279,7 @@ export const FullWidth: StoryObj<NumberFieldComponent> = {
 
 export const CustomLabelAndFeedbackText: StoryObj<NumberFieldComponent> = {
   args: {
-    id: "example-custom",
+    inputId: "example-custom",
   },
   render: (args) => ({
     props: args,

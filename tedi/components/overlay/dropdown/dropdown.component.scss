@@ -4,10 +4,10 @@ tedi-dropdown {
 
 float-ui-content {
   .float-ui-container-dropdown {
+    z-index: var(--z-index-dropdown);
     padding: 0;
     border: 0;
     border-radius: var(--dropdown-item-radius);
-    box-shadow: 0px 1px 5px 0px var(--tedi-alpha-20, rgba(0, 0, 0, 0.2));
-    z-index: var(--z-index-dropdown);
+    box-shadow: 0 1px 5px 0 var(--tedi-alpha-20, rgb(0 0 0 / 20%));
   }
 }

@@ -1,10 +1,20 @@
 $column-width: 12;
-$justify-self: ("start", "end", "center", "stretch");
-$align-self: ("start", "end", "center", "stretch");
+$justify-self: (
+  "start",
+  "end",
+  "center",
+  "stretch"
+);
+$align-self: (
+  "start",
+  "end",
+  "center",
+  "stretch"
+);
 
-.col {
+.tedi-col {
   display: block;
-  
+
   @for $i from 1 through $column-width {
     &--width-#{$i} {
       grid-column: span #{$i};

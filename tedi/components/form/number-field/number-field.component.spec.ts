@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { NumberFieldComponent } from "./number-field.component";
 import { LabelComponent } from "../label/label.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
@@ -11,8 +12,14 @@ describe("NumberFieldComponent", () => {
   let fixture: ComponentFixture<NumberFieldComponent>;
   let component: NumberFieldComponent;
   let el: HTMLElement;
+  let mockLiveAnnouncer: jest.Mocked<LiveAnnouncer>;
 
   beforeEach(() => {
+    mockLiveAnnouncer = {
+      announce: jest.fn().mockResolvedValue(undefined),
+      clear: jest.fn(),
+    } as unknown as jest.Mocked<LiveAnnouncer>;
+
     TestBed.configureTestingModule({
       imports: [
         NumberFieldComponent,
@@ -22,11 +29,14 @@ describe("NumberFieldComponent", () => {
         TextComponent,
         FeedbackTextComponent,
       ],
-      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+      providers: [
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        { provide: LiveAnnouncer, useValue: mockLiveAnnouncer },
+      ],
     });
 
     fixture = TestBed.createComponent(NumberFieldComponent);
-    fixture.componentRef.setInput("id", "test-id");
+    fixture.componentRef.setInput("inputId", "test-id");
     component = fixture.componentInstance;
     el = fixture.nativeElement;
     fixture.detectChanges();
@@ -57,6 +67,19 @@ describe("NumberFieldComponent", () => {
     expect(onTouched).toHaveBeenCalled();
   });
 
+  it("should announce value change on increment button click", () => {
+    const buttons = el.querySelectorAll("button");
+    const incrementBtn = buttons[1] as HTMLButtonElement;
+
+    incrementBtn.click();
+    fixture.detectChanges();
+
+    expect(mockLiveAnnouncer.announce).toHaveBeenCalledWith(
+      expect.any(String),
+      "polite"
+    );
+  });
+
   it("should decrement the value on decrement button click", () => {
     component.writeValue(5);
     fixture.detectChanges();
@@ -72,6 +95,39 @@ describe("NumberFieldComponent", () => {
 
     expect(component.value()).toBe(4);
     expect(onChange).toHaveBeenCalledWith(4);
+  });
+
+  it("should announce value change on decrement button click", () => {
+    component.writeValue(5);
+    fixture.detectChanges();
+
+    const decrementBtn = el.querySelector("button") as HTMLButtonElement;
+
+    decrementBtn.click();
+    fixture.detectChanges();
+
+    expect(mockLiveAnnouncer.announce).toHaveBeenCalledWith(
+      expect.any(String),
+      "polite"
+    );
+  });
+
+  it("should have aria-label on decrement button", () => {
+    const decrementBtn = el.querySelector("button") as HTMLButtonElement;
+    expect(decrementBtn.getAttribute("aria-label")).toBeTruthy();
+  });
+
+  it("should have aria-label on increment button", () => {
+    const buttons = el.querySelectorAll("button");
+    const incrementBtn = buttons[1] as HTMLButtonElement;
+    expect(incrementBtn.getAttribute("aria-label")).toBeTruthy();
+  });
+
+  it("should have aria-hidden icons inside buttons", () => {
+    const icons = el.querySelectorAll("tedi-icon");
+    icons.forEach((icon) => {
+      expect(icon.getAttribute("aria-hidden")).toBe("true");
+    });
   });
 
   it("should disable decrement button when value === min", () => {
@@ -91,6 +147,32 @@ describe("NumberFieldComponent", () => {
     const buttons = el.querySelectorAll("button");
     const incrementBtn = buttons[1] as HTMLButtonElement;
     expect(incrementBtn.disabled).toBeTruthy();
+  });
+
+  it("should set aria-invalid to true when value is below min", () => {
+    component.writeValue(2);
+    fixture.componentRef.setInput("min", 5);
+    fixture.detectChanges();
+
+    const inputEl = el.querySelector("input") as HTMLInputElement;
+    expect(inputEl.getAttribute("aria-invalid")).toBe("true");
+  });
+
+  it("should set aria-invalid to true when value is above max", () => {
+    component.writeValue(10);
+    fixture.componentRef.setInput("max", 5);
+    fixture.detectChanges();
+
+    const inputEl = el.querySelector("input") as HTMLInputElement;
+    expect(inputEl.getAttribute("aria-invalid")).toBe("true");
+  });
+
+  it("should set aria-invalid to true when invalid input is true", () => {
+    fixture.componentRef.setInput("invalid", true);
+    fixture.detectChanges();
+
+    const inputEl = el.querySelector("input") as HTMLInputElement;
+    expect(inputEl.getAttribute("aria-invalid")).toBe("true");
   });
 
   it("should call onChange when input is changed", () => {
@@ -186,5 +268,32 @@ describe("NumberFieldComponent", () => {
 
     expect(blurSpy).toHaveBeenCalled();
     expect(onTouched).toHaveBeenCalled();
+  });
+
+  it("should set aria-describedby when feedbackText is provided", () => {
+    fixture.componentRef.setInput("feedbackText", {
+      text: "Error message",
+      type: "error",
+    });
+    fixture.detectChanges();
+
+    const inputEl = el.querySelector("input") as HTMLInputElement;
+    expect(inputEl.getAttribute("aria-describedby")).toBe("test-id-feedback");
+  });
+
+  it("should not set aria-describedby when feedbackText is not provided", () => {
+    const inputEl = el.querySelector("input") as HTMLInputElement;
+    expect(inputEl.getAttribute("aria-describedby")).toBeNull();
+  });
+
+  it("should set id on feedback-text element matching aria-describedby", () => {
+    fixture.componentRef.setInput("feedbackText", {
+      text: "Error message",
+      type: "error",
+    });
+    fixture.detectChanges();
+
+    const feedbackEl = el.querySelector("tedi-feedback-text");
+    expect(feedbackEl?.getAttribute("id")).toBe("test-id-feedback");
   });
 });

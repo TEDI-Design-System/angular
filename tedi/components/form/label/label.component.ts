@@ -5,17 +5,21 @@ import {
   input,
   ViewEncapsulation,
 } from "@angular/core";
+import { TediTranslationPipe } from "../../../services";
 
 export type LabelSize = "small" | "default";
 export type LabelColor = "primary" | "secondary";
 
 @Component({
-  selector: "label[tedi-label]",
-  template: "<ng-content />",
+  selector: "[tedi-label]",
+  templateUrl: "./label.component.html",
   styleUrl: "./label.component.scss",
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    TediTranslationPipe
+  ],
   host: {
     "[class]": "classes()",
   },
@@ -42,10 +46,6 @@ export class LabelComponent {
 
     if (this.size() === "small") {
       classList.push("tedi-label--small");
-    }
-
-    if (this.required()) {
-      classList.push("tedi-label--required");
     }
 
     return classList.join(" ");

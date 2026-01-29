@@ -59,6 +59,19 @@ export class FileDropzone {
   }
 }
 
+export interface FileDropzoneError {
+  fileName: string;
+  code: string;
+  message: string;
+}
+
+export type FileDropzoneErrors = FileDropzoneError[];
+
+export enum FileDropzoneErrorCode {
+  FILE_TOO_LARGE = "file-too-large",
+  INVALID_FILE_TYPE = "invalid-file-type",
+}
+
 export type FileInputMode = "append" | "replace";
 
 export type ValidationState = "none" | "valid" | "invalid";
@@ -69,6 +82,6 @@ export type DropzoneValidatorFunction = (
   file: FileDropzone,
   standard: SizeDisplayStandard,
   translate: (key: string, ...args: unknown[]) => string
-) => string | undefined;
+) => FileDropzoneError | undefined;
 
 export type SizeDisplayStandard = "SI" | "IEC";

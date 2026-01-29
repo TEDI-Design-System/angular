@@ -1,14 +1,18 @@
-@if (href()) {
-  <a [href]="href()">
-    <ng-container *ngTemplateOutlet="content"></ng-container>
-  </a>
-} @else if (route()) {
-  <a [routerLink]="route()">
-    <ng-container *ngTemplateOutlet="content"></ng-container>
-  </a>
-} @else {
-  <ng-container *ngTemplateOutlet="content"></ng-container>
-}
+<li [class]="classes()">
+  @if (href()) {
+    <a [href]="href()" class="tedi-sidenav-dropdown-item__trigger">
+      <ng-container *ngTemplateOutlet="content"></ng-container>
+    </a>
+  } @else if (route()) {
+    <a [routerLink]="route()" class="tedi-sidenav-dropdown-item__trigger">
+      <ng-container *ngTemplateOutlet="content"></ng-container>
+    </a>
+  } @else {
+    <div class="tedi-sidenav-dropdown-item__trigger">
+      <ng-container *ngTemplateOutlet="content"></ng-container>
+    </div>
+  }
+</li>
 
 <ng-template #content>
   <ng-content></ng-content>

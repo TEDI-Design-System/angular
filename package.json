@@ -14,7 +14,7 @@
     "start": "ng run angular-components:storybook",
     "build": "ng build angular-components --configuration production && sass --load-path=node_modules src/styles/index.scss dist/index.css --style=compressed --no-source-map && replace-in-file //fonts//g \"./fonts/\" dist/index.css --isRegex && mkdir -p dist/fonts && cp -a node_modules/@tedi-design-system/core/fonts/* dist/fonts/",
     "build:sb": "ng run angular-components:build-storybook && replace-in-file //fonts//g \"./fonts/\" dist/storybook-static/main.css --isRegex",
-    "lint": "ng lint angular-components --fix",
+    "lint": "stylelint \"tedi/**/*.scss\" --fix && ng lint angular-components --fix",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --config ./jest.config.ts --coverage",
@@ -32,7 +32,7 @@
     "ngx-float-ui": "^19.0.1 || ^20.0.0"
   },
   "dependencies": {
-    "@tedi-design-system/core": "^3.0.0"
+    "@tedi-design-system/core": "^3.0.1"
   },
   "devDependencies": {
     "@angular-devkit/core": "19.2.15",
@@ -45,8 +45,8 @@
     "@angular/animations": "19.2.15",
     "@angular/cdk": "19.2.15",
     "@angular/cli": "19.2.15",
-    "@angular/compiler-cli": "19.2.15",
     "@angular/common": "19.2.15",
+    "@angular/compiler-cli": "19.2.15",
     "@angular/core": "19.2.15",
     "@angular/forms": "19.2.15",
     "@angular/language-service": "19.2.15",
@@ -93,6 +93,10 @@
     "storybook": "^8.4.7",
     "storybook-addon-angular-router": "^1.10.1",
     "storybook-addon-pseudo-states": "^4.0.3",
+    "stylelint": "^17.0.0",
+    "stylelint-config-prettier-scss": "^1.0.0",
+    "stylelint-config-recess-order": "^7.4.0",
+    "stylelint-config-standard-scss": "^17.0.0",
     "ts-node": "^10.9.2",
     "tslib": "^2.5.0",
     "typescript": "5.8"
@@ -117,8 +121,8 @@
     }
   },
   "lint-staged": {
-    "src/**/*.{css,scss}": [
-      "prettier --write"
+    "{src,tedi}/**/*.{css,scss}": [
+      "stylelint --fix"
     ],
     "src/**/*.{ts,html}": [
       "prettier --write"

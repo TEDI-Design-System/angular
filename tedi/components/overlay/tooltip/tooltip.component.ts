@@ -1,4 +1,5 @@
 import {
+  AfterContentChecked,
   Component,
   input,
   ViewEncapsulation,
@@ -6,7 +7,7 @@ import {
   viewChild,
   contentChild,
   signal,
-  AfterContentChecked,
+  ElementRef,
 } from "@angular/core";
 import {
   NgxFloatUiContentComponent,
@@ -14,9 +15,12 @@ import {
   NgxFloatUiPlacements,
 } from "ngx-float-ui";
 import { TooltipTriggerComponent } from "./tooltip-trigger/tooltip-trigger.component";
+import { TooltipContentComponent } from "./tooltip-content/tooltip-content.component";
 
 export type TooltipPosition = `${NgxFloatUiPlacements}`;
 export type TooltipOpenWith = "hover" | "click" | "both";
+
+let tooltipIdCounter = 0;
 
 @Component({
   standalone: true,
@@ -61,7 +65,14 @@ export class TooltipComponent implements AfterContentChecked {
   /** Dropdown trigger button */
   readonly tooltipTrigger = contentChild.required(TooltipTriggerComponent);
 
-  readonly containerId = signal("");
+  /** Tooltip content component */
+  readonly tooltipContent = contentChild.required(TooltipContentComponent, {
+    read: ElementRef,
+  });
+
+  readonly descriptionId = `tedi-tooltip-${++tooltipIdCounter}`;
+  readonly contentText = signal("");
+  readonly isOpen = signal(false);
 
   isContentHovered = signal(false);
   floatUiDisplay = signal<"inline" | "block">("inline");
@@ -73,6 +84,7 @@ export class TooltipComponent implements AfterContentChecked {
       clearTimeout(this.hideTimeout);
       this.floatUiComponent().show();
       this.floatUiDisplay.set("block");
+      this.isOpen.set(true);
     }
   }
 
@@ -80,6 +92,7 @@ export class TooltipComponent implements AfterContentChecked {
     if (this.floatUiComponent().state) {
       this.floatUiComponent().hide();
       this.floatUiDisplay.set("inline");
+      this.isOpen.set(false);
     }
   }
 
@@ -92,15 +105,12 @@ export class TooltipComponent implements AfterContentChecked {
   }
 
   ngAfterContentChecked(): void {
-    const floatUiEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
-    const container = floatUiEl.querySelector<HTMLElement>(
-      ".float-ui-container",
-    );
-
-    if (container) {
-      container.setAttribute("aria-labelledby", container.id + "_trigger");
-      this.containerId.set(container.id);
+    const contentEl = this.tooltipContent()?.nativeElement as HTMLElement;
+    if (contentEl) {
+      const text = contentEl.textContent?.trim() ?? "";
+      if (text !== this.contentText()) {
+        this.contentText.set(text);
+      }
     }
   }
 }

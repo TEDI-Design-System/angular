@@ -19,9 +19,9 @@
 
   &:focus-visible:not(:disabled) {
     color: $color-focus;
-    border-radius: 0;
     outline: 2px solid $color-focus;
     outline-offset: 1px;
+    border-radius: 0;
 
     .tedi-link__text {
       text-decoration: underline;
@@ -31,8 +31,8 @@
 
 .tedi-link {
   display: inline-flex;
-  cursor: pointer;
   text-decoration: none;
+  cursor: pointer;
 
   @include link-variant(
     var(--link-primary-default),
@@ -68,11 +68,11 @@
 
   tedi-icon {
     height: fit-content;
-    font-size: 16px;
-    color: inherit;
-    line-height: inherit;
-    margin-left: var(--button-sm-inner-spacing);
     margin-right: var(--button-sm-inner-spacing);
+    margin-left: var(--button-sm-inner-spacing);
+    font-size: 16px;
+    line-height: inherit;
+    color: inherit;
 
     &:first-child {
       margin-left: 0;

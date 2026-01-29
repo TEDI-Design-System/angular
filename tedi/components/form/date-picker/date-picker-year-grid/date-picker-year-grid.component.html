@@ -1,0 +1,12 @@
+<div class="tedi-date-picker__month-year-grid" role="group">
+  @for (year of pagedYears(); track year) {
+    <button
+      type="button"
+      class="tedi-date-picker__month-year-button"
+      [class.tedi-date-picker__month-year-button--selected]="selectedYear() === year"
+      (click)="onYearClick(year)"
+    >
+      {{ year }}
+    </button>
+  }
+</div>

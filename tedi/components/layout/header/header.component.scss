@@ -2,24 +2,24 @@
   display: flex;
 
   &__main {
-    width: 100%;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    background: var(--header-background);
-    box-shadow: 0px 1px 5px 0px var(--tedi-alpha-20, rgba(0, 0, 0, 0.2));
+    justify-content: space-between;
+    width: 100%;
     height: var(--layout-header-min-height);
     padding: var(--layout-header-padding-y) var(--layout-header-padding-right)
       var(--layout-header-padding-y) var(--layout-header-padding-left);
+    background: var(--header-background);
+    box-shadow: 0 1px 5px 0 var(--tedi-alpha-20, rgb(0 0 0 / 20%));
   }
 
   &__link-button {
     display: inline-flex;
     align-items: center;
-    background-color: transparent;
-    border: 0;
     padding: 0;
     font-size: var(--body-regular-size);
+    background-color: transparent;
+    border: 0;
 
     &:hover {
       span {

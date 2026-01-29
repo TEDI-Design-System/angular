@@ -1,7 +1,7 @@
 tedi-carousel-header {
   display: flex;
+  gap: var(--layout-grid-gutters-16);
   align-items: flex-end;
   justify-content: space-between;
-  gap: var(--layout-grid-gutters-16);
   padding-bottom: var(--layout-grid-gutters-08);
 }

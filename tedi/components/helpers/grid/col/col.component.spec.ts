@@ -25,8 +25,8 @@ describe("ColComponent", () => {
   });
 
   it("should render the col with default props", () => {
-    expect(colElement.classList).toContain("col");
-    expect(colElement.classList).toContain("col--width-1");
+    expect(colElement.classList).toContain("tedi-col");
+    expect(colElement.classList).toContain("tedi-col--width-1");
   });
 
   it("should apply different column widths", () => {
@@ -36,7 +36,7 @@ describe("ColComponent", () => {
       fixture.componentRef.setInput("width", width);
       fixture.detectChanges();
 
-      expect(colElement.classList).toContain(`col--width-${width}`);
+      expect(colElement.classList).toContain(`tedi-col--width-${width}`);
     }
   });
 
@@ -47,7 +47,7 @@ describe("ColComponent", () => {
       fixture.componentRef.setInput("justifySelf", justifySelf);
       fixture.detectChanges();
 
-      expect(colElement.classList).toContain(`col--justify-self-${justifySelf}`);
+      expect(colElement.classList).toContain(`tedi-col--justify-self-${justifySelf}`);
     }
   });
 
@@ -58,7 +58,7 @@ describe("ColComponent", () => {
       fixture.componentRef.setInput("alignSelf", alignSelf);
       fixture.detectChanges();
 
-      expect(colElement.classList).toContain(`col--align-self-${alignSelf}`);
+      expect(colElement.classList).toContain(`tedi-col--align-self-${alignSelf}`);
     }
   });
 

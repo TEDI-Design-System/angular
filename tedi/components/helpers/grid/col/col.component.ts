@@ -70,16 +70,16 @@ export class ColComponent implements BreakpointInputs<ColInputs> {
   });
 
   classes = computed(() => {
-    const classList = ["col", `col--width-${this.breakpointInputs().width}`];
+    const classList = ["tedi-col", `tedi-col--width-${this.breakpointInputs().width}`];
 
     if (this.breakpointInputs().justifySelf) {
       classList.push(
-        `col--justify-self-${this.breakpointInputs().justifySelf}`,
+        `tedi-col--justify-self-${this.breakpointInputs().justifySelf}`,
       );
     }
 
     if (this.breakpointInputs().alignSelf) {
-      classList.push(`col--align-self-${this.breakpointInputs().alignSelf}`);
+      classList.push(`tedi-col--align-self-${this.breakpointInputs().alignSelf}`);
     }
 
     return classList.join(" ");

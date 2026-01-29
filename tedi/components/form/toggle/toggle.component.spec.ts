@@ -14,7 +14,7 @@ describe("ToggleComponent", () => {
     });
 
     fixture = TestBed.createComponent(ToggleComponent);
-    fixture.componentRef.setInput("id", "test-toggle-id");
+    fixture.componentRef.setInput("inputId", "test-toggle-id");
     toggleElement = fixture.nativeElement;
     fixture.detectChanges();
 
