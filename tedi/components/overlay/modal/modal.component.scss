@@ -2,6 +2,7 @@
 
 @mixin modal-heading($size) {
   .tedi-modal-header__head {
+
     h1,
     h2,
     h3,
@@ -13,12 +14,18 @@
   }
 }
 
-$modal-widths: (xs, sm, md, lg, xl);
+$modal-widths: (
+  xs,
+  sm,
+  md,
+  lg,
+  xl
+);
 
 .tedi-modal {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: var(--z-index-modal);
   display: none;
 
   &--open {
@@ -95,8 +102,7 @@ $modal-widths: (xs, sm, md, lg, xl);
   }
 
   tedi-modal-header {
-    padding: var(--_tedi-modal-heading-padding-y)
-      var(--_tedi-modal-heading-padding-x);
+    padding: var(--_tedi-modal-heading-padding-y) var(--_tedi-modal-heading-padding-x);
     border-bottom: var(--borders-01) solid var(--modal-border-inner);
 
     .tedi-modal-header__head {
@@ -121,8 +127,8 @@ $modal-widths: (xs, sm, md, lg, xl);
   tedi-modal-footer {
     display: flex;
     gap: var(--layout-grid-gutters-16);
-    padding: var(--_tedi-modal-footer-padding-y)
-      var(--_tedi-modal-footer-padding-x);
+    justify-content: flex-end;
+    padding: var(--_tedi-modal-footer-padding-y) var(--_tedi-modal-footer-padding-x);
     border-top: var(--borders-01) solid var(--modal-border-inner);
   }
 }
