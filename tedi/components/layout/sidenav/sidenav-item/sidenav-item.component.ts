@@ -46,6 +46,7 @@ import { TediTranslationPipe } from "../../../../services/translation/translatio
     TediTranslationPipe,
   ],
   host: {
+    "role": "presentation",
     "style": "display: contents",
   },
 })
