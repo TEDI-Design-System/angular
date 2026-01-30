@@ -75,45 +75,6 @@ type Story = StoryObj<TagComponent & { content: string }>;
 
 export const Default: Story = {};
 
-export const WithCloseButton: Story = {
-  render: () => ({
-    template: `
-      <tedi-tag [closable]="true">
-        Tag
-      </tedi-tag>
-    `,
-  }),
-};
-
-export const WithLoader: Story = {
-  render: () => ({
-    template: `
-      <tedi-tag [loading]="true">
-        taotlus_scan_lk_1.pdf
-      </tedi-tag>
-    `,
-  }),
-};
-
-export const WithInvalidIcon: Story = {
-  render: () => ({
-    template: `
-      <tedi-row [gap]="1">
-        <tedi-col>
-          <tedi-tag type="danger">
-            taotlus_scan_lk_1.pdf
-          </tedi-tag>
-        </tedi-col>
-        <tedi-col>
-          <tedi-tag type="danger" [closable]="true">
-            taotlus_scan_lk_1.pdf
-          </tedi-tag>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
-};
-
 export const Primary: Story = {
   render: (props) => ({
     props,
