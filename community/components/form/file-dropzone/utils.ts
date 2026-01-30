@@ -80,6 +80,9 @@ export const validateFileSize =
     translate: (key: string, ...args: unknown[]) => string,
   ): ValidatorFn =>
   (control: AbstractControl<unknown>): ValidationErrors | null => {
+    if (maxSize === 0) {
+      return null;
+    }
     const files = sanitizeFileList(control.value);
 
     if (!files.length) {
@@ -107,7 +110,7 @@ const validateSingleFileSize = (
   standard: SizeDisplayStandard,
   translate: (key: string, ...args: unknown[]) => string,
 ): DropzoneValidatorError | null => {
-  if (maxSize && file.size > maxSize) {
+  if (file.size > maxSize) {
     return {
       errorKey: FileDropzoneErrorCode.FILE_TOO_LARGE,
       value: {
