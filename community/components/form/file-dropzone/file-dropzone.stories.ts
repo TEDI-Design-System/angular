@@ -6,7 +6,6 @@ import {
   moduleMetadata,
   StoryObj,
 } from "@storybook/angular";
-import { validateFileSize, validateFileType } from "./utils";
 import {
   FormControl,
   FormGroup,
@@ -58,7 +57,6 @@ const meta: Meta<FileDropzoneComponent> = {
     mode: "append",
     name: "file-dropzone",
     uploadFolder: false,
-    validators: [validateFileSize, validateFileType],
     hasError: false,
   },
   argTypes: {
@@ -117,11 +115,6 @@ const meta: Meta<FileDropzoneComponent> = {
     uploadFolder: {
       description: ` If true, allows uploading folders instead of just files. This enables the user to select a folder and upload all its contents. Default file browser behaviour will prevent upload of files in this state.`,
     },
-    validators: {
-      control: false,
-      description:
-        "Validation functions that can be used to validate files. Each function should return a string error message if validation fails, or undefined if it passes.",
-    },
     hasError: {
       description: `If true, shows the file dropzone as in a erroring state with red border.
         Overrides default validation state.`,
@@ -171,14 +164,28 @@ export const Default: Story = {
   },
 };
 
+/** Limits the maximum amount of files to 1 */
 export const MaxFileAmount: Story = {
-  ...Default,
-  
-};
+  render: (args) => {
+    const form = new FormGroup({
+      files: new FormControl(null, {
+        validators: [Validators.maxLength(1)],
+      }),
+    });
 
+    return {
+      template: Template(args),
+      props: { ...args, form },
+    };
+  },
+  args: {
+    inputId: "file-dropzone-form-control",
+    name: "file-form-control",
+  },
+};
 /** Replaces any same-name files, when usually it indexes them. */
 export const Replace: Story = {
-  render: (args) => ({ template: Template(args), props: args }),
+  ...Default,
   args: {
     mode: "replace",
   },
@@ -186,7 +193,7 @@ export const Replace: Story = {
 
 /** Custom un-translated label text. */
 export const WithHint: Story = {
-  render: (args) => ({ template: Template(args), props: args }),
+  ...Default,
   args: {
     name: "file",
     label: "Custom hint here",

@@ -1,6 +1,7 @@
+import { AbstractControl, ValidationErrors, ValidatorFn } from "@angular/forms";
 import { IECFileSize, SIFileSize } from "./constants";
 import {
-  DropzoneValidatorFunction,
+  DropzoneValidatorError,
   FileDropzone,
   FileDropzoneErrorCode,
   SizeDisplayStandard,
@@ -65,70 +66,126 @@ export function getDefaultHelpers(
   return textArray.filter(Boolean).join(". ");
 }
 
-export const validateFileSize: DropzoneValidatorFunction = (
-  maxSize: number,
-  acceptFileTypes: string,
+function sanitizeFileList(files: FileDropzone[] | unknown): FileDropzone[] {
+  if (!Array.isArray(files)) {
+    return [];
+  }
+  return files.filter((file) => file instanceof FileDropzone);
+}
+
+export const validateFileSize =
+  (
+    maxSize: number,
+    standard: SizeDisplayStandard,
+    translate: (key: string, ...args: unknown[]) => string,
+  ): ValidatorFn =>
+  (control: AbstractControl<unknown>): ValidationErrors | null => {
+    const files = sanitizeFileList(control.value);
+
+    if (!files.length) {
+      return null;
+    }
+
+    const errors: ValidationErrors = {};
+    files.forEach((file) => {
+      const err = validateSingleFileSize(file, maxSize, standard, translate);
+      if (err) {
+        errors[err.errorKey] = err.value;
+      }
+    });
+
+    if (Object.keys(errors).length) {
+      return errors;
+    }
+
+    return null;
+  };
+
+const validateSingleFileSize = (
   file: FileDropzone,
+  maxSize: number,
   standard: SizeDisplayStandard,
   translate: (key: string, ...args: unknown[]) => string,
-) => {
+): DropzoneValidatorError | null => {
   if (maxSize && file.size > maxSize) {
-    const maxSizeMB = formatBytes(maxSize, standard);
     return {
-      errorKey: "file-too-large",
+      errorKey: FileDropzoneErrorCode.FILE_TOO_LARGE,
       value: {
-        code: FileDropzoneErrorCode.FILE_TOO_LARGE,
         fileName: file.name,
         message: translate(
-          `file-upload.size-rejected-extended`,
+          "file-upload.size-rejected-extended",
           file.name,
-          maxSizeMB,
+          formatBytes(maxSize, standard),
         ),
       },
     };
   }
-  return undefined;
+  return null;
 };
 
-export const validateFileType: DropzoneValidatorFunction = (
-  maxSize: number,
-  acceptFileTypes: string,
-  file: FileDropzone,
-  standard: SizeDisplayStandard,
-  translate: (key: string, ...args: unknown[]) => string,
-) => {
-  if (acceptFileTypes) {
-    const validTypes = acceptFileTypes
-      .split(",")
-      .map((type) => type.trim().toLowerCase());
+export const validateFileType =
+  (
+    acceptFileTypes: string,
+    translate: (key: string, ...args: unknown[]) => string,
+  ): ValidatorFn =>
+  (control: AbstractControl<unknown>): ValidationErrors | null => {
+    const files = sanitizeFileList(control.value);
 
-    const fileType = file.type.toLowerCase();
-    const fileName = file.name.toLowerCase();
-
-    const matches = validTypes.some((type) => {
-      if (type.startsWith(".")) {
-        return fileName.endsWith(type);
-      }
-      if (type.endsWith("/*")) {
-        return fileType.startsWith(type.replace("/*", ""));
-      }
-      return fileType === type;
-    });
-
-    if (!matches) {
-      return {
-        errorKey: "invalid-file-type",
-        value: {
-          code: FileDropzoneErrorCode.INVALID_FILE_TYPE,
-          fileName: file.name,
-          message: translate(
-            "file-upload.extension-rejected-extended",
-            file.name,
-            acceptFileTypes,
-          ),
-        },
-      };
+    if (!files.length) {
+      return null;
     }
+
+    if (acceptFileTypes) {
+      const errors: ValidationErrors = {};
+
+      files.forEach((file) => {
+        const err = validateSingleFileType(file, acceptFileTypes, translate);
+        if (err) {
+          errors[err.errorKey] = err.value;
+        }
+      });
+
+      if (Object.keys(errors).length) {
+        return errors;
+      }
+    }
+    return null;
+  };
+
+const validateSingleFileType = (
+  file: FileDropzone,
+  acceptFileTypes: string,
+  translate: (key: string, ...args: unknown[]) => string,
+): DropzoneValidatorError | null => {
+  const validTypes = acceptFileTypes
+    .split(",")
+    .map((type) => type.trim().toLowerCase());
+
+  const fileType = file.type.toLowerCase();
+  const fileName = file.name.toLowerCase();
+
+  const matches = validTypes.some((type) => {
+    if (type.startsWith(".")) {
+      return fileName.endsWith(type);
+    }
+    if (type.endsWith("/*")) {
+      return fileType.startsWith(type.replace("/*", ""));
+    }
+    return fileType === type;
+  });
+
+  if (!matches) {
+    return {
+      errorKey: FileDropzoneErrorCode.INVALID_FILE_TYPE,
+      value: {
+        fileName: file.name,
+        message: translate(
+          "file-upload.extension-rejected-extended",
+          file.name,
+          acceptFileTypes,
+        ),
+      },
+    };
   }
-  return undefined;
+  return null;
 };

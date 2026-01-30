@@ -59,20 +59,20 @@ export class FileDropzone {
   }
 }
 
-// formcontrol error should be {key: {fileName: string, code: string, message: string}}
+export type FormControlErrors =
+  | {
+      [key: string]: SingleFileDropzoneError;
+    }
+  | null
+  | undefined;
 
-export type FormControlErrors = {
-  [key: string]: SingleFileDropzoneError;
-};
-
-export type ValidatorError = {
+export type DropzoneValidatorError = {
   errorKey: string;
   value: SingleFileDropzoneError;
 };
 
 export type SingleFileDropzoneError = {
   fileName: string;
-  code: string;
   message: string;
 };
 
@@ -84,13 +84,5 @@ export enum FileDropzoneErrorCode {
 export type FileInputMode = "append" | "replace";
 
 export type ValidationState = "none" | "valid" | "invalid";
-
-export type DropzoneValidatorFunction = (
-  maxSize: number,
-  acceptFileTypes: string,
-  file: FileDropzone,
-  standard: SizeDisplayStandard,
-  translate: (key: string, ...args: unknown[]) => string,
-) => ValidatorError | undefined;
 
 export type SizeDisplayStandard = "SI" | "IEC";
