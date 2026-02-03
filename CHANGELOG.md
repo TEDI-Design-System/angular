@@ -1,3 +1,10 @@
+# [6.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.1-rc.1...angular-6.1.0-rc.1) (2026-02-03)
+
+
+### Features
+
+* **progress-bar:** Add community progress bar [#299](https://github.com/TEDI-Design-System/angular/issues/299) ([#321](https://github.com/TEDI-Design-System/angular/issues/321)) ([3b75325](https://github.com/TEDI-Design-System/angular/commit/3b7532584d3f480b9e429d5db0fb11196d32abbc))
+
 ## [6.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0...angular-6.0.1-rc.1) (2026-01-29)
 
 
