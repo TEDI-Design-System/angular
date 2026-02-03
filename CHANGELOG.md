@@ -1,3 +1,10 @@
+# [6.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-6.1.0-rc.1...angular-6.1.0-rc.2) (2026-02-03)
+
+
+### Bug Fixes
+
+* **datepicker:** displayed value not changing on external update [#322](https://github.com/TEDI-Design-System/angular/issues/322) ([#323](https://github.com/TEDI-Design-System/angular/issues/323)) ([adfb6c1](https://github.com/TEDI-Design-System/angular/commit/adfb6c12e4855af1a4724de9e08f9fd8dbc4b835))
+
 # [6.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.1-rc.1...angular-6.1.0-rc.1) (2026-02-03)
 
 
