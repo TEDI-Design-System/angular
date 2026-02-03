@@ -1230,4 +1230,26 @@ describe("DatePickerComponent", () => {
       jest.useRealTimers();
     });
   });
+
+  describe("External selected input changes", () => {
+    it("should update inputValue when selected input is changed externally", () => {
+      const date = new Date(2024, 5, 15);
+      fixture.componentRef.setInput("selected", date);
+      fixture.detectChanges();
+
+      expect(component.inputValue()).toBe("15.06.2024");
+    });
+
+    it("should clear inputValue when selected input is set to null externally", () => {
+      fixture.componentRef.setInput("selected", new Date(2024, 5, 15));
+      fixture.detectChanges();
+
+      expect(component.inputValue()).toBe("15.06.2024");
+
+      fixture.componentRef.setInput("selected", null);
+      fixture.detectChanges();
+
+      expect(component.inputValue()).toBe("");
+    });
+  });
 });

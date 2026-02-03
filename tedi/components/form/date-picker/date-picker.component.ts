@@ -10,6 +10,7 @@ import {
   OnInit,
   viewChild,
   ElementRef,
+  effect,
 } from "@angular/core";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
@@ -272,11 +273,15 @@ export class DatePickerComponent implements OnInit {
 
   readonly translationService = inject(TediTranslationService);
 
-  ngOnInit(): void {
-    const selected = this.selected();
-    this.inputValue.set(selected ? formatDate(selected) : "");
+  constructor() {
+    effect(() => {
+      const selected = this.selected();
+      this.inputValue.set(selected ? formatDate(selected) : "");
+    });
+  }
 
-    let active = selected ?? this.today;
+  ngOnInit(): void {
+    let active = this.selected() ?? this.today;
 
     // If the initial active date is disabled, find the first enabled date
     if (this.isDisabled(active)) {
