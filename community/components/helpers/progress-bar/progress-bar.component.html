@@ -1,0 +1,20 @@
+<progress
+  class="tedi-progress__bar"
+  [id]="progressId()"
+  [max]="100"
+  [value]="value()"
+  [attr.aria-describedby]="feedbackTextId()"
+></progress>
+
+<span tedi-label size="small" class="tedi-progress__indicator"
+  >{{ value() }}%</span
+>
+
+@if (feedbackText(); as feedback) {
+  <tedi-feedback-text
+    [attr.id]="feedbackTextId()"
+    [text]="feedback.text"
+    [type]="feedback.type"
+    [position]="feedback.position"
+  />
+}
