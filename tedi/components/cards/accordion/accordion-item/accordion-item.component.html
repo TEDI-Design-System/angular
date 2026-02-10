@@ -1,0 +1,133 @@
+<div
+  class="tedi-accordion__item"
+  [class.tedi-accordion__item--selected]="selected()"
+  [class.tedi-accordion__item--expanded]="expanded()"
+>
+  @if (showIconCard()) {
+    <ng-content select="[tedi-accordion-icon-card]"></ng-content>
+  }
+
+  <div class="tedi-accordion__header-row">
+    @if (withAction()) {
+      <div
+        [id]="headerId"
+        class="tedi-accordion__header"
+        [class.tedi-accordion__header--expanded]="expanded()"
+        [class.tedi-accordion__header--with-icon-card]="showIconCard()"
+      >
+        <ng-container *ngTemplateOutlet="headerContent"></ng-container>
+      </div>
+    } @else {
+      <button
+        [id]="headerId"
+        type="button"
+        class="tedi-accordion__header tedi-accordion__header--hoverable"
+        [class.tedi-accordion__header--expanded]="expanded()"
+        [class.tedi-accordion__header--with-icon-card]="showIconCard()"
+        (click)="toggle()"
+        [attr.aria-expanded]="expanded()"
+        [attr.aria-controls]="bodyId"
+      >
+        <ng-container *ngTemplateOutlet="headerContent"></ng-container>
+      </button>
+    }
+  </div>
+
+  @if (expanded()) {
+    <div
+      class="tedi-accordion__body"
+      [id]="bodyId"
+      role="region"
+      [attr.aria-labelledby]="headerId"
+      [class.tedi-accordion__body--with-icon-card]="showIconCard()"
+    >
+      <ng-content></ng-content>
+    </div>
+  }
+</div>
+
+<ng-template #headerContent>
+  <div
+    class="tedi-accordion__start"
+    [class.tedi-accordion__start--with-description]="description()"
+  >
+    <ng-content select="[tedi-accordion-start-before-title]"></ng-content>
+
+    @if (showStartExpandIcon()) {
+      <ng-container *ngTemplateOutlet="expandIcon"></ng-container>
+    }
+
+    @if (withAction()) {
+      <ng-container *ngTemplateOutlet="collapseButton"></ng-container>
+    } @else {
+      <span tedi-text color="secondary" modifiers="normal">
+        {{ title() | tediTranslate }}
+      </span>
+    }
+
+    <ng-content select="[tedi-accordion-start-after-title]"></ng-content>
+
+    @if (descriptionPosition() !== "end") {
+      <ng-content select="[tedi-accordion-description-start]"></ng-content>
+      <ng-container *ngTemplateOutlet="descriptionBlock"></ng-container>
+    }
+  </div>
+
+  <div class="tedi-accordion__end">
+    @if (descriptionPosition() !== "start") {
+      <ng-content select="[tedi-accordion-description-end]"></ng-content>
+      <ng-container *ngTemplateOutlet="descriptionBlock"></ng-container>
+    }
+
+    @if (withAction()) {
+      <ng-content select="[tedi-accordion-action]"></ng-content>
+    }
+
+    @if (showEndExpandIcon()) {
+      @if (showExpandLabel()) {
+        <ng-container *ngTemplateOutlet="collapseButton"></ng-container>
+      } @else {
+        <ng-container *ngTemplateOutlet="expandIcon"></ng-container>
+      }
+    }
+  </div>
+</ng-template>
+
+<ng-template #collapseButton>
+  <button
+    type="button"
+    class="tedi-accordion__toggle-button"
+    [class.tedi-accordion__toggle-button-disabled]="!withAction()"
+    tedi-link
+    [underline]="false"
+    [variant]="expandLabelInverted() ? 'inverted' : 'default'"
+    [disabled]="!withAction()"
+    (click)="toggle()"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-controls]="bodyId"
+  >
+    {{ (withAction() ? title() : expandLabel()) | tediTranslate }}
+
+    <tedi-icon
+      name="expand_more"
+      [class.tedi-accordion__icon--expanded]="expanded()"
+    />
+  </button>
+</ng-template>
+
+<ng-template #expandIcon>
+  <tedi-icon
+    aria-hidden="true"
+    name="expand_more"
+    color="brand"
+    [class.tedi-accordion__icon--expanded]="expanded()"
+  />
+</ng-template>
+
+<ng-template #descriptionBlock>
+  @if (description()) {
+    <span tedi-text color="tertiary" modifiers="normal">
+      {{ description() ?? "" | tediTranslate }}
+    </span>
+  }
+</ng-template>
