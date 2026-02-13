@@ -8,16 +8,7 @@
   }
 
   <div class="tedi-accordion__header-row">
-    @if (withAction()) {
-      <div
-        [id]="headerId"
-        class="tedi-accordion__header"
-        [class.tedi-accordion__header--expanded]="expanded()"
-        [class.tedi-accordion__header--with-icon-card]="showIconCard()"
-      >
-        <ng-container *ngTemplateOutlet="headerContent"></ng-container>
-      </div>
-    } @else {
+    @if (headerClickable()) {
       <button
         [id]="headerId"
         type="button"
@@ -30,6 +21,15 @@
       >
         <ng-container *ngTemplateOutlet="headerContent"></ng-container>
       </button>
+    } @else {
+      <div
+        [id]="headerId"
+        class="tedi-accordion__header"
+        [class.tedi-accordion__header--expanded]="expanded()"
+        [class.tedi-accordion__header--with-icon-card]="showIconCard()"
+      >
+        <ng-container *ngTemplateOutlet="headerContent"></ng-container>
+      </div>
     }
   </div>
 
@@ -47,87 +47,92 @@
 </div>
 
 <ng-template #headerContent>
-  <div
-    class="tedi-accordion__start"
-    [class.tedi-accordion__start--with-description]="description()"
-  >
+  <div class="tedi-accordion__start">
+    <ng-content select="[tedi-accordion-start-action]"></ng-content>
+
     <ng-content select="[tedi-accordion-start-before-title]"></ng-content>
 
-    @if (showStartExpandIcon()) {
-      <ng-container *ngTemplateOutlet="expandIcon"></ng-container>
-    }
+    <span
+      class="tedi-accordion__title"
+      [class.tedi-accordion__title--with-description]="description()"
+      [class.tedi-accordion__title--grow]="titleLayout() === 'fill'"
+    >
+      <span class="tedi-accordion__title--main">
+        @if (showStartExpandAction()) {
+          <ng-container *ngTemplateOutlet="collapseButton"></ng-container>
+        }
 
-    @if (withAction()) {
-      <ng-container *ngTemplateOutlet="collapseButton"></ng-container>
-    } @else {
-      <span tedi-text color="secondary" modifiers="normal">
-        {{ title() | tediTranslate }}
+        @if (showDefaultTitle()) {
+          <span tedi-text color="secondary" modifiers="normal">
+            {{ title() | tediTranslate }}
+          </span>
+        }
       </span>
-    }
+
+      @if (descriptionPosition() !== "end") {
+        <ng-content select="[tedi-accordion-start-description]"></ng-content>
+
+        @if (description(); as desc) {
+          <span tedi-text color="tertiary" modifiers="normal">
+            {{ desc | tediTranslate }}
+          </span>
+        }
+      }
+    </span>
 
     <ng-content select="[tedi-accordion-start-after-title]"></ng-content>
-
-    @if (descriptionPosition() !== "end") {
-      <ng-content select="[tedi-accordion-description-start]"></ng-content>
-      <ng-container *ngTemplateOutlet="descriptionBlock"></ng-container>
-    }
   </div>
 
-  <div class="tedi-accordion__end">
-    @if (descriptionPosition() !== "start") {
-      <ng-content select="[tedi-accordion-description-end]"></ng-content>
-      <ng-container *ngTemplateOutlet="descriptionBlock"></ng-container>
-    }
+  @if (descriptionPosition() !== "start") {
+    <ng-content select="[tedi-accordion-end-description]"></ng-content>
 
-    @if (withAction()) {
-      <ng-content select="[tedi-accordion-action]"></ng-content>
+    @if (description(); as desc) {
+      <span tedi-text color="tertiary" modifiers="small">
+        {{ desc | tediTranslate }}
+      </span>
     }
+  }
 
-    @if (showEndExpandIcon()) {
-      @if (showExpandLabel()) {
-        <ng-container *ngTemplateOutlet="collapseButton"></ng-container>
-      } @else {
-        <ng-container *ngTemplateOutlet="expandIcon"></ng-container>
-      }
-    }
-  </div>
+  @if (showEndExpandAction()) {
+    <ng-container *ngTemplateOutlet="collapseButton"></ng-container>
+  }
+
+  <ng-content select="[tedi-accordion-end-action]"></ng-content>
 </ng-template>
 
 <ng-template #collapseButton>
-  <button
-    type="button"
-    class="tedi-accordion__toggle-button"
-    [class.tedi-accordion__toggle-button-disabled]="!withAction()"
-    tedi-link
-    [underline]="false"
-    [variant]="expandLabelInverted() ? 'inverted' : 'default'"
-    [disabled]="!withAction()"
-    (click)="toggle()"
-    [attr.aria-expanded]="expanded()"
-    [attr.aria-controls]="bodyId"
-  >
-    {{ (withAction() ? title() : expandLabel()) | tediTranslate }}
-
-    <tedi-icon
-      name="expand_more"
-      [class.tedi-accordion__icon--expanded]="expanded()"
-    />
-  </button>
+  @if (headerClickable()) {
+    <div
+      tedi-text
+      modifiers="normal"
+      class="tedi-accordion__expand-indicator"
+      [class.tedi-accordion__expand-indicator--with-label]="showExpandLabel()"
+    >
+      <span>
+        {{ (showExpandLabel() ? expandLabel() : "") | tediTranslate }}
+      </span>
+      <ng-container *ngTemplateOutlet="expandIcon"></ng-container>
+    </div>
+  } @else {
+    <button
+      type="button"
+      class="tedi-accordion__toggle-button"
+      tedi-link
+      [underline]="false"
+      (click)="toggle()"
+      [attr.aria-expanded]="expanded()"
+      [attr.aria-controls]="bodyId"
+    >
+      {{ title() | tediTranslate }}
+      <ng-container *ngTemplateOutlet="expandIcon"></ng-container>
+    </button>
+  }
 </ng-template>
 
 <ng-template #expandIcon>
   <tedi-icon
     aria-hidden="true"
     name="expand_more"
-    color="brand"
     [class.tedi-accordion__icon--expanded]="expanded()"
   />
-</ng-template>
-
-<ng-template #descriptionBlock>
-  @if (description()) {
-    <span tedi-text color="tertiary" modifiers="normal">
-      {{ description() ?? "" | tediTranslate }}
-    </span>
-  }
 </ng-template>

@@ -1,11 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ContentChildren,
-  QueryList,
   ViewEncapsulation,
-  AfterContentInit,
   input,
+  contentChildren,
 } from "@angular/core";
 import { AccordionItemComponent } from "../accordion-item/accordion-item.component";
 
@@ -16,33 +14,24 @@ import { AccordionItemComponent } from "../accordion-item/accordion-item.compone
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AccordionComponent implements AfterContentInit {
+export class AccordionComponent {
   /**
    * Whether the accordion allows multiple items to be expanded at the same time.
    * If false, opening one item will collapse the others automatically.
    */
   multiple = input(false);
 
-  @ContentChildren(AccordionItemComponent)
-  items!: QueryList<AccordionItemComponent>;
+  items = contentChildren(AccordionItemComponent);
 
-  ngAfterContentInit() {
-    this.items.forEach((item) => {
-      item.toggled.subscribe(() => {
-        this.onItemToggled(item);
+  onItemToggled(activeItem: AccordionItemComponent) {
+    if (this.multiple()) return;
+
+    if (activeItem.expanded()) {
+      this.items().forEach((item) => {
+        if (item !== activeItem) {
+          item.setExpanded(false);
+        }
       });
-    });
-  }
-
-  private onItemToggled(activeItem: AccordionItemComponent) {
-    const shouldExpand = !activeItem.expanded();
-
-    this.items.forEach((item) => {
-      if (item === activeItem) {
-        item.setExpanded(shouldExpand);
-      } else if (!this.multiple()) {
-        item.setExpanded(false);
-      }
-    });
+    }
   }
 }

@@ -39,25 +39,23 @@ describe("AccordionItemComponent", () => {
     expect(body).not.toBeNull();
   });
 
-  it("should emit toggled when header button is clicked", () => {
+  it("should expand when header button is clicked", () => {
     fixture.detectChanges();
-
-    const spy = jest.fn();
-    component.toggled.subscribe(spy);
 
     const button = fixture.debugElement.query(
       By.css("button.tedi-accordion__header"),
     );
 
+    expect(component.expanded()).toBe(false);
+
     button.triggerEventHandler("click");
     fixture.detectChanges();
 
-    expect(spy).toHaveBeenCalled();
-    expect(component.expanded()).toBe(false);
+    expect(component.expanded()).toBe(true);
   });
 
-  it("should not toggle expanded when withAction is true and header is clicked", () => {
-    fixture.componentRef.setInput("withAction", true);
+  it("should not toggle expanded when headerClickable is false and header is clicked", () => {
+    fixture.componentRef.setInput("headerClickable", false);
     fixture.detectChanges();
 
     const header = fixture.debugElement.query(
@@ -93,15 +91,15 @@ describe("AccordionItemComponent", () => {
     expect(button.getAttribute("aria-expanded")).toBe("true");
   });
 
-  it("should emit toggled selected state when action button is clicked", () => {
-    const spy = jest.fn();
-    component.selectToggle.subscribe(spy);
+  it("should apply selected class when selected=true", () => {
+    fixture.componentRef.setInput("selected", true);
+    fixture.detectChanges();
 
-    fixture.componentRef.setInput("selected", false);
+    const item = fixture.debugElement.query(By.css(".tedi-accordion__item"));
 
-    component.onSelectClick(new MouseEvent("click"));
-
-    expect(spy).toHaveBeenCalledWith(true);
+    expect(item.nativeElement.classList).toContain(
+      "tedi-accordion__item--selected",
+    );
   });
 
   it("should show open label when collapsed and close label when expanded", () => {
@@ -115,19 +113,4 @@ describe("AccordionItemComponent", () => {
     expect(component.expandLabel()).toBe("Close");
   });
 
-  it("should show start expand icon only when position=start and no action", () => {
-    fixture.componentRef.setInput("expandIconPosition", "start");
-    fixture.componentRef.setInput("withAction", false);
-
-    expect(component.showStartExpandIcon()).toBe(true);
-    expect(component.showEndExpandIcon()).toBe(false);
-  });
-
-  it("should not show expand icons when withAction is true", () => {
-    fixture.componentRef.setInput("expandIconPosition", "start");
-    fixture.componentRef.setInput("withAction", true);
-
-    expect(component.showStartExpandIcon()).toBe(false);
-    expect(component.showEndExpandIcon()).toBe(false);
-  });
 });

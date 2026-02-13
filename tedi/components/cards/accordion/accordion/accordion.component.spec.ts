@@ -51,7 +51,7 @@ describe("AccordionComponent", () => {
   });
 
   it("should register all accordion items via ContentChildren", () => {
-    expect(accordion.items.length).toBe(3);
+    expect(accordion.items().length).toBe(3);
   });
 
   it("should expand clicked item", () => {

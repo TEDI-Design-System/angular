@@ -4,10 +4,10 @@ import {
   Component,
   ViewEncapsulation,
   input,
-  output,
-  signal,
   OnInit,
   computed,
+  model,
+  inject,
 } from "@angular/core";
 import {
   IconComponent,
@@ -16,6 +16,7 @@ import {
   generateUUID,
   TediTranslationPipe,
 } from "@tedi-design-system/angular/tedi";
+import { AccordionComponent } from "../accordion/accordion.component";
 
 @Component({
   selector: "tedi-accordion-item",
@@ -33,94 +34,85 @@ import {
   ],
 })
 export class AccordionItemComponent implements OnInit {
+  /**
+   * If false, disables header toggling and enables using interactive elements in the accordion header.
+   */
+  headerClickable = input(true);
+  /** The title of the accordion item. */
   title = input("");
-
-  /** Optional description text shown in the header */
-  description = input<string | undefined>(undefined);
-
+  /**
+   * Sets how the accordion title stretches horizontally.
+   * `hug` - container sizes to its content.
+   * `fill` - container expands to available space, moving any trailing elements to the end.
+   */
+  titleLayout = input<"hug" | "fill">("hug");
+  /** Whether the default title text is shown in the header. */
+  showDefaultTitle = input(true);
+  /** Label shown when accordion is collapsed */
+  openLabel = input<string>("open");
+  /** Label shown when accordion is expanded */
+  closeLabel = input<string>("close");
+  /**
+   * Controls whether the expand/collapse label is shown.
+   */
+  showExpandLabel = input(true);
+  /**
+   * Controls whether the default expand/collapse icon is shown.
+   */
+  showExpandIcon = input(true);
+  /**
+   * Position of the expand action relative to the header content.
+   */
+  expandActionPosition = input<"start" | "end">("end");
   /**
    * Whether the accordion item is expanded initially.
    * Does not control the expanded state after initialization.
    */
   defaultExpanded = input(false);
-
-  /**
-   * Marks the accordion item as selected.
-   * Used together with `withAction` to render selection UI.
-   */
-  selected = input(false);
-
-  /**
-   * Controls whether the expand/collapse label is shown.
-   */
-  showExpandLabel = input(true);
-
-  /**
-   * Uses the inverted color variant for the expand label.
-   */
-  expandLabelInverted = input(false);
-
-  /** Label shown when accordion is collapsed */
-  openLabel = input<string>("open");
-
-  /** Label shown when accordion is expanded */
-  closeLabel = input<string>("close");
-
-  /**
-   * Position of the expand icon relative to the header content.
-   * Has no effect when `withAction` is true.
-   */
-  expandIconPosition = input<"start" | "end">("end");
-
+  /** Optional description text shown in the header */
+  description = input<string | undefined>(undefined);
   /**
    * Position of the description relative to the title.
    */
   descriptionPosition = input<"start" | "end" | "both">("start");
-
   /**
    * Enables the icon-card layout variant.
    */
   showIconCard = input(false);
-
   /**
-   * Disables header toggling and enables action slot usage.
+   * Marks the accordion item as selected.
    */
-  withAction = input(false);
+  selected = input(false);
 
-  expanded = signal(false);
-
-  toggled = output<void>();
-  selectToggle = output<boolean>();
+  expanded = model(false);
 
   readonly bodyId = `tedi-accordion-body-${generateUUID()}`;
   readonly headerId = `tedi-accordion-header-${generateUUID()}`;
 
+  private readonly accordion = inject(AccordionComponent, { optional: true });
+
   ngOnInit() {
-    this.expanded.set(this.defaultExpanded());
+    this.setExpanded(this.defaultExpanded());
   }
 
   toggle() {
-    this.toggled.emit();
+    this.setExpanded(!this.expanded());
+    this.accordion?.onItemToggled(this);
   }
 
   setExpanded(value: boolean) {
     this.expanded.set(value);
   }
 
-  onSelectClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.selectToggle.emit(!this.selected());
-  }
-
   expandLabel = computed(() =>
     this.expanded() ? this.closeLabel() : this.openLabel(),
   );
 
-  showStartExpandIcon = computed(
-    () => !this.withAction() && this.expandIconPosition() === "start",
+  showStartExpandAction = computed(
+    () => this.showExpandIcon() && this.expandActionPosition() === "start",
   );
 
-  showEndExpandIcon = computed(
-    () => !this.withAction() && this.expandIconPosition() === "end",
+  showEndExpandAction = computed(
+    () => this.showExpandIcon() && this.expandActionPosition() === "end",
   );
 }
