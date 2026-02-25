@@ -138,13 +138,14 @@
   grid-column: span 2;
   width: 100%;
   font-size: var(--heading-h6-size);
+  color: var(--form-input-text-filled);
   text-align: center;
   outline: none;
   background-color: var(--form-input-background-default);
   border: 0;
   border-radius: 0;
 
-  //  /* Chrome, Safari, Edge, Opera */
+  /* Chrome, Safari, Edge, Opera */
   &::-webkit-outer-spin-button,
   &::-webkit-inner-spin-button {
     appearance: none;
