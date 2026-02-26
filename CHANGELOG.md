@@ -1,3 +1,18 @@
+# [6.1.0](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0...angular-6.1.0) (2026-02-26)
+
+
+### Bug Fixes
+
+* **datepicker:** displayed value not changing on external update [#322](https://github.com/TEDI-Design-System/angular/issues/322) ([#323](https://github.com/TEDI-Design-System/angular/issues/323)) ([adfb6c1](https://github.com/TEDI-Design-System/angular/commit/adfb6c12e4855af1a4724de9e08f9fd8dbc4b835))
+* **vertical-stepper:** add missing export [#254](https://github.com/TEDI-Design-System/angular/issues/254) ([#309](https://github.com/TEDI-Design-System/angular/issues/309)) ([5355844](https://github.com/TEDI-Design-System/angular/commit/53558446861cf960f94918ac4cec5113019b2982))
+
+
+### Features
+
+* **progress-bar:** Add community progress bar [#299](https://github.com/TEDI-Design-System/angular/issues/299) ([b22be12](https://github.com/TEDI-Design-System/angular/commit/b22be1234eeab7bea67172bc4b9e3084af21a835))
+* **progress-bar:** Add community progress bar [#299](https://github.com/TEDI-Design-System/angular/issues/299) ([#321](https://github.com/TEDI-Design-System/angular/issues/321)) ([3b75325](https://github.com/TEDI-Design-System/angular/commit/3b7532584d3f480b9e429d5db0fb11196d32abbc))
+* **progress-bar:** add progress bar exports [#299](https://github.com/TEDI-Design-System/angular/issues/299) ([e6bc4bf](https://github.com/TEDI-Design-System/angular/commit/e6bc4bfb25456882e98673bc6af7499a1faffdec))
+
 # [6.1.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.1.0-rc.2...angular-6.1.0-rc.3) (2026-02-12)
 
 
