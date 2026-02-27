@@ -10,7 +10,7 @@ describe("AccordionItemComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AccordionItemComponent],
-      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "en" }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AccordionItemComponent);
@@ -113,4 +113,23 @@ describe("AccordionItemComponent", () => {
     expect(component.expandLabel()).toBe("Close");
   });
 
+  it("should include custom header and body classes when set", () => {
+    fixture.componentRef.setInput("headerClass", "custom-header");
+    fixture.componentRef.setInput("bodyClass", "custom-body");
+    fixture.detectChanges();
+
+    expect(component.headerClasses()).toEqual({
+      "custom-header": true,
+      "tedi-accordion__header": true,
+      "tedi-accordion__header--hoverable": true,
+      "tedi-accordion__header--expanded": false,
+      "tedi-accordion__header--with-icon-card": false,
+    });
+
+    expect(component.bodyClasses()).toEqual({
+      "custom-body": true,
+      "tedi-accordion__body": true,
+      "tedi-accordion__body--with-icon-card": false,
+    });
+  });
 });

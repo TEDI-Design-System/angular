@@ -4,6 +4,14 @@ import { AccordionItemComponent } from "./accordion-item/accordion-item.componen
 import { IconComponent, TextComponent } from "tedi/components/base";
 import { ButtonComponent } from "tedi/components/buttons";
 import { StatusBadgeComponent } from "community/components/tags";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
+
+document.cookie = "tedi-lang=en; path=/;";
+
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.30.43?node-id=8048-69789&t=aqojgjkZcOYAN35p-0" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.tedi.ee/1ee8444b7/p/00e937-accordion" target="_blank">Zeroheight ↗</a><br /><br />
+ */
 
 export default {
   title: "TEDI-Ready/Components/Cards/Accordion",
@@ -17,32 +25,11 @@ export default {
         ButtonComponent,
         StatusBadgeComponent,
       ],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "en" }],
     }),
   ],
-  parameters: {
-    docs: {
-      description: {
-        component: `
-<a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.30.43?node-id=8048-69789&t=aqojgjkZcOYAN35p-0" target="_blank">Figma ↗</a><br />
-<a href="https://www.tedi.ee/1ee8444b7/p/00e937-accordion" target="_blank">Zeroheight ↗</a><br /><br />
-
-### Slots
-
-| Selector | Description |
-|----------|------------|
-| \`[tedi-accordion-start-action]\` | Custom actions at the start of the header. |
-| \`[tedi-accordion-start-before-title]\` | Custom elements before the title. |
-| \`[tedi-accordion-start-after-title]\` | Custom elements after the title. |
-| \`[tedi-accordion-end-action]\` | Custom actions at the end of the header. |
-| \`[tedi-accordion-start-description]\` | Custom description content rendered below the title. |
-| \`[tedi-accordion-end-description]\` | Custom description content rendered at the end of the header. |
-| \`[tedi-accordion-icon-card]\` | Template for rendering the icon card layout. |
-      `,
-      },
-    },
-  },
   argTypes: {
-    multiple: {
+    allowMultiple: {
       control: "boolean",
       description: "Whether multiple accordion items can be opened at once.",
       table: {
@@ -122,7 +109,7 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
-    showExpandIcon: {
+    showDefaultExpandAction: {
       control: "boolean",
       description:
         "Whether to show the default expand/collapse icon. If false, you can add your own expand icon with slots.",
@@ -191,6 +178,24 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    headerClass: {
+      control: "text",
+      description: "Custom CSS classes for the accordion header.",
+      table: {
+        category: "Accordion Item",
+        type: { summary: "string" },
+        defaultValue: { summary: "" },
+      },
+    },
+    bodyClass: {
+      control: "text",
+      description: "Custom CSS classes for the accordion body.",
+      table: {
+        category: "Accordion Item",
+        type: { summary: "string" },
+        defaultValue: { summary: "" },
+      },
+    },
   },
 } as Meta;
 
@@ -222,8 +227,25 @@ const actionButtonTemplate = (selectedState: string, toggleFn: string) => `
 `;
 
 export const Default: StoryObj = {
+  parameters: {
+    docs: {
+      description: {
+        story: `
+| Selector | Description |
+|----------|------------|
+| \`[tedi-accordion-start-action]\` | Custom actions at the start of the header. |
+| \`[tedi-accordion-start-before-title]\` | Custom elements before the title. |
+| \`[tedi-accordion-start-after-title]\` | Custom elements after the title. |
+| \`[tedi-accordion-end-action]\` | Custom actions at the end of the header. |
+| \`[tedi-accordion-start-description]\` | Custom description content rendered below the title. |
+| \`[tedi-accordion-end-description]\` | Custom description content rendered at the end of the header. |
+| \`[tedi-accordion-icon-card]\` | Template for rendering the icon card layout. |
+      `,
+      },
+    },
+  },
   args: {
-    multiple: false,
+    allowMultiple: false,
     headerClickable: true,
     title: "Title",
     titleLayout: "hug",
@@ -231,13 +253,15 @@ export const Default: StoryObj = {
     openLabel: "open",
     closeLabel: "close",
     showExpandLabel: true,
-    showExpandIcon: true,
+    showDefaultExpandAction: true,
     expandActionPosition: "end",
     defaultExpanded: false,
     description: "",
     descriptionPosition: "start",
     showIconCard: false,
     selected: false,
+    headerClass: "",
+    bodyClass: "",
   },
   render: (args) => ({
     props: {
@@ -247,7 +271,7 @@ export const Default: StoryObj = {
       },
     },
     template: `
-      <tedi-accordion [multiple]="multiple">
+      <tedi-accordion [allowMultiple]="allowMultiple">
         <tedi-accordion-item
           [headerClickable]="headerClickable"
           [title]="title"
@@ -256,13 +280,15 @@ export const Default: StoryObj = {
           [openLabel]="openLabel"
           [closeLabel]="closeLabel"
           [showExpandLabel]="showExpandLabel"
-          [showExpandIcon]="showExpandIcon"
+          [showDefaultExpandAction]="showDefaultExpandAction"
           [expandActionPosition]="expandActionPosition"
           [defaultExpanded]="defaultExpanded"
           [description]="description"
           [descriptionPosition]="descriptionPosition"
           [showIconCard]="showIconCard"
           [selected]="selected"
+          [headerClass]="headerClass"
+          [bodyClass]="bodyClass"
         >
           ${`
             @if (!headerClickable) {
@@ -284,6 +310,13 @@ export const Default: StoryObj = {
 export const Header: StoryObj = {
   render: () => ({
     template: `
+      <style>
+        ::ng-deep .tedi-accordion__header.custom-header,
+        ::ng-deep .tedi-accordion__body.custom-body {
+          padding: var(--card-padding-lg);
+          background: var(--card-background-brand-quaternary);
+        }
+      </style>
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <tedi-accordion>
           <tedi-accordion-item [title]="'Title'">
@@ -377,11 +410,18 @@ export const Header: StoryObj = {
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item #item [title]="'Title'" [showExpandLabel]="false" [showExpandIcon]="false" [headerClickable]="false" [selected]="selectedC">
+          <tedi-accordion-item
+            #item
+            [title]="'Title'"
+            [showDefaultExpandAction]="false"
+            [headerClickable]="false"
+            [headerClass]="'custom-header'"
+            [bodyClass]="'custom-body'"
+          >
             <img tedi-accordion-start-before-title src="accordion_example.png" alt="Accordion example" />
             <button tedi-accordion-end-action tedi-button variant="neutral" (click)="item.toggle()">
-              <tedi-icon name="arrow_downward"></tedi-icon>
-              Custom
+              <tedi-icon [name]="item.expanded() ? 'arrow_upward' : 'arrow_downward'"></tedi-icon>
+              {{ item.expanded() ? 'Show less' : 'Show more' }}
             </button>
             ${contentExample}
           </tedi-accordion-item>

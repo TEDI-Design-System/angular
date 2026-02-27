@@ -10,7 +10,7 @@ import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.t
   standalone: true,
   imports: [AccordionComponent, AccordionItemComponent],
   template: `
-    <tedi-accordion [multiple]="multiple">
+    <tedi-accordion [allowMultiple]="allowMultiple">
       <tedi-accordion-item title="Item 1"></tedi-accordion-item>
       <tedi-accordion-item title="Item 2"></tedi-accordion-item>
       <tedi-accordion-item title="Item 3"></tedi-accordion-item>
@@ -18,7 +18,7 @@ import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.t
   `,
 })
 class TestHostComponent {
-  multiple = false;
+  allowMultiple = false;
 }
 
 describe("AccordionComponent", () => {
@@ -30,7 +30,7 @@ describe("AccordionComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
-      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "en" }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TestHostComponent);
@@ -71,7 +71,7 @@ describe("AccordionComponent", () => {
     expect(items[0].expanded()).toBe(false);
   });
 
-  it("should collapse other items when multiple=false", () => {
+  it("should collapse other items when allowMultiple=false", () => {
     items[0].toggle();
     fixture.detectChanges();
 
@@ -82,8 +82,8 @@ describe("AccordionComponent", () => {
     expect(items[1].expanded()).toBe(true);
   });
 
-  it("should allow multiple items expanded when multiple=true", () => {
-    host.multiple = true;
+  it("should allow multiple items expanded when allowMultiple=true", () => {
+    host.allowMultiple = true;
     fixture.detectChanges();
 
     items[0].toggle();

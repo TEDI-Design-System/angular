@@ -17,6 +17,7 @@ import {
   TediTranslationPipe,
 } from "@tedi-design-system/angular/tedi";
 import { AccordionComponent } from "../accordion/accordion.component";
+import { NgClass } from "@angular/common";
 
 @Component({
   selector: "tedi-accordion-item",
@@ -31,6 +32,7 @@ import { AccordionComponent } from "../accordion/accordion.component";
     TextComponent,
     LinkComponent,
     TediTranslationPipe,
+    NgClass,
   ],
 })
 export class AccordionItemComponent implements OnInit {
@@ -57,9 +59,9 @@ export class AccordionItemComponent implements OnInit {
    */
   showExpandLabel = input(true);
   /**
-   * Controls whether the default expand/collapse icon is shown.
+   * Controls whether the default expand/collapse action is shown.
    */
-  showExpandIcon = input(true);
+  showDefaultExpandAction = input(true);
   /**
    * Position of the expand action relative to the header content.
    */
@@ -83,6 +85,14 @@ export class AccordionItemComponent implements OnInit {
    * Marks the accordion item as selected.
    */
   selected = input(false);
+  /**
+   * Custom CSS classes for the accordion header.
+   */
+  headerClass = input<string | null>(null);
+  /**
+   * Custom CSS classes for the accordion body.
+   */
+  bodyClass = input<string | null>(null);
 
   expanded = model(false);
 
@@ -109,10 +119,33 @@ export class AccordionItemComponent implements OnInit {
   );
 
   showStartExpandAction = computed(
-    () => this.showExpandIcon() && this.expandActionPosition() === "start",
+    () =>
+      this.showDefaultExpandAction() && this.expandActionPosition() === "start",
   );
 
   showEndExpandAction = computed(
-    () => this.showExpandIcon() && this.expandActionPosition() === "end",
+    () =>
+      this.showDefaultExpandAction() && this.expandActionPosition() === "end",
   );
+
+  readonly headerClasses = computed(() => {
+    const customClass = this.headerClass();
+
+    return {
+      ...(customClass ? { [customClass]: true } : {}),
+      "tedi-accordion__header": true,
+      "tedi-accordion__header--hoverable": this.headerClickable(),
+      "tedi-accordion__header--expanded": this.expanded(),
+      "tedi-accordion__header--with-icon-card": this.showIconCard(),
+    };
+  });
+
+  readonly bodyClasses = computed(() => {
+    const customClass = this.bodyClass();
+    return {
+      ...(customClass ? { [customClass]: true } : {}),
+      "tedi-accordion__body": true,
+      "tedi-accordion__body--with-icon-card": this.showIconCard(),
+    };
+  });
 }

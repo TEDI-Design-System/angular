@@ -12,9 +12,7 @@
       <button
         [id]="headerId"
         type="button"
-        class="tedi-accordion__header tedi-accordion__header--hoverable"
-        [class.tedi-accordion__header--expanded]="expanded()"
-        [class.tedi-accordion__header--with-icon-card]="showIconCard()"
+        [ngClass]="headerClasses()"
         (click)="toggle()"
         [attr.aria-expanded]="expanded()"
         [attr.aria-controls]="bodyId"
@@ -22,12 +20,7 @@
         <ng-container *ngTemplateOutlet="headerContent"></ng-container>
       </button>
     } @else {
-      <div
-        [id]="headerId"
-        class="tedi-accordion__header"
-        [class.tedi-accordion__header--expanded]="expanded()"
-        [class.tedi-accordion__header--with-icon-card]="showIconCard()"
-      >
+      <div [id]="headerId" [ngClass]="headerClasses()">
         <ng-container *ngTemplateOutlet="headerContent"></ng-container>
       </div>
     }
@@ -35,11 +28,10 @@
 
   @if (expanded()) {
     <div
-      class="tedi-accordion__body"
+      [ngClass]="bodyClasses()"
       [id]="bodyId"
       role="region"
       [attr.aria-labelledby]="headerId"
-      [class.tedi-accordion__body--with-icon-card]="showIconCard()"
     >
       <ng-content></ng-content>
     </div>
