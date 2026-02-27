@@ -226,6 +226,7 @@ export class TextFieldComponent implements ControlValueAccessor {
     const customClass = this.class();
 
     return {
+      "tedi-text-field": true,
       ...(customClass ? { [customClass]: true } : {}),
       "tedi-text-field--hover": this._forceState() === "Hover",
       "tedi-text-field--active": this._forceState() === "Active",
@@ -243,6 +244,7 @@ export class TextFieldComponent implements ControlValueAccessor {
     const customClass = this.inputClass();
 
     return {
+      "tedi-text-field__input": true,
       ...(customClass ? { [customClass]: true } : {}),
       "tedi-text-field__input--arrows-hidden": this.arrowsHidden(),
     };

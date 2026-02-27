@@ -176,6 +176,24 @@ export default {
         type: { summary: "InputHTMLAttributes<HTMLInputElement>" },
       },
     },
+    class: {
+      control: "text",
+      description: "Custom CSS classes for the container.",
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+        defaultValue: { summary: "" },
+      },
+    },
+    inputClass: {
+      control: "text",
+      description: "Custom CSS classes for the input element.",
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+        defaultValue: { summary: "" },
+      },
+    },
   },
 } as Meta<TextFieldComponent>;
 
@@ -196,6 +214,8 @@ export const Default: StoryObj<TextFieldComponent> = {
     readOnly: false,
     arrowsHidden: true,
     inputAttrs: {},
+    class: "",
+    inputClass: "",
   },
   render: (args) => ({
     props: {

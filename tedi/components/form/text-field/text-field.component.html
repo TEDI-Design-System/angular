@@ -9,9 +9,8 @@
   </label>
 }
 
-<div class="tedi-text-field" [ngClass]="containerClasses()">
+<div [ngClass]="containerClasses()">
   <input
-    class="tedi-text-field__input"
     [ngClass]="inputClasses()"
     [id]="inputId()"
     [value]="value()"
