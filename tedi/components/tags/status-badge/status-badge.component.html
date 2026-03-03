@@ -1,0 +1,35 @@
+@if (title()) {
+  <abbr
+    [ngClass]="classes()"
+    [attr.id]="uniqueId"
+    [attr.title]="title()"
+    [attr.role]="role()"
+    [attr.aria-live]="ariaLive()"
+  >
+    <ng-container *ngTemplateOutlet="statusBadgeContent"></ng-container>
+  </abbr>
+} @else {
+  <div
+    [ngClass]="classes()"
+    [attr.id]="uniqueId"
+    [attr.role]="role()"
+    [attr.aria-live]="ariaLive()"
+  >
+    <ng-container *ngTemplateOutlet="statusBadgeContent"></ng-container>
+  </div>
+}
+
+<ng-template #statusBadgeContent>
+  @if (icon()) {
+    <tedi-icon
+      class="tedi-status-badge__icon"
+      [name]="icon()"
+      [color]="mapBadgeColorToIconColor()"
+      [size]="16"
+    />
+  }
+
+  @if (text()) {
+    <span class="tedi-status-badge__text">{{ text() }}</span>
+  }
+</ng-template>
