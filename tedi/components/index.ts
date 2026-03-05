@@ -8,3 +8,4 @@ export * from "./loader";
 export * from "./navigation";
 export * from "./overlay";
 export * from "./notifications";
+export * from "./tags";

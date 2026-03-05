@@ -2,24 +2,22 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
   ViewEncapsulation,
 } from "@angular/core";
-import {
-  IconComponent,
-  SpinnerComponent,
-  TediTranslationPipe,
-} from "@tedi-design-system/angular/tedi";
+import { IconComponent } from "../../base/icon/icon.component";
+import { SpinnerComponent } from "../../loader/spinner/spinner.component";
+import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
+import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
+import { _IdGenerator } from '@angular/cdk/a11y';
 
 export type TagType = "primary" | "secondary" | "danger";
 
-/**
- * @deprecated Use Tag from TEDI-ready instead. This component will be removed from future versions.
- */
 @Component({
   selector: "tedi-tag",
-  imports: [SpinnerComponent, IconComponent, TediTranslationPipe],
+  imports: [SpinnerComponent, IconComponent, ClosingButtonComponent, TediTranslationPipe],
   templateUrl: "./tag.component.html",
   styleUrl: "./tag.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -32,6 +30,8 @@ export type TagType = "primary" | "secondary" | "danger";
   },
 })
 export class TagComponent {
+  readonly idGenerator = inject(_IdGenerator);
+  readonly uniqueId = this.idGenerator.getId('tedi-tag');
   /**
    * Whether the tag is in loading state.
    * When true, a spinner will be displayed inside the tag.
@@ -55,7 +55,6 @@ export class TagComponent {
 
   /**
    * Event emitted when the close button is clicked.
-   * Only relevant when closable is true.
    */
   closed = output<Event>();
 
