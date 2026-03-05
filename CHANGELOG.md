@@ -1,3 +1,10 @@
+# [6.2.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.1.0...angular-6.2.0-rc.1) (2026-03-05)
+
+
+### Features
+
+* **tag:** new tedi-ready component [#297](https://github.com/TEDI-Design-System/angular/issues/297) ([#298](https://github.com/TEDI-Design-System/angular/issues/298)) ([caf0293](https://github.com/TEDI-Design-System/angular/commit/caf0293115f73095ab9077ca8f5b62cdad535ecf))
+
 # [6.1.0](https://github.com/TEDI-Design-System/angular/compare/angular-6.0.0...angular-6.1.0) (2026-02-26)
 
 
