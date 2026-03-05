@@ -95,12 +95,12 @@ export default {
     size: {
       description: "Input field size.",
       control: {
-        type: "select",
+        type: "radio",
       },
       options: ["default", "small", "large"],
       table: {
         category: "inputs",
-        type: { summary: "TextFieldSize", detail: "default \nsmall" },
+        type: { summary: "InputSize", detail: "default \nsmall \nlarge" },
         defaultValue: { summary: "default" },
       },
     },
@@ -182,7 +182,6 @@ export default {
       table: {
         category: "inputs",
         type: { summary: "string" },
-        defaultValue: { summary: "" },
       },
     },
     inputClass: {
@@ -191,7 +190,6 @@ export default {
       table: {
         category: "inputs",
         type: { summary: "string" },
-        defaultValue: { summary: "" },
       },
     },
   },
@@ -202,20 +200,12 @@ export const Default: StoryObj<TextFieldComponent> = {
     inputId: "example-id",
     label: "Label",
     required: false,
-    value: "",
     invalid: false,
     disabled: false,
-    placeholder: "Placeholder",
-    icon: {
-      name: "person",
-    },
     isClearable: false,
-    name: "",
     readOnly: false,
     arrowsHidden: true,
-    inputAttrs: {},
-    class: "",
-    inputClass: "",
+    size: "default",
   },
   render: (args) => ({
     props: {

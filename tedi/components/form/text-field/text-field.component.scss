@@ -4,6 +4,7 @@
   gap: var(--form-field-inner-spacing);
   align-items: center;
   width: 100%;
+  height: var(--form-field-height);
   background: var(--form-input-background-default);
   border: 1px solid var(--form-input-border-default);
   border-radius: var(--form-field-radius);
@@ -48,16 +49,22 @@
     box-shadow: none;
   }
 
-  &--small .tedi-text-field__input {
+  &--small {
     height: var(--form-field-height-sm);
-    padding-block: var(--form-field-padding-y-sm);
-    padding-inline: var(--form-field-padding-x-md-default);
+
+    .tedi-text-field__input {
+      padding-block: var(--form-field-padding-y-sm);
+      padding-inline: var(--form-field-padding-x-md-default);
+    }
   }
 
-  &--large .tedi-text-field__input {
+  &--large {
     height: var(--form-field-height-lg);
-    padding-block: var(--form-field-padding-y-lg);
-    padding-inline: var(--form-field-padding-x-lg);
+
+    .tedi-text-field__input {
+      padding-block: var(--form-field-padding-y-lg);
+      padding-inline: var(--form-field-padding-x-lg);
+    }
   }
 
   &--with-icon {
@@ -81,7 +88,6 @@
 
 .tedi-text-field__input {
   flex: 1;
-  height: var(--form-field-height);
   padding: var(--form-field-padding-y-md-default)
     var(--form-field-padding-x-md-default);
   font-size: var(--body-regular-size);
