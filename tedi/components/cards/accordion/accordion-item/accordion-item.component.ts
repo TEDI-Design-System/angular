@@ -48,8 +48,11 @@ export class AccordionItemComponent implements OnInit {
    * `fill` - container expands to available space, moving any trailing elements to the end.
    */
   titleLayout = input<"hug" | "fill">("hug");
-  /** Whether the default title text is shown in the header. */
-  showDefaultTitle = input(true);
+  /**
+   * Whether the title is rendered as separate text in the accordion header.
+   * If false and `showExpandLabel` is true, the title is used as the expand button label.
+   */
+  showSeparateTitle = input(true);
   /** Label shown when accordion is collapsed */
   openLabel = input<string>("open");
   /** Label shown when accordion is expanded */
@@ -132,8 +135,8 @@ export class AccordionItemComponent implements OnInit {
     const customClass = this.headerClass();
 
     return {
-      ...(customClass ? { [customClass]: true } : {}),
       "tedi-accordion__header": true,
+      ...(customClass ? { [customClass]: true } : {}),
       "tedi-accordion__header--hoverable": this.headerClickable(),
       "tedi-accordion__header--expanded": this.expanded(),
       "tedi-accordion__header--with-icon-card": this.showIconCard(),
@@ -143,8 +146,8 @@ export class AccordionItemComponent implements OnInit {
   readonly bodyClasses = computed(() => {
     const customClass = this.bodyClass();
     return {
-      ...(customClass ? { [customClass]: true } : {}),
       "tedi-accordion__body": true,
+      ...(customClass ? { [customClass]: true } : {}),
       "tedi-accordion__body--with-icon-card": this.showIconCard(),
     };
   });

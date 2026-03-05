@@ -54,7 +54,7 @@
           <ng-container *ngTemplateOutlet="collapseButton"></ng-container>
         }
 
-        @if (showDefaultTitle()) {
+        @if (showSeparateTitle()) {
           <span tedi-text color="secondary" modifiers="normal">
             {{ title() | tediTranslate }}
           </span>
@@ -100,9 +100,7 @@
       class="tedi-accordion__expand-indicator"
       [class.tedi-accordion__expand-indicator--with-label]="showExpandLabel()"
     >
-      <span>
-        {{ (showExpandLabel() ? expandLabel() : "") | tediTranslate }}
-      </span>
+      {{ (showExpandLabel() ? expandLabel() : "") | tediTranslate }}
       <ng-container *ngTemplateOutlet="expandIcon"></ng-container>
     </div>
   } @else {
@@ -115,7 +113,9 @@
       [attr.aria-expanded]="expanded()"
       [attr.aria-controls]="bodyId"
     >
-      {{ title() | tediTranslate }}
+      @if (showExpandLabel()) {
+        {{ (showSeparateTitle() ? expandLabel() : title()) | tediTranslate }}
+      }
       <ng-container *ngTemplateOutlet="expandIcon"></ng-container>
     </button>
   }
@@ -126,5 +126,6 @@
     aria-hidden="true"
     name="expand_more"
     [class.tedi-accordion__icon--expanded]="expanded()"
+    [class.tedi-accordion__icon--no-label]="!showExpandLabel()"
   />
 </ng-template>

@@ -133,6 +133,7 @@
   &--main {
     display: flex;
     gap: inherit;
+    align-items: center;
   }
 
   &--with-description,
@@ -172,4 +173,8 @@
       line-height: inherit;
     }
   }
+}
+
+.tedi-link tedi-icon.tedi-accordion__icon--no-label {
+  font-size: var(--icon-05);
 }
