@@ -112,6 +112,9 @@
       (click)="toggle()"
       [attr.aria-expanded]="expanded()"
       [attr.aria-controls]="bodyId"
+      [attr.aria-label]="
+        !showExpandLabel() ? (expandLabel() | tediTranslate) : null
+      "
     >
       @if (showExpandLabel()) {
         {{ (showSeparateTitle() ? expandLabel() : title()) | tediTranslate }}

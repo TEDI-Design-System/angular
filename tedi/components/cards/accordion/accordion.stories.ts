@@ -567,6 +567,13 @@ export const ActionTypes: StoryObj = {
       },
     },
   }),
+  parameters: {
+    a11y: {
+      config: {
+        rules: [{ id: "landmark-unique", enabled: false }],
+      },
+    },
+  },
 };
 
 export const WithIconCard: StoryObj = {

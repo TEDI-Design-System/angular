@@ -13,11 +13,11 @@ import {
   IconComponent,
   TextComponent,
   LinkComponent,
-  generateUUID,
   TediTranslationPipe,
 } from "@tedi-design-system/angular/tedi";
 import { AccordionComponent } from "../accordion/accordion.component";
 import { NgClass } from "@angular/common";
+import { _IdGenerator } from "@angular/cdk/a11y";
 
 @Component({
   selector: "tedi-accordion-item",
@@ -36,6 +36,9 @@ import { NgClass } from "@angular/common";
   ],
 })
 export class AccordionItemComponent implements OnInit {
+  readonly idGenerator = inject(_IdGenerator);
+  readonly bodyId = this.idGenerator.getId("tedi-accordion-body");
+  readonly headerId = this.idGenerator.getId("tedi-accordion-header");
   /**
    * If false, disables header toggling and enables using interactive elements in the accordion header.
    */
@@ -98,9 +101,6 @@ export class AccordionItemComponent implements OnInit {
   bodyClass = input<string | null>(null);
 
   expanded = model(false);
-
-  readonly bodyId = `tedi-accordion-body-${generateUUID()}`;
-  readonly headerId = `tedi-accordion-header-${generateUUID()}`;
 
   private readonly accordion = inject(AccordionComponent, { optional: true });
 
