@@ -56,7 +56,7 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^20.4.2",
     "@compodoc/compodoc": "^1.1.26",
-    "@etchteam/storybook-addon-status": "^5.0.0",
+    "@etchteam/storybook-addon-status": "^8.0.0",
     "@schematics/angular": "21.2.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.0",
