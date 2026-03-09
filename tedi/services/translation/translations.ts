@@ -39,7 +39,7 @@ export const translationsMap = {
   },
   clear: {
     description: "For clearing a value",
-    components: ["TableFilter", "TextField"],
+    components: ["TableFilter", "TextField", "Select"],
     et: "Tühjenda",
     en: "Clear",
     ru: "Очистить",
@@ -265,6 +265,13 @@ export const translationsMap = {
     et: "Vali kõik",
     en: "Select all",
     ru: "Выбрать все",
+  },
+  "select.search": {
+    description: "Placeholder text for search input in searchable select",
+    components: ["select"],
+    et: "Otsi...",
+    en: "Search...",
+    ru: "Искать...",
   },
   "stepper.completed": {
     description:

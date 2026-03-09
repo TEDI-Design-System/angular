@@ -1,0 +1,270 @@
+@import "../../overlay/dropdown/dropdown-item/dropdown-item.component";
+
+.tedi-input {
+  --_border-color: var(--form-input-border-default);
+  --_color: var(--form-input-text-filled);
+  --_background-color: var(--form-input-background-default);
+  --_placeholder-color: var(--form-input-text-placeholder);
+  --_border-radius: var(--form-field-radius);
+  --_font-size: var(--body-regular-size);
+  --_line-height: var(--body-regular-line-height);
+  --_padding-y: var(--form-field-padding-y-md-default);
+  --_padding-x: var(--form-field-padding-x-md-default);
+  --_form-field-outer-gap: var(--form-field-outer-spacing);
+
+  padding: var(--_padding-y) var(--_padding-x);
+  margin-bottom: var(--_form-field-outer-gap);
+  font-family: var(--family-default);
+  font-size: var(--_font-size);
+  line-height: var(--_line-height);
+  color: var(--_color);
+  background-color: var(--_background-color);
+  border: 1px solid var(--_border-color);
+  border-radius: var(--_border-radius);
+
+  &:hover {
+    --_border-color: var(--form-input-border-hover);
+  }
+
+  &:focus,
+  &:active,
+  &.tedi-select__trigger--search-focused {
+    border-color: var(--form-input-border-hover);
+    box-shadow: inset 0 0 0 1px var(--form-input-border-hover);
+  }
+
+  &--disabled {
+    --_color: var(--form-input-text-disabled);
+    --_border-color: var(--form-input-border-disabled);
+    --_background-color: var(--form-input-background-disabled);
+
+    pointer-events: none;
+  }
+
+  &--error:not(.tedi-input--disabled) {
+    --_border-color: var(--form-general-feedback-error-border);
+
+    &:focus,
+    &:active,
+    &.tedi-select__trigger--search-focused {
+      border-color: var(--form-general-feedback-error-border);
+      box-shadow: inset 0 0 0 1px var(--form-general-feedback-error-border);
+    }
+  }
+
+  &--valid:not(.tedi-input--disabled) {
+    --_border-color: var(--form-general-feedback-success-border);
+
+    &:focus,
+    &:active,
+    &.tedi-select__trigger--search-focused {
+      border-color: var(--form-general-feedback-success-border);
+      box-shadow: inset 0 0 0 1px var(--form-general-feedback-success-border);
+    }
+  }
+
+  &--small {
+    --_padding-y: var(--form-field-padding-y-sm);
+  }
+}
+
+.tedi-select {
+  display: block;
+  width: 100%;
+
+  &__trigger {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  &__label {
+    flex-grow: 1;
+    overflow: hidden;
+    text-align: left;
+    cursor: default;
+
+    &--placeholder {
+      color: var(--_placeholder-color);
+      pointer-events: none;
+    }
+  }
+
+  &__clear {
+    flex-grow: 0;
+    padding: 0;
+    margin: 0;
+    color: var(--button-close-text-default);
+    cursor: pointer;
+    background: none;
+    border: none;
+
+    &+.tedi-select__arrow {
+      border-left: 1px solid var(--general-border-primary);
+    }
+  }
+
+  &__arrow {
+    flex-grow: 0;
+    padding-left: var(--form-field-inner-spacing);
+    margin-left: var(--form-field-inner-spacing);
+    cursor: default;
+  }
+
+  &__dropdown {
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+    margin-top: var(--form-field-outer-spacing);
+    margin-bottom: var(--form-field-outer-spacing);
+    background: var(--card-background-primary);
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 1px 5px 0 var(--tedi-alpha-20);
+  }
+
+  &__trigger--searchable {
+    cursor: text;
+  }
+
+  &__search-wrapper {
+    position: relative;
+    display: flex;
+    flex-grow: 1;
+    flex-wrap: wrap;
+    gap: var(--form-field-inner-spacing);
+    align-items: center;
+    min-height: 1.5em;
+    overflow: hidden;
+  }
+
+  &__selected-value {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  &__search-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+    background: transparent;
+    border: none;
+
+    &:focus {
+      outline: none;
+    }
+
+    &::placeholder {
+      color: var(--form-input-text-placeholder);
+    }
+
+    &--hidden {
+      color: transparent;
+      caret-color: var(--form-input-text-filled);
+    }
+  }
+
+  &__search-input:not(&__search-input--hidden) {
+    position: relative;
+    flex: 1;
+    width: auto;
+    min-width: 50px;
+    height: auto;
+  }
+
+  &__options {
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+
+    &:focus .cdk-option-active {
+      color: var(--dropdown-item-hover-text);
+      background: var(--dropdown-item-hover-background);
+    }
+
+    .tedi-dropdown-item--selected {
+      * {
+        color: inherit !important;
+      }
+    }
+
+    .tedi-dropdown-item--focused:not(.tedi-dropdown-item--disabled) {
+      outline: var(--borders-02) solid var(--tedi-primary-500);
+      outline-offset: calc(-1 * var(--borders-02));
+    }
+  }
+
+  &__dropdown-item {
+    &--label {
+      display: none;
+    }
+
+    &--custom-content:empty+&--label {
+      display: block;
+    }
+  }
+
+  &__group-name {
+    display: block;
+    padding: var(--dropdown-group-label-padding-y, 8px) var(--dropdown-group-label-padding-x, 12px) var(--layout-grid-gutters-04, 4px);
+    font-size: var(--heading-subtitle-small-size);
+    font-weight: var(--heading-subtitle-small-weight);
+    line-height: var(--heading-subtitle-small-line-height);
+    text-transform: uppercase;
+    letter-spacing: 0;
+
+    &--selectable {
+      padding-bottom: var(--dropdown-group-label-padding-y, 8px);
+
+      &~.tedi-dropdown-item:not(.tedi-select__group-name) {
+        padding-left: var(--form-checkbox-radio-subitem-padding-left);
+      }
+    }
+  }
+
+  &--multiselect {
+    .tedi-select__trigger {
+      align-items: flex-start;
+    }
+  }
+
+  &__multiselect-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--form-field-inner-spacing);
+
+    &--single-row {
+      flex-wrap: nowrap;
+      overflow: hidden;
+
+      .tedi-tag {
+        flex-shrink: 0;
+
+        &__content {
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+
+  &__no-options {
+    color: var(--general-text-tertiary);
+    cursor: default;
+
+    &:hover {
+      color: var(--general-text-tertiary);
+      background: var(--dropdown-item-default-background);
+    }
+  }
+}

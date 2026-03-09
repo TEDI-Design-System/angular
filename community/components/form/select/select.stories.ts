@@ -23,6 +23,11 @@ import { IconComponent } from "@tedi-design-system/angular/tedi";
 const meta: Meta<SelectComponent> = {
   title: "Community/Form/Select/Single Select",
   component: SelectComponent,
+  parameters: {
+    status: {
+      type: ["existsInTediReady", "deprecated"],
+    },
+  },
   decorators: [
     moduleMetadata({
       imports: [

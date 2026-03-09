@@ -1,0 +1,283 @@
+@let listboxId = inputId() + "-listbox";
+@let labelId = inputId() + "-label";
+
+@if (label()) {
+  <label
+    [id]="labelId"
+    tedi-label
+    [for]="inputId()"
+    [required]="required()"
+    [size]="size()"
+  >
+    {{ label() }}
+  </label>
+}
+<div
+  [id]="inputId()"
+  class="tedi-select__trigger tedi-input"
+  [class.tedi-input--disabled]="disabled()"
+  [class.tedi-input--small]="size() === 'small'"
+  [class.tedi-input--error]="state() === 'error'"
+  [class.tedi-input--valid]="state() === 'valid'"
+  [class.tedi-select__trigger--searchable]="searchable()"
+  [class.tedi-select__trigger--search-focused]="searchFocused()"
+  cdkOverlayOrigin
+  #trigger="cdkOverlayOrigin"
+  [attr.role]="searchable() ? null : 'combobox'"
+  [attr.aria-haspopup]="searchable() ? null : 'listbox'"
+  [attr.aria-expanded]="searchable() ? null : isOpen()"
+  [attr.aria-controls]="searchable() ? null : listboxId"
+  [attr.aria-labelledby]="searchable() ? null : labelId"
+  [tabindex]="searchable() || disabled() ? -1 : 0"
+  (click)="onTriggerClick()"
+  (keydown.enter)="onTriggerEnter()"
+  (keydown.space)="$event.preventDefault(); toggleIsOpen()"
+  (keydown.arrowdown)="$event.preventDefault(); toggleIsOpen()"
+  (blur)="onTouched()"
+>
+  @if (searchable()) {
+    <div class="tedi-select__search-wrapper">
+      @if (!searchTerm() && selectedValues().length && !multiple()) {
+        <span class="tedi-select__selected-value">
+          @if (valueTemplate(); as tpl) {
+            <ng-container
+              [ngTemplateOutlet]="tpl.template"
+              [ngTemplateOutletContext]="getValueContext(selectedOptions()[0])"
+            />
+          } @else {
+            {{ selectedLabels().join(", ") }}
+          }
+        </span>
+      }
+      @if (multiple() && selectedValues().length) {
+        <div
+          class="tedi-select__multiselect-container"
+          [class.tedi-select__multiselect-container--single-row]="!multiRow()"
+          #multiselectContainer
+        >
+          @if (multiRow()) {
+            @for (value of selectedValues(); track value) {
+              <tedi-tag
+                [closable]="clearableTags()"
+                (closed)="deselect($event, value)"
+              >
+                {{ getLabel(value) }}
+              </tedi-tag>
+            }
+          } @else {
+            @for (value of selectedValues(); track value; let i = $index) {
+              @if (visibleTagsCount() === null || i < visibleTagsCount()!) {
+                <tedi-tag
+                  #tagElement
+                  [closable]="clearableTags()"
+                  (closed)="deselect($event, value)"
+                >
+                  {{ getLabel(value) }}
+                </tedi-tag>
+              }
+            }
+            @if (hiddenTagsCount() > 0) {
+              <tedi-tag>+{{ hiddenTagsCount() }}</tedi-tag>
+            }
+          }
+        </div>
+      }
+      <input
+        #searchInput
+        type="text"
+        class="tedi-select__search-input"
+        [class.tedi-select__search-input--hidden]="!searchTerm() && selectedValues().length && !multiple()"
+        [placeholder]="selectedValues().length ? '' : placeholder()"
+        [value]="searchTerm()"
+        [disabled]="disabled()"
+        (input)="onSearchInput($event)"
+        (focus)="onSearchFocus()"
+        (blur)="onSearchBlur()"
+        (keydown)="onSearchKeydown($event)"
+        autocomplete="off"
+        role="combobox"
+        aria-autocomplete="list"
+        [attr.aria-expanded]="isOpen()"
+        [attr.aria-controls]="listboxId"
+        [attr.aria-labelledby]="labelId"
+        [attr.aria-activedescendant]="focusedOptionId()"
+      />
+    </div>
+  } @else {
+    <span class="tedi-select__label">
+      @if (selectedValues().length) {
+        @if (multiple()) {
+          <div
+            class="tedi-select__multiselect-container"
+            [class.tedi-select__multiselect-container--single-row]="!multiRow()"
+            #multiselectContainer
+          >
+            @if (multiRow()) {
+              @for (value of selectedValues(); track value) {
+                <tedi-tag
+                  [closable]="clearableTags()"
+                  (closed)="deselect($event, value)"
+                >
+                  {{ getLabel(value) }}
+                </tedi-tag>
+              }
+            } @else {
+              @for (value of selectedValues(); track value; let i = $index) {
+                @if (visibleTagsCount() === null || i < visibleTagsCount()!) {
+                  <tedi-tag
+                    #tagElement
+                    [closable]="clearableTags()"
+                    (closed)="deselect($event, value)"
+                  >
+                    {{ getLabel(value) }}
+                  </tedi-tag>
+                }
+              }
+              @if (hiddenTagsCount() > 0) {
+                <tedi-tag>+{{ hiddenTagsCount() }}</tedi-tag>
+              }
+            }
+          </div>
+        } @else {
+          @if (valueTemplate(); as tpl) {
+            <ng-container
+              [ngTemplateOutlet]="tpl.template"
+              [ngTemplateOutletContext]="getValueContext(selectedOptions()[0])"
+            />
+          } @else {
+            {{ selectedLabels().join(", ") }}
+          }
+        }
+      } @else {
+        <span class="tedi-select__label--placeholder">
+          {{ placeholder() }}
+        </span>
+      }
+    </span>
+  }
+
+  @if (clearable() && selectedValues().length) {
+    <button
+      class="tedi-select__clear"
+      tedi-closing-button
+      type="button"
+      size="small"
+      [iconSize]="18"
+      [ariaLabel]="'clear' | tediTranslate"
+      (click)="clear($event)"
+      (keydown.enter)="clear($event)"
+      (keydown.space)="clear($event)"
+      [attr.aria-describedby]="labelId"
+    ></button>
+  }
+
+  <tedi-icon class="tedi-select__arrow" name="arrow_drop_down" />
+</div>
+@if (feedbackText(); as feedback) {
+  <tedi-feedback-text
+    [text]="feedback.text"
+    [type]="feedback.type"
+    [position]="feedback.position"
+  />
+}
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="trigger"
+  [cdkConnectedOverlayOpen]="isOpen()"
+  [cdkConnectedOverlayPositions]="dropdownPositions"
+  [cdkConnectedOverlayFlexibleDimensions]="true"
+  [cdkConnectedOverlayGrowAfterOpen]="true"
+  (detach)="toggleIsOpen(true)"
+>
+  <div
+    class="tedi-select__dropdown"
+    [style.width]="!!dropdownWidth() ? dropdownWidth() + 'px' : 'auto'"
+    [style.max-height]="dropdownMaxHeight() ? dropdownMaxHeight() + 'px' : null"
+  >
+    <ul
+      [id]="listboxId"
+      class="tedi-select__options"
+      [class.tedi-select__options--multiselect]="multiple()"
+      cdkListbox
+      [cdkListboxMultiple]="multiple()"
+      [cdkListboxValue]="visibleSelectedValues()"
+      (cdkListboxValueChange)="handleValueChange($event)"
+      (keydown.tab)="toggleIsOpen(true)"
+      (keydown.escape)="toggleIsOpen(true)"
+      #listbox="cdkListbox"
+    >
+      @if (filteredOptions().length) {
+        @if (multiple() && selectAll()) {
+          <li
+            [id]="getOptionId('selectAll')"
+            class="tedi-dropdown-item"
+            [class.tedi-dropdown-item--focused]="isOptionFocused('selectAll')"
+            [cdkOption]="SpecialOptionControls.SELECT_ALL"
+          >
+            <tedi-dropdown-item-value type="checkbox" [selected]="allOptionsSelected()">
+              <tedi-dropdown-item-value-label>{{ "select.select-all" | tediTranslate }}</tedi-dropdown-item-value-label>
+            </tedi-dropdown-item-value>
+          </li>
+        }
+
+        @for (group of optionGroups(); track group.label) {
+          @if (group.label.length > 0) {
+            @if (multiple() && selectableGroups()) {
+              <li
+                [id]="getOptionId('group', undefined, group.label)"
+                class="tedi-dropdown-item tedi-select__group-name tedi-select__group-name--selectable"
+                [class.tedi-dropdown-item--focused]="isOptionFocused('group', undefined, group.label)"
+                [cdkOption]="SpecialOptionControls.SELECT_GROUP + group.label"
+              >
+                <tedi-dropdown-item-value type="checkbox" [selected]="isGroupSelected(group.label)">
+                  <tedi-dropdown-item-value-label>
+                    <span tedi-text color="tertiary">{{ group.label }}</span>
+                  </tedi-dropdown-item-value-label>
+                </tedi-dropdown-item-value>
+              </li>
+            } @else {
+              <li class="tedi-select__group-name" role="presentation">
+                <span tedi-text color="tertiary">
+                  {{ group.label }}
+                </span>
+              </li>
+            }
+          }
+
+          @for (option of group.options; track option.value; let i = $index) {
+            <li
+              [id]="getOptionId('option', option.value)"
+              class="tedi-dropdown-item"
+              [class.tedi-dropdown-item--selected]="!multiple() && isOptionSelected(option.value)"
+              [class.tedi-dropdown-item--disabled]="option.disabled"
+              [class.tedi-dropdown-item--custom]="optionTemplate()"
+              [class.tedi-dropdown-item--focused]="isOptionFocused('option', option.value)"
+              [cdkOption]="option.value"
+              [cdkOptionDisabled]="option.disabled"
+            >
+              @if (optionTemplate(); as tpl) {
+                <ng-container
+                  [ngTemplateOutlet]="tpl.template"
+                  [ngTemplateOutletContext]="getOptionContext(option, i)"
+                />
+              } @else {
+                <tedi-dropdown-item-value
+                  [type]="multiple() ? 'checkbox' : 'default'"
+                  [selected]="isOptionSelected(option.value)"
+                  [disabled]="!!option.disabled"
+                >
+                  <tedi-dropdown-item-value-label>{{ option.label }}</tedi-dropdown-item-value-label>
+                </tedi-dropdown-item-value>
+              }
+            </li>
+          }
+        }
+      } @else {
+        <li class="tedi-dropdown-item tedi-select__no-options">
+          {{ notFoundText() || ("select.no-options" | tediTranslate) }}
+        </li>
+      }
+    </ul>
+  </div>
+</ng-template>

@@ -36,6 +36,9 @@ import {
 } from "@tedi-design-system/angular/tedi";
 import { CardComponent, CardContentComponent } from "../../../components/cards";
 
+/**
+ * @deprecated Use Select from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-select",
   imports: [
@@ -70,8 +73,7 @@ import { CardComponent, CardContentComponent } from "../../../components/cards";
   ],
 })
 export class SelectComponent
-  implements AfterContentChecked, ControlValueAccessor
-{
+  implements AfterContentChecked, ControlValueAccessor {
   /**
    * The id of the select input (for label association).
    * @default ""
@@ -205,8 +207,8 @@ export class SelectComponent
   }
 
   // ControlValueAccessor implementation
-  onChange: (value: string | null) => void = () => {};
-  onTouched: () => void = () => {};
+  onChange: (value: string | null) => void = () => { };
+  onTouched: () => void = () => { };
 
   writeValue(value: string): void {
     this.selectedOptions.set(value ? [value] : []);

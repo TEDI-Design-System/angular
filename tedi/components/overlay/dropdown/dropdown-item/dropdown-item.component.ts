@@ -1,19 +1,27 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  contentChild,
   ElementRef,
   HostListener,
   inject,
   input,
   ViewEncapsulation,
 } from "@angular/core";
-import { DropdownComponent } from "../dropdown.component";
-import { DropdownContentComponent } from "../dropdown-content/dropdown-content.component";
+import {
+  DROPDOWN_API,
+  DROPDOWN_CONTENT_API,
+  DropdownApi,
+  DropdownContentApi,
+} from "../dropdown.tokens";
+import { DropdownItemValueComponent } from "../dropdown-item-value/dropdown-item-value.component";
+import { DropdownItemValueLabelComponent } from "../dropdown-item-value/dropdown-item-value-label.component";
 
 @Component({
   selector: "li[tedi-dropdown-item]",
   standalone: true,
-  template: "<ng-content />",
+  imports: [DropdownItemValueComponent, DropdownItemValueLabelComponent],
+  templateUrl: "./dropdown-item.component.html",
   styleUrl: "./dropdown-item.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,8 +43,11 @@ export class DropdownItemComponent {
   readonly disabled = input(false);
 
   readonly host = inject<ElementRef<HTMLLIElement>>(ElementRef);
-  readonly dropdown = inject(DropdownComponent);
-  readonly dropdownContent = inject(DropdownContentComponent);
+  readonly dropdown = inject<DropdownApi>(DROPDOWN_API);
+  readonly dropdownContent = inject<DropdownContentApi>(DROPDOWN_CONTENT_API);
+
+  /** Check if custom dropdown-item-value is provided */
+  readonly customItemValue = contentChild(DropdownItemValueComponent);
 
   isSelected() {
     return this.dropdown.value() === this.value();
