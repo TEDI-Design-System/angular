@@ -11,6 +11,7 @@ import { PopoverContentComponent } from "./popover-content/popover-content.compo
   template: `
     <tedi-popover
       [position]="position"
+      [preventOverflow]="preventOverflow"
       [dismissible]="dismissible"
       [hideOnScroll]="hideOnScroll"
       [withBorder]="withBorder"
@@ -26,6 +27,7 @@ import { PopoverContentComponent } from "./popover-content/popover-content.compo
 })
 class TestHostComponent {
   position: PopoverPosition = "top";
+  preventOverflow = false;
   dismissible = true;
   hideOnScroll = false;
   withBorder = false;
@@ -61,9 +63,16 @@ describe("PopoverComponent", () => {
 
   it("should have default inputs", () => {
     expect(component.position()).toBe("top");
+    expect(component.preventOverflow()).toBe(false);
     expect(component.dismissible()).toBe(true);
     expect(component.hideOnScroll()).toBe(false);
     expect(component.withBorder()).toBe(false);
+  });
+
+  it("should update preventOverflow when input changes", () => {
+    hostComponent.preventOverflow = true;
+    fixture.detectChanges();
+    expect(component.preventOverflow()).toBe(true);
   });
 
   it("should initialize the ViewChild floatUiComponent", () => {

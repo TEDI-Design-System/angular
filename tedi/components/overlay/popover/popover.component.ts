@@ -39,6 +39,11 @@ export class PopoverComponent implements AfterContentChecked {
    */
   position = input<PopoverPosition>("top");
   /**
+   * Should position flip to opposite direction when overflowing screen?
+   * @default false
+   */
+  preventOverflow = input(false);
+  /**
    * Is dismissible by clicking outside of content?
    * @default true
    */

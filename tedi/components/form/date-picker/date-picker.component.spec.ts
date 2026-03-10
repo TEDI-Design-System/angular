@@ -1256,4 +1256,30 @@ describe("DatePickerComponent", () => {
       expect(component.inputValue()).toBe("");
     });
   });
+
+  describe("inputValue signal to DOM synchronization", () => {
+    it("should update visible input value when inputValue signal changes", () => {
+      const input = getInput();
+
+      expect(input.value).toBe("");
+
+      component.inputValue.set("20.03.2024");
+      fixture.detectChanges();
+
+      expect(input.value).toBe("20.03.2024");
+    });
+
+    it("should clear visible input value when inputValue signal is set to empty string", () => {
+      component.inputValue.set("15.06.2024");
+      fixture.detectChanges();
+
+      const input = getInput();
+      expect(input.value).toBe("15.06.2024");
+
+      component.inputValue.set("");
+      fixture.detectChanges();
+
+      expect(input.value).toBe("");
+    });
+  });
 });
