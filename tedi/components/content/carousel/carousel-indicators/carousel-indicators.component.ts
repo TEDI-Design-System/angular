@@ -57,6 +57,6 @@ export class CarouselIndicatorsComponent {
   }
 
   handleIndicatorClick(index: number) {
-    this.carousel.carouselContent().goToIndex(index);
+    this.carousel.carouselContent().goToIndex(index, { focusSlide: true });
   }
 }

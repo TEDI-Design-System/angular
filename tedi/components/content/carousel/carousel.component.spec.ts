@@ -1,6 +1,7 @@
 import { Component, ElementRef, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { CarouselContentComponent } from "./carousel-content/carousel-content.component";
 import {
   Breakpoint,
@@ -35,7 +36,8 @@ describe("CarouselContentComponent", () => {
   let mockBreakpointService: {
     isAboveBreakpoint: () => ReturnType<typeof signal>;
   };
-  let mockTranslationService: { track: jest.Mock };
+  let mockTranslationService: { track: jest.Mock; translate: jest.Mock };
+  let mockLiveAnnouncer: { announce: jest.Mock };
   let fakeViewport: HTMLDivElement;
 
   beforeEach(async () => {
@@ -61,6 +63,11 @@ describe("CarouselContentComponent", () => {
 
     mockTranslationService = {
       track: jest.fn((key: string) => () => key),
+      translate: jest.fn((key: string) => key),
+    };
+
+    mockLiveAnnouncer = {
+      announce: jest.fn().mockResolvedValue(undefined),
     };
 
     await TestBed.configureTestingModule({
@@ -69,6 +76,7 @@ describe("CarouselContentComponent", () => {
         { provide: BreakpointService, useValue: mockBreakpointService },
         { provide: TediTranslationService, useValue: mockTranslationService },
         { provide: ElementRef, useValue: new ElementRef(fakeViewport) },
+        { provide: LiveAnnouncer, useValue: mockLiveAnnouncer },
       ],
     }).compileComponents();
 
@@ -378,6 +386,114 @@ describe("CarouselContentComponent", () => {
     expect(preventDefaultSpy).toHaveBeenCalled();
     expect(component.trackIndex()).not.toBe(0);
   });
+
+  describe("announceSlideChange", () => {
+    it("should call announceSlideChange when next() is called", () => {
+      const spy = jest.spyOn(component, "announceSlideChange");
+
+      Object.defineProperty(component, "slides", {
+        configurable: true,
+        value: () => [{}, {}, {}],
+      });
+
+      component.next();
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it("should call announceSlideChange when prev() is called", () => {
+      const spy = jest.spyOn(component, "announceSlideChange");
+
+      Object.defineProperty(component, "slides", {
+        configurable: true,
+        value: () => [{}, {}, {}],
+      });
+
+      component.trackIndex.set(2);
+      component.prev();
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it("should call announceSlideChange when goToIndex() is called", () => {
+      const spy = jest.spyOn(component, "announceSlideChange");
+
+      Object.defineProperty(component, "slides", {
+        configurable: true,
+        value: () => [{}, {}, {}],
+      });
+
+      component.goToIndex(2);
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it("should call announceSlideChange on keyboard navigation", () => {
+      const spy = jest.spyOn(component, "announceSlideChange");
+
+      Object.defineProperty(component, "slides", {
+        configurable: true,
+        value: () => [{}, {}, {}],
+      });
+
+      const event = new KeyboardEvent("keydown", { key: "ArrowRight" });
+      component.onKeyDown(event);
+      expect(spy).toHaveBeenCalled();
+    });
+  });
+
+  describe("isSlideVisible", () => {
+    it("should return true for slides within the visible range", () => {
+      Object.defineProperty(component, "slides", {
+        configurable: true,
+        value: () => [{}, {}, {}, {}, {}],
+      });
+      fixture.componentRef.setInput("slidesPerView", { xs: 3 });
+      fixture.detectChanges();
+
+      const activeIndex = component.renderedActiveIndex();
+
+      // Slides at activeIndex, activeIndex+1, activeIndex+2 should be visible
+      expect(component.isSlideVisible(activeIndex)).toBe(true);
+      expect(component.isSlideVisible(activeIndex + 1)).toBe(true);
+      expect(component.isSlideVisible(activeIndex + 2)).toBe(true);
+
+      // Slide before activeIndex should not be visible
+      expect(component.isSlideVisible(activeIndex - 1)).toBe(false);
+
+      // Slide after the visible range should not be visible
+      expect(component.isSlideVisible(activeIndex + 3)).toBe(false);
+    });
+
+    it("should handle fractional slidesPerView by rounding up", () => {
+      Object.defineProperty(component, "slides", {
+        configurable: true,
+        value: () => [{}, {}, {}, {}, {}],
+      });
+      fixture.componentRef.setInput("slidesPerView", { xs: 2.5 });
+      fixture.detectChanges();
+
+      const activeIndex = component.renderedActiveIndex();
+
+      // With 2.5 slides per view, Math.ceil(2.5) = 3 slides should be visible
+      expect(component.isSlideVisible(activeIndex)).toBe(true);
+      expect(component.isSlideVisible(activeIndex + 1)).toBe(true);
+      expect(component.isSlideVisible(activeIndex + 2)).toBe(true);
+      expect(component.isSlideVisible(activeIndex + 3)).toBe(false);
+    });
+
+    it("should work correctly with single slide per view", () => {
+      Object.defineProperty(component, "slides", {
+        configurable: true,
+        value: () => [{}, {}, {}],
+      });
+      fixture.componentRef.setInput("slidesPerView", { xs: 1 });
+      fixture.detectChanges();
+
+      const activeIndex = component.renderedActiveIndex();
+
+      expect(component.isSlideVisible(activeIndex)).toBe(true);
+      expect(component.isSlideVisible(activeIndex + 1)).toBe(false);
+      expect(component.isSlideVisible(activeIndex - 1)).toBe(false);
+    });
+  });
 });
 
 @Component({
@@ -473,9 +589,9 @@ describe("CarouselIndicatorsComponent", () => {
     expect(mockCarouselContent.prev).toHaveBeenCalled();
   });
 
-  it("should call carouselContent.goToIndex() when handleIndicatorClick() is triggered", () => {
+  it("should call carouselContent.goToIndex() with focusSlide when handleIndicatorClick() is triggered", () => {
     component.handleIndicatorClick(2);
-    expect(mockCarouselContent.goToIndex).toHaveBeenCalledWith(2);
+    expect(mockCarouselContent.goToIndex).toHaveBeenCalledWith(2, { focusSlide: true });
   });
 });
 
