@@ -1,3 +1,10 @@
+# [6.2.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.2...angular-6.2.0-rc.3) (2026-03-10)
+
+
+### Bug Fixes
+
+* **date-picker:** fixed clear button aria-label [#341](https://github.com/TEDI-Design-System/angular/issues/341) ([#345](https://github.com/TEDI-Design-System/angular/issues/345)) ([f2fc6a8](https://github.com/TEDI-Design-System/angular/commit/f2fc6a855cc0a248a2c646590c33c36c442e832b))
+
 # [6.2.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.1...angular-6.2.0-rc.2) (2026-03-10)
 
 
