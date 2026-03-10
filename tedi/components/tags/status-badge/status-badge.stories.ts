@@ -14,11 +14,11 @@ import {
   StatusBadgeStatus,
   StatusBadgeVariant,
 } from "./status-badge.component";
-
-/**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.37.57?m=dev&node-id=5784-114506" target="_blank">Figma ↗</a><br />
- * <a href="https://www.tedi.ee/1ee8444b7/p/764a67-status-badge" target="_blank">Zeroheight ↗</a><br /><br />
- */
+import {
+  TooltipComponent,
+  TooltipContentComponent,
+  TooltipTriggerComponent,
+} from "tedi/components/overlay/tooltip";
 
 const colors: StatusBadgeColor[] = [
   "neutral",
@@ -69,6 +69,11 @@ const statusToIconMap: Partial<Record<StatusBadgeStatus, string>> = {
   danger: "error",
 };
 
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.37.57?m=dev&node-id=5784-114506" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.tedi.ee/1ee8444b7/p/764a67-status-badge" target="_blank">Zeroheight ↗</a><br /><br />
+ */
+
 export default {
   title: "TEDI-Ready/Components/Tags/StatusBadge",
   decorators: [
@@ -80,6 +85,9 @@ export default {
         ButtonComponent,
         RowComponent,
         ColComponent,
+        TooltipComponent,
+        TooltipTriggerComponent,
+        TooltipContentComponent,
       ],
     }),
   ],
@@ -182,19 +190,82 @@ export const Default: StoryObj<StatusBadgeComponent> = {
   }),
 };
 
+export const Size: StoryObj<StatusBadgeComponent> = {
+  render: () => ({
+    template: `
+      <tedi-row class="example-list" cols="1">
+        <tedi-row
+          [cols]="1"
+          [sm]="{ cols: 2 }"
+          gap="3"
+          alignItems="center"
+          class="padding-14-16 border-bottom"
+        >
+          <tedi-col>
+            <p tedi-text>Default</p>
+          </tedi-col>
+          <tedi-col style="display: flex; flex-wrap: wrap; gap: var(--layout-grid-gutters-08);">
+            <tedi-status-badge [text]="'Draft'" />
+            <tedi-status-badge [text]="'Draft'" [status]="'success'" />
+          </tedi-col>
+        </tedi-row>
+        <tedi-row
+          [cols]="1"
+          [sm]="{ cols: 2 }"
+          gap="3"
+          alignItems="center"
+          class="padding-14-16"
+        >
+          <tedi-col>
+            <p tedi-text>Large</p>
+          </tedi-col>
+          <tedi-col style="display: flex; flex-wrap: wrap; gap: var(--layout-grid-gutters-08);">
+            <tedi-status-badge [text]="'Draft'" [size]="'large'" />
+            <tedi-status-badge [text]="'Draft'" [status]="'success'" [size]="'large'" />
+          </tedi-col>
+        </tedi-row>
+      </tedi-row>
+    `,
+  }),
+};
+
 export const Colors: StoryObj<StatusBadgeComponent> = {
-  render: (args) => ({
-    props: { ...args, demoColors, variants, colorToIconMap },
+  render: () => ({
+    props: { demoColors, variants, colorToIconMap },
     template: `
       <tedi-row [cols]="1" [gapY]="3">
-        <tedi-row cols="6" [gap]="3" *ngFor="let color of demoColors">
-          <tedi-col style="min-width: 5rem;">
+        <tedi-row
+          *ngFor="let color of demoColors"
+          [cols]="1"
+          [sm]="{ cols: 12 }"
+          [gap]="3"
+        >
+          <tedi-col [width]="12" [sm]="{ width: 2 }">
             <p tedi-text modifiers="bold" style="text-transform: capitalize;">{{ color }}</p>
           </tedi-col>
-          <tedi-col *ngFor="let variant of variants" style="display: flex; gap: var(--layout-grid-gutters-16);">
-            <tedi-status-badge ${argsToTemplate(args)} [text]="'Text'" [color]="color" [variant]="variant" />
-            <tedi-status-badge ${argsToTemplate(args)} [text]="'Text'" [color]="color" [variant]="variant" [icon]="colorToIconMap[color]" />
-            <tedi-status-badge ${argsToTemplate(args)} [color]="color" [variant]="variant" [icon]="colorToIconMap[color]" />
+          <tedi-col
+            [width]="12"
+            [sm]="{ width: 10 }"
+            style="display: flex; flex-wrap: wrap; gap: var(--layout-grid-gutters-16);"
+          >
+            <ng-container *ngFor="let variant of variants">
+              <tedi-status-badge
+                [text]="'Text'"
+                [color]="color"
+                [variant]="variant"
+              />
+              <tedi-status-badge
+                [text]="'Text'"
+                [color]="color"
+                [variant]="variant"
+                [icon]="colorToIconMap[color]"
+              />
+              <tedi-status-badge
+                [color]="color"
+                [variant]="variant"
+                [icon]="colorToIconMap[color]"
+              />
+            </ng-container>
           </tedi-col>
         </tedi-row>
       </tedi-row>
@@ -203,18 +274,41 @@ export const Colors: StoryObj<StatusBadgeComponent> = {
 };
 
 export const WithIndicator: StoryObj<StatusBadgeComponent> = {
-  render: (args) => ({
-    props: { ...args, color: "neutral", statuses, variants, statusToIconMap },
+  render: () => ({
+    props: { color: "neutral", statuses, variants, statusToIconMap },
     template: `
     <tedi-row [cols]="1" [gapY]="3">
-      <tedi-row cols="6" [gap]="3" *ngFor="let status of statuses">
-          <tedi-col style="min-width: 5rem;">
-            <p tedi-text modifiers="bold" style="text-transform: capitalize;">{{ status }}</p>
-          </tedi-col>
-          <tedi-col *ngFor="let variant of variants" style="display: flex; gap: var(--layout-grid-gutters-16);">
-            <tedi-status-badge ${argsToTemplate(args)} [text]="'Text'" [status]="status" [variant]="variant" />
-            <tedi-status-badge ${argsToTemplate(args)} [text]="'Text'" [status]="status" [variant]="variant" [icon]="statusToIconMap[status]" />
-            <tedi-status-badge ${argsToTemplate(args)} [status]="status" [variant]="variant" [icon]="statusToIconMap[status]" />
+      <tedi-row
+        *ngFor="let status of statuses"
+        [cols]="1"
+        [sm]="{ cols: 12 }"
+        [gap]="3"
+      >
+        <tedi-col [width]="12" [sm]="{ width: 2 }">
+          <p tedi-text modifiers="bold" style="text-transform: capitalize;">{{ status }}</p>
+        </tedi-col>
+        <tedi-col
+          [width]="12"
+          [sm]="{ width: 10 }"
+          style="display: flex; flex-wrap: wrap; gap: var(--layout-grid-gutters-16);"
+        >
+          <ng-container *ngFor="let variant of variants">
+            <tedi-status-badge
+              [text]="'Text'"
+              [status]="status"
+              [variant]="variant" />
+            <tedi-status-badge
+              [text]="'Text'"
+              [status]="status"
+              [variant]="variant"
+              [icon]="statusToIconMap[status]"
+            />
+            <tedi-status-badge
+              [status]="status"
+              [variant]="variant"
+              [icon]="statusToIconMap[status]"
+            />
+          </ng-container>
           </tedi-col>
       </tedi-row>
     </tedi-row>
@@ -222,30 +316,22 @@ export const WithIndicator: StoryObj<StatusBadgeComponent> = {
   }),
 };
 
-export const Size: StoryObj<StatusBadgeComponent> = {
+export const WithTooltip: StoryObj<StatusBadgeComponent> = {
+  args: {
+    icon: "warning",
+    color: "warning",
+  },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-row class="example-list" cols="1" style="overflow: auto;">
-        <tedi-row cols="2" gap="3" alignItems="center" class="padding-14-16 border-bottom">
-          <tedi-col style="min-width: 5rem;">
-            <p tedi-text>Default</p>
-          </tedi-col>
-          <tedi-col style="display: flex; gap: var(--layout-grid-gutters-08);">
-            <tedi-status-badge ${argsToTemplate(args)} [text]="'Draft'" />
-            <tedi-status-badge ${argsToTemplate(args)} [text]="'Draft'" [status]="'success'" />
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="2" gap="3" alignItems="center" class="padding-14-16">
-          <tedi-col style="min-width: 5rem;">
-            <p tedi-text>Large</p>
-          </tedi-col>
-          <tedi-col style="display: flex; gap: var(--layout-grid-gutters-08);">
-            <tedi-status-badge ${argsToTemplate(args)} [text]="'Draft'" [size]="'large'" />
-            <tedi-status-badge ${argsToTemplate(args)} [text]="'Draft'" [status]="'success'" [size]="'large'" />
-          </tedi-col>
-        </tedi-row>
-      </tedi-row>
+      <tedi-tooltip>
+        <tedi-tooltip-trigger>
+          <tedi-status-badge ${argsToTemplate(args)} />
+        </tedi-tooltip-trigger>
+        <tedi-tooltip-content>
+          Icon-only badges should always have a tooltip to provide context and ensure accessibility.
+        </tedi-tooltip-content>
+      </tedi-tooltip>
     `,
   }),
 };

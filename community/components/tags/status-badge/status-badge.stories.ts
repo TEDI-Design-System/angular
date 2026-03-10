@@ -141,6 +141,9 @@ const meta: Meta<StatusBadgeComponent> = {
       type: "figma",
       url: "https://www.figma.com/file/jWiRIXhHRxwVdMSimKX2FF/TEDI-Design-System-(draft)?type=design&node-id=2385-24154&m=dev",
     },
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
   },
 };
 export default meta;

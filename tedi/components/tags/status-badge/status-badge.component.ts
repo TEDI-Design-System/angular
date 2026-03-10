@@ -7,7 +7,7 @@ import {
   computed,
   inject,
 } from "@angular/core";
-import { IconComponent, IconColor } from "@tedi-design-system/angular/tedi";
+import { IconComponent } from "@tedi-design-system/angular/tedi";
 import { _IdGenerator } from "@angular/cdk/a11y";
 
 export type StatusBadgeColor =
@@ -109,23 +109,6 @@ export class StatusBadgeComponent {
     }
 
     return classList;
-  });
-
-  mapBadgeColorToIconColor = computed((): IconColor => {
-    switch (this.color()) {
-      case "brand":
-        return "brand-dark";
-      case "success":
-        return "success";
-      case "accent":
-        return "secondary";
-      case "danger":
-        return "danger";
-      case "warning":
-        return "warning-dark";
-      default:
-        return "primary";
-    }
   });
 
   ariaLive = computed(() => {
