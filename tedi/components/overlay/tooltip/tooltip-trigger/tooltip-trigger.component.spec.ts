@@ -6,7 +6,6 @@ import { Renderer2 } from "@angular/core";
 
 class MockTooltipComponent {
   descriptionId = "mock-tooltip-id";
-  isOpen = jest.fn(() => false);
   isContentHovered = jest.fn(() => false);
   timeoutDelay = jest.fn(() => 100);
   hideTimeout?: ReturnType<typeof setTimeout>;
@@ -227,25 +226,13 @@ describe("TooltipTriggerComponent", () => {
       expect(btn.getAttribute("tabindex")).toBe("2");
     });
 
-    it("should set ARIA attributes on interactive element when closed", () => {
+    it("should set aria-describedby on interactive element", () => {
       hostEl.innerHTML = `<button>Click me</button>`;
       const btn = hostEl.querySelector("button")!;
       component.ngAfterContentChecked();
       fixture.detectChanges();
 
       expect(btn.getAttribute("aria-describedby")).toBe("mock-tooltip-id");
-      expect(btn.getAttribute("aria-expanded")).toBe("false");
-    });
-
-    it("should set aria-expanded to true when tooltip is open", () => {
-      tooltip.isOpen = jest.fn(() => true);
-      hostEl.innerHTML = `<button>Click me</button>`;
-      const btn = hostEl.querySelector("button")!;
-      component.ngAfterContentChecked();
-      fixture.detectChanges();
-
-      expect(btn.getAttribute("aria-describedby")).toBe("mock-tooltip-id");
-      expect(btn.getAttribute("aria-expanded")).toBe("true");
     });
   });
 });

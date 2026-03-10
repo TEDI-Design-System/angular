@@ -31,11 +31,7 @@ export class TooltipTriggerComponent implements AfterContentChecked {
       const element = this.interactiveElement();
       if (!element) return;
 
-      const descriptionId = this.tooltip.descriptionId;
-      const isOpen = this.tooltip.isOpen();
-
-      element.setAttribute("aria-describedby", descriptionId);
-      element.setAttribute("aria-expanded", String(isOpen));
+      element.setAttribute("aria-describedby", this.tooltip.descriptionId);
     });
   }
 
