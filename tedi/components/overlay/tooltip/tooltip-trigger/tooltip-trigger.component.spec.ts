@@ -92,6 +92,54 @@ describe("TooltipTriggerComponent", () => {
         hostEl.dispatchEvent(new Event("mouseenter"));
         expect(tooltip.showTooltip).not.toHaveBeenCalled();
       });
+
+      it("should not call showTooltip after recent touchstart", () => {
+        tooltip.openWith = jest.fn(() => "both");
+
+        hostEl.dispatchEvent(new Event("touchstart"));
+        hostEl.dispatchEvent(new Event("mouseenter"));
+
+        expect(tooltip.showTooltip).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("touch interaction", () => {
+      it("should toggle tooltip on touchend regardless of openWith", () => {
+        tooltip.openWith = jest.fn(() => "hover");
+
+        hostEl.dispatchEvent(new Event("touchstart"));
+        hostEl.dispatchEvent(new Event("touchend"));
+
+        expect(tooltip.toggleTooltip).toHaveBeenCalledTimes(1);
+      });
+
+      it("should not double-toggle on touch (click is ignored)", () => {
+        tooltip.openWith = jest.fn(() => "both");
+
+        hostEl.dispatchEvent(new Event("touchstart"));
+        hostEl.dispatchEvent(new Event("mouseenter"));
+        hostEl.dispatchEvent(new Event("focusin"));
+        hostEl.dispatchEvent(new Event("touchend"));
+        hostEl.click();
+
+        expect(tooltip.showTooltip).not.toHaveBeenCalled();
+        expect(tooltip.toggleTooltip).toHaveBeenCalledTimes(1);
+      });
+
+      it("should reset isTouch flag after touchend timeout", () => {
+        jest.useFakeTimers();
+        tooltip.openWith = jest.fn(() => "both");
+
+        hostEl.dispatchEvent(new Event("touchstart"));
+        hostEl.dispatchEvent(new Event("touchend"));
+
+        jest.advanceTimersByTime(300);
+
+        hostEl.dispatchEvent(new Event("mouseenter"));
+        expect(tooltip.showTooltip).toHaveBeenCalled();
+
+        jest.useRealTimers();
+      });
     });
 
     describe("mouseleave", () => {
@@ -123,6 +171,16 @@ describe("TooltipTriggerComponent", () => {
 
       it("should not call hideTooltip when openWith is 'click'", () => {
         tooltip.openWith = jest.fn(() => "click");
+        hostEl.dispatchEvent(new Event("mouseleave"));
+
+        jest.advanceTimersByTime(100);
+        expect(tooltip.hideTooltip).not.toHaveBeenCalled();
+      });
+
+      it("should not call hideTooltip after recent touchstart", () => {
+        tooltip.openWith = jest.fn(() => "both");
+
+        hostEl.dispatchEvent(new Event("touchstart"));
         hostEl.dispatchEvent(new Event("mouseleave"));
 
         jest.advanceTimersByTime(100);

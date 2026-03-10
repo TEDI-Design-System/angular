@@ -26,21 +26,33 @@ export class TooltipTriggerComponent implements AfterContentChecked {
   readonly tooltip = inject(TooltipComponent);
   private interactiveElement = signal<HTMLElement | null>(null);
 
+  private isTouch = false;
+
   constructor() {
     effect(() => {
       const element = this.interactiveElement();
       if (!element) return;
 
-      const descriptionId = this.tooltip.descriptionId;
-      const isOpen = this.tooltip.isOpen();
-
-      element.setAttribute("aria-describedby", descriptionId);
-      element.setAttribute("aria-expanded", String(isOpen));
+      element.setAttribute("aria-describedby", this.tooltip.descriptionId);
+      element.setAttribute("aria-expanded", String(this.tooltip.isOpen()));
     });
+  }
+
+  @HostListener("touchstart")
+  onTouchStart() {
+    this.isTouch = true;
+  }
+
+  @HostListener("touchend")
+  onTouchEnd() {
+    this.tooltip.toggleTooltip();
+    setTimeout(() => (this.isTouch = false), 300);
   }
 
   @HostListener("click")
   onClick() {
+    if (this.isTouch) return;
+
     if (
       this.tooltip.openWith() === "both" ||
       this.tooltip.openWith() === "click"
@@ -51,6 +63,8 @@ export class TooltipTriggerComponent implements AfterContentChecked {
 
   @HostListener("mouseenter")
   onMouseEnter() {
+    if (this.isTouch) return;
+
     if (
       this.tooltip.openWith() === "both" ||
       this.tooltip.openWith() === "hover"
@@ -61,6 +75,8 @@ export class TooltipTriggerComponent implements AfterContentChecked {
 
   @HostListener("mouseleave")
   onMouseLeave() {
+    if (this.isTouch) return;
+
     if (
       this.tooltip.openWith() === "both" ||
       this.tooltip.openWith() === "hover"
@@ -75,6 +91,8 @@ export class TooltipTriggerComponent implements AfterContentChecked {
 
   @HostListener("focusin")
   onFocusIn() {
+    if (this.isTouch) return;
+
     if (
       this.tooltip.openWith() === "both" ||
       this.tooltip.openWith() === "hover"
@@ -85,9 +103,8 @@ export class TooltipTriggerComponent implements AfterContentChecked {
 
   @HostListener("focusout")
   onFocusOut() {
-    if (this.tooltip.isContentHovered()) {
-      return;
-    }
+    if (this.isTouch) return;
+    if (this.tooltip.isContentHovered()) return;
 
     if (
       this.tooltip.openWith() === "both" ||
