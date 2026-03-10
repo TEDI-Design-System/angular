@@ -103,27 +103,138 @@ export enum SpecialOptionControls {
   ],
 })
 export class SelectComponent<T = unknown> implements AfterContentChecked, AfterViewChecked, ControlValueAccessor {
+  /**
+   * Unique identifier for the select input element.
+   * Used for label association and accessibility.
+   */
   inputId = input.required<string>();
+
+  /**
+   * Label text displayed above the select.
+   */
   label = input<string>();
+
+  /**
+   * Whether the field is required.
+   * @default false
+   */
   required = input<boolean>(false);
+
+  /**
+   * Placeholder text shown when no value is selected.
+   * @default ""
+   */
   placeholder = input<string>("");
+
+  /**
+   * Visual state of the input.
+   * @default "default"
+   */
   state = input<InputState>("default");
+
+  /**
+   * Size variant of the select.
+   * @default "default"
+   */
   size = input<InputSize>("default");
+
+  /**
+   * Whether to show a clear button when a value is selected.
+   * @default true
+   */
   clearable = input<boolean>(true);
+
+  /**
+   * Element reference used to determine dropdown width.
+   * When null, dropdown width matches the host element.
+   */
   dropdownWidthRef = input<ElementRef | null>();
+
+  /**
+   * Configuration for the feedback text displayed below the select.
+   */
   feedbackText = input<ComponentInputs<FeedbackTextComponent>>();
+
+  /**
+   * Array of items to display as options.
+   * Can be an array of objects or primitive values.
+   * @default []
+   */
   items = input<T[]>([]);
+
+  /**
+   * Property name to use as the display label for object items.
+   * @default "label"
+   */
   bindLabel = input<string>("label");
+
+  /**
+   * Property name to use as the value for object items.
+   * When undefined, the entire object is used as the value.
+   */
   bindValue = input<string | undefined>(undefined);
+
+  /**
+   * Whether multiple items can be selected.
+   * @default false
+   */
   multiple = input<boolean>(false);
+
+  /**
+   * Property name or function used to group options.
+   * When a string, uses that property from the item.
+   * When a function, calls it with each item to determine the group.
+   */
   groupBy = input<string | GroupByFn<T> | undefined>(undefined);
+
+  /**
+   * Whether to show a "Select All" option in multiselect mode.
+   * @default false
+   */
   selectAll = input<boolean>(false);
+
+  /**
+   * Whether group headers are selectable in multiselect mode.
+   * Clicking a group header selects/deselects all options in that group.
+   * @default false
+   */
   selectableGroups = input<boolean>(false);
+
+  /**
+   * Whether selected tags can be individually removed in multiselect mode.
+   * @default false
+   */
   clearableTags = input<boolean>(false);
+
+  /**
+   * Whether selected tags wrap to multiple rows in multiselect mode.
+   * When false, overflow tags are hidden and a counter is shown.
+   * @default false
+   */
   multiRow = input<boolean>(false);
+
+  /**
+   * Function used to compare option values for equality.
+   * Used to determine which options are selected.
+   * @default (a, b) => a === b
+   */
   compareWith = input<CompareWithFn>((a, b) => a === b);
+
+  /**
+   * Property name to check for disabled state on items.
+   * @default "disabled"
+   */
   disabledKey = input<string>("disabled");
+
+  /**
+   * Text displayed when no options match the search term.
+   */
   notFoundText = input<string>();
+
+  /**
+   * Whether the select has a search input for filtering options.
+   * @default false
+   */
   searchable = input<boolean>(false);
 
   readonly SpecialOptionControls = SpecialOptionControls;
