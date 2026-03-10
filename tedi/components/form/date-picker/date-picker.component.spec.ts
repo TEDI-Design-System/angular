@@ -5,6 +5,10 @@ import { NgxFloatUiContentComponent } from "ngx-float-ui";
 import { DatePickerCalendarGridComponent } from "./date-picker-calendar-grid/date-picker-calendar-grid.component";
 
 class TranslationMock {
+  translate(key: string) {
+    return key;
+  }
+
   track(key: string) {
     return () => key;
   }

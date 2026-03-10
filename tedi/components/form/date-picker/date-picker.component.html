@@ -28,7 +28,7 @@
       size="small"
       class="tedi-date-picker__clear"
       [iconSize]="18"
-      [attr.aria-label]="translationService.track('date-picker.clear-date')()"
+      [ariaLabel]="'date-picker.clear-date' | tediTranslate"
       [disabled]="inputDisabled()"
       (click)="clearInput()"
     ></button>
@@ -46,9 +46,7 @@
       variant="neutral"
       size="small"
       class="tedi-date-picker__toggle"
-      [attr.aria-label]="
-        translationService.track('date-picker.open-calendar')()
-      "
+      [attr.aria-label]="'date-picker.open-calendar' | tediTranslate"
       [disabled]="inputDisabled()"
       (click)="openCalendar()"
     >
