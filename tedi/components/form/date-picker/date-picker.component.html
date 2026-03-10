@@ -10,12 +10,12 @@
   [class.tedi-date-picker__input--error]="inputState() === 'error'"
   [attr.id]="inputId()"
   [attr.placeholder]="inputPlaceholder()"
-  [attr.aria-expanded]="!inputDisabled() && popover().floatUiComponent().state"
+  [attr.aria-expanded]="!fieldDisabled() && popover().floatUiComponent().state"
   [attr.aria-controls]="uniqueId"
   [attr.aria-readonly]="!allowManualInput()"
   [readOnly]="!allowManualInput()"
   [value]="inputValue()"
-  [disabled]="inputDisabled()"
+  [disabled]="fieldDisabled()"
   (input)="onInput($event)"
   (blur)="onInputBlur()"
   (click)="onInputClick()"
@@ -29,7 +29,7 @@
       class="tedi-date-picker__clear"
       [iconSize]="18"
       [ariaLabel]="'date-picker.clear-date' | tediTranslate"
-      [disabled]="inputDisabled()"
+      [disabled]="fieldDisabled()"
       (click)="clearInput()"
     ></button>
     <tedi-separator axis="vertical" size="1rem" />
@@ -48,7 +48,7 @@
       size="small"
       class="tedi-date-picker__toggle"
       [attr.aria-label]="'date-picker.open-calendar' | tediTranslate"
-      [disabled]="inputDisabled()"
+      [disabled]="fieldDisabled()"
       (click)="openCalendar()"
     >
       <tedi-icon name="calendar_today" size="inherit" />
