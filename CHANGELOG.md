@@ -1,3 +1,10 @@
+# [6.2.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.1...angular-6.2.0-rc.2) (2026-03-10)
+
+
+### Bug Fixes
+
+* **tooltip:** removed aria-expanded attribute [#319](https://github.com/TEDI-Design-System/angular/issues/319) ([#346](https://github.com/TEDI-Design-System/angular/issues/346)) ([f61ee3c](https://github.com/TEDI-Design-System/angular/commit/f61ee3c61f5cf7964dbc8a6b504924d398f2e415))
+
 # [6.2.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.1.0...angular-6.2.0-rc.1) (2026-03-05)
 
 
