@@ -25,7 +25,7 @@ describe("AccordionItemComponent", () => {
     fixture.detectChanges();
 
     const body = fixture.debugElement.query(By.css(".tedi-accordion__body"));
-    expect(body).toBeNull();
+    expect(body.nativeElement.offsetHeight).toBe(0);
   });
 
   it("should be expanded when defaultExpanded is true", () => {

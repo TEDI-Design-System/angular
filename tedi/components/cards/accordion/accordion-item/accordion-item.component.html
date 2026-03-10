@@ -26,16 +26,16 @@
     }
   </div>
 
-  @if (expanded()) {
-    <div
-      [ngClass]="bodyClasses()"
-      [id]="bodyId"
-      role="region"
-      [attr.aria-labelledby]="headerId"
-    >
+  <div
+    [ngClass]="bodyClasses()"
+    [id]="bodyId"
+    role="region"
+    [attr.aria-labelledby]="headerId"
+  >
+    <div class="tedi-accordion__body--inner">
       <ng-content></ng-content>
     </div>
-  }
+  </div>
 </div>
 
 <ng-template #headerContent>
@@ -128,6 +128,7 @@
   <tedi-icon
     aria-hidden="true"
     name="expand_more"
+    class="tedi-accordion__icon"
     [class.tedi-accordion__icon--expanded]="expanded()"
     [class.tedi-accordion__icon--no-label]="!showExpandLabel()"
   />

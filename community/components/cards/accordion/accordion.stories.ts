@@ -41,7 +41,7 @@ export default {
   ],
   parameters: {
     status: {
-      type: ["deprecated"],
+      type: ["deprecated", "existsInTediReady"],
     },
   },
 } as Meta<AccordionComponent>;
