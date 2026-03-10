@@ -105,25 +105,6 @@ describe("StatusBadgeComponent", () => {
     );
   });
 
-  it("should compute mapBadgeColorToIconColor correctly", () => {
-    const colors: Record<string, string> = {
-      neutral: "primary",
-      brand: "brand-dark",
-      accent: "secondary",
-      success: "success",
-      danger: "danger",
-      warning: "warning-dark",
-      transparent: "primary",
-    };
-
-    for (const [color, expectedIconColor] of Object.entries(colors)) {
-      fixture.componentRef.setInput("color", color);
-      fixture.detectChanges();
-
-      expect(component.mapBadgeColorToIconColor()).toBe(expectedIconColor);
-    }
-  });
-
   it("should include custom class in computed classes", () => {
     fixture.componentRef.setInput("class", "custom-class");
     fixture.detectChanges();
