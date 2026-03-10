@@ -1,3 +1,11 @@
+# [6.2.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.3...angular-6.2.0-rc.4) (2026-03-10)
+
+
+### Bug Fixes
+
+* **date-picker:** dynamic datepicker position fix [#347](https://github.com/TEDI-Design-System/angular/issues/347) ([#349](https://github.com/TEDI-Design-System/angular/issues/349)) ([f47d51f](https://github.com/TEDI-Design-System/angular/commit/f47d51fd41706739693e43254ac0e3776b40b839))
+* **tooltip:** correct event handling on touch devices [#348](https://github.com/TEDI-Design-System/angular/issues/348) ([#350](https://github.com/TEDI-Design-System/angular/issues/350)) ([3d1812e](https://github.com/TEDI-Design-System/angular/commit/3d1812ea234bf473fda820955b526b427e45525a))
+
 # [6.2.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.2...angular-6.2.0-rc.3) (2026-03-10)
 
 
