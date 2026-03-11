@@ -3,7 +3,7 @@ import { AccordionComponent } from "./accordion/accordion.component";
 import { AccordionItemComponent } from "./accordion-item/accordion-item.component";
 import { IconComponent, TextComponent } from "tedi/components/base";
 import { ButtonComponent } from "tedi/components/buttons";
-import { StatusBadgeComponent } from "community/components/tags";
+import { StatusBadgeComponent } from "tedi/components/tags/status-badge/status-badge.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { CheckboxComponent } from "tedi/components/form";
 
@@ -291,7 +291,7 @@ export const Default: StoryObj = {
               ${actionButtonTemplate("selected", "toggle")}
             }
           `}
-          <abr tedi-status-badge tedi-accordion-start-after-title color="success" status="none">Approved</abr>
+          <tedi-status-badge tedi-accordion-start-after-title color="success" text="Approved" />
           ${iconCardTemplate}
           ${contentExample}
         </tedi-accordion-item>
@@ -315,7 +315,7 @@ export const Variants: StoryObj = {
 
         <tedi-accordion>
           <tedi-accordion-item [title]="'Title'">
-            <abr tedi-status-badge tedi-accordion-start-after-title color="success" status="none">Approved</abr>
+            <tedi-status-badge tedi-accordion-start-after-title color="success" text="Approved" />
             ${contentExample}
           </tedi-accordion-item>
         </tedi-accordion>
@@ -743,7 +743,7 @@ export const Customized: StoryObj = {
             [title]="'Title'"
             [titleLayout]="'fill'"
           >
-            <abr tedi-status-badge tedi-accordion-start-after-title color="brand" status="none">Public</abr>
+            <tedi-status-badge tedi-accordion-start-after-title color="brand" text="Public" />
             ${contentExample}
           </tedi-accordion-item>
         </tedi-accordion>
@@ -754,7 +754,7 @@ export const Customized: StoryObj = {
             [titleLayout]="'fill'"
           >
             <tedi-icon tedi-accordion-start-before-title name="account_circle" color="brand" background="brand-secondary" [size]="16"></tedi-icon>
-            <abr tedi-status-badge tedi-accordion-start-after-title color="neutral" status="none">New</abr>
+            <tedi-status-badge tedi-accordion-start-after-title color="neutral" text="New" />
             ${contentExample}
           </tedi-accordion-item>
         </tedi-accordion>
@@ -775,7 +775,7 @@ export const Customized: StoryObj = {
             [title]="'Title'"
             [titleLayout]="'fill'"
           >
-            <abr tedi-status-badge tedi-accordion-start-before-title color="success" status="none">Approved</abr>
+            <tedi-status-badge tedi-accordion-start-before-title color="success" text="Approved" />
             ${contentExample}
           </tedi-accordion-item>
         </tedi-accordion>
