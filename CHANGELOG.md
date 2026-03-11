@@ -1,3 +1,10 @@
+# [6.2.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.7...angular-6.2.0-rc.8) (2026-03-11)
+
+
+### Features
+
+* **date-picker:** added reactive forms support [#258](https://github.com/TEDI-Design-System/angular/issues/258) ([#353](https://github.com/TEDI-Design-System/angular/issues/353)) ([d80e4ad](https://github.com/TEDI-Design-System/angular/commit/d80e4ad2a8d9229be98fc81c9b3a69907aa78e0c))
+
 # [6.2.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.6...angular-6.2.0-rc.7) (2026-03-11)
 
 
