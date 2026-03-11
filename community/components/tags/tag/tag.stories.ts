@@ -63,6 +63,11 @@ export default {
       },
     },
   },
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
 } as Meta<TagComponent>;
 
 type Story = StoryObj<TagComponent>;
