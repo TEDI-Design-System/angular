@@ -34,7 +34,7 @@
   </ng-container>
 
   <ng-container *showAt="dropdown">
-    <tedi-popover [withBorder]="true" position="bottom">
+    <tedi-popover [withBorder]="true" position="bottom" [preventOverflow]="true" appendTo="">
       <button
         tedi-button
         tedi-popover-trigger

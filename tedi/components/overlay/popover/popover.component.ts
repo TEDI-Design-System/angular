@@ -67,6 +67,12 @@ export class PopoverComponent implements AfterContentChecked {
    * @default false
    */
   lockScroll = input(false);
+  /**
+   * Append floating element to given selector.
+   * Use 'body' to append at the end of DOM or empty string to append next to trigger element.
+   * @default "body"
+   */
+  readonly appendTo = input("body");
   /** Delay time (in ms) for closing popover when not hovering trigger or content.
    * @default 100
    */
