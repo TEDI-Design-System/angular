@@ -1,3 +1,10 @@
+# [6.2.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.6...angular-6.2.0-rc.7) (2026-03-11)
+
+
+### Bug Fixes
+
+* **carousel:** improved keyboard navigation and SR support [#188](https://github.com/TEDI-Design-System/angular/issues/188) ([#351](https://github.com/TEDI-Design-System/angular/issues/351)) ([245d586](https://github.com/TEDI-Design-System/angular/commit/245d586365cdf58bd9464ac0c5b3657bd2c8a1d4))
+
 # [6.2.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.5...angular-6.2.0-rc.6) (2026-03-11)
 
 
