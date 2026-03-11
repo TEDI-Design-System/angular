@@ -1,4 +1,7 @@
+import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
+import { By } from "@angular/platform-browser";
 import { DatePickerComponent } from "./date-picker.component";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { NgxFloatUiContentComponent } from "ngx-float-ui";
@@ -12,6 +15,15 @@ class TranslationMock {
   track(key: string) {
     return () => key;
   }
+}
+
+@Component({
+  standalone: true,
+  imports: [DatePickerComponent, ReactiveFormsModule],
+  template: `<tedi-date-picker [formControl]="control" />`,
+})
+class TestHostComponent {
+  control = new FormControl<Date | null>(null);
 }
 
 describe("DatePickerComponent", () => {
@@ -1529,5 +1541,146 @@ describe("DatePickerComponent", () => {
         expect(component.fieldDisabled()).toBe(false);
       });
     });
+  });
+});
+
+describe("DatePickerComponent NG_VALUE_ACCESSOR integration", () => {
+  let fixture: ComponentFixture<TestHostComponent>;
+  let host: TestHostComponent;
+  let datePicker: DatePickerComponent;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [TestHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+      ],
+    });
+
+    fixture = TestBed.createComponent(TestHostComponent);
+    host = fixture.componentInstance;
+
+    fixture.detectChanges();
+
+    datePicker = fixture.debugElement.query(
+      By.directive(DatePickerComponent),
+    ).componentInstance as DatePickerComponent;
+
+    const mockFloatUiElement = document.createElement("div");
+    const mockContainer = document.createElement("div");
+    mockContainer.className = "float-ui-container-popover";
+    mockFloatUiElement.appendChild(mockContainer);
+
+    jest.spyOn(datePicker.popover(), "floatUiComponent").mockReturnValue({
+      state: false,
+      show: jest.fn(),
+      hide: jest.fn(),
+      elRef: {
+        nativeElement: mockFloatUiElement,
+      },
+    } as unknown as NgxFloatUiContentComponent);
+
+    fixture.detectChanges();
+  });
+
+  it("should update component when FormControl value changes", () => {
+    const date = new Date(2024, 5, 15);
+
+    host.control.setValue(date);
+    fixture.detectChanges();
+
+    expect(datePicker.selected()).toEqual(date);
+    expect(datePicker.inputValue()).toBe("15.06.2024");
+  });
+
+  it("should update FormControl when date is selected in component", () => {
+    const date = new Date(2024, 6, 20);
+
+    datePicker.selectDay({
+      date,
+      disabled: false,
+      inCurrentMonth: true,
+    });
+    fixture.detectChanges();
+
+    expect(host.control.value).toEqual(date);
+  });
+
+  it("should clear FormControl when input is cleared", () => {
+    host.control.setValue(new Date(2024, 5, 15));
+    fixture.detectChanges();
+
+    datePicker.clearInput();
+    fixture.detectChanges();
+
+    expect(host.control.value).toBeNull();
+  });
+
+  it("should disable component when FormControl is disabled", () => {
+    host.control.disable();
+    fixture.detectChanges();
+
+    expect(datePicker.fieldDisabled()).toBe(true);
+  });
+
+  it("should enable component when FormControl is enabled", () => {
+    host.control.disable();
+    fixture.detectChanges();
+
+    host.control.enable();
+    fixture.detectChanges();
+
+    expect(datePicker.fieldDisabled()).toBe(false);
+  });
+
+  it("should mark FormControl as touched when input is blurred", () => {
+    expect(host.control.touched).toBe(false);
+
+    const input = fixture.debugElement.query(By.css("input")).nativeElement;
+    input.dispatchEvent(new Event("blur"));
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(true);
+  });
+
+  it("should mark FormControl as dirty when value changes", () => {
+    expect(host.control.dirty).toBe(false);
+
+    datePicker.selectDay({
+      date: new Date(2024, 5, 15),
+      disabled: false,
+      inCurrentMonth: true,
+    });
+    fixture.detectChanges();
+
+    expect(host.control.dirty).toBe(true);
+  });
+
+  it("should handle initial FormControl value", () => {
+    const initialDate = new Date(2024, 8, 10);
+    host.control.setValue(initialDate, { emitEvent: false });
+
+    const newFixture = TestBed.createComponent(TestHostComponent);
+    newFixture.componentInstance.control.setValue(initialDate, { emitEvent: false });
+    newFixture.detectChanges();
+
+    const newDatePicker = newFixture.debugElement.query(
+      By.directive(DatePickerComponent),
+    ).componentInstance as DatePickerComponent;
+
+    expect(newDatePicker.selected()).toEqual(initialDate);
+  });
+
+  it("should update FormControl when valid date is entered manually", () => {
+    const input = fixture.debugElement.query(By.css("input")).nativeElement;
+
+    input.value = "25.07.2024";
+    input.dispatchEvent(new Event("input"));
+    fixture.detectChanges();
+
+    input.dispatchEvent(new Event("blur"));
+    fixture.detectChanges();
+
+    expect(host.control.value).toEqual(new Date(2024, 6, 25));
   });
 });
