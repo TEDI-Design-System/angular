@@ -1,3 +1,10 @@
+# [6.2.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.5...angular-6.2.0-rc.6) (2026-03-11)
+
+
+### Features
+
+* **status-badge:** add new TEDI-Ready component [#10](https://github.com/TEDI-Design-System/angular/issues/10) ([#340](https://github.com/TEDI-Design-System/angular/issues/340)) ([41e1910](https://github.com/TEDI-Design-System/angular/commit/41e1910714b7e488e99e0abdb407e58e725f263e))
+
 # [6.2.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.4...angular-6.2.0-rc.5) (2026-03-11)
 
 
