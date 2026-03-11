@@ -1,3 +1,10 @@
+# [6.2.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.4...angular-6.2.0-rc.5) (2026-03-11)
+
+
+### Features
+
+* **theme-provider:** theme provider changes [#320](https://github.com/TEDI-Design-System/angular/issues/320) ([#342](https://github.com/TEDI-Design-System/angular/issues/342)) ([1df57f9](https://github.com/TEDI-Design-System/angular/commit/1df57f95fbf203b413b9a9bb2c1982d5300c9de3))
+
 # [6.2.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.3...angular-6.2.0-rc.4) (2026-03-10)
 
 
