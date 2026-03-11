@@ -48,7 +48,8 @@
             "outputDir": "dist/storybook-static",
             "styles": [
               "./src/styles/index",
-              "./node_modules/@tedi-design-system/core/index.scss"
+              "./node_modules/@tedi-design-system/core/index.scss",
+              "./node_modules/@tedi-design-system/core/tedi-storybook-styles.scss"
             ],
             "experimentalZoneless": true
           }

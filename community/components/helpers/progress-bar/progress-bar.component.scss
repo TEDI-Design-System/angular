@@ -1,0 +1,56 @@
+@use "@tedi-design-system/core/bootstrap-utility/breakpoints";
+
+.tedi-progress {
+  --_bar-height: var(--progress-bar-height, 8px);
+  --_bar-radius: var(--progress-bar-radius, 4px);
+  --_bar-background: var(--progress-bar-background-passive, #f9f9f9);
+  --_bar-border: var(--progress-bar-border-default, #838494);
+  --_progress-background: var(--progress-bar-background-active, #005aa3);
+
+  display: grid;
+  grid-template-areas: "bar bar" ". indicator";
+  grid-template-rows: 24px;
+  grid-template-columns: 1fr auto;
+  column-gap: var(--layout-grid-gutters-08, 8px);
+
+  &__bar {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    grid-area: bar;
+    height: var(--_bar-height);
+    border-radius: var(--_bar-radius);
+    border: 1px solid var(--_bar-border);
+    width: 100%;
+    align-self: center;
+
+    &::-webkit-progress-bar {
+      background: var(--_bar-background);
+      border-radius: var(--_bar-radius);
+    }
+
+    &::-webkit-progress-value {
+      background: var(--_progress-background);
+      border-radius: var(--_bar-radius);
+    }
+
+    &::-moz-progress-bar {
+      background: var(--_progress-background);
+      border-radius: var(--_bar-radius);
+    }
+  }
+
+  &__indicator {
+    grid-area: indicator;
+  }
+
+  &--small {
+    --_bar-height: var(--progress-bar-height-sm, 4px);
+  }
+
+  &--horizontal {
+    @include breakpoints.media-breakpoint-up(sm) {
+      grid-template-areas: "bar indicator";
+    }
+  }
+}

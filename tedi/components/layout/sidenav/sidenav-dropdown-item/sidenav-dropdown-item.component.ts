@@ -21,6 +21,7 @@ import { RouterLink } from "@angular/router";
   encapsulation: ViewEncapsulation.None,
   imports: [RouterLink, NgTemplateOutlet],
   host: {
+    "role": "presentation",
     "style": "display: contents",
   },
 })

@@ -21,6 +21,9 @@ export type StatusBadgeStatus =
   | "inactive"
   | "none";
 
+/**
+ * @deprecated Use StatusBadge from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "[tedi-status-badge]",
   templateUrl: "./status-badge.component.html",

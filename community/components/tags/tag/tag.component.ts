@@ -14,6 +14,9 @@ import {
 
 export type TagType = "primary" | "secondary" | "danger";
 
+/**
+ * @deprecated Use Tag from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-tag",
   imports: [SpinnerComponent, IconComponent, TediTranslationPipe],

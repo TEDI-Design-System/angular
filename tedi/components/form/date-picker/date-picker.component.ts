@@ -5,16 +5,15 @@ import {
   computed,
   model,
   input,
-  inject,
   signal,
   OnInit,
   viewChild,
   ElementRef,
+  effect,
 } from "@angular/core";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
 import { IconComponent } from "../../base/icon/icon.component";
-import { TediTranslationService } from "../../../services/translation/translation.service";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { PopoverComponent } from "../../overlay/popover/popover.component";
 import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
@@ -24,6 +23,7 @@ import { DatePickerCalendarGridComponent } from "./date-picker-calendar-grid/dat
 import { DatePickerMonthGridComponent } from "./date-picker-month-grid/date-picker-month-grid.component";
 import { DatePickerYearGridComponent } from "./date-picker-year-grid/date-picker-year-grid.component";
 import { formatDate, parseDate, isSameDay, isBeforeDay, isAfterDay, getISOWeek } from "../../../utils/date.util";
+import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 
 export interface DatePickerDay {
   date: Date;
@@ -65,6 +65,7 @@ let datePickerId = 0;
     DatePickerCalendarGridComponent,
     DatePickerMonthGridComponent,
     DatePickerYearGridComponent,
+    TediTranslationPipe
   ],
 })
 export class DatePickerComponent implements OnInit {
@@ -270,13 +271,15 @@ export class DatePickerComponent implements OnInit {
   readonly calendarGrid = viewChild<DatePickerCalendarGridComponent>("gridElement");
   readonly popover = viewChild.required(PopoverComponent);
 
-  readonly translationService = inject(TediTranslationService);
+  constructor() {
+    effect(() => {
+      const selected = this.selected();
+      this.inputValue.set(selected ? formatDate(selected) : "");
+    });
+  }
 
   ngOnInit(): void {
-    const selected = this.selected();
-    this.inputValue.set(selected ? formatDate(selected) : "");
-
-    let active = selected ?? this.today;
+    let active = this.selected() ?? this.today;
 
     // If the initial active date is disabled, find the first enabled date
     if (this.isDisabled(active)) {
