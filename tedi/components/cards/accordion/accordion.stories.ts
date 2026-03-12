@@ -1,11 +1,14 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
-import { AccordionComponent } from "./accordion/accordion.component";
-import { AccordionItemComponent } from "./accordion-item/accordion-item.component";
-import { IconComponent, TextComponent } from "tedi/components/base";
-import { ButtonComponent } from "tedi/components/buttons";
-import { StatusBadgeComponent } from "tedi/components/tags/status-badge/status-badge.component";
+import {
+  AccordionComponent,
+  AccordionItemComponent,
+  IconComponent,
+  TextComponent,
+  ButtonComponent,
+  StatusBadgeComponent,
+  CheckboxComponent,
+} from "@tedi-design-system/angular/tedi";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
-import { CheckboxComponent } from "tedi/components/form";
 
 document.cookie = "tedi-lang=en; path=/;";
 
@@ -727,6 +730,12 @@ export const Customized: StoryObj = {
           }
         }
 
+        ::ng-deep .tedi-accordion__header.custom-icon-rotation {
+          .tedi-accordion__icon--expanded {
+            transform: rotateX(180deg);
+          }
+        }
+
         .custom-description {
           overflow: hidden;
           text-overflow: ellipsis;
@@ -752,6 +761,7 @@ export const Customized: StoryObj = {
           <tedi-accordion-item
             [title]="'Title'"
             [titleLayout]="'fill'"
+            [headerClass]="'custom-icon-rotation'"
           >
             <tedi-icon tedi-accordion-start-before-title name="account_circle" color="brand" background="brand-secondary" [size]="16"></tedi-icon>
             <tedi-status-badge tedi-accordion-start-after-title color="neutral" text="New" />

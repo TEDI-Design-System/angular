@@ -9,12 +9,10 @@ import {
   model,
   inject,
 } from "@angular/core";
-import {
-  IconComponent,
-  TextComponent,
-  LinkComponent,
-  TediTranslationPipe,
-} from "@tedi-design-system/angular/tedi";
+import { IconComponent } from "../../../base/icon/icon.component";
+import { TextComponent } from "../../../base/text/text.component";
+import { LinkComponent } from "../../../navigation/link/link.component";
+import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
 import { AccordionComponent } from "../accordion/accordion.component";
 import { NgClass } from "@angular/common";
 import { _IdGenerator } from "@angular/cdk/a11y";
@@ -108,9 +106,12 @@ export class AccordionItemComponent implements OnInit {
     this.setExpanded(this.defaultExpanded());
   }
 
+  iconRotation = 0;
+
   toggle() {
     this.setExpanded(!this.expanded());
     this.accordion?.onItemToggled(this);
+    this.iconRotation += 180;
   }
 
   setExpanded(value: boolean) {
