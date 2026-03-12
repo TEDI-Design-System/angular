@@ -46,7 +46,7 @@
   }
 
   <ng-container *ngIf="representatives().length > 1; else normalText">
-    <tedi-popover [withBorder]="true" position="bottom">
+    <tedi-popover [withBorder]="true" position="bottom" [preventOverflow]="true" appendTo="">
       <button
         type="button"
         tedi-popover-trigger

@@ -5,7 +5,7 @@
   class="tedi-header-language__label"
   >{{ "header.select-lang" | tediTranslate }}</span
 >
-<tedi-popover [withBorder]="true" position="bottom">
+<tedi-popover [withBorder]="true" position="bottom" [preventOverflow]="true" appendTo="">
   <button
     type="button"
     tedi-popover-trigger
