@@ -1,9 +1,6 @@
-@let listboxId = inputId() + "-listbox";
-@let labelId = inputId() + "-label";
-
 @if (label()) {
   <label
-    [id]="labelId"
+    [id]="labelId()"
     tedi-label
     [for]="inputId()"
     [required]="required()"
@@ -26,8 +23,8 @@
   [attr.role]="searchable() ? null : 'combobox'"
   [attr.aria-haspopup]="searchable() ? null : 'listbox'"
   [attr.aria-expanded]="searchable() ? null : isOpen()"
-  [attr.aria-controls]="searchable() ? null : listboxId"
-  [attr.aria-labelledby]="searchable() ? null : labelId"
+  [attr.aria-controls]="searchable() ? null : listboxId()"
+  [attr.aria-labelledby]="searchable() ? null : labelId()"
   [tabindex]="searchable() || disabled() ? -1 : 0"
   (click)="onTriggerClick()"
   (keydown.enter)="onTriggerEnter()"
@@ -50,37 +47,10 @@
         </span>
       }
       @if (multiple() && selectedValues().length) {
-        <div
-          class="tedi-select__multiselect-container"
-          [class.tedi-select__multiselect-container--single-row]="!multiRow()"
-          #multiselectContainer
-        >
-          @if (multiRow()) {
-            @for (value of selectedValues(); track value) {
-              <tedi-tag
-                [closable]="clearableTags()"
-                (closed)="deselect($event, value)"
-              >
-                {{ getLabel(value) }}
-              </tedi-tag>
-            }
-          } @else {
-            @for (value of selectedValues(); track value; let i = $index) {
-              @if (visibleTagsCount() === null || i < visibleTagsCount()!) {
-                <tedi-tag
-                  #tagElement
-                  [closable]="clearableTags()"
-                  (closed)="deselect($event, value)"
-                >
-                  {{ getLabel(value) }}
-                </tedi-tag>
-              }
-            }
-            @if (hiddenTagsCount() > 0) {
-              <tedi-tag>+{{ hiddenTagsCount() }}</tedi-tag>
-            }
-          }
-        </div>
+        <ng-container
+          [ngTemplateOutlet]="multiselectTags"
+          [ngTemplateOutletContext]="{ $implicit: multiselectContainerRef }"
+        />
       }
       <input
         #searchInput
@@ -98,8 +68,8 @@
         role="combobox"
         aria-autocomplete="list"
         [attr.aria-expanded]="isOpen()"
-        [attr.aria-controls]="listboxId"
-        [attr.aria-labelledby]="labelId"
+        [attr.aria-controls]="listboxId()"
+        [attr.aria-labelledby]="labelId()"
         [attr.aria-activedescendant]="focusedOptionId()"
       />
     </div>
@@ -107,37 +77,10 @@
     <span class="tedi-select__label">
       @if (selectedValues().length) {
         @if (multiple()) {
-          <div
-            class="tedi-select__multiselect-container"
-            [class.tedi-select__multiselect-container--single-row]="!multiRow()"
-            #multiselectContainer
-          >
-            @if (multiRow()) {
-              @for (value of selectedValues(); track value) {
-                <tedi-tag
-                  [closable]="clearableTags()"
-                  (closed)="deselect($event, value)"
-                >
-                  {{ getLabel(value) }}
-                </tedi-tag>
-              }
-            } @else {
-              @for (value of selectedValues(); track value; let i = $index) {
-                @if (visibleTagsCount() === null || i < visibleTagsCount()!) {
-                  <tedi-tag
-                    #tagElement
-                    [closable]="clearableTags()"
-                    (closed)="deselect($event, value)"
-                  >
-                    {{ getLabel(value) }}
-                  </tedi-tag>
-                }
-              }
-              @if (hiddenTagsCount() > 0) {
-                <tedi-tag>+{{ hiddenTagsCount() }}</tedi-tag>
-              }
-            }
-          </div>
+          <ng-container
+            [ngTemplateOutlet]="multiselectTags"
+            [ngTemplateOutletContext]="{ $implicit: multiselectContainerRef }"
+          />
         } @else {
           @if (valueTemplate(); as tpl) {
             <ng-container
@@ -167,7 +110,7 @@
       (click)="clear($event)"
       (keydown.enter)="clear($event)"
       (keydown.space)="clear($event)"
-      [attr.aria-describedby]="labelId"
+      [attr.aria-describedby]="labelId()"
     ></button>
   }
 
@@ -180,6 +123,40 @@
     [position]="feedback.position"
   />
 }
+
+<ng-template #multiselectTags>
+  <div
+    class="tedi-select__multiselect-container"
+    [class.tedi-select__multiselect-container--single-row]="!multiRow()"
+    #multiselectContainer
+  >
+    @if (multiRow()) {
+      @for (value of selectedValues(); track value) {
+        <tedi-tag
+          [closable]="clearableTags()"
+          (closed)="deselect($event, value)"
+        >
+          {{ getLabel(value) }}
+        </tedi-tag>
+      }
+    } @else {
+      @for (value of selectedValues(); track value; let i = $index) {
+        @if (visibleTagsCount() === null || i < visibleTagsCount()!) {
+          <tedi-tag
+            #tagElement
+            [closable]="clearableTags()"
+            (closed)="deselect($event, value)"
+          >
+            {{ getLabel(value) }}
+          </tedi-tag>
+        }
+      }
+      @if (hiddenTagsCount() > 0) {
+        <tedi-tag>+{{ hiddenTagsCount() }}</tedi-tag>
+      }
+    }
+  </div>
+</ng-template>
 
 <ng-template
   cdkConnectedOverlay
@@ -196,7 +173,7 @@
     [style.max-height]="dropdownMaxHeight() ? dropdownMaxHeight() + 'px' : null"
   >
     <ul
-      [id]="listboxId"
+      [id]="listboxId()"
       class="tedi-select__options"
       [class.tedi-select__options--multiselect]="multiple()"
       cdkListbox
@@ -208,7 +185,7 @@
       #listbox="cdkListbox"
     >
       @if (filteredOptions().length) {
-        @if (multiple() && selectAll()) {
+        @if (multiple() && showSelectAll()) {
           <li
             [id]="getOptionId('selectAll')"
             class="tedi-dropdown-item"

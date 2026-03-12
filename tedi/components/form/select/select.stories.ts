@@ -60,7 +60,7 @@ const meta: Meta<SelectComponent> = {
     size: { control: "radio", options: ["small", "default"] },
     clearable: { control: "boolean" },
     multiple: { control: "boolean" },
-    selectAll: { control: "boolean" },
+    showSelectAll: { control: "boolean" },
     selectableGroups: { control: "boolean" },
     clearableTags: { control: "boolean" },
     multiRow: { control: "boolean" },
@@ -73,9 +73,9 @@ const meta: Meta<SelectComponent> = {
     placeholder: "Select an option...",
     state: "default",
     size: "default",
-    clearable: true,
+    clearable: false,
     multiple: false,
-    selectAll: false,
+    showSelectAll: false,
     selectableGroups: false,
     clearableTags: false,
     multiRow: false,
@@ -104,7 +104,7 @@ export const Default: Story = {
         [size]="size"
         [clearable]="clearable"
         [multiple]="multiple"
-        [selectAll]="selectAll"
+        [showSelectAll]="showSelectAll"
         [selectableGroups]="selectableGroups"
         [clearableTags]="clearableTags"
         [multiRow]="multiRow"
@@ -409,7 +409,7 @@ export const Examples: Story = {
           bindLabel="name"
           bindValue="id"
           [multiple]="true"
-          [selectAll]="true"
+          [showSelectAll]="true"
           [clearable]="false"
         />
         <tedi-select
@@ -484,7 +484,7 @@ export const Examples: Story = {
           bindValue="id"
           groupBy="category"
           [multiple]="true"
-          [selectAll]="true"
+          [showSelectAll]="true"
           [selectableGroups]="true"
           [clearable]="true"
         />

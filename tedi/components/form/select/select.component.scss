@@ -217,7 +217,7 @@
 
   &__group-name {
     display: block;
-    padding: var(--dropdown-group-label-padding-y, 8px) var(--dropdown-group-label-padding-x, 12px) var(--layout-grid-gutters-04, 4px);
+    padding: var(--dropdown-group-label-padding-y) var(--dropdown-group-label-padding-x) var(--layout-grid-gutters-04);
     font-size: var(--heading-subtitle-small-size);
     font-weight: var(--heading-subtitle-small-weight);
     line-height: var(--heading-subtitle-small-line-height);
@@ -225,7 +225,7 @@
     letter-spacing: 0;
 
     &--selectable {
-      padding-bottom: var(--dropdown-group-label-padding-y, 8px);
+      padding-bottom: var(--dropdown-group-label-padding-y);
 
       &~.tedi-dropdown-item:not(.tedi-select__group-name) {
         padding-left: var(--form-checkbox-radio-subitem-padding-left);

@@ -20,7 +20,7 @@ import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.toke
       [multiple]="multiple"
       [searchable]="searchable"
       [clearable]="clearable"
-      [selectAll]="selectAll"
+      [showSelectAll]="showSelectAll"
       [selectableGroups]="selectableGroups"
       [groupBy]="groupBy"
       [bindLabel]="bindLabel"
@@ -60,7 +60,7 @@ class TestHostComponent {
   multiple = false;
   searchable = false;
   clearable = true;
-  selectAll = false;
+  showSelectAll = false;
   selectableGroups = false;
   groupBy: string | undefined = undefined;
   bindLabel = "label";
@@ -554,7 +554,7 @@ describe("SelectComponent", () => {
   describe("Select all", () => {
     beforeEach(() => {
       host.multiple = true;
-      host.selectAll = true;
+      host.showSelectAll = true;
       fixture.detectChanges();
     });
 
@@ -1086,7 +1086,7 @@ describe("SelectComponent", () => {
 
     it("select all should skip disabled options", fakeAsync(() => {
       host.multiple = true;
-      host.selectAll = true;
+      host.showSelectAll = true;
       fixture.detectChanges();
 
       getTrigger().click();
@@ -1289,7 +1289,7 @@ describe("SelectComponent", () => {
     describe("Keyboard selection via Enter", () => {
       it("should toggle selectAll via keyboard in multiselect", fakeAsync(() => {
         host.multiple = true;
-        host.selectAll = true;
+        host.showSelectAll = true;
         host.searchable = true;
         fixture.detectChanges();
         tick();
@@ -1469,7 +1469,7 @@ describe("SelectComponent", () => {
     describe("isOptionFocused edge cases", () => {
       it("should return false when focused option type does not match", fakeAsync(() => {
         host.multiple = true;
-        host.selectAll = true;
+        host.showSelectAll = true;
         host.searchable = true;
         fixture.detectChanges();
         tick();

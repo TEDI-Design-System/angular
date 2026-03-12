@@ -140,9 +140,9 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   /**
    * Whether to show a clear button when a value is selected.
-   * @default true
+   * @default false
    */
-  clearable = input<boolean>(true);
+  clearable = input<boolean>(false);
 
   /**
    * Element reference used to determine dropdown width.
@@ -191,7 +191,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * Whether to show a "Select All" option in multiselect mode.
    * @default false
    */
-  selectAll = input<boolean>(false);
+  showSelectAll = input<boolean>(false);
 
   /**
    * Whether group headers are selectable in multiselect mode.
@@ -255,6 +255,9 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       overlayY: "bottom",
     },
   ];
+
+  listboxId = computed(() => this.inputId() + "-listbox");
+  labelId = computed(() => this.inputId() + "-label");
 
   isOpen = signal(false);
   selectedValues = signal<unknown[]>([]);
@@ -357,7 +360,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
     const result: NavigableOption[] = [];
 
-    if (this.multiple() && this.selectAll()) {
+    if (this.multiple() && this.showSelectAll()) {
       result.push({ type: "selectAll" });
     }
 

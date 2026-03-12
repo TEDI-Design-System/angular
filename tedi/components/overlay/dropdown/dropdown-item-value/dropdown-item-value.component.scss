@@ -1,7 +1,6 @@
-tedi-dropdown-item-value,
 .tedi-dropdown-item-value {
   display: flex;
-  gap: var(--dropdown-item-inner-spacing, 8px);
+  gap: var(--dropdown-item-inner-spacing);
   align-items: center;
   width: 100%;
 
@@ -61,7 +60,7 @@ tedi-dropdown-item-value,
 
   &--horizontal &__content {
     flex-direction: row;
-    gap: var(--dropdown-item-inner-spacing, 8px);
+    gap: var(--dropdown-item-inner-spacing);
     align-items: center;
     justify-content: space-between;
   }
