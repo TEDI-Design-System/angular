@@ -102,13 +102,15 @@ jobs:
         with:
           name: library-dist
           path: dist/
+      - name: Pack library tarball
+        run: cd dist && npm pack
       - name: Create test app and verify build
         run: |
           npx @angular/cli@${{ matrix.angular-version }} new test-app \
             --skip-git --skip-tests --style=scss --ssr=false --skip-install
           cd test-app
           npm install
-          npm install ../dist @angular/cdk@${{ matrix.angular-version }} ngx-float-ui@${{ matrix.angular-version }}
+          npm install ../dist/*.tgz @angular/cdk@${{ matrix.angular-version }} ngx-float-ui@${{ matrix.angular-version }}
 
           # Import a component to verify the library is consumable
           cat > src/app/app.component.ts << 'EOF'
