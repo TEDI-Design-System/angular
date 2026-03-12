@@ -1,3 +1,10 @@
+# [6.2.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.8...angular-6.2.0-rc.9) (2026-03-12)
+
+
+### Bug Fixes
+
+* **header:** fixed profile and language dropdown positioning [#354](https://github.com/TEDI-Design-System/angular/issues/354) ([#355](https://github.com/TEDI-Design-System/angular/issues/355)) ([ae49edc](https://github.com/TEDI-Design-System/angular/commit/ae49edc7a0cac52113255e84a82d6e93d0857ff8))
+
 # [6.2.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.7...angular-6.2.0-rc.8) (2026-03-11)
 
 
