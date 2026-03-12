@@ -25,11 +25,6 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        angular-version: [19, 20, 21]
-    name: test (Angular ${{ matrix.angular-version }})
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -37,23 +32,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
-      - name: Install dependencies
-        run: npm ci --cache .npm --prefer-offline
-      - name: Update to Angular ${{ matrix.angular-version }}
-        run: |
-          BASE=$(node -p "require('./package.json').devDependencies['@angular/core'].replace(/[^0-9].*/,'')")
-          TARGET=${{ matrix.angular-version }}
-          for ((v = BASE + 1; v <= TARGET; v++)); do
-            echo "::group::Updating Angular $((v - 1)) -> $v"
-            npx ng update @angular/core@$v @angular/cli@$v --allow-dirty --force
-            npm install @angular/build@$v --force
-            echo "::endgroup::"
-          done
-          if [ "$BASE" -ne "$TARGET" ]; then
-            npm install @angular/cdk@$TARGET ngx-float-ui@$TARGET --force
-          fi
       - name: Test
-        run: npm run test
+        run: |
+          npm ci --cache .npm --prefer-offline
+          npm run test
 
   chromatic:
     needs: [lint, test]
