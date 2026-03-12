@@ -45,7 +45,8 @@ jobs:
           TARGET=${{ matrix.angular-version }}
           for ((v = BASE + 1; v <= TARGET; v++)); do
             echo "::group::Updating Angular $((v - 1)) -> $v"
-            npx ng update @angular/core@$v @angular/cli@$v @angular/build@$v --allow-dirty --force
+            npx ng update @angular/core@$v @angular/cli@$v --allow-dirty --force
+            npm install @angular/build@$v --force
             echo "::endgroup::"
           done
           if [ "$BASE" -ne "$TARGET" ]; then
