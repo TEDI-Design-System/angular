@@ -25,6 +25,11 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        angular-version: [19, 20, 21]
+    name: test (Angular ${{ matrix.angular-version }})
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,10 +37,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
-      - name: Test
+      - name: Install dependencies
+        run: npm ci --cache .npm --prefer-offline
+      - name: Detect base Angular version
+        id: base
+        run: echo "version=$(node -p "require('./package.json').devDependencies['@angular/core'].replace(/[^0-9].*/,'')")" >> "$GITHUB_OUTPUT"
+      - name: Update to Angular ${{ matrix.angular-version }}
+        if: matrix.angular-version != fromJSON(steps.base.outputs.version)
         run: |
-          npm ci --cache .npm --prefer-offline
-          npm run test
+          npx ng update @angular/core@${{ matrix.angular-version }} @angular/cli@${{ matrix.angular-version }} --allow-dirty --force
+          npm install @angular/cdk@${{ matrix.angular-version }} ngx-float-ui@${{ matrix.angular-version }} --force
+      - name: Test
+        run: npm run test
 
   chromatic:
     needs: [lint, test]
