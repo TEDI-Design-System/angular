@@ -106,12 +106,9 @@ export class AccordionItemComponent implements OnInit {
     this.setExpanded(this.defaultExpanded());
   }
 
-  iconRotation = 0;
-
   toggle() {
     this.setExpanded(!this.expanded());
     this.accordion?.onItemToggled(this);
-    this.iconRotation += 180;
   }
 
   setExpanded(value: boolean) {

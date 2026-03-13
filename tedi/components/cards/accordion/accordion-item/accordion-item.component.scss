@@ -109,8 +109,11 @@
 }
 
 .tedi-accordion__icon {
-  transform: rotate(var(--accordion-icon-rotation, 0deg));
-  transition: transform 0.3s;
+  transition: transform 0.2s ease-in-out;
+
+  &--expanded {
+    transform: rotate(-180deg);
+  }
 }
 
 .tedi-accordion__start {
