@@ -1,3 +1,10 @@
+# [6.2.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.9...angular-6.2.0-rc.10) (2026-03-13)
+
+
+### Features
+
+* **accordion:** change accordion item opened signal to model [#552](https://github.com/TEDI-Design-System/angular/issues/552) ([0680ccb](https://github.com/TEDI-Design-System/angular/commit/0680ccbc3cd3701101b50571b33991f5886d18fa))
+
 # [6.2.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.8...angular-6.2.0-rc.9) (2026-03-12)
 
 
