@@ -133,6 +133,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/TEDI-Design-System/angular.git"
+    "url": "git+https://github.com/TEDI-Design-System/angular.git"
   }
 }
