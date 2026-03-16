@@ -3,10 +3,11 @@
   #floatUiComponent
   looseTrigger="none"
   ariaRole="dialog"
-  appendTo="body"
+  [appendTo]="appendTo()"
   [floatUiLoose]="floatUiComponent"
   [targetElement]="popoverTrigger().host.nativeElement"
   [loosePlacement]="position()"
+  [preventOverflow]="position().includes('auto') ? false : preventOverflow()"
   [applyClass]="floatUiContainerClass()"
   [disableAnimation]="true"
 >

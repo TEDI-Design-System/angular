@@ -11,6 +11,8 @@ import { PopoverContentComponent } from "./popover-content/popover-content.compo
   template: `
     <tedi-popover
       [position]="position"
+      [preventOverflow]="preventOverflow"
+      [appendTo]="appendTo"
       [dismissible]="dismissible"
       [hideOnScroll]="hideOnScroll"
       [withBorder]="withBorder"
@@ -26,6 +28,8 @@ import { PopoverContentComponent } from "./popover-content/popover-content.compo
 })
 class TestHostComponent {
   position: PopoverPosition = "top";
+  preventOverflow = false;
+  appendTo = "body";
   dismissible = true;
   hideOnScroll = false;
   withBorder = false;
@@ -61,9 +65,16 @@ describe("PopoverComponent", () => {
 
   it("should have default inputs", () => {
     expect(component.position()).toBe("top");
+    expect(component.preventOverflow()).toBe(false);
     expect(component.dismissible()).toBe(true);
     expect(component.hideOnScroll()).toBe(false);
     expect(component.withBorder()).toBe(false);
+  });
+
+  it("should update preventOverflow when input changes", () => {
+    hostComponent.preventOverflow = true;
+    fixture.detectChanges();
+    expect(component.preventOverflow()).toBe(true);
   });
 
   it("should initialize the ViewChild floatUiComponent", () => {
@@ -82,9 +93,14 @@ describe("PopoverComponent", () => {
     expect(trigger?.getAttribute("aria-haspopup")).toBe("dialog");
   });
 
-  it('should have appendTo="body" on float-ui-content', () => {
-    const floatUiContent = hostEl.querySelector("float-ui-content");
-    expect(floatUiContent?.getAttribute("appendTo")).toBe("body");
+  it('should have default appendTo="body" on float-ui-content', () => {
+    expect(component.appendTo()).toBe("body");
+  });
+
+  it("should update appendTo when input changes", () => {
+    hostComponent.appendTo = "";
+    fixture.detectChanges();
+    expect(component.appendTo()).toBe("");
   });
 
   it("should not include the border class by default", () => {

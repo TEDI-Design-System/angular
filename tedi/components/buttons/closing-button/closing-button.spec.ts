@@ -47,4 +47,12 @@ describe("ClosingButtonComponent", () => {
     expect(buttonElement.getAttribute("title")).toBe("Sulge");
     expect(buttonElement.getAttribute("aria-label")).toBe("Sulge");
   });
+
+  it("should override default aria-label when provided", () => {
+    fixture.componentRef.setInput("ariaLabel", "Eemalda");
+    fixture.detectChanges();
+
+    expect(buttonElement.getAttribute("title")).toBe("Eemalda");
+    expect(buttonElement.getAttribute("aria-label")).toBe("Eemalda");
+  });
 });

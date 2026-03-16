@@ -39,6 +39,11 @@ export class PopoverComponent implements AfterContentChecked {
    */
   position = input<PopoverPosition>("top");
   /**
+   * Should position flip to opposite direction when overflowing screen?
+   * @default false
+   */
+  preventOverflow = input(false);
+  /**
    * Is dismissible by clicking outside of content?
    * @default true
    */
@@ -62,6 +67,12 @@ export class PopoverComponent implements AfterContentChecked {
    * @default false
    */
   lockScroll = input(false);
+  /**
+   * Append floating element to given selector.
+   * Use 'body' to append at the end of DOM or empty string to append next to trigger element.
+   * @default "body"
+   */
+  readonly appendTo = input("body");
   /** Delay time (in ms) for closing popover when not hovering trigger or content.
    * @default 100
    */

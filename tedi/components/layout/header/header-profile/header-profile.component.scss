@@ -46,12 +46,13 @@ tedi-header-profile {
     display: flex;
     flex-direction: column;
     width: var(--navigation-vertical-item-width-default);
+    max-width: 100%;
     min-height: calc(100dvh - var(--layout-header-min-height));
     max-height: 100%;
     overflow-y: auto;
     background: var(--general-surface-primary);
 
-    > * {
+    >* {
       padding: var(--layout-header-modal-item-padding);
 
       &:not(:last-child) {

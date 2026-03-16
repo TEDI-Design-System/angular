@@ -1,8 +1,14 @@
-import { Component, computed, input, ViewEncapsulation } from "@angular/core";
-import { IconColor, IconComponent } from "@tedi-design-system/angular/tedi";
-
-// StatusBadgeColor, StatusBadgeVariant, StatusBadgeSize, StatusBadgeStatus are identical to libs/react-components/src/tedi/components/tags/status-badge/status-badge.tsx,
-// redo to use shared constants when possible
+import { CommonModule, NgClass } from "@angular/common";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewEncapsulation,
+  input,
+  computed,
+  inject,
+} from "@angular/core";
+import { IconComponent } from "@tedi-design-system/angular/tedi";
+import { _IdGenerator } from "@angular/cdk/a11y";
 
 export type StatusBadgeColor =
   | "neutral"
@@ -14,52 +20,40 @@ export type StatusBadgeColor =
   | "transparent";
 export type StatusBadgeVariant = "filled" | "filled-bordered" | "bordered";
 export type StatusBadgeSize = "default" | "large";
-export type StatusBadgeStatus =
-  | "danger"
-  | "success"
-  | "warning"
-  | "inactive"
-  | "none";
+export type StatusBadgeStatus = "danger" | "success" | "warning" | "inactive";
 
-/**
- * @deprecated Use StatusBadge from TEDI-ready instead. This component will be removed from future versions.
- */
 @Component({
-  selector: "[tedi-status-badge]",
+  selector: "tedi-status-badge",
+  standalone: true,
+  imports: [IconComponent, CommonModule, NgClass],
   templateUrl: "./status-badge.component.html",
   styleUrl: "./status-badge.component.scss",
-  imports: [IconComponent],
   encapsulation: ViewEncapsulation.None,
-  host: {
-    "[class]": "classes()",
-    "[attr.title]": "title()",
-    "[attr.id]": "id()",
-    "[attr.role]": "role()",
-    "[attr.aria-live]": "ariaLive()",
-    "[attr.aria-label]": "title()",
-  },
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StatusBadgeComponent {
+  readonly idGenerator = inject(_IdGenerator);
+  readonly uniqueId = this.idGenerator.getId("tedi-status-badge");
+  /**
+   * The text to be displayed inside the StatusBadge.
+   */
+  text = input<string>("");
   /**
    * Additional classes to apply custom styles to the StatusBadge.
    */
-  className = input<string>();
+  class = input<string>();
   /**
    * Provides the full text or description when the Badge represents an abbreviation.
    * This is typically shown as a tooltip on hover.
    */
   title = input<string>();
   /**
-   * ID attribute
-   */
-  id = input<string>();
-  /**
    * ARIA role attribute for accessibility.
    */
   role = input<string>();
   /**
    * Specifies the color scheme of the StatusBadge.
-   * @default default
+   * @default neutral
    */
   color = input<StatusBadgeColor>("neutral");
   /**
@@ -73,9 +67,9 @@ export class StatusBadgeComponent {
    */
   size = input<StatusBadgeSize>("default");
   /**
-   * StatusBadge status indicator
+   * StatusBadge status indicator.
    */
-  status = input<StatusBadgeStatus>("inactive");
+  status = input<StatusBadgeStatus>();
   /**
    * The name of the icon to be displayed inside the StatusBadge. The icon is rendered using the `Icon` component.
    */
@@ -83,6 +77,7 @@ export class StatusBadgeComponent {
 
   classes = computed(() => {
     const classList = ["tedi-status-badge"];
+
     if (this.color()) {
       classList.push(`tedi-status-badge--color-${this.color()}`);
     }
@@ -91,49 +86,38 @@ export class StatusBadgeComponent {
       classList.push(`tedi-status-badge--variant-${this.variant()}`);
     }
 
-    if (this.status() && this.status() !== "none") {
+    if (this.status()) {
       classList.push(
         "tedi-status-badge--status",
-        `tedi-status-badge--status-${this.status()}`
+        `tedi-status-badge--status-${this.status()}`,
       );
     }
+
     if (this.size() === "large") {
       classList.push("tedi-status-badge--large");
     }
-    if (this.icon() && !this.title()) {
+
+    const hasText = !!this.text()?.trim();
+    const hasIcon = !!this.icon()?.trim();
+    if (hasIcon && !hasText) {
       classList.push("tedi-status-badge__icon-only");
     }
-    if (this.className()) {
-      classList.push(this.className()!);
+
+    const customClass = this.class();
+    if (customClass) {
+      classList.push(customClass);
     }
-    return classList.join(" ");
+
+    return classList;
   });
 
   ariaLive = computed(() => {
-    switch (this.role()) {
-      case "alert":
-        return "assertive";
-      case "status":
-        return "polite";
-      default:
-        return undefined;
+    if (this.role() === "alert") {
+      return "assertive";
     }
-  });
-
-  mapBadgeColorToIconColor = computed((): IconColor => {
-    switch (this.color()) {
-      case "brand":
-        return "brand-dark";
-      case "success":
-        return "success";
-      case "accent":
-        return "secondary";
-      case "danger":
-        return "danger";
-      case "warning":
-        return "warning-dark";
-      default:
-        return "primary";
+    if (this.role() === "status") {
+      return "polite";
     }
+    return null;
   });
 }
