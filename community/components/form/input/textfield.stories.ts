@@ -33,6 +33,11 @@ export default {
       },
     },
   },
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
 } as Meta<InputComponent>;
 
 type InputStory = StoryObj<InputComponent>;

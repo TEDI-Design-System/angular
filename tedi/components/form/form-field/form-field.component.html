@@ -1,0 +1,43 @@
+<ng-content select="label[tedi-label]"></ng-content>
+
+<div [ngClass]="classes()">
+  <ng-content select="input[tedi-text-field]"></ng-content>
+
+  @if (showClearButton()) {
+    <div class="tedi-form-field__buttons">
+      <button
+        class="tedi-form-field__clear"
+        tedi-closing-button
+        type="button"
+        size="small"
+        [attr.aria-label]="'clear' | tediTranslate"
+        [iconSize]="18"
+        [disabled]="isDisabled()"
+        (click)="clear()"
+      ></button>
+
+      @if (icon()) {
+        <tedi-separator axis="vertical" size="1rem" />
+      }
+    </div>
+  }
+
+  @if (resolvedIcon(); as icon) {
+    <div class="tedi-form-field__icon">
+      <tedi-icon
+        [name]="icon.name"
+        [size]="icon.size ?? (size() === 'small' ? 16 : 18)"
+        [color]="icon.color ?? 'secondary'"
+        [type]="icon.type ?? 'outlined'"
+        [variant]="icon.variant ?? 'outlined'"
+        [attr.aria-hidden]="true"
+      />
+    </div>
+  }
+</div>
+
+@if (feedback) {
+  <div class="tedi-form-field__feedback">
+    <ng-content select="tedi-feedback-text"></ng-content>
+  </div>
+}
