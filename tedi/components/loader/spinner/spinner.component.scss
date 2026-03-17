@@ -16,9 +16,7 @@ $spinner-sizes: (
   animation: 1.4s linear 0s infinite normal none running tedi-spinner-outer;
 
   &--inner {
-    // Convert stroke size in px to viewBox units: stroke px × (viewbox / size px)
-    stroke-width: calc(var(--tedi-spinner-stroke, 2) * #{$spinner-viewbox} / var(--tedi-spinner-size, 16));
-    r: calc(#{$spinner-viewbox / 2} - var(--tedi-spinner-stroke, 2) * #{$spinner-viewbox} / var(--tedi-spinner-size, 16) / 2);
+    stroke-width: var(--tedi-spinner-stroke-width);
     stroke-dasharray: 80, 200;
     stroke-dashoffset: 0;
     animation: 1.4s ease-in-out 0s infinite normal none running tedi-spinner-inner;
@@ -35,9 +33,11 @@ $spinner-sizes: (
   }
 
   @each $size, $stroke in $spinner-sizes {
+    $stroke-width: $stroke * $spinner-viewbox / $size;
+
     &--size-#{$size} {
       --tedi-spinner-size: #{$size};
-      --tedi-spinner-stroke: #{$stroke};
+      --tedi-spinner-stroke-width: #{$stroke-width};
     }
   }
 
