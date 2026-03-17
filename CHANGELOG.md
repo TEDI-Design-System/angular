@@ -1,3 +1,10 @@
+# [6.2.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.10...angular-6.2.0-rc.11) (2026-03-17)
+
+
+### Bug Fixes
+
+* **spinner:** fixed rendering on safari and firefox [#360](https://github.com/TEDI-Design-System/angular/issues/360) ([#361](https://github.com/TEDI-Design-System/angular/issues/361)) ([9370134](https://github.com/TEDI-Design-System/angular/commit/9370134646787751ab42af35f5eeadaa5733e96a))
+
 # [6.2.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.9...angular-6.2.0-rc.10) (2026-03-13)
 
 
