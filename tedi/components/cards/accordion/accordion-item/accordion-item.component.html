@@ -29,8 +29,10 @@
   <div
     [ngClass]="bodyClasses()"
     [id]="bodyId"
-    role="region"
+    [attr.role]="expanded() ? 'region' : null"
     [attr.aria-labelledby]="headerId"
+    [attr.aria-hidden]="!expanded()"
+    [attr.inert]="!expanded() ? '' : null"
   >
     <div class="tedi-accordion__body--inner">
       <ng-content></ng-content>
@@ -55,7 +57,13 @@
         }
 
         @if (showSeparateTitle()) {
-          <span tedi-text color="secondary" modifiers="normal">
+          <span
+            tedi-text
+            color="secondary"
+            modifiers="normal"
+            [id]="headerId + '-title'"
+            [attr.aria-hidden]="hideTitleFromSR() ? 'true' : null"
+          >
             {{ title() | tediTranslate }}
           </span>
         }
@@ -115,6 +123,7 @@
       [attr.aria-label]="
         !showExpandLabel() ? (expandLabel() | tediTranslate) : null
       "
+      [attr.aria-labelledby]="headerId + '-title'"
     >
       @if (showExpandLabel()) {
         {{ (showSeparateTitle() ? expandLabel() : title()) | tediTranslate }}

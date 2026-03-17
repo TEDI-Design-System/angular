@@ -149,4 +149,8 @@ export class AccordionItemComponent implements OnInit {
       "tedi-accordion__body--with-icon-card": this.showIconCard(),
     };
   });
+
+  hideTitleFromSR = computed(() => {
+    return !this.headerClickable() && !this.showExpandLabel();
+  });
 }
