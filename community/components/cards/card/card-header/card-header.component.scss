@@ -1,8 +1,10 @@
+@use "../card-mixins";
+
 .tedi-card-header {
   border: 1px solid var(--_card-border);
   background: var(--_card-bg);
-  padding: var(--_card-padding-top) var(--_card-padding-right)
-    var(--_card-padding-bottom) var(--_card-padding-left);
+  @include card-mixins.card-padding;
+  @include card-mixins.card-padding-overrides;
 
   &--primary {
     --_card-bg: var(--card-background-primary);
