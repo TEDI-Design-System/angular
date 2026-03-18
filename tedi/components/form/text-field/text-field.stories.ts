@@ -71,9 +71,9 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
-    containerClass: {
+    inputClass: {
       control: "text",
-      description: "Custom CSS classes for the container.",
+      description: "Custom CSS classes for the input.",
       table: {
         category: "Form Field inputs",
         type: { summary: "string" },

@@ -9,9 +9,7 @@ import {
   TEDI_FORM_FIELD_CONTROL,
   FormFieldControl,
 } from "./form-field-control";
-import {
-  FeedbackTextComponent,
-} from "../feedback-text/feedback-text.component";
+import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 
 @Component({
   selector: "mock-control",
@@ -47,7 +45,7 @@ export class MockFeedbackComponent extends FeedbackTextComponent {}
       [size]="size"
       [icon]="icon"
       [clearable]="clearable"
-      [containerClass]="containerClass"
+      [inputClass]="inputClass"
     >
       <mock-control #mockControl></mock-control>
       <tedi-feedback-text
@@ -67,7 +65,7 @@ class TestHostComponent {
   size: InputSize = "default";
   icon?: string | FormFieldIcon;
   clearable = false;
-  containerClass?: string;
+  inputClass?: string;
   feedbackType: "valid" | "error" | "default" = "default";
 }
 
@@ -95,7 +93,7 @@ describe("FormFieldComponent", () => {
   it("should apply small size class", () => {
     host.size = "small";
     fixture.detectChanges();
-    expect(formField.classes()["tedi-form-field--small"]).toBe(true);
+    expect(formField.hostClasses()["tedi-form-field--small"]).toBe(true);
   });
 
   it("should resolve string icon to config object", () => {
@@ -165,10 +163,10 @@ describe("FormFieldComponent", () => {
   });
 
   it("should apply custom class", () => {
-    host.containerClass = "custom-class";
+    host.inputClass = "custom-class";
     fixture.detectChanges();
 
-    const classes = formField.classes() as Record<string, boolean>;
+    const classes = formField.inputClasses() as Record<string, boolean>;
     expect(classes["custom-class"]).toBe(true);
   });
 });

@@ -1,4 +1,11 @@
-import { Component, computed, ContentChild, input } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ContentChild,
+  input,
+  ViewEncapsulation,
+} from "@angular/core";
 import { NgClass } from "@angular/common";
 import {
   FormFieldControl,
@@ -33,6 +40,8 @@ export interface FormFieldIcon {
   standalone: true,
   templateUrl: "./form-field.component.html",
   styleUrl: "./form-field.component.scss",
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NgClass,
     IconComponent,
@@ -40,6 +49,9 @@ export interface FormFieldIcon {
     SeparatorComponent,
     TediTranslationPipe,
   ],
+  host: {
+    "[class]": "hostClasses()",
+  },
 })
 export class FormFieldComponent {
   /**
@@ -57,9 +69,9 @@ export class FormFieldComponent {
    */
   clearable = input<boolean>(false);
   /**
-   * Custom CSS classes for the container.
+   * Custom CSS classes for the input.
    */
-  containerClass = input<string | null>(null);
+  inputClass = input<string | null>(null);
 
   @ContentChild(TEDI_FORM_FIELD_CONTROL)
   control?: FormFieldControl;
@@ -91,18 +103,24 @@ export class FormFieldComponent {
 
   readonly isDisabled = computed(() => this.control?.disabled() ?? false);
 
-  readonly classes = computed(() => {
-    const customClass = this.containerClass();
-
+  readonly hostClasses = computed(() => {
     return {
       "tedi-form-field": true,
-      ...(customClass ? { [customClass]: true } : {}),
       "tedi-form-field--valid": this.validationState() === "valid",
       "tedi-form-field--invalid": this.validationState() === "invalid",
       "tedi-form-field--disabled": this.control?.disabled(),
       "tedi-form-field--small": this.size() === "small",
       "tedi-form-field--large": this.size() === "large",
       "tedi-form-field--with-icon": this.showClearButton() || !!this.icon(),
+    };
+  });
+
+  readonly inputClasses = computed(() => {
+    const customClass = this.inputClass();
+
+    return {
+      "tedi-form-field__input": true,
+      ...(customClass ? { [customClass]: true } : {}),
     };
   });
 

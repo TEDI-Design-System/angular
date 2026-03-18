@@ -1,6 +1,6 @@
 <ng-content select="label[tedi-label]"></ng-content>
 
-<div [ngClass]="classes()">
+<div [ngClass]="inputClasses()">
   <ng-content select="input[tedi-text-field]"></ng-content>
 
   @if (showClearButton()) {
