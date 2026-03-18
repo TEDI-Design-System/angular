@@ -1,3 +1,10 @@
+# [6.2.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.13...angular-6.2.0-rc.14) (2026-03-18)
+
+
+### Bug Fixes
+
+* **card:** fix card padding overrides, add padding to tab content [#184](https://github.com/TEDI-Design-System/angular/issues/184) ([965d32f](https://github.com/TEDI-Design-System/angular/commit/965d32f0c65692933fb5644b6fd5d5706045f64e))
+
 # [6.2.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.12...angular-6.2.0-rc.13) (2026-03-18)
 
 
