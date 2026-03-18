@@ -38,6 +38,8 @@ import {
   SelectValueContext,
 } from "./select-templates.directive";
 import { InputSize, InputState } from "../form-field/form-field.component";
+export type SelectInputSize = Exclude<InputSize, "large">;
+
 export interface SelectOption<T = unknown> {
   value: T;
   label: string;
@@ -126,7 +128,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * Size variant of the select.
    * @default "default"
    */
-  size = input<InputSize>("default");
+  size = input<SelectInputSize>("default");
 
   /**
    * Whether to show a clear button when a value is selected.
