@@ -39,6 +39,11 @@ export default {
       ],
     }),
   ],
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
 } as Meta<AccordionComponent>;
 
 type AccordionStory = StoryObj<AccordionComponent>;
