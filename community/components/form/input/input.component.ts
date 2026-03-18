@@ -9,6 +9,9 @@ import {
 export type InputSize = "small" | "default";
 export type InputState = "valid" | "error" | "default";
 
+/**
+ * @deprecated Use TextField from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "[tedi-input]",
   standalone: true,
