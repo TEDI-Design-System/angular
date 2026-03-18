@@ -3,12 +3,13 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed, fakeAsync, tick } from "@angular/core/testing";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
-import { SelectComponent, SelectOption, InputState, InputSize } from "./select.component";
+import { SelectComponent, SelectOption } from "./select.component";
 import {
   SelectOptionTemplateDirective,
   SelectValueTemplateDirective,
 } from "./select-templates.directive";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
+import { InputSize, InputState } from "../form-field/form-field.component";
 
 @Component({
   standalone: true,

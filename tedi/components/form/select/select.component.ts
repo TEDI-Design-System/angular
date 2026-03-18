@@ -37,10 +37,7 @@ import {
   SelectOptionContext,
   SelectValueContext,
 } from "./select-templates.directive";
-
-export type InputState = "default" | "error" | "valid";
-export type InputSize = "default" | "small";
-
+import { InputSize, InputState } from "../form-field/form-field.component";
 export interface SelectOption<T = unknown> {
   value: T;
   label: string;

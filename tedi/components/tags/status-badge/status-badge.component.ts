@@ -7,7 +7,7 @@ import {
   computed,
   inject,
 } from "@angular/core";
-import { IconComponent } from "@tedi-design-system/angular/tedi";
+import { IconComponent } from "../../base/icon/icon.component";
 import { _IdGenerator } from "@angular/cdk/a11y";
 
 export type StatusBadgeColor =

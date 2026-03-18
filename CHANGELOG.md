@@ -1,3 +1,17 @@
+# [6.2.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.12...angular-6.2.0-rc.13) (2026-03-18)
+
+
+### Features
+
+* **text-field:** add TextField Angular TEDI-Ready component [#71](https://github.com/TEDI-Design-System/angular/issues/71) ([#331](https://github.com/TEDI-Design-System/angular/issues/331)) ([7e8ea35](https://github.com/TEDI-Design-System/angular/commit/7e8ea35f87de47ad92c0176e11c44fc671c30f0a))
+
+# [6.2.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.11...angular-6.2.0-rc.12) (2026-03-18)
+
+
+### Features
+
+* **accordion:** add accordion tedi-ready component [#262](https://github.com/TEDI-Design-System/angular/issues/262) ([#326](https://github.com/TEDI-Design-System/angular/issues/326)) ([ecdef2f](https://github.com/TEDI-Design-System/angular/commit/ecdef2f76c039999f8116b4df68426f6e46b080d))
+
 # [6.2.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.10...angular-6.2.0-rc.11) (2026-03-17)
 
 
