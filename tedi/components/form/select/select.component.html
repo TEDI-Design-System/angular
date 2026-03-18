@@ -70,7 +70,6 @@
         [attr.aria-expanded]="isOpen()"
         [attr.aria-controls]="listboxId()"
         [attr.aria-labelledby]="labelId()"
-        [attr.aria-activedescendant]="focusedOptionId()"
       />
     </div>
   } @else {
@@ -179,6 +178,8 @@
       cdkListbox
       [cdkListboxMultiple]="multiple()"
       [cdkListboxValue]="visibleSelectedValues()"
+      [cdkListboxNavigatesDisabledOptions]="false"
+      [cdkListboxUseActiveDescendant]="true"
       (cdkListboxValueChange)="handleValueChange($event)"
       (keydown.tab)="toggleIsOpen(true)"
       (keydown.escape)="toggleIsOpen(true)"
@@ -187,9 +188,7 @@
       @if (filteredOptions().length) {
         @if (multiple() && showSelectAll()) {
           <li
-            [id]="getOptionId('selectAll')"
             class="tedi-dropdown-item"
-            [class.tedi-dropdown-item--focused]="isOptionFocused('selectAll')"
             [cdkOption]="SpecialOptionControls.SELECT_ALL"
           >
             <tedi-dropdown-item-value type="checkbox" [selected]="allOptionsSelected()">
@@ -202,9 +201,7 @@
           @if (group.label.length > 0) {
             @if (multiple() && selectableGroups()) {
               <li
-                [id]="getOptionId('group', undefined, group.label)"
                 class="tedi-dropdown-item tedi-select__group-name tedi-select__group-name--selectable"
-                [class.tedi-dropdown-item--focused]="isOptionFocused('group', undefined, group.label)"
                 [cdkOption]="SpecialOptionControls.SELECT_GROUP + group.label"
               >
                 <tedi-dropdown-item-value type="checkbox" [selected]="isGroupSelected(group.label)">
@@ -224,12 +221,10 @@
 
           @for (option of group.options; track option.value; let i = $index) {
             <li
-              [id]="getOptionId('option', option.value)"
               class="tedi-dropdown-item"
               [class.tedi-dropdown-item--selected]="!multiple() && isOptionSelected(option.value)"
               [class.tedi-dropdown-item--disabled]="option.disabled"
               [class.tedi-dropdown-item--custom]="optionTemplate()"
-              [class.tedi-dropdown-item--focused]="isOptionFocused('option', option.value)"
               [cdkOption]="option.value"
               [cdkOptionDisabled]="option.disabled"
             >

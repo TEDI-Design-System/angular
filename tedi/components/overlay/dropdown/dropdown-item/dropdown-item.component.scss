@@ -23,11 +23,6 @@
   &.tedi-dropdown-item--selected {
     color: var(--dropdown-item-active-text);
     background: var(--dropdown-item-active-background);
-
-    &:focus-visible {
-      color: var(--dropdown-item-default-text);
-      background: var(--dropdown-item-default-background);
-    }
   }
 
   &[aria-disabled="true"],

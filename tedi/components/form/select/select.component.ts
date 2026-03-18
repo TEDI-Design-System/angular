@@ -57,13 +57,6 @@ export interface SelectOptionGroup<T = unknown> {
 export type GroupByFn<T = unknown> = (item: T) => string | undefined;
 export type CompareWithFn<T = unknown> = (a: T, b: T) => boolean;
 
-export interface NavigableOption {
-  type: "selectAll" | "group" | "option";
-  value?: unknown;
-  disabled?: boolean;
-  groupLabel?: string;
-}
-
 export enum SpecialOptionControls {
   SELECT_ALL = "SELECT_ALL",
   SELECT_GROUP = "SELECT_GROUP_",
@@ -266,7 +259,6 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   dropdownMaxHeight = signal<number | null>(null);
   visibleTagsCount = signal<number | null>(null);
   searchTerm = signal<string>("");
-  focusedOptionIndex = signal<number>(-1);
   searchFocused = signal<boolean>(false);
 
   hiddenTagsCount = computed(() => {
@@ -277,6 +269,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   });
 
   listboxRef = viewChild(CdkListbox, { read: ElementRef });
+  cdkListboxRef = viewChild(CdkListbox);
   triggerRef = viewChild(CdkOverlayOrigin, { read: ElementRef });
   searchInputRef = viewChild<ElementRef>("searchInput");
   multiselectContainerRef = viewChild<ElementRef>("multiselectContainer");
@@ -355,27 +348,6 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     return groups;
   });
 
-  flatFilteredOptions = computed<NavigableOption[]>(() => {
-    if (this.filteredOptions().length === 0) return [];
-
-    const result: NavigableOption[] = [];
-
-    if (this.multiple() && this.showSelectAll()) {
-      result.push({ type: "selectAll" });
-    }
-
-    for (const group of this.optionGroups()) {
-      if (group.label.length > 0 && this.multiple() && this.selectableGroups()) {
-        result.push({ type: "group", groupLabel: group.label });
-      }
-      for (const option of group.options) {
-        result.push({ type: "option", value: option.value, disabled: option.disabled });
-      }
-    }
-
-    return result;
-  });
-
   selectedOptions = computed<SelectOption<T>[]>(() => {
     const values = this.selectedValues();
     const options = this.normalizedOptions();
@@ -398,13 +370,6 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   selectedLabels = computed<string[]>(() => {
     return this.selectedOptions().map((option) => option.label);
-  });
-
-  /** Returns the ID of the currently focused option for aria-activedescendant. */
-  focusedOptionId = computed<string | null>(() => {
-    const index = this.focusedOptionIndex();
-    if (index < 0) return null;
-    return `${this.inputId()}-option-${index}`;
   });
 
   allOptionsSelected = computed<boolean>(() => {
@@ -454,48 +419,6 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     }
   }
 
-  private markNextItem(): void {
-    this.stepToItem(1);
-  }
-
-  private markPreviousItem(): void {
-    this.stepToItem(-1);
-  }
-
-  private stepToItem(step: number): void {
-    const options = this.flatFilteredOptions();
-    if (options.length === 0 || options.every((x) => x.type === "option" && x.disabled)) {
-      return;
-    }
-
-    let index = this.focusedOptionIndex();
-    index = this.getNextItemIndex(step, index, options.length);
-    this.focusedOptionIndex.set(index);
-
-    const opt = options[index];
-    if (opt.type === "option" && opt.disabled) {
-      this.stepToItem(step);
-      return;
-    }
-
-    this.scrollToFocusedOption();
-  }
-
-  private getNextItemIndex(step: number, currentIndex: number, length: number): number {
-    if (step > 0) {
-      return currentIndex >= length - 1 ? 0 : currentIndex + 1;
-    }
-    return currentIndex <= 0 ? length - 1 : currentIndex - 1;
-  }
-
-  private initFocusedOptionIndex(): void {
-    const options = this.flatFilteredOptions();
-    const firstSelectableIndex = options.findIndex(
-      (opt) => opt.type !== "option" || !opt.disabled
-    );
-    this.focusedOptionIndex.set(firstSelectableIndex >= 0 ? firstSelectableIndex : 0);
-  }
-
   focusListboxWhenVisible = effect(() => {
     if (this.isOpen() && this.searchable() && this.searchInputRef()) {
       this.searchInputRef()?.nativeElement.focus();
@@ -504,15 +427,25 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     }
   });
 
+  constructor() {
+    /**
+     * Prevent CDK from resetting active item to the first selected option
+     * whenever [cdkListboxValue] changes in multiselect mode. CDK calls
+     * _setNextFocusToSelectedOption inside _setSelection, which moves focus
+     * away from the user's current position after each selection toggle.
+     */
+    effect(() => {
+      const listbox = this.cdkListboxRef();
+      if (listbox && this.multiple()) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (listbox as any)._setNextFocusToSelectedOption = () => { };
+      }
+    });
+  }
+
   resetVisibleTagsOnSelectionChange = effect(() => {
     this.selectedValues();
     this.visibleTagsCount.set(null);
-  });
-
-  resetFocusedOptionIndexOnClose = effect(() => {
-    if (!this.isOpen()) {
-      this.focusedOptionIndex.set(-1);
-    }
   });
 
   toggleIsOpen(close?: boolean): void {
@@ -524,11 +457,11 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     } else {
       const willOpen = !this.isOpen();
       if (willOpen) {
-        this.calculateDropdownMaxHeight();
+        this.openDropdown();
       } else {
         this.dropdownMaxHeight.set(null);
+        this.isOpen.set(false);
       }
-      this.isOpen.set(willOpen);
     }
   }
 
@@ -539,8 +472,6 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     if (!this.isOpen()) {
       this.openDropdown();
     }
-
-    this.initFocusedOptionIndex();
   }
 
   onSearchFocus(): void {
@@ -574,17 +505,20 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
     switch (event.key) {
       case "ArrowDown":
+      case "ArrowUp":
+      case "Home":
+      case "End":
         event.preventDefault();
         if (this.isOpen()) {
-          this.markNextItem();
+          this.forwardToCdkListbox(event.key);
         } else {
           this.openDropdown();
         }
         break;
-      case "ArrowUp":
+      case "Enter":
         event.preventDefault();
         if (this.isOpen()) {
-          this.markPreviousItem();
+          this.forwardToCdkListbox(event.key);
         } else {
           this.openDropdown();
         }
@@ -592,14 +526,6 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       case " ":
         if (!this.isOpen()) {
           event.preventDefault();
-          this.openDropdown();
-        }
-        break;
-      case "Enter":
-        event.preventDefault();
-        if (this.isOpen() && this.focusedOptionIndex() >= 0) {
-          this.selectFocusedOption();
-        } else if (!this.isOpen()) {
           this.openDropdown();
         }
         break;
@@ -612,10 +538,27 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     }
   }
 
+  private static readonly KEY_CODES: Record<string, number> = {
+    ArrowDown: 40,
+    ArrowUp: 38,
+    Home: 36,
+    End: 35,
+    Enter: 13,
+    " ": 32,
+  };
+
+  private forwardToCdkListbox(key: string): void {
+    const listbox = this.cdkListboxRef();
+    if (listbox) {
+      const keyCode = SelectComponent.KEY_CODES[key] ?? 0;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (listbox as any)._handleKeydown(new KeyboardEvent("keydown", { key, keyCode, bubbles: true }));
+    }
+  }
+
   private openDropdown(): void {
     this.calculateDropdownMaxHeight();
     this.isOpen.set(true);
-    this.initFocusedOptionIndex();
   }
 
   private calculateDropdownMaxHeight(): void {
@@ -643,54 +586,6 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     this.isOpen.set(false);
     this.searchTerm.set("");
     this.dropdownMaxHeight.set(null);
-  }
-
-  private selectFocusedOption(): void {
-    const options = this.flatFilteredOptions();
-    const index = this.focusedOptionIndex();
-    if (index < 0 || index >= options.length) return;
-
-    const option = options[index];
-
-    if (option.type === "selectAll") {
-      this.toggleSelectAll();
-    } else if (option.type === "group") {
-      this.toggleGroupSelection(option.groupLabel!);
-    } else if (!option.disabled) {
-      if (this.multiple()) {
-        const compareWith = this.compareWith();
-        const isSelected = this.selectedValues().some((val) =>
-          compareWith(val, option.value)
-        );
-        let newValues: unknown[];
-        if (isSelected) {
-          newValues = this.selectedValues().filter(
-            (val) => !compareWith(val, option.value)
-          );
-        } else {
-          newValues = [...this.selectedValues(), option.value];
-        }
-        this.selectedValues.set(newValues);
-        this.onChange(newValues);
-        this.searchTerm.set("");
-      } else {
-        this.selectedValues.set([option.value]);
-        this.onChange(option.value);
-        this.toggleIsOpen(true);
-      }
-      this.onTouched();
-    }
-  }
-
-  private scrollToFocusedOption(): void {
-    const listbox = this.listboxRef()?.nativeElement;
-    if (!listbox) return;
-
-    const items = listbox.querySelectorAll(".tedi-dropdown-item");
-    const index = this.focusedOptionIndex();
-    if (index >= 0 && items[index]) {
-      items[index].scrollIntoView({ block: "nearest" });
-    }
   }
 
   handleValueChange(event: { value: readonly unknown[] }): void {
@@ -820,39 +715,6 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     return { $implicit: item, item, label: option.label };
   }
 
-  isOptionFocused(type: "selectAll" | "group" | "option", value?: unknown, groupLabel?: string): boolean {
-    const index = this.focusedOptionIndex();
-    const options = this.flatFilteredOptions();
-    if (index < 0 || index >= options.length) return false;
-
-    const focused = options[index];
-    if (focused.type !== type) return false;
-
-    if (type === "selectAll") return true;
-    if (type === "group") return focused.groupLabel === groupLabel;
-    if (type === "option") {
-      const compareWith = this.compareWith();
-      return compareWith(focused.value, value);
-    }
-
-    return false;
-  }
-
-  /** Returns the element ID for an option based on its position in flatFilteredOptions. */
-  getOptionId(type: "selectAll" | "group" | "option", value?: unknown, groupLabel?: string): string {
-    const options = this.flatFilteredOptions();
-    const compareWith = this.compareWith();
-
-    const index = options.findIndex((opt) => {
-      if (opt.type !== type) return false;
-      if (type === "selectAll") return true;
-      if (type === "group") return opt.groupLabel === groupLabel;
-      return compareWith(opt.value, value);
-    });
-
-    return `${this.inputId()}-option-${index}`;
-  }
-
   isGroupSelected(groupLabel: string): boolean {
     const group = this.optionGroups().find((g) => g.label === groupLabel);
     if (!group) return false;
@@ -889,6 +751,11 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     }
 
     const containerWidth = container.offsetWidth;
+
+    if (containerWidth === 0) {
+      return;
+    }
+
     const gap = 8;
     const counterTagWidth = 40;
     let usedWidth = 0;
