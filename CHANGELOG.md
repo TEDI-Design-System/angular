@@ -1,3 +1,10 @@
+# [6.2.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.11...angular-6.2.0-rc.12) (2026-03-18)
+
+
+### Features
+
+* **accordion:** add accordion tedi-ready component [#262](https://github.com/TEDI-Design-System/angular/issues/262) ([#326](https://github.com/TEDI-Design-System/angular/issues/326)) ([ecdef2f](https://github.com/TEDI-Design-System/angular/commit/ecdef2f76c039999f8116b4df68426f6e46b080d))
+
 # [6.2.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.10...angular-6.2.0-rc.11) (2026-03-17)
 
 
