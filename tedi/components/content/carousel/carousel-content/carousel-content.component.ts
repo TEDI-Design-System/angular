@@ -7,6 +7,7 @@ import {
   contentChildren,
   signal,
   viewChild,
+  viewChildren,
   AfterViewInit,
   OnDestroy,
   input,
@@ -14,6 +15,7 @@ import {
   HostListener,
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
+import { LiveAnnouncer } from "@angular/cdk/a11y";
 import { CarouselSlideDirective } from "../carousel-slide.directive";
 import {
   breakpointInput,
@@ -61,8 +63,10 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   readonly translationService = inject(TediTranslationService);
   private readonly breakpointService = inject(BreakpointService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly liveAnnouncer = inject(LiveAnnouncer);
 
   readonly track = viewChild.required<ElementRef<HTMLDivElement>>("track");
+  readonly slideElements = viewChildren<ElementRef<HTMLDivElement>>("slide");
   readonly slides = contentChildren(CarouselSlideDirective);
 
   readonly trackIndex = signal(0);
@@ -147,6 +151,16 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     return this.trackIndex() - this.windowBase() + this.buffer();
   });
 
+  /**
+   * Checks if a slide at the given rendered index is currently visible in the viewport.
+   * Used to determine which slides should be accessible to screen readers.
+   */
+  isSlideVisible(renderedIndex: number): boolean {
+    const activeIndex = this.renderedActiveIndex();
+    const slidesPerView = Math.ceil(this.currentSlidesPerView());
+    return renderedIndex >= activeIndex && renderedIndex < activeIndex + slidesPerView;
+  }
+
   readonly renderedIndices = computed(() => {
     const slidesCount = this.slides().length;
 
@@ -211,11 +225,19 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
 
   locked = false;
   dragging = false;
+  private pendingFocus = false;
   private startX = 0;
   private startIndex = 0;
   private ro?: ResizeObserver;
   private wheelTimeout?: ReturnType<typeof setTimeout>;
   private scrollDelta = 0;
+
+  @HostListener("scroll")
+  onScroll() {
+    // Prevent any scroll triggered by focus (e.g., VoiceOver navigation)
+    this.host.nativeElement.scrollLeft = 0;
+    this.host.nativeElement.scrollTop = 0;
+  }
 
   @HostListener("wheel", ["$event"])
   onWheel(event: WheelEvent) {
@@ -395,6 +417,7 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     this.animate.set(true);
     this.trackIndex.update((i) => i + 1);
     this.lockNavigation();
+    this.announceSlideChange();
   }
 
   prev(): void {
@@ -405,9 +428,10 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     this.animate.set(true);
     this.trackIndex.update((i) => i - 1);
     this.lockNavigation();
+    this.announceSlideChange();
   }
 
-  goToIndex(index: number) {
+  goToIndex(index: number, options?: { focusSlide?: boolean }) {
     const slidesCount = this.slides().length;
 
     if (!slidesCount || this.locked) {
@@ -419,6 +443,27 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     const delta = normalized - current;
     this.animate.set(true);
     this.trackIndex.update((i) => i + delta);
+
+    if (options?.focusSlide) {
+      // Focus after transition completes so DOM positions are stable
+      this.pendingFocus = true;
+    } else {
+      this.announceSlideChange();
+    }
+  }
+
+  /**
+   * Focuses the currently active slide for screen reader users.
+   * Uses preventScroll to avoid breaking carousel layout.
+   */
+  focusActiveSlide(): void {
+    setTimeout(() => {
+      const activeIndex = this.renderedActiveIndex();
+      const slideElement = this.slideElements()[activeIndex];
+      if (slideElement) {
+        slideElement.nativeElement.focus({ preventScroll: true });
+      }
+    });
   }
 
   onTransitionEnd(e: TransitionEvent) {
@@ -432,10 +477,33 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
 
     this.animate.set(false);
     this.windowBase.set(Math.floor(this.trackIndex()));
+
+    if (this.pendingFocus) {
+      this.pendingFocus = false;
+      this.focusActiveSlide();
+    }
   }
 
   lockNavigation() {
     this.locked = true;
     setTimeout(() => (this.locked = false), this.transitionMs());
+  }
+
+  /**
+   * Announces the current slide position to screen readers via LiveAnnouncer.
+   * Called after navigation to inform users of the slide change.
+   */
+  announceSlideChange(): void {
+    setTimeout(() => {
+      const slideNumber = this.slideIndex() + 1;
+      const totalSlides = this.slides().length;
+      const message = this.translationService.translate(
+        "carousel.slide",
+        slideNumber,
+        totalSlides
+      );
+
+      this.liveAnnouncer.announce(message, "polite");
+    }, 100);
   }
 }
