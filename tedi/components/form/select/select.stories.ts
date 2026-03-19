@@ -7,7 +7,10 @@ import {
   ReactiveFormsModule,
 } from "@angular/forms";
 import { SelectComponent } from "./select.component";
-import { SelectOptionTemplateDirective, SelectValueTemplateDirective } from "./select-templates.directive";
+import {
+  SelectOptionTemplateDirective,
+  SelectValueTemplateDirective,
+} from "./select-templates.directive";
 import { IconComponent } from "../../base";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import {
@@ -65,6 +68,10 @@ const meta: Meta<SelectComponent> = {
     clearableTags: { control: "boolean" },
     multiRow: { control: "boolean" },
     searchable: { control: "boolean" },
+    maxDropdownHeight: {
+      control: "number",
+      description: "Value in pixels. When not set, fits available viewport space.",
+    },
   },
   args: {
     inputId: "select-1",
@@ -80,15 +87,23 @@ const meta: Meta<SelectComponent> = {
     clearableTags: false,
     multiRow: false,
     searchable: false,
+    maxDropdownHeight: undefined,
   },
 };
 
 export default meta;
 type Story = StoryObj<SelectComponent>;
 
-const simpleOptions = ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5"];
+const simpleOptions = [
+  "Option 1",
+  "Option 2",
+  "Option 3",
+  "Option 4",
+  "Option 5",
+];
 
 export const Default: Story = {
+
   render: (args) => ({
     props: {
       ...args,
@@ -109,6 +124,7 @@ export const Default: Story = {
         [clearableTags]="clearableTags"
         [multiRow]="multiRow"
         [searchable]="searchable"
+        [maxDropdownHeight]="maxDropdownHeight"
         [items]="options"
       />
     `,
@@ -173,8 +189,25 @@ export const ValueType: Story = {
   render: () => ({
     props: {
       options: simpleOptions,
-      multiselectOptions: ["Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5", "Tag 6", "Tag 7", "Tag 8", "Tag 9", "Tag 10"],
-      oneRowOptions: ["Longer text", "Longer text on one row", "Third option", "Fourth option", "Fifth option"],
+      multiselectOptions: [
+        "Tag 1",
+        "Tag 2",
+        "Tag 3",
+        "Tag 4",
+        "Tag 5",
+        "Tag 6",
+        "Tag 7",
+        "Tag 8",
+        "Tag 9",
+        "Tag 10",
+      ],
+      oneRowOptions: [
+        "Longer text",
+        "Longer text on one row",
+        "Third option",
+        "Fourth option",
+        "Fifth option",
+      ],
       colorOptions: [
         { id: 1, name: "Cyan", color: "#59ced9" },
         { id: 2, name: "Blue", color: "#3b82f6" },
@@ -191,8 +224,25 @@ export const ValueType: Story = {
       ],
       form: new FormGroup({
         default: new FormControl("Option 1"),
-        multiselect: new FormControl(["Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5", "Tag 6", "Tag 7", "Tag 8", "Tag 9", "Tag 10"]),
-        oneRow: new FormControl(["Longer text", "Longer text on one row", "Third option", "Fourth option", "Fifth option"]),
+        multiselect: new FormControl([
+          "Tag 1",
+          "Tag 2",
+          "Tag 3",
+          "Tag 4",
+          "Tag 5",
+          "Tag 6",
+          "Tag 7",
+          "Tag 8",
+          "Tag 9",
+          "Tag 10",
+        ]),
+        oneRow: new FormControl([
+          "Longer text",
+          "Longer text on one row",
+          "Third option",
+          "Fourth option",
+          "Fifth option",
+        ]),
         color: new FormControl(1),
         icon: new FormControl(1),
       }),
@@ -364,7 +414,8 @@ export const Examples: Story = {
         {
           id: 2,
           title: "Access to medications and health data",
-          description: "Doctors will be able to see your medications and health data",
+          description:
+            "Doctors will be able to see your medications and health data",
         },
         {
           id: 3,
@@ -551,9 +602,21 @@ export const ReactiveForms: Story = {
         { id: 4, name: "Narva", slots: 4 },
       ],
       accessOptions: [
-        { id: 1, title: "Health data", description: "Access to health records" },
-        { id: 2, title: "Medications", description: "Access to medication history" },
-        { id: 3, title: "Lab results", description: "Access to laboratory results" },
+        {
+          id: 1,
+          title: "Health data",
+          description: "Access to health records",
+        },
+        {
+          id: 2,
+          title: "Medications",
+          description: "Access to medication history",
+        },
+        {
+          id: 3,
+          title: "Lab results",
+          description: "Access to laboratory results",
+        },
       ],
       permissionOptions: [
         { id: 1, title: "Read", description: "Can view documents" },

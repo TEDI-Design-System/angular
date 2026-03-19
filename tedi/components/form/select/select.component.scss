@@ -11,6 +11,7 @@
   --_padding-y: var(--form-field-padding-y-md-default);
   --_padding-x: var(--form-field-padding-x-md-default);
   --_form-field-outer-gap: var(--form-field-outer-spacing);
+  --_search-input-min-width: 50px;
 
   padding: var(--_padding-y) var(--_padding-x);
   margin-bottom: var(--_form-field-outer-gap);
@@ -134,7 +135,7 @@
     flex-wrap: wrap;
     gap: var(--form-field-inner-spacing);
     align-items: center;
-    min-height: 1.5em;
+    min-height: var(--_line-height);
     overflow: hidden;
   }
 
@@ -177,7 +178,7 @@
     position: relative;
     flex: 1;
     width: auto;
-    min-width: 50px;
+    min-width: var(--_search-input-min-width);
     height: auto;
   }
 

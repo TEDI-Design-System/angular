@@ -224,6 +224,12 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   notFoundText = input<string>();
 
   /**
+   * Maximum height of the dropdown menu in pixels.
+   * When not set, the dropdown height is calculated based on available viewport space.
+   */
+  maxDropdownHeight = input<number | undefined>();
+
+  /**
    * Whether the select has a search input for filtering options.
    * @default false
    */
@@ -561,6 +567,13 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   }
 
   private calculateDropdownMaxHeight(): void {
+    const inputMaxHeight = this.maxDropdownHeight();
+
+    if (inputMaxHeight != null) {
+      this.dropdownMaxHeight.set(inputMaxHeight);
+      return;
+    }
+
     const trigger = this.triggerRef()?.nativeElement;
     if (!trigger) {
       this.dropdownMaxHeight.set(null);
