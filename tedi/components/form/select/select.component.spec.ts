@@ -5,6 +5,7 @@ import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
 import { SelectComponent, SelectInputSize, SelectOption } from "./select.component";
 import {
+  SelectLabelTemplateDirective,
   SelectOptionTemplateDirective,
   SelectValueTemplateDirective,
 } from "./select-templates.directive";
@@ -33,6 +34,7 @@ import { InputState } from "../form-field/form-field.component";
       [clearableTags]="clearableTags"
       [multiRow]="multiRow"
       [dropdownWidthRef]="dropdownWidthRef"
+      [maxDropdownHeight]="maxDropdownHeight"
       [formControl]="control"
     >
       @if (useOptionTemplate) {
@@ -73,6 +75,7 @@ class TestHostComponent {
   clearableTags = false;
   multiRow = false;
   dropdownWidthRef: any = undefined;
+  maxDropdownHeight: number | undefined = undefined;
   useOptionTemplate = false;
   useValueTemplate = false;
   control = new FormControl<unknown>(null);
@@ -1604,5 +1607,133 @@ describe("SelectComponent", () => {
         expect(activeOption?.textContent).not.toContain("Disabled");
       }));
     });
+  });
+
+  describe("maxDropdownHeight", () => {
+    it("should use provided maxDropdownHeight value when set", fakeAsync(() => {
+      host.maxDropdownHeight = 200;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const dropdown = getDropdown();
+      expect(dropdown.style.maxHeight).toBe("200px");
+    }));
+
+    it("should calculate maxHeight from viewport when maxDropdownHeight is not set", fakeAsync(() => {
+      host.maxDropdownHeight = undefined;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const dropdown = getDropdown();
+      expect(dropdown.style.maxHeight).toBeTruthy();
+    }));
+  });
+
+  describe("toggleIsOpen closing", () => {
+    it("should close dropdown when toggling an open non-searchable select", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(true);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(false);
+    }));
+  });
+
+  describe("search focus and blur", () => {
+    it("should set searchFocused to false and mark as touched on blur", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const searchInput = getSearchInput();
+      searchInput.dispatchEvent(new Event("focus"));
+      fixture.detectChanges();
+      expect(select.searchFocused()).toBe(true);
+
+      searchInput.dispatchEvent(new Event("blur"));
+      fixture.detectChanges();
+      expect(select.searchFocused()).toBe(false);
+    }));
+  });
+
+  describe("template context guards", () => {
+    it("SelectOptionTemplateDirective ngTemplateContextGuard should return true", () => {
+      expect(
+        SelectOptionTemplateDirective.ngTemplateContextGuard({} as SelectOptionTemplateDirective, {})
+      ).toBe(true);
+    });
+
+    it("SelectLabelTemplateDirective ngTemplateContextGuard should return true", () => {
+      expect(
+        SelectLabelTemplateDirective.ngTemplateContextGuard({} as SelectLabelTemplateDirective, {})
+      ).toBe(true);
+    });
+
+    it("SelectValueTemplateDirective ngTemplateContextGuard should return true", () => {
+      expect(
+        SelectValueTemplateDirective.ngTemplateContextGuard({} as SelectValueTemplateDirective, {})
+      ).toBe(true);
+    });
+  });
+
+  describe("calculateVisibleTags", () => {
+    let offsetWidthSpy: jest.SpyInstance;
+
+    afterEach(() => {
+      offsetWidthSpy?.mockRestore();
+    });
+
+    it("should calculate visible tags for single-row multiselect", fakeAsync(() => {
+      host.multiple = true;
+      host.multiRow = false;
+      host.clearableTags = true;
+      host.items = ["Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5"];
+      host.control.setValue(["Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5"]);
+
+      // Mock offsetWidth so calculation runs (container=200, each tag=60)
+      offsetWidthSpy = jest.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockImplementation(function (this: HTMLElement) {
+        if (this.classList.contains("tedi-select__multiselect-container")) return 200;
+        if (this.tagName === "TEDI-TAG") return 60;
+        return 0;
+      });
+
+      fixture.detectChanges();
+      tick();
+
+      expect(select.visibleTagsCount()).toBeGreaterThanOrEqual(1);
+    }));
+
+    it("should show at least one tag even if none fit", fakeAsync(() => {
+      host.multiple = true;
+      host.multiRow = false;
+      host.clearableTags = true;
+      host.items = ["Tag 1", "Tag 2"];
+      host.control.setValue(["Tag 1", "Tag 2"]);
+
+      // Container too small for any tag
+      offsetWidthSpy = jest.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockImplementation(function (this: HTMLElement) {
+        if (this.classList.contains("tedi-select__multiselect-container")) return 10;
+        if (this.tagName === "TEDI-TAG") return 100;
+        return 0;
+      });
+
+      fixture.detectChanges();
+      tick();
+
+      expect(select.visibleTagsCount()).toBe(1);
+    }));
   });
 });
