@@ -1,3 +1,10 @@
+# [6.2.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.14...angular-6.2.0-rc.15) (2026-03-19)
+
+
+### Features
+
+* **accordion:** change text align to start [#552](https://github.com/TEDI-Design-System/angular/issues/552) ([be0ae3e](https://github.com/TEDI-Design-System/angular/commit/be0ae3e3c21796343773bfb9c06bed78dbdc5284))
+
 # [6.2.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.13...angular-6.2.0-rc.14) (2026-03-18)
 
 
