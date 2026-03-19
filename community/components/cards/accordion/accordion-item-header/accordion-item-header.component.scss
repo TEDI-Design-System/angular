@@ -9,6 +9,7 @@
   gap: var(--_accordion-header-spacing);
   align-items: center;
   justify-content: space-between;
+  text-align: start;
 
   [tedi-accordion-header-end] {
     margin-left: auto;
