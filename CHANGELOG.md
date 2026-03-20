@@ -1,3 +1,10 @@
+# [6.2.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.16...angular-6.2.0-rc.17) (2026-03-20)
+
+
+### Bug Fixes
+
+* **header:** replaced missing variable [#367](https://github.com/TEDI-Design-System/angular/issues/367) ([#370](https://github.com/TEDI-Design-System/angular/issues/370)) ([5e63559](https://github.com/TEDI-Design-System/angular/commit/5e63559f4e075732bef7d2f04208c36d393ccbe8))
+
 # [6.2.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.15...angular-6.2.0-rc.16) (2026-03-20)
 
 
