@@ -6,9 +6,8 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    height: var(--layout-header-min-height);
-    padding: var(--layout-header-padding-y) var(--layout-header-padding-right)
-      var(--layout-header-padding-y) var(--layout-header-padding-left);
+    height: var(--layout-header-height);
+    padding: var(--layout-header-padding-y) var(--layout-header-padding-right) var(--layout-header-padding-y) var(--layout-header-padding-left);
     background: var(--header-background);
     box-shadow: 0 1px 5px 0 var(--tedi-alpha-20, rgb(0 0 0 / 20%));
   }
