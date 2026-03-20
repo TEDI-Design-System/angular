@@ -256,3 +256,27 @@ export const WithReactiveForms: StoryObj<DatePickerComponent> = {
     };
   },
 };
+
+export const WithLowWidth: StoryObj<DatePickerComponent> = {
+  render: (args) => {
+    return {
+      template: `
+        <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));">
+          <tedi-date-picker ${argsToTemplate(args)}
+            inputPlaceholder="Select a date..."
+          />
+          <tedi-date-picker ${argsToTemplate(args)}
+            inputPlaceholder="Select a date..."
+          />
+          <tedi-date-picker ${argsToTemplate(args)}
+            inputPlaceholder="Select a date..."
+          />
+          <tedi-date-picker ${argsToTemplate(args)}
+            inputPlaceholder="Select a date..."
+          />
+        </div>
+
+      `,
+    };
+  },
+};
