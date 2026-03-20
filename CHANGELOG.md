@@ -1,3 +1,10 @@
+# [6.2.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.15...angular-6.2.0-rc.16) (2026-03-20)
+
+
+### Features
+
+* **docs:** added css-utilities documentation [#368](https://github.com/TEDI-Design-System/angular/issues/368) ([#369](https://github.com/TEDI-Design-System/angular/issues/369)) ([cf3abda](https://github.com/TEDI-Design-System/angular/commit/cf3abda1f3a3a1d71044e91c86bd88435e97ae8e))
+
 # [6.2.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.14...angular-6.2.0-rc.15) (2026-03-19)
 
 
