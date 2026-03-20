@@ -46,6 +46,7 @@ tedi-date-picker {
 .tedi-date-picker {
   &__input {
     flex: 1;
+    min-width: 0;
     padding-left: var(--form-field-padding-x-md-default);
     font-size: var(--body-regular-size);
     color: var(--form-input-text-filled);
@@ -67,6 +68,7 @@ tedi-date-picker {
     align-items: center;
     align-self: center;
     justify-content: center;
+    min-width: 0;
   }
 
   &__clear {
