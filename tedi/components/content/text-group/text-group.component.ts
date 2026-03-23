@@ -71,7 +71,7 @@ export class TextGroupComponent implements BreakpointInputs<TextGroupInputs>, Af
   });
 
   classes = computed(() => {
-    const classList = [`tedi-text-group--${this.breakpointInputs().type}`];
+    const classList = ['tedi-text-group', `tedi-text-group--${this.breakpointInputs().type}`];
     return classList.join(" ");
   });
 
