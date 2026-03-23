@@ -1,3 +1,10 @@
+# [6.2.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.17...angular-6.2.0-rc.18) (2026-03-23)
+
+
+### Bug Fixes
+
+* **text-group:** label width applied to correct element [#23](https://github.com/TEDI-Design-System/angular/issues/23) ([#373](https://github.com/TEDI-Design-System/angular/issues/373)) ([5ceaa9c](https://github.com/TEDI-Design-System/angular/commit/5ceaa9ce8d5fd4ed4c697c11fcdd04c7cf52dc7d))
+
 # [6.2.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.16...angular-6.2.0-rc.17) (2026-03-20)
 
 
