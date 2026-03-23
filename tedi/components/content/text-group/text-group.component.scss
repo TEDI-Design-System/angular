@@ -8,12 +8,15 @@ tedi-text-group {
     gap: 1rem;
     align-items: flex-start;
   }
+
+  >dt {
+    width: var(--_label-width);
+  }
 }
 
 tedi-text-group-label {
   display: flex;
   flex-shrink: 0;
-  width: var(--_label-width);
 }
 
 tedi-text-group-value {
