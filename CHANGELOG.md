@@ -1,3 +1,10 @@
+# [6.2.0-rc.19](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.18...angular-6.2.0-rc.19) (2026-03-24)
+
+
+### Features
+
+* **file-dropzone:** change file copying [#860](https://github.com/TEDI-Design-System/angular/issues/860) ([e820ec0](https://github.com/TEDI-Design-System/angular/commit/e820ec047b20fd31dafd83179a4a0634797812a0))
+
 # [6.2.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.17...angular-6.2.0-rc.18) (2026-03-23)
 
 
