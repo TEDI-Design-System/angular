@@ -14,11 +14,23 @@ import {
 } from "@angular/core";
 import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 import { CdkTrapFocus } from "@angular/cdk/a11y";
+import { ModalRef } from "./modal-ref";
+import type {
+  ModalSize,
+  ModalWidth,
+  ModalPosition
+} from "./modal.types";
 
-export type ModalSize = "default" | "small";
-export type ModalWidth = "xs" | "sm" | "md" | "lg" | "xl";
-export type ModalPosition = "center" | "left" | "right";
-
+/**
+ * Modal component that works in two modes:
+ *
+ * **Service mode** When opened via `ModalService.open()`, acts as a
+ * lightweight layout wrapper. CDK Dialog handles overlay, backdrop, focus trap,
+ * scroll blocking, and keyboard events.
+ *
+ * **Standalone mode** (deprecated): When used directly in a template with `[(open)]`,
+ * manages its own overlay, scroll lock, and focus. Migrate to `ModalService.open()`.
+ */
 @Component({
   standalone: true,
   selector: "tedi-modal",
@@ -32,7 +44,7 @@ export type ModalPosition = "center" | "left" | "right";
   },
 })
 export class ModalComponent implements AfterViewInit, OnDestroy {
-  /** Is modal open? */
+  /** @deprecated Is modal open? Only used in standalone (deprecated) mode. */
   readonly open = model(false);
 
   /** Modal size */
@@ -44,29 +56,60 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
   /** Position of the modal */
   readonly position = input<ModalPosition>("center");
 
+  /** @deprecated Whether clicking the backdrop closes the modal. Only used in standalone mode. */
+  readonly closeOnBackdropClick = input(true);
+
   private readonly document = inject(DOCUMENT);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly platformId = inject(PLATFORM_ID);
 
+  /**
+   * When a ModalRef is available, this component is inside a CDK Dialog
+   * and should act as a layout-only wrapper.
+   */
+  readonly serviceMode = !!inject(ModalRef, { optional: true });
+
   private prevBodyOverflow: string = "";
   private prevFocusedElement: HTMLElement | null = null;
 
-  readonly classes = computed(() => {
-    const classList = [
-      "tedi-modal",
-      `tedi-modal--${this.size()}`,
-      `tedi-modal--${this.width()}`,
-      `tedi-modal--${this.position()}`,
-    ];
+  private readonly isPresetWidth = computed(() =>
+    (["xs", "sm", "md", "lg", "xl"] as string[]).includes(this.width()),
+  );
 
-    if (this.open()) {
-      classList.push("tedi-modal--open");
+  /** Custom max-width for non-preset widths (legacy mode only). */
+  readonly customMaxWidth = computed(() =>
+    !this.serviceMode && !this.isPresetWidth() ? this.width() : null,
+  );
+
+  readonly classes = computed(() => {
+    const classList = ["tedi-modal"];
+
+    if (this.serviceMode) {
+      classList.push("tedi-modal--service");
+    } else {
+      classList.push(`tedi-modal--${this.size()}`);
+
+      if (this.isPresetWidth()) {
+        classList.push(`tedi-modal--${this.width()}`);
+      }
+
+      if (this.position() === "top") {
+        classList.push("tedi-modal--center", "tedi-modal--top");
+      } else {
+        classList.push(`tedi-modal--${this.position()}`);
+      }
+
+      if (this.open()) {
+        classList.push("tedi-modal--open");
+      }
     }
 
     return classList.join(" ");
   });
 
   constructor() {
+    if (this.serviceMode) return;
+
     effect(() => {
       if (!isPlatformBrowser(this.platformId)) return;
 
@@ -79,12 +122,14 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    if (this.serviceMode) return;
     if (!isPlatformBrowser(this.platformId)) return;
 
     this.document.body.appendChild(this.host.nativeElement);
   }
 
   ngOnDestroy() {
+    if (this.serviceMode) return;
     if (!isPlatformBrowser(this.platformId)) return;
 
     const element = this.host.nativeElement;
@@ -111,6 +156,13 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
     }
 
     this.document.removeEventListener("keydown", this.handleKeydown);
+  }
+
+  /** @internal */
+  onBackdropClick(): void {
+    if (this.closeOnBackdropClick()) {
+      this.open.set(false);
+    }
   }
 
   private handleKeydown = (e: KeyboardEvent) => {
