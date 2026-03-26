@@ -132,7 +132,7 @@
     @if (multiRow()) {
       @for (value of selectedValues(); track value) {
         <tedi-tag
-          [closable]="clearableTags()"
+          [closable]="isTagRemovable()"
           (closed)="deselect($event, value)"
         >
           {{ getLabel(value) }}
@@ -143,7 +143,7 @@
         @if (visibleTagsCount() === null || i < visibleTagsCount()!) {
           <tedi-tag
             #tagElement
-            [closable]="clearableTags()"
+            [closable]="isTagRemovable()"
             (closed)="deselect($event, value)"
           >
             {{ getLabel(value) }}
@@ -175,6 +175,7 @@
       [id]="listboxId()"
       class="tedi-select__options"
       [class.tedi-select__options--multiselect]="multiple()"
+      [class.tedi-select__options--swatch-grid]="dropdownType() === 'grid'"
       cdkListbox
       [cdkListboxMultiple]="multiple()"
       [cdkListboxValue]="visibleSelectedValues()"
@@ -205,9 +206,7 @@
                 [cdkOption]="SpecialOptionControls.SELECT_GROUP + group.label"
               >
                 <tedi-dropdown-item-value type="checkbox" [selected]="isGroupSelected(group.label)">
-                  <tedi-dropdown-item-value-label>
-                    <span tedi-text color="tertiary">{{ group.label }}</span>
-                  </tedi-dropdown-item-value-label>
+                  <tedi-dropdown-item-value-label>{{ group.label }}</tedi-dropdown-item-value-label>
                 </tedi-dropdown-item-value>
               </li>
             } @else {
@@ -247,7 +246,7 @@
         }
       } @else {
         <li class="tedi-dropdown-item tedi-select__no-options">
-          {{ notFoundText() || ("select.no-options" | tediTranslate) }}
+          {{ noOptionsMessage() || ("select.no-options" | tediTranslate) }}
         </li>
       }
     </ul>

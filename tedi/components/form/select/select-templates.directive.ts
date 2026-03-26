@@ -45,7 +45,7 @@ export interface SelectValueContext<T = unknown> {
  *
  * @example
  * ```html
- * <tedi-select [items]="options">
+ * <tedi-select [options]="options">
  *   <ng-template tediSelectOption let-item>
  *     <div class="custom-option">
  *       <strong>{{ item.title }}</strong>
@@ -75,7 +75,7 @@ export class SelectOptionTemplateDirective<T = unknown> {
  *
  * @example
  * ```html
- * <tedi-select [items]="options">
+ * <tedi-select [options]="options">
  *   <ng-template tediSelectLabel let-item>
  *     <span class="custom-label">{{ item.name }} ({{ item.code }})</span>
  *   </ng-template>
@@ -103,7 +103,7 @@ export class SelectLabelTemplateDirective<T = unknown> {
  *
  * @example
  * ```html
- * <tedi-select [items]="colors" bindLabel="name" bindValue="id">
+ * <tedi-select [options]="colors" bindLabel="name" bindValue="id">
  *   <ng-template tediSelectValue let-item>
  *     <div class="color-swatch" [style.background]="item.color"></div>
  *   </ng-template>

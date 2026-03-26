@@ -18,7 +18,7 @@ import { InputState } from "../form-field/form-field.component";
     <tedi-select
       [inputId]="inputId"
       [label]="label"
-      [items]="items"
+      [options]="items"
       [multiple]="multiple"
       [searchable]="searchable"
       [clearable]="clearable"
@@ -31,7 +31,7 @@ import { InputState } from "../form-field/form-field.component";
       [state]="state"
       [size]="size"
       [required]="required"
-      [clearableTags]="clearableTags"
+      [isTagRemovable]="clearableTags"
       [multiRow]="multiRow"
       [dropdownWidthRef]="dropdownWidthRef"
       [maxDropdownHeight]="maxDropdownHeight"
@@ -1690,9 +1690,11 @@ describe("SelectComponent", () => {
   });
 
   describe("calculateVisibleTags", () => {
+    let clientWidthSpy: jest.SpyInstance;
     let offsetWidthSpy: jest.SpyInstance;
 
     afterEach(() => {
+      clientWidthSpy?.mockRestore();
       offsetWidthSpy?.mockRestore();
     });
 
@@ -1703,9 +1705,13 @@ describe("SelectComponent", () => {
       host.items = ["Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5"];
       host.control.setValue(["Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5"]);
 
-      // Mock offsetWidth so calculation runs (container=200, each tag=60)
+      // Mock trigger clientWidth=300, arrow offsetWidth=24, each tag=60
+      clientWidthSpy = jest.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(function (this: HTMLElement) {
+        if (this.classList.contains("tedi-select__trigger")) return 300;
+        return 0;
+      });
       offsetWidthSpy = jest.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockImplementation(function (this: HTMLElement) {
-        if (this.classList.contains("tedi-select__multiselect-container")) return 200;
+        if (this.classList.contains("tedi-select__arrow")) return 24;
         if (this.tagName === "TEDI-TAG") return 60;
         return 0;
       });
@@ -1723,9 +1729,13 @@ describe("SelectComponent", () => {
       host.items = ["Tag 1", "Tag 2"];
       host.control.setValue(["Tag 1", "Tag 2"]);
 
-      // Container too small for any tag
+      // Trigger very small, tags too wide
+      clientWidthSpy = jest.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(function (this: HTMLElement) {
+        if (this.classList.contains("tedi-select__trigger")) return 50;
+        return 0;
+      });
       offsetWidthSpy = jest.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockImplementation(function (this: HTMLElement) {
-        if (this.classList.contains("tedi-select__multiselect-container")) return 10;
+        if (this.classList.contains("tedi-select__arrow")) return 24;
         if (this.tagName === "TEDI-TAG") return 100;
         return 0;
       });
