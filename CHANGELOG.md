@@ -1,3 +1,10 @@
+# [6.3.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0...angular-6.3.0-rc.1) (2026-03-26)
+
+
+### Features
+
+* **accordion:** add clickable and iconPosition props to community accordion header  [#552](https://github.com/TEDI-Design-System/angular/issues/552) ([d4f3251](https://github.com/TEDI-Design-System/angular/commit/d4f3251463420360f1da0a264873c40192cc22fa))
+
 # [6.2.0](https://github.com/TEDI-Design-System/angular/compare/angular-6.1.0...angular-6.2.0) (2026-03-26)
 
 
