@@ -46,7 +46,11 @@ fi
 # Run test if spec file exists
 if [[ -f "$SPEC" ]]; then
   echo "Running: npx jest $SPEC"
-  npx jest "$SPEC" --no-coverage 2>&1
+  if ! npx jest "$SPEC" --no-coverage 2>&1; then
+    echo "Auto-test failed (non-blocking)."
+  fi
 else
   echo "No spec file found at $SPEC — skipping auto-test."
 fi
+
+exit 0

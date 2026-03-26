@@ -31,7 +31,7 @@ If a new dependency is needed, stop and ask the user for permission.
 
 Create the following files in `tedi/components/<category>/<component-name>/`:
 
-```
+```text
 component-name.component.ts
 component-name.component.html
 component-name.component.scss

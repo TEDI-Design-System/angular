@@ -7,12 +7,12 @@ Target: `$ARGUMENTS`
 ### 1. Run Tests
 
 If a path was provided, run tests for that specific component:
-```
+```bash
 npx jest $ARGUMENTS
 ```
 
 If no path was provided, run the full test suite:
-```
+```bash
 npm test
 ```
 
@@ -26,7 +26,7 @@ If tests fail:
 
 ### 3. Run Lint
 
-```
+```bash
 npm run lint
 ```
 

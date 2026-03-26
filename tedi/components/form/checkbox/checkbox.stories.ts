@@ -26,7 +26,7 @@ type StoryCheckboxComponent = CheckboxComponent & {
  * <a href="https://www.tedi.ee/1ee8444b7/p/796203-checkbox" target="_blank">Zeroheight ↗</a>
  */
 export default {
-  title: "TEDI-Ready/Components/Form/Checkbox",
+  title: "TEDI-Ready/Components/Form/Choicegroup/Checkbox",
   component: CheckboxComponent,
   decorators: [
     moduleMetadata({
@@ -533,9 +533,6 @@ export const CheckboxCardsWithDescription: StoryObj<CheckboxComponent> = {
 };
 
 /**
- * Checkbox cards with icons before the label text.
- */
-/**
  * All visual states of the checkbox card component for both primary and secondary variants.
  */
 export const CheckboxCardStates: StoryObj<CheckboxComponent> = {
@@ -656,6 +653,9 @@ export const CheckboxCardStates: StoryObj<CheckboxComponent> = {
   }),
 };
 
+/**
+ * Checkbox cards with icons before the label text.
+ */
 export const CheckboxCardsWithIcons: StoryObj<CheckboxComponent> = {
   render: (args) => ({
     props: args,

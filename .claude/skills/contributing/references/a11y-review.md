@@ -51,9 +51,9 @@ Check against WAI-ARIA Authoring Practices for the component pattern:
 
 ### 6. Touch & Pointer
 
-- [ ] Touch targets minimum 44x44 CSS pixels
-- [ ] Adequate spacing between touch targets
-- [ ] No functionality dependent on hover alone (touch devices can't hover)
+- [ ] Touch targets minimum 24x24 CSS pixels (WCAG 2.5.8 — AA), prefer 44x44 (WCAG 2.5.5 — AAA)
+- [ ] Adequate spacing between touch targets (WCAG 2.5.8 — AA)
+- [ ] No functionality dependent on hover alone — touch devices can't hover (WCAG 1.4.13 — AA)
 
 ### 7. Test Coverage
 
