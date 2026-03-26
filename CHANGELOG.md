@@ -1,3 +1,10 @@
+# [6.2.0-rc.20](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.19...angular-6.2.0-rc.20) (2026-03-26)
+
+
+### Bug Fixes
+
+* **collapse:** removed bottom margin from closed collapse [#376](https://github.com/TEDI-Design-System/angular/issues/376) ([d11fc62](https://github.com/TEDI-Design-System/angular/commit/d11fc62a4bf457f54748f09b6f47035e19841654))
+
 # [6.2.0-rc.19](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0-rc.18...angular-6.2.0-rc.19) (2026-03-24)
 
 
