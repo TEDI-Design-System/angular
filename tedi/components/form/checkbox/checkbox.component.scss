@@ -24,6 +24,12 @@ input[tedi-checkbox][type="checkbox"] {
     box-shadow: 0 0 0 1px var(--form-checkbox-radio-default-border-hover);
   }
 
+  &:not(:disabled):active {
+    background-color: var(--form-checkbox-radio-default-background-active);
+    border-color: var(--form-checkbox-radio-default-border-active);
+    box-shadow: none;
+  }
+
   &:not(:checked):disabled {
     cursor: not-allowed;
     background-color: var(--form-general-background-disabled);
