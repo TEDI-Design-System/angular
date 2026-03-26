@@ -153,3 +153,4 @@ Read `.claude/skills/contributing/references/best-practices.md` for the full set
 Key things to **not** flag:
 - `ViewEncapsulation.None` — intentional, not a security concern.
 - Missing CSS `var()` fallback values — intentionally omitted.
+- CdkListbox private API access (`_setNextFocusToSelectedOption`, `_handleKeydown`) in the select component — intentional workarounds, no public CDK alternative exists.

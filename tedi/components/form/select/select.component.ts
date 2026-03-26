@@ -499,6 +499,8 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   }
 
   onTriggerClick(): void {
+    if (this.disabled()) return;
+
     if (this.searchable()) {
       this.searchInputRef()?.nativeElement.focus();
       if (!this.isOpen()) {
@@ -656,7 +658,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       }
     } else {
       const selected = values[0] ?? null;
-      this.selectedValues.set(selected ? [selected] : []);
+      this.selectedValues.set(selected != null ? [selected] : []);
       this.onChange(selected);
       this.toggleIsOpen(true);
     }
@@ -868,9 +870,12 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
         (val) => !groupValues.some((gv) => compareWith(val, gv))
       );
     } else {
-      const currentSelected = new Set(this.selectedValues());
-      groupValues.forEach((val) => currentSelected.add(val));
-      newSelection = Array.from(currentSelected);
+      newSelection = [...this.selectedValues()];
+      for (const gv of groupValues) {
+        if (!newSelection.some((val) => compareWith(val, gv))) {
+          newSelection.push(gv);
+        }
+      }
     }
 
     this.selectedValues.set(newSelection);
