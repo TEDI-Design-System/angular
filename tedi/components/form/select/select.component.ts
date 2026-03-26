@@ -232,8 +232,9 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   /**
    * Layout type for the dropdown options.
    * - `"menu"` (default): vertical list of options.
-   * - `"grid"`: swatch grid for color/icon pickers. Customizable via
-   *   `--tedi-swatch-size`, `--tedi-swatch-gap`, and `--tedi-swatch-columns` CSS properties.
+   * - `"grid"`: swatch grid layout for use with custom option templates
+   *   (e.g. color or icon pickers). Customizable via `--tedi-swatch-size`,
+   *   `--tedi-swatch-gap`, and `--tedi-swatch-columns` CSS properties.
    * @default "menu"
    */
   dropdownType = input<'menu' | 'grid'>('menu');

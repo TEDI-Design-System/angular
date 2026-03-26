@@ -77,6 +77,11 @@ const meta: Meta<SelectComponent> = {
     isTagRemovable: { control: "boolean" },
     multiRow: { control: "boolean" },
     searchable: { control: "boolean" },
+    dropdownType: {
+      control: "radio",
+      options: ["menu", "grid"],
+      description: "Use \"grid\" for swatch-type selects with custom option templates (e.g. color or icon pickers).",
+    },
     options: { control: "object" },
     maxDropdownHeight: {
       control: "number",
@@ -97,6 +102,7 @@ const meta: Meta<SelectComponent> = {
     isTagRemovable: false,
     multiRow: false,
     searchable: false,
+    dropdownType: "menu",
     maxDropdownHeight: undefined,
     options: simpleOptions as [],
   },
@@ -124,6 +130,7 @@ export const Default: Story = {
         [multiRow]="multiRow"
         [searchable]="searchable"
         [maxDropdownHeight]="maxDropdownHeight"
+        [dropdownType]="dropdownType"
         [options]="options"
         bindLabel="label"
         bindValue="value"
