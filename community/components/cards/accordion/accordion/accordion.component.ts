@@ -67,7 +67,7 @@ export class AccordionComponent implements OnInit {
   private openDefaultOpenItems() {
     const defaultOpenItems = this.defaultOpenItems();
     this.accordionItems().forEach((item) => {
-      if (defaultOpenItems?.includes(item.id())) {
+      if (defaultOpenItems?.includes(item.id() as string)) {
         item.open();
       }
     });

@@ -27,4 +27,5 @@ export class AccordionItemContentComponent {
   accordionItem = inject(AccordionItemComponent);
   headerId = this.accordionItem.headerId;
   contentId = this.accordionItem.contentId;
+  opened = this.accordionItem.opened;
 }
