@@ -10,17 +10,17 @@
   --_line-height: var(--body-regular-line-height);
   --_padding-y: var(--form-field-padding-y-md-default);
   --_padding-x: var(--form-field-padding-x-md-default);
-  --_form-field-outer-gap: var(--form-field-outer-spacing);
   --_search-input-min-width: 50px;
 
-  padding: var(--_padding-y) var(--_padding-x);
-  margin-bottom: var(--_form-field-outer-gap);
+  min-height: var(--form-field-height);
+  padding: calc(var(--_padding-y) - var(--borders-01)) var(--_padding-x);
+  margin-bottom: 0;
   font-family: var(--family-default);
   font-size: var(--_font-size);
   line-height: var(--_line-height);
   color: var(--_color);
   background-color: var(--_background-color);
-  border: 1px solid var(--_border-color);
+  border: var(--borders-01) solid var(--_border-color);
   border-radius: var(--_border-radius);
 
   &:hover {
@@ -66,6 +66,8 @@
 
   &--small {
     --_padding-y: var(--form-field-padding-y-sm);
+
+    min-height: var(--form-field-height-sm);
   }
 }
 
@@ -202,6 +204,10 @@
       &.tedi-dropdown-item--selected {
         color: var(--dropdown-item-active-text);
         background: var(--dropdown-item-active-background);
+
+        .tedi-icon {
+          color: inherit;
+        }
       }
     }
   }
@@ -226,7 +232,12 @@
     letter-spacing: 0;
 
     &--selectable {
-      padding-bottom: var(--dropdown-group-label-padding-y);
+      padding: var(--dropdown-item-padding-y, 8px) var(--dropdown-item-padding-x);
+      font-size: var(--body-regular-size);
+      font-weight: var(--body-regular-weight);
+      line-height: var(--body-regular-line-height);
+      text-transform: none;
+      letter-spacing: inherit;
 
       &~.tedi-dropdown-item:not(.tedi-select__group-name) {
         padding-left: var(--form-checkbox-radio-subitem-padding-left);
@@ -266,6 +277,50 @@
     &:hover {
       color: var(--general-text-tertiary);
       background: var(--dropdown-item-default-background);
+    }
+  }
+
+  &__dropdown:has(&__options--swatch-grid) {
+    width: fit-content;
+  }
+
+  &__options--swatch-grid {
+    --tedi-swatch-size: 24px;
+    --tedi-swatch-gap: var(--layout-grid-gutters-04);
+    --tedi-swatch-columns: 11;
+
+    display: grid;
+    grid-template-columns: repeat(auto-fit, var(--tedi-swatch-size));
+    gap: var(--tedi-swatch-gap);
+    max-width: calc(var(--tedi-swatch-columns) * (var(--tedi-swatch-size) + var(--tedi-swatch-gap)));
+    padding: var(--dropdown-body-padding-y) var(--dropdown-body-padding-x);
+
+    .tedi-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: var(--tedi-swatch-size);
+      height: var(--tedi-swatch-size);
+      min-height: auto;
+      padding: var(--layout-grid-gutters-02);
+      color: inherit;
+      background: transparent;
+      border-radius: var(--card-radius-rounded);
+
+      &.cdk-option-active:not(.tedi-dropdown-item--disabled) {
+        outline-offset: 0;
+      }
+
+      &[aria-selected="true"],
+      &.tedi-dropdown-item--selected {
+        color: inherit;
+        background: transparent;
+        border: var(--borders-02) solid var(--card-border-selected);
+      }
+
+      &:hover:not(.tedi-dropdown-item--disabled) {
+        background: transparent;
+      }
     }
   }
 }

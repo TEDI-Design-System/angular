@@ -148,11 +148,11 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   feedbackText = input<ComponentInputs<FeedbackTextComponent>>();
 
   /**
-   * Array of items to display as options.
+   * Array of options to display in the dropdown.
    * Can be an array of objects or primitive values.
    * @default []
    */
-  items = input<T[]>([]);
+  options = input<T[]>([]);
 
   /**
    * Property name to use as the display label for object items.
@@ -193,10 +193,10 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   selectableGroups = input<boolean>(false);
 
   /**
-   * Whether selected tags can be individually removed in multiselect mode.
+   * Whether selected tags are individually removable in multiselect mode.
    * @default false
    */
-  clearableTags = input<boolean>(false);
+  isTagRemovable = input<boolean>(false);
 
   /**
    * Whether selected tags wrap to multiple rows in multiselect mode.
@@ -221,13 +221,22 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   /**
    * Text displayed when no options match the search term.
    */
-  notFoundText = input<string>();
+  noOptionsMessage = input<string>();
 
   /**
    * Maximum height of the dropdown menu in pixels.
    * When not set, the dropdown height is calculated based on available viewport space.
    */
   maxDropdownHeight = input<number | undefined>();
+
+  /**
+   * Layout type for the dropdown options.
+   * - `"menu"` (default): vertical list of options.
+   * - `"grid"`: swatch grid for color/icon pickers. Customizable via
+   *   `--tedi-swatch-size`, `--tedi-swatch-gap`, and `--tedi-swatch-columns` CSS properties.
+   * @default "menu"
+   */
+  dropdownType = input<'menu' | 'grid'>('menu');
 
   /**
    * Whether the select has a search input for filtering options.
@@ -288,7 +297,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   valueTemplate = contentChild(SelectValueTemplateDirective);
 
   normalizedOptions = computed<SelectOption<T>[]>(() => {
-    const items = this.items();
+    const items = this.options();
     if (!items || items.length === 0) return [];
 
     return items.map((item) => {
@@ -627,8 +636,19 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     }
 
     if (this.multiple()) {
-      this.selectedValues.set([...values]);
-      this.onChange([...values]);
+      let newSelection: unknown[];
+      if (this.searchable() && this.searchTerm().trim()) {
+        const filtered = this.filteredOptions();
+        const compareWith = this.compareWith();
+        const hiddenSelected = this.selectedValues().filter(
+          (val) => !filtered.some((opt) => compareWith(opt.value, val))
+        );
+        newSelection = [...hiddenSelected, ...values];
+      } else {
+        newSelection = [...values];
+      }
+      this.selectedValues.set(newSelection);
+      this.onChange(newSelection);
       this.searchTerm.set("");
       if (this.searchable()) {
         this.searchInputRef()?.nativeElement.focus();
@@ -700,7 +720,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     }
 
     // Find the original item by matching the value
-    const items = this.items();
+    const items = this.options();
     const found = items.find((item) => {
       const itemRecord = item as Record<string, unknown>;
       return compareWith(itemRecord[bindValue], option.value);
@@ -750,23 +770,33 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     }
   }
 
+  private getAvailableTagWidth(): number {
+    const trigger = this.triggerRef()?.nativeElement;
+    if (!trigger) return 0;
+
+    const triggerWidth = trigger.clientWidth;
+    if (triggerWidth === 0) return 0;
+
+    const triggerStyle = getComputedStyle(trigger);
+    const padding = (parseFloat(triggerStyle.paddingLeft) || 0) + (parseFloat(triggerStyle.paddingRight) || 0);
+
+    let nonTagWidth = 0;
+    const arrow: HTMLElement | null = trigger.querySelector(".tedi-select__arrow");
+    const clear: HTMLElement | null = trigger.querySelector(".tedi-select__clear");
+    const searchInput: HTMLElement | null = trigger.querySelector(".tedi-select__search-input");
+    if (arrow) nonTagWidth += arrow.offsetWidth + (parseFloat(getComputedStyle(arrow).marginLeft) || 0) + (parseFloat(getComputedStyle(arrow).paddingLeft) || 0);
+    if (clear) nonTagWidth += clear.offsetWidth;
+    if (searchInput) nonTagWidth += parseFloat(getComputedStyle(searchInput).minWidth) || 0;
+
+    return triggerWidth - padding - nonTagWidth;
+  }
+
   private calculateVisibleTags(): void {
-    const container = this.multiselectContainerRef()?.nativeElement;
     const tags = this.tagRefs();
+    if (tags.length === 0 || this.visibleTagsCount() !== null) return;
 
-    if (!container || tags.length === 0) {
-      return;
-    }
-
-    if (this.visibleTagsCount() !== null) {
-      return;
-    }
-
-    const containerWidth = container.offsetWidth;
-
-    if (containerWidth === 0) {
-      return;
-    }
+    const availableWidth = this.getAvailableTagWidth();
+    if (availableWidth <= 0) return;
 
     const gap = 8;
     const counterTagWidth = 40;
@@ -774,17 +804,12 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     let visibleCount = 0;
 
     for (let i = 0; i < tags.length; i++) {
-      const tagEl = tags[i].nativeElement;
-      const tagWidth = tagEl.offsetWidth;
-
-      // Check if this tag fits
+      const tagWidth = tags[i].nativeElement.offsetWidth;
       const spaceNeeded = usedWidth + tagWidth + (visibleCount > 0 ? gap : 0);
-
-      // Reserve space for counter tag if there are more items
       const hasMoreItems = i < tags.length - 1;
       const reservedSpace = hasMoreItems ? counterTagWidth + gap : 0;
 
-      if (spaceNeeded + reservedSpace <= containerWidth) {
+      if (spaceNeeded + reservedSpace <= availableWidth) {
         usedWidth = spaceNeeded;
         visibleCount++;
       } else {
@@ -792,7 +817,6 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       }
     }
 
-    // Ensure at least one tag is shown
     if (visibleCount === 0 && tags.length > 0) {
       visibleCount = 1;
     }

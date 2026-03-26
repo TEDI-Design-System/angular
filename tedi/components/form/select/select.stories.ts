@@ -22,7 +22,8 @@ import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item
 import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
 import { DropdownItemValueMetaComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-meta.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
-import { AlertComponent } from "../../notifications";
+import { Component, inject } from "@angular/core";
+import { ToastService } from "../../../services/toast/toast.service";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.38.59?node-id=4449-69807&m=dev" target="_blank">Figma ↗</a><br />
@@ -50,7 +51,6 @@ const meta: Meta<SelectComponent> = {
         IconComponent,
         ButtonComponent,
         VerticalSpacingDirective,
-        AlertComponent,
       ],
     }),
   ],
@@ -65,7 +65,7 @@ const meta: Meta<SelectComponent> = {
     multiple: { control: "boolean" },
     showSelectAll: { control: "boolean" },
     selectableGroups: { control: "boolean" },
-    clearableTags: { control: "boolean" },
+    isTagRemovable: { control: "boolean" },
     multiRow: { control: "boolean" },
     searchable: { control: "boolean" },
     maxDropdownHeight: {
@@ -84,7 +84,7 @@ const meta: Meta<SelectComponent> = {
     multiple: false,
     showSelectAll: false,
     selectableGroups: false,
-    clearableTags: false,
+    isTagRemovable: false,
     multiRow: false,
     searchable: false,
     maxDropdownHeight: undefined,
@@ -95,11 +95,12 @@ export default meta;
 type Story = StoryObj<SelectComponent>;
 
 const simpleOptions = [
-  "Option 1",
-  "Option 2",
-  "Option 3",
-  "Option 4",
-  "Option 5",
+  { value: "tallinn", label: "Tallinn" },
+  { value: "narva", label: "Narva" },
+  { value: "tartu", label: "Tartu", disabled: true },
+  { value: "elva", label: "Elva" },
+  { value: "rakvere", label: "Rakvere" },
+  { value: "haapsalu", label: "Haapsalu" },
 ];
 
 export const Default: Story = {
@@ -121,11 +122,13 @@ export const Default: Story = {
         [multiple]="multiple"
         [showSelectAll]="showSelectAll"
         [selectableGroups]="selectableGroups"
-        [clearableTags]="clearableTags"
+        [isTagRemovable]="isTagRemovable"
         [multiRow]="multiRow"
         [searchable]="searchable"
         [maxDropdownHeight]="maxDropdownHeight"
-        [items]="options"
+        [options]="options"
+        bindLabel="label"
+        bindValue="value"
       />
     `,
   }),
@@ -141,13 +144,17 @@ export const Size: Story = {
         <tedi-select
           inputId="size-default"
           label="Default"
-          [items]="options"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
           size="default"
         />
         <tedi-select
           inputId="size-small"
           label="Small"
-          [items]="options"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
           size="small"
         />
       </div>
@@ -170,13 +177,99 @@ export const Type: Story = {
         <tedi-select
           inputId="type-default"
           label="Default"
-          [items]="options"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
         />
         <tedi-select
           inputId="type-hint"
           label="With hint"
           [feedbackText]="feedbackText"
-          [items]="options"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+        />
+      </div>
+    `,
+  }),
+};
+
+export const States: Story = {
+  parameters: {
+    pseudo: {
+      hover: "#states-hover .tedi-input",
+      focus: "#states-focus .tedi-input",
+      active: "#states-active .tedi-input",
+    },
+  },
+  render: () => ({
+    props: {
+      options: simpleOptions,
+      errorFeedback: { type: "error", text: "Error text" },
+      validFeedback: { type: "valid", text: "Valid text" },
+      disabledControl: new FormControl({ value: "tallinn", disabled: true }),
+    },
+    template: `
+      <div style="display: flex; flex-direction: column;" [tediVerticalSpacing]="1">
+        <tedi-select
+          inputId="states-default"
+          label="Default"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+        />
+        <div id="states-hover">
+          <tedi-select
+            inputId="states-hover-select"
+            label="Hover"
+            [options]="options"
+            bindLabel="label"
+            bindValue="value"
+          />
+        </div>
+        <div id="states-focus">
+          <tedi-select
+            inputId="states-focus-select"
+            label="Focus"
+            [options]="options"
+            bindLabel="label"
+            bindValue="value"
+          />
+        </div>
+        <div id="states-active">
+          <tedi-select
+            inputId="states-active-select"
+            label="Active"
+            [options]="options"
+            bindLabel="label"
+            bindValue="value"
+          />
+        </div>
+        <tedi-select
+          inputId="states-error"
+          label="Error"
+          state="error"
+          [feedbackText]="errorFeedback"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+        />
+        <tedi-select
+          inputId="states-valid"
+          label="Valid"
+          state="valid"
+          [feedbackText]="validFeedback"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+        />
+        <tedi-select
+          inputId="states-disabled"
+          label="Disabled"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+          [formControl]="disabledControl"
         />
       </div>
     `,
@@ -209,11 +302,28 @@ export const ValueType: Story = {
         "Fifth option",
       ],
       colorOptions: [
-        { id: 1, name: "Cyan", color: "#59ced9" },
-        { id: 2, name: "Blue", color: "#3b82f6" },
-        { id: 3, name: "Green", color: "#22c55e" },
-        { id: 4, name: "Red", color: "#ef4444" },
-        { id: 5, name: "Purple", color: "#a855f7" },
+        { id: 1, name: "Transparent", color: "transparent" },
+        { id: 2, name: "White", color: "#ffffff" },
+        { id: 3, name: "Red", color: "#f42a25" },
+        { id: 4, name: "Magenta", color: "#e81e63" },
+        { id: 5, name: "Purple", color: "#b21f7e" },
+        { id: 6, name: "Violet", color: "#673ab7" },
+        { id: 7, name: "Indigo", color: "#3f51b5" },
+        { id: 8, name: "Blue", color: "#3f88c5" },
+        { id: 9, name: "Light blue", color: "#03a9f3" },
+        { id: 10, name: "Cyan", color: "#00bcd3" },
+        { id: 11, name: "Teal", color: "#009688" },
+        { id: 12, name: "Green", color: "#4caf50" },
+        { id: 13, name: "Light green", color: "#8bc24a" },
+        { id: 14, name: "Lime", color: "#ccdb39" },
+        { id: 15, name: "Yellow", color: "#f2d611" },
+        { id: 16, name: "Amber", color: "#ffc107" },
+        { id: 17, name: "Orange", color: "#ff9800" },
+        { id: 18, name: "Deep orange", color: "#ff5722" },
+        { id: 19, name: "Grey", color: "#9e9e9e" },
+        { id: 20, name: "Blue grey", color: "#607d8b" },
+        { id: 21, name: "Brown", color: "#795548" },
+        { id: 22, name: "Black", color: "#0d0d0d" },
       ],
       iconOptions: [
         { id: 1, name: "Desktop", icon: "computer" },
@@ -223,7 +333,7 @@ export const ValueType: Story = {
         { id: 5, name: "TV", icon: "tv" },
       ],
       form: new FormGroup({
-        default: new FormControl("Option 1"),
+        default: new FormControl("tallinn"),
         multiselect: new FormControl([
           "Tag 1",
           "Tag 2",
@@ -252,13 +362,17 @@ export const ValueType: Story = {
         <tedi-select
           inputId="value-no-value"
           label="No value"
-          [items]="options"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
           [clearable]="false"
         />
         <tedi-select
           inputId="value-default"
           label="Default"
-          [items]="options"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
           [clearable]="true"
           formControlName="default"
         />
@@ -266,26 +380,28 @@ export const ValueType: Story = {
           inputId="value-placeholder"
           label="Placeholder"
           placeholder="Text value"
-          [items]="options"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
           [clearable]="false"
         />
         <tedi-select
           inputId="value-multiselect"
           label="Multiselect"
-          [items]="multiselectOptions"
+          [options]="multiselectOptions"
           [multiple]="true"
           [multiRow]="true"
-          [clearableTags]="true"
+          [isTagRemovable]="true"
           [clearable]="true"
           formControlName="multiselect"
         />
         <tedi-select
           inputId="value-multiselect-one-row"
           label="Multiselect one row"
-          [items]="oneRowOptions"
+          [options]="oneRowOptions"
           [multiple]="true"
           [multiRow]="false"
-          [clearableTags]="true"
+          [isTagRemovable]="true"
           [clearable]="true"
           formControlName="oneRow"
         />
@@ -293,24 +409,32 @@ export const ValueType: Story = {
           <tedi-select
             inputId="value-color"
             label="Color"
-            [items]="colorOptions"
+            [options]="colorOptions"
             bindLabel="name"
             bindValue="id"
             [clearable]="false"
+            [dropdownWidthRef]="null"
+            dropdownType="grid"
             formControlName="color"
           >
             <ng-template tediSelectValue let-item>
               <div
-                style="width: 100%; height: 24px; border-radius: 3px;"
-                [style.background]="item.color"
+                style="width: 24px; height: 24px; border-radius: 4px;"
+                [style.background]="item.color === 'transparent'
+                  ? 'linear-gradient(to top right, #fff calc(50% - 1px), #e53935 calc(50% - 1px), #e53935 calc(50% + 1px), #fff calc(50% + 1px))'
+                  : item.color"
+                [style.border]="item.color === 'transparent' || item.color === '#ffffff' ? '1px solid var(--form-input-border-default)' : 'none'"
                 [attr.aria-label]="item.name"
                 role="img"
               ></div>
             </ng-template>
             <ng-template tediSelectOption let-item>
               <div
-                style="width: 100%; height: 24px; border-radius: 2px; flex-shrink: 0;"
-                [style.background]="item.color"
+                style="width: 100%; height: 100%; border-radius: 4px;"
+                [style.background]="item.color === 'transparent'
+                  ? 'linear-gradient(to top right, #fff calc(50% - 1px), #e53935 calc(50% - 1px), #e53935 calc(50% + 1px), #fff calc(50% + 1px))'
+                  : item.color"
+                [style.border]="item.color === 'transparent' || item.color === '#ffffff' ? '1px solid var(--form-input-border-default)' : 'none'"
                 [attr.aria-label]="item.name"
                 role="img"
               ></div>
@@ -321,10 +445,12 @@ export const ValueType: Story = {
           <tedi-select
             inputId="value-icon"
             label="Icon"
-            [items]="iconOptions"
+            [options]="iconOptions"
             bindLabel="name"
             bindValue="id"
             [clearable]="false"
+            [dropdownWidthRef]="null"
+            dropdownType="grid"
             formControlName="icon"
           >
             <ng-template tediSelectValue let-item>
@@ -456,7 +582,7 @@ export const Examples: Story = {
           inputId="example-1"
           label="Multiselect with Select All"
           placeholder="Select options..."
-          [items]="selectAllOptions"
+          [options]="selectAllOptions"
           bindLabel="name"
           bindValue="id"
           [multiple]="true"
@@ -467,14 +593,14 @@ export const Examples: Story = {
           inputId="example-2"
           label="Scrollable list"
           placeholder="Select department..."
-          [items]="scrollableOptions"
+          [options]="scrollableOptions"
           [clearable]="false"
         />
         <tedi-select
           inputId="example-2b"
           label="Searchable select"
           placeholder="Search departments..."
-          [items]="scrollableOptions"
+          [options]="scrollableOptions"
           [searchable]="true"
           [clearable]="true"
         />
@@ -482,17 +608,17 @@ export const Examples: Story = {
           inputId="example-2c"
           label="Searchable multiselect"
           placeholder="Search and select departments..."
-          [items]="scrollableOptions"
+          [options]="scrollableOptions"
           [searchable]="true"
           [multiple]="true"
           [clearable]="true"
-          [clearableTags]="true"
+          [isTagRemovable]="true"
         />
         <tedi-select
           inputId="example-3"
           label="Grouped single select"
           placeholder="Select department..."
-          [items]="groupedOptions"
+          [options]="groupedOptions"
           bindLabel="name"
           bindValue="id"
           groupBy="category"
@@ -502,7 +628,7 @@ export const Examples: Story = {
           inputId="example-4"
           label="Options with descriptions"
           placeholder="Select access level..."
-          [items]="descriptionOptions"
+          [options]="descriptionOptions"
           bindLabel="title"
           bindValue="id"
           [clearable]="false"
@@ -518,7 +644,7 @@ export const Examples: Story = {
           inputId="example-5"
           label="Grouped multiselect"
           placeholder="Select departments..."
-          [items]="groupedOptions"
+          [options]="groupedOptions"
           bindLabel="name"
           bindValue="id"
           groupBy="category"
@@ -530,7 +656,7 @@ export const Examples: Story = {
           inputId="example-6"
           label="Grouped multiselect with Select All"
           placeholder="Select departments..."
-          [items]="groupedOptions"
+          [options]="groupedOptions"
           bindLabel="name"
           bindValue="id"
           groupBy="category"
@@ -543,7 +669,7 @@ export const Examples: Story = {
           inputId="example-7"
           label="Options with horizontal meta"
           placeholder="Select location..."
-          [items]="metaOptions"
+          [options]="metaOptions"
           bindLabel="name"
           bindValue="id"
           [clearable]="false"
@@ -559,7 +685,7 @@ export const Examples: Story = {
           inputId="example-8"
           label="Single select with radio buttons"
           placeholder="Select access level..."
-          [items]="descriptionOptions"
+          [options]="descriptionOptions"
           bindLabel="title"
           bindValue="id"
           [clearable]="false"
@@ -574,7 +700,7 @@ export const Examples: Story = {
           inputId="multiselect-custom"
           label="Multiselect with custom templates"
           placeholder="Select permissions..."
-          [items]="permissionOptions"
+          [options]="permissionOptions"
           bindLabel="title"
           bindValue="id"
           [multiple]="true"
@@ -592,119 +718,123 @@ export const Examples: Story = {
   }),
 };
 
+@Component({
+  selector: "storybook-select-reactive-forms-demo",
+  standalone: true,
+  imports: [
+    SelectComponent,
+    SelectOptionTemplateDirective,
+    ReactiveFormsModule,
+    ButtonComponent,
+    DropdownItemValueComponent,
+    DropdownItemValueLabelComponent,
+    DropdownItemValueMetaComponent,
+    VerticalSpacingDirective,
+  ],
+  template: `
+    <form
+      [formGroup]="form"
+      (ngSubmit)="onSubmit()"
+      style="display: flex; flex-direction: column;"
+      [tediVerticalSpacing]="1"
+    >
+      <tedi-select
+        inputId="rf-location"
+        label="Location"
+        placeholder="Select location..."
+        [options]="locationOptions"
+        bindLabel="name"
+        bindValue="id"
+        formControlName="location"
+      >
+        <ng-template tediSelectOption let-item>
+          <tedi-dropdown-item-value>
+            <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
+            <tedi-dropdown-item-value-meta>{{ item.slots }} slots</tedi-dropdown-item-value-meta>
+          </tedi-dropdown-item-value>
+        </ng-template>
+      </tedi-select>
+
+      <tedi-select
+        inputId="rf-access"
+        label="Access level"
+        placeholder="Select access..."
+        [options]="accessOptions"
+        bindLabel="title"
+        bindValue="id"
+        formControlName="access"
+      >
+        <ng-template tediSelectOption let-item let-selected="selected">
+          <tedi-dropdown-item-value type="radio" layout="vertical" [selected]="selected">
+            <tedi-dropdown-item-value-label>{{ item.title }}</tedi-dropdown-item-value-label>
+            <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
+          </tedi-dropdown-item-value>
+        </ng-template>
+      </tedi-select>
+
+      <tedi-select
+        inputId="rf-permissions"
+        label="Permissions"
+        placeholder="Select permissions..."
+        [options]="permissionOptions"
+        bindLabel="title"
+        bindValue="id"
+        [multiple]="true"
+        [searchable]="true"
+        formControlName="permissions"
+      >
+        <ng-template tediSelectOption let-item let-selected="selected">
+          <tedi-dropdown-item-value type="checkbox" layout="vertical" [selected]="selected">
+            <tedi-dropdown-item-value-label>{{ item.title }}</tedi-dropdown-item-value-label>
+            <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
+          </tedi-dropdown-item-value>
+        </ng-template>
+      </tedi-select>
+
+      <button tedi-button type="submit">
+        Submit
+      </button>
+    </form>
+  `,
+})
+class SelectReactiveFormsDemoComponent {
+  private readonly toastService = inject(ToastService);
+
+  locationOptions = [
+    { id: 1, name: "Tallinn", slots: 3 },
+    { id: 2, name: "Tartu", slots: 5 },
+    { id: 3, name: "Pärnu", slots: 2 },
+    { id: 4, name: "Narva", slots: 4 },
+  ];
+
+  accessOptions = [
+    { id: 1, title: "Health data", description: "Access to health records" },
+    { id: 2, title: "Medications", description: "Access to medication history" },
+    { id: 3, title: "Lab results", description: "Access to laboratory results" },
+  ];
+
+  permissionOptions = [
+    { id: 1, title: "Read", description: "Can view documents" },
+    { id: 2, title: "Write", description: "Can create and edit" },
+    { id: 3, title: "Admin", description: "Full access" },
+  ];
+
+  form = new FormGroup({
+    location: new FormControl(1),
+    access: new FormControl(2),
+    permissions: new FormControl([1, 2]),
+  });
+
+  onSubmit(): void {
+    this.toastService.success("Success", "Form submitted successfully");
+  }
+}
+
 export const ReactiveForms: Story = {
   render: () => ({
-    props: {
-      locationOptions: [
-        { id: 1, name: "Tallinn", slots: 3 },
-        { id: 2, name: "Tartu", slots: 5 },
-        { id: 3, name: "Pärnu", slots: 2 },
-        { id: 4, name: "Narva", slots: 4 },
-      ],
-      accessOptions: [
-        {
-          id: 1,
-          title: "Health data",
-          description: "Access to health records",
-        },
-        {
-          id: 2,
-          title: "Medications",
-          description: "Access to medication history",
-        },
-        {
-          id: 3,
-          title: "Lab results",
-          description: "Access to laboratory results",
-        },
-      ],
-      permissionOptions: [
-        { id: 1, title: "Read", description: "Can view documents" },
-        { id: 2, title: "Write", description: "Can create and edit" },
-        { id: 3, title: "Admin", description: "Full access" },
-      ],
-      form: new FormGroup({
-        location: new FormControl(1),
-        access: new FormControl(2),
-        permissions: new FormControl([1, 2]),
-      }),
-      submitted: false,
-      onSubmit(form: FormGroup, context: { submitted: boolean }) {
-        context.submitted = true;
-      },
+    moduleMetadata: {
+      imports: [SelectReactiveFormsDemoComponent],
     },
-    template: `
-      <form
-        [formGroup]="form"
-        (ngSubmit)="onSubmit(form, this)"
-        style="display: flex; flex-direction: column;"
-        [tediVerticalSpacing]="1"
-      >
-        <tedi-alert type="success" title="Success" [open]="submitted">Form submitted</tedi-alert>
-
-        <tedi-select
-          inputId="rf-location"
-          label="Location (horizontal meta)"
-          placeholder="Select location..."
-          [items]="locationOptions"
-          bindLabel="name"
-          bindValue="id"
-          formControlName="location"
-        >
-          <ng-template tediSelectOption let-item>
-            <tedi-dropdown-item-value>
-              <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>{{ item.slots }} slots</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
-          </ng-template>
-        </tedi-select>
-
-        <tedi-select
-          inputId="rf-access"
-          label="Access level (radio + vertical)"
-          placeholder="Select access..."
-          [items]="accessOptions"
-          bindLabel="title"
-          bindValue="id"
-          formControlName="access"
-        >
-          <ng-template tediSelectOption let-item let-selected="selected">
-            <tedi-dropdown-item-value type="radio" layout="vertical" [selected]="selected">
-              <tedi-dropdown-item-value-label>{{ item.title }}</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
-          </ng-template>
-        </tedi-select>
-
-        <tedi-select
-          inputId="rf-permissions"
-          label="Permissions (checkbox + vertical multiselect)"
-          placeholder="Select permissions..."
-          [items]="permissionOptions"
-          bindLabel="title"
-          bindValue="id"
-          [multiple]="true"
-          [searchable]="true"
-          formControlName="permissions"
-        >
-          <ng-template tediSelectOption let-item let-selected="selected">
-            <tedi-dropdown-item-value type="checkbox" layout="vertical" [selected]="selected">
-              <tedi-dropdown-item-value-label>{{ item.title }}</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
-          </ng-template>
-        </tedi-select>
-
-        <button tedi-button type="submit">
-          Submit
-        </button>
-
-        <div>
-          <strong>Form values:</strong>
-          <pre>{{ form.value | json }}</pre>
-        </div>
-
-      </form>
-    `,
+    template: `<storybook-select-reactive-forms-demo />`,
   }),
 };
