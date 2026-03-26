@@ -30,6 +30,15 @@ import { ToastService } from "../../../services/toast/toast.service";
  * <a href="https://www.tedi.ee/1ee8444b7/p/97a0a6-select" target="_blank">Zeroheight ↗</a>
  */
 
+const simpleOptions = [
+  { value: "tallinn", label: "Tallinn" },
+  { value: "narva", label: "Narva" },
+  { value: "tartu", label: "Tartu", disabled: true },
+  { value: "elva", label: "Elva" },
+  { value: "rakvere", label: "Rakvere" },
+  { value: "haapsalu", label: "Haapsalu" },
+];
+
 const meta: Meta<SelectComponent> = {
   title: "TEDI-Ready/Components/Form/Select",
   component: SelectComponent,
@@ -68,6 +77,7 @@ const meta: Meta<SelectComponent> = {
     isTagRemovable: { control: "boolean" },
     multiRow: { control: "boolean" },
     searchable: { control: "boolean" },
+    options: { control: "object" },
     maxDropdownHeight: {
       control: "number",
       description: "Value in pixels. When not set, fits available viewport space.",
@@ -88,28 +98,16 @@ const meta: Meta<SelectComponent> = {
     multiRow: false,
     searchable: false,
     maxDropdownHeight: undefined,
+    options: simpleOptions as [],
   },
 };
 
 export default meta;
 type Story = StoryObj<SelectComponent>;
 
-const simpleOptions = [
-  { value: "tallinn", label: "Tallinn" },
-  { value: "narva", label: "Narva" },
-  { value: "tartu", label: "Tartu", disabled: true },
-  { value: "elva", label: "Elva" },
-  { value: "rakvere", label: "Rakvere" },
-  { value: "haapsalu", label: "Haapsalu" },
-];
-
 export const Default: Story = {
-
   render: (args) => ({
-    props: {
-      ...args,
-      options: simpleOptions,
-    },
+    props: args,
     template: `
       <tedi-select
         [inputId]="inputId"
@@ -643,6 +641,17 @@ export const Examples: Story = {
         <tedi-select
           inputId="example-5"
           label="Grouped multiselect"
+          placeholder="Select departments..."
+          [options]="groupedOptions"
+          bindLabel="name"
+          bindValue="id"
+          groupBy="category"
+          [multiple]="true"
+          [clearable]="true"
+        />
+        <tedi-select
+          inputId="example-5b"
+          label="Grouped multiselect with selectable groups"
           placeholder="Select departments..."
           [options]="groupedOptions"
           bindLabel="name"
