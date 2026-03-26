@@ -41,6 +41,15 @@ export class SpinnerComponent {
    */
   label = input<string>();
 
+  private readonly sizeConfig: Record<SpinnerSize, { strokeWidth: number; r: number }> = {
+    10: { strokeWidth: 4.4, r: 19.8 },
+    16: { strokeWidth: 5.5, r: 19.25 },
+    48: { strokeWidth: 3.6667, r: 20.1667 },
+  };
+
+  strokeWidth = computed(() => this.sizeConfig[this.size()].strokeWidth);
+  r = computed(() => this.sizeConfig[this.size()].r);
+
   classes = computed(() => {
     const classList = [
       "tedi-spinner",

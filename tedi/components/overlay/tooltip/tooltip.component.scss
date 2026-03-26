@@ -12,6 +12,7 @@ tedi-tooltip {
 float-ui-content {
   .float-ui-container-tooltip {
     z-index: var(--z-index-tooltip);
+    width: max-content;
     padding: 0;
     border: 0;
     border-radius: var(--popover-radius-rounded);

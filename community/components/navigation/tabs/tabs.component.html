@@ -17,7 +17,11 @@
     </div>
   </tedi-card-content>
 
-  <tedi-card-content role="tabpanel" [attr.aria-labelledby]="activeTabId()">
+  <tedi-card-content
+    role="tabpanel"
+    [attr.aria-labelledby]="activeTabId()"
+    [padding]="{ horizontal: 'md', vertical: 'lg' }"
+  >
     @if (activeTabContent(); as activeContent) {
       <ng-container *ngTemplateOutlet="activeContent" />
     }

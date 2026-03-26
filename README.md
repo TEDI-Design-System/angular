@@ -30,9 +30,34 @@ To view and develop components in isolation, start Storybook for Angular:
 npm run start
 ```
 
+## Angular Version Support
+
+The library supports the three latest Angular major versions. Angular releases a new major every 6 months and deprecates versions after 18 months. See the [Angular release schedule](https://angular.dev/reference/releases) for upcoming dates.
+
+**Currently supported: Angular 19, 20, 21**
+
+CI runs build and test jobs against all supported versions using a matrix strategy. The base version (used for `npm ci`) is determined by `devDependencies` in `package.json` — the other versions are installed on top via `ng update`.
+
+### Adding a new Angular version
+
+When a new Angular major is released (e.g. v22):
+
+1. **`package.json`** — add `|| ^22.0.0` to every Angular peer dependency and `ngx-float-ui`
+2. **`.github/workflows/angular-test-and-lint.yml`** — add `22` to the `angular-version` matrix in the `build` and `test` jobs
+3. **`.github/workflows/angular-release.yml`** — add `22` to the `angular-version` matrix in the `test` job
+
+### Dropping a deprecated Angular version
+
+When an Angular major reaches end-of-life (e.g. v19):
+
+1. **`package.json`** — remove `^19.0.0 ||` from every Angular peer dependency and `ngx-float-ui`
+2. **`.github/workflows/angular-test-and-lint.yml`** — remove `19` from the `angular-version` matrix in the `build` and `test` jobs
+3. **`.github/workflows/angular-release.yml`** — remove `19` from the `angular-version` matrix in the `test` job
+4. Bump `devDependencies` to the new minimum supported Angular version so the library is always built and developed against a supported release
+
 ## Contributing
 
-Check the [wiki](https://github.com/TEDI-Design-System/general) for component guidelines and coding standards.  
+Check the [wiki](https://github.com/TEDI-Design-System/general) for component guidelines and coding standards.
 Report issues or contribute via [GitHub Issues](https://github.com/TEDI-Design-System/angular/issues).
 
 ---

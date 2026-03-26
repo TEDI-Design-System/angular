@@ -11,7 +11,7 @@ tedi-toast {
   padding: var(--toast-outer-spacing, 4px);
 
   tedi-alert {
-    box-shadow: 0 4px 10px 0 var(--tedi-alpha-14, rgba(0, 0, 0, 0.14));
+    box-shadow: 0 4px 10px 0 var(--tedi-alpha-14, rgb(0 0 0 / 14%));
   }
 }
 
@@ -22,9 +22,9 @@ tedi-toast {
   width: calc(100% - var(--toast-outer-spacing) * 2);
   height: 4px;
   background: var(--toast-progress-color);
+  border-radius: 0 var(--alert-radius) 0 var(--alert-radius);
   transform-origin: left;
   animation: toast-progress linear forwards;
-  border-radius: 0 var(--alert-radius) 0 var(--alert-radius);
 
   &--success {
     --toast-progress-color: var(--alert-default-border-success);
@@ -50,8 +50,8 @@ tedi-toast {
 .tedi-toast-container {
   position: fixed;
   inset: 0;
-  pointer-events: none;
   z-index: var(--z-index-toast, 1050);
+  pointer-events: none;
 
   &__position {
     position: absolute;
@@ -96,8 +96,8 @@ tedi-toast {
     &--bottom-left {
       bottom: var(--toast-margin-bottom);
       left: var(--toast-margin-right);
-      align-items: flex-start;
       flex-direction: column-reverse;
+      align-items: flex-start;
 
       tedi-toast {
         animation: toast-slide-in-left 0.3s ease-out forwards;
@@ -109,10 +109,10 @@ tedi-toast {
     }
 
     &--bottom-right {
-      bottom: var(--toast-margin-bottom);
       right: var(--toast-margin-right);
-      align-items: flex-end;
+      bottom: var(--toast-margin-bottom);
       flex-direction: column-reverse;
+      align-items: flex-end;
 
       tedi-toast {
         animation: toast-slide-in-right 0.3s ease-out forwards;
@@ -130,10 +130,10 @@ tedi-toast {
       &--top-right,
       &--bottom-left,
       &--bottom-right {
-        left: var(--toast-margin-left);
         right: var(--toast-margin-right);
-        transform: none;
+        left: var(--toast-margin-left);
         align-items: stretch;
+        transform: none;
 
         tedi-toast {
           width: 100%;

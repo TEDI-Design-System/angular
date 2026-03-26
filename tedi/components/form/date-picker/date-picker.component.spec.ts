@@ -1,13 +1,29 @@
+import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
+import { By } from "@angular/platform-browser";
 import { DatePickerComponent } from "./date-picker.component";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { NgxFloatUiContentComponent } from "ngx-float-ui";
 import { DatePickerCalendarGridComponent } from "./date-picker-calendar-grid/date-picker-calendar-grid.component";
 
 class TranslationMock {
+  translate(key: string) {
+    return key;
+  }
+
   track(key: string) {
     return () => key;
   }
+}
+
+@Component({
+  standalone: true,
+  imports: [DatePickerComponent, ReactiveFormsModule],
+  template: `<tedi-date-picker [formControl]="control" />`,
+})
+class TestHostComponent {
+  control = new FormControl<Date | null>(null);
 }
 
 describe("DatePickerComponent", () => {
@@ -1251,5 +1267,420 @@ describe("DatePickerComponent", () => {
 
       expect(component.inputValue()).toBe("");
     });
+  });
+
+  describe("inputValue signal to DOM synchronization", () => {
+    it("should update visible input value when inputValue signal changes", () => {
+      const input = getInput();
+
+      expect(input.value).toBe("");
+
+      component.inputValue.set("20.03.2024");
+      fixture.detectChanges();
+
+      expect(input.value).toBe("20.03.2024");
+    });
+
+    it("should clear visible input value when inputValue signal is set to empty string", () => {
+      component.inputValue.set("15.06.2024");
+      fixture.detectChanges();
+
+      const input = getInput();
+      expect(input.value).toBe("15.06.2024");
+
+      component.inputValue.set("");
+      fixture.detectChanges();
+
+      expect(input.value).toBe("");
+    });
+  });
+
+  describe("ControlValueAccessor", () => {
+    describe("writeValue()", () => {
+      it("should set selected and inputValue when given a Date", () => {
+        const date = new Date(2024, 5, 15);
+
+        component.writeValue(date);
+        fixture.detectChanges();
+
+        expect(component.selected()).toEqual(date);
+        expect(component.inputValue()).toBe("15.06.2024");
+      });
+
+      it("should clear selected and inputValue when given null", () => {
+        component.selected.set(new Date(2024, 5, 15));
+        component.inputValue.set("15.06.2024");
+        fixture.detectChanges();
+
+        component.writeValue(null);
+        fixture.detectChanges();
+
+        expect(component.selected()).toBeNull();
+        expect(component.inputValue()).toBe("");
+      });
+    });
+
+    describe("registerOnChange()", () => {
+      it("should call onChange when a day is selected", () => {
+        const onChange = jest.fn();
+        component.registerOnChange(onChange);
+
+        const date = new Date(2024, 5, 15);
+        component.selectDay({
+          date,
+          disabled: false,
+          inCurrentMonth: true,
+        });
+
+        expect(onChange).toHaveBeenCalledWith(date);
+      });
+
+      it("should NOT call onChange when selecting the same day", () => {
+        const date = new Date(2024, 5, 15);
+        component.selected.set(date);
+        fixture.detectChanges();
+
+        const onChange = jest.fn();
+        component.registerOnChange(onChange);
+
+        component.selectDay({
+          date: new Date(2024, 5, 15),
+          disabled: false,
+          inCurrentMonth: true,
+        });
+
+        expect(onChange).not.toHaveBeenCalled();
+      });
+
+      it("should call onChange with null when input is cleared", () => {
+        const onChange = jest.fn();
+        component.registerOnChange(onChange);
+
+        component.selected.set(new Date(2024, 5, 15));
+        fixture.detectChanges();
+
+        component.clearInput();
+
+        expect(onChange).toHaveBeenCalledWith(null);
+      });
+
+      it("should call onChange when valid date is entered manually on blur", () => {
+        const onChange = jest.fn();
+        component.registerOnChange(onChange);
+
+        const input = getInput();
+        input.value = "20.06.2024";
+        input.dispatchEvent(new Event("input"));
+        fixture.detectChanges();
+
+        input.dispatchEvent(new Event("blur"));
+        fixture.detectChanges();
+
+        expect(onChange).toHaveBeenCalledWith(new Date(2024, 5, 20));
+      });
+
+      it("should NOT call onChange when same date is entered manually on blur", () => {
+        const existingDate = new Date(2024, 5, 20);
+        component.selected.set(existingDate);
+        component.inputValue.set("20.06.2024");
+        fixture.detectChanges();
+
+        const onChange = jest.fn();
+        component.registerOnChange(onChange);
+
+        const input = getInput();
+        input.dispatchEvent(new Event("blur"));
+        fixture.detectChanges();
+
+        expect(onChange).not.toHaveBeenCalled();
+      });
+
+      it("should NOT call onChange when invalid date is entered manually on blur", () => {
+        const onChange = jest.fn();
+        component.registerOnChange(onChange);
+
+        const input = getInput();
+        input.value = "invalid";
+        input.dispatchEvent(new Event("input"));
+        fixture.detectChanges();
+
+        input.dispatchEvent(new Event("blur"));
+        fixture.detectChanges();
+
+        expect(onChange).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("registerOnTouched()", () => {
+      it("should call onTouched when input is blurred", () => {
+        const onTouched = jest.fn();
+        component.registerOnTouched(onTouched);
+
+        const input = getInput();
+        input.dispatchEvent(new Event("blur"));
+        fixture.detectChanges();
+
+        expect(onTouched).toHaveBeenCalled();
+      });
+
+      it("should call onTouched when calendar is closed", () => {
+        const onTouched = jest.fn();
+        component.registerOnTouched(onTouched);
+
+        component.closeCalendar();
+
+        expect(onTouched).toHaveBeenCalled();
+      });
+
+      it("should call onTouched even when allowManualInput is false", () => {
+        fixture.componentRef.setInput("allowManualInput", false);
+        fixture.detectChanges();
+
+        const onTouched = jest.fn();
+        component.registerOnTouched(onTouched);
+
+        const input = getInput();
+        input.dispatchEvent(new Event("blur"));
+        fixture.detectChanges();
+
+        expect(onTouched).toHaveBeenCalled();
+      });
+    });
+
+    describe("setDisabledState()", () => {
+      it("should disable all controls when setDisabledState(true) is called", () => {
+        component.setDisabledState(true);
+        fixture.detectChanges();
+
+        const input = getInput();
+        const toggleButton = el.querySelector(".tedi-date-picker__toggle") as HTMLButtonElement;
+
+        expect(component.fieldDisabled()).toBe(true);
+        expect(input.disabled).toBe(true);
+        expect(toggleButton.disabled).toBe(true);
+      });
+
+      it("should enable all controls when setDisabledState(false) is called", () => {
+        component.setDisabledState(true);
+        fixture.detectChanges();
+
+        component.setDisabledState(false);
+        fixture.detectChanges();
+
+        const input = getInput();
+        const toggleButton = el.querySelector(".tedi-date-picker__toggle") as HTMLButtonElement;
+
+        expect(component.fieldDisabled()).toBe(false);
+        expect(input.disabled).toBe(false);
+        expect(toggleButton.disabled).toBe(false);
+      });
+    });
+
+    describe("fieldDisabled computed", () => {
+      it("should be true when inputDisabled is true", () => {
+        fixture.componentRef.setInput("inputDisabled", true);
+        fixture.detectChanges();
+
+        expect(component.fieldDisabled()).toBe(true);
+      });
+
+      it("should be true when formDisabled is true (via setDisabledState)", () => {
+        component.setDisabledState(true);
+        fixture.detectChanges();
+
+        expect(component.fieldDisabled()).toBe(true);
+      });
+
+      it("should be true when both inputDisabled and formDisabled are true", () => {
+        fixture.componentRef.setInput("inputDisabled", true);
+        component.setDisabledState(true);
+        fixture.detectChanges();
+
+        expect(component.fieldDisabled()).toBe(true);
+      });
+
+      it("should be false when both inputDisabled and formDisabled are false", () => {
+        fixture.componentRef.setInput("inputDisabled", false);
+        component.setDisabledState(false);
+        fixture.detectChanges();
+
+        expect(component.fieldDisabled()).toBe(false);
+      });
+    });
+
+    describe("integration with form disabled state", () => {
+      it("should disable clear button when form is disabled", () => {
+        component.selected.set(new Date(2024, 5, 15));
+        fixture.detectChanges();
+
+        component.setDisabledState(true);
+        fixture.detectChanges();
+
+        const clearButton = el.querySelector(".tedi-date-picker__clear") as HTMLButtonElement;
+        expect(clearButton.disabled).toBe(true);
+      });
+
+      it("should work with combined inputDisabled and form disabled", () => {
+        // Start with inputDisabled=true
+        fixture.componentRef.setInput("inputDisabled", true);
+        fixture.detectChanges();
+
+        expect(component.fieldDisabled()).toBe(true);
+
+        // Set inputDisabled=false, but enable form disabled
+        fixture.componentRef.setInput("inputDisabled", false);
+        component.setDisabledState(true);
+        fixture.detectChanges();
+
+        expect(component.fieldDisabled()).toBe(true);
+
+        // Disable form disabled - should now be enabled
+        component.setDisabledState(false);
+        fixture.detectChanges();
+
+        expect(component.fieldDisabled()).toBe(false);
+      });
+    });
+  });
+});
+
+describe("DatePickerComponent NG_VALUE_ACCESSOR integration", () => {
+  let fixture: ComponentFixture<TestHostComponent>;
+  let host: TestHostComponent;
+  let datePicker: DatePickerComponent;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [TestHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+      ],
+    });
+
+    fixture = TestBed.createComponent(TestHostComponent);
+    host = fixture.componentInstance;
+
+    fixture.detectChanges();
+
+    datePicker = fixture.debugElement.query(
+      By.directive(DatePickerComponent),
+    ).componentInstance as DatePickerComponent;
+
+    const mockFloatUiElement = document.createElement("div");
+    const mockContainer = document.createElement("div");
+    mockContainer.className = "float-ui-container-popover";
+    mockFloatUiElement.appendChild(mockContainer);
+
+    jest.spyOn(datePicker.popover(), "floatUiComponent").mockReturnValue({
+      state: false,
+      show: jest.fn(),
+      hide: jest.fn(),
+      elRef: {
+        nativeElement: mockFloatUiElement,
+      },
+    } as unknown as NgxFloatUiContentComponent);
+
+    fixture.detectChanges();
+  });
+
+  it("should update component when FormControl value changes", () => {
+    const date = new Date(2024, 5, 15);
+
+    host.control.setValue(date);
+    fixture.detectChanges();
+
+    expect(datePicker.selected()).toEqual(date);
+    expect(datePicker.inputValue()).toBe("15.06.2024");
+  });
+
+  it("should update FormControl when date is selected in component", () => {
+    const date = new Date(2024, 6, 20);
+
+    datePicker.selectDay({
+      date,
+      disabled: false,
+      inCurrentMonth: true,
+    });
+    fixture.detectChanges();
+
+    expect(host.control.value).toEqual(date);
+  });
+
+  it("should clear FormControl when input is cleared", () => {
+    host.control.setValue(new Date(2024, 5, 15));
+    fixture.detectChanges();
+
+    datePicker.clearInput();
+    fixture.detectChanges();
+
+    expect(host.control.value).toBeNull();
+  });
+
+  it("should disable component when FormControl is disabled", () => {
+    host.control.disable();
+    fixture.detectChanges();
+
+    expect(datePicker.fieldDisabled()).toBe(true);
+  });
+
+  it("should enable component when FormControl is enabled", () => {
+    host.control.disable();
+    fixture.detectChanges();
+
+    host.control.enable();
+    fixture.detectChanges();
+
+    expect(datePicker.fieldDisabled()).toBe(false);
+  });
+
+  it("should mark FormControl as touched when input is blurred", () => {
+    expect(host.control.touched).toBe(false);
+
+    const input = fixture.debugElement.query(By.css("input")).nativeElement;
+    input.dispatchEvent(new Event("blur"));
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(true);
+  });
+
+  it("should mark FormControl as dirty when value changes", () => {
+    expect(host.control.dirty).toBe(false);
+
+    datePicker.selectDay({
+      date: new Date(2024, 5, 15),
+      disabled: false,
+      inCurrentMonth: true,
+    });
+    fixture.detectChanges();
+
+    expect(host.control.dirty).toBe(true);
+  });
+
+  it("should handle initial FormControl value", () => {
+    const initialDate = new Date(2024, 8, 10);
+    host.control.setValue(initialDate, { emitEvent: false });
+
+    const newFixture = TestBed.createComponent(TestHostComponent);
+    newFixture.componentInstance.control.setValue(initialDate, { emitEvent: false });
+    newFixture.detectChanges();
+
+    const newDatePicker = newFixture.debugElement.query(
+      By.directive(DatePickerComponent),
+    ).componentInstance as DatePickerComponent;
+
+    expect(newDatePicker.selected()).toEqual(initialDate);
+  });
+
+  it("should update FormControl when valid date is entered manually", () => {
+    const input = fixture.debugElement.query(By.css("input")).nativeElement;
+
+    input.value = "25.07.2024";
+    input.dispatchEvent(new Event("input"));
+    fixture.detectChanges();
+
+    input.dispatchEvent(new Event("blur"));
+    fixture.detectChanges();
+
+    expect(host.control.value).toEqual(new Date(2024, 6, 25));
   });
 });

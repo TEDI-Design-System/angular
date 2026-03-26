@@ -6,14 +6,16 @@
 >
   @for (idx of renderedIndices(); track $index) {
     <div
+      #slide
       class="tedi-carousel__slide"
-      [attr.role]="$index === renderedActiveIndex() ? 'group' : 'presentation'"
+      [attr.role]="isSlideVisible($index) ? 'group' : 'presentation'"
       aria-roledescription="slide"
       [attr.aria-label]="
         translationService.track('carousel.slide', idx + 1, slides().length)()
       "
       [attr.aria-current]="$index === renderedActiveIndex() ? 'true' : null"
-      [attr.aria-hidden]="$index === renderedActiveIndex() ? null : 'true'"
+      [attr.aria-hidden]="isSlideVisible($index) ? null : 'true'"
+      [attr.tabindex]="isSlideVisible($index) ? '-1' : null"
       [style.flex]="slideFlex()"
     >
       <ng-container *ngTemplateOutlet="slides()[idx].template"></ng-container>

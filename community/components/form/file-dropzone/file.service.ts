@@ -27,11 +27,11 @@ export class FileService {
         const filesToCheck = [...currentFiles, ...newFiles];
         const duplicateFiles = filesToCheck.filter(
           (file, index, self) =>
-            self.findIndex((f) => f.name === file.name) !== index
+            self.findIndex((f) => f.name === file.name) !== index,
         );
         if (duplicateFiles.length > 0) {
           newFiles = newFiles.filter(
-            (file) => !duplicateFiles.some((f) => f.name === file.name)
+            (file) => !duplicateFiles.some((f) => f.name === file.name),
           );
         }
         break;
@@ -71,11 +71,11 @@ export class FileService {
 
   private async _renameDuplicates(
     currentFiles: FileDropzone[],
-    newFiles: FileDropzone[]
+    newFiles: FileDropzone[],
   ): Promise<FileDropzone[]> {
     const renamedFiles: FileDropzone[] = [];
     const fileNames = new Set(
-      currentFiles.map((file) => file.name.toLowerCase())
+      currentFiles.map((file) => file.name.toLowerCase()),
     );
 
     for (const file of newFiles) {
@@ -91,18 +91,16 @@ export class FileService {
       }
 
       fileNames.add(newName.toLowerCase());
-      renamedFiles.push(await this._copyFile(file.file, newName));
+      renamedFiles.push(this._copyFile(file.file, newName));
     }
     return renamedFiles;
   }
 
-  private _copyFile(original: File, newName?: string): Promise<FileDropzone> {
-    return original.arrayBuffer().then((buffer) => {
-      const file = new File([buffer], newName ?? original.name, {
-        type: original.type,
-        lastModified: original.lastModified,
-      });
-      return new FileDropzone(file);
+  private _copyFile(original: File, newName?: string): FileDropzone {
+    const file = new File([original], newName ?? original.name, {
+      type: original.type,
+      lastModified: original.lastModified,
     });
+    return new FileDropzone(file);
   }
 }

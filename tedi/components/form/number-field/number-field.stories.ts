@@ -152,7 +152,7 @@ export default {
     },
     feedbackText: {
       description:
-        "[FeedbackText](/?path=/docs/community-angular-form-feedbacktext--docs) component inputs.",
+        "[FeedbackText](/?path=/docs/tedi-ready-components-form-feedbacktext--docs) component inputs.",
       control: {
         type: "object",
       },

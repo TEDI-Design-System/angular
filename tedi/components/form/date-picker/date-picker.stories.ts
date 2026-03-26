@@ -4,6 +4,7 @@ import {
   argsToTemplate,
   moduleMetadata,
 } from "@storybook/angular";
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { DatePickerComponent } from "./date-picker.component";
 
 /**
@@ -21,7 +22,7 @@ export default {
   },
   decorators: [
     moduleMetadata({
-      imports: [DatePickerComponent],
+      imports: [DatePickerComponent, ReactiveFormsModule],
     }),
   ],
   argTypes: {
@@ -229,4 +230,53 @@ export const Default: StoryObj<DatePickerComponent> = {
       <tedi-date-picker ${argsToTemplate(args)} />
     `,
   }),
+};
+
+export const WithReactiveForms: StoryObj<DatePickerComponent> = {
+  render: () => {
+    const dateControl = new FormControl<Date | null>(new Date(2024, 5, 15));
+
+    return {
+      props: { dateControl },
+      template: `
+        <div style="display: flex; flex-direction: column; gap: 16px; max-width: 400px;">
+          <tedi-date-picker
+            [formControl]="dateControl"
+            inputId="reactive-form-date"
+            inputPlaceholder="Select a date..."
+          />
+
+          <div>
+            <div>Value: {{ dateControl.value ?? 'null' }}</div>
+            <div>Touched: {{ dateControl.touched }}</div>
+            <div>Dirty: {{ dateControl.dirty }}</div>
+          </div>
+        </div>
+      `,
+    };
+  },
+};
+
+export const WithLowWidth: StoryObj<DatePickerComponent> = {
+  render: (args) => {
+    return {
+      template: `
+        <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));">
+          <tedi-date-picker ${argsToTemplate(args)}
+            inputPlaceholder="Select a date..."
+          />
+          <tedi-date-picker ${argsToTemplate(args)}
+            inputPlaceholder="Select a date..."
+          />
+          <tedi-date-picker ${argsToTemplate(args)}
+            inputPlaceholder="Select a date..."
+          />
+          <tedi-date-picker ${argsToTemplate(args)}
+            inputPlaceholder="Select a date..."
+          />
+        </div>
+
+      `,
+    };
+  },
 };

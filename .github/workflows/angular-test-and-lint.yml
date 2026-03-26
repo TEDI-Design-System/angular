@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - rc
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -37,20 +38,12 @@ jobs:
         run: |
           npm ci --cache .npm --prefer-offline
           npm run build
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Upload dist
+        uses: actions/upload-artifact@v4
         with:
-          node-version: "lts/*"
-      - name: Test
-        run: |
-          npm ci --cache .npm --prefer-offline
-          npm run test
+          name: library-dist
+          path: dist/
+          retention-days: 1
 
   test-coverage:
     runs-on: ubuntu-latest
@@ -62,6 +55,8 @@ jobs:
 
       - name: Set up Node
         uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
 
       - name: Install dependencies
         run: |
@@ -76,6 +71,50 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           working-directory: ./
+
+  compatibility:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        angular-version: [19, 20, 21]
+    name: compatibility (Angular ${{ matrix.angular-version }})
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+      - name: Download built library
+        uses: actions/download-artifact@v4
+        with:
+          name: library-dist
+          path: dist/
+      - name: Pack library tarball
+        run: cd dist && npm pack
+      - name: Create test app and verify build
+        run: |
+          npx @angular/cli@${{ matrix.angular-version }} new test-app \
+            --skip-git --skip-tests --style=scss --ssr=false --skip-install
+          cd test-app
+          npm install
+          npm install ../dist/*.tgz @angular/animations@${{ matrix.angular-version }} @angular/forms@${{ matrix.angular-version }} @angular/cdk@${{ matrix.angular-version }} ngx-float-ui@${{ matrix.angular-version }}
+
+          # Import a component to verify the library is consumable
+          cat > src/app/app.component.ts << 'EOF'
+          import { Component } from '@angular/core';
+          import { ButtonComponent } from '@tedi-design-system/angular/tedi';
+
+          @Component({
+            selector: 'app-root',
+            standalone: true,
+            imports: [ButtonComponent],
+            template: '<button tedi-button>Test</button>',
+          })
+          export class AppComponent {}
+          EOF
+
+          npx ng build
 
   chromatic:
     runs-on: ubuntu-latest
@@ -101,6 +140,8 @@ jobs:
 
       - name: Set up Node
         uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
 
       - name: Install dependencies
         run: |

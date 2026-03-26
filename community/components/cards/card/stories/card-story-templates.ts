@@ -319,9 +319,9 @@ export const renderCardPaddingsStory = () => {
         Top LG
       </tedi-card-header>
 
-      <tedi-card-header [padding]="'xs'">
+      <tedi-card-content [padding]="'xs'">
         Full XS padding
-      </tedi-card-header>
+      </tedi-card-content>
 
       <tedi-card-content background="secondary">
         Parent has left XS, right NONE, Top NONE.

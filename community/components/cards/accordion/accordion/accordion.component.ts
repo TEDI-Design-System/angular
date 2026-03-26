@@ -8,6 +8,9 @@ import {
 } from "@angular/core";
 import { AccordionItemComponent } from "../accordion-item/accordion-item.component";
 
+/**
+ * @deprecated Use Accordion from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-accordion",
   standalone: true,

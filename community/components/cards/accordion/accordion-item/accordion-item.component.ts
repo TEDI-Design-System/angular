@@ -3,7 +3,7 @@ import {
   Component,
   computed,
   input,
-  signal,
+  model,
   ViewEncapsulation,
 } from "@angular/core";
 import { CardComponent } from "../../card/card.component";
@@ -30,7 +30,7 @@ export class AccordionItemComponent {
    */
   selected = input<boolean>(false);
 
-  opened = signal<boolean>(false);
+  opened = model<boolean>(false);
 
   headerId = computed(() => {
     return `tedi-accordion-header-${this.id()}`;

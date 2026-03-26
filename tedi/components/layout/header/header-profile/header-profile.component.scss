@@ -30,28 +30,29 @@ tedi-header-profile {
 
   .tedi-header-profile__overlay {
     position: absolute;
-    top: var(--layout-header-min-height);
+    top: var(--layout-header-height);
     left: 0;
     z-index: calc(var(--z-index-header) - 1);
     width: 100%;
-    min-height: calc(100dvh - var(--layout-header-min-height));
+    min-height: calc(100dvh - var(--layout-header-height));
     background: rgb(0 0 0 / 25%);
   }
 
   .tedi-header-profile__modal {
     position: absolute;
-    top: var(--layout-header-min-height);
+    top: var(--layout-header-height);
     right: 0;
     z-index: var(--z-index-header);
     display: flex;
     flex-direction: column;
     width: var(--navigation-vertical-item-width-default);
-    min-height: calc(100dvh - var(--layout-header-min-height));
+    max-width: 100%;
+    min-height: calc(100dvh - var(--layout-header-height));
     max-height: 100%;
     overflow-y: auto;
     background: var(--general-surface-primary);
 
-    > * {
+    >* {
       padding: var(--layout-header-modal-item-padding);
 
       &:not(:last-child) {

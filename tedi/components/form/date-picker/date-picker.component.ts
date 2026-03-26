@@ -5,17 +5,17 @@ import {
   computed,
   model,
   input,
-  inject,
   signal,
   OnInit,
   viewChild,
   ElementRef,
   effect,
+  forwardRef,
 } from "@angular/core";
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
 import { IconComponent } from "../../base/icon/icon.component";
-import { TediTranslationService } from "../../../services/translation/translation.service";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { PopoverComponent } from "../../overlay/popover/popover.component";
 import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
@@ -25,6 +25,7 @@ import { DatePickerCalendarGridComponent } from "./date-picker-calendar-grid/dat
 import { DatePickerMonthGridComponent } from "./date-picker-month-grid/date-picker-month-grid.component";
 import { DatePickerYearGridComponent } from "./date-picker-year-grid/date-picker-year-grid.component";
 import { formatDate, parseDate, isSameDay, isBeforeDay, isAfterDay, getISOWeek } from "../../../utils/date.util";
+import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 
 export interface DatePickerDay {
   date: Date;
@@ -66,11 +67,34 @@ let datePickerId = 0;
     DatePickerCalendarGridComponent,
     DatePickerMonthGridComponent,
     DatePickerYearGridComponent,
+    TediTranslationPipe
+  ],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => DatePickerComponent),
+      multi: true,
+    },
   ],
 })
-export class DatePickerComponent implements OnInit {
+export class DatePickerComponent implements OnInit, ControlValueAccessor {
   readonly today = new Date();
   readonly uniqueId = `tedi-date-picker-id-${datePickerId++}`;
+
+  private formDisabled = signal(false);
+  private onChange: (value: Date | null) => void = () => {};
+  private onTouched: () => void = () => {};
+
+  private emitIfChanged(value: Date | null): void {
+    const current = this.selected();
+    const changed = value === null
+      ? current !== null
+      : !current || !isSameDay(value, current);
+
+    if (changed) {
+      this.onChange(value);
+    }
+  }
 
   /** Selected date */
   readonly selected = model<Date | null>(null);
@@ -112,6 +136,9 @@ export class DatePickerComponent implements OnInit {
 
   /** Is input disabled? */
   readonly inputDisabled = input(false);
+
+  /** Internal computed for combined disabled state (inputDisabled + formDisabled from reactive forms) */
+  readonly fieldDisabled = computed(() => this.inputDisabled() || this.formDisabled());
 
   /** Is manual typing into input allowed? */
   readonly allowManualInput = input(true);
@@ -271,8 +298,6 @@ export class DatePickerComponent implements OnInit {
   readonly calendarGrid = viewChild<DatePickerCalendarGridComponent>("gridElement");
   readonly popover = viewChild.required(PopoverComponent);
 
-  readonly translationService = inject(TediTranslationService);
-
   constructor() {
     effect(() => {
       const selected = this.selected();
@@ -295,6 +320,24 @@ export class DatePickerComponent implements OnInit {
     }
 
     this.activeDate.set(active);
+  }
+
+  // ControlValueAccessor implementation
+  writeValue(value: Date | null): void {
+    this.selected.set(value);
+    this.inputValue.set(value ? formatDate(value) : "");
+  }
+
+  registerOnChange(fn: (value: Date | null) => void): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(disabled: boolean): void {
+    this.formDisabled.set(disabled);
   }
 
   getTabIndex(date: Date): number {
@@ -333,6 +376,7 @@ export class DatePickerComponent implements OnInit {
   selectDay(day: DatePickerDay) {
     if (day.disabled) return;
 
+    this.emitIfChanged(day.date);
     this.selected.set(day.date);
     this.inputValue.set(formatDate(day.date));
 
@@ -546,12 +590,15 @@ export class DatePickerComponent implements OnInit {
   }
 
   onInputBlur() {
+    this.onTouched();
+
     if (!this.allowManualInput()) return;
 
     const selected = this.selected();
     const parsed = parseDate(this.inputValue());
 
     if (parsed) {
+      this.emitIfChanged(parsed);
       this.selected.set(parsed);
       this.month.set(parsed);
     } else {
@@ -572,6 +619,7 @@ export class DatePickerComponent implements OnInit {
   }
 
   clearInput() {
+    this.emitIfChanged(null);
     this.inputValue.set("");
     this.selected.set(null);
   }
@@ -579,6 +627,7 @@ export class DatePickerComponent implements OnInit {
   closeCalendar() {
     this.popover().floatUiComponent().hide();
     this.inputElement().nativeElement.focus();
+    this.onTouched();
   }
 
   openCalendar() {
