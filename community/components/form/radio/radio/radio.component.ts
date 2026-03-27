@@ -19,6 +19,9 @@ import { generateUUID } from "@tedi-design-system/angular/tedi";
 
 export type RadioValue = string;
 
+/**
+ * @deprecated Use Radio from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-radio",
   imports: [FeedbackTextComponent],

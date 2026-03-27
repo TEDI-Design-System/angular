@@ -17,6 +17,11 @@ export default {
   subcomponents: {
     RadioComponent,
   },
+  parameters: {
+    status: {
+      type: ["existsInTediReady"],
+    },
+  },
   args: {
     size: "default",
     direction: "column",

@@ -14,6 +14,9 @@ import { ComponentInputs, LabelComponent, FeedbackTextComponent } from "@tedi-de
 
 export type RadioGroupSize = "default" | "large";
 
+/**
+ * @deprecated Use Radio from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-radio-group",
   standalone: true,
@@ -87,8 +90,8 @@ export class RadioGroupComponent implements ControlValueAccessor {
   });
   groupValue = this._value.asReadonly();
 
-  private _onChange: (val: RadioValue) => void = () => {};
-  private _onTouched: (val: boolean) => void = () => {};
+  private _onChange: (val: RadioValue) => void = () => { };
+  private _onTouched: (val: boolean) => void = () => { };
 
   writeValue(value: RadioValue | null): void {
     this._value.set(value);
