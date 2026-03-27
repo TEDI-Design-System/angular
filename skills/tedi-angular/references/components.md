@@ -199,6 +199,47 @@ Composed of sub-components:
 <input type="checkbox" tedi-checkbox [formControl]="agreeControl" />
 ```
 
+### Radio
+**Selector:** `input[type=radio][tedi-radio]`
+**Inputs:**
+- `size: RadioSize = "default"` — "default" or "large"
+- `invalid: boolean = false`
+
+```html
+<label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
+  <input type="radio" tedi-radio name="group" value="a" />
+  Option A
+</label>
+```
+
+### RadioCard
+**Selector:** `label[tedi-radio-card]`
+**Inputs:**
+- `variant: RadioCardVariant = "primary"` — "primary" or "secondary"
+- `grouped: boolean = false` — join cards in a button-group layout
+
+```html
+<!-- Separate cards (default) -->
+<div style="display: flex; gap: 8px;">
+  <label tedi-radio-card variant="primary">
+    <input tedi-radio type="radio" name="cards" />
+    Text
+  </label>
+</div>
+
+<!-- Grouped cards -->
+<div style="display: inline-flex;">
+  <label tedi-radio-card variant="primary" [grouped]="true">
+    <input tedi-radio type="radio" name="cards" />
+    Option A
+  </label>
+  <label tedi-radio-card variant="primary" [grouped]="true">
+    <input tedi-radio type="radio" name="cards" />
+    Option B
+  </label>
+</div>
+```
+
 ### Toggle
 **Selector:** `tedi-toggle`
 **Model:** `checked: boolean`

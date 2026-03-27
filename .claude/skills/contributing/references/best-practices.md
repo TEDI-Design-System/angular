@@ -223,16 +223,16 @@ export default {
       imports: [ComponentNameComponent, /* dependencies */],
     }),
   ],
-  parameters: {
-    status: { type: ['partiallyTediReady'] }, // or 'existsInTediReady'
-  },
+  parameters: {},
   argTypes: {
+    // Every public input/model must have an entry
     inputName: {
       description: 'What this input does',
       control: { type: 'radio' },
       options: ['option1', 'option2'],
       table: {
         category: 'inputs',
+        type: { summary: 'TypeName' },
         defaultValue: { summary: 'option1' },
       },
     },
