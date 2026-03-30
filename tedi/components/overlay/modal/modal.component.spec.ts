@@ -120,22 +120,22 @@ describe("ModalComponent", () => {
     expect(classes).toContain("tedi-modal--default");
   });
 
-  it("should set max-width style on dialog for custom width", () => {
+  it("should set width style on dialog for custom width", () => {
     fixture.componentRef.setInput("width", "80%");
     fixture.componentRef.setInput("open", true);
     fixture.detectChanges();
 
     const dialog = hostEl.querySelector(".tedi-modal__dialog") as HTMLElement;
-    expect(dialog.style.maxWidth).toBe("80%");
+    expect(dialog.style.width).toBe("80%");
   });
 
-  it("should not set max-width style for preset widths", () => {
+  it("should not set width style for preset widths", () => {
     fixture.componentRef.setInput("width", "lg");
     fixture.componentRef.setInput("open", true);
     fixture.detectChanges();
 
     const dialog = hostEl.querySelector(".tedi-modal__dialog") as HTMLElement;
-    expect(dialog.style.maxWidth).toBe("");
+    expect(dialog.style.width).toBe("");
   });
 
   it("should not apply top class for side positions", () => {

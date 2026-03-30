@@ -361,6 +361,14 @@ this.modalService.open(MyModalContent, {
   position: 'right', // or 'left'
 });
 
+// Custom max-width — overrides the default 95vw cap
+this.modalService.open(MyModalContent, {
+  data: { title: 'Custom max-width' },
+  position: 'left',
+  width: '800px',
+  maxWidth: '75%',
+});
+
 // No backdrop close
 this.modalService.open(MyModalContent, {
   data: { title: 'No backdrop close' },
@@ -422,6 +430,7 @@ class MyModalContent {
           <button tedi-button (click)="openTop()">Open top-aligned modal</button>
           <button tedi-button (click)="openRight()">Open side modal (right)</button>
           <button tedi-button (click)="openLeft()">Open side modal (left)</button>
+          <button tedi-button (click)="openCustomMaxWidth()">Side modal with custom widths</button>
           <button tedi-button (click)="openNoBackdropClose()">No backdrop close</button>
           <button tedi-button (click)="openNoCloseButton()">No close button</button>
           <button tedi-button (click)="openWithDescription()">With description</button>
@@ -466,6 +475,16 @@ class MyModalContent {
           data: { title: "Side modal (left)", options: this.options },
           width: "sm",
           position: "left",
+        });
+        ref.closed.subscribe((r) => this.lastResult = r ?? "dismissed");
+      }
+
+      openCustomMaxWidth() {
+        const ref = this.modalService.open<string>(StoryModalContentComponent, {
+          data: { title: "Side modal (800px, max 75%)", options: this.options },
+          position: "left",
+          width: "800px",
+          maxWidth: "75%",
         });
         ref.closed.subscribe((r) => this.lastResult = r ?? "dismissed");
       }

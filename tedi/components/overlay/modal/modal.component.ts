@@ -76,8 +76,8 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
     (["xs", "sm", "md", "lg", "xl"] as string[]).includes(this.width()),
   );
 
-  /** Custom max-width for non-preset widths (legacy mode only). */
-  readonly customMaxWidth = computed(() =>
+  /** Custom width for non-preset widths (legacy mode only). */
+  readonly customWidth = computed(() =>
     !this.serviceMode && !this.isPresetWidth() ? this.width() : null,
   );
 

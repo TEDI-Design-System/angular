@@ -11,7 +11,7 @@ export interface ModalConfig<D = unknown> {
   data?: D;
   /** Modal size variant. @default 'default' */
   size?: ModalSize;
-  /** Modal width preset. @default 'sm' */
+  /** Modal width — preset ('xs'–'xl') or custom CSS value (e.g. '800px'). @default 'sm' */
   width?: ModalWidth;
   /** Position of the modal. @default 'center' */
   position?: ModalPosition;
@@ -25,6 +25,8 @@ export interface ModalConfig<D = unknown> {
   showClose?: boolean;
   /** Whether the modal becomes fullscreen on mobile viewports. @default false */
   mobileFullscreen?: boolean;
+  /** Max-width cap (e.g. '75%', '60vw'). Overrides the default 95vw limit. */
+  maxWidth?: string;
   /** ARIA label for the dialog. */
   ariaLabel?: string;
   /** ID of the element that labels the dialog. */

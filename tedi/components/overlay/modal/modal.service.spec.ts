@@ -119,13 +119,13 @@ describe("ModalService", () => {
     ref.close();
   });
 
-  it("should set max-width on overlay element for custom width", () => {
+  it("should set width on overlay element for custom width", () => {
     const ref = service.open(TestModalContentComponent, {
       width: "80%",
     });
 
     const overlayElement = document.querySelector(".cdk-global-overlay-wrapper .cdk-overlay-pane") as HTMLElement;
-    expect(overlayElement?.style.maxWidth).toBe("80%");
+    expect(overlayElement?.style.width).toBe("80%");
 
     ref.close();
   });
@@ -253,6 +253,26 @@ describe("ModalService", () => {
 
     const result = ref.updateSize("500px", "300px");
     expect(result).toBe(ref);
+
+    ref.close();
+  });
+
+  it("should set --_tedi-modal-max-width CSS variable when maxWidth is provided", () => {
+    const ref = service.open(TestModalContentComponent, {
+      maxWidth: "800px",
+    });
+
+    const overlayElement = document.querySelector(".cdk-global-overlay-wrapper .cdk-overlay-pane") as HTMLElement;
+    expect(overlayElement?.style.getPropertyValue("--_tedi-modal-max-width")).toBe("800px");
+
+    ref.close();
+  });
+
+  it("should not set --_tedi-modal-max-width CSS variable by default", () => {
+    const ref = service.open(TestModalContentComponent);
+
+    const overlayElement = document.querySelector(".cdk-global-overlay-wrapper .cdk-overlay-pane") as HTMLElement;
+    expect(overlayElement?.style.getPropertyValue("--_tedi-modal-max-width")).toBe("");
 
     ref.close();
   });

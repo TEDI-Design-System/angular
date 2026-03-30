@@ -43,6 +43,7 @@ export class ModalService {
       closeOnBackdropClick = true,
       closeOnEscape = true,
       mobileFullscreen = false,
+      maxWidth,
       ariaLabel,
       ariaLabelledBy,
     } = config;
@@ -70,7 +71,11 @@ export class ModalService {
     });
 
     if (!isPresetWidth) {
-      dialogRef.overlayRef.overlayElement.style.maxWidth = width;
+      dialogRef.overlayRef.overlayElement.style.width = width;
+    }
+
+    if (maxWidth) {
+      dialogRef.overlayRef.overlayElement.style.setProperty("--_tedi-modal-max-width", maxWidth);
     }
 
     this.setupDialogBehavior(dialogRef, scrollBehavior, closeOnBackdropClick, closeOnEscape);

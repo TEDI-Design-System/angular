@@ -9,7 +9,7 @@
   [cdkTrapFocus]="!serviceMode"
   [cdkTrapFocusAutoCapture]="!serviceMode && open()"
   [style.display]="serviceMode ? 'contents' : !open() ? 'none' : null"
-  [style.max-width]="customMaxWidth()"
+  [style.width]="customWidth()"
 >
   <ng-content select="tedi-modal-header" />
   <ng-content select="tedi-modal-content" />
