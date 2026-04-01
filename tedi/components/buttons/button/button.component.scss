@@ -161,7 +161,7 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 
 @mixin button-size($size) {
   & {
-    $font-size: if($size == "md", "default", $size);
+    $font-size: if($size =="md", "default", $size);
 
     font-size: var(--button-text-size-#{$font-size});
 
