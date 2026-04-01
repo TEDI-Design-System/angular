@@ -61,6 +61,7 @@ describe("IconComponent", () => {
       "warning-dark",
       "danger",
       "white",
+      "inherit"
     ];
 
     for (const color of colors) {
