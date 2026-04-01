@@ -26,6 +26,7 @@ class MockControlComponent implements FormFieldControl<string> {
   value = signal("");
   disabled = signal(false);
   invalid = signal(false);
+  setInvalidState = jest.fn();
   clearField = jest.fn();
 }
 
