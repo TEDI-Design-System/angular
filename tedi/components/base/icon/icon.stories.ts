@@ -20,6 +20,7 @@ const COLORS = [
   "warning-dark",
   "danger",
   "white",
+  "inherit"
 ];
 const BACKGROUNDS = [
   "primary",
