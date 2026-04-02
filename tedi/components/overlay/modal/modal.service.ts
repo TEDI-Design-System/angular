@@ -3,7 +3,7 @@ import { Dialog, DialogRef } from "@angular/cdk/dialog";
 import { GlobalPositionStrategy, Overlay } from "@angular/cdk/overlay";
 import { ComponentType } from "@angular/cdk/portal";
 import { ModalRef } from "./modal-ref";
-import { ModalConfig, ModalPosition, ModalScrollBehavior, MODAL_DATA } from "./modal.types";
+import { ModalConfig, ModalFullscreen, ModalPosition, ModalScrollBehavior, MODAL_DATA } from "./modal.types";
 
 const WIDTH_PRESETS: readonly string[] = ["xs", "sm", "md", "lg", "xl"];
 
@@ -42,13 +42,13 @@ export class ModalService {
       scrollBehavior = "content",
       closeOnBackdropClick = true,
       closeOnEscape = true,
-      mobileFullscreen = false,
+      fullscreen = false,
       maxWidth,
       ariaLabel,
       ariaLabelledBy,
     } = config;
 
-    const panelClasses = this.buildPanelClasses(size, width, position, scrollBehavior, mobileFullscreen);
+    const panelClasses = this.buildPanelClasses(size, width, position, scrollBehavior, fullscreen);
     const isPresetWidth = WIDTH_PRESETS.includes(width);
 
     const dialogRef = this.dialog.open<R, D>(component, {
@@ -93,7 +93,7 @@ export class ModalService {
     width: string,
     position: ModalPosition,
     scrollBehavior: ModalScrollBehavior,
-    mobileFullscreen: boolean,
+    fullscreen: ModalFullscreen,
   ): string[] {
     const classes = [
       "tedi-modal-dialog",
@@ -114,8 +114,10 @@ export class ModalService {
       classes.push("tedi-modal-dialog--scroll-page");
     }
 
-    if (mobileFullscreen) {
-      classes.push("tedi-modal-dialog--fullscreen-mobile");
+    if (fullscreen === true) {
+      classes.push("tedi-modal-dialog--fullscreen");
+    } else if (typeof fullscreen === "string") {
+      classes.push(`tedi-modal-dialog--fullscreen-${fullscreen}`);
     }
 
     return classes;

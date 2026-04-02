@@ -5,6 +5,7 @@ export type ModalWidthPreset = "xs" | "sm" | "md" | "lg" | "xl";
 export type ModalWidth = ModalWidthPreset | (string & {});
 export type ModalPosition = "center" | "top" | "left" | "right";
 export type ModalScrollBehavior = "content" | "page";
+export type ModalFullscreen = boolean | "sm" | "md" | "lg" | "xl";
 
 export interface ModalConfig<D = unknown> {
   /** Data to pass to the modal content component. Accessible via `inject(MODAL_DATA)`. */
@@ -23,8 +24,8 @@ export interface ModalConfig<D = unknown> {
   closeOnEscape?: boolean;
   /** Whether to show a close button in the header. @default true */
   showClose?: boolean;
-  /** Whether the modal becomes fullscreen on mobile viewports. @default false */
-  mobileFullscreen?: boolean;
+  /** Fullscreen mode. `true` = always fullscreen, `'sm'`/`'md'`/etc = fullscreen below that breakpoint. @default false */
+  fullscreen?: ModalFullscreen;
   /** Max-width cap (e.g. '75%', '60vw'). Overrides the default 95vw limit. */
   maxWidth?: string;
   /** ARIA label for the dialog. */

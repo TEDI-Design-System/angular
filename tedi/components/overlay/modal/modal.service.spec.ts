@@ -130,22 +130,33 @@ describe("ModalService", () => {
     ref.close();
   });
 
-  it("should apply fullscreen-mobile class when mobileFullscreen is true", () => {
+  it("should apply fullscreen class when fullscreen is true", () => {
     const ref = service.open(TestModalContentComponent, {
-      mobileFullscreen: true,
+      fullscreen: true,
     });
 
     const overlayPane = document.querySelector(".cdk-overlay-pane");
-    expect(overlayPane?.classList.contains("tedi-modal-dialog--fullscreen-mobile")).toBe(true);
+    expect(overlayPane?.classList.contains("tedi-modal-dialog--fullscreen")).toBe(true);
 
     ref.close();
   });
 
-  it("should not apply fullscreen-mobile class by default", () => {
+  it("should apply fullscreen-md class when fullscreen is 'md'", () => {
+    const ref = service.open(TestModalContentComponent, {
+      fullscreen: "md",
+    });
+
+    const overlayPane = document.querySelector(".cdk-overlay-pane");
+    expect(overlayPane?.classList.contains("tedi-modal-dialog--fullscreen-md")).toBe(true);
+
+    ref.close();
+  });
+
+  it("should not apply fullscreen class by default", () => {
     const ref = service.open(TestModalContentComponent);
 
     const overlayPane = document.querySelector(".cdk-overlay-pane");
-    expect(overlayPane?.classList.contains("tedi-modal-dialog--fullscreen-mobile")).toBe(false);
+    expect(overlayPane?.classList.contains("tedi-modal-dialog--fullscreen")).toBe(false);
 
     ref.close();
   });

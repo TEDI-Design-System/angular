@@ -285,26 +285,54 @@ $modal-widths: (
   &--scroll-page {
     --_tedi-modal-max-height: none;
 
+    cdk-dialog-container {
+      max-height: none;
+    }
+
+    .tedi-modal {
+      max-height: none;
+      overflow: visible;
+    }
+
     .tedi-modal-content {
       overflow-y: visible;
     }
   }
 
-  &--fullscreen-mobile {
-    @include breakpoints.media-breakpoint-down(sm) {
-      --_tedi-modal-max-width: 100vw;
-      --_tedi-modal-max-height: 100dvh;
+  &--fullscreen {
+    --_tedi-modal-max-width: 100vw;
+    --_tedi-modal-max-height: 100dvh;
 
+    max-width: 100vw;
+    min-height: 100dvh;
+
+    cdk-dialog-container,
+    .tedi-modal {
       min-height: 100dvh;
+    }
 
-      // cdk-dialog-container: third-party, can't add host class
-      cdk-dialog-container,
-      .tedi-modal {
+    .tedi-modal {
+      border-radius: 0;
+    }
+  }
+
+  @each $bp in (sm, md, lg, xl) {
+    &--fullscreen-#{$bp} {
+      @include breakpoints.media-breakpoint-down($bp) {
+        --_tedi-modal-max-width: 100vw;
+        --_tedi-modal-max-height: 100dvh;
+
+        max-width: 100vw;
         min-height: 100dvh;
-      }
 
-      .tedi-modal {
-        border-radius: 0;
+        cdk-dialog-container,
+        .tedi-modal {
+          min-height: 100dvh;
+        }
+
+        .tedi-modal {
+          border-radius: 0;
+        }
       }
     }
   }
