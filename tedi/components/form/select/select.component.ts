@@ -765,6 +765,23 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     );
   }
 
+  isGroupIndeterminate(groupLabel: string): boolean {
+    const group = this.optionGroups().find((g) => g.label === groupLabel);
+    if (!group) return false;
+
+    const enabledGroupOptions = group.options.filter((o) => !o.disabled);
+    if (enabledGroupOptions.length === 0) return false;
+
+    const compareWith = this.compareWith();
+    const selected = this.selectedValues();
+
+    const selectedCount = enabledGroupOptions.filter((option) =>
+      selected.some((val) => compareWith(option.value, val))
+    ).length;
+
+    return selectedCount > 0 && selectedCount < enabledGroupOptions.length;
+  }
+
   private focusTrigger(): void {
     if (this.searchable()) {
       this.searchInputRef()?.nativeElement.focus();

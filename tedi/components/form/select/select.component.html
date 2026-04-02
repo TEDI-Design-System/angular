@@ -205,7 +205,7 @@
                 class="tedi-dropdown-item tedi-select__group-name tedi-select__group-name--selectable"
                 [cdkOption]="SpecialOptionControls.SELECT_GROUP + group.label"
               >
-                <tedi-dropdown-item-value type="checkbox" [selected]="isGroupSelected(group.label)">
+                <tedi-dropdown-item-value type="checkbox" [selected]="isGroupSelected(group.label)" [indeterminate]="isGroupIndeterminate(group.label)">
                   <tedi-dropdown-item-value-label>{{ group.label }}</tedi-dropdown-item-value-label>
                 </tedi-dropdown-item-value>
               </li>

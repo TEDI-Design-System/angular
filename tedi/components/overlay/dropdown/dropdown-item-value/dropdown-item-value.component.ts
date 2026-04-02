@@ -48,6 +48,12 @@ export class DropdownItemValueComponent {
   readonly selected = input<boolean>(false);
 
   /**
+   * Whether the checkbox is in indeterminate state
+   * @default false
+   */
+  readonly indeterminate = input<boolean>(false);
+
+  /**
    * Whether the item is disabled
    * @default false
    */

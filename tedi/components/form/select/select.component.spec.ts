@@ -1150,6 +1150,78 @@ describe("SelectComponent", () => {
 
       expect(select.isGroupSelected("A")).toBe(false);
     }));
+
+    it("isGroupIndeterminate should return true when some group options selected", fakeAsync(() => {
+      host.items = [
+        { id: 1, name: "A1", group: "A" },
+        { id: 2, name: "A2", group: "A" },
+        { id: 3, name: "A3", group: "A" },
+      ];
+      host.bindLabel = "name";
+      host.bindValue = "id";
+      host.groupBy = "group";
+      host.multiple = true;
+      fixture.detectChanges();
+      tick();
+
+      host.control.setValue([1]);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.isGroupIndeterminate("A")).toBe(true);
+    }));
+
+    it("isGroupIndeterminate should return false when all group options selected", fakeAsync(() => {
+      host.items = [
+        { id: 1, name: "A1", group: "A" },
+        { id: 2, name: "A2", group: "A" },
+      ];
+      host.bindLabel = "name";
+      host.bindValue = "id";
+      host.groupBy = "group";
+      host.multiple = true;
+      fixture.detectChanges();
+      tick();
+
+      host.control.setValue([1, 2]);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.isGroupIndeterminate("A")).toBe(false);
+    }));
+
+    it("isGroupIndeterminate should return false when no group options selected", fakeAsync(() => {
+      host.items = [
+        { id: 1, name: "A1", group: "A" },
+        { id: 2, name: "A2", group: "A" },
+      ];
+      host.bindLabel = "name";
+      host.bindValue = "id";
+      host.groupBy = "group";
+      host.multiple = true;
+      fixture.detectChanges();
+      tick();
+
+      host.control.setValue([]);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.isGroupIndeterminate("A")).toBe(false);
+    }));
+
+    it("isGroupIndeterminate should return false for non-existent group", fakeAsync(() => {
+      host.items = [
+        { id: 1, name: "A1", group: "A" },
+      ];
+      host.bindLabel = "name";
+      host.bindValue = "id";
+      host.groupBy = "group";
+      host.multiple = true;
+      fixture.detectChanges();
+      tick();
+
+      expect(select.isGroupIndeterminate("B")).toBe(false);
+    }));
   });
 
   describe("Additional coverage", () => {

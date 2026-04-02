@@ -4,6 +4,17 @@
   align-items: center;
   width: 100%;
 
+  &--vertical#{&}--checkbox,
+  &--vertical#{&}--radio {
+    align-items: flex-start;
+
+    > input[tedi-checkbox][type="checkbox"],
+    > input.tedi-dropdown-item-value__radio,
+    > .tedi-icon {
+      margin-top: calc((var(--body-regular-line-height) - var(--form-checkbox-radio-size-responsive)) / 2);
+    }
+  }
+
   &--radio {
     gap: var(--form-checkbox-radio-inner-spacing);
   }
@@ -113,6 +124,15 @@ li[tedi-dropdown-item],
   }
 
   &:hover:not(.tedi-dropdown-item--disabled, [aria-disabled="true"]) {
+
+    .tedi-dropdown-item-value__label,
+    .tedi-dropdown-item-value__meta {
+      color: inherit;
+    }
+  }
+
+  &[aria-disabled="true"],
+  &.tedi-dropdown-item--disabled {
 
     .tedi-dropdown-item-value__label,
     .tedi-dropdown-item-value__meta {

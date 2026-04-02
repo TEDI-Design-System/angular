@@ -4,6 +4,7 @@
     tedi-checkbox
     class="tedi-dropdown-item-value__checkbox"
     [checked]="selected()"
+    [indeterminate]="indeterminate()"
     [disabled]="disabled()"
     (click)="$event.stopPropagation()"
   />
