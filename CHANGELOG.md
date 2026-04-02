@@ -1,3 +1,10 @@
+# [6.3.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.1...angular-6.3.0-rc.2) (2026-04-02)
+
+
+### Features
+
+* **icon:** added inherit ColorType [#114](https://github.com/TEDI-Design-System/angular/issues/114) ([#389](https://github.com/TEDI-Design-System/angular/issues/389)) ([37836f4](https://github.com/TEDI-Design-System/angular/commit/37836f470ef481404ccc2bc975c3099073387380))
+
 # [6.3.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0...angular-6.3.0-rc.1) (2026-03-26)
 
 
