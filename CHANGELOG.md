@@ -1,3 +1,10 @@
+# [6.3.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.2...angular-6.3.0-rc.3) (2026-04-02)
+
+
+### Bug Fixes
+
+* **button:** fixed invalid padding being set for neutral buttons [#383](https://github.com/TEDI-Design-System/angular/issues/383) ([#391](https://github.com/TEDI-Design-System/angular/issues/391)) ([426d231](https://github.com/TEDI-Design-System/angular/commit/426d231009e00f8d79145df2f546d470edc8c678))
+
 # [6.3.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.1...angular-6.3.0-rc.2) (2026-04-02)
 
 
