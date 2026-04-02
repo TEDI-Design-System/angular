@@ -1,6 +1,8 @@
 .tedi-accordion-item {
   --_accordion-columns: minmax(auto, 200px) auto;
-  --_accordion-header-spacing: 8px;
+  --_accordion-header-spacing: 16px;
+  --_accordion-header-title-spacing: 8px;
+  --_accordion-title-color: var(--general-text-secondary);
   $accordion-card: #{&}__card;
   & > #{$accordion-card} {
     $accordion-header: "& > .tedi-accordion-item-header-host > .tedi-accordion-item-header";

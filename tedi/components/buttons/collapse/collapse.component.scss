@@ -48,13 +48,13 @@ $transition-duration: 300ms;
   &__extender {
     visibility: hidden;
     min-height: 0;
+    padding-top: var(--dimensions-05);
     transition: visibility $transition-duration;
   }
 
   &__content {
     display: grid;
     grid-template-rows: 0fr;
-    margin-top: var(--dimensions-05);
     overflow: hidden;
     transition: grid-template-rows $transition-duration;
 

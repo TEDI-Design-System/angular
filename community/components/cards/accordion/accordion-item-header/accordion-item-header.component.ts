@@ -12,14 +12,24 @@ import {
   CardHeaderComponent,
   CardHeaderVariant,
 } from "../../card/card-header/card-header.component";
-import { IconColor, IconComponent, ButtonComponent } from "@tedi-design-system/angular/tedi";
+import {
+  IconColor,
+  IconComponent,
+  ButtonComponent,
+} from "@tedi-design-system/angular/tedi";
+import { NgTemplateOutlet } from "@angular/common";
 
 const WHITE_ICON_VARIANTS = ["brand", "brand-dark"];
 
 @Component({
   selector: "tedi-accordion-item-header",
   standalone: true,
-  imports: [CardHeaderComponent, IconComponent, ButtonComponent],
+  imports: [
+    CardHeaderComponent,
+    IconComponent,
+    ButtonComponent,
+    NgTemplateOutlet,
+  ],
   templateUrl: "./accordion-item-header.component.html",
   styleUrl: "./accordion-item-header.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -54,6 +64,14 @@ export class AccordionItemHeaderComponent {
    * Color of the indicator arrow
    */
   indicatorColor = input<IconColor>();
+  /**
+   * Whether indicator is displayed before or after the main content
+   */
+  indicatorPosition = input<"start" | "end">("end");
+  /**
+   * Whether header is clickable
+   */
+  clickable = input(true);
 
   accordionItem = inject(AccordionItemComponent);
   opened = this.accordionItem.opened;
