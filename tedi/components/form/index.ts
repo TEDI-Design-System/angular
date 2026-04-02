@@ -1,5 +1,7 @@
 export * from "./checkbox/checkbox.component";
 export * from "./checkbox-card/checkbox-card.component";
+export * from "./checkbox-group/checkbox-group.component";
+export * from "./checkbox-card-group/checkbox-card-group.component";
 export * from "./date-picker/date-picker.component";
 export * from "./feedback-text/feedback-text.component";
 export * from "./label/label.component";

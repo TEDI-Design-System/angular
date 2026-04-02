@@ -98,3 +98,8 @@ input[tedi-checkbox][type="checkbox"] {
     height: var(--form-checkbox-radio-size-large);
   }
 }
+
+label:has(input[tedi-checkbox]) + tedi-feedback-text {
+  padding-left: var(--form-checkbox-radio-size-responsive);
+  margin-left: var(--form-checkbox-radio-inner-spacing);
+}

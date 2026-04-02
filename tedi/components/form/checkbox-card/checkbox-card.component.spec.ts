@@ -5,19 +5,24 @@ import {
   CheckboxCardVariant,
 } from "./checkbox-card.component";
 import { CheckboxComponent } from "../checkbox/checkbox.component";
+import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 
 @Component({
   standalone: true,
-  imports: [CheckboxCardComponent, CheckboxComponent],
+  imports: [CheckboxCardComponent, CheckboxComponent, FeedbackTextComponent],
   template: `
     <label tedi-checkbox-card [variant]="variant">
       <input tedi-checkbox type="checkbox" />
       Text
+      @if (showDescription) {
+        <tedi-feedback-text text="Description" />
+      }
     </label>
   `,
 })
 class TestHostComponent {
   variant: CheckboxCardVariant = "primary";
+  showDescription = false;
 }
 
 describe("CheckboxCardComponent", () => {
@@ -56,5 +61,22 @@ describe("CheckboxCardComponent", () => {
   it("should contain a checkbox input", () => {
     const input = labelElement.querySelector('input[type="checkbox"]');
     expect(input).toBeTruthy();
+  });
+
+  it("should project content into content wrapper", () => {
+    const content = labelElement.querySelector(
+      ".tedi-checkbox-card__content"
+    );
+    expect(content).toBeTruthy();
+    const input = content?.querySelector('input[type="checkbox"]');
+    expect(input).toBeTruthy();
+  });
+
+  it("should project feedback text as description", () => {
+    fixture.componentInstance.showDescription = true;
+    fixture.detectChanges();
+    const feedbackText = labelElement.querySelector("tedi-feedback-text");
+    expect(feedbackText).toBeTruthy();
+    expect(feedbackText?.parentElement).toBe(labelElement);
   });
 });
