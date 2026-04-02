@@ -6,6 +6,8 @@ import {
   input,
   ViewEncapsulation,
   AfterContentInit,
+  inject,
+  DestroyRef,
 } from "@angular/core";
 import { NgClass } from "@angular/common";
 import {
@@ -24,6 +26,7 @@ import { SeparatorComponent } from "../../../components/helpers/separator/separa
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { NgControl } from "@angular/forms";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 export type InputSize = "small" | "large" | "default";
 export type InputState = "valid" | "error" | "default";
@@ -53,7 +56,6 @@ export interface FormFieldIcon {
   ],
   host: {
     "[class]": "hostClasses()",
-    "(focusout)": "onFocusOut()",
   },
 })
 export class FormFieldComponent implements AfterContentInit {
@@ -85,23 +87,13 @@ export class FormFieldComponent implements AfterContentInit {
   @ContentChild(FeedbackTextComponent)
   feedback?: FeedbackTextComponent;
 
+  private readonly destroyRef = inject(DestroyRef);
+
   ngAfterContentInit() {
-    if (this.ngControl?.statusChanges) {
-      this.ngControl.statusChanges.subscribe(() => {
-        this.updateValidationState();
-      });
-    }
+    this.ngControl?.control?.events
+      ?.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updateValidationState());
 
-    if (this.ngControl?.valueChanges) {
-      this.ngControl.valueChanges.subscribe(() => {
-        this.updateValidationState();
-      });
-    }
-
-    this.updateValidationState();
-  }
-
-  onFocusOut() {
     this.updateValidationState();
   }
 
@@ -111,7 +103,7 @@ export class FormFieldComponent implements AfterContentInit {
     const dirty = !!this.ngControl?.dirty;
     const fieldInvalid = invalid && (touched || dirty);
 
-    this.control?.setInvalidState?.(fieldInvalid);
+    this.control?.setInvalidState(fieldInvalid);
   }
 
   readonly resolvedIcon = computed<FormFieldIcon | undefined>(() => {

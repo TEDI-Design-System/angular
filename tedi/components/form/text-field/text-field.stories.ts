@@ -283,8 +283,10 @@ export const WithTemplateDrivenForms: StoryObj<TextFieldComponent> = {
 
 export const WithReactiveForms: StoryObj<TextFieldComponent> = {
   render: () => {
-    const control = new FormControl("", { nonNullable: true });
-    control.setValidators([Validators.required]);
+    const control = new FormControl("", {
+      nonNullable: true,
+      validators: [Validators.required],
+    });
 
     return {
       props: { control },
