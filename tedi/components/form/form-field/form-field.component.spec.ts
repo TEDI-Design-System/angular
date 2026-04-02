@@ -187,8 +187,12 @@ describe("FormFieldComponent", () => {
 
     formField.ngAfterContentInit();
 
+    const spy = jest.spyOn(host.mockControl, "setInvalidState");
+    spy.mockClear();
+
     events.next();
 
-    expect(host.mockControl.setInvalidState).toHaveBeenCalledWith(true);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledWith(true);
   });
 });
