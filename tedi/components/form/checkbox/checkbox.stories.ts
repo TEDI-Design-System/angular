@@ -379,31 +379,31 @@ export const States: StoryObj<CheckboxComponent> = {
     props: args,
     template: `
       <tedi-row [cols]="2" [gapY]="3">
-        <div>Default</div>
+        <strong>Default</strong>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" />
           Text
         </label>
 
-        <div>Hover</div>
+        <strong>Hover</strong>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" id="Hover" />
           Text
         </label>
 
-        <div>Selected</div>
+        <strong>Selected</strong>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" checked />
           Text
         </label>
 
-        <div>Active</div>
+        <strong>Active</strong>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" checked id="Active" />
           Text
         </label>
 
-        <div>Error</div>
+        <strong>Error</strong>
         <div>
           <label tedi-label color="primary" class="flex align-items-center gap-2">
             <input tedi-checkbox type="checkbox" [invalid]="true" />
@@ -412,19 +412,19 @@ export const States: StoryObj<CheckboxComponent> = {
           <tedi-feedback-text text="Feedback text" type="error" />
         </div>
 
-        <div>Disabled</div>
+        <strong>Disabled</strong>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" disabled />
           Text
         </label>
 
-        <div>Disabled selected</div>
+        <strong>Disabled selected</strong>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" checked disabled />
           Text
         </label>
 
-        <div>Indeterminate</div>
+        <strong>Indeterminate</strong>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" [indeterminate]="true" />
           Text
@@ -647,128 +647,109 @@ export const CheckboxCardStates: StoryObj<CheckboxComponent> = {
   render: (args) => ({
     props: args,
     template: `
-      <div class="flex flex-column gap-4">
-        <div>
-          <p tedi-text color="secondary" style="margin-bottom: 8px;">Primary</p>
-          <tedi-row [cols]="2" [gapY]="3">
-            <tedi-col>Default</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="primary">
-                <input tedi-checkbox type="checkbox" />
-                Text
-              </label>
-            </tedi-col>
+      <tedi-row [cols]="3" [gapY]="3">
+        <tedi-col></tedi-col>
+        <tedi-col><strong>Primary</strong></tedi-col>
+        <tedi-col><strong>Secondary</strong></tedi-col>
 
-            <tedi-col>Hover</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="primary">
-                <input tedi-checkbox type="checkbox" id="PrimaryHover" />
-                Text
-              </label>
-            </tedi-col>
+        <tedi-col><strong>Default</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+        </tedi-col>
 
-            <tedi-col>Selected</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="primary">
-                <input tedi-checkbox type="checkbox" checked />
-                Text
-              </label>
-            </tedi-col>
+        <tedi-col><strong>Hover</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" id="PrimaryHover" />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" id="SecondaryHover" />
+            Text
+          </label>
+        </tedi-col>
 
-            <tedi-col>Active</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="primary">
-                <input tedi-checkbox type="checkbox" checked id="PrimaryActive" />
-                Text
-              </label>
-            </tedi-col>
+        <tedi-col><strong>Selected</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" checked />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" checked />
+            Text
+          </label>
+        </tedi-col>
 
-            <tedi-col>Focus</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="primary">
-                <input tedi-checkbox type="checkbox" id="PrimaryFocus" />
-                Text
-              </label>
-            </tedi-col>
+        <tedi-col><strong>Active</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" checked id="PrimaryActive" />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" checked id="SecondaryActive" />
+            Text
+          </label>
+        </tedi-col>
 
-            <tedi-col>Disabled</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="primary">
-                <input tedi-checkbox type="checkbox" disabled />
-                Text
-              </label>
-            </tedi-col>
+        <tedi-col><strong>Focus</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" id="PrimaryFocus" />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" id="SecondaryFocus" />
+            Text
+          </label>
+        </tedi-col>
 
-            <tedi-col>Disabled selected</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="primary">
-                <input tedi-checkbox type="checkbox" checked disabled />
-                Text
-              </label>
-            </tedi-col>
-          </tedi-row>
-        </div>
-        <div>
-          <p tedi-text color="secondary" style="margin-bottom: 8px;">Secondary</p>
-          <tedi-row [cols]="2" [gapY]="3">
-            <tedi-col>Default</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="secondary">
-                <input tedi-checkbox type="checkbox" />
-                Text
-              </label>
-            </tedi-col>
+        <tedi-col><strong>Disabled</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" disabled />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" disabled />
+            Text
+          </label>
+        </tedi-col>
 
-            <tedi-col>Hover</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="secondary">
-                <input tedi-checkbox type="checkbox" id="SecondaryHover" />
-                Text
-              </label>
-            </tedi-col>
-
-            <tedi-col>Selected</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="secondary">
-                <input tedi-checkbox type="checkbox" checked />
-                Text
-              </label>
-            </tedi-col>
-
-            <tedi-col>Active</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="secondary">
-                <input tedi-checkbox type="checkbox" checked id="SecondaryActive" />
-                Text
-              </label>
-            </tedi-col>
-
-            <tedi-col>Focus</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="secondary">
-                <input tedi-checkbox type="checkbox" id="SecondaryFocus" />
-                Text
-              </label>
-            </tedi-col>
-
-            <tedi-col>Disabled</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="secondary">
-                <input tedi-checkbox type="checkbox" disabled />
-                Text
-              </label>
-            </tedi-col>
-
-            <tedi-col>Disabled selected</tedi-col>
-            <tedi-col>
-              <label tedi-checkbox-card variant="secondary">
-                <input tedi-checkbox type="checkbox" checked disabled />
-                Text
-              </label>
-            </tedi-col>
-          </tedi-row>
-        </div>
-      </div>
+        <tedi-col><strong>Disabled selected</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" checked disabled />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" checked disabled />
+            Text
+          </label>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };

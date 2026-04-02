@@ -6,8 +6,8 @@ label[tedi-checkbox-card] {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
-  min-height: var(--form-input-height);
-  padding: var(--form-checkbox-radio-card-checkbox-padding-y) var(--form-checkbox-radio-card-checkbox-padding-x);
+  min-height: var(--form-field-height);
+  padding: calc(var(--form-checkbox-radio-card-checkbox-padding-y) - var(--borders-01)) var(--form-checkbox-radio-card-checkbox-padding-x);
   font-family: var(--family-default);
   font-size: var(--body-regular-size);
   line-height: var(--body-regular-line-height);
@@ -33,7 +33,7 @@ label[tedi-checkbox-card] {
     align-items: center;
   }
 
-  > .tedi-feedback-text {
+  >.tedi-feedback-text {
     padding-left: calc(var(--form-checkbox-radio-size-responsive) + var(--form-checkbox-radio-card-inner-spacing));
     color: inherit;
   }
