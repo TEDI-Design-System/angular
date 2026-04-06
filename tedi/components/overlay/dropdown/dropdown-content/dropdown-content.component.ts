@@ -1,13 +1,15 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   contentChildren,
+  forwardRef,
   inject,
   input,
   ViewEncapsulation,
 } from "@angular/core";
 import { DropdownItemComponent } from "../dropdown-item/dropdown-item.component";
-import { DropdownComponent } from "../dropdown.component";
+import { DROPDOWN_API, DROPDOWN_CONTENT_API } from "../dropdown.tokens";
 
 export type DropdownRole = "menu" | "listbox";
 
@@ -20,8 +22,14 @@ export type DropdownRole = "menu" | "listbox";
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: "presentation",
-    "[attr.aria-labelledby]": "dropdown.containerId() + '_trigger'",
+    "[attr.aria-labelledby]": "containerId() + '_trigger'",
   },
+  providers: [
+    {
+      provide: DROPDOWN_CONTENT_API,
+      useExisting: forwardRef(() => DropdownContentComponent),
+    },
+  ],
 })
 export class DropdownContentComponent {
   /**
@@ -30,6 +38,7 @@ export class DropdownContentComponent {
    */
   readonly dropdownRole = input<DropdownRole>("menu");
 
-  readonly dropdown = inject(DropdownComponent);
+  private readonly dropdownApi = inject(DROPDOWN_API);
+  readonly containerId = computed(() => this.dropdownApi.containerId());
   readonly items = contentChildren(DropdownItemComponent);
 }
