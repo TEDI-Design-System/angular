@@ -315,7 +315,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       const disabledKey = this.disabledKey();
       const groupBy = this.groupBy();
 
-      const label = (itemRecord[bindLabel] as string) ?? String(item);
+      const label = String(itemRecord[bindLabel] ?? item);
       const value = bindValue ? itemRecord[bindValue] : item;
       const disabled = !!itemRecord[disabledKey];
       let group: string | undefined;
@@ -464,7 +464,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   });
 
   toggleIsOpen(close?: boolean): void {
-    if (this.disabled()) return;
+    if (this.disabled() && !close) return;
 
     if (close) {
       this.closeDropdown();
@@ -861,15 +861,21 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   }
 
   private toggleSelectAll(): void {
-    const enabledOptions = this.normalizedOptions().filter((o) => !o.disabled);
+    const options = this.normalizedOptions();
+    const enabledOptions = options.filter((o) => !o.disabled);
+    const compareWith = this.compareWith();
+    const disabledSelectedValues = this.selectedValues().filter((val) =>
+      options.some((o) => o.disabled && compareWith(val, o.value))
+    );
 
     if (this.allOptionsSelected()) {
-      this.selectedValues.set([]);
-      this.onChange([]);
+      this.selectedValues.set(disabledSelectedValues);
+      this.onChange(disabledSelectedValues);
     } else {
-      const allValues = enabledOptions.map((o) => o.value);
-      this.selectedValues.set(allValues);
-      this.onChange(allValues);
+      const allEnabledValues = enabledOptions.map((o) => o.value);
+      const mergedValues = [...disabledSelectedValues, ...allEnabledValues];
+      this.selectedValues.set(mergedValues);
+      this.onChange(mergedValues);
     }
   }
 
@@ -922,5 +928,8 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled.set(isDisabled);
+    if (isDisabled) {
+      this.closeDropdown();
+    }
   }
 }

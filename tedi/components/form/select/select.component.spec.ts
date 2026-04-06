@@ -243,6 +243,36 @@ describe("SelectComponent", () => {
 
       expect(select.isOpen()).toBe(false);
     });
+
+    it("should close dropdown when disabled via setDisabledState", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(true);
+
+      select.setDisabledState(true);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.isOpen()).toBe(false);
+    }));
+
+    it("should allow closing dropdown when disabled via toggleIsOpen", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(true);
+
+      select.setDisabledState(true);
+      fixture.detectChanges();
+      tick();
+
+      select.toggleIsOpen(true);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.isOpen()).toBe(false);
+    }));
   });
 
   describe("Single select", () => {
@@ -892,6 +922,21 @@ describe("SelectComponent", () => {
       expect(select.normalizedOptions()[0].value).toBe(1);
     });
 
+    it("should stringify non-string bindLabel values", () => {
+      host.items = [
+        { name: 100, id: 1 },
+        { name: true, id: 2 },
+        { name: null, id: 3 },
+      ];
+      host.bindLabel = "name";
+      host.bindValue = "id";
+      fixture.detectChanges();
+
+      expect(select.normalizedOptions()[0].label).toBe("100");
+      expect(select.normalizedOptions()[1].label).toBe("true");
+      expect(typeof select.normalizedOptions()[2].label).toBe("string");
+    });
+
     it("should use bindLabel for object items", () => {
       host.items = [{ name: "Apple" }, { name: "Banana" }];
       host.bindLabel = "name";
@@ -1108,6 +1153,59 @@ describe("SelectComponent", () => {
 
       expect(select.selectedValues()).toEqual([1, 3]);
       expect(select.selectedValues()).not.toContain(2);
+    }));
+
+    it("select all should preserve pre-selected disabled option values", fakeAsync(() => {
+      host.multiple = true;
+      host.showSelectAll = true;
+      fixture.detectChanges();
+
+      host.control.setValue([2]);
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const selectAllOption = getSelectAllOption();
+      selectAllOption.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toContain(2);
+      expect(select.selectedValues()).toContain(1);
+      expect(select.selectedValues()).toContain(3);
+    }));
+
+    it("deselect all should preserve pre-selected disabled option values", fakeAsync(() => {
+      host.multiple = true;
+      host.showSelectAll = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      // First select all to ensure all enabled options are selected
+      const selectAllOption = getSelectAllOption();
+      selectAllOption.click();
+      fixture.detectChanges();
+      tick();
+
+      // Manually add the disabled value to simulate a pre-selected disabled option
+      select.selectedValues.set([2, 1, 3]);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.allOptionsSelected()).toBe(true);
+
+      // Now deselect all — disabled value (2) should remain
+      selectAllOption.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual([2]);
     }));
   });
 
