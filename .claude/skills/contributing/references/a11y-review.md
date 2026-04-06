@@ -25,11 +25,11 @@ Check against WAI-ARIA Authoring Practices for the component pattern:
 
 ### 3. Keyboard Navigation
 
-- [ ] All interactive elements reachable via Tab
+- [ ] All standalone interactive elements reachable via Tab
+- [ ] Composite widgets (listboxes, menus, tabs, grids) are a single Tab stop with internal arrow-key navigation — do not require each child to be Tab-reachable ([APG keyboard patterns](https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/))
 - [ ] Logical tab order (no positive `tabindex` values)
 - [ ] Enter/Space activates buttons and controls
 - [ ] Escape closes overlays/popups and returns focus
-- [ ] Arrow keys navigate within composite widgets (menus, listboxes, tabs, grids)
 - [ ] Home/End navigate to first/last item where applicable
 - [ ] No keyboard traps — focus can always leave the component
 

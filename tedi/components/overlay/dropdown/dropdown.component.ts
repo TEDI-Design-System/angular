@@ -20,6 +20,7 @@ import {
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
 import { isPlatformBrowser } from "@angular/common";
+import { DROPDOWN_API } from "./dropdown.tokens";
 
 export type DropdownPosition = `${NgxFloatUiPlacements}`;
 
@@ -31,6 +32,12 @@ export type DropdownPosition = `${NgxFloatUiPlacements}`;
   styleUrl: "./dropdown.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {
+      provide: DROPDOWN_API,
+      useExisting: DropdownComponent,
+    },
+  ],
 })
 export class DropdownComponent implements AfterContentChecked, OnDestroy {
   /** Current value of dropdown (used with listbox) */

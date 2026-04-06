@@ -1,0 +1,9 @@
+<ng-content select="tedi-dropdown-item-value" />
+
+@if (!customItemValue()) {
+  <tedi-dropdown-item-value>
+    <tedi-dropdown-item-value-label>
+      <ng-content />
+    </tedi-dropdown-item-value-label>
+  </tedi-dropdown-item-value>
+}

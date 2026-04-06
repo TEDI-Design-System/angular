@@ -39,7 +39,7 @@ export const translationsMap = {
   },
   clear: {
     description: "For clearing a value",
-    components: ["TableFilter", "TextField"],
+    components: ["TableFilter", "TextField", "Select"],
     et: "Tühjenda",
     en: "Clear",
     ru: "Очистить",
@@ -247,24 +247,31 @@ export const translationsMap = {
   },
   "select.loading": {
     description: "Text when select options are loading",
-    components: ["select"],
+    components: ["Select"],
     et: "Laadimine...",
     en: "Loading...",
     ru: "Загрузка...",
   },
   "select.no-options": {
     description: "Text when select has no options",
-    components: ["select"],
+    components: ["Select"],
     et: "Valikud puuduvad",
     en: "No options",
     ru: "Нет вариантов",
   },
   "select.select-all": {
     description: "Text when select has 'select all' option",
-    components: ["select"],
+    components: ["Select"],
     et: "Vali kõik",
     en: "Select all",
     ru: "Выбрать все",
+  },
+  "select.search": {
+    description: "Placeholder text for search input in searchable select",
+    components: ["Select"],
+    et: "Otsi...",
+    en: "Search...",
+    ru: "Искать...",
   },
   "stepper.completed": {
     description:

@@ -5,7 +5,7 @@ description: >
   running tests and lint, WCAG accessibility audits, safe refactoring, and Storybook story creation.
   Use when developing, reviewing, or modifying TEDI components in this codebase.
 user-invocable: true
-argument-hint: [task description or component path]
+argument-hint: "task description or component path"
 ---
 
 # TEDI Angular Contributing
