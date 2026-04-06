@@ -34,7 +34,7 @@
 >
   @if (searchable()) {
     <div class="tedi-select__search-wrapper">
-      @if (!searchTerm() && selectedValues().length && !multiple()) {
+      @if (showSingleSelectedValue()) {
         <span class="tedi-select__selected-value">
           @if (valueTemplate(); as tpl) {
             @if (selectedOptions()[0]; as option) {
@@ -58,7 +58,7 @@
         #searchInput
         type="text"
         class="tedi-select__search-input"
-        [class.tedi-select__search-input--hidden]="!searchTerm() && selectedValues().length && !multiple()"
+        [class.tedi-select__search-input--hidden]="showSingleSelectedValue()"
         [placeholder]="selectedValues().length ? '' : placeholder()"
         [value]="searchTerm()"
         [disabled]="disabled()"

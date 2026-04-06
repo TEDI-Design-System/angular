@@ -385,6 +385,10 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     return this.selectedOptions().map((option) => option.label);
   });
 
+  showSingleSelectedValue = computed<boolean>(() => {
+    return !this.searchTerm() && !!this.selectedValues().length && !this.multiple();
+  });
+
   allOptionsSelected = computed<boolean>(() => {
     const enabledOptions = this.normalizedOptions().filter((o) => !o.disabled);
     const selected = this.selectedValues();
