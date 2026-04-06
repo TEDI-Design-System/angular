@@ -9,7 +9,11 @@ import {
   DropdownRole,
 } from "./dropdown-content/dropdown-content.component";
 import { DropdownItemComponent } from "./dropdown-item/dropdown-item.component";
+import { DropdownItemValueComponent } from "./dropdown-item-value/dropdown-item-value.component";
+import { DropdownItemValueLabelComponent } from "./dropdown-item-value/dropdown-item-value-label.component";
+import { DropdownItemValueMetaComponent } from "./dropdown-item-value/dropdown-item-value-meta.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
+import { IconComponent } from "../../base";
 
 const POSITIONS: DropdownPosition[] = [
   "auto",
@@ -44,7 +48,11 @@ export default {
         DropdownTriggerDirective,
         DropdownContentComponent,
         DropdownItemComponent,
+        DropdownItemValueComponent,
+        DropdownItemValueLabelComponent,
+        DropdownItemValueMetaComponent,
         ButtonComponent,
+        IconComponent,
       ],
     }),
   ],
@@ -156,7 +164,130 @@ export const Default: Story = {
         <tedi-dropdown-content [dropdownRole]="dropdownRole">
           <li tedi-dropdown-item>Access to health data</li>
           <li tedi-dropdown-item [disabled]="true">Declaration of intent</li>
-          <li tedi-dropdown-item [selected]="true">Contacts</li>
+          <li tedi-dropdown-item>Contacts</li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+export const WithMeta: Story = {
+  name: "With Meta Text",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+    appendTo: "body",
+    dropdownRole: "listbox",
+    ariaHasPopup: "listbox",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+        <button tedi-button tedi-dropdown-trigger [ariaHasPopup]="ariaHasPopup">
+          Select location
+        </button>
+        <tedi-dropdown-content [dropdownRole]="dropdownRole">
+          <li tedi-dropdown-item value="tallinn">
+            <tedi-dropdown-item-value>
+              <tedi-dropdown-item-value-label>Tallinn</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>3 timeslots</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </li>
+          <li tedi-dropdown-item value="tartu">
+            <tedi-dropdown-item-value>
+              <tedi-dropdown-item-value-label>Tartu</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>5 timeslots</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </li>
+          <li tedi-dropdown-item value="parnu">
+            <tedi-dropdown-item-value>
+              <tedi-dropdown-item-value-label>Pärnu</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>2 timeslots</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+export const WithIcons: Story = {
+  name: "With Icons",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+    appendTo: "body",
+    dropdownRole: "menu",
+    ariaHasPopup: "menu",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+        <button tedi-button tedi-dropdown-trigger [ariaHasPopup]="ariaHasPopup">
+          Actions
+        </button>
+        <tedi-dropdown-content [dropdownRole]="dropdownRole">
+          <li tedi-dropdown-item>
+            <tedi-dropdown-item-value>
+              <tedi-icon name="edit" [size]="18" />
+              <tedi-dropdown-item-value-label>Edit</tedi-dropdown-item-value-label>
+            </tedi-dropdown-item-value>
+          </li>
+          <li tedi-dropdown-item>
+            <tedi-dropdown-item-value>
+              <tedi-icon name="content_copy" [size]="18" />
+              <tedi-dropdown-item-value-label>Duplicate</tedi-dropdown-item-value-label>
+            </tedi-dropdown-item-value>
+          </li>
+          <li tedi-dropdown-item>
+            <tedi-dropdown-item-value>
+              <tedi-icon name="delete" [size]="18" />
+              <tedi-dropdown-item-value-label>Delete</tedi-dropdown-item-value-label>
+            </tedi-dropdown-item-value>
+          </li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+export const VerticalLayout: Story = {
+  name: "Vertical Layout",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+    appendTo: "body",
+    dropdownRole: "listbox",
+    ariaHasPopup: "listbox",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+        <button tedi-button tedi-dropdown-trigger [ariaHasPopup]="ariaHasPopup">
+          Select access level
+        </button>
+        <tedi-dropdown-content [dropdownRole]="dropdownRole">
+          <li tedi-dropdown-item value="health">
+            <tedi-dropdown-item-value layout="vertical">
+              <tedi-dropdown-item-value-label>Access to health data</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>Doctors will be able to see your health data</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </li>
+          <li tedi-dropdown-item value="medications">
+            <tedi-dropdown-item-value layout="vertical">
+              <tedi-dropdown-item-value-label>Access to medications</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>Doctors will be able to see your medications</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </li>
+          <li tedi-dropdown-item value="all">
+            <tedi-dropdown-item-value layout="vertical">
+              <tedi-dropdown-item-value-label>Access to all</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>Doctors will be able to see all your information</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </li>
         </tedi-dropdown-content>
       </tedi-dropdown>
     `,

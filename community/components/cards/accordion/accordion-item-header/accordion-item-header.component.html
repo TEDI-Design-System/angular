@@ -8,15 +8,16 @@
   [attr.aria-expanded]="opened()"
   [attr.aria-controls]="contentId()"
   (click)="toggle()"
+  [disabled]="!clickable()"
 >
-  <ng-content></ng-content>
-  @if (indicator()) {
-    <tedi-icon
-      name="keyboard_arrow_down"
-      class="tedi-accordion-item-header__indicator"
-      [size]="18"
-      [color]="indicatorIconColor()"
-    />
+  <div class="tedi-accordion-item-header__title">
+    @if (indicator() && indicatorPosition() === "start") {
+      <ng-container [ngTemplateOutlet]="indicatorIcon" />
+    }
+    <ng-content></ng-content>
+  </div>
+  @if (indicator() && indicatorPosition() === "end") {
+    <ng-container [ngTemplateOutlet]="indicatorIcon" />
   }
   @if (toggleButtonText()) {
     <span
@@ -28,10 +29,17 @@
       <tedi-icon
         name="keyboard_arrow_down"
         class="tedi-accordion-item-header__indicator"
-        [size]="16"
         color="brand"
       />
     </span>
   }
   <ng-content select="[tedi-accordion-header-end]"></ng-content>
 </button>
+
+<ng-template #indicatorIcon
+  ><tedi-icon
+    name="keyboard_arrow_down"
+    class="tedi-accordion-item-header__indicator"
+    [size]="24"
+    [color]="indicatorIconColor()"
+/></ng-template>

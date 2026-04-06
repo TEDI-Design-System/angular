@@ -15,6 +15,11 @@ import {
 const meta: Meta<MultiselectComponent> = {
   title: "Community/Form/Select/Multiselect",
   component: MultiselectComponent,
+  parameters: {
+    status: {
+      type: ["existsInTediReady", "deprecated"],
+    },
+  },
   decorators: [
     moduleMetadata({
       imports: [

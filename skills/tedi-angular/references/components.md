@@ -80,9 +80,16 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 **Inputs:**
 - `title: string = ""`
 - `titleLayout: "hug" | "fill" = "hug"`
-- `defaultExpanded: boolean = false`
+- `headerClickable: boolean = true` — whether clicking header toggles expand
+- `showSeparateTitle: boolean = true`
+- `openLabel: string = "open"` — label for expand action
+- `closeLabel: string = "close"` — label for collapse action
+- `showExpandLabel: boolean = true` — show open/close label text
+- `showDefaultExpandAction: boolean = true` — show default expand/collapse button
 - `expandActionPosition: "start" | "end" = "end"`
+- `defaultExpanded: boolean = false`
 - `description: string`
+- `descriptionPosition: "start" | "end" | "both" = "start"`
 - `showIconCard: boolean = false`
 - `selected: boolean = false`
 - `headerClass: string | null`
@@ -256,9 +263,12 @@ Composed of sub-components:
 **Selector:** `tedi-date-picker`
 **Model:** `selected: Date | null`, `month: Date`
 **Inputs:**
-- `disabled: DatePickerMatcher | null` — function `(date: Date) => boolean`
+- `disabled: DatePickerMatcher | DatePickerMatcher[] | null` — function or array of functions `(date: Date) => boolean`
+- `showNavigation: boolean = true` — show month/year navigation
 - `monthMode: DatePickerSelectorMode = "dropdown"`
 - `yearMode: DatePickerSelectorMode = "dropdown"`
+- `startYear: number | null = null` — earliest selectable year
+- `endYear: number | null = null` — latest selectable year
 - `allowManualInput: boolean = true`
 - `showWeekNumbers: boolean = false`
 - `closeOnSelect: boolean = true`
@@ -269,6 +279,72 @@ Composed of sub-components:
 
 ```html
 <tedi-date-picker [formControl]="dateControl" [showWeekNumbers]="true" />
+```
+
+### Select
+**Selector:** `tedi-select`
+**Inputs:**
+- `inputId: string` (required) — unique ID for label association and accessibility
+- `label: string` — label text above the select
+- `required: boolean = false`
+- `placeholder: string = ""`
+- `state: InputState = "default"` — "default", "error", "valid"
+- `size: SelectInputSize = "default"` — "default" or "small"
+- `clearable: boolean = false` — show clear button
+- `allowMultiple: boolean = false` — enable multiselect
+- `showSelectAll: boolean = false` — show "Select All" in multiselect
+- `selectableGroups: boolean = false` — make group headers selectable in multiselect
+- `searchable: boolean = false` — enable search input
+- `options: T[] = []` — array of options (objects or primitives)
+- `bindLabel: string = "label"` — property name for display label
+- `bindValue: string | undefined` — property name for value (whole object when undefined)
+- `groupBy: string | ((item: T) => string)` — group options by property or function
+- `isTagRemovable: boolean = false` — allow removing tags in multiselect
+- `multiRow: boolean = false` — wrap tags to multiple rows
+- `disabledKey: string = "disabled"` — property name for disabled state on option objects
+- `noOptionsMessage: string` — custom text when no options match search
+- `dropdownType: "menu" | "grid" = "menu"` — "grid" for swatch-type selects
+- `dropdownWidthRef: ElementRef | null` — element to match dropdown width to
+- `feedbackText: { text, type, position }` — feedback text config
+- `maxDropdownHeight: number` — dropdown height in pixels
+- `compareWith: (a, b) => boolean` — custom equality function
+
+Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multiselect).
+
+```html
+<!-- Single select -->
+<tedi-select
+  inputId="city"
+  label="City"
+  [options]="cities"
+  bindLabel="name"
+  bindValue="id"
+  [formControl]="cityControl"
+/>
+
+<!-- Multiselect with search -->
+<tedi-select
+  inputId="tags"
+  label="Tags"
+  [options]="tags"
+  [allowMultiple]="true"
+  [searchable]="true"
+  [clearable]="true"
+  [formControl]="tagsControl"
+/>
+```
+
+**Custom option templates** via `tediSelectOption` and `tediSelectValue` directives:
+
+```html
+<tedi-select [options]="items" bindLabel="name" bindValue="id">
+  <ng-template tediSelectOption let-item let-selected="selected">
+    <tedi-dropdown-item-value type="checkbox" [selected]="selected">
+      <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
+      <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
+    </tedi-dropdown-item-value>
+  </ng-template>
+</tedi-select>
 ```
 
 ### FormField
@@ -447,10 +523,11 @@ Composed of sub-components:
 **Inputs:**
 - `title: string`
 - `type: AlertType = "info"`
-- `icon: string`
+- `icon: string = ""`
 - `showClose: boolean = false`
 - `role: AlertRole = "alert"`
 - `variant: AlertVariant = "default"`
+- `titleElement: AlertTitleType = "h2"` — HTML tag for the title
 - `closeDelay: number = 0`
 **Outputs:**
 - `closeClick: void`
@@ -634,12 +711,15 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 ### StatusBadge
 **Selector:** `tedi-status-badge`
 **Inputs:**
-- `text: string`
+- `text: string = ""`
 - `color: StatusBadgeColor = "neutral"`
 - `variant: StatusBadgeVariant = "filled"`
 - `size: StatusBadgeSize = "default"`
 - `status: StatusBadgeStatus`
-- `icon: string`
+- `icon: string = ""`
+- `class: string` — custom CSS class
+- `title: string` — tooltip/abbreviation title
+- `role: string` — ARIA role
 
 ```html
 <tedi-status-badge text="Active" color="success" status="positive" />

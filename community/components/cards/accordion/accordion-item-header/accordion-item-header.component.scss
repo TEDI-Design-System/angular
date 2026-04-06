@@ -3,16 +3,22 @@
 }
 
 .tedi-accordion-item-header {
-  cursor: pointer;
   font-size: inherit;
   display: flex;
   gap: var(--_accordion-header-spacing);
   align-items: center;
-  justify-content: space-between;
   text-align: start;
 
-  [tedi-accordion-header-end] {
-    margin-left: auto;
+  &:not([disabled]) {
+    cursor: pointer;
+  }
+
+  &__title {
+    flex-grow: 1;
+    display: flex;
+    gap: var(--_accordion-header-title-spacing);
+    color: var(--_accordion-title-color);
+    align-items: center;
   }
 
   &__indicator {
