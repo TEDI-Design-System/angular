@@ -32,7 +32,6 @@ import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item
 import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
 import {
   SelectOptionTemplateDirective,
-  SelectLabelTemplateDirective,
   SelectValueTemplateDirective,
   SelectOptionContext,
   SelectValueContext,
@@ -57,8 +56,8 @@ export type GroupByFn<T = unknown> = (item: T) => string | undefined;
 export type CompareWithFn<T = unknown> = (a: T, b: T) => boolean;
 
 export enum SpecialOptionControls {
-  SELECT_ALL = "SELECT_ALL",
-  SELECT_GROUP = "SELECT_GROUP_",
+  SELECT_ALL = "\0SELECT_ALL",
+  SELECT_GROUP = "\0SELECT_GROUP_",
 }
 
 @Component({
@@ -294,7 +293,6 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   // Template queries for custom rendering
   optionTemplate = contentChild(SelectOptionTemplateDirective);
-  labelTemplate = contentChild(SelectLabelTemplateDirective);
   valueTemplate = contentChild(SelectValueTemplateDirective);
 
   normalizedOptions = computed<SelectOption<T>[]>(() => {
@@ -626,6 +624,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
     if (selectAllIndex !== -1) {
       this.toggleSelectAll();
+      this.onTouched();
       return;
     }
 
@@ -635,6 +634,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
         ""
       );
       this.toggleGroupSelection(groupLabel);
+      this.onTouched();
       return;
     }
 

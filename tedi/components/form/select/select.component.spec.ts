@@ -3,9 +3,8 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed, fakeAsync, tick } from "@angular/core/testing";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
-import { SelectComponent, SelectInputSize, SelectOption } from "./select.component";
+import { SelectComponent, SelectInputSize, SelectOption, SpecialOptionControls } from "./select.component";
 import {
-  SelectLabelTemplateDirective,
   SelectOptionTemplateDirective,
   SelectValueTemplateDirective,
 } from "./select-templates.directive";
@@ -650,7 +649,8 @@ describe("SelectComponent", () => {
 
       expect(select.isOpen()).toBe(true);
 
-      select.toggleIsOpen(true);
+      const listbox = document.querySelector("[cdkListbox]") as HTMLElement;
+      listbox.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
       fixture.detectChanges();
       tick();
 
@@ -765,13 +765,28 @@ describe("SelectComponent", () => {
     }));
 
     it("listbox should have aria-activedescendant", fakeAsync(() => {
-      getTrigger().click();
+      const trigger = getTrigger();
+      trigger.click();
       fixture.detectChanges();
       tick();
 
       const listbox = document.querySelector("[cdkListbox]") as HTMLElement;
       expect(listbox).toBeTruthy();
       expect(listbox.getAttribute("role")).toBe("listbox");
+
+      // Trigger keyboard navigation via CDK's internal handler to set aria-activedescendant
+      (select as any).cdkListboxRef()._handleKeydown(
+        new KeyboardEvent("keydown", { key: "ArrowDown", keyCode: 40, bubbles: true })
+      );
+      fixture.detectChanges();
+      tick();
+
+      const activeDescendantId = listbox.getAttribute("aria-activedescendant");
+      expect(activeDescendantId).toBeTruthy();
+
+      const activeElement = document.querySelector(`[id="${activeDescendantId}"]`);
+      expect(activeElement).toBeTruthy();
+      expect(activeElement!.getAttribute("role")).toBe("option");
     }));
 
     it("should mark active option on navigation", fakeAsync(() => {
@@ -1537,7 +1552,7 @@ describe("SelectComponent", () => {
         fixture.detectChanges();
         tick();
 
-        select.handleValueChange({ value: ["SELECT_GROUP_A"] });
+        select.handleValueChange({ value: [SpecialOptionControls.SELECT_GROUP + "A"] });
         fixture.detectChanges();
         tick();
 
@@ -1745,12 +1760,6 @@ describe("SelectComponent", () => {
     it("SelectOptionTemplateDirective ngTemplateContextGuard should return true", () => {
       expect(
         SelectOptionTemplateDirective.ngTemplateContextGuard({} as SelectOptionTemplateDirective, {})
-      ).toBe(true);
-    });
-
-    it("SelectLabelTemplateDirective ngTemplateContextGuard should return true", () => {
-      expect(
-        SelectLabelTemplateDirective.ngTemplateContextGuard({} as SelectLabelTemplateDirective, {})
       ).toBe(true);
     });
 

@@ -17,18 +17,6 @@ export interface SelectOptionContext<T = unknown> {
 }
 
 /**
- * Context provided to custom label templates (for displaying selected value).
- */
-export interface SelectLabelContext<T = unknown> {
-  /** The selected item (single select) or items (multiple select) */
-  $implicit: T | T[];
-  /** The selected item(s) */
-  item: T | T[];
-  /** Function to clear a specific item (for multiple select) */
-  clear: (item: T) => void;
-}
-
-/**
  * Context provided to custom value templates (for displaying selected value in trigger).
  */
 export interface SelectValueContext<T = unknown> {
@@ -66,33 +54,6 @@ export class SelectOptionTemplateDirective<T = unknown> {
     _dir: SelectOptionTemplateDirective<T>,
     ctx: unknown
   ): ctx is SelectOptionContext<T> {
-    return true;
-  }
-}
-
-/**
- * Directive for custom label template rendering (selected value display).
- *
- * @example
- * ```html
- * <tedi-select [options]="options">
- *   <ng-template tediSelectLabel let-item>
- *     <span class="custom-label">{{ item.name }} ({{ item.code }})</span>
- *   </ng-template>
- * </tedi-select>
- * ```
- */
-@Directive({
-  selector: "[tediSelectLabel]",
-  standalone: true,
-})
-export class SelectLabelTemplateDirective<T = unknown> {
-  template = inject<TemplateRef<SelectLabelContext<T>>>(TemplateRef);
-
-  static ngTemplateContextGuard<T>(
-    _dir: SelectLabelTemplateDirective<T>,
-    ctx: unknown
-  ): ctx is SelectLabelContext<T> {
     return true;
   }
 }

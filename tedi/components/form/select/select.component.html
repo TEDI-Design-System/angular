@@ -24,7 +24,7 @@
   [attr.aria-haspopup]="searchable() ? null : 'listbox'"
   [attr.aria-expanded]="searchable() ? null : isOpen()"
   [attr.aria-controls]="searchable() ? null : listboxId()"
-  [attr.aria-labelledby]="searchable() ? null : labelId()"
+  [attr.aria-labelledby]="!searchable() && label() ? labelId() : null"
   [tabindex]="searchable() || disabled() ? -1 : 0"
   (click)="onTriggerClick()"
   (keydown.enter)="onTriggerEnter()"
@@ -37,10 +37,12 @@
       @if (!searchTerm() && selectedValues().length && !multiple()) {
         <span class="tedi-select__selected-value">
           @if (valueTemplate(); as tpl) {
-            <ng-container
-              [ngTemplateOutlet]="tpl.template"
-              [ngTemplateOutletContext]="getValueContext(selectedOptions()[0])"
-            />
+            @if (selectedOptions()[0]; as option) {
+              <ng-container
+                [ngTemplateOutlet]="tpl.template"
+                [ngTemplateOutletContext]="getValueContext(option)"
+              />
+            }
           } @else {
             {{ selectedLabels().join(", ") }}
           }
@@ -69,7 +71,7 @@
         aria-autocomplete="list"
         [attr.aria-expanded]="isOpen()"
         [attr.aria-controls]="listboxId()"
-        [attr.aria-labelledby]="labelId()"
+        [attr.aria-labelledby]="label() ? labelId() : null"
       />
     </div>
   } @else {
@@ -82,10 +84,12 @@
           />
         } @else {
           @if (valueTemplate(); as tpl) {
-            <ng-container
-              [ngTemplateOutlet]="tpl.template"
-              [ngTemplateOutletContext]="getValueContext(selectedOptions()[0])"
-            />
+            @if (selectedOptions()[0]; as option) {
+              <ng-container
+                [ngTemplateOutlet]="tpl.template"
+                [ngTemplateOutletContext]="getValueContext(option)"
+              />
+            }
           } @else {
             {{ selectedLabels().join(", ") }}
           }
@@ -109,7 +113,7 @@
       (click)="clear($event)"
       (keydown.enter)="clear($event)"
       (keydown.space)="clear($event)"
-      [attr.aria-describedby]="labelId()"
+      [attr.aria-describedby]="label() ? labelId() : null"
     ></button>
   }
 
