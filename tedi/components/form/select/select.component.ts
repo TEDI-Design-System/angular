@@ -442,10 +442,12 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   constructor() {
     /**
-     * Prevent CDK from resetting active item to the first selected option
-     * whenever [cdkListboxValue] changes in multiselect mode. CDK calls
+     * Workaround: Prevent CDK from resetting active item to the first selected
+     * option whenever [cdkListboxValue] changes in multiselect mode. CDK calls
      * _setNextFocusToSelectedOption inside _setSelection, which moves focus
      * away from the user's current position after each selection toggle.
+     * Tested against @angular/cdk 19. Revisit when CDK exposes a public API
+     * to control this behavior.
      */
     effect(() => {
       const listbox = this.cdkListboxRef();

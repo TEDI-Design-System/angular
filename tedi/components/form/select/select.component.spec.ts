@@ -956,7 +956,7 @@ describe("SelectComponent", () => {
       expect(select.isOpen()).toBe(false);
     }));
 
-    it("should not close when clicking inside host element", fakeAsync(() => {
+    it("should close when clicking outside host element", fakeAsync(() => {
       getTrigger().click();
       fixture.detectChanges();
       tick();
