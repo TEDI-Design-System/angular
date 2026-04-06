@@ -18,7 +18,7 @@ import { InputState } from "../form-field/form-field.component";
       [inputId]="inputId"
       [label]="label"
       [options]="items"
-      [multiple]="multiple"
+      [allowMultiple]="allowMultiple"
       [searchable]="searchable"
       [clearable]="clearable"
       [showSelectAll]="showSelectAll"
@@ -59,7 +59,7 @@ class TestHostComponent {
   inputId = "test-select";
   label = "Test Label";
   items: unknown[] = ["Option 1", "Option 2", "Option 3"];
-  multiple = false;
+  allowMultiple = false;
   searchable = false;
   clearable = true;
   showSelectAll = false;
@@ -171,7 +171,7 @@ describe("SelectComponent", () => {
     });
 
     it("should apply multiselect class when multiple=true", () => {
-      host.multiple = true;
+      host.allowMultiple =true;
       fixture.detectChanges();
       const selectEl = fixture.debugElement.query(By.directive(SelectComponent)).nativeElement;
       expect(selectEl.classList).toContain("tedi-select--multiselect");
@@ -185,7 +185,7 @@ describe("SelectComponent", () => {
     });
 
     it("writeValue should set array of values for multiple", () => {
-      host.multiple = true;
+      host.allowMultiple =true;
       fixture.detectChanges();
       select.writeValue(["Option 1", "Option 2"]);
       expect(select.selectedValues()).toEqual(["Option 1", "Option 2"]);
@@ -198,7 +198,7 @@ describe("SelectComponent", () => {
     });
 
     it("writeValue should clear selection on empty array for multiple", () => {
-      host.multiple = true;
+      host.allowMultiple =true;
       fixture.detectChanges();
       select.writeValue(["Option 1"]);
       select.writeValue([]);
@@ -369,7 +369,7 @@ describe("SelectComponent", () => {
 
   describe("Multiple select", () => {
     beforeEach(() => {
-      host.multiple = true;
+      host.allowMultiple =true;
       fixture.detectChanges();
     });
 
@@ -568,7 +568,7 @@ describe("SelectComponent", () => {
     }));
 
     it("should select group options when selectableGroups=true", fakeAsync(() => {
-      host.multiple = true;
+      host.allowMultiple =true;
       host.selectableGroups = true;
       fixture.detectChanges();
 
@@ -589,7 +589,7 @@ describe("SelectComponent", () => {
 
   describe("Select all", () => {
     beforeEach(() => {
-      host.multiple = true;
+      host.allowMultiple =true;
       host.showSelectAll = true;
       fixture.detectChanges();
     });
@@ -1049,7 +1049,7 @@ describe("SelectComponent", () => {
     });
 
     it("visibleSelectedValues should only include filtered options", fakeAsync(() => {
-      host.multiple = true;
+      host.allowMultiple =true;
       host.searchable = true;
       fixture.detectChanges();
       tick();
@@ -1084,7 +1084,7 @@ describe("SelectComponent", () => {
     });
 
     it("hiddenTagsCount should return correct count", fakeAsync(() => {
-      host.multiple = true;
+      host.allowMultiple =true;
       fixture.detectChanges();
       tick();
 
@@ -1138,7 +1138,7 @@ describe("SelectComponent", () => {
     }));
 
     it("select all should skip disabled options", fakeAsync(() => {
-      host.multiple = true;
+      host.allowMultiple =true;
       host.showSelectAll = true;
       fixture.detectChanges();
 
@@ -1156,7 +1156,7 @@ describe("SelectComponent", () => {
     }));
 
     it("select all should preserve pre-selected disabled option values", fakeAsync(() => {
-      host.multiple = true;
+      host.allowMultiple =true;
       host.showSelectAll = true;
       fixture.detectChanges();
 
@@ -1179,7 +1179,7 @@ describe("SelectComponent", () => {
     }));
 
     it("deselect all should preserve pre-selected disabled option values", fakeAsync(() => {
-      host.multiple = true;
+      host.allowMultiple =true;
       host.showSelectAll = true;
       fixture.detectChanges();
 
@@ -1234,7 +1234,7 @@ describe("SelectComponent", () => {
       host.bindLabel = "name";
       host.bindValue = "id";
       host.groupBy = "group";
-      host.multiple = true;
+      host.allowMultiple =true;
       fixture.detectChanges();
       tick();
 
@@ -1253,7 +1253,7 @@ describe("SelectComponent", () => {
       host.bindLabel = "name";
       host.bindValue = "id";
       host.groupBy = "group";
-      host.multiple = true;
+      host.allowMultiple =true;
       fixture.detectChanges();
       tick();
 
@@ -1273,7 +1273,7 @@ describe("SelectComponent", () => {
       host.bindLabel = "name";
       host.bindValue = "id";
       host.groupBy = "group";
-      host.multiple = true;
+      host.allowMultiple =true;
       fixture.detectChanges();
       tick();
 
@@ -1292,7 +1292,7 @@ describe("SelectComponent", () => {
       host.bindLabel = "name";
       host.bindValue = "id";
       host.groupBy = "group";
-      host.multiple = true;
+      host.allowMultiple =true;
       fixture.detectChanges();
       tick();
 
@@ -1311,7 +1311,7 @@ describe("SelectComponent", () => {
       host.bindLabel = "name";
       host.bindValue = "id";
       host.groupBy = "group";
-      host.multiple = true;
+      host.allowMultiple =true;
       fixture.detectChanges();
       tick();
 
@@ -1329,7 +1329,7 @@ describe("SelectComponent", () => {
       host.bindLabel = "name";
       host.bindValue = "id";
       host.groupBy = "group";
-      host.multiple = true;
+      host.allowMultiple =true;
       fixture.detectChanges();
       tick();
 
@@ -1358,7 +1358,7 @@ describe("SelectComponent", () => {
 
     describe("Window resize", () => {
       it("should reset visibleTagsCount on resize for single-row multiselect", () => {
-        host.multiple = true;
+        host.allowMultiple =true;
         host.multiRow = false;
         fixture.detectChanges();
 
@@ -1373,7 +1373,7 @@ describe("SelectComponent", () => {
       });
 
       it("should not reset visibleTagsCount when multiRow is true", () => {
-        host.multiple = true;
+        host.allowMultiple =true;
         host.multiRow = true;
         fixture.detectChanges();
 
@@ -1465,7 +1465,7 @@ describe("SelectComponent", () => {
 
     describe("Keyboard selection via Enter", () => {
       it("should select option via keyboard navigation in multiselect", fakeAsync(() => {
-        host.multiple = true;
+        host.allowMultiple =true;
         host.searchable = true;
         fixture.detectChanges();
         tick();
@@ -1490,7 +1490,7 @@ describe("SelectComponent", () => {
 
     describe("Multiselect searchable focus", () => {
       it("should focus search input after selection in searchable multiselect", fakeAsync(() => {
-        host.multiple = true;
+        host.allowMultiple =true;
         host.searchable = true;
         fixture.detectChanges();
         tick();
@@ -1568,7 +1568,7 @@ describe("SelectComponent", () => {
         host.bindLabel = "name";
         host.bindValue = "id";
         host.groupBy = "category";
-        host.multiple = true;
+        host.allowMultiple =true;
         host.selectableGroups = true;
         fixture.detectChanges();
         tick();
@@ -1592,7 +1592,7 @@ describe("SelectComponent", () => {
 
     describe("Active option tracking", () => {
       it("should show active state on navigated option", fakeAsync(() => {
-        host.multiple = true;
+        host.allowMultiple =true;
         host.showSelectAll = true;
         host.searchable = true;
         fixture.detectChanges();
@@ -1614,7 +1614,7 @@ describe("SelectComponent", () => {
 
     describe("deselect when disabled", () => {
       it("should not deselect when component is disabled", fakeAsync(() => {
-        host.multiple = true;
+        host.allowMultiple =true;
         host.clearableTags = true;
         fixture.detectChanges();
         tick();
@@ -1645,7 +1645,7 @@ describe("SelectComponent", () => {
         host.bindLabel = "name";
         host.bindValue = "id";
         host.groupBy = "category";
-        host.multiple = true;
+        host.allowMultiple =true;
         host.selectableGroups = true;
         fixture.detectChanges();
         tick();
@@ -1878,7 +1878,7 @@ describe("SelectComponent", () => {
     });
 
     it("should calculate visible tags for single-row multiselect", fakeAsync(() => {
-      host.multiple = true;
+      host.allowMultiple =true;
       host.multiRow = false;
       host.clearableTags = true;
       host.items = ["Tag 1", "Tag 2", "Tag 3", "Tag 4", "Tag 5"];
@@ -1902,7 +1902,7 @@ describe("SelectComponent", () => {
     }));
 
     it("should show at least one tag even if none fit", fakeAsync(() => {
-      host.multiple = true;
+      host.allowMultiple =true;
       host.multiRow = false;
       host.clearableTags = true;
       host.items = ["Tag 1", "Tag 2"];

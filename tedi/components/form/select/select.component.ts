@@ -83,7 +83,7 @@ export enum SpecialOptionControls {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: "tedi-select",
-    "[class.tedi-select--multiselect]": "multiple()",
+    "[class.tedi-select--multiselect]": "allowMultiple()",
   },
   providers: [
     {
@@ -169,7 +169,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * Whether multiple items can be selected.
    * @default false
    */
-  multiple = input<boolean>(false);
+  allowMultiple = input<boolean>(false);
 
   /**
    * Property name or function used to group options.
@@ -386,7 +386,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   });
 
   showSingleSelectedValue = computed<boolean>(() => {
-    return !this.searchTerm() && !!this.selectedValues().length && !this.multiple();
+    return !this.searchTerm() && !!this.selectedValues().length && !this.allowMultiple();
   });
 
   allOptionsSelected = computed<boolean>(() => {
@@ -407,7 +407,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   }
 
   ngAfterViewChecked(): void {
-    if (this.multiple() && !this.multiRow()) {
+    if (this.allowMultiple() && !this.multiRow()) {
       this.calculateVisibleTags();
     }
   }
@@ -415,7 +415,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   @HostListener("window:resize")
   onWindowResize(): void {
     this.setDropdownWidth();
-    if (this.multiple() && !this.multiRow()) {
+    if (this.allowMultiple() && !this.multiRow()) {
       this.visibleTagsCount.set(null);
     }
   }
@@ -455,7 +455,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
      */
     effect(() => {
       const listbox = this.cdkListboxRef();
-      if (listbox && this.multiple()) {
+      if (listbox && this.allowMultiple()) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (listbox as any)._setNextFocusToSelectedOption = () => { };
       }
@@ -644,7 +644,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       return;
     }
 
-    if (this.multiple()) {
+    if (this.allowMultiple()) {
       let newSelection: unknown[];
       if (this.searchable() && this.searchTerm().trim()) {
         const filtered = this.filteredOptions();
@@ -678,7 +678,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     event.stopImmediatePropagation();
 
     this.selectedValues.set([]);
-    if (this.multiple()) {
+    if (this.allowMultiple()) {
       this.onChange([]);
     } else {
       this.onChange(null);
@@ -915,7 +915,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   onTouched: () => void = () => { };
 
   writeValue(value: unknown): void {
-    if (this.multiple()) {
+    if (this.allowMultiple()) {
       this.selectedValues.set(Array.isArray(value) ? value : []);
     } else {
       this.selectedValues.set(value != null ? [value] : []);

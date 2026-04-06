@@ -48,7 +48,7 @@
           }
         </span>
       }
-      @if (multiple() && selectedValues().length) {
+      @if (allowMultiple() && selectedValues().length) {
         <ng-container
           [ngTemplateOutlet]="multiselectTags"
           [ngTemplateOutletContext]="{ $implicit: multiselectContainerRef }"
@@ -77,7 +77,7 @@
   } @else {
     <span class="tedi-select__label">
       @if (selectedValues().length) {
-        @if (multiple()) {
+        @if (allowMultiple()) {
           <ng-container
             [ngTemplateOutlet]="multiselectTags"
             [ngTemplateOutletContext]="{ $implicit: multiselectContainerRef }"
@@ -178,10 +178,10 @@
     <ul
       [id]="listboxId()"
       class="tedi-select__options"
-      [class.tedi-select__options--multiselect]="multiple()"
+      [class.tedi-select__options--multiselect]="allowMultiple()"
       [class.tedi-select__options--swatch-grid]="dropdownType() === 'grid'"
       cdkListbox
-      [cdkListboxMultiple]="multiple()"
+      [cdkListboxMultiple]="allowMultiple()"
       [cdkListboxValue]="visibleSelectedValues()"
       [cdkListboxNavigatesDisabledOptions]="false"
       [cdkListboxUseActiveDescendant]="true"
@@ -191,7 +191,7 @@
       #listbox="cdkListbox"
     >
       @if (filteredOptions().length) {
-        @if (multiple() && showSelectAll()) {
+        @if (allowMultiple() && showSelectAll()) {
           <li
             class="tedi-dropdown-item"
             [cdkOption]="SpecialOptionControls.SELECT_ALL"
@@ -204,7 +204,7 @@
 
         @for (group of optionGroups(); track group.label) {
           @if (group.label.length > 0) {
-            @if (multiple() && selectableGroups()) {
+            @if (allowMultiple() && selectableGroups()) {
               <li
                 class="tedi-dropdown-item tedi-select__group-name tedi-select__group-name--selectable"
                 [cdkOption]="SpecialOptionControls.SELECT_GROUP + group.label"
@@ -225,7 +225,7 @@
           @for (option of group.options; track option.value; let i = $index) {
             <li
               class="tedi-dropdown-item"
-              [class.tedi-dropdown-item--selected]="!multiple() && isOptionSelected(option.value)"
+              [class.tedi-dropdown-item--selected]="!allowMultiple() && isOptionSelected(option.value)"
               [class.tedi-dropdown-item--disabled]="option.disabled"
               [class.tedi-dropdown-item--custom]="optionTemplate()"
               [cdkOption]="option.value"
@@ -238,7 +238,7 @@
                 />
               } @else {
                 <tedi-dropdown-item-value
-                  [type]="multiple() ? 'checkbox' : 'default'"
+                  [type]="allowMultiple() ? 'checkbox' : 'default'"
                   [selected]="isOptionSelected(option.value)"
                   [disabled]="!!option.disabled"
                 >

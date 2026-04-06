@@ -25,11 +25,6 @@ import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/v
 import { Component, inject } from "@angular/core";
 import { ToastService } from "../../../services/toast/toast.service";
 
-/**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.38.59?node-id=4449-69807&m=dev" target="_blank">Figma ↗</a><br />
- * <a href="https://www.tedi.ee/1ee8444b7/p/97a0a6-select" target="_blank">Zeroheight ↗</a>
- */
-
 const simpleOptions = [
   { value: "tallinn", label: "Tallinn" },
   { value: "narva", label: "Narva" },
@@ -39,6 +34,10 @@ const simpleOptions = [
   { value: "haapsalu", label: "Haapsalu" },
 ];
 
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.38.59?node-id=4449-69807&m=dev" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.tedi.ee/1ee8444b7/p/97a0a6-select" target="_blank">Zeroheight ↗</a>
+ */
 const meta: Meta<SelectComponent> = {
   title: "TEDI-Ready/Components/Form/Select",
   component: SelectComponent,
@@ -64,25 +63,69 @@ const meta: Meta<SelectComponent> = {
     }),
   ],
   argTypes: {
-    inputId: { control: "text" },
-    label: { control: "text" },
-    required: { control: "boolean" },
-    placeholder: { control: "text" },
-    state: { control: "radio", options: ["error", "valid", "default"] },
-    size: { control: "radio", options: ["small", "default"] },
-    clearable: { control: "boolean" },
-    multiple: { control: "boolean" },
-    showSelectAll: { control: "boolean" },
-    selectableGroups: { control: "boolean" },
-    isTagRemovable: { control: "boolean" },
-    multiRow: { control: "boolean" },
-    searchable: { control: "boolean" },
+    inputId: {
+      control: "text",
+      description: "Unique identifier for the select input element. Used for label association and accessibility.",
+    },
+    label: {
+      control: "text",
+      description: "Label text displayed above the select.",
+    },
+    required: {
+      control: "boolean",
+      description: "Whether the field is required.",
+    },
+    placeholder: {
+      control: "text",
+      description: "Placeholder text shown when no value is selected.",
+    },
+    state: {
+      control: "radio",
+      options: ["error", "valid", "default"],
+      description: "Visual state of the input.",
+    },
+    size: {
+      control: "radio",
+      options: ["small", "default"],
+      description: "Size variant of the select.",
+    },
+    clearable: {
+      control: "boolean",
+      description: "Whether to show a clear button when a value is selected.",
+    },
+    allowMultiple: {
+      control: "boolean",
+      description: "Whether multiple items can be selected.",
+    },
+    showSelectAll: {
+      control: "boolean",
+      description: "Whether to show a \"Select All\" option in multiselect mode.",
+    },
+    selectableGroups: {
+      control: "boolean",
+      description: "Whether group headers are selectable in multiselect mode.",
+    },
+    isTagRemovable: {
+      control: "boolean",
+      description: "Whether tags in multiselect mode can be removed by clicking.",
+    },
+    multiRow: {
+      control: "boolean",
+      description: "Whether selected tags wrap to multiple rows in multiselect mode.",
+    },
+    searchable: {
+      control: "boolean",
+      description: "Whether the select has a search input for filtering options.",
+    },
     dropdownType: {
       control: "radio",
       options: ["menu", "grid"],
       description: "Use \"grid\" for swatch-type selects with custom option templates (e.g. color or icon pickers).",
     },
-    options: { control: "object" },
+    options: {
+      control: "object",
+      description: "Array of options to display in the dropdown.",
+    },
     maxDropdownHeight: {
       control: "number",
       description: "Value in pixels. When not set, fits available viewport space.",
@@ -96,7 +139,7 @@ const meta: Meta<SelectComponent> = {
     state: "default",
     size: "default",
     clearable: false,
-    multiple: false,
+    allowMultiple: false,
     showSelectAll: false,
     selectableGroups: false,
     isTagRemovable: false,
@@ -123,7 +166,7 @@ export const Default: Story = {
         [state]="state"
         [size]="size"
         [clearable]="clearable"
-        [multiple]="multiple"
+        [allowMultiple]="allowMultiple"
         [showSelectAll]="showSelectAll"
         [selectableGroups]="selectableGroups"
         [isTagRemovable]="isTagRemovable"
@@ -394,7 +437,7 @@ export const ValueType: Story = {
           inputId="value-multiselect"
           label="Multiselect"
           [options]="multiselectOptions"
-          [multiple]="true"
+          [allowMultiple]="true"
           [multiRow]="true"
           [isTagRemovable]="true"
           [clearable]="true"
@@ -404,7 +447,7 @@ export const ValueType: Story = {
           inputId="value-multiselect-one-row"
           label="Multiselect one row"
           [options]="oneRowOptions"
-          [multiple]="true"
+          [allowMultiple]="true"
           [multiRow]="false"
           [isTagRemovable]="true"
           [clearable]="true"
@@ -590,7 +633,7 @@ export const Examples: Story = {
           [options]="selectAllOptions"
           bindLabel="name"
           bindValue="id"
-          [multiple]="true"
+          [allowMultiple]="true"
           [showSelectAll]="true"
           [clearable]="false"
         />
@@ -615,7 +658,7 @@ export const Examples: Story = {
           placeholder="Search and select departments..."
           [options]="scrollableOptions"
           [searchable]="true"
-          [multiple]="true"
+          [allowMultiple]="true"
           [clearable]="true"
           [isTagRemovable]="true"
         />
@@ -653,7 +696,7 @@ export const Examples: Story = {
           bindLabel="name"
           bindValue="id"
           groupBy="category"
-          [multiple]="true"
+          [allowMultiple]="true"
           [clearable]="true"
         />
         <tedi-select
@@ -664,7 +707,7 @@ export const Examples: Story = {
           bindLabel="name"
           bindValue="id"
           groupBy="category"
-          [multiple]="true"
+          [allowMultiple]="true"
           [selectableGroups]="true"
           [clearable]="true"
         />
@@ -676,7 +719,7 @@ export const Examples: Story = {
           bindLabel="name"
           bindValue="id"
           groupBy="category"
-          [multiple]="true"
+          [allowMultiple]="true"
           [showSelectAll]="true"
           [selectableGroups]="true"
           [clearable]="true"
@@ -719,7 +762,7 @@ export const Examples: Story = {
           [options]="permissionOptions"
           bindLabel="title"
           bindValue="id"
-          [multiple]="true"
+          [allowMultiple]="true"
           [clearable]="true"
         >
           <ng-template tediSelectOption let-item let-selected="selected">
@@ -795,7 +838,7 @@ export const Examples: Story = {
         [options]="permissionOptions"
         bindLabel="title"
         bindValue="id"
-        [multiple]="true"
+        [allowMultiple]="true"
         [searchable]="true"
         formControlName="permissions"
       >

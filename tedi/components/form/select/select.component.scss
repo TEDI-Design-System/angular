@@ -75,6 +75,10 @@
   display: block;
   width: 100%;
 
+  .tedi-feedback-text {
+    margin-top: var(--form-field-outer-spacing);
+  }
+
   &__trigger {
     display: flex;
     justify-content: space-between;
@@ -232,7 +236,7 @@
     letter-spacing: 0;
 
     &--selectable {
-      padding: var(--dropdown-item-padding-y, 8px) var(--dropdown-item-padding-x);
+      padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
       font-size: var(--body-regular-size);
       font-weight: var(--body-regular-weight);
       line-height: var(--body-regular-line-height);

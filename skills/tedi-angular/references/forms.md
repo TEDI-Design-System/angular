@@ -12,6 +12,7 @@ TEDI form controls implement Angular's `ControlValueAccessor` interface, integra
 | ToggleComponent | `tedi-toggle` | `boolean` |
 | DatePickerComponent | `tedi-date-picker` | `Date \| null` |
 | DropdownComponent | `tedi-dropdown` | `string` |
+| SelectComponent | `tedi-select` | `T \| T[]` |
 
 ## Basic Usage with Reactive Forms
 

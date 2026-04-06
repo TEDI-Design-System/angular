@@ -60,6 +60,18 @@ When an Angular major reaches end-of-life (e.g. v19):
 Check the [wiki](https://github.com/TEDI-Design-System/general) for component guidelines and coding standards.
 Report issues or contribute via [GitHub Issues](https://github.com/TEDI-Design-System/angular/issues).
 
+## AI Skills
+
+This project ships with AI agent skills to help both contributors and consumers work with TEDI components.
+
+### For consumers — `tedi-angular`
+
+Helps you build UIs with `@tedi-design-system/angular`: component usage, forms integration, theming, and translation setup.
+
+### For contributors — `contributing`
+
+Guides development inside this repo: creating new components, running tests/lint, WCAG audits, refactoring, and Storybook stories. Available as `/contributing` when working in this repository.
+
 ---
 
 ## Visual Testing
