@@ -4,9 +4,10 @@ label[tedi-radio-card] {
   --_card-border: transparent;
 
   display: inline-flex;
-  gap: var(--form-checkbox-radio-card-inner-spacing);
+  flex-direction: column;
   align-items: flex-start;
-  padding: var(--form-checkbox-radio-card-checkbox-padding-y) var(--form-checkbox-radio-card-checkbox-padding-x);
+  min-height: var(--form-field-height);
+  padding: calc(var(--form-checkbox-radio-card-checkbox-padding-y) - var(--borders-01)) var(--form-checkbox-radio-card-checkbox-padding-x);
   font-family: var(--family-default);
   font-size: var(--body-regular-size);
   line-height: var(--body-regular-line-height);
@@ -24,7 +25,17 @@ label[tedi-radio-card] {
   input[tedi-radio],
   tedi-icon {
     flex-shrink: 0;
-    margin-top: calc(var(--form-checkbox-radio-card-checkbox-indicator-padding-y) - var(--form-checkbox-radio-card-checkbox-padding-y));
+  }
+
+  .tedi-radio-card__content {
+    display: flex;
+    gap: var(--form-checkbox-radio-card-inner-spacing);
+    align-items: center;
+  }
+
+  >.tedi-feedback-text {
+    padding-left: calc(var(--form-checkbox-radio-size-responsive) + var(--form-checkbox-radio-card-inner-spacing));
+    color: inherit;
   }
 
   input[tedi-radio] {
@@ -120,6 +131,10 @@ label[tedi-radio-card] {
       input[tedi-radio] {
         background-color: transparent;
         border-color: var(--form-checkbox-radio-default-border-selected-inverted);
+
+        &::before {
+          background: var(--form-checkbox-radio-default-check-indicator-default);
+        }
       }
     }
   }

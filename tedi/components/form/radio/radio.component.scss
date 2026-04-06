@@ -34,9 +34,12 @@ input[tedi-radio][type="radio"] {
   }
 
   &:not(:disabled):active {
-    background-color: var(--form-checkbox-radio-default-background-active);
     border-color: var(--form-checkbox-radio-default-border-active);
     box-shadow: none;
+
+    &::before {
+      background: var(--form-checkbox-radio-default-background-active);
+    }
   }
 
   &:not(:checked):disabled {
@@ -84,4 +87,9 @@ input[tedi-radio][type="radio"] {
     width: var(--form-checkbox-radio-size-large);
     height: var(--form-checkbox-radio-size-large);
   }
+}
+
+label:has(input[tedi-radio]) + tedi-feedback-text {
+  padding-left: var(--form-checkbox-radio-size-responsive);
+  margin-left: var(--form-checkbox-radio-inner-spacing);
 }

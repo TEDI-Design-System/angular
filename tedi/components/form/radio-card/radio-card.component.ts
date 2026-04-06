@@ -10,7 +10,7 @@ export type RadioCardVariant = "primary" | "secondary";
 @Component({
   standalone: true,
   selector: "label[tedi-radio-card]",
-  template: "<ng-content />",
+  templateUrl: "./radio-card.component.html",
   styleUrl: "./radio-card.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

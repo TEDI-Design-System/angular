@@ -10,7 +10,7 @@ export type CheckboxCardVariant = "primary" | "secondary";
 @Component({
   standalone: true,
   selector: "label[tedi-checkbox-card]",
-  template: "<ng-content />",
+  templateUrl: "./checkbox-card.component.html",
   styleUrl: "./checkbox-card.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

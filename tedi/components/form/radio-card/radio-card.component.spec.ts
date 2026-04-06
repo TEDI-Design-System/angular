@@ -5,20 +5,25 @@ import {
   RadioCardVariant,
 } from "./radio-card.component";
 import { RadioComponent } from "../radio/radio.component";
+import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 
 @Component({
   standalone: true,
-  imports: [RadioCardComponent, RadioComponent],
+  imports: [RadioCardComponent, RadioComponent, FeedbackTextComponent],
   template: `
     <label tedi-radio-card [variant]="variant" [grouped]="grouped">
       <input tedi-radio type="radio" />
       Text
+      @if (showDescription) {
+        <tedi-feedback-text text="Description" />
+      }
     </label>
   `,
 })
 class TestHostComponent {
   variant: RadioCardVariant = "primary";
   grouped = false;
+  showDescription = false;
 }
 
 describe("RadioCardComponent", () => {
@@ -67,5 +72,22 @@ describe("RadioCardComponent", () => {
     fixture.componentInstance.grouped = true;
     fixture.detectChanges();
     expect(labelElement.classList).toContain("tedi-radio-card--grouped");
+  });
+
+  it("should project content into content wrapper", () => {
+    const content = labelElement.querySelector(
+      ".tedi-radio-card__content"
+    );
+    expect(content).toBeTruthy();
+    const input = content?.querySelector('input[type="radio"]');
+    expect(input).toBeTruthy();
+  });
+
+  it("should project feedback text as description", () => {
+    fixture.componentInstance.showDescription = true;
+    fixture.detectChanges();
+    const feedbackText = labelElement.querySelector("tedi-feedback-text");
+    expect(feedbackText).toBeTruthy();
+    expect(feedbackText?.parentElement).toBe(labelElement);
   });
 });
