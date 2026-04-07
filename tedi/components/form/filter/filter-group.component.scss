@@ -1,32 +1,33 @@
 .tedi-filter-group {
   display: inline-flex;
 
-  .tedi-filter__button {
-    border-radius: 0;
+  .tedi-filter {
+    --_filter-radius: 0;
   }
 
-  .tedi-filter + .tedi-filter .tedi-filter__button {
+  .tedi-filter+.tedi-filter {
     margin-left: calc(-1 * var(--borders-01));
   }
 
-  .tedi-filter--selected {
+  .tedi-filter--selected,
+  .tedi-filter:focus-within {
     z-index: 1;
   }
 
-  .tedi-filter--selected + .tedi-filter .tedi-filter__button,
-  .tedi-filter + .tedi-filter--selected .tedi-filter__button {
+  .tedi-filter--selected+.tedi-filter,
+  .tedi-filter+.tedi-filter--selected {
     margin-left: calc(-1 * var(--general-selected-border-width));
   }
 
-  .tedi-filter:first-child .tedi-filter__button {
-    border-radius: var(--form-checkbox-radio-card-radius) 0 0 var(--form-checkbox-radio-card-radius);
+  .tedi-filter:first-child {
+    --_filter-radius: var(--form-checkbox-radio-card-radius) 0 0 var(--form-checkbox-radio-card-radius);
   }
 
-  .tedi-filter:last-child .tedi-filter__button {
-    border-radius: 0 var(--form-checkbox-radio-card-radius) var(--form-checkbox-radio-card-radius) 0;
+  .tedi-filter:last-child {
+    --_filter-radius: 0 var(--form-checkbox-radio-card-radius) var(--form-checkbox-radio-card-radius) 0;
   }
 
-  .tedi-filter:only-child .tedi-filter__button {
-    border-radius: var(--form-checkbox-radio-card-radius);
+  .tedi-filter:only-child {
+    --_filter-radius: var(--form-checkbox-radio-card-radius);
   }
 }

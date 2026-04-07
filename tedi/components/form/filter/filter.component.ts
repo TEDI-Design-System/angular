@@ -176,8 +176,9 @@ export class FilterComponent implements ControlValueAccessor {
   readonly activeDescendantId = computed(() => {
     const idx = this.activeOptionIndex();
     if (idx === -1) return null;
-    const option = this.filteredOptions()[idx];
-    return option ? this.getOptionId(option.value) : null;
+    return idx < this.filteredOptions().length
+      ? this.getOptionId(idx)
+      : null;
   });
 
   readonly iconSize = computed(() => (this.size() === "large" ? 24 : 18));
@@ -263,8 +264,8 @@ export class FilterComponent implements ControlValueAccessor {
     this.onTouched();
   }
 
-  getOptionId(value: string): string {
-    return `${this.baseId}-option-${value}`;
+  getOptionId(index: number): string {
+    return `${this.baseId}-option-${index}`;
   }
 
   isOptionSelected(value: string): boolean {
@@ -329,11 +330,15 @@ export class FilterComponent implements ControlValueAccessor {
     this.searchTerm.set((event.target as HTMLInputElement).value);
   }
 
-  focusDropdownContent(keyboard = false): void {
+  focusDropdownContent(keyboard = false, focusLast = false): void {
     setTimeout(() => {
       if (!this.dropdown()?.floatUiComponent().state) return;
       const focusable = this.getTabStops();
-      focusable[0]?.focus();
+      if (focusLast) {
+        focusable[focusable.length - 1]?.focus();
+      } else {
+        focusable[0]?.focus();
+      }
       if (!keyboard) {
         this.activeOptionIndex.set(-1);
       }
@@ -459,7 +464,7 @@ export class FilterComponent implements ControlValueAccessor {
     if (!panel) return [];
     return Array.from(
       panel.querySelectorAll<HTMLElement>(
-        'input:not([disabled]):not([tabindex="-1"]), button:not([disabled]), [role="option"][tabindex="0"], [role="listbox"][tabindex="0"]',
+        'input:not([disabled]):not([tabindex="-1"]), button:not([disabled]), [role="option"][tabindex="0"], [role="listbox"][tabindex="0"], [role="checkbox"][tabindex="0"]',
       ),
     );
   }

@@ -26,11 +26,18 @@ export type StatusIndicatorPosition = "default" | "top-right";
     "[class.tedi-status-indicator--lg]": "size() === 'lg'",
     "[class.tedi-status-indicator--bordered]": "hasBorder()",
     "[class.tedi-status-indicator--top-right]": "position() === 'top-right'",
-    role: "img",
-    "aria-hidden": "true",
+    "[attr.role]": "label() ? 'img' : null",
+    "[attr.aria-hidden]": "!label()",
+    "[attr.aria-label]": "label() || null",
   },
 })
 export class StatusIndicatorComponent {
+  /**
+   * Accessible label for the indicator. When provided, the indicator is
+   * exposed to assistive technology with `role="img"`. When omitted, the
+   * indicator is treated as decorative (`aria-hidden="true"`).
+   */
+  readonly label = input<string>();
   /**
    * The status type, which determines the indicator color.
    * @default success

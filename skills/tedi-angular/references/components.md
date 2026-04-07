@@ -365,7 +365,7 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 **Outputs:**
 - `cleared: void` — emitted when clear button is clicked in custom content mode
 **Slots:**
-- `[tediFilterPrepend]` — content before the label (icon, status badge, indicator). Hidden when filter is selected (check icon takes its place).
+- `[tediFilterPrepend]` — content before the label (icon, status badge, indicator). Hidden when the filter is selected. In toggle mode (no dropdown), a check icon replaces it; in dropdown modes the prepend is simply removed.
 - `[tediFilterContent]` — custom dropdown content (replaces options)
 
 Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle), `string` (single-select), `string[]` (multiselect).

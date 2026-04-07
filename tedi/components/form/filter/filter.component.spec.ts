@@ -720,7 +720,7 @@ describe("FilterComponent", () => {
       const options = fixture.debugElement.query(
         By.css(".tedi-filter-dropdown__options"),
       );
-      const firstOptionId = component.getOptionId("a");
+      const firstOptionId = component.getOptionId(0);
       expect(
         options.nativeElement.getAttribute("aria-activedescendant"),
       ).toBe(firstOptionId);
@@ -966,7 +966,7 @@ describe("FilterComponent", () => {
       );
       expect(
         optionsEl.nativeElement.getAttribute("aria-activedescendant"),
-      ).toBe(component.getOptionId("a"));
+      ).toBe(component.getOptionId(0));
 
       component.onOptionsKeydown(
         new KeyboardEvent("keydown", { key: "ArrowDown" }),
@@ -975,7 +975,7 @@ describe("FilterComponent", () => {
 
       expect(
         optionsEl.nativeElement.getAttribute("aria-activedescendant"),
-      ).toBe(component.getOptionId("b"));
+      ).toBe(component.getOptionId(1));
     });
 
     it("should handle select-all Enter keydown", () => {

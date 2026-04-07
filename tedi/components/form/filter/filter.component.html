@@ -9,7 +9,7 @@
       [disabled]="disabled()"
       (click)="focusDropdownContent()"
       (keydown.arrowDown)="focusDropdownContent(true)"
-      (keydown.arrowUp)="focusDropdownContent(true)"
+      (keydown.arrowUp)="focusDropdownContent(true, true)"
     >
       <ng-container *ngTemplateOutlet="buttonContent" />
     </button>
@@ -61,7 +61,7 @@
                 role="option"
                 [attr.aria-selected]="isOptionSelected(option.value)"
                 [attr.aria-disabled]="option.disabled || null"
-                [id]="getOptionId(option.value)"
+                [id]="getOptionId(i)"
                 (click)="!option.disabled && selectOption(option.value)"
               >
                 <tedi-dropdown-item-value
@@ -131,7 +131,7 @@
                 role="option"
                 [attr.aria-selected]="isOptionSelected(option.value)"
                 [attr.aria-disabled]="option.disabled || null"
-                [id]="getOptionId(option.value)"
+                [id]="getOptionId(i)"
                 (click)="!option.disabled && toggleOption(option.value)"
               >
                 <tedi-dropdown-item-value

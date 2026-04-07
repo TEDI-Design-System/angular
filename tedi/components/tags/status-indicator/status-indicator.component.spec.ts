@@ -61,13 +61,18 @@ describe("StatusIndicatorComponent", () => {
     );
   });
 
-  it("should have aria-hidden attribute", () => {
+  it("should be aria-hidden by default (decorative)", () => {
     fixture.detectChanges();
     expect(element.getAttribute("aria-hidden")).toBe("true");
+    expect(element.getAttribute("role")).toBeNull();
+    expect(element.getAttribute("aria-label")).toBeNull();
   });
 
-  it("should have role img attribute", () => {
+  it("should expose accessible name when label is provided", () => {
+    fixture.componentRef.setInput("label", "Active");
     fixture.detectChanges();
     expect(element.getAttribute("role")).toBe("img");
+    expect(element.getAttribute("aria-label")).toBe("Active");
+    expect(element.getAttribute("aria-hidden")).toBe("false");
   });
 });

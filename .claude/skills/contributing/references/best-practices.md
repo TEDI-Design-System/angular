@@ -270,6 +270,11 @@ export const Default: StoryObj<ComponentNameComponent> = {
 };
 
 export const WithReactiveForms: StoryObj<ComponentNameComponent> = {
+  decorators: [
+    moduleMetadata({
+      imports: [MyControlComponent, ReactiveFormsModule, AlertComponent, TextComponent],
+    }),
+  ],
   render: () => ({
     props: { control: new FormControl('') },
     template: `
