@@ -114,4 +114,15 @@ describe("TextFieldComponent", () => {
 
     expect(onTouchedSpy).toHaveBeenCalled();
   });
+
+  it("should update invalid signal via setInvalidState", () => {
+    const fixture = TestBed.createComponent(TextFieldComponent);
+    const component = fixture.componentInstance;
+
+    component.setInvalidState(true);
+    expect(component.invalid()).toBe(true);
+
+    component.setInvalidState(false);
+    expect(component.invalid()).toBe(false);
+  });
 });

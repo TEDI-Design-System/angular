@@ -13,12 +13,11 @@ export interface FormFieldControl<T = unknown> {
    * Whether the control is disabled.
    */
   disabled: Signal<boolean>;
-  /**
-   * Whether the control is currently in an invalid state.
-   * Usually derived from Angular form validation state.
-   */
+  /** Reactive invalid state (driven by FormField) */
   invalid: Signal<boolean>;
 
+  /** Called by FormField to update invalid state */
+  setInvalidState(isInvalid: boolean): void;
   /**
    * Optional method used by the form field clear button.
    * If implemented, the form field can trigger clearing the value.
