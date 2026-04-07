@@ -347,6 +347,65 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 </tedi-select>
 ```
 
+### Filter
+**Selector:** `tedi-filter`
+**Model:** `selected: boolean`, `value: string`, `values: string[]`
+**Inputs:**
+- `text: string = ""` — filter label text
+- `variant: FilterVariant = "primary"` — "primary" or "secondary"
+- `size: FilterSize = "default"` — "default" or "large"
+- `multiselect: boolean = false` — multiselect dropdown mode
+- `options: FilterOption[] = []` — dropdown options `{ label, value, disabled? }`
+- `searchable: boolean = false` — show search field in dropdown
+- `showSelectAll: boolean = false` — show "Select all" in multiselect
+- `showClear: boolean = false` — show clear action in dropdown
+- `selectAllLabel: string = "Vali kõik"`
+- `clearLabel: string = "Tühjenda valik"`
+- `appendTo: string = ""` — append dropdown to selector (e.g., "body")
+**Outputs:**
+- `cleared: void` — emitted when clear button is clicked in custom content mode
+**Slots:**
+- `[tediFilterPrepend]` — content before the label (icon, status badge, indicator). Hidden when filter is selected (check icon takes its place).
+- `[tediFilterContent]` — custom dropdown content (replaces options)
+
+Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle), `string` (single-select), `string[]` (multiselect).
+
+```html
+<!-- Boolean toggle -->
+<tedi-filter text="Active" variant="secondary" [formControl]="activeControl" />
+
+<!-- Single-select dropdown -->
+<tedi-filter text="Service" [options]="options" [(value)]="value" [showClear]="true" appendTo="body" />
+
+<!-- Multiselect dropdown -->
+<tedi-filter text="Hospital" [multiselect]="true" [options]="options" [(values)]="values"
+  [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+
+<!-- With prepend content -->
+<tedi-filter text="Submitted" variant="secondary" size="large">
+  <tedi-status-badge tediFilterPrepend text="5" color="brand" />
+</tedi-filter>
+
+<!-- Custom dropdown content -->
+<tedi-filter [text]="selectedLabel" [selected]="!!selectedValue" [showClear]="true" (cleared)="clear()">
+  <div tediFilterContent>
+    <!-- custom content here -->
+  </div>
+</tedi-filter>
+```
+
+### FilterGroup
+**Selector:** `tedi-filter-group`
+Wrapper that joins filters into a connected button group with collapsed borders and shared border-radius.
+
+```html
+<tedi-filter-group>
+  <tedi-filter text="All" variant="secondary" [selected]="true" />
+  <tedi-filter text="Active" variant="secondary" />
+  <tedi-filter text="Closed" variant="secondary" />
+</tedi-filter-group>
+```
+
 ### FormField
 **Selector:** `tedi-form-field`
 **Inputs:**
@@ -715,14 +774,35 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `color: StatusBadgeColor = "neutral"`
 - `variant: StatusBadgeVariant = "filled"`
 - `size: StatusBadgeSize = "default"`
-- `status: StatusBadgeStatus`
+- `status: StatusBadgeStatus` — renders a `tedi-status-indicator` in top-right position
 - `icon: string = ""`
 - `class: string` — custom CSS class
 - `title: string` — tooltip/abbreviation title
 - `role: string` — ARIA role
 
 ```html
-<tedi-status-badge text="Active" color="success" status="positive" />
+<tedi-status-badge text="Active" color="success" status="success" />
+```
+
+### StatusIndicator
+**Selector:** `tedi-status-indicator`
+**Inputs:**
+- `type: StatusIndicatorType = "success"` — "success", "danger", "warning", "inactive"
+- `size: StatusIndicatorSize = "sm"` — "sm" or "lg"
+- `hasBorder: boolean = false` — white border ring
+- `position: StatusIndicatorPosition = "default"` — "default" (inline) or "top-right" (absolute)
+
+Standalone colored dot indicator. Used internally by `StatusBadge` and can be used standalone (e.g., as a prepend in filters).
+
+```html
+<tedi-status-indicator type="danger" />
+<tedi-status-indicator type="success" size="lg" [hasBorder]="true" />
+
+<!-- Absolute positioned on parent -->
+<span style="position: relative">
+  Lugemata teated
+  <tedi-status-indicator type="danger" position="top-right" />
+</span>
 ```
 
 ---

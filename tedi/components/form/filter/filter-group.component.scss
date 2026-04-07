@@ -1,0 +1,32 @@
+.tedi-filter-group {
+  display: inline-flex;
+
+  .tedi-filter__button {
+    border-radius: 0;
+  }
+
+  .tedi-filter + .tedi-filter .tedi-filter__button {
+    margin-left: calc(-1 * var(--borders-01));
+  }
+
+  .tedi-filter--selected {
+    z-index: 1;
+  }
+
+  .tedi-filter--selected + .tedi-filter .tedi-filter__button,
+  .tedi-filter + .tedi-filter--selected .tedi-filter__button {
+    margin-left: calc(-1 * var(--general-selected-border-width));
+  }
+
+  .tedi-filter:first-child .tedi-filter__button {
+    border-radius: var(--form-checkbox-radio-card-radius) 0 0 var(--form-checkbox-radio-card-radius);
+  }
+
+  .tedi-filter:last-child .tedi-filter__button {
+    border-radius: 0 var(--form-checkbox-radio-card-radius) var(--form-checkbox-radio-card-radius) 0;
+  }
+
+  .tedi-filter:only-child .tedi-filter__button {
+    border-radius: var(--form-checkbox-radio-card-radius);
+  }
+}

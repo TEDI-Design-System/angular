@@ -8,7 +8,6 @@ $badge-colors: (
   "transparent"
 );
 $badge-variants: ("filled", "filled-bordered", "bordered");
-$badge-status-colors: ("inactive", "success", "danger", "warning");
 
 .tedi-status-badge {
   position: relative;
@@ -59,34 +58,6 @@ $badge-status-colors: ("inactive", "success", "danger", "warning");
             --_status-badge-box-shadow: none;
           }
         }
-      }
-    }
-  }
-
-  &--status {
-    &::before {
-      position: absolute;
-      top: -0.125rem;
-      right: -0.125rem;
-      z-index: 1;
-      width: var(--status-indicator-sm);
-      height: var(--status-indicator-sm);
-      content: "";
-      background-color: var(--_status-badge--indicator-background);
-      border: 1px solid var(--status-badge-indicator-border);
-      border-radius: 50%;
-    }
-
-    &.tedi-status-badge--large::before {
-      width: var(--status-indicator-lg);
-      height: var(--status-indicator-lg);
-    }
-
-    @each $status in $badge-status-colors {
-      &-#{$status}::before {
-        --_status-badge--indicator-background: var(
-          --status-badge-indicator-#{$status}
-        );
       }
     }
   }

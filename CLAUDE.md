@@ -118,6 +118,7 @@ Path aliases:
 - Forget to provide `TediTranslationService` mock and `TEDI_TRANSLATION_DEFAULT_TOKEN` in tests
 - Use `fakeAsync`/`tick` without cleaning up in `afterEach`
 - Use `community/` components as reference for coding patterns or style — they are community-contributed and not always reviewed
+- Forget to add `.parent__button:hover .tedi-icon { color: inherit; }` (and similar for selected/active states) in components that contain icons and change text color on state — without this, the icon's color modifier class wins over the parent's color. Use `color="inherit"` for component-owned icons; for projected icons, the CSS override ensures the consumer's color applies in default state but inherits on hover/selected
 - Style Angular element selectors directly (e.g., `tedi-modal-header { ... }`) — add a CSS class to the host and style the class instead. Exception: third-party elements you can't add classes to (e.g., `cdk-dialog-container`)
 
 ## Common Test Setup

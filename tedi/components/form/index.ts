@@ -15,3 +15,7 @@ export * from "./toggle/toggle.component";
 export * from "./date-picker/date-picker.component";
 export * from "./form-field/form-field.component";
 export * from "./text-field/text-field.component";
+export * from "./filter";
+export * from "./time-field";
+export * from "./time-picker";
+export * from "./rating";
