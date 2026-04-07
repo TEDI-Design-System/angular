@@ -1,0 +1,91 @@
+<input
+  #inputElement
+  type="text"
+  class="tedi-time-field__input"
+  inputmode="numeric"
+  [id]="inputId()"
+  [attr.placeholder]="placeholder()"
+  [value]="inputValue()"
+  [disabled]="isDisabled()"
+  [attr.aria-invalid]="isInvalid() || null"
+  (input)="handleInput($event)"
+  (blur)="handleBlur()"
+/>
+<div class="tedi-time-field__actions">
+  @if (showClear()) {
+    <button
+      tedi-closing-button
+      type="button"
+      size="small"
+      class="tedi-time-field__clear"
+      [iconSize]="18"
+      [ariaLabel]="'time-field.clear' | tediTranslate"
+      [disabled]="isDisabled()"
+      (click)="clearInput()"
+    ></button>
+    <tedi-separator axis="vertical" size="1rem" />
+  }
+  @if (hasPicker()) {
+    <tedi-popover
+      #popover
+      style="display: flex; align-items: center"
+      position="bottom-end"
+      [withArrow]="false"
+      [preventOverflow]="true"
+    >
+      <button
+        tedi-button
+        tedi-popover-trigger
+        type="button"
+        variant="neutral"
+        size="small"
+        class="tedi-time-field__icon"
+        [attr.aria-label]="'time-field.select-time' | tediTranslate"
+        [disabled]="isDisabled()"
+        (click)="onPickerOpen()"
+      >
+        <tedi-icon name="schedule" size="inherit" />
+      </button>
+      <tedi-popover-content maxWidth="none" style="padding: 0">
+        <tedi-time-picker
+          #timePicker
+          [value]="value()"
+          [variant]="resolvedPickerVariant()"
+          [timeSlots]="timeSlots()"
+          [columns]="columns()"
+          [minuteStep]="minuteStep()"
+          [trapFocus]="true"
+          (valueChange)="onPickerValueChange($event)"
+          (closeRequested)="closePopoverToTrigger()"
+        />
+      </tedi-popover-content>
+    </tedi-popover>
+  } @else if (hasNativePicker()) {
+    <input
+      #nativeInput
+      type="time"
+      class="tedi-time-field__native"
+      tabindex="-1"
+      aria-hidden="true"
+      [value]="inputValue()"
+      [disabled]="isDisabled()"
+      (change)="onNativeChange($event)"
+    />
+    <button
+      tedi-button
+      type="button"
+      variant="neutral"
+      size="small"
+      class="tedi-time-field__icon"
+      [attr.aria-label]="'time-field.select-time' | tediTranslate"
+      [disabled]="isDisabled()"
+      (click)="openNativePicker()"
+    >
+      <tedi-icon name="schedule" size="inherit" />
+    </button>
+  } @else {
+    <span class="tedi-time-field__icon tedi-time-field__icon--static" aria-hidden="true">
+      <tedi-icon name="schedule" size="inherit" />
+    </span>
+  }
+</div>

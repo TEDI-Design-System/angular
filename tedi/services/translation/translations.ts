@@ -957,6 +957,21 @@ export const translationsMap = {
     en: "Next years",
     ru: "Следующие годы",
   },
+  "time-field.clear": {
+    description:
+      "Label for the button that clears the selected time from the input field.",
+    components: ["TimeField"],
+    et: "Tühjenda kellaaeg",
+    en: "Clear time",
+    ru: "Очистить время",
+  },
+  "time-field.select-time": {
+    description: "Label for the button that selects time.",
+    components: ["TimeField"],
+    et: "Vali kellaaeg",
+    en: "Select time",
+    ru: "Выбрать время",
+  },
   "vertical-stepper.completed": {
     description:
       "Label for screen-reader that this step is completed (visually hidden)",

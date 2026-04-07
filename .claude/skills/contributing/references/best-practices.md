@@ -270,28 +270,33 @@ export const Default: StoryObj<ComponentNameComponent> = {
 };
 
 export const WithReactiveForms: StoryObj<ComponentNameComponent> = {
-  decorators: [
-    moduleMetadata({
-      imports: [MyControlComponent, ReactiveFormsModule, AlertComponent, TextComponent],
-    }),
-  ],
-  render: () => ({
-    props: { control: new FormControl('') },
-    template: `
-      <tedi-my-control [formControl]="control" />
-      <tedi-alert type="info" [showClose]="false">
-        <pre tedi-text modifiers="small" style="margin: 0;">{{ {
+  render: () => {
+    const control = new FormControl('');
+
+    return {
+      props: { control },
+      template: `
+        <tedi-row cols="1" [gapY]="3">
+          <tedi-col>
+            <tedi-my-control [formControl]="control" />
+          </tedi-col>
+          <tedi-col>
+            <tedi-alert type="info" [showClose]="false">
+              <pre tedi-text modifiers="small">{{ {
   value: control.value,
   touched: control.touched,
   dirty: control.dirty
 } | json }}</pre>
-      </tedi-alert>
-    `,
-  }),
+            </tedi-alert>
+          </tedi-col>
+        </tedi-row>
+      `,
+    };
+  },
 };
 ```
 
-> **Note:** Always display reactive form state using a `<tedi-alert type="info">` with a `<pre tedi-text modifiers="small">` block and the `json` pipe. This provides a consistent, scannable debug output across all form component stories. Import `AlertComponent` and `TextComponent` in the story's `moduleMetadata`.
+> **Note:** Always display reactive form state using `tedi-row`/`tedi-col` for layout, a `<tedi-alert type="info">` with a `<pre tedi-text modifiers="small">` block and the `json` pipe. This provides a consistent, scannable debug output across all form component stories. Import `RowComponent`, `ColComponent`, `AlertComponent`, and `TextComponent` in the story's `moduleMetadata`.
 
 ### Story Coverage
 Every story file must include:
