@@ -15,7 +15,7 @@ It supports built-in themes like **Default** and **Dark**, as well as **fully cu
 
 Configure the theme using `provideTedi` in your application config:
 
-```tsx
+```ts
 import { ApplicationConfig, provideZoneChangeDetection } from "@angular/core";
 import { provideRouter } from "@angular/router";
 
@@ -55,7 +55,7 @@ You can create and use custom themes by exporting variables from Figma using the
 3. Add the generated CSS files to your Angular project
 4. Apply the theme via `provideTedi`
 
-```tsx
+```ts
 provideTedi({
   theme: "custom-theme",
 });
@@ -72,9 +72,8 @@ Ensure your theme styles are included in **angular.json** e.g:
 
 This will apply the class:
 
-```tsx
-
-<html class="tedi-theme--custom-theme">
+```html
+<html class="tedi-theme--custom-theme"></html>
 ```
 
 Your exported CSS variables should be scoped to this class.
@@ -85,7 +84,7 @@ Your exported CSS variables should be scoped to this class.
 
 You can access and update the current theme via the `ThemeService`.
 
-```tsx
+```ts
 import { Component, inject } from "@angular/core";
 import { ThemeService } from "@tedi-design-system/angular/tedi";
 
@@ -109,8 +108,9 @@ export class ExampleComponent {
 
 A simple theme switcher component:
 
-```tsx
+```ts
 import { Component, inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
 import {
   ThemeService,
   Theme,
@@ -120,7 +120,7 @@ import {
 @Component({
   selector: "app-theme-switcher",
   standalone: true,
-  imports: [ButtonComponent],
+  imports: [CommonModule, ButtonComponent],
   template: `
     <button *ngFor="let t of themes" (click)="setTheme(t)">
       {{ t }}
@@ -151,16 +151,6 @@ export class ThemeSwitcherComponent {
 - Theme is persisted via cookies (`tedi-theme`)
 - Uses Angular **signals** for reactive updates
 - Theme updates apply instantly without page reload
-
----
-
-### Example
-
-```tsx
-provideTedi({
-  theme: "custom-theme",
-});
-```
 
 ---
 
