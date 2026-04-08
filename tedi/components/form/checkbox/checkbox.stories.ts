@@ -56,6 +56,7 @@ export default {
       options: ["default", "large"],
       description: "Size of the checkbox.",
       table: {
+        category: "Checkbox",
         type: {
           summary: "CheckboxSize",
           detail: "default \nlarge",
@@ -69,6 +70,7 @@ export default {
       control: "boolean",
       description: "Is checkbox invalid?",
       table: {
+        category: "Checkbox",
         type: {
           summary: "boolean",
         },
@@ -81,6 +83,7 @@ export default {
       control: "boolean",
       description: "Is checkbox disabled?",
       table: {
+        category: "Checkbox",
         type: {
           summary: "boolean",
         },
@@ -90,6 +93,63 @@ export default {
       control: "boolean",
       description:
         "Renders an alternate checked state, with a slash, which is neither toggled on or off. Interacting with the checkbox will dismiss the indeterminate state.",
+      table: {
+        category: "Checkbox",
+      },
+    },
+    variant: {
+      control: "radio",
+      options: ["primary", "secondary"],
+      description: "Visual variant of the checkbox card.",
+      table: {
+        category: "CheckboxCard",
+        type: {
+          summary: "CheckboxCardVariant",
+          detail: "primary \nsecondary",
+        },
+        defaultValue: {
+          summary: "primary",
+        },
+      },
+    },
+    showIndicator: {
+      control: "boolean",
+      description:
+        "Whether to show the checkbox indicator. When false, the checkbox is visually hidden but remains functional.",
+      table: {
+        category: "CheckboxCard",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: {
+          summary: "true",
+        },
+      },
+    },
+    groupLabel: {
+      control: "text",
+      description: "Label text displayed above the checkbox group.",
+      table: {
+        category: "CheckboxGroup",
+        type: {
+          summary: "string",
+        },
+      },
+    },
+    groupDirection: {
+      control: "radio",
+      options: ["horizontal", "vertical"],
+      description: "Layout direction of the checkboxes.",
+      table: {
+        category: "CheckboxGroup",
+        type: {
+          summary: "CheckboxGroupDirection",
+          detail: "horizontal \nvertical",
+        },
+        defaultValue: {
+          summary: "horizontal",
+        },
+      },
     },
   },
 } as Meta<StoryCheckboxComponent>;

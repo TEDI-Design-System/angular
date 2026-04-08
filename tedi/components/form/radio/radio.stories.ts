@@ -52,6 +52,7 @@ export default {
       options: ["default", "large"],
       description: "Size of the radio.",
       table: {
+        category: "Radio",
         type: {
           summary: "RadioSize",
           detail: "default \nlarge",
@@ -65,6 +66,7 @@ export default {
       control: "boolean",
       description: "Is radio invalid?",
       table: {
+        category: "Radio",
         type: {
           summary: "boolean",
         },
@@ -77,8 +79,77 @@ export default {
       control: "boolean",
       description: "Is radio disabled?",
       table: {
+        category: "Radio",
         type: {
           summary: "boolean",
+        },
+      },
+    },
+    variant: {
+      control: "radio",
+      options: ["primary", "secondary"],
+      description: "Visual variant of the radio card.",
+      table: {
+        category: "RadioCard",
+        type: {
+          summary: "RadioCardVariant",
+          detail: "primary \nsecondary",
+        },
+        defaultValue: {
+          summary: "primary",
+        },
+      },
+    },
+    grouped: {
+      control: "boolean",
+      description:
+        "Whether the card is part of a button-group style layout.",
+      table: {
+        category: "RadioCard",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: {
+          summary: "false",
+        },
+      },
+    },
+    showIndicator: {
+      control: "boolean",
+      description:
+        "Whether to show the radio indicator. When false, the radio is visually hidden but remains functional.",
+      table: {
+        category: "RadioCard",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: {
+          summary: "true",
+        },
+      },
+    },
+    groupLabel: {
+      control: "text",
+      description: "Label text displayed above the radio group.",
+      table: {
+        category: "RadioGroup",
+        type: {
+          summary: "string",
+        },
+      },
+    },
+    groupDirection: {
+      control: "radio",
+      options: ["horizontal", "vertical"],
+      description: "Layout direction of the radios.",
+      table: {
+        category: "RadioGroup",
+        type: {
+          summary: "RadioGroupDirection",
+          detail: "horizontal \nvertical",
+        },
+        defaultValue: {
+          summary: "horizontal",
         },
       },
     },
