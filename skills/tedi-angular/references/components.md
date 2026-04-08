@@ -713,6 +713,10 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 - `inputId: string`, `value: string`, `size: CheckboxSize`, `hasError: boolean`
 - Models: `checked: boolean | null`, `indeterminate: boolean`, `disabled: boolean`
 
+### CheckboxCard
+**Selector:** `label[tedi-checkbox-card]`
+- `variant: CheckboxCardVariant = "primary"`, `showIndicator: boolean = true`
+
 ### CheckboxGroup / CheckboxCardGroup
 **Selector:** `tedi-checkbox-group`, `tedi-checkbox-card-group`
 
