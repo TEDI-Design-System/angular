@@ -1285,6 +1285,34 @@ describe("FilterComponent", () => {
       component.searchTerm.set("option a");
       expect(component.filteredOptions().length).toBe(1);
     });
+
+    it("should show only selected label by default", () => {
+      fixture.componentRef.setInput("text", "Teenus");
+      fixture.componentRef.setInput("value", "a");
+      fixture.detectChanges();
+
+      const textEl = fixture.debugElement.query(By.css(".tedi-filter__text"));
+      expect(textEl.nativeElement.textContent.trim()).toBe("Option A");
+    });
+
+    it("should show label prefix with preserveLabel", () => {
+      fixture.componentRef.setInput("text", "Teenus");
+      fixture.componentRef.setInput("preserveLabel", true);
+      fixture.componentRef.setInput("value", "a");
+      fixture.detectChanges();
+
+      const textEl = fixture.debugElement.query(By.css(".tedi-filter__text"));
+      expect(textEl.nativeElement.textContent.trim()).toBe("Teenus: Option A");
+    });
+
+    it("should show only text when no value is selected with preserveLabel", () => {
+      fixture.componentRef.setInput("text", "Teenus");
+      fixture.componentRef.setInput("preserveLabel", true);
+      fixture.detectChanges();
+
+      const textEl = fixture.debugElement.query(By.css(".tedi-filter__text"));
+      expect(textEl.nativeElement.textContent.trim()).toBe("Teenus");
+    });
   });
 
   describe("reactive forms - single-select with options", () => {

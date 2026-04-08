@@ -101,7 +101,7 @@ export class FilterComponent implements ControlValueAccessor {
    */
   readonly multiselect = input<boolean>(false);
   /**
-   * Options for the dropdown (single-select or multiselect).
+   * Options for the dropdown. Enables single-select mode, or multiselect mode when combined with the multiselect input.
    */
   readonly options = input<FilterOption[]>([]);
   /**
@@ -141,6 +141,12 @@ export class FilterComponent implements ControlValueAccessor {
    * Emitted when the clear button is clicked in a custom content dropdown.
    */
   readonly cleared = output<void>();
+  /**
+   * When true, the filter label is preserved as a prefix when a value is selected.
+   * E.g. "Teenus: Optometristi vastuvõtt" instead of just "Optometristi vastuvõtt".
+   * @default false
+   */
+  readonly preserveLabel = input<boolean>(false);
   /**
    * Append dropdown to given selector.
    * Use 'body' to append at the end of DOM or empty string to append next to trigger.
@@ -203,7 +209,11 @@ export class FilterComponent implements ControlValueAccessor {
 
   readonly displayText = computed(() => {
     if (this.isSingleSelect()) {
-      return this.selectedLabel() ?? this.text();
+      const label = this.selectedLabel();
+      if (label && this.preserveLabel()) {
+        return this.text() + ": " + label;
+      }
+      return label ?? this.text();
     }
     return this.text();
   });

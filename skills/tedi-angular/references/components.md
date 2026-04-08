@@ -356,6 +356,7 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `size: FilterSize = "default"` — "default" or "large"
 - `multiselect: boolean = false` — multiselect dropdown mode
 - `options: FilterOption[] = []` — dropdown options `{ label, value, disabled? }`
+- `preserveLabel: boolean = false` — when true, single-select shows "Text: SelectedLabel" instead of replacing text
 - `searchable: boolean = false` — show search field in dropdown
 - `showSelectAll: boolean = false` — show "Select all" in multiselect
 - `showClear: boolean = false` — show clear action in dropdown
@@ -376,6 +377,9 @@ Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle
 
 <!-- Single-select dropdown -->
 <tedi-filter text="Service" [options]="options" [(value)]="value" [showClear]="true" appendTo="body" />
+
+<!-- Single-select with label preserved (shows "Service: Option A") -->
+<tedi-filter text="Service" [options]="options" [(value)]="value" [preserveLabel]="true" appendTo="body" />
 
 <!-- Multiselect dropdown -->
 <tedi-filter text="Hospital" [multiselect]="true" [options]="options" [(values)]="values"
