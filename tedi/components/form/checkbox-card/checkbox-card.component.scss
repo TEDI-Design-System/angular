@@ -38,6 +38,24 @@ label[tedi-checkbox-card] {
     color: inherit;
   }
 
+  &.tedi-checkbox-card--hide-indicator {
+    input[tedi-checkbox] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      white-space: nowrap;
+      border: 0;
+      clip-path: inset(50%);
+    }
+
+    >.tedi-feedback-text {
+      padding-left: 0;
+    }
+  }
+
   input[tedi-checkbox] {
     &:not(:disabled):hover {
       box-shadow: none;
