@@ -957,6 +957,20 @@ export const translationsMap = {
     en: "Next years",
     ru: "Следующие годы",
   },
+  "time-picker.hours": {
+    description: "Aria label for the hours listbox in the time picker.",
+    components: ["TimePicker"],
+    et: "Tunnid",
+    en: "Hours",
+    ru: "Часы",
+  },
+  "time-picker.minutes": {
+    description: "Aria label for the minutes listbox in the time picker.",
+    components: ["TimePicker"],
+    et: "Minutid",
+    en: "Minutes",
+    ru: "Минуты",
+  },
   "time-field.clear": {
     description:
       "Label for the button that clears the selected time from the input field.",

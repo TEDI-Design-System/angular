@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Component } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { TimePickerComponent } from "./time-picker.component";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 describe("TimePickerComponent", () => {
   let fixture: ComponentFixture<TimePickerComponent>;
@@ -11,6 +12,9 @@ describe("TimePickerComponent", () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [TimePickerComponent],
+      providers: [
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
     });
 
     fixture = TestBed.createComponent(TimePickerComponent);
@@ -653,6 +657,9 @@ describe("TimePickerComponent with ReactiveFormsModule", () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [TestHostComponent],
+      providers: [
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
     });
 
     fixture = TestBed.createComponent(TestHostComponent);

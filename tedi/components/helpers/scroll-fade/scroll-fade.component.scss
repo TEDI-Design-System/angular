@@ -32,10 +32,10 @@ $percentages: (0, 10, 20);
       &::-webkit-scrollbar-thumb {
         background: var(--general-border-primary);
         border-radius: 100px;
+      }
 
-        &:hover {
-          background-color: var(--general-border-secondary);
-        }
+      &::-webkit-scrollbar-thumb:hover {
+        background-color: var(--general-border-secondary);
       }
 
       &::-webkit-scrollbar-track {

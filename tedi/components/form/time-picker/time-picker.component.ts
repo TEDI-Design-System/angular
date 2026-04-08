@@ -16,13 +16,14 @@ import {
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { ScrollFadeComponent } from "../../helpers/scroll-fade/scroll-fade.component";
+import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 
 export type TimePickerVariant = "scroll" | "slots" | "dropdown";
 
 @Component({
   selector: "tedi-time-picker",
   standalone: true,
-  imports: [ScrollFadeComponent],
+  imports: [ScrollFadeComponent, TediTranslationPipe],
   templateUrl: "./time-picker.component.html",
   styleUrl: "./time-picker.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,

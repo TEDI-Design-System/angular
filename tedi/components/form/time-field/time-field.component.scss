@@ -39,6 +39,15 @@
     }
   }
 
+  &__popover {
+    display: flex;
+    align-items: center;
+  }
+
+  &__popover-content.tedi-popover-content {
+    padding: 0;
+  }
+
   &__native {
     position: absolute;
     width: 0;

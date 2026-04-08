@@ -5,7 +5,7 @@
         #hourColumn
         class="tedi-time-picker__column"
         role="listbox"
-        aria-label="Hours"
+        [attr.aria-label]="'time-picker.hours' | tediTranslate"
       >
         @for (hour of hours; track hour; let i = $index) {
           <button
@@ -30,7 +30,7 @@
         #minuteColumn
         class="tedi-time-picker__column"
         role="listbox"
-        aria-label="Minutes"
+        [attr.aria-label]="'time-picker.minutes' | tediTranslate"
       >
         @for (minute of minutes(); track minute; let i = $index) {
           <button

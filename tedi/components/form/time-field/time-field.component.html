@@ -28,7 +28,7 @@
   @if (hasPicker()) {
     <tedi-popover
       #popover
-      style="display: flex; align-items: center"
+      class="tedi-time-field__popover"
       position="bottom-end"
       [withArrow]="false"
       [preventOverflow]="true"
@@ -46,7 +46,7 @@
       >
         <tedi-icon name="schedule" size="inherit" />
       </button>
-      <tedi-popover-content maxWidth="none" style="padding: 0">
+      <tedi-popover-content class="tedi-time-field__popover-content" maxWidth="none">
         <tedi-time-picker
           #timePicker
           [value]="value()"
