@@ -224,6 +224,7 @@ Composed of sub-components:
 **Inputs:**
 - `variant: RadioCardVariant = "primary"` — "primary" or "secondary"
 - `grouped: boolean = false` — join cards in a button-group layout
+- `showIndicator: boolean = true` — show/hide the radio indicator visually
 
 ```html
 <!-- Separate cards (default) -->

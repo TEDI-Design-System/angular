@@ -19,6 +19,7 @@ export type RadioCardVariant = "primary" | "secondary";
     "[class.tedi-radio-card--primary]": "variant() === 'primary'",
     "[class.tedi-radio-card--secondary]": "variant() === 'secondary'",
     "[class.tedi-radio-card--grouped]": "grouped()",
+    "[class.tedi-radio-card--hide-indicator]": "!showIndicator()",
   },
 })
 export class RadioCardComponent {
@@ -32,4 +33,11 @@ export class RadioCardComponent {
    * @default false
    */
   readonly grouped = input(false);
+
+  /**
+   * Whether to show the radio indicator.
+   * When false, the radio is visually hidden but remains functional.
+   * @default true
+   */
+  readonly showIndicator = input<boolean>(true);
 }

@@ -6,6 +6,7 @@ label[tedi-checkbox-card] {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   min-height: var(--form-field-height);
   padding: calc(var(--form-checkbox-radio-card-checkbox-padding-y) - var(--borders-01)) var(--form-checkbox-radio-card-checkbox-padding-x);
   font-family: var(--family-default);
