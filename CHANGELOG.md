@@ -1,3 +1,10 @@
+## [6.2.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0...angular-6.2.1) (2026-04-08)
+
+
+### Bug Fixes
+
+* **separator:** changed separator dot variable names [#390](https://github.com/TEDI-Design-System/angular/issues/390) ([#398](https://github.com/TEDI-Design-System/angular/issues/398)) ([4f87af8](https://github.com/TEDI-Design-System/angular/commit/4f87af82cadc5ac8c7e31eb440b2b9c83a989abb))
+
 # [6.2.0](https://github.com/TEDI-Design-System/angular/compare/angular-6.1.0...angular-6.2.0) (2026-03-26)
 
 
