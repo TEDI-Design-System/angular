@@ -141,13 +141,6 @@ export class FilterComponent implements ControlValueAccessor {
    * Emitted when the clear button is clicked in a custom content dropdown.
    */
   readonly cleared = output<void>();
-  /**
-   * Append dropdown to given selector.
-   * Use 'body' to append at the end of DOM or empty string to append next to trigger.
-   * @default ""
-   */
-  readonly appendTo = input("");
-
   readonly dropdown = viewChild<DropdownComponent>("dropdown");
   private readonly dropdownPanel =
     viewChild<ElementRef<HTMLElement>>("dropdownPanel");
@@ -332,7 +325,7 @@ export class FilterComponent implements ControlValueAccessor {
 
   focusDropdownContent(keyboard = false, focusLast = false): void {
     setTimeout(() => {
-      if (!this.dropdown()?.floatUiComponent().state) return;
+      if (!this.dropdown()?.isOpen()) return;
       const focusable = this.getTabStops();
       if (focusLast) {
         focusable[focusable.length - 1]?.focus();

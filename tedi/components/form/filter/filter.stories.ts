@@ -157,16 +157,6 @@ export default {
         defaultValue: { summary: "Tühjenda valik" },
       },
     },
-    appendTo: {
-      description:
-        "Append dropdown to given selector. Use 'body' to append at end of DOM",
-      control: { type: "text" },
-      table: {
-        category: "inputs",
-        type: { summary: "string" },
-        defaultValue: { summary: "''" },
-      },
-    },
   },
 } as Meta<FilterComponent>;
 
@@ -204,8 +194,7 @@ export const Multiselect: StoryObj<FilterComponent> = {
         [searchable]="true"
         [showSelectAll]="true"
         [showClear]="true"
-        appendTo="body"
-      />
+             />
     `,
   }),
 };
@@ -227,8 +216,7 @@ export const SingleSelect: StoryObj<FilterComponent> = {
         [(value)]="value"
         [searchable]="true"
         [showClear]="false"
-        appendTo="body"
-      />
+             />
     `,
   }),
 };
@@ -328,13 +316,13 @@ export const States: StoryObj<FilterComponent> = {
             <tedi-filter text="Filter" [selected]="state === 'Selected'" />
           </tedi-col>
           <tedi-col [class]="'pseudo-' + state.toLowerCase()">
-            <tedi-filter text="Filter" [multiselect]="true" [options]="options" [values]="state === 'Selected' ? ['1', '2'] : []" appendTo="body" />
+            <tedi-filter text="Filter" [multiselect]="true" [options]="options" [values]="state === 'Selected' ? ['1', '2'] : []" />
           </tedi-col>
           <tedi-col [class]="'pseudo-' + state.toLowerCase()">
             <tedi-filter text="Filter" variant="secondary" [selected]="state === 'Selected'" />
           </tedi-col>
           <tedi-col [class]="'pseudo-' + state.toLowerCase()">
-            <tedi-filter text="Filter" variant="secondary" [multiselect]="true" [options]="options" [values]="state === 'Selected' ? ['1', '2'] : []" appendTo="body" />
+            <tedi-filter text="Filter" variant="secondary" [multiselect]="true" [options]="options" [values]="state === 'Selected' ? ['1', '2'] : []" />
           </tedi-col>
           <tedi-col [class]="'pseudo-' + state.toLowerCase()">
             <tedi-filter text="Filter" size="large" [selected]="state === 'Selected'" />
@@ -367,8 +355,7 @@ export const CustomContent: StoryObj<FilterComponent> = {
             [selected]="!!selectedPeriod"
             [showClear]="true"
             (cleared)="selectedPeriod = ''"
-            appendTo="body"
-          >
+                     >
             <div tediFilterContent>
               <tedi-radio-group label="Periood" direction="vertical">
                 @for (period of periods; track period.value) {
@@ -420,8 +407,7 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
               [searchable]="true"
               [showSelectAll]="true"
               [showClear]="true"
-              appendTo="body"
-            />
+                         />
           </tedi-col>
           <tedi-col>
             <tedi-alert type="info" [showClose]="false">
@@ -566,8 +552,7 @@ export const Examples: StoryObj<FilterComponent> = {
               [options]="uuringOptions"
               [formControl]="uuringControl"
               [showClear]="true"
-              appendTo="body"
-            />
+                         />
             <tedi-filter
               text="Raviasutus"
               variant="secondary"
@@ -577,24 +562,21 @@ export const Examples: StoryObj<FilterComponent> = {
               [searchable]="true"
               [showSelectAll]="true"
               [showClear]="true"
-              appendTo="body"
-            />
+                         />
             <tedi-filter
               text="Teenus"
               variant="secondary"
               [options]="teenusOptions"
               [formControl]="teenusControl"
               [showClear]="true"
-              appendTo="body"
-            />
+                         />
             <tedi-filter
               text="Aeg alates"
               variant="secondary"
               [options]="aegAlatesOptions"
               [formControl]="aegAlatesControl"
               [showClear]="true"
-              appendTo="body"
-            />
+                         />
 
             <tedi-separator axis="vertical" size="24px" />
 

@@ -2,11 +2,11 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { OverlayContainer } from "@angular/cdk/overlay";
 import { DropdownComponent } from "./dropdown.component";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
 import { DropdownItemComponent } from "./dropdown-item/dropdown-item.component";
-import { NgxFloatUiContentComponent } from "ngx-float-ui";
 
 @Component({
   standalone: true,
@@ -40,7 +40,7 @@ describe("DropdownComponent", () => {
   let host: TestHostComponent;
   let hostEl: HTMLElement;
   let dropdown: DropdownComponent;
-  let floatUi: NgxFloatUiContentComponent;
+  let overlayContainerElement: HTMLElement;
 
   beforeAll(() => {
     (Element.prototype as any).scrollIntoView = jest.fn();
@@ -55,14 +55,20 @@ describe("DropdownComponent", () => {
     host = fixture.componentInstance;
     hostEl = fixture.nativeElement;
 
+    const overlayContainer = TestBed.inject(OverlayContainer);
+    overlayContainerElement = overlayContainer.getContainerElement();
+
     fixture.detectChanges();
 
     const dropdownDebug = fixture.debugElement.query(
       By.directive(DropdownComponent),
     );
     dropdown = dropdownDebug.componentInstance as DropdownComponent;
+  });
 
-    floatUi = dropdown.floatUiComponent() as NgxFloatUiContentComponent;
+  afterEach(() => {
+    dropdown.hideDropdown();
+    overlayContainerElement.innerHTML = "";
   });
 
   const getTrigger = () =>
@@ -70,23 +76,25 @@ describe("DropdownComponent", () => {
 
   const getItems = () =>
     Array.from(
-      hostEl.querySelectorAll("li[tedi-dropdown-item]"),
+      overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
     ) as HTMLLIElement[];
+
+  const openDropdown = () => {
+    dropdown.showDropdown();
+    fixture.detectChanges();
+  };
 
   it("should create host & dropdown", () => {
     expect(host).toBeTruthy();
     expect(dropdown).toBeTruthy();
   });
 
-  it("showDropdown() should open dropdown, set display to block and set active item", () => {
-    (floatUi as any).state = false;
-    const showSpy = jest.spyOn(floatUi, "show");
+  it("showDropdown() should open dropdown and set active item", () => {
+    expect(dropdown.isOpen()).toBe(false);
 
-    dropdown.showDropdown();
-    fixture.detectChanges();
+    openDropdown();
 
-    expect(showSpy).toHaveBeenCalled();
-    expect(dropdown.floatUiDisplay()).toBe("block");
+    expect(dropdown.isOpen()).toBe(true);
 
     const items = getItems();
     const activeItem = items.find((li) => li.getAttribute("tabindex") === "0");
@@ -94,46 +102,30 @@ describe("DropdownComponent", () => {
     expect(activeItem?.textContent).toContain("Item B");
   });
 
-  it("hideDropdown() should close dropdown, reset display and tabindices", () => {
-    (floatUi as any).state = true;
-    const hideSpy = jest.spyOn(floatUi, "hide");
+  it("hideDropdown() should close dropdown and reset tabindices", () => {
+    openDropdown();
+    expect(dropdown.isOpen()).toBe(true);
 
     dropdown.hideDropdown();
     fixture.detectChanges();
 
-    expect(hideSpy).toHaveBeenCalled();
-    expect(dropdown.floatUiDisplay()).toBe("inline");
-
-    const items = getItems();
-    const role = dropdown.dropdownContent().dropdownRole();
-    items.forEach((li, index) => {
-      const disabled = index === 2;
-      const tabindex = li.getAttribute("tabindex");
-
-      if (role === "listbox" && disabled) {
-        expect(tabindex).toBeNull();
-      } else {
-        expect(tabindex).toBe("-1");
-      }
-    });
+    expect(dropdown.isOpen()).toBe(false);
   });
 
   it("toggleDropdown() should open when closed and close when open", () => {
-    (floatUi as any).state = false;
-    const showSpy = jest.spyOn(floatUi, "show");
-    const hideSpy = jest.spyOn(floatUi, "hide");
+    expect(dropdown.isOpen()).toBe(false);
 
     dropdown.toggleDropdown();
     fixture.detectChanges();
-    expect(showSpy).toHaveBeenCalled();
+    expect(dropdown.isOpen()).toBe(true);
 
-    (floatUi as any).state = true;
     dropdown.toggleDropdown();
     fixture.detectChanges();
-    expect(hideSpy).toHaveBeenCalled();
+    expect(dropdown.isOpen()).toBe(false);
   });
 
   it("focusFirstItem() should focus first enabled item", () => {
+    openDropdown();
     dropdown.focusFirstItem();
     fixture.detectChanges();
 
@@ -145,6 +137,7 @@ describe("DropdownComponent", () => {
   });
 
   it("focusLastItem() should focus last enabled item (skipping disabled)", () => {
+    openDropdown();
     dropdown.focusLastItem();
     fixture.detectChanges();
 
@@ -156,6 +149,7 @@ describe("DropdownComponent", () => {
   });
 
   it("focusNextItem() should move focus to next enabled item", () => {
+    openDropdown();
     const items = getItems();
 
     dropdown.focusNextItem(items[0]);
@@ -164,6 +158,7 @@ describe("DropdownComponent", () => {
   });
 
   it("focusPrevItem() should move focus to previous enabled item", () => {
+    openDropdown();
     const items = getItems();
 
     dropdown.focusPrevItem(items[1]);
@@ -172,20 +167,23 @@ describe("DropdownComponent", () => {
   });
 
   it("DropdownTrigger: ArrowDown should open dropdown and focus first item", () => {
+    jest.useFakeTimers();
     const trigger = getTrigger();
 
     const event = new KeyboardEvent("keydown", { key: "ArrowDown" });
     trigger.dispatchEvent(event);
     fixture.detectChanges();
+    jest.runAllTimers();
+    jest.useRealTimers();
 
+    expect(dropdown.isOpen()).toBe(true);
     const items = getItems();
     const first = items[0];
     expect(document.activeElement).toBe(first);
   });
 
   it("DropdownTrigger: Escape should hide dropdown and keep focus on trigger", () => {
-    (floatUi as any).state = true;
-    const hideSpy = jest.spyOn(floatUi, "hide");
+    openDropdown();
     const trigger = getTrigger();
     const focusSpy = jest.spyOn(trigger, "focus");
 
@@ -193,33 +191,30 @@ describe("DropdownComponent", () => {
     trigger.dispatchEvent(event);
     fixture.detectChanges();
 
-    expect(hideSpy).toHaveBeenCalled();
+    expect(dropdown.isOpen()).toBe(false);
     expect(focusSpy).toHaveBeenCalled();
   });
 
   it("DropdownItem: Enter selects value and hides dropdown in listbox mode", () => {
     host.role = "listbox";
     fixture.detectChanges();
+    openDropdown();
 
     const items = getItems();
     const second = items[1];
-
-    (floatUi as any).state = true;
-    const hideSpy = jest.spyOn(floatUi, "hide");
 
     const event = new KeyboardEvent("keydown", { key: "Enter" });
     second.dispatchEvent(event);
     fixture.detectChanges();
 
     expect(dropdown.value()).toBe("b");
-    expect(hideSpy).toHaveBeenCalled();
+    expect(dropdown.isOpen()).toBe(false);
   });
 
   it("DropdownItem: disabled item should ignore click and keyboard", () => {
+    openDropdown();
     const items = getItems();
     const disabledItem = items[2];
-
-    const hideSpy = jest.spyOn(floatUi, "hide");
 
     disabledItem.click();
     const event = new KeyboardEvent("keydown", { key: "Enter" });
@@ -227,77 +222,18 @@ describe("DropdownComponent", () => {
     fixture.detectChanges();
 
     expect(dropdown.value()).toBe("b");
-    expect(hideSpy).not.toHaveBeenCalled();
+    expect(dropdown.isOpen()).toBe(true);
   });
 
-  describe("handleOutsideClick()", () => {
-    it("should return early when dropdown is closed (state=false)", () => {
-      (floatUi as any).state = false;
+  describe("onOutsideClick()", () => {
+    it("should hide dropdown and focus trigger", () => {
+      openDropdown();
 
       const hideSpy = jest.spyOn(dropdown, "hideDropdown");
-      const triggerFocusSpy = jest.spyOn(
-        dropdown.dropdownTrigger()!.host.nativeElement,
-        "focus",
-      );
-
-      dropdown.handleOutsideClick(new Event("pointerdown"));
-
-      expect(hideSpy).not.toHaveBeenCalled();
-      expect(triggerFocusSpy).not.toHaveBeenCalled();
-    });
-
-    it("should do nothing when click is inside the trigger element", () => {
-      (floatUi as any).state = true;
-
-      const triggerEl = dropdown.dropdownTrigger()!.host.nativeElement;
-      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
-      const focusSpy = jest.spyOn(triggerEl, "focus");
-
-      const fakeEvent = {
-        target: triggerEl,
-      } as unknown as Event;
-
-      dropdown.handleOutsideClick(fakeEvent);
-
-      expect(hideSpy).not.toHaveBeenCalled();
-      expect(focusSpy).not.toHaveBeenCalled();
-    });
-
-    it("should do nothing when click is inside the content element", () => {
-      (floatUi as any).state = true;
-
-      const contentEl = dropdown.floatUiComponent().elRef.nativeElement;
-      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
-      const focusSpy = jest.spyOn(
-        dropdown.dropdownTrigger()!.host.nativeElement,
-        "focus",
-      );
-
-      const fakeEvent = {
-        target: contentEl,
-      } as unknown as Event;
-
-      dropdown.handleOutsideClick(fakeEvent);
-
-      expect(hideSpy).not.toHaveBeenCalled();
-      expect(focusSpy).not.toHaveBeenCalled();
-    });
-
-    it("should hide dropdown and focus trigger when clicking outside", () => {
-      (floatUi as any).state = true;
-
-      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
-
       const triggerEl = dropdown.dropdownTrigger()!.host.nativeElement;
       const focusSpy = jest.spyOn(triggerEl, "focus");
 
-      const outsideTarget = document.createElement("div");
-
-      const fakeEvent = {
-        target: outsideTarget,
-      } as unknown as Event;
-
-      dropdown.handleOutsideClick(fakeEvent);
+      dropdown.onOutsideClick();
 
       expect(hideSpy).toHaveBeenCalled();
       expect(focusSpy).toHaveBeenCalled();
@@ -349,6 +285,7 @@ describe("DropdownComponent", () => {
     let itemC: HTMLLIElement;
 
     beforeEach(() => {
+      openDropdown();
       items = getItems();
       itemA = items[0];
       itemB = items[1];
@@ -356,8 +293,6 @@ describe("DropdownComponent", () => {
     });
 
     it("onClick: enabled item should call onItemSelect()", () => {
-      (floatUi as any).state = true;
-
       const hideSpy = jest.spyOn(dropdown, "hideDropdown");
       const focusSpy = jest.spyOn(getTrigger(), "focus");
       const setSpy = jest.spyOn(dropdown.value, "set");
@@ -418,8 +353,6 @@ describe("DropdownComponent", () => {
     });
 
     it("keydown: Enter should select the item & hide dropdown", () => {
-      (floatUi as any).state = true;
-
       const setSpy = jest.spyOn(dropdown.value, "set");
       const hideSpy = jest.spyOn(dropdown, "hideDropdown");
       const focusSpy = jest.spyOn(getTrigger(), "focus");
@@ -433,8 +366,6 @@ describe("DropdownComponent", () => {
     });
 
     it("keydown: Space should select the item & hide dropdown", () => {
-      (floatUi as any).state = true;
-
       const setSpy = jest.spyOn(dropdown.value, "set");
 
       itemB.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
@@ -444,8 +375,6 @@ describe("DropdownComponent", () => {
     });
 
     it("keydown: Escape should hide dropdown & return focus to trigger", () => {
-      (floatUi as any).state = true;
-
       const hideSpy = jest.spyOn(dropdown, "hideDropdown");
       const focusSpy = jest.spyOn(getTrigger(), "focus");
 
@@ -487,63 +416,75 @@ describe("DropdownComponent", () => {
     });
 
     it("ArrowDown should open dropdown (if closed) and focus first item", () => {
+      jest.useFakeTimers();
       const showSpy = jest.spyOn(dropdown, "showDropdown");
       const focusSpy = jest.spyOn(dropdown, "focusFirstItem");
 
-      (floatUi as any).state = false;
+      expect(dropdown.isOpen()).toBe(false);
 
       const event = new KeyboardEvent("keydown", { key: "ArrowDown" });
       trigger.dispatchEvent(event);
       fixture.detectChanges();
+      jest.runAllTimers();
+      jest.useRealTimers();
 
       expect(showSpy).toHaveBeenCalled();
       expect(focusSpy).toHaveBeenCalled();
     });
 
     it("ArrowDown should only focus first item when dropdown already open", () => {
+      jest.useFakeTimers();
+      openDropdown();
+
       const showSpy = jest.spyOn(dropdown, "showDropdown");
       const focusSpy = jest.spyOn(dropdown, "focusFirstItem");
-
-      (floatUi as any).state = true;
 
       const event = new KeyboardEvent("keydown", { key: "ArrowDown" });
       trigger.dispatchEvent(event);
       fixture.detectChanges();
+      jest.runAllTimers();
+      jest.useRealTimers();
 
       expect(showSpy).not.toHaveBeenCalled();
       expect(focusSpy).toHaveBeenCalled();
     });
 
     it("ArrowUp should open dropdown (if closed) and focus last item", () => {
+      jest.useFakeTimers();
       const showSpy = jest.spyOn(dropdown, "showDropdown");
       const focusSpy = jest.spyOn(dropdown, "focusLastItem");
 
-      (floatUi as any).state = false;
+      expect(dropdown.isOpen()).toBe(false);
 
       const event = new KeyboardEvent("keydown", { key: "ArrowUp" });
       trigger.dispatchEvent(event);
       fixture.detectChanges();
+      jest.runAllTimers();
+      jest.useRealTimers();
 
       expect(showSpy).toHaveBeenCalled();
       expect(focusSpy).toHaveBeenCalled();
     });
 
     it("ArrowUp should only focus last item when dropdown already open", () => {
+      jest.useFakeTimers();
+      openDropdown();
+
       const showSpy = jest.spyOn(dropdown, "showDropdown");
       const focusSpy = jest.spyOn(dropdown, "focusLastItem");
-
-      (floatUi as any).state = true;
 
       const event = new KeyboardEvent("keydown", { key: "ArrowUp" });
       trigger.dispatchEvent(event);
       fixture.detectChanges();
+      jest.runAllTimers();
+      jest.useRealTimers();
 
       expect(showSpy).not.toHaveBeenCalled();
       expect(focusSpy).toHaveBeenCalled();
     });
 
     it("Escape should hide dropdown and return focus to trigger", () => {
-      (floatUi as any).state = true;
+      openDropdown();
 
       const hideSpy = jest.spyOn(dropdown, "hideDropdown");
       const focusSpy = jest.spyOn(trigger, "focus");

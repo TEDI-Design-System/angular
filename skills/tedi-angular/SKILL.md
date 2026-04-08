@@ -25,7 +25,6 @@ npm install @tedi-design-system/angular @tedi-design-system/core
 @angular/cdk: ^19.0.0 || ^20.0.0 || ^21.0.0
 @angular/animations: ^19.0.0 || ^20.0.0 || ^21.0.0
 @angular/platform-browser: ^19.0.0 || ^20.0.0 || ^21.0.0
-ngx-float-ui: ^19.0.1 || ^20.0.0 || ^21.0.0
 ```
 
 ## Setup

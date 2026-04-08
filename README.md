@@ -42,7 +42,7 @@ CI runs build and test jobs against all supported versions using a matrix strate
 
 When a new Angular major is released (e.g. v22):
 
-1. **`package.json`** — add `|| ^22.0.0` to every Angular peer dependency and `ngx-float-ui`
+1. **`package.json`** — add `|| ^22.0.0` to every Angular peer dependency
 2. **`.github/workflows/angular-test-and-lint.yml`** — add `22` to the `angular-version` matrix in the `build` and `test` jobs
 3. **`.github/workflows/angular-release.yml`** — add `22` to the `angular-version` matrix in the `test` job
 
@@ -50,7 +50,7 @@ When a new Angular major is released (e.g. v22):
 
 When an Angular major reaches end-of-life (e.g. v19):
 
-1. **`package.json`** — remove `^19.0.0 ||` from every Angular peer dependency and `ngx-float-ui`
+1. **`package.json`** — remove `^19.0.0 ||` from every Angular peer dependency
 2. **`.github/workflows/angular-test-and-lint.yml`** — remove `19` from the `angular-version` matrix in the `build` and `test` jobs
 3. **`.github/workflows/angular-release.yml`** — remove `19` from the `angular-version` matrix in the `test` job
 4. Bump `devDependencies` to the new minimum supported Angular version so the library is always built and developed against a supported release

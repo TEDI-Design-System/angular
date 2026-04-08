@@ -361,7 +361,6 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `showClear: boolean = false` — show clear action in dropdown
 - `selectAllLabel: string = "Vali kõik"`
 - `clearLabel: string = "Tühjenda valik"`
-- `appendTo: string = ""` — append dropdown to selector (e.g., "body")
 **Outputs:**
 - `cleared: void` — emitted when clear button is clicked in custom content mode
 **Slots:**
@@ -375,11 +374,11 @@ Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle
 <tedi-filter text="Active" variant="secondary" [formControl]="activeControl" />
 
 <!-- Single-select dropdown -->
-<tedi-filter text="Service" [options]="options" [(value)]="value" [showClear]="true" appendTo="body" />
+<tedi-filter text="Service" [options]="options" [(value)]="value" [showClear]="true" />
 
 <!-- Multiselect dropdown -->
 <tedi-filter text="Hospital" [multiselect]="true" [options]="options" [(values)]="values"
-  [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+  [searchable]="true" [showSelectAll]="true" [showClear]="true" />
 
 <!-- With prepend content -->
 <tedi-filter text="Submitted" variant="secondary" size="large">
@@ -713,7 +712,6 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 **Inputs:**
 - `position: DropdownPosition = "bottom-start"`
 - `preventOverflow: boolean = true`
-- `appendTo: string`
 
 ```html
 <tedi-dropdown [(value)]="selected">
@@ -732,7 +730,6 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `dismissible: boolean = true`
 - `withArrow: boolean = true`
 - `lockScroll: boolean = false`
-- `appendTo: string = "body"`
 
 ### Tooltip
 **Selector:** `tedi-tooltip`
@@ -740,7 +737,6 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `position: TooltipPosition = "top"`
 - `preventOverflow: boolean = true`
 - `openWith: TooltipOpenWith = "both"` — hover, focus, or both
-- `appendTo: string = "body"`
 
 ```html
 <tedi-tooltip position="top">

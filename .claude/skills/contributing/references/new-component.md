@@ -54,14 +54,18 @@ Follow all patterns from best-practices:
 1. Create barrel export in `index.ts`
 2. Add export to the parent category `index.ts` (e.g., `tedi/components/form/index.ts`)
 
-## Step 6: Verify
+## Step 6: Code Review
+
+Run `/simplify` to review all changed code for reuse opportunities, code quality issues, and efficiency problems. Fix all valid findings before proceeding.
+
+## Step 7: Verify
 
 1. Run tests: `npx jest tedi/components/<category>/<component-name>/`
 2. Fix any failures.
 3. Run lint: `npm run lint`
 4. Fix any lint errors.
 
-## Step 7: Update Consumer Catalog
+## Step 8: Update Consumer Catalog
 
 Update `skills/tedi-angular/references/components.md` with the new component:
 1. Add an entry to the appropriate section (TEDI-Ready or Community) with selector, key inputs/outputs, and a usage example.

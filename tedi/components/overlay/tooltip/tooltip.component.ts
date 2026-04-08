@@ -1,23 +1,33 @@
 import {
   AfterContentChecked,
   Component,
+  computed,
+  contentChild,
+  DestroyRef,
+  ElementRef,
+  inject,
   input,
+  signal,
+  viewChild,
   ViewEncapsulation,
   ChangeDetectionStrategy,
-  viewChild,
-  contentChild,
-  signal,
-  ElementRef,
 } from "@angular/core";
 import {
-  NgxFloatUiContentComponent,
-  NgxFloatUiModule,
-  NgxFloatUiPlacements,
-} from "ngx-float-ui";
+  OverlayModule,
+  CdkConnectedOverlay,
+  ConnectedOverlayPositionChange,
+} from "@angular/cdk/overlay";
+import {
+  OverlayPosition,
+  toConnectedPositions,
+  getPlacementFromPositionChange,
+  calculateArrowOffset,
+  HorizontalPushHandler,
+} from "../overlay-position.util";
 import { TooltipTriggerComponent } from "./tooltip-trigger/tooltip-trigger.component";
 import { TooltipContentComponent } from "./tooltip-content/tooltip-content.component";
 
-export type TooltipPosition = `${NgxFloatUiPlacements}`;
+export type TooltipPosition = OverlayPosition;
 export type TooltipOpenWith = "hover" | "click" | "both";
 
 let tooltipIdCounter = 0;
@@ -25,7 +35,7 @@ let tooltipIdCounter = 0;
 @Component({
   standalone: true,
   selector: "tedi-tooltip",
-  imports: [NgxFloatUiModule],
+  imports: [OverlayModule],
   templateUrl: "./tooltip.component.html",
   styleUrl: "./tooltip.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -50,13 +60,6 @@ export class TooltipComponent implements AfterContentChecked {
    */
   readonly openWith = input<TooltipOpenWith>("both");
 
-  /**
-   * Append floating element to given selector.
-   * Use 'body' to append at the end of DOM or empty string to append next to trigger element.
-   * @default body
-   */
-  readonly appendTo = input("body");
-
   /** Delay time (in ms) for closing tooltip when not hovering trigger or content.
    * @default 100
    */
@@ -70,41 +73,93 @@ export class TooltipComponent implements AfterContentChecked {
     read: ElementRef,
   });
 
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
+
   readonly descriptionId = `tedi-tooltip-${++tooltipIdCounter}`;
   readonly contentText = signal("");
   readonly isOpen = signal(false);
+  readonly currentPlacement = signal("top");
+  readonly arrowLeft = signal<number | null>(null);
+  readonly arrowTop = signal<number | null>(null);
 
-  isContentHovered = signal(false);
-  floatUiDisplay = signal<"inline" | "block">("inline");
-  floatUiComponent = viewChild.required(NgxFloatUiContentComponent);
+  readonly overlayPositions = computed(() =>
+    toConnectedPositions(this.position(), this.preventOverflow(), 4),
+  );
+
+  readonly overlayOrigin = computed(
+    () => this.tooltipTrigger().overlayOrigin,
+  );
+
+  readonly isContentHovered = signal(false);
   hideTimeout?: ReturnType<typeof setTimeout>;
 
-  showTooltip() {
-    if (!this.floatUiComponent().state) {
+  private readonly horizontalPush = new HorizontalPushHandler(
+    () => this.connectedOverlay()?.overlayRef?.overlayElement,
+    () => this.updateArrowPosition(),
+  );
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => {
       clearTimeout(this.hideTimeout);
-      this.floatUiComponent().show();
-      this.floatUiDisplay.set("block");
+      this.horizontalPush.detach();
+    });
+  }
+
+  showTooltip() {
+    if (!this.isOpen()) {
+      clearTimeout(this.hideTimeout);
       this.isOpen.set(true);
     }
   }
 
   hideTooltip() {
-    if (this.floatUiComponent().state) {
-      this.floatUiComponent().hide();
-      this.floatUiDisplay.set("inline");
+    if (this.isOpen()) {
+      clearTimeout(this.hideTimeout);
       this.isOpen.set(false);
+      this.horizontalPush.detach();
     }
   }
 
   toggleTooltip() {
-    if (this.floatUiComponent().state) {
+    if (this.isOpen()) {
       this.hideTooltip();
     } else {
       this.showTooltip();
     }
   }
 
+  onPositionChange(change: ConnectedOverlayPositionChange) {
+    this.currentPlacement.set(getPlacementFromPositionChange(change));
+    this.horizontalPush.apply();
+    this.updateArrowPosition();
+  }
+
+  onOverlayAttach() {
+    this.syncContentText();
+    this.horizontalPush.attach();
+    this.updateArrowPosition();
+  }
+
+  private updateArrowPosition() {
+    const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+    const triggerEl = this.tooltipTrigger().host?.nativeElement;
+    if (!overlayEl || !triggerEl) return;
+
+    const offset = calculateArrowOffset(
+      this.currentPlacement(),
+      triggerEl,
+      overlayEl,
+      8,
+    );
+    this.arrowLeft.set(offset.left);
+    this.arrowTop.set(offset.top);
+  }
+
   ngAfterContentChecked(): void {
+    this.syncContentText();
+  }
+
+  private syncContentText(): void {
     const contentEl = this.tooltipContent()?.nativeElement as HTMLElement;
     if (contentEl) {
       const text = contentEl.textContent?.trim() ?? "";

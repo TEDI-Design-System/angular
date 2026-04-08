@@ -40,18 +40,22 @@ Apply changes in this order:
 5. **Tests** — update spec files to match new API/behavior
 6. **Stories** — update Storybook stories to match new API
 
-## Step 5: Verify
+## Step 5: Code Review
+
+Run `/simplify` to review all changed code for reuse opportunities, code quality issues, and efficiency problems. Fix all valid findings before proceeding.
+
+## Step 6: Verify
 
 1. Run the specific component test: `npx jest <component-path>`
 2. Run the full test suite: `npm test`
 3. Run lint: `npm run lint`
 4. Compare test results with the baseline from Step 2 — no new failures allowed.
 
-## Step 6: Update Consumer Catalog
+## Step 7: Update Consumer Catalog
 
 If the refactor changed the public API (renamed selector, inputs/outputs, removed or deprecated a component), update `skills/tedi-angular/references/components.md` to match.
 
-## Step 7: Report
+## Step 8: Report
 
 Summarize:
 - Files changed (with brief description of each change)

@@ -5,6 +5,7 @@ import {
   inject,
   input,
 } from "@angular/core";
+import { CdkOverlayOrigin } from "@angular/cdk/overlay";
 import { DropdownComponent } from "../dropdown.component";
 
 export type DropdownTriggerAriaHasPopup = "menu" | "listbox" | "dialog" | "true";
@@ -12,10 +13,11 @@ export type DropdownTriggerAriaHasPopup = "menu" | "listbox" | "dialog" | "true"
 @Directive({
   standalone: true,
   selector: "[tedi-dropdown-trigger]",
+  hostDirectives: [CdkOverlayOrigin],
   host: {
     "[attr.id]": "dropdown.containerId() + '_trigger'",
     "[attr.aria-controls]": "dropdown.containerId()",
-    "[attr.aria-expanded]": "dropdown.floatUiComponent().state",
+    "[attr.aria-expanded]": "dropdown.isOpen()",
     "[attr.aria-haspopup]": "ariaHaspopup()",
     "[attr.role]": "isButton ? null : 'button'",
     "[attr.tabindex]": "isButton ? null : '0'",
@@ -27,6 +29,7 @@ export class DropdownTriggerDirective {
 
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly dropdown = inject(DropdownComponent);
+  readonly overlayOrigin = inject(CdkOverlayOrigin, { self: true });
 
   get isButton(): boolean {
     return this.host.nativeElement.tagName === "BUTTON";
@@ -61,16 +64,16 @@ export class DropdownTriggerDirective {
   }
 
   private openAndFocusFirst() {
-    if (!this.dropdown.floatUiComponent().state) {
+    if (!this.dropdown.isOpen()) {
       this.dropdown.showDropdown();
     }
-    this.dropdown.focusFirstItem?.();
+    setTimeout(() => this.dropdown.focusFirstItem?.());
   }
 
   private openAndFocusLast() {
-    if (!this.dropdown.floatUiComponent().state) {
+    if (!this.dropdown.isOpen()) {
       this.dropdown.showDropdown();
     }
-    this.dropdown.focusLastItem?.();
+    setTimeout(() => this.dropdown.focusLastItem?.());
   }
 }

@@ -86,16 +86,6 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
-    appendTo: {
-      control: "text",
-      description:
-        "Append floating element to given selector. Use 'body' to append at the end of DOM or empty string to append next to trigger element.",
-      table: {
-        category: "dropdown",
-        type: { summary: "string" },
-        defaultValue: { summary: `""` },
-      },
-    },
     dropdownRole: {
       control: "radio",
       options: ["menu", "listbox"],
@@ -150,14 +140,13 @@ export const Default: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "menu",
     ariaHasPopup: "menu",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
         <button tedi-button tedi-dropdown-trigger [ariaHasPopup]="ariaHasPopup">
           Trigger
         </button>
@@ -176,14 +165,13 @@ export const WithMeta: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "listbox",
     ariaHasPopup: "listbox",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
         <button tedi-button tedi-dropdown-trigger [ariaHasPopup]="ariaHasPopup">
           Select location
         </button>
@@ -217,14 +205,13 @@ export const WithIcons: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "menu",
     ariaHasPopup: "menu",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
         <button tedi-button tedi-dropdown-trigger [ariaHasPopup]="ariaHasPopup">
           Actions
         </button>
@@ -258,14 +245,13 @@ export const VerticalLayout: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "listbox",
     ariaHasPopup: "listbox",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
         <button tedi-button tedi-dropdown-trigger [ariaHasPopup]="ariaHasPopup">
           Select access level
         </button>

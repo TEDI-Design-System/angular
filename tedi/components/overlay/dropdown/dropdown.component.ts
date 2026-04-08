@@ -3,31 +3,28 @@ import {
   input,
   ViewEncapsulation,
   ChangeDetectionStrategy,
-  viewChild,
   contentChild,
   signal,
-  AfterContentChecked,
-  OnDestroy,
-  inject,
-  PLATFORM_ID,
+  computed,
   model,
 } from "@angular/core";
-import {
-  NgxFloatUiContentComponent,
-  NgxFloatUiModule,
-  NgxFloatUiPlacements,
-} from "ngx-float-ui";
+import { OverlayModule } from "@angular/cdk/overlay";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
-import { isPlatformBrowser } from "@angular/common";
 import { DROPDOWN_API } from "./dropdown.tokens";
+import {
+  OverlayPosition,
+  toConnectedPositions,
+} from "../overlay-position.util";
 
-export type DropdownPosition = `${NgxFloatUiPlacements}`;
+export type DropdownPosition = OverlayPosition;
+
+let dropdownIdCounter = 0;
 
 @Component({
   standalone: true,
   selector: "tedi-dropdown",
-  imports: [NgxFloatUiModule],
+  imports: [OverlayModule],
   templateUrl: "./dropdown.component.html",
   styleUrl: "./dropdown.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -39,7 +36,7 @@ export type DropdownPosition = `${NgxFloatUiPlacements}`;
     },
   ],
 })
-export class DropdownComponent implements AfterContentChecked, OnDestroy {
+export class DropdownComponent {
   /** Current value of dropdown (used with listbox) */
   readonly value = model<string>();
 
@@ -55,109 +52,58 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
    */
   readonly preventOverflow = input(true);
 
-  /**
-   * Append floating element to given selector.
-   * Use 'body' to append at the end of DOM or empty string to append next to trigger element.
-   * @default ""
-   */
-  readonly appendTo = input("");
-
   readonly dropdownTrigger = contentChild.required(DropdownTriggerDirective);
   readonly dropdownContent = contentChild.required(DropdownContentComponent);
-  readonly floatUiComponent = viewChild.required(NgxFloatUiContentComponent);
 
   private readonly activeIndex = signal<number | null>(null);
-  readonly containerId = signal("");
-  readonly isContentHovered = signal(false);
-  readonly floatUiDisplay = signal<"inline" | "block">("inline");
+  readonly containerId = signal(`tedi-dropdown-${dropdownIdCounter++}`);
+  readonly isOpen = signal(false);
+  readonly triggerWidth = signal<number | null>(null);
 
-  private readonly platformId = inject(PLATFORM_ID);
+  readonly overlayOrigin = computed(() => this.dropdownTrigger().overlayOrigin);
 
-  constructor() {
-    if (isPlatformBrowser(this.platformId)) {
-      document.addEventListener("pointerdown", this.handleOutsideClick, true);
-    }
-  }
+  readonly overlayPositions = computed(() =>
+    toConnectedPositions(this.position(), this.preventOverflow()),
+  );
 
-  ngOnDestroy() {
-    if (isPlatformBrowser(this.platformId)) {
-      document.removeEventListener(
-        "pointerdown",
-        this.handleOutsideClick,
-        true,
-      );
-    }
-  }
-
-  ngAfterContentChecked(): void {
-    const floatUiEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
-    const container = floatUiEl.querySelector<HTMLElement>(
-      ".float-ui-container",
-    );
-
-    if (container) {
-      container.setAttribute("tabindex", "-1");
-      container.setAttribute("aria-labelledby", container.id + "_trigger");
-      this.containerId.set(container.id);
-    }
-  }
+  readonly triggerWidthVar = computed(() => {
+    const w = this.triggerWidth();
+    return w ? `${w}px` : null;
+  });
 
   showDropdown() {
-    if (this.floatUiComponent().state) return;
+    if (this.isOpen()) return;
 
-    this.floatUiComponent().show();
-    this.floatUiDisplay.set("block");
-    this.setActiveToSelectedOrFirst();
-
-    const floatUiEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
-    const triggerWidth = this.dropdownTrigger()?.host.nativeElement.offsetWidth;
-
-    if (triggerWidth) {
-      floatUiEl.style.setProperty(
-        "--_tedi-dropdown-trigger-width",
-        `${triggerWidth}px`,
-      );
+    const width = this.dropdownTrigger()?.host.nativeElement.offsetWidth;
+    if (width) {
+      this.triggerWidth.set(width);
     }
 
+    this.isOpen.set(true);
+    this.setActiveToSelectedOrFirst();
     setTimeout(() => this.focusActiveItem());
   }
 
   hideDropdown() {
-    if (this.floatUiComponent().state) {
-      this.floatUiComponent().hide();
-      this.floatUiDisplay.set("inline");
+    if (this.isOpen()) {
+      this.isOpen.set(false);
       this.activeIndex.set(null);
       this.updateTabindexes();
     }
   }
 
   toggleDropdown() {
-    if (this.floatUiComponent().state) {
+    if (this.isOpen()) {
       this.hideDropdown();
     } else {
       this.showDropdown();
     }
   }
 
-  handleOutsideClick = (event: Event) => {
-    if (!this.floatUiComponent().state) return;
-
-    const target = event.target as HTMLElement;
-
-    const triggerEl = this.dropdownTrigger().host.nativeElement;
-    const contentEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
-
-    const clickedInside =
-      triggerEl.contains(target) || contentEl.contains(target);
-
-    if (!clickedInside) {
-      this.hideDropdown();
-      triggerEl.focus();
-    }
-  };
+  onOutsideClick() {
+    this.hideDropdown();
+    this.dropdownTrigger().host.nativeElement.focus();
+  }
 
   focusFirstItem() {
     const items = this.dropdownContent().items();

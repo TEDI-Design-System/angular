@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { Component } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
+import { OverlayContainer } from "@angular/cdk/overlay";
 import { FilterComponent, FilterOption } from "./filter.component";
 import { FilterContentDirective } from "./filter-content.directive";
 import { IconComponent } from "../../base/icon/icon.component";
@@ -92,6 +93,13 @@ const TEST_OPTIONS: FilterOption[] = [
 describe("FilterComponent", () => {
   let fixture: ComponentFixture<FilterComponent>;
   let component: FilterComponent;
+  let overlayContainerElement: HTMLElement;
+
+  const openDropdown = (fix: ComponentFixture<unknown>) => {
+    const trigger = fix.debugElement.query(By.css(".tedi-filter__button"));
+    trigger.nativeElement.click();
+    fix.detectChanges();
+  };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -99,7 +107,15 @@ describe("FilterComponent", () => {
     });
     fixture = TestBed.createComponent(FilterComponent);
     component = fixture.componentInstance;
+
+    const overlayContainer = TestBed.inject(OverlayContainer);
+    overlayContainerElement = overlayContainer.getContainerElement();
+
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    overlayContainerElement.innerHTML = "";
   });
 
   it("should create", () => {
@@ -387,93 +403,92 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("showClear", true);
       fixture.componentRef.setInput("searchable", true);
       fixture.detectChanges();
+      openDropdown(fixture);
     });
 
     it("should render dropdown-item-value for each option", () => {
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options tedi-dropdown-item-value"),
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options tedi-dropdown-item-value",
       );
       expect(items.length).toBe(TEST_OPTIONS.length);
     });
 
     it("should render dropdown-item-value with checkbox type", () => {
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options tedi-dropdown-item-value"),
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options tedi-dropdown-item-value",
       );
       items.forEach((item) => {
-        expect(item.componentInstance.type()).toBe("checkbox");
+        expect(item.classList.contains("tedi-dropdown-item-value--checkbox")).toBe(true);
       });
     });
 
     it("should render dropdown-item-value-label for each option", () => {
-      const labels = fixture.debugElement.queryAll(
-        By.css(
-          ".tedi-filter-dropdown__options tedi-dropdown-item-value-label",
-        ),
+      const labels = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options tedi-dropdown-item-value-label",
       );
       expect(labels.length).toBe(TEST_OPTIONS.length);
-      expect(labels[0].nativeElement.textContent.trim()).toBe("Option A");
+      expect(labels[0].textContent!.trim()).toBe("Option A");
     });
 
     it("should pass selected state to dropdown-item-value", () => {
       fixture.componentRef.setInput("values", ["a"]);
       fixture.detectChanges();
 
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options tedi-dropdown-item-value"),
+      const checkboxes = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options tedi-dropdown-item-value input[type='checkbox']",
       );
-      expect(items[0].componentInstance.selected()).toBe(true);
-      expect(items[1].componentInstance.selected()).toBe(false);
+      expect((checkboxes[0] as HTMLInputElement).checked).toBe(true);
+      expect((checkboxes[1] as HTMLInputElement).checked).toBe(false);
     });
 
     it("should pass disabled state to dropdown-item-value", () => {
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options tedi-dropdown-item-value"),
+      const checkboxes = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options tedi-dropdown-item-value input[type='checkbox']",
       );
-      expect(items[3].componentInstance.disabled()).toBe(true);
-      expect(items[0].componentInstance.disabled()).toBe(false);
+      expect((checkboxes[3] as HTMLInputElement).disabled).toBe(true);
+      expect((checkboxes[0] as HTMLInputElement).disabled).toBe(false);
     });
 
     it("should render select-all with dropdown-item-value checkbox type", () => {
-      const selectAll = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__item--select-all tedi-dropdown-item-value"),
+      const selectAll = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__item--select-all tedi-dropdown-item-value",
       );
       expect(selectAll).toBeTruthy();
-      expect(selectAll.componentInstance.type()).toBe("checkbox");
+      expect(selectAll!.classList.contains("tedi-dropdown-item-value--checkbox")).toBe(true);
     });
 
     it("should pass indeterminate state to select-all dropdown-item-value", () => {
       fixture.componentRef.setInput("values", ["a"]);
       fixture.detectChanges();
 
-      const selectAll = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__item--select-all tedi-dropdown-item-value"),
-      );
-      expect(selectAll.componentInstance.indeterminate()).toBe(true);
-      expect(selectAll.componentInstance.selected()).toBe(false);
+      const checkbox = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__item--select-all tedi-dropdown-item-value input[type='checkbox']",
+      ) as HTMLInputElement;
+      expect(checkbox.indeterminate).toBe(true);
+      expect(checkbox.checked).toBe(false);
     });
 
     it("should pass selected state to select-all when all selected", () => {
       fixture.componentRef.setInput("values", ["a", "b", "c"]);
       fixture.detectChanges();
 
-      const selectAll = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__item--select-all tedi-dropdown-item-value"),
-      );
-      expect(selectAll.componentInstance.selected()).toBe(true);
-      expect(selectAll.componentInstance.indeterminate()).toBe(false);
+      const checkbox = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__item--select-all tedi-dropdown-item-value input[type='checkbox']",
+      ) as HTMLInputElement;
+      expect(checkbox.checked).toBe(true);
+      expect(checkbox.indeterminate).toBe(false);
     });
 
     it("should render search input when searchable", () => {
-      const search = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__search input"),
+      const search = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__search input",
       );
       expect(search).toBeTruthy();
     });
 
     it("should render clear button when showClear", () => {
-      const clear = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__clear"),
+      const clear = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__clear",
       );
       expect(clear).toBeTruthy();
     });
@@ -482,8 +497,8 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("searchable", false);
       fixture.detectChanges();
 
-      const search = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__search"),
+      const search = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__search",
       );
       expect(search).toBeNull();
     });
@@ -492,8 +507,8 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("showClear", false);
       fixture.detectChanges();
 
-      const clear = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__clear"),
+      const clear = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__clear",
       );
       expect(clear).toBeNull();
     });
@@ -502,37 +517,37 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("showSelectAll", false);
       fixture.detectChanges();
 
-      const selectAll = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__item--select-all"),
+      const selectAll = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__item--select-all",
       );
       expect(selectAll).toBeNull();
     });
 
     it("should toggle option on item click", () => {
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options .tedi-filter-dropdown__item"),
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options .tedi-filter-dropdown__item",
       );
-      items[0].nativeElement.click();
+      (items[0] as HTMLElement).click();
       fixture.detectChanges();
 
       expect(component.values()).toEqual(["a"]);
     });
 
     it("should not toggle disabled option on click", () => {
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options .tedi-filter-dropdown__item"),
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options .tedi-filter-dropdown__item",
       );
-      items[3].nativeElement.click();
+      (items[3] as HTMLElement).click();
       fixture.detectChanges();
 
       expect(component.values()).toEqual([]);
     });
 
     it("should toggle select all on select-all click", () => {
-      const selectAll = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__item--select-all"),
-      );
-      selectAll.nativeElement.click();
+      const selectAll = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__item--select-all",
+      ) as HTMLElement;
+      selectAll.click();
       fixture.detectChanges();
 
       expect(component.values()).toEqual(["a", "b", "c"]);
@@ -542,10 +557,10 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("values", ["a", "b"]);
       fixture.detectChanges();
 
-      const clear = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__clear"),
-      );
-      clear.nativeElement.click();
+      const clear = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__clear",
+      ) as HTMLElement;
+      clear.click();
       fixture.detectChanges();
 
       expect(component.values()).toEqual([]);
@@ -561,55 +576,56 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("searchable", true);
       fixture.componentRef.setInput("text", "Raviasutus");
       fixture.detectChanges();
+      openDropdown(fixture);
     });
 
     it("should have role=dialog on dropdown panel", () => {
-      const panel = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown"),
+      const panel = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown",
       );
-      expect(panel.nativeElement.getAttribute("role")).toBe("dialog");
+      expect(panel!.getAttribute("role")).toBe("dialog");
     });
 
     it("should have aria-label on dropdown panel matching text", () => {
-      const panel = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown"),
+      const panel = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown",
       );
-      expect(panel.nativeElement.getAttribute("aria-label")).toBe(
+      expect(panel!.getAttribute("aria-label")).toBe(
         "Raviasutus",
       );
     });
 
     it("should have role=listbox on options container", () => {
-      const options = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__options"),
+      const options = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__options",
       );
-      expect(options.nativeElement.getAttribute("role")).toBe("listbox");
+      expect(options!.getAttribute("role")).toBe("listbox");
     });
 
     it("should have aria-multiselectable on options container", () => {
-      const options = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__options"),
+      const options = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__options",
       );
-      expect(options.nativeElement.getAttribute("aria-multiselectable")).toBe(
+      expect(options!.getAttribute("aria-multiselectable")).toBe(
         "true",
       );
     });
 
     it("should have aria-label on options container matching text", () => {
-      const options = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__options"),
+      const options = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__options",
       );
-      expect(options.nativeElement.getAttribute("aria-label")).toBe(
+      expect(options!.getAttribute("aria-label")).toBe(
         "Raviasutus",
       );
     });
 
     it("should have role=option on each option item", () => {
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options .tedi-filter-dropdown__item"),
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options .tedi-filter-dropdown__item",
       );
       items.forEach((item) => {
-        expect(item.nativeElement.getAttribute("role")).toBe("option");
+        expect(item.getAttribute("role")).toBe("option");
       });
     });
 
@@ -617,49 +633,49 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("values", ["a"]);
       fixture.detectChanges();
 
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options [role='option']"),
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options [role='option']",
       );
-      expect(items[0].nativeElement.getAttribute("aria-selected")).toBe(
+      expect(items[0].getAttribute("aria-selected")).toBe(
         "true",
       );
-      expect(items[1].nativeElement.getAttribute("aria-selected")).toBe(
+      expect(items[1].getAttribute("aria-selected")).toBe(
         "false",
       );
     });
 
     it("should set aria-disabled on disabled options", () => {
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options [role='option']"),
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options [role='option']",
       );
-      expect(items[3].nativeElement.getAttribute("aria-disabled")).toBe(
+      expect(items[3].getAttribute("aria-disabled")).toBe(
         "true",
       );
-      expect(items[0].nativeElement.getAttribute("aria-disabled")).toBeNull();
+      expect(items[0].getAttribute("aria-disabled")).toBeNull();
     });
 
     it("should have unique IDs on option items", () => {
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options [role='option']"),
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options [role='option']",
       );
-      const ids = items.map((item) => item.nativeElement.id);
+      const ids = Array.from(items).map((item) => item.id);
 
       expect(ids.every((id: string) => id.length > 0)).toBe(true);
       expect(new Set(ids).size).toBe(ids.length);
     });
 
     it("should have role=checkbox on select-all", () => {
-      const selectAll = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__item--select-all"),
+      const selectAll = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__item--select-all",
       );
-      expect(selectAll.nativeElement.getAttribute("role")).toBe("checkbox");
+      expect(selectAll!.getAttribute("role")).toBe("checkbox");
     });
 
     it("should set aria-checked=false on select-all when none selected", () => {
-      const selectAll = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__item--select-all"),
+      const selectAll = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__item--select-all",
       );
-      expect(selectAll.nativeElement.getAttribute("aria-checked")).toBe(
+      expect(selectAll!.getAttribute("aria-checked")).toBe(
         "false",
       );
     });
@@ -668,10 +684,10 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("values", ["a"]);
       fixture.detectChanges();
 
-      const selectAll = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__item--select-all"),
+      const selectAll = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__item--select-all",
       );
-      expect(selectAll.nativeElement.getAttribute("aria-checked")).toBe(
+      expect(selectAll!.getAttribute("aria-checked")).toBe(
         "mixed",
       );
     });
@@ -680,36 +696,36 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("values", ["a", "b", "c"]);
       fixture.detectChanges();
 
-      const selectAll = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__item--select-all"),
+      const selectAll = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__item--select-all",
       );
-      expect(selectAll.nativeElement.getAttribute("aria-checked")).toBe(
+      expect(selectAll!.getAttribute("aria-checked")).toBe(
         "true",
       );
     });
 
     it("should have role=searchbox on search input", () => {
-      const search = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__search input"),
+      const search = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__search input",
       );
-      expect(search.nativeElement.getAttribute("role")).toBe("searchbox");
+      expect(search!.getAttribute("role")).toBe("searchbox");
     });
 
     it("should have aria-label on search input", () => {
-      const search = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__search input"),
+      const search = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__search input",
       );
-      expect(search.nativeElement.getAttribute("aria-label")).toBe(
+      expect(search!.getAttribute("aria-label")).toBe(
         "Raviasutus",
       );
     });
 
     it("should not have aria-activedescendant when no option is focused", () => {
-      const options = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__options"),
+      const options = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__options",
       );
       expect(
-        options.nativeElement.getAttribute("aria-activedescendant"),
+        options!.getAttribute("aria-activedescendant"),
       ).toBeNull();
     });
 
@@ -717,12 +733,12 @@ describe("FilterComponent", () => {
       component.onOptionsFocus();
       fixture.detectChanges();
 
-      const options = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__options"),
+      const options = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__options",
       );
       const firstOptionId = component.getOptionId(0);
       expect(
-        options.nativeElement.getAttribute("aria-activedescendant"),
+        options!.getAttribute("aria-activedescendant"),
       ).toBe(firstOptionId);
     });
 
@@ -732,36 +748,34 @@ describe("FilterComponent", () => {
       component.onOptionsBlur();
       fixture.detectChanges();
 
-      const options = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__options"),
+      const options = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__options",
       );
       expect(
-        options.nativeElement.getAttribute("aria-activedescendant"),
+        options!.getAttribute("aria-activedescendant"),
       ).toBeNull();
     });
 
     it("should have tabindex=0 on select-all", () => {
-      const selectAll = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__item--select-all"),
+      const selectAll = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__item--select-all",
       );
-      expect(selectAll.nativeElement.getAttribute("tabindex")).toBe("0");
+      expect(selectAll!.getAttribute("tabindex")).toBe("0");
     });
 
     it("should have tabindex=0 on options listbox", () => {
-      const options = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__options"),
+      const options = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__options",
       );
-      expect(options.nativeElement.getAttribute("tabindex")).toBe("0");
+      expect(options!.getAttribute("tabindex")).toBe("0");
     });
 
     it("should not have tabbable checkbox inputs inside dropdown-item-value", () => {
-      const checkboxes = fixture.debugElement.queryAll(
-        By.css(
-          ".tedi-filter-dropdown__options input[type='checkbox']",
-        ),
+      const checkboxes = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options input[type='checkbox']",
       );
       checkboxes.forEach((cb) => {
-        expect(cb.nativeElement.getAttribute("tabindex")).toBe("-1");
+        expect(cb.getAttribute("tabindex")).toBe("-1");
       });
     });
   });
@@ -898,59 +912,62 @@ describe("FilterComponent", () => {
     });
 
     it("should apply focused class to active option", () => {
+      openDropdown(fixture);
       component.onOptionsFocus();
       fixture.detectChanges();
 
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options .tedi-filter-dropdown__item"),
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options .tedi-filter-dropdown__item",
       );
       expect(
-        items[0].nativeElement.classList.contains(
+        items[0].classList.contains(
           "tedi-filter-dropdown__item--focused",
         ),
       ).toBe(true);
       expect(
-        items[1].nativeElement.classList.contains(
+        items[1].classList.contains(
           "tedi-filter-dropdown__item--focused",
         ),
       ).toBe(false);
     });
 
     it("should move focused class on arrow navigation", () => {
+      openDropdown(fixture);
       component.onOptionsFocus();
       component.onOptionsKeydown(
         new KeyboardEvent("keydown", { key: "ArrowDown" }),
       );
       fixture.detectChanges();
 
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options .tedi-filter-dropdown__item"),
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options .tedi-filter-dropdown__item",
       );
       expect(
-        items[0].nativeElement.classList.contains(
+        items[0].classList.contains(
           "tedi-filter-dropdown__item--focused",
         ),
       ).toBe(false);
       expect(
-        items[1].nativeElement.classList.contains(
+        items[1].classList.contains(
           "tedi-filter-dropdown__item--focused",
         ),
       ).toBe(true);
     });
 
     it("should remove focused class on blur", () => {
+      openDropdown(fixture);
       component.onOptionsFocus();
       fixture.detectChanges();
 
       component.onOptionsBlur();
       fixture.detectChanges();
 
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options .tedi-filter-dropdown__item"),
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options .tedi-filter-dropdown__item",
       );
       items.forEach((item) => {
         expect(
-          item.nativeElement.classList.contains(
+          item.classList.contains(
             "tedi-filter-dropdown__item--focused",
           ),
         ).toBe(false);
@@ -958,14 +975,15 @@ describe("FilterComponent", () => {
     });
 
     it("should update aria-activedescendant on navigation", () => {
+      openDropdown(fixture);
       component.onOptionsFocus();
       fixture.detectChanges();
 
-      const optionsEl = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__options"),
+      const optionsEl = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__options",
       );
       expect(
-        optionsEl.nativeElement.getAttribute("aria-activedescendant"),
+        optionsEl!.getAttribute("aria-activedescendant"),
       ).toBe(component.getOptionId(0));
 
       component.onOptionsKeydown(
@@ -974,18 +992,19 @@ describe("FilterComponent", () => {
       fixture.detectChanges();
 
       expect(
-        optionsEl.nativeElement.getAttribute("aria-activedescendant"),
+        optionsEl!.getAttribute("aria-activedescendant"),
       ).toBe(component.getOptionId(1));
     });
 
     it("should handle select-all Enter keydown", () => {
       fixture.componentRef.setInput("showSelectAll", true);
       fixture.detectChanges();
+      openDropdown(fixture);
 
-      const selectAll = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__item--select-all"),
-      );
-      selectAll.triggerEventHandler("keydown.enter", {});
+      const selectAll = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__item--select-all",
+      ) as HTMLElement;
+      selectAll.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
       fixture.detectChanges();
 
       expect(component.values()).toEqual(["a", "b", "c"]);
@@ -994,13 +1013,12 @@ describe("FilterComponent", () => {
     it("should handle select-all Space keydown", () => {
       fixture.componentRef.setInput("showSelectAll", true);
       fixture.detectChanges();
+      openDropdown(fixture);
 
-      const selectAll = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__item--select-all"),
-      );
-      selectAll.triggerEventHandler("keydown.space", {
-        preventDefault: () => {},
-      });
+      const selectAll = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__item--select-all",
+      ) as HTMLElement;
+      selectAll.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
       fixture.detectChanges();
 
       expect(component.values()).toEqual(["a", "b", "c"]);
@@ -1166,21 +1184,26 @@ describe("FilterComponent", () => {
     });
 
     it("should render default type dropdown-item-value", () => {
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options tedi-dropdown-item-value"),
+      openDropdown(fixture);
+
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options tedi-dropdown-item-value",
       );
       expect(items.length).toBe(TEST_OPTIONS.length);
       items.forEach((item) => {
-        expect(item.componentInstance.type()).toBe("default");
+        expect(item.classList.contains("tedi-dropdown-item-value--checkbox")).toBe(false);
+        expect(item.classList.contains("tedi-dropdown-item-value--radio")).toBe(false);
       });
     });
 
     it("should not have aria-multiselectable on listbox", () => {
-      const options = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__options"),
+      openDropdown(fixture);
+
+      const options = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown__options",
       );
       expect(
-        options.nativeElement.getAttribute("aria-multiselectable"),
+        options!.getAttribute("aria-multiselectable"),
       ).toBeNull();
     });
 
@@ -1225,14 +1248,15 @@ describe("FilterComponent", () => {
     it("should mark option as selected via aria-selected", () => {
       fixture.componentRef.setInput("value", "a");
       fixture.detectChanges();
+      openDropdown(fixture);
 
-      const items = fixture.debugElement.queryAll(
-        By.css("[role='option']"),
+      const items = overlayContainerElement.querySelectorAll(
+        "[role='option']",
       );
-      expect(items[0].nativeElement.getAttribute("aria-selected")).toBe(
+      expect(items[0].getAttribute("aria-selected")).toBe(
         "true",
       );
-      expect(items[1].nativeElement.getAttribute("aria-selected")).toBe(
+      expect(items[1].getAttribute("aria-selected")).toBe(
         "false",
       );
     });
@@ -1246,20 +1270,24 @@ describe("FilterComponent", () => {
     });
 
     it("should select option on item click", () => {
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options .tedi-filter-dropdown__item"),
+      openDropdown(fixture);
+
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options .tedi-filter-dropdown__item",
       );
-      items[0].nativeElement.click();
+      (items[0] as HTMLElement).click();
       fixture.detectChanges();
 
       expect(component.value()).toBe("a");
     });
 
     it("should not select disabled option on click", () => {
-      const items = fixture.debugElement.queryAll(
-        By.css(".tedi-filter-dropdown__options .tedi-filter-dropdown__item"),
+      openDropdown(fixture);
+
+      const items = overlayContainerElement.querySelectorAll(
+        ".tedi-filter-dropdown__options .tedi-filter-dropdown__item",
       );
-      items[3].nativeElement.click();
+      (items[3] as HTMLElement).click();
       fixture.detectChanges();
 
       expect(component.value()).toBe("");
@@ -1348,11 +1376,13 @@ describe("FilterComponent", () => {
     });
 
     it("should render custom content in dropdown", () => {
-      const customContent = hostFixture.debugElement.query(
-        By.css(".custom-datepicker"),
+      openDropdown(hostFixture);
+
+      const customContent = overlayContainerElement.querySelector(
+        ".custom-datepicker",
       );
       expect(customContent).toBeTruthy();
-      expect(customContent.nativeElement.textContent).toContain(
+      expect(customContent!.textContent).toContain(
         "Custom datepicker content",
       );
     });
@@ -1372,8 +1402,10 @@ describe("FilterComponent", () => {
     });
 
     it("should not render multiselect checkboxes", () => {
-      const checkboxes = hostFixture.debugElement.queryAll(
-        By.css("tedi-dropdown-item-value"),
+      openDropdown(hostFixture);
+
+      const checkboxes = overlayContainerElement.querySelectorAll(
+        "tedi-dropdown-item-value",
       );
       expect(checkboxes.length).toBe(0);
     });
@@ -1398,8 +1430,10 @@ describe("FilterComponent", () => {
     });
 
     it("should apply custom modifier class on dropdown panel", () => {
-      const panel = hostFixture.debugElement.query(
-        By.css(".tedi-filter-dropdown--custom"),
+      openDropdown(hostFixture);
+
+      const panel = overlayContainerElement.querySelector(
+        ".tedi-filter-dropdown--custom",
       );
       expect(panel).toBeTruthy();
     });

@@ -1,15 +1,27 @@
 <ng-content select="[tedi-popover-trigger]" />
-<float-ui-content
-  #floatUiComponent
-  looseTrigger="none"
-  ariaRole="dialog"
-  [appendTo]="appendTo()"
-  [floatUiLoose]="floatUiComponent"
-  [targetElement]="popoverTrigger().host.nativeElement"
-  [loosePlacement]="position()"
-  [preventOverflow]="position().includes('auto') ? false : preventOverflow()"
-  [applyClass]="floatUiContainerClass()"
-  [disableAnimation]="true"
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="overlayOrigin()"
+  [cdkConnectedOverlayOpen]="isOpen()"
+  [cdkConnectedOverlayPositions]="overlayPositions()"
+  (positionChange)="onPositionChange($event)"
+  (attach)="onOverlayAttach()"
 >
-  <ng-content select="tedi-popover-content" />
-</float-ui-content>
+  <div
+    [class]="panelClasses()"
+    [id]="containerId()"
+    [attr.data-placement]="currentPlacement()"
+    [attr.aria-labelledby]="ariaLabelledBy()"
+    tabindex="-1"
+    role="dialog"
+  >
+    @if (withArrow()) {
+      <div
+        class="tedi-popover__arrow"
+        [style.left.px]="arrowLeft()"
+        [style.top.px]="arrowTop()"
+      ></div>
+    }
+    <ng-content select="tedi-popover-content" />
+  </div>
+</ng-template>

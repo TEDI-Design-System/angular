@@ -10,6 +10,7 @@ import {
   signal,
   ViewEncapsulation,
 } from "@angular/core";
+import { CdkOverlayOrigin } from "@angular/cdk/overlay";
 import { TooltipComponent } from "../tooltip.component";
 
 @Component({
@@ -18,10 +19,12 @@ import { TooltipComponent } from "../tooltip.component";
   template: "<ng-content />",
   styleUrl: "../tooltip.component.scss",
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  hostDirectives: [CdkOverlayOrigin],
 })
 export class TooltipTriggerComponent implements AfterContentChecked {
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  readonly overlayOrigin = inject(CdkOverlayOrigin, { self: true });
   private renderer = inject(Renderer2);
   readonly tooltip = inject(TooltipComponent);
   private interactiveElement = signal<HTMLElement | null>(null);

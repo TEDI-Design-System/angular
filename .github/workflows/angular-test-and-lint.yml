@@ -98,7 +98,7 @@ jobs:
             --skip-git --skip-tests --style=scss --ssr=false --skip-install
           cd test-app
           npm install
-          npm install ../dist/*.tgz @angular/animations@${{ matrix.angular-version }} @angular/forms@${{ matrix.angular-version }} @angular/cdk@${{ matrix.angular-version }} ngx-float-ui@${{ matrix.angular-version }}
+          npm install ../dist/*.tgz @angular/animations@${{ matrix.angular-version }} @angular/forms@${{ matrix.angular-version }} @angular/cdk@${{ matrix.angular-version }}
 
           # Import a component to verify the library is consumable
           cat > src/app/app.component.ts << 'EOF'
