@@ -3,11 +3,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  forwardRef,
   inject,
   input,
   output,
-  ViewChild,
+  viewChild,
   ViewEncapsulation,
 } from "@angular/core";
 import { IconComponent } from "../../../base/icon/icon.component";
@@ -57,7 +56,7 @@ export class HeaderLanguageComponent {
    */
   languageChange = output<Language>();
 
-  @ViewChild(forwardRef(() => PopoverComponent)) popover?: PopoverComponent;
+  readonly popover = viewChild(PopoverComponent);
 
   translationService = inject(TediTranslationService);
 
@@ -66,6 +65,6 @@ export class HeaderLanguageComponent {
   handleChangeLang(lang: Language) {
     this.languageChange.emit(lang);
     this.translationService.setLanguage(lang);
-    this.popover?.hidePopover();
+    this.popover()?.hidePopover();
   }
 }

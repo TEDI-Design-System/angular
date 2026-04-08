@@ -102,7 +102,6 @@ export class DropdownComponent {
 
   onOutsideClick() {
     this.hideDropdown();
-    this.dropdownTrigger().host.nativeElement.focus();
   }
 
   focusFirstItem() {

@@ -106,8 +106,8 @@ export class TooltipComponent implements AfterContentChecked {
   }
 
   showTooltip() {
+    clearTimeout(this.hideTimeout);
     if (!this.isOpen()) {
-      clearTimeout(this.hideTimeout);
       this.isOpen.set(true);
     }
   }

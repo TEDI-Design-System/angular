@@ -226,7 +226,7 @@ describe("DropdownComponent", () => {
   });
 
   describe("onOutsideClick()", () => {
-    it("should hide dropdown and focus trigger", () => {
+    it("should hide dropdown without refocusing trigger", () => {
       openDropdown();
 
       const hideSpy = jest.spyOn(dropdown, "hideDropdown");
@@ -236,7 +236,7 @@ describe("DropdownComponent", () => {
       dropdown.onOutsideClick();
 
       expect(hideSpy).toHaveBeenCalled();
-      expect(focusSpy).toHaveBeenCalled();
+      expect(focusSpy).not.toHaveBeenCalled();
     });
   });
 
