@@ -1,9 +1,11 @@
-import { Meta, moduleMetadata, StoryFn, StoryObj } from "@storybook/angular";
+import {Meta, moduleMetadata, StoryFn, StoryObj} from "@storybook/angular";
 
-import { CommonModule } from "@angular/common";
-import { TabsComponent } from "./tabs.component";
-import { TabComponent } from "./tab/tab.component";
-import { TabContentComponent } from "./tab-content/tab-content.component";
+import {CommonModule} from "@angular/common";
+import {TabsComponent} from "./tabs.component";
+import {TabComponent} from "./tab/tab.component";
+import {TabContentComponent} from "./tab-content/tab-content.component";
+import {TabCardComponent} from "./tab-card/tab-card.component";
+import {TabsVerticalComponent} from "./tabs-vertical/tabs-vertical.component";
 
 /**
  * <p>Tabs allow to group content into separate chunks to be displayed one at the time.</p>
@@ -17,7 +19,7 @@ export default {
   decorators: [
     moduleMetadata({
       declarations: [],
-      imports: [CommonModule, TabsComponent, TabComponent, TabContentComponent],
+      imports: [CommonModule, TabsComponent, TabComponent, TabContentComponent, TabCardComponent, TabsVerticalComponent],
     }),
   ],
   argTypes: {
@@ -25,7 +27,7 @@ export default {
       description: "Tab unique id",
       table: {
         category: "tab",
-        type: { summary: "string" },
+        type: {summary: "string"},
       },
     },
     selected: {
@@ -33,16 +35,16 @@ export default {
         "Whether tab is initially selected. Should be used only for non routed tabs",
       table: {
         category: "tab",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
+        type: {summary: "boolean"},
+        defaultValue: {summary: "false"},
       },
     },
     disabled: {
       description: "Whether tab is disabled",
       table: {
         category: "tab",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
+        type: {summary: "boolean"},
+        defaultValue: {summary: "false"},
       },
     },
     contentTabId: {
@@ -50,14 +52,39 @@ export default {
       description: "Id that matches `tabId` given to the `tedi-tab` component",
       table: {
         category: "tab-content",
-        type: { summary: "string" },
+        type: {summary: "string"},
+      },
+    },
+    tabCardId: {
+      name: "tabId",
+      description: "Tab unique id",
+      table: {
+        category: "tab-card",
+        type: {summary: "string"},
+      },
+    },
+    tabCardTitle: {
+      name: "title",
+      description: "Tab title",
+      table: {
+        category: "tab-card",
+        type: {summary: "string"},
+      },
+    },
+    tabCardDisabled: {
+      name: "disabled",
+      description: "Whether tab is disabled",
+      table: {
+        category: "tab-card",
+        type: {summary: "boolean"},
+        defaultValue: {summary: "false"},
       },
     },
   },
 } as Meta<TabComponent>;
 
-const TabsTemplate: StoryFn<TabComponent> = ({ ...args }) => ({
-  props: { ...args },
+const TabsTemplate: StoryFn<TabComponent> = ({...args}) => ({
+  props: {...args},
   template: `
     <tedi-tabs>
       <button tedi-tab [selected]="true" tabId="tab-1">Tab 1</button>
@@ -76,16 +103,37 @@ const TabsTemplate: StoryFn<TabComponent> = ({ ...args }) => ({
   `,
 });
 
-const RoutedTabTemplate: StoryFn<TabComponent> = ({ ...args }) => ({
-  props: { ...args },
+const RoutedTabTemplate: StoryFn<TabComponent> = ({...args}) => ({
+  props: {...args},
   template: `
     <tedi-tabs>
       <a tedi-tab routerLink="1" tabId="tab-1">Tab 1</a>
       <a tedi-tab routerLink="2" tabId="tab-2">Tab 2</a>
       <a tedi-tab routerLink="3">Tab 3</a>
-      
+
       router-outlet goes here
     </tedi-tabs>
+  `,
+});
+
+const VerticalTabTemplate: StoryFn<TabComponent> = ({...args}) => ({
+  props: {...args},
+  template: `
+    <tedi-tabs-vertical>
+      <div tedi-tab-card tabId="tab-1" title="Tab 1"></div>
+      <div tedi-tab-card tabId="tab-2" title="Tab 2"></div>
+      <div tedi-tab-card tabId="tab-3" title="Tab 3 (disabled)" [disabled]="true"></div>
+
+      <tedi-tab-content tabId="tab-1">
+        Tab 1 content
+      </tedi-tab-content>
+      <tedi-tab-content tabId="tab-2">
+        Tab 2 content
+      </tedi-tab-content>
+      <tedi-tab-content tabId="tab-3">
+        Tab 3 content
+      </tedi-tab-content>
+    </tedi-tabs-vertical>
   `,
 });
 
@@ -97,4 +145,8 @@ export const Default: TableStylesStory = {
 
 export const RoutedTabs: TableStylesStory = {
   render: RoutedTabTemplate,
+};
+
+export const VerticalTabs: TableStylesStory = {
+  render: VerticalTabTemplate,
 };

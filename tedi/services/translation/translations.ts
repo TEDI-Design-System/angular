@@ -65,6 +65,12 @@ export const translationsMap = {
     en: "Breadcrumbs",
     ru: "Навигационная цепочка",
   },
+  "back": {
+    components: ["Tabs"],
+    et: "Tagasi",
+    en: "Back",
+    ru: "Назад",
+  },
   more: {
     components: ["Tabs"],
     et: "Veel",

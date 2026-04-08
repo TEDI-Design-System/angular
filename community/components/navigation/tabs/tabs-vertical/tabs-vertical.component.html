@@ -1,0 +1,22 @@
+<ng-template #tabsList>
+  <ng-content select="[tedi-tab-card]"/>
+</ng-template>
+
+@if (activeTabContent(); as activeContent) {
+  <button tedi-button type="button" variant="neutral" class="tedi-tabs-vertical__back-link" (click)="unselectAllTabs()">
+    <tedi-icon name="arrow_back" [size]="18"/>
+    <span>{{ "back" | tediTranslate }}</span>
+  </button>
+
+  <h3 tedi-text>{{ activeTabTitle() }}</h3>
+
+  <tedi-card class="tedi-tabs-vertical__card">
+    <tedi-card-content>
+      <ng-container *ngTemplateOutlet="activeContent"/>
+    </tedi-card-content>
+  </tedi-card>
+} @else {
+  <tedi-accordion class="tedi-tabs-vertical__accordion" role="tablist">
+    <ng-container *ngTemplateOutlet="tabsList"/>
+  </tedi-accordion>
+}
