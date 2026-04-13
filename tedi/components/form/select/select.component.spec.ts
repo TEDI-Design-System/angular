@@ -34,6 +34,7 @@ import { InputState } from "../form-field/form-field.component";
       [multiRow]="multiRow"
       [dropdownWidthRef]="dropdownWidthRef"
       [maxDropdownHeight]="maxDropdownHeight"
+      [searchFn]="searchFn"
       [formControl]="control"
     >
       @if (useOptionTemplate) {
@@ -75,6 +76,7 @@ class TestHostComponent {
   multiRow = false;
   dropdownWidthRef: any = undefined;
   maxDropdownHeight: number | undefined = undefined;
+  searchFn: ((term: string, item: unknown) => boolean) | undefined = undefined;
   useOptionTemplate = false;
   useValueTemplate = false;
   control = new FormControl<unknown>(null);
@@ -481,6 +483,35 @@ describe("SelectComponent", () => {
       const options = getOptions();
       expect(options.length).toBe(1);
       expect(options[0].textContent).toContain("Option 1");
+    }));
+
+    it("should use custom searchFn when provided", fakeAsync(() => {
+      host.items = [
+        { label: "Apple", code: "APL" },
+        { label: "Banana", code: "BNA" },
+        { label: "Cherry", code: "CHR" },
+      ];
+      host.bindValue = "code";
+      host.searchFn = (term: string, item: unknown) => {
+        const record = item as Record<string, string>;
+        return record["code"].toLowerCase().includes(term);
+      };
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "bna";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      expect(options.length).toBe(1);
+      expect(options[0].textContent).toContain("Banana");
     }));
 
     it("should show no options message when filter matches nothing", fakeAsync(() => {
@@ -1063,6 +1094,40 @@ describe("SelectComponent", () => {
       tick();
 
       expect(select.visibleSelectedValues()).toEqual(["Option 1"]);
+    }));
+
+    it("should preserve hidden selections when selecting during search", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.searchable = true;
+      fixture.detectChanges();
+      tick();
+
+      // Pre-select Option 1 and Option 2
+      select.selectedValues.set(["Option 1", "Option 2"]);
+      fixture.detectChanges();
+      tick();
+
+      // Open and search for "Option 3" (hides Option 1 and Option 2)
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 3";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      // Select Option 3 from filtered results
+      const options = getOptions();
+      expect(options.length).toBe(1);
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      // All three should be selected (hidden Option 1/2 preserved)
+      expect(select.selectedValues()).toEqual(expect.arrayContaining(["Option 1", "Option 2", "Option 3"]));
+      expect(select.selectedValues().length).toBe(3);
     }));
 
     it("optionGroups should group options correctly", () => {
@@ -1831,6 +1896,36 @@ describe("SelectComponent", () => {
       fixture.detectChanges();
       tick();
       expect(select.isOpen()).toBe(false);
+    }));
+  });
+
+  describe("arrow click", () => {
+    it("should close an open searchable select when clicking the arrow", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(true);
+
+      const arrow = hostEl.querySelector(".tedi-select__arrow") as HTMLElement;
+      arrow.click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(false);
+    }));
+
+    it("should open a closed searchable select when clicking the arrow", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+      expect(select.isOpen()).toBe(false);
+
+      const arrow = hostEl.querySelector(".tedi-select__arrow") as HTMLElement;
+      arrow.click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(true);
     }));
   });
 
