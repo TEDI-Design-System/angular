@@ -73,7 +73,7 @@ class FilterWithCustomContentHostComponent {
     />
   `,
 })
-class SingleSelectHostComponent2 {
+class SingleSelectHost2Component {
   options: FilterOption[] = [
     { label: "Option A", value: "a" },
     { label: "Option B", value: "b" },
@@ -1316,12 +1316,12 @@ describe("FilterComponent", () => {
   });
 
   describe("reactive forms - single-select with options", () => {
-    let hostFixture: ComponentFixture<SingleSelectHostComponent2>;
-    let host: SingleSelectHostComponent2;
+    let hostFixture: ComponentFixture<SingleSelectHost2Component>;
+    let host: SingleSelectHost2Component;
     let filterComponent: FilterComponent;
 
     beforeEach(() => {
-      hostFixture = TestBed.createComponent(SingleSelectHostComponent2);
+      hostFixture = TestBed.createComponent(SingleSelectHost2Component);
       host = hostFixture.componentInstance;
       hostFixture.detectChanges();
       filterComponent = hostFixture.debugElement.query(
