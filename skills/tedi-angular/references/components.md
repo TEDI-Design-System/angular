@@ -224,6 +224,7 @@ Composed of sub-components:
 **Inputs:**
 - `variant: RadioCardVariant = "primary"` — "primary" or "secondary"
 - `grouped: boolean = false` — join cards in a button-group layout
+- `showIndicator: boolean = true` — show/hide the radio indicator visually
 
 ```html
 <!-- Separate cards (default) -->
@@ -356,6 +357,7 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `size: FilterSize = "default"` — "default" or "large"
 - `multiselect: boolean = false` — multiselect dropdown mode
 - `options: FilterOption[] = []` — dropdown options `{ label, value, disabled? }`
+- `preserveLabel: boolean = false` — when true, single-select shows "Text: SelectedLabel" instead of replacing text
 - `searchable: boolean = false` — show search field in dropdown
 - `showSelectAll: boolean = false` — show "Select all" in multiselect
 - `showClear: boolean = false` — show clear action in dropdown
@@ -375,6 +377,9 @@ Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle
 
 <!-- Single-select dropdown -->
 <tedi-filter text="Service" [options]="options" [(value)]="value" [showClear]="true" />
+
+<!-- Single-select with label preserved (shows "Service: Option A") -->
+<tedi-filter text="Service" [options]="options" [(value)]="value" [preserveLabel]="true" />
 
 <!-- Multiselect dropdown -->
 <tedi-filter text="Hospital" [multiselect]="true" [options]="options" [(values)]="values"
@@ -829,6 +834,10 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 **Selector:** `tedi-checkbox` | ControlValueAccessor
 - `inputId: string`, `value: string`, `size: CheckboxSize`, `hasError: boolean`
 - Models: `checked: boolean | null`, `indeterminate: boolean`, `disabled: boolean`
+
+### CheckboxCard
+**Selector:** `label[tedi-checkbox-card]`
+- `variant: CheckboxCardVariant = "primary"`, `showIndicator: boolean = true`
 
 ### CheckboxGroup / CheckboxCardGroup
 **Selector:** `tedi-checkbox-group`, `tedi-checkbox-card-group`

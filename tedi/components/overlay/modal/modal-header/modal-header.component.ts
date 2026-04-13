@@ -7,6 +7,7 @@ import {
 } from "@angular/core";
 import { ClosingButtonComponent } from "../../../buttons/closing-button/closing-button.component";
 import { ModalComponent } from "../modal.component";
+import { ModalRef } from "../modal-ref";
 
 @Component({
   standalone: true,
@@ -16,14 +17,25 @@ import { ModalComponent } from "../modal.component";
   styleUrl: "../modal.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: "tedi-modal-header",
+  },
 })
 export class ModalHeaderComponent {
   /** Should show closing button? */
   readonly showClose = input(true);
 
-  private readonly modal = inject(ModalComponent);
+  /** @deprecated Injected when used inside the old template-based tedi-modal. */
+  private readonly modal = inject(ModalComponent, { optional: true });
+
+  /** Injected when opened via ModalService. */
+  private readonly modalRef = inject(ModalRef, { optional: true });
 
   closeModal() {
-    this.modal.open.set(false);
+    if (this.modalRef) {
+      this.modalRef.close();
+    } else if (this.modal) {
+      this.modal.open.set(false);
+    }
   }
 }

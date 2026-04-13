@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Component } from "@angular/core";
 import { ModalHeaderComponent } from "./modal-header.component";
 import { ModalComponent } from "../modal.component";
+import { ModalRef } from "../modal-ref";
 import { viewChild } from "@angular/core";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
 
@@ -85,5 +86,36 @@ describe("ModalHeaderComponent", () => {
     fixture.detectChanges();
 
     expect(modal.open.set).toHaveBeenCalledWith(false);
+  });
+});
+
+describe("ModalHeaderComponent (service mode)", () => {
+  let fixture: ComponentFixture<TestHostComponent>;
+  let host: TestHostComponent;
+  let component: ModalHeaderComponent;
+  let mockModalRef: { close: jest.Mock };
+
+  beforeEach(() => {
+    mockModalRef = { close: jest.fn() };
+
+    TestBed.configureTestingModule({
+      imports: [TestHostComponent],
+      providers: [
+        { provide: ModalComponent, useValue: null },
+        { provide: ModalRef, useValue: mockModalRef },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    });
+
+    fixture = TestBed.createComponent(TestHostComponent);
+    fixture.detectChanges();
+
+    host = fixture.componentInstance;
+    component = host.header();
+  });
+
+  it("should close via ModalRef when in service mode", () => {
+    component.closeModal();
+    expect(mockModalRef.close).toHaveBeenCalled();
   });
 });

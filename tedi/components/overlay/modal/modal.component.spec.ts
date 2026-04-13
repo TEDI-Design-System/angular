@@ -36,6 +36,7 @@ describe("ModalComponent", () => {
     expect(component.width()).toBe("sm");
     expect(component.position()).toBe("center");
     expect(component.open()).toBe(false);
+    expect(component.closeOnBackdropClick()).toBe(true);
   });
 
   it("should apply correct default classes", () => {
@@ -43,7 +44,11 @@ describe("ModalComponent", () => {
     expect(classes).toContain("tedi-modal--default");
     expect(classes).toContain("tedi-modal--sm");
     expect(classes).toContain("tedi-modal--center");
+    expect(classes).toContain("tedi-modal--sm");
+    expect(classes).toContain("tedi-modal--center");
+    expect(classes).not.toContain("tedi-modal--top");
     expect(classes).not.toContain("tedi-modal--open");
+    expect(classes).not.toContain("tedi-modal--service");
   });
 
   it("should add 'tedi-modal--open' class when opened", () => {
@@ -95,6 +100,73 @@ describe("ModalComponent", () => {
     expect(documentRef.activeElement).toBe(button);
 
     button.remove();
+  });
+
+  it("should apply top and center classes when position is top", () => {
+    fixture.componentRef.setInput("position", "top");
+    fixture.detectChanges();
+
+    const classes = hostEl.getAttribute("class")!;
+    expect(classes).toContain("tedi-modal--top");
+    expect(classes).toContain("tedi-modal--center");
+  });
+
+  it("should not apply width class for custom width values", () => {
+    fixture.componentRef.setInput("width", "80%");
+    fixture.detectChanges();
+
+    const classes = hostEl.getAttribute("class")!;
+    expect(classes).not.toContain("tedi-modal--80%");
+    expect(classes).toContain("tedi-modal--default");
+  });
+
+  it("should set width style on dialog for custom width", () => {
+    fixture.componentRef.setInput("width", "80%");
+    fixture.componentRef.setInput("open", true);
+    fixture.detectChanges();
+
+    const dialog = hostEl.querySelector(".tedi-modal__dialog") as HTMLElement;
+    expect(dialog.style.width).toBe("80%");
+  });
+
+  it("should not set width style for preset widths", () => {
+    fixture.componentRef.setInput("width", "lg");
+    fixture.componentRef.setInput("open", true);
+    fixture.detectChanges();
+
+    const dialog = hostEl.querySelector(".tedi-modal__dialog") as HTMLElement;
+    expect(dialog.style.width).toBe("");
+  });
+
+  it("should not apply top class for side positions", () => {
+    fixture.componentRef.setInput("position", "left");
+    fixture.detectChanges();
+
+    const classes = hostEl.getAttribute("class")!;
+    expect(classes).not.toContain("tedi-modal--top");
+  });
+
+  it("should close on backdrop click by default", () => {
+    fixture.componentRef.setInput("open", true);
+    fixture.detectChanges();
+
+    component.onBackdropClick();
+
+    expect(component.open()).toBe(false);
+  });
+
+  it("should not close on backdrop click when closeOnBackdropClick is false", () => {
+    fixture.componentRef.setInput("open", true);
+    fixture.componentRef.setInput("closeOnBackdropClick", false);
+    fixture.detectChanges();
+
+    component.onBackdropClick();
+
+    expect(component.open()).toBe(true);
+
+    // Cleanup: close modal so body overflow is restored
+    fixture.componentRef.setInput("open", false);
+    fixture.detectChanges();
   });
 });
 

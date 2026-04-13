@@ -52,7 +52,6 @@ export interface FilterOption {
     DropdownItemValueLabelComponent,
     FormFieldComponent,
     TextFieldComponent,
-    FilterContentDirective,
   ],
   templateUrl: "./filter.component.html",
   styleUrl: "./filter.component.scss",
@@ -101,7 +100,7 @@ export class FilterComponent implements ControlValueAccessor {
    */
   readonly multiselect = input<boolean>(false);
   /**
-   * Options for the dropdown (single-select or multiselect).
+   * Options for the dropdown. Enables single-select mode, or multiselect mode when combined with the multiselect input.
    */
   readonly options = input<FilterOption[]>([]);
   /**
@@ -141,6 +140,12 @@ export class FilterComponent implements ControlValueAccessor {
    * Emitted when the clear button is clicked in a custom content dropdown.
    */
   readonly cleared = output<void>();
+  /**
+   * When true, the filter label is preserved as a prefix when a value is selected.
+   * E.g. "Teenus: Optometristi vastuvõtt" instead of just "Optometristi vastuvõtt".
+   * @default false
+   */
+  readonly preserveLabel = input<boolean>(false);
   readonly dropdown = viewChild<DropdownComponent>("dropdown");
   private readonly dropdownPanel =
     viewChild<ElementRef<HTMLElement>>("dropdownPanel");
@@ -196,7 +201,11 @@ export class FilterComponent implements ControlValueAccessor {
 
   readonly displayText = computed(() => {
     if (this.isSingleSelect()) {
-      return this.selectedLabel() ?? this.text();
+      const label = this.selectedLabel();
+      if (label && this.preserveLabel()) {
+        return this.text() + ": " + label;
+      }
+      return label ?? this.text();
     }
     return this.text();
   });
@@ -225,8 +234,8 @@ export class FilterComponent implements ControlValueAccessor {
     return selectedCount > 0 && selectedCount < filtered.length;
   });
 
-  private onChange: (value: boolean | string | string[]) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: boolean | string | string[]) => void = () => { };
+  private onTouched: () => void = () => { };
 
   writeValue(value: boolean | string | string[]): void {
     if (this.multiselect()) {

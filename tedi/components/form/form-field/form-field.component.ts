@@ -5,6 +5,9 @@ import {
   ContentChild,
   input,
   ViewEncapsulation,
+  AfterContentInit,
+  inject,
+  DestroyRef,
 } from "@angular/core";
 import { NgClass } from "@angular/common";
 import {
@@ -22,6 +25,8 @@ import { ClosingButtonComponent } from "../../../components/buttons/closing-butt
 import { SeparatorComponent } from "../../../components/helpers/separator/separator.component";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
+import { NgControl } from "@angular/forms";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 export type InputSize = "small" | "large" | "default";
 export type InputState = "valid" | "error" | "default";
@@ -53,7 +58,7 @@ export interface FormFieldIcon {
     "[class]": "hostClasses()",
   },
 })
-export class FormFieldComponent {
+export class FormFieldComponent implements AfterContentInit {
   /**
    * The size of the form field.
    * @default "default"
@@ -76,8 +81,30 @@ export class FormFieldComponent {
   @ContentChild(TEDI_FORM_FIELD_CONTROL)
   control?: FormFieldControl;
 
+  @ContentChild(NgControl)
+  ngControl?: NgControl;
+
   @ContentChild(FeedbackTextComponent)
   feedback?: FeedbackTextComponent;
+
+  private readonly destroyRef = inject(DestroyRef);
+
+  ngAfterContentInit() {
+    this.ngControl?.control?.events
+      ?.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updateValidationState());
+
+    this.updateValidationState();
+  }
+
+  private updateValidationState() {
+    const invalid = !!this.ngControl?.invalid;
+    const touched = !!this.ngControl?.touched;
+    const dirty = !!this.ngControl?.dirty;
+    const fieldInvalid = invalid && (touched || dirty);
+
+    this.control?.setInvalidState(fieldInvalid);
+  }
 
   readonly resolvedIcon = computed<FormFieldIcon | undefined>(() => {
     const icon = this.icon();
@@ -88,7 +115,7 @@ export class FormFieldComponent {
 
   readonly validationState = computed<ValidationState>(() => {
     const feedbackType = this.feedback?.type();
-    const fieldInvalid = this.control?.invalid();
+    const fieldInvalid = this.control?.invalid?.() ?? false;
 
     if (fieldInvalid || feedbackType === "error") return "invalid";
     if (feedbackType === "valid") return "valid";
