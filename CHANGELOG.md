@@ -1,3 +1,10 @@
+# [6.3.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.7...angular-6.3.0-rc.8) (2026-04-13)
+
+
+### Features
+
+* **radio:** new TEDI-ready component [#7](https://github.com/TEDI-Design-System/angular/issues/7) ([#381](https://github.com/TEDI-Design-System/angular/issues/381)) ([37d21ac](https://github.com/TEDI-Design-System/angular/commit/37d21ac42562bc87edbc93e8385123a16137932b))
+
 # [6.3.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.6...angular-6.3.0-rc.7) (2026-04-13)
 
 
