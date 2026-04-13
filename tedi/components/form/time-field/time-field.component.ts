@@ -92,12 +92,13 @@ export class TimeFieldComponent
   readonly inputValue = signal("");
 
   private formDisabled = signal(false);
+  private formInvalid = signal(false);
   private onChange: (value: string | null) => void = () => {};
   private onTouched: () => void = () => {};
 
   readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
   readonly isInvalid = computed(
-    () => this.invalid() || this.state() === "error",
+    () => this.invalid() || this.formInvalid() || this.state() === "error",
   );
   readonly hasValue = computed(
     () => this.value() !== null && this.value() !== "",
@@ -134,6 +135,10 @@ export class TimeFieldComponent
 
   setDisabledState(disabled: boolean): void {
     this.formDisabled.set(disabled);
+  }
+
+  setInvalidState(isInvalid: boolean): void {
+    this.formInvalid.set(isInvalid);
   }
 
   handleInput(event: Event) {
