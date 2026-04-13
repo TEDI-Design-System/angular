@@ -1,3 +1,10 @@
+# [6.3.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.5...angular-6.3.0-rc.6) (2026-04-13)
+
+
+### Features
+
+* **checkbox:** added checkbox-card variant [#222](https://github.com/TEDI-Design-System/angular/issues/222) ([#378](https://github.com/TEDI-Design-System/angular/issues/378)) ([d04a7d6](https://github.com/TEDI-Design-System/angular/commit/d04a7d626ef8ad2f85c9da4a2fe0c23f3bb4ca9b))
+
 # [6.3.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.4...angular-6.3.0-rc.5) (2026-04-07)
 
 
