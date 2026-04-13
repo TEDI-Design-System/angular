@@ -11,5 +11,8 @@ import {
   styleUrl: "../modal.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: "tedi-modal-footer",
+  },
 })
 export class ModalFooterComponent {}

@@ -18,6 +18,7 @@ export type CheckboxCardVariant = "primary" | "secondary";
     class: "tedi-checkbox-card",
     "[class.tedi-checkbox-card--primary]": "variant() === 'primary'",
     "[class.tedi-checkbox-card--secondary]": "variant() === 'secondary'",
+    "[class.tedi-checkbox-card--hide-indicator]": "!showIndicator()",
   },
 })
 export class CheckboxCardComponent {
@@ -26,4 +27,11 @@ export class CheckboxCardComponent {
    * @default primary
    */
   readonly variant = input<CheckboxCardVariant>("primary");
+
+  /**
+   * Whether to show the checkbox indicator.
+   * When false, the checkbox is visually hidden but remains functional.
+   * @default true
+   */
+  readonly showIndicator = input<boolean>(true);
 }

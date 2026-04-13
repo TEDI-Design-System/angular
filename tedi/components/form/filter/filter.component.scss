@@ -63,25 +63,22 @@
   }
 
   &--primary {
+    --_filter-border-width: 0px;
     --_filter-bg: var(--filter-primary-default-background);
     --_filter-text: var(--filter-primary-default-text);
-    --_filter-border: var(--filter-primary-default-border);
 
     .tedi-filter__button:hover {
       --_filter-bg: var(--filter-primary-hover-background);
       --_filter-text: var(--filter-primary-hover-text);
-      --_filter-border: var(--filter-primary-hover-border);
     }
 
     &.tedi-filter--selected {
       --_filter-bg: var(--filter-primary-selected-background);
       --_filter-text: var(--filter-primary-selected-text);
-      --_filter-border: var(--filter-primary-selected-border);
 
       .tedi-filter__button:hover {
         --_filter-bg: var(--filter-primary-hover-background);
         --_filter-text: var(--filter-primary-hover-text);
-        --_filter-border: var(--filter-primary-hover-border);
       }
     }
   }
