@@ -340,12 +340,14 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   filteredOptions = computed<SelectOption<T>[]>(() => {
     const options = this.normalizedOptions();
-    const term = this.searchTerm().toLowerCase().trim();
-    const searchFn = this.searchFn();
+    const trimmed = this.searchTerm().trim();
 
-    if (!term) {
+    if (!trimmed) {
       return options;
     }
+
+    const term = trimmed.toLowerCase();
+    const searchFn = this.searchFn();
 
     if (searchFn) {
       return options.filter((option) => searchFn(term, option as unknown as T));
