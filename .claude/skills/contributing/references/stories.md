@@ -123,7 +123,7 @@ argTypes: {
 ### 7. Verify
 
 Run Storybook to visually confirm stories render correctly:
-```
+```bash
 npm start
 ```
 

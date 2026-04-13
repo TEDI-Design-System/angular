@@ -91,6 +91,7 @@ export class MyControlComponent implements ControlValueAccessor {
 - Use design tokens from `@tedi-design-system/core` for colors, spacing, typography.
 - Never use hardcoded color values — always reference tokens.
 - Never use fallback values in CSS `var()` — write `var(--token-name)`, not `var(--token-name, fallback)`.
+- No obvious comments — do not add comments that restate what a selector, class name, or variable already says (e.g., `// Primary variant` above `&--primary`, or `// Disabled state` above `&:disabled`). Only comment when the logic isn't self-evident.
 - Use `ViewEncapsulation.None` — scope styles via BEM naming, not Angular encapsulation.
 
 ### Style Targeting: Classes Over Element Selectors

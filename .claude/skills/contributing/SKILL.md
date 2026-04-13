@@ -5,7 +5,7 @@ description: >
   running tests and lint, WCAG accessibility audits, safe refactoring, and Storybook story creation.
   Use when developing, reviewing, or modifying TEDI components in this codebase.
 user-invocable: true
-argument-hint: [task description or component path]
+argument-hint: "task description or component path"
 ---
 
 # TEDI Angular Contributing
@@ -55,7 +55,7 @@ When you add, remove, rename, or change the API of a component, update the consu
 
 ### Communication
 - Be direct and concise.
-- No unnecessary comments in code — code should be self-documenting.
+- No unnecessary comments in code — code should be self-documenting. Do not add comments that restate what a selector, class name, or variable already says (e.g., `// Secondary variant` above `&.tedi-checkbox-card--secondary`). This applies to styles, templates, and code equally. Only add comments when the logic isn't self-evident.
 - When explaining decisions, focus on the "why" not the "what".
 
 ## Commands

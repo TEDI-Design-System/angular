@@ -32,7 +32,7 @@ npm run build          # Build library to dist/
 ### Component File Convention
 
 Each component folder contains:
-```
+```text
 component-name.component.ts       # Component class
 component-name.component.html     # Template
 component-name.component.scss     # Styles

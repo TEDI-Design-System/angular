@@ -14,7 +14,7 @@ Target: `$ARGUMENTS`
 ## Step 2: Baseline Tests
 
 Run the full test suite and record the result:
-```
+```bash
 npm test
 ```
 

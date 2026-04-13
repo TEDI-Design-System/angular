@@ -361,6 +361,22 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `spacing: SeparatorSpacingValue | SeparatorSpacing`
 - `size: string = "100%"`
 
+### ScrollFade
+**Selector:** `tedi-scroll-fade`
+**Inputs:**
+- `fadeSize: ScrollFadeSize = 20` — gradient size in percent (0, 10, 20)
+- `fadePosition: ScrollFadePosition = "both"` — `"top"`, `"bottom"`, or `"both"`
+- `scrollBar: ScrollFadeScrollbar = "custom"` — `"default"` or `"custom"`
+**Outputs:**
+- `scrolledToTop: void`
+- `scrolledToBottom: void`
+
+```html
+<tedi-scroll-fade fadePosition="both" [fadeSize]="10">
+  <!-- Scrollable content -->
+</tedi-scroll-fade>
+```
+
 ### Timeline
 **Selector:** `tedi-timeline`
 **Inputs:**
@@ -696,6 +712,10 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 **Selector:** `tedi-checkbox` | ControlValueAccessor
 - `inputId: string`, `value: string`, `size: CheckboxSize`, `hasError: boolean`
 - Models: `checked: boolean | null`, `indeterminate: boolean`, `disabled: boolean`
+
+### CheckboxCard
+**Selector:** `label[tedi-checkbox-card]`
+- `variant: CheckboxCardVariant = "primary"`, `showIndicator: boolean = true`
 
 ### CheckboxGroup / CheckboxCardGroup
 **Selector:** `tedi-checkbox-group`, `tedi-checkbox-card-group`
