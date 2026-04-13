@@ -1,4 +1,4 @@
-import { CdkOverlayOrigin, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
 import { CdkListbox, CdkListboxModule } from "@angular/cdk/listbox";
 import {
   AfterContentChecked,
@@ -244,6 +244,13 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    */
   searchable = input<boolean>(false);
 
+  /**
+   * Custom search function for filtering options.
+   * When provided, overrides the default label-based search.
+   * Receives the search term and the option item (with all original properties), returns true to include the option.
+   */
+  searchFn = input<((term: string, item: T) => boolean) | undefined>();
+
   readonly SpecialOptionControls = SpecialOptionControls;
 
   readonly dropdownPositions: ConnectedPosition[] = [
@@ -284,6 +291,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   listboxRef = viewChild(CdkListbox, { read: ElementRef });
   cdkListboxRef = viewChild(CdkListbox);
+  connectedOverlay = viewChild(CdkConnectedOverlay);
   triggerRef = viewChild(CdkOverlayOrigin, { read: ElementRef });
   searchInputRef = viewChild<ElementRef>("searchInput");
   multiselectContainerRef = viewChild<ElementRef>("multiselectContainer");
@@ -333,9 +341,14 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   filteredOptions = computed<SelectOption<T>[]>(() => {
     const options = this.normalizedOptions();
     const term = this.searchTerm().toLowerCase().trim();
+    const searchFn = this.searchFn();
 
     if (!term) {
       return options;
+    }
+
+    if (searchFn) {
+      return options.filter((option) => searchFn(term, option as unknown as T));
     }
 
     return options.filter((option) =>
@@ -409,6 +422,9 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   ngAfterViewChecked(): void {
     if (this.allowMultiple() && !this.multiRow()) {
       this.calculateVisibleTags();
+    }
+    if (this.isOpen()) {
+      this.connectedOverlay()?.overlayRef?.updatePosition();
     }
   }
 
@@ -513,6 +529,11 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     } else {
       this.toggleIsOpen();
     }
+  }
+
+  onArrowClick(event: Event): void {
+    event.stopPropagation();
+    this.toggleIsOpen();
   }
 
   onTriggerEnter(): void {
