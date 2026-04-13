@@ -11,7 +11,7 @@ import { FeedbackTextComponent } from "../feedback-text/feedback-text.component"
   standalone: true,
   imports: [CheckboxCardComponent, CheckboxComponent, FeedbackTextComponent],
   template: `
-    <label tedi-checkbox-card [variant]="variant">
+    <label tedi-checkbox-card [variant]="variant" [showIndicator]="showIndicator">
       <input tedi-checkbox type="checkbox" />
       Text
       @if (showDescription) {
@@ -23,6 +23,7 @@ import { FeedbackTextComponent } from "../feedback-text/feedback-text.component"
 class TestHostComponent {
   variant: CheckboxCardVariant = "primary";
   showDescription = false;
+  showIndicator = true;
 }
 
 describe("CheckboxCardComponent", () => {
@@ -78,5 +79,19 @@ describe("CheckboxCardComponent", () => {
     const feedbackText = labelElement.querySelector("tedi-feedback-text");
     expect(feedbackText).toBeTruthy();
     expect(feedbackText?.parentElement).toBe(labelElement);
+  });
+
+  it("should show indicator by default", () => {
+    expect(labelElement.classList).not.toContain(
+      "tedi-checkbox-card--hide-indicator"
+    );
+  });
+
+  it("should hide indicator when showIndicator is false", () => {
+    fixture.componentInstance.showIndicator = false;
+    fixture.detectChanges();
+    expect(labelElement.classList).toContain(
+      "tedi-checkbox-card--hide-indicator"
+    );
   });
 });

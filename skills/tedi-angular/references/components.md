@@ -224,6 +224,7 @@ Composed of sub-components:
 **Inputs:**
 - `variant: RadioCardVariant = "primary"` — "primary" or "secondary"
 - `grouped: boolean = false` — join cards in a button-group layout
+- `showIndicator: boolean = true` — show/hide the radio indicator visually
 
 ```html
 <!-- Separate cards (default) -->
@@ -837,6 +838,10 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 **Selector:** `tedi-checkbox` | ControlValueAccessor
 - `inputId: string`, `value: string`, `size: CheckboxSize`, `hasError: boolean`
 - Models: `checked: boolean | null`, `indeterminate: boolean`, `disabled: boolean`
+
+### CheckboxCard
+**Selector:** `label[tedi-checkbox-card]`
+- `variant: CheckboxCardVariant = "primary"`, `showIndicator: boolean = true`
 
 ### CheckboxGroup / CheckboxCardGroup
 **Selector:** `tedi-checkbox-group`, `tedi-checkbox-card-group`

@@ -52,6 +52,7 @@ export default {
       options: ["default", "large"],
       description: "Size of the radio.",
       table: {
+        category: "Radio",
         type: {
           summary: "RadioSize",
           detail: "default \nlarge",
@@ -65,6 +66,7 @@ export default {
       control: "boolean",
       description: "Is radio invalid?",
       table: {
+        category: "Radio",
         type: {
           summary: "boolean",
         },
@@ -77,8 +79,77 @@ export default {
       control: "boolean",
       description: "Is radio disabled?",
       table: {
+        category: "Radio",
         type: {
           summary: "boolean",
+        },
+      },
+    },
+    variant: {
+      control: "radio",
+      options: ["primary", "secondary"],
+      description: "Visual variant of the radio card.",
+      table: {
+        category: "RadioCard",
+        type: {
+          summary: "RadioCardVariant",
+          detail: "primary \nsecondary",
+        },
+        defaultValue: {
+          summary: "primary",
+        },
+      },
+    },
+    grouped: {
+      control: "boolean",
+      description:
+        "Whether the card is part of a button-group style layout.",
+      table: {
+        category: "RadioCard",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: {
+          summary: "false",
+        },
+      },
+    },
+    showIndicator: {
+      control: "boolean",
+      description:
+        "Whether to show the radio indicator. When false, the radio is visually hidden but remains functional.",
+      table: {
+        category: "RadioCard",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: {
+          summary: "true",
+        },
+      },
+    },
+    groupLabel: {
+      control: "text",
+      description: "Label text displayed above the radio group.",
+      table: {
+        category: "RadioGroup",
+        type: {
+          summary: "string",
+        },
+      },
+    },
+    groupDirection: {
+      control: "radio",
+      options: ["horizontal", "vertical"],
+      description: "Layout direction of the radios.",
+      table: {
+        category: "RadioGroup",
+        type: {
+          summary: "RadioGroupDirection",
+          detail: "horizontal \nvertical",
+        },
+        defaultValue: {
+          summary: "horizontal",
         },
       },
     },
@@ -284,313 +355,6 @@ export const Group: StoryObj<RadioComponent> = {
 };
 
 /**
- * Radio cards with primary and secondary variants side by side. Primary uses a filled background when selected, secondary uses an outline border.
- */
-export const RadioCards: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
-      <div class="flex flex-column gap-4">
-        <div>
-          <p tedi-text color="secondary" style="margin-bottom: 8px;">Primary</p>
-          <tedi-radio-card-group>
-            <label tedi-radio-card variant="primary">
-              <input tedi-radio type="radio" name="card-primary" checked />
-              Text
-            </label>
-            <label tedi-radio-card variant="primary">
-              <input tedi-radio type="radio" name="card-primary" />
-              Text
-            </label>
-            <label tedi-radio-card variant="primary">
-              <input tedi-radio type="radio" name="card-primary" />
-              Text
-            </label>
-          </tedi-radio-card-group>
-        </div>
-        <div>
-          <p tedi-text color="secondary" style="margin-bottom: 8px;">Secondary</p>
-          <tedi-radio-card-group>
-            <label tedi-radio-card variant="secondary">
-              <input tedi-radio type="radio" name="card-secondary" checked />
-              Text
-            </label>
-            <label tedi-radio-card variant="secondary">
-              <input tedi-radio type="radio" name="card-secondary" />
-              Text
-            </label>
-            <label tedi-radio-card variant="secondary">
-              <input tedi-radio type="radio" name="card-secondary" />
-              Text
-            </label>
-          </tedi-radio-card-group>
-        </div>
-      </div>
-    `,
-  }),
-};
-
-/**
- * Radio cards in a grouped layout, joined like a button group with shared borders and no gap.
- */
-export const RadioCardsGrouped: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
-      <tedi-row [cols]="2" [gapY]="3">
-        <tedi-col><p tedi-text modifiers="bold">Primary</p></tedi-col>
-        <tedi-col><p tedi-text modifiers="bold">Secondary</p></tedi-col>
-        <tedi-col>
-          <div style="display: inline-flex;">
-            <label tedi-radio-card variant="primary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-primary" />
-              Text
-            </label>
-            <label tedi-radio-card variant="primary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-primary" />
-              Text
-            </label>
-            <label tedi-radio-card variant="primary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-primary" checked />
-              Text
-            </label>
-            <label tedi-radio-card variant="primary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-primary" />
-              Text
-            </label>
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div style="display: inline-flex;">
-            <label tedi-radio-card variant="secondary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-secondary" />
-              Text
-            </label>
-            <label tedi-radio-card variant="secondary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-secondary" checked />
-              Text
-            </label>
-            <label tedi-radio-card variant="secondary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-secondary" />
-              Text
-            </label>
-            <label tedi-radio-card variant="secondary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-secondary" />
-              Text
-            </label>
-          </div>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
-};
-
-/**
- * Radio cards with a description below the label text.
- */
-export const RadioCardsWithDescription: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
-      <div class="flex flex-column gap-4">
-        <div>
-          <p tedi-text color="secondary" style="margin-bottom: 8px;">Primary</p>
-          <tedi-radio-card-group>
-            <label tedi-radio-card variant="primary">
-              <input tedi-radio type="radio" name="card-desc-primary" checked />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-            <label tedi-radio-card variant="primary">
-              <input tedi-radio type="radio" name="card-desc-primary" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-            <label tedi-radio-card variant="primary">
-              <input tedi-radio type="radio" name="card-desc-primary" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-          </tedi-radio-card-group>
-        </div>
-        <div>
-          <p tedi-text color="secondary" style="margin-bottom: 8px;">Secondary</p>
-          <tedi-radio-card-group>
-            <label tedi-radio-card variant="secondary">
-              <input tedi-radio type="radio" name="card-desc-secondary" checked />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-            <label tedi-radio-card variant="secondary">
-              <input tedi-radio type="radio" name="card-desc-secondary" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-            <label tedi-radio-card variant="secondary">
-              <input tedi-radio type="radio" name="card-desc-secondary" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-          </tedi-radio-card-group>
-        </div>
-      </div>
-    `,
-  }),
-};
-
-/**
- * Grouped radio cards with description text.
- */
-export const RadioCardsGroupedWithDescription: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
-      <tedi-row [cols]="2" [gapY]="3">
-        <tedi-col><p tedi-text modifiers="bold">Primary</p></tedi-col>
-        <tedi-col><p tedi-text modifiers="bold">Secondary</p></tedi-col>
-        <tedi-col>
-          <div style="display: inline-flex;">
-            <label tedi-radio-card variant="primary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-desc-primary" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-            <label tedi-radio-card variant="primary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-desc-primary" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-            <label tedi-radio-card variant="primary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-desc-primary" checked />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div style="display: inline-flex;">
-            <label tedi-radio-card variant="secondary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-desc-secondary" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-            <label tedi-radio-card variant="secondary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-desc-secondary" checked />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-            <label tedi-radio-card variant="secondary" [grouped]="true">
-              <input tedi-radio type="radio" name="card-group-desc-secondary" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-          </div>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
-};
-
-/**
- * Radio cards with icons before the label text.
- */
-export const RadioCardsWithIcons: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
-      <div class="flex flex-column gap-4">
-        <div>
-          <p tedi-text color="secondary" style="margin-bottom: 8px;">Primary</p>
-          <tedi-radio-card-group>
-            <label tedi-radio-card variant="primary">
-              <input tedi-radio type="radio" name="card-icon-primary" checked />
-              <tedi-icon name="apartment" [size]="18" />
-              Text
-            </label>
-            <label tedi-radio-card variant="primary">
-              <input tedi-radio type="radio" name="card-icon-primary" />
-              <tedi-icon name="stethoscope" [size]="18" />
-              Text
-            </label>
-            <label tedi-radio-card variant="primary">
-              <input tedi-radio type="radio" name="card-icon-primary" />
-              <tedi-icon name="home" [size]="18" />
-              Text
-            </label>
-          </tedi-radio-card-group>
-        </div>
-        <div>
-          <p tedi-text color="secondary" style="margin-bottom: 8px;">Secondary</p>
-          <tedi-radio-card-group>
-            <label tedi-radio-card variant="secondary">
-              <input tedi-radio type="radio" name="card-icon-secondary" checked />
-              <tedi-icon name="apartment" [size]="18" />
-              Text
-            </label>
-            <label tedi-radio-card variant="secondary">
-              <input tedi-radio type="radio" name="card-icon-secondary" />
-              <tedi-icon name="stethoscope" [size]="18" />
-              Text
-            </label>
-            <label tedi-radio-card variant="secondary">
-              <input tedi-radio type="radio" name="card-icon-secondary" />
-              <tedi-icon name="home" [size]="18" />
-              Text
-            </label>
-          </tedi-radio-card-group>
-        </div>
-        <div>
-          <p tedi-text color="secondary" style="margin-bottom: 8px;">Primary with description</p>
-          <tedi-radio-card-group>
-            <label tedi-radio-card variant="primary">
-              <input tedi-radio type="radio" name="card-icon-desc-primary" checked />
-              <tedi-icon name="apartment" [size]="18" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-            <label tedi-radio-card variant="primary">
-              <input tedi-radio type="radio" name="card-icon-desc-primary" />
-              <tedi-icon name="stethoscope" [size]="18" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-            <label tedi-radio-card variant="primary">
-              <input tedi-radio type="radio" name="card-icon-desc-primary" />
-              <tedi-icon name="home" [size]="18" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-          </tedi-radio-card-group>
-        </div>
-        <div>
-          <p tedi-text color="secondary" style="margin-bottom: 8px;">Secondary with description</p>
-          <tedi-radio-card-group>
-            <label tedi-radio-card variant="secondary">
-              <input tedi-radio type="radio" name="card-icon-desc-secondary" checked />
-              <tedi-icon name="apartment" [size]="18" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-            <label tedi-radio-card variant="secondary">
-              <input tedi-radio type="radio" name="card-icon-desc-secondary" />
-              <tedi-icon name="stethoscope" [size]="18" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-            <label tedi-radio-card variant="secondary">
-              <input tedi-radio type="radio" name="card-icon-desc-secondary" />
-              <tedi-icon name="home" [size]="18" />
-              Text
-              <tedi-feedback-text text="Description" />
-            </label>
-          </tedi-radio-card-group>
-        </div>
-      </div>
-    `,
-  }),
-};
-
-/**
  * All visual states of the radio component.
  */
 export const States: StoryObj<RadioComponent> = {
@@ -648,6 +412,313 @@ export const States: StoryObj<RadioComponent> = {
           <input tedi-radio type="radio" name="state-disabled-selected" checked disabled />
           Text
         </label>
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * Radio cards with primary and secondary variants side by side. Primary uses a filled background when selected, secondary uses an outline border.
+ */
+export const RadioCards: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
+          <tedi-radio-card-group>
+            <label tedi-radio-card variant="primary">
+              <input tedi-radio type="radio" name="card-primary" checked />
+              Text
+            </label>
+            <label tedi-radio-card variant="primary">
+              <input tedi-radio type="radio" name="card-primary" />
+              Text
+            </label>
+            <label tedi-radio-card variant="primary">
+              <input tedi-radio type="radio" name="card-primary" />
+              Text
+            </label>
+          </tedi-radio-card-group>
+        </tedi-col>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
+          <tedi-radio-card-group>
+            <label tedi-radio-card variant="secondary">
+              <input tedi-radio type="radio" name="card-secondary" checked />
+              Text
+            </label>
+            <label tedi-radio-card variant="secondary">
+              <input tedi-radio type="radio" name="card-secondary" />
+              Text
+            </label>
+            <label tedi-radio-card variant="secondary">
+              <input tedi-radio type="radio" name="card-secondary" />
+              Text
+            </label>
+          </tedi-radio-card-group>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * Radio cards in a grouped layout, joined like a button group with shared borders and no gap.
+ */
+export const RadioCardsGrouped: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
+          <div style="display: inline-flex;">
+            <label tedi-radio-card variant="primary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-primary" />
+              Text
+            </label>
+            <label tedi-radio-card variant="primary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-primary" />
+              Text
+            </label>
+            <label tedi-radio-card variant="primary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-primary" checked />
+              Text
+            </label>
+            <label tedi-radio-card variant="primary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-primary" />
+              Text
+            </label>
+          </div>
+        </tedi-col>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
+          <div style="display: inline-flex;">
+            <label tedi-radio-card variant="secondary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-secondary" />
+              Text
+            </label>
+            <label tedi-radio-card variant="secondary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-secondary" checked />
+              Text
+            </label>
+            <label tedi-radio-card variant="secondary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-secondary" />
+              Text
+            </label>
+            <label tedi-radio-card variant="secondary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-secondary" />
+              Text
+            </label>
+          </div>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * Radio cards with a description below the label text.
+ */
+export const RadioCardsWithDescription: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
+          <tedi-radio-card-group>
+            <label tedi-radio-card variant="primary">
+              <input tedi-radio type="radio" name="card-desc-primary" checked />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-radio-card variant="primary">
+              <input tedi-radio type="radio" name="card-desc-primary" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-radio-card variant="primary">
+              <input tedi-radio type="radio" name="card-desc-primary" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+          </tedi-radio-card-group>
+        </tedi-col>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
+          <tedi-radio-card-group>
+            <label tedi-radio-card variant="secondary">
+              <input tedi-radio type="radio" name="card-desc-secondary" checked />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-radio-card variant="secondary">
+              <input tedi-radio type="radio" name="card-desc-secondary" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-radio-card variant="secondary">
+              <input tedi-radio type="radio" name="card-desc-secondary" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+          </tedi-radio-card-group>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * Grouped radio cards with description text.
+ */
+export const RadioCardsGroupedWithDescription: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
+          <div style="display: inline-flex;">
+            <label tedi-radio-card variant="primary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-desc-primary" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-radio-card variant="primary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-desc-primary" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-radio-card variant="primary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-desc-primary" checked />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+          </div>
+        </tedi-col>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
+          <div style="display: inline-flex;">
+            <label tedi-radio-card variant="secondary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-desc-secondary" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-radio-card variant="secondary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-desc-secondary" checked />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-radio-card variant="secondary" [grouped]="true">
+              <input tedi-radio type="radio" name="card-group-desc-secondary" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+          </div>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * Radio cards with icons before the label text.
+ */
+export const RadioCardsWithIcons: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
+          <tedi-radio-card-group>
+            <label tedi-radio-card variant="primary">
+              <input tedi-radio type="radio" name="card-icon-primary" checked />
+              <tedi-icon name="apartment" [size]="18" />
+              Text
+            </label>
+            <label tedi-radio-card variant="primary">
+              <input tedi-radio type="radio" name="card-icon-primary" />
+              <tedi-icon name="stethoscope" [size]="18" />
+              Text
+            </label>
+            <label tedi-radio-card variant="primary">
+              <input tedi-radio type="radio" name="card-icon-primary" />
+              <tedi-icon name="home" [size]="18" />
+              Text
+            </label>
+          </tedi-radio-card-group>
+        </tedi-col>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
+          <tedi-radio-card-group>
+            <label tedi-radio-card variant="secondary">
+              <input tedi-radio type="radio" name="card-icon-secondary" checked />
+              <tedi-icon name="apartment" [size]="18" />
+              Text
+            </label>
+            <label tedi-radio-card variant="secondary">
+              <input tedi-radio type="radio" name="card-icon-secondary" />
+              <tedi-icon name="stethoscope" [size]="18" />
+              Text
+            </label>
+            <label tedi-radio-card variant="secondary">
+              <input tedi-radio type="radio" name="card-icon-secondary" />
+              <tedi-icon name="home" [size]="18" />
+              Text
+            </label>
+          </tedi-radio-card-group>
+        </tedi-col>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary with description</p>
+          <tedi-radio-card-group>
+            <label tedi-radio-card variant="primary">
+              <input tedi-radio type="radio" name="card-icon-desc-primary" checked />
+              <tedi-icon name="apartment" [size]="18" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-radio-card variant="primary">
+              <input tedi-radio type="radio" name="card-icon-desc-primary" />
+              <tedi-icon name="stethoscope" [size]="18" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-radio-card variant="primary">
+              <input tedi-radio type="radio" name="card-icon-desc-primary" />
+              <tedi-icon name="home" [size]="18" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+          </tedi-radio-card-group>
+        </tedi-col>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary with description</p>
+          <tedi-radio-card-group>
+            <label tedi-radio-card variant="secondary">
+              <input tedi-radio type="radio" name="card-icon-desc-secondary" checked />
+              <tedi-icon name="apartment" [size]="18" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-radio-card variant="secondary">
+              <input tedi-radio type="radio" name="card-icon-desc-secondary" />
+              <tedi-icon name="stethoscope" [size]="18" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-radio-card variant="secondary">
+              <input tedi-radio type="radio" name="card-icon-desc-secondary" />
+              <tedi-icon name="home" [size]="18" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+          </tedi-radio-card-group>
+        </tedi-col>
       </tedi-row>
     `,
   }),
