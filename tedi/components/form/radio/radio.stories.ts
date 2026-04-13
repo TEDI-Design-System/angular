@@ -425,8 +425,8 @@ export const RadioCards: StoryObj<RadioComponent> = {
     props: args,
     template: `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Primary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
           <tedi-radio-card-group>
             <label tedi-radio-card variant="primary">
               <input tedi-radio type="radio" name="card-primary" checked />
@@ -442,8 +442,8 @@ export const RadioCards: StoryObj<RadioComponent> = {
             </label>
           </tedi-radio-card-group>
         </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Secondary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
           <tedi-radio-card-group>
             <label tedi-radio-card variant="secondary">
               <input tedi-radio type="radio" name="card-secondary" checked />
@@ -472,8 +472,8 @@ export const RadioCardsGrouped: StoryObj<RadioComponent> = {
     props: args,
     template: `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Primary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
           <div style="display: inline-flex;">
             <label tedi-radio-card variant="primary" [grouped]="true">
               <input tedi-radio type="radio" name="card-group-primary" />
@@ -493,8 +493,8 @@ export const RadioCardsGrouped: StoryObj<RadioComponent> = {
             </label>
           </div>
         </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Secondary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
           <div style="display: inline-flex;">
             <label tedi-radio-card variant="secondary" [grouped]="true">
               <input tedi-radio type="radio" name="card-group-secondary" />
@@ -527,8 +527,8 @@ export const RadioCardsWithDescription: StoryObj<RadioComponent> = {
     props: args,
     template: `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Primary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
           <tedi-radio-card-group>
             <label tedi-radio-card variant="primary">
               <input tedi-radio type="radio" name="card-desc-primary" checked />
@@ -547,8 +547,8 @@ export const RadioCardsWithDescription: StoryObj<RadioComponent> = {
             </label>
           </tedi-radio-card-group>
         </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Secondary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
           <tedi-radio-card-group>
             <label tedi-radio-card variant="secondary">
               <input tedi-radio type="radio" name="card-desc-secondary" checked />
@@ -580,8 +580,8 @@ export const RadioCardsGroupedWithDescription: StoryObj<RadioComponent> = {
     props: args,
     template: `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Primary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
           <div style="display: inline-flex;">
             <label tedi-radio-card variant="primary" [grouped]="true">
               <input tedi-radio type="radio" name="card-group-desc-primary" />
@@ -600,8 +600,8 @@ export const RadioCardsGroupedWithDescription: StoryObj<RadioComponent> = {
             </label>
           </div>
         </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Secondary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
           <div style="display: inline-flex;">
             <label tedi-radio-card variant="secondary" [grouped]="true">
               <input tedi-radio type="radio" name="card-group-desc-secondary" />
@@ -633,8 +633,8 @@ export const RadioCardsWithIcons: StoryObj<RadioComponent> = {
     props: args,
     template: `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Primary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
           <tedi-radio-card-group>
             <label tedi-radio-card variant="primary">
               <input tedi-radio type="radio" name="card-icon-primary" checked />
@@ -653,8 +653,8 @@ export const RadioCardsWithIcons: StoryObj<RadioComponent> = {
             </label>
           </tedi-radio-card-group>
         </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Secondary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
           <tedi-radio-card-group>
             <label tedi-radio-card variant="secondary">
               <input tedi-radio type="radio" name="card-icon-secondary" checked />
@@ -673,8 +673,8 @@ export const RadioCardsWithIcons: StoryObj<RadioComponent> = {
             </label>
           </tedi-radio-card-group>
         </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Primary with description</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary with description</p>
           <tedi-radio-card-group>
             <label tedi-radio-card variant="primary">
               <input tedi-radio type="radio" name="card-icon-desc-primary" checked />
@@ -696,8 +696,8 @@ export const RadioCardsWithIcons: StoryObj<RadioComponent> = {
             </label>
           </tedi-radio-card-group>
         </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Secondary with description</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary with description</p>
           <tedi-radio-card-group>
             <label tedi-radio-card variant="secondary">
               <input tedi-radio type="radio" name="card-icon-desc-secondary" checked />
