@@ -10,6 +10,8 @@ import {
   FormFieldControl,
 } from "./form-field-control";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
+import { NgControl } from "@angular/forms";
+import { Subject } from "rxjs";
 
 @Component({
   selector: "mock-control",
@@ -26,6 +28,7 @@ class MockControlComponent implements FormFieldControl<string> {
   value = signal("");
   disabled = signal(false);
   invalid = signal(false);
+  setInvalidState = jest.fn();
   clearField = jest.fn();
 }
 
@@ -48,11 +51,11 @@ export class MockFeedbackComponent extends FeedbackTextComponent {}
       [inputClass]="inputClass"
     >
       <mock-control #mockControl></mock-control>
-      <tedi-feedback-text
+      <mock-feedback
         #feedback
         [text]="'Feedback text'"
         [type]="feedbackType"
-      ></tedi-feedback-text>
+      ></mock-feedback>
     </tedi-form-field>
   `,
 })
@@ -168,5 +171,28 @@ describe("FormFieldComponent", () => {
 
     const classes = formField.inputClasses() as Record<string, boolean>;
     expect(classes["custom-class"]).toBe(true);
+  });
+
+  it("should react to control.events and call setInvalidState", () => {
+    const events = new Subject<void>();
+
+    formField.ngControl = {
+      control: {
+        events: events.asObservable(),
+      },
+      invalid: true,
+      touched: true,
+      dirty: false,
+    } as unknown as NgControl;
+
+    formField.ngAfterContentInit();
+
+    const spy = jest.spyOn(host.mockControl, "setInvalidState");
+    spy.mockClear();
+
+    events.next();
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy).toHaveBeenCalledWith(true);
   });
 });

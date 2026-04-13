@@ -1,4 +1,10 @@
 import {
+  FormControl,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from "@angular/forms";
+import {
   argsToTemplate,
   Meta,
   moduleMetadata,
@@ -34,6 +40,8 @@ export default {
         TextComponent,
         FormFieldComponent,
         FeedbackTextComponent,
+        ReactiveFormsModule,
+        FormsModule,
       ],
     }),
   ],
@@ -241,4 +249,62 @@ export const Placeholder: StoryObj<TextFieldComponent> = {
       </tedi-form-field>
     `,
   }),
+};
+
+export const WithTemplateDrivenForms: StoryObj<TextFieldComponent> = {
+  render: () => ({
+    props: {
+      inputValue: "",
+    },
+    template: `
+      <form #form="ngForm" style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
+        <tedi-form-field>
+              <label tedi-label for="example-template-form" [required]="true">Label</label>
+          <input
+            tedi-text-field
+                id="example-template-form"
+                name="example"
+            required
+            [(ngModel)]="inputValue"
+            #inputModel="ngModel"
+          />
+        </tedi-form-field>
+
+        <div>
+          <p>Value: {{ inputValue }}</p>
+          <p>Touched: {{ inputModel.touched }}</p>
+          <p>Dirty: {{ inputModel.dirty }}</p>
+          <p>Invalid: {{ inputModel.invalid }}</p>
+        </div>
+      </form>
+    `,
+  }),
+};
+
+export const WithReactiveForms: StoryObj<TextFieldComponent> = {
+  render: () => {
+    const control = new FormControl("", {
+      nonNullable: true,
+      validators: [Validators.required],
+    });
+
+    return {
+      props: { control },
+      template: `
+        <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
+          <tedi-form-field>
+            <label tedi-label [for]="'example-reactive-form'" [required]="true">Label</label>
+            <input tedi-text-field id="example-reactive-form" [formControl]="control" />
+          </tedi-form-field>
+
+          <div>
+            <p>Value: {{ control.value }}</p>
+            <p>Touched: {{ control.touched }}</p>
+            <p>Dirty: {{ control.dirty }}</p>
+            <p>Invalid: {{ control.invalid }}</p>
+          </div>
+        </div>
+      `,
+    };
+  },
 };

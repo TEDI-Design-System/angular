@@ -502,8 +502,8 @@ export const CheckboxCards: StoryObj<CheckboxComponent> = {
     props: args,
     template: `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Primary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
           <tedi-checkbox-card-group>
             <label tedi-checkbox-card variant="primary">
               <input tedi-checkbox type="checkbox" checked />
@@ -519,8 +519,8 @@ export const CheckboxCards: StoryObj<CheckboxComponent> = {
             </label>
           </tedi-checkbox-card-group>
         </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Secondary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
           <tedi-checkbox-card-group>
             <label tedi-checkbox-card variant="secondary">
               <input tedi-checkbox type="checkbox" checked />
@@ -549,8 +549,8 @@ export const CheckboxCardsWithDescription: StoryObj<CheckboxComponent> = {
     props: args,
     template: `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Primary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
           <tedi-checkbox-card-group>
             <label tedi-checkbox-card variant="primary">
               <input tedi-checkbox type="checkbox" checked />
@@ -569,8 +569,8 @@ export const CheckboxCardsWithDescription: StoryObj<CheckboxComponent> = {
             </label>
           </tedi-checkbox-card-group>
         </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Secondary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
           <tedi-checkbox-card-group>
             <label tedi-checkbox-card variant="secondary">
               <input tedi-checkbox type="checkbox" checked />
@@ -602,8 +602,8 @@ export const CheckboxCardsWithIcons: StoryObj<CheckboxComponent> = {
     props: args,
     template: `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Primary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
           <tedi-checkbox-card-group>
             <label tedi-checkbox-card variant="primary">
               <input tedi-checkbox type="checkbox" checked />
@@ -622,8 +622,8 @@ export const CheckboxCardsWithIcons: StoryObj<CheckboxComponent> = {
             </label>
           </tedi-checkbox-card-group>
         </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Secondary</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
           <tedi-checkbox-card-group>
             <label tedi-checkbox-card variant="secondary">
               <input tedi-checkbox type="checkbox" checked />
@@ -642,8 +642,8 @@ export const CheckboxCardsWithIcons: StoryObj<CheckboxComponent> = {
             </label>
           </tedi-checkbox-card-group>
         </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Primary with description</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary with description</p>
           <tedi-checkbox-card-group>
             <label tedi-checkbox-card variant="primary">
               <input tedi-checkbox type="checkbox" checked />
@@ -665,8 +665,8 @@ export const CheckboxCardsWithIcons: StoryObj<CheckboxComponent> = {
             </label>
           </tedi-checkbox-card-group>
         </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Secondary with description</p>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary with description</p>
           <tedi-checkbox-card-group>
             <label tedi-checkbox-card variant="secondary">
               <input tedi-checkbox type="checkbox" checked />

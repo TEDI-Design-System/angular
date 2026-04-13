@@ -1,3 +1,17 @@
+# [6.3.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.4...angular-6.3.0-rc.5) (2026-04-07)
+
+
+### Bug Fixes
+
+* **text-field:** fix circular dependency issue when using with reactive forms [#382](https://github.com/TEDI-Design-System/angular/issues/382) ([#392](https://github.com/TEDI-Design-System/angular/issues/392)) ([89cf3f0](https://github.com/TEDI-Design-System/angular/commit/89cf3f01bd4091eaa5300f8bb8f800c56d45fe58))
+
+# [6.3.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.3...angular-6.3.0-rc.4) (2026-04-06)
+
+
+### Features
+
+* **select:** new tedi-ready component [#15](https://github.com/TEDI-Design-System/angular/issues/15) ([#343](https://github.com/TEDI-Design-System/angular/issues/343)) ([56af62c](https://github.com/TEDI-Design-System/angular/commit/56af62c05c621dfb6b3f2f18fd723b6dbe2fff03))
+
 # [6.3.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.2...angular-6.3.0-rc.3) (2026-04-02)
 
 
