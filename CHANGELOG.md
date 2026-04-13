@@ -1,3 +1,10 @@
+# [6.3.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.6...angular-6.3.0-rc.7) (2026-04-13)
+
+
+### Features
+
+* **modal:** completed modal tedi-ready development [#223](https://github.com/TEDI-Design-System/angular/issues/223) ([#377](https://github.com/TEDI-Design-System/angular/issues/377)) ([31868b0](https://github.com/TEDI-Design-System/angular/commit/31868b0337377275d0f53b1df74d10599fc60cd4))
+
 # [6.3.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.5...angular-6.3.0-rc.6) (2026-04-13)
 
 
