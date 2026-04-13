@@ -252,7 +252,6 @@ $modal-widths: (
 
     .tedi-modal {
       min-height: 100dvh;
-      border-radius: 0;
     }
   }
 
@@ -280,6 +279,13 @@ $modal-widths: (
 
   .tedi-modal {
     @include modal-dialog-box;
+  }
+
+  &--left,
+  &--right {
+    .tedi-modal {
+      border-radius: 0;
+    }
   }
 
   &--scroll-page {
