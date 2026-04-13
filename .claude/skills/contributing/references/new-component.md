@@ -46,7 +46,7 @@ Follow all patterns from best-practices:
 - Standalone, OnPush, ViewEncapsulation.None
 - Signal-based inputs (`input()`, `model()`, `output()`)
 - BEM SCSS with `tedi-` prefix, using design tokens
-- ControlValueAccessor if it's a form control
+- Form controls MUST implement `ControlValueAccessor` with `NG_VALUE_ACCESSOR` provider (using `forwardRef()` and `multi: true`) for reactive forms integration. Test with a host component using `ReactiveFormsModule` and `FormControl`.
 - Full WCAG compliance (roles, keyboard nav, focus, aria attributes)
 
 ## Step 5: Export

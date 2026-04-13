@@ -15,6 +15,9 @@ import { LabelComponent, FeedbackTextComponent } from "@tedi-design-system/angul
 import { CheckboxGroupComponent } from "../checkbox-group/checkbox-group.component";
 import { CheckboxComponent } from "../checkbox/checkbox.component";
 
+/**
+ * @deprecated Use Checkbox with CheckboxCard label from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   standalone: true,
   selector: "tedi-checkbox-card-group",
@@ -64,8 +67,8 @@ export class CheckboxCardGroupComponent
   );
   private _controlDisabled = signal<boolean>(false);
 
-  private _onChange: (val: string[]) => void = () => {};
-  private _onTouched: (val: boolean) => void = () => {};
+  private _onChange: (val: string[]) => void = () => { };
+  private _onTouched: (val: boolean) => void = () => { };
 
   override groupDisabled = computed(() => {
     return this.disabled() || this._controlDisabled();

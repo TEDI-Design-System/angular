@@ -27,28 +27,65 @@ Rules:
 - **Same order** — export stories in the same top-to-bottom order as they appear in Figma.
 - **Same examples** — reproduce the exact content/data shown in Figma (labels, placeholder text, number of items). Do not invent different example data.
 - **Same variants** — if Figma shows 3 tabs with specific labels, use those exact labels.
-- **States story** — if Figma has a states showcase (showing default, hover, active, focus, disabled side by side), create a `States` story that renders all states together using `storybook-addon-pseudo-states` parameters:
+- **States story** — every component that can be activated or has visual states (hover, active, focus, disabled, selected, error, etc.) **must** have a `States` story. Use a table-like layout with `tedi-row`/`tedi-col` grid components, one row per state. Each row has a bold label in the first column and the component in the second column. Use `storybook-addon-pseudo-states` parameters for hover/active/focus. If the component has multiple variants, show them **side by side in columns** (not stacked vertically) — one column per variant with a bold header row, like a comparison table.
+
+  Required imports: `RowComponent`, `ColComponent`, `TextComponent` from `@tedi-design-system/angular/tedi`.
+
+  Define states as a constant and iterate with `*ngFor`:
   ```typescript
+  const PSEUDO_STATE = ['Default', 'Hover', 'Active', 'Focus', 'Disabled'];
+
   export const States: StoryObj<ComponentName> = {
-    render: () => ({
-      template: `
-        <div style="display: flex; gap: 1rem;">
-          <tedi-component>Default</tedi-component>
-          <tedi-component>Hover</tedi-component>
-          <tedi-component>Active</tedi-component>
-          <tedi-component>Focus</tedi-component>
-          <tedi-component [disabled]="true">Disabled</tedi-component>
-        </div>
-      `,
-    }),
     parameters: {
       pseudo: {
-        hover: 'tedi-component:nth-of-type(2)',
-        active: 'tedi-component:nth-of-type(3)',
-        focusVisible: 'tedi-component:nth-of-type(4)',
+        hover: '#Hover',
+        active: '#Active',
+        focusVisible: '#Focus',
       },
     },
+    render: () => ({
+      props: { PSEUDO_STATE },
+      template: `
+        <tedi-row [cols]="1" [gapY]="3">
+          <tedi-row cols="1" [sm]="{ cols: 6 }" *ngFor="let state of PSEUDO_STATE;" alignItems="center">
+            <tedi-col width="1">
+              <p tedi-text modifiers="bold">{{ state }}</p>
+            </tedi-col>
+            <tedi-col width="5">
+              <tedi-component
+                [id]="state"
+                [disabled]="state === 'Disabled'"
+              />
+            </tedi-col>
+          </tedi-row>
+        </tedi-row>
+      `,
+    }),
   };
+  ```
+
+  Key rules:
+  - Each state's component must have `[id]="state"` so pseudo-state selectors (`#Hover`, `#Active`, `#Focus`) can target it.
+  - Include all relevant states for the component (e.g., `Selected`, `Error`, `Success` where applicable).
+  - Reference `text-field.stories.ts` as the canonical example.
+
+- **Variant comparison layout** — when a component has multiple variants (e.g., primary/secondary), always show them **side by side** in a `tedi-row` grid, not stacked vertically. Use a header row with bold labels for each variant column:
+  ```html
+  <tedi-row [cols]="2" [gapY]="3">
+    <tedi-col><p tedi-text modifiers="bold">Primary</p></tedi-col>
+    <tedi-col><p tedi-text modifiers="bold">Secondary</p></tedi-col>
+    <tedi-col><!-- primary content --></tedi-col>
+    <tedi-col><!-- secondary content --></tedi-col>
+  </tedi-row>
+  ```
+  For states with variants, use a 3-column layout (State | Primary | Secondary):
+  ```html
+  <tedi-row [cols]="3" [gapY]="3" alignItems="center">
+    <tedi-col><p tedi-text modifiers="bold">State</p></tedi-col>
+    <tedi-col><p tedi-text modifiers="bold">Primary</p></tedi-col>
+    <tedi-col><p tedi-text modifiers="bold">Secondary</p></tedi-col>
+    <!-- one row per state -->
+  </tedi-row>
   ```
 
 ### 3. Determine the Story Category
@@ -85,7 +122,6 @@ export default {
     }),
   ],
   parameters: {
-    status: { type: ['partiallyTediReady'] },
     design: { type: 'figma', url: 'https://www.figma.com/...' },
   },
   argTypes: {
@@ -98,6 +134,7 @@ export default {
 
 - [ ] Every Figma section has a corresponding story export, in the same order
 - [ ] Example content (labels, data, item count) matches Figma exactly
+- [ ] Every public input/model has a corresponding `argTypes` entry with description, control, type summary, and default value
 - [ ] `Default` story has all controls wired up via `args`
 - [ ] States story covers all visual states shown in Figma (default, hover, active, focus, disabled)
 - [ ] Reactive forms example included if the component implements ControlValueAccessor
@@ -105,11 +142,21 @@ export default {
 
 ### 6. argTypes Convention
 
+**Every public input/model must have an argTypes entry.** Do not skip any — all props must appear in the Storybook controls panel with correct typing and descriptions.
+
+Each entry must include:
+- `description` — brief explanation of what the input controls
+- `control` — appropriate control type (`'radio'`, `'select'`, `'boolean'`, `'text'`, `'number'`, `'object'`)
+- `options` — for enum/union type inputs, list all possible values
+- `table.category` — always `'inputs'`
+- `table.type.summary` — the TypeScript type name (e.g., `'boolean'`, `'string'`, `'FilterVariant'`, `'FilterOption[]'`)
+- `table.defaultValue.summary` — the default value
+
 ```typescript
 argTypes: {
   inputName: {
     description: 'Brief description of what this input controls',
-    control: { type: 'radio' },  // or 'select', 'boolean', 'text', 'number'
+    control: { type: 'radio' },  // or 'select', 'boolean', 'text', 'number', 'object'
     options: ['value1', 'value2'],
     table: {
       category: 'inputs',

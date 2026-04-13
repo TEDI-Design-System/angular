@@ -13,6 +13,9 @@ import {
 } from "@tedi-design-system/angular/tedi";
 import { generateUUID } from "@tedi-design-system/angular/tedi";
 
+/**
+ * @deprecated Use Checkbox from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   standalone: true,
   selector: "tedi-checkbox-group",
