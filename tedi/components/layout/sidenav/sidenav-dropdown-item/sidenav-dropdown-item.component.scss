@@ -5,7 +5,7 @@
   position: relative;
   display: block;
   min-height: var(--_sidenav-dropdown-item-height);
-  color: var(--navigation-vertical-item-text);
+  color: var(--navigation-vertical-item-text-default);
 
   &:hover {
     background: var(--navigation-vertical-item-background-hover);

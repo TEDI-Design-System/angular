@@ -57,7 +57,7 @@ tedi-toast {
     position: absolute;
     display: flex;
     flex-direction: column;
-    gap: var(--tedi-imensions-05);
+    gap: var(--tedi-dimensions-05);
     max-height: calc(100vh - calc(var(--toast-margin-bottom) * 2));
     overflow: visible;
 
