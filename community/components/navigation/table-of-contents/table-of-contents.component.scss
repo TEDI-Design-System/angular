@@ -15,7 +15,7 @@ $breakpoints: (
   &--position {
     &-sticky {
       position: sticky;
-      top: var(--dimensions-10);
+      top: var(--tedi-dimensions-10);
     }
     &-fixed {
       position: fixed;
@@ -24,19 +24,19 @@ $breakpoints: (
 
   &__content {
     padding: 0;
-    padding-bottom: var(--dimensions-10);
+    padding-bottom: var(--tedi-dimensions-10);
   }
 
   &__header {
     width: 100%;
-    padding: var(--dimensions-10);
+    padding: var(--tedi-dimensions-10);
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
 
   &__items {
-    gap: var(--dimensions-05);
+    gap: var(--tedi-dimensions-05);
     display: flex;
     flex-direction: column;
   }
@@ -82,7 +82,7 @@ $breakpoints: (
     }
 
     .table-of-contents__header {
-      padding: var(--dimensions-10);
+      padding: var(--tedi-dimensions-10);
     }
 
     @each $breakpoint-name, $breakpoint-value in $breakpoints {

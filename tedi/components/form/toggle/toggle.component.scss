@@ -11,10 +11,10 @@
     }
 
     &:focus-visible {
-      outline: calc(2 * var(--borders-01))
+      outline: calc(2 * var(--tedi-borders-01))
         solid
         var(--form-toggl-primary-active-default);
-      outline-offset: var(--borders-01);
+      outline-offset: var(--tedi-borders-01);
       background-color: var(--form-toggl-#{$variant}-inactive-default);
     }
 
@@ -44,10 +44,10 @@
       }
 
       &:focus-visible {
-        outline: calc(2 * var(--borders-01))
+        outline: calc(2 * var(--tedi-borders-01))
           solid
           var(--form-toggl-primary-active-default);
-        outline-offset: var(--borders-01);
+        outline-offset: var(--tedi-borders-01);
         background-color: var(--form-toggl-#{$variant}-active-default);
       }
 
@@ -68,7 +68,7 @@
   }
 
   @if $type == "outlined" {
-    border: var(--borders-01)
+    border: var(--tedi-borders-01)
       solid
       var(--form-toggl-#{$variant}-inactive-default);
 
@@ -77,7 +77,7 @@
     }
 
     &:hover {
-      border: var(--borders-01)
+      border: var(--tedi-borders-01)
         solid
         var(--form-toggl-#{$variant}-inactive-hover);
 
@@ -87,7 +87,7 @@
     }
 
     &:active {
-      border: var(--borders-01)
+      border: var(--tedi-borders-01)
         solid
         var(--form-toggl-#{$variant}-inactive-active);
 
@@ -97,11 +97,11 @@
     }
 
     &:focus-visible {
-      outline: calc(2 * var(--borders-01))
+      outline: calc(2 * var(--tedi-borders-01))
         solid
         var(--form-toggl-primary-active-default);
-      outline-offset: var(--borders-01);
-      border: var(--borders-01)
+      outline-offset: var(--tedi-borders-01);
+      border: var(--tedi-borders-01)
         solid
         var(--form-toggl-#{$variant}-inactive-default);
 
@@ -112,7 +112,7 @@
 
     &:disabled {
       cursor: not-allowed;
-      border: var(--borders-01)
+      border: var(--tedi-borders-01)
         solid
         var(--form-toggl-#{$variant}-inactive-default);
       opacity: 0.5;
@@ -127,7 +127,7 @@
     }
 
     &:checked {
-      border: var(--borders-01)
+      border: var(--tedi-borders-01)
         solid
         var(--form-toggl-#{$variant}-active-default);
 
@@ -136,7 +136,7 @@
       }
 
       &:hover {
-        border: var(--borders-01)
+        border: var(--tedi-borders-01)
           solid
           var(--form-toggl-#{$variant}-active-hover);
 
@@ -146,7 +146,7 @@
       }
 
       &:active {
-        border: var(--borders-01)
+        border: var(--tedi-borders-01)
           solid
           var(--form-toggl-#{$variant}-active-active);
 
@@ -156,11 +156,11 @@
       }
 
       &:focus-visible {
-        outline: calc(2 * var(--borders-01))
+        outline: calc(2 * var(--tedi-borders-01))
           solid
           var(--form-toggl-primary-active-default);
-        outline-offset: var(--borders-01);
-        border: var(--borders-01)
+        outline-offset: var(--tedi-borders-01);
+        border: var(--tedi-borders-01)
           solid
           var(--form-toggl-#{$variant}-active-default);
 
@@ -171,7 +171,7 @@
 
       &:disabled {
         cursor: not-allowed;
-        border: var(--borders-01)
+        border: var(--tedi-borders-01)
           solid
           var(--form-toggl-#{$variant}-active-default);
         opacity: 0.5;
