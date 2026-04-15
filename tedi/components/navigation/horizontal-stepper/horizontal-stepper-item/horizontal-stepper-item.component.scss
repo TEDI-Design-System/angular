@@ -1,0 +1,250 @@
+@use "@tedi-design-system/core/bootstrap-utility/breakpoints";
+
+.tedi-horizontal-stepper-item {
+  $host: &;
+
+  position: relative;
+  display: flex;
+
+  @include breakpoints.media-breakpoint-down(sm) {
+    flex: 1 0 0;
+
+    &--selected {
+      flex: 0 0 auto;
+    }
+  }
+
+  &__step {
+    position: relative;
+    display: flex;
+    gap: var(--stepper-item-horizontal-inner-spacing);
+    align-items: flex-start;
+    width: auto;
+    min-height: 40px;
+    padding: var(--stepper-item-horizontal-padding-y)
+      var(--stepper-item-horizontal-padding-x);
+    font-family: var(--family-default);
+    text-align: left;
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-radius: 0;
+
+    @include breakpoints.media-breakpoint-down(sm) {
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    &:focus-visible {
+      z-index: 2;
+      outline: 2px solid var(--general-focus-outline);
+      outline-offset: -2px;
+    }
+  }
+
+  &__indicator {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background-color: var(--stepper-step-default-bg);
+    border: 1px solid var(--stepper-step-default-border);
+    border-radius: 9999px;
+  }
+
+  &__number {
+    font-size: var(--body-small-bold-size);
+    font-weight: var(--body-bold-weight);
+    line-height: var(--body-small-bold-line-height);
+    color: var(--general-text-secondary);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    white-space: nowrap;
+
+    @include breakpoints.media-breakpoint-down(sm) {
+      display: none;
+
+      #{$host}--selected & {
+        display: flex;
+      }
+    }
+  }
+
+  &__label {
+    font-size: var(--body-regular-size);
+    font-weight: var(--body-regular-weight);
+    line-height: var(--body-regular-line-height);
+    color: var(--stepper-item-horizontal-text-default);
+  }
+
+  &__description {
+    font-size: var(--body-small-regular-size);
+    font-weight: var(--body-small-regular-weight);
+    line-height: var(--body-small-regular-line-height);
+    color: var(--general-text-tertiary);
+  }
+
+  // -------------------------------------------------------
+  // Default type — hover / active
+  // -------------------------------------------------------
+  &:not(#{$host}--selected):not(#{$host}--completed):not(#{$host}--error) {
+    #{$host}__step:hover {
+      #{$host}__indicator {
+        background-color: var(--stepper-step-default-bg-hover);
+        border-color: transparent;
+      }
+
+      #{$host}__number {
+        color: var(--general-text-white);
+      }
+
+      #{$host}__label {
+        color: var(--stepper-item-horizontal-text-hover);
+      }
+    }
+
+    #{$host}__step:active {
+      background-color: var(--stepper-item-horizontal-type-default-bg-active);
+
+      #{$host}__indicator {
+        background-color: var(--stepper-step-default-bg);
+        border-color: transparent;
+      }
+
+      #{$host}__number {
+        color: var(--general-text-primary);
+      }
+
+      #{$host}__label {
+        color: var(--stepper-item-horizontal-text-hover);
+      }
+    }
+  }
+
+  // -------------------------------------------------------
+  // Selected
+  // -------------------------------------------------------
+  &--selected {
+    z-index: 1;
+
+    #{$host}__step {
+      padding-right: calc(var(--stepper-item-horizontal-padding-x) + 16px);
+      cursor: default;
+      background-color: var(
+        --stepper-item-horizontal-type-selected-bg-default
+      );
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%);
+    }
+
+    #{$host}__indicator {
+      background-color: var(--stepper-step-default-bg);
+      border-color: transparent;
+    }
+
+    #{$host}__number {
+      font-weight: var(--body-bold-weight);
+      color: var(--general-text-brand);
+    }
+
+    #{$host}__label {
+      font-weight: var(--body-bold-weight);
+      line-height: var(--body-bold-line-height);
+      color: var(--stepper-item-horizontal-text-selected);
+    }
+
+    #{$host}__description {
+      color: var(--general-text-white);
+    }
+  }
+
+  // -------------------------------------------------------
+  // Completed
+  // -------------------------------------------------------
+  &--completed {
+    #{$host}__step {
+      background-color: var(
+        --stepper-item-horizontal-type-completed-bg-default
+      );
+    }
+
+    #{$host}__indicator {
+      background-color: var(--stepper-step-completed-bg);
+      border-color: transparent;
+    }
+
+    #{$host}__label {
+      color: var(--stepper-item-horizontal-text-completed-default);
+    }
+
+    #{$host}__step:hover {
+      #{$host}__indicator {
+        background-color: var(--stepper-step-completed-bg-hover);
+      }
+
+      #{$host}__label {
+        color: var(--stepper-item-horizontal-text-completed-hover);
+      }
+    }
+
+    #{$host}__step:active {
+      background-color: var(
+        --stepper-item-horizontal-type-completed-bg-active
+      );
+
+      #{$host}__indicator {
+        background-color: var(--stepper-step-completed-bg-active);
+      }
+    }
+  }
+
+  // -------------------------------------------------------
+  // Error
+  // -------------------------------------------------------
+  &--error {
+    #{$host}__step {
+      background-color: var(
+        --stepper-item-horizontal-type-danger-bg-default
+      );
+    }
+
+    #{$host}__indicator {
+      background-color: var(--stepper-step-danger-bg);
+      border-color: transparent;
+    }
+
+    #{$host}__label {
+      color: var(--stepper-item-horizontal-text-danger-default);
+    }
+
+    #{$host}__description {
+      color: var(--stepper-item-horizontal-text-danger-default);
+    }
+
+    #{$host}__step:hover {
+      #{$host}__indicator {
+        background-color: var(--stepper-step-danger-bg-hover);
+      }
+
+      #{$host}__label {
+        color: var(--stepper-item-horizontal-text-danger-hover);
+      }
+    }
+
+    #{$host}__step:active {
+      background-color: var(
+        --stepper-item-horizontal-type-danger-bg-active
+      );
+
+      #{$host}__indicator {
+        background-color: var(--stepper-step-danger-bg-active);
+      }
+    }
+  }
+}

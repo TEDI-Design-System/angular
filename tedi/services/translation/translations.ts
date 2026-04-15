@@ -289,6 +289,14 @@ export const translationsMap = {
     en: "Not completed",
     ru: "Не завершено",
   },
+  "stepper.error": {
+    description:
+      "Label for screen-reader that this step has errors (visually hidden)",
+    components: ["HorizontalStepper"],
+    et: "Viga",
+    en: "Error",
+    ru: "Ошибка",
+  },
   "skeleton.loading": {
     description: "Announced by screen-readers when skeleton is loading",
     components: ["Skeleton"],
