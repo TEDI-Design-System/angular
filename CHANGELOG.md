@@ -19,6 +19,13 @@
 
 * **modal:** completed modal tedi-ready development [#223](https://github.com/TEDI-Design-System/angular/issues/223) ([#377](https://github.com/TEDI-Design-System/angular/issues/377)) ([31868b0](https://github.com/TEDI-Design-System/angular/commit/31868b0337377275d0f53b1df74d10599fc60cd4))
 
+## [6.2.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.0...angular-6.2.1) (2026-04-08)
+
+
+### Bug Fixes
+
+* **separator:** changed separator dot variable names [#390](https://github.com/TEDI-Design-System/angular/issues/390) ([#398](https://github.com/TEDI-Design-System/angular/issues/398)) ([4f87af8](https://github.com/TEDI-Design-System/angular/commit/4f87af82cadc5ac8c7e31eb440b2b9c83a989abb))
+
 # [6.3.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.5...angular-6.3.0-rc.6) (2026-04-13)
 
 
