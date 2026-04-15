@@ -676,6 +676,93 @@ describe("SelectComponent", () => {
 
       expect(select.allOptionsSelected()).toBe(false);
     });
+
+    it("someOptionsSelected should return true when some but not all selected", () => {
+      host.control.setValue(["Option 1"]);
+      fixture.detectChanges();
+
+      expect(select.someOptionsSelected()).toBe(true);
+    });
+
+    it("someOptionsSelected should return false when all selected", () => {
+      host.control.setValue(["Option 1", "Option 2", "Option 3"]);
+      fixture.detectChanges();
+
+      expect(select.someOptionsSelected()).toBe(false);
+    });
+
+    it("someOptionsSelected should return false when none selected", () => {
+      host.control.setValue([]);
+      fixture.detectChanges();
+
+      expect(select.someOptionsSelected()).toBe(false);
+    });
+
+    it("should select only filtered options when search is active", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      const selectAllOption = getSelectAllOption();
+      selectAllOption.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 1"]);
+    }));
+
+    it("should deselect only filtered options when search is active", fakeAsync(() => {
+      host.searchable = true;
+      host.control.setValue(["Option 1", "Option 2", "Option 3"]);
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      const selectAllOption = getSelectAllOption();
+      selectAllOption.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 2", "Option 3"]);
+    }));
+
+    it("allOptionsSelected should reflect only filtered options when searching", fakeAsync(() => {
+      host.searchable = true;
+      host.control.setValue(["Option 1"]);
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      expect(select.allOptionsSelected()).toBe(true);
+    }));
   });
 
   describe("Keyboard navigation", () => {
@@ -1128,6 +1215,55 @@ describe("SelectComponent", () => {
       // All three should be selected (hidden Option 1/2 preserved)
       expect(select.selectedValues()).toEqual(expect.arrayContaining(["Option 1", "Option 2", "Option 3"]));
       expect(select.selectedValues().length).toBe(3);
+    }));
+
+    it("should not clear search term after multiselect selection", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.searchable = true;
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.searchTerm()).toBe("Option 1");
+    }));
+
+    it("should clear search term when closing multiselect dropdown", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.searchable = true;
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      // Close dropdown via arrow button
+      const arrow = hostEl.querySelector(".tedi-select__arrow") as HTMLElement;
+      arrow.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.searchTerm()).toBe("");
     }));
 
     it("optionGroups should group options correctly", () => {

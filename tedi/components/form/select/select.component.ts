@@ -405,7 +405,10 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   });
 
   allOptionsSelected = computed<boolean>(() => {
-    const enabledOptions = this.normalizedOptions().filter((o) => !o.disabled);
+    const options = this.searchTerm().trim()
+      ? this.filteredOptions()
+      : this.normalizedOptions();
+    const enabledOptions = options.filter((o) => !o.disabled);
     const selected = this.selectedValues();
     const compareWith = this.compareWith();
 
@@ -415,6 +418,21 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
         selected.some((val) => compareWith(option.value, val))
       )
     );
+  });
+
+  someOptionsSelected = computed<boolean>(() => {
+    const options = this.searchTerm().trim()
+      ? this.filteredOptions()
+      : this.normalizedOptions();
+    const enabledOptions = options.filter((o) => !o.disabled);
+    const selected = this.selectedValues();
+    const compareWith = this.compareWith();
+
+    const selectedCount = enabledOptions.filter((option) =>
+      selected.some((val) => compareWith(option.value, val))
+    ).length;
+
+    return selectedCount > 0 && selectedCount < enabledOptions.length;
   });
 
   ngAfterContentChecked(): void {
@@ -496,8 +514,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       if (willOpen) {
         this.openDropdown();
       } else {
-        this.dropdownMaxHeight.set(null);
-        this.isOpen.set(false);
+        this.closeDropdown();
       }
     }
   }
@@ -681,7 +698,6 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       }
       this.selectedValues.set(newSelection);
       this.onChange(newSelection);
-      this.searchTerm.set("");
       if (this.searchable()) {
         this.searchInputRef()?.nativeElement.focus();
       }
@@ -888,21 +904,30 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   }
 
   private toggleSelectAll(): void {
-    const options = this.normalizedOptions();
+    const isSearching = !!this.searchTerm().trim();
+    const options = isSearching
+      ? this.filteredOptions()
+      : this.normalizedOptions();
     const enabledOptions = options.filter((o) => !o.disabled);
     const compareWith = this.compareWith();
-    const disabledSelectedValues = this.selectedValues().filter((val) =>
-      options.some((o) => o.disabled && compareWith(val, o.value))
-    );
 
     if (this.allOptionsSelected()) {
-      this.selectedValues.set(disabledSelectedValues);
-      this.onChange(disabledSelectedValues);
+      // Deselect: remove only the visible enabled options, keep the rest
+      const newSelection = this.selectedValues().filter(
+        (val) => !enabledOptions.some((o) => compareWith(val, o.value))
+      );
+      this.selectedValues.set(newSelection);
+      this.onChange(newSelection);
     } else {
-      const allEnabledValues = enabledOptions.map((o) => o.value);
-      const mergedValues = [...disabledSelectedValues, ...allEnabledValues];
-      this.selectedValues.set(mergedValues);
-      this.onChange(mergedValues);
+      // Select: add visible enabled options to current selection
+      const newSelection = [...this.selectedValues()];
+      for (const option of enabledOptions) {
+        if (!newSelection.some((val) => compareWith(val, option.value))) {
+          newSelection.push(option.value);
+        }
+      }
+      this.selectedValues.set(newSelection);
+      this.onChange(newSelection);
     }
   }
 

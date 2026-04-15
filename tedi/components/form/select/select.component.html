@@ -227,7 +227,7 @@
             class="tedi-dropdown-item"
             [cdkOption]="SpecialOptionControls.SELECT_ALL"
           >
-            <tedi-dropdown-item-value type="checkbox" [selected]="allOptionsSelected()">
+            <tedi-dropdown-item-value type="checkbox" [selected]="allOptionsSelected()" [indeterminate]="someOptionsSelected()">
               <tedi-dropdown-item-value-label>{{ "select.select-all" | tediTranslate }}</tedi-dropdown-item-value-label>
             </tedi-dropdown-item-value>
           </li>
