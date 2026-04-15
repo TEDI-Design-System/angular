@@ -1,3 +1,10 @@
+# [6.3.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.8...angular-6.3.0-rc.9) (2026-04-15)
+
+
+### Bug Fixes
+
+* **variables:** update core version, fix variable names [#400](https://github.com/TEDI-Design-System/angular/issues/400) ([#408](https://github.com/TEDI-Design-System/angular/issues/408)) ([05a3153](https://github.com/TEDI-Design-System/angular/commit/05a315316c061f4e73fb0e1d17991afe8c03f030))
+
 # [6.3.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.7...angular-6.3.0-rc.8) (2026-04-13)
 
 
