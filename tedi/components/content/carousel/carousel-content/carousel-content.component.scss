@@ -7,8 +7,8 @@
   cursor: grab;
 
   &:focus-visible {
-    outline: var(--borders-02) solid var(--tedi-primary-500);
-    outline-offset: calc(-1 * var(--borders-03));
+    outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+    outline-offset: calc(-1 * var(--tedi-borders-03));
   }
 
   &:active {
@@ -43,7 +43,7 @@
   }
 
   &:focus-visible {
-    outline: var(--borders-02) solid var(--tedi-primary-500);
-    outline-offset: calc(-1 * var(--borders-03));
+    outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+    outline-offset: calc(-1 * var(--tedi-borders-03));
   }
 }

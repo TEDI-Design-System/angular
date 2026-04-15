@@ -3,7 +3,7 @@
 .table-of-contents__item {
   display: flex;
   flex-direction: column;
-  gap: var(--dimensions-05);
+  gap: var(--tedi-dimensions-05);
 
   &--active .table-of-contents__item-anchor {
     border-color: var(--link-primary-default);
@@ -27,7 +27,7 @@
     // we're inset into the card border by 1 pixel
     padding: 0
       calc(
-        var(--table-of-contents-padding-left-level-1) - var(
+        var(--table-of-contents-padding-level-1) - var(
             --_table-of-contents-inset
           )
       );

@@ -36,8 +36,8 @@ tedi-carousel-indicators {
   }
 
   &:focus-visible::after {
-    outline: var(--borders-02) solid var(--tedi-primary-500);
-    outline-offset: var(--borders-01);
+    outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+    outline-offset: var(--tedi-borders-01);
   }
 
   &--active::after {
