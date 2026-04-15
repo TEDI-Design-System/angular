@@ -1,0 +1,8 @@
+.tedi-horizontal-stepper {
+  display: flex;
+  background-color: var(--stepper-background);
+
+  &--transparent {
+    background-color: transparent;
+  }
+}
