@@ -76,9 +76,8 @@ input[tedi-checkbox][type="checkbox"] {
   }
 
   &:focus-visible {
-    outline-width: 2px;
-    outline-style: solid;
-    outline-offset: 2px;
+    outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+    outline-offset: var(--tedi-borders-01);
   }
 
   &:not(:checked, :disabled).tedi-checkbox--invalid,

@@ -4,6 +4,7 @@ import {
   moduleMetadata,
   StoryObj,
 } from "@storybook/angular";
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { RadioComponent } from "./radio.component";
 import { RadioCardComponent } from "../radio-card/radio-card.component";
 import { RadioGroupComponent } from "../radio-group/radio-group.component";
@@ -18,6 +19,7 @@ import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/t
 import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
+import { AlertComponent } from "../../notifications/alert/alert.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.41.64?node-id=6149-138013&m=dev" target="_blank">Figma ↗</a><br />
@@ -43,6 +45,8 @@ export default {
         TooltipContentComponent,
         InfoButtonComponent,
         FeedbackTextComponent,
+        AlertComponent,
+        ReactiveFormsModule,
       ],
     }),
   ],
@@ -474,45 +478,45 @@ export const RadioCardsGrouped: StoryObj<RadioComponent> = {
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
         <tedi-col class="flex flex-column gap-2">
           <p tedi-text>Primary</p>
-          <div style="display: inline-flex;">
-            <label tedi-radio-card variant="primary" [grouped]="true">
+          <tedi-radio-card-group [grouped]="true">
+            <label tedi-radio-card variant="primary">
               <input tedi-radio type="radio" name="card-group-primary" />
               Text
             </label>
-            <label tedi-radio-card variant="primary" [grouped]="true">
+            <label tedi-radio-card variant="primary">
               <input tedi-radio type="radio" name="card-group-primary" />
               Text
             </label>
-            <label tedi-radio-card variant="primary" [grouped]="true">
+            <label tedi-radio-card variant="primary">
               <input tedi-radio type="radio" name="card-group-primary" checked />
               Text
             </label>
-            <label tedi-radio-card variant="primary" [grouped]="true">
+            <label tedi-radio-card variant="primary">
               <input tedi-radio type="radio" name="card-group-primary" />
               Text
             </label>
-          </div>
+          </tedi-radio-card-group>
         </tedi-col>
         <tedi-col class="flex flex-column gap-2">
           <p tedi-text>Secondary</p>
-          <div style="display: inline-flex;">
-            <label tedi-radio-card variant="secondary" [grouped]="true">
+          <tedi-radio-card-group [grouped]="true">
+            <label tedi-radio-card variant="secondary">
               <input tedi-radio type="radio" name="card-group-secondary" />
               Text
             </label>
-            <label tedi-radio-card variant="secondary" [grouped]="true">
+            <label tedi-radio-card variant="secondary">
               <input tedi-radio type="radio" name="card-group-secondary" checked />
               Text
             </label>
-            <label tedi-radio-card variant="secondary" [grouped]="true">
+            <label tedi-radio-card variant="secondary">
               <input tedi-radio type="radio" name="card-group-secondary" />
               Text
             </label>
-            <label tedi-radio-card variant="secondary" [grouped]="true">
+            <label tedi-radio-card variant="secondary">
               <input tedi-radio type="radio" name="card-group-secondary" />
               Text
             </label>
-          </div>
+          </tedi-radio-card-group>
         </tedi-col>
       </tedi-row>
     `,
@@ -582,43 +586,43 @@ export const RadioCardsGroupedWithDescription: StoryObj<RadioComponent> = {
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
         <tedi-col class="flex flex-column gap-2">
           <p tedi-text>Primary</p>
-          <div style="display: inline-flex;">
-            <label tedi-radio-card variant="primary" [grouped]="true">
+          <tedi-radio-card-group [grouped]="true">
+            <label tedi-radio-card variant="primary">
               <input tedi-radio type="radio" name="card-group-desc-primary" />
               Text
               <tedi-feedback-text text="Description" />
             </label>
-            <label tedi-radio-card variant="primary" [grouped]="true">
+            <label tedi-radio-card variant="primary">
               <input tedi-radio type="radio" name="card-group-desc-primary" />
               Text
               <tedi-feedback-text text="Description" />
             </label>
-            <label tedi-radio-card variant="primary" [grouped]="true">
+            <label tedi-radio-card variant="primary">
               <input tedi-radio type="radio" name="card-group-desc-primary" checked />
               Text
               <tedi-feedback-text text="Description" />
             </label>
-          </div>
+          </tedi-radio-card-group>
         </tedi-col>
         <tedi-col class="flex flex-column gap-2">
           <p tedi-text>Secondary</p>
-          <div style="display: inline-flex;">
-            <label tedi-radio-card variant="secondary" [grouped]="true">
+          <tedi-radio-card-group [grouped]="true">
+            <label tedi-radio-card variant="secondary">
               <input tedi-radio type="radio" name="card-group-desc-secondary" />
               Text
               <tedi-feedback-text text="Description" />
             </label>
-            <label tedi-radio-card variant="secondary" [grouped]="true">
+            <label tedi-radio-card variant="secondary">
               <input tedi-radio type="radio" name="card-group-desc-secondary" checked />
               Text
               <tedi-feedback-text text="Description" />
             </label>
-            <label tedi-radio-card variant="secondary" [grouped]="true">
+            <label tedi-radio-card variant="secondary">
               <input tedi-radio type="radio" name="card-group-desc-secondary" />
               Text
               <tedi-feedback-text text="Description" />
             </label>
-          </div>
+          </tedi-radio-card-group>
         </tedi-col>
       </tedi-row>
     `,
@@ -843,4 +847,104 @@ export const RadioCardStates: StoryObj<RadioComponent> = {
       </tedi-row>
     `,
   }),
+};
+
+/**
+ * The group supports two form-binding modes:
+ *
+ * - **Group-level**: bind `[formControl]` to `<tedi-radio-group>`. The group
+ *   coordinates `name`, `checked`, and `disabled` across children. Emits the
+ *   selected `value` (string) as a single control.
+ * - **Individual-level (Angular native)**: bind `[formControl]` to each
+ *   `<input type="radio">` using Angular's built-in `RadioControlValueAccessor`.
+ *   All radios sharing the same control coordinate via their `name` attribute.
+ */
+export const WithReactiveForms: StoryObj<RadioComponent> = {
+  render: () => {
+    const statusControl = new FormControl<string | null>("active");
+    const planControl = new FormControl<string | null>("pro");
+    const priorityControl = new FormControl<string | null>("medium");
+
+    return {
+      props: { statusControl, planControl, priorityControl },
+      template: `
+        <tedi-row cols="1" [gapY]="3">
+          <tedi-col>
+            <tedi-radio-group label="Status" name="status" [formControl]="statusControl">
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-radio type="radio" value="all" />
+                All
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-radio type="radio" value="active" />
+                Active
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-radio type="radio" value="done" />
+                Done
+              </label>
+            </tedi-radio-group>
+          </tedi-col>
+
+          <tedi-col>
+            <tedi-radio-group label="Plan" name="plan" [formControl]="planControl">
+              <tedi-radio-card-group [grouped]="true">
+                <label tedi-radio-card variant="primary">
+                  <input tedi-radio type="radio" value="basic" />
+                  Basic
+                </label>
+                <label tedi-radio-card variant="primary">
+                  <input tedi-radio type="radio" value="pro" />
+                  Pro
+                </label>
+                <label tedi-radio-card variant="primary">
+                  <input tedi-radio type="radio" value="enterprise" />
+                  Enterprise
+                </label>
+              </tedi-radio-card-group>
+            </tedi-radio-group>
+          </tedi-col>
+
+          <tedi-col>
+            <tedi-radio-group label="Priority">
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-radio type="radio" [formControl]="priorityControl" name="priority" value="low" />
+                Low
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-radio type="radio" [formControl]="priorityControl" name="priority" value="medium" />
+                Medium
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-radio type="radio" [formControl]="priorityControl" name="priority" value="high" />
+                High
+              </label>
+            </tedi-radio-group>
+          </tedi-col>
+
+          <tedi-col>
+            <tedi-alert type="info" [showClose]="false">
+              <pre tedi-text modifiers="small">{{ {
+  status: {
+    value: statusControl.value,
+    touched: statusControl.touched,
+    dirty: statusControl.dirty
+  },
+  plan: {
+    value: planControl.value,
+    touched: planControl.touched,
+    dirty: planControl.dirty
+  },
+  priority: {
+    value: priorityControl.value,
+    touched: priorityControl.touched,
+    dirty: priorityControl.dirty
+  }
+} | json }}</pre>
+            </tedi-alert>
+          </tedi-col>
+        </tedi-row>
+      `,
+    };
+  },
 };

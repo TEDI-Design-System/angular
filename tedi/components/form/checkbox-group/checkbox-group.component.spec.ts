@@ -1,10 +1,13 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import {
   CheckboxGroupComponent,
   CheckboxGroupDirection,
 } from "./checkbox-group.component";
 import { CheckboxComponent } from "../checkbox/checkbox.component";
+import { CheckboxCardComponent } from "../checkbox-card/checkbox-card.component";
+import { CheckboxCardGroupComponent } from "../checkbox-card-group/checkbox-card-group.component";
 import { LabelComponent } from "../label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 
@@ -100,5 +103,245 @@ describe("CheckboxGroupComponent", () => {
     );
     const feedbackText = subtexts?.querySelector("tedi-feedback-text");
     expect(feedbackText).toBeTruthy();
+  });
+
+  it("should not set role when unmanaged (back-compat)", () => {
+    expect(groupElement.getAttribute("role")).toBeNull();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [CheckboxGroupComponent, CheckboxComponent, ReactiveFormsModule],
+  template: `
+    <tedi-checkbox-group [formControl]="control" label="Tags">
+      <input tedi-checkbox type="checkbox" value="urgent" />
+      <input tedi-checkbox type="checkbox" value="review" />
+      <input tedi-checkbox type="checkbox" value="draft" />
+    </tedi-checkbox-group>
+  `,
+})
+class FormControlHostComponent {
+  control = new FormControl<string[]>([]);
+}
+
+describe("CheckboxGroupComponent — managed with FormControl", () => {
+  let fixture: ComponentFixture<FormControlHostComponent>;
+  let groupElement: HTMLElement;
+  let inputs: HTMLInputElement[];
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [FormControlHostComponent],
+    });
+
+    fixture = TestBed.createComponent(FormControlHostComponent);
+    fixture.detectChanges();
+    groupElement = fixture.nativeElement.querySelector("tedi-checkbox-group");
+    inputs = Array.from(
+      groupElement.querySelectorAll('input[type="checkbox"]')
+    ) as HTMLInputElement[];
+  });
+
+  it("should apply role=group when managed", () => {
+    expect(groupElement.getAttribute("role")).toBe("group");
+  });
+
+  it("should apply aria-label from label input", () => {
+    expect(groupElement.getAttribute("aria-label")).toBe("Tags");
+  });
+
+  it("should reflect FormControl value into native checked state", () => {
+    fixture.componentInstance.control.setValue(["urgent", "draft"]);
+    fixture.detectChanges();
+    expect(inputs[0].checked).toBe(true);
+    expect(inputs[1].checked).toBe(false);
+    expect(inputs[2].checked).toBe(true);
+  });
+
+  it("should toggle on child check/uncheck", () => {
+    inputs[0].checked = true;
+    inputs[0].dispatchEvent(new Event("change", { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.control.value).toEqual(["urgent"]);
+
+    inputs[1].checked = true;
+    inputs[1].dispatchEvent(new Event("change", { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.control.value).toEqual([
+      "urgent",
+      "review",
+    ]);
+
+    inputs[0].checked = false;
+    inputs[0].dispatchEvent(new Event("change", { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.control.value).toEqual(["review"]);
+  });
+
+  it("should propagate disabled from FormControl to children", () => {
+    fixture.componentInstance.control.disable();
+    fixture.detectChanges();
+    expect(inputs.every((i) => i.disabled)).toBe(true);
+    expect(groupElement.getAttribute("aria-disabled")).toBe("true");
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [CheckboxGroupComponent, CheckboxComponent, ReactiveFormsModule],
+  template: `
+    <tedi-checkbox-group [formControl]="control">
+      <input tedi-checkbox type="checkbox" value="a" />
+      <input tedi-checkbox type="checkbox" value="b" disabled />
+    </tedi-checkbox-group>
+  `,
+})
+class IntrinsicDisabledHostComponent {
+  control = new FormControl<string[]>([]);
+}
+
+describe("CheckboxGroupComponent — per-item disabled", () => {
+  it("should preserve intrinsic disabled across group-disabled toggles", () => {
+    TestBed.configureTestingModule({
+      imports: [IntrinsicDisabledHostComponent],
+    });
+    const fixture = TestBed.createComponent(IntrinsicDisabledHostComponent);
+    fixture.detectChanges();
+    const inputs = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'input[type="checkbox"]'
+      )
+    ) as HTMLInputElement[];
+
+    // Intrinsic disabled preserved initially.
+    expect(inputs[0].disabled).toBe(false);
+    expect(inputs[1].disabled).toBe(true);
+
+    // Disabling the FormControl disables all.
+    fixture.componentInstance.control.disable();
+    fixture.detectChanges();
+    expect(inputs[0].disabled).toBe(true);
+    expect(inputs[1].disabled).toBe(true);
+
+    // Re-enabling the FormControl restores intrinsic per-item state.
+    fixture.componentInstance.control.enable();
+    fixture.detectChanges();
+    expect(inputs[0].disabled).toBe(false);
+    expect(inputs[1].disabled).toBe(true);
+  });
+
+  it("should not update values when intrinsically disabled child fires change", () => {
+    TestBed.configureTestingModule({
+      imports: [IntrinsicDisabledHostComponent],
+    });
+    const fixture = TestBed.createComponent(IntrinsicDisabledHostComponent);
+    fixture.detectChanges();
+    const inputs = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'input[type="checkbox"]'
+      )
+    ) as HTMLInputElement[];
+
+    // Simulate click on disabled input (shouldn't normally fire, but guard anyway).
+    inputs[1].checked = true;
+    inputs[1].dispatchEvent(new Event("change", { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.control.value).toEqual([]);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [CheckboxGroupComponent, CheckboxComponent],
+  template: `
+    <tedi-checkbox-group [(values)]="selected">
+      <input tedi-checkbox type="checkbox" value="a" />
+      <input tedi-checkbox type="checkbox" value="b" />
+    </tedi-checkbox-group>
+  `,
+})
+class TwoWayHostComponent {
+  selected: string[] = ["a"];
+}
+
+describe("CheckboxGroupComponent — managed with [(values)]", () => {
+  let fixture: ComponentFixture<TwoWayHostComponent>;
+  let inputs: HTMLInputElement[];
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [TwoWayHostComponent] });
+    fixture = TestBed.createComponent(TwoWayHostComponent);
+    fixture.detectChanges();
+    inputs = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'input[type="checkbox"]'
+      )
+    ) as HTMLInputElement[];
+  });
+
+  it("should reflect initial values", () => {
+    expect(inputs[0].checked).toBe(true);
+    expect(inputs[1].checked).toBe(false);
+  });
+
+  it("should update bound values on toggle", () => {
+    inputs[1].checked = true;
+    inputs[1].dispatchEvent(new Event("change", { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selected).toEqual(["a", "b"]);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [
+    CheckboxGroupComponent,
+    CheckboxComponent,
+    CheckboxCardComponent,
+    CheckboxCardGroupComponent,
+    ReactiveFormsModule,
+  ],
+  template: `
+    <tedi-checkbox-group [formControl]="control">
+      <tedi-checkbox-card-group>
+        <label tedi-checkbox-card variant="primary">
+          <input tedi-checkbox type="checkbox" value="analytics" />
+          Analytics
+        </label>
+        <label tedi-checkbox-card variant="primary">
+          <input tedi-checkbox type="checkbox" value="export" />
+          Export
+        </label>
+      </tedi-checkbox-card-group>
+    </tedi-checkbox-group>
+  `,
+})
+class CardHostComponent {
+  control = new FormControl<string[]>([]);
+}
+
+describe("CheckboxGroupComponent — card children", () => {
+  it("should coordinate card-wrapped checkboxes", () => {
+    TestBed.configureTestingModule({ imports: [CardHostComponent] });
+    const fixture = TestBed.createComponent(CardHostComponent);
+    fixture.detectChanges();
+    const inputs = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'input[type="checkbox"]'
+      )
+    ) as HTMLInputElement[];
+    fixture.componentInstance.control.setValue(["export"]);
+    fixture.detectChanges();
+    expect(inputs[0].checked).toBe(false);
+    expect(inputs[1].checked).toBe(true);
+
+    inputs[0].checked = true;
+    inputs[0].dispatchEvent(new Event("change", { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.control.value).toEqual([
+      "export",
+      "analytics",
+    ]);
   });
 });

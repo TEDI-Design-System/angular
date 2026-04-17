@@ -1,9 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
+  inject,
   input,
+  OnDestroy,
+  OnInit,
   ViewEncapsulation,
 } from "@angular/core";
+import { CheckboxGroupComponent } from "../checkbox-group/checkbox-group.component";
 
 export type CheckboxSize = "default" | "large";
 
@@ -17,9 +22,10 @@ export type CheckboxSize = "default" | "large";
   host: {
     "[class.tedi-checkbox--large]": "size() === 'large'",
     "[class.tedi-checkbox--invalid]": "invalid()",
+    "(change)": "handleChange()",
   },
 })
-export class CheckboxComponent {
+export class CheckboxComponent implements OnInit, OnDestroy {
   /**
    * Size of the checkbox.
    * @default default
@@ -30,4 +36,41 @@ export class CheckboxComponent {
    * @default false
    */
   readonly invalid = input(false);
+  /**
+   * Identity of this checkbox inside a managed `<tedi-checkbox-group>`.
+   * Required when the parent group is managed (has a FormControl or
+   * `[(values)]` binding). Ignored otherwise.
+   */
+  readonly value = input<string>();
+
+  private readonly elementRef =
+    inject<ElementRef<HTMLInputElement>>(ElementRef);
+  private readonly group = inject(CheckboxGroupComponent, { optional: true });
+  private warned = false;
+
+  get hostElement(): HTMLInputElement {
+    return this.elementRef.nativeElement;
+  }
+
+  ngOnInit(): void {
+    this.group?.registerChild(this);
+  }
+
+  ngOnDestroy(): void {
+    this.group?.unregisterChild(this);
+  }
+
+  handleChange(): void {
+    if (!this.group || !this.group.isManaged()) return;
+    if (this.hostElement.disabled) return;
+    const v = this.value();
+    if (v === undefined) {
+      if (!this.warned) {
+        this.warned = true;
+        this.group.warnMissingValue();
+      }
+      return;
+    }
+    this.group.onChildChange(v, this.hostElement.checked);
+  }
 }

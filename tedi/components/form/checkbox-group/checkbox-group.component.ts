@@ -1,10 +1,20 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
+  effect,
+  forwardRef,
+  inject,
   input,
+  isDevMode,
+  model,
+  Renderer2,
+  signal,
   ViewEncapsulation,
 } from "@angular/core";
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { TextComponent } from "../../base/text/text.component";
+import type { CheckboxComponent } from "../checkbox/checkbox.component";
 
 export type CheckboxGroupDirection = "horizontal" | "vertical";
 
@@ -16,11 +26,21 @@ export type CheckboxGroupDirection = "horizontal" | "vertical";
   styleUrl: "./checkbox-group.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => CheckboxGroupComponent),
+      multi: true,
+    },
+  ],
   host: {
     class: "tedi-checkbox-group",
+    "[attr.role]": "isManaged() ? 'group' : null",
+    "[attr.aria-label]": "isManaged() ? (label() ?? null) : null",
+    "[attr.aria-disabled]": "isManaged() && isDisabled() ? 'true' : null",
   },
 })
-export class CheckboxGroupComponent {
+export class CheckboxGroupComponent implements ControlValueAccessor {
   /**
    * Label text displayed above the checkbox group.
    */
@@ -30,4 +50,131 @@ export class CheckboxGroupComponent {
    * @default horizontal
    */
   readonly direction = input<CheckboxGroupDirection>("horizontal");
+  /**
+   * Selected values. Bind with `[(values)]` or use a FormControl on the group.
+   * When provided, the group enters managed mode and coordinates `checked`
+   * on every registered child.
+   * @default []
+   */
+  readonly values = model<string[]>([]);
+  /**
+   * Disables the entire group. Propagates to all children.
+   * @default false
+   */
+  readonly disabled = input<boolean>(false);
+
+  private readonly renderer = inject(Renderer2);
+  private readonly children = signal<readonly CheckboxComponent[]>([]);
+  private readonly cvaDisabled = signal(false);
+  private readonly managed = signal(false);
+  private readonly intrinsicDisabled = new WeakMap<CheckboxComponent, boolean>();
+  private modelSeen = false;
+
+  private onChange: (value: string[]) => void = () => {};
+  private onTouched: () => void = () => {};
+
+  readonly isManaged = this.managed.asReadonly();
+  readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
+
+  constructor() {
+    effect(() => {
+      const v = this.values();
+      if (!this.modelSeen) {
+        this.modelSeen = true;
+        if (v.length > 0) {
+          this.managed.set(true);
+        }
+      } else {
+        this.managed.set(true);
+      }
+      this.syncChildrenChecked();
+    });
+
+    effect(() => {
+      const groupDisabled = this.isDisabled();
+      for (const child of this.children()) {
+        const intrinsic = this.intrinsicDisabled.get(child) ?? false;
+        this.renderer.setProperty(
+          child.hostElement,
+          "disabled",
+          groupDisabled || intrinsic,
+        );
+      }
+    });
+  }
+
+  writeValue(values: string[] | null): void {
+    this.values.set(values ?? []);
+    this.managed.set(true);
+  }
+
+  registerOnChange(fn: (values: string[]) => void): void {
+    this.onChange = fn;
+    this.managed.set(true);
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.cvaDisabled.set(isDisabled);
+  }
+
+  registerChild(child: CheckboxComponent): void {
+    this.intrinsicDisabled.set(child, child.hostElement.disabled);
+    this.children.update((list) => [...list, child]);
+    this.applyCheckedTo(child);
+  }
+
+  unregisterChild(child: CheckboxComponent): void {
+    this.intrinsicDisabled.delete(child);
+    this.children.update((list) => list.filter((c) => c !== child));
+  }
+
+  onChildChange(value: string, checked: boolean): void {
+    if (!this.isManaged()) return;
+    const current = this.values();
+    const has = current.includes(value);
+    if (checked && !has) {
+      this.values.set([...current, value]);
+    } else if (!checked && has) {
+      this.values.set(current.filter((v) => v !== value));
+    } else {
+      return;
+    }
+    this.onChange(this.values());
+    this.onTouched();
+  }
+
+  isSelected(value: string | undefined): boolean {
+    return value !== undefined && this.values().includes(value);
+  }
+
+  private syncChildrenChecked(): void {
+    if (!this.isManaged()) return;
+    for (const child of this.children()) {
+      this.applyCheckedTo(child);
+    }
+  }
+
+  private applyCheckedTo(child: CheckboxComponent): void {
+    if (!this.isManaged()) return;
+    const v = child.value();
+    if (v === undefined) return;
+    const desired = this.values().includes(v);
+    const el = child.hostElement;
+    if (el.checked !== desired) {
+      this.renderer.setProperty(el, "checked", desired);
+    }
+  }
+
+  /** @internal */
+  warnMissingValue(): void {
+    if (isDevMode()) {
+      console.warn(
+        "[tedi-checkbox-group] A checkbox inside a managed group is missing a [value] input and will be ignored.",
+      );
+    }
+  }
 }

@@ -4,6 +4,7 @@ import {
   moduleMetadata,
   StoryObj,
 } from "@storybook/angular";
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { CheckboxComponent } from "./checkbox.component";
 import { CheckboxCardComponent } from "../checkbox-card/checkbox-card.component";
 import { CheckboxGroupComponent } from "../checkbox-group/checkbox-group.component";
@@ -18,6 +19,7 @@ import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/t
 import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
+import { AlertComponent } from "../../notifications/alert/alert.component";
 
 type StoryCheckboxComponent = CheckboxComponent & {
   indeterminate: boolean;
@@ -47,6 +49,8 @@ export default {
         TooltipContentComponent,
         InfoButtonComponent,
         FeedbackTextComponent,
+        AlertComponent,
+        ReactiveFormsModule,
       ],
     }),
   ],
@@ -812,4 +816,115 @@ export const CheckboxCardStates: StoryObj<CheckboxComponent> = {
       </tedi-row>
     `,
   }),
+};
+
+/**
+ * The group supports two form-binding modes:
+ *
+ * - **Group-level**: bind `[formControl]` to `<tedi-checkbox-group>`. The group
+ *   coordinates `checked` and `disabled` across children. Emits the selected
+ *   values as `string[]` on a single control.
+ * - **Individual-level (Angular native)**: bind `[formControl]` to each
+ *   `<input type="checkbox">` using Angular's built-in
+ *   `CheckboxControlValueAccessor`. Each control holds a boolean.
+ */
+export const WithReactiveForms: StoryObj<CheckboxComponent> = {
+  render: () => {
+    const tagsControl = new FormControl<string[]>(["urgent"]);
+    const featuresControl = new FormControl<string[]>([
+      "analytics",
+      "export",
+    ]);
+    const readControl = new FormControl<boolean>(true);
+    const writeControl = new FormControl<boolean>(false);
+    const adminControl = new FormControl<boolean>(false);
+
+    return {
+      props: {
+        tagsControl,
+        featuresControl,
+        readControl,
+        writeControl,
+        adminControl,
+      },
+      template: `
+        <tedi-row cols="1" [gapY]="3">
+          <tedi-col>
+            <tedi-checkbox-group label="Tags" [formControl]="tagsControl">
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" value="urgent" />
+                Urgent
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" value="review" />
+                Review
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" value="draft" disabled />
+                Draft
+              </label>
+            </tedi-checkbox-group>
+          </tedi-col>
+
+          <tedi-col>
+            <tedi-checkbox-group label="Features" [formControl]="featuresControl">
+              <tedi-checkbox-card-group>
+                <label tedi-checkbox-card variant="primary">
+                  <input tedi-checkbox type="checkbox" value="analytics" />
+                  Analytics
+                </label>
+                <label tedi-checkbox-card variant="primary">
+                  <input tedi-checkbox type="checkbox" value="export" />
+                  Export
+                </label>
+                <label tedi-checkbox-card variant="primary">
+                  <input tedi-checkbox type="checkbox" value="audit-log" />
+                  Audit log
+                </label>
+              </tedi-checkbox-card-group>
+            </tedi-checkbox-group>
+          </tedi-col>
+
+          <tedi-col>
+            <tedi-checkbox-group label="Permissions">
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" [formControl]="readControl" />
+                Read
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" [formControl]="writeControl" />
+                Write
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" [formControl]="adminControl" />
+                Admin
+              </label>
+            </tedi-checkbox-group>
+          </tedi-col>
+
+          <tedi-col>
+            <tedi-alert type="info" [showClose]="false">
+              <pre tedi-text modifiers="small">{{ {
+  tags: {
+    value: tagsControl.value,
+    touched: tagsControl.touched,
+    dirty: tagsControl.dirty
+  },
+  features: {
+    value: featuresControl.value,
+    touched: featuresControl.touched,
+    dirty: featuresControl.dirty
+  },
+  permissions: {
+    read: readControl.value,
+    write: writeControl.value,
+    admin: adminControl.value
+  }
+} | json }}</pre>
+            </tedi-alert>
+          </tedi-col>
+        </tedi-row>
+      `,
+    };
+  },
 };
