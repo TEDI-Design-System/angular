@@ -1,3 +1,10 @@
+# [6.3.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.10...angular-6.3.0-rc.11) (2026-04-17)
+
+
+### Features
+
+* **select:** added searchFn, improved dropdown behavior [#403](https://github.com/TEDI-Design-System/angular/issues/403) ([#404](https://github.com/TEDI-Design-System/angular/issues/404)) ([03b13d0](https://github.com/TEDI-Design-System/angular/commit/03b13d0325a31953c6dba0cd4492469d9f607a61))
+
 # [6.3.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.9...angular-6.3.0-rc.10) (2026-04-15)
 
 
