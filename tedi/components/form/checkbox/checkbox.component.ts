@@ -1,6 +1,8 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   inject,
   input,
@@ -22,6 +24,7 @@ export type CheckboxSize = "default" | "large";
   host: {
     "[class.tedi-checkbox--large]": "size() === 'large'",
     "[class.tedi-checkbox--invalid]": "invalid()",
+    "[disabled]": "effectiveDisabled()",
     "(change)": "handleChange()",
   },
 })
@@ -42,11 +45,21 @@ export class CheckboxComponent implements OnInit, OnDestroy {
    * `[(values)]` binding). Ignored otherwise.
    */
   readonly value = input<string>();
+  /**
+   * Disables this checkbox. An enclosing disabled `<tedi-checkbox-group>`
+   * forces disabled regardless of this input.
+   * @default false
+   */
+  readonly disabled = input(false, { transform: booleanAttribute });
 
   private readonly elementRef =
     inject<ElementRef<HTMLInputElement>>(ElementRef);
   private readonly group = inject(CheckboxGroupComponent, { optional: true });
   private warned = false;
+
+  readonly effectiveDisabled = computed(
+    () => this.disabled() || (this.group?.isDisabled() ?? false),
+  );
 
   get hostElement(): HTMLInputElement {
     return this.elementRef.nativeElement;
@@ -62,7 +75,7 @@ export class CheckboxComponent implements OnInit, OnDestroy {
 
   handleChange(): void {
     if (!this.group || !this.group.isManaged()) return;
-    if (this.hostElement.disabled) return;
+    if (this.effectiveDisabled()) return;
     const v = this.value();
     if (v === undefined) {
       if (!this.warned) {

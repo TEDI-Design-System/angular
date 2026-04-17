@@ -1,6 +1,8 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   inject,
   input,
@@ -22,6 +24,7 @@ export type RadioSize = "default" | "large";
   host: {
     "[class.tedi-radio--large]": "size() === 'large'",
     "[class.tedi-radio--invalid]": "invalid()",
+    "[disabled]": "effectiveDisabled()",
     "(change)": "handleChange()",
   },
 })
@@ -42,11 +45,21 @@ export class RadioComponent implements OnInit, OnDestroy {
    * binding). Ignored otherwise.
    */
   readonly value = input<string>();
+  /**
+   * Disables this radio. An enclosing disabled `<tedi-radio-group>` forces
+   * disabled regardless of this input.
+   * @default false
+   */
+  readonly disabled = input(false, { transform: booleanAttribute });
 
   private readonly elementRef =
     inject<ElementRef<HTMLInputElement>>(ElementRef);
   private readonly group = inject(RadioGroupComponent, { optional: true });
   private warned = false;
+
+  readonly effectiveDisabled = computed(
+    () => this.disabled() || (this.group?.isDisabled() ?? false),
+  );
 
   get hostElement(): HTMLInputElement {
     return this.elementRef.nativeElement;
@@ -62,7 +75,7 @@ export class RadioComponent implements OnInit, OnDestroy {
 
   handleChange(): void {
     if (!this.group || !this.group.isManaged()) return;
-    if (this.hostElement.disabled) return;
+    if (this.effectiveDisabled()) return;
     const v = this.value();
     if (v === undefined) {
       if (!this.warned) {

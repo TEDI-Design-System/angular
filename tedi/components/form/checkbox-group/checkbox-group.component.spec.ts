@@ -147,8 +147,13 @@ describe("CheckboxGroupComponent — managed with FormControl", () => {
     expect(groupElement.getAttribute("role")).toBe("group");
   });
 
-  it("should apply aria-label from label input", () => {
-    expect(groupElement.getAttribute("aria-label")).toBe("Tags");
+  it("should apply aria-labelledby pointing at the rendered label", () => {
+    const labelledBy = groupElement.getAttribute("aria-labelledby");
+    expect(labelledBy).toBeTruthy();
+    const labelEl = groupElement.querySelector(".tedi-checkbox-group__label");
+    expect(labelEl?.id).toBe(labelledBy);
+    expect(labelEl?.textContent?.trim()).toBe("Tags");
+    expect(groupElement.getAttribute("aria-label")).toBeNull();
   });
 
   it("should reflect FormControl value into native checked state", () => {
@@ -229,6 +234,51 @@ describe("CheckboxGroupComponent — per-item disabled", () => {
     fixture.detectChanges();
     expect(inputs[0].disabled).toBe(false);
     expect(inputs[1].disabled).toBe(true);
+  });
+
+  it("should reflect dynamic [disabled] toggles on a child after group-disabled cycles", () => {
+    @Component({
+      standalone: true,
+      imports: [CheckboxGroupComponent, CheckboxComponent, ReactiveFormsModule],
+      template: `
+        <tedi-checkbox-group [formControl]="control">
+          <input tedi-checkbox type="checkbox" value="a" [disabled]="aDisabled" />
+          <input tedi-checkbox type="checkbox" value="b" />
+        </tedi-checkbox-group>
+      `,
+    })
+    class DynamicHostComponent {
+      control = new FormControl<string[]>([]);
+      aDisabled = false;
+    }
+
+    TestBed.configureTestingModule({ imports: [DynamicHostComponent] });
+    const fixture = TestBed.createComponent(DynamicHostComponent);
+    fixture.detectChanges();
+    const inputs = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'input[type="checkbox"]'
+      )
+    ) as HTMLInputElement[];
+
+    expect(inputs[0].disabled).toBe(false);
+    fixture.componentInstance.aDisabled = true;
+    fixture.detectChanges();
+    expect(inputs[0].disabled).toBe(true);
+
+    fixture.componentInstance.control.disable();
+    fixture.detectChanges();
+    expect(inputs[0].disabled).toBe(true);
+    expect(inputs[1].disabled).toBe(true);
+
+    fixture.componentInstance.control.enable();
+    fixture.detectChanges();
+    expect(inputs[0].disabled).toBe(true);
+    expect(inputs[1].disabled).toBe(false);
+
+    fixture.componentInstance.aDisabled = false;
+    fixture.detectChanges();
+    expect(inputs[0].disabled).toBe(false);
   });
 
   it("should not update values when intrinsically disabled child fires change", () => {

@@ -18,6 +18,8 @@ import type { CheckboxComponent } from "../checkbox/checkbox.component";
 
 export type CheckboxGroupDirection = "horizontal" | "vertical";
 
+let nextGroupId = 0;
+
 @Component({
   standalone: true,
   imports: [TextComponent],
@@ -36,7 +38,7 @@ export type CheckboxGroupDirection = "horizontal" | "vertical";
   host: {
     class: "tedi-checkbox-group",
     "[attr.role]": "isManaged() ? 'group' : null",
-    "[attr.aria-label]": "isManaged() ? (label() ?? null) : null",
+    "[attr.aria-labelledby]": "isManaged() && label() ? labelId : null",
     "[attr.aria-disabled]": "isManaged() && isDisabled() ? 'true' : null",
   },
 })
@@ -64,11 +66,10 @@ export class CheckboxGroupComponent implements ControlValueAccessor {
   readonly disabled = input<boolean>(false);
 
   private readonly renderer = inject(Renderer2);
+  protected readonly labelId = `tedi-checkbox-group-${++nextGroupId}-label`;
   private readonly children = signal<readonly CheckboxComponent[]>([]);
   private readonly cvaDisabled = signal(false);
   private readonly managed = signal(false);
-  private readonly intrinsicDisabled = new WeakMap<CheckboxComponent, boolean>();
-  private modelSeen = false;
 
   private onChange: (value: string[]) => void = () => {};
   private onTouched: () => void = () => {};
@@ -79,27 +80,10 @@ export class CheckboxGroupComponent implements ControlValueAccessor {
   constructor() {
     effect(() => {
       const v = this.values();
-      if (!this.modelSeen) {
-        this.modelSeen = true;
-        if (v.length > 0) {
-          this.managed.set(true);
-        }
-      } else {
+      if (v.length > 0) {
         this.managed.set(true);
       }
       this.syncChildrenChecked();
-    });
-
-    effect(() => {
-      const groupDisabled = this.isDisabled();
-      for (const child of this.children()) {
-        const intrinsic = this.intrinsicDisabled.get(child) ?? false;
-        this.renderer.setProperty(
-          child.hostElement,
-          "disabled",
-          groupDisabled || intrinsic,
-        );
-      }
     });
   }
 
@@ -122,13 +106,11 @@ export class CheckboxGroupComponent implements ControlValueAccessor {
   }
 
   registerChild(child: CheckboxComponent): void {
-    this.intrinsicDisabled.set(child, child.hostElement.disabled);
     this.children.update((list) => [...list, child]);
     this.applyCheckedTo(child);
   }
 
   unregisterChild(child: CheckboxComponent): void {
-    this.intrinsicDisabled.delete(child);
     this.children.update((list) => list.filter((c) => c !== child));
   }
 

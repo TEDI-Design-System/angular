@@ -35,6 +35,10 @@ export class RadioCardComponent {
    * Whether the card is part of a button-group style layout. Prefer setting
    * `grouped` on the enclosing `tedi-radio-card-group` instead; this input
    * is retained for standalone cards outside a group.
+   *
+   * The effective state is `grouped || parentGrouped` (see `isGrouped()` and
+   * `RadioCardGroupComponent`): a child cannot opt out when its parent is
+   * grouped.
    * @default false
    */
   readonly grouped = input(false);

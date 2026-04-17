@@ -38,7 +38,7 @@ let nextGroupId = 0;
   host: {
     class: "tedi-radio-group",
     "[attr.role]": "isManaged() ? 'radiogroup' : null",
-    "[attr.aria-label]": "isManaged() ? (label() ?? null) : null",
+    "[attr.aria-labelledby]": "isManaged() && label() ? labelId : null",
     "[attr.aria-disabled]": "isManaged() && isDisabled() ? 'true' : null",
   },
 })
@@ -72,11 +72,10 @@ export class RadioGroupComponent implements ControlValueAccessor {
 
   private readonly renderer = inject(Renderer2);
   private readonly autoName = `tedi-radio-group-${++nextGroupId}`;
+  protected readonly labelId = `${this.autoName}-label`;
   private readonly children = signal<readonly RadioComponent[]>([]);
   private readonly cvaDisabled = signal(false);
   private readonly managed = signal(false);
-  private readonly intrinsicDisabled = new WeakMap<RadioComponent, boolean>();
-  private modelSeen = false;
 
   private onChange: (value: string | null) => void = () => {};
   private onTouched: () => void = () => {};
@@ -87,27 +86,10 @@ export class RadioGroupComponent implements ControlValueAccessor {
   constructor() {
     effect(() => {
       const v = this.value();
-      if (!this.modelSeen) {
-        this.modelSeen = true;
-        if (v !== null) {
-          this.managed.set(true);
-        }
-      } else {
+      if (v !== null) {
         this.managed.set(true);
       }
       this.syncChildrenChecked();
-    });
-
-    effect(() => {
-      const groupDisabled = this.isDisabled();
-      for (const child of this.children()) {
-        const intrinsic = this.intrinsicDisabled.get(child) ?? false;
-        this.renderer.setProperty(
-          child.hostElement,
-          "disabled",
-          groupDisabled || intrinsic,
-        );
-      }
     });
 
     effect(() => {
@@ -137,7 +119,6 @@ export class RadioGroupComponent implements ControlValueAccessor {
   }
 
   registerChild(child: RadioComponent): void {
-    this.intrinsicDisabled.set(child, child.hostElement.disabled);
     this.children.update((list) => [...list, child]);
     this.renderer.setAttribute(
       child.hostElement,
@@ -148,7 +129,6 @@ export class RadioGroupComponent implements ControlValueAccessor {
   }
 
   unregisterChild(child: RadioComponent): void {
-    this.intrinsicDisabled.delete(child);
     this.children.update((list) => list.filter((c) => c !== child));
   }
 

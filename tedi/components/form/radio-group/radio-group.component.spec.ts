@@ -145,8 +145,13 @@ describe("RadioGroupComponent — managed with FormControl", () => {
     expect(groupElement.getAttribute("role")).toBe("radiogroup");
   });
 
-  it("should apply aria-label from label input", () => {
-    expect(groupElement.getAttribute("aria-label")).toBe("Status");
+  it("should apply aria-labelledby pointing at the rendered label", () => {
+    const labelledBy = groupElement.getAttribute("aria-labelledby");
+    expect(labelledBy).toBeTruthy();
+    const labelEl = groupElement.querySelector(".tedi-radio-group__label");
+    expect(labelEl?.id).toBe(labelledBy);
+    expect(labelEl?.textContent?.trim()).toBe("Status");
+    expect(groupElement.getAttribute("aria-label")).toBeNull();
   });
 
   it("should share an auto-generated name across children", () => {
@@ -248,6 +253,53 @@ describe("RadioGroupComponent — managed with [(value)]", () => {
 class CardHostComponent {
   control = new FormControl<string | null>(null);
 }
+
+describe("RadioGroupComponent — per-item disabled", () => {
+  it("should reflect dynamic [disabled] toggles on a child after group-disabled cycles", () => {
+    @Component({
+      standalone: true,
+      imports: [RadioGroupComponent, RadioComponent, ReactiveFormsModule],
+      template: `
+        <tedi-radio-group [formControl]="control">
+          <input tedi-radio type="radio" value="a" [disabled]="aDisabled" />
+          <input tedi-radio type="radio" value="b" />
+        </tedi-radio-group>
+      `,
+    })
+    class DynamicHostComponent {
+      control = new FormControl<string | null>(null);
+      aDisabled = false;
+    }
+
+    TestBed.configureTestingModule({ imports: [DynamicHostComponent] });
+    const fixture = TestBed.createComponent(DynamicHostComponent);
+    fixture.detectChanges();
+    const inputs = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'input[type="radio"]'
+      )
+    ) as HTMLInputElement[];
+
+    expect(inputs[0].disabled).toBe(false);
+    fixture.componentInstance.aDisabled = true;
+    fixture.detectChanges();
+    expect(inputs[0].disabled).toBe(true);
+
+    fixture.componentInstance.control.disable();
+    fixture.detectChanges();
+    expect(inputs[0].disabled).toBe(true);
+    expect(inputs[1].disabled).toBe(true);
+
+    fixture.componentInstance.control.enable();
+    fixture.detectChanges();
+    expect(inputs[0].disabled).toBe(true);
+    expect(inputs[1].disabled).toBe(false);
+
+    fixture.componentInstance.aDisabled = false;
+    fixture.detectChanges();
+    expect(inputs[0].disabled).toBe(false);
+  });
+});
 
 describe("RadioGroupComponent — card children", () => {
   it("should coordinate card-wrapped radios", () => {
