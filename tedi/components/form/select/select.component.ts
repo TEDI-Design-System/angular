@@ -1,4 +1,4 @@
-import { CdkOverlayOrigin, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
 import { CdkListbox, CdkListboxModule } from "@angular/cdk/listbox";
 import {
   AfterContentChecked,
@@ -244,6 +244,13 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    */
   searchable = input<boolean>(false);
 
+  /**
+   * Custom search function for filtering options.
+   * When provided, overrides the default label-based search.
+   * Receives the search term and the option item (with all original properties), returns true to include the option.
+   */
+  searchFn = input<((term: string, item: T) => boolean) | undefined>();
+
   readonly SpecialOptionControls = SpecialOptionControls;
 
   readonly dropdownPositions: ConnectedPosition[] = [
@@ -284,6 +291,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   listboxRef = viewChild(CdkListbox, { read: ElementRef });
   cdkListboxRef = viewChild(CdkListbox);
+  connectedOverlay = viewChild(CdkConnectedOverlay);
   triggerRef = viewChild(CdkOverlayOrigin, { read: ElementRef });
   searchInputRef = viewChild<ElementRef>("searchInput");
   multiselectContainerRef = viewChild<ElementRef>("multiselectContainer");
@@ -332,10 +340,17 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   filteredOptions = computed<SelectOption<T>[]>(() => {
     const options = this.normalizedOptions();
-    const term = this.searchTerm().toLowerCase().trim();
+    const trimmed = this.searchTerm().trim();
 
-    if (!term) {
+    if (!trimmed) {
       return options;
+    }
+
+    const term = trimmed.toLowerCase();
+    const searchFn = this.searchFn();
+
+    if (searchFn) {
+      return options.filter((option) => searchFn(term, option as unknown as T));
     }
 
     return options.filter((option) =>
@@ -390,7 +405,10 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   });
 
   allOptionsSelected = computed<boolean>(() => {
-    const enabledOptions = this.normalizedOptions().filter((o) => !o.disabled);
+    const options = this.searchTerm().trim()
+      ? this.filteredOptions()
+      : this.normalizedOptions();
+    const enabledOptions = options.filter((o) => !o.disabled);
     const selected = this.selectedValues();
     const compareWith = this.compareWith();
 
@@ -402,6 +420,21 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     );
   });
 
+  someOptionsSelected = computed<boolean>(() => {
+    const options = this.searchTerm().trim()
+      ? this.filteredOptions()
+      : this.normalizedOptions();
+    const enabledOptions = options.filter((o) => !o.disabled);
+    const selected = this.selectedValues();
+    const compareWith = this.compareWith();
+
+    const selectedCount = enabledOptions.filter((option) =>
+      selected.some((val) => compareWith(option.value, val))
+    ).length;
+
+    return selectedCount > 0 && selectedCount < enabledOptions.length;
+  });
+
   ngAfterContentChecked(): void {
     this.setDropdownWidth();
   }
@@ -409,6 +442,9 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   ngAfterViewChecked(): void {
     if (this.allowMultiple() && !this.multiRow()) {
       this.calculateVisibleTags();
+    }
+    if (this.isOpen()) {
+      this.connectedOverlay()?.overlayRef?.updatePosition();
     }
   }
 
@@ -478,8 +514,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       if (willOpen) {
         this.openDropdown();
       } else {
-        this.dropdownMaxHeight.set(null);
-        this.isOpen.set(false);
+        this.closeDropdown();
       }
     }
   }
@@ -513,6 +548,11 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     } else {
       this.toggleIsOpen();
     }
+  }
+
+  onArrowClick(event: Event): void {
+    event.stopPropagation();
+    this.toggleIsOpen();
   }
 
   onTriggerEnter(): void {
@@ -658,7 +698,6 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       }
       this.selectedValues.set(newSelection);
       this.onChange(newSelection);
-      this.searchTerm.set("");
       if (this.searchable()) {
         this.searchInputRef()?.nativeElement.focus();
       }
@@ -865,21 +904,30 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   }
 
   private toggleSelectAll(): void {
-    const options = this.normalizedOptions();
+    const isSearching = !!this.searchTerm().trim();
+    const options = isSearching
+      ? this.filteredOptions()
+      : this.normalizedOptions();
     const enabledOptions = options.filter((o) => !o.disabled);
     const compareWith = this.compareWith();
-    const disabledSelectedValues = this.selectedValues().filter((val) =>
-      options.some((o) => o.disabled && compareWith(val, o.value))
-    );
 
     if (this.allOptionsSelected()) {
-      this.selectedValues.set(disabledSelectedValues);
-      this.onChange(disabledSelectedValues);
+      // Deselect: remove only the visible enabled options, keep the rest
+      const newSelection = this.selectedValues().filter(
+        (val) => !enabledOptions.some((o) => compareWith(val, o.value))
+      );
+      this.selectedValues.set(newSelection);
+      this.onChange(newSelection);
     } else {
-      const allEnabledValues = enabledOptions.map((o) => o.value);
-      const mergedValues = [...disabledSelectedValues, ...allEnabledValues];
-      this.selectedValues.set(mergedValues);
-      this.onChange(mergedValues);
+      // Select: add visible enabled options to current selection
+      const newSelection = [...this.selectedValues()];
+      for (const option of enabledOptions) {
+        if (!newSelection.some((val) => compareWith(val, option.value))) {
+          newSelection.push(option.value);
+        }
+      }
+      this.selectedValues.set(newSelection);
+      this.onChange(newSelection);
     }
   }
 
