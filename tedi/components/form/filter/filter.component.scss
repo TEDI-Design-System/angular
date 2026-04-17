@@ -47,15 +47,19 @@
     padding: 0 var(--_filter-inner-spacing);
   }
 
-  &__prepend {
+  &__prepend,
+  &__append {
     display: flex;
     align-items: center;
     padding: 0 var(--_filter-inner-spacing);
 
-    &:empty,
-    &--hidden {
+    &:empty {
       display: none;
     }
+  }
+
+  &__prepend--hidden {
+    display: none;
   }
 
   &__count {
@@ -163,6 +167,21 @@
 
     &--disabled {
       cursor: not-allowed;
+    }
+
+    &--selected {
+      color: var(--dropdown-item-active-text);
+      background: var(--dropdown-item-active-background);
+
+      .tedi-dropdown-item-value__label,
+      .tedi-dropdown-item-value__meta {
+        color: inherit;
+      }
+
+      &:hover:not(&--disabled) {
+        color: var(--dropdown-item-active-text);
+        background: var(--dropdown-item-active-background);
+      }
     }
 
     &--focused {

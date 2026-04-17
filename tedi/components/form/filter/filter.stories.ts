@@ -5,6 +5,7 @@ import {
   ButtonComponent,
   FilterComponent,
   FilterContentDirective,
+  FilterPrependDirective,
   FilterGroupComponent,
   RowComponent,
   ColComponent,
@@ -29,6 +30,7 @@ export default {
         ButtonComponent,
         FilterComponent,
         FilterContentDirective,
+        FilterPrependDirective,
         FilterGroupComponent,
         IconComponent,
         ReactiveFormsModule,
@@ -176,73 +178,143 @@ export const Default: StoryObj<FilterComponent> = {
   },
 };
 
-export const SingleSelect: StoryObj<FilterComponent> = {
+export const Size: StoryObj<FilterComponent> = {
   render: () => ({
     template: `
-      <div class="flex flex-column gap-4">
-        <div>
-          <p tedi-text modifiers="bold" class="mb-2">Separate</p>
-          <div class="flex flex-column gap-2">
-            <div class="flex flex-wrap gap-2">
-              <tedi-filter text="Vastuvõtud" [selected]="true" />
-              <tedi-filter text="Analüüsid" [selected]="true" />
-              <tedi-filter text="Uuringud" />
-              <tedi-filter text="Vaktsineerimised" />
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <tedi-filter text="Vastuvõtud" variant="secondary" [selected]="true" />
-              <tedi-filter text="Analüüsid" variant="secondary" [selected]="true" />
-              <tedi-filter text="Uuringud" variant="secondary" />
-              <tedi-filter text="Vaktsineerimised" variant="secondary" />
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <tedi-filter text="Vastuvõtud" variant="secondary" [selected]="true">
-                <tedi-icon tediFilterPrepend name="medical_services" [size]="18" />
-              </tedi-filter>
-              <tedi-filter text="Analüüsid" variant="secondary">
-                <tedi-icon tediFilterPrepend name="science" [size]="18" />
-              </tedi-filter>
-              <tedi-filter text="Uuringud" variant="secondary">
-                <tedi-icon tediFilterPrepend name="biotech" [size]="18" />
-              </tedi-filter>
-              <tedi-filter text="Vaktsineerimised" variant="secondary">
-                <tedi-icon tediFilterPrepend name="vaccines" [size]="18" />
-              </tedi-filter>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <p tedi-text modifiers="bold" class="mb-2">Grouped</p>
-          <div class="flex flex-column gap-2">
-            <div class="flex flex-wrap gap-2">
-              <tedi-filter-group>
-                <tedi-filter text="Kooskõlastatud" />
-                <tedi-filter text="Tagasilükatud" />
-              </tedi-filter-group>
-              <tedi-filter-group>
-                <tedi-filter text="Kooskõlastatud" [selected]="true" />
-                <tedi-filter text="Tagasilükatud" />
-              </tedi-filter-group>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <tedi-filter-group>
-                <tedi-filter text="Kooskõlastatud" variant="secondary" />
-                <tedi-filter text="Tagasilükatud" variant="secondary" />
-              </tedi-filter-group>
-              <tedi-filter-group>
-                <tedi-filter text="Kooskõlastatud" variant="secondary" [selected]="true" />
-                <tedi-filter text="Tagasilükatud" variant="secondary" />
-              </tedi-filter-group>
-            </div>
-          </div>
-        </div>
-      </div>
+      <tedi-row [cols]="2" [gapY]="3" alignItems="center">
+        <tedi-col><p tedi-text modifiers="bold">Default</p></tedi-col>
+        <tedi-col class="flex flex-wrap gap-2">
+          <tedi-filter text="Text" [selected]="true" />
+          <tedi-filter text="Text" />
+          <tedi-filter text="Text" />
+          <tedi-filter text="Text" />
+        </tedi-col>
+        <tedi-col><p tedi-text modifiers="bold">Large</p></tedi-col>
+        <tedi-col class="flex flex-wrap gap-2">
+          <tedi-filter text="Text" size="large" [selected]="true" />
+          <tedi-filter text="Text" size="large" />
+          <tedi-filter text="Text" size="large" />
+          <tedi-filter text="Text" size="large" />
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };
 
-export const Multiselect: StoryObj<FilterComponent> = {
+/**
+ * Single value filters include boolean toggles (separate and grouped) and single-select dropdown filters.
+ */
+export const SingleValueFilter: StoryObj<FilterComponent> = {
+  render: () => ({
+    props: {
+      teenusOptions: [
+        { label: "Optometristi vastuvõtt", value: "1" },
+        { label: "Silmaarsti vastuvõtt", value: "2" },
+        { label: "Hambaarsti vastuvõtt", value: "3" },
+      ],
+      raviasutusOptions: [
+        { label: "Fertilitas", value: "1" },
+        { label: "Ida-Tallinna Keskhaigla", value: "2" },
+        { label: "Lääne-Tallinna Keskhaigla", value: "3" },
+        { label: "Põhja-Eesti Regionaalhaigla", value: "4" },
+        { label: "Tallinna Lastehaigla", value: "5" },
+        { label: "Tartu Ülikooli Kliinikum", value: "6" },
+      ],
+    },
+    template: `
+      <tedi-row cols="1" [gapY]="3">
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Separate</p>
+          <div class="flex flex-wrap gap-2">
+            <tedi-filter text="Vastuvõtud" [selected]="true" />
+            <tedi-filter text="Analüüsid" [selected]="true" />
+            <tedi-filter text="Uuringud" />
+            <tedi-filter text="Vaktsineerimised" />
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <tedi-filter text="Vastuvõtud" variant="secondary" [selected]="true" />
+            <tedi-filter text="Analüüsid" variant="secondary" [selected]="true" />
+            <tedi-filter text="Uuringud" variant="secondary" />
+            <tedi-filter text="Vaktsineerimised" variant="secondary" />
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <tedi-filter text="Vastuvõtud" variant="secondary" [selected]="true">
+              <tedi-icon tediFilterPrepend name="medical_services" [size]="18" />
+            </tedi-filter>
+            <tedi-filter text="Analüüsid" variant="secondary">
+              <tedi-icon tediFilterPrepend name="science" [size]="18" />
+            </tedi-filter>
+            <tedi-filter text="Uuringud" variant="secondary">
+              <tedi-icon tediFilterPrepend name="biotech" [size]="18" />
+            </tedi-filter>
+            <tedi-filter text="Vaktsineerimised" variant="secondary">
+              <tedi-icon tediFilterPrepend name="vaccines" [size]="18" />
+            </tedi-filter>
+          </div>
+        </tedi-col>
+
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Grouped</p>
+          <div class="flex flex-wrap gap-2">
+            <tedi-filter-group>
+              <tedi-filter text="Kooskõlastatud" />
+              <tedi-filter text="Tagasilükatud" />
+            </tedi-filter-group>
+            <tedi-filter-group>
+              <tedi-filter text="Kooskõlastatud" [selected]="true" />
+              <tedi-filter text="Tagasilükatud" />
+            </tedi-filter-group>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <tedi-filter-group>
+              <tedi-filter text="Kooskõlastatud" variant="secondary" />
+              <tedi-filter text="Tagasilükatud" variant="secondary" />
+            </tedi-filter-group>
+            <tedi-filter-group>
+              <tedi-filter text="Kooskõlastatud" variant="secondary" [selected]="true" />
+              <tedi-filter text="Tagasilükatud" variant="secondary" />
+            </tedi-filter-group>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <tedi-filter-group>
+              <tedi-filter text="Analüüsid" />
+              <tedi-filter text="Doonorlus" />
+              <tedi-filter text="Uuringud" />
+              <tedi-filter text="Vaktsineerimised" />
+            </tedi-filter-group>
+          </div>
+        </tedi-col>
+
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Dropdown label + value</p>
+          <div class="flex flex-wrap gap-2">
+            <tedi-filter text="Teenus" [options]="teenusOptions" [preserveLabel]="true" [showClear]="true" appendTo="body" />
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <tedi-filter text="Teenus" variant="secondary" [options]="teenusOptions" [preserveLabel]="true" [showClear]="true" appendTo="body" />
+          </div>
+        </tedi-col>
+
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Dropdown value</p>
+          <div class="flex flex-wrap gap-2">
+            <tedi-filter text="Raviasutus" [options]="raviasutusOptions" appendTo="body" />
+            <tedi-filter text="Teenus" [options]="teenusOptions" appendTo="body" />
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <tedi-filter text="Raviasutus" variant="secondary" [options]="raviasutusOptions" appendTo="body" />
+            <tedi-filter text="Teenus" variant="secondary" [options]="teenusOptions" appendTo="body" />
+          </div>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * Multi value filters use a dropdown with checkboxes, search, select all, and clear functionality.
+ */
+export const MultiValueFilter: StoryObj<FilterComponent> = {
   render: () => ({
     props: {
       options: [
@@ -253,56 +325,18 @@ export const Multiselect: StoryObj<FilterComponent> = {
         { label: "Tallinna Lastehaigla", value: "5" },
         { label: "Tartu Ülikooli Kliinikum", value: "6" },
       ],
-      teenusOptions: [
-        { label: "Optometristi vastuvõtt", value: "1" },
-        { label: "Silmaarsti vastuvõtt", value: "2" },
-        { label: "Hambaarsti vastuvõtt", value: "3" },
-      ],
-      compactValues1: [] as string[],
-      compactValues2: [] as string[],
+      values1: [] as string[],
+      values2: [] as string[],
     },
     template: `
-      <div class="flex flex-column gap-4">
-        <div>
-          <p tedi-text modifiers="bold" class="mb-2">Compact</p>
-          <div class="flex flex-column gap-2">
-            <div class="flex flex-wrap gap-2">
-              <tedi-filter text="Raviasutus" [multiselect]="true" [options]="options" [(values)]="compactValues1" [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
-              <tedi-filter text="Teenus" [options]="teenusOptions" appendTo="body" />
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <tedi-filter text="Raviasutus" variant="secondary" [multiselect]="true" [options]="options" [(values)]="compactValues2" [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
-              <tedi-filter text="Teenus" variant="secondary" [options]="teenusOptions" appendTo="body" />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <p tedi-text modifiers="bold" class="mb-2">Show value and label</p>
-          <div class="flex flex-column gap-2">
-            <div class="flex flex-wrap gap-2">
-              <tedi-filter text="Teenus" [options]="teenusOptions" [preserveLabel]="true" [showClear]="true" appendTo="body" />
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <tedi-filter text="Teenus" variant="secondary" [options]="teenusOptions" [preserveLabel]="true" [showClear]="true" appendTo="body" />
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <p tedi-text modifiers="bold" class="mb-2">Show value</p>
-          <div class="flex flex-column gap-2">
-            <div class="flex flex-wrap gap-2">
-              <tedi-filter text="Raviasutus" [options]="options" appendTo="body" />
-              <tedi-filter text="Teenus" [options]="teenusOptions" appendTo="body" />
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <tedi-filter text="Raviasutus" variant="secondary" [options]="options" appendTo="body" />
-              <tedi-filter text="Teenus" variant="secondary" [options]="teenusOptions" appendTo="body" />
-            </div>
-          </div>
-        </div>
-      </div>
+      <tedi-row cols="1" [gapY]="3">
+        <tedi-col class="flex flex-wrap gap-2">
+          <tedi-filter text="Raviasutus" [multiselect]="true" [options]="options" [(values)]="values1" [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+        </tedi-col>
+        <tedi-col class="flex flex-wrap gap-2">
+          <tedi-filter text="Raviasutus" variant="secondary" [multiselect]="true" [options]="options" [(values)]="values2" [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };
@@ -310,61 +344,106 @@ export const Multiselect: StoryObj<FilterComponent> = {
 export const CustomizeContent: StoryObj<FilterComponent> = {
   render: () => ({
     template: `
-      <div class="flex flex-column gap-2">
-        <tedi-filter-group>
-          <tedi-filter text="Unread (3)" variant="secondary" size="large">
-            <tedi-status-indicator tediFilterPrepend type="danger" />
-          </tedi-filter>
-          <tedi-filter text="All" variant="secondary" size="large" />
-        </tedi-filter-group>
-
-        <tedi-filter-group>
-          <tedi-filter text="Unread (3)" variant="secondary" size="large" [selected]="true">
-            <tedi-status-indicator tediFilterPrepend type="danger" />
-          </tedi-filter>
-          <tedi-filter text="All" variant="secondary" size="large" />
-        </tedi-filter-group>
-
-        <tedi-filter-group>
-          <tedi-filter text="Submitted" variant="secondary" size="large">
-            <tedi-status-badge tediFilterPrepend text="5" color="brand" />
-          </tedi-filter>
-          <tedi-filter text="Requires attention" variant="secondary" size="large">
-            <tedi-status-badge tediFilterPrepend text="7" color="danger" />
-          </tedi-filter>
-        </tedi-filter-group>
-
-        <tedi-filter-group>
-          <tedi-filter text="Submitted" variant="secondary" size="large" [selected]="true">
-            <tedi-status-badge tediFilterPrepend text="5" color="brand" />
-          </tedi-filter>
-          <tedi-filter text="Requires attention" variant="secondary" size="large">
-            <tedi-status-badge tediFilterPrepend text="7" color="danger" />
-          </tedi-filter>
-        </tedi-filter-group>
-      </div>
-    `,
-  }),
-};
-
-export const GroupedFilters: StoryObj<FilterComponent> = {
-  render: () => ({
-    template: `
-      <tedi-row cols="auto" [gap]="3">
-        <tedi-col>
+      <tedi-row cols="1" [gapY]="3">
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Prepend hidden when selected (default)</p>
           <tedi-filter-group>
-            <tedi-filter text="Kõik" [selected]="true" />
-            <tedi-filter text="Aktiivsed" />
-            <tedi-filter text="Lõpetatud" />
+            <tedi-filter text="Unread (3)" variant="secondary" size="large">
+              <tedi-status-indicator tediFilterPrepend type="danger" />
+            </tedi-filter>
+            <tedi-filter text="All" variant="secondary" size="large" />
+          </tedi-filter-group>
+          <tedi-filter-group>
+            <tedi-filter text="Unread (3)" variant="secondary" size="large" [selected]="true">
+              <tedi-status-indicator tediFilterPrepend type="danger" />
+            </tedi-filter>
+            <tedi-filter text="All" variant="secondary" size="large" />
+          </tedi-filter-group>
+          <tedi-filter-group>
+            <tedi-filter text="Submitted" variant="secondary" size="large">
+              <tedi-status-badge tediFilterPrepend text="5" color="brand" />
+            </tedi-filter>
+            <tedi-filter text="Requires attention" variant="secondary" size="large">
+              <tedi-status-badge tediFilterPrepend text="7" color="danger" />
+            </tedi-filter>
+          </tedi-filter-group>
+          <tedi-filter-group>
+            <tedi-filter text="Submitted" variant="secondary" size="large" [selected]="true">
+              <tedi-status-badge tediFilterPrepend text="5" color="brand" />
+            </tedi-filter>
+            <tedi-filter text="Requires attention" variant="secondary" size="large">
+              <tedi-status-badge tediFilterPrepend text="7" color="danger" />
+            </tedi-filter>
           </tedi-filter-group>
         </tedi-col>
-        <tedi-col>
+
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Prepend visible when selected</p>
           <tedi-filter-group>
-            <tedi-filter text="Kõik" variant="secondary" [selected]="true" />
-            <tedi-filter text="Aktiivsed" variant="secondary" />
-            <tedi-filter text="Lõpetatud" variant="secondary" />
+            <tedi-filter text="Submitted" variant="secondary" size="large">
+              <tedi-status-badge tediFilterPrepend [hideWhenSelected]="false" text="5" color="brand" />
+            </tedi-filter>
+            <tedi-filter text="Requires attention" variant="secondary" size="large">
+              <tedi-status-badge tediFilterPrepend [hideWhenSelected]="false" text="7" color="danger" />
+            </tedi-filter>
+          </tedi-filter-group>
+          <tedi-filter-group>
+            <tedi-filter text="Submitted" variant="secondary" size="large" [selected]="true">
+              <tedi-status-badge tediFilterPrepend [hideWhenSelected]="false" text="5" color="brand" />
+            </tedi-filter>
+            <tedi-filter text="Requires attention" variant="secondary" size="large">
+              <tedi-status-badge tediFilterPrepend [hideWhenSelected]="false" text="7" color="danger" />
+            </tedi-filter>
           </tedi-filter-group>
         </tedi-col>
+
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Append</p>
+          <tedi-filter-group>
+            <tedi-filter text="Submitted" variant="secondary" size="large">
+              <tedi-status-badge tediFilterAppend text="5" color="brand" />
+            </tedi-filter>
+            <tedi-filter text="Requires attention" variant="secondary" size="large">
+              <tedi-status-badge tediFilterAppend text="7" color="danger" />
+            </tedi-filter>
+          </tedi-filter-group>
+          <tedi-filter-group>
+            <tedi-filter text="Submitted" variant="secondary" size="large" [selected]="true">
+              <tedi-status-badge tediFilterAppend text="5" color="brand" />
+            </tedi-filter>
+            <tedi-filter text="Requires attention" variant="secondary" size="large">
+              <tedi-status-badge tediFilterAppend text="7" color="danger" />
+            </tedi-filter>
+          </tedi-filter-group>
+        </tedi-col>
+
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Append with dropdown</p>
+          <tedi-filter
+            text="Requires attention"
+            variant="secondary"
+            size="large"
+            [options]="[{ label: 'Option A', value: 'a' }, { label: 'Option B', value: 'b' }]"
+            appendTo="body"
+          >
+            <tedi-status-badge tediFilterAppend text="7" color="danger" />
+          </tedi-filter>
+        </tedi-col>
+
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Prepend icon with append and dropdown</p>
+          <tedi-filter
+            text="Requires attention"
+            variant="secondary"
+            size="large"
+            [options]="[{ label: 'Option A', value: 'a' }, { label: 'Option B', value: 'b' }]"
+            appendTo="body"
+          >
+            <tedi-icon tediFilterPrepend name="language" [size]="18" />
+            <tedi-status-badge tediFilterAppend text="7" color="danger" />
+          </tedi-filter>
+        </tedi-col>
+
       </tedi-row>
     `,
   }),
@@ -467,58 +546,6 @@ export const CustomDropdownContent: StoryObj<FilterComponent> = {
   }),
 };
 
-export const WithReactiveForms: StoryObj<FilterComponent> = {
-  render: () => {
-    const singleControl = new FormControl<boolean>(false);
-    const multiControl = new FormControl<string[]>([]);
-    const options = [
-      { label: "Optometristi vastuvõtt", value: "1" },
-      { label: "Silmaarsti vastuvõtt", value: "2" },
-      { label: "Hambaarsti vastuvõtt", value: "3" },
-    ];
-
-    return {
-      props: { singleControl, multiControl, options },
-      template: `
-        <tedi-row cols="1" [gapY]="3">
-          <tedi-col class="flex gap-2">
-            <tedi-filter
-              text="Vastuvõtud"
-              [formControl]="singleControl"
-            />
-            <tedi-filter
-              text="Teenused"
-              [multiselect]="true"
-              [options]="options"
-              [formControl]="multiControl"
-              [searchable]="true"
-              [showSelectAll]="true"
-              [showClear]="true"
-              appendTo="body"
-            />
-          </tedi-col>
-          <tedi-col>
-            <tedi-alert type="info" [showClose]="false">
-              <pre tedi-text modifiers="small">{{ {
-  single: {
-    value: singleControl.value,
-    touched: singleControl.touched,
-    dirty: singleControl.dirty
-  },
-  multi: {
-    value: multiControl.value,
-    touched: multiControl.touched,
-    dirty: multiControl.dirty
-  }
-} | json }}</pre>
-            </tedi-alert>
-          </tedi-col>
-        </tedi-row>
-      `,
-    };
-  },
-};
-
 export const Examples: StoryObj<FilterComponent> = {
   render: () => {
     const vastuvotudControl = new FormControl<boolean>(true);
@@ -531,6 +558,10 @@ export const Examples: StoryObj<FilterComponent> = {
     ]);
     const teenusControl = new FormControl<string>("");
     const aegAlatesControl = new FormControl<string>("");
+    const typeControl = new FormControl<string | null>("all");
+    const teenusControl2 = new FormControl<string>("");
+    const categoryControl = new FormControl<string[]>(["vastuvotud", "analuusid"]);
+    const typeControl2 = new FormControl<string | null>("all");
 
     const uuringOptions = [
       { label: "Vereanalüüs", value: "1" },
@@ -566,10 +597,57 @@ export const Examples: StoryObj<FilterComponent> = {
         raviasutusControl,
         teenusControl,
         aegAlatesControl,
+        typeControl,
+        teenusControl2,
+        categoryControl,
+        typeControl2,
         uuringOptions,
         raviasutusOptions,
         teenusOptions,
         aegAlatesOptions,
+        typeOptions: [
+          { label: "Kõik", value: "all" },
+          { label: "Aktiivsed", value: "active" },
+          { label: "Lõpetatud", value: "done" },
+        ],
+        categoryOptions: [
+          { label: "Vastuvõtud", value: "vastuvotud" },
+          { label: "Analüüsid", value: "analuusid" },
+          { label: "Uuringud", value: "uuringud" },
+          { label: "Vaktsineerimised", value: "vaktsineerimised" },
+        ],
+        radioFilters: [
+          {
+            label: "Tüüp", control: typeControl, options: [
+              { label: "Kõik", value: "all" },
+              { label: "Aktiivsed", value: "active" },
+              { label: "Lõpetatud", value: "done" },
+            ]
+          },
+          { label: "Teenus", control: teenusControl, options: teenusOptions },
+          { label: "Raviasutus", control: raviasutusControl, options: raviasutusOptions },
+        ],
+        checkboxFilters: [
+          {
+            label: "Kategooria", control: categoryControl, options: [
+              { label: "Vastuvõtud", value: "vastuvotud" },
+              { label: "Analüüsid", value: "analuusid" },
+              { label: "Uuringud", value: "uuringud" },
+              { label: "Vaktsineerimised", value: "vaktsineerimised" },
+            ]
+          },
+          { label: "Teenus", control: teenusControl2, options: teenusOptions },
+        ],
+        primaryFilters: [
+          {
+            label: "Tüüp", control: typeControl2, options: [
+              { label: "Kõik", value: "all" },
+              { label: "Aktiivsed", value: "active" },
+              { label: "Lõpetatud", value: "done" },
+            ]
+          },
+          { label: "Uuring", control: uuringControl, options: uuringOptions },
+        ],
         clearAll() {
           [vastuvotudControl, analuusidControl, uuringudControl].forEach((c) => c.setValue(false));
           [uuringControl, teenusControl, aegAlatesControl].forEach((c) => c.setValue(""));
@@ -688,6 +766,214 @@ export const Examples: StoryObj<FilterComponent> = {
 
           <tedi-col>
             <p tedi-text color="tertiary">64 tulemust</p>
+          </tedi-col>
+
+          <tedi-col><tedi-separator /></tedi-col>
+
+          <tedi-col>
+            <h1 tedi-text="h1" color="secondary">Andmed</h1>
+          </tedi-col>
+
+          <tedi-col class="flex flex-wrap gap-2 align-items-center">
+            <tedi-filter-group label="Tüüp" [formControl]="typeControl">
+              <tedi-filter text="Kõik" value="all" variant="secondary" />
+              <tedi-filter text="Aktiivsed" value="active" variant="secondary" />
+              <tedi-filter text="Lõpetatud" value="done" variant="secondary" />
+            </tedi-filter-group>
+
+            <tedi-separator axis="vertical" size="24px" />
+
+            <tedi-filter
+              text="Teenus"
+              variant="secondary"
+              [options]="teenusOptions"
+              [formControl]="teenusControl"
+              [showClear]="true"
+              appendTo="body"
+            />
+            <tedi-filter
+              text="Raviasutus"
+              variant="secondary"
+              [multiselect]="true"
+              [options]="raviasutusOptions"
+              [formControl]="raviasutusControl"
+              [searchable]="true"
+              [showSelectAll]="true"
+              [showClear]="true"
+              appendTo="body"
+            />
+          </tedi-col>
+
+          @if (getTags(radioFilters).length) {
+            <tedi-col class="flex flex-wrap gap-1">
+              @for (tag of getTags(radioFilters); track tag.text) {
+                <tedi-tag [closable]="true" (closed)="tag.remove()">{{ tag.text }}</tedi-tag>
+              }
+            </tedi-col>
+          }
+
+          <tedi-col><tedi-separator /></tedi-col>
+
+          <tedi-col>
+            <h1 tedi-text="h1" color="secondary">Menetlusdokumendid</h1>
+          </tedi-col>
+
+          <tedi-col class="flex flex-wrap gap-2 align-items-center">
+            <tedi-filter-group
+              label="Kategooria"
+              [multiselect]="true"
+              [formControl]="categoryControl"
+            >
+              <tedi-filter text="Vastuvõtud" value="vastuvotud" variant="secondary" />
+              <tedi-filter text="Analüüsid" value="analuusid" variant="secondary" />
+              <tedi-filter text="Uuringud" value="uuringud" variant="secondary" />
+              <tedi-filter text="Vaktsineerimised" value="vaktsineerimised" variant="secondary" />
+            </tedi-filter-group>
+
+            <tedi-separator axis="vertical" size="24px" />
+
+            <tedi-filter
+              text="Teenus"
+              variant="secondary"
+              [options]="teenusOptions"
+              [formControl]="teenusControl2"
+              [showClear]="true"
+              appendTo="body"
+            />
+          </tedi-col>
+
+          @if (getTags(checkboxFilters).length) {
+            <tedi-col class="flex flex-wrap gap-1">
+              @for (tag of getTags(checkboxFilters); track tag.text) {
+                <tedi-tag [closable]="true" (closed)="tag.remove()">{{ tag.text }}</tedi-tag>
+              }
+            </tedi-col>
+          }
+
+          <tedi-col><tedi-separator /></tedi-col>
+
+          <tedi-col>
+            <h1 tedi-text="h1" color="secondary">Taotlused (primary)</h1>
+          </tedi-col>
+
+          <tedi-col class="flex flex-wrap gap-2 align-items-center">
+            <tedi-filter-group label="Tüüp" [formControl]="typeControl2">
+              <tedi-filter text="Kõik" value="all" />
+              <tedi-filter text="Aktiivsed" value="active" />
+              <tedi-filter text="Lõpetatud" value="done" />
+            </tedi-filter-group>
+
+            <tedi-separator axis="vertical" size="24px" />
+
+            <tedi-filter
+              text="Uuring"
+              [options]="uuringOptions"
+              [formControl]="uuringControl"
+              [showClear]="true"
+              appendTo="body"
+            />
+          </tedi-col>
+
+          @if (getTags(primaryFilters).length) {
+            <tedi-col class="flex flex-wrap gap-1">
+              @for (tag of getTags(primaryFilters); track tag.text) {
+                <tedi-tag [closable]="true" (closed)="tag.remove()">{{ tag.text }}</tedi-tag>
+              }
+            </tedi-col>
+          }
+        </tedi-row>
+      `,
+    };
+  },
+};
+
+export const WithReactiveForms: StoryObj<FilterComponent> = {
+  render: () => {
+    const singleControl = new FormControl<boolean>(false);
+    const multiControl = new FormControl<string[]>([]);
+    const options = [
+      { label: "Optometristi vastuvõtt", value: "1" },
+      { label: "Silmaarsti vastuvõtt", value: "2" },
+      { label: "Hambaarsti vastuvõtt", value: "3" },
+    ];
+
+    const groupSingleControl = new FormControl<string | null>("all");
+    const groupMultiControl = new FormControl<string[]>(["urgent"]);
+
+    return {
+      props: {
+        singleControl,
+        multiControl,
+        options,
+        groupSingleControl,
+        groupMultiControl,
+      },
+      template: `
+        <tedi-row cols="1" [gapY]="3">
+          <tedi-col class="flex gap-2">
+            <tedi-filter
+              text="Vastuvõtud"
+              [formControl]="singleControl"
+            />
+            <tedi-filter
+              text="Teenused"
+              [multiselect]="true"
+              [options]="options"
+              [formControl]="multiControl"
+              [searchable]="true"
+              [showSelectAll]="true"
+              [showClear]="true"
+              appendTo="body"
+            />
+          </tedi-col>
+          <tedi-col>
+            <tedi-alert type="info" [showClose]="false">
+              <pre tedi-text modifiers="small">{{ {
+  single: {
+    value: singleControl.value,
+    touched: singleControl.touched,
+    dirty: singleControl.dirty
+  },
+  multi: {
+    value: multiControl.value,
+    touched: multiControl.touched,
+    dirty: multiControl.dirty
+  }
+} | json }}</pre>
+            </tedi-alert>
+          </tedi-col>
+
+          <tedi-col class="flex flex-column gap-2">
+            <p tedi-text>Grouped single-select</p>
+            <tedi-filter-group label="Status" [formControl]="groupSingleControl">
+              <tedi-filter text="Kõik" value="all" />
+              <tedi-filter text="Aktiivsed" value="active" />
+              <tedi-filter text="Lõpetatud" value="done" />
+            </tedi-filter-group>
+          </tedi-col>
+          <tedi-col class="flex flex-column gap-2">
+            <p tedi-text>Grouped multi-select</p>
+            <tedi-filter-group label="Tags" [multiselect]="true" [formControl]="groupMultiControl">
+              <tedi-filter text="Kiire" value="urgent" />
+              <tedi-filter text="Ülevaatus" value="review" />
+              <tedi-filter text="Mustand" value="draft" />
+            </tedi-filter-group>
+          </tedi-col>
+          <tedi-col>
+            <tedi-alert type="info" [showClose]="false">
+              <pre tedi-text modifiers="small">{{ {
+  groupSingle: {
+    value: groupSingleControl.value,
+    touched: groupSingleControl.touched,
+    dirty: groupSingleControl.dirty
+  },
+  groupMulti: {
+    value: groupMultiControl.value,
+    touched: groupMultiControl.touched,
+    dirty: groupMultiControl.dirty
+  }
+} | json }}</pre>
+            </tedi-alert>
           </tedi-col>
         </tedi-row>
       `,

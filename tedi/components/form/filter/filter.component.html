@@ -58,6 +58,7 @@
                 class="tedi-filter-dropdown__item"
                 [class.tedi-filter-dropdown__item--disabled]="option.disabled"
                 [class.tedi-filter-dropdown__item--focused]="activeOptionIndex() === i"
+                [class.tedi-filter-dropdown__item--selected]="isOptionSelected(option.value)"
                 role="option"
                 [attr.aria-selected]="isOptionSelected(option.value)"
                 [attr.aria-disabled]="option.disabled || null"
@@ -165,7 +166,9 @@
     class="tedi-filter__button"
     type="button"
     [disabled]="disabled()"
-    [attr.aria-pressed]="isSelected()"
+    [attr.role]="isGroupedRadio() ? 'radio' : null"
+    [attr.aria-checked]="isGroupedRadio() ? isSelected() : null"
+    [attr.aria-pressed]="isGroupedRadio() ? null : isSelected()"
     (click)="toggle()"
   >
     <ng-container *ngTemplateOutlet="buttonContent" />
@@ -173,15 +176,19 @@
 }
 
 <ng-template #buttonContent>
-  <div class="tedi-filter__prepend" [class.tedi-filter__prepend--hidden]="isSelected()">
-    <ng-content select="[tediFilterPrepend]" />
-  </div>
-
   @if (!hasDropdown() && isSelected()) {
     <tedi-icon class="tedi-filter__icon" name="check" [size]="iconSize()" color="inherit" />
   }
 
+  <div class="tedi-filter__prepend" [class.tedi-filter__prepend--hidden]="hidePrepend()">
+    <ng-content select="[tediFilterPrepend]" />
+  </div>
+
   <span class="tedi-filter__text">{{ displayText() }}</span>
+
+  <div class="tedi-filter__append">
+    <ng-content select="[tediFilterAppend]" />
+  </div>
 
   @if (multiselect() && isSelected() && selectedCount() > 0) {
     <tedi-status-badge class="tedi-filter__count" [text]="'' + selectedCount()" color="brand" />

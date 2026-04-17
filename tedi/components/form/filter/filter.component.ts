@@ -13,6 +13,7 @@ import {
   signal,
   viewChild,
 } from "@angular/core";
+import { FilterGroupComponent } from "./filter-group.component";
 import { _IdGenerator } from "@angular/cdk/a11y";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { NgTemplateOutlet } from "@angular/common";
@@ -27,6 +28,7 @@ import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown
 import { FormFieldComponent } from "../form-field/form-field.component";
 import { TextFieldComponent } from "../text-field/text-field.component";
 import { FilterContentDirective } from "./filter-content.directive";
+import { FilterPrependDirective } from "./filter-prepend.directive";
 
 export type FilterVariant = "primary" | "secondary";
 export type FilterSize = "default" | "large";
@@ -162,7 +164,11 @@ export class FilterComponent implements ControlValueAccessor {
   private readonly triggerBtn =
     viewChild<ElementRef<HTMLButtonElement>>("triggerBtn");
 
+  private readonly filterGroup = inject(FilterGroupComponent, {
+    optional: true,
+  });
   private readonly customContent = contentChild(FilterContentDirective);
+  private readonly filterPrepend = contentChild(FilterPrependDirective);
   readonly hasCustomContent = computed(() => !!this.customContent());
   readonly hasOptions = computed(() => this.options().length > 0);
   readonly isSingleSelect = computed(
@@ -175,7 +181,10 @@ export class FilterComponent implements ControlValueAccessor {
   private readonly idGenerator = inject(_IdGenerator);
   private readonly baseId = this.idGenerator.getId("tedi-filter");
 
-  readonly disabled = signal(false);
+  private readonly _disabled = signal(false);
+  readonly disabled = computed(
+    () => this._disabled() || !!this.filterGroup?.disabled(),
+  );
   readonly searchTerm = signal("");
   readonly activeOptionIndex = signal<number>(-1);
 
@@ -189,7 +198,24 @@ export class FilterComponent implements ControlValueAccessor {
 
   readonly iconSize = computed(() => (this.size() === "large" ? 24 : 18));
 
+  readonly isGrouped = computed(
+    () => !!this.filterGroup && this.filterGroup.isManaged(),
+  );
+
+  readonly isGroupedRadio = computed(
+    () => this.isGrouped() && !this.filterGroup!.multiselect(),
+  );
+
+  readonly hidePrepend = computed(
+    () =>
+      this.isSelected() &&
+      (this.filterPrepend()?.hideWhenSelected() ?? true),
+  );
+
   readonly isSelected = computed(() => {
+    if (this.isGrouped()) {
+      return this.filterGroup!.isSelected(this.value());
+    }
     if (this.multiselect()) {
       return this.values().length > 0;
     }
@@ -264,10 +290,14 @@ export class FilterComponent implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.disabled.set(isDisabled);
+    this._disabled.set(isDisabled);
   }
 
   toggle(): void {
+    if (this.isGrouped()) {
+      this.filterGroup!.selectFilter(this.value());
+      return;
+    }
     const newValue = !this.selected();
     this.selected.set(newValue);
     this.onChange(newValue);

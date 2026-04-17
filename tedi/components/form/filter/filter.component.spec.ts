@@ -4,7 +4,9 @@ import { Component } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { FilterComponent, FilterOption } from "./filter.component";
 import { FilterContentDirective } from "./filter-content.directive";
+import { FilterPrependDirective } from "./filter-prepend.directive";
 import { IconComponent } from "../../base/icon/icon.component";
+import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 
 @Component({
   standalone: true,
@@ -80,6 +82,53 @@ class SingleSelectHost2Component {
     { label: "Option C", value: "c" },
   ];
   control = new FormControl<string>("");
+}
+
+@Component({
+  standalone: true,
+  imports: [
+    FilterComponent,
+    FilterPrependDirective,
+    StatusBadgeComponent,
+  ],
+  template: `
+    <tedi-filter text="Submitted" [selected]="selected">
+      <tedi-status-badge tediFilterPrepend text="5" color="brand" />
+    </tedi-filter>
+  `,
+})
+class PrependDefaultHostComponent {
+  selected = false;
+}
+
+@Component({
+  standalone: true,
+  imports: [
+    FilterComponent,
+    FilterPrependDirective,
+    StatusBadgeComponent,
+  ],
+  template: `
+    <tedi-filter text="Submitted" [selected]="selected">
+      <tedi-status-badge tediFilterPrepend [hideWhenSelected]="false" text="5" color="brand" />
+    </tedi-filter>
+  `,
+})
+class PrependVisibleHostComponent {
+  selected = false;
+}
+
+@Component({
+  standalone: true,
+  imports: [FilterComponent, StatusBadgeComponent],
+  template: `
+    <tedi-filter text="Requires attention" [selected]="selected">
+      <tedi-status-badge tediFilterAppend text="7" color="danger" />
+    </tedi-filter>
+  `,
+})
+class AppendHostComponent {
+  selected = false;
 }
 
 const TEST_OPTIONS: FilterOption[] = [
@@ -1440,5 +1489,166 @@ describe("FilterComponent", () => {
         button.nativeElement.hasAttribute("aria-haspopup"),
       ).toBe(true);
     });
+  });
+
+  describe("prepend directive", () => {
+    it("should hide prepend when selected by default", () => {
+      const hostFixture = TestBed.createComponent(
+        PrependDefaultHostComponent,
+      );
+      hostFixture.detectChanges();
+
+      const prepend = hostFixture.debugElement.query(
+        By.css(".tedi-filter__prepend"),
+      );
+      expect(
+        prepend.nativeElement.classList.contains(
+          "tedi-filter__prepend--hidden",
+        ),
+      ).toBe(false);
+
+      hostFixture.componentInstance.selected = true;
+      hostFixture.detectChanges();
+
+      expect(
+        prepend.nativeElement.classList.contains(
+          "tedi-filter__prepend--hidden",
+        ),
+      ).toBe(true);
+    });
+
+    it("should keep prepend visible when hideWhenSelected is false", () => {
+      const hostFixture = TestBed.createComponent(
+        PrependVisibleHostComponent,
+      );
+      hostFixture.detectChanges();
+
+      hostFixture.componentInstance.selected = true;
+      hostFixture.detectChanges();
+
+      const prepend = hostFixture.debugElement.query(
+        By.css(".tedi-filter__prepend"),
+      );
+      expect(
+        prepend.nativeElement.classList.contains(
+          "tedi-filter__prepend--hidden",
+        ),
+      ).toBe(false);
+    });
+
+    it("should show check icon alongside visible prepend when selected", () => {
+      const hostFixture = TestBed.createComponent(
+        PrependVisibleHostComponent,
+      );
+      hostFixture.componentInstance.selected = true;
+      hostFixture.detectChanges();
+
+      const checkIcon = hostFixture.debugElement.query(
+        By.css(".tedi-filter__icon"),
+      );
+      const prepend = hostFixture.debugElement.query(
+        By.css(".tedi-filter__prepend"),
+      );
+      expect(checkIcon).toBeTruthy();
+      expect(
+        prepend.nativeElement.classList.contains(
+          "tedi-filter__prepend--hidden",
+        ),
+      ).toBe(false);
+    });
+
+    it("should render check icon before prepend in DOM order", () => {
+      const hostFixture = TestBed.createComponent(
+        PrependVisibleHostComponent,
+      );
+      hostFixture.componentInstance.selected = true;
+      hostFixture.detectChanges();
+
+      const button = hostFixture.debugElement.query(
+        By.css(".tedi-filter__button"),
+      );
+      const children = Array.from(
+        button.nativeElement.children,
+      ) as HTMLElement[];
+      const iconIndex = children.findIndex((el) =>
+        el.classList.contains("tedi-filter__icon"),
+      );
+      const prependIndex = children.findIndex((el) =>
+        el.classList.contains("tedi-filter__prepend"),
+      );
+      expect(iconIndex).toBeLessThan(prependIndex);
+    });
+
+    it("should hide prepend when no directive is used (backward compat)", () => {
+      const hostFixture = TestBed.createComponent(
+        FilterWithIconHostComponent,
+      );
+      hostFixture.detectChanges();
+
+      const filter = hostFixture.debugElement.query(
+        By.directive(FilterComponent),
+      );
+      filter.componentInstance.selected.set(true);
+      hostFixture.detectChanges();
+
+      const prepend = hostFixture.debugElement.query(
+        By.css(".tedi-filter__prepend"),
+      );
+      expect(
+        prepend.nativeElement.classList.contains(
+          "tedi-filter__prepend--hidden",
+        ),
+      ).toBe(true);
+    });
+  });
+
+  describe("append directive", () => {
+    it("should project append content after text", () => {
+      const hostFixture = TestBed.createComponent(AppendHostComponent);
+      hostFixture.detectChanges();
+
+      const append = hostFixture.debugElement.query(
+        By.css(".tedi-filter__append"),
+      );
+      expect(append).toBeTruthy();
+
+      const badge = append.query(By.directive(StatusBadgeComponent));
+      expect(badge).toBeTruthy();
+    });
+
+    it("should render append after text in DOM order", () => {
+      const hostFixture = TestBed.createComponent(AppendHostComponent);
+      hostFixture.detectChanges();
+
+      const button = hostFixture.debugElement.query(
+        By.css(".tedi-filter__button"),
+      );
+      const children = Array.from(
+        button.nativeElement.children,
+      ) as HTMLElement[];
+      const textIndex = children.findIndex((el) =>
+        el.classList.contains("tedi-filter__text"),
+      );
+      const appendIndex = children.findIndex((el) =>
+        el.classList.contains("tedi-filter__append"),
+      );
+      expect(textIndex).toBeLessThan(appendIndex);
+    });
+
+    it("should keep append visible when selected by default", () => {
+      const hostFixture = TestBed.createComponent(AppendHostComponent);
+      hostFixture.componentInstance.selected = true;
+      hostFixture.detectChanges();
+
+      const append = hostFixture.debugElement.query(
+        By.css(".tedi-filter__append"),
+      );
+      expect(
+        append.nativeElement.classList.contains(
+          "tedi-filter__append--hidden",
+        ),
+      ).toBe(false);
+    });
+
   });
 });
