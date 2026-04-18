@@ -103,10 +103,14 @@ export class CheckboxGroupComponent implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this.cvaDisabled.set(isDisabled);
+    this.managed.set(true);
   }
 
   registerChild(child: CheckboxComponent): void {
     this.children.update((list) => [...list, child]);
+    if (child.value() !== undefined) {
+      this.managed.set(true);
+    }
     this.applyCheckedTo(child);
   }
 

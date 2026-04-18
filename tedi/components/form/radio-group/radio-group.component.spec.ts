@@ -228,6 +228,40 @@ describe("RadioGroupComponent — managed with [(value)]", () => {
 
 @Component({
   standalone: true,
+  imports: [RadioGroupComponent, RadioComponent],
+  template: `
+    <tedi-radio-group [(value)]="selected">
+      <input tedi-radio type="radio" value="a" />
+      <input tedi-radio type="radio" value="b" />
+    </tedi-radio-group>
+  `,
+})
+class TwoWayNullInitialHostComponent {
+  selected: string | null = null;
+}
+
+describe("RadioGroupComponent — managed with [(value)] starting null", () => {
+  it("should propagate clicks even when two-way value starts null", () => {
+    TestBed.configureTestingModule({
+      imports: [TwoWayNullInitialHostComponent],
+    });
+    const fixture = TestBed.createComponent(TwoWayNullInitialHostComponent);
+    fixture.detectChanges();
+    const inputs = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'input[type="radio"]'
+      )
+    ) as HTMLInputElement[];
+
+    inputs[1].checked = true;
+    inputs[1].dispatchEvent(new Event("change", { bubbles: true }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selected).toBe("b");
+  });
+});
+
+@Component({
+  standalone: true,
   imports: [
     RadioGroupComponent,
     RadioComponent,

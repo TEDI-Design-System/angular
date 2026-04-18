@@ -116,6 +116,7 @@ export class RadioGroupComponent implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this.cvaDisabled.set(isDisabled);
+    this.managed.set(true);
   }
 
   registerChild(child: RadioComponent): void {
@@ -125,6 +126,9 @@ export class RadioGroupComponent implements ControlValueAccessor {
       "name",
       this.name() ?? this.autoName,
     );
+    if (child.value() !== undefined) {
+      this.managed.set(true);
+    }
     this.applyCheckedTo(child);
   }
 

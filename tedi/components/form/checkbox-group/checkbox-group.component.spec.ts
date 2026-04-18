@@ -206,6 +206,21 @@ class IntrinsicDisabledHostComponent {
   control = new FormControl<string[]>([]);
 }
 
+@Component({
+  standalone: true,
+  imports: [CheckboxGroupComponent, CheckboxComponent, ReactiveFormsModule],
+  template: `
+    <tedi-checkbox-group [formControl]="control">
+      <input tedi-checkbox type="checkbox" value="a" [disabled]="aDisabled" />
+      <input tedi-checkbox type="checkbox" value="b" />
+    </tedi-checkbox-group>
+  `,
+})
+class DynamicDisabledHostComponent {
+  control = new FormControl<string[]>([]);
+  aDisabled = false;
+}
+
 describe("CheckboxGroupComponent — per-item disabled", () => {
   it("should preserve intrinsic disabled across group-disabled toggles", () => {
     TestBed.configureTestingModule({
@@ -237,23 +252,8 @@ describe("CheckboxGroupComponent — per-item disabled", () => {
   });
 
   it("should reflect dynamic [disabled] toggles on a child after group-disabled cycles", () => {
-    @Component({
-      standalone: true,
-      imports: [CheckboxGroupComponent, CheckboxComponent, ReactiveFormsModule],
-      template: `
-        <tedi-checkbox-group [formControl]="control">
-          <input tedi-checkbox type="checkbox" value="a" [disabled]="aDisabled" />
-          <input tedi-checkbox type="checkbox" value="b" />
-        </tedi-checkbox-group>
-      `,
-    })
-    class DynamicHostComponent {
-      control = new FormControl<string[]>([]);
-      aDisabled = false;
-    }
-
-    TestBed.configureTestingModule({ imports: [DynamicHostComponent] });
-    const fixture = TestBed.createComponent(DynamicHostComponent);
+    TestBed.configureTestingModule({ imports: [DynamicDisabledHostComponent] });
+    const fixture = TestBed.createComponent(DynamicDisabledHostComponent);
     fixture.detectChanges();
     const inputs = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll(
@@ -393,5 +393,46 @@ describe("CheckboxGroupComponent — card children", () => {
       "export",
       "analytics",
     ]);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [CheckboxGroupComponent, CheckboxComponent, ReactiveFormsModule],
+  template: `
+    <tedi-checkbox-group [formControl]="control">
+      <input tedi-checkbox type="checkbox" />
+    </tedi-checkbox-group>
+  `,
+})
+class MissingValueHostComponent {
+  control = new FormControl<string[]>([]);
+}
+
+describe("CheckboxGroupComponent — missing child value", () => {
+  it("should warn once per instance and drop the change", () => {
+    TestBed.configureTestingModule({ imports: [MissingValueHostComponent] });
+    const fixture = TestBed.createComponent(MissingValueHostComponent);
+    fixture.detectChanges();
+    const input = (
+      fixture.nativeElement as HTMLElement
+    ).querySelector<HTMLInputElement>('input[type="checkbox"]')!;
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+
+    input.checked = true;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    fixture.detectChanges();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.control.value).toEqual([]);
+
+    input.checked = false;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    input.checked = true;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    fixture.detectChanges();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.control.value).toEqual([]);
+
+    warnSpy.mockRestore();
   });
 });
