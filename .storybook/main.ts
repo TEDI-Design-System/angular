@@ -6,6 +6,7 @@ const config: StorybookConfig = {
     "../src/docs/get-started.mdx",
     "../src/docs/changelog.mdx",
     "../src/docs/badges.mdx",
+    "../src/docs/custom-theming.mdx",
     "../src/docs/css-utilities.mdx",
     "../src/docs/colors/colors.mdx",
     "../src/docs/**/*.stories.@(js|jsx|mjs|ts|tsx)",
