@@ -24,7 +24,7 @@
 
   @include modal-heading(h3);
 
-  button[tedi-closing-button] {
+  .tedi-modal-header__close {
     width: var(--button-sm-icon-size);
     height: var(--button-sm-icon-size);
   }
@@ -40,7 +40,7 @@
 
   @include modal-heading(h4);
 
-  button[tedi-closing-button] {
+  .tedi-modal-header__close {
     width: var(--button-xs-icon-size);
     height: var(--button-xs-icon-size);
   }
@@ -66,7 +66,7 @@
       gap: var(--layout-grid-gutters-08);
       align-items: center;
 
-      button[tedi-closing-button] {
+      .tedi-modal-header__close {
         margin-left: auto;
       }
     }
