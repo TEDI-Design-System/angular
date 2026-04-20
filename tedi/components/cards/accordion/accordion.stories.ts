@@ -1,13 +1,11 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
-import {
-  AccordionComponent,
-  AccordionItemComponent,
-  IconComponent,
-  TextComponent,
-  ButtonComponent,
-  StatusBadgeComponent,
-  CheckboxComponent,
-} from "@tedi-design-system/angular/tedi";
+import { AccordionComponent } from "./accordion/accordion.component";
+import { AccordionItemComponent } from "./accordion-item/accordion-item.component";
+import { IconComponent } from "../../base/icon/icon.component";
+import { TextComponent } from "../../base/text/text.component";
+import { ButtonComponent } from "../../buttons/button/button.component";
+import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
+import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 document.cookie = "tedi-lang=en; path=/;";

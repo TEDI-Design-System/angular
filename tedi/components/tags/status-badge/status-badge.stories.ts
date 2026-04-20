@@ -4,21 +4,21 @@ import {
   moduleMetadata,
   argsToTemplate,
 } from "@storybook/angular";
+import { IconComponent } from "../../base/icon/icon.component";
+import { TextComponent } from "../../base/text/text.component";
+import { ButtonComponent } from "../../buttons/button/button.component";
 import {
-  IconComponent,
-  TextComponent,
-  ButtonComponent,
   StatusBadgeComponent,
-  ColComponent,
-  RowComponent,
-  TooltipComponent,
-  TooltipContentComponent,
-  TooltipTriggerComponent,
   StatusBadgeColor,
   StatusBadgeSize,
   StatusBadgeStatus,
   StatusBadgeVariant,
-} from "@tedi-design-system/angular/tedi";
+} from "./status-badge.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
+import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
+import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
 
 const colors: StatusBadgeColor[] = [
   "neutral",
