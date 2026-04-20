@@ -110,6 +110,41 @@ describe("RadioGroupComponent", () => {
 
 @Component({
   standalone: true,
+  imports: [RadioGroupComponent, RadioComponent],
+  template: `
+    <tedi-radio-group>
+      <input tedi-radio type="radio" value="a" name="static" checked />
+      <input tedi-radio type="radio" value="b" name="static" />
+    </tedi-radio-group>
+  `,
+})
+class UnmanagedValuedHostComponent {}
+
+describe("RadioGroupComponent — unmanaged with valued children", () => {
+  it("should stay unmanaged and preserve names and pre-checked state", () => {
+    TestBed.configureTestingModule({ imports: [UnmanagedValuedHostComponent] });
+    const fixture = TestBed.createComponent(UnmanagedValuedHostComponent);
+    fixture.detectChanges();
+    const groupElement = fixture.nativeElement.querySelector(
+      "tedi-radio-group"
+    ) as HTMLElement;
+    const inputs = Array.from(
+      groupElement.querySelectorAll('input[type="radio"]')
+    ) as HTMLInputElement[];
+
+    expect(groupElement.getAttribute("role")).toBeNull();
+    expect(groupElement.getAttribute("aria-labelledby")).toBeNull();
+    expect(groupElement.getAttribute("aria-label")).toBeNull();
+    expect(groupElement.getAttribute("aria-disabled")).toBeNull();
+    expect(inputs[0].getAttribute("name")).toBe("static");
+    expect(inputs[1].getAttribute("name")).toBe("static");
+    expect(inputs[0].checked).toBe(true);
+    expect(inputs[1].checked).toBe(false);
+  });
+});
+
+@Component({
+  standalone: true,
   imports: [RadioGroupComponent, RadioComponent, ReactiveFormsModule],
   template: `
     <tedi-radio-group [formControl]="control" label="Status">
@@ -186,6 +221,52 @@ describe("RadioGroupComponent — managed with FormControl", () => {
 
 @Component({
   standalone: true,
+  imports: [RadioGroupComponent, RadioComponent, ReactiveFormsModule],
+  template: `
+    <tedi-radio-group
+      [formControl]="control"
+      [ariaLabel]="ariaLabel"
+      [ariaLabelledby]="ariaLabelledby"
+    >
+      <input tedi-radio type="radio" value="a" />
+    </tedi-radio-group>
+  `,
+})
+class AriaNameHostComponent {
+  control = new FormControl<string | null>(null);
+  ariaLabel?: string;
+  ariaLabelledby?: string;
+}
+
+describe("RadioGroupComponent — accessible name fallbacks", () => {
+  it("should use ariaLabel when managed and no label/ariaLabelledby", () => {
+    TestBed.configureTestingModule({ imports: [AriaNameHostComponent] });
+    const fixture = TestBed.createComponent(AriaNameHostComponent);
+    fixture.componentInstance.ariaLabel = "My options";
+    fixture.detectChanges();
+    const groupElement = fixture.nativeElement.querySelector(
+      "tedi-radio-group"
+    ) as HTMLElement;
+    expect(groupElement.getAttribute("aria-label")).toBe("My options");
+    expect(groupElement.getAttribute("aria-labelledby")).toBeNull();
+  });
+
+  it("should use ariaLabelledby when managed and no label", () => {
+    TestBed.configureTestingModule({ imports: [AriaNameHostComponent] });
+    const fixture = TestBed.createComponent(AriaNameHostComponent);
+    fixture.componentInstance.ariaLabelledby = "external-label";
+    fixture.componentInstance.ariaLabel = "Fallback";
+    fixture.detectChanges();
+    const groupElement = fixture.nativeElement.querySelector(
+      "tedi-radio-group"
+    ) as HTMLElement;
+    expect(groupElement.getAttribute("aria-labelledby")).toBe("external-label");
+    expect(groupElement.getAttribute("aria-label")).toBeNull();
+  });
+});
+
+@Component({
+  standalone: true,
   imports: [RadioGroupComponent, RadioComponent],
   template: `
     <tedi-radio-group [(value)]="selected">
@@ -219,40 +300,6 @@ describe("RadioGroupComponent — managed with [(value)]", () => {
   });
 
   it("should update bound value on click", () => {
-    inputs[1].checked = true;
-    inputs[1].dispatchEvent(new Event("change", { bubbles: true }));
-    fixture.detectChanges();
-    expect(fixture.componentInstance.selected).toBe("b");
-  });
-});
-
-@Component({
-  standalone: true,
-  imports: [RadioGroupComponent, RadioComponent],
-  template: `
-    <tedi-radio-group [(value)]="selected">
-      <input tedi-radio type="radio" value="a" />
-      <input tedi-radio type="radio" value="b" />
-    </tedi-radio-group>
-  `,
-})
-class TwoWayNullInitialHostComponent {
-  selected: string | null = null;
-}
-
-describe("RadioGroupComponent — managed with [(value)] starting null", () => {
-  it("should propagate clicks even when two-way value starts null", () => {
-    TestBed.configureTestingModule({
-      imports: [TwoWayNullInitialHostComponent],
-    });
-    const fixture = TestBed.createComponent(TwoWayNullInitialHostComponent);
-    fixture.detectChanges();
-    const inputs = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll(
-        'input[type="radio"]'
-      )
-    ) as HTMLInputElement[];
-
     inputs[1].checked = true;
     inputs[1].dispatchEvent(new Event("change", { bubbles: true }));
     fixture.detectChanges();

@@ -38,7 +38,8 @@ let nextGroupId = 0;
   host: {
     class: "tedi-checkbox-group",
     "[attr.role]": "isManaged() ? 'group' : null",
-    "[attr.aria-labelledby]": "isManaged() && label() ? labelId : null",
+    "[attr.aria-labelledby]": "managedAriaLabelledby()",
+    "[attr.aria-label]": "managedAriaLabel()",
     "[attr.aria-disabled]": "isManaged() && isDisabled() ? 'true' : null",
   },
 })
@@ -64,6 +65,16 @@ export class CheckboxGroupComponent implements ControlValueAccessor {
    * @default false
    */
   readonly disabled = input<boolean>(false);
+  /**
+   * Accessible name for the group. Use when no visible `label` is rendered.
+   * Ignored when `label` or `ariaLabelledby` is provided.
+   */
+  readonly ariaLabel = input<string>();
+  /**
+   * ID of an external element that labels the group. Ignored when `label` is
+   * provided.
+   */
+  readonly ariaLabelledby = input<string>();
 
   private readonly renderer = inject(Renderer2);
   protected readonly labelId = `tedi-checkbox-group-${++nextGroupId}-label`;
@@ -76,6 +87,16 @@ export class CheckboxGroupComponent implements ControlValueAccessor {
 
   readonly isManaged = this.managed.asReadonly();
   readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
+  protected readonly managedAriaLabelledby = computed<string | null>(() => {
+    if (!this.isManaged()) return null;
+    if (this.label()) return this.labelId;
+    return this.ariaLabelledby() ?? null;
+  });
+  protected readonly managedAriaLabel = computed<string | null>(() => {
+    if (!this.isManaged()) return null;
+    if (this.label() || this.ariaLabelledby()) return null;
+    return this.ariaLabel() ?? null;
+  });
 
   constructor() {
     effect(() => {
@@ -108,9 +129,6 @@ export class CheckboxGroupComponent implements ControlValueAccessor {
 
   registerChild(child: CheckboxComponent): void {
     this.children.update((list) => [...list, child]);
-    if (child.value() !== undefined) {
-      this.managed.set(true);
-    }
     this.applyCheckedTo(child);
   }
 

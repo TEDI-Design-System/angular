@@ -38,7 +38,8 @@ let nextGroupId = 0;
   host: {
     class: "tedi-radio-group",
     "[attr.role]": "isManaged() ? 'radiogroup' : null",
-    "[attr.aria-labelledby]": "isManaged() && label() ? labelId : null",
+    "[attr.aria-labelledby]": "managedAriaLabelledby()",
+    "[attr.aria-label]": "managedAriaLabel()",
     "[attr.aria-disabled]": "isManaged() && isDisabled() ? 'true' : null",
   },
 })
@@ -60,8 +61,8 @@ export class RadioGroupComponent implements ControlValueAccessor {
    */
   readonly value = model<string | null>(null);
   /**
-   * Shared `name` attribute applied to every child radio. Auto-generated when
-   * omitted. Under SSR, pass an explicit `name` to avoid hydration mismatches.
+   * Shared `name` attribute applied to child radios. Auto-generated when
+   * omitted. Pass an explicit `name` to avoid SSR hydration mismatches.
    */
   readonly name = input<string>();
   /**
@@ -69,6 +70,16 @@ export class RadioGroupComponent implements ControlValueAccessor {
    * @default false
    */
   readonly disabled = input<boolean>(false);
+  /**
+   * Accessible name for the group. Use when no visible `label` is rendered.
+   * Ignored when `label` or `ariaLabelledby` is provided.
+   */
+  readonly ariaLabel = input<string>();
+  /**
+   * ID of an external element that labels the group. Ignored when `label` is
+   * provided.
+   */
+  readonly ariaLabelledby = input<string>();
 
   private readonly renderer = inject(Renderer2);
   private readonly autoName = `tedi-radio-group-${++nextGroupId}`;
@@ -82,6 +93,16 @@ export class RadioGroupComponent implements ControlValueAccessor {
 
   readonly isManaged = this.managed.asReadonly();
   readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
+  protected readonly managedAriaLabelledby = computed<string | null>(() => {
+    if (!this.isManaged()) return null;
+    if (this.label()) return this.labelId;
+    return this.ariaLabelledby() ?? null;
+  });
+  protected readonly managedAriaLabel = computed<string | null>(() => {
+    if (!this.isManaged()) return null;
+    if (this.label() || this.ariaLabelledby()) return null;
+    return this.ariaLabel() ?? null;
+  });
 
   constructor() {
     effect(() => {
@@ -93,6 +114,7 @@ export class RadioGroupComponent implements ControlValueAccessor {
     });
 
     effect(() => {
+      if (!this.isManaged()) return;
       const groupName = this.name() ?? this.autoName;
       for (const child of this.children()) {
         this.renderer.setAttribute(child.hostElement, "name", groupName);
@@ -121,14 +143,6 @@ export class RadioGroupComponent implements ControlValueAccessor {
 
   registerChild(child: RadioComponent): void {
     this.children.update((list) => [...list, child]);
-    this.renderer.setAttribute(
-      child.hostElement,
-      "name",
-      this.name() ?? this.autoName,
-    );
-    if (child.value() !== undefined) {
-      this.managed.set(true);
-    }
     this.applyCheckedTo(child);
   }
 

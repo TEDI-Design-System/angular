@@ -112,6 +112,39 @@ describe("CheckboxGroupComponent", () => {
 
 @Component({
   standalone: true,
+  imports: [CheckboxGroupComponent, CheckboxComponent],
+  template: `
+    <tedi-checkbox-group>
+      <input tedi-checkbox type="checkbox" value="a" checked />
+      <input tedi-checkbox type="checkbox" value="b" />
+    </tedi-checkbox-group>
+  `,
+})
+class UnmanagedValuedHostComponent {}
+
+describe("CheckboxGroupComponent — unmanaged with valued children", () => {
+  it("should stay unmanaged and preserve pre-checked state", () => {
+    TestBed.configureTestingModule({ imports: [UnmanagedValuedHostComponent] });
+    const fixture = TestBed.createComponent(UnmanagedValuedHostComponent);
+    fixture.detectChanges();
+    const groupElement = fixture.nativeElement.querySelector(
+      "tedi-checkbox-group"
+    ) as HTMLElement;
+    const inputs = Array.from(
+      groupElement.querySelectorAll('input[type="checkbox"]')
+    ) as HTMLInputElement[];
+
+    expect(groupElement.getAttribute("role")).toBeNull();
+    expect(groupElement.getAttribute("aria-labelledby")).toBeNull();
+    expect(groupElement.getAttribute("aria-label")).toBeNull();
+    expect(groupElement.getAttribute("aria-disabled")).toBeNull();
+    expect(inputs[0].checked).toBe(true);
+    expect(inputs[1].checked).toBe(false);
+  });
+});
+
+@Component({
+  standalone: true,
   imports: [CheckboxGroupComponent, CheckboxComponent, ReactiveFormsModule],
   template: `
     <tedi-checkbox-group [formControl]="control" label="Tags">
@@ -189,6 +222,52 @@ describe("CheckboxGroupComponent — managed with FormControl", () => {
     fixture.detectChanges();
     expect(inputs.every((i) => i.disabled)).toBe(true);
     expect(groupElement.getAttribute("aria-disabled")).toBe("true");
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [CheckboxGroupComponent, CheckboxComponent, ReactiveFormsModule],
+  template: `
+    <tedi-checkbox-group
+      [formControl]="control"
+      [ariaLabel]="ariaLabel"
+      [ariaLabelledby]="ariaLabelledby"
+    >
+      <input tedi-checkbox type="checkbox" value="a" />
+    </tedi-checkbox-group>
+  `,
+})
+class AriaNameHostComponent {
+  control = new FormControl<string[]>([]);
+  ariaLabel?: string;
+  ariaLabelledby?: string;
+}
+
+describe("CheckboxGroupComponent — accessible name fallbacks", () => {
+  it("should use ariaLabel when managed and no label/ariaLabelledby", () => {
+    TestBed.configureTestingModule({ imports: [AriaNameHostComponent] });
+    const fixture = TestBed.createComponent(AriaNameHostComponent);
+    fixture.componentInstance.ariaLabel = "My options";
+    fixture.detectChanges();
+    const groupElement = fixture.nativeElement.querySelector(
+      "tedi-checkbox-group"
+    ) as HTMLElement;
+    expect(groupElement.getAttribute("aria-label")).toBe("My options");
+    expect(groupElement.getAttribute("aria-labelledby")).toBeNull();
+  });
+
+  it("should use ariaLabelledby when managed and no label", () => {
+    TestBed.configureTestingModule({ imports: [AriaNameHostComponent] });
+    const fixture = TestBed.createComponent(AriaNameHostComponent);
+    fixture.componentInstance.ariaLabelledby = "external-label";
+    fixture.componentInstance.ariaLabel = "Fallback";
+    fixture.detectChanges();
+    const groupElement = fixture.nativeElement.querySelector(
+      "tedi-checkbox-group"
+    ) as HTMLElement;
+    expect(groupElement.getAttribute("aria-labelledby")).toBe("external-label");
+    expect(groupElement.getAttribute("aria-label")).toBeNull();
   });
 });
 
