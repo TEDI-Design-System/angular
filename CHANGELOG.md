@@ -1,3 +1,10 @@
+# [6.3.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.11...angular-6.3.0-rc.12) (2026-04-20)
+
+
+### Bug Fixes
+
+* **modal:** added custom class to modal close button [#409](https://github.com/TEDI-Design-System/angular/issues/409) ([#411](https://github.com/TEDI-Design-System/angular/issues/411)) ([e81fa01](https://github.com/TEDI-Design-System/angular/commit/e81fa01ca3f59b97cb57809556d4398ece34e5ff))
+
 # [6.3.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.10...angular-6.3.0-rc.11) (2026-04-17)
 
 
