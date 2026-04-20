@@ -437,6 +437,7 @@ export const States: StoryObj<CheckboxComponent> = {
     pseudo: {
       hover: "#Hover",
       active: "#Active",
+      focusVisible: "#Focus",
     },
   },
   render: (args) => ({
@@ -464,6 +465,12 @@ export const States: StoryObj<CheckboxComponent> = {
         <strong>Active</strong>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" checked id="Active" />
+          Text
+        </label>
+
+        <strong>Focus</strong>
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
+          <input tedi-checkbox type="checkbox" id="Focus" />
           Text
         </label>
 

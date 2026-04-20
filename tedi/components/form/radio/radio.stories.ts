@@ -366,6 +366,7 @@ export const States: StoryObj<RadioComponent> = {
     pseudo: {
       hover: "#Hover",
       active: "#Active",
+      focusVisible: "#Focus",
     },
   },
   render: (args) => ({
@@ -393,6 +394,12 @@ export const States: StoryObj<RadioComponent> = {
         <strong>Active</strong>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-radio type="radio" name="state-active" id="Active" />
+          Text
+        </label>
+
+        <strong>Focus</strong>
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
+          <input tedi-radio type="radio" name="state-focus" id="Focus" />
           Text
         </label>
 

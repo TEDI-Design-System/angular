@@ -71,12 +71,14 @@ input[tedi-radio][type="radio"] {
   }
 
   &:not(:checked, :disabled).tedi-radio--invalid,
-  &:user-invalid,
-  &.ng-invalid.ng-touched {
+  &:not(:checked, :disabled):user-invalid,
+  &:not(:checked, :disabled).ng-invalid.ng-touched {
+    background-color: var(--form-checkbox-radio-default-background-error);
     border-color: var(--form-general-feedback-error-border);
 
     &:hover {
-      border-color: var(--form-checkbox-radio-default-border-hover);
+      border-color: var(--form-general-feedback-error-border);
+      box-shadow: 0 0 0 1px var(--form-general-feedback-error-border);
     }
   }
 
@@ -86,6 +88,14 @@ input[tedi-radio][type="radio"] {
     width: var(--form-checkbox-radio-size-large);
     height: var(--form-checkbox-radio-size-large);
   }
+}
+
+label:has(input[tedi-radio]:not(:disabled)) {
+  cursor: pointer;
+}
+
+label:has(input[tedi-radio]:disabled) {
+  cursor: not-allowed;
 }
 
 label:has(input[tedi-radio]) + tedi-feedback-text {
