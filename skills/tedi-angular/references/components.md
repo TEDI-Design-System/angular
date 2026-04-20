@@ -201,9 +201,49 @@ Composed of sub-components:
 **Inputs:**
 - `size: CheckboxSize = "default"` — "default" or "large"
 - `invalid: boolean = false`
+- `value: string` — identity within a `<tedi-checkbox-group>` (required when the group is form-bound)
+- `disabled: boolean = false`
 
 ```html
+<!-- Standalone checkbox -->
 <input type="checkbox" tedi-checkbox [formControl]="agreeControl" />
+
+<!-- Inside a form-bound group — [value] identifies the option -->
+<tedi-checkbox-group [formControl]="tagsControl">
+  <input type="checkbox" tedi-checkbox value="urgent" />
+  <input type="checkbox" tedi-checkbox value="review" />
+</tedi-checkbox-group>
+```
+
+### CheckboxGroup
+**Selector:** `tedi-checkbox-group` | ControlValueAccessor
+**Value type:** `string[]`
+**Inputs:**
+- `label: string` — visible label above the group
+- `direction: CheckboxGroupDirection = "horizontal"` — "horizontal" or "vertical"
+- `disabled: boolean = false` — propagates to all children
+- `ariaLabel: string` — accessible name when no visible `label` is rendered
+- `ariaLabelledby: string` — ID of an external element that labels the group
+**Models:** `values: string[]`
+
+Coordinates `checked` state across child `input[tedi-checkbox]` elements via their `[value]`. The group renders as a passive visual wrapper until a `FormControl` binds or `[(values)]` / `[values]` is bound with a non-empty array — at that point it applies `role="group"`, ARIA wiring, and takes over child `checked` state. For a null/empty initial value, use a `FormControl`:
+
+```typescript
+tagsControl = new FormControl<string[]>([]);
+```
+
+```html
+<tedi-checkbox-group [formControl]="tagsControl" label="Tags">
+  <input type="checkbox" tedi-checkbox value="urgent" />
+  <input type="checkbox" tedi-checkbox value="review" />
+  <input type="checkbox" tedi-checkbox value="draft" />
+</tedi-checkbox-group>
+
+<!-- Two-way binding with a preselected value -->
+<tedi-checkbox-group [(values)]="selected" label="Tags">
+  <input type="checkbox" tedi-checkbox value="a" />
+  <input type="checkbox" tedi-checkbox value="b" />
+</tedi-checkbox-group>
 ```
 
 ### Radio
@@ -211,12 +251,53 @@ Composed of sub-components:
 **Inputs:**
 - `size: RadioSize = "default"` — "default" or "large"
 - `invalid: boolean = false`
+- `value: string` — identity within a `<tedi-radio-group>` (required when the group is form-bound)
+- `disabled: boolean = false`
 
 ```html
+<!-- Standalone radio (consumer-managed name) -->
 <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
   <input type="radio" tedi-radio name="group" value="a" />
   Option A
 </label>
+
+<!-- Inside a form-bound group -->
+<tedi-radio-group [formControl]="statusControl">
+  <input type="radio" tedi-radio value="all" />
+  <input type="radio" tedi-radio value="active" />
+</tedi-radio-group>
+```
+
+### RadioGroup
+**Selector:** `tedi-radio-group` | ControlValueAccessor
+**Value type:** `string | null`
+**Inputs:**
+- `label: string` — visible label above the group
+- `direction: RadioGroupDirection = "horizontal"` — "horizontal" or "vertical"
+- `name: string` — shared `name` attribute for child radios (auto-generated when omitted). Pass explicitly to avoid SSR hydration mismatches.
+- `disabled: boolean = false` — propagates to all children
+- `ariaLabel: string` — accessible name when no visible `label` is rendered
+- `ariaLabelledby: string` — ID of an external element that labels the group
+**Models:** `value: string | null`
+
+Coordinates `checked` state across child `input[tedi-radio]` elements via their `[value]`. Passive visual wrapper until a `FormControl` binds or `[(value)]` / `[value]` is bound with a non-null value. For a null initial value, use a `FormControl`:
+
+```typescript
+statusControl = new FormControl<string | null>(null);
+```
+
+```html
+<tedi-radio-group [formControl]="statusControl" label="Status">
+  <input type="radio" tedi-radio value="all" />
+  <input type="radio" tedi-radio value="active" />
+  <input type="radio" tedi-radio value="done" />
+</tedi-radio-group>
+
+<!-- Two-way binding with a preselected value -->
+<tedi-radio-group [(value)]="status" label="Status">
+  <input type="radio" tedi-radio value="all" />
+  <input type="radio" tedi-radio value="active" />
+</tedi-radio-group>
 ```
 
 ### RadioCard
@@ -235,17 +316,17 @@ Composed of sub-components:
   </label>
 </div>
 
-<!-- Grouped cards -->
-<div style="display: inline-flex;">
+<!-- Grouped cards inside a form-bound RadioGroup -->
+<tedi-radio-group [formControl]="planControl">
   <label tedi-radio-card variant="primary" [grouped]="true">
-    <input tedi-radio type="radio" name="cards" />
-    Option A
+    <input tedi-radio type="radio" value="basic" />
+    Basic
   </label>
   <label tedi-radio-card variant="primary" [grouped]="true">
-    <input tedi-radio type="radio" name="cards" />
-    Option B
+    <input tedi-radio type="radio" value="pro" />
+    Pro
   </label>
-</div>
+</tedi-radio-group>
 ```
 
 ### Toggle
