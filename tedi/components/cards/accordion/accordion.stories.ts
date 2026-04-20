@@ -6,6 +6,7 @@ import { TextComponent } from "../../base/text/text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
+import { LabelComponent } from "../../form/label/label.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 document.cookie = "tedi-lang=en; path=/;";
@@ -27,6 +28,7 @@ export default {
         ButtonComponent,
         StatusBadgeComponent,
         CheckboxComponent,
+        LabelComponent,
       ],
       providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "en" }],
     }),

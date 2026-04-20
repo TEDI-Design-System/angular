@@ -1,7 +1,6 @@
 {
   "$schema": "https://www.chromatic.com/config-file.schema.json",
   "buildScriptName": "build:sb",
-  "onlyStoryFiles": ["tedi/**/*.stories.*"],
   "autoAcceptChanges": "main",
   "exitOnceUploaded": true,
   "skip": "dependabot/**",
