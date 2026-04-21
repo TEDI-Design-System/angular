@@ -1,3 +1,10 @@
+# [6.3.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.12...angular-6.3.0-rc.13) (2026-04-21)
+
+
+### Bug Fixes
+
+* **general:** update core version [#418](https://github.com/TEDI-Design-System/angular/issues/418) ([#419](https://github.com/TEDI-Design-System/angular/issues/419)) ([aa5cef7](https://github.com/TEDI-Design-System/angular/commit/aa5cef748a2470c9e2cedd16021ecac836dff2c5))
+
 # [6.3.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.11...angular-6.3.0-rc.12) (2026-04-20)
 
 
