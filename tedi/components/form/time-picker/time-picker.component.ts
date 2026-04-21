@@ -126,6 +126,9 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit 
     this.value.set(newValue);
     this.onTouched();
     this.onChange(newValue);
+    if (this.variant() === "scroll") {
+      this.focusOtherColumn("hour");
+    }
   }
 
   selectMinute(minute: string): void {
@@ -180,42 +183,49 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit 
     const currentIndex = items.indexOf(target as HTMLButtonElement);
     if (currentIndex === -1) return;
 
-    let nextIndex: number | null = null;
-
-    switch (event.key) {
-      case "ArrowDown":
-        nextIndex = Math.min(currentIndex + 1, items.length - 1);
-        break;
-      case "ArrowUp":
-        nextIndex = Math.max(currentIndex - 1, 0);
-        break;
-      case "Home":
-        nextIndex = 0;
-        break;
-      case "End":
-        nextIndex = items.length - 1;
-        break;
-      case "PageDown":
-        nextIndex = Math.min(currentIndex + 5, items.length - 1);
-        break;
-      case "PageUp":
-        nextIndex = Math.max(currentIndex - 5, 0);
-        break;
-      case "Enter":
-      case " ":
-        event.preventDefault();
-        if (type === "hour") {
-          this.selectHour(items[currentIndex].textContent!.trim());
-        } else {
-          this.selectMinute(items[currentIndex].textContent!.trim());
-        }
-        return;
-      default:
-        return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      const label = items[currentIndex].textContent!.trim();
+      if (type === "hour") {
+        this.selectHour(label);
+      } else {
+        this.selectMinute(label);
+      }
+      return;
     }
+
+    const nextIndex = this.getNextColumnIndex(
+      event.key,
+      currentIndex,
+      items.length,
+    );
+    if (nextIndex === null) return;
 
     event.preventDefault();
     items[nextIndex].focus();
+  }
+
+  private getNextColumnIndex(
+    key: string,
+    currentIndex: number,
+    length: number,
+  ): number | null {
+    switch (key) {
+      case "ArrowDown":
+        return (currentIndex + 1) % length;
+      case "ArrowUp":
+        return (currentIndex - 1 + length) % length;
+      case "Home":
+        return 0;
+      case "End":
+        return length - 1;
+      case "PageDown":
+        return Math.min(currentIndex + 5, length - 1);
+      case "PageUp":
+        return Math.max(currentIndex - 5, 0);
+      default:
+        return null;
+    }
   }
 
   getSlotTabIndex(index: number): number {

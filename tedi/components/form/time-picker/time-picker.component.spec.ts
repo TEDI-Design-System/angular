@@ -72,6 +72,20 @@ describe("TimePickerComponent", () => {
       expect(onChange).toHaveBeenCalledWith("14:00");
     });
 
+    it("should move focus to minute column after selecting an hour", () => {
+      const hourItems = el
+        .querySelectorAll(".tedi-time-picker__column")[0]
+        .querySelectorAll(".tedi-time-picker__item");
+      const minuteItems = el
+        .querySelectorAll(".tedi-time-picker__column")[1]
+        .querySelectorAll(".tedi-time-picker__item");
+
+      (hourItems[8] as HTMLButtonElement).click();
+      fixture.detectChanges();
+
+      expect(document.activeElement).toBe(minuteItems[0]);
+    });
+
     it("should select minute on click", () => {
       const onChange = jest.fn();
       component.registerOnChange(onChange);
@@ -238,22 +252,31 @@ describe("TimePickerComponent", () => {
         expect(onChange).toHaveBeenCalledWith("00:15");
       });
 
-      it("should not move past first item with ArrowUp", () => {
+      it("should wrap to last item on ArrowUp at first", () => {
         const hourItems = el
           .querySelectorAll(".tedi-time-picker__column")[0]
           .querySelectorAll(".tedi-time-picker__item");
         (hourItems[0] as HTMLElement).focus();
         dispatchKey(hourItems[0] as HTMLElement, "ArrowUp");
-        expect(document.activeElement).toBe(hourItems[0]);
+        expect(document.activeElement).toBe(hourItems[23]);
       });
 
-      it("should not move past last item with ArrowDown", () => {
+      it("should wrap to first item on ArrowDown at last", () => {
         const hourItems = el
           .querySelectorAll(".tedi-time-picker__column")[0]
           .querySelectorAll(".tedi-time-picker__item");
         (hourItems[23] as HTMLElement).focus();
         dispatchKey(hourItems[23] as HTMLElement, "ArrowDown");
-        expect(document.activeElement).toBe(hourItems[23]);
+        expect(document.activeElement).toBe(hourItems[0]);
+      });
+
+      it("should wrap minute column on ArrowDown at last", () => {
+        const minuteItems = el
+          .querySelectorAll(".tedi-time-picker__column")[1]
+          .querySelectorAll(".tedi-time-picker__item");
+        (minuteItems[59] as HTMLElement).focus();
+        dispatchKey(minuteItems[59] as HTMLElement, "ArrowDown");
+        expect(document.activeElement).toBe(minuteItems[0]);
       });
 
       it("should not trap Tab when trapFocus is false", () => {
