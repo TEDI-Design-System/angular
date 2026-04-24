@@ -88,8 +88,8 @@ export class RadioGroupComponent implements ControlValueAccessor {
   private readonly cvaDisabled = signal(false);
   private readonly managed = signal(false);
 
-  private onChange: (value: string | null) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: string | null) => void = () => { };
+  private onTouched: () => void = () => { };
 
   readonly isManaged = this.managed.asReadonly();
   readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
@@ -106,8 +106,7 @@ export class RadioGroupComponent implements ControlValueAccessor {
 
   constructor() {
     effect(() => {
-      const v = this.value();
-      if (v !== null) {
+      if (this.value() !== null) {
         this.managed.set(true);
       }
       this.syncChildrenChecked();
@@ -171,9 +170,9 @@ export class RadioGroupComponent implements ControlValueAccessor {
 
   private applyCheckedTo(child: RadioComponent): void {
     if (!this.isManaged()) return;
-    const v = child.value();
-    if (v === undefined) return;
-    const desired = v === this.value();
+    const childVal = child.value();
+    if (childVal === undefined) return;
+    const desired = childVal === this.value();
     const el = child.hostElement;
     if (el.checked !== desired) {
       this.renderer.setProperty(el, "checked", desired);

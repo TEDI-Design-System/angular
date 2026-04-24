@@ -82,8 +82,8 @@ export class CheckboxGroupComponent implements ControlValueAccessor {
   private readonly cvaDisabled = signal(false);
   private readonly managed = signal(false);
 
-  private onChange: (value: string[]) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: string[]) => void = () => { };
+  private onTouched: () => void = () => { };
 
   readonly isManaged = this.managed.asReadonly();
   readonly isDisabled = computed(() => this.disabled() || this.cvaDisabled());
@@ -100,8 +100,7 @@ export class CheckboxGroupComponent implements ControlValueAccessor {
 
   constructor() {
     effect(() => {
-      const v = this.values();
-      if (v.length > 0) {
+      if (this.values().length > 0) {
         this.managed.set(true);
       }
       this.syncChildrenChecked();
@@ -164,9 +163,9 @@ export class CheckboxGroupComponent implements ControlValueAccessor {
 
   private applyCheckedTo(child: CheckboxComponent): void {
     if (!this.isManaged()) return;
-    const v = child.value();
-    if (v === undefined) return;
-    const desired = this.values().includes(v);
+    const childVal = child.value();
+    if (childVal === undefined) return;
+    const desired = this.values().includes(childVal);
     const el = child.hostElement;
     if (el.checked !== desired) {
       this.renderer.setProperty(el, "checked", desired);
