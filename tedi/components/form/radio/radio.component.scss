@@ -5,6 +5,7 @@ input[tedi-radio][type="radio"] {
 
   position: relative;
   width: var(--form-checkbox-radio-size-responsive);
+  min-width: var(--form-checkbox-radio-size-responsive);
   height: var(--form-checkbox-radio-size-responsive);
   padding: 0;
   margin: 0;
@@ -98,7 +99,7 @@ label:has(input[tedi-radio]:disabled) {
   cursor: not-allowed;
 }
 
-label:has(input[tedi-radio]) + tedi-feedback-text {
+label:has(input[tedi-radio])+tedi-feedback-text {
   padding-left: var(--form-checkbox-radio-size-responsive);
   margin-left: var(--form-checkbox-radio-inner-spacing);
 }
