@@ -61,22 +61,22 @@ describe("AccordionItemHeaderComponent", () => {
     expect(titleText).toContain("Hello");
   });
 
-  it("should render a button when headerClickable is true", () => {
+  it("should render a button trigger when headerClickable is true", () => {
     const button = fixture.debugElement.query(
-      By.css("button.tedi-accordion__header"),
+      By.css("button.tedi-accordion-item-header__trigger"),
     );
     expect(button).not.toBeNull();
   });
 
-  it("should render a non-button element when headerClickable is false", () => {
+  it("should render a non-button trigger when headerClickable is false", () => {
     host.headerClickable = false;
     fixture.detectChanges();
 
     const button = fixture.debugElement.query(
-      By.css("button.tedi-accordion__header"),
+      By.css("button.tedi-accordion-item-header__trigger"),
     );
     const div = fixture.debugElement.query(
-      By.css("div.tedi-accordion__header"),
+      By.css("div.tedi-accordion-item-header__trigger"),
     );
 
     expect(button).toBeNull();
@@ -85,7 +85,7 @@ describe("AccordionItemHeaderComponent", () => {
 
   it("should toggle the item when the clickable header is clicked", () => {
     const button = fixture.debugElement.query(
-      By.css("button.tedi-accordion__header"),
+      By.css("button.tedi-accordion-item-header__trigger"),
     );
 
     expect(host.item.expanded()).toBe(false);
@@ -94,23 +94,23 @@ describe("AccordionItemHeaderComponent", () => {
     expect(host.item.expanded()).toBe(true);
   });
 
-  it("should not toggle the item when headerClickable is false and header is clicked", () => {
+  it("should not toggle the item when headerClickable is false and the trigger is clicked", () => {
     host.headerClickable = false;
     fixture.detectChanges();
 
-    const header = fixture.debugElement.query(
-      By.css(".tedi-accordion__header"),
+    const trigger = fixture.debugElement.query(
+      By.css(".tedi-accordion-item-header__trigger"),
     );
 
-    header.triggerEventHandler("click");
+    trigger.triggerEventHandler("click");
     fixture.detectChanges();
 
     expect(host.item.expanded()).toBe(false);
   });
 
-  it("should set aria-expanded on header button", () => {
+  it("should set aria-expanded on the trigger button", () => {
     const button = fixture.debugElement.query(
-      By.css("button.tedi-accordion__header"),
+      By.css("button.tedi-accordion-item-header__trigger"),
     )?.nativeElement as HTMLButtonElement;
 
     expect(button.getAttribute("aria-expanded")).toBe("false");
@@ -135,16 +135,42 @@ describe("AccordionItemHeaderComponent", () => {
     expect(host.header.expandLabel()).toBe("Close");
   });
 
-  it("should include custom header class when set", () => {
+  it("should apply block class and modifiers on the host element", () => {
+    const headerEl = fixture.debugElement.query(
+      By.directive(AccordionItemHeaderComponent),
+    ).nativeElement as HTMLElement;
+
+    expect(headerEl.classList).toContain("tedi-accordion-item-header");
+    expect(headerEl.classList).toContain(
+      "tedi-accordion-item-header--hoverable",
+    );
+    expect(headerEl.classList).not.toContain(
+      "tedi-accordion-item-header--expanded",
+    );
+
+    host.item.setExpanded(true);
+    fixture.detectChanges();
+    expect(headerEl.classList).toContain(
+      "tedi-accordion-item-header--expanded",
+    );
+
+    host.headerClickable = false;
+    fixture.detectChanges();
+    expect(headerEl.classList).not.toContain(
+      "tedi-accordion-item-header--hoverable",
+    );
+  });
+
+  it("should apply custom headerClass on the host element", () => {
     host.headerClass = "custom-header";
     fixture.detectChanges();
 
-    expect(host.header.headerClasses()).toEqual({
-      "custom-header": true,
-      "tedi-accordion__header": true,
-      "tedi-accordion__header--hoverable": true,
-      "tedi-accordion__header--expanded": false,
-      "tedi-accordion__header--with-icon-card": false,
-    });
+    const headerEl = fixture.debugElement.query(
+      By.directive(AccordionItemHeaderComponent),
+    ).nativeElement as HTMLElement;
+
+    expect(headerEl.classList).toContain("custom-header");
+    // The block class should still be present
+    expect(headerEl.classList).toContain("tedi-accordion-item-header");
   });
 });

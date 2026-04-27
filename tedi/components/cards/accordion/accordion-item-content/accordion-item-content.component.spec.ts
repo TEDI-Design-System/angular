@@ -50,28 +50,28 @@ describe("AccordionItemContentComponent", () => {
 
   it("should project its children into the content", () => {
     const content = fixture.debugElement.query(
-      By.css(".tedi-accordion__content"),
+      By.css(".tedi-accordion-item-content"),
     );
     expect(content.nativeElement.textContent).toContain("Content");
   });
 
-  it("should link content id with header aria-controls", () => {
+  it("should link content id with the trigger's aria-controls", () => {
     const content = fixture.debugElement.query(
-      By.css(".tedi-accordion__content"),
+      By.css(".tedi-accordion-item-content"),
     );
-    const header = fixture.debugElement.query(
-      By.css(".tedi-accordion__header"),
+    const trigger = fixture.debugElement.query(
+      By.css(".tedi-accordion-item-header__trigger"),
     );
 
     expect(content.nativeElement.id).toBeTruthy();
-    expect(header.nativeElement.getAttribute("aria-controls")).toBe(
+    expect(trigger.nativeElement.getAttribute("aria-controls")).toBe(
       content.nativeElement.id,
     );
   });
 
   it("should toggle aria-hidden and inert with the expanded state", () => {
     const content = fixture.debugElement.query(
-      By.css(".tedi-accordion__content"),
+      By.css(".tedi-accordion-item-content"),
     );
 
     expect(content.nativeElement.getAttribute("aria-hidden")).toBe("true");
@@ -84,15 +84,46 @@ describe("AccordionItemContentComponent", () => {
     expect(content.nativeElement.hasAttribute("inert")).toBe(false);
   });
 
-  it("should include custom contentClass and icon-card modifier in contentClasses", () => {
+  it("should set role and aria-labelledby on the panel", () => {
+    const content = fixture.debugElement.query(
+      By.css(".tedi-accordion-item-content"),
+    );
+    const trigger = fixture.debugElement.query(
+      By.css(".tedi-accordion-item-header__trigger"),
+    );
+
+    // aria-labelledby always points to the trigger's id
+    expect(trigger.nativeElement.id).toBeTruthy();
+    expect(content.nativeElement.getAttribute("aria-labelledby")).toBe(
+      trigger.nativeElement.id,
+    );
+
+    // role is null while collapsed
+    expect(content.nativeElement.getAttribute("role")).toBeNull();
+
+    // role becomes "region" once expanded; aria-labelledby is unchanged
+    fixture.componentInstance.item.setExpanded(true);
+    fixture.detectChanges();
+
+    expect(content.nativeElement.getAttribute("role")).toBe("region");
+    expect(content.nativeElement.getAttribute("aria-labelledby")).toBe(
+      trigger.nativeElement.id,
+    );
+  });
+
+  it("should apply custom contentClass and the icon-card modifier on the host", () => {
     fixture.componentInstance.contentClass = "custom-content";
     fixture.componentInstance.showIconCard = true;
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.content.contentClasses()).toEqual({
-      "custom-content": true,
-      "tedi-accordion__content": true,
-      "tedi-accordion__content--with-icon-card": true,
-    });
+    const contentEl = fixture.debugElement.query(
+      By.directive(AccordionItemContentComponent),
+    ).nativeElement as HTMLElement;
+
+    expect(contentEl.classList).toContain("tedi-accordion-item-content");
+    expect(contentEl.classList).toContain("custom-content");
+    expect(contentEl.classList).toContain(
+      "tedi-accordion-item-content--with-icon-card",
+    );
   });
 });

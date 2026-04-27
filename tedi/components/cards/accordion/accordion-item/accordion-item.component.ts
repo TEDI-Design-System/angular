@@ -72,10 +72,10 @@ export class AccordionItemComponent implements OnInit {
 
   toggle() {
     this.setExpanded(!this.expanded());
-    this.accordion?.onItemToggled(this);
   }
 
   setExpanded(value: boolean) {
     this.expanded.set(value);
+    this.accordion?.onItemToggled(this);
   }
 }

@@ -58,10 +58,14 @@ describe("AccordionItemComponent", () => {
 
   it("should be collapsed by default", () => {
     initHost();
+
+    expect(item.expanded()).toBe(false);
+
     const content = fixture.debugElement.query(
-      By.css(".tedi-accordion__content"),
+      By.css(".tedi-accordion-item-content"),
     );
-    expect(content.nativeElement.offsetHeight).toBe(0);
+    expect(content.nativeElement.getAttribute("aria-hidden")).toBe("true");
+    expect(content.nativeElement.hasAttribute("inert")).toBe(true);
   });
 
   it("should be expanded when defaultExpanded is true", () => {
@@ -70,9 +74,10 @@ describe("AccordionItemComponent", () => {
     expect(item.expanded()).toBe(true);
 
     const content = fixture.debugElement.query(
-      By.css(".tedi-accordion__content"),
+      By.css(".tedi-accordion-item-content"),
     );
-    expect(content).not.toBeNull();
+    expect(content.nativeElement.getAttribute("aria-hidden")).toBe("false");
+    expect(content.nativeElement.hasAttribute("inert")).toBe(false);
   });
 
   it("should update expanded state when setExpanded is called", () => {

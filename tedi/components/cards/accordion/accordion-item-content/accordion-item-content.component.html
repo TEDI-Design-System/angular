@@ -1,12 +1,3 @@
-<div
-  [ngClass]="contentClasses()"
-  [id]="contentId"
-  [attr.role]="expanded() ? 'region' : null"
-  [attr.aria-labelledby]="headerId"
-  [attr.aria-hidden]="!expanded()"
-  [attr.inert]="!expanded() ? '' : null"
->
-  <div class="tedi-accordion-item-content__inner">
-    <ng-content></ng-content>
-  </div>
+<div class="tedi-accordion-item-content__inner">
+  <ng-content></ng-content>
 </div>

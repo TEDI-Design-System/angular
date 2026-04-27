@@ -80,8 +80,8 @@ export default {
       control: "boolean",
       description:
         "Defines whether the entire header acts as the toggle trigger.\n\n" +
-        "`true` (default): clicking anywhere on the header toggles the item.\n\n" +
-        "`false`: the header does not toggle automatically. You must provide a custom toggle control inside the header (e.g. button or link).",
+        "`true` (default): the header is rendered as a button; clicking anywhere on it toggles the item.\n\n" +
+        "`false`: the header is rendered as a non-interactive container. The default expand action is still rendered alongside it unless `showDefaultExpandAction` is also set to `false`. Set `headerClickable=false` when projecting interactive children (action buttons, checkboxes, links) into the header to avoid nesting interactive controls.",
       table: {
         category: "Accordion Item Header",
         type: { summary: "boolean" },
@@ -761,24 +761,24 @@ export const Customized: StoryObj = {
     },
     template: `
       <style>
-        ::ng-deep .tedi-accordion__header.custom-header,
-        ::ng-deep .tedi-accordion__content.custom-content {
+        ::ng-deep .tedi-accordion-item-header.custom-header,
+        ::ng-deep .tedi-accordion-item-content.custom-content {
           background: var(--card-background-brand-quaternary);
         }
 
-        ::ng-deep .tedi-accordion__header.custom-header {
+        ::ng-deep .tedi-accordion-item-header.custom-header {
           .tedi-accordion-item-header__start {
             gap: var(--layout-grid-gutters-16);
           }
         }
 
-        ::ng-deep .tedi-accordion__header.custom-title {
+        ::ng-deep .tedi-accordion-item-header.custom-title {
           .tedi-accordion-item-header__title-main span {
             font-weight: var(--heading-h6-weight);
           }
         }
 
-        ::ng-deep .tedi-accordion__header.custom-icon-rotation {
+        ::ng-deep .tedi-accordion-item-header.custom-icon-rotation {
           .tedi-accordion-item-header__icon--expanded {
             transform: rotateX(180deg);
           }

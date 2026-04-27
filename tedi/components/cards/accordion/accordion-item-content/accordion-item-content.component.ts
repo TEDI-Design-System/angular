@@ -1,8 +1,6 @@
-import { NgClass } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   inject,
   input,
   ViewEncapsulation,
@@ -16,13 +14,20 @@ import { AccordionItemComponent } from "../accordion-item/accordion-item.compone
   styleUrl: "./accordion-item-content.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass],
+  imports: [],
   host: {
     "[class.tedi-accordion-item-content]": "true",
+    "[class.tedi-accordion-item-content--with-icon-card]": "item.showIconCard()",
+    "[class]": "contentClass() ?? ''",
+    "[id]": "contentId",
+    "[attr.role]": "expanded() ? 'region' : null",
+    "[attr.aria-labelledby]": "headerId",
+    "[attr.aria-hidden]": "!expanded()",
+    "[attr.inert]": "!expanded() ? '' : null",
   },
 })
 export class AccordionItemContentComponent {
-  private readonly item = inject(AccordionItemComponent);
+  protected readonly item = inject(AccordionItemComponent);
 
   /**
    * Custom CSS classes for the accordion content.
@@ -32,13 +37,4 @@ export class AccordionItemContentComponent {
   readonly headerId = this.item.headerId;
   readonly contentId = this.item.contentId;
   readonly expanded = this.item.expanded;
-
-  readonly contentClasses = computed(() => {
-    const customClass = this.contentClass();
-    return {
-      "tedi-accordion__content": true,
-      ...(customClass ? { [customClass]: true } : {}),
-      "tedi-accordion__content--with-icon-card": this.item.showIconCard(),
-    };
-  });
 }

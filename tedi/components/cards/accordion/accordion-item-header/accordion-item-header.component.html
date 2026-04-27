@@ -2,7 +2,7 @@
   <button
     [id]="headerId"
     type="button"
-    [ngClass]="headerClasses()"
+    class="tedi-accordion-item-header__trigger"
     (click)="toggle()"
     [attr.aria-expanded]="expanded()"
     [attr.aria-controls]="contentId"
@@ -10,7 +10,7 @@
     <ng-container *ngTemplateOutlet="headerContent"></ng-container>
   </button>
 } @else {
-  <div [id]="headerId" [ngClass]="headerClasses()">
+  <div [id]="headerId" class="tedi-accordion-item-header__trigger">
     <ng-container *ngTemplateOutlet="headerContent"></ng-container>
   </div>
 }

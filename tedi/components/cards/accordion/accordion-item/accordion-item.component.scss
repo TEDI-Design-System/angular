@@ -8,20 +8,20 @@
     border: 1px solid var(--card-border-selected);
     border-radius: var(--card-radius-rounded);
 
-    .tedi-accordion__header,
-    &.tedi-accordion__item--expanded .tedi-accordion__content,
+    .tedi-accordion-item-header,
+    &.tedi-accordion__item--expanded .tedi-accordion-item-content,
     [tedi-accordion-icon-card] {
       border: transparent;
     }
 
-    .tedi-accordion__header,
-    &.tedi-accordion__item--expanded .tedi-accordion__content {
+    .tedi-accordion-item-header,
+    &.tedi-accordion__item--expanded .tedi-accordion-item-content {
       &--with-icon-card {
         border-left: 1px solid var(--card-border-primary);
       }
     }
 
-    .tedi-accordion__header {
+    .tedi-accordion-item-header {
       &--expanded {
         border-bottom: 1px solid var(--card-border-primary);
       }
@@ -31,7 +31,7 @@
   &--expanded {
     grid-template-rows: max-content minmax(0, 1fr);
 
-    .tedi-accordion__content {
+    .tedi-accordion-item-content {
       border: 1px solid var(--card-border-primary);
       border-top: none;
       border-radius: 0 0 var(--card-radius-rounded) var(--card-radius-rounded);

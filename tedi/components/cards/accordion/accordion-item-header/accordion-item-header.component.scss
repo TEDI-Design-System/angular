@@ -1,17 +1,9 @@
 .tedi-accordion-item-header {
+  position: relative;
   display: flex;
   grid-row: 1;
   grid-column: 2;
   align-items: stretch;
-}
-
-.tedi-accordion__header {
-  position: relative;
-  display: flex;
-  flex: 1;
-  gap: var(--layout-grid-gutters-16);
-  align-items: center;
-  padding: var(--card-padding-md-default);
   background: var(--card-background-primary);
   border: 1px solid var(--card-border-primary);
   border-radius: var(--card-radius-rounded);
@@ -20,7 +12,7 @@
     border-radius: var(--card-radius-rounded) var(--card-radius-rounded) 0 0;
   }
 
-  &--expanded.tedi-accordion__header--with-icon-card {
+  &--expanded.tedi-accordion-item-header--with-icon-card {
     border-radius: 0 var(--card-radius-rounded) 0 0;
   }
 
@@ -40,7 +32,7 @@
       background: var(--general-surface-brand-tertiary);
     }
 
-    &:focus-visible {
+    &:has(.tedi-accordion-item-header__trigger:focus-visible) {
       z-index: 1;
       outline: none;
       background: var(--card-background-primary);
@@ -50,6 +42,21 @@
         0 0 0 3px var(--tedi-primary-500);
     }
   }
+}
+
+.tedi-accordion-item-header__trigger {
+  display: flex;
+  flex: 1;
+  gap: var(--layout-grid-gutters-16);
+  align-items: center;
+  padding: var(--card-padding-md-default);
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: inherit;
+  outline: none;
+  background: transparent;
+  border: 0;
 }
 
 .tedi-accordion-item-header__start {
@@ -78,7 +85,6 @@
 
   &--grow {
     flex: 1;
-    justify-content: space-between;
   }
 }
 
@@ -95,12 +101,12 @@
   align-items: center;
   color: var(--accordion-action-color);
 
-  tedi-icon {
+  .tedi-accordion-item-header__icon {
     color: inherit;
   }
 
   &--with-label {
-    tedi-icon {
+    .tedi-accordion-item-header__icon {
       margin-left: var(--button-sm-inner-spacing);
       font-size: var(--tedi-size-02);
       line-height: inherit;
@@ -116,6 +122,6 @@
   }
 }
 
-.tedi-link tedi-icon.tedi-accordion-item-header__icon--no-label {
+.tedi-link .tedi-accordion-item-header__icon--no-label {
   font-size: var(--icon-05);
 }

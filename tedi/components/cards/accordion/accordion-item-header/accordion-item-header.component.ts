@@ -1,4 +1,4 @@
-import { CommonModule, NgClass } from "@angular/common";
+import { CommonModule } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -22,7 +22,6 @@ import { AccordionItemComponent } from "../accordion-item/accordion-item.compone
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    NgClass,
     IconComponent,
     TextComponent,
     LinkComponent,
@@ -30,10 +29,15 @@ import { AccordionItemComponent } from "../accordion-item/accordion-item.compone
   ],
   host: {
     "[class.tedi-accordion-item-header]": "true",
+    "[class.tedi-accordion-item-header--hoverable]": "headerClickable()",
+    "[class.tedi-accordion-item-header--expanded]": "expanded()",
+    "[class.tedi-accordion-item-header--with-icon-card]":
+      "item.showIconCard()",
+    "[class]": "headerClass() ?? ''",
   },
 })
 export class AccordionItemHeaderComponent {
-  private readonly item = inject(AccordionItemComponent);
+  protected readonly item = inject(AccordionItemComponent);
 
   /**
    * If false, disables header toggling and enables using interactive elements in the accordion header.
@@ -83,18 +87,6 @@ export class AccordionItemHeaderComponent {
     () =>
       this.showDefaultExpandAction() && this.expandActionPosition() === "end",
   );
-
-  readonly headerClasses = computed(() => {
-    const customClass = this.headerClass();
-
-    return {
-      "tedi-accordion__header": true,
-      ...(customClass ? { [customClass]: true } : {}),
-      "tedi-accordion__header--hoverable": this.headerClickable(),
-      "tedi-accordion__header--expanded": this.expanded(),
-      "tedi-accordion__header--with-icon-card": this.item.showIconCard(),
-    };
-  });
 
   toggle() {
     this.item.toggle();
