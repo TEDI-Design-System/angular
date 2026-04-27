@@ -1,22 +1,38 @@
-import { CommonModule } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
   input,
   OnInit,
-  computed,
   model,
   inject,
 } from "@angular/core";
-import { IconComponent } from "../../../base/icon/icon.component";
-import { TextComponent } from "../../../base/text/text.component";
-import { LinkComponent } from "../../../navigation/link/link.component";
-import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
-import { AccordionComponent } from "../accordion/accordion.component";
-import { NgClass } from "@angular/common";
 import { _IdGenerator } from "@angular/cdk/a11y";
+import { AccordionComponent } from "../accordion/accordion.component";
 
+/**
+ * A single item inside a `tedi-accordion`. Owns the item's state (expanded)
+ * and the inputs shared by header and content (selected, showIconCard,
+ * defaultExpanded).
+ *
+ * Header-related configuration lives on `tedi-accordion-item-header`; body
+ * styling lives on `tedi-accordion-item-content`.
+ *
+ * Use together with the header and content children:
+ *
+ * ```html
+ * <tedi-accordion-item>
+ *   <tedi-accordion-item-header>
+ *     <span tedi-accordion-title>Title</span>
+ *   </tedi-accordion-item-header>
+ *   <tedi-accordion-item-content>Content</tedi-accordion-item-content>
+ * </tedi-accordion-item>
+ * ```
+ *
+ * The optional `[tedi-accordion-icon-card]` slot is projected as a direct
+ * child of the item (not inside the header), because it occupies its own
+ * column in the item's grid layout.
+ */
 @Component({
   selector: "tedi-accordion-item",
   standalone: true,
@@ -24,79 +40,27 @@ import { _IdGenerator } from "@angular/cdk/a11y";
   styleUrl: "./accordion-item.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    IconComponent,
-    CommonModule,
-    TextComponent,
-    LinkComponent,
-    TediTranslationPipe,
-    NgClass,
-  ],
+  imports: [],
 })
 export class AccordionItemComponent implements OnInit {
   readonly idGenerator = inject(_IdGenerator);
-  readonly bodyId = this.idGenerator.getId("tedi-accordion-body");
+  readonly contentId = this.idGenerator.getId("tedi-accordion-content");
   readonly headerId = this.idGenerator.getId("tedi-accordion-header");
-  /**
-   * If false, disables header toggling and enables using interactive elements in the accordion header.
-   */
-  headerClickable = input(true);
-  /** The title of the accordion item. */
-  title = input("");
-  /**
-   * Sets how the accordion title stretches horizontally.
-   * `hug` - container sizes to its content.
-   * `fill` - container expands to available space, moving any trailing elements to the end.
-   */
-  titleLayout = input<"hug" | "fill">("hug");
-  /**
-   * Whether the title is rendered as separate text in the accordion header.
-   * If false and `showExpandLabel` is true, the title is used as the expand button label.
-   */
-  showSeparateTitle = input(true);
-  /** Label shown when accordion is collapsed */
-  openLabel = input<string>("open");
-  /** Label shown when accordion is expanded */
-  closeLabel = input<string>("close");
-  /**
-   * Controls whether the expand/collapse label is shown.
-   */
-  showExpandLabel = input(true);
-  /**
-   * Controls whether the default expand/collapse action is shown.
-   */
-  showDefaultExpandAction = input(true);
-  /**
-   * Position of the expand action relative to the header content.
-   */
-  expandActionPosition = input<"start" | "end">("end");
+
   /**
    * Whether the accordion item is expanded initially.
    * Does not control the expanded state after initialization.
    */
   defaultExpanded = input(false);
-  /** Optional description text shown in the header */
-  description = input<string | undefined>(undefined);
   /**
-   * Position of the description relative to the title.
-   */
-  descriptionPosition = input<"start" | "end" | "both">("start");
-  /**
-   * Enables the icon-card layout variant.
+   * Enables the icon-card layout variant. Affects both header and content
+   * styling, so it lives on the item.
    */
   showIconCard = input(false);
   /**
    * Marks the accordion item as selected.
    */
   selected = input(false);
-  /**
-   * Custom CSS classes for the accordion header.
-   */
-  headerClass = input<string | null>(null);
-  /**
-   * Custom CSS classes for the accordion body.
-   */
-  bodyClass = input<string | null>(null);
 
   expanded = model(false);
 
@@ -114,43 +78,4 @@ export class AccordionItemComponent implements OnInit {
   setExpanded(value: boolean) {
     this.expanded.set(value);
   }
-
-  expandLabel = computed(() =>
-    this.expanded() ? this.closeLabel() : this.openLabel(),
-  );
-
-  showStartExpandAction = computed(
-    () =>
-      this.showDefaultExpandAction() && this.expandActionPosition() === "start",
-  );
-
-  showEndExpandAction = computed(
-    () =>
-      this.showDefaultExpandAction() && this.expandActionPosition() === "end",
-  );
-
-  readonly headerClasses = computed(() => {
-    const customClass = this.headerClass();
-
-    return {
-      "tedi-accordion__header": true,
-      ...(customClass ? { [customClass]: true } : {}),
-      "tedi-accordion__header--hoverable": this.headerClickable(),
-      "tedi-accordion__header--expanded": this.expanded(),
-      "tedi-accordion__header--with-icon-card": this.showIconCard(),
-    };
-  });
-
-  readonly bodyClasses = computed(() => {
-    const customClass = this.bodyClass();
-    return {
-      "tedi-accordion__body": true,
-      ...(customClass ? { [customClass]: true } : {}),
-      "tedi-accordion__body--with-icon-card": this.showIconCard(),
-    };
-  });
-
-  hideTitleFromSR = computed(() => {
-    return !this.headerClickable() && !this.showExpandLabel();
-  });
 }
