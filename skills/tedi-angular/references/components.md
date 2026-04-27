@@ -637,6 +637,26 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 <a tedi-link href="/page" variant="default">Go to page</a>
 ```
 
+### HorizontalStepper
+**Selector:** `tedi-horizontal-stepper`
+**Inputs:**
+- `ariaLabel: string`
+- `background: "default" | "transparent" = "default"`
+- `compact: boolean | "sm" | "md" | "lg" | "xl" = "sm"` — collapse labels to show only indicators plus the selected step's label. `true` = always collapsed; a breakpoint = collapsed below that breakpoint.
+
+**Sub-component:** `tedi-horizontal-stepper-item`
+- `label: string` (required), `description: string`
+- `completed`, `error`, `selected` (booleanAttribute inputs)
+- `(stepSelect)` — emitted on click
+
+```html
+<tedi-horizontal-stepper ariaLabel="Form progress" compact="md">
+  <tedi-horizontal-stepper-item label="Request" completed />
+  <tedi-horizontal-stepper-item label="Application" selected />
+  <tedi-horizontal-stepper-item label="Response" />
+</tedi-horizontal-stepper>
+```
+
 ## Notifications
 
 ### Alert
