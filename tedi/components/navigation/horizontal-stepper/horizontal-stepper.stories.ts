@@ -34,6 +34,17 @@ export default {
         category: "inputs",
       },
     },
+    compact: {
+      control: "select",
+      options: [true, false, "sm", "md", "lg", "xl"],
+      description:
+        "Collapse labels (show only indicators + selected step's label). `true` = always; a breakpoint string = collapse below that breakpoint.",
+      table: {
+        defaultValue: { summary: "'sm'" },
+        type: { summary: "boolean | 'sm' | 'md' | 'lg' | 'xl'" },
+        category: "inputs",
+      },
+    },
   },
 } as Meta<HorizontalStepperComponent>;
 
@@ -161,6 +172,42 @@ export const TransparentBackground: Story = {
         <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
         <tedi-horizontal-stepper-item label="Geenianalüüs" />
         <tedi-horizontal-stepper-item label="Vastus" />
+      </tedi-horizontal-stepper>
+    `,
+  }),
+};
+
+/**
+ * Always collapsed — only indicators plus the selected step's label are shown,
+ * regardless of viewport width.
+ */
+export const AlwaysCompact: Story = {
+  render: (props) => ({
+    props,
+    template: `
+      <tedi-horizontal-stepper ariaLabel="Form progress" [compact]="true">
+        <tedi-horizontal-stepper-item label="Kutse" completed />
+        <tedi-horizontal-stepper-item label="Tahteavaldus" selected description="Ametnik täidab" />
+        <tedi-horizontal-stepper-item label="Geenianalüüs" description="Ametnik täidab" />
+        <tedi-horizontal-stepper-item label="Vastus" description="Ametnik täidab" />
+      </tedi-horizontal-stepper>
+    `,
+  }),
+};
+
+/**
+ * Collapses at the `md` breakpoint — useful when labels with descriptions
+ * would overflow on narrower desktops.
+ */
+export const CompactAtMdBreakpoint: Story = {
+  render: (props) => ({
+    props,
+    template: `
+      <tedi-horizontal-stepper ariaLabel="Form progress" compact="md">
+        <tedi-horizontal-stepper-item label="Kutse" completed />
+        <tedi-horizontal-stepper-item label="Tahteavaldus" selected description="Ametnik täidab" />
+        <tedi-horizontal-stepper-item label="Geenianalüüs" description="Ametnik täidab" />
+        <tedi-horizontal-stepper-item label="Vastus" description="Ametnik täidab" />
       </tedi-horizontal-stepper>
     `,
   }),

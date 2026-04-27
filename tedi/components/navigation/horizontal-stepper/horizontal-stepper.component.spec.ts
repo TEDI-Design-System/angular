@@ -2,7 +2,10 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
-import { HorizontalStepperComponent } from "./horizontal-stepper.component";
+import {
+  HorizontalStepperComponent,
+  HorizontalStepperCompact,
+} from "./horizontal-stepper.component";
 import { HorizontalStepperItemComponent } from "./horizontal-stepper-item/horizontal-stepper-item.component";
 
 class TranslationMock {
@@ -19,7 +22,11 @@ class TranslationMock {
   standalone: true,
   imports: [HorizontalStepperComponent, HorizontalStepperItemComponent],
   template: `
-    <tedi-horizontal-stepper [ariaLabel]="ariaLabel" [background]="background">
+    <tedi-horizontal-stepper
+      [ariaLabel]="ariaLabel"
+      [background]="background"
+      [compact]="compact"
+    >
       <tedi-horizontal-stepper-item label="Request" completed />
       <tedi-horizontal-stepper-item label="Application" selected />
       <tedi-horizontal-stepper-item label="General info" />
@@ -30,6 +37,7 @@ class TranslationMock {
 class TestHostComponent {
   ariaLabel = "Form progress";
   background: "default" | "transparent" = "default";
+  compact: HorizontalStepperCompact = "sm";
 }
 
 describe("HorizontalStepperComponent", () => {
@@ -123,5 +131,47 @@ describe("HorizontalStepperComponent", () => {
     expect(items[3].classList).not.toContain(
       "tedi-horizontal-stepper-item--completed",
     );
+  });
+
+  describe("compact input", () => {
+    it("should apply compact-sm class by default", () => {
+      expect(getStepper().classList).toContain(
+        "tedi-horizontal-stepper--compact-sm",
+      );
+      expect(getStepper().classList).not.toContain(
+        "tedi-horizontal-stepper--compact",
+      );
+    });
+
+    it("should apply compact class when compact is true", () => {
+      host.compact = true;
+      fixture.detectChanges();
+
+      expect(getStepper().classList).toContain(
+        "tedi-horizontal-stepper--compact",
+      );
+      expect(getStepper().classList).not.toContain(
+        "tedi-horizontal-stepper--compact-sm",
+      );
+    });
+
+    it("should not apply any compact class when compact is false", () => {
+      host.compact = false;
+      fixture.detectChanges();
+
+      const classes = Array.from(getStepper().classList);
+      expect(classes.some((c) => c.startsWith("tedi-horizontal-stepper--compact"))).toBe(false);
+    });
+
+    it("should apply the matching breakpoint class", () => {
+      for (const bp of ["sm", "md", "lg", "xl"] as const) {
+        host.compact = bp;
+        fixture.detectChanges();
+
+        expect(getStepper().classList).toContain(
+          `tedi-horizontal-stepper--compact-${bp}`,
+        );
+      }
+    });
   });
 });

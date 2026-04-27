@@ -1,18 +1,8 @@
-@use "@tedi-design-system/core/bootstrap-utility/breakpoints";
-
 .tedi-horizontal-stepper-item {
   $host: &;
 
   position: relative;
   display: flex;
-
-  @include breakpoints.media-breakpoint-down(sm) {
-    flex: 1 0 0;
-
-    &--selected {
-      flex: 0 0 auto;
-    }
-  }
 
   &__step {
     position: relative;
@@ -21,20 +11,13 @@
     align-items: flex-start;
     width: auto;
     min-height: 40px;
-    padding: var(--stepper-item-horizontal-padding-y)
-      var(--stepper-item-horizontal-padding-x);
+    padding: var(--stepper-item-horizontal-padding-y) var(--stepper-item-horizontal-padding-x);
     font-family: var(--family-default);
     text-align: left;
     cursor: pointer;
     background: none;
     border: none;
     border-radius: 0;
-
-    @include breakpoints.media-breakpoint-down(sm) {
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-    }
 
     &:focus-visible {
       z-index: 2;
@@ -48,11 +31,11 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: var(--stepper-item-vertical-step-size-lg);
+    height: var(--stepper-item-vertical-step-size-lg);
     background-color: var(--stepper-step-default-bg);
     border: 1px solid var(--stepper-step-default-border);
-    border-radius: 9999px;
+    border-radius: 100%;
   }
 
   &__number {
@@ -67,14 +50,6 @@
     flex-direction: column;
     justify-content: center;
     white-space: nowrap;
-
-    @include breakpoints.media-breakpoint-down(sm) {
-      display: none;
-
-      #{$host}--selected & {
-        display: flex;
-      }
-    }
   }
 
   &__label {
@@ -91,9 +66,6 @@
     color: var(--general-text-tertiary);
   }
 
-  // -------------------------------------------------------
-  // Default type — hover / active
-  // -------------------------------------------------------
   &:not(#{$host}--selected):not(#{$host}--completed):not(#{$host}--error) {
     #{$host}__step:hover {
       #{$host}__indicator {
@@ -132,15 +104,15 @@
   // Selected
   // -------------------------------------------------------
   &--selected {
+    --_step-arrow-width: 1rem;
+
     z-index: 1;
 
     #{$host}__step {
-      padding-right: calc(var(--stepper-item-horizontal-padding-x) + 16px);
+      padding-right: calc(var(--stepper-item-horizontal-padding-x) + var(--_step-arrow-width));
       cursor: default;
-      background-color: var(
-        --stepper-item-horizontal-type-selected-bg-default
-      );
-      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 50%, calc(100% - 16px) 100%, 0 100%);
+      background-color: var(--stepper-item-horizontal-type-selected-bg-default);
+      clip-path: polygon(0 0, calc(100% - var(--_step-arrow-width)) 0, 100% 50%, calc(100% - var(--_step-arrow-width)) 100%, 0 100%);
     }
 
     #{$host}__indicator {
@@ -164,14 +136,9 @@
     }
   }
 
-  // -------------------------------------------------------
-  // Completed
-  // -------------------------------------------------------
   &--completed {
     #{$host}__step {
-      background-color: var(
-        --stepper-item-horizontal-type-completed-bg-default
-      );
+      background-color: var(--stepper-item-horizontal-type-completed-bg-default);
     }
 
     #{$host}__indicator {
@@ -183,35 +150,38 @@
       color: var(--stepper-item-horizontal-text-completed-default);
     }
 
+    #{$host}__description {
+      color: var(--stepper-item-horizontal-text-completed-default);
+    }
+
     #{$host}__step:hover {
       #{$host}__indicator {
         background-color: var(--stepper-step-completed-bg-hover);
       }
 
-      #{$host}__label {
+      #{$host}__label,
+      #{$host}__description {
         color: var(--stepper-item-horizontal-text-completed-hover);
       }
     }
 
     #{$host}__step:active {
-      background-color: var(
-        --stepper-item-horizontal-type-completed-bg-active
-      );
+      background-color: var(--stepper-item-horizontal-type-completed-bg-active);
 
       #{$host}__indicator {
-        background-color: var(--stepper-step-completed-bg-active);
+        background-color: var(--stepper-step-completed-bg-hover);
+      }
+
+      #{$host}__label,
+      #{$host}__description {
+        color: var(--stepper-item-horizontal-text-completed-hover);
       }
     }
   }
 
-  // -------------------------------------------------------
-  // Error
-  // -------------------------------------------------------
   &--error {
     #{$host}__step {
-      background-color: var(
-        --stepper-item-horizontal-type-danger-bg-default
-      );
+      background-color: var(--stepper-item-horizontal-type-danger-bg-default);
     }
 
     #{$host}__indicator {
@@ -232,18 +202,22 @@
         background-color: var(--stepper-step-danger-bg-hover);
       }
 
-      #{$host}__label {
+      #{$host}__label,
+      #{$host}__description {
         color: var(--stepper-item-horizontal-text-danger-hover);
       }
     }
 
     #{$host}__step:active {
-      background-color: var(
-        --stepper-item-horizontal-type-danger-bg-active
-      );
+      background-color: var(--stepper-item-horizontal-type-danger-bg-active);
 
       #{$host}__indicator {
-        background-color: var(--stepper-step-danger-bg-active);
+        background-color: var(--stepper-step-danger-bg-hover);
+      }
+
+      #{$host}__label,
+      #{$host}__description {
+        color: var(--stepper-item-horizontal-text-danger-hover);
       }
     }
   }
