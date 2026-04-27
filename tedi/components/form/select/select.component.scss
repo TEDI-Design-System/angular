@@ -10,7 +10,7 @@
   --_line-height: var(--body-regular-line-height);
   --_padding-y: var(--form-field-padding-y-md-default);
   --_padding-x: var(--form-field-padding-x-md-default);
-  --_search-input-min-width: 50px;
+  --_search-input-min-width: 1px;
 
   min-height: var(--form-field-height);
   padding: calc(var(--_padding-y) - var(--tedi-borders-01)) var(--_padding-x);
@@ -114,9 +114,18 @@
 
   &__arrow {
     flex-grow: 0;
+    flex-shrink: 0;
+    padding: 0;
     padding-left: var(--form-field-inner-spacing);
     margin-left: var(--form-field-inner-spacing);
+    color: inherit;
     cursor: default;
+    background: none;
+    border: none;
+
+    &:focus-visible {
+      outline: none;
+    }
   }
 
   &__dropdown {
