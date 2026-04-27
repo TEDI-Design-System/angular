@@ -173,4 +173,23 @@ describe("AccordionItemHeaderComponent", () => {
     // The block class should still be present
     expect(headerEl.classList).toContain("tedi-accordion-item-header");
   });
+
+  it("should apply custom headerClass alongside modifiers without replacing them", () => {
+    host.headerClass = "custom-header";
+    host.item.setExpanded(true);
+    fixture.detectChanges();
+
+    const headerEl = fixture.debugElement.query(
+      By.directive(AccordionItemHeaderComponent),
+    ).nativeElement as HTMLElement;
+
+    expect(headerEl.classList).toContain("tedi-accordion-item-header");
+    expect(headerEl.classList).toContain(
+      "tedi-accordion-item-header--expanded",
+    );
+    expect(headerEl.classList).toContain(
+      "tedi-accordion-item-header--hoverable",
+    );
+    expect(headerEl.classList).toContain("custom-header");
+  });
 });
