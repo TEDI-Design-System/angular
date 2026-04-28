@@ -1,3 +1,10 @@
+# [6.3.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.13...angular-6.3.0-rc.14) (2026-04-28)
+
+
+### Features
+
+* **checkbox,radio:** added formControl support to groups [#412](https://github.com/TEDI-Design-System/angular/issues/412) ([#413](https://github.com/TEDI-Design-System/angular/issues/413)) ([077be96](https://github.com/TEDI-Design-System/angular/commit/077be96990f4801f07c98359a0d6d775f0180cfb))
+
 # [6.3.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.12...angular-6.3.0-rc.13) (2026-04-21)
 
 
