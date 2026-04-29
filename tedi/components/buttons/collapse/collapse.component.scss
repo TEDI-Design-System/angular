@@ -35,7 +35,7 @@ $transition-duration: 300ms;
       justify-content: center;
       width: var(--button-sm-icon-size);
       height: var(--button-sm-icon-size);
-      border: var(--borders-01) solid
+      border: var(--tedi-borders-01) solid
         var(--button-main-secondary-border-default);
       border-radius: 100%;
     }
@@ -48,7 +48,7 @@ $transition-duration: 300ms;
   &__extender {
     visibility: hidden;
     min-height: 0;
-    padding-top: var(--dimensions-05);
+    padding-top: var(--tedi-dimensions-05);
     transition: visibility $transition-duration;
   }
 

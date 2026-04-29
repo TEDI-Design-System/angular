@@ -2,11 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   model,
   ViewEncapsulation,
 } from "@angular/core";
 import { CardComponent } from "../../card/card.component";
+import { _IdGenerator } from "@angular/cdk/a11y";
 
 @Component({
   selector: "tedi-accordion-item",
@@ -24,7 +26,7 @@ export class AccordionItemComponent {
   /**
    * Accordion item id
    */
-  id = input.required<string>();
+  id = input<string>();
   /**
    * Whether accordion item is selected
    */
@@ -32,11 +34,17 @@ export class AccordionItemComponent {
 
   opened = model<boolean>(false);
 
+  private idGenerator = inject(_IdGenerator);
+
+  private itemId = computed(
+    () => this.id() || this.idGenerator.getId("accordion"),
+  );
+
   headerId = computed(() => {
-    return `tedi-accordion-header-${this.id()}`;
+    return `tedi-accordion-header-${this.itemId()}`;
   });
   contentId = computed(() => {
-    return `tedi-accordion-content-${this.id()}`;
+    return `tedi-accordion-content-${this.itemId()}`;
   });
 
   open() {

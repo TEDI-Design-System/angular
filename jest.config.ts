@@ -12,7 +12,7 @@ export default {
   testPathIgnorePatterns: ["/node_modules/", "/dist/"],
   moduleFileExtensions: ["ts", "html", "js", "json"],
   resolver: "jest-preset-angular/build/resolvers/ng-jest-resolver.js",
-  testEnvironment: "jsdom",
+  testEnvironment: "<rootDir>/jest-jsdom-env.ts",
   collectCoverage: true,
   collectCoverageFrom: ["./tedi/components/**/*.{js,ts,tsx}"],
   coveragePathIgnorePatterns: ["\\.stories\\.ts$"],

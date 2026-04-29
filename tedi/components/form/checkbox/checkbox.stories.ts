@@ -4,8 +4,13 @@ import {
   moduleMetadata,
   StoryObj,
 } from "@storybook/angular";
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { CheckboxComponent } from "./checkbox.component";
+import { CheckboxCardComponent } from "../checkbox-card/checkbox-card.component";
+import { CheckboxGroupComponent } from "../checkbox-group/checkbox-group.component";
+import { CheckboxCardGroupComponent } from "../checkbox-card-group/checkbox-card-group.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
 import { TextComponent } from "../../base/text/text.component";
 import { LabelComponent } from "../label/label.component";
 import { IconComponent } from "../../base/icon/icon.component";
@@ -14,14 +19,14 @@ import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/t
 import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
-
+import { AlertComponent } from "../../notifications/alert/alert.component";
 
 type StoryCheckboxComponent = CheckboxComponent & {
   indeterminate: boolean;
 };
 
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.21.30?node-id=6149-138033&m=dev" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.41.64?node-id=4228-72936&m=dev" target="_blank">Figma ↗</a><br />
  * <a href="https://www.tedi.ee/1ee8444b7/p/796203-checkbox" target="_blank">Zeroheight ↗</a>
  */
 export default {
@@ -31,7 +36,11 @@ export default {
     moduleMetadata({
       imports: [
         CheckboxComponent,
+        CheckboxCardComponent,
+        CheckboxGroupComponent,
+        CheckboxCardGroupComponent,
         RowComponent,
+        ColComponent,
         TextComponent,
         LabelComponent,
         IconComponent,
@@ -40,6 +49,8 @@ export default {
         TooltipContentComponent,
         InfoButtonComponent,
         FeedbackTextComponent,
+        AlertComponent,
+        ReactiveFormsModule,
       ],
     }),
   ],
@@ -49,6 +60,7 @@ export default {
       options: ["default", "large"],
       description: "Size of the checkbox.",
       table: {
+        category: "Checkbox",
         type: {
           summary: "CheckboxSize",
           detail: "default \nlarge",
@@ -62,6 +74,7 @@ export default {
       control: "boolean",
       description: "Is checkbox invalid?",
       table: {
+        category: "Checkbox",
         type: {
           summary: "boolean",
         },
@@ -74,6 +87,7 @@ export default {
       control: "boolean",
       description: "Is checkbox disabled?",
       table: {
+        category: "Checkbox",
         type: {
           summary: "boolean",
         },
@@ -82,27 +96,91 @@ export default {
     indeterminate: {
       control: "boolean",
       description:
-        "Renders a alternate checked state, with a slash, which is neither toggled on or off, interacting with the checkbox will dismiss the indeterminate state.",
+        "Renders an alternate checked state, with a slash, which is neither toggled on or off. Interacting with the checkbox will dismiss the indeterminate state.",
+      table: {
+        category: "Checkbox",
+      },
+    },
+    variant: {
+      control: "radio",
+      options: ["primary", "secondary"],
+      description: "Visual variant of the checkbox card.",
+      table: {
+        category: "CheckboxCard",
+        type: {
+          summary: "CheckboxCardVariant",
+          detail: "primary \nsecondary",
+        },
+        defaultValue: {
+          summary: "primary",
+        },
+      },
+    },
+    showIndicator: {
+      control: "boolean",
+      description:
+        "Whether to show the checkbox indicator. When false, the checkbox is visually hidden but remains functional.",
+      table: {
+        category: "CheckboxCard",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: {
+          summary: "true",
+        },
+      },
+    },
+    groupLabel: {
+      control: "text",
+      description: "Label text displayed above the checkbox group.",
+      table: {
+        category: "CheckboxGroup",
+        type: {
+          summary: "string",
+        },
+      },
+    },
+    groupDirection: {
+      control: "radio",
+      options: ["horizontal", "vertical"],
+      description: "Layout direction of the checkboxes.",
+      table: {
+        category: "CheckboxGroup",
+        type: {
+          summary: "CheckboxGroupDirection",
+          detail: "horizontal \nvertical",
+        },
+        defaultValue: {
+          summary: "horizontal",
+        },
+      },
     },
   },
 } as Meta<StoryCheckboxComponent>;
 
 export const Default: StoryObj<StoryCheckboxComponent & { disabled: boolean }> =
-  {
-    args: {
-      size: "default",
-      invalid: false,
-      disabled: false,
-      indeterminate: false,
-    },
-    render: (args) => ({
-      props: args,
-      template: `
-      <input tedi-checkbox type="checkbox" ${argsToTemplate(args)} />
+{
+  args: {
+    size: "default",
+    invalid: false,
+    disabled: false,
+    indeterminate: false,
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <label tedi-label color="primary" class="flex align-items-center gap-2">
+        <input tedi-checkbox type="checkbox" ${argsToTemplate(args)} />
+        Text
+      </label>
     `,
-    }),
-  };
+  }),
+};
 
+/**
+ * Default size is used on desktop, large size is applied automatically on mobile screen sizes.
+ * Use in tables where the checkbox has no text. **Otherwise, prefer using default size.**
+ */
 export const Size: StoryObj<CheckboxComponent> = {
   render: (args) => ({
     props: args,
@@ -121,21 +199,20 @@ export const Vertical: StoryObj<CheckboxComponent> = {
   render: (args) => ({
     props: args,
     template: `
-      <p tedi-text color="secondary">Label</p>
-      <tedi-row [cols]="1" [gapY]="1">
-        <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
+      <tedi-checkbox-group label="Label" direction="vertical">
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" checked />
           Text
         </label>
-        <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" checked />
           Text
         </label>
-        <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" />
           Text
         </label>
-      </tedi-row>
+      </tedi-checkbox-group>
     `,
   }),
 };
@@ -144,21 +221,20 @@ export const Horizontal: StoryObj<CheckboxComponent> = {
   render: (args) => ({
     props: args,
     template: `
-      <p tedi-text color="secondary">Label</p>
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
+      <tedi-checkbox-group label="Label">
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" checked />
           Text
         </label>
-        <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" checked />
           Text
         </label>
-        <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" />
           Text
         </label>
-      </div>
+      </tedi-checkbox-group>
     `,
   }),
 };
@@ -196,33 +272,34 @@ export const VerticalTree: StoryObj<CheckboxComponent> = {
     return {
       props: args,
       template: `
-        <p tedi-text color="secondary">Label</p>
-        <label tedi-label id="parentCB" color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-          <input tedi-checkbox type="checkbox" />
-          Text
-        </label>
-        <tedi-row id="childrenCB" [cols]="1" [gapY]="1" style="padding-left: 32px;">
-          <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-            <input tedi-checkbox type="checkbox" checked />
-            Text
-          </label>
-          <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-            <input tedi-checkbox type="checkbox" checked />
-            Text
-          </label>
-          <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
+        <tedi-checkbox-group label="Label" direction="vertical">
+          <label tedi-label id="parentCB" color="primary" class="flex align-items-center gap-2">
             <input tedi-checkbox type="checkbox" />
             Text
           </label>
-          <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-            <input tedi-checkbox type="checkbox" />
-            Text
-          </label>
-          <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-            <input tedi-checkbox type="checkbox" />
-            Text
-          </label>
-        </tedi-row>
+          <tedi-checkbox-group id="childrenCB" direction="vertical" style="padding-left: 32px;">
+            <label tedi-label color="primary" class="flex align-items-center gap-2">
+              <input tedi-checkbox type="checkbox" checked />
+              Text
+            </label>
+            <label tedi-label color="primary" class="flex align-items-center gap-2">
+              <input tedi-checkbox type="checkbox" checked />
+              Text
+            </label>
+            <label tedi-label color="primary" class="flex align-items-center gap-2">
+              <input tedi-checkbox type="checkbox" />
+              Text
+            </label>
+            <label tedi-label color="primary" class="flex align-items-center gap-2">
+              <input tedi-checkbox type="checkbox" />
+              Text
+            </label>
+            <label tedi-label color="primary" class="flex align-items-center gap-2">
+              <input tedi-checkbox type="checkbox" />
+              Text
+            </label>
+          </tedi-checkbox-group>
+        </tedi-checkbox-group>
       `,
     };
   },
@@ -233,23 +310,31 @@ export const Separate: StoryObj<CheckboxComponent> = {
     props: args,
     template: `
       <tedi-row [cols]="1" [gapY]="4">
-        <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
+        <div>
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+          <tedi-feedback-text text="Hint text" />
+        </div>
+        <div>
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" [invalid]="true" />
+            Text
+          </label>
+          <tedi-feedback-text text="Feedback text" type="error" />
+        </div>
+        <label tedi-label color="primary" [required]="true" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" />
           Text
         </label>
-        <div style="display: inline-flex; align-items: center; gap: 8px;">
-          <input tedi-checkbox id="checkbox-required" type="checkbox" />
-          <label tedi-label for="checkbox-required" color="primary" [required]="true">
-            Text
-          </label>
-        </div>
-        <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" />
           <tedi-icon name="stethoscope" [size]="16" />
           Text
         </label>
-        <div style="display: inline-flex; align-items: center; gap: 4px;">
-          <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
+        <div class="flex align-items-center gap-1">
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
             <input tedi-checkbox type="checkbox" />
             Text
           </label>
@@ -262,18 +347,12 @@ export const Separate: StoryObj<CheckboxComponent> = {
             </tedi-tooltip-content>
           </tedi-tooltip>
         </div>
-        <div style="display: inline-flex; gap: 8px;">
-          <div>
-            <input tedi-checkbox id="checkbox-with-desc" type="checkbox" />
-          </div>
-          <div>
-            <label tedi-label for="checkbox-with-desc" color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              Text
-            </label>
-            <p tedi-text color="secondary">
-              Description
-            </p>
-          </div>
+        <div>
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+          <tedi-feedback-text text="Description" />
         </div>
       </tedi-row>
     `,
@@ -285,79 +364,574 @@ export const Group: StoryObj<CheckboxComponent> = {
     props: args,
     template: `
       <tedi-row [cols]="2" [gapY]="3">
-        <div>
-          <p tedi-text color="secondary">Label</p>
-          <tedi-row [cols]="1" [gapY]="1">
-            <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <input tedi-checkbox type="checkbox" />
-              Text
-            </label>
-            <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <input tedi-checkbox type="checkbox" />
-              Text
-            </label>
-            <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <input tedi-checkbox type="checkbox" />
-              Text
-            </label>
-          </tedi-row>
+        <tedi-checkbox-group label="Label" direction="vertical">
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
           <tedi-feedback-text text="Hint text" />
-        </div>
-        <div>
-          <p tedi-text color="secondary">Label</p>
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <input tedi-checkbox type="checkbox" />
-              Text
-            </label>
-            <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <input tedi-checkbox type="checkbox" />
-              Text
-            </label>
-            <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <input tedi-checkbox type="checkbox" />
-              Text
-            </label>
-          </div>
+        </tedi-checkbox-group>
+        <tedi-checkbox-group label="Label" direction="vertical">
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+          <tedi-feedback-text text="Feedback text" type="error" />
+        </tedi-checkbox-group>
+        <tedi-checkbox-group label="Label">
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
           <tedi-feedback-text text="Hint text" />
-        </div>
-        <div>
-          <p tedi-text color="secondary">Label</p>
-          <tedi-row [cols]="1" [gapY]="1">
-            <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <input tedi-checkbox type="checkbox" />
-              Text
-            </label>
-            <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <input tedi-checkbox type="checkbox" />
-              Text
-            </label>
-            <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <input tedi-checkbox type="checkbox" />
-              Text
-            </label>
-          </tedi-row>
+        </tedi-checkbox-group>
+        <tedi-checkbox-group label="Label">
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
           <tedi-feedback-text text="Feedback text" type="error" />
-        </div>
-        <div>
-          <p tedi-text color="secondary">Label</p>
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <input tedi-checkbox type="checkbox" />
-              Text
-            </label>
-            <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <input tedi-checkbox type="checkbox" />
-              Text
-            </label>
-            <label tedi-label color="primary" style="display: inline-flex; align-items: center; gap: 8px;">
-              <input tedi-checkbox type="checkbox" />
-              Text
-            </label>
-          </div>
-          <tedi-feedback-text text="Feedback text" type="error" />
-        </div>
+        </tedi-checkbox-group>
       </tedi-row>
     `,
   }),
+};
+
+/**
+ * All visual states of the checkbox component.
+ */
+export const States: StoryObj<CheckboxComponent> = {
+  parameters: {
+    pseudo: {
+      hover: "#Hover",
+      active: "#Active",
+      focusVisible: "#Focus",
+    },
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-row [cols]="2" [gapY]="3">
+        <strong>Default</strong>
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
+          <input tedi-checkbox type="checkbox" />
+          Text
+        </label>
+
+        <strong>Hover</strong>
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
+          <input tedi-checkbox type="checkbox" id="Hover" />
+          Text
+        </label>
+
+        <strong>Selected</strong>
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
+          <input tedi-checkbox type="checkbox" checked />
+          Text
+        </label>
+
+        <strong>Active</strong>
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
+          <input tedi-checkbox type="checkbox" checked id="Active" />
+          Text
+        </label>
+
+        <strong>Focus</strong>
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
+          <input tedi-checkbox type="checkbox" id="Focus" />
+          Text
+        </label>
+
+        <strong>Error</strong>
+        <div>
+          <label tedi-label color="primary" class="flex align-items-center gap-2">
+            <input tedi-checkbox type="checkbox" [invalid]="true" />
+            Text
+          </label>
+          <tedi-feedback-text text="Feedback text" type="error" />
+        </div>
+
+        <strong>Disabled</strong>
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
+          <input tedi-checkbox type="checkbox" disabled />
+          Text
+        </label>
+
+        <strong>Disabled selected</strong>
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
+          <input tedi-checkbox type="checkbox" checked disabled />
+          Text
+        </label>
+
+        <strong>Indeterminate</strong>
+        <label tedi-label color="primary" class="flex align-items-center gap-2">
+          <input tedi-checkbox type="checkbox" [indeterminate]="true" />
+          Text
+        </label>
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * Checkbox cards with primary and secondary variants. Primary uses a filled background when selected, secondary uses an outline border.
+ */
+export const CheckboxCards: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
+          <tedi-checkbox-card-group>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" checked />
+              Text
+            </label>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" />
+              Text
+            </label>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" />
+              Text
+            </label>
+          </tedi-checkbox-card-group>
+        </tedi-col>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
+          <tedi-checkbox-card-group>
+            <label tedi-checkbox-card variant="secondary">
+              <input tedi-checkbox type="checkbox" checked />
+              Text
+            </label>
+            <label tedi-checkbox-card variant="secondary">
+              <input tedi-checkbox type="checkbox" />
+              Text
+            </label>
+            <label tedi-checkbox-card variant="secondary">
+              <input tedi-checkbox type="checkbox" />
+              Text
+            </label>
+          </tedi-checkbox-card-group>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * Checkbox cards with a description below the label text.
+ */
+export const CheckboxCardsWithDescription: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
+          <tedi-checkbox-card-group>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" checked />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+          </tedi-checkbox-card-group>
+        </tedi-col>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
+          <tedi-checkbox-card-group>
+            <label tedi-checkbox-card variant="secondary">
+              <input tedi-checkbox type="checkbox" checked />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-checkbox-card variant="secondary">
+              <input tedi-checkbox type="checkbox" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-checkbox-card variant="secondary">
+              <input tedi-checkbox type="checkbox" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+          </tedi-checkbox-card-group>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * Checkbox cards with icons before the label text.
+ */
+export const CheckboxCardsWithIcons: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary</p>
+          <tedi-checkbox-card-group>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" checked />
+              <tedi-icon name="apartment" [size]="18" />
+              Text
+            </label>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" />
+              <tedi-icon name="stethoscope" [size]="18" />
+              Text
+            </label>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" />
+              <tedi-icon name="home" [size]="18" />
+              Text
+            </label>
+          </tedi-checkbox-card-group>
+        </tedi-col>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary</p>
+          <tedi-checkbox-card-group>
+            <label tedi-checkbox-card variant="secondary">
+              <input tedi-checkbox type="checkbox" checked />
+              <tedi-icon name="apartment" [size]="18" />
+              Text
+            </label>
+            <label tedi-checkbox-card variant="secondary">
+              <input tedi-checkbox type="checkbox" />
+              <tedi-icon name="stethoscope" [size]="18" />
+              Text
+            </label>
+            <label tedi-checkbox-card variant="secondary">
+              <input tedi-checkbox type="checkbox" />
+              <tedi-icon name="home" [size]="18" />
+              Text
+            </label>
+          </tedi-checkbox-card-group>
+        </tedi-col>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Primary with description</p>
+          <tedi-checkbox-card-group>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" checked />
+              <tedi-icon name="apartment" [size]="18" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" />
+              <tedi-icon name="stethoscope" [size]="18" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" />
+              <tedi-icon name="home" [size]="18" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+          </tedi-checkbox-card-group>
+        </tedi-col>
+        <tedi-col class="flex flex-column gap-2">
+          <p tedi-text>Secondary with description</p>
+          <tedi-checkbox-card-group>
+            <label tedi-checkbox-card variant="secondary">
+              <input tedi-checkbox type="checkbox" checked />
+              <tedi-icon name="apartment" [size]="18" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-checkbox-card variant="secondary">
+              <input tedi-checkbox type="checkbox" />
+              <tedi-icon name="stethoscope" [size]="18" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+            <label tedi-checkbox-card variant="secondary">
+              <input tedi-checkbox type="checkbox" />
+              <tedi-icon name="home" [size]="18" />
+              Text
+              <tedi-feedback-text text="Description" />
+            </label>
+          </tedi-checkbox-card-group>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * All visual states of the checkbox card component for both primary and secondary variants.
+ */
+export const CheckboxCardStates: StoryObj<CheckboxComponent> = {
+  parameters: {
+    pseudo: {
+      hover: ["#PrimaryHover", "#SecondaryHover"],
+      active: ["#PrimaryActive", "#SecondaryActive"],
+      focusVisible: ["#PrimaryFocus", "#SecondaryFocus"],
+    },
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-row [cols]="3" [gapY]="3">
+        <tedi-col></tedi-col>
+        <tedi-col><strong>Primary</strong></tedi-col>
+        <tedi-col><strong>Secondary</strong></tedi-col>
+
+        <tedi-col><strong>Default</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" />
+            Text
+          </label>
+        </tedi-col>
+
+        <tedi-col><strong>Hover</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" id="PrimaryHover" />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" id="SecondaryHover" />
+            Text
+          </label>
+        </tedi-col>
+
+        <tedi-col><strong>Selected</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" checked />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" checked />
+            Text
+          </label>
+        </tedi-col>
+
+        <tedi-col><strong>Active</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" checked id="PrimaryActive" />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" checked id="SecondaryActive" />
+            Text
+          </label>
+        </tedi-col>
+
+        <tedi-col><strong>Focus</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" id="PrimaryFocus" />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" id="SecondaryFocus" />
+            Text
+          </label>
+        </tedi-col>
+
+        <tedi-col><strong>Disabled</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" disabled />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" disabled />
+            Text
+          </label>
+        </tedi-col>
+
+        <tedi-col><strong>Disabled selected</strong></tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="primary">
+            <input tedi-checkbox type="checkbox" checked disabled />
+            Text
+          </label>
+        </tedi-col>
+        <tedi-col>
+          <label tedi-checkbox-card variant="secondary">
+            <input tedi-checkbox type="checkbox" checked disabled />
+            Text
+          </label>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * The group supports two form-binding modes:
+ *
+ * - **Group-level**: bind `[formControl]` to `<tedi-checkbox-group>`. The group
+ *   coordinates `checked` and `disabled` across children. Emits the selected
+ *   values as `string[]` on a single control.
+ * - **Individual-level (Angular native)**: bind `[formControl]` to each
+ *   `<input type="checkbox">` using Angular's built-in
+ *   `CheckboxControlValueAccessor`. Each control holds a boolean.
+ */
+export const WithReactiveForms: StoryObj<CheckboxComponent> = {
+  render: () => {
+    const tagsControl = new FormControl<string[]>(["urgent"]);
+    const featuresControl = new FormControl<string[]>([
+      "analytics",
+      "export",
+    ]);
+    const readControl = new FormControl<boolean>(true);
+    const writeControl = new FormControl<boolean>(false);
+    const adminControl = new FormControl<boolean>(false);
+
+    return {
+      props: {
+        tagsControl,
+        featuresControl,
+        readControl,
+        writeControl,
+        adminControl,
+      },
+      template: `
+        <tedi-row cols="1" [gapY]="3">
+          <tedi-col>
+            <tedi-checkbox-group label="Tags" [formControl]="tagsControl">
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" value="urgent" />
+                Urgent
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" value="review" />
+                Review
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" value="draft" disabled />
+                Draft
+              </label>
+            </tedi-checkbox-group>
+          </tedi-col>
+
+          <tedi-col>
+            <tedi-checkbox-group label="Features" [formControl]="featuresControl">
+              <tedi-checkbox-card-group>
+                <label tedi-checkbox-card variant="primary">
+                  <input tedi-checkbox type="checkbox" value="analytics" />
+                  Analytics
+                </label>
+                <label tedi-checkbox-card variant="primary">
+                  <input tedi-checkbox type="checkbox" value="export" />
+                  Export
+                </label>
+                <label tedi-checkbox-card variant="primary">
+                  <input tedi-checkbox type="checkbox" value="audit-log" />
+                  Audit log
+                </label>
+              </tedi-checkbox-card-group>
+            </tedi-checkbox-group>
+          </tedi-col>
+
+          <tedi-col>
+            <tedi-checkbox-group label="Permissions">
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" [formControl]="readControl" />
+                Read
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" [formControl]="writeControl" />
+                Write
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" [formControl]="adminControl" />
+                Admin
+              </label>
+            </tedi-checkbox-group>
+          </tedi-col>
+
+          <tedi-col>
+            <tedi-alert type="info" [showClose]="false">
+              <pre tedi-text modifiers="small">{{ {
+  tags: {
+    value: tagsControl.value,
+    touched: tagsControl.touched,
+    dirty: tagsControl.dirty
+  },
+  features: {
+    value: featuresControl.value,
+    touched: featuresControl.touched,
+    dirty: featuresControl.dirty
+  },
+  permissions: {
+    read: readControl.value,
+    write: writeControl.value,
+    admin: adminControl.value
+  }
+} | json }}</pre>
+            </tedi-alert>
+          </tedi-col>
+        </tedi-row>
+      `,
+    };
+  },
 };

@@ -15,24 +15,24 @@
 
     width: var(--form-field-height);
     height: var(--form-field-height);
-    border: var(--borders-01) solid var(--form-input-border-default);
+    border: var(--tedi-borders-01) solid var(--form-input-border-default);
 
     &:disabled {
       background-color: var(--form-input-background-disabled);
-      border: var(--borders-01) solid var(--form-input-border-disabled);
+      border: var(--tedi-borders-01) solid var(--form-input-border-disabled);
       opacity: 0.5;
     }
 
     &--decrement {
       z-index: 2;
-      margin-right: calc(-1 * var(--borders-01));
+      margin-right: calc(-1 * var(--tedi-borders-01));
       border-radius: 0;
       border-top-left-radius: var(--button-radius-sm);
       border-bottom-left-radius: var(--button-radius-sm);
     }
 
     &--increment {
-      margin-left: calc(-1 * var(--borders-01));
+      margin-left: calc(-1 * var(--tedi-borders-01));
       border-radius: 0;
       border-top-right-radius: var(--button-radius-sm);
       border-bottom-right-radius: var(--button-radius-sm);
@@ -95,12 +95,13 @@
   padding-right: var(--form-field-padding-y-3-default);
   padding-left: var(--form-field-padding-y-3-default);
   background-color: var(--form-input-background-default);
-  border: var(--borders-01) solid var(--form-input-border-default);
+  border: var(--tedi-borders-01) solid var(--form-input-border-default);
 
   &:focus-within {
     z-index: 2;
-    outline: calc(2 * var(--borders-01)) solid var(--form-input-border-active);
-    outline-offset: var(--borders-01);
+    outline: calc(2 * var(--tedi-borders-01)) solid
+      var(--form-input-border-active);
+    outline-offset: var(--tedi-borders-01);
     border-color: var(--form-input-border-active);
     border-radius: var(--button-radius-sm);
   }

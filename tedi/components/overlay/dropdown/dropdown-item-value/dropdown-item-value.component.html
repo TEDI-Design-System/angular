@@ -1,0 +1,25 @@
+@if (type() === 'checkbox') {
+  <input
+    type="checkbox"
+    tedi-checkbox
+    class="tedi-dropdown-item-value__checkbox"
+    [checked]="selected()"
+    [indeterminate]="indeterminate()"
+    [disabled]="disabled()"
+    (click)="$event.stopPropagation()"
+  />
+} @else if (type() === 'radio') {
+  <input
+    type="radio"
+    class="tedi-dropdown-item-value__radio"
+    [checked]="selected()"
+    [disabled]="disabled()"
+    (click)="$event.stopPropagation()"
+  />
+}
+<ng-content select="tedi-icon, [tediIcon]" />
+<div class="tedi-dropdown-item-value__content">
+  <ng-content select="tedi-dropdown-item-value-label" />
+  <ng-content select="tedi-dropdown-item-value-meta" />
+</div>
+<ng-content />

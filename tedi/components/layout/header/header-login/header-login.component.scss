@@ -20,8 +20,8 @@ tedi-header-login {
       border-radius: 0;
 
       &:focus-visible {
-        outline: var(--borders-02) solid var(--tedi-primary-500);
-        outline-offset: calc(-1 * var(--borders-02));
+        outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+        outline-offset: calc(-1 * var(--tedi-borders-02));
       }
 
       tedi-icon {

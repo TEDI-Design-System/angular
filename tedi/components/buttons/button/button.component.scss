@@ -79,11 +79,13 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
   &:where(.tedi-button--small) {
     --_btn-padding-y: var(--button-sm-neutral-padding-y);
     --_btn-padding-x: var(--button-sm-neutral-padding-x);
+    --_btn-padding: calc(var(--_btn-padding-y) - 1px) var(--_btn-padding-x);
   }
 
   &:where(.tedi-button--default) {
     --_btn-padding-y: var(--button-md-neutral-padding-y);
     --_btn-padding-x: var(--button-md-neutral-padding-x);
+    --_btn-padding: calc(var(--_btn-padding-y) - 1px) var(--_btn-padding-x);
   }
 }
 
@@ -101,7 +103,7 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     text-decoration: none;
     cursor: pointer;
     background: var(--_btn-bg);
-    border: var(--borders-01) solid var(--_btn-border);
+    border: var(--tedi-borders-01) solid var(--_btn-border);
     border-radius: var(--button-radius-default);
     transition: 150ms ease;
     transition-property: background-color, border-color;
@@ -172,7 +174,9 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 
 @mixin button-size($size) {
   & {
-    font-size: var(--button-text-size-#{$size});
+    $font-size: if($size == "md", "default", $size);
+
+    font-size: var(--button-text-size-#{$font-size});
 
     @include button-size-vars(#{$size});
   }

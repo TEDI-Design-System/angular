@@ -46,7 +46,7 @@
     padding: var(--_sidenav-item-padding-y) var(--_sidenav-item-padding-right)
       var(--_sidenav-item-padding-y) var(--_sidenav-item-padding-left);
     font-size: inherit;
-    color: var(--navigation-vertical-item-text);
+    color: var(--navigation-vertical-item-text-default);
     text-align: start;
     text-decoration: none;
     cursor: pointer;
@@ -137,7 +137,7 @@
   &__link {
     padding: var(--_sidenav-item-padding-y) var(--_sidenav-item-padding-right)
       var(--_sidenav-item-padding-y) var(--_sidenav-item-padding-left);
-    color: var(--navigation-vertical-item-text);
+    color: var(--navigation-vertical-item-text-default);
     text-decoration: none;
 
     &:hover {

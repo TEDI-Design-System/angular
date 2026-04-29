@@ -9,14 +9,8 @@ import {
   signal,
   output,
   ElementRef,
-  Self,
-  Optional,
 } from "@angular/core";
-import {
-  ControlValueAccessor,
-  NG_VALUE_ACCESSOR,
-  NgControl,
-} from "@angular/forms";
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import {
   FormFieldControl,
   TEDI_FORM_FIELD_CONTROL,
@@ -65,22 +59,15 @@ export class TextFieldComponent
    */
   readonly clear = output<void>();
 
-  constructor(
-    private el: ElementRef<HTMLInputElement>,
-    @Optional() @Self() private ngControl: NgControl | null,
-  ) {
-    if (this.ngControl) {
-      this.ngControl.valueAccessor = this;
-    }
-  }
+  constructor(private el: ElementRef<HTMLInputElement>) {}
 
-  readonly disabled = computed(
-    () => this.el.nativeElement.disabled || this.formDisabled(),
-  );
-  readonly invalid = computed(() => {
-    const control = this.ngControl?.control;
-    return !!(control?.invalid && (control?.touched || control?.dirty));
-  });
+  readonly disabled = computed(() => this.formDisabled());
+
+  readonly invalid = signal(false);
+
+  setInvalidState(isInvalid: boolean) {
+    this.invalid.set(isInvalid);
+  }
 
   private formDisabled = signal(false);
   private onChange: (value: string) => void = () => {};

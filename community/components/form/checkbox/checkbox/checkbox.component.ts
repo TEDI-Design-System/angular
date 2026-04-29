@@ -23,6 +23,9 @@ import { generateUUID } from "@tedi-design-system/angular/tedi";
 
 export type CheckboxSize = "default" | "large";
 
+/**
+ * @deprecated Use Checkbox from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   standalone: true,
   selector: "tedi-checkbox",
@@ -84,8 +87,8 @@ export class CheckboxComponent implements ControlValueAccessor, OnInit {
     optional: true,
   });
 
-  private _onChange: (val: boolean) => void = () => {};
-  _onTouched: () => void = () => {};
+  private _onChange: (val: boolean) => void = () => { };
+  _onTouched: () => void = () => { };
 
   feedbackTextId = computed(() => {
     if (this.feedbackText()) {

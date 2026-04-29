@@ -9,6 +9,10 @@ import { NG_VALUE_ACCESSOR } from "@angular/forms";
 import { ChoiceGroupDirective } from "../../choicegroup/choicegroup.directive";
 import { LabelComponent, FeedbackTextComponent } from "@tedi-design-system/angular/tedi";
 import { RadioGroupComponent } from "../radio-group/radio-group.component";
+
+/**
+ * @deprecated Use Radio with RadioCard label from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   standalone: true,
   selector: "tedi-radio-card-group",
