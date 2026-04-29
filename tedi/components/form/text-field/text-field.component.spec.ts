@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TextFieldComponent } from "./text-field.component";
-import { ReactiveFormsModule } from "@angular/forms";
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { Component } from "@angular/core";
 import { By } from "@angular/platform-browser";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
@@ -11,6 +11,15 @@ import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.toke
   template: `<input tedi-text-field />`,
 })
 class TestHostComponent {}
+
+@Component({
+  standalone: true,
+  imports: [TextFieldComponent, ReactiveFormsModule],
+  template: `<input tedi-text-field [formControl]="control" />`,
+})
+class FormControlHostComponent {
+  control = new FormControl<string>("", { nonNullable: true });
+}
 
 describe("TextFieldComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
@@ -67,27 +76,6 @@ describe("TextFieldComponent", () => {
     expect(onTouchedSpy).toHaveBeenCalled();
   });
 
-  it("setDisabledState() should disable control", () => {
-    textField.setDisabledState(true);
-    fixture.detectChanges();
-
-    expect(textField.disabled()).toBe(true);
-    expect(input.disabled).toBe(true);
-  });
-
-  it("setDisabledState() should re-enable control after being disabled", () => {
-    textField.setDisabledState(true);
-    fixture.detectChanges();
-    expect(textField.disabled()).toBe(true);
-    expect(input.disabled).toBe(true);
-
-    textField.setDisabledState(false);
-    fixture.detectChanges();
-
-    expect(textField.disabled()).toBe(false);
-    expect(input.disabled).toBe(false);
-  });
-
   it("clearField() should clear value", () => {
     textField.writeValue("test");
 
@@ -95,15 +83,6 @@ describe("TextFieldComponent", () => {
 
     expect(textField.value()).toBe("");
     expect(input.value).toBe("");
-  });
-
-  it("clearField() should not clear when disabled", () => {
-    textField.writeValue("test");
-    textField.setDisabledState(true);
-
-    textField.clearField();
-
-    expect(textField.value()).toBe("test");
   });
 
   it("should call onChange when input changes", () => {
@@ -137,5 +116,55 @@ describe("TextFieldComponent", () => {
 
     component.setInvalidState(false);
     expect(component.invalid()).toBe(false);
+  });
+
+  describe("when bound to a reactive FormControl", () => {
+    let fcFixture: ComponentFixture<FormControlHostComponent>;
+    let fcTextField: TextFieldComponent;
+    let fcInput: HTMLInputElement;
+    let control: FormControl<string>;
+
+    beforeEach(() => {
+      fcFixture = TestBed.createComponent(FormControlHostComponent);
+      fcFixture.detectChanges();
+
+      const debug = fcFixture.debugElement.query(
+        By.directive(TextFieldComponent),
+      );
+      fcTextField = debug.componentInstance;
+      fcInput = debug.nativeElement;
+      control = fcFixture.componentInstance.control;
+    });
+
+    it("should disable when control.disable() is called", () => {
+      control.disable();
+      fcFixture.detectChanges();
+
+      expect(fcTextField.disabled()).toBe(true);
+      expect(fcInput.disabled).toBe(true);
+    });
+
+    it("should re-enable after control.disable() then control.enable()", () => {
+      control.disable();
+      fcFixture.detectChanges();
+      expect(fcTextField.disabled()).toBe(true);
+      expect(fcInput.disabled).toBe(true);
+
+      control.enable();
+      fcFixture.detectChanges();
+      expect(fcTextField.disabled()).toBe(false);
+      expect(fcInput.disabled).toBe(false);
+    });
+
+    it("clearField() should not clear when control is disabled", () => {
+      control.setValue("test");
+      control.disable();
+      fcFixture.detectChanges();
+
+      fcTextField.clearField();
+
+      expect(fcTextField.value()).toBe("test");
+      expect(control.value).toBe("test");
+    });
   });
 });
