@@ -1,3 +1,10 @@
+# [6.3.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.14...angular-6.3.0-rc.15) (2026-04-29)
+
+
+### Bug Fixes
+
+* **text-field:** fix disabled state tracking [#421](https://github.com/TEDI-Design-System/angular/issues/421) ([#422](https://github.com/TEDI-Design-System/angular/issues/422)) ([39db9ca](https://github.com/TEDI-Design-System/angular/commit/39db9ca4af1daad885deabb1ad3f052efc3fd397))
+
 # [6.3.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.13...angular-6.3.0-rc.14) (2026-04-28)
 
 
