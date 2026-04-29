@@ -75,6 +75,19 @@ describe("TextFieldComponent", () => {
     expect(input.disabled).toBe(true);
   });
 
+  it("setDisabledState() should re-enable control after being disabled", () => {
+    textField.setDisabledState(true);
+    fixture.detectChanges();
+    expect(textField.disabled()).toBe(true);
+    expect(input.disabled).toBe(true);
+
+    textField.setDisabledState(false);
+    fixture.detectChanges();
+
+    expect(textField.disabled()).toBe(false);
+    expect(input.disabled).toBe(false);
+  });
+
   it("clearField() should clear value", () => {
     textField.writeValue("test");
 
