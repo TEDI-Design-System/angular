@@ -93,7 +93,7 @@
     "storybook": "^8.4.7",
     "storybook-addon-angular-router": "^1.10.1",
     "storybook-addon-pseudo-states": "^4.0.3",
-    "stylelint": "^17.0.0",
+    "stylelint": "^17.9.1",
     "stylelint-config-prettier-scss": "^1.0.0",
     "stylelint-config-recess-order": "^7.4.0",
     "stylelint-config-standard-scss": "^17.0.0",
