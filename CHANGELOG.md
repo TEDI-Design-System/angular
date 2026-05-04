@@ -1,3 +1,10 @@
+## [6.3.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0...angular-6.3.1) (2026-05-04)
+
+
+### Bug Fixes
+
+* **select:** clear placeholder on value select [#432](https://github.com/TEDI-Design-System/angular/issues/432) ([#433](https://github.com/TEDI-Design-System/angular/issues/433)) ([f87ef36](https://github.com/TEDI-Design-System/angular/commit/f87ef36eaf412055ccbcdbefee047d59813a8347))
+
 # [6.3.0](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.1...angular-6.3.0) (2026-04-29)
 
 
