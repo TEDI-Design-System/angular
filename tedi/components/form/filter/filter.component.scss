@@ -2,9 +2,8 @@
   --_filter-bg: transparent;
   --_filter-text: inherit;
   --_filter-border: transparent;
-  --_filter-border-width: var(--borders-01);
+  --_filter-border-width: var(--tedi-borders-01);
   --_filter-padding-x: var(--filter-default-padding-x);
-  --_filter-inner-spacing: var(--filter-default-inner-spacing);
   --_filter-radius: var(--form-checkbox-radio-card-radius);
 
   display: inline-flex;
@@ -39,19 +38,28 @@
   }
 
   &__text {
-    padding: calc(var(--filter-default-padding-y) - var(--_filter-border-width)) var(--_filter-inner-spacing);
+    padding: calc(var(--filter-default-padding-y) - var(--_filter-border-width)) var(--filter-default-inner-spacing);
     white-space: nowrap;
   }
 
   &__icon {
-    padding: 0 var(--_filter-inner-spacing);
+    padding: 0 var(--filter-default-inner-spacing-sm);
   }
 
-  &__prepend,
+  &__prepend {
+    display: flex;
+    align-items: center;
+    padding: 0 var(--filter-default-inner-spacing-sm);
+
+    &:empty {
+      display: none;
+    }
+  }
+
   &__append {
     display: flex;
     align-items: center;
-    padding: 0 var(--_filter-inner-spacing);
+    padding: 0 var(--layout-grid-gutters-02);
 
     &:empty {
       display: none;
@@ -108,7 +116,6 @@
 
   &--large {
     --_filter-padding-x: var(--filter-lg-padding-x);
-    --_filter-inner-spacing: var(--filter-lg-inner-spacing);
 
     .tedi-filter__text {
       padding-top: calc(var(--filter-lg-padding-y) - var(--_filter-border-width));
@@ -161,8 +168,8 @@
     }
 
     &:focus-visible {
-      outline: var(--borders-02) solid var(--form-input-border-active);
-      outline-offset: calc(-1 * var(--borders-02));
+      outline: var(--tedi-borders-02) solid var(--form-input-border-active);
+      outline-offset: calc(-1 * var(--tedi-borders-02));
     }
 
     &--disabled {
@@ -185,12 +192,8 @@
     }
 
     &--focused {
-      outline: var(--borders-02) solid var(--form-input-border-active);
-      outline-offset: calc(-1 * var(--borders-02));
-    }
-
-    &--select-all {
-      font-weight: var(--body-semi-bold-weight);
+      outline: var(--tedi-borders-02) solid var(--form-input-border-active);
+      outline-offset: calc(-1 * var(--tedi-borders-02));
     }
   }
 
@@ -214,8 +217,8 @@
     }
 
     &:focus-visible {
-      outline: var(--borders-02) solid var(--tedi-primary-500);
-      outline-offset: calc(-1 * var(--borders-02));
+      outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+      outline-offset: calc(-1 * var(--tedi-borders-02));
     }
   }
 }

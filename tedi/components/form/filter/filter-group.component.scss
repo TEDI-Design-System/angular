@@ -6,11 +6,11 @@
   }
 
   .tedi-filter--secondary+.tedi-filter--secondary {
-    margin-left: calc(-1 * var(--borders-01));
+    margin-left: calc(-1 * var(--tedi-borders-01));
   }
 
-  .tedi-filter--primary:not(:last-child, .tedi-filter--selected) .tedi-filter__button {
-    border-right: var(--borders-01) solid var(--filter-secondary-default-border);
+  .tedi-filter--primary:not(:last-child) .tedi-filter__button {
+    border-right: var(--tedi-borders-01) solid var(--filter-secondary-default-border);
 
     &:hover {
       border-right-color: transparent;

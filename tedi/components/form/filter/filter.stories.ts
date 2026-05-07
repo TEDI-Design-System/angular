@@ -910,37 +910,24 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
       },
       template: `
         <tedi-row cols="1" [gapY]="3">
-          <tedi-col class="flex gap-2">
-            <tedi-filter
-              text="Vastuvõtud"
-              [formControl]="singleControl"
-            />
-            <tedi-filter
-              text="Teenused"
-              [multiselect]="true"
-              [options]="options"
-              [formControl]="multiControl"
-              [searchable]="true"
-              [showSelectAll]="true"
-              [showClear]="true"
-              appendTo="body"
-            />
-          </tedi-col>
-          <tedi-col>
-            <tedi-alert type="info" [showClose]="false">
-              <pre tedi-text modifiers="small">{{ {
-  single: {
-    value: singleControl.value,
-    touched: singleControl.touched,
-    dirty: singleControl.dirty
-  },
-  multi: {
-    value: multiControl.value,
-    touched: multiControl.touched,
-    dirty: multiControl.dirty
-  }
-} | json }}</pre>
-            </tedi-alert>
+          <tedi-col class="flex flex-column gap-2">
+            <p tedi-text>Standalone single &amp; multi-select</p>
+            <div class="flex gap-2">
+              <tedi-filter
+                text="Vastuvõtud"
+                [formControl]="singleControl"
+              />
+              <tedi-filter
+                text="Teenused"
+                [multiselect]="true"
+                [options]="options"
+                [formControl]="multiControl"
+                [searchable]="true"
+                [showSelectAll]="true"
+                [showClear]="true"
+                appendTo="body"
+              />
+            </div>
           </tedi-col>
 
           <tedi-col class="flex flex-column gap-2">
@@ -962,6 +949,16 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
           <tedi-col>
             <tedi-alert type="info" [showClose]="false">
               <pre tedi-text modifiers="small">{{ {
+  single: {
+    value: singleControl.value,
+    touched: singleControl.touched,
+    dirty: singleControl.dirty
+  },
+  multi: {
+    value: multiControl.value,
+    touched: multiControl.touched,
+    dirty: multiControl.dirty
+  },
   groupSingle: {
     value: groupSingleControl.value,
     touched: groupSingleControl.touched,
