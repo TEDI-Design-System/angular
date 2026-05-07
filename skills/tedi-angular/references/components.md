@@ -78,30 +78,70 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 ### AccordionItem
 **Selector:** `tedi-accordion-item`
 **Inputs:**
-- `title: string = ""`
-- `titleLayout: "hug" | "fill" = "hug"`
-- `headerClickable: boolean = true` — whether clicking header toggles expand
-- `showSeparateTitle: boolean = true`
-- `openLabel: string = "open"` — label for expand action
-- `closeLabel: string = "close"` — label for collapse action
-- `showExpandLabel: boolean = true` — show open/close label text
-- `showDefaultExpandAction: boolean = true` — show default expand/collapse button
-- `expandActionPosition: "start" | "end" = "end"`
-- `defaultExpanded: boolean = false`
-- `description: string`
-- `descriptionPosition: "start" | "end" | "both" = "start"`
-- `showIconCard: boolean = false`
-- `selected: boolean = false`
-- `headerClass: string | null`
-- `bodyClass: string | null`
+- `defaultExpanded: boolean = false` — initial expanded state
+- `showIconCard: boolean = false` — enable the icon-card grid column
+- `selected: boolean = false` — visual selected state
 **Model:** `expanded: boolean`
-**Slots:** default, `[tedi-accordion-icon-card]`, `[tedi-accordion-start-action]`, `[tedi-accordion-end-action]`
+**Slots:** `<tedi-accordion-item-header>`, `<tedi-accordion-item-content>`, `[tedi-accordion-icon-card]` (direct child of the item, occupies its own grid column)
+
+### AccordionItemHeader
+**Selector:** `tedi-accordion-item-header`
+**Inputs:**
+- `headerClickable: boolean = true` — when true, the whole header is the toggle button. Set to false when projecting interactive children (action buttons, checkboxes, links) so the header becomes a div with a separate small toggle button.
+- `titleLayout: "hug" | "fill" = "hug"` — `fill` makes the title flex-grow, pushing trailing siblings to the right edge of the start group
+- `openLabel: string = "open"` — label shown when collapsed (passed through `tediTranslate`)
+- `closeLabel: string = "close"` — label shown when expanded (passed through `tediTranslate`)
+- `showExpandLabel: boolean = true` — when false, the toggle is icon-only and uses `aria-label` for its accessible name
+- `showDefaultExpandAction: boolean = true` — when false, no default toggle button is rendered (consumer provides their own via slots and calls `item.toggle()`)
+- `expandActionPosition: "start" | "end" = "end"`
+- `headerClass: string | null` — extra CSS class on the header element
+**Slots:**
+- `[tedi-accordion-title]` — the accordion title content (rendered in the title position)
+- `[tedi-accordion-start-action]` — actions at the start of the header (e.g., before the title group)
+- `[tedi-accordion-before-title]` — element rendered immediately before the title (e.g., a small icon)
+- `[tedi-accordion-after-title]` — element rendered immediately after the title, inside the start group
+- `[tedi-accordion-start-description]` — description below the title (triggers a column-flex layout for title + description)
+- `[tedi-accordion-end-description]` — description rendered at the right side of the header
+- `[tedi-accordion-end-action]` — actions at the end of the header (e.g., custom toggle button or status indicator)
+
+### AccordionItemContent
+**Selector:** `tedi-accordion-item-content`
+**Inputs:**
+- `contentClass: string | null` — extra CSS class on the content element
+**Slots:** default (the collapsible content)
+
+The content panel is automatically given `role="region"`, `aria-labelledby` pointing to the header, and `inert` + `aria-hidden` when collapsed.
 
 ```html
 <tedi-accordion>
-  <tedi-accordion-item title="Section 1">Content 1</tedi-accordion-item>
-  <tedi-accordion-item title="Section 2">Content 2</tedi-accordion-item>
+  <tedi-accordion-item>
+    <tedi-accordion-item-header>
+      <span tedi-accordion-title>Section 1</span>
+    </tedi-accordion-item-header>
+    <tedi-accordion-item-content>Content 1</tedi-accordion-item-content>
+  </tedi-accordion-item>
+  <tedi-accordion-item>
+    <tedi-accordion-item-header>
+      <span tedi-accordion-title>Section 2</span>
+      <tedi-status-badge tedi-accordion-end-description color="success" text="Approved" />
+    </tedi-accordion-item-header>
+    <tedi-accordion-item-content>Content 2</tedi-accordion-item-content>
+  </tedi-accordion-item>
 </tedi-accordion>
+```
+
+For non-clickable headers with custom actions (the toggle stays visible at the start, the action button sits at the end):
+
+```html
+<tedi-accordion-item [selected]="isSelected">
+  <tedi-accordion-item-header [headerClickable]="false" expandActionPosition="start">
+    <span tedi-accordion-title>Title</span>
+    <button tedi-button tedi-accordion-end-action (click)="$event.stopPropagation(); toggleSelected()">
+      Select
+    </button>
+  </tedi-accordion-item-header>
+  <tedi-accordion-item-content>Body</tedi-accordion-item-content>
+</tedi-accordion-item>
 ```
 
 ## Content
