@@ -5,10 +5,10 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 @mixin button-variant-color-vars($variant, $icon-only: false, $affix: main) {
   & {
     @if $icon-only {
-      --_btn-bg: var(--button-#{$affix}-#{$variant}-icon-only-background-default);
-    }
-
-    @else {
+      --_btn-bg: var(
+        --button-#{$affix}-#{$variant}-icon-only-background-default
+      );
+    } @else {
       --_btn-bg: var(--button-#{$affix}-#{$variant}-background-default);
     }
 
@@ -23,25 +23,33 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
   }
 }
 
-@mixin button-state-color-vars($variant,
+@mixin button-state-color-vars(
+  $variant,
   $state,
   $icon-only: false,
-  $affix: main) {
+  $affix: main
+) {
   & {
     @if $icon-only {
-      --_btn-#{$state}-bg: var(--button-#{$affix}-#{$variant}-icon-only-background-#{$state},
-        var(--button-#{$affix}-#{$variant}-icon-only-background-default));
+      --_btn-#{$state}-bg: var(
+        --button-#{$affix}-#{$variant}-icon-only-background-#{$state},
+        var(--button-#{$affix}-#{$variant}-icon-only-background-default)
+      );
+    } @else {
+      --_btn-#{$state}-bg: var(
+        --button-#{$affix}-#{$variant}-background-#{$state},
+        var(--button-#{$affix}-#{$variant}-background-default)
+      );
     }
 
-    @else {
-      --_btn-#{$state}-bg: var(--button-#{$affix}-#{$variant}-background-#{$state},
-        var(--button-#{$affix}-#{$variant}-background-default));
-    }
-
-    --_btn-#{$state}-border: var(--button-#{$affix}-#{$variant}-border-#{$state},
-      var(--button-#{$affix}-#{$variant}-border-default));
-    --_btn-#{$state}-text: var(--button-#{$affix}-#{$variant}-text-#{$state},
-      var(--button-#{$affix}-#{$variant}-text-default));
+    --_btn-#{$state}-border: var(
+      --button-#{$affix}-#{$variant}-border-#{$state},
+      var(--button-#{$affix}-#{$variant}-border-default)
+    );
+    --_btn-#{$state}-text: var(
+      --button-#{$affix}-#{$variant}-text-#{$state},
+      var(--button-#{$affix}-#{$variant}-text-default)
+    );
   }
 }
 
@@ -52,9 +60,7 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     @if list.index($neutral-variants, $variant) {
       --_btn-disabled-bg: var(--button-main-disabled-neutral-background);
       --_btn-disabled-border: var(--button-main-disabled-neutral-border);
-    }
-
-    @else {
+    } @else {
       --_btn-disabled-bg: var(--button-main-disabled-general-background);
       --_btn-disabled-border: var(--button-main-disabled-general-border);
     }
@@ -62,7 +68,8 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 }
 
 @mixin button-size-vars($size) {
-  --_btn-padding: calc(var(--_btn-padding-y) - 1px) calc(var(--_btn-padding-x) - 1px);
+  --_btn-padding: calc(var(--_btn-padding-y) - 1px)
+    calc(var(--_btn-padding-x) - 1px);
   --_btn-inner-spacing: var(--button-#{$size}-inner-spacing);
   --_btn-padding-y: var(--button-#{$size}-padding-y);
   --_btn-padding-x: var(--button-#{$size}-padding-x);
@@ -96,7 +103,7 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     text-decoration: none;
     cursor: pointer;
     background: var(--_btn-bg);
-    border: var(--borders-01) solid var(--_btn-border);
+    border: var(--tedi-borders-01) solid var(--_btn-border);
     border-radius: var(--button-radius-default);
     transition: 150ms ease;
     transition-property: background-color, border-color;
@@ -108,20 +115,26 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     }
 
     &--pl {
-
-      &:not(.tedi-button--neutral,
+      &:not(
+        .tedi-button--neutral,
         .tedi-button--danger-neutral,
-        .tedi-button--neutral-inverted) {
-        padding-left: calc(var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px);
+        .tedi-button--neutral-inverted
+      ) {
+        padding-left: calc(
+          var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px
+        );
       }
     }
 
     &--pr {
-
-      &:not(.tedi-button--neutral,
+      &:not(
+        .tedi-button--neutral,
         .tedi-button--danger-neutral,
-        .tedi-button--neutral-inverted) {
-        padding-right: calc(var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px);
+        .tedi-button--neutral-inverted
+      ) {
+        padding-right: calc(
+          var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px
+        );
       }
     }
 
@@ -161,7 +174,7 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 
 @mixin button-size($size) {
   & {
-    $font-size: if($size =="md", "default", $size);
+    $font-size: if($size == "md", "default", $size);
 
     font-size: var(--button-text-size-#{$font-size});
 

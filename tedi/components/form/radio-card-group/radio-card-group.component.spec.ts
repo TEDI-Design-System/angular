@@ -8,7 +8,7 @@ import { RadioComponent } from "../radio/radio.component";
   standalone: true,
   imports: [RadioCardGroupComponent, RadioCardComponent, RadioComponent],
   template: `
-    <tedi-radio-card-group>
+    <tedi-radio-card-group [grouped]="grouped">
       <label tedi-radio-card variant="primary">
         <input tedi-radio type="radio" name="test" />
         Option 1
@@ -20,7 +20,9 @@ import { RadioComponent } from "../radio/radio.component";
     </tedi-radio-card-group>
   `,
 })
-class TestHostComponent {}
+class TestHostComponent {
+  grouped = false;
+}
 
 describe("RadioCardGroupComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
@@ -46,5 +48,40 @@ describe("RadioCardGroupComponent", () => {
   it("should project card content", () => {
     const cards = groupElement.querySelectorAll("label[tedi-radio-card]");
     expect(cards.length).toBe(2);
+  });
+
+  it("should not have grouped class by default", () => {
+    expect(groupElement.classList).not.toContain(
+      "tedi-radio-card-group--grouped"
+    );
+  });
+
+  it("should apply grouped class when grouped input is true", () => {
+    fixture.componentInstance.grouped = true;
+    fixture.detectChanges();
+    expect(groupElement.classList).toContain(
+      "tedi-radio-card-group--grouped"
+    );
+  });
+
+  it("should propagate grouped state to child cards", () => {
+    fixture.componentInstance.grouped = true;
+    fixture.detectChanges();
+    const cards = Array.from(
+      groupElement.querySelectorAll("label[tedi-radio-card]")
+    );
+    expect(cards.length).toBe(2);
+    for (const card of cards) {
+      expect(card.classList).toContain("tedi-radio-card--grouped");
+    }
+  });
+
+  it("should not apply grouped class to children when group is not grouped", () => {
+    const cards = Array.from(
+      groupElement.querySelectorAll("label[tedi-radio-card]")
+    );
+    for (const card of cards) {
+      expect(card.classList).not.toContain("tedi-radio-card--grouped");
+    }
   });
 });

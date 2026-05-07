@@ -8,7 +8,12 @@ label[tedi-checkbox-card] {
   align-items: flex-start;
   justify-content: center;
   min-height: var(--form-field-height);
-  padding: calc(var(--form-checkbox-radio-card-checkbox-padding-y) - var(--borders-01)) var(--form-checkbox-radio-card-checkbox-padding-x);
+  padding: calc(
+      var(--form-checkbox-radio-card-checkbox-padding-y) - var(
+          --tedi-borders-01
+        )
+    )
+    var(--form-checkbox-radio-card-checkbox-padding-x);
   font-family: var(--family-default);
   font-size: var(--body-regular-size);
   line-height: var(--body-regular-line-height);
@@ -34,8 +39,11 @@ label[tedi-checkbox-card] {
     align-items: center;
   }
 
-  >.tedi-feedback-text {
-    padding-left: calc(var(--form-checkbox-radio-size-responsive) + var(--form-checkbox-radio-card-inner-spacing));
+  > .tedi-feedback-text {
+    padding-left: calc(
+      var(--form-checkbox-radio-size-responsive) +
+        var(--form-checkbox-radio-card-inner-spacing)
+    );
     color: inherit;
   }
 
@@ -52,7 +60,7 @@ label[tedi-checkbox-card] {
       clip-path: inset(50%);
     }
 
-    >.tedi-feedback-text {
+    > .tedi-feedback-text {
       padding-left: 0;
     }
   }
@@ -64,8 +72,8 @@ label[tedi-checkbox-card] {
   }
 
   &:has(input:focus-visible) {
-    outline: 2px solid var(--form-input-border-active);
-    outline-offset: 1px;
+    outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+    outline-offset: var(--tedi-borders-01);
 
     input[tedi-checkbox]:focus-visible {
       outline: none;
@@ -79,16 +87,22 @@ label[tedi-checkbox-card] {
   &.tedi-checkbox-card--primary {
     --_card-bg: var(--form-checkbox-radio-card-primary-default-background);
     --_card-text: var(--form-checkbox-radio-card-primary-default-text);
-    --_card-border: var(--form-checkbox-radio-card-primary-default-border-separate);
+    --_card-border: var(
+      --form-checkbox-radio-card-primary-default-border-separate
+    );
 
     &:has(input:checked) {
       --_card-bg: var(--form-checkbox-radio-card-primary-selected-background);
       --_card-text: var(--form-checkbox-radio-card-primary-selected-text);
-      --_card-border: var(--form-checkbox-radio-card-primary-selected-border-separate);
+      --_card-border: var(
+        --form-checkbox-radio-card-primary-selected-border-separate
+      );
 
       input[tedi-checkbox]:not(:disabled) {
         background-color: transparent;
-        border-color: var(--form-checkbox-radio-default-border-selected-inverted);
+        border-color: var(
+          --form-checkbox-radio-default-border-selected-inverted
+        );
       }
     }
 
@@ -99,19 +113,33 @@ label[tedi-checkbox-card] {
     }
 
     &:has(input:disabled:not(:checked)) {
-      --_card-bg: var(--form-checkbox-radio-card-primary-disabled-default-background);
-      --_card-text: var(--form-checkbox-radio-card-primary-disabled-default-text);
-      --_card-border: var(--form-checkbox-radio-card-primary-disabled-default-background);
+      --_card-bg: var(
+        --form-checkbox-radio-card-primary-disabled-default-background
+      );
+      --_card-text: var(
+        --form-checkbox-radio-card-primary-disabled-default-text
+      );
+      --_card-border: var(
+        --form-checkbox-radio-card-primary-disabled-default-background
+      );
     }
 
     &:has(input:disabled:checked) {
-      --_card-bg: var(--form-checkbox-radio-card-primary-disabled-selected-background);
-      --_card-text: var(--form-checkbox-radio-card-primary-disabled-selected-text);
-      --_card-border: var(--form-checkbox-radio-card-primary-disabled-selected-background);
+      --_card-bg: var(
+        --form-checkbox-radio-card-primary-disabled-selected-background
+      );
+      --_card-text: var(
+        --form-checkbox-radio-card-primary-disabled-selected-text
+      );
+      --_card-border: var(
+        --form-checkbox-radio-card-primary-disabled-selected-background
+      );
 
       input[tedi-checkbox] {
         background-color: transparent;
-        border-color: var(--form-checkbox-radio-default-border-selected-inverted);
+        border-color: var(
+          --form-checkbox-radio-default-border-selected-inverted
+        );
       }
     }
   }
@@ -126,8 +154,7 @@ label[tedi-checkbox-card] {
       --_card-text: var(--form-checkbox-radio-card-secondary-selected-text);
       --_card-border: var(--form-checkbox-radio-card-secondary-selected-border);
 
-      outline: 1px solid var(--_card-border);
-      outline-offset: -2px;
+      box-shadow: inset 0 0 0 var(--tedi-borders-01) var(--_card-border);
     }
 
     &:has(input:hover:not(:disabled)) {
@@ -137,18 +164,29 @@ label[tedi-checkbox-card] {
     }
 
     &:has(input:disabled:not(:checked)) {
-      --_card-bg: var(--form-checkbox-radio-card-secondary-disabled-default-background);
-      --_card-text: var(--form-checkbox-radio-card-secondary-disabled-default-text);
-      --_card-border: var(--form-checkbox-radio-card-secondary-disabled-default-border);
+      --_card-bg: var(
+        --form-checkbox-radio-card-secondary-disabled-default-background
+      );
+      --_card-text: var(
+        --form-checkbox-radio-card-secondary-disabled-default-text
+      );
+      --_card-border: var(
+        --form-checkbox-radio-card-secondary-disabled-default-border
+      );
     }
 
     &:has(input:disabled:checked) {
-      --_card-bg: var(--form-checkbox-radio-card-secondary-disabled-selected-background);
-      --_card-text: var(--form-checkbox-radio-card-secondary-disabled-selected-text);
-      --_card-border: var(--form-checkbox-radio-card-secondary-disabled-selected-border);
+      --_card-bg: var(
+        --form-checkbox-radio-card-secondary-disabled-selected-background
+      );
+      --_card-text: var(
+        --form-checkbox-radio-card-secondary-disabled-selected-text
+      );
+      --_card-border: var(
+        --form-checkbox-radio-card-secondary-disabled-selected-border
+      );
 
-      outline: 1px solid var(--_card-border);
-      outline-offset: -2px;
+      box-shadow: inset 0 0 0 var(--tedi-borders-01) var(--_card-border);
     }
   }
 }

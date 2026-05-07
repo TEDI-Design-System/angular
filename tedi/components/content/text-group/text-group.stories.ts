@@ -8,11 +8,9 @@ import {
 } from "@storybook/angular";
 
 import { TextGroupComponent } from "./text-group.component";
-import {
-  IconComponent,
-  RowComponent,
-  VerticalSpacingDirective,
-} from "@tedi-design-system/angular/tedi";
+import { IconComponent } from "../../base/icon/icon.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 import { createBreakpointArgTypes } from "../../../../src/dev-tools/createBreakpointArgTypes";
 import { StatusBadgeComponent } from "@tedi-design-system/angular/community";
 

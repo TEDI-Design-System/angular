@@ -3,7 +3,6 @@
 
 @mixin modal-heading($size) {
   .tedi-modal-header__head {
-
     h1,
     h2,
     h3,
@@ -25,7 +24,7 @@
 
   @include modal-heading(h3);
 
-  button[tedi-closing-button] {
+  .tedi-modal-header__close {
     width: var(--button-sm-icon-size);
     height: var(--button-sm-icon-size);
   }
@@ -41,7 +40,7 @@
 
   @include modal-heading(h4);
 
-  button[tedi-closing-button] {
+  .tedi-modal-header__close {
     width: var(--button-xs-icon-size);
     height: var(--button-xs-icon-size);
   }
@@ -52,21 +51,22 @@
   flex-direction: column;
   width: 100%;
   background-color: var(--modal-background);
-  border: var(--borders-01) solid var(--modal-border-outer);
+  border: var(--tedi-borders-01) solid var(--modal-border-outer);
   border-radius: var(--modal-radius);
 }
 
 @mixin modal-content-styles {
   .tedi-modal-header {
-    padding: var(--_tedi-modal-heading-padding-y) var(--_tedi-modal-heading-padding-x);
-    border-bottom: var(--borders-01) solid var(--modal-border-inner);
+    padding: var(--_tedi-modal-heading-padding-y)
+      var(--_tedi-modal-heading-padding-x);
+    border-bottom: var(--tedi-borders-01) solid var(--modal-border-inner);
 
     .tedi-modal-header__head {
       display: flex;
       gap: var(--layout-grid-gutters-08);
       align-items: center;
 
-      button[tedi-closing-button] {
+      .tedi-modal-header__close {
         margin-left: auto;
       }
     }
@@ -98,18 +98,13 @@
     display: flex;
     gap: var(--_tedi-modal-footer-gap);
     justify-content: flex-end;
-    padding: var(--_tedi-modal-footer-padding-y) var(--_tedi-modal-footer-padding-x);
-    border-top: var(--borders-01) solid var(--modal-border-inner);
+    padding: var(--_tedi-modal-footer-padding-y)
+      var(--_tedi-modal-footer-padding-x);
+    border-top: var(--tedi-borders-01) solid var(--modal-border-inner);
   }
 }
 
-$modal-widths: (
-  xs,
-  sm,
-  md,
-  lg,
-  xl
-);
+$modal-widths: (xs, sm, md, lg, xl);
 
 // =============================================================================
 // Legacy template-based modal (deprecated)
@@ -139,7 +134,10 @@ $modal-widths: (
   @each $width in $modal-widths {
     &--#{$width} {
       .tedi-modal__dialog {
-        max-width: min(var(--modal-max-width-#{$width}), var(--_tedi-modal-max-width));
+        max-width: min(
+          var(--modal-max-width-#{$width}),
+          var(--_tedi-modal-max-width)
+        );
       }
     }
   }
@@ -233,7 +231,10 @@ $modal-widths: (
 
   @each $width in $modal-widths {
     &--#{$width} {
-      max-width: min(var(--modal-max-width-#{$width}), var(--_tedi-modal-max-width));
+      max-width: min(
+        var(--modal-max-width-#{$width}),
+        var(--_tedi-modal-max-width)
+      );
     }
   }
 

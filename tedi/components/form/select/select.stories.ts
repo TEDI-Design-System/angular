@@ -117,6 +117,10 @@ const meta: Meta<SelectComponent> = {
       control: "boolean",
       description: "Whether the select has a search input for filtering options.",
     },
+    searchFn: {
+      control: false,
+      description: "Custom search function `(term: string, item: T) => boolean`. When provided, overrides the default label-based search.",
+    },
     dropdownType: {
       control: "radio",
       options: ["menu", "grid"],
@@ -895,5 +899,80 @@ export const ReactiveForms: Story = {
       imports: [SelectReactiveFormsDemoComponent],
     },
     template: `<storybook-select-reactive-forms-demo />`,
+  }),
+};
+
+interface PermissionOption {
+  id: number;
+  title: string;
+  description: string;
+}
+
+@Component({
+  selector: "storybook-select-custom-search-demo",
+  standalone: true,
+  imports: [
+    SelectComponent,
+    SelectOptionTemplateDirective,
+    DropdownItemValueComponent,
+    DropdownItemValueLabelComponent,
+    DropdownItemValueMetaComponent,
+  ],
+  template: `
+    <tedi-select
+      inputId="custom-search"
+      label="Searchable with custom search function"
+      placeholder="Search by title or description..."
+      [options]="options"
+      bindLabel="title"
+      bindValue="id"
+      [searchable]="true"
+      [allowMultiple]="true"
+      [clearable]="true"
+      [isTagRemovable]="true"
+      [searchFn]="searchFn"
+    >
+      <ng-template tediSelectOption let-item let-selected="selected">
+        <tedi-dropdown-item-value type="checkbox" layout="vertical" [selected]="selected">
+          <tedi-dropdown-item-value-label>{{ item.title }}</tedi-dropdown-item-value-label>
+          <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
+        </tedi-dropdown-item-value>
+      </ng-template>
+    </tedi-select>
+  `,
+})
+class SelectCustomSearchDemoComponent {
+  options: PermissionOption[] = [
+    { id: 1, title: "Read permissions", description: "Can view documents and files" },
+    { id: 2, title: "Write permissions", description: "Can create and edit documents" },
+    { id: 3, title: "Admin permissions", description: "Full access to all features" },
+    { id: 4, title: "Delete permissions", description: "Can remove documents and data" },
+  ];
+
+  searchFn = (term: string, item: PermissionOption): boolean => {
+    return item.title.toLowerCase().includes(term) || item.description.toLowerCase().includes(term);
+  };
+}
+
+export const CustomSearchFunction: Story = {
+  parameters: {
+    docs: {
+      source: {
+        type: "code" as const,
+        code:
+          "// [searchFn] overrides the default label-based search.\n" +
+          "// The item parameter contains all original properties of the option object.\n\n" +
+          "searchFn = (term: string, item: PermissionOption): boolean =>\n" +
+          "  item.title.toLowerCase().includes(term)\n" +
+          "  || item.description.toLowerCase().includes(term);",
+        language: "typescript",
+      },
+    },
+  },
+  render: () => ({
+    moduleMetadata: {
+      imports: [SelectCustomSearchDemoComponent],
+    },
+    template: `<storybook-select-custom-search-demo />`,
   }),
 };
