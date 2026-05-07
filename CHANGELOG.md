@@ -1,3 +1,10 @@
+# [6.4.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.1...angular-6.4.0-rc.1) (2026-05-07)
+
+
+### Features
+
+* **accordion:** separate header and content [#406](https://github.com/TEDI-Design-System/angular/issues/406) ([#420](https://github.com/TEDI-Design-System/angular/issues/420)) ([37e3127](https://github.com/TEDI-Design-System/angular/commit/37e3127e42b9d803bf42201b81b5bc25e4b917b1))
+
 ## [6.3.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0...angular-6.3.1) (2026-05-04)
 
 
