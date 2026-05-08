@@ -22,6 +22,16 @@
     &:disabled {
       cursor: not-allowed;
     }
+
+    &::-webkit-calendar-picker-indicator,
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button,
+    &::-webkit-clear-button,
+    &::-webkit-list-button {
+      display: none;
+      margin: 0;
+      appearance: none;
+    }
   }
 
   &__actions {
@@ -46,17 +56,6 @@
 
   &__popover-content.tedi-popover-content {
     padding: 0;
-  }
-
-  &__native {
-    position: absolute;
-    width: 0;
-    height: 0;
-    padding: 0;
-    overflow: hidden;
-    pointer-events: none;
-    border: 0;
-    opacity: 0;
   }
 
   &__icon {

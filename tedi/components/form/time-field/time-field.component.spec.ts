@@ -224,10 +224,10 @@ describe("TimeFieldComponent", () => {
       fixture.detectChanges();
     });
 
-    it("should render hidden native time input", () => {
-      const native = el.querySelector(".tedi-time-field__native") as HTMLInputElement;
-      expect(native).toBeTruthy();
-      expect(native.type).toBe("time");
+    it("should render the visible input with type=time", () => {
+      const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      expect(input).toBeTruthy();
+      expect(input.type).toBe("time");
     });
 
     it("should render trigger button without popover", () => {
@@ -236,38 +236,91 @@ describe("TimeFieldComponent", () => {
       expect(btn).toBeTruthy();
     });
 
-    it("should sync native input value from component value", () => {
+    it("should sync visible input value from component value", () => {
       component.writeValue("15:00");
       fixture.detectChanges();
 
-      const native = el.querySelector(".tedi-time-field__native") as HTMLInputElement;
-      expect(native.value).toBe("15:00");
+      const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      expect(input.value).toBe("15:00");
     });
 
-    it("should update value on native input change", () => {
+    it("should commit value on blur after typing", () => {
       const onChange = jest.fn();
       component.registerOnChange(onChange);
 
-      const native = el.querySelector(".tedi-time-field__native") as HTMLInputElement;
-      native.value = "16:45";
-      native.dispatchEvent(new Event("change"));
+      const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      input.value = "16:45";
+      input.dispatchEvent(new Event("input"));
+      input.dispatchEvent(new Event("blur"));
 
       expect(component.value()).toBe("16:45");
       expect(onChange).toHaveBeenCalledWith("16:45");
     });
 
-    it("should set value to null when native input is cleared", () => {
+    it("should set value to null when input is cleared and blurred", () => {
       const onChange = jest.fn();
       component.registerOnChange(onChange);
       component.writeValue("12:00");
       fixture.detectChanges();
 
-      const native = el.querySelector(".tedi-time-field__native") as HTMLInputElement;
-      native.value = "";
-      native.dispatchEvent(new Event("change"));
+      const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      input.value = "";
+      input.dispatchEvent(new Event("input"));
+      input.dispatchEvent(new Event("blur"));
 
       expect(component.value()).toBeNull();
       expect(onChange).toHaveBeenCalledWith(null);
+    });
+  });
+
+  describe("picker trigger", () => {
+    it("should open popover when input is clicked with pickerTrigger=input", () => {
+      fixture.componentRef.setInput("pickerTrigger", "input");
+      fixture.detectChanges();
+
+      const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      const popoverSpy = jest.spyOn(component.popover()!, "showPopover");
+
+      input.click();
+
+      expect(popoverSpy).toHaveBeenCalled();
+    });
+
+    it("should NOT open popover when input is clicked with pickerTrigger=button", () => {
+      const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      const popoverSpy = jest.spyOn(component.popover()!, "showPopover");
+
+      input.click();
+
+      expect(popoverSpy).not.toHaveBeenCalled();
+    });
+
+    it("should mark input as readonly when pickerTrigger=input", () => {
+      fixture.componentRef.setInput("pickerTrigger", "input");
+      fixture.detectChanges();
+
+      const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      expect(input.readOnly).toBe(true);
+    });
+  });
+
+  describe("picker variant=none", () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput("pickerVariant", "none");
+      fixture.detectChanges();
+    });
+
+    it("should render the visible input with type=time", () => {
+      const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      expect(input.type).toBe("time");
+    });
+
+    it("should not render any picker affordance", () => {
+      expect(el.querySelector("tedi-popover")).toBeNull();
+      expect(el.querySelector(".tedi-time-field__icon")).toBeTruthy();
+      expect(
+        el.querySelector(".tedi-time-field__icon--static"),
+      ).toBeTruthy();
     });
   });
 

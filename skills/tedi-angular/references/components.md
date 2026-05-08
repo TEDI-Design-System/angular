@@ -363,6 +363,52 @@ statusControl = new FormControl<string | null>(null);
 <tedi-date-picker [formControl]="dateControl" [showWeekNumbers]="true" />
 ```
 
+### TimeField
+**Selector:** `tedi-time-field`
+**Model:** `value: string | null` — `HH:mm`
+**Inputs:**
+- `inputId: string` (required) — unique ID for label association
+- `placeholder: string`
+- `size: TimeFieldSize = "default"` — `"default"` or `"small"`
+- `state: TimeFieldState = "default"` — `"default" | "error" | "valid"`
+- `disabled: boolean = false`
+- `invalid: boolean = false`
+- `clearable: boolean = true`
+- `pickerVariant: TimeFieldPickerVariant = "scroll"` — `"scroll" | "slots" | "dropdown" | "none" | "native"`. `"none"` renders just the input (with browser-native HH:mm validation); `"native"` uses the OS time picker
+- `pickerTrigger: TimeFieldPickerTrigger = "button"` — `"button"` opens via the icon, `"input"` also opens when the input is clicked
+- `closeOnSelect: boolean = false` — close the popover/modal as soon as a value is picked
+- `timeSlots: string[] = []` — `HH:mm` strings for `"slots"` and `"dropdown"` variants
+- `columns: number = 3` — grid columns for the `"slots"` variant
+- `minuteStep: number = 1` — minute increment for the `"scroll"` variant
+- `modal: TimeFieldModal = "md"` — open the picker in a modal: `true` always, `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl"`) means modal below that breakpoint
+
+```html
+<tedi-form-field>
+  <label tedi-label for="time">Time</label>
+  <tedi-time-field inputId="time" [formControl]="timeControl" pickerTrigger="input" />
+</tedi-form-field>
+```
+
+### TimePicker
+**Selector:** `tedi-time-picker`
+**Model:** `value: string | null` — `HH:mm`
+**Inputs:**
+- `variant: TimePickerVariant = "scroll"` — `"scroll" | "slots" | "dropdown"`
+- `timeSlots: string[] = []` — predefined `HH:mm` strings for `"slots"` and `"dropdown"`
+- `columns: number = 3` — grid columns for the `"slots"` variant
+- `minuteStep: number = 1` — minute increment for the `"scroll"` variant
+- `disabled: boolean = false`
+- `trapFocus: boolean = false` — trap Tab inside the picker (used when embedded in a popover/modal)
+
+**Outputs:**
+- `closeRequested: void` — emitted when the picker requests to be closed (Tab while `trapFocus` is `true`)
+
+Standalone time picker. Most consumers should use `tedi-time-field` instead — it bundles the picker, an input, and the popover/modal trigger logic.
+
+```html
+<tedi-time-picker [(value)]="time" variant="scroll" [minuteStep]="5" />
+```
+
 ### Select
 **Selector:** `tedi-select`
 **Inputs:**
@@ -722,9 +768,13 @@ openModal() {
     width: 'md',                    // 'xs' | 'sm' | 'md' | 'lg' | 'xl' | custom CSS value
     size: 'default',                // 'default' | 'small'
     position: 'center',             // 'center' | 'top' | 'left' | 'right'
-    closeOnBackdropClick: true,
     scrollBehavior: 'content',      // 'content' | 'page'
-    mobileFullscreen: false,
+    closeOnBackdropClick: true,
+    closeOnEscape: true,
+    showClose: true,
+    fullscreen: false,              // true | 'sm' | 'md' | 'lg' | 'xl'
+    maxWidth: '60vw',               // optional cap, overrides default 95vw
+    ariaLabel: 'Confirm action',
   });
 
   ref.closed.subscribe(result => console.log(result));
@@ -733,12 +783,17 @@ openModal() {
 
 **ModalConfig inputs:**
 - `data: unknown` — injected via `MODAL_DATA` token
-- `width: ModalWidth = "sm"` — preset (`xs`-`xl`) or custom CSS value (`"80%"`, `"600px"`)
 - `size: ModalSize = "default"` — `"default"` or `"small"`
-- `position: ModalPosition = "center"` — `"center"`, `"top"`, `"left"`, `"right"`
+- `width: ModalWidth = "sm"` — preset (`"xs" | "sm" | "md" | "lg" | "xl"`) or custom CSS value (`"80%"`, `"600px"`)
+- `position: ModalPosition = "center"` — `"center" | "top" | "left" | "right"`
+- `scrollBehavior: ModalScrollBehavior = "content"` — `"content"` scrolls inside the modal, `"page"` scrolls the overlay
 - `closeOnBackdropClick: boolean = true`
-- `scrollBehavior: "content" | "page" = "content"`
-- `mobileFullscreen: boolean = false`
+- `closeOnEscape: boolean = true`
+- `showClose: boolean = true` — show the close button in the header
+- `fullscreen: ModalFullscreen = false` — `true` always fullscreen, `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl"`) means fullscreen below that breakpoint
+- `maxWidth: string` — optional max-width cap (e.g. `"75%"`, `"60vw"`); overrides the default `95vw`
+- `ariaLabel: string` — ARIA label for the dialog
+- `ariaLabelledBy: string` — ID of the element that labels the dialog
 
 **ModalRef methods/properties:**
 - `close(result?: R)` — close with optional result

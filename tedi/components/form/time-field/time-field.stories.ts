@@ -35,10 +35,14 @@ export default {
       ],
     }),
   ],
+  parameters: {
+    status: {
+      type: ["breakpointSupport"],
+    },
+  },
   argTypes: {
     inputId: {
-      description:
-        "The unique identifier for the input element that this label is associated with.",
+      description: "Unique ID for label association and accessibility.",
       control: { type: "text" },
       table: {
         category: "inputs",
@@ -46,16 +50,16 @@ export default {
       },
     },
     value: {
-      description:
-        "Value of the input field in HH:mm format. Supports two-way binding.",
+      description: "Selected time in HH:mm format. Two-way bindable.",
       control: { type: "text" },
       table: {
         category: "inputs",
         type: { summary: "string | null" },
+        defaultValue: { summary: "null" },
       },
     },
     placeholder: {
-      description: "Placeholder text shown when value is empty.",
+      description: "Placeholder shown when the input is empty.",
       control: { type: "text" },
       table: {
         category: "inputs",
@@ -63,8 +67,8 @@ export default {
       },
     },
     size: {
-      description: "Size of the time field.",
-      control: { type: "select" },
+      description: "Field size — matches the surrounding tedi-form-field.",
+      control: { type: "radio" },
       options: ["default", "small"],
       table: {
         category: "inputs",
@@ -73,8 +77,8 @@ export default {
       },
     },
     state: {
-      description: "Visual state of the time field.",
-      control: { type: "select" },
+      description: "Visual validation state.",
+      control: { type: "radio" },
       options: ["default", "error", "valid"],
       table: {
         category: "inputs",
@@ -83,7 +87,7 @@ export default {
       },
     },
     disabled: {
-      description: "Is input disabled?",
+      description: "Disables interaction. Combines with the form-control disabled state.",
       control: { type: "boolean" },
       table: {
         category: "inputs",
@@ -92,7 +96,7 @@ export default {
       },
     },
     invalid: {
-      description: "Marks the field as invalid for validation purposes.",
+      description: "Marks the field as invalid for ARIA + form-field error styling.",
       control: { type: "boolean" },
       table: {
         category: "inputs",
@@ -100,16 +104,137 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    clearable: {
+      description: "Show a clear button when the field has a value.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    pickerVariant: {
+      description:
+        "Picker variant. `none` renders just the input with browser HH:mm validation; `native` opens the OS time picker.",
+      control: { type: "radio" },
+      options: ["scroll", "slots", "dropdown", "none", "native"],
+      table: {
+        category: "inputs",
+        type: {
+          summary: "TimeFieldPickerVariant",
+          detail: "scroll \nslots \ndropdown \nnone \nnative",
+        },
+        defaultValue: { summary: "scroll" },
+      },
+    },
+    pickerTrigger: {
+      description:
+        "What opens the picker: only the icon (`button`) or also clicking the input (`input`).",
+      control: { type: "radio" },
+      options: ["button", "input"],
+      table: {
+        category: "inputs",
+        type: { summary: "TimeFieldPickerTrigger", detail: "button \ninput" },
+        defaultValue: { summary: "button" },
+      },
+    },
+    closeOnSelect: {
+      description: "Close the popover/modal as soon as the user picks a value.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    timeSlots: {
+      description: "Predefined HH:mm strings for the slots and dropdown variants.",
+      control: { type: "object" },
+      table: {
+        category: "inputs",
+        type: { summary: "string[]" },
+        defaultValue: { summary: "[]" },
+      },
+    },
+    columns: {
+      description: "Grid columns for the slots variant.",
+      control: { type: "number" },
+      table: {
+        category: "inputs",
+        type: { summary: "number" },
+        defaultValue: { summary: "3" },
+      },
+    },
+    minuteStep: {
+      description: "Minute step for the scroll variant — e.g. 5 renders 00, 05, 10…",
+      control: { type: "number" },
+      table: {
+        category: "inputs",
+        type: { summary: "number" },
+        defaultValue: { summary: "1" },
+      },
+    },
+    modal: {
+      description:
+        "Open the picker in a modal: `true` always, `false` never, breakpoint name (`sm | md | lg | xl`) means modal below that breakpoint.",
+      control: { type: "select" },
+      options: [true, false, "sm", "md", "lg", "xl"],
+      table: {
+        category: "inputs",
+        type: {
+          summary: "TimeFieldModal",
+          detail: "boolean \nsm \nmd \nlg \nxl",
+        },
+        defaultValue: { summary: "md" },
+      },
+    },
   },
 } as Meta<TimeFieldComponent>;
 
 export const Default: StoryObj<TimeFieldComponent> = {
-  render: () => ({
+  args: {
+    inputId: "example-id",
+    placeholder: "hh:mm",
+    size: "default",
+    state: "default",
+    disabled: false,
+    invalid: false,
+    clearable: true,
+    pickerVariant: "scroll",
+    pickerTrigger: "button",
+    closeOnSelect: false,
+    timeSlots: [],
+    columns: 3,
+    minuteStep: 1,
+    modal: "md",
+  },
+  render: (args) => ({
+    props: args,
     template: `
-      <tedi-form-field style="width: 200px">
-        <label tedi-label for="example-id">Label</label>
-        <tedi-time-field inputId="example-id" />
-      </tedi-form-field>
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="example-id">Label</label>
+            <tedi-time-field
+              [inputId]="inputId"
+              [(value)]="value"
+              [placeholder]="placeholder"
+              [size]="size"
+              [state]="state"
+              [disabled]="disabled"
+              [invalid]="invalid"
+              [clearable]="clearable"
+              [pickerVariant]="pickerVariant"
+              [pickerTrigger]="pickerTrigger"
+              [closeOnSelect]="closeOnSelect"
+              [timeSlots]="timeSlots"
+              [columns]="columns"
+              [minuteStep]="minuteStep"
+              [modal]="modal"
+            />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };
@@ -193,10 +318,14 @@ export const States: StoryObj<TimeFieldComponent> = {
 export const WithValue: StoryObj<TimeFieldComponent> = {
   render: () => ({
     template: `
-      <tedi-form-field>
-        <label tedi-label for="example-value">Label</label>
-        <tedi-time-field inputId="example-value" value="14:30" />
-      </tedi-form-field>
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="example-value">Label</label>
+            <tedi-time-field inputId="example-value" value="14:30" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };
@@ -204,10 +333,14 @@ export const WithValue: StoryObj<TimeFieldComponent> = {
 export const WithPlaceholder: StoryObj<TimeFieldComponent> = {
   render: () => ({
     template: `
-      <tedi-form-field>
-        <label tedi-label for="example-placeholder">Label</label>
-        <tedi-time-field inputId="example-placeholder" placeholder="hh:mm" />
-      </tedi-form-field>
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="example-placeholder">Label</label>
+            <tedi-time-field inputId="example-placeholder" placeholder="hh:mm" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };
@@ -215,11 +348,15 @@ export const WithPlaceholder: StoryObj<TimeFieldComponent> = {
 export const WithHint: StoryObj<TimeFieldComponent> = {
   render: () => ({
     template: `
-      <tedi-form-field>
-        <label tedi-label for="example-hint">Label</label>
-        <tedi-time-field inputId="example-hint" />
-        <tedi-feedback-text text="Hint text" type="hint" position="left" />
-      </tedi-form-field>
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="example-hint">Label</label>
+            <tedi-time-field inputId="example-hint" />
+            <tedi-feedback-text text="Hint text" type="hint" position="left" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };
@@ -227,11 +364,15 @@ export const WithHint: StoryObj<TimeFieldComponent> = {
 export const WithError: StoryObj<TimeFieldComponent> = {
   render: () => ({
     template: `
-      <tedi-form-field>
-        <label tedi-label for="example-error">Label</label>
-        <tedi-time-field inputId="example-error" state="error" [invalid]="true" value="12:00" />
-        <tedi-feedback-text text="Please enter a valid time" type="error" position="left" />
-      </tedi-form-field>
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="example-error">Label</label>
+            <tedi-time-field inputId="example-error" state="error" [invalid]="true" value="12:00" />
+            <tedi-feedback-text text="Please enter a valid time" type="error" position="left" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };
@@ -239,10 +380,14 @@ export const WithError: StoryObj<TimeFieldComponent> = {
 export const WithScrollPicker: StoryObj<TimeFieldComponent> = {
   render: () => ({
     template: `
-      <tedi-form-field>
-        <label tedi-label for="scroll-picker">Time</label>
-        <tedi-time-field inputId="scroll-picker" value="03:03" pickerVariant="scroll" />
-      </tedi-form-field>
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="scroll-picker">Time</label>
+            <tedi-time-field inputId="scroll-picker" value="03:03" pickerVariant="scroll" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };
@@ -253,10 +398,14 @@ export const WithSlotsPicker: StoryObj<TimeFieldComponent> = {
       slots: ["09:30", "10:00", "11:30", "15:30", "18:30", "20:30"],
     },
     template: `
-      <tedi-form-field>
-        <label tedi-label for="slots-picker">Time</label>
-        <tedi-time-field inputId="slots-picker" value="11:30" pickerVariant="slots" [timeSlots]="slots" [columns]="3" />
-      </tedi-form-field>
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="slots-picker">Time</label>
+            <tedi-time-field inputId="slots-picker" value="11:30" pickerVariant="slots" [timeSlots]="slots" [columns]="3" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };
@@ -267,10 +416,14 @@ export const WithDropdownPicker: StoryObj<TimeFieldComponent> = {
       slots: ["12:30", "13:00", "13:30", "14:00", "14:30"],
     },
     template: `
-      <tedi-form-field>
-        <label tedi-label for="dropdown-picker">Time</label>
-        <tedi-time-field inputId="dropdown-picker" value="13:30" pickerVariant="dropdown" [timeSlots]="slots" />
-      </tedi-form-field>
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="dropdown-picker">Time</label>
+            <tedi-time-field inputId="dropdown-picker" value="13:30" pickerVariant="dropdown" [timeSlots]="slots" [closeOnSelect]="true" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };
@@ -278,10 +431,14 @@ export const WithDropdownPicker: StoryObj<TimeFieldComponent> = {
 export const WithScrollPickerStep15: StoryObj<TimeFieldComponent> = {
   render: () => ({
     template: `
-      <tedi-form-field>
-        <label tedi-label for="scroll-picker-step">Time</label>
-        <tedi-time-field inputId="scroll-picker-step" value="14:30" pickerVariant="scroll" [minuteStep]="15" />
-      </tedi-form-field>
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="scroll-picker-step">Time</label>
+            <tedi-time-field inputId="scroll-picker-step" value="14:30" pickerVariant="scroll" [minuteStep]="15" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };
@@ -289,10 +446,100 @@ export const WithScrollPickerStep15: StoryObj<TimeFieldComponent> = {
 export const WithNativePicker: StoryObj<TimeFieldComponent> = {
   render: () => ({
     template: `
-      <tedi-form-field>
-        <label tedi-label for="native-picker">Time</label>
-        <tedi-time-field inputId="native-picker" value="09:30" pickerVariant="native" />
-      </tedi-form-field>
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="native-picker">Time</label>
+            <tedi-time-field inputId="native-picker" value="09:30" pickerVariant="native" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Native picker uses the browser's built-in `<input type=\"time\">` UI instead of the custom popover. Recommended on mobile for native UX. The visible input itself becomes `type=\"time\"`, so the OS keyboard and validation kick in automatically.",
+      },
+    },
+  },
+};
+
+export const WithoutPicker: StoryObj<TimeFieldComponent> = {
+  render: () => ({
+    template: `
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="no-picker">Time</label>
+            <tedi-time-field inputId="no-picker" placeholder="hh:mm" pickerVariant="none" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When you only need a typed time entry without any picker UI, set `pickerVariant=\"none\"`. The input is rendered as `type=\"time\"` so the browser still enforces HH:mm format.",
+      },
+    },
+  },
+};
+
+export const MobileModal: StoryObj<TimeFieldComponent> = {
+  render: () => ({
+    template: `
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="mobile-modal">Time</label>
+            <tedi-time-field inputId="mobile-modal" pickerTrigger="input" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+  parameters: {
+    viewport: { defaultViewport: "mobile1" },
+    docs: {
+      description: {
+        story:
+          "On viewports below the `md` breakpoint, the picker opens in a centered modal with explicit Cancel/Confirm buttons instead of a popover. Pass a different breakpoint name to shift the threshold (e.g. `modal=\"lg\"`), `[modal]=\"true\"` to always use the modal, or `[modal]=\"false\"` to always use the popover.",
+      },
+    },
+  },
+};
+
+export const PickerTrigger: StoryObj<TimeFieldComponent> = {
+  render: () => ({
+    template: `
+      <tedi-row cols="1" gapY="3">
+        <tedi-col>
+          <tedi-row cols="1" [md]="{ cols: 3 }">
+            <tedi-col>
+              <p tedi-text>Clock button is clickable (default)</p>
+              <tedi-form-field>
+                <label tedi-label for="trigger-button">Time</label>
+                <tedi-time-field inputId="trigger-button" pickerTrigger="button" />
+              </tedi-form-field>
+            </tedi-col>
+          </tedi-row>
+        </tedi-col>
+        <tedi-col>
+          <tedi-row cols="1" [md]="{ cols: 3 }">
+            <tedi-col>
+              <p tedi-text>Input is clickable</p>
+              <tedi-form-field>
+                <label tedi-label for="trigger-input">Time</label>
+                <tedi-time-field inputId="trigger-input" pickerTrigger="input" />
+              </tedi-form-field>
+            </tedi-col>
+          </tedi-row>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };
@@ -306,10 +553,14 @@ export const WithReactiveForms: StoryObj<TimeFieldComponent> = {
       template: `
         <tedi-row cols="1" [gapY]="3">
           <tedi-col>
-            <tedi-form-field>
-              <label tedi-label for="reactive-time">Time</label>
-              <tedi-time-field inputId="reactive-time" [formControl]="control" />
-            </tedi-form-field>
+            <tedi-row cols="1" [md]="{ cols: 3 }">
+              <tedi-col>
+                <tedi-form-field>
+                  <label tedi-label for="reactive-time">Time</label>
+                  <tedi-time-field inputId="reactive-time" [formControl]="control" />
+                </tedi-form-field>
+              </tedi-col>
+            </tedi-row>
           </tedi-col>
           <tedi-col>
             <tedi-alert type="info" [showClose]="false">

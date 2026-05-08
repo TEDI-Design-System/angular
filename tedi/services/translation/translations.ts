@@ -986,6 +986,29 @@ export const translationsMap = {
     en: "Select time",
     ru: "Выбрать время",
   },
+  "time-field.modal-title": {
+    description: "Title shown in the mobile time picker modal header.",
+    components: ["TimeField"],
+    et: "Kellaaeg",
+    en: "Time",
+    ru: "Время",
+  },
+  "time-field.confirm": {
+    description:
+      "Label for the confirm button in the mobile time picker modal.",
+    components: ["TimeField"],
+    et: "Kinnita",
+    en: "Confirm",
+    ru: "Подтвердить",
+  },
+  "time-field.cancel": {
+    description:
+      "Label for the cancel button in the mobile time picker modal.",
+    components: ["TimeField"],
+    et: "Tühista",
+    en: "Cancel",
+    ru: "Отмена",
+  },
   "vertical-stepper.completed": {
     description:
       "Label for screen-reader that this step is completed (visually hidden)",

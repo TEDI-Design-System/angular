@@ -24,18 +24,26 @@ export default {
       imports: [TimePickerComponent, RowComponent, ColComponent, ReactiveFormsModule, AlertComponent, TextComponent],
     }),
   ],
+  parameters: {
+    design: {
+      type: "figma",
+      url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.41.64?node-id=42943-146292&m=dev",
+    },
+  },
   argTypes: {
     value: {
-      description: "Selected time value in HH:mm format.",
+      description: "Selected time in HH:mm format. Two-way bindable.",
       control: { type: "text" },
       table: {
         category: "inputs",
         type: { summary: "string | null" },
+        defaultValue: { summary: "null" },
       },
     },
     variant: {
-      description: "Visual variant of the time picker.",
-      control: { type: "select" },
+      description:
+        "Visual variant — scroll wheels, predefined slot grid, or a dropdown list.",
+      control: { type: "radio" },
       options: ["scroll", "slots", "dropdown"],
       table: {
         category: "inputs",
@@ -44,7 +52,7 @@ export default {
       },
     },
     minuteStep: {
-      description: "Minute increment for scroll variant.",
+      description: "Minute increment for the scroll variant — e.g. 5 renders 00, 05, 10…",
       control: { type: "number" },
       table: {
         category: "inputs",
@@ -53,7 +61,7 @@ export default {
       },
     },
     timeSlots: {
-      description: "Array of predefined time strings for slots variant.",
+      description: "Predefined HH:mm strings rendered by the slots and dropdown variants.",
       control: { type: "object" },
       table: {
         category: "inputs",
@@ -62,7 +70,7 @@ export default {
       },
     },
     columns: {
-      description: "Number of grid columns for slots variant.",
+      description: "Number of columns rendered by the slots variant.",
       control: { type: "number" },
       table: {
         category: "inputs",
@@ -70,14 +78,51 @@ export default {
         defaultValue: { summary: "3" },
       },
     },
+    disabled: {
+      description: "Disables interaction with the picker.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    trapFocus: {
+      description:
+        "Trap Tab inside the picker (scroll variant: between hour/minute columns; slots/dropdown: emits closeRequested).",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
   },
 } as Meta<TimePickerComponent>;
 
 export const Default: StoryObj<TimePickerComponent> = {
-  render: () => ({
+  args: {
+    value: "03:03",
+    variant: "scroll",
+    timeSlots: [],
+    columns: 3,
+    minuteStep: 1,
+    disabled: false,
+    trapFocus: false,
+  },
+  render: (args) => ({
+    props: args,
     template: `
       <div style="width: 178px;">
-        <tedi-time-picker value="03:03" />
+        <tedi-time-picker
+          [(value)]="value"
+          [variant]="variant"
+          [timeSlots]="timeSlots"
+          [columns]="columns"
+          [minuteStep]="minuteStep"
+          [disabled]="disabled"
+          [trapFocus]="trapFocus"
+        />
       </div>
     `,
   }),
@@ -88,6 +133,16 @@ export const ScrollWithStep: StoryObj<TimePickerComponent> = {
     template: `
       <div style="width: 178px;">
         <tedi-time-picker value="14:30" [minuteStep]="5" />
+      </div>
+    `,
+  }),
+};
+
+export const Disabled: StoryObj<TimePickerComponent> = {
+  render: () => ({
+    template: `
+      <div style="width: 178px;">
+        <tedi-time-picker value="09:30" [disabled]="true" />
       </div>
     `,
   }),

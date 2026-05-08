@@ -73,17 +73,13 @@ describe("TimePickerComponent", () => {
     });
 
     it("should move focus to minute column after selecting an hour", () => {
-      const hourItems = el
-        .querySelectorAll(".tedi-time-picker__column")[0]
-        .querySelectorAll(".tedi-time-picker__item");
-      const minuteItems = el
-        .querySelectorAll(".tedi-time-picker__column")[1]
-        .querySelectorAll(".tedi-time-picker__item");
+      const columns = el.querySelectorAll(".tedi-time-picker__column");
+      const hourItems = columns[0].querySelectorAll(".tedi-time-picker__item");
 
       (hourItems[8] as HTMLButtonElement).click();
       fixture.detectChanges();
 
-      expect(document.activeElement).toBe(minuteItems[0]);
+      expect(document.activeElement).toBe(columns[1]);
     });
 
     it("should select minute on click", () => {
@@ -138,160 +134,157 @@ describe("TimePickerComponent", () => {
       expect(hourItems[0].getAttribute("aria-selected")).toBe("false");
     });
 
-    describe("roving tabindex", () => {
-      it("should set tabindex 0 on first item when no selection", () => {
-        const hourItems = el
-          .querySelectorAll(".tedi-time-picker__column")[0]
-          .querySelectorAll(".tedi-time-picker__item");
-        expect(hourItems[0].getAttribute("tabindex")).toBe("0");
-        expect(hourItems[1].getAttribute("tabindex")).toBe("-1");
+    describe("column tabindex and aria", () => {
+      it("should expose tabindex 0 on each column", () => {
+        const columns = el.querySelectorAll(".tedi-time-picker__column");
+        expect(columns[0].getAttribute("tabindex")).toBe("0");
+        expect(columns[1].getAttribute("tabindex")).toBe("0");
       });
 
-      it("should set tabindex 0 on selected item", () => {
+      it("should set tabindex -1 on every item", () => {
+        const items = el
+          .querySelectorAll(".tedi-time-picker__column")[0]
+          .querySelectorAll(".tedi-time-picker__item");
+        Array.from(items).forEach((item) => {
+          expect(item.getAttribute("tabindex")).toBe("-1");
+        });
+      });
+
+      it("should set tabindex -1 on columns when disabled", () => {
+        fixture.componentRef.setInput("disabled", true);
+        fixture.detectChanges();
+
+        const columns = el.querySelectorAll(".tedi-time-picker__column");
+        expect(columns[0].getAttribute("tabindex")).toBe("-1");
+        expect(columns[1].getAttribute("tabindex")).toBe("-1");
+      });
+
+      it("should set aria-activedescendant to selected item id", () => {
         component.writeValue("05:30");
         fixture.detectChanges();
 
-        const hourItems = el
-          .querySelectorAll(".tedi-time-picker__column")[0]
-          .querySelectorAll(".tedi-time-picker__item");
-        expect(hourItems[5].getAttribute("tabindex")).toBe("0");
-        expect(hourItems[0].getAttribute("tabindex")).toBe("-1");
+        const columns = el.querySelectorAll(".tedi-time-picker__column");
+        const hourItems = columns[0].querySelectorAll(".tedi-time-picker__item");
+        const minuteItems = columns[1].querySelectorAll(".tedi-time-picker__item");
 
-        const minuteItems = el
-          .querySelectorAll(".tedi-time-picker__column")[1]
-          .querySelectorAll(".tedi-time-picker__item");
-        expect(minuteItems[30].getAttribute("tabindex")).toBe("0");
-        expect(minuteItems[0].getAttribute("tabindex")).toBe("-1");
+        expect(columns[0].getAttribute("aria-activedescendant")).toBe(
+          hourItems[5].getAttribute("id"),
+        );
+        expect(columns[1].getAttribute("aria-activedescendant")).toBe(
+          minuteItems[30].getAttribute("id"),
+        );
       });
     });
 
     describe("keyboard navigation", () => {
-      const dispatchKey = (element: HTMLElement, key: string) => {
+      const dispatchKey = (element: Element, key: string) => {
         element.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
       };
 
-      it("should move focus with ArrowDown", () => {
-        const hourItems = el
-          .querySelectorAll(".tedi-time-picker__column")[0]
-          .querySelectorAll(".tedi-time-picker__item");
-        (hourItems[0] as HTMLElement).focus();
-        dispatchKey(hourItems[0] as HTMLElement, "ArrowDown");
-        expect(document.activeElement).toBe(hourItems[1]);
+      it("should select next value with ArrowDown", () => {
+        component.writeValue("05:00");
+        fixture.detectChanges();
+
+        const hourColumn = el.querySelectorAll(".tedi-time-picker__column")[0];
+        dispatchKey(hourColumn, "ArrowDown");
+
+        expect(component.value()).toBe("06:00");
       });
 
-      it("should move focus with ArrowUp", () => {
-        const hourItems = el
-          .querySelectorAll(".tedi-time-picker__column")[0]
-          .querySelectorAll(".tedi-time-picker__item");
-        (hourItems[2] as HTMLElement).focus();
-        dispatchKey(hourItems[2] as HTMLElement, "ArrowUp");
-        expect(document.activeElement).toBe(hourItems[1]);
+      it("should select previous value with ArrowUp", () => {
+        component.writeValue("05:00");
+        fixture.detectChanges();
+
+        const hourColumn = el.querySelectorAll(".tedi-time-picker__column")[0];
+        dispatchKey(hourColumn, "ArrowUp");
+
+        expect(component.value()).toBe("04:00");
       });
 
-      it("should move focus to first item with Home", () => {
-        const hourItems = el
-          .querySelectorAll(".tedi-time-picker__column")[0]
-          .querySelectorAll(".tedi-time-picker__item");
-        (hourItems[10] as HTMLElement).focus();
-        dispatchKey(hourItems[10] as HTMLElement, "Home");
-        expect(document.activeElement).toBe(hourItems[0]);
+      it("should jump to first hour with Home", () => {
+        component.writeValue("10:00");
+        fixture.detectChanges();
+
+        const hourColumn = el.querySelectorAll(".tedi-time-picker__column")[0];
+        dispatchKey(hourColumn, "Home");
+
+        expect(component.value()).toBe("00:00");
       });
 
-      it("should move focus to last item with End", () => {
-        const hourItems = el
-          .querySelectorAll(".tedi-time-picker__column")[0]
-          .querySelectorAll(".tedi-time-picker__item");
-        (hourItems[0] as HTMLElement).focus();
-        dispatchKey(hourItems[0] as HTMLElement, "End");
-        expect(document.activeElement).toBe(hourItems[23]);
+      it("should jump to last hour with End", () => {
+        component.writeValue("00:00");
+        fixture.detectChanges();
+
+        const hourColumn = el.querySelectorAll(".tedi-time-picker__column")[0];
+        dispatchKey(hourColumn, "End");
+
+        expect(component.value()).toBe("23:00");
       });
 
-      it("should jump 5 items with PageDown", () => {
-        const hourItems = el
-          .querySelectorAll(".tedi-time-picker__column")[0]
-          .querySelectorAll(".tedi-time-picker__item");
-        (hourItems[0] as HTMLElement).focus();
-        dispatchKey(hourItems[0] as HTMLElement, "PageDown");
-        expect(document.activeElement).toBe(hourItems[5]);
+      it("should advance 5 with PageDown", () => {
+        component.writeValue("00:00");
+        fixture.detectChanges();
+
+        const hourColumn = el.querySelectorAll(".tedi-time-picker__column")[0];
+        dispatchKey(hourColumn, "PageDown");
+
+        expect(component.value()).toBe("05:00");
       });
 
-      it("should jump 5 items with PageUp", () => {
-        const hourItems = el
-          .querySelectorAll(".tedi-time-picker__column")[0]
-          .querySelectorAll(".tedi-time-picker__item");
-        (hourItems[10] as HTMLElement).focus();
-        dispatchKey(hourItems[10] as HTMLElement, "PageUp");
-        expect(document.activeElement).toBe(hourItems[5]);
+      it("should rewind 5 with PageUp", () => {
+        component.writeValue("10:00");
+        fixture.detectChanges();
+
+        const hourColumn = el.querySelectorAll(".tedi-time-picker__column")[0];
+        dispatchKey(hourColumn, "PageUp");
+
+        expect(component.value()).toBe("05:00");
       });
 
-      it("should select item with Enter", () => {
-        const onChange = jest.fn();
-        component.registerOnChange(onChange);
+      it("should advance focus to minute column on Enter from hour column", () => {
+        const columns = el.querySelectorAll(".tedi-time-picker__column");
+        (columns[0] as HTMLElement).focus();
+        dispatchKey(columns[0], "Enter");
 
-        const hourItems = el
-          .querySelectorAll(".tedi-time-picker__column")[0]
-          .querySelectorAll(".tedi-time-picker__item");
-        (hourItems[8] as HTMLElement).focus();
-        dispatchKey(hourItems[8] as HTMLElement, "Enter");
-
-        expect(component.value()).toBe("08:00");
-        expect(onChange).toHaveBeenCalledWith("08:00");
+        expect(document.activeElement).toBe(columns[1]);
       });
 
-      it("should select item with Space", () => {
-        const onChange = jest.fn();
-        component.registerOnChange(onChange);
+      it("should wrap to last hour on ArrowUp at first", () => {
+        component.writeValue("00:00");
+        fixture.detectChanges();
 
-        const minuteItems = el
-          .querySelectorAll(".tedi-time-picker__column")[1]
-          .querySelectorAll(".tedi-time-picker__item");
-        (minuteItems[15] as HTMLElement).focus();
-        dispatchKey(minuteItems[15] as HTMLElement, " ");
+        const hourColumn = el.querySelectorAll(".tedi-time-picker__column")[0];
+        dispatchKey(hourColumn, "ArrowUp");
 
-        expect(component.value()).toBe("00:15");
-        expect(onChange).toHaveBeenCalledWith("00:15");
+        expect(component.value()).toBe("23:00");
       });
 
-      it("should wrap to last item on ArrowUp at first", () => {
-        const hourItems = el
-          .querySelectorAll(".tedi-time-picker__column")[0]
-          .querySelectorAll(".tedi-time-picker__item");
-        (hourItems[0] as HTMLElement).focus();
-        dispatchKey(hourItems[0] as HTMLElement, "ArrowUp");
-        expect(document.activeElement).toBe(hourItems[23]);
-      });
+      it("should wrap to first hour on ArrowDown at last", () => {
+        component.writeValue("23:00");
+        fixture.detectChanges();
 
-      it("should wrap to first item on ArrowDown at last", () => {
-        const hourItems = el
-          .querySelectorAll(".tedi-time-picker__column")[0]
-          .querySelectorAll(".tedi-time-picker__item");
-        (hourItems[23] as HTMLElement).focus();
-        dispatchKey(hourItems[23] as HTMLElement, "ArrowDown");
-        expect(document.activeElement).toBe(hourItems[0]);
+        const hourColumn = el.querySelectorAll(".tedi-time-picker__column")[0];
+        dispatchKey(hourColumn, "ArrowDown");
+
+        expect(component.value()).toBe("00:00");
       });
 
       it("should wrap minute column on ArrowDown at last", () => {
-        const minuteItems = el
-          .querySelectorAll(".tedi-time-picker__column")[1]
-          .querySelectorAll(".tedi-time-picker__item");
-        (minuteItems[59] as HTMLElement).focus();
-        dispatchKey(minuteItems[59] as HTMLElement, "ArrowDown");
-        expect(document.activeElement).toBe(minuteItems[0]);
+        component.writeValue("01:59");
+        fixture.detectChanges();
+
+        const minuteColumn = el.querySelectorAll(".tedi-time-picker__column")[1];
+        dispatchKey(minuteColumn, "ArrowDown");
+
+        expect(component.value()).toBe("01:00");
       });
 
       it("should not trap Tab when trapFocus is false", () => {
-        const hourItems = el
-          .querySelectorAll(".tedi-time-picker__column")[0]
-          .querySelectorAll(".tedi-time-picker__item");
-        const minuteItems = el
-          .querySelectorAll(".tedi-time-picker__column")[1]
-          .querySelectorAll(".tedi-time-picker__item");
+        const columns = el.querySelectorAll(".tedi-time-picker__column");
+        (columns[0] as HTMLElement).focus();
+        dispatchKey(columns[0], "Tab");
 
-        (hourItems[0] as HTMLElement).focus();
-        dispatchKey(hourItems[0] as HTMLElement, "Tab");
-
-        // Tab should not move focus to minute column (not trapped)
-        expect(document.activeElement).not.toBe(minuteItems[0]);
+        expect(document.activeElement).not.toBe(columns[1]);
       });
 
       describe("with trapFocus enabled", () => {
@@ -301,48 +294,19 @@ describe("TimePickerComponent", () => {
         });
 
         it("should move focus from hour to minute column on Tab", () => {
-          const hourItems = el
-            .querySelectorAll(".tedi-time-picker__column")[0]
-            .querySelectorAll(".tedi-time-picker__item");
-          const minuteItems = el
-            .querySelectorAll(".tedi-time-picker__column")[1]
-            .querySelectorAll(".tedi-time-picker__item");
+          const columns = el.querySelectorAll(".tedi-time-picker__column");
+          (columns[0] as HTMLElement).focus();
+          dispatchKey(columns[0], "Tab");
 
-          (hourItems[0] as HTMLElement).focus();
-          dispatchKey(hourItems[0] as HTMLElement, "Tab");
-
-          expect(document.activeElement).toBe(minuteItems[0]);
+          expect(document.activeElement).toBe(columns[1]);
         });
 
         it("should move focus from minute to hour column on Tab", () => {
-          const hourItems = el
-            .querySelectorAll(".tedi-time-picker__column")[0]
-            .querySelectorAll(".tedi-time-picker__item");
-          const minuteItems = el
-            .querySelectorAll(".tedi-time-picker__column")[1]
-            .querySelectorAll(".tedi-time-picker__item");
+          const columns = el.querySelectorAll(".tedi-time-picker__column");
+          (columns[1] as HTMLElement).focus();
+          dispatchKey(columns[1], "Tab");
 
-          (minuteItems[0] as HTMLElement).focus();
-          dispatchKey(minuteItems[0] as HTMLElement, "Tab");
-
-          expect(document.activeElement).toBe(hourItems[0]);
-        });
-
-        it("should focus selected item in target column on Tab", () => {
-          component.writeValue("05:30");
-          fixture.detectChanges();
-
-          const hourItems = el
-            .querySelectorAll(".tedi-time-picker__column")[0]
-            .querySelectorAll(".tedi-time-picker__item");
-          const minuteItems = el
-            .querySelectorAll(".tedi-time-picker__column")[1]
-            .querySelectorAll(".tedi-time-picker__item");
-
-          (hourItems[5] as HTMLElement).focus();
-          dispatchKey(hourItems[5] as HTMLElement, "Tab");
-
-          expect(document.activeElement).toBe(minuteItems[30]);
+          expect(document.activeElement).toBe(columns[0]);
         });
       });
     });
@@ -659,6 +623,28 @@ describe("TimePickerComponent", () => {
       (hourItems[5] as HTMLButtonElement).click();
 
       expect(onTouched).toHaveBeenCalled();
+    });
+
+    it("should clear visual highlight when value is reset to null", () => {
+      component.writeValue("14:30");
+      fixture.detectChanges();
+
+      let columns = el.querySelectorAll(".tedi-time-picker__column");
+      let hourItems = columns[0].querySelectorAll(".tedi-time-picker__item");
+      let minuteItems = columns[1].querySelectorAll(".tedi-time-picker__item");
+      expect(hourItems[14].classList.contains("tedi-time-picker__item--selected")).toBe(true);
+      expect(minuteItems[30].classList.contains("tedi-time-picker__item--selected")).toBe(true);
+
+      component.writeValue(null);
+      fixture.detectChanges();
+
+      columns = el.querySelectorAll(".tedi-time-picker__column");
+      hourItems = columns[0].querySelectorAll(".tedi-time-picker__item");
+      minuteItems = columns[1].querySelectorAll(".tedi-time-picker__item");
+      expect(hourItems[0].classList.contains("tedi-time-picker__item--selected")).toBe(true);
+      expect(hourItems[14].classList.contains("tedi-time-picker__item--selected")).toBe(false);
+      expect(minuteItems[0].classList.contains("tedi-time-picker__item--selected")).toBe(true);
+      expect(minuteItems[30].classList.contains("tedi-time-picker__item--selected")).toBe(false);
     });
   });
 });

@@ -1,13 +1,15 @@
 <input
   #inputElement
-  type="text"
   class="tedi-time-field__input"
   inputmode="numeric"
+  [type]="inputType()"
   [id]="inputId()"
   [attr.placeholder]="placeholder()"
   [value]="inputValue()"
   [disabled]="isDisabled()"
+  [readOnly]="inputIsTrigger()"
   [attr.aria-invalid]="isInvalid() || null"
+  (click)="onInputClick()"
   (input)="handleInput($event)"
   (blur)="handleBlur()"
 />
@@ -26,51 +28,57 @@
     <tedi-separator axis="vertical" size="1rem" />
   }
   @if (hasPicker()) {
-    <tedi-popover
-      #popover
-      class="tedi-time-field__popover"
-      position="bottom-end"
-      [withArrow]="false"
-      [preventOverflow]="true"
-    >
+    @if (useMobileModal()) {
       <button
         tedi-button
-        tedi-popover-trigger
         type="button"
         variant="neutral"
         size="small"
         class="tedi-time-field__icon"
         [attr.aria-label]="'time-field.select-time' | tediTranslate"
         [disabled]="isDisabled()"
-        (click)="onPickerOpen()"
+        (click)="openPicker()"
       >
         <tedi-icon name="schedule" size="inherit" />
       </button>
-      <tedi-popover-content class="tedi-time-field__popover-content" maxWidth="none">
-        <tedi-time-picker
-          #timePicker
-          [value]="value()"
-          [variant]="resolvedPickerVariant()"
-          [timeSlots]="timeSlots()"
-          [columns]="columns()"
-          [minuteStep]="minuteStep()"
-          [trapFocus]="true"
-          (valueChange)="onPickerValueChange($event)"
-          (closeRequested)="closePopoverToTrigger()"
-        />
-      </tedi-popover-content>
-    </tedi-popover>
+    } @else {
+      <tedi-popover
+        #popover
+        class="tedi-time-field__popover"
+        position="bottom-end"
+        [withArrow]="false"
+        [preventOverflow]="true"
+      >
+        <button
+          tedi-button
+          tedi-popover-trigger
+          type="button"
+          variant="neutral"
+          size="small"
+          class="tedi-time-field__icon"
+          [attr.aria-label]="'time-field.select-time' | tediTranslate"
+          [disabled]="isDisabled()"
+          (click)="onPickerOpen()"
+        >
+          <tedi-icon name="schedule" size="inherit" />
+        </button>
+        <tedi-popover-content class="tedi-time-field__popover-content" maxWidth="none">
+          <tedi-time-picker
+            #timePicker
+            [value]="value()"
+            [variant]="resolvedPickerVariant()"
+            [timeSlots]="timeSlots()"
+            [columns]="columns()"
+            [minuteStep]="minuteStep()"
+            [trapFocus]="true"
+            [style.--_tedi-time-picker-dropdown-min-width.px]="dropdownWidth()"
+            (valueChange)="onPickerValueChange($event)"
+            (closeRequested)="closePopoverToTrigger()"
+          />
+        </tedi-popover-content>
+      </tedi-popover>
+    }
   } @else if (hasNativePicker()) {
-    <input
-      #nativeInput
-      type="time"
-      class="tedi-time-field__native"
-      tabindex="-1"
-      aria-hidden="true"
-      [value]="inputValue()"
-      [disabled]="isDisabled()"
-      (change)="onNativeChange($event)"
-    />
     <button
       tedi-button
       type="button"
