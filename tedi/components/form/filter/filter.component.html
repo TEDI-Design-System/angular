@@ -28,14 +28,18 @@
           </div>
           @if (showClear()) {
             <tedi-separator />
-            <button
-              type="button"
-              class="tedi-filter-dropdown__clear"
-              (click)="onCustomClear()"
-            >
-              <tedi-icon name="refresh" [size]="18" color="brand" />
-              <span>{{ clearLabel() }}</span>
-            </button>
+            <div class="tedi-filter-dropdown__clear">
+              <button
+                tedi-button
+                variant="neutral"
+                size="small"
+                type="button"
+                (click)="onCustomClear()"
+              >
+                <tedi-icon name="refresh" [size]="18" color="brand" />
+                <span>{{ clearLabel() }}</span>
+              </button>
+            </div>
           }
         } @else if (isSingleSelect()) {
           @if (searchable()) {
@@ -51,6 +55,7 @@
             tabindex="0"
             (focus)="onOptionsFocus()"
             (blur)="onOptionsBlur()"
+            (mousedown)="onOptionsMousedown()"
             (keydown)="onOptionsKeydown($event)"
           >
             @for (option of filteredOptions(); track option.value; let i = $index) {
@@ -77,14 +82,18 @@
 
           @if (showClear()) {
             <tedi-separator />
-            <button
-              type="button"
-              class="tedi-filter-dropdown__clear"
-              (click)="clearSingleSelection()"
-            >
-              <tedi-icon name="refresh" [size]="18" color="brand" />
-              <span>{{ clearLabel() }}</span>
-            </button>
+            <div class="tedi-filter-dropdown__clear">
+              <button
+                tedi-button
+                variant="neutral"
+                size="small"
+                type="button"
+                (click)="clearSingleSelection()"
+              >
+                <tedi-icon name="refresh" [size]="18" color="brand" />
+                <span>{{ clearLabel() }}</span>
+              </button>
+            </div>
           }
         } @else {
           @if (searchable()) {
@@ -122,6 +131,7 @@
             tabindex="0"
             (focus)="onOptionsFocus()"
             (blur)="onOptionsBlur()"
+            (mousedown)="onOptionsMousedown()"
             (keydown)="onOptionsKeydown($event)"
           >
             @for (option of filteredOptions(); track option.value; let i = $index) {
@@ -148,14 +158,18 @@
 
           @if (showClear()) {
             <tedi-separator />
-            <button
-              type="button"
-              class="tedi-filter-dropdown__clear"
-              (click)="clearSelection()"
-            >
-              <tedi-icon name="refresh" [size]="18" color="brand" />
-              <span>{{ clearLabel() }}</span>
-            </button>
+            <div class="tedi-filter-dropdown__clear">
+              <button
+                tedi-button
+                variant="neutral"
+                size="small"
+                type="button"
+                (click)="clearSelection()"
+              >
+                <tedi-icon name="refresh" [size]="18" color="brand" />
+                <span>{{ clearLabel() }}</span>
+              </button>
+            </div>
           }
         }
       </div>

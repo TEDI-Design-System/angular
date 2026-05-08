@@ -592,7 +592,7 @@ describe("FilterComponent", () => {
       fixture.detectChanges();
 
       const clear = fixture.debugElement.query(
-        By.css(".tedi-filter-dropdown__clear"),
+        By.css(".tedi-filter-dropdown__clear button"),
       );
       clear.nativeElement.click();
       fixture.detectChanges();

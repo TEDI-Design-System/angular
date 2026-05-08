@@ -17,6 +17,7 @@ import { FilterGroupComponent } from "./filter-group.component";
 import { _IdGenerator } from "@angular/cdk/a11y";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { NgTemplateOutlet } from "@angular/common";
+import { ButtonComponent } from "../../buttons";
 import { IconComponent } from "../../base/icon/icon.component";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
@@ -44,6 +45,7 @@ export interface FilterOption {
   standalone: true,
   imports: [
     NgTemplateOutlet,
+    ButtonComponent,
     IconComponent,
     StatusBadgeComponent,
     SeparatorComponent,
@@ -187,6 +189,7 @@ export class FilterComponent implements ControlValueAccessor {
   );
   readonly searchTerm = signal("");
   readonly activeOptionIndex = signal<number>(-1);
+  private suppressNextOptionsFocusAutoSelect = false;
 
   readonly activeDescendantId = computed(() => {
     const idx = this.activeOptionIndex();
@@ -373,14 +376,15 @@ export class FilterComponent implements ControlValueAccessor {
   focusDropdownContent(keyboard = false, focusLast = false): void {
     setTimeout(() => {
       if (!this.dropdown()?.floatUiComponent().state) return;
+      if (!keyboard) {
+        this.suppressNextOptionsFocusAutoSelect = true;
+        this.activeOptionIndex.set(-1);
+      }
       const focusable = this.getTabStops();
       if (focusLast) {
         focusable[focusable.length - 1]?.focus();
       } else {
         focusable[0]?.focus();
-      }
-      if (!keyboard) {
-        this.activeOptionIndex.set(-1);
       }
     });
   }
@@ -400,12 +404,22 @@ export class FilterComponent implements ControlValueAccessor {
   }
 
   onOptionsFocus(): void {
+    if (this.suppressNextOptionsFocusAutoSelect) {
+      this.suppressNextOptionsFocusAutoSelect = false;
+      return;
+    }
     if (this.activeOptionIndex() === -1) {
       this.activeOptionIndex.set(this.findNextEnabledIndex(-1, 1));
     }
   }
 
   onOptionsBlur(): void {
+    this.activeOptionIndex.set(-1);
+    this.suppressNextOptionsFocusAutoSelect = false;
+  }
+
+  onOptionsMousedown(): void {
+    this.suppressNextOptionsFocusAutoSelect = true;
     this.activeOptionIndex.set(-1);
   }
 
