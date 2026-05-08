@@ -12,7 +12,7 @@
 
     &:not(:first-child) {
       padding-left: var(--layout-header-items-right-gutter-x);
-      border-left: var(--borders-01) solid var(--general-border-primary);
+      border-left: var(--tedi-borders-01) solid var(--general-border-primary);
     }
 
     &:not(:last-child) {

@@ -61,9 +61,7 @@ export class TextFieldComponent
 
   constructor(private el: ElementRef<HTMLInputElement>) {}
 
-  readonly disabled = computed(
-    () => this.el.nativeElement.disabled || this.formDisabled(),
-  );
+  readonly disabled = computed(() => this.formDisabled());
 
   readonly invalid = signal(false);
 

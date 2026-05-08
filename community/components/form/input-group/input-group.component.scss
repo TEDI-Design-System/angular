@@ -12,12 +12,12 @@
 }
 
 .tedi-input-group__container {
-  --_input-group-rounded: var(--radius-02-default);
+  --_input-group-rounded: var(--tedi-radius-02-default);
 
   --_input-group-background-color: var(--form-input-background-default);
-  --_input-group-min-height: var(--dimensions-14);
+  --_input-group-min-height: var(--tedi-dimensions-14);
   --_input-group-text-color: var(--general-text-secondary);
-  --_input-group-border-width: var(--borders-01);
+  --_input-group-border-width: var(--tedi-borders-01);
   --_input-group-border-color: var(--form-input-border-default);
 
   --_input-group-side-background-color: var(

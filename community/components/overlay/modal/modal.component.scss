@@ -26,8 +26,8 @@ $modal-breapoints: (xs, sm, md, lg, xl);
 }
 
 .tedi-modal {
-  --_modal-border: var(--borders-01) solid var(--modal-border-outer);
-  --_modal-padding: var(--dimensions-13);
+  --_modal-border: var(--tedi-borders-01) solid var(--modal-border-outer);
+  --_modal-padding: var(--tedi-dimensions-13);
   --_tedi-modal-heading-padding-x: var(--modal-heading-padding-x);
   --_tedi-modal-heading-padding-y: var(--modal-heading-padding-y);
   --_tedi-modal-footer-padding-x: var(--modal-footer-padding-x);
@@ -36,20 +36,20 @@ $modal-breapoints: (xs, sm, md, lg, xl);
   overflow: auto;
 
   @include responsive-sizes(
-    var(--dimensions-10),
-    var(--dimensions-05),
+    var(--tedi-dimensions-10),
+    var(--tedi-dimensions-05),
     --_tedi-modal-heading-padding-x
   );
 
   &--padding-small {
     @include responsive-sizes(
-      var(--dimensions-10),
-      var(--dimensions-05),
+      var(--tedi-dimensions-10),
+      var(--tedi-dimensions-05),
       modal-heading-padding
     );
     @include responsive-sizes(
-      var(--dimensions-10),
-      var(--dimensions-05),
+      var(--tedi-dimensions-10),
+      var(--tedi-dimensions-05),
       modal-footer-padding
     );
   }

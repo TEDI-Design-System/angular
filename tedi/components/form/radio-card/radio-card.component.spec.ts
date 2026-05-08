@@ -4,6 +4,7 @@ import {
   RadioCardComponent,
   RadioCardVariant,
 } from "./radio-card.component";
+import { RadioCardGroupComponent } from "../radio-card-group/radio-card-group.component";
 import { RadioComponent } from "../radio/radio.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 
@@ -104,5 +105,50 @@ describe("RadioCardComponent", () => {
     expect(labelElement.classList).toContain(
       "tedi-radio-card--hide-indicator"
     );
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [RadioCardComponent, RadioCardGroupComponent, RadioComponent],
+  template: `
+    <tedi-radio-card-group [grouped]="groupGrouped">
+      <label tedi-radio-card [grouped]="cardGrouped">
+        <input tedi-radio type="radio" name="inherit-test" />
+        Option
+      </label>
+    </tedi-radio-card-group>
+  `,
+})
+class InheritanceHostComponent {
+  groupGrouped = false;
+  cardGrouped = false;
+}
+
+describe("RadioCardComponent — grouped inheritance", () => {
+  let fixture: ComponentFixture<InheritanceHostComponent>;
+  let labelElement: HTMLLabelElement;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [InheritanceHostComponent] });
+    fixture = TestBed.createComponent(InheritanceHostComponent);
+    fixture.detectChanges();
+    labelElement = fixture.nativeElement.querySelector("label[tedi-radio-card]");
+  });
+
+  it("should not be grouped when neither input is set", () => {
+    expect(labelElement.classList).not.toContain("tedi-radio-card--grouped");
+  });
+
+  it("should be grouped when parent group is grouped", () => {
+    fixture.componentInstance.groupGrouped = true;
+    fixture.detectChanges();
+    expect(labelElement.classList).toContain("tedi-radio-card--grouped");
+  });
+
+  it("should be grouped when card's own input is set", () => {
+    fixture.componentInstance.cardGrouped = true;
+    fixture.detectChanges();
+    expect(labelElement.classList).toContain("tedi-radio-card--grouped");
   });
 });

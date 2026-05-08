@@ -18,8 +18,8 @@ $badge-variants: ("filled", "filled-bordered", "bordered");
 $badge-status-colors: ("inactive", "success", "danger", "warning");
 
 .tedi-status-badge {
-  --status-badge-icon-primary: var(--blue-700);
-  --status-badge-icon-secondary: var(--orange-700);
+  --status-badge-icon-primary: var(--tedi-blue-700);
+  --status-badge-icon-secondary: var(--tedi-orange-700);
 
   position: relative;
   display: inline-flex;
