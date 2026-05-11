@@ -1,6 +1,73 @@
+import { Component, signal } from "@angular/core";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
+import { ButtonComponent } from "../../buttons/button/button.component";
 import { HorizontalStepperComponent } from "./horizontal-stepper.component";
 import { HorizontalStepperItemComponent } from "./horizontal-stepper-item/horizontal-stepper-item.component";
+
+const STEPS = ["Kutse", "Tahteavaldus", "Geenianalüüs", "Vastus"];
+
+@Component({
+  selector: "story-step-click-navigation",
+  standalone: true,
+  imports: [HorizontalStepperComponent, HorizontalStepperItemComponent],
+  template: `
+    <tedi-horizontal-stepper ariaLabel="Form progress">
+      @for (label of steps; track label; let i = $index) {
+        <tedi-horizontal-stepper-item
+          [label]="label"
+          [completed]="i < current()"
+          [selected]="i === current()"
+          (stepSelect)="current.set(i)"
+        />
+      }
+    </tedi-horizontal-stepper>
+  `,
+})
+class StepClickNavigationDemoComponent {
+  steps = STEPS;
+  current = signal(1);
+}
+
+@Component({
+  selector: "story-external-navigation",
+  standalone: true,
+  imports: [
+    HorizontalStepperComponent,
+    HorizontalStepperItemComponent,
+    ButtonComponent,
+  ],
+  template: `
+    <div style="display: flex; flex-direction: column; gap: 24px; align-items: flex-start;">
+      <tedi-horizontal-stepper ariaLabel="Form progress" style="width: 100%;">
+        @for (label of steps; track label; let i = $index) {
+          <tedi-horizontal-stepper-item
+            [label]="label"
+            [completed]="i < current()"
+            [selected]="i === current()"
+            [disabled]="i > current()"
+            (stepSelect)="current.set(i)"
+          />
+        }
+      </tedi-horizontal-stepper>
+      <div style="display: flex; gap: 8px;">
+        <button tedi-button variant="secondary" [disabled]="current() === 0" (click)="back()">Tagasi</button>
+        <button tedi-button [disabled]="current() === steps.length - 1" (click)="next()">Edasi</button>
+      </div>
+    </div>
+  `,
+})
+class ExternalNavigationDemoComponent {
+  steps = STEPS;
+  current = signal(0);
+
+  back(): void {
+    this.current.update((s) => Math.max(0, s - 1));
+  }
+
+  next(): void {
+    this.current.update((s) => Math.min(this.steps.length - 1, s + 1));
+  }
+}
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.68?node-id=11201-120695&m=dev" target="_blank">Figma ↗</a><br>
@@ -211,4 +278,101 @@ export const CompactAtMdBreakpoint: Story = {
       </tedi-horizontal-stepper>
     `,
   }),
+};
+
+/**
+ * Validation runs at the end of the form — every step is reachable via the
+ * header. Each item listens to `stepSelect` and updates the active step.
+ * Past steps render as `completed`, future steps stay default.
+ */
+export const ClickToNavigate: Story = {
+  render: () => ({
+    moduleMetadata: { imports: [StepClickNavigationDemoComponent] },
+    template: `<story-step-click-navigation />`,
+  }),
+  parameters: {
+    docs: {
+      source: {
+        type: "code",
+        language: "ts",
+        code: `@Component({
+  imports: [HorizontalStepperComponent, HorizontalStepperItemComponent],
+  template: \`
+    <tedi-horizontal-stepper ariaLabel="Form progress">
+      @for (label of steps; track label; let i = $index) {
+        <tedi-horizontal-stepper-item
+          [label]="label"
+          [completed]="i < current()"
+          [selected]="i === current()"
+          (stepSelect)="current.set(i)"
+        />
+      }
+    </tedi-horizontal-stepper>
+  \`,
+})
+export class FormWizardComponent {
+  steps = ["Kutse", "Tahteavaldus", "Geenianalüüs", "Vastus"];
+  current = signal(1);
+}`,
+      },
+    },
+  },
+};
+
+/**
+ * Step-by-step validation — the user advances with `Edasi`/`Tagasi`.
+ * Past steps render as `completed` and are clickable for back-navigation;
+ * future steps are `disabled` so the user can't skip ahead from the header.
+ */
+export const ExternalNavigation: Story = {
+  render: () => ({
+    moduleMetadata: { imports: [ExternalNavigationDemoComponent] },
+    template: `<story-external-navigation />`,
+  }),
+  parameters: {
+    docs: {
+      source: {
+        type: "code",
+        language: "ts",
+        code: `@Component({
+  imports: [
+    HorizontalStepperComponent,
+    HorizontalStepperItemComponent,
+    ButtonComponent,
+  ],
+  template: \`
+    <tedi-horizontal-stepper ariaLabel="Form progress">
+      @for (label of steps; track label; let i = $index) {
+        <tedi-horizontal-stepper-item
+          [label]="label"
+          [completed]="i < current()"
+          [selected]="i === current()"
+          [disabled]="i > current()"
+          (stepSelect)="current.set(i)"
+        />
+      }
+    </tedi-horizontal-stepper>
+    <button tedi-button variant="secondary" [disabled]="current() === 0" (click)="back()">
+      Tagasi
+    </button>
+    <button tedi-button [disabled]="current() === steps.length - 1" (click)="next()">
+      Edasi
+    </button>
+  \`,
+})
+export class FormWizardComponent {
+  steps = ["Kutse", "Tahteavaldus", "Geenianalüüs", "Vastus"];
+  current = signal(0);
+
+  back(): void {
+    this.current.update((s) => Math.max(0, s - 1));
+  }
+
+  next(): void {
+    this.current.update((s) => Math.min(this.steps.length - 1, s + 1));
+  }
+}`,
+      },
+    },
+  },
 };

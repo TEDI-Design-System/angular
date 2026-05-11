@@ -24,6 +24,7 @@ class TranslationMock {
       [completed]="completed"
       [error]="error"
       [selected]="selected"
+      [disabled]="disabled"
       (stepSelect)="onStepSelect()"
     />
   `,
@@ -34,6 +35,7 @@ class TestHostComponent {
   completed = false;
   error = false;
   selected = false;
+  disabled = false;
   onStepSelect = jest.fn();
 }
 
@@ -187,6 +189,36 @@ describe("HorizontalStepperItemComponent", () => {
     fixture.detectChanges();
 
     expect(host.onStepSelect).toHaveBeenCalled();
+  });
+
+  it("should not emit stepSelect when selected", () => {
+    host.selected = true;
+    fixture.detectChanges();
+
+    getButton().click();
+    fixture.detectChanges();
+
+    expect(host.onStepSelect).not.toHaveBeenCalled();
+  });
+
+  it("should apply disabled class and disable the button when disabled", () => {
+    host.disabled = true;
+    fixture.detectChanges();
+
+    expect(getItem().classList).toContain(
+      "tedi-horizontal-stepper-item--disabled",
+    );
+    expect(getButton().disabled).toBe(true);
+  });
+
+  it("should not emit stepSelect when disabled", () => {
+    host.disabled = true;
+    fixture.detectChanges();
+
+    getButton().click();
+    fixture.detectChanges();
+
+    expect(host.onStepSelect).not.toHaveBeenCalled();
   });
 
   it("should render a button element", () => {

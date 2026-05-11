@@ -24,6 +24,10 @@
       outline: 2px solid var(--general-focus-outline);
       outline-offset: -2px;
     }
+
+    &:disabled {
+      cursor: default;
+    }
   }
 
   &__indicator {
@@ -67,10 +71,10 @@
   }
 
   &:not(#{$host}--selected):not(#{$host}--completed):not(#{$host}--error) {
-    #{$host}__step:hover {
+    #{$host}__step:hover:not(:disabled) {
       #{$host}__indicator {
         background-color: var(--stepper-step-default-bg-hover);
-        border-color: transparent;
+        border-color: var(--stepper-step-default-border-hover);
       }
 
       #{$host}__number {
@@ -82,16 +86,14 @@
       }
     }
 
-    #{$host}__step:active {
-      background-color: var(--stepper-item-horizontal-type-default-bg-active);
-
+    #{$host}__step:active:not(:disabled) {
       #{$host}__indicator {
-        background-color: var(--stepper-step-default-bg);
-        border-color: transparent;
+        background-color: var(--stepper-step-default-bg-active);
+        border-color: var(--stepper-step-default-border-active);
       }
 
       #{$host}__number {
-        color: var(--general-text-primary);
+        color: var(--general-text-white);
       }
 
       #{$host}__label {
@@ -154,7 +156,7 @@
       color: var(--stepper-item-horizontal-text-completed-default);
     }
 
-    #{$host}__step:hover {
+    #{$host}__step:hover:not(:disabled) {
       #{$host}__indicator {
         background-color: var(--stepper-step-completed-bg-hover);
       }
@@ -165,7 +167,7 @@
       }
     }
 
-    #{$host}__step:active {
+    #{$host}__step:active:not(:disabled) {
       background-color: var(--stepper-item-horizontal-type-completed-bg-active);
 
       #{$host}__indicator {
@@ -197,7 +199,7 @@
       color: var(--stepper-item-horizontal-text-danger-default);
     }
 
-    #{$host}__step:hover {
+    #{$host}__step:hover:not(:disabled) {
       #{$host}__indicator {
         background-color: var(--stepper-step-danger-bg-hover);
       }
@@ -208,7 +210,7 @@
       }
     }
 
-    #{$host}__step:active {
+    #{$host}__step:active:not(:disabled) {
       background-color: var(--stepper-item-horizontal-type-danger-bg-active);
 
       #{$host}__indicator {

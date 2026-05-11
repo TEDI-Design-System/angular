@@ -1,8 +1,9 @@
 <button
   class="tedi-horizontal-stepper-item__step"
   type="button"
+  [disabled]="disabled()"
   [attr.aria-current]="selected() ? 'step' : null"
-  (click)="stepSelect.emit()"
+  (click)="onClick()"
 >
   <span class="tedi-horizontal-stepper-item__indicator">
     @if (completed() && !error()) {

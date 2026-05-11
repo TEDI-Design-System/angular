@@ -23,6 +23,7 @@ import { TediTranslationPipe } from "../../../../services/translation/translatio
     "[class.tedi-horizontal-stepper-item--completed]":
       "completed() && !error()",
     "[class.tedi-horizontal-stepper-item--error]": "error()",
+    "[class.tedi-horizontal-stepper-item--disabled]": "disabled()",
   },
 })
 export class HorizontalStepperItemComponent {
@@ -31,9 +32,24 @@ export class HorizontalStepperItemComponent {
   completed = input(false, { transform: booleanAttribute });
   error = input(false, { transform: booleanAttribute });
   selected = input(false, { transform: booleanAttribute });
+  /**
+   * Prevents the step from being clicked or focused. Use for future steps
+   * the user shouldn't reach yet (e.g. when validation runs step-by-step).
+   * Leave completed steps enabled so users can navigate back to them.
+   */
+  disabled = input(false, { transform: booleanAttribute });
 
+  /**
+   * Emits when the user clicks the step. Does not emit when the step is
+   * selected (it's already the current step) or disabled.
+   */
   stepSelect = output();
 
   /** @internal Set by parent HorizontalStepperComponent */
   _stepNumber = signal(0);
+
+  protected onClick(): void {
+    if (this.selected()) return;
+    this.stepSelect.emit();
+  }
 }
