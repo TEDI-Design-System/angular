@@ -115,7 +115,7 @@ export default {
     },
     pickerVariant: {
       description:
-        "Picker variant. `none` renders just the input with browser HH:mm validation and no picker UI.",
+        "Picker variant. `none` renders just the input with no picker UI — typed input is still normalized on blur.",
       control: { type: "radio" },
       options: ["scroll", "slots", "dropdown", "none"],
       table: {
@@ -564,7 +564,7 @@ export const WithoutPicker: StoryObj<TimeFieldComponent> = {
     docs: {
       description: {
         story:
-          "When you only need a typed time entry without any picker UI, set `pickerVariant=\"none\"`. The input is rendered as `type=\"time\"` so the browser still enforces HH:mm format.",
+          "When you only need a typed time entry without any picker UI, set `pickerVariant=\"none\"`. The input stays a plain text field, so the same blur-time normalization as the `InputFormatting` story applies. Use `useNativePicker` if you want the browser's `type=\"time\"` UI instead.",
       },
     },
   },

@@ -335,9 +335,9 @@ describe("TimeFieldComponent", () => {
       fixture.detectChanges();
     });
 
-    it("should render the visible input with type=time", () => {
+    it("should render the visible input as plain text (no native picker)", () => {
       const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
-      expect(input.type).toBe("time");
+      expect(input.type).toBe("text");
     });
 
     it("should not render any picker affordance", () => {

@@ -101,7 +101,7 @@ export class TimeFieldComponent
   readonly invalid = input<boolean>(false);
   /** Show a clear button when the field has a value. */
   readonly clearable = input<boolean>(true);
-  /** Picker variant. `none` renders just the input with browser HH:mm validation and no picker UI. */
+  /** Picker variant. `none` renders just the input with no picker UI — typed input is still normalized on blur. */
   readonly pickerVariant = input<TimeFieldPickerVariant>("scroll");
   /**
    * Use the OS native time picker instead of the custom one. Accepts a breakpoint object,
@@ -168,9 +168,7 @@ export class TimeFieldComponent
     () => this.pickerVariant() as TimePickerVariant,
   );
   readonly inputType = computed(() =>
-    this.useNativePickerResolved() || this.pickerVariant() === "none"
-      ? "time"
-      : "text",
+    this.useNativePickerResolved() ? "time" : "text",
   );
   readonly inputIsTrigger = computed(
     () =>
