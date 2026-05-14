@@ -29,6 +29,31 @@ class StepClickNavigationDemoComponent {
 }
 
 @Component({
+  selector: "story-compact-navigation",
+  standalone: true,
+  imports: [HorizontalStepperComponent, HorizontalStepperItemComponent],
+  template: `
+    <div style="max-width: 480px;">
+      <tedi-horizontal-stepper ariaLabel="Form progress" [compact]="true">
+        @for (label of steps; track label; let i = $index) {
+          <tedi-horizontal-stepper-item
+            [label]="label"
+            description="Ametnik täidab"
+            [completed]="i < current()"
+            [selected]="i === current()"
+            (stepSelect)="current.set(i)"
+          />
+        }
+      </tedi-horizontal-stepper>
+    </div>
+  `,
+})
+class CompactNavigationDemoComponent {
+  steps = STEPS;
+  current = signal(1);
+}
+
+@Component({
   selector: "story-external-navigation",
   standalone: true,
   imports: [
@@ -103,12 +128,12 @@ export default {
     },
     compact: {
       control: "select",
-      options: [true, false, "sm", "md", "lg", "xl"],
+      options: [true, false, "sm", "md", "lg", "xl", "xxl"],
       description:
         "Collapse labels (show only indicators + selected step's label). `true` = always; a breakpoint string = collapse below that breakpoint.",
       table: {
         defaultValue: { summary: "'sm'" },
-        type: { summary: "boolean | 'sm' | 'md' | 'lg' | 'xl'" },
+        type: { summary: "boolean | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'" },
         category: "inputs",
       },
     },
@@ -121,7 +146,7 @@ export const Default: Story = {
   render: (props) => ({
     props,
     template: `
-      <tedi-horizontal-stepper ariaLabel="Form progress" [background]="background">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" [background]="background" [compact]="compact">
         <tedi-horizontal-stepper-item label="Kutse" selected />
         <tedi-horizontal-stepper-item label="Tahteavaldus" />
         <tedi-horizontal-stepper-item label="Geenianalüüs" />
@@ -130,7 +155,9 @@ export const Default: Story = {
     `,
   }),
   args: {
+    ariaLabel: "Form progress",
     background: "default",
+    compact: "sm",
   },
 };
 
@@ -245,39 +272,44 @@ export const TransparentBackground: Story = {
 };
 
 /**
- * Always collapsed — only indicators plus the selected step's label are shown,
- * regardless of viewport width.
+ * Collapsed — only indicators plus the selected step's label are shown.
+ * Use `[compact]="true"` for always-on, or pass a breakpoint (e.g. `compact="md"`)
+ * to collapse only below that viewport width. Each indicator is clickable so the
+ * user can jump between steps.
  */
-export const AlwaysCompact: Story = {
-  render: (props) => ({
-    props,
-    template: `
-      <tedi-horizontal-stepper ariaLabel="Form progress" [compact]="true">
-        <tedi-horizontal-stepper-item label="Kutse" completed />
-        <tedi-horizontal-stepper-item label="Tahteavaldus" selected description="Ametnik täidab" />
-        <tedi-horizontal-stepper-item label="Geenianalüüs" description="Ametnik täidab" />
-        <tedi-horizontal-stepper-item label="Vastus" description="Ametnik täidab" />
-      </tedi-horizontal-stepper>
-    `,
+export const Compact: Story = {
+  render: () => ({
+    moduleMetadata: { imports: [CompactNavigationDemoComponent] },
+    template: `<story-compact-navigation />`,
   }),
-};
-
-/**
- * Collapses at the `md` breakpoint — useful when labels with descriptions
- * would overflow on narrower desktops.
- */
-export const CompactAtMdBreakpoint: Story = {
-  render: (props) => ({
-    props,
-    template: `
-      <tedi-horizontal-stepper ariaLabel="Form progress" compact="md">
-        <tedi-horizontal-stepper-item label="Kutse" completed />
-        <tedi-horizontal-stepper-item label="Tahteavaldus" selected description="Ametnik täidab" />
-        <tedi-horizontal-stepper-item label="Geenianalüüs" description="Ametnik täidab" />
-        <tedi-horizontal-stepper-item label="Vastus" description="Ametnik täidab" />
-      </tedi-horizontal-stepper>
-    `,
-  }),
+  parameters: {
+    docs: {
+      source: {
+        type: "code",
+        language: "ts",
+        code: `@Component({
+  imports: [HorizontalStepperComponent, HorizontalStepperItemComponent],
+  template: \`
+    <tedi-horizontal-stepper ariaLabel="Form progress" [compact]="true">
+      @for (label of steps; track label; let i = $index) {
+        <tedi-horizontal-stepper-item
+          [label]="label"
+          description="Ametnik täidab"
+          [completed]="i < current()"
+          [selected]="i === current()"
+          (stepSelect)="current.set(i)"
+        />
+      }
+    </tedi-horizontal-stepper>
+  \`,
+})
+export class FormWizardComponent {
+  steps = ["Kutse", "Tahteavaldus", "Geenianalüüs", "Vastus"];
+  current = signal(1);
+}`,
+      },
+    },
+  },
 };
 
 /**

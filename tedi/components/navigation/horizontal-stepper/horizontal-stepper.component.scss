@@ -36,7 +36,7 @@
     @include compact-styles;
   }
 
-  @each $bp in (sm, md, lg, xl) {
+  @each $bp in (sm, md, lg, xl, xxl) {
     &--compact-#{$bp} {
       @include breakpoints.media-breakpoint-down($bp) {
         @include compact-styles;

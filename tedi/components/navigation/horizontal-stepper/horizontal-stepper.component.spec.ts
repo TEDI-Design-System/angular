@@ -2,11 +2,9 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
-import {
-  HorizontalStepperComponent,
-  HorizontalStepperCompact,
-} from "./horizontal-stepper.component";
+import { HorizontalStepperComponent } from "./horizontal-stepper.component";
 import { HorizontalStepperItemComponent } from "./horizontal-stepper-item/horizontal-stepper-item.component";
+import { BreakpointFlag } from "../../../services/breakpoint/breakpoint.service";
 
 class TranslationMock {
   translate(key: string) {
@@ -37,7 +35,7 @@ class TranslationMock {
 class TestHostComponent {
   ariaLabel = "Form progress";
   background: "default" | "transparent" = "default";
-  compact: HorizontalStepperCompact = "sm";
+  compact: BreakpointFlag = "sm";
 }
 
 describe("HorizontalStepperComponent", () => {
@@ -164,7 +162,7 @@ describe("HorizontalStepperComponent", () => {
     });
 
     it("should apply the matching breakpoint class", () => {
-      for (const bp of ["sm", "md", "lg", "xl"] as const) {
+      for (const bp of ["sm", "md", "lg", "xl", "xxl"] as const) {
         host.compact = bp;
         fixture.detectChanges();
 

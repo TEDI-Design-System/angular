@@ -7,10 +7,9 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { HorizontalStepperItemComponent } from "./horizontal-stepper-item/horizontal-stepper-item.component";
+import { BreakpointFlag } from "../../../services/breakpoint/breakpoint.service";
 
 export type HorizontalStepperBackground = "default" | "transparent";
-export type HorizontalStepperBreakpoint = "sm" | "md" | "lg" | "xl";
-export type HorizontalStepperCompact = boolean | HorizontalStepperBreakpoint;
 
 @Component({
   selector: "tedi-horizontal-stepper",
@@ -27,6 +26,7 @@ export type HorizontalStepperCompact = boolean | HorizontalStepperBreakpoint;
     "[class.tedi-horizontal-stepper--compact-md]": "compact() === 'md'",
     "[class.tedi-horizontal-stepper--compact-lg]": "compact() === 'lg'",
     "[class.tedi-horizontal-stepper--compact-xl]": "compact() === 'xl'",
+    "[class.tedi-horizontal-stepper--compact-xxl]": "compact() === 'xxl'",
     role: "navigation",
     "[attr.aria-label]": "ariaLabel()",
   },
@@ -36,9 +36,9 @@ export class HorizontalStepperComponent {
   background = input<HorizontalStepperBackground>("default");
   /**
    * Collapse labels so only indicators plus the selected step's label are visible.
-   * `true` — always collapsed. A breakpoint (`'sm'`, `'md'`, `'lg'`, `'xl'`) — collapsed below that breakpoint. @default 'sm'
+   * `true` — always collapsed. A breakpoint (`'sm'`, `'md'`, `'lg'`, `'xl'`, `'xxl'`) — collapsed below that breakpoint. @default 'sm'
    */
-  compact = input<HorizontalStepperCompact>("sm");
+  compact = input<BreakpointFlag>("sm");
 
   items = contentChildren(HorizontalStepperItemComponent);
 
