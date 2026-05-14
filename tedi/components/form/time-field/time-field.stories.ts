@@ -115,16 +115,29 @@ export default {
     },
     pickerVariant: {
       description:
-        "Picker variant. `none` renders just the input with browser HH:mm validation; `native` opens the OS time picker.",
+        "Picker variant. `none` renders just the input with browser HH:mm validation and no picker UI.",
       control: { type: "radio" },
-      options: ["scroll", "slots", "dropdown", "none", "native"],
+      options: ["scroll", "slots", "dropdown", "none"],
       table: {
         category: "inputs",
         type: {
           summary: "TimeFieldPickerVariant",
-          detail: "scroll \nslots \ndropdown \nnone \nnative",
+          detail: "scroll \nslots \ndropdown \nnone",
         },
         defaultValue: { summary: "scroll" },
+      },
+    },
+    useNativePicker: {
+      description:
+        "Use the OS native time picker. Accepts a breakpoint object, e.g. `{ xs: true, md: false }` to use the native picker on phones and the custom variant on larger screens. When `true`, overrides `pickerVariant` and `modal`.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: {
+          summary: "BreakpointInput<boolean>",
+          detail: "boolean \n{ xs: boolean; sm?: boolean; md?: boolean; lg?: boolean; xl?: boolean; xxl?: boolean }",
+        },
+        defaultValue: { summary: "false" },
       },
     },
     pickerTrigger: {
@@ -201,6 +214,7 @@ export const Default: StoryObj<TimeFieldComponent> = {
     invalid: false,
     clearable: true,
     pickerVariant: "scroll",
+    useNativePicker: false,
     pickerTrigger: "button",
     closeOnSelect: false,
     timeSlots: [],
@@ -225,6 +239,7 @@ export const Default: StoryObj<TimeFieldComponent> = {
               [invalid]="invalid"
               [clearable]="clearable"
               [pickerVariant]="pickerVariant"
+              [useNativePicker]="useNativePicker"
               [pickerTrigger]="pickerTrigger"
               [closeOnSelect]="closeOnSelect"
               [timeSlots]="timeSlots"
@@ -450,7 +465,7 @@ export const WithNativePicker: StoryObj<TimeFieldComponent> = {
         <tedi-col>
           <tedi-form-field>
             <label tedi-label for="native-picker">Time</label>
-            <tedi-time-field inputId="native-picker" value="09:30" pickerVariant="native" />
+            <tedi-time-field inputId="native-picker" value="09:30" [useNativePicker]="true" />
           </tedi-form-field>
         </tedi-col>
       </tedi-row>
@@ -460,7 +475,35 @@ export const WithNativePicker: StoryObj<TimeFieldComponent> = {
     docs: {
       description: {
         story:
-          "Native picker uses the browser's built-in `<input type=\"time\">` UI instead of the custom popover. Recommended on mobile for native UX. The visible input itself becomes `type=\"time\"`, so the OS keyboard and validation kick in automatically.",
+          "Native picker uses the browser's built-in `<input type=\"time\">` UI instead of the custom popover. Set `[useNativePicker]=\"true\"` to force it everywhere. The visible input becomes `type=\"time\"`, so the OS keyboard and validation kick in automatically. To use the native picker only on small viewports, see the `WithResponsiveNativePicker` story.",
+      },
+    },
+  },
+};
+
+export const WithResponsiveNativePicker: StoryObj<TimeFieldComponent> = {
+  render: () => ({
+    template: `
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="responsive-native">Time</label>
+            <tedi-time-field
+              inputId="responsive-native"
+              value="09:30"
+              pickerVariant="scroll"
+              [useNativePicker]="{ xs: true, md: false }"
+            />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`useNativePicker` accepts a `BreakpointInput<boolean>`, so consumers can switch the picker per breakpoint. Here the OS picker is used on `xs`/`sm`, and the custom `scroll` variant takes over from `md` upward — without having to redefine `pickerVariant` for each breakpoint.",
       },
     },
   },

@@ -73,8 +73,10 @@ export interface TimePickerModalData {
   styles: [
     `
       .tedi-time-picker-modal {
-        --_tedi-time-picker-width: 100%;
         --_tedi-modal-body-padding: 0;
+      }
+      .tedi-time-picker-modal .tedi-time-picker {
+        --_tedi-time-picker-width: 100%;
       }
       .tedi-time-picker-modal__content {
         display: flex;

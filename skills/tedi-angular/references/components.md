@@ -374,7 +374,8 @@ statusControl = new FormControl<string | null>(null);
 - `disabled: boolean = false`
 - `invalid: boolean = false`
 - `clearable: boolean = true`
-- `pickerVariant: TimeFieldPickerVariant = "scroll"` — `"scroll" | "slots" | "dropdown" | "none" | "native"`. `"none"` renders just the input (with browser-native HH:mm validation); `"native"` uses the OS time picker
+- `pickerVariant: TimeFieldPickerVariant = "scroll"` — `"scroll" | "slots" | "dropdown" | "none"`. `"none"` renders just the input with browser-native HH:mm validation and no picker UI
+- `useNativePicker: BreakpointInput<boolean> = false` — when `true`, overrides `pickerVariant` and uses the OS time picker (`<input type="time">`). Accepts a breakpoint object, e.g. `{ xs: true, md: false }` to use the OS picker on phones and the custom variant from `md` upward
 - `pickerTrigger: TimeFieldPickerTrigger = "button"` — `"button"` opens via the icon, `"input"` also opens when the input is clicked
 - `closeOnSelect: boolean = false` — close the popover/modal as soon as a value is picked
 - `timeSlots: string[] = []` — `HH:mm` strings for `"slots"` and `"dropdown"` variants
@@ -387,6 +388,13 @@ statusControl = new FormControl<string | null>(null);
   <label tedi-label for="time">Time</label>
   <tedi-time-field inputId="time" [formControl]="timeControl" pickerTrigger="input" />
 </tedi-form-field>
+
+<!-- Custom scroll picker on desktop, OS picker on mobile -->
+<tedi-time-field
+  inputId="time"
+  pickerVariant="scroll"
+  [useNativePicker]="{ xs: true, md: false }"
+/>
 ```
 
 ### TimePicker

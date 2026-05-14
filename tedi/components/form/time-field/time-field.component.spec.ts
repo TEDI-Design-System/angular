@@ -220,7 +220,7 @@ describe("TimeFieldComponent", () => {
 
   describe("native picker", () => {
     beforeEach(() => {
-      fixture.componentRef.setInput("pickerVariant", "native");
+      fixture.componentRef.setInput("useNativePicker", true);
       fixture.detectChanges();
     });
 

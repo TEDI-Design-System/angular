@@ -25,7 +25,11 @@ import {
   TimePickerVariant,
 } from "../time-picker/time-picker.component";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
-import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
+import {
+  breakpointInput,
+  BreakpointInput,
+  BreakpointService,
+} from "../../../services/breakpoint/breakpoint.service";
 import { ModalService } from "../../overlay/modal/modal.service";
 import {
   FormFieldControl,
@@ -38,7 +42,7 @@ import {
 
 export type TimeFieldSize = "default" | "small";
 export type TimeFieldState = "default" | "error" | "valid";
-export type TimeFieldPickerVariant = TimePickerVariant | "none" | "native";
+export type TimeFieldPickerVariant = TimePickerVariant | "none";
 export type TimeFieldPickerTrigger = "button" | "input";
 export type TimeFieldModal = boolean | "sm" | "md" | "lg" | "xl";
 
@@ -96,8 +100,17 @@ export class TimeFieldComponent
   readonly invalid = input<boolean>(false);
   /** Show a clear button when the field has a value. */
   readonly clearable = input<boolean>(true);
-  /** Picker variant. `none` renders just the input (with browser HH:mm validation); `native` opens the OS picker. */
+  /** Picker variant. `none` renders just the input with browser HH:mm validation and no picker UI. */
   readonly pickerVariant = input<TimeFieldPickerVariant>("scroll");
+  /**
+   * Use the OS native time picker instead of the custom one. Accepts a breakpoint object,
+   * e.g. `{ xs: true, md: false }` to use the native picker on phones and the custom variant on larger screens.
+   * When `true`, overrides `pickerVariant` and `modal` — the input renders as `type="time"`.
+   */
+  readonly useNativePicker = input(
+    { xs: false },
+    { transform: (v: BreakpointInput<boolean>) => breakpointInput(v) },
+  );
   /** What opens the picker: only the icon (`button`) or also clicking the input (`input`). */
   readonly pickerTrigger = input<TimeFieldPickerTrigger>("button");
   /** Close the popover/modal as soon as the user picks a value. */
@@ -137,18 +150,27 @@ export class TimeFieldComponent
     () => this.value() !== null && this.value() !== "",
   );
   readonly showClear = computed(() => this.hasValue() && this.clearable());
-  readonly hasPicker = computed(() => {
-    const v = this.pickerVariant();
-    return v !== "none" && v !== "native";
+  readonly useNativePickerResolved = computed(() => {
+    const v = this.useNativePicker();
+    if (v.xxl !== undefined && this.breakpointService.isAboveBreakpoint("xxl")()) return v.xxl;
+    if (v.xl !== undefined && this.breakpointService.isAboveBreakpoint("xl")()) return v.xl;
+    if (v.lg !== undefined && this.breakpointService.isAboveBreakpoint("lg")()) return v.lg;
+    if (v.md !== undefined && this.breakpointService.isAboveBreakpoint("md")()) return v.md;
+    if (v.sm !== undefined && this.breakpointService.isAboveBreakpoint("sm")()) return v.sm;
+    return v.xs;
   });
-  readonly hasNativePicker = computed(() => this.pickerVariant() === "native");
-  readonly resolvedPickerVariant = computed(
+  readonly hasPicker = computed(
+    () => this.pickerVariant() !== "none" && !this.useNativePickerResolved(),
+  );
+  readonly hasNativePicker = computed(() => this.useNativePickerResolved());
+  readonly customPickerVariant = computed(
     () => this.pickerVariant() as TimePickerVariant,
   );
-  readonly inputType = computed(() => {
-    const v = this.pickerVariant();
-    return v === "native" || v === "none" ? "time" : "text";
-  });
+  readonly inputType = computed(() =>
+    this.useNativePickerResolved() || this.pickerVariant() === "none"
+      ? "time"
+      : "text",
+  );
   readonly inputIsTrigger = computed(
     () =>
       this.pickerTrigger() === "input" &&
@@ -264,7 +286,7 @@ export class TimeFieldComponent
   private openMobileModal() {
     const data: TimePickerModalData = {
       value: this.value(),
-      variant: this.resolvedPickerVariant(),
+      variant: this.customPickerVariant(),
       timeSlots: this.timeSlots(),
       columns: this.columns(),
       minuteStep: this.minuteStep(),
