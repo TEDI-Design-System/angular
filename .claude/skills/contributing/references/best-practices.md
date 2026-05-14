@@ -87,7 +87,7 @@ import {
 } from "../../../services/breakpoint/breakpoint.service";
 
 readonly useNativePicker = input(
-  false as BreakpointInput<boolean>,
+  { xs: false },
   { transform: (v: BreakpointInput<boolean>) => breakpointInput(v) },
 );
 
