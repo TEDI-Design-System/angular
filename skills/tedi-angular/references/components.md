@@ -642,7 +642,7 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 **Inputs:**
 - `ariaLabel: string`
 - `background: "default" | "transparent" = "default"`
-- `compact: boolean | "sm" | "md" | "lg" | "xl" = "sm"` — collapse labels to show only indicators plus the selected step's label. `true` = always collapsed; a breakpoint = collapsed below that breakpoint.
+- `compact: boolean | "sm" | "md" | "lg" | "xl" | "xxl" = "sm"` — collapse labels to show only indicators plus the selected step's label. `true` = always collapsed; a breakpoint = collapsed below that breakpoint.
 
 **Sub-component:** `tedi-horizontal-stepper-item`
 - `label: string` (required), `description: string`
@@ -720,8 +720,9 @@ openModal() {
     size: 'default',                // 'default' | 'small'
     position: 'center',             // 'center' | 'top' | 'left' | 'right'
     closeOnBackdropClick: true,
+    closeOnEscape: true,
     scrollBehavior: 'content',      // 'content' | 'page'
-    mobileFullscreen: false,
+    fullscreen: false,              // true | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | false
   });
 
   ref.closed.subscribe(result => console.log(result));
@@ -731,11 +732,15 @@ openModal() {
 **ModalConfig inputs:**
 - `data: unknown` — injected via `MODAL_DATA` token
 - `width: ModalWidth = "sm"` — preset (`xs`-`xl`) or custom CSS value (`"80%"`, `"600px"`)
+- `maxWidth: string` — max-width cap (e.g. `"75%"`, `"60vw"`). Overrides the default 95vw limit.
 - `size: ModalSize = "default"` — `"default"` or `"small"`
 - `position: ModalPosition = "center"` — `"center"`, `"top"`, `"left"`, `"right"`
 - `closeOnBackdropClick: boolean = true`
+- `closeOnEscape: boolean = true`
 - `scrollBehavior: "content" | "page" = "content"`
-- `mobileFullscreen: boolean = false`
+- `fullscreen: boolean | "sm" | "md" | "lg" | "xl" | "xxl" = false` — `true` = always fullscreen; a breakpoint = fullscreen below that breakpoint.
+- `ariaLabel: string` — ARIA label for the dialog.
+- `ariaLabelledBy: string` — ID of the element that labels the dialog.
 
 **ModalRef methods/properties:**
 - `close(result?: R)` — close with optional result
