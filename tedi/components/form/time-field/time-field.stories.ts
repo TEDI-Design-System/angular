@@ -392,6 +392,44 @@ export const WithError: StoryObj<TimeFieldComponent> = {
   }),
 };
 
+export const InputFormatting: StoryObj<TimeFieldComponent> = {
+  render: () => ({
+    template: `
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="input-formatting">Type a time and tab out</label>
+            <tedi-time-field inputId="input-formatting" placeholder="hh:mm" pickerVariant="none" />
+            <tedi-feedback-text text="Try 1155, 930, 11.55, or 9:5" type="hint" position="left" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story: `
+On blur, typed input is normalized to the canonical \`HH:mm\` form. The same rules
+apply regardless of \`pickerVariant\` — they only affect manual typing.
+
+| Input            | Normalized | Notes                                           |
+| ---------------- | ---------- | ----------------------------------------------- |
+| \`09:30\`          | \`09:30\`    | Already valid — passed through                  |
+| \`9:5\`            | \`09:05\`    | Single-digit hour or minute is zero-padded      |
+| \`1155\`           | \`11:55\`    | 4 digits → split as \`HH\` + \`mm\`                 |
+| \`930\`            | \`09:30\`    | 3 digits → split as \`H\` + \`mm\`                  |
+| \`11.55\`, \`11-55\`, \`11 55\` | \`11:55\` | Any non-digit is treated as the separator |
+| \`24:00\`, \`12:60\` | unchanged | Out-of-range — input reverts to the last valid value |
+| \`abc\`, \`1\`, \`12\` | unchanged | Cannot be normalized — reverts to the last valid value |
+
+Empty input clears the value (\`null\`).
+`,
+      },
+    },
+  },
+};
+
 export const WithScrollPicker: StoryObj<TimeFieldComponent> = {
   render: () => ({
     template: `

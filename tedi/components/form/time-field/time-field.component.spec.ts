@@ -105,6 +105,31 @@ describe("TimeFieldComponent", () => {
       expect(component.value()).toBe("23:59");
     });
 
+    it("should normalize 4-digit input without delimiter", () => {
+      input.value = "1155";
+      input.dispatchEvent(new Event("input"));
+      input.dispatchEvent(new Event("blur"));
+
+      expect(component.value()).toBe("11:55");
+      expect(component.inputValue()).toBe("11:55");
+    });
+
+    it("should normalize 3-digit input without delimiter", () => {
+      input.value = "930";
+      input.dispatchEvent(new Event("input"));
+      input.dispatchEvent(new Event("blur"));
+
+      expect(component.value()).toBe("09:30");
+    });
+
+    it("should normalize alternative delimiters", () => {
+      input.value = "11.55";
+      input.dispatchEvent(new Event("input"));
+      input.dispatchEvent(new Event("blur"));
+
+      expect(component.value()).toBe("11:55");
+    });
+
     it("should reject 24:00", () => {
       component.writeValue("12:00");
       fixture.detectChanges();

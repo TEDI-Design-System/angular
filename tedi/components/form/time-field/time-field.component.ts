@@ -39,6 +39,7 @@ import {
   TimePickerModalComponent,
   TimePickerModalData,
 } from "./time-picker-modal.component";
+import { normalizeTime } from "../../../utils/time.util";
 
 export type TimeFieldSize = "default" | "small";
 export type TimeFieldState = "default" | "error" | "valid";
@@ -221,7 +222,9 @@ export class TimeFieldComponent
     this.onTouched();
 
     const raw = this.inputValue();
-    if (raw === "") {
+    const normalized = normalizeTime(raw);
+
+    if (normalized === "") {
       if (this.value() !== null) {
         this.value.set(null);
         this.onChange(null);
@@ -229,13 +232,12 @@ export class TimeFieldComponent
       return;
     }
 
-    const parsed = this.parseTime(raw);
-    if (parsed) {
-      if (parsed !== this.value()) {
-        this.value.set(parsed);
-        this.onChange(parsed);
+    if (normalized !== null) {
+      if (normalized !== this.value()) {
+        this.value.set(normalized);
+        this.onChange(normalized);
       }
-      this.inputValue.set(parsed);
+      this.inputValue.set(normalized);
     } else {
       this.inputValue.set(this.value() ?? "");
     }
@@ -357,16 +359,4 @@ export class TimeFieldComponent
     this.onTouched();
   }
 
-  private parseTime(value: string): string | null {
-    const trimmed = value.trim();
-    const match = trimmed.match(/^(\d{1,2}):(\d{2})$/);
-    if (!match) return null;
-
-    const hours = parseInt(match[1], 10);
-    const minutes = parseInt(match[2], 10);
-
-    if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
-
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-  }
 }
