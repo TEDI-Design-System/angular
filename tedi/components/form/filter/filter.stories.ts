@@ -20,6 +20,9 @@ import { RadioComponent } from "../radio/radio.component";
 import { RadioGroupComponent } from "../radio-group/radio-group.component";
 import { LabelComponent } from "../label/label.component";
 
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=4612-83722&m=dev" target="_blank">Figma ↗</a>
+ */
 export default {
   title: "TEDI-Ready/Components/Form/Filter",
   component: FilterComponent,
