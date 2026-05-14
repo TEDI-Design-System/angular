@@ -49,7 +49,7 @@ export class HorizontalStepperItemComponent {
   _stepNumber = signal(0);
 
   protected onClick(): void {
-    if (this.selected()) return;
+    if (this.selected() || this.disabled()) return;
     this.stepSelect.emit();
   }
 }
