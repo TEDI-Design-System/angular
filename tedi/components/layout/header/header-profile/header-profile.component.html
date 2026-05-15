@@ -1,8 +1,8 @@
-<ng-container *hideAt="showPopover()">
+<ng-container *hideAt="breakpointInputs().showPopover">
   <ng-container *ngTemplateOutlet="trigger" />
 </ng-container>
 
-<ng-container *showAt="showPopover()">
+<ng-container *showAt="breakpointInputs().showPopover">
   <tedi-popover
     [withBorder]="true"
     position="bottom"
@@ -13,9 +13,7 @@
       tedi-popover-trigger
       [attr.data-open]="modalOpen()"
       [variant]="buttonVariant()"
-      [attr.aria-label]="
-        !label() ? translationService.track('header.profile')() : null
-      "
+      [attr.aria-label]="!showLabel() ? resolvedLabel() : null"
       (click)="handleModalOpen()"
     >
       <ng-container *ngTemplateOutlet="buttonContent" />
@@ -41,9 +39,7 @@
       tedi-button
       [attr.data-open]="modalOpen()"
       [variant]="buttonVariant()"
-      [attr.aria-label]="
-        !label() ? translationService.track('header.profile')() : null
-      "
+      [attr.aria-label]="!showLabel() ? resolvedLabel() : null"
       [attr.aria-haspopup]="'dialog'"
       [attr.aria-expanded]="modalOpen()"
       (click)="handleModalOpen()"
@@ -59,10 +55,10 @@
     name="account_circle"
     color="brand"
     class="tedi-header-profile__icon"
-    [class.tedi-header-profile__icon--small]="label()"
+    [class.tedi-header-profile__icon--small]="showLabel()"
   />
-  @if (label()) {
-    <span class="tedi-header-profile__label">{{ label() }}</span>
+  @if (showLabel()) {
+    <span class="tedi-header-profile__label">{{ resolvedLabel() }}</span>
     <tedi-icon name="expand_more" class="tedi-header-profile__icon--expand" />
   }
 </ng-template>

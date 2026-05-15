@@ -2,8 +2,10 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Component, NO_ERRORS_SCHEMA, signal } from "@angular/core";
 import { HeaderRoleComponent, Representative } from "./header-role.component";
 import { HeaderRoleTitleDirective } from "./header-role-title.directive";
+import { HeaderProfileComponent } from "../header-profile/header-profile.component";
 import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
 import { TediTranslationService } from "../../../../services/translation/translation.service";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
 
 function createMobileBreakpointMock(): Partial<BreakpointService> {
   const isBelowSignal = signal(true);
@@ -11,6 +13,7 @@ function createMobileBreakpointMock(): Partial<BreakpointService> {
   return {
     isBelowBreakpoint: () => isBelowSignal,
     isAboveBreakpoint: () => isAboveSignal,
+    getBreakpointInputs: <T>(inputs: T) => inputs,
   };
 }
 
@@ -20,6 +23,7 @@ function createDesktopBreakpointMock(): Partial<BreakpointService> {
   return {
     isBelowBreakpoint: () => isBelowSignal,
     isAboveBreakpoint: () => isAboveSignal,
+    getBreakpointInputs: <T>(inputs: T) => inputs,
   };
 }
 
@@ -396,5 +400,112 @@ describe("HeaderRoleComponent desktop popover effects", () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+});
+
+describe("HeaderRoleComponent reset on parent profile close", () => {
+  const mockTranslationService = {
+    translate: (key: string) => key,
+    track: (key: string) => () => key,
+  } as Partial<TediTranslationService>;
+  const reps: Representative[] = [
+    { id: "1", name: "Alice", description: "Lead" },
+    { id: "2", name: "Bob", description: "Dev" },
+  ];
+
+  function setup(): {
+    fixture: ComponentFixture<unknown>;
+    profile: HeaderProfileComponent;
+    role: HeaderRoleComponent;
+  } {
+    @Component({
+      standalone: true,
+      imports: [HeaderProfileComponent, HeaderRoleComponent],
+      template: `
+        <tedi-header-profile>
+          <tedi-header-role
+            label="Roll:"
+            [showInput]="true"
+            [representatives]="reps"
+            [currentRepresentative]="reps[0]"
+          />
+        </tedi-header-profile>
+      `,
+    })
+    class HostComponent {
+      reps = reps;
+    }
+
+    TestBed.configureTestingModule({
+      imports: [HostComponent],
+      providers: [
+        { provide: TediTranslationService, useValue: mockTranslationService },
+        { provide: BreakpointService, useValue: createMobileBreakpointMock() },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    });
+
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+
+    const profileEl = fixture.debugElement.query(
+      (de) => de.componentInstance instanceof HeaderProfileComponent,
+    );
+    const profile = profileEl.componentInstance as HeaderProfileComponent;
+
+    profile.modalOpen.set(true);
+    fixture.detectChanges();
+
+    const roleEl = fixture.debugElement.query(
+      (de) => de.componentInstance instanceof HeaderRoleComponent,
+    );
+    return {
+      fixture,
+      profile,
+      role: roleEl.componentInstance as HeaderRoleComponent,
+    };
+  }
+
+  it("collapses mobileOpen and clears inputValue when the parent profile modal closes", () => {
+    const { fixture, profile, role } = setup();
+
+    role.mobileOpen.set(true);
+    role.inputValue.set("alice");
+    fixture.detectChanges();
+
+    expect(role.mobileOpen()).toBe(true);
+    expect(role.inputValue()).toBe("alice");
+
+    // Close profile → role state should reset.
+    profile.modalOpen.set(false);
+    fixture.detectChanges();
+
+    expect(role.mobileOpen()).toBe(false);
+    expect(role.inputValue()).toBe("");
+  });
+
+  it("does nothing when HeaderRole is rendered outside any HeaderProfile", () => {
+    TestBed.configureTestingModule({
+      imports: [HeaderRoleComponent],
+      providers: [
+        { provide: TediTranslationService, useValue: mockTranslationService },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    });
+
+    const fixture = TestBed.createComponent(HeaderRoleComponent);
+    fixture.componentRef.setInput("label", "Roll:");
+    fixture.componentRef.setInput("representatives", reps);
+    fixture.componentRef.setInput("currentRepresentative", reps[0]);
+    fixture.detectChanges();
+
+    fixture.componentInstance.mobileOpen.set(true);
+    fixture.componentInstance.inputValue.set("alice");
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.mobileOpen()).toBe(true);
+    expect(fixture.componentInstance.inputValue()).toBe("alice");
   });
 });

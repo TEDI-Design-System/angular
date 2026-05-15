@@ -7,7 +7,10 @@ import { TediTranslationService } from "../../../../services/translation/transla
 @Component({
   standalone: true,
   imports: [HeaderLoginComponent],
-  template: `<tedi-header-login [href]="href" [label]="label"></tedi-header-login>`,
+  template: `<tedi-header-login
+    [href]="href"
+    [label]="label"
+  ></tedi-header-login>`,
 })
 class TestHostComponent {
   href?: string;
@@ -27,6 +30,7 @@ describe("HeaderLoginComponent", () => {
     isMobileSignal = signal(false);
     mockBreakpointService = {
       isBelowBreakpoint: () => isMobileSignal,
+      getBreakpointInputs: <T>(inputs: T) => inputs,
     } as Partial<BreakpointService>;
     mockTranslationService = {
       translate: jest.fn((key: string) => key),

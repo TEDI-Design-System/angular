@@ -23,6 +23,7 @@ import { PopoverComponent } from "../../../overlay/popover/popover.component";
 import { PopoverContentComponent } from "../../../overlay/popover/popover-content/popover-content.component";
 import {
   Breakpoint,
+  BreakpointInputs,
   BreakpointService,
 } from "../../../../services/breakpoint/breakpoint.service";
 import { PopoverTriggerDirective } from "../../../overlay/popover/popover-trigger/popover-trigger.directive";
@@ -30,6 +31,15 @@ import { TediTranslationService } from "../../../../services/translation/transla
 import { HeaderMobileButtonComponent } from "../header-mobile-button/header-mobile-button.component";
 
 export type HeaderProfileSize = "default" | "small";
+
+/**
+ * Subset of `HeaderProfileComponent` inputs that can be overridden per
+ * breakpoint via the `[xs]` / `[sm]` / `[md]` / `[lg]` / `[xl]` / `[xxl]` inputs.
+ */
+export type HeaderProfileInputs = {
+  label: string;
+  showPopover: Breakpoint;
+};
 
 @Component({
   selector: "tedi-header-profile",
@@ -50,14 +60,26 @@ export type HeaderProfileSize = "default" | "small";
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HeaderProfileComponent implements AfterContentInit {
+export class HeaderProfileComponent
+  implements BreakpointInputs<HeaderProfileInputs>, AfterContentInit
+{
   /**
-   * Custom label text for the profile button. When provided, used as-is — not
-   * translated. When omitted or empty, the desktop trigger renders as an
-   * icon-only button (no visible label) and the mobile trigger falls back to
-   * the `header.profile` translation key.
+   * Custom label text for the profile button. Falls back to the `header.profile`
+   * translation key on desktop, or `header.profile.mobile` on mobile.
    */
   label = input("");
+
+  /**
+   * Whether to display a text label next to the profile icon on non-mobile
+   * viewports. When `false` the desktop trigger renders as an icon-only button
+   * and the label (custom or translated) is used as the `aria-label` only.
+   * When `true` the label is visible and a chevron is shown next to it.
+   *
+   * Has no effect on the mobile/small variant — the mobile button always
+   * shows its label.
+   * @default false
+   */
+  showLabel = input<boolean>(false);
   /**
    * Defines the breakpoint from which the profile menu is displayed as a popover.
    * Below this breakpoint, it is rendered as a modal.
@@ -91,6 +113,13 @@ export class HeaderProfileComponent implements AfterContentInit {
    */
   size = input<HeaderProfileSize>();
 
+  xs = input<HeaderProfileInputs>();
+  sm = input<HeaderProfileInputs>();
+  md = input<HeaderProfileInputs>();
+  lg = input<HeaderProfileInputs>();
+  xl = input<HeaderProfileInputs>();
+  xxl = input<HeaderProfileInputs>();
+
   readonly breakpointService = inject(BreakpointService);
   readonly translationService = inject(TediTranslationService);
   private readonly document = inject(DOCUMENT);
@@ -107,12 +136,28 @@ export class HeaderProfileComponent implements AfterContentInit {
     return size === "small";
   });
 
+  protected readonly breakpointInputs = computed<HeaderProfileInputs>(() => {
+    return this.breakpointService.getBreakpointInputs<HeaderProfileInputs>({
+      label: this.label(),
+      showPopover: this.showPopover(),
+      xs: this.xs(),
+      sm: this.sm(),
+      md: this.md(),
+      lg: this.lg(),
+      xl: this.xl(),
+      xxl: this.xxl(),
+    });
+  });
+
   readonly resolvedLabel = computed(() => {
-    if (this.label()) {
-      return this.label();
+    const { label } = this.breakpointInputs();
+    if (label) {
+      return label;
     }
 
-    return this.translationService.translate("header.profile");
+    return this.translationService.translate(
+      this.isMobile() ? "header.profile.mobile" : "header.profile",
+    );
   });
 
   constructor() {
@@ -128,7 +173,7 @@ export class HeaderProfileComponent implements AfterContentInit {
   modalOpen = signal(false);
 
   readonly buttonVariant = computed<ButtonVariant>(() => {
-    if (this.isSmall() || !this.label()) {
+    if (this.isSmall() || !this.showLabel()) {
       return "neutral";
     }
 
@@ -151,7 +196,8 @@ export class HeaderProfileComponent implements AfterContentInit {
   }
 
   handleModalOpen() {
-    if (!this.breakpointService.isAboveBreakpoint(this.showPopover())()) {
+    const { showPopover } = this.breakpointInputs();
+    if (!this.breakpointService.isAboveBreakpoint(showPopover)()) {
       this.modalOpen.update((prev) => !prev);
     }
   }

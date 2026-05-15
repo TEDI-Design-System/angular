@@ -28,6 +28,7 @@ import { PopoverTriggerDirective } from "../../../overlay/popover/popover-trigge
 import { PopoverContentComponent } from "../../../overlay/popover/popover-content/popover-content.component";
 import { SeparatorComponent } from "../../../helpers/separator/separator.component";
 import { IconSize } from "../../../base/icon/icon.component";
+import { HeaderProfileComponent } from "../header-profile/header-profile.component";
 
 export type RepresentativeIcon = {
   /** Material Icon name. */
@@ -136,6 +137,10 @@ export class HeaderRoleComponent {
 
   private previousPopoverOpen: boolean | undefined;
 
+  private readonly parentProfile = inject(HeaderProfileComponent, {
+    optional: true,
+  });
+
   constructor() {
     effect(() => {
       if (this.popover()?.isOpen() && this.showInput()) {
@@ -155,6 +160,15 @@ export class HeaderRoleComponent {
       }
       this.previousPopoverOpen = isOpen;
     });
+
+    if (this.parentProfile) {
+      effect(() => {
+        if (!this.parentProfile!.modalOpen()) {
+          this.mobileOpen.set(false);
+          this.inputValue.set("");
+        }
+      });
+    }
   }
 
   translationService = inject(TediTranslationService);

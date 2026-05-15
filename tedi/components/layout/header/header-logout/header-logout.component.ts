@@ -7,13 +7,26 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { IconComponent } from "../../../base/icon/icon.component";
-import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
+import {
+  BreakpointInputs,
+  BreakpointService,
+} from "../../../../services/breakpoint/breakpoint.service";
 import { TextComponent } from "../../../base/text/text.component";
 import { LinkComponent } from "../../../navigation/link/link.component";
 import { TediTranslationService } from "../../../../services/translation/translation.service";
 import { HeaderMobileButtonComponent } from "../header-mobile-button/header-mobile-button.component";
 
 export type HeaderLogoutSize = "default" | "small";
+
+/**
+ * Subset of `HeaderLogoutComponent` inputs that can be overridden per
+ * breakpoint via the `[xs]` / `[sm]` / `[md]` / `[lg]` / `[xl]` / `[xxl]`
+ * inputs. Mirrors React's `HeaderLogoutBreakpointProps`.
+ */
+export type HeaderLogoutInputs = {
+  size: HeaderLogoutSize | undefined;
+  label: string;
+};
 
 @Component({
   selector: "tedi-header-logout",
@@ -32,7 +45,9 @@ export type HeaderLogoutSize = "default" | "small";
     class: "tedi-header-logout",
   },
 })
-export class HeaderLogoutComponent {
+export class HeaderLogoutComponent
+  implements BreakpointInputs<HeaderLogoutInputs>
+{
   private translationService = inject(TediTranslationService);
   breakpointService = inject(BreakpointService);
   private isMobile = this.breakpointService.isBelowBreakpoint("md");
@@ -65,14 +80,37 @@ export class HeaderLogoutComponent {
    */
   href = input<string>();
 
+  xs = input<HeaderLogoutInputs>();
+  sm = input<HeaderLogoutInputs>();
+  md = input<HeaderLogoutInputs>();
+  lg = input<HeaderLogoutInputs>();
+  xl = input<HeaderLogoutInputs>();
+  xxl = input<HeaderLogoutInputs>();
+
+  protected readonly breakpointInputs = computed<HeaderLogoutInputs>(() =>
+    this.breakpointService.getBreakpointInputs<HeaderLogoutInputs>({
+      size: this.size(),
+      label: this.label(),
+      xs: this.xs(),
+      sm: this.sm(),
+      md: this.md(),
+      lg: this.lg(),
+      xl: this.xl(),
+      xxl: this.xxl(),
+    }),
+  );
+
   isSmall = computed(() => {
-    const size = this.size() ?? (this.isMobile() ? "small" : "default");
+    const size =
+      this.breakpointInputs().size ??
+      (this.isMobile() ? "small" : "default");
     return size === "small";
   });
 
   resolvedLabel = computed(() => {
-    if (this.label()) {
-      return this.label();
+    const { label } = this.breakpointInputs();
+    if (label) {
+      return label;
     }
 
     return this.translationService.translate(

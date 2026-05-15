@@ -64,7 +64,9 @@
     }
 
     button {
+      gap: var(--link-inner-spacing-x);
       padding: 0;
+      border: none;
 
       tedi-icon {
         transition: transform var(--_header-role-transition-duration)

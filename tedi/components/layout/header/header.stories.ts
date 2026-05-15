@@ -821,7 +821,7 @@ export const AlternativeProfileAndLogoutButton1: StoryObj<HeaderComponent> = {
           </ng-container>
           <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
           <tedi-separator axis="vertical" />
-          <tedi-header-profile label="My profile">
+          <tedi-header-profile [showLabel]="true">
             <ng-container *hideAt="'lg'">
               <tedi-header-role
                 label="Asutus:"
@@ -867,7 +867,7 @@ export const AlternativeProfileAndLogoutButton2: StoryObj<HeaderComponent> = {
           </ng-container>
           <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
           <tedi-separator axis="vertical" />
-          <tedi-header-profile label="My profile">
+          <tedi-header-profile [showLabel]="true">
             <ng-container *hideAt="'lg'">
               <tedi-header-role
                 label="Isikukood:"
@@ -895,7 +895,7 @@ export const AlternativeProfileAndLogoutButton3: StoryObj<HeaderComponent> = {
         <tedi-header-actions>
           <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
           <tedi-separator axis="vertical" />
-          <tedi-header-profile label="Mari Maasikas">
+          <tedi-header-profile [showLabel]="true" [md]="{ label: 'Mari Maasikas' }">
               <tedi-header-role
                 *hideAt="'lg'"
                 description="49504080934"
@@ -1016,7 +1016,7 @@ export const WithSearch2: StoryObj<HeaderComponent> = {
           </ng-container>
           <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
           <tedi-separator axis="vertical" />
-          <tedi-header-profile label="Mari Maasikas">
+          <tedi-header-profile [showLabel]="true" [md]="{ label: 'Mari Maasikas' }">
             <tedi-header-role
               description="49504080934"
               [showInput]="true"

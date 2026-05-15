@@ -165,6 +165,13 @@ export const translationsMap = {
   "header.profile": {
     description: "Label for profile button",
     components: ["HeaderProfile"],
+    et: "Minu profiil",
+    en: "My profile",
+    ru: "Мой профиль",
+  },
+  "header.profile.mobile": {
+    description: "Label for profile button on mobile",
+    components: ["HeaderProfile"],
     et: "Profiil",
     en: "Profile",
     ru: "Профиль",

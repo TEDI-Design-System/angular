@@ -71,16 +71,55 @@ describe("HeaderProfileComponent", () => {
       expect(component.resolvedLabel()).toBe("John Doe");
     });
 
-    it("falls back to the `header.profile` translation key when `label` is empty", () => {
+    it("falls back to `header.profile` on desktop when `label` is empty", () => {
+      jest
+        .spyOn(component.breakpointService, "isBelowBreakpoint")
+        .mockReturnValue(signal(false));
       const translate = jest
         .spyOn(component.translationService, "translate")
-        .mockImplementation(((...args: unknown[]) => `__${args[0]}__`) as unknown as typeof component.translationService.translate);
+        .mockImplementation(
+          ((...args: unknown[]) =>
+            `__${args[0]}__`) as unknown as typeof component.translationService.translate,
+        );
 
       fixture.componentRef.setInput("label", "");
       fixture.detectChanges();
 
       expect(component.resolvedLabel()).toBe("__header.profile__");
       expect(translate).toHaveBeenCalledWith("header.profile");
+    });
+
+    it("falls back to `header.profile.mobile` on mobile when `label` is empty", () => {
+      jest
+        .spyOn(component.breakpointService, "isBelowBreakpoint")
+        .mockReturnValue(signal(true));
+      const translate = jest
+        .spyOn(component.translationService, "translate")
+        .mockImplementation(
+          ((...args: unknown[]) =>
+            `__${args[0]}__`) as unknown as typeof component.translationService.translate,
+        );
+
+      fixture.componentRef.setInput("label", "");
+      fixture.detectChanges();
+
+      expect(component.resolvedLabel()).toBe("__header.profile.mobile__");
+      expect(translate).toHaveBeenCalledWith("header.profile.mobile");
+    });
+
+    it("uses the breakpoint-override label when its tier is active", () => {
+      jest
+        .spyOn(component.breakpointService, "getBreakpointInputs")
+        .mockReturnValue({
+          label: "Mari Maasikas",
+          showPopover: "lg",
+        });
+
+      fixture.componentRef.setInput("label", "");
+      fixture.componentRef.setInput("md", { label: "Mari Maasikas" });
+      fixture.detectChanges();
+
+      expect(component.resolvedLabel()).toBe("Mari Maasikas");
     });
   });
 
@@ -114,23 +153,23 @@ describe("HeaderProfileComponent", () => {
       expect(component.buttonVariant()).toBe("neutral");
     });
 
-    it("should return 'neutral' when label is empty", () => {
+    it("should return 'neutral' when showLabel is false", () => {
       const mockSignal = signal(false);
       jest
         .spyOn(component.breakpointService, "isBelowBreakpoint")
         .mockReturnValue(mockSignal);
-      fixture.componentRef.setInput("label", "");
+      fixture.componentRef.setInput("showLabel", false);
       fixture.detectChanges();
 
       expect(component.buttonVariant()).toBe("neutral");
     });
 
-    it("should return 'secondary' when above 'md' breakpoint and label is provided", () => {
+    it("should return 'secondary' when above 'md' breakpoint and showLabel is true", () => {
       const mockSignal = signal(false);
       jest
         .spyOn(component.breakpointService, "isBelowBreakpoint")
         .mockReturnValue(mockSignal);
-      fixture.componentRef.setInput("label", "John Doe");
+      fixture.componentRef.setInput("showLabel", true);
       fixture.detectChanges();
 
       expect(component.buttonVariant()).toBe("secondary");
