@@ -113,7 +113,7 @@ describe("HeaderLogoutComponent", () => {
       const label = fixture.nativeElement.querySelector(
         "tedi-header-mobile-button .tedi-header-mobile-button__text",
       );
-      expect(label?.textContent?.trim()).toBe("header.logout-small");
+      expect(label?.textContent?.trim()).toBe("header.logout.mobile");
     });
 
     it("forwards `href` so HeaderMobileButton renders as an anchor", () => {

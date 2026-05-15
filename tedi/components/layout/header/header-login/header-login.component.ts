@@ -57,7 +57,7 @@ export class HeaderLoginComponent
 
   /**
    * Custom label text for the login button. When provided, used as-is — not
-   * translated. When omitted or empty, falls back to the `header.login-small`
+   * translated. When omitted or empty, falls back to the `header.login.mobile`
    * translation key for the compact variant and `header.login` for the full
    * variant.
    */
@@ -102,7 +102,7 @@ export class HeaderLoginComponent
     }
 
     return this.translationService.translate(
-      this.isSmall() ? "header.login-small" : "header.login",
+      this.isSmall() ? "header.login.mobile" : "header.login",
     );
   });
 }

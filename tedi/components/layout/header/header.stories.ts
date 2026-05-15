@@ -246,7 +246,7 @@ export default {
     loginLabel: {
       name: "label",
       description:
-        "Custom label text. Falls back to the `header.login` / `header.login-small` translation key.",
+        "Custom label text. Falls back to the `header.login` / `header.login.mobile` translation key.",
       table: { category: "header-login", type: { summary: "string" } },
     },
     loginHref: {
@@ -267,7 +267,7 @@ export default {
     logoutLabel: {
       name: "label",
       description:
-        "Custom label text. Falls back to the `header.logout` / `header.logout-small` translation key.",
+        "Custom label text. Falls back to the `header.logout` / `header.logout.mobile` translation key.",
       table: { category: "header-logout", type: { summary: "string" } },
     },
     logoutHref: {
@@ -1032,7 +1032,7 @@ export const WithSearch2: StoryObj<HeaderComponent> = {
         </tedi-header-actions>
         <tedi-header-bottom>
           <tedi-header-search mobileVariant="inline">
-            <tedi-search inputId="search-4" />
+            <tedi-search inputId="search-5" />
           </tedi-header-search>
         </tedi-header-bottom>
       </header>

@@ -48,8 +48,8 @@ export type HeaderLogoutInputs = {
 export class HeaderLogoutComponent
   implements BreakpointInputs<HeaderLogoutInputs>
 {
-  private translationService = inject(TediTranslationService);
-  breakpointService = inject(BreakpointService);
+  private readonly translationService = inject(TediTranslationService);
+  private readonly breakpointService = inject(BreakpointService);
   private isMobile = this.breakpointService.isBelowBreakpoint("md");
 
   /**
@@ -68,7 +68,7 @@ export class HeaderLogoutComponent
 
   /**
    * Custom label text for the logout button. When provided, used as-is — not
-   * translated. When omitted or empty, falls back to the `header.logout-small`
+   * translated. When omitted or empty, falls back to the `header.logout.mobile`
    * translation key for the compact variant and `header.logout` for the full
    * variant.
    */
@@ -114,7 +114,7 @@ export class HeaderLogoutComponent
     }
 
     return this.translationService.translate(
-      this.isSmall() ? "header.logout-small" : "header.logout",
+      this.isSmall() ? "header.logout.mobile" : "header.logout",
     );
   });
 }

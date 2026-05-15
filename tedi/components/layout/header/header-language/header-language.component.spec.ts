@@ -5,6 +5,7 @@ import {
   Language,
   TediTranslationService,
 } from '../../../../services/translation/translation.service';
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from '../../../../tokens/translation.token';
 
 describe('HeaderLanguageComponent', () => {
   let fixture: ComponentFixture<HeaderLanguageComponent>;
@@ -25,7 +26,8 @@ describe('HeaderLanguageComponent', () => {
     await TestBed.configureTestingModule({
       imports: [HeaderLanguageComponent],
       providers: [
-        { provide: TediTranslationService, useValue: mockTranslationService }
+        { provide: TediTranslationService, useValue: mockTranslationService },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: 'et' },
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();

@@ -31,6 +31,9 @@ export type PopoverPosition = `${NgxFloatUiPlacements}`;
   styleUrl: "./popover.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: "tedi-popover",
+  },
 })
 export class PopoverComponent implements AfterContentChecked {
   /**

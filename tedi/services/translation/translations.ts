@@ -134,7 +134,7 @@ export const translationsMap = {
     en: "Log in",
     ru: "Зайти на портал",
   },
-  "header.login-small": {
+  "header.login.mobile": {
     description: "Label for login button in mobile view",
     components: ["HeaderLogin"],
     et: "Sisene",
@@ -148,7 +148,7 @@ export const translationsMap = {
     en: "Log out",
     ru: "Выйти",
   },
-  "header.logout-small": {
+  "header.logout.mobile": {
     description: "Label for logout button (small)",
     components: ["HeaderLogout"],
     et: "Välju",

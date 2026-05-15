@@ -267,6 +267,23 @@ describe("HeaderSearchComponent", () => {
       expect(getToggleHost()).toBeFalsy();
       expect(closeSpy).toHaveBeenCalled();
     });
+
+    it("resets modalOpen when the variant flips away from `modal`", () => {
+      getToggle()!.click();
+      fixture.detectChanges();
+
+      fixture.componentRef.setInput("mobileVariant", "inline");
+      fixture.detectChanges();
+
+      fixture.componentRef.setInput("mobileVariant", "modal");
+      fixture.detectChanges();
+
+      const dialog = fixture.nativeElement.querySelector(
+        ".tedi-header-search__modal",
+      ) as HTMLDialogElement | null;
+      expect(dialog).toBeTruthy();
+      expect(dialog?.open).toBe(false);
+    });
   });
 
   describe("mobile + inline variant", () => {

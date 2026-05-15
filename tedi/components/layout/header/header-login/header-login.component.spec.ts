@@ -64,7 +64,7 @@ describe("HeaderLoginComponent", () => {
     isMobileSignal.set(true);
     fixture.detectChanges();
     expect(mockTranslationService.translate).toHaveBeenCalledWith(
-      "header.login-small",
+      "header.login.mobile",
     );
   });
 
@@ -121,7 +121,7 @@ describe("HeaderLoginComponent", () => {
       const text = fixture.nativeElement.querySelector(
         "tedi-header-mobile-button .tedi-header-mobile-button__text",
       );
-      expect(text?.textContent?.trim()).toBe("header.login-small");
+      expect(text?.textContent?.trim()).toBe("header.login.mobile");
     });
 
     it("forwards `href` to HeaderMobileButton so it renders as an anchor", () => {

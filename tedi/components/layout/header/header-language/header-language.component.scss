@@ -7,12 +7,12 @@
   align-items: flex-start;
   justify-content: center;
 
-  [tedi-popover-trigger] tedi-icon[name="expand_more"] {
+  [tedi-popover-trigger] .tedi-header-language__chevron {
     margin: 0;
     transition: transform 0.2s ease-in-out;
   }
 
-  [tedi-popover-trigger][aria-expanded="true"] tedi-icon[name="expand_more"] {
+  [tedi-popover-trigger][aria-expanded="true"] .tedi-header-language__chevron {
     transform: rotate(-180deg);
   }
 

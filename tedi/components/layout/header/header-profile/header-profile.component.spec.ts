@@ -2,20 +2,33 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { NO_ERRORS_SCHEMA, signal } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 import { HeaderProfileComponent } from "./header-profile.component";
+import { TediTranslationService } from "../../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
 
 describe("HeaderProfileComponent", () => {
   let fixture: ComponentFixture<HeaderProfileComponent>;
   let component: HeaderProfileComponent;
   let documentMock: Document;
+  let mockTranslationService: {
+    translate: jest.Mock;
+    track: jest.Mock;
+  };
 
   beforeEach(() => {
     documentMock = document;
+    mockTranslationService = {
+      translate: jest.fn((key: string) => key),
+      track: jest.fn((key: string) => () => key),
+    };
 
     TestBed.configureTestingModule({
       imports: [HeaderProfileComponent],
       providers: [
         { provide: DOCUMENT, useValue: documentMock },
+        {
+          provide: TediTranslationService,
+          useValue: mockTranslationService,
+        },
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
       ],
       schemas: [NO_ERRORS_SCHEMA],
@@ -75,36 +88,34 @@ describe("HeaderProfileComponent", () => {
       jest
         .spyOn(component.breakpointService, "isBelowBreakpoint")
         .mockReturnValue(signal(false));
-      const translate = jest
-        .spyOn(component.translationService, "translate")
-        .mockImplementation(
-          ((...args: unknown[]) =>
-            `__${args[0]}__`) as unknown as typeof component.translationService.translate,
-        );
+      mockTranslationService.translate.mockImplementation(
+        (key: string) => `__${key}__`,
+      );
 
       fixture.componentRef.setInput("label", "");
       fixture.detectChanges();
 
       expect(component.resolvedLabel()).toBe("__header.profile__");
-      expect(translate).toHaveBeenCalledWith("header.profile");
+      expect(mockTranslationService.translate).toHaveBeenCalledWith(
+        "header.profile",
+      );
     });
 
     it("falls back to `header.profile.mobile` on mobile when `label` is empty", () => {
       jest
         .spyOn(component.breakpointService, "isBelowBreakpoint")
         .mockReturnValue(signal(true));
-      const translate = jest
-        .spyOn(component.translationService, "translate")
-        .mockImplementation(
-          ((...args: unknown[]) =>
-            `__${args[0]}__`) as unknown as typeof component.translationService.translate,
-        );
+      mockTranslationService.translate.mockImplementation(
+        (key: string) => `__${key}__`,
+      );
 
       fixture.componentRef.setInput("label", "");
       fixture.detectChanges();
 
       expect(component.resolvedLabel()).toBe("__header.profile.mobile__");
-      expect(translate).toHaveBeenCalledWith("header.profile.mobile");
+      expect(mockTranslationService.translate).toHaveBeenCalledWith(
+        "header.profile.mobile",
+      );
     });
 
     it("uses the breakpoint-override label when its tier is active", () => {

@@ -25,7 +25,12 @@
       }
     </div>
     @if (hasMultipleRepresentatives()) {
-      <button tedi-button variant="neutral" (click)="handleMobileOpen()">
+      <button
+        type="button"
+        tedi-button
+        variant="neutral"
+        (click)="handleMobileOpen()"
+      >
         {{ collapseText() }}
         <tedi-icon name="expand_more" [attr.data-open]="mobileOpen()" />
       </button>
@@ -71,7 +76,7 @@
         class="tedi-link tedi-header__link-button"
       >
         <span>{{ currentRepresentative().name }}</span>
-        <tedi-icon name="expand_more" />
+        <tedi-icon name="expand_more" class="tedi-header-role__chevron" />
       </button>
       <tedi-popover-content maxWidth="small" class="tedi-header-role__dropdown">
         <ng-container *ngTemplateOutlet="content"></ng-container>
@@ -98,6 +103,7 @@
   }
   <button
     *ngFor="let r of filteredRepresentatives(); trackBy: trackById"
+    type="button"
     class="tedi-header-role__representative"
     [attr.data-selected]="r.id === currentRepresentative().id"
     (click)="handleSelectRepresentative(r)"

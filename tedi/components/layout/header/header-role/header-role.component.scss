@@ -16,12 +16,12 @@
     background-color: transparent;
   }
 
-  [tedi-popover-trigger] tedi-icon[name="expand_more"] {
+  [tedi-popover-trigger] .tedi-header-role__chevron {
     margin: 0;
     transition: transform 0.2s ease-in-out;
   }
 
-  [tedi-popover-trigger][aria-expanded="true"] tedi-icon[name="expand_more"] {
+  [tedi-popover-trigger][aria-expanded="true"] .tedi-header-role__chevron {
     transform: rotate(-180deg);
   }
 

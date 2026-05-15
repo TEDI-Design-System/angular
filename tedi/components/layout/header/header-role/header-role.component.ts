@@ -142,6 +142,14 @@ export class HeaderRoleComponent {
   });
 
   constructor() {
+    // `setTimeout` (not `queueMicrotask` / `afterNextRender`) is deliberate:
+    // PopoverComponent's `showPopover()` queues its own
+    // `setTimeout(() => container.focus(...))` to focus the floating-UI
+    // overlay container (popover.component.ts:144). Queuing our input focus
+    // via `setTimeout` puts it AFTER the popover's task in the macrotask
+    // queue, so we focus the search input last and the popover doesn't steal
+    // focus back. Microtask-/render-tier alternatives fire BEFORE the
+    // popover's setTimeout and cause focus loss.
     effect(() => {
       if (this.popover()?.isOpen() && this.showInput()) {
         setTimeout(() => this.searchInput()?.nativeElement.focus());

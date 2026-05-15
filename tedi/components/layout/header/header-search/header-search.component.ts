@@ -101,7 +101,9 @@ export class HeaderSearchComponent {
     });
 
     effect(() => {
-      if (!this.isMobile() && this.modalOpen()) {
+      const dialogRendered =
+        this.isMobile() && this.mobileVariant() === "modal";
+      if (!dialogRendered && this.modalOpen()) {
         this.modalOpen.set(false);
       }
     });

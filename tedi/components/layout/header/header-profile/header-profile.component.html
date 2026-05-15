@@ -9,6 +9,7 @@
     [preventOverflow]="true"
   >
     <button
+      type="button"
       tedi-button
       tedi-popover-trigger
       [attr.data-open]="modalOpen()"
@@ -36,6 +37,7 @@
     />
   } @else {
     <button
+      type="button"
       tedi-button
       [attr.data-open]="modalOpen()"
       [variant]="buttonVariant()"
