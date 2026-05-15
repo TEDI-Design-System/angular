@@ -5,14 +5,18 @@
   class="tedi-header-language__label"
   >{{ "header.select-lang" | tediTranslate }}</span
 >
-<tedi-popover [withBorder]="true" position="bottom" [preventOverflow]="true" appendTo="">
+<tedi-popover
+  [withBorder]="true"
+  position="bottom"
+  [preventOverflow]="true"
+>
   <button
     type="button"
     tedi-popover-trigger
     class="tedi-link tedi-header__link-button"
   >
     <span>{{ languages()[translationService.getLanguage()] }}</span>
-    <tedi-icon name="expand_more" />
+    <tedi-icon name="expand_more" [size]="16" color="inherit" />
   </button>
   <tedi-popover-content maxWidth="none">
     <button

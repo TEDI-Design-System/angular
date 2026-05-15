@@ -14,6 +14,7 @@ export type TextModifiers =
   | "h6"
   | "normal"
   | "small"
+  | "extra-small"
   | "bold"
   | "thin"
   | "italic"
@@ -45,7 +46,8 @@ export type TextColor =
   | "warning"
   | "danger"
   | "info"
-  | "neutral";
+  | "neutral"
+  | "inherit";
 
 @Component({
   selector: "[tedi-text]",
@@ -53,7 +55,7 @@ export type TextColor =
   templateUrl: "./text.component.html",
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    "[class]": "classes()"
+    "[class]": "classes()",
   },
 })
 export class TextComponent {
@@ -81,7 +83,6 @@ export class TextComponent {
       : modifiersValue
         ? [modifiersValue]
         : [];
-    
 
     modifierClasses.forEach((modifier) => {
       if (this.isHeadingModifier(modifier)) {

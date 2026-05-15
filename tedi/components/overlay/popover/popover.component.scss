@@ -6,7 +6,8 @@ $popover-max-width: (
 );
 
 tedi-popover {
-  display: block;
+  display: inline-flex;
+  align-items: center;
 }
 
 [tedi-popover-trigger] {
@@ -22,6 +23,7 @@ float-ui-content {
   .float-ui-container-popover {
     z-index: var(--z-index-dropdown);
     padding: 0;
+    background: var(--popover-background);
     border: var(--tedi-borders-01) solid var(--popover-border);
     border-radius: var(--popover-radius-rounded);
     box-shadow: 0 1px 5px 0 var(--tedi-alpha-20, rgb(0 0 0 / 20%));
@@ -41,17 +43,23 @@ float-ui-content {
       border-radius: var(--popover-radius-rounded);
 
       .float-ui-arrow {
-        width: 18px;
-        height: 18px;
+        box-sizing: border-box;
+        width: 1.5rem;
+        height: 1.5rem;
+        background: var(--popover-background);
         border-right: 4px solid var(--header-popover-border-top);
         border-bottom: 4px solid var(--header-popover-border-top);
+        filter: drop-shadow(0 0 5px var(--tedi-alpha-20));
+        clip-path: polygon(100% 0, 100% 100%, 0 100%);
+        fill: var(--popover-background);
       }
 
       &[data-float-ui-placement="top"] {
         border-bottom: 4px solid var(--header-popover-border-top);
 
         .float-ui-arrow {
-          bottom: -12px !important;
+          bottom: -0.75rem;
+          transform: rotate(45deg);
         }
       }
 
@@ -59,7 +67,7 @@ float-ui-content {
         border-top: 4px solid var(--header-popover-border-top);
 
         .float-ui-arrow {
-          top: -12px !important;
+          top: -0.75rem;
         }
       }
 
@@ -67,7 +75,7 @@ float-ui-content {
         border-right: 4px solid var(--header-popover-border-top);
 
         .float-ui-arrow {
-          right: -12px !important;
+          right: -0.75rem;
         }
       }
 
@@ -75,7 +83,7 @@ float-ui-content {
         border-left: 4px solid var(--header-popover-border-top);
 
         .float-ui-arrow {
-          left: -12px !important;
+          left: -0.75rem;
         }
       }
     }

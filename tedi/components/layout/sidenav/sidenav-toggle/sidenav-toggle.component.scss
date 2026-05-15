@@ -6,10 +6,15 @@
   justify-content: center;
   width: 3.5rem;
   height: 3.5rem;
+  padding: 1rem;
   cursor: pointer;
   background: var(--button-main-primary-background-default);
   border: 0;
   border-radius: 0;
+
+  tedi-icon {
+    color: var(--button-main-primary-text-default);
+  }
 
   &--hidden {
     display: none;

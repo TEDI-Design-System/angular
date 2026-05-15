@@ -1,7 +1,7 @@
 @use "@tedi-design-system/core/bootstrap-utility/breakpoints";
 
 :root {
-  --_header-role-transition-duration: 300ms;
+  --_header-role-transition-duration: 0.2s;
 }
 
 .tedi-header-role {
@@ -9,67 +9,70 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
+  height: unset;
+  background-color: var(--general-surface-secondary);
+
+  @include breakpoints.media-breakpoint-up(lg) {
+    background-color: transparent;
+  }
+
+  [tedi-popover-trigger] tedi-icon[name="expand_more"] {
+    margin: 0;
+    transition: transform 0.2s ease-in-out;
+  }
+
+  [tedi-popover-trigger][aria-expanded="true"] tedi-icon[name="expand_more"] {
+    transform: rotate(-180deg);
+  }
 
   &__head {
     display: flex;
-    gap: 4px;
+    gap: var(--layout-grid-gutters-04);
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    padding: var(--card-padding-md-default);
+    transition: padding var(--_header-role-transition-duration) ease;
+
+    &--open {
+      padding: var(--card-padding-md-default) var(--card-padding-md-default)
+        var(--card-padding-xs) var(--card-padding-md-default);
+    }
 
     @include breakpoints.media-breakpoint-up(lg) {
       justify-content: flex-start;
+      padding: 0;
     }
 
     .tedi-header-role__info {
       display: flex;
-      flex-direction: row;
-      gap: var(--layout-grid-gutters-16);
+      flex-direction: column;
+      align-items: flex-start;
 
-      &[data-multiple="true"] {
-        flex-direction: column;
-        gap: 0;
-
-        .tedi-header-role__description::before {
-          display: none;
-        }
+      &--inline {
+        flex-direction: row;
+        gap: var(--layout-grid-gutters-08);
+        align-items: center;
       }
+    }
 
-      .tedi-header-role__description {
-        position: relative;
-
-        &::before {
-          position: absolute;
-          top: 50%;
-          left: calc(-1 * var(--layout-grid-gutters-16) / 2);
-          width: 1px;
-          height: 1rem;
-          content: "";
-          background: var(--general-border-secondary);
-          transform: translateY(-50%);
-        }
-      }
+    .tedi-header-role__info-title {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--layout-grid-gutters-04);
+      align-items: center;
     }
 
     button {
+      padding: 0;
+
       tedi-icon {
-        transition: transform var(--_header-role-transition-duration) ease;
+        transition: transform var(--_header-role-transition-duration)
+          ease-in-out;
 
         &[data-open="true"] {
-          transform: rotate(180deg);
+          transform: rotate(-180deg);
         }
-      }
-    }
-  }
-
-  tedi-popover-trigger {
-    tedi-icon {
-      transition: transform var(--_header-role-transition-duration) ease;
-    }
-
-    &[data-open="true"] {
-      tedi-icon {
-        transform: rotate(180deg);
       }
     }
   }
@@ -77,7 +80,7 @@
   &__dropdown {
     display: flex;
     flex-direction: column;
-    gap: var(--layout-grid-gutters-16) !important;
+    gap: var(--layout-grid-gutters-16);
 
     > * {
       &:not(:first-child) {
@@ -96,12 +99,17 @@
     }
   }
 
+  &__value {
+    min-width: max-content;
+  }
+
   &__representative {
     display: flex;
-    gap: 8px;
+    gap: var(--layout-grid-gutters-08);
     align-items: center;
     width: 100%;
     padding: var(--card-padding-xs);
+    font-family: var(--family-default);
     font-size: var(--body-regular-size);
     color: var(--general-text-secondary);
     text-align: start;
@@ -133,6 +141,10 @@
     tedi-icon {
       color: inherit;
     }
+
+    [tedi-text] {
+      color: inherit;
+    }
   }
 
   &__input {
@@ -154,14 +166,14 @@
   &__collapse {
     display: grid;
     visibility: hidden;
-    grid-template-rows: 0fr;
+    grid-template-rows: minmax(0, 0fr);
     width: 100%;
     overflow: hidden;
     transition: grid-template-rows var(--_header-role-transition-duration) ease;
 
     &[data-open="true"] {
       visibility: visible;
-      grid-template-rows: 1fr;
+      grid-template-rows: minmax(0, 1fr);
 
       .tedi-header-role__collapse__items {
         visibility: visible;
@@ -174,6 +186,9 @@
       flex-direction: column;
       gap: var(--layout-grid-gutters-16);
       min-height: 0;
+      padding: 0 var(--card-padding-md-default) var(--card-padding-md-default)
+        var(--card-padding-md-default);
+      overflow: hidden;
       transition: visibility var(--_header-role-transition-duration) ease;
 
       > * {

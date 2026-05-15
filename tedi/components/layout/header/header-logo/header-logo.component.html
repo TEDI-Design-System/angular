@@ -1,0 +1,16 @@
+@if (href(); as link) {
+  <a [href]="link" class="tedi-header-logo__link">
+    <ng-container *ngTemplateOutlet="logos" />
+  </a>
+} @else {
+  <ng-container *ngTemplateOutlet="logos" />
+}
+
+<ng-template #logos>
+  <span class="tedi-header-logo__default">
+    <ng-content />
+  </span>
+  <span class="tedi-header-logo__dark">
+    <ng-content select="[tediHeaderLogoDark]" />
+  </span>
+</ng-template>

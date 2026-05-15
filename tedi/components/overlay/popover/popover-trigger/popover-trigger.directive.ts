@@ -15,8 +15,8 @@ import { PopoverComponent } from "../popover.component";
     role: "button",
     "aria-haspopup": "dialog",
     "[id]": "popover.containerId() + '_trigger'",
-    "[attr.aria-expanded]": "popover.floatUiComponent().state",
-    "[attr.aria-controls]": "popover.containerId()",
+    "[attr.aria-expanded]": "popover.isOpen()",
+    "[attr.aria-controls]": "popover.containerId() || null",
     "[class.tedi-popover-trigger__text]": "underline()",
   },
 })

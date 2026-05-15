@@ -89,6 +89,13 @@ export class PopoverComponent implements AfterContentChecked {
 
   readonly containerId = signal("");
   readonly isContentHovered = signal(false);
+  /**
+   * Reactive open state. Mirrors `floatUiComponent().state` but is signal-based so
+   * consumers (e.g. trigger host bindings, parent components on OnPush) re-evaluate
+   * immediately when the popover opens or closes via any code path — click,
+   * outside-click dismiss, Escape, scroll-hide, etc.
+   */
+  readonly isOpen = signal(false);
 
   hideTimeout?: ReturnType<typeof setTimeout>;
   private keydownListener?: () => void;
@@ -118,6 +125,7 @@ export class PopoverComponent implements AfterContentChecked {
 
     clearTimeout(this.hideTimeout);
     this.floatUiComponent().show();
+    this.isOpen.set(true);
 
     const floatUiEl = this.floatUiComponent().elRef
       .nativeElement as HTMLElement;
@@ -150,6 +158,7 @@ export class PopoverComponent implements AfterContentChecked {
     this.cleanupScrollListener();
     this.cleanupDismissListeners();
     this.floatUiComponent().hide();
+    this.isOpen.set(false);
 
     if (this.lockScroll()) {
       this.renderer.removeStyle(this.document.body, "overflow");

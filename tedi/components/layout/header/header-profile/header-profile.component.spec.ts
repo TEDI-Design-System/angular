@@ -25,8 +25,8 @@ describe("HeaderProfileComponent", () => {
     component = fixture.componentInstance;
 
     // set required inputs
-    fixture.componentRef.setInput("name", "John Doe");
-    fixture.componentRef.setInput("showDropdown", "lg");
+    fixture.componentRef.setInput("label", "John Doe");
+    fixture.componentRef.setInput("showPopover", "lg");
 
     fixture.detectChanges();
   });
@@ -66,8 +66,46 @@ describe("HeaderProfileComponent", () => {
     expect(component.modalOpen()).toBe(false);
   });
 
+  describe("resolvedLabel", () => {
+    it("returns the custom label as-is when `label` is set", () => {
+      expect(component.resolvedLabel()).toBe("John Doe");
+    });
+
+    it("falls back to the `header.profile` translation key when `label` is empty", () => {
+      const translate = jest
+        .spyOn(component.translationService, "translate")
+        .mockImplementation(((...args: unknown[]) => `__${args[0]}__`) as unknown as typeof component.translationService.translate);
+
+      fixture.componentRef.setInput("label", "");
+      fixture.detectChanges();
+
+      expect(component.resolvedLabel()).toBe("__header.profile__");
+      expect(translate).toHaveBeenCalledWith("header.profile");
+    });
+  });
+
+  describe("body scroll lock effect", () => {
+    afterEach(() => {
+      documentMock.body.style.removeProperty("overflow");
+    });
+
+    it("locks body scroll when the modal opens", () => {
+      component.modalOpen.set(true);
+      fixture.detectChanges();
+      expect(documentMock.body.style.overflow).toBe("hidden");
+    });
+
+    it("restores body scroll when the modal closes", () => {
+      component.modalOpen.set(true);
+      fixture.detectChanges();
+      component.modalOpen.set(false);
+      fixture.detectChanges();
+      expect(documentMock.body.style.overflow).toBe("");
+    });
+  });
+
   describe("buttonVariant", () => {
-    it("should return 'neutral' when below 'sm' breakpoint", () => {
+    it("should return 'neutral' when below 'md' breakpoint", () => {
       const mockSignal = signal(true);
       jest
         .spyOn(component.breakpointService, "isBelowBreakpoint")
@@ -76,23 +114,23 @@ describe("HeaderProfileComponent", () => {
       expect(component.buttonVariant()).toBe("neutral");
     });
 
-    it("should return 'neutral' when name is empty", () => {
+    it("should return 'neutral' when label is empty", () => {
       const mockSignal = signal(false);
       jest
         .spyOn(component.breakpointService, "isBelowBreakpoint")
         .mockReturnValue(mockSignal);
-      fixture.componentRef.setInput("name", "");
+      fixture.componentRef.setInput("label", "");
       fixture.detectChanges();
 
       expect(component.buttonVariant()).toBe("neutral");
     });
 
-    it("should return 'secondary' when above 'sm' breakpoint and name is provided", () => {
+    it("should return 'secondary' when above 'md' breakpoint and label is provided", () => {
       const mockSignal = signal(false);
       jest
         .spyOn(component.breakpointService, "isBelowBreakpoint")
         .mockReturnValue(mockSignal);
-      fixture.componentRef.setInput("name", "John Doe");
+      fixture.componentRef.setInput("label", "John Doe");
       fixture.detectChanges();
 
       expect(component.buttonVariant()).toBe("secondary");

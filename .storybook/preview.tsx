@@ -9,6 +9,8 @@ import {
   Title,
 } from "@storybook/blocks";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../tedi/tokens/translation.token";
+import { TEDI_THEME_DEFAULT_TOKEN } from "../tedi/tokens/theme.token";
+import { THEME_FALLBACK_VALUE } from "../tedi/services/theme/theme.service";
 
 export const globalTypes = {
   theme: {
@@ -62,7 +64,10 @@ const preview: Preview = {
   decorators: [
     themeDecorator,
     applicationConfig({
-      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+      providers: [
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        { provide: TEDI_THEME_DEFAULT_TOKEN, useValue: THEME_FALLBACK_VALUE },
+      ],
     }),
   ],
   parameters: {
