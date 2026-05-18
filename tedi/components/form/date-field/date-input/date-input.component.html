@@ -1,0 +1,47 @@
+@if (hasChips()) {
+  <div class="tedi-date-input__chips">
+    @for (chip of chips(); track chip.id) {
+      <tedi-tag
+        [closable]="!disabled() && !readOnly()"
+        (closed)="handleChipRemove(chip.id)"
+      >
+        {{ chip.label }}
+      </tedi-tag>
+    }
+  </div>
+}
+<input
+  #inputElement
+  tedi-text-field
+  class="tedi-date-input__input"
+  [id]="inputId()"
+  [type]="inputType()"
+  [attr.placeholder]="placeholder() || null"
+  [disabled]="disabled()"
+  [readOnly]="readOnly()"
+  [required]="required()"
+  (input)="handleInput($event)"
+/>
+<div class="tedi-date-input__actions">
+  @if (showClear()) {
+    <button
+      type="button"
+      class="tedi-date-input__clear"
+      [attr.aria-label]="clearAriaLabel()"
+      (click)="handleClear()"
+    >
+      <tedi-icon name="close" [size]="18" color="inherit" />
+    </button>
+  }
+  <button
+    type="button"
+    class="tedi-date-input__icon"
+    [class.tedi-date-input__icon--active]="iconActive()"
+    [disabled]="disabled() || iconDisabled()"
+    [attr.aria-label]="iconAriaLabel()"
+    [attr.aria-expanded]="iconActive()"
+    (click)="handleIconClick()"
+  >
+    <tedi-icon name="calendar_today" [size]="18" color="inherit" />
+  </button>
+</div>

@@ -1,0 +1,39 @@
+.tedi-calendar {
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
+  min-width: var(--tedi-containers-03);
+
+  &__months {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  &__month {
+    display: flex;
+    flex-direction: column;
+    padding: var(--card-padding-md-default);
+  }
+
+  &__footer {
+    padding-top: var(--layout-grid-gutters-08);
+    margin: 0 var(--card-padding-md-default) var(--card-padding-xs);
+    border-top: var(--tedi-borders-01) solid var(--general-border-primary);
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  &--bordered {
+    border: var(--tedi-borders-01) solid var(--card-border-primary);
+    border-radius: var(--card-radius-rounded);
+  }
+
+  &--disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+}

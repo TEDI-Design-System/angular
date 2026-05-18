@@ -1,0 +1,53 @@
+<table
+  class="tedi-calendar-day-grid"
+  [class.tedi-calendar-day-grid--with-week-numbers]="showWeekNumbers()"
+  role="grid"
+>
+  <thead>
+    <tr class="tedi-calendar-day-grid__header" role="row">
+      @if (showWeekNumbers()) {
+        <th
+          class="tedi-calendar-day-grid__week-number-header"
+          aria-hidden="true"
+        ></th>
+      }
+      @for (name of weekdayNames(); track $index) {
+        <th class="tedi-calendar-day-grid__weekday" role="columnheader" scope="col">
+          {{ name }}
+        </th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of grid(); track rowKey(row, $index)) {
+      <tr class="tedi-calendar-day-grid__row" role="row">
+        @if (showWeekNumbers()) {
+          <td class="tedi-calendar-day-grid__week-number" aria-hidden="true">
+            {{ weekNumber(row) }}
+          </td>
+        }
+        @for (day of row; track cellKey(day, $index)) {
+          <td class="tedi-calendar-day-grid__cell" role="gridcell">
+            @if (day) {
+              <button
+                type="button"
+                [class]="cellState(day)"
+                [attr.aria-selected]="isSelected(day) ? 'true' : null"
+                [attr.aria-disabled]="isDisabled(day) ? 'true' : null"
+                [attr.tabindex]="isFocusable(day) ? 0 : -1"
+                [attr.data-date-key]="day.getTime()"
+                (click)="handleClick(day)"
+                (mouseenter)="handleMouseEnter(day)"
+                (mouseleave)="handleMouseLeave()"
+                (focus)="handleFocus(day)"
+                (blur)="handleBlur()"
+              >
+                {{ day.getDate() }}
+              </button>
+            }
+          </td>
+        }
+      </tr>
+    }
+  </tbody>
+</table>

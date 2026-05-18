@@ -1,0 +1,120 @@
+.tedi-date-input {
+  display: flex;
+  flex: 1;
+  gap: var(--form-field-inner-spacing);
+  align-items: center;
+  min-width: 0;
+  padding-right: var(--form-field-padding-x-md-default);
+
+  &--with-chips {
+    flex-wrap: wrap;
+    align-items: center;
+    padding: var(--layout-grid-gutters-04) var(--form-field-padding-x-md-default)
+      var(--layout-grid-gutters-04) var(--form-field-padding-x-md-default);
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--layout-grid-gutters-04);
+    align-items: center;
+    min-width: 0;
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  // When useNativePicker is active the input swaps to type=date. WebKit/Blink
+  // (Chrome, Safari, Edge) render their own calendar-picker indicator on the
+  // right, plus inner spin/clear buttons — we replace them with our own icon
+  // button, so suppress the browser-default ones. Firefox does not render a
+  // native indicator on <input type="date"> so no Firefox-specific rule is
+  // needed.
+  &__input[type="date"] {
+    &::-webkit-calendar-picker-indicator {
+      display: none;
+      appearance: none;
+    }
+
+    &::-webkit-inner-spin-button {
+      display: none;
+    }
+
+    &::-webkit-clear-button {
+      display: none;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: var(--layout-grid-gutters-04);
+    align-items: center;
+    align-self: center;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  &__clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--button-xs-icon-size);
+    height: var(--form-field-button-height-sm);
+    padding: 0;
+    color: var(--general-icon-secondary);
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: var(--button-radius-sm);
+
+    &:hover {
+      color: var(--general-icon-primary);
+      background: var(--button-main-neutral-icon-only-background-hover);
+    }
+
+    &:focus-visible {
+      outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+      outline-offset: var(--tedi-borders-01);
+    }
+  }
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--button-xs-icon-size);
+    height: var(--form-field-button-height-sm);
+    padding: 0;
+    color: var(--general-icon-secondary);
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    border-radius: var(--button-radius-sm);
+
+    &:hover {
+      color: var(--button-main-neutral-text-hover);
+      background: var(--button-main-neutral-icon-only-background-hover);
+    }
+
+    &:active,
+    &--active {
+      color: var(--button-main-neutral-text-active);
+      background: var(--button-main-neutral-icon-only-background-active);
+    }
+
+    &:focus-visible {
+      outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+      outline-offset: var(--tedi-borders-01);
+    }
+
+    &:disabled {
+      color: var(--general-icon-disabled);
+      pointer-events: none;
+      cursor: not-allowed;
+      background: transparent;
+    }
+  }
+
+}

@@ -957,6 +957,37 @@ export const translationsMap = {
     en: "Next years",
     ru: "Следующие годы",
   },
+  "date-field.remove-chip": {
+    description:
+      "Label for the remove button on a selected-date chip inside the date field.",
+    components: ["DateField"],
+    et: (label: string) => `Eemalda ${label}`,
+    en: (label: string) => `Remove ${label}`,
+    ru: (label: string) => `Удалить ${label}`,
+  },
+  "date-field.modal-title": {
+    description: "Title shown in the mobile date picker modal header.",
+    components: ["DateField"],
+    et: "Kuupäev",
+    en: "Date",
+    ru: "Дата",
+  },
+  "date-field.confirm": {
+    description:
+      "Label for the confirm button in the mobile date picker modal.",
+    components: ["DateField"],
+    et: "Kinnita",
+    en: "Confirm",
+    ru: "Подтвердить",
+  },
+  "date-field.cancel": {
+    description:
+      "Label for the cancel button in the mobile date picker modal.",
+    components: ["DateField"],
+    et: "Tühista",
+    en: "Cancel",
+    ru: "Отмена",
+  },
   "time-picker.hours": {
     description: "Aria label for the hours listbox in the time picker.",
     components: ["TimePicker"],
