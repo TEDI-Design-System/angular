@@ -1,3 +1,15 @@
+# [6.4.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.2...angular-6.4.0-rc.3) (2026-05-18)
+
+
+### Bug Fixes
+
+* **collapse:** add button type to prevent form submission [#434](https://github.com/TEDI-Design-System/angular/issues/434) ([#441](https://github.com/TEDI-Design-System/angular/issues/441)) ([2e13aef](https://github.com/TEDI-Design-System/angular/commit/2e13aefdd60145b58b2e1053b09fa89a9a1a391c))
+
+
+### Reverts
+
+* **horizontal-stepper:** undo premature rc commits [#405](https://github.com/TEDI-Design-System/angular/issues/405) ([#436](https://github.com/TEDI-Design-System/angular/issues/436)) ([a575670](https://github.com/TEDI-Design-System/angular/commit/a57567051e7a522ab1e691b46c5ef4d52f599f0f))
+
 # [6.4.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.1...angular-6.4.0-rc.2) (2026-05-08)
 
 
