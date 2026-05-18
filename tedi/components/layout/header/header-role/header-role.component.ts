@@ -1,5 +1,4 @@
 import { NgFor, NgIf, NgTemplateOutlet } from "@angular/common";
-import { _IdGenerator } from "@angular/cdk/a11y";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -54,6 +53,8 @@ export type Representative = {
   icon?: string | RepresentativeIcon;
   description?: string;
 };
+
+let nextHeaderRoleInputId = 0;
 
 @Component({
   selector: "tedi-header-role",
@@ -117,9 +118,7 @@ export class HeaderRoleComponent {
   mobileOpen = signal(false);
   inputValue = signal("");
 
-  protected readonly inputId = inject(_IdGenerator).getId(
-    "tedi-header-role-input-",
-  );
+  protected readonly inputId = `tedi-header-role-input-${nextHeaderRoleInputId++}`;
 
   readonly breakpointService = inject(BreakpointService);
   readonly isTabletView = computed(() =>

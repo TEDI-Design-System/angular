@@ -87,5 +87,13 @@ tedi-header-profile {
         font-size: var(--icon-02);
       }
     }
+
+    tedi-header-logout .tedi-header-logout__button tedi-icon {
+      font-size: var(--icon-02);
+    }
   }
+}
+
+.tedi-header-profile__popover tedi-header-logout tedi-icon {
+  font-size: var(--icon-02);
 }

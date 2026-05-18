@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { HeaderLoginComponent } from "./header-login.component";
 import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
 import { TediTranslationService } from "../../../../services/translation/translation.service";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
 
 @Component({
   standalone: true,
@@ -42,6 +43,7 @@ describe("HeaderLoginComponent", () => {
       providers: [
         { provide: BreakpointService, useValue: mockBreakpointService },
         { provide: TediTranslationService, useValue: mockTranslationService },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
       ],
     }).compileComponents();
 
