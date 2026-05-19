@@ -2,18 +2,26 @@
   class="tedi-calendar-day-grid"
   [class.tedi-calendar-day-grid--with-week-numbers]="showWeekNumbers()"
   role="grid"
+  [attr.aria-label]="gridAriaLabel()"
+  [attr.aria-multiselectable]="multiselectable() ? 'true' : null"
 >
   <thead>
     <tr class="tedi-calendar-day-grid__header" role="row">
       @if (showWeekNumbers()) {
         <th
           class="tedi-calendar-day-grid__week-number-header"
-          aria-hidden="true"
+          scope="col"
+          [attr.aria-label]="weekNumberHeaderLabel()"
         ></th>
       }
-      @for (name of weekdayNames(); track $index) {
-        <th class="tedi-calendar-day-grid__weekday" role="columnheader" scope="col">
-          {{ name }}
+      @for (name of weekdayNames(); track $index; let i = $index) {
+        <th
+          class="tedi-calendar-day-grid__weekday"
+          role="columnheader"
+          scope="col"
+          [attr.aria-label]="weekdayFullNames()[i]"
+        >
+          <span aria-hidden="true">{{ name }}</span>
         </th>
       }
     </tr>
@@ -22,8 +30,13 @@
     @for (row of grid(); track rowKey(row, $index)) {
       <tr class="tedi-calendar-day-grid__row" role="row">
         @if (showWeekNumbers()) {
-          <td class="tedi-calendar-day-grid__week-number" aria-hidden="true">
-            {{ weekNumber(row) }}
+          <td
+            class="tedi-calendar-day-grid__week-number"
+            role="rowheader"
+            scope="row"
+            [attr.aria-label]="weekNumberLabel(row)"
+          >
+            <span aria-hidden="true">{{ weekNumber(row) }}</span>
           </td>
         }
         @for (day of row; track cellKey(day, $index)) {
@@ -34,15 +47,24 @@
                 [class]="cellState(day)"
                 [attr.aria-selected]="isSelected(day) ? 'true' : null"
                 [attr.aria-disabled]="isDisabled(day) ? 'true' : null"
+                [attr.aria-label]="ariaLabelForDay(day)"
                 [attr.tabindex]="isFocusable(day) ? 0 : -1"
                 [attr.data-date-key]="day.getTime()"
                 (click)="handleClick(day)"
                 (mouseenter)="handleMouseEnter(day)"
                 (mouseleave)="handleMouseLeave()"
                 (focus)="handleFocus(day)"
-                (blur)="handleBlur()"
+                (blur)="handleBlur($event)"
               >
                 {{ day.getDate() }}
+                @let status = statusForDay(day);
+                @if (status) {
+                  <tedi-status-indicator
+                    [type]="status.type"
+                    size="sm"
+                    [hasBorder]="true"
+                  />
+                }
               </button>
             }
           </td>

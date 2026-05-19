@@ -7,6 +7,8 @@ import {
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { CalendarComponent } from "./calendar.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
+import { IconComponent } from "../../base/icon/icon.component";
+import { StatusIndicatorComponent } from "../../tags/status-indicator/status-indicator.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 import { TextComponent } from "../../base/text/text.component";
 import type { DateRange } from "../../../utils/date.util";
@@ -25,25 +27,36 @@ import type { Matcher } from "../../../utils/matchers.util";
 // Lock "today" for Chromatic stability. Patches the global Date constructor
 // for this stories module so the calendar's internal `new Date()` checks
 // (today indicator, focusable-day fallback) resolve to a fixed reference.
-const FIXED_TODAY_MS = new Date(2026, 4, 18).getTime();
-const RealDate = Date;
-class MockDate extends RealDate {
-  constructor(...args: unknown[]) {
-    if (args.length === 0) {
-      super(FIXED_TODAY_MS);
-      return;
+//
+// Guard against double-patching: Storybook HMR re-evaluates this module, and
+// without the guard each reload would wrap the previous MockDate in another
+// subclass — every `new Date()` would then traverse a growing prototype chain,
+// pegging CPU once enough reloads have happened (especially in Docs view
+// where many calendars instantiate at once).
+const FIXED_TODAY_MS = new Date(2026, 4, 16).getTime();
+const GLOBAL_MARK = "__tediCalendarMockDate";
+const globalScope = globalThis as unknown as Record<string, unknown> & {
+  Date: typeof Date;
+};
+if (!globalScope[GLOBAL_MARK]) {
+  const RealDate = Date;
+  class MockDate extends RealDate {
+    constructor(...args: unknown[]) {
+      if (args.length === 0) {
+        super(FIXED_TODAY_MS);
+        return;
+      }
+      super(...(args as ConstructorParameters<typeof Date>));
     }
-    super(
-      ...(args as ConstructorParameters<typeof Date>),
-    );
+    static override now(): number {
+      return FIXED_TODAY_MS;
+    }
   }
-  static override now(): number {
-    return FIXED_TODAY_MS;
-  }
+  globalScope.Date = MockDate as typeof Date;
+  globalScope[GLOBAL_MARK] = true;
 }
-(globalThis as unknown as { Date: typeof Date }).Date = MockDate as typeof Date;
 
-const today = new Date(2026, 4, 18);
+const today = new Date(2026, 4, 16);
 const startOfThisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 const inThreeDays = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3);
 const inFiveDays = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5);
@@ -59,6 +72,8 @@ export default {
       imports: [
         CalendarComponent,
         ButtonComponent,
+        IconComponent,
+        StatusIndicatorComponent,
         ReactiveFormsModule,
         AlertComponent,
         TextComponent,
@@ -96,13 +111,13 @@ export default {
     },
     monthYearSelectType: {
       description:
-        "How the header exposes month/year picking. `dropdown` shows two dropdowns; `grid` switches the body to a month or year grid when the header label is clicked.",
+        "How the header exposes month/year picking. `dropdown` shows two dropdowns; `grid` switches the body to a month or year grid when the header label is clicked; `static` renders just the label with no interactive picker — only prev/next chevrons can change the month.",
       control: { type: "radio" },
-      options: ["dropdown", "grid"],
+      options: ["dropdown", "grid", "static"],
       table: {
         category: "inputs",
         type: {
-          summary: '"dropdown" | "grid"',
+          summary: '"dropdown" | "grid" | "static"',
         },
         defaultValue: { summary: "dropdown" },
       },
@@ -244,28 +259,6 @@ export const Default: Story = {
     props: { ...args, currentMonth: startOfThisMonth },
     template: `<tedi-calendar [currentMonth]="currentMonth" ${argsToTemplate(args)} />`,
   }),
-};
-
-export const WithSelectedValue: Story = {
-  render: () => ({
-    props: {
-      currentMonth: startOfThisMonth,
-      selected: inThreeDays,
-    },
-    template: `
-      <tedi-calendar
-        [currentMonth]="currentMonth"
-        [value]="selected"
-      />
-    `,
-  }),
-  parameters: {
-    docs: {
-      description: {
-        story: "Single-mode calendar with a starting value preselected.",
-      },
-    },
-  },
 };
 
 export const MultipleSelectedDates: Story = {
@@ -417,6 +410,48 @@ export const Availability: Story = {
   },
 };
 
+export const DayStatuses: Story = {
+  render: () => {
+    type Status = { type: "success"; label: string };
+    const dateOffset = (offset: number): Date =>
+      new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
+    const statusByDate = new Map<string, Status>([
+      [dateOffset(-2).toDateString(), { type: "success", label: "Confirmed appointment" }],
+      [dateOffset(4).toDateString(), { type: "success", label: "Confirmed appointment" }],
+      [dateOffset(10).toDateString(), { type: "success", label: "Confirmed appointment" }],
+    ]);
+    const dayStatus = (date: Date): Status | undefined =>
+      statusByDate.get(date.toDateString());
+    return {
+      props: { dayStatus, currentMonth: startOfThisMonth },
+      template: `
+        <tedi-calendar
+          [currentMonth]="currentMonth"
+          [dayStatus]="dayStatus"
+        >
+          <div
+            tediCalendarFooter
+            style="display: flex; flex-wrap: wrap; gap: 0.75rem 1rem; align-items: center;"
+          >
+            <span style="display: inline-flex; align-items: center; gap: 0.375rem;">
+              <tedi-status-indicator type="success" size="sm" [hasBorder]="true" />
+              Confirmed
+            </span>
+          </div>
+        </tedi-calendar>
+      `,
+    };
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pass a `dayStatus` function `(date) => { type, label } | undefined` to overlay a `tedi-status-indicator` dot on specific days. The `label` is required — it's surfaced on the day button's `aria-label` so screen readers announce the status alongside the date (the dot itself stays `aria-hidden`, satisfying WCAG 1.1.1). Pair the calendar with a legend in the footer so colorblind users can decode the indicator colors (WCAG 1.4.1 — color is not the only cue).",
+      },
+    },
+  },
+};
+
 export const DisabledMatchers: Story = {
   render: () => {
     const matchers: Matcher[] = [
@@ -472,41 +507,31 @@ export const WithWeeksCount: Story = {
   },
 };
 
-export const HeaderDropdown: Story = {
+export const HeaderVariants: Story = {
   render: () => ({
     props: { currentMonth: startOfThisMonth },
     template: `
-      <tedi-calendar
-        [currentMonth]="currentMonth"
-        monthYearSelectType="dropdown"
-      />
+      <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+        <tedi-calendar
+          [currentMonth]="currentMonth"
+          monthYearSelectType="dropdown"
+        />
+        <tedi-calendar
+          [currentMonth]="currentMonth"
+          monthYearSelectType="grid"
+        />
+        <tedi-calendar
+          [currentMonth]="currentMonth"
+          monthYearSelectType="static"
+        />
+      </div>
     `,
   }),
   parameters: {
     docs: {
       description: {
         story:
-          "Default header — the month and year are picked from inline dropdowns. Useful when users expect fast keyboard-friendly selection.",
-      },
-    },
-  },
-};
-
-export const HeaderGrid: Story = {
-  render: () => ({
-    props: { currentMonth: startOfThisMonth },
-    template: `
-      <tedi-calendar
-        [currentMonth]="currentMonth"
-        monthYearSelectType="grid"
-      />
-    `,
-  }),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "`monthYearSelectType='grid'` replaces the header dropdowns with a clickable label that drills the body into a month or year grid.",
+          "`monthYearSelectType` controls the header's month/year picker. `dropdown` (default) shows two inline dropdowns. `grid` replaces the dropdowns with a clickable label that drills the body into a month or year grid. `static` renders the label as plain text — month changes only via prev/next chevrons.",
       },
     },
   },
@@ -581,86 +606,78 @@ export const WithLegend: Story = {
 };
 
 export const WithFooter: Story = {
-  render: () => {
-    const control = new FormControl<Date | null>(inThreeDays);
-    const clear = (): void => control.setValue(null);
-    return {
-      props: { control, currentMonth: startOfThisMonth, clear },
-      template: `
-        <tedi-calendar [currentMonth]="currentMonth" [formControl]="control">
-          <div tediCalendarFooter style="display: flex; justify-content: flex-end; padding: 8px 12px;">
-            <button tedi-button variant="link" (click)="clear()">Clear</button>
-          </div>
-        </tedi-calendar>
-      `,
-    };
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Anything projected with the `tediCalendarFooter` attribute renders below the calendar body. Use it for clear/today shortcuts or for surfacing the current selection.",
-      },
-    },
-  },
-};
-
-export const InputDisabled: Story = {
-  render: () => ({
-    props: { currentMonth: startOfThisMonth, selected: inThreeDays },
-    template: `
-      <tedi-calendar
-        [currentMonth]="currentMonth"
-        [value]="selected"
-        [inputDisabled]="true"
-      />
-    `,
-  }),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "`inputDisabled=true` blocks all interactions and applies the disabled visual style. The reactive-forms `disabled` state has the same effect.",
-      },
-    },
-  },
-};
-
-export const OutsideDaysHidden: Story = {
   render: () => ({
     props: { currentMonth: startOfThisMonth },
     template: `
-      <tedi-calendar
-        [currentMonth]="currentMonth"
-        [showOutsideDays]="false"
-      />
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <tedi-calendar [currentMonth]="currentMonth">
+            <div
+              tediCalendarFooter
+              style="display: flex; justify-content: center; width: 100%;"
+            >
+              <button tedi-button variant="neutral" size="small" type="button">
+                Select time
+                <tedi-icon name="schedule" [size]="18" />
+              </button>
+            </div>
+          </tedi-calendar>
+          <tedi-calendar [currentMonth]="currentMonth">
+            <div
+              tediCalendarFooter
+              style="display: flex; justify-content: center; width: 100%;"
+            >
+              <button tedi-button type="button">
+                Search times
+                <tedi-icon name="arrow_forward" [size]="18" />
+              </button>
+            </div>
+          </tedi-calendar>
+        </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <tedi-calendar [currentMonth]="currentMonth">
+            <div
+              tediCalendarFooter
+              style="display: flex; justify-content: center; width: 100%;"
+            >
+              <button
+                tedi-button
+                variant="secondary"
+                size="small"
+                type="button"
+              >
+                Cancel selection
+              </button>
+            </div>
+          </tedi-calendar>
+          <tedi-calendar [currentMonth]="currentMonth">
+            <div
+              tediCalendarFooter
+              style="display: flex; gap: 0.5rem; width: 100%;"
+            >
+              <button
+                tedi-button
+                variant="secondary"
+                size="small"
+                type="button"
+                style="flex: 1;"
+              >
+                Cancel
+              </button>
+              <button tedi-button size="small" type="button" style="flex: 1;">
+                Save
+              </button>
+            </div>
+          </tedi-calendar>
+        </div>
+      </div>
     `,
   }),
   parameters: {
     docs: {
       description: {
         story:
-          "Hide the trailing/leading days from neighbouring months by setting `showOutsideDays=false`. Their cells stay in the grid but are blank.",
-      },
-    },
-  },
-};
-
-export const WithCustomLocale: Story = {
-  render: () => ({
-    props: { currentMonth: startOfThisMonth },
-    template: `
-      <tedi-calendar
-        [currentMonth]="currentMonth"
-        localeCode="en-US"
-      />
-    `,
-  }),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Override `localeCode` (BCP-47) to switch month names, weekday names and the first day of the week. `en-US` starts the week on Sunday.",
+          "Anything projected with the `tediCalendarFooter` attribute renders below the calendar body, above the built-in separator. Four common patterns: a centered link to a sibling picker (e.g. \"Select time\"), a centered primary action, a single secondary action, and a full-width Cancel + Save button pair.",
       },
     },
   },

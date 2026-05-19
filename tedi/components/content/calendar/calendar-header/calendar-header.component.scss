@@ -26,6 +26,7 @@
     gap: var(--layout-grid-gutters-04);
     align-items: center;
     padding-left: var(--layout-grid-gutters-04);
+    font-family: inherit;
     font-size: var(--body-regular-size);
     font-weight: 500;
     color: var(--general-text-primary);
@@ -76,7 +77,9 @@
 
   &__static-label {
     font-size: var(--body-regular-size);
+    font-weight: 500;
     color: var(--general-text-primary);
+    text-transform: capitalize;
   }
 
   &--disabled {

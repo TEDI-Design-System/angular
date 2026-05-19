@@ -29,7 +29,10 @@ import {
   toggleDateInArray,
 } from "../../../utils/date.util";
 import { matchAny, Matcher } from "../../../utils/matchers.util";
-import { CalendarDayGridComponent } from "./calendar-day-grid/calendar-day-grid.component";
+import {
+  CalendarDayGridComponent,
+  DayStatusFn,
+} from "./calendar-day-grid/calendar-day-grid.component";
 import { CalendarMonthGridComponent } from "./calendar-month-grid/calendar-month-grid.component";
 import { CalendarYearGridComponent } from "./calendar-year-grid/calendar-year-grid.component";
 import { CalendarHeaderComponent } from "./calendar-header/calendar-header.component";
@@ -85,7 +88,10 @@ export class CalendarComponent implements ControlValueAccessor {
   readonly disabledMatchers = input<Matcher[]>([]);
   readonly availableDays = input<DayAvailabilityInput>(undefined);
   readonly unavailableDays = input<DayAvailabilityInput>(undefined);
-  readonly monthYearSelectType = input<"dropdown" | "grid">("dropdown");
+  readonly dayStatus = input<DayStatusFn | undefined>(undefined);
+  readonly monthYearSelectType = input<"dropdown" | "grid" | "static">(
+    "dropdown",
+  );
   readonly required = input<boolean>(false);
   readonly numberOfMonths = input<number>(1);
   readonly inputDisabled = input<boolean>(false);

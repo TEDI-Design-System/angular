@@ -2,11 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
   ViewEncapsulation,
 } from "@angular/core";
 import { isSameYear } from "../../../../utils/date.util";
+import { TediTranslationService } from "../../../../services/translation/translation.service";
 
 type YearPredicate = (year: Date) => boolean;
 
@@ -29,6 +31,8 @@ export class CalendarYearGridComponent {
 
   readonly yearSelect = output<Date>();
 
+  private readonly translation = inject(TediTranslationService);
+
   readonly years = computed<YearEntry[]>(() => {
     const start = this.pageStart();
     const size = this.pageSize();
@@ -39,6 +43,19 @@ export class CalendarYearGridComponent {
     }
     return entries;
   });
+
+  readonly rows = computed<YearEntry[][]>(() => {
+    const entries = this.years();
+    const rows: YearEntry[][] = [];
+    for (let i = 0; i < entries.length; i += 3) {
+      rows.push(entries.slice(i, i + 3));
+    }
+    return rows;
+  });
+
+  readonly gridAriaLabel = computed(() =>
+    this.translation.translate("date-picker.choose-year"),
+  );
 
   private readonly today = new Date();
 

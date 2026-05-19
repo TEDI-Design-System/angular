@@ -900,12 +900,58 @@ export const translationsMap = {
     en: "Sun",
     ru: "Вс",
   },
+  "date-picker.today": {
+    description:
+      "Prefix announced by assistive tech before the date when a day cell represents today (e.g., \"Today, Friday, 16 May 2026\").",
+    components: ["DatePicker"],
+    et: "Täna",
+    en: "Today",
+    ru: "Сегодня",
+  },
   "date-picker.go-next-month": {
     description: "Label for next month navigation",
     components: ["DatePicker"],
     et: "Järgmine kuu",
     en: "Next month",
     ru: "Следующий месяц",
+  },
+  "date-picker.calendar-nav": {
+    description:
+      "ARIA label for the calendar navigation toolbar (prev/next + month/year selectors).",
+    components: ["DatePicker"],
+    et: "Kalendri navigeerimine",
+    en: "Calendar navigation",
+    ru: "Навигация по календарю",
+  },
+  "date-picker.choose-month": {
+    description: "ARIA label for the month-picker grid.",
+    components: ["DatePicker"],
+    et: "Vali kuu",
+    en: "Choose month",
+    ru: "Выберите месяц",
+  },
+  "date-picker.choose-year": {
+    description: "ARIA label for the year-picker grid.",
+    components: ["DatePicker"],
+    et: "Vali aasta",
+    en: "Choose year",
+    ru: "Выберите год",
+  },
+  "date-picker.week-number": {
+    description:
+      "ARIA label announced for the ISO week-number cell at the start of each row.",
+    components: ["DatePicker"],
+    et: (n: number) => `Nädal ${n}`,
+    en: (n: number) => `Week ${n}`,
+    ru: (n: number) => `Неделя ${n}`,
+  },
+  "date-picker.week-number-header": {
+    description:
+      "ARIA label announced for the week-number column header (e.g., \"Week\").",
+    components: ["DatePicker"],
+    et: "Nädal",
+    en: "Week",
+    ru: "Неделя",
   },
   "date-picker.go-prev-month": {
     description: "Label for previous month navigation",

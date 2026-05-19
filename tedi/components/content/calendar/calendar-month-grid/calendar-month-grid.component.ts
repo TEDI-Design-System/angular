@@ -2,11 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
   ViewEncapsulation,
 } from "@angular/core";
 import { getMonthNames, isSameMonth } from "../../../../utils/date.util";
+import { TediTranslationService } from "../../../../services/translation/translation.service";
 
 type MonthPredicate = (month: Date) => boolean;
 
@@ -28,8 +30,27 @@ export class CalendarMonthGridComponent {
 
   readonly monthSelect = output<Date>();
 
+  private readonly translation = inject(TediTranslationService);
+
   readonly monthNames = computed(() =>
     getMonthNames(this.localeCode(), this.monthNameFormat()),
+  );
+
+  readonly monthLongNames = computed(() =>
+    getMonthNames(this.localeCode(), "long"),
+  );
+
+  readonly rows = computed<number[][]>(() => {
+    const indices = Array.from({ length: 12 }, (_, i) => i);
+    const rows: number[][] = [];
+    for (let i = 0; i < indices.length; i += 3) {
+      rows.push(indices.slice(i, i + 3));
+    }
+    return rows;
+  });
+
+  readonly gridAriaLabel = computed(() =>
+    this.translation.translate("date-picker.choose-month"),
   );
 
   private readonly today = new Date();

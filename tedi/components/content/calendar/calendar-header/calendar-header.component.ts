@@ -17,6 +17,7 @@ import { TediTranslationService } from "../../../../services/translation/transla
 import {
   addMonths,
   addYears,
+  formatMonthYear,
   getDaysInMonth,
   getMonthNames,
   startOfMonth,
@@ -24,7 +25,7 @@ import {
 import { matchAny, Matcher } from "../../../../utils/matchers.util";
 import { CalendarView } from "../types";
 
-type MonthYearSelectType = "dropdown" | "grid";
+type MonthYearSelectType = "dropdown" | "grid" | "static";
 type MonthPredicate = (month: Date) => boolean;
 type YearPredicate = (year: Date) => boolean;
 
@@ -172,6 +173,22 @@ export class CalendarHeaderComponent {
   readonly selectYearLabel = computed(() =>
     this.translationService.translate("date-picker.select-year"),
   );
+
+  readonly navAriaLabel = computed(() =>
+    this.translationService.translate("date-picker.calendar-nav"),
+  );
+
+  /**
+   * Text fed to the visually-hidden `aria-live` region so screen readers
+   * announce the visible header label whenever the user navigates between
+   * months/years. Mirrors react-day-picker's hidden `role="status"` span.
+   */
+  readonly captionAnnouncement = computed(() => {
+    const view = this.view();
+    if (view === "years") return this.yearRangeLabel();
+    if (view === "months") return String(this.currentYear());
+    return formatMonthYear(this.currentMonth(), this.localeCode());
+  });
 
   handlePrev(): void {
     if (this.prevDisabled()) return;

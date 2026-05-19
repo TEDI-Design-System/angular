@@ -257,30 +257,6 @@ export const Default: Story = {
   },
 };
 
-export const WithSelectedValue: Story = {
-  render: () => {
-    const control = new FormControl<Date | null>(inThreeDays);
-    return {
-      props: { control },
-      template: `
-        <tedi-form-field>
-          <label tedi-label for="date-with-value">Date</label>
-          <tedi-date-field inputId="date-with-value" [formControl]="control" />
-          <tedi-feedback-text text="Pick a date." />
-        </tedi-form-field>
-      `,
-    };
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Single-mode field with a starting value bound through `FormControl`. The popover opens at the selected month on first interaction.",
-      },
-    },
-  },
-};
-
 export const Multiple: Story = {
   render: () => {
     const control = new FormControl<Date[] | null>([inThreeDays, inTenDays]);
@@ -340,80 +316,46 @@ export const Range: Story = {
   },
 };
 
-export const DisablePast: Story = {
+export const DisabledDates: Story = {
   render: () => {
-    const control = new FormControl<Date | null>(null);
-    return {
-      props: { control },
-      template: `
-        <tedi-form-field>
-          <label tedi-label for="date-disable-past">Date</label>
-          <tedi-date-field
-            inputId="date-disable-past"
-            [formControl]="control"
-            [disablePast]="true"
-          />
-          <tedi-feedback-text text="Only today and future dates are selectable." />
-        </tedi-form-field>
-      `,
-    };
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "`disablePast=true` blocks every date strictly before today. Typed values that fall in the past are rejected on commit.",
-      },
-    },
-  },
-};
-
-export const DisableFuture: Story = {
-  render: () => {
-    const control = new FormControl<Date | null>(null);
-    return {
-      props: { control },
-      template: `
-        <tedi-form-field>
-          <label tedi-label for="date-disable-future">Date</label>
-          <tedi-date-field
-            inputId="date-disable-future"
-            [formControl]="control"
-            [disableFuture]="true"
-          />
-          <tedi-feedback-text text="Only today and past dates are selectable." />
-        </tedi-form-field>
-      `,
-    };
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "`disableFuture=true` blocks every date strictly after today. Useful for date-of-birth or historical-event inputs.",
-      },
-    },
-  },
-};
-
-export const MinAndMaxDate: Story = {
-  render: () => {
-    const control = new FormControl<Date | null>(null);
+    const pastControl = new FormControl<Date | null>(null);
+    const futureControl = new FormControl<Date | null>(null);
+    const minMaxControl = new FormControl<Date | null>(null);
     const minDate = new Date(today.getFullYear(), today.getMonth(), 1);
     const maxDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     return {
-      props: { control, minDate, maxDate },
+      props: { pastControl, futureControl, minMaxControl, minDate, maxDate },
       template: `
-        <tedi-form-field>
-          <label tedi-label for="date-min-max">Date</label>
-          <tedi-date-field
-            inputId="date-min-max"
-            [formControl]="control"
-            [minDate]="minDate"
-            [maxDate]="maxDate"
-          />
-          <tedi-feedback-text text="Pick a date in the current month." />
-        </tedi-form-field>
+        <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
+          <tedi-form-field>
+            <label tedi-label for="date-disable-past">Disable past</label>
+            <tedi-date-field
+              inputId="date-disable-past"
+              [formControl]="pastControl"
+              [disablePast]="true"
+            />
+            <tedi-feedback-text text="Only today and future dates are selectable." />
+          </tedi-form-field>
+          <tedi-form-field>
+            <label tedi-label for="date-disable-future">Disable future</label>
+            <tedi-date-field
+              inputId="date-disable-future"
+              [formControl]="futureControl"
+              [disableFuture]="true"
+            />
+            <tedi-feedback-text text="Only today and past dates are selectable." />
+          </tedi-form-field>
+          <tedi-form-field>
+            <label tedi-label for="date-min-max">Min/max window</label>
+            <tedi-date-field
+              inputId="date-min-max"
+              [formControl]="minMaxControl"
+              [minDate]="minDate"
+              [maxDate]="maxDate"
+            />
+            <tedi-feedback-text text="Pick a date in the current month." />
+          </tedi-form-field>
+        </div>
       `,
     };
   },
@@ -421,7 +363,7 @@ export const MinAndMaxDate: Story = {
     docs: {
       description: {
         story:
-          "`minDate` and `maxDate` constrain the selectable window. Both bounds are inclusive.",
+          "Three ways to restrict the selectable window. `disablePast` blocks every date strictly before today (date-of-birth-style fields); `disableFuture` blocks every date strictly after today (historical-event fields); `minDate`/`maxDate` clamp the window to an explicit inclusive range. Typed values outside the constraint are rejected on commit.",
       },
     },
   },
@@ -457,49 +399,37 @@ export const CustomFormatAndParse: Story = {
   },
 };
 
-export const UseNativePicker: Story = {
+export const NativePicker: Story = {
   render: () => {
-    const control = new FormControl<Date | null>(null);
+    const allControl = new FormControl<Date | null>(null);
+    const bpControl = new FormControl<Date | null>(null);
     return {
-      props: { control },
-      template: `
-        <tedi-form-field>
-          <label tedi-label for="date-native">Date</label>
-          <tedi-date-field
-            inputId="date-native"
-            [formControl]="control"
-            [useNativePicker]="true"
-          />
-          <tedi-feedback-text text="Uses the OS-native date picker." />
-        </tedi-form-field>
-      `,
-    };
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "`useNativePicker=true` swaps the popover for the browser's built-in `<input type=\"date\">` UI. Only available in `single` mode. Accepts a `BreakpointInput<boolean>` — see `UseNativePickerBreakpoint`.",
+      props: {
+        allControl,
+        bpControl,
+        useNativeBp: { xs: true, md: false },
       },
-    },
-  },
-};
-
-export const UseNativePickerBreakpoint: Story = {
-  render: () => {
-    const control = new FormControl<Date | null>(null);
-    return {
-      props: { control, useNativePicker: { xs: true, md: false } },
       template: `
-        <tedi-form-field>
-          <label tedi-label for="date-native-bp">Date</label>
-          <tedi-date-field
-            inputId="date-native-bp"
-            [formControl]="control"
-            [useNativePicker]="useNativePicker"
-          />
-          <tedi-feedback-text text="Native picker on phones, custom popover from md upward." />
-        </tedi-form-field>
+        <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
+          <tedi-form-field>
+            <label tedi-label for="date-native">Always native</label>
+            <tedi-date-field
+              inputId="date-native"
+              [formControl]="allControl"
+              [useNativePicker]="true"
+            />
+            <tedi-feedback-text text="Uses the OS-native date picker on every viewport." />
+          </tedi-form-field>
+          <tedi-form-field>
+            <label tedi-label for="date-native-bp">Native below md</label>
+            <tedi-date-field
+              inputId="date-native-bp"
+              [formControl]="bpControl"
+              [useNativePicker]="useNativeBp"
+            />
+            <tedi-feedback-text text="Native picker on phones, custom popover from md upward." />
+          </tedi-form-field>
+        </div>
       `,
     };
   },
@@ -507,7 +437,7 @@ export const UseNativePickerBreakpoint: Story = {
     docs: {
       description: {
         story:
-          "`useNativePicker` accepts a `BreakpointInput<boolean>`. Here the OS picker is used below `md`, and the custom popover takes over from `md` upward.",
+          "`useNativePicker=true` swaps the popover for the browser's built-in `<input type=\"date\">` UI (single mode only). The prop accepts a `BreakpointInput<boolean>`, so passing `{ xs: true, md: false }` keeps the native picker on phones and the custom popover from `md` upward.",
       },
     },
   },
@@ -515,19 +445,31 @@ export const UseNativePickerBreakpoint: Story = {
 
 export const Modal: Story = {
   render: () => {
-    const control = new FormControl<Date | null>(null);
+    const alwaysControl = new FormControl<Date | null>(null);
+    const bpControl = new FormControl<Date | null>(null);
     return {
-      props: { control },
+      props: { alwaysControl, bpControl },
       template: `
-        <tedi-form-field>
-          <label tedi-label for="date-modal">Date</label>
-          <tedi-date-field
-            inputId="date-modal"
-            [formControl]="control"
-            [modal]="true"
-          />
-          <tedi-feedback-text text="Calendar always opens in a centered modal." />
-        </tedi-form-field>
+        <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
+          <tedi-form-field>
+            <label tedi-label for="date-modal">Always modal</label>
+            <tedi-date-field
+              inputId="date-modal"
+              [formControl]="alwaysControl"
+              [modal]="true"
+            />
+            <tedi-feedback-text text="Calendar always opens in a centered modal." />
+          </tedi-form-field>
+          <tedi-form-field>
+            <label tedi-label for="date-modal-md">Modal below md</label>
+            <tedi-date-field
+              inputId="date-modal-md"
+              [formControl]="bpControl"
+              modal="md"
+            />
+            <tedi-feedback-text text="Popover from md upward, modal below md." />
+          </tedi-form-field>
+        </div>
       `,
     };
   },
@@ -535,36 +477,7 @@ export const Modal: Story = {
     docs: {
       description: {
         story:
-          "`[modal]=\"true\"` always opens the calendar in a centered modal with explicit Cancel/Confirm buttons — independent of viewport size.",
-      },
-    },
-  },
-};
-
-export const ModalBelowMd: Story = {
-  render: () => {
-    const control = new FormControl<Date | null>(null);
-    return {
-      props: { control },
-      template: `
-        <tedi-form-field>
-          <label tedi-label for="date-modal-md">Date</label>
-          <tedi-date-field
-            inputId="date-modal-md"
-            [formControl]="control"
-            modal="md"
-          />
-          <tedi-feedback-text text="Opens as a popover from md upward, as a modal below md." />
-        </tedi-form-field>
-      `,
-    };
-  },
-  parameters: {
-    viewport: { defaultViewport: "mobile1" },
-    docs: {
-      description: {
-        story:
-          "`modal=\"md\"` (the default) renders the calendar in a modal below the `md` breakpoint and in a popover above it. Pass a different breakpoint name to shift the threshold.",
+          "`[modal]=\"true\"` forces the calendar into a centered modal with explicit Cancel/Confirm buttons. `modal=\"md\"` (the default) renders a modal below the `md` breakpoint and a popover above it — pass a different breakpoint name to shift the threshold.",
       },
     },
   },
@@ -714,21 +627,33 @@ export const Required: Story = {
   },
 };
 
-export const SelectionLevelMonths: Story = {
+export const SelectionLevel: Story = {
   render: () => {
-    const control = new FormControl<Date | null>(null);
+    const monthControl = new FormControl<Date | null>(null);
+    const yearControl = new FormControl<Date | null>(null);
     return {
-      props: { control },
+      props: { monthControl, yearControl },
       template: `
-        <tedi-form-field>
-          <label tedi-label for="date-months">Month</label>
-          <tedi-date-field
-            inputId="date-months"
-            [formControl]="control"
-            selectionLevel="months"
-          />
-          <tedi-feedback-text text="Pick a month." />
-        </tedi-form-field>
+        <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
+          <tedi-form-field>
+            <label tedi-label for="date-months">Month</label>
+            <tedi-date-field
+              inputId="date-months"
+              [formControl]="monthControl"
+              selectionLevel="months"
+            />
+            <tedi-feedback-text text="Pick a month — the calendar commits at month granularity." />
+          </tedi-form-field>
+          <tedi-form-field>
+            <label tedi-label for="date-years">Year</label>
+            <tedi-date-field
+              inputId="date-years"
+              [formControl]="yearControl"
+              selectionLevel="years"
+            />
+            <tedi-feedback-text text="Pick a year — the calendar commits at year granularity." />
+          </tedi-form-field>
+        </div>
       `,
     };
   },
@@ -736,35 +661,7 @@ export const SelectionLevelMonths: Story = {
     docs: {
       description: {
         story:
-          "`selectionLevel=\"months\"` commits at month granularity — the calendar shows the month grid as the final step.",
-      },
-    },
-  },
-};
-
-export const SelectionLevelYears: Story = {
-  render: () => {
-    const control = new FormControl<Date | null>(null);
-    return {
-      props: { control },
-      template: `
-        <tedi-form-field>
-          <label tedi-label for="date-years">Year</label>
-          <tedi-date-field
-            inputId="date-years"
-            [formControl]="control"
-            selectionLevel="years"
-          />
-          <tedi-feedback-text text="Pick a year." />
-        </tedi-form-field>
-      `,
-    };
-  },
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "`selectionLevel=\"years\"` commits at year granularity — the year grid is the final step.",
+          "`selectionLevel` controls the lowest committable granularity. `months` makes the month grid the final step; `years` makes the year grid the final step.",
       },
     },
   },

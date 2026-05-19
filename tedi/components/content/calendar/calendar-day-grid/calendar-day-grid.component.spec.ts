@@ -3,6 +3,17 @@ import { By } from "@angular/platform-browser";
 import { CalendarDayGridComponent } from "./calendar-day-grid.component";
 import { DateRange } from "../../../../utils/date.util";
 import { Matcher } from "../../../../utils/matchers.util";
+import { TediTranslationService } from "../../../../services/translation/translation.service";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
+
+class TranslationMock {
+  translate(key: string): string {
+    return key;
+  }
+  track(key: string): () => string {
+    return () => key;
+  }
+}
 
 describe("CalendarDayGridComponent", () => {
   let fixture: ComponentFixture<CalendarDayGridComponent>;
@@ -13,6 +24,10 @@ describe("CalendarDayGridComponent", () => {
   function createComponent(): void {
     TestBed.configureTestingModule({
       imports: [CalendarDayGridComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
     });
     fixture = TestBed.createComponent(CalendarDayGridComponent);
     component = fixture.componentInstance;
@@ -367,9 +382,31 @@ describe("CalendarDayGridComponent", () => {
         ),
       ).toBe(true);
 
-      component.handleBlur();
+      component.handleBlur(new FocusEvent("blur"));
       fixture.detectChanges();
       expect(hasAnyPreviewClass()).toBe(false);
+    });
+
+    it("keeps preview classes when focus moves to a sibling day cell (no flash)", () => {
+      fixture.componentRef.setInput("mode", "range");
+      fixture.componentRef.setInput("value", { from: new Date(2024, 4, 10) });
+      fixture.detectChanges();
+
+      component.handleFocus(new Date(2024, 4, 14));
+      fixture.detectChanges();
+      expect(hasAnyPreviewClass()).toBe(true);
+
+      // Simulate the browser-native blur → focus chain that fires when the
+      // user clicks a different day in the same grid. relatedTarget points
+      // at the incoming cell — blur should NOT clear hoveredDate, because
+      // doing so would render one frame with no preview (visible as a flash).
+      const nextCell = buttonForDay(new Date(2024, 4, 16));
+      expect(nextCell).toBeTruthy();
+      component.handleBlur(
+        new FocusEvent("blur", { relatedTarget: nextCell as EventTarget }),
+      );
+      fixture.detectChanges();
+      expect(hasAnyPreviewClass()).toBe(true);
     });
 
     it("does not apply preview classes on focus when not in range mode", () => {
@@ -378,7 +415,7 @@ describe("CalendarDayGridComponent", () => {
       component.handleFocus(new Date(2024, 4, 14));
       fixture.detectChanges();
       expect(hasAnyPreviewClass()).toBe(false);
-      component.handleBlur();
+      component.handleBlur(new FocusEvent("blur"));
       fixture.detectChanges();
       expect(hasAnyPreviewClass()).toBe(false);
     });
@@ -483,6 +520,86 @@ describe("CalendarDayGridComponent", () => {
 
     it("returns null for an all-null row", () => {
       expect(component.weekNumber([null, null, null, null, null, null, null])).toBeNull();
+    });
+  });
+
+  describe("a11y", () => {
+    function gridTable(): HTMLElement {
+      return fixture.debugElement.query(By.css(".tedi-calendar-day-grid"))
+        .nativeElement as HTMLElement;
+    }
+
+    it("sets aria-label on the grid to the month/year", () => {
+      const label = gridTable().getAttribute("aria-label");
+      // formatMonthYear via Intl yields locale-specific output; we just assert
+      // both the month name and year appear in it.
+      expect(label).toMatch(/2024/);
+      expect(label?.toLowerCase()).toContain("mai");
+    });
+
+    it("omits aria-multiselectable in single mode", () => {
+      expect(gridTable().getAttribute("aria-multiselectable")).toBeNull();
+    });
+
+    it("sets aria-multiselectable=true in multiple mode", () => {
+      fixture.componentRef.setInput("mode", "multiple");
+      fixture.detectChanges();
+      expect(gridTable().getAttribute("aria-multiselectable")).toBe("true");
+    });
+
+    it("sets aria-multiselectable=true in range mode", () => {
+      fixture.componentRef.setInput("mode", "range");
+      fixture.detectChanges();
+      expect(gridTable().getAttribute("aria-multiselectable")).toBe("true");
+    });
+
+    it("exposes a long aria-label on each weekday header", () => {
+      const headers = fixture.debugElement.queryAll(
+        By.css(".tedi-calendar-day-grid__weekday"),
+      );
+      const labels = headers.map(
+        (h) => (h.nativeElement as HTMLElement).getAttribute("aria-label"),
+      );
+      // Estonian locale "et" returns "esmaspäev" .. "pühapäev" for `long`.
+      for (const label of labels) {
+        expect(label && label.length > 3).toBe(true);
+      }
+    });
+
+    it("hides the visual narrow weekday text from screen readers", () => {
+      const headers = fixture.debugElement.queryAll(
+        By.css(".tedi-calendar-day-grid__weekday span"),
+      );
+      for (const h of headers) {
+        expect((h.nativeElement as HTMLElement).getAttribute("aria-hidden")).toBe(
+          "true",
+        );
+      }
+    });
+
+    it("week number cell is a rowheader with translated aria-label", () => {
+      fixture.componentRef.setInput("showWeekNumbers", true);
+      fixture.detectChanges();
+      const cell = fixture.debugElement.query(
+        By.css(".tedi-calendar-day-grid__week-number"),
+      );
+      expect(cell.nativeElement.getAttribute("role")).toBe("rowheader");
+      expect(cell.nativeElement.getAttribute("scope")).toBe("row");
+      expect(cell.nativeElement.getAttribute("aria-label")).toBe(
+        "date-picker.week-number",
+      );
+    });
+
+    it("week number column header has scope=col and translated aria-label", () => {
+      fixture.componentRef.setInput("showWeekNumbers", true);
+      fixture.detectChanges();
+      const header = fixture.debugElement.query(
+        By.css(".tedi-calendar-day-grid__week-number-header"),
+      );
+      expect(header.nativeElement.getAttribute("scope")).toBe("col");
+      expect(header.nativeElement.getAttribute("aria-label")).toBe(
+        "date-picker.week-number-header",
+      );
     });
   });
 });

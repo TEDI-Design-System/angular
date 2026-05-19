@@ -2,6 +2,17 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { CalendarMonthGridComponent } from "./calendar-month-grid.component";
 import { getMonthNames } from "../../../../utils/date.util";
+import { TediTranslationService } from "../../../../services/translation/translation.service";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
+
+class TranslationMock {
+  translate(key: string): string {
+    return key;
+  }
+  track(key: string) {
+    return () => key;
+  }
+}
 
 describe("CalendarMonthGridComponent", () => {
   let fixture: ComponentFixture<CalendarMonthGridComponent>;
@@ -12,6 +23,10 @@ describe("CalendarMonthGridComponent", () => {
   function createComponent(): void {
     TestBed.configureTestingModule({
       imports: [CalendarMonthGridComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
     });
     fixture = TestBed.createComponent(CalendarMonthGridComponent);
     component = fixture.componentInstance;
@@ -42,16 +57,23 @@ describe("CalendarMonthGridComponent", () => {
       expect(buttons().length).toBe(12);
     });
 
-    it("renders the grid container with role=grid and a single role=row", () => {
+    it("renders the grid container with role=grid and four role=row rows of three cells", () => {
       const grid = fixture.debugElement.query(
         By.css(".tedi-calendar-month-grid"),
       );
       expect(grid.nativeElement.getAttribute("role")).toBe("grid");
+      expect(grid.nativeElement.getAttribute("aria-label")).toBe(
+        "date-picker.choose-month",
+      );
       const rows = fixture.debugElement.queryAll(
         By.css(".tedi-calendar-month-grid__row"),
       );
-      expect(rows.length).toBe(1);
-      expect(rows[0].nativeElement.getAttribute("role")).toBe("row");
+      expect(rows.length).toBe(4);
+      for (const row of rows) {
+        expect(row.nativeElement.getAttribute("role")).toBe("row");
+        const cells = row.queryAll(By.css(".tedi-calendar-month-grid__cell"));
+        expect(cells.length).toBe(3);
+      }
     });
   });
 

@@ -448,4 +448,51 @@ describe("CalendarHeaderComponent", () => {
       expect(navButtons()[1].disabled).toBe(false);
     });
   });
+
+  describe("a11y", () => {
+    function nav(): HTMLElement {
+      return fixture.debugElement.query(By.css("nav.tedi-calendar-header"))
+        .nativeElement as HTMLElement;
+    }
+
+    function liveRegion(): HTMLElement {
+      return fixture.debugElement.query(
+        By.css("nav.tedi-calendar-header .sr-only[role='status']"),
+      ).nativeElement as HTMLElement;
+    }
+
+    it("renders the header as a <nav> with translated aria-label", () => {
+      expect(nav().tagName).toBe("NAV");
+      expect(nav().getAttribute("aria-label")).toBe(
+        "date-picker.calendar-nav",
+      );
+    });
+
+    it("exposes a polite live region for caption announcements", () => {
+      const el = liveRegion();
+      expect(el.getAttribute("aria-live")).toBe("polite");
+      expect(el.getAttribute("aria-atomic")).toBe("true");
+      expect(el.classList.contains("sr-only")).toBe(true);
+    });
+
+    it("live region in days view announces month/year text", () => {
+      const text = liveRegion().textContent?.trim() ?? "";
+      expect(text).toMatch(/2024/);
+      expect(text.toLowerCase()).toContain("mai");
+    });
+
+    it("live region in months view announces the visible year", () => {
+      fixture.componentRef.setInput("view", "months");
+      fixture.detectChanges();
+      expect(liveRegion().textContent?.trim()).toBe("2024");
+    });
+
+    it("live region in years view announces the year-range bracket", () => {
+      fixture.componentRef.setInput("view", "years");
+      fixture.componentRef.setInput("yearPageStart", 2020);
+      fixture.componentRef.setInput("yearPageSize", 12);
+      fixture.detectChanges();
+      expect(liveRegion().textContent?.trim()).toBe("2020-2031");
+    });
+  });
 });

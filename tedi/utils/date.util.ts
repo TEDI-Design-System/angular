@@ -218,7 +218,7 @@ export function getMonthNames(
  */
 export function getWeekdayNames(
   localeCode: string,
-  format: "short" | "narrow",
+  format: "long" | "short" | "narrow",
   firstDayOfWeek: number,
 ): string[] {
   const fmt = new Intl.DateTimeFormat(localeCode, { weekday: format });
@@ -244,6 +244,38 @@ export function formatLocaleDate(date: Date, localeCode: string): string {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
+  });
+  return fmt.format(date);
+}
+
+/**
+ * Formats a Date as a long-form, locale-aware string suitable for
+ * `aria-label` use — e.g. for `en-US` produces "Friday, May 16, 2026" and for
+ * `et-EE` "reede, 16. mai 2026". Matches react-day-picker's `labelDay` shape.
+ */
+export function formatLocaleDateLong(
+  date: Date,
+  localeCode: string,
+): string {
+  const fmt = new Intl.DateTimeFormat(localeCode, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  return fmt.format(date);
+}
+
+/**
+ * Formats a Date as a locale-aware "Month Year" string — e.g. "May 2026" for
+ * `en-US` and "mai 2026" for `et-EE`. Used as the aria-label for the day
+ * grid and inside the calendar header's aria-live region so screen readers
+ * announce the visible month/year on navigation.
+ */
+export function formatMonthYear(date: Date, localeCode: string): string {
+  const fmt = new Intl.DateTimeFormat(localeCode, {
+    year: "numeric",
+    month: "long",
   });
   return fmt.format(date);
 }

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   model,
   output,
@@ -10,6 +11,8 @@ import {
 import {
   buildMonthGrid,
   DateRange,
+  formatLocaleDateLong,
+  formatMonthYear,
   getISOWeek,
   getWeekdayNames,
   isAfterDay,
@@ -18,15 +21,31 @@ import {
   isSameMonth,
 } from "../../../../utils/date.util";
 import { matchAny, Matcher } from "../../../../utils/matchers.util";
+import {
+  StatusIndicatorComponent,
+  StatusIndicatorType,
+} from "../../../tags/status-indicator/status-indicator.component";
+import { TediTranslationService } from "../../../../services/translation/translation.service";
 import { DateFieldMode } from "../types";
 
 type DayPredicate = (date: Date) => boolean;
 type DayAvailabilityInput = Date[] | DayPredicate | undefined;
 type CalendarValue = Date | Date[] | DateRange | null;
+export interface DayStatus {
+  type: StatusIndicatorType;
+  /**
+   * Accessible label for the status. Surfaced on the day button's `aria-label`
+   * so screen readers announce the date together with its status — required to
+   * meet WCAG 1.1.1 / 1.4.1 since the indicator dot alone is decorative.
+   */
+  label: string;
+}
+export type DayStatusFn = (date: Date) => DayStatus | null | undefined;
 
 @Component({
   selector: "tedi-calendar-day-grid",
   standalone: true,
+  imports: [StatusIndicatorComponent],
   templateUrl: "./calendar-day-grid.component.html",
   styleUrl: "./calendar-day-grid.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -44,6 +63,9 @@ export class CalendarDayGridComponent {
   readonly availableDays = input<DayAvailabilityInput>(undefined);
   readonly unavailableDays = input<DayAvailabilityInput>(undefined);
   readonly inputDisabled = input<boolean>(false);
+  readonly dayStatus = input<DayStatusFn | undefined>(undefined);
+
+  private readonly translation = inject(TediTranslationService);
 
   readonly daySelect = output<Date>();
 
@@ -52,6 +74,28 @@ export class CalendarDayGridComponent {
   readonly weekdayNames = computed(() =>
     getWeekdayNames(this.localeCode(), "narrow", this.firstDayOfWeek()),
   );
+
+  readonly weekdayFullNames = computed(() =>
+    getWeekdayNames(this.localeCode(), "long", this.firstDayOfWeek()),
+  );
+
+  readonly gridAriaLabel = computed(() =>
+    formatMonthYear(this.month(), this.localeCode()),
+  );
+
+  readonly multiselectable = computed(
+    () => this.mode() === "multiple" || this.mode() === "range",
+  );
+
+  readonly weekNumberHeaderLabel = computed(() =>
+    this.translation.translate("date-picker.week-number-header"),
+  );
+
+  weekNumberLabel(row: (Date | null)[]): string | null {
+    const value = this.weekNumber(row);
+    if (value === null) return null;
+    return this.translation.translate("date-picker.week-number", value);
+  }
 
   readonly grid = computed(() =>
     buildMonthGrid(
@@ -84,6 +128,25 @@ export class CalendarDayGridComponent {
     );
     return firstSelectable ? this.dayKey(firstSelectable) : null;
   });
+
+  statusForDay(day: Date | null): DayStatus | null {
+    if (!day) return null;
+    const fn = this.dayStatus();
+    if (!fn) return null;
+    return fn(day) ?? null;
+  }
+
+  ariaLabelForDay(day: Date | null): string | null {
+    if (!day) return null;
+    const parts: string[] = [];
+    if (isSameDay(day, new Date())) {
+      parts.push(this.translation.translate("date-picker.today"));
+    }
+    parts.push(formatLocaleDateLong(day, this.localeCode()));
+    const status = this.statusForDay(day);
+    if (status?.label) parts.push(status.label);
+    return parts.join(", ");
+  }
 
   cellState(day: Date | null): string {
     if (!day) return "";
@@ -242,8 +305,15 @@ export class CalendarDayGridComponent {
     this.hoveredDate.set(day);
   }
 
-  handleBlur(): void {
+  handleBlur(event: FocusEvent): void {
     if (this.mode() !== "range") return;
+    const next = event.relatedTarget as HTMLElement | null;
+    // Clicking a sibling day fires blur on the previous focus target before
+    // focus lands on the new one. Clearing here would render one frame with
+    // no preview, which the user sees as a flash. Skip the clear when focus
+    // is moving to another cell in the same grid — the incoming focus handler
+    // will overwrite hoveredDate with the new day.
+    if (next?.closest(".tedi-calendar-day-grid")) return;
     this.hoveredDate.set(null);
   }
 

@@ -1,6 +1,7 @@
-<div
+<nav
   class="tedi-calendar-header"
   [class.tedi-calendar-header--disabled]="inputDisabled()"
+  [attr.aria-label]="navAriaLabel()"
 >
   @if (showNavigation()) {
     <button
@@ -56,7 +57,7 @@
               }
             </tedi-dropdown-content>
           </tedi-dropdown>
-        } @else {
+        } @else if (monthYearSelectType() === "grid") {
           <button
             type="button"
             class="tedi-calendar-header__label-button"
@@ -66,6 +67,10 @@
           >
             {{ currentMonthLabel() }}
           </button>
+        } @else {
+          <span class="tedi-calendar-header__static-label">
+            {{ currentMonthLabel() }}
+          </span>
         }
 
         @if (monthYearSelectType() === "dropdown") {
@@ -105,7 +110,7 @@
               }
             </tedi-dropdown-content>
           </tedi-dropdown>
-        } @else {
+        } @else if (monthYearSelectType() === "grid") {
           <button
             type="button"
             class="tedi-calendar-header__label-button"
@@ -115,6 +120,10 @@
           >
             {{ currentYear() }}
           </button>
+        } @else {
+          <span class="tedi-calendar-header__static-label">
+            {{ currentYear() }}
+          </span>
         }
       }
       @case ("months") {
@@ -154,7 +163,7 @@
               }
             </tedi-dropdown-content>
           </tedi-dropdown>
-        } @else {
+        } @else if (monthYearSelectType() === "grid") {
           <button
             type="button"
             class="tedi-calendar-header__label-button"
@@ -164,6 +173,10 @@
           >
             {{ currentYear() }}
           </button>
+        } @else {
+          <span class="tedi-calendar-header__static-label">
+            {{ currentYear() }}
+          </span>
         }
       }
       @case ("years") {
@@ -188,4 +201,8 @@
       <tedi-icon name="arrow_forward" [size]="18" />
     </button>
   }
-</div>
+
+  <span class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+    {{ captionAnnouncement() }}
+  </span>
+</nav>

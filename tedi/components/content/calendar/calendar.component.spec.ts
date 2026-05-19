@@ -985,6 +985,10 @@ describe("CalendarComponent", () => {
   describe("prev/next via internal handlers", () => {
     it("prev in years view decrements yearPageStart", () => {
       const fixture = createComponent();
+      // Widen the year bounds so the prev page isn't blocked by the default
+      // ±10 window — this test only cares about page-decrement math.
+      fixture.componentRef.setInput("minYear", 1900);
+      fixture.componentRef.setInput("maxYear", 2200);
       const component = fixture.componentInstance;
       component.view.set("years");
       fixture.detectChanges();
