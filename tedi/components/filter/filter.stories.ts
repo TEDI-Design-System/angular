@@ -192,6 +192,7 @@ export const Default: StoryObj<FilterComponent> = {
 export const Size: StoryObj<FilterComponent> = {
   render: () => ({
     template: `
+      <div style="background: var(--general-surface-primary); padding: 24px;">
       <tedi-row [cols]="2" [gapY]="3" alignItems="center">
         <tedi-col><p tedi-text modifiers="bold">Default</p></tedi-col>
         <tedi-col class="flex flex-wrap gap-2">
@@ -208,6 +209,7 @@ export const Size: StoryObj<FilterComponent> = {
           <tedi-filter text="Text" size="large" />
         </tedi-col>
       </tedi-row>
+      </div>
     `,
   }),
 };
