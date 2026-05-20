@@ -38,6 +38,7 @@ export interface DateFieldModalData {
   required: boolean;
   disabledMatchers: Matcher[];
   availableDays: DayAvailabilityInput;
+  unavailableDays: DayAvailabilityInput;
   shouldDisableMonth: MonthPredicate | undefined;
   shouldDisableYear: YearPredicate | undefined;
   closeOnSelect: boolean;
@@ -75,6 +76,7 @@ export interface DateFieldModalData {
           [required]="data.required"
           [disabledMatchers]="data.disabledMatchers"
           [availableDays]="data.availableDays"
+          [unavailableDays]="data.unavailableDays"
           [shouldDisableMonth]="data.shouldDisableMonth"
           [shouldDisableYear]="data.shouldDisableYear"
           (valueChange)="draft.set($event)"

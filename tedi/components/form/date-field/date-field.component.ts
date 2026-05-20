@@ -106,6 +106,7 @@ export class DateFieldComponent
   readonly shouldDisableMonth = input<MonthPredicate | undefined>(undefined);
   readonly shouldDisableYear = input<YearPredicate | undefined>(undefined);
   readonly availableDays = input<DayAvailabilityInput>(undefined);
+  readonly unavailableDays = input<DayAvailabilityInput>(undefined);
   readonly selectionLevel = input<CalendarView>("days");
   readonly monthYearSelectType = input<"dropdown" | "grid">("dropdown");
   readonly initialMonth = input<Date | undefined>(undefined);
@@ -346,7 +347,9 @@ export class DateFieldComponent
     if (!this.showCalendar()) return;
 
     if (this.useModal()) {
-      this.openModal();
+      if (!this.overlayOpen()) {
+        this.openModal();
+      }
       return;
     }
 
@@ -480,6 +483,7 @@ export class DateFieldComponent
       required: this.required(),
       disabledMatchers: this.disabledMatchers(),
       availableDays: this.availableDays(),
+      unavailableDays: this.unavailableDays(),
       shouldDisableMonth: this.shouldDisableMonth(),
       shouldDisableYear: this.shouldDisableYear(),
       closeOnSelect: this.closeOnSelectEffective(),

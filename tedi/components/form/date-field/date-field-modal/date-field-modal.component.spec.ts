@@ -32,6 +32,7 @@ function makeData(
     required: false,
     disabledMatchers: [],
     availableDays: undefined,
+    unavailableDays: undefined,
     shouldDisableMonth: undefined,
     shouldDisableYear: undefined,
     closeOnSelect: true,

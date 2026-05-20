@@ -60,6 +60,7 @@
                 @let status = statusForDay(day);
                 @if (status) {
                   <tedi-status-indicator
+                    class="tedi-calendar-day-grid__status"
                     [type]="status.type"
                     size="sm"
                     [hasBorder]="true"

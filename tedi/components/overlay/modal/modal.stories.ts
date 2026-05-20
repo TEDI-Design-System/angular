@@ -434,6 +434,7 @@ class StoryModalWithToastComponent {
     const date = this.selectedDate();
     const formatted = date ? formatDate(date) : "no date selected";
     this.toastService.success("Saved", `Selected date: ${formatted}`);
+    this.ref.close();
   }
 }
 

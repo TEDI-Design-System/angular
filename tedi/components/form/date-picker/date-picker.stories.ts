@@ -20,7 +20,7 @@ export default {
   component: DatePickerComponent,
   parameters: {
     status: {
-      type: ["partiallyTediReady"],
+      type: ["partiallyTediReady", "deprecated"],
     },
   },
   decorators: [
