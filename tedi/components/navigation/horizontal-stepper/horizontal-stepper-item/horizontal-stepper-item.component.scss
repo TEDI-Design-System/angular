@@ -21,8 +21,8 @@
 
     &:focus-visible {
       z-index: 2;
-      outline: 2px solid var(--general-focus-outline);
-      outline-offset: -2px;
+      outline: none;
+      box-shadow: 0 0 0 1px var(--tedi-neutral-100), 0 0 0 3px var(--tedi-primary-400);
     }
 
     &:disabled {
@@ -115,6 +115,10 @@
       cursor: default;
       background-color: var(--stepper-item-horizontal-type-selected-bg-default);
       clip-path: polygon(0 0, calc(100% - var(--_step-arrow-width)) 0, 100% 50%, calc(100% - var(--_step-arrow-width)) 100%, 0 100%);
+
+      &:focus-visible {
+        clip-path: none;
+      }
     }
 
     #{$host}__indicator {
