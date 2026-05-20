@@ -27,9 +27,13 @@
       outline: var(--tedi-borders-02) solid var(--form-input-border-active);
       outline-offset: var(--tedi-borders-01);
     }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
   }
 
-  &__button:hover .tedi-icon {
+  &__button:not(:disabled):hover .tedi-icon {
     color: inherit;
   }
 
@@ -50,6 +54,7 @@
     display: flex;
     align-items: center;
     padding: 0 var(--filter-default-inner-spacing-sm);
+    color: var(--_filter-text);
 
     &:empty {
       display: none;
@@ -79,19 +84,34 @@
     --_filter-bg: var(--filter-primary-default-background);
     --_filter-text: var(--filter-primary-default-text);
 
-    .tedi-filter__button:hover {
+    .tedi-filter__button:not(:disabled):hover {
       --_filter-bg: var(--filter-primary-hover-background);
       --_filter-text: var(--filter-primary-hover-text);
+    }
+
+    .tedi-filter__button:not(:disabled):active {
+      --_filter-bg: var(--filter-primary-active-background);
+      --_filter-text: var(--filter-primary-active-text);
     }
 
     &.tedi-filter--selected {
       --_filter-bg: var(--filter-primary-selected-background);
       --_filter-text: var(--filter-primary-selected-text);
 
-      .tedi-filter__button:hover {
+      .tedi-filter__button:not(:disabled):hover {
         --_filter-bg: var(--filter-primary-hover-background);
         --_filter-text: var(--filter-primary-hover-text);
       }
+
+      .tedi-filter__button:not(:disabled):active {
+        --_filter-bg: var(--filter-primary-active-background);
+        --_filter-text: var(--filter-primary-active-text);
+      }
+    }
+
+    &.tedi-filter--disabled {
+      --_filter-bg: var(--filter-primary-disabled-background);
+      --_filter-text: var(--filter-primary-disabled-text);
     }
   }
 
@@ -100,10 +120,16 @@
     --_filter-text: var(--filter-secondary-default-text);
     --_filter-border: var(--filter-secondary-default-border);
 
-    .tedi-filter__button:hover {
+    .tedi-filter__button:not(:disabled):hover {
       --_filter-bg: var(--filter-secondary-hover-background);
       --_filter-text: var(--filter-secondary-hover-text);
       --_filter-border: var(--filter-secondary-hover-border);
+    }
+
+    .tedi-filter__button:not(:disabled):active {
+      --_filter-bg: var(--filter-secondary-active-background);
+      --_filter-text: var(--filter-secondary-active-text);
+      --_filter-border: var(--filter-secondary-active-border);
     }
 
     &.tedi-filter--selected {
@@ -111,6 +137,13 @@
       --_filter-text: var(--filter-secondary-selected-text);
       --_filter-border: var(--filter-secondary-selected-border);
       --_filter-border-width: var(--general-selected-border-width);
+    }
+
+    &.tedi-filter--disabled {
+      --_filter-bg: var(--filter-secondary-disabled-background);
+      --_filter-text: var(--filter-secondary-disabled-text);
+      --_filter-border: var(--filter-secondary-disabled-border);
+      --_filter-border-width: var(--tedi-borders-01);
     }
   }
 

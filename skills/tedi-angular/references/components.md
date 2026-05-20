@@ -167,6 +167,88 @@ Composed of sub-components:
 </tedi-text-group>
 ```
 
+## Filter
+
+### Filter
+**Selector:** `tedi-filter`
+**Model:** `selected: boolean`, `value: string`, `values: string[]`
+**Inputs:**
+- `text: string = ""` — filter label text
+- `variant: FilterVariant = "primary"` — "primary" or "secondary"
+- `size: FilterSize = "default"` — "default" or "large"
+- `multiselect: boolean = false` — multiselect dropdown mode
+- `options: FilterOption[] = []` — dropdown options `{ label, value, disabled? }`
+- `preserveLabel: boolean = false` — when true, single-select shows "Text: SelectedLabel" instead of replacing text
+- `searchable: boolean = false` — show search field in dropdown
+- `showSelectAll: boolean = false` — show "Select all" in multiselect
+- `showClear: boolean = false` — show clear action in dropdown
+- `selectAllLabel: string = "Vali kõik"`
+- `clearLabel: string = "Tühjenda valik"`
+- `appendTo: string = ""` — append dropdown to selector (e.g., "body")
+- `disabled: boolean = false` — also set automatically by a disabled `FormControl` or a disabled parent `FilterGroup`
+**Outputs:**
+- `cleared: void` — emitted when clear button is clicked in custom content mode
+**Slots:**
+- `[tediFilterPrepend]` — content before the label (icon, status badge, indicator). Hidden when the filter is selected. In toggle mode (no dropdown), a check icon replaces it; in dropdown modes the prepend is simply removed.
+- `[tediFilterContent]` — custom dropdown content (replaces options)
+
+Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle), `string` (single-select), `string[]` (multiselect).
+
+```html
+<!-- Boolean toggle -->
+<tedi-filter text="Active" variant="secondary" [formControl]="activeControl" />
+
+<!-- Single-select dropdown -->
+<tedi-filter text="Service" [options]="options" [(value)]="value" [showClear]="true" appendTo="body" />
+
+<!-- Single-select with label preserved (shows "Service: Option A") -->
+<tedi-filter text="Service" [options]="options" [(value)]="value" [preserveLabel]="true" appendTo="body" />
+
+<!-- Multiselect dropdown -->
+<tedi-filter text="Hospital" [multiselect]="true" [options]="options" [(values)]="values"
+  [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+
+<!-- With prepend content -->
+<tedi-filter text="Submitted" variant="secondary" size="large">
+  <tedi-status-badge tediFilterPrepend text="5" color="brand" />
+</tedi-filter>
+
+<!-- Custom dropdown content -->
+<tedi-filter [text]="selectedLabel" [selected]="!!selectedValue" [showClear]="true" (cleared)="clear()">
+  <div tediFilterContent>
+    <!-- custom content here -->
+  </div>
+</tedi-filter>
+
+<!-- Disabled -->
+<tedi-filter text="Service" [options]="options" [(value)]="value" [disabled]="true" />
+```
+
+### FilterGroup
+**Selector:** `tedi-filter-group`
+Wrapper that joins filters into a connected button group with collapsed borders and shared border-radius. Supports `multiselect` and a shared `formControl`/`disabled` state that propagates to children.
+
+```html
+<tedi-filter-group>
+  <tedi-filter text="All" variant="secondary" [selected]="true" />
+  <tedi-filter text="Active" variant="secondary" />
+  <tedi-filter text="Closed" variant="secondary" />
+</tedi-filter-group>
+
+<!-- Radio-like single-select via shared FormControl -->
+<tedi-filter-group label="Type" [formControl]="typeControl">
+  <tedi-filter text="All" value="all" />
+  <tedi-filter text="Active" value="active" />
+  <tedi-filter text="Closed" value="done" />
+</tedi-filter-group>
+
+<!-- Multi-select via shared FormControl -->
+<tedi-filter-group label="Tags" [multiselect]="true" [formControl]="tagsControl">
+  <tedi-filter text="Urgent" value="urgent" />
+  <tedi-filter text="Review" value="review" />
+</tedi-filter-group>
+```
+
 ## Form
 
 ### TextField
@@ -427,69 +509,6 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
     </tedi-dropdown-item-value>
   </ng-template>
 </tedi-select>
-```
-
-### Filter
-**Selector:** `tedi-filter`
-**Model:** `selected: boolean`, `value: string`, `values: string[]`
-**Inputs:**
-- `text: string = ""` — filter label text
-- `variant: FilterVariant = "primary"` — "primary" or "secondary"
-- `size: FilterSize = "default"` — "default" or "large"
-- `multiselect: boolean = false` — multiselect dropdown mode
-- `options: FilterOption[] = []` — dropdown options `{ label, value, disabled? }`
-- `preserveLabel: boolean = false` — when true, single-select shows "Text: SelectedLabel" instead of replacing text
-- `searchable: boolean = false` — show search field in dropdown
-- `showSelectAll: boolean = false` — show "Select all" in multiselect
-- `showClear: boolean = false` — show clear action in dropdown
-- `selectAllLabel: string = "Vali kõik"`
-- `clearLabel: string = "Tühjenda valik"`
-- `appendTo: string = ""` — append dropdown to selector (e.g., "body")
-**Outputs:**
-- `cleared: void` — emitted when clear button is clicked in custom content mode
-**Slots:**
-- `[tediFilterPrepend]` — content before the label (icon, status badge, indicator). Hidden when the filter is selected. In toggle mode (no dropdown), a check icon replaces it; in dropdown modes the prepend is simply removed.
-- `[tediFilterContent]` — custom dropdown content (replaces options)
-
-Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle), `string` (single-select), `string[]` (multiselect).
-
-```html
-<!-- Boolean toggle -->
-<tedi-filter text="Active" variant="secondary" [formControl]="activeControl" />
-
-<!-- Single-select dropdown -->
-<tedi-filter text="Service" [options]="options" [(value)]="value" [showClear]="true" appendTo="body" />
-
-<!-- Single-select with label preserved (shows "Service: Option A") -->
-<tedi-filter text="Service" [options]="options" [(value)]="value" [preserveLabel]="true" appendTo="body" />
-
-<!-- Multiselect dropdown -->
-<tedi-filter text="Hospital" [multiselect]="true" [options]="options" [(values)]="values"
-  [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
-
-<!-- With prepend content -->
-<tedi-filter text="Submitted" variant="secondary" size="large">
-  <tedi-status-badge tediFilterPrepend text="5" color="brand" />
-</tedi-filter>
-
-<!-- Custom dropdown content -->
-<tedi-filter [text]="selectedLabel" [selected]="!!selectedValue" [showClear]="true" (cleared)="clear()">
-  <div tediFilterContent>
-    <!-- custom content here -->
-  </div>
-</tedi-filter>
-```
-
-### FilterGroup
-**Selector:** `tedi-filter-group`
-Wrapper that joins filters into a connected button group with collapsed borders and shared border-radius.
-
-```html
-<tedi-filter-group>
-  <tedi-filter text="All" variant="secondary" [selected]="true" />
-  <tedi-filter text="Active" variant="secondary" />
-  <tedi-filter text="Closed" variant="secondary" />
-</tedi-filter-group>
 ```
 
 ### FormField

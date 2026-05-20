@@ -17,17 +17,17 @@ import { FilterGroupComponent } from "./filter-group.component";
 import { _IdGenerator } from "@angular/cdk/a11y";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { NgTemplateOutlet } from "@angular/common";
-import { ButtonComponent } from "../../buttons";
-import { IconComponent } from "../../base/icon/icon.component";
-import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
-import { SeparatorComponent } from "../../helpers/separator/separator.component";
-import { DropdownComponent } from "../../overlay/dropdown/dropdown.component";
-import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
-import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-content/dropdown-content.component";
-import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
-import { FormFieldComponent } from "../form-field/form-field.component";
-import { TextFieldComponent } from "../text-field/text-field.component";
+import { ButtonComponent } from "../buttons";
+import { IconComponent } from "../base/icon/icon.component";
+import { StatusBadgeComponent } from "../tags/status-badge/status-badge.component";
+import { SeparatorComponent } from "../helpers/separator/separator.component";
+import { DropdownComponent } from "../overlay/dropdown/dropdown.component";
+import { DropdownTriggerDirective } from "../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
+import { DropdownContentComponent } from "../overlay/dropdown/dropdown-content/dropdown-content.component";
+import { DropdownItemValueComponent } from "../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
+import { DropdownItemValueLabelComponent } from "../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
+import { FormFieldComponent } from "../form/form-field/form-field.component";
+import { TextFieldComponent } from "../form/text-field/text-field.component";
 import { FilterContentDirective } from "./filter-content.directive";
 import { FilterPrependDirective } from "./filter-prepend.directive";
 
@@ -75,7 +75,7 @@ export interface FilterOption {
     "[class.tedi-filter--secondary]": "variant() === 'secondary'",
     "[class.tedi-filter--large]": "size() === 'large'",
     "[class.tedi-filter--selected]": "isSelected()",
-    "[class.tedi-filter--disabled]": "disabled()",
+    "[class.tedi-filter--disabled]": "isDisabled()",
   },
 })
 export class FilterComponent implements ControlValueAccessor {
@@ -157,6 +157,12 @@ export class FilterComponent implements ControlValueAccessor {
    * @default ""
    */
   readonly appendTo = input("");
+  /**
+   * Whether the filter is disabled. Also set automatically when used with a disabled FormControl
+   * or when nested in a disabled FilterGroup.
+   * @default false
+   */
+  readonly disabled = input<boolean>(false);
 
   readonly dropdown = viewChild<DropdownComponent>("dropdown");
   private readonly dropdownPanel =
@@ -183,9 +189,12 @@ export class FilterComponent implements ControlValueAccessor {
   private readonly idGenerator = inject(_IdGenerator);
   private readonly baseId = this.idGenerator.getId("tedi-filter");
 
-  private readonly _disabled = signal(false);
-  readonly disabled = computed(
-    () => this._disabled() || !!this.filterGroup?.disabled(),
+  private readonly formDisabled = signal(false);
+  readonly isDisabled = computed(
+    () =>
+      this.disabled() ||
+      this.formDisabled() ||
+      !!this.filterGroup?.disabled(),
   );
   readonly searchTerm = signal("");
   readonly activeOptionIndex = signal<number>(-1);
@@ -271,8 +280,8 @@ export class FilterComponent implements ControlValueAccessor {
     return selectedCount > 0 && selectedCount < filtered.length;
   });
 
-  private onChange: (value: boolean | string | string[]) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: boolean | string | string[]) => void = () => { };
+  private onTouched: () => void = () => { };
 
   writeValue(value: boolean | string | string[]): void {
     if (this.multiselect()) {
@@ -293,7 +302,7 @@ export class FilterComponent implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this._disabled.set(isDisabled);
+    this.formDisabled.set(isDisabled);
   }
 
   toggle(): void {

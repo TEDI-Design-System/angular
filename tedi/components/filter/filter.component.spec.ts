@@ -5,8 +5,8 @@ import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { FilterComponent, FilterOption } from "./filter.component";
 import { FilterContentDirective } from "./filter-content.directive";
 import { FilterPrependDirective } from "./filter-prepend.directive";
-import { IconComponent } from "../../base/icon/icon.component";
-import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
+import { IconComponent } from "../base/icon/icon.component";
+import { StatusBadgeComponent } from "../tags/status-badge/status-badge.component";
 
 @Component({
   standalone: true,

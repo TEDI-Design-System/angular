@@ -6,7 +6,7 @@
       ariaHaspopup="dialog"
       class="tedi-filter__button"
       type="button"
-      [disabled]="disabled()"
+      [disabled]="isDisabled()"
       (click)="focusDropdownContent()"
       (keydown.arrowDown)="focusDropdownContent(true)"
       (keydown.arrowUp)="focusDropdownContent(true, true)"
@@ -100,7 +100,7 @@
             <ng-container *ngTemplateOutlet="searchField" />
           }
 
-          @if (showSelectAll()) {
+          @if (showSelectAll() && filteredOptions().length > 0) {
             <div
               class="tedi-filter-dropdown__item tedi-filter-dropdown__item--select-all"
               role="checkbox"
@@ -179,7 +179,7 @@
   <button
     class="tedi-filter__button"
     type="button"
-    [disabled]="disabled()"
+    [disabled]="isDisabled()"
     [attr.role]="isGroupedRadio() ? 'radio' : null"
     [attr.aria-checked]="isGroupedRadio() ? isSelected() : null"
     [attr.aria-pressed]="isGroupedRadio() ? null : isSelected()"
