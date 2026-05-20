@@ -1,0 +1,30 @@
+<tedi-modal>
+  <tedi-modal-header />
+  <tedi-modal-content>
+    <ul class="tedi-pagination-mobile-modal__list">
+      @for (page of pages; track page) {
+        <li>
+          <button
+            type="button"
+            class="tedi-pagination-mobile-modal__item"
+            [class.tedi-pagination-mobile-modal__item--selected]="page === data.currentPage"
+            [attr.aria-current]="page === data.currentPage ? 'page' : null"
+            [attr.aria-label]="
+              page === data.currentPage
+                ? data.labels.currentPageAriaLabel(page)
+                : data.labels.pageAriaLabel(page)
+            "
+            (click)="selectPage(page)"
+          >
+            <span
+              class="tedi-pagination-mobile-modal__radio"
+              [class.tedi-pagination-mobile-modal__radio--selected]="page === data.currentPage"
+              aria-hidden="true"
+            ></span>
+            <span class="tedi-pagination-mobile-modal__label">{{ page }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  </tedi-modal-content>
+</tedi-modal>

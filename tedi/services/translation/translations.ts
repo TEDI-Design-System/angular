@@ -498,18 +498,27 @@ export const translationsMap = {
     ru: "Следущая страница",
   },
   "pagination.results": {
-    description: "Total results text",
+    description:
+      "Total results text. Returns the full localised string with count embedded — locales decide their own word order.",
     components: ["Table", "Pagination"],
-    et: (count?: number) => (count === 1 ? "tulemus" : "tulemust"),
-    en: (count?: number) => (count === 1 ? "result" : "results"),
-    ru: (count?: number) => (count === 1 ? "результат" : "результа"),
+    et: (count?: number) => `${count ?? 0} ${count === 1 ? "tulemus" : "tulemust"}`,
+    en: (count?: number) => `${count ?? 0} ${count === 1 ? "result" : "results"}`,
+    ru: (count?: number) => `${count ?? 0} ${count === 1 ? "результат" : "результа"}`,
   },
   "pagination.page-size": {
     description: "Label of page size select",
     components: ["Table", "Pagination"],
     et: "Kuva korraga",
-    en: "Page size",
-    ru: "Размер страницы",
+    en: "Show per page",
+    ru: "Показывать по",
+  },
+  "pagination.page-status": {
+    description:
+      "Status message announced to screen readers via an aria-live region when the page changes.",
+    components: ["Pagination"],
+    et: (page?: number, total?: number) => `Lehekülg ${page ?? 0} / ${total ?? 0}`,
+    en: (page?: number, total?: number) => `Page ${page ?? 0} of ${total ?? 0}`,
+    ru: (page?: number, total?: number) => `Страница ${page ?? 0} из ${total ?? 0}`,
   },
   "table-of-contents.title": {
     description: "Title of the table of contents",
