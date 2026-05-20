@@ -1,3 +1,10 @@
+# [6.4.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.3...angular-6.4.0-rc.4) (2026-05-20)
+
+
+### Bug Fixes
+
+* **alert:** renamed error to danger in storybook type options array [#438](https://github.com/TEDI-Design-System/angular/issues/438) ([#444](https://github.com/TEDI-Design-System/angular/issues/444)) ([23acf9c](https://github.com/TEDI-Design-System/angular/commit/23acf9c3d3a4bb67f80ed06beccbb31010cc7e61))
+
 # [6.4.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.2...angular-6.4.0-rc.3) (2026-05-18)
 
 
