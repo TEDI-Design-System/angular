@@ -369,19 +369,21 @@ statusControl = new FormControl<string | null>(null);
 **Inputs:**
 - `inputId: string` (required) — unique ID for label association
 - `placeholder: string`
-- `size: TimeFieldSize = "default"` — `"default"` or `"small"`
-- `state: TimeFieldState = "default"` — `"default" | "error" | "valid"`
 - `disabled: boolean = false`
-- `invalid: boolean = false`
+- `invalid: boolean = false` — manually mark the field invalid (combines with reactive-form validity)
 - `clearable: boolean = true`
-- `pickerVariant: TimeFieldPickerVariant = "scroll"` — `"scroll" | "slots" | "dropdown" | "none"`. `"none"` renders just the input with browser-native HH:mm validation and no picker UI
-- `useNativePicker: BreakpointInput<boolean> = false` — when `true`, overrides `pickerVariant` and uses the OS time picker (`<input type="time">`). Accepts a breakpoint object, e.g. `{ xs: true, md: false }` to use the OS picker on phones and the custom variant from `md` upward
+- `pickerVariant: TimeFieldPickerVariant = "scroll"` — `"scroll" | "slots" | "dropdown" | "none"`. `"none"` renders just the input — typed input is still normalized on blur (e.g. `9` → `09:00`, `930` → `09:30`)
+- `useNativePicker: TimeFieldUseNativePicker = false` — `true` always uses the OS time picker (`<input type="time">`), `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl"`) means native below that breakpoint. When resolved to `true`, overrides `pickerVariant` and `modal`
 - `pickerTrigger: TimeFieldPickerTrigger = "button"` — `"button"` opens via the icon, `"input"` also opens when the input is clicked
 - `closeOnSelect: boolean = false` — close the popover/modal as soon as a value is picked
 - `timeSlots: string[] = []` — `HH:mm` strings for `"slots"` and `"dropdown"` variants
 - `columns: number = 3` — grid columns for the `"slots"` variant
+- `showSlotIndicator: boolean = false` — show the radio indicator dot on each card in the `"slots"` variant
 - `minuteStep: number = 1` — minute increment for the `"scroll"` variant
 - `modal: TimeFieldModal = "md"` — open the picker in a modal: `true` always, `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl"`) means modal below that breakpoint
+- `fullscreen: TimeFieldFullscreen = false` — make the modal fullscreen: `true` always, `false` never, breakpoint name means fullscreen below that breakpoint. Only applies when the picker opens as a modal
+
+Sizing and validation styling come from the wrapping `tedi-form-field` — set them there, not on `tedi-time-field`. Free-typed values are normalized on blur (digits-only → `HH:mm`); invalid input reverts to the previous value.
 
 ```html
 <tedi-form-field>
@@ -389,12 +391,15 @@ statusControl = new FormControl<string | null>(null);
   <tedi-time-field inputId="time" [formControl]="timeControl" pickerTrigger="input" />
 </tedi-form-field>
 
-<!-- Custom scroll picker on desktop, OS picker on mobile -->
+<!-- Custom scroll picker on desktop, OS picker below md -->
 <tedi-time-field
   inputId="time"
   pickerVariant="scroll"
-  [useNativePicker]="{ xs: true, md: false }"
+  useNativePicker="md"
 />
+
+<!-- Modal below md, fullscreen below sm -->
+<tedi-time-field inputId="time" modal="md" fullscreen="sm" />
 ```
 
 ### TimePicker
@@ -404,17 +409,24 @@ statusControl = new FormControl<string | null>(null);
 - `variant: TimePickerVariant = "scroll"` — `"scroll" | "slots" | "dropdown"`
 - `timeSlots: string[] = []` — predefined `HH:mm` strings for `"slots"` and `"dropdown"`
 - `columns: number = 3` — grid columns for the `"slots"` variant
+- `showSlotIndicator: boolean = false` — show the radio indicator dot on each card in the `"slots"` variant
 - `minuteStep: number = 1` — minute increment for the `"scroll"` variant
 - `disabled: boolean = false`
-- `trapFocus: boolean = false` — trap Tab inside the picker (used when embedded in a popover/modal)
+- `border: boolean = false` — render with a surrounding border, useful when embedded inline (not in a popover/modal)
+- `trapFocus: boolean = false` — trap Tab inside the picker (used when embedded in a popover/modal). `scroll` cycles between hour/minute columns; `slots`/`dropdown` emit `closeRequested`
 
 **Outputs:**
 - `closeRequested: void` — emitted when the picker requests to be closed (Tab while `trapFocus` is `true`)
+
+**Keyboard:** `scroll` columns respond to `ArrowUp`/`ArrowDown`, `Home`/`End`, `PageUp`/`PageDown` (jump 5); `Enter`/`Space` on the hour column moves focus to minutes. `dropdown` items respond to `ArrowUp`/`ArrowDown`, `Home`/`End`, `Enter`/`Space`.
 
 Standalone time picker. Most consumers should use `tedi-time-field` instead — it bundles the picker, an input, and the popover/modal trigger logic.
 
 ```html
 <tedi-time-picker [(value)]="time" variant="scroll" [minuteStep]="5" />
+
+<!-- Inline picker rendered with a border -->
+<tedi-time-picker [(value)]="time" variant="slots" [timeSlots]="['09:00','10:00','11:00']" [border]="true" />
 ```
 
 ### Select

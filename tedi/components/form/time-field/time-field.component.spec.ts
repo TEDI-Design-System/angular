@@ -1,11 +1,13 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { TimeFieldComponent } from "./time-field.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
 import { LabelComponent } from "../label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
+import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
+import { ModalService } from "../../overlay/modal/modal.service";
 
 describe("TimeFieldComponent", () => {
   let fixture: ComponentFixture<TimeFieldComponent>;
@@ -212,6 +214,46 @@ describe("TimeFieldComponent", () => {
 
       expect(el.querySelector("tedi-separator")).toBeTruthy();
     });
+
+    it("should stop click propagation when the clear button is clicked", () => {
+      component.writeValue("14:30");
+      fixture.detectChanges();
+
+      const clearBtn = el.querySelector(
+        ".tedi-time-field__clear",
+      ) as HTMLButtonElement;
+      const event = new MouseEvent("click", { bubbles: true, cancelable: true });
+      const stopSpy = jest.spyOn(event, "stopPropagation");
+
+      clearBtn.dispatchEvent(event);
+      expect(stopSpy).toHaveBeenCalled();
+      expect(component.value()).toBeNull();
+    });
+  });
+
+  describe("field-focus delegation", () => {
+    it("should forward focus from the wrapper to the input", () => {
+      const wrapper = el.querySelector(".tedi-time-field__field") as HTMLElement;
+      const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+
+      wrapper.dispatchEvent(new FocusEvent("focus", { bubbles: false }));
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should NOT forward focus when a focus event bubbles from a child", () => {
+      const wrapper = el.querySelector(".tedi-time-field__field") as HTMLElement;
+      const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+
+      // Simulate a focus event whose target is the input (bubbled up to wrapper).
+      const event = new FocusEvent("focus", { bubbles: true });
+      Object.defineProperty(event, "target", { value: input });
+      Object.defineProperty(event, "currentTarget", { value: wrapper });
+      component.onFieldFocus(event);
+
+      expect(focusSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe("FormFieldControl", () => {
@@ -226,11 +268,17 @@ describe("TimeFieldComponent", () => {
       expect(component.isDisabled()).toBe(true);
     });
 
-    it("should expose isInvalid as invalid signal", () => {
-      expect(component.isInvalid()).toBe(false);
+    it("should expose invalid signal driven by the invalid input", () => {
+      expect(component.invalid()).toBe(false);
       fixture.componentRef.setInput("invalid", true);
       fixture.detectChanges();
-      expect(component.isInvalid()).toBe(true);
+      expect(component.invalid()).toBe(true);
+    });
+
+    it("should expose invalid signal driven by setInvalidState", () => {
+      expect(component.invalid()).toBe(false);
+      component.setInvalidState(true);
+      expect(component.invalid()).toBe(true);
     });
 
     it("should provide clearField method", () => {
@@ -295,6 +343,253 @@ describe("TimeFieldComponent", () => {
 
       expect(component.value()).toBeNull();
       expect(onChange).toHaveBeenCalledWith(null);
+    });
+
+    it("should show the clear button immediately after a value is picked (no blur required)", () => {
+      expect(el.querySelector(".tedi-time-field__clear")).toBeNull();
+
+      const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      input.value = "16:45";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+
+      expect(component.value()).toBe("16:45");
+      expect(el.querySelector(".tedi-time-field__clear")).toBeTruthy();
+    });
+  });
+
+  describe("native picker — breakpoint form", () => {
+    let isBelowMd: ReturnType<typeof signal<boolean>>;
+    let bpFixture: ComponentFixture<TimeFieldComponent>;
+    let bpComponent: TimeFieldComponent;
+    let bpEl: HTMLElement;
+
+    beforeEach(() => {
+      isBelowMd = signal(false);
+      const breakpointMock = {
+        isBelowBreakpoint: (target: string) =>
+          target === "md" ? isBelowMd : signal(false),
+        isAboveBreakpoint: () => signal(false),
+      };
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [TimeFieldComponent],
+        providers: [
+          { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+          { provide: BreakpointService, useValue: breakpointMock },
+        ],
+      });
+
+      bpFixture = TestBed.createComponent(TimeFieldComponent);
+      bpFixture.componentRef.setInput("inputId", "bp-test");
+      bpFixture.componentRef.setInput("useNativePicker", "md");
+      bpComponent = bpFixture.componentInstance;
+      bpEl = bpFixture.nativeElement;
+      bpFixture.detectChanges();
+    });
+
+    it("should use the native picker when current viewport is below the breakpoint", () => {
+      isBelowMd.set(true);
+      bpFixture.detectChanges();
+
+      expect(bpComponent.useNativePickerResolved()).toBe(true);
+      const input = bpEl.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      expect(input.type).toBe("time");
+      expect(bpEl.querySelector("tedi-popover")).toBeNull();
+    });
+
+    it("should use the custom picker when current viewport is at or above the breakpoint", () => {
+      isBelowMd.set(false);
+      bpFixture.detectChanges();
+
+      expect(bpComponent.useNativePickerResolved()).toBe(false);
+      const input = bpEl.querySelector(".tedi-time-field__input") as HTMLInputElement;
+      expect(input.type).toBe("text");
+      expect(bpEl.querySelector("tedi-popover")).toBeTruthy();
+    });
+
+    it("should react to viewport changes", () => {
+      isBelowMd.set(false);
+      bpFixture.detectChanges();
+      expect(bpComponent.useNativePickerResolved()).toBe(false);
+
+      isBelowMd.set(true);
+      bpFixture.detectChanges();
+      expect(bpComponent.useNativePickerResolved()).toBe(true);
+    });
+  });
+
+  describe("modal breakpoint switch", () => {
+    let isBelowMd: ReturnType<typeof signal<boolean>>;
+    let mFixture: ComponentFixture<TimeFieldComponent>;
+    let mComponent: TimeFieldComponent;
+    let mEl: HTMLElement;
+
+    beforeEach(() => {
+      isBelowMd = signal(false);
+      const breakpointMock = {
+        isBelowBreakpoint: (target: string) =>
+          target === "md" ? isBelowMd : signal(false),
+        isAboveBreakpoint: () => signal(false),
+      };
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [TimeFieldComponent],
+        providers: [
+          { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+          { provide: BreakpointService, useValue: breakpointMock },
+        ],
+      });
+
+      mFixture = TestBed.createComponent(TimeFieldComponent);
+      mFixture.componentRef.setInput("inputId", "modal-test");
+      mFixture.componentRef.setInput("modal", "md");
+      mComponent = mFixture.componentInstance;
+      mEl = mFixture.nativeElement;
+      mFixture.detectChanges();
+    });
+
+    it("should render the popover branch when above the modal breakpoint", () => {
+      isBelowMd.set(false);
+      mFixture.detectChanges();
+
+      expect(mComponent.useMobileModal()).toBe(false);
+      expect(mEl.querySelector("tedi-popover")).toBeTruthy();
+    });
+
+    it("should drop the popover branch when below the modal breakpoint", () => {
+      isBelowMd.set(true);
+      mFixture.detectChanges();
+
+      expect(mComponent.useMobileModal()).toBe(true);
+      expect(mEl.querySelector("tedi-popover")).toBeNull();
+    });
+
+    it("should not use the modal when pickerVariant=none even if below the breakpoint", () => {
+      mFixture.componentRef.setInput("pickerVariant", "none");
+      isBelowMd.set(true);
+      mFixture.detectChanges();
+
+      expect(mComponent.useMobileModal()).toBe(false);
+    });
+  });
+
+  describe("openMobileModal lifecycle", () => {
+    let modalServiceMock: { open: jest.Mock };
+    let modalRefMock: { closed: { subscribe: jest.Mock } };
+    let closedCallback: ((result: string | null | undefined) => void) | null;
+    let mFixture: ComponentFixture<TimeFieldComponent>;
+    let mComponent: TimeFieldComponent;
+    let mEl: HTMLElement;
+
+    beforeEach(() => {
+      closedCallback = null;
+      modalRefMock = {
+        closed: {
+          subscribe: jest.fn((fn) => {
+            closedCallback = fn;
+            return { unsubscribe: jest.fn() };
+          }),
+        },
+      };
+      modalServiceMock = {
+        open: jest.fn().mockReturnValue(modalRefMock),
+      };
+      const breakpointMock = {
+        isBelowBreakpoint: () => signal(true),
+        isAboveBreakpoint: () => signal(false),
+      };
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [TimeFieldComponent],
+        providers: [
+          { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+          { provide: BreakpointService, useValue: breakpointMock },
+          { provide: ModalService, useValue: modalServiceMock },
+        ],
+      });
+
+      mFixture = TestBed.createComponent(TimeFieldComponent);
+      mFixture.componentRef.setInput("inputId", "modal-life");
+      mFixture.componentRef.setInput("modal", true);
+      mComponent = mFixture.componentInstance;
+      mEl = mFixture.nativeElement;
+      mFixture.detectChanges();
+    });
+
+    it("should open the modal with the current picker config", () => {
+      mFixture.componentRef.setInput("timeSlots", ["09:00", "09:30"]);
+      mFixture.componentRef.setInput("columns", 2);
+      mFixture.componentRef.setInput("minuteStep", 5);
+      mComponent.writeValue("10:15");
+      mFixture.detectChanges();
+
+      mComponent.openPicker();
+
+      expect(modalServiceMock.open).toHaveBeenCalledTimes(1);
+      const args = modalServiceMock.open.mock.calls[0];
+      expect(args[1].data).toEqual(
+        expect.objectContaining({
+          value: "10:15",
+          variant: "scroll",
+          timeSlots: ["09:00", "09:30"],
+          columns: 2,
+          minuteStep: 5,
+        }),
+      );
+    });
+
+    it("should commit the result and refocus the input when the modal closes with a value", () => {
+      const onChange = jest.fn();
+      mComponent.registerOnChange(onChange);
+      const inputEl = mEl.querySelector("input") as HTMLInputElement;
+      const focusSpy = jest.spyOn(inputEl, "focus");
+
+      mComponent.openPicker();
+      expect(closedCallback).toBeTruthy();
+      closedCallback!("14:00");
+      mFixture.detectChanges();
+
+      expect(mComponent.value()).toBe("14:00");
+      expect(onChange).toHaveBeenCalledWith("14:00");
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should NOT change value when the modal closes with undefined (cancel)", () => {
+      const onChange = jest.fn();
+      mComponent.registerOnChange(onChange);
+      mComponent.writeValue("08:00");
+      mFixture.detectChanges();
+
+      mComponent.openPicker();
+      closedCallback!(undefined);
+      mFixture.detectChanges();
+
+      expect(mComponent.value()).toBe("08:00");
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it("should call onTouched on close regardless of result", () => {
+      const onTouched = jest.fn();
+      mComponent.registerOnTouched(onTouched);
+
+      mComponent.openPicker();
+      closedCallback!(undefined);
+
+      expect(onTouched).toHaveBeenCalled();
+    });
+
+    it("should forward the fullscreen input to the modal config", () => {
+      mFixture.componentRef.setInput("fullscreen", "md");
+      mFixture.detectChanges();
+
+      mComponent.openPicker();
+
+      const args = modalServiceMock.open.mock.calls[0];
+      expect(args[1].fullscreen).toBe("md");
     });
   });
 
@@ -369,7 +664,16 @@ describe("TimeFieldComponent", () => {
   });
 
   describe("accessibility", () => {
-    it("should set aria-invalid when invalid", () => {
+    it("should set aria-invalid when setInvalidState(true) is called", () => {
+      component.setInvalidState(true);
+      fixture.detectChanges();
+
+      expect(el.querySelector("input")?.getAttribute("aria-invalid")).toBe(
+        "true",
+      );
+    });
+
+    it("should set aria-invalid when the invalid input is true", () => {
       fixture.componentRef.setInput("invalid", true);
       fixture.detectChanges();
 
@@ -378,16 +682,7 @@ describe("TimeFieldComponent", () => {
       );
     });
 
-    it("should set aria-invalid when state is error", () => {
-      fixture.componentRef.setInput("state", "error");
-      fixture.detectChanges();
-
-      expect(el.querySelector("input")?.getAttribute("aria-invalid")).toBe(
-        "true",
-      );
-    });
-
-    it("should not set aria-invalid when state is default", () => {
+    it("should not set aria-invalid by default", () => {
       expect(
         el.querySelector("input")?.hasAttribute("aria-invalid"),
       ).toBe(false);
@@ -497,6 +792,50 @@ describe("TimeFieldComponent with ReactiveFormsModule", () => {
 class CompositeTestHostComponent {
   control = new FormControl<string | null>(null);
 }
+
+@Component({
+  standalone: true,
+  imports: [TimeFieldComponent, FormFieldComponent, LabelComponent],
+  template: `
+    <tedi-form-field>
+      <label tedi-label for="bind-host">Time</label>
+      <tedi-time-field inputId="bind-host" [invalid]="invalid" />
+    </tedi-form-field>
+  `,
+})
+class InvalidBindingHostComponent {
+  invalid = false;
+}
+
+describe("TimeFieldComponent invalid input binding", () => {
+  let fixture: ComponentFixture<InvalidBindingHostComponent>;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [InvalidBindingHostComponent],
+      providers: [
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    });
+    fixture = TestBed.createComponent(InvalidBindingHostComponent);
+    fixture.detectChanges();
+  });
+
+  it("should toggle tedi-form-field--invalid when [invalid] changes", () => {
+    const ff = fixture.nativeElement.querySelector(
+      "tedi-form-field",
+    ) as HTMLElement;
+    expect(ff.classList.contains("tedi-form-field--invalid")).toBe(false);
+
+    fixture.componentInstance.invalid = true;
+    fixture.detectChanges();
+    expect(ff.classList.contains("tedi-form-field--invalid")).toBe(true);
+
+    fixture.componentInstance.invalid = false;
+    fixture.detectChanges();
+    expect(ff.classList.contains("tedi-form-field--invalid")).toBe(false);
+  });
+});
 
 describe("TimeFieldComponent inside FormFieldComponent", () => {
   let fixture: ComponentFixture<CompositeTestHostComponent>;

@@ -26,6 +26,7 @@ export interface TimePickerModalData {
   variant: TimePickerVariant;
   timeSlots: string[];
   columns: number;
+  showSlotIndicator: boolean;
   minuteStep: number;
 }
 
@@ -43,47 +44,8 @@ export interface TimePickerModalData {
     TediTranslationPipe,
     TimePickerComponent,
   ],
-  template: `
-    <form class="tedi-time-picker-modal__form" (submit)="onSubmit($event)">
-      <tedi-modal class="tedi-time-picker-modal">
-        <tedi-modal-header>
-          <h2>{{ "time-field.modal-title" | tediTranslate }}</h2>
-        </tedi-modal-header>
-        <tedi-modal-content class="tedi-time-picker-modal__content">
-          <tedi-time-picker
-            [value]="draft()"
-            [variant]="data.variant"
-            [timeSlots]="data.timeSlots"
-            [columns]="data.columns"
-            [minuteStep]="data.minuteStep"
-            (valueChange)="draft.set($event)"
-          />
-        </tedi-modal-content>
-        <tedi-modal-footer>
-          <button tedi-button type="button" variant="secondary" (click)="cancel()">
-            {{ "time-field.cancel" | tediTranslate }}
-          </button>
-          <button tedi-button type="submit">
-            {{ "time-field.confirm" | tediTranslate }}
-          </button>
-        </tedi-modal-footer>
-      </tedi-modal>
-    </form>
-  `,
-  styles: [
-    `
-      .tedi-time-picker-modal {
-        --_tedi-modal-body-padding: 0;
-      }
-      .tedi-time-picker-modal .tedi-time-picker {
-        --_tedi-time-picker-width: 100%;
-      }
-      .tedi-time-picker-modal__content {
-        display: flex;
-        justify-content: center;
-      }
-    `,
-  ],
+  templateUrl: "./time-picker-modal.component.html",
+  styleUrl: "./time-picker-modal.component.scss",
 })
 export class TimePickerModalComponent implements AfterViewInit, OnDestroy {
   readonly data = inject(MODAL_DATA) as TimePickerModalData;

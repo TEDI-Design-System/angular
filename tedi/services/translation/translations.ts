@@ -1009,6 +1009,14 @@ export const translationsMap = {
     en: "Cancel",
     ru: "Отмена",
   },
+  "time-picker.no-slots": {
+    description:
+      "Empty-state message shown in the slots/dropdown time picker when no time slots have been provided.",
+    components: ["TimePicker", "TimeField"],
+    et: "Aegu ei ole määratud",
+    en: "No times available",
+    ru: "Нет доступных вариантов",
+  },
   "vertical-stepper.completed": {
     description:
       "Label for screen-reader that this step is completed (visually hidden)",

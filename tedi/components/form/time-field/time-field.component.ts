@@ -1,10 +1,12 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   ElementRef,
   forwardRef,
   inject,
+  Injector,
   input,
   model,
   signal,
@@ -13,6 +15,7 @@ import {
   effect,
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
+import { NgTemplateOutlet } from "@angular/common";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
 import { IconComponent } from "../../base/icon/icon.component";
@@ -25,12 +28,9 @@ import {
   TimePickerVariant,
 } from "../time-picker/time-picker.component";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
-import {
-  breakpointInput,
-  BreakpointInput,
-  BreakpointService,
-} from "../../../services/breakpoint/breakpoint.service";
+import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
 import { ModalService } from "../../overlay/modal/modal.service";
+import { ModalFullscreen } from "../../overlay/modal/modal.types";
 import {
   FormFieldControl,
   TEDI_FORM_FIELD_CONTROL,
@@ -41,13 +41,11 @@ import {
 } from "./time-picker-modal.component";
 import { normalizeTime } from "../../../utils/time.util";
 
-export type TimeFieldSize = "default" | "small";
-export type TimeFieldState = "default" | "error" | "valid";
 export type TimeFieldPickerVariant = TimePickerVariant | "none";
 export type TimeFieldPickerTrigger = "button" | "input";
 export type TimeFieldModal = boolean | "sm" | "md" | "lg" | "xl";
-
-const DROPDOWN_TRIGGER_OFFSET = 12;
+export type TimeFieldFullscreen = ModalFullscreen;
+export type TimeFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
 
 @Component({
   selector: "tedi-time-field",
@@ -57,6 +55,7 @@ const DROPDOWN_TRIGGER_OFFSET = 12;
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   imports: [
+    NgTemplateOutlet,
     ButtonComponent,
     ClosingButtonComponent,
     SeparatorComponent,
@@ -91,27 +90,24 @@ export class TimeFieldComponent
   readonly value = model<string | null>(null);
   /** Placeholder shown when the input is empty. */
   readonly placeholder = input<string>();
-  /** Field size — matches the surrounding `tedi-form-field`. */
-  readonly size = input<TimeFieldSize>("default");
-  /** Visual validation state. */
-  readonly state = input<TimeFieldState>("default");
+  /**
+   * Manually mark the field as invalid. Sets `aria-invalid` on the input and triggers
+   * the form-field's invalid styling. Combines with reactive-form validity reported
+   * via `setInvalidState`.
+   */
+  // eslint-disable-next-line @angular-eslint/no-input-rename
+  protected readonly invalidInput = input<boolean>(false, { alias: "invalid" });
   /** Disables interaction. Combines with the form-control disabled state. */
   readonly disabled = input<boolean>(false);
-  /** Marks the field as invalid for ARIA + form-field error styling. */
-  readonly invalid = input<boolean>(false);
   /** Show a clear button when the field has a value. */
   readonly clearable = input<boolean>(true);
   /** Picker variant. `none` renders just the input with no picker UI — typed input is still normalized on blur. */
   readonly pickerVariant = input<TimeFieldPickerVariant>("scroll");
   /**
-   * Use the OS native time picker instead of the custom one. Accepts a breakpoint object,
-   * e.g. `{ xs: true, md: false }` to use the native picker on phones and the custom variant on larger screens.
-   * When `true`, overrides `pickerVariant` and `modal` — the input renders as `type="time"`.
+   * Use the OS native time picker instead of the custom one. `true` always, `false` never, breakpoint name → native below that breakpoint (custom from that breakpoint up).
+   * When resolved to `true`, overrides `pickerVariant` and `modal` — the input renders as `type="time"`.
    */
-  readonly useNativePicker = input(
-    { xs: false },
-    { transform: (v: BreakpointInput<boolean>) => breakpointInput(v) },
-  );
+  readonly useNativePicker = input<TimeFieldUseNativePicker>(false);
   /** What opens the picker: only the icon (`button`) or also clicking the input (`input`). */
   readonly pickerTrigger = input<TimeFieldPickerTrigger>("button");
   /** Close the popover/modal as soon as the user picks a value. */
@@ -120,21 +116,26 @@ export class TimeFieldComponent
   readonly timeSlots = input<string[]>([]);
   /** Grid columns for the `slots` variant. */
   readonly columns = input<number>(3);
+  /** Show the radio indicator dot on each card in the `slots` variant. */
+  readonly showSlotIndicator = input<boolean>(false);
   /** Minute step for the `scroll` variant — e.g. `5` renders `00, 05, 10…`. */
   readonly minuteStep = input<number>(1);
   /** Open the picker in a modal: `true` always, `false` never, breakpoint name → modal below that breakpoint. */
   readonly modal = input<TimeFieldModal>("md");
+  /** Make the mobile modal fullscreen: `true` always, `false` never, breakpoint name → fullscreen below that breakpoint. Only applies when the picker actually opens as a modal. */
+  readonly fullscreen = input<TimeFieldFullscreen>(false);
 
   private readonly breakpointService = inject(BreakpointService);
   private readonly modalService = inject(ModalService);
-  private readonly hostEl = inject(ElementRef<HTMLElement>);
-
-  readonly dropdownWidth = signal<number | null>(null);
+  private readonly injector = inject(Injector);
 
   readonly inputElement =
     viewChild.required<ElementRef<HTMLInputElement>>("inputElement");
+  readonly fieldEl = viewChild<ElementRef<HTMLElement>>("fieldEl");
   readonly popover = viewChild<PopoverComponent>("popover");
   readonly timePicker = viewChild<TimePickerComponent>("timePicker");
+
+  readonly dropdownMinWidth = signal<number | null>(null);
 
   readonly inputValue = signal("");
 
@@ -144,8 +145,8 @@ export class TimeFieldComponent
   private onTouched: () => void = () => {};
 
   readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
-  readonly isInvalid = computed(
-    () => this.invalid() || this.formInvalid() || this.state() === "error",
+  readonly invalid = computed(
+    () => this.invalidInput() || this.formInvalid(),
   );
   readonly hasValue = computed(
     () => this.value() !== null && this.value() !== "",
@@ -153,12 +154,9 @@ export class TimeFieldComponent
   readonly showClear = computed(() => this.hasValue() && this.clearable());
   readonly useNativePickerResolved = computed(() => {
     const v = this.useNativePicker();
-    if (v.xxl !== undefined && this.breakpointService.isAboveBreakpoint("xxl")()) return v.xxl;
-    if (v.xl !== undefined && this.breakpointService.isAboveBreakpoint("xl")()) return v.xl;
-    if (v.lg !== undefined && this.breakpointService.isAboveBreakpoint("lg")()) return v.lg;
-    if (v.md !== undefined && this.breakpointService.isAboveBreakpoint("md")()) return v.md;
-    if (v.sm !== undefined && this.breakpointService.isAboveBreakpoint("sm")()) return v.sm;
-    return v.xs;
+    return typeof v === "boolean"
+      ? v
+      : this.breakpointService.isBelowBreakpoint(v)();
   });
   readonly hasPicker = computed(
     () => this.pickerVariant() !== "none" && !this.useNativePickerResolved(),
@@ -169,6 +167,11 @@ export class TimeFieldComponent
   );
   readonly inputType = computed(() =>
     this.useNativePickerResolved() ? "time" : "text",
+  );
+  readonly popoverPosition = computed(() =>
+    this.pickerTrigger() === "input"
+      ? ("bottom-start" as const)
+      : ("bottom-end" as const),
   );
   readonly inputIsTrigger = computed(
     () =>
@@ -191,6 +194,9 @@ export class TimeFieldComponent
   }
 
   writeValue(value: string | null): void {
+    // The constructor effect also mirrors `value` into `inputValue`, but we sync it
+    // here too so synchronous reads (e.g. tests, CVA wiring) see the new value
+    // without waiting for the next change-detection tick.
     this.value.set(value);
     this.inputValue.set(value ?? "");
   }
@@ -214,6 +220,14 @@ export class TimeFieldComponent
   handleInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.inputValue.set(value);
+
+    if (this.useNativePickerResolved()) {
+      const next = value === "" ? null : value;
+      if (next !== this.value()) {
+        this.value.set(next);
+        this.onChange(next);
+      }
+    }
   }
 
   handleBlur() {
@@ -265,10 +279,32 @@ export class TimeFieldComponent
     input.focus();
   }
 
-  onInputClick() {
-    if (this.isDisabled()) return;
-    if (!this.inputIsTrigger()) return;
-    this.openPicker();
+  onInputClick(event: MouseEvent) {
+    // When the input isn't acting as the picker trigger, stop the click from
+    // bubbling to the wrapper's popover-trigger directive (which would otherwise
+    // open the picker on every click into the input).
+    if (this.isDisabled() || !this.inputIsTrigger()) {
+      event.stopPropagation();
+      return;
+    }
+    if (this.useMobileModal()) {
+      this.openPicker();
+    }
+  }
+
+  onClearClick(event: MouseEvent) {
+    event.stopPropagation();
+    this.clearInput();
+  }
+
+  // Forwards focus from the wrapper (popover-trigger) to the input. The popover's
+  // `hidePopover(true)` lands focus on the wrapper element; we delegate so the user
+  // gets a single visible focus indicator on the input instead of two stacked rings.
+  // The guard ignores bubbled focus events from inner elements (input, buttons) so
+  // we don't loop when focus actually arrives at the input.
+  onFieldFocus(event: FocusEvent) {
+    if (event.target !== event.currentTarget) return;
+    this.inputElement().nativeElement.focus({ preventScroll: true });
   }
 
   openPicker() {
@@ -283,12 +319,23 @@ export class TimeFieldComponent
     this.popover()?.showPopover();
   }
 
+  // Icon-button click handler. In popover mode the wrapper's `tedi-popover-trigger`
+  // opens the popover via click bubbling, so we just run scroll/focus side effects;
+  // in mobile-modal mode there's no wrapper directive, so we open the modal explicitly.
+  triggerPicker() {
+    this.onPickerOpen();
+    if (this.useMobileModal()) {
+      this.openPicker();
+    }
+  }
+
   private openMobileModal() {
     const data: TimePickerModalData = {
       value: this.value(),
       variant: this.customPickerVariant(),
       timeSlots: this.timeSlots(),
       columns: this.columns(),
+      showSlotIndicator: this.showSlotIndicator(),
       minuteStep: this.minuteStep(),
     };
 
@@ -299,6 +346,7 @@ export class TimeFieldComponent
         size: "small",
         width: "sm",
         position: "center",
+        fullscreen: this.fullscreen(),
         maxWidth: "var(--tedi-containers-03)",
       },
     );
@@ -316,21 +364,31 @@ export class TimeFieldComponent
   }
 
   onPickerOpen() {
+    // Dropdown variant: size its min-width to the field wrapper so it spans
+    // the full input area instead of shrinking to fit the time strings.
+    // The popover content is positioned relative to the wrapper but sized
+    // by its own content, so this min-width is what visually fills the gap.
     if (this.pickerVariant() === "dropdown") {
-      const host = this.hostEl.nativeElement as HTMLElement;
-      const formField = host.closest(".tedi-form-field") as HTMLElement | null;
-      const anchor = formField ?? host;
-      this.dropdownWidth.set(anchor.offsetWidth - DROPDOWN_TRIGGER_OFFSET);
+      const w = this.fieldEl()?.nativeElement.offsetWidth ?? null;
+      this.dropdownMinWidth.set(w);
     } else {
-      this.dropdownWidth.set(null);
+      this.dropdownMinWidth.set(null);
     }
 
-    setTimeout(() => {
-      this.timePicker()?.scrollToSelected();
-      setTimeout(() => {
-        this.timePicker()?.focusActiveItem();
-      });
-    });
+    // The popover renders on the next change-detection tick, so we wait for two
+    // renders: the first lays out the picker (needed for scrollToSelected to
+    // measure item heights); the second lets the scroll position settle before
+    // we move focus into the picker.
+    afterNextRender(
+      () => {
+        this.timePicker()?.scrollToSelected();
+        afterNextRender(
+          () => this.timePicker()?.focusActiveItem(),
+          { injector: this.injector },
+        );
+      },
+      { injector: this.injector },
+    );
   }
 
   onPickerValueChange(newValue: string | null) {
@@ -346,15 +404,15 @@ export class TimeFieldComponent
     }
   }
 
-  closePopoverToTrigger() {
-    this.popover()?.hidePopover(true);
-    this.onTouched();
+  // Closes the picker popover and lands focus back on the input. We always pass
+  // `focusTrigger=false` to the popover (its built-in path would land focus on the
+  // wrapper, which (focus) would then bounce into the input — same destination,
+  // one extra hop). `notifyTouched` is true for explicit user dismissals
+  // (Tab/Escape from the picker, value selected with closeOnSelect) so
+  // ControlValueAccessor consumers see a touch event.
+  closePopover(notifyTouched = true) {
+    this.popover()?.hidePopover(false);
+    this.inputElement().nativeElement.focus({ preventScroll: true });
+    if (notifyTouched) this.onTouched();
   }
-
-  closePopover() {
-    this.popover()?.hidePopover(true);
-    this.inputElement().nativeElement.focus();
-    this.onTouched();
-  }
-
 }

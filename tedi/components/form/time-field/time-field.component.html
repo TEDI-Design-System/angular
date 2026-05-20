@@ -1,34 +1,80 @@
-<input
-  #inputElement
-  class="tedi-time-field__input"
-  inputmode="numeric"
-  [type]="inputType()"
-  [id]="inputId()"
-  [attr.placeholder]="placeholder()"
-  [value]="inputValue()"
-  [disabled]="isDisabled()"
-  [readOnly]="inputIsTrigger()"
-  [attr.aria-invalid]="isInvalid() || null"
-  (click)="onInputClick()"
-  (input)="handleInput($event)"
-  (blur)="handleBlur()"
-/>
-<div class="tedi-time-field__actions">
-  @if (showClear()) {
-    <button
-      tedi-closing-button
-      type="button"
-      size="small"
-      class="tedi-time-field__clear"
-      [iconSize]="18"
-      [ariaLabel]="'time-field.clear' | tediTranslate"
-      [disabled]="isDisabled()"
-      (click)="clearInput()"
-    ></button>
-    <tedi-separator axis="vertical" size="1rem" />
-  }
-  @if (hasPicker()) {
-    @if (useMobileModal()) {
+@if (hasPicker() && !useMobileModal()) {
+  <tedi-popover
+    #popover
+    class="tedi-time-field__popover"
+    [position]="popoverPosition()"
+    [withArrow]="false"
+    [preventOverflow]="true"
+  >
+    <!--
+      The wrapper acts as the popover's positioning anchor + click trigger.
+      `tabindex="-1"` keeps it programmatically focusable (popover refocuses
+      it on close); `(focus)` delegates that focus to the input so the user
+      doesn't see a double focus indicator. See onFieldFocus().
+    -->
+    <div
+      #fieldEl
+      tedi-popover-trigger
+      class="tedi-time-field__field"
+      [attr.role]="null"
+      [attr.tabindex]="-1"
+      (focus)="onFieldFocus($event)"
+    >
+      <ng-container *ngTemplateOutlet="fieldContent" />
+    </div>
+    <tedi-popover-content class="tedi-time-field__popover-content" maxWidth="none">
+      <tedi-time-picker
+        #timePicker
+        [value]="value()"
+        [variant]="customPickerVariant()"
+        [timeSlots]="timeSlots()"
+        [columns]="columns()"
+        [showSlotIndicator]="showSlotIndicator()"
+        [minuteStep]="minuteStep()"
+        [trapFocus]="true"
+        [style.--tedi-time-picker-dropdown-min-width.px]="dropdownMinWidth()"
+        (valueChange)="onPickerValueChange($event)"
+        (closeRequested)="closePopover()"
+      />
+    </tedi-popover-content>
+  </tedi-popover>
+} @else {
+  <div class="tedi-time-field__field">
+    <ng-container *ngTemplateOutlet="fieldContent" />
+  </div>
+}
+
+<ng-template #fieldContent>
+  <input
+    #inputElement
+    class="tedi-time-field__input"
+    inputmode="numeric"
+    [type]="inputType()"
+    [id]="inputId()"
+    [attr.placeholder]="placeholder()"
+    [value]="inputValue()"
+    [disabled]="isDisabled()"
+    [readOnly]="inputIsTrigger()"
+    [attr.aria-invalid]="invalid() || null"
+    (click)="onInputClick($event)"
+    (input)="handleInput($event)"
+    (blur)="handleBlur()"
+  />
+  <div class="tedi-time-field__actions">
+    @if (showClear()) {
+      <button
+        tedi-closing-button
+        type="button"
+        size="small"
+        class="tedi-time-field__clear"
+        [iconSize]="18"
+        [ariaLabel]="'time-field.clear' | tediTranslate"
+        [disabled]="isDisabled()"
+        (click)="onClearClick($event)"
+      ></button>
+      <tedi-separator axis="vertical" size="1rem" />
+    }
+    @if (hasPicker()) {
       <button
         tedi-button
         type="button"
@@ -37,63 +83,27 @@
         class="tedi-time-field__icon"
         [attr.aria-label]="'time-field.select-time' | tediTranslate"
         [disabled]="isDisabled()"
-        (click)="openPicker()"
+        (click)="triggerPicker()"
+      >
+        <tedi-icon name="schedule" size="inherit" />
+      </button>
+    } @else if (hasNativePicker()) {
+      <button
+        tedi-button
+        type="button"
+        variant="neutral"
+        size="small"
+        class="tedi-time-field__icon"
+        [attr.aria-label]="'time-field.select-time' | tediTranslate"
+        [disabled]="isDisabled()"
+        (click)="openNativePicker()"
       >
         <tedi-icon name="schedule" size="inherit" />
       </button>
     } @else {
-      <tedi-popover
-        #popover
-        class="tedi-time-field__popover"
-        position="bottom-end"
-        [withArrow]="false"
-        [preventOverflow]="true"
-      >
-        <button
-          tedi-button
-          tedi-popover-trigger
-          type="button"
-          variant="neutral"
-          size="small"
-          class="tedi-time-field__icon"
-          [attr.aria-label]="'time-field.select-time' | tediTranslate"
-          [disabled]="isDisabled()"
-          (click)="onPickerOpen()"
-        >
-          <tedi-icon name="schedule" size="inherit" />
-        </button>
-        <tedi-popover-content class="tedi-time-field__popover-content" maxWidth="none">
-          <tedi-time-picker
-            #timePicker
-            [value]="value()"
-            [variant]="customPickerVariant()"
-            [timeSlots]="timeSlots()"
-            [columns]="columns()"
-            [minuteStep]="minuteStep()"
-            [trapFocus]="true"
-            [style.--_tedi-time-picker-dropdown-min-width.px]="dropdownWidth()"
-            (valueChange)="onPickerValueChange($event)"
-            (closeRequested)="closePopoverToTrigger()"
-          />
-        </tedi-popover-content>
-      </tedi-popover>
+      <span class="tedi-time-field__icon tedi-time-field__icon--static" aria-hidden="true">
+        <tedi-icon name="schedule" size="inherit" />
+      </span>
     }
-  } @else if (hasNativePicker()) {
-    <button
-      tedi-button
-      type="button"
-      variant="neutral"
-      size="small"
-      class="tedi-time-field__icon"
-      [attr.aria-label]="'time-field.select-time' | tediTranslate"
-      [disabled]="isDisabled()"
-      (click)="openNativePicker()"
-    >
-      <tedi-icon name="schedule" size="inherit" />
-    </button>
-  } @else {
-    <span class="tedi-time-field__icon tedi-time-field__icon--static" aria-hidden="true">
-      <tedi-icon name="schedule" size="inherit" />
-    </span>
-  }
-</div>
+  </div>
+</ng-template>

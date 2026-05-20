@@ -1,0 +1,26 @@
+<form class="tedi-time-picker-modal__form" (submit)="onSubmit($event)">
+  <tedi-modal class="tedi-time-picker-modal">
+    <tedi-modal-header>
+      <h2>{{ "time-field.modal-title" | tediTranslate }}</h2>
+    </tedi-modal-header>
+    <tedi-modal-content class="tedi-time-picker-modal__content">
+      <tedi-time-picker
+        [value]="draft()"
+        [variant]="data.variant"
+        [timeSlots]="data.timeSlots"
+        [columns]="data.columns"
+        [showSlotIndicator]="data.showSlotIndicator"
+        [minuteStep]="data.minuteStep"
+        (valueChange)="draft.set($event)"
+      />
+    </tedi-modal-content>
+    <tedi-modal-footer>
+      <button tedi-button type="button" variant="secondary" (click)="cancel()">
+        {{ "time-field.cancel" | tediTranslate }}
+      </button>
+      <button tedi-button type="submit">
+        {{ "time-field.confirm" | tediTranslate }}
+      </button>
+    </tedi-modal-footer>
+  </tedi-modal>
+</form>
