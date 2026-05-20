@@ -10,7 +10,7 @@
     gap: var(--stepper-item-horizontal-inner-spacing);
     align-items: flex-start;
     width: auto;
-    min-height: 40px;
+    min-height: var(--stepper-item-horizontal-min-height);
     padding: var(--stepper-item-horizontal-padding-y) var(--stepper-item-horizontal-padding-x);
     font-family: var(--family-default);
     text-align: left;
