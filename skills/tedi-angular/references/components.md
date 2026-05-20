@@ -637,6 +637,51 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 <a tedi-link href="/page" variant="default">Go to page</a>
 ```
 
+### Pagination
+**Selector:** `tedi-pagination`
+**Inputs:**
+- `pageCount: number` (required) — total number of pages
+- `totalItems: number` — when set, renders the `"{count} results"` label
+- `pageSizeOptions: number[] = []` — options for the page-size select; empty hides the select
+- `boundaryCount: number = 1` — pages always shown at the start and end
+- `siblingCount: number = 1` — pages shown on either side of the current page
+- `labels: Partial<PaginationLabels>` — override any of the default text/aria labels
+- `background: "white" | "transparent" = "white"` — `transparent` removes the surface fill + top border for use on non-white containers
+- `hideResults: PaginationVisibility = false` — `true`/`false` or a breakpoint name (`"sm"`–`"xxl"`) to hide below that breakpoint
+- `hidePageSize: PaginationVisibility = false`
+- `hidePager: PaginationVisibility = false`
+
+**Models:**
+- `page: number = 1` — current page (1-based), two-way bindable with `[(page)]`
+- `pageSize: number | undefined` — current page size, two-way bindable with `[(pageSize)]`
+
+**Outputs:**
+- `pageChange: number` — new 1-based page
+- `pageSizeChange: number` — new page size
+
+Below `md` the pager collapses to a `{current} / {total}` trigger that opens a modal page picker. Status changes are announced via a polite `aria-live` region.
+
+```html
+<tedi-pagination
+  [pageCount]="10"
+  [(page)]="page"
+  [totalItems]="97"
+  [(pageSize)]="pageSize"
+  [pageSizeOptions]="[10, 25, 50, 100]"
+/>
+```
+
+Use the per-slot hide toggles to render different parts above and below a table:
+
+```html
+<tedi-pagination [pageCount]="pageCount" [(page)]="page" [totalItems]="total"
+                 [(pageSize)]="pageSize" [pageSizeOptions]="[10, 25, 50]"
+                 [hidePager]="true" />
+<!-- table content -->
+<tedi-pagination [pageCount]="pageCount" [(page)]="page"
+                 [hideResults]="true" [hidePageSize]="true" />
+```
+
 ## Notifications
 
 ### Alert
