@@ -171,28 +171,28 @@ Composed of sub-components:
 
 ### Filter
 **Selector:** `tedi-filter`
-**Model:** `selected: boolean`, `value: string`, `values: string[]`
+**Model:** `selected: boolean`, `value: string | string[]`
 **Inputs:**
 - `text: string = ""` — filter label text
 - `variant: FilterVariant = "primary"` — "primary" or "secondary"
 - `size: FilterSize = "default"` — "default" or "large"
-- `multiselect: boolean = false` — multiselect dropdown mode
+- `allowMultiple: boolean = false` — multi-select mode; `value` is treated as `string[]` when true
 - `options: FilterOption[] = []` — dropdown options `{ label, value, disabled? }`
 - `preserveLabel: boolean = false` — when true, single-select shows "Text: SelectedLabel" instead of replacing text
-- `searchable: boolean = false` — show search field in dropdown
-- `showSelectAll: boolean = false` — show "Select all" in multiselect
+- `searchable: boolean = false` — show search field in dropdown (with clear button)
+- `showSelectAll: boolean = false` — show "Select all" in multi-select
 - `showClear: boolean = false` — show clear action in dropdown
-- `selectAllLabel: string = "Vali kõik"`
-- `clearLabel: string = "Tühjenda valik"`
+- `selectAllLabel?: string` — override for "Select all" label (defaults to translated string)
+- `clearLabel?: string` — override for "Clear selection" label (defaults to translated string)
 - `appendTo: string = ""` — append dropdown to selector (e.g., "body")
 - `disabled: boolean = false` — also set automatically by a disabled `FormControl` or a disabled parent `FilterGroup`
 **Outputs:**
 - `cleared: void` — emitted when clear button is clicked in custom content mode
 **Slots:**
-- `[tediFilterPrepend]` — content before the label (icon, status badge, indicator). Hidden when the filter is selected. In toggle mode (no dropdown), a check icon replaces it; in dropdown modes the prepend is simply removed.
+- `[tediFilterPrepend]` — content before the label (icon, status badge, indicator). Hidden when the filter is selected. In toggle mode (no dropdown), a check icon replaces it; in dropdown modes the prepend is simply removed. Use `color="inherit"` on `<tedi-icon>` to match the filter's text color.
 - `[tediFilterContent]` — custom dropdown content (replaces options)
 
-Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle), `string` (single-select), `string[]` (multiselect).
+Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle), `string` (single-select), `string[]` (multi-select).
 
 ```html
 <!-- Boolean toggle -->
@@ -204,8 +204,8 @@ Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle
 <!-- Single-select with label preserved (shows "Service: Option A") -->
 <tedi-filter text="Service" [options]="options" [(value)]="value" [preserveLabel]="true" appendTo="body" />
 
-<!-- Multiselect dropdown -->
-<tedi-filter text="Hospital" [multiselect]="true" [options]="options" [(values)]="values"
+<!-- Multi-select dropdown -->
+<tedi-filter text="Hospital" [allowMultiple]="true" [options]="options" [(value)]="values"
   [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
 
 <!-- With prepend content -->
@@ -226,7 +226,7 @@ Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle
 
 ### FilterGroup
 **Selector:** `tedi-filter-group`
-Wrapper that joins filters into a connected button group with collapsed borders and shared border-radius. Supports `multiselect` and a shared `formControl`/`disabled` state that propagates to children.
+Wrapper that joins filters into a connected button group with collapsed borders and shared border-radius. Supports `allowMultiple` and a shared `formControl`/`disabled` state that propagates to children.
 
 ```html
 <tedi-filter-group>
@@ -243,7 +243,7 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 </tedi-filter-group>
 
 <!-- Multi-select via shared FormControl -->
-<tedi-filter-group label="Tags" [multiselect]="true" [formControl]="tagsControl">
+<tedi-filter-group label="Tags" [allowMultiple]="true" [formControl]="tagsControl">
   <tedi-filter text="Urgent" value="urgent" />
   <tedi-filter text="Review" value="review" />
 </tedi-filter-group>

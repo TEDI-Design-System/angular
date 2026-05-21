@@ -37,7 +37,7 @@
                 (click)="onCustomClear()"
               >
                 <tedi-icon name="refresh" [size]="18" color="brand" />
-                <span>{{ clearLabel() }}</span>
+                <span>{{ resolvedClearLabel() }}</span>
               </button>
             </div>
           }
@@ -91,7 +91,7 @@
                 (click)="clearSingleSelection()"
               >
                 <tedi-icon name="refresh" [size]="18" color="brand" />
-                <span>{{ clearLabel() }}</span>
+                <span>{{ resolvedClearLabel() }}</span>
               </button>
             </div>
           }
@@ -115,7 +115,7 @@
                 [selected]="allFilteredSelected()"
                 [indeterminate]="someFilteredSelected()"
               >
-                <tedi-dropdown-item-value-label>{{ selectAllLabel() }}</tedi-dropdown-item-value-label>
+                <tedi-dropdown-item-value-label>{{ resolvedSelectAllLabel() }}</tedi-dropdown-item-value-label>
               </tedi-dropdown-item-value>
             </div>
             <tedi-separator />
@@ -167,7 +167,7 @@
                 (click)="clearSelection()"
               >
                 <tedi-icon name="refresh" [size]="18" color="brand" />
-                <span>{{ clearLabel() }}</span>
+                <span>{{ resolvedClearLabel() }}</span>
               </button>
             </div>
           }
@@ -204,7 +204,7 @@
     <ng-content select="[tediFilterAppend]" />
   </div>
 
-  @if (multiselect() && isSelected() && selectedCount() > 0) {
+  @if (isMultiSelect() && isSelected() && selectedCount() > 0) {
     <tedi-status-badge class="tedi-filter__count" [text]="'' + selectedCount()" color="brand" />
   }
 
@@ -215,7 +215,7 @@
 
 <ng-template #searchField>
   <div class="tedi-filter-dropdown__search">
-    <tedi-form-field icon="search">
+    <tedi-form-field icon="search" [clearable]="true">
       <input
         tedi-text-field
         type="text"
@@ -223,6 +223,7 @@
         [attr.aria-label]="text()"
         [value]="searchTerm()"
         (input)="onSearchInput($event)"
+        (clear)="onSearchClear()"
       />
     </tedi-form-field>
   </div>

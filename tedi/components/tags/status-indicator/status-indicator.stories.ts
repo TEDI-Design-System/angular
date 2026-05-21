@@ -84,7 +84,7 @@ export const Default: StoryObj<StatusIndicatorComponent> = {
   render: (args) => ({
     props: args,
     template: `
-      <div style="background: var(--general-surface-tertiary); padding: 16px; display: inline-block;">
+      <div style="background: var(--general-surface-tertiary); padding: 16px; display: inline-block; width: 100%;">
         <tedi-status-indicator [type]="type" [size]="size" [hasBorder]="hasBorder" [position]="position" [label]="label" />
       </div>
     `,
@@ -94,7 +94,7 @@ export const Default: StoryObj<StatusIndicatorComponent> = {
 export const AllVariants: StoryObj<StatusIndicatorComponent> = {
   render: () => ({
     template: `
-      <div style="background: var(--general-surface-tertiary); padding: 16px;">
+      <div style="background: var(--general-surface-tertiary); padding: 16px; width: 100%;">
         <tedi-row [cols]="2" [gapY]="3" alignItems="center">
           <tedi-col><p tedi-text modifiers="bold">Small</p></tedi-col>
           <tedi-col class="flex gap-3 align-items-center">

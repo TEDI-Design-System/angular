@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ViewEncapsulation,
+  computed,
   forwardRef,
   input,
   model,
@@ -26,7 +27,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
   host: {
     class: "tedi-filter-group",
     "[attr.role]":
-      "isManaged() ? (multiselect() ? 'group' : 'radiogroup') : null",
+      "isManaged() ? (allowMultiple() ? 'group' : 'radiogroup') : null",
     "[attr.aria-label]": "label()",
   },
 })
@@ -34,17 +35,15 @@ export class FilterGroupComponent implements ControlValueAccessor {
   /**
    * Multi-select mode allows multiple filters to be selected simultaneously.
    * When false, only one filter can be selected at a time (radio-like behavior).
+   * Value is treated as `string[]` when true, `string | null` otherwise.
    * @default false
    */
-  readonly multiselect = input<boolean>(false);
+  readonly allowMultiple = input<boolean>(false);
   /**
-   * Selected value in single-select mode. Two-way bound.
+   * Selected value (single-select) or values (multi-select). Two-way bound.
+   * Use `string | null` when `allowMultiple` is false, `string[]` when true.
    */
-  readonly value = model<string | null>(null);
-  /**
-   * Selected values in multi-select mode. Two-way bound.
-   */
-  readonly values = model<string[]>([]);
+  readonly value = model<string | string[] | null>(null);
   /**
    * Accessible label for the group.
    */
@@ -53,12 +52,21 @@ export class FilterGroupComponent implements ControlValueAccessor {
   readonly isManaged = signal(false);
   readonly disabled = signal(false);
 
+  private readonly multiValues = computed<string[]>(() => {
+    const v = this.value();
+    return Array.isArray(v) ? v : [];
+  });
+  private readonly singleValue = computed<string | null>(() => {
+    const v = this.value();
+    return typeof v === "string" ? v : null;
+  });
+
   private onChange: (value: string | null | string[]) => void = () => {};
   private onTouched: () => void = () => {};
 
   writeValue(value: string | null | string[]): void {
-    if (this.multiselect()) {
-      this.values.set(Array.isArray(value) ? value : []);
+    if (this.allowMultiple()) {
+      this.value.set(Array.isArray(value) ? value : []);
     } else {
       this.value.set(typeof value === "string" ? value : null);
     }
@@ -78,15 +86,15 @@ export class FilterGroupComponent implements ControlValueAccessor {
   }
 
   selectFilter(value: string): void {
-    if (this.multiselect()) {
-      const current = this.values();
+    if (this.allowMultiple()) {
+      const current = this.multiValues();
       const next = current.includes(value)
         ? current.filter((v) => v !== value)
         : [...current, value];
-      this.values.set(next);
+      this.value.set(next);
       this.onChange(next);
     } else {
-      const next = this.value() === value ? null : value;
+      const next = this.singleValue() === value ? null : value;
       this.value.set(next);
       this.onChange(next);
     }
@@ -94,9 +102,9 @@ export class FilterGroupComponent implements ControlValueAccessor {
   }
 
   isSelected(value: string): boolean {
-    if (this.multiselect()) {
-      return this.values().includes(value);
+    if (this.allowMultiple()) {
+      return this.multiValues().includes(value);
     }
-    return this.value() === value;
+    return this.singleValue() === value;
   }
 }
