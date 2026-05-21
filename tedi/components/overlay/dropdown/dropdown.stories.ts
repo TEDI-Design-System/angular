@@ -136,6 +136,23 @@ export default {
         type: { summary: "boolean" },
       },
     },
+    closeOnSelect: {
+      description:
+        "Whether activating this item closes the dropdown. Set `false` for items that should keep the dropdown open after selection (e.g. multi-select checkboxes).",
+      table: {
+        category: "dropdown-item",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    itemSelect: {
+      description:
+        "Fires on click or keyboard (Enter / Space) activation. Use to react to selection without depending on click ordering.",
+      table: {
+        category: "dropdown-item",
+        type: { summary: "EventEmitter<void>" },
+      },
+    },
   },
 } as Meta<DropdownComponent>;
 
@@ -288,6 +305,75 @@ export const VerticalLayout: Story = {
               <tedi-dropdown-item-value-meta>Doctors will be able to see all your information</tedi-dropdown-item-value-meta>
             </tedi-dropdown-item-value>
           </li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+/**
+ * Items with `[closeOnSelect]="false"` keep the dropdown open after activation
+ * and emit `(itemSelect)` for both mouse click and keyboard (Enter / Space).
+ * Useful for multi-select checkbox menus where the user toggles several
+ * options in a row — e.g. a column-visibility chooser. Disabled items don't
+ * emit `itemSelect`, so consumers don't need to guard against them in their
+ * handlers.
+ */
+export const KeepOpenOnSelect: Story = {
+  name: "Keep Open on Select (multi-select)",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+    appendTo: "body",
+    dropdownRole: "menu",
+    ariaHasPopup: "menu",
+  },
+  render: (args) => ({
+    props: {
+      ...args,
+      filters: [
+        { id: "active", label: "Active", selected: true },
+        { id: "inactive", label: "Inactive", selected: false },
+        { id: "archived", label: "Archived", selected: false },
+        { id: "drafts", label: "Drafts", selected: true, disabled: true },
+      ] as Array<{
+        id: string;
+        label: string;
+        selected: boolean;
+        disabled?: boolean;
+      }>,
+      toggleFilter(
+        filters: Array<{ id: string; selected: boolean }>,
+        id: string,
+      ) {
+        const target = filters.find((f) => f.id === id);
+        if (target) target.selected = !target.selected;
+      },
+    },
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+        <button tedi-button tedi-dropdown-trigger variant="neutral" [ariaHasPopup]="ariaHasPopup">
+          <tedi-icon name="filter_list" [size]="18" color="inherit" />
+          Filters
+        </button>
+        <tedi-dropdown-content [dropdownRole]="dropdownRole">
+          @for (filter of filters; track filter.id) {
+            <li
+              tedi-dropdown-item
+              [value]="filter.id"
+              [disabled]="!!filter.disabled"
+              [closeOnSelect]="false"
+              (itemSelect)="toggleFilter(filters, filter.id)"
+            >
+              <tedi-dropdown-item-value
+                type="checkbox"
+                [selected]="filter.selected"
+                [disabled]="!!filter.disabled"
+              >
+                <tedi-dropdown-item-value-label>{{ filter.label }}</tedi-dropdown-item-value-label>
+              </tedi-dropdown-item-value>
+            </li>
+          }
         </tedi-dropdown-content>
       </tedi-dropdown>
     `,

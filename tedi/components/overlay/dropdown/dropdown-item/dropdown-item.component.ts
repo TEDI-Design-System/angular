@@ -6,6 +6,7 @@ import {
   HostListener,
   inject,
   input,
+  output,
   ViewEncapsulation,
 } from "@angular/core";
 import {
@@ -41,6 +42,21 @@ export class DropdownItemComponent {
 
   /** Is item disabled? */
   readonly disabled = input(false);
+
+  /**
+   * Whether selecting this item closes the dropdown. Set `false` for items
+   * that should keep the dropdown open after selection (e.g. multi-select
+   * checkboxes).
+   * @default true
+   */
+  readonly closeOnSelect = input(true);
+
+  /**
+   * Fires when the item is activated via click or keyboard (Enter / Space).
+   * Use to react to selection without depending on click event ordering with
+   * the host's built-in `onClick` handler.
+   */
+  readonly itemSelect = output<void>();
 
   readonly host = inject<ElementRef<HTMLLIElement>>(ElementRef);
   readonly dropdown = inject<DropdownApi>(DROPDOWN_API);
@@ -112,6 +128,10 @@ export class DropdownItemComponent {
     if (this.dropdownContent.dropdownRole() === "listbox") {
       this.dropdown.value.set(this.value());
     }
+
+    this.itemSelect.emit();
+
+    if (!this.closeOnSelect()) return;
 
     this.dropdown.hideDropdown();
     this.dropdown.dropdownTrigger()?.host.nativeElement.focus();

@@ -207,6 +207,61 @@ Composed of sub-components:
 </tedi-text-group>
 ```
 
+### Table
+**Selector:** `tedi-table` (generic `<TData>`)
+**Data pipeline:** `@tanstack/angular-table`
+**Inputs (signal):**
+- `data: TData[]` (required)
+- `columns: TediColumnDef<TData>[]` (required) — TanStack `ColumnDef` extended with `rowSpan`
+- `size: 'medium' | 'small' = 'medium'`
+- `caption: TemplateRef | string`
+- `striped`, `verticalBorders`, `borderless`, `stickyFirstColumn`, `stickyHeader`, `rowHover` — booleans
+- `maxHeight: number | string`
+- `activeRowId: string` — adds `aria-current="true"` to that row
+- `interactive: boolean` — adds `role="button"`, tabindex + Enter/Space activation; subscribe to `rowClick`
+- `enableRowSelection: boolean | (row) => boolean`
+- `enableColumnFilters: boolean`
+- `renderSubComponent: TemplateRef<{ $implicit: Row<TData> }>` — expanded row content
+- `getRowCanExpand`, `getSubRows` — predicates
+- `pagination: boolean | { pageSize?, pageSizeOptions? }`
+- `manualPagination`, `manualSorting`, `manualFiltering`, `pageCount`, `rowCount`
+- `state: Partial<TableState>` — controlled
+- `defaultState: Partial<TableState>` — initial uncontrolled
+- `persist: { key, storage?, include? }` — localStorage backed
+- `placeholder: TemplateRef | string`, `placeholderRole: 'alert' | 'status'`
+
+**Outputs:** `stateChange: TableState`, `rowClick: Row<TData>`
+
+**Per-column sorting (`sortingFn`)** — inherited from TanStack `ColumnDef`:
+- Built-ins: `'alphanumeric'`, `'alphanumericCaseSensitive'`, `'text'`, `'textCaseSensitive'`, `'datetime'`, `'basic'`, `'auto'` (default).
+- Custom: `(rowA, rowB, columnId) => number` — comparator for ascending order; the table flips the sign on descending sort. Use `row.getValue(columnId)` to read cell values without touching `row.original`.
+
+```ts
+const columns: TediColumnDef<Person>[] = [
+  { id: 'name', accessorKey: 'name', sortingFn: (a, b, id) =>
+      a.getValue<string>(id).localeCompare(b.getValue<string>(id), 'et') },
+  { id: 'salary', accessorKey: 'salary', sortingFn: 'alphanumeric' },
+];
+```
+
+**Companion components:** `<tedi-table-toolbar>`, `<tedi-table-columns-menu>`, `[tedi-table-header-button]`
+
+**Helpers:** `groupRowSpan(rows, keyFn)` — produce a `rowSpan` callback that auto-collapses consecutive equal keys.
+
+```html
+<tedi-table
+  [data]="people"
+  [columns]="cols"
+  [pagination]="{ pageSize: 10 }"
+  [enableRowSelection]="true"
+  (stateChange)="onState($event)"
+>
+  <tedi-table-toolbar>
+    <tedi-table-columns-menu />
+  </tedi-table-toolbar>
+</tedi-table>
+```
+
 ## Form
 
 ### TextField
@@ -523,6 +578,24 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `thickness: number = 1`
 - `spacing: SeparatorSpacingValue | SeparatorSpacing`
 - `size: string = "100%"`
+
+### EmptyState
+**Selector:** `tedi-empty-state`
+**Inputs:**
+- `type: "separate" | "attached" | "inside" = "separate"` — container variant
+- `size: "default" | "small" = "default"`
+- `icon: string | null = "spa"` — Material icon name; pass `null` to hide
+- `iconColor: IconColor = "brand"`, `iconSize: IconSize = 36`
+- `heading: string` — optional `<h3>` rendered in brand color
+
+Description is projected via `<ng-content>`. Actions slot is projected via `<ng-content select="[tedi-empty-state-actions]">`.
+
+```html
+<tedi-empty-state heading="Choose new time" icon="event_busy">
+  You have no data to display
+  <button tedi-button tedi-empty-state-actions type="button">Choose time</button>
+</tedi-empty-state>
+```
 
 ### ScrollFade
 **Selector:** `tedi-scroll-fade`

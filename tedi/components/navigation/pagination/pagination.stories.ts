@@ -17,9 +17,6 @@ export default {
     }),
   ],
   parameters: {
-    status: {
-      type: "partiallyTediReady",
-    },
     design: {
       type: "figma",
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=8478-72385&m=dev",

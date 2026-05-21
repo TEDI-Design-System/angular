@@ -1,0 +1,386 @@
+<ng-content select="tedi-table-toolbar" />
+<ng-content select="tedi-table-columns-menu" />
+
+<div class="tedi-table__scroll" [attr.style]="maxHeightStyle()">
+  <table
+    class="tedi-table__table"
+    [attr.id]="id() || null"
+    [attr.aria-rowcount]="ariaRowCount()"
+    [attr.aria-colcount]="leafColumnCount() > 0 ? leafColumnCount() : null"
+  >
+    @if (caption(); as cap) {
+      <caption class="tedi-table__caption">
+        @if (isString(cap)) {
+          {{ cap }}
+        } @else {
+          <ng-container *ngTemplateOutlet="$any(cap)" />
+        }
+      </caption>
+    }
+
+    <thead class="tedi-table__head">
+      @for (
+        headerGroup of headerGroups();
+        track headerGroup.id;
+        let rowIndex = $index
+      ) {
+        <tr
+          class="tedi-table__row"
+          [attr.aria-rowindex]="paginationEnabled() ? rowIndex + 1 : null"
+          [cdkDropListDisabled]="!draggableColumns() || rowIndex > 0"
+          cdkDropList
+          cdkDropListOrientation="horizontal"
+          (cdkDropListDropped)="handleColumnDrop($event)"
+        >
+          @for (header of headerGroup.headers; track header.id) {
+            @if (shouldRenderHeader(header, rowIndex)) {
+              @let meta = getColumnMeta(header.column);
+              @let ariaSort = getHeaderAriaSort(header.column);
+              @let headerLabel = getHeaderLabel(header.column);
+              @let rowSpan = getHeaderRowSpan(header, rowIndex);
+              <th
+                scope="col"
+                cdkDrag
+                [cdkDragDisabled]="
+                  !draggableColumns() ||
+                  rowIndex > 0 ||
+                  header.column.id === SELECT_COLUMN_ID ||
+                  header.column.id === EXPAND_COLUMN_ID
+                "
+                cdkDragLockAxis="x"
+                [class]="
+                  'tedi-table__header-cell' +
+                  (isHeaderGroup(header)
+                    ? ' tedi-table__header-cell--group'
+                    : '') +
+                  (meta?.align
+                    ? ' tedi-table__cell--align-' + meta?.align
+                    : '') +
+                  (meta?.vAlign
+                    ? ' tedi-table__cell--valign-' + meta?.vAlign
+                    : '')
+                "
+                [attr.colspan]="header.colSpan > 1 ? header.colSpan : null"
+                [attr.rowspan]="rowSpan"
+                [attr.aria-sort]="ariaSort"
+                [attr.aria-label]="headerLabel"
+                [attr.style]="
+                  header.column.getSize()
+                    ? 'width: ' + header.column.getSize() + 'px'
+                    : null
+                "
+              >
+                @if (header.column.id === SELECT_COLUMN_ID) {
+                  <input
+                    tedi-checkbox
+                    type="checkbox"
+                    [id]="resolvedId() + '-select-all'"
+                    [name]="resolvedId() + '-select-all'"
+                    [attr.aria-label]="selectAllLabel()"
+                    [checked]="isAllPageRowsSelected()"
+                    [indeterminate]="
+                      isSomePageRowsSelected() && !isAllPageRowsSelected()
+                    "
+                    (change)="handleSelectAll($any($event.target).checked)"
+                  />
+                } @else if (header.column.id === EXPAND_COLUMN_ID) {
+                  <!-- empty -->
+                } @else if (header.column.id === DRAG_COLUMN_ID) {
+                  <!-- empty -->
+                } @else {
+                  <span style="display:inline-flex; align-items:center; gap:4px;">
+                    @if (
+                      draggableColumns() &&
+                      rowIndex === 0 &&
+                      !isHeaderGroup(header)
+                    ) {
+                      <button
+                        type="button"
+                        cdkDragHandle
+                        class="tedi-table__drag-handle"
+                        aria-label="Drag column"
+                      >
+                        <tedi-icon
+                          name="drag_indicator"
+                          [size]="18"
+                          color="inherit"
+                        />
+                      </button>
+                    }
+                    <ng-container
+                      *flexRender="
+                        header.column.columnDef.header;
+                        props: header.getContext();
+                        let content
+                      "
+                    >
+                      @if (isString(content) || isNumber(content)) {
+                        {{ content }}
+                      } @else {
+                        {{ content }}
+                      }
+                    </ng-container>
+                  </span>
+                }
+              </th>
+            }
+          }
+        </tr>
+      }
+      @if (enableColumnFilters()) {
+        <tr
+          class="tedi-table__row tedi-table__row--filter"
+          [attr.aria-rowindex]="
+            paginationEnabled() ? headerGroups().length + 1 : null
+          "
+        >
+          @for (column of leafColumns(); track column.id) {
+            @let filterId = resolvedId() + '-filter-' + column.id;
+            <th class="tedi-table__header-cell" scope="col">
+              @if (column.getCanFilter()) {
+                <tedi-form-field size="small">
+                  <input
+                    tedi-text-field
+                    type="text"
+                    [id]="filterId"
+                    [name]="filterId"
+                    [attr.aria-label]="filterLabel(column)"
+                    [placeholder]="filterPlaceholder()"
+                    [value]="getFilterValue(column)"
+                    (input)="
+                      handleColumnFilter(column, $any($event.target).value)
+                    "
+                  />
+                </tedi-form-field>
+              }
+            </th>
+          }
+        </tr>
+      }
+    </thead>
+
+    <tbody
+      class="tedi-table__body"
+      cdkDropList
+      [cdkDropListDisabled]="!draggableRows()"
+      (cdkDropListDropped)="handleRowDrop($any($event))"
+    >
+      @if (rows().length === 0) {
+        <tr class="tedi-table__row">
+          <td
+            class="tedi-table__cell tedi-table__cell--placeholder"
+            [attr.colspan]="leafColumnCount() > 0 ? leafColumnCount() : 1"
+          >
+            @if (placeholder(); as pl) {
+              @if (placeholderRole()) {
+                <div [attr.role]="placeholderRole()">
+                  @if (isString(pl)) {
+                    {{ pl }}
+                  } @else {
+                    <ng-container *ngTemplateOutlet="$any(pl)" />
+                  }
+                </div>
+              } @else {
+                @if (isString(pl)) {
+                  {{ pl }}
+                } @else {
+                  <ng-container *ngTemplateOutlet="$any(pl)" />
+                }
+              }
+            } @else {
+              @if (placeholderRole()) {
+                <div [attr.role]="placeholderRole()">
+                  {{ placeholderLabel() }}
+                </div>
+              } @else {
+                {{ placeholderLabel() }}
+              }
+            }
+          </td>
+        </tr>
+      } @else {
+        @for (row of rows(); track row.id; let visibleIndex = $index) {
+          @let isActiveRow =
+            activeRowId() !== undefined && row.id === activeRowId();
+          @let ariaRowIndex = getRowIndex(visibleIndex);
+          @let subRowId = resolvedId() + '-sub-' + row.id;
+          <tr
+            cdkDrag
+            [cdkDragDisabled]="!draggableRows()"
+            cdkDragLockAxis="y"
+            [class]="
+              'tedi-table__row' +
+              (row.getIsSelected() ? ' tedi-table__row--selected' : '') +
+              (isActiveRow ? ' tedi-table__row--active' : '') +
+              (interactive() ? ' tedi-table__row--clickable' : '') +
+              (row.depth > 0 ? ' tedi-table__row--sub-row' : '')
+            "
+            [attr.role]="interactive() ? 'button' : null"
+            [attr.tabindex]="interactive() ? 0 : null"
+            [attr.aria-rowindex]="ariaRowIndex"
+            [attr.aria-current]="isActiveRow ? 'true' : null"
+            (click)="interactive() && handleRowClick(row)"
+            (keydown)="handleRowKeydown($event, row)"
+          >
+            @for (cell of row.getVisibleCells(); track cell.id) {
+              @let cellMeta = getColumnMeta(cell.column);
+              @let cellContext = cell.getContext();
+              @let resolvedSpan = resolveRowSpan(cell, cellContext);
+              @if (resolvedSpan !== 0) {
+                <td
+                  [class]="
+                    'tedi-table__cell' +
+                    (cellMeta?.align
+                      ? ' tedi-table__cell--align-' + cellMeta?.align
+                      : '') +
+                    (cellMeta?.vAlign
+                      ? ' tedi-table__cell--valign-' + cellMeta?.vAlign
+                      : '')
+                  "
+                  [attr.rowspan]="
+                    resolvedSpan !== null && resolvedSpan > 1
+                      ? resolvedSpan
+                      : null
+                  "
+                >
+                  @if (cell.column.id === DRAG_COLUMN_ID) {
+                    <button
+                      type="button"
+                      cdkDragHandle
+                      class="tedi-table__drag-handle"
+                      aria-label="Drag row"
+                      (click)="$event.stopPropagation()"
+                    >
+                      <tedi-icon
+                        name="drag_indicator"
+                        [size]="18"
+                        color="inherit"
+                      />
+                    </button>
+                  } @else if (cell.column.id === SELECT_COLUMN_ID) {
+                    <input
+                      tedi-checkbox
+                      type="checkbox"
+                      [id]="resolvedId() + '-select-' + row.id"
+                      [name]="resolvedId() + '-select-' + row.id"
+                      [attr.aria-label]="selectRowLabel(row)"
+                      [checked]="row.getIsSelected()"
+                      [disabled]="!row.getCanSelect()"
+                      [indeterminate]="row.getIsSomeSelected()"
+                      (change)="
+                        handleSelectRow(row, $any($event.target).checked)
+                      "
+                      (click)="$event.stopPropagation()"
+                    />
+                  } @else if (cell.column.id === EXPAND_COLUMN_ID) {
+                    @if (row.getCanExpand()) {
+                      <button
+                        type="button"
+                        class="tedi-table__expand-toggle"
+                        [id]="resolvedId() + '-expand-' + row.id"
+                        [attr.aria-controls]="subRowId"
+                        [attr.aria-expanded]="row.getIsExpanded()"
+                        [attr.aria-label]="
+                          expandRowLabel(row.getIsExpanded())
+                        "
+                        (click)="handleExpandToggle($event, row)"
+                        (keydown)="handleExpandKeydown($event)"
+                      >
+                        <tedi-icon
+                          [name]="
+                            row.getIsExpanded()
+                              ? 'keyboard_arrow_up'
+                              : 'keyboard_arrow_down'
+                          "
+                          [size]="18"
+                          color="inherit"
+                        />
+                      </button>
+                    }
+                  } @else {
+                    <ng-container
+                      *flexRender="
+                        cell.column.columnDef.cell;
+                        props: cellContext;
+                        let content
+                      "
+                    >
+                      {{ content }}
+                    </ng-container>
+                  }
+                </td>
+              }
+            }
+          </tr>
+          @if (renderSubComponent(); as subTpl) {
+            @if (row.getIsExpanded()) {
+              <tr class="tedi-table__row tedi-table__row--sub-component">
+                <td
+                  class="tedi-table__cell tedi-table__cell--sub-component"
+                  [attr.id]="subRowId"
+                  role="region"
+                  [attr.aria-label]="rowDetailsLabel()"
+                  [attr.colspan]="leafColumnCount() > 0 ? leafColumnCount() : 1"
+                >
+                  <ng-container
+                    *ngTemplateOutlet="subTpl; context: { $implicit: row }"
+                  />
+                </td>
+              </tr>
+            }
+          }
+        }
+      }
+    </tbody>
+
+    @if (hasFooter()) {
+      <tfoot class="tedi-table__foot">
+        @for (group of footerGroups(); track group.id) {
+          <tr class="tedi-table__row">
+            @for (header of group.headers; track header.id) {
+              @let footerMeta = getColumnMeta(header.column);
+              <td
+                [class]="
+                  'tedi-table__cell tedi-table__cell--footer' +
+                  (footerMeta?.align
+                    ? ' tedi-table__cell--align-' + footerMeta?.align
+                    : '') +
+                  (footerMeta?.vAlign
+                    ? ' tedi-table__cell--valign-' + footerMeta?.vAlign
+                    : '')
+                "
+                [attr.colspan]="header.colSpan > 1 ? header.colSpan : null"
+              >
+                @if (!header.isPlaceholder) {
+                  <ng-container
+                    *flexRender="
+                      header.column.columnDef.footer;
+                      props: header.getContext();
+                      let content
+                    "
+                  >
+                    {{ content }}
+                  </ng-container>
+                }
+              </td>
+            }
+          </tr>
+        }
+      </tfoot>
+    }
+  </table>
+</div>
+
+@if (paginationEnabled()) {
+  <div class="tedi-table__pagination">
+    <tedi-pagination
+      [pageCount]="paginationPageCount()"
+      [page]="paginationPage()"
+      [totalItems]="paginationTotalItems()"
+      [pageSize]="paginationPageSize()"
+      [pageSizeOptions]="paginationPageSizeOptions()"
+      (pageChange)="handlePaginationPageChange($event)"
+      (pageSizeChange)="handlePaginationPageSizeChange($event)"
+    />
+  </div>
+}
