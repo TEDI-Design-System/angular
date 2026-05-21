@@ -933,6 +933,30 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
         options,
         groupSingleControl,
         groupMultiControl,
+        get formData() {
+          return {
+            single: {
+              value: singleControl.value,
+              touched: singleControl.touched,
+              dirty: singleControl.dirty,
+            },
+            multi: {
+              value: multiControl.value,
+              touched: multiControl.touched,
+              dirty: multiControl.dirty,
+            },
+            groupSingle: {
+              value: groupSingleControl.value,
+              touched: groupSingleControl.touched,
+              dirty: groupSingleControl.dirty,
+            },
+            groupMulti: {
+              value: groupMultiControl.value,
+              touched: groupMultiControl.touched,
+              dirty: groupMultiControl.dirty,
+            },
+          };
+        },
       },
       template: `
         <div style="background: var(--general-surface-primary); padding: 24px;">
@@ -975,28 +999,7 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
           </tedi-col>
           <tedi-col>
             <tedi-alert type="info" [showClose]="false">
-              <pre tedi-text modifiers="small" style="min-height: 600px;">{{ {
-                single: {
-                  value: singleControl.value,
-                  touched: singleControl.touched,
-                  dirty: singleControl.dirty
-                },
-                multi: {
-                  value: multiControl.value,
-                  touched: multiControl.touched,
-                  dirty: multiControl.dirty
-                },
-                groupSingle: {
-                  value: groupSingleControl.value,
-                  touched: groupSingleControl.touched,
-                  dirty: groupSingleControl.dirty
-                },
-                groupMulti: {
-                  value: groupMultiControl.value,
-                  touched: groupMultiControl.touched,
-                  dirty: groupMultiControl.dirty
-                }} | json }}
-              </pre>
+              <pre tedi-text modifiers="small" style="min-height: 600px;">{{ formData | json }}</pre>
             </tedi-alert>
           </tedi-col>
         </tedi-row>
