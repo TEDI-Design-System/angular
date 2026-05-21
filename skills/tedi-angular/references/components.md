@@ -179,7 +179,9 @@ Composed of sub-components:
 - `allowMultiple: boolean = false` — multi-select mode; `value` is treated as `string[]` when true
 - `options: FilterOption[] = []` — dropdown options `{ label, value, disabled? }`
 - `preserveLabel: boolean = false` — when true, single-select shows "Text: SelectedLabel" instead of replacing text
-- `searchable: boolean = false` — show search field in dropdown (with clear button)
+- `showSearch: boolean = false` — show the search field in the dropdown
+- `searchClearable: boolean = true` — show clear (×) button in the search field (only when `showSearch` is true)
+- `clearSearchOnSelect: boolean = false` — clear the search field after an option is selected or toggled
 - `showSelectAll: boolean = false` — show "Select all" in multi-select
 - `showClear: boolean = false` — show clear action in dropdown
 - `selectAllLabel?: string` — override for "Select all" label (defaults to translated string)
@@ -206,7 +208,7 @@ Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle
 
 <!-- Multi-select dropdown -->
 <tedi-filter text="Hospital" [allowMultiple]="true" [options]="options" [(value)]="values"
-  [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+  [showSearch]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
 
 <!-- With prepend content -->
 <tedi-filter text="Submitted" variant="secondary" size="large">

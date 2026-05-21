@@ -116,8 +116,28 @@ export default {
         defaultValue: { summary: "[]" },
       },
     },
-    searchable: {
-      description: "Show search field in the dropdown",
+    showSearch: {
+      description: "Show the search field in the dropdown",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    searchClearable: {
+      description:
+        "Whether the dropdown search field has a clear (×) button. Only applies when `showSearch` is true",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    clearSearchOnSelect: {
+      description:
+        "Clear the search field after an option is selected (or toggled in multi-select)",
       control: { type: "boolean" },
       table: {
         category: "inputs",
@@ -239,7 +259,7 @@ export const SingleValueFilter: StoryObj<FilterComponent> = {
       <div style="background: var(--general-surface-primary); padding: 24px;">
       <tedi-row cols="1" [gapY]="3">
         <tedi-col class="flex flex-column gap-2">
-          <h4 tedi-text >Separate</h4>
+          <h5 tedi-text modifiers="h5">Separate</h5>
           <div class="flex flex-wrap gap-2">
             <tedi-filter text="Vastuvõtud" [selected]="true" />
             <tedi-filter text="Analüüsid" [selected]="true" />
@@ -269,7 +289,7 @@ export const SingleValueFilter: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <h4 tedi-text >Grouped</h4>
+          <h5 tedi-text modifiers="h5">Grouped</h5>
           <div class="flex flex-wrap gap-2">
             <tedi-filter-group>
               <tedi-filter text="Kooskõlastatud" />
@@ -301,7 +321,7 @@ export const SingleValueFilter: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <h4 tedi-text >Dropdown label + value</h4>
+          <h5 tedi-text modifiers="h5">Dropdown label + value</h5>
           <div class="flex flex-wrap gap-2">
             <tedi-filter text="Teenus" [options]="teenusOptions" [preserveLabel]="true" [showClear]="true" appendTo="body" />
           </div>
@@ -311,7 +331,7 @@ export const SingleValueFilter: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <h4 tedi-text >Dropdown value</h4>
+          <h5 tedi-text modifiers="h5">Dropdown value</h5>
           <div class="flex flex-wrap gap-2">
             <tedi-filter text="Raviasutus" [options]="raviasutusOptions" appendTo="body" />
             <tedi-filter text="Teenus" [options]="teenusOptions" appendTo="body" />
@@ -348,10 +368,10 @@ export const MultiValueFilter: StoryObj<FilterComponent> = {
       <div style="background: var(--general-surface-primary); padding: 24px;">
       <tedi-row cols="1" [gapY]="3">
         <tedi-col class="flex flex-wrap gap-2">
-          <tedi-filter text="Raviasutus" [allowMultiple]="true" [options]="options" [(value)]="values1" [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+          <tedi-filter text="Raviasutus" [allowMultiple]="true" [options]="options" [(value)]="values1" [showSearch]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
         </tedi-col>
         <tedi-col class="flex flex-wrap gap-2">
-          <tedi-filter text="Raviasutus" variant="secondary" [allowMultiple]="true" [options]="options" [(value)]="values2" [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+          <tedi-filter text="Raviasutus" variant="secondary" [allowMultiple]="true" [options]="options" [(value)]="values2" [showSearch]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
         </tedi-col>
       </tedi-row>
       </div>
@@ -365,7 +385,7 @@ export const CustomizeContent: StoryObj<FilterComponent> = {
       <div style="background: var(--general-surface-primary); padding: 24px;">
       <tedi-row cols="1" [gapY]="3">
         <tedi-col class="flex flex-column gap-2">
-          <h4 tedi-text >Prepend hidden when selected (default)</h4>
+          <h5 tedi-text modifiers="h5">Prepend hidden when selected (default)</h5>
           <tedi-filter-group>
             <tedi-filter text="Unread (3)" variant="secondary" size="large">
               <tedi-status-indicator tediFilterPrepend type="danger" />
@@ -397,7 +417,7 @@ export const CustomizeContent: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <h4 tedi-text >Prepend visible when selected</h4>
+          <h5 tedi-text modifiers="h5">Prepend visible when selected</h5>
           <tedi-filter-group>
             <tedi-filter text="Submitted" variant="secondary" size="large">
               <tedi-status-badge tediFilterPrepend [hideWhenSelected]="false" text="5" color="brand" />
@@ -417,7 +437,7 @@ export const CustomizeContent: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <h4 tedi-text >Append</h4>
+          <h5 tedi-text modifiers="h5">Append</h5>
           <tedi-filter-group>
             <tedi-filter text="Submitted" variant="secondary" size="large">
               <tedi-status-badge tediFilterAppend text="5" color="brand" />
@@ -437,7 +457,7 @@ export const CustomizeContent: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <h4 tedi-text >Append with dropdown</h4>
+          <h5 tedi-text modifiers="h5">Append with dropdown</h5>
           <tedi-filter
             text="Requires attention"
             variant="secondary"
@@ -450,7 +470,7 @@ export const CustomizeContent: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <h4 tedi-text >Prepend icon with append and dropdown</h4>
+          <h5 tedi-text modifiers="h5">Prepend icon with append and dropdown</h5>
           <tedi-filter
             text="Requires attention"
             variant="secondary"
@@ -751,7 +771,7 @@ export const Examples: StoryObj<FilterComponent> = {
               [allowMultiple]="true"
               [options]="raviasutusOptions"
               [formControl]="raviasutusControl"
-              [searchable]="true"
+              [showSearch]="true"
               [showSelectAll]="true"
               [showClear]="true"
               appendTo="body"
@@ -822,7 +842,7 @@ export const Examples: StoryObj<FilterComponent> = {
               [allowMultiple]="true"
               [options]="raviasutusOptions"
               [formControl]="raviasutusControl"
-              [searchable]="true"
+              [showSearch]="true"
               [showSelectAll]="true"
               [showClear]="true"
               appendTo="body"
@@ -962,7 +982,7 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
         <div style="background: var(--general-surface-primary); padding: 24px;">
         <tedi-row cols="1" [gapY]="3">
           <tedi-col class="flex flex-column gap-2">
-            <h4 tedi-text >Standalone single &amp; multi-select</h4>
+            <h5 tedi-text modifiers="h5">Standalone single &amp; multi-select</h5>
             <div class="flex gap-2">
               <tedi-filter
                 text="Vastuvõtud"
@@ -973,7 +993,7 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
                 [allowMultiple]="true"
                 [options]="options"
                 [formControl]="multiControl"
-                [searchable]="true"
+                [showSearch]="true"
                 [showSelectAll]="true"
                 [showClear]="true"
                 appendTo="body"
@@ -982,7 +1002,7 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
           </tedi-col>
 
           <tedi-col class="flex flex-column gap-2">
-            <h4 tedi-text >Grouped single-select</h4>
+            <h5 tedi-text modifiers="h5">Grouped single-select</h5>
             <tedi-filter-group label="Status" [formControl]="groupSingleControl">
               <tedi-filter text="Kõik" value="all" />
               <tedi-filter text="Aktiivsed" value="active" />
@@ -990,7 +1010,7 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
             </tedi-filter-group>
           </tedi-col>
           <tedi-col class="flex flex-column gap-2">
-            <h4 tedi-text >Grouped multi-select</h4>
+            <h5 tedi-text modifiers="h5">Grouped multi-select</h5>
             <tedi-filter-group label="Tags" [allowMultiple]="true" [formControl]="groupMultiControl">
               <tedi-filter text="Kiire" value="urgent" />
               <tedi-filter text="Ülevaatus" value="review" />

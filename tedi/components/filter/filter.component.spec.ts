@@ -436,7 +436,7 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("options", TEST_OPTIONS);
       fixture.componentRef.setInput("showSelectAll", true);
       fixture.componentRef.setInput("showClear", true);
-      fixture.componentRef.setInput("searchable", true);
+      fixture.componentRef.setInput("showSearch", true);
       fixture.detectChanges();
     });
 
@@ -515,7 +515,7 @@ describe("FilterComponent", () => {
       expect(selectAll.componentInstance.indeterminate()).toBe(false);
     });
 
-    it("should render search input when searchable", () => {
+    it("should render search input when showSearch is true", () => {
       const search = fixture.debugElement.query(
         By.css(".tedi-filter-dropdown__search input"),
       );
@@ -529,8 +529,8 @@ describe("FilterComponent", () => {
       expect(clear).toBeTruthy();
     });
 
-    it("should not render search input when not searchable", () => {
-      fixture.componentRef.setInput("searchable", false);
+    it("should not render search input when showSearch is false", () => {
+      fixture.componentRef.setInput("showSearch", false);
       fixture.detectChanges();
 
       const search = fixture.debugElement.query(
@@ -601,6 +601,77 @@ describe("FilterComponent", () => {
 
       expect(component.multiValues()).toEqual([]);
     });
+
+    it("should mark search form-field as clearable by default", () => {
+      const formField = fixture.debugElement.query(
+        By.css(".tedi-filter-dropdown__search tedi-form-field"),
+      );
+      expect(formField.componentInstance.clearable()).toBe(true);
+    });
+
+    it("should mark search form-field as non-clearable when searchClearable is false", () => {
+      fixture.componentRef.setInput("searchClearable", false);
+      fixture.detectChanges();
+
+      const formField = fixture.debugElement.query(
+        By.css(".tedi-filter-dropdown__search tedi-form-field"),
+      );
+      expect(formField.componentInstance.clearable()).toBe(false);
+    });
+
+    it("should reset searchTerm on (clear) from the search field", () => {
+      component.searchTerm.set("opt");
+      fixture.detectChanges();
+
+      component.onSearchClear();
+      expect(component.searchTerm()).toBe("");
+    });
+  });
+
+  describe("clearSearchOnSelect", () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput("options", TEST_OPTIONS);
+      fixture.componentRef.setInput("showSearch", true);
+      fixture.detectChanges();
+    });
+
+    it("should keep searchTerm after selectOption when clearSearchOnSelect is false (default)", () => {
+      component.searchTerm.set("opt");
+      component.selectOption("a");
+
+      expect(component.searchTerm()).toBe("opt");
+    });
+
+    it("should clear searchTerm after selectOption when clearSearchOnSelect is true", () => {
+      fixture.componentRef.setInput("clearSearchOnSelect", true);
+      fixture.detectChanges();
+
+      component.searchTerm.set("opt");
+      component.selectOption("a");
+
+      expect(component.searchTerm()).toBe("");
+    });
+
+    it("should keep searchTerm after toggleOption when clearSearchOnSelect is false (default)", () => {
+      fixture.componentRef.setInput("allowMultiple", true);
+      fixture.detectChanges();
+
+      component.searchTerm.set("opt");
+      component.toggleOption("a");
+
+      expect(component.searchTerm()).toBe("opt");
+    });
+
+    it("should clear searchTerm after toggleOption when clearSearchOnSelect is true", () => {
+      fixture.componentRef.setInput("allowMultiple", true);
+      fixture.componentRef.setInput("clearSearchOnSelect", true);
+      fixture.detectChanges();
+
+      component.searchTerm.set("opt");
+      component.toggleOption("a");
+
+      expect(component.searchTerm()).toBe("");
+    });
   });
 
   describe("accessibility", () => {
@@ -609,7 +680,7 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("options", TEST_OPTIONS);
       fixture.componentRef.setInput("showSelectAll", true);
       fixture.componentRef.setInput("showClear", true);
-      fixture.componentRef.setInput("searchable", true);
+      fixture.componentRef.setInput("showSearch", true);
       fixture.componentRef.setInput("text", "Raviasutus");
       fixture.detectChanges();
     });

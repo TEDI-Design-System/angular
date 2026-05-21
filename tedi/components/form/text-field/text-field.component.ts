@@ -38,6 +38,7 @@ import {
     class: "tedi-text-field",
     "[class.tedi-text-field--arrows-hidden]": "arrowsHidden()",
     "[attr.aria-invalid]": "invalid() || null",
+    "[value]": "value()",
     "(input)": "handleInputChange($event)",
     "(blur)": "handleBlur()",
   },

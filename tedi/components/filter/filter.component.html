@@ -42,7 +42,7 @@
             </div>
           }
         } @else if (isSingleSelect()) {
-          @if (searchable()) {
+          @if (showSearch()) {
             <ng-container *ngTemplateOutlet="searchField" />
           }
 
@@ -96,7 +96,7 @@
             </div>
           }
         } @else {
-          @if (searchable()) {
+          @if (showSearch()) {
             <ng-container *ngTemplateOutlet="searchField" />
           }
 
@@ -215,14 +215,13 @@
 
 <ng-template #searchField>
   <div class="tedi-filter-dropdown__search">
-    <tedi-form-field icon="search" [clearable]="true">
+    <tedi-form-field icon="search" [clearable]="searchClearable()">
       <input
         tedi-text-field
         type="text"
         role="searchbox"
         [attr.aria-label]="text()"
-        [value]="searchTerm()"
-        (input)="onSearchInput($event)"
+        [(value)]="searchTerm"
         (clear)="onSearchClear()"
       />
     </tedi-form-field>

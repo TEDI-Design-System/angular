@@ -116,10 +116,22 @@ export class FilterComponent implements ControlValueAccessor {
    */
   readonly value = model<string | string[]>("");
   /**
-   * Show search field in the dropdown.
+   * Show the search field in the dropdown.
    * @default false
    */
-  readonly searchable = input<boolean>(false);
+  readonly showSearch = input<boolean>(false);
+  /**
+   * Whether the dropdown search field has a clear (×) button.
+   * Only applies when `showSearch` is true.
+   * @default true
+   */
+  readonly searchClearable = input<boolean>(true);
+  /**
+   * Whether to clear the search field after an option is selected (or toggled in multi-select).
+   * Useful in multi-select flows where the user picks several options consecutively.
+   * @default false
+   */
+  readonly clearSearchOnSelect = input<boolean>(false);
   /**
    * Show "Select all" option in the dropdown.
    * @default false
@@ -355,6 +367,9 @@ export class FilterComponent implements ControlValueAccessor {
     this.value.set(newValue);
     this.onChange(newValue);
     this.onTouched();
+    if (this.clearSearchOnSelect()) {
+      this.searchTerm.set("");
+    }
     this.dropdown()?.hideDropdown();
     this.triggerBtn()?.nativeElement.focus();
   }
@@ -367,6 +382,9 @@ export class FilterComponent implements ControlValueAccessor {
     this.value.set(newValues);
     this.onChange(newValues);
     this.onTouched();
+    if (this.clearSearchOnSelect()) {
+      this.searchTerm.set("");
+    }
   }
 
   toggleSelectAll(): void {
@@ -399,10 +417,6 @@ export class FilterComponent implements ControlValueAccessor {
 
   onCustomClear(): void {
     this.cleared.emit();
-  }
-
-  onSearchInput(event: Event): void {
-    this.searchTerm.set((event.target as HTMLInputElement).value);
   }
 
   onSearchClear(): void {
