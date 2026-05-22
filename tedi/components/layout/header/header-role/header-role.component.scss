@@ -1,7 +1,7 @@
 @use "@tedi-design-system/core/bootstrap-utility/breakpoints";
 
 :root {
-  --_header-role-transition-duration: 0.2s;
+  --_header-role-transition-duration: 0.3s;
 }
 
 .tedi-header-role {
@@ -11,9 +11,11 @@
   justify-content: center;
   height: unset;
   background-color: var(--general-surface-secondary);
+  border-bottom: var(--tedi-borders-04) solid var(--general-border-brand);
 
   @include breakpoints.media-breakpoint-up(lg) {
     background-color: transparent;
+    border-bottom: 0;
   }
 
   [tedi-popover-trigger] .tedi-header-role__chevron {
@@ -33,11 +35,6 @@
     width: 100%;
     padding: var(--card-padding-md-default);
     transition: padding var(--_header-role-transition-duration) ease;
-
-    &--open {
-      padding: var(--card-padding-md-default) var(--card-padding-md-default)
-        var(--card-padding-xs) var(--card-padding-md-default);
-    }
 
     @include breakpoints.media-breakpoint-up(lg) {
       justify-content: flex-start;
@@ -69,8 +66,7 @@
       border: none;
 
       tedi-icon {
-        transition: transform var(--_header-role-transition-duration)
-          ease-in-out;
+        transition: transform 0.2s ease-in-out;
 
         &[data-open="true"] {
           transform: rotate(-180deg);
@@ -177,7 +173,7 @@
       visibility: visible;
       grid-template-rows: minmax(0, 1fr);
 
-      .tedi-header-role__collapse__items {
+      .tedi-header-role__collapse--items {
         visibility: visible;
       }
     }

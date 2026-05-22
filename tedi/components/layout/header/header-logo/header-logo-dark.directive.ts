@@ -6,7 +6,7 @@ import { Directive } from "@angular/core";
  * slot when the active theme is `dark`.
  */
 @Directive({
-  selector: "[tediHeaderLogoDark]",
+  selector: "[tedi-header-logo-dark]",
   standalone: true,
 })
 export class HeaderLogoDarkDirective {}

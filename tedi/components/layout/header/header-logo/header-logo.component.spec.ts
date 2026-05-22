@@ -103,7 +103,7 @@ describe("HeaderLogoComponent", () => {
       template: `
         <tedi-header-logo>
           <img src="logo.svg" alt="Logo" />
-          <img tediHeaderLogoDark src="logo-dark.svg" alt="Dark" />
+          <img tedi-header-logo-dark src="logo-dark.svg" alt="Dark" />
         </tedi-header-logo>
       `,
     })
@@ -144,7 +144,7 @@ describe("HeaderLogoComponent", () => {
       template: `
         <tedi-header-logo>
           <img src="logo.svg" alt="Logo" />
-          <img tediHeaderLogoDark src="logo-dark.svg" alt="Dark" />
+          <img tedi-header-logo-dark src="logo-dark.svg" alt="Dark" />
         </tedi-header-logo>
       `,
     })
@@ -163,7 +163,7 @@ describe("HeaderLogoComponent", () => {
       template: `
         <tedi-header-logo>
           <img src="logo.svg" alt="Logo" />
-          <img tediHeaderLogoDark src="logo-dark.svg" alt="Dark" />
+          <img tedi-header-logo-dark src="logo-dark.svg" alt="Dark" />
         </tedi-header-logo>
       `,
     })

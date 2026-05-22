@@ -114,18 +114,25 @@ export const translationsMap = {
     ru: "Роль",
   },
   "header.role-search": {
-    description: "Label for role search input",
+    description: "Label for Role search input",
     components: ["HeaderRole"],
-    et: "Otsi esindatavat",
+    et: "Otsi isikut",
     en: "Search representative",
     ru: "Найти представителя",
   },
-  "header.role-no-representatives": {
-    description: "Label for empty representatives search result",
+  "header.role-search.organization": {
+    description: "Label for Role search input when searching for organizations",
     components: ["HeaderRole"],
-    et: "Esindatavaid ei leitud!",
-    en: "No representatives found!",
-    ru: "Представители не найдены!",
+    et: "Otsi asutust",
+    en: "Search organization",
+    ru: "Найти организацию",
+  },
+  "header.role-no-representatives": {
+    description: "Text shown when representative search yields no results",
+    components: ["HeaderRole"],
+    et: "Esindatavaid ei leitud",
+    en: "No representatives found",
+    ru: "Представители не найдены",
   },
   "header.login": {
     description: "Label for login button",

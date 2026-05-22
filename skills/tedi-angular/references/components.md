@@ -438,16 +438,53 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 ### Header
 **Selector:** `header[tedi-header]`
 
+Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language`, `tedi-header-login`, `tedi-header-logout`, `tedi-header-profile`, `tedi-header-role`, `tedi-header-search`
+
+**tedi-header-logo:**
+- `href?: string` — wraps logo in an anchor
+- `showLogo: boolean = true` — simple boolean for feature flags or custom media queries. For responsive hiding at standard breakpoints, use `*showAt` / `*hideAt` directives instead (e.g. `<tedi-header-logo *showAt="'md'">`).
+- Supports dark variant via `tedi-header-logo-dark` directive on projected content.
+
+**tedi-header-role:**
+- `representatives: Representative[]` (required) — `Representative` has `id: string`, `name: string`, `description?: string`, `icon?: string | RepresentativeIcon`
+- `currentRepresentative: Representative` (required, two-way with `model()`)
+- `label?: string` — label text in the title position
+- `description?: string` — description text
+- `showSearch?: boolean = false` — show search input above representative list
+- `searchClearable?: boolean = false` — show clear button on search input
+- `clearSearchOnSelect?: boolean = true` — clear search when a representative is selected
+- `isOrganization?: boolean = false` — affects search label
+- `searchLabel?: string` — custom search input label (falls back to i18n)
+- `organizationSearchLabel?: string` — search label when `isOrganization` is true
+- `showRoleSwitch?: boolean` — show role selection toggle (defaults to true when multiple representatives)
+- `roleSelectionToggle: OutputEmitterRef<boolean>` — emits when role selection opens/closes
+- Custom content via `[tedi-header-role-content]` directive replaces default representative list.
+- Custom no-results content via `[tedi-header-role-no-results]` directive.
+- Custom title via `[tedi-header-role-title]` directive.
+- When multiple `tedi-header-role` components are inside a `tedi-header-profile`, opening one accordion automatically closes the others on mobile/tablet.
+
+**tedi-header-language:**
+- `languages: HeaderLanguage` (required) — object with `Language` keys and display string values
+- `languageChange: OutputEmitterRef<Language>` — emits on language selection
+
+**tedi-header-login:** bp — `size?: 'default' | 'small'` (auto `'small'` on mobile), `label?: string`, `onClick?: () => void`, `href?: string`
+**tedi-header-logout:** bp — `size?: 'default' | 'small'` (auto `'small'` on mobile), `label?: string`, `onClick?: () => void`, `href?: string`
+
+**tedi-header-profile:** bp — `showPopover?: Breakpoint = 'lg'`, `label?: string`, `showLabel?: boolean = false`, `size?: HeaderProfileSize`, `noStyle?: boolean = false`
+- `noStyle` removes default padding, borders, and background from modal children. Does not affect `tedi-header-role`'s own 4px brand bottom border.
+
+**tedi-header-search:** `mobileVariant?: 'modal' | 'inline'`, `mobileLabels?: { button?, modalTitle? }`, `disabled?: boolean`
+
 ```html
 <header tedi-header>
-  <tedi-header-content>
+  <tedi-header-logo href="/">
     <img src="logo.svg" alt="Logo" />
-  </tedi-header-content>
+  </tedi-header-logo>
   <tedi-header-actions>
     <tedi-header-language [languages]="languages" (languageChange)="onLangChange($event)" />
-    <tedi-header-profile [name]="userName">
-      <tedi-header-role [role]="role" [representatives]="reps" [(currentRepresentative)]="currentRep" />
-      <tedi-header-logout />
+    <tedi-header-profile>
+      <tedi-header-role [representatives]="reps" [(currentRepresentative)]="currentRep" />
+      <tedi-header-logout href="/logout" />
     </tedi-header-profile>
   </tedi-header-actions>
 </header>

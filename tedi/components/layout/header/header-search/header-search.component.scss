@@ -1,6 +1,10 @@
 .tedi-header-search {
   display: contents;
 
+  .tedi-search__container {
+    margin-bottom: 0;
+  }
+
   &__modal {
     position: fixed;
     top: 0;

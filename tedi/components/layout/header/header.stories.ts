@@ -19,7 +19,11 @@ import {
 import { HeaderComponent } from "./header.component";
 import { HeaderContentComponent } from "./header-content/header-content.component";
 import { HeaderActionsComponent } from "./header-actions/header-actions.component";
-import { HeaderRoleComponent } from "./header-role/header-role.component";
+import {
+  HeaderRoleComponent,
+  HeaderRoleContentDirective,
+  HeaderRoleNoResultsDirective,
+} from "./header-role/header-role.component";
 import { HeaderRoleTitleDirective } from "./header-role/header-role-title.directive";
 import { HeaderLanguageComponent } from "./header-language/header-language.component";
 import { HeaderProfileComponent } from "./header-profile/header-profile.component";
@@ -47,6 +51,7 @@ import { TextFieldComponent } from "../../form/text-field/text-field.component";
 // used here only to demo HeaderSearch consumption — do NOT mirror this import from
 // any non-story file inside `tedi/`.
 import { SearchComponent } from "community/components/form";
+import { TextComponent } from "../../base/text/text.component";
 import { TagComponent } from "../../tags/tag/tag.component";
 import { ToggleComponent } from "../../form/toggle/toggle.component";
 
@@ -61,7 +66,7 @@ const profileTranslations = {
   darkMode: { et: "Tume režiim", en: "Dark mode", ru: "Тёмная тема" },
   notifications: {
     et: "Riiklikud teated",
-    en: "National notifications",
+    en: "Official Notices",
     ru: "Государственные уведомления",
   },
   accessibility: {
@@ -73,6 +78,14 @@ const profileTranslations = {
   services: { et: "Teenused", en: "Services", ru: "Услуги" },
   blog: { et: "Blogi", en: "Blog", ru: "Блог" },
   contact: { et: "Kontakt", en: "Contact", ru: "Контакт" },
+  organization: { et: "Asutus", en: "Organization", ru: "Организация" },
+  personalCode: { et: "Isikukood", en: "Personal code", ru: "Личный код" },
+  role: { et: "Roll", en: "Role", ru: "Роль" },
+  representative: {
+    et: "Esindatav",
+    en: "Representative",
+    ru: "Представитель",
+  },
 } as const satisfies Record<string, Record<Language, string>>;
 
 type ProfileTranslationKey = keyof typeof profileTranslations;
@@ -184,6 +197,9 @@ export default {
         SearchComponent,
         TagComponent,
         HeaderRoleTitleDirective,
+        HeaderRoleContentDirective,
+        HeaderRoleNoResultsDirective,
+        TextComponent,
         ToggleComponent,
         StoryThemeToggleComponent,
         StoryResponsiveLogoDirective,
@@ -318,13 +334,39 @@ export default {
       description: "Description text shown next to the representative name.",
       table: { category: "header-role", type: { summary: "string" } },
     },
-    showInput: {
+    showSearch: {
       description:
-        "Show a search input above the representative list. Useful for long lists.",
+        "Whether to display the search input above the representative list.",
       table: {
         category: "header-role",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
+      },
+    },
+    searchClearable: {
+      description: "Whether the search input shows a clear button.",
+      table: {
+        category: "header-role",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    clearSearchOnSelect: {
+      description:
+        "Whether to clear the search input when a representative is selected.",
+      table: {
+        category: "header-role",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    showRoleSwitch: {
+      description:
+        "Whether to show the role selection toggle and dropdown. Defaults to showing when there are multiple representatives.",
+      table: {
+        category: "header-role",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "undefined" },
       },
     },
     representatives: {
@@ -348,6 +390,31 @@ export default {
       table: {
         category: "header-role",
         type: { summary: "EventEmitter<Representative>" },
+      },
+    },
+    isOrganization: {
+      description:
+        "Whether the role represents an organization. Affects the search input label.",
+      table: {
+        category: "header-role",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    searchLabel: {
+      description:
+        "Label for the search input when selecting a representative. Falls back to i18n labels when not provided.",
+      table: {
+        category: "header-role",
+        type: { summary: "string" },
+      },
+    },
+    organizationSearchLabel: {
+      description:
+        "Label for the search input when selecting an organization representative. Overrides both the default and `searchLabel` when `isOrganization` is true.",
+      table: {
+        category: "header-role",
+        type: { summary: "string" },
       },
     },
     roleSelectionToggle: {
@@ -420,7 +487,7 @@ const organizations2 = `[
 const currentOrganization = `{ id: 'org-1', name: 'Pärnu linnavolikogu' }`;
 const currentOrganization2 = `{ id: 'org-2', name: 'Tartu Linnavalitsus' }`;
 
-const profileMenuContent = `
+const profileMenuContent = (showLogout = true) => `
   <a tedi-link href="#" [underline]="false">{{ 'myData' | storyTranslate }}</a>
   <a tedi-link href="#" [underline]="false">{{ 'representatives' | storyTranslate }}</a>
   <a tedi-link href="#" [underline]="false">{{ 'contacts' | storyTranslate }}</a>
@@ -433,14 +500,21 @@ const profileMenuContent = `
     <tedi-icon name="notifications" />
     {{ 'notifications' | storyTranslate }}
   </a>
-  <tedi-separator *showAt="'lg'" />
-  <tedi-header-logout href="#" />
+
+  ${
+    showLogout
+      ? `
+      <tedi-separator *showAt="'lg'" />
+      <tedi-header-logout href="#" />
+    `
+      : ""
+  }
 `;
 
 const logo = `
   <tedi-header-logo href="/">
     <img src="header-logo.svg" alt="Logo" />
-    <img tediHeaderLogoDark src="header-logo-white.svg" alt="Logo (Dark Mode)" />
+    <img tedi-header-logo-dark src="header-logo-white.svg" alt="Logo (Dark Mode)" />
   </tedi-header-logo>
 `;
 
@@ -452,7 +526,7 @@ const responsiveLogo = `
     href="/"
   >
     <img src="header-logo.svg" alt="Logo" />
-    <img tediHeaderLogoDark src="header-logo-white.svg" alt="Logo (Dark Mode)" />
+    <img tedi-header-logo-dark src="header-logo-white.svg" alt="Logo (Dark Mode)" />
   </tedi-header-logo>
 `;
 
@@ -477,7 +551,7 @@ Header is responsive and adapts to mobile layouts automatically, but some subcom
 To preview the mobile layout, resize the browser window or use Storybook's viewport tools.
 
 Header consists of several sub-components:
-- \`HeaderLogoComponent\`: Wraps the project logo. Project the light/default logo as direct content; optionally project a dark-theme variant marked with \`tediHeaderLogoDark\` for automatic swap when the active theme is \`dark\`.
+- \`HeaderLogoComponent\`: Wraps the project logo. Project the light/default logo as direct content; optionally project a dark-theme variant marked with \`tedi-header-logo-dark\` for automatic swap when the active theme is \`dark\`.
 - \`HeaderContentComponent\`: Used for showing links in desktop view.
 - \`HeaderActionsComponent\`: Used for showing and styling actions in header (placed at the right side).
 - \`HeaderRoleComponent\`: Used for showing role selection. Accepts an optional title element projected via the \`[tedi-header-role-title]\` slot when richer markup (e.g. a tag) is needed instead of the plain \`label\` text.
@@ -492,9 +566,16 @@ Example with theme-aware logo:
 \`\`\`html
 <tedi-header-logo href="/">
   <img src="logo.svg" alt="Logo" />
-  <img tediHeaderLogoDark src="logo-white.svg" alt="Logo (dark mode)" />
+  <img tedi-header-logo-dark src="logo-white.svg" alt="Logo (dark mode)" />
 </tedi-header-logo>
 \`\`\`
+
+| Selector | Description |
+|----------|------------|
+| \`[tedi-header-logo-dark]\` | Dark-theme logo variant. The logo component swaps to this image when the active theme is \`dark\`. |
+| \`[tedi-header-role-title]\` | Title content projected into the role header (e.g. a \`<tedi-tag>\`). Replaces the bold \`label\` text. |
+| \`[tedi-header-role-content]\` | Custom content projected into the role selection popover (desktop) or accordion (mobile). Replaces the default representative list. |
+| \`[tedi-header-role-no-results]\` | Custom "no results" content shown when the search filter produces an empty representative list. |
         `,
       },
     },
@@ -537,7 +618,7 @@ Example with theme-aware logo:
   }),
 };
 
-export const LoggedOut1: StoryObj<HeaderComponent> = {
+export const LoggedOut: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
     styles: [mobileSidenavWrapperStyles],
@@ -581,7 +662,7 @@ export const LoggedOut1: StoryObj<HeaderComponent> = {
   }),
 };
 
-export const LoggedOut2: StoryObj<HeaderComponent> = {
+export const LoggedOutWithSearch: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
     styles: [mobileSidenavWrapperStyles],
@@ -624,7 +705,7 @@ export const LoggedOut2: StoryObj<HeaderComponent> = {
   }),
 };
 
-export const LoggedIn1: StoryObj<HeaderComponent> = {
+export const LoggedIn: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
     template: `
@@ -635,9 +716,9 @@ export const LoggedIn1: StoryObj<HeaderComponent> = {
             ${accessibilityLink}
             <tedi-separator axis="vertical" />
             <tedi-header-role
-              label="Roll:"
+              [label]="('role' | storyTranslate) + ':'"
               description="49504080934"
-              [showInput]="true"
+              [showSearch]="true"
               [representatives]="${representatives}"
               [currentRepresentative]="${currentRepresentative}"
             />
@@ -647,15 +728,15 @@ export const LoggedIn1: StoryObj<HeaderComponent> = {
           <tedi-separator axis="vertical" />
           <tedi-header-profile>
             <tedi-header-role
-              label="Roll:"
+              [label]="('role' | storyTranslate) + ':'"
               description="49504080934"
-              [showInput]="true"
+              [showSearch]="true"
               [representatives]="${representatives}"
               [currentRepresentative]="${currentRepresentative}"
               *hideAt="'lg'"
             />
             <ng-container *hideAt="'lg'">${accessibilityLink}</ng-container>
-            ${profileMenuContent}
+            ${profileMenuContent()}
           </tedi-header-profile>
         </tedi-header-actions>
       </header>
@@ -663,7 +744,7 @@ export const LoggedIn1: StoryObj<HeaderComponent> = {
   }),
 };
 
-export const LoggedIn2: StoryObj<HeaderComponent> = {
+export const LoggedInWithTagLabel: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
     template: `
@@ -674,11 +755,11 @@ export const LoggedIn2: StoryObj<HeaderComponent> = {
             ${accessibilityLink}
             <tedi-separator axis="vertical" />
             <tedi-header-role
-              [showInput]="true"
+              [showSearch]="true"
               [representatives]="${representatives}"
               [currentRepresentative]="${currentRepresentative}"
             >
-              <tedi-tag tedi-header-role-title>Esindatav:</tedi-tag>
+              <tedi-tag tedi-header-role-title>{{ 'representative' | storyTranslate }}:</tedi-tag>
             </tedi-header-role>
             <tedi-separator axis="vertical" />
           </ng-container>
@@ -686,15 +767,15 @@ export const LoggedIn2: StoryObj<HeaderComponent> = {
           <tedi-separator axis="vertical" />
           <tedi-header-profile>
             <tedi-header-role
-              [showInput]="true"
+              [showSearch]="true"
               [representatives]="${representatives}"
               [currentRepresentative]="${currentRepresentative}"
               *hideAt="'lg'"
             >
-              <tedi-tag tedi-header-role-title>Esindatav:</tedi-tag>
+              <tedi-tag tedi-header-role-title>{{ 'representative' | storyTranslate }}:</tedi-tag>
             </tedi-header-role>
             <ng-container *hideAt="'lg'">${accessibilityLink}</ng-container>
-            ${profileMenuContent}
+            ${profileMenuContent()}
           </tedi-header-profile>
         </tedi-header-actions>
       </header>
@@ -702,7 +783,7 @@ export const LoggedIn2: StoryObj<HeaderComponent> = {
   }),
 };
 
-export const WithOrganizationSelection1: StoryObj<HeaderComponent> = {
+export const WithOrganizationSelection: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
     template: `
@@ -713,16 +794,17 @@ export const WithOrganizationSelection1: StoryObj<HeaderComponent> = {
             ${accessibilityLink}
             <tedi-separator axis="vertical" />
             <tedi-header-role
-              label="Asutus"
-              [showInput]="true"
+              [label]="'organization' | storyTranslate"
+              [showSearch]="true"
               [representatives]="${organizations}"
               [currentRepresentative]="${currentOrganization}"
+              [isOrganization]="true"
             />
             <tedi-separator axis="vertical" />
             <tedi-header-role
-              label="Roll:"
+              [label]="('role' | storyTranslate) + ':'"
               description="49504080934"
-              [showInput]="true"
+              [showSearch]="true"
               [representatives]="${representatives}"
               [currentRepresentative]="${currentRepresentative}"
             />
@@ -733,21 +815,22 @@ export const WithOrganizationSelection1: StoryObj<HeaderComponent> = {
           <tedi-header-profile>
             <ng-container *hideAt="'lg'">
               <tedi-header-role
-                label="Asutus:"
-                [showInput]="true"
+                [label]="('organization' | storyTranslate) + ':'"
+                [showSearch]="true"
                 [representatives]="${organizations}"
                 [currentRepresentative]="${currentOrganization}"
+                [isOrganization]="true"
               />
               <tedi-header-role
-                label="Roll:"
+                [label]="('role' | storyTranslate) + ':'"
                 description="49504080934"
-                [showInput]="true"
+                [showSearch]="true"
                 [representatives]="${representatives}"
                 [currentRepresentative]="${currentRepresentative}"
               />
               ${accessibilityLink}
             </ng-container>
-            ${profileMenuContent}
+            ${profileMenuContent()}
           </tedi-header-profile>
         </tedi-header-actions>
       </header>
@@ -755,7 +838,7 @@ export const WithOrganizationSelection1: StoryObj<HeaderComponent> = {
   }),
 };
 
-export const WithOrganizationSelection2: StoryObj<HeaderComponent> = {
+export const WithSingleOrganization: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
     template: `
@@ -766,10 +849,11 @@ export const WithOrganizationSelection2: StoryObj<HeaderComponent> = {
             ${accessibilityLink}
             <tedi-separator axis="vertical" />
             <tedi-header-role
-              label="Asutus"
-              [showInput]="true"
+              [label]="'organization' | storyTranslate"
+              [showSearch]="true"
               [representatives]="${organizations2}"
               [currentRepresentative]="${currentOrganization2}"
+              [isOrganization]="true"
             />
             <tedi-separator axis="vertical" />
           </ng-container>
@@ -778,14 +862,15 @@ export const WithOrganizationSelection2: StoryObj<HeaderComponent> = {
           <tedi-header-profile>
             <ng-container *hideAt="'lg'">
               <tedi-header-role
-                label="Asutus:"
-                [showInput]="true"
+                [label]="('organization' | storyTranslate) + ':'"
+                [showSearch]="true"
                 [representatives]="${organizations2}"
                 [currentRepresentative]="${currentOrganization2}"
+                [isOrganization]="true"
               />
               ${accessibilityLink}
             </ng-container>
-            ${profileMenuContent}
+            ${profileMenuContent()}
           </tedi-header-profile>
         </tedi-header-actions>
       </header>
@@ -793,7 +878,7 @@ export const WithOrganizationSelection2: StoryObj<HeaderComponent> = {
   }),
 };
 
-export const AlternativeProfileAndLogoutButton1: StoryObj<HeaderComponent> = {
+export const WithProfileLabel: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
     template: `
@@ -804,16 +889,17 @@ export const AlternativeProfileAndLogoutButton1: StoryObj<HeaderComponent> = {
             ${accessibilityLink}
             <tedi-separator axis="vertical" />
             <tedi-header-role
-              label="Asutus"
-              [showInput]="true"
+              [label]="'organization' | storyTranslate"
+              [showSearch]="true"
               [representatives]="${organizations}"
               [currentRepresentative]="${currentOrganization}"
+              [isOrganization]="true"
             />
             <tedi-separator axis="vertical" />
             <tedi-header-role
-              label="Isikukood:"
+              [label]="('personalCode' | storyTranslate) + ':'"
               description="49504080934"
-              [showInput]="true"
+              [showSearch]="true"
               [representatives]="${representatives}"
               [currentRepresentative]="${currentRepresentative}"
             />
@@ -824,21 +910,22 @@ export const AlternativeProfileAndLogoutButton1: StoryObj<HeaderComponent> = {
           <tedi-header-profile [showLabel]="true">
             <ng-container *hideAt="'lg'">
               <tedi-header-role
-                label="Asutus:"
-                [showInput]="true"
+                [label]="('organization' | storyTranslate) + ':'"
+                [showSearch]="true"
                 [representatives]="${organizations}"
                 [currentRepresentative]="${currentOrganization}"
+                [isOrganization]="true"
               />
               <tedi-header-role
-                label="Isikukood:"
+                [label]="('personalCode' | storyTranslate) + ':'"
                 description="49504080934"
-                [showInput]="true"
+                [showSearch]="true"
                 [representatives]="${representatives}"
                 [currentRepresentative]="${currentRepresentative}"
               />
               ${accessibilityLink}
             </ng-container>
-            ${profileMenuContent}
+            ${profileMenuContent()}
           </tedi-header-profile>
         </tedi-header-actions>
       </header>
@@ -846,7 +933,7 @@ export const AlternativeProfileAndLogoutButton1: StoryObj<HeaderComponent> = {
   }),
 };
 
-export const AlternativeProfileAndLogoutButton2: StoryObj<HeaderComponent> = {
+export const WithProfileLabelAndNoOrganization: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
     template: `
@@ -857,9 +944,9 @@ export const AlternativeProfileAndLogoutButton2: StoryObj<HeaderComponent> = {
             ${accessibilityLink}
             <tedi-separator axis="vertical" />
             <tedi-header-role
-              label="Isikukood:"
+              [label]="('personalCode' | storyTranslate) + ':'"
               description="49504080934"
-              [showInput]="true"
+              [showSearch]="true"
               [representatives]="${representatives}"
               [currentRepresentative]="${currentRepresentative}"
             />
@@ -870,15 +957,15 @@ export const AlternativeProfileAndLogoutButton2: StoryObj<HeaderComponent> = {
           <tedi-header-profile [showLabel]="true">
             <ng-container *hideAt="'lg'">
               <tedi-header-role
-                label="Isikukood:"
+                [label]="('personalCode' | storyTranslate) + ':'"
                 description="49504080934"
-                [showInput]="true"
+                [showSearch]="true"
                 [representatives]="${representatives}"
                 [currentRepresentative]="${currentRepresentative}"
               />
               ${accessibilityLink}
             </ng-container>
-            ${profileMenuContent}
+            ${profileMenuContent()}
           </tedi-header-profile>
         </tedi-header-actions>
       </header>
@@ -886,7 +973,7 @@ export const AlternativeProfileAndLogoutButton2: StoryObj<HeaderComponent> = {
   }),
 };
 
-export const AlternativeProfileAndLogoutButton3: StoryObj<HeaderComponent> = {
+export const WithNameAsProfileLabel: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
     template: `
@@ -899,12 +986,12 @@ export const AlternativeProfileAndLogoutButton3: StoryObj<HeaderComponent> = {
               <tedi-header-role
                 *hideAt="'lg'"
                 description="49504080934"
-                [showInput]="true"
+                [showSearch]="true"
                 [representatives]="${representatives2}"
                 [currentRepresentative]="${currentRepresentative}"
               />
               ${accessibilityLink}
-            ${profileMenuContent}
+            ${profileMenuContent()}
           </tedi-header-profile>
         </tedi-header-actions>
       </header>
@@ -912,7 +999,7 @@ export const AlternativeProfileAndLogoutButton3: StoryObj<HeaderComponent> = {
   }),
 };
 
-export const AlternativeProfileAndLogoutButton4: StoryObj<HeaderComponent> = {
+export const WithStandaloneLogoutButton: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
     template: `
@@ -923,10 +1010,11 @@ export const AlternativeProfileAndLogoutButton4: StoryObj<HeaderComponent> = {
             ${accessibilityLink}
             <tedi-separator axis="vertical" />
             <tedi-header-role
-              label="Asutus"
-              [showInput]="true"
+              [label]="'organization' | storyTranslate"
+              [showSearch]="true"
               [representatives]="${organizations}"
               [currentRepresentative]="${currentOrganization}"
+              [isOrganization]="true"
             />
             <tedi-separator axis="vertical" />
           </ng-container>
@@ -935,10 +1023,11 @@ export const AlternativeProfileAndLogoutButton4: StoryObj<HeaderComponent> = {
             <tedi-separator axis="vertical" />
             <tedi-header-profile>
               <tedi-header-role
-                label="Asutus:"
-                [showInput]="true"
+                [label]="('organization' | storyTranslate) + ':'"
+                [showSearch]="true"
                 [representatives]="${organizations}"
                 [currentRepresentative]="${currentOrganization}"
+                [isOrganization]="true"
               />
               ${accessibilityLink}
             </tedi-header-profile>
@@ -951,7 +1040,7 @@ export const AlternativeProfileAndLogoutButton4: StoryObj<HeaderComponent> = {
   }),
 };
 
-export const WithSearch1: StoryObj<HeaderComponent> = {
+export const WithInlineSearch: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
     template: `
@@ -964,9 +1053,9 @@ export const WithSearch1: StoryObj<HeaderComponent> = {
           <tedi-separator axis="vertical" />
           <ng-container *showAt="'lg'">
             <tedi-header-role
-              label="Roll:"
+              [label]="('role' | storyTranslate) + ':'"
               description="49504080934"
-              [showInput]="true"
+              [showSearch]="true"
               [representatives]="${representatives}"
               [currentRepresentative]="${currentRepresentative}"
             />
@@ -976,15 +1065,15 @@ export const WithSearch1: StoryObj<HeaderComponent> = {
           <tedi-separator axis="vertical" />
           <tedi-header-profile>
             <tedi-header-role
-              label="Roll:"
+              [label]="('role' | storyTranslate) + ':'"
               description="49504080934"
-              [showInput]="true"
+              [showSearch]="true"
               [representatives]="${representatives}"
               [currentRepresentative]="${currentRepresentative}"
               *hideAt="'lg'"
             />
             <ng-container *hideAt="'lg'">${accessibilityLink}</ng-container>
-            ${profileMenuContent}
+            ${profileMenuContent()}
           </tedi-header-profile>
         </tedi-header-actions>
       </header>
@@ -992,7 +1081,7 @@ export const WithSearch1: StoryObj<HeaderComponent> = {
   }),
 };
 
-export const WithSearch2: StoryObj<HeaderComponent> = {
+export const WithMobileBottomSearch: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
     template: `
@@ -1008,7 +1097,7 @@ export const WithSearch2: StoryObj<HeaderComponent> = {
             <tedi-separator axis="vertical" />
             <tedi-header-role
               description="49504080934"
-              [showInput]="true"
+              [showSearch]="true"
               [representatives]="${representatives2}"
               [currentRepresentative]="${currentRepresentative}"
             />
@@ -1019,13 +1108,13 @@ export const WithSearch2: StoryObj<HeaderComponent> = {
           <tedi-header-profile [showLabel]="true" [md]="{ label: 'Mari Maasikas' }">
             <tedi-header-role
               description="49504080934"
-              [showInput]="true"
+              [showSearch]="true"
               [representatives]="${representatives2}"
               [currentRepresentative]="${currentRepresentative}"
               *hideAt="'lg'"
             />
             <ng-container *hideAt="'lg'">${accessibilityLink}</ng-container>
-            ${profileMenuContent}
+            ${profileMenuContent(false)}
           </tedi-header-profile>
           <tedi-separator axis="vertical" />
           <tedi-header-logout href="#" />
@@ -1035,6 +1124,59 @@ export const WithSearch2: StoryObj<HeaderComponent> = {
             <tedi-search inputId="search-5" />
           </tedi-header-search>
         </tedi-header-bottom>
+      </header>
+    `,
+  }),
+};
+
+export const WithCustomRoleContent: StoryObj<HeaderComponent> = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <header tedi-header>
+        ${logo}
+        <tedi-header-actions>
+          <ng-container *showAt="'lg'">
+            ${accessibilityLink}
+            <tedi-separator axis="vertical" />
+            <tedi-header-role
+              [label]="('role' | storyTranslate) + ':'"
+              description="49504080934"
+              [representatives]="${representatives}"
+              [currentRepresentative]="${currentRepresentative}"
+              [showRoleSwitch]="true"
+            >
+              <ng-template tedi-header-role-content>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                  <tedi-icon name="heart_check" [size]="36" color="brand" />
+                  <span tedi-text [color]="'secondary'" modifiers="center">Sul puuduvad esindatavad</span>
+                </div>
+              </ng-template>
+            </tedi-header-role>
+            <tedi-separator axis="vertical" />
+          </ng-container>
+          <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
+          <tedi-separator axis="vertical" />
+          <tedi-header-profile>
+            <tedi-header-role
+              [label]="('role' | storyTranslate) + ':'"
+              description="49504080934"
+              [representatives]="${representatives}"
+              [currentRepresentative]="${currentRepresentative}"
+              [showRoleSwitch]="true"
+              *hideAt="'lg'"
+            >
+              <ng-template tedi-header-role-content>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1rem;">
+                  <tedi-icon name="heart_check" [size]="36" color="brand" />
+                  <span tedi-text [color]="'secondary'" modifiers="center">Sul puuduvad esindatavad</span>
+                </div>
+              </ng-template>
+            </tedi-header-role>
+            <ng-container *hideAt="'lg'">${accessibilityLink}</ng-container>
+            ${profileMenuContent()}
+          </tedi-header-profile>
+        </tedi-header-actions>
       </header>
     `,
   }),
@@ -1054,9 +1196,9 @@ export const LoggedInWithSidenav: StoryObj<HeaderComponent> = {
               ${accessibilityLink}
               <tedi-separator axis="vertical" />
               <tedi-header-role
-                label="Roll:"
+                [label]="('role' | storyTranslate) + ':'"
                 description="49504080934"
-                [showInput]="true"
+                [showSearch]="true"
                 [representatives]="${representatives}"
                 [currentRepresentative]="${currentRepresentative}"
               />
@@ -1066,15 +1208,15 @@ export const LoggedInWithSidenav: StoryObj<HeaderComponent> = {
             <tedi-separator axis="vertical" />
             <tedi-header-profile>
               <tedi-header-role
-                label="Roll:"
+                [label]="('role' | storyTranslate) + ':'"
                 description="49504080934"
-                [showInput]="true"
+                [showSearch]="true"
                 [representatives]="${representatives}"
                 [currentRepresentative]="${currentRepresentative}"
                 *hideAt="'lg'"
               />
               <ng-container *hideAt="'lg'">${accessibilityLink}</ng-container>
-              ${profileMenuContent}
+              ${profileMenuContent()}
             </tedi-header-profile>
           </tedi-header-actions>
         </header>

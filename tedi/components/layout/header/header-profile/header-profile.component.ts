@@ -172,6 +172,14 @@ export class HeaderProfileComponent
 
   modalOpen = signal(false);
 
+  /**
+   * Tracks which `HeaderRoleComponent` instance currently has its
+   * accordion open. When a role opens, it writes its own reference here;
+   * other roles watch this signal and close themselves when it changes.
+   * @internal
+   */
+  readonly activeRole = signal<unknown>(null);
+
   readonly buttonVariant = computed<ButtonVariant>(() => {
     if (this.isSmall() || !this.showLabel()) {
       return "neutral";

@@ -24,15 +24,15 @@ float-ui-content {
     z-index: var(--z-index-dropdown);
     padding: 0;
     background: var(--popover-background);
-    border: var(--tedi-borders-01) solid var(--popover-border);
+    border: var(--popover-border-width-md) solid var(--popover-border-default);
     border-radius: var(--popover-radius-rounded);
     box-shadow: 0 1px 5px 0 var(--tedi-alpha-20, rgb(0 0 0 / 20%));
 
     &--arrow {
       .float-ui-arrow {
         z-index: var(--z-index-dropdown);
-        width: 24px;
-        height: 24px;
+        width: 1.5rem;
+        height: 1.5rem;
         background: var(--popover-background);
         filter: drop-shadow(0 0 5px var(--tedi-alpha-20));
         clip-path: inset(0 -5px -5px 0);
@@ -42,20 +42,36 @@ float-ui-content {
     &--border {
       border-radius: var(--popover-radius-rounded);
 
+      &::before {
+        position: absolute;
+        content: "";
+        background: var(--popover-border-prominent);
+      }
+
       .float-ui-arrow {
         box-sizing: border-box;
         width: 1.5rem;
         height: 1.5rem;
         background: var(--popover-background);
-        border-right: 4px solid var(--header-popover-border-top);
-        border-bottom: 4px solid var(--header-popover-border-top);
+        border-right: var(--popover-border-width-lg) solid
+          var(--popover-border-prominent);
+        border-bottom: var(--popover-border-width-lg) solid
+          var(--popover-border-prominent);
         filter: drop-shadow(0 0 5px var(--tedi-alpha-20));
         clip-path: polygon(100% 0, 100% 100%, 0 100%);
         fill: var(--popover-background);
       }
 
       &[data-float-ui-placement="top"] {
-        border-bottom: 4px solid var(--header-popover-border-top);
+        border-bottom-right-radius: var(--popover-radius-sharp);
+        border-bottom-left-radius: var(--popover-radius-sharp);
+
+        &::before {
+          bottom: calc(-1 * var(--popover-border-width-lg));
+          left: calc(-1 * var(--popover-border-width-md));
+          width: calc(100% + 2 * var(--popover-border-width-md));
+          height: var(--popover-border-width-lg);
+        }
 
         .float-ui-arrow {
           bottom: -0.75rem;
@@ -64,7 +80,15 @@ float-ui-content {
       }
 
       &[data-float-ui-placement="bottom"] {
-        border-top: 4px solid var(--header-popover-border-top);
+        border-top-left-radius: var(--popover-radius-sharp);
+        border-top-right-radius: var(--popover-radius-sharp);
+
+        &::before {
+          top: calc(-1 * var(--popover-border-width-lg));
+          left: calc(-1 * var(--popover-border-width-md));
+          width: calc(100% + 2 * var(--popover-border-width-md));
+          height: var(--popover-border-width-lg);
+        }
 
         .float-ui-arrow {
           top: -0.75rem;
@@ -72,7 +96,15 @@ float-ui-content {
       }
 
       &[data-float-ui-placement="left"] {
-        border-right: 4px solid var(--header-popover-border-top);
+        border-top-right-radius: var(--popover-radius-sharp);
+        border-bottom-right-radius: var(--popover-radius-sharp);
+
+        &::before {
+          top: calc(-1 * var(--popover-border-width-md));
+          right: calc(-1 * var(--popover-border-width-lg));
+          width: var(--popover-border-width-lg);
+          height: calc(100% + 2 * var(--popover-border-width-md));
+        }
 
         .float-ui-arrow {
           right: -0.75rem;
@@ -80,7 +112,15 @@ float-ui-content {
       }
 
       &[data-float-ui-placement="right"] {
-        border-left: 4px solid var(--header-popover-border-top);
+        border-top-left-radius: var(--popover-radius-sharp);
+        border-bottom-left-radius: var(--popover-radius-sharp);
+
+        &::before {
+          top: calc(-1 * var(--popover-border-width-md));
+          left: calc(-1 * var(--popover-border-width-lg));
+          width: var(--popover-border-width-lg);
+          height: calc(100% + 2 * var(--popover-border-width-md));
+        }
 
         .float-ui-arrow {
           left: -0.75rem;
@@ -89,11 +129,11 @@ float-ui-content {
     }
 
     &[data-float-ui-placement="top"] {
-      transform: translateY(-4px);
+      transform: translateY(-2px);
     }
 
     &[data-float-ui-placement="bottom"] {
-      transform: translateY(4px);
+      transform: translateY(2px);
 
       .float-ui-arrow {
         transform: rotate(-135deg);
@@ -101,7 +141,7 @@ float-ui-content {
     }
 
     &[data-float-ui-placement="left"] {
-      transform: translateX(-4px);
+      transform: translateX(-2px);
 
       .float-ui-arrow {
         transform: rotate(-45deg);
@@ -109,7 +149,7 @@ float-ui-content {
     }
 
     &[data-float-ui-placement="right"] {
-      transform: translateX(4px);
+      transform: translateX(2px);
 
       .float-ui-arrow {
         transform: rotate(135deg);

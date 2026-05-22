@@ -2,14 +2,14 @@
   <div
     class="tedi-header-role__head"
     [class.tedi-header-role__head--open]="
-      mobileOpen() && hasMultipleRepresentatives()
+      mobileOpen() && hasRoleSelection()
     "
   >
     <div
       tedi-text
       color="secondary"
       class="tedi-header-role__info"
-      [class.tedi-header-role__info--inline]="!hasMultipleRepresentatives()"
+      [class.tedi-header-role__info--inline]="!hasRoleSelection()"
     >
       <div class="tedi-header-role__info-title">
         <ng-container *ngTemplateOutlet="roleTitle"></ng-container>
@@ -18,13 +18,13 @@
         </p>
       </div>
       @if (description()) {
-        @if (!hasMultipleRepresentatives()) {
+        @if (!hasRoleSelection()) {
           <tedi-separator axis="vertical" size="1rem" />
         }
         <span class="tedi-header-role__description">{{ description() }}</span>
       }
     </div>
-    @if (hasMultipleRepresentatives()) {
+    @if (hasRoleSelection()) {
       <button
         type="button"
         tedi-button
@@ -36,10 +36,14 @@
       </button>
     }
   </div>
-  @if (hasMultipleRepresentatives()) {
+  @if (hasRoleSelection()) {
     <div class="tedi-header-role__collapse" [attr.data-open]="mobileOpen()">
-      <div class="tedi-header-role__collapse__items">
-        <ng-container *ngTemplateOutlet="content"></ng-container>
+      <div class="tedi-header-role__collapse--items">
+        @if (hasCustomContent()) {
+          <ng-container *ngTemplateOutlet="customContentTemplate()"></ng-container>
+        } @else {
+          <ng-container *ngTemplateOutlet="content"></ng-container>
+        }
       </div>
     </div>
   }
@@ -53,7 +57,7 @@
       modifiers="small"
       class="tedi-header-role__head"
       [class.tedi-header-role__head--open]="
-        hasMultipleRepresentatives() && mobileOpen()
+        hasRoleSelection() && mobileOpen()
       "
     >
       <ng-container *ngTemplateOutlet="roleTitle"></ng-container>
@@ -64,7 +68,7 @@
     </div>
   }
 
-  <ng-container *ngIf="hasMultipleRepresentatives(); else normalText">
+  <ng-container *ngIf="hasRoleSelection(); else normalText">
     <tedi-popover
       [withBorder]="true"
       position="bottom"
@@ -79,14 +83,18 @@
         <tedi-icon name="expand_more" class="tedi-header-role__chevron" />
       </button>
       <tedi-popover-content maxWidth="small" class="tedi-header-role__dropdown">
-        <ng-container *ngTemplateOutlet="content"></ng-container>
+        @if (hasCustomContent()) {
+          <ng-container *ngTemplateOutlet="customContentTemplate()"></ng-container>
+        } @else {
+          <ng-container *ngTemplateOutlet="content"></ng-container>
+        }
       </tedi-popover-content>
     </tedi-popover>
   </ng-container>
 </ng-container>
 
 <ng-template #content>
-  @if (showInput()) {
+  @if (showSearch()) {
     <div>
       <label [attr.for]="inputId">{{ searchText() }}</label>
       <input
@@ -99,7 +107,11 @@
     </div>
   }
   @if (filteredRepresentatives().length === 0) {
-    <span class="tedi-header-role__no-results">{{ noResultsText() }}</span>
+    @if (hasNoResultsContent()) {
+      <ng-container *ngTemplateOutlet="noResultsTemplate()"></ng-container>
+    } @else {
+      <span class="tedi-header-role__no-results">{{ noResultsText() }}</span>
+    }
   }
   <button
     *ngFor="let r of filteredRepresentatives(); trackBy: trackById"

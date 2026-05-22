@@ -50,16 +50,9 @@ tedi-header-profile {
     background: var(--general-surface-primary);
     border-top: 1px solid var(--general-border-primary);
 
-    &:not(&--no-style) > * {
-      &:not(.tedi-header-role) {
-        padding: var(--layout-header-modal-item-padding);
-      }
-
+    &:not(&--no-style) > *:not(.tedi-header-role) {
+      padding: var(--layout-header-modal-item-padding);
       border-bottom: var(--tedi-borders-01) solid var(--general-border-primary);
-
-      &:has(.tedi-header-role__head) {
-        border-bottom: var(--tedi-borders-04) solid var(--general-border-brand);
-      }
     }
 
     tedi-header-logout .tedi-header-mobile-button {

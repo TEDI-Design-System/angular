@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   contentChild,
+  Directive,
   effect,
   ElementRef,
   inject,
@@ -11,6 +12,7 @@ import {
   model,
   output,
   signal,
+  TemplateRef,
   ViewEncapsulation,
   viewChild,
 } from "@angular/core";
@@ -53,6 +55,52 @@ export type Representative = {
   icon?: string | RepresentativeIcon;
   description?: string;
 };
+
+/**
+ * Structural marker for custom content projected into the role selection
+ * popover (desktop) or accordion (tablet/mobile).
+ *
+ * When present, replaces the default representative list entirely.
+ *
+ * Usage:
+ * ```html
+ * <tedi-header-role ...>
+ *   <ng-template tedi-header-role-content>
+ *     <div>Custom content here</div>
+ *   </ng-template>
+ * </tedi-header-role>
+ * ```
+ */
+@Directive({
+  selector: "[tedi-header-role-content]",
+  standalone: true,
+})
+export class HeaderRoleContentDirective {
+  readonly templateRef = inject(TemplateRef);
+}
+
+/**
+ * Structural marker for custom "no results" content shown when the search
+ * filter produces an empty representative list.
+ *
+ * When absent, the component falls back to a default translated string.
+ *
+ * Usage:
+ * ```html
+ * <tedi-header-role ...>
+ *   <ng-template tedi-header-role-no-results>
+ *     <tedi-empty-state description="No matches found" />
+ *   </ng-template>
+ * </tedi-header-role>
+ * ```
+ */
+@Directive({
+  selector: "[tedi-header-role-no-results]",
+  standalone: true,
+})
+export class HeaderRoleNoResultsDirective {
+  readonly templateRef = inject(TemplateRef);
+}
 
 let nextHeaderRoleInputId = 0;
 
@@ -100,10 +148,60 @@ export class HeaderRoleComponent {
    */
   protected readonly titleContent = contentChild(HeaderRoleTitleDirective);
   protected readonly hasTitle = computed(() => !!this.titleContent());
-  /** Should show input in representative list?
+
+  /**
+   * Projected custom content that replaces the default representative list.
+   */
+  protected readonly customContent = contentChild(HeaderRoleContentDirective);
+  protected readonly hasCustomContent = computed(() => !!this.customContent());
+  protected readonly customContentTemplate = computed(
+    () => this.customContent()?.templateRef ?? null,
+  );
+
+  protected readonly noResultsContent = contentChild(
+    HeaderRoleNoResultsDirective,
+  );
+  protected readonly hasNoResultsContent = computed(
+    () => !!this.noResultsContent(),
+  );
+  protected readonly noResultsTemplate = computed(
+    () => this.noResultsContent()?.templateRef ?? null,
+  );
+  /**
+   * Whether to display the search input above the representative list.
    * @default false
    */
-  showInput = input(false);
+  showSearch = input(false);
+  /**
+   * Whether the search input shows a clear button.
+   * @default false
+   */
+  searchClearable = input(false);
+  /**
+   * Whether to clear the search input when a representative is selected.
+   * @default true
+   */
+  clearSearchOnSelect = input(true);
+  /**
+   * Whether to show the role selection toggle and dropdown.
+   * When not set, defaults to showing the selection when there are multiple representatives.
+   */
+  /**
+   * Whether the role represents an organization.
+   * Affects the search input label.
+   */
+  isOrganization = input(false);
+  /**
+   * Label for the search input when selecting a representative.
+   * Falls back to i18n labels when not provided.
+   */
+  searchLabel = input<string | undefined>(undefined);
+  /**
+   * Label for the search input when selecting an organization representative.
+   * Overrides both the default and `searchLabel` when `isOrganization` is true.
+   */
+  organizationSearchLabel = input<string | undefined>(undefined);
+  showRoleSwitch = input<boolean | undefined>(undefined);
   /** List of representatives */
   representatives = input.required<Representative[]>();
   /** Current representative */
@@ -125,8 +223,8 @@ export class HeaderRoleComponent {
     this.breakpointService.isBelowBreakpoint("lg")(),
   );
 
-  protected readonly hasMultipleRepresentatives = computed(
-    () => this.representatives().length > 1,
+  protected readonly hasRoleSelection = computed(
+    () => this.showRoleSwitch() ?? this.representatives().length > 1,
   );
 
   private readonly popover = viewChild(PopoverComponent);
@@ -150,7 +248,7 @@ export class HeaderRoleComponent {
     // focus back. Microtask-/render-tier alternatives fire BEFORE the
     // popover's setTimeout and cause focus loss.
     effect(() => {
-      if (this.popover()?.isOpen() && this.showInput()) {
+      if (this.popover()?.isOpen() && this.showSearch()) {
         setTimeout(() => this.searchInput()?.nativeElement.focus());
       }
     });
@@ -175,13 +273,28 @@ export class HeaderRoleComponent {
           this.inputValue.set("");
         }
       });
+
+      effect(() => {
+        const active = this.parentProfile!.activeRole();
+        const isOpen = this.mobileOpen();
+        this.closeIfOtherRoleActive(active, isOpen);
+      });
     }
   }
 
   translationService = inject(TediTranslationService);
   switchRoleText = this.translationService.track("header.role-switch");
   closeText = this.translationService.track("close");
-  searchText = this.translationService.track("header.role-search");
+  private defaultSearchText =
+    this.translationService.track("header.role-search");
+  private defaultOrgSearchText = this.translationService.track(
+    "header.role-search.organization",
+  );
+  searchText = computed(() =>
+    this.isOrganization()
+      ? (this.organizationSearchLabel() ?? this.defaultOrgSearchText())
+      : (this.searchLabel() ?? this.defaultSearchText()),
+  );
   noResultsText = this.translationService.track(
     "header.role-no-representatives",
   );
@@ -207,13 +320,29 @@ export class HeaderRoleComponent {
     });
   });
 
+  closeIfOtherRoleActive(active: unknown, isOpen: boolean): void {
+    if (active !== null && active !== this && isOpen) {
+      this.mobileOpen.set(false);
+      this.inputValue.set("");
+    }
+  }
+
   handleMobileOpen() {
     this.mobileOpen.update((prev) => !prev);
     this.roleSelectionToggle.emit(this.mobileOpen());
+
+    if (this.mobileOpen() && this.parentProfile) {
+      this.parentProfile.activeRole.set(this);
+    }
   }
 
   handleSelectRepresentative(r: Representative) {
     this.currentRepresentative.set(r);
+
+    if (this.clearSearchOnSelect()) {
+      this.inputValue.set("");
+    }
+
     this.popover()?.hidePopover();
   }
 

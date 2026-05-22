@@ -1,6 +1,12 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import { Component, NO_ERRORS_SCHEMA, signal } from "@angular/core";
-import { HeaderRoleComponent, Representative } from "./header-role.component";
+import {
+  HeaderRoleComponent,
+  HeaderRoleContentDirective,
+  HeaderRoleNoResultsDirective,
+  Representative,
+} from "./header-role.component";
 import { HeaderRoleTitleDirective } from "./header-role-title.directive";
 import { HeaderProfileComponent } from "../header-profile/header-profile.component";
 import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
@@ -49,7 +55,7 @@ describe("HeaderRoleComponent", () => {
     // Set required inputs
     fixture.componentRef.setInput("label", "Admin");
     fixture.componentRef.setInput("description", "Administrator Role");
-    fixture.componentRef.setInput("showInput", true);
+    fixture.componentRef.setInput("showSearch", true);
     const reps: Representative[] = [
       { id: "1", name: "Alice", description: "Team Lead" },
       { id: "2", name: "Bob", description: "Developer" },
@@ -321,7 +327,7 @@ describe("HeaderRoleComponent desktop popover effects", () => {
       template: `
         <tedi-header-role
           label="Roll:"
-          [showInput]="true"
+          [showSearch]="true"
           [representatives]="reps"
           [currentRepresentative]="reps[0]"
         ></tedi-header-role>
@@ -374,7 +380,7 @@ describe("HeaderRoleComponent desktop popover effects", () => {
     expect(emitted).toEqual([true, false]);
   });
 
-  it("focuses the search input when the popover opens with showInput=true", () => {
+  it("focuses the search input when the popover opens with showSearch=true", () => {
     jest.useFakeTimers();
     try {
       const { fixture, headerRole } = setup();
@@ -425,7 +431,7 @@ describe("HeaderRoleComponent reset on parent profile close", () => {
         <tedi-header-profile>
           <tedi-header-role
             label="Roll:"
-            [showInput]="true"
+            [showSearch]="true"
             [representatives]="reps"
             [currentRepresentative]="reps[0]"
           />
@@ -507,5 +513,243 @@ describe("HeaderRoleComponent reset on parent profile close", () => {
 
     expect(fixture.componentInstance.mobileOpen()).toBe(true);
     expect(fixture.componentInstance.inputValue()).toBe("alice");
+  });
+});
+
+describe("HeaderRoleComponent custom content directives", () => {
+  const mockTranslationService = {
+    translate: (key: string) => key,
+    track: (key: string) => () => key,
+  } as Partial<TediTranslationService>;
+  const reps: Representative[] = [
+    { id: "1", name: "Alice", description: "Lead" },
+    { id: "2", name: "Bob", description: "Dev" },
+  ];
+
+  it("should expose templateRef via HeaderRoleContentDirective", () => {
+    @Component({
+      standalone: true,
+      imports: [HeaderRoleComponent, HeaderRoleContentDirective],
+      template: `
+        <tedi-header-role
+          label="Roll:"
+          [representatives]="reps"
+          [currentRepresentative]="reps[0]"
+        >
+          <ng-template tedi-header-role-content>
+            <div data-testid="custom-content">Custom role content</div>
+          </ng-template>
+        </tedi-header-role>
+      `,
+    })
+    class HostComponent {
+      reps = reps;
+    }
+
+    TestBed.configureTestingModule({
+      imports: [HostComponent],
+      providers: [
+        { provide: TediTranslationService, useValue: mockTranslationService },
+        { provide: BreakpointService, useValue: createMobileBreakpointMock() },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    });
+
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+
+    const roleEl = fixture.debugElement.query(
+      (de) => de.componentInstance instanceof HeaderRoleComponent,
+    );
+    const roleComp = roleEl.componentInstance as HeaderRoleComponent;
+
+    expect(
+      (roleComp as unknown as { hasCustomContent: () => boolean })
+        .hasCustomContent(),
+    ).toBe(true);
+    expect(
+      (roleComp as unknown as { customContentTemplate: () => unknown })
+        .customContentTemplate(),
+    ).toBeTruthy();
+  });
+
+  it("should expose templateRef via HeaderRoleNoResultsDirective", () => {
+    @Component({
+      standalone: true,
+      imports: [HeaderRoleComponent, HeaderRoleNoResultsDirective],
+      template: `
+        <tedi-header-role
+          label="Roll:"
+          [representatives]="reps"
+          [currentRepresentative]="reps[0]"
+        >
+          <ng-template tedi-header-role-no-results>
+            <div data-testid="no-results">No matches found</div>
+          </ng-template>
+        </tedi-header-role>
+      `,
+    })
+    class HostComponent {
+      reps = reps;
+    }
+
+    TestBed.configureTestingModule({
+      imports: [HostComponent],
+      providers: [
+        { provide: TediTranslationService, useValue: mockTranslationService },
+        { provide: BreakpointService, useValue: createMobileBreakpointMock() },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    });
+
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+
+    const roleEl = fixture.debugElement.query(
+      (de) => de.componentInstance instanceof HeaderRoleComponent,
+    );
+    const roleComp = roleEl.componentInstance as HeaderRoleComponent;
+
+    expect(
+      (roleComp as unknown as { hasNoResultsContent: () => boolean })
+        .hasNoResultsContent(),
+    ).toBe(true);
+    expect(
+      (roleComp as unknown as { noResultsTemplate: () => unknown })
+        .noResultsTemplate(),
+    ).toBeTruthy();
+  });
+});
+
+describe("HeaderRoleComponent mutual exclusion and activeRole", () => {
+  const mockTranslationService = {
+    translate: (key: string) => key,
+    track: (key: string) => () => key,
+  } as Partial<TediTranslationService>;
+  const repsA: Representative[] = [
+    { id: "1", name: "Alice", description: "Lead" },
+    { id: "2", name: "Bob", description: "Dev" },
+  ];
+  const repsB: Representative[] = [
+    { id: "3", name: "Charlie", description: "QA" },
+    { id: "4", name: "Dana", description: "PM" },
+  ];
+
+  function setup(): {
+    fixture: ComponentFixture<unknown>;
+    profile: HeaderProfileComponent;
+    roleA: HeaderRoleComponent;
+    roleB: HeaderRoleComponent;
+  } {
+    @Component({
+      standalone: true,
+      imports: [HeaderProfileComponent, HeaderRoleComponent],
+      template: `
+        <tedi-header-profile>
+          <tedi-header-role
+            label="Role A"
+            [showSearch]="true"
+            [representatives]="repsA"
+            [currentRepresentative]="repsA[0]"
+          />
+          <tedi-header-role
+            label="Role B"
+            [showSearch]="true"
+            [representatives]="repsB"
+            [currentRepresentative]="repsB[0]"
+          />
+        </tedi-header-profile>
+      `,
+    })
+    class HostComponent {
+      repsA = repsA;
+      repsB = repsB;
+    }
+
+    TestBed.configureTestingModule({
+      imports: [HostComponent],
+      providers: [
+        { provide: TediTranslationService, useValue: mockTranslationService },
+        { provide: BreakpointService, useValue: createMobileBreakpointMock() },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+      schemas: [NO_ERRORS_SCHEMA],
+    });
+
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+
+    const profileEl = fixture.debugElement.query(
+      (de) => de.componentInstance instanceof HeaderProfileComponent,
+    );
+    const profile = profileEl.componentInstance as HeaderProfileComponent;
+
+    profile.modalOpen.set(true);
+    fixture.detectChanges();
+
+    const roleEls = fixture.debugElement.queryAll(
+      By.directive(HeaderRoleComponent),
+    );
+
+    return {
+      fixture,
+      profile,
+      roleA: roleEls[0].componentInstance as HeaderRoleComponent,
+      roleB: roleEls[1].componentInstance as HeaderRoleComponent,
+    };
+  }
+
+  it("sets parentProfile.activeRole to self when handleMobileOpen opens", () => {
+    const { fixture, profile, roleA } = setup();
+
+    roleA.handleMobileOpen();
+    fixture.detectChanges();
+
+    expect(roleA.mobileOpen()).toBe(true);
+    expect(profile.activeRole()).toBe(roleA);
+  });
+
+  it("closes the first role and clears its input when the second role opens", () => {
+    const { fixture, profile, roleA, roleB } = setup();
+
+    roleA.mobileOpen.set(true);
+    profile.activeRole.set(roleA);
+    roleA.inputValue.set("alice");
+    fixture.detectChanges();
+
+    expect(roleA.mobileOpen()).toBe(true);
+    expect(roleA.inputValue()).toBe("alice");
+
+    roleA.closeIfOtherRoleActive(roleB, true);
+
+    expect(roleA.mobileOpen()).toBe(false);
+    expect(roleA.inputValue()).toBe("");
+  });
+
+  it("does not close the role when the active role is self", () => {
+    const { fixture, profile, roleA } = setup();
+
+    roleA.mobileOpen.set(true);
+    profile.activeRole.set(roleA);
+    roleA.inputValue.set("alice");
+    fixture.detectChanges();
+
+    roleA.closeIfOtherRoleActive(roleA, true);
+
+    expect(roleA.mobileOpen()).toBe(true);
+    expect(roleA.inputValue()).toBe("alice");
+  });
+
+  it("does not close the role when active role is null", () => {
+    const { fixture, roleA } = setup();
+
+    roleA.mobileOpen.set(true);
+    roleA.inputValue.set("alice");
+    fixture.detectChanges();
+
+    roleA.closeIfOtherRoleActive(null, true);
+
+    expect(roleA.mobileOpen()).toBe(true);
+    expect(roleA.inputValue()).toBe("alice");
   });
 });

@@ -16,9 +16,15 @@
     &:has(.tedi-header-profile--mobile) {
       padding-left: 0;
     }
+  }
 
-    @include breakpoints.media-breakpoint-only(md) {
-      max-height: 2.75rem;
-    }
+  > .tedi-separator--vertical {
+    align-self: stretch;
+    height: auto !important;
+    margin: var(--layout-header-separator-padding-y) 0;
+  }
+
+  @include breakpoints.media-breakpoint-only(md) {
+    max-height: 2.75rem;
   }
 }
