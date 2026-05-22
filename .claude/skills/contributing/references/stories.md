@@ -110,9 +110,8 @@ import { moduleMetadata } from '@storybook/angular';
 import { ComponentName } from './index';
 
 /**
- * <a href="https://www.figma.com/design/..." target="_BLANK">Figma ↗</a>
+ * <a href="https://www.figma.com/design/..." target="_blank">Figma ↗</a>
  */
-
 export default {
   title: 'TEDI-Ready/Components/Category/ComponentName',
   component: ComponentName,
@@ -121,14 +120,30 @@ export default {
       imports: [ComponentName, /* required dependencies */],
     }),
   ],
-  parameters: {
-    design: { type: 'figma', url: 'https://www.figma.com/...' },
-  },
   argTypes: {
     // One entry per public input
   },
 } as Meta<ComponentName>;
 ```
+
+**Figma link (required).** Place the link as a JSDoc anchor directly above `export default` — Storybook renders it at the top of the Docs page. This is the convention used by every TEDI-Ready story. Format:
+
+```typescript
+/**
+ * <a href="https://www.figma.com/design/<file-id>/<file-name>?node-id=<node>&m=dev" target="_blank">Figma ↗</a>
+ */
+```
+
+If the component also has a Zeroheight page, add it on the next line with `<br>`:
+
+```typescript
+/**
+ * <a href="https://www.figma.com/design/..." target="_blank">Figma ↗</a><br>
+ * <a href="https://www.tedi.ee/..." target="_blank">Zeroheight ↗</a>
+ */
+```
+
+Applies equally to new components and retrofits — if an existing story lacks the link, add it.
 
 ### 5. Story Checklist
 
@@ -138,7 +153,7 @@ export default {
 - [ ] `Default` story has all controls wired up via `args`
 - [ ] States story covers all visual states shown in Figma (default, hover, active, focus, disabled)
 - [ ] Reactive forms example included if the component implements ControlValueAccessor
-- [ ] Figma link is in the meta `parameters.design` and in the JSDoc comment above `export default`
+- [ ] Figma link is in the JSDoc comment above `export default` (format: `<a href="..." target="_blank">Figma ↗</a>`)
 
 ### 6. argTypes Convention
 
