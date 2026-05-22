@@ -21,18 +21,13 @@ import {
   ValidationErrors,
 } from "@angular/forms";
 import {
-  ClosingButtonComponent,
+  AttachmentComponent,
   FeedbackTextComponent,
   IconComponent,
-  TooltipComponent,
-  TooltipTriggerComponent,
-  TooltipContentComponent,
-  InfoButtonComponent,
   TediTranslationPipe,
   TediTranslationService,
   VerticalSpacingDirective,
 } from "@tedi-design-system/angular/tedi";
-import { CardComponent, CardContentComponent } from "../../cards";
 import {
   DropzoneValidatorFunction,
   FeedbackTextProps,
@@ -57,13 +52,7 @@ import { FileService } from "./file.service";
   imports: [
     IconComponent,
     FeedbackTextComponent,
-    CardComponent,
-    CardContentComponent,
-    ClosingButtonComponent,
-    TooltipComponent,
-    TooltipTriggerComponent,
-    TooltipContentComponent,
-    InfoButtonComponent,
+    AttachmentComponent,
     ReactiveFormsModule,
     VerticalSpacingDirective,
     TediTranslationPipe,
@@ -287,23 +276,6 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
     });
     return issues;
   }
-
-  fileClasses = (file: FileDropzone): string => {
-    const classList = ["tedi-file-dropzone__file-item"];
-    if (file.className) {
-      classList.push(...file.className);
-    }
-    if (file.fileStatus != "none") {
-      classList.push(`tedi-file-dropzone__file-item--${file.fileStatus}`);
-    }
-    return classList.join(" ");
-  };
-
-  tooltipClasses = (file: FileDropzone): string => {
-    const classes = ["tedi-file-dropzone__tooltip"];
-    classes.push(`tedi-file-dropzone__tooltip--${file.helper?.type || "hint"}`);
-    return classes.join(" ");
-  };
 
   selectionChange = (event: Event) => {
     const fileList = (event.target as HTMLInputElement).files;

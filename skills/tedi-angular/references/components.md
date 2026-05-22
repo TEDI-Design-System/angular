@@ -585,6 +585,55 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 
 ## Helpers
 
+### Attachment
+**Selector:** `tedi-attachment`
+**Inputs:**
+- `name: string` (required) — file name displayed in the card
+- `fileSize: string` — pre-formatted file size (e.g. `"0.9 MB"`)
+- `error: string` — error feedback. When set, switches the card to its error visual and renders feedback text below. Implies `invalid`.
+- `invalid: boolean = false` — switches the card to its error visual (danger background + error icon) without rendering feedback text. Use when the error message is rendered elsewhere (e.g. an aggregate validation message).
+- `removable: boolean = true` — show/hide the delete button
+- `disabled: boolean = false` — disables the delete button without hiding it
+- `removeLabel: string` — override the delete-button aria-label
+- `mobile: boolean | undefined` — manually force the mobile variant. When `undefined`, derived from `mobileBreakpoint`.
+- `mobileBreakpoint: Breakpoint = "sm"` — viewport breakpoint below which the mobile variant kicks in
+**Outputs:**
+- `remove: void` — fired when the delete button is clicked
+**Slots:** project a `<tedi-progress-bar>` to show upload/processing progress. Configure label, hint, and value formatting on the projected progress bar itself.
+
+```html
+<tedi-attachment name="report.pdf" fileSize="0.9 MB" (remove)="onRemove()">
+  <tedi-progress-bar
+    [value]="34"
+    valuePosition="bottom"
+    [feedbackText]="{ text: 'Uploading', type: 'hint' }"
+  />
+</tedi-attachment>
+```
+
+### ProgressBar
+**Selector:** `tedi-progress-bar`
+**Inputs:**
+- `value: number = 0` — 0–100, clamped
+- `progressId: string` — id for the underlying `<progress>` element
+- `direction: "horizontal" | "vertical" = "horizontal"` — where the percentage sits relative to the bar
+- `small: boolean = false` — 4px bar height instead of 8px
+- `label: string` — optional title (top or horizontal)
+- `labelPosition: "top" | "horizontal" = "top"`
+- `required: boolean = false` — red `*` after the label
+- `showValue: boolean = true` — show/hide the percentage value
+- `valuePosition: "horizontal" | "bottom" = "horizontal"` — where to place the percentage value
+- `valueLabel: string` — override the rendered value text (e.g. `"1/5"`)
+- `ariaLabel: string` — falls back to `label`
+**Slots:** project a `<tedi-feedback-text>` to render a hint or error line below the bar.
+
+```html
+<tedi-progress-bar [value]="42" label="Uploading" required>
+  <tedi-feedback-text text="Uploading" type="hint" />
+</tedi-progress-bar>
+<tedi-progress-bar [value]="20" valueLabel="1/5" />
+```
+
 ### Row / Col (Grid)
 **Selectors:** `tedi-row`, `tedi-col`
 
@@ -1040,8 +1089,7 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 ## Helpers
 
 ### ProgressBar
-**Selector:** `tedi-progress-bar`
-- `value: number = 0`, `direction: "horizontal" | "vertical"`, `small: boolean`
+**⚠️ DEPRECATED** — use the TEDI-Ready `tedi-progress-bar` from `@tedi-design-system/angular/tedi`. Same selector; the TEDI-Ready version is a superset.
 
 ## Navigation
 

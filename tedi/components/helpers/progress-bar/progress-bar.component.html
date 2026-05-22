@@ -1,0 +1,59 @@
+@if (label() && labelPosition() === "top") {
+  <label
+    tedi-label
+    color="primary"
+    [required]="required()"
+    [for]="progressId()"
+    class="tedi-progress-bar__label"
+  >
+    {{ label() }}
+  </label>
+}
+
+<div class="tedi-progress-bar__row">
+  @if (label() && labelPosition() === "horizontal") {
+    <label
+      tedi-label
+      color="primary"
+      [required]="required()"
+      [for]="progressId()"
+      class="tedi-progress-bar__label"
+    >
+      {{ label() }}
+    </label>
+  }
+
+  <div class="tedi-progress-bar__main">
+    <div class="tedi-progress-bar__bar-row">
+      <progress
+        class="tedi-progress-bar__bar"
+        [id]="progressId()"
+        [max]="100"
+        [value]="value()"
+        [attr.aria-label]="accessibleLabel()"
+      ></progress>
+
+      @if (showValue() && valuePosition() === "horizontal") {
+        <span tedi-label size="small" class="tedi-progress-bar__value">
+          {{ formattedValue() }}
+        </span>
+      }
+    </div>
+
+    @if (hasHintRow()) {
+      <div class="tedi-progress-bar__hint-row">
+        <ng-content select="tedi-feedback-text" />
+
+        @if (showValue() && valuePosition() === "bottom") {
+          <span
+            tedi-label
+            size="small"
+            class="tedi-progress-bar__value tedi-progress-bar__value--bottom"
+          >
+            {{ formattedValue() }}
+          </span>
+        }
+      </div>
+    }
+  </div>
+</div>

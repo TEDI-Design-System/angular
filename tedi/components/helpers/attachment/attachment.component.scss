@@ -1,0 +1,141 @@
+.tedi-attachment {
+  display: block;
+  width: 100%;
+
+  &__card {
+    display: grid;
+    grid-template-areas: "title close";
+    grid-template-columns: 1fr auto;
+    gap: var(--layout-grid-gutters-08) var(--layout-grid-gutters-16);
+    padding: var(--card-padding-xs);
+    background: var(--card-background-tertiary);
+    border-radius: var(--card-radius-rounded);
+  }
+
+  &--has-progress &__card {
+    grid-template-areas:
+      "title close"
+      "progress close";
+  }
+
+  &__title-row {
+    display: flex;
+    grid-area: title;
+    gap: var(--layout-grid-gutters-08);
+    align-items: center;
+    min-width: 0;
+  }
+
+  &__title-group {
+    display: flex;
+    flex: 1 1 auto;
+    gap: var(--layout-grid-gutters-08);
+    align-items: center;
+    min-width: 0;
+  }
+
+  &__title {
+    min-width: 0;
+    font-size: var(--body-regular-size);
+    font-weight: var(--body-regular-weight);
+    line-height: var(--body-regular-line-height);
+    color: var(--general-text-primary);
+    overflow-wrap: anywhere;
+  }
+
+  &__error-icon {
+    flex-shrink: 0;
+  }
+
+  &__size {
+    flex-shrink: 0;
+    font-size: var(--body-small-regular-size);
+    font-weight: var(--body-small-regular-weight);
+    line-height: var(--body-small-regular-line-height);
+    color: var(--general-text-tertiary);
+  }
+
+  &__progress {
+    grid-area: progress;
+    min-width: 0;
+  }
+
+  &__progress--empty {
+    display: none;
+  }
+
+  &__remove {
+    display: flex;
+    flex-shrink: 0;
+    grid-area: close;
+    align-items: center;
+    align-self: start;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    color: var(--button-close-text-default);
+    cursor: pointer;
+    background: var(--button-close-background-default);
+    border: 1px solid var(--button-close-background-default);
+    border-radius: var(--button-radius-default);
+    transition: background 0.2s ease;
+
+    --general-icon-primary: var(--button-close-text-default);
+
+    &:hover {
+      background: var(--button-close-background-hover);
+
+      --general-icon-primary: var(--button-close-text-hover);
+    }
+
+    &:active {
+      background: var(--button-close-background-active);
+
+      --general-icon-primary: var(--button-close-text-active);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--button-main-primary-border-focus);
+      outline-offset: -2px;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  &__feedback {
+    margin-top: var(--layout-grid-gutters-04);
+  }
+
+  &--error &__card {
+    background: var(--card-background-danger);
+  }
+
+  &--mobile &__card {
+    column-gap: var(--layout-grid-gutters-08);
+  }
+
+  &--mobile#{&}--has-progress &__card {
+    grid-template-areas:
+      "title close"
+      "progress progress";
+  }
+
+  &--mobile &__title-row {
+    flex-direction: column;
+    gap: var(--layout-grid-gutters-02);
+    align-items: stretch;
+  }
+
+  &--mobile &__title-group {
+    flex: 0 0 auto;
+  }
+
+  &--mobile &__remove {
+    width: 40px;
+    height: 40px;
+  }
+}
