@@ -598,6 +598,164 @@ describe("TimePickerComponent", () => {
       expect(minuteItems[30].classList.contains("tedi-time-picker__item--selected")).toBe(false);
     });
   });
+
+  describe("focusActiveItem", () => {
+    it("should focus the hour column in scroll variant", () => {
+      const hourColumn = el.querySelectorAll(
+        ".tedi-time-picker__column",
+      )[0] as HTMLElement;
+      const focusSpy = jest.spyOn(hourColumn, "focus");
+
+      component.focusActiveItem();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should focus the checked radio in slots variant", () => {
+      fixture.componentRef.setInput("variant", "slots");
+      fixture.componentRef.setInput("timeSlots", ["09:00", "10:00", "11:00"]);
+      component.writeValue("10:00");
+      fixture.detectChanges();
+
+      const inputs = el.querySelectorAll<HTMLInputElement>(
+        '.tedi-time-picker__grid input[type="radio"]',
+      );
+      const focusSpy = jest.spyOn(inputs[1], "focus");
+
+      component.focusActiveItem();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should focus the first radio in slots variant when nothing selected", () => {
+      fixture.componentRef.setInput("variant", "slots");
+      fixture.componentRef.setInput("timeSlots", ["09:00", "10:00"]);
+      fixture.detectChanges();
+
+      const inputs = el.querySelectorAll<HTMLInputElement>(
+        '.tedi-time-picker__grid input[type="radio"]',
+      );
+      const focusSpy = jest.spyOn(inputs[0], "focus");
+
+      component.focusActiveItem();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should focus the tabindex-0 item in dropdown variant", () => {
+      fixture.componentRef.setInput("variant", "dropdown");
+      fixture.componentRef.setInput("timeSlots", ["09:00", "10:00", "11:00"]);
+      component.writeValue("10:00");
+      fixture.detectChanges();
+
+      const items = el.querySelectorAll<HTMLElement>(
+        ".tedi-time-picker__dropdown-item",
+      );
+      const focusSpy = jest.spyOn(items[1], "focus");
+
+      component.focusActiveItem();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("scrollToSelected", () => {
+    it("should not throw when called outside scroll variant", () => {
+      fixture.componentRef.setInput("variant", "dropdown");
+      fixture.componentRef.setInput("timeSlots", ["09:00"]);
+      fixture.detectChanges();
+
+      expect(() => component.scrollToSelected()).not.toThrow();
+    });
+
+    it("should align scroll for scroll variant without throwing", () => {
+      component.writeValue("12:00");
+      fixture.detectChanges();
+
+      expect(() => component.scrollToSelected()).not.toThrow();
+    });
+  });
+
+  describe("dropdown keyboard fall-through", () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput("variant", "dropdown");
+      fixture.componentRef.setInput("timeSlots", ["09:00", "10:00"]);
+      fixture.detectChanges();
+    });
+
+    it("should ignore unhandled keys without throwing", () => {
+      const items = el.querySelectorAll(".tedi-time-picker__dropdown-item");
+      const event = new KeyboardEvent("keydown", { key: "x", bubbles: true });
+      const preventSpy = jest.spyOn(event, "preventDefault");
+
+      items[0].dispatchEvent(event);
+
+      expect(preventSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("scroll variant unhandled keys", () => {
+    it("should ignore non-navigation keys", () => {
+      component.writeValue("05:00");
+      fixture.detectChanges();
+
+      const hourColumn = el.querySelectorAll(".tedi-time-picker__column")[0];
+      const event = new KeyboardEvent("keydown", { key: "x", bubbles: true });
+      const preventSpy = jest.spyOn(event, "preventDefault");
+
+      hourColumn.dispatchEvent(event);
+
+      expect(preventSpy).not.toHaveBeenCalled();
+      expect(component.value()).toBe("05:00");
+    });
+  });
+
+  describe("scroll-driven selection", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("should commit the value after the scroll debounce settles", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      const hourColumn = el.querySelectorAll(
+        ".tedi-time-picker__column",
+      )[0] as HTMLElement;
+      Object.defineProperty(hourColumn, "scrollTop", {
+        value: 240,
+        configurable: true,
+      });
+      hourColumn.dispatchEvent(new Event("scroll"));
+
+      jest.runAllTimers();
+
+      expect(onChange).toHaveBeenCalled();
+    });
+
+    it("should clear pending debounce timers on destroy", () => {
+      const hourColumn = el.querySelectorAll(
+        ".tedi-time-picker__column",
+      )[0] as HTMLElement;
+      Object.defineProperty(hourColumn, "scrollTop", {
+        value: 100,
+        configurable: true,
+      });
+      hourColumn.dispatchEvent(new Event("scroll"));
+
+      const clearSpy = jest.spyOn(global, "clearTimeout");
+      try {
+        fixture.destroy();
+        expect(clearSpy).toHaveBeenCalled();
+      } finally {
+        clearSpy.mockRestore();
+      }
+    });
+  });
 });
 
 @Component({

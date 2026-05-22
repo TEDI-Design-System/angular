@@ -716,6 +716,180 @@ describe("TimeFieldComponent", () => {
       expect(component.isDisabled()).toBe(true);
       expect(el.querySelector("input")?.disabled).toBe(true);
     });
+
+    it("should preserve in-progress input when writeValue is called with the same value", () => {
+      component.writeValue("10:00");
+      const input = el.querySelector("input") as HTMLInputElement;
+      input.value = "10:3";
+      input.dispatchEvent(new Event("input"));
+      expect(component.inputValue()).toBe("10:3");
+
+      component.writeValue("10:00");
+
+      expect(component.inputValue()).toBe("10:3");
+    });
+  });
+
+  describe("triggerPicker", () => {
+    it("should call onPickerOpen on icon-button click", () => {
+      const spy = jest.spyOn(component, "onPickerOpen");
+      const iconBtn = el.querySelector(
+        ".tedi-time-field__icon",
+      ) as HTMLButtonElement;
+      iconBtn.click();
+
+      expect(spy).toHaveBeenCalled();
+    });
+  });
+
+  describe("onPickerValueChange", () => {
+    it("should commit a new value", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      component.onPickerValueChange("13:45");
+
+      expect(component.value()).toBe("13:45");
+      expect(component.inputValue()).toBe("13:45");
+      expect(onChange).toHaveBeenCalledWith("13:45");
+    });
+
+    it("should NOT call onChange when the value is unchanged", () => {
+      component.writeValue("10:00");
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      component.onPickerValueChange("10:00");
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it("should close the popover when closeOnSelect is true", () => {
+      fixture.componentRef.setInput("closeOnSelect", true);
+      fixture.detectChanges();
+
+      const hideSpy = jest
+        .spyOn(component.popover()!, "hidePopover")
+        .mockImplementation(() => {});
+
+      component.onPickerValueChange("09:15");
+
+      expect(hideSpy).toHaveBeenCalled();
+    });
+
+    it("should NOT close the popover when closeOnSelect is false", () => {
+      const hideSpy = jest
+        .spyOn(component.popover()!, "hidePopover")
+        .mockImplementation(() => {});
+
+      component.onPickerValueChange("09:15");
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("closePopover", () => {
+    it("should hide the popover and refocus the input", () => {
+      const hideSpy = jest
+        .spyOn(component.popover()!, "hidePopover")
+        .mockImplementation(() => {});
+      const input = el.querySelector("input") as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+
+      component.closePopover();
+
+      expect(hideSpy).toHaveBeenCalledWith(false);
+      expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+    });
+
+    it("should call onTouched by default", () => {
+      jest
+        .spyOn(component.popover()!, "hidePopover")
+        .mockImplementation(() => {});
+      const onTouched = jest.fn();
+      component.registerOnTouched(onTouched);
+
+      component.closePopover();
+
+      expect(onTouched).toHaveBeenCalled();
+    });
+
+    it("should NOT call onTouched when notifyTouched is false", () => {
+      jest
+        .spyOn(component.popover()!, "hidePopover")
+        .mockImplementation(() => {});
+      const onTouched = jest.fn();
+      component.registerOnTouched(onTouched);
+
+      component.closePopover(false);
+
+      expect(onTouched).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("onPickerOpen", () => {
+    it("should set dropdown min-width from the field wrapper when variant is dropdown", () => {
+      fixture.componentRef.setInput("pickerVariant", "dropdown");
+      fixture.componentRef.setInput("timeSlots", ["09:00", "09:30"]);
+      fixture.detectChanges();
+
+      const wrapper = component.fieldEl()!.nativeElement;
+      Object.defineProperty(wrapper, "offsetWidth", {
+        value: 240,
+        configurable: true,
+      });
+
+      component.onPickerOpen();
+
+      expect(component.dropdownMinWidth()).toBe(240);
+    });
+
+    it("should reset dropdown min-width for non-dropdown variants", () => {
+      component.dropdownMinWidth.set(200);
+
+      component.onPickerOpen();
+
+      expect(component.dropdownMinWidth()).toBeNull();
+    });
+  });
+
+  describe("native picker explicit", () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput("useNativePicker", true);
+      fixture.detectChanges();
+    });
+
+    it("should call input.showPicker when available", () => {
+      const input = el.querySelector("input") as HTMLInputElement;
+      const showPicker = jest.fn();
+      (input as unknown as { showPicker?: () => void }).showPicker = showPicker;
+
+      component.openNativePicker();
+
+      expect(showPicker).toHaveBeenCalled();
+    });
+
+    it("should focus the input when showPicker throws", () => {
+      const input = el.querySelector("input") as HTMLInputElement;
+      (input as unknown as { showPicker?: () => void }).showPicker = () => {
+        throw new Error("not a user gesture");
+      };
+      const focusSpy = jest.spyOn(input, "focus");
+
+      component.openNativePicker();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should focus the input when showPicker is not available", () => {
+      const input = el.querySelector("input") as HTMLInputElement;
+      (input as unknown as { showPicker?: () => void }).showPicker = undefined;
+      const focusSpy = jest.spyOn(input, "focus");
+
+      component.openNativePicker();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
   });
 });
 
