@@ -6,6 +6,8 @@ import {
 } from "@storybook/angular";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { DatePickerComponent } from "./date-picker.component";
+import { AlertComponent } from "../../notifications/alert/alert.component";
+import { TextComponent } from "../../base/text/text.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.23.39?node-id=9938-87564&m=dev" target="_blank">Figma ↗</a><br>
@@ -22,7 +24,7 @@ export default {
   },
   decorators: [
     moduleMetadata({
-      imports: [DatePickerComponent, ReactiveFormsModule],
+      imports: [DatePickerComponent, ReactiveFormsModule, AlertComponent, TextComponent],
     }),
   ],
   argTypes: {
@@ -246,11 +248,13 @@ export const WithReactiveForms: StoryObj<DatePickerComponent> = {
             inputPlaceholder="Select a date..."
           />
 
-          <div>
-            <div>Value: {{ dateControl.value ?? 'null' }}</div>
-            <div>Touched: {{ dateControl.touched }}</div>
-            <div>Dirty: {{ dateControl.dirty }}</div>
-          </div>
+          <tedi-alert type="info" [showClose]="false">
+            <pre tedi-text modifiers="small" style="margin: 0;">{{ {
+  value: dateControl.value,
+  touched: dateControl.touched,
+  dirty: dateControl.dirty
+} | json }}</pre>
+          </tedi-alert>
         </div>
       `,
     };

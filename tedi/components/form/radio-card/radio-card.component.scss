@@ -97,7 +97,7 @@ label[tedi-radio-card] {
       border-bottom-right-radius: var(--form-checkbox-radio-card-radius);
     }
 
-    & + & {
+    &+& {
       margin-left: -1px;
     }
 

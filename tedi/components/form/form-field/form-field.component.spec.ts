@@ -12,6 +12,7 @@ import {
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { NgControl } from "@angular/forms";
 import { Subject } from "rxjs";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 @Component({
   selector: "mock-control",
@@ -80,6 +81,7 @@ describe("FormFieldComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TestHostComponent);
@@ -123,22 +125,52 @@ describe("FormFieldComponent", () => {
     expect(icon).toBeNull();
   });
 
-  it("should not show clear button when value is empty", () => {
+  it("should hide clear button slot when value is empty", () => {
     host.clearable = true;
     host.mockControl.value.set("");
     fixture.detectChanges();
 
-    const button = fixture.nativeElement.querySelector("button");
-    expect(button).toBeNull();
+    const buttons = fixture.nativeElement.querySelector(
+      ".tedi-form-field__buttons",
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.classList.contains("tedi-form-field__buttons--hidden")).toBe(
+      true,
+    );
+    expect(buttons.getAttribute("aria-hidden")).toBe("true");
+
+    const button = buttons.querySelector("button");
+    expect(button.hasAttribute("disabled")).toBe(true);
+    expect(button.getAttribute("tabindex")).toBe("-1");
   });
 
-  it("should not show clear button when clearable is false", () => {
+  it("should show clear button when clearable and value is set", () => {
+    host.clearable = true;
+    host.mockControl.value.set("Test");
+    fixture.detectChanges();
+
+    const buttons = fixture.nativeElement.querySelector(
+      ".tedi-form-field__buttons",
+    );
+    expect(buttons).toBeTruthy();
+    expect(buttons.classList.contains("tedi-form-field__buttons--hidden")).toBe(
+      false,
+    );
+    expect(buttons.getAttribute("aria-hidden")).toBeNull();
+
+    const button = buttons.querySelector("button");
+    expect(button.hasAttribute("disabled")).toBe(false);
+  });
+
+  it("should not render buttons slot when clearable is false", () => {
     host.clearable = false;
     host.mockControl.value.set("Test");
     fixture.detectChanges();
 
-    const button = fixture.nativeElement.querySelector("button");
-    expect(button).toBeNull();
+    const buttons = fixture.nativeElement.querySelector(
+      ".tedi-form-field__buttons",
+    );
+    expect(buttons).toBeNull();
   });
 
   it("should call control.clearField when clear is triggered", () => {

@@ -7,7 +7,7 @@ import {
 } from "@angular/core";
 import { DropdownComponent } from "../dropdown.component";
 
-export type DropdownTriggerAriaHasPopup = "menu" | "listbox" | "true";
+export type DropdownTriggerAriaHasPopup = "menu" | "listbox" | "dialog" | "true";
 
 @Directive({
   standalone: true,
@@ -16,7 +16,7 @@ export type DropdownTriggerAriaHasPopup = "menu" | "listbox" | "true";
     "[attr.id]": "dropdown.containerId() + '_trigger'",
     "[attr.aria-controls]": "dropdown.containerId()",
     "[attr.aria-expanded]": "dropdown.floatUiComponent().state",
-    "[attr.aria-haspopup]": "'menu'",
+    "[attr.aria-haspopup]": "ariaHaspopup()",
     "[attr.role]": "isButton ? null : 'button'",
     "[attr.tabindex]": "isButton ? null : '0'",
   },

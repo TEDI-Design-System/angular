@@ -123,6 +123,32 @@ tedi-modal-header { padding: var(--token); }
 cdk-dialog-container { outline: none; }
 ```
 
+### Icon Color Inheritance Inside Parent Components
+
+When a `tedi-icon` is placed inside an interactive component whose text color changes on hover/active/selected states, the icon should:
+- **Default state:** respect the user's `color` input (e.g., `color="danger"` shows danger)
+- **State changes (hover, selected, active):** inherit the parent's text color
+
+**For component-owned icons** (in the component's own template), use `color="inherit"` so they always follow the parent:
+```html
+<tedi-icon name="check" [size]="18" color="inherit" />
+```
+
+**For projected/consumer icons** (via `ng-content`), the consumer controls the `color` input. The parent component must override icon color only on state changes via CSS:
+```scss
+.tedi-my-component__button:hover .tedi-icon {
+  color: inherit;
+}
+
+.tedi-my-component--selected .tedi-icon {
+  color: inherit;
+}
+```
+
+This lets the consumer's chosen color (e.g., `color="brand"`) apply in the default state, while ensuring the icon follows the parent's text color on hover/selected/active. The selector `.tedi-my-component__button:hover .tedi-icon` (specificity 0,2,0+pseudo) beats `.tedi-icon--color-primary` (0,1,0).
+
+**Every component that contains icons and changes text color on state must include these overrides.**
+
 ### Example
 ```scss
 .tedi-button {
@@ -244,12 +270,28 @@ export const Default: StoryObj<ComponentNameComponent> = {
 };
 
 export const WithReactiveForms: StoryObj<ComponentNameComponent> = {
+  decorators: [
+    moduleMetadata({
+      imports: [MyControlComponent, ReactiveFormsModule, AlertComponent, TextComponent],
+    }),
+  ],
   render: () => ({
     props: { control: new FormControl('') },
-    template: `<tedi-my-control [formControl]="control" />`,
+    template: `
+      <tedi-my-control [formControl]="control" />
+      <tedi-alert type="info" [showClose]="false">
+        <pre tedi-text modifiers="small" style="margin: 0;">{{ {
+  value: control.value,
+  touched: control.touched,
+  dirty: control.dirty
+} | json }}</pre>
+      </tedi-alert>
+    `,
   }),
 };
 ```
+
+> **Note:** Always display reactive form state using a `<tedi-alert type="info">` with a `<pre tedi-text modifiers="small">` block and the `json` pipe. This provides a consistent, scannable debug output across all form component stories. Import `AlertComponent` and `TextComponent` in the story's `moduleMetadata`.
 
 ### Story Coverage
 Every story file must include:
