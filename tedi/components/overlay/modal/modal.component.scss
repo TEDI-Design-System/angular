@@ -323,7 +323,7 @@ $modal-widths: (xs, sm, md, lg, xl);
     }
   }
 
-  @each $bp in (sm, md, lg, xl) {
+  @each $bp in (sm, md, lg, xl, xxl) {
     &--fullscreen-#{$bp} {
       @include breakpoints.media-breakpoint-down($bp) {
         --_tedi-modal-max-width: 100vw;
