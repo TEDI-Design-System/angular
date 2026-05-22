@@ -75,28 +75,36 @@
   &__popover-content.tedi-popover-content {
     padding: 0;
   }
+}
 
-  &__icon {
-    flex-shrink: 0;
-    width: var(--button-xs-icon-size) !important;
-    height: var(--form-field-button-height-sm) !important;
-    font-size: 1.125rem !important;
-    border-radius: var(--button-radius-sm) !important;
+.tedi-time-field .tedi-time-field__icon {
+  flex-shrink: 0;
+  width: var(--button-xs-icon-size);
+  height: var(--form-field-button-height-sm);
+  font-size: 1.125rem;
+  border-radius: var(--button-radius-sm);
 
-    &:disabled {
-      cursor: not-allowed;
-    }
+  &:disabled {
+    cursor: not-allowed;
+  }
 
-    &--static {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--form-input-text-placeholder);
-    }
+  &--open:not(:disabled),
+  &--open:not(:disabled):hover,
+  &--open:not(:disabled):active {
+    color: var(--_btn-active-text);
+    background: var(--_btn-active-bg);
+    border-color: var(--_btn-active-border);
+  }
 
-    @include breakpoints.media-breakpoint-down(sm) {
-      width: var(--form-field-button-height) !important;
-      height: var(--form-field-button-height) !important;
-    }
+  &--static {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--form-input-text-placeholder);
+  }
+
+  @include breakpoints.media-breakpoint-down(sm) {
+    width: var(--form-field-button-height);
+    height: var(--form-field-button-height);
   }
 }

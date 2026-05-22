@@ -79,9 +79,10 @@
         tedi-button
         type="button"
         variant="neutral"
-        size="small"
         class="tedi-time-field__icon"
+        [class.tedi-time-field__icon--open]="popoverIsOpen()"
         [attr.aria-label]="'time-field.select-time' | tediTranslate"
+        [attr.aria-expanded]="popoverIsOpen() || null"
         [disabled]="isDisabled()"
         (click)="triggerPicker()"
       >

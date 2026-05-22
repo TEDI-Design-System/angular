@@ -185,6 +185,12 @@ export class TimeFieldComponent
       ? modal
       : this.breakpointService.isBelowBreakpoint(modal)();
   });
+  // Reads the popover's underlying float-ui open state. Plain method (not computed)
+  // because `.state` isn't a signal — relies on CD ticks (which all open/close
+  // paths trigger via user events) to re-evaluate in the template.
+  popoverIsOpen(): boolean {
+    return !!this.popover()?.floatUiComponent().state;
+  }
 
   constructor() {
     effect(() => {
@@ -194,6 +200,10 @@ export class TimeFieldComponent
   }
 
   writeValue(value: string | null): void {
+    // Guard against same-value patches: without this, a parent form patching the
+    // current value back (common with reactive forms) would overwrite the user's
+    // in-progress input mid-typing.
+    if (value === this.value()) return;
     // The constructor effect also mirrors `value` into `inputValue`, but we sync it
     // here too so synchronous reads (e.g. tests, CVA wiring) see the new value
     // without waiting for the next change-detection tick.
