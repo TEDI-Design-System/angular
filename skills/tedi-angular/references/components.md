@@ -45,6 +45,41 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 <button tedi-button variant="secondary" size="small">Small</button>
 ```
 
+### ButtonGroup
+**Selector:** `tedi-button-group`
+**Inputs:**
+- `variant: "primary" | "secondary" = "primary"`
+- `size: "default" | "small" = "default"`
+- `stretch: boolean = false` — items share horizontal space equally
+- `ariaLabel: string` — required when no visible heading labels the group
+- `enableMobileDropdown: boolean = false` — collapse to a dropdown below `mobileBreakpoint`
+- `mobileBreakpoint: Breakpoint = "md"`
+- `dropdownLabel: string` — falls back to the `buttonGroup.menu` translation
+- `dropdownLabelMode: "static" | "selected" = "static"`
+**Outputs:** `selectionChange: string` (emits the id of the activated item)
+**Slots:** `<button tedi-button-group-item>` children
+
+### ButtonGroupItemDirective
+**Selector:** `button[tedi-button-group-item]`
+**Inputs:**
+- `id: string` (required) — emitted via the parent's `selectionChange`; also mirrored to the host's HTML `id` attribute
+- `label: string` (required) — text used in the mobile-dropdown trigger/items; also becomes the host's `aria-label` when `icon` is set
+- `selected: boolean = false` — drives `--selected` class and `aria-pressed`
+- `disabled: boolean = false` — native `disabled` attribute
+- `iconLeft: string` — icon name auto-rendered before the button content (and in the mobile-dropdown item)
+- `iconRight: string` — icon name auto-rendered after the button content (and in the mobile-dropdown item)
+- `icon: string` — icon-only mode; auto-rendered into the button, and used as the dropdown trigger/item icon. Pair with empty button content; `label` becomes the accessible name
+**Outputs:** `clicked: MouseEvent` (suppressed on disabled items)
+**ARIA:** `aria-pressed="true|false"` on each item; `aria-label` from `label` when `icon` is set.
+
+```html
+<tedi-button-group ariaLabel="View" variant="primary" (selectionChange)="selected.set($event)">
+  <button tedi-button-group-item id="1" label="Details" [selected]="selected() === '1'">Details</button>
+  <button tedi-button-group-item id="2" label="Updates" iconLeft="refresh" [selected]="selected() === '2'">Updates</button>
+  <button tedi-button-group-item id="3" label="Settings" [disabled]="true">Settings</button>
+</tedi-button-group>
+```
+
 ### ClosingButton
 **Selector:** `button[tedi-closing-button]`
 **Inputs:**
