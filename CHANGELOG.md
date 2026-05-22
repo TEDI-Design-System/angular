@@ -1,3 +1,37 @@
+# [6.4.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.3...angular-6.4.0-rc.4) (2026-05-20)
+
+
+### Bug Fixes
+
+* **alert:** renamed error to danger in storybook type options array [#438](https://github.com/TEDI-Design-System/angular/issues/438) ([#444](https://github.com/TEDI-Design-System/angular/issues/444)) ([23acf9c](https://github.com/TEDI-Design-System/angular/commit/23acf9c3d3a4bb67f80ed06beccbb31010cc7e61))
+
+# [6.4.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.2...angular-6.4.0-rc.3) (2026-05-18)
+
+
+### Bug Fixes
+
+* **collapse:** add button type to prevent form submission [#434](https://github.com/TEDI-Design-System/angular/issues/434) ([#441](https://github.com/TEDI-Design-System/angular/issues/441)) ([2e13aef](https://github.com/TEDI-Design-System/angular/commit/2e13aefdd60145b58b2e1053b09fa89a9a1a391c))
+
+
+### Reverts
+
+* **horizontal-stepper:** undo premature rc commits [#405](https://github.com/TEDI-Design-System/angular/issues/405) ([#436](https://github.com/TEDI-Design-System/angular/issues/436)) ([a575670](https://github.com/TEDI-Design-System/angular/commit/a57567051e7a522ab1e691b46c5ef4d52f599f0f))
+
+# [6.4.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.1...angular-6.4.0-rc.2) (2026-05-08)
+
+
+### Features
+
+* **horizontal-stepper:** fixes from review [#405](https://github.com/TEDI-Design-System/angular/issues/405) ([5a9d803](https://github.com/TEDI-Design-System/angular/commit/5a9d8035bf4bed2c45abb069ea1cfd972c6c28b3))
+* **horizontal-stepper:** new TEDI-ready component [#405](https://github.com/TEDI-Design-System/angular/issues/405) ([a7d6282](https://github.com/TEDI-Design-System/angular/commit/a7d6282b6ae8d9bed331d96f859e5f4a7aec10db))
+
+# [6.4.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.1...angular-6.4.0-rc.1) (2026-05-07)
+
+
+### Features
+
+* **accordion:** separate header and content [#406](https://github.com/TEDI-Design-System/angular/issues/406) ([#420](https://github.com/TEDI-Design-System/angular/issues/420)) ([37e3127](https://github.com/TEDI-Design-System/angular/commit/37e3127e42b9d803bf42201b81b5bc25e4b917b1))
+
 ## [6.3.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0...angular-6.3.1) (2026-05-04)
 
 
