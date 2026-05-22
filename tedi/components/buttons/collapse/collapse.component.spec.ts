@@ -108,4 +108,13 @@ describe("CollapseComponent", () => {
     );
     expect(iconWrapper).toBeNull();
   });
+
+  it("should render the toggle button with type='button' to avoid submitting parent forms", () => {
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector(
+      ".tedi-collapse__button",
+    );
+    expect(button).toBeTruthy();
+    expect(button.getAttribute("type")).toBe("button");
+    expect(button.type).toBe("button");
+  });
 });

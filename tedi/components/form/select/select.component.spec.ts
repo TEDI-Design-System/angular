@@ -548,6 +548,20 @@ describe("SelectComponent", () => {
       expect(select.searchTerm()).toBe("");
     }));
 
+    it("should not show placeholder on search input after a value is selected", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      expect(input.getAttribute("placeholder")).toBe("");
+    }));
+
     it("should open dropdown when typing", fakeAsync(() => {
       const input = getSearchInput();
       input.value = "O";

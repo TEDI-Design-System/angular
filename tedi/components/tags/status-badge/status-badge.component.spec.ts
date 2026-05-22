@@ -65,8 +65,10 @@ describe("StatusBadgeComponent", () => {
       badge?.classList.contains("tedi-status-badge--variant-filled-bordered"),
     ).toBe(true);
     expect(badge?.classList.contains("tedi-status-badge--large")).toBe(true);
-    expect(badge?.classList.contains("tedi-status-badge--status")).toBe(true);
-    expect(badge?.classList.contains("tedi-status-badge--status-success")).toBe(
+
+    const indicator = element.querySelector("tedi-status-indicator");
+    expect(indicator).not.toBeNull();
+    expect(indicator?.classList.contains("tedi-status-indicator--success")).toBe(
       true,
     );
   });

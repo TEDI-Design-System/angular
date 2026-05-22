@@ -38,6 +38,7 @@ import {
     class: "tedi-text-field",
     "[class.tedi-text-field--arrows-hidden]": "arrowsHidden()",
     "[attr.aria-invalid]": "invalid() || null",
+    "[value]": "value()",
     "(input)": "handleInputChange($event)",
     "(blur)": "handleBlur()",
   },
@@ -61,9 +62,7 @@ export class TextFieldComponent
 
   constructor(private el: ElementRef<HTMLInputElement>) {}
 
-  readonly disabled = computed(
-    () => this.el.nativeElement.disabled || this.formDisabled(),
-  );
+  readonly disabled = computed(() => this.formDisabled());
 
   readonly invalid = signal(false);
 

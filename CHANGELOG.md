@@ -1,3 +1,96 @@
+# [6.4.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.5...angular-6.4.0-rc.6) (2026-05-22)
+
+
+### Features
+
+* **horizontal-stepper:** new TEDI-ready component [#405](https://github.com/TEDI-Design-System/angular/issues/405) ([#437](https://github.com/TEDI-Design-System/angular/issues/437)) ([eec1733](https://github.com/TEDI-Design-System/angular/commit/eec1733fd6f5da20789ce3f853bd5d7f29f13455))
+
+# [6.4.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.4...angular-6.4.0-rc.5) (2026-05-22)
+
+
+### Features
+
+* **filter,status-indicator:** new filter component, status-indicator [#329](https://github.com/TEDI-Design-System/angular/issues/329) ([#396](https://github.com/TEDI-Design-System/angular/issues/396)) ([99e93b3](https://github.com/TEDI-Design-System/angular/commit/99e93b37830a89ea24fc45b706e09ec677433e80)), closes [#222](https://github.com/TEDI-Design-System/angular/issues/222) [#222](https://github.com/TEDI-Design-System/angular/issues/222) [#222](https://github.com/TEDI-Design-System/angular/issues/222) [#7](https://github.com/TEDI-Design-System/angular/issues/7) [#7](https://github.com/TEDI-Design-System/angular/issues/7) [#222](https://github.com/TEDI-Design-System/angular/issues/222) [#222](https://github.com/TEDI-Design-System/angular/issues/222)
+
+# [6.4.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.3...angular-6.4.0-rc.4) (2026-05-20)
+
+
+### Bug Fixes
+
+* **alert:** renamed error to danger in storybook type options array [#438](https://github.com/TEDI-Design-System/angular/issues/438) ([#444](https://github.com/TEDI-Design-System/angular/issues/444)) ([23acf9c](https://github.com/TEDI-Design-System/angular/commit/23acf9c3d3a4bb67f80ed06beccbb31010cc7e61))
+
+# [6.4.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.2...angular-6.4.0-rc.3) (2026-05-18)
+
+
+### Bug Fixes
+
+* **collapse:** add button type to prevent form submission [#434](https://github.com/TEDI-Design-System/angular/issues/434) ([#441](https://github.com/TEDI-Design-System/angular/issues/441)) ([2e13aef](https://github.com/TEDI-Design-System/angular/commit/2e13aefdd60145b58b2e1053b09fa89a9a1a391c))
+
+
+### Reverts
+
+* **horizontal-stepper:** undo premature rc commits [#405](https://github.com/TEDI-Design-System/angular/issues/405) ([#436](https://github.com/TEDI-Design-System/angular/issues/436)) ([a575670](https://github.com/TEDI-Design-System/angular/commit/a57567051e7a522ab1e691b46c5ef4d52f599f0f))
+
+# [6.4.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.1...angular-6.4.0-rc.2) (2026-05-08)
+
+
+### Features
+
+* **horizontal-stepper:** fixes from review [#405](https://github.com/TEDI-Design-System/angular/issues/405) ([5a9d803](https://github.com/TEDI-Design-System/angular/commit/5a9d8035bf4bed2c45abb069ea1cfd972c6c28b3))
+* **horizontal-stepper:** new TEDI-ready component [#405](https://github.com/TEDI-Design-System/angular/issues/405) ([a7d6282](https://github.com/TEDI-Design-System/angular/commit/a7d6282b6ae8d9bed331d96f859e5f4a7aec10db))
+
+# [6.4.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.1...angular-6.4.0-rc.1) (2026-05-07)
+
+
+### Features
+
+* **accordion:** separate header and content [#406](https://github.com/TEDI-Design-System/angular/issues/406) ([#420](https://github.com/TEDI-Design-System/angular/issues/420)) ([37e3127](https://github.com/TEDI-Design-System/angular/commit/37e3127e42b9d803bf42201b81b5bc25e4b917b1))
+
+## [6.3.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0...angular-6.3.1) (2026-05-04)
+
+
+### Bug Fixes
+
+* **select:** clear placeholder on value select [#432](https://github.com/TEDI-Design-System/angular/issues/432) ([#433](https://github.com/TEDI-Design-System/angular/issues/433)) ([f87ef36](https://github.com/TEDI-Design-System/angular/commit/f87ef36eaf412055ccbcdbefee047d59813a8347))
+
+# [6.3.0](https://github.com/TEDI-Design-System/angular/compare/angular-6.2.1...angular-6.3.0) (2026-04-29)
+
+
+### Bug Fixes
+
+* **button:** fixed invalid padding being set for neutral buttons [#383](https://github.com/TEDI-Design-System/angular/issues/383) ([#391](https://github.com/TEDI-Design-System/angular/issues/391)) ([426d231](https://github.com/TEDI-Design-System/angular/commit/426d231009e00f8d79145df2f546d470edc8c678))
+* **general:** update core version [#418](https://github.com/TEDI-Design-System/angular/issues/418) ([#419](https://github.com/TEDI-Design-System/angular/issues/419)) ([aa5cef7](https://github.com/TEDI-Design-System/angular/commit/aa5cef748a2470c9e2cedd16021ecac836dff2c5))
+* **modal:** added custom class to modal close button [#409](https://github.com/TEDI-Design-System/angular/issues/409) ([#411](https://github.com/TEDI-Design-System/angular/issues/411)) ([e81fa01](https://github.com/TEDI-Design-System/angular/commit/e81fa01ca3f59b97cb57809556d4398ece34e5ff))
+* **text-field:** fix circular dependency issue when using with reactive forms [#382](https://github.com/TEDI-Design-System/angular/issues/382) ([#392](https://github.com/TEDI-Design-System/angular/issues/392)) ([89cf3f0](https://github.com/TEDI-Design-System/angular/commit/89cf3f01bd4091eaa5300f8bb8f800c56d45fe58))
+* **text-field:** fix disabled state tracking [#421](https://github.com/TEDI-Design-System/angular/issues/421) ([#422](https://github.com/TEDI-Design-System/angular/issues/422)) ([39db9ca](https://github.com/TEDI-Design-System/angular/commit/39db9ca4af1daad885deabb1ad3f052efc3fd397))
+* **variables:** update core version, fix variable names [#400](https://github.com/TEDI-Design-System/angular/issues/400) ([#408](https://github.com/TEDI-Design-System/angular/issues/408)) ([05a3153](https://github.com/TEDI-Design-System/angular/commit/05a315316c061f4e73fb0e1d17991afe8c03f030))
+
+
+### Features
+
+* **accordion:** add clickable and iconPosition props to community accordion header  [#552](https://github.com/TEDI-Design-System/angular/issues/552) ([d4f3251](https://github.com/TEDI-Design-System/angular/commit/d4f3251463420360f1da0a264873c40192cc22fa))
+* **checkbox,radio:** added formControl support to groups [#412](https://github.com/TEDI-Design-System/angular/issues/412) ([#413](https://github.com/TEDI-Design-System/angular/issues/413)) ([077be96](https://github.com/TEDI-Design-System/angular/commit/077be96990f4801f07c98359a0d6d775f0180cfb))
+* **checkbox:** added checkbox-card variant [#222](https://github.com/TEDI-Design-System/angular/issues/222) ([#378](https://github.com/TEDI-Design-System/angular/issues/378)) ([d04a7d6](https://github.com/TEDI-Design-System/angular/commit/d04a7d626ef8ad2f85c9da4a2fe0c23f3bb4ca9b))
+* **icon:** added inherit ColorType [#114](https://github.com/TEDI-Design-System/angular/issues/114) ([#389](https://github.com/TEDI-Design-System/angular/issues/389)) ([37836f4](https://github.com/TEDI-Design-System/angular/commit/37836f470ef481404ccc2bc975c3099073387380))
+* **modal:** completed modal tedi-ready development [#223](https://github.com/TEDI-Design-System/angular/issues/223) ([#377](https://github.com/TEDI-Design-System/angular/issues/377)) ([31868b0](https://github.com/TEDI-Design-System/angular/commit/31868b0337377275d0f53b1df74d10599fc60cd4))
+* **radio:** new TEDI-ready component [#7](https://github.com/TEDI-Design-System/angular/issues/7) ([#381](https://github.com/TEDI-Design-System/angular/issues/381)) ([37d21ac](https://github.com/TEDI-Design-System/angular/commit/37d21ac42562bc87edbc93e8385123a16137932b))
+* **select:** added searchFn, improved dropdown behavior [#403](https://github.com/TEDI-Design-System/angular/issues/403) ([#404](https://github.com/TEDI-Design-System/angular/issues/404)) ([03b13d0](https://github.com/TEDI-Design-System/angular/commit/03b13d0325a31953c6dba0cd4492469d9f607a61))
+* **select:** new tedi-ready component [#15](https://github.com/TEDI-Design-System/angular/issues/15) ([#343](https://github.com/TEDI-Design-System/angular/issues/343)) ([56af62c](https://github.com/TEDI-Design-System/angular/commit/56af62c05c621dfb6b3f2f18fd723b6dbe2fff03))
+
+# [6.3.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.14...angular-6.3.0-rc.15) (2026-04-29)
+
+
+### Bug Fixes
+
+* **text-field:** fix disabled state tracking [#421](https://github.com/TEDI-Design-System/angular/issues/421) ([#422](https://github.com/TEDI-Design-System/angular/issues/422)) ([39db9ca](https://github.com/TEDI-Design-System/angular/commit/39db9ca4af1daad885deabb1ad3f052efc3fd397))
+
+# [6.3.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.13...angular-6.3.0-rc.14) (2026-04-28)
+
+
+### Features
+
+* **checkbox,radio:** added formControl support to groups [#412](https://github.com/TEDI-Design-System/angular/issues/412) ([#413](https://github.com/TEDI-Design-System/angular/issues/413)) ([077be96](https://github.com/TEDI-Design-System/angular/commit/077be96990f4801f07c98359a0d6d775f0180cfb))
+
 # [6.3.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.0-rc.12...angular-6.3.0-rc.13) (2026-04-21)
 
 

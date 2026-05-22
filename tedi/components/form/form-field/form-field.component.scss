@@ -44,7 +44,8 @@
     }
   }
 
-  &--disabled .tedi-form-field__input {
+  &--disabled .tedi-form-field__input,
+  &__input:has(input:disabled) {
     cursor: not-allowed;
     background: var(--form-input-background-disabled);
     border-color: var(--form-input-border-disabled);
@@ -64,7 +65,7 @@
       .tedi-form-field--valid,
       .tedi-form-field--invalid
     )
-    .tedi-form-field__input {
+    .tedi-form-field__input:not(:has(input:disabled)) {
     &:hover,
     &:has(input:hover) {
       border-color: var(--form-input-border-hover);
@@ -97,5 +98,9 @@
     display: flex;
     gap: var(--layout-grid-gutters-04);
     align-items: center;
+
+    &--hidden {
+      visibility: hidden;
+    }
   }
 }

@@ -61,7 +61,7 @@
           type="text"
           class="tedi-select__search-input"
           [class.tedi-select__search-input--hidden]="showSingleSelectedValue()"
-          [placeholder]="placeholder()"
+          [placeholder]="showSingleSelectedValue() ? '' : placeholder()"
           [value]="searchTerm()"
           [disabled]="disabled()"
           (input)="onSearchInput($event)"
