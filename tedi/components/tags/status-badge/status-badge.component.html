@@ -20,6 +20,15 @@
 }
 
 <ng-template #statusBadgeContent>
+  @if (status()) {
+    <tedi-status-indicator
+      [type]="status()!"
+      [size]="size() === 'large' ? 'lg' : 'sm'"
+      [hasBorder]="true"
+      position="top-right"
+    />
+  }
+
   @if (icon()) {
     <tedi-icon class="tedi-status-badge__icon" [name]="icon()" [size]="16" />
   }
