@@ -3,8 +3,12 @@
 <div [ngClass]="inputClasses()">
   <ng-content select="input[tedi-text-field]"></ng-content>
 
-  @if (showClearButton()) {
-    <div class="tedi-form-field__buttons">
+  @if (clearable()) {
+    <div
+      class="tedi-form-field__buttons"
+      [class.tedi-form-field__buttons--hidden]="!showClearButton()"
+      [attr.aria-hidden]="!showClearButton() || null"
+    >
       <button
         class="tedi-form-field__clear"
         tedi-closing-button
@@ -12,7 +16,8 @@
         size="small"
         [ariaLabel]="'clear' | tediTranslate"
         [iconSize]="18"
-        [disabled]="isDisabled()"
+        [tabIndex]="showClearButton() ? 0 : -1"
+        [disabled]="isDisabled() || !showClearButton()"
         (click)="clear()"
       ></button>
 

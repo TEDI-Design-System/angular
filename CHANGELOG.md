@@ -1,3 +1,17 @@
+# [6.4.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.5...angular-6.4.0-rc.6) (2026-05-22)
+
+
+### Features
+
+* **horizontal-stepper:** new TEDI-ready component [#405](https://github.com/TEDI-Design-System/angular/issues/405) ([#437](https://github.com/TEDI-Design-System/angular/issues/437)) ([eec1733](https://github.com/TEDI-Design-System/angular/commit/eec1733fd6f5da20789ce3f853bd5d7f29f13455))
+
+# [6.4.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.4...angular-6.4.0-rc.5) (2026-05-22)
+
+
+### Features
+
+* **filter,status-indicator:** new filter component, status-indicator [#329](https://github.com/TEDI-Design-System/angular/issues/329) ([#396](https://github.com/TEDI-Design-System/angular/issues/396)) ([99e93b3](https://github.com/TEDI-Design-System/angular/commit/99e93b37830a89ea24fc45b706e09ec677433e80)), closes [#222](https://github.com/TEDI-Design-System/angular/issues/222) [#222](https://github.com/TEDI-Design-System/angular/issues/222) [#222](https://github.com/TEDI-Design-System/angular/issues/222) [#7](https://github.com/TEDI-Design-System/angular/issues/7) [#7](https://github.com/TEDI-Design-System/angular/issues/7) [#222](https://github.com/TEDI-Design-System/angular/issues/222) [#222](https://github.com/TEDI-Design-System/angular/issues/222)
+
 # [6.4.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.3...angular-6.4.0-rc.4) (2026-05-20)
 
 

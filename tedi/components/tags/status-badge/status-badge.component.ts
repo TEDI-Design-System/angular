@@ -8,6 +8,7 @@ import {
   inject,
 } from "@angular/core";
 import { IconComponent } from "../../base/icon/icon.component";
+import { StatusIndicatorComponent } from "../status-indicator/status-indicator.component";
 import { _IdGenerator } from "@angular/cdk/a11y";
 
 export type StatusBadgeColor =
@@ -25,7 +26,7 @@ export type StatusBadgeStatus = "danger" | "success" | "warning" | "inactive";
 @Component({
   selector: "tedi-status-badge",
   standalone: true,
-  imports: [IconComponent, CommonModule, NgClass],
+  imports: [IconComponent, StatusIndicatorComponent, CommonModule, NgClass],
   templateUrl: "./status-badge.component.html",
   styleUrl: "./status-badge.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -84,13 +85,6 @@ export class StatusBadgeComponent {
 
     if (this.variant()) {
       classList.push(`tedi-status-badge--variant-${this.variant()}`);
-    }
-
-    if (this.status()) {
-      classList.push(
-        "tedi-status-badge--status",
-        `tedi-status-badge--status-${this.status()}`,
-      );
     }
 
     if (this.size() === "large") {

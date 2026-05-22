@@ -289,6 +289,14 @@ export const translationsMap = {
     en: "Not completed",
     ru: "Не завершено",
   },
+  "stepper.error": {
+    description:
+      "Label for screen-reader that this step has errors (visually hidden)",
+    components: ["HorizontalStepper"],
+    et: "Viga",
+    en: "Error",
+    ru: "Ошибка",
+  },
   "skeleton.loading": {
     description: "Announced by screen-readers when skeleton is loading",
     components: ["Skeleton"],
@@ -352,6 +360,13 @@ export const translationsMap = {
     et: "Eemalda kõik",
     en: "Remove all",
     ru: "Удалить все",
+  },
+  "filter.clear-selection": {
+    description: "Label for the clear-selection action in the Filter dropdown",
+    components: ["Filter"],
+    et: "Tühjenda valik",
+    en: "Clear selection",
+    ru: "Очистить выбор",
   },
   "table.filter.no-options": {
     description: "When select filter has no options",

@@ -1,6 +1,7 @@
 export * from "./base";
 export * from "./buttons";
 export * from "./content";
+export * from "./filter";
 export * from "./form";
 export * from "./helpers";
 export * from "./layout";
