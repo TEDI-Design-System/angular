@@ -1,3 +1,10 @@
+# [6.4.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.5...angular-6.4.0-rc.6) (2026-05-22)
+
+
+### Features
+
+* **horizontal-stepper:** new TEDI-ready component [#405](https://github.com/TEDI-Design-System/angular/issues/405) ([#437](https://github.com/TEDI-Design-System/angular/issues/437)) ([eec1733](https://github.com/TEDI-Design-System/angular/commit/eec1733fd6f5da20789ce3f853bd5d7f29f13455))
+
 # [6.4.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.4...angular-6.4.0-rc.5) (2026-05-22)
 
 
