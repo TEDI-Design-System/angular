@@ -39,6 +39,7 @@ import { HideAtDirective } from "../../../directives/hide-at/hide-at.directive";
 import { SideNavToggleComponent } from "../sidenav/sidenav-toggle/sidenav-toggle.component";
 import { SideNavComponent } from "../sidenav/sidenav.component";
 import { SideNavItemComponent } from "../sidenav/sidenav-item/sidenav-item.component";
+import { SideNavOverlayComponent } from "../sidenav/sidenav-overlay/sidenav-overlay.component";
 import { SideNavDropdownComponent } from "../sidenav/sidenav-dropdown/sidenav-dropdown.component";
 import { SideNavDropdownItemComponent } from "../sidenav/sidenav-dropdown-item/sidenav-dropdown-item.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
@@ -187,6 +188,7 @@ export default {
         SideNavComponent,
         SideNavItemComponent,
         SideNavToggleComponent,
+        SideNavOverlayComponent,
         SideNavDropdownComponent,
         SideNavDropdownItemComponent,
         HeaderSearchComponent,
@@ -491,15 +493,15 @@ const profileMenuContent = (showLogout = true) => `
   <a tedi-link href="#" [underline]="false">{{ 'myData' | storyTranslate }}</a>
   <a tedi-link href="#" [underline]="false">{{ 'representatives' | storyTranslate }}</a>
   <a tedi-link href="#" [underline]="false">{{ 'contacts' | storyTranslate }}</a>
-  <tedi-separator *showAt="'lg'" />
-
-  <story-theme-toggle />
 
   <tedi-separator *showAt="'lg'" />
   <a tedi-link href="#" [underline]="false">
     <tedi-icon name="notifications" />
     {{ 'notifications' | storyTranslate }}
   </a>
+
+  <tedi-separator *showAt="'lg'" />
+  <story-theme-toggle />
 
   ${
     showLogout
@@ -602,6 +604,7 @@ Example with theme-aware logo:
             <tedi-header-login />
           </tedi-header-actions>
         </header>
+        <tedi-sidenav-overlay></tedi-sidenav-overlay>
         <nav tedi-sidenav *hideAt="'lg'" style="flex: 1;">
           <tedi-sidenav-item href="#">
             Link text
@@ -640,6 +643,7 @@ export const LoggedOut: StoryObj<HeaderComponent> = {
             <tedi-header-login />
           </tedi-header-actions>
         </header>
+        <tedi-sidenav-overlay></tedi-sidenav-overlay>
         <nav tedi-sidenav *hideAt="'lg'" style="flex: 1;">
           <tedi-sidenav-item href="#">
             Link text
@@ -685,15 +689,26 @@ export const LoggedOutWithSearch: StoryObj<HeaderComponent> = {
             </tedi-header-search>
           </tedi-header-content>
           <tedi-header-actions>
-            <tedi-header-search *hideAt="'lg'">
-              <tedi-search inputId="logged-out-2-search" />
-            </tedi-header-search>
-            <tedi-separator axis="vertical" />
+            <ng-container *showAt="'md'">
+              <ng-container *hideAt="'lg'">
+                <tedi-header-search>
+                  <tedi-search inputId="logged-out-2-search-tablet" />
+                </tedi-header-search>
+                <tedi-separator axis="vertical" />
+              </ng-container>
+            </ng-container>
             <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
             <tedi-separator axis="vertical" />
+            <ng-container *hideAt="'md'">
+              <tedi-header-search>
+                <tedi-search inputId="logged-out-2-search-mobile" />
+              </tedi-header-search>
+              <tedi-separator axis="vertical" />
+            </ng-container>
             <tedi-header-login />
           </tedi-header-actions>
         </header>
+        <tedi-sidenav-overlay></tedi-sidenav-overlay>
         <nav tedi-sidenav *hideAt="'lg'" style="flex: 1;">
           <tedi-sidenav-item href="#">{{ 'home' | storyTranslate }}</tedi-sidenav-item>
           <tedi-sidenav-item href="#">{{ 'services' | storyTranslate }}</tedi-sidenav-item>
@@ -1047,10 +1062,12 @@ export const WithInlineSearch: StoryObj<HeaderComponent> = {
       <header tedi-header>
         ${logo}
         <tedi-header-actions>
-          <tedi-header-search>
-            <tedi-search inputId="search-3" />
-          </tedi-header-search>
-          <tedi-separator axis="vertical" />
+          <ng-container *showAt="'md'">
+            <tedi-header-search>
+              <tedi-search inputId="search-3-desktop" />
+            </tedi-header-search>
+            <tedi-separator axis="vertical" />
+          </ng-container>
           <ng-container *showAt="'lg'">
             <tedi-header-role
               [label]="('role' | storyTranslate) + ':'"
@@ -1063,6 +1080,12 @@ export const WithInlineSearch: StoryObj<HeaderComponent> = {
           </ng-container>
           <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
           <tedi-separator axis="vertical" />
+          <ng-container *hideAt="'md'">
+            <tedi-header-search>
+              <tedi-search inputId="search-3-mobile" />
+            </tedi-header-search>
+            <tedi-separator axis="vertical" />
+          </ng-container>
           <tedi-header-profile>
             <tedi-header-role
               [label]="('role' | storyTranslate) + ':'"
@@ -1220,6 +1243,7 @@ export const LoggedInWithSidenav: StoryObj<HeaderComponent> = {
             </tedi-header-profile>
           </tedi-header-actions>
         </header>
+        <tedi-sidenav-overlay></tedi-sidenav-overlay>
         <nav tedi-sidenav style="flex: 1;">
           <tedi-sidenav-item icon="account_circle">
             Minu andmed
