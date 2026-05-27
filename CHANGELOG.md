@@ -1,3 +1,10 @@
+# [6.4.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.6...angular-6.4.0-rc.7) (2026-05-27)
+
+
+### Features
+
+* **select:** added clearSearchOnSelect input and some useful outputs [#439](https://github.com/TEDI-Design-System/angular/issues/439) ([#449](https://github.com/TEDI-Design-System/angular/issues/449)) ([37a7325](https://github.com/TEDI-Design-System/angular/commit/37a73256079811b113db9ab8f814211d58e0292a))
+
 # [6.4.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0-rc.5...angular-6.4.0-rc.6) (2026-05-22)
 
 
