@@ -4,13 +4,13 @@
 
 @if (activeTabContent(); as activeContent) {
   <button tedi-button type="button" variant="neutral" class="tedi-tabs-vertical__back-link" (click)="unselectAllTabs()">
-    <tedi-icon name="arrow_back" [size]="18"/>
+    <tedi-icon name="arrow_back" [size]="18" color="inherit"/>
     <span>{{ "back" | tediTranslate }}</span>
   </button>
 
   <h3 tedi-text>{{ activeTabTitle() }}</h3>
 
-  <tedi-card class="tedi-tabs-vertical__card">
+  <tedi-card class="tedi-tabs-vertical__card" role="tabpanel" [id]="activeTabId() + '-panel'" [attr.aria-labelledby]="activeTabId()">
     <tedi-card-content>
       <ng-container *ngTemplateOutlet="activeContent"/>
     </tedi-card-content>

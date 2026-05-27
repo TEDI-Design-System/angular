@@ -1,13 +1,9 @@
 import {ChangeDetectionStrategy, Component, computed, contentChildren, ViewEncapsulation} from '@angular/core';
+import {outputToObservable, takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
+import {EMPTY, merge, switchMap} from 'rxjs';
 import {CardComponent, CardContentComponent, TabContentComponent} from "@tedi-design-system/angular/community";
 import {TabCardComponent} from "../tab-card/tab-card.component";
-import {
-  AccordionComponent,
-  ButtonComponent,
-  IconComponent,
-  TediTranslationPipe,
-  TextComponent
-} from "@tedi-design-system/angular/tedi";
+import {AccordionComponent, ButtonComponent, IconComponent, TediTranslationPipe, TextComponent} from "@tedi-design-system/angular/tedi";
 import {NgTemplateOutlet} from "@angular/common";
 
 @Component({
@@ -33,6 +29,19 @@ import {NgTemplateOutlet} from "@angular/common";
 export class TabsVerticalComponent {
   private readonly tabs = contentChildren(TabCardComponent);
   private readonly tabContents = contentChildren(TabContentComponent);
+
+  constructor() {
+    toObservable(this.tabs).pipe(
+      switchMap(tabs =>
+        tabs.length === 0
+          ? EMPTY
+          : merge(...tabs.map(t => outputToObservable(t.tabSelected)))
+      ),
+      takeUntilDestroyed()
+    ).subscribe(tabId => {
+      this.tabs().forEach(t => t.selected.set(t.tabId() === tabId));
+    });
+  }
 
   activeTabId = computed(() =>
     this.tabs().find((tab) => tab.selected())?.tabId()
