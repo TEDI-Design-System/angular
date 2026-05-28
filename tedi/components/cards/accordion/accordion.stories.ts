@@ -1,6 +1,8 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 import { AccordionComponent } from "./accordion/accordion.component";
 import { AccordionItemComponent } from "./accordion-item/accordion-item.component";
+import { AccordionItemHeaderComponent } from "./accordion-item-header/accordion-item-header.component";
+import { AccordionItemContentComponent } from "./accordion-item-content/accordion-item-content.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
@@ -23,6 +25,8 @@ export default {
       imports: [
         AccordionComponent,
         AccordionItemComponent,
+        AccordionItemHeaderComponent,
+        AccordionItemContentComponent,
         IconComponent,
         TextComponent,
         ButtonComponent,
@@ -43,97 +47,6 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
-    headerClickable: {
-      control: "boolean",
-      description:
-        "Defines whether the entire header acts as the toggle trigger.\n\n" +
-        "`true` (default): clicking anywhere on the header toggles the item.\n\n" +
-        "`false`: the header does not toggle automatically. You must provide a custom toggle control inside the header (e.g. button or link).",
-      table: {
-        category: "Accordion Item",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "true" },
-      },
-    },
-    title: {
-      control: "text",
-      description: "The title of the accordion item.",
-      table: {
-        category: "Accordion Item",
-        type: { summary: "string" },
-      },
-    },
-    titleLayout: {
-      control: "radio",
-      options: ["hug", "fill"],
-      description:
-        "Controls how the title stretches.\n\n" +
-        "`hug`: wraps tightly around content.\n\n" +
-        "`fill`: expands to available space and pushes trailing elements to the end.",
-      table: {
-        category: "Accordion Item",
-        type: { summary: "'hug' | 'fill'" },
-        defaultValue: { summary: "hug" },
-      },
-    },
-    showSeparateTitle: {
-      control: "boolean",
-      description:
-        "Controls whether the title is rendered as a separate text in the accordion header.\n" +
-        "If false and `showExpandLabel` is true, the title is used as the expand button label.",
-      table: {
-        category: "Accordion Item",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "true" },
-      },
-    },
-    openLabel: {
-      control: "text",
-      description: "Label for the open action.",
-      table: {
-        category: "Accordion Item",
-        type: { summary: "string" },
-        defaultValue: { summary: "open" },
-      },
-    },
-    closeLabel: {
-      control: "text",
-      description: "Label for the close action.",
-      table: {
-        category: "Accordion Item",
-        type: { summary: "string" },
-        defaultValue: { summary: "close" },
-      },
-    },
-    showExpandLabel: {
-      control: "boolean",
-      description: "Whether to show the expand/collapse labels.",
-      table: {
-        category: "Accordion Item",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "true" },
-      },
-    },
-    showDefaultExpandAction: {
-      control: "boolean",
-      description:
-        "Whether to show the default expand/collapse icon. If false, you can add your own expand icon with slots.",
-      table: {
-        category: "Accordion Item",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "true" },
-      },
-    },
-    expandActionPosition: {
-      control: "radio",
-      options: ["start", "end"],
-      description: "Position of the expand/collapse action.",
-      table: {
-        category: "Accordion Item",
-        type: { summary: "'start' | 'end'" },
-        defaultValue: { summary: "end" },
-      },
-    },
     defaultExpanded: {
       control: "boolean",
       description:
@@ -142,25 +55,6 @@ export default {
         category: "Accordion Item",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
-      },
-    },
-    description: {
-      control: "text",
-      description:
-        "The description text of the accordion item. If you need to have different descriptions, use slots.",
-      table: {
-        category: "Accordion Item",
-        type: { summary: "string" },
-      },
-    },
-    descriptionPosition: {
-      control: "radio",
-      options: ["start", "end", "both"],
-      description: "Position of the description text.",
-      table: {
-        category: "Accordion Item",
-        type: { summary: "'start' | 'end' | 'both'" },
-        defaultValue: { summary: "start" },
       },
     },
     showIconCard: {
@@ -182,19 +76,91 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    headerClickable: {
+      control: "boolean",
+      description:
+        "Defines whether the entire header acts as the toggle trigger.\n\n" +
+        "`true` (default): the header is rendered as a button; clicking anywhere on it toggles the item.\n\n" +
+        "`false`: the header is rendered as a non-interactive container. The default expand action is still rendered alongside it unless `showDefaultExpandAction` is also set to `false`. Set `headerClickable=false` when projecting interactive children (action buttons, checkboxes, links) into the header to avoid nesting interactive controls.",
+      table: {
+        category: "Accordion Item Header",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    titleLayout: {
+      control: "radio",
+      options: ["hug", "fill"],
+      description:
+        "Controls how the title stretches.\n\n" +
+        "`hug`: wraps tightly around content.\n\n" +
+        "`fill`: expands to available space and pushes trailing elements to the end.",
+      table: {
+        category: "Accordion Item Header",
+        type: { summary: "'hug' | 'fill'" },
+        defaultValue: { summary: "hug" },
+      },
+    },
+    openLabel: {
+      control: "text",
+      description: "Label for the open action.",
+      table: {
+        category: "Accordion Item Header",
+        type: { summary: "string" },
+        defaultValue: { summary: "open" },
+      },
+    },
+    closeLabel: {
+      control: "text",
+      description: "Label for the close action.",
+      table: {
+        category: "Accordion Item Header",
+        type: { summary: "string" },
+        defaultValue: { summary: "close" },
+      },
+    },
+    showExpandLabel: {
+      control: "boolean",
+      description: "Whether to show the expand/collapse labels.",
+      table: {
+        category: "Accordion Item Header",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    showDefaultExpandAction: {
+      control: "boolean",
+      description:
+        "Whether to show the default expand/collapse icon. If false, you can add your own expand icon with slots.",
+      table: {
+        category: "Accordion Item Header",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    expandActionPosition: {
+      control: "radio",
+      options: ["start", "end"],
+      description: "Position of the expand/collapse action.",
+      table: {
+        category: "Accordion Item Header",
+        type: { summary: "'start' | 'end'" },
+        defaultValue: { summary: "end" },
+      },
+    },
     headerClass: {
       control: "text",
       description: "Custom CSS classes for the accordion header.",
       table: {
-        category: "Accordion Item",
+        category: "Accordion Item Header",
         type: { summary: "string" },
       },
     },
-    bodyClass: {
+    contentClass: {
       control: "text",
-      description: "Custom CSS classes for the accordion body.",
+      description: "Custom CSS classes for the accordion content.",
       table: {
-        category: "Accordion Item",
+        category: "Accordion Item Content",
         type: { summary: "string" },
       },
     },
@@ -233,15 +199,23 @@ export const Default: StoryObj = {
     docs: {
       description: {
         story: `
+The accordion item is composed of three parts, each owning its own configuration:
+
+- \`<tedi-accordion-item>\`: owns the item's state (\`expanded\`) and the inputs shared by header and content (\`selected\`, \`showIconCard\`, \`defaultExpanded\`).
+- \`<tedi-accordion-item-header>\`: owns header appearance and interaction (\`titleLayout\`, \`headerClickable\`, expand labels, \`headerClass\`, etc.). Put the title and any extras (action buttons, badges, descriptions) inside this element using the corresponding slot attributes.
+- \`<tedi-accordion-item-content>\`: owns content styling (\`contentClass\`). Wraps the collapsible content.
+
+
 | Selector | Description |
 |----------|------------|
+| \`[tedi-accordion-title]\` | The accordion title. |
+| \`[tedi-accordion-before-title]\` | Custom elements before the title. |
+| \`[tedi-accordion-after-title]\` | Custom elements after the title. |
 | \`[tedi-accordion-start-action]\` | Custom actions at the start of the header. |
-| \`[tedi-accordion-start-before-title]\` | Custom elements before the title. |
-| \`[tedi-accordion-start-after-title]\` | Custom elements after the title. |
 | \`[tedi-accordion-end-action]\` | Custom actions at the end of the header. |
-| \`[tedi-accordion-start-description]\` | Custom description content rendered below the title. |
-| \`[tedi-accordion-end-description]\` | Custom description content rendered at the end of the header. |
-| \`[tedi-accordion-icon-card]\` | Template for rendering the icon card layout. |
+| \`[tedi-accordion-start-description]\` | Description rendered below the title. |
+| \`[tedi-accordion-end-description]\` | Description rendered at the end of the header. |
+| \`[tedi-accordion-icon-card]\` | Template for rendering the icon card layout (child of \`<tedi-accordion-item>\`). |
       `,
       },
     },
@@ -249,16 +223,13 @@ export const Default: StoryObj = {
   args: {
     allowMultiple: false,
     headerClickable: true,
-    title: "Title",
     titleLayout: "hug",
-    showSeparateTitle: true,
     openLabel: "open",
     closeLabel: "close",
     showExpandLabel: true,
     showDefaultExpandAction: true,
     expandActionPosition: "end",
     defaultExpanded: false,
-    descriptionPosition: "start",
     showIconCard: false,
     selected: false,
   },
@@ -272,34 +243,40 @@ export const Default: StoryObj = {
     template: `
       <tedi-accordion [allowMultiple]="allowMultiple">
         <tedi-accordion-item
-          [headerClickable]="headerClickable"
-          [title]="title"
-          [titleLayout]="titleLayout"
-          [showSeparateTitle]="showSeparateTitle"
-          [openLabel]="openLabel"
-          [closeLabel]="closeLabel"
-          [showExpandLabel]="showExpandLabel"
-          [showDefaultExpandAction]="showDefaultExpandAction"
-          [expandActionPosition]="expandActionPosition"
           [defaultExpanded]="defaultExpanded"
-          [description]="description"
-          [descriptionPosition]="descriptionPosition"
           [showIconCard]="showIconCard"
           [selected]="selected"
-          [headerClass]="headerClass"
-          [bodyClass]="bodyClass"
         >
-          ${`
-            @if (!headerClickable) {
-              ${actionButtonTemplate("selected", "toggle")}
-            }
-          `}
-          <tedi-status-badge tedi-accordion-start-after-title color="success" text="Approved" />
           ${iconCardTemplate}
-          ${contentExample}
+          <tedi-accordion-item-header
+            [headerClickable]="headerClickable"
+            [titleLayout]="titleLayout"
+            [openLabel]="openLabel"
+            [closeLabel]="closeLabel"
+            [showExpandLabel]="showExpandLabel"
+            [showDefaultExpandAction]="showDefaultExpandAction"
+            [expandActionPosition]="expandActionPosition"
+            [headerClass]="headerClass"
+          >
+            <span tedi-accordion-title>Title</span>
+            ${`
+              @if (!headerClickable) {
+                ${actionButtonTemplate("selected", "toggle")}
+              }
+            `}
+            <tedi-status-badge tedi-accordion-after-title color="success" text="Approved" />
+          </tedi-accordion-item-header>
+          <tedi-accordion-item-content [contentClass]="contentClass">
+            ${contentExample}
+          </tedi-accordion-item-content>
         </tedi-accordion-item>
-        <tedi-accordion-item [title]="'Title 2'" [openLabel]="'open'" [closeLabel]="'close'" [expandActionPosition]="'end'">
-          ${contentExample}
+        <tedi-accordion-item>
+          <tedi-accordion-item-header [openLabel]="'open'" [closeLabel]="'close'" [expandActionPosition]="'end'">
+            <span tedi-accordion-title>Title 2</span>
+          </tedi-accordion-item-header>
+          <tedi-accordion-item-content>
+            ${contentExample}
+          </tedi-accordion-item-content>
         </tedi-accordion-item>
       </tedi-accordion>
     `,
@@ -311,97 +288,126 @@ export const Variants: StoryObj = {
     template: `
       <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
         <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'">
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header>
+              <span tedi-accordion-title>Title</span>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'">
-            <tedi-status-badge tedi-accordion-start-after-title color="success" text="Approved" />
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header>
+              <span tedi-accordion-title>Title</span>
+              <tedi-status-badge tedi-accordion-after-title color="success" text="Approved" />
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'">
-            <tedi-icon tedi-accordion-start-before-title name="description" color="secondary" [size]="18"></tedi-icon>
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header>
+              <span tedi-accordion-title>Title</span>
+              <tedi-icon tedi-accordion-before-title name="description" color="secondary" [size]="18"></tedi-icon>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'">
-            <tedi-icon tedi-accordion-start-before-title name="account_circle" color="brand" background="brand-secondary" [size]="16"></tedi-icon>
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header>
+              <span tedi-accordion-title>Title</span>
+              <tedi-icon tedi-accordion-before-title name="account_circle" color="brand" background="brand-secondary" [size]="16"></tedi-icon>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'" [showExpandLabel]="false">
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header [showExpandLabel]="false">
+              <span tedi-accordion-title>Title</span>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'" expandActionPosition="start" [showExpandLabel]="false">
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header expandActionPosition="start" [showExpandLabel]="false">
+              <span tedi-accordion-title>Title</span>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'" [description]="'Description'" [descriptionPosition]="'end'" [showExpandLabel]="false">
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header [showExpandLabel]="false">
+              <span tedi-accordion-title>Title</span>
+              <span tedi-accordion-end-description tedi-text color="tertiary" modifiers="small">
+                Description
+              </span>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'" [description]="'Description'" [showExpandLabel]="false">
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header [showExpandLabel]="false">
+              <span tedi-accordion-title>Title</span>
+              <span tedi-accordion-start-description tedi-text color="tertiary" modifiers="normal">
+                Description
+              </span>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'" [descriptionPosition]="'both'" [description]="'Description'" [showExpandLabel]="false">
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header [showExpandLabel]="false">
+              <span tedi-accordion-title>Title</span>
+              <span tedi-accordion-start-description tedi-text color="tertiary" modifiers="normal">
+                Description
+              </span>
+              <span tedi-accordion-end-description tedi-text color="tertiary" modifiers="small">
+                Description
+              </span>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'" [descriptionPosition]="'both'" [showExpandLabel]="false">
-            <span tedi-accordion-start-description tedi-text color="tertiary" modifiers="normal">
-              Description
-            </span>
-            <span tedi-accordion-end-description tedi-text color="tertiary" modifiers="small">
-              Another description
-            </span>
-            ${contentExample}
+          <tedi-accordion-item [selected]="selectedA">
+            <tedi-accordion-item-header
+              [headerClickable]="false"
+              expandActionPosition="start"
+              openLabel="Title"
+              closeLabel="Title"
+            >
+              ${actionButtonTemplate("selectedA", "toggleA")}
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item
-            [headerClickable]="false"
-            [title]="'Title'"
-            [showSeparateTitle]="false"
-            expandActionPosition="start"
-            [selected]="selectedA"
-          >
-            ${actionButtonTemplate("selectedA", "toggleA")}
-            ${contentExample}
-          </tedi-accordion-item>
-        </tedi-accordion>
-
-        <tedi-accordion>
-          <tedi-accordion-item
-            [headerClickable]="false"
-            [title]="'Title'"
-            [showSeparateTitle]="false"
-            expandActionPosition="start"
-            [selected]="selectedB"
-          >
-            ${actionButtonTemplate("selectedB", "toggleB")}
-            ${contentExample}
+          <tedi-accordion-item [selected]="selectedB">
+            <tedi-accordion-item-header
+              [headerClickable]="false"
+              expandActionPosition="start"
+              openLabel="Title"
+              closeLabel="Title"
+            >
+              ${actionButtonTemplate("selectedB", "toggleB")}
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
       </div>
@@ -441,110 +447,142 @@ export const ActionTypes: StoryObj = {
       <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
         <div class="story-row">
           <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'">
-            ${contentExample}
-          </tedi-accordion-item>
+            <tedi-accordion-item>
+              <tedi-accordion-item-header>
+                <span tedi-accordion-title>Title</span>
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
+            </tedi-accordion-item>
           </tedi-accordion>
           <tedi-accordion>
-            <tedi-accordion-item [title]="'Title'" [defaultExpanded]="true">
-              ${contentExample}
+            <tedi-accordion-item [defaultExpanded]="true">
+              <tedi-accordion-item-header>
+                <span tedi-accordion-title>Title</span>
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
         <div class="story-row">
           <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'" [headerClickable]="false" [showSeparateTitle]="false" expandActionPosition="start">
-            ${contentExample}
-          </tedi-accordion-item>
+            <tedi-accordion-item>
+              <tedi-accordion-item-header
+                [headerClickable]="false"
+                expandActionPosition="start"
+                openLabel="Title"
+                closeLabel="Title"
+              />
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
+            </tedi-accordion-item>
           </tedi-accordion>
           <tedi-accordion>
-            <tedi-accordion-item [title]="'Title'" [headerClickable]="false" [showSeparateTitle]="false" expandActionPosition="start" [defaultExpanded]="true">
-              ${contentExample}
+            <tedi-accordion-item [defaultExpanded]="true">
+              <tedi-accordion-item-header
+                [headerClickable]="false"
+                expandActionPosition="start"
+                openLabel="Title"
+                closeLabel="Title"
+              />
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
         <div class="story-row">
           <tedi-accordion>
-            <tedi-accordion-item [title]="'Title'" [showExpandLabel]="false">
-              ${contentExample}
+            <tedi-accordion-item>
+              <tedi-accordion-item-header [showExpandLabel]="false">
+                <span tedi-accordion-title>Title</span>
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
           <tedi-accordion>
-            <tedi-accordion-item [title]="'Title'" [defaultExpanded]="true" [showExpandLabel]="false">
-              ${contentExample}
-            </tedi-accordion-item>
-          </tedi-accordion>
-        </div>
-
-        <div class="story-row">
-          <tedi-accordion>
-            <tedi-accordion-item [title]="'Title'" [showExpandLabel]="false" [expandActionPosition]="'start'">
-              ${contentExample}
-            </tedi-accordion-item>
-          </tedi-accordion>
-          <tedi-accordion>
-            <tedi-accordion-item [title]="'Title'" [showExpandLabel]="false" [expandActionPosition]="'start'" [defaultExpanded]="true">
-              ${contentExample}
+            <tedi-accordion-item [defaultExpanded]="true">
+              <tedi-accordion-item-header [showExpandLabel]="false">
+                <span tedi-accordion-title>Title</span>
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
         <div class="story-row">
           <tedi-accordion>
-            <tedi-accordion-item
-              [headerClickable]="false"
-              [title]="'Title'"
-              [showSeparateTitle]="false"
-              expandActionPosition="start"
-              [selected]="selectedA"
-            >
-              ${actionButtonTemplate("selectedA", "toggleA")}
-              ${contentExample}
+            <tedi-accordion-item>
+              <tedi-accordion-item-header [showExpandLabel]="false" [expandActionPosition]="'start'">
+                <span tedi-accordion-title>Title</span>
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
-
           <tedi-accordion>
-            <tedi-accordion-item
-              [headerClickable]="false"
-              [title]="'Title'"
-              [showSeparateTitle]="false"
-              expandActionPosition="start"
-              [defaultExpanded]="true"
-              [selected]="selectedB"
-            >
-              ${actionButtonTemplate("selectedB", "toggleB")}
-              ${contentExample}
+            <tedi-accordion-item [defaultExpanded]="true">
+              <tedi-accordion-item-header [showExpandLabel]="false" [expandActionPosition]="'start'">
+                <span tedi-accordion-title>Title</span>
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
         <div class="story-row">
           <tedi-accordion>
-            <tedi-accordion-item
-              [headerClickable]="false"
-              [title]="'Title'"
-              [showSeparateTitle]="false"
-              expandActionPosition="start"
-              [selected]="selectedC"
-            >
-              ${actionButtonTemplate("selectedC", "toggleC")}
-              ${contentExample}
+            <tedi-accordion-item [selected]="selectedA">
+              <tedi-accordion-item-header
+                [headerClickable]="false"
+                expandActionPosition="start"
+                openLabel="Title"
+                closeLabel="Title"
+              >
+                ${actionButtonTemplate("selectedA", "toggleA")}
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
 
           <tedi-accordion>
-            <tedi-accordion-item
-              [headerClickable]="false"
-              [title]="'Title'"
-              [showSeparateTitle]="false"
-              expandActionPosition="start"
-              [defaultExpanded]="true"
-              [selected]="selectedD"
-            >
-              ${actionButtonTemplate("selectedD", "toggleD")}
-              ${contentExample}
+            <tedi-accordion-item [defaultExpanded]="true" [selected]="selectedB">
+              <tedi-accordion-item-header
+                [headerClickable]="false"
+                expandActionPosition="start"
+                openLabel="Title"
+                closeLabel="Title"
+              >
+                ${actionButtonTemplate("selectedB", "toggleB")}
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
+            </tedi-accordion-item>
+          </tedi-accordion>
+        </div>
+
+        <div class="story-row">
+          <tedi-accordion>
+            <tedi-accordion-item [selected]="selectedC">
+              <tedi-accordion-item-header
+                [headerClickable]="false"
+                expandActionPosition="start"
+                openLabel="Title"
+                closeLabel="Title"
+              >
+                ${actionButtonTemplate("selectedC", "toggleC")}
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
+            </tedi-accordion-item>
+          </tedi-accordion>
+
+          <tedi-accordion>
+            <tedi-accordion-item [defaultExpanded]="true" [selected]="selectedD">
+              <tedi-accordion-item-header
+                [headerClickable]="false"
+                expandActionPosition="start"
+                openLabel="Title"
+                closeLabel="Title"
+              >
+                ${actionButtonTemplate("selectedD", "toggleD")}
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
@@ -585,96 +623,106 @@ export const WithIconCard: StoryObj = {
       <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
         <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-08);">
           <tedi-accordion>
-            <tedi-accordion-item [title]="'Title'" [showIconCard]="true">
+            <tedi-accordion-item [showIconCard]="true">
               ${iconCardTemplate}
-              ${contentExample}
+              <tedi-accordion-item-header>
+                <span tedi-accordion-title>Title</span>
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
           <tedi-accordion>
-            <tedi-accordion-item [title]="'Title'" [defaultExpanded]="true" [showIconCard]="true">
+            <tedi-accordion-item [defaultExpanded]="true" [showIconCard]="true">
               ${iconCardTemplate}
-              ${contentExample}
-            </tedi-accordion-item>
-          </tedi-accordion>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-08);">
-          <tedi-accordion>
-            <tedi-accordion-item [title]="'Title'" [showExpandLabel]="false" [showIconCard]="true">
-              ${iconCardTemplate}
-              ${contentExample}
-            </tedi-accordion-item>
-          </tedi-accordion>
-          <tedi-accordion>
-            <tedi-accordion-item [title]="'Title'" [defaultExpanded]="true" [showExpandLabel]="false" [showIconCard]="true">
-              ${iconCardTemplate}
-              ${contentExample}
+              <tedi-accordion-item-header>
+                <span tedi-accordion-title>Title</span>
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-08);">
           <tedi-accordion>
-            <tedi-accordion-item
-              [headerClickable]="false"
-              [showIconCard]="true"
-              [title]="'Title'"
-              [showSeparateTitle]="false"
-              expandActionPosition="start"
-              [selected]="selectedA"
-            >
+            <tedi-accordion-item [showIconCard]="true">
               ${iconCardTemplate}
-              ${actionButtonTemplate("selectedA", "toggleA")}
-              ${contentExample}
+              <tedi-accordion-item-header [showExpandLabel]="false">
+                <span tedi-accordion-title>Title</span>
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
+            </tedi-accordion-item>
+          </tedi-accordion>
+          <tedi-accordion>
+            <tedi-accordion-item [defaultExpanded]="true" [showIconCard]="true">
+              ${iconCardTemplate}
+              <tedi-accordion-item-header [showExpandLabel]="false">
+                <span tedi-accordion-title>Title</span>
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
+            </tedi-accordion-item>
+          </tedi-accordion>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-08);">
+          <tedi-accordion>
+            <tedi-accordion-item [showIconCard]="true" [selected]="selectedA">
+              ${iconCardTemplate}
+              <tedi-accordion-item-header
+                [headerClickable]="false"
+                expandActionPosition="start"
+                openLabel="Title"
+                closeLabel="Title"
+              >
+                ${actionButtonTemplate("selectedA", "toggleA")}
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
 
           <tedi-accordion style="flex: 1;">
-            <tedi-accordion-item
-              [headerClickable]="false"
-              [showIconCard]="true"
-              [title]="'Title'"
-              [showSeparateTitle]="false"
-              expandActionPosition="start"
-              [defaultExpanded]="true"
-              [selected]="selectedB"
-            >
+            <tedi-accordion-item [defaultExpanded]="true" [showIconCard]="true" [selected]="selectedB">
               ${iconCardTemplate}
-              ${actionButtonTemplate("selectedB", "toggleB")}
-              ${contentExample}
+              <tedi-accordion-item-header
+                [headerClickable]="false"
+                expandActionPosition="start"
+                openLabel="Title"
+                closeLabel="Title"
+              >
+                ${actionButtonTemplate("selectedB", "toggleB")}
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-08);">
           <tedi-accordion>
-            <tedi-accordion-item
-              [headerClickable]="false"
-              [showIconCard]="true"
-              [title]="'Title'"
-              [showSeparateTitle]="false"
-              expandActionPosition="start"
-              [selected]="selectedC"
-            >
+            <tedi-accordion-item [showIconCard]="true" [selected]="selectedC">
               ${iconCardTemplate}
-              ${actionButtonTemplate("selectedC", "toggleC")}
-              ${contentExample}
+              <tedi-accordion-item-header
+                [headerClickable]="false"
+                expandActionPosition="start"
+                openLabel="Title"
+                closeLabel="Title"
+              >
+                ${actionButtonTemplate("selectedC", "toggleC")}
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
 
           <tedi-accordion>
-            <tedi-accordion-item
-              [headerClickable]="false"
-              [showIconCard]="true"
-              [title]="'Title'"
-              [showSeparateTitle]="false"
-              expandActionPosition="start"
-              [defaultExpanded]="true"
-              [selected]="selectedD"
-            >
+            <tedi-accordion-item [defaultExpanded]="true" [showIconCard]="true" [selected]="selectedD">
               ${iconCardTemplate}
-              ${actionButtonTemplate("selectedD", "toggleD")}
-              ${contentExample}
+              <tedi-accordion-item-header
+                [headerClickable]="false"
+                expandActionPosition="start"
+                openLabel="Title"
+                closeLabel="Title"
+              >
+                ${actionButtonTemplate("selectedD", "toggleD")}
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
@@ -713,25 +761,25 @@ export const Customized: StoryObj = {
     },
     template: `
       <style>
-        ::ng-deep .tedi-accordion__header.custom-header,
-        ::ng-deep .tedi-accordion__body.custom-body {
+        ::ng-deep .tedi-accordion-item-header.custom-header,
+        ::ng-deep .tedi-accordion-item-content.custom-content {
           background: var(--card-background-brand-quaternary);
         }
 
-        ::ng-deep .tedi-accordion__header.custom-header {
-          .tedi-accordion__start {
+        ::ng-deep .tedi-accordion-item-header.custom-header {
+          .tedi-accordion-item-header__start {
             gap: var(--layout-grid-gutters-16);
           }
         }
 
-        ::ng-deep .tedi-accordion__header.custom-title {
-          .tedi-accordion__title--main span {
+        ::ng-deep .tedi-accordion-item-header.custom-title {
+          .tedi-accordion-item-header__title-main span {
             font-weight: var(--heading-h6-weight);
           }
         }
 
-        ::ng-deep .tedi-accordion__header.custom-icon-rotation {
-          .tedi-accordion__icon--expanded {
+        ::ng-deep .tedi-accordion-item-header.custom-icon-rotation {
+          .tedi-accordion-item-header__icon--expanded {
             transform: rotateX(180deg);
           }
         }
@@ -748,94 +796,108 @@ export const Customized: StoryObj = {
       </style>
       <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
         <tedi-accordion>
-          <tedi-accordion-item
-            [title]="'Title'"
-            [titleLayout]="'fill'"
-          >
-            <tedi-status-badge tedi-accordion-start-after-title color="brand" text="Public" />
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header [titleLayout]="'fill'">
+              <span tedi-accordion-title>Title</span>
+              <tedi-status-badge tedi-accordion-after-title color="brand" text="Public" />
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item
-            [title]="'Title'"
-            [titleLayout]="'fill'"
-            [headerClass]="'custom-icon-rotation'"
-          >
-            <tedi-icon tedi-accordion-start-before-title name="account_circle" color="brand" background="brand-secondary" [size]="16"></tedi-icon>
-            <tedi-status-badge tedi-accordion-start-after-title color="neutral" text="New" />
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header
+              [titleLayout]="'fill'"
+              [headerClass]="'custom-icon-rotation'"
+            >
+              <span tedi-accordion-title>Title</span>
+              <tedi-icon tedi-accordion-before-title name="account_circle" color="brand" background="brand-secondary" [size]="16"></tedi-icon>
+              <tedi-status-badge tedi-accordion-after-title color="neutral" text="New" />
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
 
         <tedi-accordion>
-          <tedi-accordion-item [title]="'Title'" [headerClickable]="false" [showExpandLabel]="false" expandActionPosition="start" [selected]="selectedState">
-            <label tedi-label tedi-accordion-end-action color="primary" style="display: inline-flex; align-items: center; gap: var(--layout-grid-gutters-08);">
-              <input tedi-checkbox type="checkbox" [checked]="selectedState" (change)="toggleSelect($event)" />
-              {{ selectedState ? 'Unselect' : 'Select' }} this value
-            </label>
-            ${contentExample}
+          <tedi-accordion-item [selected]="selectedState">
+            <tedi-accordion-item-header
+              [headerClickable]="false"
+              [showExpandLabel]="false"
+              expandActionPosition="start"
+            >
+              <span tedi-accordion-title>Title</span>
+              <label tedi-label tedi-accordion-end-action color="primary" style="display: inline-flex; align-items: center; gap: var(--layout-grid-gutters-08);">
+                <input tedi-checkbox type="checkbox" [checked]="selectedState" (change)="toggleSelect($event)" />
+                {{ selectedState ? 'Unselect' : 'Select' }} this value
+              </label>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item
-            [title]="'Title'"
-            [titleLayout]="'fill'"
-          >
-            <tedi-status-badge tedi-accordion-start-before-title color="success" text="Approved" />
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header [titleLayout]="'fill'">
+              <span tedi-accordion-title>Title</span>
+              <tedi-status-badge tedi-accordion-before-title color="success" text="Approved" />
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item [title]="'Mari Maasikas'" [descriptionPosition]="'both'" [headerClass]="'custom-title'">
-            <img tedi-accordion-start-before-title src="custom_accordion_1.png" alt="Accordion example" />
-            <span tedi-accordion-start-description tedi-text color="tertiary" modifiers="normal">
-              mari.maasikas&#64;gmail.com
-            </span>
-            <span tedi-accordion-end-description tedi-text color="tertiary" modifiers="small">
-              Verified
-            </span>
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header
+              [headerClass]="'custom-title'"
+            >
+              <span tedi-accordion-title>Mari Maasikas</span>
+              <img tedi-accordion-before-title src="custom_accordion_1.png" alt="Accordion example" />
+              <span tedi-accordion-start-description tedi-text color="tertiary" modifiers="normal">
+                mari.maasikas&#64;gmail.com
+              </span>
+              <tedi-status-badge tedi-accordion-end-description color="success" text="Verified" />
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item
-            [title]="'Some important title'"
-            [titleLayout]="'fill'"
-            [showExpandLabel]="false"
-            [headerClass]="'custom-title'"
-          >
-            <img tedi-accordion-start-after-title src="custom_accordion_2.png" alt="Accordion example" />
-            <span tedi-accordion-start-description tedi-text color="tertiary" modifiers="normal" class="custom-description">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </span>
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header
+              [titleLayout]="'fill'"
+              [showExpandLabel]="false"
+              [headerClass]="'custom-title'"
+            >
+              <span tedi-accordion-title>Some important title</span>
+              <img tedi-accordion-after-title src="custom_accordion_2.png" alt="Accordion example" />
+              <span tedi-accordion-start-description tedi-text color="tertiary" modifiers="normal" class="custom-description">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+              </span>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <tedi-accordion>
-          <tedi-accordion-item
-            #item
-            [title]="'Some important title'"
-            [showDefaultExpandAction]="false"
-            [headerClickable]="false"
-            [headerClass]="'custom-header custom-title custom-description'"
-            [bodyClass]="'custom-body'"
-          >
-            <img tedi-accordion-start-before-title src="custom_accordion_2.png" alt="Accordion example" />
-            <span tedi-accordion-start-description tedi-text color="primary" modifiers="normal" class="custom-description">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            </span>
-            <button tedi-accordion-end-action tedi-button variant="neutral" (click)="item.toggle()">
-              <tedi-icon [name]="item.expanded() ? 'arrow_upward' : 'arrow_downward'"></tedi-icon>
-              {{ item.expanded() ? 'Show less' : 'Show more' }}
-            </button>
-            ${contentExample}
+          <tedi-accordion-item #item>
+            <tedi-accordion-item-header
+              [showDefaultExpandAction]="false"
+              [headerClickable]="false"
+              [headerClass]="'custom-header custom-title custom-description'"
+            >
+              <span tedi-accordion-title>Some important title</span>
+              <img tedi-accordion-before-title src="custom_accordion_2.png" alt="Accordion example" />
+              <span tedi-accordion-start-description tedi-text color="primary" modifiers="normal" class="custom-description">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+              </span>
+              <button tedi-accordion-end-action tedi-button variant="neutral" (click)="item.toggle()">
+                <tedi-icon [name]="item.expanded() ? 'arrow_upward' : 'arrow_downward'"></tedi-icon>
+                {{ item.expanded() ? 'Show less' : 'Show more' }}
+              </button>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content [contentClass]="'custom-content'">${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
       </div>
@@ -849,21 +911,33 @@ export const AccordionBehavior: StoryObj = {
       <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
         <h4 tedi-text>Single-expand accordion</h4>
         <tedi-accordion style="margin-bottom: var(--layout-grid-gutters-16);">
-          <tedi-accordion-item [title]="'Title 1'">
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header>
+              <span tedi-accordion-title>Title 1</span>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
-          <tedi-accordion-item [title]="'Title 2'">
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header>
+              <span tedi-accordion-title>Title 2</span>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
 
         <h4 tedi-text>Multi-expand accordion</h4>
         <tedi-accordion [allowMultiple]="true">
-          <tedi-accordion-item [title]="'Title 1'">
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header>
+              <span tedi-accordion-title>Title 1</span>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
-          <tedi-accordion-item [title]="'Title 2'">
-            ${contentExample}
+          <tedi-accordion-item>
+            <tedi-accordion-item-header>
+              <span tedi-accordion-title>Title 2</span>
+            </tedi-accordion-item-header>
+            <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
         </tedi-accordion>
       </div>

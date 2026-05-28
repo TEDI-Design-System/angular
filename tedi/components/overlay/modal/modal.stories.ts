@@ -6,7 +6,7 @@ import { ModalContentComponent } from "./modal-content/modal-content.component";
 import { ModalFooterComponent } from "./modal-footer/modal-footer.component";
 import { ModalService } from "./modal.service";
 import { ModalRef } from "./modal-ref";
-import { MODAL_DATA } from "./modal.types";
+import { MODAL_DATA, ModalFullscreen } from "./modal.types";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { LabelComponent } from "../../form/label/label.component";
 import { IconComponent } from "../../base/icon/icon.component";
@@ -496,7 +496,7 @@ export default {
       description: "Scroll behavior when content overflows. `'content'` scrolls inside the modal, `'page'` scrolls the full overlay.",
     },
     fullscreen: {
-      table: { type: { summary: "boolean | 'sm' | 'md' | 'lg' | 'xl'" }, defaultValue: { summary: "false" }, category: "ModalConfig" },
+      table: { type: { summary: "boolean | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'" }, defaultValue: { summary: "false" }, category: "ModalConfig" },
       description: "Fullscreen mode. `true` = always fullscreen. A breakpoint string (e.g. `'md'`) makes the modal fullscreen below that breakpoint.",
     },
     closeOnBackdropClick: {
@@ -544,7 +544,7 @@ export const Default: StoryObj = {
     maxWidth: { control: "text" },
     position: { control: "select", options: ["center", "top", "left", "right"] },
     scrollBehavior: { control: "select", options: ["content", "page"] },
-    fullscreen: { control: "text", description: "Set `true` for always fullscreen or a breakpoint string (`sm`, `md`, `lg`, `xl`)." },
+    fullscreen: { control: "text", description: "Set `true` for always fullscreen or a breakpoint string (`sm`, `md`, `lg`, `xl`, `xxl`)." },
     closeOnBackdropClick: { control: "boolean" },
     closeOnEscape: { control: "boolean" },
     showClose: { control: "boolean" },
@@ -635,7 +635,7 @@ class MyModalContent {
           maxWidth: this.maxWidth || undefined,
           position: this.position as "center" | "top" | "left" | "right",
           scrollBehavior: this.scrollBehavior as "content" | "page",
-          fullscreen: this.parseFullscreen() as boolean | "sm" | "md" | "lg" | "xl",
+          fullscreen: this.parseFullscreen() as ModalFullscreen,
           closeOnBackdropClick: this.closeOnBackdropClick,
           closeOnEscape: this.closeOnEscape,
         });

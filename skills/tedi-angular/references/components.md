@@ -78,30 +78,70 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 ### AccordionItem
 **Selector:** `tedi-accordion-item`
 **Inputs:**
-- `title: string = ""`
-- `titleLayout: "hug" | "fill" = "hug"`
-- `headerClickable: boolean = true` — whether clicking header toggles expand
-- `showSeparateTitle: boolean = true`
-- `openLabel: string = "open"` — label for expand action
-- `closeLabel: string = "close"` — label for collapse action
-- `showExpandLabel: boolean = true` — show open/close label text
-- `showDefaultExpandAction: boolean = true` — show default expand/collapse button
-- `expandActionPosition: "start" | "end" = "end"`
-- `defaultExpanded: boolean = false`
-- `description: string`
-- `descriptionPosition: "start" | "end" | "both" = "start"`
-- `showIconCard: boolean = false`
-- `selected: boolean = false`
-- `headerClass: string | null`
-- `bodyClass: string | null`
+- `defaultExpanded: boolean = false` — initial expanded state
+- `showIconCard: boolean = false` — enable the icon-card grid column
+- `selected: boolean = false` — visual selected state
 **Model:** `expanded: boolean`
-**Slots:** default, `[tedi-accordion-icon-card]`, `[tedi-accordion-start-action]`, `[tedi-accordion-end-action]`
+**Slots:** `<tedi-accordion-item-header>`, `<tedi-accordion-item-content>`, `[tedi-accordion-icon-card]` (direct child of the item, occupies its own grid column)
+
+### AccordionItemHeader
+**Selector:** `tedi-accordion-item-header`
+**Inputs:**
+- `headerClickable: boolean = true` — when true, the whole header is the toggle button. Set to false when projecting interactive children (action buttons, checkboxes, links) so the header becomes a div with a separate small toggle button.
+- `titleLayout: "hug" | "fill" = "hug"` — `fill` makes the title flex-grow, pushing trailing siblings to the right edge of the start group
+- `openLabel: string = "open"` — label shown when collapsed (passed through `tediTranslate`)
+- `closeLabel: string = "close"` — label shown when expanded (passed through `tediTranslate`)
+- `showExpandLabel: boolean = true` — when false, the toggle is icon-only and uses `aria-label` for its accessible name
+- `showDefaultExpandAction: boolean = true` — when false, no default toggle button is rendered (consumer provides their own via slots and calls `item.toggle()`)
+- `expandActionPosition: "start" | "end" = "end"`
+- `headerClass: string | null` — extra CSS class on the header element
+**Slots:**
+- `[tedi-accordion-title]` — the accordion title content (rendered in the title position)
+- `[tedi-accordion-start-action]` — actions at the start of the header (e.g., before the title group)
+- `[tedi-accordion-before-title]` — element rendered immediately before the title (e.g., a small icon)
+- `[tedi-accordion-after-title]` — element rendered immediately after the title, inside the start group
+- `[tedi-accordion-start-description]` — description below the title (triggers a column-flex layout for title + description)
+- `[tedi-accordion-end-description]` — description rendered at the right side of the header
+- `[tedi-accordion-end-action]` — actions at the end of the header (e.g., custom toggle button or status indicator)
+
+### AccordionItemContent
+**Selector:** `tedi-accordion-item-content`
+**Inputs:**
+- `contentClass: string | null` — extra CSS class on the content element
+**Slots:** default (the collapsible content)
+
+The content panel is automatically given `role="region"`, `aria-labelledby` pointing to the header, and `inert` + `aria-hidden` when collapsed.
 
 ```html
 <tedi-accordion>
-  <tedi-accordion-item title="Section 1">Content 1</tedi-accordion-item>
-  <tedi-accordion-item title="Section 2">Content 2</tedi-accordion-item>
+  <tedi-accordion-item>
+    <tedi-accordion-item-header>
+      <span tedi-accordion-title>Section 1</span>
+    </tedi-accordion-item-header>
+    <tedi-accordion-item-content>Content 1</tedi-accordion-item-content>
+  </tedi-accordion-item>
+  <tedi-accordion-item>
+    <tedi-accordion-item-header>
+      <span tedi-accordion-title>Section 2</span>
+      <tedi-status-badge tedi-accordion-end-description color="success" text="Approved" />
+    </tedi-accordion-item-header>
+    <tedi-accordion-item-content>Content 2</tedi-accordion-item-content>
+  </tedi-accordion-item>
 </tedi-accordion>
+```
+
+For non-clickable headers with custom actions (the toggle stays visible at the start, the action button sits at the end):
+
+```html
+<tedi-accordion-item [selected]="isSelected">
+  <tedi-accordion-item-header [headerClickable]="false" expandActionPosition="start">
+    <span tedi-accordion-title>Title</span>
+    <button tedi-button tedi-accordion-end-action (click)="$event.stopPropagation(); toggleSelected()">
+      Select
+    </button>
+  </tedi-accordion-item-header>
+  <tedi-accordion-item-content>Body</tedi-accordion-item-content>
+</tedi-accordion-item>
 ```
 
 ## Content
@@ -165,6 +205,90 @@ Composed of sub-components:
   <tedi-text-group-label>Name</tedi-text-group-label>
   <tedi-text-group-value>John Doe</tedi-text-group-value>
 </tedi-text-group>
+```
+
+## Filter
+
+### Filter
+**Selector:** `tedi-filter`
+**Model:** `selected: boolean`, `value: string | string[]`
+**Inputs:**
+- `text: string = ""` — filter label text
+- `variant: FilterVariant = "primary"` — "primary" or "secondary"
+- `size: FilterSize = "default"` — "default" or "large"
+- `allowMultiple: boolean = false` — multi-select mode; `value` is treated as `string[]` when true
+- `options: FilterOption[] = []` — dropdown options `{ label, value, disabled? }`
+- `preserveLabel: boolean = false` — when true, single-select shows "Text: SelectedLabel" instead of replacing text
+- `showSearch: boolean = false` — show the search field in the dropdown
+- `searchClearable: boolean = true` — show clear (×) button in the search field (only when `showSearch` is true)
+- `clearSearchOnSelect: boolean = false` — clear the search field after an option is selected or toggled
+- `showSelectAll: boolean = false` — show "Select all" in multi-select
+- `showClear: boolean = false` — show clear action in dropdown
+- `selectAllLabel?: string` — override for "Select all" label (defaults to translated string)
+- `clearLabel?: string` — override for "Clear selection" label (defaults to translated string)
+- `appendTo: string = ""` — append dropdown to selector (e.g., "body")
+- `disabled: boolean = false` — also set automatically by a disabled `FormControl` or a disabled parent `FilterGroup`
+**Outputs:**
+- `cleared: void` — emitted when clear button is clicked in custom content mode
+**Slots:**
+- `[tediFilterPrepend]` — content before the label (icon, status badge, indicator). Hidden when the filter is selected. In toggle mode (no dropdown), a check icon replaces it; in dropdown modes the prepend is simply removed. Use `color="inherit"` on `<tedi-icon>` to match the filter's text color.
+- `[tediFilterContent]` — custom dropdown content (replaces options)
+
+Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle), `string` (single-select), `string[]` (multi-select).
+
+```html
+<!-- Boolean toggle -->
+<tedi-filter text="Active" variant="secondary" [formControl]="activeControl" />
+
+<!-- Single-select dropdown -->
+<tedi-filter text="Service" [options]="options" [(value)]="value" [showClear]="true" appendTo="body" />
+
+<!-- Single-select with label preserved (shows "Service: Option A") -->
+<tedi-filter text="Service" [options]="options" [(value)]="value" [preserveLabel]="true" appendTo="body" />
+
+<!-- Multi-select dropdown -->
+<tedi-filter text="Hospital" [allowMultiple]="true" [options]="options" [(value)]="values"
+  [showSearch]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+
+<!-- With prepend content -->
+<tedi-filter text="Submitted" variant="secondary" size="large">
+  <tedi-status-badge tediFilterPrepend text="5" color="brand" />
+</tedi-filter>
+
+<!-- Custom dropdown content -->
+<tedi-filter [text]="selectedLabel" [selected]="!!selectedValue" [showClear]="true" (cleared)="clear()">
+  <div tediFilterContent>
+    <!-- custom content here -->
+  </div>
+</tedi-filter>
+
+<!-- Disabled -->
+<tedi-filter text="Service" [options]="options" [(value)]="value" [disabled]="true" />
+```
+
+### FilterGroup
+**Selector:** `tedi-filter-group`
+Wrapper that joins filters into a connected button group with collapsed borders and shared border-radius. Supports `allowMultiple` and a shared `formControl`/`disabled` state that propagates to children.
+
+```html
+<tedi-filter-group>
+  <tedi-filter text="All" variant="secondary" [selected]="true" />
+  <tedi-filter text="Active" variant="secondary" />
+  <tedi-filter text="Closed" variant="secondary" />
+</tedi-filter-group>
+
+<!-- Radio-like single-select via shared FormControl -->
+<tedi-filter-group label="Type" [formControl]="typeControl">
+  <tedi-filter text="All" value="all" />
+  <tedi-filter text="Active" value="active" />
+  <tedi-filter text="Closed" value="done" />
+</tedi-filter-group>
+
+<!-- Multi-select via shared FormControl -->
+<tedi-filter-group label="Tags" [allowMultiple]="true" [formControl]="tagsControl">
+  <tedi-filter text="Urgent" value="urgent" />
+  <tedi-filter text="Review" value="review" />
+</tedi-filter-group>
 ```
 
 ## Form
@@ -597,6 +721,26 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 <a tedi-link href="/page" variant="default">Go to page</a>
 ```
 
+### HorizontalStepper
+**Selector:** `tedi-horizontal-stepper`
+**Inputs:**
+- `ariaLabel: string`
+- `background: "default" | "transparent" = "default"`
+- `compact: boolean | "sm" | "md" | "lg" | "xl" | "xxl" = "sm"` — collapse labels to show only indicators plus the selected step's label. `true` = always collapsed; a breakpoint = collapsed below that breakpoint.
+
+**Sub-component:** `tedi-horizontal-stepper-item`
+- `label: string` (required), `description: string`
+- `completed`, `error`, `selected` (booleanAttribute inputs)
+- `(stepSelect)` — emitted on click
+
+```html
+<tedi-horizontal-stepper ariaLabel="Form progress" compact="md">
+  <tedi-horizontal-stepper-item label="Request" completed />
+  <tedi-horizontal-stepper-item label="Application" selected />
+  <tedi-horizontal-stepper-item label="Response" />
+</tedi-horizontal-stepper>
+```
+
 ## Notifications
 
 ### Alert
@@ -660,8 +804,9 @@ openModal() {
     size: 'default',                // 'default' | 'small'
     position: 'center',             // 'center' | 'top' | 'left' | 'right'
     closeOnBackdropClick: true,
+    closeOnEscape: true,
     scrollBehavior: 'content',      // 'content' | 'page'
-    mobileFullscreen: false,
+    fullscreen: false,              // true | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | false
   });
 
   ref.closed.subscribe(result => console.log(result));
@@ -671,11 +816,15 @@ openModal() {
 **ModalConfig inputs:**
 - `data: unknown` — injected via `MODAL_DATA` token
 - `width: ModalWidth = "sm"` — preset (`xs`-`xl`) or custom CSS value (`"80%"`, `"600px"`)
+- `maxWidth: string` — max-width cap (e.g. `"75%"`, `"60vw"`). Overrides the default 95vw limit.
 - `size: ModalSize = "default"` — `"default"` or `"small"`
 - `position: ModalPosition = "center"` — `"center"`, `"top"`, `"left"`, `"right"`
 - `closeOnBackdropClick: boolean = true`
+- `closeOnEscape: boolean = true`
 - `scrollBehavior: "content" | "page" = "content"`
-- `mobileFullscreen: boolean = false`
+- `fullscreen: boolean | "sm" | "md" | "lg" | "xl" | "xxl" = false` — `true` = always fullscreen; a breakpoint = fullscreen below that breakpoint.
+- `ariaLabel: string` — ARIA label for the dialog.
+- `ariaLabelledBy: string` — ID of the element that labels the dialog.
 
 **ModalRef methods/properties:**
 - `close(result?: R)` — close with optional result
@@ -797,14 +946,35 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `color: StatusBadgeColor = "neutral"`
 - `variant: StatusBadgeVariant = "filled"`
 - `size: StatusBadgeSize = "default"`
-- `status: StatusBadgeStatus`
+- `status: StatusBadgeStatus` — renders a `tedi-status-indicator` in top-right position
 - `icon: string = ""`
 - `class: string` — custom CSS class
 - `title: string` — tooltip/abbreviation title
 - `role: string` — ARIA role
 
 ```html
-<tedi-status-badge text="Active" color="success" status="positive" />
+<tedi-status-badge text="Active" color="success" status="success" />
+```
+
+### StatusIndicator
+**Selector:** `tedi-status-indicator`
+**Inputs:**
+- `type: StatusIndicatorType = "success"` — "success", "danger", "warning", "inactive"
+- `size: StatusIndicatorSize = "sm"` — "sm" or "lg"
+- `hasBorder: boolean = false` — white border ring
+- `position: StatusIndicatorPosition = "default"` — "default" (inline) or "top-right" (absolute)
+
+Standalone colored dot indicator. Used internally by `StatusBadge` and can be used standalone (e.g., as a prepend in filters).
+
+```html
+<tedi-status-indicator type="danger" />
+<tedi-status-indicator type="success" size="lg" [hasBorder]="true" />
+
+<!-- Absolute positioned on parent -->
+<span style="position: relative">
+  Lugemata teated
+  <tedi-status-indicator type="danger" position="top-right" />
+</span>
 ```
 
 ---
