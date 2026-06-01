@@ -9,20 +9,23 @@
   width: 100%;
   padding: var(--pagination-padding-y) var(--pagination-padding-x);
 
+  &.tedi-pagination--no-pager {
+    grid-template-areas: "results page-size";
+    grid-template-columns: 1fr auto;
+  }
+
+  // Mobile uses flex (not grid) so hidden slots actually collapse out of the
+  // layout — named grid areas would otherwise reserve an empty row even when
+  // the only visible slot is the pager.
   @include breakpoints.media-breakpoint-down(md) {
-    grid-template-areas:
-      "page-size"
-      "results"
-      "pager";
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: var(--layout-grid-gutters-08);
 
-    // Page-size at top is only correct when pager is also visible. Drop it back
-    // out of the layout when the pager is hidden so the strip reads results → page-size.
     &.tedi-pagination--no-pager {
-      grid-template-areas: "results page-size";
-      grid-template-columns: 1fr auto;
+      flex-direction: row;
       gap: var(--layout-grid-gutters-16);
+      justify-content: space-between;
     }
   }
 
@@ -74,12 +77,14 @@
     @include breakpoints.media-breakpoint-down(md) {
       justify-content: center;
       justify-self: center;
+      order: 2;
     }
 
     .tedi-pagination--no-pager & {
       @include breakpoints.media-breakpoint-down(md) {
         justify-content: flex-start;
         justify-self: start;
+        order: 0;
       }
     }
   }
@@ -89,6 +94,10 @@
     grid-area: pager;
     align-items: center;
     justify-self: center;
+
+    @include breakpoints.media-breakpoint-down(md) {
+      order: 3;
+    }
   }
 
   &__slot-end {
@@ -103,6 +112,7 @@
       gap: var(--layout-grid-gutters-04);
       justify-content: center;
       justify-self: center;
+      order: 1;
     }
 
     .tedi-pagination--no-pager & {
@@ -342,6 +352,13 @@
       flex-direction: column;
       gap: var(--layout-grid-gutters-04);
       align-items: center;
+    }
+
+    .tedi-pagination--no-pager & {
+      @include breakpoints.media-breakpoint-down(md) {
+        flex-direction: row;
+        gap: var(--form-field-inner-spacing);
+      }
     }
   }
 
