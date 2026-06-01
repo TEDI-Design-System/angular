@@ -473,7 +473,7 @@ describe("PaginationComponent mobile layout", () => {
     });
   });
 
-  it("omits the modal title by default and includes it when showModalTitle is true", () => {
+  it("includes the modal title by default and omits it when showModalTitle is false", () => {
     const fixture = TestBed.createComponent(PaginationComponent);
     fixture.componentRef.setInput("pageCount", 10);
     fixture.componentRef.setInput("page", 3);
@@ -482,18 +482,18 @@ describe("PaginationComponent mobile layout", () => {
     (fixture.nativeElement.querySelector(
       ".tedi-pagination__mobile-trigger",
     ) as HTMLButtonElement).click();
-    expect(modalOpenSpy.mock.calls[0][1].data.title).toBeUndefined();
+    expect(modalOpenSpy.mock.calls[0][1].data.title).toBe("Select page");
 
     modalClosedSubject.next(undefined);
     fixture.detectChanges();
 
-    fixture.componentRef.setInput("showModalTitle", true);
+    fixture.componentRef.setInput("showModalTitle", false);
     fixture.detectChanges();
 
     (fixture.nativeElement.querySelector(
       ".tedi-pagination__mobile-trigger",
     ) as HTMLButtonElement).click();
-    expect(modalOpenSpy.mock.calls[1][1].data.title).toBe("Select page");
+    expect(modalOpenSpy.mock.calls[1][1].data.title).toBeUndefined();
   });
 
   it("navigates to the page returned by the modal", () => {

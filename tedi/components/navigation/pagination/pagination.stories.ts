@@ -18,9 +18,6 @@ export default {
     }),
   ],
   parameters: {
-    status: {
-      type: "partiallyTediReady",
-    },
     design: {
       type: "figma",
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=8478-72385&m=dev",
@@ -154,7 +151,7 @@ export default {
       table: {
         category: "inputs",
         type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
+        defaultValue: { summary: "true" },
       },
     },
     hideResults: {
@@ -426,30 +423,6 @@ export const CustomResultsSlot: Story = {
       description: {
         story:
           "Project `[tediPaginationResults]` content to replace the default \"X results\" label entirely — useful when the count is an approximation (`1000+`), a status pill, or a more complex DOM than a plain count.",
-      },
-    },
-  },
-};
-
-export const MobilePickerWithTitle: Story = {
-  args: {
-    pageCount: 50,
-    page: 24,
-    totalItems: 480,
-    pageSize: 10,
-    pageSizeOptions: [10, 25, 50, 100],
-    showModalTitle: true,
-  },
-  render: (args) => ({
-    props: args,
-    template: `<tedi-pagination ${argsToTemplate(args)} />`,
-  }),
-  parameters: {
-    viewport: { defaultViewport: "mobile1" },
-    docs: {
-      description: {
-        story:
-          "Below `md`, both the page-jump and page-size selectors open a bottom-aligned modal. The active page is scrolled into view on open. Enable `showModalTitle` to show a heading inside each picker.",
       },
     },
   },

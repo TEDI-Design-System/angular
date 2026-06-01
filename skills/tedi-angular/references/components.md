@@ -734,7 +734,7 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `dividerPosition: "top" | "bottom" | "none" = "top"` — where the divider line sits (or removed entirely)
 - `disableArrowsAtBoundary: boolean = false` — keep prev/next arrows visible (but disabled) at the first/last page instead of hiding them
 - `showArrowLabels: boolean = false` — render visible text labels next to the prev/next icons
-- `showModalTitle: boolean = false` — show a heading inside the mobile picker modals
+- `showModalTitle: boolean = true` — show a heading inside the mobile picker modals; set `false` to hide
 - `hideResults: PaginationVisibility = false` — `true`/`false` or a breakpoint name (`"sm"`–`"xxl"`) to hide below that breakpoint
 - `hidePageSize: PaginationVisibility = false`
 - `hidePager: PaginationVisibility = false`
@@ -863,7 +863,7 @@ openModal() {
     data: { title: 'Hello' },
     width: 'md',                    // 'xs' | 'sm' | 'md' | 'lg' | 'xl' | custom CSS value
     size: 'default',                // 'default' | 'small'
-    position: 'center',             // 'center' | 'top' | 'left' | 'right'
+    position: 'center',             // 'center' | 'top' | 'bottom' | 'left' | 'right'
     closeOnBackdropClick: true,
     closeOnEscape: true,
     scrollBehavior: 'content',      // 'content' | 'page'
@@ -879,7 +879,7 @@ openModal() {
 - `width: ModalWidth = "sm"` — preset (`xs`-`xl`) or custom CSS value (`"80%"`, `"600px"`)
 - `maxWidth: string` — max-width cap (e.g. `"75%"`, `"60vw"`). Overrides the default 95vw limit.
 - `size: ModalSize = "default"` — `"default"` or `"small"`
-- `position: ModalPosition = "center"` — `"center"`, `"top"`, `"left"`, `"right"`
+- `position: ModalPosition = "center"` — `"center"`, `"top"`, `"bottom"`, `"left"`, `"right"`. `"bottom"` anchors the modal to the bottom edge with a fixed margin (useful for mobile bottom-sheet patterns).
 - `closeOnBackdropClick: boolean = true`
 - `closeOnEscape: boolean = true`
 - `scrollBehavior: "content" | "page" = "content"`
@@ -922,7 +922,9 @@ class MyModalContent {
 ```
 
 **Sub-components:**
-- `tedi-modal-header` — `showClose: boolean = true`
+- `tedi-modal-header`
+  - `showClose: boolean = true` — toggle the close button
+  - `closeButtonSize: ClosingButtonSize` (optional) — overrides the close button size. When unset, the close button auto-tracks the modal `size` variant (default → standard, small → compact).
 - `tedi-modal-content` — scrollable body
 - `tedi-modal-footer` — action buttons
 

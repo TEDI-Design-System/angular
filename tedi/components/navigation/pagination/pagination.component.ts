@@ -146,9 +146,9 @@ export class PaginationComponent {
   /**
    * Show a heading inside the mobile page-jump / page-size picker modals.
    * Uses the `pageTitle` / `pageSizeTitle` labels.
-   * @default false
+   * @default true
    */
-  readonly showModalTitle = input<boolean>(false);
+  readonly showModalTitle = input<boolean>(true);
 
   /** Emits whenever the user navigates to a different page. */
   readonly pageChange = output<number>();
