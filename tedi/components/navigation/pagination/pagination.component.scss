@@ -11,15 +11,14 @@
 
   @include breakpoints.media-breakpoint-down(md) {
     grid-template-areas:
+      "page-size"
       "results"
-      "pager"
-      "page-size";
+      "pager";
     grid-template-columns: 1fr;
     gap: var(--layout-grid-gutters-08);
 
-    // When the pager is hidden (e.g. a top-of-table pagination row showing
-    // only results + page-size), keep them on a single row even at mobile —
-    // matches the Figma `Mobile=True, Position=Top` variant.
+    // Page-size at top is only correct when pager is also visible. Drop it back
+    // out of the layout when the pager is hidden so the strip reads results → page-size.
     &.tedi-pagination--no-pager {
       grid-template-areas: "results page-size";
       grid-template-columns: 1fr auto;
@@ -29,11 +28,20 @@
 
   &--bg-white {
     background: var(--general-surface-primary);
-    border-top: var(--tedi-borders-01) solid var(--general-border-secondary);
   }
 
   &--bg-transparent {
     background: transparent;
+  }
+
+  // Divider sits above or below the row. `--bg-transparent` opts out entirely
+  // since transparent placements typically have their own surrounding border.
+  &--divider-top:not(.tedi-pagination--bg-transparent) {
+    border-top: var(--tedi-borders-01) solid var(--general-border-secondary);
+  }
+
+  &--divider-bottom:not(.tedi-pagination--bg-transparent) {
+    border-bottom: var(--tedi-borders-01) solid var(--general-border-secondary);
   }
 
   // Empty grid slots would otherwise reserve an implicit row/column, so hide
@@ -68,7 +76,6 @@
       justify-self: center;
     }
 
-    // No-pager mode at mobile keeps results left-aligned (single-row layout).
     .tedi-pagination--no-pager & {
       @include breakpoints.media-breakpoint-down(md) {
         justify-content: flex-start;
@@ -91,15 +98,17 @@
     justify-content: flex-end;
     min-width: 0;
 
-    // Stacked mobile layout — center horizontally instead of pinning right.
     @include breakpoints.media-breakpoint-down(md) {
+      flex-direction: column;
+      gap: var(--layout-grid-gutters-04);
       justify-content: center;
       justify-self: center;
     }
 
-    // No-pager mode keeps the single-row layout, so restore right alignment.
     .tedi-pagination--no-pager & {
       @include breakpoints.media-breakpoint-down(md) {
+        flex-direction: row;
+        gap: var(--form-field-inner-spacing);
         justify-content: flex-end;
         justify-self: end;
       }
@@ -132,6 +141,15 @@
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       gap: var(--layout-grid-gutters-16);
+    }
+
+    // Arrow buttons claim the outer columns on mobile (via --previous/--next
+    // justify-self). With arrows removed the picker would land in column 1
+    // and skew left — collapse to a single centered column instead.
+    .tedi-pagination--no-arrows & {
+      @include breakpoints.media-breakpoint-down(md) {
+        grid-template-columns: auto;
+      }
     }
   }
 
@@ -180,8 +198,7 @@
     border-radius: var(--button-radius-default);
 
     // Extend the touch target to 32×32 without changing the visual size —
-    // satisfies WCAG 2.5.8 with margin for touch error. The pseudo-element
-    // captures clicks because it sits over the button surface.
+    // satisfies WCAG 2.5.8 with margin for touch error.
     &::before {
       position: absolute;
       inset: -4px;
@@ -230,7 +247,6 @@
       font-size: var(--button-icon-inner-icon-only-size) !important;
     }
 
-    // Extend the touch target to 32×32 (WCAG 2.5.8 with margin).
     &::before {
       position: absolute;
       inset: -4px;
@@ -241,6 +257,31 @@
       color: transparent;
       pointer-events: none;
     }
+
+    .tedi-pagination--keep-disabled-arrows &[disabled] {
+      color: var(--button-main-neutral-text-disabled);
+    }
+
+    // With text labels the buttons take their natural size and keep the
+    // disabled colour visible — boundary state matters when arrows are kept
+    // disabled rather than hidden.
+    &--with-label {
+      gap: var(--button-sm-icon-spacing);
+      width: auto;
+      min-width: 0;
+      padding: 0 var(--button-sm-padding-x);
+
+      &[disabled] {
+        color: var(--button-main-neutral-text-disabled);
+      }
+    }
+  }
+
+  &__nav-button-label {
+    font-family: var(--family-default);
+    font-size: var(--body-small-regular-size);
+    font-weight: var(--body-small-regular-weight);
+    line-height: var(--body-small-regular-line-height);
   }
 
   &__nav-button--previous {
@@ -296,6 +337,12 @@
     align-items: center;
     justify-content: flex-end;
     min-width: 0;
+
+    @include breakpoints.media-breakpoint-down(md) {
+      flex-direction: column;
+      gap: var(--layout-grid-gutters-04);
+      align-items: center;
+    }
   }
 
   &__page-size-label {
@@ -316,5 +363,27 @@
   &__page-size-select.tedi-select {
     width: auto;
     min-width: 64px;
+  }
+
+  &__page-size-trigger {
+    display: inline-flex;
+    gap: var(--form-field-inner-spacing);
+    align-items: center;
+    min-height: var(--form-field-height-sm);
+    padding: var(--form-field-padding-y-sm) var(--form-field-padding-x-md-default);
+    font-family: var(--family-default);
+    font-size: var(--body-regular-size);
+    font-weight: var(--body-regular-weight);
+    line-height: var(--body-regular-line-height);
+    color: var(--form-input-text-filled);
+    cursor: pointer;
+    background: var(--form-input-background-default);
+    border: var(--tedi-borders-01) solid var(--form-input-border-default);
+    border-radius: var(--form-field-radius);
+
+    &:focus-visible {
+      outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+      outline-offset: var(--tedi-borders-01);
+    }
   }
 }

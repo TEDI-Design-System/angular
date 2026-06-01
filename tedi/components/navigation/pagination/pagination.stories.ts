@@ -1,5 +1,6 @@
 import { argsToTemplate, Meta, moduleMetadata, StoryObj } from "@storybook/angular";
 import { PaginationComponent } from "./pagination.component";
+import { TediPaginationResultsDirective } from "./pagination-results.directive";
 
 /**
  * Navigation between paginated sets of content. Renders a row of page buttons
@@ -13,7 +14,7 @@ export default {
   component: PaginationComponent,
   decorators: [
     moduleMetadata({
-      imports: [PaginationComponent],
+      imports: [PaginationComponent, TediPaginationResultsDirective],
     }),
   ],
   parameters: {
@@ -102,6 +103,58 @@ export default {
         category: "inputs",
         type: { summary: "PaginationBackground", detail: "white \ntransparent" },
         defaultValue: { summary: "white" },
+      },
+    },
+    dividerPosition: {
+      description:
+        "Position of the divider line. `'none'` removes it entirely.",
+      control: { type: "radio" },
+      options: ["top", "bottom", "none"],
+      table: {
+        category: "inputs",
+        type: { summary: "PaginationDividerPosition" },
+        defaultValue: { summary: "top" },
+      },
+    },
+    disableArrowsAtBoundary: {
+      description:
+        "Keep prev/next arrows visible (but disabled) at the first/last page instead of hiding them.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    showArrowLabels: {
+      description:
+        "Render the prev/next text labels next to the arrow icons.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    hideArrows: {
+      description:
+        "Hide the prev/next arrows. `true` = always hidden, a breakpoint name = hidden below that breakpoint.",
+      control: { type: "select" },
+      options: [false, true, "sm", "md", "lg", "xl", "xxl"],
+      table: {
+        category: "inputs",
+        type: { summary: "PaginationVisibility" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    showModalTitle: {
+      description:
+        "Show a heading inside the mobile page-jump / page-size picker modals.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
       },
     },
     hideResults: {
@@ -266,7 +319,7 @@ export const TopBottomSplit: Story = {
   render: (args) => ({
     props: args,
     template: `
-      <tedi-pagination ${argsToTemplate(args)} [hidePager]="true" />
+      <tedi-pagination ${argsToTemplate(args)} [hidePager]="true" dividerPosition="bottom" />
       <div style="padding: 24px 0; color: var(--general-text-tertiary); text-align: center;">— table content goes here —</div>
       <tedi-pagination ${argsToTemplate(args)} [hideResults]="true" [hidePageSize]="true" />
     `,
@@ -304,6 +357,104 @@ export const ResponsiveVisibility: Story = {
   },
 };
 
+export const DividerBottom: Story = {
+  args: {
+    pageCount: 10,
+    page: 3,
+    totalItems: 97,
+    pageSize: 10,
+    pageSizeOptions: [10, 25, 50, 100],
+    dividerPosition: "bottom",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-pagination ${argsToTemplate(args)} />
+      <div style="padding: 24px 0; color: var(--general-text-tertiary); text-align: center;">— table content goes here —</div>
+    `,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When pagination sits *above* the content, set `dividerPosition=\"bottom\"` so the line separates the strip from the rows below it. Use `\"none\"` to remove the divider when the wrapping container already has one.",
+      },
+    },
+  },
+};
+
+export const DisabledBoundaryArrows: Story = {
+  args: {
+    pageCount: 10,
+    page: 1,
+    totalItems: 97,
+    pageSize: 10,
+    pageSizeOptions: [10, 25, 50, 100],
+    disableArrowsAtBoundary: true,
+  },
+  render: (args) => ({
+    props: args,
+    template: `<tedi-pagination ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "By default the prev/next arrow disappears at the first/last page so the pager looks balanced. Set `disableArrowsAtBoundary=true` to keep them visibly disabled instead — useful when a stable footprint matters more than a clean look.",
+      },
+    },
+  },
+};
+
+export const CustomResultsSlot: Story = {
+  args: {
+    pageCount: 10,
+    page: 3,
+    pageSize: 10,
+    pageSizeOptions: [10, 25, 50, 100],
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-pagination ${argsToTemplate(args)}>
+        <span tediPaginationResults class="text-small">1000+ tulemust</span>
+      </tedi-pagination>
+    `,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Project `[tediPaginationResults]` content to replace the default \"X results\" label entirely — useful when the count is an approximation (`1000+`), a status pill, or a more complex DOM than a plain count.",
+      },
+    },
+  },
+};
+
+export const MobilePickerWithTitle: Story = {
+  args: {
+    pageCount: 50,
+    page: 24,
+    totalItems: 480,
+    pageSize: 10,
+    pageSizeOptions: [10, 25, 50, 100],
+    showModalTitle: true,
+  },
+  render: (args) => ({
+    props: args,
+    template: `<tedi-pagination ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    viewport: { defaultViewport: "mobile1" },
+    docs: {
+      description: {
+        story:
+          "Below `md`, both the page-jump and page-size selectors open a bottom-aligned modal. The active page is scrolled into view on open. Enable `showModalTitle` to show a heading inside each picker.",
+      },
+    },
+  },
+};
+
 export const CustomLabels: Story = {
   args: {
     pageCount: 10,
@@ -319,6 +470,8 @@ export const CustomLabels: Story = {
       currentPageAriaLabel: (page) => `Praegune lehekülg, lehekülg ${page}`,
       results: (count) => `${count} rida`,
       pageSize: "Kirjete arv lehel",
+      pageTitle: "Vali lehekülg",
+      pageSizeTitle: "Kirjete arv lehel",
     },
   },
   render: (args) => ({

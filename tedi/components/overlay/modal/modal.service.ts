@@ -104,8 +104,8 @@ export class ModalService {
       classes.push(`tedi-modal-dialog--${width}`);
     }
 
-    if (position === "top") {
-      classes.push("tedi-modal-dialog--center", "tedi-modal-dialog--top");
+    if (position === "top" || position === "bottom") {
+      classes.push("tedi-modal-dialog--center", `tedi-modal-dialog--${position}`);
     } else {
       classes.push(`tedi-modal-dialog--${position}`);
     }
@@ -164,6 +164,10 @@ export class ModalService {
 
     if (position === "top") {
       return global.centerHorizontally().top("var(--modal-top-margin)");
+    }
+
+    if (position === "bottom") {
+      return global.centerHorizontally().bottom("var(--modal-top-margin)");
     }
 
     if (scrollBehavior === "page") {

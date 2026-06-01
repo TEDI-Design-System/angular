@@ -4,7 +4,7 @@ import { BreakpointFlag } from "../../../services/breakpoint/breakpoint.service"
 export type ModalSize = "default" | "small";
 export type ModalWidthPreset = "xs" | "sm" | "md" | "lg" | "xl";
 export type ModalWidth = ModalWidthPreset | (string & {});
-export type ModalPosition = "center" | "top" | "left" | "right";
+export type ModalPosition = "center" | "top" | "bottom" | "left" | "right";
 export type ModalScrollBehavior = "content" | "page";
 export type ModalFullscreen = BreakpointFlag;
 
