@@ -3,7 +3,8 @@ import { By } from "@angular/platform-browser";
 import { Component, signal } from "@angular/core";
 import { provideNoopAnimations } from "@angular/platform-browser/animations";
 import { PaginationComponent } from "./pagination.component";
-import { PaginationMobileModalComponent } from "./pagination-mobile-modal/pagination-mobile-modal.component";
+import { PaginationOptionPickerModalComponent } from "./pagination-option-picker-modal/pagination-option-picker-modal.component";
+import { TediPaginationResultsDirective } from "./pagination-results.directive";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
@@ -34,6 +35,10 @@ class TranslationMock {
         const [page, total] = args as [number, number];
         return `Page ${page} of ${total}`;
       }
+      case "pagination.page-title":
+        return "Select page";
+      case "pagination.page-size-title":
+        return "Results per page";
       default:
         return key;
     }
@@ -281,6 +286,52 @@ describe("PaginationComponent", () => {
     );
   });
 
+  it("defaults to divider-top", () => {
+    const fixture = setup();
+    expect((fixture.nativeElement as HTMLElement).classList).toContain(
+      "tedi-pagination--divider-top",
+    );
+  });
+
+  it("applies the chosen dividerPosition modifier", () => {
+    const fixture = setup();
+    fixture.componentRef.setInput("dividerPosition", "bottom");
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).classList).toContain(
+      "tedi-pagination--divider-bottom",
+    );
+  });
+
+  it("applies the keep-disabled-arrows modifier when disableArrowsAtBoundary is set", () => {
+    const fixture = setup();
+    fixture.componentRef.setInput("disableArrowsAtBoundary", true);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).classList).toContain(
+      "tedi-pagination--keep-disabled-arrows",
+    );
+  });
+
+  it("hides the prev/next arrows entirely when hideArrows is true", () => {
+    const fixture = setup({ pageCount: 5, page: 3 });
+    fixture.componentRef.setInput("hideArrows", true);
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(".tedi-pagination__nav-button"),
+    ).toBeNull();
+  });
+
+  it("shows visible arrow labels when showArrowLabels is true", () => {
+    const fixture = setup({ pageCount: 5, page: 3 });
+    fixture.componentRef.setInput("showArrowLabels", true);
+    fixture.detectChanges();
+    const labels = fixture.nativeElement.querySelectorAll(
+      ".tedi-pagination__nav-button-label",
+    );
+    expect(labels.length).toBe(2);
+    expect(labels[0].textContent.trim()).toBe("Previous page");
+    expect(labels[1].textContent.trim()).toBe("Next page");
+  });
+
   it("hides the results label when hideResults is true", () => {
     const fixture = setup({ pageCount: 10, totalItems: 28 });
     fixture.componentRef.setInput("hideResults", true);
@@ -319,6 +370,38 @@ describe("PaginationComponent", () => {
     expect(
       fixture.nativeElement.querySelector(".tedi-pagination__results"),
     ).not.toBeNull();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [PaginationComponent, TediPaginationResultsDirective],
+  template: `
+    <tedi-pagination [pageCount]="10" [page]="3" [totalItems]="1000">
+      <span tediPaginationResults>1000+ tulemust</span>
+    </tedi-pagination>
+  `,
+})
+class ProjectedResultsHostComponent {}
+
+describe("PaginationComponent custom results slot", () => {
+  it("renders projected [tediPaginationResults] content instead of the default label", () => {
+    TestBed.configureTestingModule({
+      imports: [ProjectedResultsHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        provideNoopAnimations(),
+      ],
+    });
+    const fixture = TestBed.createComponent(ProjectedResultsHostComponent);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector(".tedi-pagination__results"),
+    ).toBeNull();
+    const projected = fixture.nativeElement.querySelector("[tediPaginationResults]");
+    expect(projected?.textContent.trim()).toBe("1000+ tulemust");
   });
 });
 
@@ -366,7 +449,7 @@ describe("PaginationComponent mobile layout", () => {
     expect(fixture.nativeElement.querySelector(".tedi-pagination__list")).toBeNull();
   });
 
-  it("opens the modal picker on trigger click", () => {
+  it("opens the picker modal on trigger click with computed options + selectedValue", () => {
     const fixture = TestBed.createComponent(PaginationComponent);
     fixture.componentRef.setInput("pageCount", 10);
     fixture.componentRef.setInput("page", 3);
@@ -379,8 +462,38 @@ describe("PaginationComponent mobile layout", () => {
 
     expect(modalOpenSpy).toHaveBeenCalledTimes(1);
     const [component, config] = modalOpenSpy.mock.calls[0];
-    expect(component).toBe(PaginationMobileModalComponent);
-    expect(config.data).toMatchObject({ pageCount: 10, currentPage: 3 });
+    expect(component).toBe(PaginationOptionPickerModalComponent);
+    expect(config.position).toBe("bottom");
+    expect(config.data.selectedValue).toBe(3);
+    expect(config.data.options.length).toBe(10);
+    expect(config.data.options[2]).toMatchObject({
+      value: 3,
+      label: "3",
+      ariaLabel: "Current page, page 3",
+    });
+  });
+
+  it("includes the modal title by default and omits it when showModalTitle is false", () => {
+    const fixture = TestBed.createComponent(PaginationComponent);
+    fixture.componentRef.setInput("pageCount", 10);
+    fixture.componentRef.setInput("page", 3);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector(
+      ".tedi-pagination__mobile-trigger",
+    ) as HTMLButtonElement).click();
+    expect(modalOpenSpy.mock.calls[0][1].data.title).toBe("Select page");
+
+    modalClosedSubject.next(undefined);
+    fixture.detectChanges();
+
+    fixture.componentRef.setInput("showModalTitle", false);
+    fixture.detectChanges();
+
+    (fixture.nativeElement.querySelector(
+      ".tedi-pagination__mobile-trigger",
+    ) as HTMLButtonElement).click();
+    expect(modalOpenSpy.mock.calls[1][1].data.title).toBeUndefined();
   });
 
   it("navigates to the page returned by the modal", () => {
@@ -423,7 +536,7 @@ describe("PaginationComponent mobile layout", () => {
     expect(fixture.componentInstance.page()).toBe(3);
   });
 
-  it("renders the page-size selector on mobile when pageSizeOptions is set", () => {
+  it("renders the page-size trigger on mobile when pageSizeOptions is set", () => {
     const fixture = TestBed.createComponent(PaginationComponent);
     fixture.componentRef.setInput("pageCount", 10);
     fixture.componentRef.setInput("pageSize", 10);
@@ -431,8 +544,40 @@ describe("PaginationComponent mobile layout", () => {
     fixture.detectChanges();
 
     expect(
-      fixture.nativeElement.querySelector(".tedi-pagination__page-size-select"),
+      fixture.nativeElement.querySelector(".tedi-pagination__page-size-trigger"),
     ).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector(".tedi-pagination__page-size-select"),
+    ).toBeNull();
+  });
+
+  it("opens the page-size modal and emits the chosen page size", () => {
+    const fixture = TestBed.createComponent(PaginationComponent);
+    fixture.componentRef.setInput("pageCount", 10);
+    fixture.componentRef.setInput("pageSize", 10);
+    fixture.componentRef.setInput("pageSizeOptions", [10, 25, 50]);
+    fixture.detectChanges();
+
+    let emitted: number | undefined;
+    fixture.componentInstance.pageSizeChange.subscribe((v) => (emitted = v));
+
+    const trigger: HTMLButtonElement = fixture.nativeElement.querySelector(
+      ".tedi-pagination__page-size-trigger",
+    );
+    trigger.click();
+
+    expect(modalOpenSpy).toHaveBeenCalledTimes(1);
+    const [, config] = modalOpenSpy.mock.calls[0];
+    expect(config.data.options.map((o: { value: number }) => o.value)).toEqual([
+      10, 25, 50,
+    ]);
+    expect(config.data.selectedValue).toBe(10);
+
+    modalClosedSubject.next(50);
+    fixture.detectChanges();
+
+    expect(emitted).toBe(50);
+    expect(fixture.componentInstance.pageSize()).toBe(50);
   });
 
   it("starts the mobile trigger aria-label with visible '{current} / {total}' text (WCAG 2.5.3)", () => {

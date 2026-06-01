@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChild,
   effect,
   inject,
   input,
@@ -14,7 +15,6 @@ import { FormsModule } from "@angular/forms";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { SelectComponent } from "../../form/select/select.component";
-import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
 import { ModalService } from "../../overlay/modal/modal.service";
@@ -22,25 +22,22 @@ import { generateUUID } from "../../../helpers/generate-uuid";
 import { usePagination } from "./pagination.utils";
 import {
   PaginationBackground,
+  PaginationDividerPosition,
   PaginationItem,
   PaginationLabels,
   PaginationVisibility,
 } from "./pagination.types";
+import { TediPaginationResultsDirective } from "./pagination-results.directive";
 import {
-  PaginationMobileModalComponent,
-  PaginationMobileModalData,
-} from "./pagination-mobile-modal/pagination-mobile-modal.component";
+  PaginationOptionPickerModalComponent,
+  PaginationOptionPickerModalData,
+  PaginationOptionPickerOption,
+} from "./pagination-option-picker-modal/pagination-option-picker-modal.component";
 
 @Component({
   selector: "tedi-pagination",
   standalone: true,
-  imports: [
-    FormsModule,
-    ButtonComponent,
-    IconComponent,
-    SelectComponent,
-    TediTranslationPipe,
-  ],
+  imports: [FormsModule, ButtonComponent, IconComponent, SelectComponent],
   templateUrl: "./pagination.component.html",
   styleUrl: "./pagination.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -63,7 +60,8 @@ export class PaginationComponent {
 
   /**
    * Total number of items across all pages. When set, the "{count} results"
-   * label is rendered to the left of the nav.
+   * label is rendered to the left of the nav. Can be replaced entirely by
+   * projecting `[tediPaginationResults]` content.
    */
   readonly totalItems = input<number | undefined>(undefined);
 
@@ -86,17 +84,24 @@ export class PaginationComponent {
   readonly labels = input<Partial<PaginationLabels> | undefined>(undefined);
 
   /**
-   * Background variant. `transparent` removes the surface fill and top border —
+   * Background variant. `transparent` removes the surface fill and divider —
    * use it when pagination sits on a non-white container.
    * @default 'white'
    */
   readonly background = input<PaginationBackground>("white");
 
   /**
-   * Hide the "X results" label even when `totalItems` is set. Pass a
-   * breakpoint name (e.g. `"md"`) to hide only below that breakpoint —
-   * mirrors the `boolean | breakpoint` pattern used by `tedi-modal`'s
-   * `fullscreen` input.
+   * Where the divider line sits relative to the pagination row.
+   * `'none'` removes the divider entirely. The `transparent` background
+   * variant overrides this and never renders a divider.
+   * @default 'top'
+   */
+  readonly dividerPosition = input<PaginationDividerPosition>("top");
+
+  /**
+   * Hide the "X results" label even when `totalItems` is set or content is
+   * projected via `[tediPaginationResults]`. Pass a breakpoint name to hide
+   * only below that breakpoint.
    * @default false
    */
   readonly hideResults = input<PaginationVisibility>(false);
@@ -115,11 +120,44 @@ export class PaginationComponent {
    */
   readonly hidePager = input<PaginationVisibility>(false);
 
+  /**
+   * Hide the prev/next arrow buttons inside the pager. Pass a breakpoint
+   * name to hide only below that breakpoint. The page list / mobile picker
+   * stays visible.
+   * @default false
+   */
+  readonly hideArrows = input<PaginationVisibility>(false);
+
+  /**
+   * Keep prev/next arrows visible (but disabled) at the first/last page
+   * instead of removing them from layout. Useful when the pager should
+   * have a stable footprint regardless of position.
+   * @default false
+   */
+  readonly disableArrowsAtBoundary = input<boolean>(false);
+
+  /**
+   * Render the `previous` / `next` text labels next to the arrow icons.
+   * Without this only the icons show and the labels become aria-only.
+   * @default false
+   */
+  readonly showArrowLabels = input<boolean>(false);
+
+  /**
+   * Show a heading inside the mobile page-jump / page-size picker modals.
+   * Uses the `pageTitle` / `pageSizeTitle` labels.
+   * @default true
+   */
+  readonly showModalTitle = input<boolean>(true);
+
   /** Emits whenever the user navigates to a different page. */
   readonly pageChange = output<number>();
 
   /** Emits when the user picks a different page size. */
   readonly pageSizeChange = output<number>();
+
+  /** Detects the `[tediPaginationResults]` content-projection slot, if any. */
+  protected readonly customResults = contentChild(TediPaginationResultsDirective);
 
   private readonly translationService = inject(TediTranslationService);
   private readonly breakpointService = inject(BreakpointService);
@@ -133,10 +171,15 @@ export class PaginationComponent {
     const classes = [
       "tedi-pagination",
       `tedi-pagination--bg-${this.background()}`,
+      `tedi-pagination--divider-${this.dividerPosition()}`,
     ];
     if (!this.showPager()) classes.push("tedi-pagination--no-pager");
     if (!this.showResults()) classes.push("tedi-pagination--no-results");
     if (!this.showPageSizeSelect()) classes.push("tedi-pagination--no-page-size");
+    if (!this.showArrows()) classes.push("tedi-pagination--no-arrows");
+    if (this.disableArrowsAtBoundary()) {
+      classes.push("tedi-pagination--keep-disabled-arrows");
+    }
     return classes.join(" ");
   });
 
@@ -186,6 +229,9 @@ export class PaginationComponent {
       pageStatus:
         overrides.pageStatus ??
         ((p, total) => t.translate("pagination.page-status", p, total)),
+      pageTitle: overrides.pageTitle ?? t.translate("pagination.page-title"),
+      pageSizeTitle:
+        overrides.pageSizeTitle ?? t.translate("pagination.page-size-title"),
     };
   });
 
@@ -208,9 +254,14 @@ export class PaginationComponent {
   protected readonly isPagerHidden = computed(() =>
     this.resolveVisibility(this.hidePager()),
   );
+  protected readonly areArrowsHidden = computed(() =>
+    this.resolveVisibility(this.hideArrows()),
+  );
 
   protected readonly showResults = computed(
-    () => !this.isResultsHidden() && this.totalItems() !== undefined,
+    () =>
+      !this.isResultsHidden() &&
+      (this.customResults() != null || this.totalItems() !== undefined),
   );
   protected readonly showPageSizeSelect = computed(
     () => !this.isPageSizeHidden() && this.pageSizeOptions().length > 0,
@@ -218,6 +269,13 @@ export class PaginationComponent {
   protected readonly showPager = computed(
     () => !this.isPagerHidden() && this.pageCount() > 1,
   );
+
+  /**
+   * Whether the prev/next arrows should render at all. When false they're
+   * removed from the DOM. Boundary state (first / last page) is handled via
+   * `disableArrowsAtBoundary` + the `--keep-disabled` modifier class.
+   */
+  protected readonly showArrows = computed(() => !this.areArrowsHidden());
 
   private resolveVisibility(value: PaginationVisibility): boolean {
     if (typeof value === "boolean") return value;
@@ -244,12 +302,17 @@ export class PaginationComponent {
    * for voice-control users.
    */
   protected readonly mobileTriggerAriaLabel = computed(
-    () =>
-      `${this.mobileTriggerLabel()}, ${this.mergedLabels().ariaLabel}`,
+    () => `${this.mobileTriggerLabel()}, ${this.mergedLabels().ariaLabel}`,
   );
 
-  /** Whether the mobile picker modal is currently open. */
+  protected readonly mobilePageSizeAriaLabel = computed(
+    () => `${this.pageSize() ?? ""}, ${this.mergedLabels().pageSize}`,
+  );
+
+  /** Whether the mobile page-jump picker modal is currently open. */
   protected readonly isMobileModalOpen = signal(false);
+  /** Whether the mobile page-size picker modal is currently open. */
+  protected readonly isPageSizeModalOpen = signal(false);
 
   protected readonly statusText = computed(() =>
     this.pageCount() > 1
@@ -284,21 +347,31 @@ export class PaginationComponent {
   }
 
   protected openMobilePicker(): void {
-    const data: PaginationMobileModalData = {
-      pageCount: this.pageCount(),
-      currentPage: this.currentPage(),
-      labels: this.mergedLabels(),
-    };
-
-    this.isMobileModalOpen.set(true);
-    const ref = this.modalService.open<number, PaginationMobileModalData>(
-      PaginationMobileModalComponent,
-      {
-        data,
-        width: "360px",
-        ariaLabel: this.mergedLabels().ariaLabel,
+    const labels = this.mergedLabels();
+    const options: PaginationOptionPickerOption[] = Array.from(
+      { length: this.pageCount() },
+      (_, i) => {
+        const page = i + 1;
+        const isSelected = page === this.currentPage();
+        return {
+          value: page,
+          label: String(page),
+          ariaLabel: isSelected
+            ? labels.currentPageAriaLabel(page)
+            : labels.pageAriaLabel(page),
+        };
       },
     );
+
+    this.isMobileModalOpen.set(true);
+    const ref = this.openPickerModal({
+      data: {
+        options,
+        selectedValue: this.currentPage(),
+        title: this.showModalTitle() ? labels.pageTitle : undefined,
+      },
+      ariaLabel: labels.ariaLabel,
+    });
 
     ref.closed.subscribe((selected) => {
       this.isMobileModalOpen.set(false);
@@ -306,5 +379,47 @@ export class PaginationComponent {
         this.handlePageChange(selected);
       }
     });
+  }
+
+  protected openPageSizePicker(): void {
+    const labels = this.mergedLabels();
+    const current = this.pageSize();
+    const options: PaginationOptionPickerOption[] = this.pageSizeOptions().map((size) => ({
+      value: size,
+      label: String(size),
+      ariaLabel: `${labels.pageSize}, ${size}`,
+    }));
+
+    this.isPageSizeModalOpen.set(true);
+    const ref = this.openPickerModal({
+      data: {
+        options,
+        selectedValue: current ?? options[0]?.value ?? 0,
+        title: this.showModalTitle() ? labels.pageSizeTitle : undefined,
+      },
+      ariaLabel: labels.pageSize,
+    });
+
+    ref.closed.subscribe((selected) => {
+      this.isPageSizeModalOpen.set(false);
+      if (typeof selected === "number") {
+        this.handlePageSizeChange(selected);
+      }
+    });
+  }
+
+  private openPickerModal(args: {
+    data: PaginationOptionPickerModalData;
+    ariaLabel: string;
+  }) {
+    return this.modalService.open<number, PaginationOptionPickerModalData>(
+      PaginationOptionPickerModalComponent,
+      {
+        data: args.data,
+        width: "360px",
+        position: "bottom",
+        ariaLabel: args.ariaLabel,
+      },
+    );
   }
 }

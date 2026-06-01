@@ -803,10 +803,15 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 - `boundaryCount: number = 1` — pages always shown at the start and end
 - `siblingCount: number = 1` — pages shown on either side of the current page
 - `labels: Partial<PaginationLabels>` — override any of the default text/aria labels
-- `background: "white" | "transparent" = "white"` — `transparent` removes the surface fill + top border for use on non-white containers
+- `background: "white" | "transparent" = "white"` — `transparent` removes the surface fill + divider for use on non-white containers
+- `dividerPosition: "top" | "bottom" | "none" = "top"` — where the divider line sits (or removed entirely)
+- `disableArrowsAtBoundary: boolean = false` — keep prev/next arrows visible (but disabled) at the first/last page instead of hiding them
+- `showArrowLabels: boolean = false` — render visible text labels next to the prev/next icons
+- `showModalTitle: boolean = true` — show a heading inside the mobile picker modals; set `false` to hide
 - `hideResults: PaginationVisibility = false` — `true`/`false` or a breakpoint name (`"sm"`–`"xxl"`) to hide below that breakpoint
 - `hidePageSize: PaginationVisibility = false`
 - `hidePager: PaginationVisibility = false`
+- `hideArrows: PaginationVisibility = false` — hide just the prev/next arrows; pager itself stays
 
 **Models:**
 - `page: number = 1` — current page (1-based), two-way bindable with `[(page)]`
@@ -816,7 +821,10 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 - `pageChange: number` — new 1-based page
 - `pageSizeChange: number` — new page size
 
-Below `md` the pager collapses to a `{current} / {total}` trigger that opens a modal page picker. Status changes are announced via a polite `aria-live` region.
+**Content projection:**
+- `[tediPaginationResults]` — projected content fully replaces the default "X results" left block. Useful for approximations (`1000+ tulemust`) or richer DOM. Import the `TediPaginationResultsDirective`.
+
+Below `md` the pager collapses to a `{current} / {total}` trigger and the page-size dropdown becomes a trigger button — both open a bottom-aligned modal picker that scrolls the active option into view on open. Status changes are announced via a polite `aria-live` region.
 
 ```html
 <tedi-pagination
@@ -833,10 +841,18 @@ Use the per-slot hide toggles to render different parts above and below a table:
 ```html
 <tedi-pagination [pageCount]="pageCount" [(page)]="page" [totalItems]="total"
                  [(pageSize)]="pageSize" [pageSizeOptions]="[10, 25, 50]"
-                 [hidePager]="true" />
+                 [hidePager]="true" dividerPosition="bottom" />
 <!-- table content -->
 <tedi-pagination [pageCount]="pageCount" [(page)]="page"
                  [hideResults]="true" [hidePageSize]="true" />
+```
+
+Custom results slot:
+
+```html
+<tedi-pagination [pageCount]="10" [(page)]="page" [totalItems]="1000">
+  <span tediPaginationResults>1000+ tulemust</span>
+</tedi-pagination>
 ```
 
 ### HorizontalStepper
@@ -920,7 +936,7 @@ openModal() {
     data: { title: 'Hello' },
     width: 'md',                    // 'xs' | 'sm' | 'md' | 'lg' | 'xl' | custom CSS value
     size: 'default',                // 'default' | 'small'
-    position: 'center',             // 'center' | 'top' | 'left' | 'right'
+    position: 'center',             // 'center' | 'top' | 'bottom' | 'left' | 'right'
     closeOnBackdropClick: true,
     closeOnEscape: true,
     scrollBehavior: 'content',      // 'content' | 'page'
@@ -936,7 +952,7 @@ openModal() {
 - `width: ModalWidth = "sm"` — preset (`xs`-`xl`) or custom CSS value (`"80%"`, `"600px"`)
 - `maxWidth: string` — max-width cap (e.g. `"75%"`, `"60vw"`). Overrides the default 95vw limit.
 - `size: ModalSize = "default"` — `"default"` or `"small"`
-- `position: ModalPosition = "center"` — `"center"`, `"top"`, `"left"`, `"right"`
+- `position: ModalPosition = "center"` — `"center"`, `"top"`, `"bottom"`, `"left"`, `"right"`. `"bottom"` anchors the modal to the bottom edge with a fixed margin (useful for mobile bottom-sheet patterns).
 - `closeOnBackdropClick: boolean = true`
 - `closeOnEscape: boolean = true`
 - `scrollBehavior: "content" | "page" = "content"`
@@ -979,7 +995,9 @@ class MyModalContent {
 ```
 
 **Sub-components:**
-- `tedi-modal-header` — `showClose: boolean = true`
+- `tedi-modal-header`
+  - `showClose: boolean = true` — toggle the close button
+  - `closeButtonSize: ClosingButtonSize` (optional) — overrides the close button size. When unset, the close button auto-tracks the modal `size` variant (default → standard, small → compact).
 - `tedi-modal-content` — scrollable body
 - `tedi-modal-footer` — action buttons
 

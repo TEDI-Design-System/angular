@@ -9,27 +9,39 @@
 
 <div class="tedi-pagination__slot-start">
   @if (showResults()) {
-    <span class="tedi-pagination__results">
-      {{ mergedLabels().results(totalItems()!) }}
-    </span>
+    @if (customResults()) {
+      <ng-content select="[tediPaginationResults]" />
+    } @else {
+      <span class="tedi-pagination__results">
+        {{ mergedLabels().results(totalItems()!) }}
+      </span>
+    }
   }
 </div>
 
 <div class="tedi-pagination__slot-center">
   @if (showPager()) {
     <nav class="tedi-pagination__nav" [attr.aria-label]="mergedLabels().ariaLabel">
-      <button
-        tedi-button
-        type="button"
-        variant="neutral"
-        size="small"
-        class="tedi-pagination__nav-button tedi-pagination__nav-button--previous"
-        [attr.aria-label]="mergedLabels().previous"
-        [disabled]="previousItem().disabled"
-        (click)="handlePageChange(previousItem().page)"
-      >
-        <tedi-icon name="arrow_back" />
-      </button>
+      @if (showArrows()) {
+        <button
+          tedi-button
+          type="button"
+          variant="neutral"
+          size="small"
+          class="tedi-pagination__nav-button tedi-pagination__nav-button--previous"
+          [class.tedi-pagination__nav-button--with-label]="showArrowLabels()"
+          [attr.aria-label]="mergedLabels().previous"
+          [disabled]="previousItem().disabled"
+          (click)="handlePageChange(previousItem().page)"
+        >
+          <tedi-icon name="arrow_back" />
+          @if (showArrowLabels()) {
+            <span class="tedi-pagination__nav-button-label">
+              {{ mergedLabels().previous }}
+            </span>
+          }
+        </button>
+      }
 
       @if (!useCompactPicker()) {
         <ul class="tedi-pagination__list">
@@ -80,18 +92,26 @@
         </button>
       }
 
-      <button
-        tedi-button
-        type="button"
-        variant="neutral"
-        size="small"
-        class="tedi-pagination__nav-button tedi-pagination__nav-button--next"
-        [attr.aria-label]="mergedLabels().next"
-        [disabled]="nextItem().disabled"
-        (click)="handlePageChange(nextItem().page)"
-      >
-        <tedi-icon name="arrow_forward" />
-      </button>
+      @if (showArrows()) {
+        <button
+          tedi-button
+          type="button"
+          variant="neutral"
+          size="small"
+          class="tedi-pagination__nav-button tedi-pagination__nav-button--next"
+          [class.tedi-pagination__nav-button--with-label]="showArrowLabels()"
+          [attr.aria-label]="mergedLabels().next"
+          [disabled]="nextItem().disabled"
+          (click)="handlePageChange(nextItem().page)"
+        >
+          @if (showArrowLabels()) {
+            <span class="tedi-pagination__nav-button-label">
+              {{ mergedLabels().next }}
+            </span>
+          }
+          <tedi-icon name="arrow_forward" />
+        </button>
+      }
     </nav>
   }
 </div>
@@ -99,19 +119,36 @@
 <div class="tedi-pagination__slot-end">
   @if (showPageSizeSelect()) {
     <div class="tedi-pagination__page-size">
-      <label class="tedi-pagination__page-size-label" [attr.for]="pageSizeInputId">
-        {{ mergedLabels().pageSize }}
-      </label>
-      <tedi-select
-        class="tedi-pagination__page-size-select"
-        [inputId]="pageSizeInputId"
-        size="small"
-        [options]="pageSizeSelectOptions()"
-        bindLabel="label"
-        bindValue="value"
-        [ngModel]="pageSize()"
-        (ngModelChange)="handlePageSizeChange($event)"
-      />
+      @if (useCompactPicker()) {
+        <span class="tedi-pagination__page-size-label">
+          {{ mergedLabels().pageSize }}
+        </span>
+        <button
+          type="button"
+          class="tedi-pagination__page-size-trigger"
+          aria-haspopup="dialog"
+          [attr.aria-expanded]="isPageSizeModalOpen()"
+          [attr.aria-label]="mobilePageSizeAriaLabel()"
+          (click)="openPageSizePicker()"
+        >
+          <span aria-hidden="true">{{ pageSize() }}</span>
+          <tedi-icon name="arrow_drop_down" />
+        </button>
+      } @else {
+        <label class="tedi-pagination__page-size-label" [attr.for]="pageSizeInputId">
+          {{ mergedLabels().pageSize }}
+        </label>
+        <tedi-select
+          class="tedi-pagination__page-size-select"
+          [inputId]="pageSizeInputId"
+          size="small"
+          [options]="pageSizeSelectOptions()"
+          bindLabel="label"
+          bindValue="value"
+          [ngModel]="pageSize()"
+          (ngModelChange)="handlePageSizeChange($event)"
+        />
+      }
     </div>
   }
 </div>

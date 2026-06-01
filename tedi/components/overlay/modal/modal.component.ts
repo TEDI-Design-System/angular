@@ -9,12 +9,16 @@ import {
   AfterViewInit,
   ElementRef,
   OnDestroy,
+  Optional,
   PLATFORM_ID,
+  SkipSelf,
+  Signal,
   effect,
 } from "@angular/core";
 import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 import { CdkTrapFocus } from "@angular/cdk/a11y";
 import { ModalRef } from "./modal-ref";
+import { MODAL_SIZE } from "./modal.types";
 import type {
   ModalSize,
   ModalWidth,
@@ -42,6 +46,22 @@ import type {
   host: {
     "[class]": "classes()",
   },
+  providers: [
+    {
+      provide: MODAL_SIZE,
+      // In service mode the template `size` input stays at its default — the
+      // real variant lives on the cdk-overlay-pane and is provided by
+      // ModalService via the dialog injector. Delegate to that when present.
+      useFactory: (
+        modal: ModalComponent,
+        parentSize: Signal<ModalSize> | null,
+      ) => (modal.serviceMode && parentSize ? parentSize : modal.size),
+      deps: [
+        ModalComponent,
+        [new Optional(), new SkipSelf(), MODAL_SIZE],
+      ],
+    },
+  ],
 })
 export class ModalComponent implements AfterViewInit, OnDestroy {
   /** @deprecated Is modal open? Only used in standalone (deprecated) mode. */

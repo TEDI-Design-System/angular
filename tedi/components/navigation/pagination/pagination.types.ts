@@ -1,7 +1,7 @@
 export type PaginationBackground = "white" | "transparent";
 
 /**
- * Visibility toggle for the results / page-size / pager slots.
+ * Visibility toggle for the results / page-size / pager / arrow slots.
  * - `true` — always hidden
  * - `false` (default) — always visible
  * - `'sm'` / `'md'` / `'lg'` / `'xl'` / `'xxl'` — hidden below that breakpoint
@@ -10,6 +10,14 @@ export type PaginationBackground = "white" | "transparent";
  * `fullscreen` input.
  */
 export type PaginationVisibility = boolean | "sm" | "md" | "lg" | "xl" | "xxl";
+
+/**
+ * Where the divider sits relative to the pagination row.
+ * - `'top'` (default) — border on top, matches single-row layouts under content
+ * - `'bottom'` — border on bottom, for above-content placements
+ * - `'none'` — no divider, useful when the surrounding container already has one
+ */
+export type PaginationDividerPosition = "top" | "bottom" | "none";
 
 export type PaginationItemType = "page" | "previous" | "next" | "ellipsis";
 
@@ -37,4 +45,8 @@ export interface PaginationLabels {
   pageSize: string;
   /** Announcement for the aria-live region when the page changes. @default (page, total) => 'Page {page} of {total}' */
   pageStatus: (page: number, pageCount: number) => string;
+  /** Title shown above the page-jump modal on mobile when `showModalTitle` is true. @default 'Select page' */
+  pageTitle: string;
+  /** Title shown above the page-size modal on mobile when `showModalTitle` is true. @default 'Show per page' */
+  pageSizeTitle: string;
 }

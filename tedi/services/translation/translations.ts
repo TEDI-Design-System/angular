@@ -584,6 +584,22 @@ export const translationsMap = {
     en: (page?: number, total?: number) => `Page ${page ?? 0} of ${total ?? 0}`,
     ru: (page?: number, total?: number) => `Страница ${page ?? 0} из ${total ?? 0}`,
   },
+  "pagination.page-title": {
+    description:
+      "Title of the mobile page-jump picker modal, shown when `showModalTitle` is enabled.",
+    components: ["Pagination"],
+    et: "Vali lehekülg",
+    en: "Select page",
+    ru: "Выбрать страницу",
+  },
+  "pagination.page-size-title": {
+    description:
+      "Title of the mobile page-size picker modal, shown when `showModalTitle` is enabled.",
+    components: ["Pagination"],
+    et: "Tulemusi lehel",
+    en: "Results per page",
+    ru: "Результатов на странице",
+  },
   "table-of-contents.title": {
     description: "Title of the table of contents",
     components: ["TableOfContents"],
