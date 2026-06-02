@@ -137,13 +137,6 @@ export class PaginationComponent {
   readonly disableArrowsAtBoundary = input<boolean>(false);
 
   /**
-   * Render the `previous` / `next` text labels next to the arrow icons.
-   * Without this only the icons show and the labels become aria-only.
-   * @default false
-   */
-  readonly showArrowLabels = input<boolean>(false);
-
-  /**
    * Show a heading inside the mobile page-jump / page-size picker modals.
    * Uses the `pageTitle` / `pageSizeTitle` labels.
    * @default true

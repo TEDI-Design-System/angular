@@ -194,9 +194,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--pagination-button-size);
+    min-width: var(--pagination-button-size);
     height: var(--pagination-button-size);
-    padding: 0;
+    padding: 0 var(--layout-grid-gutters-04);
     font-family: var(--family-default);
     font-size: var(--body-small-regular-size);
     font-weight: var(--body-small-regular-weight);
@@ -271,27 +271,6 @@
     .tedi-pagination--keep-disabled-arrows &[disabled] {
       color: var(--button-main-neutral-text-disabled);
     }
-
-    // With text labels the buttons take their natural size and keep the
-    // disabled colour visible — boundary state matters when arrows are kept
-    // disabled rather than hidden.
-    &--with-label {
-      gap: var(--button-sm-icon-spacing);
-      width: auto;
-      min-width: 0;
-      padding: 0 var(--button-sm-padding-x);
-
-      &[disabled] {
-        color: var(--button-main-neutral-text-disabled);
-      }
-    }
-  }
-
-  &__nav-button-label {
-    font-family: var(--family-default);
-    font-size: var(--body-small-regular-size);
-    font-weight: var(--body-small-regular-weight);
-    line-height: var(--body-small-regular-line-height);
   }
 
   &__nav-button--previous {

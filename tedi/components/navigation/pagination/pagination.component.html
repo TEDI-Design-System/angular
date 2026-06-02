@@ -29,17 +29,11 @@
           variant="neutral"
           size="small"
           class="tedi-pagination__nav-button tedi-pagination__nav-button--previous"
-          [class.tedi-pagination__nav-button--with-label]="showArrowLabels()"
           [attr.aria-label]="mergedLabels().previous"
           [disabled]="previousItem().disabled"
           (click)="handlePageChange(previousItem().page)"
         >
           <tedi-icon name="arrow_back" />
-          @if (showArrowLabels()) {
-            <span class="tedi-pagination__nav-button-label">
-              {{ mergedLabels().previous }}
-            </span>
-          }
         </button>
       }
 
@@ -99,16 +93,10 @@
           variant="neutral"
           size="small"
           class="tedi-pagination__nav-button tedi-pagination__nav-button--next"
-          [class.tedi-pagination__nav-button--with-label]="showArrowLabels()"
           [attr.aria-label]="mergedLabels().next"
           [disabled]="nextItem().disabled"
           (click)="handlePageChange(nextItem().page)"
         >
-          @if (showArrowLabels()) {
-            <span class="tedi-pagination__nav-button-label">
-              {{ mergedLabels().next }}
-            </span>
-          }
           <tedi-icon name="arrow_forward" />
         </button>
       }

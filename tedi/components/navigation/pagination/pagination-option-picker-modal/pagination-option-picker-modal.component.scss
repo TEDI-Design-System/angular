@@ -1,19 +1,30 @@
 .tedi-pagination-option-picker-modal {
   --_tedi-modal-body-padding: 0;
+  --_tedi-pagination-option-picker-item-size: 48px;
 
-  &__list {
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    margin: 0;
-    list-style: none;
+  .tedi-modal-content {
+    overflow: hidden;
+  }
+
+  &__viewport {
+    display: block;
+    visibility: hidden;
+    width: 100%;
+    height: min(calc(var(--_tedi-pagination-option-picker-count, 1) * var(--_tedi-pagination-option-picker-item-size)),
+        calc(95dvh));
+
+    &--ready {
+      visibility: visible;
+    }
   }
 
   &__item {
+    box-sizing: border-box;
     display: flex;
     gap: var(--form-checkbox-radio-inner-spacing);
     align-items: center;
     width: 100%;
+    height: var(--_tedi-pagination-option-picker-item-size);
     padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
     font-family: var(--family-default);
     font-size: var(--body-regular-size);

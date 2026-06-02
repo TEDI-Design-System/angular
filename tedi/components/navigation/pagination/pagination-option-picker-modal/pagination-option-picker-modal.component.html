@@ -5,27 +5,30 @@
     }
   </tedi-modal-header>
   <tedi-modal-content>
-    <ul class="tedi-pagination-option-picker-modal__list">
-      @for (option of data.options; track option.value) {
-        <li>
-          <button
-            #itemButton
-            type="button"
-            class="tedi-pagination-option-picker-modal__item"
-            [class.tedi-pagination-option-picker-modal__item--selected]="option.value === data.selectedValue"
-            [attr.aria-current]="option.value === data.selectedValue ? 'true' : null"
-            [attr.aria-label]="option.ariaLabel"
-            (click)="selectValue(option.value)"
-          >
-            <span
-              class="tedi-pagination-option-picker-modal__radio"
-              [class.tedi-pagination-option-picker-modal__radio--selected]="option.value === data.selectedValue"
-              aria-hidden="true"
-            ></span>
-            <span class="tedi-pagination-option-picker-modal__label">{{ option.label }}</span>
-          </button>
-        </li>
-      }
-    </ul>
+    <cdk-virtual-scroll-viewport
+      class="tedi-pagination-option-picker-modal__viewport"
+      [class.tedi-pagination-option-picker-modal__viewport--ready]="ready()"
+      [itemSize]="itemSize"
+      [style.--_tedi-pagination-option-picker-count]="data.options.length"
+      minBufferPx="240"
+      maxBufferPx="480"
+    >
+      <button
+        *cdkVirtualFor="let option of data.options; trackBy: trackByValue"
+        type="button"
+        class="tedi-pagination-option-picker-modal__item"
+        [class.tedi-pagination-option-picker-modal__item--selected]="option.value === data.selectedValue"
+        [attr.aria-current]="option.value === data.selectedValue ? 'true' : null"
+        [attr.aria-label]="option.ariaLabel"
+        (click)="selectValue(option.value)"
+      >
+        <span
+          class="tedi-pagination-option-picker-modal__radio"
+          [class.tedi-pagination-option-picker-modal__radio--selected]="option.value === data.selectedValue"
+          aria-hidden="true"
+        ></span>
+        <span class="tedi-pagination-option-picker-modal__label">{{ option.label }}</span>
+      </button>
+    </cdk-virtual-scroll-viewport>
   </tedi-modal-content>
 </tedi-modal>
