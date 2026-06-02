@@ -1,6 +1,33 @@
 <ng-content select="tedi-table-toolbar" />
 <ng-content select="tedi-table-columns-menu" />
 
+@if (resolvedTopSlot(); as top) {
+  <div class="tedi-table__pagination tedi-table__pagination--top">
+    <tedi-pagination
+      [pageCount]="paginationPageCount()"
+      [page]="paginationPage()"
+      [totalItems]="paginationTotalItems()"
+      [pageSize]="paginationPageSize()"
+      [pageSizeOptions]="paginationPageSizeOptions()"
+      [boundaryCount]="top.boundaryCount"
+      [siblingCount]="top.siblingCount"
+      [labels]="top.labels"
+      [background]="top.background"
+      [dividerPosition]="top.dividerPosition"
+      [hideResults]="top.hideResults"
+      [hidePageSize]="top.hidePageSize"
+      [hidePager]="top.hidePager"
+      [hideArrows]="top.hideArrows"
+      [disableArrowsAtBoundary]="top.disableArrowsAtBoundary"
+      [showArrowLabels]="top.showArrowLabels"
+      [showModalTitle]="top.showModalTitle"
+      [customResultsTemplate]="topResultsTemplate()"
+      (pageChange)="handlePaginationPageChange($event)"
+      (pageSizeChange)="handlePaginationPageSizeChange($event)"
+    />
+  </div>
+}
+
 <div class="tedi-table__scroll" [attr.style]="maxHeightStyle()">
   <table
     class="tedi-table__table"
@@ -71,24 +98,26 @@
                 "
               >
                 @if (header.column.id === SELECT_COLUMN_ID) {
-                  <input
-                    tedi-checkbox
-                    type="checkbox"
-                    [id]="resolvedId() + '-select-all'"
-                    [name]="resolvedId() + '-select-all'"
-                    [attr.aria-label]="selectAllLabel()"
-                    [checked]="isAllPageRowsSelected()"
-                    [indeterminate]="
-                      isSomePageRowsSelected() && !isAllPageRowsSelected()
-                    "
-                    (change)="handleSelectAll($any($event.target).checked)"
-                  />
+                  @if (selectionMode() === "multiple") {
+                    <input
+                      tedi-checkbox
+                      type="checkbox"
+                      [id]="resolvedId() + '-select-all'"
+                      [name]="resolvedId() + '-select-all'"
+                      [attr.aria-label]="selectAllLabel()"
+                      [checked]="isAllPageRowsSelected()"
+                      [indeterminate]="
+                        isSomePageRowsSelected() && !isAllPageRowsSelected()
+                      "
+                      (change)="handleSelectAll($any($event.target).checked)"
+                    />
+                  }
                 } @else if (header.column.id === EXPAND_COLUMN_ID) {
                   <!-- empty -->
                 } @else if (header.column.id === DRAG_COLUMN_ID) {
                   <!-- empty -->
                 } @else {
-                  <span style="display:inline-flex; align-items:center; gap:4px;">
+                  <span class="tedi-table__header-content">
                     @if (
                       draggableColumns() &&
                       rowIndex === 0 &&
@@ -114,12 +143,89 @@
                         let content
                       "
                     >
-                      @if (isString(content) || isNumber(content)) {
+                      @if (shouldRenderSortableHeader(header.column, content)) {
+                        <button
+                          tedi-table-header-button
+                          [icon]="sortIcon(header.column)"
+                          [selected]="!!header.column.getIsSorted()"
+                          (click)="handleSortToggle(header.column)"
+                        >
+                          {{ content }}
+                        </button>
+                      } @else if (isString(content) || isNumber(content)) {
                         {{ content }}
                       } @else {
                         {{ content }}
                       }
                     </ng-container>
+                    @if (shouldRenderFilterButton(header.column)) {
+                      <tedi-popover
+                        #filterPopover
+                        class="tedi-table__filter-popover"
+                        position="bottom-end"
+                        [preventOverflow]="true"
+                      >
+                        <button
+                          tedi-popover-trigger
+                          tedi-table-header-button
+                          icon="filter_alt"
+                          [selected]="filterIsActive(header.column)"
+                          [filled]="filterIsActive(header.column)"
+                          [aria-label]="filterAriaLabel(header.column)"
+                          (click)="handleFilterTriggerClick(header.column)"
+                        ></button>
+                        <tedi-popover-content>
+                          <div class="tedi-table__filter">
+                            <div class="tedi-table__filter-body">
+                              @if (
+                                filterTemplateFor(header.column);
+                                as tpl
+                              ) {
+                                <ng-container
+                                  *ngTemplateOutlet="
+                                    tpl;
+                                    context: filterContextFor(
+                                      header.column,
+                                      filterPopover
+                                    )
+                                  "
+                                />
+                              }
+                            </div>
+                            <div class="tedi-table__filter-actions">
+                              <button
+                                tedi-button
+                                variant="secondary"
+                                size="small"
+                                type="button"
+                                (click)="
+                                  handleFilterClear(
+                                    header.column,
+                                    filterPopover
+                                  )
+                                "
+                              >
+                                {{ filterClearLabel() }}
+                              </button>
+                              <button
+                                tedi-button
+                                variant="primary"
+                                size="small"
+                                type="button"
+                                (click)="
+                                  handleFilterApply(
+                                    header.column,
+                                    filterPopover
+                                  )
+                                "
+                              >
+                                {{ filterApplyLabel() }}
+                              </button>
+                            </div>
+                          </div>
+                        </tedi-popover-content>
+                      </tedi-popover>
+                    }
                   </span>
                 }
               </th>
@@ -199,10 +305,10 @@
           </td>
         </tr>
       } @else {
-        @for (row of rows(); track row.id; let visibleIndex = $index) {
+        @for (row of rows(); track row.id) {
           @let isActiveRow =
             activeRowId() !== undefined && row.id === activeRowId();
-          @let ariaRowIndex = getRowIndex(visibleIndex);
+          @let ariaRowIndex = rowAriaIndexById().get(row.id) ?? null;
           @let subRowId = resolvedId() + '-sub-' + row.id;
           <tr
             cdkDrag
@@ -258,25 +364,49 @@
                       />
                     </button>
                   } @else if (cell.column.id === SELECT_COLUMN_ID) {
-                    <input
-                      tedi-checkbox
-                      type="checkbox"
-                      [id]="resolvedId() + '-select-' + row.id"
-                      [name]="resolvedId() + '-select-' + row.id"
-                      [attr.aria-label]="selectRowLabel(row)"
-                      [checked]="row.getIsSelected()"
-                      [disabled]="!row.getCanSelect()"
-                      [indeterminate]="row.getIsSomeSelected()"
-                      (change)="
-                        handleSelectRow(row, $any($event.target).checked)
-                      "
-                      (click)="$event.stopPropagation()"
-                    />
+                    @if (selectionMode() === "multiple") {
+                      <input
+                        tedi-checkbox
+                        type="checkbox"
+                        [id]="resolvedId() + '-select-' + row.id"
+                        [name]="resolvedId() + '-select-' + row.id"
+                        [attr.aria-label]="selectRowLabel(row)"
+                        [checked]="row.getIsSelected()"
+                        [disabled]="!row.getCanSelect()"
+                        [indeterminate]="row.getIsSomeSelected()"
+                        (change)="
+                          handleSelectRow(row, $any($event.target).checked)
+                        "
+                        (click)="$event.stopPropagation()"
+                      />
+                    } @else {
+                      <input
+                        tedi-radio
+                        type="radio"
+                        [id]="resolvedId() + '-select-' + row.id"
+                        [name]="resolvedId() + '-select-row'"
+                        [attr.aria-label]="selectRowLabel(row)"
+                        [checked]="row.getIsSelected()"
+                        [disabled]="!row.getCanSelect()"
+                        (change)="
+                          handleSelectRow(row, $any($event.target).checked)
+                        "
+                        (click)="$event.stopPropagation()"
+                      />
+                    }
                   } @else if (cell.column.id === EXPAND_COLUMN_ID) {
                     @if (row.getCanExpand()) {
                       <button
+                        tedi-button
                         type="button"
-                        class="tedi-table__expand-toggle"
+                        variant="secondary"
+                        size="small"
+                        [class]="
+                          'tedi-table__expand-toggle' +
+                          (row.getIsExpanded()
+                            ? ' tedi-table__expand-toggle--open'
+                            : '')
+                        "
                         [id]="resolvedId() + '-expand-' + row.id"
                         [attr.aria-controls]="subRowId"
                         [attr.aria-expanded]="row.getIsExpanded()"
@@ -287,12 +417,8 @@
                         (keydown)="handleExpandKeydown($event)"
                       >
                         <tedi-icon
-                          [name]="
-                            row.getIsExpanded()
-                              ? 'keyboard_arrow_up'
-                              : 'keyboard_arrow_down'
-                          "
-                          [size]="18"
+                          class="tedi-table__expand-toggle__icon"
+                          name="expand_more"
                           color="inherit"
                         />
                       </button>
@@ -371,14 +497,27 @@
   </table>
 </div>
 
-@if (paginationEnabled()) {
-  <div class="tedi-table__pagination">
+@if (resolvedBottomSlot(); as bottom) {
+  <div class="tedi-table__pagination tedi-table__pagination--bottom">
     <tedi-pagination
       [pageCount]="paginationPageCount()"
       [page]="paginationPage()"
       [totalItems]="paginationTotalItems()"
       [pageSize]="paginationPageSize()"
       [pageSizeOptions]="paginationPageSizeOptions()"
+      [boundaryCount]="bottom.boundaryCount"
+      [siblingCount]="bottom.siblingCount"
+      [labels]="bottom.labels"
+      [background]="bottom.background"
+      [dividerPosition]="bottom.dividerPosition"
+      [hideResults]="bottom.hideResults"
+      [hidePageSize]="bottom.hidePageSize"
+      [hidePager]="bottom.hidePager"
+      [hideArrows]="bottom.hideArrows"
+      [disableArrowsAtBoundary]="bottom.disableArrowsAtBoundary"
+      [showArrowLabels]="bottom.showArrowLabels"
+      [showModalTitle]="bottom.showModalTitle"
+      [customResultsTemplate]="bottomResultsTemplate()"
       (pageChange)="handlePaginationPageChange($event)"
       (pageSizeChange)="handlePaginationPageSizeChange($event)"
     />

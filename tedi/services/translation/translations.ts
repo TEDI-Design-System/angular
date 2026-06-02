@@ -493,6 +493,30 @@ export const translationsMap = {
     en: "Filter…",
     ru: "Фильтр…",
   },
+  "table.filter-apply": {
+    description:
+      "Apply action in the built-in column filter popover footer",
+    components: ["Table"],
+    et: "Filtreeri",
+    en: "Apply",
+    ru: "Применить",
+  },
+  "table.filter-clear": {
+    description:
+      "Clear action in the built-in column filter popover footer",
+    components: ["Table"],
+    et: "Tühista",
+    en: "Clear",
+    ru: "Сбросить",
+  },
+  "table.filter-button-aria": {
+    description:
+      "Accessible label of the built-in column filter trigger button",
+    components: ["Table"],
+    et: (column: string) => `Filtreeri ${column}`,
+    en: (column: string) => `Filter ${column}`,
+    ru: (column: string) => `Фильтр по ${column}`,
+  },
   "table.columns": {
     description: "Default label of the columns visibility trigger",
     components: ["Table"],

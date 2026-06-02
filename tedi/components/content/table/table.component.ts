@@ -3,15 +3,18 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChild,
   effect,
   inject,
   Injector,
   input,
+  signal,
   Signal,
   TemplateRef,
   untracked,
   ViewEncapsulation,
   output,
+  type WritableSignal,
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
@@ -23,6 +26,7 @@ import {
 } from "@angular/cdk/drag-drop";
 import {
   type CellContext,
+  type Column,
   type ColumnDef,
   type ColumnFiltersState,
   type ColumnOrderState,
@@ -45,10 +49,17 @@ import {
 } from "@tanstack/angular-table";
 import { generateUUID } from "../../../helpers/generate-uuid";
 import { PaginationComponent } from "../../navigation/pagination/pagination.component";
+import { TediPaginationResultsDirective } from "../../navigation/pagination/pagination-results.directive";
+import { TediTableHeaderButtonComponent } from "./table-header-button/table-header-button.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
+import { RadioComponent } from "../../form/radio/radio.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { IconComponent } from "../../base/icon/icon.component";
+import { ButtonComponent } from "../../buttons/button/button.component";
+import { PopoverComponent } from "../../overlay/popover/popover.component";
+import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
+import { PopoverTriggerDirective } from "../../overlay/popover/popover-trigger/popover-trigger.directive";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { TEDI_TABLE_CONTEXT } from "./table.context";
 import {
@@ -57,12 +68,15 @@ import {
 } from "./table.persistence";
 import type {
   TableColumnMeta,
+  TableFilterOptions,
   TablePaginationOptions,
   TablePersistOptions,
+  TableSelectionMode,
   TableSize,
   TableState,
   TediColumnDef,
   TediTableContextValue,
+  TediTableFilterContext,
 } from "./table.types";
 
 const SELECT_COLUMN_ID = "__select__";
@@ -94,6 +108,60 @@ interface ResolvedPaginationOptions {
   pageSizeOptions: number[] | false;
 }
 
+/**
+ * Per-slot visual config forwarded to a `tedi-pagination` instance rendered by
+ * the table. Mirrors the pagination component's inputs (defaults applied so the
+ * template binds plain values, not `T | undefined`).
+ */
+interface ResolvedPaginationSlot {
+  boundaryCount: number;
+  siblingCount: number;
+  labels: TablePaginationOptions["labels"];
+  background: NonNullable<TablePaginationOptions["background"]>;
+  dividerPosition: NonNullable<TablePaginationOptions["dividerPosition"]>;
+  hideResults: NonNullable<TablePaginationOptions["hideResults"]>;
+  hidePageSize: NonNullable<TablePaginationOptions["hidePageSize"]>;
+  hidePager: NonNullable<TablePaginationOptions["hidePager"]>;
+  hideArrows: NonNullable<TablePaginationOptions["hideArrows"]>;
+  disableArrowsAtBoundary: boolean;
+  showArrowLabels: boolean;
+  showModalTitle: boolean;
+}
+
+const SLOT_DEFAULTS_BOTTOM: ResolvedPaginationSlot = {
+  boundaryCount: 1,
+  siblingCount: 1,
+  labels: undefined,
+  background: "white",
+  dividerPosition: "top",
+  hideResults: false,
+  hidePageSize: false,
+  hidePager: false,
+  hideArrows: false,
+  disableArrowsAtBoundary: false,
+  showArrowLabels: false,
+  showModalTitle: true,
+};
+
+const SLOT_DEFAULTS_TOP: ResolvedPaginationSlot = {
+  ...SLOT_DEFAULTS_BOTTOM,
+  dividerPosition: "bottom",
+};
+
+function resolveSlotOptions(
+  value: boolean | TablePaginationOptions | undefined,
+  defaults: ResolvedPaginationSlot,
+): ResolvedPaginationSlot | null {
+  if (!value) return null;
+  if (value === true) return defaults;
+  const merged = { ...defaults } as unknown as Record<string, unknown>;
+  for (const key of Object.keys(defaults) as (keyof ResolvedPaginationSlot)[]) {
+    const override = (value as Record<string, unknown>)[key];
+    if (override !== undefined) merged[key] = override;
+  }
+  return merged as unknown as ResolvedPaginationSlot;
+}
+
 @Component({
   standalone: true,
   selector: "tedi-table",
@@ -102,10 +170,17 @@ interface ResolvedPaginationOptions {
     FormsModule,
     FlexRenderDirective,
     PaginationComponent,
+    TediPaginationResultsDirective,
+    TediTableHeaderButtonComponent,
     CheckboxComponent,
+    RadioComponent,
     TextFieldComponent,
     FormFieldComponent,
     IconComponent,
+    ButtonComponent,
+    PopoverComponent,
+    PopoverContentComponent,
+    PopoverTriggerDirective,
     CdkDropList,
     CdkDrag,
     CdkDragHandle,
@@ -151,6 +226,16 @@ export class TediTableComponent<TData> {
   readonly enableRowSelection = input<
     boolean | ((row: Row<TData>) => boolean) | undefined
   >(undefined);
+  /**
+   * Whether row selection is multi- or single-row. `'multiple'` (default)
+   * renders a checkbox per row + a select-all checkbox in the header.
+   * `'single'` renders a radio per row (sharing one `name` so native HTML
+   * group behaviour auto-deselects siblings) and omits the header control —
+   * select-all is meaningless in single-select mode. Mirrors the React
+   * Table's `selectionMode` prop.
+   * @default 'multiple'
+   */
+  readonly selectionMode = input<TableSelectionMode>("multiple");
   readonly enableColumnFilters = input(false, { transform: booleanAttribute });
   readonly renderSubComponent = input<
     TemplateRef<{ $implicit: Row<TData> }> | undefined
@@ -161,7 +246,23 @@ export class TediTableComponent<TData> {
   readonly getSubRows = input<
     ((row: TData) => TData[] | undefined) | undefined
   >(undefined);
+  /**
+   * Enables pagination and configures the bottom paginator slot. This is also
+   * the source of truth for `pageSize` / `pageSizeOptions` — the top slot
+   * (if any) shares the same state. Pass `true` to enable with defaults,
+   * `false` / omit to disable entirely.
+   */
   readonly pagination = input<boolean | TablePaginationOptions | undefined>(
+    undefined,
+  );
+  /**
+   * Opt-in top paginator slot. Independent visual config from the bottom slot
+   * (different `hide*` toggles, divider position, labels, etc.) but shares
+   * page / page-size state with the bottom slot. Requires `pagination` to be
+   * truthy — if pagination as a feature is off, the top slot does not render.
+   * @default undefined
+   */
+  readonly paginationTop = input<boolean | TablePaginationOptions | undefined>(
     undefined,
   );
   readonly manualPagination = input(false, { transform: booleanAttribute });
@@ -255,11 +356,80 @@ export class TediTableComponent<TData> {
     return Array.isArray(opts) && opts.length > 0 ? opts : [];
   });
 
+  protected readonly resolvedBottomSlot = computed<ResolvedPaginationSlot | null>(
+    () => {
+      if (!this.paginationEnabled()) return null;
+      return resolveSlotOptions(this.pagination(), SLOT_DEFAULTS_BOTTOM);
+    },
+  );
+
+  protected readonly resolvedTopSlot = computed<ResolvedPaginationSlot | null>(
+    () => {
+      if (!this.paginationEnabled()) return null;
+      return resolveSlotOptions(this.paginationTop(), SLOT_DEFAULTS_TOP);
+    },
+  );
+
+  /**
+   * Which slot the `[tediPaginationResults]` projection should be rendered in.
+   * Picks whichever paginator actually shows results; defaults to the bottom
+   * when both do, falls back to the top when bottom hides results.
+   */
+  protected readonly resultsRenderTarget = computed<"top" | "bottom" | null>(
+    () => {
+      const top = this.resolvedTopSlot();
+      const bottom = this.resolvedBottomSlot();
+      const topShows = top !== null && top.hideResults !== true;
+      const bottomShows = bottom !== null && bottom.hideResults !== true;
+      if (bottomShows) return "bottom";
+      if (topShows) return "top";
+      return null;
+    },
+  );
+
+  /**
+   * Captures a `<ng-template tediPaginationResults>` declared inside the
+   * `<tedi-table>` host. The captured template is forwarded to whichever
+   * paginator slot is set to display results.
+   */
+  private readonly customResultsDirective = contentChild(
+    TediPaginationResultsDirective,
+  );
+  protected readonly customResultsTemplate = computed(
+    () => this.customResultsDirective()?.template ?? null,
+  );
+  protected readonly topResultsTemplate = computed(() =>
+    this.resultsRenderTarget() === "top" ? this.customResultsTemplate() : null,
+  );
+  protected readonly bottomResultsTemplate = computed(() =>
+    this.resultsRenderTarget() === "bottom"
+      ? this.customResultsTemplate()
+      : null,
+  );
+
+  private readonly paginationHostClasses = computed(() => {
+    const classes: string[] = [];
+    if (this.paginationEnabled()) classes.push("tedi-table--has-pagination");
+    if (this.resolvedTopSlot()) classes.push("tedi-table--has-pagination-top");
+    if (this.resolvedBottomSlot())
+      classes.push("tedi-table--has-pagination-bottom");
+    return classes;
+  });
+
   private readonly hasExpansion = computed(() =>
     Boolean(this.renderSubComponent() || this.getSubRows()),
   );
   private readonly hasSelection = computed(() =>
     Boolean(this.enableRowSelection()),
+  );
+  /**
+   * True when any column has `filterable` truthy. The table forces TanStack's
+   * column-filter machinery on in this case so per-column `getCanFilter()`
+   * returns true and the trigger button renders — without forcing the
+   * legacy inline filter row.
+   */
+  private readonly hasFilterableColumns = computed(() =>
+    this.columns().some((col) => Boolean(col.filterable)),
   );
 
   private readonly augmentedColumns = computed<TediColumnDef<TData>[]>(() => {
@@ -401,7 +571,12 @@ export class TediTableComponent<TData> {
         columns: this.augmentedColumns() as ColumnDef<TData>[],
         state: this.buildResolvedState(),
         enableRowSelection: this.enableRowSelection(),
-        enableColumnFilters: this.enableColumnFilters(),
+        enableMultiRowSelection: this.selectionMode() === "multiple",
+        // Force column-filter machinery on when any column opts into the
+        // built-in `filterable` shorthand — without this, `getCanFilter()`
+        // returns false and the trigger button never renders.
+        enableColumnFilters:
+          this.enableColumnFilters() || this.hasFilterableColumns(),
         manualPagination,
         manualSorting,
         manualFiltering,
@@ -427,6 +602,10 @@ export class TediTableComponent<TData> {
           paginationEnabled && !manualPagination
             ? getPaginationRowModel()
             : undefined,
+        // Keep expanded sub-rows on their parent's page instead of counting
+        // them against pageSize — otherwise expanding a row pushes root rows
+        // off the page (they appear hidden). TanStack defaults this to true.
+        paginateExpandedRows: false,
       };
     },
   ) as unknown as TanstackTable<TData>;
@@ -448,6 +627,7 @@ export class TediTableComponent<TData> {
     this.rowCount();
     this.pageCount();
     this.enableColumnFilters();
+    this.hasFilterableColumns();
     this.enableRowSelection();
     this.paginationOptions();
   }
@@ -463,7 +643,7 @@ export class TediTableComponent<TData> {
     if (this.interactive()) classes.push("tedi-table--clickable-rows");
     const hoverEnabled = this.rowHover() ?? this.interactive();
     if (hoverEnabled) classes.push("tedi-table--row-hover");
-    if (this.paginationEnabled()) classes.push("tedi-table--has-pagination");
+    classes.push(...this.paginationHostClasses());
     if (this.draggableRows() || this.draggableColumns())
       classes.push("tedi-table--draggable");
     this.trackTableInputs();
@@ -521,6 +701,29 @@ export class TediTableComponent<TData> {
       ? this.headerRowCount() + this.totalDataRowCount()
       : null,
   );
+
+  // aria-rowindex per rendered row, keyed by row id. Pagination counts only
+  // top-level rows (paginateExpandedRows is false), so aria-rowcount reflects
+  // root rows alone. We index roots sequentially across pages and leave
+  // expanded sub-rows without an index — otherwise their flattened position
+  // would inflate later roots' indices and overflow aria-rowcount.
+  protected readonly rowAriaIndexById = computed(() => {
+    const map = new Map<string, number | null>();
+    if (!this.paginationEnabled()) return map;
+    const header = this.headerRowCount();
+    const pagination = untracked(() => this.table.getState().pagination);
+    const pageStart = pagination.pageIndex * pagination.pageSize;
+    let rootOrdinal = 0;
+    for (const row of this.rows()) {
+      if (row.depth === 0) {
+        map.set(row.id, header + pageStart + rootOrdinal + 1);
+        rootOrdinal += 1;
+      } else {
+        map.set(row.id, null);
+      }
+    }
+    return map;
+  });
 
   protected readonly paginationPage = computed(() => {
     this.trackTableInputs();
@@ -773,13 +976,6 @@ export class TediTableComponent<TData> {
     return header.subHeaders.length > 0;
   }
 
-  protected getRowIndex(visibleIndex: number): number | null {
-    if (!this.paginationEnabled()) return null;
-    const pagination = untracked(() => this.table.getState().pagination);
-    const offset = pagination.pageIndex * pagination.pageSize;
-    return this.headerRowCount() + offset + visibleIndex + 1;
-  }
-
   protected getFilterValue(
     column: ReturnType<TanstackTable<TData>["getAllLeafColumns"]>[number],
   ): string {
@@ -793,6 +989,192 @@ export class TediTableComponent<TData> {
 
   protected isNumber(value: unknown): value is number {
     return typeof value === "number";
+  }
+
+  /**
+   * Returns true when the column opted into the built-in sort affordance
+   * (`sortable: true` on its `TediColumnDef`), TanStack reports it can sort
+   * (`enableSorting !== false`), and the rendered header content is a plain
+   * string / number. Custom header `TemplateRef`s and functions bow out of
+   * the shorthand and render via `flexRender` as-is.
+   */
+  protected shouldRenderSortableHeader(
+    column: Column<TData, unknown>,
+    content: unknown,
+  ): boolean {
+    const def = column.columnDef as TediColumnDef<TData>;
+    if (def.sortable !== true) return false;
+    if (!column.getCanSort()) return false;
+    return typeof content === "string" || typeof content === "number";
+  }
+
+  /**
+   * Material icon name reflecting the column's current sort state.
+   * `asc → arrow_upward`, `desc → arrow_downward`, otherwise `unfold_more`.
+   */
+  protected sortIcon(column: Column<TData, unknown>): string {
+    const dir = column.getIsSorted();
+    if (dir === "asc") return "arrow_upward";
+    if (dir === "desc") return "arrow_downward";
+    return "unfold_more";
+  }
+
+  protected handleSortToggle(column: Column<TData, unknown>): void {
+    column.toggleSorting();
+  }
+
+  /**
+   * Per-column in-popover filter draft. Keyed by `column.id`. The signal
+   * carries the unapplied value while the popover is open; `Apply` calls
+   * `column.setFilterValue(draft())`, `Clear` resets both the draft and the
+   * applied value. Lazy-initialised so columns without `filterable` pay
+   * nothing.
+   */
+  private readonly filterDrafts = new Map<string, WritableSignal<unknown>>();
+
+  /**
+   * Normalises `filterable: true | TableFilterOptions | undefined | false`
+   * into `TableFilterOptions | null`. `null` means the column did not opt in.
+   */
+  private resolveFilterOptions(
+    col: Column<TData, unknown>,
+  ): TableFilterOptions | null {
+    const def = col.columnDef as TediColumnDef<TData>;
+    const flag = def.filterable;
+    if (!flag) return null;
+    if (flag === true) return {};
+    return flag;
+  }
+
+  /**
+   * Typed accessor for the consumer-provided filter template — pulls
+   * `TediColumnDef.filterTemplate` off a TanStack `Column.columnDef` (whose
+   * static type is the base `ColumnDef`, so the property would otherwise
+   * read as `unknown` in strict templates).
+   */
+  protected filterTemplateFor(
+    col: Column<TData, unknown>,
+  ): TemplateRef<TediTableFilterContext<unknown, TData>> | undefined {
+    const def = col.columnDef as TediColumnDef<TData>;
+    return def.filterTemplate as
+      | TemplateRef<TediTableFilterContext<unknown, TData>>
+      | undefined;
+  }
+
+  /**
+   * True when the column opted into the built-in filter affordance
+   * (`filterable: true | TableFilterOptions`) AND TanStack reports it can
+   * filter (`enableColumnFilter !== false`, etc.).
+   */
+  protected shouldRenderFilterButton(col: Column<TData, unknown>): boolean {
+    if (!this.resolveFilterOptions(col)) return false;
+    return col.getCanFilter();
+  }
+
+  /** Whether the column currently has a filter applied. Drives the trigger's
+   *  selected / filled state. */
+  protected filterIsActive(col: Column<TData, unknown>): boolean {
+    return col.getFilterValue() !== undefined;
+  }
+
+  /** Translated aria-label for the filter trigger button — uses the column
+   *  label (header text or `meta.label`). */
+  protected filterAriaLabel(
+    col: ReturnType<TanstackTable<TData>["getAllLeafColumns"]>[number],
+  ): string {
+    const label = this.resolveColumnLabel(col);
+    return this.translation.translate("table.filter-button-aria", label);
+  }
+
+  protected filterApplyLabel(): string {
+    return this.translation.translate("table.filter-apply");
+  }
+
+  protected filterClearLabel(): string {
+    return this.translation.translate("table.filter-clear");
+  }
+
+  private getFilterDraft(
+    columnId: string,
+    initial: unknown,
+  ): WritableSignal<unknown> {
+    let s = this.filterDrafts.get(columnId);
+    if (!s) {
+      s = signal<unknown>(initial);
+      this.filterDrafts.set(columnId, s);
+    }
+    return s;
+  }
+
+  /**
+   * Called when the filter trigger button is clicked. If `clearOnClose` is
+   * set, the draft is reset to the currently-applied value every time the
+   * popover opens — otherwise the draft persists across opens until the user
+   * Applies or Clears.
+   */
+  protected handleFilterTriggerClick(col: Column<TData, unknown>): void {
+    const opts = this.resolveFilterOptions(col);
+    const applied = col.getFilterValue();
+    if (opts?.clearOnClose) {
+      this.getFilterDraft(col.id, applied).set(applied);
+    } else {
+      // Ensure draft exists with current applied value as starting point.
+      this.getFilterDraft(col.id, applied);
+    }
+  }
+
+  /**
+   * Builds the per-column context object handed to the consumer's
+   * `filterTemplate`. Calling `setValue` writes to the draft; `apply` /
+   * `clear` commit the draft and close the popover.
+   */
+  /**
+   * Builds the per-column context object handed to the consumer's
+   * `filterTemplate`. `$implicit` is wired to the context itself so
+   * `<ng-template let-ctx>` resolves `ctx.value`, `ctx.setValue`,
+   * `ctx.apply()`, `ctx.clear()` and `ctx.column` without extra `let-*`
+   * destructuring.
+   */
+  protected filterContextFor(
+    col: Column<TData, unknown>,
+    popover: PopoverComponent,
+  ): TediTableFilterContext<unknown, TData> {
+    const draft = this.getFilterDraft(col.id, col.getFilterValue());
+    const ctx = {
+      value: draft(),
+      setValue: (next: unknown) => draft.set(next),
+      apply: () => {
+        col.setFilterValue(draft());
+        popover.hidePopover(true);
+      },
+      clear: () => {
+        draft.set(undefined);
+        col.setFilterValue(undefined);
+        popover.hidePopover(true);
+      },
+      column: col,
+    } as Omit<TediTableFilterContext<unknown, TData>, "$implicit">;
+    (ctx as TediTableFilterContext<unknown, TData>).$implicit =
+      ctx as TediTableFilterContext<unknown, TData>;
+    return ctx as TediTableFilterContext<unknown, TData>;
+  }
+
+  protected handleFilterApply(
+    col: Column<TData, unknown>,
+    popover: PopoverComponent,
+  ): void {
+    const draft = this.getFilterDraft(col.id, col.getFilterValue());
+    col.setFilterValue(draft());
+    popover.hidePopover(true);
+  }
+
+  protected handleFilterClear(
+    col: Column<TData, unknown>,
+    popover: PopoverComponent,
+  ): void {
+    this.getFilterDraft(col.id, col.getFilterValue()).set(undefined);
+    col.setFilterValue(undefined);
+    popover.hidePopover(true);
   }
 
   /**

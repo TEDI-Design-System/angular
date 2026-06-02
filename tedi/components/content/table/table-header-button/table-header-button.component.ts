@@ -13,7 +13,7 @@ import { IconComponent, IconSize } from "../../../base/icon/icon.component";
   selector: "button[tedi-table-header-button]",
   imports: [IconComponent],
   template:
-    '<tedi-icon [name]="icon()" [variant]="iconVariant()" color="inherit" [size]="iconSize()" />',
+    '<ng-content /><tedi-icon [name]="icon()" [variant]="iconVariant()" color="inherit" [size]="iconSize()" />',
   styleUrl: "./table-header-button.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,7 +21,7 @@ import { IconComponent, IconSize } from "../../../base/icon/icon.component";
     type: "button",
     "[class]": "hostClasses()",
     "[disabled]": "disabled() || null",
-    "[attr.aria-label]": "ariaLabel()",
+    "[attr.aria-label]": "ariaLabel() || null",
   },
 })
 export class TediTableHeaderButtonComponent {
@@ -52,8 +52,14 @@ export class TediTableHeaderButtonComponent {
    */
   readonly iconSize = input<IconSize>(18);
 
-  /** Required accessible name for the icon-only button. */
-  readonly ariaLabel = input.required<string>({ alias: "aria-label" });
+  /**
+   * Accessible name override. Optional when visible text is projected into the
+   * button — the projected text already serves as the accessible name. Required
+   * for icon-only usage (e.g. filter triggers) where no visible label exists.
+   */
+  readonly ariaLabel = input<string | undefined>(undefined, {
+    alias: "aria-label",
+  });
 
   protected readonly iconVariant = computed(() =>
     this.filled() ? "filled" : "outlined",

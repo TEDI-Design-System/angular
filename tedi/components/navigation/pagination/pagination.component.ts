@@ -9,8 +9,10 @@ import {
   model,
   output,
   signal,
+  TemplateRef,
   ViewEncapsulation,
 } from "@angular/core";
+import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
@@ -37,7 +39,13 @@ import {
 @Component({
   selector: "tedi-pagination",
   standalone: true,
-  imports: [FormsModule, ButtonComponent, IconComponent, SelectComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonComponent,
+    IconComponent,
+    SelectComponent,
+  ],
   templateUrl: "./pagination.component.html",
   styleUrl: "./pagination.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -150,6 +158,16 @@ export class PaginationComponent {
    */
   readonly showModalTitle = input<boolean>(true);
 
+  /**
+   * Template used to render the "results" slot. Wrapper components (e.g.
+   * `<tedi-table>`) forward a consumer-supplied template here when content
+   * projection isn't a viable option. Direct pagination consumers can keep
+   * using `[tediPaginationResults]` on a child element instead.
+   */
+  readonly customResultsTemplate = input<TemplateRef<unknown> | null | undefined>(
+    undefined,
+  );
+
   /** Emits whenever the user navigates to a different page. */
   readonly pageChange = output<number>();
 
@@ -158,6 +176,17 @@ export class PaginationComponent {
 
   /** Detects the `[tediPaginationResults]` content-projection slot, if any. */
   protected readonly customResults = contentChild(TediPaginationResultsDirective);
+
+  /**
+   * Template resolved from either the `[customResultsTemplate]` input (wrapper
+   * use case) or the directive captured from projected content when placed on
+   * an `<ng-template>` (direct use case). Falls back to `null` when the
+   * consumer used the attribute-on-element form, which is handled by the
+   * `<ng-content>` slot instead.
+   */
+  protected readonly resolvedCustomResultsTemplate = computed(
+    () => this.customResultsTemplate() ?? this.customResults()?.template ?? null,
+  );
 
   private readonly translationService = inject(TediTranslationService);
   private readonly breakpointService = inject(BreakpointService);
@@ -261,7 +290,9 @@ export class PaginationComponent {
   protected readonly showResults = computed(
     () =>
       !this.isResultsHidden() &&
-      (this.customResults() != null || this.totalItems() !== undefined),
+      (this.customResults() != null ||
+        this.customResultsTemplate() != null ||
+        this.totalItems() !== undefined),
   );
   protected readonly showPageSizeSelect = computed(
     () => !this.isPageSizeHidden() && this.pageSizeOptions().length > 0,

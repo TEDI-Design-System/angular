@@ -9,12 +9,14 @@
 
 <div class="tedi-pagination__slot-start">
   @if (showResults()) {
-    @if (customResults()) {
-      <ng-content select="[tediPaginationResults]" />
+    @if (resolvedCustomResultsTemplate(); as tpl) {
+      <ng-container *ngTemplateOutlet="tpl" />
     } @else {
-      <span class="tedi-pagination__results">
-        {{ mergedLabels().results(totalItems()!) }}
-      </span>
+      <ng-content select="[tediPaginationResults]">
+        <span class="tedi-pagination__results">
+          {{ mergedLabels().results(totalItems() ?? 0) }}
+        </span>
+      </ng-content>
     }
   }
 </div>

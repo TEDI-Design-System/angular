@@ -2,6 +2,9 @@ import {
   booleanAttribute,
   Component,
   computed,
+  Directive,
+  effect,
+  inject,
   input,
   signal,
   TemplateRef,
@@ -18,8 +21,15 @@ import { TediTableComponent } from "./table.component";
 import { TediTableToolbarComponent } from "./table-toolbar/table-toolbar.component";
 import { TediTableColumnsMenuComponent } from "./table-columns-menu/table-columns-menu.component";
 import { TediTableHeaderButtonComponent } from "./table-header-button/table-header-button.component";
+import { TediPaginationResultsDirective } from "../../navigation/pagination/pagination-results.directive";
 import { groupRowSpan } from "./row-span.utils";
-import type { TableState, TediColumnDef } from "./table.types";
+import type {
+  TableSelectionMode,
+  TableSize,
+  TableState,
+  TediColumnDef,
+  TediTableFilterContext,
+} from "./table.types";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { LinkComponent } from "../../navigation/link/link.component";
@@ -43,6 +53,10 @@ import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-conten
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
 import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
 import { EmptyStateComponent } from "../../helpers/empty-state/empty-state.component";
+import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
+import { TextGroupComponent } from "../text-group/text-group.component";
+import { TextGroupLabelComponent } from "../text-group/text-group-label.component";
+import { TextGroupValueComponent } from "../text-group/text-group-value.component";
 
 // ---------------------------------------------------------------------------
 // Shared data — mirrors `react/src/tedi/components/content/table/table.stories.tsx`.
@@ -253,9 +267,9 @@ const collapsiblePeople: CollapsibleRecord[] = Array.from({ length: 28 }, (_, in
   const subRows: CollapsibleRecord[] | undefined =
     index % 2 === 0
       ? [
-          { id: `${id}-1`, name, age: seed.age, visits: Math.floor(seed.visits / 2), status: "Kehtiv" },
-          { id: `${id}-2`, name, age: seed.age, visits: seed.visits - Math.floor(seed.visits / 2), status: "Kehtetu" },
-        ]
+        { id: `${id}-1`, name, age: seed.age, visits: Math.floor(seed.visits / 2), status: "Kehtiv" },
+        { id: `${id}-2`, name, age: seed.age, visits: seed.visits - Math.floor(seed.visits / 2), status: "Kehtetu" },
+      ]
       : undefined;
   return { ...seed, id, name, ...(subRows ? { subRows } : {}) };
 });
@@ -550,6 +564,47 @@ function createEditableRows<T extends { id: string }>(initial: T[]) {
   };
 }
 
+// Shared appearance inputs every story host inherits — keeps the Storybook
+// controls panel functional for every story, not just Default. `@Directive()`
+// (no selector) is required so Angular walks the inheritance chain and picks
+// up these signal inputs as inputs of every subclass component.
+@Directive({ standalone: true })
+abstract class TableStoryHostBase {
+  readonly size = input<TableSize>("medium");
+  readonly striped = input(false, { transform: booleanAttribute });
+  readonly verticalBorders = input(false, { transform: booleanAttribute });
+  readonly borderless = input(false, { transform: booleanAttribute });
+  readonly stickyFirstColumn = input(false, { transform: booleanAttribute });
+  readonly stickyHeader = input(false, { transform: booleanAttribute });
+  readonly rowHover = input(false, { transform: booleanAttribute });
+  readonly interactive = input(false, { transform: booleanAttribute });
+  readonly enableRowSelection = input(false, { transform: booleanAttribute });
+  readonly selectionMode = input<TableSelectionMode>("multiple");
+  readonly enableColumnFilters = input(false, { transform: booleanAttribute });
+  readonly maxHeight = input<number | undefined>(undefined);
+  readonly activeRowId = input<string | undefined>(undefined);
+  readonly placeholderRole = input<"alert" | "status" | undefined>(undefined);
+}
+
+// Sibling binding fragment so every story template can forward the base-class
+// inputs to its <tedi-table> without repeating the property list.
+const TABLE_APPEARANCE_BINDINGS = `
+  [size]="size()"
+  [striped]="striped()"
+  [verticalBorders]="verticalBorders()"
+  [borderless]="borderless()"
+  [stickyFirstColumn]="stickyFirstColumn()"
+  [stickyHeader]="stickyHeader()"
+  [rowHover]="rowHover()"
+  [interactive]="interactive()"
+  [enableRowSelection]="enableRowSelection()"
+  [selectionMode]="selectionMode()"
+  [enableColumnFilters]="enableColumnFilters()"
+  [maxHeight]="maxHeight()"
+  [activeRowId]="activeRowId()"
+  [placeholderRole]="placeholderRole()"
+`.trim();
+
 type TediTableStoryArgs = {
   size: "medium" | "small";
   striped: boolean;
@@ -560,6 +615,7 @@ type TediTableStoryArgs = {
   rowHover: boolean;
   interactive: boolean;
   enableRowSelection: boolean;
+  selectionMode: TableSelectionMode;
   enableColumnFilters: boolean;
   maxHeight: number | undefined;
   activeRowId: string | undefined;
@@ -575,14 +631,26 @@ type TediTableStoryArgs = {
  * filtering, expansion, selection, pagination, sticky chrome and body row
  * spanning. Cells render via per-column `cell` accessor (string or
  * `TemplateRef`).
+ *
+ * In-depth examples for column definitions, cell / header / footer
+ * templates, row spanning, expansion sub-rows and editable cells live on the
+ * <a href="?path=/docs/tedi-ready-content-table--cells-and-templates">Cells and Templates</a> page.
  */
 const meta: Meta<TediTableStoryArgs> = {
   title: "TEDI-Ready/Content/Table",
   component: TediTableComponent,
   parameters: {
+    status: {
+      type: ["partiallyTediReady"],
+    },
     design: {
       type: "figma",
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=11335-186161&m=dev",
+    },
+    docs: {
+      source: {
+        type: "code",
+      },
     },
   },
   args: {
@@ -595,6 +663,7 @@ const meta: Meta<TediTableStoryArgs> = {
     rowHover: false,
     interactive: false,
     enableRowSelection: false,
+    selectionMode: "multiple",
     enableColumnFilters: false,
     maxHeight: undefined,
     activeRowId: undefined,
@@ -603,7 +672,7 @@ const meta: Meta<TediTableStoryArgs> = {
   argTypes: {
     // Visual / layout
     size: {
-      description: "Visual size. `medium` = 49px rows, `small` = 41px rows.",
+      description: "Visual size.",
       control: { type: "inline-radio" },
       options: ["medium", "small"],
       table: {
@@ -697,6 +766,17 @@ const meta: Meta<TediTableStoryArgs> = {
         defaultValue: { summary: "false" },
       },
     },
+    selectionMode: {
+      description:
+        "`multiple` (default) renders checkboxes + select-all. `single` renders radios sharing one HTML group and omits select-all.",
+      control: { type: "inline-radio" },
+      options: ["multiple", "single"],
+      table: {
+        category: "behavior",
+        type: { summary: "TableSelectionMode" },
+        defaultValue: { summary: "multiple" },
+      },
+    },
     enableColumnFilters: {
       description: "Render the per-column filter row below the header.",
       control: "boolean",
@@ -744,19 +824,7 @@ type Story = StoryObj<TediTableStoryArgs>;
       [data]="data"
       [columns]="columns()"
       [pagination]="pagination"
-      [size]="size()"
-      [striped]="striped()"
-      [verticalBorders]="verticalBorders()"
-      [borderless]="borderless()"
-      [stickyFirstColumn]="stickyFirstColumn()"
-      [stickyHeader]="stickyHeader()"
-      [rowHover]="rowHover()"
-      [interactive]="interactive()"
-      [enableRowSelection]="enableRowSelection()"
-      [enableColumnFilters]="enableColumnFilters()"
-      [maxHeight]="maxHeight()"
-      [activeRowId]="activeRowId()"
-      [placeholderRole]="placeholderRole()"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
     <ng-template #actions>
       <span style="display:inline-flex; gap:8px; justify-content:flex-end; width:100%;">
@@ -768,7 +836,7 @@ type Story = StoryObj<TediTableStoryArgs>;
     </ng-template>
   `,
 })
-class DefaultStoryHostComponent {
+class DefaultStoryHostComponent extends TableStoryHostBase {
   data = bookings;
   pagination = SHOWCASE_PAGINATION_3;
   actionsTpl = viewChild<TemplateRef<CellContext<Booking, unknown>>>("actions");
@@ -785,20 +853,6 @@ class DefaultStoryHostComponent {
       cell: this.actionsTpl() ?? "",
     } as TediColumnDef<Booking>,
   ]);
-
-  readonly size = input<"medium" | "small">("medium");
-  readonly striped = input(false, { transform: booleanAttribute });
-  readonly verticalBorders = input(false, { transform: booleanAttribute });
-  readonly borderless = input(false, { transform: booleanAttribute });
-  readonly stickyFirstColumn = input(false, { transform: booleanAttribute });
-  readonly stickyHeader = input(false, { transform: booleanAttribute });
-  readonly rowHover = input(false, { transform: booleanAttribute });
-  readonly interactive = input(false, { transform: booleanAttribute });
-  readonly enableRowSelection = input(false, { transform: booleanAttribute });
-  readonly enableColumnFilters = input(false, { transform: booleanAttribute });
-  readonly maxHeight = input<number | undefined>(undefined);
-  readonly activeRowId = input<string | undefined>(undefined);
-  readonly placeholderRole = input<"alert" | "status" | undefined>(undefined);
 }
 
 export const Default: Story = {
@@ -807,6 +861,18 @@ export const Default: Story = {
     props: args,
     template: `<tedi-default-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [pagination]="{ pageSize: 3, pageSizeOptions: [3, 10, 25, 50] }"
+/>`,
+      },
+    },
+  },
 };
 
 // ---------- Sizes ----------
@@ -814,6 +880,9 @@ export const Default: Story = {
   standalone: true,
   selector: "tedi-sizes-story",
   imports: [TediTableComponent],
+  // The "Small" table below intentionally hardcodes size="small" to keep the
+  // side-by-side comparison meaningful. The "Default" table reads its size
+  // from the Storybook control (via the appearance bindings).
   template: `
     <div style="display:flex; flex-direction:column; gap:24px;">
       <h3 style="margin:0;">Default</h3>
@@ -822,6 +891,7 @@ export const Default: Story = {
         [data]="data"
         [columns]="columns"
         [pagination]="pagination"
+        ${TABLE_APPEARANCE_BINDINGS}
       />
       <h3 style="margin:0;">Small</h3>
       <tedi-table
@@ -830,11 +900,23 @@ export const Default: Story = {
         [data]="data"
         [columns]="columns"
         [pagination]="pagination"
+        [striped]="striped()"
+        [verticalBorders]="verticalBorders()"
+        [borderless]="borderless()"
+        [stickyFirstColumn]="stickyFirstColumn()"
+        [stickyHeader]="stickyHeader()"
+        [rowHover]="rowHover()"
+        [interactive]="interactive()"
+        [enableRowSelection]="enableRowSelection()"
+        [enableColumnFilters]="enableColumnFilters()"
+        [maxHeight]="maxHeight()"
+        [activeRowId]="activeRowId()"
+        [placeholderRole]="placeholderRole()"
       />
     </div>
   `,
 })
-class SizesStoryHostComponent {
+class SizesStoryHostComponent extends TableStoryHostBase {
   data = bookings;
   pagination = SHOWCASE_PAGINATION_3;
   columns: TediColumnDef<Booking>[] = [
@@ -846,10 +928,23 @@ class SizesStoryHostComponent {
 }
 
 export const Sizes: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [SizesStoryHostComponent] },
-    template: `<tedi-sizes-story />`,
+    props: args,
+    template: `<tedi-sizes-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Default size -->
+<tedi-table [data]="data" [columns]="columns" [pagination]="pagination" />
+
+<!-- Small size -->
+<tedi-table size="small" [data]="data" [columns]="columns" [pagination]="pagination" />`,
+      },
+    },
+  },
 };
 
 // ---------- Simple ----------
@@ -864,18 +959,21 @@ export const Sizes: Story = {
         [data]="bookings"
         [columns]="bookingColumns"
         [pagination]="paginationBooking"
+        ${TABLE_APPEARANCE_BINDINGS}
       />
       <tedi-table
         id="tedi-table-simple-people"
         [data]="people"
         [columns]="peopleColumns()"
         [pagination]="paginationPeople"
+        ${TABLE_APPEARANCE_BINDINGS}
       />
       <tedi-table
         id="tedi-table-simple-doctors"
         [data]="doctors"
         [columns]="doctorColumns()"
         [pagination]="paginationBooking"
+        ${TABLE_APPEARANCE_BINDINGS}
       />
     </div>
 
@@ -898,7 +996,7 @@ export const Sizes: Story = {
     </ng-template>
   `,
 })
-class SimpleStoryHostComponent {
+class SimpleStoryHostComponent extends TableStoryHostBase {
   bookings = bookings;
   people = filterablePeople;
   doctors = doctors;
@@ -949,53 +1047,69 @@ class SimpleStoryHostComponent {
 }
 
 export const Simple: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [SimpleStoryHostComponent] },
-    template: `<tedi-simple-story />`,
+    props: args,
+    template: `<tedi-simple-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Plain text columns -->
+<tedi-table [data]="bookings" [columns]="bookingColumns" [pagination]="pagination" />
+
+<!-- Columns with templated cells (link, status badge):
+  peopleColumns = [
+    id: 'name', header: 'Isik', accessorKey: 'name', cell: personNameTpl,
+    id: 'age', header: 'Vanus', accessorKey: 'age',
+    id: 'visits', header: 'Külastuste arv', accessorKey: 'visits',
+    id: 'status', header: 'Tõendi staatus', accessorKey: 'status', cell: personStatusTpl,
+  ]
+-->
+<tedi-table [data]="people" [columns]="peopleColumns" [pagination]="pagination" />
+
+<ng-template #personName let-ctx>
+  <a tedi-link href="#">{{ ctx.row.original.name }}</a>
+</ng-template>
+<ng-template #personStatus let-ctx>
+  <tedi-status-badge
+    [color]="statusColor[ctx.row.original.status]"
+    [text]="ctx.row.original.status"
+  />
+</ng-template>`,
+      },
+    },
+  },
 };
 
 // ---------- MergedCells (grouped headers + sort) ----------
 @Component({
   standalone: true,
   selector: "tedi-merged-cells-story",
-  imports: [TediTableComponent, TediTableHeaderButtonComponent],
+  imports: [TediTableComponent],
   template: `
     <tedi-table
       id="tedi-table-merged"
-      verticalBorders
       [data]="data"
-      [columns]="columns()"
+      [columns]="columns"
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
-    <ng-template #dateHeader let-ctx>
-      <span style="display:inline-flex; align-items:center; gap:4px;">
-        Kuupäev
-        <button
-          tedi-table-header-button
-          [icon]="iconFor(ctx.column.getIsSorted())"
-          [selected]="!!ctx.column.getIsSorted()"
-          (click)="ctx.column.toggleSorting()"
-          [aria-label]="'Sort by Kuupäev'"
-        ></button>
-      </span>
-    </ng-template>
   `,
 })
-class MergedCellsStoryHostComponent {
+class MergedCellsStoryHostComponent extends TableStoryHostBase {
   data = bookings;
   pagination = DEFAULT_PAGINATION;
-  iconFor = sortIconFor;
 
-  dateHeaderTpl = viewChild<TemplateRef<unknown>>("dateHeader");
-
-  columns = computed<TediColumnDef<Booking>[]>(() => [
+  columns: TediColumnDef<Booking>[] = [
     {
       id: "dateRange",
+      header: "Kuupäev",
       accessorKey: "dateRange",
       size: 240,
-      header: this.dateHeaderTpl() ?? "Kuupäev",
-    } as TediColumnDef<Booking>,
+      sortable: true,
+    },
     {
       id: "aeg",
       header: "Aeg",
@@ -1005,14 +1119,40 @@ class MergedCellsStoryHostComponent {
       ],
     } as TediColumnDef<Booking>,
     { id: "location", header: "Asukoht", accessorKey: "location" },
-  ]);
+  ];
 }
 
 export const MergedCells: Story = {
-  render: () => ({
+  args: { verticalBorders: true },
+  render: (args) => ({
     moduleMetadata: { imports: [MergedCellsStoryHostComponent] },
-    template: `<tedi-merged-cells-story />`,
+    props: args,
+    template: `<tedi-merged-cells-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Nested header groups via 'columns' on a parent column. The
+  dateRange column opts into the built-in sort affordance with
+  sortable: true.
+
+  columns = [
+    id: 'dateRange', header: 'Kuupäev', accessorKey: 'dateRange',
+      size: 240, sortable: true,
+    id: 'aeg', header: 'Aeg', columns: [hour, duration],
+    id: 'location', header: 'Asukoht', accessorKey: 'location',
+  ]
+-->
+<tedi-table
+  verticalBorders
+  [data]="data"
+  [columns]="columns"
+  [pagination]="pagination"
+/>`,
+      },
+    },
+  },
 };
 
 // ---------- GroupedRows (body row spanning — Angular-only feature) ----------
@@ -1033,9 +1173,9 @@ const patientRows: PatientRow[] = [
   standalone: true,
   selector: "tedi-grouped-rows-story",
   imports: [TediTableComponent],
-  template: `<tedi-table [data]="data" [columns]="columns" verticalBorders />`,
+  template: `<tedi-table [data]="data" [columns]="columns" ${TABLE_APPEARANCE_BINDINGS} />`,
 })
-class GroupedRowsStoryHostComponent {
+class GroupedRowsStoryHostComponent extends TableStoryHostBase {
   data = patientRows;
   columns: TediColumnDef<PatientRow>[] = [
     {
@@ -1056,10 +1196,29 @@ class GroupedRowsStoryHostComponent {
 }
 
 export const GroupedRows: Story = {
-  render: () => ({
+  args: { verticalBorders: true },
+  render: (args) => ({
     moduleMetadata: { imports: [GroupedRowsStoryHostComponent] },
-    template: `<tedi-grouped-rows-story />`,
+    props: args,
+    template: `<tedi-grouped-rows-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- The first column collapses adjacent rows with the same value
+  via rowSpan. Use the groupRowSpan helper:
+  columns = [
+    id: 'date', header: 'Date', accessorKey: 'date',
+      rowSpan: groupRowSpan(rows, row => row.original.date),
+    id: 'doctor', header: 'Doctor', accessorKey: 'doctor',
+    id: 'procedure', header: 'Procedure', accessorKey: 'procedure',
+  ]
+-->
+<tedi-table [data]="data" [columns]="columns" verticalBorders />`,
+      },
+    },
+  },
 };
 
 // ---------- VerticalBorders (services with sort + info tooltips) ----------
@@ -1077,22 +1236,20 @@ export const GroupedRows: Story = {
   template: `
     <tedi-table
       id="tedi-table-vb"
-      verticalBorders
       [data]="data"
       [columns]="columns()"
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
     <ng-template #serviceHeader let-ctx>
-      <span style="display:inline-flex; align-items:center; gap:4px;">
+      <button
+        tedi-table-header-button
+        [icon]="iconFor(ctx.column.getIsSorted())"
+        [selected]="!!ctx.column.getIsSorted()"
+        (click)="ctx.column.toggleSorting()"
+      >
         Teenus
-        <button
-          tedi-table-header-button
-          [icon]="iconFor(ctx.column.getIsSorted())"
-          [selected]="!!ctx.column.getIsSorted()"
-          (click)="ctx.column.toggleSorting()"
-          [aria-label]="'Sorteeri Teenus järgi'"
-        ></button>
-      </span>
+      </button>
     </ng-template>
     <ng-template #doctorHeader>
       <span style="display:inline-flex; align-items:center; gap:4px;">
@@ -1123,7 +1280,7 @@ export const GroupedRows: Story = {
     </ng-template>
   `,
 })
-class VerticalBordersStoryHostComponent {
+class VerticalBordersStoryHostComponent extends TableStoryHostBase {
   data = services;
   pagination = DEFAULT_PAGINATION;
   iconFor = sortIconFor;
@@ -1162,10 +1319,57 @@ class VerticalBordersStoryHostComponent {
 }
 
 export const VerticalBorders: Story = {
-  render: () => ({
+  args: { verticalBorders: true },
+  render: (args) => ({
     moduleMetadata: { imports: [VerticalBordersStoryHostComponent] },
-    template: `<tedi-vertical-borders-story />`,
+    props: args,
+    template: `<tedi-vertical-borders-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- columns:
+    id: 'service', accessorKey: 'service', header: serviceHeaderTpl,
+    id: 'doctor', accessorKey: 'doctor', header: doctorHeaderTpl,
+    id: 'price', accessorKey: 'price', header: 'Maksumus',
+      meta: align right, cell: priceCellTpl,
+    id: 'location', accessorKey: 'location', header: locationHeaderTpl,
+-->
+<tedi-table
+  verticalBorders
+  [data]="data"
+  [columns]="columns"
+  [pagination]="pagination"
+/>
+
+<ng-template #serviceHeader let-ctx>
+  <button
+    tedi-table-header-button
+    [icon]="iconFor(ctx.column.getIsSorted())"
+    [selected]="!!ctx.column.getIsSorted()"
+    (click)="ctx.column.toggleSorting()"
+  >
+    Teenus
+  </button>
+</ng-template>
+<ng-template #doctorHeader>
+  <span>
+    Arst
+    <tedi-tooltip>
+      <tedi-tooltip-trigger>
+        <button tedi-info-button aria-label="Arst info"></button>
+      </tedi-tooltip-trigger>
+      <tedi-tooltip-content>Vastutav raviarst.</tedi-tooltip-content>
+    </tedi-tooltip>
+  </span>
+</ng-template>
+<ng-template #priceCell let-ctx>
+  {{ format(ctx.row.original.price) }} €/h
+</ng-template>`,
+      },
+    },
+  },
 };
 
 // ---------- NoOutsideBorder ----------
@@ -1178,22 +1382,37 @@ export const VerticalBorders: Story = {
       id="tedi-table-borderless"
       [data]="data"
       [columns]="columns"
-      borderless
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
   `,
 })
-class NoOutsideBorderStoryHostComponent {
+class NoOutsideBorderStoryHostComponent extends TableStoryHostBase {
   data = people;
   columns = personColumns;
   pagination = DEFAULT_PAGINATION;
 }
 
 export const NoOutsideBorder: Story = {
-  render: () => ({
+  args: { borderless: true },
+  render: (args) => ({
     moduleMetadata: { imports: [NoOutsideBorderStoryHostComponent] },
-    template: `<tedi-no-outside-border-story />`,
+    props: args,
+    template: `<tedi-no-outside-border-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<tedi-table
+  [data]="data"
+  [columns]="columns"
+  borderless
+  [pagination]="pagination"
+/>`,
+      },
+    },
+  },
 };
 
 // ---------- EditableValues ----------
@@ -1207,11 +1426,12 @@ export const NoOutsideBorder: Story = {
       [data]="editor.rows()"
       [columns]="columns()"
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
     ${BOOKING_EDIT_TEMPLATES}
   `,
 })
-class EditableValuesStoryHostComponent {
+class EditableValuesStoryHostComponent extends TableStoryHostBase {
   protected readonly counties = ESTONIAN_COUNTIES;
   protected readonly editor = createEditableRows<Booking>(bookings);
   pagination = DEFAULT_PAGINATION;
@@ -1262,17 +1482,63 @@ class EditableValuesStoryHostComponent {
 }
 
 export const EditableValues: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [EditableValuesStoryHostComponent] },
-    template: `<tedi-editable-values-story />`,
+    props: args,
+    template: `<tedi-editable-values-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Each editable column points its 'cell' at a template that
+  toggles between a read-only value and a form control based on
+  editor.isEditing(rowId). The last column renders save / cancel
+  via the editActions template.
+-->
+<tedi-table
+  [data]="editor.rows()"
+  [columns]="columns"
+  [pagination]="pagination"
+/>
+
+<ng-template #dateRangeCell let-ctx>
+  @if (editor.isEditing(ctx.row.original.id)) {
+    <tedi-form-field size="small">
+      <input
+        tedi-text-field
+        type="text"
+        [ngModel]="editor.draftValue(ctx.row.original.id, 'dateRange')"
+        (ngModelChange)="editor.setDraftValue(ctx.row.original.id, 'dateRange', $event)"
+        aria-label="Kuupäev"
+      />
+    </tedi-form-field>
+  } @else {
+    {{ ctx.row.original.dateRange }}
+  }
+</ng-template>
+
+<ng-template #editActions let-ctx>
+  @if (editor.isEditing(ctx.row.original.id)) {
+    <button tedi-closing-button aria-label="Tühista"
+      (click)="editor.cancelEdit()"></button>
+    <button tedi-button variant="primary" size="small"
+      (click)="editor.commitEdit()">Kinnita</button>
+  } @else {
+    <button tedi-button variant="neutral" size="small"
+      (click)="editor.beginEdit(ctx.row.original)">Muuda</button>
+  }
+</ng-template>`,
+      },
+    },
+  },
 };
 
 // ---------- Sortable ----------
 @Component({
   standalone: true,
   selector: "tedi-sortable-story",
-  imports: [TediTableComponent, TediTableHeaderButtonComponent],
+  imports: [TediTableComponent],
   template: `
     <div style="
       color: var(--general-text-secondary);
@@ -1280,13 +1546,13 @@ export const EditableValues: Story = {
       font-size: var(--body-small-regular-size);
     ">
       <p style="margin: 0 0 8px;">
-        Each column opts into sorting via the header template binding
-        <code>ctx.column.toggleSorting()</code>. Use <code>column.getIsSorted()</code>
-        to drive the icon and <code>aria-sort</code> state.
+        Opt a column into the built-in sort affordance with
+        <code>sortable: true</code> on its <code>TediColumnDef</code>. The
+        entire header title becomes clickable, an icon reflects the sort
+        state, and <code>aria-sort</code> is wired automatically.
       </p>
       <p style="margin: 0 0 8px;">
-        Customise comparison per column with <code>sortingFn</code> on
-        <code>TediColumnDef</code>:
+        Customise comparison per column with <code>sortingFn</code>:
       </p>
       <ul style="margin: 0 0 8px; padding-left: 20px;">
         <li>
@@ -1303,7 +1569,7 @@ export const EditableValues: Story = {
         </li>
       </ul>
       <p style="margin: 0;">
-        Examples below:
+        Below:
         <strong>Name</strong> uses locale-aware compare,
         <strong>Salary</strong> sorts numerically (built-in
         <code>'alphanumeric'</code>),
@@ -1314,28 +1580,15 @@ export const EditableValues: Story = {
     <tedi-table
       id="tedi-table-sortable"
       [data]="data"
-      [columns]="columns()"
+      [columns]="columns"
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
-    <ng-template #sortHeader let-ctx>
-      <span style="display:inline-flex; align-items:center; gap:4px;">
-        {{ ctx.column.columnDef.meta?.label }}
-        <button
-          tedi-table-header-button
-          [icon]="iconFor(ctx.column.getIsSorted())"
-          [selected]="!!ctx.column.getIsSorted()"
-          (click)="ctx.column.toggleSorting()"
-          [aria-label]="'Sort by ' + ctx.column.columnDef.meta?.label"
-        ></button>
-      </span>
-    </ng-template>
   `,
 })
-class SortableStoryHostComponent {
+class SortableStoryHostComponent extends TableStoryHostBase {
   data = people;
   pagination = DEFAULT_PAGINATION;
-  iconFor = sortIconFor;
-  sortHeaderTpl = viewChild<TemplateRef<unknown>>("sortHeader");
 
   // Custom sortingFn: locale-aware string comparison for Estonian characters
   // (ä, ö, õ, ü etc.). Default `auto` would still work for ASCII names but
@@ -1350,61 +1603,91 @@ class SortableStoryHostComponent {
     return a.localeCompare(b, "et", { sensitivity: "base" });
   };
 
-  columns = computed<TediColumnDef<Person>[]>(() => {
-    const header = this.sortHeaderTpl() ?? "";
-    return [
-      {
-        id: "name",
-        header,
-        accessorKey: "name",
-        meta: { label: "Name" },
-        sortingFn: this.nameLocaleCompare,
-      } as TediColumnDef<Person>,
-      {
-        id: "role",
-        header,
-        accessorKey: "role",
-        meta: { label: "Role" },
-      } as TediColumnDef<Person>,
-      {
-        id: "location",
-        header,
-        accessorKey: "location",
-        meta: { label: "Location" },
-      } as TediColumnDef<Person>,
-      {
-        id: "salary",
-        header,
-        accessorKey: "salary",
-        meta: { label: "Salary" },
-        sortingFn: "alphanumeric",
-      } as TediColumnDef<Person>,
-    ];
-  });
+  columns: TediColumnDef<Person>[] = [
+    {
+      id: "name",
+      header: "Name",
+      accessorKey: "name",
+      sortable: true,
+      sortingFn: this.nameLocaleCompare,
+    },
+    {
+      id: "role",
+      header: "Role",
+      accessorKey: "role",
+      sortable: true,
+    },
+    {
+      id: "location",
+      header: "Location",
+      accessorKey: "location",
+      sortable: true,
+    },
+    {
+      id: "salary",
+      header: "Salary",
+      accessorKey: "salary",
+      sortable: true,
+      sortingFn: "alphanumeric",
+    },
+  ];
 }
 
 export const Sortable: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [SortableStoryHostComponent] },
-    template: `<tedi-sortable-story />`,
+    props: args,
+    template: `<tedi-sortable-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Sort affordance is baked in. Set sortable: true on a column and
+  the table auto-renders the sort button around its (string) header,
+  wires the icon to the sort state, and sets aria-sort. Pair with
+  sortingFn for a custom comparator.
+
+  Built-in sortingFns: 'alphanumeric', 'alphanumericCaseSensitive',
+    'text', 'textCaseSensitive', 'datetime', 'basic', 'auto'.
+
+  columns:
+    - id 'name'     header 'Name'     sortable: true   sortingFn: localeCompare
+    - id 'role'     header 'Role'     sortable: true
+    - id 'location' header 'Location' sortable: true
+    - id 'salary'   header 'Salary'   sortable: true   sortingFn: 'alphanumeric'
+-->
+<tedi-table [data]="data" [columns]="columns" [pagination]="pagination" />`,
+      },
+    },
+  },
 };
 
-// ---------- Filters (popover-driven per-column filters) ----------
+// ---------- Filters (built-in filter popover via `filterable: true`) ----------
 @Component({
   standalone: true,
   selector: "tedi-filters-story",
+  styles: [
+    `
+      .tedi-filters-story__option-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--tedi-dimensions-04);
+      }
+
+      .tedi-filters-story__option {
+        display: inline-flex;
+        gap: var(--tedi-dimensions-04);
+        align-items: center;
+      }
+    `,
+  ],
   imports: [
     TediTableComponent,
-    TediTableHeaderButtonComponent,
     StatusBadgeComponent,
     TextFieldComponent,
     FormFieldComponent,
     CheckboxComponent,
-    ButtonComponent,
-    PopoverComponent,
-    PopoverContentComponent,
-    PopoverTriggerDirective,
   ],
   template: `
     <tedi-table
@@ -1412,135 +1695,43 @@ export const Sortable: Story = {
       [data]="data"
       [columns]="columns()"
       [pagination]="pagination"
-      [maxHeight]="480"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
 
-    <ng-template #nameHeader let-ctx>
-      <span style="display:inline-flex; align-items:center; gap:4px;">
-        Nimi
-        <button
-          tedi-table-header-button
-          [icon]="iconFor(ctx.column.getIsSorted())"
-          [selected]="!!ctx.column.getIsSorted()"
-          (click)="ctx.column.toggleSorting()"
-          [aria-label]="'Sorteeri Nimi'"
-        ></button>
-        <tedi-popover
-          position="bottom-end"
-          [preventOverflow]="true"
-          style="display:inline-flex;"
-        >
-          <button
-            tedi-popover-trigger
-            tedi-table-header-button
-            icon="filter_alt"
-            [selected]="!!ctx.column.getFilterValue()"
-            [filled]="!!ctx.column.getFilterValue()"
-            [aria-label]="'Filtreeri Nimi'"
-          ></button>
-          <tedi-popover-content>
-            <div style="display:flex; flex-direction:column; gap:8px;">
-              <tedi-form-field size="small">
-                <input
-                  tedi-text-field
-                  type="text"
-                  [value]="textDraft()"
-                  (input)="textDraft.set($any($event.target).value)"
-                  aria-label="Nimi"
-                />
-              </tedi-form-field>
-              <div style="display:flex; gap:8px; justify-content:flex-end;">
-                <button
-                  tedi-button
-                  variant="secondary"
-                  size="small"
-                  type="button"
-                  (click)="textDraft.set(''); ctx.column.setFilterValue(undefined)"
-                >Tühista</button>
-                <button
-                  tedi-button
-                  variant="primary"
-                  size="small"
-                  type="button"
-                  (click)="ctx.column.setFilterValue(textDraft() || undefined)"
-                >Filtreeri</button>
-              </div>
-            </div>
-          </tedi-popover-content>
-        </tedi-popover>
-      </span>
+    <ng-template #textFilter let-ctx>
+      <tedi-form-field size="small">
+        <input
+          tedi-text-field
+          type="text"
+          [value]="ctx.value ?? ''"
+          (input)="ctx.setValue($any($event.target).value)"
+          [attr.aria-label]="ctx.column.columnDef.header"
+        />
+      </tedi-form-field>
     </ng-template>
 
-    <ng-template #plainSort let-ctx>
-      <span style="display:inline-flex; align-items:center; gap:4px;">
-        {{ ctx.column.columnDef.meta?.label }}
-        <button
-          tedi-table-header-button
-          [icon]="iconFor(ctx.column.getIsSorted())"
-          [selected]="!!ctx.column.getIsSorted()"
-          (click)="ctx.column.toggleSorting()"
-          [aria-label]="'Sorteeri ' + ctx.column.columnDef.meta?.label"
-        ></button>
-      </span>
-    </ng-template>
-
-    <ng-template #statusHeader let-ctx>
-      <span style="display:inline-flex; align-items:center; gap:4px;">
-        Tõendi staatus
-        <button
-          tedi-table-header-button
-          [icon]="iconFor(ctx.column.getIsSorted())"
-          [selected]="!!ctx.column.getIsSorted()"
-          (click)="ctx.column.toggleSorting()"
-          [aria-label]="'Sorteeri Tõendi staatus'"
-        ></button>
-        <tedi-popover
-          position="bottom-end"
-          [preventOverflow]="true"
-          style="display:inline-flex;"
-        >
-          <button
-            tedi-popover-trigger
-            tedi-table-header-button
-            icon="filter_alt"
-            [selected]="(ctx.column.getFilterValue()?.length ?? 0) > 0"
-            [filled]="(ctx.column.getFilterValue()?.length ?? 0) > 0"
-            [aria-label]="'Filtreeri Tõendi staatus'"
-          ></button>
-          <tedi-popover-content>
-            <div style="display:flex; flex-direction:column; gap:8px;">
-              @for (option of certStatuses; track option) {
-                <label style="display:inline-flex; gap:8px; align-items:center;">
-                  <input
-                    tedi-checkbox
-                    type="checkbox"
-                    [value]="option"
-                    [checked]="statusDraft().includes(option)"
-                    (change)="toggleStatus(option, $any($event.target).checked)"
-                  />
-                  {{ option }}
-                </label>
-              }
-              <div style="display:flex; gap:8px; justify-content:flex-end;">
-                <button
-                  tedi-button
-                  variant="secondary"
-                  size="small"
-                  type="button"
-                  (click)="statusDraft.set([]); ctx.column.setFilterValue(undefined)"
-                >Tühista</button>
-                <button
-                  tedi-button
-                  variant="primary"
-                  size="small"
-                  type="button"
-                  (click)="ctx.column.setFilterValue(statusDraft().length ? statusDraft() : undefined)"
-                >Filtreeri</button>
-              </div>
-            </div>
-          </tedi-popover-content>
-        </tedi-popover>
-      </span>
+    <ng-template #statusFilter let-ctx>
+      <div class="tedi-filters-story__option-list">
+        @for (option of certStatuses; track option) {
+          <label class="tedi-filters-story__option">
+            <input
+              tedi-checkbox
+              type="checkbox"
+              [checked]="(ctx.value ?? []).includes(option)"
+              (change)="
+                ctx.setValue(
+                  toggleStatus(
+                    ctx.value,
+                    option,
+                    $any($event.target).checked
+                  )
+                )
+              "
+            />
+            <span>{{ option }}</span>
+          </label>
+        }
+      </div>
     </ng-template>
 
     <ng-template #statusCell let-ctx>
@@ -1551,70 +1742,136 @@ export const Sortable: Story = {
     </ng-template>
   `,
 })
-class FiltersStoryHostComponent {
+class FiltersStoryHostComponent extends TableStoryHostBase {
   data = filterablePeople;
   pagination = DEFAULT_PAGINATION;
-  iconFor = sortIconFor;
   certStatuses = CERT_STATUSES;
   statusColor = certStatusColor;
 
-  textDraft = signal("");
-  statusDraft = signal<CertStatus[]>([]);
-
-  nameHeaderTpl = viewChild<TemplateRef<unknown>>("nameHeader");
-  plainSortTpl = viewChild<TemplateRef<unknown>>("plainSort");
-  statusHeaderTpl = viewChild<TemplateRef<unknown>>("statusHeader");
+  textFilterTpl =
+    viewChild<TemplateRef<TediTableFilterContext<string, PersonRecord>>>(
+      "textFilter",
+    );
+  statusFilterTpl =
+    viewChild<
+      TemplateRef<TediTableFilterContext<CertStatus[], PersonRecord>>
+    >("statusFilter");
   statusCellTpl =
     viewChild<TemplateRef<CellContext<PersonRecord, unknown>>>("statusCell");
 
-  toggleStatus(status: CertStatus, checked: boolean) {
-    this.statusDraft.update((prev) =>
-      checked ? [...prev, status] : prev.filter((v) => v !== status),
-    );
+  toggleStatus(
+    current: CertStatus[] | undefined,
+    option: CertStatus,
+    on: boolean,
+  ): CertStatus[] | undefined {
+    const next = on
+      ? [...(current ?? []), option]
+      : (current ?? []).filter((s) => s !== option);
+    return next.length ? next : undefined;
   }
 
   columns = computed<TediColumnDef<PersonRecord>[]>(() => [
     {
       id: "name",
+      header: "Nimi",
       accessorKey: "name",
+      sortable: true,
+      filterable: true,
       filterFn: "includesString",
-      header: this.nameHeaderTpl() ?? "Nimi",
+      filterTemplate: this.textFilterTpl() ?? undefined,
     } as TediColumnDef<PersonRecord>,
     {
       id: "jobStart",
+      header: "Töökoht",
       accessorKey: "jobStart",
-      header: this.plainSortTpl() ?? "Töö algus",
-      meta: { label: "Töö algus" },
+      sortable: true,
+      filterable: true,
+      filterFn: "includesString",
+      filterTemplate: this.textFilterTpl() ?? undefined,
     } as TediColumnDef<PersonRecord>,
     {
       id: "age",
+      header: "Vanus",
       accessorKey: "age",
-      header: this.plainSortTpl() ?? "Vanus",
-      meta: { label: "Vanus" },
-    } as TediColumnDef<PersonRecord>,
+      sortable: true,
+      sortingFn: "alphanumeric",
+    },
     {
       id: "visits",
+      header: "Külastused",
       accessorKey: "visits",
-      header: this.plainSortTpl() ?? "Külastuste arv",
-      meta: { label: "Külastuste arv" },
-    } as TediColumnDef<PersonRecord>,
+      sortable: true,
+      sortingFn: "alphanumeric",
+    },
     {
       id: "status",
+      header: "Tõendi staatus",
       accessorKey: "status",
-      header: this.statusHeaderTpl() ?? "Tõendi staatus",
+      sortable: true,
+      filterable: true,
+      filterFn: "arrIncludesSome",
+      filterTemplate: this.statusFilterTpl() ?? undefined,
       cell: this.statusCellTpl() ?? "",
-      filterFn: ((row: Row<PersonRecord>, id: string, value: CertStatus[]) =>
-        !value?.length ||
-        value.includes(row.getValue(id) as CertStatus)) as unknown as string,
     } as TediColumnDef<PersonRecord>,
   ]);
 }
 
 export const Filters: Story = {
-  render: () => ({
+  args: { maxHeight: 480 },
+  render: (args) => ({
     moduleMetadata: { imports: [FiltersStoryHostComponent] },
-    template: `<tedi-filters-story />`,
+    props: args,
+    template: `<tedi-filters-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Opt a column into the built-in filter popover with
+  filterable: true (or filterable: clearOnClose true). Pass the input
+  UI through filterTemplate. The table renders the trigger button,
+  positions the popover, owns the draft state, and renders translated
+  Apply / Clear buttons in the footer.
+
+  columns:
+    id 'name'   header 'Nimi'   sortable filterable filterFn 'includesString'
+    id 'status' header 'Tõendi staatus' sortable filterable filterFn 'arrIncludesSome'
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [pagination]="pagination"
+  [maxHeight]="480"
+/>
+
+<ng-template #textFilter let-ctx>
+  <tedi-form-field size="small">
+    <input
+      tedi-text-field
+      type="text"
+      [value]="ctx.value ?? ''"
+      (input)="ctx.setValue($any($event.target).value)"
+      [attr.aria-label]="ctx.column.columnDef.header"
+    />
+  </tedi-form-field>
+</ng-template>
+
+<ng-template #statusFilter let-ctx>
+  @for (option of certStatuses; track option) {
+    <label>
+      <input
+        tedi-checkbox
+        type="checkbox"
+        [checked]="(ctx.value ?? []).includes(option)"
+        (change)="ctx.setValue(toggleStatus(ctx.value, option, $any($event.target).checked))"
+      />
+      <span>{{ option }}</span>
+    </label>
+  }
+</ng-template>`,
+      },
+    },
+  },
 };
 
 // ---------- CollapsibleRows (nested sub-rows) ----------
@@ -1629,6 +1886,7 @@ export const Filters: Story = {
       [columns]="columns()"
       [getSubRows]="getSubRows"
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
     <ng-template #statusCell let-ctx>
       <tedi-status-badge
@@ -1638,7 +1896,7 @@ export const Filters: Story = {
     </ng-template>
   `,
 })
-class CollapsibleRowsStoryHostComponent {
+class CollapsibleRowsStoryHostComponent extends TableStoryHostBase {
   data = collapsiblePeople;
   pagination = DEFAULT_PAGINATION;
   statusColor = certStatusColor;
@@ -1660,10 +1918,36 @@ class CollapsibleRowsStoryHostComponent {
 }
 
 export const CollapsibleRows: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [CollapsibleRowsStoryHostComponent] },
-    template: `<tedi-collapsible-rows-story />`,
+    props: args,
+    template: `<tedi-collapsible-rows-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Provide [getSubRows] so the table can build the expansion tree.
+  An expand toggle is rendered automatically in the first column for
+  rows that have sub-rows.
+  getSubRows = (row) => row.subRows
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [pagination]="pagination"
+/>
+
+<ng-template #statusCell let-ctx>
+  <tedi-status-badge
+    [color]="statusColor[ctx.row.original.status]"
+    [text]="ctx.row.original.status"
+  />
+</ng-template>`,
+      },
+    },
+  },
 };
 
 // ---------- SelectableRows ----------
@@ -1676,8 +1960,8 @@ export const CollapsibleRows: Story = {
       id="tedi-table-selectable"
       [data]="data"
       [columns]="columns()"
-      [enableRowSelection]="true"
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
     <ng-template #personName let-ctx>
       <a tedi-link href="#" (click)="$event.preventDefault()">{{ ctx.row.original.name }}</a>
@@ -1690,7 +1974,7 @@ export const CollapsibleRows: Story = {
     </ng-template>
   `,
 })
-class SelectableRowsStoryHostComponent {
+class SelectableRowsStoryHostComponent extends TableStoryHostBase {
   data = filterablePeople;
   pagination = DEFAULT_PAGINATION;
   statusColor = certStatusColor;
@@ -1719,10 +2003,64 @@ class SelectableRowsStoryHostComponent {
 }
 
 export const SelectableRows: Story = {
-  render: () => ({
+  args: { enableRowSelection: true },
+  render: (args) => ({
     moduleMetadata: { imports: [SelectableRowsStoryHostComponent] },
-    template: `<tedi-selectable-rows-story />`,
+    props: args,
+    template: `<tedi-selectable-rows-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Default selectionMode is 'multiple' — checkbox per row plus
+  a select-all checkbox in the header. Pass a predicate
+  (row) => boolean to enableRowSelection to allow only some rows.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [enableRowSelection]="true"
+  [pagination]="pagination"
+/>`,
+      },
+    },
+  },
+};
+
+export const SingleSelectableRows: Story = {
+  args: { enableRowSelection: true, selectionMode: "single" },
+  render: (args) => ({
+    moduleMetadata: { imports: [SelectableRowsStoryHostComponent] },
+    props: args,
+    template: `<tedi-selectable-rows-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pass `selectionMode: 'single'` to swap the checkbox column for " +
+          "radios. Picking a row auto-deselects the previously selected one " +
+          "(via TanStack's `enableMultiRowSelection: false` + native HTML " +
+          "radio-group behaviour) and the header's select-all control is " +
+          "omitted entirely.",
+      },
+      source: {
+        language: "html",
+        code: `<!-- selectionMode 'single' renders radios per row, shares one
+  HTML name so picking a row auto-deselects siblings, and drops
+  the header select-all control.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [enableRowSelection]="true"
+  selectionMode="single"
+  [pagination]="pagination"
+/>`,
+      },
+    },
+  },
 };
 
 // ---------- ClickableRows ----------
@@ -1742,10 +2080,21 @@ export const SelectableRows: Story = {
       id="tedi-table-clickable"
       [data]="data"
       [columns]="columns()"
-      [interactive]="true"
-      [activeRowId]="active()?.id"
+      [activeRowId]="active()?.id ?? activeRowId()"
       (rowClick)="onClick($event)"
       [pagination]="pagination"
+      [size]="size()"
+      [striped]="striped()"
+      [verticalBorders]="verticalBorders()"
+      [borderless]="borderless()"
+      [stickyFirstColumn]="stickyFirstColumn()"
+      [stickyHeader]="stickyHeader()"
+      [rowHover]="rowHover()"
+      [interactive]="interactive()"
+      [enableRowSelection]="enableRowSelection()"
+      [enableColumnFilters]="enableColumnFilters()"
+      [maxHeight]="maxHeight()"
+      [placeholderRole]="placeholderRole()"
     />
     <ng-template #personStatus let-ctx>
       <tedi-status-badge
@@ -1756,7 +2105,7 @@ export const SelectableRows: Story = {
     </ng-template>
   `,
 })
-class ClickableRowsStoryHostComponent {
+class ClickableRowsStoryHostComponent extends TableStoryHostBase {
   data = filterablePeople;
   pagination = DEFAULT_PAGINATION;
   statusColor = certStatusColor;
@@ -1783,10 +2132,31 @@ class ClickableRowsStoryHostComponent {
 }
 
 export const ClickableRows: Story = {
-  render: () => ({
+  args: { interactive: true },
+  render: (args) => ({
     moduleMetadata: { imports: [ClickableRowsStoryHostComponent] },
-    template: `<tedi-clickable-rows-story />`,
+    props: args,
+    template: `<tedi-clickable-rows-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- [interactive]="true" gives rows role=button, tabindex, and
+  keyboard activation. Subscribe to (rowClick) to react to clicks.
+  [activeRowId] highlights the row whose id matches.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [interactive]="true"
+  [activeRowId]="active()?.id"
+  (rowClick)="onClick($event)"
+  [pagination]="pagination"
+/>`,
+      },
+    },
+  },
 };
 
 // ---------- Striped ----------
@@ -1799,22 +2169,37 @@ export const ClickableRows: Story = {
       id="tedi-table-striped"
       [data]="data"
       [columns]="columns"
-      striped
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
   `,
 })
-class StripedStoryHostComponent {
+class StripedStoryHostComponent extends TableStoryHostBase {
   data = people;
   columns = personColumns;
   pagination = DEFAULT_PAGINATION;
 }
 
 export const Striped: Story = {
-  render: () => ({
+  args: { striped: true },
+  render: (args) => ({
     moduleMetadata: { imports: [StripedStoryHostComponent] },
-    template: `<tedi-striped-story />`,
+    props: args,
+    template: `<tedi-striped-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<tedi-table
+  [data]="data"
+  [columns]="columns"
+  striped
+  [pagination]="pagination"
+/>`,
+      },
+    },
+  },
 };
 
 // ---------- StickyFirstColumn ----------
@@ -1828,8 +2213,8 @@ export const Striped: Story = {
         id="tedi-table-sticky"
         [data]="data"
         [columns]="columns()"
-        stickyFirstColumn
         [pagination]="pagination"
+        ${TABLE_APPEARANCE_BINDINGS}
       />
     </div>
     <ng-template #nameCell let-ctx>
@@ -1842,7 +2227,7 @@ export const Striped: Story = {
     </ng-template>
   `,
 })
-class StickyFirstColumnStoryHostComponent {
+class StickyFirstColumnStoryHostComponent extends TableStoryHostBase {
   data = stickyDoctors;
   pagination = DEFAULT_PAGINATION;
   nameCellTpl =
@@ -1886,10 +2271,28 @@ class StickyFirstColumnStoryHostComponent {
 }
 
 export const StickyFirstColumn: Story = {
-  render: () => ({
+  args: { stickyFirstColumn: true },
+  render: (args) => ({
     moduleMetadata: { imports: [StickyFirstColumnStoryHostComponent] },
-    template: `<tedi-sticky-first-story />`,
+    props: args,
+    template: `<tedi-sticky-first-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Add 'stickyFirstColumn' to freeze the leftmost column during
+  horizontal scroll. Column widths come from each column's 'size'.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  stickyFirstColumn
+  [pagination]="pagination"
+/>`,
+      },
+    },
+  },
 };
 
 // ---------- StickyHeader ----------
@@ -1902,21 +2305,38 @@ export const StickyFirstColumn: Story = {
       id="tedi-table-sticky-header"
       [data]="data"
       [columns]="columns"
-      stickyHeader
-      [maxHeight]="240"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
   `,
 })
-class StickyHeaderStoryHostComponent {
+class StickyHeaderStoryHostComponent extends TableStoryHostBase {
   data = people;
   columns = personColumns;
 }
 
 export const StickyHeader: Story = {
-  render: () => ({
+  args: { stickyHeader: true, maxHeight: 480 },
+  render: (args) => ({
     moduleMetadata: { imports: [StickyHeaderStoryHostComponent] },
-    template: `<tedi-sticky-header-story />`,
+    props: args,
+    template: `<tedi-sticky-header-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- 'stickyHeader' pins thead during vertical scroll.
+  Requires [maxHeight] so the body can scroll independently.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  stickyHeader
+  [maxHeight]="240"
+/>`,
+      },
+    },
+  },
 };
 
 // ---------- StickyHeaderAndFirstColumn ----------
@@ -1930,9 +2350,7 @@ export const StickyHeader: Story = {
         id="tedi-table-sticky-both"
         [data]="data"
         [columns]="columns()"
-        stickyHeader
-        stickyFirstColumn
-        [maxHeight]="280"
+        ${TABLE_APPEARANCE_BINDINGS}
       />
     </div>
     <ng-template #nameCell let-ctx>
@@ -1945,7 +2363,7 @@ export const StickyHeader: Story = {
     </ng-template>
   `,
 })
-class StickyHeaderAndFirstColumnStoryHostComponent {
+class StickyHeaderAndFirstColumnStoryHostComponent extends TableStoryHostBase {
   data = stickyDoctors;
   nameCellTpl =
     viewChild<TemplateRef<CellContext<StickyDoctor, unknown>>>("nameCell");
@@ -1988,10 +2406,29 @@ class StickyHeaderAndFirstColumnStoryHostComponent {
 }
 
 export const StickyHeaderAndFirstColumn: Story = {
-  render: () => ({
+  args: { stickyFirstColumn: true, stickyHeader: true, maxHeight: 480 },
+  render: (args) => ({
     moduleMetadata: { imports: [StickyHeaderAndFirstColumnStoryHostComponent] },
-    template: `<tedi-sticky-both-story />`,
+    props: args,
+    template: `<tedi-sticky-both-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Combine 'stickyHeader' and 'stickyFirstColumn'. The corner
+  cell stays pinned in both axes during scroll.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  stickyHeader
+  stickyFirstColumn
+  [maxHeight]="280"
+/>`,
+      },
+    },
+  },
 };
 
 // ---------- WithEmptyState ----------
@@ -2005,7 +2442,7 @@ export const StickyHeaderAndFirstColumn: Story = {
       [data]="empty"
       [columns]="columns"
       [placeholder]="emptyTpl"
-      placeholderRole="status"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
     <ng-template #emptyTpl>
       <tedi-empty-state type="inside" icon="spa" iconColor="tertiary">
@@ -2014,16 +2451,41 @@ export const StickyHeaderAndFirstColumn: Story = {
     </ng-template>
   `,
 })
-class WithEmptyStateStoryHostComponent {
+class WithEmptyStateStoryHostComponent extends TableStoryHostBase {
   empty: Person[] = [];
   columns = personColumns;
 }
 
 export const WithEmptyState: Story = {
-  render: () => ({
+  args: { placeholderRole: "status" },
+  render: (args) => ({
     moduleMetadata: { imports: [WithEmptyStateStoryHostComponent] },
-    template: `<tedi-empty-story />`,
+    props: args,
+    template: `<tedi-empty-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Provide a [placeholder] template that the table renders when
+  data is empty. placeholderRole sets the ARIA live region role
+  ('status' = polite, 'alert' = assertive).
+-->
+<tedi-table
+  [data]="empty"
+  [columns]="columns"
+  [placeholder]="emptyTpl"
+  placeholderRole="status"
+/>
+
+<ng-template #emptyTpl>
+  <tedi-empty-state type="inside" icon="spa" iconColor="tertiary">
+    No results found
+  </tedi-empty-state>
+</ng-template>`,
+      },
+    },
+  },
 };
 
 // ---------- LongTexts ----------
@@ -2037,6 +2499,7 @@ export const WithEmptyState: Story = {
       [data]="data"
       [columns]="columns()"
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
     <ng-template #nameCell let-ctx>
       <div>
@@ -2078,7 +2541,7 @@ export const WithEmptyState: Story = {
     </ng-template>
   `,
 })
-class LongTextsStoryHostComponent {
+class LongTextsStoryHostComponent extends TableStoryHostBase {
   private static readonly TRUNCATE_LENGTH = 70;
   data = doctors;
   pagination = SHOWCASE_PAGINATION_3;
@@ -2109,7 +2572,7 @@ class LongTextsStoryHostComponent {
   protected truncate(text: string): string {
     if (text.length <= LongTextsStoryHostComponent.TRUNCATE_LENGTH) return text;
     return (
-      text.slice(0, LongTextsStoryHostComponent.TRUNCATE_LENGTH).trimEnd() +
+      text.slice(0, LongTextsStoryHostComponent.TRUNCATE_LENGTH).trim() +
       "…"
     );
   }
@@ -2125,10 +2588,44 @@ class LongTextsStoryHostComponent {
 }
 
 export const LongTexts: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [LongTextsStoryHostComponent] },
-    template: `<tedi-long-texts-story />`,
+    props: args,
+    template: `<tedi-long-texts-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Constrain a column with 'size' and let the cell template
+  decide whether to truncate or render the full text via a
+  per-row 'expanded' set.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [pagination]="pagination"
+/>
+
+<ng-template #descCell let-ctx>
+  @let expanded = expandedDescriptions().has(ctx.row.original.id);
+  <span style="display:inline-block; max-width: 480px;">
+    @if (expanded) {
+      {{ description }}
+      <a tedi-link href="#" (click)="toggleDescription(ctx.row.original.id); $event.preventDefault()">
+        Näita vähem
+      </a>
+    } @else {
+      {{ truncate(description) }}
+      <a tedi-link href="#" (click)="toggleDescription(ctx.row.original.id); $event.preventDefault()">
+        Näita rohkem
+      </a>
+    }
+  </span>
+</ng-template>`,
+      },
+    },
+  },
 };
 
 // ---------- Actions ----------
@@ -2150,6 +2647,7 @@ export const LongTexts: Story = {
       [data]="data"
       [columns]="columns()"
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
     <ng-template #nameCell let-ctx>
       <div>
@@ -2181,7 +2679,7 @@ export const LongTexts: Story = {
     </ng-template>
   `,
 })
-class ActionsStoryHostComponent {
+class ActionsStoryHostComponent extends TableStoryHostBase {
   data = doctors;
   pagination = SHOWCASE_PAGINATION_3;
   nameCellTpl =
@@ -2206,10 +2704,47 @@ class ActionsStoryHostComponent {
 }
 
 export const Actions: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [ActionsStoryHostComponent] },
-    template: `<tedi-actions-story />`,
+    props: args,
+    template: `<tedi-actions-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- The 'actions' column has size:1 so it shrinks to the action
+  button's intrinsic width. The cell template renders a dropdown
+  with row-scoped action items.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [pagination]="pagination"
+/>
+
+<ng-template #actions let-ctx>
+  <tedi-dropdown position="bottom-end">
+    <button
+      tedi-button
+      tedi-dropdown-trigger
+      variant="secondary"
+      size="small"
+      [attr.aria-label]="'Avalda ' + ctx.row.original.name + ' valikud'"
+    >
+      <tedi-icon name="more_vert" [size]="16" color="inherit" />
+    </button>
+    <tedi-dropdown-content>
+      <li tedi-dropdown-item>Muuda</li>
+      <li tedi-dropdown-item>Dubleeri</li>
+      <li tedi-dropdown-item>Saada e-mail</li>
+      <li tedi-dropdown-item>Kustuta</li>
+    </tedi-dropdown-content>
+  </tedi-dropdown>
+</ng-template>`,
+      },
+    },
+  },
 };
 
 // ---------- Custom ----------
@@ -2233,6 +2768,7 @@ export const Actions: Story = {
       [data]="data"
       [columns]="columns()"
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
     <ng-template #nameCell let-ctx>
       <div style="display:flex; align-items:center; gap:12px;">
@@ -2297,7 +2833,7 @@ export const Actions: Story = {
     </ng-template>
   `,
 })
-class CustomStoryHostComponent {
+class CustomStoryHostComponent extends TableStoryHostBase {
   data = customDoctors;
   pagination = SHOWCASE_PAGINATION_3;
   initials = initialsOf;
@@ -2331,10 +2867,62 @@ class CustomStoryHostComponent {
 }
 
 export const Custom: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [CustomStoryHostComponent] },
-    template: `<tedi-custom-story />`,
+    props: args,
+    template: `<tedi-custom-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Cell templates can render arbitrary content: avatar circles,
+  inline alerts, popovers triggered from per-row buttons, etc.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [pagination]="pagination"
+/>
+
+<ng-template #nameCell let-ctx>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <span aria-hidden="true" class="avatar">
+      {{ initials(ctx.row.original.name) }}
+    </span>
+    <div>
+      <div>{{ ctx.row.original.name }}</div>
+      <div>{{ ctx.row.original.specialty }}</div>
+    </div>
+  </div>
+</ng-template>
+<ng-template #noteCell let-ctx>
+  @if (ctx.row.original.note && ctx.row.original.noteColor) {
+    <tedi-alert
+      [type]="ctx.row.original.noteColor === 'danger' ? 'error' : 'warning'"
+      variant="default"
+      role="status"
+    >
+      {{ ctx.row.original.note }}
+    </tedi-alert>
+  }
+</ng-template>
+<ng-template #actions let-ctx>
+  <tedi-popover>
+    <button
+      tedi-popover-trigger
+      tedi-info-button
+      [attr.aria-label]="ctx.row.original.name + ' eelvaade'"
+    ></button>
+    <tedi-popover-content>
+      <div>{{ ctx.row.original.name }}</div>
+      <div>{{ ctx.row.original.specialty }} · {{ ctx.row.original.location }}</div>
+    </tedi-popover-content>
+  </tedi-popover>
+</ng-template>`,
+      },
+    },
+  },
 };
 
 // ---------- WithFooter ----------
@@ -2348,6 +2936,7 @@ export const Custom: Story = {
       [data]="data"
       [columns]="columns()"
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
     <ng-template #salaryCell let-ctx>
       {{ format(ctx.row.original.salary) }}
@@ -2355,7 +2944,7 @@ export const Custom: Story = {
     <ng-template #salaryFooter>Total €{{ totalLabel() }}</ng-template>
   `,
 })
-class WithFooterStoryHostComponent {
+class WithFooterStoryHostComponent extends TableStoryHostBase {
   data = people;
   pagination = DEFAULT_PAGINATION;
   format = (v: number) => v.toLocaleString("et-EE");
@@ -2382,10 +2971,34 @@ class WithFooterStoryHostComponent {
 }
 
 export const WithFooter: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [WithFooterStoryHostComponent] },
-    template: `<tedi-footer-story />`,
+    props: args,
+    template: `<tedi-footer-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Each column may declare a 'footer' as a string or a TemplateRef.
+  columns = [
+    id: 'name', header: 'Name', accessorKey: 'name', footer: '28 people',
+    id: 'role', header: 'Role', accessorKey: 'role',
+    id: 'location', header: 'Location', accessorKey: 'location',
+    id: 'salary', header: 'Salary (€)', accessorKey: 'salary',
+      meta: align right, cell: salaryCellTpl, footer: salaryFooterTpl,
+  ]
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [pagination]="pagination"
+/>
+
+<ng-template #salaryFooter>Total €{{ totalLabel() }}</ng-template>`,
+      },
+    },
+  },
 };
 
 // ---------- WithColumnsMenu ----------
@@ -2403,6 +3016,7 @@ export const WithFooter: Story = {
       [data]="data"
       [columns]="columns"
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     >
       <tedi-table-toolbar>
         <tedi-table-columns-menu />
@@ -2410,17 +3024,37 @@ export const WithFooter: Story = {
     </tedi-table>
   `,
 })
-class WithColumnsMenuStoryHostComponent {
+class WithColumnsMenuStoryHostComponent extends TableStoryHostBase {
   data = people;
   columns = personColumns;
   pagination = DEFAULT_PAGINATION;
 }
 
 export const WithColumnsMenu: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [WithColumnsMenuStoryHostComponent] },
-    template: `<tedi-columns-menu-story />`,
+    props: args,
+    template: `<tedi-columns-menu-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Project a <tedi-table-toolbar> with the built-in
+  <tedi-table-columns-menu> to let users toggle column visibility.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [pagination]="pagination"
+>
+  <tedi-table-toolbar>
+    <tedi-table-columns-menu />
+  </tedi-table-toolbar>
+</tedi-table>`,
+      },
+    },
+  },
 };
 
 // ---------- DraggableRows ----------
@@ -2446,10 +3080,11 @@ export const WithColumnsMenu: Story = {
       [draggableRows]="true"
       [pagination]="pagination"
       (rowDrop)="onRowDrop($event)"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
   `,
 })
-class DraggableRowsStoryHostComponent {
+class DraggableRowsStoryHostComponent extends TableStoryHostBase {
   protected readonly rows = signal<Person[]>(people.slice(0, 8));
   pagination = SHOWCASE_PAGINATION_4;
   columns: TediColumnDef<Person>[] = [
@@ -2469,10 +3104,30 @@ class DraggableRowsStoryHostComponent {
 }
 
 export const DraggableRows: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [DraggableRowsStoryHostComponent] },
-    template: `<tedi-draggable-rows-story />`,
+    props: args,
+    template: `<tedi-draggable-rows-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- [draggableRows]="true" makes rows reorderable. The table emits
+  (rowDrop) with a CdkDragDrop event; the consumer reorders its
+  data array (e.g. via CDK's moveItemInArray) and feeds it back
+  through [data].
+-->
+<tedi-table
+  [data]="rows()"
+  [columns]="columns"
+  [draggableRows]="true"
+  [pagination]="pagination"
+  (rowDrop)="onRowDrop($event)"
+/>`,
+      },
+    },
+  },
 };
 
 // ---------- DraggableColumns ----------
@@ -2498,10 +3153,11 @@ export const DraggableRows: Story = {
       [columns]="columns"
       [draggableColumns]="true"
       [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
     />
   `,
 })
-class DraggableColumnsStoryHostComponent {
+class DraggableColumnsStoryHostComponent extends TableStoryHostBase {
   data = people;
   pagination = DEFAULT_PAGINATION;
   columns: TediColumnDef<Person>[] = [
@@ -2513,10 +3169,29 @@ class DraggableColumnsStoryHostComponent {
 }
 
 export const DraggableColumns: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [DraggableColumnsStoryHostComponent] },
-    template: `<tedi-draggable-columns-story />`,
+    props: args,
+    template: `<tedi-draggable-columns-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- [draggableColumns]="true" lets users drag header cells to reorder.
+  No consumer wiring is required — the table updates its own
+  'columnOrder' state. Persist across reloads by adding 'columnOrder'
+  to the persist.include list.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [draggableColumns]="true"
+  [pagination]="pagination"
+/>`,
+      },
+    },
+  },
 };
 
 // ---------- ServerSide ----------
@@ -2550,7 +3225,7 @@ export const DraggableColumns: Story = {
       <tedi-table
         id="tedi-table-server-side"
         [data]="page()"
-        [columns]="columns()"
+        [columns]="columns"
         [manualPagination]="true"
         [manualSorting]="true"
         [pageCount]="totalPages()"
@@ -2558,27 +3233,15 @@ export const DraggableColumns: Story = {
         [state]="tableState()"
         [pagination]="paginationOpts"
         (stateChange)="onState($event)"
+        ${TABLE_APPEARANCE_BINDINGS}
       />
     </div>
-    <ng-template #sortHeader let-ctx>
-      <span style="display:inline-flex; align-items:center; gap:4px;">
-        {{ ctx.column.columnDef.meta?.label }}
-        <button
-          tedi-table-header-button
-          [icon]="iconFor(ctx.column.getIsSorted())"
-          [selected]="!!ctx.column.getIsSorted()"
-          (click)="ctx.column.toggleSorting()"
-          [aria-label]="'Sort by ' + ctx.column.columnDef.meta?.label"
-        ></button>
-      </span>
-    </ng-template>
   `,
 })
-class ServerSideStoryHostComponent {
+class ServerSideStoryHostComponent extends TableStoryHostBase {
   source = people;
   total = people.length;
   paginationOpts = { pageSize: 5, pageSizeOptions: [5, 10, 25] };
-  iconFor = sortIconFor;
 
   tableState = signal<Partial<TableState>>({
     pagination: { pageIndex: 0, pageSize: 5 },
@@ -2586,8 +3249,6 @@ class ServerSideStoryHostComponent {
   });
   page = signal<Person[]>(this.source.slice(0, 5));
   totalPages = signal<number>(Math.ceil(this.source.length / 5));
-
-  sortHeaderTpl = viewChild<TemplateRef<unknown>>("sortHeader");
 
   snippet = `const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 const [sorting, setSorting] = useState([]);
@@ -2607,17 +3268,13 @@ const { data: page, total } = useServerQuery({ pagination, sorting });
   [pagination]="{ pageSize: 10 }"
 />`;
 
-  columns = computed<TediColumnDef<Person>[]>(() => {
-    const header = this.sortHeaderTpl() ?? "";
-    return personColumns.map(
-      (col) =>
-        ({
-          ...col,
-          header,
-          meta: { label: typeof col.header === "string" ? col.header : col.id },
-        }) as TediColumnDef<Person>,
-    );
-  });
+  columns: TediColumnDef<Person>[] = personColumns.map(
+    (col) =>
+      ({
+        ...col,
+        sortable: true,
+      }) as TediColumnDef<Person>,
+  );
 
   onState(next: TableState) {
     const pagination = next.pagination ?? { pageIndex: 0, pageSize: 5 };
@@ -2643,8 +3300,423 @@ const { data: page, total } = useServerQuery({ pagination, sorting });
 }
 
 export const ServerSide: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [ServerSideStoryHostComponent] },
-    template: `<tedi-server-side-story />`,
+    props: args,
+    template: `<tedi-server-side-story ${argsToTemplate(args)} />`,
   }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Server-side pagination + sorting. The parent owns the current
+  page slice and the sort state; the table is told manualPagination
+  + manualSorting so it does not re-slice or re-sort the data array.
+  Add manualFiltering the same way for column filters.
+
+  Each column has sortable: true on its TediColumnDef so the built-in
+  sort button shows up in every header — clicks fire (stateChange)
+  with the new sort, the parent refetches.
+
+  [data]         = current page only (not the full set)
+  [pageCount]    = Math.ceil(total / pageSize)
+  [rowCount]     = total row count (shown in 'X results')
+  [state]        = parent-owned pagination + sorting state
+  (stateChange)  = refetch + re-slice when paging or sort changes
+-->
+<tedi-table
+  [data]="page()"
+  [columns]="columns"
+  [manualPagination]="true"
+  [manualSorting]="true"
+  [pageCount]="totalPages()"
+  [rowCount]="total"
+  [state]="tableState()"
+  [pagination]="paginationOpts"
+  (stateChange)="onState($event)"
+/>`,
+      },
+    },
+  },
 };
+
+// ---------- Pagination: top and bottom ----------
+@Component({
+  standalone: true,
+  selector: "tedi-pagination-top-and-bottom-story",
+  imports: [TediTableComponent],
+  template: `
+    <tedi-table
+      id="tedi-table-pagination-top-and-bottom"
+      [data]="data"
+      [columns]="columns"
+      [pagination]="pagination"
+      [paginationTop]="paginationTop"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+  `,
+})
+class PaginationTopAndBottomStoryHostComponent extends TableStoryHostBase {
+  data = bookings;
+  columns: TediColumnDef<Booking>[] = [
+    { id: "dateRange", header: "Kuupäev", accessorKey: "dateRange" },
+    { id: "hour", header: "Kellaaeg", accessorKey: "hour" },
+    { id: "duration", header: "Kestus", accessorKey: "duration" },
+    { id: "location", header: "Asukoht", accessorKey: "location" },
+  ];
+
+  pagination = {
+    pageSize: 5,
+    pageSizeOptions: [5, 10, 25],
+    hideResults: true,
+    hidePageSize: true,
+  };
+
+  paginationTop = {
+    hidePager: true,
+  };
+}
+
+export const PaginationTopAndBottom: Story = {
+  render: (args) => ({
+    moduleMetadata: { imports: [PaginationTopAndBottomStoryHostComponent] },
+    props: args,
+    template: `<tedi-pagination-top-and-bottom-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Render a paginator above and below the table. Both slots share " +
+          "page / page-size state but each has its own visual config. Here " +
+          "the top slot shows the results count and page-size selector, " +
+          "while the bottom slot shows only the pager.",
+      },
+      source: {
+        language: "html",
+        code: `<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [pagination]="{ pageSize: 5, pageSizeOptions: [5, 10, 25], hideResults: true, hidePageSize: true }"
+  [paginationTop]="{ hidePager: true }"
+/>`,
+      },
+    },
+  },
+};
+
+// ---------- Pagination: custom results slot ----------
+@Component({
+  standalone: true,
+  selector: "tedi-pagination-custom-results-story",
+  imports: [TediTableComponent, TediPaginationResultsDirective],
+  template: `
+    <tedi-table
+      id="tedi-table-pagination-custom-results"
+      [data]="data"
+      [columns]="columns"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    >
+      <ng-template tediPaginationResults>1000+ kirjet</ng-template>
+    </tedi-table>
+  `,
+})
+class PaginationCustomResultsStoryHostComponent extends TableStoryHostBase {
+  data = bookings;
+  pagination = SHOWCASE_PAGINATION_3;
+  columns: TediColumnDef<Booking>[] = [
+    { id: "dateRange", header: "Kuupäev", accessorKey: "dateRange" },
+    { id: "hour", header: "Kellaaeg", accessorKey: "hour" },
+    { id: "duration", header: "Kestus", accessorKey: "duration" },
+    { id: "location", header: "Asukoht", accessorKey: "location" },
+  ];
+}
+
+export const PaginationCustomResults: Story = {
+  render: (args) => ({
+    moduleMetadata: { imports: [PaginationCustomResultsStoryHostComponent] },
+    props: args,
+    template: `<tedi-pagination-custom-results-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Replace the default `\"X results\"` label with arbitrary content " +
+          "by projecting an `<ng-template tediPaginationResults>` inside " +
+          "`<tedi-table>`. The table captures the template and routes it to " +
+          "whichever paginator slot is currently displaying results.",
+      },
+      source: {
+        language: "html",
+        code: `<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [pagination]="{ pageSize: 3, pageSizeOptions: [3, 10, 25, 50] }"
+>
+  <ng-template tediPaginationResults>1000+ kirjet</ng-template>
+</tedi-table>`,
+      },
+    },
+  },
+};
+
+// ---------- Pagination: fully configured ----------
+@Component({
+  standalone: true,
+  selector: "tedi-pagination-fully-configured-story",
+  imports: [TediTableComponent],
+  template: `
+    <tedi-table
+      id="tedi-table-pagination-fully-configured"
+      [data]="data"
+      [columns]="columns"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+  `,
+})
+class PaginationFullyConfiguredStoryHostComponent extends TableStoryHostBase {
+  data = Array.from({ length: 80 }, (_, index) => ({
+    ...bookings[index % bookings.length],
+    id: String(index + 1),
+  }));
+  columns: TediColumnDef<Booking>[] = [
+    { id: "dateRange", header: "Kuupäev", accessorKey: "dateRange" },
+    { id: "hour", header: "Kellaaeg", accessorKey: "hour" },
+    { id: "duration", header: "Kestus", accessorKey: "duration" },
+    { id: "location", header: "Asukoht", accessorKey: "location" },
+  ];
+
+  pagination = {
+    pageSize: 5,
+    pageSizeOptions: [5, 10, 25, 50],
+    boundaryCount: 2,
+    siblingCount: 2,
+    disableArrowsAtBoundary: true,
+    hideArrows: "md" as const,
+    labels: {
+      results: (count: number) => `Kokku ${count} kirjet`,
+      pageSize: "Ridu lehel",
+    },
+  };
+}
+
+export const PaginationFullyConfigured: Story = {
+  render: (args) => ({
+    moduleMetadata: { imports: [PaginationFullyConfiguredStoryHostComponent] },
+    props: args,
+    template: `<tedi-pagination-fully-configured-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "All `tedi-pagination` inputs are forwarded through " +
+          "`TablePaginationOptions`. This example sets `boundaryCount: 2`, " +
+          "`siblingCount: 2`, `disableArrowsAtBoundary`, " +
+          "`hideArrows: 'md'` (arrows collapse below the `md` breakpoint), " +
+          "and overrides the results / page-size labels.",
+      },
+      source: {
+        language: "html",
+        code: `<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [pagination]="{
+    pageSize: 5,
+    pageSizeOptions: [5, 10, 25, 50],
+    boundaryCount: 2,
+    siblingCount: 2,
+    disableArrowsAtBoundary: true,
+    hideArrows: 'md',
+    labels: {
+      results: (count) => \`Kokku \${count} kirjet\`,
+      pageSize: 'Ridu lehel',
+    },
+  }"
+/>`,
+      },
+    },
+  },
+};
+
+// ---------- Responsive (hide columns below breakpoint, show as sub-row) ----------
+@Component({
+  standalone: true,
+  selector: "tedi-responsive-story",
+  imports: [
+    TediTableComponent,
+    TextGroupComponent,
+    TextGroupLabelComponent,
+    TextGroupValueComponent,
+  ],
+  styles: [
+    `
+      .tedi-responsive-story__hint {
+        margin-bottom: var(--tedi-dimensions-10);
+        color: var(--general-text-secondary);
+        font-size: var(--body-small-regular-size);
+      }
+
+      .tedi-responsive-story__details {
+        display: flex;
+        flex-direction: column;
+        gap: var(--layout-grid-gutters-08);
+        padding: var(--tedi-dimensions-05) 0;
+      }
+    `,
+  ],
+  template: `
+    <p class="tedi-responsive-story__hint">
+      Resize the viewport across the <code>md</code> breakpoint (1024px) to
+      see the email / role / location columns collapse into an expandable
+      sub-row. The expand column itself only appears below the breakpoint.
+    </p>
+    <tedi-table
+      id="tedi-table-responsive"
+      ${TABLE_APPEARANCE_BINDINGS}
+      [data]="data"
+      [columns]="columns"
+      [state]="tableState()"
+      (stateChange)="onState($event)"
+      [renderSubComponent]="responsiveSubRow()"
+      [getRowCanExpand]="getRowCanExpand"
+      [pagination]="pagination"
+    />
+    <ng-template #details let-row>
+      <div class="tedi-responsive-story__details">
+        @for (col of hiddenColumns; track col.id) {
+          <tedi-text-group type="horizontal" labelWidth="5rem">
+            <tedi-text-group-label>{{ col.header }}</tedi-text-group-label>
+            <tedi-text-group-value>{{
+              row.original[col.key]
+            }}</tedi-text-group-value>
+          </tedi-text-group>
+        }
+      </div>
+    </ng-template>
+  `,
+})
+class ResponsiveStoryHostComponent extends TableStoryHostBase {
+  private readonly breakpoint = inject(BreakpointService);
+  protected readonly isBelowMd = this.breakpoint.isBelowBreakpoint("md");
+
+  data = people;
+  pagination = SHOWCASE_PAGINATION_3;
+
+  /** Columns hidden when the viewport is below `md`. Visible everywhere else. */
+  protected readonly hiddenColumns = [
+    { id: "email", key: "email", header: "Email" },
+    { id: "role", key: "role", header: "Role" },
+    { id: "location", key: "location", header: "Location" },
+  ] as const;
+
+  columns: TediColumnDef<Person>[] = [
+    { id: "name", header: "Name", accessorKey: "name", sortable: true },
+    { id: "email", header: "Email", accessorKey: "email" },
+    { id: "role", header: "Role", accessorKey: "role" },
+    { id: "location", header: "Location", accessorKey: "location" },
+    {
+      id: "salary",
+      header: "Salary",
+      accessorKey: "salary",
+      sortable: true,
+      sortingFn: "alphanumeric",
+    },
+  ];
+
+  protected readonly tableState = signal<Partial<TableState>>({});
+
+  protected readonly detailsTpl =
+    viewChild<TemplateRef<{ $implicit: Row<Person> }>>("details");
+
+  /** Only project the sub-row template below `md`, so the expand column
+   *  itself disappears at larger viewports. */
+  protected readonly responsiveSubRow = computed(() =>
+    this.isBelowMd() ? this.detailsTpl() : undefined,
+  );
+
+  /** Restrict expansion to viewports where there's actually hidden info. */
+  protected readonly getRowCanExpand = () => this.isBelowMd();
+
+  constructor() {
+    super();
+    // Keep the columnVisibility slice in sync with the breakpoint signal —
+    // other state slices (sort / filter / pagination) are still managed via
+    // the regular [state] / (stateChange) round-trip below.
+    effect(() => {
+      const below = this.isBelowMd();
+      this.tableState.update((prev) => ({
+        ...prev,
+        columnVisibility: this.hiddenColumns.reduce<Record<string, boolean>>(
+          (acc, c) => {
+            acc[c.id] = !below;
+            return acc;
+          },
+          {},
+        ),
+      }));
+    });
+  }
+
+  protected onState(next: TableState): void {
+    this.tableState.set(next);
+  }
+}
+
+export const Responsive: Story = {
+  render: (args) => ({
+    moduleMetadata: { imports: [ResponsiveStoryHostComponent] },
+    props: args,
+    template: `<tedi-responsive-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pattern for shrinking a wide table on small viewports: hide the " +
+          "less-essential columns via `state.columnVisibility` and surface " +
+          "their values inside a row-detail template projected through " +
+          "`[renderSubComponent]`. Driven by `BreakpointService` — flipping " +
+          "the `[renderSubComponent]` binding to `undefined` above the " +
+          "breakpoint also removes the expand column entirely. Resize the " +
+          "viewport across the `md` breakpoint (1024px) to see it switch.",
+      },
+      source: {
+        language: "html",
+        code: `<!-- TS sketch:
+  hiddenColumns = [{ id: 'email', key: 'email', header: 'Email' }, ...];
+  isBelowMd = inject(BreakpointService).isBelowBreakpoint('md');
+  responsiveSubRow = computed(() =>
+    this.isBelowMd() ? this.detailsTpl() : undefined,
+  );
+  tableState = signal({});
+  // effect: syncs columnVisibility with isBelowMd via state.columnVisibility
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [state]="tableState()"
+  (stateChange)="onState($event)"
+  [renderSubComponent]="responsiveSubRow()"
+  [getRowCanExpand]="getRowCanExpand"
+  [pagination]="pagination"
+/>
+
+<ng-template #details let-row>
+  <div class="my-details">
+    @for (col of hiddenColumns; track col.id) {
+      <tedi-text-group type="horizontal" labelWidth="5rem">
+        <tedi-text-group-label>{{ col.header }}</tedi-text-group-label>
+        <tedi-text-group-value>{{ row.original[col.key] }}</tedi-text-group-value>
+      </tedi-text-group>
+    }
+  </div>
+</ng-template>`,
+      },
+    },
+  },
+};
+

@@ -19,8 +19,17 @@ class HostComponent {
   readonly icon = signal("unfold_more");
   readonly filled = signal(false);
   readonly selected = signal(false);
-  readonly ariaLabel = signal("Sort by name");
+  readonly ariaLabel = signal<string | undefined>("Sort by name");
 }
+
+@Component({
+  standalone: true,
+  imports: [TediTableHeaderButtonComponent],
+  template: `
+    <button tedi-table-header-button icon="unfold_more">Nimi</button>
+  `,
+})
+class LabelHostComponent {}
 
 describe("TediTableHeaderButtonComponent", () => {
   function setup() {
@@ -36,6 +45,18 @@ describe("TediTableHeaderButtonComponent", () => {
       "button[tedi-table-header-button]",
     );
     expect(button.getAttribute("aria-label")).toBe("Sort by name");
+    expect(button.querySelector("tedi-icon")).not.toBeNull();
+  });
+
+  it("omits aria-label when no override is provided and projected text serves as the accessible name", () => {
+    TestBed.configureTestingModule({ imports: [LabelHostComponent] });
+    const fixture = TestBed.createComponent(LabelHostComponent);
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelector(
+      "button[tedi-table-header-button]",
+    );
+    expect(button.getAttribute("aria-label")).toBeNull();
+    expect(button.textContent).toContain("Nimi");
     expect(button.querySelector("tedi-icon")).not.toBeNull();
   });
 

@@ -45,6 +45,17 @@
   background: var(--table-default);
 }
 
+.tedi-table__header-content {
+  display: inline-flex;
+  gap: var(--layout-grid-gutters-04);
+  align-items: center;
+}
+
+.tedi-table__filter-popover {
+  display: inline-flex;
+  align-items: center;
+}
+
 .tedi-table__row {
   border-bottom: var(--tedi-borders-01) solid var(--table-border);
 
@@ -139,8 +150,8 @@
 }
 
 .tedi-table__row--filter .tedi-table__header-cell {
-  padding-top: var(--tedi-dimensions-8);
-  padding-bottom: var(--tedi-dimensions-8);
+  padding-top: var(--tedi-dimensions-05);
+  padding-bottom: var(--tedi-dimensions-05);
   font-weight: var(--body-regular-weight);
   background: var(--general-surface-primary);
 }
@@ -180,19 +191,34 @@
 
 .tedi-table--has-pagination {
   gap: 0;
+}
 
-  .tedi-table__scroll {
-    border-bottom: 0;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
-  }
+.tedi-table--has-pagination-bottom .tedi-table__scroll {
+  border-bottom: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.tedi-table--has-pagination-top .tedi-table__scroll {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .tedi-table__pagination {
   border: var(--tedi-borders-01) solid var(--table-border);
+}
+
+.tedi-table__pagination--bottom {
   border-top: 0;
   border-bottom-right-radius: var(--table-radius);
   border-bottom-left-radius: var(--table-radius);
+}
+
+.tedi-table__pagination--top {
+  border-bottom: 0;
+  border-top-left-radius: var(--table-radius);
+  border-top-right-radius: var(--table-radius);
 }
 
 .tedi-table--borderless .tedi-table__pagination {
@@ -292,8 +318,14 @@
 .cdk-drag-preview.tedi-table__header-cell {
   display: table;
   cursor: grabbing;
-  background: var(--table-default);
+  background: var(--table-hover);
+  border: var(--tedi-borders-01) solid var(--card-border-primary);
+  border-radius: var(--table-radius);
   box-shadow: 0 6px 16px var(--tedi-alpha-20);
+}
+
+.cdk-drag-preview.tedi-table__row > .tedi-table__cell {
+  background: var(--table-hover);
 }
 
 .cdk-drag-placeholder.tedi-table__row,
@@ -306,24 +338,29 @@
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-.tedi-table__expand-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  color: var(--general-text-tertiary);
-  cursor: pointer;
-  background: transparent;
-  border: 0;
-  border-radius: var(--button-radius-sm);
+.tedi-table__filter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tedi-dimensions-12);
+  width: 100%;
+}
 
-  &:hover:not(:disabled) {
-    background: var(--button-main-neutral-icon-only-background-hover);
+.tedi-table__filter-actions {
+  display: flex;
+  gap: var(--button-gutter-x-sm);
+
+  > * {
+    flex: 1 1 0;
+    justify-content: center;
+  }
+}
+
+.tedi-table__expand-toggle {
+  &__icon {
+    transition: transform 300ms ease;
   }
 
-  &:focus-visible {
-    color: var(--button-main-primary-background-default);
-    outline: var(--tedi-borders-02) solid var(--general-border-focus);
-    outline-offset: 0;
+  &--open .tedi-table__expand-toggle__icon {
+    transform: rotate(180deg);
   }
 }
