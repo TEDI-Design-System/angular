@@ -139,6 +139,7 @@ export default {
     closeOnSelect: {
       description:
         "Whether activating this item closes the dropdown. Set `false` for items that should keep the dropdown open after selection (e.g. multi-select checkboxes).",
+      control: "boolean",
       table: {
         category: "dropdown-item",
         type: { summary: "boolean" },

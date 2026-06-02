@@ -6,6 +6,7 @@ import {
   input,
   ViewEncapsulation,
 } from "@angular/core";
+
 import { IconComponent, IconSize } from "../../../base/icon/icon.component";
 
 @Component({
@@ -19,7 +20,8 @@ import { IconComponent, IconSize } from "../../../base/icon/icon.component";
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     type: "button",
-    "[class]": "hostClasses()",
+    class: "tedi-table-header-button",
+    "[class.tedi-table-header-button--selected]": "selected()",
     "[disabled]": "disabled() || null",
     "[attr.aria-label]": "ariaLabel() || null",
   },
@@ -64,10 +66,4 @@ export class TediTableHeaderButtonComponent {
   protected readonly iconVariant = computed(() =>
     this.filled() ? "filled" : "outlined",
   );
-
-  protected readonly hostClasses = computed(() => {
-    const classes = ["tedi-table-header-button"];
-    if (this.selected()) classes.push("tedi-table-header-button--selected");
-    return classes.join(" ");
-  });
 }

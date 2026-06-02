@@ -538,6 +538,20 @@ export const translationsMap = {
     en: "Collapse row",
     ru: "Свернуть строку",
   },
+  "table.drag-column": {
+    description: "Accessible label of the column reorder drag handle",
+    components: ["Table"],
+    et: "Lohista veergu",
+    en: "Drag column",
+    ru: "Перетащить колонку",
+  },
+  "table.drag-row": {
+    description: "Accessible label of the row reorder drag handle",
+    components: ["Table"],
+    et: "Lohista rida",
+    en: "Drag row",
+    ru: "Перетащить строку",
+  },
   "tooltip.icon-trigger": {
     description: "Label we use for icons that are tooltip triggers",
     components: ["TooltipTrigger"],

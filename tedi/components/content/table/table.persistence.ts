@@ -129,7 +129,16 @@ export function createTablePersistence(options: {
       controlledSignal.set(next);
     },
     setPersist(next) {
+      const previous = persist;
       persist = next;
+      // When the persistence source changes (key or storage), the internal
+      // slices still hold the previous table's state. Rehydrate from the new
+      // source so we don't bleed state across tables / persistence keys.
+      const sourceChanged =
+        previous?.key !== next?.key || previous?.storage !== next?.storage;
+      if (sourceChanged) {
+        internal.set(readInitialState(next, options.defaultState ?? {}));
+      }
     },
     setOnStateChange(cb) {
       onStateChange = cb;

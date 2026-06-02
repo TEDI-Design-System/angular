@@ -3570,7 +3570,7 @@ export const PaginationFullyConfigured: Story = {
   ],
   template: `
     <p class="tedi-responsive-story__hint">
-      Resize the viewport across the <code>md</code> breakpoint (1024px) to
+      Resize the viewport across the <code>md</code> breakpoint to
       see the email / role / location columns collapse into an expandable
       sub-row. The expand column itself only appears below the breakpoint.
     </p>
@@ -3682,7 +3682,7 @@ export const Responsive: Story = {
           "`[renderSubComponent]`. Driven by `BreakpointService` — flipping " +
           "the `[renderSubComponent]` binding to `undefined` above the " +
           "breakpoint also removes the expand column entirely. Resize the " +
-          "viewport across the `md` breakpoint (1024px) to see it switch.",
+          "viewport across the `md` breakpoint to see it switch.",
       },
       source: {
         language: "html",

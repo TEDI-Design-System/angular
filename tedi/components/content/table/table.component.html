@@ -19,7 +19,6 @@
       [hidePager]="top.hidePager"
       [hideArrows]="top.hideArrows"
       [disableArrowsAtBoundary]="top.disableArrowsAtBoundary"
-      [showArrowLabels]="top.showArrowLabels"
       [showModalTitle]="top.showModalTitle"
       [customResultsTemplate]="topResultsTemplate()"
       (pageChange)="handlePaginationPageChange($event)"
@@ -127,7 +126,7 @@
                         type="button"
                         cdkDragHandle
                         class="tedi-table__drag-handle"
-                        aria-label="Drag column"
+                        [attr.aria-label]="dragColumnLabel()"
                       >
                         <tedi-icon
                           name="drag_indicator"
@@ -354,7 +353,7 @@
                       type="button"
                       cdkDragHandle
                       class="tedi-table__drag-handle"
-                      aria-label="Drag row"
+                      [attr.aria-label]="dragRowLabel()"
                       (click)="$event.stopPropagation()"
                     >
                       <tedi-icon
@@ -515,7 +514,6 @@
       [hidePager]="bottom.hidePager"
       [hideArrows]="bottom.hideArrows"
       [disableArrowsAtBoundary]="bottom.disableArrowsAtBoundary"
-      [showArrowLabels]="bottom.showArrowLabels"
       [showModalTitle]="bottom.showModalTitle"
       [customResultsTemplate]="bottomResultsTemplate()"
       (pageChange)="handlePaginationPageChange($event)"

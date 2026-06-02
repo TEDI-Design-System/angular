@@ -304,10 +304,11 @@ export class TediTableComponent<TData> {
   readonly stateChange = output<TableState>();
   readonly rowClick = output<Row<TData>>();
   /**
-   * Fires when a row is dropped to a new position. The event carries the
-   * CDK `previousIndex` and `currentIndex`; reorder the source `data` array
-   * (e.g. `moveItemInArray(data, previousIndex, currentIndex)`) and pass it
-   * back via `[data]` to apply.
+   * Fires when a row is dropped to a new position. `previousIndex` and
+   * `currentIndex` are normalised to **source `data` array** positions — even
+   * when the table is sorted, filtered, or paginated — so consumers can call
+   * `moveItemInArray(data, previousIndex, currentIndex)` directly and pass the
+   * reordered array back via `[data]`.
    */
   readonly rowDrop = output<CdkDragDrop<TData[]>>();
 
@@ -323,6 +324,10 @@ export class TediTableComponent<TData> {
   protected readonly rowDetailsLabel = this.translation.track(
     "table.row-details",
   );
+  protected readonly dragColumnLabel = this.translation.track(
+    "table.drag-column",
+  );
+  protected readonly dragRowLabel = this.translation.track("table.drag-row");
 
   private readonly persistence: TablePersistenceController;
   protected readonly tableState: Signal<TableState>;
@@ -818,7 +823,30 @@ export class TediTableComponent<TData> {
 
   protected handleRowDrop(event: CdkDragDrop<TData[]>): void {
     if (event.previousIndex === event.currentIndex) return;
-    this.rowDrop.emit(event);
+    // The CDK event reports indices against the rendered row collection. When
+    // pagination / sorting / filtering is on, those don't match the source
+    // `data` array — consumers calling `moveItemInArray(data, ...)` with the
+    // raw indices would corrupt order. Map view indices → source indices by
+    // looking up `row.original` in the data array.
+    const renderedRows = this.rows();
+    const data = this.data();
+    const previousRow = renderedRows[event.previousIndex];
+    const currentRow = renderedRows[event.currentIndex];
+    if (!previousRow || !currentRow) {
+      this.rowDrop.emit(event);
+      return;
+    }
+    const previousSourceIndex = data.indexOf(previousRow.original);
+    const currentSourceIndex = data.indexOf(currentRow.original);
+    if (previousSourceIndex === -1 || currentSourceIndex === -1) {
+      this.rowDrop.emit(event);
+      return;
+    }
+    this.rowDrop.emit({
+      ...event,
+      previousIndex: previousSourceIndex,
+      currentIndex: currentSourceIndex,
+    });
   }
 
   protected handleColumnDrop(event: CdkDragDrop<unknown>): void {
@@ -826,11 +854,34 @@ export class TediTableComponent<TData> {
     const visibleLeafIds = untracked(() =>
       this.table.getVisibleLeafColumns().map((column) => column.id),
     );
-    const next = [...visibleLeafIds];
-    const [moved] = next.splice(event.previousIndex, 1);
-    next.splice(event.currentIndex, 0, moved);
+    const reorderedVisible = [...visibleLeafIds];
+    const [moved] = reorderedVisible.splice(event.previousIndex, 1);
+    reorderedVisible.splice(event.currentIndex, 0, moved);
+    // Compute the new full leaf order: take the previous full order, then
+    // overwrite each visible-id slot in document order with the reordered
+    // visible ids. Hidden ids stay anchored at their previous positions.
     this.applyPatch<ColumnOrderState>(
-      next,
+      (prev) => {
+        const fullOrder =
+          prev.length > 0
+            ? [...prev]
+            : untracked(() =>
+                this.table.getAllLeafColumns().map((c) => c.id),
+              );
+        const visibleSet = new Set(visibleLeafIds);
+        let visibleCursor = 0;
+        for (let i = 0; i < fullOrder.length; i++) {
+          if (visibleSet.has(fullOrder[i])) {
+            fullOrder[i] = reorderedVisible[visibleCursor++];
+          }
+        }
+        // Append any visible ids not already in fullOrder (e.g. fresh columns
+        // that haven't been written to the order slice yet).
+        for (const id of reorderedVisible) {
+          if (!fullOrder.includes(id)) fullOrder.push(id);
+        }
+        return fullOrder;
+      },
       (prev) => prev.columnOrder ?? [],
       (value) => ({ columnOrder: value }),
     );

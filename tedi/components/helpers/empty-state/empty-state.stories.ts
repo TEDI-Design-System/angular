@@ -70,6 +70,11 @@ export default {
       ],
       table: { category: "inputs", defaultValue: { summary: "brand" } },
     },
+    iconSize: {
+      description: "Icon size in pixels.",
+      control: { type: "number", min: 8, max: 72, step: 1 },
+      table: { category: "inputs", defaultValue: { summary: "36" } },
+    },
     heading: {
       description: "Optional heading above the description.",
       control: "text",
