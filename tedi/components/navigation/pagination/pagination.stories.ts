@@ -123,16 +123,6 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
-    showArrowLabels: {
-      description:
-        "Render the prev/next text labels next to the arrow icons.",
-      control: "boolean",
-      table: {
-        category: "inputs",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
-      },
-    },
     hideArrows: {
       description:
         "Hide the prev/next arrows. `true` = always hidden, a breakpoint name = hidden below that breakpoint.",
@@ -280,6 +270,22 @@ export const ManyPagesEllipsis: Story = {
     props: args,
     template: `<tedi-pagination ${argsToTemplate(args)} />`,
   }),
+};
+
+export const HugePageCount: Story = {
+  args: { pageCount: 5000, page: 2500 },
+  render: (args) => ({
+    props: args,
+    template: `<tedi-pagination ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Stress-test with a very large page count (5000 pages). The pager still renders a compact range with ellipses on both sides, and the mobile page-jump modal stays usable.",
+      },
+    },
+  },
 };
 
 export const WiderSiblings: Story = {

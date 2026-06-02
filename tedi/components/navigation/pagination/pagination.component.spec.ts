@@ -320,18 +320,6 @@ describe("PaginationComponent", () => {
     ).toBeNull();
   });
 
-  it("shows visible arrow labels when showArrowLabels is true", () => {
-    const fixture = setup({ pageCount: 5, page: 3 });
-    fixture.componentRef.setInput("showArrowLabels", true);
-    fixture.detectChanges();
-    const labels = fixture.nativeElement.querySelectorAll(
-      ".tedi-pagination__nav-button-label",
-    );
-    expect(labels.length).toBe(2);
-    expect(labels[0].textContent.trim()).toBe("Previous page");
-    expect(labels[1].textContent.trim()).toBe("Next page");
-  });
-
   it("hides the results label when hideResults is true", () => {
     const fixture = setup({ pageCount: 10, totalItems: 28 });
     fixture.componentRef.setInput("hideResults", true);

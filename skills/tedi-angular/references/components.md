@@ -806,7 +806,6 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 - `background: "white" | "transparent" = "white"` — `transparent` removes the surface fill + divider for use on non-white containers
 - `dividerPosition: "top" | "bottom" | "none" = "top"` — where the divider line sits (or removed entirely)
 - `disableArrowsAtBoundary: boolean = false` — keep prev/next arrows visible (but disabled) at the first/last page instead of hiding them
-- `showArrowLabels: boolean = false` — render visible text labels next to the prev/next icons
 - `showModalTitle: boolean = true` — show a heading inside the mobile picker modals; set `false` to hide
 - `hideResults: PaginationVisibility = false` — `true`/`false` or a breakpoint name (`"sm"`–`"xxl"`) to hide below that breakpoint
 - `hidePageSize: PaginationVisibility = false`
