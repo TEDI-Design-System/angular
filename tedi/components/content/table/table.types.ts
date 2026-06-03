@@ -26,6 +26,14 @@ export type TableSize = "medium" | "small";
 export type TableSelectionMode = "multiple" | "single";
 
 /**
+ * How an expandable row is toggled. `button` (default) only reacts to clicks
+ * on the chevron button and renders it in the `secondary` (bordered) arrow
+ * style. `row` lets a click anywhere on the row toggle expansion and renders
+ * the chevron in the `default` (neutral) style.
+ */
+export type TableExpandTrigger = "button" | "row";
+
+/**
  * Optional shape that columns can put in `columnDef.meta` to:
  *
  * - drive the column-filter aria-label when the header is non-textual (`label`),

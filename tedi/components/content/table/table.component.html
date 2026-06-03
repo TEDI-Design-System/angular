@@ -309,6 +309,7 @@
             activeRowId() !== undefined && row.id === activeRowId();
           @let ariaRowIndex = rowAriaIndexById().get(row.id) ?? null;
           @let subRowId = resolvedId() + '-sub-' + row.id;
+          @let expandsOnClick = rowExpandsOnClick(row);
           <tr
             cdkDrag
             [cdkDragDisabled]="!draggableRows()"
@@ -317,14 +318,18 @@
               'tedi-table__row' +
               (row.getIsSelected() ? ' tedi-table__row--selected' : '') +
               (isActiveRow ? ' tedi-table__row--active' : '') +
-              (interactive() ? ' tedi-table__row--clickable' : '') +
+              (interactive() || expandsOnClick
+                ? ' tedi-table__row--clickable'
+                : '') +
               (row.depth > 0 ? ' tedi-table__row--sub-row' : '')
             "
             [attr.role]="interactive() ? 'button' : null"
             [attr.tabindex]="interactive() ? 0 : null"
             [attr.aria-rowindex]="ariaRowIndex"
             [attr.aria-current]="isActiveRow ? 'true' : null"
-            (click)="interactive() && handleRowClick(row)"
+            (click)="
+              (interactive() || expandsOnClick) && handleRowClick(row)
+            "
             (keydown)="handleRowKeydown($event, row)"
           >
             @for (cell of row.getVisibleCells(); track cell.id) {
@@ -395,32 +400,19 @@
                     }
                   } @else if (cell.column.id === EXPAND_COLUMN_ID) {
                     @if (row.getCanExpand()) {
-                      <button
-                        tedi-button
-                        type="button"
-                        variant="secondary"
-                        size="small"
-                        [class]="
-                          'tedi-table__expand-toggle' +
-                          (row.getIsExpanded()
-                            ? ' tedi-table__expand-toggle--open'
-                            : '')
+                      <tedi-collapse-button
+                        [arrowType]="
+                          expandTrigger() === 'row' ? 'default' : 'secondary'
                         "
+                        [hideText]="true"
+                        [open]="row.getIsExpanded()"
                         [id]="resolvedId() + '-expand-' + row.id"
-                        [attr.aria-controls]="subRowId"
-                        [attr.aria-expanded]="row.getIsExpanded()"
-                        [attr.aria-label]="
-                          expandRowLabel(row.getIsExpanded())
-                        "
-                        (click)="handleExpandToggle($event, row)"
+                        [ariaControls]="subRowId"
+                        [ariaLabel]="expandRowLabel(row.getIsExpanded())"
+                        (openChange)="handleExpandToggle(row)"
+                        (click)="$event.stopPropagation()"
                         (keydown)="handleExpandKeydown($event)"
-                      >
-                        <tedi-icon
-                          class="tedi-table__expand-toggle__icon"
-                          name="expand_more"
-                          color="inherit"
-                        />
-                      </button>
+                      />
                     }
                   } @else {
                     <ng-container
@@ -438,18 +430,29 @@
             }
           </tr>
           @if (renderSubComponent(); as subTpl) {
-            @if (row.getIsExpanded()) {
-              <tr class="tedi-table__row tedi-table__row--sub-component">
+            @if (row.getCanExpand()) {
+              @let isExpanded = row.getIsExpanded();
+              <tr
+                [class]="
+                  'tedi-table__row tedi-table__row--sub-component' +
+                  (isExpanded ? ' tedi-table__row--sub-component-open' : '')
+                "
+              >
                 <td
                   class="tedi-table__cell tedi-table__cell--sub-component"
                   [attr.id]="subRowId"
-                  role="region"
-                  [attr.aria-label]="rowDetailsLabel()"
+                  [attr.role]="isExpanded ? 'region' : null"
+                  [attr.aria-label]="isExpanded ? rowDetailsLabel() : null"
+                  [attr.inert]="isExpanded ? null : ''"
                   [attr.colspan]="leafColumnCount() > 0 ? leafColumnCount() : 1"
                 >
-                  <ng-container
-                    *ngTemplateOutlet="subTpl; context: { $implicit: row }"
-                  />
+                  <div class="tedi-table__sub-component-wrapper">
+                    <div class="tedi-table__sub-component-content">
+                      <ng-container
+                        *ngTemplateOutlet="subTpl; context: { $implicit: row }"
+                      />
+                    </div>
+                  </div>
                 </td>
               </tr>
             }

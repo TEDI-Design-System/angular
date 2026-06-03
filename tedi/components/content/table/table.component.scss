@@ -135,6 +135,11 @@
 
 .tedi-table__row--sub-component {
   background: var(--table-striped);
+  border-bottom: 0;
+
+  &-open {
+    border-bottom: var(--tedi-borders-01) solid var(--table-border);
+  }
 }
 
 .tedi-table__row--sub-row {
@@ -142,7 +147,23 @@
 }
 
 .tedi-table__cell--sub-component {
+  padding: 0;
+}
+
+.tedi-table__sub-component-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms ease;
+
+  .tedi-table__row--sub-component-open & {
+    grid-template-rows: 1fr;
+  }
+}
+
+.tedi-table__sub-component-content {
+  min-height: 0;
   padding: var(--table-data-padding-y) var(--table-data-padding-x);
+  overflow: hidden;
 }
 
 .tedi-table__row--filter {
@@ -355,12 +376,3 @@
   }
 }
 
-.tedi-table__expand-toggle {
-  &__icon {
-    transition: transform 300ms ease;
-  }
-
-  &--open .tedi-table__expand-toggle__icon {
-    transform: rotate(180deg);
-  }
-}

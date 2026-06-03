@@ -57,6 +57,7 @@ import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
+import { CollapseButtonComponent } from "../../buttons/collapse-button/collapse-button.component";
 import { PopoverComponent } from "../../overlay/popover/popover.component";
 import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
 import { PopoverTriggerDirective } from "../../overlay/popover/popover-trigger/popover-trigger.directive";
@@ -68,6 +69,7 @@ import {
 } from "./table.persistence";
 import type {
   TableColumnMeta,
+  TableExpandTrigger,
   TableFilterOptions,
   TablePaginationOptions,
   TablePersistOptions,
@@ -178,6 +180,7 @@ function resolveSlotOptions(
     FormFieldComponent,
     IconComponent,
     ButtonComponent,
+    CollapseButtonComponent,
     PopoverComponent,
     PopoverContentComponent,
     PopoverTriggerDirective,
@@ -243,6 +246,13 @@ export class TediTableComponent<TData> {
   readonly getRowCanExpand = input<((row: Row<TData>) => boolean) | undefined>(
     undefined,
   );
+  /**
+   * How an expandable row is toggled. `button` (default) — only the chevron
+   * button toggles; rendered in the bordered secondary style. `row` — clicking
+   * anywhere on the row toggles; chevron rendered in the neutral default style.
+   * @default 'button'
+   */
+  readonly expandTrigger = input<TableExpandTrigger>("button");
   readonly getSubRows = input<
     ((row: TData) => TData[] | undefined) | undefined
   >(undefined);
@@ -645,8 +655,10 @@ export class TediTableComponent<TData> {
     if (this.stickyFirstColumn())
       classes.push("tedi-table--sticky-first-column");
     if (this.stickyHeader()) classes.push("tedi-table--sticky-header");
-    if (this.interactive()) classes.push("tedi-table--clickable-rows");
-    const hoverEnabled = this.rowHover() ?? this.interactive();
+    const rowExpand = this.expandTrigger() === "row";
+    if (this.interactive() || rowExpand)
+      classes.push("tedi-table--clickable-rows");
+    const hoverEnabled = this.rowHover() ?? (this.interactive() || rowExpand);
     if (hoverEnabled) classes.push("tedi-table--row-hover");
     classes.push(...this.paginationHostClasses());
     if (this.draggableRows() || this.draggableColumns())
@@ -808,8 +820,16 @@ export class TediTableComponent<TData> {
   }
 
   protected handleRowClick(row: Row<TData>): void {
-    if (!this.interactive()) return;
-    this.rowClick.emit(row);
+    if (this.expandTrigger() === "row" && row.getCanExpand()) {
+      row.toggleExpanded();
+    }
+    if (this.interactive()) {
+      this.rowClick.emit(row);
+    }
+  }
+
+  protected rowExpandsOnClick(row: Row<TData>): boolean {
+    return this.expandTrigger() === "row" && row.getCanExpand();
   }
 
   protected handleRowKeydown(event: KeyboardEvent, row: Row<TData>): void {
@@ -969,8 +989,7 @@ export class TediTableComponent<TData> {
     row.toggleSelected(checked);
   }
 
-  protected handleExpandToggle(event: Event, row: Row<TData>): void {
-    event.stopPropagation();
+  protected handleExpandToggle(row: Row<TData>): void {
     row.toggleExpanded();
   }
 

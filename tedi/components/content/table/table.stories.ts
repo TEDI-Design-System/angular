@@ -24,6 +24,7 @@ import { TediTableHeaderButtonComponent } from "./table-header-button/table-head
 import { TediPaginationResultsDirective } from "../../navigation/pagination/pagination-results.directive";
 import { groupRowSpan } from "./row-span.utils";
 import type {
+  TableExpandTrigger,
   TableSelectionMode,
   TableSize,
   TableState,
@@ -578,6 +579,7 @@ abstract class TableStoryHostBase {
   readonly stickyHeader = input(false, { transform: booleanAttribute });
   readonly rowHover = input(false, { transform: booleanAttribute });
   readonly interactive = input(false, { transform: booleanAttribute });
+  readonly expandTrigger = input<TableExpandTrigger>("button");
   readonly enableRowSelection = input(false, { transform: booleanAttribute });
   readonly selectionMode = input<TableSelectionMode>("multiple");
   readonly enableColumnFilters = input(false, { transform: booleanAttribute });
@@ -597,6 +599,7 @@ const TABLE_APPEARANCE_BINDINGS = `
   [stickyHeader]="stickyHeader()"
   [rowHover]="rowHover()"
   [interactive]="interactive()"
+  [expandTrigger]="expandTrigger()"
   [enableRowSelection]="enableRowSelection()"
   [selectionMode]="selectionMode()"
   [enableColumnFilters]="enableColumnFilters()"
@@ -614,6 +617,7 @@ type TediTableStoryArgs = {
   stickyHeader: boolean;
   rowHover: boolean;
   interactive: boolean;
+  expandTrigger: TableExpandTrigger;
   enableRowSelection: boolean;
   selectionMode: TableSelectionMode;
   enableColumnFilters: boolean;
@@ -662,6 +666,7 @@ const meta: Meta<TediTableStoryArgs> = {
     stickyHeader: false,
     rowHover: false,
     interactive: false,
+    expandTrigger: "button",
     enableRowSelection: false,
     selectionMode: "multiple",
     enableColumnFilters: false,
@@ -754,6 +759,17 @@ const meta: Meta<TediTableStoryArgs> = {
         category: "behavior",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
+      },
+    },
+    expandTrigger: {
+      description:
+        "How an expandable row is toggled. `button` (default) — only the chevron button toggles, rendered in the bordered secondary style. `row` — clicking anywhere on the row toggles, chevron rendered in the neutral default style.",
+      control: { type: "inline-radio" },
+      options: ["button", "row"],
+      table: {
+        category: "behavior",
+        type: { summary: "TableExpandTrigger" },
+        defaultValue: { summary: "button" },
       },
     },
     enableRowSelection: {
@@ -1945,6 +1961,82 @@ export const CollapsibleRows: Story = {
     [text]="ctx.row.original.status"
   />
 </ng-template>`,
+      },
+    },
+  },
+};
+
+// ---------- CollapsibleRowsRowTrigger ----------
+@Component({
+  standalone: true,
+  selector: "tedi-collapsible-rows-row-trigger-story",
+  imports: [TediTableComponent, StatusBadgeComponent],
+  template: `
+    <tedi-table
+      id="tedi-table-collapse-row-trigger"
+      [data]="data"
+      [columns]="columns()"
+      [getSubRows]="getSubRows"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+    <ng-template #statusCell let-ctx>
+      <tedi-status-badge
+        [color]="statusColor[ctx.row.original.status]"
+        [text]="ctx.row.original.status"
+      />
+    </ng-template>
+  `,
+})
+class CollapsibleRowsRowTriggerStoryHostComponent extends TableStoryHostBase {
+  data = collapsiblePeople;
+  pagination = DEFAULT_PAGINATION;
+  statusColor = certStatusColor;
+  getSubRows = (row: CollapsibleRecord) => row.subRows;
+  statusCellTpl =
+    viewChild<TemplateRef<CellContext<CollapsibleRecord, unknown>>>(
+      "statusCell",
+    );
+
+  columns = computed<TediColumnDef<CollapsibleRecord>[]>(() => [
+    { id: "name", header: "Isik", accessorKey: "name" },
+    { id: "age", header: "Vanus", accessorKey: "age" },
+    { id: "visits", header: "Külastuste arv", accessorKey: "visits" },
+    {
+      id: "status",
+      header: "Tõendi staatus",
+      accessorKey: "status",
+      cell: this.statusCellTpl() ?? "",
+    } as TediColumnDef<CollapsibleRecord>,
+  ]);
+}
+
+export const CollapsibleRowsRowTrigger: Story = {
+  args: { expandTrigger: "row" },
+  render: (args) => ({
+    moduleMetadata: { imports: [CollapsibleRowsRowTriggerStoryHostComponent] },
+    props: args,
+    template: `<tedi-collapsible-rows-row-trigger-story ${argsToTemplate(
+      args,
+    )} />`,
+  }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- expandTrigger="row" lets a click anywhere on the row toggle
+  expansion. The chevron renders in the neutral "default" arrow style
+  (no border) — it acts as a visual indicator while the row is the
+  clickable target. Compare with the default "button" trigger, which
+  reserves toggling to the bordered "secondary" chevron only.
+-->
+<tedi-table
+  expandTrigger="row"
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [pagination]="pagination"
+/>`,
       },
     },
   },
