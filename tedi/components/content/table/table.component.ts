@@ -57,7 +57,10 @@ import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
-import { CollapseButtonComponent } from "../../buttons/collapse-button/collapse-button.component";
+import {
+  CollapseButtonComponent,
+  type CollapseButtonArrowType,
+} from "../../buttons/collapse-button/collapse-button.component";
 import { PopoverComponent } from "../../overlay/popover/popover.component";
 import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
 import { PopoverTriggerDirective } from "../../overlay/popover/popover-trigger/popover-trigger.directive";
@@ -126,7 +129,10 @@ interface ResolvedPaginationSlot {
   hidePager: NonNullable<TablePaginationOptions["hidePager"]>;
   hideArrows: NonNullable<TablePaginationOptions["hideArrows"]>;
   disableArrowsAtBoundary: boolean;
+  arrowVariant: NonNullable<TablePaginationOptions["arrowVariant"]>;
   showArrowLabels: boolean;
+  previousIcon: NonNullable<TablePaginationOptions["previousIcon"]>;
+  nextIcon: NonNullable<TablePaginationOptions["nextIcon"]>;
   showModalTitle: boolean;
 }
 
@@ -141,7 +147,10 @@ const SLOT_DEFAULTS_BOTTOM: ResolvedPaginationSlot = {
   hidePager: false,
   hideArrows: false,
   disableArrowsAtBoundary: false,
+  arrowVariant: "neutral",
   showArrowLabels: false,
+  previousIcon: "arrow_back",
+  nextIcon: "arrow_forward",
   showModalTitle: true,
 };
 
@@ -223,9 +232,23 @@ export class TediTableComponent<TData> {
   readonly borderless = input(false, { transform: booleanAttribute });
   readonly stickyFirstColumn = input(false, { transform: booleanAttribute });
   readonly stickyHeader = input(false, { transform: booleanAttribute });
+  /**
+   * Switches the table to `table-layout: fixed`, making column `size` /
+   * `minSize` / `maxSize` authoritative — cell content wraps inside the
+   * allotted width instead of stretching the column. With the default auto
+   * layout, browsers size columns to content and the widths are only hints.
+   * @default false
+   */
+  readonly fixedLayout = input(false, { transform: booleanAttribute });
   readonly maxHeight = input<number | string | undefined>(undefined);
   readonly activeRowId = input<string | undefined>(undefined);
   readonly rowHover = input<boolean | undefined>(undefined);
+  /**
+   * Enables row selection and renders the selection column. Pass `true` to
+   * allow selecting any row, or a predicate `(row) => boolean` to gate which
+   * rows are selectable. Pair with `selectionMode` for checkbox vs radio.
+   * @default undefined
+   */
   readonly enableRowSelection = input<
     boolean | ((row: Row<TData>) => boolean) | undefined
   >(undefined);
@@ -240,19 +263,59 @@ export class TediTableComponent<TData> {
    */
   readonly selectionMode = input<TableSelectionMode>("multiple");
   readonly enableColumnFilters = input(false, { transform: booleanAttribute });
+  /**
+   * Template rendered as an expandable detail row beneath each expandable row.
+   * Receives the TanStack `Row` as `$implicit` (`let-row`). Providing it
+   * auto-adds the expand column; pair with `getRowCanExpand` to gate which
+   * rows expand.
+   * @default undefined
+   */
   readonly renderSubComponent = input<
     TemplateRef<{ $implicit: Row<TData> }> | undefined
   >(undefined);
+  /**
+   * Predicate deciding whether a given row can expand. When omitted, every row
+   * with a `renderSubComponent` / sub-rows is expandable.
+   * @default undefined
+   */
   readonly getRowCanExpand = input<((row: Row<TData>) => boolean) | undefined>(
     undefined,
   );
   /**
    * How an expandable row is toggled. `button` (default) — only the chevron
-   * button toggles; rendered in the bordered secondary style. `row` — clicking
-   * anywhere on the row toggles; chevron rendered in the neutral default style.
+   * button toggles. `row` — clicking anywhere on the row toggles. The chevron
+   * renders in the bordered `secondary` style regardless; use
+   * `expandButtonVariant` to change it.
    * @default 'button'
    */
   readonly expandTrigger = input<TableExpandTrigger>("button");
+  /**
+   * Overrides the expand toggle button's arrow style. Defaults to the bordered
+   * `secondary` style; set `default` for the neutral (borderless) chevron.
+   * Only affects the icon-only button (i.e. when `expandButtonLabel` is unset).
+   * @default undefined
+   */
+  readonly expandButtonVariant = input<CollapseButtonArrowType | undefined>(
+    undefined,
+  );
+  /**
+   * Renders a visible label next to the expand chevron instead of an icon-only
+   * button. Pass a single string to use the same label in both states, or an
+   * `{ open, close }` pair for distinct collapsed / expanded labels (`open` is
+   * shown while collapsed, `close` while expanded). When unset, the button is
+   * icon-only and its accessible name comes from the translated
+   * expand/collapse-row labels.
+   * @default undefined
+   */
+  readonly expandButtonLabel = input<
+    string | { open: string; close: string } | undefined
+  >(undefined);
+  /**
+   * Accessor returning a row's child rows, enabling hierarchical / tree data.
+   * Children render as nested sub-rows under their parent and expand via the
+   * same chevron.
+   * @default undefined
+   */
   readonly getSubRows = input<
     ((row: TData) => TData[] | undefined) | undefined
   >(undefined);
@@ -275,17 +338,61 @@ export class TediTableComponent<TData> {
   readonly paginationTop = input<boolean | TablePaginationOptions | undefined>(
     undefined,
   );
+  /**
+   * Switch pagination to server-side mode: the table renders `data` as the
+   * current page as-is and does not slice it. Supply `pageCount` or `rowCount`.
+   * @default false
+   */
   readonly manualPagination = input(false, { transform: booleanAttribute });
+  /**
+   * Switch sorting to server-side mode: the table emits sort state via
+   * `(stateChange)` but does not reorder `data` itself.
+   * @default false
+   */
   readonly manualSorting = input(false, { transform: booleanAttribute });
+  /**
+   * Switch filtering to server-side mode: the table emits filter state via
+   * `(stateChange)` but does not filter `data` itself.
+   * @default false
+   */
   readonly manualFiltering = input(false, { transform: booleanAttribute });
+  /** Total page count for server-side pagination (`manualPagination`). */
   readonly pageCount = input<number | undefined>(undefined);
+  /** Total row count for server-side pagination (`manualPagination`). */
   readonly rowCount = input<number | undefined>(undefined);
+  /**
+   * Controlled state. When provided, the table is fully controlled — render the
+   * given slices and emit every change via `(stateChange)` for the consumer to
+   * apply back.
+   * @default undefined
+   */
   readonly state = input<Partial<TableState> | undefined>(undefined);
+  /**
+   * Initial state for uncontrolled mode (seeds sorting / filters / pagination /
+   * selection etc. on first render). Ignored once `state` is provided.
+   * @default undefined
+   */
   readonly defaultState = input<Partial<TableState> | undefined>(undefined);
+  /**
+   * Persist selected state slices to storage. `{ key, storage?, include? }` —
+   * defaults to persisting user-preference slices (`columnVisibility`,
+   * `columnOrder`, `rowOrder`, `columnSizing`).
+   * @default undefined
+   */
   readonly persist = input<TablePersistOptions | undefined>(undefined);
+  /**
+   * Empty-state content shown when there are no rows — a string or a
+   * `TemplateRef`. Defaults to the translated `table.no-data` label.
+   * @default undefined
+   */
   readonly placeholder = input<TemplateRef<unknown> | string | undefined>(
     undefined,
   );
+  /**
+   * ARIA live-region role wrapping the empty-state placeholder — `'status'`
+   * (polite) or `'alert'` (assertive). Omit for no live region.
+   * @default undefined
+   */
   readonly placeholderRole = input<"alert" | "status" | undefined>(undefined);
   /**
    * Adds clickable styling, role="button", and keyboard activation to rows.
@@ -311,7 +418,16 @@ export class TediTableComponent<TData> {
    */
   readonly draggableColumns = input(false, { transform: booleanAttribute });
 
+  /**
+   * Emits the full merged table state whenever any slice changes (sorting,
+   * filters, pagination, selection, expansion, column visibility / order).
+   * Use with `state` for controlled mode or to persist externally.
+   */
   readonly stateChange = output<TableState>();
+  /**
+   * Emits the activated row. Only fires when `interactive` is `true` (click or
+   * Enter/Space on a focused row).
+   */
   readonly rowClick = output<Row<TData>>();
   /**
    * Fires when a row is dropped to a new position. `previousIndex` and
@@ -324,6 +440,15 @@ export class TediTableComponent<TData> {
 
   protected readonly injector = inject(Injector);
   private readonly translation = inject(TediTranslationService);
+
+  private readonly _hoveredRowId = signal<string | null>(null);
+  /**
+   * Id of the data row currently under the pointer, or `null`. Exposed so
+   * cell templates can react to hover (e.g. emphasise a badge while its row is
+   * hovered). Read it via a template reference: `#table` →
+   * `table.hoveredRowId()`. Also available through `TEDI_TABLE_CONTEXT`.
+   */
+  readonly hoveredRowId = this._hoveredRowId.asReadonly();
 
   private readonly internalId = generateUUID();
   protected readonly resolvedId = computed(
@@ -404,14 +529,16 @@ export class TediTableComponent<TData> {
 
   /**
    * Captures a `<ng-template tediPaginationResults>` declared inside the
-   * `<tedi-table>` host. The captured template is forwarded to whichever
-   * paginator slot is set to display results.
+   * `<tedi-table>` host. Read as a `TemplateRef` (the directive is a bare
+   * marker) and forwarded — projected as `<span tediPaginationResults>` — into
+   * whichever paginator slot is set to display results.
    */
-  private readonly customResultsDirective = contentChild(
+  private readonly customResultsTemplateRef = contentChild(
     TediPaginationResultsDirective,
+    { read: TemplateRef },
   );
   protected readonly customResultsTemplate = computed(
-    () => this.customResultsDirective()?.template ?? null,
+    () => this.customResultsTemplateRef() ?? null,
   );
   protected readonly topResultsTemplate = computed(() =>
     this.resultsRenderTarget() === "top" ? this.customResultsTemplate() : null,
@@ -481,7 +608,9 @@ export class TediTableComponent<TData> {
         enableSorting: false,
         enableHiding: false,
         enableColumnFilter: false,
-        size: 40,
+        // Icon-only toggles fit the 40px control column; a visible label needs
+        // room, so fall back to TanStack's default sizing in label mode.
+        size: this.expandButtonHasLabel() ? undefined : 40,
         header: "",
         cell: () => "",
       } as TediColumnDef<TData>);
@@ -648,21 +777,22 @@ export class TediTableComponent<TData> {
   }
 
   protected readonly hostClasses = computed(() => {
-    const classes = ["tedi-table", `tedi-table--${this.size()}`];
-    if (this.striped()) classes.push("tedi-table--striped");
-    if (this.verticalBorders()) classes.push("tedi-table--vertical-borders");
-    if (this.borderless()) classes.push("tedi-table--borderless");
-    if (this.stickyFirstColumn())
-      classes.push("tedi-table--sticky-first-column");
-    if (this.stickyHeader()) classes.push("tedi-table--sticky-header");
     const rowExpand = this.expandTrigger() === "row";
-    if (this.interactive() || rowExpand)
-      classes.push("tedi-table--clickable-rows");
     const hoverEnabled = this.rowHover() ?? (this.interactive() || rowExpand);
-    if (hoverEnabled) classes.push("tedi-table--row-hover");
+    const flags: [boolean, string][] = [
+      [this.striped(), "tedi-table--striped"],
+      [this.verticalBorders(), "tedi-table--vertical-borders"],
+      [this.borderless(), "tedi-table--borderless"],
+      [this.stickyFirstColumn(), "tedi-table--sticky-first-column"],
+      [this.stickyHeader(), "tedi-table--sticky-header"],
+      [this.fixedLayout(), "tedi-table--fixed-layout"],
+      [this.interactive() || rowExpand, "tedi-table--clickable-rows"],
+      [hoverEnabled, "tedi-table--row-hover"],
+      [this.draggableRows() || this.draggableColumns(), "tedi-table--draggable"],
+    ];
+    const classes = ["tedi-table", `tedi-table--${this.size()}`];
+    for (const [on, name] of flags) if (on) classes.push(name);
     classes.push(...this.paginationHostClasses());
-    if (this.draggableRows() || this.draggableColumns())
-      classes.push("tedi-table--draggable");
     this.trackTableInputs();
     if (untracked(() => this.table.getHeaderGroups().length) > 1)
       classes.push("tedi-table--grouped-headers");
@@ -713,8 +843,18 @@ export class TediTableComponent<TData> {
     return untracked(() => this.table.getFilteredRowModel().rows.length);
   });
 
+  /**
+   * `aria-rowcount` / `aria-rowindex` only apply to genuine grid rows (role
+   * `row`). When `interactive` is on, each `<tr>` takes `role="button"`, which
+   * does not allow `aria-rowindex` — so the whole row-indexing scheme is
+   * disabled to avoid an invalid-ARIA violation.
+   */
+  protected readonly ariaRowIndexingEnabled = computed(
+    () => this.paginationEnabled() && !this.interactive(),
+  );
+
   protected readonly ariaRowCount = computed(() =>
-    this.paginationEnabled()
+    this.ariaRowIndexingEnabled()
       ? this.headerRowCount() + this.totalDataRowCount()
       : null,
   );
@@ -726,7 +866,7 @@ export class TediTableComponent<TData> {
   // would inflate later roots' indices and overflow aria-rowcount.
   protected readonly rowAriaIndexById = computed(() => {
     const map = new Map<string, number | null>();
-    if (!this.paginationEnabled()) return map;
+    if (!this.ariaRowIndexingEnabled()) return map;
     const header = this.headerRowCount();
     const pagination = untracked(() => this.table.getState().pagination);
     const pageStart = pagination.pageIndex * pagination.pageSize;
@@ -798,6 +938,7 @@ export class TediTableComponent<TData> {
       size: this.size,
       id: this.resolvedId,
       state: this.tableState,
+      hoveredRowId: this.hoveredRowId,
     };
 
     effect(() => this.persistence.setControlled(this.state()));
@@ -830,6 +971,69 @@ export class TediTableComponent<TData> {
 
   protected rowExpandsOnClick(row: Row<TData>): boolean {
     return this.expandTrigger() === "row" && row.getCanExpand();
+  }
+
+  protected handleRowMouseEnter(row: Row<TData>): void {
+    this._hoveredRowId.set(row.id);
+  }
+
+  protected handleRowMouseLeave(): void {
+    this._hoveredRowId.set(null);
+  }
+
+  /**
+   * Consumer-authored sizing per column id, read from the *original* column
+   * defs (`augmentedColumns`) — TanStack merges its defaults
+   * (`size: 150`, `minSize: 20`, `maxSize: Number.MAX_SAFE_INTEGER`) into the
+   * resolved `column.columnDef`, so that copy can't tell "set" from "default".
+   */
+  private readonly authoredColumnSizing = computed(() => {
+    const map = new Map<
+      string,
+      { hasSize: boolean; minSize?: number; maxSize?: number }
+    >();
+    for (const def of this.augmentedColumns()) {
+      const col = def as TediColumnDef<TData> & { accessorKey?: string };
+      const id =
+        col.id ?? (typeof col.accessorKey === "string" ? col.accessorKey : undefined);
+      if (id === undefined) continue;
+      map.set(id, {
+        hasSize:
+          col.size !== undefined ||
+          col.minSize !== undefined ||
+          col.maxSize !== undefined,
+        minSize: col.minSize,
+        maxSize: col.maxSize,
+      });
+    }
+    return map;
+  });
+
+  /**
+   * Rendered `width` (px) for a column's cells. Under `fixedLayout`, only
+   * explicitly-sized columns get a width so the unsized ones absorb the
+   * leftover space (otherwise fixed layout scales every column up to fill the
+   * table). In auto layout the (clamped) size is emitted as a hint for all.
+   */
+  protected headerCellWidth(column: {
+    id: string;
+    getSize: () => number;
+  }): number | null {
+    if (this.fixedLayout() && !this.authoredColumnSizing().get(column.id)?.hasSize)
+      return null;
+    return column.getSize() || null;
+  }
+
+  /** Consumer-set `min-width` (px); `null` when not set (TanStack's default
+   *  `20` is not emitted as CSS). */
+  protected columnMinWidth(column: { id: string }): number | null {
+    return this.authoredColumnSizing().get(column.id)?.minSize ?? null;
+  }
+
+  /** Consumer-set `max-width` (px); `null` when not set (TanStack's default
+   *  `Number.MAX_SAFE_INTEGER` is not emitted as CSS). */
+  protected columnMaxWidth(column: { id: string }): number | null {
+    return this.authoredColumnSizing().get(column.id)?.maxSize ?? null;
   }
 
   protected handleRowKeydown(event: KeyboardEvent, row: Row<TData>): void {
@@ -874,6 +1078,18 @@ export class TediTableComponent<TData> {
     const visibleLeafIds = untracked(() =>
       this.table.getVisibleLeafColumns().map((column) => column.id),
     );
+    // Bail if the visible-column set shifted between drag start and drop
+    // (e.g. a column was toggled off via the columns menu mid-drag). CDK's
+    // indices are now stale and would point at the wrong column — let the
+    // drop snap back so the user can re-drag against fresh state.
+    if (
+      event.previousIndex < 0 ||
+      event.previousIndex >= visibleLeafIds.length ||
+      event.currentIndex < 0 ||
+      event.currentIndex >= visibleLeafIds.length
+    ) {
+      return;
+    }
     const reorderedVisible = [...visibleLeafIds];
     const [moved] = reorderedVisible.splice(event.previousIndex, 1);
     reorderedVisible.splice(event.currentIndex, 0, moved);
@@ -980,6 +1196,36 @@ export class TediTableComponent<TData> {
       ? this.translation.translate("table.collapse-row")
       : this.translation.translate("table.expand-row");
   }
+
+  /** Whether the consumer opted the expand button into visible-label mode. */
+  protected readonly expandButtonHasLabel = computed(
+    () => this.expandButtonLabel() !== undefined,
+  );
+
+  /**
+   * Arrow style for the expand toggle button. Defaults to the bordered
+   * `secondary` style regardless of `expandTrigger`; honours
+   * `expandButtonVariant` when the consumer sets it.
+   */
+  protected readonly resolvedExpandVariant = computed<CollapseButtonArrowType>(
+    () => this.expandButtonVariant() ?? "secondary",
+  );
+
+  /** Visible label shown while a row is collapsed (`open` action). */
+  protected readonly expandButtonOpenText = computed<string | undefined>(() => {
+    const label = this.expandButtonLabel();
+    if (label === undefined) return undefined;
+    return typeof label === "string" ? label : label.open;
+  });
+
+  /** Visible label shown while a row is expanded (`close` action). */
+  protected readonly expandButtonCloseText = computed<string | undefined>(
+    () => {
+      const label = this.expandButtonLabel();
+      if (label === undefined) return undefined;
+      return typeof label === "string" ? label : label.close;
+    },
+  );
 
   protected handleSelectAll(checked: boolean): void {
     this.table.toggleAllPageRowsSelected(checked);

@@ -27,9 +27,9 @@ export type TableSelectionMode = "multiple" | "single";
 
 /**
  * How an expandable row is toggled. `button` (default) only reacts to clicks
- * on the chevron button and renders it in the `secondary` (bordered) arrow
- * style. `row` lets a click anywhere on the row toggle expansion and renders
- * the chevron in the `default` (neutral) style.
+ * on the chevron button. `row` lets a click anywhere on the row toggle
+ * expansion. Both render the chevron in the `secondary` (bordered) arrow style
+ * by default — override it with the table's `expandButtonVariant` input.
  */
 export type TableExpandTrigger = "button" | "row";
 
@@ -219,4 +219,6 @@ export interface TediTableContextValue<TData = unknown> {
   id: Signal<string>;
   /** Merged table state signal. */
   state: Signal<TableState>;
+  /** Id of the row currently under the pointer, or `null`. */
+  hoveredRowId: Signal<string | null>;
 }

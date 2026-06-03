@@ -132,23 +132,49 @@ describe("PaginationComponent", () => {
     expect(emitted).toBe(false);
   });
 
-  it("disables Previous on the first page and Next on the last", () => {
+  it("removes Previous from the DOM on the first page and Next on the last by default", () => {
     const fixture = setup({ pageCount: 3, page: 1 });
-    let prev: HTMLButtonElement | null = fixture.nativeElement.querySelector(
-      'button[aria-label="Previous page"]',
-    );
-    let next: HTMLButtonElement | null = fixture.nativeElement.querySelector(
-      'button[aria-label="Next page"]',
-    );
+    expect(
+      fixture.nativeElement.querySelector(".tedi-pagination__nav-button--previous"),
+    ).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector(".tedi-pagination__nav-button--next"),
+    ).not.toBeNull();
+
+    fixture.componentRef.setInput("page", 3);
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(".tedi-pagination__nav-button--previous"),
+    ).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector(".tedi-pagination__nav-button--next"),
+    ).toBeNull();
+  });
+
+  it("keeps boundary arrows rendered as disabled when disableArrowsAtBoundary is true", () => {
+    const fixture = setup({ pageCount: 3, page: 1 });
+    fixture.componentRef.setInput("disableArrowsAtBoundary", true);
+    fixture.detectChanges();
+
+    const prev = fixture.nativeElement.querySelector(
+      ".tedi-pagination__nav-button--previous",
+    ) as HTMLButtonElement | null;
+    const next = fixture.nativeElement.querySelector(
+      ".tedi-pagination__nav-button--next",
+    ) as HTMLButtonElement | null;
     expect(prev?.disabled).toBe(true);
     expect(next?.disabled).toBe(false);
 
     fixture.componentRef.setInput("page", 3);
     fixture.detectChanges();
-    prev = fixture.nativeElement.querySelector('button[aria-label="Previous page"]');
-    next = fixture.nativeElement.querySelector('button[aria-label="Next page"]');
-    expect(prev?.disabled).toBe(false);
-    expect(next?.disabled).toBe(true);
+    const prev2 = fixture.nativeElement.querySelector(
+      ".tedi-pagination__nav-button--previous",
+    ) as HTMLButtonElement | null;
+    const next2 = fixture.nativeElement.querySelector(
+      ".tedi-pagination__nav-button--next",
+    ) as HTMLButtonElement | null;
+    expect(prev2?.disabled).toBe(false);
+    expect(next2?.disabled).toBe(true);
   });
 
   it("Previous / Next move the current page by one", () => {
@@ -170,6 +196,64 @@ describe("PaginationComponent", () => {
     prev?.click();
     fixture.detectChanges();
     expect(emitted[emitted.length - 1]).toBe(2);
+  });
+
+  it("renders prev/next as icon-only by default (label exposed via aria-label)", () => {
+    const fixture = setup({ pageCount: 5, page: 3 });
+    const prev = fixture.nativeElement.querySelector(
+      ".tedi-pagination__nav-button--previous",
+    ) as HTMLButtonElement;
+    expect(prev.getAttribute("aria-label")).toBe("Previous page");
+    expect(prev.classList).toContain("tedi-button--icon-only");
+    expect(prev.classList).toContain("tedi-button--neutral");
+    expect(prev.querySelector("span")).toBeNull();
+  });
+
+  it("renders prev/next labels as visible text when showArrowLabels is true", () => {
+    const fixture = setup({ pageCount: 5, page: 3 });
+    fixture.componentRef.setInput("showArrowLabels", true);
+    fixture.detectChanges();
+    const prev = fixture.nativeElement.querySelector(
+      ".tedi-pagination__nav-button--previous",
+    ) as HTMLButtonElement;
+    const next = fixture.nativeElement.querySelector(
+      ".tedi-pagination__nav-button--next",
+    ) as HTMLButtonElement;
+    expect(prev.querySelector("span")?.textContent?.trim()).toBe("Previous page");
+    expect(next.querySelector("span")?.textContent?.trim()).toBe("Next page");
+    expect(prev.getAttribute("aria-label")).toBeNull();
+    expect(next.getAttribute("aria-label")).toBeNull();
+    expect(prev.classList).not.toContain("tedi-button--icon-only");
+  });
+
+  it("uses the configured previousIcon / nextIcon", () => {
+    const fixture = setup({ pageCount: 5, page: 3 });
+    fixture.componentRef.setInput("previousIcon", "chevron_left");
+    fixture.componentRef.setInput("nextIcon", "chevron_right");
+    fixture.detectChanges();
+    const prevIcon = fixture.nativeElement.querySelector(
+      ".tedi-pagination__nav-button--previous tedi-icon",
+    ) as HTMLElement;
+    const nextIcon = fixture.nativeElement.querySelector(
+      ".tedi-pagination__nav-button--next tedi-icon",
+    ) as HTMLElement;
+    expect(prevIcon.textContent?.trim()).toBe("chevron_left");
+    expect(nextIcon.textContent?.trim()).toBe("chevron_right");
+  });
+
+  it("applies the configured arrowVariant to prev/next buttons", () => {
+    const fixture = setup({ pageCount: 5, page: 3 });
+    fixture.componentRef.setInput("arrowVariant", "primary");
+    fixture.detectChanges();
+    const prev = fixture.nativeElement.querySelector(
+      ".tedi-pagination__nav-button--previous",
+    ) as HTMLButtonElement;
+    const next = fixture.nativeElement.querySelector(
+      ".tedi-pagination__nav-button--next",
+    ) as HTMLButtonElement;
+    expect(prev.classList).toContain("tedi-button--primary");
+    expect(next.classList).toContain("tedi-button--primary");
+    expect(prev.classList).not.toContain("tedi-button--neutral");
   });
 
   it("renders ellipses for large page counts", () => {
@@ -299,15 +383,6 @@ describe("PaginationComponent", () => {
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).classList).toContain(
       "tedi-pagination--divider-bottom",
-    );
-  });
-
-  it("applies the keep-disabled-arrows modifier when disableArrowsAtBoundary is set", () => {
-    const fixture = setup();
-    fixture.componentRef.setInput("disableArrowsAtBoundary", true);
-    fixture.detectChanges();
-    expect((fixture.nativeElement as HTMLElement).classList).toContain(
-      "tedi-pagination--keep-disabled-arrows",
     );
   });
 

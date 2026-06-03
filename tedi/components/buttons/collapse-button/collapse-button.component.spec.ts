@@ -44,9 +44,7 @@ describe("CollapseButtonComponent", () => {
     const emitted: boolean[] = [];
     component.openChange.subscribe((value) => emitted.push(value));
 
-    const button: HTMLButtonElement = fixture.nativeElement.querySelector(
-      ".tedi-collapse-button",
-    );
+    const button: HTMLButtonElement = fixture.nativeElement;
     button.click();
     expect(emitted).toEqual([true]);
 
@@ -107,9 +105,7 @@ describe("CollapseButtonComponent", () => {
   it("applies the --small modifier when size is 'small'", () => {
     fixture.componentRef.setInput("size", "small");
     fixture.detectChanges();
-    const button: HTMLButtonElement = fixture.nativeElement.querySelector(
-      ".tedi-collapse-button",
-    );
+    const button: HTMLButtonElement = fixture.nativeElement;
     expect(button.classList.contains("tedi-collapse-button--small")).toBe(
       true,
     );
@@ -119,9 +115,7 @@ describe("CollapseButtonComponent", () => {
     fixture.componentRef.setInput("hideText", true);
     fixture.componentRef.setInput("arrowType", "default");
     fixture.detectChanges();
-    const button: HTMLButtonElement = fixture.nativeElement.querySelector(
-      ".tedi-collapse-button",
-    );
+    const button: HTMLButtonElement = fixture.nativeElement;
     expect(button.classList.contains("tedi-collapse-button--neutral")).toBe(
       true,
     );
@@ -131,9 +125,7 @@ describe("CollapseButtonComponent", () => {
   });
 
   it("toggles the --open modifier based on the open input", () => {
-    const button: HTMLButtonElement = fixture.nativeElement.querySelector(
-      ".tedi-collapse-button",
-    );
+    const button: HTMLButtonElement = fixture.nativeElement;
     expect(button.classList.contains("tedi-collapse-button--open")).toBe(false);
 
     fixture.componentRef.setInput("open", true);
@@ -149,9 +141,7 @@ describe("CollapseButtonComponent", () => {
     fixture.componentRef.setInput("open", true);
     fixture.detectChanges();
 
-    const button: HTMLButtonElement = fixture.nativeElement.querySelector(
-      ".tedi-collapse-button",
-    );
+    const button: HTMLButtonElement = fixture.nativeElement;
     expect(button.id).toBe("btn-1");
     expect(button.getAttribute("aria-controls")).toBe("panel-1");
     expect(button.getAttribute("aria-label")).toBe("Toggle details");
@@ -161,18 +151,14 @@ describe("CollapseButtonComponent", () => {
   it("does not emit aria-label when text is visible (avoids WCAG 2.5.3 Label-in-Name conflict with visible text)", () => {
     fixture.componentRef.setInput("ariaLabel", "Toggle details");
     fixture.detectChanges();
-    const button: HTMLButtonElement = fixture.nativeElement.querySelector(
-      ".tedi-collapse-button",
-    );
+    const button: HTMLButtonElement = fixture.nativeElement;
     expect(button.getAttribute("aria-label")).toBeNull();
   });
 
   it("falls back to the translated open/close text as aria-label in icon-only mode", () => {
     fixture.componentRef.setInput("hideText", true);
     fixture.detectChanges();
-    const button: HTMLButtonElement = fixture.nativeElement.querySelector(
-      ".tedi-collapse-button",
-    );
+    const button: HTMLButtonElement = fixture.nativeElement;
     expect(button.getAttribute("aria-label")).toBe("open");
 
     fixture.componentRef.setInput("open", true);
@@ -181,10 +167,7 @@ describe("CollapseButtonComponent", () => {
   });
 
   it("renders the toggle button with type='button' to avoid submitting parent forms", () => {
-    const button: HTMLButtonElement = fixture.nativeElement.querySelector(
-      ".tedi-collapse-button",
-    );
+    const button: HTMLButtonElement = fixture.nativeElement;
     expect(button.getAttribute("type")).toBe("button");
-    expect(button.type).toBe("button");
   });
 });

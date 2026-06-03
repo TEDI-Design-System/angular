@@ -15,12 +15,21 @@ export type CollapseButtonSize = "default" | "small";
 
 @Component({
   standalone: true,
-  selector: "tedi-collapse-button",
+  selector: "button[tedi-collapse-button]",
   imports: [IconComponent],
   templateUrl: "./collapse-button.component.html",
   styleUrls: ["./collapse-button.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  host: {
+    type: "button",
+    "[class]": "hostClasses()",
+    "[attr.id]": "id() || null",
+    "[attr.aria-expanded]": "open()",
+    "[attr.aria-controls]": "ariaControls() || null",
+    "[attr.aria-label]": "resolvedAriaLabel()",
+    "(click)": "toggle()",
+  },
 })
 export class CollapseButtonComponent {
   private translationService = inject(TediTranslationService);

@@ -3,7 +3,8 @@
   [class.tedi-collapse--open]="isOpen() === true"
   [class.tedi-collapse--inverted]="isInvertedActive()"
 >
-  <tedi-collapse-button
+  <button
+    tedi-collapse-button
     [open]="isOpen()"
     [openText]="openText()"
     [closeText]="closeText()"
@@ -13,7 +14,7 @@
     [inverted]="inverted()"
     [ariaControls]="collapseContentId"
     (openChange)="isOpen.set($event)"
-  />
+  ></button>
   <div class="tedi-collapse__content" [id]="collapseContentId">
     <div class="tedi-collapse__extender">
       <ng-content></ng-content>

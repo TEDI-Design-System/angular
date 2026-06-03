@@ -20,10 +20,7 @@ import {
 } from "./collapse-button.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
-import {
-  type TextColor,
-  TextComponent,
-} from "../../base/text/text.component";
+import { type TextColor, TextComponent } from "../../base/text/text.component";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 
@@ -33,7 +30,8 @@ const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
   imports: [CollapseButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <tedi-collapse-button
+    <button
+      tedi-collapse-button
       [open]="isOpen()"
       [openText]="openText()"
       [closeText]="closeText()"
@@ -43,7 +41,7 @@ const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
       [inverted]="inverted()"
       [ariaLabel]="ariaLabel()"
       (openChange)="isOpen.set($event)"
-    />
+    ></button>
   `,
 })
 class CollapseButtonDemoComponent {
@@ -81,7 +79,8 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
             <tedi-row [cols]="5" alignItems="center" [gapX]="2">
               <p tedi-text [color]="titleColor">{{ state }}</p>
               <tedi-col [width]="4" style="display: flex; gap: 1rem; align-items: center;">
-                <tedi-collapse-button
+                <button
+                  tedi-collapse-button
                   [id]="state"
                   [openText]="openText"
                   [closeText]="closeText"
@@ -89,8 +88,9 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
                   [arrowType]="arrowType"
                   [inverted]="inverted"
                   [ariaLabel]="ariaLabel"
-                />
-                <tedi-collapse-button
+                ></button>
+                <button
+                  tedi-collapse-button
                   [id]="state"
                   [open]="true"
                   [openText]="openText"
@@ -99,7 +99,7 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
                   [arrowType]="arrowType"
                   [inverted]="inverted"
                   [ariaLabel]="ariaLabel"
-                />
+                ></button>
               </tedi-col>
             </tedi-row>
           </tedi-col>
@@ -112,7 +112,8 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
             <tedi-row [cols]="5" alignItems="center" [gapX]="2">
               <p tedi-text [color]="titleColor">{{ state }}</p>
               <tedi-col [width]="4" style="display: flex; gap: 1rem; align-items: center;">
-                <tedi-collapse-button
+                <button
+                  tedi-collapse-button
                   [id]="state"
                   size="small"
                   [openText]="openText"
@@ -121,8 +122,9 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
                   [arrowType]="arrowType"
                   [inverted]="inverted"
                   [ariaLabel]="ariaLabel"
-                />
-                <tedi-collapse-button
+                ></button>
+                <button
+                  tedi-collapse-button
                   [id]="state"
                   [open]="true"
                   size="small"
@@ -132,7 +134,7 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
                   [arrowType]="arrowType"
                   [inverted]="inverted"
                   [ariaLabel]="ariaLabel"
-                />
+                ></button>
               </tedi-col>
             </tedi-row>
           </tedi-col>
@@ -214,8 +216,7 @@ export default {
       },
     },
     arrowType: {
-      description:
-        "Chevron style. Only takes effect with `hideText`.",
+      description: "Chevron style. Only takes effect with `hideText`.",
       control: { type: "inline-radio" },
       options: ["default", "secondary"],
       table: {

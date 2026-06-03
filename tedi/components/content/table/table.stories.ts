@@ -577,6 +577,7 @@ abstract class TableStoryHostBase {
   readonly borderless = input(false, { transform: booleanAttribute });
   readonly stickyFirstColumn = input(false, { transform: booleanAttribute });
   readonly stickyHeader = input(false, { transform: booleanAttribute });
+  readonly fixedLayout = input(false, { transform: booleanAttribute });
   readonly rowHover = input(false, { transform: booleanAttribute });
   readonly interactive = input(false, { transform: booleanAttribute });
   readonly expandTrigger = input<TableExpandTrigger>("button");
@@ -597,6 +598,7 @@ const TABLE_APPEARANCE_BINDINGS = `
   [borderless]="borderless()"
   [stickyFirstColumn]="stickyFirstColumn()"
   [stickyHeader]="stickyHeader()"
+  [fixedLayout]="fixedLayout()"
   [rowHover]="rowHover()"
   [interactive]="interactive()"
   [expandTrigger]="expandTrigger()"
@@ -615,6 +617,7 @@ type TediTableStoryArgs = {
   borderless: boolean;
   stickyFirstColumn: boolean;
   stickyHeader: boolean;
+  fixedLayout: boolean;
   rowHover: boolean;
   interactive: boolean;
   expandTrigger: TableExpandTrigger;
@@ -624,12 +627,38 @@ type TediTableStoryArgs = {
   maxHeight: number | undefined;
   activeRowId: string | undefined;
   placeholderRole: "alert" | "status" | undefined;
+  // Documented-only (set per story, not interactive controls)
+  data?: unknown[];
+  columns?: unknown[];
+  id?: string;
+  caption?: unknown;
+  renderSubComponent?: unknown;
+  getRowCanExpand?: unknown;
+  getSubRows?: unknown;
+  expandButtonVariant?: "default" | "secondary";
+  expandButtonLabel?: string | { open: string; close: string };
+  pagination?: unknown;
+  paginationTop?: unknown;
+  manualPagination?: boolean;
+  manualSorting?: boolean;
+  manualFiltering?: boolean;
+  pageCount?: number;
+  rowCount?: number;
+  state?: unknown;
+  defaultState?: unknown;
+  persist?: unknown;
+  placeholder?: unknown;
+  draggableRows?: boolean;
+  draggableColumns?: boolean;
+  stateChange?: unknown;
+  rowClick?: unknown;
+  rowDrop?: unknown;
 };
 
 /**
- * <a href="https://tanstack.com/table/latest/docs/framework/angular/angular-table" target="_BLANK">@tanstack/angular-table ↗</a><br/>
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=11335-186161&m=dev" target="_BLANK">Figma ↗</a><br/>
  * <a href="https://www.tedi.ee/1ee8444b7/p/557b9f-table" target="_BLANK">Zeroheight ↗</a>
+ * <a href="https://tanstack.com/table/latest/docs/framework/angular/angular-table" target="_BLANK">@tanstack/angular-table ↗</a><br/>
  *
  * Headless data table built on `@tanstack/angular-table`. Supports sorting,
  * filtering, expansion, selection, pagination, sticky chrome and body row
@@ -664,6 +693,7 @@ const meta: Meta<TediTableStoryArgs> = {
     borderless: false,
     stickyFirstColumn: false,
     stickyHeader: false,
+    fixedLayout: false,
     rowHover: false,
     interactive: false,
     expandTrigger: "button",
@@ -724,6 +754,16 @@ const meta: Meta<TediTableStoryArgs> = {
     },
     stickyHeader: {
       description: "Pin `<thead>` during vertical scroll. Requires `maxHeight`.",
+      control: "boolean",
+      table: {
+        category: "appearance",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    fixedLayout: {
+      description:
+        "`table-layout: fixed` — makes column `size` / `minSize` / `maxSize` authoritative (content wraps instead of stretching the column). Required for max-width caps to hold.",
       control: "boolean",
       table: {
         category: "appearance",
@@ -817,7 +857,189 @@ const meta: Meta<TediTableStoryArgs> = {
         type: { summary: "'alert' | 'status'" },
       },
     },
-    // Inputs not driven by Storybook controls (data, columns, etc.) — documented for completeness.
+    // Inputs / outputs set per story (not interactive controls) — documented
+    // here so the args table lists the full API.
+    data: {
+      description: "Row data. Required.",
+      control: false,
+      table: { category: "data", type: { summary: "TData[]" } },
+    },
+    columns: {
+      description: "Column definitions. Required.",
+      control: false,
+      table: { category: "data", type: { summary: "TediColumnDef<TData>[]" } },
+    },
+    id: {
+      description:
+        "Stable id used to prefix synthetic ids; auto-generated when omitted.",
+      control: false,
+      table: { category: "data", type: { summary: "string" } },
+    },
+    caption: {
+      description: "Caption rendered above the table.",
+      control: false,
+      table: { category: "data", type: { summary: "string | TemplateRef" } },
+    },
+    renderSubComponent: {
+      description:
+        "Template rendered as an expandable detail row (receives the Row as `$implicit`). Auto-adds the expand column.",
+      control: false,
+      table: {
+        category: "expansion",
+        type: { summary: "TemplateRef<{ $implicit: Row<TData> }>" },
+      },
+    },
+    getRowCanExpand: {
+      description: "Predicate deciding whether a row can expand.",
+      control: false,
+      table: { category: "expansion", type: { summary: "(row) => boolean" } },
+    },
+    getSubRows: {
+      description:
+        "Accessor returning a row's child rows for hierarchical / tree data.",
+      control: false,
+      table: {
+        category: "expansion",
+        type: { summary: "(row) => TData[] | undefined" },
+      },
+    },
+    expandButtonVariant: {
+      description:
+        "Expand toggle arrow style. Defaults to bordered `secondary`; `default` is the neutral chevron. Only affects icon-only mode.",
+      control: false,
+      table: {
+        category: "expansion",
+        type: { summary: '"default" | "secondary"' },
+      },
+    },
+    expandButtonLabel: {
+      description:
+        "Visible label next to the chevron (single string, or `{ open, close }` per state). Switches the toggle out of icon-only mode.",
+      control: false,
+      table: {
+        category: "expansion",
+        type: { summary: "string | { open; close }" },
+      },
+    },
+    pagination: {
+      description:
+        "Enables + configures the bottom paginator. `true` for defaults or a `TablePaginationOptions` object (source of truth for pageSize / pageSizeOptions).",
+      control: false,
+      table: {
+        category: "pagination",
+        type: { summary: "boolean | TablePaginationOptions" },
+      },
+    },
+    paginationTop: {
+      description:
+        "Opt-in top paginator slot; shares page state with the bottom but has independent visual config. Requires `pagination`.",
+      control: false,
+      table: {
+        category: "pagination",
+        type: { summary: "boolean | TablePaginationOptions" },
+      },
+    },
+    manualPagination: {
+      description:
+        "Server-side pagination — render `data` as the current page as-is. Supply `pageCount` / `rowCount`.",
+      control: false,
+      table: {
+        category: "pagination",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    pageCount: {
+      description: "Total page count for server-side pagination.",
+      control: false,
+      table: { category: "pagination", type: { summary: "number" } },
+    },
+    rowCount: {
+      description: "Total row count for server-side pagination.",
+      control: false,
+      table: { category: "pagination", type: { summary: "number" } },
+    },
+    manualSorting: {
+      description:
+        "Server-side sorting — emit sort state via `(stateChange)` without reordering `data`.",
+      control: false,
+      table: {
+        category: "behavior",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    manualFiltering: {
+      description:
+        "Server-side filtering — emit filter state via `(stateChange)` without filtering `data`.",
+      control: false,
+      table: {
+        category: "behavior",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    placeholder: {
+      description:
+        "Empty-state content (string or TemplateRef). Defaults to the translated `table.no-data`.",
+      control: false,
+      table: { category: "behavior", type: { summary: "string | TemplateRef" } },
+    },
+    state: {
+      description:
+        "Controlled state — render the given slices and emit every change via `(stateChange)`.",
+      control: false,
+      table: { category: "state", type: { summary: "Partial<TableState>" } },
+    },
+    defaultState: {
+      description:
+        "Initial state for uncontrolled mode (seeds sorting / filters / pagination / selection).",
+      control: false,
+      table: { category: "state", type: { summary: "Partial<TableState>" } },
+    },
+    persist: {
+      description:
+        "Persist selected state slices to storage (`{ key, storage?, include? }`).",
+      control: false,
+      table: { category: "state", type: { summary: "TablePersistOptions" } },
+    },
+    draggableRows: {
+      description:
+        "Reorder rows via drag-and-drop; emits `(rowDrop)` with source-array indices.",
+      control: false,
+      table: {
+        category: "drag & drop",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    draggableColumns: {
+      description:
+        "Reorder columns via header drag; updates internal `columnOrder` state.",
+      control: false,
+      table: {
+        category: "drag & drop",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    stateChange: {
+      description:
+        "Emits the full merged `TableState` whenever any slice changes.",
+      control: false,
+      table: { category: "outputs", type: { summary: "TableState" } },
+    },
+    rowClick: {
+      description: "Emits the activated row. Only fires when `interactive` is true.",
+      control: false,
+      table: { category: "outputs", type: { summary: "Row<TData>" } },
+    },
+    rowDrop: {
+      description:
+        "Emits when a row is dropped; indices normalised to source-`data` positions.",
+      control: false,
+      table: { category: "outputs", type: { summary: "CdkDragDrop<TData[]>" } },
+    },
   },
 };
 
@@ -1179,10 +1401,10 @@ interface PatientRow {
   procedure: string;
 }
 const patientRows: PatientRow[] = [
-  { id: "1", date: "2026-05-20", doctor: "Dr Tamm", procedure: "Consultation" },
-  { id: "2", date: "2026-05-20", doctor: "Dr Tamm", procedure: "Follow-up" },
-  { id: "3", date: "2026-05-21", doctor: "Dr Kask", procedure: "X-ray" },
-  { id: "4", date: "2026-05-21", doctor: "Dr Kask", procedure: "Consultation" },
+  { id: "1", date: "20.05.2026", doctor: "Dr Tamm", procedure: "Consultation" },
+  { id: "2", date: "20.05.2026", doctor: "Dr Tamm", procedure: "Follow-up" },
+  { id: "3", date: "21.05.2026", doctor: "Dr Kask", procedure: "X-ray" },
+  { id: "4", date: "21.05.2026", doctor: "Dr Kask", procedure: "Consultation" },
 ];
 
 @Component({
@@ -1198,6 +1420,7 @@ class GroupedRowsStoryHostComponent extends TableStoryHostBase {
       id: "date",
       header: "Date",
       accessorKey: "date",
+      meta: { vAlign: "top" },
       rowSpan: groupRowSpan(
         patientRows.map(
           (_, i) =>
@@ -1223,15 +1446,113 @@ export const GroupedRows: Story = {
       source: {
         language: "html",
         code: `<!-- The first column collapses adjacent rows with the same value
-  via rowSpan. Use the groupRowSpan helper:
+  via rowSpan. Use the groupRowSpan helper. meta.vAlign: 'top' keeps the
+  spanned cell's content aligned to the top instead of vertically centered:
   columns = [
     id: 'date', header: 'Date', accessorKey: 'date',
+      meta: { vAlign: 'top' },
       rowSpan: groupRowSpan(rows, row => row.original.date),
     id: 'doctor', header: 'Doctor', accessorKey: 'doctor',
     id: 'procedure', header: 'Procedure', accessorKey: 'procedure',
   ]
 -->
 <tedi-table [data]="data" [columns]="columns" verticalBorders />`,
+      },
+    },
+  },
+};
+
+// ---------- ColumnSizing (size / minSize / maxSize) ----------
+interface SizedRow {
+  code: string;
+  count: number;
+  name: string;
+  description: string;
+}
+const sizedRows: SizedRow[] = [
+  {
+    code: "A1",
+    count: 3,
+    name: "Maasikas",
+    description:
+      "Magus punane suvemari, mida kasutatakse moosides, kookides ja värskelt söögiks.",
+  },
+  {
+    code: "B2",
+    count: 17,
+    name: "Mustikas",
+    description:
+      "Tumesinine metsamari, tuntud antioksüdantide rohkuse ja magushapu maitse poolest.",
+  },
+  {
+    code: "C3",
+    count: 5,
+    name: "Vaarikas",
+    description:
+      "Õrn punane mari pehme tekstuuriga, sobib teedesse, magustoitudesse ja siirupitesse.",
+  },
+];
+
+@Component({
+  standalone: true,
+  selector: "tedi-column-sizing-story",
+  imports: [TediTableComponent],
+  template: `
+    <tedi-table
+      id="tedi-table-column-sizing"
+      [data]="data"
+      [columns]="columns"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+  `,
+})
+class ColumnSizingStoryHostComponent extends TableStoryHostBase {
+  data = sizedRows;
+  columns: TediColumnDef<SizedRow>[] = [
+    { id: "code", header: "Kood", accessorKey: "code", maxSize: 72 },
+    { id: "count", header: "Arv", accessorKey: "count", size: 64, minSize: 120 },
+    { id: "name", header: "Nimi", accessorKey: "name", maxSize: 140 },
+    // No size set → flexes to absorb leftover space, so the long description
+    // extends to fill the table while the other columns hold their widths.
+    { id: "description", header: "Kirjeldus", accessorKey: "description" },
+  ];
+}
+
+export const ColumnSizing: Story = {
+  args: { verticalBorders: true, fixedLayout: true },
+  render: (args) => ({
+    moduleMetadata: { imports: [ColumnSizingStoryHostComponent] },
+    props: args,
+    template: `<tedi-column-sizing-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Columns accept TanStack's `size`, `minSize` and `maxSize`, rendered as " +
+          "`width` / `min-width` / `max-width`. **`fixedLayout` is required** — in " +
+          "the default auto layout the browser sizes columns to content and the " +
+          "widths are only hints. Under fixed layout, leave at least one column " +
+          "**unsized** so it absorbs the leftover space; otherwise every column " +
+          "scales up to fill the table. Here `Kood` is capped at 72px, `Arv` is " +
+          "held to ≥120px (its `size: 64` is lifted by `minSize: 120`), `Nimi` is " +
+          "capped at 140px, and `Kirjeldus` is left unsized so it extends to fill " +
+          "the remaining width.",
+      },
+      source: {
+        language: "html",
+        code: `<!-- size → width, minSize → min-width, maxSize → max-width (px),
+  applied only when set. fixedLayout (table-layout: fixed) is required;
+  leave one column unsized so it absorbs the slack and extends
+  (otherwise all columns scale up to fill the table width).
+  columns = [
+    { id: 'code', header: 'Kood', accessorKey: 'code', maxSize: 72 },
+    { id: 'count', header: 'Arv', accessorKey: 'count', size: 64, minSize: 120 },
+    { id: 'name', header: 'Nimi', accessorKey: 'name', maxSize: 140 },
+    { id: 'description', header: 'Kirjeldus', accessorKey: 'description' }, // flex
+  ]
+-->
+<tedi-table [data]="data" [columns]="columns" fixedLayout verticalBorders />`,
       },
     },
   },
@@ -1977,6 +2298,7 @@ export const CollapsibleRows: Story = {
       [data]="data"
       [columns]="columns()"
       [getSubRows]="getSubRows"
+      [expandButtonVariant]="'default'"
       [pagination]="pagination"
       ${TABLE_APPEARANCE_BINDINGS}
     />
@@ -2012,7 +2334,7 @@ class CollapsibleRowsRowTriggerStoryHostComponent extends TableStoryHostBase {
 }
 
 export const CollapsibleRowsRowTrigger: Story = {
-  args: { expandTrigger: "row" },
+  args: { expandTrigger: "row", rowHover: true },
   render: (args) => ({
     moduleMetadata: { imports: [CollapsibleRowsRowTriggerStoryHostComponent] },
     props: args,
@@ -2025,17 +2347,99 @@ export const CollapsibleRowsRowTrigger: Story = {
       source: {
         language: "html",
         code: `<!-- expandTrigger="row" lets a click anywhere on the row toggle
-  expansion. The chevron renders in the neutral "default" arrow style
-  (no border) — it acts as a visual indicator while the row is the
-  clickable target. Compare with the default "button" trigger, which
-  reserves toggling to the bordered "secondary" chevron only.
+  expansion. Here the chevron uses the neutral (borderless) "default"
+  arrow style via [expandButtonVariant]="'default'" — it acts as a
+  visual indicator while the whole row is the clickable target. Drop
+  the input to keep the bordered "secondary" chevron (the default).
+  Hover styling is automatic with expandTrigger="row"; bind [rowHover]
+  only to override it ([rowHover]="false" suppresses it).
 -->
 <tedi-table
   expandTrigger="row"
   [data]="data"
   [columns]="columns"
   [getSubRows]="getSubRows"
+  [expandButtonVariant]="'default'"
   [pagination]="pagination"
+/>`,
+      },
+    },
+  },
+};
+
+// ---------- CollapsibleRowsLabeledToggle ----------
+@Component({
+  standalone: true,
+  selector: "tedi-collapsible-rows-labeled-toggle-story",
+  imports: [TediTableComponent, StatusBadgeComponent],
+  template: `
+    <tedi-table
+      id="tedi-table-collapse-labeled"
+      [data]="data"
+      [columns]="columns()"
+      [getSubRows]="getSubRows"
+      [expandButtonLabel]="{ open: 'Näita', close: 'Peida' }"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+    <ng-template #statusCell let-ctx>
+      <tedi-status-badge
+        [color]="statusColor[ctx.row.original.status]"
+        [text]="ctx.row.original.status"
+      />
+    </ng-template>
+  `,
+})
+class CollapsibleRowsLabeledToggleStoryHostComponent extends TableStoryHostBase {
+  data = collapsiblePeople;
+  pagination = DEFAULT_PAGINATION;
+  statusColor = certStatusColor;
+  getSubRows = (row: CollapsibleRecord) => row.subRows;
+  statusCellTpl =
+    viewChild<TemplateRef<CellContext<CollapsibleRecord, unknown>>>(
+      "statusCell",
+    );
+
+  columns = computed<TediColumnDef<CollapsibleRecord>[]>(() => [
+    { id: "name", header: "Isik", accessorKey: "name" },
+    { id: "age", header: "Vanus", accessorKey: "age" },
+    { id: "visits", header: "Külastuste arv", accessorKey: "visits" },
+    {
+      id: "status",
+      header: "Tõendi staatus",
+      accessorKey: "status",
+      cell: this.statusCellTpl() ?? "",
+    } as TediColumnDef<CollapsibleRecord>,
+  ]);
+}
+
+export const CollapsibleRowsLabeledToggle: Story = {
+  render: (args) => ({
+    moduleMetadata: {
+      imports: [CollapsibleRowsLabeledToggleStoryHostComponent],
+    },
+    props: args,
+    template: `<tedi-collapsible-rows-labeled-toggle-story ${argsToTemplate(
+      args,
+    )} />`,
+  }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- expandButtonLabel switches the expand toggle from an icon-only
+  button to a visible text + chevron button. Pass a single string to
+  use one label for both states, or { open, close } for distinct
+  collapsed / expanded labels (open = shown while collapsed). The
+  expand column widens automatically to fit the label.
+  expandButtonVariant can still override the chevron style when no
+  label is set (icon-only mode).
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [expandButtonLabel]="{ open: 'Näita', close: 'Peida' }"
 />`,
       },
     },
@@ -2062,6 +2466,7 @@ export const CollapsibleRowsRowTrigger: Story = {
       <tedi-status-badge
         [color]="statusColor[ctx.row.original.status]"
         [text]="ctx.row.original.status"
+        [variant]="ctx.row.getIsSelected() ? 'filled-bordered' : 'filled'"
       />
     </ng-template>
   `,
@@ -2108,13 +2513,23 @@ export const SelectableRows: Story = {
         code: `<!-- Default selectionMode is 'multiple' — checkbox per row plus
   a select-all checkbox in the header. Pass a predicate
   (row) => boolean to enableRowSelection to allow only some rows.
+  The status cell reacts to per-row selection via ctx.row.getIsSelected()
+  — bordering the badge while the row is selected.
 -->
 <tedi-table
   [data]="data"
   [columns]="columns"
   [enableRowSelection]="true"
   [pagination]="pagination"
-/>`,
+/>
+
+<ng-template #personStatus let-ctx>
+  <tedi-status-badge
+    [color]="statusColor[ctx.row.original.status]"
+    [text]="ctx.row.original.status"
+    [variant]="ctx.row.getIsSelected() ? 'filled-bordered' : 'filled'"
+  />
+</ng-template>`,
       },
     },
   },
@@ -2141,7 +2556,8 @@ export const SingleSelectableRows: Story = {
         language: "html",
         code: `<!-- selectionMode 'single' renders radios per row, shares one
   HTML name so picking a row auto-deselects siblings, and drops
-  the header select-all control.
+  the header select-all control. The status cell borders its badge
+  while the row is selected via ctx.row.getIsSelected().
 -->
 <tedi-table
   [data]="data"
@@ -2149,7 +2565,15 @@ export const SingleSelectableRows: Story = {
   [enableRowSelection]="true"
   selectionMode="single"
   [pagination]="pagination"
-/>`,
+/>
+
+<ng-template #personStatus let-ctx>
+  <tedi-status-badge
+    [color]="statusColor[ctx.row.original.status]"
+    [text]="ctx.row.original.status"
+    [variant]="ctx.row.getIsSelected() ? 'filled-bordered' : 'filled'"
+  />
+</ng-template>`,
       },
     },
   },
@@ -2169,6 +2593,7 @@ export const SingleSelectableRows: Story = {
       }}
     </p>
     <tedi-table
+      #table
       id="tedi-table-clickable"
       [data]="data"
       [columns]="columns()"
@@ -2192,7 +2617,11 @@ export const SingleSelectableRows: Story = {
       <tedi-status-badge
         [color]="statusColor[ctx.row.original.status]"
         [text]="ctx.row.original.status"
-        [variant]="active()?.id === ctx.row.id ? 'filled-bordered' : 'filled'"
+        [variant]="
+          active()?.id === ctx.row.id || table.hoveredRowId() === ctx.row.id
+            ? 'filled-bordered'
+            : 'filled'
+        "
       />
     </ng-template>
   `,
@@ -2224,7 +2653,7 @@ class ClickableRowsStoryHostComponent extends TableStoryHostBase {
 }
 
 export const ClickableRows: Story = {
-  args: { interactive: true },
+  args: { interactive: true, rowHover: true },
   render: (args) => ({
     moduleMetadata: { imports: [ClickableRowsStoryHostComponent] },
     props: args,
@@ -2236,16 +2665,33 @@ export const ClickableRows: Story = {
         language: "html",
         code: `<!-- [interactive]="true" gives rows role=button, tabindex, and
   keyboard activation. Subscribe to (rowClick) to react to clicks.
-  [activeRowId] highlights the row whose id matches.
+  [activeRowId] highlights the row whose id matches. The status cell
+  borders its badge for the active OR hovered row — read the table's
+  exposed hoveredRowId() signal via a #table template ref. Hover
+  styling is automatic with [interactive]; bind [rowHover] only to
+  override it ([rowHover]="false" suppresses it).
 -->
 <tedi-table
+  #table
   [data]="data"
   [columns]="columns"
   [interactive]="true"
   [activeRowId]="active()?.id"
   (rowClick)="onClick($event)"
   [pagination]="pagination"
-/>`,
+/>
+
+<ng-template #personStatus let-ctx>
+  <tedi-status-badge
+    [color]="statusColor[ctx.row.original.status]"
+    [text]="ctx.row.original.status"
+    [variant]="
+      active()?.id === ctx.row.id || table.hoveredRowId() === ctx.row.id
+        ? 'filled-bordered'
+        : 'filled'
+    "
+  />
+</ng-template>`,
       },
     },
   },

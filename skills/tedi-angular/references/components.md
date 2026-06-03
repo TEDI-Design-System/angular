@@ -63,7 +63,7 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 **Slots:** default
 
 ### CollapseButton
-**Selector:** `tedi-collapse-button`
+**Selector:** `button[tedi-collapse-button]` — apply to a native `<button>` (the button *is* the host; do not nest a button).
 
 Headless chevron toggle extracted from `Collapse` for cases where you only need the toggle affordance (e.g. inside a table row, accordion, or custom disclosure). Emits `(openChange)` and renders a chevron that animates with `open`.
 
@@ -82,9 +82,9 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 - `openChange: boolean`
 
 ```html
-<tedi-collapse-button [(open)]="expanded" ariaControls="panel-1" />
-<tedi-collapse-button [open]="expanded" [hideText]="true" arrowType="secondary"
-  ariaLabel="Toggle row" (openChange)="expanded = $event" />
+<button tedi-collapse-button [(open)]="expanded" ariaControls="panel-1"></button>
+<button tedi-collapse-button [open]="expanded" [hideText]="true" arrowType="secondary"
+  ariaLabel="Toggle row" (openChange)="expanded = $event"></button>
 ```
 
 ### InfoButton
@@ -250,6 +250,7 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `borderless: boolean = false`
 - `stickyFirstColumn: boolean = false`
 - `stickyHeader: boolean = false`
+- `fixedLayout: boolean = false` — `table-layout: fixed`; makes column `size`/`minSize`/`maxSize` authoritative (content wraps instead of stretching the column). Required for column width caps to hold.
 - `maxHeight: number | string` — wraps the table in a scrollable container (pair with `stickyHeader`)
 - `activeRowId: string` — highlights one row
 - `rowHover: boolean` — force hover styling on/off (default tracks `interactive`)
@@ -258,11 +259,13 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `selectionMode: "multiple" | "single" = "multiple"` — `multiple` shows checkboxes + select-all; `single` shows radios (no select-all)
 - `renderSubComponent: TemplateRef<{ $implicit: Row<TData> }>` — expanded-row content template; auto-renders an expand column
 - `getRowCanExpand: (row) => boolean` — gate which rows expand
-- `expandTrigger: "button" | "row" = "button"` — `row` lets a click anywhere on the row toggle expansion
+- `expandTrigger: "button" | "row" = "button"` — `row` lets a click anywhere on the row toggle expansion. The chevron uses the bordered `secondary` style regardless; change it via `expandButtonVariant`.
+- `expandButtonVariant: "default" | "secondary"` — override the expand toggle's arrow style. Defaults to the bordered `secondary` style; set `default` for the neutral (borderless) chevron. Only affects the icon-only button (i.e. when `expandButtonLabel` is unset).
+- `expandButtonLabel: string | { open: string; close: string }` — render a visible label next to the chevron instead of an icon-only button. A single string is used for both states; the `{ open, close }` form sets distinct collapsed (`open`) / expanded (`close`) labels. When unset the button stays icon-only with the translated expand/collapse aria-label.
 - `getSubRows: (row) => TData[] | undefined` — hierarchical / tree rows
 - `enableColumnFilters: boolean = false` — force TanStack's filter machinery (auto-on when any column sets `filterable`)
-- `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune.
-- `paginationTop: boolean | TablePaginationOptions` — opt-in top paginator; shares state with bottom but has independent visual config. Requires `pagination` to be truthy.
+- `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`).
+- `paginationTop: boolean | TablePaginationOptions` — opt-in top paginator; shares page / page-size state with bottom but has independent visual config (its own arrow + `hide*` settings). Requires `pagination` to be truthy.
 - `manualPagination: boolean = false` — server-side pagination; supply `pageCount` or `rowCount`
 - `manualSorting: boolean = false`
 - `manualFiltering: boolean = false`
@@ -286,6 +289,7 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `filterable: boolean | { clearOnClose?: boolean }` — opt into the built-in filter popover (icon `filter_alt`). Requires `filterTemplate`.
 - `filterTemplate: TemplateRef<TediTableFilterContext>` — UI rendered inside the filter popover. The context exposes `value`, `setValue`, `apply()`, `clear()`, and `column`. Apply/Clear footer buttons are wired automatically.
 - `rowSpan: number | ((info: CellContext) => number)` — body-level row spanning. Return `>1` to emit `rowspan="N"`; return `0` to skip the `<td>`.
+- `size` / `minSize` / `maxSize` (TanStack) — rendered as `width` / `min-width` / `max-width` (px) on the column's cells, applied only when set. **Authoritative only under `[fixedLayout]="true"`** — with the default auto layout they're hints and content can stretch the column past them. Under fixed layout, leave **at least one column unsized** so it absorbs the leftover space; if every column is sized, `table-layout: fixed` scales them all up to fill the table's width.
 - `meta: TableColumnMeta` — `{ label?, align?, vAlign? }` for accessible label + cell alignment.
 
 **Per-column sorting (`sortingFn`)** — inherited from TanStack `ColumnDef`:
@@ -293,6 +297,18 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - Custom: `(rowA, rowB, columnId) => number`. Use `row.getValue(columnId)` to read cell values.
 
 **Cell rendering:** `cell` accepts a string property key, a `(info) => value` accessor, a `TemplateRef`, or a `ComponentType` — all rendered via TanStack's `FlexRenderDirective`.
+
+**Reacting to row state in cell templates:** a `TemplateRef` cell receives the TanStack `CellContext` (commonly aliased `let-ctx`), so `ctx.row` exposes the row's live state — `ctx.row.getIsSelected()`, `ctx.row.getIsExpanded()`, `ctx.row.original`, `ctx.row.id` — and the cell re-renders when that state changes. Use it to restyle cell content per row, e.g. border a status badge while its row is selected (compare against `activeRowId` for interactive/clickable rows):
+
+```html
+<ng-template #statusCell let-ctx>
+  <tedi-status-badge
+    [color]="statusColor[ctx.row.original.status]"
+    [text]="ctx.row.original.status"
+    [variant]="ctx.row.getIsSelected() ? 'filled-bordered' : 'filled'"
+  />
+</ng-template>
+```
 
 **Helpers:** `groupRowSpan(rows, keyFn)` — produces a `rowSpan` callback that auto-collapses consecutive equal keys. Pass the *currently-rendered* row set (`table.getRowModel().rows`) so spans operate on post-filter/sort rows.
 
@@ -959,7 +975,11 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 - `labels: Partial<PaginationLabels>` — override any of the default text/aria labels
 - `background: "white" | "transparent" = "white"` — `transparent` removes the surface fill + divider for use on non-white containers
 - `dividerPosition: "top" | "bottom" | "none" = "top"` — where the divider line sits (or removed entirely)
-- `disableArrowsAtBoundary: boolean = false` — keep prev/next arrows visible (but disabled) at the first/last page instead of hiding them
+- `disableArrowsAtBoundary: boolean = false` — keep the prev/next button **rendered** (as a disabled `tedi-button`) at the first/last page instead of removing it from the DOM. By default the boundary arrow is removed entirely so the pager looks balanced.
+- `arrowVariant: ButtonVariant = "neutral"` — variant for the prev/next buttons; accepts any `tedi-button` variant (`primary`, `secondary`, `danger`, `success`, `neutral-inverted`, etc.). The arrows are rendered as actual `tedi-button`s under the hood, so all variant styling/states come for free.
+- `showArrowLabels: boolean = false` — render the `previous` / `next` translated labels as visible button text next to the icon. When `false` (default) the buttons are icon-only and the labels are exposed only via `aria-label`. Use the `labels` input to override the wording (e.g. shorter `"Previous"` instead of `"Previous page"`).
+- `previousIcon: string = "arrow_back"` — Material Symbols icon name for the previous-page arrow.
+- `nextIcon: string = "arrow_forward"` — Material Symbols icon name for the next-page arrow. Pair with `previousIcon` to swap in chevrons (`chevron_left` / `chevron_right`) or any other arrow style.
 - `showModalTitle: boolean = true` — show a heading inside the mobile picker modals; set `false` to hide
 - `hideResults: PaginationVisibility = false` — `true`/`false` or a breakpoint name (`"sm"`–`"xxl"`) to hide below that breakpoint
 - `hidePageSize: PaginationVisibility = false`
@@ -1006,6 +1026,19 @@ Custom results slot:
 <tedi-pagination [pageCount]="10" [(page)]="page" [totalItems]="1000">
   <span tediPaginationResults>1000+ tulemust</span>
 </tedi-pagination>
+```
+
+Render the prev/next arrows as labelled primary buttons with custom icons:
+
+```html
+<tedi-pagination
+  [pageCount]="10"
+  [(page)]="page"
+  arrowVariant="primary"
+  [showArrowLabels]="true"
+  previousIcon="chevron_left"
+  nextIcon="chevron_right"
+/>
 ```
 
 ### HorizontalStepper
@@ -1340,8 +1373,10 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 
 ### Pagination
 **Selector:** `tedi-pagination`
-- Models: `page: number = 1`, `pageSize: number = 50`
-- `pageSizeOptions: number[]`, `length: number`
+- Models: `page: number = 1`, `pageSize: number | undefined`
+- Required: `pageCount: number`
+- `pageSizeOptions: number[]`, `totalItems: number`, `boundaryCount`, `siblingCount`
+- Arrows: `arrowVariant: ButtonVariant`, `showArrowLabels: boolean`, `previousIcon`/`nextIcon: string`, `disableArrowsAtBoundary: boolean`
 
 ### Tabs
 **Selector:** `tedi-tabs`

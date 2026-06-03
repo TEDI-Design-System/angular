@@ -94,6 +94,22 @@
   vertical-align: bottom;
 }
 
+// Reserve the icon-only toggle's height on every expand cell — including the
+// empty ones on non-expandable rows / sub-rows — so all rows in a collapsible
+// table share the taller height (Figma: equal row heights). Label-mode toggles
+// already fit the regular row height, so the reservation is skipped there.
+.tedi-table__expand-toggle {
+  // Block-level flex (not inline-flex) so the empty spacer on non-expandable
+  // rows doesn't pick up the cell's line-box baseline gap — that mismatch made
+  // placeholder rows a few px taller than button rows.
+  display: flex;
+  align-items: center;
+
+  &--icon-only {
+    min-height: var(--button-sm-icon-size);
+  }
+}
+
 .tedi-table__cell--placeholder {
   padding: var(--tedi-dimensions-14) var(--table-data-padding-x);
   color: var(--general-text-secondary);
@@ -293,6 +309,12 @@
       inset -1px 0 0 var(--table-border),
       inset 0 -1px 0 var(--table-border-th);
   }
+}
+
+// `fixedLayout` makes column size / minSize / maxSize authoritative — content
+// wraps within the allotted width instead of stretching the column.
+.tedi-table--fixed-layout .tedi-table__table {
+  table-layout: fixed;
 }
 
 // Drag-and-drop: keep widths stable during drag (CDK preview otherwise
