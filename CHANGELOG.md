@@ -1,3 +1,10 @@
+# [6.5.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0...angular-6.5.0-rc.1) (2026-06-03)
+
+
+### Features
+
+* **pagination:** tedi-ready component [#446](https://github.com/TEDI-Design-System/angular/issues/446) ([#447](https://github.com/TEDI-Design-System/angular/issues/447)) ([47af78b](https://github.com/TEDI-Design-System/angular/commit/47af78bcaf990aa874a9f9812d60c53e72352dd3))
+
 # [6.4.0](https://github.com/TEDI-Design-System/angular/compare/angular-6.3.1...angular-6.4.0) (2026-05-28)
 
 
