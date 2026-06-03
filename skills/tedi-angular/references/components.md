@@ -62,6 +62,31 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 - `arrowType: ArrowType = "default"`
 **Slots:** default
 
+### CollapseButton
+**Selector:** `tedi-collapse-button`
+
+Headless chevron toggle extracted from `Collapse` for cases where you only need the toggle affordance (e.g. inside a table row, accordion, or custom disclosure). Emits `(openChange)` and renders a chevron that animates with `open`.
+
+**Inputs:**
+- `open: boolean = false` — current open state; pair with `(openChange)`
+- `openText: string` — label when collapsed (falls back to translated `"open"`)
+- `closeText: string` — label when expanded (falls back to translated `"close"`)
+- `hideText: boolean = false` — icon-only mode; `ariaLabel` becomes the accessible name
+- `arrowType: "default" | "secondary" = "default"` — `"secondary"` paints the bordered style (only effective in icon-only mode)
+- `size: "default" | "small" = "default"`
+- `inverted: boolean = false` — light text/icon for dark backgrounds (ignored when `arrowType="secondary"`)
+- `ariaControls: string` — id of the disclosed region
+- `ariaLabel: string` — required when `hideText` is true
+- `id: string`
+**Outputs:**
+- `openChange: boolean`
+
+```html
+<tedi-collapse-button [(open)]="expanded" ariaControls="panel-1" />
+<tedi-collapse-button [open]="expanded" [hideText]="true" arrowType="secondary"
+  ariaLabel="Toggle row" (openChange)="expanded = $event" />
+```
+
 ### InfoButton
 **Selector:** `button[tedi-info-button]`
 **Inputs:**
@@ -209,57 +234,186 @@ Composed of sub-components:
 
 ### Table
 **Selector:** `tedi-table` (generic `<TData>`)
-**Data pipeline:** `@tanstack/angular-table`
-**Inputs (signal):**
-- `data: TData[]` (required)
-- `columns: TediColumnDef<TData>[]` (required) — TanStack `ColumnDef` extended with `rowSpan`
-- `size: 'medium' | 'small' = 'medium'`
-- `caption: TemplateRef | string`
-- `striped`, `verticalBorders`, `borderless`, `stickyFirstColumn`, `stickyHeader`, `rowHover` — booleans
-- `maxHeight: number | string`
-- `activeRowId: string` — adds `aria-current="true"` to that row
-- `interactive: boolean` — adds `role="button"`, tabindex + Enter/Space activation; subscribe to `rowClick`
-- `enableRowSelection: boolean | (row) => boolean`
-- `enableColumnFilters: boolean`
-- `renderSubComponent: TemplateRef<{ $implicit: Row<TData> }>` — expanded row content
-- `getRowCanExpand`, `getSubRows` — predicates
-- `pagination: boolean | { pageSize?, pageSizeOptions? }`
-- `manualPagination`, `manualSorting`, `manualFiltering`, `pageCount`, `rowCount`
-- `state: Partial<TableState>` — controlled
-- `defaultState: Partial<TableState>` — initial uncontrolled
-- `persist: { key, storage?, include? }` — localStorage backed
-- `placeholder: TemplateRef | string`, `placeholderRole: 'alert' | 'status'`
 
-**Outputs:** `stateChange: TableState`, `rowClick: Row<TData>`
+Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.com/table). Columns are configured via `TediColumnDef<TData>[]` objects (no `*tediCellDef` directives). Owns sorting, filtering, pagination, row selection, expansion, column visibility/order, and row/column drag-and-drop. State is uncontrolled by default; opt into controlled mode via `state` + `(stateChange)`, defaulted via `defaultState`, or persisted to storage via `persist`.
+
+**Peer dependency:** add `@tanstack/angular-table` to your app (it is a runtime dependency of `@tedi-design-system/angular`).
+
+**Inputs:**
+- `data: TData[]` (required)
+- `columns: TediColumnDef<TData>[]` (required)
+- `id: string` — stable id used to prefix synthetic ids; auto-generated when omitted
+- `size: "medium" | "small" = "medium"`
+- `caption: TemplateRef | string` — caption above the table
+- `striped: boolean = false`
+- `verticalBorders: boolean = false`
+- `borderless: boolean = false`
+- `stickyFirstColumn: boolean = false`
+- `stickyHeader: boolean = false`
+- `maxHeight: number | string` — wraps the table in a scrollable container (pair with `stickyHeader`)
+- `activeRowId: string` — highlights one row
+- `rowHover: boolean` — force hover styling on/off (default tracks `interactive`)
+- `interactive: boolean = false` — adds `role="button"`, hover/active styles, and keyboard activation to rows; subscribe to `(rowClick)`
+- `enableRowSelection: boolean | ((row) => boolean)` — opt-in selection; auto-renders a selection column
+- `selectionMode: "multiple" | "single" = "multiple"` — `multiple` shows checkboxes + select-all; `single` shows radios (no select-all)
+- `renderSubComponent: TemplateRef<{ $implicit: Row<TData> }>` — expanded-row content template; auto-renders an expand column
+- `getRowCanExpand: (row) => boolean` — gate which rows expand
+- `expandTrigger: "button" | "row" = "button"` — `row` lets a click anywhere on the row toggle expansion
+- `getSubRows: (row) => TData[] | undefined` — hierarchical / tree rows
+- `enableColumnFilters: boolean = false` — force TanStack's filter machinery (auto-on when any column sets `filterable`)
+- `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune.
+- `paginationTop: boolean | TablePaginationOptions` — opt-in top paginator; shares state with bottom but has independent visual config. Requires `pagination` to be truthy.
+- `manualPagination: boolean = false` — server-side pagination; supply `pageCount` or `rowCount`
+- `manualSorting: boolean = false`
+- `manualFiltering: boolean = false`
+- `pageCount: number` — total pages in manual mode
+- `rowCount: number` — total rows in manual mode
+- `state: Partial<TableState>` — controlled state
+- `defaultState: Partial<TableState>` — initial uncontrolled state
+- `persist: TablePersistOptions` — `{ key, storage?, include? }` to persist state to `localStorage` (defaults persist user-preference slices: `columnVisibility`, `columnOrder`, `rowOrder`, `columnSizing`)
+- `placeholder: TemplateRef | string` — empty-state content (defaults to translated `table.no-data`)
+- `placeholderRole: "alert" | "status"`
+- `draggableRows: boolean = false` — reorder rows via CDK drag-drop; emits `(rowDrop)` with indices normalised to the source `data` array
+- `draggableColumns: boolean = false` — reorder columns via header drag; updates internal `columnOrder` state
+
+**Outputs:**
+- `stateChange: TableState`
+- `rowClick: Row<TData>` — only fires when `interactive` is true
+- `rowDrop: CdkDragDrop<TData[]>` — `previousIndex`/`currentIndex` are source-array positions; pass through `moveItemInArray(data, prev, curr)` and rebind `[data]`
+
+**Column definition (`TediColumnDef<TData>`):** extends TanStack's `ColumnDef` with Angular-specific fields:
+- `sortable: boolean` — opt the column into the built-in sort affordance (string `header` only). Pair with `sortingFn` to override the comparator. For custom UIs, pass a `TemplateRef` for `header` and call `column.toggleSorting()` yourself.
+- `filterable: boolean | { clearOnClose?: boolean }` — opt into the built-in filter popover (icon `filter_alt`). Requires `filterTemplate`.
+- `filterTemplate: TemplateRef<TediTableFilterContext>` — UI rendered inside the filter popover. The context exposes `value`, `setValue`, `apply()`, `clear()`, and `column`. Apply/Clear footer buttons are wired automatically.
+- `rowSpan: number | ((info: CellContext) => number)` — body-level row spanning. Return `>1` to emit `rowspan="N"`; return `0` to skip the `<td>`.
+- `meta: TableColumnMeta` — `{ label?, align?, vAlign? }` for accessible label + cell alignment.
 
 **Per-column sorting (`sortingFn`)** — inherited from TanStack `ColumnDef`:
 - Built-ins: `'alphanumeric'`, `'alphanumericCaseSensitive'`, `'text'`, `'textCaseSensitive'`, `'datetime'`, `'basic'`, `'auto'` (default).
-- Custom: `(rowA, rowB, columnId) => number` — comparator for ascending order; the table flips the sign on descending sort. Use `row.getValue(columnId)` to read cell values without touching `row.original`.
+- Custom: `(rowA, rowB, columnId) => number`. Use `row.getValue(columnId)` to read cell values.
 
-```ts
-const columns: TediColumnDef<Person>[] = [
-  { id: 'name', accessorKey: 'name', sortingFn: (a, b, id) =>
-      a.getValue<string>(id).localeCompare(b.getValue<string>(id), 'et') },
-  { id: 'salary', accessorKey: 'salary', sortingFn: 'alphanumeric' },
+**Cell rendering:** `cell` accepts a string property key, a `(info) => value` accessor, a `TemplateRef`, or a `ComponentType` — all rendered via TanStack's `FlexRenderDirective`.
+
+**Helpers:** `groupRowSpan(rows, keyFn)` — produces a `rowSpan` callback that auto-collapses consecutive equal keys. Pass the *currently-rendered* row set (`table.getRowModel().rows`) so spans operate on post-filter/sort rows.
+
+```typescript
+import {
+  TediTableComponent,
+  type TediColumnDef,
+  groupRowSpan,
+} from '@tedi-design-system/angular/tedi';
+
+interface Person { id: string; name: string; role: string; salary: number; }
+
+columns: TediColumnDef<Person>[] = [
+  { accessorKey: 'name', header: 'Name', sortable: true },
+  { accessorKey: 'role', header: 'Role', meta: { align: 'left' } },
+  {
+    accessorKey: 'salary',
+    header: 'Salary',
+    meta: { align: 'right' },
+    cell: ({ getValue }) => `${getValue<number>()} €`,
+  },
 ];
 ```
 
-**Companion components:** `<tedi-table-toolbar>`, `<tedi-table-columns-menu>`, `[tedi-table-header-button]`
-
-**Helpers:** `groupRowSpan(rows, keyFn)` — produce a `rowSpan` callback that auto-collapses consecutive equal keys.
-
 ```html
 <tedi-table
-  [data]="people"
-  [columns]="cols"
-  [pagination]="{ pageSize: 10 }"
+  [data]="people()"
+  [columns]="columns"
+  [pagination]="{ pageSize: 25, pageSizeOptions: [10, 25, 50] }"
   [enableRowSelection]="true"
-  (stateChange)="onState($event)"
+  [interactive]="true"
+  (rowClick)="open($event.original)"
 >
   <tedi-table-toolbar>
     <tedi-table-columns-menu />
   </tedi-table-toolbar>
 </tedi-table>
+```
+
+Server-side pagination + persisted view preferences:
+
+```html
+<tedi-table
+  [data]="rows()"
+  [columns]="columns"
+  [manualPagination]="true"
+  [manualSorting]="true"
+  [pageCount]="pageCount()"
+  [pagination]="true"
+  [state]="{ pagination: page(), sorting: sorting() }"
+  (stateChange)="onStateChange($event)"
+  [persist]="{ key: 'tedi.tables.invoices' }"
+/>
+```
+
+Expandable rows + custom filter template:
+
+```html
+<ng-template #expanded let-row>
+  <tedi-text-group type="horizontal" labelWidth="160px">
+    <tedi-text-group-label>Email</tedi-text-group-label>
+    <tedi-text-group-value>{{ row.original.email }}</tedi-text-group-value>
+  </tedi-text-group>
+</ng-template>
+
+<ng-template #roleFilter let-ctx>
+  <tedi-form-field>
+    <input tedi-text-field [ngModel]="ctx.value ?? ''"
+      (ngModelChange)="ctx.setValue($event)" (keydown.enter)="ctx.apply()" />
+  </tedi-form-field>
+</ng-template>
+
+<tedi-table
+  [data]="rows()"
+  [columns]="columns"
+  [renderSubComponent]="expanded"
+  expandTrigger="row"
+/>
+```
+
+### TableToolbar
+**Selector:** `tedi-table-toolbar`
+
+Layout wrapper that sits above a `<tedi-table>` for filter chips, search inputs, and action buttons. No inputs — pure CSS container.
+
+```html
+<tedi-table-toolbar>
+  <input tedi-text-field placeholder="Search" [(value)]="query" />
+  <tedi-filter text="Status" [options]="statusOptions" [(value)]="status" />
+  <tedi-table-columns-menu />
+</tedi-table-toolbar>
+<tedi-table [data]="rows()" [columns]="columns" />
+```
+
+### TableColumnsMenu
+**Selector:** `tedi-table-columns-menu`
+
+Dropdown that lets the user toggle column visibility for the nearest ancestor `<tedi-table>` (uses `TEDI_TABLE_CONTEXT`). Must render as a descendant of `<tedi-table>` — picks up the table via DI.
+
+**Inputs:**
+- `triggerLabel: string` — overrides the translated `table.columns` label
+
+### TableHeaderButton
+**Selector:** `button[tedi-table-header-button]`
+
+Icon button used inside custom column header templates (e.g., combined sort + filter triggers). Picks up the column's selected/active state visually.
+
+**Inputs:**
+- `icon: string` (required) — Material Symbols icon name
+- `filled: boolean = false` — render the icon's filled variant
+- `selected: boolean = false` — brand-coloured active state
+- `disabled: boolean = false`
+- `iconSize: IconSize = 18`
+- `ariaLabel: string` — required for icon-only usage
+
+```html
+<ng-template #header let-ctx>
+  <button tedi-table-header-button icon="filter_alt"
+    [selected]="ctx.column.getIsFiltered()" ariaLabel="Filter">
+  </button>
+</ng-template>
 ```
 
 ## Filter
@@ -1224,3 +1378,5 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 ### TableStyles
 **Selector:** `tedi-table-styles`
 - `size: "default" | "small"`, `verticalBorders: boolean`, `striped: boolean`, `clickable: boolean`
+
+Visual-only wrapper that applies TEDI table styles to a hand-rolled `<table>`. Prefer the TEDI-Ready `<tedi-table>` (with TanStack-powered sorting / filtering / pagination) for new code; reach for `tedi-table-styles` only when you specifically need to drive the markup yourself.
