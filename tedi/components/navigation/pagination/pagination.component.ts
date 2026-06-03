@@ -12,7 +12,7 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { ButtonComponent } from "../../buttons/button/button.component";
+import { ButtonComponent, ButtonVariant } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { SelectComponent } from "../../form/select/select.component";
 import { TediTranslationService } from "../../../services/translation/translation.service";
@@ -129,12 +129,40 @@ export class PaginationComponent {
   readonly hideArrows = input<PaginationVisibility>(false);
 
   /**
-   * Keep prev/next arrows visible (but disabled) at the first/last page
-   * instead of removing them from layout. Useful when the pager should
+   * Keep prev/next arrows rendered (but disabled) at the first/last page
+   * instead of removing them from the DOM. Useful when the pager should
    * have a stable footprint regardless of position.
    * @default false
    */
   readonly disableArrowsAtBoundary = input<boolean>(false);
+
+  /**
+   * Variant for the prev/next arrow buttons — accepts any `tedi-button`
+   * variant. Defaults to `neutral` for icon-only arrows; pair with
+   * `showArrowLabels` to render a regular button (e.g. `primary` with text).
+   * @default 'neutral'
+   */
+  readonly arrowVariant = input<ButtonVariant>("neutral");
+
+  /**
+   * Render the `previous` / `next` labels as visible button text next to
+   * the arrow icon. When false (default) the buttons are icon-only and the
+   * labels are exposed only via `aria-label`.
+   * @default false
+   */
+  readonly showArrowLabels = input<boolean>(false);
+
+  /**
+   * Material Symbols icon name for the previous-page arrow.
+   * @default 'arrow_back'
+   */
+  readonly previousIcon = input<string>("arrow_back");
+
+  /**
+   * Material Symbols icon name for the next-page arrow.
+   * @default 'arrow_forward'
+   */
+  readonly nextIcon = input<string>("arrow_forward");
 
   /**
    * Show a heading inside the mobile page-jump / page-size picker modals.
@@ -170,9 +198,6 @@ export class PaginationComponent {
     if (!this.showResults()) classes.push("tedi-pagination--no-results");
     if (!this.showPageSizeSelect()) classes.push("tedi-pagination--no-page-size");
     if (!this.showArrows()) classes.push("tedi-pagination--no-arrows");
-    if (this.disableArrowsAtBoundary()) {
-      classes.push("tedi-pagination--keep-disabled-arrows");
-    }
     return classes.join(" ");
   });
 
@@ -265,10 +290,31 @@ export class PaginationComponent {
 
   /**
    * Whether the prev/next arrows should render at all. When false they're
-   * removed from the DOM. Boundary state (first / last page) is handled via
-   * `disableArrowsAtBoundary` + the `--keep-disabled` modifier class.
+   * removed from the DOM. At the first/last page, individual arrows are
+   * additionally gated by `disableArrowsAtBoundary` — see `showPrevious`
+   * / `showNext`.
    */
   protected readonly showArrows = computed(() => !this.areArrowsHidden());
+
+  /**
+   * Whether the previous-arrow button is rendered. Removed at the first
+   * page unless `disableArrowsAtBoundary` keeps it as a disabled button.
+   */
+  protected readonly showPrevious = computed(
+    () =>
+      this.showArrows() &&
+      (this.disableArrowsAtBoundary() || !this.previousItem().disabled),
+  );
+
+  /**
+   * Whether the next-arrow button is rendered. Removed at the last page
+   * unless `disableArrowsAtBoundary` keeps it as a disabled button.
+   */
+  protected readonly showNext = computed(
+    () =>
+      this.showArrows() &&
+      (this.disableArrowsAtBoundary() || !this.nextItem().disabled),
+  );
 
   private resolveVisibility(value: PaginationVisibility): boolean {
     if (typeof value === "boolean") return value;

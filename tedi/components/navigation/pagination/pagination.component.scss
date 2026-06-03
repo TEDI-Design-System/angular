@@ -245,34 +245,6 @@
     }
   }
 
-  &__nav-button.tedi-button {
-    position: relative;
-    width: var(--pagination-button-size);
-    min-width: var(--pagination-button-size);
-    height: var(--pagination-button-size);
-    padding: 0;
-    color: var(--general-text-brand);
-
-    tedi-icon {
-      font-size: var(--button-icon-inner-icon-only-size) !important;
-    }
-
-    &::before {
-      position: absolute;
-      inset: -4px;
-      content: "";
-    }
-
-    &[disabled] {
-      color: transparent;
-      pointer-events: none;
-    }
-
-    .tedi-pagination--keep-disabled-arrows &[disabled] {
-      color: var(--button-main-neutral-text-disabled);
-    }
-  }
-
   &__nav-button--previous {
     @include breakpoints.media-breakpoint-down(md) {
       justify-self: end;

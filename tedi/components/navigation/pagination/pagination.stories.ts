@@ -115,12 +115,61 @@ export default {
     },
     disableArrowsAtBoundary: {
       description:
-        "Keep prev/next arrows visible (but disabled) at the first/last page instead of hiding them.",
+        "Keep the prev/next button rendered (but disabled) at the first/last page instead of removing it from the DOM.",
       control: "boolean",
       table: {
         category: "inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
+      },
+    },
+    arrowVariant: {
+      description:
+        "Variant for the prev/next arrow buttons. Accepts any `tedi-button` variant.",
+      control: { type: "select" },
+      options: [
+        "primary",
+        "secondary",
+        "neutral",
+        "success",
+        "danger",
+        "danger-neutral",
+        "primary-inverted",
+        "secondary-inverted",
+        "neutral-inverted",
+      ],
+      table: {
+        category: "inputs",
+        type: { summary: "ButtonVariant" },
+        defaultValue: { summary: "neutral" },
+      },
+    },
+    showArrowLabels: {
+      description:
+        "Render the `previous` / `next` labels as visible text next to the arrow icon. When false, the buttons are icon-only.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    previousIcon: {
+      description: "Material Symbols icon name for the previous-page arrow.",
+      control: "text",
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+        defaultValue: { summary: "arrow_back" },
+      },
+    },
+    nextIcon: {
+      description: "Material Symbols icon name for the next-page arrow.",
+      control: "text",
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+        defaultValue: { summary: "arrow_forward" },
       },
     },
     hideArrows: {
@@ -403,7 +452,78 @@ export const DisabledBoundaryArrows: Story = {
     docs: {
       description: {
         story:
-          "By default the prev/next arrow disappears at the first/last page so the pager looks balanced. Set `disableArrowsAtBoundary=true` to keep them visibly disabled instead — useful when a stable footprint matters more than a clean look.",
+          "By default the prev/next button is removed from the DOM at the first/last page so the pager looks balanced. Set `disableArrowsAtBoundary=true` to keep it rendered as a disabled button instead — useful when a stable footprint matters more than a clean look.",
+      },
+    },
+  },
+};
+
+export const ArrowsWithLabels: Story = {
+  args: {
+    pageCount: 10,
+    page: 3,
+    totalItems: 97,
+    pageSize: 10,
+    pageSizeOptions: [10, 25, 50, 100],
+    showArrowLabels: true,
+  },
+  render: (args) => ({
+    props: args,
+    template: `<tedi-pagination ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Set `showArrowLabels=true` to render the `previous` / `next` translation labels as visible text next to the icon. Use the `labels` input to override the wording (e.g. \"Previous\" instead of \"Previous page\") when shorter button text is preferred.",
+      },
+    },
+  },
+};
+
+export const CustomArrowIcons: Story = {
+  args: {
+    pageCount: 10,
+    page: 3,
+    totalItems: 97,
+    pageSize: 10,
+    pageSizeOptions: [10, 25, 50, 100],
+    previousIcon: "chevron_left",
+    nextIcon: "chevron_right",
+  },
+  render: (args) => ({
+    props: args,
+    template: `<tedi-pagination ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Override the default `arrow_back` / `arrow_forward` Material Symbols icons via `previousIcon` and `nextIcon`. Useful when the surrounding design system uses a different arrow style (chevrons, double arrows, etc.).",
+      },
+    },
+  },
+};
+
+export const ArrowsPrimaryVariant: Story = {
+  args: {
+    pageCount: 10,
+    page: 3,
+    totalItems: 97,
+    pageSize: 10,
+    pageSizeOptions: [10, 25, 50, 100],
+    arrowVariant: "primary",
+    showArrowLabels: true,
+  },
+  render: (args) => ({
+    props: args,
+    template: `<tedi-pagination ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Use `arrowVariant` to apply any `tedi-button` variant to the prev/next buttons. Pair with `showArrowLabels` to render a regular labelled button — useful when the pager needs to read as a primary navigation action rather than a subtle icon-only control.",
       },
     },
   },

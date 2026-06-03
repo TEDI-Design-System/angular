@@ -732,7 +732,11 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `labels: Partial<PaginationLabels>` — override any of the default text/aria labels
 - `background: "white" | "transparent" = "white"` — `transparent` removes the surface fill + divider for use on non-white containers
 - `dividerPosition: "top" | "bottom" | "none" = "top"` — where the divider line sits (or removed entirely)
-- `disableArrowsAtBoundary: boolean = false` — keep prev/next arrows visible (but disabled) at the first/last page instead of hiding them
+- `disableArrowsAtBoundary: boolean = false` — keep the prev/next button **rendered** (as a disabled `tedi-button`) at the first/last page instead of removing it from the DOM. By default the boundary arrow is removed entirely so the pager looks balanced.
+- `arrowVariant: ButtonVariant = "neutral"` — variant for the prev/next buttons; accepts any `tedi-button` variant (`primary`, `secondary`, `danger`, `success`, `neutral-inverted`, etc.). The arrows are rendered as actual `tedi-button`s under the hood, so all variant styling/states come for free.
+- `showArrowLabels: boolean = false` — render the `previous` / `next` translated labels as visible button text next to the icon. When `false` (default) the buttons are icon-only and the labels are exposed only via `aria-label`. Use the `labels` input to override the wording (e.g. shorter `"Previous"` instead of `"Previous page"`).
+- `previousIcon: string = "arrow_back"` — Material Symbols icon name for the previous-page arrow.
+- `nextIcon: string = "arrow_forward"` — Material Symbols icon name for the next-page arrow. Pair with `previousIcon` to swap in chevrons (`chevron_left` / `chevron_right`) or any other arrow style.
 - `showModalTitle: boolean = true` — show a heading inside the mobile picker modals; set `false` to hide
 - `hideResults: PaginationVisibility = false` — `true`/`false` or a breakpoint name (`"sm"`–`"xxl"`) to hide below that breakpoint
 - `hidePageSize: PaginationVisibility = false`
@@ -779,6 +783,19 @@ Custom results slot:
 <tedi-pagination [pageCount]="10" [(page)]="page" [totalItems]="1000">
   <span tediPaginationResults>1000+ tulemust</span>
 </tedi-pagination>
+```
+
+Render the prev/next arrows as labelled primary buttons with custom icons:
+
+```html
+<tedi-pagination
+  [pageCount]="10"
+  [(page)]="page"
+  arrowVariant="primary"
+  [showArrowLabels]="true"
+  previousIcon="chevron_left"
+  nextIcon="chevron_right"
+/>
 ```
 
 ### HorizontalStepper
@@ -1113,8 +1130,10 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 
 ### Pagination
 **Selector:** `tedi-pagination`
-- Models: `page: number = 1`, `pageSize: number = 50`
-- `pageSizeOptions: number[]`, `length: number`
+- Models: `page: number = 1`, `pageSize: number | undefined`
+- Required: `pageCount: number`
+- `pageSizeOptions: number[]`, `totalItems: number`, `boundaryCount`, `siblingCount`
+- Arrows: `arrowVariant: ButtonVariant`, `showArrowLabels: boolean`, `previousIcon`/`nextIcon: string`, `disableArrowsAtBoundary: boolean`
 
 ### Tabs
 **Selector:** `tedi-tabs`

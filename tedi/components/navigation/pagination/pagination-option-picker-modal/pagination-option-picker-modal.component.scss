@@ -54,6 +54,10 @@
         background: var(--dropdown-item-active-background);
       }
     }
+
+    &--last {
+      border-bottom: none;
+    }
   }
 
   &__radio {

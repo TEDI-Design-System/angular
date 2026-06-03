@@ -14,10 +14,11 @@
       maxBufferPx="480"
     >
       <button
-        *cdkVirtualFor="let option of data.options; trackBy: trackByValue"
+        *cdkVirtualFor="let option of data.options; trackBy: trackByValue; let last = last"
         type="button"
         class="tedi-pagination-option-picker-modal__item"
         [class.tedi-pagination-option-picker-modal__item--selected]="option.value === data.selectedValue"
+        [class.tedi-pagination-option-picker-modal__item--last]="last"
         [attr.aria-current]="option.value === data.selectedValue ? 'true' : null"
         [attr.aria-label]="option.ariaLabel"
         (click)="selectValue(option.value)"
