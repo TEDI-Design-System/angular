@@ -721,6 +721,83 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 <a tedi-link href="/page" variant="default">Go to page</a>
 ```
 
+### Pagination
+**Selector:** `tedi-pagination`
+**Inputs:**
+- `pageCount: number` (required) — total number of pages
+- `totalItems: number` — when set, renders the `"{count} results"` label
+- `pageSizeOptions: number[] = []` — options for the page-size select; empty hides the select
+- `boundaryCount: number = 1` — pages always shown at the start and end
+- `siblingCount: number = 1` — pages shown on either side of the current page
+- `labels: Partial<PaginationLabels>` — override any of the default text/aria labels
+- `background: "white" | "transparent" = "white"` — `transparent` removes the surface fill + divider for use on non-white containers
+- `dividerPosition: "top" | "bottom" | "none" = "top"` — where the divider line sits (or removed entirely)
+- `disableArrowsAtBoundary: boolean = false` — keep the prev/next button **rendered** (as a disabled `tedi-button`) at the first/last page instead of removing it from the DOM. By default the boundary arrow is removed entirely so the pager looks balanced.
+- `arrowVariant: ButtonVariant = "neutral"` — variant for the prev/next buttons; accepts any `tedi-button` variant (`primary`, `secondary`, `danger`, `success`, `neutral-inverted`, etc.). The arrows are rendered as actual `tedi-button`s under the hood, so all variant styling/states come for free.
+- `showArrowLabels: boolean = false` — render the `previous` / `next` translated labels as visible button text next to the icon. When `false` (default) the buttons are icon-only and the labels are exposed only via `aria-label`. Use the `labels` input to override the wording (e.g. shorter `"Previous"` instead of `"Previous page"`).
+- `previousIcon: string = "arrow_back"` — Material Symbols icon name for the previous-page arrow.
+- `nextIcon: string = "arrow_forward"` — Material Symbols icon name for the next-page arrow. Pair with `previousIcon` to swap in chevrons (`chevron_left` / `chevron_right`) or any other arrow style.
+- `showModalTitle: boolean = true` — show a heading inside the mobile picker modals; set `false` to hide
+- `hideResults: PaginationVisibility = false` — `true`/`false` or a breakpoint name (`"sm"`–`"xxl"`) to hide below that breakpoint
+- `hidePageSize: PaginationVisibility = false`
+- `hidePager: PaginationVisibility = false`
+- `hideArrows: PaginationVisibility = false` — hide just the prev/next arrows; pager itself stays
+
+**Models:**
+- `page: number = 1` — current page (1-based), two-way bindable with `[(page)]`
+- `pageSize: number | undefined` — current page size, two-way bindable with `[(pageSize)]`
+
+**Outputs:**
+- `pageChange: number` — new 1-based page
+- `pageSizeChange: number` — new page size
+
+**Content projection:**
+- `[tediPaginationResults]` — projected content fully replaces the default "X results" left block. Useful for approximations (`1000+ tulemust`) or richer DOM. Import the `TediPaginationResultsDirective`.
+
+Below `md` the pager collapses to a `{current} / {total}` trigger and the page-size dropdown becomes a trigger button — both open a bottom-aligned modal picker that scrolls the active option into view on open. Status changes are announced via a polite `aria-live` region.
+
+```html
+<tedi-pagination
+  [pageCount]="10"
+  [(page)]="page"
+  [totalItems]="97"
+  [(pageSize)]="pageSize"
+  [pageSizeOptions]="[10, 25, 50, 100]"
+/>
+```
+
+Use the per-slot hide toggles to render different parts above and below a table:
+
+```html
+<tedi-pagination [pageCount]="pageCount" [(page)]="page" [totalItems]="total"
+                 [(pageSize)]="pageSize" [pageSizeOptions]="[10, 25, 50]"
+                 [hidePager]="true" dividerPosition="bottom" />
+<!-- table content -->
+<tedi-pagination [pageCount]="pageCount" [(page)]="page"
+                 [hideResults]="true" [hidePageSize]="true" />
+```
+
+Custom results slot:
+
+```html
+<tedi-pagination [pageCount]="10" [(page)]="page" [totalItems]="1000">
+  <span tediPaginationResults>1000+ tulemust</span>
+</tedi-pagination>
+```
+
+Render the prev/next arrows as labelled primary buttons with custom icons:
+
+```html
+<tedi-pagination
+  [pageCount]="10"
+  [(page)]="page"
+  arrowVariant="primary"
+  [showArrowLabels]="true"
+  previousIcon="chevron_left"
+  nextIcon="chevron_right"
+/>
+```
+
 ### HorizontalStepper
 **Selector:** `tedi-horizontal-stepper`
 **Inputs:**
@@ -802,7 +879,7 @@ openModal() {
     data: { title: 'Hello' },
     width: 'md',                    // 'xs' | 'sm' | 'md' | 'lg' | 'xl' | custom CSS value
     size: 'default',                // 'default' | 'small'
-    position: 'center',             // 'center' | 'top' | 'left' | 'right'
+    position: 'center',             // 'center' | 'top' | 'bottom' | 'left' | 'right'
     closeOnBackdropClick: true,
     closeOnEscape: true,
     scrollBehavior: 'content',      // 'content' | 'page'
@@ -818,7 +895,7 @@ openModal() {
 - `width: ModalWidth = "sm"` — preset (`xs`-`xl`) or custom CSS value (`"80%"`, `"600px"`)
 - `maxWidth: string` — max-width cap (e.g. `"75%"`, `"60vw"`). Overrides the default 95vw limit.
 - `size: ModalSize = "default"` — `"default"` or `"small"`
-- `position: ModalPosition = "center"` — `"center"`, `"top"`, `"left"`, `"right"`
+- `position: ModalPosition = "center"` — `"center"`, `"top"`, `"bottom"`, `"left"`, `"right"`. `"bottom"` anchors the modal to the bottom edge with a fixed margin (useful for mobile bottom-sheet patterns).
 - `closeOnBackdropClick: boolean = true`
 - `closeOnEscape: boolean = true`
 - `scrollBehavior: "content" | "page" = "content"`
@@ -861,7 +938,9 @@ class MyModalContent {
 ```
 
 **Sub-components:**
-- `tedi-modal-header` — `showClose: boolean = true`
+- `tedi-modal-header`
+  - `showClose: boolean = true` — toggle the close button
+  - `closeButtonSize: ClosingButtonSize` (optional) — overrides the close button size. When unset, the close button auto-tracks the modal `size` variant (default → standard, small → compact).
 - `tedi-modal-content` — scrollable body
 - `tedi-modal-footer` — action buttons
 
@@ -1051,8 +1130,10 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 
 ### Pagination
 **Selector:** `tedi-pagination`
-- Models: `page: number = 1`, `pageSize: number = 50`
-- `pageSizeOptions: number[]`, `length: number`
+- Models: `page: number = 1`, `pageSize: number | undefined`
+- Required: `pageCount: number`
+- `pageSizeOptions: number[]`, `totalItems: number`, `boundaryCount`, `siblingCount`
+- Arrows: `arrowVariant: ButtonVariant`, `showArrowLabels: boolean`, `previousIcon`/`nextIcon: string`, `disableArrowsAtBoundary: boolean`
 
 ### Tabs
 **Selector:** `tedi-tabs`
