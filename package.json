@@ -53,7 +53,7 @@
     "@angular/platform-browser": "19.2.15",
     "@angular/platform-browser-dynamic": "19.2.15",
     "@angular/router": "19.2.15",
-    "@commitlint/cli": "^20.5.0",
+    "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^20.4.2",
     "@compodoc/compodoc": "^1.1.26",
     "@etchteam/storybook-addon-status": "^5.0.0",
