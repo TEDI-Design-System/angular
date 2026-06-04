@@ -498,7 +498,7 @@ statusControl = new FormControl<string | null>(null);
 - `clearable: boolean = true`
 - `pickerVariant: TimeFieldPickerVariant = "scroll"` — `"scroll" | "slots" | "dropdown" | "none"`. `"none"` renders just the input — typed input is still normalized on blur (e.g. `9` → `09:00`, `930` → `09:30`)
 - `useNativePicker: TimeFieldUseNativePicker = false` — `true` always uses the OS time picker (`<input type="time">`), `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl"`) means native below that breakpoint. When resolved to `true`, overrides `pickerVariant` and `modal`
-- `pickerTrigger: TimeFieldPickerTrigger = "button"` — `"button"` opens via the icon, `"input"` also opens when the input is clicked
+- `pickerTrigger: TimeFieldPickerTrigger = "button"` — `"button"` opens via the icon only (popover opens toward the icon/end); `"input"` also opens when the input is clicked (popover opens from the field start/left). The popover always matches the input width
 - `closeOnSelect: boolean = false` — close the popover/modal as soon as a value is picked
 - `timeSlots: string[] = []` — `HH:mm` strings for `"slots"` and `"dropdown"` variants
 - `columns: number = 3` — grid columns for the `"slots"` variant
@@ -544,7 +544,7 @@ Sizing and validation styling come from the wrapping `tedi-form-field` — set t
 
 **Keyboard:** `scroll` columns respond to `ArrowUp`/`ArrowDown`, `Home`/`End`, `PageUp`/`PageDown` (jump 5); `Enter`/`Space` on the hour column moves focus to minutes. `dropdown` items respond to `ArrowUp`/`ArrowDown`, `Home`/`End`, `Enter`/`Space`.
 
-Standalone time picker. Most consumers should use `tedi-time-field` instead — it bundles the picker, an input, and the popover/modal trigger logic.
+Standalone time picker. Most consumers should use `tedi-time-field` instead — it bundles the picker, an input, and the popover/modal trigger logic. With no value, the `scroll` wheel parks on `12:00` (display only — nothing is selected until the user picks).
 
 ```html
 <tedi-time-picker [(value)]="time" variant="scroll" [minuteStep]="5" />

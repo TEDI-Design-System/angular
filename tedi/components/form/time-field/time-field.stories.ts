@@ -205,6 +205,7 @@ export default {
 export const Default: StoryObj = {
   args: {
     inputId: "example-id",
+    value: null,
     placeholder: "hh:mm",
     invalid: false,
     disabled: false,
@@ -393,17 +394,17 @@ export const ValueType: StoryObj = {
   },
 };
 
-export const PickerTrigger: StoryObj = {
+export const OnClickType: StoryObj = {
   render: () => ({
     template: `
-      <tedi-row cols="1" gap="3">
+      <tedi-row cols="1" gapY="3">
         <tedi-col>
           <tedi-row cols="1" [md]="{ cols: 3 }">
             <tedi-col>
               <p tedi-text>Clock button is clickable</p>
               <tedi-form-field>
                 <label tedi-label for="trigger-button">Time</label>
-                <tedi-time-field inputId="trigger-button" pickerTrigger="button" />
+                <tedi-time-field inputId="trigger-button" value="03:03" pickerTrigger="button" />
               </tedi-form-field>
             </tedi-col>
           </tedi-row>
@@ -414,7 +415,7 @@ export const PickerTrigger: StoryObj = {
               <p tedi-text>Input is clickable</p>
               <tedi-form-field>
                 <label tedi-label for="trigger-input">Time</label>
-                <tedi-time-field inputId="trigger-input" pickerTrigger="input" />
+                <tedi-time-field inputId="trigger-input" value="03:03" pickerTrigger="input" />
               </tedi-form-field>
             </tedi-col>
           </tedi-row>
@@ -422,50 +423,42 @@ export const PickerTrigger: StoryObj = {
       </tedi-row>
     `,
   }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`pickerTrigger` controls how the picker opens: `button` (default) opens it only from the clock icon (popover anchored to the icon); `input` opens it from anywhere in the field (popover anchored to the field, left-aligned and matched to the input width).",
+      },
+    },
+  },
 };
 
-export const WithScrollPicker: StoryObj = {
-  render: () => ({
-    template: `
-      <tedi-row cols="1" [md]="{ cols: 2 }" [gap]="3">
-        <tedi-col>
-          <p tedi-text modifiers="small bold">Button trigger</p>
-          <tedi-form-field>
-            <label tedi-label for="scroll-picker-button">Time</label>
-            <tedi-time-field inputId="scroll-picker-button" value="03:03" pickerVariant="scroll" pickerTrigger="button" />
-          </tedi-form-field>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="small bold">Input trigger</p>
-          <tedi-form-field>
-            <label tedi-label for="scroll-picker-input">Time</label>
-            <tedi-time-field inputId="scroll-picker-input" value="03:03" pickerVariant="scroll" pickerTrigger="input" />
-          </tedi-form-field>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
-};
-
-export const WithSlotsPicker: StoryObj = {
+export const PredefinedTimeSlots: StoryObj = {
   render: () => ({
     props: {
       slots: ["09:30", "10:00", "11:30", "15:30", "18:30", "20:30"],
     },
     template: `
-      <tedi-row cols="1" [md]="{ cols: 2 }" [gap]="3">
+      <tedi-row cols="1" [md]="{ cols: 3 }" [gap]="3">
+        <tedi-col>
+          <p tedi-text modifiers="small bold">Input trigger (recommended)</p>
+          <tedi-form-field>
+            <label tedi-label for="slots-picker-input">Time</label>
+            <tedi-time-field inputId="slots-picker-input" value="11:30" pickerVariant="slots" [timeSlots]="slots" [columns]="3" pickerTrigger="input" />
+          </tedi-form-field>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="small bold">Radio buttons (showSlotIndicator)</p>
+          <tedi-form-field>
+            <label tedi-label for="slots-picker-radio">Time</label>
+            <tedi-time-field inputId="slots-picker-radio" value="11:30" pickerVariant="slots" [timeSlots]="slots" [columns]="3" [showSlotIndicator]="true" pickerTrigger="input" />
+          </tedi-form-field>
+        </tedi-col>
         <tedi-col>
           <p tedi-text modifiers="small bold">Button trigger</p>
           <tedi-form-field>
             <label tedi-label for="slots-picker-button">Time</label>
             <tedi-time-field inputId="slots-picker-button" value="11:30" pickerVariant="slots" [timeSlots]="slots" [columns]="3" pickerTrigger="button" />
-          </tedi-form-field>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="small bold">Input trigger (recommended for slots)</p>
-          <tedi-form-field>
-            <label tedi-label for="slots-picker-input">Time</label>
-            <tedi-time-field inputId="slots-picker-input" value="11:30" pickerVariant="slots" [timeSlots]="slots" [columns]="3" pickerTrigger="input" />
           </tedi-form-field>
         </tedi-col>
       </tedi-row>
@@ -475,13 +468,13 @@ export const WithSlotsPicker: StoryObj = {
     docs: {
       description: {
         story:
-          "When the picker offers a fixed set of choices (`slots` / `dropdown`), prefer `pickerTrigger=\"input\"` so the user is signalled the input is not free-form. Button-trigger is shown for completeness.",
+          "Predefined time slots rendered as a grid of selectable cards. Set `[showSlotIndicator]=\"true\"` to surface the radio indicator dot. When the picker offers a fixed set of choices (`slots` / `dropdown`), prefer `pickerTrigger=\"input\"` so the user is signalled the input is not free-form — button-trigger is shown for completeness.",
       },
     },
   },
 };
 
-export const WithDropdownPicker: StoryObj = {
+export const Dropdown: StoryObj = {
   render: () => ({
     props: {
       slots: ["12:30", "13:00", "13:30", "14:00", "14:30"],
@@ -507,13 +500,13 @@ export const WithDropdownPicker: StoryObj = {
   }),
 };
 
-export const WithCustomMinuteStep: StoryObj = {
+export const CustomStep: StoryObj = {
   render: () => ({
     template: `
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
           <tedi-form-field>
-            <label tedi-label for="scroll-picker-step">Time</label>
+            <label tedi-label for="scroll-picker-step">Time with 15-min steps</label>
             <tedi-time-field inputId="scroll-picker-step" value="14:30" pickerVariant="scroll" [minuteStep]="15" />
           </tedi-form-field>
         </tedi-col>
@@ -524,7 +517,7 @@ export const WithCustomMinuteStep: StoryObj = {
     docs: {
       description: {
         story:
-          "`[minuteStep]=\"15\"` renders the minute wheel as `00, 15, 30, 45`. Any divisor of 60 works (`1`, `5`, `10`, `15`, `20`, `30`).",
+          "`minuteStep` sets the increment between minute values on the scroll wheel. `[minuteStep]=\"15\"` renders the minute wheel as `00, 15, 30, 45`. Any divisor of 60 works (`1`, `5`, `10`, `15`, `20`, `30`).",
       },
     },
   },
@@ -566,7 +559,7 @@ export const NativePicker: StoryObj = {
   },
 };
 
-export const WithoutPicker: StoryObj = {
+export const FieldWithoutPicker: StoryObj = {
   render: () => ({
     template: `
       <tedi-row cols="1" [md]="{ cols: 3 }">
@@ -583,7 +576,7 @@ export const WithoutPicker: StoryObj = {
     docs: {
       description: {
         story:
-          "When you only need a typed time entry without any picker UI, set `pickerVariant=\"none\"`. The input stays a plain text field, so the same blur-time normalization as the `InputFormatting` story applies. Use `useNativePicker` if you want the browser's `type=\"time\"` UI instead.",
+          "When you only need a typed time entry without any picker UI, set `pickerVariant=\"none\"`. The input stays a plain text field, so the same blur-time normalization as the `ManualTyping` story applies. Use `useNativePicker` if you want the browser's `type=\"time\"` UI instead.",
       },
     },
   },
@@ -626,7 +619,7 @@ export const MobileModal: StoryObj = {
   },
 };
 
-export const InputFormatting: StoryObj = {
+export const ManualTyping: StoryObj = {
   render: () => ({
     template: `
       <tedi-row cols="1" [md]="{ cols: 3 }">

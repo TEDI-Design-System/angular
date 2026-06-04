@@ -576,7 +576,7 @@ describe("TimePickerComponent", () => {
       expect(onTouched).toHaveBeenCalled();
     });
 
-    it("should clear visual highlight when value is reset to null", () => {
+    it("should park the highlight on 12:00 when value is reset to null", () => {
       component.writeValue("14:30");
       fixture.detectChanges();
 
@@ -592,10 +592,21 @@ describe("TimePickerComponent", () => {
       columns = el.querySelectorAll(".tedi-time-picker__column");
       hourItems = columns[0].querySelectorAll(".tedi-time-picker__item");
       minuteItems = columns[1].querySelectorAll(".tedi-time-picker__item");
-      expect(hourItems[0].classList.contains("tedi-time-picker__item--selected")).toBe(true);
+      // No value → wheel parks on 12:00 (display only; nothing is selected/emitted).
+      expect(hourItems[12].classList.contains("tedi-time-picker__item--selected")).toBe(true);
       expect(hourItems[14].classList.contains("tedi-time-picker__item--selected")).toBe(false);
       expect(minuteItems[0].classList.contains("tedi-time-picker__item--selected")).toBe(true);
       expect(minuteItems[30].classList.contains("tedi-time-picker__item--selected")).toBe(false);
+    });
+
+    it("should not emit a value while parked on the 12:00 default", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+      component.writeValue(null);
+      fixture.detectChanges();
+
+      expect(component.value()).toBeNull();
+      expect(onChange).not.toHaveBeenCalled();
     });
   });
 

@@ -140,7 +140,8 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit,
   readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
   readonly gridStyle = computed(() => `grid-template-columns: repeat(${this.columns()}, 1fr)`);
 
-  readonly selectedHourIndex = computed(() => this.selectedHour() ?? 0);
+  // With no value the wheel parks on 12:00 (display only — nothing is emitted).
+  readonly selectedHourIndex = computed(() => this.selectedHour() ?? 12);
   readonly selectedMinuteIndex = computed(() => {
     const m = this.selectedMinute();
     if (m === null) return 0;

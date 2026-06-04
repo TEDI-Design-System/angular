@@ -168,11 +168,6 @@ export class TimeFieldComponent
   readonly inputType = computed(() =>
     this.useNativePickerResolved() ? "time" : "text",
   );
-  readonly popoverPosition = computed(() =>
-    this.pickerTrigger() === "input"
-      ? ("bottom-start" as const)
-      : ("bottom-end" as const),
-  );
   readonly inputIsTrigger = computed(
     () =>
       this.pickerTrigger() === "input" &&
@@ -185,6 +180,17 @@ export class TimeFieldComponent
       ? modal
       : this.breakpointService.isBelowBreakpoint(modal)();
   });
+  // Popover only when there's a custom picker, not a modal, and not disabled
+  // (disabled renders no trigger, so it can't be opened).
+  readonly usePopover = computed(
+    () => this.hasPicker() && !this.useMobileModal() && !this.isDisabled(),
+  );
+  // Opens from the field start for input-trigger, toward the icon end for button.
+  readonly popoverPosition = computed(() =>
+    this.pickerTrigger() === "input"
+      ? ("bottom-start" as const)
+      : ("bottom-end" as const),
+  );
   // Reads the popover's underlying float-ui open state. Plain method (not computed)
   // because `.state` isn't a signal — relies on CD ticks (which all open/close
   // paths trigger via user events) to re-evaluate in the template.
@@ -290,16 +296,32 @@ export class TimeFieldComponent
   }
 
   onInputClick(event: MouseEvent) {
-    // When the input isn't acting as the picker trigger, stop the click from
-    // bubbling to the wrapper's popover-trigger directive (which would otherwise
-    // open the picker on every click into the input).
-    if (this.isDisabled() || !this.inputIsTrigger()) {
-      event.stopPropagation();
+    if (this.isDisabled()) return;
+    // No popover wrapper in modal mode, so open it explicitly.
+    if (this.inputIsTrigger() && this.useMobileModal()) {
+      this.openPicker();
       return;
     }
-    if (this.useMobileModal()) {
-      this.openPicker();
+    // Button-trigger: keep the input click from bubbling to the trigger directive.
+    if (this.usePopover() && !this.inputIsTrigger()) {
+      event.stopPropagation();
     }
+  }
+
+  // The wrapper is the popover trigger; input-trigger opens from any field click,
+  // so align the wheel here. (Button-trigger reaches the trigger only via the
+  // icon — see onIconClick — so nothing to do here.)
+  onFieldClick() {
+    if (this.isDisabled()) return;
+    if (this.inputIsTrigger()) {
+      this.onPickerOpen();
+    }
+  }
+
+  // The click bubbles to the trigger directive which toggles the popover; we
+  // just align the wheel.
+  onIconClick() {
+    this.onPickerOpen();
   }
 
   onClearClick(event: MouseEvent) {
@@ -327,16 +349,6 @@ export class TimeFieldComponent
     }
 
     this.popover()?.showPopover();
-  }
-
-  // Icon-button click handler. In popover mode the wrapper's `tedi-popover-trigger`
-  // opens the popover via click bubbling, so we just run scroll/focus side effects;
-  // in mobile-modal mode there's no wrapper directive, so we open the modal explicitly.
-  triggerPicker() {
-    this.onPickerOpen();
-    if (this.useMobileModal()) {
-      this.openPicker();
-    }
   }
 
   private openMobileModal() {

@@ -233,6 +233,11 @@ describe("TimeFieldComponent", () => {
 
   describe("field-focus delegation", () => {
     it("should forward focus from the wrapper to the input", () => {
+      // Focus delegation only applies in input-trigger mode, where the field
+      // wrapper is the popover trigger (the popover refocuses it on close).
+      fixture.componentRef.setInput("pickerTrigger", "input");
+      fixture.detectChanges();
+
       const wrapper = el.querySelector(".tedi-time-field__field") as HTMLElement;
       const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;
       const focusSpy = jest.spyOn(input, "focus");
@@ -615,6 +620,34 @@ describe("TimeFieldComponent", () => {
       expect(popoverSpy).not.toHaveBeenCalled();
     });
 
+    it("should guard the field area against opening with pickerTrigger=button", () => {
+      // Button mode anchors the popover to the field but only the icon may open
+      // it; the wrapper's non-interactive areas are made unclickable via the
+      // `--button-trigger` class (pointer-events). Input mode opens from the
+      // whole field, so the guard is absent.
+      const field = el.querySelector(".tedi-time-field__field") as HTMLElement;
+      expect(
+        field.classList.contains("tedi-time-field__field--button-trigger"),
+      ).toBe(true);
+
+      fixture.componentRef.setInput("pickerTrigger", "input");
+      fixture.detectChanges();
+      const inputField = el.querySelector(
+        ".tedi-time-field__field",
+      ) as HTMLElement;
+      expect(
+        inputField.classList.contains("tedi-time-field__field--button-trigger"),
+      ).toBe(false);
+    });
+
+    it("should open toward the button end in button mode and the field start in input mode", () => {
+      expect(component.popoverPosition()).toBe("bottom-end");
+
+      fixture.componentRef.setInput("pickerTrigger", "input");
+      fixture.detectChanges();
+      expect(component.popoverPosition()).toBe("bottom-start");
+    });
+
     it("should mark input as readonly when pickerTrigger=input", () => {
       fixture.componentRef.setInput("pickerTrigger", "input");
       fixture.detectChanges();
@@ -660,6 +693,14 @@ describe("TimeFieldComponent", () => {
         ".tedi-time-field__icon",
       ) as HTMLButtonElement;
       expect(iconBtn.disabled).toBe(true);
+    });
+
+    it("should not render a popover trigger when disabled (cannot be opened by clicking)", () => {
+      fixture.componentRef.setInput("disabled", true);
+      fixture.detectChanges();
+
+      expect(component.usePopover()).toBe(false);
+      expect(el.querySelector("tedi-popover")).toBeNull();
     });
   });
 
@@ -730,7 +771,7 @@ describe("TimeFieldComponent", () => {
     });
   });
 
-  describe("triggerPicker", () => {
+  describe("icon button trigger", () => {
     it("should call onPickerOpen on icon-button click", () => {
       const spy = jest.spyOn(component, "onPickerOpen");
       const iconBtn = el.querySelector(

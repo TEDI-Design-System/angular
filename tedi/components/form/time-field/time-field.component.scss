@@ -23,6 +23,19 @@
     &:focus-visible {
       outline: none;
     }
+
+    // Button-trigger: the wrapper anchors the popover but only the icon opens it.
+    // Disabling pointer events on the wrapper's dead areas keeps stray clicks off
+    // the trigger directive; the controls re-enable events below.
+    &--button-trigger {
+      pointer-events: none;
+
+      .tedi-time-field__input,
+      .tedi-time-field__clear,
+      .tedi-time-field__icon {
+        pointer-events: auto;
+      }
+    }
   }
 
   &__input {
@@ -79,10 +92,19 @@
 
 .tedi-time-field .tedi-time-field__icon {
   flex-shrink: 0;
-  width: var(--button-xs-icon-size);
-  height: var(--form-field-button-height-sm);
+
+  // 24px, growing to a 32px touch target below md. Feeding the size into the
+  // token tedi-button reads avoids overrides — its default jumps to 44px on mobile.
+  --button-sm-icon-size: var(--form-field-button-height-sm);
+
+  width: var(--button-sm-icon-size);
+  height: var(--button-sm-icon-size);
   font-size: 1.125rem;
   border-radius: var(--button-radius-sm);
+
+  @include breakpoints.media-breakpoint-down(md) {
+    --button-sm-icon-size: var(--form-field-button-height);
+  }
 
   &:disabled {
     cursor: not-allowed;
@@ -101,10 +123,5 @@
     align-items: center;
     justify-content: center;
     color: var(--form-input-text-placeholder);
-  }
-
-  @include breakpoints.media-breakpoint-down(sm) {
-    width: var(--form-field-button-height);
-    height: var(--form-field-button-height);
   }
 }
