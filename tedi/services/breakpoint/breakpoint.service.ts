@@ -32,6 +32,15 @@ export type BreakpointObject<T> = { xs: T } & Partial<
 >;
 export type BreakpointInput<T> = T | BreakpointObject<T>;
 
+/**
+ * Flag that toggles a feature on/off, optionally only below a breakpoint.
+ * `true` — always on. `false` — always off. A breakpoint name — on below that breakpoint.
+ *
+ * `'xs'` is intentionally excluded: "below xs" has no meaningful viewport and would
+ * be a confusing duplicate of `true`. Use `true` for always-on.
+ */
+export type BreakpointFlag = boolean | Exclude<Breakpoint, "xs">;
+
 @Injectable({
   providedIn: "root",
 })

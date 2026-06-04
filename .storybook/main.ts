@@ -11,6 +11,7 @@ const config: StorybookConfig = {
     "../src/docs/colors/colors.mdx",
     "../src/docs/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "../tedi/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "../tedi/**/*.mdx",
     "../community/**/*.stories.@(js|jsx|mjs|ts|tsx)",
   ],
   addons: [
