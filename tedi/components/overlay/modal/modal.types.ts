@@ -1,10 +1,10 @@
-import { InjectionToken } from "@angular/core";
+import { InjectionToken, Signal } from "@angular/core";
 import { BreakpointFlag } from "../../../services/breakpoint/breakpoint.service";
 
 export type ModalSize = "default" | "small";
 export type ModalWidthPreset = "xs" | "sm" | "md" | "lg" | "xl";
 export type ModalWidth = ModalWidthPreset | (string & {});
-export type ModalPosition = "center" | "top" | "left" | "right";
+export type ModalPosition = "center" | "top" | "bottom" | "left" | "right";
 export type ModalScrollBehavior = "content" | "page";
 export type ModalFullscreen = BreakpointFlag;
 
@@ -37,3 +37,11 @@ export interface ModalConfig<D = unknown> {
 
 /** Injection token for data passed to a modal opened via ModalService. */
 export const MODAL_DATA = new InjectionToken<unknown>("TediModalData");
+
+/**
+ * Injection token exposing the current modal's `size` variant as a signal.
+ * Provided by both the template-based `<tedi-modal>` and `ModalService` so
+ * child components (notably `<tedi-modal-header>`) can derive size-aware
+ * defaults without duplicating the variant in their own inputs.
+ */
+export const MODAL_SIZE = new InjectionToken<Signal<ModalSize>>("TediModalSize");

@@ -1,0 +1,29 @@
+<tedi-dropdown position="bottom-end">
+  <button tedi-button tedi-dropdown-trigger variant="neutral" type="button">
+    <tedi-icon name="tune" [size]="18" color="inherit" />
+    {{ triggerLabel() ?? defaultLabel() }}
+  </button>
+  <tedi-dropdown-content>
+    @for (column of hideableColumns(); track column.id) {
+      @let isVisible = column.getIsVisible();
+      @let isLastVisible = isVisible && visibleCount() === 1;
+      <li
+        tedi-dropdown-item
+        [value]="column.id"
+        [disabled]="isLastVisible"
+        [closeOnSelect]="false"
+        (itemSelect)="handleToggle(column)"
+      >
+        <tedi-dropdown-item-value
+          type="checkbox"
+          [selected]="isVisible"
+          [disabled]="isLastVisible"
+        >
+          <tedi-dropdown-item-value-label>
+            {{ resolveHeader(column) }}
+          </tedi-dropdown-item-value-label>
+        </tedi-dropdown-item-value>
+      </li>
+    }
+  </tedi-dropdown-content>
+</tedi-dropdown>

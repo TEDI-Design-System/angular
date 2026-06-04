@@ -493,6 +493,93 @@ export const translationsMap = {
           ? "Отменить сортировку"
           : "Сортировать по возрастанию",
   },
+  "table.no-data": {
+    description: "Default placeholder when table data is empty",
+    components: ["Table"],
+    et: "Andmed puuduvad",
+    en: "No data",
+    ru: "Нет данных",
+  },
+  "table.row-details": {
+    description: "Accessible label for the expanded row details region",
+    components: ["Table"],
+    et: "Rea üksikasjad",
+    en: "Row details",
+    ru: "Подробности строки",
+  },
+  "table.filter-input": {
+    description: "Accessible label for a column filter input",
+    components: ["Table"],
+    et: (column: string) => `Filtreeri ${column}`,
+    en: (column: string) => `Filter ${column}`,
+    ru: (column: string) => `Фильтр ${column}`,
+  },
+  "table.filter-placeholder": {
+    description: "Placeholder shown in a column filter input",
+    components: ["Table"],
+    et: "Filtreeri…",
+    en: "Filter…",
+    ru: "Фильтр…",
+  },
+  "table.filter-apply": {
+    description:
+      "Apply action in the built-in column filter popover footer",
+    components: ["Table"],
+    et: "Filtreeri",
+    en: "Apply",
+    ru: "Применить",
+  },
+  "table.filter-clear": {
+    description:
+      "Clear action in the built-in column filter popover footer",
+    components: ["Table"],
+    et: "Tühista",
+    en: "Clear",
+    ru: "Сбросить",
+  },
+  "table.filter-button-aria": {
+    description:
+      "Accessible label of the built-in column filter trigger button",
+    components: ["Table"],
+    et: (column: string) => `Filtreeri ${column}`,
+    en: (column: string) => `Filter ${column}`,
+    ru: (column: string) => `Фильтр по ${column}`,
+  },
+  "table.columns": {
+    description: "Default label of the columns visibility trigger",
+    components: ["Table"],
+    et: "Veerud",
+    en: "Columns",
+    ru: "Колонки",
+  },
+  "table.expand-row": {
+    description: "Label for the expand row toggle (collapsed state)",
+    components: ["Table"],
+    et: "Laienda rida",
+    en: "Expand row",
+    ru: "Развернуть строку",
+  },
+  "table.collapse-row": {
+    description: "Label for the expand row toggle (expanded state)",
+    components: ["Table"],
+    et: "Ahenda rida",
+    en: "Collapse row",
+    ru: "Свернуть строку",
+  },
+  "table.drag-column": {
+    description: "Accessible label of the column reorder drag handle",
+    components: ["Table"],
+    et: "Lohista veergu",
+    en: "Drag column",
+    ru: "Перетащить колонку",
+  },
+  "table.drag-row": {
+    description: "Accessible label of the row reorder drag handle",
+    components: ["Table"],
+    et: "Lohista rida",
+    en: "Drag row",
+    ru: "Перетащить строку",
+  },
   "tooltip.icon-trigger": {
     description: "Label we use for icons that are tooltip triggers",
     components: ["TooltipTrigger"],
@@ -541,18 +628,43 @@ export const translationsMap = {
     ru: "Следущая страница",
   },
   "pagination.results": {
-    description: "Total results text",
+    description:
+      "Total results text. Returns the full localised string with count embedded — locales decide their own word order.",
     components: ["Table", "Pagination"],
-    et: (count?: number) => (count === 1 ? "tulemus" : "tulemust"),
-    en: (count?: number) => (count === 1 ? "result" : "results"),
-    ru: (count?: number) => (count === 1 ? "результат" : "результа"),
+    et: (count?: number) => `${count ?? 0} ${count === 1 ? "tulemus" : "tulemust"}`,
+    en: (count?: number) => `${count ?? 0} ${count === 1 ? "result" : "results"}`,
+    ru: (count?: number) => `${count ?? 0} ${count === 1 ? "результат" : "результа"}`,
   },
   "pagination.page-size": {
     description: "Label of page size select",
     components: ["Table", "Pagination"],
     et: "Kuva korraga",
-    en: "Page size",
-    ru: "Размер страницы",
+    en: "Show per page",
+    ru: "Показывать по",
+  },
+  "pagination.page-status": {
+    description:
+      "Status message announced to screen readers via an aria-live region when the page changes.",
+    components: ["Pagination"],
+    et: (page?: number, total?: number) => `Lehekülg ${page ?? 0} / ${total ?? 0}`,
+    en: (page?: number, total?: number) => `Page ${page ?? 0} of ${total ?? 0}`,
+    ru: (page?: number, total?: number) => `Страница ${page ?? 0} из ${total ?? 0}`,
+  },
+  "pagination.page-title": {
+    description:
+      "Title of the mobile page-jump picker modal, shown when `showModalTitle` is enabled.",
+    components: ["Pagination"],
+    et: "Vali lehekülg",
+    en: "Select page",
+    ru: "Выбрать страницу",
+  },
+  "pagination.page-size-title": {
+    description:
+      "Title of the mobile page-size picker modal, shown when `showModalTitle` is enabled.",
+    components: ["Pagination"],
+    et: "Tulemusi lehel",
+    en: "Results per page",
+    ru: "Результатов на странице",
   },
   "table-of-contents.title": {
     description: "Title of the table of contents",
