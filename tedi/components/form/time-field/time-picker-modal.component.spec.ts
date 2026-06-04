@@ -64,7 +64,21 @@ describe("TimePickerModalComponent", () => {
     expect(closeSpy).toHaveBeenCalledWith("11:00");
   });
 
-  it("should submit when Enter is pressed on a non-button target inside the host", () => {
+  it("should submit when Enter is pressed on a non-button target outside the picker", () => {
+    setup();
+    component.draft.set("10:15");
+
+    const target = el.querySelector("h2") as HTMLElement;
+    expect(target).toBeTruthy();
+
+    target.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
+    );
+
+    expect(closeSpy).toHaveBeenCalledWith("10:15");
+  });
+
+  it("should NOT submit when Enter is pressed inside the time-picker", () => {
     setup();
     component.draft.set("10:15");
 
@@ -75,7 +89,7 @@ describe("TimePickerModalComponent", () => {
       new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
     );
 
-    expect(closeSpy).toHaveBeenCalledWith("10:15");
+    expect(closeSpy).not.toHaveBeenCalled();
   });
 
   it("should NOT intercept Enter when pressed on a footer button", () => {

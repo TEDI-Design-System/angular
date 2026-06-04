@@ -179,7 +179,7 @@ Consumer side:
 
 In `skills/tedi-angular/references/components.md`, write breakpoint-aware inputs as:
 
-```
+```markdown
 - `useNativePicker: BreakpointInput<boolean> = false` — ... Accepts a breakpoint object, e.g. `{ xs: true, md: false }`
 ```
 

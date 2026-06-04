@@ -78,6 +78,8 @@ export class TimePickerModalComponent implements AfterViewInit, OnDestroy {
   private onCaptureKeydown = (event: KeyboardEvent): void => {
     if (event.key !== "Enter") return;
     if (event.target instanceof HTMLButtonElement) return;
+    // Let the picker handle Enter itself (scroll column nav, dropdown selection)
+    if ((event.target as HTMLElement | null)?.closest("tedi-time-picker")) return;
     const form = this.host.nativeElement.querySelector("form");
     if (!form) return;
     event.preventDefault();
