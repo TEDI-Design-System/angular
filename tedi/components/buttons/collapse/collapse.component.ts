@@ -1,24 +1,26 @@
 import {
   Component,
+  computed,
   input,
   signal,
   AfterViewInit,
   ChangeDetectionStrategy,
   ViewEncapsulation,
-  inject,
-  Renderer2,
 } from "@angular/core";
-import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
-import { IconComponent } from "../../base/icon/icon.component";
-import { TextComponent } from "../../base/text/text.component";
+import {
+  CollapseButtonComponent,
+  type CollapseButtonArrowType,
+  type CollapseButtonSize,
+} from "../collapse-button/collapse-button.component";
 import { generateUUID } from "../../../helpers/generate-uuid";
 
-export type ArrowType = "default" | "secondary";
+export type ArrowType = CollapseButtonArrowType;
+export type CollapseSize = CollapseButtonSize;
 
 @Component({
   standalone: true,
   selector: "tedi-collapse",
-  imports: [IconComponent, TextComponent, TediTranslationPipe],
+  imports: [CollapseButtonComponent],
   templateUrl: "./collapse.component.html",
   styleUrls: ["./collapse.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,10 +51,26 @@ export class CollapseComponent implements AfterViewInit {
    * @default "default"
    */
   arrowType = input<ArrowType>("default");
+  /**
+   * Visual size of the toggle button.
+   * @default "default"
+   */
+  size = input<CollapseSize>("default");
+  /**
+   * Inverted color palette — flips the link / icon colors to their
+   * inverted-surface equivalents (white text + icon), for use on top of dark
+   * backgrounds. Pairs with both the text and icon-only variants; the
+   * secondary-arrow style has no inverted form in the design and the flag is
+   * ignored when `arrowType === 'secondary'`.
+   * @default false
+   */
+  inverted = input<boolean>(false);
 
-  renderer = inject(Renderer2);
   collapseContentId: string = `collapse-content-${generateUUID()}`;
   isOpen = signal<boolean>(false);
+  protected readonly isInvertedActive = computed(
+    () => this.inverted() && this.arrowType() !== "secondary",
+  );
 
   toggleCollapse() {
     this.isOpen.update((prev) => !prev);

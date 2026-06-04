@@ -4,5 +4,5 @@
   "lib": {
     "entryFile": "public-api.ts"
   },
-  "allowedNonPeerDependencies": ["@tedi-design-system/core"]
+  "allowedNonPeerDependencies": ["@tedi-design-system/core", "@tanstack/angular-table"]
 }
