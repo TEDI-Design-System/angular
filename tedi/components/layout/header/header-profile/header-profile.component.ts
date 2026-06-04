@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   inject,
@@ -125,7 +126,7 @@ export class HeaderProfileComponent
   private readonly document = inject(DOCUMENT);
   private readonly host = inject(ElementRef);
   private readonly renderer = inject(Renderer2);
-  private readonly eventListeners: (() => void)[] = [];
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly isMobile = computed(() =>
     this.breakpointService.isBelowBreakpoint("md")(),
@@ -161,12 +162,16 @@ export class HeaderProfileComponent
   });
 
   constructor() {
-    effect(() => {
+    effect((onCleanup) => {
       if (this.modalOpen()) {
         this.renderer.setStyle(this.document.body, "overflow", "hidden");
       } else {
         this.renderer.removeStyle(this.document.body, "overflow");
       }
+
+      onCleanup(() => {
+        this.renderer.removeStyle(this.document.body, "overflow");
+      });
     });
   }
 
@@ -191,16 +196,20 @@ export class HeaderProfileComponent
   ngAfterContentInit(): void {
     const element = this.host.nativeElement as HTMLElement;
 
-    this.eventListeners.push(
-      this.renderer.listen("document", "click", (event: MouseEvent) => {
+    const cleanup = this.renderer.listen(
+      "document",
+      "click",
+      (event: MouseEvent) => {
         const target = event.target as HTMLElement;
         const clickedInside = element.contains(target);
 
         if (this.modalOpen() && !clickedInside) {
           this.modalOpen.set(false);
         }
-      }),
+      },
     );
+
+    this.destroyRef.onDestroy(cleanup);
   }
 
   handleModalOpen() {

@@ -102,16 +102,21 @@ describe("HeaderMobileButtonComponent", () => {
       expect(getButton()?.getAttribute("aria-expanded")).toBe("false");
     });
 
-    it("forwards aria attrs to the inner anchor when rendered as link", () => {
+    it("forwards `ariaLabel` to the inner anchor when rendered as link", () => {
       fixture.componentRef.setInput("href", "/page");
       fixture.componentRef.setInput("ariaLabel", "Open");
+      fixture.detectChanges();
+      expect(getAnchor()?.getAttribute("aria-label")).toBe("Open");
+    });
+
+    it("does not forward popup-trigger aria attrs to the link branch", () => {
+      fixture.componentRef.setInput("href", "/page");
       fixture.componentRef.setInput("ariaHasPopup", "dialog");
       fixture.componentRef.setInput("ariaExpanded", false);
       fixture.detectChanges();
       const anchor = getAnchor();
-      expect(anchor?.getAttribute("aria-label")).toBe("Open");
-      expect(anchor?.getAttribute("aria-haspopup")).toBe("dialog");
-      expect(anchor?.getAttribute("aria-expanded")).toBe("false");
+      expect(anchor?.hasAttribute("aria-haspopup")).toBe(false);
+      expect(anchor?.hasAttribute("aria-expanded")).toBe(false);
     });
 
     it("omits aria attrs when inputs are not set", () => {

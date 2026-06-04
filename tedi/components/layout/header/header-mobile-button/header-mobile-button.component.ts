@@ -52,15 +52,23 @@ export class HeaderMobileButtonComponent {
    */
   ariaLabel = input<string>();
   /**
-   * Forwarded to the inner `<button>`/`<a>` as `aria-haspopup`. Set to
-   * `'dialog'` when the button opens a modal dialog, `'menu'` for menus, etc.
+   * Forwarded to the inner `<button>` as `aria-haspopup`. Set to `'dialog'`
+   * when the button opens a modal dialog, `'menu'` for menus, etc.
+   *
+   * Only applied when the component renders as a `<button>` (i.e. when
+   * `href` is not set). A real navigation link with popup-trigger semantics
+   * is confusing to assistive tech — if a popup is involved, omit `href`
+   * so the component renders as a button.
    */
   ariaHasPopup = input<
     "true" | "false" | "menu" | "listbox" | "tree" | "grid" | "dialog"
   >();
   /**
-   * Forwarded to the inner `<button>`/`<a>` as `aria-expanded`. Pair with
+   * Forwarded to the inner `<button>` as `aria-expanded`. Pair with
    * `ariaHasPopup` when this button toggles a dialog/menu open.
+   *
+   * Only applied when the component renders as a `<button>` (i.e. when
+   * `href` is not set).
    */
   ariaExpanded = input<boolean>();
 
