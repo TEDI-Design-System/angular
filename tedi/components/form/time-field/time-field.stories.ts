@@ -206,7 +206,7 @@ export const Default: StoryObj = {
   args: {
     inputId: "example-id",
     value: null,
-    placeholder: "hh:mm",
+    placeholder: "tt:mm",
     invalid: false,
     disabled: false,
     clearable: true,
@@ -226,7 +226,7 @@ export const Default: StoryObj = {
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
           <tedi-form-field>
-            <label tedi-label for="example-id">Time</label>
+            <label tedi-label for="example-id">Aeg</label>
             <tedi-time-field
               [inputId]="inputId"
               [(value)]="value"
@@ -258,14 +258,14 @@ export const Sizes: StoryObj = {
         <tedi-row cols="1" [md]="{ cols: 2 }" alignItems="center" class="padding-14-16 border-bottom">
           <b>Default</b>
           <tedi-form-field>
-            <label tedi-label for="size-default">Time</label>
+            <label tedi-label for="size-default">Aeg</label>
             <tedi-time-field inputId="size-default" />
           </tedi-form-field>
         </tedi-row>
         <tedi-row cols="1" [md]="{ cols: 2 }" alignItems="center" class="padding-14-16">
           <b>Small</b>
           <tedi-form-field size="small">
-            <label tedi-label for="size-small">Time</label>
+            <label tedi-label for="size-small">Aeg</label>
             <tedi-time-field inputId="size-small" />
           </tedi-form-field>
         </tedi-row>
@@ -301,7 +301,7 @@ export const States: StoryObj = {
             </tedi-col>
             <tedi-col width="5">
               <tedi-form-field>
-                <label tedi-label [for]="state">Time</label>
+                <label tedi-label [for]="state">Aeg</label>
                 <tedi-time-field
                   [inputId]="state"
                   [value]="state === 'Disabled' ? '12:00' : null"
@@ -317,9 +317,9 @@ export const States: StoryObj = {
           </tedi-col>
           <tedi-col width="5">
             <tedi-form-field>
-              <label tedi-label for="state-error">Time</label>
+              <label tedi-label for="state-error">Aeg</label>
               <tedi-time-field inputId="state-error" [invalid]="true" value="12:00" />
-              <tedi-feedback-text text="Feedback text" type="error" />
+              <tedi-feedback-text text="Tagasiside tekst" type="error" />
             </tedi-form-field>
           </tedi-col>
         </tedi-row>
@@ -329,9 +329,9 @@ export const States: StoryObj = {
           </tedi-col>
           <tedi-col width="5">
             <tedi-form-field>
-              <label tedi-label for="state-success">Time</label>
+              <label tedi-label for="state-success">Aeg</label>
               <tedi-time-field inputId="state-success" value="12:00" />
-              <tedi-feedback-text text="Feedback text" type="valid" />
+              <tedi-feedback-text text="Tagasiside tekst" type="valid" />
             </tedi-form-field>
           </tedi-col>
         </tedi-row>
@@ -353,7 +353,7 @@ export const FieldOptions: StoryObj = {
             <tedi-form-field>
               <label tedi-label for="opts-hint">Time field with hint</label>
               <tedi-time-field inputId="opts-hint" />
-              <tedi-feedback-text text="Hint text" type="hint" />
+              <tedi-feedback-text text="Vihjetekst" type="hint" />
             </tedi-form-field>
           </tedi-row>
         </tedi-col>
@@ -369,15 +369,15 @@ export const ValueType: StoryObj = {
         <tedi-col>
           <tedi-row cols="1" gapY="3">
             <tedi-form-field>
-              <label tedi-label for="value-default">Time</label>
+              <label tedi-label for="value-default">Aeg</label>
               <tedi-time-field inputId="value-default" />
             </tedi-form-field>
             <tedi-form-field>
-              <label tedi-label for="value-placeholder">Time</label>
-              <tedi-time-field inputId="value-placeholder" placeholder="hh:mm" />
+              <label tedi-label for="value-placeholder">Aeg</label>
+              <tedi-time-field inputId="value-placeholder" placeholder="tt:mm" />
             </tedi-form-field>
             <tedi-form-field>
-              <label tedi-label for="value-set">Time</label>
+              <label tedi-label for="value-set">Aeg</label>
               <tedi-time-field inputId="value-set" value="13:00" />
             </tedi-form-field>
           </tedi-row>
@@ -403,7 +403,7 @@ export const OnClickType: StoryObj = {
             <tedi-col>
               <p tedi-text>Clock button is clickable</p>
               <tedi-form-field>
-                <label tedi-label for="trigger-button">Time</label>
+                <label tedi-label for="trigger-button">Aeg</label>
                 <tedi-time-field inputId="trigger-button" value="03:03" pickerTrigger="button" />
               </tedi-form-field>
             </tedi-col>
@@ -414,7 +414,7 @@ export const OnClickType: StoryObj = {
             <tedi-col>
               <p tedi-text>Input is clickable</p>
               <tedi-form-field>
-                <label tedi-label for="trigger-input">Time</label>
+                <label tedi-label for="trigger-input">Aeg</label>
                 <tedi-time-field inputId="trigger-input" value="03:03" pickerTrigger="input" />
               </tedi-form-field>
             </tedi-col>
@@ -443,21 +443,21 @@ export const PredefinedTimeSlots: StoryObj = {
         <tedi-col>
           <p tedi-text modifiers="small bold">Input trigger (recommended)</p>
           <tedi-form-field>
-            <label tedi-label for="slots-picker-input">Time</label>
+            <label tedi-label for="slots-picker-input">Aeg</label>
             <tedi-time-field inputId="slots-picker-input" value="11:30" pickerVariant="slots" [timeSlots]="slots" [columns]="3" pickerTrigger="input" />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
           <p tedi-text modifiers="small bold">Radio buttons (showSlotIndicator)</p>
           <tedi-form-field>
-            <label tedi-label for="slots-picker-radio">Time</label>
+            <label tedi-label for="slots-picker-radio">Aeg</label>
             <tedi-time-field inputId="slots-picker-radio" value="11:30" pickerVariant="slots" [timeSlots]="slots" [columns]="3" [showSlotIndicator]="true" pickerTrigger="input" />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
           <p tedi-text modifiers="small bold">Button trigger</p>
           <tedi-form-field>
-            <label tedi-label for="slots-picker-button">Time</label>
+            <label tedi-label for="slots-picker-button">Aeg</label>
             <tedi-time-field inputId="slots-picker-button" value="11:30" pickerVariant="slots" [timeSlots]="slots" [columns]="3" pickerTrigger="button" />
           </tedi-form-field>
         </tedi-col>
@@ -484,14 +484,14 @@ export const Dropdown: StoryObj = {
         <tedi-col>
           <p tedi-text modifiers="small bold">Button trigger</p>
           <tedi-form-field>
-            <label tedi-label for="dropdown-picker-button">Time</label>
+            <label tedi-label for="dropdown-picker-button">Aeg</label>
             <tedi-time-field inputId="dropdown-picker-button" value="13:30" pickerVariant="dropdown" [timeSlots]="slots" [closeOnSelect]="true" pickerTrigger="button" />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
           <p tedi-text modifiers="small bold">Input trigger (recommended for dropdown)</p>
           <tedi-form-field>
-            <label tedi-label for="dropdown-picker-input">Time</label>
+            <label tedi-label for="dropdown-picker-input">Aeg</label>
             <tedi-time-field inputId="dropdown-picker-input" value="13:30" pickerVariant="dropdown" [timeSlots]="slots" [closeOnSelect]="true" pickerTrigger="input" />
           </tedi-form-field>
         </tedi-col>
@@ -530,14 +530,14 @@ export const NativePicker: StoryObj = {
         <tedi-col>
           <p tedi-text modifiers="small bold">Always native (useNativePicker=true)</p>
           <tedi-form-field>
-            <label tedi-label for="native-picker">Time</label>
+            <label tedi-label for="native-picker">Aeg</label>
             <tedi-time-field inputId="native-picker" value="09:30" [useNativePicker]="true" />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
           <p tedi-text modifiers="small bold">Responsive (useNativePicker=md)</p>
           <tedi-form-field>
-            <label tedi-label for="responsive-native">Time</label>
+            <label tedi-label for="responsive-native">Aeg</label>
             <tedi-time-field
               inputId="responsive-native"
               value="09:30"
@@ -565,8 +565,8 @@ export const FieldWithoutPicker: StoryObj = {
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
           <tedi-form-field>
-            <label tedi-label for="no-picker">Time</label>
-            <tedi-time-field inputId="no-picker" placeholder="hh:mm" pickerVariant="none" />
+            <label tedi-label for="no-picker">Aeg</label>
+            <tedi-time-field inputId="no-picker" placeholder="tt:mm" pickerVariant="none" />
           </tedi-form-field>
         </tedi-col>
       </tedi-row>
@@ -589,14 +589,14 @@ export const MobileModal: StoryObj = {
         <tedi-col>
           <p tedi-text modifiers="small bold">Centered modal</p>
           <tedi-form-field>
-            <label tedi-label for="mobile-modal">Time</label>
+            <label tedi-label for="mobile-modal">Aeg</label>
             <tedi-time-field inputId="mobile-modal" pickerTrigger="input" />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
           <p tedi-text modifiers="small bold">Fullscreen modal (fullscreen=md)</p>
           <tedi-form-field>
-            <label tedi-label for="fullscreen-modal">Time</label>
+            <label tedi-label for="fullscreen-modal">Aeg</label>
             <tedi-time-field
               inputId="fullscreen-modal"
               pickerTrigger="input"
@@ -626,7 +626,7 @@ export const ManualTyping: StoryObj = {
         <tedi-col>
           <tedi-form-field>
             <label tedi-label for="input-formatting">Type a time and tab out</label>
-            <tedi-time-field inputId="input-formatting" placeholder="hh:mm" pickerVariant="none" />
+            <tedi-time-field inputId="input-formatting" placeholder="tt:mm" pickerVariant="none" />
             <tedi-feedback-text text="Try 1155, 930, 11.55, or 9:5" type="hint" position="left" />
           </tedi-form-field>
         </tedi-col>
@@ -663,7 +663,7 @@ export const WithReactiveForms: StoryObj = {
             <tedi-row cols="1" [md]="{ cols: 3 }">
               <tedi-col>
                 <tedi-form-field>
-                  <label tedi-label for="reactive-time">Time</label>
+                  <label tedi-label for="reactive-time">Aeg</label>
                   <tedi-time-field inputId="reactive-time" [formControl]="control" />
                 </tedi-form-field>
               </tedi-col>
