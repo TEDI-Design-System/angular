@@ -1,3 +1,10 @@
+# [6.5.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.3...angular-6.5.0-rc.4) (2026-06-05)
+
+
+### Features
+
+* **time-field,time-picker,scroll-fade:** new tedi-ready components [#374](https://github.com/TEDI-Design-System/angular/issues/374) ([#397](https://github.com/TEDI-Design-System/angular/issues/397)) ([0040e62](https://github.com/TEDI-Design-System/angular/commit/0040e621f55310c6b4909d92d5787766c39f00c6))
+
 # [6.5.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.2...angular-6.5.0-rc.3) (2026-06-05)
 
 
