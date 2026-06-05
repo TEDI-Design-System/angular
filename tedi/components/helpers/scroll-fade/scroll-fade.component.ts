@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  OnDestroy,
   ViewEncapsulation,
   computed,
   input,
@@ -26,7 +27,7 @@ export type ScrollFadeScrollbar = "default" | "custom";
     "[class]": "classes()",
   },
 })
-export class ScrollFadeComponent implements AfterViewInit {
+export class ScrollFadeComponent implements AfterViewInit, OnDestroy {
   /** Size of the fade gradient in percentages. */
   readonly fadeSize = input<ScrollFadeSize>(20);
 
@@ -43,6 +44,7 @@ export class ScrollFadeComponent implements AfterViewInit {
   readonly scrolledToBottom = output<void>();
 
   private readonly innerRef = viewChild.required<ElementRef<HTMLDivElement>>("inner");
+  private resizeObserver: ResizeObserver | null = null;
 
   private readonly fade = signal({ top: false, bottom: false });
 
@@ -81,6 +83,15 @@ export class ScrollFadeComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     const el = this.innerRef().nativeElement;
     this.updateFade(el.scrollTop, el.scrollHeight, el.clientHeight);
+
+    this.resizeObserver = new ResizeObserver(() => {
+      this.updateFade(el.scrollTop, el.scrollHeight, el.clientHeight);
+    });
+    this.resizeObserver.observe(el);
+  }
+
+  ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
   }
 
   private updateFade(scrollTop: number, scrollHeight: number, clientHeight: number): void {

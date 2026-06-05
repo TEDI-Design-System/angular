@@ -713,6 +713,72 @@ statusControl = new FormControl<string | null>(null);
 <tedi-date-picker [formControl]="dateControl" [showWeekNumbers]="true" />
 ```
 
+### TimeField
+**Selector:** `tedi-time-field`
+**Model:** `value: string | null` — `HH:mm`
+**Inputs:**
+- `inputId: string` (required) — unique ID for label association
+- `placeholder: string`
+- `disabled: boolean = false`
+- `invalid: boolean = false` — manually mark the field invalid (combines with reactive-form validity)
+- `clearable: boolean = true`
+- `pickerVariant: TimeFieldPickerVariant = "scroll"` — `"scroll" | "slots" | "dropdown" | "none"`. `"none"` renders just the input — typed input is still normalized on blur (e.g. `9` → `09:00`, `930` → `09:30`)
+- `useNativePicker: TimeFieldUseNativePicker = false` — `true` always uses the OS time picker (`<input type="time">`), `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl"`) means native below that breakpoint. When resolved to `true`, overrides `pickerVariant` and `modal`
+- `pickerTrigger: TimeFieldPickerTrigger = "button"` — `"button"` opens via the icon only (popover opens toward the icon/end); `"input"` also opens when the input is clicked (popover opens from the field start/left). The popover always matches the input width
+- `closeOnSelect: boolean = false` — close the popover/modal as soon as a value is picked
+- `timeSlots: string[] = []` — `HH:mm` strings for `"slots"` and `"dropdown"` variants
+- `columns: number = 3` — grid columns for the `"slots"` variant
+- `showSlotIndicator: boolean = false` — show the radio indicator dot on each card in the `"slots"` variant
+- `minuteStep: number = 1` — minute increment for the `"scroll"` variant
+- `modal: TimeFieldModal = "md"` — open the picker in a modal: `true` always, `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl"`) means modal below that breakpoint
+- `fullscreen: TimeFieldFullscreen = false` — make the modal fullscreen: `true` always, `false` never, breakpoint name means fullscreen below that breakpoint. Only applies when the picker opens as a modal
+
+Sizing and validation styling come from the wrapping `tedi-form-field` — set them there, not on `tedi-time-field`. Free-typed values are normalized on blur (digits-only → `HH:mm`); invalid input reverts to the previous value.
+
+```html
+<tedi-form-field>
+  <label tedi-label for="time">Time</label>
+  <tedi-time-field inputId="time" [formControl]="timeControl" pickerTrigger="input" />
+</tedi-form-field>
+
+<!-- Custom scroll picker on desktop, OS picker below md -->
+<tedi-time-field
+  inputId="time"
+  pickerVariant="scroll"
+  useNativePicker="md"
+/>
+
+<!-- Modal below md, fullscreen below sm -->
+<tedi-time-field inputId="time" modal="md" fullscreen="sm" />
+```
+
+### TimePicker
+**Selector:** `tedi-time-picker`
+**Model:** `value: string | null` — `HH:mm`
+**Inputs:**
+- `variant: TimePickerVariant = "scroll"` — `"scroll" | "slots" | "dropdown"`
+- `timeSlots: string[] = []` — predefined `HH:mm` strings for `"slots"` and `"dropdown"`
+- `columns: number = 3` — grid columns for the `"slots"` variant
+- `showSlotIndicator: boolean = false` — show the radio indicator dot on each card in the `"slots"` variant
+- `minuteStep: number = 1` — minute increment for the `"scroll"` variant
+- `disabled: boolean = false`
+- `border: boolean = false` — render with a surrounding border, useful when embedded inline (not in a popover/modal)
+- `trapFocus: boolean = false` — trap Tab inside the picker (used when embedded in a popover/modal). `scroll` cycles between hour/minute columns; `slots`/`dropdown` emit `closeRequested`
+
+**Outputs:**
+- `closeRequested: void` — emitted when the picker requests to be closed (Tab while `trapFocus` is `true`)
+
+**Keyboard:** `scroll` columns respond to `ArrowUp`/`ArrowDown`, `Home`/`End`, `PageUp`/`PageDown` (jump 5); `Enter`/`Space` on the hour column moves focus to minutes. `dropdown` items respond to `ArrowUp`/`ArrowDown`, `Home`/`End`, `Enter`/`Space`.
+
+Standalone time picker. Most consumers should use `tedi-time-field` instead — it bundles the picker, an input, and the popover/modal trigger logic. With no value, the `scroll` wheel parks on `12:00` (display only — nothing is selected until the user picks).
+
+```html
+<tedi-time-picker [(value)]="time" variant="scroll" [minuteStep]="5" />
+
+<!-- Inline picker rendered with a border -->
+<tedi-time-picker [(value)]="time" variant="slots" [timeSlots]="['09:00','10:00','11:00']" [border]="true" />
+```
+
 ### Select
 **Selector:** `tedi-select`
 **Inputs:**
@@ -777,6 +843,69 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
     </tedi-dropdown-item-value>
   </ng-template>
 </tedi-select>
+```
+
+### Filter
+**Selector:** `tedi-filter`
+**Model:** `selected: boolean`, `value: string`, `values: string[]`
+**Inputs:**
+- `text: string = ""` — filter label text
+- `variant: FilterVariant = "primary"` — "primary" or "secondary"
+- `size: FilterSize = "default"` — "default" or "large"
+- `multiselect: boolean = false` — multiselect dropdown mode
+- `options: FilterOption[] = []` — dropdown options `{ label, value, disabled? }`
+- `preserveLabel: boolean = false` — when true, single-select shows "Text: SelectedLabel" instead of replacing text
+- `searchable: boolean = false` — show search field in dropdown
+- `showSelectAll: boolean = false` — show "Select all" in multiselect
+- `showClear: boolean = false` — show clear action in dropdown
+- `selectAllLabel: string = "Vali kõik"`
+- `clearLabel: string = "Tühjenda valik"`
+- `appendTo: string = ""` — append dropdown to selector (e.g., "body")
+**Outputs:**
+- `cleared: void` — emitted when clear button is clicked in custom content mode
+**Slots:**
+- `[tediFilterPrepend]` — content before the label (icon, status badge, indicator). Hidden when the filter is selected. In toggle mode (no dropdown), a check icon replaces it; in dropdown modes the prepend is simply removed.
+- `[tediFilterContent]` — custom dropdown content (replaces options)
+
+Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle), `string` (single-select), `string[]` (multiselect).
+
+```html
+<!-- Boolean toggle -->
+<tedi-filter text="Active" variant="secondary" [formControl]="activeControl" />
+
+<!-- Single-select dropdown -->
+<tedi-filter text="Service" [options]="options" [(value)]="value" [showClear]="true" appendTo="body" />
+
+<!-- Single-select with label preserved (shows "Service: Option A") -->
+<tedi-filter text="Service" [options]="options" [(value)]="value" [preserveLabel]="true" appendTo="body" />
+
+<!-- Multiselect dropdown -->
+<tedi-filter text="Hospital" [multiselect]="true" [options]="options" [(values)]="values"
+  [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+
+<!-- With prepend content -->
+<tedi-filter text="Submitted" variant="secondary" size="large">
+  <tedi-status-badge tediFilterPrepend text="5" color="brand" />
+</tedi-filter>
+
+<!-- Custom dropdown content -->
+<tedi-filter [text]="selectedLabel" [selected]="!!selectedValue" [showClear]="true" (cleared)="clear()">
+  <div tediFilterContent>
+    <!-- custom content here -->
+  </div>
+</tedi-filter>
+```
+
+### FilterGroup
+**Selector:** `tedi-filter-group`
+Wrapper that joins filters into a connected button group with collapsed borders and shared border-radius.
+
+```html
+<tedi-filter-group>
+  <tedi-filter text="All" variant="secondary" [selected]="true" />
+  <tedi-filter text="Active" variant="secondary" />
+  <tedi-filter text="Closed" variant="secondary" />
+</tedi-filter-group>
 ```
 
 ### FormField
@@ -1124,10 +1253,13 @@ openModal() {
     width: 'md',                    // 'xs' | 'sm' | 'md' | 'lg' | 'xl' | custom CSS value
     size: 'default',                // 'default' | 'small'
     position: 'center',             // 'center' | 'top' | 'bottom' | 'left' | 'right'
+    scrollBehavior: 'content',      // 'content' | 'page'
     closeOnBackdropClick: true,
     closeOnEscape: true,
-    scrollBehavior: 'content',      // 'content' | 'page'
-    fullscreen: false,              // true | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | false
+    showClose: true,
+    fullscreen: false,              // true | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'
+    maxWidth: '60vw',               // optional cap, overrides default 95vw
+    ariaLabel: 'Confirm action',
   });
 
   ref.closed.subscribe(result => console.log(result));
@@ -1136,16 +1268,17 @@ openModal() {
 
 **ModalConfig inputs:**
 - `data: unknown` — injected via `MODAL_DATA` token
-- `width: ModalWidth = "sm"` — preset (`xs`-`xl`) or custom CSS value (`"80%"`, `"600px"`)
-- `maxWidth: string` — max-width cap (e.g. `"75%"`, `"60vw"`). Overrides the default 95vw limit.
 - `size: ModalSize = "default"` — `"default"` or `"small"`
-- `position: ModalPosition = "center"` — `"center"`, `"top"`, `"bottom"`, `"left"`, `"right"`. `"bottom"` anchors the modal to the bottom edge with a fixed margin (useful for mobile bottom-sheet patterns).
+- `width: ModalWidth = "sm"` — preset (`"xs" | "sm" | "md" | "lg" | "xl"`) or custom CSS value (`"80%"`, `"600px"`)
+- `position: ModalPosition = "center"` — `"center" | "top" | "bottom" | "left" | "right"`. `"bottom"` anchors the modal to the bottom edge with a fixed margin (useful for mobile bottom-sheet patterns)
+- `scrollBehavior: ModalScrollBehavior = "content"` — `"content"` scrolls inside the modal, `"page"` scrolls the overlay
 - `closeOnBackdropClick: boolean = true`
 - `closeOnEscape: boolean = true`
-- `scrollBehavior: "content" | "page" = "content"`
-- `fullscreen: boolean | "sm" | "md" | "lg" | "xl" | "xxl" = false` — `true` = always fullscreen; a breakpoint = fullscreen below that breakpoint.
-- `ariaLabel: string` — ARIA label for the dialog.
-- `ariaLabelledBy: string` — ID of the element that labels the dialog.
+- `showClose: boolean = true` — show the close button in the header
+- `fullscreen: ModalFullscreen = false` — `true` always fullscreen, `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl" | "xxl"`) means fullscreen below that breakpoint
+- `maxWidth: string` — optional max-width cap (e.g. `"75%"`, `"60vw"`); overrides the default `95vw`
+- `ariaLabel: string` — ARIA label for the dialog
+- `ariaLabelledBy: string` — ID of the element that labels the dialog
 
 **ModalRef methods/properties:**
 - `close(result?: R)` — close with optional result

@@ -1084,6 +1084,66 @@ export const translationsMap = {
     en: "Next years",
     ru: "Следующие годы",
   },
+  "time-picker.hours": {
+    description: "Aria label for the hours listbox in the time picker.",
+    components: ["TimePicker"],
+    et: "Tunnid",
+    en: "Hours",
+    ru: "Часы",
+  },
+  "time-picker.minutes": {
+    description: "Aria label for the minutes listbox in the time picker.",
+    components: ["TimePicker"],
+    et: "Minutid",
+    en: "Minutes",
+    ru: "Минуты",
+  },
+  "time-field.clear": {
+    description:
+      "Label for the button that clears the selected time from the input field.",
+    components: ["TimeField"],
+    et: "Tühjenda kellaaeg",
+    en: "Clear time",
+    ru: "Очистить время",
+  },
+  "time-field.select-time": {
+    description: "Label for the button that selects time.",
+    components: ["TimeField"],
+    et: "Vali kellaaeg",
+    en: "Select time",
+    ru: "Выбрать время",
+  },
+  "time-field.modal-title": {
+    description: "Title shown in the mobile time picker modal header.",
+    components: ["TimeField"],
+    et: "Kellaaeg",
+    en: "Time",
+    ru: "Время",
+  },
+  "time-field.confirm": {
+    description:
+      "Label for the confirm button in the mobile time picker modal.",
+    components: ["TimeField"],
+    et: "Kinnita",
+    en: "Confirm",
+    ru: "Подтвердить",
+  },
+  "time-field.cancel": {
+    description:
+      "Label for the cancel button in the mobile time picker modal.",
+    components: ["TimeField"],
+    et: "Tühista",
+    en: "Cancel",
+    ru: "Отмена",
+  },
+  "time-picker.no-slots": {
+    description:
+      "Empty-state message shown in the slots/dropdown time picker when no time slots have been provided.",
+    components: ["TimePicker", "TimeField"],
+    et: "Aegu ei ole määratud",
+    en: "No times available",
+    ru: "Нет доступных вариантов",
+  },
   "vertical-stepper.completed": {
     description:
       "Label for screen-reader that this step is completed (visually hidden)",

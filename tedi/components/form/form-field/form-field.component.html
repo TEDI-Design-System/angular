@@ -1,7 +1,7 @@
 <ng-content select="label[tedi-label]"></ng-content>
 
 <div [ngClass]="inputClasses()">
-  <ng-content select="input[tedi-text-field]"></ng-content>
+  <ng-content select="input[tedi-text-field], tedi-time-field"></ng-content>
 
   @if (clearable()) {
     <div

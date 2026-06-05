@@ -19,11 +19,12 @@ Enter plan mode and create a detailed plan covering:
 - **Component name** and selector (`tedi-` prefix)
 - **Category** — which folder under `tedi/components/` it belongs to
 - **API design** — all inputs (with types and defaults), outputs, content projection slots
+- **Responsive inputs** — for each input, check if the React equivalent uses `BreakpointSupport<T>` or `BreakpointInput<T>`. If yes, plan the Angular equivalent (see "Responsive Inputs (Breakpoint Support)" in best-practices.md for pattern A vs B). Even without a React reference, ask: would consumers reasonably need to vary this input per breakpoint? If so, add breakpoint support up front — retrofitting later is a breaking change.
 - **Accessibility** — ARIA roles, keyboard interactions, screen reader behavior, focus management
 - **Dependencies** — existing TEDI components to reuse, third-party libraries if needed
 - **File list** — every file to create
 - **Test plan** — what to test (inputs, outputs, states, keyboard, a11y, form integration if applicable)
-- **Stories plan** — which stories to create (match all Figma variants)
+- **Stories plan** — which stories to create (match all Figma variants); include a responsive-case story for any breakpoint-aware input
 
 If a new dependency is needed, stop and ask the user for permission.
 
