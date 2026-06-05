@@ -17,6 +17,10 @@
     }
   }
 
+  .tedi-filter--primary.tedi-filter--selected:not(:last-child) .tedi-filter__button {
+    border-right-color: var(--filter-primary-selected-border);
+  }
+
   .tedi-filter--selected,
   .tedi-filter:focus-within {
     z-index: 1;

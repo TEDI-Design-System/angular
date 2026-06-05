@@ -57,43 +57,60 @@
     </div>
   </div>
 } @else if (variant() === 'dropdown') {
-  <div class="tedi-time-picker__dropdown" role="listbox">
-    @for (slot of timeSlots(); track slot; let i = $index) {
-      <button
-        type="button"
-        class="tedi-time-picker__dropdown-item"
-        role="option"
-        [class.tedi-time-picker__dropdown-item--selected]="isSlotSelected(slot)"
-        [attr.aria-selected]="isSlotSelected(slot)"
-        [disabled]="isDisabled()"
-        [attr.tabindex]="getDropdownTabIndex(i)"
-        (click)="selectSlot(slot)"
-        (keydown)="onDropdownKeydown($event)"
-      >
-        {{ slot }}
-      </button>
-    }
-  </div>
+  @if (timeSlots().length === 0) {
+    <p class="tedi-time-picker__empty">{{ 'time-picker.no-slots' | tediTranslate }}</p>
+  } @else {
+    <div
+      class="tedi-time-picker__dropdown"
+      role="listbox"
+      [attr.aria-disabled]="isDisabled() ? true : null"
+    >
+      @for (slot of timeSlots(); track slot; let i = $index) {
+        <div
+          class="tedi-time-picker__dropdown-item"
+          role="option"
+          [class.tedi-time-picker__dropdown-item--selected]="isSlotSelected(slot)"
+          [attr.aria-selected]="isSlotSelected(slot)"
+          [attr.aria-disabled]="isDisabled() ? true : null"
+          [attr.tabindex]="isDisabled() ? -1 : getDropdownTabIndex(i)"
+          (click)="!isDisabled() && selectSlot(slot)"
+          (keydown)="onDropdownKeydown($event)"
+        >
+          {{ slot }}
+        </div>
+      }
+    </div>
+  }
 } @else if (variant() === 'slots') {
-  <div
-    class="tedi-time-picker__grid"
-    role="radiogroup"
-    [style]="gridStyle()"
-  >
-    @for (slot of timeSlots(); track slot; let i = $index) {
-      <button
-        type="button"
-        class="tedi-time-picker__slot"
-        role="radio"
-        [class.tedi-time-picker__slot--selected]="isSlotSelected(slot)"
-        [attr.aria-checked]="isSlotSelected(slot)"
-        [disabled]="isDisabled()"
-        [attr.tabindex]="getSlotTabIndex(i)"
-        (click)="selectSlot(slot)"
-        (keydown)="onSlotKeydown($event)"
-      >
-        {{ slot }}
-      </button>
-    }
-  </div>
+  @if (timeSlots().length === 0) {
+    <p class="tedi-time-picker__empty">{{ 'time-picker.no-slots' | tediTranslate }}</p>
+  } @else {
+    <tedi-radio-card-group
+      class="tedi-time-picker__grid"
+      role="radiogroup"
+      [style]="gridStyle()"
+    >
+      @for (slot of timeSlots(); track slot; let i = $index) {
+        <label
+          tedi-radio-card
+          variant="secondary"
+          class="tedi-time-picker__slot"
+          [showIndicator]="showSlotIndicator()"
+          [for]="slotId(i)"
+        >
+          <input
+            tedi-radio
+            type="radio"
+            [id]="slotId(i)"
+            [name]="radioGroupName"
+            [value]="slot"
+            [checked]="isSlotSelected(slot)"
+            [disabled]="isDisabled()"
+            (change)="onRadioChange(slot)"
+          />
+          {{ slot }}
+        </label>
+      }
+    </tedi-radio-card-group>
+  }
 }

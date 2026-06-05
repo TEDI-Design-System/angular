@@ -3,6 +3,7 @@
 
 @mixin modal-heading($size) {
   .tedi-modal-header__head {
+
     h1,
     h2,
     h3,
@@ -23,11 +24,6 @@
   --_tedi-modal-footer-gap: var(--button-gutter-x);
 
   @include modal-heading(h3);
-
-  .tedi-modal-header__close {
-    width: var(--button-sm-icon-size);
-    height: var(--button-sm-icon-size);
-  }
 }
 
 @mixin modal-size-small {
@@ -39,11 +35,6 @@
   --_tedi-modal-footer-gap: var(--button-gutter-x-sm);
 
   @include modal-heading(h4);
-
-  .tedi-modal-header__close {
-    width: var(--button-xs-icon-size);
-    height: var(--button-xs-icon-size);
-  }
 }
 
 @mixin modal-dialog-box {
@@ -57,8 +48,7 @@
 
 @mixin modal-content-styles {
   .tedi-modal-header {
-    padding: var(--_tedi-modal-heading-padding-y)
-      var(--_tedi-modal-heading-padding-x);
+    padding: var(--_tedi-modal-heading-padding-y) var(--_tedi-modal-heading-padding-x);
     border-bottom: var(--tedi-borders-01) solid var(--modal-border-inner);
 
     .tedi-modal-header__head {
@@ -98,13 +88,18 @@
     display: flex;
     gap: var(--_tedi-modal-footer-gap);
     justify-content: flex-end;
-    padding: var(--_tedi-modal-footer-padding-y)
-      var(--_tedi-modal-footer-padding-x);
+    padding: var(--_tedi-modal-footer-padding-y) var(--_tedi-modal-footer-padding-x);
     border-top: var(--tedi-borders-01) solid var(--modal-border-inner);
   }
 }
 
-$modal-widths: (xs, sm, md, lg, xl);
+$modal-widths: (
+  xs,
+  sm,
+  md,
+  lg,
+  xl
+);
 
 // =============================================================================
 // Legacy template-based modal (deprecated)
@@ -134,10 +129,8 @@ $modal-widths: (xs, sm, md, lg, xl);
   @each $width in $modal-widths {
     &--#{$width} {
       .tedi-modal__dialog {
-        max-width: min(
-          var(--modal-max-width-#{$width}),
-          var(--_tedi-modal-max-width)
-        );
+        max-width: min(var(--modal-max-width-#{$width}),
+          var(--_tedi-modal-max-width));
       }
     }
   }
@@ -231,10 +224,8 @@ $modal-widths: (xs, sm, md, lg, xl);
 
   @each $width in $modal-widths {
     &--#{$width} {
-      max-width: min(
-        var(--modal-max-width-#{$width}),
-        var(--_tedi-modal-max-width)
-      );
+      max-width: min(var(--modal-max-width-#{$width}),
+        var(--_tedi-modal-max-width));
     }
   }
 
@@ -266,6 +257,7 @@ $modal-widths: (xs, sm, md, lg, xl);
 
   &--center {
     // cdk-dialog-container: third-party, can't add host class
+
     cdk-dialog-container {
       display: flex;
       flex-direction: column;
@@ -323,7 +315,7 @@ $modal-widths: (xs, sm, md, lg, xl);
     }
   }
 
-  @each $bp in (sm, md, lg, xl) {
+  @each $bp in (sm, md, lg, xl, xxl) {
     &--fullscreen-#{$bp} {
       @include breakpoints.media-breakpoint-down($bp) {
         --_tedi-modal-max-width: 100vw;

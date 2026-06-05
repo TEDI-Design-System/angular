@@ -106,5 +106,9 @@
     display: flex;
     gap: var(--layout-grid-gutters-04);
     align-items: center;
+
+    &--hidden {
+      visibility: hidden;
+    }
   }
 }

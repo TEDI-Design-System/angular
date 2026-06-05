@@ -1,14 +1,14 @@
 ---
 name: tedi-angular
 description: >
-  Build UIs with @tedi-design-system/angular — 38+ accessible Angular components with design token
+  Build UIs with @tedi-design-system/angular — 40+ accessible Angular components with design token
   theming. Use when creating interfaces, integrating form controls, customizing themes, or working
   with TEDI components in an Angular application.
 ---
 
 # TEDI Design System — Angular
 
-Angular component library with 38+ accessible, standalone components. Built on Angular 19+ with signal-based APIs and design tokens from `@tedi-design-system/core`.
+Angular component library with 40+ accessible, standalone components. Built on Angular 19+ with signal-based APIs and design tokens from `@tedi-design-system/core`.
 
 ## Installation
 

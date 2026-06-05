@@ -4,6 +4,11 @@ import { PaginationComponent } from "./pagination.component";
 export default {
   title: "Community/Navigation/Pagination",
   component: PaginationComponent,
+  parameters: {
+    status: {
+      type: ["existsInTediReady"],
+    },
+  },
   args: {
     page: 1,
     length: 500,

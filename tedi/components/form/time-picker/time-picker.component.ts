@@ -18,6 +18,10 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { _IdGenerator } from "@angular/cdk/a11y";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
+import { isValidTime } from "../../../utils/time.util";
+import { RadioCardComponent } from "../radio-card/radio-card.component";
+import { RadioCardGroupComponent } from "../radio-card-group/radio-card-group.component";
+import { RadioComponent } from "../radio/radio.component";
 
 export type TimePickerVariant = "scroll" | "slots" | "dropdown";
 
@@ -31,7 +35,12 @@ type WheelType = "hour" | "minute";
 @Component({
   selector: "tedi-time-picker",
   standalone: true,
-  imports: [TediTranslationPipe],
+  imports: [
+    TediTranslationPipe,
+    RadioCardComponent,
+    RadioCardGroupComponent,
+    RadioComponent,
+  ],
   templateUrl: "./time-picker.component.html",
   styleUrl: "./time-picker.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,6 +51,7 @@ type WheelType = "hour" | "minute";
     "[class.tedi-time-picker--slots]": "variant() === 'slots'",
     "[class.tedi-time-picker--dropdown]": "variant() === 'dropdown'",
     "[class.tedi-time-picker--disabled]": "isDisabled()",
+    "[class.tedi-time-picker--bordered]": "border()",
   },
   providers: [
     {
@@ -60,10 +70,14 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit,
   readonly timeSlots = input<string[]>([]);
   /** Number of columns for the `slots` grid. */
   readonly columns = input<number>(3);
+  /** Show the radio indicator dot on each card in the `slots` variant. Has no effect on other variants. */
+  readonly showSlotIndicator = input<boolean>(false);
   /** Minute step for the `scroll` variant — e.g. `5` renders `00, 05, 10…`. */
   readonly minuteStep = input<number>(1);
   /** Disables interaction. Combines with the form-control disabled state. */
   readonly disabled = input<boolean>(false);
+  /** Render the picker with a surrounding border — useful when embedded inside other content where it needs to stand apart. */
+  readonly border = input<boolean>(false);
   /** Trap Tab between hour/minute columns (`scroll`) or emit `closeRequested` (`slots`/`dropdown`). */
   readonly trapFocus = input<boolean>(false);
   /** Emitted when the picker requests to be closed (Tab while `trapFocus` is `true`). */
@@ -79,6 +93,8 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit,
   private readonly isProgrammaticScroll: Record<WheelType, boolean> = { hour: false, minute: false };
   private readonly scrollLockTimer: Partial<Record<WheelType, ReturnType<typeof setTimeout>>> = {};
   private readonly scrollDebounceTimer: Partial<Record<WheelType, ReturnType<typeof setTimeout>>> = {};
+  private cachedItemHeight: number | null = null;
+  private resizeObserver: ResizeObserver | null = null;
 
   private readonly hourScrollIndex = signal(0);
   private readonly minuteScrollIndex = signal(0);
@@ -86,14 +102,26 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit,
   readonly hourColumns = viewChildren<ElementRef<HTMLElement>>("hourColumn");
   readonly minuteColumns = viewChildren<ElementRef<HTMLElement>>("minuteColumn");
 
+  /**
+   * The current `value` after validation. Invalid strings (e.g. `"25:99"`,
+   * `"abc"`, anything not matching `HH:mm`) collapse to `null`, so the picker
+   * renders as "no selection" instead of trying to scroll to a nonexistent
+   * row. The `value` model itself is left untouched — consumers using
+   * reactive forms can still see their invalid state.
+   */
+  private readonly safeValue = computed(() => {
+    const v = this.value()?.trim();
+    return v && isValidTime(v) ? v : null;
+  });
+
   readonly selectedHour = computed(() => {
-    const val = this.value();
+    const val = this.safeValue();
     if (!val) return null;
     return parseInt(val.split(":")[0], 10);
   });
 
   readonly selectedMinute = computed(() => {
-    const val = this.value();
+    const val = this.safeValue();
     if (!val) return null;
     return parseInt(val.split(":")[1], 10);
   });
@@ -112,7 +140,8 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit,
   readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
   readonly gridStyle = computed(() => `grid-template-columns: repeat(${this.columns()}, 1fr)`);
 
-  readonly selectedHourIndex = computed(() => this.selectedHour() ?? 0);
+  // With no value the wheel parks on 12:00 (display only — nothing is emitted).
+  readonly selectedHourIndex = computed(() => this.selectedHour() ?? 12);
   readonly selectedMinuteIndex = computed(() => {
     const m = this.selectedMinute();
     if (m === null) return 0;
@@ -133,9 +162,23 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit,
     return `${this.uniqueId}minute-${index}`;
   }
 
+  slotId(index: number): string {
+    return `${this.uniqueId}slot-${index}`;
+  }
+
+  get radioGroupName(): string {
+    return `${this.uniqueId}slot-group`;
+  }
+
+  onRadioChange(slot: string): void {
+    this.selectSlot(slot);
+  }
+
   constructor() {
     effect(() => {
-      this.value();
+      // Re-align the scroll wheel when the (sanitized) value changes. Reading
+      // safeValue here intentionally skips realignment for invalid strings.
+      this.safeValue();
       if (!this.initialized) return;
       if (this.variant() !== "scroll") return;
       this.alignScroll("instant");
@@ -144,16 +187,28 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit,
 
   ngAfterViewInit(): void {
     this.initialized = true;
+    this.cachedItemHeight = this.measureItemHeight();
+    if (typeof ResizeObserver !== "undefined") {
+      this.resizeObserver = new ResizeObserver(
+        () => (this.cachedItemHeight = this.measureItemHeight()),
+      );
+      this.resizeObserver.observe(this.el.nativeElement as HTMLElement);
+    }
     requestAnimationFrame(() => this.alignScroll("instant"));
   }
 
-  private getItemHeight(): number {
+  private measureItemHeight(): number {
     const root = this.el.nativeElement as HTMLElement;
     const item = root.querySelector(".tedi-time-picker__item") as HTMLElement | null;
     return item?.offsetHeight || DEFAULT_ITEM_HEIGHT;
   }
 
+  private getItemHeight(): number {
+    return this.cachedItemHeight ?? this.measureItemHeight();
+  }
+
   ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
     (Object.keys(this.scrollLockTimer) as WheelType[]).forEach((k) => {
       const t = this.scrollLockTimer[k];
       if (t) clearTimeout(t);
@@ -311,15 +366,20 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit,
     }, SCROLL_DEBOUNCE_MS);
   }
 
+  /** Roving-tabindex helper for dropdown items: only the selected item (or the first
+   * when nothing is selected yet) is in the tab sequence. */
   getDropdownTabIndex(index: number): number {
-    return this.getSelectedSlotTabIndex(index);
-  }
-
-  getSlotTabIndex(index: number): number {
-    return this.getSelectedSlotTabIndex(index);
+    const slots = this.timeSlots();
+    const selectedIndex = slots.indexOf(this.value() ?? "");
+    if (selectedIndex !== -1) {
+      return selectedIndex === index ? 0 : -1;
+    }
+    return index === 0 ? 0 : -1;
   }
 
   onDropdownKeydown(event: KeyboardEvent): void {
+    if (this.isDisabled()) return;
+
     if (event.key === "Tab") {
       if (this.trapFocus()) {
         event.preventDefault();
@@ -334,9 +394,9 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit,
     if (!list) return;
 
     const items = Array.from(
-      list.querySelectorAll<HTMLButtonElement>(".tedi-time-picker__dropdown-item"),
+      list.querySelectorAll<HTMLElement>(".tedi-time-picker__dropdown-item"),
     );
-    const currentIndex = items.indexOf(target as HTMLButtonElement);
+    const currentIndex = items.indexOf(target);
     if (currentIndex === -1) return;
 
     let nextIndex: number | null = null;
@@ -367,56 +427,6 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit,
     items[nextIndex].focus();
   }
 
-  onSlotKeydown(event: KeyboardEvent): void {
-    if (event.key === "Tab") {
-      if (this.trapFocus()) {
-        event.preventDefault();
-        event.stopPropagation();
-        this.closeRequested.emit();
-      }
-      return;
-    }
-
-    const target = event.target as HTMLElement;
-    const grid = target.closest(".tedi-time-picker__grid");
-    if (!grid) return;
-
-    const slots = Array.from(
-      grid.querySelectorAll<HTMLButtonElement>(".tedi-time-picker__slot"),
-    );
-    const currentIndex = slots.indexOf(target as HTMLButtonElement);
-    if (currentIndex === -1) return;
-
-    const cols = this.columns();
-    let nextIndex: number | null = null;
-
-    switch (event.key) {
-      case "ArrowRight":
-        nextIndex = Math.min(currentIndex + 1, slots.length - 1);
-        break;
-      case "ArrowLeft":
-        nextIndex = Math.max(currentIndex - 1, 0);
-        break;
-      case "ArrowDown":
-        nextIndex = Math.min(currentIndex + cols, slots.length - 1);
-        break;
-      case "ArrowUp":
-        nextIndex = Math.max(currentIndex - cols, 0);
-        break;
-      case "Enter":
-      case " ":
-        event.preventDefault();
-        this.selectSlot(slots[currentIndex].textContent!.trim());
-        return;
-      default:
-        return;
-    }
-
-    if (nextIndex !== null) {
-      event.preventDefault();
-      slots[nextIndex].focus();
-    }
-  }
 
   private focusOtherColumn(currentType: WheelType): void {
     const target = currentType === "hour" ? this.minuteColumns()[0] : this.hourColumns()[0];
@@ -430,44 +440,30 @@ export class TimePickerComponent implements ControlValueAccessor, AfterViewInit,
       return;
     }
 
-    let container: HTMLElement | undefined;
-    let selector: string;
+    const root = this.el.nativeElement as HTMLElement;
 
-    if (variant === "dropdown") {
-      container = this.el.nativeElement.querySelector(".tedi-time-picker__dropdown") ?? undefined;
-      selector = ".tedi-time-picker__dropdown-item";
-    } else if (variant === "slots") {
-      container = this.el.nativeElement.querySelector(".tedi-time-picker__grid") ?? undefined;
-      selector = ".tedi-time-picker__slot";
-    } else {
+    if (variant === "slots") {
+      const inputs = root.querySelectorAll<HTMLInputElement>(
+        '.tedi-time-picker__grid input[type="radio"]',
+      );
+      const checked = Array.from(inputs).find((input) => input.checked);
+      (checked ?? inputs[0])?.focus({ preventScroll: true });
       return;
     }
 
-    if (!container) return;
-
-    const items = container.querySelectorAll<HTMLButtonElement>(selector);
-    const focusable = Array.from(items).find(
-      (item) => item.getAttribute("tabindex") === "0",
-    );
-    (focusable ?? items[0])?.focus({ preventScroll: true });
-  }
-
-  /** @deprecated Use focusActiveItem() instead */
-  focusHourColumn(): void {
-    this.focusActiveItem();
+    if (variant === "dropdown") {
+      const items = root.querySelectorAll<HTMLButtonElement>(
+        ".tedi-time-picker__dropdown-item",
+      );
+      const focusable = Array.from(items).find(
+        (item) => item.getAttribute("tabindex") === "0",
+      );
+      (focusable ?? items[0])?.focus({ preventScroll: true });
+    }
   }
 
   scrollToSelected(): void {
     this.alignScroll("instant");
-  }
-
-  private getSelectedSlotTabIndex(index: number): number {
-    const slots = this.timeSlots();
-    const selectedIndex = slots.indexOf(this.value() ?? "");
-    if (selectedIndex !== -1) {
-      return selectedIndex === index ? 0 : -1;
-    }
-    return index === 0 ? 0 : -1;
   }
 
   private getColumnElement(type: WheelType): HTMLElement | undefined {

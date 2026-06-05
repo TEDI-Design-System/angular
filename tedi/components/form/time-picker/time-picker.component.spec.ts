@@ -469,30 +469,39 @@ describe("TimePickerComponent", () => {
       fixture.detectChanges();
     });
 
-    it("should render slot buttons", () => {
-      const slotButtons = el.querySelectorAll(".tedi-time-picker__slot");
-      expect(slotButtons.length).toBe(6);
+    it("should render a radio card per slot", () => {
+      const cards = el.querySelectorAll(".tedi-time-picker__slot");
+      expect(cards.length).toBe(6);
+      const inputs = el.querySelectorAll<HTMLInputElement>(
+        '.tedi-time-picker__grid input[type="radio"]',
+      );
+      expect(inputs.length).toBe(6);
     });
 
-    it("should select slot on click", () => {
+    it("should select slot when its radio input changes", () => {
       const onChange = jest.fn();
       component.registerOnChange(onChange);
 
-      const slotButtons = el.querySelectorAll(".tedi-time-picker__slot");
-      (slotButtons[2] as HTMLButtonElement).click();
+      const inputs = el.querySelectorAll<HTMLInputElement>(
+        '.tedi-time-picker__grid input[type="radio"]',
+      );
+      inputs[2].checked = true;
+      inputs[2].dispatchEvent(new Event("change", { bubbles: true }));
       fixture.detectChanges();
 
       expect(component.value()).toBe("11:00");
       expect(onChange).toHaveBeenCalledWith("11:00");
     });
 
-    it("should highlight selected slot", () => {
+    it("should mark the matching radio input as checked", () => {
       component.writeValue("10:30");
       fixture.detectChanges();
 
-      const slotButtons = el.querySelectorAll(".tedi-time-picker__slot");
-      expect(slotButtons[1].classList.contains("tedi-time-picker__slot--selected")).toBe(true);
-      expect(slotButtons[0].classList.contains("tedi-time-picker__slot--selected")).toBe(false);
+      const inputs = el.querySelectorAll<HTMLInputElement>(
+        '.tedi-time-picker__grid input[type="radio"]',
+      );
+      expect(inputs[1].checked).toBe(true);
+      expect(inputs[0].checked).toBe(false);
     });
 
     it("should render grid with configurable columns", () => {
@@ -508,97 +517,39 @@ describe("TimePickerComponent", () => {
       expect(grid?.getAttribute("role")).toBe("radiogroup");
     });
 
-    it("should set aria-checked on selected slot", () => {
-      component.writeValue("14:00");
+    it("should share a single radio group name across all slots", () => {
+      const inputs = el.querySelectorAll<HTMLInputElement>(
+        '.tedi-time-picker__grid input[type="radio"]',
+      );
+      const names = new Set(Array.from(inputs).map((i) => i.name));
+      expect(names.size).toBe(1);
+    });
+
+    it("should hide the radio indicator by default", () => {
+      const card = el.querySelector(".tedi-time-picker__slot");
+      expect(card?.classList.contains("tedi-radio-card--hide-indicator")).toBe(
+        true,
+      );
+    });
+
+    it("should show the radio indicator when showSlotIndicator is true", () => {
+      fixture.componentRef.setInput("showSlotIndicator", true);
       fixture.detectChanges();
 
-      const slotButtons = el.querySelectorAll(".tedi-time-picker__slot");
-      expect(slotButtons[3].getAttribute("aria-checked")).toBe("true");
-      expect(slotButtons[0].getAttribute("aria-checked")).toBe("false");
+      const card = el.querySelector(".tedi-time-picker__slot");
+      expect(card?.classList.contains("tedi-radio-card--hide-indicator")).toBe(
+        false,
+      );
     });
 
-    describe("roving tabindex", () => {
-      it("should set tabindex 0 on first item when no selection", () => {
-        const slots = el.querySelectorAll(".tedi-time-picker__slot");
-        expect(slots[0].getAttribute("tabindex")).toBe("0");
-        expect(slots[1].getAttribute("tabindex")).toBe("-1");
-      });
+    it("should disable every radio input when disabled", () => {
+      fixture.componentRef.setInput("disabled", true);
+      fixture.detectChanges();
 
-      it("should set tabindex 0 on selected item", () => {
-        component.writeValue("11:00");
-        fixture.detectChanges();
-
-        const slots = el.querySelectorAll(".tedi-time-picker__slot");
-        expect(slots[2].getAttribute("tabindex")).toBe("0");
-        expect(slots[0].getAttribute("tabindex")).toBe("-1");
-      });
-    });
-
-    describe("keyboard navigation", () => {
-      const dispatchKey = (element: HTMLElement, key: string) => {
-        element.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
-      };
-
-      it("should move focus with ArrowRight", () => {
-        const slots = el.querySelectorAll(".tedi-time-picker__slot");
-        (slots[0] as HTMLElement).focus();
-        dispatchKey(slots[0] as HTMLElement, "ArrowRight");
-        expect(document.activeElement).toBe(slots[1]);
-      });
-
-      it("should move focus with ArrowLeft", () => {
-        const slots = el.querySelectorAll(".tedi-time-picker__slot");
-        (slots[2] as HTMLElement).focus();
-        dispatchKey(slots[2] as HTMLElement, "ArrowLeft");
-        expect(document.activeElement).toBe(slots[1]);
-      });
-
-      it("should move focus with ArrowDown by column count", () => {
-        const slots = el.querySelectorAll(".tedi-time-picker__slot");
-        (slots[0] as HTMLElement).focus();
-        dispatchKey(slots[0] as HTMLElement, "ArrowDown");
-        expect(document.activeElement).toBe(slots[3]);
-      });
-
-      it("should move focus with ArrowUp by column count", () => {
-        const slots = el.querySelectorAll(".tedi-time-picker__slot");
-        (slots[3] as HTMLElement).focus();
-        dispatchKey(slots[3] as HTMLElement, "ArrowUp");
-        expect(document.activeElement).toBe(slots[0]);
-      });
-
-      it("should select slot with Enter", () => {
-        const onChange = jest.fn();
-        component.registerOnChange(onChange);
-
-        const slots = el.querySelectorAll(".tedi-time-picker__slot");
-        (slots[1] as HTMLElement).focus();
-        dispatchKey(slots[1] as HTMLElement, "Enter");
-
-        expect(component.value()).toBe("10:30");
-        expect(onChange).toHaveBeenCalledWith("10:30");
-      });
-
-      it("should not trap Tab when trapFocus is false", () => {
-        const closeRequested = jest.spyOn(component.closeRequested, "emit");
-        const slots = el.querySelectorAll(".tedi-time-picker__slot");
-        (slots[0] as HTMLElement).focus();
-        dispatchKey(slots[0] as HTMLElement, "Tab");
-
-        expect(closeRequested).not.toHaveBeenCalled();
-      });
-
-      it("should emit closeRequested on Tab when trapFocus is true", () => {
-        fixture.componentRef.setInput("trapFocus", true);
-        fixture.detectChanges();
-
-        const closeRequested = jest.spyOn(component.closeRequested, "emit");
-        const slots = el.querySelectorAll(".tedi-time-picker__slot");
-        (slots[0] as HTMLElement).focus();
-        dispatchKey(slots[0] as HTMLElement, "Tab");
-
-        expect(closeRequested).toHaveBeenCalled();
-      });
+      const inputs = el.querySelectorAll<HTMLInputElement>(
+        '.tedi-time-picker__grid input[type="radio"]',
+      );
+      expect(Array.from(inputs).every((i) => i.disabled)).toBe(true);
     });
   });
 
@@ -625,7 +576,7 @@ describe("TimePickerComponent", () => {
       expect(onTouched).toHaveBeenCalled();
     });
 
-    it("should clear visual highlight when value is reset to null", () => {
+    it("should park the highlight on 12:00 when value is reset to null", () => {
       component.writeValue("14:30");
       fixture.detectChanges();
 
@@ -641,10 +592,179 @@ describe("TimePickerComponent", () => {
       columns = el.querySelectorAll(".tedi-time-picker__column");
       hourItems = columns[0].querySelectorAll(".tedi-time-picker__item");
       minuteItems = columns[1].querySelectorAll(".tedi-time-picker__item");
-      expect(hourItems[0].classList.contains("tedi-time-picker__item--selected")).toBe(true);
+      // No value → wheel parks on 12:00 (display only; nothing is selected/emitted).
+      expect(hourItems[12].classList.contains("tedi-time-picker__item--selected")).toBe(true);
       expect(hourItems[14].classList.contains("tedi-time-picker__item--selected")).toBe(false);
       expect(minuteItems[0].classList.contains("tedi-time-picker__item--selected")).toBe(true);
       expect(minuteItems[30].classList.contains("tedi-time-picker__item--selected")).toBe(false);
+    });
+
+    it("should not emit a value while parked on the 12:00 default", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+      component.writeValue(null);
+      fixture.detectChanges();
+
+      expect(component.value()).toBeNull();
+      expect(onChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("focusActiveItem", () => {
+    it("should focus the hour column in scroll variant", () => {
+      const hourColumn = el.querySelectorAll(
+        ".tedi-time-picker__column",
+      )[0] as HTMLElement;
+      const focusSpy = jest.spyOn(hourColumn, "focus");
+
+      component.focusActiveItem();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should focus the checked radio in slots variant", () => {
+      fixture.componentRef.setInput("variant", "slots");
+      fixture.componentRef.setInput("timeSlots", ["09:00", "10:00", "11:00"]);
+      component.writeValue("10:00");
+      fixture.detectChanges();
+
+      const inputs = el.querySelectorAll<HTMLInputElement>(
+        '.tedi-time-picker__grid input[type="radio"]',
+      );
+      const focusSpy = jest.spyOn(inputs[1], "focus");
+
+      component.focusActiveItem();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should focus the first radio in slots variant when nothing selected", () => {
+      fixture.componentRef.setInput("variant", "slots");
+      fixture.componentRef.setInput("timeSlots", ["09:00", "10:00"]);
+      fixture.detectChanges();
+
+      const inputs = el.querySelectorAll<HTMLInputElement>(
+        '.tedi-time-picker__grid input[type="radio"]',
+      );
+      const focusSpy = jest.spyOn(inputs[0], "focus");
+
+      component.focusActiveItem();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should focus the tabindex-0 item in dropdown variant", () => {
+      fixture.componentRef.setInput("variant", "dropdown");
+      fixture.componentRef.setInput("timeSlots", ["09:00", "10:00", "11:00"]);
+      component.writeValue("10:00");
+      fixture.detectChanges();
+
+      const items = el.querySelectorAll<HTMLElement>(
+        ".tedi-time-picker__dropdown-item",
+      );
+      const focusSpy = jest.spyOn(items[1], "focus");
+
+      component.focusActiveItem();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("scrollToSelected", () => {
+    it("should not throw when called outside scroll variant", () => {
+      fixture.componentRef.setInput("variant", "dropdown");
+      fixture.componentRef.setInput("timeSlots", ["09:00"]);
+      fixture.detectChanges();
+
+      expect(() => component.scrollToSelected()).not.toThrow();
+    });
+
+    it("should align scroll for scroll variant without throwing", () => {
+      component.writeValue("12:00");
+      fixture.detectChanges();
+
+      expect(() => component.scrollToSelected()).not.toThrow();
+    });
+  });
+
+  describe("dropdown keyboard fall-through", () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput("variant", "dropdown");
+      fixture.componentRef.setInput("timeSlots", ["09:00", "10:00"]);
+      fixture.detectChanges();
+    });
+
+    it("should ignore unhandled keys without throwing", () => {
+      const items = el.querySelectorAll(".tedi-time-picker__dropdown-item");
+      const event = new KeyboardEvent("keydown", { key: "x", bubbles: true });
+      const preventSpy = jest.spyOn(event, "preventDefault");
+
+      items[0].dispatchEvent(event);
+
+      expect(preventSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("scroll variant unhandled keys", () => {
+    it("should ignore non-navigation keys", () => {
+      component.writeValue("05:00");
+      fixture.detectChanges();
+
+      const hourColumn = el.querySelectorAll(".tedi-time-picker__column")[0];
+      const event = new KeyboardEvent("keydown", { key: "x", bubbles: true });
+      const preventSpy = jest.spyOn(event, "preventDefault");
+
+      hourColumn.dispatchEvent(event);
+
+      expect(preventSpy).not.toHaveBeenCalled();
+      expect(component.value()).toBe("05:00");
+    });
+  });
+
+  describe("scroll-driven selection", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("should commit the value after the scroll debounce settles", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      const hourColumn = el.querySelectorAll(
+        ".tedi-time-picker__column",
+      )[0] as HTMLElement;
+      Object.defineProperty(hourColumn, "scrollTop", {
+        value: 240,
+        configurable: true,
+      });
+      hourColumn.dispatchEvent(new Event("scroll"));
+
+      jest.runAllTimers();
+
+      expect(onChange).toHaveBeenCalled();
+    });
+
+    it("should clear pending debounce timers on destroy", () => {
+      const hourColumn = el.querySelectorAll(
+        ".tedi-time-picker__column",
+      )[0] as HTMLElement;
+      Object.defineProperty(hourColumn, "scrollTop", {
+        value: 100,
+        configurable: true,
+      });
+      hourColumn.dispatchEvent(new Event("scroll"));
+
+      const clearSpy = jest.spyOn(global, "clearTimeout");
+      try {
+        fixture.destroy();
+        expect(clearSpy).toHaveBeenCalled();
+      } finally {
+        clearSpy.mockRestore();
+      }
     });
   });
 });

@@ -8,20 +8,20 @@
     border: 1px solid var(--card-border-selected);
     border-radius: var(--card-radius-rounded);
 
-    .tedi-accordion__header,
-    &.tedi-accordion__item--expanded .tedi-accordion__body,
+    .tedi-accordion-item-header,
+    &.tedi-accordion__item--expanded .tedi-accordion-item-content,
     [tedi-accordion-icon-card] {
       border: transparent;
     }
 
-    .tedi-accordion__header,
-    &.tedi-accordion__item--expanded .tedi-accordion__body {
+    .tedi-accordion-item-header,
+    &.tedi-accordion__item--expanded .tedi-accordion-item-content {
       &--with-icon-card {
         border-left: 1px solid var(--card-border-primary);
       }
     }
 
-    .tedi-accordion__header {
+    .tedi-accordion-item-header {
       &--expanded {
         border-bottom: 1px solid var(--card-border-primary);
       }
@@ -31,7 +31,7 @@
   &--expanded {
     grid-template-rows: max-content minmax(0, 1fr);
 
-    .tedi-accordion__body {
+    .tedi-accordion-item-content {
       border: 1px solid var(--card-border-primary);
       border-top: none;
       border-radius: 0 0 var(--card-radius-rounded) var(--card-radius-rounded);
@@ -41,87 +41,6 @@
       }
     }
   }
-}
-
-.tedi-accordion__header-row {
-  display: flex;
-  grid-row: 1;
-  grid-column: 2;
-  align-items: stretch;
-}
-
-.tedi-accordion__header {
-  position: relative;
-  display: flex;
-  flex: 1;
-  gap: var(--layout-grid-gutters-16);
-  align-items: center;
-  padding: var(--card-padding-md-default);
-  background: var(--card-background-primary);
-  border: 1px solid var(--card-border-primary);
-  border-radius: var(--card-radius-rounded);
-
-  &--expanded {
-    border-radius: var(--card-radius-rounded) var(--card-radius-rounded) 0 0;
-  }
-
-  &--expanded.tedi-accordion__header--with-icon-card {
-    border-radius: 0 var(--card-radius-rounded) 0 0;
-  }
-
-  &--with-icon-card {
-    border-radius: var(--card-radius-sharp) var(--card-radius-rounded)
-      var(--card-radius-rounded) var(--card-radius-sharp);
-  }
-
-  &--hoverable {
-    cursor: pointer;
-
-    &:hover {
-      background: var(--general-surface-hover);
-    }
-
-    &:active {
-      background: var(--general-surface-brand-tertiary);
-    }
-
-    &:focus-visible {
-      z-index: 1;
-      outline: none;
-      background: var(--card-background-primary);
-      border: 1px solid var(--card-border-primary);
-      box-shadow:
-        0 0 0 1px var(--tedi-neutral-100),
-        0 0 0 3px var(--tedi-primary-500);
-    }
-  }
-}
-
-.tedi-accordion__body {
-  grid-row: 2;
-  grid-column: 2;
-  overflow: hidden;
-  background: var(--card-background-primary);
-
-  &--inner {
-    padding: var(--card-padding-md-default);
-  }
-}
-
-.tedi-accordion__icon {
-  transition: transform 0.2s ease-in-out;
-
-  &--expanded {
-    transform: rotate(-180deg);
-  }
-}
-
-.tedi-accordion__start {
-  display: flex;
-  flex: 1;
-  gap: var(--layout-grid-gutters-08);
-  align-items: center;
-  min-width: 0;
 }
 
 [tedi-accordion-icon-card] {
@@ -138,57 +57,4 @@
   border-right: none;
   border-radius: var(--card-radius-rounded) var(--card-radius-sharp)
     var(--card-radius-sharp) var(--card-radius-rounded);
-}
-
-.tedi-accordion__title {
-  display: flex;
-  gap: var(--layout-grid-gutters-08);
-
-  &--main {
-    display: flex;
-    gap: inherit;
-    align-items: center;
-  }
-
-  &--with-description,
-  &:has([tedi-accordion-start-description]) {
-    flex-direction: column;
-    gap: 0;
-    align-items: flex-start;
-  }
-
-  &--grow {
-    flex: 1;
-    justify-content: space-between;
-  }
-}
-
-.tedi-accordion__toggle-button {
-  display: flex;
-  padding: 0;
-  font-size: var(--body-regular-size);
-  background: transparent;
-  border: transparent;
-}
-
-.tedi-accordion__expand-indicator {
-  display: flex;
-  align-items: center;
-  color: var(--accordion-action-color);
-
-  tedi-icon {
-    color: inherit;
-  }
-
-  &--with-label {
-    tedi-icon {
-      margin-left: var(--button-sm-inner-spacing);
-      font-size: var(--tedi-size-02);
-      line-height: inherit;
-    }
-  }
-}
-
-.tedi-link tedi-icon.tedi-accordion__icon--no-label {
-  font-size: var(--icon-05);
 }

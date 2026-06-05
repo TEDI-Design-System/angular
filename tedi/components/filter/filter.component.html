@@ -6,7 +6,7 @@
       ariaHaspopup="dialog"
       class="tedi-filter__button"
       type="button"
-      [disabled]="disabled()"
+      [disabled]="isDisabled()"
       (click)="focusDropdownContent()"
       (keydown.arrowDown)="focusDropdownContent(true)"
       (keydown.arrowUp)="focusDropdownContent(true, true)"
@@ -37,12 +37,12 @@
                 (click)="onCustomClear()"
               >
                 <tedi-icon name="refresh" [size]="18" color="brand" />
-                <span>{{ clearLabel() }}</span>
+                <span>{{ resolvedClearLabel() }}</span>
               </button>
             </div>
           }
         } @else if (isSingleSelect()) {
-          @if (searchable()) {
+          @if (showSearch()) {
             <ng-container *ngTemplateOutlet="searchField" />
           }
 
@@ -91,16 +91,16 @@
                 (click)="clearSingleSelection()"
               >
                 <tedi-icon name="refresh" [size]="18" color="brand" />
-                <span>{{ clearLabel() }}</span>
+                <span>{{ resolvedClearLabel() }}</span>
               </button>
             </div>
           }
         } @else {
-          @if (searchable()) {
+          @if (showSearch()) {
             <ng-container *ngTemplateOutlet="searchField" />
           }
 
-          @if (showSelectAll()) {
+          @if (showSelectAll() && filteredOptions().length > 0) {
             <div
               class="tedi-filter-dropdown__item tedi-filter-dropdown__item--select-all"
               role="checkbox"
@@ -115,7 +115,7 @@
                 [selected]="allFilteredSelected()"
                 [indeterminate]="someFilteredSelected()"
               >
-                <tedi-dropdown-item-value-label>{{ selectAllLabel() }}</tedi-dropdown-item-value-label>
+                <tedi-dropdown-item-value-label>{{ resolvedSelectAllLabel() }}</tedi-dropdown-item-value-label>
               </tedi-dropdown-item-value>
             </div>
             <tedi-separator />
@@ -167,7 +167,7 @@
                 (click)="clearSelection()"
               >
                 <tedi-icon name="refresh" [size]="18" color="brand" />
-                <span>{{ clearLabel() }}</span>
+                <span>{{ resolvedClearLabel() }}</span>
               </button>
             </div>
           }
@@ -179,7 +179,7 @@
   <button
     class="tedi-filter__button"
     type="button"
-    [disabled]="disabled()"
+    [disabled]="isDisabled()"
     [attr.role]="isGroupedRadio() ? 'radio' : null"
     [attr.aria-checked]="isGroupedRadio() ? isSelected() : null"
     [attr.aria-pressed]="isGroupedRadio() ? null : isSelected()"
@@ -204,7 +204,7 @@
     <ng-content select="[tediFilterAppend]" />
   </div>
 
-  @if (multiselect() && isSelected() && selectedCount() > 0) {
+  @if (isMultiSelect() && isSelected() && selectedCount() > 0) {
     <tedi-status-badge class="tedi-filter__count" [text]="'' + selectedCount()" color="brand" />
   }
 
@@ -215,14 +215,14 @@
 
 <ng-template #searchField>
   <div class="tedi-filter-dropdown__search">
-    <tedi-form-field icon="search">
+    <tedi-form-field icon="search" [clearable]="searchClearable()">
       <input
         tedi-text-field
         type="text"
         role="searchbox"
         [attr.aria-label]="text()"
-        [value]="searchTerm()"
-        (input)="onSearchInput($event)"
+        [(value)]="searchTerm"
+        (clear)="onSearchClear()"
       />
     </tedi-form-field>
   </div>

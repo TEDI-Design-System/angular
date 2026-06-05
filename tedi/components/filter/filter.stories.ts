@@ -1,27 +1,28 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
-import {
-  AlertComponent,
-  ButtonComponent,
-  FilterComponent,
-  FilterContentDirective,
-  FilterPrependDirective,
-  FilterGroupComponent,
-  RowComponent,
-  ColComponent,
-  SeparatorComponent,
-  StatusBadgeComponent,
-  StatusIndicatorComponent,
-  TagComponent,
-  TextComponent,
-} from "@tedi-design-system/angular/tedi";
-import { IconComponent } from "../../base/icon/icon.component";
-import { RadioComponent } from "../radio/radio.component";
-import { RadioGroupComponent } from "../radio-group/radio-group.component";
-import { LabelComponent } from "../label/label.component";
+import { FilterComponent } from "./filter.component";
+import { FilterContentDirective } from "./filter-content.directive";
+import { FilterPrependDirective } from "./filter-prepend.directive";
+import { FilterGroupComponent } from "./filter-group.component";
+import { AlertComponent } from "../notifications/alert/alert.component";
+import { ButtonComponent } from "../buttons/button/button.component";
+import { RowComponent } from "../helpers/grid/row/row.component";
+import { ColComponent } from "../helpers/grid/col/col.component";
+import { SeparatorComponent } from "../helpers/separator/separator.component";
+import { StatusBadgeComponent } from "../tags/status-badge/status-badge.component";
+import { StatusIndicatorComponent } from "../tags/status-indicator/status-indicator.component";
+import { TagComponent } from "../tags/tag/tag.component";
+import { TextComponent } from "../base/text/text.component";
+import { IconComponent } from "../base/icon/icon.component";
+import { RadioComponent } from "../form/radio/radio.component";
+import { RadioGroupComponent } from "../form/radio-group/radio-group.component";
+import { LabelComponent } from "../form/label/label.component";
 
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=4612-83722&m=dev" target="_blank">Figma ↗</a>
+ */
 export default {
-  title: "TEDI-Ready/Components/Form/Filter",
+  title: "TEDI-Ready/Components/Filter",
   component: FilterComponent,
   decorators: [
     moduleMetadata({
@@ -86,9 +87,9 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
-    multiselect: {
+    allowMultiple: {
       description:
-        "Multi-select mode opens a dropdown with checkbox options",
+        "Multi-select mode opens a dropdown with checkbox options. Value is treated as `string[]` when true",
       control: { type: "boolean" },
       table: {
         category: "inputs",
@@ -96,13 +97,14 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
-    values: {
-      description: "Selected values in multiselect mode (two-way bound). Requires multiselect and options inputs",
-      control: { type: "object" },
+    value: {
+      description:
+        "Selected value (`string`) or values (`string[]`) depending on `allowMultiple`. Two-way bound",
+      control: false,
       table: {
         category: "inputs",
-        type: { summary: "string[]" },
-        defaultValue: { summary: "[]" },
+        type: { summary: "string | string[]" },
+        defaultValue: { summary: "''" },
       },
     },
     options: {
@@ -114,8 +116,28 @@ export default {
         defaultValue: { summary: "[]" },
       },
     },
-    searchable: {
-      description: "Show search field in the dropdown",
+    showSearch: {
+      description: "Show the search field in the dropdown",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    searchClearable: {
+      description:
+        "Whether the dropdown search field has a clear (×) button. Only applies when `showSearch` is true",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    clearSearchOnSelect: {
+      description:
+        "Clear the search field after an option is selected (or toggled in multi-select)",
       control: { type: "boolean" },
       table: {
         category: "inputs",
@@ -142,21 +164,21 @@ export default {
       },
     },
     selectAllLabel: {
-      description: 'Label for "Select all" option',
+      description: 'Override for the "Select all" option label. Defaults to the translated string',
       control: { type: "text" },
       table: {
         category: "inputs",
-        type: { summary: "string" },
-        defaultValue: { summary: "Vali kõik" },
+        type: { summary: "string | undefined" },
+        defaultValue: { summary: "translated" },
       },
     },
     clearLabel: {
-      description: 'Label for "Clear selection" action',
+      description: 'Override for the "Clear selection" action label. Defaults to the translated string',
       control: { type: "text" },
       table: {
         category: "inputs",
-        type: { summary: "string" },
-        defaultValue: { summary: "Tühjenda valik" },
+        type: { summary: "string | undefined" },
+        defaultValue: { summary: "translated" },
       },
     },
     appendTo: {
@@ -167,6 +189,16 @@ export default {
         category: "inputs",
         type: { summary: "string" },
         defaultValue: { summary: "''" },
+      },
+    },
+    disabled: {
+      description:
+        "Whether the filter is disabled. Also set by a disabled FormControl or a disabled FilterGroup",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
       },
     },
   },
@@ -181,6 +213,7 @@ export const Default: StoryObj<FilterComponent> = {
 export const Size: StoryObj<FilterComponent> = {
   render: () => ({
     template: `
+      <div style="background: var(--general-surface-primary); padding: 24px;">
       <tedi-row [cols]="2" [gapY]="3" alignItems="center">
         <tedi-col><p tedi-text modifiers="bold">Default</p></tedi-col>
         <tedi-col class="flex flex-wrap gap-2">
@@ -197,6 +230,7 @@ export const Size: StoryObj<FilterComponent> = {
           <tedi-filter text="Text" size="large" />
         </tedi-col>
       </tedi-row>
+      </div>
     `,
   }),
 };
@@ -222,9 +256,10 @@ export const SingleValueFilter: StoryObj<FilterComponent> = {
       ],
     },
     template: `
+      <div style="background: var(--general-surface-primary); padding: 24px;">
       <tedi-row cols="1" [gapY]="3">
         <tedi-col class="flex flex-column gap-2">
-          <p tedi-text>Separate</p>
+          <h5 tedi-text modifiers="h5">Separate</h5>
           <div class="flex flex-wrap gap-2">
             <tedi-filter text="Vastuvõtud" [selected]="true" />
             <tedi-filter text="Analüüsid" [selected]="true" />
@@ -239,22 +274,22 @@ export const SingleValueFilter: StoryObj<FilterComponent> = {
           </div>
           <div class="flex flex-wrap gap-2">
             <tedi-filter text="Vastuvõtud" variant="secondary" [selected]="true">
-              <tedi-icon tediFilterPrepend name="medical_services" [size]="18" />
+              <tedi-icon tediFilterPrepend name="medical_services" [size]="18" color="inherit" />
             </tedi-filter>
             <tedi-filter text="Analüüsid" variant="secondary">
-              <tedi-icon tediFilterPrepend name="science" [size]="18" />
+              <tedi-icon tediFilterPrepend name="science" [size]="18" color="inherit" />
             </tedi-filter>
             <tedi-filter text="Uuringud" variant="secondary">
-              <tedi-icon tediFilterPrepend name="biotech" [size]="18" />
+              <tedi-icon tediFilterPrepend name="biotech" [size]="18" color="inherit" />
             </tedi-filter>
             <tedi-filter text="Vaktsineerimised" variant="secondary">
-              <tedi-icon tediFilterPrepend name="vaccines" [size]="18" />
+              <tedi-icon tediFilterPrepend name="vaccines" [size]="18" color="inherit" />
             </tedi-filter>
           </div>
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <p tedi-text>Grouped</p>
+          <h5 tedi-text modifiers="h5">Grouped</h5>
           <div class="flex flex-wrap gap-2">
             <tedi-filter-group>
               <tedi-filter text="Kooskõlastatud" />
@@ -286,7 +321,7 @@ export const SingleValueFilter: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <p tedi-text>Dropdown label + value</p>
+          <h5 tedi-text modifiers="h5">Dropdown label + value</h5>
           <div class="flex flex-wrap gap-2">
             <tedi-filter text="Teenus" [options]="teenusOptions" [preserveLabel]="true" [showClear]="true" appendTo="body" />
           </div>
@@ -296,7 +331,7 @@ export const SingleValueFilter: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <p tedi-text>Dropdown value</p>
+          <h5 tedi-text modifiers="h5">Dropdown value</h5>
           <div class="flex flex-wrap gap-2">
             <tedi-filter text="Raviasutus" [options]="raviasutusOptions" appendTo="body" />
             <tedi-filter text="Teenus" [options]="teenusOptions" appendTo="body" />
@@ -307,6 +342,7 @@ export const SingleValueFilter: StoryObj<FilterComponent> = {
           </div>
         </tedi-col>
       </tedi-row>
+      </div>
     `,
   }),
 };
@@ -329,14 +365,16 @@ export const MultiValueFilter: StoryObj<FilterComponent> = {
       values2: [] as string[],
     },
     template: `
+      <div style="background: var(--general-surface-primary); padding: 24px;">
       <tedi-row cols="1" [gapY]="3">
         <tedi-col class="flex flex-wrap gap-2">
-          <tedi-filter text="Raviasutus" [multiselect]="true" [options]="options" [(values)]="values1" [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+          <tedi-filter text="Raviasutus" [allowMultiple]="true" [options]="options" [(value)]="values1" [showSearch]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
         </tedi-col>
         <tedi-col class="flex flex-wrap gap-2">
-          <tedi-filter text="Raviasutus" variant="secondary" [multiselect]="true" [options]="options" [(values)]="values2" [searchable]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+          <tedi-filter text="Raviasutus" variant="secondary" [allowMultiple]="true" [options]="options" [(value)]="values2" [showSearch]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
         </tedi-col>
       </tedi-row>
+      </div>
     `,
   }),
 };
@@ -344,9 +382,10 @@ export const MultiValueFilter: StoryObj<FilterComponent> = {
 export const CustomizeContent: StoryObj<FilterComponent> = {
   render: () => ({
     template: `
+      <div style="background: var(--general-surface-primary); padding: 24px;">
       <tedi-row cols="1" [gapY]="3">
         <tedi-col class="flex flex-column gap-2">
-          <p tedi-text>Prepend hidden when selected (default)</p>
+          <h5 tedi-text modifiers="h5">Prepend hidden when selected (default)</h5>
           <tedi-filter-group>
             <tedi-filter text="Unread (3)" variant="secondary" size="large">
               <tedi-status-indicator tediFilterPrepend type="danger" />
@@ -378,7 +417,7 @@ export const CustomizeContent: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <p tedi-text>Prepend visible when selected</p>
+          <h5 tedi-text modifiers="h5">Prepend visible when selected</h5>
           <tedi-filter-group>
             <tedi-filter text="Submitted" variant="secondary" size="large">
               <tedi-status-badge tediFilterPrepend [hideWhenSelected]="false" text="5" color="brand" />
@@ -398,7 +437,7 @@ export const CustomizeContent: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <p tedi-text>Append</p>
+          <h5 tedi-text modifiers="h5">Append</h5>
           <tedi-filter-group>
             <tedi-filter text="Submitted" variant="secondary" size="large">
               <tedi-status-badge tediFilterAppend text="5" color="brand" />
@@ -418,7 +457,7 @@ export const CustomizeContent: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <p tedi-text>Append with dropdown</p>
+          <h5 tedi-text modifiers="h5">Append with dropdown</h5>
           <tedi-filter
             text="Requires attention"
             variant="secondary"
@@ -431,7 +470,7 @@ export const CustomizeContent: StoryObj<FilterComponent> = {
         </tedi-col>
 
         <tedi-col class="flex flex-column gap-2">
-          <p tedi-text>Prepend icon with append and dropdown</p>
+          <h5 tedi-text modifiers="h5">Prepend icon with append and dropdown</h5>
           <tedi-filter
             text="Requires attention"
             variant="secondary"
@@ -439,12 +478,13 @@ export const CustomizeContent: StoryObj<FilterComponent> = {
             [options]="[{ label: 'Option A', value: 'a' }, { label: 'Option B', value: 'b' }]"
             appendTo="body"
           >
-            <tedi-icon tediFilterPrepend name="language" [size]="18" />
+            <tedi-icon tediFilterPrepend name="language" [size]="18" color="inherit" />
             <tedi-status-badge tediFilterAppend text="7" color="danger" />
           </tedi-filter>
         </tedi-col>
 
       </tedi-row>
+      </div>
     `,
   }),
 };
@@ -459,7 +499,7 @@ export const States: StoryObj<FilterComponent> = {
   },
   render: () => ({
     props: {
-      STATES: ["Default", "Hover", "Active", "Focus", "Selected"],
+      STATES: ["Default", "Hover", "Active", "Focus", "Selected", "Disabled"],
       options: [
         { label: "Optometristi vastuvõtt", value: "1" },
         { label: "Silmaarsti vastuvõtt", value: "2" },
@@ -467,33 +507,35 @@ export const States: StoryObj<FilterComponent> = {
       ],
     },
     template: `
-      <tedi-row [cols]="6" [gapY]="3" alignItems="center">
-        <tedi-col><p tedi-text modifiers="bold">State</p></tedi-col>
-        <tedi-col><p tedi-text modifiers="bold">Primary</p></tedi-col>
-        <tedi-col><p tedi-text modifiers="bold">Primary multiselect</p></tedi-col>
-        <tedi-col><p tedi-text modifiers="bold">Secondary</p></tedi-col>
-        <tedi-col><p tedi-text modifiers="bold">Secondary multiselect</p></tedi-col>
-        <tedi-col><p tedi-text modifiers="bold">Large</p></tedi-col>
+      <div style="overflow-x: auto; background: var(--general-surface-primary); padding: 24px;">
+        <tedi-row [cols]="6" [gapY]="3" alignItems="center" style="min-width: 1200px;">
+          <tedi-col><p tedi-text modifiers="bold">State</p></tedi-col>
+          <tedi-col><p tedi-text modifiers="bold">Primary</p></tedi-col>
+          <tedi-col><p tedi-text modifiers="bold">Primary multiselect</p></tedi-col>
+          <tedi-col><p tedi-text modifiers="bold">Secondary</p></tedi-col>
+          <tedi-col><p tedi-text modifiers="bold">Secondary multiselect</p></tedi-col>
+          <tedi-col><p tedi-text modifiers="bold">Large</p></tedi-col>
 
-        @for (state of STATES; track state) {
-          <tedi-col><p tedi-text>{{ state }}</p></tedi-col>
-          <tedi-col [class]="'pseudo-' + state.toLowerCase()">
-            <tedi-filter text="Filter" [selected]="state === 'Selected'" />
-          </tedi-col>
-          <tedi-col [class]="'pseudo-' + state.toLowerCase()">
-            <tedi-filter text="Filter" [multiselect]="true" [options]="options" [values]="state === 'Selected' ? ['1', '2'] : []" appendTo="body" />
-          </tedi-col>
-          <tedi-col [class]="'pseudo-' + state.toLowerCase()">
-            <tedi-filter text="Filter" variant="secondary" [selected]="state === 'Selected'" />
-          </tedi-col>
-          <tedi-col [class]="'pseudo-' + state.toLowerCase()">
-            <tedi-filter text="Filter" variant="secondary" [multiselect]="true" [options]="options" [values]="state === 'Selected' ? ['1', '2'] : []" appendTo="body" />
-          </tedi-col>
-          <tedi-col [class]="'pseudo-' + state.toLowerCase()">
-            <tedi-filter text="Filter" size="large" [selected]="state === 'Selected'" />
-          </tedi-col>
-        }
-      </tedi-row>
+          @for (state of STATES; track state) {
+            <tedi-col><p tedi-text>{{ state }}</p></tedi-col>
+            <tedi-col [class]="'pseudo-' + state.toLowerCase()">
+              <tedi-filter text="Filter" [selected]="state === 'Selected'" [disabled]="state === 'Disabled'" />
+            </tedi-col>
+            <tedi-col [class]="'pseudo-' + state.toLowerCase()">
+              <tedi-filter text="Filter" [allowMultiple]="true" [options]="options" [value]="state === 'Selected' ? ['1', '2'] : []" [disabled]="state === 'Disabled'" appendTo="body" />
+            </tedi-col>
+            <tedi-col [class]="'pseudo-' + state.toLowerCase()">
+              <tedi-filter text="Filter" variant="secondary" [selected]="state === 'Selected'" [disabled]="state === 'Disabled'" />
+            </tedi-col>
+            <tedi-col [class]="'pseudo-' + state.toLowerCase()">
+              <tedi-filter text="Filter" variant="secondary" [allowMultiple]="true" [options]="options" [value]="state === 'Selected' ? ['1', '2'] : []" [disabled]="state === 'Disabled'" appendTo="body" />
+            </tedi-col>
+            <tedi-col [class]="'pseudo-' + state.toLowerCase()">
+              <tedi-filter text="Filter" size="large" [selected]="state === 'Selected'" [disabled]="state === 'Disabled'" />
+            </tedi-col>
+          }
+        </tedi-row>
+      </div>
     `,
   }),
 };
@@ -513,6 +555,7 @@ export const CustomDropdownContent: StoryObj<FilterComponent> = {
       },
     },
     template: `
+      <div style="background: var(--general-surface-primary); padding: 24px;">
       <tedi-row cols="1" [gapY]="3">
         <tedi-col class="flex gap-2">
           <tedi-filter
@@ -542,6 +585,7 @@ export const CustomDropdownContent: StoryObj<FilterComponent> = {
           </tedi-filter>
         </tedi-col>
       </tedi-row>
+      </div>
     `,
   }),
 };
@@ -688,6 +732,7 @@ export const Examples: StoryObj<FilterComponent> = {
         },
       },
       template: `
+        <div style="background: var(--general-surface-primary); padding: 24px;">
         <tedi-row cols="1" [gapY]="3">
           <tedi-col>
             <h1 tedi-text="h1" color="secondary">Taotlused</h1>
@@ -723,10 +768,10 @@ export const Examples: StoryObj<FilterComponent> = {
             <tedi-filter
               text="Raviasutus"
               variant="secondary"
-              [multiselect]="true"
+              [allowMultiple]="true"
               [options]="raviasutusOptions"
               [formControl]="raviasutusControl"
-              [searchable]="true"
+              [showSearch]="true"
               [showSelectAll]="true"
               [showClear]="true"
               appendTo="body"
@@ -750,8 +795,8 @@ export const Examples: StoryObj<FilterComponent> = {
 
             <tedi-separator axis="vertical" size="24px" />
 
-            <button tedi-button variant="neutral" size="small" class="text-nowrap" (click)="clearAll()">
-              <tedi-icon name="refresh" [size]="18" />
+            <button tedi-button variant="neutral" class="text-nowrap" (click)="clearAll()">
+              <tedi-icon name="refresh" [size]="18" color="inherit" />
               Tühjenda filtrid
             </button>
           </tedi-col>
@@ -794,10 +839,10 @@ export const Examples: StoryObj<FilterComponent> = {
             <tedi-filter
               text="Raviasutus"
               variant="secondary"
-              [multiselect]="true"
+              [allowMultiple]="true"
               [options]="raviasutusOptions"
               [formControl]="raviasutusControl"
-              [searchable]="true"
+              [showSearch]="true"
               [showSelectAll]="true"
               [showClear]="true"
               appendTo="body"
@@ -821,7 +866,7 @@ export const Examples: StoryObj<FilterComponent> = {
           <tedi-col class="flex flex-wrap gap-2 align-items-center">
             <tedi-filter-group
               label="Kategooria"
-              [multiselect]="true"
+              [allowMultiple]="true"
               [formControl]="categoryControl"
             >
               <tedi-filter text="Vastuvõtud" value="vastuvotud" variant="secondary" />
@@ -853,7 +898,7 @@ export const Examples: StoryObj<FilterComponent> = {
           <tedi-col><tedi-separator /></tedi-col>
 
           <tedi-col>
-            <h1 tedi-text="h1" color="secondary">Taotlused (primary)</h1>
+            <h1 tedi-text="h1" color="secondary">Taotlused</h1>
           </tedi-col>
 
           <tedi-col class="flex flex-wrap gap-2 align-items-center">
@@ -882,6 +927,7 @@ export const Examples: StoryObj<FilterComponent> = {
             </tedi-col>
           }
         </tedi-row>
+        </div>
       `,
     };
   },
@@ -907,11 +953,36 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
         options,
         groupSingleControl,
         groupMultiControl,
+        get formData() {
+          return {
+            single: {
+              value: singleControl.value,
+              touched: singleControl.touched,
+              dirty: singleControl.dirty,
+            },
+            multi: {
+              value: multiControl.value,
+              touched: multiControl.touched,
+              dirty: multiControl.dirty,
+            },
+            groupSingle: {
+              value: groupSingleControl.value,
+              touched: groupSingleControl.touched,
+              dirty: groupSingleControl.dirty,
+            },
+            groupMulti: {
+              value: groupMultiControl.value,
+              touched: groupMultiControl.touched,
+              dirty: groupMultiControl.dirty,
+            },
+          };
+        },
       },
       template: `
+        <div style="background: var(--general-surface-primary); padding: 24px;">
         <tedi-row cols="1" [gapY]="3">
           <tedi-col class="flex flex-column gap-2">
-            <p tedi-text>Standalone single &amp; multi-select</p>
+            <h5 tedi-text modifiers="h5">Standalone single &amp; multi-select</h5>
             <div class="flex gap-2">
               <tedi-filter
                 text="Vastuvõtud"
@@ -919,10 +990,10 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
               />
               <tedi-filter
                 text="Teenused"
-                [multiselect]="true"
+                [allowMultiple]="true"
                 [options]="options"
                 [formControl]="multiControl"
-                [searchable]="true"
+                [showSearch]="true"
                 [showSelectAll]="true"
                 [showClear]="true"
                 appendTo="body"
@@ -931,7 +1002,7 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
           </tedi-col>
 
           <tedi-col class="flex flex-column gap-2">
-            <p tedi-text>Grouped single-select</p>
+            <h5 tedi-text modifiers="h5">Grouped single-select</h5>
             <tedi-filter-group label="Status" [formControl]="groupSingleControl">
               <tedi-filter text="Kõik" value="all" />
               <tedi-filter text="Aktiivsed" value="active" />
@@ -939,8 +1010,8 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
             </tedi-filter-group>
           </tedi-col>
           <tedi-col class="flex flex-column gap-2">
-            <p tedi-text>Grouped multi-select</p>
-            <tedi-filter-group label="Tags" [multiselect]="true" [formControl]="groupMultiControl">
+            <h5 tedi-text modifiers="h5">Grouped multi-select</h5>
+            <tedi-filter-group label="Tags" [allowMultiple]="true" [formControl]="groupMultiControl">
               <tedi-filter text="Kiire" value="urgent" />
               <tedi-filter text="Ülevaatus" value="review" />
               <tedi-filter text="Mustand" value="draft" />
@@ -948,31 +1019,11 @@ export const WithReactiveForms: StoryObj<FilterComponent> = {
           </tedi-col>
           <tedi-col>
             <tedi-alert type="info" [showClose]="false">
-              <pre tedi-text modifiers="small">{{ {
-  single: {
-    value: singleControl.value,
-    touched: singleControl.touched,
-    dirty: singleControl.dirty
-  },
-  multi: {
-    value: multiControl.value,
-    touched: multiControl.touched,
-    dirty: multiControl.dirty
-  },
-  groupSingle: {
-    value: groupSingleControl.value,
-    touched: groupSingleControl.touched,
-    dirty: groupSingleControl.dirty
-  },
-  groupMulti: {
-    value: groupMultiControl.value,
-    touched: groupMultiControl.touched,
-    dirty: groupMultiControl.dirty
-  }
-} | json }}</pre>
+              <pre tedi-text modifiers="small" style="min-height: 600px;">{{ formData | json }}</pre>
             </tedi-alert>
           </tedi-col>
         </tedi-row>
+        </div>
       `,
     };
   },

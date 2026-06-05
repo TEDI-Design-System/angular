@@ -4,6 +4,7 @@ import { Component } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { FilterGroupComponent } from "./filter-group.component";
 import { FilterComponent } from "./filter.component";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../tokens/translation.token";
 
 @Component({
   standalone: true,
@@ -26,7 +27,7 @@ class SingleSelectGroupHostComponent {
   template: `
     <tedi-filter-group
       label="Tags"
-      [multiselect]="true"
+      [allowMultiple]="true"
       [formControl]="control"
     >
       <tedi-filter text="Urgent" value="urgent" />
@@ -59,6 +60,7 @@ describe("FilterGroupComponent", () => {
     beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [SingleSelectGroupHostComponent],
+        providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
       });
       fixture = TestBed.createComponent(SingleSelectGroupHostComponent);
       host = fixture.componentInstance;
@@ -260,6 +262,7 @@ describe("FilterGroupComponent", () => {
     beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [MultiSelectGroupHostComponent],
+        providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
       });
       fixture = TestBed.createComponent(MultiSelectGroupHostComponent);
       host = fixture.componentInstance;
@@ -397,6 +400,7 @@ describe("FilterGroupComponent", () => {
     beforeEach(() => {
       TestBed.configureTestingModule({
         imports: [UnmanagedGroupHostComponent],
+        providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
       });
       fixture = TestBed.createComponent(UnmanagedGroupHostComponent);
       fixture.detectChanges();

@@ -36,6 +36,7 @@ import { InputState } from "../form-field/form-field.component";
       [dropdownWidthRef]="dropdownWidthRef"
       [maxDropdownHeight]="maxDropdownHeight"
       [searchFn]="searchFn"
+      [clearSearchOnSelect]="clearSearchOnSelect"
       [formControl]="control"
     >
       @if (useOptionTemplate) {
@@ -79,6 +80,7 @@ class TestHostComponent {
   dropdownWidthRef: any = undefined;
   maxDropdownHeight: number | undefined = undefined;
   searchFn: ((term: string, item: unknown) => boolean) | undefined = undefined;
+  clearSearchOnSelect = false;
   useOptionTemplate = false;
   useValueTemplate = false;
   control = new FormControl<unknown>(null);
@@ -2188,6 +2190,281 @@ describe("SelectComponent", () => {
       tick();
 
       expect(select.visibleTagsCount()).toBe(1);
+    }));
+  });
+
+  describe("clearSearchOnSelect", () => {
+    it("should clear search term after picking an option in searchable multiselect when true", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.searchable = true;
+      host.clearSearchOnSelect = true;
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.searchTerm()).toBe("");
+    }));
+
+    it("should keep search term after picking an option in searchable multiselect when false (default)", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.searchable = true;
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.searchTerm()).toBe("Option 1");
+    }));
+  });
+
+  describe("Outputs", () => {
+    it("selectionChange should emit the new value on single-select pick", fakeAsync(() => {
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith("Option 1");
+    }));
+
+    it("selectionChange should emit the array on multi-select pick", fakeAsync(() => {
+      host.allowMultiple = true;
+      fixture.detectChanges();
+
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith(["Option 1"]);
+    }));
+
+    it("selectionChange should emit on tag deselect", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.clearableTags = true;
+      fixture.detectChanges();
+      host.control.setValue(["Option 1", "Option 2"]);
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      const tags = getTags();
+      const closeBtn = tags[0].querySelector("[tedi-closing-button]") as HTMLElement;
+      closeBtn.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith(["Option 2"]);
+    }));
+
+    it("selectionChange should emit on select-all", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.showSelectAll = true;
+      fixture.detectChanges();
+
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      getSelectAllOption().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith(["Option 1", "Option 2", "Option 3"]);
+    }));
+
+    it("selectionChange should emit on group toggle", fakeAsync(() => {
+      host.items = [
+        { id: 1, name: "A1", category: "A" },
+        { id: 2, name: "A2", category: "A" },
+      ];
+      host.bindLabel = "name";
+      host.bindValue = "id";
+      host.groupBy = "category";
+      host.allowMultiple = true;
+      host.selectableGroups = true;
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const groupHeaders = document.querySelectorAll(".tedi-select__group-name--selectable");
+      (groupHeaders[0] as HTMLElement).click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith([1, 2]);
+    }));
+
+    it("selectionChange should emit null on clear in single-select", fakeAsync(() => {
+      host.control.setValue("Option 1");
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      getClearButton().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith(null);
+    }));
+
+    it("selectionChange should emit empty array on clear in multi-select", fakeAsync(() => {
+      host.allowMultiple = true;
+      fixture.detectChanges();
+      host.control.setValue(["Option 1", "Option 2"]);
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      getClearButton().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith([]);
+    }));
+
+    it("cleared should emit on clear button click", fakeAsync(() => {
+      host.control.setValue("Option 1");
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.cleared.subscribe(spy);
+
+      getClearButton().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledTimes(1);
+    }));
+
+    it("searchChange should emit the current search term", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+
+      const spy = jest.fn();
+      select.searchChange.subscribe(spy);
+
+      const input = getSearchInput();
+      input.value = "Opt";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith("Opt");
+    }));
+
+    it("opened should emit when dropdown opens", fakeAsync(() => {
+      const spy = jest.fn();
+      select.opened.subscribe(spy);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledTimes(1);
+    }));
+
+    it("closed should emit when dropdown closes via outside click", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.closed.subscribe(spy);
+
+      document.body.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledTimes(1);
+    }));
+
+    it("closed should emit when dropdown closes via toggle", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.closed.subscribe(spy);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledTimes(1);
+    }));
+
+    it("opened should not emit when already open", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.opened.subscribe(spy);
+
+      // Trigger another open while already open
+      (select as any).openDropdown();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).not.toHaveBeenCalled();
     }));
   });
 });

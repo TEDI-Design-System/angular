@@ -5,8 +5,9 @@ import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { FilterComponent, FilterOption } from "./filter.component";
 import { FilterContentDirective } from "./filter-content.directive";
 import { FilterPrependDirective } from "./filter-prepend.directive";
-import { IconComponent } from "../../base/icon/icon.component";
-import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
+import { IconComponent } from "../base/icon/icon.component";
+import { StatusBadgeComponent } from "../tags/status-badge/status-badge.component";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../tokens/translation.token";
 
 @Component({
   standalone: true,
@@ -34,7 +35,7 @@ class SingleSelectHostComponent {
   template: `
     <tedi-filter
       text="Multi"
-      [multiselect]="true"
+      [allowMultiple]="true"
       [options]="options"
       [formControl]="control"
     />
@@ -145,6 +146,7 @@ describe("FilterComponent", () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [FilterComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
     });
     fixture = TestBed.createComponent(FilterComponent);
     component = fixture.componentInstance;
@@ -277,7 +279,7 @@ describe("FilterComponent", () => {
 
   describe("multiselect mode", () => {
     beforeEach(() => {
-      fixture.componentRef.setInput("multiselect", true);
+      fixture.componentRef.setInput("allowMultiple", true);
       fixture.componentRef.setInput("options", TEST_OPTIONS);
       fixture.detectChanges();
     });
@@ -290,7 +292,7 @@ describe("FilterComponent", () => {
     });
 
     it("should not show dropdown arrow in boolean mode", () => {
-      fixture.componentRef.setInput("multiselect", false);
+      fixture.componentRef.setInput("allowMultiple", false);
       fixture.componentRef.setInput("options", []);
       fixture.detectChanges();
 
@@ -301,7 +303,7 @@ describe("FilterComponent", () => {
     });
 
     it("should not show check icon in multiselect mode", () => {
-      fixture.componentRef.setInput("values", ["a"]);
+      fixture.componentRef.setInput("value", ["a"]);
       fixture.detectChanges();
 
       const icon = fixture.debugElement.query(
@@ -327,7 +329,7 @@ describe("FilterComponent", () => {
     });
 
     it("should show selected class when values are present", () => {
-      fixture.componentRef.setInput("values", ["a", "b"]);
+      fixture.componentRef.setInput("value", ["a", "b"]);
       fixture.detectChanges();
 
       expect(
@@ -338,7 +340,7 @@ describe("FilterComponent", () => {
     });
 
     it("should show count badge when values are selected", () => {
-      fixture.componentRef.setInput("values", ["a", "b"]);
+      fixture.componentRef.setInput("value", ["a", "b"]);
       fixture.detectChanges();
 
       const badge = fixture.debugElement.query(By.css("tedi-status-badge"));
@@ -352,21 +354,21 @@ describe("FilterComponent", () => {
 
     it("should toggle option selection", () => {
       component.toggleOption("a");
-      expect(component.values()).toEqual(["a"]);
+      expect(component.multiValues()).toEqual(["a"]);
 
       component.toggleOption("b");
-      expect(component.values()).toEqual(["a", "b"]);
+      expect(component.multiValues()).toEqual(["a", "b"]);
 
       component.toggleOption("a");
-      expect(component.values()).toEqual(["b"]);
+      expect(component.multiValues()).toEqual(["b"]);
     });
 
     it("should clear all selections", () => {
-      fixture.componentRef.setInput("values", ["a", "b"]);
+      fixture.componentRef.setInput("value", ["a", "b"]);
       fixture.detectChanges();
 
       component.clearSelection();
-      expect(component.values()).toEqual([]);
+      expect(component.multiValues()).toEqual([]);
     });
 
     it("should filter options by search term", () => {
@@ -377,21 +379,21 @@ describe("FilterComponent", () => {
 
     it("should toggle select all", () => {
       component.toggleSelectAll();
-      expect(component.values()).toEqual(["a", "b", "c"]);
+      expect(component.multiValues()).toEqual(["a", "b", "c"]);
     });
 
     it("should deselect all when all are selected", () => {
-      fixture.componentRef.setInput("values", ["a", "b", "c"]);
+      fixture.componentRef.setInput("value", ["a", "b", "c"]);
       fixture.detectChanges();
 
       component.toggleSelectAll();
-      expect(component.values()).toEqual([]);
+      expect(component.multiValues()).toEqual([]);
     });
 
     it("should compute allFilteredSelected correctly", () => {
       expect(component.allFilteredSelected()).toBe(false);
 
-      fixture.componentRef.setInput("values", ["a", "b", "c"]);
+      fixture.componentRef.setInput("value", ["a", "b", "c"]);
       fixture.detectChanges();
 
       expect(component.allFilteredSelected()).toBe(true);
@@ -400,7 +402,7 @@ describe("FilterComponent", () => {
     it("should compute someFilteredSelected correctly", () => {
       expect(component.someFilteredSelected()).toBe(false);
 
-      fixture.componentRef.setInput("values", ["a"]);
+      fixture.componentRef.setInput("value", ["a"]);
       fixture.detectChanges();
 
       expect(component.someFilteredSelected()).toBe(true);
@@ -408,33 +410,33 @@ describe("FilterComponent", () => {
 
     it("should not include disabled options in select all", () => {
       component.toggleSelectAll();
-      expect(component.values()).not.toContain("d");
+      expect(component.multiValues()).not.toContain("d");
     });
 
     it("should select all only for filtered options when search is active", () => {
       component.searchTerm.set("Option A");
       component.toggleSelectAll();
-      expect(component.values()).toEqual(["a"]);
+      expect(component.multiValues()).toEqual(["a"]);
     });
 
     it("should preserve non-filtered selections when toggling select all with search", () => {
-      fixture.componentRef.setInput("values", ["b"]);
+      fixture.componentRef.setInput("value", ["b"]);
       fixture.detectChanges();
 
       component.searchTerm.set("Option A");
       component.toggleSelectAll();
-      expect(component.values()).toContain("a");
-      expect(component.values()).toContain("b");
+      expect(component.multiValues()).toContain("a");
+      expect(component.multiValues()).toContain("b");
     });
   });
 
   describe("multiselect dropdown content", () => {
     beforeEach(() => {
-      fixture.componentRef.setInput("multiselect", true);
+      fixture.componentRef.setInput("allowMultiple", true);
       fixture.componentRef.setInput("options", TEST_OPTIONS);
       fixture.componentRef.setInput("showSelectAll", true);
       fixture.componentRef.setInput("showClear", true);
-      fixture.componentRef.setInput("searchable", true);
+      fixture.componentRef.setInput("showSearch", true);
       fixture.detectChanges();
     });
 
@@ -465,7 +467,7 @@ describe("FilterComponent", () => {
     });
 
     it("should pass selected state to dropdown-item-value", () => {
-      fixture.componentRef.setInput("values", ["a"]);
+      fixture.componentRef.setInput("value", ["a"]);
       fixture.detectChanges();
 
       const items = fixture.debugElement.queryAll(
@@ -492,7 +494,7 @@ describe("FilterComponent", () => {
     });
 
     it("should pass indeterminate state to select-all dropdown-item-value", () => {
-      fixture.componentRef.setInput("values", ["a"]);
+      fixture.componentRef.setInput("value", ["a"]);
       fixture.detectChanges();
 
       const selectAll = fixture.debugElement.query(
@@ -503,7 +505,7 @@ describe("FilterComponent", () => {
     });
 
     it("should pass selected state to select-all when all selected", () => {
-      fixture.componentRef.setInput("values", ["a", "b", "c"]);
+      fixture.componentRef.setInput("value", ["a", "b", "c"]);
       fixture.detectChanges();
 
       const selectAll = fixture.debugElement.query(
@@ -513,7 +515,7 @@ describe("FilterComponent", () => {
       expect(selectAll.componentInstance.indeterminate()).toBe(false);
     });
 
-    it("should render search input when searchable", () => {
+    it("should render search input when showSearch is true", () => {
       const search = fixture.debugElement.query(
         By.css(".tedi-filter-dropdown__search input"),
       );
@@ -527,8 +529,8 @@ describe("FilterComponent", () => {
       expect(clear).toBeTruthy();
     });
 
-    it("should not render search input when not searchable", () => {
-      fixture.componentRef.setInput("searchable", false);
+    it("should not render search input when showSearch is false", () => {
+      fixture.componentRef.setInput("showSearch", false);
       fixture.detectChanges();
 
       const search = fixture.debugElement.query(
@@ -564,7 +566,7 @@ describe("FilterComponent", () => {
       items[0].nativeElement.click();
       fixture.detectChanges();
 
-      expect(component.values()).toEqual(["a"]);
+      expect(component.multiValues()).toEqual(["a"]);
     });
 
     it("should not toggle disabled option on click", () => {
@@ -574,7 +576,7 @@ describe("FilterComponent", () => {
       items[3].nativeElement.click();
       fixture.detectChanges();
 
-      expect(component.values()).toEqual([]);
+      expect(component.multiValues()).toEqual([]);
     });
 
     it("should toggle select all on select-all click", () => {
@@ -584,11 +586,11 @@ describe("FilterComponent", () => {
       selectAll.nativeElement.click();
       fixture.detectChanges();
 
-      expect(component.values()).toEqual(["a", "b", "c"]);
+      expect(component.multiValues()).toEqual(["a", "b", "c"]);
     });
 
     it("should clear selection on clear button click", () => {
-      fixture.componentRef.setInput("values", ["a", "b"]);
+      fixture.componentRef.setInput("value", ["a", "b"]);
       fixture.detectChanges();
 
       const clear = fixture.debugElement.query(
@@ -597,17 +599,88 @@ describe("FilterComponent", () => {
       clear.nativeElement.click();
       fixture.detectChanges();
 
-      expect(component.values()).toEqual([]);
+      expect(component.multiValues()).toEqual([]);
+    });
+
+    it("should mark search form-field as clearable by default", () => {
+      const formField = fixture.debugElement.query(
+        By.css(".tedi-filter-dropdown__search tedi-form-field"),
+      );
+      expect(formField.componentInstance.clearable()).toBe(true);
+    });
+
+    it("should mark search form-field as non-clearable when searchClearable is false", () => {
+      fixture.componentRef.setInput("searchClearable", false);
+      fixture.detectChanges();
+
+      const formField = fixture.debugElement.query(
+        By.css(".tedi-filter-dropdown__search tedi-form-field"),
+      );
+      expect(formField.componentInstance.clearable()).toBe(false);
+    });
+
+    it("should reset searchTerm on (clear) from the search field", () => {
+      component.searchTerm.set("opt");
+      fixture.detectChanges();
+
+      component.onSearchClear();
+      expect(component.searchTerm()).toBe("");
+    });
+  });
+
+  describe("clearSearchOnSelect", () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput("options", TEST_OPTIONS);
+      fixture.componentRef.setInput("showSearch", true);
+      fixture.detectChanges();
+    });
+
+    it("should keep searchTerm after selectOption when clearSearchOnSelect is false (default)", () => {
+      component.searchTerm.set("opt");
+      component.selectOption("a");
+
+      expect(component.searchTerm()).toBe("opt");
+    });
+
+    it("should clear searchTerm after selectOption when clearSearchOnSelect is true", () => {
+      fixture.componentRef.setInput("clearSearchOnSelect", true);
+      fixture.detectChanges();
+
+      component.searchTerm.set("opt");
+      component.selectOption("a");
+
+      expect(component.searchTerm()).toBe("");
+    });
+
+    it("should keep searchTerm after toggleOption when clearSearchOnSelect is false (default)", () => {
+      fixture.componentRef.setInput("allowMultiple", true);
+      fixture.detectChanges();
+
+      component.searchTerm.set("opt");
+      component.toggleOption("a");
+
+      expect(component.searchTerm()).toBe("opt");
+    });
+
+    it("should clear searchTerm after toggleOption when clearSearchOnSelect is true", () => {
+      fixture.componentRef.setInput("allowMultiple", true);
+      fixture.componentRef.setInput("clearSearchOnSelect", true);
+      fixture.detectChanges();
+
+      component.searchTerm.set("opt");
+      component.toggleOption("a");
+
+      expect(component.searchTerm()).toBe("");
     });
   });
 
   describe("accessibility", () => {
     beforeEach(() => {
-      fixture.componentRef.setInput("multiselect", true);
+      fixture.componentRef.setInput("allowMultiple", true);
       fixture.componentRef.setInput("options", TEST_OPTIONS);
       fixture.componentRef.setInput("showSelectAll", true);
       fixture.componentRef.setInput("showClear", true);
-      fixture.componentRef.setInput("searchable", true);
+      fixture.componentRef.setInput("showSearch", true);
       fixture.componentRef.setInput("text", "Raviasutus");
       fixture.detectChanges();
     });
@@ -663,7 +736,7 @@ describe("FilterComponent", () => {
     });
 
     it("should set aria-selected on options", () => {
-      fixture.componentRef.setInput("values", ["a"]);
+      fixture.componentRef.setInput("value", ["a"]);
       fixture.detectChanges();
 
       const items = fixture.debugElement.queryAll(
@@ -714,7 +787,7 @@ describe("FilterComponent", () => {
     });
 
     it("should set aria-checked=mixed on select-all when some selected", () => {
-      fixture.componentRef.setInput("values", ["a"]);
+      fixture.componentRef.setInput("value", ["a"]);
       fixture.detectChanges();
 
       const selectAll = fixture.debugElement.query(
@@ -726,7 +799,7 @@ describe("FilterComponent", () => {
     });
 
     it("should set aria-checked=true on select-all when all selected", () => {
-      fixture.componentRef.setInput("values", ["a", "b", "c"]);
+      fixture.componentRef.setInput("value", ["a", "b", "c"]);
       fixture.detectChanges();
 
       const selectAll = fixture.debugElement.query(
@@ -817,7 +890,7 @@ describe("FilterComponent", () => {
 
   describe("keyboard navigation", () => {
     beforeEach(() => {
-      fixture.componentRef.setInput("multiselect", true);
+      fixture.componentRef.setInput("allowMultiple", true);
       fixture.componentRef.setInput("options", TEST_OPTIONS);
       fixture.detectChanges();
     });
@@ -914,12 +987,12 @@ describe("FilterComponent", () => {
 
     it("should toggle focused option on Enter", () => {
       component.onOptionsFocus();
-      expect(component.values()).toEqual([]);
+      expect(component.multiValues()).toEqual([]);
 
       component.onOptionsKeydown(
         new KeyboardEvent("keydown", { key: "Enter" }),
       );
-      expect(component.values()).toEqual(["a"]);
+      expect(component.multiValues()).toEqual(["a"]);
     });
 
     it("should toggle focused option on Space", () => {
@@ -928,12 +1001,12 @@ describe("FilterComponent", () => {
       component.onOptionsKeydown(
         new KeyboardEvent("keydown", { key: " " }),
       );
-      expect(component.values()).toEqual(["a"]);
+      expect(component.multiValues()).toEqual(["a"]);
 
       component.onOptionsKeydown(
         new KeyboardEvent("keydown", { key: " " }),
       );
-      expect(component.values()).toEqual([]);
+      expect(component.multiValues()).toEqual([]);
     });
 
     it("should not toggle disabled option on Enter", () => {
@@ -943,7 +1016,7 @@ describe("FilterComponent", () => {
       component.onOptionsKeydown(
         new KeyboardEvent("keydown", { key: "Enter" }),
       );
-      expect(component.values()).toEqual([]);
+      expect(component.multiValues()).toEqual([]);
     });
 
     it("should apply focused class to active option", () => {
@@ -1037,7 +1110,7 @@ describe("FilterComponent", () => {
       selectAll.triggerEventHandler("keydown.enter", {});
       fixture.detectChanges();
 
-      expect(component.values()).toEqual(["a", "b", "c"]);
+      expect(component.multiValues()).toEqual(["a", "b", "c"]);
     });
 
     it("should handle select-all Space keydown", () => {
@@ -1052,7 +1125,7 @@ describe("FilterComponent", () => {
       });
       fixture.detectChanges();
 
-      expect(component.values()).toEqual(["a", "b", "c"]);
+      expect(component.multiValues()).toEqual(["a", "b", "c"]);
     });
   });
 
@@ -1146,7 +1219,7 @@ describe("FilterComponent", () => {
       host.control.setValue(["a", "b"]);
       hostFixture.detectChanges();
 
-      expect(filterComponent.values()).toEqual(["a", "b"]);
+      expect(filterComponent.multiValues()).toEqual(["a", "b"]);
     });
 
     it("should update form control on option toggle", () => {
