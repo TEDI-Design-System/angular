@@ -286,6 +286,8 @@ export const Default: Story = {
     disablePast: false,
     disableFuture: false,
     showOutsideDays: true,
+    enableCalendar: true,
+    isTagRemovable: true,
   },
   render: (args) => {
     const control = new FormControl<Date | null>(null);
@@ -308,8 +310,12 @@ export const Default: Story = {
             [required]="required"
             [disablePast]="disablePast"
             [disableFuture]="disableFuture"
+            [enableCalendar]="enableCalendar"
             [showOutsideDays]="showOutsideDays"
             [showWeekNumbers]="showWeekNumbers"
+            [multiRow]="multiRow"
+            [tagEllipsis]="tagEllipsis"
+            [isTagRemovable]="isTagRemovable"
           />
           <tedi-feedback-text text="Pick a date" />
         </tedi-form-field>
