@@ -113,6 +113,12 @@ const meta: Meta<SelectComponent> = {
       control: "boolean",
       description: "Whether selected tags wrap to multiple rows in multiselect mode.",
     },
+    tagEllipsis: {
+      control: "radio",
+      options: [false, "start", "end"],
+      description:
+        "Which end a tag's label truncates from when it doesn't fit. `false` never truncates; `end` → `label…`; `start` → `…label`.",
+    },
     searchable: {
       control: "boolean",
       description: "Whether the select has a search input for filtering options.",
@@ -148,6 +154,7 @@ const meta: Meta<SelectComponent> = {
     selectableGroups: false,
     isTagRemovable: false,
     multiRow: false,
+    tagEllipsis: false,
     searchable: false,
     dropdownType: "menu",
     maxDropdownHeight: undefined,
@@ -449,12 +456,13 @@ export const ValueType: Story = {
         />
         <tedi-select
           inputId="value-multiselect-one-row"
-          label="Multiselect one row"
+          label="Multiselect one row (tagEllipsis=&quot;end&quot;)"
           [options]="oneRowOptions"
           [allowMultiple]="true"
           [multiRow]="false"
           [isTagRemovable]="true"
           [clearable]="true"
+          tagEllipsis="end"
           formControlName="oneRow"
         />
         <div style="width: 100px;">

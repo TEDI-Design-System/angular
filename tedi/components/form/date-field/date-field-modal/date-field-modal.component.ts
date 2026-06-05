@@ -33,6 +33,7 @@ export interface DateFieldModalData {
   selectionLevel: CalendarView;
   localeCode: string;
   showOutsideDays: boolean;
+  showWeekNumbers: boolean;
   numberOfMonths: number;
   monthYearSelectType: "dropdown" | "grid";
   required: boolean;
@@ -65,12 +66,14 @@ export interface DateFieldModalData {
       </tedi-modal-header>
       <tedi-modal-content class="tedi-date-field-modal__content">
         <tedi-calendar
+          [bordered]="false"
           [value]="draft()"
           [currentMonth]="month()"
           [mode]="data.mode"
           [selectionLevel]="data.selectionLevel"
           [localeCode]="data.localeCode"
           [showOutsideDays]="data.showOutsideDays"
+          [showWeekNumbers]="data.showWeekNumbers"
           [numberOfMonths]="data.numberOfMonths"
           [monthYearSelectType]="data.monthYearSelectType"
           [required]="data.required"

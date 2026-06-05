@@ -270,9 +270,19 @@
     flex-wrap: wrap;
     gap: var(--form-field-inner-spacing);
 
+    // Single row: the tags clip inside an inner wrapper while the +N counter
+    // and the search input sit outside it and never shrink, so the counter
+    // stays visible as the field narrows.
     &--single-row {
       flex-wrap: nowrap;
-      overflow: hidden;
+
+      .tedi-select__multiselect-tags {
+        display: flex;
+        flex: 0 1 auto;
+        gap: var(--form-field-inner-spacing);
+        min-width: 0;
+        overflow: hidden;
+      }
 
       .tedi-tag {
         flex-shrink: 0;
@@ -280,6 +290,11 @@
         &__content {
           white-space: nowrap;
         }
+      }
+
+      .tedi-select__multiselect-counter,
+      .tedi-select__search-input {
+        flex-shrink: 0;
       }
     }
   }

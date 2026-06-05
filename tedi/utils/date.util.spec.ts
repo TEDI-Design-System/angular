@@ -6,6 +6,7 @@ import {
   endOfMonth,
   formatDate,
   formatLocaleDate,
+  formatLocaleDateHint,
   getDaysInMonth,
   getFirstDayOfWeek,
   getISOWeek,
@@ -32,6 +33,19 @@ describe("date.util", () => {
 
     it("should pad single digit day and month with zero", () => {
       expect(formatDate(new Date(2026, 0, 5))).toBe("05.01.2026");
+    });
+  });
+
+  describe("formatLocaleDateHint", () => {
+    it("builds an Estonian hint with localized tokens and locale separators", () => {
+      expect(formatLocaleDateHint("et-EE")).toBe("pp.kk.aaaa");
+    });
+
+    it("falls back to English tokens for an unknown language", () => {
+      const hint = formatLocaleDateHint("xx-XX");
+      expect(hint).toContain("dd");
+      expect(hint).toContain("mm");
+      expect(hint).toContain("yyyy");
     });
   });
 

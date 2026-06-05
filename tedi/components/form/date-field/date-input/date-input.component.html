@@ -1,27 +1,34 @@
-@if (hasChips()) {
-  <div class="tedi-date-input__chips">
-    @for (chip of chips(); track chip.id) {
-      <tedi-tag
-        [closable]="!disabled() && !readOnly()"
-        (closed)="handleChipRemove(chip.id)"
-      >
-        {{ chip.label }}
-      </tedi-tag>
+<div class="tedi-date-input__field" #fieldElement>
+  @if (hasTags()) {
+    <div class="tedi-date-input__tags">
+      @for (tag of visibleTags(); track tag.id) {
+        <tedi-tag
+          #tagElement
+          [ellipsis]="ellipsis()"
+          [closable]="removable() && !disabled() && !readOnly()"
+          (closed)="handleTagRemove(tag.id)"
+        >
+          {{ tag.label }}
+        </tedi-tag>
+      }
+    </div>
+    @if (hiddenTagsCount() > 0) {
+      <tedi-tag class="tedi-date-input__tags-counter">+{{ hiddenTagsCount() }}</tedi-tag>
     }
-  </div>
-}
-<input
-  #inputElement
-  tedi-text-field
-  class="tedi-date-input__input"
-  [id]="inputId()"
-  [type]="inputType()"
-  [attr.placeholder]="placeholder() || null"
-  [disabled]="disabled()"
-  [readOnly]="readOnly()"
-  [required]="required()"
-  (input)="handleInput($event)"
-/>
+  }
+  <input
+    #inputElement
+    tedi-text-field
+    class="tedi-date-input__input"
+    [id]="inputId()"
+    [type]="inputType()"
+    [attr.placeholder]="placeholder() || null"
+    [disabled]="disabled()"
+    [readOnly]="readOnly()"
+    [required]="required()"
+    (input)="handleInput($event)"
+  />
+</div>
 <div class="tedi-date-input__actions">
   @if (showClear()) {
     <button

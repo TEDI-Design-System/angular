@@ -65,7 +65,7 @@ const inTenDays = new Date(today.getFullYear(), today.getMonth(), today.getDate(
 const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
 
 export default {
-  title: "TEDI-Ready/Components/Content/Calendar",
+  title: "TEDI-Ready/Content/Calendar",
   component: CalendarComponent,
   decorators: [
     moduleMetadata({
@@ -617,8 +617,8 @@ export const WithFooter: Story = {
               style="display: flex; justify-content: center; width: 100%;"
             >
               <button tedi-button variant="neutral" size="small" type="button">
-                Select time
                 <tedi-icon name="schedule" [size]="18" />
+                Select time
               </button>
             </div>
           </tedi-calendar>
@@ -677,7 +677,7 @@ export const WithFooter: Story = {
     docs: {
       description: {
         story:
-          "Anything projected with the `tediCalendarFooter` attribute renders below the calendar body, above the built-in separator. Four common patterns: a centered link to a sibling picker (e.g. \"Select time\"), a centered primary action, a single secondary action, and a full-width Cancel + Save button pair.",
+          "Anything projected with the `tediCalendarFooter` attribute renders below the calendar body, above the built-in separator. Four common patterns: a centered link to a sibling picker (e.g. \"Select time\", icon on the left per Figma), a centered primary action, a single secondary action, and a full-width Cancel + Save button pair.",
       },
     },
   },

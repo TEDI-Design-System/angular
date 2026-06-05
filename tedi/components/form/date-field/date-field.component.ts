@@ -10,6 +10,7 @@ import {
   model,
   output,
   signal,
+  untracked,
   viewChild,
   ViewEncapsulation,
 } from "@angular/core";
@@ -18,7 +19,8 @@ import {
   OverlayModule,
 } from "@angular/cdk/overlay";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { DateInputComponent, DateInputChip } from "./date-input/date-input.component";
+import { DateInputComponent, DateInputTag } from "./date-input/date-input.component";
+import { TagEllipsis } from "../../tags/tag/tag.component";
 import { CalendarComponent } from "../../content/calendar/calendar.component";
 import {
   CalendarView,
@@ -38,16 +40,19 @@ import {
 } from "../../../services/breakpoint/breakpoint.service";
 import {
   formatLocaleDate,
+  formatLocaleDateHint,
   isSameDay,
   parseLocaleDate,
   startOfMonth,
 } from "../../../utils/date.util";
 import { matchAny, Matcher } from "../../../utils/matchers.util";
 import { ModalService } from "../../overlay/modal/modal.service";
+import { ModalRef } from "../../overlay/modal/modal-ref";
 import {
   DateFieldModalComponent,
   DateFieldModalData,
 } from "./date-field-modal/date-field-modal.component";
+import { ButtonComponent } from "../../buttons";
 
 type DateFieldValue = Date | Date[] | DateRange | null;
 type DateFieldFormatter = (value: DateFieldValue) => string;
@@ -57,6 +62,7 @@ type MonthPredicate = (month: Date) => boolean;
 type YearPredicate = (year: Date) => boolean;
 type DateFieldCalendarTrigger = "input" | "button";
 type DateFieldModalInput = BreakpointInput<boolean> | Breakpoint;
+export type DateFieldSize = "default" | "small";
 
 @Component({
   selector: "tedi-date-field",
@@ -68,6 +74,7 @@ type DateFieldModalInput = BreakpointInput<boolean> | Breakpoint;
   imports: [
     CalendarComponent,
     DateInputComponent,
+    ButtonComponent,
     OverlayModule,
   ],
   providers: [
@@ -86,11 +93,28 @@ type DateFieldModalInput = BreakpointInput<boolean> | Breakpoint;
   },
 })
 export class DateFieldComponent
-  implements ControlValueAccessor, FormFieldControl<DateFieldValue>
-{
+  implements ControlValueAccessor, FormFieldControl<DateFieldValue> {
   readonly inputId = input.required<string>();
   readonly value = model<DateFieldValue>(null);
   readonly mode = input<DateFieldMode>("single");
+  /**
+   * `multiple` mode tag layout. `true` (default) wraps tags across rows and
+   * grows the field height; `false` keeps a single row and collapses overflow
+   * into a "+N" counter.
+   */
+  readonly multiRow = input<boolean>(true);
+  /**
+   * Which end the `multiple`-mode tags truncate from when a label doesn't fit.
+   * `false` (default) never truncates; `end` → `05.06…`; `start` → `…06.2026`
+   * (keeps the year visible).
+   */
+  readonly tagEllipsis = input<TagEllipsis>(false);
+  /**
+   * Whether `multiple`-mode tags show a remove button. `true` (default) lets
+   * users remove a selected date by closing its tag; `false` renders them as
+   * read-only chips.
+   */
+  readonly isTagRemovable = input<boolean>(true);
   readonly placeholder = input<string>("");
   readonly disabledInput = input<Matcher | Matcher[] | undefined>(undefined, {
     // eslint-disable-next-line @angular-eslint/no-input-rename -- 'disabled' conflicts with FormFieldControl.disabled Signal<boolean> required by the form-field-control contract; alias keeps the spec'd public binding name
@@ -99,6 +123,8 @@ export class DateFieldComponent
   readonly inputDisabled = input<boolean>(false);
   readonly readOnly = input<boolean>(false);
   readonly required = input<boolean>(false);
+  /** Field size — matches the surrounding `tedi-form-field`. */
+  readonly size = input<DateFieldSize>("default");
   readonly minDate = input<Date | undefined>(undefined);
   readonly maxDate = input<Date | undefined>(undefined);
   readonly disablePast = input<boolean>(false);
@@ -113,6 +139,7 @@ export class DateFieldComponent
   readonly localeCode = input<string>("et-EE");
   readonly closeOnSelect = input<boolean | undefined>(undefined);
   readonly showOutsideDays = input<boolean>(true);
+  readonly showWeekNumbers = input<boolean>(false);
   readonly numberOfMonths = input(
     { xs: 1 },
     { transform: (v: BreakpointInput<number>) => breakpointInput(v) },
@@ -129,10 +156,10 @@ export class DateFieldComponent
     },
   );
   readonly useNativePicker = input(
-    { xs: false },
+    { xs: true, md: false },
     { transform: (v: BreakpointInput<boolean>) => breakpointInput(v) },
   );
-  readonly modal = input<DateFieldModalInput>("md");
+  readonly modal = input<DateFieldModalInput>(false);
   readonly formatDate = input<DateFieldFormatter | undefined>(undefined);
   readonly parseDate = input<DateFieldParser | undefined>(undefined);
 
@@ -167,9 +194,10 @@ export class DateFieldComponent
 
   private readonly cvaDisabled = signal(false);
   private readonly formInvalid = signal(false);
+  private modalRef: ModalRef<DateFieldValue> | null = null;
 
-  private onChange: (value: DateFieldValue) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: DateFieldValue) => void = () => { };
+  private onTouched: () => void = () => { };
 
   readonly fieldDisabled = computed(
     () => this.inputDisabled() || this.cvaDisabled(),
@@ -205,7 +233,10 @@ export class DateFieldComponent
   );
 
   readonly useNativePickerEffective = computed(
-    () => this.useNativePickerResolved() && this.mode() === "single",
+    () =>
+      this.useNativePickerResolved() &&
+      this.mode() === "single" &&
+      !this.modalEnabled(),
   );
 
   readonly numberOfMonthsResolved = computed(() => {
@@ -256,6 +287,14 @@ export class DateFieldComponent
     return this.toIsoDate(v);
   });
 
+  readonly effectivePlaceholder = computed(() => {
+    const explicit = this.placeholder();
+    if (explicit) return explicit;
+    if (this.mode() !== "single") return "";
+    if (this.useNativePickerEffective()) return "";
+    return formatLocaleDateHint(this.localeCode());
+  });
+
   readonly displayValue = computed(() => {
     const v = this.value();
     if (this.mode() === "multiple") return "";
@@ -265,7 +304,7 @@ export class DateFieldComponent
     return this.defaultFormat(v);
   });
 
-  readonly chipsForMultipleMode = computed<DateInputChip[]>(() => {
+  readonly tagsForMultipleMode = computed<DateInputTag[]>(() => {
     if (this.mode() !== "multiple") return [];
     const v = this.value();
     if (!Array.isArray(v)) return [];
@@ -303,6 +342,22 @@ export class DateFieldComponent
         return;
       }
       this.openChange.emit(open);
+    });
+
+    effect(() => {
+      // Track the active picker strategy. Crossing a breakpoint can flip
+      // between popover, modal and native picker — if the picker is open when
+      // that happens the popover and modal would render simultaneously (double
+      // calendar) or the overlay would get wedged open. Close it on any flip.
+      this.usePopover();
+      this.useModal();
+      this.useNativePickerEffective();
+      untracked(() => {
+        if (!this.overlayOpen()) return;
+        this.modalRef?.close();
+        this.modalRef = null;
+        this.overlayOpen.set(false);
+      });
     });
   }
 
@@ -387,7 +442,7 @@ export class DateFieldComponent
     this.commitValue(parsed);
   }
 
-  handleChipRemove(id: string): void {
+  handleTagRemove(id: string): void {
     if (this.fieldDisabled() || this.readOnly()) return;
     const v = this.value();
     if (!Array.isArray(v)) return;
@@ -478,6 +533,7 @@ export class DateFieldComponent
       selectionLevel: this.selectionLevel(),
       localeCode: this.localeCode(),
       showOutsideDays: this.showOutsideDays(),
+      showWeekNumbers: this.showWeekNumbers(),
       numberOfMonths: this.numberOfMonthsResolved(),
       monthYearSelectType: this.monthYearSelectType(),
       required: this.required(),
@@ -496,11 +552,16 @@ export class DateFieldComponent
         size: "small",
         width: "sm",
         position: "center",
-        maxWidth: "var(--tedi-containers-03)",
+        // containers-03 is the calendar's exact width; add the modal's two
+        // outer borders so the content box (border-box) leaves room for it
+        // without a 2px horizontal scroll.
+        maxWidth: "calc(var(--tedi-containers-03) + 2 * var(--tedi-borders-01))",
       },
     );
+    this.modalRef = ref;
 
     ref.closed.subscribe((result) => {
+      this.modalRef = null;
       this.overlayOpen.set(false);
       this.onTouched();
       if (result === undefined) return;

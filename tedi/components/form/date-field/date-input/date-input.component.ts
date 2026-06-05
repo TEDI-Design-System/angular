@@ -1,4 +1,5 @@
 import {
+  AfterViewChecked,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -6,17 +7,21 @@ import {
   effect,
   inject,
   input,
+  NgZone,
   output,
+  signal,
   viewChild,
+  viewChildren,
   ViewEncapsulation,
 } from "@angular/core";
 import { IconComponent } from "../../../base/icon/icon.component";
 import { TextFieldComponent } from "../../text-field/text-field.component";
-import { TagComponent } from "../../../tags/tag/tag.component";
+import { TagComponent, TagEllipsis } from "../../../tags/tag/tag.component";
 import { TediTranslationService } from "../../../../services/translation/translation.service";
 import { DateFieldMode } from "../../../content/calendar/types";
+import { calculateVisibleTagCount } from "../../../../utils/tag-overflow.util";
 
-export interface DateInputChip {
+export interface DateInputTag {
   id: string;
   label: string;
 }
@@ -33,14 +38,29 @@ export interface DateInputChip {
     class: "tedi-date-input",
     "[class.tedi-date-input--disabled]": "disabled()",
     "[class.tedi-date-input--readonly]": "readOnly()",
-    "[class.tedi-date-input--with-chips]": "hasChips()",
+    "[class.tedi-date-input--with-tags]": "hasTags()",
+    "[class.tedi-date-input--tags-wrap]": "hasTags() && multiRow()",
+    "[class.tedi-date-input--tags-single-row]": "hasTags() && !multiRow()",
+    "[class.tedi-date-input--tags-measuring]":
+      "hasTags() && !multiRow() && visibleTagsCount() === null",
+    "(window:resize)": "onResize()",
   },
 })
-export class DateInputComponent {
+export class DateInputComponent implements AfterViewChecked {
   readonly inputId = input.required<string>();
   readonly value = input<string>("");
-  readonly chips = input<readonly DateInputChip[]>([]);
+  readonly tags = input<readonly DateInputTag[]>([]);
   readonly mode = input<DateFieldMode>("single");
+  /**
+   * Multiple mode: when `true` (default) the tags wrap to multiple rows and the
+   * field grows in height. When `false` the tags stay on a single row and the
+   * overflow collapses into a "+N" counter tag.
+   */
+  readonly multiRow = input<boolean>(true);
+  /** Which end the tag labels truncate from when they don't fit (`false` = no truncation). */
+  readonly ellipsis = input<TagEllipsis>(false);
+  /** Whether the tags show a remove (close) button. */
+  readonly removable = input<boolean>(true);
   readonly placeholder = input<string>("");
   readonly disabled = input<boolean>(false);
   readonly readOnly = input<boolean>(false);
@@ -53,14 +73,24 @@ export class DateInputComponent {
 
   readonly inputChange = output<string>();
   readonly iconClick = output<void>();
-  readonly chipRemove = output<string>();
+  readonly tagRemove = output<string>();
   readonly clear = output<void>();
 
   private readonly translationService = inject(TediTranslationService);
+  private readonly ngZone = inject(NgZone);
 
   private readonly inputElement = viewChild("inputElement", {
     read: ElementRef,
   });
+  private readonly fieldElement = viewChild<ElementRef<HTMLElement>>(
+    "fieldElement",
+  );
+  private readonly tagElements = viewChildren("tagElement", {
+    read: ElementRef,
+  });
+
+  /** Number of tags that fit on a single row; `null` until measured. */
+  readonly visibleTagsCount = signal<number | null>(null);
 
   constructor() {
     effect(() => {
@@ -72,11 +102,45 @@ export class DateInputComponent {
         target.value = next;
       }
     });
+
+    effect(() => {
+      // Re-measure whenever the tag set changes.
+      this.tags();
+      this.visibleTagsCount.set(null);
+    });
   }
 
-  readonly hasChips = computed(
-    () => this.mode() === "multiple" && this.chips().length > 0,
+  ngAfterViewChecked(): void {
+    if (this.hasTags() && !this.multiRow()) {
+      this.calculateVisibleTags();
+    }
+  }
+
+  onResize(): void {
+    if (this.hasTags() && !this.multiRow()) {
+      this.visibleTagsCount.set(null);
+    }
+  }
+
+  readonly hasTags = computed(
+    () => this.mode() === "multiple" && this.tags().length > 0,
   );
+
+  readonly visibleTags = computed<readonly DateInputTag[]>(() => {
+    const all = this.tags();
+    if (this.multiRow()) return all;
+    const visible = this.visibleTagsCount();
+    // Render everything until the first measurement pass completes.
+    if (visible === null) return all;
+    return all.slice(0, visible);
+  });
+
+  readonly hiddenTagsCount = computed(() => {
+    const visible = this.visibleTagsCount();
+    const total = this.tags().length;
+    if (this.multiRow() || visible === null || visible >= total) return 0;
+    return total - visible;
+  });
 
   readonly inputType = computed(() => (this.useNativePicker() ? "date" : "text"));
 
@@ -89,7 +153,7 @@ export class DateInputComponent {
       this.clearable() &&
       !this.disabled() &&
       !this.readOnly() &&
-      this.inputValue() !== "",
+      (this.inputValue() !== "" || this.hasTags()),
   );
 
   readonly iconAriaLabel = this.translationService.track(
@@ -110,13 +174,42 @@ export class DateInputComponent {
     this.iconClick.emit();
   }
 
-  handleChipRemove(id: string): void {
+  handleTagRemove(id: string): void {
     if (this.disabled() || this.readOnly()) return;
-    this.chipRemove.emit(id);
+    this.tagRemove.emit(id);
   }
 
   handleClear(): void {
     if (this.disabled() || this.readOnly()) return;
     this.clear.emit();
+  }
+
+  private calculateVisibleTags(): void {
+    const tags = this.tagElements();
+    if (tags.length === 0 || this.visibleTagsCount() !== null) return;
+
+    const available = this.getAvailableTagWidth();
+    if (available <= 0) return;
+
+    const widths = tags.map(
+      (tag) => (tag.nativeElement as HTMLElement).offsetWidth,
+    );
+    const visible = calculateVisibleTagCount(widths, available);
+
+    this.ngZone.run(() => this.visibleTagsCount.set(visible));
+  }
+
+  private getAvailableTagWidth(): number {
+    const field = this.fieldElement()?.nativeElement;
+    if (!field) return 0;
+    const width = field.clientWidth;
+    if (width === 0) return 0;
+
+    const inputEl = field.querySelector<HTMLElement>(".tedi-date-input__input");
+    const inputMinWidth = inputEl
+      ? parseFloat(getComputedStyle(inputEl).minWidth) || 0
+      : 0;
+
+    return width - inputMinWidth;
   }
 }

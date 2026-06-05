@@ -292,6 +292,35 @@ function escapeRegExp(value: string): string {
 
 type LocalePattern = { order: DateFieldName[]; regex: RegExp };
 
+const FIELD_HINT_TOKENS: Record<string, Record<DateFieldName, string>> = {
+  et: { day: "pp", month: "kk", year: "aaaa" },
+  en: { day: "dd", month: "mm", year: "yyyy" },
+  ru: { day: "дд", month: "мм", year: "гггг" },
+};
+
+/**
+ * Builds a locale-aware manual-entry hint such as `pp.kk.aaaa` (et-EE),
+ * `dd.mm.yyyy` (en) or `дд.мм.гггг` (ru). Field order and separators are
+ * derived from `Intl.DateTimeFormat` (so they always match what the field
+ * formats and parses), while the letter tokens are localized per language.
+ * Falls back to English tokens for unknown languages.
+ */
+export function formatLocaleDateHint(localeCode: string): string {
+  const fmt = new Intl.DateTimeFormat(localeCode, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const parts = fmt.formatToParts(new Date(2024, 0, 2));
+  const lang = localeCode.split("-")[0].toLowerCase();
+  const tokens = FIELD_HINT_TOKENS[lang] ?? FIELD_HINT_TOKENS["en"];
+  let hint = "";
+  for (const part of parts) {
+    hint += isDateFieldType(part.type) ? tokens[part.type] : part.value;
+  }
+  return hint;
+}
+
 const FIELD_DIGIT_RANGE: Record<DateFieldName, string> = {
   day: "\\d{1,2}",
   month: "\\d{1,2}",

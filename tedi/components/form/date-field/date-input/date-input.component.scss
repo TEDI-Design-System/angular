@@ -6,14 +6,63 @@
   min-width: 0;
   padding-right: var(--form-field-padding-x-md-default);
 
-  &--with-chips {
-    flex-wrap: wrap;
-    align-items: center;
-    padding: var(--layout-grid-gutters-04) var(--form-field-padding-x-md-default)
-      var(--layout-grid-gutters-04) var(--form-field-padding-x-md-default);
+  &--with-tags {
+    // Vertical padding = the field's text padding minus the form-field box
+    // border, so a single 24px tag row sits exactly centered in the 40px field
+    // (no 2px overshoot), and wrapped rows top-align from that same offset.
+    padding-block: calc(
+      var(--form-field-padding-y-md-default) - var(--tedi-borders-01)
+    );
+    padding-inline: var(--form-field-padding-x-md-default);
   }
 
-  &__chips {
+  // The shared text input is sized to fill a single-line field (height + own
+  // padding); inside the tags row that inflates the row past the field height,
+  // so slim it down to sit inline with the tags.
+  &--with-tags &__input {
+    height: auto;
+    padding: 0;
+  }
+
+  // Multi-row (wrap) mode: top-align the field and the clear/calendar actions
+  // so they line up with the first row of tags as the field grows. The
+  // single-row (+N) mode keeps the base centered alignment.
+  &--tags-wrap {
+    align-items: flex-start;
+  }
+
+  &--tags-wrap &__actions {
+    align-self: flex-start;
+  }
+
+  // Single row: the tags container clips its overflow while the +N counter
+  // (a sibling of the container) never shrinks, so the counter and the
+  // clear/calendar buttons stay visible as the field narrows.
+  &--tags-single-row &__tags {
+    flex: 0 1 auto;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  &__tags-counter {
+    flex-shrink: 0;
+  }
+
+  // During the measuring pass (before the visible count is known) the tags must
+  // keep their natural width so the overflow count is measured correctly.
+  &--tags-measuring &__tags .tedi-tag {
+    flex-shrink: 0;
+  }
+
+  &__field {
+    display: flex;
+    flex: 1;
+    gap: var(--layout-grid-gutters-04);
+    align-items: center;
+    min-width: 0;
+  }
+
+  &__tags {
     display: flex;
     flex-wrap: wrap;
     gap: var(--layout-grid-gutters-04);
@@ -49,11 +98,11 @@
 
   &__actions {
     display: flex;
+    flex-shrink: 0;
     gap: var(--layout-grid-gutters-04);
     align-items: center;
     align-self: center;
     justify-content: center;
-    min-width: 0;
   }
 
   &__clear {
@@ -110,11 +159,31 @@
     }
 
     &:disabled {
-      color: var(--general-icon-disabled);
+      color: var(--general-text-disabled);
       pointer-events: none;
       cursor: not-allowed;
       background: transparent;
     }
   }
 
+}
+
+// The shared form-field input box is fixed-height; in multiple mode (tags) let
+// it grow to fit the wrapped rows and top-align its contents, mirroring the
+// React MultiValueField (min-height + flex-wrap). Specificity (0,3,0) beats the
+// form-field size height rules regardless of stylesheet order.
+.tedi-form-field .tedi-form-field__input:has(.tedi-date-input--tags-wrap) {
+  align-items: flex-start;
+  height: auto;
+  min-height: var(--form-field-height);
+}
+
+.tedi-form-field--small
+  .tedi-form-field__input:has(.tedi-date-input--tags-wrap) {
+  min-height: var(--form-field-height-sm);
+}
+
+.tedi-form-field--large
+  .tedi-form-field__input:has(.tedi-date-input--tags-wrap) {
+  min-height: var(--form-field-height-lg);
 }

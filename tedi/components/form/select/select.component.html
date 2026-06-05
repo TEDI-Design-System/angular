@@ -146,6 +146,7 @@
     @if (multiRow()) {
       @for (value of selectedValues(); track value) {
         <tedi-tag
+          [ellipsis]="tagEllipsis()"
           [closable]="isTagRemovable()"
           (closed)="deselect($event, value)"
         >
@@ -153,19 +154,22 @@
         </tedi-tag>
       }
     } @else {
-      @for (value of selectedValues(); track value; let i = $index) {
-        @if (visibleTagsCount() === null || i < visibleTagsCount()!) {
-          <tedi-tag
-            #tagElement
-            [closable]="isTagRemovable()"
-            (closed)="deselect($event, value)"
-          >
-            {{ getLabel(value) }}
-          </tedi-tag>
+      <div class="tedi-select__multiselect-tags">
+        @for (value of selectedValues(); track value; let i = $index) {
+          @if (visibleTagsCount() === null || i < visibleTagsCount()!) {
+            <tedi-tag
+              #tagElement
+              [ellipsis]="tagEllipsis()"
+              [closable]="isTagRemovable()"
+              (closed)="deselect($event, value)"
+            >
+              {{ getLabel(value) }}
+            </tedi-tag>
+          }
         }
-      }
+      </div>
       @if (hiddenTagsCount() > 0) {
-        <tedi-tag>+{{ hiddenTagsCount() }}</tedi-tag>
+        <tedi-tag class="tedi-select__multiselect-counter">+{{ hiddenTagsCount() }}</tedi-tag>
       }
     }
     @if (searchable()) {

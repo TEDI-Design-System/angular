@@ -118,6 +118,16 @@ describe("DateFieldComponent", () => {
       expect(input.placeholder).toBe("dd.mm.yyyy");
     });
 
+    it("defaults the placeholder to the locale format hint in single mode", () => {
+      const { component } = createField({ mode: "single" });
+      expect(component.effectivePlaceholder()).toBe("pp.kk.aaaa");
+    });
+
+    it("does not auto-fill a format-hint placeholder in multiple mode", () => {
+      const { component } = createField({ mode: "multiple" });
+      expect(component.effectivePlaceholder()).toBe("");
+    });
+
     it("renders the formatted display value for a single Date", () => {
       const { el, component, fixture } = createField({ mode: "single" });
       component.writeValue(new Date(2026, 4, 14));
@@ -586,16 +596,16 @@ describe("DateFieldComponent", () => {
     });
   });
 
-  describe("multiple mode chips", () => {
-    it("renders chips for selected dates in multiple mode", () => {
+  describe("multiple mode tags", () => {
+    it("renders tags for selected dates in multiple mode", () => {
       const { el, component, fixture } = createField({ mode: "multiple" });
       component.value.set([new Date(2026, 4, 14), new Date(2026, 5, 1)]);
       fixture.detectChanges();
-      const chips = el.querySelectorAll("tedi-tag");
-      expect(chips.length).toBe(2);
+      const tags = el.querySelectorAll("tedi-tag");
+      expect(tags.length).toBe(2);
     });
 
-    it("removes a date when the chip is removed", () => {
+    it("removes a date when the tag is removed", () => {
       const { el, component, fixture } = createField({ mode: "multiple" });
       component.value.set([new Date(2026, 4, 14), new Date(2026, 5, 1)]);
       fixture.detectChanges();
@@ -605,6 +615,29 @@ describe("DateFieldComponent", () => {
       removeBtn.click();
       const v = component.value() as Date[];
       expect(v.length).toBe(1);
+    });
+
+    it("renders read-only tags (no close button) when isTagRemovable is false", () => {
+      const { el, component, fixture } = createField({
+        mode: "multiple",
+        isTagRemovable: false,
+      });
+      component.value.set([new Date(2026, 4, 14), new Date(2026, 5, 1)]);
+      fixture.detectChanges();
+      expect(el.querySelectorAll("tedi-tag").length).toBe(2);
+      expect(el.querySelector("tedi-tag .tedi-closing-button")).toBeNull();
+    });
+
+    it("forwards tagEllipsis to the rendered tags", () => {
+      const { el, component, fixture } = createField({
+        mode: "multiple",
+        tagEllipsis: "start",
+      });
+      component.value.set([new Date(2026, 4, 14)]);
+      fixture.detectChanges();
+      const tag = el.querySelector("tedi-tag");
+      expect(tag?.classList.contains("tedi-tag--ellipsis")).toBe(true);
+      expect(tag?.classList.contains("tedi-tag--ellipsis-start")).toBe(true);
     });
   });
 
@@ -822,6 +855,45 @@ describe("DateFieldComponent", () => {
       const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
       bp.setBreakpoint("xs");
       expect(component.modalEnabled()).toBe(false);
+    });
+
+    it("defaults single-mode fields to the native picker below md", () => {
+      const { component } = createField();
+      const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
+      bp.setBreakpoint("sm");
+      expect(component.useNativePickerEffective()).toBe(true);
+    });
+
+    it("uses the custom popover from md upward by default", () => {
+      const { component } = createField();
+      const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
+      bp.setBreakpoint("lg");
+      expect(component.useNativePickerEffective()).toBe(false);
+      expect(component.usePopover()).toBe(true);
+    });
+
+    it("lets an opted-in modal take precedence over the native default", () => {
+      const { component } = createField({ modal: true });
+      const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
+      bp.setBreakpoint("sm");
+      expect(component.useNativePickerEffective()).toBe(false);
+      expect(component.useModal()).toBe(true);
+    });
+  });
+
+  describe("responsive strategy change", () => {
+    it("closes an open popover when the viewport crosses into the native range", () => {
+      const { component, fixture } = createField();
+      const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
+      bp.setBreakpoint("lg");
+      fixture.detectChanges();
+
+      component.handleIconClick();
+      expect(component.overlayOpen()).toBe(true);
+
+      bp.setBreakpoint("sm");
+      fixture.detectChanges();
+      expect(component.overlayOpen()).toBe(false);
     });
   });
 
@@ -1059,7 +1131,7 @@ describe("DateFieldComponent", () => {
 @Component({
   standalone: true,
   imports: [DateFieldComponent, ReactiveFormsModule],
-  template: `<tedi-date-field inputId="rf-test" [formControl]="control" />`,
+  template: `<tedi-date-field inputId="rf-test" [formControl]="control" [useNativePicker]="false" />`,
 })
 class ReactiveHostComponent {
   control = new FormControl<Date | Date[] | DateRange | null>(null);

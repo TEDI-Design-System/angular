@@ -70,29 +70,29 @@ describe("DateInputComponent", () => {
     expect(input.value).toBe("2026-05-14");
   });
 
-  it("does not render chips when mode is single, even with chips provided", () => {
+  it("does not render tags when mode is single, even with tags provided", () => {
     fixture.componentRef.setInput("mode", "single");
-    fixture.componentRef.setInput("chips", [{ id: "a", label: "01.01.2026" }]);
+    fixture.componentRef.setInput("tags", [{ id: "a", label: "01.01.2026" }]);
     fixture.detectChanges();
 
-    const chips = el.querySelector(".tedi-date-input__chips");
-    expect(chips).toBeNull();
+    const tags = el.querySelector(".tedi-date-input__tags");
+    expect(tags).toBeNull();
     expect(el.querySelectorAll("tedi-tag").length).toBe(0);
   });
 
-  it("does not render chips when mode is multiple but chips list is empty", () => {
+  it("does not render tags when mode is multiple but tags list is empty", () => {
     fixture.componentRef.setInput("mode", "multiple");
-    fixture.componentRef.setInput("chips", []);
+    fixture.componentRef.setInput("tags", []);
     fixture.detectChanges();
 
-    const chips = el.querySelector(".tedi-date-input__chips");
-    expect(chips).toBeNull();
+    const tags = el.querySelector(".tedi-date-input__tags");
+    expect(tags).toBeNull();
     expect(el.querySelectorAll("tedi-tag").length).toBe(0);
   });
 
-  it("renders chips as tedi-tag elements when mode='multiple' and chips list is non-empty", () => {
+  it("renders tags as tedi-tag elements when mode='multiple' and tags list is non-empty", () => {
     fixture.componentRef.setInput("mode", "multiple");
-    fixture.componentRef.setInput("chips", [
+    fixture.componentRef.setInput("tags", [
       { id: "a", label: "01.01.2026" },
       { id: "b", label: "02.01.2026" },
     ]);
@@ -104,9 +104,9 @@ describe("DateInputComponent", () => {
     expect(tags[1].textContent).toContain("02.01.2026");
   });
 
-  it("emits chipRemove with the chip id when the tag's close button is clicked", () => {
+  it("emits tagRemove with the tag id when the tag's close button is clicked", () => {
     fixture.componentRef.setInput("mode", "multiple");
-    fixture.componentRef.setInput("chips", [{ id: "chip-1", label: "01.01.2026" }]);
+    fixture.componentRef.setInput("tags", [{ id: "tag-1", label: "01.01.2026" }]);
     fixture.detectChanges();
 
     const removeBtn = el.querySelector(
@@ -114,15 +114,15 @@ describe("DateInputComponent", () => {
     ) as HTMLButtonElement;
     expect(removeBtn).not.toBeNull();
     const spy = jest.fn();
-    component.chipRemove.subscribe(spy);
+    component.tagRemove.subscribe(spy);
 
     removeBtn.click();
-    expect(spy).toHaveBeenCalledWith("chip-1");
+    expect(spy).toHaveBeenCalledWith("tag-1");
   });
 
   it("does not render a tag close button when disabled", () => {
     fixture.componentRef.setInput("mode", "multiple");
-    fixture.componentRef.setInput("chips", [{ id: "chip-1", label: "01.01.2026" }]);
+    fixture.componentRef.setInput("tags", [{ id: "tag-1", label: "01.01.2026" }]);
     fixture.componentRef.setInput("disabled", true);
     fixture.detectChanges();
 
@@ -132,12 +132,36 @@ describe("DateInputComponent", () => {
 
   it("does not render a tag close button when readOnly", () => {
     fixture.componentRef.setInput("mode", "multiple");
-    fixture.componentRef.setInput("chips", [{ id: "chip-1", label: "01.01.2026" }]);
+    fixture.componentRef.setInput("tags", [{ id: "tag-1", label: "01.01.2026" }]);
     fixture.componentRef.setInput("readOnly", true);
     fixture.detectChanges();
 
     const removeBtn = el.querySelector("tedi-tag .tedi-closing-button");
     expect(removeBtn).toBeNull();
+  });
+
+  it("does not render a tag close button when removable is false", () => {
+    fixture.componentRef.setInput("mode", "multiple");
+    fixture.componentRef.setInput("tags", [{ id: "tag-1", label: "01.01.2026" }]);
+    fixture.componentRef.setInput("removable", false);
+    fixture.detectChanges();
+
+    expect(el.querySelector("tedi-tag")).not.toBeNull();
+    expect(el.querySelector("tedi-tag .tedi-closing-button")).toBeNull();
+  });
+
+  it("forwards the ellipsis input to the rendered tags", () => {
+    fixture.componentRef.setInput("mode", "multiple");
+    fixture.componentRef.setInput("tags", [{ id: "tag-1", label: "01.01.2026" }]);
+    fixture.detectChanges();
+    // default: no ellipsis
+    expect(el.querySelector("tedi-tag.tedi-tag--ellipsis")).toBeNull();
+
+    fixture.componentRef.setInput("ellipsis", "start");
+    fixture.detectChanges();
+    const tag = el.querySelector("tedi-tag");
+    expect(tag?.classList.contains("tedi-tag--ellipsis")).toBe(true);
+    expect(tag?.classList.contains("tedi-tag--ellipsis-start")).toBe(true);
   });
 
   it("emits iconClick when the calendar icon button is clicked", () => {
@@ -255,9 +279,9 @@ describe("DateInputComponent", () => {
     expect(label?.length).toBeGreaterThan(0);
   });
 
-  it("renders a labelled tag close button that is described by the chip label", () => {
+  it("renders a labelled tag close button that is described by the tag label", () => {
     fixture.componentRef.setInput("mode", "multiple");
-    fixture.componentRef.setInput("chips", [{ id: "a", label: "01.01.2026" }]);
+    fixture.componentRef.setInput("tags", [{ id: "a", label: "01.01.2026" }]);
     fixture.detectChanges();
 
     const tag = el.querySelector("tedi-tag") as HTMLElement;
@@ -281,6 +305,15 @@ describe("DateInputComponent", () => {
     expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
   });
 
+  it("renders the clear button in multiple mode when tags exist but the text value is empty", () => {
+    fixture.componentRef.setInput("clearable", true);
+    fixture.componentRef.setInput("mode", "multiple");
+    fixture.componentRef.setInput("value", "");
+    fixture.componentRef.setInput("tags", [{ id: "a", label: "14.05.2026" }]);
+    fixture.detectChanges();
+    expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
+  });
+
   it("emits clear when the clear button is clicked", () => {
     fixture.componentRef.setInput("clearable", true);
     fixture.componentRef.setInput("value", "14.05.2026");
@@ -296,14 +329,67 @@ describe("DateInputComponent", () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  it("toggles the with-chips host modifier based on chip rendering", () => {
+  it("toggles the with-tags host modifier based on tag rendering", () => {
     const host = el as HTMLElement;
-    expect(host.classList.contains("tedi-date-input--with-chips")).toBe(false);
+    expect(host.classList.contains("tedi-date-input--with-tags")).toBe(false);
 
     fixture.componentRef.setInput("mode", "multiple");
-    fixture.componentRef.setInput("chips", [{ id: "a", label: "01.01.2026" }]);
+    fixture.componentRef.setInput("tags", [{ id: "a", label: "01.01.2026" }]);
     fixture.detectChanges();
-    expect(host.classList.contains("tedi-date-input--with-chips")).toBe(true);
+    expect(host.classList.contains("tedi-date-input--with-tags")).toBe(true);
+  });
+
+  it("toggles tags-wrap vs tags-single-row based on multiRow", () => {
+    const host = el as HTMLElement;
+    fixture.componentRef.setInput("mode", "multiple");
+    fixture.componentRef.setInput("tags", [{ id: "a", label: "01.01.2026" }]);
+    fixture.detectChanges();
+    expect(host.classList.contains("tedi-date-input--tags-wrap")).toBe(true);
+    expect(host.classList.contains("tedi-date-input--tags-single-row")).toBe(
+      false,
+    );
+
+    fixture.componentRef.setInput("multiRow", false);
+    fixture.detectChanges();
+    expect(host.classList.contains("tedi-date-input--tags-wrap")).toBe(false);
+    expect(host.classList.contains("tedi-date-input--tags-single-row")).toBe(
+      true,
+    );
+  });
+
+  it("renders a +N counter for the overflow tags in single-row mode", () => {
+    fixture.componentRef.setInput("mode", "multiple");
+    fixture.componentRef.setInput("multiRow", false);
+    fixture.componentRef.setInput("tags", [
+      { id: "a", label: "01.01.2026" },
+      { id: "b", label: "02.01.2026" },
+      { id: "c", label: "03.01.2026" },
+    ]);
+    fixture.detectChanges();
+
+    // jsdom has no layout, so force the measured visible count.
+    component.visibleTagsCount.set(1);
+    fixture.detectChanges();
+
+    expect(component.hiddenTagsCount()).toBe(2);
+    const counter = el.querySelector(".tedi-date-input__tags-counter");
+    expect(counter?.textContent).toContain("+2");
+    // 1 visible tag + 1 counter tag
+    expect(el.querySelectorAll("tedi-tag").length).toBe(2);
+  });
+
+  it("renders all tags and no counter in multi-row mode", () => {
+    fixture.componentRef.setInput("mode", "multiple");
+    fixture.componentRef.setInput("tags", [
+      { id: "a", label: "01.01.2026" },
+      { id: "b", label: "02.01.2026" },
+      { id: "c", label: "03.01.2026" },
+    ]);
+    fixture.detectChanges();
+
+    expect(component.hiddenTagsCount()).toBe(0);
+    expect(el.querySelector(".tedi-date-input__tags-counter")).toBeNull();
+    expect(el.querySelectorAll("tedi-tag").length).toBe(3);
   });
 
   it("applies disabled and readonly host modifiers based on inputs", () => {

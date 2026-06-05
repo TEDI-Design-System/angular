@@ -27,6 +27,7 @@ function makeData(
     selectionLevel: "days",
     localeCode: "et-EE",
     showOutsideDays: true,
+    showWeekNumbers: false,
     numberOfMonths: 1,
     monthYearSelectType: "dropdown",
     required: false,
