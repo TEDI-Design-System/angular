@@ -21,7 +21,7 @@ export default {
   render: (props) => ({
     props,
     template: `
-      <tedi-tag [type]="type" [loading]="loading" [closable]="closable">
+      <tedi-tag [type]="type" [loading]="loading" [closable]="closable" [ellipsis]="ellipsis">
         {{content}}
       </tedi-tag>
     `,
@@ -30,6 +30,7 @@ export default {
     type: "primary",
     loading: false,
     closable: false,
+    ellipsis: false,
     content: "Tag",
   },
   argTypes: {
@@ -68,12 +69,43 @@ export default {
         category: "inputs",
       },
     },
+    ellipsis: {
+      control: "radio",
+      options: [false, "start", "end"],
+      description:
+        "Which end the label truncates from when it doesn't fit. `false` never truncates; `end` → `Long label…`; `start` → `…label`. Truncation only kicks in when the tag is width-constrained.",
+      table: {
+        defaultValue: { summary: "false" },
+        type: { summary: "TagEllipsis", detail: "false \nstart \nend" },
+        category: "inputs",
+      },
+    },
   },
 } as Meta<TagComponent & { content: string }>;
 
 type Story = StoryObj<TagComponent & { content: string }>;
 
 export const Default: Story = {};
+
+export const Ellipsis: Story = {
+  render: () => ({
+    template: `
+      <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 7rem;">
+        <tedi-tag [closable]="true">A fairly long tag label that wraps</tedi-tag>
+        <tedi-tag [closable]="true" ellipsis="end">A fairly long tag label, end</tedi-tag>
+        <tedi-tag [closable]="true" ellipsis="start">start, a fairly long tag label</tedi-tag>
+      </div>
+    `,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "When width-constrained, `ellipsis` truncates the label (the close button stays fixed). `false` never truncates — the label wraps, `end` cuts the end, `start`  cuts the start.",
+      },
+    },
+  },
+};
 
 export const Primary: Story = {
   render: (props) => ({

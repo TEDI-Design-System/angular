@@ -14,6 +14,7 @@ import { ClosingButtonComponent } from "../../buttons/closing-button/closing-but
 import { _IdGenerator } from '@angular/cdk/a11y';
 
 export type TagType = "primary" | "secondary" | "danger";
+export type TagEllipsis = "start" | "end" | false;
 
 @Component({
   selector: "tedi-tag",
@@ -26,6 +27,8 @@ export type TagType = "primary" | "secondary" | "danger";
     "[class.tedi-tag]": "true",
     "[class.tedi-tag--loading]": "loading()",
     "[class.tedi-tag--closable]": "closable()",
+    "[class.tedi-tag--ellipsis]": "ellipsis() !== false",
+    "[class.tedi-tag--ellipsis-start]": "ellipsis() === 'start'",
     "[class]": "classes()",
   },
 })
@@ -52,6 +55,15 @@ export class TagComponent {
    * @default "primary"
    */
   type = input<TagType>("primary");
+
+  /**
+   * Which end the label truncates from when it doesn't fit. `false` (default)
+   * never truncates — the tag keeps its full width. `end` shows an ellipsis at
+   * the end (`05.06…`); `start` shows it at the start (`…06.2026`), which keeps
+   * the most significant part of values like dates visible.
+   * @default false
+   */
+  ellipsis = input<TagEllipsis>(false);
 
   /**
    * Event emitted when the close button is clicked.
