@@ -1,3 +1,10 @@
+# [6.5.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.2...angular-6.5.0-rc.3) (2026-06-05)
+
+
+### Features
+
+* **table:** added selectedRowHighlight input and updated stories [#445](https://github.com/TEDI-Design-System/angular/issues/445) ([c7aeb1b](https://github.com/TEDI-Design-System/angular/commit/c7aeb1bd7cece79c0654879020cd6ea2f3abebb9))
+
 # [6.5.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.1...angular-6.5.0-rc.2) (2026-06-04)
 
 
