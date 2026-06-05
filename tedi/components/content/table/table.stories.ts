@@ -582,6 +582,7 @@ abstract class TableStoryHostBase {
   readonly interactive = input(false, { transform: booleanAttribute });
   readonly expandTrigger = input<TableExpandTrigger>("button");
   readonly enableRowSelection = input(false, { transform: booleanAttribute });
+  readonly selectedRowHighlight = input(true, { transform: booleanAttribute });
   readonly selectionMode = input<TableSelectionMode>("multiple");
   readonly enableColumnFilters = input(false, { transform: booleanAttribute });
   readonly maxHeight = input<number | undefined>(undefined);
@@ -603,6 +604,7 @@ const TABLE_APPEARANCE_BINDINGS = `
   [interactive]="interactive()"
   [expandTrigger]="expandTrigger()"
   [enableRowSelection]="enableRowSelection()"
+  [selectedRowHighlight]="selectedRowHighlight()"
   [selectionMode]="selectionMode()"
   [enableColumnFilters]="enableColumnFilters()"
   [maxHeight]="maxHeight()"
@@ -622,6 +624,7 @@ type TediTableStoryArgs = {
   interactive: boolean;
   expandTrigger: TableExpandTrigger;
   enableRowSelection: boolean;
+  selectedRowHighlight: boolean;
   selectionMode: TableSelectionMode;
   enableColumnFilters: boolean;
   maxHeight: number | undefined;
@@ -820,6 +823,16 @@ const meta: Meta<TediTableStoryArgs> = {
         category: "behavior",
         type: { summary: "boolean | ((row) => boolean)" },
         defaultValue: { summary: "false" },
+      },
+    },
+    selectedRowHighlight: {
+      description:
+        "Whether selected rows get a background highlight. Default `true`.",
+      control: "boolean",
+      table: {
+        category: "behavior",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
       },
     },
     selectionMode: {
@@ -2500,7 +2513,7 @@ class SelectableRowsStoryHostComponent extends TableStoryHostBase {
 }
 
 export const SelectableRows: Story = {
-  args: { enableRowSelection: true },
+  args: { enableRowSelection: true, selectedRowHighlight: false },
   render: (args) => ({
     moduleMetadata: { imports: [SelectableRowsStoryHostComponent] },
     props: args,
@@ -2520,6 +2533,7 @@ export const SelectableRows: Story = {
   [data]="data"
   [columns]="columns"
   [enableRowSelection]="true"
+  [selectedRowHighlight]="false"
   [pagination]="pagination"
 />
 
@@ -2682,6 +2696,130 @@ export const ClickableRows: Story = {
 />
 
 <ng-template #personStatus let-ctx>
+  <tedi-status-badge
+    [color]="statusColor[ctx.row.original.status]"
+    [text]="ctx.row.original.status"
+    [variant]="
+      active()?.id === ctx.row.id || table.hoveredRowId() === ctx.row.id
+        ? 'filled-bordered'
+        : 'filled'
+    "
+  />
+</ng-template>`,
+      },
+    },
+  },
+};
+
+// ---------- CollapsibleClickableRows ----------
+@Component({
+  standalone: true,
+  selector: "tedi-collapsible-clickable-rows-story",
+  imports: [TediTableComponent, StatusBadgeComponent],
+  template: `
+    <p style="margin-bottom: 10px;">
+      {{
+        active()
+          ? "You clicked " + active()!.name
+          : "Click a row to select it. Click the chevron or the row itself to expand."
+      }}
+    </p>
+    <tedi-table
+      #table
+      id="tedi-table-collapsible-clickable"
+      [data]="data"
+      [columns]="columns()"
+      [getSubRows]="getSubRows"
+      [interactive]="true"
+      [activeRowId]="active()?.id"
+      (rowClick)="onClick($event)"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+    <ng-template #statusCell let-ctx>
+      <tedi-status-badge
+        [color]="statusColor[ctx.row.original.status]"
+        [text]="ctx.row.original.status"
+        [variant]="
+          active()?.id === ctx.row.id || table.hoveredRowId() === ctx.row.id
+            ? 'filled-bordered'
+            : 'filled'
+        "
+      />
+    </ng-template>
+  `,
+})
+class CollapsibleClickableRowsStoryHostComponent extends TableStoryHostBase {
+  data = collapsiblePeople;
+  pagination = DEFAULT_PAGINATION;
+  statusColor = certStatusColor;
+  active = signal<CollapsibleRecord | null>(null);
+
+  getSubRows = (row: CollapsibleRecord) => row.subRows;
+  statusCellTpl =
+    viewChild<TemplateRef<CellContext<CollapsibleRecord, unknown>>>("statusCell");
+
+  columns = computed<TediColumnDef<CollapsibleRecord>[]>(() => [
+    { id: "name", header: "Isik", accessorKey: "name" },
+    { id: "age", header: "Vanus", accessorKey: "age" },
+    { id: "visits", header: "Külastuste arv", accessorKey: "visits" },
+    {
+      id: "status",
+      header: "Tõendi staatus",
+      accessorKey: "status",
+      cell: this.statusCellTpl() ?? "",
+    } as TediColumnDef<CollapsibleRecord>,
+  ]);
+
+  onClick(row: Row<CollapsibleRecord>) {
+    // Only update active row if the click is not on the expand toggle
+    this.active.set({ ...row.original, id: row.id });
+  }
+}
+
+export const CollapsibleClickableRows: Story = {
+  args: { interactive: true, rowHover: true },
+  render: (args) => ({
+    moduleMetadata: { imports: [CollapsibleClickableRowsStoryHostComponent] },
+    props: args,
+    template: `<tedi-collapsible-clickable-rows-story ${argsToTemplate(
+      args,
+    )} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Combines [getSubRows] (collapsible / tree data) with " +
+          "interactive = true for clickable rows. Rows that have sub-rows show " +
+          "an expand chevron and respond to clicks in two ways: clicking the chevron " +
+          "toggles expansion, while clicking anywhere else on the row activates it " +
+          "(shown via [activeRowId]). The status cell borders its badge for both the " +
+          "active and hovered rows — read the table's exposed hoveredRowId() signal via a " +
+          "#table template ref.",
+      },
+      source: {
+        language: "html",
+        code: `<!-- [getSubRows] builds an expansion tree so rows with sub-rows
+  show an expand chevron. [interactive]="true" makes every row act like a
+  button (role=button, tabindex, Enter/Space). [activeRowId] pins the
+  clicked row visually — it stays highlighted while a side pane shows
+  its content. The status cell borders its badge for the active OR
+  hovered row — read the table's exposed hoveredRowId() signal via a
+  #table template ref.
+-->
+<tedi-table
+  #table
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [interactive]="true"
+  [activeRowId]="active()?.id"
+  (rowClick)="onClick($event)"
+  [pagination]="pagination"
+/>
+
+<ng-template #statusCell let-ctx>
   <tedi-status-badge
     [color]="statusColor[ctx.row.original.status]"
     [text]="ctx.row.original.status"

@@ -94,6 +94,7 @@ const columns: TediColumnDef<Person>[] = [
       [getSubRows]="getSubRows()"
       [interactive]="interactive()"
       [activeRowId]="activeRowId()"
+      [selectedRowHighlight]="selectedRowHighlight()"
       [persist]="persist()"
       [state]="state()"
       [defaultState]="defaultState()"
@@ -140,6 +141,7 @@ class HostComponent {
   >(undefined);
   readonly interactive = signal(false);
   readonly activeRowId = signal<string | undefined>(undefined);
+  readonly selectedRowHighlight = signal(true);
   readonly persist = signal<TablePersistOptions | undefined>(undefined);
   readonly state = signal<Partial<TableState> | undefined>(undefined);
   readonly defaultState = signal<Partial<TableState> | undefined>(undefined);
@@ -246,6 +248,45 @@ describe("TediTableComponent", () => {
       fixture.detectChanges();
       const lastEmit = fixture.componentInstance.onStateChange.mock.calls.at(-1);
       expect(lastEmit?.[0].rowSelection).toEqual({ "0": true, "1": true });
+    });
+
+    it("adds .tedi-table__row--selected to selected rows by default", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.enableRowSelection.set(true);
+      fixture.detectChanges();
+      const selectAll = fixture.nativeElement.querySelector(
+        'input[aria-label="Select all"]',
+      ) as HTMLInputElement;
+      selectAll.click();
+      fixture.detectChanges();
+      const rows = Array.from(
+        fixture.nativeElement.querySelectorAll(".tedi-table__row") as NodeListOf<
+          HTMLTableRowElement
+        >,
+      );
+      expect(rows.some((r) => r.classList.contains("tedi-table__row--selected"))).toBe(
+        true,
+      );
+    });
+
+    it("omits .tedi-table__row--selected when selectedRowHighlight is false", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.enableRowSelection.set(true);
+      fixture.componentInstance.selectedRowHighlight.set(false);
+      fixture.detectChanges();
+      const selectAll = fixture.nativeElement.querySelector(
+        'input[aria-label="Select all"]',
+      ) as HTMLInputElement;
+      selectAll.click();
+      fixture.detectChanges();
+      const rows = Array.from(
+        fixture.nativeElement.querySelectorAll(".tedi-table__row") as NodeListOf<
+          HTMLTableRowElement
+        >,
+      );
+      expect(
+        rows.some((r) => r.classList.contains("tedi-table__row--selected")),
+      ).toBe(false);
     });
   });
 

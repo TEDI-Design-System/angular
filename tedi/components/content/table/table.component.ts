@@ -227,10 +227,31 @@ export class TediTableComponent<TData> {
   readonly caption = input<TemplateRef<unknown> | string | undefined>(
     undefined,
   );
+  /**
+   * Alternating row backgrounds (zebra striping).
+   * @default false
+   */
   readonly striped = input(false, { transform: booleanAttribute });
+  /**
+   * Vertical separators between columns.
+   * @default false
+   */
   readonly verticalBorders = input(false, { transform: booleanAttribute });
+  /**
+   * Removes the table's outer border and corner radius.
+   * @default false
+   */
   readonly borderless = input(false, { transform: booleanAttribute });
+  /**
+   * Freezes the first column in place during horizontal scroll.
+   * @default false
+   */
   readonly stickyFirstColumn = input(false, { transform: booleanAttribute });
+  /**
+   * Pins `<thead>` to the top during vertical scroll. Requires `maxHeight` to
+   * be set so the table has a scroll container.
+   * @default false
+   */
   readonly stickyHeader = input(false, { transform: booleanAttribute });
   /**
    * Switches the table to `table-layout: fixed`, making column `size` /
@@ -240,8 +261,32 @@ export class TediTableComponent<TData> {
    * @default false
    */
   readonly fixedLayout = input(false, { transform: booleanAttribute });
+  /**
+   * Constrains the table's height and wraps it in a vertically scrollable
+   * container. A number is treated as pixels; a string is used verbatim as a
+   * CSS length. Pair with `stickyHeader` to keep the header visible while
+   * scrolling.
+   * @default undefined
+   */
   readonly maxHeight = input<number | string | undefined>(undefined);
+  /**
+   * Id of the row to render in the active/highlighted state. Use to mark the
+   * row whose detail is currently open elsewhere (e.g. a side panel).
+   * @default undefined
+   */
   readonly activeRowId = input<string | undefined>(undefined);
+  /**
+   * Whether selected rows get a background highlight. Default `true`.
+   * Set to `false` when you want selection state for logic but not visual.
+   * @default true
+   */
+  readonly selectedRowHighlight = input(true, { transform: booleanAttribute });
+  /**
+   * Forces the row hover background on (`true`) or off (`false`). When omitted,
+   * hover styling tracks whether rows are interactive — on when `interactive`
+   * is set or `expandTrigger` is `'row'`, off otherwise.
+   * @default undefined
+   */
   readonly rowHover = input<boolean | undefined>(undefined);
   /**
    * Enables row selection and renders the selection column. Pass `true` to
@@ -262,6 +307,13 @@ export class TediTableComponent<TData> {
    * @default 'multiple'
    */
   readonly selectionMode = input<TableSelectionMode>("multiple");
+  /**
+   * Forces TanStack's column-filter machinery on. Automatically enabled when
+   * any column opts into the built-in `filterable` shorthand, so set this
+   * explicitly only when wiring filters through `state` / `(stateChange)`
+   * without using `filterable` columns.
+   * @default false
+   */
   readonly enableColumnFilters = input(false, { transform: booleanAttribute });
   /**
    * Template rendered as an expandable detail row beneath each expandable row.

@@ -320,7 +320,9 @@
             cdkDragLockAxis="y"
             [class]="
               'tedi-table__row' +
-              (row.getIsSelected() ? ' tedi-table__row--selected' : '') +
+              (this.selectedRowHighlight() && row.getIsSelected()
+                ? ' tedi-table__row--selected'
+                : '') +
               (isActiveRow ? ' tedi-table__row--active' : '') +
               (interactive() || expandsOnClick
                 ? ' tedi-table__row--clickable'

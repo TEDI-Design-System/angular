@@ -257,6 +257,7 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `interactive: boolean = false` — adds `role="button"`, hover/active styles, and keyboard activation to rows; subscribe to `(rowClick)`
 - `enableRowSelection: boolean | ((row) => boolean)` — opt-in selection; auto-renders a selection column
 - `selectionMode: "multiple" | "single" = "multiple"` — `multiple` shows checkboxes + select-all; `single` shows radios (no select-all)
+- `selectedRowHighlight: boolean = true` — whether selected rows get a background highlight. Set `false` to keep selection state for logic without the visual highlight (e.g. when you render selection feedback yourself in a cell template)
 - `renderSubComponent: TemplateRef<{ $implicit: Row<TData> }>` — expanded-row content template; auto-renders an expand column
 - `getRowCanExpand: (row) => boolean` — gate which rows expand
 - `expandTrigger: "button" | "row" = "button"` — `row` lets a click anywhere on the row toggle expansion. The chevron uses the bordered `secondary` style regardless; change it via `expandButtonVariant`.
