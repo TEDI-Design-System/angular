@@ -29,12 +29,25 @@
 
   &:focus-visible {
     color: var(--button-main-primary-background-default);
-    outline: var(--tedi-borders-02) solid var(--general-border-focus);
-    outline-offset: 0;
+
+    // Anchor the outline ring to this transparent border so it always renders
+    outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+    outline-offset: var(--tedi-borders-02);
+    background: transparent;
+    border-color: transparent;
   }
 
   &--selected {
     color: var(--button-main-primary-background-default);
+
+    &:focus-visible {
+      // Merge base focus-visible with the selected state
+      color: var(--button-main-primary-background-default);
+      outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+      outline-offset: var(--tedi-borders-02);
+      background: transparent;
+      border-color: transparent;
+    }
   }
 
   &:disabled {

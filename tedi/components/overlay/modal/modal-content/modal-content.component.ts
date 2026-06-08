@@ -3,6 +3,7 @@ import {
   ViewEncapsulation,
   ChangeDetectionStrategy,
 } from "@angular/core";
+import { CdkScrollable } from "@angular/cdk/scrolling";
 
 @Component({
   standalone: true,
@@ -12,6 +13,7 @@ import {
   styleUrl: "../modal.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  hostDirectives: [CdkScrollable],
   host: {
     class: "tedi-modal-content",
   },

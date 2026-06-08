@@ -33,6 +33,7 @@ import { InputState } from "../form-field/form-field.component";
       [isTagRemovable]="clearableTags"
       [multiRow]="multiRow"
       [dropdownWidthRef]="dropdownWidthRef"
+      [dropdownAlign]="dropdownAlign"
       [maxDropdownHeight]="maxDropdownHeight"
       [searchFn]="searchFn"
       [clearSearchOnSelect]="clearSearchOnSelect"
@@ -76,6 +77,7 @@ class TestHostComponent {
   clearableTags = false;
   multiRow = false;
   dropdownWidthRef: any = undefined;
+  dropdownAlign: "start" | "end" = "start";
   maxDropdownHeight: number | undefined = undefined;
   searchFn: ((term: string, item: unknown) => boolean) | undefined = undefined;
   clearSearchOnSelect = false;
@@ -1156,6 +1158,27 @@ describe("SelectComponent", () => {
   });
 
   describe("Computed properties", () => {
+    it("dropdownPositions anchor to the start edge by default", () => {
+      expect(select.dropdownPositions().every((p) => p.originX === "start")).toBe(
+        true,
+      );
+      expect(select.dropdownPositions().every((p) => p.overlayX === "start")).toBe(
+        true,
+      );
+    });
+
+    it("dropdownPositions anchor to the end edge when dropdownAlign is 'end'", () => {
+      host.dropdownAlign = "end";
+      fixture.detectChanges();
+
+      expect(select.dropdownPositions().every((p) => p.originX === "end")).toBe(
+        true,
+      );
+      expect(select.dropdownPositions().every((p) => p.overlayX === "end")).toBe(
+        true,
+      );
+    });
+
     it("selectedLabels should return labels of selected options", () => {
       host.control.setValue("Option 1");
       fixture.detectChanges();

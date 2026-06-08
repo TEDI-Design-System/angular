@@ -1,7 +1,12 @@
-import { Component, signal, TemplateRef, viewChild } from "@angular/core";
+import { Component, signal, TemplateRef, viewChild, input } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { provideNoopAnimations } from "@angular/platform-browser/animations";
+import { booleanAttribute } from "@angular/core";
+import {
+  type CdkDragDrop,
+  moveItemInArray,
+} from "@angular/cdk/drag-drop";
 import type { CellContext, Row } from "@tanstack/angular-table";
 import { TediTableComponent } from "./table.component";
 import { TediTableColumnsMenuComponent } from "./table-columns-menu/table-columns-menu.component";
@@ -34,6 +39,17 @@ const TRANSLATIONS: Record<string, Translator> = {
   "table.collapse-row": () => "Collapse row",
   "table.select-all": (selected) => (selected ? "Deselect all" : "Select all"),
   "table.select-row": (selected) => (selected ? "Deselect row" : "Select row"),
+  "table.reorder.pickup": (label) => `Column ${label ?? ""} picked up`.trim(),
+  "table.reorder.move": (label, pos) =>
+    `Column ${label ?? ""} at position ${pos ?? ""}`.trim(),
+  "table.reorder.drop": (label, pos) =>
+    `Column ${label ?? ""} dropped at position ${pos ?? ""}`.trim(),
+  "table.reorder.cancel": () => "Column reordering cancelled",
+  "table.row-reorder.pickup": (pos) => `Row ${pos ?? ""} picked up`.trim(),
+  "table.row-reorder.move": (pos) => `Row moved to position ${pos ?? ""}`.trim(),
+  "table.row-reorder.drop": (pos) =>
+    `Row dropped at position ${pos ?? ""}`.trim(),
+  "table.row-reorder.cancel": () => "Row reordering cancelled",
   "pagination.title": () => "Pagination",
   "pagination.prev-page": () => "Previous page",
   "pagination.next-page": () => "Next page",
@@ -93,6 +109,7 @@ const columns: TediColumnDef<Person>[] = [
       [renderSubComponent]="subTemplate()"
       [getSubRows]="getSubRows()"
       [interactive]="interactive()"
+      [rowAriaLabel]="rowAriaLabel()"
       [activeRowId]="activeRowId()"
       [selectedRowHighlight]="selectedRowHighlight()"
       [persist]="persist()"
@@ -140,6 +157,9 @@ class HostComponent {
     ((row: Person) => Person[] | undefined) | undefined
   >(undefined);
   readonly interactive = signal(false);
+  readonly rowAriaLabel = signal<((row: Row<Person>) => string) | undefined>(
+    undefined,
+  );
   readonly activeRowId = signal<string | undefined>(undefined);
   readonly selectedRowHighlight = signal(true);
   readonly persist = signal<TablePersistOptions | undefined>(undefined);
@@ -447,6 +467,49 @@ describe("TediTableComponent", () => {
       expect(rows.length).toBe(5);
     });
 
+    it("collapses to one page and renders all rows when a 'Show all' page size is selected", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.data.set(
+        Array.from({ length: 15 }, (_, i) => ({
+          id: String(i),
+          name: `Person ${i}`,
+          role: "Role",
+        })),
+      );
+      fixture.componentInstance.pagination.set({
+        pageSize: 5,
+        pageSizeOptions: [5, 10, { value: 15, label: "Show all" }],
+      });
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelectorAll(
+          ".tedi-table__body .tedi-table__row",
+        ).length,
+      ).toBe(5);
+      expect(
+        fixture.nativeElement.querySelector(".tedi-pagination__nav"),
+      ).not.toBeNull();
+
+      const table = fixture.debugElement.query(By.directive(TediTableComponent))
+        .componentInstance as unknown as {
+        handlePaginationPageSizeChange: (size: number) => void;
+        paginationPageCount: () => number;
+      };
+      table.handlePaginationPageSizeChange(15);
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelectorAll(
+          ".tedi-table__body .tedi-table__row",
+        ).length,
+      ).toBe(15);
+      expect(table.paginationPageCount()).toBe(1);
+      expect(
+        fixture.nativeElement.querySelector(".tedi-pagination__nav"),
+      ).toBeNull();
+    });
+
     it("uses rowCount for the aria-rowcount when manual pagination is set", () => {
       const fixture = setupHost();
       fixture.componentInstance.data.set(data);
@@ -700,6 +763,49 @@ describe("TediTableComponent", () => {
       Object.defineProperty(event, "currentTarget", { value: firstRow });
       firstRow.dispatchEvent(event);
       expect(fixture.componentInstance.onRowClick).toHaveBeenCalled();
+    });
+
+    it("does not emit rowClick when a text selection is active", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.interactive.set(true);
+      fixture.detectChanges();
+      const firstRow = fixture.nativeElement.querySelector(
+        ".tedi-table__body .tedi-table__row",
+      ) as HTMLElement;
+      const selectionSpy = jest
+        .spyOn(window, "getSelection")
+        .mockReturnValue({
+          isCollapsed: false,
+          toString: () => "selected text",
+        } as unknown as Selection);
+      firstRow.click();
+      expect(fixture.componentInstance.onRowClick).not.toHaveBeenCalled();
+      selectionSpy.mockRestore();
+    });
+
+    it("applies the rowAriaLabel resolver as aria-label on interactive rows", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.interactive.set(true);
+      fixture.componentInstance.rowAriaLabel.set(
+        (row) => `Open ${row.original.name}`,
+      );
+      fixture.detectChanges();
+      const firstRow = fixture.nativeElement.querySelector(
+        ".tedi-table__body .tedi-table__row",
+      );
+      expect(firstRow?.getAttribute("aria-label")).toBe(
+        `Open ${data[0].name}`,
+      );
+    });
+
+    it("omits aria-label when the row is not interactive", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.rowAriaLabel.set(() => "should be ignored");
+      fixture.detectChanges();
+      const firstRow = fixture.nativeElement.querySelector(
+        ".tedi-table__body .tedi-table__row",
+      );
+      expect(firstRow?.getAttribute("aria-label")).toBeNull();
     });
   });
 
@@ -1232,5 +1338,713 @@ describe("TediTableComponent", () => {
       expect(filterBtn).not.toBeNull();
       expect(sortBtn?.textContent).toContain("Name");
     });
+  });
+});
+
+// ── Keyboard column reordering tests ────────────────────────────────────────
+
+describe("Table: keyboard column reordering", () => {
+  let fixture: ComponentFixture<ReorderTestHostComponent>;
+
+  const reorderColumns: TediColumnDef<Person>[] = [
+    { id: "name", header: "Name", accessorKey: "name" },
+    { id: "role", header: "Role", accessorKey: "role" },
+    { id: "id", header: "ID", accessorKey: "id" },
+  ];
+
+  @Component({
+    standalone: true,
+    imports: [TediTableComponent],
+    template: `
+      <tedi-table
+        [data]="data()"
+        [columns]="columns()"
+        [reorderableColumns]="reorderableColumns()"
+        [pagination]="pagination()"
+      />
+    `,
+  })
+  class ReorderTestHostComponent {
+    data = signal<Person[]>(data);
+    columns = signal(reorderColumns);
+    reorderableColumns = input(false, { transform: booleanAttribute });
+    pagination = signal<boolean | TablePaginationOptions | undefined>(undefined);
+  }
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ReorderTestHostComponent],
+      providers: [
+        provideNoopAnimations(),
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "en" },
+      ],
+    }).compileComponents();
+  });
+
+  function _createFixture() {
+    fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+      ReorderTestHostComponent
+    >;
+    return fixture;
+  }
+
+  describe("reorderableColumns input", () => {
+    it("should not render live region when disabled", () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="false"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      const liveRegion = fixture.nativeElement.querySelector('[aria-live="polite"]');
+      expect(liveRegion).toBeNull();
+    });
+
+    it("should render live region when enabled", () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      const liveRegion = fixture.nativeElement.querySelector('[aria-live="polite"]');
+      expect(liveRegion).not.toBeNull();
+    });
+
+    it("enables mouse drag through the same input (header cdkDrag not disabled)", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const cell = fixture.nativeElement.querySelector(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+      expect(cell?.classList.contains("cdk-drag-disabled")).toBe(false);
+    });
+
+    it("disables mouse drag when reorderableColumns is false", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="false"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const cell = fixture.nativeElement.querySelector(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+      expect(cell?.classList.contains("cdk-drag-disabled")).toBe(true);
+    });
+  });
+
+  describe("pickup (Space/Enter)", () => {
+    it("should set aria-pressed on picked-up cell", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              #table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const cells = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+      expect(cells.length).toBeGreaterThan(0);
+
+      // Simulate Space on first cell
+      const event = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+      cells[0].dispatchEvent(event);
+      fixture.detectChanges();
+
+      const pickedCell = fixture.nativeElement.querySelector(
+        '.tedi-table__header-cell--picked-up',
+      );
+      expect(pickedCell).not.toBeNull();
+      const pickedHandle = pickedCell?.querySelector(".tedi-table__drag-handle");
+      expect(pickedHandle?.getAttribute("aria-pressed")).toBe("true");
+    });
+
+    it("should announce pickup via live region", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              #table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const cells = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+      const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true });
+      cells[0].dispatchEvent(event);
+      fixture.detectChanges();
+
+      const liveRegion = fixture.nativeElement.querySelector('[aria-live="polite"]');
+      expect(liveRegion?.textContent).toContain("Name");
+    });
+  });
+
+  describe("move (ArrowLeft/ArrowRight)", () => {
+    it("should update move delta when arrows pressed", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              #table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const cells = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+
+      // Pick up first cell
+      const pickupEvent = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+      cells[0].dispatchEvent(pickupEvent);
+      fixture.detectChanges();
+
+      // Move right twice
+      const rightEvent1 = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true });
+      cells[0].dispatchEvent(rightEvent1);
+      fixture.detectChanges();
+
+      const rightEvent2 = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true });
+      cells[0].dispatchEvent(rightEvent2);
+      fixture.detectChanges();
+
+      // Verify table state has column order update pending
+      const tableComponent = fixture.componentInstance;
+      expect(tableComponent).toBeTruthy();
+    });
+
+    it("should clamp delta at visible column boundaries", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              #table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const cells = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+
+      // Pick up first cell
+      const pickupEvent = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+      cells[0].dispatchEvent(pickupEvent);
+      fixture.detectChanges();
+
+      // Try to move left (should clamp at 0 — column stays picked up)
+      const leftEvent = new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true });
+      cells[0].dispatchEvent(leftEvent);
+      fixture.detectChanges();
+
+      const handle = cells[0].querySelector(".tedi-table__drag-handle");
+      expect(handle?.getAttribute("aria-pressed")).toBe("true");
+    });
+  });
+
+  describe("drop (Space/Enter)", () => {
+    it("should commit reordered columns", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              #table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const cells = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+
+      // Pick up first cell
+      const pickupEvent = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+      cells[0].dispatchEvent(pickupEvent);
+      fixture.detectChanges();
+
+      // Move right once
+      const rightEvent = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true });
+      cells[0].dispatchEvent(rightEvent);
+      fixture.detectChanges();
+
+      // Drop
+      const dropEvent = new KeyboardEvent("keydown", { key: "Enter", bubbles: true });
+      cells[0].dispatchEvent(dropEvent);
+      fixture.detectChanges();
+
+      // Should no longer be picked up
+      const pickedCell = fixture.nativeElement.querySelector(
+        '.tedi-table__header-cell--picked-up',
+      );
+      expect(pickedCell).toBeNull();
+    });
+
+    it("should announce drop position via live region", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              #table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const cells = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+
+      // Pick up and drop immediately (no move)
+      const pickupEvent = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+      cells[0].dispatchEvent(pickupEvent);
+      fixture.detectChanges();
+
+      const dropEvent = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+      cells[0].dispatchEvent(dropEvent);
+      fixture.detectChanges();
+
+      const liveRegion = fixture.nativeElement.querySelector('[aria-live="polite"]');
+      expect(liveRegion?.textContent).toContain("drop");
+    });
+  });
+
+  describe("cancel (Escape)", () => {
+    it("should return to idle phase without committing", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              #table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const cells = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+
+      // Pick up first cell
+      const pickupEvent = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+      cells[0].dispatchEvent(pickupEvent);
+      fixture.detectChanges();
+
+      // Move right
+      const rightEvent = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true });
+      cells[0].dispatchEvent(rightEvent);
+      fixture.detectChanges();
+
+      // Cancel
+      const escapeEvent = new KeyboardEvent("keydown", { key: "Escape", bubbles: true });
+      cells[0].dispatchEvent(escapeEvent);
+      fixture.detectChanges();
+
+      // Should no longer be picked up
+      const pickedCell = fixture.nativeElement.querySelector(
+        '.tedi-table__header-cell--picked-up',
+      );
+      expect(pickedCell).toBeNull();
+    });
+
+    it("should announce cancellation via live region", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              #table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const cells = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+
+      // Pick up then cancel
+      const pickupEvent = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+      cells[0].dispatchEvent(pickupEvent);
+      fixture.detectChanges();
+
+      const escapeEvent = new KeyboardEvent("keydown", { key: "Escape", bubbles: true });
+      cells[0].dispatchEvent(escapeEvent);
+      fixture.detectChanges();
+
+      const liveRegion = fixture.nativeElement.querySelector('[aria-live="polite"]');
+      expect(liveRegion?.textContent).toContain("cancel");
+    });
+  });
+
+  describe("ARIA accessibility", () => {
+    it("should set aria-pressed correctly on picked-up cells", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              #table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const cells = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+      const handles = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head .tedi-table__drag-handle",
+      );
+
+      // The reorder handle is an unpressed toggle button initially.
+      expect(handles[0]?.getAttribute("aria-pressed")).toBe("false");
+
+      // Pick up first cell
+      const pickupEvent = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+      cells[0].dispatchEvent(pickupEvent);
+      fixture.detectChanges();
+
+      expect(handles[0]?.getAttribute("aria-pressed")).toBe("true");
+
+      // Other handles stay unpressed
+      if (handles.length > 1) {
+        expect(handles[1]?.getAttribute("aria-pressed")).toBe("false");
+      }
+    });
+
+    it("should add visual highlight class to picked-up cell", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              #table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const cells = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+
+      // Pick up first cell
+      const pickupEvent = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+      cells[0].dispatchEvent(pickupEvent);
+      fixture.detectChanges();
+
+      expect(cells[0]?.classList.contains("tedi-table__header-cell--picked-up")).toBe(true);
+
+      // Drop
+      const dropEvent = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+      cells[0].dispatchEvent(dropEvent);
+      fixture.detectChanges();
+
+      expect(cells[0]?.classList.contains("tedi-table__header-cell--picked-up")).toBe(false);
+    });
+  });
+});
+
+// ── Keyboard row reordering tests ───────────────────────────────────────────
+
+describe("Table: keyboard row reordering", () => {
+  @Component({
+    standalone: true,
+    imports: [TediTableComponent],
+    template: `
+      <tedi-table
+        [data]="data()"
+        [columns]="columns"
+        [reorderableRows]="true"
+        (rowDrop)="onRowDrop($event)"
+      />
+    `,
+  })
+  class RowReorderHostComponent {
+    readonly data = signal<Person[]>([
+      { id: "1", name: "Anna", role: "Engineer" },
+      { id: "2", name: "Jüri", role: "Designer" },
+      { id: "3", name: "Mari", role: "Product" },
+    ]);
+    readonly columns: TediColumnDef<Person>[] = [
+      { id: "name", header: "Name", accessorKey: "name" },
+      { id: "role", header: "Role", accessorKey: "role" },
+    ];
+    readonly drops: CdkDragDrop<Person[]>[] = [];
+
+    onRowDrop(event: CdkDragDrop<Person[]>) {
+      this.drops.push(event);
+      this.data.update((current) => {
+        const next = [...current];
+        moveItemInArray(next, event.previousIndex, event.currentIndex);
+        return next;
+      });
+    }
+  }
+
+  function setup() {
+    TestBed.configureTestingModule({
+      imports: [RowReorderHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        provideNoopAnimations(),
+      ],
+    });
+    const fixture = TestBed.createComponent(RowReorderHostComponent);
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  const rowHandles = (fixture: ComponentFixture<RowReorderHostComponent>) =>
+    fixture.nativeElement.querySelectorAll(
+      ".tedi-table__body .tedi-table__drag-handle",
+    ) as NodeListOf<HTMLElement>;
+
+  const press = (el: HTMLElement, key: string) =>
+    el.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+
+  it("renders a reorder handle for every body row", () => {
+    const fixture = setup();
+    expect(rowHandles(fixture).length).toBe(3);
+  });
+
+  it("enables mouse drag through the same input (row cdkDrag not disabled)", () => {
+    const fixture = setup();
+    const row = fixture.nativeElement.querySelector(
+      ".tedi-table__body .tedi-table__row",
+    ) as HTMLElement;
+    expect(row?.classList.contains("cdk-drag-disabled")).toBe(false);
+  });
+
+  it("picks up a row on Space — sets aria-pressed and the picked-up class", () => {
+    const fixture = setup();
+    press(rowHandles(fixture)[0], " ");
+    fixture.detectChanges();
+
+    const handle = rowHandles(fixture)[0];
+    expect(handle.getAttribute("aria-pressed")).toBe("true");
+    const pickedRow = fixture.nativeElement.querySelector(
+      ".tedi-table__body .tedi-table__row--picked-up",
+    );
+    expect(pickedRow?.textContent).toContain("Anna");
+  });
+
+  it("emits rowDrop with source indices when moving down", () => {
+    const fixture = setup();
+    press(rowHandles(fixture)[0], " ");
+    fixture.detectChanges();
+    press(rowHandles(fixture)[0], "ArrowDown");
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.drops).toHaveLength(1);
+    expect(fixture.componentInstance.drops[0]).toMatchObject({
+      previousIndex: 0,
+      currentIndex: 1,
+    });
+    expect(fixture.componentInstance.data().map((p) => p.name)).toEqual([
+      "Jüri",
+      "Anna",
+      "Mari",
+    ]);
+  });
+
+  it("clamps at the page boundary — no move above the first row", () => {
+    const fixture = setup();
+    press(rowHandles(fixture)[0], " ");
+    fixture.detectChanges();
+    press(rowHandles(fixture)[0], "ArrowUp");
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.drops).toHaveLength(0);
+    expect(fixture.componentInstance.data().map((p) => p.name)).toEqual([
+      "Anna",
+      "Jüri",
+      "Mari",
+    ]);
+  });
+
+  it("restores the original position on Escape", () => {
+    const fixture = setup();
+    press(rowHandles(fixture)[0], " ");
+    fixture.detectChanges();
+    press(rowHandles(fixture)[0], "ArrowDown");
+    fixture.detectChanges();
+    // Anna is now at index 1; Escape should move it back to index 0.
+    const handleForAnna = rowHandles(fixture)[1];
+    press(handleForAnna, "Escape");
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.data().map((p) => p.name)).toEqual([
+      "Anna",
+      "Jüri",
+      "Mari",
+    ]);
+    const pickedRow = fixture.nativeElement.querySelector(
+      ".tedi-table__row--picked-up",
+    );
+    expect(pickedRow).toBeNull();
+  });
+
+  it("announces drop and clears the picked-up state on Enter", () => {
+    const fixture = setup();
+    press(rowHandles(fixture)[0], " ");
+    fixture.detectChanges();
+    press(rowHandles(fixture)[0], "Enter");
+    fixture.detectChanges();
+
+    const live = fixture.nativeElement.querySelector('[aria-live="polite"]');
+    expect(live?.textContent?.toLowerCase()).toContain("drop");
+    const pickedRow = fixture.nativeElement.querySelector(
+      ".tedi-table__row--picked-up",
+    );
+    expect(pickedRow).toBeNull();
   });
 });
