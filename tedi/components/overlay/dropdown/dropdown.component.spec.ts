@@ -11,7 +11,7 @@ import { NgxFloatUiContentComponent } from "ngx-float-ui";
 @Component({
   standalone: true,
   template: `
-    <tedi-dropdown [value]="value">
+    <tedi-dropdown [value]="value" [hideOnScroll]="hideOnScroll">
       <button tedi-dropdown-trigger>Trigger</button>
 
       <tedi-dropdown-content [dropdownRole]="role">
@@ -33,6 +33,7 @@ import { NgxFloatUiContentComponent } from "ngx-float-ui";
 class TestHostComponent {
   value = "b";
   role: "menu" | "listbox" = "listbox";
+  hideOnScroll = false;
 }
 
 @Component({
@@ -160,6 +161,53 @@ describe("DropdownComponent", () => {
     dropdown.toggleDropdown();
     fixture.detectChanges();
     expect(hideSpy).toHaveBeenCalled();
+  });
+
+  describe("hideOnScroll", () => {
+    it("sets up a scroll listener when opened with hideOnScroll true", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      (floatUi as any).state = false;
+
+      dropdown.showDropdown();
+
+      expect((dropdown as any).scrollListener).toBeDefined();
+    });
+
+    it("does not set up a scroll listener when hideOnScroll is false", () => {
+      host.hideOnScroll = false;
+      fixture.detectChanges();
+      (floatUi as any).state = false;
+
+      dropdown.showDropdown();
+
+      expect((dropdown as any).scrollListener).toBeUndefined();
+    });
+
+    it("hides the dropdown on scroll when hideOnScroll is true", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      (floatUi as any).state = false;
+      dropdown.showDropdown();
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      (floatUi as any).state = true;
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect((dropdown as any).scrollListener).toBeUndefined();
+    });
+
+    it("cleans up the scroll listener on destroy", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      (floatUi as any).state = false;
+      dropdown.showDropdown();
+
+      fixture.destroy();
+
+      expect((dropdown as any).scrollListener).toBeUndefined();
+    });
   });
 
   it("focusFirstItem() should focus first enabled item", () => {
