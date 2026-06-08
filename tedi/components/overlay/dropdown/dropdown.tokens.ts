@@ -15,8 +15,10 @@ export interface DropdownApi {
   focusLastItem(): void;
   /** Close the dropdown and reset active item state. */
   hideDropdown(): void;
-  /** Reference to the dropdown trigger directive. Used to read trigger dimensions and return focus. */
-  dropdownTrigger(): { host: { nativeElement: HTMLElement } } | undefined;
+  /** Reference to the dropdown trigger directive. `host` is the element the directive sits on (used for positioning and dimensions); `focus()` moves focus to the actual interactive trigger element, which may be a button nested inside a wrapping component. */
+  dropdownTrigger():
+    | { host: { nativeElement: HTMLElement }; focus(): void }
+    | undefined;
 }
 
 export const DROPDOWN_API = new InjectionToken<DropdownApi>("DropdownApi");

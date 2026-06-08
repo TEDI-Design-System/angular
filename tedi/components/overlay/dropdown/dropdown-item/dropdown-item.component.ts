@@ -119,7 +119,7 @@ export class DropdownItemComponent {
       case "Escape":
         event.preventDefault();
         this.dropdown.hideDropdown();
-        this.dropdown.dropdownTrigger()?.host.nativeElement.focus();
+        this.dropdown.dropdownTrigger()?.focus();
         break;
     }
   }
@@ -134,6 +134,6 @@ export class DropdownItemComponent {
     if (!this.closeOnSelect()) return;
 
     this.dropdown.hideDropdown();
-    this.dropdown.dropdownTrigger()?.host.nativeElement.focus();
+    this.dropdown.dropdownTrigger()?.focus();
   }
 }

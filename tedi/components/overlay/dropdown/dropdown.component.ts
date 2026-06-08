@@ -6,6 +6,7 @@ import {
   viewChild,
   contentChild,
   signal,
+  computed,
   AfterContentChecked,
   OnDestroy,
   inject,
@@ -70,6 +71,7 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
   readonly containerId = signal("");
   readonly isContentHovered = signal(false);
   readonly floatUiDisplay = signal<"inline" | "block">("inline");
+  readonly opened = computed(() => this.floatUiDisplay() === "block");
 
   private readonly platformId = inject(PLATFORM_ID);
 
@@ -155,7 +157,7 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
 
     if (!clickedInside) {
       this.hideDropdown();
-      triggerEl.focus();
+      this.dropdownTrigger().focus();
     }
   };
 

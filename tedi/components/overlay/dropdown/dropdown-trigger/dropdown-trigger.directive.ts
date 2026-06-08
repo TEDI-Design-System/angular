@@ -1,35 +1,72 @@
 import {
+  AfterViewInit,
   Directive,
   ElementRef,
   HostListener,
+  Renderer2,
+  effect,
   inject,
   input,
+  signal,
 } from "@angular/core";
 import { DropdownComponent } from "../dropdown.component";
 
 export type DropdownTriggerAriaHasPopup = "menu" | "listbox" | "dialog" | "true";
 
+const FOCUSABLE_SELECTOR = "button, a[href], [tabindex]";
+
 @Directive({
   standalone: true,
   selector: "[tedi-dropdown-trigger]",
-  host: {
-    "[attr.id]": "dropdown.containerId() + '_trigger'",
-    "[attr.aria-controls]": "dropdown.containerId()",
-    "[attr.aria-expanded]": "dropdown.floatUiComponent().state",
-    "[attr.aria-haspopup]": "ariaHaspopup()",
-    "[attr.role]": "isButton ? null : 'button'",
-    "[attr.tabindex]": "isButton ? null : '0'",
-  },
 })
-export class DropdownTriggerDirective {
+export class DropdownTriggerDirective implements AfterViewInit {
   /** Defines the aria-haspopup attribute for the trigger, informing assistive technologies whether it opens a menu or listbox. Improves accessibility by describing the type of popup. */
   readonly ariaHaspopup = input<DropdownTriggerAriaHasPopup>("menu");
 
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly dropdown = inject(DropdownComponent);
+  private readonly renderer = inject(Renderer2);
 
-  get isButton(): boolean {
-    return this.host.nativeElement.tagName === "BUTTON";
+  /**
+   * The element that actually receives focus and ARIA semantics. When the directive
+   * sits on a native `<button>`/`<a href>` that element is used directly. When it wraps
+   * a button component (e.g. `<app-button>` that renders its own native button), the
+   * inner focusable element is used instead — otherwise the wrapper and the inner button
+   * would both be tab stops, and the ARIA state would land on the wrong element.
+   */
+  private readonly triggerElement = signal<HTMLElement | null>(null);
+
+  constructor() {
+    effect(() => {
+      const el = this.triggerElement();
+      if (!el) return;
+
+      this.renderer.setAttribute(
+        el,
+        "id",
+        `${this.dropdown.containerId()}_trigger`,
+      );
+      this.renderer.setAttribute(el, "aria-controls", this.dropdown.containerId());
+      this.renderer.setAttribute(el, "aria-haspopup", this.ariaHaspopup());
+      this.renderer.setAttribute(
+        el,
+        "aria-expanded",
+        String(this.dropdown.opened()),
+      );
+
+      if (!this.isNativelyFocusable(el)) {
+        this.renderer.setAttribute(el, "role", "button");
+        this.renderer.setAttribute(el, "tabindex", "0");
+      }
+    });
+  }
+
+  ngAfterViewInit() {
+    this.triggerElement.set(this.resolveTriggerElement());
+  }
+
+  focus() {
+    this.triggerElement()?.focus();
   }
 
   @HostListener("click")
@@ -55,9 +92,21 @@ export class DropdownTriggerDirective {
       case "Escape":
         event.preventDefault();
         this.dropdown.hideDropdown();
-        this.host.nativeElement.focus();
+        this.focus();
         break;
     }
+  }
+
+  private resolveTriggerElement(): HTMLElement {
+    const el = this.host.nativeElement;
+    if (this.isNativelyFocusable(el)) return el;
+    return el.querySelector<HTMLElement>(FOCUSABLE_SELECTOR) ?? el;
+  }
+
+  private isNativelyFocusable(el: HTMLElement): boolean {
+    return (
+      el.tagName === "BUTTON" || (el.tagName === "A" && el.hasAttribute("href"))
+    );
   }
 
   private openAndFocusFirst() {

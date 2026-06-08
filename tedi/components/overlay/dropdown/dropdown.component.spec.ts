@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Component } from "@angular/core";
+import { Component, ViewEncapsulation } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { DropdownComponent } from "./dropdown.component";
@@ -34,6 +34,35 @@ class TestHostComponent {
   value = "b";
   role: "menu" | "listbox" = "listbox";
 }
+
+@Component({
+  selector: "app-button",
+  standalone: true,
+  template: `<button><ng-content /></button>`,
+  encapsulation: ViewEncapsulation.None,
+})
+class MockButtonComponent {}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <app-button tedi-dropdown-trigger>Trigger</app-button>
+
+      <tedi-dropdown-content>
+        <li tedi-dropdown-item value="a">Item A</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+    MockButtonComponent,
+  ],
+})
+class WrappingButtonHostComponent {}
 
 describe("DropdownComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
@@ -561,6 +590,71 @@ describe("DropdownComponent", () => {
       expect(trigger.getAttribute("aria-expanded")).toBe("false");
       expect(trigger.getAttribute("role")).toBeNull();
       expect(trigger.getAttribute("tabindex")).toBeNull();
+    });
+  });
+
+  describe("DropdownTriggerDirective on a wrapping button component", () => {
+    let wrappedFixture: ComponentFixture<WrappingButtonHostComponent>;
+    let wrappedDropdown: DropdownComponent;
+    let wrapperEl: HTMLElement;
+    let innerButton: HTMLButtonElement;
+
+    beforeEach(() => {
+      wrappedFixture = TestBed.createComponent(WrappingButtonHostComponent);
+      wrappedFixture.detectChanges();
+
+      wrappedDropdown = wrappedFixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      wrapperEl = wrappedFixture.nativeElement.querySelector(
+        "[tedi-dropdown-trigger]",
+      ) as HTMLElement;
+      innerButton = wrapperEl.querySelector("button") as HTMLButtonElement;
+    });
+
+    it("applies ARIA/role/tabindex to the inner button, not the wrapper", () => {
+      expect(wrapperEl.tagName).toBe("APP-BUTTON");
+
+      expect(innerButton.getAttribute("aria-haspopup")).toBe("menu");
+      expect(innerButton.getAttribute("aria-expanded")).toBe("false");
+      expect(innerButton.getAttribute("aria-controls")).toBe(
+        wrappedDropdown.containerId(),
+      );
+      expect(innerButton.getAttribute("id")).toBe(
+        `${wrappedDropdown.containerId()}_trigger`,
+      );
+
+      expect(innerButton.getAttribute("role")).toBeNull();
+      expect(innerButton.getAttribute("tabindex")).toBeNull();
+    });
+
+    it("does not turn the wrapper into a second tab stop", () => {
+      expect(wrapperEl.getAttribute("role")).toBeNull();
+      expect(wrapperEl.getAttribute("tabindex")).toBeNull();
+      expect(wrapperEl.getAttribute("aria-expanded")).toBeNull();
+    });
+
+    it("keeps aria-expanded in sync on the inner button", () => {
+      const wrappedFloatUi = wrappedDropdown.floatUiComponent() as any;
+
+      wrappedFloatUi.state = false;
+      wrappedDropdown.showDropdown();
+      wrappedFixture.detectChanges();
+      expect(innerButton.getAttribute("aria-expanded")).toBe("true");
+
+      wrappedFloatUi.state = true;
+      wrappedDropdown.hideDropdown();
+      wrappedFixture.detectChanges();
+      expect(innerButton.getAttribute("aria-expanded")).toBe("false");
+    });
+
+    it("focus() targets the inner button", () => {
+      const focusSpy = jest.spyOn(innerButton, "focus");
+
+      wrappedDropdown.dropdownTrigger().focus();
+
+      expect(focusSpy).toHaveBeenCalled();
     });
   });
 });
