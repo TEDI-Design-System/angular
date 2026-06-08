@@ -125,7 +125,7 @@
           [attr.aria-label]="mobilePageSizeAriaLabel()"
           (click)="openPageSizePicker()"
         >
-          <span aria-hidden="true">{{ pageSize() }}</span>
+          <span aria-hidden="true">{{ selectedPageSizeLabel() }}</span>
           <tedi-icon name="arrow_drop_down" />
         </button>
       } @else {
@@ -139,6 +139,8 @@
           [options]="pageSizeSelectOptions()"
           bindLabel="label"
           bindValue="value"
+          [dropdownWidthRef]="null"
+          dropdownAlign="end"
           [ngModel]="pageSize()"
           (ngModelChange)="handlePageSizeChange($event)"
         />

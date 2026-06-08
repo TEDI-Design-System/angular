@@ -25,6 +25,7 @@ import {
   PaginationDividerPosition,
   PaginationItem,
   PaginationLabels,
+  PaginationPageSizeOption,
   PaginationVisibility,
 } from "./pagination.types";
 import { TediPaginationResultsDirective } from "./pagination-results.directive";
@@ -71,8 +72,15 @@ export class PaginationComponent {
    */
   readonly pageSize = model<number | undefined>(undefined);
 
-  /** Options for the page-size select. Empty/undefined hides the select. */
-  readonly pageSizeOptions = input<number[]>([]);
+  /**
+   * Options for the page-size select. Empty/undefined hides the select.
+   * Accepts plain numbers, or `{ value, label }` objects when the visible
+   * text should differ from the value — e.g. a "Show all" entry
+   * `{ value: totalItems, label: 'Show all' }`. Selecting an option emits its
+   * `value` via `pageSizeChange`; the pager collapses naturally once the
+   * consumer recomputes `pageCount` down to 1.
+   */
+  readonly pageSizeOptions = input<(number | PaginationPageSizeOption)[]>([]);
 
   /** Pages always shown at the start and end. @default 1 */
   readonly boundaryCount = input<number>(1);
@@ -324,12 +332,22 @@ export class PaginationComponent {
     return order.indexOf(current) < order.indexOf(value);
   }
 
-  protected readonly pageSizeSelectOptions = computed(() =>
-    this.pageSizeOptions().map((option) => ({
-      value: option,
-      label: String(option),
-    })),
+  protected readonly pageSizeSelectOptions = computed<PaginationPageSizeOption[]>(() =>
+    this.pageSizeOptions().map((option) =>
+      typeof option === "number" ? { value: option, label: String(option) } : option,
+    ),
   );
+
+  /**
+   * Visible text for the currently selected page size. Resolves the matching
+   * option's label so labelled options (e.g. "Show all") render their text
+   * instead of the raw numeric value on the mobile trigger.
+   */
+  protected readonly selectedPageSizeLabel = computed(() => {
+    const current = this.pageSize();
+    const match = this.pageSizeSelectOptions().find((o) => o.value === current);
+    return match?.label ?? (current != null ? String(current) : "");
+  });
 
   protected readonly mobileTriggerLabel = computed(
     () => `${this.currentPage()} / ${this.pageCount()}`,
@@ -345,7 +363,7 @@ export class PaginationComponent {
   );
 
   protected readonly mobilePageSizeAriaLabel = computed(
-    () => `${this.pageSize() ?? ""}, ${this.mergedLabels().pageSize}`,
+    () => `${this.selectedPageSizeLabel()}, ${this.mergedLabels().pageSize}`,
   );
 
   /** Whether the mobile page-jump picker modal is currently open. */
@@ -423,11 +441,13 @@ export class PaginationComponent {
   protected openPageSizePicker(): void {
     const labels = this.mergedLabels();
     const current = this.pageSize();
-    const options: PaginationOptionPickerOption[] = this.pageSizeOptions().map((size) => ({
-      value: size,
-      label: String(size),
-      ariaLabel: `${labels.pageSize}, ${size}`,
-    }));
+    const options: PaginationOptionPickerOption[] = this.pageSizeSelectOptions().map(
+      ({ value, label }) => ({
+        value,
+        label,
+        ariaLabel: `${labels.pageSize}, ${label}`,
+      }),
+    );
 
     this.isPageSizeModalOpen.set(true);
     const ref = this.openPickerModal({
