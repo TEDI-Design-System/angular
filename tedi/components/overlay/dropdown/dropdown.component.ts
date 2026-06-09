@@ -23,6 +23,7 @@ import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.di
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
 import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 import { DROPDOWN_API } from "./dropdown.tokens";
+import { getFocusableElements } from "../../../utils/elements.util";
 
 export type DropdownPosition = `${NgxFloatUiPlacements}`;
 
@@ -88,6 +89,7 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
       document.addEventListener("pointerdown", this.handleOutsideClick, true);
+      document.addEventListener("focusin", this.handleFocusOut, true);
     }
   }
 
@@ -98,6 +100,7 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
         this.handleOutsideClick,
         true,
       );
+      document.removeEventListener("focusin", this.handleFocusOut, true);
     }
     this.cleanupScrollListener();
   }
@@ -176,6 +179,43 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
       this.dropdownTrigger().focus();
     }
   };
+
+  handleFocusOut = (event: FocusEvent) => {
+    if (!this.floatUiComponent().state) return;
+
+    const target = event.target as HTMLElement;
+
+    const triggerEl = this.dropdownTrigger().host.nativeElement;
+    const contentEl = this.floatUiComponent().elRef
+      .nativeElement as HTMLElement;
+
+    const focusedInside =
+      triggerEl.contains(target) || contentEl.contains(target);
+
+    if (!focusedInside) {
+      this.hideDropdown();
+    }
+  };
+
+  tabOutOfDropdown(shiftKey: boolean) {
+    const triggerEl = this.dropdownTrigger().focusableElement;
+    const contentEl = this.floatUiComponent().elRef
+      .nativeElement as HTMLElement;
+
+    const focusable = getFocusableElements(this.document.body).filter(
+      (el) => !contentEl.contains(el),
+    );
+    const triggerIndex = focusable.indexOf(triggerEl);
+    const next = shiftKey
+      ? focusable[triggerIndex - 1]
+      : focusable[triggerIndex + 1];
+
+    this.hideDropdown();
+
+    if (next) {
+      setTimeout(() => next.focus());
+    }
+  }
 
   focusFirstItem() {
     const items = this.dropdownContent().items();

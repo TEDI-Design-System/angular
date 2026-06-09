@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Component, ViewEncapsulation } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { DropdownComponent } from "./dropdown.component";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
@@ -381,6 +386,111 @@ describe("DropdownComponent", () => {
     });
   });
 
+  describe("handleFocusOut()", () => {
+    it("should return early when dropdown is closed (state=false)", () => {
+      (floatUi as any).state = false;
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.handleFocusOut({
+        target: document.createElement("div"),
+      } as unknown as FocusEvent);
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
+    it("should do nothing when focus moves inside the trigger element", () => {
+      (floatUi as any).state = true;
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.handleFocusOut({
+        target: dropdown.dropdownTrigger()!.host.nativeElement,
+      } as unknown as FocusEvent);
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
+    it("should do nothing when focus moves inside the content element", () => {
+      (floatUi as any).state = true;
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.handleFocusOut({
+        target: dropdown.floatUiComponent().elRef.nativeElement,
+      } as unknown as FocusEvent);
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
+    it("should hide dropdown without refocusing trigger when focus leaves (e.g. Tab)", () => {
+      (floatUi as any).state = true;
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      const focusSpy = jest.spyOn(
+        dropdown.dropdownTrigger()!.host.nativeElement,
+        "focus",
+      );
+
+      dropdown.handleFocusOut({
+        target: document.createElement("div"),
+      } as unknown as FocusEvent);
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect(focusSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("tabOutOfDropdown()", () => {
+    let before: HTMLButtonElement;
+    let after: HTMLButtonElement;
+
+    beforeEach(() => {
+      document.body.appendChild(fixture.nativeElement);
+      before = document.createElement("button");
+      after = document.createElement("button");
+      document.body.insertBefore(before, fixture.nativeElement);
+      document.body.appendChild(after);
+      (floatUi as any).state = true;
+    });
+
+    afterEach(() => {
+      before.remove();
+      after.remove();
+      fixture.nativeElement.remove();
+    });
+
+    it("Tab closes the dropdown and focuses the element after the trigger", fakeAsync(() => {
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.tabOutOfDropdown(false);
+      tick();
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect(document.activeElement).toBe(after);
+    }));
+
+    it("Shift+Tab closes the dropdown and focuses the element before the trigger", fakeAsync(() => {
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.tabOutOfDropdown(true);
+      tick();
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect(document.activeElement).toBe(before);
+    }));
+
+    it("excludes dropdown content from the tab target so focus never re-enters the menu", fakeAsync(() => {
+      after.remove();
+
+      dropdown.tabOutOfDropdown(false);
+      tick();
+
+      const items = getItems();
+      expect(items).not.toContain(document.activeElement);
+    }));
+  });
+
   describe("setActiveToSelectedOrFirst()", () => {
     it("should activate the selected item when it exists and is enabled", () => {
       host.value = "b";
@@ -531,6 +641,26 @@ describe("DropdownComponent", () => {
 
       expect(hideSpy).toHaveBeenCalled();
       expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("keydown: Tab calls dropdown.tabOutOfDropdown(false)", () => {
+      const spy = jest.spyOn(dropdown, "tabOutOfDropdown");
+
+      itemA.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalledWith(false);
+    });
+
+    it("keydown: Shift+Tab calls dropdown.tabOutOfDropdown(true)", () => {
+      const spy = jest.spyOn(dropdown, "tabOutOfDropdown");
+
+      itemA.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Tab", shiftKey: true }),
+      );
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalledWith(true);
     });
 
     it("keydown: disabled item should preventDefault and NOT process", () => {

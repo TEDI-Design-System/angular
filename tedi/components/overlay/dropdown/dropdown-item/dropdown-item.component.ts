@@ -121,6 +121,11 @@ export class DropdownItemComponent {
         this.dropdown.hideDropdown();
         this.dropdown.dropdownTrigger()?.focus();
         break;
+
+      case "Tab":
+        event.preventDefault();
+        this.dropdown.tabOutOfDropdown(event.shiftKey);
+        break;
     }
   }
 

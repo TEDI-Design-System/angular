@@ -69,6 +69,12 @@ export class DropdownTriggerDirective implements AfterViewInit {
     this.triggerElement()?.focus();
   }
 
+  /** The element that is actually in the tab order — the resolved interactive
+   * element, which may be a button nested inside a wrapping component. */
+  get focusableElement(): HTMLElement {
+    return this.triggerElement() ?? this.host.nativeElement;
+  }
+
   @HostListener("click")
   onClick() {
     this.dropdown.toggleDropdown();
