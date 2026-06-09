@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
@@ -24,6 +25,7 @@ import {
   CdkDragHandle,
   CdkDropList,
 } from "@angular/cdk/drag-drop";
+import { CdkScrollable } from "@angular/cdk/scrolling";
 import {
   type CellContext,
   type Column,
@@ -50,6 +52,7 @@ import {
 import { generateUUID } from "../../../helpers/generate-uuid";
 import { PaginationComponent } from "../../navigation/pagination/pagination.component";
 import { TediPaginationResultsDirective } from "../../navigation/pagination/pagination-results.directive";
+import type { PaginationPageSizeOption } from "../../navigation/pagination/pagination.types";
 import { TediTableHeaderButtonComponent } from "./table-header-button/table-header-button.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import { RadioComponent } from "../../form/radio/radio.component";
@@ -82,6 +85,7 @@ import type {
   TediColumnDef,
   TediTableContextValue,
   TediTableFilterContext,
+  ColumnReorderPhase,
 } from "./table.types";
 
 const SELECT_COLUMN_ID = "__select__";
@@ -110,7 +114,7 @@ const EMPTY_OBJECT: Record<string, never> = Object.freeze({}) as Record<
 
 interface ResolvedPaginationOptions {
   pageSize: number;
-  pageSizeOptions: number[] | false;
+  pageSizeOptions: (number | PaginationPageSizeOption)[] | false;
 }
 
 /**
@@ -196,6 +200,7 @@ function resolveSlotOptions(
     CdkDropList,
     CdkDrag,
     CdkDragHandle,
+    CdkScrollable,
   ],
   templateUrl: "./table.component.html",
   styleUrl: "./table.component.scss",
@@ -454,21 +459,39 @@ export class TediTableComponent<TData> {
    */
   readonly interactive = input(false, { transform: booleanAttribute });
   /**
-   * Makes data rows reorderable via drag-and-drop. The consumer reorders the
-   * `data` array in `(rowDrop)` (typically with `moveItemInArray`) and passes
-   * the new array back via `[data]`. Pair with `table-layout: fixed` (via the
-   * `tedi-table--draggable-rows` host modifier added automatically) so the
-   * drag preview preserves cell widths.
-   * @default false
+   * Supplies an explicit accessible name for each interactive row. Without it,
+   * a `role="button"` row's name is assembled from all its cell text — verbose
+   * and confusing under a screen reader. Receives the TanStack `Row`; return a
+   * concise label (e.g. the row's primary identifier). Only applied while
+   * `interactive` is `true`.
+   * @default undefined
    */
-  readonly draggableRows = input(false, { transform: booleanAttribute });
+  readonly rowAriaLabel = input<((row: Row<TData>) => string) | undefined>(
+    undefined,
+  );
   /**
-   * Makes columns reorderable via drag-and-drop on the header row. Reorders
-   * the table's internal `columnOrder` state directly — no consumer wiring
-   * needed beyond persisting the state slice if desired.
+   * Makes data rows reorderable by **mouse drag and keyboard**. Mouse: drag a
+   * row by its handle. Keyboard: `Tab` to a row's reorder handle, `Space`/`Enter`
+   * to pick it up, Up/Down arrows to move it one position (clamped to the
+   * current page), `Space`/`Enter` to drop, `Escape` to cancel. Every move is
+   * emitted via `(rowDrop)` with **source `data` indices** — apply it with
+   * `moveItemInArray(data, previousIndex, currentIndex)` and pass the new array
+   * back via `[data]`. The `tedi-table--draggable` host modifier is added
+   * automatically; pair with `table-layout: fixed` so the drag preview
+   * preserves cell widths.
    * @default false
    */
-  readonly draggableColumns = input(false, { transform: booleanAttribute });
+  readonly reorderableRows = input(false, { transform: booleanAttribute });
+  /**
+   * Makes columns reorderable by **mouse drag and keyboard** on the header row.
+   * Mouse: drag a header cell by its handle. Keyboard: `Tab` to a header,
+   * `Space`/`Enter` to pick up the column, Left/Right arrows to move it,
+   * `Space`/`Enter` to drop, `Escape` to cancel. Reorders the table's internal
+   * `columnOrder` state directly — no consumer wiring needed beyond persisting
+   * the state slice if desired.
+   * @default false
+   */
+  readonly reorderableColumns = input(false, { transform: booleanAttribute });
 
   /**
    * Emits the full merged table state whenever any slice changes (sorting,
@@ -516,6 +539,31 @@ export class TediTableComponent<TData> {
   );
   protected readonly dragRowLabel = this.translation.track("table.drag-row");
 
+  // ── Keyboard column-reorder state machine ──────────────────────────────────
+  /** Currently picked-up column id (during keyboard reordering), or `null`. */
+  private readonly _pickedUpColumnId = signal<string | null>(null);
+  /** Column order snapshot captured when picking up — restored on cancel. */
+  private _originalOrder: ColumnOrderState = [];
+  /** Computed phase derived from whether a column is currently picked up. */
+  protected readonly reorderPhase: Signal<ColumnReorderPhase> = computed(() =>
+    this._pickedUpColumnId() !== null ? "picked-up" : "idle",
+  );
+  /** Id of the column under keyboard focus for reordering. */
+  readonly pickedUpColumnId = this._pickedUpColumnId.asReadonly();
+
+  // ── Keyboard row-reorder state machine ─────────────────────────────────────
+  // Tracked by the row's `original` data reference (not `row.id`, which is
+  // index-based by default and would change as rows reorder).
+  private readonly _pickedUpRow = signal<TData | null>(null);
+  /** Source `data` index of the picked-up row at pickup — used to restore on
+   *  cancel. */
+  private _originalRowSourceIndex = -1;
+  /** The data item of the row currently picked up for keyboard reordering. */
+  readonly pickedUpRow = this._pickedUpRow.asReadonly();
+
+  // Live-region id for announcing reorder events to screen readers.
+  protected liveRegionId = `tedi-table-live-${generateUUID()}`;
+
   private readonly persistence: TablePersistenceController;
   protected readonly tableState: Signal<TableState>;
 
@@ -543,7 +591,9 @@ export class TediTableComponent<TData> {
     () => this.paginationOptions() !== null,
   );
 
-  protected readonly paginationPageSizeOptions = computed<number[]>(() => {
+  protected readonly paginationPageSizeOptions = computed<
+    (number | PaginationPageSizeOption)[]
+  >(() => {
     const opts = this.paginationOptions()?.pageSizeOptions;
     return Array.isArray(opts) && opts.length > 0 ? opts : [];
   });
@@ -630,7 +680,7 @@ export class TediTableComponent<TData> {
     const cols = this.columns();
     const leading: TediColumnDef<TData>[] = [];
 
-    if (this.draggableRows()) {
+    if (this.reorderableRows()) {
       leading.push({
         id: DRAG_COLUMN_ID,
         enableSorting: false,
@@ -840,7 +890,7 @@ export class TediTableComponent<TData> {
       [this.fixedLayout(), "tedi-table--fixed-layout"],
       [this.interactive() || rowExpand, "tedi-table--clickable-rows"],
       [hoverEnabled, "tedi-table--row-hover"],
-      [this.draggableRows() || this.draggableColumns(), "tedi-table--draggable"],
+      [this.reorderableRows() || this.reorderableColumns(), "tedi-table--draggable"],
     ];
     const classes = ["tedi-table", `tedi-table--${this.size()}`];
     for (const [on, name] of flags) if (on) classes.push(name);
@@ -1013,12 +1063,32 @@ export class TediTableComponent<TData> {
   }
 
   protected handleRowClick(row: Row<TData>): void {
+    // A click that ends a text drag-select shouldn't activate the row —
+    // otherwise copying cell text inadvertently fires the row action.
+    if (this.hasTextSelection()) return;
     if (this.expandTrigger() === "row" && row.getCanExpand()) {
       row.toggleExpanded();
     }
     if (this.interactive()) {
       this.rowClick.emit(row);
     }
+  }
+
+  private hasTextSelection(): boolean {
+    if (typeof window === "undefined") return false;
+    const selection = window.getSelection();
+    return Boolean(
+      selection &&
+        !selection.isCollapsed &&
+        selection.toString().trim().length > 0,
+    );
+  }
+
+  /** Accessible name for an interactive row, from `rowAriaLabel`. `null` when
+   *  the row is not interactive or no resolver is provided. */
+  protected rowAriaLabelFor(row: Row<TData>): string | null {
+    if (!this.interactive()) return null;
+    return this.rowAriaLabel()?.(row) ?? null;
   }
 
   protected rowExpandsOnClick(row: Row<TData>): boolean {
@@ -1125,6 +1195,133 @@ export class TediTableComponent<TData> {
     });
   }
 
+  // ── Keyboard row-reorder handlers ──────────────────────────────────────────
+  /** Stable id for a row's reorder handle button — used to restore keyboard
+   *  focus after a live move relocates it. */
+  protected rowReorderHandleId(rowId: string): string {
+    return `${this.resolvedId()}-row-reorder-${rowId}`;
+  }
+
+  /** Emit a synthetic `(rowDrop)` carrying source `data` indices, matching the
+   *  shape consumers already handle with `moveItemInArray`. */
+  private emitRowMove(previousSourceIndex: number, currentSourceIndex: number): void {
+    if (previousSourceIndex === currentSourceIndex) return;
+    this.rowDrop.emit({
+      previousIndex: previousSourceIndex,
+      currentIndex: currentSourceIndex,
+      item: null,
+      container: null,
+      previousContainer: null,
+      isPointerOverContainer: false,
+      distance: { x: 0, y: 0 },
+      dropPoint: { x: 0, y: 0 },
+      event: null,
+    } as unknown as CdkDragDrop<TData[]>);
+  }
+
+  protected handleRowReorderKeydown(event: KeyboardEvent, row: Row<TData>): void {
+    if (!this.reorderableRows()) return;
+    const picked = this._pickedUpRow();
+
+    switch (event.key) {
+      case " ":
+      case "Enter":
+        event.preventDefault();
+        if (picked === null) {
+          this.handleRowPickup(row);
+        } else {
+          this.handleRowReorderDrop();
+        }
+        break;
+      case "Escape":
+        if (picked !== null) {
+          event.preventDefault();
+          this.handleRowReorderCancel();
+        }
+        break;
+      case "ArrowUp":
+        if (picked !== null) {
+          event.preventDefault();
+          this.movePickedRow(-1);
+        }
+        break;
+      case "ArrowDown":
+        if (picked !== null) {
+          event.preventDefault();
+          this.movePickedRow(1);
+        }
+        break;
+    }
+  }
+
+  /** Pick up `row` for keyboard reordering. */
+  protected handleRowPickup(row: Row<TData>): void {
+    this._pickedUpRow.set(row.original);
+    this._originalRowSourceIndex = this.data().indexOf(row.original);
+    const position =
+      this.rows().findIndex((r) => r.original === row.original) + 1;
+    this.announceReorder("table.row-reorder.pickup", position);
+  }
+
+  /**
+   * Move the picked-up row one position in `direction`, clamped to the current
+   * page's rendered rows. Emits the move through `(rowDrop)` (source indices)
+   * for the consumer to apply, so the reorder is visible while moving.
+   */
+  protected movePickedRow(direction: -1 | 1): void {
+    const picked = this._pickedUpRow();
+    if (picked === null) return;
+    const rendered = this.rows();
+    const currentIndex = rendered.findIndex((r) => r.original === picked);
+    if (currentIndex < 0) return;
+    const targetIndex = currentIndex + direction;
+    if (targetIndex < 0 || targetIndex >= rendered.length) return;
+    const data = this.data();
+    const previousSourceIndex = data.indexOf(rendered[currentIndex].original);
+    const currentSourceIndex = data.indexOf(rendered[targetIndex].original);
+    if (previousSourceIndex < 0 || currentSourceIndex < 0) return;
+    this.emitRowMove(previousSourceIndex, currentSourceIndex);
+    this.announceReorder("table.row-reorder.move", targetIndex + 1);
+    this.focusRowReorderHandle(picked);
+  }
+
+  /** Drop the picked-up row, keeping its already-applied live position. */
+  protected handleRowReorderDrop(): void {
+    const picked = this._pickedUpRow();
+    if (picked === null) return;
+    const position = this.rows().findIndex((r) => r.original === picked) + 1;
+    this._pickedUpRow.set(null);
+    this._originalRowSourceIndex = -1;
+    this.announceReorder("table.row-reorder.drop", position);
+  }
+
+  /** Cancel the reorder, emitting a move that returns the row to its original
+   *  position captured at pickup. */
+  protected handleRowReorderCancel(): void {
+    const picked = this._pickedUpRow();
+    if (picked !== null && this._originalRowSourceIndex >= 0) {
+      const currentSourceIndex = this.data().indexOf(picked);
+      if (currentSourceIndex >= 0) {
+        this.emitRowMove(currentSourceIndex, this._originalRowSourceIndex);
+      }
+    }
+    this._pickedUpRow.set(null);
+    this._originalRowSourceIndex = -1;
+    this.announceReorder("table.row-reorder.cancel");
+  }
+
+  private focusRowReorderHandle(picked: TData): void {
+    afterNextRender(
+      () => {
+        const row = this.rows().find((r) => r.original === picked);
+        if (row) {
+          document.getElementById(this.rowReorderHandleId(row.id))?.focus();
+        }
+      },
+      { injector: this.injector },
+    );
+  }
+
   protected handleColumnDrop(event: CdkDragDrop<unknown>): void {
     if (event.previousIndex === event.currentIndex) return;
     const visibleLeafIds = untracked(() =>
@@ -1173,6 +1370,203 @@ export class TediTableComponent<TData> {
       (prev) => prev.columnOrder ?? [],
       (value) => ({ columnOrder: value }),
     );
+  }
+
+  // ── Keyboard column-reorder handlers ───────────────────────────────────────
+  /** Announce a message to the live region for screen-reader accessibility. */
+  protected announceReorder(messageKey: string, ...args: unknown[]): void {
+    const msg = this.translation.translate(messageKey, ...args);
+    const region = document.getElementById(this.liveRegionId);
+    if (region) region.textContent = msg;
+  }
+
+  /**
+   * Reorder the column at `targetIndex` to `sourceIndex` and persist the
+   * resulting order via TanStack's column-order patch. Returns the visible
+   * label of the moved column for use in ARIA announcements.
+   */
+  protected executeColumnReorder(
+    sourceIndex: number,
+    targetIndex: number,
+  ): string {
+    const visibleLeafIds = untracked(() =>
+      this.table.getVisibleLeafColumns().map((column) => column.id),
+    );
+    if (
+      sourceIndex < 0 ||
+      sourceIndex >= visibleLeafIds.length ||
+      targetIndex < 0 ||
+      targetIndex >= visibleLeafIds.length
+    ) {
+      return "";
+    }
+
+    // Build the new full leaf order using the same algorithm as handleColumnDrop,
+    // but with the picked-up column moved from sourceIndex to targetIndex.
+    const reorderedVisible = [...visibleLeafIds];
+    const [moved] = reorderedVisible.splice(sourceIndex, 1);
+    reorderedVisible.splice(targetIndex, 0, moved);
+
+    this.applyPatch<ColumnOrderState>(
+      (prev) => {
+        // Seed from the full leaf list (not just visible ids) so hidden columns
+        // stay anchored in the persisted order — same source as handleColumnDrop.
+        const fullOrder =
+          prev.length > 0
+            ? [...prev]
+            : untracked(() =>
+                this.table.getAllLeafColumns().map((c) => c.id),
+              );
+        const visibleSet = new Set(visibleLeafIds);
+        let visibleCursor = 0;
+        for (let i = 0; i < fullOrder.length; i++) {
+          if (visibleSet.has(fullOrder[i])) {
+            fullOrder[i] = reorderedVisible[visibleCursor++];
+          }
+        }
+        for (const id of reorderedVisible) {
+          if (!fullOrder.includes(id)) fullOrder.push(id);
+        }
+        return fullOrder;
+      },
+      (prev) => prev.columnOrder ?? [],
+      (value) => ({ columnOrder: value }),
+    );
+
+    // Resolve the visible label of the moved column for ARIA announcements.
+    const col = this.table.getVisibleLeafColumns().find(
+      (c) => c.id === moved,
+    );
+    return col ? this.resolveColumnLabel(col) : moved;
+  }
+
+  /** Pick up the column at `header` for keyboard reordering. */
+  protected handlePickup(header: {
+    column: ReturnType<TanstackTable<TData>["getAllLeafColumns"]>[number];
+  }): void {
+    this._originalOrder = [...(this.tableState().columnOrder ?? [])];
+    this._pickedUpColumnId.set(header.column.id);
+    const label = this.resolveColumnLabel(header.column);
+    this.announceReorder("table.reorder.pickup", label);
+  }
+
+  /**
+   * Move the picked-up column one position in `direction` and apply it
+   * immediately, so the reorder is visible while moving rather than only on
+   * commit. Clamps at the visible-column boundaries.
+   */
+  protected movePickedColumn(
+    direction: -1 | 1,
+    header: {
+      column: ReturnType<TanstackTable<TData>["getAllLeafColumns"]>[number];
+    },
+  ): void {
+    const pickedId = this.pickedUpColumnId();
+    if (pickedId === null) return;
+    const visibleLeafIds = untracked(() =>
+      this.table.getVisibleLeafColumns().map((c) => c.id),
+    );
+    const currentIndex = visibleLeafIds.indexOf(pickedId);
+    if (currentIndex < 0) return;
+    const targetIndex = currentIndex + direction;
+    if (targetIndex < 0 || targetIndex >= visibleLeafIds.length) return;
+    const label =
+      this.executeColumnReorder(currentIndex, targetIndex) ||
+      this.resolveColumnLabel(header.column);
+    this.announceReorder("table.reorder.move", label, targetIndex + 1);
+    // Reordering relocates the focused handle in the DOM; restore focus to it
+    // after the view updates so consecutive arrow presses keep moving the same
+    // column instead of stalling after one step.
+    afterNextRender(
+      () => document.getElementById(this.reorderHandleId(pickedId))?.focus(),
+      { injector: this.injector },
+    );
+  }
+
+  /** Stable id for a column's reorder handle button — used to restore keyboard
+   *  focus after a live move relocates it. */
+  protected reorderHandleId(columnId: string): string {
+    return `${this.resolvedId()}-reorder-${columnId}`;
+  }
+
+  /** Drop the picked-up column, keeping its already-applied live position. */
+  protected handleDrop(header: {
+    column: ReturnType<TanstackTable<TData>["getAllLeafColumns"]>[number];
+  }): void {
+    const pickedId = this.pickedUpColumnId();
+    if (pickedId === null) return;
+    const position =
+      untracked(() =>
+        this.table.getVisibleLeafColumns().findIndex((c) => c.id === pickedId),
+      ) + 1;
+    this._pickedUpColumnId.set(null);
+    this._originalOrder = [];
+    this.announceReorder(
+      "table.reorder.drop",
+      this.resolveColumnLabel(header.column),
+      position,
+    );
+  }
+
+  /** Cancel the current reorder, restoring the order captured at pickup. */
+  protected handleCancel(): void {
+    const original = [...this._originalOrder];
+    this.applyPatch<ColumnOrderState>(
+      () => original,
+      (prev) => prev.columnOrder ?? [],
+      (value) => ({ columnOrder: value }),
+    );
+    this._pickedUpColumnId.set(null);
+    this._originalOrder = [];
+    this.announceReorder("table.reorder.cancel");
+  }
+
+  protected handleHeaderKeydown(
+    event: KeyboardEvent,
+    header: {
+      column: ReturnType<TanstackTable<TData>["getAllLeafColumns"]>[number];
+    },
+  ): void {
+    if (!this.reorderableColumns()) return;
+    // The keydown listener lives on the <th>, so Space/Enter from nested sort or
+    // filter controls bubbles here. Only act when the event originates from the
+    // drag handle (or the <th> itself) — otherwise bail so we don't
+    // preventDefault and hijack the nested button's activation.
+    const target = event.target as HTMLElement | null;
+    const fromHandle = !!target?.closest(".tedi-table__drag-handle");
+    const fromHeaderCell = target === event.currentTarget;
+    if (!fromHandle && !fromHeaderCell) return;
+    const picked = this.pickedUpColumnId();
+
+    switch (event.key) {
+      case " ":
+      case "Enter":
+        event.preventDefault();
+        if (picked === null) {
+          this.handlePickup(header);
+        } else {
+          this.handleDrop(header);
+        }
+        break;
+      case "Escape":
+        if (picked !== null) {
+          event.preventDefault();
+          this.handleCancel();
+        }
+        break;
+      case "ArrowLeft":
+        if (picked !== null) {
+          event.preventDefault();
+          this.movePickedColumn(-1, header);
+        }
+        break;
+      case "ArrowRight":
+        if (picked !== null) {
+          event.preventDefault();
+          this.movePickedColumn(1, header);
+        }
+        break;
+    }
   }
 
   protected handlePaginationPageChange(nextPage: number): void {

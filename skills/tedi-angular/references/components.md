@@ -255,6 +255,7 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `activeRowId: string` — highlights one row
 - `rowHover: boolean` — force hover styling on/off (default tracks `interactive`)
 - `interactive: boolean = false` — adds `role="button"`, hover/active styles, and keyboard activation to rows; subscribe to `(rowClick)`
+- `rowAriaLabel: (row: Row<TData>) => string` — explicit accessible name per interactive row (without it, a `role="button"` row's name is built from all its cell text). Only applied when `interactive` is true
 - `enableRowSelection: boolean | ((row) => boolean)` — opt-in selection; auto-renders a selection column
 - `selectionMode: "multiple" | "single" = "multiple"` — `multiple` shows checkboxes + select-all; `single` shows radios (no select-all)
 - `selectedRowHighlight: boolean = true` — whether selected rows get a background highlight. Set `false` to keep selection state for logic without the visual highlight (e.g. when you render selection feedback yourself in a cell template)
@@ -265,7 +266,7 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `expandButtonLabel: string | { open: string; close: string }` — render a visible label next to the chevron instead of an icon-only button. A single string is used for both states; the `{ open, close }` form sets distinct collapsed (`open`) / expanded (`close`) labels. When unset the button stays icon-only with the translated expand/collapse aria-label.
 - `getSubRows: (row) => TData[] | undefined` — hierarchical / tree rows
 - `enableColumnFilters: boolean = false` — force TanStack's filter machinery (auto-on when any column sets `filterable`)
-- `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`).
+- `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`). `pageSizeOptions` accepts plain numbers or `{ value, label }` objects — use the object form for a **"Show all"** entry whose `value` is large enough to hold every row: pass the row total when you know it (`data.length`), or `Number.MAX_SAFE_INTEGER` when you don't. Filtering only shrinks the row count, so a large page size always collapses the result to a single page. (Don't use `-1` — TanStack clamps `setPageSize` to `≥ 1`.)
 - `paginationTop: boolean | TablePaginationOptions` — opt-in top paginator; shares page / page-size state with bottom but has independent visual config (its own arrow + `hide*` settings). Requires `pagination` to be truthy.
 - `manualPagination: boolean = false` — server-side pagination; supply `pageCount` or `rowCount`
 - `manualSorting: boolean = false`
@@ -277,8 +278,8 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `persist: TablePersistOptions` — `{ key, storage?, include? }` to persist state to `localStorage` (defaults persist user-preference slices: `columnVisibility`, `columnOrder`, `rowOrder`, `columnSizing`)
 - `placeholder: TemplateRef | string` — empty-state content (defaults to translated `table.no-data`)
 - `placeholderRole: "alert" | "status"`
-- `draggableRows: boolean = false` — reorder rows via CDK drag-drop; emits `(rowDrop)` with indices normalised to the source `data` array
-- `draggableColumns: boolean = false` — reorder columns via header drag; updates internal `columnOrder` state
+- `reorderableRows: boolean = false` — reorder rows by **mouse drag and keyboard** (one input). Mouse: drag a row by its handle. Keyboard: Tab to the handle, Space/Enter to pick up, ↑/↓ to move within the current page, Space/Enter to drop, Escape to cancel. Emits `(rowDrop)` with indices normalised to the source `data` array.
+- `reorderableColumns: boolean = false` — reorder columns by **mouse drag and keyboard** (one input). Mouse: drag a header cell by its handle. Keyboard: Tab to a header, Space/Enter to pick up, ←/→ to move live, Space/Enter to drop, Escape to cancel. Updates internal `columnOrder` state.
 
 **Outputs:**
 - `stateChange: TableState`
@@ -803,6 +804,7 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 - `noOptionsMessage: string` — custom text when no options match search
 - `dropdownType: "menu" | "grid" = "menu"` — "grid" for swatch-type selects
 - `dropdownWidthRef: ElementRef | null` — element to match dropdown width to
+- `dropdownAlign: "start" | "end" = "start"` — which trigger edge the dropdown anchors to; use `"end"` for right-aligned selects so the panel expands inward
 - `feedbackText: { text, type, position }` — feedback text config
 - `maxDropdownHeight: number` — dropdown height in pixels
 - `compareWith: (a, b) => boolean` — custom equality function
@@ -1099,7 +1101,7 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 **Inputs:**
 - `pageCount: number` (required) — total number of pages
 - `totalItems: number` — when set, renders the `"{count} results"` label
-- `pageSizeOptions: number[] = []` — options for the page-size select; empty hides the select
+- `pageSizeOptions: (number | PaginationPageSizeOption)[] = []` — options for the page-size select; empty hides the select. Plain numbers label themselves; pass `{ value, label }` objects when the visible text should differ from the value — most commonly a **"Show all"** entry. The component stays presentational: selecting an option emits its `value` and the consumer recomputes `pageCount` (see the "Show all" example below).
 - `boundaryCount: number = 1` — pages always shown at the start and end
 - `siblingCount: number = 1` — pages shown on either side of the current page
 - `labels: Partial<PaginationLabels>` — override any of the default text/aria labels
@@ -1157,6 +1159,29 @@ Custom results slot:
   <span tediPaginationResults>1000+ tulemust</span>
 </tedi-pagination>
 ```
+
+"Show all" page size — a labelled option whose value covers every row. The component is dumb; recompute `pageCount` in the change handler so the pager collapses to a single page:
+
+```html
+<tedi-pagination
+  [pageCount]="pageCount"
+  [(page)]="page"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="[10, 25, 50, { value: totalItems, label: 'Show all' }]"
+  (pageSizeChange)="onPageSizeChange($event)"
+/>
+```
+
+```ts
+onPageSizeChange(size: number) {
+  this.pageSize = size;
+  this.pageCount = Math.max(1, Math.ceil(this.totalItems / size)); // → 1 for "Show all"
+  this.page = 1;
+}
+```
+
+Supply the label already translated — there is no built-in `pagination.show-all` translation key.
 
 Render the prev/next arrows as labelled primary buttons with custom icons:
 

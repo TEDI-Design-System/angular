@@ -54,7 +54,7 @@ const setup = (
     page: number;
     totalItems: number;
     pageSize: number;
-    pageSizeOptions: number[];
+    pageSizeOptions: (number | { value: number; label: string })[];
     boundaryCount: number;
     siblingCount: number;
   }> = {},
@@ -293,6 +293,17 @@ describe("PaginationComponent", () => {
     expect(
       fixture.nativeElement.querySelector(".tedi-pagination__page-size-select"),
     ).toBeNull();
+  });
+
+  it("still renders the page-size selector when given labelled options", () => {
+    const fixture = setup({
+      pageCount: 5,
+      pageSize: 50,
+      pageSizeOptions: [10, 25, { value: 50, label: "Show all" }],
+    });
+    expect(
+      fixture.nativeElement.querySelector(".tedi-pagination__page-size-select"),
+    ).not.toBeNull();
   });
 
   it("does not render the nav when pageCount <= 1", () => {
@@ -641,6 +652,56 @@ describe("PaginationComponent mobile layout", () => {
 
     expect(emitted).toBe(50);
     expect(fixture.componentInstance.pageSize()).toBe(50);
+  });
+
+  it("shows the labelled option's text (not its value) on the page-size trigger", () => {
+    const fixture = TestBed.createComponent(PaginationComponent);
+    fixture.componentRef.setInput("pageCount", 1);
+    fixture.componentRef.setInput("pageSize", 1000);
+    fixture.componentRef.setInput("pageSizeOptions", [
+      10,
+      25,
+      { value: 1000, label: "Show all" },
+    ]);
+    fixture.detectChanges();
+
+    const trigger: HTMLButtonElement = fixture.nativeElement.querySelector(
+      ".tedi-pagination__page-size-trigger",
+    );
+    expect(trigger.querySelector("span")?.textContent?.trim()).toBe("Show all");
+    expect(trigger.getAttribute("aria-label")).toBe("Show all, Show per page");
+  });
+
+  it("passes labelled page-size options to the modal and emits the chosen value", () => {
+    const fixture = TestBed.createComponent(PaginationComponent);
+    fixture.componentRef.setInput("pageCount", 5);
+    fixture.componentRef.setInput("pageSize", 10);
+    fixture.componentRef.setInput("pageSizeOptions", [
+      10,
+      25,
+      { value: 1000, label: "Show all" },
+    ]);
+    fixture.detectChanges();
+
+    let emitted: number | undefined;
+    fixture.componentInstance.pageSizeChange.subscribe((v) => (emitted = v));
+
+    (fixture.nativeElement.querySelector(
+      ".tedi-pagination__page-size-trigger",
+    ) as HTMLButtonElement).click();
+
+    const [, config] = modalOpenSpy.mock.calls[0];
+    expect(config.data.options[2]).toMatchObject({
+      value: 1000,
+      label: "Show all",
+      ariaLabel: "Show per page, Show all",
+    });
+
+    modalClosedSubject.next(1000);
+    fixture.detectChanges();
+
+    expect(emitted).toBe(1000);
+    expect(fixture.componentInstance.pageSize()).toBe(1000);
   });
 
   it("starts the mobile trigger aria-label with visible '{current} / {total}' text (WCAG 2.5.3)", () => {

@@ -152,15 +152,6 @@
       grid-template-columns: 1fr auto 1fr;
       gap: var(--layout-grid-gutters-16);
     }
-
-    // Arrow buttons claim the outer columns on mobile (via --previous/--next
-    // justify-self). With arrows removed the picker would land in column 1
-    // and skew left — collapse to a single centered column instead.
-    .tedi-pagination--no-arrows & {
-      @include breakpoints.media-breakpoint-down(md) {
-        grid-template-columns: auto;
-      }
-    }
   }
 
   &__list {
@@ -247,12 +238,14 @@
 
   &__nav-button--previous {
     @include breakpoints.media-breakpoint-down(md) {
+      grid-column: 1;
       justify-self: end;
     }
   }
 
   &__nav-button--next {
     @include breakpoints.media-breakpoint-down(md) {
+      grid-column: 3;
       justify-self: start;
     }
   }
@@ -269,6 +262,10 @@
     background: var(--form-input-background-default);
     border: var(--tedi-borders-01) solid var(--form-input-border-default);
     border-radius: var(--form-field-radius);
+
+    @include breakpoints.media-breakpoint-down(md) {
+      grid-column: 2;
+    }
 
     &:focus-visible {
       outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
