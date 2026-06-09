@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Component } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { Component, ViewEncapsulation } from "@angular/core";
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { DropdownComponent } from "./dropdown.component";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
@@ -11,7 +16,7 @@ import { NgxFloatUiContentComponent } from "ngx-float-ui";
 @Component({
   standalone: true,
   template: `
-    <tedi-dropdown [value]="value">
+    <tedi-dropdown [value]="value" [hideOnScroll]="hideOnScroll">
       <button tedi-dropdown-trigger>Trigger</button>
 
       <tedi-dropdown-content [dropdownRole]="role">
@@ -33,7 +38,37 @@ import { NgxFloatUiContentComponent } from "ngx-float-ui";
 class TestHostComponent {
   value = "b";
   role: "menu" | "listbox" = "listbox";
+  hideOnScroll = false;
 }
+
+@Component({
+  selector: "app-button",
+  standalone: true,
+  template: `<button><ng-content /></button>`,
+  encapsulation: ViewEncapsulation.None,
+})
+class MockButtonComponent {}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <app-button tedi-dropdown-trigger>Trigger</app-button>
+
+      <tedi-dropdown-content>
+        <li tedi-dropdown-item value="a">Item A</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+    MockButtonComponent,
+  ],
+})
+class WrappingButtonHostComponent {}
 
 describe("DropdownComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
@@ -131,6 +166,53 @@ describe("DropdownComponent", () => {
     dropdown.toggleDropdown();
     fixture.detectChanges();
     expect(hideSpy).toHaveBeenCalled();
+  });
+
+  describe("hideOnScroll", () => {
+    it("sets up a scroll listener when opened with hideOnScroll true", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      (floatUi as any).state = false;
+
+      dropdown.showDropdown();
+
+      expect((dropdown as any).scrollListener).toBeDefined();
+    });
+
+    it("does not set up a scroll listener when hideOnScroll is false", () => {
+      host.hideOnScroll = false;
+      fixture.detectChanges();
+      (floatUi as any).state = false;
+
+      dropdown.showDropdown();
+
+      expect((dropdown as any).scrollListener).toBeUndefined();
+    });
+
+    it("hides the dropdown on scroll when hideOnScroll is true", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      (floatUi as any).state = false;
+      dropdown.showDropdown();
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      (floatUi as any).state = true;
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect((dropdown as any).scrollListener).toBeUndefined();
+    });
+
+    it("cleans up the scroll listener on destroy", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      (floatUi as any).state = false;
+      dropdown.showDropdown();
+
+      fixture.destroy();
+
+      expect((dropdown as any).scrollListener).toBeUndefined();
+    });
   });
 
   it("focusFirstItem() should focus first enabled item", () => {
@@ -304,6 +386,111 @@ describe("DropdownComponent", () => {
     });
   });
 
+  describe("handleFocusOut()", () => {
+    it("should return early when dropdown is closed (state=false)", () => {
+      (floatUi as any).state = false;
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.handleFocusOut({
+        target: document.createElement("div"),
+      } as unknown as FocusEvent);
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
+    it("should do nothing when focus moves inside the trigger element", () => {
+      (floatUi as any).state = true;
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.handleFocusOut({
+        target: dropdown.dropdownTrigger()!.host.nativeElement,
+      } as unknown as FocusEvent);
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
+    it("should do nothing when focus moves inside the content element", () => {
+      (floatUi as any).state = true;
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.handleFocusOut({
+        target: dropdown.floatUiComponent().elRef.nativeElement,
+      } as unknown as FocusEvent);
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
+    it("should hide dropdown without refocusing trigger when focus leaves (e.g. Tab)", () => {
+      (floatUi as any).state = true;
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      const focusSpy = jest.spyOn(
+        dropdown.dropdownTrigger()!.host.nativeElement,
+        "focus",
+      );
+
+      dropdown.handleFocusOut({
+        target: document.createElement("div"),
+      } as unknown as FocusEvent);
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect(focusSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("tabOutOfDropdown()", () => {
+    let before: HTMLButtonElement;
+    let after: HTMLButtonElement;
+
+    beforeEach(() => {
+      document.body.appendChild(fixture.nativeElement);
+      before = document.createElement("button");
+      after = document.createElement("button");
+      document.body.insertBefore(before, fixture.nativeElement);
+      document.body.appendChild(after);
+      (floatUi as any).state = true;
+    });
+
+    afterEach(() => {
+      before.remove();
+      after.remove();
+      fixture.nativeElement.remove();
+    });
+
+    it("Tab closes the dropdown and focuses the element after the trigger", fakeAsync(() => {
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.tabOutOfDropdown(false);
+      tick();
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect(document.activeElement).toBe(after);
+    }));
+
+    it("Shift+Tab closes the dropdown and focuses the element before the trigger", fakeAsync(() => {
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.tabOutOfDropdown(true);
+      tick();
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect(document.activeElement).toBe(before);
+    }));
+
+    it("excludes dropdown content from the tab target so focus never re-enters the menu", fakeAsync(() => {
+      after.remove();
+
+      dropdown.tabOutOfDropdown(false);
+      tick();
+
+      const items = getItems();
+      expect(items).not.toContain(document.activeElement);
+    }));
+  });
+
   describe("setActiveToSelectedOrFirst()", () => {
     it("should activate the selected item when it exists and is enabled", () => {
       host.value = "b";
@@ -456,6 +643,26 @@ describe("DropdownComponent", () => {
       expect(focusSpy).toHaveBeenCalled();
     });
 
+    it("keydown: Tab calls dropdown.tabOutOfDropdown(false)", () => {
+      const spy = jest.spyOn(dropdown, "tabOutOfDropdown");
+
+      itemA.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalledWith(false);
+    });
+
+    it("keydown: Shift+Tab calls dropdown.tabOutOfDropdown(true)", () => {
+      const spy = jest.spyOn(dropdown, "tabOutOfDropdown");
+
+      itemA.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Tab", shiftKey: true }),
+      );
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalledWith(true);
+    });
+
     it("keydown: disabled item should preventDefault and NOT process", () => {
       const event = new KeyboardEvent("keydown", { key: "Enter" });
       const preventSpy = jest.spyOn(event, "preventDefault");
@@ -561,6 +768,71 @@ describe("DropdownComponent", () => {
       expect(trigger.getAttribute("aria-expanded")).toBe("false");
       expect(trigger.getAttribute("role")).toBeNull();
       expect(trigger.getAttribute("tabindex")).toBeNull();
+    });
+  });
+
+  describe("DropdownTriggerDirective on a wrapping button component", () => {
+    let wrappedFixture: ComponentFixture<WrappingButtonHostComponent>;
+    let wrappedDropdown: DropdownComponent;
+    let wrapperEl: HTMLElement;
+    let innerButton: HTMLButtonElement;
+
+    beforeEach(() => {
+      wrappedFixture = TestBed.createComponent(WrappingButtonHostComponent);
+      wrappedFixture.detectChanges();
+
+      wrappedDropdown = wrappedFixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      wrapperEl = wrappedFixture.nativeElement.querySelector(
+        "[tedi-dropdown-trigger]",
+      ) as HTMLElement;
+      innerButton = wrapperEl.querySelector("button") as HTMLButtonElement;
+    });
+
+    it("applies ARIA/role/tabindex to the inner button, not the wrapper", () => {
+      expect(wrapperEl.tagName).toBe("APP-BUTTON");
+
+      expect(innerButton.getAttribute("aria-haspopup")).toBe("menu");
+      expect(innerButton.getAttribute("aria-expanded")).toBe("false");
+      expect(innerButton.getAttribute("aria-controls")).toBe(
+        wrappedDropdown.containerId(),
+      );
+      expect(innerButton.getAttribute("id")).toBe(
+        `${wrappedDropdown.containerId()}_trigger`,
+      );
+
+      expect(innerButton.getAttribute("role")).toBeNull();
+      expect(innerButton.getAttribute("tabindex")).toBeNull();
+    });
+
+    it("does not turn the wrapper into a second tab stop", () => {
+      expect(wrapperEl.getAttribute("role")).toBeNull();
+      expect(wrapperEl.getAttribute("tabindex")).toBeNull();
+      expect(wrapperEl.getAttribute("aria-expanded")).toBeNull();
+    });
+
+    it("keeps aria-expanded in sync on the inner button", () => {
+      const wrappedFloatUi = wrappedDropdown.floatUiComponent() as any;
+
+      wrappedFloatUi.state = false;
+      wrappedDropdown.showDropdown();
+      wrappedFixture.detectChanges();
+      expect(innerButton.getAttribute("aria-expanded")).toBe("true");
+
+      wrappedFloatUi.state = true;
+      wrappedDropdown.hideDropdown();
+      wrappedFixture.detectChanges();
+      expect(innerButton.getAttribute("aria-expanded")).toBe("false");
+    });
+
+    it("focus() targets the inner button", () => {
+      const focusSpy = jest.spyOn(innerButton, "focus");
+
+      wrappedDropdown.dropdownTrigger().focus();
+
+      expect(focusSpy).toHaveBeenCalled();
     });
   });
 });

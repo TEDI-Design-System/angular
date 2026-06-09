@@ -1342,6 +1342,7 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `position: DropdownPosition = "bottom-start"`
 - `preventOverflow: boolean = true`
 - `appendTo: string`
+- `hideOnScroll: boolean = false` — close the dropdown when the page scrolls
 
 ```html
 <tedi-dropdown [(value)]="selected">
