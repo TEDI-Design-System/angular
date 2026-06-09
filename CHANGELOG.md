@@ -1,3 +1,10 @@
+# [6.5.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.5...angular-6.5.0-rc.6) (2026-06-09)
+
+
+### Features
+
+* **table:** behavioural improvements [#470](https://github.com/TEDI-Design-System/angular/issues/470) ([#473](https://github.com/TEDI-Design-System/angular/issues/473)) ([098a616](https://github.com/TEDI-Design-System/angular/commit/098a61656d11238deb59550c1e37ec0ea9e3f960))
+
 # [6.5.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.4...angular-6.5.0-rc.5) (2026-06-09)
 
 
