@@ -1522,6 +1522,47 @@ describe("Table: keyboard column reordering", () => {
       expect(pickedHandle?.getAttribute("aria-pressed")).toBe("true");
     });
 
+    it("does not start reorder when Space originates from a nested sort button", async () => {
+      TestBed.overrideComponent(ReorderTestHostComponent, {
+        set: {
+          template: `
+            <tedi-table
+              #table
+              [data]="data()"
+              [columns]="columns()"
+              [reorderableColumns]="true"
+              [pagination]="pagination()"
+            />
+          `,
+        },
+      });
+      fixture = TestBed.createComponent(ReorderTestHostComponent) as ComponentFixture<
+        ReorderTestHostComponent
+      >;
+      fixture.componentInstance.columns.set([
+        { id: "name", header: "Name", accessorKey: "name", sortable: true },
+        { id: "role", header: "Role", accessorKey: "role" },
+      ]);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const sortButton = fixture.nativeElement.querySelector(
+        ".tedi-table__head button[tedi-table-header-button]",
+      ) as HTMLElement;
+      expect(sortButton).not.toBeNull();
+
+      const event = new KeyboardEvent("keydown", { key: " ", bubbles: true });
+      sortButton.dispatchEvent(event);
+      fixture.detectChanges();
+
+      // The column must stay un-picked and the default action must survive so
+      // the sort button can activate normally.
+      expect(
+        fixture.nativeElement.querySelector(".tedi-table__header-cell--picked-up"),
+      ).toBeNull();
+      expect(event.defaultPrevented).toBe(false);
+    });
+
     it("should announce pickup via live region", async () => {
       TestBed.overrideComponent(ReorderTestHostComponent, {
         set: {

@@ -1409,8 +1409,14 @@ export class TediTableComponent<TData> {
 
     this.applyPatch<ColumnOrderState>(
       (prev) => {
+        // Seed from the full leaf list (not just visible ids) so hidden columns
+        // stay anchored in the persisted order — same source as handleColumnDrop.
         const fullOrder =
-          prev.length > 0 ? [...prev] : visibleLeafIds;
+          prev.length > 0
+            ? [...prev]
+            : untracked(() =>
+                this.table.getAllLeafColumns().map((c) => c.id),
+              );
         const visibleSet = new Set(visibleLeafIds);
         let visibleCursor = 0;
         for (let i = 0; i < fullOrder.length; i++) {
@@ -1522,6 +1528,14 @@ export class TediTableComponent<TData> {
     },
   ): void {
     if (!this.reorderableColumns()) return;
+    // The keydown listener lives on the <th>, so Space/Enter from nested sort or
+    // filter controls bubbles here. Only act when the event originates from the
+    // drag handle (or the <th> itself) — otherwise bail so we don't
+    // preventDefault and hijack the nested button's activation.
+    const target = event.target as HTMLElement | null;
+    const fromHandle = !!target?.closest(".tedi-table__drag-handle");
+    const fromHeaderCell = target === event.currentTarget;
+    if (!fromHandle && !fromHeaderCell) return;
     const picked = this.pickedUpColumnId();
 
     switch (event.key) {

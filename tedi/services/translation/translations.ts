@@ -556,11 +556,11 @@ export const translationsMap = {
     description: "Live region message when a column is picked up for keyboard reordering",
     components: ["Table"],
     et: (column: string) =>
-      `Veerg ${column} on valitud. Kasuta vasakut/paremat noolt liigutamiseks ja Tühikut või Sisestust kinnitamiseks.`,
+      `Veerg ${column} on valitud. Kasuta vasakut/paremat noolt liigutamiseks ja Tühikut või Sisestust kinnitamiseks. Vajuta Escape tühistamiseks.`,
     en: (column: string) =>
-      `Column ${column} picked up. Use Left/Right arrow to move, Space or Enter to drop.`,
+      `Column ${column} picked up. Use Left/Right arrow to move, Space or Enter to drop. Press Escape to cancel.`,
     ru: (column: string) =>
-      `Столбец ${column} взят. Используйте стрелки влево/вправо для перемещения, Пробел или Enter для подтверждения.`,
+      `Столбец ${column} взят. Используйте стрелки влево/вправо для перемещения, Пробел или Enter для подтверждения. Нажмите Escape для отмены.`,
   },
   "table.reorder.move": {
     description: "Live region message while a picked-up column is moved between positions",
@@ -593,11 +593,11 @@ export const translationsMap = {
     description: "Live region message when a row is picked up for keyboard reordering",
     components: ["Table"],
     et: (position: number) =>
-      `Rida ${position} on valitud. Kasuta üles-/allanoolt liigutamiseks ja Tühikut või Sisestust kinnitamiseks.`,
+      `Rida ${position} on valitud. Kasuta üles-/allanoolt liigutamiseks ja Tühikut või Sisestust kinnitamiseks. Vajuta Escape tühistamiseks.`,
     en: (position: number) =>
-      `Row ${position} picked up. Use Up/Down arrow to move, Space or Enter to drop.`,
+      `Row ${position} picked up. Use Up/Down arrow to move, Space or Enter to drop. Press Escape to cancel.`,
     ru: (position: number) =>
-      `Строка ${position} взята. Используйте стрелки вверх/вниз для перемещения, Пробел или Enter для подтверждения.`,
+      `Строка ${position} взята. Используйте стрелки вверх/вниз для перемещения, Пробел или Enter для подтверждения. Нажмите Escape для отмены.`,
   },
   "table.row-reorder.move": {
     description: "Live region message while a picked-up row is moved between positions",

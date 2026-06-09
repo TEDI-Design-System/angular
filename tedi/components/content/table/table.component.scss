@@ -297,6 +297,18 @@
     background: var(--table-striped);
   }
 
+  .tedi-table__body .tedi-table__row--picked-up>.tedi-table__cell:first-child {
+    background: var(--table-hover);
+  }
+
+  &.tedi-table--striped .tedi-table__body .tedi-table__row--picked-up:nth-of-type(even)>.tedi-table__cell:first-child {
+    background: var(--table-hover);
+  }
+
+  .tedi-table__head .tedi-table__header-cell--picked-up:first-child {
+    background: var(--table-hover);
+  }
+
   // The sticky first cell paints above the row (z-index), covering the row's
   // inset focus outline along the left, top and bottom edges. Re-draw those
   // three edges of the ring on the cell itself (box-shadow survives the
