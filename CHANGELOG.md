@@ -1,3 +1,10 @@
+# [6.5.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.4...angular-6.5.0-rc.5) (2026-06-09)
+
+
+### Features
+
+* **dropdown:** Added support for wrapped buttons [#468](https://github.com/TEDI-Design-System/angular/issues/468) ([#469](https://github.com/TEDI-Design-System/angular/issues/469)) ([056340a](https://github.com/TEDI-Design-System/angular/commit/056340adadfa6c3cae22ce18f1911f529d2892a6))
+
 # [6.5.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.3...angular-6.5.0-rc.4) (2026-06-05)
 
 
