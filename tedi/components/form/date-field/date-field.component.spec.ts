@@ -464,6 +464,74 @@ describe("DateFieldComponent", () => {
     });
   });
 
+  describe("overlay focus management", () => {
+    function openOverlay(component: DateFieldComponent): void {
+      component.overlayOpen.set(true);
+    }
+
+    function queryOverlay(): HTMLElement | null {
+      return document.querySelector(".tedi-date-field__overlay");
+    }
+
+    it("renders the overlay as a focus-trapped dialog with a label", () => {
+      const { fixture, component } = createField();
+      openOverlay(component);
+      fixture.detectChanges();
+
+      const overlay = queryOverlay();
+      expect(overlay).toBeTruthy();
+      expect(overlay?.getAttribute("role")).toBe("dialog");
+      expect(overlay?.getAttribute("aria-label")).toBe(
+        "date-field.calendar-dialog",
+      );
+      expect(overlay?.hasAttribute("cdkTrapFocus")).toBe(true);
+
+      component.overlayOpen.set(false);
+      fixture.detectChanges();
+    });
+
+    it("pulls focus into the calendar when the overlay attaches", () => {
+      const { fixture, component } = createField();
+      openOverlay(component);
+      fixture.detectChanges();
+
+      const calendar = component.calendar();
+      expect(calendar).toBeTruthy();
+      const focusSpy = jest.spyOn(calendar!, "focusActiveCell");
+
+      component.handleOverlayAttached();
+      expect(focusSpy).toHaveBeenCalled();
+
+      component.overlayOpen.set(false);
+      fixture.detectChanges();
+    });
+
+    it("does nothing on attach when the calendar is not present", () => {
+      const { component } = createField();
+      expect(() => component.handleOverlayAttached()).not.toThrow();
+    });
+
+    it("moves DOM focus into the calendar when opened via the icon (real flow)", () => {
+      const { fixture, el, component } = createField();
+      const iconBtn = el.querySelector(
+        ".tedi-date-input__icon",
+      ) as HTMLButtonElement;
+      iconBtn.click();
+      fixture.detectChanges();
+
+      return Promise.resolve().then(() => {
+        const roving = document.querySelector<HTMLElement>(
+          '.tedi-date-field__overlay .tedi-calendar-day-grid__day[tabindex="0"]',
+        );
+        expect(roving).toBeTruthy();
+        expect(document.activeElement).toBe(roving);
+
+        component.overlayOpen.set(false);
+        fixture.detectChanges();
+      });
+    });
+  });
+
   describe("closeOnSelect heuristic", () => {
     it("defaults to true for single mode", () => {
       const { component } = createField({ mode: "single" });

@@ -768,6 +768,35 @@ describe("CalendarComponent", () => {
     });
   });
 
+  describe("focusActiveCell", () => {
+    it("focuses the roving day cell in the day view", () => {
+      const fixture = createComponent();
+      fixture.componentInstance.focusActiveCell();
+      fixture.detectChanges();
+      return Promise.resolve().then(() => {
+        const roving = (
+          fixture.debugElement.nativeElement as HTMLElement
+        ).querySelector<HTMLElement>('.tedi-calendar-day-grid__day[tabindex="0"]');
+        expect(roving).toBeTruthy();
+        expect(document.activeElement).toBe(roving);
+      });
+    });
+
+    it("focuses the first enabled control in the months view", () => {
+      const fixture = createComponent();
+      fixture.componentInstance.view.set("months");
+      fixture.detectChanges();
+      fixture.componentInstance.focusActiveCell();
+      fixture.detectChanges();
+      return Promise.resolve().then(() => {
+        expect(document.activeElement).toBeInstanceOf(HTMLButtonElement);
+        expect(
+          (document.activeElement as HTMLButtonElement).disabled,
+        ).toBe(false);
+      });
+    });
+  });
+
   describe("multi-month", () => {
     it("renders N day grids when numberOfMonths > 1", () => {
       const fixture = createComponent();

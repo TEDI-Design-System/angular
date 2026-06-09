@@ -525,6 +525,25 @@ export class CalendarComponent implements ControlValueAccessor {
     return Array.from(host.querySelectorAll<HTMLButtonElement>(selector));
   }
 
+  /**
+   * Moves focus to the calendar's active cell — the roving-tabindex day in the
+   * day view, or the first enabled control in the month/year views. Used by
+   * popover hosts (e.g. date-field) to pull focus into the calendar when it
+   * opens, since the CDK overlay is detached from the trigger in DOM order.
+   */
+  focusActiveCell(): void {
+    afterNextRender(
+      () => {
+        const host = this.hostEl.nativeElement as HTMLElement;
+        const target =
+          host.querySelector<HTMLElement>('[tabindex="0"]') ??
+          host.querySelector<HTMLElement>("button:not([disabled])");
+        target?.focus();
+      },
+      { injector: this.injector },
+    );
+  }
+
   private focusDayCell(date: Date): void {
     const key = new Date(
       date.getFullYear(),

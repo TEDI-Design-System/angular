@@ -18,6 +18,7 @@ import {
   ConnectedPosition,
   OverlayModule,
 } from "@angular/cdk/overlay";
+import { A11yModule } from "@angular/cdk/a11y";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { DateInputComponent, DateInputTag } from "./date-input/date-input.component";
 import { TagEllipsis } from "../../tags/tag/tag.component";
@@ -53,6 +54,7 @@ import {
   DateFieldModalData,
 } from "./date-field-modal/date-field-modal.component";
 import { ButtonComponent } from "../../buttons";
+import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 
 type DateFieldValue = Date | Date[] | DateRange | null;
 type DateFieldFormatter = (value: DateFieldValue) => string;
@@ -76,6 +78,8 @@ export type DateFieldSize = "default" | "small";
     DateInputComponent,
     ButtonComponent,
     OverlayModule,
+    A11yModule,
+    TediTranslationPipe,
   ],
   providers: [
     {
@@ -494,6 +498,10 @@ export class DateFieldComponent
     if (target && host.contains(target)) return;
     this.overlayOpen.set(false);
     this.onTouched();
+  }
+
+  handleOverlayAttached(): void {
+    this.calendar()?.focusActiveCell();
   }
 
   handleOverlayKeydown(event: KeyboardEvent): void {

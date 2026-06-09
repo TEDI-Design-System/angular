@@ -1138,6 +1138,14 @@ export const translationsMap = {
     en: (label: string) => `Remove ${label}`,
     ru: (label: string) => `Удалить ${label}`,
   },
+  "date-field.calendar-dialog": {
+    description:
+      "ARIA label for the calendar popover dialog opened from the date field.",
+    components: ["DateField"],
+    et: "Vali kuupäev",
+    en: "Choose date",
+    ru: "Выберите дату",
+  },
   "date-field.modal-title": {
     description: "Title shown in the mobile date picker modal header.",
     components: ["DateField"],

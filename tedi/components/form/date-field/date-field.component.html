@@ -31,11 +31,15 @@
     [cdkConnectedOverlayOpen]="overlayOpen()"
     [cdkConnectedOverlayPositions]="overlayPositions"
     [cdkConnectedOverlayHasBackdrop]="false"
+    (attach)="handleOverlayAttached()"
     (overlayOutsideClick)="handleOverlayOutsideClick($event)"
     (detach)="closeOverlay()"
   >
     <div
       class="tedi-date-field__overlay"
+      role="dialog"
+      [attr.aria-label]="'date-field.calendar-dialog' | tediTranslate"
+      cdkTrapFocus
       (keydown)="handleOverlayKeydown($event)"
     >
       <tedi-calendar
