@@ -1,3 +1,10 @@
+# [6.5.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.8...angular-6.5.0-rc.9) (2026-06-10)
+
+
+### Features
+
+* Added angular v22 support [#466](https://github.com/TEDI-Design-System/angular/issues/466) ([#476](https://github.com/TEDI-Design-System/angular/issues/476)) ([36b1266](https://github.com/TEDI-Design-System/angular/commit/36b12666ffbbb9a51d58cc57559581b3aaf31588))
+
 # [6.5.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.7...angular-6.5.0-rc.8) (2026-06-10)
 
 
