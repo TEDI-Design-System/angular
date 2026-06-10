@@ -955,6 +955,20 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 **Row inputs:** `cols`, `minColWidth`, `justifyItems`, `alignItems`, `gap`, `gapX`, `gapY` + responsive breakpoints
 **Col inputs:** `width` (1-12), `justifySelf`, `alignSelf` + responsive breakpoints
 
+### Ellipsis
+**Selector:** `tedi-ellipsis`
+**Inputs:**
+- `lineClamp: number = 2` — maximum lines before truncating (end position only)
+- `tooltip: boolean = true` — show hover/focus tooltip with full text when truncated
+- `position: 'start' | 'end' = 'end'` — `'end'` = trailing multi-line clamp; `'start'` = leading single-line
+
+```html
+<tedi-ellipsis style="max-width:200px">Long content that overflows...</tedi-ellipsis>
+
+<!-- Leading ellipsis (single-line) -->
+<tedi-ellipsis [position]="'start'" style="max-width:200px">/users/tehiK/tedi/angular/src/lib/components/helpers/ellipsis/ellipsis.component.ts</tedi-ellipsis>
+```
+
 ### Separator
 **Selector:** `tedi-separator`
 **Inputs:**
@@ -1413,12 +1427,16 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `loading: boolean = false`
 - `closable: boolean = false`
 - `type: TagType = "primary"`
+- `ellipsis: TagEllipsis = false` — `false | "start" | "end"`. When set (and the tag is width-constrained), truncates the label to a single line with an ellipsis at that end and reveals the full label in a tooltip on hover/focus. `false` lets the label wrap.
 **Outputs:**
 - `closed: Event`
 **Slots:** default
 
 ```html
 <tedi-tag type="primary" [closable]="true" (closed)="onRemove()">Label</tedi-tag>
+
+<!-- Truncate a long label (needs a width constraint, e.g. a max-width parent) -->
+<tedi-tag ellipsis="end" [closable]="true">A fairly long tag label</tedi-tag>
 ```
 
 ### StatusBadge
