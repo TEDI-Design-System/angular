@@ -255,6 +255,7 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `activeRowId: string` — highlights one row
 - `rowHover: boolean` — force hover styling on/off (default tracks `interactive`)
 - `interactive: boolean = false` — adds `role="button"`, hover/active styles, and keyboard activation to rows; subscribe to `(rowClick)`
+- `rowAriaLabel: (row: Row<TData>) => string` — explicit accessible name per interactive row (without it, a `role="button"` row's name is built from all its cell text). Only applied when `interactive` is true
 - `enableRowSelection: boolean | ((row) => boolean)` — opt-in selection; auto-renders a selection column
 - `selectionMode: "multiple" | "single" = "multiple"` — `multiple` shows checkboxes + select-all; `single` shows radios (no select-all)
 - `selectedRowHighlight: boolean = true` — whether selected rows get a background highlight. Set `false` to keep selection state for logic without the visual highlight (e.g. when you render selection feedback yourself in a cell template)
@@ -265,25 +266,39 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `expandButtonLabel: string | { open: string; close: string }` — render a visible label next to the chevron instead of an icon-only button. A single string is used for both states; the `{ open, close }` form sets distinct collapsed (`open`) / expanded (`close`) labels. When unset the button stays icon-only with the translated expand/collapse aria-label.
 - `getSubRows: (row) => TData[] | undefined` — hierarchical / tree rows
 - `enableColumnFilters: boolean = false` — force TanStack's filter machinery (auto-on when any column sets `filterable`)
-- `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`).
+- `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`). `pageSizeOptions` accepts plain numbers or `{ value, label }` objects — use the object form for a **"Show all"** entry whose `value` is large enough to hold every row: pass the row total when you know it (`data.length`), or `Number.MAX_SAFE_INTEGER` when you don't. Filtering only shrinks the row count, so a large page size always collapses the result to a single page. (Don't use `-1` — TanStack clamps `setPageSize` to `≥ 1`.)
 - `paginationTop: boolean | TablePaginationOptions` — opt-in top paginator; shares page / page-size state with bottom but has independent visual config (its own arrow + `hide*` settings). Requires `pagination` to be truthy.
 - `manualPagination: boolean = false` — server-side pagination; supply `pageCount` or `rowCount`
 - `manualSorting: boolean = false`
 - `manualFiltering: boolean = false`
 - `pageCount: number` — total pages in manual mode
 - `rowCount: number` — total rows in manual mode
-- `state: Partial<TableState>` — controlled state
-- `defaultState: Partial<TableState>` — initial uncontrolled state
-- `persist: TablePersistOptions` — `{ key, storage?, include? }` to persist state to `localStorage` (defaults persist user-preference slices: `columnVisibility`, `columnOrder`, `rowOrder`, `columnSizing`)
+- `state: Partial<TableState>` — controlled state. Per-slice: only the slices you pass are controlled (the table renders them verbatim and never changes them itself); write changes back from `(stateChange)` or the UI appears frozen. Other slices stay internal.
+- `defaultState: Partial<TableState>` — initial state for uncontrolled slices. Read once; the table owns the state afterwards (later changes to the input are ignored once the user interacts).
+- `persist: TablePersistOptions` — `{ key, storage?, include? }` to persist state to `localStorage` (defaults persist user-preference slices: `columnVisibility`, `columnOrder`, `rowOrder`, `columnSizing`; add task-scoped slices like `sorting`/`columnFilters` via `include`)
 - `placeholder: TemplateRef | string` — empty-state content (defaults to translated `table.no-data`)
 - `placeholderRole: "alert" | "status"`
-- `draggableRows: boolean = false` — reorder rows via CDK drag-drop; emits `(rowDrop)` with indices normalised to the source `data` array
-- `draggableColumns: boolean = false` — reorder columns via header drag; updates internal `columnOrder` state
+- `reorderableRows: boolean = false` — reorder rows by **mouse drag and keyboard** (one input). Mouse: drag a row by its handle. Keyboard: Tab to the handle, Space/Enter to pick up, ↑/↓ to move within the current page, Space/Enter to drop, Escape to cancel. Emits `(rowDrop)` with indices normalised to the source `data` array.
+- `reorderableColumns: boolean = false` — reorder columns by **mouse drag and keyboard** (one input). Mouse: drag a header cell by its handle. Keyboard: Tab to a header, Space/Enter to pick up, ←/→ to move live, Space/Enter to drop, Escape to cancel. Updates internal `columnOrder` state.
 
 **Outputs:**
-- `stateChange: TableState`
+- `stateChange: TableState` — emits the full merged `TableState` after every change, regardless of which slice changed
 - `rowClick: Row<TData>` — only fires when `interactive` is true
 - `rowDrop: CdkDragDrop<TData[]>` — `previousIndex`/`currentIndex` are source-array positions; pass through `moveItemInArray(data, prev, curr)` and rebind `[data]`
+
+**State management (`TableState`):** one object holds every interactive slice — `columnVisibility`, `columnOrder`, `rowOrder`, `columnSizing`, `rowSelection`, `expanded`, `columnFilters`, `sorting`, `pagination` (slice types are TanStack's). Modes mix per slice: uncontrolled (default), seeded via `defaultState`, controlled via `state` + `(stateChange)`, persisted via `persist`. Precedence per slice: `state` (controlled) > persisted storage value > `defaultState` > built-in default. Row-keyed slices (`rowSelection`, `expanded`) use TanStack's default row IDs — the row index as a string, nested sub-rows as dotted paths (`"0.1"`) — so index-keyed state shifts if `data` order changes. `expanded` also accepts `true` for "all rows".
+
+Render expandable rows open on first load (still user-collapsible):
+
+```html
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [defaultState]="{ expanded: true }"
+/>
+<!-- or only specific rows: [defaultState]="{ expanded: { '0': true, '2': true } }" -->
+```
 
 **Column definition (`TediColumnDef<TData>`):** extends TanStack's `ColumnDef` with Angular-specific fields:
 - `sortable: boolean` — opt the column into the built-in sort affordance (string `header` only). Pair with `sortingFn` to override the comparator. For custom UIs, pass a `TemplateRef` for `header` and call `column.toggleSorting()` yourself.
@@ -917,6 +932,7 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 - `noOptionsMessage: string` — custom text when no options match search
 - `dropdownType: "menu" | "grid" = "menu"` — "grid" for swatch-type selects
 - `dropdownWidthRef: ElementRef | null` — element to match dropdown width to
+- `dropdownAlign: "start" | "end" = "start"` — which trigger edge the dropdown anchors to; use `"end"` for right-aligned selects so the panel expands inward
 - `feedbackText: { text, type, position }` — feedback text config
 - `maxDropdownHeight: number` — dropdown height in pixels
 - `compareWith: (a, b) => boolean` — custom equality function
@@ -1069,6 +1085,20 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 **Row inputs:** `cols`, `minColWidth`, `justifyItems`, `alignItems`, `gap`, `gapX`, `gapY` + responsive breakpoints
 **Col inputs:** `width` (1-12), `justifySelf`, `alignSelf` + responsive breakpoints
 
+### Ellipsis
+**Selector:** `tedi-ellipsis`
+**Inputs:**
+- `lineClamp: number = 2` — maximum lines before truncating (end position only)
+- `tooltip: boolean = true` — show hover/focus tooltip with full text when truncated
+- `position: 'start' | 'end' = 'end'` — `'end'` = trailing multi-line clamp; `'start'` = leading single-line
+
+```html
+<tedi-ellipsis style="max-width:200px">Long content that overflows...</tedi-ellipsis>
+
+<!-- Leading ellipsis (single-line) -->
+<tedi-ellipsis [position]="'start'" style="max-width:200px">/users/tehiK/tedi/angular/src/lib/components/helpers/ellipsis/ellipsis.component.ts</tedi-ellipsis>
+```
+
 ### Separator
 **Selector:** `tedi-separator`
 **Inputs:**
@@ -1215,7 +1245,7 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 **Inputs:**
 - `pageCount: number` (required) — total number of pages
 - `totalItems: number` — when set, renders the `"{count} results"` label
-- `pageSizeOptions: number[] = []` — options for the page-size select; empty hides the select
+- `pageSizeOptions: (number | PaginationPageSizeOption)[] = []` — options for the page-size select; empty hides the select. Plain numbers label themselves; pass `{ value, label }` objects when the visible text should differ from the value — most commonly a **"Show all"** entry. The component stays presentational: selecting an option emits its `value` and the consumer recomputes `pageCount` (see the "Show all" example below).
 - `boundaryCount: number = 1` — pages always shown at the start and end
 - `siblingCount: number = 1` — pages shown on either side of the current page
 - `labels: Partial<PaginationLabels>` — override any of the default text/aria labels
@@ -1273,6 +1303,29 @@ Custom results slot:
   <span tediPaginationResults>1000+ tulemust</span>
 </tedi-pagination>
 ```
+
+"Show all" page size — a labelled option whose value covers every row. The component is dumb; recompute `pageCount` in the change handler so the pager collapses to a single page:
+
+```html
+<tedi-pagination
+  [pageCount]="pageCount"
+  [(page)]="page"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="[10, 25, 50, { value: totalItems, label: 'Show all' }]"
+  (pageSizeChange)="onPageSizeChange($event)"
+/>
+```
+
+```ts
+onPageSizeChange(size: number) {
+  this.pageSize = size;
+  this.pageCount = Math.max(1, Math.ceil(this.totalItems / size)); // → 1 for "Show all"
+  this.page = 1;
+}
+```
+
+Supply the label already translated — there is no built-in `pagination.show-all` translation key.
 
 Render the prev/next arrows as labelled primary buttons with custom icons:
 
@@ -1458,6 +1511,7 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `position: DropdownPosition = "bottom-start"`
 - `preventOverflow: boolean = true`
 - `appendTo: string`
+- `hideOnScroll: boolean = false` — close the dropdown when the page scrolls
 
 ```html
 <tedi-dropdown [(value)]="selected">
@@ -1500,17 +1554,19 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 ### Tag
 **Selector:** `tedi-tag`
 **Inputs:**
-- `loading: boolean = false` — show a spinner inside the tag
-- `closable: boolean = false` — show a close button that emits `(closed)` when clicked
-- `type: TagType = "primary"` — "primary", "secondary", or "danger"
-- `ellipsis: TagEllipsis = false` — which end the label truncates from when it doesn't fit. `false` never truncates; `end` → `label…`; `start` → `…label` (keeps dates like 06.2026 visible)
+- `loading: boolean = false`
+- `closable: boolean = false`
+- `type: TagType = "primary"`
+- `ellipsis: TagEllipsis = false` — `false | "start" | "end"`. When set (and the tag is width-constrained), truncates the label to a single line with an ellipsis at that end and reveals the full label in a tooltip on hover/focus. `false` lets the label wrap.
 **Outputs:**
 - `closed: Event`
 **Slots:** default
 
 ```html
 <tedi-tag type="primary" [closable]="true" (closed)="onRemove()">Label</tedi-tag>
-<tedi-tag type="secondary" ellipsis="start">Very long tag label that needs truncation</tedi-tag>
+
+<!-- Truncate a long label (needs a width constraint, e.g. a max-width parent) -->
+<tedi-tag ellipsis="end" [closable]="true">A fairly long tag label</tedi-tag>
 ```
 
 ### StatusBadge

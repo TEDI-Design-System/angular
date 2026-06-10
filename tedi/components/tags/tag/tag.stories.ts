@@ -73,7 +73,7 @@ export default {
       control: "radio",
       options: [false, "start", "end"],
       description:
-        "Which end the label truncates from when it doesn't fit. `false` never truncates; `end` → `Long label…`; `start` → `…label`. Truncation only kicks in when the tag is width-constrained.",
+        "Which end the label truncates from when it doesn't fit. `false` never truncates; `end` → `Long label…`; `start` → `…label`. Truncation only kicks in when the tag is width-constrained, and the full label shows in a tooltip on hover/focus.",
       table: {
         defaultValue: { summary: "false" },
         type: { summary: "TagEllipsis", detail: "false \nstart \nend" },
@@ -101,7 +101,7 @@ export const Ellipsis: Story = {
     docs: {
       description: {
         story:
-          "When width-constrained, `ellipsis` truncates the label (the close button stays fixed). `false` never truncates — the label wraps, `end` cuts the end, `start`  cuts the start.",
+          "When width-constrained, `ellipsis` truncates the label (the close button stays fixed) and reveals the full text in a tooltip on hover/focus. `false` never truncates — the label wraps; `end` cuts the end; `start` cuts the start.",
       },
     },
   },

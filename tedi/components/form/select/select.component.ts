@@ -144,6 +144,14 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   dropdownWidthRef = input<ElementRef | null>();
 
   /**
+   * Which edge of the trigger the dropdown is anchored to. Use `"end"` when the
+   * select sits against the right edge of its container so the panel expands
+   * inward instead of overflowing.
+   * @default "start"
+   */
+  dropdownAlign = input<"start" | "end">("start");
+
+  /**
    * Configuration for the feedback text displayed below the select.
    */
   feedbackText = input<ComponentInputs<FeedbackTextComponent>>();
@@ -300,22 +308,15 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   readonly SpecialOptionControls = SpecialOptionControls;
 
-  readonly dropdownPositions: ConnectedPosition[] = [
-    // Open below, expand downward
-    {
-      originX: "start",
-      originY: "bottom",
-      overlayX: "start",
-      overlayY: "top",
-    },
-    // Fallback: open above, expand upward
-    {
-      originX: "start",
-      originY: "top",
-      overlayX: "start",
-      overlayY: "bottom",
-    },
-  ];
+  readonly dropdownPositions = computed<ConnectedPosition[]>(() => {
+    const x = this.dropdownAlign();
+    return [
+      // Open below, expand downward
+      { originX: x, originY: "bottom", overlayX: x, overlayY: "top" },
+      // Fallback: open above, expand upward
+      { originX: x, originY: "top", overlayX: x, overlayY: "bottom" },
+    ];
+  });
 
   listboxId = computed(() => this.inputId() + "-listbox");
   labelId = computed(() => this.inputId() + "-label");

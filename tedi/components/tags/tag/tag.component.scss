@@ -20,6 +20,20 @@
     padding: var(--tag-default-padding-y) 0;
   }
 
+  &--ellipsis {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  &--ellipsis &__content {
+    min-width: 0;
+  }
+
+  &--ellipsis &__icon-wrapper,
+  &--ellipsis .tedi-closing-button {
+    flex-shrink: 0;
+  }
+
   &__icon-wrapper {
     line-height: var(--_line-height);
   }

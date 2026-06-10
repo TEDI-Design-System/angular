@@ -6,11 +6,13 @@ import {
   viewChild,
   contentChild,
   signal,
+  computed,
   AfterContentChecked,
   OnDestroy,
   inject,
   PLATFORM_ID,
   model,
+  Renderer2,
 } from "@angular/core";
 import {
   NgxFloatUiContentComponent,
@@ -19,8 +21,9 @@ import {
 } from "ngx-float-ui";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
-import { isPlatformBrowser } from "@angular/common";
+import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 import { DROPDOWN_API } from "./dropdown.tokens";
+import { getFocusableElements } from "../../../utils/elements.util";
 
 export type DropdownPosition = `${NgxFloatUiPlacements}`;
 
@@ -62,6 +65,12 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
    */
   readonly appendTo = input("");
 
+  /**
+   * Does the dropdown hide when the page scrolls?
+   * @default false
+   */
+  readonly hideOnScroll = input(false);
+
   readonly dropdownTrigger = contentChild.required(DropdownTriggerDirective);
   readonly dropdownContent = contentChild.required(DropdownContentComponent);
   readonly floatUiComponent = viewChild.required(NgxFloatUiContentComponent);
@@ -70,12 +79,17 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
   readonly containerId = signal("");
   readonly isContentHovered = signal(false);
   readonly floatUiDisplay = signal<"inline" | "block">("inline");
+  readonly opened = computed(() => this.floatUiDisplay() === "block");
 
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly document = inject(DOCUMENT);
+  private readonly renderer = inject(Renderer2);
+  private scrollListener?: () => void;
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
       document.addEventListener("pointerdown", this.handleOutsideClick, true);
+      document.addEventListener("focusin", this.handleFocusOut, true);
     }
   }
 
@@ -86,7 +100,9 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
         this.handleOutsideClick,
         true,
       );
+      document.removeEventListener("focusin", this.handleFocusOut, true);
     }
+    this.cleanupScrollListener();
   }
 
   ngAfterContentChecked(): void {
@@ -121,11 +137,16 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
       );
     }
 
+    if (this.hideOnScroll()) {
+      this.setupScrollListener();
+    }
+
     setTimeout(() => this.focusActiveItem());
   }
 
   hideDropdown() {
     if (this.floatUiComponent().state) {
+      this.cleanupScrollListener();
       this.floatUiComponent().hide();
       this.floatUiDisplay.set("inline");
       this.activeIndex.set(null);
@@ -155,9 +176,46 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
 
     if (!clickedInside) {
       this.hideDropdown();
-      triggerEl.focus();
+      this.dropdownTrigger().focus();
     }
   };
+
+  handleFocusOut = (event: FocusEvent) => {
+    if (!this.floatUiComponent().state) return;
+
+    const target = event.target as HTMLElement;
+
+    const triggerEl = this.dropdownTrigger().host.nativeElement;
+    const contentEl = this.floatUiComponent().elRef
+      .nativeElement as HTMLElement;
+
+    const focusedInside =
+      triggerEl.contains(target) || contentEl.contains(target);
+
+    if (!focusedInside) {
+      this.hideDropdown();
+    }
+  };
+
+  tabOutOfDropdown(shiftKey: boolean) {
+    const triggerEl = this.dropdownTrigger().focusableElement;
+    const contentEl = this.floatUiComponent().elRef
+      .nativeElement as HTMLElement;
+
+    const focusable = getFocusableElements(this.document.body).filter(
+      (el) => !contentEl.contains(el),
+    );
+    const triggerIndex = focusable.indexOf(triggerEl);
+    const next = shiftKey
+      ? focusable[triggerIndex - 1]
+      : focusable[triggerIndex + 1];
+
+    this.hideDropdown();
+
+    if (next) {
+      setTimeout(() => next.focus());
+    }
+  }
 
   focusFirstItem() {
     const items = this.dropdownContent().items();
@@ -262,6 +320,28 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
         }
       }
     });
+  }
+
+  private setupScrollListener() {
+    this.cleanupScrollListener();
+
+    this.scrollListener = this.renderer.listen(
+      this.document,
+      "scroll",
+      () => {
+        if (this.floatUiComponent().state) {
+          this.hideDropdown();
+        }
+      },
+      { capture: true, passive: true },
+    );
+  }
+
+  private cleanupScrollListener() {
+    if (this.scrollListener) {
+      this.scrollListener();
+      this.scrollListener = undefined;
+    }
   }
 
   private findIndexByElement(el: HTMLLIElement): number {

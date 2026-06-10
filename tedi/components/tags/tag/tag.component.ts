@@ -11,6 +11,8 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { SpinnerComponent } from "../../loader/spinner/spinner.component";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
+import { EllipsisComponent, EllipsisPosition } from "../../helpers/ellipsis";
+import { NgTemplateOutlet } from "@angular/common";
 import { _IdGenerator } from '@angular/cdk/a11y';
 
 export type TagType = "primary" | "secondary" | "danger";
@@ -18,7 +20,14 @@ export type TagEllipsis = "start" | "end" | false;
 
 @Component({
   selector: "tedi-tag",
-  imports: [SpinnerComponent, IconComponent, ClosingButtonComponent, TediTranslationPipe],
+  imports: [
+    SpinnerComponent,
+    IconComponent,
+    ClosingButtonComponent,
+    TediTranslationPipe,
+    EllipsisComponent,
+    NgTemplateOutlet,
+  ],
   templateUrl: "./tag.component.html",
   styleUrl: "./tag.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -28,7 +37,6 @@ export type TagEllipsis = "start" | "end" | false;
     "[class.tedi-tag--loading]": "loading()",
     "[class.tedi-tag--closable]": "closable()",
     "[class.tedi-tag--ellipsis]": "ellipsis() !== false",
-    "[class.tedi-tag--ellipsis-start]": "ellipsis() === 'start'",
     "[class]": "classes()",
   },
 })
@@ -58,9 +66,11 @@ export class TagComponent {
 
   /**
    * Which end the label truncates from when it doesn't fit. `false` (default)
-   * never truncates — the tag keeps its full width. `end` shows an ellipsis at
-   * the end (`05.06…`); `start` shows it at the start (`…06.2026`), which keeps
-   * the most significant part of values like dates visible.
+   * never truncates — the label wraps and the tag keeps its full width. `end`
+   * shows an ellipsis at the end (`Long label…`); `start` shows it at the start
+   * (`…label`), which keeps the most significant part of values like dates
+   * visible. Truncation only kicks in when the tag is width-constrained, and the
+   * full label is revealed in a tooltip on hover/focus.
    * @default false
    */
   ellipsis = input<TagEllipsis>(false);
@@ -77,6 +87,10 @@ export class TagComponent {
     }
     return classList.join(" ");
   });
+
+  ellipsisPosition = computed<EllipsisPosition>(() =>
+    this.ellipsis() === "start" ? "start" : "end",
+  );
 
   handleClose(event: Event) {
     this.closed.emit(event);

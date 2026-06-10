@@ -57,11 +57,11 @@ export default {
     },
     pageSizeOptions: {
       description:
-        "Options shown in the page-size dropdown. Empty array hides the dropdown.",
+        "Options shown in the page-size dropdown. Empty array hides the dropdown. Accepts plain numbers or `{ value, label }` objects — use the object form for a 'Show all' entry whose label differs from its value.",
       control: "object",
       table: {
         category: "inputs",
-        type: { summary: "number[]" },
+        type: { summary: "(number | PaginationPageSizeOption)[]" },
         defaultValue: { summary: "[]" },
       },
     },
@@ -549,6 +549,44 @@ export const CustomResultsSlot: Story = {
       description: {
         story:
           "Project `[tediPaginationResults]` content to replace the default \"X results\" label entirely — useful when the count is an approximation (`1000+`), a status pill, or a more complex DOM than a plain count.",
+      },
+    },
+  },
+};
+
+export const ShowAll: Story = {
+  render: () => ({
+    props: {
+      totalItems: 97,
+      page: 1,
+      pageSize: 10,
+      pageCount: 10,
+      pageSizeOptions: [10, 25, 50, { value: 97, label: "Show all" }],
+      onPageSizeChange(
+        this: { totalItems: number; pageSize: number; pageCount: number; page: number },
+        size: number,
+      ) {
+        this.pageSize = size;
+        this.pageCount = Math.max(1, Math.ceil(this.totalItems / size));
+        this.page = 1;
+      },
+    },
+    template: `
+      <tedi-pagination
+        [pageCount]="pageCount"
+        [(page)]="page"
+        [totalItems]="totalItems"
+        [pageSize]="pageSize"
+        [pageSizeOptions]="pageSizeOptions"
+        (pageSizeChange)="onPageSizeChange($event)"
+      />
+    `,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "\"Show all\" is just a labelled page-size option: `{ value: totalItems, label: 'Show all' }`. The component stays presentational — it emits the option's `value`, and the consumer recomputes `pageCount` from `totalItems / pageSize`. When that collapses to 1, the pager hides itself. Supply the label already translated; there is no built-in `pagination.show-all` key.",
       },
     },
   },

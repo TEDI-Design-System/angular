@@ -11,6 +11,7 @@ import {
   signal,
   viewChild,
 } from "@angular/core";
+import { CdkScrollable } from "@angular/cdk/scrolling";
 
 export type ScrollFadeSize = 0 | 10 | 20;
 export type ScrollFadePosition = "top" | "bottom" | "both";
@@ -19,6 +20,7 @@ export type ScrollFadeScrollbar = "default" | "custom";
 @Component({
   standalone: true,
   selector: "tedi-scroll-fade",
+  imports: [CdkScrollable],
   templateUrl: "./scroll-fade.component.html",
   styleUrl: "./scroll-fade.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -84,10 +86,12 @@ export class ScrollFadeComponent implements AfterViewInit, OnDestroy {
     const el = this.innerRef().nativeElement;
     this.updateFade(el.scrollTop, el.scrollHeight, el.clientHeight);
 
-    this.resizeObserver = new ResizeObserver(() => {
-      this.updateFade(el.scrollTop, el.scrollHeight, el.clientHeight);
-    });
-    this.resizeObserver.observe(el);
+    if (typeof ResizeObserver !== "undefined") {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.updateFade(el.scrollTop, el.scrollHeight, el.clientHeight);
+      });
+      this.resizeObserver.observe(el);
+    }
   }
 
   ngOnDestroy(): void {

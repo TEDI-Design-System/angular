@@ -1,3 +1,38 @@
+# [6.5.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.7...angular-6.5.0-rc.8) (2026-06-10)
+
+
+### Bug Fixes
+
+* **table:** state is correctly forwarded + added state docs [#477](https://github.com/TEDI-Design-System/angular/issues/477) ([#478](https://github.com/TEDI-Design-System/angular/issues/478)) ([9282b60](https://github.com/TEDI-Design-System/angular/commit/9282b60e2c984a619d50594b3b02285b196001eb))
+
+# [6.5.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.6...angular-6.5.0-rc.7) (2026-06-10)
+
+
+### Features
+
+* **ellipsis:** new tedi-ready component [#472](https://github.com/TEDI-Design-System/angular/issues/472) ([#475](https://github.com/TEDI-Design-System/angular/issues/475)) ([a38d594](https://github.com/TEDI-Design-System/angular/commit/a38d5945f3a598cbbe669693fc7fc52702279fa3))
+
+# [6.5.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.5...angular-6.5.0-rc.6) (2026-06-09)
+
+
+### Features
+
+* **table:** behavioural improvements [#470](https://github.com/TEDI-Design-System/angular/issues/470) ([#473](https://github.com/TEDI-Design-System/angular/issues/473)) ([098a616](https://github.com/TEDI-Design-System/angular/commit/098a61656d11238deb59550c1e37ec0ea9e3f960))
+
+# [6.5.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.4...angular-6.5.0-rc.5) (2026-06-09)
+
+
+### Features
+
+* **dropdown:** Added support for wrapped buttons [#468](https://github.com/TEDI-Design-System/angular/issues/468) ([#469](https://github.com/TEDI-Design-System/angular/issues/469)) ([056340a](https://github.com/TEDI-Design-System/angular/commit/056340adadfa6c3cae22ce18f1911f529d2892a6))
+
+# [6.5.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.3...angular-6.5.0-rc.4) (2026-06-05)
+
+
+### Features
+
+* **time-field,time-picker,scroll-fade:** new tedi-ready components [#374](https://github.com/TEDI-Design-System/angular/issues/374) ([#397](https://github.com/TEDI-Design-System/angular/issues/397)) ([0040e62](https://github.com/TEDI-Design-System/angular/commit/0040e621f55310c6b4909d92d5787766c39f00c6))
+
 # [6.5.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.2...angular-6.5.0-rc.3) (2026-06-05)
 
 
