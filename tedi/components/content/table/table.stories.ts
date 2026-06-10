@@ -660,8 +660,8 @@ type TediTableStoryArgs = {
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=11335-186161&m=dev" target="_BLANK">Figma ↗</a><br/>
- * <a href="https://www.tedi.ee/1ee8444b7/p/557b9f-table" target="_BLANK">Zeroheight ↗</a>
- * <a href="https://tanstack.com/table/latest/docs/framework/angular/angular-table" target="_BLANK">@tanstack/angular-table ↗</a><br/>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/557b9f-table" target="_BLANK">Zeroheight ↗</a><br/>
+ * <a href="https://tanstack.com/table/latest/docs/framework/angular/angular-table" target="_BLANK">@tanstack/angular-table ↗</a>
  *
  * Headless data table built on `@tanstack/angular-table`. Supports sorting,
  * filtering, expansion, selection, pagination, sticky chrome and body row

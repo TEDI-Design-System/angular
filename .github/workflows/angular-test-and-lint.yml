@@ -78,7 +78,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        angular-version: [19, 20, 21]
+        angular-version: [20, 21, 22]
     name: compatibility (Angular ${{ matrix.angular-version }})
     steps:
       - name: Setup Node.js
@@ -98,7 +98,16 @@ jobs:
             --skip-git --skip-tests --style=scss --ssr=false --skip-install
           cd test-app
           npm install
-          npm install ../dist/*.tgz @angular/animations@${{ matrix.angular-version }} @angular/forms@${{ matrix.angular-version }} @angular/cdk@${{ matrix.angular-version }} ngx-float-ui@${{ matrix.angular-version }}
+
+          # ngx-float-ui has no Angular 22 release yet — cap at v21 and use
+          # --legacy-peer-deps on newer Angular majors until it catches up.
+          FLOAT_UI_VERSION=${{ matrix.angular-version }}
+          LEGACY_FLAG=""
+          if [ "${{ matrix.angular-version }}" -ge 22 ]; then
+            FLOAT_UI_VERSION=21
+            LEGACY_FLAG="--legacy-peer-deps"
+          fi
+          npm install $LEGACY_FLAG ../dist/*.tgz @angular/animations@${{ matrix.angular-version }} @angular/forms@${{ matrix.angular-version }} @angular/cdk@${{ matrix.angular-version }} ngx-float-ui@$FLOAT_UI_VERSION
 
           # Import a component to verify the library is consumable
           cat > src/app/app.component.ts << 'EOF'

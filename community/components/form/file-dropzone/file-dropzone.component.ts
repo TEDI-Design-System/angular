@@ -10,7 +10,6 @@ import {
   ElementRef,
   OnInit,
   output,
-  Self,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
@@ -71,6 +70,8 @@ import { FileService } from "./file.service";
   providers: [FileService],
 })
 export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
+  _ngControl = inject(NgControl, { self: true });
+
   /**
    * Specifies the allowed file types (e.g., "image/png, image/jpeg").
    *
@@ -222,7 +223,7 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
     position: "left",
   }));
 
-  constructor(@Self() public _ngControl: NgControl) {
+  constructor() {
     this._ngControl.valueAccessor = this;
   }
 

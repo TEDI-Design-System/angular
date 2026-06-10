@@ -131,20 +131,28 @@ export const Small: Story = {
 };
 
 export const WithTextInverted: Story = {
-  parameters: { backgrounds: { default: "brand" } },
   args: {
     inverted: true,
     openText: "Open",
     closeText: "Close",
   },
+  globals: {
+    backgrounds: {
+      value: "brand"
+    }
+  },
 };
 
 export const IconOnlyInverted: Story = {
-  parameters: { backgrounds: { default: "brand" } },
   args: {
     inverted: true,
     hideCollapseText: true,
     openText: "Open",
     closeText: "Close",
+  },
+  globals: {
+    backgrounds: {
+      value: "brand"
+    }
   },
 };

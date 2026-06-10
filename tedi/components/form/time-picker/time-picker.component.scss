@@ -69,12 +69,12 @@
   height: 100%;
   padding: var(--_tedi-time-picker-snap-padding) 0;
   overflow-y: scroll;
+  scroll-behavior: smooth;
   overscroll-behavior-y: contain;
   scroll-snap-type: y mandatory;
   scroll-padding: var(--_tedi-time-picker-snap-padding);
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
   -ms-overflow-style: none;
 
   &::-webkit-scrollbar {
