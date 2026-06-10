@@ -13,7 +13,7 @@
     "prepare": "husky",
     "start": "ng run angular-components:storybook",
     "build": "ng build angular-components --configuration production && sass --load-path=node_modules src/styles/index.scss dist/index.css --style=compressed --no-source-map && replace-in-file //fonts//g \"./fonts/\" dist/index.css --isRegex && mkdir -p dist/fonts && cp -a node_modules/@tedi-design-system/core/fonts/* dist/fonts/",
-    "build:sb": "ng run angular-components:build-storybook && replace-in-file //fonts//g \"./fonts/\" dist/storybook-static/main.css --isRegex",
+    "build:sb": "ng run angular-components:build-storybook && replace-in-file //fonts//g \"./fonts/\" \"dist/storybook-static/*.css\" --isRegex",
     "build:sb:chromatic": "ng run angular-components:build-storybook",
     "lint": "stylelint \"tedi/**/*.scss\" --fix && ng lint angular-components --fix",
     "test": "jest --passWithNoTests",
