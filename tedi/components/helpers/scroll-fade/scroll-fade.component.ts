@@ -86,10 +86,12 @@ export class ScrollFadeComponent implements AfterViewInit, OnDestroy {
     const el = this.innerRef().nativeElement;
     this.updateFade(el.scrollTop, el.scrollHeight, el.clientHeight);
 
-    this.resizeObserver = new ResizeObserver(() => {
-      this.updateFade(el.scrollTop, el.scrollHeight, el.clientHeight);
-    });
-    this.resizeObserver.observe(el);
+    if (typeof ResizeObserver !== "undefined") {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.updateFade(el.scrollTop, el.scrollHeight, el.clientHeight);
+      });
+      this.resizeObserver.observe(el);
+    }
   }
 
   ngOnDestroy(): void {

@@ -1,0 +1,23 @@
+@if (isEllipsed() && tooltip()) {
+  <tedi-tooltip openWith="hover">
+    <tedi-tooltip-trigger class="tedi-ellipsis__trigger">
+      <ng-container [ngTemplateOutlet]="contentTpl" />
+    </tedi-tooltip-trigger>
+    <tedi-tooltip-content>{{ fullText() }}</tedi-tooltip-content>
+  </tedi-tooltip>
+} @else {
+  <ng-container [ngTemplateOutlet]="contentTpl" />
+}
+
+<ng-template #contentTpl>
+  <span class="tedi-ellipsis__wrapper">
+    <span
+      #content
+      [class]="contentClasses()"
+      [style.-webkit-line-clamp]="clampStyle()"
+      [style.line-clamp]="clampStyle()"
+    >
+      <span class="tedi-ellipsis__inner"><ng-content /></span>
+    </span>
+  </span>
+</ng-template>
