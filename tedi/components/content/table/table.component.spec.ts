@@ -172,7 +172,9 @@ class HostComponent {
   readonly onRowClick = jest.fn();
 }
 
-function setupHost(): ComponentFixture<HostComponent> {
+function setupHost(
+  beforeFirstRender?: (host: HostComponent) => void,
+): ComponentFixture<HostComponent> {
   TestBed.configureTestingModule({
     imports: [HostComponent],
     providers: [
@@ -182,6 +184,7 @@ function setupHost(): ComponentFixture<HostComponent> {
     ],
   });
   const fixture = TestBed.createComponent(HostComponent);
+  beforeFirstRender?.(fixture.componentInstance);
   fixture.detectChanges();
   return fixture;
 }
@@ -822,6 +825,27 @@ describe("TediTableComponent", () => {
   });
 
   describe("state / persistence", () => {
+    it("seeds the initial render from defaultState (expanded rows open)", () => {
+      const nested: Person[] = [
+        {
+          id: "p",
+          name: "Parent",
+          role: "Role",
+          subRows: [{ id: "c", name: "Child", role: "Role" }],
+        },
+      ];
+      const fixture = setupHost((host) => {
+        host.data.set(nested);
+        host.getSubRows.set((row) => row.subRows);
+        host.defaultState.set({ expanded: true });
+      });
+      const subRow = fixture.nativeElement.querySelector(
+        ".tedi-table__body .tedi-table__row--sub-row",
+      );
+      expect(subRow).not.toBeNull();
+      expect(fixture.nativeElement.textContent).toContain("Child");
+    });
+
     it("emits stateChange when state slice updates", () => {
       const fixture = setupHost();
       fixture.componentInstance.enableRowSelection.set(true);

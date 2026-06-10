@@ -1000,13 +1000,18 @@ const meta: Meta<TediTableStoryArgs> = {
     },
     state: {
       description:
-        "Controlled state — render the given slices and emit every change via `(stateChange)`.",
+        "Controlled state — render the given slices verbatim and emit every " +
+        "change via `(stateChange)`. Per-slice: unlisted slices stay " +
+        "internal. See the **State Management** docs page.",
       control: false,
       table: { category: "state", type: { summary: "Partial<TableState>" } },
     },
     defaultState: {
       description:
-        "Initial state for uncontrolled mode (seeds sorting / filters / pagination / selection).",
+        "Initial state for uncontrolled slices — seeds any `TableState` " +
+        "slice (sorting / filters / pagination / selection / expansion, " +
+        "e.g. `{ expanded: true }`). Read once; the table owns the state " +
+        "afterwards. See the **State Management** docs page.",
       control: false,
       table: { category: "state", type: { summary: "Partial<TableState>" } },
     },
@@ -2480,6 +2485,81 @@ export const CollapsibleRowsLabeledToggle: Story = {
   [columns]="columns"
   [getSubRows]="getSubRows"
   [expandButtonLabel]="{ open: 'Näita', close: 'Peida' }"
+/>`,
+      },
+    },
+  },
+};
+
+// ---------- CollapsibleRowsExpandedByDefault ----------
+@Component({
+  standalone: true,
+  selector: "tedi-collapsible-rows-expanded-story",
+  imports: [TediTableComponent, StatusBadgeComponent],
+  template: `
+    <tedi-table
+      id="tedi-table-collapse-expanded"
+      [data]="data"
+      [columns]="columns()"
+      [getSubRows]="getSubRows"
+      [defaultState]="{ expanded: true }"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+    <ng-template #statusCell let-ctx>
+      <tedi-status-badge
+        [color]="statusColor[ctx.row.original.status]"
+        [text]="ctx.row.original.status"
+      />
+    </ng-template>
+  `,
+})
+class CollapsibleRowsExpandedStoryHostComponent extends TableStoryHostBase {
+  data = collapsiblePeople;
+  pagination = DEFAULT_PAGINATION;
+  statusColor = certStatusColor;
+  getSubRows = (row: CollapsibleRecord) => row.subRows;
+  statusCellTpl =
+    viewChild<TemplateRef<CellContext<CollapsibleRecord, unknown>>>(
+      "statusCell",
+    );
+
+  columns = computed<TediColumnDef<CollapsibleRecord>[]>(() => [
+    { id: "name", header: "Isik", accessorKey: "name" },
+    { id: "age", header: "Vanus", accessorKey: "age" },
+    { id: "visits", header: "Külastuste arv", accessorKey: "visits" },
+    {
+      id: "status",
+      header: "Tõendi staatus",
+      accessorKey: "status",
+      cell: this.statusCellTpl() ?? "",
+    } as TediColumnDef<CollapsibleRecord>,
+  ]);
+}
+
+export const CollapsibleRowsExpandedByDefault: Story = {
+  render: (args) => ({
+    moduleMetadata: { imports: [CollapsibleRowsExpandedStoryHostComponent] },
+    props: args,
+    template: `<tedi-collapsible-rows-expanded-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- defaultState seeds the initial (uncontrolled) table state. Pass
+  { expanded: true } to render every expandable row open on first
+  render — users can still collapse rows afterwards. To open only
+  specific rows, pass a map of row IDs instead (IDs default to the
+  row's index as a string; nested sub-rows use dotted paths):
+  [defaultState]="{ expanded: { '0': true, '2': true } }"
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [defaultState]="{ expanded: true }"
+  [pagination]="pagination"
 />`,
       },
     },

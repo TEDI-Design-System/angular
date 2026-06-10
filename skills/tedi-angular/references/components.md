@@ -273,18 +273,32 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `manualFiltering: boolean = false`
 - `pageCount: number` — total pages in manual mode
 - `rowCount: number` — total rows in manual mode
-- `state: Partial<TableState>` — controlled state
-- `defaultState: Partial<TableState>` — initial uncontrolled state
-- `persist: TablePersistOptions` — `{ key, storage?, include? }` to persist state to `localStorage` (defaults persist user-preference slices: `columnVisibility`, `columnOrder`, `rowOrder`, `columnSizing`)
+- `state: Partial<TableState>` — controlled state. Per-slice: only the slices you pass are controlled (the table renders them verbatim and never changes them itself); write changes back from `(stateChange)` or the UI appears frozen. Other slices stay internal.
+- `defaultState: Partial<TableState>` — initial state for uncontrolled slices. Read once; the table owns the state afterwards (later changes to the input are ignored once the user interacts).
+- `persist: TablePersistOptions` — `{ key, storage?, include? }` to persist state to `localStorage` (defaults persist user-preference slices: `columnVisibility`, `columnOrder`, `rowOrder`, `columnSizing`; add task-scoped slices like `sorting`/`columnFilters` via `include`)
 - `placeholder: TemplateRef | string` — empty-state content (defaults to translated `table.no-data`)
 - `placeholderRole: "alert" | "status"`
 - `reorderableRows: boolean = false` — reorder rows by **mouse drag and keyboard** (one input). Mouse: drag a row by its handle. Keyboard: Tab to the handle, Space/Enter to pick up, ↑/↓ to move within the current page, Space/Enter to drop, Escape to cancel. Emits `(rowDrop)` with indices normalised to the source `data` array.
 - `reorderableColumns: boolean = false` — reorder columns by **mouse drag and keyboard** (one input). Mouse: drag a header cell by its handle. Keyboard: Tab to a header, Space/Enter to pick up, ←/→ to move live, Space/Enter to drop, Escape to cancel. Updates internal `columnOrder` state.
 
 **Outputs:**
-- `stateChange: TableState`
+- `stateChange: TableState` — emits the full merged `TableState` after every change, regardless of which slice changed
 - `rowClick: Row<TData>` — only fires when `interactive` is true
 - `rowDrop: CdkDragDrop<TData[]>` — `previousIndex`/`currentIndex` are source-array positions; pass through `moveItemInArray(data, prev, curr)` and rebind `[data]`
+
+**State management (`TableState`):** one object holds every interactive slice — `columnVisibility`, `columnOrder`, `rowOrder`, `columnSizing`, `rowSelection`, `expanded`, `columnFilters`, `sorting`, `pagination` (slice types are TanStack's). Modes mix per slice: uncontrolled (default), seeded via `defaultState`, controlled via `state` + `(stateChange)`, persisted via `persist`. Precedence per slice: `state` (controlled) > persisted storage value > `defaultState` > built-in default. Row-keyed slices (`rowSelection`, `expanded`) use TanStack's default row IDs — the row index as a string, nested sub-rows as dotted paths (`"0.1"`) — so index-keyed state shifts if `data` order changes. `expanded` also accepts `true` for "all rows".
+
+Render expandable rows open on first load (still user-collapsible):
+
+```html
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [defaultState]="{ expanded: true }"
+/>
+<!-- or only specific rows: [defaultState]="{ expanded: { '0': true, '2': true } }" -->
+```
 
 **Column definition (`TediColumnDef<TData>`):** extends TanStack's `ColumnDef` with Angular-specific fields:
 - `sortable: boolean` — opt the column into the built-in sort affordance (string `header` only). Pair with `sortingFn` to override the comparator. For custom UIs, pass a `TemplateRef` for `header` and call `column.toggleSorting()` yourself.
@@ -955,6 +969,20 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 **Row inputs:** `cols`, `minColWidth`, `justifyItems`, `alignItems`, `gap`, `gapX`, `gapY` + responsive breakpoints
 **Col inputs:** `width` (1-12), `justifySelf`, `alignSelf` + responsive breakpoints
 
+### Ellipsis
+**Selector:** `tedi-ellipsis`
+**Inputs:**
+- `lineClamp: number = 2` — maximum lines before truncating (end position only)
+- `tooltip: boolean = true` — show hover/focus tooltip with full text when truncated
+- `position: 'start' | 'end' = 'end'` — `'end'` = trailing multi-line clamp; `'start'` = leading single-line
+
+```html
+<tedi-ellipsis style="max-width:200px">Long content that overflows...</tedi-ellipsis>
+
+<!-- Leading ellipsis (single-line) -->
+<tedi-ellipsis [position]="'start'" style="max-width:200px">/users/tehiK/tedi/angular/src/lib/components/helpers/ellipsis/ellipsis.component.ts</tedi-ellipsis>
+```
+
 ### Separator
 **Selector:** `tedi-separator`
 **Inputs:**
@@ -1413,12 +1441,16 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `loading: boolean = false`
 - `closable: boolean = false`
 - `type: TagType = "primary"`
+- `ellipsis: TagEllipsis = false` — `false | "start" | "end"`. When set (and the tag is width-constrained), truncates the label to a single line with an ellipsis at that end and reveals the full label in a tooltip on hover/focus. `false` lets the label wrap.
 **Outputs:**
 - `closed: Event`
 **Slots:** default
 
 ```html
 <tedi-tag type="primary" [closable]="true" (closed)="onRemove()">Label</tedi-tag>
+
+<!-- Truncate a long label (needs a width constraint, e.g. a max-width parent) -->
+<tedi-tag ellipsis="end" [closable]="true">A fairly long tag label</tedi-tag>
 ```
 
 ### StatusBadge

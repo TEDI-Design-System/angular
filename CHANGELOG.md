@@ -1,3 +1,17 @@
+# [6.5.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.7...angular-6.5.0-rc.8) (2026-06-10)
+
+
+### Bug Fixes
+
+* **table:** state is correctly forwarded + added state docs [#477](https://github.com/TEDI-Design-System/angular/issues/477) ([#478](https://github.com/TEDI-Design-System/angular/issues/478)) ([9282b60](https://github.com/TEDI-Design-System/angular/commit/9282b60e2c984a619d50594b3b02285b196001eb))
+
+# [6.5.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.6...angular-6.5.0-rc.7) (2026-06-10)
+
+
+### Features
+
+* **ellipsis:** new tedi-ready component [#472](https://github.com/TEDI-Design-System/angular/issues/472) ([#475](https://github.com/TEDI-Design-System/angular/issues/475)) ([a38d594](https://github.com/TEDI-Design-System/angular/commit/a38d5945f3a598cbbe669693fc7fc52702279fa3))
+
 # [6.5.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.5...angular-6.5.0-rc.6) (2026-06-09)
 
 
