@@ -763,15 +763,15 @@ export class TediTableComponent<TData> {
         ),
       onPaginationChange: paginationEnabled
         ? (updater: Updater<PaginationState>) =>
-            this.applyPatch<PaginationState>(
-              updater,
-              (prev) =>
-                prev.pagination ?? {
-                  pageIndex: 0,
-                  pageSize: paginationOpts?.pageSize ?? 10,
-                },
-              (next) => ({ pagination: next }),
-            )
+          this.applyPatch<PaginationState>(
+            updater,
+            (prev) =>
+              prev.pagination ?? {
+                pageIndex: 0,
+                pageSize: paginationOpts?.pageSize ?? 10,
+              },
+            (next) => ({ pagination: next }),
+          )
         : undefined,
     };
   }
@@ -851,7 +851,10 @@ export class TediTableComponent<TData> {
         // Keep expanded sub-rows on their parent's page instead of counting
         // them against pageSize — otherwise expanding a row pushes root rows
         // off the page (they appear hidden). TanStack defaults this to true.
-        paginateExpandedRows: false,
+        // Only set false when the client-side pagination row model runs:
+        // with `false`, sub-row flattening happens exclusively inside
+        // getPaginationRowModel, so without it expansion would never render.
+        paginateExpandedRows: !(paginationEnabled && !manualPagination),
       };
     },
   ) as unknown as TanstackTable<TData>;
@@ -1027,7 +1030,7 @@ export class TediTableComponent<TData> {
     this.persistence = createTablePersistence({
       persist: this.persist(),
       controlled: this.state(),
-      defaultState: this.defaultState(),
+      defaultState: () => this.defaultState(),
       onStateChange: (next) => this.stateChange.emit(next),
     });
     this.tableState = this.persistence.state;
@@ -1079,8 +1082,8 @@ export class TediTableComponent<TData> {
     const selection = window.getSelection();
     return Boolean(
       selection &&
-        !selection.isCollapsed &&
-        selection.toString().trim().length > 0,
+      !selection.isCollapsed &&
+      selection.toString().trim().length > 0,
     );
   }
 
@@ -1351,8 +1354,8 @@ export class TediTableComponent<TData> {
           prev.length > 0
             ? [...prev]
             : untracked(() =>
-                this.table.getAllLeafColumns().map((c) => c.id),
-              );
+              this.table.getAllLeafColumns().map((c) => c.id),
+            );
         const visibleSet = new Set(visibleLeafIds);
         let visibleCursor = 0;
         for (let i = 0; i < fullOrder.length; i++) {
@@ -1415,8 +1418,8 @@ export class TediTableComponent<TData> {
           prev.length > 0
             ? [...prev]
             : untracked(() =>
-                this.table.getAllLeafColumns().map((c) => c.id),
-              );
+              this.table.getAllLeafColumns().map((c) => c.id),
+            );
         const visibleSet = new Set(visibleLeafIds);
         let visibleCursor = 0;
         for (let i = 0; i < fullOrder.length; i++) {

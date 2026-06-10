@@ -68,28 +68,37 @@ export interface TablePersistenceController {
 export function createTablePersistence(options: {
   persist?: TablePersistOptions;
   controlled?: Partial<TableState>;
-  defaultState?: Partial<TableState>;
+  /**
+   * Accessor, not a value — the component creates this controller in its
+   * constructor, before signal inputs receive their bound values, so the
+   * default state must be resolved lazily on first read.
+   */
+  defaultState?: () => Partial<TableState> | undefined;
   onStateChange?: (state: TableState) => void;
 }): TablePersistenceController {
   let persist = options.persist;
   let onStateChange = options.onStateChange;
 
-  const internal = signal<TableState>(
-    readInitialState(persist, options.defaultState ?? {}),
-  );
+  // `undefined` until the first patch; until then the resolved state falls
+  // back to storage / defaultState, re-resolved lazily so late-arriving
+  // input values are picked up.
+  const internal = signal<TableState | undefined>(undefined);
   const controlledSignal = signal<Partial<TableState> | undefined>(
     options.controlled,
   );
 
+  const initialInternal = () =>
+    readInitialState(persist, options.defaultState?.() ?? {});
+
   const state = computed<TableState>(() => ({
-    ...internal(),
+    ...(internal() ?? initialInternal()),
     ...(controlledSignal() ?? {}),
   }));
 
   return {
     state,
     patch(patchOrFn: TableStatePatch) {
-      const previousInternal = internal();
+      const previousInternal = internal() ?? initialInternal();
       const currentControlled = controlledSignal() ?? {};
       const mergedPrev: TableState = {
         ...previousInternal,
@@ -137,7 +146,7 @@ export function createTablePersistence(options: {
       const sourceChanged =
         previous?.key !== next?.key || previous?.storage !== next?.storage;
       if (sourceChanged) {
-        internal.set(readInitialState(next, options.defaultState ?? {}));
+        internal.set(readInitialState(next, options.defaultState?.() ?? {}));
       }
     },
     setOnStateChange(cb) {
