@@ -705,7 +705,9 @@ describe("DateFieldComponent", () => {
       fixture.detectChanges();
       const tag = el.querySelector("tedi-tag");
       expect(tag?.classList.contains("tedi-tag--ellipsis")).toBe(true);
-      expect(tag?.classList.contains("tedi-tag--ellipsis-start")).toBe(true);
+      expect(
+        tag?.querySelector(".tedi-ellipsis__content--start"),
+      ).not.toBeNull();
     });
   });
 

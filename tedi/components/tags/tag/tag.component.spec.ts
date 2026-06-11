@@ -28,29 +28,28 @@ describe("TagComponent", () => {
     expect(component.ellipsis()).toBe(false);
   });
 
-  it("does not apply ellipsis classes by default", () => {
+  it("does not render an ellipsis by default", () => {
     expect(fixture.nativeElement.classList).not.toContain("tedi-tag--ellipsis");
-    expect(fixture.nativeElement.classList).not.toContain(
-      "tedi-tag--ellipsis-start",
-    );
+    expect(fixture.nativeElement.querySelector("tedi-ellipsis")).toBeNull();
   });
 
-  it("applies the ellipsis class for ellipsis='end' (without the start modifier)", () => {
+  it("renders a trailing ellipsis for ellipsis='end'", () => {
     fixture.componentRef.setInput("ellipsis", "end");
     fixture.detectChanges();
     expect(fixture.nativeElement.classList).toContain("tedi-tag--ellipsis");
-    expect(fixture.nativeElement.classList).not.toContain(
-      "tedi-tag--ellipsis-start",
-    );
+    expect(fixture.nativeElement.querySelector("tedi-ellipsis")).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector(".tedi-ellipsis__content--start"),
+    ).toBeNull();
   });
 
-  it("applies both ellipsis classes for ellipsis='start'", () => {
+  it("renders a leading ellipsis for ellipsis='start'", () => {
     fixture.componentRef.setInput("ellipsis", "start");
     fixture.detectChanges();
     expect(fixture.nativeElement.classList).toContain("tedi-tag--ellipsis");
-    expect(fixture.nativeElement.classList).toContain(
-      "tedi-tag--ellipsis-start",
-    );
+    expect(
+      fixture.nativeElement.querySelector(".tedi-ellipsis__content--start"),
+    ).not.toBeNull();
   });
 
   it("should have tedi-tag class", () => {
