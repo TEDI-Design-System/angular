@@ -78,7 +78,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        angular-version: [19, 20, 21]
+        angular-version: [20, 21, 22]
     name: compatibility (Angular ${{ matrix.angular-version }})
     steps:
       - name: Setup Node.js
@@ -133,10 +133,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
-
-      - name: Fetch baseline branch (rc)
-        run: git fetch origin rc
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -147,11 +144,6 @@ jobs:
         run: |
           npm ci --cache .npm --prefer-offline
 
-      - name: Build Storybook
-        run: |
-          npm run build:sb
-
       - name: Publish to Chromatic
         run: |
-          echo "CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_TOKEN }}"
           CHROMATIC_PROJECT_TOKEN=${{ secrets.CHROMATIC_TOKEN }} npm run chromatic

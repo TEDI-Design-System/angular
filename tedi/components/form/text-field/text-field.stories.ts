@@ -10,15 +10,13 @@ import {
   moduleMetadata,
   StoryObj,
 } from "@storybook/angular";
-import {
-  TextFieldComponent,
-  FormFieldComponent,
-  ColComponent,
-  RowComponent,
-  FeedbackTextComponent,
-  TextComponent,
-  LabelComponent,
-} from "@tedi-design-system/angular/tedi";
+import { TextFieldComponent } from "./text-field.component";
+import { FormFieldComponent } from "../form-field/form-field.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
+import { TextComponent } from "../../base/text/text.component";
+import { LabelComponent } from "../label/label.component";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];
 

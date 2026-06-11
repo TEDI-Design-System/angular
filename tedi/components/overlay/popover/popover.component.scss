@@ -1,5 +1,4 @@
 $popover-max-width: (
-  "none": none,
   "small": 240px,
   "medium": 480px,
   "large": 840px,
@@ -13,15 +12,15 @@ tedi-popover {
   cursor: pointer;
 
   &:focus-visible {
-    outline: var(--borders-02) solid var(--primary-500);
-    outline-offset: var(--borders-01);
+    outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+    outline-offset: var(--tedi-borders-01);
   }
 }
 
 .tedi-popover__container {
   position: relative;
   z-index: var(--z-index-dropdown);
-  border: var(--borders-01) solid var(--popover-border);
+  border: var(--tedi-borders-01) solid var(--popover-border);
   border-radius: var(--popover-radius-rounded);
   box-shadow: 0 1px 5px 0 var(--tedi-alpha-20);
 

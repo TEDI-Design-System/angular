@@ -138,7 +138,7 @@ export class FormFieldComponent implements AfterContentInit {
       "tedi-form-field--disabled": this.control?.disabled(),
       "tedi-form-field--small": this.size() === "small",
       "tedi-form-field--large": this.size() === "large",
-      "tedi-form-field--with-icon": this.showClearButton() || !!this.icon(),
+      "tedi-form-field--with-icon": this.clearable() || !!this.icon(),
     };
   });
 

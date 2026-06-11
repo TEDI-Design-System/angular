@@ -10,8 +10,8 @@ import { FooterBodyComponent } from "./footer-body/footer-body.component";
 import { FooterSectionComponent } from "./footer-section/footer-section.component";
 import { FooterSideComponent } from "./footer-side/footer-side.component";
 import { FooterBottomComponent } from "./footer-bottom/footer-bottom.component";
-import { TextComponent } from "@tedi-design-system/angular/tedi";
-import { LinkComponent } from "@tedi-design-system/angular/tedi";
+import { TextComponent } from "../../base/text/text.component";
+import { LinkComponent } from "../../navigation/link/link.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.12.16--work-in-progress-?node-id=6459-181755&m=dev" target="_BLANK">Figma ↗</a><br/>

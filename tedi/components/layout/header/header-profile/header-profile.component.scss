@@ -15,8 +15,8 @@ tedi-header-profile {
     border-radius: 0;
 
     &:focus-visible {
-      outline: var(--borders-02) solid var(--tedi-primary-500);
-      outline-offset: calc(-1 * var(--borders-02));
+      outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+      outline-offset: calc(-1 * var(--tedi-borders-02));
     }
 
     tedi-icon {
@@ -52,15 +52,16 @@ tedi-header-profile {
     overflow-y: auto;
     background: var(--general-surface-primary);
 
-    >* {
+    > * {
       padding: var(--layout-header-modal-item-padding);
 
       &:not(:last-child) {
-        border-bottom: var(--borders-01) solid var(--general-border-primary);
+        border-bottom: var(--tedi-borders-01) solid
+          var(--general-border-primary);
       }
 
       &:has(.tedi-header-role__head) {
-        border-bottom: var(--borders-04) solid var(--general-border-brand);
+        border-bottom: var(--tedi-borders-04) solid var(--general-border-brand);
       }
     }
 

@@ -38,7 +38,7 @@ export default {
     },
     type: {
       control: "radio",
-      options: ["info", "success", "warning", "error"],
+      options: ["info", "success", "warning", "danger"],
       description:
         "Defines the visual and contextual type of the alert. This determines the icon, color, and overall style, making it clear whether the alert is informational, a success message, a warning, or an error.",
       defaultValue: {

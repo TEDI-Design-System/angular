@@ -1,5 +1,3 @@
-@use "@tedi-design-system/core/mixins";
-
 $transition-duration: 300ms;
 
 :host {
@@ -7,48 +5,14 @@ $transition-duration: 300ms;
 }
 
 .tedi-collapse {
-  &__button {
-    display: flex;
-    gap: var(--link-inner-spacing-x);
-    align-items: center;
-    cursor: pointer;
-
-    @include mixins.button-reset;
-
-    &--text {
-      text-decoration: underline;
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--button-main-neutral-text-default);
-      outline-offset: var(--global-outline-offset);
-    }
-  }
-
-  &__icon {
-    color: var(--button-main-neutral-text-default);
-    transition: transform $transition-duration ease;
-
-    &--wrapper {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: var(--button-sm-icon-size);
-      height: var(--button-sm-icon-size);
-      border: var(--borders-01) solid
-        var(--button-main-secondary-border-default);
-      border-radius: 100%;
-    }
-
-    .tedi-collapse--open > .tedi-collapse__button & {
-      transform: rotate(180deg);
-    }
+  &--inverted {
+    color: var(--general-text-white);
   }
 
   &__extender {
     visibility: hidden;
     min-height: 0;
-    padding-top: var(--dimensions-05);
+    padding-top: var(--tedi-dimensions-05);
     transition: visibility $transition-duration;
   }
 

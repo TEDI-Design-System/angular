@@ -1,0 +1,176 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Documentation/Custom theming" />
+
+The **ThemeService** provides global theme management for Angular applications by applying
+a corresponding theme class (`.tedi-theme--*`) to the document root.
+
+It supports built-in themes like **Default** and **Dark**, as well as **fully custom themes generated from design tokens** via Figma. That assumes project designer has created overrides for TEDI variables in your project.
+
+---
+
+## Usage
+
+### Setup (ApplicationConfig)
+
+Configure the theme using `provideTedi` in your application config:
+
+```ts
+import { ApplicationConfig, provideZoneChangeDetection } from "@angular/core";
+import { provideRouter } from "@angular/router";
+
+import { routes } from "./app.routes";
+import { provideTedi } from "@tedi-design-system/angular/tedi";
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideTedi({
+      theme: "default",
+      language: "et",
+    }),
+  ],
+};
+```
+
+The **theme** option accepts:
+
+- Built-in themes:
+  - `default`
+  - `dark`
+- Custom themes:
+  - Any string (e.g. `"custom-theme"`)
+
+---
+
+### Custom Themes (Figma Integration)
+
+You can create and use custom themes by exporting variables from Figma using the <a href="https://www.figma.com/community/plugin/1612732083806730958">TEDI Figma Variable Exporter plugin ↗</a>.
+
+#### Steps:
+
+1. Define your theme in Figma (e.g. `custom-theme`)
+2. Export variables using the plugin
+3. Add the generated CSS files to your Angular project
+4. Apply the theme via `provideTedi`
+
+```ts
+provideTedi({
+  theme: "custom-theme",
+});
+```
+
+Ensure your theme styles are included in **angular.json** e.g:
+
+```tsx
+"styles": [
+  "node_modules/@tedi-design-system/angular/index.css",
+  "src/variables/themes/custom-theme/index.css"
+]
+```
+
+This will apply the class:
+
+```html
+<html class="tedi-theme--custom-theme"></html>
+```
+
+Your exported CSS variables should be scoped to this class.
+
+---
+
+### Using ThemeService
+
+You can access and update the current theme via the `ThemeService`.
+
+```ts
+import { Component, inject } from "@angular/core";
+import { ThemeService } from "@tedi-design-system/angular/tedi";
+
+@Component({
+  selector: "app-example",
+  standalone: true,
+  template: ` <button (click)="setCustomTheme()">Custom theme</button> `,
+})
+export class ExampleComponent {
+  private readonly themeService = inject(ThemeService);
+
+  setCustomTheme() {
+    this.themeService.theme.set("custom-theme");
+  }
+}
+```
+
+---
+
+### Theme Switcher Example
+
+A simple theme switcher component:
+
+```ts
+import { Component, inject } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import {
+  ThemeService,
+  Theme,
+  ButtonComponent,
+} from "@tedi-design-system/angular/tedi";
+
+@Component({
+  selector: "app-theme-switcher",
+  standalone: true,
+  imports: [CommonModule, ButtonComponent],
+  template: `
+    <button *ngFor="let t of themes" (click)="setTheme(t)">
+      {{ t }}
+    </button>
+  `,
+})
+export class ThemeSwitcherComponent {
+  private readonly themeService = inject(ThemeService);
+
+  readonly theme = this.themeService.theme;
+  readonly themes: Theme[] = ["custom-theme", "custom-theme-dark"];
+
+  setTheme(theme: Theme) {
+    this.themeService.theme.set(theme);
+  }
+}
+```
+
+> You only need a switcher if your app allows users to change themes dynamically.
+
+---
+
+### Behavior
+
+- The service:
+  - Removes any existing `.tedi-theme--*` classes from `<html>`
+  - Applies the active theme class: `.tedi-theme--{theme}`
+- Theme is persisted via cookies (`tedi-theme`)
+- Uses Angular **signals** for reactive updates
+- Theme updates apply instantly without page reload
+
+---
+
+## Server-Side Rendering (Angular SSR)
+
+When using Angular SSR, the theme should be initialized consistently to avoid flickering.
+
+### Why this matters
+
+- Prevents mismatch between server and client render
+- Avoids flashing incorrect theme on load
+- Ensures consistent UI on first paint
+
+Since the theme is stored in cookies (`tedi-theme`), SSR setups should read the cookie and provide the same initial value.
+
+---
+
+## Notes
+
+- Custom themes must define CSS variables under `.tedi-theme--{theme-name}`
+- Theme names are flexible but should align with your design system
+- Ensure theme CSS is loaded globally (via `angular.json`)
+- Multiple themes can coexist as long as variables are scoped correctly

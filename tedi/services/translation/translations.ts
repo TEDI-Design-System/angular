@@ -289,6 +289,14 @@ export const translationsMap = {
     en: "Not completed",
     ru: "Не завершено",
   },
+  "stepper.error": {
+    description:
+      "Label for screen-reader that this step has errors (visually hidden)",
+    components: ["HorizontalStepper"],
+    et: "Viga",
+    en: "Error",
+    ru: "Ошибка",
+  },
   "skeleton.loading": {
     description: "Announced by screen-readers when skeleton is loading",
     components: ["Skeleton"],
@@ -352,6 +360,13 @@ export const translationsMap = {
     et: "Eemalda kõik",
     en: "Remove all",
     ru: "Удалить все",
+  },
+  "filter.clear-selection": {
+    description: "Label for the clear-selection action in the Filter dropdown",
+    components: ["Filter"],
+    et: "Tühjenda valik",
+    en: "Clear selection",
+    ru: "Очистить выбор",
   },
   "table.filter.no-options": {
     description: "When select filter has no options",
@@ -450,6 +465,161 @@ export const translationsMap = {
           ? "Отменить сортировку"
           : "Сортировать по возрастанию",
   },
+  "table.no-data": {
+    description: "Default placeholder when table data is empty",
+    components: ["Table"],
+    et: "Andmed puuduvad",
+    en: "No data",
+    ru: "Нет данных",
+  },
+  "table.row-details": {
+    description: "Accessible label for the expanded row details region",
+    components: ["Table"],
+    et: "Rea üksikasjad",
+    en: "Row details",
+    ru: "Подробности строки",
+  },
+  "table.filter-input": {
+    description: "Accessible label for a column filter input",
+    components: ["Table"],
+    et: (column: string) => `Filtreeri ${column}`,
+    en: (column: string) => `Filter ${column}`,
+    ru: (column: string) => `Фильтр ${column}`,
+  },
+  "table.filter-placeholder": {
+    description: "Placeholder shown in a column filter input",
+    components: ["Table"],
+    et: "Filtreeri…",
+    en: "Filter…",
+    ru: "Фильтр…",
+  },
+  "table.filter-apply": {
+    description:
+      "Apply action in the built-in column filter popover footer",
+    components: ["Table"],
+    et: "Filtreeri",
+    en: "Apply",
+    ru: "Применить",
+  },
+  "table.filter-clear": {
+    description:
+      "Clear action in the built-in column filter popover footer",
+    components: ["Table"],
+    et: "Tühista",
+    en: "Clear",
+    ru: "Сбросить",
+  },
+  "table.filter-button-aria": {
+    description:
+      "Accessible label of the built-in column filter trigger button",
+    components: ["Table"],
+    et: (column: string) => `Filtreeri ${column}`,
+    en: (column: string) => `Filter ${column}`,
+    ru: (column: string) => `Фильтр по ${column}`,
+  },
+  "table.columns": {
+    description: "Default label of the columns visibility trigger",
+    components: ["Table"],
+    et: "Veerud",
+    en: "Columns",
+    ru: "Колонки",
+  },
+  "table.expand-row": {
+    description: "Label for the expand row toggle (collapsed state)",
+    components: ["Table"],
+    et: "Laienda rida",
+    en: "Expand row",
+    ru: "Развернуть строку",
+  },
+  "table.collapse-row": {
+    description: "Label for the expand row toggle (expanded state)",
+    components: ["Table"],
+    et: "Ahenda rida",
+    en: "Collapse row",
+    ru: "Свернуть строку",
+  },
+  "table.drag-column": {
+    description: "Accessible label of the column reorder drag handle",
+    components: ["Table"],
+    et: "Lohista veergu",
+    en: "Drag column",
+    ru: "Перетащить колонку",
+  },
+  "table.drag-row": {
+    description: "Accessible label of the row reorder drag handle",
+    components: ["Table"],
+    et: "Lohista rida",
+    en: "Drag row",
+    ru: "Перетащить строку",
+  },
+  "table.reorder.pickup": {
+    description: "Live region message when a column is picked up for keyboard reordering",
+    components: ["Table"],
+    et: (column: string) =>
+      `Veerg ${column} on valitud. Kasuta vasakut/paremat noolt liigutamiseks ja Tühikut või Sisestust kinnitamiseks. Vajuta Escape tühistamiseks.`,
+    en: (column: string) =>
+      `Column ${column} picked up. Use Left/Right arrow to move, Space or Enter to drop. Press Escape to cancel.`,
+    ru: (column: string) =>
+      `Столбец ${column} взят. Используйте стрелки влево/вправо для перемещения, Пробел или Enter для подтверждения. Нажмите Escape для отмены.`,
+  },
+  "table.reorder.move": {
+    description: "Live region message while a picked-up column is moved between positions",
+    components: ["Table"],
+    et: (column: string, position: number) =>
+      `Veerg ${column} positsioonil ${position}.`,
+    en: (column: string, position: number) =>
+      `Column ${column} at position ${position}.`,
+    ru: (column: string, position: number) =>
+      `Столбец ${column} на позиции ${position}.`,
+  },
+  "table.reorder.drop": {
+    description: "Live region message when a column is dropped",
+    components: ["Table"],
+    et: (column: string, position: number) =>
+      `Veerg ${column} paigutatud positsioonile ${position}.`,
+    en: (column: string, position: number) =>
+      `Column ${column} moved to position ${position}.`,
+    ru: (column: string, position: number) =>
+      `Столбец ${column} перемещен на позицию ${position}.`,
+  },
+  "table.reorder.cancel": {
+    description: "Live region message when column reorder is cancelled",
+    components: ["Table"],
+    et: "Veeru ümberjärjestamine tühistatud.",
+    en: "Column reordering cancelled.",
+    ru: "Перестановка столбцов отменена.",
+  },
+  "table.row-reorder.pickup": {
+    description: "Live region message when a row is picked up for keyboard reordering",
+    components: ["Table"],
+    et: (position: number) =>
+      `Rida ${position} on valitud. Kasuta üles-/allanoolt liigutamiseks ja Tühikut või Sisestust kinnitamiseks. Vajuta Escape tühistamiseks.`,
+    en: (position: number) =>
+      `Row ${position} picked up. Use Up/Down arrow to move, Space or Enter to drop. Press Escape to cancel.`,
+    ru: (position: number) =>
+      `Строка ${position} взята. Используйте стрелки вверх/вниз для перемещения, Пробел или Enter для подтверждения. Нажмите Escape для отмены.`,
+  },
+  "table.row-reorder.move": {
+    description: "Live region message while a picked-up row is moved between positions",
+    components: ["Table"],
+    et: (position: number) => `Rida liigutatud positsioonile ${position}.`,
+    en: (position: number) => `Row moved to position ${position}.`,
+    ru: (position: number) => `Строка перемещена на позицию ${position}.`,
+  },
+  "table.row-reorder.drop": {
+    description: "Live region message when a row is dropped",
+    components: ["Table"],
+    et: (position: number) => `Rida paigutatud positsioonile ${position}.`,
+    en: (position: number) => `Row dropped at position ${position}.`,
+    ru: (position: number) => `Строка размещена на позиции ${position}.`,
+  },
+  "table.row-reorder.cancel": {
+    description: "Live region message when row reorder is cancelled",
+    components: ["Table"],
+    et: "Ridade ümberjärjestamine tühistatud.",
+    en: "Row reordering cancelled.",
+    ru: "Перестановка строк отменена.",
+  },
   "tooltip.icon-trigger": {
     description: "Label we use for icons that are tooltip triggers",
     components: ["TooltipTrigger"],
@@ -498,18 +668,43 @@ export const translationsMap = {
     ru: "Следущая страница",
   },
   "pagination.results": {
-    description: "Total results text",
+    description:
+      "Total results text. Returns the full localised string with count embedded — locales decide their own word order.",
     components: ["Table", "Pagination"],
-    et: (count?: number) => (count === 1 ? "tulemus" : "tulemust"),
-    en: (count?: number) => (count === 1 ? "result" : "results"),
-    ru: (count?: number) => (count === 1 ? "результат" : "результа"),
+    et: (count?: number) => `${count ?? 0} ${count === 1 ? "tulemus" : "tulemust"}`,
+    en: (count?: number) => `${count ?? 0} ${count === 1 ? "result" : "results"}`,
+    ru: (count?: number) => `${count ?? 0} ${count === 1 ? "результат" : "результа"}`,
   },
   "pagination.page-size": {
     description: "Label of page size select",
     components: ["Table", "Pagination"],
     et: "Kuva korraga",
-    en: "Page size",
-    ru: "Размер страницы",
+    en: "Show per page",
+    ru: "Показывать по",
+  },
+  "pagination.page-status": {
+    description:
+      "Status message announced to screen readers via an aria-live region when the page changes.",
+    components: ["Pagination"],
+    et: (page?: number, total?: number) => `Lehekülg ${page ?? 0} / ${total ?? 0}`,
+    en: (page?: number, total?: number) => `Page ${page ?? 0} of ${total ?? 0}`,
+    ru: (page?: number, total?: number) => `Страница ${page ?? 0} из ${total ?? 0}`,
+  },
+  "pagination.page-title": {
+    description:
+      "Title of the mobile page-jump picker modal, shown when `showModalTitle` is enabled.",
+    components: ["Pagination"],
+    et: "Vali lehekülg",
+    en: "Select page",
+    ru: "Выбрать страницу",
+  },
+  "pagination.page-size-title": {
+    description:
+      "Title of the mobile page-size picker modal, shown when `showModalTitle` is enabled.",
+    components: ["Pagination"],
+    et: "Tulemusi lehel",
+    en: "Results per page",
+    ru: "Результатов на странице",
   },
   "table-of-contents.title": {
     description: "Title of the table of contents",
@@ -985,6 +1180,37 @@ export const translationsMap = {
     et: "Vali kellaaeg",
     en: "Select time",
     ru: "Выбрать время",
+  },
+  "time-field.modal-title": {
+    description: "Title shown in the mobile time picker modal header.",
+    components: ["TimeField"],
+    et: "Kellaaeg",
+    en: "Time",
+    ru: "Время",
+  },
+  "time-field.confirm": {
+    description:
+      "Label for the confirm button in the mobile time picker modal.",
+    components: ["TimeField"],
+    et: "Kinnita",
+    en: "Confirm",
+    ru: "Подтвердить",
+  },
+  "time-field.cancel": {
+    description:
+      "Label for the cancel button in the mobile time picker modal.",
+    components: ["TimeField"],
+    et: "Tühista",
+    en: "Cancel",
+    ru: "Отмена",
+  },
+  "time-picker.no-slots": {
+    description:
+      "Empty-state message shown in the slots/dropdown time picker when no time slots have been provided.",
+    components: ["TimePicker", "TimeField"],
+    et: "Aegu ei ole määratud",
+    en: "No times available",
+    ru: "Нет доступных вариантов",
   },
   "vertical-stepper.completed": {
     description:

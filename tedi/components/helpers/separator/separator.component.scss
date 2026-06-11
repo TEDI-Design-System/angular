@@ -55,8 +55,8 @@ $sizes: (
   &::before {
     position: absolute;
     top: 1.25rem;
-    width: var(--separator-dotted-dot-lg);
-    height: var(--separator-dotted-dot-lg);
+    width: var(--separator-dot-size-lg);
+    height: var(--separator-dot-size-lg);
     content: "";
     background-color: var(--general-border-primary);
     border-radius: 100%;
@@ -76,8 +76,8 @@ $sizes: (
 
 .tedi-separator--dotted-small::before {
   top: 1.5rem;
-  width: var(--separator-dotted-dot-md);
-  height: var(--separator-dotted-dot-md);
+  width: var(--separator-dot-size-md);
+  height: var(--separator-dot-size-md);
   transform: translateX(-5px);
 }
 
@@ -138,8 +138,8 @@ $thicknesses: (
   &::before {
     position: relative;
     display: block;
-    width: var(--separator-dotted-dot-sm);
-    height: var(--separator-dotted-dot-sm);
+    width: var(--separator-dot-size-sm);
+    height: var(--separator-dot-size-sm);
     content: "";
     border-radius: 100%;
 
@@ -147,23 +147,23 @@ $thicknesses: (
   }
 
   &.tedi-separator--dot-only-extra-small::before {
-    width: var(--separator-dotted-dot-xs);
-    height: var(--separator-dotted-dot-xs);
+    width: var(--separator-dot-size-xs);
+    height: var(--separator-dot-size-xs);
   }
 
   &.tedi-separator--dot-only-small::before {
-    width: var(--separator-dotted-dot-sm);
-    height: var(--separator-dotted-dot-sm);
+    width: var(--separator-dot-size-sm);
+    height: var(--separator-dot-size-sm);
   }
 
   &.tedi-separator--dot-only-medium::before {
-    width: var(--separator-dotted-dot-md);
-    height: var(--separator-dotted-dot-md);
+    width: var(--separator-dot-size-md);
+    height: var(--separator-dot-size-md);
   }
 
   &.tedi-separator--dot-only-large::before {
-    width: var(--separator-dotted-dot-lg);
-    height: var(--separator-dotted-dot-lg);
+    width: var(--separator-dot-size-lg);
+    height: var(--separator-dot-size-lg);
   }
 
   &-filled {
@@ -217,10 +217,10 @@ $thicknesses: (
   }
 
   &.tedi-separator--dotted::before {
-    top: calc(var(--separator-dotted-dot-lg) / 2 * -1);
+    top: calc(var(--separator-dot-size-lg) / 2 * -1);
   }
 
   &.tedi-separator--dotted-small::before {
-    top: calc(var(--separator-dotted-dot-md) / 2 * -1);
+    top: calc(var(--separator-dot-size-md) / 2 * -1);
   }
 }

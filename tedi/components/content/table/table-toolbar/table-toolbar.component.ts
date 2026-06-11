@@ -5,14 +5,15 @@ import {
 } from "@angular/core";
 
 @Component({
-  selector: "tedi-filter-group",
   standalone: true,
-  template: `<ng-content />`,
-  styleUrl: "./filter-group.component.scss",
+  selector: "tedi-table-toolbar",
+  template: "<ng-content />",
+  styleUrl: "./table-toolbar.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: "tedi-filter-group",
+    class: "tedi-table-toolbar",
+    "data-name": "tedi-table-toolbar",
   },
 })
-export class FilterGroupComponent {}
+export class TediTableToolbarComponent {}

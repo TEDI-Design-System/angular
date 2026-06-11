@@ -13,20 +13,24 @@ import {
   signal,
   viewChild,
 } from "@angular/core";
+import { FilterGroupComponent } from "./filter-group.component";
 import { _IdGenerator } from "@angular/cdk/a11y";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { NgTemplateOutlet } from "@angular/common";
-import { IconComponent } from "../../base/icon/icon.component";
-import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
-import { SeparatorComponent } from "../../helpers/separator/separator.component";
-import { DropdownComponent } from "../../overlay/dropdown/dropdown.component";
-import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
-import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-content/dropdown-content.component";
-import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
-import { FormFieldComponent } from "../form-field/form-field.component";
-import { TextFieldComponent } from "../text-field/text-field.component";
+import { ButtonComponent } from "../buttons";
+import { IconComponent } from "../base/icon/icon.component";
+import { StatusBadgeComponent } from "../tags/status-badge/status-badge.component";
+import { SeparatorComponent } from "../helpers/separator/separator.component";
+import { DropdownComponent } from "../overlay/dropdown/dropdown.component";
+import { DropdownTriggerDirective } from "../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
+import { DropdownContentComponent } from "../overlay/dropdown/dropdown-content/dropdown-content.component";
+import { DropdownItemValueComponent } from "../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
+import { DropdownItemValueLabelComponent } from "../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
+import { FormFieldComponent } from "../form/form-field/form-field.component";
+import { TextFieldComponent } from "../form/text-field/text-field.component";
 import { FilterContentDirective } from "./filter-content.directive";
+import { FilterPrependDirective } from "./filter-prepend.directive";
+import { TediTranslationService } from "../../services/translation/translation.service";
 
 export type FilterVariant = "primary" | "secondary";
 export type FilterSize = "default" | "large";
@@ -42,6 +46,7 @@ export interface FilterOption {
   standalone: true,
   imports: [
     NgTemplateOutlet,
+    ButtonComponent,
     IconComponent,
     StatusBadgeComponent,
     SeparatorComponent,
@@ -52,6 +57,7 @@ export interface FilterOption {
     DropdownItemValueLabelComponent,
     FormFieldComponent,
     TextFieldComponent,
+    FilterContentDirective,
   ],
   templateUrl: "./filter.component.html",
   styleUrl: "./filter.component.scss",
@@ -70,7 +76,7 @@ export interface FilterOption {
     "[class.tedi-filter--secondary]": "variant() === 'secondary'",
     "[class.tedi-filter--large]": "size() === 'large'",
     "[class.tedi-filter--selected]": "isSelected()",
-    "[class.tedi-filter--disabled]": "disabled()",
+    "[class.tedi-filter--disabled]": "isDisabled()",
   },
 })
 export class FilterComponent implements ControlValueAccessor {
@@ -89,33 +95,43 @@ export class FilterComponent implements ControlValueAccessor {
    */
   readonly size = input<FilterSize>("default");
   /**
-   * Whether the filter is selected (boolean mode).
+   * Whether the filter is selected (boolean toggle mode, used when no options are provided).
    * @default false
    */
   readonly selected = model<boolean>(false);
   /**
-   * Multi-select mode renders checkboxes and allows multiple selections.
-   * When false and options are provided, single-select mode is used.
+   * Enables multi-select mode. When true, value is treated as `string[]`; when false,
+   * value is treated as `string`. Has no effect when no options are provided.
    * @default false
    */
-  readonly multiselect = input<boolean>(false);
+  readonly allowMultiple = input<boolean>(false);
   /**
-   * Options for the dropdown. Enables single-select mode, or multiselect mode when combined with the multiselect input.
+   * Options for the dropdown. Enables single-select mode, or multi-select mode when
+   * combined with `allowMultiple`.
    */
   readonly options = input<FilterOption[]>([]);
   /**
-   * Selected value in single-select mode. Two-way bound.
+   * Selected value (single-select) or values (multi-select). Two-way bound.
+   * Use `string` when `allowMultiple` is false, `string[]` when true.
    */
-  readonly value = model<string>("");
+  readonly value = model<string | string[]>("");
   /**
-   * Selected values in multiselect mode. Two-way bound.
-   */
-  readonly values = model<string[]>([]);
-  /**
-   * Show search field in the dropdown.
+   * Show the search field in the dropdown.
    * @default false
    */
-  readonly searchable = input<boolean>(false);
+  readonly showSearch = input<boolean>(false);
+  /**
+   * Whether the dropdown search field has a clear (×) button.
+   * Only applies when `showSearch` is true.
+   * @default true
+   */
+  readonly searchClearable = input<boolean>(true);
+  /**
+   * Whether to clear the search field after an option is selected (or toggled in multi-select).
+   * Useful in multi-select flows where the user picks several options consecutively.
+   * @default false
+   */
+  readonly clearSearchOnSelect = input<boolean>(false);
   /**
    * Show "Select all" option in the dropdown.
    * @default false
@@ -127,15 +143,13 @@ export class FilterComponent implements ControlValueAccessor {
    */
   readonly showClear = input<boolean>(false);
   /**
-   * Label for "Select all" option.
-   * @default Vali kõik
+   * Override for the "Select all" option label. Defaults to the translated string.
    */
-  readonly selectAllLabel = input<string>("Vali kõik");
+  readonly selectAllLabel = input<string | undefined>(undefined);
   /**
-   * Label for "Clear selection" action.
-   * @default Tühjenda valik
+   * Override for the "Clear selection" action label. Defaults to the translated string.
    */
-  readonly clearLabel = input<string>("Tühjenda valik");
+  readonly clearLabel = input<string | undefined>(undefined);
   /**
    * Emitted when the clear button is clicked in a custom content dropdown.
    */
@@ -146,6 +160,13 @@ export class FilterComponent implements ControlValueAccessor {
    * @default false
    */
   readonly preserveLabel = input<boolean>(false);
+  /**
+   * Whether the filter is disabled. Also set automatically when used with a disabled FormControl
+   * or when nested in a disabled FilterGroup.
+   * @default false
+   */
+  readonly disabled = input<boolean>(false);
+
   readonly dropdown = viewChild<DropdownComponent>("dropdown");
   private readonly dropdownPanel =
     viewChild<ElementRef<HTMLElement>>("dropdownPanel");
@@ -154,22 +175,59 @@ export class FilterComponent implements ControlValueAccessor {
   private readonly triggerBtn =
     viewChild<ElementRef<HTMLButtonElement>>("triggerBtn");
 
+  private readonly filterGroup = inject(FilterGroupComponent, {
+    optional: true,
+  });
+  private readonly translationService = inject(TediTranslationService);
   private readonly customContent = contentChild(FilterContentDirective);
+  private readonly filterPrepend = contentChild(FilterPrependDirective);
   readonly hasCustomContent = computed(() => !!this.customContent());
   readonly hasOptions = computed(() => this.options().length > 0);
+  readonly isMultiSelect = computed(
+    () => this.hasOptions() && this.allowMultiple(),
+  );
   readonly isSingleSelect = computed(
-    () => this.hasOptions() && !this.multiselect(),
+    () => this.hasOptions() && !this.allowMultiple(),
   );
   readonly hasDropdown = computed(
     () => this.hasOptions() || this.hasCustomContent(),
   );
 
+  readonly singleValue = computed<string>(() => {
+    const v = this.value();
+    return typeof v === "string" ? v : "";
+  });
+  readonly multiValues = computed<string[]>(() => {
+    const v = this.value();
+    return Array.isArray(v) ? v : [];
+  });
+
+  private readonly defaultSelectAllLabel = this.translationService.track(
+    "select.select-all",
+  );
+  private readonly defaultClearLabel = this.translationService.track(
+    "filter.clear-selection",
+  );
+  readonly resolvedSelectAllLabel = computed(
+    () => this.selectAllLabel() ?? this.defaultSelectAllLabel(),
+  );
+  readonly resolvedClearLabel = computed(
+    () => this.clearLabel() ?? this.defaultClearLabel(),
+  );
+
   private readonly idGenerator = inject(_IdGenerator);
   private readonly baseId = this.idGenerator.getId("tedi-filter");
 
-  readonly disabled = signal(false);
+  private readonly formDisabled = signal(false);
+  readonly isDisabled = computed(
+    () =>
+      this.disabled() ||
+      this.formDisabled() ||
+      !!this.filterGroup?.disabled(),
+  );
   readonly searchTerm = signal("");
   readonly activeOptionIndex = signal<number>(-1);
+  private suppressNextOptionsFocusAutoSelect = false;
 
   readonly activeDescendantId = computed(() => {
     const idx = this.activeOptionIndex();
@@ -181,20 +239,37 @@ export class FilterComponent implements ControlValueAccessor {
 
   readonly iconSize = computed(() => (this.size() === "large" ? 24 : 18));
 
+  readonly isGrouped = computed(
+    () => !!this.filterGroup && this.filterGroup.isManaged(),
+  );
+
+  readonly isGroupedRadio = computed(
+    () => this.isGrouped() && !this.filterGroup!.allowMultiple(),
+  );
+
+  readonly hidePrepend = computed(
+    () =>
+      this.isSelected() &&
+      (this.filterPrepend()?.hideWhenSelected() ?? true),
+  );
+
   readonly isSelected = computed(() => {
-    if (this.multiselect()) {
-      return this.values().length > 0;
+    if (this.isGrouped()) {
+      return this.filterGroup!.isSelected(this.singleValue());
+    }
+    if (this.isMultiSelect()) {
+      return this.multiValues().length > 0;
     }
     if (this.isSingleSelect()) {
-      return this.value() !== "";
+      return this.singleValue() !== "";
     }
     return this.selected();
   });
 
-  readonly selectedCount = computed(() => this.values().length);
+  readonly selectedCount = computed(() => this.multiValues().length);
 
   readonly selectedLabel = computed(() => {
-    const val = this.value();
+    const val = this.singleValue();
     if (!val) return null;
     return this.options().find((opt) => opt.value === val)?.label ?? null;
   });
@@ -221,13 +296,13 @@ export class FilterComponent implements ControlValueAccessor {
   readonly allFilteredSelected = computed(() => {
     const filtered = this.filteredOptions().filter((opt) => !opt.disabled);
     if (filtered.length === 0) return false;
-    const vals = this.values();
+    const vals = this.multiValues();
     return filtered.every((opt) => vals.includes(opt.value));
   });
 
   readonly someFilteredSelected = computed(() => {
     const filtered = this.filteredOptions().filter((opt) => !opt.disabled);
-    const vals = this.values();
+    const vals = this.multiValues();
     const selectedCount = filtered.filter((opt) =>
       vals.includes(opt.value),
     ).length;
@@ -238,8 +313,8 @@ export class FilterComponent implements ControlValueAccessor {
   private onTouched: () => void = () => { };
 
   writeValue(value: boolean | string | string[]): void {
-    if (this.multiselect()) {
-      this.values.set(Array.isArray(value) ? value : []);
+    if (this.isMultiSelect()) {
+      this.value.set(Array.isArray(value) ? value : []);
     } else if (this.isSingleSelect()) {
       this.value.set(typeof value === "string" ? value : "");
     } else {
@@ -256,10 +331,14 @@ export class FilterComponent implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.disabled.set(isDisabled);
+    this.formDisabled.set(isDisabled);
   }
 
   toggle(): void {
+    if (this.isGrouped()) {
+      this.filterGroup!.selectFilter(this.singleValue());
+      return;
+    }
     const newValue = !this.selected();
     this.selected.set(newValue);
     this.onChange(newValue);
@@ -272,28 +351,34 @@ export class FilterComponent implements ControlValueAccessor {
 
   isOptionSelected(value: string): boolean {
     if (this.isSingleSelect()) {
-      return this.value() === value;
+      return this.singleValue() === value;
     }
-    return this.values().includes(value);
+    return this.multiValues().includes(value);
   }
 
   selectOption(value: string): void {
-    const newValue = this.value() === value ? "" : value;
+    const newValue = this.singleValue() === value ? "" : value;
     this.value.set(newValue);
     this.onChange(newValue);
     this.onTouched();
+    if (this.clearSearchOnSelect()) {
+      this.searchTerm.set("");
+    }
     this.dropdown()?.hideDropdown();
     this.triggerBtn()?.nativeElement.focus();
   }
 
   toggleOption(value: string): void {
-    const current = this.values();
+    const current = this.multiValues();
     const newValues = current.includes(value)
       ? current.filter((v) => v !== value)
       : [...current, value];
-    this.values.set(newValues);
+    this.value.set(newValues);
     this.onChange(newValues);
     this.onTouched();
+    if (this.clearSearchOnSelect()) {
+      this.searchTerm.set("");
+    }
   }
 
   toggleSelectAll(): void {
@@ -301,19 +386,19 @@ export class FilterComponent implements ControlValueAccessor {
     let newValues: string[];
     if (this.allFilteredSelected()) {
       const filteredValues = new Set(filtered.map((opt) => opt.value));
-      newValues = this.values().filter((v) => !filteredValues.has(v));
+      newValues = this.multiValues().filter((v) => !filteredValues.has(v));
     } else {
-      const current = new Set(this.values());
+      const current = new Set(this.multiValues());
       filtered.forEach((opt) => current.add(opt.value));
       newValues = [...current];
     }
-    this.values.set(newValues);
+    this.value.set(newValues);
     this.onChange(newValues);
     this.onTouched();
   }
 
   clearSelection(): void {
-    this.values.set([]);
+    this.value.set([]);
     this.onChange([]);
     this.onTouched();
   }
@@ -328,21 +413,22 @@ export class FilterComponent implements ControlValueAccessor {
     this.cleared.emit();
   }
 
-  onSearchInput(event: Event): void {
-    this.searchTerm.set((event.target as HTMLInputElement).value);
+  onSearchClear(): void {
+    this.searchTerm.set("");
   }
 
   focusDropdownContent(keyboard = false, focusLast = false): void {
     setTimeout(() => {
       if (!this.dropdown()?.isOpen()) return;
+      if (!keyboard) {
+        this.suppressNextOptionsFocusAutoSelect = true;
+        this.activeOptionIndex.set(-1);
+      }
       const focusable = this.getTabStops();
       if (focusLast) {
         focusable[focusable.length - 1]?.focus();
       } else {
         focusable[0]?.focus();
-      }
-      if (!keyboard) {
-        this.activeOptionIndex.set(-1);
       }
     });
   }
@@ -362,12 +448,22 @@ export class FilterComponent implements ControlValueAccessor {
   }
 
   onOptionsFocus(): void {
+    if (this.suppressNextOptionsFocusAutoSelect) {
+      this.suppressNextOptionsFocusAutoSelect = false;
+      return;
+    }
     if (this.activeOptionIndex() === -1) {
       this.activeOptionIndex.set(this.findNextEnabledIndex(-1, 1));
     }
   }
 
   onOptionsBlur(): void {
+    this.activeOptionIndex.set(-1);
+    this.suppressNextOptionsFocusAutoSelect = false;
+  }
+
+  onOptionsMousedown(): void {
+    this.suppressNextOptionsFocusAutoSelect = true;
     this.activeOptionIndex.set(-1);
   }
 

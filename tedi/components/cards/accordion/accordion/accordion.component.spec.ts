@@ -3,17 +3,39 @@ import { Component } from "@angular/core";
 
 import { AccordionComponent } from "./accordion.component";
 import { AccordionItemComponent } from "../accordion-item/accordion-item.component";
+import { AccordionItemHeaderComponent } from "../accordion-item-header/accordion-item-header.component";
+import { AccordionItemContentComponent } from "../accordion-item-content/accordion-item-content.component";
 import { By } from "@angular/platform-browser";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
 
 @Component({
   standalone: true,
-  imports: [AccordionComponent, AccordionItemComponent],
+  imports: [
+    AccordionComponent,
+    AccordionItemComponent,
+    AccordionItemHeaderComponent,
+    AccordionItemContentComponent,
+  ],
   template: `
     <tedi-accordion [allowMultiple]="allowMultiple">
-      <tedi-accordion-item title="Item 1"></tedi-accordion-item>
-      <tedi-accordion-item title="Item 2"></tedi-accordion-item>
-      <tedi-accordion-item title="Item 3"></tedi-accordion-item>
+      <tedi-accordion-item>
+        <tedi-accordion-item-header>
+          <span tedi-accordion-title>Item 1</span>
+        </tedi-accordion-item-header>
+        <tedi-accordion-item-content>Content 1</tedi-accordion-item-content>
+      </tedi-accordion-item>
+      <tedi-accordion-item>
+        <tedi-accordion-item-header>
+          <span tedi-accordion-title>Item 2</span>
+        </tedi-accordion-item-header>
+        <tedi-accordion-item-content>Content 2</tedi-accordion-item-content>
+      </tedi-accordion-item>
+      <tedi-accordion-item>
+        <tedi-accordion-item-header>
+          <span tedi-accordion-title>Item 3</span>
+        </tedi-accordion-item-header>
+        <tedi-accordion-item-content>Content 3</tedi-accordion-item-content>
+      </tedi-accordion-item>
     </tedi-accordion>
   `,
 })

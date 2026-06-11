@@ -9,6 +9,7 @@ import {
   signal,
   output,
   ElementRef,
+  inject,
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import {
@@ -38,6 +39,7 @@ import {
     class: "tedi-text-field",
     "[class.tedi-text-field--arrows-hidden]": "arrowsHidden()",
     "[attr.aria-invalid]": "invalid() || null",
+    "[value]": "value()",
     "(input)": "handleInputChange($event)",
     "(blur)": "handleBlur()",
   },
@@ -45,6 +47,8 @@ import {
 export class TextFieldComponent
   implements ControlValueAccessor, FormFieldControl
 {
+  private el = inject<ElementRef<HTMLInputElement>>(ElementRef);
+
   /**
    * Value of the input field. Supports two-way binding, use with form controls.
    */
@@ -59,11 +63,7 @@ export class TextFieldComponent
    */
   readonly clear = output<void>();
 
-  constructor(private el: ElementRef<HTMLInputElement>) {}
-
-  readonly disabled = computed(
-    () => this.el.nativeElement.disabled || this.formDisabled(),
-  );
+  readonly disabled = computed(() => this.formDisabled());
 
   readonly invalid = signal(false);
 

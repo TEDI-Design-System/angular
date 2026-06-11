@@ -1,11 +1,12 @@
-import { InjectionToken } from "@angular/core";
+import { InjectionToken, Signal } from "@angular/core";
+import { BreakpointFlag } from "../../../services/breakpoint/breakpoint.service";
 
 export type ModalSize = "default" | "small";
 export type ModalWidthPreset = "xs" | "sm" | "md" | "lg" | "xl";
 export type ModalWidth = ModalWidthPreset | (string & {});
-export type ModalPosition = "center" | "top" | "left" | "right";
+export type ModalPosition = "center" | "top" | "bottom" | "left" | "right";
 export type ModalScrollBehavior = "content" | "page";
-export type ModalFullscreen = boolean | "sm" | "md" | "lg" | "xl";
+export type ModalFullscreen = BreakpointFlag;
 
 export interface ModalConfig<D = unknown> {
   /** Data to pass to the modal content component. Accessible via `inject(MODAL_DATA)`. */
@@ -24,7 +25,7 @@ export interface ModalConfig<D = unknown> {
   closeOnEscape?: boolean;
   /** Whether to show a close button in the header. @default true */
   showClose?: boolean;
-  /** Fullscreen mode. `true` = always fullscreen, `'sm'`/`'md'`/etc = fullscreen below that breakpoint. @default false */
+  /** Fullscreen mode. `true` = always fullscreen, a breakpoint (`'sm'`, `'md'`, `'lg'`, `'xl'`, `'xxl'`) = fullscreen below that breakpoint. @default false */
   fullscreen?: ModalFullscreen;
   /** Max-width cap (e.g. '75%', '60vw'). Overrides the default 95vw limit. */
   maxWidth?: string;
@@ -36,3 +37,11 @@ export interface ModalConfig<D = unknown> {
 
 /** Injection token for data passed to a modal opened via ModalService. */
 export const MODAL_DATA = new InjectionToken<unknown>("TediModalData");
+
+/**
+ * Injection token exposing the current modal's `size` variant as a signal.
+ * Provided by both the template-based `<tedi-modal>` and `ModalService` so
+ * child components (notably `<tedi-modal-header>`) can derive size-aware
+ * defaults without duplicating the variant in their own inputs.
+ */
+export const MODAL_SIZE = new InjectionToken<Signal<ModalSize>>("TediModalSize");

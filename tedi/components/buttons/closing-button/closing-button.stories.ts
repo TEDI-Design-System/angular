@@ -6,12 +6,10 @@ import {
 } from "@storybook/angular";
 
 import { ClosingButtonComponent } from "./closing-button.component";
-import {
-  ColComponent,
-  IconComponent,
-  RowComponent,
-  VerticalSpacingDirective,
-} from "@tedi-design-system/angular/tedi";
+import { ColComponent } from "../../helpers/grid/col/col.component";
+import { IconComponent } from "../../base/icon/icon.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 

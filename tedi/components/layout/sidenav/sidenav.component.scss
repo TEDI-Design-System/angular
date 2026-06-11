@@ -49,7 +49,7 @@
     padding: var(--button-md-icon-padding);
     cursor: pointer;
     background: var(--button-floating-secondary-background-default);
-    border: var(--borders-01) solid
+    border: var(--tedi-borders-01) solid
       var(--button-floating-secondary-border-default);
     border-radius: var(--button-radius-default);
     transform: translateX(50%);
@@ -57,20 +57,20 @@
     &:hover {
       color: var(--button-floating-secondary-text-hover);
       background: var(--button-floating-secondary-background-hover);
-      border: var(--borders-01) solid
+      border: var(--tedi-borders-01) solid
         var(--button-floating-secondary-border-hover);
     }
 
     &:active {
       color: var(--button-floating-secondary-text-active);
       background: var(--button-floating-secondary-background-active);
-      border: var(--borders-01) solid
+      border: var(--tedi-borders-01) solid
         var(--button-floating-secondary-border-active);
     }
 
     &:focus-visible {
-      outline: var(--borders-02) solid var(--tedi-primary-500);
-      outline-offset: var(--borders-01);
+      outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+      outline-offset: var(--tedi-borders-01);
     }
   }
 
@@ -134,7 +134,7 @@
 
   &--dividers {
     tedi-sidenav-item > .tedi-sidenav-item {
-      border-bottom: var(--borders-01) solid
+      border-bottom: var(--tedi-borders-01) solid
         var(--navigation-vertical-item-border);
     }
 
@@ -199,7 +199,7 @@
         position: absolute;
         top: var(--_sidenav-item-padding-y);
         right: var(--_sidenav-item-padding-right);
-        font-size: var(--size-03);
+        font-size: var(--tedi-size-03);
 
         &[data-open="true"] {
           transform: rotate(-90deg);
@@ -214,7 +214,7 @@
     }
 
     .tedi-sidenav-group-title {
-      border-bottom: var(--borders-01) solid
+      border-bottom: var(--tedi-borders-01) solid
         var(--navigation-vertical-group-title-text);
 
       .tedi-sidenav-group-title__text {
@@ -229,7 +229,7 @@
       visibility: hidden;
       min-width: var(--_sidenav-dropdown-collapsed-min-width);
       background: var(--dropdown-item-default-background);
-      border: var(--borders-01) solid var(--card-border-primary);
+      border: var(--tedi-borders-01) solid var(--card-border-primary);
       border-radius: var(--form-select-area-radius);
       box-shadow: 0 1px 5px 0 var(--tedi-alpha-20);
       transition: none;
@@ -337,12 +337,12 @@
     font-size: var(--_sidenav-item-font-size);
     font-size: inherit;
     line-height: var(--_sidenav-item-line-height);
-    color: var(--navigation-vertical-item-text);
+    color: var(--navigation-vertical-item-text-default);
     text-align: start;
     cursor: pointer;
     background: transparent;
     border: 0;
-    border-bottom: var(--borders-01) solid
+    border-bottom: var(--tedi-borders-01) solid
       var(--navigation-vertical-item-border);
 
     &:hover {

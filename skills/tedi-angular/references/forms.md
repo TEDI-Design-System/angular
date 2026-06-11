@@ -9,8 +9,12 @@ TEDI form controls implement Angular's `ControlValueAccessor` interface, integra
 | TextFieldComponent | `input[tedi-text-field]` | `string` |
 | NumberFieldComponent | `tedi-number-field` | `number` |
 | CheckboxComponent | `input[tedi-checkbox]` | `boolean` |
+| CheckboxGroupComponent | `tedi-checkbox-group` | `string[]` |
+| RadioGroupComponent | `tedi-radio-group` | `string \| null` |
 | ToggleComponent | `tedi-toggle` | `boolean` |
 | DatePickerComponent | `tedi-date-picker` | `Date \| null` |
+| TimeFieldComponent | `tedi-time-field` | `string \| null` (HH:mm) |
+| TimePickerComponent | `tedi-time-picker` | `string \| null` (HH:mm) |
 | DropdownComponent | `tedi-dropdown` | `string` |
 | SelectComponent | `tedi-select` | `T \| T[]` |
 
@@ -92,7 +96,20 @@ TEDI controls also support two-way binding via `model()` signals:
 <tedi-date-picker [(selected)]="selectedDate" />
 <tedi-dropdown [(value)]="selectedOption" />
 <tedi-toggle [(value)]="isEnabled" />
+
+<!-- Checkbox / radio groups — children identified by [value] -->
+<tedi-checkbox-group [(values)]="selectedTags">
+  <input type="checkbox" tedi-checkbox value="a" />
+  <input type="checkbox" tedi-checkbox value="b" />
+</tedi-checkbox-group>
+
+<tedi-radio-group [(value)]="status">
+  <input type="radio" tedi-radio value="active" />
+  <input type="radio" tedi-radio value="archived" />
+</tedi-radio-group>
 ```
+
+**Note:** `tedi-checkbox-group` / `tedi-radio-group` activate their form-control behavior only when a `FormControl` is bound or the two-way-bound value is non-null / non-empty. For null/empty initial values, prefer a `FormControl` — `new FormControl<string[]>([])` or `new FormControl<string | null>(null)`. Without any binding, the group is a passive visual wrapper.
 
 ## Validation States
 

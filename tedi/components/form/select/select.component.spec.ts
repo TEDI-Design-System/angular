@@ -33,7 +33,10 @@ import { InputState } from "../form-field/form-field.component";
       [isTagRemovable]="clearableTags"
       [multiRow]="multiRow"
       [dropdownWidthRef]="dropdownWidthRef"
+      [dropdownAlign]="dropdownAlign"
       [maxDropdownHeight]="maxDropdownHeight"
+      [searchFn]="searchFn"
+      [clearSearchOnSelect]="clearSearchOnSelect"
       [formControl]="control"
     >
       @if (useOptionTemplate) {
@@ -74,7 +77,10 @@ class TestHostComponent {
   clearableTags = false;
   multiRow = false;
   dropdownWidthRef: any = undefined;
+  dropdownAlign: "start" | "end" = "start";
   maxDropdownHeight: number | undefined = undefined;
+  searchFn: ((term: string, item: unknown) => boolean) | undefined = undefined;
+  clearSearchOnSelect = false;
   useOptionTemplate = false;
   useValueTemplate = false;
   control = new FormControl<unknown>(null);
@@ -483,6 +489,35 @@ describe("SelectComponent", () => {
       expect(options[0].textContent).toContain("Option 1");
     }));
 
+    it("should use custom searchFn when provided", fakeAsync(() => {
+      host.items = [
+        { label: "Apple", code: "APL" },
+        { label: "Banana", code: "BNA" },
+        { label: "Cherry", code: "CHR" },
+      ];
+      host.bindValue = "code";
+      host.searchFn = (term: string, item: unknown) => {
+        const record = item as Record<string, string>;
+        return record["code"].toLowerCase().includes(term);
+      };
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "bna";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      expect(options.length).toBe(1);
+      expect(options[0].textContent).toContain("Banana");
+    }));
+
     it("should show no options message when filter matches nothing", fakeAsync(() => {
       getTrigger().click();
       fixture.detectChanges();
@@ -515,6 +550,20 @@ describe("SelectComponent", () => {
       tick();
 
       expect(select.searchTerm()).toBe("");
+    }));
+
+    it("should not show placeholder on search input after a value is selected", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      expect(input.getAttribute("placeholder")).toBe("");
     }));
 
     it("should open dropdown when typing", fakeAsync(() => {
@@ -645,6 +694,93 @@ describe("SelectComponent", () => {
 
       expect(select.allOptionsSelected()).toBe(false);
     });
+
+    it("someOptionsSelected should return true when some but not all selected", () => {
+      host.control.setValue(["Option 1"]);
+      fixture.detectChanges();
+
+      expect(select.someOptionsSelected()).toBe(true);
+    });
+
+    it("someOptionsSelected should return false when all selected", () => {
+      host.control.setValue(["Option 1", "Option 2", "Option 3"]);
+      fixture.detectChanges();
+
+      expect(select.someOptionsSelected()).toBe(false);
+    });
+
+    it("someOptionsSelected should return false when none selected", () => {
+      host.control.setValue([]);
+      fixture.detectChanges();
+
+      expect(select.someOptionsSelected()).toBe(false);
+    });
+
+    it("should select only filtered options when search is active", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      const selectAllOption = getSelectAllOption();
+      selectAllOption.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 1"]);
+    }));
+
+    it("should deselect only filtered options when search is active", fakeAsync(() => {
+      host.searchable = true;
+      host.control.setValue(["Option 1", "Option 2", "Option 3"]);
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      const selectAllOption = getSelectAllOption();
+      selectAllOption.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 2", "Option 3"]);
+    }));
+
+    it("allOptionsSelected should reflect only filtered options when searching", fakeAsync(() => {
+      host.searchable = true;
+      host.control.setValue(["Option 1"]);
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      expect(select.allOptionsSelected()).toBe(true);
+    }));
   });
 
   describe("Keyboard navigation", () => {
@@ -1022,6 +1158,27 @@ describe("SelectComponent", () => {
   });
 
   describe("Computed properties", () => {
+    it("dropdownPositions anchor to the start edge by default", () => {
+      expect(select.dropdownPositions().every((p) => p.originX === "start")).toBe(
+        true,
+      );
+      expect(select.dropdownPositions().every((p) => p.overlayX === "start")).toBe(
+        true,
+      );
+    });
+
+    it("dropdownPositions anchor to the end edge when dropdownAlign is 'end'", () => {
+      host.dropdownAlign = "end";
+      fixture.detectChanges();
+
+      expect(select.dropdownPositions().every((p) => p.originX === "end")).toBe(
+        true,
+      );
+      expect(select.dropdownPositions().every((p) => p.overlayX === "end")).toBe(
+        true,
+      );
+    });
+
     it("selectedLabels should return labels of selected options", () => {
       host.control.setValue("Option 1");
       fixture.detectChanges();
@@ -1063,6 +1220,89 @@ describe("SelectComponent", () => {
       tick();
 
       expect(select.visibleSelectedValues()).toEqual(["Option 1"]);
+    }));
+
+    it("should preserve hidden selections when selecting during search", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.searchable = true;
+      fixture.detectChanges();
+      tick();
+
+      // Pre-select Option 1 and Option 2
+      select.selectedValues.set(["Option 1", "Option 2"]);
+      fixture.detectChanges();
+      tick();
+
+      // Open and search for "Option 3" (hides Option 1 and Option 2)
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 3";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      // Select Option 3 from filtered results
+      const options = getOptions();
+      expect(options.length).toBe(1);
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      // All three should be selected (hidden Option 1/2 preserved)
+      expect(select.selectedValues()).toEqual(expect.arrayContaining(["Option 1", "Option 2", "Option 3"]));
+      expect(select.selectedValues().length).toBe(3);
+    }));
+
+    it("should not clear search term after multiselect selection", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.searchable = true;
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.searchTerm()).toBe("Option 1");
+    }));
+
+    it("should clear search term when closing multiselect dropdown", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.searchable = true;
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      // Close dropdown via arrow button
+      const arrow = hostEl.querySelector(".tedi-select__arrow") as HTMLElement;
+      arrow.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.searchTerm()).toBe("");
     }));
 
     it("optionGroups should group options correctly", () => {
@@ -1834,6 +2074,36 @@ describe("SelectComponent", () => {
     }));
   });
 
+  describe("arrow click", () => {
+    it("should close an open searchable select when clicking the arrow", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(true);
+
+      const arrow = hostEl.querySelector(".tedi-select__arrow") as HTMLElement;
+      arrow.click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(false);
+    }));
+
+    it("should open a closed searchable select when clicking the arrow", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+      expect(select.isOpen()).toBe(false);
+
+      const arrow = hostEl.querySelector(".tedi-select__arrow") as HTMLElement;
+      arrow.click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(true);
+    }));
+  });
+
   describe("search focus and blur", () => {
     it("should set searchFocused to false and mark as touched on blur", fakeAsync(() => {
       host.searchable = true;
@@ -1923,6 +2193,281 @@ describe("SelectComponent", () => {
       tick();
 
       expect(select.visibleTagsCount()).toBe(1);
+    }));
+  });
+
+  describe("clearSearchOnSelect", () => {
+    it("should clear search term after picking an option in searchable multiselect when true", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.searchable = true;
+      host.clearSearchOnSelect = true;
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.searchTerm()).toBe("");
+    }));
+
+    it("should keep search term after picking an option in searchable multiselect when false (default)", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.searchable = true;
+      fixture.detectChanges();
+      tick();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.searchTerm()).toBe("Option 1");
+    }));
+  });
+
+  describe("Outputs", () => {
+    it("selectionChange should emit the new value on single-select pick", fakeAsync(() => {
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith("Option 1");
+    }));
+
+    it("selectionChange should emit the array on multi-select pick", fakeAsync(() => {
+      host.allowMultiple = true;
+      fixture.detectChanges();
+
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const options = getOptions();
+      options[0].click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith(["Option 1"]);
+    }));
+
+    it("selectionChange should emit on tag deselect", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.clearableTags = true;
+      fixture.detectChanges();
+      host.control.setValue(["Option 1", "Option 2"]);
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      const tags = getTags();
+      const closeBtn = tags[0].querySelector("[tedi-closing-button]") as HTMLElement;
+      closeBtn.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith(["Option 2"]);
+    }));
+
+    it("selectionChange should emit on select-all", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.showSelectAll = true;
+      fixture.detectChanges();
+
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      getSelectAllOption().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith(["Option 1", "Option 2", "Option 3"]);
+    }));
+
+    it("selectionChange should emit on group toggle", fakeAsync(() => {
+      host.items = [
+        { id: 1, name: "A1", category: "A" },
+        { id: 2, name: "A2", category: "A" },
+      ];
+      host.bindLabel = "name";
+      host.bindValue = "id";
+      host.groupBy = "category";
+      host.allowMultiple = true;
+      host.selectableGroups = true;
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const groupHeaders = document.querySelectorAll(".tedi-select__group-name--selectable");
+      (groupHeaders[0] as HTMLElement).click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith([1, 2]);
+    }));
+
+    it("selectionChange should emit null on clear in single-select", fakeAsync(() => {
+      host.control.setValue("Option 1");
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      getClearButton().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith(null);
+    }));
+
+    it("selectionChange should emit empty array on clear in multi-select", fakeAsync(() => {
+      host.allowMultiple = true;
+      fixture.detectChanges();
+      host.control.setValue(["Option 1", "Option 2"]);
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.selectionChange.subscribe(spy);
+
+      getClearButton().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith([]);
+    }));
+
+    it("cleared should emit on clear button click", fakeAsync(() => {
+      host.control.setValue("Option 1");
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.cleared.subscribe(spy);
+
+      getClearButton().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledTimes(1);
+    }));
+
+    it("searchChange should emit the current search term", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+
+      const spy = jest.fn();
+      select.searchChange.subscribe(spy);
+
+      const input = getSearchInput();
+      input.value = "Opt";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledWith("Opt");
+    }));
+
+    it("opened should emit when dropdown opens", fakeAsync(() => {
+      const spy = jest.fn();
+      select.opened.subscribe(spy);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledTimes(1);
+    }));
+
+    it("closed should emit when dropdown closes via outside click", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.closed.subscribe(spy);
+
+      document.body.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledTimes(1);
+    }));
+
+    it("closed should emit when dropdown closes via toggle", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.closed.subscribe(spy);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).toHaveBeenCalledTimes(1);
+    }));
+
+    it("opened should not emit when already open", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const spy = jest.fn();
+      select.opened.subscribe(spy);
+
+      // Trigger another open while already open
+      (select as any).openDropdown();
+      fixture.detectChanges();
+      tick();
+
+      expect(spy).not.toHaveBeenCalled();
     }));
   });
 });

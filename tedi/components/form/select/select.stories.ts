@@ -22,7 +22,7 @@ import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item
 import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
 import { DropdownItemValueMetaComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-meta.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
-import { Component, inject } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { ToastService } from "../../../services/toast/toast.service";
 
 const simpleOptions = [
@@ -117,6 +117,39 @@ const meta: Meta<SelectComponent> = {
       control: "boolean",
       description: "Whether the select has a search input for filtering options.",
     },
+    searchFn: {
+      control: false,
+      description: "Custom search function `(term: string, item: T) => boolean`. When provided, overrides the default label-based search.",
+    },
+    clearSearchOnSelect: {
+      control: "boolean",
+      description: "Whether to clear the search input after an option is selected. Mostly useful for searchable multiselect.",
+    },
+    selectionChange: {
+      action: "selectionChange",
+      control: false,
+      description: "Emitted whenever the selection changes (option click, tag removal, clear, select-all, group toggle). Payload is the selected value (or `null`) in single-select, or the array of selected values in multi-select.",
+    },
+    searchChange: {
+      action: "searchChange",
+      control: false,
+      description: "Emitted with the current search term whenever the user types in the search input. Only fires when `searchable` is `true`.",
+    },
+    opened: {
+      action: "opened",
+      control: false,
+      description: "Emitted when the dropdown panel opens.",
+    },
+    closed: {
+      action: "closed",
+      control: false,
+      description: "Emitted when the dropdown panel closes.",
+    },
+    cleared: {
+      action: "cleared",
+      control: false,
+      description: "Emitted when the user clicks the clear button. Fires alongside `selectionChange`, which carries the new (empty) value.",
+    },
     dropdownType: {
       control: "radio",
       options: ["menu", "grid"],
@@ -145,6 +178,7 @@ const meta: Meta<SelectComponent> = {
     isTagRemovable: false,
     multiRow: false,
     searchable: false,
+    clearSearchOnSelect: false,
     dropdownType: "menu",
     maxDropdownHeight: undefined,
     options: simpleOptions as [],
@@ -172,11 +206,17 @@ export const Default: Story = {
         [isTagRemovable]="isTagRemovable"
         [multiRow]="multiRow"
         [searchable]="searchable"
+        [clearSearchOnSelect]="clearSearchOnSelect"
         [maxDropdownHeight]="maxDropdownHeight"
         [dropdownType]="dropdownType"
         [options]="options"
         bindLabel="label"
         bindValue="value"
+        (selectionChange)="selectionChange($event)"
+        (searchChange)="searchChange($event)"
+        (opened)="opened()"
+        (closed)="closed()"
+        (cleared)="cleared()"
       />
     `,
   }),
@@ -663,6 +703,17 @@ export const Examples: Story = {
           [isTagRemovable]="true"
         />
         <tedi-select
+          inputId="example-2d"
+          label="Searchable multiselect with clearSearchOnSelect"
+          placeholder="Search and select departments..."
+          [options]="scrollableOptions"
+          [searchable]="true"
+          [allowMultiple]="true"
+          [clearable]="true"
+          [isTagRemovable]="true"
+          [clearSearchOnSelect]="true"
+        />
+        <tedi-select
           inputId="example-3"
           label="Grouped single select"
           placeholder="Select department..."
@@ -895,5 +946,170 @@ export const ReactiveForms: Story = {
       imports: [SelectReactiveFormsDemoComponent],
     },
     template: `<storybook-select-reactive-forms-demo />`,
+  }),
+};
+
+interface PermissionOption {
+  id: number;
+  title: string;
+  description: string;
+}
+
+@Component({
+  selector: "storybook-select-custom-search-demo",
+  standalone: true,
+  imports: [
+    SelectComponent,
+    SelectOptionTemplateDirective,
+    DropdownItemValueComponent,
+    DropdownItemValueLabelComponent,
+    DropdownItemValueMetaComponent,
+  ],
+  template: `
+    <tedi-select
+      inputId="custom-search"
+      label="Searchable with custom search function"
+      placeholder="Search by title or description..."
+      [options]="options"
+      bindLabel="title"
+      bindValue="id"
+      [searchable]="true"
+      [allowMultiple]="true"
+      [clearable]="true"
+      [isTagRemovable]="true"
+      [searchFn]="searchFn"
+    >
+      <ng-template tediSelectOption let-item let-selected="selected">
+        <tedi-dropdown-item-value type="checkbox" layout="vertical" [selected]="selected">
+          <tedi-dropdown-item-value-label>{{ item.title }}</tedi-dropdown-item-value-label>
+          <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
+        </tedi-dropdown-item-value>
+      </ng-template>
+    </tedi-select>
+  `,
+})
+class SelectCustomSearchDemoComponent {
+  options: PermissionOption[] = [
+    { id: 1, title: "Read permissions", description: "Can view documents and files" },
+    { id: 2, title: "Write permissions", description: "Can create and edit documents" },
+    { id: 3, title: "Admin permissions", description: "Full access to all features" },
+    { id: 4, title: "Delete permissions", description: "Can remove documents and data" },
+  ];
+
+  searchFn = (term: string, item: PermissionOption): boolean => {
+    return item.title.toLowerCase().includes(term) || item.description.toLowerCase().includes(term);
+  };
+}
+
+export const CustomSearchFunction: Story = {
+  parameters: {
+    docs: {
+      source: {
+        type: "code" as const,
+        code:
+          "// [searchFn] overrides the default label-based search.\n" +
+          "// The item parameter contains all original properties of the option object.\n\n" +
+          "searchFn = (term: string, item: PermissionOption): boolean =>\n" +
+          "  item.title.toLowerCase().includes(term)\n" +
+          "  || item.description.toLowerCase().includes(term);",
+        language: "typescript",
+      },
+    },
+  },
+  render: () => ({
+    moduleMetadata: {
+      imports: [SelectCustomSearchDemoComponent],
+    },
+    template: `<storybook-select-custom-search-demo />`,
+  }),
+};
+
+@Component({
+  selector: "storybook-select-outputs-demo",
+  standalone: true,
+  imports: [SelectComponent, ButtonComponent, VerticalSpacingDirective],
+  template: `
+    <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start;">
+      <div style="display: flex; flex-direction: column;" [tediVerticalSpacing]="1">
+        <tedi-select
+          inputId="outputs-demo"
+          label="Searchable multiselect"
+          placeholder="Pick a city..."
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+          [searchable]="true"
+          [allowMultiple]="true"
+          [clearable]="true"
+          [isTagRemovable]="true"
+          (selectionChange)="logEvent('selectionChange', $event)"
+          (searchChange)="logEvent('searchChange', $event)"
+          (opened)="logEvent('opened')"
+          (closed)="logEvent('closed')"
+          (cleared)="logEvent('cleared')"
+        />
+        <button tedi-button variant="secondary" (click)="clearLog()">Clear log</button>
+      </div>
+      <div
+        style="
+          font-family: monospace;
+          font-size: 12px;
+          background: var(--general-surface-primary);
+          border: 1px solid var(--general-border-primary);
+          border-radius: 4px;
+          padding: 12px;
+          min-height: 240px;
+          max-height: 400px;
+          overflow: auto;
+        "
+      >
+        @if (events().length === 0) {
+          <span style="color: var(--general-text-tertiary);">Interact with the select to see events.</span>
+        } @else {
+          @for (event of events(); track $index) {
+            <div>
+              <strong>{{ event.name }}</strong>
+              @if (event.payload !== undefined) {
+                <span> → {{ event.payload }}</span>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  `,
+})
+class SelectOutputsDemoComponent {
+  options = [
+    { value: "tallinn", label: "Tallinn" },
+    { value: "narva", label: "Narva" },
+    { value: "tartu", label: "Tartu" },
+    { value: "elva", label: "Elva" },
+    { value: "rakvere", label: "Rakvere" },
+    { value: "haapsalu", label: "Haapsalu" },
+  ];
+
+  events = signal<{ name: string; payload?: string }[]>([]);
+
+  logEvent(name: string, payload?: unknown): void {
+    const formatted = payload === undefined ? undefined : JSON.stringify(payload);
+    this.events.update((list) => [{ name, payload: formatted }, ...list].slice(0, 50));
+  }
+
+  clearLog(): void {
+    this.events.set([]);
+  }
+}
+
+/**
+ * Interactive demo of every output the component emits. Pick options, type in the search field,
+ * open/close the dropdown, and click the clear button to see each event fire in the log on the right.
+ */
+export const Outputs: Story = {
+  render: () => ({
+    moduleMetadata: {
+      imports: [SelectOutputsDemoComponent],
+    },
+    template: `<storybook-select-outputs-demo />`,
   }),
 };

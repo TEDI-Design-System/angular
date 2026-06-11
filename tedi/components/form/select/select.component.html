@@ -5,12 +5,13 @@
     [for]="inputId()"
     [required]="required()"
     [size]="size()"
+    (click)="onTriggerClick()"
   >
     {{ label() }}
   </label>
 }
 <div
-  [id]="inputId()"
+  [id]="searchable() ? null : inputId()"
   class="tedi-select__trigger tedi-input"
   [class.tedi-input--disabled]="disabled()"
   [class.tedi-input--small]="size() === 'small'"
@@ -53,26 +54,28 @@
           [ngTemplateOutlet]="multiselectTags"
           [ngTemplateOutletContext]="{ $implicit: multiselectContainerRef }"
         />
+      } @else {
+        <input
+          #searchInput
+          [id]="inputId()"
+          type="text"
+          class="tedi-select__search-input"
+          [class.tedi-select__search-input--hidden]="showSingleSelectedValue()"
+          [placeholder]="showSingleSelectedValue() ? '' : placeholder()"
+          [value]="searchTerm()"
+          [disabled]="disabled()"
+          (input)="onSearchInput($event)"
+          (focus)="onSearchFocus()"
+          (blur)="onSearchBlur()"
+          (keydown)="onSearchKeydown($event)"
+          autocomplete="off"
+          role="combobox"
+          aria-autocomplete="list"
+          [attr.aria-expanded]="isOpen()"
+          [attr.aria-controls]="listboxId()"
+          [attr.aria-labelledby]="label() ? labelId() : null"
+        />
       }
-      <input
-        #searchInput
-        type="text"
-        class="tedi-select__search-input"
-        [class.tedi-select__search-input--hidden]="showSingleSelectedValue()"
-        [placeholder]="selectedValues().length ? '' : placeholder()"
-        [value]="searchTerm()"
-        [disabled]="disabled()"
-        (input)="onSearchInput($event)"
-        (focus)="onSearchFocus()"
-        (blur)="onSearchBlur()"
-        (keydown)="onSearchKeydown($event)"
-        autocomplete="off"
-        role="combobox"
-        aria-autocomplete="list"
-        [attr.aria-expanded]="isOpen()"
-        [attr.aria-controls]="listboxId()"
-        [attr.aria-labelledby]="label() ? labelId() : null"
-      />
     </div>
   } @else {
     <span class="tedi-select__label">
@@ -117,7 +120,14 @@
     ></button>
   }
 
-  <tedi-icon class="tedi-select__arrow" name="arrow_drop_down" />
+  <button
+    class="tedi-select__arrow"
+    type="button"
+    tabindex="-1"
+    (click)="onArrowClick($event)"
+  >
+    <tedi-icon name="arrow_drop_down" />
+  </button>
 </div>
 @if (feedbackText(); as feedback) {
   <tedi-feedback-text
@@ -158,6 +168,26 @@
         <tedi-tag>+{{ hiddenTagsCount() }}</tedi-tag>
       }
     }
+    @if (searchable()) {
+      <input
+        #searchInput
+        [id]="inputId()"
+        type="text"
+        class="tedi-select__search-input"
+        [value]="searchTerm()"
+        [disabled]="disabled()"
+        (input)="onSearchInput($event)"
+        (focus)="onSearchFocus()"
+        (blur)="onSearchBlur()"
+        (keydown)="onSearchKeydown($event)"
+        autocomplete="off"
+        role="combobox"
+        aria-autocomplete="list"
+        [attr.aria-expanded]="isOpen()"
+        [attr.aria-controls]="listboxId()"
+        [attr.aria-labelledby]="label() ? labelId() : null"
+      />
+    }
   </div>
 </ng-template>
 
@@ -165,7 +195,7 @@
   cdkConnectedOverlay
   [cdkConnectedOverlayOrigin]="trigger"
   [cdkConnectedOverlayOpen]="isOpen()"
-  [cdkConnectedOverlayPositions]="dropdownPositions"
+  [cdkConnectedOverlayPositions]="dropdownPositions()"
   [cdkConnectedOverlayFlexibleDimensions]="true"
   [cdkConnectedOverlayGrowAfterOpen]="true"
   (detach)="toggleIsOpen(true)"
@@ -196,7 +226,7 @@
             class="tedi-dropdown-item"
             [cdkOption]="SpecialOptionControls.SELECT_ALL"
           >
-            <tedi-dropdown-item-value type="checkbox" [selected]="allOptionsSelected()">
+            <tedi-dropdown-item-value type="checkbox" [selected]="allOptionsSelected()" [indeterminate]="someOptionsSelected()">
               <tedi-dropdown-item-value-label>{{ "select.select-all" | tediTranslate }}</tedi-dropdown-item-value-label>
             </tedi-dropdown-item-value>
           </li>

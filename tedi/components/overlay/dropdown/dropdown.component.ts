@@ -6,12 +6,18 @@ import {
   contentChild,
   signal,
   computed,
+  OnDestroy,
+  inject,
+  PLATFORM_ID,
   model,
+  Renderer2,
 } from "@angular/core";
 import { OverlayModule } from "@angular/cdk/overlay";
+import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
 import { DROPDOWN_API } from "./dropdown.tokens";
+import { getFocusableElements } from "../../../utils/elements.util";
 import {
   OverlayPosition,
   toConnectedPositions,
@@ -36,7 +42,7 @@ let dropdownIdCounter = 0;
     },
   ],
 })
-export class DropdownComponent {
+export class DropdownComponent implements OnDestroy {
   /** Current value of dropdown (used with listbox) */
   readonly value = model<string>();
 
@@ -51,6 +57,12 @@ export class DropdownComponent {
    * @default true
    */
   readonly preventOverflow = input(true);
+
+  /**
+   * Does the dropdown hide when the page scrolls?
+   * @default false
+   */
+  readonly hideOnScroll = input(false);
 
   readonly dropdownTrigger = contentChild.required(DropdownTriggerDirective);
   readonly dropdownContent = contentChild.required(DropdownContentComponent);
@@ -71,6 +83,24 @@ export class DropdownComponent {
     return w ? `${w}px` : null;
   });
 
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly document = inject(DOCUMENT);
+  private readonly renderer = inject(Renderer2);
+  private scrollListener?: () => void;
+
+  constructor() {
+    if (isPlatformBrowser(this.platformId)) {
+      document.addEventListener("focusin", this.handleFocusOut, true);
+    }
+  }
+
+  ngOnDestroy() {
+    if (isPlatformBrowser(this.platformId)) {
+      document.removeEventListener("focusin", this.handleFocusOut, true);
+    }
+    this.cleanupScrollListener();
+  }
+
   showDropdown() {
     if (this.isOpen()) return;
 
@@ -81,11 +111,17 @@ export class DropdownComponent {
 
     this.isOpen.set(true);
     this.setActiveToSelectedOrFirst();
+
+    if (this.hideOnScroll()) {
+      this.setupScrollListener();
+    }
+
     setTimeout(() => this.focusActiveItem());
   }
 
   hideDropdown() {
     if (this.isOpen()) {
+      this.cleanupScrollListener();
       this.isOpen.set(false);
       this.activeIndex.set(null);
       this.updateTabindexes();
@@ -102,6 +138,41 @@ export class DropdownComponent {
 
   onOutsideClick() {
     this.hideDropdown();
+  }
+
+  handleFocusOut = (event: FocusEvent) => {
+    if (!this.isOpen()) return;
+
+    const target = event.target as HTMLElement;
+
+    const triggerEl = this.dropdownTrigger().host.nativeElement;
+    const contentEl = this.dropdownContent().host.nativeElement;
+
+    const focusedInside =
+      triggerEl.contains(target) || contentEl.contains(target);
+
+    if (!focusedInside) {
+      this.hideDropdown();
+    }
+  };
+
+  tabOutOfDropdown(shiftKey: boolean) {
+    const triggerEl = this.dropdownTrigger().focusableElement;
+    const contentEl = this.dropdownContent().host.nativeElement;
+
+    const focusable = getFocusableElements(this.document.body).filter(
+      (el) => !contentEl.contains(el),
+    );
+    const triggerIndex = focusable.indexOf(triggerEl);
+    const next = shiftKey
+      ? focusable[triggerIndex - 1]
+      : focusable[triggerIndex + 1];
+
+    this.hideDropdown();
+
+    if (next) {
+      setTimeout(() => next.focus());
+    }
   }
 
   focusFirstItem() {
@@ -207,6 +278,28 @@ export class DropdownComponent {
         }
       }
     });
+  }
+
+  private setupScrollListener() {
+    this.cleanupScrollListener();
+
+    this.scrollListener = this.renderer.listen(
+      this.document,
+      "scroll",
+      () => {
+        if (this.isOpen()) {
+          this.hideDropdown();
+        }
+      },
+      { capture: true, passive: true },
+    );
+  }
+
+  private cleanupScrollListener() {
+    if (this.scrollListener) {
+      this.scrollListener();
+      this.scrollListener = undefined;
+    }
   }
 
   private findIndexByElement(el: HTMLLIElement): number {

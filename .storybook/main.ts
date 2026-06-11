@@ -6,19 +6,19 @@ const config: StorybookConfig = {
     "../src/docs/get-started.mdx",
     "../src/docs/changelog.mdx",
     "../src/docs/badges.mdx",
+    "../src/docs/custom-theming.mdx",
     "../src/docs/css-utilities.mdx",
     "../src/docs/colors/colors.mdx",
     "../src/docs/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "../tedi/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "../tedi/**/*.mdx",
     "../community/**/*.stories.@(js|jsx|mjs|ts|tsx)",
   ],
   addons: [
-    "@storybook/addon-essentials",
-    "@storybook/addon-interactions",
+    "@storybook/addon-docs",
     "@storybook/addon-a11y",
     "@etchteam/storybook-addon-status",
     "storybook-addon-pseudo-states",
-    "storybook-addon-angular-router",
   ],
   framework: {
     name: "@storybook/angular",
@@ -27,9 +27,6 @@ const config: StorybookConfig = {
     },
   },
   staticDirs: ["../public"],
-  docs: {
-    autodocs: true,
-  },
   core: {
     disableTelemetry: true,
   },

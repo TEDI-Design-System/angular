@@ -1,4 +1,4 @@
-import { CdkOverlayOrigin, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
+import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
 import { CdkListbox, CdkListboxModule } from "@angular/cdk/listbox";
 import {
   AfterContentChecked,
@@ -12,6 +12,7 @@ import {
   inject,
   input,
   NgZone,
+  output,
   signal,
   viewChild,
   viewChildren,
@@ -142,6 +143,14 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   dropdownWidthRef = input<ElementRef | null>();
 
   /**
+   * Which edge of the trigger the dropdown is anchored to. Use `"end"` when the
+   * select sits against the right edge of its container so the panel expands
+   * inward instead of overflowing.
+   * @default "start"
+   */
+  dropdownAlign = input<"start" | "end">("start");
+
+  /**
    * Configuration for the feedback text displayed below the select.
    */
   feedbackText = input<ComponentInputs<FeedbackTextComponent>>();
@@ -244,24 +253,62 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    */
   searchable = input<boolean>(false);
 
+  /**
+   * Custom search function for filtering options.
+   * When provided, overrides the default label-based search.
+   * Receives the search term and the option item (with all original properties), returns true to include the option.
+   */
+  searchFn = input<((term: string, item: T) => boolean) | undefined>();
+
+  /**
+   * Whether to clear the search input after an option is selected.
+   * Only has a visible effect in multi-select mode — in single-select mode
+   * the dropdown closes on selection, which already clears the search term.
+   * @default false
+   */
+  clearSearchOnSelect = input<boolean>(false);
+
+  /**
+   * Emits whenever the selection changes from any source: option click,
+   * tag removal, clear button, select-all, or group toggle.
+   * Payload is the array of selected values in multi-select mode, or the
+   * single selected value (or `null`) in single-select mode.
+   */
+  readonly selectionChange = output<T | T[] | null>();
+
+  /**
+   * Emits the current search term whenever the user types in the search input.
+   * Only fires when `searchable` is `true`.
+   */
+  readonly searchChange = output<string>();
+
+  /**
+   * Emits when the dropdown panel opens.
+   */
+  readonly opened = output<void>();
+
+  /**
+   * Emits when the dropdown panel closes.
+   */
+  readonly closed = output<void>();
+
+  /**
+   * Emits when the user clicks the clear button.
+   * Fires alongside `selectionChange`, which carries the new (empty) value.
+   */
+  readonly cleared = output<void>();
+
   readonly SpecialOptionControls = SpecialOptionControls;
 
-  readonly dropdownPositions: ConnectedPosition[] = [
-    // Open below, expand downward
-    {
-      originX: "start",
-      originY: "bottom",
-      overlayX: "start",
-      overlayY: "top",
-    },
-    // Fallback: open above, expand upward
-    {
-      originX: "start",
-      originY: "top",
-      overlayX: "start",
-      overlayY: "bottom",
-    },
-  ];
+  readonly dropdownPositions = computed<ConnectedPosition[]>(() => {
+    const x = this.dropdownAlign();
+    return [
+      // Open below, expand downward
+      { originX: x, originY: "bottom", overlayX: x, overlayY: "top" },
+      // Fallback: open above, expand upward
+      { originX: x, originY: "top", overlayX: x, overlayY: "bottom" },
+    ];
+  });
 
   listboxId = computed(() => this.inputId() + "-listbox");
   labelId = computed(() => this.inputId() + "-label");
@@ -284,6 +331,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   listboxRef = viewChild(CdkListbox, { read: ElementRef });
   cdkListboxRef = viewChild(CdkListbox);
+  connectedOverlay = viewChild(CdkConnectedOverlay);
   triggerRef = viewChild(CdkOverlayOrigin, { read: ElementRef });
   searchInputRef = viewChild<ElementRef>("searchInput");
   multiselectContainerRef = viewChild<ElementRef>("multiselectContainer");
@@ -332,10 +380,17 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   filteredOptions = computed<SelectOption<T>[]>(() => {
     const options = this.normalizedOptions();
-    const term = this.searchTerm().toLowerCase().trim();
+    const trimmed = this.searchTerm().trim();
 
-    if (!term) {
+    if (!trimmed) {
       return options;
+    }
+
+    const term = trimmed.toLowerCase();
+    const searchFn = this.searchFn();
+
+    if (searchFn) {
+      return options.filter((option) => searchFn(term, option as unknown as T));
     }
 
     return options.filter((option) =>
@@ -390,7 +445,10 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   });
 
   allOptionsSelected = computed<boolean>(() => {
-    const enabledOptions = this.normalizedOptions().filter((o) => !o.disabled);
+    const options = this.searchTerm().trim()
+      ? this.filteredOptions()
+      : this.normalizedOptions();
+    const enabledOptions = options.filter((o) => !o.disabled);
     const selected = this.selectedValues();
     const compareWith = this.compareWith();
 
@@ -402,6 +460,21 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     );
   });
 
+  someOptionsSelected = computed<boolean>(() => {
+    const options = this.searchTerm().trim()
+      ? this.filteredOptions()
+      : this.normalizedOptions();
+    const enabledOptions = options.filter((o) => !o.disabled);
+    const selected = this.selectedValues();
+    const compareWith = this.compareWith();
+
+    const selectedCount = enabledOptions.filter((option) =>
+      selected.some((val) => compareWith(option.value, val))
+    ).length;
+
+    return selectedCount > 0 && selectedCount < enabledOptions.length;
+  });
+
   ngAfterContentChecked(): void {
     this.setDropdownWidth();
   }
@@ -409,6 +482,9 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   ngAfterViewChecked(): void {
     if (this.allowMultiple() && !this.multiRow()) {
       this.calculateVisibleTags();
+    }
+    if (this.isOpen()) {
+      this.connectedOverlay()?.overlayRef?.updatePosition();
     }
   }
 
@@ -431,8 +507,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     const clickedInside = hostElement.contains(target) || listboxElement?.contains(target);
 
     if (!clickedInside) {
-      this.isOpen.set(false);
-      this.searchTerm.set("");
+      this.closeDropdown();
     }
   }
 
@@ -478,8 +553,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       if (willOpen) {
         this.openDropdown();
       } else {
-        this.dropdownMaxHeight.set(null);
-        this.isOpen.set(false);
+        this.closeDropdown();
       }
     }
   }
@@ -487,6 +561,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   onSearchInput(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.searchTerm.set(input.value);
+    this.searchChange.emit(input.value);
 
     if (!this.isOpen()) {
       this.openDropdown();
@@ -513,6 +588,11 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     } else {
       this.toggleIsOpen();
     }
+  }
+
+  onArrowClick(event: Event): void {
+    event.stopPropagation();
+    this.toggleIsOpen();
   }
 
   onTriggerEnter(): void {
@@ -578,8 +658,10 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   }
 
   private openDropdown(): void {
+    if (this.isOpen()) return;
     this.calculateDropdownMaxHeight();
     this.isOpen.set(true);
+    this.opened.emit();
   }
 
   private calculateDropdownMaxHeight(): void {
@@ -611,9 +693,11 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   }
 
   private closeDropdown(): void {
+    if (!this.isOpen()) return;
     this.isOpen.set(false);
     this.searchTerm.set("");
     this.dropdownMaxHeight.set(null);
+    this.closed.emit();
   }
 
   handleValueChange(event: { value: readonly unknown[] }): void {
@@ -658,7 +742,10 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       }
       this.selectedValues.set(newSelection);
       this.onChange(newSelection);
-      this.searchTerm.set("");
+      this.selectionChange.emit(newSelection as T[]);
+      if (this.clearSearchOnSelect()) {
+        this.searchTerm.set("");
+      }
       if (this.searchable()) {
         this.searchInputRef()?.nativeElement.focus();
       }
@@ -666,6 +753,10 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       const selected = values[0] ?? null;
       this.selectedValues.set(selected != null ? [selected] : []);
       this.onChange(selected);
+      this.selectionChange.emit(selected as T | null);
+      if (this.clearSearchOnSelect()) {
+        this.searchTerm.set("");
+      }
       this.toggleIsOpen(true);
     }
 
@@ -680,9 +771,12 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     this.selectedValues.set([]);
     if (this.allowMultiple()) {
       this.onChange([]);
+      this.selectionChange.emit([] as T[]);
     } else {
       this.onChange(null);
+      this.selectionChange.emit(null);
     }
+    this.cleared.emit();
     this.onTouched();
     this.focusTrigger();
   }
@@ -700,6 +794,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
     this.selectedValues.set(newSelection);
     this.onChange(newSelection);
+    this.selectionChange.emit(newSelection as T[]);
     this.onTouched();
   }
 
@@ -865,21 +960,32 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   }
 
   private toggleSelectAll(): void {
-    const options = this.normalizedOptions();
+    const isSearching = !!this.searchTerm().trim();
+    const options = isSearching
+      ? this.filteredOptions()
+      : this.normalizedOptions();
     const enabledOptions = options.filter((o) => !o.disabled);
     const compareWith = this.compareWith();
-    const disabledSelectedValues = this.selectedValues().filter((val) =>
-      options.some((o) => o.disabled && compareWith(val, o.value))
-    );
 
     if (this.allOptionsSelected()) {
-      this.selectedValues.set(disabledSelectedValues);
-      this.onChange(disabledSelectedValues);
+      // Deselect: remove only the visible enabled options, keep the rest
+      const newSelection = this.selectedValues().filter(
+        (val) => !enabledOptions.some((o) => compareWith(val, o.value))
+      );
+      this.selectedValues.set(newSelection);
+      this.onChange(newSelection);
+      this.selectionChange.emit(newSelection as T[]);
     } else {
-      const allEnabledValues = enabledOptions.map((o) => o.value);
-      const mergedValues = [...disabledSelectedValues, ...allEnabledValues];
-      this.selectedValues.set(mergedValues);
-      this.onChange(mergedValues);
+      // Select: add visible enabled options to current selection
+      const newSelection = [...this.selectedValues()];
+      for (const option of enabledOptions) {
+        if (!newSelection.some((val) => compareWith(val, option.value))) {
+          newSelection.push(option.value);
+        }
+      }
+      this.selectedValues.set(newSelection);
+      this.onChange(newSelection);
+      this.selectionChange.emit(newSelection as T[]);
     }
   }
 
@@ -909,6 +1015,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
     this.selectedValues.set(newSelection);
     this.onChange(newSelection);
+    this.selectionChange.emit(newSelection as T[]);
   }
 
   onChange: (value: unknown) => void = () => { };

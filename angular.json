@@ -27,6 +27,7 @@
         "storybook": {
           "builder": "@storybook/angular:start-storybook",
           "options": {
+            "browserTarget": "angular-components:storybook",
             "configDir": "./.storybook",
             "compodoc": true,
             "compodocArgs": ["-e", "json", "-d", "."],
@@ -42,6 +43,7 @@
         "build-storybook": {
           "builder": "@storybook/angular:build-storybook",
           "options": {
+            "browserTarget": "angular-components:build-storybook",
             "configDir": "./.storybook",
             "compodoc": true,
             "compodocArgs": ["-e", "json", "-d", "."],
@@ -51,7 +53,8 @@
               "./node_modules/@tedi-design-system/core/index.scss",
               "./node_modules/@tedi-design-system/core/tedi-storybook-styles.scss"
             ],
-            "experimentalZoneless": true
+            "experimentalZoneless": true,
+            "statsJson": true
           }
         },
         "lint": {

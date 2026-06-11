@@ -1,9 +1,16 @@
-import { Injectable, inject } from "@angular/core";
+import { Injectable, inject, signal } from "@angular/core";
 import { Dialog, DialogRef } from "@angular/cdk/dialog";
 import { GlobalPositionStrategy, Overlay } from "@angular/cdk/overlay";
 import { ComponentType } from "@angular/cdk/portal";
 import { ModalRef } from "./modal-ref";
-import { ModalConfig, ModalFullscreen, ModalPosition, ModalScrollBehavior, MODAL_DATA } from "./modal.types";
+import {
+  ModalConfig,
+  ModalFullscreen,
+  ModalPosition,
+  ModalScrollBehavior,
+  MODAL_DATA,
+  MODAL_SIZE,
+} from "./modal.types";
 
 const WIDTH_PRESETS: readonly string[] = ["xs", "sm", "md", "lg", "xl"];
 
@@ -67,6 +74,7 @@ export class ModalService {
       providers: (ref) => [
         { provide: ModalRef, useValue: new ModalRef<R>(ref) },
         { provide: MODAL_DATA, useValue: data },
+        { provide: MODAL_SIZE, useValue: signal(size) },
       ],
     });
 
@@ -104,8 +112,8 @@ export class ModalService {
       classes.push(`tedi-modal-dialog--${width}`);
     }
 
-    if (position === "top") {
-      classes.push("tedi-modal-dialog--center", "tedi-modal-dialog--top");
+    if (position === "top" || position === "bottom") {
+      classes.push("tedi-modal-dialog--center", `tedi-modal-dialog--${position}`);
     } else {
       classes.push(`tedi-modal-dialog--${position}`);
     }
@@ -164,6 +172,10 @@ export class ModalService {
 
     if (position === "top") {
       return global.centerHorizontally().top("var(--modal-top-margin)");
+    }
+
+    if (position === "bottom") {
+      return global.centerHorizontally().bottom("var(--modal-top-margin)");
     }
 
     if (scrollBehavior === "page") {
