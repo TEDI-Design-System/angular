@@ -116,13 +116,10 @@ export class CalendarComponent implements ControlValueAccessor {
   private onTouched: () => void = () => {};
 
   constructor() {
-    effect(
-      () => {
-        const level = this.selectionLevel();
-        this.view.set(level);
-      },
-      { allowSignalWrites: true },
-    );
+    effect(() => {
+      const level = this.selectionLevel();
+      this.view.set(level);
+    });
   }
 
   readonly effectiveDisabled = computed(
