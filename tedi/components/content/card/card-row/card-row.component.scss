@@ -1,0 +1,19 @@
+.tedi-card-row {
+  display: flex;
+}
+
+.tedi-card > .tedi-card-row:first-child > :first-child {
+  border-start-start-radius: var(--card-radius-rounded);
+}
+
+.tedi-card > .tedi-card-row:first-child > :last-child {
+  border-start-end-radius: var(--card-radius-rounded);
+}
+
+.tedi-card > .tedi-card-row:last-child > :first-child {
+  border-end-start-radius: var(--card-radius-rounded);
+}
+
+.tedi-card > .tedi-card-row:last-child > :last-child {
+  border-end-end-radius: var(--card-radius-rounded);
+}

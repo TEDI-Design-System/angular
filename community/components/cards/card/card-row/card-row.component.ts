@@ -6,6 +6,9 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 
+/**
+ * @deprecated Use CardRow from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-card-row",
   standalone: true,

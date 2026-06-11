@@ -4,6 +4,7 @@ import { TimelineComponent } from "./timeline.component";
 import { TimelineItemComponent } from "./timeline-item/timeline-item.component";
 import { TimelineTitleComponent } from "./timeline-title/timeline-title.component";
 import { TimelineDescriptionComponent } from "./timeline-description/timeline-description.component";
+import { TimelineTimingsBottomDirective } from "./timeline-timings-bottom.directive";
 
 @Component({
   standalone: true,
@@ -36,6 +37,24 @@ class MultipleTimelineItemsHostComponent {
   items!: QueryList<TimelineItemComponent>;
 }
 
+@Component({
+  standalone: true,
+  imports: [
+    TimelineComponent,
+    TimelineItemComponent,
+    TimelineTimingsBottomDirective,
+  ],
+  template: `
+    <tedi-timeline>
+      <tedi-timeline-item [timings]="['2024']">
+        <span *tediTimelineTimingsBottom class="bottom">Muudetud</span>
+        Content
+      </tedi-timeline-item>
+    </tedi-timeline>
+  `,
+})
+class TimingsBottomHostComponent {}
+
 describe("Timeline Components", () => {
   let fixture: ComponentFixture<TimelineComponent>;
 
@@ -55,6 +74,33 @@ describe("Timeline Components", () => {
 
   it("should create TimelineComponent", () => {
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it("should project timings-bottom content into the timings column", () => {
+    const hostFixture = TestBed.createComponent(TimingsBottomHostComponent);
+    hostFixture.detectChanges();
+    const bottom = hostFixture.nativeElement.querySelector(
+      ".tedi-timeline__timings .bottom",
+    );
+    expect(bottom?.textContent).toContain("Muudetud");
+  });
+
+  it("should set card padding variable", () => {
+    fixture.componentRef.setInput("variant", "card");
+    fixture.componentRef.setInput("cardPadding", 0.75);
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.style.getPropertyValue("--_timeline-card-padding"),
+    ).toBe("0.75rem");
+  });
+
+  it("should apply card variant class", () => {
+    expect(fixture.nativeElement.classList).not.toContain(
+      "tedi-timeline--card",
+    );
+    fixture.componentRef.setInput("variant", "card");
+    fixture.detectChanges();
+    expect(fixture.nativeElement.classList).toContain("tedi-timeline--card");
   });
 
   it("should allow registering and unregistering items", () => {

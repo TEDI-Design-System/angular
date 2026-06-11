@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChild,
   inject,
   input,
   OnDestroy,
@@ -14,24 +15,33 @@ import {
 } from "../../separator/separator.component";
 import { TextComponent } from "../../../base/text/text.component";
 import { TimelineComponent } from "../timeline.component";
-import { NgClass } from "@angular/common";
+import { NgClass, NgTemplateOutlet } from "@angular/common";
+import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
+import { TimelineTimingsBottomDirective } from "../timeline-timings-bottom.directive";
 
 type TimelineItemState = "current" | "past" | "future";
 
 @Component({
   standalone: true,
   selector: "tedi-timeline-item",
-  imports: [SeparatorComponent, TextComponent, NgClass],
+  imports: [SeparatorComponent, TextComponent, NgClass, NgTemplateOutlet],
   templateUrl: "./timeline-item.component.html",
   styleUrl: "./timeline-item.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    "[class.tedi-timeline__item--has-bottom]": "isMobile() && !!timingsBottom()",
+  },
 })
 export class TimelineItemComponent implements OnInit, OnDestroy {
   /** Item timings */
   timings = input<string[]>([]);
 
   timeline = inject(TimelineComponent, { optional: true });
+
+  protected isMobile = inject(BreakpointService).isBelowBreakpoint("lg");
+
+  protected timingsBottom = contentChild(TimelineTimingsBottomDirective);
 
   ngOnInit() {
     if (!this.timeline) {
