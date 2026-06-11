@@ -24,7 +24,6 @@
     "chromatic": "npm run build:sb:chromatic && npx chromatic --project-token=$CHROMATIC_PROJECT_TOKEN"
   },
   "peerDependencies": {
-    "@angular/animations": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/cdk": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/common": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0",
@@ -44,7 +43,6 @@
     "@angular-eslint/eslint-plugin-template": "20.7.0",
     "@angular-eslint/schematics": "20.7.0",
     "@angular-eslint/template-parser": "20.7.0",
-    "@angular/animations": "20.3.24",
     "@angular/build": "20.3.27",
     "@angular/cdk": "20.2.14",
     "@angular/cli": "20.3.27",

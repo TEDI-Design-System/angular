@@ -1,7 +1,6 @@
 import { Component, signal, TemplateRef, viewChild, input } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { provideNoopAnimations } from "@angular/platform-browser/animations";
 import { booleanAttribute } from "@angular/core";
 import {
   type CdkDragDrop,
@@ -180,7 +179,6 @@ function setupHost(
     providers: [
       { provide: TediTranslationService, useClass: TranslationMock },
       { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-      provideNoopAnimations(),
     ],
   });
   const fixture = TestBed.createComponent(HostComponent);
@@ -684,7 +682,6 @@ describe("TediTableComponent", () => {
         providers: [
           { provide: TediTranslationService, useClass: TranslationMock },
           { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-          provideNoopAnimations(),
         ],
       });
       const fixture = TestBed.createComponent(ResultsSlotHostComponent);
@@ -978,7 +975,6 @@ describe("TediTableComponent", () => {
         providers: [
           { provide: TediTranslationService, useClass: TranslationMock },
           { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-          provideNoopAnimations(),
         ],
       });
       const fixture = TestBed.createComponent(ColumnsMenuHostComponent);
@@ -1115,7 +1111,6 @@ describe("TediTableComponent", () => {
         providers: [
           { provide: TediTranslationService, useClass: TranslationMock },
           { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-          provideNoopAnimations(),
         ],
       });
       const fixture = TestBed.createComponent(FilterableHostComponent);
@@ -1404,7 +1399,6 @@ describe("Table: keyboard column reordering", () => {
     await TestBed.configureTestingModule({
       imports: [ReorderTestHostComponent],
       providers: [
-        provideNoopAnimations(),
         { provide: TediTranslationService, useClass: TranslationMock },
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "en" },
       ],
@@ -2005,7 +1999,6 @@ describe("Table: keyboard row reordering", () => {
       providers: [
         { provide: TediTranslationService, useClass: TranslationMock },
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-        provideNoopAnimations(),
       ],
     });
     const fixture = TestBed.createComponent(RowReorderHostComponent);

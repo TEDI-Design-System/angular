@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { Component, signal } from "@angular/core";
-import { provideNoopAnimations } from "@angular/platform-browser/animations";
 import { PaginationComponent } from "./pagination.component";
 import { PaginationOptionPickerModalComponent } from "./pagination-option-picker-modal/pagination-option-picker-modal.component";
 import { TediPaginationResultsDirective } from "./pagination-results.directive";
@@ -64,7 +63,6 @@ const setup = (
     providers: [
       { provide: TediTranslationService, useClass: TranslationMock },
       { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-      provideNoopAnimations(),
     ],
   });
   const fixture = TestBed.createComponent(PaginationComponent);
@@ -465,7 +463,6 @@ describe("PaginationComponent custom results slot", () => {
       providers: [
         { provide: TediTranslationService, useClass: TranslationMock },
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-        provideNoopAnimations(),
       ],
     });
     const fixture = TestBed.createComponent(ProjectedResultsHostComponent);
@@ -506,7 +503,6 @@ describe("PaginationComponent mobile layout", () => {
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
         { provide: BreakpointService, useValue: mockBreakpointService },
         { provide: ModalService, useValue: mockModalService },
-        provideNoopAnimations(),
       ],
     });
   });
@@ -755,7 +751,6 @@ describe("PaginationComponent two-way binding", () => {
       providers: [
         { provide: TediTranslationService, useClass: TranslationMock },
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-        provideNoopAnimations(),
       ],
     });
     fixture = TestBed.createComponent(TwoWayBindingHostComponent);

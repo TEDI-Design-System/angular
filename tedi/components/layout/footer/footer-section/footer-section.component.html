@@ -7,7 +7,11 @@
   [class.tedi-footer-section__container--mobile]="mobileLayout()"
 >
   @if (applyCollapse()) {
-    <button class="tedi-footer-section__button" (click)="toggleCollapse()">
+    <button
+      class="tedi-footer-section__button"
+      [attr.aria-expanded]="collapseOpen()"
+      (click)="toggleCollapse()"
+    >
       {{ heading() }}
       <tedi-icon
         class="collapse__icon"
@@ -21,14 +25,13 @@
     </strong>
   }
   <div
-    [class.tedi-footer-section__content-hidden]="
+    class="tedi-footer-section__content-wrapper"
+    [class.tedi-footer-section__content-wrapper--collapsed]="
       applyCollapse() && !collapseOpen()
     "
-    [@collapseContent]="
-      applyCollapse() ? (collapseOpen() ? 'expanded' : 'collapsed') : 'expanded'
-    "
-    class="tedi-footer-section__content"
   >
-    <ng-content></ng-content>
+    <div class="tedi-footer-section__content">
+      <ng-content></ng-content>
+    </div>
   </div>
 </div>

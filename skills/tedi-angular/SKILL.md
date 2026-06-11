@@ -23,7 +23,6 @@ npm install @tedi-design-system/angular @tedi-design-system/core
 @angular/common: ^20.0.0 || ^21.0.0 || ^22.0.0
 @angular/forms: ^20.0.0 || ^21.0.0 || ^22.0.0
 @angular/cdk: ^20.0.0 || ^21.0.0 || ^22.0.0
-@angular/animations: ^20.0.0 || ^21.0.0 || ^22.0.0
 @angular/platform-browser: ^20.0.0 || ^21.0.0 || ^22.0.0
 ```
 
