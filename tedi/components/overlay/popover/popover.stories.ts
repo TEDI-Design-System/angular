@@ -71,6 +71,20 @@ export default {
         },
       },
     },
+    preventOverflow: {
+      control: "boolean",
+      description:
+        "Should position flip to opposite direction when overflowing screen?",
+      defaultValue: {
+        summary: "false",
+      },
+      table: {
+        category: "popover inputs",
+        type: {
+          summary: "boolean",
+        },
+      },
+    },
     dismissible: {
       control: "boolean",
       description: "Is dismissible by clicking outside of content?",
@@ -201,6 +215,7 @@ type Story = StoryObj<
 export const Default: Story = {
   args: {
     position: "top",
+    preventOverflow: false,
     dismissible: true,
     hideOnScroll: false,
     withBorder: false,
@@ -213,7 +228,7 @@ export const Default: Story = {
   render: (args) => ({
     props: args,
     template: `
-      <tedi-popover [position]="position" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay">
+      <tedi-popover [position]="position" [preventOverflow]="preventOverflow" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay">
         <button tedi-button tedi-popover-trigger>
           Popover Trigger
         </button>

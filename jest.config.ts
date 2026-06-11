@@ -13,6 +13,9 @@ export default {
   moduleFileExtensions: ["ts", "html", "js", "json"],
   resolver: "jest-preset-angular/build/resolvers/ng-jest-resolver.js",
   testEnvironment: "<rootDir>/jest-jsdom-env.ts",
+  // Recycles long-lived workers to avoid intermittent SIGSEGV crashes
+  // in jest 29 workers on recent Node versions
+  workerIdleMemoryLimit: "1GB",
   collectCoverage: true,
   collectCoverageFrom: ["./tedi/components/**/*.{js,ts,tsx}"],
   coveragePathIgnorePatterns: ["\\.stories\\.ts$"],

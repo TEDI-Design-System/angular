@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { provideNoopAnimations } from "@angular/platform-browser/animations";
 import { CdkVirtualScrollViewport } from "@angular/cdk/scrolling";
 import {
   PaginationOptionPickerModalComponent,
@@ -68,7 +67,6 @@ const setup = (data: Partial<PaginationOptionPickerModalData> = {}) => {
       { provide: ModalRef, useValue: modalRef },
       { provide: MODAL_DATA, useValue: modalData },
       { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-      provideNoopAnimations(),
     ],
   });
 

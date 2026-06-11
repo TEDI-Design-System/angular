@@ -1,36 +1,37 @@
 import {
   Component,
+  forwardRef,
   input,
   ViewEncapsulation,
   ChangeDetectionStrategy,
-  viewChild,
   contentChild,
   signal,
   computed,
-  AfterContentChecked,
   OnDestroy,
   inject,
   PLATFORM_ID,
   model,
   Renderer2,
 } from "@angular/core";
-import {
-  NgxFloatUiContentComponent,
-  NgxFloatUiModule,
-  NgxFloatUiPlacements,
-} from "ngx-float-ui";
+import { OverlayModule } from "@angular/cdk/overlay";
+import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
-import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 import { DROPDOWN_API } from "./dropdown.tokens";
 import { getFocusableElements } from "../../../utils/elements.util";
+import {
+  OverlayPosition,
+  toConnectedPositions,
+} from "../overlay-position.util";
 
-export type DropdownPosition = `${NgxFloatUiPlacements}`;
+export type DropdownPosition = OverlayPosition;
+
+let dropdownIdCounter = 0;
 
 @Component({
   standalone: true,
   selector: "tedi-dropdown",
-  imports: [NgxFloatUiModule],
+  imports: [OverlayModule],
   templateUrl: "./dropdown.component.html",
   styleUrl: "./dropdown.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -38,11 +39,11 @@ export type DropdownPosition = `${NgxFloatUiPlacements}`;
   providers: [
     {
       provide: DROPDOWN_API,
-      useExisting: DropdownComponent,
+      useExisting: forwardRef(() => DropdownComponent),
     },
   ],
 })
-export class DropdownComponent implements AfterContentChecked, OnDestroy {
+export class DropdownComponent implements OnDestroy {
   /** Current value of dropdown (used with listbox) */
   readonly value = model<string>();
 
@@ -59,13 +60,6 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
   readonly preventOverflow = input(true);
 
   /**
-   * Append floating element to given selector.
-   * Use 'body' to append at the end of DOM or empty string to append next to trigger element.
-   * @default ""
-   */
-  readonly appendTo = input("");
-
-  /**
    * Does the dropdown hide when the page scrolls?
    * @default false
    */
@@ -73,13 +67,22 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
 
   readonly dropdownTrigger = contentChild.required(DropdownTriggerDirective);
   readonly dropdownContent = contentChild.required(DropdownContentComponent);
-  readonly floatUiComponent = viewChild.required(NgxFloatUiContentComponent);
 
   private readonly activeIndex = signal<number | null>(null);
-  readonly containerId = signal("");
-  readonly isContentHovered = signal(false);
-  readonly floatUiDisplay = signal<"inline" | "block">("inline");
-  readonly opened = computed(() => this.floatUiDisplay() === "block");
+  readonly containerId = signal(`tedi-dropdown-${dropdownIdCounter++}`);
+  readonly isOpen = signal(false);
+  readonly triggerWidth = signal<number | null>(null);
+
+  readonly overlayOrigin = computed(() => this.dropdownTrigger().overlayOrigin);
+
+  readonly overlayPositions = computed(() =>
+    toConnectedPositions(this.position(), this.preventOverflow()),
+  );
+
+  readonly triggerWidthVar = computed(() => {
+    const w = this.triggerWidth();
+    return w ? `${w}px` : null;
+  });
 
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
@@ -88,106 +91,72 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
-      document.addEventListener("pointerdown", this.handleOutsideClick, true);
       document.addEventListener("focusin", this.handleFocusOut, true);
     }
   }
 
   ngOnDestroy() {
     if (isPlatformBrowser(this.platformId)) {
-      document.removeEventListener(
-        "pointerdown",
-        this.handleOutsideClick,
-        true,
-      );
       document.removeEventListener("focusin", this.handleFocusOut, true);
     }
     this.cleanupScrollListener();
   }
 
-  ngAfterContentChecked(): void {
-    const floatUiEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
-    const container = floatUiEl.querySelector<HTMLElement>(
-      ".float-ui-container",
-    );
+  showDropdown(initialFocus: "selected" | "first" | "last" = "selected") {
+    if (this.isOpen()) return;
 
-    if (container) {
-      container.setAttribute("tabindex", "-1");
-      container.setAttribute("aria-labelledby", container.id + "_trigger");
-      this.containerId.set(container.id);
+    const width = this.dropdownTrigger()?.host.nativeElement.offsetWidth;
+    if (width) {
+      this.triggerWidth.set(width);
     }
-  }
 
-  showDropdown() {
-    if (this.floatUiComponent().state) return;
-
-    this.floatUiComponent().show();
-    this.floatUiDisplay.set("block");
+    this.isOpen.set(true);
     this.setActiveToSelectedOrFirst();
-
-    const floatUiEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
-    const triggerWidth = this.dropdownTrigger()?.host.nativeElement.offsetWidth;
-
-    if (triggerWidth) {
-      floatUiEl.style.setProperty(
-        "--_tedi-dropdown-trigger-width",
-        `${triggerWidth}px`,
-      );
-    }
 
     if (this.hideOnScroll()) {
       this.setupScrollListener();
     }
 
-    setTimeout(() => this.focusActiveItem());
+    // Deferred so the overlay content is attached before focusing
+    setTimeout(() => {
+      if (initialFocus === "first") {
+        this.focusFirstItem();
+      } else if (initialFocus === "last") {
+        this.focusLastItem();
+      } else {
+        this.focusActiveItem();
+      }
+    });
   }
 
   hideDropdown() {
-    if (this.floatUiComponent().state) {
+    if (this.isOpen()) {
       this.cleanupScrollListener();
-      this.floatUiComponent().hide();
-      this.floatUiDisplay.set("inline");
+      this.isOpen.set(false);
       this.activeIndex.set(null);
       this.updateTabindexes();
     }
   }
 
   toggleDropdown() {
-    if (this.floatUiComponent().state) {
+    if (this.isOpen()) {
       this.hideDropdown();
     } else {
       this.showDropdown();
     }
   }
 
-  handleOutsideClick = (event: Event) => {
-    if (!this.floatUiComponent().state) return;
-
-    const target = event.target as HTMLElement;
-
-    const triggerEl = this.dropdownTrigger().host.nativeElement;
-    const contentEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
-
-    const clickedInside =
-      triggerEl.contains(target) || contentEl.contains(target);
-
-    if (!clickedInside) {
-      this.hideDropdown();
-      this.dropdownTrigger().focus();
-    }
-  };
+  onOutsideClick() {
+    this.hideDropdown();
+  }
 
   handleFocusOut = (event: FocusEvent) => {
-    if (!this.floatUiComponent().state) return;
+    if (!this.isOpen()) return;
 
     const target = event.target as HTMLElement;
 
     const triggerEl = this.dropdownTrigger().host.nativeElement;
-    const contentEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
+    const contentEl = this.dropdownContent().host.nativeElement;
 
     const focusedInside =
       triggerEl.contains(target) || contentEl.contains(target);
@@ -199,8 +168,7 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
 
   tabOutOfDropdown(shiftKey: boolean) {
     const triggerEl = this.dropdownTrigger().focusableElement;
-    const contentEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
+    const contentEl = this.dropdownContent().host.nativeElement;
 
     const focusable = getFocusableElements(this.document.body).filter(
       (el) => !contentEl.contains(el),
@@ -329,7 +297,7 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
       this.document,
       "scroll",
       () => {
-        if (this.floatUiComponent().state) {
+        if (this.isOpen()) {
           this.hideDropdown();
         }
       },

@@ -52,8 +52,8 @@ export class SelectOptionTemplateDirective<T = unknown> {
 
   static ngTemplateContextGuard<T>(
     _dir: SelectOptionTemplateDirective<T>,
-    ctx: unknown
-  ): ctx is SelectOptionContext<T> {
+    _ctx: unknown,
+  ): _ctx is SelectOptionContext<T> {
     return true;
   }
 }
@@ -80,8 +80,8 @@ export class SelectValueTemplateDirective<T = unknown> {
 
   static ngTemplateContextGuard<T>(
     _dir: SelectValueTemplateDirective<T>,
-    ctx: unknown
-  ): ctx is SelectValueContext<T> {
+    _ctx: unknown,
+  ): _ctx is SelectValueContext<T> {
     return true;
   }
 }

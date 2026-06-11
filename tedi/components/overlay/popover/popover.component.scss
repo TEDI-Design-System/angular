@@ -17,93 +17,92 @@ tedi-popover {
   }
 }
 
-float-ui-content {
-  .float-ui-container-popover {
-    z-index: var(--z-index-dropdown);
-    padding: 0;
-    border: var(--tedi-borders-01) solid var(--popover-border);
+.tedi-popover__container {
+  position: relative;
+  z-index: var(--z-index-dropdown);
+  border: var(--tedi-borders-01) solid var(--popover-border);
+  border-radius: var(--popover-radius-rounded);
+  box-shadow: 0 1px 5px 0 var(--tedi-alpha-20);
+
+  &--arrow {
+    .tedi-popover__arrow {
+      position: absolute;
+      z-index: 0;
+      width: 24px;
+      height: 24px;
+      background: var(--popover-background);
+      filter: drop-shadow(0 0 5px var(--tedi-alpha-20));
+      clip-path: inset(0 -5px -5px 0);
+    }
+
+    .tedi-popover-content {
+      z-index: 1;
+    }
+
+    &[data-placement="top"] .tedi-popover__arrow {
+      bottom: -12px;
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    &[data-placement="bottom"] .tedi-popover__arrow {
+      top: -12px;
+      transform: translateX(-50%) rotate(-135deg);
+    }
+
+    &[data-placement="left"] .tedi-popover__arrow {
+      right: -12px;
+      transform: translateY(-50%) rotate(-45deg);
+    }
+
+    &[data-placement="right"] .tedi-popover__arrow {
+      left: -12px;
+      transform: translateY(-50%) rotate(135deg);
+    }
+  }
+
+  &--border {
     border-radius: var(--popover-radius-rounded);
-    box-shadow: 0 1px 5px 0 var(--tedi-alpha-20, rgb(0 0 0 / 20%));
 
-    &--arrow {
-      .float-ui-arrow {
-        z-index: var(--z-index-dropdown);
-        width: 24px;
-        height: 24px;
-        background: var(--popover-background);
-        filter: drop-shadow(0 0 5px var(--tedi-alpha-20));
-        clip-path: inset(0 -5px -5px 0);
+    .tedi-popover__arrow {
+      width: 18px;
+      height: 18px;
+      border-right: 4px solid var(--header-popover-border-top);
+      border-bottom: 4px solid var(--header-popover-border-top);
+    }
+
+    &[data-placement="top"] {
+      border-bottom: 4px solid var(--header-popover-border-top);
+
+      .tedi-popover__arrow {
+        bottom: -12px;
+        transform: translateX(-50%) rotate(45deg);
       }
     }
 
-    &--border {
-      border-radius: var(--popover-radius-rounded);
+    &[data-placement="bottom"] {
+      border-top: 4px solid var(--header-popover-border-top);
 
-      .float-ui-arrow {
-        width: 18px;
-        height: 18px;
-        border-right: 4px solid var(--header-popover-border-top);
-        border-bottom: 4px solid var(--header-popover-border-top);
-      }
-
-      &[data-float-ui-placement="top"] {
-        border-bottom: 4px solid var(--header-popover-border-top);
-
-        .float-ui-arrow {
-          bottom: -12px !important;
-        }
-      }
-
-      &[data-float-ui-placement="bottom"] {
-        border-top: 4px solid var(--header-popover-border-top);
-
-        .float-ui-arrow {
-          top: -12px !important;
-        }
-      }
-
-      &[data-float-ui-placement="left"] {
-        border-right: 4px solid var(--header-popover-border-top);
-
-        .float-ui-arrow {
-          right: -12px !important;
-        }
-      }
-
-      &[data-float-ui-placement="right"] {
-        border-left: 4px solid var(--header-popover-border-top);
-
-        .float-ui-arrow {
-          left: -12px !important;
-        }
+      .tedi-popover__arrow {
+        top: -12px;
+        transform: translateX(-50%) rotate(-135deg);
       }
     }
 
-    &[data-float-ui-placement="top"] {
-      transform: translateY(-4px);
-    }
+    &[data-placement="left"] {
+      border-right: 4px solid var(--header-popover-border-top);
 
-    &[data-float-ui-placement="bottom"] {
-      transform: translateY(4px);
-
-      .float-ui-arrow {
-        transform: rotate(-135deg);
+      .tedi-popover__arrow {
+        right: -12px;
+        transform: translateY(-60%) rotate(-45deg);
       }
     }
 
-    &[data-float-ui-placement="left"] {
-      transform: translateX(-4px);
+    &[data-placement="right"] {
+      border-left: 4px solid var(--header-popover-border-top);
 
-      .float-ui-arrow {
-        transform: rotate(-45deg);
-      }
-    }
-
-    &[data-float-ui-placement="right"] {
-      transform: translateX(4px);
-
-      .float-ui-arrow {
-        transform: rotate(135deg);
+      .tedi-popover__arrow {
+        left: -12px;
+        transform: translateY(-60%) rotate(135deg);
       }
     }
   }

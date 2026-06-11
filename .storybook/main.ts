@@ -15,12 +15,10 @@ const config: StorybookConfig = {
     "../community/**/*.stories.@(js|jsx|mjs|ts|tsx)",
   ],
   addons: [
-    "@storybook/addon-essentials",
-    "@storybook/addon-interactions",
+    "@storybook/addon-docs",
     "@storybook/addon-a11y",
     "@etchteam/storybook-addon-status",
     "storybook-addon-pseudo-states",
-    "storybook-addon-angular-router",
   ],
   framework: {
     name: "@storybook/angular",
@@ -29,9 +27,6 @@ const config: StorybookConfig = {
     },
   },
   staticDirs: ["../public"],
-  docs: {
-    autodocs: true,
-  },
   core: {
     disableTelemetry: true,
   },

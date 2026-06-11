@@ -1,18 +1,15 @@
-<div
-  applyClass="float-ui-container-dropdown"
-  style="display: contents"
-  looseTrigger="none"
-  ariaRole="presentation"
-  [hideOnClickOutside]="true"
-  [floatUiLoose]="floatUiComponent"
-  [loosePlacement]="position()"
-  [preventOverflow]="position().includes('auto') ? false : preventOverflow()"
-  [disableAnimation]="true"
-  [targetElement]="dropdownTrigger().host.nativeElement"
-  [appendTo]="appendTo()"
+<ng-content select="[tedi-dropdown-trigger]" />
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="overlayOrigin()"
+  [cdkConnectedOverlayOpen]="isOpen()"
+  [cdkConnectedOverlayPositions]="overlayPositions()"
+  (overlayOutsideClick)="onOutsideClick()"
 >
-  <ng-content select="[tedi-dropdown-trigger]" />
-</div>
-<float-ui-content #floatUiComponent [style.display]="floatUiDisplay()">
-  <ng-content select="tedi-dropdown-content" />
-</float-ui-content>
+  <div
+    class="tedi-dropdown__panel"
+    [style.--_tedi-dropdown-trigger-width]="triggerWidthVar()"
+  >
+    <ng-content select="tedi-dropdown-content" />
+  </div>
+</ng-template>

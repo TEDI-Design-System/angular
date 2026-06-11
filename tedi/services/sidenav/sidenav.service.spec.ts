@@ -153,7 +153,7 @@ describe("SideNavService", () => {
       expect(service.isCollapsed()).toBe(true);
 
       isBelowBreakpointSignal.set(true);
-      TestBed.flushEffects();
+      TestBed.tick();
 
       expect(service.isCollapsed()).toBe(false);
     });
