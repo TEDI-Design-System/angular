@@ -125,6 +125,7 @@
       }
 
       &.tedi-calendar-day-grid__day--today::before {
+        inset: var(--tedi-borders-01);
         border-color: var(--form-datepicker-today-border-secondary);
       }
     }

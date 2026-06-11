@@ -183,6 +183,7 @@ export class CalendarDayGridComponent {
     range: DateRange,
     modifiers: string[],
   ): void {
+    if (range.to && isSameDay(range.from, range.to)) return;
     if (isSameDay(day, range.from)) modifiers.push("range-start");
     if (range.to && isSameDay(day, range.to)) modifiers.push("range-end");
     if (this.isInCommittedRangeMiddle(day, range)) {
@@ -197,7 +198,6 @@ export class CalendarDayGridComponent {
   ): void {
     const hovered = this.hoveredDate();
     if (!hovered || isSameDay(hovered, range.from)) {
-      if (isSameDay(day, range.from)) modifiers.push("range-start");
       return;
     }
     const hoverIsAfter = isAfterDay(hovered, range.from);

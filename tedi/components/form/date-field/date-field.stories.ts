@@ -295,7 +295,7 @@ export const Default: Story = {
       props: { ...args, control },
       template: `
         <tedi-form-field [size]="size">
-          <label tedi-label for="date-default" [required]="required">Date</label>
+          <label tedi-label for="date-default" [required]="required">Kuupäev</label>
           <tedi-date-field
             inputId="date-default"
             [formControl]="control"
@@ -317,7 +317,7 @@ export const Default: Story = {
             [tagEllipsis]="tagEllipsis"
             [isTagRemovable]="isTagRemovable"
           />
-          <tedi-feedback-text text="Pick a date" />
+          <tedi-feedback-text text="Vali kuupäev" />
         </tedi-form-field>
       `,
     };
@@ -330,13 +330,13 @@ export const Size: Story = {
       <tedi-row [cols]="1" [gap]="3">
         <tedi-col>
           <tedi-form-field size="default">
-            <label tedi-label for="date-size-default">Default</label>
+            <label tedi-label for="date-size-default">Vaikimisi</label>
             <tedi-date-field inputId="date-size-default" size="default" />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
           <tedi-form-field size="small">
-            <label tedi-label for="date-size-small">Small</label>
+            <label tedi-label for="date-size-small">Väike</label>
             <tedi-date-field inputId="date-size-small" size="small" />
           </tedi-form-field>
         </tedi-col>
@@ -363,28 +363,28 @@ export const States: Story = {
         <tedi-row [cols]="1" [gap]="3">
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-state-default">Default</label>
+              <label tedi-label for="date-state-default">Vaikimisi</label>
               <tedi-date-field inputId="date-state-default" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-state-disabled">Disabled</label>
+              <label tedi-label for="date-state-disabled">Mitteaktiivne</label>
               <tedi-date-field inputId="date-state-disabled" [formControl]="disabledControl" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-state-valid">Success</label>
+              <label tedi-label for="date-state-valid">Õnnestumine</label>
               <tedi-date-field inputId="date-state-valid" />
-              <tedi-feedback-text text="Feedback text" type="valid" />
+              <tedi-feedback-text text="Tagasiside tekst" type="valid" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-state-error">Error</label>
+              <label tedi-label for="date-state-error">Viga</label>
               <tedi-date-field inputId="date-state-error" />
-              <tedi-feedback-text text="Feedback text" type="error" />
+              <tedi-feedback-text text="Tagasiside tekst" type="error" />
             </tedi-form-field>
           </tedi-col>
         </tedi-row>
@@ -415,20 +415,20 @@ export const FieldOptions: Story = {
         <tedi-row [cols]="1" [gap]="3">
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-opt-default">Date field default</label>
+              <label tedi-label for="date-opt-default">Vaikimisi kuupäevaväli</label>
               <tedi-date-field inputId="date-opt-default" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-opt-hint">Date field with hint</label>
+              <label tedi-label for="date-opt-hint">Kuupäevaväli vihjega</label>
               <tedi-date-field inputId="date-opt-hint" placeholder="pp.kk.aaaa" />
-              <tedi-feedback-text text="kk.pp.aaaa" />
+              <tedi-feedback-text text="pp.kk.aaaa" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-opt-shortcuts">Date field with shortcuts</label>
+              <label tedi-label for="date-opt-shortcuts">Kuupäevaväli otseteedega</label>
               <tedi-date-field inputId="date-opt-shortcuts" [formControl]="shortcutControl" />
               <div class="flex gap-2">
                 <button tedi-button variant="neutral" size="small" type="button" (click)="setToday()">Täna</button>
@@ -465,25 +465,25 @@ export const ValueType: Story = {
         <tedi-row [cols]="1" [gap]="3">
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-vt-single">Single</label>
+              <label tedi-label for="date-vt-single">Üksik kuupäev</label>
               <tedi-date-field inputId="date-vt-single" [formControl]="single" placeholder="pp.kk.aaaa" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-vt-single-value">Single with default value</label>
+              <label tedi-label for="date-vt-single-value">Üksik kuupäev vaikeväärtusega</label>
               <tedi-date-field inputId="date-vt-single-value" [formControl]="singleWithValue" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-vt-multiple">Multiple</label>
+              <label tedi-label for="date-vt-multiple">Mitu kuupäeva</label>
               <tedi-date-field inputId="date-vt-multiple" mode="multiple" [formControl]="multiple" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-vt-range">Range</label>
+              <label tedi-label for="date-vt-range">Vahemik</label>
               <tedi-date-field inputId="date-vt-range" mode="range" [formControl]="range" />
             </tedi-form-field>
           </tedi-col>
@@ -515,16 +515,16 @@ export const MultipleTagLayout: Story = {
         <tedi-row [cols]="1" [gap]="3">
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-tags-wrap">Multi-row (default)</label>
+              <label tedi-label for="date-tags-wrap">Mitmerealine (vaikimisi)</label>
               <tedi-date-field inputId="date-tags-wrap" mode="multiple" [formControl]="wrapControl" />
-              <tedi-feedback-text text="Tags wrap to new rows; the field grows in height." />
+              <tedi-feedback-text text="Sildid murduvad uutele ridadele; välja kõrgus kasvab." />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-tags-single">Single row + counter</label>
+              <label tedi-label for="date-tags-single">Üherealine + loendur</label>
               <tedi-date-field inputId="date-tags-single" mode="multiple" [multiRow]="false" tagEllipsis="start" [formControl]="singleRowControl" />
-              <tedi-feedback-text text="Tags stay on one row; overflow collapses into a +N counter. Narrow tags truncate from the start (…06.2026)." />
+              <tedi-feedback-text text="Sildid püsivad ühel real; ülejääk koondub +N loendurisse. Kitsad sildid lühenevad algusest (…06.2026)." />
             </tedi-form-field>
           </tedi-col>
         </tedi-row>
@@ -551,13 +551,13 @@ export const OnClickType: Story = {
         <tedi-row [gap]="3" [xs]="{ cols: 1 }" [lg]="{ cols: 2 }">
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-trigger-button">Calendar icon is clickable</label>
+              <label tedi-label for="date-trigger-button">Kalendriikoon on klõpsatav</label>
               <tedi-date-field inputId="date-trigger-button" [formControl]="buttonControl" calendarTrigger="button" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-trigger-input">Input is clickable</label>
+              <label tedi-label for="date-trigger-input">Sisestusväli on klõpsatav</label>
               <tedi-date-field inputId="date-trigger-input" [formControl]="inputControl" calendarTrigger="input" />
             </tedi-form-field>
           </tedi-col>
@@ -600,31 +600,31 @@ export const Range: Story = {
         <tedi-row [gap]="3" [xs]="{ cols: 1 }" [lg]="{ cols: 2 }">
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="range-default">Default range</label>
+              <label tedi-label for="range-default">Vaikimisi vahemik</label>
               <tedi-date-field inputId="range-default" mode="range" [formControl]="defaultRange" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="range-limits">Range with min/max window</label>
+              <label tedi-label for="range-limits">Vahemik min/max piiranguga</label>
               <tedi-date-field inputId="range-limits" mode="range" [formControl]="limitsRange" [minDate]="twoMonthsAgo" [maxDate]="maxDate" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="range-start-only">Start date only</label>
+              <label tedi-label for="range-start-only">Ainult alguskuupäev</label>
               <tedi-date-field inputId="range-start-only" mode="range" [formControl]="startOnly" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="range-disabled-past">Range with disabled past</label>
+              <label tedi-label for="range-disabled-past">Vahemik keelatud minevikuga</label>
               <tedi-date-field inputId="range-disabled-past" mode="range" [formControl]="disabledPastRange" [disablePast]="true" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="range-multiple-months">Range with multiple months</label>
+              <label tedi-label for="range-multiple-months">Vahemik mitme kuuga</label>
               <tedi-date-field inputId="range-multiple-months" mode="range" [formControl]="multipleMonthsRange" [numberOfMonths]="2" />
             </tedi-form-field>
           </tedi-col>
@@ -647,9 +647,9 @@ export const DisabledWeekends: Story = {
     props: { weekendMatcher: { dayOfWeek: [0, 6] } },
     template: `
       <tedi-form-field>
-        <label tedi-label for="date-weekends">Date</label>
+        <label tedi-label for="date-weekends">Kuupäev</label>
         <tedi-date-field inputId="date-weekends" [disabled]="weekendMatcher" />
-        <tedi-feedback-text text="Weekends are not selectable." />
+        <tedi-feedback-text text="Nädalavahetused ei ole valitavad." />
       </tedi-form-field>
     `,
   }),
@@ -667,9 +667,9 @@ export const ShowWeekCount: Story = {
   render: () => ({
     template: `
       <tedi-form-field>
-        <label tedi-label for="date-week-count">Date</label>
+        <label tedi-label for="date-week-count">Kuupäev</label>
         <tedi-date-field inputId="date-week-count" [showWeekNumbers]="true" />
-        <tedi-feedback-text text="ISO week numbers are shown on the left." />
+        <tedi-feedback-text text="ISO nädalanumbrid kuvatakse vasakul." />
       </tedi-form-field>
     `,
   }),
@@ -686,9 +686,9 @@ export const MultipleMonths: Story = {
   render: () => ({
     template: `
       <tedi-form-field>
-        <label tedi-label for="date-multiple-months">Date</label>
+        <label tedi-label for="date-multiple-months">Kuupäev</label>
         <tedi-date-field inputId="date-multiple-months" [numberOfMonths]="2" />
-        <tedi-feedback-text text="Two months are shown side by side (clamped to one below md)." />
+        <tedi-feedback-text text="Kaks kuud kuvatakse kõrvuti (alla md jääb üks kuu)." />
       </tedi-form-field>
     `,
   }),
@@ -711,7 +711,7 @@ export const YearGrid: Story = {
       props: { control, formatYear },
       template: `
         <tedi-form-field>
-          <label tedi-label for="date-year-grid">Year</label>
+          <label tedi-label for="date-year-grid">Aasta</label>
           <tedi-date-field
             inputId="date-year-grid"
             [formControl]="control"
@@ -720,7 +720,7 @@ export const YearGrid: Story = {
             [formatDate]="formatYear"
             placeholder="aaaa"
           />
-          <tedi-feedback-text text="Pick a year — the field shows only the year number." />
+          <tedi-feedback-text text="Vali aasta — väli näitab ainult aastanumbrit." />
         </tedi-form-field>
       `,
     };
@@ -745,13 +745,13 @@ export const WithFooter: Story = {
         <tedi-row [gap]="3" [xs]="{ cols: 1 }" [lg]="{ cols: 2 }">
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-footer-time">Time</label>
+              <label tedi-label for="date-footer-time">Kellaaeg</label>
               <tedi-date-field inputId="date-footer-time" [formControl]="timeControl">
                 <tedi-row tediCalendarFooter justifyItems="center">
                   <tedi-col>
                     <button tedi-button variant="neutral" size="small" type="button">
                       <tedi-icon name="schedule" [size]="18" />
-                      Select time
+                      Vali kellaaeg
                     </button>
                   </tedi-col>
                 </tedi-row>
@@ -760,14 +760,14 @@ export const WithFooter: Story = {
           </tedi-col>
           <tedi-col>
             <tedi-form-field>
-              <label tedi-label for="date-footer-save">Date</label>
+              <label tedi-label for="date-footer-save">Kuupäev</label>
               <tedi-date-field inputId="date-footer-save" [formControl]="saveControl">
                 <tedi-row tediCalendarFooter [cols]="2" [gapX]="2">
                   <tedi-col>
-                    <button tedi-button class="w-100" variant="secondary" size="small" type="button">Cancel</button>
+                    <button tedi-button class="w-100" variant="secondary" size="small" type="button">Tühista</button>
                   </tedi-col>
                   <tedi-col>
-                    <button tedi-button class="w-100" size="small" type="button">Save</button>
+                    <button tedi-button class="w-100" size="small" type="button">Salvesta</button>
                   </tedi-col>
                 </tedi-row>
               </tedi-date-field>
@@ -800,9 +800,9 @@ export const AvailableDays: Story = {
       props: { control, availableDays },
       template: `
         <tedi-form-field>
-          <label tedi-label for="date-available">Date</label>
+          <label tedi-label for="date-available">Kuupäev</label>
           <tedi-date-field inputId="date-available" [formControl]="control" [availableDays]="availableDays" />
-          <tedi-feedback-text text="Only the highlighted days are selectable." />
+          <tedi-feedback-text text="Ainult esiletõstetud päevad on valitavad." />
         </tedi-form-field>
       `,
     };
@@ -824,9 +824,9 @@ export const NativePicker: Story = {
       props: { control },
       template: `
         <tedi-form-field>
-          <label tedi-label for="date-native">Date</label>
+          <label tedi-label for="date-native">Kuupäev</label>
           <tedi-date-field inputId="date-native" [formControl]="control" [useNativePicker]="true" />
-          <tedi-feedback-text text="Uses the OS-native date picker on every viewport." />
+          <tedi-feedback-text text="Kasutab operatsioonisüsteemi kuupäevavalijat igal ekraanilaiusel." />
         </tedi-form-field>
       `,
     };
@@ -848,9 +848,9 @@ export const ModalPicker: Story = {
       props: { control },
       template: `
         <tedi-form-field>
-          <label tedi-label for="date-modal">Date</label>
+          <label tedi-label for="date-modal">Kuupäev</label>
           <tedi-date-field inputId="date-modal" [formControl]="control" [modal]="true" />
-          <tedi-feedback-text text="Calendar always opens in a centered modal with Cancel/Confirm." />
+          <tedi-feedback-text text="Kalender avaneb alati tsentreeritud modaalis koos Tühista/Kinnita nuppudega." />
         </tedi-form-field>
       `,
     };
@@ -872,9 +872,9 @@ export const ResponsiveModalPicker: Story = {
       props: { control },
       template: `
         <tedi-form-field>
-          <label tedi-label for="date-modal-md">Date</label>
+          <label tedi-label for="date-modal-md">Kuupäev</label>
           <tedi-date-field inputId="date-modal-md" [formControl]="control" modal="md" [useNativePicker]="false" />
-          <tedi-feedback-text text="Popover from md upward, modal below md. Resize the canvas to see it switch." />
+          <tedi-feedback-text text="Alates md hüpikuna, alla md modaalina. Muuda lõuendi suurust, et vahetust näha." />
         </tedi-form-field>
       `,
     };
@@ -896,7 +896,7 @@ export const CustomFormatAndParse: Story = {
       props: { control, formatUS, parseUS },
       template: `
         <tedi-form-field>
-          <label tedi-label for="date-custom-format">Date (MM/dd/yyyy)</label>
+          <label tedi-label for="date-custom-format">Kuupäev (MM/dd/yyyy)</label>
           <tedi-date-field
             inputId="date-custom-format"
             [formControl]="control"
@@ -904,7 +904,7 @@ export const CustomFormatAndParse: Story = {
             [parseDate]="parseUS"
             placeholder="mm/dd/yyyy"
           />
-          <tedi-feedback-text text="Try typing 12/24/2026." />
+          <tedi-feedback-text text="Proovi sisestada 12/24/2026." />
         </tedi-form-field>
       `,
     };
@@ -926,14 +926,14 @@ export const EnableCalendarFalse: Story = {
       props: { control },
       template: `
         <tedi-form-field>
-          <label tedi-label for="date-no-calendar">Date</label>
+          <label tedi-label for="date-no-calendar">Kuupäev</label>
           <tedi-date-field
             inputId="date-no-calendar"
             [formControl]="control"
             [enableCalendar]="false"
             placeholder="pp.kk.aaaa"
           />
-          <tedi-feedback-text text="Typing only — no picker UI." />
+          <tedi-feedback-text text="Ainult käsitsi sisestus — valija puudub." />
         </tedi-form-field>
       `,
     };
@@ -955,14 +955,14 @@ export const CustomLocale: Story = {
       props: { control },
       template: `
         <tedi-form-field>
-          <label tedi-label for="date-locale">Date</label>
+          <label tedi-label for="date-locale">Kuupäev</label>
           <tedi-date-field
             inputId="date-locale"
             [formControl]="control"
             localeCode="en-US"
             [useNativePicker]="false"
           />
-          <tedi-feedback-text text="Switches month names, weekday names and first day of the week." />
+          <tedi-feedback-text text="Vahetab kuude nimed, nädalapäevade nimed ja nädala esimese päeva." />
         </tedi-form-field>
       `,
     };
@@ -997,23 +997,23 @@ export const WithReactiveForms: Story = {
           <tedi-row [cols]="1" [gap]="3">
             <tedi-col>
               <tedi-form-field>
-                <label tedi-label for="date-form-start" [required]="true">Start date</label>
+                <label tedi-label for="date-form-start" [required]="true">Alguskuupäev</label>
                 <tedi-date-field inputId="date-form-start" formControlName="start" [required]="true" [useNativePicker]="false" />
-                <tedi-feedback-text text="Pick a start date." />
+                <tedi-feedback-text text="Vali alguskuupäev." />
               </tedi-form-field>
             </tedi-col>
             <tedi-col>
               <tedi-form-field>
-                <label tedi-label for="date-form-end">End date</label>
+                <label tedi-label for="date-form-end">Lõppkuupäev</label>
                 <tedi-date-field inputId="date-form-end" formControlName="end" [useNativePicker]="false" />
-                <tedi-feedback-text text="Pick an end date." />
+                <tedi-feedback-text text="Vali lõppkuupäev." />
               </tedi-form-field>
             </tedi-col>
             <tedi-col>
               <tedi-form-field>
-                <label tedi-label for="date-form-range" [required]="true">Date range</label>
+                <label tedi-label for="date-form-range" [required]="true">Kuupäevavahemik</label>
                 <tedi-date-field inputId="date-form-range" formControlName="range" mode="range" [required]="true" />
-                <tedi-feedback-text text="Pick a start and end date." />
+                <tedi-feedback-text text="Vali algus- ja lõppkuupäev." />
               </tedi-form-field>
             </tedi-col>
             <tedi-col>

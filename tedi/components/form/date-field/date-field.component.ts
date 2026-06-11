@@ -179,22 +179,24 @@ export class DateFieldComponent
   readonly currentMonth = signal<Date>(new Date());
   readonly overlayOpen = signal<boolean>(false);
 
-  readonly overlayPositions: ConnectedPosition[] = [
-    {
-      originX: "start",
-      originY: "bottom",
-      overlayX: "start",
-      overlayY: "top",
-      offsetY: 4,
-    },
-    {
-      originX: "start",
-      originY: "top",
-      overlayX: "start",
-      overlayY: "bottom",
-      offsetY: -4,
-    },
-  ];
+  private readonly openedBy = signal<DateFieldCalendarTrigger>("button");
+
+  readonly overlayPositions = computed<ConnectedPosition[]>(() => {
+    const aligned: Pick<ConnectedPosition, "originX" | "overlayX"> =
+      this.openedBy() === "button"
+        ? { originX: "end", overlayX: "end" }
+        : { originX: "start", overlayX: "start" };
+    const opposite: Pick<ConnectedPosition, "originX" | "overlayX"> =
+      this.openedBy() === "button"
+        ? { originX: "start", overlayX: "start" }
+        : { originX: "end", overlayX: "end" };
+    return [
+      { ...aligned, originY: "bottom", overlayY: "top", offsetY: 4 },
+      { ...aligned, originY: "top", overlayY: "bottom", offsetY: -4 },
+      { ...opposite, originY: "bottom", overlayY: "top", offsetY: 4 },
+      { ...opposite, originY: "top", overlayY: "bottom", offsetY: -4 },
+    ];
+  });
 
   private readonly cvaDisabled = signal(false);
   private readonly formInvalid = signal(false);
@@ -395,6 +397,10 @@ export class DateFieldComponent
   }
 
   handleIconClick(): void {
+    this.togglePicker("button");
+  }
+
+  private togglePicker(trigger: DateFieldCalendarTrigger): void {
     if (this.fieldDisabled()) return;
     if (!this.enableCalendarResolved()) return;
 
@@ -416,6 +422,7 @@ export class DateFieldComponent
       this.overlayOpen.set(false);
       this.onTouched();
     } else {
+      this.openedBy.set(trigger);
       this.overlayOpen.set(true);
     }
   }
@@ -465,7 +472,7 @@ export class DateFieldComponent
     const target = event.target as HTMLElement | null;
     if (!target) return;
     if (!target.matches(".tedi-date-input__input")) return;
-    this.handleIconClick();
+    this.togglePicker("input");
   }
 
   handleCalendarSelect(): void {

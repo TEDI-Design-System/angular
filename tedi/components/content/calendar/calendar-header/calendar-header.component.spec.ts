@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { OverlayContainer } from "@angular/cdk/overlay";
 import { CalendarHeaderComponent } from "./calendar-header.component";
 import { TediTranslationService } from "../../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
@@ -18,8 +19,13 @@ class TranslationMock {
 describe("CalendarHeaderComponent", () => {
   let fixture: ComponentFixture<CalendarHeaderComponent>;
   let component: CalendarHeaderComponent;
+  let overlayContainerElement: HTMLElement;
 
   const MAY_2024 = new Date(2024, 4, 1);
+
+  beforeAll(() => {
+    Element.prototype.scrollIntoView = jest.fn();
+  });
 
   function createComponent(): void {
     TestBed.configureTestingModule({
@@ -31,6 +37,8 @@ describe("CalendarHeaderComponent", () => {
     });
     fixture = TestBed.createComponent(CalendarHeaderComponent);
     component = fixture.componentInstance;
+    overlayContainerElement =
+      TestBed.inject(OverlayContainer).getContainerElement();
     fixture.componentRef.setInput("currentMonth", MAY_2024);
     fixture.componentRef.setInput("view", "days");
     fixture.detectChanges();
@@ -72,6 +80,17 @@ describe("CalendarHeaderComponent", () => {
   beforeEach(() => {
     createComponent();
   });
+
+  afterEach(() => {
+    overlayContainerElement.innerHTML = "";
+  });
+
+  // The dropdown content renders inside the CDK overlay container, so the
+  // dropdown must be opened via its trigger before its items can be queried.
+  function openDropdown(triggerIndex: number): void {
+    selectTriggers()[triggerIndex].click();
+    fixture.detectChanges();
+  }
 
   it("should create", () => {
     expect(component).toBeTruthy();
@@ -173,23 +192,24 @@ describe("CalendarHeaderComponent", () => {
 
   describe("dropdown selection emission", () => {
     function monthItems(): HTMLLIElement[] {
-      return fixture.debugElement
-        .queryAll(
-          By.css(".tedi-calendar-header__dropdown--month li[tedi-dropdown-item]"),
-        )
-        .map((d) => d.nativeElement as HTMLLIElement);
+      return Array.from(
+        overlayContainerElement.querySelectorAll<HTMLLIElement>(
+          ".tedi-calendar-header__dropdown--month li[tedi-dropdown-item]",
+        ),
+      );
     }
 
     function yearItems(): HTMLLIElement[] {
-      return fixture.debugElement
-        .queryAll(
-          By.css(".tedi-calendar-header__dropdown--year li[tedi-dropdown-item]"),
-        )
-        .map((d) => d.nativeElement as HTMLLIElement);
+      return Array.from(
+        overlayContainerElement.querySelectorAll<HTMLLIElement>(
+          ".tedi-calendar-header__dropdown--year li[tedi-dropdown-item]",
+        ),
+      );
     }
 
     it("emits monthChange with startOfMonth(picked) when a month item is clicked", () => {
       const emit = jest.spyOn(component.monthChange, "emit");
+      openDropdown(0);
       // Items are indexed 0..11; index 7 = August.
       monthItems()[7].click();
       fixture.detectChanges();
@@ -210,6 +230,7 @@ describe("CalendarHeaderComponent", () => {
 
     it("emits yearChange with Jan 1 of picked year when a year item is clicked", () => {
       const emit = jest.spyOn(component.yearChange, "emit");
+      openDropdown(1);
       const item = yearItems().find(
         (el) => el.textContent?.trim() === "2030",
       );
@@ -259,12 +280,13 @@ describe("CalendarHeaderComponent", () => {
 
   describe("fully-disabled-month detection (dropdown items)", () => {
     function disabledMonthIndices(): number[] {
-      return fixture.debugElement
-        .queryAll(By.css(".tedi-calendar-header__dropdown--month li"))
-        .map((d, i) => ({
-          disabled: (d.nativeElement as HTMLElement).getAttribute(
-            "aria-disabled",
-          ),
+      return Array.from(
+        overlayContainerElement.querySelectorAll<HTMLElement>(
+          ".tedi-calendar-header__dropdown--month li",
+        ),
+      )
+        .map((el, i) => ({
+          disabled: el.getAttribute("aria-disabled"),
           i,
         }))
         .filter((x) => x.disabled === "true")
@@ -278,6 +300,7 @@ describe("CalendarHeaderComponent", () => {
       fixture.componentRef.setInput("disabledMatchers", matchers);
       fixture.detectChanges();
 
+      openDropdown(0);
       expect(disabledMonthIndices()).toContain(4);
     });
 
@@ -288,6 +311,7 @@ describe("CalendarHeaderComponent", () => {
       fixture.componentRef.setInput("disabledMatchers", matchers);
       fixture.detectChanges();
 
+      openDropdown(0);
       expect(disabledMonthIndices()).not.toContain(4);
     });
 
@@ -298,15 +322,18 @@ describe("CalendarHeaderComponent", () => {
       );
       fixture.detectChanges();
 
+      openDropdown(0);
       expect(disabledMonthIndices()).toContain(0);
     });
   });
 
   describe("fully-disabled-year detection (dropdown items)", () => {
     function yearItems(): HTMLElement[] {
-      return fixture.debugElement
-        .queryAll(By.css(".tedi-calendar-header__dropdown--year li"))
-        .map((d) => d.nativeElement as HTMLElement);
+      return Array.from(
+        overlayContainerElement.querySelectorAll<HTMLElement>(
+          ".tedi-calendar-header__dropdown--year li",
+        ),
+      );
     }
 
     it("marks a year disabled when every month is fully disabled", () => {
@@ -318,6 +345,7 @@ describe("CalendarHeaderComponent", () => {
       fixture.componentRef.setInput("disabledMatchers", matchers);
       fixture.detectChanges();
 
+      openDropdown(1);
       const items = yearItems();
       const disabled2023 = items.find((el) => el.textContent?.trim() === "2023");
       const disabled2024 = items.find((el) => el.textContent?.trim() === "2024");
@@ -334,6 +362,7 @@ describe("CalendarHeaderComponent", () => {
       );
       fixture.detectChanges();
 
+      openDropdown(1);
       const items = yearItems();
       const item2024 = items.find((el) => el.textContent?.trim() === "2024");
       expect(item2024?.getAttribute("aria-disabled")).toBe("true");

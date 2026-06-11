@@ -187,15 +187,36 @@ describe("CalendarDayGridComponent", () => {
   });
 
   describe("selection — range mode", () => {
-    it("marks --range-start when only from is set", () => {
+    it("marks only --selected (fully rounded) when only from is set", () => {
       fixture.componentRef.setInput("mode", "range");
       const range: DateRange = { from: new Date(2024, 4, 10) };
       fixture.componentRef.setInput("value", range);
       fixture.detectChanges();
 
       const fromBtn = buttonForDay(new Date(2024, 4, 10));
-      expect(fromBtn?.classList).toContain(
+      expect(fromBtn?.classList).not.toContain(
         "tedi-calendar-day-grid__day--range-start",
+      );
+      expect(fromBtn?.classList).toContain(
+        "tedi-calendar-day-grid__day--selected",
+      );
+    });
+
+    it("marks only --selected (fully rounded) when from and to are the same day", () => {
+      fixture.componentRef.setInput("mode", "range");
+      const range: DateRange = {
+        from: new Date(2024, 4, 10),
+        to: new Date(2024, 4, 10),
+      };
+      fixture.componentRef.setInput("value", range);
+      fixture.detectChanges();
+
+      const fromBtn = buttonForDay(new Date(2024, 4, 10));
+      expect(fromBtn?.classList).not.toContain(
+        "tedi-calendar-day-grid__day--range-start",
+      );
+      expect(fromBtn?.classList).not.toContain(
+        "tedi-calendar-day-grid__day--range-end",
       );
       expect(fromBtn?.classList).toContain(
         "tedi-calendar-day-grid__day--selected",
