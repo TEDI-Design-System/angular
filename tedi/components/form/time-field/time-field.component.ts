@@ -191,11 +191,8 @@ export class TimeFieldComponent
       ? ("bottom-start" as const)
       : ("bottom-end" as const),
   );
-  // Reads the popover's underlying float-ui open state. Plain method (not computed)
-  // because `.state` isn't a signal — relies on CD ticks (which all open/close
-  // paths trigger via user events) to re-evaluate in the template.
   popoverIsOpen(): boolean {
-    return !!this.popover()?.floatUiComponent().state;
+    return !!this.popover()?.isOpen();
   }
 
   constructor() {

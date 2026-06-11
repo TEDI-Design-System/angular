@@ -3,7 +3,7 @@ import { InjectionToken, Signal, WritableSignal } from "@angular/core";
 export interface DropdownApi {
   /** Current value of the dropdown. Used to track the selected option in listbox mode. */
   value: WritableSignal<string | undefined>;
-  /** ID of the float-ui container element. Used to link trigger and content for accessibility. */
+  /** ID of the overlay container element. Used to link trigger and content for accessibility. */
   containerId: WritableSignal<string>;
   /** Move focus to the next enabled item after the given element. */
   focusNextItem(fromEl: HTMLLIElement): void;

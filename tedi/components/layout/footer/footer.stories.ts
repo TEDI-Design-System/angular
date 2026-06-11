@@ -1,10 +1,4 @@
-import {
-  applicationConfig,
-  Meta,
-  moduleMetadata,
-  StoryObj,
-} from "@storybook/angular";
-import { provideAnimations } from "@angular/platform-browser/animations";
+import { Meta, moduleMetadata, StoryObj } from "@storybook/angular";
 import { FooterComponent } from "./footer.component";
 import { FooterBodyComponent } from "./footer-body/footer-body.component";
 import { FooterSectionComponent } from "./footer-section/footer-section.component";
@@ -31,9 +25,6 @@ export default {
   title: "TEDI-Ready/Layout/Footer",
   component: FooterComponent,
   decorators: [
-    applicationConfig({
-      providers: [provideAnimations()],
-    }),
     moduleMetadata({
       imports: [
         FooterComponent,

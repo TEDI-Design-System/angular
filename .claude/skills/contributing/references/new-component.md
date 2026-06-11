@@ -55,14 +55,20 @@ Follow all patterns from best-practices:
 1. Create barrel export in `index.ts`
 2. Add export to the parent category `index.ts` (e.g., `tedi/components/form/index.ts`)
 
-## Step 6: Verify
+## Step 6: Code Review
+
+Run `/simplify` — a Claude Code skill available in this repository that reviews the changed code for reuse opportunities, simplification, efficiency, and altitude cleanups, then proposes fixes. Fix all valid findings before proceeding.
+
+A finding is **valid** when it is confirmed against the current code (not stale or already addressed), preserves behavior and the public API, and aligns with `best-practices.md`. Skip findings that are speculative, purely stylistic against project conventions, or would change behavior — note briefly why a finding was skipped.
+
+## Step 7: Verify
 
 1. Run tests: `npx jest tedi/components/<category>/<component-name>/`
 2. Fix any failures.
 3. Run lint: `npm run lint`
 4. Fix any lint errors.
 
-## Step 7: Update Consumer Catalog
+## Step 8: Update Consumer Catalog
 
 Update `skills/tedi-angular/references/components.md` with the new component:
 1. Add an entry to the appropriate section (TEDI-Ready or Community) with selector, key inputs/outputs, and a usage example.

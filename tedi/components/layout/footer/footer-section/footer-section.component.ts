@@ -7,14 +7,6 @@ import {
   signal,
   ViewEncapsulation,
 } from "@angular/core";
-import {
-  trigger,
-  state,
-  style,
-  transition,
-  animate,
-} from "@angular/animations";
-
 import { TextComponent } from "../../../base/text/text.component";
 import { IconComponent } from "../../../base/icon/icon.component";
 import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
@@ -31,27 +23,6 @@ import { BreakpointService } from "../../../../services/breakpoint/breakpoint.se
     class: "tedi-footer-section",
     "[class.tedi-footer-section--collapse]": "applyCollapse()",
   },
-  animations: [
-    trigger("collapseContent", [
-      state(
-        "collapsed",
-        style({
-          height: "0",
-          opacity: 0,
-          visibility: "hidden",
-        }),
-      ),
-      state(
-        "expanded",
-        style({
-          height: "*",
-          opacity: 1,
-          visibility: "visible",
-        }),
-      ),
-      transition("collapsed <=> expanded", [animate("300ms ease")]),
-    ]),
-  ],
 })
 export class FooterSectionComponent {
   /**

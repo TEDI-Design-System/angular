@@ -23,9 +23,7 @@ npm install @tedi-design-system/angular @tedi-design-system/core
 @angular/common: ^20.0.0 || ^21.0.0 || ^22.0.0
 @angular/forms: ^20.0.0 || ^21.0.0 || ^22.0.0
 @angular/cdk: ^20.0.0 || ^21.0.0 || ^22.0.0
-@angular/animations: ^20.0.0 || ^21.0.0 || ^22.0.0
 @angular/platform-browser: ^20.0.0 || ^21.0.0 || ^22.0.0
-ngx-float-ui: ^20.0.0 || ^21.0.0 (no Angular 22 release yet — on Angular 22, install ngx-float-ui@21 with --legacy-peer-deps)
 ```
 
 ## Setup

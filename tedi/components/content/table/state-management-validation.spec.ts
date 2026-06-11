@@ -7,7 +7,6 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { provideNoopAnimations } from "@angular/platform-browser/animations";
 import { TediTableComponent } from "./table.component";
 import { PaginationComponent } from "../../navigation/pagination/pagination.component";
 import type {
@@ -90,7 +89,6 @@ function setup(
     providers: [
       { provide: TediTranslationService, useClass: TranslationMock },
       { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-      provideNoopAnimations(),
     ],
   });
   const fixture = TestBed.createComponent(HostComponent);

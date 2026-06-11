@@ -154,18 +154,18 @@ describe("EllipsisComponent", () => {
   describe("tooltip rendering", () => {
     it("should show tooltip wrapper when truncated and tooltip is true", () => {
       mockTruncated("height");
-      expect(ellipsisEl.querySelector("[role=tooltip]")).toBeTruthy();
+      expect(ellipsisEl.querySelector("tedi-tooltip-trigger")).toBeTruthy();
     });
 
     it("should not show tooltip wrapper when not truncated", () => {
-      expect(ellipsisEl.querySelector("[role=tooltip]")).toBeNull();
+      expect(ellipsisEl.querySelector("tedi-tooltip-trigger")).toBeNull();
     });
 
     it("should not show tooltip wrapper when truncated but tooltip is false", () => {
       host.tooltip = false;
       fixture.detectChanges();
       mockTruncated("height");
-      expect(ellipsisEl.querySelector("[role=tooltip]")).toBeNull();
+      expect(ellipsisEl.querySelector("tedi-tooltip-trigger")).toBeNull();
     });
   });
 

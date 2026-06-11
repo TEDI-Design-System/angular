@@ -97,16 +97,6 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
-    appendTo: {
-      control: "text",
-      description:
-        "Append floating element to given selector. Use 'body' to append at the end of DOM or empty string to append next to trigger element.",
-      table: {
-        category: "dropdown",
-        type: { summary: "string" },
-        defaultValue: { summary: `""` },
-      },
-    },
     dropdownRole: {
       control: "radio",
       options: ["menu", "listbox"],
@@ -179,14 +169,13 @@ export const Default: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "menu",
     ariaHaspopup: "menu",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
         <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
           Trigger
         </button>
@@ -205,14 +194,13 @@ export const WithMeta: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "listbox",
     ariaHaspopup: "listbox",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
         <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
           Select location
         </button>
@@ -246,14 +234,13 @@ export const WithIcons: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "menu",
     ariaHaspopup: "menu",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
         <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
           Actions
         </button>
@@ -287,14 +274,13 @@ export const VerticalLayout: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "listbox",
     ariaHaspopup: "listbox",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
         <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
           Select access level
         </button>
@@ -334,14 +320,13 @@ export const WithWrappingButtonComponent: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "menu",
     ariaHaspopup: "menu",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
         <app-demo-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
           Actions
         </app-demo-button>
@@ -368,7 +353,6 @@ export const KeepOpenOnSelect: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "menu",
     ariaHaspopup: "menu",
   },
@@ -395,7 +379,7 @@ export const KeepOpenOnSelect: Story = {
       },
     },
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
         <button tedi-button tedi-dropdown-trigger variant="neutral" [ariaHaspopup]="ariaHaspopup">
           <tedi-icon name="filter_list" [size]="18" color="inherit" />
           Filters

@@ -12,17 +12,7 @@ import { Meta } from "@storybook/addon-docs/blocks";
 npm install @tedi-design-system/angular
 ```
 
-### 2. Add Angular animations provider
-
-```ts
-import { provideAnimations } from "@angular/platform-browser/animations";
-
-export const appConfig: ApplicationConfig = {
-  providers: [...yourOtherProviders, provideAnimations()],
-};
-```
-
-### 3. Add TEDI Provider (Theme + Language)
+### 2. Add TEDI Provider (Theme + Language)
 
 TEDI provides theming and language resolution out of the box using cookies and server/browser detection.
 
@@ -32,7 +22,7 @@ Add the provider to your app.config.ts:
 import { provideTedi } from "@tedi-design-system/angular/tedi";
 
 export const appConfig: ApplicationConfig = {
-  providers: [...yourOtherProviders, provideAnimations(), provideTedi()],
+  providers: [...yourOtherProviders, provideTedi()],
 };
 ```
 
@@ -51,7 +41,7 @@ This will:
 - Fall back to provided defaults
 - Apply correct values during SSR and browser hydration
 
-### 4. Add styles to angular.json
+### 3. Add styles to angular.json
 
 ```json
 "styles": [
@@ -59,7 +49,7 @@ This will:
 ]
 ```
 
-### 5. Import components from the design system
+### 4. Import components from the design system
 
 Components come from the tedi or community folders:
 
@@ -68,7 +58,7 @@ import { SomeComponent } from "@tedi-design-system/angular/tedi";
 import { SomeComponent } from "@tedi-design-system/angular/community";
 ```
 
-### 6. Use the imported components in your standalone components
+### 5. Use the imported components in your standalone components
 
 ```ts
 @Component({
@@ -146,12 +136,10 @@ Available languages are defined in your translation service, e.g.:
 
 ```ts
 import { ApplicationConfig } from "@angular/core";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { provideTedi } from "@tedi-design-system/angular";
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideAnimations(),
     provideTedi({
       theme: "dark",
       language: "en",
