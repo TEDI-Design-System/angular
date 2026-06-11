@@ -1,5 +1,6 @@
 import {
   Component,
+  forwardRef,
   input,
   ViewEncapsulation,
   ChangeDetectionStrategy,
@@ -38,7 +39,7 @@ let dropdownIdCounter = 0;
   providers: [
     {
       provide: DROPDOWN_API,
-      useExisting: DropdownComponent,
+      useExisting: forwardRef(() => DropdownComponent),
     },
   ],
 })
@@ -101,7 +102,7 @@ export class DropdownComponent implements OnDestroy {
     this.cleanupScrollListener();
   }
 
-  showDropdown() {
+  showDropdown(initialFocus: "selected" | "first" | "last" = "selected") {
     if (this.isOpen()) return;
 
     const width = this.dropdownTrigger()?.host.nativeElement.offsetWidth;
@@ -116,7 +117,16 @@ export class DropdownComponent implements OnDestroy {
       this.setupScrollListener();
     }
 
-    setTimeout(() => this.focusActiveItem());
+    // Deferred so the overlay content is attached before focusing
+    setTimeout(() => {
+      if (initialFocus === "first") {
+        this.focusFirstItem();
+      } else if (initialFocus === "last") {
+        this.focusLastItem();
+      } else {
+        this.focusActiveItem();
+      }
+    });
   }
 
   hideDropdown() {

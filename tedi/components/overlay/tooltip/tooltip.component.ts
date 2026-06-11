@@ -19,6 +19,7 @@ import {
 } from "@angular/cdk/overlay";
 import {
   OverlayPosition,
+  OverlaySide,
   toConnectedPositions,
   getPlacementFromPositionChange,
   calculateArrowOffset,
@@ -78,7 +79,7 @@ export class TooltipComponent implements AfterContentChecked {
   readonly descriptionId = `tedi-tooltip-${++tooltipIdCounter}`;
   readonly contentText = signal("");
   readonly isOpen = signal(false);
-  readonly currentPlacement = signal("top");
+  readonly currentPlacement = signal<OverlaySide>("top");
   readonly arrowLeft = signal<number | null>(null);
   readonly arrowTop = signal<number | null>(null);
 

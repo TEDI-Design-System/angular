@@ -181,9 +181,12 @@ export function toConnectedPositions(
   return positions;
 }
 
+/** The side of the trigger an overlay resolved to after positioning. */
+export type OverlaySide = "top" | "bottom" | "left" | "right";
+
 export function getPlacementFromPositionChange(
   change: ConnectedOverlayPositionChange,
-): string {
+): OverlaySide {
   const { originY, overlayY, originX, overlayX } = change.connectionPair;
 
   if (overlayX === "end" && originX === "start") return "left";
@@ -270,7 +273,7 @@ export class HorizontalPushHandler {
 }
 
 export function calculateArrowOffset(
-  placement: string,
+  placement: OverlaySide,
   triggerEl: HTMLElement,
   overlayEl: HTMLElement,
   arrowSize: number,

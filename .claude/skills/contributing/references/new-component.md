@@ -57,7 +57,9 @@ Follow all patterns from best-practices:
 
 ## Step 6: Code Review
 
-Run `/simplify` to review all changed code for reuse opportunities, code quality issues, and efficiency problems. Fix all valid findings before proceeding.
+Run `/simplify` — a Claude Code skill available in this repository that reviews the changed code for reuse opportunities, simplification, efficiency, and altitude cleanups, then proposes fixes. Fix all valid findings before proceeding.
+
+A finding is **valid** when it is confirmed against the current code (not stale or already addressed), preserves behavior and the public API, and aligns with `best-practices.md`. Skip findings that are speculative, purely stylistic against project conventions, or would change behavior — note briefly why a finding was skipped.
 
 ## Step 7: Verify
 

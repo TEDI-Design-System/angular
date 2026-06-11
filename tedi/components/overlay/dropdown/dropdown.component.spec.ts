@@ -102,6 +102,7 @@ describe("DropdownComponent", () => {
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     dropdown.hideDropdown();
     overlayContainerElement.innerHTML = "";
   });

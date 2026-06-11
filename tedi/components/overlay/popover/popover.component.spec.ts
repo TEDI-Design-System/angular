@@ -254,8 +254,13 @@ describe("PopoverComponent", () => {
       expect(component.isOpen()).toBe(false);
     });
 
-    it("should remove body overflow style when lockScroll is true", () => {
+    it("should remove body overflow style when lockScroll was set at open", () => {
       hostComponent.lockScroll = true;
+      fixture.detectChanges();
+
+      // Reopen so the scroll lock is captured at open time
+      component.hidePopover();
+      component.showPopover();
       fixture.detectChanges();
 
       const renderer = component["renderer"];
@@ -264,6 +269,23 @@ describe("PopoverComponent", () => {
       component.hidePopover();
 
       expect(removeStyleSpy).toHaveBeenCalledWith(document.body, "overflow");
+    });
+
+    it("should not remove body overflow when lockScroll was false at open", () => {
+      // Opened in beforeEach with lockScroll=false; flipping it mid-open
+      // must not clobber a body overflow style the popover never set
+      hostComponent.lockScroll = true;
+      fixture.detectChanges();
+
+      const renderer = component["renderer"];
+      const removeStyleSpy = jest.spyOn(renderer, "removeStyle");
+
+      component.hidePopover();
+
+      expect(removeStyleSpy).not.toHaveBeenCalledWith(
+        document.body,
+        "overflow",
+      );
     });
 
     it("should focus trigger when focusTrigger is true", () => {

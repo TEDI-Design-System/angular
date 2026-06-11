@@ -119,16 +119,18 @@ export class DropdownTriggerDirective implements AfterViewInit {
   }
 
   private openAndFocusFirst() {
-    if (!this.dropdown.isOpen()) {
-      this.dropdown.showDropdown();
+    if (this.dropdown.isOpen()) {
+      this.dropdown.focusFirstItem();
+    } else {
+      this.dropdown.showDropdown("first");
     }
-    setTimeout(() => this.dropdown.focusFirstItem?.());
   }
 
   private openAndFocusLast() {
-    if (!this.dropdown.isOpen()) {
-      this.dropdown.showDropdown();
+    if (this.dropdown.isOpen()) {
+      this.dropdown.focusLastItem();
+    } else {
+      this.dropdown.showDropdown("last");
     }
-    setTimeout(() => this.dropdown.focusLastItem?.());
   }
 }

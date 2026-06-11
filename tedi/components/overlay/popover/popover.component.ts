@@ -19,6 +19,7 @@ import {
 } from "@angular/cdk/overlay";
 import {
   OverlayPosition,
+  OverlaySide,
   toConnectedPositions,
   getPlacementFromPositionChange,
   calculateArrowOffset,
@@ -91,7 +92,7 @@ export class PopoverComponent {
   );
 
   readonly isOpen = signal(false);
-  readonly currentPlacement = signal("top");
+  readonly currentPlacement = signal<OverlaySide>("top");
   readonly containerId = signal(`tedi-popover-${popoverIdCounter++}`);
   readonly isContentHovered = signal(false);
   readonly arrowLeft = signal<number | null>(null);
@@ -124,6 +125,9 @@ export class PopoverComponent {
   });
 
   hideTimeout?: ReturnType<typeof setTimeout>;
+  /** Whether this popover locked body scroll when it opened — read on close
+   * so a mid-open change to the lockScroll input can't leave the lock stuck. */
+  private lockedScrollAtOpen = false;
   private keydownListener?: () => void;
   private scrollListener?: () => void;
   private focusinListener?: () => void;
@@ -150,7 +154,8 @@ export class PopoverComponent {
     clearTimeout(this.hideTimeout);
     this.isOpen.set(true);
 
-    if (this.lockScroll()) {
+    this.lockedScrollAtOpen = this.lockScroll();
+    if (this.lockedScrollAtOpen) {
       this.renderer.setStyle(this.document.body, "overflow", "hidden");
     }
   }
@@ -194,8 +199,9 @@ export class PopoverComponent {
     this.cleanupDismissListeners();
     this.isOpen.set(false);
 
-    if (this.lockScroll()) {
+    if (this.lockedScrollAtOpen) {
       this.renderer.removeStyle(this.document.body, "overflow");
+      this.lockedScrollAtOpen = false;
     }
 
     if (focusTrigger) {
@@ -322,8 +328,17 @@ export class PopoverComponent {
     }
   }
 
+  /** Focusable elements on the page, excluding the popover's own overlay —
+   * those are detached on close, so focusing them would drop focus to body. */
+  private getPageFocusableElements(): HTMLElement[] {
+    const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+    return getFocusableElements(this.document.body).filter(
+      (el) => !overlayEl?.contains(el),
+    );
+  }
+
   private focusElementAfterTrigger() {
-    const focusableElements = getFocusableElements(this.document.body);
+    const focusableElements = this.getPageFocusableElements();
     const triggerIndex = focusableElements.indexOf(
       this.popoverTrigger().host.nativeElement,
     );
@@ -336,7 +351,7 @@ export class PopoverComponent {
   }
 
   private focusElementBeforeTrigger() {
-    const focusableElements = getFocusableElements(this.document.body);
+    const focusableElements = this.getPageFocusableElements();
     const triggerIndex = focusableElements.indexOf(
       this.popoverTrigger().host.nativeElement,
     );
