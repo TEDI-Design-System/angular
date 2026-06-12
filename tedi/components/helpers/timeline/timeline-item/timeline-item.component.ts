@@ -30,6 +30,7 @@ type TimelineItemState = "current" | "past" | "future";
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    class: "tedi-timeline-item",
     "[class.tedi-timeline__item--has-bottom]": "isMobile() && !!timingsBottom()",
   },
 })

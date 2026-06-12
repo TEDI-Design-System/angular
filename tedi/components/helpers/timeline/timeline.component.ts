@@ -20,9 +20,10 @@ export type TimelineCardPadding = CardPaddingNumber;
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    class: "tedi-timeline",
     "[class.tedi-timeline--card]": "variant() === 'card'",
     "[style.--_timeline-card-padding]":
-      "variant() === 'card' && cardPadding() ? cardPadding() + 'rem' : null",
+      "variant() === 'card' && cardPadding() != null ? cardPadding() + 'rem' : null",
   },
 })
 export class TimelineComponent {
