@@ -1,7 +1,11 @@
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ProgressBarComponent } from "./progress-bar.component";
 import { FeedbackTextComponent } from "../../form/feedback-text/feedback-text.component";
+import {
+  Breakpoint,
+  BreakpointService,
+} from "../../../services/breakpoint/breakpoint.service";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
@@ -14,14 +18,34 @@ class TranslationMock {
   }
 }
 
+class BreakpointMock {
+  isBelow = signal(false);
+  isBelowBreakpoint(_: Breakpoint) {
+    return this.isBelow.asReadonly();
+  }
+  isAboveBreakpoint(_: Breakpoint) {
+    return signal(false).asReadonly();
+  }
+  currentBreakpoint() {
+    return signal(undefined as Breakpoint | undefined).asReadonly();
+  }
+  getBreakpointInputs<T>(inputs: T): T {
+    return inputs;
+  }
+}
+
 describe("ProgressBarComponent", () => {
   let fixture: ComponentFixture<ProgressBarComponent>;
   let host: HTMLElement;
+  let breakpoint: BreakpointMock;
 
   beforeEach(async () => {
+    breakpoint = new BreakpointMock();
+
     await TestBed.configureTestingModule({
       imports: [ProgressBarComponent],
       providers: [
+        { provide: BreakpointService, useValue: breakpoint },
         { provide: TediTranslationService, useClass: TranslationMock },
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
       ],
@@ -34,7 +58,6 @@ describe("ProgressBarComponent", () => {
 
   it("should render the progressbar with default classes", () => {
     expect(host.classList).toContain("tedi-progress-bar");
-    expect(host.classList).toContain("tedi-progress-bar--horizontal");
     expect(host.classList).not.toContain("tedi-progress-bar--small");
   });
 
@@ -57,8 +80,8 @@ describe("ProgressBarComponent", () => {
     expect(fixture.componentInstance.value()).toBe(100);
   });
 
-  it("should apply small modifier", () => {
-    fixture.componentRef.setInput("small", true);
+  it("should apply small modifier when size='small'", () => {
+    fixture.componentRef.setInput("size", "small");
     fixture.detectChanges();
 
     expect(host.classList).toContain("tedi-progress-bar--small");
@@ -79,6 +102,16 @@ describe("ProgressBarComponent", () => {
     const value = host.querySelector(".tedi-progress-bar__value");
     expect(value?.textContent).toContain("1/5");
     expect(value?.textContent).not.toContain("20%");
+  });
+
+  it("should expose the custom value label via aria-valuetext", () => {
+    const progress = host.querySelector("progress") as HTMLProgressElement;
+    expect(progress.getAttribute("aria-valuetext")).toBeNull();
+
+    fixture.componentRef.setInput("valueLabel", "1/5");
+    fixture.detectChanges();
+
+    expect(progress.getAttribute("aria-valuetext")).toBe("1/5");
   });
 
   it("should hide the percentage when showValue=false", () => {
@@ -126,15 +159,54 @@ describe("ProgressBarComponent", () => {
     expect(host.querySelector(".tedi-label--required")).toBeTruthy();
   });
 
-  it("should not render the hint-row when no feedback is projected and no bottom value", () => {
-    expect(host.querySelector(".tedi-progress-bar__hint-row")).toBeNull();
+  it("should leave the hint-row empty when no feedback is projected and no bottom value", () => {
+    const hintRow = host.querySelector(".tedi-progress-bar__hint-row");
+    expect(hintRow).toBeTruthy();
+    expect(hintRow?.childElementCount).toBe(0);
   });
 
-  it("should render the hint-row when bottom value is enabled", () => {
+  it("should render the value on the hint-row when bottom value is enabled", () => {
     fixture.componentRef.setInput("valuePosition", "bottom");
     fixture.detectChanges();
 
-    expect(host.querySelector(".tedi-progress-bar__hint-row")).toBeTruthy();
+    const hintRow = host.querySelector(".tedi-progress-bar__hint-row");
+    expect(hintRow?.childElementCount).toBe(1);
+    expect(
+      hintRow?.querySelector(".tedi-progress-bar__value--bottom"),
+    ).toBeTruthy();
+  });
+
+  it("should force the value to the bottom when `mobile=true`", () => {
+    fixture.componentRef.setInput("value", 30);
+    fixture.componentRef.setInput("mobile", true);
+    fixture.detectChanges();
+
+    expect(host.classList).toContain("tedi-progress-bar--value-bottom");
+    expect(
+      host.querySelector(".tedi-progress-bar__value--bottom")?.textContent,
+    ).toContain("30%");
+    expect(
+      host.querySelector(".tedi-progress-bar__track-row .tedi-progress-bar__value"),
+    ).toBeNull();
+  });
+
+  it("should force the value to the bottom when below the mobile breakpoint", () => {
+    breakpoint.isBelow.set(true);
+    fixture.detectChanges();
+
+    expect(host.classList).toContain("tedi-progress-bar--value-bottom");
+    expect(
+      host.querySelector(".tedi-progress-bar__value--bottom"),
+    ).toBeTruthy();
+  });
+
+  it("should let an explicit `mobile=false` override the breakpoint", () => {
+    breakpoint.isBelow.set(true);
+    fixture.componentRef.setInput("mobile", false);
+    fixture.detectChanges();
+
+    expect(host.classList).not.toContain("tedi-progress-bar--value-bottom");
+    expect(host.querySelector(".tedi-progress-bar__value--bottom")).toBeNull();
   });
 
   it("should set aria-label from `ariaLabel` then fall back to `label`", () => {
@@ -166,6 +238,7 @@ describe("ProgressBarComponent — content projection", () => {
     await TestBed.configureTestingModule({
       imports: [HostComponent],
       providers: [
+        { provide: BreakpointService, useClass: BreakpointMock },
         { provide: TediTranslationService, useClass: TranslationMock },
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
       ],
@@ -177,11 +250,9 @@ describe("ProgressBarComponent — content projection", () => {
     const host: HTMLElement = fixture.nativeElement;
     const hintRow = host.querySelector(".tedi-progress-bar__hint-row");
     expect(hintRow).toBeTruthy();
-    expect(hintRow?.classList).not.toContain(
-      "tedi-progress-bar__hint-row--empty",
-    );
+    expect(hintRow?.childElementCount).toBe(1);
 
-    const feedback = hintRow?.querySelector("tedi-feedback-text");
+    const feedback = hintRow?.querySelector(".tedi-feedback-text");
     expect(feedback).toBeTruthy();
     expect(feedback?.textContent).toContain("Uploading");
   });

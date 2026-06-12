@@ -1,7 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { AttachmentComponent } from "./attachment.component";
-import { ProgressBarComponent } from "../progress-bar/progress-bar.component";
+import { ProgressBarComponent } from "../../loader/progress-bar/progress-bar.component";
 import { Breakpoint, BreakpointService } from "../../../services/breakpoint/breakpoint.service";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";

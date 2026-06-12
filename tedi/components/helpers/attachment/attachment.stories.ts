@@ -6,7 +6,7 @@ import {
 } from "@storybook/angular";
 import { ComponentInputs } from "../../../types/inputs.type";
 import { AttachmentComponent } from "./attachment.component";
-import { ProgressBarComponent } from "../progress-bar/progress-bar.component";
+import { ProgressBarComponent } from "../../loader/progress-bar/progress-bar.component";
 import { FeedbackTextComponent } from "../../form/feedback-text/feedback-text.component";
 
 type StoryArgs = ComponentInputs<AttachmentComponent>;
@@ -23,7 +23,11 @@ export default {
   component: AttachmentComponent,
   decorators: [
     moduleMetadata({
-      imports: [AttachmentComponent, ProgressBarComponent, FeedbackTextComponent],
+      imports: [
+        AttachmentComponent,
+        ProgressBarComponent,
+        FeedbackTextComponent,
+      ],
     }),
   ],
   argTypes: {
@@ -89,6 +93,15 @@ export default {
   args: {
     name: "Kodukülastusakt_Triin.pdf",
   },
+  parameters: {
+    backgrounds: {
+      values: [
+        { name: "white", value: "var(--general-surface-primary)" },
+        { name: "brand", value: "var(--tedi-primary-600)" },
+      ],
+      default: "white",
+    },
+  },
 } as Meta<AttachmentComponent>;
 
 type Story = StoryObj<AttachmentComponent>;
@@ -99,9 +112,13 @@ const renderPlain = (args: StoryArgs) => ({
 });
 
 export const Default: Story = {
+  render: renderPlain,
+};
+
+export const List: Story = {
   render: () => ({
     template: `
-      <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div class="flex flex-column gap-2">
         <tedi-attachment name="Kodukülastusakt_Triin.pdf" />
         <tedi-attachment name="Lisa_5.pdf" />
         <tedi-attachment name="Graafik_2025.pdf" />
@@ -113,7 +130,7 @@ export const Default: Story = {
 export const WithProgress: Story = {
   render: () => ({
     template: `
-      <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div class="flex flex-column gap-2">
         <tedi-attachment name="Kodukülastusakt_Triin.pdf">
           <tedi-progress-bar [value]="34" valuePosition="bottom">
             <tedi-feedback-text text="Üleslaadimine" type="hint" />
@@ -135,7 +152,7 @@ export const WithFileSize: Story = {
 export const Mobile: Story = {
   render: () => ({
     template: `
-      <div style="max-width: 350px; display: flex; flex-direction: column; gap: 16px;">
+      <div class="flex flex-column gap-3" style="max-width: 350px;">
         <tedi-attachment
           [mobile]="true"
           name="Kodukülastusakt_Triin_natuke_pikema_pealkirjaga.pdf"
@@ -165,7 +182,7 @@ export const Mobile: Story = {
 export const Error: Story = {
   render: () => ({
     template: `
-      <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div class="flex flex-column gap-3">
         <tedi-attachment name="Kodukülastusakt_Triin.pdf" />
         <tedi-attachment
           name="Kodukülastusakt_Triin.pdf"

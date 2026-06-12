@@ -45,6 +45,8 @@
 
   &__error-icon {
     flex-shrink: 0;
+
+    --general-icon-danger: var(--status-badge-text-danger);
   }
 
   &__size {
@@ -64,42 +66,21 @@
     display: none;
   }
 
-  &__remove {
+  &__actions {
     display: flex;
     flex-shrink: 0;
     grid-area: close;
     align-items: center;
     align-self: start;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    padding: 0;
-    color: var(--button-close-text-default);
-    cursor: pointer;
-    background: var(--button-close-background-default);
-    border: 1px solid var(--button-close-background-default);
-    border-radius: var(--button-radius-default);
-    transition: background 0.2s ease;
 
-    --general-icon-primary: var(--button-close-text-default);
-
-    &:hover {
-      background: var(--button-close-background-hover);
-
-      --general-icon-primary: var(--button-close-text-hover);
+    &:empty {
+      display: none;
     }
+  }
 
-    &:active {
-      background: var(--button-close-background-active);
-
-      --general-icon-primary: var(--button-close-text-active);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--button-main-primary-border-focus);
-      outline-offset: -2px;
-    }
-
+  // Visuals come from .tedi-closing-button; only attachment-specific
+  // states and the mobile size override live here.
+  &__remove {
     &:disabled {
       cursor: not-allowed;
       opacity: 0.5;
@@ -135,7 +116,7 @@
   }
 
   &--mobile &__remove {
-    width: 40px;
-    height: 40px;
+    width: var(--button-sm-height);
+    height: var(--button-sm-height);
   }
 }

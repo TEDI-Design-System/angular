@@ -50,7 +50,9 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 **Inputs:**
 - `size: ClosingButtonSize = "default"`
 - `iconSize: ClosingButtonIconSize = 24` — 18 or 24
+- `icon: string = "close"` — Material Symbols icon; override for other closing-like actions such as delete/remove (e.g. `delete`). Provide a matching `ariaLabel` when overriding.
 - `ariaLabel: string`
+- `showTitle: boolean = true` — set `false` to drop the native `title` attribute (e.g. when wrapped in a `tedi-tooltip`)
 
 ### Collapse
 **Selector:** `tedi-collapse`
@@ -603,35 +605,10 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 
 ```html
 <tedi-attachment name="report.pdf" fileSize="0.9 MB" (remove)="onRemove()">
-  <tedi-progress-bar
-    [value]="34"
-    valuePosition="bottom"
-    [feedbackText]="{ text: 'Uploading', type: 'hint' }"
-  />
+  <tedi-progress-bar [value]="34" valuePosition="bottom">
+    <tedi-feedback-text text="Uploading" type="hint" />
+  </tedi-progress-bar>
 </tedi-attachment>
-```
-
-### ProgressBar
-**Selector:** `tedi-progress-bar`
-**Inputs:**
-- `value: number = 0` — 0–100, clamped
-- `progressId: string` — id for the underlying `<progress>` element
-- `direction: "horizontal" | "vertical" = "horizontal"` — where the percentage sits relative to the bar
-- `small: boolean = false` — 4px bar height instead of 8px
-- `label: string` — optional title (top or horizontal)
-- `labelPosition: "top" | "horizontal" = "top"`
-- `required: boolean = false` — red `*` after the label
-- `showValue: boolean = true` — show/hide the percentage value
-- `valuePosition: "horizontal" | "bottom" = "horizontal"` — where to place the percentage value
-- `valueLabel: string` — override the rendered value text (e.g. `"1/5"`)
-- `ariaLabel: string` — falls back to `label`
-**Slots:** project a `<tedi-feedback-text>` to render a hint or error line below the bar.
-
-```html
-<tedi-progress-bar [value]="42" label="Uploading" required>
-  <tedi-feedback-text text="Uploading" type="hint" />
-</tedi-progress-bar>
-<tedi-progress-bar [value]="20" valueLabel="1/5" />
 ```
 
 ### Row / Col (Grid)
@@ -746,6 +723,30 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 ```
 
 ## Loader
+
+### ProgressBar
+**Selector:** `tedi-progress-bar`
+**Inputs:**
+- `value: number = 0` — 0–100, clamped
+- `progressId: string` — id for the underlying `<progress>` element
+- `size: "default" | "small" = "default"` — `small` renders a 4px bar height instead of 8px
+- `label: string` — optional title (top or horizontal)
+- `labelPosition: "top" | "horizontal" = "top"`
+- `required: boolean = false` — red `*` after the label
+- `showValue: boolean = true` — show/hide the percentage value
+- `valuePosition: "horizontal" | "bottom" = "horizontal"` — where to place the percentage value
+- `valueLabel: string` — override the rendered value text (e.g. `"1/5"`); also exposed via `aria-valuetext`
+- `ariaLabel: string` — falls back to `label`
+- `mobile: boolean | undefined` — manually force the mobile variant. When `undefined`, derived from `mobileBreakpoint`; set `false` to disable the automatic behavior. The mobile variant always renders the value below the bar, regardless of `valuePosition`.
+- `mobileBreakpoint: Breakpoint = "sm"` — viewport breakpoint below which the mobile variant kicks in
+**Slots:** project a `<tedi-feedback-text>` to render a hint or error line below the bar.
+
+```html
+<tedi-progress-bar [value]="42" label="Uploading" required>
+  <tedi-feedback-text text="Uploading" type="hint" />
+</tedi-progress-bar>
+<tedi-progress-bar [value]="20" valueLabel="1/5" />
+```
 
 ### Spinner
 **Selector:** `tedi-spinner`

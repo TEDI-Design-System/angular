@@ -36,14 +36,14 @@
     min-width: 0;
   }
 
-  &__bar-row {
+  &__track-row {
     display: flex;
     gap: var(--layout-grid-gutters-08);
     align-items: center;
     min-height: var(--body-regular-line-height);
   }
 
-  &__bar {
+  &__track {
     flex: 1 1 auto;
     width: 100%;
     height: var(--_bar-height);
@@ -78,9 +78,13 @@
     gap: var(--layout-grid-gutters-08);
     align-items: flex-start;
     min-width: 0;
+
+    &:empty {
+      display: none;
+    }
   }
 
-  &__hint-row tedi-feedback-text {
+  &__hint-row .tedi-feedback-text {
     flex: 1 1 auto;
     min-width: 0;
   }

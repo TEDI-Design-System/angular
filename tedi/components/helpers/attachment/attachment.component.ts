@@ -10,8 +10,12 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { IconComponent } from "../../base/icon/icon.component";
+import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
 import { FeedbackTextComponent } from "../../form/feedback-text/feedback-text.component";
-import { ProgressBarComponent } from "../progress-bar/progress-bar.component";
+import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
+import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
+import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
+import { ProgressBarComponent } from "../../loader/progress-bar/progress-bar.component";
 import {
   Breakpoint,
   BreakpointService,
@@ -19,8 +23,16 @@ import {
 import { TediTranslationService } from "../../../services/translation/translation.service";
 
 @Component({
+  standalone: true,
   selector: "tedi-attachment",
-  imports: [IconComponent, FeedbackTextComponent],
+  imports: [
+    IconComponent,
+    ClosingButtonComponent,
+    FeedbackTextComponent,
+    TooltipComponent,
+    TooltipTriggerComponent,
+    TooltipContentComponent,
+  ],
   templateUrl: "./attachment.component.html",
   styleUrl: "./attachment.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,

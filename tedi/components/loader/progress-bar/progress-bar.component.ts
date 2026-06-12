@@ -3,18 +3,22 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  contentChild,
+  inject,
   input,
   ViewEncapsulation,
 } from "@angular/core";
-import { FeedbackTextComponent } from "../../form/feedback-text/feedback-text.component";
 import { LabelComponent } from "../../form/label/label.component";
+import {
+  Breakpoint,
+  BreakpointService,
+} from "../../../services/breakpoint/breakpoint.service";
 
-export type ProgressBarDirection = "horizontal" | "vertical";
+export type ProgressBarSize = "default" | "small";
 export type ProgressBarLabelPosition = "top" | "horizontal";
 export type ProgressBarValuePosition = "horizontal" | "bottom";
 
 @Component({
+  standalone: true,
   selector: "tedi-progress-bar",
   imports: [LabelComponent],
   templateUrl: "./progress-bar.component.html",
@@ -23,11 +27,11 @@ export type ProgressBarValuePosition = "horizontal" | "bottom";
   encapsulation: ViewEncapsulation.None,
   host: {
     "[class.tedi-progress-bar]": "true",
-    "[class.tedi-progress-bar--small]": "small()",
-    "[class.tedi-progress-bar--horizontal]": "direction() === 'horizontal'",
+    "[class.tedi-progress-bar--small]": "size() === 'small'",
     "[class.tedi-progress-bar--label-horizontal]":
       "label() && labelPosition() === 'horizontal'",
-    "[class.tedi-progress-bar--value-bottom]": "valuePosition() === 'bottom'",
+    "[class.tedi-progress-bar--value-bottom]":
+      "effectiveValuePosition() === 'bottom'",
   },
 })
 export class ProgressBarComponent {
@@ -44,17 +48,11 @@ export class ProgressBarComponent {
     transform: (raw) => Math.min(100, Math.max(0, Number(raw) || 0)),
   });
   /**
-   * Direction (layout) of the percentage relative to the bar.
-   * - `horizontal` – percentage to the right of the bar.
-   * - `vertical` – percentage below the bar.
-   * @default horizontal
+   * Size of the bar. `small` renders a 4px bar height instead of the
+   * default 8px.
+   * @default default
    */
-  direction = input<ProgressBarDirection>("horizontal");
-  /**
-   * Small variant — 4px bar height instead of the default 8px.
-   * @default false
-   */
-  small = input(false, { transform: booleanAttribute });
+  size = input<ProgressBarSize>("default");
   /**
    * Optional title rendered above (default) or to the left of the bar.
    */
@@ -88,20 +86,39 @@ export class ProgressBarComponent {
    *
    * Use this when the progress represents something other than a percentage —
    * e.g. `value=20` with `valueLabel="1/5"` shows the bar at 20% but renders
-   * the label as "1/5". `value` still drives the bar fill and ARIA semantics.
+   * the label as "1/5". `value` still drives the bar fill; the label is also
+   * exposed to assistive technology via `aria-valuetext`.
    */
   valueLabel = input<string>();
   /**
    * Accessible label for the progress bar. Falls back to `label()` when omitted.
    */
   ariaLabel = input<string>();
+  /**
+   * Manually force the mobile variant on or off. When `undefined`, the
+   * variant is auto-derived from the viewport breakpoint (see
+   * `mobileBreakpoint`). Set to `false` to opt out of the automatic
+   * behavior entirely. The mobile variant always renders the value on the
+   * hint row beneath the bar, regardless of `valuePosition`.
+   */
+  mobile = input<boolean | undefined>(undefined);
+  /**
+   * Viewport breakpoint below which the mobile variant kicks in when
+   * `mobile` is not set explicitly.
+   * @default "sm"
+   */
+  mobileBreakpoint = input<Breakpoint>("sm");
 
-  protected projectedFeedback = contentChild(FeedbackTextComponent);
+  private breakpointService = inject(BreakpointService);
 
-  protected hasHintRow = computed(
-    () =>
-      !!this.projectedFeedback() ||
-      (this.showValue() && this.valuePosition() === "bottom"),
+  private _autoMobile = computed(() => {
+    return this.breakpointService.isBelowBreakpoint(this.mobileBreakpoint())();
+  });
+
+  protected isMobile = computed(() => this.mobile() ?? this._autoMobile());
+
+  protected effectiveValuePosition = computed<ProgressBarValuePosition>(() =>
+    this.isMobile() ? "bottom" : this.valuePosition(),
   );
 
   protected formattedValue = computed(

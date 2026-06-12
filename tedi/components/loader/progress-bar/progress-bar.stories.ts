@@ -7,6 +7,7 @@ import {
 import { ComponentInputs } from "../../../types/inputs.type";
 import { ProgressBarComponent } from "./progress-bar.component";
 import { FeedbackTextComponent } from "../../form/feedback-text/feedback-text.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
 
 type StoryArgs = ComponentInputs<ProgressBarComponent>;
 
@@ -18,11 +19,11 @@ type StoryArgs = ComponentInputs<ProgressBarComponent>;
  * or error message below the bar.
  */
 export default {
-  title: "TEDI-Ready/Components/Helpers/ProgressBar",
+  title: "TEDI-Ready/Components/Loader/ProgressBar",
   component: ProgressBarComponent,
   decorators: [
     moduleMetadata({
-      imports: [ProgressBarComponent, FeedbackTextComponent],
+      imports: [ProgressBarComponent, FeedbackTextComponent, RowComponent],
     }),
   ],
   argTypes: {
@@ -41,23 +42,15 @@ export default {
         defaultValue: { summary: "0" },
       },
     },
-    direction: {
-      description: "Orientation — controls where the percentage sits.",
+    size: {
+      description:
+        "Size of the bar. `small` renders a 4px bar height instead of the default 8px.",
       control: { type: "radio" },
-      options: ["horizontal", "vertical"],
+      options: ["default", "small"],
       table: {
         category: "inputs",
-        type: { summary: "ProgressBarDirection" },
-        defaultValue: { summary: "horizontal" },
-      },
-    },
-    small: {
-      description: "Small variant — 4px bar height instead of the default 8px.",
-      control: "boolean",
-      table: {
-        category: "inputs",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
+        type: { summary: "ProgressBarSize" },
+        defaultValue: { summary: "default" },
       },
     },
     label: {
@@ -117,6 +110,24 @@ export default {
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
+    mobile: {
+      description:
+        "Manually force the mobile variant. When `undefined`, derived from the viewport breakpoint; set to `false` to disable the automatic behavior. The mobile variant always renders the value below the bar.",
+      control: { type: "radio" },
+      options: [undefined, true, false],
+      table: { category: "inputs", type: { summary: "boolean | undefined" } },
+    },
+    mobileBreakpoint: {
+      description:
+        "Viewport breakpoint below which the mobile variant is auto-applied.",
+      control: { type: "radio" },
+      options: ["xs", "sm", "md", "lg", "xl", "xxl"],
+      table: {
+        category: "inputs",
+        type: { summary: "Breakpoint" },
+        defaultValue: { summary: "sm" },
+      },
+    },
   },
   args: {
     value: 20,
@@ -144,11 +155,18 @@ export const Default: Story = {
   render: renderPlain,
 };
 
-export const Small: Story = {
-  render: renderPlain,
-  args: {
-    small: true,
-  },
+export const Size: Story = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-row [cols]="1" [gapY]="3">
+        <div>Default</div>
+        <tedi-progress-bar [value]="20" />
+        <div>Small</div>
+        <tedi-progress-bar [value]="20" size="small" />
+      </tedi-row>
+    `,
+  }),
 };
 
 export const WithLabelTop: Story = {
@@ -192,19 +210,25 @@ export const ValueBelow: Story = {
   },
 };
 
+/**
+ * On mobile viewports (below the `mobileBreakpoint`, default `sm`) the value
+ * always moves to the row beneath the bar, regardless of `valuePosition`.
+ * Here the mobile variant is forced with `[mobile]="true"`.
+ */
+export const Mobile: Story = {
+  render: renderWithFeedback("Üleslaadimine", "hint"),
+  args: {
+    mobile: true,
+    label: "Edenemisriba pealkiri",
+  },
+};
+
 export const CustomValueLabel: Story = {
   render: renderPlain,
   args: {
     value: 20,
     valueLabel: "1/5",
     label: "Steps completed",
-  },
-};
-
-export const Vertical: Story = {
-  render: renderWithFeedback("Üleslaadimine", "hint"),
-  args: {
-    direction: "vertical",
   },
 };
 
