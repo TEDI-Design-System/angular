@@ -64,6 +64,31 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 - `arrowType: ArrowType = "default"`
 **Slots:** default
 
+### CollapseButton
+**Selector:** `button[tedi-collapse-button]` — apply to a native `<button>` (the button *is* the host; do not nest a button).
+
+Headless chevron toggle extracted from `Collapse` for cases where you only need the toggle affordance (e.g. inside a table row, accordion, or custom disclosure). Emits `(openChange)` and renders a chevron that animates with `open`.
+
+**Inputs:**
+- `open: boolean = false` — current open state; pair with `(openChange)`
+- `openText: string` — label when collapsed (falls back to translated `"open"`)
+- `closeText: string` — label when expanded (falls back to translated `"close"`)
+- `hideText: boolean = false` — icon-only mode; `ariaLabel` becomes the accessible name
+- `arrowType: "default" | "secondary" = "default"` — `"secondary"` paints the bordered style (only effective in icon-only mode)
+- `size: "default" | "small" = "default"`
+- `inverted: boolean = false` — light text/icon for dark backgrounds (ignored when `arrowType="secondary"`)
+- `ariaControls: string` — id of the disclosed region
+- `ariaLabel: string` — required when `hideText` is true
+- `id: string`
+**Outputs:**
+- `openChange: boolean`
+
+```html
+<button tedi-collapse-button [(open)]="expanded" ariaControls="panel-1"></button>
+<button tedi-collapse-button [open]="expanded" [hideText]="true" arrowType="secondary"
+  ariaLabel="Toggle row" (openChange)="expanded = $event"></button>
+```
+
 ### InfoButton
 **Selector:** `button[tedi-info-button]`
 **Inputs:**
@@ -209,6 +234,222 @@ Composed of sub-components:
 </tedi-text-group>
 ```
 
+### Table
+**Selector:** `tedi-table` (generic `<TData>`)
+
+Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.com/table). Columns are configured via `TediColumnDef<TData>[]` objects (no `*tediCellDef` directives). Owns sorting, filtering, pagination, row selection, expansion, column visibility/order, and row/column drag-and-drop. State is uncontrolled by default; opt into controlled mode via `state` + `(stateChange)`, defaulted via `defaultState`, or persisted to storage via `persist`.
+
+**Peer dependency:** add `@tanstack/angular-table` to your app (it is a runtime dependency of `@tedi-design-system/angular`).
+
+**Inputs:**
+- `data: TData[]` (required)
+- `columns: TediColumnDef<TData>[]` (required)
+- `id: string` — stable id used to prefix synthetic ids; auto-generated when omitted
+- `size: "medium" | "small" = "medium"`
+- `caption: TemplateRef | string` — caption above the table
+- `striped: boolean = false`
+- `verticalBorders: boolean = false`
+- `borderless: boolean = false`
+- `stickyFirstColumn: boolean = false`
+- `stickyHeader: boolean = false`
+- `fixedLayout: boolean = false` — `table-layout: fixed`; makes column `size`/`minSize`/`maxSize` authoritative (content wraps instead of stretching the column). Required for column width caps to hold.
+- `maxHeight: number | string` — wraps the table in a scrollable container (pair with `stickyHeader`)
+- `activeRowId: string` — highlights one row
+- `rowHover: boolean` — force hover styling on/off (default tracks `interactive`)
+- `interactive: boolean = false` — adds `role="button"`, hover/active styles, and keyboard activation to rows; subscribe to `(rowClick)`
+- `rowAriaLabel: (row: Row<TData>) => string` — explicit accessible name per interactive row (without it, a `role="button"` row's name is built from all its cell text). Only applied when `interactive` is true
+- `enableRowSelection: boolean | ((row) => boolean)` — opt-in selection; auto-renders a selection column
+- `selectionMode: "multiple" | "single" = "multiple"` — `multiple` shows checkboxes + select-all; `single` shows radios (no select-all)
+- `selectedRowHighlight: boolean = true` — whether selected rows get a background highlight. Set `false` to keep selection state for logic without the visual highlight (e.g. when you render selection feedback yourself in a cell template)
+- `renderSubComponent: TemplateRef<{ $implicit: Row<TData> }>` — expanded-row content template; auto-renders an expand column
+- `getRowCanExpand: (row) => boolean` — gate which rows expand
+- `expandTrigger: "button" | "row" = "button"` — `row` lets a click anywhere on the row toggle expansion. The chevron uses the bordered `secondary` style regardless; change it via `expandButtonVariant`.
+- `expandButtonVariant: "default" | "secondary"` — override the expand toggle's arrow style. Defaults to the bordered `secondary` style; set `default` for the neutral (borderless) chevron. Only affects the icon-only button (i.e. when `expandButtonLabel` is unset).
+- `expandButtonLabel: string | { open: string; close: string }` — render a visible label next to the chevron instead of an icon-only button. A single string is used for both states; the `{ open, close }` form sets distinct collapsed (`open`) / expanded (`close`) labels. When unset the button stays icon-only with the translated expand/collapse aria-label.
+- `getSubRows: (row) => TData[] | undefined` — hierarchical / tree rows
+- `enableColumnFilters: boolean = false` — force TanStack's filter machinery (auto-on when any column sets `filterable`)
+- `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`). `pageSizeOptions` accepts plain numbers or `{ value, label }` objects — use the object form for a **"Show all"** entry whose `value` is large enough to hold every row: pass the row total when you know it (`data.length`), or `Number.MAX_SAFE_INTEGER` when you don't. Filtering only shrinks the row count, so a large page size always collapses the result to a single page. (Don't use `-1` — TanStack clamps `setPageSize` to `≥ 1`.)
+- `paginationTop: boolean | TablePaginationOptions` — opt-in top paginator; shares page / page-size state with bottom but has independent visual config (its own arrow + `hide*` settings). Requires `pagination` to be truthy.
+- `manualPagination: boolean = false` — server-side pagination; supply `pageCount` or `rowCount`
+- `manualSorting: boolean = false`
+- `manualFiltering: boolean = false`
+- `pageCount: number` — total pages in manual mode
+- `rowCount: number` — total rows in manual mode
+- `state: Partial<TableState>` — controlled state. Per-slice: only the slices you pass are controlled (the table renders them verbatim and never changes them itself); write changes back from `(stateChange)` or the UI appears frozen. Other slices stay internal.
+- `defaultState: Partial<TableState>` — initial state for uncontrolled slices. Read once; the table owns the state afterwards (later changes to the input are ignored once the user interacts).
+- `persist: TablePersistOptions` — `{ key, storage?, include? }` to persist state to `localStorage` (defaults persist user-preference slices: `columnVisibility`, `columnOrder`, `rowOrder`, `columnSizing`; add task-scoped slices like `sorting`/`columnFilters` via `include`)
+- `placeholder: TemplateRef | string` — empty-state content (defaults to translated `table.no-data`)
+- `placeholderRole: "alert" | "status"`
+- `reorderableRows: boolean = false` — reorder rows by **mouse drag and keyboard** (one input). Mouse: drag a row by its handle. Keyboard: Tab to the handle, Space/Enter to pick up, ↑/↓ to move within the current page, Space/Enter to drop, Escape to cancel. Emits `(rowDrop)` with indices normalised to the source `data` array.
+- `reorderableColumns: boolean = false` — reorder columns by **mouse drag and keyboard** (one input). Mouse: drag a header cell by its handle. Keyboard: Tab to a header, Space/Enter to pick up, ←/→ to move live, Space/Enter to drop, Escape to cancel. Updates internal `columnOrder` state.
+
+**Outputs:**
+- `stateChange: TableState` — emits the full merged `TableState` after every change, regardless of which slice changed
+- `rowClick: Row<TData>` — only fires when `interactive` is true
+- `rowDrop: CdkDragDrop<TData[]>` — `previousIndex`/`currentIndex` are source-array positions; pass through `moveItemInArray(data, prev, curr)` and rebind `[data]`
+
+**State management (`TableState`):** one object holds every interactive slice — `columnVisibility`, `columnOrder`, `rowOrder`, `columnSizing`, `rowSelection`, `expanded`, `columnFilters`, `sorting`, `pagination` (slice types are TanStack's). Modes mix per slice: uncontrolled (default), seeded via `defaultState`, controlled via `state` + `(stateChange)`, persisted via `persist`. Precedence per slice: `state` (controlled) > persisted storage value > `defaultState` > built-in default. Row-keyed slices (`rowSelection`, `expanded`) use TanStack's default row IDs — the row index as a string, nested sub-rows as dotted paths (`"0.1"`) — so index-keyed state shifts if `data` order changes. `expanded` also accepts `true` for "all rows".
+
+Render expandable rows open on first load (still user-collapsible):
+
+```html
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [defaultState]="{ expanded: true }"
+/>
+<!-- or only specific rows: [defaultState]="{ expanded: { '0': true, '2': true } }" -->
+```
+
+**Column definition (`TediColumnDef<TData>`):** extends TanStack's `ColumnDef` with Angular-specific fields:
+- `sortable: boolean` — opt the column into the built-in sort affordance (string `header` only). Pair with `sortingFn` to override the comparator. For custom UIs, pass a `TemplateRef` for `header` and call `column.toggleSorting()` yourself.
+- `filterable: boolean | { clearOnClose?: boolean }` — opt into the built-in filter popover (icon `filter_alt`). Requires `filterTemplate`.
+- `filterTemplate: TemplateRef<TediTableFilterContext>` — UI rendered inside the filter popover. The context exposes `value`, `setValue`, `apply()`, `clear()`, and `column`. Apply/Clear footer buttons are wired automatically.
+- `rowSpan: number | ((info: CellContext) => number)` — body-level row spanning. Return `>1` to emit `rowspan="N"`; return `0` to skip the `<td>`.
+- `size` / `minSize` / `maxSize` (TanStack) — rendered as `width` / `min-width` / `max-width` (px) on the column's cells, applied only when set. **Authoritative only under `[fixedLayout]="true"`** — with the default auto layout they're hints and content can stretch the column past them. Under fixed layout, leave **at least one column unsized** so it absorbs the leftover space; if every column is sized, `table-layout: fixed` scales them all up to fill the table's width.
+- `meta: TableColumnMeta` — `{ label?, align?, vAlign? }` for accessible label + cell alignment.
+
+**Per-column sorting (`sortingFn`)** — inherited from TanStack `ColumnDef`:
+- Built-ins: `'alphanumeric'`, `'alphanumericCaseSensitive'`, `'text'`, `'textCaseSensitive'`, `'datetime'`, `'basic'`, `'auto'` (default).
+- Custom: `(rowA, rowB, columnId) => number`. Use `row.getValue(columnId)` to read cell values.
+
+**Cell rendering:** `cell` accepts a string property key, a `(info) => value` accessor, a `TemplateRef`, or a `ComponentType` — all rendered via TanStack's `FlexRenderDirective`.
+
+**Reacting to row state in cell templates:** a `TemplateRef` cell receives the TanStack `CellContext` (commonly aliased `let-ctx`), so `ctx.row` exposes the row's live state — `ctx.row.getIsSelected()`, `ctx.row.getIsExpanded()`, `ctx.row.original`, `ctx.row.id` — and the cell re-renders when that state changes. Use it to restyle cell content per row, e.g. border a status badge while its row is selected (compare against `activeRowId` for interactive/clickable rows):
+
+```html
+<ng-template #statusCell let-ctx>
+  <tedi-status-badge
+    [color]="statusColor[ctx.row.original.status]"
+    [text]="ctx.row.original.status"
+    [variant]="ctx.row.getIsSelected() ? 'filled-bordered' : 'filled'"
+  />
+</ng-template>
+```
+
+**Helpers:** `groupRowSpan(rows, keyFn)` — produces a `rowSpan` callback that auto-collapses consecutive equal keys. Pass the *currently-rendered* row set (`table.getRowModel().rows`) so spans operate on post-filter/sort rows.
+
+```typescript
+import {
+  TediTableComponent,
+  type TediColumnDef,
+  groupRowSpan,
+} from '@tedi-design-system/angular/tedi';
+
+interface Person { id: string; name: string; role: string; salary: number; }
+
+columns: TediColumnDef<Person>[] = [
+  { accessorKey: 'name', header: 'Name', sortable: true },
+  { accessorKey: 'role', header: 'Role', meta: { align: 'left' } },
+  {
+    accessorKey: 'salary',
+    header: 'Salary',
+    meta: { align: 'right' },
+    cell: ({ getValue }) => `${getValue<number>()} €`,
+  },
+];
+```
+
+```html
+<tedi-table
+  [data]="people()"
+  [columns]="columns"
+  [pagination]="{ pageSize: 25, pageSizeOptions: [10, 25, 50] }"
+  [enableRowSelection]="true"
+  [interactive]="true"
+  (rowClick)="open($event.original)"
+>
+  <tedi-table-toolbar>
+    <tedi-table-columns-menu />
+  </tedi-table-toolbar>
+</tedi-table>
+```
+
+Server-side pagination + persisted view preferences:
+
+```html
+<tedi-table
+  [data]="rows()"
+  [columns]="columns"
+  [manualPagination]="true"
+  [manualSorting]="true"
+  [pageCount]="pageCount()"
+  [pagination]="true"
+  [state]="{ pagination: page(), sorting: sorting() }"
+  (stateChange)="onStateChange($event)"
+  [persist]="{ key: 'tedi.tables.invoices' }"
+/>
+```
+
+Expandable rows + custom filter template:
+
+```html
+<ng-template #expanded let-row>
+  <tedi-text-group type="horizontal" labelWidth="160px">
+    <tedi-text-group-label>Email</tedi-text-group-label>
+    <tedi-text-group-value>{{ row.original.email }}</tedi-text-group-value>
+  </tedi-text-group>
+</ng-template>
+
+<ng-template #roleFilter let-ctx>
+  <tedi-form-field>
+    <input tedi-text-field [ngModel]="ctx.value ?? ''"
+      (ngModelChange)="ctx.setValue($event)" (keydown.enter)="ctx.apply()" />
+  </tedi-form-field>
+</ng-template>
+
+<tedi-table
+  [data]="rows()"
+  [columns]="columns"
+  [renderSubComponent]="expanded"
+  expandTrigger="row"
+/>
+```
+
+### TableToolbar
+**Selector:** `tedi-table-toolbar`
+
+Layout wrapper that sits above a `<tedi-table>` for filter chips, search inputs, and action buttons. No inputs — pure CSS container.
+
+```html
+<tedi-table-toolbar>
+  <input tedi-text-field placeholder="Search" [(value)]="query" />
+  <tedi-filter text="Status" [options]="statusOptions" [(value)]="status" />
+  <tedi-table-columns-menu />
+</tedi-table-toolbar>
+<tedi-table [data]="rows()" [columns]="columns" />
+```
+
+### TableColumnsMenu
+**Selector:** `tedi-table-columns-menu`
+
+Dropdown that lets the user toggle column visibility for the nearest ancestor `<tedi-table>` (uses `TEDI_TABLE_CONTEXT`). Must render as a descendant of `<tedi-table>` — picks up the table via DI.
+
+**Inputs:**
+- `triggerLabel: string` — overrides the translated `table.columns` label
+
+### TableHeaderButton
+**Selector:** `button[tedi-table-header-button]`
+
+Icon button used inside custom column header templates (e.g., combined sort + filter triggers). Picks up the column's selected/active state visually.
+
+**Inputs:**
+- `icon: string` (required) — Material Symbols icon name
+- `filled: boolean = false` — render the icon's filled variant
+- `selected: boolean = false` — brand-coloured active state
+- `disabled: boolean = false`
+- `iconSize: IconSize = 18`
+- `ariaLabel: string` — required for icon-only usage
+
+```html
+<ng-template #header let-ctx>
+  <button tedi-table-header-button icon="filter_alt"
+    [selected]="ctx.column.getIsFiltered()" ariaLabel="Filter">
+  </button>
+</ng-template>
+```
+
 ## Filter
 
 ### Filter
@@ -228,7 +469,6 @@ Composed of sub-components:
 - `showClear: boolean = false` — show clear action in dropdown
 - `selectAllLabel?: string` — override for "Select all" label (defaults to translated string)
 - `clearLabel?: string` — override for "Clear selection" label (defaults to translated string)
-- `appendTo: string = ""` — append dropdown to selector (e.g., "body")
 - `disabled: boolean = false` — also set automatically by a disabled `FormControl` or a disabled parent `FilterGroup`
 **Outputs:**
 - `cleared: void` — emitted when clear button is clicked in custom content mode
@@ -243,14 +483,14 @@ Implements `ControlValueAccessor`. Value type depends on mode: `boolean` (toggle
 <tedi-filter text="Active" variant="secondary" [formControl]="activeControl" />
 
 <!-- Single-select dropdown -->
-<tedi-filter text="Service" [options]="options" [(value)]="value" [showClear]="true" appendTo="body" />
+<tedi-filter text="Service" [options]="options" [(value)]="value" [showClear]="true" />
 
 <!-- Single-select with label preserved (shows "Service: Option A") -->
-<tedi-filter text="Service" [options]="options" [(value)]="value" [preserveLabel]="true" appendTo="body" />
+<tedi-filter text="Service" [options]="options" [(value)]="value" [preserveLabel]="true" />
 
 <!-- Multi-select dropdown -->
 <tedi-filter text="Hospital" [allowMultiple]="true" [options]="options" [(value)]="values"
-  [showSearch]="true" [showSelectAll]="true" [showClear]="true" appendTo="body" />
+  [showSearch]="true" [showSelectAll]="true" [showClear]="true" />
 
 <!-- With prepend content -->
 <tedi-filter text="Submitted" variant="secondary" size="large">
@@ -489,6 +729,72 @@ statusControl = new FormControl<string | null>(null);
 <tedi-date-picker [formControl]="dateControl" [showWeekNumbers]="true" />
 ```
 
+### TimeField
+**Selector:** `tedi-time-field`
+**Model:** `value: string | null` — `HH:mm`
+**Inputs:**
+- `inputId: string` (required) — unique ID for label association
+- `placeholder: string`
+- `disabled: boolean = false`
+- `invalid: boolean = false` — manually mark the field invalid (combines with reactive-form validity)
+- `clearable: boolean = true`
+- `pickerVariant: TimeFieldPickerVariant = "scroll"` — `"scroll" | "slots" | "dropdown" | "none"`. `"none"` renders just the input — typed input is still normalized on blur (e.g. `9` → `09:00`, `930` → `09:30`)
+- `useNativePicker: TimeFieldUseNativePicker = false` — `true` always uses the OS time picker (`<input type="time">`), `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl"`) means native below that breakpoint. When resolved to `true`, overrides `pickerVariant` and `modal`
+- `pickerTrigger: TimeFieldPickerTrigger = "button"` — `"button"` opens via the icon only (popover opens toward the icon/end); `"input"` also opens when the input is clicked (popover opens from the field start/left). The popover always matches the input width
+- `closeOnSelect: boolean = false` — close the popover/modal as soon as a value is picked
+- `timeSlots: string[] = []` — `HH:mm` strings for `"slots"` and `"dropdown"` variants
+- `columns: number = 3` — grid columns for the `"slots"` variant
+- `showSlotIndicator: boolean = false` — show the radio indicator dot on each card in the `"slots"` variant
+- `minuteStep: number = 1` — minute increment for the `"scroll"` variant
+- `modal: TimeFieldModal = "md"` — open the picker in a modal: `true` always, `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl"`) means modal below that breakpoint
+- `fullscreen: TimeFieldFullscreen = false` — make the modal fullscreen: `true` always, `false` never, breakpoint name means fullscreen below that breakpoint. Only applies when the picker opens as a modal
+
+Sizing and validation styling come from the wrapping `tedi-form-field` — set them there, not on `tedi-time-field`. Free-typed values are normalized on blur (digits-only → `HH:mm`); invalid input reverts to the previous value.
+
+```html
+<tedi-form-field>
+  <label tedi-label for="time">Time</label>
+  <tedi-time-field inputId="time" [formControl]="timeControl" pickerTrigger="input" />
+</tedi-form-field>
+
+<!-- Custom scroll picker on desktop, OS picker below md -->
+<tedi-time-field
+  inputId="time"
+  pickerVariant="scroll"
+  useNativePicker="md"
+/>
+
+<!-- Modal below md, fullscreen below sm -->
+<tedi-time-field inputId="time" modal="md" fullscreen="sm" />
+```
+
+### TimePicker
+**Selector:** `tedi-time-picker`
+**Model:** `value: string | null` — `HH:mm`
+**Inputs:**
+- `variant: TimePickerVariant = "scroll"` — `"scroll" | "slots" | "dropdown"`
+- `timeSlots: string[] = []` — predefined `HH:mm` strings for `"slots"` and `"dropdown"`
+- `columns: number = 3` — grid columns for the `"slots"` variant
+- `showSlotIndicator: boolean = false` — show the radio indicator dot on each card in the `"slots"` variant
+- `minuteStep: number = 1` — minute increment for the `"scroll"` variant
+- `disabled: boolean = false`
+- `border: boolean = false` — render with a surrounding border, useful when embedded inline (not in a popover/modal)
+- `trapFocus: boolean = false` — trap Tab inside the picker (used when embedded in a popover/modal). `scroll` cycles between hour/minute columns; `slots`/`dropdown` emit `closeRequested`
+
+**Outputs:**
+- `closeRequested: void` — emitted when the picker requests to be closed (Tab while `trapFocus` is `true`)
+
+**Keyboard:** `scroll` columns respond to `ArrowUp`/`ArrowDown`, `Home`/`End`, `PageUp`/`PageDown` (jump 5); `Enter`/`Space` on the hour column moves focus to minutes. `dropdown` items respond to `ArrowUp`/`ArrowDown`, `Home`/`End`, `Enter`/`Space`.
+
+Standalone time picker. Most consumers should use `tedi-time-field` instead — it bundles the picker, an input, and the popover/modal trigger logic. With no value, the `scroll` wheel parks on `12:00` (display only — nothing is selected until the user picks).
+
+```html
+<tedi-time-picker [(value)]="time" variant="scroll" [minuteStep]="5" />
+
+<!-- Inline picker rendered with a border -->
+<tedi-time-picker [(value)]="time" variant="slots" [timeSlots]="['09:00','10:00','11:00']" [border]="true" />
+```
+
 ### Select
 **Selector:** `tedi-select`
 **Inputs:**
@@ -513,6 +819,7 @@ statusControl = new FormControl<string | null>(null);
 - `noOptionsMessage: string` — custom text when no options match search
 - `dropdownType: "menu" | "grid" = "menu"` — "grid" for swatch-type selects
 - `dropdownWidthRef: ElementRef | null` — element to match dropdown width to
+- `dropdownAlign: "start" | "end" = "start"` — which trigger edge the dropdown anchors to; use `"end"` for right-aligned selects so the panel expands inward
 - `feedbackText: { text, type, position }` — feedback text config
 - `maxDropdownHeight: number` — dropdown height in pixels
 - `compareWith: (a, b) => boolean` — custom equality function
@@ -624,6 +931,20 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 **Row inputs:** `cols`, `minColWidth`, `justifyItems`, `alignItems`, `gap`, `gapX`, `gapY` + responsive breakpoints
 **Col inputs:** `width` (1-12), `justifySelf`, `alignSelf` + responsive breakpoints
 
+### Ellipsis
+**Selector:** `tedi-ellipsis`
+**Inputs:**
+- `lineClamp: number = 2` — maximum lines before truncating (end position only)
+- `tooltip: boolean = true` — show hover/focus tooltip with full text when truncated
+- `position: 'start' | 'end' = 'end'` — `'end'` = trailing multi-line clamp; `'start'` = leading single-line
+
+```html
+<tedi-ellipsis style="max-width:200px">Long content that overflows...</tedi-ellipsis>
+
+<!-- Leading ellipsis (single-line) -->
+<tedi-ellipsis [position]="'start'" style="max-width:200px">/users/tehiK/tedi/angular/src/lib/components/helpers/ellipsis/ellipsis.component.ts</tedi-ellipsis>
+```
+
 ### Separator
 **Selector:** `tedi-separator`
 **Inputs:**
@@ -633,6 +954,24 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `thickness: number = 1`
 - `spacing: SeparatorSpacingValue | SeparatorSpacing`
 - `size: string = "100%"`
+
+### EmptyState
+**Selector:** `tedi-empty-state`
+**Inputs:**
+- `type: "separate" | "attached" | "inside" = "separate"` — container variant
+- `size: "default" | "small" = "default"`
+- `icon: string | null = "spa"` — Material icon name; pass `null` to hide
+- `iconColor: IconColor = "brand"`, `iconSize: IconSize = 36`
+- `heading: string` — optional `<h3>` rendered in brand color
+
+Description is projected via `<ng-content>`. Actions slot is projected via `<ng-content select="[tedi-empty-state-actions]">`.
+
+```html
+<tedi-empty-state heading="Choose new time" icon="event_busy">
+  You have no data to display
+  <button tedi-button tedi-empty-state-actions type="button">Choose time</button>
+</tedi-empty-state>
+```
 
 ### ScrollFade
 **Selector:** `tedi-scroll-fade`
@@ -771,6 +1110,106 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 <a tedi-link href="/page" variant="default">Go to page</a>
 ```
 
+### Pagination
+**Selector:** `tedi-pagination`
+**Inputs:**
+- `pageCount: number` (required) — total number of pages
+- `totalItems: number` — when set, renders the `"{count} results"` label
+- `pageSizeOptions: (number | PaginationPageSizeOption)[] = []` — options for the page-size select; empty hides the select. Plain numbers label themselves; pass `{ value, label }` objects when the visible text should differ from the value — most commonly a **"Show all"** entry. The component stays presentational: selecting an option emits its `value` and the consumer recomputes `pageCount` (see the "Show all" example below).
+- `boundaryCount: number = 1` — pages always shown at the start and end
+- `siblingCount: number = 1` — pages shown on either side of the current page
+- `labels: Partial<PaginationLabels>` — override any of the default text/aria labels
+- `background: "white" | "transparent" = "white"` — `transparent` removes the surface fill + divider for use on non-white containers
+- `dividerPosition: "top" | "bottom" | "none" = "top"` — where the divider line sits (or removed entirely)
+- `disableArrowsAtBoundary: boolean = false` — keep the prev/next button **rendered** (as a disabled `tedi-button`) at the first/last page instead of removing it from the DOM. By default the boundary arrow is removed entirely so the pager looks balanced.
+- `arrowVariant: ButtonVariant = "neutral"` — variant for the prev/next buttons; accepts any `tedi-button` variant (`primary`, `secondary`, `danger`, `success`, `neutral-inverted`, etc.). The arrows are rendered as actual `tedi-button`s under the hood, so all variant styling/states come for free.
+- `showArrowLabels: boolean = false` — render the `previous` / `next` translated labels as visible button text next to the icon. When `false` (default) the buttons are icon-only and the labels are exposed only via `aria-label`. Use the `labels` input to override the wording (e.g. shorter `"Previous"` instead of `"Previous page"`).
+- `previousIcon: string = "arrow_back"` — Material Symbols icon name for the previous-page arrow.
+- `nextIcon: string = "arrow_forward"` — Material Symbols icon name for the next-page arrow. Pair with `previousIcon` to swap in chevrons (`chevron_left` / `chevron_right`) or any other arrow style.
+- `showModalTitle: boolean = true` — show a heading inside the mobile picker modals; set `false` to hide
+- `hideResults: PaginationVisibility = false` — `true`/`false` or a breakpoint name (`"sm"`–`"xxl"`) to hide below that breakpoint
+- `hidePageSize: PaginationVisibility = false`
+- `hidePager: PaginationVisibility = false`
+- `hideArrows: PaginationVisibility = false` — hide just the prev/next arrows; pager itself stays
+
+**Models:**
+- `page: number = 1` — current page (1-based), two-way bindable with `[(page)]`
+- `pageSize: number | undefined` — current page size, two-way bindable with `[(pageSize)]`
+
+**Outputs:**
+- `pageChange: number` — new 1-based page
+- `pageSizeChange: number` — new page size
+
+**Content projection:**
+- `[tediPaginationResults]` — projected content fully replaces the default "X results" left block. Useful for approximations (`1000+ tulemust`) or richer DOM. Import the `TediPaginationResultsDirective`.
+
+Below `md` the pager collapses to a `{current} / {total}` trigger and the page-size dropdown becomes a trigger button — both open a bottom-aligned modal picker that scrolls the active option into view on open. Status changes are announced via a polite `aria-live` region.
+
+```html
+<tedi-pagination
+  [pageCount]="10"
+  [(page)]="page"
+  [totalItems]="97"
+  [(pageSize)]="pageSize"
+  [pageSizeOptions]="[10, 25, 50, 100]"
+/>
+```
+
+Use the per-slot hide toggles to render different parts above and below a table:
+
+```html
+<tedi-pagination [pageCount]="pageCount" [(page)]="page" [totalItems]="total"
+                 [(pageSize)]="pageSize" [pageSizeOptions]="[10, 25, 50]"
+                 [hidePager]="true" dividerPosition="bottom" />
+<!-- table content -->
+<tedi-pagination [pageCount]="pageCount" [(page)]="page"
+                 [hideResults]="true" [hidePageSize]="true" />
+```
+
+Custom results slot:
+
+```html
+<tedi-pagination [pageCount]="10" [(page)]="page" [totalItems]="1000">
+  <span tediPaginationResults>1000+ tulemust</span>
+</tedi-pagination>
+```
+
+"Show all" page size — a labelled option whose value covers every row. The component is dumb; recompute `pageCount` in the change handler so the pager collapses to a single page:
+
+```html
+<tedi-pagination
+  [pageCount]="pageCount"
+  [(page)]="page"
+  [totalItems]="totalItems"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="[10, 25, 50, { value: totalItems, label: 'Show all' }]"
+  (pageSizeChange)="onPageSizeChange($event)"
+/>
+```
+
+```ts
+onPageSizeChange(size: number) {
+  this.pageSize = size;
+  this.pageCount = Math.max(1, Math.ceil(this.totalItems / size)); // → 1 for "Show all"
+  this.page = 1;
+}
+```
+
+Supply the label already translated — there is no built-in `pagination.show-all` translation key.
+
+Render the prev/next arrows as labelled primary buttons with custom icons:
+
+```html
+<tedi-pagination
+  [pageCount]="10"
+  [(page)]="page"
+  arrowVariant="primary"
+  [showArrowLabels]="true"
+  previousIcon="chevron_left"
+  nextIcon="chevron_right"
+/>
+```
+
 ### HorizontalStepper
 **Selector:** `tedi-horizontal-stepper`
 **Inputs:**
@@ -852,11 +1291,14 @@ openModal() {
     data: { title: 'Hello' },
     width: 'md',                    // 'xs' | 'sm' | 'md' | 'lg' | 'xl' | custom CSS value
     size: 'default',                // 'default' | 'small'
-    position: 'center',             // 'center' | 'top' | 'left' | 'right'
+    position: 'center',             // 'center' | 'top' | 'bottom' | 'left' | 'right'
+    scrollBehavior: 'content',      // 'content' | 'page'
     closeOnBackdropClick: true,
     closeOnEscape: true,
-    scrollBehavior: 'content',      // 'content' | 'page'
-    fullscreen: false,              // true | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | false
+    showClose: true,
+    fullscreen: false,              // true | 'sm' | 'md' | 'lg' | 'xl' | 'xxl'
+    maxWidth: '60vw',               // optional cap, overrides default 95vw
+    ariaLabel: 'Confirm action',
   });
 
   ref.closed.subscribe(result => console.log(result));
@@ -865,16 +1307,17 @@ openModal() {
 
 **ModalConfig inputs:**
 - `data: unknown` — injected via `MODAL_DATA` token
-- `width: ModalWidth = "sm"` — preset (`xs`-`xl`) or custom CSS value (`"80%"`, `"600px"`)
-- `maxWidth: string` — max-width cap (e.g. `"75%"`, `"60vw"`). Overrides the default 95vw limit.
 - `size: ModalSize = "default"` — `"default"` or `"small"`
-- `position: ModalPosition = "center"` — `"center"`, `"top"`, `"left"`, `"right"`
+- `width: ModalWidth = "sm"` — preset (`"xs" | "sm" | "md" | "lg" | "xl"`) or custom CSS value (`"80%"`, `"600px"`)
+- `position: ModalPosition = "center"` — `"center" | "top" | "bottom" | "left" | "right"`. `"bottom"` anchors the modal to the bottom edge with a fixed margin (useful for mobile bottom-sheet patterns)
+- `scrollBehavior: ModalScrollBehavior = "content"` — `"content"` scrolls inside the modal, `"page"` scrolls the overlay
 - `closeOnBackdropClick: boolean = true`
 - `closeOnEscape: boolean = true`
-- `scrollBehavior: "content" | "page" = "content"`
-- `fullscreen: boolean | "sm" | "md" | "lg" | "xl" | "xxl" = false` — `true` = always fullscreen; a breakpoint = fullscreen below that breakpoint.
-- `ariaLabel: string` — ARIA label for the dialog.
-- `ariaLabelledBy: string` — ID of the element that labels the dialog.
+- `showClose: boolean = true` — show the close button in the header
+- `fullscreen: ModalFullscreen = false` — `true` always fullscreen, `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl" | "xxl"`) means fullscreen below that breakpoint
+- `maxWidth: string` — optional max-width cap (e.g. `"75%"`, `"60vw"`); overrides the default `95vw`
+- `ariaLabel: string` — ARIA label for the dialog
+- `ariaLabelledBy: string` — ID of the element that labels the dialog
 
 **ModalRef methods/properties:**
 - `close(result?: R)` — close with optional result
@@ -911,7 +1354,9 @@ class MyModalContent {
 ```
 
 **Sub-components:**
-- `tedi-modal-header` — `showClose: boolean = true`
+- `tedi-modal-header`
+  - `showClose: boolean = true` — toggle the close button
+  - `closeButtonSize: ClosingButtonSize` (optional) — overrides the close button size. When unset, the close button auto-tracks the modal `size` variant (default → standard, small → compact).
 - `tedi-modal-content` — scrollable body
 - `tedi-modal-footer` — action buttons
 
@@ -935,7 +1380,7 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 **Inputs:**
 - `position: DropdownPosition = "bottom-start"`
 - `preventOverflow: boolean = true`
-- `appendTo: string`
+- `hideOnScroll: boolean = false` — close the dropdown when the page scrolls
 
 ```html
 <tedi-dropdown [(value)]="selected">
@@ -954,7 +1399,6 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `dismissible: boolean = true`
 - `withArrow: boolean = true`
 - `lockScroll: boolean = false`
-- `appendTo: string = "body"`
 
 ### Tooltip
 **Selector:** `tedi-tooltip`
@@ -962,7 +1406,6 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `position: TooltipPosition = "top"`
 - `preventOverflow: boolean = true`
 - `openWith: TooltipOpenWith = "both"` — hover, focus, or both
-- `appendTo: string = "body"`
 
 ```html
 <tedi-tooltip position="top">
@@ -981,12 +1424,16 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `loading: boolean = false`
 - `closable: boolean = false`
 - `type: TagType = "primary"`
+- `ellipsis: TagEllipsis = false` — `false | "start" | "end"`. When set (and the tag is width-constrained), truncates the label to a single line with an ellipsis at that end and reveals the full label in a tooltip on hover/focus. `false` lets the label wrap.
 **Outputs:**
 - `closed: Event`
 **Slots:** default
 
 ```html
 <tedi-tag type="primary" [closable]="true" (closed)="onRemove()">Label</tedi-tag>
+
+<!-- Truncate a long label (needs a width constraint, e.g. a max-width parent) -->
+<tedi-tag ellipsis="end" [closable]="true">A fairly long tag label</tedi-tag>
 ```
 
 ### StatusBadge
@@ -1100,8 +1547,10 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 
 ### Pagination
 **Selector:** `tedi-pagination`
-- Models: `page: number = 1`, `pageSize: number = 50`
-- `pageSizeOptions: number[]`, `length: number`
+- Models: `page: number = 1`, `pageSize: number | undefined`
+- Required: `pageCount: number`
+- `pageSizeOptions: number[]`, `totalItems: number`, `boundaryCount`, `siblingCount`
+- Arrows: `arrowVariant: ButtonVariant`, `showArrowLabels: boolean`, `previousIcon`/`nextIcon: string`, `disableArrowsAtBoundary: boolean`
 
 ### Tabs
 **Selector:** `tedi-tabs`
@@ -1138,3 +1587,5 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 ### TableStyles
 **Selector:** `tedi-table-styles`
 - `size: "default" | "small"`, `verticalBorders: boolean`, `striped: boolean`, `clickable: boolean`
+
+Visual-only wrapper that applies TEDI table styles to a hand-rolled `<table>`. Prefer the TEDI-Ready `<tedi-table>` (with TanStack-powered sorting / filtering / pagination) for new code; reach for `tedi-table-styles` only when you specifically need to drive the markup yourself.

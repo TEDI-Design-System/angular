@@ -225,14 +225,21 @@ export const InvertedUnderlined: StoryObj<TemplateType> = {
       hover: "#Hover",
       active: "#Active",
       focusVisible: "#Focus",
-    },
-    backgrounds: { default: "brand" },
+    }
   },
+
   args: {
     variant: "inverted",
     titleColor: "white",
   },
+
   render: LinkTemplate,
+
+  globals: {
+    backgrounds: {
+      value: "brand"
+    }
+  }
 };
 
 export const InvertedNoUnderline: StoryObj<TemplateType> = {
@@ -241,15 +248,22 @@ export const InvertedNoUnderline: StoryObj<TemplateType> = {
       hover: "#Hover",
       active: "#Active",
       focusVisible: "#Focus",
-    },
-    backgrounds: { default: "brand" },
+    }
   },
+
   args: {
     variant: "inverted",
     underline: false,
     titleColor: "white",
   },
+
   render: LinkTemplate,
+
+  globals: {
+    backgrounds: {
+      value: "brand"
+    }
+  }
 };
 
 export const WithIcons: StoryObj<LinkComponent> = {

@@ -10,7 +10,7 @@
   [class.tedi-date-picker__input--error]="inputState() === 'error'"
   [attr.id]="inputId()"
   [attr.placeholder]="inputPlaceholder()"
-  [attr.aria-expanded]="!fieldDisabled() && popover().floatUiComponent().state"
+  [attr.aria-expanded]="!fieldDisabled() && popover().isOpen()"
   [attr.aria-controls]="uniqueId"
   [attr.aria-readonly]="!allowManualInput()"
   [readOnly]="!allowManualInput()"

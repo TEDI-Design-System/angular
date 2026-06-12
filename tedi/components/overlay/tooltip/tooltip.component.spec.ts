@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TooltipComponent, TooltipPosition } from "./tooltip.component";
-import { NgxFloatUiContentComponent } from "ngx-float-ui";
 import { Component, input, viewChild } from "@angular/core";
+import { OverlayContainer } from "@angular/cdk/overlay";
 import { TooltipTriggerComponent } from "./tooltip-trigger/tooltip-trigger.component";
 import { TooltipContentComponent } from "./tooltip-content/tooltip-content.component";
 
@@ -12,7 +12,6 @@ import { TooltipContentComponent } from "./tooltip-content/tooltip-content.compo
     <tedi-tooltip
       [position]="position()"
       [preventOverflow]="preventOverflow()"
-      [appendTo]="appendTo()"
       [timeoutDelay]="timeoutDelay()"
     >
       <tedi-tooltip-trigger>Trigger</tedi-tooltip-trigger>
@@ -23,7 +22,6 @@ import { TooltipContentComponent } from "./tooltip-content/tooltip-content.compo
 class TestTooltipComponent {
   position = input<TooltipPosition>("top");
   preventOverflow = input(true);
-  appendTo = input("body");
   timeoutDelay = input(100);
 
   tooltip = viewChild.required(TooltipComponent);
@@ -32,6 +30,7 @@ class TestTooltipComponent {
 describe("TooltipComponent", () => {
   let fixture: ComponentFixture<TestTooltipComponent>;
   let component: TestTooltipComponent;
+  let overlayContainer: OverlayContainer;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -40,7 +39,12 @@ describe("TooltipComponent", () => {
 
     fixture = TestBed.createComponent(TestTooltipComponent);
     component = fixture.componentInstance;
+    overlayContainer = TestBed.inject(OverlayContainer);
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    overlayContainer.ngOnDestroy();
   });
 
   it("should create component", () => {
@@ -50,14 +54,11 @@ describe("TooltipComponent", () => {
   it("should have default input values", () => {
     expect(component.position()).toBe("top");
     expect(component.preventOverflow()).toBe(true);
-    expect(component.appendTo()).toBe("body");
     expect(component.timeoutDelay()).toBe(100);
   });
 
-  it("should initialize the viewChild floatUiComponent", () => {
-    expect(component.tooltip().floatUiComponent()).toBeInstanceOf(
-      NgxFloatUiContentComponent,
-    );
+  it("should have isOpen initially false", () => {
+    expect(component.tooltip().isOpen()).toBe(false);
   });
 
   it("should clear hide timeout when showing tooltip", () => {
@@ -90,12 +91,6 @@ describe("TooltipComponent", () => {
     }
   });
 
-  it("should update appendTo when input changes", () => {
-    fixture.componentRef.setInput("appendTo", "custom-container");
-    fixture.detectChanges();
-    expect(component.appendTo()).toBe("custom-container");
-  });
-
   it("should update preventOverflow when input changes", () => {
     fixture.componentRef.setInput("preventOverflow", false);
     fixture.detectChanges();
@@ -109,53 +104,46 @@ describe("TooltipComponent", () => {
   });
 
   it("should show tooltip when not visible", () => {
-    const floatUi = component.tooltip().floatUiComponent();
-    floatUi.state = false;
-    const showSpy = jest.spyOn(floatUi, "show");
+    const tooltip = component.tooltip();
+    expect(tooltip.isOpen()).toBe(false);
+
     const clearSpy = jest.spyOn(global, "clearTimeout");
+    tooltip.showTooltip();
 
-    component.tooltip().showTooltip();
-
-    expect(clearSpy).toHaveBeenCalledWith(component.tooltip().hideTimeout);
-    expect(showSpy).toHaveBeenCalled();
-    expect(component.tooltip().floatUiDisplay()).toBe("block");
+    expect(clearSpy).toHaveBeenCalledWith(tooltip.hideTimeout);
+    expect(tooltip.isOpen()).toBe(true);
   });
 
-  it("should not call showTooltip again if already visible", () => {
-    const floatUi = component.tooltip().floatUiComponent();
-    floatUi.state = true;
-    const showSpy = jest.spyOn(floatUi, "show");
+  it("should not show tooltip again if already visible", () => {
+    const tooltip = component.tooltip();
+    tooltip.isOpen.set(true);
 
-    component.tooltip().showTooltip();
+    tooltip.showTooltip();
 
-    expect(showSpy).not.toHaveBeenCalled();
+    expect(tooltip.isOpen()).toBe(true);
   });
 
   it("should hide tooltip when visible", () => {
-    const floatUi = component.tooltip().floatUiComponent();
-    floatUi.state = true;
-    const hideSpy = jest.spyOn(floatUi, "hide");
+    const tooltip = component.tooltip();
+    tooltip.isOpen.set(true);
 
-    component.tooltip().hideTooltip();
+    tooltip.hideTooltip();
 
-    expect(hideSpy).toHaveBeenCalled();
-    expect(component.tooltip().floatUiDisplay()).toBe("inline");
+    expect(tooltip.isOpen()).toBe(false);
   });
 
   it("should not hide tooltip if not visible", () => {
-    const floatUi = component.tooltip().floatUiComponent();
-    floatUi.state = false;
-    const hideSpy = jest.spyOn(floatUi, "hide");
+    const tooltip = component.tooltip();
+    expect(tooltip.isOpen()).toBe(false);
 
-    component.tooltip().hideTooltip();
+    tooltip.hideTooltip();
 
-    expect(hideSpy).not.toHaveBeenCalled();
+    expect(tooltip.isOpen()).toBe(false);
   });
 
   it("should call hideTooltip when tooltip is visible", () => {
     const tooltip = component.tooltip();
-    const floatUi = tooltip.floatUiComponent();
-    floatUi.state = true;
+    tooltip.isOpen.set(true);
 
     const hideSpy = jest.spyOn(tooltip, "hideTooltip");
     const showSpy = jest.spyOn(tooltip, "showTooltip");
@@ -168,8 +156,7 @@ describe("TooltipComponent", () => {
 
   it("should call showTooltip when tooltip is hidden", () => {
     const tooltip = component.tooltip();
-    const floatUi = tooltip.floatUiComponent();
-    floatUi.state = false;
+    expect(tooltip.isOpen()).toBe(false);
 
     const hideSpy = jest.spyOn(tooltip, "hideTooltip");
     const showSpy = jest.spyOn(tooltip, "showTooltip");

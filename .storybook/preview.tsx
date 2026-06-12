@@ -1,4 +1,5 @@
 import { applicationConfig, Preview, StoryContext } from "@storybook/angular";
+import { provideRouter, withDisabledInitialNavigation } from "@angular/router";
 import { Theme } from "../tedi/services/theme/theme.service";
 import {
   Controls,
@@ -7,7 +8,7 @@ import {
   Stories,
   Subtitle,
   Title,
-} from "@storybook/blocks";
+} from "@storybook/addon-docs/blocks";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../tedi/tokens/translation.token";
 
 export const globalTypes = {
@@ -59,18 +60,29 @@ const themeDecorator = (storyFn: any, context: StoryContext) => {
 };
 
 const preview: Preview = {
+  tags: ["autodocs"],
   decorators: [
     themeDecorator,
     applicationConfig({
-      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+      providers: [
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        // Replaces storybook-addon-angular-router (Storybook 8 only):
+        // provides Router/ActivatedRoute for stories using routerLink.
+        // Initial navigation must stay disabled — the router cannot match
+        // Storybook's iframe.html URL and the failed render breaks stories.
+        provideRouter([], withDisabledInitialNavigation()),
+      ],
     }),
   ],
   parameters: {
     viewMode: "docs",
     backgrounds: {
-      values: [{ name: "brand", value: "var(--tedi-primary-600)" }],
+      options: {
+        brand: { name: "brand", value: "var(--tedi-primary-600)" }
+      },
     },
     docs: {
+      codePanel: true,
       toc: true,
       page: () => (
         <>
