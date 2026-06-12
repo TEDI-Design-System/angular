@@ -27,8 +27,7 @@
             "path": "dist/*.tgz",
             "label": "Package"
           }
-        ],
-        "successCommentCondition": "<%= issue.number !== 0 %>"
+        ]
       }
     ]
   ]

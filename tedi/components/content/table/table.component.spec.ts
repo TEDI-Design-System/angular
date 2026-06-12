@@ -1,7 +1,6 @@
 import { Component, signal, TemplateRef, viewChild, input } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { provideNoopAnimations } from "@angular/platform-browser/animations";
 import { booleanAttribute } from "@angular/core";
 import {
   type CdkDragDrop,
@@ -180,7 +179,6 @@ function setupHost(
     providers: [
       { provide: TediTranslationService, useClass: TranslationMock },
       { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-      provideNoopAnimations(),
     ],
   });
   const fixture = TestBed.createComponent(HostComponent);
@@ -684,7 +682,6 @@ describe("TediTableComponent", () => {
         providers: [
           { provide: TediTranslationService, useClass: TranslationMock },
           { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-          provideNoopAnimations(),
         ],
       });
       const fixture = TestBed.createComponent(ResultsSlotHostComponent);
@@ -978,7 +975,6 @@ describe("TediTableComponent", () => {
         providers: [
           { provide: TediTranslationService, useClass: TranslationMock },
           { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-          provideNoopAnimations(),
         ],
       });
       const fixture = TestBed.createComponent(ColumnsMenuHostComponent);
@@ -1115,7 +1111,6 @@ describe("TediTableComponent", () => {
         providers: [
           { provide: TediTranslationService, useClass: TranslationMock },
           { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-          provideNoopAnimations(),
         ],
       });
       const fixture = TestBed.createComponent(FilterableHostComponent);
@@ -1145,7 +1140,7 @@ describe("TediTableComponent", () => {
 
     function getPopoverContent(): HTMLElement | null {
       return document.body.querySelector(
-        ".float-ui-container-popover",
+        ".tedi-popover__container",
       ) as HTMLElement | null;
     }
 
@@ -1153,7 +1148,7 @@ describe("TediTableComponent", () => {
       // Popovers append to body — clean up any leftover overlay containers
       // between tests so DOM queries scoped to body stay deterministic.
       document.body
-        .querySelectorAll(".float-ui-container-popover")
+        .querySelectorAll(".tedi-popover__container")
         .forEach((node) => node.remove());
     });
 
@@ -1318,8 +1313,13 @@ describe("TediTableComponent", () => {
       input.dispatchEvent(new Event("input"));
       fixture.detectChanges();
 
-      // Reopen via trigger click — clearOnClose resets the draft to applied
-      // value (undefined here → input renders empty).
+      // Close via trigger click — clearOnClose discards the unapplied draft.
+      trigger = findTriggerButton(fixture)!;
+      trigger.click();
+      fixture.detectChanges();
+
+      // Reopen — the draft has been reset to the applied value
+      // (undefined here → input renders empty).
       trigger = findTriggerButton(fixture)!;
       trigger.click();
       fixture.detectChanges();
@@ -1399,7 +1399,6 @@ describe("Table: keyboard column reordering", () => {
     await TestBed.configureTestingModule({
       imports: [ReorderTestHostComponent],
       providers: [
-        provideNoopAnimations(),
         { provide: TediTranslationService, useClass: TranslationMock },
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "en" },
       ],
@@ -2000,7 +1999,6 @@ describe("Table: keyboard row reordering", () => {
       providers: [
         { provide: TediTranslationService, useClass: TranslationMock },
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
-        provideNoopAnimations(),
       ],
     });
     const fixture = TestBed.createComponent(RowReorderHostComponent);

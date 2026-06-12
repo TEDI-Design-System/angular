@@ -30,12 +30,34 @@
     @include footer-links;
   }
 
-  &__content {
-    @include footer-links;
+  &__content-wrapper {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition:
+      grid-template-rows 300ms ease,
+      margin-top 300ms ease,
+      visibility 300ms ease,
+      opacity 300ms ease;
+
+    &--collapsed {
+      visibility: hidden;
+      grid-template-rows: 0fr;
+
+      // negative margin cancels the container gap so the collapsed section
+      // ends at the button, like the old display: none did
+      margin-top: calc(-1 * var(--layout-footer-item-vertical-spacing));
+      opacity: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
   }
 
-  &__content-hidden {
-    display: none;
+  &__content {
+    @include footer-links;
+
+    overflow: hidden;
   }
 
   &__button {

@@ -36,22 +36,20 @@ The library supports the three latest Angular major versions. Angular releases a
 
 **Currently supported: Angular 20, 21, 22**
 
-> **Note:** `ngx-float-ui` has not published an Angular 22 release yet. On Angular 22, install `ngx-float-ui@21` with `--legacy-peer-deps` until it ships.
-
 The library is built and tested against the base version pinned in `devDependencies`. In addition, the `compatibility` job in CI installs the built package into a fresh app for every supported Angular major to verify it is consumable.
 
 ### Adding a new Angular version
 
 When a new Angular major is released (e.g. v23):
 
-1. **`package.json`** — add `|| ^23.0.0` to every Angular peer dependency (and `ngx-float-ui` once it has a matching release)
+1. **`package.json`** — add `|| ^23.0.0` to every Angular peer dependency
 2. **`.github/workflows/angular-test-and-lint.yml`** — add `23` to the `angular-version` matrix in the `compatibility` job
 
 ### Dropping a deprecated Angular version
 
 When an Angular major reaches end-of-life (e.g. v20):
 
-1. **`package.json`** — remove `^20.0.0 ||` from every Angular peer dependency and `ngx-float-ui`
+1. **`package.json`** — remove `^20.0.0 ||` from every Angular peer dependency
 2. **`.github/workflows/angular-test-and-lint.yml`** — remove `20` from the `angular-version` matrix in the `compatibility` job
 3. Bump `devDependencies` to the new minimum supported Angular version so the library is always built and developed against a supported release
 

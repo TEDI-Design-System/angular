@@ -9,6 +9,7 @@ import {
   input,
   signal,
 } from "@angular/core";
+import { CdkOverlayOrigin } from "@angular/cdk/overlay";
 import { DropdownComponent } from "../dropdown.component";
 
 export type DropdownTriggerAriaHasPopup = "menu" | "listbox" | "dialog" | "true";
@@ -18,6 +19,7 @@ const FOCUSABLE_SELECTOR = "button, a[href], [tabindex]";
 @Directive({
   standalone: true,
   selector: "[tedi-dropdown-trigger]",
+  hostDirectives: [CdkOverlayOrigin],
 })
 export class DropdownTriggerDirective implements AfterViewInit {
   /** Defines the aria-haspopup attribute for the trigger, informing assistive technologies whether it opens a menu or listbox. Improves accessibility by describing the type of popup. */
@@ -25,6 +27,7 @@ export class DropdownTriggerDirective implements AfterViewInit {
 
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly dropdown = inject(DropdownComponent);
+  readonly overlayOrigin = inject(CdkOverlayOrigin, { self: true });
   private readonly renderer = inject(Renderer2);
 
   /**
@@ -51,7 +54,7 @@ export class DropdownTriggerDirective implements AfterViewInit {
       this.renderer.setAttribute(
         el,
         "aria-expanded",
-        String(this.dropdown.opened()),
+        String(this.dropdown.isOpen()),
       );
 
       if (!this.isNativelyFocusable(el)) {
@@ -116,16 +119,18 @@ export class DropdownTriggerDirective implements AfterViewInit {
   }
 
   private openAndFocusFirst() {
-    if (!this.dropdown.floatUiComponent().state) {
-      this.dropdown.showDropdown();
+    if (this.dropdown.isOpen()) {
+      this.dropdown.focusFirstItem();
+    } else {
+      this.dropdown.showDropdown("first");
     }
-    this.dropdown.focusFirstItem?.();
   }
 
   private openAndFocusLast() {
-    if (!this.dropdown.floatUiComponent().state) {
-      this.dropdown.showDropdown();
+    if (this.dropdown.isOpen()) {
+      this.dropdown.focusLastItem();
+    } else {
+      this.dropdown.showDropdown("last");
     }
-    this.dropdown.focusLastItem?.();
   }
 }

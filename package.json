@@ -24,13 +24,11 @@
     "chromatic": "npm run build:sb:chromatic && npx chromatic --project-token=$CHROMATIC_PROJECT_TOKEN"
   },
   "peerDependencies": {
-    "@angular/animations": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/cdk": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/common": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/forms": "^20.0.0 || ^21.0.0 || ^22.0.0",
-    "@angular/platform-browser": "^20.0.0 || ^21.0.0 || ^22.0.0",
-    "ngx-float-ui": "^20.0.0 || ^21.0.0"
+    "@angular/platform-browser": "^20.0.0 || ^21.0.0 || ^22.0.0"
   },
   "dependencies": {
     "@tanstack/angular-table": "^8.21.4",
@@ -45,7 +43,6 @@
     "@angular-eslint/eslint-plugin-template": "20.7.0",
     "@angular-eslint/schematics": "20.7.0",
     "@angular-eslint/template-parser": "20.7.0",
-    "@angular/animations": "20.3.24",
     "@angular/build": "20.3.27",
     "@angular/cdk": "20.2.14",
     "@angular/cli": "20.3.27",
@@ -84,7 +81,6 @@
     "jest-preset-angular": "^14.6.2",
     "lint-staged": "^16.4.0",
     "ng-packagr": "^20.3.2",
-    "ngx-float-ui": "20.1.0",
     "prettier": "^3.4.2",
     "readdirp": "4.1.2",
     "replace-in-file": "^8.4.0",
