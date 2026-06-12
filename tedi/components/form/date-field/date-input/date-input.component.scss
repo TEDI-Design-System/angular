@@ -106,27 +106,7 @@
   }
 
   &__clear {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--button-xs-icon-size);
-    height: var(--form-field-button-height-sm);
-    padding: 0;
-    color: var(--general-icon-secondary);
-    cursor: pointer;
-    background: transparent;
-    border: 0;
-    border-radius: var(--button-radius-sm);
-
-    &:hover {
-      color: var(--general-icon-primary);
-      background: var(--button-main-neutral-icon-only-background-hover);
-    }
-
-    &:focus-visible {
-      outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
-      outline-offset: var(--tedi-borders-01);
-    }
+    flex-shrink: 0;
   }
 
   &__icon {

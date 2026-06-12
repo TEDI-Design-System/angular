@@ -32,13 +32,14 @@
 <div class="tedi-date-input__actions">
   @if (showClear()) {
     <button
+      tedi-closing-button
       type="button"
+      size="small"
       class="tedi-date-input__clear"
-      [attr.aria-label]="clearAriaLabel()"
+      [iconSize]="18"
+      [ariaLabel]="clearAriaLabel()"
       (click)="handleClear()"
-    >
-      <tedi-icon name="close" [size]="18" color="inherit" />
-    </button>
+    ></button>
     <tedi-separator axis="vertical" size="1rem" />
   }
   <button

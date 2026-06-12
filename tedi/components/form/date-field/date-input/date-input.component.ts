@@ -15,6 +15,7 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { IconComponent } from "../../../base/icon/icon.component";
+import { ClosingButtonComponent } from "../../../buttons";
 import { SeparatorComponent } from "../../../helpers/separator/separator.component";
 import { TextFieldComponent } from "../../text-field/text-field.component";
 import { TagComponent, TagEllipsis } from "../../../tags/tag/tag.component";
@@ -32,7 +33,13 @@ export interface DateInputTag {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [IconComponent, SeparatorComponent, TextFieldComponent, TagComponent],
+  imports: [
+    ClosingButtonComponent,
+    IconComponent,
+    SeparatorComponent,
+    TextFieldComponent,
+    TagComponent,
+  ],
   templateUrl: "./date-input.component.html",
   styleUrl: "./date-input.component.scss",
   host: {
