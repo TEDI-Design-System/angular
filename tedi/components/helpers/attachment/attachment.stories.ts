@@ -93,15 +93,6 @@ export default {
   args: {
     name: "Kodukülastusakt_Triin.pdf",
   },
-  parameters: {
-    backgrounds: {
-      values: [
-        { name: "white", value: "var(--general-surface-primary)" },
-        { name: "brand", value: "var(--tedi-primary-600)" },
-      ],
-      default: "white",
-    },
-  },
 } as Meta<AttachmentComponent>;
 
 type Story = StoryObj<AttachmentComponent>;
