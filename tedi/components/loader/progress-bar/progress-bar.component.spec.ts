@@ -18,19 +18,42 @@ class TranslationMock {
   }
 }
 
+const BREAKPOINT_ORDER: Breakpoint[] = ["xs", "sm", "md", "lg", "xl", "xxl"];
+
 class BreakpointMock {
-  isBelow = signal(false);
+  current = signal<Breakpoint | undefined>(undefined);
   isBelowBreakpoint(_: Breakpoint) {
-    return this.isBelow.asReadonly();
+    return signal(false).asReadonly();
   }
   isAboveBreakpoint(_: Breakpoint) {
     return signal(false).asReadonly();
   }
   currentBreakpoint() {
-    return signal(undefined as Breakpoint | undefined).asReadonly();
+    return this.current.asReadonly();
   }
-  getBreakpointInputs<T>(inputs: T): T {
-    return inputs;
+  getBreakpointInputs<T>(inputs: Record<string, unknown>): T {
+    let resolved: Record<string, unknown> = {};
+    Object.keys(inputs).forEach((key) => {
+      if (!BREAKPOINT_ORDER.includes(key as Breakpoint)) {
+        resolved[key] = inputs[key];
+      }
+    });
+
+    const current = this.current();
+    if (!current) {
+      return resolved as T;
+    }
+
+    for (let i = 0; i <= BREAKPOINT_ORDER.indexOf(current); i++) {
+      const override = inputs[BREAKPOINT_ORDER[i]] as
+        | Record<string, unknown>
+        | undefined;
+      if (override) {
+        resolved = { ...resolved, ...override };
+      }
+    }
+
+    return resolved as T;
   }
 }
 
@@ -176,37 +199,29 @@ describe("ProgressBarComponent", () => {
     ).toBeTruthy();
   });
 
-  it("should force the value to the bottom when `mobile=true`", () => {
-    fixture.componentRef.setInput("value", 30);
-    fixture.componentRef.setInput("mobile", true);
-    fixture.detectChanges();
+  it("should apply breakpoint overrides at the active breakpoint and up", () => {
+    fixture.componentRef.setInput("label", "Upload");
+    fixture.componentRef.setInput("labelPosition", "top");
+    fixture.componentRef.setInput("valuePosition", "bottom");
+    fixture.componentRef.setInput("md", {
+      labelPosition: "horizontal",
+      valuePosition: "horizontal",
+    });
 
+    breakpoint.current.set("sm");
+    fixture.detectChanges();
+    expect(host.classList).not.toContain("tedi-progress-bar--label-horizontal");
     expect(host.classList).toContain("tedi-progress-bar--value-bottom");
-    expect(
-      host.querySelector(".tedi-progress-bar__value--bottom")?.textContent,
-    ).toContain("30%");
-    expect(
-      host.querySelector(".tedi-progress-bar__track-row .tedi-progress-bar__value"),
-    ).toBeNull();
-  });
 
-  it("should force the value to the bottom when below the mobile breakpoint", () => {
-    breakpoint.isBelow.set(true);
+    breakpoint.current.set("md");
     fixture.detectChanges();
-
-    expect(host.classList).toContain("tedi-progress-bar--value-bottom");
-    expect(
-      host.querySelector(".tedi-progress-bar__value--bottom"),
-    ).toBeTruthy();
-  });
-
-  it("should let an explicit `mobile=false` override the breakpoint", () => {
-    breakpoint.isBelow.set(true);
-    fixture.componentRef.setInput("mobile", false);
-    fixture.detectChanges();
-
+    expect(host.classList).toContain("tedi-progress-bar--label-horizontal");
     expect(host.classList).not.toContain("tedi-progress-bar--value-bottom");
-    expect(host.querySelector(".tedi-progress-bar__value--bottom")).toBeNull();
+
+    breakpoint.current.set("lg");
+    fixture.detectChanges();
+    expect(host.classList).toContain("tedi-progress-bar--label-horizontal");
+    expect(host.classList).not.toContain("tedi-progress-bar--value-bottom");
   });
 
   it("should set aria-label from `ariaLabel` then fall back to `label`", () => {

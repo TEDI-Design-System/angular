@@ -1,4 +1,4 @@
-@if (label() && labelPosition() === "top") {
+@if (label() && currentProps().labelPosition === "top") {
   <label
     tedi-label
     color="primary"
@@ -11,7 +11,7 @@
 }
 
 <div class="tedi-progress-bar__row">
-  @if (label() && labelPosition() === "horizontal") {
+  @if (label() && currentProps().labelPosition === "horizontal") {
     <label
       tedi-label
       color="primary"
@@ -31,10 +31,10 @@
         [max]="100"
         [value]="value()"
         [attr.aria-label]="accessibleLabel()"
-        [attr.aria-valuetext]="valueLabel()"
+        [attr.aria-valuetext]="currentProps().valueLabel"
       ></progress>
 
-      @if (showValue() && effectiveValuePosition() === "horizontal") {
+      @if (currentProps().showValue && currentProps().valuePosition === "horizontal") {
         <span tedi-label size="small" class="tedi-progress-bar__value">
           {{ formattedValue() }}
         </span>
@@ -44,7 +44,7 @@
     <div class="tedi-progress-bar__hint-row">
       <ng-content select="tedi-feedback-text" />
 
-      @if (showValue() && effectiveValuePosition() === "bottom") {
+      @if (currentProps().showValue && currentProps().valuePosition === "bottom") {
         <span
           tedi-label
           size="small"

@@ -8,14 +8,29 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { LabelComponent } from "../../form/label/label.component";
-import {
-  Breakpoint,
-  BreakpointService,
-} from "../../../services/breakpoint/breakpoint.service";
+import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
 
 export type ProgressBarSize = "default" | "small";
 export type ProgressBarLabelPosition = "top" | "horizontal";
 export type ProgressBarValuePosition = "horizontal" | "bottom";
+
+/**
+ * The subset of inputs that can be overridden per breakpoint via the
+ * `xs`–`xxl` inputs. Every field is optional — only the ones you set override
+ * the base value at that breakpoint.
+ */
+export type ProgressBarInputs = {
+  /** Overrides {@link ProgressBarComponent.size}. */
+  size?: ProgressBarSize;
+  /** Overrides {@link ProgressBarComponent.labelPosition}. */
+  labelPosition?: ProgressBarLabelPosition;
+  /** Overrides {@link ProgressBarComponent.showValue}. */
+  showValue?: boolean;
+  /** Overrides {@link ProgressBarComponent.valuePosition}. */
+  valuePosition?: ProgressBarValuePosition;
+  /** Overrides {@link ProgressBarComponent.valueLabel}. */
+  valueLabel?: string;
+};
 
 @Component({
   standalone: true,
@@ -27,11 +42,11 @@ export type ProgressBarValuePosition = "horizontal" | "bottom";
   encapsulation: ViewEncapsulation.None,
   host: {
     "[class.tedi-progress-bar]": "true",
-    "[class.tedi-progress-bar--small]": "size() === 'small'",
+    "[class.tedi-progress-bar--small]": "currentProps().size === 'small'",
     "[class.tedi-progress-bar--label-horizontal]":
-      "label() && labelPosition() === 'horizontal'",
+      "label() && currentProps().labelPosition === 'horizontal'",
     "[class.tedi-progress-bar--value-bottom]":
-      "effectiveValuePosition() === 'bottom'",
+      "currentProps().valuePosition === 'bottom'",
   },
 })
 export class ProgressBarComponent {
@@ -94,35 +109,72 @@ export class ProgressBarComponent {
    * Accessible label for the progress bar. Falls back to `label()` when omitted.
    */
   ariaLabel = input<string>();
-  /**
-   * Manually force the mobile variant on or off. When `undefined`, the
-   * variant is auto-derived from the viewport breakpoint (see
-   * `mobileBreakpoint`). Set to `false` to opt out of the automatic
-   * behavior entirely. The mobile variant always renders the value on the
-   * hint row beneath the bar, regardless of `valuePosition`.
+
+  /*
+   * Per-breakpoint overrides (`xs`–`xxl`).
+   *
+   * The base inputs (`size`, `labelPosition`, `valuePosition`, …) describe the
+   * smallest viewport. Each breakpoint input takes a *partial* `ProgressBarInputs`
+   * that is layered on top from that breakpoint **and up** — so you only set what
+   * changes, and larger breakpoints inherit from smaller ones until overridden.
+   *
+   * Breakpoint widths: `xs` ≥ 0, `sm` ≥ 576, `md` ≥ 768, `lg` ≥ 992,
+   * `xl` ≥ 1200, `xxl` ≥ 1400 (px).
+   *
+   * @example
+   * ```html
+   * <!-- Mobile-first: stacked label + value below the bar.
+   *      From md up: inline label on the left, value beside the bar. -->
+   * <tedi-progress-bar
+   *   [value]="40"
+   *   label="Upload"
+   *   labelPosition="top"
+   *   valuePosition="bottom"
+   *   [md]="{ labelPosition: 'horizontal', valuePosition: 'horizontal' }"
+   * />
+   *
+   * <!-- Multiple breakpoints stack: sm hides the value, xl shows it again. -->
+   * <tedi-progress-bar
+   *   [value]="40"
+   *   [sm]="{ showValue: false }"
+   *   [xl]="{ showValue: true }"
+   * />
+   * ```
    */
-  mobile = input<boolean | undefined>(undefined);
-  /**
-   * Viewport breakpoint below which the mobile variant kicks in when
-   * `mobile` is not set explicitly.
-   * @default "sm"
-   */
-  mobileBreakpoint = input<Breakpoint>("sm");
+
+  /** Overrides applied from the `xs` breakpoint (≥ 0px) and up. */
+  xs = input<ProgressBarInputs>();
+  /** Overrides applied from the `sm` breakpoint (≥ 576px) and up. */
+  sm = input<ProgressBarInputs>();
+  /** Overrides applied from the `md` breakpoint (≥ 768px) and up. */
+  md = input<ProgressBarInputs>();
+  /** Overrides applied from the `lg` breakpoint (≥ 992px) and up. */
+  lg = input<ProgressBarInputs>();
+  /** Overrides applied from the `xl` breakpoint (≥ 1200px) and up. */
+  xl = input<ProgressBarInputs>();
+  /** Overrides applied from the `xxl` breakpoint (≥ 1400px) and up. */
+  xxl = input<ProgressBarInputs>();
 
   private breakpointService = inject(BreakpointService);
 
-  private _autoMobile = computed(() => {
-    return this.breakpointService.isBelowBreakpoint(this.mobileBreakpoint())();
-  });
-
-  protected isMobile = computed(() => this.mobile() ?? this._autoMobile());
-
-  protected effectiveValuePosition = computed<ProgressBarValuePosition>(() =>
-    this.isMobile() ? "bottom" : this.valuePosition(),
+  protected currentProps = computed(() =>
+    this.breakpointService.getBreakpointInputs<ProgressBarInputs>({
+      size: this.size(),
+      labelPosition: this.labelPosition(),
+      showValue: this.showValue(),
+      valuePosition: this.valuePosition(),
+      valueLabel: this.valueLabel(),
+      xs: this.xs(),
+      sm: this.sm(),
+      md: this.md(),
+      lg: this.lg(),
+      xl: this.xl(),
+      xxl: this.xxl(),
+    }),
   );
 
   protected formattedValue = computed(
-    () => this.valueLabel() ?? `${this.value()}%`,
+    () => this.currentProps().valueLabel ?? `${this.value()}%`,
   );
 
   protected accessibleLabel = computed(
