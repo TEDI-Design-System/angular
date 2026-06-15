@@ -1,0 +1,137 @@
+import { Meta, Canvas } from "@storybook/addon-docs/blocks";
+import * as TableStories from "./table.stories";
+
+<Meta of={TableStories} name="Grouping" />
+
+# Grouping
+
+`tedi-table` can collapse consecutive rows that share a key into a single
+visually spanning cell, and — when you group at the table level — make the
+control columns (selection / expand / drag), row selection, and row dividers
+all operate per group. This is the high-level alternative to wiring `rowSpan`
+by hand (see <a href="?path=/docs/tedi-ready-content-table--cells-and-templates#row-spanning">Row spanning</a> for the low-level callback).
+
+<Canvas of={TableStories.GroupedSelectableRows} />
+
+---
+
+## Two ways to group
+
+- **`groupBy` on a column** — merge that one column's cells across consecutive
+  equal keys.
+- **`groupRowsBy` on the table** — one grouping that also drives the control
+  columns, row selection and dividers.
+
+Both compute spans **internally against the live row model** (post filter /
+sort / pagination) — no manual `groupRowSpan(table.getRowModel().rows, …)`
+wiring, and no risk of reading the row model during render.
+
+---
+
+## Column-level `groupBy`
+
+Merge one column's consecutive equal values into a spanning cell:
+
+```ts
+columns: TediColumnDef<Person>[] = [
+  {
+    id: "location",
+    header: "Asukoht",
+    accessorKey: "location",
+    groupBy: (row) => row.original.location, // span rows with the same location
+    meta: { vAlign: "top" }, // anchor the merged cell to the top
+  },
+  { id: "name", header: "Nimi", accessorKey: "name" },
+];
+```
+
+- A function `(row) => key` groups the column by its own key.
+- `true` reuses the table-level `groupRowsBy` key (shared grouping).
+- `groupBy` takes precedence over a `rowSpan` callback on the same column.
+
+> Pair grouped columns with `meta: { vAlign: "top" }` so the spanning cell's
+> content sits at the top of the merged block instead of vertically centered.
+
+---
+
+## Table-level `groupRowsBy`
+
+Set a single grouping key on the table and the **control columns span each
+group automatically** — one checkbox, one chevron and one drag handle per group
+instead of per row:
+
+```html
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [groupRowsBy]="groupRowsBy"
+  [enableRowSelection]="true"
+  rowGroupDividers="between"
+/>
+```
+
+```ts
+// Rows with the same key form a group. Rows with no key fall back to their
+// own id, so they stay their own (singleton) group.
+groupRowsBy = (row: Row<Order>) => row.original.orderId ?? row.id;
+```
+
+Data columns opt into spanning the **same** groups with `groupBy: true`:
+
+```ts
+{ id: "orderId", header: "Tellimus", accessorFn: (r) => r.orderId,
+  groupBy: true, meta: { vAlign: "top" } }
+```
+
+---
+
+## Group selection
+
+With `groupRowsBy` + `enableRowSelection`, the group's single checkbox toggles
+**every row in the group** and renders the indeterminate state when only part of
+the group is selected. The header select-all and `(stateChange)` keep working
+unchanged — no custom selection code.
+
+Singleton groups (a group of one — e.g. a `getSubRows` parent keyed by its own
+id) fall back to the normal row checkbox, so a parent still cascades selection
+to its children via TanStack's sub-row selection.
+
+---
+
+## Row dividers — `rowGroupDividers`
+
+When the table is grouped, choose how row dividers are drawn:
+
+```html
+<tedi-table [groupRowsBy]="groupRowsBy" rowGroupDividers="between" />
+```
+
+- `"all"` (default) — a divider under every row, as usual.
+- `"between"` — dividers only at group boundaries; rows within a group read as
+  one block.
+- `"none"` — no row dividers.
+
+Has no effect when `groupRowsBy` is not set.
+
+---
+
+## Filtering grouped / tree data
+
+For tree data (`getSubRows`), filtering keeps a parent row and shows only the
+**matching descendants** when a leaf matches — a filter that doesn't match the
+parent no longer drops its whole subtree. This is automatic; no configuration
+needed.
+
+When filtering a grouped column, return a group-wide value from `accessorFn`
+(e.g. the joined keys of the group) so every row in a group shares one filter
+value — that way a filter keeps the whole group together and never splits a
+`groupBy` span.
+
+---
+
+## Full example
+
+The **GroupedSelectableRows** story composes all of the above — collapsible
+person groups, one checkbox per group and per transaction, row-spanned
+id / date columns, group-boundary dividers, column filters and rich cells. Read
+its source for the complete column definitions.

@@ -24,6 +24,7 @@ import { TediTableHeaderButtonComponent } from "./table-header-button/table-head
 import { TediPaginationResultsDirective } from "../../navigation/pagination/pagination-results.directive";
 import { groupRowSpan } from "./row-span.utils";
 import type {
+  TableControlColumn,
   TableExpandTrigger,
   TableSelectionMode,
   TableSize,
@@ -35,14 +36,13 @@ import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { LinkComponent } from "../../navigation/link/link.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
-import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
-import { SelectComponent } from "../../form/select/select.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
+import { EllipsisComponent } from "../../helpers/ellipsis/ellipsis.component";
 import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
 import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
 import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
@@ -58,512 +58,48 @@ import { BreakpointService } from "../../../services/breakpoint/breakpoint.servi
 import { TextGroupComponent } from "../text-group/text-group.component";
 import { TextGroupLabelComponent } from "../text-group/text-group-label.component";
 import { TextGroupValueComponent } from "../text-group/text-group-value.component";
-
-// ---------------------------------------------------------------------------
-// Shared data — mirrors `react/src/tedi/components/content/table/table.stories.tsx`.
-// Keep these seeds + Estonian labels aligned so Chromatic comparisons line up.
-// ---------------------------------------------------------------------------
-
-interface Person {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  location: string;
-  salary: number;
-  status: "active" | "inactive";
-}
-
-const personSeed: Omit<Person, "id">[] = [
-  {
-    name: "Anna Tamm",
-    email: "anna.tamm@example.ee",
-    role: "Engineer",
-    location: "Tallinn",
-    salary: 4200,
-    status: "active",
-  },
-  {
-    name: "Jüri Kask",
-    email: "juri.kask@example.ee",
-    role: "Designer",
-    location: "Tartu",
-    salary: 3800,
-    status: "active",
-  },
-  {
-    name: "Maria Saar",
-    email: "maria.saar@example.ee",
-    role: "Product",
-    location: "Pärnu",
-    salary: 4600,
-    status: "active",
-  },
-  {
-    name: "Mart Mets",
-    email: "mart.mets@example.ee",
-    role: "Engineer",
-    location: "Tallinn",
-    salary: 4100,
-    status: "inactive",
-  },
-  {
-    name: "Liis Lepp",
-    email: "liis.lepp@example.ee",
-    role: "Ops",
-    location: "Narva",
-    salary: 3600,
-    status: "active",
-  },
-  {
-    name: "Kadri Kask",
-    email: "kadri.kask@example.ee",
-    role: "Engineer",
-    location: "Viljandi",
-    salary: 4000,
-    status: "active",
-  },
-  {
-    name: "Rain Roos",
-    email: "rain.roos@example.ee",
-    role: "Designer",
-    location: "Rakvere",
-    salary: 3900,
-    status: "inactive",
-  },
-];
-
-const people: Person[] = Array.from({ length: 28 }, (_, index) => {
-  const seed = personSeed[index % personSeed.length];
-  const round = Math.floor(index / personSeed.length);
-  return {
-    ...seed,
-    id: String(index + 1),
-    name: round === 0 ? seed.name : `${seed.name} ${round + 1}`,
-  };
-});
-
-const personColumns: TediColumnDef<Person>[] = [
-  { id: "name", header: "Name", accessorKey: "name" },
-  { id: "email", header: "Email", accessorKey: "email" },
-  { id: "role", header: "Role", accessorKey: "role" },
-  { id: "location", header: "Location", accessorKey: "location" },
-];
-
-interface Booking {
-  id: string;
-  dateRange: string;
-  hour: string;
-  duration: string;
-  location: string;
-}
-
-const bookingDateRange = "22.03.2029 – 29.03.2029";
-
-const bookings: Booking[] = Array.from({ length: 28 }, (_, index) => ({
-  id: String(index + 1),
-  dateRange: bookingDateRange,
-  hour: "11:14",
-  duration: "6 min",
-  location: "Harjumaa",
-}));
-
-interface Doctor {
-  id: string;
-  name: string;
-  specialty: string;
-  experience: string;
-  location: string;
-}
-
-const doctorSeed: Omit<Doctor, "id">[] = [
-  {
-    name: "Kalle Kask",
-    specialty: "Dermatovenereoloog",
-    experience: "4 a",
-    location: "Tallinn",
-  },
-  {
-    name: "Mari Maasikas",
-    specialty: "Kopsuarst",
-    experience: "4 a",
-    location: "Tallinn",
-  },
-  {
-    name: "Vello Vaarikas",
-    specialty: "Kõrva-nina-kurguarst",
-    experience: "4 a",
-    location: "Tallinn",
-  },
-];
-
-const doctors: Doctor[] = Array.from({ length: 28 }, (_, index) => ({
-  ...doctorSeed[index % doctorSeed.length],
-  id: String(index + 1),
-}));
-
-type CertStatus = "Kehtiv" | "Kehtetu" | "Aegumas" | "Aegunud";
-const CERT_STATUSES: CertStatus[] = ["Kehtiv", "Kehtetu", "Aegumas", "Aegunud"];
-const certStatusColor: Record<
+import {
+  people,
+  personColumns,
+  bookings,
+  doctors,
+  CERT_STATUSES,
+  certStatusColor,
+  filterablePeople,
+  collapsiblePeople,
+  stickyDoctors,
+  services,
+  customDoctors,
+  errorRows,
+} from "./table-demo-data";
+import type {
+  Person,
+  Booking,
+  Doctor,
   CertStatus,
-  "success" | "warning" | "danger" | "neutral"
-> = {
-  Kehtiv: "success",
-  Aegumas: "warning",
-  Kehtetu: "danger",
-  Aegunud: "neutral",
-};
+  PersonRecord,
+  CollapsibleRecord,
+  StickyDoctor,
+  Service,
+  CustomDoctor,
+  ErrorRowRecord,
+} from "./table-demo-data";
+import {
+  priceFormatter,
+  initialsOf,
+  LONG_DESCRIPTION,
+  DEFAULT_PAGINATION,
+  SHOWCASE_PAGINATION_3,
+  SHOWCASE_PAGINATION_4,
+  sortIconFor,
+  ESTONIAN_COUNTIES,
+  BOOKING_EDIT_TEMPLATES,
+  EDIT_IMPORTS,
+  createEditableRows,
+  TABLE_APPEARANCE_BINDINGS,
+} from "./table-demo.constants";
 
-interface PersonRecord {
-  id: string;
-  name: string;
-  jobStart: string;
-  age: number;
-  visits: number;
-  status: CertStatus;
-}
 
-const filterablePeopleSeed: Omit<PersonRecord, "id">[] = [
-  { name: "Mari Maasikas", jobStart: "21.08.2019", age: 25, visits: 6, status: "Kehtiv" },
-  { name: "Kalle Kapsapea", jobStart: "14.03.2020", age: 35, visits: 13, status: "Kehtiv" },
-  { name: "Mart Mägi", jobStart: "02.01.2018", age: 43, visits: 26, status: "Kehtiv" },
-  { name: "Meelis Mets", jobStart: "10.07.2021", age: 64, visits: 26, status: "Kehtetu" },
-  { name: "Kadri Kask", jobStart: "30.11.2022", age: 32, visits: 4, status: "Aegumas" },
-  { name: "Liis Linn", jobStart: "21.08.2019", age: 21, visits: 13, status: "Aegunud" },
-];
-
-const filterablePeople: PersonRecord[] = Array.from({ length: 28 }, (_, index) => {
-  const seed = filterablePeopleSeed[index % filterablePeopleSeed.length];
-  const round = Math.floor(index / filterablePeopleSeed.length);
-  return {
-    ...seed,
-    id: String(index + 1),
-    name: round === 0 ? seed.name : `${seed.name} ${round + 1}`,
-  };
-});
-
-interface CollapsibleRecord {
-  id: string;
-  name: string;
-  age: number;
-  visits: number;
-  status: CertStatus;
-  subRows?: CollapsibleRecord[];
-}
-
-const collapsibleSeed: Omit<CollapsibleRecord, "id" | "subRows">[] = [
-  { name: "Mari Maasikas", age: 25, visits: 6, status: "Kehtiv" },
-  { name: "Kalle Kapsapea", age: 35, visits: 13, status: "Kehtiv" },
-  { name: "Mart Mägi", age: 43, visits: 26, status: "Kehtiv" },
-  { name: "Meelis Mets", age: 64, visits: 26, status: "Kehtetu" },
-  { name: "Kadri Kask", age: 32, visits: 4, status: "Aegumas" },
-  { name: "Liis Linn", age: 21, visits: 13, status: "Aegunud" },
-];
-
-const collapsiblePeople: CollapsibleRecord[] = Array.from({ length: 28 }, (_, index) => {
-  const seed = collapsibleSeed[index % collapsibleSeed.length];
-  const round = Math.floor(index / collapsibleSeed.length);
-  const name = round === 0 ? seed.name : `${seed.name} ${round + 1}`;
-  const id = String(index + 1);
-  const subRows: CollapsibleRecord[] | undefined =
-    index % 2 === 0
-      ? [
-        { id: `${id}-1`, name, age: seed.age, visits: Math.floor(seed.visits / 2), status: "Kehtiv" },
-        { id: `${id}-2`, name, age: seed.age, visits: seed.visits - Math.floor(seed.visits / 2), status: "Kehtetu" },
-      ]
-      : undefined;
-  return { ...seed, id, name, ...(subRows ? { subRows } : {}) };
-});
-
-interface StickyDoctor extends Doctor {
-  personalId: string;
-  email: string;
-  phone: string;
-  room: string;
-  nextAvailable: string;
-  patientsToday: number;
-  rating: string;
-}
-
-const stickyDoctorSeed: Omit<StickyDoctor, "id">[] = [
-  {
-    name: "Kalle Kask",
-    personalId: "49504080456",
-    specialty: "Dermatovenereoloog",
-    experience: "4 a",
-    location: "Tallinn",
-    email: "kalle.kask@tedi.ee",
-    phone: "+372 5123 4567",
-    room: "Kabinet 304",
-    nextAvailable: "29.03.2029 09:30",
-    patientsToday: 12,
-    rating: "4.7 / 5",
-  },
-  {
-    name: "Mari Maasikas",
-    personalId: "39404080456",
-    specialty: "Kopsuarst",
-    experience: "4 a",
-    location: "Tallinn",
-    email: "mari.maasikas@tedi.ee",
-    phone: "+372 5234 5678",
-    room: "Kabinet 211",
-    nextAvailable: "30.03.2029 14:00",
-    patientsToday: 9,
-    rating: "4.9 / 5",
-  },
-  {
-    name: "Vello Vaarikas",
-    personalId: "39403080865",
-    specialty: "Kõrva-nina-kurguarst",
-    experience: "4 a",
-    location: "Tallinn",
-    email: "vello.vaarikas@tedi.ee",
-    phone: "+372 5345 6789",
-    room: "Kabinet 117",
-    nextAvailable: "29.03.2029 11:15",
-    patientsToday: 14,
-    rating: "4.5 / 5",
-  },
-];
-
-const stickyDoctors: StickyDoctor[] = Array.from({ length: 28 }, (_, index) => ({
-  ...stickyDoctorSeed[index % stickyDoctorSeed.length],
-  id: String(index + 1),
-}));
-
-interface Service {
-  id: string;
-  service: string;
-  doctor: string;
-  price: number;
-  location: string;
-}
-
-const serviceSeed: Omit<Service, "id">[] = [
-  { service: "Vaimse tervise nõustamisteenus", doctor: "Pille Paunküla", price: 45.5, location: "Tallinn" },
-  { service: "Hematoloogia", doctor: "Kalle Kuusik", price: 89.99, location: "Tallinn" },
-  { service: "Ortopeedia", doctor: "Märt Männimets", price: 110, location: "Tallinn" },
-  { service: "Dermatoloogia", doctor: "Anna Tamm", price: 75, location: "Tartu" },
-  { service: "Kardioloogia", doctor: "Mati Saar", price: 120.5, location: "Pärnu" },
-  { service: "Neuroloogia", doctor: "Liis Põld", price: 95.25, location: "Tallinn" },
-  { service: "Pediaatria", doctor: "Jaan Lepp", price: 60, location: "Tartu" },
-];
-const services: Service[] = Array.from({ length: 28 }, (_, index) => ({
-  id: String(index + 1),
-  ...serviceSeed[index % serviceSeed.length],
-}));
-
-type CustomNoteColor = "warning" | "danger" | undefined;
-interface CustomDoctor extends Doctor {
-  note?: string;
-  noteColor?: CustomNoteColor;
-}
-
-const customDoctorSeed: Omit<CustomDoctor, "id">[] = [
-  {
-    name: "Kalle Kask",
-    specialty: "Dermatovenereoloog",
-    experience: "4 a",
-    location: "Tallinn",
-    note: "Esineb maksehäireid",
-    noteColor: "warning",
-  },
-  { name: "Mari Maasikas", specialty: "Kopsuarst", experience: "4 a", location: "Tallinn" },
-  {
-    name: "Vello Vaarikas",
-    specialty: "Kõrva-nina-kurguarst",
-    experience: "4 a",
-    location: "Tallinn",
-    note: "Arve tasumata",
-    noteColor: "danger",
-  },
-];
-
-const customDoctors: CustomDoctor[] = Array.from({ length: 28 }, (_, index) => ({
-  ...customDoctorSeed[index % customDoctorSeed.length],
-  id: String(index + 1),
-}));
-
-const priceFormatter = new Intl.NumberFormat("et-EE", {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
-
-const initialsOf = (name: string) =>
-  name
-    .split(" ")
-    .map((part) => part[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("");
-
-const LONG_DESCRIPTION =
-  "Pellentesque mattis augue at mi tristique dignissim. Aliquam lobortis hendrerit " +
-  "augue, sit amet pellentesque nibh ultricies eu. Nullam ut nibh non lectus pulvinar " +
-  "volutpat.";
-
-const DEFAULT_PAGINATION = { pageSize: 10, pageSizeOptions: [10, 25, 50] };
-const SHOWCASE_PAGINATION_3 = { pageSize: 3, pageSizeOptions: [3, 10, 25, 50] };
-const SHOWCASE_PAGINATION_4 = { pageSize: 4, pageSizeOptions: [4, 10, 25, 50] };
-
-const sortIconFor = (sorted: false | "asc" | "desc"): string =>
-  sorted === "asc"
-    ? "arrow_upward"
-    : sorted === "desc"
-      ? "arrow_downward"
-      : "unfold_more";
-
-// Estonian counties used as options for the editable "Asukoht" (location)
-// select cells across editable stories.
-const ESTONIAN_COUNTIES: { label: string; value: string }[] = [
-  { label: "Harjumaa", value: "Harjumaa" },
-  { label: "Hiiumaa", value: "Hiiumaa" },
-  { label: "Ida-Virumaa", value: "Ida-Virumaa" },
-  { label: "Jõgevamaa", value: "Jõgevamaa" },
-  { label: "Järvamaa", value: "Järvamaa" },
-  { label: "Läänemaa", value: "Läänemaa" },
-  { label: "Lääne-Virumaa", value: "Lääne-Virumaa" },
-  { label: "Põlvamaa", value: "Põlvamaa" },
-  { label: "Pärnumaa", value: "Pärnumaa" },
-  { label: "Raplamaa", value: "Raplamaa" },
-  { label: "Saaremaa", value: "Saaremaa" },
-  { label: "Tartumaa", value: "Tartumaa" },
-  { label: "Valgamaa", value: "Valgamaa" },
-  { label: "Viljandimaa", value: "Viljandimaa" },
-  { label: "Võrumaa", value: "Võrumaa" },
-];
-
-// Shared template fragments for booking + doctor inline-edit cells. Each host
-// component includes these in its template string and declares the matching
-// `viewChild` template refs to wire them into the columns. The `editor`
-// accessor is assumed to be on the host (`createEditableRows<T>(...)`).
-function editableTextCellTemplate(
-  tplName: string,
-  field: string,
-  ariaLabel: string,
-  icon?: string,
-): string {
-  const fieldAttr = icon ? ` icon="${icon}"` : "";
-  return `
-<ng-template #${tplName} let-ctx>
-  @if (editor.isEditing(ctx.row.original.id)) {
-    <tedi-form-field size="small"${fieldAttr}>
-      <input
-        tedi-text-field
-        type="text"
-        [ngModel]="editor.draftValue(ctx.row.original.id, '${field}')"
-        (ngModelChange)="editor.setDraftValue(ctx.row.original.id, '${field}', $event)"
-        aria-label="${ariaLabel}"
-      />
-    </tedi-form-field>
-  } @else {
-    {{ ctx.row.original.${field} }}
-  }
-</ng-template>`;
-}
-
-function editableLocationCellTemplate(tplName = "locationCell"): string {
-  return `
-<ng-template #${tplName} let-ctx>
-  @if (editor.isEditing(ctx.row.original.id)) {
-    <tedi-select
-      [inputId]="'location-' + ctx.row.original.id"
-      size="small"
-      [options]="counties"
-      bindLabel="label"
-      bindValue="value"
-      [ngModel]="editor.draftValue(ctx.row.original.id, 'location')"
-      (ngModelChange)="editor.setDraftValue(ctx.row.original.id, 'location', $event)"
-    />
-  } @else {
-    {{ ctx.row.original.location }}
-  }
-</ng-template>`;
-}
-
-const EDITABLE_ACTIONS_TEMPLATE = `
-<ng-template #editActions let-ctx>
-  <span style="display:inline-flex; gap:8px; justify-content:flex-end; align-items:center; width:100%;">
-    @if (editor.isEditing(ctx.row.original.id)) {
-      <button tedi-closing-button type="button" aria-label="Tühista"
-        (click)="editor.cancelEdit()"></button>
-      <button tedi-button variant="primary" size="small" type="button"
-        (click)="editor.commitEdit()">
-        <tedi-icon name="check" [size]="16" color="inherit" />
-        Kinnita
-      </button>
-    } @else {
-      <button tedi-button variant="neutral" size="small" type="button"
-        (click)="editor.beginEdit(ctx.row.original)">
-        <tedi-icon name="edit" [size]="16" color="inherit" />
-        Muuda
-      </button>
-    }
-  </span>
-</ng-template>`;
-
-const BOOKING_EDIT_TEMPLATES =
-  editableTextCellTemplate("dateRangeCell", "dateRange", "Kuupäev") +
-  editableTextCellTemplate("hourCell", "hour", "Kellaaeg", "schedule") +
-  editableTextCellTemplate("durationCell", "duration", "Kestus") +
-  editableLocationCellTemplate("locationCell") +
-  EDITABLE_ACTIONS_TEMPLATE;
-
-const EDIT_IMPORTS = [
-  TediTableComponent,
-  ButtonComponent,
-  IconComponent,
-  TextFieldComponent,
-  ClosingButtonComponent,
-  FormFieldComponent,
-  SelectComponent,
-  FormsModule,
-];
-
-// Shared editable-rows controller — mirrors the React `useEditableRows` hook.
-// Each host that wants per-row inline editing calls this once with its initial
-// rows; the returned object exposes signals + handlers that templates wire up
-// via `editor.isEditing(...)`, `editor.beginEdit(...)`, etc.
-function createEditableRows<T extends { id: string }>(initial: T[]) {
-  const rows = signal<T[]>(initial);
-  const editingId = signal<string | null>(null);
-  const draft = signal<T | null>(null);
-
-  return {
-    rows,
-    editingId,
-    draft,
-    isEditing: (id: string) => editingId() === id,
-    draftValue: (id: string, field: keyof T): string => {
-      const d = draft();
-      if (!d || d.id !== id) return "";
-      return String(d[field] ?? "");
-    },
-    setDraftValue: (id: string, field: keyof T, value: string): void => {
-      draft.update((prev) =>
-        prev && prev.id === id ? { ...prev, [field]: value } : prev,
-      );
-    },
-    beginEdit: (row: T): void => {
-      editingId.set(row.id);
-      draft.set({ ...row });
-    },
-    cancelEdit: (): void => {
-      editingId.set(null);
-      draft.set(null);
-    },
-    commitEdit: (): void => {
-      const current = draft();
-      if (!current) return;
-      rows.update((existing) =>
-        existing.map((row) => (row.id === current.id ? current : row)),
-      );
-      editingId.set(null);
-      draft.set(null);
-    },
-  };
-}
 
 // Shared appearance inputs every story host inherits — keeps the Storybook
 // controls panel functional for every story, not just Default. `@Directive()`
@@ -585,32 +121,17 @@ abstract class TableStoryHostBase {
   readonly selectedRowHighlight = input(true, { transform: booleanAttribute });
   readonly selectionMode = input<TableSelectionMode>("multiple");
   readonly enableColumnFilters = input(false, { transform: booleanAttribute });
+  readonly rowGroupDividers = input<"all" | "between" | "none">("all");
+  readonly controlColumnOrder = input<TableControlColumn[]>([
+    "drag",
+    "select",
+    "expand",
+  ]);
   readonly maxHeight = input<number | undefined>(undefined);
   readonly activeRowId = input<string | undefined>(undefined);
   readonly placeholderRole = input<"alert" | "status" | undefined>(undefined);
 }
 
-// Sibling binding fragment so every story template can forward the base-class
-// inputs to its <tedi-table> without repeating the property list.
-const TABLE_APPEARANCE_BINDINGS = `
-  [size]="size()"
-  [striped]="striped()"
-  [verticalBorders]="verticalBorders()"
-  [borderless]="borderless()"
-  [stickyFirstColumn]="stickyFirstColumn()"
-  [stickyHeader]="stickyHeader()"
-  [fixedLayout]="fixedLayout()"
-  [rowHover]="rowHover()"
-  [interactive]="interactive()"
-  [expandTrigger]="expandTrigger()"
-  [enableRowSelection]="enableRowSelection()"
-  [selectedRowHighlight]="selectedRowHighlight()"
-  [selectionMode]="selectionMode()"
-  [enableColumnFilters]="enableColumnFilters()"
-  [maxHeight]="maxHeight()"
-  [activeRowId]="activeRowId()"
-  [placeholderRole]="placeholderRole()"
-`.trim();
 
 type TediTableStoryArgs = {
   size: "medium" | "small";
@@ -627,10 +148,14 @@ type TediTableStoryArgs = {
   selectedRowHighlight: boolean;
   selectionMode: TableSelectionMode;
   enableColumnFilters: boolean;
+  rowGroupDividers: "all" | "between" | "none";
+  controlColumnOrder: TableControlColumn[];
   maxHeight: number | undefined;
   activeRowId: string | undefined;
   placeholderRole: "alert" | "status" | undefined;
   // Documented-only (set per story, not interactive controls)
+  groupRowsBy?: unknown;
+  groupBy?: unknown;
   data?: unknown[];
   columns?: unknown[];
   id?: string;
@@ -703,6 +228,8 @@ const meta: Meta<TediTableStoryArgs> = {
     enableRowSelection: false,
     selectionMode: "multiple",
     enableColumnFilters: false,
+    rowGroupDividers: "all",
+    controlColumnOrder: ["drag", "select", "expand"],
     maxHeight: undefined,
     activeRowId: undefined,
     placeholderRole: undefined,
@@ -855,6 +382,27 @@ const meta: Meta<TediTableStoryArgs> = {
         defaultValue: { summary: "false" },
       },
     },
+    rowGroupDividers: {
+      description:
+        "When grouped via `groupRowsBy`, how row dividers are drawn: 'all' (every row), 'between' (only at group boundaries) or 'none'.",
+      control: { type: "inline-radio" },
+      options: ["all", "between", "none"],
+      table: {
+        category: "grouping",
+        type: { summary: "'all' | 'between' | 'none'" },
+        defaultValue: { summary: "all" },
+      },
+    },
+    controlColumnOrder: {
+      description:
+        "Order of the auto-injected control columns. Only enabled controls render; any omitted enabled control is appended.",
+      control: { type: "object" },
+      table: {
+        category: "grouping",
+        type: { summary: "('drag' | 'select' | 'expand')[]" },
+        defaultValue: { summary: '["drag", "select", "expand"]' },
+      },
+    },
     activeRowId: {
       description: "Highlight the row whose id matches as the active row.",
       control: "text",
@@ -914,6 +462,24 @@ const meta: Meta<TediTableStoryArgs> = {
       table: {
         category: "expansion",
         type: { summary: "(row) => TData[] | undefined" },
+      },
+    },
+    groupRowsBy: {
+      description:
+        "Table-level row grouping key. Consecutive rows with an equal key form a group; control columns span each group, selection is per group, and group boundaries drive `rowGroupDividers`.",
+      control: false,
+      table: {
+        category: "grouping",
+        type: { summary: "(row: Row<TData>) => unknown" },
+      },
+    },
+    groupBy: {
+      description:
+        "Per-column (`TediColumnDef`) option: merge consecutive equal keys into a spanning cell. A function groups by its own key; `true` reuses the table `groupRowsBy` key.",
+      control: false,
+      table: {
+        category: "grouping",
+        type: { summary: "boolean | ((row: Row<TData>) => unknown)" },
       },
     },
     expandButtonVariant: {
@@ -2045,6 +1611,7 @@ export const Sortable: Story = {
     TextFieldComponent,
     FormFieldComponent,
     CheckboxComponent,
+    FormsModule,
   ],
   template: `
     <tedi-table
@@ -2060,8 +1627,9 @@ export const Sortable: Story = {
         <input
           tedi-text-field
           type="text"
-          [value]="ctx.value ?? ''"
-          (input)="ctx.setValue($any($event.target).value)"
+          [ngModel]="ctx.value ?? ''"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="ctx.setValue($event)"
           [attr.aria-label]="ctx.column.columnDef.header"
         />
       </tedi-form-field>
@@ -4639,6 +4207,254 @@ export const Responsive: Story = {
     }
   </div>
 </ng-template>`,
+      },
+    },
+  },
+};
+
+
+@Component({
+  standalone: true,
+  selector: "tedi-grouped-selectable-rows-story",
+  styles: [
+    `
+      .tedi-error-rows-story__person,
+      .tedi-error-rows-story__code {
+        display: inline-flex;
+        gap: var(--tedi-dimensions-04);
+      }
+
+      .tedi-error-rows-story__person {
+        flex-wrap: wrap;
+      }
+
+      .tedi-error-rows-story__muted {
+        color: var(--general-text-secondary);
+      }
+
+      .tedi-error-rows-story__more {
+        display: block;
+        width: fit-content;
+      }
+    `,
+  ],
+  imports: [
+    TediTableComponent,
+    IconComponent,
+    LinkComponent,
+    StatusBadgeComponent,
+    EllipsisComponent,
+    FormFieldComponent,
+    TextFieldComponent,
+    FormsModule,
+  ],
+  template: `
+    <tedi-table
+      id="tedi-table-grouped-selectable"
+      [data]="data"
+      [columns]="columns()"
+      [getSubRows]="getSubRows"
+      [groupRowsBy]="groupRowsBy"
+      [defaultState]="defaultState"
+      [expandButtonVariant]="'default'"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+
+    <ng-template #personCell let-ctx>
+      @if (ctx.row.depth === 0) {
+        <span class="tedi-error-rows-story__person">
+          <tedi-icon name="person" [size]="18" color="secondary" />
+          <a tedi-link href="#" (click)="$event.preventDefault()">{{
+            ctx.row.original.person
+          }}</a>
+          <span class="tedi-error-rows-story__muted"
+            >· {{ ctx.row.original.idCode }} · {{ ctx.row.original.country }}</span
+          >
+        </span>
+      } @else {
+        <a tedi-link href="#" (click)="$event.preventDefault()">{{
+          ctx.row.original.transactionId
+        }}</a>
+      }
+    </ng-template>
+
+    <ng-template #codeCell let-ctx>
+      @if (ctx.row.original.code) {
+        <span class="tedi-error-rows-story__code">
+          <tedi-status-badge
+            variant="filled-bordered"
+            [color]="ctx.row.original.severity === 'warning' ? 'warning' : 'danger'"
+            [icon]="
+              ctx.row.original.severity === 'warning' ? 'warning' : 'emergency_home'
+            "
+          />
+          {{ ctx.row.original.code }}
+        </span>
+      }
+    </ng-template>
+
+    <ng-template #descCell let-ctx>
+      @if (ctx.row.original.description) {
+        @let key = ctx.row.id;
+        @let expanded = isExpanded(key);
+        @if (expanded) {
+          <span>{{ ctx.row.original.description }}</span>
+        } @else {
+          <tedi-ellipsis [lineClamp]="2" [tooltip]="false">{{
+            ctx.row.original.description
+          }}</tedi-ellipsis>
+        }
+        <a
+          tedi-link
+          href="#"
+          class="tedi-error-rows-story__more"
+          (click)="$event.preventDefault(); toggleDesc(key)"
+          >{{ expanded ? "Näita vähem" : "Näita rohkem" }}</a
+        >
+      }
+    </ng-template>
+
+    <ng-template #textFilter let-ctx>
+      <tedi-form-field size="small">
+        <input
+          tedi-text-field
+          type="text"
+          [ngModel]="ctx.value ?? ''"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="ctx.setValue($event)"
+          [attr.aria-label]="ctx.column.columnDef.header"
+        />
+      </tedi-form-field>
+    </ng-template>
+  `,
+})
+class GroupedSelectableRowsStoryHostComponent extends TableStoryHostBase {
+  data = errorRows;
+  pagination = DEFAULT_PAGINATION;
+  defaultState: TableState = { expanded: true };
+  getSubRows = (row: ErrorRowRecord) => row.subRows;
+  groupRowsBy = (row: Row<ErrorRowRecord>) =>
+    row.original.transactionId ?? row.id;
+
+  private expandedDesc = signal<Set<string>>(new Set());
+  isExpanded = (key: string): boolean => this.expandedDesc().has(key);
+  toggleDesc(key: string): void {
+    const next = new Set(this.expandedDesc());
+    if (next.has(key)) {
+      next.delete(key);
+    } else {
+      next.add(key);
+    }
+    this.expandedDesc.set(next);
+  }
+
+  personCellTpl =
+    viewChild<TemplateRef<CellContext<ErrorRowRecord, unknown>>>("personCell");
+  codeCellTpl =
+    viewChild<TemplateRef<CellContext<ErrorRowRecord, unknown>>>("codeCell");
+  descCellTpl =
+    viewChild<TemplateRef<CellContext<ErrorRowRecord, unknown>>>("descCell");
+  textFilterTpl =
+    viewChild<TemplateRef<TediTableFilterContext<string, ErrorRowRecord>>>(
+      "textFilter",
+    );
+
+  columns = computed<TediColumnDef<ErrorRowRecord>[]>(() => [
+    {
+      id: "personTransaction",
+      header: "Isik/Tehing",
+      accessorFn: (row) => row.person ?? row.transactionId ?? "",
+      minSize: 172,
+      filterable: true,
+      filterFn: "includesString",
+      filterTemplate: this.textFilterTpl() ?? undefined,
+      cell: this.personCellTpl() ?? "",
+      meta: { vAlign: "top" },
+      groupBy: true,
+    } as TediColumnDef<ErrorRowRecord>,
+    {
+      id: "code",
+      header: "Veakood",
+      accessorFn: (row) => row.txnCodes ?? "",
+      filterable: true,
+      filterFn: "includesString",
+      filterTemplate: this.textFilterTpl() ?? undefined,
+      cell: this.codeCellTpl() ?? "",
+      meta: { vAlign: "top" },
+    } as TediColumnDef<ErrorRowRecord>,
+    {
+      id: "description",
+      header: "Vea kirjeldus",
+      cell: this.descCellTpl() ?? "",
+      meta: { vAlign: "top" },
+    } as TediColumnDef<ErrorRowRecord>,
+    {
+      id: "date",
+      header: "Tehingu edastamise kuupäev",
+      accessorFn: (row) => row.date ?? "",
+      meta: { vAlign: "top" },
+      groupBy: true,
+    },
+  ]);
+}
+
+export const GroupedSelectableRows: Story = {
+  args: { enableRowSelection: true, rowGroupDividers: "between" },
+  render: (args) => ({
+    moduleMetadata: { imports: [GroupedSelectableRowsStoryHostComponent] },
+    props: args,
+    template: `<tedi-grouped-selectable-rows-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The TEDI error-list layout, built entirely from Table grouping " +
+          "primitives:\n\n" +
+          "- **`groupRowsBy`** groups rows by transaction. The built-in " +
+          "select and expand control columns span each group automatically — " +
+          "one checkbox and one chevron per transaction.\n" +
+          "- **Group selection** — the transaction checkbox selects all of its " +
+          "error rows; the person (parent) checkbox cascades to every child. " +
+          "Both show the indeterminate state. No custom selection code.\n" +
+          "- **`groupBy: true`** on the *Isik/Tehing* and *date* columns merges " +
+          "them across each transaction's error rows, so *Veakood* / *Vea " +
+          "kirjeldus* stay one-row-per-error and line up.\n" +
+          "- **`rowGroupDividers=\"between\"`** draws dividers only at group " +
+          "boundaries — no `:has()` CSS hack.\n" +
+          "- The selection checkbox sits before the expand chevron via the " +
+          "default `controlColumnOrder`.\n" +
+          "- Clicking a link or the checkbox no longer needs " +
+          "`stopPropagation` — the table ignores clicks on interactive cell " +
+          "controls.",
+      },
+      source: {
+        language: "html",
+        code: `<!-- groupRowsBy defines the transaction groups; control columns span
+  them and selection is per group. groupBy: true merges the data columns
+  over the same groups. rowGroupDividers keeps dividers between groups only.
+  groupRowsBy = (row) => row.original.transactionId ?? row.id
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [groupRowsBy]="groupRowsBy"
+  rowGroupDividers="between"
+  [enableRowSelection]="true"
+  [defaultState]="{ expanded: true }"
+/>
+
+<!-- columns -->
+{ id: 'personTransaction', header: 'Isik/Tehing', cell: personCellTpl,
+  filterable: true, meta: { vAlign: 'top' }, groupBy: true }
+{ id: 'code', header: 'Veakood', cell: codeCellTpl,
+  filterable: true, meta: { vAlign: 'top' } }
+{ id: 'description', header: 'Vea kirjeldus', cell: descCellTpl,
+  meta: { vAlign: 'top' } }
+{ id: 'date', header: 'Tehingu edastamise kuupäev',
+  meta: { vAlign: 'top' }, groupBy: true }`,
       },
     },
   },
