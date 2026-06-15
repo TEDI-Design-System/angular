@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   contentChildren,
+  ElementRef,
   forwardRef,
   inject,
   input,
@@ -38,6 +39,7 @@ export class DropdownContentComponent {
    */
   readonly dropdownRole = input<DropdownRole>("menu");
 
+  readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly dropdownApi = inject(DROPDOWN_API);
   readonly containerId = computed(() => this.dropdownApi.containerId());
   readonly items = contentChildren(DropdownItemComponent);

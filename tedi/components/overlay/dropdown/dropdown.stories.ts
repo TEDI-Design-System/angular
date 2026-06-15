@@ -1,3 +1,4 @@
+import { Component, ViewEncapsulation } from "@angular/core";
 import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
 import { DropdownComponent, DropdownPosition } from "./dropdown.component";
 import {
@@ -14,6 +15,15 @@ import { DropdownItemValueLabelComponent } from "./dropdown-item-value/dropdown-
 import { DropdownItemValueMetaComponent } from "./dropdown-item-value/dropdown-item-value-meta.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base";
+
+@Component({
+  selector: "app-demo-button",
+  standalone: true,
+  imports: [ButtonComponent],
+  template: `<button tedi-button><ng-content /></button>`,
+  encapsulation: ViewEncapsulation.None,
+})
+class DemoWrappingButtonComponent {}
 
 const POSITIONS: DropdownPosition[] = [
   "auto",
@@ -53,6 +63,7 @@ export default {
         DropdownItemValueMetaComponent,
         ButtonComponent,
         IconComponent,
+        DemoWrappingButtonComponent,
       ],
     }),
   ],
@@ -86,16 +97,6 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
-    appendTo: {
-      control: "text",
-      description:
-        "Append floating element to given selector. Use 'body' to append at the end of DOM or empty string to append next to trigger element.",
-      table: {
-        category: "dropdown",
-        type: { summary: "string" },
-        defaultValue: { summary: `""` },
-      },
-    },
     dropdownRole: {
       control: "radio",
       options: ["menu", "listbox"],
@@ -107,7 +108,7 @@ export default {
         defaultValue: { summary: "menu" },
       },
     },
-    ariaHasPopup: {
+    ariaHaspopup: {
       control: "radio",
       options: ["menu", "listbox", "true"],
       description:
@@ -160,7 +161,7 @@ export default {
 type Story = StoryObj<
   DropdownComponent & {
     dropdownRole: DropdownRole;
-    ariaHasPopup: DropdownTriggerAriaHasPopup;
+    ariaHaspopup: DropdownTriggerAriaHasPopup;
   }
 >;
 
@@ -168,15 +169,14 @@ export const Default: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "menu",
-    ariaHasPopup: "menu",
+    ariaHaspopup: "menu",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
-        <button tedi-button tedi-dropdown-trigger [ariaHasPopup]="ariaHasPopup">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
           Trigger
         </button>
         <tedi-dropdown-content [dropdownRole]="dropdownRole">
@@ -194,15 +194,14 @@ export const WithMeta: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "listbox",
-    ariaHasPopup: "listbox",
+    ariaHaspopup: "listbox",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
-        <button tedi-button tedi-dropdown-trigger [ariaHasPopup]="ariaHasPopup">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
           Select location
         </button>
         <tedi-dropdown-content [dropdownRole]="dropdownRole">
@@ -235,15 +234,14 @@ export const WithIcons: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "menu",
-    ariaHasPopup: "menu",
+    ariaHaspopup: "menu",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
-        <button tedi-button tedi-dropdown-trigger [ariaHasPopup]="ariaHasPopup">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
           Actions
         </button>
         <tedi-dropdown-content [dropdownRole]="dropdownRole">
@@ -276,15 +274,14 @@ export const VerticalLayout: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "listbox",
-    ariaHasPopup: "listbox",
+    ariaHaspopup: "listbox",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
-        <button tedi-button tedi-dropdown-trigger [ariaHasPopup]="ariaHasPopup">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
           Select access level
         </button>
         <tedi-dropdown-content [dropdownRole]="dropdownRole">
@@ -313,6 +310,37 @@ export const VerticalLayout: Story = {
 };
 
 /**
+ * When the trigger sits on a component that wraps its own `<button>` (here
+ * `<app-demo-button>`), the directive resolves that inner button and applies the
+ * `id`, `aria-*`, focus, and keyboard handling there — keeping a single tab stop
+ * with correct screen-reader announcements.
+ */
+export const WithWrappingButtonComponent: Story = {
+  name: "Trigger on a Wrapping Button Component",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+    dropdownRole: "menu",
+    ariaHaspopup: "menu",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <app-demo-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
+          Actions
+        </app-demo-button>
+        <tedi-dropdown-content [dropdownRole]="dropdownRole">
+          <li tedi-dropdown-item>Access to health data</li>
+          <li tedi-dropdown-item [disabled]="true">Declaration of intent</li>
+          <li tedi-dropdown-item>Contacts</li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+/**
  * Items with `[closeOnSelect]="false"` keep the dropdown open after activation
  * and emit `(itemSelect)` for both mouse click and keyboard (Enter / Space).
  * Useful for multi-select checkbox menus where the user toggles several
@@ -325,9 +353,8 @@ export const KeepOpenOnSelect: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
-    appendTo: "body",
     dropdownRole: "menu",
-    ariaHasPopup: "menu",
+    ariaHaspopup: "menu",
   },
   render: (args) => ({
     props: {
@@ -352,8 +379,8 @@ export const KeepOpenOnSelect: Story = {
       },
     },
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [appendTo]="appendTo">
-        <button tedi-button tedi-dropdown-trigger variant="neutral" [ariaHasPopup]="ariaHasPopup">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <button tedi-button tedi-dropdown-trigger variant="neutral" [ariaHaspopup]="ariaHaspopup">
           <tedi-icon name="filter_list" [size]="18" color="inherit" />
           Filters
         </button>

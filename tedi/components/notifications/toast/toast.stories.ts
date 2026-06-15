@@ -2,10 +2,8 @@ import {
   type Meta,
   type StoryObj,
   moduleMetadata,
-  applicationConfig,
 } from "@storybook/angular";
 import { Component, inject } from "@angular/core";
-import { provideAnimations } from "@angular/platform-browser/animations";
 
 import { ToastComponent } from "./toast.component";
 import { ToastService } from "../../../services/toast/toast.service";
@@ -52,11 +50,6 @@ export default {
         ColComponent,
         ButtonComponent,
         VerticalSpacingDirective,
-      ],
-    }),
-    applicationConfig({
-      providers: [
-        provideAnimations(),
       ],
     }),
   ],

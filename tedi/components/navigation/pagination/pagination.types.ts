@@ -21,6 +21,17 @@ export type PaginationDividerPosition = "top" | "bottom" | "none";
 
 export type PaginationItemType = "page" | "previous" | "next" | "ellipsis";
 
+/**
+ * A labelled page-size option. Use it alongside plain numbers in
+ * `pageSizeOptions` when the visible text should differ from the value —
+ * most commonly a "Show all" entry: `{ value: totalItems, label: 'Show all' }`.
+ * The label is rendered as-is, so supply it already translated.
+ */
+export interface PaginationPageSizeOption {
+  value: number;
+  label: string;
+}
+
 export interface PaginationItem {
   type: PaginationItemType;
   page: number | null;

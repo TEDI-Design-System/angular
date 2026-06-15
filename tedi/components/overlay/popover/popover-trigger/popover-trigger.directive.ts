@@ -5,11 +5,13 @@ import {
   inject,
   input,
 } from "@angular/core";
+import { CdkOverlayOrigin } from "@angular/cdk/overlay";
 import { PopoverComponent } from "../popover.component";
 
 @Directive({
   standalone: true,
   selector: "[tedi-popover-trigger]",
+  hostDirectives: [CdkOverlayOrigin],
   host: {
     tabindex: "0",
     role: "button",
@@ -29,6 +31,7 @@ export class PopoverTriggerDirective {
 
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly popover = inject(PopoverComponent);
+  readonly overlayOrigin = inject(CdkOverlayOrigin, { self: true });
 
   @HostListener("click")
   onClick() {

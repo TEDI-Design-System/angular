@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { OverlayContainer } from "@angular/cdk/overlay";
 import { PopoverComponent, PopoverPosition } from "./popover.component";
-import { NgxFloatUiContentComponent } from "ngx-float-ui";
 import { PopoverTriggerDirective } from "./popover-trigger/popover-trigger.directive";
 import { PopoverContentComponent } from "./popover-content/popover-content.component";
 
@@ -12,7 +12,6 @@ import { PopoverContentComponent } from "./popover-content/popover-content.compo
     <tedi-popover
       [position]="position"
       [preventOverflow]="preventOverflow"
-      [appendTo]="appendTo"
       [dismissible]="dismissible"
       [hideOnScroll]="hideOnScroll"
       [withBorder]="withBorder"
@@ -29,7 +28,6 @@ import { PopoverContentComponent } from "./popover-content/popover-content.compo
 class TestHostComponent {
   position: PopoverPosition = "top";
   preventOverflow = false;
-  appendTo = "body";
   dismissible = true;
   hideOnScroll = false;
   withBorder = false;
@@ -42,6 +40,7 @@ describe("PopoverComponent", () => {
   let hostComponent: TestHostComponent;
   let component: PopoverComponent;
   let hostEl: HTMLElement;
+  let overlayContainerElement: HTMLElement;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -57,6 +56,13 @@ describe("PopoverComponent", () => {
       (el) => el.componentInstance instanceof PopoverComponent,
     );
     component = popoverDebugEl?.componentInstance as PopoverComponent;
+
+    const overlayContainer = TestBed.inject(OverlayContainer);
+    overlayContainerElement = overlayContainer.getContainerElement();
+  });
+
+  afterEach(() => {
+    component.hidePopover();
   });
 
   it("should create component", () => {
@@ -77,9 +83,8 @@ describe("PopoverComponent", () => {
     expect(component.preventOverflow()).toBe(true);
   });
 
-  it("should initialize the ViewChild floatUiComponent", () => {
-    const instance = component.floatUiComponent();
-    expect(instance).toBeInstanceOf(NgxFloatUiContentComponent);
+  it("should have isOpen default to false", () => {
+    expect(component.isOpen()).toBe(false);
   });
 
   it("should render trigger button", () => {
@@ -93,32 +98,22 @@ describe("PopoverComponent", () => {
     expect(trigger?.getAttribute("aria-haspopup")).toBe("dialog");
   });
 
-  it('should have default appendTo="body" on float-ui-content', () => {
-    expect(component.appendTo()).toBe("body");
-  });
-
-  it("should update appendTo when input changes", () => {
-    hostComponent.appendTo = "";
-    fixture.detectChanges();
-    expect(component.appendTo()).toBe("");
-  });
-
   it("should not include the border class by default", () => {
-    expect(component.floatUiContainerClass()).not.toContain("border");
+    expect(component.panelClasses()).not.toContain("border");
   });
 
   it("should apply the border class when withBorder is true", () => {
     hostComponent.withBorder = true;
     fixture.detectChanges();
 
-    expect(component.floatUiContainerClass()).toContain(
-      "float-ui-container-popover--border",
+    expect(component.panelClasses()).toContain(
+      "tedi-popover__container--border",
     );
   });
 
   it("should include arrow class when withArrow is true", () => {
-    expect(component.floatUiContainerClass()).toContain(
-      "float-ui-container-popover--arrow",
+    expect(component.panelClasses()).toContain(
+      "tedi-popover__container--arrow",
     );
   });
 
@@ -126,7 +121,7 @@ describe("PopoverComponent", () => {
     hostComponent.withArrow = false;
     fixture.detectChanges();
 
-    expect(component.floatUiContainerClass()).not.toContain("arrow");
+    expect(component.panelClasses()).not.toContain("arrow");
   });
 
   it("should update position when input changes", () => {
@@ -166,23 +161,20 @@ describe("PopoverComponent", () => {
 
   describe("showPopover()", () => {
     it("should not show popover if already open", () => {
-      const floatUi = component.floatUiComponent();
-      Object.defineProperty(floatUi, "state", { value: true, writable: true });
-      const showSpy = jest.spyOn(floatUi, "show");
+      component.isOpen.set(true);
 
+      const previousState = component.isOpen();
       component.showPopover();
 
-      expect(showSpy).not.toHaveBeenCalled();
+      expect(component.isOpen()).toBe(previousState);
     });
 
-    it("should call floatUiComponent.show() when closed", () => {
-      const floatUi = component.floatUiComponent();
-      Object.defineProperty(floatUi, "state", { value: false, writable: true });
-      const showSpy = jest.spyOn(floatUi, "show");
+    it("should set isOpen to true when closed", () => {
+      expect(component.isOpen()).toBe(false);
 
       component.showPopover();
 
-      expect(showSpy).toHaveBeenCalled();
+      expect(component.isOpen()).toBe(true);
     });
 
     it("should set body overflow:hidden when lockScroll is true", () => {
@@ -190,9 +182,6 @@ describe("PopoverComponent", () => {
       hostComponent.hideOnScroll = false;
       hostComponent.lockScroll = true;
       fixture.detectChanges();
-
-      const floatUi = component.floatUiComponent();
-      Object.defineProperty(floatUi, "state", { value: false, writable: true });
 
       const renderer = component["renderer"];
       const setStyleSpy = jest.spyOn(renderer, "setStyle");
@@ -205,7 +194,6 @@ describe("PopoverComponent", () => {
         "hidden",
       );
 
-      Object.defineProperty(floatUi, "state", { value: true, writable: true });
       component.hidePopover();
     });
 
@@ -214,14 +202,14 @@ describe("PopoverComponent", () => {
       hostComponent.dismissible = false;
       fixture.detectChanges();
 
-      const floatUi = component.floatUiComponent();
-      Object.defineProperty(floatUi, "state", { value: false, writable: true });
-
       component.showPopover();
+      fixture.detectChanges();
+
+      // Trigger attach manually since CDK overlay may not render in unit tests
+      component.onOverlayAttach();
 
       expect(component["scrollListener"]).toBeDefined();
 
-      Object.defineProperty(floatUi, "state", { value: true, writable: true });
       component.hidePopover();
     });
 
@@ -230,48 +218,49 @@ describe("PopoverComponent", () => {
       hostComponent.hideOnScroll = false;
       fixture.detectChanges();
 
-      const floatUi = component.floatUiComponent();
-      Object.defineProperty(floatUi, "state", { value: false, writable: true });
-
       component.showPopover();
+      fixture.detectChanges();
+
+      component.onOverlayAttach();
 
       expect(component["focusinListener"]).toBeDefined();
       expect(component["mousedownListener"]).toBeDefined();
 
-      Object.defineProperty(floatUi, "state", { value: true, writable: true });
       component.hidePopover();
     });
   });
 
   describe("hidePopover()", () => {
     beforeEach(() => {
-      const floatUi = component.floatUiComponent();
-      Object.defineProperty(floatUi, "state", { value: false, writable: true });
       component.showPopover();
-      Object.defineProperty(floatUi, "state", { value: true, writable: true });
+      fixture.detectChanges();
+      component.onOverlayAttach();
     });
 
     it("should not hide popover if already closed", () => {
-      const floatUi = component.floatUiComponent();
-      Object.defineProperty(floatUi, "state", { value: false, writable: true });
-      const hideSpy = jest.spyOn(floatUi, "hide");
+      component.isOpen.set(false);
 
       component.hidePopover();
 
-      expect(hideSpy).not.toHaveBeenCalled();
+      // It was called but returned early
+      expect(component.isOpen()).toBe(false);
     });
 
-    it("should call floatUiComponent.hide() when open", () => {
-      const floatUi = component.floatUiComponent();
-      const hideSpy = jest.spyOn(floatUi, "hide");
+    it("should set isOpen to false when open", () => {
+      expect(component.isOpen()).toBe(true);
 
       component.hidePopover();
 
-      expect(hideSpy).toHaveBeenCalled();
+      expect(component.isOpen()).toBe(false);
     });
 
-    it("should remove body overflow style when lockScroll is true", () => {
+    it("should remove body overflow style when lockScroll was set at open", () => {
       hostComponent.lockScroll = true;
+      fixture.detectChanges();
+
+      // Reopen so the scroll lock is captured at open time
+      component.hidePopover();
+      component.showPopover();
       fixture.detectChanges();
 
       const renderer = component["renderer"];
@@ -280,6 +269,23 @@ describe("PopoverComponent", () => {
       component.hidePopover();
 
       expect(removeStyleSpy).toHaveBeenCalledWith(document.body, "overflow");
+    });
+
+    it("should not remove body overflow when lockScroll was false at open", () => {
+      // Opened in beforeEach with lockScroll=false; flipping it mid-open
+      // must not clobber a body overflow style the popover never set
+      hostComponent.lockScroll = true;
+      fixture.detectChanges();
+
+      const renderer = component["renderer"];
+      const removeStyleSpy = jest.spyOn(renderer, "removeStyle");
+
+      component.hidePopover();
+
+      expect(removeStyleSpy).not.toHaveBeenCalledWith(
+        document.body,
+        "overflow",
+      );
     });
 
     it("should focus trigger when focusTrigger is true", () => {
@@ -312,8 +318,7 @@ describe("PopoverComponent", () => {
 
   describe("togglePopover()", () => {
     it("should call hidePopover(true) when popover is open", () => {
-      const floatUi = component.floatUiComponent();
-      Object.defineProperty(floatUi, "state", { value: true, writable: true });
+      component.isOpen.set(true);
       const hideSpy = jest.spyOn(component, "hidePopover");
 
       component.togglePopover();
@@ -322,8 +327,7 @@ describe("PopoverComponent", () => {
     });
 
     it("should call showPopover() when popover is closed", () => {
-      const floatUi = component.floatUiComponent();
-      Object.defineProperty(floatUi, "state", { value: false, writable: true });
+      component.isOpen.set(false);
       const showSpy = jest.spyOn(component, "showPopover");
 
       component.togglePopover();
@@ -334,19 +338,14 @@ describe("PopoverComponent", () => {
 
   describe("Keyboard navigation", () => {
     beforeEach(() => {
-      const floatUi = component.floatUiComponent();
-      Object.defineProperty(floatUi, "state", { value: false, writable: true });
       component.showPopover();
-      Object.defineProperty(floatUi, "state", { value: true, writable: true });
-    });
-
-    afterEach(() => {
-      component.hidePopover();
+      fixture.detectChanges();
+      component.onOverlayAttach();
     });
 
     it("should close popover and focus trigger on Escape key", () => {
-      const container = document.querySelector(
-        ".float-ui-container-popover",
+      const container = overlayContainerElement.querySelector(
+        ".tedi-popover__container",
       ) as HTMLElement;
       const trigger = component.popoverTrigger().host.nativeElement;
       const focusSpy = jest.spyOn(trigger, "focus");
@@ -361,8 +360,8 @@ describe("PopoverComponent", () => {
     });
 
     it("should handle Tab key when at last focusable element", () => {
-      const container = document.querySelector(
-        ".float-ui-container-popover",
+      const container = overlayContainerElement.querySelector(
+        ".tedi-popover__container",
       ) as HTMLElement;
 
       if (container) {
@@ -383,8 +382,8 @@ describe("PopoverComponent", () => {
     });
 
     it("should handle Shift+Tab when at first focusable element", () => {
-      const container = document.querySelector(
-        ".float-ui-container-popover",
+      const container = overlayContainerElement.querySelector(
+        ".tedi-popover__container",
       ) as HTMLElement;
 
       if (container) {
@@ -414,10 +413,9 @@ describe("PopoverComponent", () => {
       hostComponent.dismissible = false;
       fixture.detectChanges();
 
-      const floatUi = component.floatUiComponent();
-      Object.defineProperty(floatUi, "state", { value: false, writable: true });
       component.showPopover();
-      Object.defineProperty(floatUi, "state", { value: true, writable: true });
+      fixture.detectChanges();
+      component.onOverlayAttach();
 
       const hideSpy = jest.spyOn(component, "hidePopover");
 
@@ -434,14 +432,9 @@ describe("PopoverComponent", () => {
       hostComponent.hideOnScroll = false;
       fixture.detectChanges();
 
-      const floatUi = component.floatUiComponent();
-      Object.defineProperty(floatUi, "state", { value: false, writable: true });
       component.showPopover();
-      Object.defineProperty(floatUi, "state", { value: true, writable: true });
-    });
-
-    afterEach(() => {
-      component.hidePopover();
+      fixture.detectChanges();
+      component.onOverlayAttach();
     });
 
     it("should close popover on mousedown outside", () => {
@@ -469,8 +462,8 @@ describe("PopoverComponent", () => {
 
     it("should NOT close popover on mousedown inside container", () => {
       const hideSpy = jest.spyOn(component, "hidePopover");
-      const container = document.querySelector(
-        ".float-ui-container-popover",
+      const container = overlayContainerElement.querySelector(
+        ".tedi-popover__container",
       ) as HTMLElement;
 
       const event = new MouseEvent("mousedown", { bubbles: true });

@@ -1,9 +1,7 @@
 <ng-container *hideAt="'lg'">
   <div
     class="tedi-header-role__head"
-    [class.tedi-header-role__head--open]="
-      mobileOpen() && hasRoleSelection()
-    "
+    [class.tedi-header-role__head--open]="mobileOpen() && hasRoleSelection()"
   >
     <div
       tedi-text
@@ -40,7 +38,9 @@
     <div class="tedi-header-role__collapse" [attr.data-open]="mobileOpen()">
       <div class="tedi-header-role__collapse--items">
         @if (hasCustomContent()) {
-          <ng-container *ngTemplateOutlet="customContentTemplate()"></ng-container>
+          <ng-container
+            *ngTemplateOutlet="customContentTemplate()"
+          ></ng-container>
         } @else {
           <ng-container *ngTemplateOutlet="content"></ng-container>
         }
@@ -56,9 +56,7 @@
       color="secondary"
       modifiers="small"
       class="tedi-header-role__head"
-      [class.tedi-header-role__head--open]="
-        hasRoleSelection() && mobileOpen()
-      "
+      [class.tedi-header-role__head--open]="hasRoleSelection() && mobileOpen()"
     >
       <ng-container *ngTemplateOutlet="roleTitle"></ng-container>
 
@@ -84,7 +82,9 @@
       </button>
       <tedi-popover-content maxWidth="small" class="tedi-header-role__dropdown">
         @if (hasCustomContent()) {
-          <ng-container *ngTemplateOutlet="customContentTemplate()"></ng-container>
+          <ng-container
+            *ngTemplateOutlet="customContentTemplate()"
+          ></ng-container>
         } @else {
           <ng-container *ngTemplateOutlet="content"></ng-container>
         }

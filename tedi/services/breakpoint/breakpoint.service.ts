@@ -4,6 +4,7 @@ import {
   InputSignal,
   Signal,
   signal,
+  inject,
 } from "@angular/core";
 import { BreakpointObserver } from "@angular/cdk/layout";
 
@@ -45,10 +46,12 @@ export type BreakpointFlag = boolean | Exclude<Breakpoint, "xs">;
   providedIn: "root",
 })
 export class BreakpointService {
+  private breakpointObserver = inject(BreakpointObserver);
+
   private readonly _currentBreakpoint = signal<Breakpoint | undefined>(
     undefined,
   );
-  constructor(private breakpointObserver: BreakpointObserver) {
+  constructor() {
     this.breakpointObserver
       .observe(
         Object.values(BREAKPOINTS).map((value) => `(min-width: ${value}px)`),

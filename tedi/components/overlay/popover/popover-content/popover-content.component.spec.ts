@@ -6,7 +6,6 @@ import {
   PopoverWidth,
 } from "./popover-content.component";
 import { PopoverComponent } from "../popover.component";
-import { NgxFloatUiContentComponent } from "ngx-float-ui";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
 
 @Component({
@@ -39,11 +38,6 @@ describe("PopoverContentComponent", () => {
 
     popoverMock = {
       hidePopover: hidePopoverSpy,
-      floatUiComponent: (() =>
-        ({
-          hide: jest.fn(),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        }) as unknown as NgxFloatUiContentComponent) as any,
     };
 
     TestBed.configureTestingModule({

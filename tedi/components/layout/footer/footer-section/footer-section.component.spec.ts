@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FooterSectionComponent } from "./footer-section.component";
 import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
-import { provideNoopAnimations } from "@angular/platform-browser/animations";
 import { signal } from "@angular/core";
 
 describe("FooterSectionComponent", () => {
@@ -25,7 +24,6 @@ describe("FooterSectionComponent", () => {
           provide: BreakpointService,
           useValue: mockBreakpointService,
         },
-        provideNoopAnimations(),
       ],
     }).compileComponents();
 
@@ -84,53 +82,38 @@ describe("FooterSectionComponent", () => {
   });
 
   it("should toggle collapse state when collapse is enabled and mobile", () => {
+    mockBreakpointService.isBelowBreakpoint.mockImplementation((breakpoint) =>
+      signal(breakpoint === "sm"),
+    );
+    fixture = TestBed.createComponent(FooterSectionComponent);
     fixture.componentRef.setInput("heading", "test-heading");
     fixture.componentRef.setInput("collapse", true);
-    fixture.componentInstance.applyCollapse = signal(true);
     fixture.detectChanges();
 
-    fixture
-      .whenStable()
-      .then(() => {
-        const content = fixture.nativeElement.querySelector(
-          ".tedi-footer-section__content",
-        );
+    const wrapper = fixture.nativeElement.querySelector(
+      ".tedi-footer-section__content-wrapper",
+    );
+    const button = fixture.nativeElement.querySelector(
+      ".tedi-footer-section__button",
+    );
 
-        expect(content.getAttribute("ng-reflect-animation-state")).toBe(
-          "collapsed",
-        );
+    expect(wrapper.classList).toContain(
+      "tedi-footer-section__content-wrapper--collapsed",
+    );
+    expect(button.getAttribute("aria-expanded")).toBe("false");
 
-        const button = fixture.nativeElement.querySelector(
-          ".tedi-footer-section__button",
-        );
-        button.click();
-        fixture.detectChanges();
+    button.click();
+    fixture.detectChanges();
+    expect(wrapper.classList).not.toContain(
+      "tedi-footer-section__content-wrapper--collapsed",
+    );
+    expect(button.getAttribute("aria-expanded")).toBe("true");
 
-        return fixture.whenStable();
-      })
-      .then(() => {
-        const content = fixture.nativeElement.querySelector(
-          ".tedi-footer-section__content",
-        );
-        expect(content.getAttribute("ng-reflect-animation-state")).toBe(
-          "expanded",
-        );
-
-        const button = fixture.nativeElement.querySelector(
-          ".tedi-footer-section__button",
-        );
-        button.click();
-        fixture.detectChanges();
-
-        return fixture.whenStable();
-      })
-      .then(() => {
-        const content = fixture.nativeElement.querySelector(
-          ".tedi-footer-section__content",
-        );
-        expect(content.getAttribute("ng-reflect-animation-state")).toBe(
-          "collapsed",
-        );
-      });
+    button.click();
+    fixture.detectChanges();
+    expect(wrapper.classList).toContain(
+      "tedi-footer-section__content-wrapper--collapsed",
+    );
+    expect(button.getAttribute("aria-expanded")).toBe("false");
   });
 });
