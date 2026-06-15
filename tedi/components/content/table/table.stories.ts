@@ -22,7 +22,6 @@ import { TediTableToolbarComponent } from "./table-toolbar/table-toolbar.compone
 import { TediTableColumnsMenuComponent } from "./table-columns-menu/table-columns-menu.component";
 import { TediTableHeaderButtonComponent } from "./table-header-button/table-header-button.component";
 import { TediPaginationResultsDirective } from "../../navigation/pagination/pagination-results.directive";
-import { groupRowSpan } from "./row-span.utils";
 import type {
   TableControlColumn,
   TableExpandTrigger,
@@ -979,7 +978,7 @@ export const MergedCells: Story = {
   },
 };
 
-// ---------- GroupedRows (body row spanning — Angular-only feature) ----------
+// ---------- GroupedRows (column-level groupBy — visual cell merging) ----------
 interface PatientRow {
   id: string;
   date: string;
@@ -1007,13 +1006,10 @@ class GroupedRowsStoryHostComponent extends TableStoryHostBase {
       header: "Date",
       accessorKey: "date",
       meta: { vAlign: "top" },
-      rowSpan: groupRowSpan(
-        patientRows.map(
-          (_, i) =>
-            ({ id: String(i), original: patientRows[i] }) as unknown as Row<PatientRow>,
-        ),
-        (row) => row.original.date,
-      ),
+      // Merge consecutive rows that share a date into one spanning cell. The
+      // span is computed internally against the live (post sort / filter /
+      // pagination) row model — no manual rowSpan wiring.
+      groupBy: (row) => row.original.date,
     },
     { id: "doctor", header: "Doctor", accessorKey: "doctor" },
     { id: "procedure", header: "Procedure", accessorKey: "procedure" },
@@ -1029,17 +1025,33 @@ export const GroupedRows: Story = {
   }),
   parameters: {
     docs: {
+      description: {
+        story:
+          "**Column-level grouping with `groupBy`.** The *Date* column sets " +
+          "`groupBy: (row) => row.original.date`, so consecutive rows that " +
+          "share a date are merged into one spanning cell. The span is " +
+          "computed internally against the live (post sort / filter / " +
+          "pagination) row model — no manual `rowSpan` wiring.\n\n" +
+          "`groupBy` here is **purely visual**: it merges that one column's " +
+          "cells and nothing else. It does *not* make the rows behave as a " +
+          "group — turn on `enableRowSelection` and you still get one checkbox " +
+          "per row. When rows should act as a unit (one checkbox / chevron per " +
+          "group, group-boundary dividers), reach for table-level " +
+          "`groupRowsBy` instead — see **Grouped Selectable Rows** below.\n\n" +
+          "Pair grouped columns with `meta: { vAlign: 'top' }` so the merged " +
+          "cell's content sits at the top of the block rather than centered.",
+      },
       source: {
         language: "html",
-        code: `<!-- The first column collapses adjacent rows with the same value
-  via rowSpan. Use the groupRowSpan helper. meta.vAlign: 'top' keeps the
-  spanned cell's content aligned to the top instead of vertically centered:
+        code: `<!-- The Date column merges consecutive rows with the same value
+  via groupBy. The span is computed internally — no manual rowSpan wiring.
+  meta.vAlign: 'top' anchors the merged cell's content to the top:
   columns = [
-    id: 'date', header: 'Date', accessorKey: 'date',
+    { id: 'date', header: 'Date', accessorKey: 'date',
       meta: { vAlign: 'top' },
-      rowSpan: groupRowSpan(rows, row => row.original.date),
-    id: 'doctor', header: 'Doctor', accessorKey: 'doctor',
-    id: 'procedure', header: 'Procedure', accessorKey: 'procedure',
+      groupBy: (row) => row.original.date },
+    { id: 'doctor', header: 'Doctor', accessorKey: 'doctor' },
+    { id: 'procedure', header: 'Procedure', accessorKey: 'procedure' },
   ]
 -->
 <tedi-table [data]="data" [columns]="columns" verticalBorders />`,
@@ -1048,6 +1060,258 @@ export const GroupedRows: Story = {
   },
 };
 
+// ---------- GroupedSelectableRows (table-level groupRowsBy + group selection) ----------
+@Component({
+  standalone: true,
+  selector: "tedi-grouped-selectable-rows-story",
+  styles: [
+    `
+      .tedi-error-rows-story__person,
+      .tedi-error-rows-story__code {
+        display: inline-flex;
+        gap: var(--tedi-dimensions-04);
+      }
+
+      .tedi-error-rows-story__person {
+        flex-wrap: wrap;
+      }
+
+      .tedi-error-rows-story__muted {
+        color: var(--general-text-secondary);
+      }
+
+      .tedi-error-rows-story__more {
+        display: block;
+        width: fit-content;
+      }
+    `,
+  ],
+  imports: [
+    TediTableComponent,
+    IconComponent,
+    LinkComponent,
+    StatusBadgeComponent,
+    EllipsisComponent,
+    FormFieldComponent,
+    TextFieldComponent,
+    FormsModule,
+  ],
+  template: `
+    <tedi-table
+      id="tedi-table-grouped-selectable"
+      [data]="data"
+      [columns]="columns()"
+      [getSubRows]="getSubRows"
+      [groupRowsBy]="groupRowsBy"
+      [defaultState]="defaultState"
+      [expandButtonVariant]="'default'"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+
+    <ng-template #personCell let-ctx>
+      @if (ctx.row.depth === 0) {
+        <span class="tedi-error-rows-story__person">
+          <tedi-icon name="person" [size]="18" color="secondary" />
+          <a tedi-link href="#" (click)="$event.preventDefault()">{{
+            ctx.row.original.person
+          }}</a>
+          <span class="tedi-error-rows-story__muted"
+            >· {{ ctx.row.original.idCode }} · {{ ctx.row.original.country }}</span
+          >
+        </span>
+      } @else {
+        <a tedi-link href="#" (click)="$event.preventDefault()">{{
+          ctx.row.original.transactionId
+        }}</a>
+      }
+    </ng-template>
+
+    <ng-template #codeCell let-ctx>
+      @if (ctx.row.original.code) {
+        <span class="tedi-error-rows-story__code">
+          <tedi-status-badge
+            variant="filled-bordered"
+            [color]="ctx.row.original.severity === 'warning' ? 'warning' : 'danger'"
+            [icon]="
+              ctx.row.original.severity === 'warning' ? 'warning' : 'emergency_home'
+            "
+          />
+          {{ ctx.row.original.code }}
+        </span>
+      }
+    </ng-template>
+
+    <ng-template #descCell let-ctx>
+      @if (ctx.row.original.description) {
+        @let key = ctx.row.id;
+        @let expanded = isExpanded(key);
+        @if (expanded) {
+          <span>{{ ctx.row.original.description }}</span>
+        } @else {
+          <tedi-ellipsis [lineClamp]="2" [tooltip]="false">{{
+            ctx.row.original.description
+          }}</tedi-ellipsis>
+        }
+        <a
+          tedi-link
+          href="#"
+          class="tedi-error-rows-story__more"
+          (click)="$event.preventDefault(); toggleDesc(key)"
+          >{{ expanded ? "Näita vähem" : "Näita rohkem" }}</a
+        >
+      }
+    </ng-template>
+
+    <ng-template #textFilter let-ctx>
+      <tedi-form-field size="small">
+        <input
+          tedi-text-field
+          type="text"
+          [ngModel]="ctx.value ?? ''"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="ctx.setValue($event)"
+          [attr.aria-label]="ctx.column.columnDef.header"
+        />
+      </tedi-form-field>
+    </ng-template>
+  `,
+})
+class GroupedSelectableRowsStoryHostComponent extends TableStoryHostBase {
+  data = errorRows;
+  pagination = DEFAULT_PAGINATION;
+  defaultState: TableState = { expanded: true };
+  getSubRows = (row: ErrorRowRecord) => row.subRows;
+  groupRowsBy = (row: Row<ErrorRowRecord>) =>
+    row.original.transactionId ?? row.id;
+
+  private expandedDesc = signal<Set<string>>(new Set());
+  isExpanded = (key: string): boolean => this.expandedDesc().has(key);
+  toggleDesc(key: string): void {
+    const next = new Set(this.expandedDesc());
+    if (next.has(key)) {
+      next.delete(key);
+    } else {
+      next.add(key);
+    }
+    this.expandedDesc.set(next);
+  }
+
+  personCellTpl =
+    viewChild<TemplateRef<CellContext<ErrorRowRecord, unknown>>>("personCell");
+  codeCellTpl =
+    viewChild<TemplateRef<CellContext<ErrorRowRecord, unknown>>>("codeCell");
+  descCellTpl =
+    viewChild<TemplateRef<CellContext<ErrorRowRecord, unknown>>>("descCell");
+  textFilterTpl =
+    viewChild<TemplateRef<TediTableFilterContext<string, ErrorRowRecord>>>(
+      "textFilter",
+    );
+
+  columns = computed<TediColumnDef<ErrorRowRecord>[]>(() => [
+    {
+      id: "personTransaction",
+      header: "Isik/Tehing",
+      accessorFn: (row) => row.person ?? row.transactionId ?? "",
+      minSize: 172,
+      filterable: true,
+      filterFn: "includesString",
+      filterTemplate: this.textFilterTpl() ?? undefined,
+      cell: this.personCellTpl() ?? "",
+      meta: { vAlign: "top" },
+      groupBy: true,
+    } as TediColumnDef<ErrorRowRecord>,
+    {
+      id: "code",
+      header: "Veakood",
+      accessorFn: (row) => row.txnCodes ?? "",
+      filterable: true,
+      filterFn: "includesString",
+      filterTemplate: this.textFilterTpl() ?? undefined,
+      cell: this.codeCellTpl() ?? "",
+      meta: { vAlign: "top" },
+    } as TediColumnDef<ErrorRowRecord>,
+    {
+      id: "description",
+      header: "Vea kirjeldus",
+      cell: this.descCellTpl() ?? "",
+      meta: { vAlign: "top" },
+    } as TediColumnDef<ErrorRowRecord>,
+    {
+      id: "date",
+      header: "Tehingu edastamise kuupäev",
+      accessorFn: (row) => row.date ?? "",
+      meta: { vAlign: "top" },
+      groupBy: true,
+    },
+  ]);
+}
+
+export const GroupedSelectableRows: Story = {
+  args: { enableRowSelection: true, rowGroupDividers: "between" },
+  render: (args) => ({
+    moduleMetadata: { imports: [GroupedSelectableRowsStoryHostComponent] },
+    props: args,
+    template: `<tedi-grouped-selectable-rows-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "**Table-level grouping with `groupRowsBy`.** Where **Grouped Rows** " +
+          "(above) merges a single column visually, `groupRowsBy` declares " +
+          "that the rows themselves form groups — so the control columns, row " +
+          "selection and dividers all operate per group. Data columns then opt " +
+          "into spanning the *same* groups with `groupBy: true`.\n\n" +
+          "The TEDI error-list layout, built entirely from Table grouping " +
+          "primitives:\n\n" +
+          "- **`groupRowsBy`** groups rows by transaction. The built-in " +
+          "select and expand control columns span each group automatically — " +
+          "one checkbox and one chevron per transaction.\n" +
+          "- **Group selection** — the transaction checkbox selects all of its " +
+          "error rows; the person (parent) checkbox cascades to every child. " +
+          "Both show the indeterminate state. No custom selection code.\n" +
+          "- **`groupBy: true`** on the *Isik/Tehing* and *date* columns merges " +
+          "them across each transaction's error rows, so *Veakood* / *Vea " +
+          "kirjeldus* stay one-row-per-error and line up.\n" +
+          "- **`rowGroupDividers=\"between\"`** draws dividers only at group " +
+          "boundaries — no `:has()` CSS hack.\n" +
+          "- The selection checkbox sits before the expand chevron via the " +
+          "default `controlColumnOrder`.\n" +
+          "- Clicking a link or the checkbox no longer needs " +
+          "`stopPropagation` — the table ignores clicks on interactive cell " +
+          "controls.",
+      },
+      source: {
+        language: "html",
+        code: `<!-- groupRowsBy defines the transaction groups; control columns span
+  them and selection is per group. groupBy: true merges the data columns
+  over the same groups. rowGroupDividers keeps dividers between groups only.
+  groupRowsBy = (row) => row.original.transactionId ?? row.id
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [groupRowsBy]="groupRowsBy"
+  rowGroupDividers="between"
+  [enableRowSelection]="true"
+  [defaultState]="{ expanded: true }"
+/>
+
+<!-- columns -->
+{ id: 'personTransaction', header: 'Isik/Tehing', cell: personCellTpl,
+  filterable: true, meta: { vAlign: 'top' }, groupBy: true }
+{ id: 'code', header: 'Veakood', cell: codeCellTpl,
+  filterable: true, meta: { vAlign: 'top' } }
+{ id: 'description', header: 'Vea kirjeldus', cell: descCellTpl,
+  meta: { vAlign: 'top' } }
+{ id: 'date', header: 'Tehingu edastamise kuupäev',
+  meta: { vAlign: 'top' }, groupBy: true }`,
+      },
+    },
+  },
+};
 // ---------- ColumnSizing (size / minSize / maxSize) ----------
 interface SizedRow {
   code: string;
@@ -4207,254 +4471,6 @@ export const Responsive: Story = {
     }
   </div>
 </ng-template>`,
-      },
-    },
-  },
-};
-
-
-@Component({
-  standalone: true,
-  selector: "tedi-grouped-selectable-rows-story",
-  styles: [
-    `
-      .tedi-error-rows-story__person,
-      .tedi-error-rows-story__code {
-        display: inline-flex;
-        gap: var(--tedi-dimensions-04);
-      }
-
-      .tedi-error-rows-story__person {
-        flex-wrap: wrap;
-      }
-
-      .tedi-error-rows-story__muted {
-        color: var(--general-text-secondary);
-      }
-
-      .tedi-error-rows-story__more {
-        display: block;
-        width: fit-content;
-      }
-    `,
-  ],
-  imports: [
-    TediTableComponent,
-    IconComponent,
-    LinkComponent,
-    StatusBadgeComponent,
-    EllipsisComponent,
-    FormFieldComponent,
-    TextFieldComponent,
-    FormsModule,
-  ],
-  template: `
-    <tedi-table
-      id="tedi-table-grouped-selectable"
-      [data]="data"
-      [columns]="columns()"
-      [getSubRows]="getSubRows"
-      [groupRowsBy]="groupRowsBy"
-      [defaultState]="defaultState"
-      [expandButtonVariant]="'default'"
-      [pagination]="pagination"
-      ${TABLE_APPEARANCE_BINDINGS}
-    />
-
-    <ng-template #personCell let-ctx>
-      @if (ctx.row.depth === 0) {
-        <span class="tedi-error-rows-story__person">
-          <tedi-icon name="person" [size]="18" color="secondary" />
-          <a tedi-link href="#" (click)="$event.preventDefault()">{{
-            ctx.row.original.person
-          }}</a>
-          <span class="tedi-error-rows-story__muted"
-            >· {{ ctx.row.original.idCode }} · {{ ctx.row.original.country }}</span
-          >
-        </span>
-      } @else {
-        <a tedi-link href="#" (click)="$event.preventDefault()">{{
-          ctx.row.original.transactionId
-        }}</a>
-      }
-    </ng-template>
-
-    <ng-template #codeCell let-ctx>
-      @if (ctx.row.original.code) {
-        <span class="tedi-error-rows-story__code">
-          <tedi-status-badge
-            variant="filled-bordered"
-            [color]="ctx.row.original.severity === 'warning' ? 'warning' : 'danger'"
-            [icon]="
-              ctx.row.original.severity === 'warning' ? 'warning' : 'emergency_home'
-            "
-          />
-          {{ ctx.row.original.code }}
-        </span>
-      }
-    </ng-template>
-
-    <ng-template #descCell let-ctx>
-      @if (ctx.row.original.description) {
-        @let key = ctx.row.id;
-        @let expanded = isExpanded(key);
-        @if (expanded) {
-          <span>{{ ctx.row.original.description }}</span>
-        } @else {
-          <tedi-ellipsis [lineClamp]="2" [tooltip]="false">{{
-            ctx.row.original.description
-          }}</tedi-ellipsis>
-        }
-        <a
-          tedi-link
-          href="#"
-          class="tedi-error-rows-story__more"
-          (click)="$event.preventDefault(); toggleDesc(key)"
-          >{{ expanded ? "Näita vähem" : "Näita rohkem" }}</a
-        >
-      }
-    </ng-template>
-
-    <ng-template #textFilter let-ctx>
-      <tedi-form-field size="small">
-        <input
-          tedi-text-field
-          type="text"
-          [ngModel]="ctx.value ?? ''"
-          [ngModelOptions]="{ standalone: true }"
-          (ngModelChange)="ctx.setValue($event)"
-          [attr.aria-label]="ctx.column.columnDef.header"
-        />
-      </tedi-form-field>
-    </ng-template>
-  `,
-})
-class GroupedSelectableRowsStoryHostComponent extends TableStoryHostBase {
-  data = errorRows;
-  pagination = DEFAULT_PAGINATION;
-  defaultState: TableState = { expanded: true };
-  getSubRows = (row: ErrorRowRecord) => row.subRows;
-  groupRowsBy = (row: Row<ErrorRowRecord>) =>
-    row.original.transactionId ?? row.id;
-
-  private expandedDesc = signal<Set<string>>(new Set());
-  isExpanded = (key: string): boolean => this.expandedDesc().has(key);
-  toggleDesc(key: string): void {
-    const next = new Set(this.expandedDesc());
-    if (next.has(key)) {
-      next.delete(key);
-    } else {
-      next.add(key);
-    }
-    this.expandedDesc.set(next);
-  }
-
-  personCellTpl =
-    viewChild<TemplateRef<CellContext<ErrorRowRecord, unknown>>>("personCell");
-  codeCellTpl =
-    viewChild<TemplateRef<CellContext<ErrorRowRecord, unknown>>>("codeCell");
-  descCellTpl =
-    viewChild<TemplateRef<CellContext<ErrorRowRecord, unknown>>>("descCell");
-  textFilterTpl =
-    viewChild<TemplateRef<TediTableFilterContext<string, ErrorRowRecord>>>(
-      "textFilter",
-    );
-
-  columns = computed<TediColumnDef<ErrorRowRecord>[]>(() => [
-    {
-      id: "personTransaction",
-      header: "Isik/Tehing",
-      accessorFn: (row) => row.person ?? row.transactionId ?? "",
-      minSize: 172,
-      filterable: true,
-      filterFn: "includesString",
-      filterTemplate: this.textFilterTpl() ?? undefined,
-      cell: this.personCellTpl() ?? "",
-      meta: { vAlign: "top" },
-      groupBy: true,
-    } as TediColumnDef<ErrorRowRecord>,
-    {
-      id: "code",
-      header: "Veakood",
-      accessorFn: (row) => row.txnCodes ?? "",
-      filterable: true,
-      filterFn: "includesString",
-      filterTemplate: this.textFilterTpl() ?? undefined,
-      cell: this.codeCellTpl() ?? "",
-      meta: { vAlign: "top" },
-    } as TediColumnDef<ErrorRowRecord>,
-    {
-      id: "description",
-      header: "Vea kirjeldus",
-      cell: this.descCellTpl() ?? "",
-      meta: { vAlign: "top" },
-    } as TediColumnDef<ErrorRowRecord>,
-    {
-      id: "date",
-      header: "Tehingu edastamise kuupäev",
-      accessorFn: (row) => row.date ?? "",
-      meta: { vAlign: "top" },
-      groupBy: true,
-    },
-  ]);
-}
-
-export const GroupedSelectableRows: Story = {
-  args: { enableRowSelection: true, rowGroupDividers: "between" },
-  render: (args) => ({
-    moduleMetadata: { imports: [GroupedSelectableRowsStoryHostComponent] },
-    props: args,
-    template: `<tedi-grouped-selectable-rows-story ${argsToTemplate(args)} />`,
-  }),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "The TEDI error-list layout, built entirely from Table grouping " +
-          "primitives:\n\n" +
-          "- **`groupRowsBy`** groups rows by transaction. The built-in " +
-          "select and expand control columns span each group automatically — " +
-          "one checkbox and one chevron per transaction.\n" +
-          "- **Group selection** — the transaction checkbox selects all of its " +
-          "error rows; the person (parent) checkbox cascades to every child. " +
-          "Both show the indeterminate state. No custom selection code.\n" +
-          "- **`groupBy: true`** on the *Isik/Tehing* and *date* columns merges " +
-          "them across each transaction's error rows, so *Veakood* / *Vea " +
-          "kirjeldus* stay one-row-per-error and line up.\n" +
-          "- **`rowGroupDividers=\"between\"`** draws dividers only at group " +
-          "boundaries — no `:has()` CSS hack.\n" +
-          "- The selection checkbox sits before the expand chevron via the " +
-          "default `controlColumnOrder`.\n" +
-          "- Clicking a link or the checkbox no longer needs " +
-          "`stopPropagation` — the table ignores clicks on interactive cell " +
-          "controls.",
-      },
-      source: {
-        language: "html",
-        code: `<!-- groupRowsBy defines the transaction groups; control columns span
-  them and selection is per group. groupBy: true merges the data columns
-  over the same groups. rowGroupDividers keeps dividers between groups only.
-  groupRowsBy = (row) => row.original.transactionId ?? row.id
--->
-<tedi-table
-  [data]="data"
-  [columns]="columns"
-  [getSubRows]="getSubRows"
-  [groupRowsBy]="groupRowsBy"
-  rowGroupDividers="between"
-  [enableRowSelection]="true"
-  [defaultState]="{ expanded: true }"
-/>
-
-<!-- columns -->
-{ id: 'personTransaction', header: 'Isik/Tehing', cell: personCellTpl,
-  filterable: true, meta: { vAlign: 'top' }, groupBy: true }
-{ id: 'code', header: 'Veakood', cell: codeCellTpl,
-  filterable: true, meta: { vAlign: 'top' } }
-{ id: 'description', header: 'Vea kirjeldus', cell: descCellTpl,
-  meta: { vAlign: 'top' } }
-{ id: 'date', header: 'Tehingu edastamise kuupäev',
-  meta: { vAlign: 'top' }, groupBy: true }`,
       },
     },
   },

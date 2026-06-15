@@ -22,6 +22,13 @@ by hand (see <a href="?path=/docs/tedi-ready-content-table--cells-and-templates#
 - **`groupRowsBy` on the table** — one grouping that also drives the control
   columns, row selection and dividers.
 
+**Which one?** Use column **`groupBy`** when you only want a column to *look*
+merged — it's purely visual and changes nothing else (turn on row selection and
+you still get one checkbox per row). Use table **`groupRowsBy`** when the rows
+genuinely *are* a group that should act as a unit — one checkbox, one chevron
+and one drag handle per group, plus group-boundary dividers. With `groupRowsBy`
+set, data columns opt into spanning the same groups with `groupBy: true`.
+
 Both compute spans **internally against the live row model** (post filter /
 sort / pagination) — no manual `groupRowSpan(table.getRowModel().rows, …)`
 wiring, and no risk of reading the row model during render.
