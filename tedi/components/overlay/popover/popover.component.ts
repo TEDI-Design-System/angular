@@ -102,10 +102,7 @@ export class PopoverComponent {
   readonly arrowTop = signal<number | null>(null);
 
   readonly overlayOrigin = computed(() => this.popoverTrigger().overlayOrigin);
-  private readonly arrowOffset = computed(() => {
-    if (!this.withArrow()) return 0;
-    return this.withBorder() ? 18 : 12;
-  });
+  private readonly arrowOffset = computed(() => (this.withArrow() ? 12 : 0));
 
   readonly overlayPositions = computed(() =>
     toConnectedPositions(
@@ -227,7 +224,11 @@ export class PopoverComponent {
     const triggerEl = this.popoverTrigger().host.nativeElement;
     if (!overlayEl || !triggerEl) return;
 
-    const arrowSize = 24;
+    const arrowEl = overlayEl.querySelector<HTMLElement>(
+      ".tedi-popover__arrow",
+    );
+    const arrowSize = arrowEl?.offsetWidth ?? 24;
+
     const offset = calculateArrowOffset(
       this.currentPlacement(),
       triggerEl,

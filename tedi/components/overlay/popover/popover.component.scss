@@ -29,8 +29,8 @@ $popover-max-width: (
     .tedi-popover__arrow {
       position: absolute;
       z-index: 0;
-      width: 24px;
-      height: 24px;
+      width: 1.5rem;
+      height: 1.5rem;
       background: var(--popover-background);
       filter: drop-shadow(0 0 5px var(--tedi-alpha-20));
       clip-path: inset(0 -5px -5px 0);
@@ -41,22 +41,22 @@ $popover-max-width: (
     }
 
     &[data-placement="top"] .tedi-popover__arrow {
-      bottom: -12px;
+      bottom: -0.75rem;
       transform: translateX(-50%) rotate(45deg);
     }
 
     &[data-placement="bottom"] .tedi-popover__arrow {
-      top: -12px;
+      top: -0.75rem;
       transform: translateX(-50%) rotate(-135deg);
     }
 
     &[data-placement="left"] .tedi-popover__arrow {
-      right: -12px;
+      right: -0.75rem;
       transform: translateY(-50%) rotate(-45deg);
     }
 
     &[data-placement="right"] .tedi-popover__arrow {
-      left: -12px;
+      left: -0.75rem;
       transform: translateY(-50%) rotate(135deg);
     }
   }
