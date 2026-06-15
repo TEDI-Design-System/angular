@@ -38,7 +38,7 @@ describe("HeaderMobileButtonComponent", () => {
 
   it("renders an icon", () => {
     expect(getIcon()).toBeTruthy();
-    expect(getIcon()?.getAttribute("ng-reflect-name")).toBe("menu");
+    expect(getIcon()?.textContent?.trim()).toBe("menu");
   });
 
   describe("when no href is provided", () => {

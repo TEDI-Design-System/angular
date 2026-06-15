@@ -72,16 +72,18 @@ describe('HeaderLanguageComponent', () => {
     });
 
     it('hides the popover when one is rendered', () => {
-      const hide = jest.fn();
-      component.popover = {
-        floatUiComponent: () => ({ hide }),
-      } as unknown as typeof component.popover;
+      const hidePopover = jest.fn();
+      jest
+        .spyOn(component, 'popover')
+        .mockReturnValue({ hidePopover } as unknown as ReturnType<
+          typeof component.popover
+        >);
       component.handleChangeLang('et');
-      expect(hide).toHaveBeenCalledTimes(1);
+      expect(hidePopover).toHaveBeenCalledTimes(1);
     });
 
     it('no-ops when no popover is present', () => {
-      component.popover = undefined;
+      jest.spyOn(component, 'popover').mockReturnValue(undefined);
       expect(() => component.handleChangeLang('en')).not.toThrow();
     });
   });
