@@ -901,20 +901,41 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `fileSize: string` — pre-formatted file size (e.g. `"0.9 MB"`)
 - `error: string` — error feedback. When set, switches the card to its error visual and renders feedback text below. Implies `invalid`.
 - `invalid: boolean = false` — switches the card to its error visual (danger background + error icon) without rendering feedback text. Use when the error message is rendered elsewhere (e.g. an aggregate validation message).
-- `removable: boolean = true` — show/hide the delete button
-- `disabled: boolean = false` — disables the delete button without hiding it
-- `removeLabel: string` — override the delete-button aria-label
+- `size: "default" | "small" = "default"` — `small` tightens the content's vertical padding (4px vs 8px), pairing with small action buttons. Set the projected buttons' own `size="small"` separately.
 - `mobile: boolean | undefined` — manually force the mobile variant. When `undefined`, derived from `mobileBreakpoint`.
 - `mobileBreakpoint: Breakpoint = "sm"` — viewport breakpoint below which the mobile variant kicks in
-**Outputs:**
-- `remove: void` — fired when the delete button is clicked
-**Slots:** project a `<tedi-progress-bar>` to show upload/processing progress. Configure label, hint, and value formatting on the projected progress bar itself.
+**Slots:**
+- project a `<tedi-progress-bar>` to show upload/processing progress. Configure label, hint, and value formatting on the projected progress bar itself.
+- project action buttons (download, delete, …) inside a single `<tedi-attachment-actions>` container (`AttachmentActionsComponent`). Action buttons are **not** built in — use neutral `tedi-button`s, wire up `(click)`/`disabled` yourself. For icon-only buttons give each an `aria-label` (and optionally a tooltip). The container owns the layout: add `padded` to it for labeled (text) buttons (adds a 12px gap + 8px inline padding, since neutral text buttons have no horizontal padding); omit it for icon-only buttons, which sit flush.
+
+**`<tedi-attachment-actions>` (`AttachmentActionsComponent`)** — container for the action buttons. Input: `padded: boolean = false`.
 
 ```html
-<tedi-attachment name="report.pdf" fileSize="0.9 MB" (remove)="onRemove()">
+<tedi-attachment name="report.pdf" fileSize="0.9 MB">
   <tedi-progress-bar [value]="34" valuePosition="bottom">
     <tedi-feedback-text text="Uploading" type="hint" />
   </tedi-progress-bar>
+  <tedi-attachment-actions>
+    <button tedi-button variant="neutral" aria-label="Download" (click)="onDownload()">
+      <tedi-icon name="download" [size]="18" />
+    </button>
+    <tedi-tooltip>
+      <tedi-tooltip-trigger>
+        <button tedi-button variant="neutral" aria-label="Delete" (click)="onRemove()">
+          <tedi-icon name="delete" [size]="18" />
+        </button>
+      </tedi-tooltip-trigger>
+      <tedi-tooltip-content>Delete</tedi-tooltip-content>
+    </tedi-tooltip>
+  </tedi-attachment-actions>
+</tedi-attachment>
+
+<!-- labeled (text) buttons → add `padded` -->
+<tedi-attachment name="report.pdf">
+  <tedi-attachment-actions padded>
+    <button tedi-button variant="neutral"><tedi-icon name="download" [size]="18" /> Download</button>
+    <button tedi-button variant="neutral"><tedi-icon name="delete" [size]="18" /> Delete</button>
+  </tedi-attachment-actions>
 </tedi-attachment>
 ```
 

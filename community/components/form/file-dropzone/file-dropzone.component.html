@@ -44,9 +44,29 @@
             ? file.helper?.text
             : undefined
         "
-        [disabled]="file.disabled"
-        (remove)="removeFile(file)"
-      />
+      >
+        <tedi-attachment-actions>
+          <tedi-tooltip>
+            <tedi-tooltip-trigger>
+              <button
+                tedi-button
+                type="button"
+                variant="neutral"
+                [attr.aria-label]="
+                  ('remove' | tediTranslate) + ' ' + (file.label ?? file.name)
+                "
+                [disabled]="file.disabled"
+                (click)="removeFile(file)"
+              >
+                <tedi-icon name="delete" [size]="18" />
+              </button>
+            </tedi-tooltip-trigger>
+            <tedi-tooltip-content>
+              {{ ("remove" | tediTranslate) + " " + (file.label ?? file.name) }}
+            </tedi-tooltip-content>
+          </tedi-tooltip>
+        </tedi-attachment-actions>
+      </tedi-attachment>
     </div>
   }
 </ng-content>

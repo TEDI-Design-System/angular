@@ -6,33 +6,22 @@ import {
   contentChild,
   inject,
   input,
-  output,
   ViewEncapsulation,
 } from "@angular/core";
 import { IconComponent } from "../../base/icon/icon.component";
-import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
 import { FeedbackTextComponent } from "../../form/feedback-text/feedback-text.component";
-import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
-import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
-import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
 import { ProgressBarComponent } from "../../loader/progress-bar/progress-bar.component";
 import {
   Breakpoint,
   BreakpointService,
 } from "../../../services/breakpoint/breakpoint.service";
-import { TediTranslationService } from "../../../services/translation/translation.service";
+
+export type AttachmentSize = "default" | "small";
 
 @Component({
   standalone: true,
   selector: "tedi-attachment",
-  imports: [
-    IconComponent,
-    ClosingButtonComponent,
-    FeedbackTextComponent,
-    TooltipComponent,
-    TooltipTriggerComponent,
-    TooltipContentComponent,
-  ],
+  imports: [IconComponent, FeedbackTextComponent],
   templateUrl: "./attachment.component.html",
   styleUrl: "./attachment.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,13 +30,13 @@ import { TediTranslationService } from "../../../services/translation/translatio
     "[class.tedi-attachment]": "true",
     "[class.tedi-attachment--error]": "hasErrorVisual()",
     "[class.tedi-attachment--mobile]": "isMobile()",
+    "[class.tedi-attachment--small]": "size() === 'small'",
     "[class.tedi-attachment--has-progress]": "!!projectedProgress()",
   },
 })
 export class AttachmentComponent {
   protected projectedProgress = contentChild(ProgressBarComponent);
   private breakpointService = inject(BreakpointService);
-  private translationService = inject(TediTranslationService);
 
   /**
    * File name to display.
@@ -74,26 +63,17 @@ export class AttachmentComponent {
    */
   invalid = input(false, { transform: booleanAttribute });
   /**
-   * Whether to show the delete button.
-   * @default true
+   * Visual size. `small` tightens the content's vertical padding (4px instead
+   * of 8px), pairing with small action buttons projected into the slot. The
+   * action buttons themselves are consumer-controlled — set their own `size`.
+   * @default "default"
    */
-  removable = input(true, { transform: booleanAttribute });
-  /**
-   * Disables the delete button. The button stays visible (so the user knows
-   * the file is non-removable in context), but is not interactive.
-   * @default false
-   */
-  disabled = input(false, { transform: booleanAttribute });
-  /**
-   * Override the delete-button aria-label. Defaults to a translated "remove"
-   * followed by the file name.
-   */
-  removeLabel = input<string>();
+  size = input<AttachmentSize>("default");
   /**
    * Manually force the mobile variant on or off. When `undefined`, the
    * variant is auto-derived from the viewport breakpoint (see
-   * `mobileBreakpoint`). The mobile variant uses a 32px close button, an
-   * 8px gap, and renders the progress bar below the title row.
+   * `mobileBreakpoint`). The mobile variant uses an 8px gap and renders the
+   * progress bar below the title row.
    */
   mobile = input<boolean | undefined>(undefined);
   /**
@@ -103,11 +83,6 @@ export class AttachmentComponent {
    */
   mobileBreakpoint = input<Breakpoint>("sm");
 
-  /**
-   * Emits when the user clicks the delete button.
-   */
-  remove = output<void>();
-
   private _autoMobile = computed(() => {
     return this.breakpointService.isBelowBreakpoint(this.mobileBreakpoint())();
   });
@@ -115,13 +90,4 @@ export class AttachmentComponent {
   protected isMobile = computed(() => this.mobile() ?? this._autoMobile());
 
   protected hasErrorVisual = computed(() => !!this.error() || this.invalid());
-
-  protected resolvedRemoveLabel = computed(() => {
-    if (this.removeLabel()) return this.removeLabel()!;
-    return `${this.translationService.translate("remove")} ${this.name()}`;
-  });
-
-  protected onRemove(): void {
-    this.remove.emit();
-  }
 }

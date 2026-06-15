@@ -20,11 +20,16 @@ import {
   ValidationErrors,
 } from "@angular/forms";
 import {
+  AttachmentActionsComponent,
   AttachmentComponent,
+  ButtonComponent,
   FeedbackTextComponent,
   IconComponent,
   TediTranslationPipe,
   TediTranslationService,
+  TooltipComponent,
+  TooltipContentComponent,
+  TooltipTriggerComponent,
   VerticalSpacingDirective,
 } from "@tedi-design-system/angular/tedi";
 import {
@@ -52,6 +57,11 @@ import { FileService } from "./file.service";
     IconComponent,
     FeedbackTextComponent,
     AttachmentComponent,
+    AttachmentActionsComponent,
+    ButtonComponent,
+    TooltipComponent,
+    TooltipTriggerComponent,
+    TooltipContentComponent,
     ReactiveFormsModule,
     VerticalSpacingDirective,
     TediTranslationPipe,

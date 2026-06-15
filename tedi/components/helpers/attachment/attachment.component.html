@@ -25,25 +25,7 @@
   </div>
 
   <div class="tedi-attachment__actions">
-    @if (removable()) {
-      <tedi-tooltip>
-        <tedi-tooltip-trigger>
-          <button
-            tedi-closing-button
-            type="button"
-            class="tedi-attachment__remove"
-            icon="delete"
-            size="small"
-            [iconSize]="18"
-            [showTitle]="false"
-            [ariaLabel]="resolvedRemoveLabel()"
-            [disabled]="disabled()"
-            (click)="onRemove()"
-          ></button>
-        </tedi-tooltip-trigger>
-        <tedi-tooltip-content>{{ resolvedRemoveLabel() }}</tedi-tooltip-content>
-      </tedi-tooltip>
-    }
+    <ng-content select="tedi-attachment-actions" />
   </div>
 </div>
 

@@ -1,0 +1,9 @@
+.tedi-attachment-actions {
+  display: flex;
+  align-items: center;
+
+  &--padded {
+    gap: var(--tedi-dimensions-07);
+    padding-inline: var(--card-padding-xs);
+  }
+}

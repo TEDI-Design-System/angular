@@ -1,6 +1,7 @@
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { AttachmentComponent } from "./attachment.component";
+import { AttachmentActionsComponent } from "./attachment-actions.component";
 import { ProgressBarComponent } from "../../loader/progress-bar/progress-bar.component";
 import { Breakpoint, BreakpointService } from "../../../services/breakpoint/breakpoint.service";
 import { TediTranslationService } from "../../../services/translation/translation.service";
@@ -33,21 +34,27 @@ class BreakpointMock {
 
 @Component({
   standalone: true,
-  imports: [AttachmentComponent, ProgressBarComponent],
+  imports: [
+    AttachmentComponent,
+    AttachmentActionsComponent,
+    ProgressBarComponent,
+  ],
   template: `
     <tedi-attachment
       [name]="name"
       [fileSize]="fileSize"
       [error]="error"
       [invalid]="invalid"
-      [removable]="removable"
-      [removeLabel]="removeLabel"
+      [size]="size"
       [mobile]="mobile"
-      [disabled]="disabled"
-      (remove)="onRemove()"
     >
       @if (progress !== undefined) {
         <tedi-progress-bar [value]="progress" />
+      }
+      @if (showActions) {
+        <tedi-attachment-actions [padded]="padded">
+          <button type="button" class="test-action">Delete</button>
+        </tedi-attachment-actions>
       }
     </tedi-attachment>
   `,
@@ -58,11 +65,10 @@ class TestHostComponent {
   progress?: number;
   error?: string;
   invalid = false;
-  removable = true;
-  disabled = false;
-  removeLabel?: string;
+  size: "default" | "small" = "default";
   mobile?: boolean;
-  onRemove = jest.fn();
+  showActions = false;
+  padded = false;
 }
 
 describe("AttachmentComponent", () => {
@@ -128,6 +134,29 @@ describe("AttachmentComponent", () => {
     expect(progressEl.value).toBe(42);
   });
 
+  it("should project an actions container into the actions slot", () => {
+    host.showActions = true;
+    fixture.detectChanges();
+
+    const group = element.querySelector(
+      ".tedi-attachment__actions .tedi-attachment-actions",
+    );
+    expect(group).toBeTruthy();
+    expect(group?.querySelector(".test-action")).toBeTruthy();
+  });
+
+  it("should toggle the actions group `--padded` modifier via the `padded` input", () => {
+    host.showActions = true;
+    fixture.detectChanges();
+
+    const group = element.querySelector(".tedi-attachment-actions")!;
+    expect(group.classList).not.toContain("tedi-attachment-actions--padded");
+
+    host.padded = true;
+    fixture.detectChanges();
+    expect(group.classList).toContain("tedi-attachment-actions--padded");
+  });
+
   it("should switch to error visual when `error` is set", () => {
     host.error = "File too large";
     fixture.detectChanges();
@@ -150,39 +179,15 @@ describe("AttachmentComponent", () => {
     expect(element.querySelector("tedi-feedback-text")).toBeNull();
   });
 
-  it("should emit `remove` when the delete button is clicked", () => {
-    const button = element.querySelector(".tedi-attachment__remove") as HTMLButtonElement;
-    button.click();
-
-    expect(host.onRemove).toHaveBeenCalledTimes(1);
+  it("should not apply the small modifier by default", () => {
+    expect(element.classList).not.toContain("tedi-attachment--small");
   });
 
-  it("should hide the remove button when removable=false", () => {
-    host.removable = false;
+  it("should apply the small modifier when `size=small`", () => {
+    host.size = "small";
     fixture.detectChanges();
 
-    expect(element.querySelector(".tedi-attachment__remove")).toBeNull();
-  });
-
-  it("should disable the remove button when disabled=true", () => {
-    host.disabled = true;
-    fixture.detectChanges();
-
-    const button = element.querySelector(".tedi-attachment__remove") as HTMLButtonElement;
-    expect(button.disabled).toBe(true);
-  });
-
-  it("should derive a default remove aria-label from the file name", () => {
-    const button = element.querySelector(".tedi-attachment__remove") as HTMLButtonElement;
-    expect(button.getAttribute("aria-label")).toBe("remove doc.pdf");
-  });
-
-  it("should use custom remove label when provided", () => {
-    host.removeLabel = "Kustuta";
-    fixture.detectChanges();
-
-    const button = element.querySelector(".tedi-attachment__remove") as HTMLButtonElement;
-    expect(button.getAttribute("aria-label")).toBe("Kustuta");
+    expect(element.classList).toContain("tedi-attachment--small");
   });
 
   it("should apply the mobile modifier when `mobile=true`", () => {
