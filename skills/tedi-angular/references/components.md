@@ -899,6 +899,7 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 **Inputs:**
 - `name: string` (required) — file name displayed in the card
 - `fileSize: string` — pre-formatted file size (e.g. `"0.9 MB"`)
+- `icon: string` — leading file-type icon (Material Symbol name, e.g. `"description"`, `"picture_as_pdf"`) shown before the file name
 - `error: string` — error feedback. When set, switches the card to its error visual and renders feedback text below. Implies `invalid`.
 - `invalid: boolean = false` — switches the card to its error visual (danger background + error icon) without rendering feedback text. Use when the error message is rendered elsewhere (e.g. an aggregate validation message).
 - `mobile: boolean | undefined` — manually force the mobile variant. When `undefined`, derived from `mobileBreakpoint`.

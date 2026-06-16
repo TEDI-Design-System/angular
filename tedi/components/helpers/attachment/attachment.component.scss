@@ -42,6 +42,10 @@
     overflow-wrap: anywhere;
   }
 
+  &__icon {
+    flex-shrink: 0;
+  }
+
   &__error-icon {
     flex-shrink: 0;
 

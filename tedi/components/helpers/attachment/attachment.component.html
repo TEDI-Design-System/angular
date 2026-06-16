@@ -1,6 +1,13 @@
 <div class="tedi-attachment__card">
   <div class="tedi-attachment__title-row">
     <div class="tedi-attachment__title-group">
+      @if (icon()) {
+        <tedi-icon
+          [name]="icon()!"
+          [size]="18"
+          class="tedi-attachment__icon"
+        />
+      }
       <span class="tedi-attachment__title">{{ name() }}</span>
       @if (hasErrorVisual()) {
         <tedi-icon

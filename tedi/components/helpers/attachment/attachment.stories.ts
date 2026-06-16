@@ -18,7 +18,7 @@ import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/t
 type StoryArgs = ComponentInputs<AttachmentComponent>;
 
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.56.78?node-id=51174-101981&m=dev" target="_blank">Figma ↗</a><br>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.59.78?node-id=30427-154342&m=dev" target="_blank">Figma ↗</a><br>
  * <a href="https://www.tedi.ee/1ee8444b7/p/9133f7-attachment" target="_blank">Zeroheight ↗</a>
  *
  * Project a `<tedi-progress-bar>` inside the attachment to show upload progress.
@@ -55,6 +55,12 @@ export default {
     },
     fileSize: {
       description: "Pre-formatted file size string (e.g. `\"0.9 MB\"`).",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    icon: {
+      description:
+        "Leading file-type icon shown before the file name (Material Symbol name).",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
@@ -100,48 +106,49 @@ export default {
 
 type Story = StoryObj<AttachmentComponent>;
 
-const actions = `
-  <tedi-attachment-actions>
-    <tedi-tooltip>
-      <tedi-tooltip-trigger>
-        <button tedi-button variant="neutral" aria-label="Lae alla">
-          <tedi-icon name="download" [size]="18" />
-        </button>
-      </tedi-tooltip-trigger>
-      <tedi-tooltip-content>Lae alla</tedi-tooltip-content>
-    </tedi-tooltip>
-    <tedi-tooltip>
-      <tedi-tooltip-trigger>
-        <button tedi-button variant="neutral" aria-label="Kustuta">
-          <tedi-icon name="delete" [size]="18" />
-        </button>
-      </tedi-tooltip-trigger>
-      <tedi-tooltip-content>Kustuta</tedi-tooltip-content>
-    </tedi-tooltip>
-  </tedi-attachment-actions>
+const action = (icon: string, label: string, size?: "small") => `
+  <tedi-tooltip>
+    <tedi-tooltip-trigger>
+      <button tedi-button variant="neutral"${size ? ` size="${size}"` : ""} aria-label="${label}">
+        <tedi-icon name="${icon}" [size]="18" />
+      </button>
+    </tedi-tooltip-trigger>
+    <tedi-tooltip-content>${label}</tedi-tooltip-content>
+  </tedi-tooltip>
 `;
 
-const renderWithActions = (args: StoryArgs) => ({
+const deleteAction = `<tedi-attachment-actions>${action("delete", "Kustuta")}</tedi-attachment-actions>`;
+const downloadAction = `<tedi-attachment-actions>${action("download", "Laadi alla")}</tedi-attachment-actions>`;
+
+const renderWithDelete = (args: StoryArgs) => ({
   props: args,
-  template: `<tedi-attachment ${argsToTemplate(args)}>${actions}</tedi-attachment>`,
+  template: `<tedi-attachment ${argsToTemplate(args)}>${deleteAction}</tedi-attachment>`,
 });
 
 export const Default: Story = {
-  render: renderWithActions,
+  render: renderWithDelete,
 };
 
-export const List: Story = {
+/**
+ * Read-only attachments expose only a download action — no delete button.
+ */
+export const ReadOnly: Story = {
   render: () => ({
     template: `
       <div class="flex flex-column gap-2">
-        <tedi-attachment name="Kodukülastusakt_Triin.pdf">${actions}</tedi-attachment>
-        <tedi-attachment name="Lisa_5.pdf">${actions}</tedi-attachment>
-        <tedi-attachment name="Graafik_2025.pdf">${actions}</tedi-attachment>
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf">${downloadAction}</tedi-attachment>
+        <tedi-attachment name="Lisa_5.pdf">${downloadAction}</tedi-attachment>
+        <tedi-attachment name="Graafik_2025.pdf">${downloadAction}</tedi-attachment>
       </div>
     `,
   }),
 };
 
+/**
+ * Project a `<tedi-progress-bar>` to show upload progress. Use a projected
+ * `<tedi-feedback-text type="hint">` for the status label; the percentage is
+ * rendered automatically.
+ */
 export const WithProgress: Story = {
   render: () => ({
     template: `
@@ -150,19 +157,149 @@ export const WithProgress: Story = {
           <tedi-progress-bar [value]="34" valuePosition="bottom">
             <tedi-feedback-text text="Üleslaadimine" type="hint" />
           </tedi-progress-bar>
-          ${actions}
+          ${deleteAction}
         </tedi-attachment>
-        <tedi-attachment name="Kodukülastusakt_Triin.pdf">${actions}</tedi-attachment>
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB">
+          <tedi-progress-bar [value]="34" valuePosition="bottom" />
+          ${deleteAction}
+        </tedi-attachment>
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB">
+          <tedi-progress-bar [value]="34" valuePosition="bottom">
+            <tedi-feedback-text text="Üleslaadimine" type="hint" />
+          </tedi-progress-bar>
+          ${downloadAction}
+        </tedi-attachment>
       </div>
     `,
   }),
 };
 
 export const WithFileSize: Story = {
-  render: renderWithActions,
+  render: renderWithDelete,
   args: {
     fileSize: "0,9 MB",
   },
+};
+
+/**
+ * Pass a Material Symbol name to `icon` to show a leading file-type icon
+ * before the file name.
+ */
+export const WithIcon: Story = {
+  render: () => ({
+    template: `
+      <div class="flex flex-column gap-2">
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" icon="description">${deleteAction}</tedi-attachment>
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" icon="imagesmode">${deleteAction}</tedi-attachment>
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" icon="imagesmode">${deleteAction}</tedi-attachment>
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" icon="picture_as_pdf">${deleteAction}</tedi-attachment>
+      </div>
+    `,
+  }),
+};
+
+/**
+ * Leave the actions slot empty to render an attachment with no action buttons.
+ */
+export const WithoutDeleteButton: Story = {
+  render: () => ({
+    template: `
+      <div class="flex flex-column gap-2">
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" />
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" />
+      </div>
+    `,
+  }),
+};
+
+/**
+ * Project any combination of neutral icon buttons into the actions slot —
+ * view, download, delete, or a mix. The last row uses `size="small"` buttons
+ * alongside a progress bar.
+ */
+export const WithDifferentActions: Story = {
+  render: () => ({
+    template: `
+      <div class="flex flex-column gap-2">
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf">
+          <tedi-attachment-actions>
+            ${action("visibility", "Vaata")}
+            ${action("download", "Laadi alla")}
+            ${action("delete", "Kustuta")}
+          </tedi-attachment-actions>
+        </tedi-attachment>
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf">
+          <tedi-attachment-actions>
+            ${action("download", "Laadi alla")}
+            ${action("delete", "Kustuta")}
+          </tedi-attachment-actions>
+        </tedi-attachment>
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf">${downloadAction}</tedi-attachment>
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" />
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB">
+          <tedi-progress-bar [value]="34" valuePosition="bottom">
+            <tedi-feedback-text text="Üleslaadimine" type="hint" />
+          </tedi-progress-bar>
+          <tedi-attachment-actions>
+            ${action("download", "Laadi alla", "small")}
+            ${action("delete", "Kustuta", "small")}
+          </tedi-attachment-actions>
+        </tedi-attachment>
+      </div>
+    `,
+  }),
+};
+
+export const Mobile: Story = {
+  render: () => ({
+    template: `
+      <div class="flex flex-column gap-3" style="max-width: 350px;">
+        <tedi-attachment
+          [mobile]="true"
+          name="Kodukülastusakt_Triin_natuke_pikema_pealkirjaga.pdf"
+          fileSize="0,9 MB"
+        >
+          <tedi-progress-bar [value]="34" valuePosition="bottom">
+            <tedi-feedback-text text="Üleslaadimine" type="hint" />
+          </tedi-progress-bar>
+          ${deleteAction}
+        </tedi-attachment>
+        <tedi-attachment
+          [mobile]="true"
+          name="Kodukülastusakt_Triin_natuke_pikema_pealkirjaga.pdf"
+          fileSize="0,9 MB"
+        >${deleteAction}</tedi-attachment>
+        <tedi-attachment [mobile]="true" name="Kodukülastusakt.pdf" fileSize="0,9 MB">${deleteAction}</tedi-attachment>
+        <tedi-attachment [mobile]="true" name="Kodukülastusakt.pdf" fileSize="0,9 MB">${downloadAction}</tedi-attachment>
+        <tedi-attachment [mobile]="true" name="Kodukülastusakt.pdf" fileSize="0,9 MB">
+          <tedi-attachment-actions>
+            ${action("download", "Laadi alla")}
+            ${action("delete", "Kustuta")}
+          </tedi-attachment-actions>
+        </tedi-attachment>
+        <tedi-attachment [mobile]="true" name="Kodukülastusakt.pdf" fileSize="0,9 MB">
+          <tedi-attachment-actions>
+            ${action("download", "Laadi alla")}
+            ${action("more_vert", "Rohkem")}
+          </tedi-attachment-actions>
+        </tedi-attachment>
+      </div>
+    `,
+  }),
+};
+
+export const Error: Story = {
+  render: () => ({
+    template: `
+      <div class="flex flex-column gap-3">
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf">${deleteAction}</tedi-attachment>
+        <tedi-attachment
+          name="Kodukülastusakt_Triin.pdf"
+          error="Feedback text"
+        >${deleteAction}</tedi-attachment>
+      </div>
+    `,
+  }),
 };
 
 /**
@@ -189,90 +326,6 @@ export const LabeledActions: Story = {
           </button>
         </tedi-attachment-actions>
       </tedi-attachment>
-    `,
-  }),
-};
-
-/**
- * Project small action buttons by setting `size="small"` on each button. They
- * stay vertically centered in the card.
- */
-export const SmallButtons: Story = {
-  render: () => ({
-    template: `
-      <tedi-attachment name="Kodukülastusakt_Triin.pdf">
-        <tedi-attachment-actions>
-          <tedi-tooltip>
-            <tedi-tooltip-trigger>
-              <button tedi-button variant="neutral" size="small" aria-label="Vaata">
-                <tedi-icon name="visibility" [size]="18" />
-              </button>
-            </tedi-tooltip-trigger>
-            <tedi-tooltip-content>Vaata</tedi-tooltip-content>
-          </tedi-tooltip>
-          <tedi-tooltip>
-            <tedi-tooltip-trigger>
-              <button tedi-button variant="neutral" size="small" aria-label="Laadi alla">
-                <tedi-icon name="download" [size]="18" />
-              </button>
-            </tedi-tooltip-trigger>
-            <tedi-tooltip-content>Laadi alla</tedi-tooltip-content>
-          </tedi-tooltip>
-          <tedi-tooltip>
-            <tedi-tooltip-trigger>
-              <button tedi-button variant="neutral" size="small" aria-label="Kustuta">
-                <tedi-icon name="delete" [size]="18" />
-              </button>
-            </tedi-tooltip-trigger>
-            <tedi-tooltip-content>Kustuta</tedi-tooltip-content>
-          </tedi-tooltip>
-        </tedi-attachment-actions>
-      </tedi-attachment>
-    `,
-  }),
-};
-
-export const Mobile: Story = {
-  render: () => ({
-    template: `
-      <div class="flex flex-column gap-3" style="max-width: 350px;">
-        <tedi-attachment
-          [mobile]="true"
-          name="Kodukülastusakt_Triin_natuke_pikema_pealkirjaga.pdf"
-          fileSize="0,9 MB"
-        >
-          <tedi-progress-bar [value]="34" valuePosition="bottom">
-            <tedi-feedback-text text="Üleslaadimine" type="hint" />
-          </tedi-progress-bar>
-          ${actions}
-        </tedi-attachment>
-
-        <tedi-attachment
-          [mobile]="true"
-          name="Kodukülastusakt_Triin_natuke_pikema_pealkirjaga.pdf"
-          fileSize="0,9 MB"
-        >${actions}</tedi-attachment>
-
-        <tedi-attachment
-          [mobile]="true"
-          name="Kodukülastusakt.pdf"
-          fileSize="0,9 MB"
-        >${actions}</tedi-attachment>
-      </div>
-    `,
-  }),
-};
-
-export const Error: Story = {
-  render: () => ({
-    template: `
-      <div class="flex flex-column gap-3">
-        <tedi-attachment name="Kodukülastusakt_Triin.pdf">${actions}</tedi-attachment>
-        <tedi-attachment
-          name="Kodukülastusakt_Triin.pdf"
-          error="Feedback text"
-        >${actions}</tedi-attachment>
-      </div>
     `,
   }),
 };

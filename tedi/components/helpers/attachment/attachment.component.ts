@@ -45,6 +45,11 @@ export class AttachmentComponent {
    */
   fileSize = input<string>();
   /**
+   * Leading file-type icon shown before the file name. Pass a Material Symbol
+   * name (e.g. `"description"`, `"picture_as_pdf"`, `"imagesmode"`).
+   */
+  icon = input<string>();
+  /**
    * Error feedback message. When set, the attachment switches to its error
    * visual: red card background, error icon next to the name, and the
    * message rendered as feedback text below the card. Implies `invalid`.

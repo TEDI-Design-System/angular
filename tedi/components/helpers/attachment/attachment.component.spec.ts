@@ -43,6 +43,7 @@ class BreakpointMock {
     <tedi-attachment
       [name]="name"
       [fileSize]="fileSize"
+      [icon]="icon"
       [error]="error"
       [invalid]="invalid"
       [mobile]="mobile"
@@ -61,6 +62,7 @@ class BreakpointMock {
 class TestHostComponent {
   name = "doc.pdf";
   fileSize?: string;
+  icon?: string;
   progress?: number;
   error?: string;
   invalid = false;
@@ -105,6 +107,21 @@ describe("AttachmentComponent", () => {
 
   it("should not render file size when omitted", () => {
     expect(element.querySelector(".tedi-attachment__size")).toBeNull();
+  });
+
+  it("should not render a leading icon by default", () => {
+    expect(element.querySelector(".tedi-attachment__icon")).toBeNull();
+  });
+
+  it("should render a leading icon when `icon` is set", () => {
+    host.icon = "picture_as_pdf";
+    fixture.detectChanges();
+
+    const icon = element.querySelector(
+      ".tedi-attachment__title-group .tedi-attachment__icon",
+    );
+    expect(icon).toBeTruthy();
+    expect(icon?.classList).toContain("material-symbols");
   });
 
   it("should not render a progress-bar by default and not add --has-progress", () => {
