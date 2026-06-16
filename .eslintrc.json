@@ -1,9 +1,14 @@
 {
   "overrides": [
     {
-      "files": ["*.ts", "**/*.ts"],
+      "files": [
+        "*.ts",
+        "**/*.ts"
+      ],
       "parserOptions": {
-        "project": ["tsconfig.eslint.json"]
+        "project": [
+          "tsconfig.eslint.json"
+        ]
       },
       "extends": [
         "eslint:recommended",
@@ -21,7 +26,10 @@
         "indent": "off",
         "simple-import-sort/imports": "off",
         "array-bracket-spacing": "off",
-        "complexity": ["error", 14],
+        "complexity": [
+          "error",
+          14
+        ],
         "@typescript-eslint/array-type": "off",
         "@typescript-eslint/no-unused-vars": [
           "error",
@@ -33,13 +41,20 @@
       }
     },
     {
-      "files": ["*.html"],
-      "extends": ["plugin:@angular-eslint/template/recommended"],
+      "files": [
+        "*.html"
+      ],
+      "extends": [
+        "plugin:@angular-eslint/template/recommended"
+      ],
       "rules": {
         "@angular-eslint/template/no-negated-async": "warn",
         "@angular-eslint/template/eqeqeq": "off",
         "@typescript-eslint/ban-ts-comment": "off"
       }
     }
+  ],
+  "extends": [
+    "plugin:storybook/recommended"
   ]
 }

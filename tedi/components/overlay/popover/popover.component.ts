@@ -5,74 +5,78 @@ import {
   ChangeDetectionStrategy,
   input,
   inject,
+  DestroyRef,
   Renderer2,
   computed,
   viewChild,
   signal,
   contentChild,
-  AfterContentChecked,
 } from "@angular/core";
 import {
-  NgxFloatUiContentComponent,
-  NgxFloatUiModule,
-  NgxFloatUiPlacements,
-} from "ngx-float-ui";
+  OverlayModule,
+  CdkConnectedOverlay,
+  ConnectedOverlayPositionChange,
+} from "@angular/cdk/overlay";
+import {
+  OverlayPosition,
+  OverlaySide,
+  toConnectedPositions,
+  getPlacementFromPositionChange,
+  calculateArrowOffset,
+  HorizontalPushHandler,
+} from "../overlay-position.util";
 import { PopoverTriggerDirective } from "./popover-trigger/popover-trigger.directive";
 import { getFocusableElements } from "../../../utils/elements.util";
 import { PopoverContentComponent } from "./popover-content/popover-content.component";
 
-export type PopoverPosition = `${NgxFloatUiPlacements}`;
+export type PopoverPosition = OverlayPosition;
+
+let popoverIdCounter = 0;
 
 @Component({
   standalone: true,
   selector: "tedi-popover",
-  imports: [NgxFloatUiModule],
+  imports: [OverlayModule],
   templateUrl: "./popover.component.html",
   styleUrl: "./popover.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PopoverComponent implements AfterContentChecked {
+export class PopoverComponent {
   /**
    * The position of the popover relative to the trigger element.
    * @default top
    */
-  position = input<PopoverPosition>("top");
+  readonly position = input<PopoverPosition>("top");
   /**
    * Should position flip to opposite direction when overflowing screen?
    * @default false
    */
-  preventOverflow = input(false);
+  readonly preventOverflow = input(false);
   /**
    * Is dismissible by clicking outside of content?
    * @default true
    */
-  dismissible = input(true);
+  readonly dismissible = input(true);
   /**
    * Does popover content hide on scroll?
    * @default false
    */
-  hideOnScroll = input(false);
+  readonly hideOnScroll = input(false);
   /**
    * Does popover have illustrative border on the arrow side?
    * @default false
    */
-  withBorder = input(false);
+  readonly withBorder = input(false);
   /**
    * Should show arrow?
    */
-  withArrow = input(true);
+  readonly withArrow = input(true);
   /**
    * Lock scrolling on rest of the page?
    * @default false
    */
-  lockScroll = input(false);
-  /**
-   * Append floating element to given selector.
-   * Use 'body' to append at the end of DOM or empty string to append next to trigger element.
-   * @default "body"
-   */
-  readonly appendTo = input("body");
+  readonly lockScroll = input(false);
   /** Delay time (in ms) for closing popover when not hovering trigger or content.
    * @default 100
    */
@@ -81,58 +85,95 @@ export class PopoverComponent implements AfterContentChecked {
   private readonly document = inject(DOCUMENT);
   private readonly renderer = inject(Renderer2);
 
-  readonly floatUiComponent = viewChild.required(NgxFloatUiContentComponent);
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
   readonly popoverTrigger = contentChild.required(PopoverTriggerDirective);
   private readonly popoverContent = contentChild.required(
     PopoverContentComponent,
   );
 
-  readonly containerId = signal("");
+  readonly isOpen = signal(false);
+  readonly currentPlacement = signal<OverlaySide>("top");
+  readonly containerId = signal(`tedi-popover-${popoverIdCounter++}`);
   readonly isContentHovered = signal(false);
+  readonly arrowLeft = signal<number | null>(null);
+  readonly arrowTop = signal<number | null>(null);
+
+  readonly overlayOrigin = computed(() => this.popoverTrigger().overlayOrigin);
+  private readonly arrowOffset = computed(() =>
+    this.withArrow() ? (this.withBorder() ? 9 : 12) : 0,
+  );
+
+  readonly overlayPositions = computed(() =>
+    toConnectedPositions(
+      this.position(),
+      this.preventOverflow(),
+      this.arrowOffset(),
+    ),
+  );
+
+  readonly panelClasses = computed(() => {
+    const classList = ["tedi-popover__container"];
+    if (this.withBorder()) classList.push("tedi-popover__container--border");
+    if (this.withArrow()) classList.push("tedi-popover__container--arrow");
+    return classList.join(" ");
+  });
+
+  readonly ariaLabelledBy = computed(() => {
+    return this.popoverContent().title()
+      ? this.popoverContent().titleId
+      : this.containerId() + "_trigger";
+  });
 
   hideTimeout?: ReturnType<typeof setTimeout>;
+  /** Whether this popover locked body scroll when it opened — read on close
+   * so a mid-open change to the lockScroll input can't leave the lock stuck. */
+  private lockedScrollAtOpen = false;
   private keydownListener?: () => void;
   private scrollListener?: () => void;
   private focusinListener?: () => void;
   private mousedownListener?: () => void;
 
-  ngAfterContentChecked() {
-    const floatUiEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
-    const container = floatUiEl.querySelector<HTMLElement>(
-      ".float-ui-container-popover",
-    );
+  private readonly horizontalPush = new HorizontalPushHandler(
+    () => this.connectedOverlay()?.overlayRef?.overlayElement,
+    () => this.updateArrowPosition(),
+  );
 
-    if (container) {
-      const labelledBy = this.popoverContent().title()
-        ? this.popoverContent().titleId
-        : container.id + "_trigger";
-      container.setAttribute("tabindex", "-1");
-      container.setAttribute("aria-labelledby", labelledBy);
-      this.containerId.set(container.id);
-    }
+  constructor() {
+    inject(DestroyRef).onDestroy(() => {
+      clearTimeout(this.hideTimeout);
+      this.horizontalPush.detach();
+      this.cleanupKeyboardNavigation();
+      this.cleanupScrollListener();
+      this.cleanupDismissListeners();
+    });
   }
 
   showPopover() {
-    if (this.floatUiComponent().state) return;
+    if (this.isOpen()) return;
 
     clearTimeout(this.hideTimeout);
-    this.floatUiComponent().show();
+    this.isOpen.set(true);
 
-    const floatUiEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
-    const container = floatUiEl.querySelector<HTMLElement>(
-      ".float-ui-container-popover",
-    );
-
-    if (this.lockScroll()) {
+    this.lockedScrollAtOpen = this.lockScroll();
+    if (this.lockedScrollAtOpen) {
       this.renderer.setStyle(this.document.body, "overflow", "hidden");
     }
+  }
 
+  onOverlayAttach() {
+    const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+    if (!overlayEl) return;
+
+    const container = overlayEl.querySelector(
+      ".tedi-popover__container",
+    ) as HTMLElement;
     if (container) {
       setTimeout(() => container.focus({ preventScroll: true }));
       this.setupKeyboardNavigation(container);
     }
+
+    this.horizontalPush.attach();
+    this.updateArrowPosition();
 
     if (this.hideOnScroll()) {
       this.setupScrollListener();
@@ -143,16 +184,24 @@ export class PopoverComponent implements AfterContentChecked {
     }
   }
 
+  onPositionChange(change: ConnectedOverlayPositionChange) {
+    this.currentPlacement.set(getPlacementFromPositionChange(change));
+    this.horizontalPush.apply();
+    this.updateArrowPosition();
+  }
+
   hidePopover(focusTrigger?: boolean) {
-    if (!this.floatUiComponent().state) return;
+    if (!this.isOpen()) return;
 
     this.cleanupKeyboardNavigation();
     this.cleanupScrollListener();
+    this.horizontalPush.detach();
     this.cleanupDismissListeners();
-    this.floatUiComponent().hide();
+    this.isOpen.set(false);
 
-    if (this.lockScroll()) {
+    if (this.lockedScrollAtOpen) {
       this.renderer.removeStyle(this.document.body, "overflow");
+      this.lockedScrollAtOpen = false;
     }
 
     if (focusTrigger) {
@@ -161,26 +210,29 @@ export class PopoverComponent implements AfterContentChecked {
   }
 
   togglePopover() {
-    if (this.floatUiComponent().state) {
+    if (this.isOpen()) {
       this.hidePopover(true);
     } else {
       this.showPopover();
     }
   }
 
-  readonly floatUiContainerClass = computed(() => {
-    const classList = ["float-ui-container-popover"];
+  private updateArrowPosition() {
+    if (!this.withArrow()) return;
+    const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+    const triggerEl = this.popoverTrigger().host.nativeElement;
+    if (!overlayEl || !triggerEl) return;
 
-    if (this.withBorder()) {
-      classList.push("float-ui-container-popover--border");
-    }
-
-    if (this.withArrow()) {
-      classList.push("float-ui-container-popover--arrow");
-    }
-
-    return classList.join(",");
-  });
+    const arrowSize = this.withBorder() ? 18 : 24;
+    const offset = calculateArrowOffset(
+      this.currentPlacement(),
+      triggerEl,
+      overlayEl,
+      arrowSize,
+    );
+    this.arrowLeft.set(offset.left);
+    this.arrowTop.set(offset.top);
+  }
 
   private setupKeyboardNavigation(container: HTMLElement) {
     this.cleanupKeyboardNavigation();
@@ -189,7 +241,7 @@ export class PopoverComponent implements AfterContentChecked {
       container,
       "keydown",
       (e: KeyboardEvent) => {
-        if (e.key === "Escape" && this.floatUiComponent().state) {
+        if (e.key === "Escape" && this.isOpen()) {
           e.preventDefault();
           this.hidePopover(true);
         }
@@ -233,7 +285,7 @@ export class PopoverComponent implements AfterContentChecked {
       this.document,
       "scroll",
       () => {
-        if (this.floatUiComponent().state) {
+        if (this.isOpen()) {
           this.hidePopover(false);
         }
       },
@@ -276,8 +328,17 @@ export class PopoverComponent implements AfterContentChecked {
     }
   }
 
+  /** Focusable elements on the page, excluding the popover's own overlay —
+   * those are detached on close, so focusing them would drop focus to body. */
+  private getPageFocusableElements(): HTMLElement[] {
+    const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+    return getFocusableElements(this.document.body).filter(
+      (el) => !overlayEl?.contains(el),
+    );
+  }
+
   private focusElementAfterTrigger() {
-    const focusableElements = getFocusableElements(this.document.body);
+    const focusableElements = this.getPageFocusableElements();
     const triggerIndex = focusableElements.indexOf(
       this.popoverTrigger().host.nativeElement,
     );
@@ -290,7 +351,7 @@ export class PopoverComponent implements AfterContentChecked {
   }
 
   private focusElementBeforeTrigger() {
-    const focusableElements = getFocusableElements(this.document.body);
+    const focusableElements = this.getPageFocusableElements();
     const triggerIndex = focusableElements.indexOf(
       this.popoverTrigger().host.nativeElement,
     );
@@ -304,11 +365,11 @@ export class PopoverComponent implements AfterContentChecked {
 
   private handleClosePopoverEvent(e: Event) {
     const triggerEl = this.popoverTrigger().host.nativeElement;
-    const containerEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
+    const containerEl =
+      this.connectedOverlay()?.overlayRef?.overlayElement as HTMLElement;
     const target = e.target as HTMLElement | null;
 
-    if (!target || triggerEl.contains(target) || containerEl.contains(target)) {
+    if (!target || triggerEl.contains(target) || containerEl?.contains(target)) {
       return;
     }
 

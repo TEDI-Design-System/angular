@@ -17,6 +17,9 @@ import {
   TextComponent,
 } from "@tedi-design-system/angular/tedi";
 
+/**
+ * @deprecated Use Pagination from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-pagination",
   imports: [

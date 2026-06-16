@@ -40,18 +40,24 @@ Apply changes in this order:
 5. **Tests** — update spec files to match new API/behavior
 6. **Stories** — update Storybook stories to match new API
 
-## Step 5: Verify
+## Step 5: Code Review
+
+Run `/simplify` — a Claude Code skill available in this repository that reviews the changed code for reuse opportunities, simplification, efficiency, and altitude cleanups, then proposes fixes. Fix all valid findings before proceeding.
+
+A finding is **valid** when it is confirmed against the current code (not stale or already addressed), preserves behavior and the public API, and aligns with `best-practices.md`. Skip findings that are speculative, purely stylistic against project conventions, or would change behavior — note briefly why a finding was skipped.
+
+## Step 6: Verify
 
 1. Run the specific component test: `npx jest <component-path>`
 2. Run the full test suite: `npm test`
 3. Run lint: `npm run lint`
 4. Compare test results with the baseline from Step 2 — no new failures allowed.
 
-## Step 6: Update Consumer Catalog
+## Step 7: Update Consumer Catalog
 
 If the refactor changed the public API (renamed selector, inputs/outputs, removed or deprecated a component), update `skills/tedi-angular/references/components.md` to match.
 
-## Step 7: Report
+## Step 8: Report
 
 Summarize:
 - Files changed (with brief description of each change)

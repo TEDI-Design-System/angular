@@ -11,7 +11,6 @@ import {
 } from "@angular/core";
 import { DropdownComponent } from "../dropdown/dropdown.component";
 import { FocusableOption } from "@angular/cdk/a11y";
-import {} from "@angular/cdk/menu";
 
 const itemRole = {
   menu: "menuitem",
@@ -37,6 +36,8 @@ const itemRole = {
   },
 })
 export class DropdownItemComponent implements FocusableOption {
+  private element = inject<ElementRef<HTMLElement>>(ElementRef);
+
   /**
    * Applies the selected style to the dropdown item.
    */
@@ -87,7 +88,7 @@ export class DropdownItemComponent implements FocusableOption {
     this.itemSelected.emit();
   }
 
-  constructor(private element: ElementRef<HTMLElement>) {
+  constructor() {
     effect(() => {
       this.disabled = this.disabledInput();
     });

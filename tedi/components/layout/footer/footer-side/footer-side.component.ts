@@ -1,5 +1,4 @@
 import {
-  Attribute,
   ChangeDetectionStrategy,
   Component,
   inject,
@@ -7,6 +6,7 @@ import {
   signal,
   ViewEncapsulation,
   HostBinding,
+  HostAttributeToken,
 } from "@angular/core";
 import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
 
@@ -22,6 +22,11 @@ export type FooterSidePosition = "start" | "center" | "end";
   encapsulation: ViewEncapsulation.None,
 })
 export class FooterSideComponent {
+  isStart = inject(new HostAttributeToken("tedi-footer-start"), {
+    optional: true,
+  });
+  isEnd = inject(new HostAttributeToken("tedi-footer-end"), { optional: true });
+
   /**
    * Specifies the position of the footer internal content.
    * @default center
@@ -32,10 +37,7 @@ export class FooterSideComponent {
 
   mobileLayout = this.breakpointService.isBelowBreakpoint("sm");
 
-  constructor(
-    @Attribute("tedi-footer-start") public isStart: string,
-    @Attribute("tedi-footer-end") public isEnd: string,
-  ) {
+  constructor() {
     const side =
       this.isStart !== null ? "start" : this.isEnd !== null ? "end" : null;
     if (side) this.placement.set(side as FooterSidePlacement);

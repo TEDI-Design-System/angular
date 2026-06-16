@@ -1,0 +1,30 @@
+@if (!hideText()) {
+  <span class="tedi-collapse-button__text">{{ label() }}</span>
+  <span class="tedi-collapse-button__icon-pad">
+    <tedi-icon
+      class="tedi-collapse-button__icon"
+      name="expand_more"
+      color="inherit"
+      [variant]="iconVariant()"
+      [size]="iconSize()"
+    />
+  </span>
+} @else if (arrowType() === "secondary") {
+  <span class="tedi-collapse-button__icon-wrapper">
+    <tedi-icon
+      class="tedi-collapse-button__icon"
+      name="expand_more"
+      color="inherit"
+      [variant]="iconVariant()"
+      [size]="iconSize()"
+    />
+  </span>
+} @else {
+  <tedi-icon
+    class="tedi-collapse-button__icon"
+    name="expand_more"
+    color="inherit"
+    [variant]="iconVariant()"
+    [size]="iconSize()"
+  />
+}

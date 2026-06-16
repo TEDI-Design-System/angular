@@ -4,7 +4,6 @@ import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
 import { DatePickerComponent } from "./date-picker.component";
 import { TediTranslationService } from "../../../services/translation/translation.service";
-import { NgxFloatUiContentComponent } from "ngx-float-ui";
 import { DatePickerCalendarGridComponent } from "./date-picker-calendar-grid/date-picker-calendar-grid.component";
 
 class TranslationMock {
@@ -42,21 +41,6 @@ describe("DatePickerComponent", () => {
     fixture = TestBed.createComponent(DatePickerComponent);
     component = fixture.componentInstance;
     el = fixture.nativeElement;
-
-    const mockFloatUiElement = document.createElement("div");
-    const mockContainer = document.createElement("div");
-    mockContainer.className = "float-ui-container-popover";
-    mockContainer.id = "mock-popover-container";
-    mockFloatUiElement.appendChild(mockContainer);
-
-    jest.spyOn(component.popover(), "floatUiComponent").mockReturnValue({
-      state: false,
-      show: jest.fn(),
-      hide: jest.fn(),
-      elRef: {
-        nativeElement: mockFloatUiElement,
-      },
-    } as unknown as NgxFloatUiContentComponent);
 
     fixture.detectChanges();
   });
@@ -226,10 +210,8 @@ describe("DatePickerComponent", () => {
   });
 
   it("Escape in day grid should hide popover and focus input", () => {
-    const hideMock = jest.fn();
-    const pop = component.popover().floatUiComponent();
-    pop.hide = hideMock;
-    pop.state = true;
+    const hideSpy = jest.spyOn(component.popover(), "hidePopover");
+    component.popover().isOpen.set(true);
 
     const input = component.inputElement().nativeElement;
     const focusSpy = jest.spyOn(input, "focus");
@@ -239,7 +221,7 @@ describe("DatePickerComponent", () => {
 
     component.onDayKeydown(event, today);
 
-    expect(hideMock).toHaveBeenCalled();
+    expect(hideSpy).toHaveBeenCalled();
     expect(focusSpy).toHaveBeenCalled();
   });
 
@@ -262,9 +244,8 @@ describe("DatePickerComponent", () => {
   it("onInputClick should do nothing when allowManualInput=true", () => {
     fixture.componentRef.setInput("allowManualInput", true);
 
-    const pop = component.popover().floatUiComponent();
-    const hideSpy = jest.spyOn(pop, "hide");
-    const showSpy = jest.spyOn(pop, "show");
+    const hideSpy = jest.spyOn(component.popover(), "hidePopover");
+    const showSpy = jest.spyOn(component.popover(), "showPopover");
 
     component.onInputClick();
 
@@ -275,10 +256,9 @@ describe("DatePickerComponent", () => {
   it("onInputClick should hide popover and focus input when popover is open", () => {
     fixture.componentRef.setInput("allowManualInput", false);
 
-    const pop = component.popover().floatUiComponent();
-    pop.state = true;
+    component.popover().isOpen.set(true);
 
-    const hideSpy = jest.spyOn(pop, "hide");
+    const hideSpy = jest.spyOn(component.popover(), "hidePopover");
     const focusSpy = jest.spyOn(
       component.inputElement().nativeElement,
       "focus",
@@ -293,10 +273,9 @@ describe("DatePickerComponent", () => {
   it("onInputClick should show popover and call openCalendar when popover closed", () => {
     fixture.componentRef.setInput("allowManualInput", false);
 
-    const pop = component.popover().floatUiComponent();
-    pop.state = false;
+    component.popover().isOpen.set(false);
 
-    const showSpy = jest.spyOn(pop, "show");
+    const showSpy = jest.spyOn(component.popover(), "showPopover");
     const openSpy = jest.spyOn(component, "openCalendar");
 
     component.onInputClick();
@@ -822,10 +801,7 @@ describe("DatePickerComponent", () => {
 
   describe("closeOnSelect behavior", () => {
     it("should close popover after selection when closeOnSelect is true", () => {
-      const hideSpy = jest.spyOn(
-        component.popover().floatUiComponent(),
-        "hide",
-      );
+      const hideSpy = jest.spyOn(component.popover(), "hidePopover");
 
       component.selectDay({
         date: new Date(2024, 4, 15),
@@ -840,10 +816,7 @@ describe("DatePickerComponent", () => {
       fixture.componentRef.setInput("closeOnSelect", false);
       fixture.detectChanges();
 
-      const hideSpy = jest.spyOn(
-        component.popover().floatUiComponent(),
-        "hide",
-      );
+      const hideSpy = jest.spyOn(component.popover(), "hidePopover");
 
       component.selectDay({
         date: new Date(2024, 4, 15),
@@ -1051,20 +1024,6 @@ describe("DatePickerComponent", () => {
     it("should find first enabled date when initial active date is disabled", () => {
       const newFixture = TestBed.createComponent(DatePickerComponent);
       const newComponent = newFixture.componentInstance;
-
-      const mockFloatUiElement = document.createElement("div");
-      const mockContainer = document.createElement("div");
-      mockContainer.className = "float-ui-container-popover";
-      mockFloatUiElement.appendChild(mockContainer);
-
-      jest.spyOn(newComponent.popover(), "floatUiComponent").mockReturnValue({
-        state: false,
-        show: jest.fn(),
-        hide: jest.fn(),
-        elRef: {
-          nativeElement: mockFloatUiElement,
-        },
-      } as unknown as NgxFloatUiContentComponent);
 
       newFixture.componentRef.setInput("disabled", {
         before: new Date(2030, 0, 1),
@@ -1565,20 +1524,6 @@ describe("DatePickerComponent NG_VALUE_ACCESSOR integration", () => {
     datePicker = fixture.debugElement.query(
       By.directive(DatePickerComponent),
     ).componentInstance as DatePickerComponent;
-
-    const mockFloatUiElement = document.createElement("div");
-    const mockContainer = document.createElement("div");
-    mockContainer.className = "float-ui-container-popover";
-    mockFloatUiElement.appendChild(mockContainer);
-
-    jest.spyOn(datePicker.popover(), "floatUiComponent").mockReturnValue({
-      state: false,
-      show: jest.fn(),
-      hide: jest.fn(),
-      elRef: {
-        nativeElement: mockFloatUiElement,
-      },
-    } as unknown as NgxFloatUiContentComponent);
 
     fixture.detectChanges();
   });

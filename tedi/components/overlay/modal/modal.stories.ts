@@ -465,6 +465,7 @@ class StoryNoFooterComponent {
 export default {
   title: "TEDI-Ready/Components/Overlay/Modal",
   component: ModalComponent,
+
   decorators: [
     moduleMetadata({
       imports: [
@@ -473,11 +474,11 @@ export default {
       ],
     }),
   ],
-  parameters: {},
+
   argTypes: {
     size: {
       table: { type: { summary: "'default' | 'small'" }, defaultValue: { summary: "'default'" }, category: "ModalConfig" },
-      description: "Modal size variant. Controls padding, heading size, and close button size.",
+      description: "Modal size variant. Controls padding and heading size. Close button defaults to match this variant unless `closeButtonSize` is set explicitly on `<tedi-modal-header>`.",
     },
     width: {
       table: { type: { summary: "'xs' | 'sm' | 'md' | 'lg' | 'xl' | string" }, defaultValue: { summary: "'sm'" }, category: "ModalConfig" },
@@ -488,8 +489,8 @@ export default {
       description: "Max-width cap (e.g. `'75%'`, `'60vw'`). Overrides the default 95vw limit.",
     },
     position: {
-      table: { type: { summary: "'center' | 'top' | 'left' | 'right'" }, defaultValue: { summary: "'center'" }, category: "ModalConfig" },
-      description: "Position of the modal on screen. `'left'` and `'right'` create side/drawer modals.",
+      table: { type: { summary: "'center' | 'top' | 'bottom' | 'left' | 'right'" }, defaultValue: { summary: "'center'" }, category: "ModalConfig" },
+      description: "Position of the modal on screen. `'left'` / `'right'` create side/drawer modals. `'top'` and `'bottom'` anchor the modal to the corresponding edge with a fixed margin — useful for mobile bottom-sheet patterns.",
     },
     scrollBehavior: {
       table: { type: { summary: "'content' | 'page'" }, defaultValue: { summary: "'content'" }, category: "ModalConfig" },
@@ -511,6 +512,10 @@ export default {
       table: { type: { summary: "boolean" }, defaultValue: { summary: "true" }, category: "ModalConfig" },
       description: "Whether to show a close button in the header. Set via `[showClose]` on `<tedi-modal-header>`.",
     },
+    closeButtonSize: {
+      table: { type: { summary: "ClosingButtonSize" }, category: "ModalConfig" },
+      description: "Size of the close button. When unset, tracks the modal `size` variant (default → standard, small → compact). Set via `[closeButtonSize]` on `<tedi-modal-header>` to override.",
+    },
     data: {
       table: { type: { summary: "unknown" }, category: "ModalConfig" },
       description: "Data passed to the modal content component. Accessible via `inject(MODAL_DATA)`.",
@@ -523,7 +528,7 @@ export default {
       table: { type: { summary: "string" }, category: "ModalConfig" },
       description: "ID of the element that labels the dialog.",
     },
-  },
+  }
 } as Meta<ModalComponent>;
 
 export const Default: StoryObj = {
@@ -542,7 +547,7 @@ export const Default: StoryObj = {
     size: { control: "select", options: ["default", "small"] },
     width: { control: "text" },
     maxWidth: { control: "text" },
-    position: { control: "select", options: ["center", "top", "left", "right"] },
+    position: { control: "select", options: ["center", "top", "bottom", "left", "right"] },
     scrollBehavior: { control: "select", options: ["content", "page"] },
     fullscreen: { control: "text", description: "Set `true` for always fullscreen or a breakpoint string (`sm`, `md`, `lg`, `xl`, `xxl`)." },
     closeOnBackdropClick: { control: "boolean" },

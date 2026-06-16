@@ -1,14 +1,14 @@
 ---
 name: tedi-angular
 description: >
-  Build UIs with @tedi-design-system/angular — 38+ accessible Angular components with design token
+  Build UIs with @tedi-design-system/angular — 40+ accessible Angular components with design token
   theming. Use when creating interfaces, integrating form controls, customizing themes, or working
   with TEDI components in an Angular application.
 ---
 
 # TEDI Design System — Angular
 
-Angular component library with 38+ accessible, standalone components. Built on Angular 19+ with signal-based APIs and design tokens from `@tedi-design-system/core`.
+Angular component library with 40+ accessible, standalone components. Built on Angular 20+ with signal-based APIs and design tokens from `@tedi-design-system/core`.
 
 ## Installation
 
@@ -19,13 +19,11 @@ npm install @tedi-design-system/angular @tedi-design-system/core
 ### Peer Dependencies
 
 ```
-@angular/core: ^19.0.0 || ^20.0.0 || ^21.0.0
-@angular/common: ^19.0.0 || ^20.0.0 || ^21.0.0
-@angular/forms: ^19.0.0 || ^20.0.0 || ^21.0.0
-@angular/cdk: ^19.0.0 || ^20.0.0 || ^21.0.0
-@angular/animations: ^19.0.0 || ^20.0.0 || ^21.0.0
-@angular/platform-browser: ^19.0.0 || ^20.0.0 || ^21.0.0
-ngx-float-ui: ^19.0.1 || ^20.0.0 || ^21.0.0
+@angular/core: ^20.0.0 || ^21.0.0 || ^22.0.0
+@angular/common: ^20.0.0 || ^21.0.0 || ^22.0.0
+@angular/forms: ^20.0.0 || ^21.0.0 || ^22.0.0
+@angular/cdk: ^20.0.0 || ^21.0.0 || ^22.0.0
+@angular/platform-browser: ^20.0.0 || ^21.0.0 || ^22.0.0
 ```
 
 ## Setup
@@ -46,11 +44,14 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-### 2. Import core styles
+### 2. Add styles to angular.json
 
-```scss
-// styles.scss
-@use '@tedi-design-system/core/scss' as tedi;
+The package ships a precompiled stylesheet (design tokens, fonts, and component styles included):
+
+```json
+"styles": [
+  "node_modules/@tedi-design-system/angular/index.css"
+]
 ```
 
 ### 3. Use components

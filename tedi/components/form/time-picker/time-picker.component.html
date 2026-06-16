@@ -1,0 +1,116 @@
+@if (variant() === 'scroll') {
+  <div class="tedi-time-picker__columns" role="group">
+    <div
+      #hourColumn
+      class="tedi-time-picker__column"
+      role="listbox"
+      [attr.tabindex]="isDisabled() ? -1 : 0"
+      [attr.aria-label]="'time-picker.hours' | tediTranslate"
+      [attr.aria-activedescendant]="hourActiveId()"
+      [attr.aria-disabled]="isDisabled()"
+      (keydown)="onColumnKeydown($event, 'hour')"
+      (scroll)="onColumnScroll('hour')"
+    >
+      @for (hour of hours; track hour; let i = $index) {
+        <button
+          type="button"
+          class="tedi-time-picker__item"
+          role="option"
+          [id]="hourItemId(i)"
+          [class.tedi-time-picker__item--selected]="highlightedHourIndex() === i"
+          [attr.aria-selected]="selectedHour() === +hour"
+          [disabled]="isDisabled()"
+          tabindex="-1"
+          (click)="onHourClick(hour)"
+        >
+          {{ hour }}
+        </button>
+      }
+    </div>
+    <div class="tedi-time-picker__separator"></div>
+    <div
+      #minuteColumn
+      class="tedi-time-picker__column"
+      role="listbox"
+      [attr.tabindex]="isDisabled() ? -1 : 0"
+      [attr.aria-label]="'time-picker.minutes' | tediTranslate"
+      [attr.aria-activedescendant]="minuteActiveId()"
+      [attr.aria-disabled]="isDisabled()"
+      (keydown)="onColumnKeydown($event, 'minute')"
+      (scroll)="onColumnScroll('minute')"
+    >
+      @for (minute of minutes(); track minute; let i = $index) {
+        <button
+          type="button"
+          class="tedi-time-picker__item"
+          role="option"
+          [id]="minuteItemId(i)"
+          [class.tedi-time-picker__item--selected]="highlightedMinuteIndex() === i"
+          [attr.aria-selected]="selectedMinute() === +minute"
+          [disabled]="isDisabled()"
+          tabindex="-1"
+          (click)="onMinuteClick(minute)"
+        >
+          {{ minute }}
+        </button>
+      }
+    </div>
+  </div>
+} @else if (variant() === 'dropdown') {
+  @if (timeSlots().length === 0) {
+    <p class="tedi-time-picker__empty">{{ 'time-picker.no-slots' | tediTranslate }}</p>
+  } @else {
+    <div
+      class="tedi-time-picker__dropdown"
+      role="listbox"
+      [attr.aria-disabled]="isDisabled() ? true : null"
+    >
+      @for (slot of timeSlots(); track slot; let i = $index) {
+        <div
+          class="tedi-time-picker__dropdown-item"
+          role="option"
+          [class.tedi-time-picker__dropdown-item--selected]="isSlotSelected(slot)"
+          [attr.aria-selected]="isSlotSelected(slot)"
+          [attr.aria-disabled]="isDisabled() ? true : null"
+          [attr.tabindex]="isDisabled() ? -1 : getDropdownTabIndex(i)"
+          (click)="!isDisabled() && selectSlot(slot)"
+          (keydown)="onDropdownKeydown($event)"
+        >
+          {{ slot }}
+        </div>
+      }
+    </div>
+  }
+} @else if (variant() === 'slots') {
+  @if (timeSlots().length === 0) {
+    <p class="tedi-time-picker__empty">{{ 'time-picker.no-slots' | tediTranslate }}</p>
+  } @else {
+    <tedi-radio-card-group
+      class="tedi-time-picker__grid"
+      role="radiogroup"
+      [style]="gridStyle()"
+    >
+      @for (slot of timeSlots(); track slot; let i = $index) {
+        <label
+          tedi-radio-card
+          variant="secondary"
+          class="tedi-time-picker__slot"
+          [showIndicator]="showSlotIndicator()"
+          [for]="slotId(i)"
+        >
+          <input
+            tedi-radio
+            type="radio"
+            [id]="slotId(i)"
+            [name]="radioGroupName"
+            [value]="slot"
+            [checked]="isSlotSelected(slot)"
+            [disabled]="isDisabled()"
+            (change)="onRadioChange(slot)"
+          />
+          {{ slot }}
+        </label>
+      }
+    </tedi-radio-card-group>
+  }
+}

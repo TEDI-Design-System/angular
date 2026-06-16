@@ -16,8 +16,27 @@ export default {
     defaultOpen: false,
     hideCollapseText: false,
     arrowType: "default",
+    size: "default",
+    inverted: false,
   },
   argTypes: {
+    size: {
+      control: "inline-radio",
+      options: ["default", "small"],
+      description:
+        "Visual size of the toggle button. `small` uses 14px text and a 24px icon button.",
+      table: {
+        defaultValue: { summary: "default" },
+      },
+    },
+    inverted: {
+      control: "boolean",
+      description:
+        "Render with inverted colors (white text/icon, tinted state backgrounds) for use on a brand-coloured surface.",
+      table: {
+        defaultValue: { summary: "false" },
+      },
+    },
     openText: {
       control: "text",
       description:
@@ -100,5 +119,40 @@ export const InitiallyOpen: Story = {
     defaultOpen: true,
     openText: "Open",
     closeText: "Close",
+  },
+};
+
+export const Small: Story = {
+  args: {
+    size: "small",
+    openText: "Open",
+    closeText: "Close",
+  },
+};
+
+export const WithTextInverted: Story = {
+  args: {
+    inverted: true,
+    openText: "Open",
+    closeText: "Close",
+  },
+  globals: {
+    backgrounds: {
+      value: "brand"
+    }
+  },
+};
+
+export const IconOnlyInverted: Story = {
+  args: {
+    inverted: true,
+    hideCollapseText: true,
+    openText: "Open",
+    closeText: "Close",
+  },
+  globals: {
+    backgrounds: {
+      value: "brand"
+    }
   },
 };
