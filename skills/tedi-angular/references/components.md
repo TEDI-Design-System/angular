@@ -171,6 +171,50 @@ For non-clickable headers with custom actions (the toggle stays visible at the s
 
 ## Content
 
+### Calendar
+**Selector:** `tedi-calendar` | ControlValueAccessor
+
+The standalone date-selection surface used inside DateField, and embeddable directly. Supports `single`, `multiple` and `range` selection modes, three commit levels (`days`, `months`, `years`), available/unavailable day predicates, ISO week numbers, multi-month layouts, dropdown vs. grid month/year selection, custom locales, and a footer projection slot (`tediCalendarFooter`).
+
+**Models (two-way):**
+- `value: Date | Date[] | DateRange | null` — shape follows `mode` (`single` → `Date`, `multiple` → `Date[]`, `range` → `{ from, to }`)
+- `currentMonth: Date` — the first (left-most) month shown
+- `view: CalendarView = "days"` — active view: `"days"`, `"months"`, or `"years"`
+
+**Outputs:**
+- `select: { date: CalendarValue; day: Date }` — emitted on commit; `date` is the new full value, `day` is the clicked day/month/year
+
+**Inputs:**
+- `mode: DateFieldMode = "single"` — `"single"`, `"multiple"`, or `"range"`
+- `selectionLevel: CalendarView = "days"` — lowest level the user can commit to: `"days"`, `"months"`, or `"years"`
+- `monthYearSelectType: "dropdown" | "grid" | "static" = "dropdown"` — header month/year picker. `dropdown` (two dropdowns), `grid` (drill into month/year grid), `static` (label only — prev/next chevrons change the month)
+- `localeCode: string = "et-EE"` — BCP-47 locale for weekday/month names and the first day of the week
+- `showOutsideDays: boolean = true` — render trailing/leading days from adjacent months
+- `showWeekNumbers: boolean = false` — render the ISO week-number column
+- `showNavigation: boolean = true` — show the previous/next chevrons
+- `bordered: boolean = true` — render the calendar's own border and rounded corners. Disable when embedding in a surface that already has a border
+- `numberOfMonths: number = 1` — consecutive months rendered side by side (capped to what fits the viewport)
+- `required: boolean = false` — in `mode='multiple'`, prevents clearing the last selected date
+- `inputDisabled: boolean = false` — disables all interactions (combines with the reactive-forms disabled state)
+- `disabledMatchers: Matcher[] = []` — disabled-date matchers (`Date`, `Date[]`, `{ before }`, `{ after }`, `{ before, after }`, `{ from, to? }`, `{ dayOfWeek: number[] }`, or `(date) => boolean`)
+- `availableDays: Date[] | ((date: Date) => boolean) | undefined` — whitelist of selectable days; every other day is disabled
+- `unavailableDays: Date[] | ((date: Date) => boolean) | undefined` — blacklist; takes precedence over `availableDays`
+- `dayStatus: ((date: Date) => DayStatus | null | undefined) | undefined` — overlays a `tedi-status-indicator` dot on days; the returned `label` is surfaced on the day's `aria-label`
+- `shouldDisableMonth: ((month: Date) => boolean) | undefined` — disable a whole month
+- `shouldDisableYear: ((year: Date) => boolean) | undefined` — disable a whole year
+- `minYear: number | null = null` — earliest year offered (defaults to 10 years before the current year)
+- `maxYear: number | null = null` — latest year offered (defaults to 10 years after the current year)
+
+```html
+<!-- Embedded range picker, two months -->
+<tedi-calendar mode="range" [formControl]="rangeControl" [numberOfMonths]="2" />
+
+<!-- With a projected footer legend -->
+<tedi-calendar [availableDays]="availableDays">
+  <div tediCalendarFooter>Legend…</div>
+</tedi-calendar>
+```
+
 ### Carousel
 **Selector:** `tedi-carousel`
 
@@ -763,11 +807,12 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 - `closeOnSelect: boolean | undefined = undefined` — whether to close picker after selection (defaults to `true` in single mode)
 - `showOutsideDays: boolean = true` — render trailing/leading days from adjacent months
 - `showWeekNumbers: boolean = false` — render an ISO week-number column on the left of the day grid
-- `numberOfMonths: BreakpointObject<number> = { xs: 1 }` — number of months shown side by side (responsive). Below `md` clamped to 1
+- `numberOfMonths: BreakpointInput<number> = { xs: 1 }` — number of months shown side by side. A plain number (e.g. `2`) applies at every breakpoint (phone and modal included); pass a per-breakpoint object (e.g. `{ xs: 1, lg: 2 }`) to narrow it on small screens. The visible count is capped to what fits the viewport
 - `enableCalendar: BreakpointObject<boolean> = { xs: true }` — enables the calendar picker UI. `false` hides the icon button and popover/modal — typing only
 - `calendarTrigger: BreakpointObject<"input" | "button"> = { xs: "button" }` — what opens the calendar: `"button"` (icon) or `"input"` (the whole input)
-- `useNativePicker: BreakpointObject<boolean> = { xs: true, md: false }` — uses OS-native date picker instead of custom popover (single mode only)
-- `modal: boolean | string = false` — opens calendar in a centered modal. Accepts `true`, `false`, or breakpoint name (e.g., `"md"` means modal below md)
+- `useNativePicker: boolean | "sm" | "md" | "lg" | "xl" = false` — uses the OS-native date picker instead of the custom popover (single mode only). `true` always, `false` never, a breakpoint name uses native below that breakpoint and the custom popover from it upward
+- `modal: boolean | "sm" | "md" | "lg" | "xl" = false` — opens the calendar in a centered modal (with explicit Cancel/Confirm) instead of the popover. `true` always, `false` never, a breakpoint name means modal below that breakpoint
+- `fullscreen: boolean | "sm" | "md" | "lg" | "xl" = false` — render the calendar modal fullscreen. `true` always, `false` never, a breakpoint name makes it fullscreen below that breakpoint. Only applies when the calendar opens as a modal (see `modal`)
 - `formatDate: ((value: DateFieldValue) => string) | undefined` — custom formatter for displaying the date value; callback receives the value and returns a display string
 - `parseDate: ((value: string) => DateFieldValue | undefined) | undefined` — custom parser for parsing typed input into a Date, Date array or DateRange; return `undefined` to reject the input
 

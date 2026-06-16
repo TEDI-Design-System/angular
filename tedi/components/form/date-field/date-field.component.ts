@@ -33,7 +33,6 @@ import {
   TEDI_FORM_FIELD_CONTROL,
 } from "../form-field/form-field-control";
 import {
-  Breakpoint,
   breakpointInput,
   BreakpointInput,
   BreakpointObject,
@@ -49,6 +48,7 @@ import {
 import { matchAny, Matcher } from "../../../utils/matchers.util";
 import { ModalService } from "../../overlay/modal/modal.service";
 import { ModalRef } from "../../overlay/modal/modal-ref";
+import { ModalFullscreen } from "../../overlay/modal/modal.types";
 import {
   DateFieldModalComponent,
   DateFieldModalData,
@@ -63,7 +63,8 @@ type DayAvailabilityInput = Date[] | ((d: Date) => boolean) | undefined;
 type MonthPredicate = (month: Date) => boolean;
 type YearPredicate = (year: Date) => boolean;
 type DateFieldCalendarTrigger = "input" | "button";
-type DateFieldModalInput = BreakpointInput<boolean> | Breakpoint;
+type DateFieldModalInput = boolean | "sm" | "md" | "lg" | "xl";
+export type DateFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
 export type DateFieldSize = "default" | "small";
 
 @Component({
@@ -98,8 +99,21 @@ export type DateFieldSize = "default" | "small";
 })
 export class DateFieldComponent
   implements ControlValueAccessor, FormFieldControl<DateFieldValue> {
+  /**
+   * Unique ID for label association and accessibility. Bind the sibling
+   * `<label tedi-label [for]>` to the same value.
+   */
   readonly inputId = input.required<string>();
+  /**
+   * The selected value (two-way / `ControlValueAccessor`). Shape follows `mode`:
+   * `single` → `Date | null`, `multiple` → `Date[]`, `range` → `{ from, to }`.
+   */
   readonly value = model<DateFieldValue>(null);
+  /**
+   * Selection mode. `single` selects one date, `multiple` toggles dates in an
+   * array (rendered as tags), `range` builds a `{ from, to }` range across two
+   * clicks.
+   */
   readonly mode = input<DateFieldMode>("single");
   /**
    * `multiple` mode tag layout. `true` (default) wraps tags across rows and
@@ -119,39 +133,118 @@ export class DateFieldComponent
    * read-only chips.
    */
   readonly isTagRemovable = input<boolean>(true);
+  /** Placeholder rendered in the input when there is no value. */
   readonly placeholder = input<string>("");
+  /**
+   * Disables specific days via matchers (does not disable the whole field).
+   * Exposed in templates as `[disabled]`; accepts a `Date`, `Date[]`,
+   * `{ before }`, `{ after }`, `{ from, to? }`, `{ dayOfWeek: number[] }`, or a
+   * `(date) => boolean` predicate (single or array).
+   */
   readonly disabledInput = input<Matcher | Matcher[] | undefined>(undefined, {
     // eslint-disable-next-line @angular-eslint/no-input-rename -- 'disabled' conflicts with FormFieldControl.disabled Signal<boolean> required by the form-field-control contract; alias keeps the spec'd public binding name
     alias: "disabled",
   });
+  /** Disables the field entirely — text input, icon button, and calendar. */
   readonly inputDisabled = input<boolean>(false);
+  /**
+   * Blocks typing into the input but leaves the calendar interactive — useful
+   * for guided picking.
+   */
   readonly readOnly = input<boolean>(false);
+  /**
+   * Marks the input as required (sets the native `required` attribute). In
+   * `multiple` mode it also prevents clearing the last selected date. The
+   * asterisk indicator lives on the sibling `<label tedi-label [required]>` —
+   * bind it there too, since DateField owns no label.
+   */
   readonly required = input<boolean>(false);
   /** Field size — matches the surrounding `tedi-form-field`. */
   readonly size = input<DateFieldSize>("default");
+  /** Disables all dates before this date (inclusive boundary stays enabled). */
   readonly minDate = input<Date | undefined>(undefined);
+  /** Disables all dates after this date (inclusive boundary stays enabled). */
   readonly maxDate = input<Date | undefined>(undefined);
+  /** Disable all dates before today. */
   readonly disablePast = input<boolean>(false);
+  /** Disable all dates after today. */
   readonly disableFuture = input<boolean>(false);
+  /**
+   * Predicate `(month) => boolean` returning `true` to disable a whole month in
+   * the calendar's month navigation/grid. Leave `undefined` to disable nothing.
+   */
   readonly shouldDisableMonth = input<MonthPredicate | undefined>(undefined);
+  /**
+   * Predicate `(year) => boolean` returning `true` to disable a whole year in
+   * the calendar's year navigation/grid. Leave `undefined` to disable nothing.
+   */
   readonly shouldDisableYear = input<YearPredicate | undefined>(undefined);
+  /**
+   * Whitelist of selectable days — an explicit `Date[]` or a predicate
+   * `(date) => boolean`. Every other day is disabled.
+   */
   readonly availableDays = input<DayAvailabilityInput>(undefined);
+  /**
+   * Blacklist of unavailable days — a `Date[]` or a predicate `(date) => boolean`.
+   * Takes precedence over `availableDays`.
+   */
   readonly unavailableDays = input<DayAvailabilityInput>(undefined);
+  /**
+   * Lowest level the user can commit to. `days` shows the day grid as the final
+   * step; `months` and `years` commit at that level instead.
+   */
   readonly selectionLevel = input<CalendarView>("days");
+  /**
+   * How the calendar header exposes month/year picking. `dropdown` shows two
+   * dropdowns; `grid` drills into a month/year grid when the header label is
+   * clicked.
+   */
   readonly monthYearSelectType = input<"dropdown" | "grid">("dropdown");
+  /**
+   * Month the calendar opens on when there is no value. Ignored once a value is
+   * set (the calendar anchors to the selected date).
+   */
   readonly initialMonth = input<Date | undefined>(undefined);
+  /**
+   * BCP-47 locale for weekday/month names, the first day of the week, and the
+   * default `formatDate`/`parseDate` behaviour.
+   */
   readonly localeCode = input<string>("et-EE");
+  /**
+   * Whether to close the picker after a selection. Defaults to `true` in
+   * `single` mode and `false` in `multiple`/`range` when left `undefined`.
+   */
   readonly closeOnSelect = input<boolean | undefined>(undefined);
+  /**
+   * Render the trailing/leading days from the adjacent month inside the current
+   * month's grid.
+   */
   readonly showOutsideDays = input<boolean>(true);
+  /** Render an ISO week-number column on the left of the day grid. */
   readonly showWeekNumbers = input<boolean>(false);
+  /**
+   * Number of month grids shown side by side. Accepts a `BreakpointInput<number>`:
+   * a plain number (e.g. `2`) applies at every breakpoint; pass a per-breakpoint
+   * object (e.g. `{ xs: 1, lg: 2 }`) to narrow it on small screens.
+   */
   readonly numberOfMonths = input(
     { xs: 1 },
     { transform: (v: BreakpointInput<number>) => breakpointInput(v) },
   );
+  /**
+   * Enables the calendar picker UI. When resolved to `false`, hides the icon
+   * button and disables the popover/modal — the user can only type a date.
+   * Accepts a `BreakpointInput<boolean>` for per-breakpoint behaviour.
+   */
   readonly enableCalendar = input(
     { xs: true },
     { transform: (v: BreakpointInput<boolean>) => breakpointInput(v) },
   );
+  /**
+   * What opens the calendar. `button` opens it from the icon button; `input`
+   * also opens it when the text input is clicked (and blocks typing). Accepts a
+   * `BreakpointInput` for per-breakpoint behaviour.
+   */
   readonly calendarTrigger = input(
     { xs: "button" as DateFieldCalendarTrigger },
     {
@@ -159,14 +252,29 @@ export class DateFieldComponent
         breakpointInput(v),
     },
   );
-  readonly useNativePicker = input(
-    { xs: true, md: false },
-    { transform: (v: BreakpointInput<boolean>) => breakpointInput(v) },
-  );
+  /**
+   * Use the OS native date picker instead of the custom popover (single mode only).
+   * `true` always, `false` never, breakpoint name → native below that breakpoint
+   * (custom popover from that breakpoint up).
+   */
+  readonly useNativePicker = input<DateFieldUseNativePicker>(false);
+  /** Open the calendar in a modal: `true` always, `false` never, breakpoint name → modal below that breakpoint. */
   readonly modal = input<DateFieldModalInput>(false);
+  /** Make the modal fullscreen: `true` always, `false` never, breakpoint name → fullscreen below that breakpoint. Only applies when the calendar actually opens as a modal. */
+  readonly fullscreen = input<ModalFullscreen>(false);
+  /**
+   * Custom formatter for the input's display string. Overrides the locale-aware
+   * default. Receives the `DateFieldValue` and returns a string.
+   */
   readonly formatDate = input<DateFieldFormatter | undefined>(undefined);
+  /**
+   * Custom parser for turning typed input into a value. Overrides the
+   * locale-aware default. Receives the raw string and returns a `DateFieldValue`,
+   * or `undefined` when the input can't be parsed.
+   */
   readonly parseDate = input<DateFieldParser | undefined>(undefined);
 
+  /** Emitted whenever the picker (popover/modal) open state changes. */
   readonly openChange = output<boolean>();
 
   private readonly breakpointService = inject(BreakpointService);
@@ -234,9 +342,12 @@ export class DateFieldComponent
     return result;
   });
 
-  readonly useNativePickerResolved = computed(() =>
-    this.resolveBreakpointInput(this.useNativePicker()),
-  );
+  readonly useNativePickerResolved = computed(() => {
+    const v = this.useNativePicker();
+    return typeof v === "boolean"
+      ? v
+      : this.breakpointService.isBelowBreakpoint(v)();
+  });
 
   readonly useNativePickerEffective = computed(
     () =>
@@ -245,12 +356,9 @@ export class DateFieldComponent
       !this.modalEnabled(),
   );
 
-  readonly numberOfMonthsResolved = computed(() => {
-    const raw = this.resolveBreakpointInput(this.numberOfMonths());
-    const belowMd = this.breakpointService.isBelowBreakpoint("md")();
-    if (belowMd) return 1;
-    return Math.max(1, raw);
-  });
+  readonly numberOfMonthsResolved = computed(() =>
+    Math.max(1, this.resolveBreakpointInput(this.numberOfMonths())),
+  );
 
   readonly enableCalendarResolved = computed(() =>
     this.resolveBreakpointInput(this.enableCalendar()),
@@ -262,10 +370,9 @@ export class DateFieldComponent
 
   readonly modalEnabled = computed(() => {
     const m = this.modal();
-    if (typeof m === "string") {
-      return this.breakpointService.isBelowBreakpoint(m)();
-    }
-    return this.resolveBreakpointInput(breakpointInput(m));
+    return typeof m === "boolean"
+      ? m
+      : this.breakpointService.isBelowBreakpoint(m)();
   });
 
   readonly closeOnSelectEffective = computed(() => {
@@ -567,10 +674,12 @@ export class DateFieldComponent
         size: "small",
         width: "sm",
         position: "center",
-        // containers-03 is the calendar's exact width; add the modal's two
-        // outer borders so the content box (border-box) leaves room for it
-        // without a 2px horizontal scroll.
-        maxWidth: "calc(var(--tedi-containers-03) + 2 * var(--tedi-borders-01))",
+        fullscreen: this.fullscreen(),
+        // containers-03 is one month grid's exact width; scale by the resolved
+        // month count so a multi-month calendar fits side by side, and add the
+        // modal's two outer borders so the border-box content leaves room for
+        // it without a 2px horizontal scroll.
+        maxWidth: `calc(${this.numberOfMonthsResolved()} * var(--tedi-containers-03) + 2 * var(--tedi-borders-01))`,
       },
     );
     this.modalRef = ref;

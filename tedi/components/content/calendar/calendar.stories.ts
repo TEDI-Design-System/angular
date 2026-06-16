@@ -81,6 +81,37 @@ export default {
     }),
   ],
   argTypes: {
+    view: {
+      description:
+        "Active view (two-way). `days` shows the day grid, `months` the month grid, `years` the year grid. Driven by `selectionLevel` and header navigation, but can be set directly to open on a specific level.",
+      control: { type: "radio" },
+      options: ["days", "months", "years"],
+      table: {
+        category: "inputs",
+        type: { summary: "CalendarView", detail: "days \nmonths \nyears" },
+        defaultValue: { summary: "days" },
+      },
+    },
+    currentMonth: {
+      description:
+        "The first (left-most) month shown (two-way). Drives which month grid renders and is updated by header navigation and keyboard paging.",
+      control: { type: "date" },
+      table: {
+        category: "inputs",
+        type: { summary: "Date" },
+        defaultValue: { summary: "new Date()" },
+      },
+    },
+    value: {
+      description:
+        "The selected value (two-way / `ControlValueAccessor`). Shape follows `mode`: `single` → `Date | null`, `multiple` → `Date[]`, `range` → `{ from, to }`.",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "Date | Date[] | DateRange | null" },
+        defaultValue: { summary: "null" },
+      },
+    },
     mode: {
       description:
         "Selection mode. `single` selects one date, `multiple` toggles dates in an array, `range` builds a `{ from, to }` range across two clicks.",
@@ -229,6 +260,64 @@ export default {
         category: "inputs",
         type: { summary: "Date[] | ((date: Date) => boolean)" },
         defaultValue: { summary: "undefined" },
+      },
+    },
+    dayStatus: {
+      description:
+        "Function `(date) => { type, label } | undefined` that overlays a `tedi-status-indicator` dot on specific days. The `label` is surfaced on the day button's `aria-label` for screen readers.",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "(date: Date) => DayStatus | null | undefined" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    shouldDisableMonth: {
+      description:
+        "Predicate `(month) => boolean` returning `true` to disable a whole month (header navigation and the month grid).",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "(month: Date) => boolean" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    shouldDisableYear: {
+      description:
+        "Predicate `(year) => boolean` returning `true` to disable a whole year (header navigation and the year grid).",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "(year: Date) => boolean" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    minYear: {
+      description:
+        "Earliest year offered in the year grid/dropdown. Defaults to 10 years before the current year when `null`.",
+      control: { type: "number" },
+      table: {
+        category: "inputs",
+        type: { summary: "number | null" },
+        defaultValue: { summary: "null" },
+      },
+    },
+    maxYear: {
+      description:
+        "Latest year offered in the year grid/dropdown. Defaults to 10 years after the current year when `null`.",
+      control: { type: "number" },
+      table: {
+        category: "inputs",
+        type: { summary: "number | null" },
+        defaultValue: { summary: "null" },
+      },
+    },
+    select: {
+      description:
+        "Emitted whenever a value is committed. `date` is the new full value (shape follows `mode`); `day` is the specific day/month/year that was clicked.",
+      table: {
+        category: "outputs",
+        type: { summary: "{ date: CalendarValue; day: Date }" },
       },
     },
   },

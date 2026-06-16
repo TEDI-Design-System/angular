@@ -1,8 +1,10 @@
 import {
   afterNextRender,
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   forwardRef,
@@ -70,47 +72,143 @@ const YEAR_PAGE_SIZE = 12;
     class: "tedi-calendar",
     "[class.tedi-calendar--disabled]": "effectiveDisabled()",
     "[class.tedi-calendar--multi-month]": "numberOfMonths() > 1",
+    "[class.tedi-calendar--with-week-numbers]": "showWeekNumbers()",
     "[class.tedi-calendar--bordered]": "bordered()",
+    "[style.--_tedi-calendar-month-count]": "numberOfMonths()",
   },
 })
 export class CalendarComponent implements ControlValueAccessor {
+  /**
+   * Active view (two-way). `days` shows the day grid, `months` the month grid,
+   * `years` the year grid. Driven by `selectionLevel` and the header navigation,
+   * but can be set directly to open the calendar on a specific level.
+   */
   readonly view = model<CalendarView>("days");
+  /**
+   * The first (left-most) month shown (two-way). Drives which month grid is
+   * rendered and is updated by header navigation and keyboard paging. For
+   * multi-month layouts the additional months follow this one.
+   */
   readonly currentMonth = model<Date>(new Date());
+  /**
+   * The selected value (two-way / `ControlValueAccessor`). Shape follows `mode`:
+   * `single` → `Date | null`, `multiple` → `Date[]`, `range` → `{ from, to }`.
+   */
   readonly value = model<CalendarValue>(null);
 
+  /**
+   * Selection mode. `single` selects one date, `multiple` toggles dates in an
+   * array, `range` builds a `{ from, to }` range across two clicks.
+   */
   readonly mode = input<DateFieldMode>("single");
+  /**
+   * Lowest level the user can commit to. `days` shows the day grid as the final
+   * step; `months` and `years` commit at that level instead.
+   */
   readonly selectionLevel = input<CalendarView>("days");
+  /**
+   * BCP-47 locale used for weekday/month names and the first day of the week.
+   */
   readonly localeCode = input<string>("et-EE");
+  /**
+   * Render the trailing/leading days from the adjacent month inside the current
+   * month's grid.
+   */
   readonly showOutsideDays = input<boolean>(true);
+  /** Render the ISO week-number column at the start of each row. */
   readonly showWeekNumbers = input<boolean>(false);
+  /** Show the previous/next navigation chevrons in the header. */
   readonly showNavigation = input<boolean>(true);
+  /**
+   * Render the calendar with its own outer border and rounded corners. Disable
+   * when embedding inside a surface that already has a border (e.g. the
+   * DateField overlay).
+   */
   readonly bordered = input<boolean>(true);
+  /**
+   * Matchers that mark dates as disabled. Each matcher can be a `Date`, `Date[]`,
+   * `{ before }`, `{ after }`, `{ before, after }`, `{ from, to? }`,
+   * `{ dayOfWeek: number[] }`, or a `(date) => boolean` predicate.
+   */
   readonly disabledMatchers = input<Matcher[]>([]);
+  /**
+   * Whitelist of selectable days — an explicit `Date[]` or a predicate
+   * `(date) => boolean`. Days outside the whitelist are disabled.
+   */
   readonly availableDays = input<DayAvailabilityInput>(undefined);
+  /**
+   * Blacklist of unavailable days — a `Date[]` or a predicate `(date) => boolean`.
+   * Takes precedence over `availableDays`.
+   */
   readonly unavailableDays = input<DayAvailabilityInput>(undefined);
+  /**
+   * Function `(date) => { type, label } | null | undefined` that overlays a
+   * `tedi-status-indicator` dot on specific days. The `label` is surfaced on the
+   * day button's `aria-label` for screen readers.
+   */
   readonly dayStatus = input<DayStatusFn | undefined>(undefined);
+  /**
+   * How the header exposes month/year picking. `dropdown` shows two dropdowns;
+   * `grid` switches the body to a month or year grid when the header label is
+   * clicked; `static` renders just the label — only the prev/next chevrons can
+   * change the month.
+   */
   readonly monthYearSelectType = input<"dropdown" | "grid" | "static">(
     "dropdown",
   );
+  /**
+   * When `mode='multiple'`, prevents clearing the last selected date — at least
+   * one date must remain selected.
+   */
   readonly required = input<boolean>(false);
+  /**
+   * How many consecutive months to render side by side. Useful for range
+   * selection. The visible count is capped to what fits the viewport width.
+   */
   readonly numberOfMonths = input<number>(1);
+  /**
+   * Disables all interactions. Combines with the reactive-forms disabled state.
+   */
   readonly inputDisabled = input<boolean>(false);
+  /**
+   * Predicate `(month) => boolean` returning `true` to disable a whole month
+   * (header navigation and the month grid). Leave `undefined` to disable nothing.
+   */
   readonly shouldDisableMonth = input<MonthPredicate | undefined>(undefined);
+  /**
+   * Predicate `(year) => boolean` returning `true` to disable a whole year
+   * (header navigation and the year grid). Leave `undefined` to disable nothing.
+   */
   readonly shouldDisableYear = input<YearPredicate | undefined>(undefined);
+  /**
+   * Earliest year offered in the year grid/dropdown. Defaults to 10 years before
+   * the current year when `null`.
+   */
   readonly minYear = input<number | null>(null);
+  /**
+   * Latest year offered in the year grid/dropdown. Defaults to 10 years after
+   * the current year when `null`.
+   */
   readonly maxYear = input<number | null>(null);
 
+  /**
+   * Emitted whenever a value is committed. `date` is the new full value (shape
+   * follows `mode`); `day` is the specific day/month/year that was clicked.
+   */
   // eslint-disable-next-line @angular-eslint/no-output-native -- 'select' is mandated by the DateField spec for parity with TEDI React
   readonly select = output<{ date: CalendarValue; day: Date }>();
 
   private readonly hostEl = inject(ElementRef<HTMLElement>);
   private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly yearPageSize = YEAR_PAGE_SIZE;
 
   private readonly cvaDisabled = signal(false);
   private readonly internalYearPageStart = signal<number | null>(null);
   readonly hoveredDay = signal<Date | null>(null);
+  // Tracks the viewport width so the fit-columns measurement re-runs on resize.
+  private readonly viewportWidth = signal(0);
 
   private onChange: (value: CalendarValue) => void = () => {};
   private onTouched: () => void = () => {};
@@ -120,6 +218,59 @@ export class CalendarComponent implements ControlValueAccessor {
       const level = this.selectionLevel();
       this.view.set(level);
     });
+
+    // Observe viewport resizes so multi-month layouts re-measure how many
+    // month grids fit. Measuring the viewport (not the parent) avoids a
+    // feedback loop: the popover/overlay hugs the calendar's width, so reading
+    // the parent's width would just echo the width we set.
+    afterNextRender(() => {
+      const observer = new ResizeObserver(() =>
+        this.viewportWidth.set(document.documentElement.clientWidth),
+      );
+      observer.observe(document.documentElement);
+      this.viewportWidth.set(document.documentElement.clientWidth);
+      this.destroyRef.onDestroy(() => observer.disconnect());
+    });
+
+    // Re-measure after every render that changes the month count, the
+    // week-number column, the active view, or the viewport. We write the CSS
+    // custom property imperatively (not via a template binding) so updating it
+    // never re-triggers change detection.
+    afterRenderEffect(() => {
+      this.numberOfMonths();
+      this.showWeekNumbers();
+      this.view();
+      this.viewportWidth();
+      this.updateFitColumns();
+    });
+  }
+
+  private static readonly VIEWPORT_MARGIN_PX = 32;
+
+  private updateFitColumns(): void {
+    const host = this.hostEl.nativeElement;
+    const count = this.numberOfMonths();
+    if (count <= 1) {
+      host.style.setProperty("--_tedi-calendar-fit-columns", "1");
+      return;
+    }
+    const monthEl = host.querySelector(
+      ".tedi-calendar__month",
+    ) as HTMLElement | null;
+    if (!monthEl) {
+      host.style.setProperty("--_tedi-calendar-fit-columns", `${count}`);
+      return;
+    }
+    const monthWidth = monthEl.getBoundingClientRect().width;
+    if (!monthWidth) return;
+    const available =
+      document.documentElement.clientWidth -
+      CalendarComponent.VIEWPORT_MARGIN_PX;
+    const fit = Math.max(
+      1,
+      Math.min(count, Math.floor(available / monthWidth)),
+    );
+    host.style.setProperty("--_tedi-calendar-fit-columns", `${fit}`);
   }
 
   readonly effectiveDisabled = computed(

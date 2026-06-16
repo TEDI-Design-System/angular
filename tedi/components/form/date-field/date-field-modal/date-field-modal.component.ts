@@ -104,6 +104,7 @@ export interface DateFieldModalData {
       }
       .tedi-date-field-modal__content {
         display: flex;
+        align-items: center;
         justify-content: center;
       }
     `,

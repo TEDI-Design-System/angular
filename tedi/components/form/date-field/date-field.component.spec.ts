@@ -881,34 +881,45 @@ describe("DateFieldComponent", () => {
   });
 
   describe("breakpoint-aware resolution", () => {
-    it("uses the xxl branch when at xxl breakpoint", () => {
+    it("resolves true at every breakpoint when useNativePicker is true", () => {
       const { component } = createField({
-        useNativePicker: { xs: false, xxl: true },
+        useNativePicker: true,
       });
       const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
       bp.setBreakpoint("xxl");
       expect(component.useNativePickerResolved()).toBe(true);
     });
 
-    it("falls back to xs when no other breakpoint matches", () => {
+    it("resolves false at every breakpoint when useNativePicker is false", () => {
       const { component } = createField({
-        useNativePicker: { xs: true },
+        useNativePicker: false,
       });
       const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
       bp.setBreakpoint("xs");
-      expect(component.useNativePickerResolved()).toBe(true);
+      expect(component.useNativePickerResolved()).toBe(false);
     });
 
-    it("clamps numberOfMonths to 1 below md", () => {
+    it("keeps an explicit numberOfMonths below md (no forced clamp)", () => {
       const { component } = createField({ numberOfMonths: 2 });
       const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
       bp.setBreakpoint("sm");
-      expect(component.numberOfMonthsResolved()).toBe(1);
+      expect(component.numberOfMonthsResolved()).toBe(2);
     });
 
     it("respects numberOfMonths above md", () => {
       const { component } = createField({ numberOfMonths: 2 });
       const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
+      bp.setBreakpoint("lg");
+      expect(component.numberOfMonthsResolved()).toBe(2);
+    });
+
+    it("narrows numberOfMonths per breakpoint when given an object", () => {
+      const { component } = createField({
+        numberOfMonths: { xs: 1, lg: 2 },
+      });
+      const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
+      bp.setBreakpoint("sm");
+      expect(component.numberOfMonthsResolved()).toBe(1);
       bp.setBreakpoint("lg");
       expect(component.numberOfMonthsResolved()).toBe(2);
     });
@@ -927,11 +938,12 @@ describe("DateFieldComponent", () => {
       expect(component.modalEnabled()).toBe(false);
     });
 
-    it("defaults single-mode fields to the native picker below md", () => {
+    it("defaults to the custom popover (not native) below md", () => {
       const { component } = createField();
       const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
       bp.setBreakpoint("sm");
-      expect(component.useNativePickerEffective()).toBe(true);
+      expect(component.useNativePickerEffective()).toBe(false);
+      expect(component.usePopover()).toBe(true);
     });
 
     it("uses the custom popover from md upward by default", () => {
@@ -942,8 +954,15 @@ describe("DateFieldComponent", () => {
       expect(component.usePopover()).toBe(true);
     });
 
-    it("lets an opted-in modal take precedence over the native default", () => {
-      const { component } = createField({ modal: true });
+    it("uses the native picker below md when opted in with a breakpoint name", () => {
+      const { component } = createField({ useNativePicker: "md" });
+      const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
+      bp.setBreakpoint("sm");
+      expect(component.useNativePickerEffective()).toBe(true);
+    });
+
+    it("lets an opted-in modal take precedence over the native picker", () => {
+      const { component } = createField({ modal: true, useNativePicker: "md" });
       const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
       bp.setBreakpoint("sm");
       expect(component.useNativePickerEffective()).toBe(false);
@@ -953,7 +972,7 @@ describe("DateFieldComponent", () => {
 
   describe("responsive strategy change", () => {
     it("closes an open popover when the viewport crosses into the native range", () => {
-      const { component, fixture } = createField();
+      const { component, fixture } = createField({ useNativePicker: "md" });
       const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
       bp.setBreakpoint("lg");
       fixture.detectChanges();
@@ -1100,7 +1119,7 @@ describe("DateFieldComponent", () => {
     });
   });
 
-  describe("breakpoint resolver — lower-tier branches", () => {
+  describe("useNativePicker breakpoint-name resolution", () => {
     function makeFieldAt(breakpoint: string, inputs: Record<string, unknown>) {
       const r = createField(inputs);
       const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
@@ -1108,31 +1127,23 @@ describe("DateFieldComponent", () => {
       return r;
     }
 
-    it("uses xl branch at xl breakpoint", () => {
-      const { component } = makeFieldAt("xl", {
-        useNativePicker: { xs: false, xl: true },
-      });
+    it("resolves native below the named breakpoint", () => {
+      const { component } = makeFieldAt("sm", { useNativePicker: "md" });
       expect(component.useNativePickerResolved()).toBe(true);
     });
 
-    it("uses lg branch at lg breakpoint", () => {
-      const { component } = makeFieldAt("lg", {
-        useNativePicker: { xs: false, lg: true },
-      });
-      expect(component.useNativePickerResolved()).toBe(true);
+    it("resolves custom at the named breakpoint", () => {
+      const { component } = makeFieldAt("md", { useNativePicker: "md" });
+      expect(component.useNativePickerResolved()).toBe(false);
     });
 
-    it("uses md branch at md breakpoint", () => {
-      const { component } = makeFieldAt("md", {
-        useNativePicker: { xs: false, md: true },
-      });
-      expect(component.useNativePickerResolved()).toBe(true);
+    it("resolves custom above the named breakpoint", () => {
+      const { component } = makeFieldAt("xl", { useNativePicker: "md" });
+      expect(component.useNativePickerResolved()).toBe(false);
     });
 
-    it("uses sm branch at sm breakpoint", () => {
-      const { component } = makeFieldAt("sm", {
-        useNativePicker: { xs: false, sm: true },
-      });
+    it("supports a higher breakpoint name (native below xl)", () => {
+      const { component } = makeFieldAt("lg", { useNativePicker: "xl" });
       expect(component.useNativePickerResolved()).toBe(true);
     });
   });
