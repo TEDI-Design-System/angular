@@ -56,7 +56,6 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 - `ariaLabel: string` — required when no visible heading labels the group
 - `enableMobileDropdown: boolean = false` — collapse to a dropdown below `mobileBreakpoint`
 - `mobileBreakpoint: Breakpoint = "md"`
-- `dropdownTriggerVariant: ButtonVariant` — mobile trigger style; derived from `variant` when unset
 - `dropdownLabel: string` — falls back to the `buttonGroup.menu` translation
 - `dropdownLabelMode: "static" | "selected" = "static"`
 **Outputs:** `selectionChange: string` (emits the value the user toggled)

@@ -80,13 +80,6 @@ export class ButtonGroupComponent {
   readonly value = model<string | string[]>();
 
   /**
-   * Variant for the mobile dropdown trigger. When unset, it is derived from
-   * `variant`: `primary-button-group` → `primary`, `secondary-button-group` →
-   * `secondary`, and any other variant is used as-is.
-   */
-  readonly dropdownTriggerVariant = input<ButtonVariant>();
-
-  /**
    * When true, items share the available horizontal space equally.
    * @default false
    */
@@ -136,9 +129,9 @@ export class ButtonGroupComponent {
     () => this.enableMobileDropdown() && this.isBelowMobile(),
   );
 
+  /** Trigger variant derived from the group `variant` (button-group variants map
+   * to their plain counterpart; any other variant is used as-is). */
   readonly triggerVariant = computed<ButtonVariant>(() => {
-    const explicit = this.dropdownTriggerVariant();
-    if (explicit) return explicit;
     const variant = this.variant();
     switch (variant) {
       case "primary-button-group":
@@ -148,6 +141,14 @@ export class ButtonGroupComponent {
       default:
         return variant;
     }
+  });
+
+  /** Whether the group uses a *-button-group variant (drives the trigger radius). */
+  protected readonly isButtonGroupVariant = computed(() => {
+    const variant = this.variant();
+    return (
+      variant === "primary-button-group" || variant === "secondary-button-group"
+    );
   });
 
   protected readonly selectedItem = computed(() =>
@@ -170,6 +171,8 @@ export class ButtonGroupComponent {
     const list = ["tedi-button-group"];
     if (this.stretch()) list.push("tedi-button-group--stretch");
     if (this.isDropdownMode()) list.push("tedi-button-group--dropdown-mode");
+    if (this.isButtonGroupVariant())
+      list.push("tedi-button-group--segmented");
     return list.join(" ");
   });
 
