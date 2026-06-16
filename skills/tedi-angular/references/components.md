@@ -1219,6 +1219,54 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
 </tedi-horizontal-stepper>
 ```
 
+### Tabs
+**Selector:** `tedi-tabs`
+**Inputs:**
+- `value: string` — controlled active tab id; bind with `[(value)]` or `[value]` + `(valueChange)`
+- `defaultValue: string = ""` — initial active tab id for uncontrolled usage
+
+**Outputs:**
+- `valueChange: string` — emitted with the new active tab id when it changes
+
+**Sub-components:**
+- `tedi-tabs-list` — the `role="tablist"` container.
+  - `aria-label: string` / `aria-labelledby: string` — accessible name for the tablist
+  - `overflowMode: "dropdown" | "scroll" = "dropdown"` — when tabs don't fit, either collapse overflowing tabs into a "More" dropdown or enable horizontal scrolling with fade indicators
+- `button[tedi-tabs-trigger]` — a tab button (applied to a native `<button>`).
+  - `id: string` (required) — links to the matching `tedi-tabs-content` panel (`aria-controls="{id}-panel"`)
+  - `icon: string` — Material Symbols icon shown before the label
+  - `disabled: boolean = false`
+- `tedi-tabs-content` — a tab panel (`role="tabpanel"`).
+  - `id: string` — when set, shown only while that tab is active; omit to always render (e.g. for a router outlet)
+
+Keyboard: Arrow Left/Right (with wrap), Home/End move focus between enabled tabs; only the active tab is in the tab order. Disabled tabs are skipped. Full WAI-ARIA tab pattern.
+
+```html
+<tedi-tabs defaultValue="tab-1">
+  <tedi-tabs-list aria-label="Health tabs">
+    <button tedi-tabs-trigger id="tab-1">Health timeline</button>
+    <button tedi-tabs-trigger id="tab-2" icon="medication">Medication history</button>
+    <button tedi-tabs-trigger id="tab-3" [disabled]="true">Archived</button>
+  </tedi-tabs-list>
+  <tedi-tabs-content id="tab-1">Timeline content</tedi-tabs-content>
+  <tedi-tabs-content id="tab-2">Medication content</tedi-tabs-content>
+  <tedi-tabs-content id="tab-3">Archived content</tedi-tabs-content>
+</tedi-tabs>
+```
+
+Controlled usage:
+
+```html
+<tedi-tabs [(value)]="activeTab">
+  <tedi-tabs-list aria-label="Controlled tabs" overflowMode="scroll">
+    <button tedi-tabs-trigger id="tab-1">First</button>
+    <button tedi-tabs-trigger id="tab-2">Second</button>
+  </tedi-tabs-list>
+  <tedi-tabs-content id="tab-1">First panel</tedi-tabs-content>
+  <tedi-tabs-content id="tab-2">Second panel</tedi-tabs-content>
+</tedi-tabs>
+```
+
 ## Notifications
 
 ### Alert
