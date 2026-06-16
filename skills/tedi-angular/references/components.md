@@ -901,7 +901,6 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `fileSize: string` — pre-formatted file size (e.g. `"0.9 MB"`)
 - `error: string` — error feedback. When set, switches the card to its error visual and renders feedback text below. Implies `invalid`.
 - `invalid: boolean = false` — switches the card to its error visual (danger background + error icon) without rendering feedback text. Use when the error message is rendered elsewhere (e.g. an aggregate validation message).
-- `size: "default" | "small" = "default"` — `small` tightens the content's vertical padding (4px vs 8px), pairing with small action buttons. Set the projected buttons' own `size="small"` separately.
 - `mobile: boolean | undefined` — manually force the mobile variant. When `undefined`, derived from `mobileBreakpoint`.
 - `mobileBreakpoint: Breakpoint = "sm"` — viewport breakpoint below which the mobile variant kicks in
 **Slots:**

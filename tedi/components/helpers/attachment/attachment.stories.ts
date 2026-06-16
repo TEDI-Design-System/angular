@@ -74,17 +74,6 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
-    size: {
-      description:
-        "Visual size. `small` tightens the content's vertical padding (4px vs 8px).",
-      control: { type: "radio" },
-      options: ["default", "small"],
-      table: {
-        category: "inputs",
-        type: { summary: "default | small" },
-        defaultValue: { summary: "default" },
-      },
-    },
     mobile: {
       description:
         "Manually force the mobile variant. When `undefined`, derived from the viewport breakpoint.",
@@ -205,15 +194,13 @@ export const LabeledActions: Story = {
 };
 
 /**
- * The small attachment pairs a tighter card (`size="small"`) with small action
- * buttons. Set `size="small"` on the attachment **and** `size="small"` on each
- * projected button — the two are independent. Icon-only buttons still need an
- * `aria-label` and a tooltip.
+ * Project small action buttons by setting `size="small"` on each button. They
+ * stay vertically centered in the card.
  */
-export const Small: Story = {
+export const SmallButtons: Story = {
   render: () => ({
     template: `
-      <tedi-attachment name="Kodukülastusakt_Triin.pdf" size="small">
+      <tedi-attachment name="Kodukülastusakt_Triin.pdf">
         <tedi-attachment-actions>
           <tedi-tooltip>
             <tedi-tooltip-trigger>

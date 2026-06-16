@@ -72,6 +72,7 @@
     grid-area: actions;
     align-items: center;
     align-self: start;
+    min-height: var(--button-md-icon-size);
 
     &:empty {
       display: none;
@@ -84,18 +85,6 @@
 
   &--error &__card {
     background: var(--card-background-danger);
-  }
-
-  &--small &__title-row {
-    padding-block: var(--card-padding-xxs);
-  }
-
-  &--small#{&}--has-progress &__title-row {
-    padding-bottom: var(--layout-grid-gutters-08);
-  }
-
-  &--small &__progress {
-    padding-bottom: var(--card-padding-xxs);
   }
 
   &--mobile#{&}--has-progress &__card {

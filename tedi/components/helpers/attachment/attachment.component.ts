@@ -16,8 +16,6 @@ import {
   BreakpointService,
 } from "../../../services/breakpoint/breakpoint.service";
 
-export type AttachmentSize = "default" | "small";
-
 @Component({
   standalone: true,
   selector: "tedi-attachment",
@@ -30,7 +28,6 @@ export type AttachmentSize = "default" | "small";
     "[class.tedi-attachment]": "true",
     "[class.tedi-attachment--error]": "hasErrorVisual()",
     "[class.tedi-attachment--mobile]": "isMobile()",
-    "[class.tedi-attachment--small]": "size() === 'small'",
     "[class.tedi-attachment--has-progress]": "!!projectedProgress()",
   },
 })
@@ -62,13 +59,6 @@ export class AttachmentComponent {
    * @default false
    */
   invalid = input(false, { transform: booleanAttribute });
-  /**
-   * Visual size. `small` tightens the content's vertical padding (4px instead
-   * of 8px), pairing with small action buttons projected into the slot. The
-   * action buttons themselves are consumer-controlled — set their own `size`.
-   * @default "default"
-   */
-  size = input<AttachmentSize>("default");
   /**
    * Manually force the mobile variant on or off. When `undefined`, the
    * variant is auto-derived from the viewport breakpoint (see

@@ -45,7 +45,6 @@ class BreakpointMock {
       [fileSize]="fileSize"
       [error]="error"
       [invalid]="invalid"
-      [size]="size"
       [mobile]="mobile"
     >
       @if (progress !== undefined) {
@@ -65,7 +64,6 @@ class TestHostComponent {
   progress?: number;
   error?: string;
   invalid = false;
-  size: "default" | "small" = "default";
   mobile?: boolean;
   showActions = false;
   padded = false;
@@ -177,17 +175,6 @@ describe("AttachmentComponent", () => {
     expect(element.classList).toContain("tedi-attachment--error");
     expect(element.querySelector(".tedi-attachment__error-icon")).toBeTruthy();
     expect(element.querySelector("tedi-feedback-text")).toBeNull();
-  });
-
-  it("should not apply the small modifier by default", () => {
-    expect(element.classList).not.toContain("tedi-attachment--small");
-  });
-
-  it("should apply the small modifier when `size=small`", () => {
-    host.size = "small";
-    fixture.detectChanges();
-
-    expect(element.classList).toContain("tedi-attachment--small");
   });
 
   it("should apply the mobile modifier when `mobile=true`", () => {
