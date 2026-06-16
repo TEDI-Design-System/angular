@@ -13,79 +13,60 @@ import {
   ViewContainerRef,
 } from "@angular/core";
 import { IconComponent } from "../../../base/icon/icon.component";
+import { BaseButtonDirective } from "../../button/base-button.directive";
+import {
+  ButtonSize,
+  ButtonVariant,
+} from "../../button/button.component";
 import { ButtonGroupComponent } from "../button-group.component";
 
 type IconSlot = "left" | "right" | "solo";
 
 /**
- * Decorates a `<button>` inside a `tedi-button-group` to participate in the
- * group's strip and mobile-dropdown rendering. Reads `size`/`type` from the
- * parent group and emits selection upward on click.
- *
- * The `iconLeft`/`iconRight`/`icon` inputs are auto-rendered into the button
- * via dynamically created `tedi-icon` components — the consumer doesn't need
- * to project them into the button content. The same inputs feed the mobile
- * dropdown's trigger/items.
+ * Turns a `<button>` inside `tedi-button-group` into a styled, selectable item.
+ * Extends `tedi-button` (composes `BaseButtonDirective` and applies the
+ * `tedi-button` variant classes), inherits `variant`/`size` from the parent
+ * group (overridable per item), and derives its selected state from the group's
+ * `value`. The `iconLeft`/`iconRight`/`icon` inputs are auto-rendered as
+ * `tedi-icon` elements and reused by the mobile dropdown.
  */
 @Directive({
-  selector: "button[tedi-button-group-item]",
+  selector: "button[tedi-button-group-button]",
   standalone: true,
+  hostDirectives: [BaseButtonDirective],
   host: {
     "[class]": "hostClasses()",
-    "[attr.id]": "id()",
     "[attr.disabled]": "disabled() ? '' : null",
     "[attr.aria-pressed]": "selected()",
     "[attr.aria-label]": "icon() ? label() : null",
   },
 })
-export class ButtonGroupItemDirective {
-  /**
-   * Unique identifier emitted via the parent's `selectionChange` output when
-   * this item is activated.
-   */
-  readonly id = input.required<string>();
+export class ButtonGroupButtonDirective {
+  /** Identity contributing to the group's selected value. */
+  readonly value = input.required<string>();
 
-  /**
-   * Display label. Used as the visible text in the mobile dropdown and as the
-   * dropdown trigger label when `dropdownLabelMode="selected"`. The item's
-   * projected content is what's shown in the strip.
-   */
+  /** Visible text; used by the mobile dropdown and as the accessible name in icon-only mode. */
   readonly label = input.required<string>();
 
-  /**
-   * Marks this item as currently selected. Drives the `--selected` class and
-   * `aria-pressed`.
-   * @default false
-   */
-  readonly selected = input(false, { transform: booleanAttribute });
-
-  /**
-   * Disables interaction via the native `disabled` attribute.
-   * @default false
-   */
+  /** Disables interaction via the native `disabled` attribute. */
   readonly disabled = input(false, { transform: booleanAttribute });
 
-  /**
-   * Icon name rendered before the label in both the strip button and the
-   * mobile dropdown item.
-   */
+  /** Icon rendered before the label (and in the dropdown item). */
   readonly iconLeft = input<string>();
 
-  /**
-   * Icon name rendered after the label in both the strip button and the
-   * mobile dropdown item.
-   */
+  /** Icon rendered after the label (and in the dropdown item). */
   readonly iconRight = input<string>();
 
-  /**
-   * Icon-only mode: icon name used in the dropdown trigger and dropdown item
-   * when this item has no inline label.
-   */
+  /** Icon-only mode: icon for the button, dropdown trigger and dropdown item. */
   readonly icon = input<string>();
 
-  /**
-   * Fires on user activation (click or keyboard). Disabled items don't emit.
-   */
+  /** Overrides the group's `variant` for this item. */
+  readonly variant = input<ButtonVariant>();
+
+  /** Overrides the group's `size` for this item. */
+  readonly size = input<ButtonSize>();
+
+  /** Fires on user activation (click). Disabled items don't emit. */
   readonly clicked = output<MouseEvent>();
 
   private readonly host = inject<ElementRef<HTMLButtonElement>>(ElementRef);
@@ -95,15 +76,19 @@ export class ButtonGroupItemDirective {
 
   private readonly iconRefs = new Map<IconSlot, ComponentRef<IconComponent>>();
 
-  protected readonly hostClasses = computed(() => {
-    const list = [
-      "tedi-button-group__item",
-      `tedi-button-group__item--size-${this.parent.size()}`,
-    ];
-    if (this.selected()) list.push("tedi-button-group__item--selected");
-    if (this.disabled()) list.push("tedi-button-group__item--disabled");
-    return list.join(" ");
-  });
+  readonly effectiveVariant = computed(
+    () => this.variant() ?? this.parent.variant(),
+  );
+  readonly effectiveSize = computed(() => this.size() ?? this.parent.size());
+  readonly selected = computed(() => this.parent.isSelected(this.value()));
+
+  protected readonly hostClasses = computed(() =>
+    [
+      "tedi-button",
+      `tedi-button--${this.effectiveVariant()}`,
+      `tedi-button--${this.effectiveSize()}`,
+    ].join(" "),
+  );
 
   constructor() {
     effect(() => this.syncIcon("left", this.iconLeft()));
@@ -147,6 +132,6 @@ export class ButtonGroupItemDirective {
   protected onClick(event: MouseEvent) {
     if (this.disabled()) return;
     this.clicked.emit(event);
-    this.parent.emitSelection(this.id());
+    this.parent.toggle(this.value());
   }
 }

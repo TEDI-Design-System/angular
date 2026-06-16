@@ -1,19 +1,18 @@
 import { signal } from "@angular/core";
 import { Meta, moduleMetadata, StoryObj } from "@storybook/angular";
 import { ButtonGroupComponent } from "./button-group.component";
-import { ButtonGroupItemDirective } from "./button-group-item/button-group-item.directive";
+import { ButtonGroupButtonDirective } from "./button-group-button/button-group-button.directive";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { TextComponent } from "../../base/text/text.component";
 
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=3506-29547&m=dev" target="_blank">Figma ↗</a><br>
+ * <a href="https://www.figma.com/design/ze9LXyoxEdGV8vpEdat7Oi/Button-group-buttons?node-id=136-19706&m=dev" target="_blank">Figma ↗</a><br>
  * <a href="https://www.tedi.ee/1ee8444b7/p/82e9cf-button-group" target="_blank">Zeroheight ↗</a><br>
  *
- * Group of mutually exclusive buttons. Use for switching between related
- * views, switching layouts (table / list / calendar), or filtering. Below
- * the `mobileBreakpoint` (when `enableMobileDropdown` is true) the group
- * collapses into a dropdown menu.
+ * Group of toggle buttons used as a view switcher (an alternative to tabs).
+ * Selection lives on the group via `[(value)]`.
+ * Below the `mobileBreakpoint` (when `enableMobileDropdown` is true) the group collapses into a dropdown menu.
  */
 export default {
   title: "TEDI-Ready/Components/Buttons/ButtonGroup",
@@ -22,7 +21,7 @@ export default {
     moduleMetadata({
       imports: [
         ButtonGroupComponent,
-        ButtonGroupItemDirective,
+        ButtonGroupButtonDirective,
         RowComponent,
         ColComponent,
         TextComponent,
@@ -34,14 +33,31 @@ export default {
       type: ["breakpointSupport"],
     },
   },
+  args: {
+    variant: "primary-button-group",
+    size: "default",
+    stretch: false,
+    multiple: false,
+    enableMobileDropdown: false,
+    mobileBreakpoint: "md",
+    dropdownLabelMode: "static",
+  },
   argTypes: {
     variant: {
       control: "select",
-      options: ["primary", "secondary"],
-      description: "Visual style of the group.",
+      options: [
+        "primary-button-group",
+        "secondary-button-group",
+        "primary",
+        "secondary",
+        "success",
+        "danger",
+      ],
+      description:
+        "Variant applied to every item (each item may override via its own `variant`). Any `ButtonVariant` works; non-group variants show their active colors when selected.",
       table: {
-        defaultValue: { summary: "primary" },
-        type: { summary: "'primary' | 'secondary'" },
+        defaultValue: { summary: "primary-button-group" },
+        type: { summary: "ButtonVariant" },
         category: "ButtonGroup inputs",
       },
     },
@@ -55,10 +71,18 @@ export default {
         category: "ButtonGroup inputs",
       },
     },
+    multiple: {
+      control: "boolean",
+      description: "Allow several values to be toggled on (value becomes string[]).",
+      table: {
+        defaultValue: { summary: "false" },
+        type: { summary: "boolean" },
+        category: "ButtonGroup inputs",
+      },
+    },
     stretch: {
       control: "boolean",
-      description:
-        "When true, items share horizontal space equally. On mobile, items always stretch.",
+      description: "When true, items share horizontal space equally.",
       table: {
         defaultValue: { summary: "false" },
         type: { summary: "boolean" },
@@ -67,14 +91,12 @@ export default {
     },
     ariaLabel: {
       control: "text",
-      description:
-        "Accessible name for the group. Required when no visible heading labels it.",
+      description: "Accessible name for the group.",
       table: { type: { summary: "string" }, category: "ButtonGroup inputs" },
     },
     enableMobileDropdown: {
       control: "boolean",
-      description:
-        "Collapse the strip into a dropdown menu below `mobileBreakpoint`.",
+      description: "Collapse the strip into a dropdown below `mobileBreakpoint`.",
       table: {
         defaultValue: { summary: "false" },
         type: { summary: "boolean" },
@@ -91,103 +113,41 @@ export default {
         category: "ButtonGroup inputs",
       },
     },
+    dropdownTriggerVariant: {
+      control: "select",
+      options: ["primary", "secondary", "neutral"],
+      description: "Variant for the mobile trigger. Derived from `variant` when unset.",
+      table: { type: { summary: "ButtonVariant" }, category: "ButtonGroup inputs" },
+    },
     dropdownLabel: {
       control: "text",
-      description:
-        "Label shown on the dropdown trigger. Falls back to the `buttonGroup.menu` translation.",
+      description: "Label shown on the dropdown trigger.",
       table: { type: { summary: "string" }, category: "ButtonGroup inputs" },
     },
     dropdownLabelMode: {
       control: "select",
       options: ["static", "selected"],
-      description:
-        "`static` keeps `dropdownLabel`; `selected` shows the selected item's label.",
+      description: "`static` keeps `dropdownLabel`; `selected` shows the selected item's label.",
       table: {
         defaultValue: { summary: "static" },
         type: { summary: "'static' | 'selected'" },
         category: "ButtonGroup inputs",
       },
     },
+    value: {
+      control: false,
+      description: "Selected value(s). `string` in single mode, `string[]` in multiple.",
+      table: {
+        type: { summary: "string | string[]" },
+        category: "ButtonGroup inputs",
+      },
+    },
     selectionChange: {
       action: "selectionChange",
-      description: "Emits the `id` of the item the user activated.",
+      description: "Emits the value of the item the user toggled.",
       table: {
         type: { summary: "EventEmitter<string>" },
         category: "ButtonGroup events",
-      },
-    },
-    id: {
-      control: false,
-      description:
-        "(ButtonGroupItem) Unique identifier emitted via `selectionChange`. Required.",
-      table: {
-        type: { summary: "string" },
-        category: "ButtonGroupItem inputs",
-      },
-    },
-    label: {
-      control: false,
-      description:
-        "(ButtonGroupItem) Display label used in the mobile dropdown trigger/items. Required.",
-      table: {
-        type: { summary: "string" },
-        category: "ButtonGroupItem inputs",
-      },
-    },
-    selected: {
-      control: false,
-      description:
-        "(ButtonGroupItem) Marks this item as currently selected. Drives the `--selected` class and `aria-pressed`.",
-      table: {
-        defaultValue: { summary: "false" },
-        type: { summary: "boolean" },
-        category: "ButtonGroupItem inputs",
-      },
-    },
-    disabled: {
-      control: false,
-      description:
-        "(ButtonGroupItem) Disables the item via the native `disabled` attribute.",
-      table: {
-        defaultValue: { summary: "false" },
-        type: { summary: "boolean" },
-        category: "ButtonGroupItem inputs",
-      },
-    },
-    iconLeft: {
-      control: false,
-      description:
-        "(ButtonGroupItem) Icon name rendered before the label in the button and the mobile-dropdown item.",
-      table: {
-        type: { summary: "string" },
-        category: "ButtonGroupItem inputs",
-      },
-    },
-    iconRight: {
-      control: false,
-      description:
-        "(ButtonGroupItem) Icon name rendered after the label in the button and the mobile-dropdown item.",
-      table: {
-        type: { summary: "string" },
-        category: "ButtonGroupItem inputs",
-      },
-    },
-    icon: {
-      control: false,
-      description:
-        "(ButtonGroupItem) Icon-only mode for the dropdown trigger/item.",
-      table: {
-        type: { summary: "string" },
-        category: "ButtonGroupItem inputs",
-      },
-    },
-    clicked: {
-      control: false,
-      description:
-        "(ButtonGroupItem) Fires on user activation. Disabled items don't emit.",
-      table: {
-        type: { summary: "EventEmitter<MouseEvent>" },
-        category: "ButtonGroupItem events",
       },
     },
   },
@@ -196,68 +156,80 @@ export default {
 type Story = StoryObj<ButtonGroupComponent>;
 
 export const Default: Story = {
-  render: (props) => ({
-    props,
+  render: (args) => ({
+    props: { ...args, value: signal<string>("2") },
     template: `
       <tedi-button-group
         [variant]="variant"
         [size]="size"
+        [multiple]="multiple"
         [stretch]="stretch"
         [ariaLabel]="ariaLabel"
         [enableMobileDropdown]="enableMobileDropdown"
         [mobileBreakpoint]="mobileBreakpoint"
+        [dropdownTriggerVariant]="dropdownTriggerVariant"
         [dropdownLabel]="dropdownLabel"
         [dropdownLabelMode]="dropdownLabelMode"
+        [value]="value()"
+        (valueChange)="value.set($event)"
       >
-        <button tedi-button-group-item id="1" label="Details">Details</button>
-        <button tedi-button-group-item id="2" label="Updates" [selected]="true">Updates</button>
-        <button tedi-button-group-item id="3" label="Settings">Settings</button>
+        <button tedi-button-group-button value="1" label="Details">Details</button>
+        <button tedi-button-group-button value="2" label="Updates">Updates</button>
+        <button tedi-button-group-button value="3" label="Settings">Settings</button>
       </tedi-button-group>
     `,
   }),
   args: {
-    variant: "primary",
-    size: "default",
-    stretch: false,
     ariaLabel: "Button group example",
-    enableMobileDropdown: false,
-    mobileBreakpoint: "md",
-    dropdownLabelMode: "static",
   },
 };
 
+/**
+ * Both variants. Showcase — controls are disabled.
+ */
 export const Variants: Story = {
+  parameters: { controls: { disable: true } },
   render: () => ({
+    props: { v1: signal<string>("2"), v2: signal<string>("2") },
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px;">
-        <tedi-button-group variant="primary" ariaLabel="Primary tabs">
-          <button tedi-button-group-item id="1" label="Tab 1">Tab 1</button>
-          <button tedi-button-group-item id="2" label="Tab 2" [selected]="true">Tab 2</button>
-          <button tedi-button-group-item id="3" label="Tab 3">Tab 3</button>
+        <tedi-button-group variant="primary-button-group" ariaLabel="Primary tabs"
+          [value]="v1()" (valueChange)="v1.set($event)">
+          <button tedi-button-group-button value="1" label="Tab 1">Tab 1</button>
+          <button tedi-button-group-button value="2" label="Tab 2">Tab 2</button>
+          <button tedi-button-group-button value="3" label="Tab 3">Tab 3</button>
         </tedi-button-group>
-        <tedi-button-group variant="secondary" ariaLabel="Secondary tabs">
-          <button tedi-button-group-item id="1" label="Tab 1">Tab 1</button>
-          <button tedi-button-group-item id="2" label="Tab 2" [selected]="true">Tab 2</button>
-          <button tedi-button-group-item id="3" label="Tab 3">Tab 3</button>
+        <tedi-button-group variant="secondary-button-group" ariaLabel="Secondary tabs"
+          [value]="v2()" (valueChange)="v2.set($event)">
+          <button tedi-button-group-button value="1" label="Tab 1">Tab 1</button>
+          <button tedi-button-group-button value="2" label="Tab 2">Tab 2</button>
+          <button tedi-button-group-button value="3" label="Tab 3">Tab 3</button>
         </tedi-button-group>
       </div>
     `,
   }),
 };
 
+/**
+ * Both sizes. Showcase — controls are disabled.
+ */
 export const Sizes: Story = {
+  parameters: { controls: { disable: true } },
   render: () => ({
+    props: { v1: signal<string>("2"), v2: signal<string>("2") },
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px;">
-        <tedi-button-group size="default" ariaLabel="Default size">
-          <button tedi-button-group-item id="1" label="Tab 1">Tab 1</button>
-          <button tedi-button-group-item id="2" label="Tab 2" [selected]="true">Tab 2</button>
-          <button tedi-button-group-item id="3" label="Tab 3">Tab 3</button>
+        <tedi-button-group size="default" ariaLabel="Default size"
+          [value]="v1()" (valueChange)="v1.set($event)">
+          <button tedi-button-group-button value="1" label="Tab 1">Tab 1</button>
+          <button tedi-button-group-button value="2" label="Tab 2">Tab 2</button>
+          <button tedi-button-group-button value="3" label="Tab 3">Tab 3</button>
         </tedi-button-group>
-        <tedi-button-group size="small" ariaLabel="Small size">
-          <button tedi-button-group-item id="1" label="Tab 1">Tab 1</button>
-          <button tedi-button-group-item id="2" label="Tab 2" [selected]="true">Tab 2</button>
-          <button tedi-button-group-item id="3" label="Tab 3">Tab 3</button>
+        <tedi-button-group size="small" ariaLabel="Small size"
+          [value]="v2()" (valueChange)="v2.set($event)">
+          <button tedi-button-group-button value="1" label="Tab 1">Tab 1</button>
+          <button tedi-button-group-button value="2" label="Tab 2">Tab 2</button>
+          <button tedi-button-group-button value="3" label="Tab 3">Tab 3</button>
         </tedi-button-group>
       </div>
     `,
@@ -265,75 +237,75 @@ export const Sizes: Story = {
 };
 
 export const WithIcon: Story = {
-  render: () => ({
+  render: (args) => ({
+    props: { ...args, value: signal<string>("2") },
     template: `
-      <tedi-button-group ariaLabel="With icons">
-        <button tedi-button-group-item id="1" label="Tab 1" iconLeft="table">Tab 1</button>
-        <button tedi-button-group-item id="2" label="Tab 2" iconLeft="refresh" [selected]="true">Tab 2</button>
-        <button tedi-button-group-item id="3" label="Tab 3" iconLeft="settings">Tab 3</button>
+      <tedi-button-group ariaLabel="With icons" [variant]="variant" [size]="size"
+        [value]="value()" (valueChange)="value.set($event)">
+        <button tedi-button-group-button value="1" label="Tab 1" iconLeft="table">Tab 1</button>
+        <button tedi-button-group-button value="2" label="Tab 2" iconLeft="refresh">Tab 2</button>
+        <button tedi-button-group-button value="3" label="Tab 3" iconLeft="settings">Tab 3</button>
       </tedi-button-group>
     `,
   }),
 };
 
 export const IconOnly: Story = {
-  render: () => ({
+  render: (args) => ({
+    props: { ...args, value: signal<string>("2") },
     template: `
-      <tedi-button-group ariaLabel="Icon-only tabs">
-        <button tedi-button-group-item id="1" label="Table view" icon="table"></button>
-        <button tedi-button-group-item id="2" label="Refresh" icon="refresh" [selected]="true"></button>
-        <button tedi-button-group-item id="3" label="Settings" icon="settings"></button>
-      </tedi-button-group>
-    `,
-  }),
-};
-
-export const DifferentWidthButtons: Story = {
-  render: () => ({
-    template: `
-      <tedi-button-group ariaLabel="Variable widths">
-        <button tedi-button-group-item id="1" label="Text" [selected]="true">Text</button>
-        <button tedi-button-group-item id="2" label="Longer text">Longer text</button>
-        <button tedi-button-group-item id="3" label="Even longer text">Even longer text</button>
+      <tedi-button-group ariaLabel="Icon-only tabs" [variant]="variant" [size]="size"
+        [value]="value()" (valueChange)="value.set($event)">
+        <button tedi-button-group-button value="1" label="Table view" icon="table"></button>
+        <button tedi-button-group-button value="2" label="Refresh" icon="refresh"></button>
+        <button tedi-button-group-button value="3" label="Settings" icon="settings"></button>
       </tedi-button-group>
     `,
   }),
 };
 
 export const Stretched: Story = {
-  render: () => ({
+  render: (args) => ({
+    props: { ...args, value: signal<string>("2") },
     template: `
-      <tedi-button-group ariaLabel="Stretched" [stretch]="true">
-        <button tedi-button-group-item id="1" label="Details">Details</button>
-        <button tedi-button-group-item id="2" label="Updates" [selected]="true">Updates</button>
-        <button tedi-button-group-item id="3" label="Settings">Settings</button>
+      <tedi-button-group ariaLabel="Stretched" [stretch]="true" [variant]="variant" [size]="size"
+        [value]="value()" (valueChange)="value.set($event)">
+        <button tedi-button-group-button value="1" label="Details">Details</button>
+        <button tedi-button-group-button value="2" label="Updates">Updates</button>
+        <button tedi-button-group-button value="3" label="Settings">Settings</button>
       </tedi-button-group>
     `,
   }),
 };
 
 export const Disabled: Story = {
-  render: () => ({
+  render: (args) => ({
+    props: { ...args, value: signal<string>("1") },
     template: `
-      <tedi-button-group ariaLabel="With disabled item">
-        <button tedi-button-group-item id="1" label="Details" [selected]="true">Details</button>
-        <button tedi-button-group-item id="2" label="Updates">Updates</button>
-        <button tedi-button-group-item id="3" label="Settings" [disabled]="true">Settings</button>
+      <tedi-button-group ariaLabel="With disabled item" [variant]="variant" [size]="size"
+        [value]="value()" (valueChange)="value.set($event)">
+        <button tedi-button-group-button value="1" label="Details">Details</button>
+        <button tedi-button-group-button value="2" label="Updates">Updates</button>
+        <button tedi-button-group-button value="3" label="Settings" [disabled]="true">Settings</button>
       </tedi-button-group>
     `,
   }),
 };
 
+/**
+ * All states for both variants. Showcase — controls are disabled.
+ */
 export const States: Story = {
   parameters: {
+    controls: { disable: true },
     pseudo: {
-      hover: ".pseudo-hover .tedi-button-group__item:first-child",
-      focusVisible: ".pseudo-focus .tedi-button-group__item:first-child",
+      hover: ".pseudo-hover .tedi-button:first-child",
+      focusVisible: ".pseudo-focus .tedi-button:first-child",
     },
   },
   render: () => ({
     props: {
-      STATES: ["Default", "Hover", "Active", "Focus", "Disabled"],
+      STATES: ["Default", "Hover", "Selected", "Focus", "Disabled"],
     },
     template: `
       <div style="overflow-x: auto; padding: 24px;">
@@ -345,23 +317,23 @@ export const States: Story = {
           @for (state of STATES; track state) {
             <tedi-col><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
             <tedi-col [class]="'pseudo-' + state.toLowerCase()">
-              <tedi-button-group variant="primary" [ariaLabel]="'Primary ' + state">
+              <tedi-button-group variant="primary-button-group" [ariaLabel]="'Primary ' + state"
+                [value]="state === 'Selected' ? 'p' : undefined">
                 <button
-                  tedi-button-group-item
-                  [id]="'p-' + state"
+                  tedi-button-group-button
+                  value="p"
                   label="Tab 1"
-                  [selected]="state === 'Active'"
                   [disabled]="state === 'Disabled'"
                 >Tab 1</button>
               </tedi-button-group>
             </tedi-col>
             <tedi-col [class]="'pseudo-' + state.toLowerCase()">
-              <tedi-button-group variant="secondary" [ariaLabel]="'Secondary ' + state">
+              <tedi-button-group variant="secondary-button-group" [ariaLabel]="'Secondary ' + state"
+                [value]="state === 'Selected' ? 's' : undefined">
                 <button
-                  tedi-button-group-item
-                  [id]="'s-' + state"
+                  tedi-button-group-button
+                  value="s"
                   label="Tab 1"
-                  [selected]="state === 'Active'"
                   [disabled]="state === 'Disabled'"
                 >Tab 1</button>
               </tedi-button-group>
@@ -374,18 +346,23 @@ export const States: Story = {
 };
 
 export const MobileDropdown: Story = {
-  render: () => ({
+  render: (args) => ({
+    props: { ...args, value: signal<string>("2") },
     template: `
       <div style="max-width: 320px;">
         <tedi-button-group
           ariaLabel="Mobile collapses to dropdown"
+          [variant]="variant"
           [enableMobileDropdown]="true"
           mobileBreakpoint="xxl"
+          [dropdownTriggerVariant]="dropdownTriggerVariant"
           dropdownLabelMode="selected"
+          [value]="value()"
+          (valueChange)="value.set($event)"
         >
-          <button tedi-button-group-item id="1" label="Details" iconLeft="info">Details</button>
-          <button tedi-button-group-item id="2" label="Updates" iconLeft="refresh" [selected]="true">Updates</button>
-          <button tedi-button-group-item id="3" label="Settings" iconLeft="settings">Settings</button>
+          <button tedi-button-group-button value="1" label="Details" iconLeft="info">Details</button>
+          <button tedi-button-group-button value="2" label="Updates" iconLeft="refresh">Updates</button>
+          <button tedi-button-group-button value="3" label="Settings" iconLeft="settings">Settings</button>
         </tedi-button-group>
       </div>
     `,
@@ -393,35 +370,74 @@ export const MobileDropdown: Story = {
 };
 
 /**
- * Bind `[selected]` from local state and listen to
- * `(selectionChange)` to update it.
+ * Bind `[(value)]` to a string in single mode and read it back.
  */
-export const Controlled: StoryObj<{ variant: "primary" | "secondary" }> = {
-  render: (props) => ({
-    props: {
-      ...props,
-      selected: signal("2"),
-    },
+export const Controlled: Story = {
+  render: (args) => ({
+    props: { ...args, selected: signal<string>("2") },
     template: `
       <tedi-button-group
         ariaLabel="View"
         [variant]="variant"
-        (selectionChange)="selected.set($event)"
+        [value]="selected()"
+        (valueChange)="selected.set($event)"
       >
-        <button tedi-button-group-item id="1" label="Details" [selected]="selected() === '1'">Details</button>
-        <button tedi-button-group-item id="2" label="Updates" [selected]="selected() === '2'">Updates</button>
-        <button tedi-button-group-item id="3" label="Settings" [selected]="selected() === '3'">Settings</button>
+        <button tedi-button-group-button value="1" label="Details">Details</button>
+        <button tedi-button-group-button value="2" label="Updates">Updates</button>
+        <button tedi-button-group-button value="3" label="Settings">Settings</button>
       </tedi-button-group>
       <p style="margin-top: 8px;">Selected: {{ selected() }}</p>
     `,
   }),
-  args: {
-    variant: "primary",
-  },
-  argTypes: {
-    variant: {
-      control: "select",
-      options: ["primary", "secondary"],
-    },
-  },
+};
+
+/**
+ * Set `multiple` to toggle several values; `value` is a string array.
+ */
+export const Multiple: Story = {
+  render: (args) => ({
+    props: { ...args, selected: signal<string[]>(["open"]) },
+    template: `
+      <tedi-button-group
+        ariaLabel="Filters"
+        [variant]="variant"
+        [multiple]="true"
+        [value]="selected()"
+        (valueChange)="selected.set($event)"
+      >
+        <button tedi-button-group-button value="new" label="New">New</button>
+        <button tedi-button-group-button value="open" label="Open">Open</button>
+        <button tedi-button-group-button value="done" label="Done">Done</button>
+      </tedi-button-group>
+      <p style="margin-top: 8px;">Selected: {{ selected().join(", ") }}</p>
+    `,
+  }),
+};
+
+/**
+ * Any `ButtonVariant` works in the group — set it on the group (a selected item
+ * shows that variant's active colors), or override `variant` on a single item.
+ * Showcase — controls are disabled.
+ */
+export const OtherVariants: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => ({
+    props: { v1: signal<string>("2"), v2: signal<string>("1") },
+    template: `
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <tedi-button-group variant="secondary" ariaLabel="Secondary group"
+          [value]="v1()" (valueChange)="v1.set($event)">
+          <button tedi-button-group-button value="1" label="One">One</button>
+          <button tedi-button-group-button value="2" label="Two">Two</button>
+          <button tedi-button-group-button value="3" label="Three">Three</button>
+        </tedi-button-group>
+        <tedi-button-group variant="primary-button-group" ariaLabel="Per-item override"
+          [value]="v2()" (valueChange)="v2.set($event)">
+          <button tedi-button-group-button value="1" label="Keep">Keep</button>
+          <button tedi-button-group-button value="2" label="Default">Default</button>
+          <button tedi-button-group-button value="3" variant="danger" label="Danger">Danger</button>
+        </tedi-button-group>
+      </div>
+    `,
+  }),
 };

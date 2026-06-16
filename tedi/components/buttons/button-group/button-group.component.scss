@@ -1,153 +1,50 @@
 @use "@tedi-design-system/core/bootstrap-utility/breakpoints";
+@use "../button/button.component";
 
 .tedi-button-group {
   display: flex;
 
   &--stretch {
-    .tedi-button-group__item {
+    .tedi-button {
       flex: 1;
     }
   }
 
-  &__item {
-    --_item-border-width: var(--tedi-borders-01);
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: auto;
-    font-family: var(--family-default);
-    font-weight: var(--body-regular-weight);
-    line-height: var(--body-bold-line-height);
-    text-align: center;
-    white-space: nowrap;
-    cursor: pointer;
-    border-radius: 0;
-    transition: 150ms ease;
-    transition-property: background-color, border-color, color;
-
-    &:first-child {
-      border-top-left-radius: var(--button-radius-sm);
-      border-bottom-left-radius: var(--button-radius-sm);
-    }
-
+  .tedi-button {
     &:not(:first-child) {
       margin-left: calc(var(--tedi-borders-01) * -1);
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
     }
 
-    &:last-child {
-      border-top-right-radius: var(--button-radius-sm);
-      border-bottom-right-radius: var(--button-radius-sm);
+    &:not(:last-child) {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
     }
 
     &:focus-visible {
       z-index: 2;
-      outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
-      outline-offset: var(--tedi-borders-01);
     }
 
-    &--size-default {
-      gap: var(--button-md-inner-spacing);
-      min-height: var(--button-md-height);
-      padding: calc(var(--button-md-padding-y) - var(--_item-border-width))
-        var(--button-md-padding-x);
-      font-size: var(--button-text-size-default);
+    &[aria-pressed="true"] {
+      z-index: 1;
     }
 
-    &--size-small {
-      gap: var(--button-sm-inner-spacing);
-      min-height: var(--button-sm-height);
-      padding: calc(var(--button-sm-padding-y) - var(--_item-border-width))
-        var(--button-sm-padding-x);
-      font-size: var(--button-text-size-small);
-    }
-
-    &--disabled,
-    &:disabled {
-      cursor: not-allowed;
+    &[aria-pressed="true"]:not(:disabled) {
+      color: var(--_btn-active-text);
+      background: var(--_btn-active-bg);
+      border-color: var(--_btn-active-border);
     }
   }
 
   @include breakpoints.media-breakpoint-down(md) {
-    .tedi-button-group__item {
+    .tedi-button {
       flex: 1;
     }
   }
 
-  &--primary {
-    .tedi-button-group__item {
-      color: var(--button-group-primary-inactive-text);
-      background-color: var(--button-group-primary-inactive-background);
-      border: var(--_item-border-width) solid var(--button-group-primary-inactive-border);
-
-      &:hover:not(:disabled) {
-        color: var(--button-group-primary-hover-text);
-        background-color: var(--button-group-primary-hover-background);
-        border-color: var(--button-group-primary-hover-border);
-      }
-
-      &.tedi-button-group__item--selected:not(:disabled) {
-        z-index: 1;
-        color: var(--button-group-primary-selected-text);
-        background-color: var(--button-group-primary-selected-background);
-        border-color: var(--button-group-primary-selected-border);
-      }
-
-      &:disabled {
-        color: var(--button-group-primary-disabled-text);
-        background-color: var(--button-group-primary-disabled-background);
-        border-color: var(--button-group-primary-disabled-border);
-      }
-    }
-
-    .tedi-button-group__dropdown-trigger[aria-expanded="true"] {
-      background-color: var(--button-main-primary-background-active);
-      border-color: var(--button-main-primary-border-active);
-    }
-  }
-
-  &--secondary {
-    .tedi-button-group__item {
-      color: var(--button-group-secondary-inactive-text);
-      background-color: var(--button-group-secondary-inactive-background);
-      border: var(--_item-border-width) solid var(--button-group-secondary-inactive-border);
-
-      &:hover:not(:disabled) {
-        color: var(--button-group-secondary-hover-text);
-        background-color: var(--button-group-secondary-hover-background);
-        border-color: var(--button-group-secondary-hover-border);
-      }
-
-      &.tedi-button-group__item--selected:not(:disabled) {
-        --_item-border-width: var(--tedi-borders-02);
-
-        z-index: 1;
-        color: var(--button-group-secondary-selected-text);
-        background-color: var(--button-group-secondary-selected-background);
-        border-color: var(--button-group-secondary-selected-border);
-      }
-
-      &:disabled {
-        color: var(--button-group-secondary-disabled-text);
-        background-color: var(--button-group-secondary-disabled-background);
-        border-color: var(--button-group-secondary-disabled-border);
-      }
-    }
-
-    .tedi-button-group__dropdown-trigger[aria-expanded="true"] {
-      background-color: var(--button-main-secondary-background-active);
-      border-color: var(--button-main-secondary-border-active);
-    }
-  }
-
-  &__item:hover .tedi-icon,
-  &__item--selected .tedi-icon,
-  &__item:focus-visible .tedi-icon {
-    color: inherit;
-  }
-
   &--dropdown-mode {
-    > .tedi-button-group__item {
+    > .tedi-button {
       display: none;
     }
   }
@@ -159,6 +56,12 @@
 
   &__dropdown-trigger {
     flex: 1;
+
+    &[aria-expanded="true"] {
+      color: var(--_btn-active-text);
+      background: var(--_btn-active-bg);
+      border-color: var(--_btn-active-border);
+    }
   }
 
   &__dropdown-item {

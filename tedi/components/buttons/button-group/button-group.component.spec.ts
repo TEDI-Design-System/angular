@@ -1,15 +1,13 @@
 import { Component, signal } from "@angular/core";
-import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { ComponentFixture, fakeAsync, TestBed, tick } from "@angular/core/testing";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { Subject } from "rxjs";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { BREAKPOINTS } from "../../../services/breakpoint/breakpoint.service";
-import {
-  ButtonGroupComponent,
-  ButtonGroupVariant,
-} from "./button-group.component";
-import { ButtonGroupItemDirective } from "./button-group-item/button-group-item.directive";
+import { ButtonVariant, ButtonSize } from "../button/button.component";
+import { ButtonGroupComponent } from "./button-group.component";
+import { ButtonGroupButtonDirective } from "./button-group-button/button-group-button.directive";
 
 class TranslationMock {
   translate(key: string) {
@@ -39,10 +37,14 @@ class BreakpointObserverMock {
 
 @Component({
   standalone: true,
-  imports: [ButtonGroupComponent, ButtonGroupItemDirective],
+  imports: [ButtonGroupComponent, ButtonGroupButtonDirective],
   template: `
     <tedi-button-group
       [variant]="variant()"
+      [size]="size()"
+      [multiple]="multiple()"
+      [value]="value()"
+      (valueChange)="value.set($event)"
       [ariaLabel]="ariaLabel()"
       [stretch]="stretch()"
       [enableMobileDropdown]="enableMobileDropdown()"
@@ -50,25 +52,21 @@ class BreakpointObserverMock {
       [dropdownLabel]="dropdownLabel()"
       (selectionChange)="onSelect($event)"
     >
-      <button tedi-button-group-item id="1" label="Details" [selected]="active() === '1'">
-        Details
-      </button>
+      <button tedi-button-group-button value="1" label="Details">Details</button>
       <button
-        tedi-button-group-item
-        id="2"
+        tedi-button-group-button
+        value="2"
         label="Updates"
         [iconLeft]="iconLeft()"
         [iconRight]="iconRight()"
         [icon]="iconOnly()"
-        [selected]="active() === '2'"
       >
         Updates
       </button>
       <button
-        tedi-button-group-item
-        id="3"
+        tedi-button-group-button
+        value="3"
         label="Settings"
-        [selected]="active() === '3'"
         [disabled]="disable3()"
       >
         Settings
@@ -77,22 +75,23 @@ class BreakpointObserverMock {
   `,
 })
 class TestHostComponent {
-  variant = signal<ButtonGroupVariant>("primary");
+  variant = signal<ButtonVariant>("primary-button-group");
+  size = signal<ButtonSize>("default");
+  multiple = signal(false);
+  value = signal<string | string[] | undefined>("2");
   ariaLabel = signal<string | undefined>("Tabs");
   stretch = signal(false);
   enableMobileDropdown = signal(false);
   dropdownLabelMode = signal<"selected" | "static">("static");
   dropdownLabel = signal<string | undefined>(undefined);
   disable3 = signal(false);
-  active = signal("2");
-  selected = signal<string | null>(null);
   iconLeft = signal<string | undefined>("refresh");
   iconRight = signal<string | undefined>(undefined);
   iconOnly = signal<string | undefined>(undefined);
+  lastToggled = signal<string | null>(null);
 
-  onSelect(id: string) {
-    this.selected.set(id);
-    this.active.set(id);
+  onSelect(value: string) {
+    this.lastToggled.set(value);
   }
 }
 
@@ -107,7 +106,7 @@ describe("ButtonGroupComponent", () => {
 
   function getItems(): NodeListOf<HTMLButtonElement> {
     return fixture.nativeElement.querySelectorAll(
-      ":scope tedi-button-group > [tedi-button-group-item]",
+      ":scope tedi-button-group > [tedi-button-group-button]",
     );
   }
 
@@ -129,29 +128,107 @@ describe("ButtonGroupComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should create with role=group and aria-label per TEDI spec", () => {
+  it("should create with role=group and aria-label", () => {
     expect(getRoot()).toBeTruthy();
     expect(getRoot().getAttribute("role")).toBe("group");
     expect(getRoot().getAttribute("aria-label")).toBe("Tabs");
   });
 
-  it("should project one item per consumer-provided button", () => {
+  it("should render one button per item", () => {
     const items = getItems();
     expect(items.length).toBe(3);
     items.forEach((b) => expect(b.tagName).toBe("BUTTON"));
   });
 
-  it("should apply variant modifier class on host", () => {
-    expect(getRoot().classList).toContain("tedi-button-group--primary");
+  it("should apply tedi-button + inherited variant/size classes to items", () => {
+    const items = getItems();
+    items.forEach((b) => {
+      expect(b.classList).toContain("tedi-button");
+      expect(b.classList).toContain("tedi-button--primary-button-group");
+      expect(b.classList).toContain("tedi-button--default");
+    });
 
-    host.variant.set("secondary");
+    host.variant.set("secondary-button-group");
+    host.size.set("small");
     fixture.detectChanges();
 
-    expect(getRoot().classList).toContain("tedi-button-group--secondary");
-    expect(getRoot().classList).not.toContain("tedi-button-group--primary");
+    items.forEach((b) => {
+      expect(b.classList).toContain("tedi-button--secondary-button-group");
+      expect(b.classList).toContain("tedi-button--small");
+    });
   });
 
-  it("should toggle stretch modifier on host", () => {
+  it("should derive aria-pressed from the group value (single)", () => {
+    const items = getItems();
+    expect(items[0].getAttribute("aria-pressed")).toBe("false");
+    expect(items[1].getAttribute("aria-pressed")).toBe("true");
+    expect(items[2].getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("should not set aria-current on items", () => {
+    getItems().forEach((b) =>
+      expect(b.hasAttribute("aria-current")).toBe(false),
+    );
+  });
+
+  it("should select on click and emit selectionChange (single)", () => {
+    getItems()[0].click();
+    fixture.detectChanges();
+
+    expect(host.value()).toBe("1");
+    expect(host.lastToggled()).toBe("1");
+    expect(getItems()[0].getAttribute("aria-pressed")).toBe("true");
+    expect(getItems()[1].getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("should deselect when re-clicking the active item (single)", () => {
+    getItems()[1].click();
+    fixture.detectChanges();
+
+    expect(host.value()).toBeUndefined();
+    expect(getItems()[1].getAttribute("aria-pressed")).toBe("false");
+  });
+
+  it("should toggle array membership when multiple", () => {
+    host.multiple.set(true);
+    host.value.set([]);
+    fixture.detectChanges();
+
+    getItems()[0].click();
+    fixture.detectChanges();
+    expect(host.value()).toEqual(["1"]);
+
+    getItems()[2].click();
+    fixture.detectChanges();
+    expect(host.value()).toEqual(["1", "3"]);
+
+    getItems()[0].click();
+    fixture.detectChanges();
+    expect(host.value()).toEqual(["3"]);
+
+    expect(getItems()[0].getAttribute("aria-pressed")).toBe("false");
+    expect(getItems()[2].getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("should disable items via the native disabled attribute", () => {
+    host.disable3.set(true);
+    fixture.detectChanges();
+
+    expect(getItems()[2].disabled).toBe(true);
+  });
+
+  it("should ignore clicks on disabled items", () => {
+    host.disable3.set(true);
+    fixture.detectChanges();
+
+    getItems()[2].click();
+    fixture.detectChanges();
+
+    expect(host.lastToggled()).toBeNull();
+    expect(host.value()).toBe("2");
+  });
+
+  it("should toggle the stretch modifier on the host", () => {
     expect(getRoot().classList).not.toContain("tedi-button-group--stretch");
 
     host.stretch.set(true);
@@ -160,77 +237,20 @@ describe("ButtonGroupComponent", () => {
     expect(getRoot().classList).toContain("tedi-button-group--stretch");
   });
 
-  it("should mark the selected item with --selected class", () => {
-    const items = getItems();
-    expect(items[0].classList).not.toContain("tedi-button-group__item--selected");
-    expect(items[1].classList).toContain("tedi-button-group__item--selected");
-    expect(items[2].classList).not.toContain("tedi-button-group__item--selected");
-  });
-
-  it("should set aria-pressed on button hosts", () => {
-    const items = getItems();
-    expect(items[0].getAttribute("aria-pressed")).toBe("false");
-    expect(items[1].getAttribute("aria-pressed")).toBe("true");
-    expect(items[2].getAttribute("aria-pressed")).toBe("false");
-  });
-
-  it("should not set aria-current on button hosts", () => {
-    const items = getItems();
-    items.forEach((b) =>
-      expect(b.hasAttribute("aria-current")).toBe(false),
-    );
-  });
-
-  it("should update aria-pressed when selection changes", () => {
-    host.active.set("3");
-    fixture.detectChanges();
-
-    const items = getItems();
-    expect(items[0].getAttribute("aria-pressed")).toBe("false");
-    expect(items[1].getAttribute("aria-pressed")).toBe("false");
-    expect(items[2].getAttribute("aria-pressed")).toBe("true");
-  });
-
-  it("should disable native buttons via the disabled attribute", () => {
-    host.disable3.set(true);
-    fixture.detectChanges();
-
-    const items = getItems();
-    expect(items[2].disabled).toBe(true);
-    expect(items[2].classList).toContain("tedi-button-group__item--disabled");
-  });
-
-  it("should emit selectionChange with item id on click", () => {
-    getItems()[0].click();
-    expect(host.selected()).toBe("1");
-
-    getItems()[2].click();
-    expect(host.selected()).toBe("3");
-  });
-
-  it("should ignore clicks on disabled items", () => {
-    host.disable3.set(true);
-    fixture.detectChanges();
-
-    getItems()[2].click();
-    expect(host.selected()).toBeNull();
-  });
-
   describe("auto-rendered icons", () => {
     it("should prepend an icon when iconLeft is set", () => {
-      const icon = getItems()[1].querySelector("tedi-icon");
-      expect(icon).toBeTruthy();
-      expect(getItems()[1].firstElementChild?.tagName.toLowerCase()).toBe(
-        "tedi-icon",
-      );
+      const item = getItems()[1];
+      expect(item.querySelector("tedi-icon")).toBeTruthy();
+      expect(item.firstElementChild?.tagName.toLowerCase()).toBe("tedi-icon");
     });
 
     it("should append an icon when iconRight is set", () => {
       host.iconRight.set("arrow_right");
       fixture.detectChanges();
 
-      const item = getItems()[1];
-      expect(item.lastElementChild?.tagName.toLowerCase()).toBe("tedi-icon");
+      expect(getItems()[1].lastElementChild?.tagName.toLowerCase()).toBe(
+        "tedi-icon",
+      );
     });
 
     it("should remove the icon when the input is cleared", () => {
@@ -246,8 +266,9 @@ describe("ButtonGroupComponent", () => {
       host.iconLeft.set("table");
       fixture.detectChanges();
 
-      const icon = getItems()[1].querySelector("tedi-icon");
-      expect(icon?.textContent?.trim()).toBe("table");
+      expect(
+        getItems()[1].querySelector("tedi-icon")?.textContent?.trim(),
+      ).toBe("table");
     });
 
     it("should set aria-label from label in icon-only mode", () => {
@@ -264,71 +285,111 @@ describe("ButtonGroupComponent", () => {
   });
 
   describe("mobile dropdown", () => {
-    beforeEach(() => {
+    beforeEach(fakeAsync(() => {
       host.enableMobileDropdown.set(true);
       bpObserver.emit("sm");
       fixture.detectChanges();
-    });
+      tick();
+    }));
 
-    function getDropdownTrigger(): HTMLElement {
+    function getTrigger(): HTMLElement {
       return fixture.nativeElement.querySelector(
         ".tedi-button-group__dropdown-trigger",
       );
     }
 
     it("should collapse into a dropdown trigger below md", () => {
-      expect(getDropdownTrigger()).toBeTruthy();
-      expect(getRoot().classList).toContain(
-        "tedi-button-group--dropdown-mode",
-      );
-    });
-
-    it("should hide projected items via the dropdown-mode class (CSS)", () => {
-      // items are still in the DOM (consumer projected them) but hidden via CSS
-      expect(getItems().length).toBe(3);
+      expect(getTrigger()).toBeTruthy();
       expect(getRoot().classList).toContain("tedi-button-group--dropdown-mode");
     });
 
-    it("should drop role=group on the host while in dropdown mode", () => {
+    it("should drop role=group while in dropdown mode", () => {
       expect(getRoot().hasAttribute("role")).toBe(false);
     });
 
     it("should use the buttonGroup.menu fallback label by default", () => {
-      expect(getDropdownTrigger().textContent).toContain("buttonGroup.menu");
+      expect(getTrigger().textContent).toContain("buttonGroup.menu");
     });
 
-    it("should use the selected item's label when dropdownLabelMode is selected", () => {
+    it("should use the selected item's label when dropdownLabelMode is selected", fakeAsync(() => {
       host.dropdownLabelMode.set("selected");
       fixture.detectChanges();
+      tick();
 
-      expect(getDropdownTrigger().textContent).toContain("Updates");
-    });
+      expect(getTrigger().textContent).toContain("Updates");
+    }));
 
-    it("should ignore clicks on disabled dropdown items", () => {
-      host.disable3.set(true);
+    it("should fall back to static label in multiple mode", fakeAsync(() => {
+      host.multiple.set(true);
+      host.value.set(["1", "2"]);
+      host.dropdownLabelMode.set("selected");
       fixture.detectChanges();
+      tick();
 
-      const dropdownItems = fixture.nativeElement.querySelectorAll(
+      expect(getTrigger().textContent).toContain("buttonGroup.menu");
+    }));
+
+  function openDropdown() {
+    const trigger = document.querySelector(".tedi-button-group__dropdown-trigger") as HTMLElement;
+    trigger.click();
+  }
+
+    it("should mark selected dropdown items", fakeAsync(() => {
+      fixture.detectChanges();
+      tick();
+      openDropdown();
+      fixture.detectChanges();
+      tick();
+
+      const selected = document.querySelector(
+        ".tedi-button-group__dropdown-item--selected",
+      );
+      expect(selected?.textContent).toContain("Updates");
+    }));
+
+    it("should toggle selection from a dropdown item click", fakeAsync(() => {
+      fixture.detectChanges();
+      tick();
+      openDropdown();
+      fixture.detectChanges();
+      tick();
+
+      const items = document.querySelectorAll<HTMLElement>(
         ".tedi-button-group__dropdown-item",
       );
-      dropdownItems[2].click();
-      expect(host.selected()).toBeNull();
-    });
-
-    it("should use the custom dropdownLabel when provided", () => {
-      host.dropdownLabel.set("Choose");
+      items[0].click();
       fixture.detectChanges();
+      tick();
 
-      expect(getDropdownTrigger().textContent).toContain("Choose");
-    });
+      expect(host.value()).toBe("1");
+    }));
 
-    it("should switch back to the strip when viewport grows", () => {
+    it("should ignore clicks on disabled dropdown items", fakeAsync(() => {
+      host.disable3.set(true);
+      fixture.detectChanges();
+      tick();
+      openDropdown();
+      fixture.detectChanges();
+      tick();
+
+      const items = document.querySelectorAll<HTMLElement>(
+        ".tedi-button-group__dropdown-item",
+      );
+      items[2].click();
+      fixture.detectChanges();
+      tick();
+
+      expect(host.lastToggled()).toBeNull();
+    }));
+
+    it("should switch back to the strip when the viewport grows", fakeAsync(() => {
       bpObserver.emit("lg");
       fixture.detectChanges();
+      tick();
 
-      expect(getDropdownTrigger()).toBeFalsy();
+      expect(getTrigger()).toBeFalsy();
       expect(getItems().length).toBe(3);
       expect(getRoot().getAttribute("role")).toBe("group");
-    });
+    }));
   });
 });

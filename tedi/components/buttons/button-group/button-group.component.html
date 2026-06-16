@@ -4,23 +4,21 @@
   <tedi-dropdown class="tedi-button-group__dropdown" appendTo="body">
     <button
       tedi-dropdown-trigger
+      tedi-button
       type="button"
+      [variant]="triggerVariant()"
       [attr.aria-label]="ariaLabel() || null"
-      [class]="
-        'tedi-button-group__item tedi-button-group__item--selected tedi-button-group__item--size-' +
-        size() +
-        ' tedi-button-group__dropdown-trigger'
-      "
+      class="tedi-button-group__dropdown-trigger"
     >
       <tedi-icon [name]="triggerIcon()" color="inherit" [size]="18" />
       {{ triggerLabel() }}
     </button>
 
     <tedi-dropdown-content>
-      @for (item of items(); track item.id()) {
+      @for (item of items(); track item.value()) {
         <li
           tedi-dropdown-item
-          [value]="item.id()"
+          [value]="item.value()"
           [disabled]="item.disabled()"
           class="tedi-button-group__dropdown-item"
           [class.tedi-button-group__dropdown-item--selected]="item.selected()"

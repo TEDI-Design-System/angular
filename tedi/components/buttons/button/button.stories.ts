@@ -52,6 +52,8 @@ export default {
         "success",
         "danger",
         "danger-neutral",
+        "primary-button-group",
+        "secondary-button-group",
       ],
       description:
         "Specifies the color theme of the button. The color should meet accessibility standards for color contrast.",
@@ -61,7 +63,7 @@ export default {
         type: {
           summary: "ButtonVariant",
           detail:
-            "primary \nsecondary \nneutral \nsuccess \ndanger \ndanger-neutral \nprimary-inverted \nsecondary-inverted \nneutral-inverted",
+            "primary \nsecondary \nneutral \nsuccess \ndanger \ndanger-neutral \nprimary-inverted \nsecondary-inverted \nneutral-inverted \nprimary-button-group \nsecondary-button-group",
         },
       },
     },
