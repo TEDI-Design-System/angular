@@ -20,7 +20,7 @@ document.cookie = "tedi-lang=en; path=/;";
  */
 
 export default {
-  title: "TEDI-Ready/Components/Cards/Accordion",
+  title: "TEDI-Ready/Content/Accordion",
   decorators: [
     moduleMetadata({
       imports: [
