@@ -1,6 +1,16 @@
 <ng-content select="tedi-table-toolbar" />
 <ng-content select="tedi-table-columns-menu" />
 
+<!-- Live region for screen-reader announcements during keyboard reordering -->
+@if (reorderableColumns() || reorderableRows()) {
+  <div
+    [id]="liveRegionId"
+    aria-live="polite"
+    aria-atomic="true"
+    class="tedi-table__sr-only"
+  ></div>
+}
+
 @if (resolvedTopSlot(); as top) {
   <div class="tedi-table__pagination tedi-table__pagination--top">
     <tedi-pagination
@@ -36,7 +46,7 @@
   </div>
 }
 
-<div class="tedi-table__scroll" [attr.style]="maxHeightStyle()">
+<div class="tedi-table__scroll" [attr.style]="maxHeightStyle()" cdkScrollable>
   <table
     class="tedi-table__table"
     [attr.id]="id() || null"
@@ -62,9 +72,10 @@
         <tr
           class="tedi-table__row"
           [attr.aria-rowindex]="ariaRowIndexingEnabled() ? rowIndex + 1 : null"
-          [cdkDropListDisabled]="!draggableColumns() || rowIndex > 0"
+          [cdkDropListDisabled]="!reorderableColumns() || rowIndex > 0"
           cdkDropList
           cdkDropListOrientation="horizontal"
+          cdkDropListAutoScrollDisabled
           (cdkDropListDropped)="handleColumnDrop($event)"
         >
           @for (header of headerGroup.headers; track header.id) {
@@ -77,12 +88,13 @@
                 scope="col"
                 cdkDrag
                 [cdkDragDisabled]="
-                  !draggableColumns() ||
+                  !reorderableColumns() ||
                   rowIndex > 0 ||
                   header.column.id === SELECT_COLUMN_ID ||
                   header.column.id === EXPAND_COLUMN_ID
                 "
                 cdkDragLockAxis="x"
+                (keydown)="handleHeaderKeydown($event, header)"
                 [class]="
                   'tedi-table__header-cell' +
                   (isHeaderGroup(header)
@@ -93,6 +105,9 @@
                     : '') +
                   (meta?.vAlign
                     ? ' tedi-table__cell--valign-' + meta?.vAlign
+                    : '') +
+                  (pickedUpColumnId() === header.column.id
+                    ? ' tedi-table__header-cell--picked-up'
                     : '')
                 "
                 [attr.colspan]="header.colSpan > 1 ? header.colSpan : null"
@@ -125,7 +140,7 @@
                 } @else {
                   <span class="tedi-table__header-content">
                     @if (
-                      draggableColumns() &&
+                      reorderableColumns() &&
                       rowIndex === 0 &&
                       !isHeaderGroup(header)
                     ) {
@@ -133,7 +148,16 @@
                         type="button"
                         cdkDragHandle
                         class="tedi-table__drag-handle"
+                        [class.tedi-table__drag-handle--picked-up]="
+                          pickedUpColumnId() === header.column.id
+                        "
+                        [id]="reorderHandleId(header.column.id)"
                         [attr.aria-label]="dragColumnLabel()"
+                        [attr.aria-pressed]="
+                          reorderableColumns()
+                            ? pickedUpColumnId() === header.column.id
+                            : null
+                        "
                       >
                         <tedi-icon
                           name="drag_indicator"
@@ -271,7 +295,7 @@
     <tbody
       class="tedi-table__body"
       cdkDropList
-      [cdkDropListDisabled]="!draggableRows()"
+      [cdkDropListDisabled]="!reorderableRows()"
       (cdkDropListDropped)="handleRowDrop($any($event))"
     >
       @if (rows().length === 0) {
@@ -316,19 +340,25 @@
           @let expandsOnClick = rowExpandsOnClick(row);
           <tr
             cdkDrag
-            [cdkDragDisabled]="!draggableRows()"
+            [cdkDragDisabled]="!reorderableRows()"
             cdkDragLockAxis="y"
             [class]="
               'tedi-table__row' +
-              (row.getIsSelected() ? ' tedi-table__row--selected' : '') +
+              (this.selectedRowHighlight() && row.getIsSelected()
+                ? ' tedi-table__row--selected'
+                : '') +
               (isActiveRow ? ' tedi-table__row--active' : '') +
               (interactive() || expandsOnClick
                 ? ' tedi-table__row--clickable'
                 : '') +
-              (row.depth > 0 ? ' tedi-table__row--sub-row' : '')
+              (row.depth > 0 ? ' tedi-table__row--sub-row' : '') +
+              (pickedUpRow() === row.original
+                ? ' tedi-table__row--picked-up'
+                : '')
             "
             [attr.role]="interactive() ? 'button' : null"
             [attr.tabindex]="interactive() ? 0 : null"
+            [attr.aria-label]="rowAriaLabelFor(row)"
             [attr.aria-rowindex]="ariaRowIndex"
             [attr.aria-current]="isActiveRow ? 'true' : null"
             (click)="(interactive() || expandsOnClick) && handleRowClick(row)"
@@ -362,8 +392,18 @@
                       type="button"
                       cdkDragHandle
                       class="tedi-table__drag-handle"
+                      [class.tedi-table__drag-handle--picked-up]="
+                        pickedUpRow() === row.original
+                      "
+                      [id]="rowReorderHandleId(row.id)"
                       [attr.aria-label]="dragRowLabel()"
+                      [attr.aria-pressed]="
+                        reorderableRows()
+                          ? pickedUpRow() === row.original
+                          : null
+                      "
                       (click)="$event.stopPropagation()"
+                      (keydown)="handleRowReorderKeydown($event, row)"
                     >
                       <tedi-icon
                         name="drag_indicator"
@@ -465,9 +505,11 @@
                 >
                   <div class="tedi-table__sub-component-wrapper">
                     <div class="tedi-table__sub-component-content">
-                      <ng-container
-                        *ngTemplateOutlet="subTpl; context: { $implicit: row }"
-                      />
+                      <div class="tedi-table__sub-component-inner">
+                        <ng-container
+                          *ngTemplateOutlet="subTpl; context: { $implicit: row }"
+                        />
+                      </div>
                     </div>
                   </div>
                 </td>

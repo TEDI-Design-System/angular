@@ -4,6 +4,7 @@ import {
   ElementRef,
   input,
   Renderer2,
+  inject,
 } from "@angular/core";
 import type { VerticalSpacingSize } from "./vertical-spacing.directive";
 
@@ -12,12 +13,10 @@ import type { VerticalSpacingSize } from "./vertical-spacing.directive";
   standalone: true,
 })
 export class VerticalSpacingItemDirective implements AfterViewInit {
-  tediVerticalSpacingItem = input<VerticalSpacingSize>(0);
+  private readonly el = inject(ElementRef);
+  private readonly renderer = inject(Renderer2);
 
-  constructor(
-    private readonly el: ElementRef,
-    private readonly renderer: Renderer2,
-  ) {}
+  tediVerticalSpacingItem = input<VerticalSpacingSize>(0);
 
   ngAfterViewInit(): void {
     this.renderer.addClass(

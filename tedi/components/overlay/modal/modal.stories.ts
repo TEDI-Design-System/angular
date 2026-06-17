@@ -465,6 +465,7 @@ class StoryNoFooterComponent {
 export default {
   title: "TEDI-Ready/Components/Overlay/Modal",
   component: ModalComponent,
+
   decorators: [
     moduleMetadata({
       imports: [
@@ -473,7 +474,7 @@ export default {
       ],
     }),
   ],
-  parameters: {},
+
   argTypes: {
     size: {
       table: { type: { summary: "'default' | 'small'" }, defaultValue: { summary: "'default'" }, category: "ModalConfig" },
@@ -527,7 +528,7 @@ export default {
       table: { type: { summary: "string" }, category: "ModalConfig" },
       description: "ID of the element that labels the dialog.",
     },
-  },
+  }
 } as Meta<ModalComponent>;
 
 export const Default: StoryObj = {

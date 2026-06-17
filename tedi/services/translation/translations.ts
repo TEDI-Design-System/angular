@@ -553,6 +553,74 @@ export const translationsMap = {
     en: "Drag row",
     ru: "Перетащить строку",
   },
+  "table.reorder.pickup": {
+    description: "Live region message when a column is picked up for keyboard reordering",
+    components: ["Table"],
+    et: (column: string) =>
+      `Veerg ${column} on valitud. Kasuta vasakut/paremat noolt liigutamiseks ja Tühikut või Sisestust kinnitamiseks. Vajuta Escape tühistamiseks.`,
+    en: (column: string) =>
+      `Column ${column} picked up. Use Left/Right arrow to move, Space or Enter to drop. Press Escape to cancel.`,
+    ru: (column: string) =>
+      `Столбец ${column} взят. Используйте стрелки влево/вправо для перемещения, Пробел или Enter для подтверждения. Нажмите Escape для отмены.`,
+  },
+  "table.reorder.move": {
+    description: "Live region message while a picked-up column is moved between positions",
+    components: ["Table"],
+    et: (column: string, position: number) =>
+      `Veerg ${column} positsioonil ${position}.`,
+    en: (column: string, position: number) =>
+      `Column ${column} at position ${position}.`,
+    ru: (column: string, position: number) =>
+      `Столбец ${column} на позиции ${position}.`,
+  },
+  "table.reorder.drop": {
+    description: "Live region message when a column is dropped",
+    components: ["Table"],
+    et: (column: string, position: number) =>
+      `Veerg ${column} paigutatud positsioonile ${position}.`,
+    en: (column: string, position: number) =>
+      `Column ${column} moved to position ${position}.`,
+    ru: (column: string, position: number) =>
+      `Столбец ${column} перемещен на позицию ${position}.`,
+  },
+  "table.reorder.cancel": {
+    description: "Live region message when column reorder is cancelled",
+    components: ["Table"],
+    et: "Veeru ümberjärjestamine tühistatud.",
+    en: "Column reordering cancelled.",
+    ru: "Перестановка столбцов отменена.",
+  },
+  "table.row-reorder.pickup": {
+    description: "Live region message when a row is picked up for keyboard reordering",
+    components: ["Table"],
+    et: (position: number) =>
+      `Rida ${position} on valitud. Kasuta üles-/allanoolt liigutamiseks ja Tühikut või Sisestust kinnitamiseks. Vajuta Escape tühistamiseks.`,
+    en: (position: number) =>
+      `Row ${position} picked up. Use Up/Down arrow to move, Space or Enter to drop. Press Escape to cancel.`,
+    ru: (position: number) =>
+      `Строка ${position} взята. Используйте стрелки вверх/вниз для перемещения, Пробел или Enter для подтверждения. Нажмите Escape для отмены.`,
+  },
+  "table.row-reorder.move": {
+    description: "Live region message while a picked-up row is moved between positions",
+    components: ["Table"],
+    et: (position: number) => `Rida liigutatud positsioonile ${position}.`,
+    en: (position: number) => `Row moved to position ${position}.`,
+    ru: (position: number) => `Строка перемещена на позицию ${position}.`,
+  },
+  "table.row-reorder.drop": {
+    description: "Live region message when a row is dropped",
+    components: ["Table"],
+    et: (position: number) => `Rida paigutatud positsioonile ${position}.`,
+    en: (position: number) => `Row dropped at position ${position}.`,
+    ru: (position: number) => `Строка размещена на позиции ${position}.`,
+  },
+  "table.row-reorder.cancel": {
+    description: "Live region message when row reorder is cancelled",
+    components: ["Table"],
+    et: "Ridade ümberjärjestamine tühistatud.",
+    en: "Row reordering cancelled.",
+    ru: "Перестановка строк отменена.",
+  },
   "tooltip.icon-trigger": {
     description: "Label we use for icons that are tooltip triggers",
     components: ["TooltipTrigger"],
@@ -1084,6 +1152,66 @@ export const translationsMap = {
     et: "Järgmised aastad",
     en: "Next years",
     ru: "Следующие годы",
+  },
+  "time-picker.hours": {
+    description: "Aria label for the hours listbox in the time picker.",
+    components: ["TimePicker"],
+    et: "Tunnid",
+    en: "Hours",
+    ru: "Часы",
+  },
+  "time-picker.minutes": {
+    description: "Aria label for the minutes listbox in the time picker.",
+    components: ["TimePicker"],
+    et: "Minutid",
+    en: "Minutes",
+    ru: "Минуты",
+  },
+  "time-field.clear": {
+    description:
+      "Label for the button that clears the selected time from the input field.",
+    components: ["TimeField"],
+    et: "Tühjenda kellaaeg",
+    en: "Clear time",
+    ru: "Очистить время",
+  },
+  "time-field.select-time": {
+    description: "Label for the button that selects time.",
+    components: ["TimeField"],
+    et: "Vali kellaaeg",
+    en: "Select time",
+    ru: "Выбрать время",
+  },
+  "time-field.modal-title": {
+    description: "Title shown in the mobile time picker modal header.",
+    components: ["TimeField"],
+    et: "Kellaaeg",
+    en: "Time",
+    ru: "Время",
+  },
+  "time-field.confirm": {
+    description:
+      "Label for the confirm button in the mobile time picker modal.",
+    components: ["TimeField"],
+    et: "Kinnita",
+    en: "Confirm",
+    ru: "Подтвердить",
+  },
+  "time-field.cancel": {
+    description:
+      "Label for the cancel button in the mobile time picker modal.",
+    components: ["TimeField"],
+    et: "Tühista",
+    en: "Cancel",
+    ru: "Отмена",
+  },
+  "time-picker.no-slots": {
+    description:
+      "Empty-state message shown in the slots/dropdown time picker when no time slots have been provided.",
+    components: ["TimePicker", "TimeField"],
+    et: "Aegu ei ole määratud",
+    en: "No times available",
+    ru: "Нет доступных вариантов",
   },
   "vertical-stepper.completed": {
     description:

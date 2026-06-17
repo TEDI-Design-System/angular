@@ -46,10 +46,11 @@ export class PopoverContentComponent {
   titleId = `popover-title-${popoverTitleId++}`;
 
   classes = computed(() => {
-    const classList = [
-      "tedi-popover-content",
-      `tedi-popover-content--${this.maxWidth()}`,
-    ];
+    const classList = ["tedi-popover-content"];
+    const maxWidth = this.maxWidth();
+    if (maxWidth !== "none") {
+      classList.push(`tedi-popover-content--${maxWidth}`);
+    }
     return classList.join(" ");
   });
 

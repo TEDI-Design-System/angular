@@ -609,11 +609,11 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
   onInputClick() {
     if (this.allowManualInput()) return;
 
-    if (this.popover().floatUiComponent().state) {
-      this.popover().floatUiComponent().hide();
+    if (this.popover().isOpen()) {
+      this.popover().hidePopover();
       this.inputElement().nativeElement.focus();
     } else {
-      this.popover().floatUiComponent().show();
+      this.popover().showPopover();
       this.openCalendar();
     }
   }
@@ -625,7 +625,7 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
   }
 
   closeCalendar() {
-    this.popover().floatUiComponent().hide();
+    this.popover().hidePopover();
     this.inputElement().nativeElement.focus();
     this.onTouched();
   }

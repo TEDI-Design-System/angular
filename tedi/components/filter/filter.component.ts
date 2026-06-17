@@ -161,12 +161,6 @@ export class FilterComponent implements ControlValueAccessor {
    */
   readonly preserveLabel = input<boolean>(false);
   /**
-   * Append dropdown to given selector.
-   * Use 'body' to append at the end of DOM or empty string to append next to trigger.
-   * @default ""
-   */
-  readonly appendTo = input("");
-  /**
    * Whether the filter is disabled. Also set automatically when used with a disabled FormControl
    * or when nested in a disabled FilterGroup.
    * @default false
@@ -425,7 +419,7 @@ export class FilterComponent implements ControlValueAccessor {
 
   focusDropdownContent(keyboard = false, focusLast = false): void {
     setTimeout(() => {
-      if (!this.dropdown()?.floatUiComponent().state) return;
+      if (!this.dropdown()?.isOpen()) return;
       if (!keyboard) {
         this.suppressNextOptionsFocusAutoSelect = true;
         this.activeOptionIndex.set(-1);

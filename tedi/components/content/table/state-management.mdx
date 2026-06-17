@@ -1,0 +1,194 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import * as TableStories from "./table.stories";
+
+<Meta of={TableStories} name="State Management" />
+
+# State Management
+
+Everything interactive in `tedi-table` — sorting, filters, pagination, row
+selection, expansion, column visibility/order/sizing, row order — lives in one
+`TableState` object. There are three ways to work with it, and they can be
+mixed per slice:
+
+1. **Uncontrolled** (default) — the table owns its state internally.
+2. **Seeded** — pass `defaultState` to choose the *initial* state; the table
+   owns it afterwards.
+3. **Controlled** — pass `state` for the slices you own and update them from
+   `(stateChange)`.
+
+Additionally, `persist` saves selected slices to storage so they survive a
+page reload.
+
+---
+
+## The `TableState` object
+
+```ts
+import type { TableState } from "@tedi-design-system/angular/tedi";
+
+interface TableState {
+  columnVisibility?: VisibilityState;   // { [columnId]: boolean }
+  columnOrder?: ColumnOrderState;       // columnId[]
+  rowOrder?: string[];                  // rowId[] (reorderableRows)
+  columnSizing?: ColumnSizingState;     // { [columnId]: px }
+  rowSelection?: RowSelectionState;     // { [rowId]: true }
+  expanded?: ExpandedState;             // true | { [rowId]: true }
+  columnFilters?: ColumnFiltersState;   // { id, value }[]
+  sorting?: SortingState;               // { id, desc }[]
+  pagination?: PaginationState;         // { pageIndex, pageSize }
+}
+```
+
+The slice types come from TanStack Table and are re-exported through
+`@tanstack/angular-table`. For background on the underlying state model, see
+the [TanStack Table state guide for Angular](https://tanstack.com/table/latest/docs/framework/angular/guide/table-state)
+— note that `tedi-table` wraps it, so the `state` / `defaultState` inputs and
+the `(stateChange)` output described on this page replace TanStack's `state` /
+`initialState` / `onStateChange` options (`persist` has no TanStack
+equivalent).
+
+**Row IDs:** the table uses TanStack's default row IDs — the row's index as a
+string (`"0"`, `"1"`, …), with nested sub-rows using dotted paths (`"0.1"`).
+Keep that in mind for `rowSelection` / `expanded` keys: if the order of `data`
+changes between loads, index-keyed state points at different rows.
+
+---
+
+## Uncontrolled (default)
+
+Pass nothing — the table manages all state internally. `(stateChange)` still
+emits the full merged `TableState` after every change, so you can observe
+without owning:
+
+```html
+<tedi-table [data]="data" [columns]="columns" (stateChange)="log($event)" />
+```
+
+---
+
+## Seeding initial state — `defaultState`
+
+`defaultState` sets the initial value of any slice and then hands ownership
+back to the table. It is read once — changing it after the user has interacted
+with the table has no effect.
+
+Open all expandable rows on first render:
+
+```html
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [defaultState]="{ expanded: true }"
+/>
+```
+
+Open only specific rows (`true` = all; a map keyed by row ID = some):
+
+```html
+<tedi-table [defaultState]="{ expanded: { '0': true, '2': true } }" ... />
+```
+
+Start sorted and on page 2 with rows pre-selected:
+
+```html
+<tedi-table
+  [defaultState]="{
+    sorting: [{ id: 'name', desc: false }],
+    pagination: { pageIndex: 1, pageSize: 25 },
+    rowSelection: { '3': true }
+  }"
+  [pagination]="true"
+  [enableRowSelection]="true"
+  ...
+/>
+```
+
+A seeded (or controlled) `pagination` slice is the source of truth for the
+current page and page size — both the bottom and top paginator components
+render it. `pageSizeOptions` however come only from the `pagination` /
+`paginationTop` inputs, so keep a seeded `pageSize` within the configured
+options (like `25` above with the default `[10, 25, 50]`) — otherwise the
+table still paginates by it, but the page-size dropdown has no matching
+option to show as selected.
+
+---
+
+## Controlled — `state` + `(stateChange)`
+
+Control is **per slice**: only the slices present in `state` are controlled,
+everything else stays internal. A controlled slice renders exactly what you
+pass — the table never changes it itself, so you must write changes back from
+`(stateChange)` or the UI appears frozen.
+
+The typical use is server-side data, where the backend needs the current page
+and sort order:
+
+```html
+<tedi-table
+  [data]="rows()"
+  [columns]="columns"
+  [manualPagination]="true"
+  [manualSorting]="true"
+  [pageCount]="pageCount()"
+  [pagination]="true"
+  [state]="{ pagination: page(), sorting: sorting() }"
+  (stateChange)="onStateChange($event)"
+/>
+```
+
+```ts
+readonly page = signal<PaginationState>({ pageIndex: 0, pageSize: 10 });
+readonly sorting = signal<SortingState>([]);
+
+onStateChange(next: TableState) {
+  if (next.pagination) this.page.set(next.pagination);
+  this.sorting.set(next.sorting ?? []);
+}
+```
+
+`(stateChange)` always emits the full merged `TableState`, regardless of which
+slice changed.
+
+---
+
+## Persistence — `persist`
+
+`persist` writes state to storage on every change and restores it on init:
+
+```html
+<tedi-table [persist]="{ key: 'tedi.tables.invoices' }" ... />
+```
+
+`TablePersistOptions`:
+
+- `key` — storage key, must be stable and unique per table.
+- `storage` — storage backend, defaults to `window.localStorage`.
+- `include` — which slices to persist. Defaults to the user-preference slices
+  only: `columnVisibility`, `columnOrder`, `rowOrder`, `columnSizing`.
+  Task-scoped slices (selection, expansion, filters, sorting, pagination)
+  reset between sessions unless you add them explicitly:
+
+```html
+<tedi-table
+  [persist]="{
+    key: 'tedi.tables.invoices',
+    include: ['columnVisibility', 'columnOrder', 'sorting', 'columnFilters']
+  }"
+  ...
+/>
+```
+
+---
+
+## Precedence
+
+When several mechanisms touch the same slice, the resolution order is:
+
+1. `state` (controlled) — always wins for the slices it contains.
+2. Persisted storage value — restored on init for slices in `include`.
+3. `defaultState` — used when nothing is persisted for that slice.
+4. Built-in defaults.
+
+So a slice that is both persisted and seeded uses `defaultState` on the very
+first visit and the stored value on every visit after.

@@ -9,6 +9,7 @@ import {
   signal,
   output,
   ElementRef,
+  inject,
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import {
@@ -46,6 +47,8 @@ import {
 export class TextFieldComponent
   implements ControlValueAccessor, FormFieldControl
 {
+  private el = inject<ElementRef<HTMLInputElement>>(ElementRef);
+
   /**
    * Value of the input field. Supports two-way binding, use with form controls.
    */
@@ -59,8 +62,6 @@ export class TextFieldComponent
    * Callback triggered when the clear button is clicked.
    */
   readonly clear = output<void>();
-
-  constructor(private el: ElementRef<HTMLInputElement>) {}
 
   readonly disabled = computed(() => this.formDisabled());
 

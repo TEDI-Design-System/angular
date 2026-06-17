@@ -14,9 +14,13 @@ import type {
   VisibilityState,
 } from "@tanstack/angular-table";
 import type { PaginationComponent } from "../../navigation/pagination/pagination.component";
+import type { PaginationPageSizeOption } from "../../navigation/pagination/pagination.types";
 import type { ComponentInputs } from "../../../types/inputs.type";
 
 export type TableSize = "medium" | "small";
+
+/** Phases of keyboard-driven column reordering. */
+export type ColumnReorderPhase = "idle" | "picked-up" | "moving";
 
 /**
  * Selection mode for `<tedi-table>` row selection. `multiple` (default) shows
@@ -104,9 +108,11 @@ export type TablePaginationOptions = Partial<
   pageSize?: number;
   /**
    * Options rendered in the built-in page-size selector. Pass `false` to hide.
+   * Accepts plain numbers or `{ value, label }` objects — use the object form
+   * for a "Show all" entry whose label differs from its value.
    * @default [10, 25, 50]
    */
-  pageSizeOptions?: number[] | false;
+  pageSizeOptions?: (number | PaginationPageSizeOption)[] | false;
 };
 
 /**

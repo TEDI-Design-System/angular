@@ -582,6 +582,7 @@ abstract class TableStoryHostBase {
   readonly interactive = input(false, { transform: booleanAttribute });
   readonly expandTrigger = input<TableExpandTrigger>("button");
   readonly enableRowSelection = input(false, { transform: booleanAttribute });
+  readonly selectedRowHighlight = input(true, { transform: booleanAttribute });
   readonly selectionMode = input<TableSelectionMode>("multiple");
   readonly enableColumnFilters = input(false, { transform: booleanAttribute });
   readonly maxHeight = input<number | undefined>(undefined);
@@ -603,6 +604,7 @@ const TABLE_APPEARANCE_BINDINGS = `
   [interactive]="interactive()"
   [expandTrigger]="expandTrigger()"
   [enableRowSelection]="enableRowSelection()"
+  [selectedRowHighlight]="selectedRowHighlight()"
   [selectionMode]="selectionMode()"
   [enableColumnFilters]="enableColumnFilters()"
   [maxHeight]="maxHeight()"
@@ -622,6 +624,7 @@ type TediTableStoryArgs = {
   interactive: boolean;
   expandTrigger: TableExpandTrigger;
   enableRowSelection: boolean;
+  selectedRowHighlight: boolean;
   selectionMode: TableSelectionMode;
   enableColumnFilters: boolean;
   maxHeight: number | undefined;
@@ -648,8 +651,8 @@ type TediTableStoryArgs = {
   defaultState?: unknown;
   persist?: unknown;
   placeholder?: unknown;
-  draggableRows?: boolean;
-  draggableColumns?: boolean;
+  reorderableRows?: boolean;
+  reorderableColumns?: boolean;
   stateChange?: unknown;
   rowClick?: unknown;
   rowDrop?: unknown;
@@ -657,8 +660,8 @@ type TediTableStoryArgs = {
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=11335-186161&m=dev" target="_BLANK">Figma ↗</a><br/>
- * <a href="https://www.tedi.ee/1ee8444b7/p/557b9f-table" target="_BLANK">Zeroheight ↗</a>
- * <a href="https://tanstack.com/table/latest/docs/framework/angular/angular-table" target="_BLANK">@tanstack/angular-table ↗</a><br/>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/557b9f-table" target="_BLANK">Zeroheight ↗</a><br/>
+ * <a href="https://tanstack.com/table/latest/docs/framework/angular/angular-table" target="_BLANK">@tanstack/angular-table ↗</a>
  *
  * Headless data table built on `@tanstack/angular-table`. Supports sorting,
  * filtering, expansion, selection, pagination, sticky chrome and body row
@@ -820,6 +823,16 @@ const meta: Meta<TediTableStoryArgs> = {
         category: "behavior",
         type: { summary: "boolean | ((row) => boolean)" },
         defaultValue: { summary: "false" },
+      },
+    },
+    selectedRowHighlight: {
+      description:
+        "Whether selected rows get a background highlight. Default `true`.",
+      control: "boolean",
+      table: {
+        category: "behavior",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
       },
     },
     selectionMode: {
@@ -987,13 +1000,18 @@ const meta: Meta<TediTableStoryArgs> = {
     },
     state: {
       description:
-        "Controlled state — render the given slices and emit every change via `(stateChange)`.",
+        "Controlled state — render the given slices verbatim and emit every " +
+        "change via `(stateChange)`. Per-slice: unlisted slices stay " +
+        "internal. See the **State Management** docs page.",
       control: false,
       table: { category: "state", type: { summary: "Partial<TableState>" } },
     },
     defaultState: {
       description:
-        "Initial state for uncontrolled mode (seeds sorting / filters / pagination / selection).",
+        "Initial state for uncontrolled slices — seeds any `TableState` " +
+        "slice (sorting / filters / pagination / selection / expansion, " +
+        "e.g. `{ expanded: true }`). Read once; the table owns the state " +
+        "afterwards. See the **State Management** docs page.",
       control: false,
       table: { category: "state", type: { summary: "Partial<TableState>" } },
     },
@@ -1003,9 +1021,10 @@ const meta: Meta<TediTableStoryArgs> = {
       control: false,
       table: { category: "state", type: { summary: "TablePersistOptions" } },
     },
-    draggableRows: {
+    reorderableRows: {
       description:
-        "Reorder rows via drag-and-drop; emits `(rowDrop)` with source-array indices.",
+        "Reorder rows by mouse drag **and** keyboard (one input). Emits " +
+        "`(rowDrop)` with source-array indices.",
       control: false,
       table: {
         category: "drag & drop",
@@ -1013,9 +1032,10 @@ const meta: Meta<TediTableStoryArgs> = {
         defaultValue: { summary: "false" },
       },
     },
-    draggableColumns: {
+    reorderableColumns: {
       description:
-        "Reorder columns via header drag; updates internal `columnOrder` state.",
+        "Reorder columns by mouse drag **and** keyboard (one input). Updates " +
+        "internal `columnOrder` state.",
       control: false,
       table: {
         category: "drag & drop",
@@ -2081,7 +2101,14 @@ export const Sortable: Story = {
 })
 class FiltersStoryHostComponent extends TableStoryHostBase {
   data = filterablePeople;
-  pagination = DEFAULT_PAGINATION;
+  pagination = {
+    pageSize: 10,
+    pageSizeOptions: [
+      10,
+      25,
+      { value: filterablePeople.length, label: "Näita kõiki" },
+    ],
+  };
   certStatuses = CERT_STATUSES;
   statusColor = certStatusColor;
 
@@ -2162,6 +2189,16 @@ export const Filters: Story = {
   }),
   parameters: {
     docs: {
+      description: {
+        story:
+          'The page-size dropdown includes a **"Show all"** option, built with the ' +
+          "`{ value, label }` form of `pageSizeOptions`. Its `value` is the page " +
+          "size used when the option is picked, so make it large enough to hold " +
+          "every row: when you know the row total, pass it (here `data.length`); " +
+          "when you don't, pass `Number.MAX_SAFE_INTEGER`. Either way the table " +
+          "renders all rows on one page and the pager collapses — filtering only " +
+          "shrinks the row count, so a large page size always fits the result.",
+      },
       source: {
         language: "html",
         code: `<!-- Opt a column into the built-in filter popover with
@@ -2173,6 +2210,14 @@ export const Filters: Story = {
   columns:
     id 'name'   header 'Nimi'   sortable filterable filterFn 'includesString'
     id 'status' header 'Tõendi staatus' sortable filterable filterFn 'arrIncludesSome'
+
+  pagination — a "Show all" page size is just a { value, label } option whose
+  value is large enough to hold every row. Use the row total when you know it
+  (data.length), or Number.MAX_SAFE_INTEGER when you don't:
+    pagination = {
+      pageSize: 10,
+      pageSizeOptions: [10, 25, { value: data.length, label: 'Näita kõiki' }],
+    };
 -->
 <tedi-table
   [data]="data"
@@ -2446,6 +2491,81 @@ export const CollapsibleRowsLabeledToggle: Story = {
   },
 };
 
+// ---------- CollapsibleRowsExpandedByDefault ----------
+@Component({
+  standalone: true,
+  selector: "tedi-collapsible-rows-expanded-story",
+  imports: [TediTableComponent, StatusBadgeComponent],
+  template: `
+    <tedi-table
+      id="tedi-table-collapse-expanded"
+      [data]="data"
+      [columns]="columns()"
+      [getSubRows]="getSubRows"
+      [defaultState]="{ expanded: true }"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+    <ng-template #statusCell let-ctx>
+      <tedi-status-badge
+        [color]="statusColor[ctx.row.original.status]"
+        [text]="ctx.row.original.status"
+      />
+    </ng-template>
+  `,
+})
+class CollapsibleRowsExpandedStoryHostComponent extends TableStoryHostBase {
+  data = collapsiblePeople;
+  pagination = DEFAULT_PAGINATION;
+  statusColor = certStatusColor;
+  getSubRows = (row: CollapsibleRecord) => row.subRows;
+  statusCellTpl =
+    viewChild<TemplateRef<CellContext<CollapsibleRecord, unknown>>>(
+      "statusCell",
+    );
+
+  columns = computed<TediColumnDef<CollapsibleRecord>[]>(() => [
+    { id: "name", header: "Isik", accessorKey: "name" },
+    { id: "age", header: "Vanus", accessorKey: "age" },
+    { id: "visits", header: "Külastuste arv", accessorKey: "visits" },
+    {
+      id: "status",
+      header: "Tõendi staatus",
+      accessorKey: "status",
+      cell: this.statusCellTpl() ?? "",
+    } as TediColumnDef<CollapsibleRecord>,
+  ]);
+}
+
+export const CollapsibleRowsExpandedByDefault: Story = {
+  render: (args) => ({
+    moduleMetadata: { imports: [CollapsibleRowsExpandedStoryHostComponent] },
+    props: args,
+    template: `<tedi-collapsible-rows-expanded-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- defaultState seeds the initial (uncontrolled) table state. Pass
+  { expanded: true } to render every expandable row open on first
+  render — users can still collapse rows afterwards. To open only
+  specific rows, pass a map of row IDs instead (IDs default to the
+  row's index as a string; nested sub-rows use dotted paths):
+  [defaultState]="{ expanded: { '0': true, '2': true } }"
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [defaultState]="{ expanded: true }"
+  [pagination]="pagination"
+/>`,
+      },
+    },
+  },
+};
+
 // ---------- SelectableRows ----------
 @Component({
   standalone: true,
@@ -2500,7 +2620,7 @@ class SelectableRowsStoryHostComponent extends TableStoryHostBase {
 }
 
 export const SelectableRows: Story = {
-  args: { enableRowSelection: true },
+  args: { enableRowSelection: true, selectedRowHighlight: false },
   render: (args) => ({
     moduleMetadata: { imports: [SelectableRowsStoryHostComponent] },
     props: args,
@@ -2520,6 +2640,7 @@ export const SelectableRows: Story = {
   [data]="data"
   [columns]="columns"
   [enableRowSelection]="true"
+  [selectedRowHighlight]="false"
   [pagination]="pagination"
 />
 
@@ -2682,6 +2803,130 @@ export const ClickableRows: Story = {
 />
 
 <ng-template #personStatus let-ctx>
+  <tedi-status-badge
+    [color]="statusColor[ctx.row.original.status]"
+    [text]="ctx.row.original.status"
+    [variant]="
+      active()?.id === ctx.row.id || table.hoveredRowId() === ctx.row.id
+        ? 'filled-bordered'
+        : 'filled'
+    "
+  />
+</ng-template>`,
+      },
+    },
+  },
+};
+
+// ---------- CollapsibleClickableRows ----------
+@Component({
+  standalone: true,
+  selector: "tedi-collapsible-clickable-rows-story",
+  imports: [TediTableComponent, StatusBadgeComponent],
+  template: `
+    <p style="margin-bottom: 10px;">
+      {{
+        active()
+          ? "You clicked " + active()!.name
+          : "Click a row to select it. Click the chevron or the row itself to expand."
+      }}
+    </p>
+    <tedi-table
+      #table
+      id="tedi-table-collapsible-clickable"
+      [data]="data"
+      [columns]="columns()"
+      [getSubRows]="getSubRows"
+      [interactive]="true"
+      [activeRowId]="active()?.id"
+      (rowClick)="onClick($event)"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+    <ng-template #statusCell let-ctx>
+      <tedi-status-badge
+        [color]="statusColor[ctx.row.original.status]"
+        [text]="ctx.row.original.status"
+        [variant]="
+          active()?.id === ctx.row.id || table.hoveredRowId() === ctx.row.id
+            ? 'filled-bordered'
+            : 'filled'
+        "
+      />
+    </ng-template>
+  `,
+})
+class CollapsibleClickableRowsStoryHostComponent extends TableStoryHostBase {
+  data = collapsiblePeople;
+  pagination = DEFAULT_PAGINATION;
+  statusColor = certStatusColor;
+  active = signal<CollapsibleRecord | null>(null);
+
+  getSubRows = (row: CollapsibleRecord) => row.subRows;
+  statusCellTpl =
+    viewChild<TemplateRef<CellContext<CollapsibleRecord, unknown>>>("statusCell");
+
+  columns = computed<TediColumnDef<CollapsibleRecord>[]>(() => [
+    { id: "name", header: "Isik", accessorKey: "name" },
+    { id: "age", header: "Vanus", accessorKey: "age" },
+    { id: "visits", header: "Külastuste arv", accessorKey: "visits" },
+    {
+      id: "status",
+      header: "Tõendi staatus",
+      accessorKey: "status",
+      cell: this.statusCellTpl() ?? "",
+    } as TediColumnDef<CollapsibleRecord>,
+  ]);
+
+  onClick(row: Row<CollapsibleRecord>) {
+    // Only update active row if the click is not on the expand toggle
+    this.active.set({ ...row.original, id: row.id });
+  }
+}
+
+export const CollapsibleClickableRows: Story = {
+  args: { interactive: true, rowHover: true },
+  render: (args) => ({
+    moduleMetadata: { imports: [CollapsibleClickableRowsStoryHostComponent] },
+    props: args,
+    template: `<tedi-collapsible-clickable-rows-story ${argsToTemplate(
+      args,
+    )} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Combines [getSubRows] (collapsible / tree data) with " +
+          "interactive = true for clickable rows. Rows that have sub-rows show " +
+          "an expand chevron and respond to clicks in two ways: clicking the chevron " +
+          "toggles expansion, while clicking anywhere else on the row activates it " +
+          "(shown via [activeRowId]). The status cell borders its badge for both the " +
+          "active and hovered rows — read the table's exposed hoveredRowId() signal via a " +
+          "#table template ref.",
+      },
+      source: {
+        language: "html",
+        code: `<!-- [getSubRows] builds an expansion tree so rows with sub-rows
+  show an expand chevron. [interactive]="true" makes every row act like a
+  button (role=button, tabindex, Enter/Space). [activeRowId] pins the
+  clicked row visually — it stays highlighted while a side pane shows
+  its content. The status cell borders its badge for the active OR
+  hovered row — read the table's exposed hoveredRowId() signal via a
+  #table template ref.
+-->
+<tedi-table
+  #table
+  [data]="data"
+  [columns]="columns"
+  [getSubRows]="getSubRows"
+  [interactive]="true"
+  [activeRowId]="active()?.id"
+  (rowClick)="onClick($event)"
+  [pagination]="pagination"
+/>
+
+<ng-template #statusCell let-ctx>
   <tedi-status-badge
     [color]="statusColor[ctx.row.original.status]"
     [text]="ctx.row.original.status"
@@ -2963,6 +3208,102 @@ export const StickyHeaderAndFirstColumn: Story = {
   stickyHeader
   stickyFirstColumn
   [maxHeight]="280"
+/>`,
+      },
+    },
+  },
+};
+
+// ---------- ClickableStickyFirstColumn ----------
+@Component({
+  standalone: true,
+  selector: "tedi-clickable-sticky-story",
+  imports: [TediTableComponent],
+  template: `
+    <p style="margin-bottom: 10px;">
+      {{ active() ? "You clicked " + active()!.name : "Click or focus a row." }}
+    </p>
+    <div style="width: 100%;">
+      <tedi-table
+        id="tedi-table-clickable-sticky"
+        [data]="data"
+        [columns]="columns()"
+        [rowAriaLabel]="rowAriaLabel"
+        (rowClick)="onClick($event)"
+        ${TABLE_APPEARANCE_BINDINGS}
+      />
+    </div>
+    <ng-template #nameCell let-ctx>
+      <span style="display:inline-flex; align-items:center; gap:16px;">
+        {{ ctx.row.original.name }}
+        <span style="color: var(--general-text-tertiary);">
+          {{ ctx.row.original.personalId }}
+        </span>
+      </span>
+    </ng-template>
+  `,
+})
+class ClickableStickyFirstColumnStoryHostComponent extends TableStoryHostBase {
+  data = stickyDoctors;
+  active = signal<StickyDoctor | null>(null);
+  nameCellTpl =
+    viewChild<TemplateRef<CellContext<StickyDoctor, unknown>>>("nameCell");
+
+  rowAriaLabel = (row: Row<StickyDoctor>) => `Ava arst ${row.original.name}`;
+
+  onClick(row: Row<StickyDoctor>) {
+    this.active.set(row.original);
+  }
+
+  columns = computed<TediColumnDef<StickyDoctor>[]>(() => [
+    {
+      id: "name",
+      header: "Arst",
+      accessorKey: "name",
+      size: 280,
+      cell: this.nameCellTpl() ?? "",
+    } as TediColumnDef<StickyDoctor>,
+    { id: "specialty", header: "Eriala", accessorKey: "specialty", size: 240 },
+    { id: "experience", header: "Tööstaaž", accessorKey: "experience", size: 160 },
+    { id: "location", header: "Asukoht", accessorKey: "location", size: 160 },
+    { id: "email", header: "E-post", accessorKey: "email", size: 240 },
+    { id: "phone", header: "Telefon", accessorKey: "phone", size: 180 },
+    { id: "room", header: "Kabinet", accessorKey: "room", size: 160 },
+  ]);
+}
+
+export const ClickableStickyFirstColumn: Story = {
+  args: {
+    interactive: true,
+    rowHover: true,
+    stickyFirstColumn: true,
+    stickyHeader: true,
+    maxHeight: 400,
+  },
+  render: (args) => ({
+    moduleMetadata: { imports: [ClickableStickyFirstColumnStoryHostComponent] },
+    props: args,
+    template: `<tedi-clickable-sticky-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!-- Interactive rows + stickyFirstColumn. The keyboard focus ring is
+  redrawn on the pinned first column (its opaque background would
+  otherwise cover the row's outline). Supply [rowAriaLabel] so each
+  role=button row gets a concise accessible name instead of its full
+  cell text.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  interactive
+  stickyFirstColumn
+  stickyHeader
+  [maxHeight]="400"
+  [rowAriaLabel]="rowAriaLabel"
+  (rowClick)="onClick($event)"
 />`,
       },
     },
@@ -3595,10 +3936,10 @@ export const WithColumnsMenu: Story = {
   },
 };
 
-// ---------- DraggableRows ----------
+// ---------- ReorderableRows ----------
 @Component({
   standalone: true,
-  selector: "tedi-draggable-rows-story",
+  selector: "tedi-reorderable-rows-story",
   imports: [TediTableComponent],
   template: `
     <div style="
@@ -3606,23 +3947,34 @@ export const WithColumnsMenu: Story = {
       margin-bottom: 16px;
       font-size: var(--body-small-regular-size);
     ">
-      Drag any row to reorder it. The table emits
-      <code>(rowDrop)</code>; this story uses CDK's
-      <code>moveItemInArray</code> to reorder the data array and pipes the
-      new array back via <code>[data]</code>.
+      <p style="margin: 0 0 8px;">
+        Reorder rows two ways — both emit <code>(rowDrop)</code>; this story
+        applies it with CDK's <code>moveItemInArray</code> and pipes the new
+        array back via <code>[data]</code>:
+      </p>
+      <ul style="margin: 0; padding-left: 20px;">
+        <li><strong>Mouse:</strong> drag any row by its handle.</li>
+        <li>
+          <strong>Keyboard:</strong> <code>Tab</code> to a row's handle,
+          <code>Space</code>/<code>Enter</code> to pick it up,
+          <code>↑</code>/<code>↓</code> to move (within the page),
+          <code>Space</code>/<code>Enter</code> to drop,
+          <code>Escape</code> to cancel.
+        </li>
+      </ul>
     </div>
     <tedi-table
-      id="tedi-table-draggable-rows"
+      id="tedi-table-reorderable-rows"
       [data]="rows()"
       [columns]="columns"
-      [draggableRows]="true"
+      [reorderableRows]="true"
       [pagination]="pagination"
       (rowDrop)="onRowDrop($event)"
       ${TABLE_APPEARANCE_BINDINGS}
     />
   `,
 })
-class DraggableRowsStoryHostComponent extends TableStoryHostBase {
+class ReorderableRowsStoryHostComponent extends TableStoryHostBase {
   protected readonly rows = signal<Person[]>(people.slice(0, 8));
   pagination = SHOWCASE_PAGINATION_4;
   columns: TediColumnDef<Person>[] = [
@@ -3641,25 +3993,35 @@ class DraggableRowsStoryHostComponent extends TableStoryHostBase {
   }
 }
 
-export const DraggableRows: Story = {
+export const ReorderableRows: Story = {
   render: (args) => ({
-    moduleMetadata: { imports: [DraggableRowsStoryHostComponent] },
+    moduleMetadata: { imports: [ReorderableRowsStoryHostComponent] },
     props: args,
-    template: `<tedi-draggable-rows-story ${argsToTemplate(args)} />`,
+    template: `<tedi-reorderable-rows-story ${argsToTemplate(args)} />`,
   }),
   parameters: {
     docs: {
+      description: {
+        story:
+          "`reorderableRows` enables row reordering by **mouse drag and " +
+          "keyboard** together — drag a row by its handle, or `Tab` to the " +
+          "handle, `Space`/`Enter` to pick up, Up/Down to move (clamped to the " +
+          "current page), `Space`/`Enter` to drop, `Escape` to cancel. Every " +
+          "move emits `(rowDrop)` with source `data` indices — apply it with " +
+          "`moveItemInArray` and feed the array back via `[data]`. The picked-up " +
+          "row is highlighted and the handle exposes `aria-pressed`; a live " +
+          "region announces pickup, move, drop and cancel.",
+      },
       source: {
         language: "html",
-        code: `<!-- [draggableRows]="true" makes rows reorderable. The table emits
-  (rowDrop) with a CdkDragDrop event; the consumer reorders its
-  data array (e.g. via CDK's moveItemInArray) and feeds it back
-  through [data].
+        code: `<!-- reorderableRows = mouse drag + keyboard, in one input.
+  Emits (rowDrop); the consumer reorders its data array (e.g. via
+  CDK's moveItemInArray) and feeds it back through [data].
 -->
 <tedi-table
   [data]="rows()"
   [columns]="columns"
-  [draggableRows]="true"
+  [reorderableRows]="true"
   [pagination]="pagination"
   (rowDrop)="onRowDrop($event)"
 />`,
@@ -3668,10 +4030,10 @@ export const DraggableRows: Story = {
   },
 };
 
-// ---------- DraggableColumns ----------
+// ---------- ReorderableColumns ----------
 @Component({
   standalone: true,
-  selector: "tedi-draggable-columns-story",
+  selector: "tedi-reorderable-columns-story",
   imports: [TediTableComponent],
   template: `
     <div style="
@@ -3679,23 +4041,34 @@ export const DraggableRows: Story = {
       margin-bottom: 16px;
       font-size: var(--body-small-regular-size);
     ">
-      Drag any header cell to reorder columns. The table updates its own
-      <code>columnOrder</code> state internally — no consumer wiring is
-      required beyond setting <code>[draggableColumns]="true"</code>. Persist
-      the order across reloads by adding <code>'columnOrder'</code> to the
-      <code>persist.include</code> list.
+      <p style="margin: 0 0 8px;">
+        Reorder columns two ways — both update the table's own
+        <code>columnOrder</code> state internally:
+      </p>
+      <ul style="margin: 0 0 8px; padding-left: 20px;">
+        <li><strong>Mouse:</strong> drag any header cell by its handle.</li>
+        <li>
+          <strong>Keyboard:</strong> <code>Tab</code> to a header,
+          <code>Space</code>/<code>Enter</code> to pick it up,
+          <code>←</code>/<code>→</code> to move,
+          <code>Space</code>/<code>Enter</code> to drop,
+          <code>Escape</code> to cancel.
+        </li>
+      </ul>
+      Persist the order across reloads by adding <code>'columnOrder'</code> to
+      the <code>persist.include</code> list.
     </div>
     <tedi-table
-      id="tedi-table-draggable-cols"
+      id="tedi-table-reorderable-cols"
       [data]="data"
       [columns]="columns"
-      [draggableColumns]="true"
+      [reorderableColumns]="true"
       [pagination]="pagination"
       ${TABLE_APPEARANCE_BINDINGS}
     />
   `,
 })
-class DraggableColumnsStoryHostComponent extends TableStoryHostBase {
+class ReorderableColumnsStoryHostComponent extends TableStoryHostBase {
   data = people;
   pagination = DEFAULT_PAGINATION;
   columns: TediColumnDef<Person>[] = [
@@ -3706,25 +4079,38 @@ class DraggableColumnsStoryHostComponent extends TableStoryHostBase {
   ];
 }
 
-export const DraggableColumns: Story = {
+export const ReorderableColumns: Story = {
+  args: { stickyHeader: true, maxHeight: 480 },
   render: (args) => ({
-    moduleMetadata: { imports: [DraggableColumnsStoryHostComponent] },
+    moduleMetadata: { imports: [ReorderableColumnsStoryHostComponent] },
     props: args,
-    template: `<tedi-draggable-columns-story ${argsToTemplate(args)} />`,
+    template: `<tedi-reorderable-columns-story ${argsToTemplate(args)} />`,
   }),
   parameters: {
     docs: {
+      description: {
+        story:
+          "`reorderableColumns` enables column reordering by **mouse drag and " +
+          "keyboard** together — drag a header cell by its handle, or `Tab` to " +
+          "a header, `Space`/`Enter` to pick up, Left/Right to move, " +
+          "`Space`/`Enter` to drop, `Escape` to cancel. Both update the table's " +
+          "own `columnOrder` state internally. The picked-up cell gets " +
+          "`aria-pressed=\"true\"` and a primary highlight, and a live region " +
+          "announces pickup, drop, and cancel for screen readers.",
+      },
       source: {
         language: "html",
-        code: `<!-- [draggableColumns]="true" lets users drag header cells to reorder.
-  No consumer wiring is required — the table updates its own
-  'columnOrder' state. Persist across reloads by adding 'columnOrder'
-  to the persist.include list.
+        code: `<!-- reorderableColumns = mouse drag + keyboard, in one input.
+  Updates the table's columnOrder internally. 'stickyHeader' pins
+  thead during vertical scroll; requires [maxHeight]. Persist across
+  reloads by adding 'columnOrder' to persist.include.
 -->
 <tedi-table
   [data]="data"
   [columns]="columns"
-  [draggableColumns]="true"
+  reorderableColumns
+  [stickyHeader]="true"
+  [maxHeight]="480"
   [pagination]="pagination"
 />`,
       },
@@ -4257,4 +4643,3 @@ export const Responsive: Story = {
     },
   },
 };
-

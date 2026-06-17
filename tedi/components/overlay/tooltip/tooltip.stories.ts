@@ -101,20 +101,6 @@ export default {
         },
       },
     },
-    appendTo: {
-      control: "text",
-      description:
-        "Append floating element to given selector. Use 'body' to append at the end of DOM or empty string to append next to trigger element.",
-      table: {
-        category: "tooltip",
-        type: {
-          summary: "string",
-        },
-        defaultValue: {
-          summary: "body",
-        },
-      },
-    },
     timeoutDelay: {
       control: "number",
       description:
@@ -157,7 +143,6 @@ export const Default: Story = {
   args: {
     position: "top",
     preventOverflow: true,
-    appendTo: "body",
     timeoutDelay: 100,
     maxWidth: "medium",
     openWith: "both",
@@ -165,7 +150,7 @@ export const Default: Story = {
   render: (args) => ({
     props: args,
     template: `
-      <tedi-tooltip [position]="position" [timeoutDelay]="timeoutDelay" [preventOverflow]="preventOverflow" [appendTo]="appendTo" [openWith]="openWith">
+      <tedi-tooltip [position]="position" [timeoutDelay]="timeoutDelay" [preventOverflow]="preventOverflow" [openWith]="openWith">
         <tedi-tooltip-trigger>
           <button tedi-info-button></button>
         </tedi-tooltip-trigger>

@@ -171,14 +171,21 @@ export const PrimaryInverted: StoryObj<TemplateType> = {
       hover: "#Hover",
       active: "#Active",
       focusVisible: "#Focus",
-    },
-    backgrounds: { default: "brand" },
+    }
   },
+
   args: {
     titleColor: "white",
     variant: "primary-inverted",
   },
+
   render: ButtonTemplate,
+
+  globals: {
+    backgrounds: {
+      value: "brand"
+    }
+  }
 };
 
 export const Secondary: StoryObj<TemplateType> = {
@@ -201,14 +208,21 @@ export const SecondaryInverted: StoryObj<TemplateType> = {
       hover: "#Hover",
       active: "#Active",
       focusVisible: "#Focus",
-    },
-    backgrounds: { default: "brand" },
+    }
   },
+
   args: {
     titleColor: "white",
     variant: "secondary-inverted",
   },
+
   render: ButtonTemplate,
+
+  globals: {
+    backgrounds: {
+      value: "brand"
+    }
+  }
 };
 
 export const Neutral: StoryObj<TemplateType> = {
@@ -231,14 +245,21 @@ export const NeutralInverted: StoryObj<TemplateType> = {
       hover: "#Hover",
       active: "#Active",
       focusVisible: "#Focus",
-    },
-    backgrounds: { default: "brand" },
+    }
   },
+
   args: {
     titleColor: "white",
     variant: "neutral-inverted",
   },
+
   render: ButtonTemplate,
+
+  globals: {
+    backgrounds: {
+      value: "brand"
+    }
+  }
 };
 
 export const Success: StoryObj<TemplateType> = {

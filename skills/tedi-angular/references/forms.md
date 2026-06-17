@@ -13,6 +13,8 @@ TEDI form controls implement Angular's `ControlValueAccessor` interface, integra
 | RadioGroupComponent | `tedi-radio-group` | `string \| null` |
 | ToggleComponent | `tedi-toggle` | `boolean` |
 | DatePickerComponent | `tedi-date-picker` | `Date \| null` |
+| TimeFieldComponent | `tedi-time-field` | `string \| null` (HH:mm) |
+| TimePickerComponent | `tedi-time-picker` | `string \| null` (HH:mm) |
 | DropdownComponent | `tedi-dropdown` | `string` |
 | SelectComponent | `tedi-select` | `T \| T[]` |
 
