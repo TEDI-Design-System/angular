@@ -1,6 +1,7 @@
 .tedi-card-button {
   display: block;
   width: 100%;
+  height: 100%;
   padding: 0;
   font: inherit;
   color: inherit;
@@ -10,10 +11,19 @@
   background: none;
   border: none;
 
+  > .tedi-card {
+    height: 100%;
+
+    > .tedi-card-row {
+      flex: 1 0 auto;
+    }
+  }
+
   &:hover>.tedi-card {
     border-color: var(--button-card-hover-border);
 
-    .tedi-card-content {
+    .tedi-card-content,
+    .tedi-card-icon {
       background-color: var(--button-card-hover-background);
     }
 
@@ -21,20 +31,16 @@
       color: var(--button-card-icon-hover);
     }
 
-    .tedi-card-icon {
-      color: var(--general-icon-white);
-      background-color: var(--button-card-hover-icon-background);
-    }
-
-    .tedi-card-icon .tedi-icon {
-      color: inherit;
+    .tedi-separator {
+      border-color: var(--button-card-hover-border);
     }
   }
 
   &:active>.tedi-card {
     border-color: var(--button-card-active-border);
 
-    .tedi-card-content {
+    .tedi-card-content,
+    .tedi-card-icon {
       background-color: var(--button-card-active-background);
     }
 
@@ -42,13 +48,8 @@
       color: var(--button-card-icon-hover);
     }
 
-    .tedi-card-icon {
-      color: var(--general-icon-white);
-      background-color: var(--button-card-active-icon-background);
-    }
-
-    .tedi-card-icon .tedi-icon {
-      color: inherit;
+    .tedi-separator {
+      border-color: var(--button-card-active-border);
     }
   }
 
@@ -76,6 +77,10 @@
       .tedi-icon,
       .tedi-card-icon {
         color: var(--general-text-disabled);
+      }
+
+      .tedi-separator {
+        border-color: var(--button-card-disabled-border);
       }
     }
   }

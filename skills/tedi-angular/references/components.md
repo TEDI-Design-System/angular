@@ -49,7 +49,7 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 **Selector:** `a[tedi-card-button]` or `button[tedi-card-button]`
 **Slots:** `tedi-card` only (other content is not projected) — the card may use any of its blocks (content, rows, icon cells)
 
-Interactive wrapper around a `tedi-card`: the host element provides semantics (anchor for href/routerLink navigation, button for actions and the disabled state) and applies hover/active/focus/disabled states to the card inside. Icon cells turn brand-colored on hover/active. Do not place other interactive elements inside.
+Interactive wrapper around a `tedi-card`: the host element provides semantics (anchor for href/routerLink navigation, button for actions and the disabled state) and applies hover/active/focus/disabled states to the card inside. On hover/active the whole card — content and icon cells alike — shares the same light hover/active background, and icons turn brand-colored. Do not place other interactive elements inside.
 
 ```html
 <a tedi-card-button routerLink="/toetused">
@@ -1069,7 +1069,7 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 **Inputs:**
 - `activeIndex: number` — items before it render as past, after it as future
 - `variant: TimelineVariant = "default"` — "card" renders each item as a bordered, padded card row inside a card frame
-- `cardPadding: TimelineCardPadding` — item padding in rems for the card variant; same values as Card padding (0 | 0.5 | 0.75 | 1 | 1.5 | 2 | 2.5 | 3; default 1)
+- `cardPadding: TimelineCardPadding` — item padding in rems for the card variant; same values as Card padding (0 | 0.25 | 0.5 | 0.75 | 1 | 1.25 | 1.5 | 2 | 2.5 | 3; default 1)
 - Sub-components: `tedi-timeline-item` (`timings: string[]`), `tedi-timeline-title`, `tedi-timeline-description`
 - Content marked with `*tediTimelineTimingsBottom` is pinned to the bottom of the timings column on desktop and rendered after the item content on mobile (e.g. a "Muudetud …" line)
 

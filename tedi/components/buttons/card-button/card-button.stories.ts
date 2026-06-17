@@ -57,7 +57,7 @@ type Story = StoryObj<CardButtonComponent>;
 export const Default: Story = {
   render: () => ({
     template: `
-      <a tedi-card-button href="#">
+      <button tedi-card-button type="button">
         <tedi-card>
           <tedi-card-content class="flex align-items-center justify-content-between gap-3">
             <div>
@@ -67,16 +67,16 @@ export const Default: Story = {
             <tedi-icon name="arrow_right_alt" color="secondary" />
           </tedi-card-content>
         </tedi-card>
-      </a>
+      </button>
     `,
   }),
 };
 
-export const CardRow: Story = {
+export const CardRows: Story = {
   render: () => ({
     template: `
       <div [tediVerticalSpacing]="1">
-        <a tedi-card-button href="#">
+        <button tedi-card-button type="button">
           <tedi-card>
             <tedi-card-content class="flex align-items-center gap-3">
               <p tedi-text modifiers="bold">8:30</p>
@@ -90,8 +90,20 @@ export const CardRow: Story = {
               </span>
             </tedi-card-content>
           </tedi-card>
-        </a>
-        <a tedi-card-button href="#">
+        </button>
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center gap-3">
+              <p tedi-text modifiers="bold">8:30</p>
+              <p tedi-text modifiers="bold" class="flex-fill">Kardioloog</p>
+              <span tedi-text color="brand" class="flex align-items-center gap-2">
+                <span *showAt="'sm'" aria-hidden="true">Broneerima</span>
+                <tedi-icon name="arrow_right_alt" color="brand" label="Broneerima" />
+              </span>
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+        <button tedi-card-button type="button">
           <tedi-card>
             <tedi-card-content class="flex align-items-center gap-3">
               <tedi-icon name="monitor_heart" color="secondary" />
@@ -105,8 +117,55 @@ export const CardRow: Story = {
               </span>
             </tedi-card-content>
           </tedi-card>
-        </a>
-        <a tedi-card-button href="#">
+        </button>
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center gap-3">
+              <tedi-icon name="monitor_heart" color="secondary" />
+              <p tedi-text modifiers="bold" class="flex-fill">Kardioloog</p>
+              <p tedi-text modifiers="small" color="secondary">Valdkond</p>
+              <span tedi-text color="brand" class="flex align-items-center gap-2">
+                <span *showAt="'sm'" aria-hidden="true">Broneerima</span>
+                <tedi-icon name="arrow_right_alt" color="brand" label="Broneerima" />
+              </span>
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-row>
+              <tedi-card-icon>
+                <tedi-icon name="monitor_heart" />
+              </tedi-card-icon>
+              <tedi-separator axis="vertical" size="auto" />
+              <tedi-card-content class="flex align-items-center gap-3">
+                <div class="flex-fill">
+                  <p tedi-text modifiers="bold">Kardioloog</p>
+                  <p tedi-text modifiers="small" color="secondary">Valdkond</p>
+                </div>
+                <span tedi-text color="brand" class="flex align-items-center gap-2">
+                  <span *showAt="'sm'" aria-hidden="true">Broneerima</span>
+                  <tedi-icon name="arrow_right_alt" color="brand" label="Broneerima" />
+                </span>
+              </tedi-card-content>
+            </tedi-card-row>
+          </tedi-card>
+        </button>
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center gap-3">
+              <div class="flex-fill">
+                <p tedi-text modifiers="bold">Kardioloog</p>
+                <p tedi-text modifiers="small" color="secondary">Valdkond</p>
+              </div>
+              <span tedi-text color="brand" class="flex align-items-center gap-2">
+                <span *showAt="'sm'" aria-hidden="true">Broneerima</span>
+                <tedi-icon name="arrow_right_alt" color="brand" label="Broneerima" />
+              </span>
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+        <button tedi-card-button type="button">
           <tedi-card>
             <tedi-card-content class="flex align-items-center gap-3">
               <div class="flex-fill">
@@ -119,22 +178,108 @@ export const CardRow: Story = {
               </span>
             </tedi-card-content>
           </tedi-card>
-        </a>
+        </button>
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center gap-3">
+              <tedi-icon name="monitor_heart" color="secondary" />
+              <div class="flex-fill">
+                <p tedi-text modifiers="bold">Perearst</p>
+                <p tedi-text modifiers="small" color="secondary">Dr. Mari Maasikas</p>
+              </div>
+              <tedi-status-badge color="success" text="Aktiivne" />
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center gap-3">
+              <p tedi-text modifiers="bold" class="flex-fill">Üldandmed</p>
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center justify-content-between gap-3">
+              <div>
+                <h4 tedi-text color="brand">Minu andmed</h4>
+                <p tedi-text modifiers="small" color="secondary">Isikuandmed ja sinu perearstiga seotud info.</p>
+              </div>
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
       </div>
     `,
   }),
 };
 
-export const CardShortcutWithIconCard: Story = {
+export const CardShortcut: Story = {
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [lg]="{ cols: 2 }" [gap]="3">
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center justify-content-between gap-3">
+              <div>
+                <p tedi-text modifiers="bold">Töövõime</p>
+                <p tedi-text modifiers="small" color="secondary">Näiteks töövõimetuslehed, töövõime hindamine</p>
+              </div>
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center justify-content-between gap-3">
+              <div>
+                <p tedi-text modifiers="bold">Esindusõigus Terviseportaalis</p>
+                <p tedi-text modifiers="small" color="secondary">Võimaldab jagada ligipääsu sinu terviseandmetele</p>
+              </div>
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center justify-content-between gap-3">
+              <div>
+                <p tedi-text modifiers="bold">Mootorsõiduki juhiloa tõend</p>
+                <p tedi-text modifiers="small" color="secondary">Kehtib kuni 28.05.2024</p>
+              </div>
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center justify-content-between gap-3">
+              <div>
+                <p tedi-text modifiers="bold">Minu hammaste tervis</p>
+                <p tedi-text modifiers="small" color="secondary">Ülevaade sinu vastuvõttudest</p>
+              </div>
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+      </tedi-row>
+    `,
+  }),
+};
+
+export const WithIconCard: Story = {
   render: () => ({
     template: `
       <tedi-row [cols]="1" [lg]="{ cols: 3 }" [gap]="3">
-        <a tedi-card-button href="#">
+        <button tedi-card-button type="button">
           <tedi-card>
             <tedi-card-row>
               <tedi-card-icon>
                 <tedi-icon name="euro_symbol" />
               </tedi-card-icon>
+              <tedi-separator axis="vertical" size="auto" />
               <tedi-card-content class="flex align-items-center justify-content-between gap-3">
                 <div>
                   <p tedi-text modifiers="bold">Isiku toetused</p>
@@ -144,13 +289,14 @@ export const CardShortcutWithIconCard: Story = {
               </tedi-card-content>
             </tedi-card-row>
           </tedi-card>
-        </a>
-        <a tedi-card-button href="#">
+        </button>
+        <button tedi-card-button type="button">
           <tedi-card>
             <tedi-card-row>
               <tedi-card-icon>
                 <tedi-icon name="checklist" />
               </tedi-card-icon>
+              <tedi-separator axis="vertical" size="auto" />
               <tedi-card-content class="flex align-items-center justify-content-between gap-3">
                 <div>
                   <p tedi-text modifiers="bold">Isiku hindamised</p>
@@ -160,13 +306,14 @@ export const CardShortcutWithIconCard: Story = {
               </tedi-card-content>
             </tedi-card-row>
           </tedi-card>
-        </a>
-        <a tedi-card-button href="#">
+        </button>
+        <button tedi-card-button type="button">
           <tedi-card>
             <tedi-card-row>
               <tedi-card-icon>
                 <tedi-icon name="contract" />
               </tedi-card-icon>
+              <tedi-separator axis="vertical" size="auto" />
               <tedi-card-content class="flex align-items-center justify-content-between gap-3">
                 <div>
                   <p tedi-text modifiers="bold">Isiku teenused</p>
@@ -176,34 +323,8 @@ export const CardShortcutWithIconCard: Story = {
               </tedi-card-content>
             </tedi-card-row>
           </tedi-card>
-        </a>
+        </button>
       </tedi-row>
-    `,
-  }),
-};
-
-export const AsButton: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Use a button host when the card triggers an action instead of navigating. Only the button host supports the disabled state.",
-      },
-    },
-  },
-  render: () => ({
-    template: `
-      <button tedi-card-button type="button">
-        <tedi-card>
-          <tedi-card-content class="flex align-items-center justify-content-between gap-3">
-            <div>
-              <p tedi-text modifiers="bold">Töövõime</p>
-              <p tedi-text modifiers="small" color="secondary">Näiteks töövõimetuslehed, töövõime hindamine</p>
-            </div>
-            <tedi-icon name="arrow_right_alt" color="secondary" />
-          </tedi-card-content>
-        </tedi-card>
-      </button>
     `,
   }),
 };
@@ -223,10 +344,11 @@ export const States: Story = {
           <p tedi-text modifiers="bold">Default</p>
         </tedi-col>
         <tedi-col width="5">
-          <a tedi-card-button id="Default" href="#">
+          <button tedi-card-button id="Default" type="button">
             <tedi-card>
               <tedi-card-row>
                 <tedi-card-icon><tedi-icon name="euro_symbol" /></tedi-card-icon>
+                <tedi-separator axis="vertical" size="auto" />
                 <tedi-card-content class="flex align-items-center justify-content-between gap-3">
                   <div>
                     <p tedi-text modifiers="bold">Isiku toetused</p>
@@ -236,16 +358,17 @@ export const States: Story = {
                 </tedi-card-content>
               </tedi-card-row>
             </tedi-card>
-          </a>
+          </button>
         </tedi-col>
         <tedi-col width="1">
           <p tedi-text modifiers="bold">Hover</p>
         </tedi-col>
         <tedi-col width="5">
-          <a tedi-card-button id="Hover" href="#">
+          <button tedi-card-button id="Hover" type="button">
             <tedi-card>
               <tedi-card-row>
                 <tedi-card-icon><tedi-icon name="euro_symbol" /></tedi-card-icon>
+                <tedi-separator axis="vertical" size="auto" />
                 <tedi-card-content class="flex align-items-center justify-content-between gap-3">
                   <div>
                     <p tedi-text modifiers="bold">Isiku toetused</p>
@@ -255,16 +378,17 @@ export const States: Story = {
                 </tedi-card-content>
               </tedi-card-row>
             </tedi-card>
-          </a>
+          </button>
         </tedi-col>
         <tedi-col width="1">
           <p tedi-text modifiers="bold">Active</p>
         </tedi-col>
         <tedi-col width="5">
-          <a tedi-card-button id="Active" href="#">
+          <button tedi-card-button id="Active" type="button">
             <tedi-card>
               <tedi-card-row>
                 <tedi-card-icon><tedi-icon name="euro_symbol" /></tedi-card-icon>
+                <tedi-separator axis="vertical" size="auto" />
                 <tedi-card-content class="flex align-items-center justify-content-between gap-3">
                   <div>
                     <p tedi-text modifiers="bold">Isiku toetused</p>
@@ -274,16 +398,17 @@ export const States: Story = {
                 </tedi-card-content>
               </tedi-card-row>
             </tedi-card>
-          </a>
+          </button>
         </tedi-col>
         <tedi-col width="1">
           <p tedi-text modifiers="bold">Focus</p>
         </tedi-col>
         <tedi-col width="5">
-          <a tedi-card-button id="Focus" href="#">
+          <button tedi-card-button id="Focus" type="button">
             <tedi-card>
               <tedi-card-row>
                 <tedi-card-icon><tedi-icon name="euro_symbol" /></tedi-card-icon>
+                <tedi-separator axis="vertical" size="auto" />
                 <tedi-card-content class="flex align-items-center justify-content-between gap-3">
                   <div>
                     <p tedi-text modifiers="bold">Isiku toetused</p>
@@ -293,7 +418,7 @@ export const States: Story = {
                 </tedi-card-content>
               </tedi-card-row>
             </tedi-card>
-          </a>
+          </button>
         </tedi-col>
         <tedi-col width="1">
           <p tedi-text modifiers="bold">Disabled</p>
@@ -303,6 +428,7 @@ export const States: Story = {
             <tedi-card>
               <tedi-card-row>
                 <tedi-card-icon><tedi-icon name="euro_symbol" /></tedi-card-icon>
+                <tedi-separator axis="vertical" size="auto" />
                 <tedi-card-content class="flex align-items-center justify-content-between gap-3">
                   <div>
                     <p tedi-text modifiers="bold">Isiku toetused</p>
@@ -319,52 +445,28 @@ export const States: Story = {
   }),
 };
 
-export const TabCard: Story = {
+export const AsLink: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Mobile navigation pattern: full-width tab cards with a brand title, description and a centered arrow.",
+          "Use an anchor host when the card navigates to another page or route. The button host is the default; only the button host supports the disabled state.",
       },
     },
   },
   render: () => ({
     template: `
-      <div [tediVerticalSpacing]="1">
-        <a tedi-card-button href="#">
-          <tedi-card>
-            <tedi-card-content class="flex align-items-center justify-content-between gap-3">
-              <div>
-                <h4 tedi-text color="brand">Minu andmed</h4>
-                <p tedi-text modifiers="small" color="secondary">Isikuandmed ja sinu perearstiga seotud info.</p>
-              </div>
-              <tedi-icon name="arrow_right_alt" color="secondary" />
-            </tedi-card-content>
-          </tedi-card>
-        </a>
-        <a tedi-card-button href="#">
-          <tedi-card>
-            <tedi-card-content class="flex align-items-center justify-content-between gap-3">
-              <div>
-                <h4 tedi-text color="brand">Minu retseptid</h4>
-                <p tedi-text modifiers="small" color="secondary">Retseptid ja meditsiiniseadme kaardid.</p>
-              </div>
-              <tedi-icon name="arrow_right_alt" color="secondary" />
-            </tedi-card-content>
-          </tedi-card>
-        </a>
-        <a tedi-card-button href="#">
-          <tedi-card>
-            <tedi-card-content class="flex align-items-center justify-content-between gap-3">
-              <div>
-                <h4 tedi-text color="brand">Minu vaktsineerimised</h4>
-                <p tedi-text modifiers="small" color="secondary">Vaktsineerimiste ülevaade ja immuniseerimiskava.</p>
-              </div>
-              <tedi-icon name="arrow_right_alt" color="secondary" />
-            </tedi-card-content>
-          </tedi-card>
-        </a>
-      </div>
+      <a tedi-card-button href="#">
+        <tedi-card>
+          <tedi-card-content class="flex align-items-center justify-content-between gap-3">
+            <div>
+              <p tedi-text modifiers="bold">Töövõime</p>
+              <p tedi-text modifiers="small" color="secondary">Näiteks töövõimetuslehed, töövõime hindamine</p>
+            </div>
+            <tedi-icon name="arrow_right_alt" color="secondary" />
+          </tedi-card-content>
+        </tedi-card>
+      </a>
     `,
   }),
 };
@@ -380,12 +482,13 @@ export const ComplexCard: Story = {
   },
   render: () => ({
     template: `
-      <a tedi-card-button href="#">
+      <button tedi-card-button type="button">
         <tedi-card>
           <tedi-card-row>
             <tedi-card-icon>
               <tedi-icon name="prescriptions" />
             </tedi-card-icon>
+            <tedi-separator axis="vertical" size="auto" />
             <tedi-card-content class="flex flex-wrap align-items-center justify-content-between gap-3">
               <div>
                 <p tedi-text modifiers="bold">Amlodipiin 50mg</p>
@@ -399,35 +502,30 @@ export const ComplexCard: Story = {
             </tedi-card-content>
           </tedi-card-row>
           <tedi-separator />
-          <tedi-card-row>
-            <tedi-card-icon>
-              <tedi-icon name="info" />
-            </tedi-card-icon>
-            <tedi-card-content>
-              <tedi-row [cols]="1" [md]="{ cols: 3 }" [gap]="1">
-                <tedi-col>
-                  <tedi-text-group type="vertical">
-                    <tedi-text-group-label>Toimeaine</tedi-text-group-label>
-                    <tedi-text-group-value>Amlodipiin</tedi-text-group-value>
-                  </tedi-text-group>
-                </tedi-col>
-                <tedi-col>
-                  <tedi-text-group type="vertical">
-                    <tedi-text-group-label>Kogus</tedi-text-group-label>
-                    <tedi-text-group-value>30 tk</tedi-text-group-value>
-                  </tedi-text-group>
-                </tedi-col>
-                <tedi-col>
-                  <tedi-text-group type="vertical">
-                    <tedi-text-group-label>Välja ostmata</tedi-text-group-label>
-                    <tedi-text-group-value>5 / 6 retsepti</tedi-text-group-value>
-                  </tedi-text-group>
-                </tedi-col>
-              </tedi-row>
-            </tedi-card-content>
-          </tedi-card-row>
+          <tedi-card-content>
+            <tedi-row [cols]="1" [md]="{ cols: 3 }" [gap]="2">
+              <tedi-col>
+                <tedi-text-group type="vertical">
+                  <tedi-text-group-label>Toimeaine</tedi-text-group-label>
+                  <tedi-text-group-value>Amlodipiin</tedi-text-group-value>
+                </tedi-text-group>
+              </tedi-col>
+              <tedi-col>
+                <tedi-text-group type="vertical">
+                  <tedi-text-group-label>Kogus</tedi-text-group-label>
+                  <tedi-text-group-value>30 tk</tedi-text-group-value>
+                </tedi-text-group>
+              </tedi-col>
+              <tedi-col>
+                <tedi-text-group type="vertical">
+                  <tedi-text-group-label>Välja ostmata</tedi-text-group-label>
+                  <tedi-text-group-value>5 / 6 retsepti</tedi-text-group-value>
+                </tedi-text-group>
+              </tedi-col>
+            </tedi-row>
+          </tedi-card-content>
         </tedi-card>
-      </a>
+      </button>
     `,
   }),
 };
