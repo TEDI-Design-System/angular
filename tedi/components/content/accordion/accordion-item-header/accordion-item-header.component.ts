@@ -9,7 +9,11 @@ import {
 } from "@angular/core";
 import { IconComponent } from "../../../base/icon/icon.component";
 import { TextComponent } from "../../../base/text/text.component";
-import { CollapseButtonComponent } from "../../../buttons/collapse-button/collapse-button.component";
+import {
+  CollapseButtonArrowType,
+  CollapseButtonComponent,
+  CollapseButtonSize,
+} from "../../../buttons/collapse-button/collapse-button.component";
 import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
 import { AccordionItemComponent } from "../accordion-item/accordion-item.component";
 
@@ -32,8 +36,7 @@ import { AccordionItemComponent } from "../accordion-item/accordion-item.compone
     "[class.tedi-accordion-item-header--hoverable]":
       "headerClickable() && !item.disabled()",
     "[class.tedi-accordion-item-header--expanded]": "expanded()",
-    "[class.tedi-accordion-item-header--with-icon-card]":
-      "item.showIconCard()",
+    "[class.tedi-accordion-item-header--with-icon-card]": "item.showIconCard()",
     "[class.tedi-accordion-item-header--disabled]": "item.disabled()",
     "[class]": "headerClass() ?? ''",
   },
@@ -80,6 +83,45 @@ export class AccordionItemHeaderComponent {
    */
   headingLevel = input<1 | 2 | 3 | 4 | 5 | 6 | undefined>(undefined);
 
+  /**
+   * Chevron style of the default expand action.
+   * Only effective when `headerClickable` is `false` (otherwise the
+   * default expand action isn't a `CollapseButton`) and `showExpandLabel`
+   * is `false` (only icon-only mode honours `arrowType` — see the
+   * `CollapseButton` docs).
+   * @default "default"
+   */
+  expandActionArrowType = input<CollapseButtonArrowType>("default");
+  /**
+   * Visual size of the default expand action. Only effective when
+   * `headerClickable` is `false`.
+   *
+   * When omitted, the size is derived from `showExpandLabel`:
+   * - `showExpandLabel === true`  → `"default"`
+   * - `showExpandLabel === false` → `"small"` (icon-only mode reads
+   *   better at the smaller chevron size).
+   *
+   * Pass an explicit value to override the derived default.
+   */
+  expandActionSize = input<CollapseButtonSize | undefined>(undefined);
+  /**
+   * Use the inverted (light-on-dark) palette for the default expand
+   * action, for placement on a dark or brand background. Only effective
+   * when `headerClickable` is `false`.
+   * @default false
+   */
+  expandActionInverted = input<boolean>(false);
+  /**
+   * Whether the default expand action's label is underlined. Defaults to
+   * `false` so the chevron stays the sole affordance — an underlined
+   * label inside the accordion header reads as a stray link. Set to
+   * `true` for contexts that want link-style styling. Only effective
+   * when `headerClickable` is `false` and the expand action is not in
+   * icon-only mode (i.e. `showExpandLabel` is `true`).
+   * @default false
+   */
+  expandActionUnderline = input<boolean>(false);
+
   readonly headerId = this.item.headerId;
   readonly contentId = this.item.contentId;
   readonly expanded = this.item.expanded;
@@ -97,6 +139,11 @@ export class AccordionItemHeaderComponent {
   readonly showEndExpandAction = computed(
     () =>
       this.showDefaultExpandAction() && this.expandActionPosition() === "end",
+  );
+
+  readonly resolvedExpandActionSize = computed<CollapseButtonSize>(
+    () =>
+      this.expandActionSize() ?? (this.showExpandLabel() ? "default" : "small"),
   );
 
   toggle() {

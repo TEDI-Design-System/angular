@@ -111,12 +111,15 @@
   } @else {
     <button
       tedi-collapse-button
-      [underline]="false"
+      [underline]="expandActionUnderline()"
       (openChange)="toggle()"
       [open]="expanded()"
       [openText]="openLabel() | tediTranslate"
       [closeText]="closeLabel() | tediTranslate"
       [hideText]="!showExpandLabel()"
+      [arrowType]="expandActionArrowType()"
+      [size]="resolvedExpandActionSize()"
+      [inverted]="expandActionInverted()"
       [ariaControls]="contentId"
       [disabled]="disabled()"
       [attr.aria-disabled]="disabled() || null"

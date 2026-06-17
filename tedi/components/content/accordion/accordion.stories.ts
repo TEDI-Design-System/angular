@@ -233,6 +233,58 @@ export default {
         defaultValue: { summary: "end" },
       },
     },
+    expandActionArrowType: {
+      control: "radio",
+      options: ["default", "secondary"],
+      description:
+        "Chevron style of the default expand action. Only effective when " +
+        "`headerClickable` is `false` (otherwise the default expand action " +
+        "isn't a `CollapseButton`) and `showExpandLabel` is `false` (only " +
+        "icon-only mode honours `arrowType`).",
+      table: {
+        category: "Accordion Item Header",
+        type: { summary: "'default' | 'secondary'" },
+        defaultValue: { summary: "default" },
+      },
+    },
+    expandActionSize: {
+      control: "radio",
+      options: [undefined, "default", "small"],
+      description:
+        "Visual size of the default expand action. Only effective when " +
+        "`headerClickable` is `false`. When omitted, the size is derived " +
+        "from `showExpandLabel` — `true` → `default`, `false` → `small`. " +
+        "Pass a value to override the derived default.",
+      table: {
+        category: "Accordion Item Header",
+        type: { summary: "'default' | 'small' | undefined" },
+      },
+    },
+    expandActionInverted: {
+      control: "boolean",
+      description:
+        "Use the inverted (light-on-dark) palette for the default expand " +
+        "action, for placement on a dark or brand background. Only " +
+        "effective when `headerClickable` is `false`.",
+      table: {
+        category: "Accordion Item Header",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    expandActionUnderline: {
+      control: "boolean",
+      description:
+        "Whether the default expand action's label is underlined. " +
+        "Defaults to `false` so the chevron stays the sole affordance. " +
+        "Only effective when `headerClickable` is `false` and " +
+        "`showExpandLabel` is `true` (icon-only mode never underlines).",
+      table: {
+        category: "Accordion Item Header",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     headerClass: {
       control: "text",
       description: "Custom CSS classes for the accordion header.",
@@ -327,6 +379,10 @@ The accordion item is composed of three parts, each owning its own configuration
     showExpandLabel: true,
     showDefaultExpandAction: true,
     expandActionPosition: "end",
+    expandActionArrowType: "default",
+    expandActionSize: undefined,
+    expandActionInverted: false,
+    expandActionUnderline: false,
     defaultExpanded: false,
     showIconCard: false,
     selected: false,
@@ -362,6 +418,10 @@ The accordion item is composed of three parts, each owning its own configuration
             [showExpandLabel]="showExpandLabel"
             [showDefaultExpandAction]="showDefaultExpandAction"
             [expandActionPosition]="expandActionPosition"
+            [expandActionArrowType]="expandActionArrowType"
+            [expandActionSize]="expandActionSize"
+            [expandActionInverted]="expandActionInverted"
+            [expandActionUnderline]="expandActionUnderline"
             [headerClass]="headerClass"
             [headingLevel]="headingLevel"
           >
