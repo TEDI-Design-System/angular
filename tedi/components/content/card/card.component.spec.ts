@@ -1,10 +1,47 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { BreakpointObserver } from "@angular/cdk/layout";
-import { of } from "rxjs";
-import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
+import {
+  Breakpoint,
+  BreakpointService,
+} from "../../../services/breakpoint/breakpoint.service";
 import { CardComponent, CardInputs } from "./card.component";
 import { CardBorderRadius, CardBorderType } from "./card.utils";
+
+const BREAKPOINT_ORDER: Breakpoint[] = ["xs", "sm", "md", "lg", "xl", "xxl"];
+
+/**
+ * Deterministic stand-in for the real BreakpointService. The real service
+ * resolves the active breakpoint from a one-time BreakpointObserver
+ * subscription in its constructor, which — because it is providedIn: 'root' —
+ * can leak a stale instance across test files under CI's parallel workers and
+ * never pick up a per-test observer mock. This mock has no such state: the
+ * active breakpoint is set explicitly per test. The merge logic it mirrors is
+ * covered on its own in breakpoint.service.spec.ts.
+ */
+class BreakpointServiceMock {
+  current: Breakpoint = "xs";
+
+  getBreakpointInputs<TInputs>(
+    inputs: Record<string, unknown>,
+  ): TInputs {
+    let resolved: Record<string, unknown> = {};
+
+    for (const key of Object.keys(inputs)) {
+      if (!BREAKPOINT_ORDER.includes(key as Breakpoint)) {
+        resolved[key] = inputs[key];
+      }
+    }
+
+    for (let i = 0; i <= BREAKPOINT_ORDER.indexOf(this.current); i++) {
+      const breakpointInputs = inputs[BREAKPOINT_ORDER[i]];
+      if (breakpointInputs) {
+        resolved = { ...resolved, ...(breakpointInputs as object) };
+      }
+    }
+
+    return resolved as TInputs;
+  }
+}
 
 @Component({
   standalone: true,
@@ -31,26 +68,14 @@ describe("CardComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let host: TestHostComponent;
 
-  const createComponent = (minWidthMatches: number[] = [0]) => {
+  const createComponent = (currentBreakpoint: Breakpoint = "xs") => {
+    const breakpointService = new BreakpointServiceMock();
+    breakpointService.current = currentBreakpoint;
+
     TestBed.configureTestingModule({
       imports: [TestHostComponent],
       providers: [
-        BreakpointService,
-        {
-          provide: BreakpointObserver,
-          useValue: {
-            observe: () =>
-              of({
-                matches: true,
-                breakpoints: Object.fromEntries(
-                  minWidthMatches.map((width) => [
-                    `(min-width: ${width}px)`,
-                    true,
-                  ]),
-                ),
-              }),
-          },
-        },
+        { provide: BreakpointService, useValue: breakpointService },
       ],
     });
 
@@ -148,7 +173,7 @@ describe("CardComponent", () => {
   });
 
   it("should apply breakpoint overrides at matching breakpoint", () => {
-    createComponent([0, 576, 768]);
+    createComponent("md");
     host.md = { borderless: true, border: "left-success-primary" };
     fixture.detectChanges();
     expect(cardElement().classList).toContain("tedi-card--borderless");
@@ -159,7 +184,7 @@ describe("CardComponent", () => {
   });
 
   it("should not apply breakpoint overrides below their breakpoint", () => {
-    createComponent([0]);
+    createComponent("xs");
     host.md = { borderless: true };
     fixture.detectChanges();
     expect(cardElement().classList).not.toContain("tedi-card--borderless");
