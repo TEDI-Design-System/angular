@@ -2,7 +2,7 @@
   --tedi-accordion-item-gap: var(--layout-grid-gutters-08);
 }
 
-tedi-accordion {
+.tedi-accordion {
   display: flex;
   flex-direction: column;
   gap: var(--tedi-accordion-item-gap);

@@ -64,6 +64,7 @@ export type AccordionInputs = {
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    "[class.tedi-accordion]": "true",
     "[style.--tedi-accordion-item-gap]": "itemGapStyle()",
   },
 })

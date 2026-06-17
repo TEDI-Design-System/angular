@@ -118,6 +118,7 @@
       [closeText]="closeLabel() | tediTranslate"
       [hideText]="!showExpandLabel()"
       [ariaControls]="contentId"
+      [disabled]="disabled()"
       [attr.aria-disabled]="disabled() || null"
       [attr.tabindex]="disabled() ? -1 : null"
     ></button>

@@ -102,8 +102,9 @@ export class AccordionItemComponent implements OnInit, OnDestroy {
       !this.disabled() &&
       typeof window !== "undefined"
     ) {
-      const id = this.itemId() as string;
       this.hashChangeHandler = () => {
+        const id = this.itemId();
+        if (!this.openOnHashMatch() || !id || this.disabled()) return;
         if (window.location.hash === `#${id}`) {
           this.setExpanded(true);
         }

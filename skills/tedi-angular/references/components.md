@@ -92,7 +92,7 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 **Inputs:**
 - `ariaLabel: string`
 
-## Cards
+## Content
 
 ### Accordion
 **Selector:** `tedi-accordion`
@@ -201,8 +201,6 @@ Open every item by default — group-level `defaultExpanded` cascades to each ch
   </tedi-accordion-item>
 </tedi-accordion>
 ```
-
-## Content
 
 ### Carousel
 **Selector:** `tedi-carousel`
