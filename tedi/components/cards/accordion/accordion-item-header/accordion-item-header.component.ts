@@ -9,7 +9,7 @@ import {
 } from "@angular/core";
 import { IconComponent } from "../../../base/icon/icon.component";
 import { TextComponent } from "../../../base/text/text.component";
-import { LinkComponent } from "../../../navigation/link/link.component";
+import { CollapseButtonComponent } from "../../../buttons/collapse-button/collapse-button.component";
 import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
 import { AccordionItemComponent } from "../accordion-item/accordion-item.component";
 
@@ -24,15 +24,17 @@ import { AccordionItemComponent } from "../accordion-item/accordion-item.compone
     CommonModule,
     IconComponent,
     TextComponent,
-    LinkComponent,
+    CollapseButtonComponent,
     TediTranslationPipe,
   ],
   host: {
     "[class.tedi-accordion-item-header]": "true",
-    "[class.tedi-accordion-item-header--hoverable]": "headerClickable()",
+    "[class.tedi-accordion-item-header--hoverable]":
+      "headerClickable() && !item.disabled()",
     "[class.tedi-accordion-item-header--expanded]": "expanded()",
     "[class.tedi-accordion-item-header--with-icon-card]":
       "item.showIconCard()",
+    "[class.tedi-accordion-item-header--disabled]": "item.disabled()",
     "[class]": "headerClass() ?? ''",
   },
 })
@@ -69,10 +71,19 @@ export class AccordionItemHeaderComponent {
    * Custom CSS classes for the accordion header.
    */
   headerClass = input<string | null>(null);
+  /**
+   * When set, wraps the header trigger in a semantic `<h1>`–`<h6>` element
+   * following the WAI-ARIA Accordion Pattern. Improves accessibility for
+   * documents with a heading hierarchy (FAQ pages, docs). The wrapper uses
+   * `display: contents` so it doesn't affect the visual layout — it only adds
+   * semantic information for assistive technologies and TOC tools.
+   */
+  headingLevel = input<1 | 2 | 3 | 4 | 5 | 6 | undefined>(undefined);
 
   readonly headerId = this.item.headerId;
   readonly contentId = this.item.contentId;
   readonly expanded = this.item.expanded;
+  readonly disabled = computed(() => this.item.disabled());
 
   readonly expandLabel = computed(() =>
     this.expanded() ? this.closeLabel() : this.openLabel(),

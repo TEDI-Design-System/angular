@@ -70,6 +70,12 @@ export class CollapseButtonComponent {
    */
   inverted = input<boolean>(false);
   /**
+   * Whether to underline the text label.
+   * Has no effect in icon-only mode.
+   * @default true
+   */
+  underline = input<boolean>(true);
+  /**
    * ID of the disclosed region. Forwarded to `aria-controls`.
    */
   ariaControls = input<string>();
@@ -128,6 +134,9 @@ export class CollapseButtonComponent {
           ? "tedi-collapse-button--secondary"
           : "tedi-collapse-button--neutral",
       );
+    }
+    if (!this.underline() && !this.hideText()) {
+      classes.push("tedi-collapse-button--no-underline");
     }
     return classes.join(" ");
   });

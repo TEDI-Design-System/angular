@@ -97,15 +97,23 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 ### Accordion
 **Selector:** `tedi-accordion`
 **Inputs:**
-- `allowMultiple: boolean = false`
+- `allowMultiple: boolean = false` — allow several items expanded simultaneously
+- `defaultExpanded: boolean | undefined = undefined` — group-level default for items' initial expanded state. Per-item `defaultExpanded` (including an explicit `false`) takes precedence. Typically combined with `allowMultiple` to start with all items open.
+- `itemGap: number | undefined = undefined` — vertical gap between sibling items, in **rem** (matches TEDI's layout-spacing convention; scales with user font-size). Any number is accepted. Forwarded as the `--tedi-accordion-item-gap` CSS variable — consumers needing an exact-pixel override can set that variable directly on a class. Falls back to the `:root` default (`var(--layout-grid-gutters-08)` = 0.5rem) when omitted.
+
+**Breakpoint inputs:** `allowMultiple`, `defaultExpanded`, and `itemGap` can each be overridden per breakpoint via `xs` / `sm` / `md` / `lg` / `xl` / `xxl` inputs, which accept partial `AccordionInputs` objects. Example: `<tedi-accordion [allowMultiple]="false" [lg]="{ allowMultiple: true }">` — single-expand on phone, multi-expand from lg upward. Resolved via `BreakpointService.getBreakpointInputs`; cascades smallest → largest like Bootstrap's grid.
+
 **Slots:** default (AccordionItem children)
 
 ### AccordionItem
 **Selector:** `tedi-accordion-item`
 **Inputs:**
-- `defaultExpanded: boolean = false` — initial expanded state
+- `defaultExpanded: boolean | undefined = undefined` — initial expanded state. Falls back to the parent Accordion's `defaultExpanded` when omitted; pass `false` explicitly to keep an item collapsed even when the group default is `true`.
 - `showIconCard: boolean = false` — enable the icon-card grid column
 - `selected: boolean = false` — visual selected state
+- `disabled: boolean = false` — header trigger becomes non-interactive; current expanded state is preserved
+- `itemId: string | undefined = undefined` — stable id used for hash-based deep-linking (separate from the auto-generated `headerId` / `contentId` for ARIA)
+- `openOnHashMatch: boolean = false` — when `itemId` is set and `window.location.hash === '#<itemId>'`, auto-expands the item. Listens to `hashchange` so in-page navigation also opens the matching item. Requires `itemId`; no-op otherwise.
 **Model:** `expanded: boolean`
 **Slots:** `<tedi-accordion-item-header>`, `<tedi-accordion-item-content>`, `[tedi-accordion-icon-card]` (direct child of the item, occupies its own grid column)
 
@@ -120,6 +128,7 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 - `showDefaultExpandAction: boolean = true` — when false, no default toggle button is rendered (consumer provides their own via slots and calls `item.toggle()`)
 - `expandActionPosition: "start" | "end" = "end"`
 - `headerClass: string | null` — extra CSS class on the header element
+- `headingLevel: 1 | 2 | 3 | 4 | 5 | 6 | undefined = undefined` — wraps the trigger in a semantic `<h1>`–`<h6>` element per WAI-ARIA Accordion Pattern. Wrapper uses `display: contents` so it doesn't affect layout. Recommended for docs / FAQ pages where the accordion participates in the document outline.
 **Slots:**
 - `[tedi-accordion-title]` — the accordion title content (rendered in the title position)
 - `[tedi-accordion-start-action]` — actions at the start of the header (e.g., before the title group)
@@ -136,6 +145,10 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 **Slots:** default (the collapsible content)
 
 The content panel is automatically given `role="region"`, `aria-labelledby` pointing to the header, and `inert` + `aria-hidden` when collapsed.
+
+**Mobile icon-card layout:** below the `md` breakpoint (`< 768px`), items with `showIconCard` stack the icon-card *above* the header instead of placing it in a left column — phone-sized viewports can't fit both side-by-side without truncating the icon-card text or the header content. Borders and corner radii are redistributed accordingly. No input needed; the rule is applied via `media-breakpoint-down(md)`.
+
+**Print:** the accordion uses a `@media print` rule that forces every item to expand on paper so collapsed content isn't lost. No input needed.
 
 ```html
 <tedi-accordion>
@@ -167,6 +180,26 @@ For non-clickable headers with custom actions (the toggle stays visible at the s
   </tedi-accordion-item-header>
   <tedi-accordion-item-content>Body</tedi-accordion-item-content>
 </tedi-accordion-item>
+```
+
+Open every item by default — group-level `defaultExpanded` cascades to each child unless the child overrides:
+
+```html
+<tedi-accordion [allowMultiple]="true" [defaultExpanded]="true">
+  <tedi-accordion-item>
+    <tedi-accordion-item-header>
+      <span tedi-accordion-title>Section 1</span>
+    </tedi-accordion-item-header>
+    <tedi-accordion-item-content>Body 1</tedi-accordion-item-content>
+  </tedi-accordion-item>
+  <!-- Per-item override: this one stays closed -->
+  <tedi-accordion-item [defaultExpanded]="false">
+    <tedi-accordion-item-header>
+      <span tedi-accordion-title>Section 2</span>
+    </tedi-accordion-item-header>
+    <tedi-accordion-item-content>Body 2</tedi-accordion-item-content>
+  </tedi-accordion-item>
+</tedi-accordion>
 ```
 
 ## Content

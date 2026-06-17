@@ -1,19 +1,58 @@
-@if (headerClickable()) {
-  <button
-    [id]="headerId"
-    type="button"
-    class="tedi-accordion-item-header__trigger"
-    (click)="toggle()"
-    [attr.aria-expanded]="expanded()"
-    [attr.aria-controls]="contentId"
-  >
-    <ng-container *ngTemplateOutlet="headerContent"></ng-container>
-  </button>
-} @else {
-  <div [id]="headerId" class="tedi-accordion-item-header__trigger">
-    <ng-container *ngTemplateOutlet="headerContent"></ng-container>
-  </div>
+@switch (headingLevel()) {
+  @case (1) {
+    <h1 class="tedi-accordion-item-header__heading-wrapper">
+      <ng-container *ngTemplateOutlet="trigger"></ng-container>
+    </h1>
+  }
+  @case (2) {
+    <h2 class="tedi-accordion-item-header__heading-wrapper">
+      <ng-container *ngTemplateOutlet="trigger"></ng-container>
+    </h2>
+  }
+  @case (3) {
+    <h3 class="tedi-accordion-item-header__heading-wrapper">
+      <ng-container *ngTemplateOutlet="trigger"></ng-container>
+    </h3>
+  }
+  @case (4) {
+    <h4 class="tedi-accordion-item-header__heading-wrapper">
+      <ng-container *ngTemplateOutlet="trigger"></ng-container>
+    </h4>
+  }
+  @case (5) {
+    <h5 class="tedi-accordion-item-header__heading-wrapper">
+      <ng-container *ngTemplateOutlet="trigger"></ng-container>
+    </h5>
+  }
+  @case (6) {
+    <h6 class="tedi-accordion-item-header__heading-wrapper">
+      <ng-container *ngTemplateOutlet="trigger"></ng-container>
+    </h6>
+  }
+  @default {
+    <ng-container *ngTemplateOutlet="trigger"></ng-container>
+  }
 }
+
+<ng-template #trigger>
+  @if (headerClickable()) {
+    <button
+      [id]="headerId"
+      type="button"
+      class="tedi-accordion-item-header__trigger"
+      (click)="toggle()"
+      [disabled]="disabled()"
+      [attr.aria-expanded]="expanded()"
+      [attr.aria-controls]="contentId"
+    >
+      <ng-container *ngTemplateOutlet="headerContent"></ng-container>
+    </button>
+  } @else {
+    <div [id]="headerId" class="tedi-accordion-item-header__trigger">
+      <ng-container *ngTemplateOutlet="headerContent"></ng-container>
+    </div>
+  }
+</ng-template>
 
 <ng-template #headerContent>
   <div class="tedi-accordion-item-header__start">
@@ -61,35 +100,26 @@
       "
     >
       {{ (showExpandLabel() ? expandLabel() : "") | tediTranslate }}
-      <ng-container *ngTemplateOutlet="expandIcon"></ng-container>
+      <tedi-icon
+        aria-hidden="true"
+        name="expand_more"
+        class="tedi-accordion-item-header__icon"
+        [class.tedi-accordion-item-header__icon--expanded]="expanded()"
+        [class.tedi-accordion-item-header__icon--no-label]="!showExpandLabel()"
+      />
     </div>
   } @else {
     <button
-      type="button"
-      class="tedi-accordion-item-header__toggle-button"
-      tedi-link
+      tedi-collapse-button
       [underline]="false"
-      (click)="toggle()"
-      [attr.aria-expanded]="expanded()"
-      [attr.aria-controls]="contentId"
-      [attr.aria-label]="
-        !showExpandLabel() ? (expandLabel() | tediTranslate) : null
-      "
-    >
-      @if (showExpandLabel()) {
-        {{ expandLabel() | tediTranslate }}
-      }
-      <ng-container *ngTemplateOutlet="expandIcon"></ng-container>
-    </button>
+      (openChange)="toggle()"
+      [open]="expanded()"
+      [openText]="openLabel() | tediTranslate"
+      [closeText]="closeLabel() | tediTranslate"
+      [hideText]="!showExpandLabel()"
+      [ariaControls]="contentId"
+      [attr.aria-disabled]="disabled() || null"
+      [attr.tabindex]="disabled() ? -1 : null"
+    ></button>
   }
-</ng-template>
-
-<ng-template #expandIcon>
-  <tedi-icon
-    aria-hidden="true"
-    name="expand_more"
-    class="tedi-accordion-item-header__icon"
-    [class.tedi-accordion-item-header__icon--expanded]="expanded()"
-    [class.tedi-accordion-item-header__icon--no-label]="!showExpandLabel()"
-  />
 </ng-template>
