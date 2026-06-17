@@ -36,6 +36,16 @@ describe("ClosingButtonComponent", () => {
     expect(icon.classList).toContain("tedi-icon--size-18");
   });
 
+  it("should render the close icon by default and allow overriding it", () => {
+    const icon = fixture.nativeElement.querySelector(".tedi-icon");
+    expect(icon.textContent).toContain("close");
+
+    fixture.componentRef.setInput("icon", "delete");
+    fixture.detectChanges();
+
+    expect(icon.textContent).toContain("delete");
+  });
+
   it("should update size when input changes", () => {
     fixture.componentRef.setInput("size", "small");
     fixture.detectChanges();
@@ -54,5 +64,13 @@ describe("ClosingButtonComponent", () => {
 
     expect(buttonElement.getAttribute("title")).toBe("Eemalda");
     expect(buttonElement.getAttribute("aria-label")).toBe("Eemalda");
+  });
+
+  it("should drop the title attribute when showTitle=false but keep aria-label", () => {
+    fixture.componentRef.setInput("showTitle", false);
+    fixture.detectChanges();
+
+    expect(buttonElement.getAttribute("title")).toBeNull();
+    expect(buttonElement.getAttribute("aria-label")).toBe("Sulge");
   });
 });

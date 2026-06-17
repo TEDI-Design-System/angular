@@ -4,6 +4,11 @@ import { ProgressBarComponent } from "./progress-bar.component";
 export default {
   title: "Community/Helpers/ProgressBar",
   component: ProgressBarComponent,
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
   decorators: [
     moduleMetadata({
       imports: [ProgressBarComponent],

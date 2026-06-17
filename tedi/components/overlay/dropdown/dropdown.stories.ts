@@ -97,6 +97,15 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
+    hideOnScroll: {
+      control: "boolean",
+      description: "Does the dropdown hide when the page scrolls?",
+      table: {
+        category: "dropdown",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     dropdownRole: {
       control: "radio",
       options: ["menu", "listbox"],
@@ -169,13 +178,14 @@ export const Default: Story = {
   args: {
     position: "bottom-start",
     preventOverflow: true,
+    hideOnScroll: false,
     dropdownRole: "menu",
     ariaHaspopup: "menu",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [hideOnScroll]="hideOnScroll">
         <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
           Trigger
         </button>

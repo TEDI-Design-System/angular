@@ -50,7 +50,9 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 **Inputs:**
 - `size: ClosingButtonSize = "default"`
 - `iconSize: ClosingButtonIconSize = 24` — 18 or 24
+- `icon: string = "close"` — Material Symbols icon; override for other closing-like actions such as delete/remove (e.g. `delete`). Provide a matching `ariaLabel` when overriding.
 - `ariaLabel: string`
+- `showTitle: boolean = true` — set `false` to drop the native `title` attribute (e.g. when wrapped in a `tedi-tooltip`)
 
 ### Collapse
 **Selector:** `tedi-collapse`
@@ -892,6 +894,51 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 
 ## Helpers
 
+### Attachment
+**Selector:** `tedi-attachment`
+**Inputs:**
+- `name: string` (required) — file name displayed in the card
+- `fileSize: string` — pre-formatted file size (e.g. `"0.9 MB"`)
+- `icon: string` — leading file-type icon (Material Symbol name, e.g. `"description"`, `"picture_as_pdf"`) shown before the file name
+- `error: string` — error feedback. When set, switches the card to its error visual and renders feedback text below. Implies `invalid`.
+- `invalid: boolean = false` — switches the card to its error visual (danger background + error icon) without rendering feedback text. Use when the error message is rendered elsewhere (e.g. an aggregate validation message).
+- `direction: "horizontal" | "vertical" | undefined` — content layout. `horizontal` keeps name/progress on one row beside the actions; `vertical` stacks them with actions pinned top-right (use in narrow containers/sidebars). When `undefined`, derived from `verticalBelow`.
+- `verticalBelow: Breakpoint = "sm"` — viewport breakpoint below which the layout auto-switches to `vertical`
+**Slots:**
+- project a `<tedi-progress-bar>` to show upload/processing progress. Configure label, hint, and value formatting on the projected progress bar itself.
+- project action buttons (download, delete, …) inside a single `<tedi-attachment-actions>` container (`AttachmentActionsComponent`). Action buttons are **not** built in — use neutral `tedi-button`s, wire up `(click)`/`disabled` yourself. For icon-only buttons give each an `aria-label` (and optionally a tooltip). The container owns the layout: add `padded` to it for labeled (text) buttons (adds a 12px gap + 8px inline padding, since neutral text buttons have no horizontal padding); omit it for icon-only buttons, which sit flush.
+
+**`<tedi-attachment-actions>` (`AttachmentActionsComponent`)** — container for the action buttons. Input: `padded: boolean = false`.
+
+```html
+<tedi-attachment name="report.pdf" fileSize="0.9 MB">
+  <tedi-progress-bar [value]="34" valuePosition="bottom">
+    <tedi-feedback-text text="Uploading" type="hint" />
+  </tedi-progress-bar>
+  <tedi-attachment-actions>
+    <button tedi-button variant="neutral" aria-label="Download" (click)="onDownload()">
+      <tedi-icon name="download" [size]="18" />
+    </button>
+    <tedi-tooltip>
+      <tedi-tooltip-trigger>
+        <button tedi-button variant="neutral" aria-label="Delete" (click)="onRemove()">
+          <tedi-icon name="delete" [size]="18" />
+        </button>
+      </tedi-tooltip-trigger>
+      <tedi-tooltip-content>Delete</tedi-tooltip-content>
+    </tedi-tooltip>
+  </tedi-attachment-actions>
+</tedi-attachment>
+
+<!-- labeled (text) buttons → add `padded` -->
+<tedi-attachment name="report.pdf">
+  <tedi-attachment-actions padded>
+    <button tedi-button variant="neutral"><tedi-icon name="download" [size]="18" /> Download</button>
+    <button tedi-button variant="neutral"><tedi-icon name="delete" [size]="18" /> Delete</button>
+  </tedi-attachment-actions>
+</tedi-attachment>
+```
+
 ### Row / Col (Grid)
 **Selectors:** `tedi-row`, `tedi-col`
 
@@ -1036,6 +1083,29 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 ```
 
 ## Loader
+
+### ProgressBar
+**Selector:** `tedi-progress-bar`
+**Inputs:**
+- `value: number = 0` — 0–100, clamped
+- `progressId: string` — id for the underlying `<progress>` element
+- `size: "default" | "small" = "default"` — `small` renders a 4px bar height instead of 8px
+- `label: string` — optional title (top or horizontal)
+- `labelPosition: "top" | "horizontal" = "top"`
+- `required: boolean = false` — red `*` after the label
+- `showValue: boolean = true` — show/hide the percentage value
+- `valuePosition: "horizontal" | "bottom" = "horizontal"` — where to place the percentage value
+- `valueLabel: string` — override the rendered value text (e.g. `"1/5"`); also exposed via `aria-valuetext`
+- `ariaLabel: string` — falls back to `label`
+- `xs` / `sm` / `md` / `lg` / `xl` / `xxl: ProgressBarInputs` — per-breakpoint overrides of `size`, `labelPosition`, `showValue`, `valuePosition` and `valueLabel`. Each takes a partial set of inputs that layers on top from that breakpoint and up (mobile-first), e.g. `[md]="{ labelPosition: 'horizontal', valuePosition: 'horizontal' }"`.
+**Slots:** project a `<tedi-feedback-text>` to render a hint or error line below the bar.
+
+```html
+<tedi-progress-bar [value]="42" label="Uploading" required>
+  <tedi-feedback-text text="Uploading" type="hint" />
+</tedi-progress-bar>
+<tedi-progress-bar [value]="20" valueLabel="1/5" />
+```
 
 ### Spinner
 **Selector:** `tedi-spinner`
@@ -1487,8 +1557,7 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 ## Helpers
 
 ### ProgressBar
-**Selector:** `tedi-progress-bar`
-- `value: number = 0`, `direction: "horizontal" | "vertical"`, `small: boolean`
+**⚠️ DEPRECATED** — use the TEDI-Ready `tedi-progress-bar` from `@tedi-design-system/angular/tedi`. Same selector; the TEDI-Ready version is a superset.
 
 ## Navigation
 

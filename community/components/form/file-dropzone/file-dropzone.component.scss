@@ -6,18 +6,3 @@
     pointer-events: none;
   }
 }
-
-.tedi-file-dropzone__card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  --_card-border: transparent;
-}
-
-.tedi-file-dropzone__tooltip--error .tedi-info-button {
-  --button-main-neutral-text-default: var(--tedi-red-700);
-}
-
-.tedi-file-dropzone__file-name {
-  display: flex;
-}
