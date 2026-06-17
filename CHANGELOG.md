@@ -1,3 +1,10 @@
+# [6.5.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.11...angular-6.5.0-rc.12) (2026-06-17)
+
+
+### Features
+
+* **card,card-button,timeline-card:** new tedi-ready components [#453](https://github.com/TEDI-Design-System/angular/issues/453) ([#479](https://github.com/TEDI-Design-System/angular/issues/479)) ([7c13043](https://github.com/TEDI-Design-System/angular/commit/7c13043bca246e241bd381f8444bb9670a9413e7))
+
 # [6.5.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.10...angular-6.5.0-rc.11) (2026-06-17)
 
 
