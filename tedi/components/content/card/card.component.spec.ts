@@ -2,6 +2,7 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { BreakpointObserver } from "@angular/cdk/layout";
 import { of } from "rxjs";
+import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
 import { CardComponent, CardInputs } from "./card.component";
 import { CardBorderRadius, CardBorderType } from "./card.utils";
 
@@ -34,6 +35,7 @@ describe("CardComponent", () => {
     TestBed.configureTestingModule({
       imports: [TestHostComponent],
       providers: [
+        BreakpointService,
         {
           provide: BreakpointObserver,
           useValue: {
