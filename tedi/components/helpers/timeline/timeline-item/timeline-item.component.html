@@ -4,6 +4,11 @@
       {{ timing }}
     </div>
   }
+  @if (!isMobile() && timingsBottom()) {
+    <div class="tedi-timeline__timings-bottom">
+      <ng-container *ngTemplateOutlet="timingsBottom()!.templateRef" />
+    </div>
+  }
 </div>
 <div
   class="tedi-timeline__marker"
@@ -31,3 +36,8 @@
     <ng-content />
   </div>
 </div>
+@if (isMobile() && timingsBottom()) {
+  <div class="tedi-timeline__timings-bottom">
+    <ng-container *ngTemplateOutlet="timingsBottom()!.templateRef" />
+  </div>
+}

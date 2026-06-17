@@ -4,6 +4,7 @@ import { TimelineComponent } from "./timeline.component";
 import { TimelineItemComponent } from "./timeline-item/timeline-item.component";
 import { TimelineTitleComponent } from "./timeline-title/timeline-title.component";
 import { TimelineDescriptionComponent } from "./timeline-description/timeline-description.component";
+import { TimelineTimingsBottomDirective } from "./timeline-timings-bottom.directive";
 import { CollapseComponent } from "../../buttons/collapse/collapse.component";
 import { TextComponent } from "../../base/text/text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
@@ -32,6 +33,7 @@ export default {
         TimelineItemComponent,
         TimelineTitleComponent,
         TimelineDescriptionComponent,
+        TimelineTimingsBottomDirective,
         CollapseComponent,
         TextComponent,
         ButtonComponent,
@@ -47,6 +49,28 @@ export default {
       table: {
         category: "timeline",
         type: { summary: "number" },
+      },
+    },
+    variant: {
+      description:
+        "Visual variant. 'card' wraps the timeline in the borders and paddings of a card.",
+      control: { type: "radio" },
+      options: ["default", "card"],
+      table: {
+        category: "timeline",
+        type: { summary: "TimelineVariant" },
+        defaultValue: { summary: "default" },
+      },
+    },
+    cardPadding: {
+      description:
+        "Item padding in rems for the card variant. Same values as the Card component.",
+      control: { type: "select" },
+      options: [0, 0.5, 0.75, 1, 1.5, 2, 2.5, 3],
+      table: {
+        category: "timeline",
+        type: { summary: "TimelineCardPadding" },
+        defaultValue: { summary: "1" },
       },
     },
     timings: {
@@ -65,11 +89,12 @@ type Story = StoryObj<TimelineComponent>;
 export const Default: Story = {
   args: {
     activeIndex: 2,
+    variant: "default",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-timeline [activeIndex]="activeIndex">
+      <tedi-timeline [activeIndex]="activeIndex" [variant]="variant" [cardPadding]="cardPadding">
         <tedi-timeline-item [timings]="['1990', '14. detsember']">
           <tedi-timeline-title>Staaži kogumise algus (I sammas)</tedi-timeline-title>
         </tedi-timeline-item>
@@ -282,6 +307,44 @@ export const WithMultipleDates: Story = {
         <tedi-timeline-item [timings]="['1991', '15. jaanuar']">
           <tedi-timeline-title>Otsus</tedi-timeline-title>
           <tedi-timeline-description>Otsus tehakse teatavaks.</tedi-timeline-description>
+        </tedi-timeline-item>
+      </tedi-timeline>
+    `,
+  }),
+};
+
+export const TimelineCard: Story = {
+  args: {
+    activeIndex: 1,
+    variant: "card",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-timeline [activeIndex]="activeIndex" [variant]="variant" [cardPadding]="cardPadding">
+        <tedi-timeline-item [timings]="['11.01.2024 12:23', 'Kersti Ööviul']">
+          <p *tediTimelineTimingsBottom tedi-text modifiers="small" color="tertiary">
+            Muudetud 08.02.2024 12:23
+          </p>
+          <tedi-timeline-title>Suhtlus isikuga</tedi-timeline-title>
+          <tedi-collapse openText="Näita rohkem" closeText="Näita vähem" [defaultOpen]="true">
+            <p tedi-text modifiers="small" color="secondary">Lisainfo: Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          </tedi-collapse>
+        </tedi-timeline-item>
+        <tedi-timeline-item [timings]="['08.02.2024 12:23', 'Kersti Ööviul']">
+          <p *tediTimelineTimingsBottom tedi-text modifiers="small" color="tertiary">
+            Muudetud 12.03.2024 12:23
+          </p>
+          <tedi-timeline-title>Suhtlus isikuga</tedi-timeline-title>
+          <tedi-collapse openText="Näita rohkem" closeText="Näita vähem">
+            <p tedi-text modifiers="small" color="secondary">Lisainfo: Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          </tedi-collapse>
+        </tedi-timeline-item>
+        <tedi-timeline-item [timings]="['12.05.2024 12:23', 'Kersti Ööviul']">
+          <tedi-timeline-title>Suhtlus isikuga</tedi-timeline-title>
+          <tedi-collapse openText="Näita rohkem" closeText="Näita vähem">
+            <p tedi-text modifiers="small" color="secondary">Lisainfo: Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          </tedi-collapse>
         </tedi-timeline-item>
       </tedi-timeline>
     `,

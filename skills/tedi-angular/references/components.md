@@ -45,6 +45,29 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 <button tedi-button variant="secondary" size="small">Small</button>
 ```
 
+### CardButton
+**Selector:** `a[tedi-card-button]` or `button[tedi-card-button]`
+**Slots:** `tedi-card` only (other content is not projected) — the card may use any of its blocks (content, rows, icon cells)
+
+Interactive wrapper around a `tedi-card`: the host element provides semantics (anchor for href/routerLink navigation, button for actions and the disabled state) and applies hover/active/focus/disabled states to the card inside. On hover/active the whole card — content and icon cells alike — shares the same light hover/active background, and icons turn brand-colored. Do not place other interactive elements inside.
+
+```html
+<a tedi-card-button routerLink="/toetused">
+  <tedi-card>
+    <tedi-card-row>
+      <tedi-card-icon><tedi-icon name="euro_symbol" /></tedi-card-icon>
+      <tedi-card-content class="flex align-items-center justify-content-between gap-3">
+        <div>
+          <p tedi-text modifiers="bold">Isiku toetused</p>
+          <p tedi-text modifiers="small" color="secondary">Toetused mis on isikule ette nähtud</p>
+        </div>
+        <tedi-icon name="arrow_right_alt" color="secondary" />
+      </tedi-card-content>
+    </tedi-card-row>
+  </tedi-card>
+</a>
+```
+
 ### ClosingButton
 **Selector:** `button[tedi-closing-button]`
 **Inputs:**
@@ -172,6 +195,84 @@ For non-clickable headers with custom actions (the toggle stays visible at the s
 ```
 
 ## Content
+
+### Card
+**Selector:** `tedi-card`
+**Inputs:**
+- `background: CardBackground` — default background for child blocks ("primary", "secondary", "tertiary", "accent", "brand-primary"…"brand-quaternary", "danger/success/info/warning/neutral-primary/-secondary")
+- `padding: CardPadding` — default padding for child blocks; rem number (0–3) or `{vertical, horizontal}` / `{top, right, bottom, left}` object
+- `borderRadius: CardBorderRadius` — `false` removes all radius, or object per side/corner (`{top: false}`, `{topLeft: false}`…)
+- `borderless: boolean = false`
+- `border: CardBorderType` — background value colors the whole border; `top-`/`left-` prefix draws a 4px accent border on that side (e.g. `"left-danger-primary"`)
+- Responsive: `xs, sm, md, lg, xl, xxl: CardInputs`
+
+Composed of sub-components:
+
+```html
+<tedi-card border="left-info-primary" [padding]="1.5">
+  <tedi-card-header background="brand-primary">Title</tedi-card-header>
+  <tedi-alert variant="noSideBorders">Notification</tedi-alert>
+  <tedi-card-content>First block</tedi-card-content>
+  <tedi-separator />
+  <tedi-card-content background="secondary">Second block</tedi-card-content>
+</tedi-card>
+```
+
+All dividers are plain `tedi-separator` elements: horizontal between blocks/rows, vertical with `size="auto"` between cells inside a `tedi-card-row`. For an in-card notification place a `tedi-alert variant="noSideBorders"` directly inside the card.
+
+The card itself is non-interactive. To make a whole card clickable, wrap it in **CardButton** (`a[tedi-card-button]` / `button[tedi-card-button]`, Buttons section), which adds hover/active/focus/disabled states.
+
+### CardContent
+**Selector:** `tedi-card-content`
+**Inputs:**
+- `background: CardBackground = "primary"` — inherits from card when unset
+- `padding: CardPadding = 1` — inherits from card when unset
+- `backgroundImage: string` — image url; with `backgroundPosition`, `backgroundSize`, `backgroundRepeat`
+- `autoWidth: boolean = false` — takes only content width inside a row (icon/date cells)
+- Responsive: `xs, sm, md, lg, xl, xxl: CardContentInputs`
+
+### CardIcon
+**Selector:** `tedi-card-icon`
+**Inputs:**
+- `type: CardIconType = "default"` — "default" (secondary background, secondary icon) or "brand" (brand-primary background, white icon)
+- `size: CardIconSize = "default"` — "small" uses 0.75rem padding; pair with a 16px icon
+- Plus all CardContent inputs (`background` override, `autoWidth`, …)
+
+Top-aligned icon cell for a card row; the projected `tedi-icon` inherits the cell color:
+
+```html
+<tedi-card-row>
+  <tedi-card-icon type="brand"><tedi-icon name="monitor_heart" /></tedi-card-icon>
+  <tedi-card-content>…</tedi-card-content>
+</tedi-card-row>
+```
+
+### CardRow
+**Selector:** `tedi-card-row`
+
+Lays out `tedi-card-content` / `tedi-card-icon` cells horizontally. No inputs — dividers are plain `tedi-separator` elements:
+
+```html
+<tedi-card>
+  <tedi-card-row>
+    <tedi-card-content [autoWidth]="true">08.12.2024</tedi-card-content>
+    <tedi-separator axis="vertical" size="auto" />
+    <tedi-card-content>COVID-19</tedi-card-content>
+  </tedi-card-row>
+  <tedi-separator />
+  <tedi-card-row>
+    <tedi-card-content>Left</tedi-card-content>
+    <tedi-card-content background="secondary">Right</tedi-card-content>
+  </tedi-card-row>
+</tedi-card>
+```
+
+For a card-styled timeline use `tedi-timeline variant="card"` (Helpers section); for a decorative dotted line between cells place a vertical dotted `tedi-separator` between them.
+
+### CardHeader
+**Selector:** `tedi-card-header`
+
+Same inputs as CardContent, but `background` defaults to `"brand-primary"` and is not inherited from the card.
 
 ### Carousel
 **Selector:** `tedi-carousel`
@@ -1013,13 +1114,20 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 ### Timeline
 **Selector:** `tedi-timeline`
 **Inputs:**
-- `activeIndex: number`
+- `activeIndex: number` — items before it render as past, after it as future
+- `variant: TimelineVariant = "default"` — "card" renders each item as a bordered, padded card row inside a card frame
+- `cardPadding: TimelineCardPadding` — item padding in rems for the card variant; same values as Card padding (0 | 0.25 | 0.5 | 0.75 | 1 | 1.25 | 1.5 | 2 | 2.5 | 3; default 1)
+- Sub-components: `tedi-timeline-item` (`timings: string[]`), `tedi-timeline-title`, `tedi-timeline-description`
+- Content marked with `*tediTimelineTimingsBottom` is pinned to the bottom of the timings column on desktop and rendered after the item content on mobile (e.g. a "Muudetud …" line)
 
 ```html
-<tedi-timeline [activeIndex]="1">
-  <tedi-timeline-item [timings]="['10:00']">
-    <tedi-timeline-title>Step 1</tedi-timeline-title>
-    <tedi-timeline-description>Description</tedi-timeline-description>
+<tedi-timeline variant="card" [activeIndex]="1" [cardPadding]="1">
+  <tedi-timeline-item [timings]="['11.01.2024 12:23', 'Kersti Ööviul']">
+    <p *tediTimelineTimingsBottom tedi-text modifiers="small" color="tertiary">Muudetud 08.02.2024</p>
+    <tedi-timeline-title>Suhtlus isikuga</tedi-timeline-title>
+    <tedi-collapse openText="Näita rohkem" closeText="Näita vähem">
+      <p tedi-text modifiers="small" color="secondary">Lisainfo</p>
+    </tedi-collapse>
   </tedi-timeline-item>
 </tedi-timeline>
 ```
@@ -1511,10 +1619,12 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 ## Cards
 
 ### Accordion — **DEPRECATED** (use TEDI-Ready Accordion)
-### Card
+### Card — **DEPRECATED** (use TEDI-Ready Card)
 **Selector:** `tedi-card`
 - `borderless: boolean`, `spacing: CardSpacing = "md"`, `accentBorder: CardAccentBorder`, `selected: boolean`
 - Sub-components: `tedi-card-header`, `tedi-card-content`, `tedi-card-row`
+
+> The TEDI-Ready Card (Content section above) uses the same `tedi-card` selector but a different API (`padding` in rems instead of named `spacing`, `border` instead of `accentBorder`, plus `tedi-card-icon` and breakpoint inputs; the Community `timeline` input is replaced by `tedi-timeline variant="card"`). Do not mix imports of the two in one component.
 
 ## Form
 
