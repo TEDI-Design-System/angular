@@ -266,6 +266,13 @@ export const translationsMap = {
     en: "An error occurred while uploading the file",
     ru: "Произошла ошибка при загрузке файла",
   },
+  "file-attachment.uploading": {
+    description: "Default hint label shown under the progress bar in Attachment while a file is being uploaded",
+    components: ["Attachment"],
+    et: "Üleslaadimine",
+    en: "Uploading",
+    ru: "Загрузка",
+  },
   "modal.close": {
     description: "Label for modals close button",
     components: ["Modal"],

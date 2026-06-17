@@ -286,9 +286,9 @@ export const SecondaryButton: StoryObj<StatesArgs> = {
 };
 
 export const WithTextInverted: StoryObj<StatesArgs> = {
-  parameters: {
-    ...PSEUDO_PARAMS,
-    backgrounds: { default: "brand" },
+  parameters: PSEUDO_PARAMS,
+  globals: {
+    backgrounds: { value: "brand" },
   },
   args: {
     hideText: false,
@@ -302,9 +302,9 @@ export const WithTextInverted: StoryObj<StatesArgs> = {
 };
 
 export const IconOnlyInverted: StoryObj<StatesArgs> = {
-  parameters: {
-    ...PSEUDO_PARAMS,
-    backgrounds: { default: "brand" },
+  parameters: PSEUDO_PARAMS,
+  globals: {
+    backgrounds: { value: "brand" },
   },
   args: {
     hideText: true,
