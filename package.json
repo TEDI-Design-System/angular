@@ -2,7 +2,7 @@
   "name": "@tedi-design-system/angular",
   "version": "0.0.0-semantic-version",
   "type": "module",
-  "main": "community.mjs",
+  "main": "fesm2022/tedi-design-system-angular.mjs",
   "module": "community.mjs",
   "exports": {
     "./index.css": {
