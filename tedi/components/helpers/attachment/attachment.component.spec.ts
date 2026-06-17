@@ -46,7 +46,7 @@ class BreakpointMock {
       [icon]="icon"
       [error]="error"
       [invalid]="invalid"
-      [mobile]="mobile"
+      [direction]="direction"
     >
       @if (progress !== undefined) {
         <tedi-progress-bar [value]="progress" />
@@ -66,7 +66,7 @@ class TestHostComponent {
   progress?: number;
   error?: string;
   invalid = false;
-  mobile?: boolean;
+  direction?: "horizontal" | "vertical";
   showActions = false;
   padded = false;
 }
@@ -194,25 +194,25 @@ describe("AttachmentComponent", () => {
     expect(element.querySelector("tedi-feedback-text")).toBeNull();
   });
 
-  it("should apply the mobile modifier when `mobile=true`", () => {
-    host.mobile = true;
+  it("should apply the vertical modifier when `direction='vertical'`", () => {
+    host.direction = "vertical";
     fixture.detectChanges();
 
-    expect(element.classList).toContain("tedi-attachment--mobile");
+    expect(element.classList).toContain("tedi-attachment--vertical");
   });
 
-  it("should auto-apply the mobile modifier when below the breakpoint", () => {
+  it("should auto-apply the vertical modifier when below the breakpoint", () => {
     breakpoint.isBelow.set(true);
     fixture.detectChanges();
 
-    expect(element.classList).toContain("tedi-attachment--mobile");
+    expect(element.classList).toContain("tedi-attachment--vertical");
   });
 
-  it("should let an explicit `mobile=false` override the breakpoint", () => {
+  it("should let an explicit `direction='horizontal'` override the breakpoint", () => {
     breakpoint.isBelow.set(true);
-    host.mobile = false;
+    host.direction = "horizontal";
     fixture.detectChanges();
 
-    expect(element.classList).not.toContain("tedi-attachment--mobile");
+    expect(element.classList).not.toContain("tedi-attachment--vertical");
   });
 });

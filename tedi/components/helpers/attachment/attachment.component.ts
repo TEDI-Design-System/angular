@@ -16,6 +16,8 @@ import {
   BreakpointService,
 } from "../../../services/breakpoint/breakpoint.service";
 
+export type AttachmentDirection = "horizontal" | "vertical";
+
 @Component({
   standalone: true,
   selector: "tedi-attachment",
@@ -27,7 +29,7 @@ import {
   host: {
     "[class.tedi-attachment]": "true",
     "[class.tedi-attachment--error]": "hasErrorVisual()",
-    "[class.tedi-attachment--mobile]": "isMobile()",
+    "[class.tedi-attachment--vertical]": "isVertical()",
     "[class.tedi-attachment--has-progress]": "!!projectedProgress()",
   },
 })
@@ -65,24 +67,30 @@ export class AttachmentComponent {
    */
   invalid = input(false, { transform: booleanAttribute });
   /**
-   * Manually force the mobile variant on or off. When `undefined`, the
-   * variant is auto-derived from the viewport breakpoint (see
-   * `mobileBreakpoint`). The mobile variant uses an 8px gap and renders the
-   * progress bar below the title row.
+   * Content layout direction.
+   * - `horizontal` – name/size and progress sit on a single row beside the
+   *   actions (the default desktop layout).
+   * - `vertical` – name, size and progress stack in a column with the actions
+   *   pinned top-right. Useful in narrow containers (mobile, sidebars).
+   *
+   * When `undefined`, the direction is auto-derived from the viewport: it
+   * switches to `vertical` below the `verticalBelow` breakpoint.
    */
-  mobile = input<boolean | undefined>(undefined);
+  direction = input<AttachmentDirection | undefined>(undefined);
   /**
-   * Viewport breakpoint below which the mobile variant kicks in when
-   * `mobile` is not set explicitly.
+   * Viewport breakpoint below which the layout auto-switches to `vertical`
+   * when `direction` is not set explicitly.
    * @default "sm"
    */
-  mobileBreakpoint = input<Breakpoint>("sm");
+  verticalBelow = input<Breakpoint>("sm");
 
-  private _autoMobile = computed(() => {
-    return this.breakpointService.isBelowBreakpoint(this.mobileBreakpoint())();
+  private _autoVertical = computed(() => {
+    return this.breakpointService.isBelowBreakpoint(this.verticalBelow())();
   });
 
-  protected isMobile = computed(() => this.mobile() ?? this._autoMobile());
+  protected isVertical = computed(
+    () => (this.direction() ?? (this._autoVertical() ? "vertical" : "horizontal")) === "vertical",
+  );
 
   protected hasErrorVisual = computed(() => !!this.error() || this.invalid());
 }

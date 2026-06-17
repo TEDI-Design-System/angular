@@ -286,7 +286,7 @@ export const WithLabel: Story = {
         <tedi-progress-bar [value]="40" label="Progress" [required]="true" valuePosition="bottom">
           <tedi-feedback-text text="Üleslaadimine" type="hint" />
         </tedi-progress-bar>
-        <tedi-progress-bar [value]="40" label="Küsitluses osalenutest olid vanuses 15-18" labelPosition="horizontal" />
+        <tedi-progress-bar [value]="40" label="Küsitluses osalenutest olid vanuses 15-18" labelPosition="top" [md]="{ labelPosition: 'horizontal' }" />
       </tedi-row>
     `,
   }),

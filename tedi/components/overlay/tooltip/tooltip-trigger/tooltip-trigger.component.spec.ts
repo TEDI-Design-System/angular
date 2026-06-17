@@ -292,5 +292,21 @@ describe("TooltipTriggerComponent", () => {
 
       expect(btn.getAttribute("aria-describedby")).toBe("mock-tooltip-id");
     });
+
+    it("should resolve the first focusable descendant when the child is a non-focusable wrapper", () => {
+      hostEl.innerHTML = `<div class="wrapper"><button>Inner</button></div>`;
+      const wrapper = hostEl.querySelector(".wrapper")!;
+      const btn = hostEl.querySelector("button")!;
+      component.ngAfterContentChecked();
+      fixture.detectChanges();
+
+      expect(btn.classList.contains("tedi-tooltip-trigger--focus")).toBe(true);
+      expect(btn.getAttribute("tabindex")).toBe("0");
+      expect(btn.getAttribute("aria-describedby")).toBe("mock-tooltip-id");
+      expect(wrapper.getAttribute("tabindex")).toBeNull();
+      expect(wrapper.classList.contains("tedi-tooltip-trigger--focus")).toBe(
+        false,
+      );
+    });
   });
 });

@@ -902,8 +902,8 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `icon: string` — leading file-type icon (Material Symbol name, e.g. `"description"`, `"picture_as_pdf"`) shown before the file name
 - `error: string` — error feedback. When set, switches the card to its error visual and renders feedback text below. Implies `invalid`.
 - `invalid: boolean = false` — switches the card to its error visual (danger background + error icon) without rendering feedback text. Use when the error message is rendered elsewhere (e.g. an aggregate validation message).
-- `mobile: boolean | undefined` — manually force the mobile variant. When `undefined`, derived from `mobileBreakpoint`.
-- `mobileBreakpoint: Breakpoint = "sm"` — viewport breakpoint below which the mobile variant kicks in
+- `direction: "horizontal" | "vertical" | undefined` — content layout. `horizontal` keeps name/progress on one row beside the actions; `vertical` stacks them with actions pinned top-right (use in narrow containers/sidebars). When `undefined`, derived from `verticalBelow`.
+- `verticalBelow: Breakpoint = "sm"` — viewport breakpoint below which the layout auto-switches to `vertical`
 **Slots:**
 - project a `<tedi-progress-bar>` to show upload/processing progress. Configure label, hint, and value formatting on the projected progress bar itself.
 - project action buttons (download, delete, …) inside a single `<tedi-attachment-actions>` container (`AttachmentActionsComponent`). Action buttons are **not** built in — use neutral `tedi-button`s, wire up `(click)`/`disabled` yourself. For icon-only buttons give each an `aria-label` (and optionally a tooltip). The container owns the layout: add `padded` to it for labeled (text) buttons (adds a 12px gap + 8px inline padding, since neutral text buttons have no horizontal padding); omit it for icon-only buttons, which sit flush.
@@ -1097,8 +1097,7 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 - `valuePosition: "horizontal" | "bottom" = "horizontal"` — where to place the percentage value
 - `valueLabel: string` — override the rendered value text (e.g. `"1/5"`); also exposed via `aria-valuetext`
 - `ariaLabel: string` — falls back to `label`
-- `mobile: boolean | undefined` — manually force the mobile variant. When `undefined`, derived from `mobileBreakpoint`; set `false` to disable the automatic behavior. The mobile variant always renders the value below the bar, regardless of `valuePosition`.
-- `mobileBreakpoint: Breakpoint = "sm"` — viewport breakpoint below which the mobile variant kicks in
+- `xs` / `sm` / `md` / `lg` / `xl` / `xxl: ProgressBarInputs` — per-breakpoint overrides of `size`, `labelPosition`, `showValue`, `valuePosition` and `valueLabel`. Each takes a partial set of inputs that layers on top from that breakpoint and up (mobile-first), e.g. `[md]="{ labelPosition: 'horizontal', valuePosition: 'horizontal' }"`.
 **Slots:** project a `<tedi-feedback-text>` to render a hint or error line below the bar.
 
 ```html

@@ -14,6 +14,12 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
 import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
 import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
+import { DropdownComponent } from "../../overlay/dropdown/dropdown.component";
+import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
+import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-content/dropdown-content.component";
+import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
+import { ShowAtDirective } from "../../../directives/show-at/show-at.directive";
+import { HideAtDirective } from "../../../directives/hide-at/hide-at.directive";
 
 type StoryArgs = ComponentInputs<AttachmentComponent>;
 
@@ -44,6 +50,12 @@ export default {
         TooltipComponent,
         TooltipTriggerComponent,
         TooltipContentComponent,
+        DropdownComponent,
+        DropdownTriggerDirective,
+        DropdownContentComponent,
+        DropdownItemComponent,
+        ShowAtDirective,
+        HideAtDirective,
       ],
     }),
   ],
@@ -80,16 +92,19 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
-    mobile: {
+    direction: {
       description:
-        "Manually force the mobile variant. When `undefined`, derived from the viewport breakpoint.",
+        "Content layout direction. `horizontal` keeps name/progress on one row beside the actions; `vertical` stacks them with actions pinned top-right. When `undefined`, derived from the viewport breakpoint.",
       control: { type: "radio" },
-      options: [undefined, true, false],
-      table: { category: "inputs", type: { summary: "boolean | undefined" } },
+      options: [undefined, "horizontal", "vertical"],
+      table: {
+        category: "inputs",
+        type: { summary: "AttachmentDirection | undefined" },
+      },
     },
-    mobileBreakpoint: {
+    verticalBelow: {
       description:
-        "Viewport breakpoint below which the mobile variant is auto-applied.",
+        "Viewport breakpoint below which the layout auto-switches to `vertical` when `direction` is not set.",
       control: { type: "radio" },
       options: ["xs", "sm", "md", "lg", "xl", "xxl"],
       table: {
@@ -167,7 +182,10 @@ export const WithProgress: Story = {
           <tedi-progress-bar [value]="34" valuePosition="bottom">
             <tedi-feedback-text text="Üleslaadimine" type="hint" />
           </tedi-progress-bar>
-          ${downloadAction}
+          <tedi-attachment-actions>
+            ${action("download", "Laadi alla")}
+            ${action("delete", "Kustuta")}
+          </tedi-attachment-actions>
         </tedi-attachment>
       </div>
     `,
@@ -235,7 +253,7 @@ export const WithDifferentActions: Story = {
           </tedi-attachment-actions>
         </tedi-attachment>
         <tedi-attachment name="Kodukülastusakt_Triin.pdf">${downloadAction}</tedi-attachment>
-        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB" />
+        <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB">${deleteAction}</tedi-attachment>
         <tedi-attachment name="Kodukülastusakt_Triin.pdf" fileSize="0,9 MB">
           <tedi-progress-bar [value]="34" valuePosition="bottom">
             <tedi-feedback-text text="Üleslaadimine" type="hint" />
@@ -250,12 +268,18 @@ export const WithDifferentActions: Story = {
   }),
 };
 
-export const Mobile: Story = {
+/**
+ * Set `direction="vertical"` to stack the name, size and progress in a column
+ * with the actions pinned top-right. Useful on mobile or in narrow containers
+ * such as a sidebar. Leave `direction` unset to switch automatically below the
+ * `verticalBelow` breakpoint (default `sm`).
+ */
+export const Vertical: Story = {
   render: () => ({
     template: `
       <div class="flex flex-column gap-3" style="max-width: 350px;">
         <tedi-attachment
-          [mobile]="true"
+          direction="vertical"
           name="Kodukülastusakt_Triin_natuke_pikema_pealkirjaga.pdf"
           fileSize="0,9 MB"
         >
@@ -265,22 +289,35 @@ export const Mobile: Story = {
           ${deleteAction}
         </tedi-attachment>
         <tedi-attachment
-          [mobile]="true"
+          direction="vertical"
           name="Kodukülastusakt_Triin_natuke_pikema_pealkirjaga.pdf"
           fileSize="0,9 MB"
         >${deleteAction}</tedi-attachment>
-        <tedi-attachment [mobile]="true" name="Kodukülastusakt.pdf" fileSize="0,9 MB">${deleteAction}</tedi-attachment>
-        <tedi-attachment [mobile]="true" name="Kodukülastusakt.pdf" fileSize="0,9 MB">${downloadAction}</tedi-attachment>
-        <tedi-attachment [mobile]="true" name="Kodukülastusakt.pdf" fileSize="0,9 MB">
+        <tedi-attachment direction="vertical" name="Kodukülastusakt.pdf" fileSize="0,9 MB">${deleteAction}</tedi-attachment>
+        <tedi-attachment direction="vertical" name="Kodukülastusakt.pdf" fileSize="0,9 MB">${downloadAction}</tedi-attachment>
+        <tedi-attachment direction="vertical" name="Kodukülastusakt.pdf" fileSize="0,9 MB">
           <tedi-attachment-actions>
             ${action("download", "Laadi alla")}
             ${action("delete", "Kustuta")}
           </tedi-attachment-actions>
         </tedi-attachment>
-        <tedi-attachment [mobile]="true" name="Kodukülastusakt.pdf" fileSize="0,9 MB">
+        <tedi-attachment direction="vertical" name="Kodukülastusakt.pdf" fileSize="0,9 MB">
           <tedi-attachment-actions>
             ${action("download", "Laadi alla")}
-            ${action("more_vert", "Rohkem")}
+            <tedi-tooltip>
+              <tedi-tooltip-trigger>
+                <tedi-dropdown>
+                  <button tedi-button variant="neutral" tedi-dropdown-trigger ariaHaspopup="menu" aria-label="Rohkem valikuid">
+                    <tedi-icon name="more_vert" [size]="18" />
+                  </button>
+                  <tedi-dropdown-content dropdownRole="menu">
+                    <li tedi-dropdown-item>Nimeta ümber</li>
+                    <li tedi-dropdown-item>Kustuta</li>
+                  </tedi-dropdown-content>
+                </tedi-dropdown>
+              </tedi-tooltip-trigger>
+              <tedi-tooltip-content>Rohkem valikuid</tedi-tooltip-content>
+            </tedi-tooltip>
           </tedi-attachment-actions>
         </tedi-attachment>
       </div>
@@ -288,7 +325,7 @@ export const Mobile: Story = {
   }),
 };
 
-export const Error: Story = {
+export const WithError: Story = {
   render: () => ({
     template: `
       <div class="flex flex-column gap-3">
@@ -303,19 +340,21 @@ export const Error: Story = {
 };
 
 /**
- * Labeled neutral buttons (icon + text). With visible labels the buttons no
- * longer need tooltips.
+ * Labeled neutral buttons (icon + text) on desktop that collapse to icon-only
+ * buttons with tooltips on narrow screens. Project two `<tedi-attachment-actions>`
+ * containers and toggle them with the `showAt` / `hideAt` directives at the `sm`
+ * breakpoint.
  *
- * Add `padded` to the `<tedi-attachment-actions>` container so it adds a gap
- * between the buttons and inline padding — neutral text buttons have no
- * horizontal padding of their own and would otherwise touch the card edge.
- * (Icon-only buttons omit it and sit flush.)
+ * Add `padded` to the labeled container so it adds a gap between the buttons and
+ * inline padding — neutral text buttons have no horizontal padding of their own
+ * and would otherwise touch the card edge. Icon-only buttons omit it and sit
+ * flush. Resize the preview to see the switch.
  */
 export const LabeledActions: Story = {
   render: () => ({
     template: `
       <tedi-attachment name="Kodukülastusakt_Triin.pdf">
-        <tedi-attachment-actions padded>
+        <tedi-attachment-actions padded showAt="sm">
           <button tedi-button variant="neutral">
             <tedi-icon name="download" [size]="18" />
             Laadi alla
@@ -324,6 +363,10 @@ export const LabeledActions: Story = {
             <tedi-icon name="delete" [size]="18" />
             Kustuta
           </button>
+        </tedi-attachment-actions>
+        <tedi-attachment-actions hideAt="sm">
+          ${action("download", "Laadi alla")}
+          ${action("delete", "Kustuta")}
         </tedi-attachment-actions>
       </tedi-attachment>
     `,
