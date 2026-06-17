@@ -650,14 +650,14 @@ export const Border: Story = {
         <tedi-col>
           <tedi-card>
             <tedi-card-content>
-              <p tedi-text>With border</p>
+              <p tedi-text>Äärtega</p>
             </tedi-card-content>
           </tedi-card>
         </tedi-col>
         <tedi-col>
           <tedi-card [borderless]="true">
             <tedi-card-content>
-              <p tedi-text>Borderless</p>
+              <p tedi-text>Ilma äärteta</p>
             </tedi-card-content>
           </tedi-card>
         </tedi-col>
@@ -673,56 +673,56 @@ export const BorderRadius: Story = {
         <tedi-col>
           <tedi-card>
             <tedi-card-content>
-              <p tedi-text>Default radius</p>
+              <p tedi-text>Vaikimisi nurgaraadius</p>
             </tedi-card-content>
           </tedi-card>
         </tedi-col>
         <tedi-col>
           <tedi-card [borderRadius]="false">
             <tedi-card-content>
-              <p tedi-text>No radius</p>
+              <p tedi-text>Nurgaraadius puudub</p>
             </tedi-card-content>
           </tedi-card>
         </tedi-col>
         <tedi-col>
           <tedi-card [borderRadius]="{ top: false }">
             <tedi-card-content>
-              <p tedi-text>No top radius</p>
+              <p tedi-text>Ülemine nurgaraadius puudub</p>
             </tedi-card-content>
           </tedi-card>
         </tedi-col>
         <tedi-col>
           <tedi-card [borderRadius]="{ bottom: false }">
             <tedi-card-content>
-              <p tedi-text>No bottom radius</p>
+              <p tedi-text>Alumine nurgaraadius puudub</p>
             </tedi-card-content>
           </tedi-card>
         </tedi-col>
         <tedi-col>
           <tedi-card [borderRadius]="{ left: false }">
             <tedi-card-content>
-              <p tedi-text>No left radius</p>
+              <p tedi-text>Vasak nurgaraadius puudub</p>
             </tedi-card-content>
           </tedi-card>
         </tedi-col>
         <tedi-col>
           <tedi-card [borderRadius]="{ right: false }">
             <tedi-card-content>
-              <p tedi-text>No right radius</p>
+              <p tedi-text>Parem nurgaraadius puudub</p>
             </tedi-card-content>
           </tedi-card>
         </tedi-col>
         <tedi-col>
           <tedi-card [borderRadius]="{ topLeft: false }">
             <tedi-card-content>
-              <p tedi-text>No top-left corner</p>
+              <p tedi-text>Ülemine vasak nurgaraadius puudub</p>
             </tedi-card-content>
           </tedi-card>
         </tedi-col>
         <tedi-col>
           <tedi-card [borderRadius]="{ bottomRight: false }">
             <tedi-card-content>
-              <p tedi-text>No bottom-right corner</p>
+              <p tedi-text>Alumine parem nurgaraadius puudub</p>
             </tedi-card-content>
           </tedi-card>
         </tedi-col>
@@ -747,13 +747,13 @@ const BACKGROUND_EXAMPLES: { name: CardBackground; light: boolean }[] =
 
 export const Backgrounds: Story = {
   render: () => ({
-    props: { backgrounds: BACKGROUND_EXAMPLES },
+    props: { backgrounds: BACKGROUND_EXAMPLES, CABBAGE_TEXT },
     template: `
       <tedi-row [cols]="1" [sm]="{ cols: 2 }" [lg]="{ cols: 3 }" [gap]="2">
         @for (bg of backgrounds; track bg.name) {
           <tedi-card [background]="bg.name">
             <tedi-card-content>
-              <p tedi-text [color]="bg.light ? 'white' : 'primary'">{{ bg.name }}</p>
+              <p tedi-text [color]="bg.light ? 'white' : 'primary'">{{ CABBAGE_TEXT }}</p>
             </tedi-card-content>
           </tedi-card>
         }
