@@ -1,3 +1,10 @@
+# [6.5.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.10...angular-6.5.0-rc.11) (2026-06-17)
+
+
+### Features
+
+* **progressbar,attachment:** new tedi-ready components [#253](https://github.com/TEDI-Design-System/angular/issues/253) ([#451](https://github.com/TEDI-Design-System/angular/issues/451)) ([b2b9b5b](https://github.com/TEDI-Design-System/angular/commit/b2b9b5b47b33c19b5efcd719d79409d606aff573)), closes [#482](https://github.com/TEDI-Design-System/angular/issues/482)
+
 # [6.5.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.9...angular-6.5.0-rc.10) (2026-06-11)
 
 
