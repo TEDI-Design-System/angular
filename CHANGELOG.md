@@ -1,3 +1,10 @@
+# [6.5.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.12...angular-6.5.0-rc.13) (2026-06-18)
+
+
+### Features
+
+* **alert:** add tedi-alert-action slot [#460](https://github.com/TEDI-Design-System/angular/issues/460) ([#461](https://github.com/TEDI-Design-System/angular/issues/461)) ([ca8fc86](https://github.com/TEDI-Design-System/angular/commit/ca8fc86447979044e973e9423459faf765a707a8))
+
 # [6.5.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.11...angular-6.5.0-rc.12) (2026-06-17)
 
 
