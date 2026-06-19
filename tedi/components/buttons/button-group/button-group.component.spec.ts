@@ -237,6 +237,22 @@ describe("ButtonGroupComponent", () => {
     expect(getRoot().classList).toContain("tedi-button-group--stretch");
   });
 
+  it("should wrap the label text in a padded span", () => {
+    const label = getItems()[0].querySelector(
+      ".tedi-button-group-button__label",
+    );
+    expect(label).toBeTruthy();
+    expect(label?.textContent?.trim()).toBe("Details");
+  });
+
+  it("should keep the icon flush before the wrapped label", () => {
+    const item = getItems()[1];
+    expect(item.firstElementChild?.tagName.toLowerCase()).toBe("tedi-icon");
+    expect(item.lastElementChild?.classList).toContain(
+      "tedi-button-group-button__label",
+    );
+  });
+
   describe("auto-rendered icons", () => {
     it("should prepend an icon when iconLeft is set", () => {
       const item = getItems()[1];

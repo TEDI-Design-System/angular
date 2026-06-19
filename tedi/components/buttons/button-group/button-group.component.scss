@@ -94,3 +94,11 @@
     border-radius: var(--button-radius-sm);
   }
 }
+
+.tedi-button.tedi-button-group-button {
+  gap: 0;
+}
+
+.tedi-button-group-button__label {
+  padding-inline: var(--_btn-inner-spacing);
+}
