@@ -1,3 +1,10 @@
+# [6.5.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.13...angular-6.5.0-rc.14) (2026-06-19)
+
+
+### Features
+
+* **button-group:** new tedi-ready component [#9](https://github.com/TEDI-Design-System/angular/issues/9) ([#450](https://github.com/TEDI-Design-System/angular/issues/450)) ([37a4d3b](https://github.com/TEDI-Design-System/angular/commit/37a4d3b5c4f3d031634b56298a70596aebe34f64))
+
 # [6.5.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.12...angular-6.5.0-rc.13) (2026-06-18)
 
 
