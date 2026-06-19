@@ -265,6 +265,17 @@ export const Default: DemoStory = {
   }),
 };
 
+export const States: StoryObj<StatesArgs> = {
+  parameters: PSEUDO_PARAMS,
+  args: {
+    hideText: false,
+    arrowType: "default",
+    openText: "Open",
+    closeText: "Close",
+  },
+  render: StatesTemplate,
+};
+
 export const IconOnly: StoryObj<StatesArgs> = {
   parameters: PSEUDO_PARAMS,
   args: {
@@ -286,9 +297,11 @@ export const SecondaryButton: StoryObj<StatesArgs> = {
 };
 
 export const WithTextInverted: StoryObj<StatesArgs> = {
-  parameters: {
-    ...PSEUDO_PARAMS,
-    backgrounds: { default: "brand" },
+  parameters: PSEUDO_PARAMS,
+  globals: {
+    backgrounds: {
+      value: "brand",
+    },
   },
   args: {
     hideText: false,
@@ -302,9 +315,11 @@ export const WithTextInverted: StoryObj<StatesArgs> = {
 };
 
 export const IconOnlyInverted: StoryObj<StatesArgs> = {
-  parameters: {
-    ...PSEUDO_PARAMS,
-    backgrounds: { default: "brand" },
+  parameters: PSEUDO_PARAMS,
+  globals: {
+    backgrounds: {
+      value: "brand",
+    },
   },
   args: {
     hideText: true,
@@ -312,17 +327,6 @@ export const IconOnlyInverted: StoryObj<StatesArgs> = {
     inverted: true,
     titleColor: "white",
     ariaLabel: "Toggle details",
-  },
-  render: StatesTemplate,
-};
-
-export const States: StoryObj<StatesArgs> = {
-  parameters: PSEUDO_PARAMS,
-  args: {
-    hideText: false,
-    arrowType: "default",
-    openText: "Open",
-    closeText: "Close",
   },
   render: StatesTemplate,
 };

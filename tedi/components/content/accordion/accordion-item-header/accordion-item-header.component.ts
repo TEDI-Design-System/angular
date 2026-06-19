@@ -14,7 +14,7 @@ import {
   CollapseButtonComponent,
   CollapseButtonSize,
 } from "../../../buttons/collapse-button/collapse-button.component";
-import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
+import { TediTranslationService } from "../../../../services/translation/translation.service";
 import { AccordionItemComponent } from "../accordion-item/accordion-item.component";
 
 @Component({
@@ -24,13 +24,7 @@ import { AccordionItemComponent } from "../accordion-item/accordion-item.compone
   styleUrl: "./accordion-item-header.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    IconComponent,
-    TextComponent,
-    CollapseButtonComponent,
-    TediTranslationPipe,
-  ],
+  imports: [CommonModule, IconComponent, TextComponent, CollapseButtonComponent],
   host: {
     "[class.tedi-accordion-item-header]": "true",
     "[class.tedi-accordion-item-header--hoverable]":
@@ -43,6 +37,9 @@ import { AccordionItemComponent } from "../accordion-item/accordion-item.compone
 })
 export class AccordionItemHeaderComponent {
   protected readonly item = inject(AccordionItemComponent);
+  private readonly translationService = inject(TediTranslationService);
+  private readonly defaultOpenLabel = this.translationService.track("open");
+  private readonly defaultCloseLabel = this.translationService.track("close");
 
   /**
    * If false, disables header toggling and enables using interactive elements in the accordion header.
@@ -54,10 +51,18 @@ export class AccordionItemHeaderComponent {
    * `fill` - container expands to available space, moving any trailing elements to the end.
    */
   titleLayout = input<"hug" | "fill">("hug");
-  /** Label shown when accordion is collapsed */
-  openLabel = input<string>("open");
-  /** Label shown when accordion is expanded */
-  closeLabel = input<string>("close");
+  /**
+   * Text shown when accordion is collapsed. Rendered literally — translate
+   * at the call site if needed. When omitted, falls back to the translated
+   * `"open"` label from `TediTranslationService`.
+   */
+  openText = input<string>();
+  /**
+   * Text shown when accordion is expanded. Rendered literally — translate
+   * at the call site if needed. When omitted, falls back to the translated
+   * `"close"` label from `TediTranslationService`.
+   */
+  closeText = input<string>();
   /**
    * Controls whether the expand/collapse label is shown.
    */
@@ -128,7 +133,9 @@ export class AccordionItemHeaderComponent {
   readonly disabled = computed(() => this.item.disabled());
 
   readonly expandLabel = computed(() =>
-    this.expanded() ? this.closeLabel() : this.openLabel(),
+    this.expanded()
+      ? (this.closeText() ?? this.defaultCloseLabel())
+      : (this.openText() ?? this.defaultOpenLabel()),
   );
 
   readonly showStartExpandAction = computed(

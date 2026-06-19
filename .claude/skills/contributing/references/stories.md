@@ -98,7 +98,12 @@ Find where the component lives under `tedi/components/` and map to the Storybook
 | `tedi/components/buttons/` | `TEDI-Ready/Components/Buttons/` |
 | `tedi/components/overlay/` | `TEDI-Ready/Components/Overlay/` |
 | `tedi/components/navigation/` | `TEDI-Ready/Components/Navigation/` |
+| `tedi/components/content/` | `TEDI-Ready/Content/` (no `Components/` segment) |
+| `tedi/components/layout/` | `TEDI-Ready/Layout/` (no `Components/` segment) |
+| `tedi/components/base/` | `TEDI-Ready/Base/` (no `Components/` segment) |
 | Other category | `TEDI-Ready/Components/<Category>/` |
+
+**Note:** the `Content`, `Layout`, and `Base` groups sit directly under `TEDI-Ready/` — they skip the `Components/` segment. Check sibling stories in the same folder before picking a title.
 
 ### 4. Create the Stories File
 
@@ -113,7 +118,7 @@ import { ComponentName } from './index';
  * <a href="https://www.figma.com/design/..." target="_blank">Figma ↗</a>
  */
 export default {
-  title: 'TEDI-Ready/Components/Category/ComponentName',
+  title: 'TEDI-Ready/Components/Category/ComponentName', // or 'TEDI-Ready/<Content|Layout|Base>/ComponentName' for those groups
   component: ComponentName,
   decorators: [
     moduleMetadata({

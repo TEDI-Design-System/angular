@@ -75,6 +75,7 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 - `arrowType: "default" | "secondary" = "default"` — `"secondary"` paints the bordered style (only effective in icon-only mode)
 - `size: "default" | "small" = "default"`
 - `inverted: boolean = false` — light text/icon for dark backgrounds (ignored when `arrowType="secondary"`)
+- `underline: boolean = true` — underline the visible text label (no effect in icon-only mode)
 - `ariaControls: string` — id of the disclosed region
 - `ariaLabel: string` — required when `hideText` is true
 - `id: string`
@@ -122,11 +123,15 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 **Inputs:**
 - `headerClickable: boolean = true` — when true, the whole header is the toggle button. Set to false when projecting interactive children (action buttons, checkboxes, links) so the header becomes a div with a separate small toggle button.
 - `titleLayout: "hug" | "fill" = "hug"` — `fill` makes the title flex-grow, pushing trailing siblings to the right edge of the start group
-- `openLabel: string = "open"` — label shown when collapsed (passed through `tediTranslate`)
-- `closeLabel: string = "close"` — label shown when expanded (passed through `tediTranslate`)
+- `openText: string | undefined` — text shown when collapsed, rendered literally. When omitted, falls back to the translated `"open"` label from `TediTranslationService`. Pipe through `tediTranslate` at the call site if you need a localised override.
+- `closeText: string | undefined` — text shown when expanded, rendered literally. When omitted, falls back to the translated `"close"` label from `TediTranslationService`. Pipe through `tediTranslate` at the call site if you need a localised override.
 - `showExpandLabel: boolean = true` — when false, the toggle is icon-only and uses `aria-label` for its accessible name
 - `showDefaultExpandAction: boolean = true` — when false, no default toggle button is rendered (consumer provides their own via slots and calls `item.toggle()`)
 - `expandActionPosition: "start" | "end" = "end"`
+- `expandActionArrowType: "default" | "secondary" = "default"` — chevron style passthrough to the underlying `CollapseButton`. Only effective when `headerClickable` is `false` and `showExpandLabel` is `false` (icon-only mode).
+- `expandActionSize: "default" | "small" | undefined` — size passthrough to the underlying `CollapseButton`. Only effective when `headerClickable` is `false`. When omitted, derived from `showExpandLabel` (true → `default`, false → `small`).
+- `expandActionInverted: boolean = false` — inverted palette passthrough. Only effective when `headerClickable` is `false`.
+- `expandActionUnderline: boolean = false` — underline the default expand action's text. Only effective when `headerClickable` is `false` and `showExpandLabel` is `true`.
 - `headerClass: string | null` — extra CSS class on the header element
 - `headingLevel: 1 | 2 | 3 | 4 | 5 | 6 | undefined = undefined` — wraps the trigger in a semantic `<h1>`–`<h6>` element per WAI-ARIA Accordion Pattern. Wrapper uses `display: contents` so it doesn't affect layout. Recommended for docs / FAQ pages where the accordion participates in the document outline.
 **Slots:**

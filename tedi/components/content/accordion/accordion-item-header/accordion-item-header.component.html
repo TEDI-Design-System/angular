@@ -99,7 +99,7 @@
         showExpandLabel()
       "
     >
-      {{ (showExpandLabel() ? expandLabel() : "") | tediTranslate }}
+      {{ showExpandLabel() ? expandLabel() : "" }}
       <tedi-icon
         aria-hidden="true"
         name="expand_more"
@@ -114,8 +114,8 @@
       [underline]="expandActionUnderline()"
       (openChange)="toggle()"
       [open]="expanded()"
-      [openText]="openLabel() | tediTranslate"
-      [closeText]="closeLabel() | tediTranslate"
+      [openText]="openText()"
+      [closeText]="closeText()"
       [hideText]="!showExpandLabel()"
       [arrowType]="expandActionArrowType()"
       [size]="resolvedExpandActionSize()"

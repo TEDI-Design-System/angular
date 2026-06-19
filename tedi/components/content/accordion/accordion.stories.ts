@@ -180,28 +180,26 @@ export default {
         defaultValue: { summary: "hug" },
       },
     },
-    openLabel: {
+    openText: {
       control: "text",
       description:
-        "Label shown when the accordion is collapsed. The default `open` is " +
-        "a translation key — `tediTranslate` resolves it to the active locale. " +
-        "Known translation keys are localized, custom strings are used as-is.",
+        "Text shown when the accordion is collapsed. Rendered literally — " +
+        "translate at the call site if needed. When omitted, falls back to the translated " +
+        "`open` label from `TediTranslationService`.",
       table: {
         category: "Accordion Item Header",
         type: { summary: "string" },
-        defaultValue: { summary: "open" },
       },
     },
-    closeLabel: {
+    closeText: {
       control: "text",
       description:
-        "Label shown when the accordion is expanded. The default `close` is " +
-        "a translation key — `tediTranslate` resolves it to the active locale. " +
-        "Known translation keys are localized, custom strings are used as-is.",
+        "Text shown when the accordion is expanded. Rendered literally — " +
+        "translate at the call site if needed. When omitted, falls back to the translated " +
+        "`close` label from `TediTranslationService`.",
       table: {
         category: "Accordion Item Header",
         type: { summary: "string" },
-        defaultValue: { summary: "close" },
       },
     },
     showExpandLabel: {
@@ -374,8 +372,6 @@ The accordion item is composed of three parts, each owning its own configuration
     accordionDefaultExpanded: false,
     headerClickable: true,
     titleLayout: "hug",
-    openLabel: "open",
-    closeLabel: "close",
     showExpandLabel: true,
     showDefaultExpandAction: true,
     expandActionPosition: "end",
@@ -413,8 +409,8 @@ The accordion item is composed of three parts, each owning its own configuration
           <tedi-accordion-item-header
             [headerClickable]="headerClickable"
             [titleLayout]="titleLayout"
-            [openLabel]="openLabel"
-            [closeLabel]="closeLabel"
+            [openText]="openText"
+            [closeText]="closeText"
             [showExpandLabel]="showExpandLabel"
             [showDefaultExpandAction]="showDefaultExpandAction"
             [expandActionPosition]="expandActionPosition"
@@ -438,7 +434,7 @@ The accordion item is composed of three parts, each owning its own configuration
           </tedi-accordion-item-content>
         </tedi-accordion-item>
         <tedi-accordion-item>
-          <tedi-accordion-item-header [openLabel]="'open'" [closeLabel]="'close'" [expandActionPosition]="'end'">
+          <tedi-accordion-item-header [expandActionPosition]="'end'">
             <span tedi-accordion-title>Title 2</span>
           </tedi-accordion-item-header>
           <tedi-accordion-item-content>
@@ -555,8 +551,8 @@ export const Variants: StoryObj = {
             <tedi-accordion-item-header
               [headerClickable]="false"
               expandActionPosition="start"
-              openLabel="Title"
-              closeLabel="Title"
+              openText="Title"
+              closeText="Title"
             >
               ${actionButtonTemplate("selectedA", "toggleA")}
             </tedi-accordion-item-header>
@@ -569,8 +565,8 @@ export const Variants: StoryObj = {
             <tedi-accordion-item-header
               [headerClickable]="false"
               expandActionPosition="start"
-              openLabel="Title"
-              closeLabel="Title"
+              openText="Title"
+              closeText="Title"
             >
               ${actionButtonTemplate("selectedB", "toggleB")}
             </tedi-accordion-item-header>
@@ -637,8 +633,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openLabel="Title"
-                closeLabel="Title"
+                openText="Title"
+                closeText="Title"
               />
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -648,8 +644,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openLabel="Title"
-                closeLabel="Title"
+                openText="Title"
+                closeText="Title"
               />
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -700,8 +696,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openLabel="Title"
-                closeLabel="Title"
+                openText="Title"
+                closeText="Title"
               >
                 ${actionButtonTemplate("selectedA", "toggleA")}
               </tedi-accordion-item-header>
@@ -714,8 +710,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openLabel="Title"
-                closeLabel="Title"
+                openText="Title"
+                closeText="Title"
               >
                 ${actionButtonTemplate("selectedB", "toggleB")}
               </tedi-accordion-item-header>
@@ -730,8 +726,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openLabel="Title"
-                closeLabel="Title"
+                openText="Title"
+                closeText="Title"
               >
                 ${actionButtonTemplate("selectedC", "toggleC")}
               </tedi-accordion-item-header>
@@ -744,8 +740,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openLabel="Title"
-                closeLabel="Title"
+                openText="Title"
+                closeText="Title"
               >
                 ${actionButtonTemplate("selectedD", "toggleD")}
               </tedi-accordion-item-header>
@@ -837,8 +833,8 @@ export const WithIconCard: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openLabel="Title"
-                closeLabel="Title"
+                openText="Title"
+                closeText="Title"
               >
                 ${actionButtonTemplate("selectedA", "toggleA")}
               </tedi-accordion-item-header>
@@ -852,8 +848,8 @@ export const WithIconCard: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openLabel="Title"
-                closeLabel="Title"
+                openText="Title"
+                closeText="Title"
               >
                 ${actionButtonTemplate("selectedB", "toggleB")}
               </tedi-accordion-item-header>
@@ -869,8 +865,8 @@ export const WithIconCard: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openLabel="Title"
-                closeLabel="Title"
+                openText="Title"
+                closeText="Title"
               >
                 ${actionButtonTemplate("selectedC", "toggleC")}
               </tedi-accordion-item-header>
@@ -884,8 +880,8 @@ export const WithIconCard: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openLabel="Title"
-                closeLabel="Title"
+                openText="Title"
+                closeText="Title"
               >
                 ${actionButtonTemplate("selectedD", "toggleD")}
               </tedi-accordion-item-header>
