@@ -28,7 +28,7 @@ class BreakpointObserverMock {
   emit(breakpoint: keyof typeof BREAKPOINTS | undefined) {
     const breakpoints: Record<string, boolean> = {};
     for (const value of Object.values(BREAKPOINTS)) {
-      breakpoints[`(min-width: ${value}px)`] =
+      breakpoints[`(min-width: ${value}rem)`] =
         breakpoint !== undefined && value <= BREAKPOINTS[breakpoint];
     }
     this.state$.next({ breakpoints });
@@ -342,7 +342,7 @@ describe("ButtonGroupComponent", () => {
       tick();
 
       const selected = document.querySelector(
-        ".tedi-button-group__dropdown-item--selected",
+        ".tedi-dropdown-item--selected",
       );
       expect(selected?.textContent).toContain("Updates");
     }));
@@ -355,7 +355,7 @@ describe("ButtonGroupComponent", () => {
       tick();
 
       const items = document.querySelectorAll<HTMLElement>(
-        ".tedi-button-group__dropdown-item",
+        "li[tedi-dropdown-item]",
       );
       items[0].click();
       fixture.detectChanges();
@@ -373,7 +373,7 @@ describe("ButtonGroupComponent", () => {
       tick();
 
       const items = document.querySelectorAll<HTMLElement>(
-        ".tedi-button-group__dropdown-item",
+        "li[tedi-dropdown-item]",
       );
       items[2].click();
       fixture.detectChanges();

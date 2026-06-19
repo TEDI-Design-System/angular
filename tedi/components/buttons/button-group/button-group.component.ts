@@ -26,6 +26,8 @@ import { DropdownComponent } from "../../overlay/dropdown/dropdown.component";
 import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-content/dropdown-content.component";
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
+import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
+import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 
 export type ButtonGroupDropdownLabelMode = "selected" | "static";
@@ -40,6 +42,8 @@ export type ButtonGroupDropdownLabelMode = "selected" | "static";
     DropdownTriggerDirective,
     DropdownContentComponent,
     DropdownItemComponent,
+    DropdownItemValueComponent,
+    DropdownItemValueLabelComponent,
   ],
   templateUrl: "./button-group.component.html",
   styleUrl: "./button-group.component.scss",
@@ -176,7 +180,6 @@ export class ButtonGroupComponent {
     return list.join(" ");
   });
 
-  /** Whether `value` is currently selected. */
   isSelected(value: string): boolean {
     const current = this.value();
     if (this.multiple()) {
@@ -185,7 +188,6 @@ export class ButtonGroupComponent {
     return current === value;
   }
 
-  /** Toggles `value` in the selection and emits `selectionChange`. */
   toggle(value: string) {
     if (this.multiple()) {
       const current = Array.isArray(this.value())
@@ -204,7 +206,7 @@ export class ButtonGroupComponent {
     this.selectionChange.emit(value);
   }
 
-  protected onDropdownItemClick(item: ButtonGroupButtonDirective) {
+  protected onDropdownItemSelect(item: ButtonGroupButtonDirective) {
     if (item.disabled()) return;
     this.toggle(item.value());
   }

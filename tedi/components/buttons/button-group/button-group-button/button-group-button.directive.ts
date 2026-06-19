@@ -20,7 +20,7 @@ import {
 } from "../../button/button.component";
 import { ButtonGroupComponent } from "../button-group.component";
 
-type IconSlot = "left" | "right" | "solo";
+type IconSlot = "left" | "right" | "only";
 
 /**
  * Turns a `<button>` inside `tedi-button-group` into a styled, selectable item.
@@ -93,7 +93,7 @@ export class ButtonGroupButtonDirective {
   constructor() {
     effect(() => this.syncIcon("left", this.iconLeft()));
     effect(() => this.syncIcon("right", this.iconRight()));
-    effect(() => this.syncIcon("solo", this.icon()));
+    effect(() => this.syncIcon("only", this.icon()));
   }
 
   private syncIcon(slot: IconSlot, name: string | undefined) {
