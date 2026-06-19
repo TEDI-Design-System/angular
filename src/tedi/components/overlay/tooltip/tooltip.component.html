@@ -1,0 +1,25 @@
+<ng-content select="tedi-tooltip-trigger" />
+@if (contentText()) {
+  <span [id]="descriptionId" class="sr-only">{{ contentText() }}</span>
+}
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="overlayOrigin()"
+  [cdkConnectedOverlayOpen]="isOpen()"
+  [cdkConnectedOverlayPositions]="overlayPositions()"
+  (positionChange)="onPositionChange($event)"
+  (attach)="onOverlayAttach()"
+>
+  <div
+    class="tedi-tooltip__container"
+    [attr.data-placement]="currentPlacement()"
+    aria-hidden="true"
+  >
+    <div
+      class="tedi-tooltip__arrow"
+      [style.left.px]="arrowLeft()"
+      [style.top.px]="arrowTop()"
+    ></div>
+    <ng-content select="tedi-tooltip-content" />
+  </div>
+</ng-template>

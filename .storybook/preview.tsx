@@ -1,6 +1,6 @@
 import { applicationConfig, Preview, StoryContext } from "@storybook/angular";
 import { provideRouter, withDisabledInitialNavigation } from "@angular/router";
-import { Theme } from "../tedi/services/theme/theme.service";
+import { Theme } from "../src/tedi/services/theme/theme.service";
 import {
   Controls,
   Description,
@@ -9,7 +9,7 @@ import {
   Subtitle,
   Title,
 } from "@storybook/addon-docs/blocks";
-import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../tedi/tokens/translation.token";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../src/tedi/tokens/translation.token";
 
 export const globalTypes = {
   theme: {
