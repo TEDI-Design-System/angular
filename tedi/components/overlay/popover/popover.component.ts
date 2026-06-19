@@ -224,16 +224,21 @@ export class PopoverComponent {
     const triggerEl = this.popoverTrigger().host.nativeElement;
     if (!overlayEl || !triggerEl) return;
 
+    // Read the arrow's actual rendered size so the calculation stays correct
+    // regardless of whether the SCSS uses px or rem and regardless of root
+    // font-size. If the arrow isn't in the DOM yet (e.g. first
+    // `updateArrowPosition` before the template projects it), bail out — the
+    // subsequent `(positionChange)` call will retry with the real size.
     const arrowEl = overlayEl.querySelector<HTMLElement>(
       ".tedi-popover__arrow",
     );
-    const arrowSize = arrowEl?.offsetWidth ?? 24;
+    if (!arrowEl) return;
 
     const offset = calculateArrowOffset(
       this.currentPlacement(),
       triggerEl,
       overlayEl,
-      arrowSize,
+      arrowEl.offsetWidth,
     );
     this.arrowLeft.set(offset.left);
     this.arrowTop.set(offset.top);

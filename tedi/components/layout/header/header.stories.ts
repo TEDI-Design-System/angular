@@ -256,6 +256,8 @@ export default {
       name: "size",
       description:
         "Visual size of the login button. Auto-selected from the viewport when omitted.",
+      control: { type: "select" },
+      options: [undefined, "default", "small"],
       table: {
         category: "header-login",
         type: { summary: "'default' | 'small'" },
@@ -582,6 +584,15 @@ Example with theme-aware logo:
       },
     },
   },
+  args: {
+    logoHref: "/",
+    showLogo: true,
+    alignment: "center",
+    languages: { et: "EST", en: "ENG", ru: "RUS" },
+    loginHref: undefined,
+    loginLabel: "",
+    loginSize: undefined,
+  } as Record<string, unknown>,
   render: (args) => ({
     props: args,
     styles: [mobileSidenavWrapperStyles],
@@ -589,19 +600,23 @@ Example with theme-aware logo:
       <div class="story-mobile-sidenav-wrapper">
         <header tedi-header>
           <button tedi-sidenav-toggle></button>
-          ${logo}
-          <tedi-header-content *showAt="'lg'">
+          <tedi-header-logo [href]="logoHref" [showLogo]="showLogo">
+            <img src="header-logo.svg" alt="Logo" />
+            <img tedi-header-logo-dark src="header-logo-white.svg" alt="Logo (Dark Mode)" />
+          </tedi-header-logo>
+          <tedi-header-content *showAt="'lg'" [alignment]="alignment">
             <a tedi-link href="#" [underline]="false">Link text</a>
             <a tedi-link href="#" [underline]="false">Link text</a>
             <a tedi-link href="#" [underline]="false">Link text</a>
           </tedi-header-content>
           <tedi-header-actions>
-            <tedi-header-language
-              [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }"
-              currentLanguage="et"
-            />
+            <tedi-header-language [languages]="languages" />
             <tedi-separator axis="vertical" />
-            <tedi-header-login />
+            <tedi-header-login
+              [href]="loginHref"
+              [label]="loginLabel"
+              [size]="loginSize"
+            />
           </tedi-header-actions>
         </header>
         <tedi-sidenav-overlay></tedi-sidenav-overlay>

@@ -183,10 +183,6 @@ export class HeaderRoleComponent {
    */
   clearSearchOnSelect = input(true);
   /**
-   * Whether to show the role selection toggle and dropdown.
-   * When not set, defaults to showing the selection when there are multiple representatives.
-   */
-  /**
    * Whether the role represents an organization.
    * Affects the search input label.
    */
@@ -201,6 +197,10 @@ export class HeaderRoleComponent {
    * Overrides both the default and `searchLabel` when `isOrganization` is true.
    */
   organizationSearchLabel = input<string | undefined>(undefined);
+  /**
+   * Whether to show the role selection toggle and dropdown.
+   * When not set, defaults to showing the selection when there are multiple representatives.
+   */
   showRoleSwitch = input<boolean | undefined>(undefined);
   /** List of representatives */
   representatives = input.required<Representative[]>();
