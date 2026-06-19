@@ -155,3 +155,4 @@ Key things to **not** flag:
 - `ViewEncapsulation.None` — intentional, not a security concern.
 - Missing CSS `var()` fallback values — intentionally omitted.
 - CdkListbox private API access (`_setNextFocusToSelectedOption`, `_handleKeydown`) in the select component — intentional workarounds, no public CDK alternative exists.
+- `parameters.status: { type: ["breakpointSupport"] }` on a story — this is a valid, registered status badge (see `.storybook/preview.tsx` and `best-practices.md`). Keep it on components with breakpoint-dependent behavior or inputs that accept breakpoint values. Do not suggest removing it.

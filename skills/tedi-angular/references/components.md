@@ -36,13 +36,52 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 ### Button
 **Selector:** `[tedi-button]`
 **Inputs:**
-- `variant: ButtonVariant = "primary"`
+- `variant: ButtonVariant = "primary"` — primary | secondary | neutral | success | danger | danger-neutral | primary-inverted | secondary-inverted | neutral-inverted | primary-button-group | secondary-button-group
 - `size: ButtonSize = "default"` — "default" or "small"
 **Slots:** default
 
 ```html
 <button tedi-button variant="primary">Click me</button>
 <button tedi-button variant="secondary" size="small">Small</button>
+```
+
+### ButtonGroup
+**Selector:** `tedi-button-group`
+**Inputs:**
+- `variant: ButtonVariant = "primary-button-group"` — applied to every item (overridable per item). Any `ButtonVariant` works; only the `*-button-group` variants get the connected/segmented strip geometry, other variants keep their own radius and show their active colors when selected.
+- `size: "default" | "small" = "default"`
+- `multiple: boolean = false` — allow several values; `value` becomes `string[]`
+- `value: string | string[]` — selected value(s); two-way bindable `[(value)]`
+- `stretch: boolean = false` — items share horizontal space equally
+- `ariaLabel: string` — required when no visible heading labels the group
+- `enableMobileDropdown: boolean = false` — collapse to a dropdown below `mobileBreakpoint`
+- `mobileBreakpoint: Breakpoint = "md"`
+- `dropdownLabel: string` — falls back to the `buttonGroup.menu` translation
+- `dropdownLabelMode: "static" | "selected" = "static"`
+**Outputs:** `selectionChange: string` (emits the value the user toggled)
+**Slots:** `<button tedi-button-group-button>` children
+
+### ButtonGroupButton
+**Selector:** `button[tedi-button-group-button]`
+Extends `tedi-button` (composes `BaseButtonDirective`); inherits `variant`/`size` from the group.
+**Inputs:**
+- `value: string` (required) — the item's identity; contributes to the group's selected value
+- `label: string` (required) — text used in the mobile dropdown; also the `aria-label` when `icon` is set
+- `disabled: boolean = false` — native `disabled` attribute
+- `iconLeft: string` — icon name auto-rendered before the content (and in the dropdown item)
+- `iconRight: string` — icon name auto-rendered after the content (and in the dropdown item)
+- `icon: string` — icon-only mode; auto-rendered into the button and used as the dropdown icon
+- `variant: ButtonVariant` — overrides the group's variant for this item
+- `size: "default" | "small"` — overrides the group's size for this item
+**Outputs:** `clicked: MouseEvent` (suppressed on disabled items)
+**ARIA:** `aria-pressed="true|false"` per item (derived from the group value); `role="group"` on the group.
+
+```html
+<tedi-button-group ariaLabel="View" variant="primary-button-group" [(value)]="selected">
+  <button tedi-button-group-button value="1" label="Details">Details</button>
+  <button tedi-button-group-button value="2" label="Updates" iconLeft="refresh">Updates</button>
+  <button tedi-button-group-button value="3" label="Settings" [disabled]="true">Settings</button>
+</tedi-button-group>
 ```
 
 ### CardButton

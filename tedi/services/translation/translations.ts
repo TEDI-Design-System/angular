@@ -798,6 +798,13 @@ export const translationsMap = {
     en: (value: string, isOpen: boolean) => (`${isOpen ? 'Close' : 'Open'} ${value} submenu`),
     ru: (value: string, isOpen: boolean) => (`${isOpen ? 'Закрыть' : 'Открыть'} ${value} подменю`),
   },
+  "buttonGroup.menu": {
+    description: "Fallback label for ButtonGroup mobile dropdown trigger",
+    components: ["ButtonGroup"],
+    et: "Menüü",
+    en: "Menu",
+    ru: "Меню",
+  },
   carousel: {
     description: "Label for carousel",
     components: ["CarouselContent"],

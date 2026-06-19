@@ -37,6 +37,8 @@ describe("ButtonComponent", () => {
       "primary-inverted",
       "secondary-inverted",
       "neutral-inverted",
+      "primary-button-group",
+      "secondary-button-group",
     ];
 
     for (const variant of variants) {
