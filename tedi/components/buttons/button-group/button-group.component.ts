@@ -167,6 +167,7 @@ export class ButtonGroupComponent {
   });
 
   protected readonly triggerIcon = computed(() => {
+    if (this.dropdownLabelMode() === "static" || this.multiple()) return "menu";
     const selected = this.selectedItem();
     return selected?.iconLeft() ?? selected?.icon() ?? "menu";
   });

@@ -329,6 +329,22 @@ describe("ButtonGroupComponent", () => {
       expect(getTrigger().textContent).toContain("buttonGroup.menu");
     }));
 
+    it("should keep a static trigger icon in static mode", () => {
+      expect(getTrigger().querySelector("tedi-icon")?.textContent?.trim()).toBe(
+        "menu",
+      );
+    });
+
+    it("should reflect the selected item's icon when dropdownLabelMode is selected", fakeAsync(() => {
+      host.dropdownLabelMode.set("selected");
+      fixture.detectChanges();
+      tick();
+
+      expect(getTrigger().querySelector("tedi-icon")?.textContent?.trim()).toBe(
+        "refresh",
+      );
+    }));
+
   function openDropdown() {
     const trigger = document.querySelector(".tedi-button-group__dropdown-trigger") as HTMLElement;
     trigger.click();

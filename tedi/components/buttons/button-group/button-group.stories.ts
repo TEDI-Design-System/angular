@@ -401,19 +401,30 @@ export const Stretched: Story = {
 };
 
 export const MobileDropdown: Story = {
+  args: {
+    ariaLabel: "Mobiilis koondub rippmenüüks",
+    enableMobileDropdown: true,
+    mobileBreakpoint: "xxl",
+    dropdownLabel: "Alammenüü",
+    dropdownLabelMode: "static",
+  },
   render: (args) => ({
     props: { ...args, value: signal<string | undefined>(undefined) },
     template: `
       <div style="max-width: 320px;">
         <tedi-button-group
-          ariaLabel="Mobiilis koondub rippmenüüks"
           [variant]="variant"
-          [enableMobileDropdown]="true"
-          mobileBreakpoint="xxl"
-          dropdownLabel="Alammenüü"
-          dropdownLabelMode="static"
+          [size]="size"
+          [multiple]="multiple"
+          [stretch]="stretch"
+          [ariaLabel]="ariaLabel"
+          [enableMobileDropdown]="enableMobileDropdown"
+          [mobileBreakpoint]="mobileBreakpoint"
+          [dropdownLabel]="dropdownLabel"
+          [dropdownLabelMode]="dropdownLabelMode"
           [value]="value()"
           (valueChange)="value.set($event)"
+          (selectionChange)="selectionChange($event)"
         >
           <button tedi-button-group-button value="1" label="Tabel" iconLeft="table">Tabel</button>
           <button tedi-button-group-button value="2" label="Loend" iconLeft="list">Loend</button>
