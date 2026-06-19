@@ -117,10 +117,10 @@
     }
   },
   "lint-staged": {
-    "src/**/*.{css,scss}": [
+    "src/!(community)/**/*.{css,scss}": [
       "stylelint --fix"
     ],
-    "src/**/*.{ts,html}": [
+    "src/!(community)/**/*.{ts,html}": [
       "prettier --write"
     ]
   },
