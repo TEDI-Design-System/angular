@@ -51,6 +51,9 @@ export class AlertComponent {
   icon = input<string>("");
   /**
    * If true, a close button will be displayed.
+   *
+   * Ignored when a `[tedi-alert-action]` element is projected — the action
+   * slot wins, and is responsible for any close affordance it wants to expose.
    * @default false
    */
   showClose = input<boolean>(false);

@@ -9,6 +9,9 @@ import { ClosingButtonComponent } from "./closing-button.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
+import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
+import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
+import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
@@ -30,6 +33,9 @@ export default {
         IconComponent,
         RowComponent,
         ColComponent,
+        TooltipComponent,
+        TooltipTriggerComponent,
+        TooltipContentComponent,
       ],
     }),
   ],
@@ -44,10 +50,34 @@ export default {
     },
     iconSize: {
       control: "radio",
-      options: ["24", "18"],
-      description: "The size of the button in pixels",
+      options: [24, 18],
+      description: "The size of the icon inside the button in pixels.",
       table: {
         defaultValue: { summary: "24" },
+      },
+    },
+    ariaLabel: {
+      control: "text",
+      description:
+        'ARIA label (and native `title`) of the button. Overrides the translated default label "close".',
+      table: {
+        defaultValue: { summary: "close" },
+      },
+    },
+    icon: {
+      control: "text",
+      description:
+        "Material Symbols icon rendered inside the button. Override for other closing-like actions such as delete/remove (e.g. `delete`) and provide a matching `ariaLabel`.",
+      table: {
+        defaultValue: { summary: "close" },
+      },
+    },
+    showTitle: {
+      control: "boolean",
+      description:
+        "Render the label as a native `title` attribute. Set to `false` when the button is wrapped in a `tedi-tooltip` so the native tooltip does not double the custom one.",
+      table: {
+        defaultValue: { summary: "true" },
       },
     },
   },
@@ -63,6 +93,9 @@ type Story = StoryObj<ClosingButtonComponent>;
 export const Default: Story = {
   args: {
     size: "default",
+    iconSize: 24,
+    icon: "close",
+    showTitle: true,
   },
   render: (args) => ({
     props: args,
@@ -73,9 +106,6 @@ export const Default: Story = {
 };
 
 export const Size: Story = {
-  args: {
-    size: "default",
-  },
   render: (args) => ({
     props: args,
     template: `
@@ -102,9 +132,6 @@ export const Size: Story = {
 };
 
 export const IconSize: Story = {
-  args: {
-    size: "default",
-  },
   render: (args) => ({
     props: args,
     template: `
@@ -114,7 +141,7 @@ export const IconSize: Story = {
             18px
           </tedi-col>
           <tedi-col>
-            <button tedi-closing-button size="small" iconSize="18"></button>
+            <button tedi-closing-button size="small" [iconSize]="18"></button>
           </tedi-col>
         </tedi-row>
         <tedi-row class="padding-14-16" [gap]="3">
@@ -131,6 +158,53 @@ export const IconSize: Story = {
   }),
 };
 
+/**
+ * Override the `icon` input to reuse the closing-button look for other
+ * closing-like actions such as delete/remove. Always provide a matching
+ * `ariaLabel` — the default label is "close".
+ */
+export const CustomIcon: Story = {
+  render: () => ({
+    template: `
+      <div class="flex gap-2">
+        <button tedi-closing-button icon="delete" ariaLabel="Kustuta"></button>
+        <button tedi-closing-button icon="delete_forever" ariaLabel="Kustuta jäädavalt"></button>
+      </div>
+    `,
+  }),
+};
+
+/**
+ * Wrap the button in a `tedi-tooltip` to show a custom tooltip on hover.
+ * Set `[showTitle]="false"` so the native browser tooltip (the `title`
+ * attribute) does not double the custom one — the `aria-label` is kept.
+ */
+export const WithTooltip: Story = {
+  render: () => ({
+    template: `
+      <div class="flex gap-2">
+        <tedi-tooltip>
+          <tedi-tooltip-trigger>
+            <button tedi-closing-button [showTitle]="false"></button>
+          </tedi-tooltip-trigger>
+          <tedi-tooltip-content>Sulge</tedi-tooltip-content>
+        </tedi-tooltip>
+        <tedi-tooltip>
+          <tedi-tooltip-trigger>
+            <button
+              tedi-closing-button
+              icon="delete"
+              [showTitle]="false"
+              ariaLabel="Kustuta"
+            ></button>
+          </tedi-tooltip-trigger>
+          <tedi-tooltip-content>Kustuta</tedi-tooltip-content>
+        </tedi-tooltip>
+      </div>
+    `,
+  }),
+};
+
 export const States: Story = {
   parameters: {
     pseudo: {
@@ -140,7 +214,7 @@ export const States: Story = {
     },
   },
   render: (args) => ({
-    props: { args, PSEUDO_STATE },
+    props: { ...args, PSEUDO_STATE },
     template: `
       <tedi-row [cols]="1" [gapY]="3">
         <tedi-col *ngFor="let state of PSEUDO_STATE;" style="max-width: 200px; display: grid; grid-template-columns: repeat(2, 1fr); align-items: center;">

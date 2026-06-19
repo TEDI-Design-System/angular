@@ -1,3 +1,24 @@
+# [6.5.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.12...angular-6.5.0-rc.13) (2026-06-18)
+
+
+### Features
+
+* **alert:** add tedi-alert-action slot [#460](https://github.com/TEDI-Design-System/angular/issues/460) ([#461](https://github.com/TEDI-Design-System/angular/issues/461)) ([ca8fc86](https://github.com/TEDI-Design-System/angular/commit/ca8fc86447979044e973e9423459faf765a707a8))
+
+# [6.5.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.11...angular-6.5.0-rc.12) (2026-06-17)
+
+
+### Features
+
+* **card,card-button,timeline-card:** new tedi-ready components [#453](https://github.com/TEDI-Design-System/angular/issues/453) ([#479](https://github.com/TEDI-Design-System/angular/issues/479)) ([7c13043](https://github.com/TEDI-Design-System/angular/commit/7c13043bca246e241bd381f8444bb9670a9413e7))
+
+# [6.5.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.10...angular-6.5.0-rc.11) (2026-06-17)
+
+
+### Features
+
+* **progressbar,attachment:** new tedi-ready components [#253](https://github.com/TEDI-Design-System/angular/issues/253) ([#451](https://github.com/TEDI-Design-System/angular/issues/451)) ([b2b9b5b](https://github.com/TEDI-Design-System/angular/commit/b2b9b5b47b33c19b5efcd719d79409d606aff573)), closes [#482](https://github.com/TEDI-Design-System/angular/issues/482)
+
 # [6.5.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.9...angular-6.5.0-rc.10) (2026-06-11)
 
 

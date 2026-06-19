@@ -35,43 +35,38 @@
 <ng-content select="[file-list]">
   @for (file of files(); track file.name) {
     <div class="tedi-file-dropzone__file-list" [tediVerticalSpacing]="0.5">
-      <tedi-card
-        padding="none"
-        [className]="fileClasses(file)"
-        [background]="
-          file.fileStatus && file.fileStatus == 'invalid'
-            ? 'danger-primary'
-            : 'tertiary'
+      <tedi-attachment
+        [name]="file.label ?? file.name"
+        [fileSize]="formatBytes(file.size)"
+        [invalid]="file.fileStatus === 'invalid'"
+        [error]="
+          validateIndividually() && file.fileStatus === 'invalid'
+            ? file.helper?.text
+            : undefined
         "
       >
-        <tedi-card-content class="tedi-file-dropzone__card" padding="xs">
-          <div class="tedi-file-dropzone__file-name">
-            {{ file.label ?? file.name }}
-
-            @if (file && validateIndividually() && file.helper; as helper) {
-              <tedi-tooltip
-                [className]="tooltipClasses(file)"
-                [position]="helper?.position || 'top'"
+        <tedi-attachment-actions>
+          <tedi-tooltip>
+            <tedi-tooltip-trigger>
+              <button
+                tedi-button
+                type="button"
+                variant="neutral"
+                [attr.aria-label]="
+                  ('remove' | tediTranslate) + ' ' + (file.label ?? file.name)
+                "
+                [disabled]="file.disabled"
+                (click)="removeFile(file)"
               >
-                <tedi-tooltip-trigger>
-                  <button tedi-info-button [disabled]="file.disabled"></button>
-                </tedi-tooltip-trigger>
-
-                <tedi-tooltip-content>
-                  {{ helper.text }}
-                </tedi-tooltip-content>
-              </tedi-tooltip>
-            }
-          </div>
-          <button
-            tedi-closing-button
-            [title]="'clear' | tediTranslate"
-            [iconSize]="18"
-            (click)="removeFile(file)"
-            size="small"
-          ></button>
-        </tedi-card-content>
-      </tedi-card>
+                <tedi-icon name="delete" [size]="18" />
+              </button>
+            </tedi-tooltip-trigger>
+            <tedi-tooltip-content>
+              {{ ("remove" | tediTranslate) + " " + (file.label ?? file.name) }}
+            </tedi-tooltip-content>
+          </tedi-tooltip>
+        </tedi-attachment-actions>
+      </tedi-attachment>
     </div>
   }
 </ng-content>
