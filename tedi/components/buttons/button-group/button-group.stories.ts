@@ -99,7 +99,7 @@ export default {
     ariaLabel: {
       control: "text",
       description: "Accessible name for the group.",
-      table: { type: { summary: "string" }, category: "ButtonGroup inputs" },
+      table: { type: { summary: "string" }, category: "inputs" },
     },
     enableMobileDropdown: {
       control: "boolean",
@@ -123,7 +123,7 @@ export default {
     dropdownLabel: {
       control: "text",
       description: "Label shown on the dropdown trigger.",
-      table: { type: { summary: "string" }, category: "ButtonGroup inputs" },
+      table: { type: { summary: "string" }, category: "inputs" },
     },
     dropdownLabelMode: {
       control: "select",
