@@ -61,6 +61,9 @@ const themeDecorator = (storyFn: any, context: StoryContext) => {
 
 const preview: Preview = {
   tags: ["autodocs"],
+  initialGlobals: {
+    backgrounds: { value: "default" },
+  },
   decorators: [
     themeDecorator,
     applicationConfig({
@@ -78,7 +81,14 @@ const preview: Preview = {
     viewMode: "docs",
     backgrounds: {
       options: {
-        brand: { name: "brand", value: "var(--tedi-primary-600)" }
+        default: { name: "default", value: "var(--general-surface-primary)" },
+        muted: { name: "muted", value: "var(--general-surface-secondary)" },
+        subtle: { name: "subtle", value: "var(--general-surface-tertiary)" },
+        disabled: { name: "disabled", value: "var(--general-surface-disabled)" },
+        black: { name: "black", value: "var(--tedi-neutral-900)" },
+        inverted: { name: "inverted", value: "var(--general-surface-inverted-primary)" },
+        "inverted-contrast": { name: "inverted-contrast", value: "var(--general-surface-inverted-secondary)" },
+        brand: { name: "brand", value: "var(--tedi-primary-600)" },
       },
     },
     docs: {

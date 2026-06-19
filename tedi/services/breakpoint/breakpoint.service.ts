@@ -8,13 +8,20 @@ import {
 } from "@angular/core";
 import { BreakpointObserver } from "@angular/cdk/layout";
 
+/**
+ * Grid breakpoints in `rem`, mirroring `$grid-breakpoints` in
+ * `@tedi-design-system/core`. `rem` is used (instead of `px`) so breakpoints
+ * resolve against the browser's base font size and scale with the user's font
+ * preference — keeping these JS breakpoints aligned with the rem-based CSS
+ * tokens at any zoom / font-size setting.
+ */
 export const BREAKPOINTS = {
   xs: 0,
-  sm: 576,
-  md: 768,
-  lg: 992,
-  xl: 1200,
-  xxl: 1400,
+  sm: 36,
+  md: 48,
+  lg: 62,
+  xl: 75,
+  xxl: 87.5,
 } as const;
 
 const breakpointsOrder: Breakpoint[] = ["xs", "sm", "md", "lg", "xl", "xxl"];
@@ -54,20 +61,20 @@ export class BreakpointService {
   constructor() {
     this.breakpointObserver
       .observe(
-        Object.values(BREAKPOINTS).map((value) => `(min-width: ${value}px)`),
+        Object.values(BREAKPOINTS).map((value) => `(min-width: ${value}rem)`),
       )
       .subscribe((state) => {
-        if (state.breakpoints[`(min-width: ${BREAKPOINTS.xxl}px)`]) {
+        if (state.breakpoints[`(min-width: ${BREAKPOINTS.xxl}rem)`]) {
           this._currentBreakpoint.set("xxl");
-        } else if (state.breakpoints[`(min-width: ${BREAKPOINTS.xl}px)`]) {
+        } else if (state.breakpoints[`(min-width: ${BREAKPOINTS.xl}rem)`]) {
           this._currentBreakpoint.set("xl");
-        } else if (state.breakpoints[`(min-width: ${BREAKPOINTS.lg}px)`]) {
+        } else if (state.breakpoints[`(min-width: ${BREAKPOINTS.lg}rem)`]) {
           this._currentBreakpoint.set("lg");
-        } else if (state.breakpoints[`(min-width: ${BREAKPOINTS.md}px)`]) {
+        } else if (state.breakpoints[`(min-width: ${BREAKPOINTS.md}rem)`]) {
           this._currentBreakpoint.set("md");
-        } else if (state.breakpoints[`(min-width: ${BREAKPOINTS.sm}px)`]) {
+        } else if (state.breakpoints[`(min-width: ${BREAKPOINTS.sm}rem)`]) {
           this._currentBreakpoint.set("sm");
-        } else if (state.breakpoints[`(min-width: ${BREAKPOINTS.xs}px)`]) {
+        } else if (state.breakpoints[`(min-width: ${BREAKPOINTS.xs}rem)`]) {
           this._currentBreakpoint.set("xs");
         } else {
           this._currentBreakpoint.set(undefined);

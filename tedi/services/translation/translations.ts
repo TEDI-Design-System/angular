@@ -239,6 +239,13 @@ export const translationsMap = {
     en: "An error occurred while uploading the file",
     ru: "Произошла ошибка при загрузке файла",
   },
+  "file-attachment.uploading": {
+    description: "Default hint label shown under the progress bar in Attachment while a file is being uploaded",
+    components: ["Attachment"],
+    et: "Üleslaadimine",
+    en: "Uploading",
+    ru: "Загрузка",
+  },
   "modal.close": {
     description: "Label for modals close button",
     components: ["Modal"],
@@ -791,6 +798,13 @@ export const translationsMap = {
     et: (value: string, isOpen: boolean) => (`${isOpen ? 'Sulge' : 'Ava'} ${value} alammenüü`),
     en: (value: string, isOpen: boolean) => (`${isOpen ? 'Close' : 'Open'} ${value} submenu`),
     ru: (value: string, isOpen: boolean) => (`${isOpen ? 'Закрыть' : 'Открыть'} ${value} подменю`),
+  },
+  "buttonGroup.menu": {
+    description: "Fallback label for ButtonGroup mobile dropdown trigger",
+    components: ["ButtonGroup"],
+    et: "Menüü",
+    en: "Menu",
+    ru: "Меню",
   },
   carousel: {
     description: "Label for carousel",

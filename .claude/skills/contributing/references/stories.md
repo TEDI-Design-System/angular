@@ -165,7 +165,7 @@ Applies equally to new components and retrofits — if an existing story lacks t
 **Every public input/model must have an argTypes entry.** Do not skip any — all props must appear in the Storybook controls panel with correct typing and descriptions.
 
 Each entry must include:
-- `description` — brief explanation of what the input controls
+- `description` — concise, developer-friendly explanation of what the input does. Don't restate the name/type, pad with the obvious, or add usage examples. If there's nothing non-obvious to say, a short factual line is enough.
 - `control` — appropriate control type (`'radio'`, `'select'`, `'boolean'`, `'text'`, `'number'`, `'object'`)
 - `options` — for enum/union type inputs, list all possible values
 - `table.category` — always `'inputs'`

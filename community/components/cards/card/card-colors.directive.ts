@@ -20,6 +20,9 @@ export type CardColors =
   | "neutral-primary"
   | "neutral-secondary";
 
+/**
+ * @deprecated Use background and border inputs on TEDI-ready Card components instead. This directive will be removed from future versions.
+ */
 @Directive({
   standalone: true,
   host: {

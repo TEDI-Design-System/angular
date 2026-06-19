@@ -6,7 +6,9 @@ import {
 } from "@storybook/angular";
 
 import { AlertComponent } from "./alert.component";
+import { ButtonComponent } from "../../buttons/button/button.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
+import { IconComponent } from "../../base";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=4438-86446&t=lPIIY0laoX80DnVD-4" target="_blank">Figma ↗</a><br>
@@ -18,7 +20,7 @@ export default {
   component: AlertComponent,
   decorators: [
     moduleMetadata({
-      imports: [AlertComponent, RowComponent],
+      imports: [AlertComponent, ButtonComponent, RowComponent, IconComponent],
     }),
   ],
   argTypes: {
@@ -238,6 +240,24 @@ export const WithTitleLongTextAndClosingButton: Story = {
         Sed sed tellus eu augue finibus efficitur sit amet a velit. Donec vitae ex et ligula commodo luctus.
         Phasellus accumsan ligula quis nibh hendrerit, ac rutrum velit dictum. Curabitur ut vulputate justo.
         Proin eu sapien tellus. Morbi quis dapibus felis. Quisque commodo tempus vulputate.
+      </tedi-alert>
+    `,
+  }),
+};
+
+/**
+ * Project an element with the `tedi-alert-action` attribute to fill the
+ * right-side slot — for example a CTA button that takes the user somewhere
+ * relevant. When set, the default close button (`showClose`) is hidden, so the
+ * action slot is responsible for any dismiss affordance it wants to expose.
+ */
+export const WithActionButton: Story = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-alert type="warning" icon="warning">
+        Your account is missing a profile photo — add one so colleagues can recognise you in shared documents.
+        <button tedi-button tedi-alert-action variant="secondary">Open profile <tedi-icon name="arrow_forward" [size]="24" /></button>
       </tedi-alert>
     `,
   }),
