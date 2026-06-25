@@ -8,6 +8,21 @@ import { TabsListComponent, TabsOverflowMode } from "./tabs-list/tabs-list.compo
 import { TabsTriggerComponent } from "./tabs-trigger/tabs-trigger.component";
 import { TabsContentComponent } from "./tabs-content/tabs-content.component";
 
+const mockAfterNextRender: { callback: (() => void) | null } = {
+  callback: null,
+};
+
+jest.mock("@angular/core", () => {
+  const actual = jest.requireActual("@angular/core");
+  return {
+    ...actual,
+    afterNextRender: jest.fn((callback: () => void) => {
+      mockAfterNextRender.callback = callback;
+      return { destroy: jest.fn() };
+    }),
+  };
+});
+
 class TranslationMock {
   translate(key: string) {
     return key;
@@ -314,6 +329,76 @@ describe("Tabs", () => {
       resizeCallback?.();
       fixture.detectChanges();
       expect(fixture.debugElement.query(By.css(".tedi-tabs-list__more"))).toBeNull();
+    });
+
+    it("keeps the More button when content grows while already overflowing", () => {
+      const fixture = setup();
+      const list = fixture.debugElement.query(By.css('[role="tablist"]')).nativeElement as HTMLElement;
+      const wrapper = fixture.debugElement.query(By.css(".tedi-tabs-list")).nativeElement as HTMLElement;
+
+      Object.defineProperty(list, "scrollWidth", { value: 500, configurable: true });
+      Object.defineProperty(list, "clientWidth", { value: 300, configurable: true });
+      Object.defineProperty(wrapper, "clientWidth", { value: 300, configurable: true });
+      resizeCallback?.();
+      fixture.detectChanges();
+      expect(fixture.debugElement.query(By.css(".tedi-tabs-list__more-btn"))).toBeTruthy();
+
+      // Content grows to 800 while overflowing; wrapper grows to 600 — still doesn't fit.
+      Object.defineProperty(list, "scrollWidth", { value: 800, configurable: true });
+      Object.defineProperty(wrapper, "clientWidth", { value: 600, configurable: true });
+      resizeCallback?.();
+      fixture.detectChanges();
+
+      expect(fixture.debugElement.query(By.css(".tedi-tabs-list__more-btn"))).toBeTruthy();
+    });
+
+    it("re-checks overflow when the set of triggers changes without a resize", () => {
+      @Component({
+        standalone: true,
+        imports: [TabsComponent, TabsListComponent, TabsTriggerComponent, TabsContentComponent],
+        template: `
+          <tedi-tabs defaultValue="tab-1">
+            <tedi-tabs-list aria-label="Dynamic tabs">
+              @for (id of tabIds; track id) {
+                <button tedi-tabs-trigger [id]="id">{{ id }}</button>
+              }
+            </tedi-tabs-list>
+            <tedi-tabs-content id="tab-1">Content</tedi-tabs-content>
+          </tedi-tabs>
+        `,
+      })
+      class DynamicHost {
+        tabIds = ["tab-1", "tab-2"];
+      }
+
+      TestBed.configureTestingModule({
+        imports: [DynamicHost],
+        providers: [
+          { provide: TediTranslationService, useClass: TranslationMock },
+          { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        ],
+      });
+      const fixture = TestBed.createComponent(DynamicHost);
+      fixture.detectChanges();
+
+      const list = fixture.debugElement.query(By.css('[role="tablist"]')).nativeElement as HTMLElement;
+      const wrapper = fixture.debugElement.query(By.css(".tedi-tabs-list")).nativeElement as HTMLElement;
+      Object.defineProperty(list, "clientWidth", { value: 300, configurable: true });
+      Object.defineProperty(wrapper, "clientWidth", { value: 300, configurable: true });
+
+      // Two tabs fit — no More button.
+      Object.defineProperty(list, "scrollWidth", { value: 300, configurable: true });
+      mockAfterNextRender.callback?.();
+      fixture.detectChanges();
+      expect(fixture.debugElement.query(By.css(".tedi-tabs-list__more-btn"))).toBeNull();
+
+      // Adding tabs overflows the row; the effect re-checks without any resize.
+      Object.defineProperty(list, "scrollWidth", { value: 800, configurable: true });
+      fixture.componentInstance.tabIds = ["tab-1", "tab-2", "tab-3", "tab-4"];
+      fixture.detectChanges();
+      mockAfterNextRender.callback?.();
+      fixture.detectChanges();
+      expect(fixture.debugElement.query(By.css(".tedi-tabs-list__more-btn"))).toBeTruthy();
     });
 
     it("does not show More in scroll mode", () => {

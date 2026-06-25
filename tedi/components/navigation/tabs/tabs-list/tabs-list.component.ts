@@ -3,11 +3,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  Injector,
   OnDestroy,
   PLATFORM_ID,
   ViewEncapsulation,
+  afterNextRender,
   computed,
   contentChildren,
+  effect,
   inject,
   input,
   signal,
@@ -63,6 +66,7 @@ export class TabsListComponent implements AfterViewInit, OnDestroy {
   private readonly tabs = inject(TabsComponent);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
 
   /** Accessible label for the tablist. */
   readonly ariaLabel = input<string>(undefined, { alias: "aria-label" });
@@ -82,7 +86,6 @@ export class TabsListComponent implements AfterViewInit, OnDestroy {
   private readonly triggers = contentChildren(TabsTriggerComponent);
 
   private readonly isOverflowing = signal(false);
-  private naturalWidth = 0;
   private resizeObserver?: ResizeObserver;
 
   readonly canScrollStart = signal(false);
@@ -106,6 +109,18 @@ export class TabsListComponent implements AfterViewInit, OnDestroy {
         icon: trigger.icon(),
       }));
   });
+
+  constructor() {
+    // The ResizeObserver only fires on container resize, so re-check overflow
+    // when the set of triggers changes too. Measure after the next render so the
+    // DOM reflects the added/removed triggers.
+    effect(() => {
+      this.triggers();
+      if (!isPlatformBrowser(this.platformId)) return;
+      if (this.overflowMode() !== "dropdown") return;
+      afterNextRender(() => this.checkOverflow(), { injector: this.injector });
+    });
+  }
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -147,14 +162,16 @@ export class TabsListComponent implements AfterViewInit, OnDestroy {
   private checkOverflow(): void {
     const wrapper = this.host.nativeElement;
     const list = this.listRef().nativeElement;
+    if (list.clientWidth === 0) return;
 
-    if (this.isOverflowing()) {
-      if (this.naturalWidth <= wrapper.clientWidth) {
-        this.isOverflowing.set(false);
-      }
-    } else if (list.scrollWidth > list.clientWidth && list.clientWidth > 0) {
-      this.naturalWidth = list.scrollWidth;
-      this.isOverflowing.set(true);
-    }
+    // Overflow hides non-selected triggers (display:none), collapsing scrollWidth.
+    // Measure with the class off (sync reflow, no paint) to get the true width.
+    const overflowClass = "tedi-tabs-list__items--overflow";
+    const wasCollapsed = list.classList.contains(overflowClass);
+    if (wasCollapsed) list.classList.remove(overflowClass);
+    const naturalWidth = list.scrollWidth;
+    if (wasCollapsed) list.classList.add(overflowClass);
+
+    this.isOverflowing.set(naturalWidth > wrapper.clientWidth);
   }
 }
