@@ -16,7 +16,7 @@
   <div class="tedi-tabs-list__more">
     <tedi-dropdown position="bottom-end">
       <button type="button" tedi-dropdown-trigger class="tedi-tabs-list__more-btn">
-        {{ "more" | tediTranslate }}
+        {{ dropdownLabel() || ("more" | tediTranslate) }}
         <tedi-icon name="expand_more" [size]="18" color="inherit" />
       </button>
       <tedi-dropdown-content dropdownRole="menu">

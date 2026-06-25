@@ -7,6 +7,7 @@ import { ButtonGroupComponent } from "../../buttons/button-group/button-group.co
 import { ButtonGroupButtonDirective } from "../../buttons/button-group/button-group-button/button-group-button.directive";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { StatusIndicatorComponent } from "../../tags/status-indicator/status-indicator.component";
+import { EllipsisComponent } from "../../helpers/ellipsis/ellipsis.component";
 import { TabsComponent } from "./tabs.component";
 import { TabsListComponent } from "./tabs-list/tabs-list.component";
 import { TabsTriggerComponent } from "./tabs-trigger/tabs-trigger.component";
@@ -74,6 +75,7 @@ export default {
         ButtonGroupButtonDirective,
         StatusBadgeComponent,
         StatusIndicatorComponent,
+        EllipsisComponent,
       ],
     }),
   ],
@@ -111,6 +113,12 @@ export default {
         type: { summary: '"dropdown" | "scroll"' },
         defaultValue: { summary: "dropdown" },
       },
+    },
+    dropdownLabel: {
+      description:
+        "Label for the overflow dropdown trigger. Defaults to the `more` translation.",
+      control: false,
+      table: { category: "TabsList inputs", type: { summary: "string" } },
     },
     listAriaLabel: {
       name: "aria-label",
@@ -203,7 +211,8 @@ export const WithStatusBadge: Story = {
       <tedi-tabs defaultValue="tab-1">
         <tedi-tabs-list aria-label="Olekumärgisega sakid">
           <button tedi-tabs-trigger id="tab-1">
-            Terviseteekond <tedi-status-badge color="brand" text="Esitatud" />
+            <tedi-ellipsis [lineClamp]="1" [tooltip]="false">Terviseteekond</tedi-ellipsis>
+            <tedi-status-badge color="brand" text="Esitatud" />
           </button>
           <button tedi-tabs-trigger id="tab-2">
             <span style="position: relative">
@@ -254,23 +263,19 @@ export const Controlled: Story = {
     props: { currentTab: "tab-1", content },
     styles: DEMO_STYLES,
     template: `
-      <tedi-row [cols]="1" [gapY]="2">
-        <tedi-col>
-          <p tedi-text>Current tab: <strong>{{ currentTab }}</strong></p>
-        </tedi-col>
-        <tedi-col>
-          <tedi-tabs [value]="currentTab" (valueChange)="currentTab = $event">
-            <tedi-tabs-list aria-label="Juhitavad sakid">
-              <button tedi-tabs-trigger id="tab-1">Terviseteekond</button>
-              <button tedi-tabs-trigger id="tab-2">Haiguste kulg</button>
-              <button tedi-tabs-trigger id="tab-3">Ravimite ajalugu</button>
-            </tedi-tabs-list>
-            <tedi-tabs-content id="tab-1"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.healthTimeline }}</p></div></tedi-tabs-content>
-            <tedi-tabs-content id="tab-2"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.diseaseCourse }}</p></div></tedi-tabs-content>
-            <tedi-tabs-content id="tab-3"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.medication }}</p></div></tedi-tabs-content>
-          </tedi-tabs>
-        </tedi-col>
-      </tedi-row>
+      <div class="flex flex-column gap-2">
+        <p tedi-text>Current tab: <strong>{{ currentTab }}</strong></p>
+        <tedi-tabs [value]="currentTab" (valueChange)="currentTab = $event">
+          <tedi-tabs-list aria-label="Juhitavad sakid">
+            <button tedi-tabs-trigger id="tab-1">Terviseteekond</button>
+            <button tedi-tabs-trigger id="tab-2">Haiguste kulg</button>
+            <button tedi-tabs-trigger id="tab-3">Ravimite ajalugu</button>
+          </tedi-tabs-list>
+          <tedi-tabs-content id="tab-1"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.healthTimeline }}</p></div></tedi-tabs-content>
+          <tedi-tabs-content id="tab-2"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.diseaseCourse }}</p></div></tedi-tabs-content>
+          <tedi-tabs-content id="tab-3"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.medication }}</p></div></tedi-tabs-content>
+        </tedi-tabs>
+      </div>
     `,
   }),
 };
@@ -299,28 +304,24 @@ export const OverflowBehavior: Story = {
     props: { content },
     styles: [...DEMO_STYLES, `.tedi-tabs-demo-overflow { max-width: 400px; }`],
     template: `
-      <tedi-row [cols]="1" [gapY]="3">
-        <tedi-col>
-          <p tedi-text [modifiers]="'bold'">Dropdown (default)</p>
-        </tedi-col>
-        <tedi-col class="tedi-tabs-demo-overflow">
+      <div class="flex flex-column gap-3">
+        <p tedi-text [modifiers]="'bold'">Dropdown (default)</p>
+        <div class="tedi-tabs-demo-overflow">
           <tedi-tabs defaultValue="more-1">
             <tedi-tabs-list aria-label="Ületäituvad sakid rippmenüüga">
               <button tedi-tabs-trigger id="more-1">Terviseteekond</button>
               <button tedi-tabs-trigger id="more-2">Haiguste kulg</button>
               <button tedi-tabs-trigger id="more-3">Ravimite ajalugu</button>
               <button tedi-tabs-trigger id="more-4">Tahteavaldused</button>
-          </tedi-tabs-list>
+            </tedi-tabs-list>
             <tedi-tabs-content id="more-1"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.healthTimeline }}</p></div></tedi-tabs-content>
             <tedi-tabs-content id="more-2"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.diseaseCourse }}</p></div></tedi-tabs-content>
             <tedi-tabs-content id="more-3"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.medication }}</p></div></tedi-tabs-content>
             <tedi-tabs-content id="more-4"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.declarations }}</p></div></tedi-tabs-content>
-        </tedi-tabs>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text [modifiers]="'bold'">Horizontal scroll</p>
-        </tedi-col>
-        <tedi-col class="tedi-tabs-demo-overflow">
+          </tedi-tabs>
+        </div>
+        <p tedi-text [modifiers]="'bold'">Horizontal scroll</p>
+        <div class="tedi-tabs-demo-overflow">
           <tedi-tabs defaultValue="scroll-1">
             <tedi-tabs-list aria-label="Ületäituvad sakid kerimisega" overflowMode="scroll">
               <button tedi-tabs-trigger id="scroll-1">Terviseteekond</button>
@@ -333,8 +334,8 @@ export const OverflowBehavior: Story = {
             <tedi-tabs-content id="scroll-3"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.medication }}</p></div></tedi-tabs-content>
             <tedi-tabs-content id="scroll-4"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.declarations }}</p></div></tedi-tabs-content>
           </tedi-tabs>
-        </tedi-col>
-      </tedi-row>
+        </div>
+      </div>
     `,
   }),
 };
@@ -355,22 +356,20 @@ export const WithSubTabs: Story = {
         <tedi-tabs-content id="tab-2"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.proceduresInPlanning }}</p></div></tedi-tabs-content>
         <tedi-tabs-content id="tab-3">
           <div class="tedi-tabs-demo-content">
-            <tedi-row [cols]="1" [gapY]="2">
-              <tedi-col>
-                <tedi-button-group
-                  variant="secondary-button-group"
-                  ariaLabel="Õnnetuste ja haiguste alamnavigatsioon"
-                  [(value)]="activeSubTab"
-                >
-                  <button tedi-button-group-button value="work-accidents" label="Tööõnnetused">Tööõnnetused</button>
-                  <button tedi-button-group-button value="occupational-diseases" label="Kutsehaigused">Kutsehaigused</button>
-                  <button tedi-button-group-button value="work-related-illnesses" label="Tööga seotud haigused">Tööga seotud haigused</button>
-                </tedi-button-group>
-              </tedi-col>
-              <tedi-col>
-                <p tedi-text>{{ subTabContent[activeSubTab] }}</p>
-              </tedi-col>
-            </tedi-row>
+            <div class="flex flex-column gap-2">
+              <tedi-button-group
+                variant="secondary-button-group"
+                ariaLabel="Õnnetuste ja haiguste alamnavigatsioon"
+                [enableMobileDropdown]="true"
+                dropdownLabelMode="selected"
+                [(value)]="activeSubTab"
+              >
+                <button tedi-button-group-button value="work-accidents" label="Tööõnnetused">Tööõnnetused</button>
+                <button tedi-button-group-button value="occupational-diseases" label="Kutsehaigused">Kutsehaigused</button>
+                <button tedi-button-group-button value="work-related-illnesses" label="Tööga seotud haigused">Tööga seotud haigused</button>
+              </tedi-button-group>
+              <p tedi-text>{{ subTabContent[activeSubTab] }}</p>
+            </div>
           </div>
         </tedi-tabs-content>
         <tedi-tabs-content id="tab-4"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.calendar }}</p></div></tedi-tabs-content>

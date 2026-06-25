@@ -80,6 +80,8 @@ export class TabsListComponent implements AfterViewInit, OnDestroy {
    * - `scroll`: enables horizontal scrolling with a fade indicator
    */
   readonly overflowMode = input<TabsOverflowMode>("dropdown");
+  /** Label for the overflow dropdown trigger. Defaults to the `more` translation. */
+  readonly dropdownLabel = input<string>();
 
   private readonly listRef =
     viewChild.required<ElementRef<HTMLDivElement>>("list");

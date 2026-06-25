@@ -1410,6 +1410,7 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
 - `tedi-tabs-list` — the `role="tablist"` container.
   - `aria-label: string` / `aria-labelledby: string` — accessible name for the tablist
   - `overflowMode: "dropdown" | "scroll" = "dropdown"` — when tabs don't fit, either collapse overflowing tabs into a "More" dropdown or enable horizontal scrolling with fade indicators
+  - `dropdownLabel: string` — label for the overflow dropdown trigger; falls back to the `more` translation (`Veel` in et)
 - `button[tedi-tabs-trigger]` — a tab button (applied to a native `<button>`).
   - `id: string` (required) — links to the matching `tedi-tabs-content` panel (`aria-controls="{id}-panel"`)
   - `icon: string` — Material Symbols icon shown before the label
