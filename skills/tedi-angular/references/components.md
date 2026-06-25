@@ -155,6 +155,7 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 **Selector:** `button[tedi-info-button]`
 **Inputs:**
 - `ariaLabel: string`
+- `color: 'primary' | 'inverted' = 'primary'` — use `inverted` on dark or colored backgrounds
 
 ## Cards
 
