@@ -51,8 +51,7 @@
       color: var(--button-main-neutral-inverted-text-focus);
       outline: none;
       background-color: var(--button-main-neutral-inverted-background-focus);
-      box-shadow: 0 0 0 var(--tedi-borders-02)
-        var(--button-main-neutral-inverted-border-focus);
+      box-shadow: 0 0 0 var(--tedi-borders-02) var(--tedi-neutral-100);
     }
   }
 }

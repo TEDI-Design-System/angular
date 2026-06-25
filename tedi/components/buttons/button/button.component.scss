@@ -5,10 +5,10 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 @mixin button-variant-color-vars($variant, $icon-only: false, $affix: main) {
   & {
     @if $icon-only {
-      --_btn-bg: var(
-        --button-#{$affix}-#{$variant}-icon-only-background-default
-      );
-    } @else {
+      --_btn-bg: var(--button-#{$affix}-#{$variant}-icon-only-background-default);
+    }
+
+    @else {
       --_btn-bg: var(--button-#{$affix}-#{$variant}-background-default);
     }
 
@@ -23,33 +23,25 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
   }
 }
 
-@mixin button-state-color-vars(
-  $variant,
+@mixin button-state-color-vars($variant,
   $state,
   $icon-only: false,
-  $affix: main
-) {
+  $affix: main) {
   & {
     @if $icon-only {
-      --_btn-#{$state}-bg: var(
-        --button-#{$affix}-#{$variant}-icon-only-background-#{$state},
-        var(--button-#{$affix}-#{$variant}-icon-only-background-default)
-      );
-    } @else {
-      --_btn-#{$state}-bg: var(
-        --button-#{$affix}-#{$variant}-background-#{$state},
-        var(--button-#{$affix}-#{$variant}-background-default)
-      );
+      --_btn-#{$state}-bg: var(--button-#{$affix}-#{$variant}-icon-only-background-#{$state},
+        var(--button-#{$affix}-#{$variant}-icon-only-background-default));
     }
 
-    --_btn-#{$state}-border: var(
-      --button-#{$affix}-#{$variant}-border-#{$state},
-      var(--button-#{$affix}-#{$variant}-border-default)
-    );
-    --_btn-#{$state}-text: var(
-      --button-#{$affix}-#{$variant}-text-#{$state},
-      var(--button-#{$affix}-#{$variant}-text-default)
-    );
+    @else {
+      --_btn-#{$state}-bg: var(--button-#{$affix}-#{$variant}-background-#{$state},
+        var(--button-#{$affix}-#{$variant}-background-default));
+    }
+
+    --_btn-#{$state}-border: var(--button-#{$affix}-#{$variant}-border-#{$state},
+      var(--button-#{$affix}-#{$variant}-border-default));
+    --_btn-#{$state}-text: var(--button-#{$affix}-#{$variant}-text-#{$state},
+      var(--button-#{$affix}-#{$variant}-text-default));
   }
 }
 
@@ -60,7 +52,9 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     @if list.index($neutral-variants, $variant) {
       --_btn-disabled-bg: var(--button-main-disabled-neutral-background);
       --_btn-disabled-border: var(--button-main-disabled-neutral-border);
-    } @else {
+    }
+
+    @else {
       --_btn-disabled-bg: var(--button-main-disabled-general-background);
       --_btn-disabled-border: var(--button-main-disabled-general-border);
     }
@@ -68,8 +62,7 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 }
 
 @mixin button-size-vars($size) {
-  --_btn-padding: calc(var(--_btn-padding-y) - 1px)
-    calc(var(--_btn-padding-x) - 1px);
+  --_btn-padding: calc(var(--_btn-padding-y) - 1px) calc(var(--_btn-padding-x) - 1px);
   --_btn-inner-spacing: var(--button-#{$size}-inner-spacing);
   --_btn-padding-y: var(--button-#{$size}-padding-y);
   --_btn-padding-x: var(--button-#{$size}-padding-x);
@@ -115,30 +108,24 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     }
 
     &--pl {
-      &:not(
-        .tedi-button--neutral,
+
+      &:not(.tedi-button--neutral,
         .tedi-button--danger-neutral,
         .tedi-button--neutral-inverted,
         .tedi-button--primary-button-group,
-        .tedi-button--secondary-button-group
-      ) {
-        padding-left: calc(
-          var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px
-        );
+        .tedi-button--secondary-button-group) {
+        padding-left: calc(var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px);
       }
     }
 
     &--pr {
-      &:not(
-        .tedi-button--neutral,
+
+      &:not(.tedi-button--neutral,
         .tedi-button--danger-neutral,
         .tedi-button--neutral-inverted,
         .tedi-button--primary-button-group,
-        .tedi-button--secondary-button-group
-      ) {
-        padding-right: calc(
-          var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px
-        );
+        .tedi-button--secondary-button-group) {
+        padding-right: calc(var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px);
       }
     }
 
@@ -178,7 +165,7 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 
 @mixin button-size($size) {
   & {
-    $font-size: if($size == "md", "default", $size);
+    $font-size: if($size =="md", "default", $size);
 
     font-size: var(--button-text-size-#{$font-size});
 
@@ -289,13 +276,13 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
       color: var(--button-group-secondary-selected-text);
       background: var(--button-group-secondary-selected-background);
       border-color: var(--button-group-secondary-selected-border);
-      box-shadow: inset 0 0 0 var(--tedi-borders-01)
-        var(--button-group-secondary-selected-border);
+      box-shadow: inset 0 0 0 var(--tedi-borders-01) var(--button-group-secondary-selected-border);
     }
   }
 
   &[class*="-inverted"]:focus-visible {
     outline: none;
+    border-color: var(--tedi-neutral-100);
     box-shadow:
       0 0 0 1px var(--tedi-neutral-100),
       0 0 0 3px var(--_btn-outline);
