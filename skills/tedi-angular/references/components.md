@@ -1114,7 +1114,7 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `color: SeparatorColor = "primary"`
 - `variant: SeparatorVariant`
 - `thickness: number = 1`
-- `spacing: SeparatorSpacingValue | SeparatorSpacing`
+- `spacing: SeparatorSpacingValue | SeparatorSpacing` — margins. Horizontal supports y-spacing only (number → top+bottom; object `y`/`top`/`bottom`; x ignored). Vertical supports both x and y (number → left+right; object `x`/`y` shorthands or explicit `top`/`bottom`/`left`/`right`). `x`=left+right, `y`=top+bottom; explicit side overrides the shorthand.
 - `size: string = "100%"`
 
 ### EmptyState
