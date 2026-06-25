@@ -29,6 +29,11 @@ export default {
     CardHeaderComponent,
     CardContentComponent,
   },
+  parameters: {
+    status: {
+      type: ["existsInTediReady", "deprecated"],
+    },
+  },
   args: {
     spacing: "md",
   },

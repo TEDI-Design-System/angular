@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   booleanAttribute,
   ComponentRef,
   computed,
@@ -20,7 +21,7 @@ import {
 } from "../../button/button.component";
 import { ButtonGroupComponent } from "../button-group.component";
 
-type IconSlot = "left" | "right" | "solo";
+type IconSlot = "left" | "right" | "only";
 
 /**
  * Turns a `<button>` inside `tedi-button-group` into a styled, selectable item.
@@ -41,7 +42,7 @@ type IconSlot = "left" | "right" | "solo";
     "[attr.aria-label]": "icon() ? label() : null",
   },
 })
-export class ButtonGroupButtonDirective {
+export class ButtonGroupButtonDirective implements AfterViewInit {
   /** Identity contributing to the group's selected value. */
   readonly value = input.required<string>();
 
@@ -85,6 +86,7 @@ export class ButtonGroupButtonDirective {
   protected readonly hostClasses = computed(() =>
     [
       "tedi-button",
+      "tedi-button-group-button",
       `tedi-button--${this.effectiveVariant()}`,
       `tedi-button--${this.effectiveSize()}`,
     ].join(" "),
@@ -93,7 +95,26 @@ export class ButtonGroupButtonDirective {
   constructor() {
     effect(() => this.syncIcon("left", this.iconLeft()));
     effect(() => this.syncIcon("right", this.iconRight()));
-    effect(() => this.syncIcon("solo", this.icon()));
+    effect(() => this.syncIcon("only", this.icon()));
+  }
+
+  ngAfterViewInit() {
+    this.wrapLabel();
+  }
+
+  /** Wraps the projected text in a padded span so the gap to an adjacent icon
+   * comes from the label (the icon itself stays flush), matching the design. */
+  private wrapLabel() {
+    const button = this.host.nativeElement;
+    const textNodes = Array.from(button.childNodes).filter(
+      (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+    );
+    if (textNodes.length === 0) return;
+
+    const label = this.renderer.createElement("span");
+    this.renderer.addClass(label, "tedi-button-group-button__label");
+    this.renderer.insertBefore(button, label, textNodes[0]);
+    textNodes.forEach((node) => this.renderer.appendChild(label, node));
   }
 
   private syncIcon(slot: IconSlot, name: string | undefined) {

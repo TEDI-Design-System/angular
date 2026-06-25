@@ -1,6 +1,16 @@
 import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input, ViewEncapsulation } from "@angular/core";
 import { ComponentInputs, FeedbackTextComponent, generateUUID, LabelComponent } from "@tedi-design-system/angular/tedi";
 
+/**
+ * @deprecated Use the TEDI-Ready `ProgressBarComponent` from
+ * `@tedi-design-system/angular/tedi` instead. Same selector, but the API
+ * differs: the `feedbackText` input is gone — project a
+ * `<tedi-feedback-text>` child instead — and `small` is replaced by
+ * `size: "default" | "small"`. The TEDI-Ready version also adds
+ * `label`, `labelPosition`, `required`, `showValue`, `valuePosition`,
+ * `valueLabel`, `ariaLabel`, `mobile`, and `mobileBreakpoint`. The CSS host
+ * class is renamed from `.tedi-progress` to `.tedi-progress-bar`.
+ */
 @Component({
   selector: "tedi-progress-bar",
   imports: [FeedbackTextComponent, LabelComponent],

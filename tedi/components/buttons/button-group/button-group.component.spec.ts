@@ -28,7 +28,7 @@ class BreakpointObserverMock {
   emit(breakpoint: keyof typeof BREAKPOINTS | undefined) {
     const breakpoints: Record<string, boolean> = {};
     for (const value of Object.values(BREAKPOINTS)) {
-      breakpoints[`(min-width: ${value}px)`] =
+      breakpoints[`(min-width: ${value}rem)`] =
         breakpoint !== undefined && value <= BREAKPOINTS[breakpoint];
     }
     this.state$.next({ breakpoints });
@@ -237,6 +237,22 @@ describe("ButtonGroupComponent", () => {
     expect(getRoot().classList).toContain("tedi-button-group--stretch");
   });
 
+  it("should wrap the label text in a padded span", () => {
+    const label = getItems()[0].querySelector(
+      ".tedi-button-group-button__label",
+    );
+    expect(label).toBeTruthy();
+    expect(label?.textContent?.trim()).toBe("Details");
+  });
+
+  it("should keep the icon flush before the wrapped label", () => {
+    const item = getItems()[1];
+    expect(item.firstElementChild?.tagName.toLowerCase()).toBe("tedi-icon");
+    expect(item.lastElementChild?.classList).toContain(
+      "tedi-button-group-button__label",
+    );
+  });
+
   describe("auto-rendered icons", () => {
     it("should prepend an icon when iconLeft is set", () => {
       const item = getItems()[1];
@@ -329,6 +345,22 @@ describe("ButtonGroupComponent", () => {
       expect(getTrigger().textContent).toContain("buttonGroup.menu");
     }));
 
+    it("should keep a static trigger icon in static mode", () => {
+      expect(getTrigger().querySelector("tedi-icon")?.textContent?.trim()).toBe(
+        "menu",
+      );
+    });
+
+    it("should reflect the selected item's icon when dropdownLabelMode is selected", fakeAsync(() => {
+      host.dropdownLabelMode.set("selected");
+      fixture.detectChanges();
+      tick();
+
+      expect(getTrigger().querySelector("tedi-icon")?.textContent?.trim()).toBe(
+        "refresh",
+      );
+    }));
+
   function openDropdown() {
     const trigger = document.querySelector(".tedi-button-group__dropdown-trigger") as HTMLElement;
     trigger.click();
@@ -342,7 +374,7 @@ describe("ButtonGroupComponent", () => {
       tick();
 
       const selected = document.querySelector(
-        ".tedi-button-group__dropdown-item--selected",
+        ".tedi-dropdown-item--selected",
       );
       expect(selected?.textContent).toContain("Updates");
     }));
@@ -355,7 +387,7 @@ describe("ButtonGroupComponent", () => {
       tick();
 
       const items = document.querySelectorAll<HTMLElement>(
-        ".tedi-button-group__dropdown-item",
+        "li[tedi-dropdown-item]",
       );
       items[0].click();
       fixture.detectChanges();
@@ -373,7 +405,7 @@ describe("ButtonGroupComponent", () => {
       tick();
 
       const items = document.querySelectorAll<HTMLElement>(
-        ".tedi-button-group__dropdown-item",
+        "li[tedi-dropdown-item]",
       );
       items[2].click();
       fixture.detectChanges();

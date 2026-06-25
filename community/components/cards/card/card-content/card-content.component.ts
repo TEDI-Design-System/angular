@@ -8,6 +8,9 @@ import {
 import { CardColorsDirective } from "../card-colors.directive";
 import { CardPaddingDirective } from "../card-padding.directive";
 
+/**
+ * @deprecated Use CardContent from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-card-content",
   standalone: true,

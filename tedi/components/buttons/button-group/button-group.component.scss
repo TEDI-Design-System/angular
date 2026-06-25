@@ -28,7 +28,7 @@
 
   // Connected geometry for bare strip items (direct children only, so the mobile
   // dropdown trigger inside `tedi-dropdown` keeps its own radius).
-  > .tedi-button {
+  >.tedi-button {
     &:not(:first-child) {
       margin-left: calc(var(--tedi-borders-01) * -1);
       border-top-left-radius: 0;
@@ -67,8 +67,9 @@
   }
 
   &--dropdown-mode {
-    > .tedi-button,
-    > tedi-tooltip {
+
+    >.tedi-button,
+    >tedi-tooltip {
       display: none;
     }
   }
@@ -94,13 +95,20 @@
     border-radius: var(--button-radius-sm);
   }
 
-  &__dropdown-item {
-    display: flex;
-    gap: var(--button-md-inner-spacing);
-    align-items: center;
+  &--segmented &__dropdown-trigger.tedi-button--secondary {
+    padding: calc(var(--_btn-padding-y) - var(--tedi-borders-02)) calc(var(--_btn-padding-x) - var(--tedi-borders-02));
+    border-width: var(--tedi-borders-02);
 
-    &--selected {
-      font-weight: var(--body-bold-weight);
+    &:not([aria-expanded="true"]) {
+      border-color: var(--button-group-secondary-selected-border);
     }
   }
+}
+
+.tedi-button.tedi-button-group-button {
+  gap: 0;
+}
+
+.tedi-button-group-button__label {
+  padding-inline: var(--_btn-inner-spacing);
 }

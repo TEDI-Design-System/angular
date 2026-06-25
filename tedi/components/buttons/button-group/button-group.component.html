@@ -1,7 +1,7 @@
 <ng-content />
 
 @if (isDropdownMode()) {
-  <tedi-dropdown class="tedi-button-group__dropdown" appendTo="body">
+  <tedi-dropdown class="tedi-button-group__dropdown" appendTo="body" [offset]="0">
     <button
       tedi-dropdown-trigger
       tedi-button
@@ -20,19 +20,20 @@
           tedi-dropdown-item
           [value]="item.value()"
           [disabled]="item.disabled()"
-          class="tedi-button-group__dropdown-item"
-          [class.tedi-button-group__dropdown-item--selected]="item.selected()"
-          (click)="onDropdownItemClick(item)"
+          [class.tedi-dropdown-item--selected]="item.selected()"
+          (itemSelect)="onDropdownItemSelect(item)"
         >
-          @if (item.iconLeft()) {
-            <tedi-icon [name]="item.iconLeft()!" color="inherit" [size]="18" />
-          } @else if (item.icon()) {
-            <tedi-icon [name]="item.icon()!" color="inherit" [size]="18" />
-          }
-          {{ item.label() }}
-          @if (item.iconRight()) {
-            <tedi-icon [name]="item.iconRight()!" color="inherit" [size]="18" />
-          }
+          <tedi-dropdown-item-value>
+            @if (item.iconLeft()) {
+              <tedi-icon [name]="item.iconLeft()!" color="inherit" [size]="18" />
+            } @else if (item.icon()) {
+              <tedi-icon [name]="item.icon()!" color="inherit" [size]="18" />
+            }
+            <tedi-dropdown-item-value-label>{{ item.label() }}</tedi-dropdown-item-value-label>
+            @if (item.iconRight()) {
+              <tedi-icon [name]="item.iconRight()!" color="inherit" [size]="18" />
+            }
+          </tedi-dropdown-item-value>
         </li>
       }
     </tedi-dropdown-content>

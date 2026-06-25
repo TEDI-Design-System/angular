@@ -65,7 +65,7 @@ export default {
       table: {
         defaultValue: { summary: "primary-button-group" },
         type: { summary: "ButtonVariant" },
-        category: "ButtonGroup inputs",
+        category: "inputs",
       },
     },
     size: {
@@ -75,7 +75,7 @@ export default {
       table: {
         defaultValue: { summary: "default" },
         type: { summary: "'default' | 'small'" },
-        category: "ButtonGroup inputs",
+        category: "inputs",
       },
     },
     multiple: {
@@ -84,7 +84,7 @@ export default {
       table: {
         defaultValue: { summary: "false" },
         type: { summary: "boolean" },
-        category: "ButtonGroup inputs",
+        category: "inputs",
       },
     },
     stretch: {
@@ -93,13 +93,13 @@ export default {
       table: {
         defaultValue: { summary: "false" },
         type: { summary: "boolean" },
-        category: "ButtonGroup inputs",
+        category: "inputs",
       },
     },
     ariaLabel: {
       control: "text",
       description: "Accessible name for the group.",
-      table: { type: { summary: "string" }, category: "ButtonGroup inputs" },
+      table: { type: { summary: "string" }, category: "inputs" },
     },
     enableMobileDropdown: {
       control: "boolean",
@@ -107,7 +107,7 @@ export default {
       table: {
         defaultValue: { summary: "false" },
         type: { summary: "boolean" },
-        category: "ButtonGroup inputs",
+        category: "inputs",
       },
     },
     mobileBreakpoint: {
@@ -117,13 +117,13 @@ export default {
       table: {
         defaultValue: { summary: "md" },
         type: { summary: "Breakpoint" },
-        category: "ButtonGroup inputs",
+        category: "inputs",
       },
     },
     dropdownLabel: {
       control: "text",
       description: "Label shown on the dropdown trigger.",
-      table: { type: { summary: "string" }, category: "ButtonGroup inputs" },
+      table: { type: { summary: "string" }, category: "inputs" },
     },
     dropdownLabelMode: {
       control: "select",
@@ -132,7 +132,7 @@ export default {
       table: {
         defaultValue: { summary: "static" },
         type: { summary: "'static' | 'selected'" },
-        category: "ButtonGroup inputs",
+        category: "inputs",
       },
     },
     value: {
@@ -140,7 +140,7 @@ export default {
       description: "Selected value(s). `string` in single mode, `string[]` in multiple.",
       table: {
         type: { summary: "string | string[]" },
-        category: "ButtonGroup inputs",
+        category: "inputs",
       },
     },
     selectionChange: {
@@ -148,7 +148,7 @@ export default {
       description: "Emits the value of the item the user toggled.",
       table: {
         type: { summary: "EventEmitter<string>" },
-        category: "ButtonGroup events",
+        category: "events",
       },
     },
   },
@@ -156,9 +156,6 @@ export default {
 
 type Story = StoryObj<ButtonGroupComponent>;
 
-/**
- * The interactive playground — every control in the panel drives the group.
- */
 export const Default: Story = {
   render: (args) => ({
     props: { ...args, value: signal<string>("2") },
@@ -175,6 +172,7 @@ export const Default: Story = {
         [dropdownLabelMode]="dropdownLabelMode"
         [value]="value()"
         (valueChange)="value.set($event)"
+        (selectionChange)="selectionChange($event)"
       >
         <button tedi-button-group-button value="1" label="Tabel">Tabel</button>
         <button tedi-button-group-button value="2" label="Loend">Loend</button>
@@ -201,9 +199,9 @@ export const Sizes: Story = {
       <tedi-row [cols]="1" [gapY]="3">
         @for (size of sizes; track size) {
           <tedi-col>
-            <tedi-row [cols]="12" alignItems="center">
+            <tedi-row cols="1" [md]="{ cols: 12 }" [gapY]="1" alignItems="center">
               <tedi-col [width]="2">
-                <p tedi-text modifiers="bold">{{ size === 'default' ? 'Vaikimisi' : 'Väike' }}</p>
+                <p tedi-text modifiers="bold">{{ size === 'default' ? 'Default' : 'Small' }}</p>
               </tedi-col>
               <tedi-col [width]="10">
                 <tedi-button-group [size]="size"
@@ -319,7 +317,7 @@ export const Primary: Story = {
       <tedi-row [cols]="1" [gapY]="2">
         @for (state of states; track state) {
           <tedi-col>
-            <tedi-row [cols]="12" alignItems="center">
+            <tedi-row cols="1" [md]="{ cols: 12 }" [gapY]="1" alignItems="center">
               <tedi-col [width]="2"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
               <tedi-col [width]="10">
                 <tedi-button-group variant="primary-button-group" [ariaLabel]="'Esmane ' + state"
@@ -355,7 +353,7 @@ export const Secondary: Story = {
       <tedi-row [cols]="1" [gapY]="2">
         @for (state of states; track state) {
           <tedi-col>
-            <tedi-row [cols]="12" alignItems="center">
+            <tedi-row cols="1" [md]="{ cols: 12 }" [gapY]="1" alignItems="center">
               <tedi-col [width]="2"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
               <tedi-col [width]="10">
                 <tedi-button-group variant="secondary-button-group" [ariaLabel]="'Teisene ' + state"
@@ -402,34 +400,31 @@ export const Stretched: Story = {
   }),
 };
 
-export const Disabled: Story = {
-  render: (args) => ({
-    props: { ...args, value: signal<string>("1") },
-    template: `
-      <tedi-button-group ariaLabel="Keelatud elemendiga" [variant]="variant" [size]="size"
-        [value]="value()" (valueChange)="value.set($event)">
-        <button tedi-button-group-button value="1" label="Tabel">Tabel</button>
-        <button tedi-button-group-button value="2" label="Loend">Loend</button>
-        <button tedi-button-group-button value="3" label="Kalender" [disabled]="true">Kalender</button>
-      </tedi-button-group>
-    `,
-  }),
-};
-
 export const MobileDropdown: Story = {
+  args: {
+    ariaLabel: "Mobiilis koondub rippmenüüks",
+    enableMobileDropdown: true,
+    mobileBreakpoint: "xxl",
+    dropdownLabel: "Alammenüü",
+    dropdownLabelMode: "static",
+  },
   render: (args) => ({
     props: { ...args, value: signal<string | undefined>(undefined) },
     template: `
       <div style="max-width: 320px;">
         <tedi-button-group
-          ariaLabel="Mobiilis koondub rippmenüüks"
           [variant]="variant"
-          [enableMobileDropdown]="true"
-          mobileBreakpoint="xxl"
-          dropdownLabel="Alammenüü"
-          dropdownLabelMode="static"
+          [size]="size"
+          [multiple]="multiple"
+          [stretch]="stretch"
+          [ariaLabel]="ariaLabel"
+          [enableMobileDropdown]="enableMobileDropdown"
+          [mobileBreakpoint]="mobileBreakpoint"
+          [dropdownLabel]="dropdownLabel"
+          [dropdownLabelMode]="dropdownLabelMode"
           [value]="value()"
           (valueChange)="value.set($event)"
+          (selectionChange)="selectionChange($event)"
         >
           <button tedi-button-group-button value="1" label="Tabel" iconLeft="table">Tabel</button>
           <button tedi-button-group-button value="2" label="Loend" iconLeft="list">Loend</button>

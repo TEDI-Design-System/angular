@@ -23,6 +23,13 @@ tedi-timeline-item {
       padding-bottom: var(--timeline-padding-y);
     }
 
+    > .tedi-timeline__timings-bottom {
+      @include breakpoints.media-breakpoint-up(lg) {
+        margin-top: auto;
+        text-align: right;
+      }
+    }
+
     .tedi-timeline__time {
       position: relative;
       display: flex;
@@ -95,5 +102,15 @@ tedi-timeline-item {
     display: flex;
     flex-direction: column;
     gap: var(--timeline-padding-y);
+  }
+
+  > .tedi-timeline__timings-bottom {
+    grid-row: auto;
+    grid-column: 2;
+    padding-bottom: var(--timeline-padding-y);
+  }
+
+  &.tedi-timeline__item--has-bottom .tedi-timeline__marker {
+    grid-row: span 3;
   }
 }
