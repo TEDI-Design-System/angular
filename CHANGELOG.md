@@ -1,3 +1,10 @@
+# [6.5.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.14...angular-6.5.0-rc.15) (2026-06-25)
+
+
+### Features
+
+* **header:** update Header component against Figma [#312](https://github.com/TEDI-Design-System/angular/issues/312) ([#440](https://github.com/TEDI-Design-System/angular/issues/440)) ([81b1c18](https://github.com/TEDI-Design-System/angular/commit/81b1c1875dc1506d7135f63f0fcaf104957f54b5))
+
 # [6.5.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.13...angular-6.5.0-rc.14) (2026-06-19)
 
 
