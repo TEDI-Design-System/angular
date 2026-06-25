@@ -19,6 +19,9 @@ class TranslationMock {
 
 let resizeCallback: (() => void) | null = null;
 
+const originalResizeObserver = global.ResizeObserver;
+const originalScrollIntoView = Element.prototype.scrollIntoView;
+
 beforeAll(() => {
   global.ResizeObserver = jest.fn().mockImplementation((cb: ResizeObserverCallback) => ({
     observe: jest.fn(() => {
@@ -30,6 +33,11 @@ beforeAll(() => {
     }),
   }));
   Element.prototype.scrollIntoView = jest.fn();
+});
+
+afterAll(() => {
+  global.ResizeObserver = originalResizeObserver;
+  Element.prototype.scrollIntoView = originalScrollIntoView;
 });
 
 @Component({
