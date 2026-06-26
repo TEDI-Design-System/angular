@@ -117,7 +117,7 @@ type DateFieldStoryArgs = DateFieldComponent & {
   feedback?: string;
   /** Story-only: initial value seeded into the field's form control. */
   initialValue?: Date | Date[] | DateRange | null;
-  /** Story-only: bound to the `disabled` matcher input (aliased from `disabledInput`). */
+  /** Story-only: bound to the date-field's `disabledMatchers` input. */
   disabledMatcher?: Matcher | Matcher[];
 };
 
@@ -165,7 +165,7 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
           [minDate]="minDate"
           [maxDate]="maxDate"
           [initialMonth]="initialMonth"
-          [disabled]="disabledMatcher"
+          [disabledMatchers]="disabledMatcher"
           [availableDays]="availableDays"
           [unavailableDays]="unavailableDays"
           [formatDate]="formatDate"
@@ -858,7 +858,7 @@ export const DisabledWeekends: Story = {
     docs: {
       description: {
         story:
-          "Pass a `{ dayOfWeek: number[] }` matcher to `disabled` (0 = Sunday … 6 = Saturday) to grey out recurring weekdays. The `disabled` input also accepts single dates, ranges and predicate functions.",
+          "Pass a `{ dayOfWeek: number[] }` matcher to `disabledMatchers` (0 = Sunday … 6 = Saturday) to grey out recurring weekdays. The `disabledMatchers` input also accepts single dates, ranges and predicate functions.",
       },
     },
   },

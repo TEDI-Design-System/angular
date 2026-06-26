@@ -237,7 +237,7 @@ describe("DateFieldComponent", () => {
       const matcher = { before: new Date(2030, 11, 31) };
       const { component } = createField({
         mode: "single",
-        disabled: matcher,
+        disabledMatchers: matcher,
       });
       component.handleInputChange("14.05.2026");
       expect(component.value()).toBeNull();
@@ -275,19 +275,19 @@ describe("DateFieldComponent", () => {
     });
   });
 
-  describe("disabledMatchers computed", () => {
-    it("combines disabled, minDate, maxDate, disablePast, disableFuture", () => {
+  describe("resolvedDisabledMatchers computed", () => {
+    it("combines disabledMatchers, minDate, maxDate, disablePast, disableFuture", () => {
       const min = new Date(2020, 0, 1);
       const max = new Date(2030, 11, 31);
       const single = new Date(2025, 0, 1);
       const { component } = createField({
-        disabled: single,
+        disabledMatchers: single,
         minDate: min,
         maxDate: max,
         disablePast: true,
         disableFuture: true,
       });
-      const matchers = component.disabledMatchers();
+      const matchers = component.resolvedDisabledMatchers();
       expect(matchers.length).toBe(5);
     });
 
@@ -295,14 +295,14 @@ describe("DateFieldComponent", () => {
       const { component } = createField({
         minDate: new Date(2022, 0, 1),
       });
-      const matchers = component.disabledMatchers();
+      const matchers = component.resolvedDisabledMatchers();
       expect(matchers[0]).toEqual({ before: new Date(2022, 0, 1) });
     });
 
     it("forwards an array of matchers", () => {
       const arr = [new Date(2024, 0, 1), new Date(2024, 1, 1)];
-      const { component } = createField({ disabled: arr });
-      expect(component.disabledMatchers()).toEqual(arr);
+      const { component } = createField({ disabledMatchers: arr });
+      expect(component.resolvedDisabledMatchers()).toEqual(arr);
     });
   });
 
@@ -624,7 +624,7 @@ describe("DateFieldComponent", () => {
 
     it("matcher disabled does NOT mark the input disabled", () => {
       const { el } = createField({
-        disabled: { before: new Date(2030, 0, 1) },
+        disabledMatchers: { before: new Date(2030, 0, 1) },
       });
       const input = el.querySelector(
         "input.tedi-date-input__input",
@@ -1157,7 +1157,7 @@ describe("DateFieldComponent", () => {
       const matcher = new Date(2026, 4, 14);
       const { component } = createField({
         mode: "range",
-        disabled: matcher,
+        disabledMatchers: matcher,
         parseDate: customParse,
       });
       component.handleInputChange("anything");
@@ -1188,7 +1188,7 @@ describe("DateFieldComponent", () => {
       const matcher = new Date(2026, 4, 20);
       const { component } = createField({
         mode: "range",
-        disabled: matcher,
+        disabledMatchers: matcher,
         parseDate: customParse,
       });
       component.handleInputChange("anything");
@@ -1200,7 +1200,7 @@ describe("DateFieldComponent", () => {
       const matcher = new Date(2026, 4, 14);
       const { component } = createField({
         mode: "multiple",
-        disabled: matcher,
+        disabledMatchers: matcher,
         parseDate: customParse,
       });
       component.handleInputChange("anything");

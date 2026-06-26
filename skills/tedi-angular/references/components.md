@@ -899,7 +899,8 @@ statusControl = new FormControl<string | null>(null);
 **Selector:** `tedi-date-picker`
 **Model:** `selected: Date | null`, `month: Date`
 **Inputs:**
-- `disabled: DatePickerMatcher | DatePickerMatcher[] | null` — function or array of functions `(date: Date) => boolean`
+- `disabledMatchers: DatePickerMatcher | DatePickerMatcher[] | null` — disabled dates that cannot be selected (`Date`, `Date[]`, `{ before }`, `{ after }`, `{ from, to? }`, or a `(date: Date) => boolean` predicate). Prefer this over `disabled`, whose name clashes with `FormControlDirective`'s boolean `disabled` when used with `[formControl]`
+- `disabled: DatePickerMatcher | DatePickerMatcher[] | null` — **⚠️ DEPRECATED**, use `disabledMatchers` (same shape, merged with it). Binding `[disabled]` together with `[formControl]` raises a template type error (#494)
 - `showNavigation: boolean = true` — show month/year navigation
 - `monthMode: DatePickerSelectorMode = "dropdown"`
 - `yearMode: DatePickerSelectorMode = "dropdown"`
@@ -933,7 +934,7 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 - `tagEllipsis: TagEllipsis = false` — which end `multiple`-mode tags truncate from when a label doesn't fit. `false`, `end`, or `start`
 - `isTagRemovable: boolean = true` — whether `multiple`-mode tags show a remove button
 - `placeholder: string = ""` — placeholder in the input when no value
-- `disabled: Matcher | Matcher[]` (property `disabledInput`) — disables specific days/dates via matchers. Exposed as `[disabled]` in templates (property name is `disabledInput` to avoid conflict with `FormFieldControl.disabled`). Accepts `{ dayOfWeek: number[] }`, single dates, ranges or predicates
+- `disabledMatchers: Matcher | Matcher[]` — disables specific days/dates via matchers. Named `disabledMatchers` (not `disabled`) to avoid clashing with `FormControlDirective`'s boolean `disabled` when used with `[formControl]`. Accepts `{ dayOfWeek: number[] }`, single dates, ranges or predicates
 - `inputDisabled: boolean = false` — disables the field entirely (input, icon button, and calendar)
 - `readOnly: boolean = false` — blocks typing but leaves the calendar interactive
 - `required: boolean = false` — marks input as required; in `multiple` mode prevents clearing the last date
