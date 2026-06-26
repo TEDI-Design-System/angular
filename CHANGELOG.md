@@ -1,3 +1,52 @@
+# [6.5.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.16...angular-6.5.0-rc.17) (2026-06-26)
+
+
+### Bug Fixes
+
+* **dropdown:** overridden browser-default padding on dropdown-content [#498](https://github.com/TEDI-Design-System/angular/issues/498) ([#499](https://github.com/TEDI-Design-System/angular/issues/499)) ([1219cde](https://github.com/TEDI-Design-System/angular/commit/1219cde830ecb55e978870994b46bfda24b0e051))
+
+# [6.5.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.15...angular-6.5.0-rc.16) (2026-06-25)
+
+
+### Features
+
+* **table:** added new features [#480](https://github.com/TEDI-Design-System/angular/issues/480) ([#485](https://github.com/TEDI-Design-System/angular/issues/485)) ([1ca8a2d](https://github.com/TEDI-Design-System/angular/commit/1ca8a2da9deb615ece8d89a1b09276177ef97c2c))
+
+# [6.5.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.14...angular-6.5.0-rc.15) (2026-06-25)
+
+
+### Features
+
+* **header:** update Header component against Figma [#312](https://github.com/TEDI-Design-System/angular/issues/312) ([#440](https://github.com/TEDI-Design-System/angular/issues/440)) ([81b1c18](https://github.com/TEDI-Design-System/angular/commit/81b1c1875dc1506d7135f63f0fcaf104957f54b5))
+
+# [6.5.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.13...angular-6.5.0-rc.14) (2026-06-19)
+
+
+### Features
+
+* **button-group:** new tedi-ready component [#9](https://github.com/TEDI-Design-System/angular/issues/9) ([#450](https://github.com/TEDI-Design-System/angular/issues/450)) ([37a4d3b](https://github.com/TEDI-Design-System/angular/commit/37a4d3b5c4f3d031634b56298a70596aebe34f64))
+
+# [6.5.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.12...angular-6.5.0-rc.13) (2026-06-18)
+
+
+### Features
+
+* **alert:** add tedi-alert-action slot [#460](https://github.com/TEDI-Design-System/angular/issues/460) ([#461](https://github.com/TEDI-Design-System/angular/issues/461)) ([ca8fc86](https://github.com/TEDI-Design-System/angular/commit/ca8fc86447979044e973e9423459faf765a707a8))
+
+# [6.5.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.11...angular-6.5.0-rc.12) (2026-06-17)
+
+
+### Features
+
+* **card,card-button,timeline-card:** new tedi-ready components [#453](https://github.com/TEDI-Design-System/angular/issues/453) ([#479](https://github.com/TEDI-Design-System/angular/issues/479)) ([7c13043](https://github.com/TEDI-Design-System/angular/commit/7c13043bca246e241bd381f8444bb9670a9413e7))
+
+# [6.5.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.10...angular-6.5.0-rc.11) (2026-06-17)
+
+
+### Features
+
+* **progressbar,attachment:** new tedi-ready components [#253](https://github.com/TEDI-Design-System/angular/issues/253) ([#451](https://github.com/TEDI-Design-System/angular/issues/451)) ([b2b9b5b](https://github.com/TEDI-Design-System/angular/commit/b2b9b5b47b33c19b5efcd719d79409d606aff573)), closes [#482](https://github.com/TEDI-Design-System/angular/issues/482)
+
 # [6.5.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.9...angular-6.5.0-rc.10) (2026-06-11)
 
 

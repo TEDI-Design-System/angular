@@ -1,19 +1,26 @@
-@if (title()) {
-  <div class="tedi-alert__head">
-    @if (icon()) {
-      <tedi-icon [name]="icon()" [size]="18" />
-    }
-    <ng-container *ngTemplateOutlet="heading"></ng-container>
-  </div>
-  <ng-container *ngTemplateOutlet="content"></ng-container>
-} @else {
-  <div class="tedi-alert__content">
-    @if (icon()) {
-      <tedi-icon [name]="icon()" [size]="18" class="tedi-alert__content-icon" />
-    }
+<div class="tedi-alert__body">
+  @if (title()) {
+    <div class="tedi-alert__head">
+      @if (icon()) {
+        <tedi-icon [name]="icon()" [size]="18" />
+      }
+      <ng-container *ngTemplateOutlet="heading"></ng-container>
+    </div>
     <ng-container *ngTemplateOutlet="content"></ng-container>
-  </div>
-}
+  } @else {
+    <div class="tedi-alert__content">
+      @if (icon()) {
+        <tedi-icon [name]="icon()" [size]="18" class="tedi-alert__content-icon" />
+      }
+      <ng-container *ngTemplateOutlet="content"></ng-container>
+    </div>
+  }
+</div>
+
+<div class="tedi-alert__action">
+  <ng-content select="[tedi-alert-action]"></ng-content>
+</div>
+
 @if (showClose()) {
   <button
     tedi-closing-button

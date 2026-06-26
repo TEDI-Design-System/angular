@@ -15,6 +15,9 @@ export type CardHeaderVariant =
   | "brand"
   | "brand-dark";
 
+/**
+ * @deprecated Use CardHeader from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-card-header, [tedi-card-header]",
   standalone: true,

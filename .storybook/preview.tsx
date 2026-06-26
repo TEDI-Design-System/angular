@@ -10,6 +10,8 @@ import {
   Title,
 } from "@storybook/addon-docs/blocks";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../tedi/tokens/translation.token";
+import { TEDI_THEME_DEFAULT_TOKEN } from "../tedi/tokens/theme.token";
+import { THEME_FALLBACK_VALUE } from "../tedi/services/theme/theme.service";
 
 export const globalTypes = {
   theme: {
@@ -61,11 +63,15 @@ const themeDecorator = (storyFn: any, context: StoryContext) => {
 
 const preview: Preview = {
   tags: ["autodocs"],
+  initialGlobals: {
+    backgrounds: { value: "default" },
+  },
   decorators: [
     themeDecorator,
     applicationConfig({
       providers: [
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        { provide: TEDI_THEME_DEFAULT_TOKEN, useValue: THEME_FALLBACK_VALUE },
         // Replaces storybook-addon-angular-router (Storybook 8 only):
         // provides Router/ActivatedRoute for stories using routerLink.
         // Initial navigation must stay disabled — the router cannot match
@@ -78,7 +84,14 @@ const preview: Preview = {
     viewMode: "docs",
     backgrounds: {
       options: {
-        brand: { name: "brand", value: "var(--tedi-primary-600)" }
+        default: { name: "default", value: "var(--general-surface-primary)" },
+        muted: { name: "muted", value: "var(--general-surface-secondary)" },
+        subtle: { name: "subtle", value: "var(--general-surface-tertiary)" },
+        disabled: { name: "disabled", value: "var(--general-surface-disabled)" },
+        black: { name: "black", value: "var(--tedi-neutral-900)" },
+        inverted: { name: "inverted", value: "var(--general-surface-inverted-primary)" },
+        "inverted-contrast": { name: "inverted-contrast", value: "var(--general-surface-inverted-secondary)" },
+        brand: { name: "brand", value: "var(--tedi-primary-600)" },
       },
     },
     docs: {

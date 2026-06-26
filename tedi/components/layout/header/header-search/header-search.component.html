@@ -1,0 +1,41 @@
+@if (isMobile() && mobileVariant() === "modal") {
+  <tedi-header-mobile-button
+    icon="search"
+    [label]="buttonLabel()"
+    [ariaLabel]="buttonLabel()"
+    ariaHasPopup="dialog"
+    [ariaExpanded]="modalOpen()"
+    [selected]="modalOpen()"
+    [disabled]="disabled()"
+    (click)="open()"
+  />
+  <dialog
+    #dialog
+    class="tedi-header-search__modal"
+    [attr.aria-label]="modalTitle()"
+    (close)="onDialogClose()"
+  >
+    <div class="tedi-header-search__modal-heading">
+      <span tedi-text modifiers="h3" color="secondary">
+        {{ modalTitle() }}
+      </span>
+      <button
+        type="button"
+        class="tedi-header-search__button-close"
+        [attr.aria-label]="closeLabel()"
+        (click)="close()"
+      >
+        <tedi-icon name="close" [size]="24" color="inherit" />
+      </button>
+    </div>
+    <div class="tedi-header-search__modal-body">
+      <ng-container *ngTemplateOutlet="searchContent"></ng-container>
+    </div>
+  </dialog>
+} @else {
+  <ng-container *ngTemplateOutlet="searchContent"></ng-container>
+}
+
+<ng-template #searchContent>
+  <ng-content></ng-content>
+</ng-template>

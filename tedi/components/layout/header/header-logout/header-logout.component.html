@@ -1,4 +1,26 @@
-<tedi-icon name="logout" />
-<span>
-    <ng-content></ng-content>
-</span>
+@if (isSmall()) {
+  <tedi-header-mobile-button
+    icon="logout"
+    [label]="resolvedLabel()"
+    [href]="href()"
+  />
+} @else if (href()) {
+  <a
+    tedi-link
+    [underline]="false"
+    [href]="href()"
+    class="tedi-header-logout__button"
+  >
+    <tedi-icon name="logout" color="inherit" />
+    <span tedi-text color="inherit">
+      {{ resolvedLabel() }}
+    </span>
+  </a>
+} @else {
+  <button type="button" class="tedi-header-logout__button">
+    <tedi-icon name="logout" color="inherit" />
+    <span tedi-text color="inherit">
+      {{ resolvedLabel() }}
+    </span>
+  </button>
+}

@@ -1,3 +1,4 @@
+import { Component } from "@angular/core";
 import { ComponentFixture, TestBed, fakeAsync, tick } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import {
@@ -296,6 +297,71 @@ describe("AlertComponent", () => {
       expect(element.getAttribute("aria-label")).toBe(
         "danger alert: Error occurred"
       );
+    });
+  });
+
+  describe("action slot", () => {
+    @Component({
+      standalone: true,
+      imports: [AlertComponent],
+      template: `
+        <tedi-alert [showClose]="showClose">
+          Content
+          @if (showAction) {
+            <button tedi-alert-action type="button">Open profile</button>
+          }
+        </tedi-alert>
+      `,
+    })
+    class HostComponent {
+      showAction = true;
+      showClose = false;
+    }
+
+    function createHost() {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [HostComponent],
+        providers: [
+          { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        ],
+      });
+      const hostFixture = TestBed.createComponent(HostComponent);
+      hostFixture.detectChanges();
+      return hostFixture;
+    }
+
+    it("renders the action slot content", () => {
+      const hostFixture = createHost();
+      const actionButton = hostFixture.debugElement.query(
+        By.css("button[tedi-alert-action]"),
+      );
+      expect(actionButton).toBeTruthy();
+      expect(actionButton.nativeElement.textContent.trim()).toBe(
+        "Open profile",
+      );
+    });
+
+    it("projects the action into the action slot wrapper", () => {
+      const hostFixture = createHost();
+      const actionSlot = hostFixture.debugElement.query(
+        By.css(".tedi-alert__action"),
+      ).nativeElement as HTMLElement;
+
+      expect(actionSlot.querySelector("button[tedi-alert-action]")).toBeTruthy();
+    });
+
+    it("renders the action slot even without showClose", () => {
+      const hostFixture = createHost();
+      const actionButton = hostFixture.debugElement.query(
+        By.css("button[tedi-alert-action]"),
+      );
+      const closeButton = hostFixture.debugElement.query(
+        By.css(".tedi-alert__close"),
+      );
+
+      expect(actionButton).toBeTruthy();
+      expect(closeButton).toBeNull();
     });
   });
 

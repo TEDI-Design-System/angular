@@ -1392,8 +1392,7 @@ export const FooterVariants: StoryObj = {
 // No footer — simply omit <tedi-modal-footer>
 
 this.modalService.open(MyModalContent, {
-  data: { title: 'Title' },
-  size: 'small',
+  data: { title: 'Title' }
 });`,
         language: "typescript",
         type: "code",
@@ -1432,8 +1431,7 @@ this.modalService.open(MyModalContent, {
 
       openDefault() {
         this.modalService.open(StoryModalContentComponent, {
-          data: this.data,
-          size: "small",
+          data: this.data
         });
       }
 

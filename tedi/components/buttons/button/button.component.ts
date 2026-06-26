@@ -10,7 +10,9 @@ export type ButtonVariant =
   | "danger-neutral"
   | "primary-inverted"
   | "secondary-inverted"
-  | "neutral-inverted";
+  | "neutral-inverted"
+  | "primary-button-group"
+  | "secondary-button-group";
 
 export type ButtonSize = "default" | "small";
 
@@ -32,6 +34,10 @@ export type ButtonSize = "default" | "small";
 export class ButtonComponent {
   /**
    * Specifies the color theme of the button. The color should meet accessibility standards for color contrast.
+   *
+   * `primary-button-group` and `secondary-button-group` are intended for items inside
+   * `tedi-button-group`: they use the small (`button-radius-sm`) corner radius and show
+   * their selected state via `aria-pressed`.
    * @default primary
    */
   variant = input<ButtonVariant>("primary");

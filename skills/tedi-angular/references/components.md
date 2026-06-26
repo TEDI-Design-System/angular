@@ -36,7 +36,7 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 ### Button
 **Selector:** `[tedi-button]`
 **Inputs:**
-- `variant: ButtonVariant = "primary"`
+- `variant: ButtonVariant = "primary"` — primary | secondary | neutral | success | danger | danger-neutral | primary-inverted | secondary-inverted | neutral-inverted | primary-button-group | secondary-button-group
 - `size: ButtonSize = "default"` — "default" or "small"
 **Slots:** default
 
@@ -45,12 +45,76 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 <button tedi-button variant="secondary" size="small">Small</button>
 ```
 
+### ButtonGroup
+**Selector:** `tedi-button-group`
+**Inputs:**
+- `variant: ButtonVariant = "primary-button-group"` — applied to every item (overridable per item). Any `ButtonVariant` works; only the `*-button-group` variants get the connected/segmented strip geometry, other variants keep their own radius and show their active colors when selected.
+- `size: "default" | "small" = "default"`
+- `multiple: boolean = false` — allow several values; `value` becomes `string[]`
+- `value: string | string[]` — selected value(s); two-way bindable `[(value)]`
+- `stretch: boolean = false` — items share horizontal space equally
+- `ariaLabel: string` — required when no visible heading labels the group
+- `enableMobileDropdown: boolean = false` — collapse to a dropdown below `mobileBreakpoint`
+- `mobileBreakpoint: Breakpoint = "md"`
+- `dropdownLabel: string` — falls back to the `buttonGroup.menu` translation
+- `dropdownLabelMode: "static" | "selected" = "static"`
+**Outputs:** `selectionChange: string` (emits the value the user toggled)
+**Slots:** `<button tedi-button-group-button>` children
+
+### ButtonGroupButton
+**Selector:** `button[tedi-button-group-button]`
+Extends `tedi-button` (composes `BaseButtonDirective`); inherits `variant`/`size` from the group.
+**Inputs:**
+- `value: string` (required) — the item's identity; contributes to the group's selected value
+- `label: string` (required) — text used in the mobile dropdown; also the `aria-label` when `icon` is set
+- `disabled: boolean = false` — native `disabled` attribute
+- `iconLeft: string` — icon name auto-rendered before the content (and in the dropdown item)
+- `iconRight: string` — icon name auto-rendered after the content (and in the dropdown item)
+- `icon: string` — icon-only mode; auto-rendered into the button and used as the dropdown icon
+- `variant: ButtonVariant` — overrides the group's variant for this item
+- `size: "default" | "small"` — overrides the group's size for this item
+**Outputs:** `clicked: MouseEvent` (suppressed on disabled items)
+**ARIA:** `aria-pressed="true|false"` per item (derived from the group value); `role="group"` on the group.
+
+```html
+<tedi-button-group ariaLabel="View" variant="primary-button-group" [(value)]="selected">
+  <button tedi-button-group-button value="1" label="Details">Details</button>
+  <button tedi-button-group-button value="2" label="Updates" iconLeft="refresh">Updates</button>
+  <button tedi-button-group-button value="3" label="Settings" [disabled]="true">Settings</button>
+</tedi-button-group>
+```
+
+### CardButton
+**Selector:** `a[tedi-card-button]` or `button[tedi-card-button]`
+**Slots:** `tedi-card` only (other content is not projected) — the card may use any of its blocks (content, rows, icon cells)
+
+Interactive wrapper around a `tedi-card`: the host element provides semantics (anchor for href/routerLink navigation, button for actions and the disabled state) and applies hover/active/focus/disabled states to the card inside. On hover/active the whole card — content and icon cells alike — shares the same light hover/active background, and icons turn brand-colored. Do not place other interactive elements inside.
+
+```html
+<a tedi-card-button routerLink="/toetused">
+  <tedi-card>
+    <tedi-card-row>
+      <tedi-card-icon><tedi-icon name="euro_symbol" /></tedi-card-icon>
+      <tedi-card-content class="flex align-items-center justify-content-between gap-3">
+        <div>
+          <p tedi-text modifiers="bold">Isiku toetused</p>
+          <p tedi-text modifiers="small" color="secondary">Toetused mis on isikule ette nähtud</p>
+        </div>
+        <tedi-icon name="arrow_right_alt" color="secondary" />
+      </tedi-card-content>
+    </tedi-card-row>
+  </tedi-card>
+</a>
+```
+
 ### ClosingButton
 **Selector:** `button[tedi-closing-button]`
 **Inputs:**
 - `size: ClosingButtonSize = "default"`
 - `iconSize: ClosingButtonIconSize = 24` — 18 or 24
+- `icon: string = "close"` — Material Symbols icon; override for other closing-like actions such as delete/remove (e.g. `delete`). Provide a matching `ariaLabel` when overriding.
 - `ariaLabel: string`
+- `showTitle: boolean = true` — set `false` to drop the native `title` attribute (e.g. when wrapped in a `tedi-tooltip`)
 
 ### Collapse
 **Selector:** `tedi-collapse`
@@ -215,6 +279,84 @@ The standalone date-selection surface used inside DateField, and embeddable dire
 </tedi-calendar>
 ```
 
+### Card
+**Selector:** `tedi-card`
+**Inputs:**
+- `background: CardBackground` — default background for child blocks ("primary", "secondary", "tertiary", "accent", "brand-primary"…"brand-quaternary", "danger/success/info/warning/neutral-primary/-secondary")
+- `padding: CardPadding` — default padding for child blocks; rem number (0–3) or `{vertical, horizontal}` / `{top, right, bottom, left}` object
+- `borderRadius: CardBorderRadius` — `false` removes all radius, or object per side/corner (`{top: false}`, `{topLeft: false}`…)
+- `borderless: boolean = false`
+- `border: CardBorderType` — background value colors the whole border; `top-`/`left-` prefix draws a 4px accent border on that side (e.g. `"left-danger-primary"`)
+- Responsive: `xs, sm, md, lg, xl, xxl: CardInputs`
+
+Composed of sub-components:
+
+```html
+<tedi-card border="left-info-primary" [padding]="1.5">
+  <tedi-card-header background="brand-primary">Title</tedi-card-header>
+  <tedi-alert variant="noSideBorders">Notification</tedi-alert>
+  <tedi-card-content>First block</tedi-card-content>
+  <tedi-separator />
+  <tedi-card-content background="secondary">Second block</tedi-card-content>
+</tedi-card>
+```
+
+All dividers are plain `tedi-separator` elements: horizontal between blocks/rows, vertical with `size="auto"` between cells inside a `tedi-card-row`. For an in-card notification place a `tedi-alert variant="noSideBorders"` directly inside the card.
+
+The card itself is non-interactive. To make a whole card clickable, wrap it in **CardButton** (`a[tedi-card-button]` / `button[tedi-card-button]`, Buttons section), which adds hover/active/focus/disabled states.
+
+### CardContent
+**Selector:** `tedi-card-content`
+**Inputs:**
+- `background: CardBackground = "primary"` — inherits from card when unset
+- `padding: CardPadding = 1` — inherits from card when unset
+- `backgroundImage: string` — image url; with `backgroundPosition`, `backgroundSize`, `backgroundRepeat`
+- `autoWidth: boolean = false` — takes only content width inside a row (icon/date cells)
+- Responsive: `xs, sm, md, lg, xl, xxl: CardContentInputs`
+
+### CardIcon
+**Selector:** `tedi-card-icon`
+**Inputs:**
+- `type: CardIconType = "default"` — "default" (secondary background, secondary icon) or "brand" (brand-primary background, white icon)
+- `size: CardIconSize = "default"` — "small" uses 0.75rem padding; pair with a 16px icon
+- Plus all CardContent inputs (`background` override, `autoWidth`, …)
+
+Top-aligned icon cell for a card row; the projected `tedi-icon` inherits the cell color:
+
+```html
+<tedi-card-row>
+  <tedi-card-icon type="brand"><tedi-icon name="monitor_heart" /></tedi-card-icon>
+  <tedi-card-content>…</tedi-card-content>
+</tedi-card-row>
+```
+
+### CardRow
+**Selector:** `tedi-card-row`
+
+Lays out `tedi-card-content` / `tedi-card-icon` cells horizontally. No inputs — dividers are plain `tedi-separator` elements:
+
+```html
+<tedi-card>
+  <tedi-card-row>
+    <tedi-card-content [autoWidth]="true">08.12.2024</tedi-card-content>
+    <tedi-separator axis="vertical" size="auto" />
+    <tedi-card-content>COVID-19</tedi-card-content>
+  </tedi-card-row>
+  <tedi-separator />
+  <tedi-card-row>
+    <tedi-card-content>Left</tedi-card-content>
+    <tedi-card-content background="secondary">Right</tedi-card-content>
+  </tedi-card-row>
+</tedi-card>
+```
+
+For a card-styled timeline use `tedi-timeline variant="card"` (Helpers section); for a decorative dotted line between cells place a vertical dotted `tedi-separator` between them.
+
+### CardHeader
+**Selector:** `tedi-card-header`
+
+Same inputs as CardContent, but `background` defaults to `"brand-primary"` and is not inherited from the card.
+
 ### Carousel
 **Selector:** `tedi-carousel`
 
@@ -298,7 +440,7 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `maxHeight: number | string` — wraps the table in a scrollable container (pair with `stickyHeader`)
 - `activeRowId: string` — highlights one row
 - `rowHover: boolean` — force hover styling on/off (default tracks `interactive`)
-- `interactive: boolean = false` — adds `role="button"`, hover/active styles, and keyboard activation to rows; subscribe to `(rowClick)`
+- `interactive: boolean = false` — adds `role="button"`, hover/active styles, and keyboard activation to rows; subscribe to `(rowClick)`. Clicks landing on interactive controls inside a cell (links, buttons, checkboxes, form fields) are ignored by row activation/expansion — no manual `stopPropagation` needed.
 - `rowAriaLabel: (row: Row<TData>) => string` — explicit accessible name per interactive row (without it, a `role="button"` row's name is built from all its cell text). Only applied when `interactive` is true
 - `enableRowSelection: boolean | ((row) => boolean)` — opt-in selection; auto-renders a selection column
 - `selectionMode: "multiple" | "single" = "multiple"` — `multiple` shows checkboxes + select-all; `single` shows radios (no select-all)
@@ -309,6 +451,9 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `expandButtonVariant: "default" | "secondary"` — override the expand toggle's arrow style. Defaults to the bordered `secondary` style; set `default` for the neutral (borderless) chevron. Only affects the icon-only button (i.e. when `expandButtonLabel` is unset).
 - `expandButtonLabel: string | { open: string; close: string }` — render a visible label next to the chevron instead of an icon-only button. A single string is used for both states; the `{ open, close }` form sets distinct collapsed (`open`) / expanded (`close`) labels. When unset the button stays icon-only with the translated expand/collapse aria-label.
 - `getSubRows: (row) => TData[] | undefined` — hierarchical / tree rows
+- `groupRowsBy: (row: Row<TData>) => unknown` — table-level row grouping. Consecutive rendered rows with an equal key form a group; the control columns (select / expand / drag) span each group (one checkbox + one chevron per group), row selection works per group (the group's single checkbox toggles all its rows and goes indeterminate when partial), and group boundaries drive `rowGroupDividers`. Data columns opt into spanning the same groups with `groupBy: true`.
+- `rowGroupDividers: "all" | "between" | "none" = "all"` — when grouped, controls row dividers: `"between"` draws them only at group boundaries (rows within a group read as one block); `"none"` removes them. No effect without `groupRowsBy`.
+- `controlColumnOrder: ("drag" | "select" | "expand")[] = ["drag", "select", "expand"]` — order of the auto-injected control columns. Only enabled controls render; any enabled control omitted from the list is appended. Use it to place the selection checkbox before the expand chevron, etc.
 - `enableColumnFilters: boolean = false` — force TanStack's filter machinery (auto-on when any column sets `filterable`)
 - `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`). `pageSizeOptions` accepts plain numbers or `{ value, label }` objects — use the object form for a **"Show all"** entry whose `value` is large enough to hold every row: pass the row total when you know it (`data.length`), or `Number.MAX_SAFE_INTEGER` when you don't. Filtering only shrinks the row count, so a large page size always collapses the result to a single page. (Don't use `-1` — TanStack clamps `setPageSize` to `≥ 1`.)
 - `paginationTop: boolean | TablePaginationOptions` — opt-in top paginator; shares page / page-size state with bottom but has independent visual config (its own arrow + `hide*` settings). Requires `pagination` to be truthy.
@@ -348,7 +493,8 @@ Render expandable rows open on first load (still user-collapsible):
 - `sortable: boolean` — opt the column into the built-in sort affordance (string `header` only). Pair with `sortingFn` to override the comparator. For custom UIs, pass a `TemplateRef` for `header` and call `column.toggleSorting()` yourself.
 - `filterable: boolean | { clearOnClose?: boolean }` — opt into the built-in filter popover (icon `filter_alt`). Requires `filterTemplate`.
 - `filterTemplate: TemplateRef<TediTableFilterContext>` — UI rendered inside the filter popover. The context exposes `value`, `setValue`, `apply()`, `clear()`, and `column`. Apply/Clear footer buttons are wired automatically.
-- `rowSpan: number | ((info: CellContext) => number)` — body-level row spanning. Return `>1` to emit `rowspan="N"`; return `0` to skip the `<td>`.
+- `rowSpan: number | ((info: CellContext) => number)` — body-level row spanning. Return `>1` to emit `rowspan="N"`; return `0` to skip the `<td>`. Prefer `groupBy` for key-based grouping; reach for `rowSpan` only for fully custom span logic.
+- `groupBy: boolean | ((row: Row<TData>) => unknown)` — merge consecutive rendered rows with an equal key into one spanning cell, computed internally against the live (post-filter/sort/paginate) row model — no manual `groupRowSpan` wiring. A function groups this column by its own key; `true` reuses the table-level `groupRowsBy`. Takes precedence over `rowSpan`.
 - `size` / `minSize` / `maxSize` (TanStack) — rendered as `width` / `min-width` / `max-width` (px) on the column's cells, applied only when set. **Authoritative only under `[fixedLayout]="true"`** — with the default auto layout they're hints and content can stretch the column past them. Under fixed layout, leave **at least one column unsized** so it absorbs the leftover space; if every column is sized, `table-layout: fixed` scales them all up to fill the table's width.
 - `meta: TableColumnMeta` — `{ label?, align?, vAlign? }` for accessible label + cell alignment.
 
@@ -370,7 +516,7 @@ Render expandable rows open on first load (still user-collapsible):
 </ng-template>
 ```
 
-**Helpers:** `groupRowSpan(rows, keyFn)` — produces a `rowSpan` callback that auto-collapses consecutive equal keys. Pass the *currently-rendered* row set (`table.getRowModel().rows`) so spans operate on post-filter/sort rows.
+**Helpers:** `groupRowSpan(rows, keyFn)` — produces a `rowSpan` callback that auto-collapses consecutive equal keys. Pass the *currently-rendered* row set (`table.getRowModel().rows`) so spans operate on post-filter/sort rows. **Prefer the column `groupBy` option**, which does this internally against the live row model; use this helper only for a standalone `rowSpan` callback.
 
 ```typescript
 import {
@@ -1053,6 +1199,51 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 
 ## Helpers
 
+### Attachment
+**Selector:** `tedi-attachment`
+**Inputs:**
+- `name: string` (required) — file name displayed in the card
+- `fileSize: string` — pre-formatted file size (e.g. `"0.9 MB"`)
+- `icon: string` — leading file-type icon (Material Symbol name, e.g. `"description"`, `"picture_as_pdf"`) shown before the file name
+- `error: string` — error feedback. When set, switches the card to its error visual and renders feedback text below. Implies `invalid`.
+- `invalid: boolean = false` — switches the card to its error visual (danger background + error icon) without rendering feedback text. Use when the error message is rendered elsewhere (e.g. an aggregate validation message).
+- `direction: "horizontal" | "vertical" | undefined` — content layout. `horizontal` keeps name/progress on one row beside the actions; `vertical` stacks them with actions pinned top-right (use in narrow containers/sidebars). When `undefined`, derived from `verticalBelow`.
+- `verticalBelow: Breakpoint = "sm"` — viewport breakpoint below which the layout auto-switches to `vertical`
+**Slots:**
+- project a `<tedi-progress-bar>` to show upload/processing progress. Configure label, hint, and value formatting on the projected progress bar itself.
+- project action buttons (download, delete, …) inside a single `<tedi-attachment-actions>` container (`AttachmentActionsComponent`). Action buttons are **not** built in — use neutral `tedi-button`s, wire up `(click)`/`disabled` yourself. For icon-only buttons give each an `aria-label` (and optionally a tooltip). The container owns the layout: add `padded` to it for labeled (text) buttons (adds a 12px gap + 8px inline padding, since neutral text buttons have no horizontal padding); omit it for icon-only buttons, which sit flush.
+
+**`<tedi-attachment-actions>` (`AttachmentActionsComponent`)** — container for the action buttons. Input: `padded: boolean = false`.
+
+```html
+<tedi-attachment name="report.pdf" fileSize="0.9 MB">
+  <tedi-progress-bar [value]="34" valuePosition="bottom">
+    <tedi-feedback-text text="Uploading" type="hint" />
+  </tedi-progress-bar>
+  <tedi-attachment-actions>
+    <button tedi-button variant="neutral" aria-label="Download" (click)="onDownload()">
+      <tedi-icon name="download" [size]="18" />
+    </button>
+    <tedi-tooltip>
+      <tedi-tooltip-trigger>
+        <button tedi-button variant="neutral" aria-label="Delete" (click)="onRemove()">
+          <tedi-icon name="delete" [size]="18" />
+        </button>
+      </tedi-tooltip-trigger>
+      <tedi-tooltip-content>Delete</tedi-tooltip-content>
+    </tedi-tooltip>
+  </tedi-attachment-actions>
+</tedi-attachment>
+
+<!-- labeled (text) buttons → add `padded` -->
+<tedi-attachment name="report.pdf">
+  <tedi-attachment-actions padded>
+    <button tedi-button variant="neutral"><tedi-icon name="download" [size]="18" /> Download</button>
+    <button tedi-button variant="neutral"><tedi-icon name="delete" [size]="18" /> Delete</button>
+  </tedi-attachment-actions>
+</tedi-attachment>
+```
+
 ### Row / Col (Grid)
 **Selectors:** `tedi-row`, `tedi-col`
 
@@ -1127,13 +1318,20 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 ### Timeline
 **Selector:** `tedi-timeline`
 **Inputs:**
-- `activeIndex: number`
+- `activeIndex: number` — items before it render as past, after it as future
+- `variant: TimelineVariant = "default"` — "card" renders each item as a bordered, padded card row inside a card frame
+- `cardPadding: TimelineCardPadding` — item padding in rems for the card variant; same values as Card padding (0 | 0.25 | 0.5 | 0.75 | 1 | 1.25 | 1.5 | 2 | 2.5 | 3; default 1)
+- Sub-components: `tedi-timeline-item` (`timings: string[]`), `tedi-timeline-title`, `tedi-timeline-description`
+- Content marked with `*tediTimelineTimingsBottom` is pinned to the bottom of the timings column on desktop and rendered after the item content on mobile (e.g. a "Muudetud …" line)
 
 ```html
-<tedi-timeline [activeIndex]="1">
-  <tedi-timeline-item [timings]="['10:00']">
-    <tedi-timeline-title>Step 1</tedi-timeline-title>
-    <tedi-timeline-description>Description</tedi-timeline-description>
+<tedi-timeline variant="card" [activeIndex]="1" [cardPadding]="1">
+  <tedi-timeline-item [timings]="['11.01.2024 12:23', 'Kersti Ööviul']">
+    <p *tediTimelineTimingsBottom tedi-text modifiers="small" color="tertiary">Muudetud 08.02.2024</p>
+    <tedi-timeline-title>Suhtlus isikuga</tedi-timeline-title>
+    <tedi-collapse openText="Näita rohkem" closeText="Näita vähem">
+      <p tedi-text modifiers="small" color="secondary">Lisainfo</p>
+    </tedi-collapse>
   </tedi-timeline-item>
 </tedi-timeline>
 ```
@@ -1143,16 +1341,53 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 ### Header
 **Selector:** `header[tedi-header]`
 
+Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language`, `tedi-header-login`, `tedi-header-logout`, `tedi-header-profile`, `tedi-header-role`, `tedi-header-search`
+
+**tedi-header-logo:**
+- `href?: string` — wraps logo in an anchor
+- `showLogo: boolean = true` — simple boolean for feature flags or custom media queries. For responsive hiding at standard breakpoints, use `*showAt` / `*hideAt` directives instead (e.g. `<tedi-header-logo *showAt="'md'">`).
+- Supports dark variant via `tedi-header-logo-dark` directive on projected content.
+
+**tedi-header-role:**
+- `representatives: Representative[]` (required) — `Representative` has `id: string`, `name: string`, `description?: string`, `icon?: string | RepresentativeIcon`
+- `currentRepresentative: Representative` (required, two-way with `model()`)
+- `label?: string` — label text in the title position
+- `description?: string` — description text
+- `showSearch?: boolean = false` — show search input above representative list
+- `searchClearable?: boolean = false` — show clear button on search input
+- `clearSearchOnSelect?: boolean = true` — clear search when a representative is selected
+- `isOrganization?: boolean = false` — affects search label
+- `searchLabel?: string` — custom search input label (falls back to i18n)
+- `organizationSearchLabel?: string` — search label when `isOrganization` is true
+- `showRoleSwitch?: boolean` — show role selection toggle (defaults to true when multiple representatives)
+- `roleSelectionToggle: OutputEmitterRef<boolean>` — emits when role selection opens/closes
+- Custom content via `[tedi-header-role-content]` directive replaces default representative list.
+- Custom no-results content via `[tedi-header-role-no-results]` directive.
+- Custom title via `[tedi-header-role-title]` directive.
+- When multiple `tedi-header-role` components are inside a `tedi-header-profile`, opening one accordion automatically closes the others on mobile/tablet.
+
+**tedi-header-language:**
+- `languages: HeaderLanguage` (required) — object with `Language` keys and display string values
+- `languageChange: OutputEmitterRef<Language>` — emits on language selection
+
+**tedi-header-login:** bp — `size?: 'default' | 'small'` (auto `'small'` on mobile), `label?: string`, `onClick?: () => void`, `href?: string`
+**tedi-header-logout:** bp — `size?: 'default' | 'small'` (auto `'small'` on mobile), `label?: string`, `onClick?: () => void`, `href?: string`
+
+**tedi-header-profile:** bp — `showPopover?: Breakpoint = 'lg'`, `label?: string`, `showLabel?: boolean = false`, `size?: HeaderProfileSize`, `noStyle?: boolean = false`
+- `noStyle` removes default padding, borders, and background from modal children. Does not affect `tedi-header-role`'s own 4px brand bottom border.
+
+**tedi-header-search:** `mobileVariant?: 'modal' | 'inline'`, `mobileLabels?: { button?, modalTitle? }`, `disabled?: boolean`
+
 ```html
 <header tedi-header>
-  <tedi-header-content>
+  <tedi-header-logo href="/">
     <img src="logo.svg" alt="Logo" />
-  </tedi-header-content>
+  </tedi-header-logo>
   <tedi-header-actions>
     <tedi-header-language [languages]="languages" (languageChange)="onLangChange($event)" />
-    <tedi-header-profile [name]="userName">
-      <tedi-header-role [role]="role" [representatives]="reps" [(currentRepresentative)]="currentRep" />
-      <tedi-header-logout />
+    <tedi-header-profile>
+      <tedi-header-role [representatives]="reps" [(currentRepresentative)]="currentRep" />
+      <tedi-header-logout href="/logout" />
     </tedi-header-profile>
   </tedi-header-actions>
 </header>
@@ -1197,6 +1432,29 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 ```
 
 ## Loader
+
+### ProgressBar
+**Selector:** `tedi-progress-bar`
+**Inputs:**
+- `value: number = 0` — 0–100, clamped
+- `progressId: string` — id for the underlying `<progress>` element
+- `size: "default" | "small" = "default"` — `small` renders a 4px bar height instead of 8px
+- `label: string` — optional title (top or horizontal)
+- `labelPosition: "top" | "horizontal" = "top"`
+- `required: boolean = false` — red `*` after the label
+- `showValue: boolean = true` — show/hide the percentage value
+- `valuePosition: "horizontal" | "bottom" = "horizontal"` — where to place the percentage value
+- `valueLabel: string` — override the rendered value text (e.g. `"1/5"`); also exposed via `aria-valuetext`
+- `ariaLabel: string` — falls back to `label`
+- `xs` / `sm` / `md` / `lg` / `xl` / `xxl: ProgressBarInputs` — per-breakpoint overrides of `size`, `labelPosition`, `showValue`, `valuePosition` and `valueLabel`. Each takes a partial set of inputs that layers on top from that breakpoint and up (mobile-first), e.g. `[md]="{ labelPosition: 'horizontal', valuePosition: 'horizontal' }"`.
+**Slots:** project a `<tedi-feedback-text>` to render a hint or error line below the bar.
+
+```html
+<tedi-progress-bar [value]="42" label="Uploading" required>
+  <tedi-feedback-text text="Uploading" type="hint" />
+</tedi-progress-bar>
+<tedi-progress-bar [value]="20" valueLabel="1/5" />
+```
 
 ### Spinner
 **Selector:** `tedi-spinner`
@@ -1602,10 +1860,12 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 ## Cards
 
 ### Accordion — **DEPRECATED** (use TEDI-Ready Accordion)
-### Card
+### Card — **DEPRECATED** (use TEDI-Ready Card)
 **Selector:** `tedi-card`
 - `borderless: boolean`, `spacing: CardSpacing = "md"`, `accentBorder: CardAccentBorder`, `selected: boolean`
 - Sub-components: `tedi-card-header`, `tedi-card-content`, `tedi-card-row`
+
+> The TEDI-Ready Card (Content section above) uses the same `tedi-card` selector but a different API (`padding` in rems instead of named `spacing`, `border` instead of `accentBorder`, plus `tedi-card-icon` and breakpoint inputs; the Community `timeline` input is replaced by `tedi-timeline variant="card"`). Do not mix imports of the two in one component.
 
 ## Form
 
@@ -1648,8 +1908,7 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 ## Helpers
 
 ### ProgressBar
-**Selector:** `tedi-progress-bar`
-- `value: number = 0`, `direction: "horizontal" | "vertical"`, `small: boolean`
+**⚠️ DEPRECATED** — use the TEDI-Ready `tedi-progress-bar` from `@tedi-design-system/angular/tedi`. Same selector; the TEDI-Ready version is a superset.
 
 ## Navigation
 
