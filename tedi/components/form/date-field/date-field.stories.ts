@@ -379,6 +379,21 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    disabledMatcher: {
+      name: "disabledMatchers",
+      description:
+        "Disables specific days via matchers (does not disable the whole field).",
+      control: { type: "object" },
+      table: {
+        category: "inputs",
+        type: {
+          summary: "Matcher | Matcher[]",
+          detail: `Date \n| Date[] \n| { before: Date } \n| { after: Date } \n| { from: Date; to?: Date } \n| { dayOfWeek: number[] } \n| ((date: Date) => boolean)
+          `,
+        },
+        defaultValue: { summary: "undefined" },
+      },
+    },
     disablePast: {
       description: "Disable all dates before today.",
       control: { type: "boolean" },
