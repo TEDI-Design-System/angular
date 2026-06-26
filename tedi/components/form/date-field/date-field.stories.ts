@@ -117,7 +117,7 @@ type DateFieldStoryArgs = DateFieldComponent & {
   feedback?: string;
   /** Story-only: initial value seeded into the field's form control. */
   initialValue?: Date | Date[] | DateRange | null;
-  /** Story-only: bound to the `disabled` matcher input (aliased from `disabledInput`). */
+  /** Story-only: bound to the date-field's `disabledMatchers` input. */
   disabledMatcher?: Matcher | Matcher[];
 };
 
@@ -165,7 +165,7 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
           [minDate]="minDate"
           [maxDate]="maxDate"
           [initialMonth]="initialMonth"
-          [disabled]="disabledMatcher"
+          [disabledMatchers]="disabledMatcher"
           [availableDays]="availableDays"
           [unavailableDays]="unavailableDays"
           [formatDate]="formatDate"
@@ -377,6 +377,21 @@ export default {
         category: "inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
+      },
+    },
+    disabledMatcher: {
+      name: "disabledMatchers",
+      description:
+        "Disables specific days via matchers (does not disable the whole field).",
+      control: { type: "object" },
+      table: {
+        category: "inputs",
+        type: {
+          summary: "Matcher | Matcher[]",
+          detail: `Date \n| Date[] \n| { before: Date } \n| { after: Date } \n| { from: Date; to?: Date } \n| { dayOfWeek: number[] } \n| ((date: Date) => boolean)
+          `,
+        },
+        defaultValue: { summary: "undefined" },
       },
     },
     disablePast: {
@@ -858,7 +873,7 @@ export const DisabledWeekends: Story = {
     docs: {
       description: {
         story:
-          "Pass a `{ dayOfWeek: number[] }` matcher to `disabled` (0 = Sunday … 6 = Saturday) to grey out recurring weekdays. The `disabled` input also accepts single dates, ranges and predicate functions.",
+          "Pass a `{ dayOfWeek: number[] }` matcher to `disabledMatchers` (0 = Sunday … 6 = Saturday) to grey out recurring weekdays. The `disabledMatchers` input also accepts single dates, ranges and predicate functions.",
       },
     },
   },

@@ -137,14 +137,12 @@ export class DateFieldComponent
   readonly placeholder = input<string>("");
   /**
    * Disables specific days via matchers (does not disable the whole field).
-   * Exposed in templates as `[disabled]`; accepts a `Date`, `Date[]`,
-   * `{ before }`, `{ after }`, `{ from, to? }`, `{ dayOfWeek: number[] }`, or a
-   * `(date) => boolean` predicate (single or array).
+   * Accepts a `Date`, `Date[]`, `{ before }`, `{ after }`, `{ from, to? }`,
+   * `{ dayOfWeek: number[] }`, or a `(date) => boolean` predicate (single or
+   * array). Named `disabledMatchers` (not `disabled`) so it doesn't clash with
+   * `FormControlDirective`'s boolean `disabled` when used with `[formControl]`.
    */
-  readonly disabledInput = input<Matcher | Matcher[] | undefined>(undefined, {
-    // eslint-disable-next-line @angular-eslint/no-input-rename -- 'disabled' conflicts with FormFieldControl.disabled Signal<boolean> required by the form-field-control contract; alias keeps the spec'd public binding name
-    alias: "disabled",
-  });
+  readonly disabledMatchers = input<Matcher | Matcher[] | undefined>(undefined);
   /** Disables the field entirely — text input, icon button, and calendar. */
   readonly inputDisabled = input<boolean>(false);
   /**
@@ -321,9 +319,9 @@ export class DateFieldComponent
 
   readonly invalid = computed(() => this.formInvalid());
 
-  readonly disabledMatchers = computed<Matcher[]>(() => {
+  readonly resolvedDisabledMatchers = computed<Matcher[]>(() => {
     const result: Matcher[] = [];
-    const explicit = this.disabledInput();
+    const explicit = this.disabledMatchers();
     if (Array.isArray(explicit)) {
       result.push(...explicit);
     } else if (explicit !== undefined) {
@@ -659,7 +657,7 @@ export class DateFieldComponent
       numberOfMonths: this.numberOfMonthsResolved(),
       monthYearSelectType: this.monthYearSelectType(),
       required: this.required(),
-      disabledMatchers: this.disabledMatchers(),
+      disabledMatchers: this.resolvedDisabledMatchers(),
       availableDays: this.availableDays(),
       unavailableDays: this.unavailableDays(),
       shouldDisableMonth: this.shouldDisableMonth(),
@@ -731,7 +729,7 @@ export class DateFieldComponent
 
   private parsedValueIsDisabled(value: DateFieldValue): boolean {
     if (value === null) return false;
-    const matchers = this.disabledMatchers();
+    const matchers = this.resolvedDisabledMatchers();
     if (matchers.length === 0) return false;
     if (value instanceof Date) return matchAny(value, matchers);
     if (Array.isArray(value)) return value.some((d) => matchAny(d, matchers));
@@ -784,7 +782,7 @@ export class DateFieldComponent
     return v.xs;
   }
 
-  // Note: 'today' is captured per-getter call but disabledMatchers is a
+  // Note: 'today' is captured per-getter call but resolvedDisabledMatchers is a
   // computed() — it will not re-evaluate at midnight rollover. For sessions
   // spanning midnight the past/future windows may become stale until any
   // other dependency changes.
