@@ -235,6 +235,50 @@ For non-clickable headers with custom actions (the toggle stays visible at the s
 
 ## Content
 
+### Calendar
+**Selector:** `tedi-calendar` | ControlValueAccessor
+
+The standalone date-selection surface used inside DateField, and embeddable directly. Supports `single`, `multiple` and `range` selection modes, three commit levels (`days`, `months`, `years`), available/unavailable day predicates, ISO week numbers, multi-month layouts, dropdown vs. grid month/year selection, custom locales, and a footer projection slot (`tediCalendarFooter`).
+
+**Models (two-way):**
+- `value: Date | Date[] | DateRange | null` — shape follows `mode` (`single` → `Date`, `multiple` → `Date[]`, `range` → `{ from, to }`)
+- `currentMonth: Date` — the first (left-most) month shown
+- `view: CalendarView = "days"` — active view: `"days"`, `"months"`, or `"years"`
+
+**Outputs:**
+- `select: { date: CalendarValue; day: Date }` — emitted on commit; `date` is the new full value, `day` is the clicked day/month/year
+
+**Inputs:**
+- `mode: DateFieldMode = "single"` — `"single"`, `"multiple"`, or `"range"`
+- `selectionLevel: CalendarView = "days"` — lowest level the user can commit to: `"days"`, `"months"`, or `"years"`
+- `monthYearSelectType: "dropdown" | "grid" | "static" = "dropdown"` — header month/year picker. `dropdown` (two dropdowns), `grid` (drill into month/year grid), `static` (label only — prev/next chevrons change the month)
+- `localeCode: string = "et-EE"` — BCP-47 locale for weekday/month names and the first day of the week
+- `showOutsideDays: boolean = true` — render trailing/leading days from adjacent months
+- `showWeekNumbers: boolean = false` — render the ISO week-number column
+- `showNavigation: boolean = true` — show the previous/next chevrons
+- `bordered: boolean = true` — render the calendar's own border and rounded corners. Disable when embedding in a surface that already has a border
+- `numberOfMonths: number = 1` — consecutive months rendered side by side (capped to what fits the viewport)
+- `required: boolean = false` — in `mode='multiple'`, prevents clearing the last selected date
+- `inputDisabled: boolean = false` — disables all interactions (combines with the reactive-forms disabled state)
+- `disabledMatchers: Matcher[] = []` — disabled-date matchers (`Date`, `Date[]`, `{ before }`, `{ after }`, `{ before, after }`, `{ from, to? }`, `{ dayOfWeek: number[] }`, or `(date) => boolean`)
+- `availableDays: Date[] | ((date: Date) => boolean) | undefined` — whitelist of selectable days; every other day is disabled
+- `unavailableDays: Date[] | ((date: Date) => boolean) | undefined` — blacklist; takes precedence over `availableDays`
+- `dayStatus: ((date: Date) => DayStatus | null | undefined) | undefined` — overlays a `tedi-status-indicator` dot on days; the returned `label` is surfaced on the day's `aria-label`
+- `shouldDisableMonth: ((month: Date) => boolean) | undefined` — disable a whole month
+- `shouldDisableYear: ((year: Date) => boolean) | undefined` — disable a whole year
+- `minYear: number | null = null` — earliest year offered (defaults to 10 years before the current year)
+- `maxYear: number | null = null` — latest year offered (defaults to 10 years after the current year)
+
+```html
+<!-- Embedded range picker, two months -->
+<tedi-calendar mode="range" [formControl]="rangeControl" [numberOfMonths]="2" />
+
+<!-- With a projected footer legend -->
+<tedi-calendar [availableDays]="availableDays">
+  <div tediCalendarFooter>Legend…</div>
+</tedi-calendar>
+```
+
 ### Card
 **Selector:** `tedi-card`
 **Inputs:**
@@ -873,6 +917,121 @@ statusControl = new FormControl<string | null>(null);
 <tedi-date-picker [formControl]="dateControl" [showWeekNumbers]="true" />
 ```
 
+### DateField
+**Selector:** `tedi-date-field` | ControlValueAccessor
+
+Form-control wrapper around the Calendar. Exposes a typed text input paired with a popover (or modal) that renders the Calendar. On phones, single-mode fields default to the native OS date picker; an opt-in modal is also available. Supports `single`, `multiple` and `range` modes, custom formatting/parsing, and the same selection-level/header options as Calendar.
+
+**Model:** `value: Date | Date[] | DateRange | null`
+**Outputs:**
+- `openChange: boolean` — emitted when the picker (popover/modal) open state changes
+
+**Inputs:**
+- `inputId: string` (required) — unique ID for label association
+- `mode: DateFieldMode = "single"` — "single", "multiple" (tags), or "range" ({ from, to })
+- `multiRow: boolean = true` — `multiple` mode tag layout. `true` wraps tags across rows; `false` keeps a single row with a "+N" counter
+- `tagEllipsis: TagEllipsis = false` — which end `multiple`-mode tags truncate from when a label doesn't fit. `false`, `end`, or `start`
+- `isTagRemovable: boolean = true` — whether `multiple`-mode tags show a remove button
+- `placeholder: string = ""` — placeholder in the input when no value
+- `disabled: Matcher | Matcher[]` (property `disabledInput`) — disables specific days/dates via matchers. Exposed as `[disabled]` in templates (property name is `disabledInput` to avoid conflict with `FormFieldControl.disabled`). Accepts `{ dayOfWeek: number[] }`, single dates, ranges or predicates
+- `inputDisabled: boolean = false` — disables the field entirely (input, icon button, and calendar)
+- `readOnly: boolean = false` — blocks typing but leaves the calendar interactive
+- `required: boolean = false` — marks input as required; in `multiple` mode prevents clearing the last date
+- `size: DateFieldSize = "default"` — "default" or "small"; should match the surrounding `tedi-form-field` size
+- `minDate: Date | undefined` — disables all dates before this date
+- `maxDate: Date | undefined` — disables all dates after this date
+- `disablePast: boolean = false` — disable all dates before today
+- `disableFuture: boolean = false` — disable all dates after today
+- `shouldDisableMonth: (month: Date) => boolean | undefined` — predicate returning true to disable a month; use `undefined` to leave it enabled
+- `shouldDisableYear: (year: Date) => boolean | undefined` — predicate returning true to disable a year; use `undefined` to leave it enabled
+- `availableDays: Date[] | ((d: Date) => boolean) | undefined` — days that ARE available (inverse of unavailableDays)
+- `unavailableDays: Date[] | ((d: Date) => boolean) | undefined` — days that are NOT available
+- `selectionLevel: CalendarView = "days"` — lowest level the user can commit to: "days", "months", or "years"
+- `monthYearSelectType: "dropdown" | "grid" = "dropdown"` — how the header exposes month/year picking
+- `initialMonth: Date | undefined` — the month to initially display in the calendar
+- `localeCode: string = "et-EE"` — BCP-47 locale for weekday/month names, first day of week, default formatDate/parseDate
+- `closeOnSelect: boolean | undefined = undefined` — whether to close picker after selection (defaults to `true` in single mode)
+- `showOutsideDays: boolean = true` — render trailing/leading days from adjacent months
+- `showWeekNumbers: boolean = false` — render an ISO week-number column on the left of the day grid
+- `numberOfMonths: BreakpointInput<number> = { xs: 1 }` — number of months shown side by side. A plain number (e.g. `2`) applies at every breakpoint (phone and modal included); pass a per-breakpoint object (e.g. `{ xs: 1, lg: 2 }`) to narrow it on small screens. The visible count is capped to what fits the viewport
+- `enableCalendar: BreakpointObject<boolean> = { xs: true }` — enables the calendar picker UI. `false` hides the icon button and popover/modal — typing only
+- `calendarTrigger: BreakpointObject<"input" | "button"> = { xs: "button" }` — what opens the calendar: `"button"` (icon) or `"input"` (the whole input)
+- `useNativePicker: boolean | "sm" | "md" | "lg" | "xl" = false` — uses the OS-native date picker instead of the custom popover (single mode only). `true` always, `false` never, a breakpoint name uses native below that breakpoint and the custom popover from it upward
+- `modal: boolean | "sm" | "md" | "lg" | "xl" = false` — opens the calendar in a centered modal (with explicit Cancel/Confirm) instead of the popover. `true` always, `false` never, a breakpoint name means modal below that breakpoint
+- `fullscreen: boolean | "sm" | "md" | "lg" | "xl" = false` — render the calendar modal fullscreen. `true` always, `false` never, a breakpoint name makes it fullscreen below that breakpoint. Only applies when the calendar opens as a modal (see `modal`)
+- `formatDate: ((value: DateFieldValue) => string) | undefined` — custom formatter for displaying the date value; callback receives the value and returns a display string
+- `parseDate: ((value: string) => DateFieldValue | undefined) | undefined` — custom parser for parsing typed input into a Date, Date array or DateRange; return `undefined` to reject the input
+
+```html
+<!-- Single mode -->
+<tedi-form-field>
+  <label tedi-label for="date">Date</label>
+  <tedi-date-field inputId="date" [formControl]="dateControl" />
+</tedi-form-field>
+
+<!-- Multiple mode with tags -->
+<tedi-form-field>
+  <label tedi-label for="dates">Dates</label>
+  <tedi-date-field
+    inputId="dates"
+    mode="multiple"
+    [formControl]="datesControl"
+    [multiRow]="false"
+    tagEllipsis="start"
+    [isTagRemovable]="true"
+  />
+</tedi-form-field>
+
+<!-- Range mode with constraints -->
+<tedi-form-field>
+  <label tedi-label for="range">Date range</label>
+  <tedi-date-field
+    inputId="range"
+    mode="range"
+    [formControl]="rangeControl"
+    [minDate]="minDate"
+    [maxDate]="maxDate"
+    [showWeekNumbers]="true"
+  />
+</tedi-form-field>
+
+<!-- Custom format/parse (US style MM/dd/yyyy) -->
+<tedi-date-field
+  inputId="us-date"
+  [formControl]="usControl"
+  [formatDate]="formatUS"
+  [parseDate]="parseUS"
+  placeholder="mm/dd/yyyy"
+/>
+
+<!-- Typing only — no picker UI -->
+<tedi-date-field inputId="typedate" [enableCalendar]="false" />
+
+<!-- Modal picker below md, popover above -->
+<tedi-date-field inputId="modal-date" [formControl]="control" modal="md" [useNativePicker]="false" />
+
+<!-- Native picker on phones, custom from md upward -->
+<tedi-date-field inputId="native-date" [formControl]="control" />
+
+<!-- Year selection with grid header -->
+<tedi-date-field
+  inputId="year-date"
+  selectionLevel="years"
+  monthYearSelectType="grid"
+  [formatDate]="(v) => v instanceof Date ? String(v.getFullYear()) : ''"
+/>
+
+<!-- Weekends unavailable (predicate) -->
+<tedi-date-field inputId="unavail" [formControl]="control" [unavailableDays]="(d) => [0, 6].includes(d.getDay())" />
+
+<!-- Disable past/future -->
+<tedi-date-field inputId="future-only" [disablePast]="true" />
+<tedi-date-field inputId="past-only" [disableFuture]="true" />
+
+<!-- Multi-month side by side -->
+<tedi-date-field inputId="multi-mo" [numberOfMonths]="2" />
+```
+
 ### TimeField
 **Selector:** `tedi-time-field`
 **Model:** `value: string | null` — `HH:mm`
@@ -967,6 +1126,8 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 - `feedbackText: { text, type, position }` — feedback text config
 - `maxDropdownHeight: number` — dropdown height in pixels
 - `compareWith: (a, b) => boolean` — custom equality function
+- `tagEllipsis: TagEllipsis = false` — which end a selected tag's label truncates from when it doesn't fit. Only used in multiselect mode with `multiRow="false"`. `false` never truncates; `end` → `label…`; `start` → `…label`
+- `searchFn: (term: string, item: T) => boolean` — custom search function for filtering options. Overrides the default label-based search when provided
 
 Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multiselect).
 

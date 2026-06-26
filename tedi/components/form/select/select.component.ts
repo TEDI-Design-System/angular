@@ -26,9 +26,10 @@ import { IconComponent, TextComponent } from "../../base";
 import { ClosingButtonComponent } from "../../buttons";
 import { TediTranslationPipe } from "../../../services";
 import { ComponentInputs } from "../../../types";
+import { calculateVisibleTagCount } from "../../../utils/tag-overflow.util";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { LabelComponent } from "../label/label.component";
-import { TagComponent } from "../../tags/tag/tag.component";
+import { TagComponent, TagEllipsis } from "../../tags/tag/tag.component";
 import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
 import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
 import {
@@ -212,6 +213,13 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * @default false
    */
   multiRow = input<boolean>(false);
+
+  /**
+   * Which end a selected tag's label truncates from when it doesn't fit.
+   * `false` (default) never truncates; `end` → `label…`; `start` → `…label`.
+   * @default false
+   */
+  tagEllipsis = input<TagEllipsis>(false);
 
   /**
    * Function used to compare option values for equality.
@@ -919,28 +927,8 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     const availableWidth = this.getAvailableTagWidth();
     if (availableWidth <= 0) return;
 
-    const gap = 8;
-    const counterTagWidth = 40;
-    let usedWidth = 0;
-    let visibleCount = 0;
-
-    for (let i = 0; i < tags.length; i++) {
-      const tagWidth = tags[i].nativeElement.offsetWidth;
-      const spaceNeeded = usedWidth + tagWidth + (visibleCount > 0 ? gap : 0);
-      const hasMoreItems = i < tags.length - 1;
-      const reservedSpace = hasMoreItems ? counterTagWidth + gap : 0;
-
-      if (spaceNeeded + reservedSpace <= availableWidth) {
-        usedWidth = spaceNeeded;
-        visibleCount++;
-      } else {
-        break;
-      }
-    }
-
-    if (visibleCount === 0 && tags.length > 0) {
-      visibleCount = 1;
-    }
+    const widths = tags.map((tag) => tag.nativeElement.offsetWidth);
+    const visibleCount = calculateVisibleTagCount(widths, availableWidth);
 
     this.ngZone.run(() => {
       this.visibleTagsCount.set(visibleCount);

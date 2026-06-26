@@ -1,7 +1,7 @@
 <ng-content select="label[tedi-label]"></ng-content>
 
 <div [ngClass]="inputClasses()">
-  <ng-content select="input[tedi-text-field], tedi-time-field"></ng-content>
+  <ng-content select="input[tedi-text-field], tedi-time-field, tedi-date-field"></ng-content>
 
   @if (clearable()) {
     <div
@@ -46,3 +46,7 @@
     <ng-content select="tedi-feedback-text"></ng-content>
   </div>
 }
+
+<div class="tedi-form-field__extra">
+  <ng-content></ng-content>
+</div>
