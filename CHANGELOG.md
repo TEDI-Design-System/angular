@@ -1,3 +1,10 @@
+# [6.5.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.17...angular-6.5.0-rc.18) (2026-06-26)
+
+
+### Features
+
+* **date-field,calendar:** calendar tedi-ready [#6](https://github.com/TEDI-Design-System/angular/issues/6) ([#443](https://github.com/TEDI-Design-System/angular/issues/443)) ([467271a](https://github.com/TEDI-Design-System/angular/commit/467271a16b943501115547695be45131f9256246))
+
 # [6.5.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.16...angular-6.5.0-rc.17) (2026-06-26)
 
 
