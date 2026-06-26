@@ -1,3 +1,10 @@
+# [6.5.0-rc.19](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.18...angular-6.5.0-rc.19) (2026-06-26)
+
+
+### Bug Fixes
+
+* **date-field,date-picker:** resolved conflict with formcontrol [#494](https://github.com/TEDI-Design-System/angular/issues/494) ([#501](https://github.com/TEDI-Design-System/angular/issues/501)) ([7721071](https://github.com/TEDI-Design-System/angular/commit/7721071204cbd0b7009720925e3be84046d451ad))
+
 # [6.5.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.17...angular-6.5.0-rc.18) (2026-06-26)
 
 
