@@ -933,7 +933,7 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 - `tagEllipsis: TagEllipsis = false` — which end `multiple`-mode tags truncate from when a label doesn't fit. `false`, `end`, or `start`
 - `isTagRemovable: boolean = true` — whether `multiple`-mode tags show a remove button
 - `placeholder: string = ""` — placeholder in the input when no value
-- `disabled: Matcher | Matcher[]` (property `disabledInput`) — disables specific days/dates via matchers. Exposed as `[disabled]` in templates (property name is `disabledInput` to avoid conflict with `FormFieldControl.disabled`). Accepts `{ dayOfWeek: number[] }`, single dates, ranges or predicates
+- `disabledMatchers: Matcher | Matcher[]` — disables specific days/dates via matchers. Named `disabledMatchers` (not `disabled`) to avoid clashing with `FormControlDirective`'s boolean `disabled` when used with `[formControl]`. Accepts `{ dayOfWeek: number[] }`, single dates, ranges or predicates
 - `inputDisabled: boolean = false` — disables the field entirely (input, icon button, and calendar)
 - `readOnly: boolean = false` — blocks typing but leaves the calendar interactive
 - `required: boolean = false` — marks input as required; in `multiple` mode prevents clearing the last date
