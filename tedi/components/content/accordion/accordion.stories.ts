@@ -15,7 +15,21 @@ import { SeparatorComponent } from "../../helpers/separator/separator.component"
 import { ShowAtDirective } from "../../../directives/show-at/show-at.directive";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
-document.cookie = "tedi-lang=et; path=/;";
+const LANG_COOKIE = "tedi-lang";
+
+const readLangCookie = (): string | undefined =>
+  document.cookie
+    .split("; ")
+    .find((entry) => entry.startsWith(`${LANG_COOKIE}=`))
+    ?.split("=")[1];
+
+const writeLangCookie = (value: string | undefined) => {
+  if (value === undefined) {
+    document.cookie = `${LANG_COOKIE}=; path=/; max-age=0`;
+  } else {
+    document.cookie = `${LANG_COOKIE}=${value}; path=/`;
+  }
+};
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.30.43?node-id=8048-69789&t=aqojgjkZcOYAN35p-0" target="_blank">Figma ↗</a><br />
@@ -24,6 +38,16 @@ document.cookie = "tedi-lang=et; path=/;";
 
 export default {
   title: "TEDI-Ready/Content/Accordion",
+  // Switch the active locale to Estonian for accordion stories only. Storybook
+  // runs `beforeEach` per story, and the returned function restores whatever
+  // cookie was there before so other components' stories keep their locale.
+  beforeEach: () => {
+    const previous = readLangCookie();
+    writeLangCookie("et");
+    return () => {
+      writeLangCookie(previous);
+    };
+  },
   decorators: [
     moduleMetadata({
       imports: [
