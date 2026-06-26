@@ -110,42 +110,56 @@ export const translationsMap = {
   "header.role-switch": {
     description: "Label for role switch button",
     components: ["HeaderRole"],
-    et: "Vaheta rolli",
-    en: "Switch role",
-    ru: "Сменить роль",
+    et: "Roll",
+    en: "Role",
+    ru: "Роль",
   },
   "header.role-search": {
-    description: "Label for role search input",
+    description: "Label for Role search input",
     components: ["HeaderRole"],
-    et: "Otsi esindatavat",
+    et: "Otsi isikut",
     en: "Search representative",
     ru: "Найти представителя",
   },
-  "header.role-no-representatives": {
-    description: "Label for empty representatives search result",
+  "header.role-search.organization": {
+    description: "Label for Role search input when searching for organizations",
     components: ["HeaderRole"],
-    et: "Esindatavaid ei leitud!",
-    en: "No representatives found!",
-    ru: "Представители не найдены!",
+    et: "Otsi asutust",
+    en: "Search organization",
+    ru: "Найти организацию",
+  },
+  "header.role-no-representatives": {
+    description: "Text shown when representative search yields no results",
+    components: ["HeaderRole"],
+    et: "Esindatavaid ei leitud",
+    en: "No representatives found",
+    ru: "Представители не найдены",
   },
   "header.login": {
     description: "Label for login button",
     components: ["HeaderLogin"],
     et: "Sisene portaali",
     en: "Log in",
-    ru: "авторизоваться",
+    ru: "Зайти на портал",
   },
-  "header.login-mobile": {
+  "header.login.mobile": {
     description: "Label for login button in mobile view",
     components: ["HeaderLogin"],
     et: "Sisene",
     en: "Log in",
-    ru: "авторизоваться",
+    ru: "Войти",
   },
   "header.logout": {
     description: "Label for logout button",
     components: ["HeaderLogout"],
     et: "Logi välja",
+    en: "Log out",
+    ru: "Выйти",
+  },
+  "header.logout.mobile": {
+    description: "Label for logout button (small)",
+    components: ["HeaderLogout"],
+    et: "Välju",
     en: "Log out",
     ru: "Выйти",
   },
@@ -159,9 +173,23 @@ export const translationsMap = {
   "header.profile": {
     description: "Label for profile button",
     components: ["HeaderProfile"],
+    et: "Minu profiil",
+    en: "My profile",
+    ru: "Мой профиль",
+  },
+  "header.profile.mobile": {
+    description: "Label for profile button on mobile",
+    components: ["HeaderProfile"],
     et: "Profiil",
     en: "Profile",
     ru: "Профиль",
+  },
+  "header.search": {
+    description: "Label for search button",
+    components: ["HeaderSearch"],
+    et: "Otsing",
+    en: "Search",
+    ru: "Поиск",
   },
   "file-upload.add": {
     description: "Label for add file button",
@@ -795,9 +823,12 @@ export const translationsMap = {
   "sidenav.toggleSubmenu": {
     description: "Label for sidenav submenu toggle",
     components: ["Sidenav"],
-    et: (value: string, isOpen: boolean) => (`${isOpen ? 'Sulge' : 'Ava'} ${value} alammenüü`),
-    en: (value: string, isOpen: boolean) => (`${isOpen ? 'Close' : 'Open'} ${value} submenu`),
-    ru: (value: string, isOpen: boolean) => (`${isOpen ? 'Закрыть' : 'Открыть'} ${value} подменю`),
+    et: (value: string, isOpen: boolean) =>
+      `${isOpen ? "Sulge" : "Ava"} ${value} alammenüü`,
+    en: (value: string, isOpen: boolean) =>
+      `${isOpen ? "Close" : "Open"} ${value} submenu`,
+    ru: (value: string, isOpen: boolean) =>
+      `${isOpen ? "Закрыть" : "Открыть"} ${value} подменю`,
   },
   "buttonGroup.menu": {
     description: "Fallback label for ButtonGroup mobile dropdown trigger",

@@ -317,6 +317,21 @@ import { groupRowSpan } from "@tedi-design-system/angular/tedi";
 }
 ```
 
+> **Prefer `groupBy`.** For key-based grouping, the column `groupBy` option
+> computes spans internally against the live row model and also unlocks
+> table-level grouping (spanning control columns, group selection, group
+> dividers). Reach for the raw `rowSpan` callback only for fully custom span
+> logic. See <a href="?path=/docs/tedi-ready-content-table--grouping">Grouping</a>.
+
+---
+
+## Interactive controls in cells
+
+Clicks that land on an interactive control inside a cell — a link, button,
+checkbox, or form field — do **not** activate the row or toggle its expansion,
+even when the row is `interactive` or `expandTrigger="row"`. You don't need to
+add `(click)="$event.stopPropagation()"` to cell content.
+
 ---
 
 ## Expansion sub-rows
@@ -338,6 +353,28 @@ Combine with `getRowCanExpand` to limit which rows can open:
 ```
 
 The expansion toggle column is added automatically — no need to declare it.
+
+---
+
+## Control columns
+
+Enabling selection (`enableRowSelection`), expansion (`getSubRows` /
+`renderSubComponent`) or row reordering (`reorderableRows`) auto-injects the
+matching control column — the selection checkbox, expand chevron and drag
+handle. They are fixed-width, and their content is centered and top-aligned, so
+they stay tidy next to tall or row-spanned cells.
+
+Reorder them with `controlColumnOrder` (default `["drag", "select", "expand"]`).
+Only the controls you actually enable render; any enabled control left out of
+the list is appended at the end:
+
+```html
+<!-- selection checkbox before the expand chevron -->
+<tedi-table [controlColumnOrder]="['select', 'expand']" ... />
+```
+
+When the table is grouped, these control columns span each group — see
+<a href="?path=/docs/tedi-ready-content-table--grouping">Grouping</a>.
 
 ---
 

@@ -1,44 +1,37 @@
 .tedi-header-logout {
-  display: flex;
-  gap: var(--link-inner-spacing-x);
+  display: inline-flex;
   align-items: center;
-  padding: 0;
-  font-size: var(--body-regular-size);
-  background: transparent;
-  border: 0;
 
-  &:hover {
-    span {
-      text-decoration: underline !important;
-    }
-  }
-
-  &--mobile {
-    flex-direction: column;
-    gap: 0;
+  &__button {
+    display: flex;
+    gap: var(--link-inner-spacing-x);
     align-items: center;
-    justify-content: center;
-    min-width: var(--layout-header-mobile-button-size);
-    min-height: var(--layout-header-mobile-button-size);
-    padding: var(--layout-grid-gutters-08);
-    font-size: var(--body-extra-small-size);
-    line-height: var(--body-regular-line-height);
-    border: 0;
-    border-radius: 0;
+    min-width: max-content;
+    padding: 0;
+    font-size: var(--body-regular-size);
 
-    &:focus-visible {
-      outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
-      outline-offset: calc(-1 * var(--tedi-borders-02));
-    }
-
-    tedi-icon {
-      margin: 0 !important;
-      margin-bottom: 4px !important;
-      font-size: var(--icon-05) !important;
+    tedi-icon.tedi-icon {
+      margin: 0;
+      font-size: var(--icon-03);
     }
   }
 
-  span {
-    text-decoration: none !important;
+  &__button:not(.tedi-link) {
+    color: var(--header-mobile-button-text-default);
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+
+    &:hover {
+      color: var(--header-mobile-button-text-hover);
+
+      span {
+        text-decoration: underline;
+      }
+    }
+
+    &:active {
+      color: var(--header-mobile-button-text-active);
+    }
   }
 }

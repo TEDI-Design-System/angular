@@ -432,7 +432,7 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `maxHeight: number | string` — wraps the table in a scrollable container (pair with `stickyHeader`)
 - `activeRowId: string` — highlights one row
 - `rowHover: boolean` — force hover styling on/off (default tracks `interactive`)
-- `interactive: boolean = false` — adds `role="button"`, hover/active styles, and keyboard activation to rows; subscribe to `(rowClick)`
+- `interactive: boolean = false` — adds `role="button"`, hover/active styles, and keyboard activation to rows; subscribe to `(rowClick)`. Clicks landing on interactive controls inside a cell (links, buttons, checkboxes, form fields) are ignored by row activation/expansion — no manual `stopPropagation` needed.
 - `rowAriaLabel: (row: Row<TData>) => string` — explicit accessible name per interactive row (without it, a `role="button"` row's name is built from all its cell text). Only applied when `interactive` is true
 - `enableRowSelection: boolean | ((row) => boolean)` — opt-in selection; auto-renders a selection column
 - `selectionMode: "multiple" | "single" = "multiple"` — `multiple` shows checkboxes + select-all; `single` shows radios (no select-all)
@@ -443,6 +443,9 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `expandButtonVariant: "default" | "secondary"` — override the expand toggle's arrow style. Defaults to the bordered `secondary` style; set `default` for the neutral (borderless) chevron. Only affects the icon-only button (i.e. when `expandButtonLabel` is unset).
 - `expandButtonLabel: string | { open: string; close: string }` — render a visible label next to the chevron instead of an icon-only button. A single string is used for both states; the `{ open, close }` form sets distinct collapsed (`open`) / expanded (`close`) labels. When unset the button stays icon-only with the translated expand/collapse aria-label.
 - `getSubRows: (row) => TData[] | undefined` — hierarchical / tree rows
+- `groupRowsBy: (row: Row<TData>) => unknown` — table-level row grouping. Consecutive rendered rows with an equal key form a group; the control columns (select / expand / drag) span each group (one checkbox + one chevron per group), row selection works per group (the group's single checkbox toggles all its rows and goes indeterminate when partial), and group boundaries drive `rowGroupDividers`. Data columns opt into spanning the same groups with `groupBy: true`.
+- `rowGroupDividers: "all" | "between" | "none" = "all"` — when grouped, controls row dividers: `"between"` draws them only at group boundaries (rows within a group read as one block); `"none"` removes them. No effect without `groupRowsBy`.
+- `controlColumnOrder: ("drag" | "select" | "expand")[] = ["drag", "select", "expand"]` — order of the auto-injected control columns. Only enabled controls render; any enabled control omitted from the list is appended. Use it to place the selection checkbox before the expand chevron, etc.
 - `enableColumnFilters: boolean = false` — force TanStack's filter machinery (auto-on when any column sets `filterable`)
 - `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`). `pageSizeOptions` accepts plain numbers or `{ value, label }` objects — use the object form for a **"Show all"** entry whose `value` is large enough to hold every row: pass the row total when you know it (`data.length`), or `Number.MAX_SAFE_INTEGER` when you don't. Filtering only shrinks the row count, so a large page size always collapses the result to a single page. (Don't use `-1` — TanStack clamps `setPageSize` to `≥ 1`.)
 - `paginationTop: boolean | TablePaginationOptions` — opt-in top paginator; shares page / page-size state with bottom but has independent visual config (its own arrow + `hide*` settings). Requires `pagination` to be truthy.
@@ -482,7 +485,8 @@ Render expandable rows open on first load (still user-collapsible):
 - `sortable: boolean` — opt the column into the built-in sort affordance (string `header` only). Pair with `sortingFn` to override the comparator. For custom UIs, pass a `TemplateRef` for `header` and call `column.toggleSorting()` yourself.
 - `filterable: boolean | { clearOnClose?: boolean }` — opt into the built-in filter popover (icon `filter_alt`). Requires `filterTemplate`.
 - `filterTemplate: TemplateRef<TediTableFilterContext>` — UI rendered inside the filter popover. The context exposes `value`, `setValue`, `apply()`, `clear()`, and `column`. Apply/Clear footer buttons are wired automatically.
-- `rowSpan: number | ((info: CellContext) => number)` — body-level row spanning. Return `>1` to emit `rowspan="N"`; return `0` to skip the `<td>`.
+- `rowSpan: number | ((info: CellContext) => number)` — body-level row spanning. Return `>1` to emit `rowspan="N"`; return `0` to skip the `<td>`. Prefer `groupBy` for key-based grouping; reach for `rowSpan` only for fully custom span logic.
+- `groupBy: boolean | ((row: Row<TData>) => unknown)` — merge consecutive rendered rows with an equal key into one spanning cell, computed internally against the live (post-filter/sort/paginate) row model — no manual `groupRowSpan` wiring. A function groups this column by its own key; `true` reuses the table-level `groupRowsBy`. Takes precedence over `rowSpan`.
 - `size` / `minSize` / `maxSize` (TanStack) — rendered as `width` / `min-width` / `max-width` (px) on the column's cells, applied only when set. **Authoritative only under `[fixedLayout]="true"`** — with the default auto layout they're hints and content can stretch the column past them. Under fixed layout, leave **at least one column unsized** so it absorbs the leftover space; if every column is sized, `table-layout: fixed` scales them all up to fill the table's width.
 - `meta: TableColumnMeta` — `{ label?, align?, vAlign? }` for accessible label + cell alignment.
 
@@ -504,7 +508,7 @@ Render expandable rows open on first load (still user-collapsible):
 </ng-template>
 ```
 
-**Helpers:** `groupRowSpan(rows, keyFn)` — produces a `rowSpan` callback that auto-collapses consecutive equal keys. Pass the *currently-rendered* row set (`table.getRowModel().rows`) so spans operate on post-filter/sort rows.
+**Helpers:** `groupRowSpan(rows, keyFn)` — produces a `rowSpan` callback that auto-collapses consecutive equal keys. Pass the *currently-rendered* row set (`table.getRowModel().rows`) so spans operate on post-filter/sort rows. **Prefer the column `groupBy` option**, which does this internally against the live row model; use this helper only for a standalone `rowSpan` callback.
 
 ```typescript
 import {
@@ -1212,16 +1216,53 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 ### Header
 **Selector:** `header[tedi-header]`
 
+Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language`, `tedi-header-login`, `tedi-header-logout`, `tedi-header-profile`, `tedi-header-role`, `tedi-header-search`
+
+**tedi-header-logo:**
+- `href?: string` — wraps logo in an anchor
+- `showLogo: boolean = true` — simple boolean for feature flags or custom media queries. For responsive hiding at standard breakpoints, use `*showAt` / `*hideAt` directives instead (e.g. `<tedi-header-logo *showAt="'md'">`).
+- Supports dark variant via `tedi-header-logo-dark` directive on projected content.
+
+**tedi-header-role:**
+- `representatives: Representative[]` (required) — `Representative` has `id: string`, `name: string`, `description?: string`, `icon?: string | RepresentativeIcon`
+- `currentRepresentative: Representative` (required, two-way with `model()`)
+- `label?: string` — label text in the title position
+- `description?: string` — description text
+- `showSearch?: boolean = false` — show search input above representative list
+- `searchClearable?: boolean = false` — show clear button on search input
+- `clearSearchOnSelect?: boolean = true` — clear search when a representative is selected
+- `isOrganization?: boolean = false` — affects search label
+- `searchLabel?: string` — custom search input label (falls back to i18n)
+- `organizationSearchLabel?: string` — search label when `isOrganization` is true
+- `showRoleSwitch?: boolean` — show role selection toggle (defaults to true when multiple representatives)
+- `roleSelectionToggle: OutputEmitterRef<boolean>` — emits when role selection opens/closes
+- Custom content via `[tedi-header-role-content]` directive replaces default representative list.
+- Custom no-results content via `[tedi-header-role-no-results]` directive.
+- Custom title via `[tedi-header-role-title]` directive.
+- When multiple `tedi-header-role` components are inside a `tedi-header-profile`, opening one accordion automatically closes the others on mobile/tablet.
+
+**tedi-header-language:**
+- `languages: HeaderLanguage` (required) — object with `Language` keys and display string values
+- `languageChange: OutputEmitterRef<Language>` — emits on language selection
+
+**tedi-header-login:** bp — `size?: 'default' | 'small'` (auto `'small'` on mobile), `label?: string`, `onClick?: () => void`, `href?: string`
+**tedi-header-logout:** bp — `size?: 'default' | 'small'` (auto `'small'` on mobile), `label?: string`, `onClick?: () => void`, `href?: string`
+
+**tedi-header-profile:** bp — `showPopover?: Breakpoint = 'lg'`, `label?: string`, `showLabel?: boolean = false`, `size?: HeaderProfileSize`, `noStyle?: boolean = false`
+- `noStyle` removes default padding, borders, and background from modal children. Does not affect `tedi-header-role`'s own 4px brand bottom border.
+
+**tedi-header-search:** `mobileVariant?: 'modal' | 'inline'`, `mobileLabels?: { button?, modalTitle? }`, `disabled?: boolean`
+
 ```html
 <header tedi-header>
-  <tedi-header-content>
+  <tedi-header-logo href="/">
     <img src="logo.svg" alt="Logo" />
-  </tedi-header-content>
+  </tedi-header-logo>
   <tedi-header-actions>
     <tedi-header-language [languages]="languages" (languageChange)="onLangChange($event)" />
-    <tedi-header-profile [name]="userName">
-      <tedi-header-role [role]="role" [representatives]="reps" [(currentRepresentative)]="currentRep" />
-      <tedi-header-logout />
+    <tedi-header-profile>
+      <tedi-header-role [representatives]="reps" [(currentRepresentative)]="currentRep" />
+      <tedi-header-logout href="/logout" />
     </tedi-header-profile>
   </tedi-header-actions>
 </header>
