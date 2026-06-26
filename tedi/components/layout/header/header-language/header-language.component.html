@@ -12,11 +12,16 @@
     class="tedi-link tedi-header__link-button"
   >
     <span>{{ languages()[translationService.getLanguage()] }}</span>
-    <tedi-icon name="expand_more" [size]="18" />
+    <tedi-icon
+      name="expand_more"
+      color="inherit"
+      class="tedi-header-language__chevron"
+    />
   </button>
   <tedi-popover-content maxWidth="none">
     <button
       *ngFor="let language of languageKeys()"
+      type="button"
       class="tedi-link tedi-header__link-button"
       (click)="handleChangeLang(language)"
     >

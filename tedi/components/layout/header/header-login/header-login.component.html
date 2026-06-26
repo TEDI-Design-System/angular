@@ -1,10 +1,25 @@
-<button 
-    tedi-button 
-    [variant]="isMobile() ? 'neutral' : 'primary'" 
-    [class]="{ 'tedi-header-login__button': true, 'tedi-header-login__button--mobile': isMobile() }"
->
-    @if (isMobile()) {
-        <tedi-icon name="login" [size]="24" />
-    }
-    {{ text() }}
-</button>
+@if (isSmall()) {
+  <tedi-header-mobile-button
+    icon="login"
+    [label]="resolvedLabel()"
+    [href]="href()"
+  />
+} @else if (href()) {
+  <a
+    tedi-button
+    variant="primary"
+    [href]="href()"
+    class="tedi-header-login__button"
+  >
+    {{ resolvedLabel() }}
+  </a>
+} @else {
+  <button
+    type="button"
+    tedi-button
+    variant="primary"
+    class="tedi-header-login__button"
+  >
+    {{ resolvedLabel() }}
+  </button>
+}

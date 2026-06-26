@@ -1,108 +1,74 @@
-@if (showDropdown(); as dropdown) {
-  <ng-container *hideAt="dropdown">
+<ng-container *hideAt="breakpointInputs().showPopover">
+  <ng-container *ngTemplateOutlet="trigger" />
+</ng-container>
+
+<ng-container *showAt="breakpointInputs().showPopover">
+  <tedi-popover [withBorder]="true" position="bottom" [preventOverflow]="true">
     <button
+      type="button"
       tedi-button
+      tedi-popover-trigger
       [attr.data-open]="modalOpen()"
-      [class]="buttonClass()"
       [variant]="buttonVariant()"
-      [attr.aria-label]="
-        breakpointService.isBelowBreakpoint('sm')() || !name()
-          ? translationService.track('header.profile')()
-          : null
-      "
+      [attr.aria-label]="!showLabel() ? resolvedLabel() : null"
       (click)="handleModalOpen()"
     >
-      @if (breakpointService.isBelowBreakpoint("sm")()) {
-        <tedi-icon
-          [name]="modalOpen() ? 'close' : 'account_circle'"
-          color="brand"
-          [size]="24"
-        />
-        {{ "header.profile" | tediTranslate }}
-      } @else {
-        <tedi-icon
-          name="account_circle"
-          color="brand"
-          [size]="name() ? 18 : 36"
-        />
-        {{ name() }}
-        @if (name()) {
-          <tedi-icon name="expand_more" />
-        }
-      }
+      <ng-container *ngTemplateOutlet="buttonContent" />
     </button>
-    <ng-container *ngTemplateOutlet="modal"></ng-container>
-  </ng-container>
+    <tedi-popover-content maxWidth="small" class="tedi-header-profile__popover">
+      <ng-container *ngTemplateOutlet="content" />
+    </tedi-popover-content>
+  </tedi-popover>
+</ng-container>
 
-  <ng-container *showAt="dropdown">
-    <tedi-popover [withBorder]="true" position="bottom" [preventOverflow]="true">
-      <button
-        tedi-button
-        tedi-popover-trigger
-        [attr.data-open]="modalOpen()"
-        [class]="buttonClass()"
-        [variant]="buttonVariant()"
-        (click)="handleModalOpen()"
-      >
-        @if (breakpointService.isBelowBreakpoint("sm")()) {
-          <tedi-icon
-            [name]="modalOpen() ? 'close' : 'account_circle'"
-            color="brand"
-            [size]="24"
-          />
-          {{ "header.profile" | tediTranslate }}
-        } @else {
-          <tedi-icon
-            name="account_circle"
-            color="brand"
-            [size]="name() ? 18 : 36"
-          />
-          {{ name() }}
-          @if (name()) {
-            <tedi-icon name="expand_more" />
-          }
-        }
-      </button>
-      <tedi-popover-content maxWidth="small">
-        <ng-container *ngTemplateOutlet="content"></ng-container>
-      </tedi-popover-content>
-    </tedi-popover>
-  </ng-container>
-} @else {
-  <button
-    tedi-button
-    [attr.data-open]="modalOpen()"
-    [class]="buttonClass()"
-    [variant]="buttonVariant()"
-    (click)="handleModalOpen()"
-  >
-    @if (breakpointService.isBelowBreakpoint("sm")()) {
-      <tedi-icon
-        [name]="modalOpen() ? 'close' : 'account_circle'"
-        color="brand"
-        [size]="24"
-      />
-      {{ "header.profile" | tediTranslate }}
-    } @else {
-      <tedi-icon
-        name="account_circle"
-        color="brand"
-        [size]="name() ? 18 : 36"
-      />
-      {{ name() }}
-      @if (name()) {
-        <tedi-icon name="expand_more" />
-      }
-    }
-  </button>
-  <ng-container *ngTemplateOutlet="modal"></ng-container>
-}
+<ng-template #trigger>
+  @if (isSmall()) {
+    <tedi-header-mobile-button
+      [icon]="modalOpen() ? 'close' : 'account_circle'"
+      [label]="resolvedLabel()"
+      [selected]="modalOpen()"
+      ariaHasPopup="dialog"
+      [ariaExpanded]="modalOpen()"
+      (click)="handleModalOpen()"
+    />
+  } @else {
+    <button
+      type="button"
+      tedi-button
+      [attr.data-open]="modalOpen()"
+      [variant]="buttonVariant()"
+      [attr.aria-label]="!showLabel() ? resolvedLabel() : null"
+      [attr.aria-haspopup]="'dialog'"
+      [attr.aria-expanded]="modalOpen()"
+      (click)="handleModalOpen()"
+    >
+      <ng-container *ngTemplateOutlet="buttonContent" />
+    </button>
+  }
+  <ng-container *ngTemplateOutlet="modal" />
+</ng-template>
+
+<ng-template #buttonContent>
+  <tedi-icon
+    name="account_circle"
+    color="brand"
+    class="tedi-header-profile__icon"
+    [class.tedi-header-profile__icon--small]="showLabel()"
+  />
+  @if (showLabel()) {
+    <span class="tedi-header-profile__label">{{ resolvedLabel() }}</span>
+    <tedi-icon name="expand_more" class="tedi-header-profile__icon--expand" />
+  }
+</ng-template>
 
 <ng-template #modal>
   @if (modalOpen()) {
     <div class="tedi-header-profile__overlay" (click)="handleModalOpen()"></div>
-    <div class="tedi-header-profile__modal">
-      <ng-container *ngTemplateOutlet="content"></ng-container>
+    <div
+      class="tedi-header-profile__modal"
+      [class.tedi-header-profile__modal--no-style]="noStyle()"
+    >
+      <ng-container *ngTemplateOutlet="content" />
     </div>
   }
 </ng-template>
