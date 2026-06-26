@@ -17,7 +17,7 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 **Selector:** `tedi-icon`
 **Inputs:**
 - `name: string` — Material Icon name (required)
-- `size: IconSize = 24` — 8, 12, 16, 18, 24, 36, 48, or "inherit"
+- `size: IconSize` — 8, 12, 16, 18, 22, 24, 36, 48, or "inherit". When unset, the icon inherits a contextual default from its host (`tedi-button`/`tedi-link` → 18, small `tedi-link` → 16), falling back to 24 standalone. An explicit value always overrides the context.
 - `color: IconColor = "primary"`
 - `background: IconBackgroundColor` — circular background color
 - `variant: IconVariant = "outlined"` — "filled" or "outlined"

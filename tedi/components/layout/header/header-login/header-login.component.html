@@ -4,7 +4,7 @@
     [class]="{ 'tedi-header-login__button': true, 'tedi-header-login__button--mobile': isMobile() }"
 >
     @if (isMobile()) {
-        <tedi-icon name="login" />
+        <tedi-icon name="login" [size]="24" />
     }
     {{ text() }}
 </button>

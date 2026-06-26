@@ -23,10 +23,6 @@ tedi-header-login {
         outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
         outline-offset: calc(-1 * var(--tedi-borders-02));
       }
-
-      tedi-icon {
-        font-size: var(--icon-05);
-      }
     }
   }
 }

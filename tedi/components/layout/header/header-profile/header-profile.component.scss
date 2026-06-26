@@ -19,10 +19,6 @@ tedi-header-profile {
       outline-offset: calc(-1 * var(--tedi-borders-02));
     }
 
-    tedi-icon {
-      font-size: var(--icon-05);
-    }
-
     &[data-open="true"] {
       background: var(--button-main-neutral-icon-only-background-active);
     }
