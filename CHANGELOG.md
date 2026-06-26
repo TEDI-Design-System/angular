@@ -1,3 +1,10 @@
+# [6.5.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.16...angular-6.5.0-rc.17) (2026-06-26)
+
+
+### Bug Fixes
+
+* **dropdown:** overridden browser-default padding on dropdown-content [#498](https://github.com/TEDI-Design-System/angular/issues/498) ([#499](https://github.com/TEDI-Design-System/angular/issues/499)) ([1219cde](https://github.com/TEDI-Design-System/angular/commit/1219cde830ecb55e978870994b46bfda24b0e051))
+
 # [6.5.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.15...angular-6.5.0-rc.16) (2026-06-25)
 
 
