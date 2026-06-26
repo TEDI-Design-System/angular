@@ -22,6 +22,7 @@ export type DropdownRole = "menu" | "listbox";
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    class: "tedi-dropdown-content",
     role: "presentation",
     "[attr.aria-labelledby]": "containerId() + '_trigger'",
   },
