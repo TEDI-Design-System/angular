@@ -1,4 +1,4 @@
-import { Component } from "@angular/core";
+import { Component, input } from "@angular/core";
 import { By } from "@angular/platform-browser";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TediTranslationService } from "../../../services/translation/translation.service";
@@ -59,8 +59,8 @@ afterAll(() => {
   standalone: true,
   imports: [TabsComponent, TabsListComponent, TabsTriggerComponent, TabsContentComponent],
   template: `
-    <tedi-tabs [value]="value" [defaultValue]="defaultValue" (valueChange)="onChange($event)">
-      <tedi-tabs-list aria-label="Test tabs" [overflowMode]="overflowMode">
+    <tedi-tabs [value]="value()" [defaultValue]="defaultValue()" (valueChange)="onChange($event)">
+      <tedi-tabs-list aria-label="Test tabs" [overflowMode]="overflowMode()">
         <button tedi-tabs-trigger id="tab-1">Tab 1</button>
         <button tedi-tabs-trigger id="tab-2">Tab 2</button>
         <button tedi-tabs-trigger id="tab-3" [disabled]="true">Tab 3</button>
@@ -72,9 +72,9 @@ afterAll(() => {
   `,
 })
 class HostComponent {
-  value?: string;
-  defaultValue = "tab-1";
-  overflowMode: TabsOverflowMode = "dropdown";
+  value = input<string>();
+  defaultValue = input("tab-1");
+  overflowMode = input<TabsOverflowMode>("dropdown");
   onChange = jest.fn();
 }
 
@@ -250,7 +250,7 @@ describe("Tabs", () => {
   describe("controlled mode", () => {
     it("does not switch internally and emits valueChange", () => {
       const fixture = setup();
-      fixture.componentInstance.value = "tab-1";
+      fixture.componentRef.setInput("value", "tab-1");
       fixture.detectChanges();
 
       tabs(fixture)[1].click();
@@ -259,7 +259,7 @@ describe("Tabs", () => {
       expect(fixture.componentInstance.onChange).toHaveBeenCalledWith("tab-2");
       expect(visiblePanelText(fixture)).toEqual(["Content 1"]);
 
-      fixture.componentInstance.value = "tab-2";
+      fixture.componentRef.setInput("value", "tab-2");
       fixture.detectChanges();
       expect(visiblePanelText(fixture)).toEqual(["Content 2"]);
     });
@@ -359,7 +359,7 @@ describe("Tabs", () => {
         template: `
           <tedi-tabs defaultValue="tab-1">
             <tedi-tabs-list aria-label="Dynamic tabs">
-              @for (id of tabIds; track id) {
+              @for (id of tabIds(); track id) {
                 <button tedi-tabs-trigger [id]="id">{{ id }}</button>
               }
             </tedi-tabs-list>
@@ -368,7 +368,7 @@ describe("Tabs", () => {
         `,
       })
       class DynamicHost {
-        tabIds = ["tab-1", "tab-2"];
+        tabIds = input(["tab-1", "tab-2"]);
       }
 
       TestBed.configureTestingModule({
@@ -394,7 +394,7 @@ describe("Tabs", () => {
 
       // Adding tabs overflows the row; the effect re-checks without any resize.
       Object.defineProperty(list, "scrollWidth", { value: 800, configurable: true });
-      fixture.componentInstance.tabIds = ["tab-1", "tab-2", "tab-3", "tab-4"];
+      fixture.componentRef.setInput("tabIds", ["tab-1", "tab-2", "tab-3", "tab-4"]);
       fixture.detectChanges();
       mockAfterNextRender.callback?.();
       fixture.detectChanges();
@@ -403,7 +403,7 @@ describe("Tabs", () => {
 
     it("does not show More in scroll mode", () => {
       const fixture = setup();
-      fixture.componentInstance.overflowMode = "scroll";
+      fixture.componentRef.setInput("overflowMode", "scroll");
       fixture.detectChanges();
       simulateOverflow(fixture);
       expect(fixture.debugElement.query(By.css(".tedi-tabs-list__more"))).toBeNull();
@@ -411,7 +411,7 @@ describe("Tabs", () => {
 
     it("toggles scroll-fade indicators in scroll mode", () => {
       const fixture = setup();
-      fixture.componentInstance.overflowMode = "scroll";
+      fixture.componentRef.setInput("overflowMode", "scroll");
       fixture.detectChanges();
 
       const listEl = fixture.debugElement.query(By.css('[role="tablist"]')).nativeElement as HTMLElement;

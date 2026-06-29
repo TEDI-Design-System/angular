@@ -25,12 +25,11 @@
             tedi-dropdown-item
             [value]="item.id"
             [disabled]="item.disabled"
+            [clipContent]="false"
+            [attr.aria-label]="item.trigger.label"
             (itemSelect)="selectTab(item.id)"
           >
-            @if (item.icon) {
-              <tedi-icon [name]="item.icon" [size]="18" color="inherit" />
-            }
-            {{ item.label }}
+            <span [tediTabsOverflowContent]="item.trigger"></span>
           </li>
         }
       </tedi-dropdown-content>

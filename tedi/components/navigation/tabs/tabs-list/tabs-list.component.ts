@@ -25,14 +25,14 @@ import { DropdownItemComponent } from "../../../overlay/dropdown/dropdown-item/d
 import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
 import { TabsComponent } from "../tabs.component";
 import { TabsTriggerComponent } from "../tabs-trigger/tabs-trigger.component";
+import { TabsOverflowContentDirective } from "./tabs-overflow-content.directive";
 
 export type TabsOverflowMode = "dropdown" | "scroll";
 
 interface OverflowItem {
   id: string;
-  label: string;
   disabled: boolean;
-  icon?: string;
+  trigger: TabsTriggerComponent;
 }
 
 /**
@@ -49,6 +49,7 @@ interface OverflowItem {
     DropdownContentComponent,
     DropdownItemComponent,
     TediTranslationPipe,
+    TabsOverflowContentDirective,
   ],
   templateUrl: "./tabs-list.component.html",
   styleUrl: "./tabs-list.component.scss",
@@ -106,9 +107,8 @@ export class TabsListComponent implements AfterViewInit, OnDestroy {
       .filter((trigger) => trigger.id() !== active)
       .map((trigger) => ({
         id: trigger.id(),
-        label: trigger.label,
         disabled: trigger.disabled(),
-        icon: trigger.icon(),
+        trigger,
       }));
   });
 

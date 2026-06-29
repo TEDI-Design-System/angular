@@ -55,9 +55,15 @@ export class TabsTriggerComponent {
 
   readonly isSelected = computed(() => this.tabs.activeTab() === this.id());
 
-  /** Plain-text label, used to render this tab inside the overflow dropdown. */
+  /** Plain-text label, used as the accessible name of the overflow dropdown item. */
   get label(): string {
     return this.host.nativeElement.textContent?.trim() ?? "";
+  }
+
+  get contentNodes(): Node[] {
+    return Array.from(this.host.nativeElement.childNodes).map((node) =>
+      node.cloneNode(true),
+    );
   }
 
   handleClick(): void {

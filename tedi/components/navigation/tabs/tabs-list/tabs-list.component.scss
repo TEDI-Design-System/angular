@@ -14,27 +14,23 @@
     top: 0;
     bottom: 0;
     z-index: 1;
-    width: 48px;
+    width: 3rem;
     pointer-events: none;
     content: "";
   }
 
   &--fade-start::before {
     left: 0;
-    background: linear-gradient(
-      to right,
-      var(--tab-background) 10%,
-      transparent 80%
-    );
+    background: linear-gradient(to right,
+        var(--tab-background) 10%,
+        transparent 80%);
   }
 
   &--fade-end::after {
     right: 0;
-    background: linear-gradient(
-      to left,
-      var(--tab-background) 10%,
-      transparent 80%
-    );
+    background: linear-gradient(to left,
+        var(--tab-background) 10%,
+        transparent 80%);
   }
 
   &__items {

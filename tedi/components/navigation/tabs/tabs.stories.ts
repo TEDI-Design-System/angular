@@ -8,6 +8,7 @@ import { ButtonGroupButtonDirective } from "../../buttons/button-group/button-gr
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { StatusIndicatorComponent } from "../../tags/status-indicator/status-indicator.component";
 import { EllipsisComponent } from "../../helpers/ellipsis/ellipsis.component";
+import { CardContentComponent } from "../../content/card/card-content/card-content.component";
 import { TabsComponent } from "./tabs.component";
 import { TabsListComponent } from "./tabs-list/tabs-list.component";
 import { TabsTriggerComponent } from "./tabs-trigger/tabs-trigger.component";
@@ -47,15 +48,6 @@ const subTabContent: Record<string, string> = {
   "work-related-illnesses": "Tööga seotud haiguste teated ja tulemused.",
 };
 
-// TODO: `.tedi-tabs-demo-content` only imitates Card padding for
-// these demos. Replace the wrapper `<div class="tedi-tabs-demo-content">` with the
-// TEDI-Ready Card content block once the Card component (#453) lands.
-const DEMO_STYLES = [
-  `.tedi-tabs-demo-content {
-     padding: var(--card-padding-lg) var(--card-padding-md-default);
-   }`,
-];
-
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.38.59?node-id=3419-38773&m=dev" target="_blank">Figma ↗</a><br/>
  * <a href="https://www.tedi.ee/1ee8444b7/p/9833df-tab" target="_blank">Zeroheight ↗</a>
@@ -76,6 +68,7 @@ export default {
         StatusBadgeComponent,
         StatusIndicatorComponent,
         EllipsisComponent,
+        CardContentComponent,
       ],
     }),
   ],
@@ -170,7 +163,6 @@ type Story = StoryObj<TabsComponent>;
 export const Default: Story = {
   render: () => ({
     props: { content },
-    styles: DEMO_STYLES,
     template: `
       <tedi-tabs defaultValue="tab-1">
         <tedi-tabs-list aria-label="Tervise sakid">
@@ -178,9 +170,9 @@ export const Default: Story = {
           <button tedi-tabs-trigger id="tab-2">Haiguste kulg</button>
           <button tedi-tabs-trigger id="tab-3">Ravimite ajalugu</button>
         </tedi-tabs-list>
-        <tedi-tabs-content id="tab-1"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.healthTimeline }}</p></div></tedi-tabs-content>
-        <tedi-tabs-content id="tab-2"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.diseaseCourse }}</p></div></tedi-tabs-content>
-        <tedi-tabs-content id="tab-3"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.medication }}</p></div></tedi-tabs-content>
+        <tedi-tabs-content id="tab-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="tab-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="tab-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
       </tedi-tabs>
     `,
   }),
@@ -189,15 +181,14 @@ export const Default: Story = {
 export const WithIcons: Story = {
   render: () => ({
     props: { content },
-    styles: DEMO_STYLES,
     template: `
       <tedi-tabs defaultValue="tab-1">
         <tedi-tabs-list aria-label="Ikoonidega sakid">
           <button tedi-tabs-trigger id="tab-1" icon="table_chart">Tabel</button>
           <button tedi-tabs-trigger id="tab-2" icon="grid_on">Ruudustik</button>
         </tedi-tabs-list>
-        <tedi-tabs-content id="tab-1"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.table }}</p></div></tedi-tabs-content>
-        <tedi-tabs-content id="tab-2"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.grid }}</p></div></tedi-tabs-content>
+        <tedi-tabs-content id="tab-1"><tedi-card-content><p tedi-text>{{ content.table }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="tab-2"><tedi-card-content><p tedi-text>{{ content.grid }}</p></tedi-card-content></tedi-tabs-content>
       </tedi-tabs>
     `,
   }),
@@ -206,7 +197,6 @@ export const WithIcons: Story = {
 export const WithStatusBadge: Story = {
   render: () => ({
     props: { content },
-    styles: DEMO_STYLES,
     template: `
       <tedi-tabs defaultValue="tab-1">
         <tedi-tabs-list aria-label="Olekumärgisega sakid">
@@ -221,9 +211,9 @@ export const WithStatusBadge: Story = {
           </button>
           <button tedi-tabs-trigger id="tab-3">Ravimite ajalugu</button>
         </tedi-tabs-list>
-        <tedi-tabs-content id="tab-1"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.healthTimeline }}</p></div></tedi-tabs-content>
-        <tedi-tabs-content id="tab-2"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.unreadMessages }}</p></div></tedi-tabs-content>
-        <tedi-tabs-content id="tab-3"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.medication }}</p></div></tedi-tabs-content>
+        <tedi-tabs-content id="tab-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="tab-2"><tedi-card-content><p tedi-text>{{ content.unreadMessages }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="tab-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
       </tedi-tabs>
     `,
   }),
@@ -261,7 +251,6 @@ export const States: Story = {
 export const Controlled: Story = {
   render: () => ({
     props: { currentTab: "tab-1", content },
-    styles: DEMO_STYLES,
     template: `
       <div class="flex flex-column gap-2">
         <p tedi-text>Current tab: <strong>{{ currentTab }}</strong></p>
@@ -271,9 +260,9 @@ export const Controlled: Story = {
             <button tedi-tabs-trigger id="tab-2">Haiguste kulg</button>
             <button tedi-tabs-trigger id="tab-3">Ravimite ajalugu</button>
           </tedi-tabs-list>
-          <tedi-tabs-content id="tab-1"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.healthTimeline }}</p></div></tedi-tabs-content>
-          <tedi-tabs-content id="tab-2"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.diseaseCourse }}</p></div></tedi-tabs-content>
-          <tedi-tabs-content id="tab-3"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.medication }}</p></div></tedi-tabs-content>
+          <tedi-tabs-content id="tab-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
+          <tedi-tabs-content id="tab-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
+          <tedi-tabs-content id="tab-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
         </tedi-tabs>
       </div>
     `,
@@ -283,7 +272,6 @@ export const Controlled: Story = {
 export const WithDisabledTab: Story = {
   render: () => ({
     props: { content },
-    styles: DEMO_STYLES,
     template: `
       <tedi-tabs defaultValue="tab-1">
         <tedi-tabs-list aria-label="Keelatud sakiga sakid">
@@ -291,9 +279,9 @@ export const WithDisabledTab: Story = {
           <button tedi-tabs-trigger id="tab-2">Haiguste kulg</button>
           <button tedi-tabs-trigger id="tab-3" [disabled]="true">Ravimite ajalugu</button>
         </tedi-tabs-list>
-        <tedi-tabs-content id="tab-1"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.healthTimeline }}</p></div></tedi-tabs-content>
-        <tedi-tabs-content id="tab-2"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.diseaseCourse }}</p></div></tedi-tabs-content>
-        <tedi-tabs-content id="tab-3"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.medication }}</p></div></tedi-tabs-content>
+        <tedi-tabs-content id="tab-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="tab-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="tab-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
       </tedi-tabs>
     `,
   }),
@@ -302,7 +290,7 @@ export const WithDisabledTab: Story = {
 export const OverflowBehavior: Story = {
   render: () => ({
     props: { content },
-    styles: [...DEMO_STYLES, `.tedi-tabs-demo-overflow { max-width: 400px; }`],
+    styles: [`.tedi-tabs-demo-overflow { max-width: 400px; }`],
     template: `
       <div class="flex flex-column gap-3">
         <p tedi-text [modifiers]="'bold'">Dropdown (default)</p>
@@ -314,10 +302,10 @@ export const OverflowBehavior: Story = {
               <button tedi-tabs-trigger id="more-3">Ravimite ajalugu</button>
               <button tedi-tabs-trigger id="more-4">Tahteavaldused</button>
             </tedi-tabs-list>
-            <tedi-tabs-content id="more-1"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.healthTimeline }}</p></div></tedi-tabs-content>
-            <tedi-tabs-content id="more-2"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.diseaseCourse }}</p></div></tedi-tabs-content>
-            <tedi-tabs-content id="more-3"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.medication }}</p></div></tedi-tabs-content>
-            <tedi-tabs-content id="more-4"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.declarations }}</p></div></tedi-tabs-content>
+            <tedi-tabs-content id="more-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
+            <tedi-tabs-content id="more-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
+            <tedi-tabs-content id="more-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
+            <tedi-tabs-content id="more-4"><tedi-card-content><p tedi-text>{{ content.declarations }}</p></tedi-card-content></tedi-tabs-content>
           </tedi-tabs>
         </div>
         <p tedi-text [modifiers]="'bold'">Horizontal scroll</p>
@@ -329,10 +317,10 @@ export const OverflowBehavior: Story = {
               <button tedi-tabs-trigger id="scroll-3">Ravimite ajalugu</button>
               <button tedi-tabs-trigger id="scroll-4">Tahteavaldused</button>
             </tedi-tabs-list>
-            <tedi-tabs-content id="scroll-1"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.healthTimeline }}</p></div></tedi-tabs-content>
-            <tedi-tabs-content id="scroll-2"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.diseaseCourse }}</p></div></tedi-tabs-content>
-            <tedi-tabs-content id="scroll-3"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.medication }}</p></div></tedi-tabs-content>
-            <tedi-tabs-content id="scroll-4"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.declarations }}</p></div></tedi-tabs-content>
+            <tedi-tabs-content id="scroll-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
+            <tedi-tabs-content id="scroll-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
+            <tedi-tabs-content id="scroll-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
+            <tedi-tabs-content id="scroll-4"><tedi-card-content><p tedi-text>{{ content.declarations }}</p></tedi-card-content></tedi-tabs-content>
           </tedi-tabs>
         </div>
       </div>
@@ -343,7 +331,6 @@ export const OverflowBehavior: Story = {
 export const WithSubTabs: Story = {
   render: () => ({
     props: { content, subTabContent, activeSubTab: "work-accidents" },
-    styles: DEMO_STYLES,
     template: `
       <tedi-tabs defaultValue="tab-3">
         <tedi-tabs-list aria-label="Töötervishoiu ja -ohutuse sakid">
@@ -352,10 +339,10 @@ export const WithSubTabs: Story = {
           <button tedi-tabs-trigger id="tab-3">Õnnetused ja haigused</button>
           <button tedi-tabs-trigger id="tab-4">Kalender</button>
         </tedi-tabs-list>
-        <tedi-tabs-content id="tab-1"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.proceduresInProgress }}</p></div></tedi-tabs-content>
-        <tedi-tabs-content id="tab-2"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.proceduresInPlanning }}</p></div></tedi-tabs-content>
+        <tedi-tabs-content id="tab-1"><tedi-card-content><p tedi-text>{{ content.proceduresInProgress }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="tab-2"><tedi-card-content><p tedi-text>{{ content.proceduresInPlanning }}</p></tedi-card-content></tedi-tabs-content>
         <tedi-tabs-content id="tab-3">
-          <div class="tedi-tabs-demo-content">
+          <tedi-card-content>
             <div class="flex flex-column gap-2">
               <tedi-button-group
                 variant="secondary-button-group"
@@ -370,9 +357,9 @@ export const WithSubTabs: Story = {
               </tedi-button-group>
               <p tedi-text>{{ subTabContent[activeSubTab] }}</p>
             </div>
-          </div>
+          </tedi-card-content>
         </tedi-tabs-content>
-        <tedi-tabs-content id="tab-4"><div class="tedi-tabs-demo-content"><p tedi-text>{{ content.calendar }}</p></div></tedi-tabs-content>
+        <tedi-tabs-content id="tab-4"><tedi-card-content><p tedi-text>{{ content.calendar }}</p></tedi-card-content></tedi-tabs-content>
       </tedi-tabs>
     `,
   }),
