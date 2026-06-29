@@ -1,0 +1,79 @@
+@if (variant() === 'star') {
+  <div class="tedi-rating__items tedi-rating__items--star">
+    @for (entry of indexedItems(); track entry.index) {
+      <button
+        type="button"
+        class="tedi-rating__star"
+        [class.tedi-rating__star--selected]="isStarFilled(entry.index)"
+        role="radio"
+        [attr.aria-checked]="value() === entry.index"
+        [attr.aria-label]="entry.index + ' / ' + resolvedMax()"
+        [attr.tabindex]="getTabIndex(entry.index)"
+        [disabled]="isDisabled()"
+        (click)="select(entry.index)"
+        (keydown)="handleKeydown($event, entry.index)"
+        (blur)="handleBlur()"
+      >
+        <tedi-icon
+          name="kid_star"
+          [variant]="isStarFilled(entry.index) ? 'filled' : 'outlined'"
+          color="inherit"
+        />
+      </button>
+    }
+  </div>
+} @else if (variant() === 'number') {
+  <div class="tedi-rating__items">
+    @for (entry of indexedItems(); track entry.index; let first = $first; let last = $last) {
+      <div class="tedi-rating__item">
+        <button
+          type="button"
+          class="tedi-rating__number"
+          [class.tedi-rating__number--selected]="value() === entry.index"
+          role="radio"
+          [attr.aria-checked]="value() === entry.index"
+          [attr.tabindex]="getTabIndex(entry.index)"
+          [disabled]="isDisabled()"
+          (click)="select(entry.index)"
+          (keydown)="handleKeydown($event, entry.index)"
+          (blur)="handleBlur()"
+        >
+          {{ entry.index }}
+        </button>
+        @if (first && startLabel()) {
+          <span class="tedi-rating__label">{{ startLabel() }}</span>
+        }
+        @if (last && endLabel()) {
+          <span class="tedi-rating__label">{{ endLabel() }}</span>
+        }
+      </div>
+    }
+  </div>
+} @else if (variant() === 'icon') {
+  <div class="tedi-rating__items">
+    @for (entry of indexedItems(); track entry.index) {
+      <div class="tedi-rating__item">
+        <button
+          type="button"
+          class="tedi-rating__icon-btn"
+          [class.tedi-rating__icon-btn--selected]="value() === entry.index"
+          role="radio"
+          [attr.aria-checked]="value() === entry.index"
+          [attr.aria-label]="entry.item?.label || '' + entry.index"
+          [attr.tabindex]="getTabIndex(entry.index)"
+          [disabled]="isDisabled()"
+          (click)="select(entry.index)"
+          (keydown)="handleKeydown($event, entry.index)"
+          (blur)="handleBlur()"
+        >
+          @if (entry.item?.icon) {
+            <tedi-icon [name]="entry.item.icon" color="inherit" />
+          }
+        </button>
+        @if (entry.item?.label) {
+          <span class="tedi-rating__label">{{ entry.item.label }}</span>
+        }
+      </div>
+    }
+  </div>
+}

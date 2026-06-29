@@ -11,6 +11,7 @@ export * from "./date-picker/date-picker.component";
 export * from "./feedback-text/feedback-text.component";
 export * from "./label/label.component";
 export * from "./number-field/number-field.component";
+export * from "./rating";
 export * from "./select";
 export * from "./toggle/toggle.component";
 export * from "./form-field/form-field.component";

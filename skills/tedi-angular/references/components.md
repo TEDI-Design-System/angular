@@ -750,6 +750,26 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 - `required: boolean = false`
 - `invalid: boolean = false`
 
+### Rating
+**Selector:** `tedi-rating` | ControlValueAccessor
+**Model:** `value: number | null` — selected rating (1-based); re-selecting the current value clears it
+**Inputs:**
+- `variant: RatingVariant = "star"` — "star", "number", or "icon"
+- `max: number = 5` — item count for star/number variants
+- `items: RatingItem[] = []` — `{ icon: string; label?: string }[]` for the icon variant (count derives from length)
+- `startLabel: string`, `endLabel: string` — labels under the first/last item (number variant)
+- `ariaLabel: string` — accessible name for the `radiogroup`
+
+Renders as a `radiogroup` with roving-tabindex keyboard support (arrows wrap, Home/End, Enter/Space). Disabled state comes from the bound `FormControl`.
+
+```html
+<tedi-rating [formControl]="ratingControl" ariaLabel="Rate this item" />
+
+<tedi-rating variant="number" [max]="10" startLabel="Väga halb" endLabel="Suurepärane" [(value)]="score" ariaLabel="Score" />
+
+<tedi-rating variant="icon" [items]="faces" [(value)]="mood" ariaLabel="Rate your experience" />
+```
+
 ### Checkbox
 **Selector:** `input[type=checkbox][tedi-checkbox]`
 **Inputs:**
