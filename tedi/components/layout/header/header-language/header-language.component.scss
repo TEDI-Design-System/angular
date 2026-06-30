@@ -16,6 +16,12 @@
     transform: rotate(-180deg);
   }
 
+  &--label-left {
+    flex-direction: row;
+    gap: var(--layout-grid-gutters-08);
+    align-items: center;
+  }
+
   @include breakpoints.media-breakpoint-down(md) {
     display: flex;
     align-items: center;
