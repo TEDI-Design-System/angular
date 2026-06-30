@@ -1,4 +1,4 @@
-import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
+import { CdkConnectedOverlay, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
 import { CdkListbox, CdkListboxModule } from "@angular/cdk/listbox";
 import {
   AfterContentChecked,
@@ -380,7 +380,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   listboxRef = viewChild(CdkListbox, { read: ElementRef });
   cdkListboxRef = viewChild(CdkListbox);
   connectedOverlay = viewChild(CdkConnectedOverlay);
-  triggerRef = viewChild(CdkOverlayOrigin, { read: ElementRef });
+  triggerRef = viewChild("trigger", { read: ElementRef });
   searchInputRef = viewChild<ElementRef>("searchInput");
   multiselectContainerRef = viewChild<ElementRef>("multiselectContainer");
   tagRefs = viewChildren("tagElement", { read: ElementRef });

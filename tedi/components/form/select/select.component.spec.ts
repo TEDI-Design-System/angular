@@ -2163,6 +2163,23 @@ describe("SelectComponent", () => {
 
       expect(select.isOpen()).toBe(false);
     }));
+
+    it("should restore focus to the trigger, not the tooltip, when closing with a tooltip present", fakeAsync(() => {
+      host.tooltip = "More info about this field";
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(true);
+
+      select.toggleIsOpen(true);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.triggerRef()?.nativeElement).toBe(getTrigger());
+      expect(document.activeElement).toBe(getTrigger());
+    }));
   });
 
   describe("external label association", () => {
