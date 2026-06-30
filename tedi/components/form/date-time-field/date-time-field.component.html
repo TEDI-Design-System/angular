@@ -1,0 +1,173 @@
+<tedi-date-input
+  #dateInput
+  cdkOverlayOrigin
+  #overlayOrigin="cdkOverlayOrigin"
+  [inputId]="inputId()"
+  [value]="displayValue()"
+  [placeholder]="effectivePlaceholder()"
+  [disabled]="fieldDisabled()"
+  [readOnly]="readOnly()"
+  [required]="required()"
+  [iconActive]="overlayOpen()"
+  [useNativePicker]="useNativePickerEffective()"
+  nativeInputType="datetime-local"
+  [nativeIsoValue]="nativeIsoValue()"
+  [clearable]="canClear()"
+  (inputChange)="handleInputChange($event)"
+  (iconClick)="handleIconClick()"
+  (clear)="handleClear()"
+/>
+
+@if (usePopover()) {
+  <ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="overlayOrigin"
+    [cdkConnectedOverlayOpen]="overlayOpen()"
+    [cdkConnectedOverlayPositions]="overlayPositions()"
+    [cdkConnectedOverlayHasBackdrop]="false"
+    (attach)="handleOverlayAttached()"
+    (overlayOutsideClick)="handleOverlayOutsideClick($event)"
+    (detach)="closeOverlay()"
+  >
+    <div
+      class="tedi-date-time-field__overlay"
+      role="dialog"
+      [attr.aria-label]="'date-field.calendar-dialog' | tediTranslate"
+      cdkTrapFocus
+      (keydown)="handleOverlayKeydown($event)"
+    >
+      @if (mode() === "range") {
+        <div class="tedi-date-time-field__range">
+          <ng-container
+            [ngTemplateOutlet]="calendarTpl"
+            [ngTemplateOutletContext]="{ footer: null }"
+          />
+          <div class="tedi-date-time-field__range-separator" aria-hidden="true"></div>
+          <div class="tedi-date-time-field__range-times">
+            <ng-container
+              [ngTemplateOutlet]="rangeTimeTpl"
+              [ngTemplateOutletContext]="{ kind: 'from', time: fromTime(), slots: fromAvailableTimes() }"
+            />
+            <ng-container
+              [ngTemplateOutlet]="rangeTimeTpl"
+              [ngTemplateOutletContext]="{ kind: 'to', time: toTime(), slots: toAvailableTimes() }"
+            />
+          </div>
+        </div>
+      } @else if (effectiveLayout() === "side-by-side") {
+        <div class="tedi-date-time-field__split">
+          <ng-container
+            [ngTemplateOutlet]="calendarTpl"
+            [ngTemplateOutletContext]="{ footer: null }"
+          />
+          <div class="tedi-date-time-field__split-separator" aria-hidden="true"></div>
+          <div class="tedi-date-time-field__split-time">
+            <span class="tedi-date-time-field__split-heading">
+              {{ timeHeading() ?? ("date-time-field.time-heading" | tediTranslate) }}
+            </span>
+            <ng-container [ngTemplateOutlet]="singleTimePickerTpl" />
+          </div>
+        </div>
+      } @else if (step() === "date") {
+        <ng-container
+          [ngTemplateOutlet]="calendarTpl"
+          [ngTemplateOutletContext]="{ footer: footerTpl }"
+        />
+      } @else {
+        <div class="tedi-date-time-field__time-step">
+          <header class="tedi-date-time-field__time-header">
+            <button
+              tedi-button
+              type="button"
+              variant="neutral"
+              size="small"
+              class="tedi-date-time-field__time-back"
+              (click)="goToDateStep()"
+            >
+              <tedi-icon name="arrow_back" [size]="18" color="inherit" />
+              {{ backLabel() ?? ("date-time-field.back" | tediTranslate) }}
+            </button>
+            <span class="tedi-date-time-field__time-date">{{ shortSelectedDate() }}</span>
+          </header>
+          <ng-container [ngTemplateOutlet]="singleTimePickerTpl" />
+        </div>
+      }
+    </div>
+  </ng-template>
+}
+
+<ng-template #calendarTpl let-footer="footer">
+  <tedi-calendar
+    #calendar
+    [bordered]="false"
+    [value]="value()"
+    [currentMonth]="currentMonth()"
+    [mode]="mode()"
+    [selectionLevel]="selectionLevel()"
+    [localeCode]="localeCode()"
+    [showOutsideDays]="showOutsideDays()"
+    [showWeekNumbers]="showWeekNumbers()"
+    [numberOfMonths]="numberOfMonthsResolved()"
+    [monthYearSelectType]="monthYearSelectType()"
+    [required]="required()"
+    [disabledMatchers]="resolvedDisabledMatchers()"
+    [availableDays]="availableDays()"
+    [unavailableDays]="unavailableDays()"
+    [shouldDisableMonth]="shouldDisableMonth()"
+    [shouldDisableYear]="shouldDisableYear()"
+    [inputDisabled]="fieldDisabled()"
+    (currentMonthChange)="handleCurrentMonthChange($event)"
+    (select)="handleCalendarSelect()"
+  >
+    @if (footer) {
+      <div tediCalendarFooter class="tedi-date-time-field__select-time-wrapper">
+        <ng-container [ngTemplateOutlet]="footer" />
+      </div>
+    }
+  </tedi-calendar>
+</ng-template>
+
+<ng-template #footerTpl>
+  <button
+    tedi-button
+    type="button"
+    variant="neutral"
+    size="small"
+    (click)="goToTimeStep()"
+  >
+    <tedi-icon name="schedule" [size]="18" color="inherit" />
+    {{ selectTimeLabel() ?? ("date-time-field.select-time" | tediTranslate) }}
+  </button>
+</ng-template>
+
+<ng-template #singleTimePickerTpl>
+  <tedi-time-picker
+    #stepTimePicker
+    [value]="singleTime()"
+    [variant]="singleAvailableTimes()?.length ? 'slots' : 'scroll'"
+    [timeSlots]="singleAvailableTimes() ?? []"
+    [showSlotIndicator]="resolvedGridVariant() === 'radio'"
+    [columns]="slotColumns()"
+    [minuteStep]="minuteStep()"
+    [trapFocus]="true"
+    (valueChange)="handleTimeSelect($event)"
+  />
+</ng-template>
+
+<ng-template #rangeTimeTpl let-kind="kind" let-time="time" let-slots="slots">
+  <div class="tedi-date-time-field__split-time">
+    <span class="tedi-date-time-field__split-heading">
+      {{ timeHeading() ?? ("date-time-field.time-heading" | tediTranslate) }}
+    </span>
+    <tedi-time-picker
+      [value]="time"
+      [variant]="slots?.length ? 'slots' : 'scroll'"
+      [timeSlots]="slots ?? []"
+      [showSlotIndicator]="resolvedGridVariant() === 'radio'"
+      [columns]="slotColumns()"
+      [minuteStep]="minuteStep()"
+      [trapFocus]="true"
+      (valueChange)="handleRangeTimeSelect(kind, $event)"
+    />
+  </div>
+</ng-template>
