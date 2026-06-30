@@ -1,3 +1,15 @@
+# [7.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.19...angular-7.0.0-rc.1) (2026-06-30)
+
+
+### Bug Fixes
+
+* **icon:** size input now works inside buttons and links [#435](https://github.com/TEDI-Design-System/angular/issues/435) ([#497](https://github.com/TEDI-Design-System/angular/issues/497)) ([e2b6a70](https://github.com/TEDI-Design-System/angular/commit/e2b6a701cd928827d4ed68931cca4de2b9a03042))
+
+
+### BREAKING CHANGES
+
+* **icon:** button and link icon size changed, tedi-icon--size-* overrides no longer work
+
 # [6.5.0-rc.19](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.18...angular-6.5.0-rc.19) (2026-06-26)
 
 
