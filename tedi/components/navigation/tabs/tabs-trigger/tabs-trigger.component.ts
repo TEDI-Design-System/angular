@@ -66,6 +66,14 @@ export class TabsTriggerComponent {
     );
   }
 
+  /** Scrolls this trigger into view within a horizontally scrolling tablist. */
+  scrollIntoView(): void {
+    this.host.nativeElement.scrollIntoView({
+      block: "nearest",
+      inline: "nearest",
+    });
+  }
+
   handleClick(): void {
     if (!this.disabled()) {
       this.tabs.select(this.id());

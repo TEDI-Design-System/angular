@@ -122,6 +122,21 @@ export class TabsListComponent implements AfterViewInit, OnDestroy {
       if (this.overflowMode() !== "dropdown") return;
       afterNextRender(() => this.checkOverflow(), { injector: this.injector });
     });
+
+    effect(() => {
+      const active = this.tabs.activeTab();
+      if (!isPlatformBrowser(this.platformId)) return;
+      if (this.overflowMode() !== "scroll") return;
+      const trigger = this.triggers().find((t) => t.id() === active);
+      if (!trigger) return;
+      afterNextRender(
+        () => {
+          trigger.scrollIntoView();
+          this.updateScrollFade();
+        },
+        { injector: this.injector },
+      );
+    });
   }
 
   ngAfterViewInit(): void {
