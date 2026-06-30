@@ -1,3 +1,10 @@
+# [7.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0-rc.1...angular-7.0.0-rc.2) (2026-06-30)
+
+
+### Features
+
+* **tabs:** new tedi-ready component [#14](https://github.com/TEDI-Design-System/angular/issues/14) ([#481](https://github.com/TEDI-Design-System/angular/issues/481)) ([5f37a32](https://github.com/TEDI-Design-System/angular/commit/5f37a32b73bf34e0b76ce4228aaec84d010bc6cf))
+
 # [7.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.19...angular-7.0.0-rc.1) (2026-06-30)
 
 
