@@ -2221,20 +2221,23 @@ describe("SelectComponent", () => {
       externalLabel.id = "external-label-id";
       document.body.appendChild(externalLabel);
 
-      host.label = "";
-      host.ariaLabelledby = "external-label-id";
-      fixture.detectChanges();
-      tick();
+      try {
+        host.label = "";
+        host.ariaLabelledby = "external-label-id";
+        fixture.detectChanges();
+        tick();
 
-      externalLabel.click();
-      fixture.detectChanges();
-      tick();
+        externalLabel.click();
+        fixture.detectChanges();
+        tick();
 
-      expect(select.isOpen()).toBe(true);
+        expect(select.isOpen()).toBe(true);
 
-      select.toggleIsOpen(true);
-      tick();
-      document.body.removeChild(externalLabel);
+        select.toggleIsOpen(true);
+        tick();
+      } finally {
+        document.body.removeChild(externalLabel);
+      }
     }));
 
     it("should not wire external label clicks when the built-in label is set", fakeAsync(() => {
@@ -2242,16 +2245,47 @@ describe("SelectComponent", () => {
       externalLabel.id = "external-label-id";
       document.body.appendChild(externalLabel);
 
-      host.ariaLabelledby = "external-label-id";
-      fixture.detectChanges();
-      tick();
+      try {
+        host.ariaLabelledby = "external-label-id";
+        fixture.detectChanges();
+        tick();
 
-      externalLabel.click();
-      fixture.detectChanges();
-      tick();
+        externalLabel.click();
+        fixture.detectChanges();
+        tick();
 
-      expect(select.isOpen()).toBe(false);
-      document.body.removeChild(externalLabel);
+        expect(select.isOpen()).toBe(false);
+      } finally {
+        document.body.removeChild(externalLabel);
+      }
+    }));
+
+    it("should wire clicks for every id in a space-separated ariaLabelledby", fakeAsync(() => {
+      const labelA = document.createElement("span");
+      labelA.id = "ext-label-a";
+      const labelB = document.createElement("span");
+      labelB.id = "ext-label-b";
+      document.body.appendChild(labelA);
+      document.body.appendChild(labelB);
+
+      try {
+        host.label = "";
+        host.ariaLabelledby = "ext-label-a ext-label-b";
+        fixture.detectChanges();
+        tick();
+
+        labelB.click();
+        fixture.detectChanges();
+        tick();
+
+        expect(select.isOpen()).toBe(true);
+
+        select.toggleIsOpen(true);
+        tick();
+      } finally {
+        document.body.removeChild(labelA);
+        document.body.removeChild(labelB);
+      }
     }));
   });
 

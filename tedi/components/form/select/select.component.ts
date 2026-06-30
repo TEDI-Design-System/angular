@@ -573,18 +573,25 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * when the built-in `label` is used.
    */
   bindExternalLabelClick = effect((onCleanup) => {
-    const id = this.ariaLabelledby();
-    if (this.label() || !id) return;
+    const ids = this.ariaLabelledby();
+    if (this.label() || !ids) return;
 
-    const labelEl = document.getElementById(id);
-    if (!labelEl) return;
+    // `aria-labelledby` is a space-separated IDREF list, so resolve each id.
+    const labelEls = ids
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (labelEls.length === 0) return;
 
     const open = (event: Event) => {
       event.stopPropagation();
       this.onTriggerClick();
     };
-    labelEl.addEventListener("click", open);
-    onCleanup(() => labelEl.removeEventListener("click", open));
+    labelEls.forEach((el) => el.addEventListener("click", open));
+    onCleanup(() =>
+      labelEls.forEach((el) => el.removeEventListener("click", open))
+    );
   });
 
   constructor() {

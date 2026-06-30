@@ -11,6 +11,7 @@ import { TediTranslationService } from "../../../services";
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
+    "type": "button",
     "class": "tedi-info-button",
     "[attr.aria-label]": "ariaLabel() || _defaultLabel()"
   }
