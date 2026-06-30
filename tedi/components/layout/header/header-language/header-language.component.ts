@@ -89,7 +89,7 @@ export class HeaderLanguageComponent {
   /** Self-describing accessible name for the trigger, e.g. "Language EST". */
   readonly triggerAriaLabel = computed(() => {
     const label =
-      this.selectLabel() ??
+      this.selectLabel() ||
       this.translationService.translate("header.select-lang");
     return `${label} ${this.displayedLanguage() ?? ""}`.trim();
   });

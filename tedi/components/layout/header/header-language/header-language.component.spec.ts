@@ -116,6 +116,17 @@ describe("HeaderLanguageComponent", () => {
       );
     });
 
+    it("falls back to the translated select label when selectLabel is an empty string", () => {
+      mockTranslationService.translate.mockReturnValue("Language");
+
+      const fresh = TestBed.createComponent(HeaderLanguageComponent);
+      fresh.componentRef.setInput("languages", { et: "EST" });
+      fresh.componentRef.setInput("selectLabel", "");
+      fresh.detectChanges();
+
+      expect(fresh.componentInstance.triggerAriaLabel()).toBe("Language EST");
+    });
+
     it("omits the language (and trailing space) when none is displayed", () => {
       fixture.componentRef.setInput("languages", { en: "ENG" });
       fixture.componentRef.setInput("selectLabel", "Choose language");
