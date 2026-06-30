@@ -17,6 +17,9 @@ import { InputState } from "../form-field/form-field.component";
     <tedi-select
       [inputId]="inputId"
       [label]="label"
+      [tooltip]="tooltip"
+      [ariaLabelledby]="ariaLabelledby"
+      [ariaLabel]="ariaLabel"
       [options]="items"
       [allowMultiple]="allowMultiple"
       [searchable]="searchable"
@@ -62,6 +65,9 @@ import { InputState } from "../form-field/form-field.component";
 class TestHostComponent {
   inputId = "test-select";
   label = "Test Label";
+  tooltip: string | undefined = undefined;
+  ariaLabelledby: string | undefined = undefined;
+  ariaLabel: string | undefined = undefined;
   items: unknown[] = ["Option 1", "Option 2", "Option 3"];
   allowMultiple = false;
   searchable = false;
@@ -2122,6 +2128,76 @@ describe("SelectComponent", () => {
       tick();
       expect(select.isOpen()).toBe(true);
     }));
+
+    it("should render the arrow as a decorative span, not a button", () => {
+      const arrow = hostEl.querySelector(".tedi-select__arrow") as HTMLElement;
+      expect(arrow.tagName).toBe("SPAN");
+      expect(arrow.getAttribute("aria-hidden")).toBe("true");
+    });
+  });
+
+  describe("label tooltip", () => {
+    it("should not render the tooltip info button by default", () => {
+      expect(hostEl.querySelector("[tedi-info-button]")).toBeNull();
+    });
+
+    it("should render the tooltip info button as a sibling of the label when tooltip is set", () => {
+      host.tooltip = "More info about this field";
+      fixture.detectChanges();
+
+      const labelRow = hostEl.querySelector(".tedi-select__label-row");
+      expect(labelRow).toBeTruthy();
+      const infoButton = labelRow?.querySelector("[tedi-info-button]");
+      expect(infoButton).toBeTruthy();
+      expect(getLabel().contains(infoButton as Node)).toBe(false);
+    });
+
+    it("should not open the dropdown when clicking the tooltip info button", fakeAsync(() => {
+      host.tooltip = "More info about this field";
+      fixture.detectChanges();
+
+      const infoButton = hostEl.querySelector("[tedi-info-button]") as HTMLElement;
+      infoButton.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.isOpen()).toBe(false);
+    }));
+  });
+
+  describe("external label association", () => {
+    it("should reference the built-in label via aria-labelledby on the trigger", () => {
+      expect(getTrigger().getAttribute("aria-labelledby")).toBe(
+        getLabel().getAttribute("id"),
+      );
+    });
+
+    it("should fall back to a consumer aria-labelledby when there is no built-in label", () => {
+      host.label = "";
+      host.ariaLabelledby = "external-label-id";
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-labelledby")).toBe("external-label-id");
+      expect(getTrigger().getAttribute("aria-label")).toBeNull();
+    });
+
+    it("should prefer the built-in label over a consumer aria-labelledby", () => {
+      host.ariaLabelledby = "external-label-id";
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-labelledby")).toBe(
+        getLabel().getAttribute("id"),
+      );
+    });
+
+    it("should expose aria-label when no labelledby reference is available", () => {
+      host.label = "";
+      host.ariaLabel = "Page size";
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-label")).toBe("Page size");
+      expect(getTrigger().getAttribute("aria-labelledby")).toBeNull();
+    });
   });
 
   describe("search focus and blur", () => {
