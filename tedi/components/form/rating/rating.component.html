@@ -1,25 +1,31 @@
 @if (variant() === 'star') {
-  <div class="tedi-rating__items tedi-rating__items--star">
-    @for (entry of indexedItems(); track entry.index) {
-      <button
-        type="button"
-        class="tedi-rating__star"
-        [class.tedi-rating__star--selected]="isStarFilled(entry.index)"
-        role="radio"
-        [attr.aria-checked]="value() === entry.index"
-        [attr.aria-label]="entry.index + ' / ' + resolvedMax()"
-        [attr.tabindex]="getTabIndex(entry.index)"
-        [disabled]="isDisabled()"
-        (click)="select(entry.index)"
-        (keydown)="handleKeydown($event, entry.index)"
-        (blur)="handleBlur()"
-      >
-        <tedi-icon
-          name="kid_star"
-          [variant]="isStarFilled(entry.index) ? 'filled' : 'outlined'"
-          color="inherit"
-        />
-      </button>
+  <div class="tedi-rating__items tedi-rating__items--star" (pointerleave)="clearHover()">
+    @for (box of starGrid(); track box.index) {
+      <span class="tedi-rating__star-box">
+        <span class="tedi-rating__star-icon">
+          <tedi-icon [name]="icon()" variant="outlined" color="secondary" />
+        </span>
+        <span class="tedi-rating__star-icon tedi-rating__star-icon--filled" [style.width.%]="getStarFill(box.index)">
+          <tedi-icon [name]="icon()" variant="filled" [color]="color()" />
+        </span>
+        @for (segment of box.segments; track segment.value) {
+          <button
+            type="button"
+            class="tedi-rating__segment"
+            [style.left.%]="segment.leftPercent"
+            [style.width.%]="segment.widthPercent"
+            role="radio"
+            [attr.aria-checked]="isSegmentChecked(segment.value)"
+            [attr.aria-label]="segment.value + ' / ' + resolvedMax()"
+            [attr.tabindex]="getSegmentTabIndex(segment.value)"
+            [disabled]="isDisabled()"
+            (pointerenter)="setHover(segment.value)"
+            (click)="select(segment.value)"
+            (keydown)="handleStarKeydown($event, segment.value)"
+            (blur)="handleBlur()"
+          ></button>
+        }
+      </span>
     }
   </div>
 } @else if (variant() === 'number') {

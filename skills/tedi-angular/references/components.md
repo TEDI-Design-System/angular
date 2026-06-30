@@ -756,6 +756,9 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 **Inputs:**
 - `variant: RatingVariant = "star"` — "star", "number", or "icon"
 - `max: number = 5` — item count for star/number variants
+- `precision: 1 | 0.5 = 1` — star-variant increment. `0.5` (half stars) is **discouraged** — each half-star target is below the WCAG 2.5.8 24×24px minimum (a dev-mode warning is logged). Ignored by number/icon
+- `icon: string = "kid_star"` — Material Symbols icon for the star variant (needs filled + outlined variants for partial fill)
+- `color: IconColor = "brand"` — fill color of selected stars (star variant); empty stars stay neutral
 - `items: RatingItem[] = []` — `{ icon: string; label?: string }[]` for the icon variant (count derives from length)
 - `startLabel: string`, `endLabel: string` — labels under the first/last item (number variant)
 - `ariaLabel: string` — accessible name for the `radiogroup`
@@ -764,6 +767,8 @@ Renders as a `radiogroup` with roving-tabindex keyboard support (arrows wrap, Ho
 
 ```html
 <tedi-rating [formControl]="ratingControl" ariaLabel="Rate this item" />
+
+<tedi-rating [precision]="0.5" [(value)]="score" ariaLabel="Half-star rating" />
 
 <tedi-rating variant="number" [max]="10" startLabel="Väga halb" endLabel="Suurepärane" [(value)]="score" ariaLabel="Score" />
 

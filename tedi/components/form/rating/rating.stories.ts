@@ -62,6 +62,48 @@ export default {
         defaultValue: { summary: "5" },
       },
     },
+    precision: {
+      description:
+        "Star-variant increment. Only 1 or 0.5 are supported; 0.5 (half stars) is discouraged — each half-star target falls below the WCAG 2.5.8 24×24px minimum. Ignored by other variants.",
+      control: "inline-radio",
+      options: [1, 0.5],
+      table: {
+        category: "inputs",
+        type: { summary: "1 | 0.5" },
+        defaultValue: { summary: "1" },
+      },
+    },
+    icon: {
+      description:
+        "Material Symbols icon for the star variant. Needs both filled and outlined variants for partial fill to read correctly.",
+      control: "text",
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+        defaultValue: { summary: '"kid_star"' },
+      },
+    },
+    color: {
+      description:
+        "Fill color of selected stars (star variant). Empty stars stay neutral.",
+      control: "select",
+      options: [
+        "brand",
+        "brand-dark",
+        "success",
+        "warning",
+        "warning-dark",
+        "danger",
+        "primary",
+        "secondary",
+        "tertiary",
+      ],
+      table: {
+        category: "inputs",
+        type: { summary: "IconColor" },
+        defaultValue: { summary: '"brand"' },
+      },
+    },
     items: {
       description:
         "Array of rating items for icon variant. Each item has an icon name and optional label.",
@@ -134,6 +176,44 @@ export const StarVariant: Story = {
   }),
 };
 
+export const HalfStar: Story = {
+  render: () => ({
+    template: `
+      <div class="flex flex-column gap-4">
+        <div class="flex flex-column gap-2">
+          <p tedi-text>Empty</p>
+          <tedi-rating [precision]="0.5" ariaLabel="Half-star rating" />
+        </div>
+        <div class="flex flex-column gap-2">
+          <p tedi-text>2.5 / 5</p>
+          <tedi-rating [precision]="0.5" [value]="2.5" ariaLabel="Half-star rating" />
+        </div>
+        <div class="flex flex-column gap-2">
+          <p tedi-text>3.5 / 5</p>
+          <tedi-rating [precision]="0.5" [value]="3.5" ariaLabel="Half-star rating" />
+        </div>
+      </div>
+    `,
+  }),
+};
+
+export const CustomIcon: Story = {
+  render: () => ({
+    template: `
+      <div class="flex flex-column gap-4">
+        <div class="flex flex-column gap-2">
+          <p tedi-text>Hearts</p>
+          <tedi-rating icon="favorite" color="danger" [value]="3" ariaLabel="Heart rating" />
+        </div>
+        <div class="flex flex-column gap-2">
+          <p tedi-text>Thumbs up</p>
+          <tedi-rating icon="thumb_up" color="success" [value]="4" ariaLabel="Thumb rating" />
+        </div>
+      </div>
+    `,
+  }),
+};
+
 export const NumberVariant: Story = {
   render: () => ({
     template: `
@@ -185,11 +265,11 @@ export const IconVariant: Story = {
 export const WithFormControl: Story = {
   render: () => ({
     props: {
-      control: new FormControl<number | null>(2),
+      control: new FormControl<number | null>(2.5),
     },
     template: `
       <div class="flex flex-column gap-3">
-        <tedi-rating [formControl]="control" ariaLabel="Form control rating" />
+        <tedi-rating [formControl]="control" [precision]="0.5" ariaLabel="Form control rating" />
         <tedi-alert type="info" [showClose]="false">
           <pre tedi-text modifiers="small">{{ {
   value: control.value,
