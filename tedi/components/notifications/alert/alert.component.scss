@@ -111,6 +111,10 @@
 
     .tedi-alert__content {
       gap: var(--layout-grid-gutters-04);
+
+      .tedi-alert__content-icon {
+        line-height: var(--body-small-regular-line-height);
+      }
     }
   }
 
