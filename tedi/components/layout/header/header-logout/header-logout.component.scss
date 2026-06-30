@@ -11,8 +11,9 @@
     font-size: var(--body-regular-size);
 
     tedi-icon.tedi-icon {
+      --_tedi-icon-size: var(--icon-03);
+
       margin: 0;
-      font-size: var(--icon-03);
     }
   }
 
