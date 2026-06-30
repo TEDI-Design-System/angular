@@ -567,6 +567,26 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     }
   });
 
+  /**
+   * Make an external label clickable to behave like the built-in one: clicking the
+   * element referenced via `ariaLabelledby` opens the dropdown. Skipped
+   * when the built-in `label` is used.
+   */
+  bindExternalLabelClick = effect((onCleanup) => {
+    const id = this.ariaLabelledby();
+    if (this.label() || !id) return;
+
+    const labelEl = document.getElementById(id);
+    if (!labelEl) return;
+
+    const open = (event: Event) => {
+      event.stopPropagation();
+      this.onTriggerClick();
+    };
+    labelEl.addEventListener("click", open);
+    onCleanup(() => labelEl.removeEventListener("click", open));
+  });
+
   constructor() {
     /**
      * Workaround: Prevent CDK from resetting active item to the first selected

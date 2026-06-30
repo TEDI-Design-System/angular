@@ -2215,6 +2215,44 @@ describe("SelectComponent", () => {
       expect(getTrigger().getAttribute("aria-label")).toBe("Page size");
       expect(getTrigger().getAttribute("aria-labelledby")).toBeNull();
     });
+
+    it("should open the dropdown when clicking an external label referenced via ariaLabelledby", fakeAsync(() => {
+      const externalLabel = document.createElement("span");
+      externalLabel.id = "external-label-id";
+      document.body.appendChild(externalLabel);
+
+      host.label = "";
+      host.ariaLabelledby = "external-label-id";
+      fixture.detectChanges();
+      tick();
+
+      externalLabel.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.isOpen()).toBe(true);
+
+      select.toggleIsOpen(true);
+      tick();
+      document.body.removeChild(externalLabel);
+    }));
+
+    it("should not wire external label clicks when the built-in label is set", fakeAsync(() => {
+      const externalLabel = document.createElement("span");
+      externalLabel.id = "external-label-id";
+      document.body.appendChild(externalLabel);
+
+      host.ariaLabelledby = "external-label-id";
+      fixture.detectChanges();
+      tick();
+
+      externalLabel.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.isOpen()).toBe(false);
+      document.body.removeChild(externalLabel);
+    }));
   });
 
   describe("search focus and blur", () => {
