@@ -3,6 +3,20 @@
     max-width: 1200px;
   }
 
+  /* Theme-aware canvas/docs-preview surface. The docs preview block ships a
+     hardcoded white background (emotion class) and the backgrounds addon does
+     not paint the "default" option, so without this the canvas shows white in
+     dark theme. Specificity (0,2,0) beats the emotion rule without !important,
+     so a story's explicit background (addon, !important) still wins. */
+  .sb-show-main.sb-show-main,
+  .sbdocs-preview.sb-unstyled {
+    background-color: var(--general-surface-primary);
+  }
+
+  .docblock-argstable label {
+    color: inherit;
+  }
+
   body.sb-show-main,
   body.sb-show-main #storybook-root {
     height: auto !important;

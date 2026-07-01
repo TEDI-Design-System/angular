@@ -24,6 +24,10 @@ export type SeparatorSpacingValue =
   | 2.5
   | 5;
 export type SeparatorSpacing = {
+  /** Shorthand for `left` and `right`. Overridden by an explicit side. */
+  x?: SeparatorSpacingValue;
+  /** Shorthand for `top` and `bottom`. Overridden by an explicit side. */
+  y?: SeparatorSpacingValue;
   top?: SeparatorSpacingValue;
   bottom?: SeparatorSpacingValue;
   left?: SeparatorSpacingValue;
@@ -71,9 +75,11 @@ export class SeparatorComponent {
    */
   thickness = input<SeparatorThickness>(1);
   /**
-   * Spacing applied based on the axis:
-   * - For horizontal axis, spacing is applied to top and bottom of the separator.
-   * - For vertical axis, spacing is applied to left and right of the separator.
+   * Spacing applied as margins around the separator.
+   * - Horizontal axis supports y-spacing only: a number sets top and bottom; the object form's `y` (or `top`/`bottom`) set each side. `x`/`left`/`right` are ignored.
+   * - Vertical axis supports both x- and y-spacing: a number sets left and right; the object form accepts `x`/`y` shorthands or explicit `top`/`bottom`/`left`/`right`.
+   *
+   * In the object form, `x` is shorthand for `left`+`right` and `y` for `top`+`bottom`; an explicit side overrides the matching shorthand.
    */
   spacing = input<SeparatorSpacingValue | SeparatorSpacing>();
   /**
@@ -100,10 +106,10 @@ export class SeparatorComponent {
       classList.push(`tedi-separator--${this.variant()}-${this.dotSize()}`);
     }
 
-    if (this.variant() === "dot-only" && this.dotFilled()) {
-      classList.push(`tedi-separator--${this.variant()}-filled`);
-    } else {
-      classList.push(`tedi-separator--${this.variant()}-outlined`);
+    if (this.variant() === "dot-only") {
+      classList.push(
+        `tedi-separator--${this.variant()}-${this.dotFilled() ? "filled" : "outlined"}`,
+      );
     }
 
     if (this.thickness()) {
@@ -115,29 +121,26 @@ export class SeparatorComponent {
     if (spacing && typeof spacing === "number") {
       classList.push(`tedi-separator--spacing-${spacing}`.replace(".", "-"));
     } else if (spacing) {
-      if (this.axis() === "horizontal") {
-        if (spacing.top) {
-          classList.push(
-            `tedi-separator--top-${spacing.top}`.replace(".", "-"),
-          );
+      const top = spacing.top ?? spacing.y;
+      const bottom = spacing.bottom ?? spacing.y;
+      const left = spacing.left ?? spacing.x;
+      const right = spacing.right ?? spacing.x;
+
+      if (top) {
+        classList.push(`tedi-separator--top-${top}`.replace(".", "-"));
+      }
+
+      if (bottom) {
+        classList.push(`tedi-separator--bottom-${bottom}`.replace(".", "-"));
+      }
+
+      if (this.axis() === "vertical") {
+        if (left) {
+          classList.push(`tedi-separator--left-${left}`.replace(".", "-"));
         }
 
-        if (spacing.bottom) {
-          classList.push(
-            `tedi-separator--bottom-${spacing.bottom}`.replace(".", "-"),
-          );
-        }
-      } else {
-        if (spacing.left) {
-          classList.push(
-            `tedi-separator--left-${spacing.left}`.replace(".", "-"),
-          );
-        }
-
-        if (spacing.right) {
-          classList.push(
-            `tedi-separator--right-${spacing.right}`.replace(".", "-"),
-          );
+        if (right) {
+          classList.push(`tedi-separator--right-${right}`.replace(".", "-"));
         }
       }
     }

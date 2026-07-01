@@ -33,4 +33,25 @@
   tedi-icon {
     color: inherit;
   }
+
+  &--inverted {
+    color: var(--button-main-neutral-inverted-text-default);
+
+    &:hover {
+      color: var(--button-main-neutral-inverted-text-hover);
+      background: var(--button-main-neutral-inverted-icon-only-background-hover);
+    }
+
+    &:active {
+      color: var(--button-main-neutral-inverted-text-active);
+      background: var(--button-main-neutral-inverted-icon-only-background-active);
+    }
+
+    &:focus-visible {
+      color: var(--button-main-neutral-inverted-text-focus);
+      outline: none;
+      background-color: var(--button-main-neutral-inverted-background-focus);
+      box-shadow: 0 0 0 var(--tedi-borders-02) var(--tedi-neutral-100);
+    }
+  }
 }
