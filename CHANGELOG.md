@@ -1,3 +1,11 @@
+# [7.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0-rc.2...angular-7.0.0-rc.3) (2026-07-01)
+
+
+### Features
+
+* **alert:** Added small size [#502](https://github.com/TEDI-Design-System/angular/issues/502) ([#503](https://github.com/TEDI-Design-System/angular/issues/503)) ([c6bd5aa](https://github.com/TEDI-Design-System/angular/commit/c6bd5aa028dee0da175982d208bbc16c91cfbbc7))
+* **info-button:** added inverted variant [#236](https://github.com/TEDI-Design-System/angular/issues/236) ([#496](https://github.com/TEDI-Design-System/angular/issues/496)) ([0a67fa8](https://github.com/TEDI-Design-System/angular/commit/0a67fa87824be62e0726e3873c83843457194eff))
+
 # [7.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0-rc.1...angular-7.0.0-rc.2) (2026-06-30)
 
 
