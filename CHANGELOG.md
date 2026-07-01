@@ -1,3 +1,10 @@
+# [7.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0-rc.3...angular-7.0.0-rc.4) (2026-07-01)
+
+
+### Features
+
+* **accordion:** fix mobile examples, add new inputs and stories [#467](https://github.com/TEDI-Design-System/angular/issues/467) ([#483](https://github.com/TEDI-Design-System/angular/issues/483)) ([c45e3e7](https://github.com/TEDI-Design-System/angular/commit/c45e3e7bdee1dc244bf1b6d5a57458f516e7dc6a))
+
 # [7.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0-rc.2...angular-7.0.0-rc.3) (2026-07-01)
 
 
