@@ -10,6 +10,8 @@ import {
   Title,
 } from "@storybook/addon-docs/blocks";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../tedi/tokens/translation.token";
+import { TEDI_THEME_DEFAULT_TOKEN } from "../tedi/tokens/theme.token";
+import { THEME_FALLBACK_VALUE } from "../tedi/services/theme/theme.service";
 
 export const globalTypes = {
   theme: {
@@ -60,6 +62,7 @@ const preview: Preview = {
     applicationConfig({
       providers: [
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        { provide: TEDI_THEME_DEFAULT_TOKEN, useValue: THEME_FALLBACK_VALUE },
         // Replaces storybook-addon-angular-router (Storybook 8 only):
         // provides Router/ActivatedRoute for stories using routerLink.
         // Initial navigation must stay disabled — the router cannot match
@@ -124,6 +127,12 @@ const preview: Preview = {
           color: "#fff",
           description:
             "This component lacks some TEDI-Ready functionality, e.g it may rely on another component that has not yet been developed",
+        },
+        deprecated: {
+          background: "#b00020",
+          color: "#fff",
+          description:
+            "This component is deprecated and will be removed in a future release. Migrate to its replacement.",
         },
         mobileViewDifference: {
           background: "#99BDDA",

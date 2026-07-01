@@ -94,6 +94,14 @@
     margin-top: var(--form-field-outer-spacing);
   }
 
+  &__extra {
+    margin-top: var(--form-field-outer-spacing);
+
+    &:empty {
+      display: none;
+    }
+  }
+
   &__buttons {
     display: flex;
     gap: var(--layout-grid-gutters-04);

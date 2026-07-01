@@ -1,3 +1,57 @@
+# [7.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0-rc.1...angular-7.0.0-rc.2) (2026-06-30)
+
+
+### Features
+
+* **tabs:** new tedi-ready component [#14](https://github.com/TEDI-Design-System/angular/issues/14) ([#481](https://github.com/TEDI-Design-System/angular/issues/481)) ([5f37a32](https://github.com/TEDI-Design-System/angular/commit/5f37a32b73bf34e0b76ce4228aaec84d010bc6cf))
+
+# [7.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.19...angular-7.0.0-rc.1) (2026-06-30)
+
+
+### Bug Fixes
+
+* **icon:** size input now works inside buttons and links [#435](https://github.com/TEDI-Design-System/angular/issues/435) ([#497](https://github.com/TEDI-Design-System/angular/issues/497)) ([e2b6a70](https://github.com/TEDI-Design-System/angular/commit/e2b6a701cd928827d4ed68931cca4de2b9a03042))
+
+
+### BREAKING CHANGES
+
+* **icon:** button and link icon size changed, tedi-icon--size-* overrides no longer work
+
+# [6.5.0-rc.19](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.18...angular-6.5.0-rc.19) (2026-06-26)
+
+
+### Bug Fixes
+
+* **date-field,date-picker:** resolved conflict with formcontrol [#494](https://github.com/TEDI-Design-System/angular/issues/494) ([#501](https://github.com/TEDI-Design-System/angular/issues/501)) ([7721071](https://github.com/TEDI-Design-System/angular/commit/7721071204cbd0b7009720925e3be84046d451ad))
+
+# [6.5.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.17...angular-6.5.0-rc.18) (2026-06-26)
+
+
+### Features
+
+* **date-field,calendar:** calendar tedi-ready [#6](https://github.com/TEDI-Design-System/angular/issues/6) ([#443](https://github.com/TEDI-Design-System/angular/issues/443)) ([467271a](https://github.com/TEDI-Design-System/angular/commit/467271a16b943501115547695be45131f9256246))
+
+# [6.5.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.16...angular-6.5.0-rc.17) (2026-06-26)
+
+
+### Bug Fixes
+
+* **dropdown:** overridden browser-default padding on dropdown-content [#498](https://github.com/TEDI-Design-System/angular/issues/498) ([#499](https://github.com/TEDI-Design-System/angular/issues/499)) ([1219cde](https://github.com/TEDI-Design-System/angular/commit/1219cde830ecb55e978870994b46bfda24b0e051))
+
+# [6.5.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.15...angular-6.5.0-rc.16) (2026-06-25)
+
+
+### Features
+
+* **table:** added new features [#480](https://github.com/TEDI-Design-System/angular/issues/480) ([#485](https://github.com/TEDI-Design-System/angular/issues/485)) ([1ca8a2d](https://github.com/TEDI-Design-System/angular/commit/1ca8a2da9deb615ece8d89a1b09276177ef97c2c))
+
+# [6.5.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.14...angular-6.5.0-rc.15) (2026-06-25)
+
+
+### Features
+
+* **header:** update Header component against Figma [#312](https://github.com/TEDI-Design-System/angular/issues/312) ([#440](https://github.com/TEDI-Design-System/angular/issues/440)) ([81b1c18](https://github.com/TEDI-Design-System/angular/commit/81b1c1875dc1506d7135f63f0fcaf104957f54b5))
+
 # [6.5.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.13...angular-6.5.0-rc.14) (2026-06-19)
 
 

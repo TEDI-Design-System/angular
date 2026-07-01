@@ -109,42 +109,56 @@ export const translationsMap = {
   "header.role-switch": {
     description: "Label for role switch button",
     components: ["HeaderRole"],
-    et: "Vaheta rolli",
-    en: "Switch role",
-    ru: "Сменить роль",
+    et: "Roll",
+    en: "Role",
+    ru: "Роль",
   },
   "header.role-search": {
-    description: "Label for role search input",
+    description: "Label for Role search input",
     components: ["HeaderRole"],
-    et: "Otsi esindatavat",
+    et: "Otsi isikut",
     en: "Search representative",
     ru: "Найти представителя",
   },
-  "header.role-no-representatives": {
-    description: "Label for empty representatives search result",
+  "header.role-search.organization": {
+    description: "Label for Role search input when searching for organizations",
     components: ["HeaderRole"],
-    et: "Esindatavaid ei leitud!",
-    en: "No representatives found!",
-    ru: "Представители не найдены!",
+    et: "Otsi asutust",
+    en: "Search organization",
+    ru: "Найти организацию",
+  },
+  "header.role-no-representatives": {
+    description: "Text shown when representative search yields no results",
+    components: ["HeaderRole"],
+    et: "Esindatavaid ei leitud",
+    en: "No representatives found",
+    ru: "Представители не найдены",
   },
   "header.login": {
     description: "Label for login button",
     components: ["HeaderLogin"],
     et: "Sisene portaali",
     en: "Log in",
-    ru: "авторизоваться",
+    ru: "Зайти на портал",
   },
-  "header.login-mobile": {
+  "header.login.mobile": {
     description: "Label for login button in mobile view",
     components: ["HeaderLogin"],
     et: "Sisene",
     en: "Log in",
-    ru: "авторизоваться",
+    ru: "Войти",
   },
   "header.logout": {
     description: "Label for logout button",
     components: ["HeaderLogout"],
     et: "Logi välja",
+    en: "Log out",
+    ru: "Выйти",
+  },
+  "header.logout.mobile": {
+    description: "Label for logout button (small)",
+    components: ["HeaderLogout"],
+    et: "Välju",
     en: "Log out",
     ru: "Выйти",
   },
@@ -158,9 +172,23 @@ export const translationsMap = {
   "header.profile": {
     description: "Label for profile button",
     components: ["HeaderProfile"],
+    et: "Minu profiil",
+    en: "My profile",
+    ru: "Мой профиль",
+  },
+  "header.profile.mobile": {
+    description: "Label for profile button on mobile",
+    components: ["HeaderProfile"],
     et: "Profiil",
     en: "Profile",
     ru: "Профиль",
+  },
+  "header.search": {
+    description: "Label for search button",
+    components: ["HeaderSearch"],
+    et: "Otsing",
+    en: "Search",
+    ru: "Поиск",
   },
   "file-upload.add": {
     description: "Label for add file button",
@@ -794,9 +822,12 @@ export const translationsMap = {
   "sidenav.toggleSubmenu": {
     description: "Label for sidenav submenu toggle",
     components: ["Sidenav"],
-    et: (value: string, isOpen: boolean) => (`${isOpen ? 'Sulge' : 'Ava'} ${value} alammenüü`),
-    en: (value: string, isOpen: boolean) => (`${isOpen ? 'Close' : 'Open'} ${value} submenu`),
-    ru: (value: string, isOpen: boolean) => (`${isOpen ? 'Закрыть' : 'Открыть'} ${value} подменю`),
+    et: (value: string, isOpen: boolean) =>
+      `${isOpen ? "Sulge" : "Ava"} ${value} alammenüü`,
+    en: (value: string, isOpen: boolean) =>
+      `${isOpen ? "Close" : "Open"} ${value} submenu`,
+    ru: (value: string, isOpen: boolean) =>
+      `${isOpen ? "Закрыть" : "Открыть"} ${value} подменю`,
   },
   "buttonGroup.menu": {
     description: "Fallback label for ButtonGroup mobile dropdown trigger",
@@ -1109,12 +1140,58 @@ export const translationsMap = {
     en: "Sun",
     ru: "Вс",
   },
+  "date-picker.today": {
+    description:
+      "Prefix announced by assistive tech before the date when a day cell represents today (e.g., \"Today, Friday, 16 May 2026\").",
+    components: ["DatePicker"],
+    et: "Täna",
+    en: "Today",
+    ru: "Сегодня",
+  },
   "date-picker.go-next-month": {
     description: "Label for next month navigation",
     components: ["DatePicker"],
     et: "Järgmine kuu",
     en: "Next month",
     ru: "Следующий месяц",
+  },
+  "date-picker.calendar-nav": {
+    description:
+      "ARIA label for the calendar navigation toolbar (prev/next + month/year selectors).",
+    components: ["DatePicker"],
+    et: "Kalendri navigeerimine",
+    en: "Calendar navigation",
+    ru: "Навигация по календарю",
+  },
+  "date-picker.choose-month": {
+    description: "ARIA label for the month-picker grid.",
+    components: ["DatePicker"],
+    et: "Vali kuu",
+    en: "Choose month",
+    ru: "Выберите месяц",
+  },
+  "date-picker.choose-year": {
+    description: "ARIA label for the year-picker grid.",
+    components: ["DatePicker"],
+    et: "Vali aasta",
+    en: "Choose year",
+    ru: "Выберите год",
+  },
+  "date-picker.week-number": {
+    description:
+      "ARIA label announced for the ISO week-number cell at the start of each row.",
+    components: ["DatePicker"],
+    et: (n: number) => `Nädal ${n}`,
+    en: (n: number) => `Week ${n}`,
+    ru: (n: number) => `Неделя ${n}`,
+  },
+  "date-picker.week-number-header": {
+    description:
+      "ARIA label announced for the week-number column header (e.g., \"Week\").",
+    components: ["DatePicker"],
+    et: "Nädal",
+    en: "Week",
+    ru: "Неделя",
   },
   "date-picker.go-prev-month": {
     description: "Label for previous month navigation",
@@ -1165,6 +1242,45 @@ export const translationsMap = {
     et: "Järgmised aastad",
     en: "Next years",
     ru: "Следующие годы",
+  },
+  "date-field.remove-chip": {
+    description:
+      "Label for the remove button on a selected-date chip inside the date field.",
+    components: ["DateField"],
+    et: (label: string) => `Eemalda ${label}`,
+    en: (label: string) => `Remove ${label}`,
+    ru: (label: string) => `Удалить ${label}`,
+  },
+  "date-field.calendar-dialog": {
+    description:
+      "ARIA label for the calendar popover dialog opened from the date field.",
+    components: ["DateField"],
+    et: "Vali kuupäev",
+    en: "Choose date",
+    ru: "Выберите дату",
+  },
+  "date-field.modal-title": {
+    description: "Title shown in the mobile date picker modal header.",
+    components: ["DateField"],
+    et: "Kuupäev",
+    en: "Date",
+    ru: "Дата",
+  },
+  "date-field.confirm": {
+    description:
+      "Label for the confirm button in the mobile date picker modal.",
+    components: ["DateField"],
+    et: "Kinnita",
+    en: "Confirm",
+    ru: "Подтвердить",
+  },
+  "date-field.cancel": {
+    description:
+      "Label for the cancel button in the mobile date picker modal.",
+    components: ["DateField"],
+    et: "Tühista",
+    en: "Cancel",
+    ru: "Отмена",
   },
   "time-picker.hours": {
     description: "Aria label for the hours listbox in the time picker.",

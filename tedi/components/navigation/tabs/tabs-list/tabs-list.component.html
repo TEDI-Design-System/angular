@@ -1,0 +1,38 @@
+<div
+  #list
+  role="tablist"
+  data-name="tabs-list"
+  class="tedi-tabs-list__items"
+  [class.tedi-tabs-list__items--overflow]="showMore()"
+  [class.tedi-tabs-list__items--scroll]="overflowMode() === 'scroll'"
+  [attr.aria-label]="ariaLabel()"
+  [attr.aria-labelledby]="ariaLabelledby()"
+  (scroll)="updateScrollFade()"
+>
+  <ng-content />
+</div>
+
+@if (showMore()) {
+  <div class="tedi-tabs-list__more">
+    <tedi-dropdown position="bottom-end">
+      <button type="button" tedi-dropdown-trigger class="tedi-tabs-list__more-btn">
+        {{ dropdownLabel() || ("more" | tediTranslate) }}
+        <tedi-icon name="expand_more" [size]="18" color="inherit" />
+      </button>
+      <tedi-dropdown-content dropdownRole="menu">
+        @for (item of dropdownItems(); track item.id) {
+          <li
+            tedi-dropdown-item
+            [value]="item.id"
+            [disabled]="item.disabled"
+            [clipContent]="false"
+            [attr.aria-label]="item.trigger.label"
+            (itemSelect)="selectTab(item.id)"
+          >
+            <span [tediTabsOverflowContent]="item.trigger"></span>
+          </li>
+        }
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  </div>
+}

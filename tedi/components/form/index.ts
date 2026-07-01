@@ -6,6 +6,7 @@ export * from "./radio/radio.component";
 export * from "./radio-card/radio-card.component";
 export * from "./radio-group/radio-group.component";
 export * from "./radio-card-group/radio-card-group.component";
+export * from "./date-field";
 export * from "./date-picker/date-picker.component";
 export * from "./feedback-text/feedback-text.component";
 export * from "./label/label.component";

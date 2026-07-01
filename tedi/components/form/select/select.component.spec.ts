@@ -32,6 +32,7 @@ import { InputState } from "../form-field/form-field.component";
       [required]="required"
       [isTagRemovable]="clearableTags"
       [multiRow]="multiRow"
+      [tagEllipsis]="tagEllipsis"
       [dropdownWidthRef]="dropdownWidthRef"
       [dropdownAlign]="dropdownAlign"
       [maxDropdownHeight]="maxDropdownHeight"
@@ -76,6 +77,7 @@ class TestHostComponent {
   required = false;
   clearableTags = false;
   multiRow = false;
+  tagEllipsis: "start" | "end" | false = false;
   dropdownWidthRef: any = undefined;
   dropdownAlign: "start" | "end" = "start";
   maxDropdownHeight: number | undefined = undefined;
@@ -416,6 +418,24 @@ describe("SelectComponent", () => {
 
       const tags = getTags();
       expect(tags.length).toBe(2);
+    }));
+
+    it("forwards tagEllipsis to the rendered tags", fakeAsync(() => {
+      host.control.setValue(["Option 1", "Option 2"]);
+      fixture.detectChanges();
+      tick();
+      expect(
+        getTags().every((t) => !t.classList.contains("tedi-tag--ellipsis")),
+      ).toBe(true);
+
+      host.tagEllipsis = "end";
+      fixture.detectChanges();
+      tick();
+      const tags = getTags();
+      expect(tags.length).toBeGreaterThan(0);
+      expect(tags.every((t) => t.classList.contains("tedi-tag--ellipsis"))).toBe(
+        true,
+      );
     }));
 
     it("should deselect via tag close button when clearableTags=true", fakeAsync(() => {

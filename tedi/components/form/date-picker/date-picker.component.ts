@@ -82,8 +82,8 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
   readonly uniqueId = `tedi-date-picker-id-${datePickerId++}`;
 
   private formDisabled = signal(false);
-  private onChange: (value: Date | null) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: Date | null) => void = () => { };
+  private onTouched: () => void = () => { };
 
   private emitIfChanged(value: Date | null): void {
     const current = this.selected();
@@ -102,10 +102,25 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
   /** Currently shown month */
   readonly month = model(this.today);
 
-  /** Disabled dates that cannot be selected. */
+  /**
+   * Disabled dates that cannot be selected.
+   *
+   * @deprecated Use `disabledMatchers` instead. This input shares the public
+   * binding name `disabled` with `FormControlDirective`, so binding `[disabled]`
+   * on a date-picker that also uses `[formControl]` raises a template type error
+   * (`Type 'DatePickerMatcher[]' is not assignable to type 'boolean'`).
+   */
   readonly disabled = input<DatePickerMatcher | DatePickerMatcher[] | null>(
     null,
   );
+
+  /**
+   * Disabled dates that cannot be selected (`Date`, `Date[]`, `{ before }`,
+   * `{ after }`, `{ from, to? }`, or a `(date) => boolean` predicate).
+   */
+  readonly disabledMatchers = input<
+    DatePickerMatcher | DatePickerMatcher[] | null
+  >(null);
 
   /** Shows or hides the calendar navigation controls (previous/next month buttons). */
   readonly showNavigation = input(true);
@@ -397,10 +412,12 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
   }
 
   isDisabled(date: Date): boolean {
-    const rules = this.disabled();
-    if (!rules) return false;
-
-    const matchers = Array.isArray(rules) ? rules : [rules];
+    const matchers = [this.disabled(), this.disabledMatchers()]
+      .filter((rule): rule is DatePickerMatcher | DatePickerMatcher[] =>
+        Array.isArray(rule) ? rule.length > 0 : rule !== null,
+      )
+      .flatMap((rule) => (Array.isArray(rule) ? rule : [rule]));
+    if (matchers.length === 0) return false;
     return matchers.some((m) => this.matches(m, date));
   }
 

@@ -38,6 +38,10 @@ import { FocusableOption } from "@angular/cdk/a11y";
     },
   ],
 })
+/**
+ * @deprecated Use the TEDI-Ready `button[tedi-tabs-trigger]` from
+ * `@tedi-design-system/angular` instead.
+ */
 export class TabComponent implements FocusableOption {
   private element = inject(ElementRef);
 

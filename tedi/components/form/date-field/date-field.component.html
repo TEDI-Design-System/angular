@@ -1,0 +1,79 @@
+<tedi-date-input
+  #dateInput
+  cdkOverlayOrigin
+  #overlayOrigin="cdkOverlayOrigin"
+  [inputId]="inputId()"
+  [value]="displayValue()"
+  [tags]="tagsForMultipleMode()"
+  [mode]="mode()"
+  [multiRow]="multiRow()"
+  [ellipsis]="tagEllipsis()"
+  [removable]="isTagRemovable()"
+  [placeholder]="effectivePlaceholder()"
+  [disabled]="fieldDisabled()"
+  [readOnly]="readOnly() || inputIsTrigger()"
+  [required]="required()"
+  [iconActive]="overlayOpen()"
+  [iconDisabled]="!enableCalendarResolved()"
+  [useNativePicker]="useNativePickerEffective()"
+  [nativeIsoValue]="nativeIsoValue()"
+  [clearable]="canClear()"
+  (click)="handleInputClick($event)"
+  (inputChange)="handleInputChange($event)"
+  (iconClick)="handleIconClick()"
+  (tagRemove)="handleTagRemove($event)"
+  (clear)="handleClear()"
+/>
+@if (usePopover()) {
+  <ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="overlayOrigin"
+    [cdkConnectedOverlayOpen]="overlayOpen()"
+    [cdkConnectedOverlayPositions]="overlayPositions()"
+    [cdkConnectedOverlayHasBackdrop]="false"
+    (attach)="handleOverlayAttached()"
+    (overlayOutsideClick)="handleOverlayOutsideClick($event)"
+    (detach)="closeOverlay()"
+  >
+    <div
+      class="tedi-date-field__overlay"
+      role="dialog"
+      [attr.aria-label]="'date-field.calendar-dialog' | tediTranslate"
+      cdkTrapFocus
+      (keydown)="handleOverlayKeydown($event)"
+    >
+      <tedi-calendar
+        #calendar
+        [bordered]="false"
+        [value]="value()"
+        [currentMonth]="currentMonth()"
+        [mode]="mode()"
+        [selectionLevel]="selectionLevel()"
+        [localeCode]="localeCode()"
+        [showOutsideDays]="showOutsideDays()"
+        [showWeekNumbers]="showWeekNumbers()"
+        [numberOfMonths]="numberOfMonthsResolved()"
+        [monthYearSelectType]="monthYearSelectType()"
+        [required]="required()"
+        [disabledMatchers]="resolvedDisabledMatchers()"
+        [availableDays]="availableDays()"
+        [unavailableDays]="unavailableDays()"
+        [shouldDisableMonth]="shouldDisableMonth()"
+        [shouldDisableYear]="shouldDisableYear()"
+        [inputDisabled]="fieldDisabled()"
+        (currentMonthChange)="handleCurrentMonthChange($event)"
+        (select)="handleCalendarSelect()"
+      >
+        <!--
+          Footer projection forwards into the overlay-mounted calendar.
+          Modal mode (modal-below-breakpoint) does NOT receive projected
+          footers — the modal opens via ModalService.open() with a data
+          hash, which has no projection mechanism. If footer-in-modal is
+          ever required, refactor to pass a TemplateRef through the modal's
+          data injection.
+        -->
+        <ng-content select="[tediCalendarFooter]" />
+      </tedi-calendar>
+    </div>
+  </ng-template>
+}

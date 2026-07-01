@@ -56,6 +56,7 @@ export default {
         "h6",
         "normal",
         "small",
+        "extra-small",
         "bold",
         "thin",
         "italic",
@@ -81,7 +82,7 @@ export default {
         type: {
           summary: "TextModifiers[] | TextModifiers",
           detail:
-            "h1 \nh2 \nh3 \nh4 \nh5 \nh6 \nnormal \nsmall \nbold \nthin \nitalic \ncenter \nleft \nright \nnowrap \nbreak-all \nbreak-word \nbreak-spaces \nuppercase \nlowercase \ncapitalize \ncapitalize-first \ninline-block \ninline \nline-normal \nline-condensed \nsubtitle",
+            "h1 \nh2 \nh3 \nh4 \nh5 \nh6 \nnormal \nsmall \nextra-small \nbold \nthin \nitalic \ncenter \nleft \nright \nnowrap \nbreak-all \nbreak-word \nbreak-spaces \nuppercase \nlowercase \ncapitalize \ncapitalize-first \ninline-block \ninline \nline-normal \nline-condensed \nsubtitle",
         },
       },
     },
@@ -102,13 +103,14 @@ export default {
         "danger",
         "info",
         "neutral",
+        "inherit",
       ],
       table: {
         category: "inputs",
         type: {
           summary: "TextColor",
           detail:
-            "primary \nsecondary \ntertiary \nwhite \ndisabled \nbrand \nsuccess \nwarning \ndanger \ninfo \nneutral",
+            "primary \nsecondary \ntertiary \nwhite \ndisabled \nbrand \nsuccess \nwarning \ndanger \ninfo \nneutral \ninherit",
         },
         defaultValue: { summary: "primary" },
       },
@@ -213,6 +215,16 @@ export const Body: StoryObj<TextComponent> = {
           </small>
           <small tedi-text modifiers="italic">Small italic</small>
         </tedi-row>
+        <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
+          <small>Extra small</small>
+          <span tedi-text modifiers="extra-small">Extra small</span>
+        </tedi-row>
+        <tedi-row [cols]="2" [class]="'padding-14-16'">
+          <small>
+            <b>Extra small bold</b>
+          </small>
+          <span tedi-text [modifiers]="['extra-small', 'bold']">Extra small bold</span>
+        </tedi-row>
       </div>
     `,
   }),
@@ -237,6 +249,25 @@ export const GeneralTextColors: StoryObj<TextComponent> = {
         </p>
         <p tedi-text class="bg bg-primary" color="white">
           Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid.
+        </p>
+      </div>
+    `,
+  }),
+};
+
+export const InheritedTextColor: StoryObj<TextComponent> = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <div [tediVerticalSpacing]="1">
+        <p tedi-text color="brand">
+          This paragraph is brand-colored. <span tedi-text color="inherit" modifiers="bold">This bold span inherits the brand color from its parent.</span>
+        </p>
+        <p tedi-text color="danger">
+          This paragraph is danger-colored. <span tedi-text color="inherit" modifiers="italic">This italic span inherits the danger color from its parent.</span>
+        </p>
+        <p tedi-text class="bg bg-primary" color="white">
+          This paragraph sits on a primary background and uses white text. <span tedi-text color="inherit" modifiers="bold">This bold span inherits the white color from its parent.</span>
         </p>
       </div>
     `,

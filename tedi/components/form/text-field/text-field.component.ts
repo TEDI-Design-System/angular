@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   model,
   ViewEncapsulation,
@@ -39,14 +40,12 @@ import {
     class: "tedi-text-field",
     "[class.tedi-text-field--arrows-hidden]": "arrowsHidden()",
     "[attr.aria-invalid]": "invalid() || null",
-    "[value]": "value()",
     "(input)": "handleInputChange($event)",
     "(blur)": "handleBlur()",
   },
 })
 export class TextFieldComponent
-  implements ControlValueAccessor, FormFieldControl
-{
+  implements ControlValueAccessor, FormFieldControl {
   private el = inject<ElementRef<HTMLInputElement>>(ElementRef);
 
   /**
@@ -72,11 +71,19 @@ export class TextFieldComponent
   }
 
   private formDisabled = signal(false);
-  private onChange: (value: string) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: string) => void = () => { };
+  private onTouched: () => void = () => { };
+
+  constructor() {
+    effect(() => {
+      const value = this.value();
+      if (this.el.nativeElement.value !== value) {
+        this.el.nativeElement.value = value;
+      }
+    });
+  }
 
   private setValue(value: string) {
-    this.el.nativeElement.value = value;
     this.value.set(value);
   }
 

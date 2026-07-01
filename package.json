@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@tanstack/angular-table": "^8.21.4",
-    "@tedi-design-system/core": "^6.2.1"
+    "@tedi-design-system/core": "^6.4.1"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "20.3.27",

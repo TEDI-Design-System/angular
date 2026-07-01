@@ -1,0 +1,208 @@
+<nav
+  class="tedi-calendar-header"
+  [class.tedi-calendar-header--disabled]="inputDisabled()"
+  [attr.aria-label]="navAriaLabel()"
+>
+  @if (showNavigation()) {
+    <button
+      tedi-button
+      type="button"
+      variant="neutral"
+      size="small"
+      class="tedi-calendar-header__nav-button"
+      [attr.aria-label]="prevAriaLabel()"
+      [disabled]="prevDisabled()"
+      (click)="handlePrev()"
+    >
+      <tedi-icon name="arrow_back" [size]="18" />
+    </button>
+  }
+
+  <div class="tedi-calendar-header__title">
+    @switch (view()) {
+      @case ("days") {
+        @if (monthYearSelectType() === "dropdown") {
+          <tedi-dropdown
+            [value]="currentMonthIndex().toString()"
+            (valueChange)="handleMonthSelect($event)"
+          >
+            <button
+              tedi-dropdown-trigger
+              type="button"
+              ariaHaspopup="listbox"
+              class="tedi-calendar-header__select"
+              [attr.aria-label]="selectMonthLabel()"
+              [disabled]="inputDisabled()"
+            >
+              {{ currentMonthLabel() }}
+              <tedi-icon
+                name="arrow_drop_down"
+                class="tedi-calendar-header__select-arrow"
+                color="inherit"
+                size="inherit"
+              />
+            </button>
+            <tedi-dropdown-content
+              dropdownRole="listbox"
+              class="tedi-calendar-header__dropdown tedi-calendar-header__dropdown--month"
+            >
+              @for (option of monthOptions(); track option.index) {
+                <li
+                  tedi-dropdown-item
+                  [value]="option.index.toString()"
+                  [disabled]="option.disabled"
+                >
+                  {{ option.label }}
+                </li>
+              }
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        } @else if (monthYearSelectType() === "grid") {
+          <button
+            type="button"
+            class="tedi-calendar-header__label-button"
+            [attr.aria-label]="selectMonthLabel()"
+            [disabled]="inputDisabled()"
+            (click)="handleMonthLabelClick()"
+          >
+            {{ currentMonthLabel() }}
+          </button>
+        } @else {
+          <span class="tedi-calendar-header__static-label">
+            {{ currentMonthLabel() }}
+          </span>
+        }
+
+        @if (monthYearSelectType() === "dropdown") {
+          <tedi-dropdown
+            position="bottom-end"
+            [value]="currentYear().toString()"
+            (valueChange)="handleYearSelect($event)"
+          >
+            <button
+              tedi-dropdown-trigger
+              type="button"
+              ariaHaspopup="listbox"
+              class="tedi-calendar-header__select"
+              [attr.aria-label]="selectYearLabel()"
+              [disabled]="inputDisabled()"
+            >
+              {{ currentYear() }}
+              <tedi-icon
+                name="arrow_drop_down"
+                class="tedi-calendar-header__select-arrow"
+                color="inherit"
+                size="inherit"
+              />
+            </button>
+            <tedi-dropdown-content
+              dropdownRole="listbox"
+              class="tedi-calendar-header__dropdown tedi-calendar-header__dropdown--year"
+            >
+              @for (option of yearOptions(); track option.year) {
+                <li
+                  tedi-dropdown-item
+                  [value]="option.year.toString()"
+                  [disabled]="option.disabled"
+                >
+                  {{ option.year }}
+                </li>
+              }
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        } @else if (monthYearSelectType() === "grid") {
+          <button
+            type="button"
+            class="tedi-calendar-header__label-button"
+            [attr.aria-label]="selectYearLabel()"
+            [disabled]="inputDisabled()"
+            (click)="handleYearLabelClick()"
+          >
+            {{ currentYear() }}
+          </button>
+        } @else {
+          <span class="tedi-calendar-header__static-label">
+            {{ currentYear() }}
+          </span>
+        }
+      }
+      @case ("months") {
+        @if (monthYearSelectType() === "dropdown") {
+          <tedi-dropdown
+            [value]="currentYear().toString()"
+            (valueChange)="handleYearSelect($event)"
+          >
+            <button
+              tedi-dropdown-trigger
+              type="button"
+              ariaHaspopup="listbox"
+              class="tedi-calendar-header__select"
+              [attr.aria-label]="selectYearLabel()"
+              [disabled]="inputDisabled()"
+            >
+              {{ currentYear() }}
+              <tedi-icon
+                name="arrow_drop_down"
+                class="tedi-calendar-header__select-arrow"
+                color="inherit"
+                size="inherit"
+              />
+            </button>
+            <tedi-dropdown-content
+              dropdownRole="listbox"
+              class="tedi-calendar-header__dropdown tedi-calendar-header__dropdown--year"
+            >
+              @for (option of yearOptions(); track option.year) {
+                <li
+                  tedi-dropdown-item
+                  [value]="option.year.toString()"
+                  [disabled]="option.disabled"
+                >
+                  {{ option.year }}
+                </li>
+              }
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        } @else if (monthYearSelectType() === "grid") {
+          <button
+            type="button"
+            class="tedi-calendar-header__label-button"
+            [attr.aria-label]="selectYearLabel()"
+            [disabled]="inputDisabled()"
+            (click)="handleYearLabelClick()"
+          >
+            {{ currentYear() }}
+          </button>
+        } @else {
+          <span class="tedi-calendar-header__static-label">
+            {{ currentYear() }}
+          </span>
+        }
+      }
+      @case ("years") {
+        <span class="tedi-calendar-header__static-label">
+          {{ yearRangeLabel() }}
+        </span>
+      }
+    }
+  </div>
+
+  @if (showNavigation()) {
+    <button
+      tedi-button
+      type="button"
+      variant="neutral"
+      size="small"
+      class="tedi-calendar-header__nav-button"
+      [attr.aria-label]="nextAriaLabel()"
+      [disabled]="nextDisabled()"
+      (click)="handleNext()"
+    >
+      <tedi-icon name="arrow_forward" [size]="18" />
+    </button>
+  }
+
+  <span class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+    {{ captionAnnouncement() }}
+  </span>
+</nav>

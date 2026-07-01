@@ -17,7 +17,7 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 **Selector:** `tedi-icon`
 **Inputs:**
 - `name: string` — Material Icon name (required)
-- `size: IconSize = 24` — 8, 12, 16, 18, 24, 36, 48, or "inherit"
+- `size: IconSize` — 8, 12, 16, 18, 22, 24, 36, 48, or "inherit". When unset, the icon inherits a contextual default from its host (`tedi-button`/`tedi-link` → 18, small `tedi-link` → 16), falling back to 24 standalone. An explicit value always overrides the context.
 - `color: IconColor = "primary"`
 - `background: IconBackgroundColor` — circular background color
 - `variant: IconVariant = "outlined"` — "filled" or "outlined"
@@ -236,6 +236,50 @@ For non-clickable headers with custom actions (the toggle stays visible at the s
 
 ## Content
 
+### Calendar
+**Selector:** `tedi-calendar` | ControlValueAccessor
+
+The standalone date-selection surface used inside DateField, and embeddable directly. Supports `single`, `multiple` and `range` selection modes, three commit levels (`days`, `months`, `years`), available/unavailable day predicates, ISO week numbers, multi-month layouts, dropdown vs. grid month/year selection, custom locales, and a footer projection slot (`tediCalendarFooter`).
+
+**Models (two-way):**
+- `value: Date | Date[] | DateRange | null` — shape follows `mode` (`single` → `Date`, `multiple` → `Date[]`, `range` → `{ from, to }`)
+- `currentMonth: Date` — the first (left-most) month shown
+- `view: CalendarView = "days"` — active view: `"days"`, `"months"`, or `"years"`
+
+**Outputs:**
+- `select: { date: CalendarValue; day: Date }` — emitted on commit; `date` is the new full value, `day` is the clicked day/month/year
+
+**Inputs:**
+- `mode: DateFieldMode = "single"` — `"single"`, `"multiple"`, or `"range"`
+- `selectionLevel: CalendarView = "days"` — lowest level the user can commit to: `"days"`, `"months"`, or `"years"`
+- `monthYearSelectType: "dropdown" | "grid" | "static" = "dropdown"` — header month/year picker. `dropdown` (two dropdowns), `grid` (drill into month/year grid), `static` (label only — prev/next chevrons change the month)
+- `localeCode: string = "et-EE"` — BCP-47 locale for weekday/month names and the first day of the week
+- `showOutsideDays: boolean = true` — render trailing/leading days from adjacent months
+- `showWeekNumbers: boolean = false` — render the ISO week-number column
+- `showNavigation: boolean = true` — show the previous/next chevrons
+- `bordered: boolean = true` — render the calendar's own border and rounded corners. Disable when embedding in a surface that already has a border
+- `numberOfMonths: number = 1` — consecutive months rendered side by side (capped to what fits the viewport)
+- `required: boolean = false` — in `mode='multiple'`, prevents clearing the last selected date
+- `inputDisabled: boolean = false` — disables all interactions (combines with the reactive-forms disabled state)
+- `disabledMatchers: Matcher[] = []` — disabled-date matchers (`Date`, `Date[]`, `{ before }`, `{ after }`, `{ before, after }`, `{ from, to? }`, `{ dayOfWeek: number[] }`, or `(date) => boolean`)
+- `availableDays: Date[] | ((date: Date) => boolean) | undefined` — whitelist of selectable days; every other day is disabled
+- `unavailableDays: Date[] | ((date: Date) => boolean) | undefined` — blacklist; takes precedence over `availableDays`
+- `dayStatus: ((date: Date) => DayStatus | null | undefined) | undefined` — overlays a `tedi-status-indicator` dot on days; the returned `label` is surfaced on the day's `aria-label`
+- `shouldDisableMonth: ((month: Date) => boolean) | undefined` — disable a whole month
+- `shouldDisableYear: ((year: Date) => boolean) | undefined` — disable a whole year
+- `minYear: number | null = null` — earliest year offered (defaults to 10 years before the current year)
+- `maxYear: number | null = null` — latest year offered (defaults to 10 years after the current year)
+
+```html
+<!-- Embedded range picker, two months -->
+<tedi-calendar mode="range" [formControl]="rangeControl" [numberOfMonths]="2" />
+
+<!-- With a projected footer legend -->
+<tedi-calendar [availableDays]="availableDays">
+  <div tediCalendarFooter>Legend…</div>
+</tedi-calendar>
+```
+
 ### Card
 **Selector:** `tedi-card`
 **Inputs:**
@@ -397,7 +441,7 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `maxHeight: number | string` — wraps the table in a scrollable container (pair with `stickyHeader`)
 - `activeRowId: string` — highlights one row
 - `rowHover: boolean` — force hover styling on/off (default tracks `interactive`)
-- `interactive: boolean = false` — adds `role="button"`, hover/active styles, and keyboard activation to rows; subscribe to `(rowClick)`
+- `interactive: boolean = false` — adds `role="button"`, hover/active styles, and keyboard activation to rows; subscribe to `(rowClick)`. Clicks landing on interactive controls inside a cell (links, buttons, checkboxes, form fields) are ignored by row activation/expansion — no manual `stopPropagation` needed.
 - `rowAriaLabel: (row: Row<TData>) => string` — explicit accessible name per interactive row (without it, a `role="button"` row's name is built from all its cell text). Only applied when `interactive` is true
 - `enableRowSelection: boolean | ((row) => boolean)` — opt-in selection; auto-renders a selection column
 - `selectionMode: "multiple" | "single" = "multiple"` — `multiple` shows checkboxes + select-all; `single` shows radios (no select-all)
@@ -408,6 +452,9 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `expandButtonVariant: "default" | "secondary"` — override the expand toggle's arrow style. Defaults to the bordered `secondary` style; set `default` for the neutral (borderless) chevron. Only affects the icon-only button (i.e. when `expandButtonLabel` is unset).
 - `expandButtonLabel: string | { open: string; close: string }` — render a visible label next to the chevron instead of an icon-only button. A single string is used for both states; the `{ open, close }` form sets distinct collapsed (`open`) / expanded (`close`) labels. When unset the button stays icon-only with the translated expand/collapse aria-label.
 - `getSubRows: (row) => TData[] | undefined` — hierarchical / tree rows
+- `groupRowsBy: (row: Row<TData>) => unknown` — table-level row grouping. Consecutive rendered rows with an equal key form a group; the control columns (select / expand / drag) span each group (one checkbox + one chevron per group), row selection works per group (the group's single checkbox toggles all its rows and goes indeterminate when partial), and group boundaries drive `rowGroupDividers`. Data columns opt into spanning the same groups with `groupBy: true`.
+- `rowGroupDividers: "all" | "between" | "none" = "all"` — when grouped, controls row dividers: `"between"` draws them only at group boundaries (rows within a group read as one block); `"none"` removes them. No effect without `groupRowsBy`.
+- `controlColumnOrder: ("drag" | "select" | "expand")[] = ["drag", "select", "expand"]` — order of the auto-injected control columns. Only enabled controls render; any enabled control omitted from the list is appended. Use it to place the selection checkbox before the expand chevron, etc.
 - `enableColumnFilters: boolean = false` — force TanStack's filter machinery (auto-on when any column sets `filterable`)
 - `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`). `pageSizeOptions` accepts plain numbers or `{ value, label }` objects — use the object form for a **"Show all"** entry whose `value` is large enough to hold every row: pass the row total when you know it (`data.length`), or `Number.MAX_SAFE_INTEGER` when you don't. Filtering only shrinks the row count, so a large page size always collapses the result to a single page. (Don't use `-1` — TanStack clamps `setPageSize` to `≥ 1`.)
 - `paginationTop: boolean | TablePaginationOptions` — opt-in top paginator; shares page / page-size state with bottom but has independent visual config (its own arrow + `hide*` settings). Requires `pagination` to be truthy.
@@ -447,7 +494,8 @@ Render expandable rows open on first load (still user-collapsible):
 - `sortable: boolean` — opt the column into the built-in sort affordance (string `header` only). Pair with `sortingFn` to override the comparator. For custom UIs, pass a `TemplateRef` for `header` and call `column.toggleSorting()` yourself.
 - `filterable: boolean | { clearOnClose?: boolean }` — opt into the built-in filter popover (icon `filter_alt`). Requires `filterTemplate`.
 - `filterTemplate: TemplateRef<TediTableFilterContext>` — UI rendered inside the filter popover. The context exposes `value`, `setValue`, `apply()`, `clear()`, and `column`. Apply/Clear footer buttons are wired automatically.
-- `rowSpan: number | ((info: CellContext) => number)` — body-level row spanning. Return `>1` to emit `rowspan="N"`; return `0` to skip the `<td>`.
+- `rowSpan: number | ((info: CellContext) => number)` — body-level row spanning. Return `>1` to emit `rowspan="N"`; return `0` to skip the `<td>`. Prefer `groupBy` for key-based grouping; reach for `rowSpan` only for fully custom span logic.
+- `groupBy: boolean | ((row: Row<TData>) => unknown)` — merge consecutive rendered rows with an equal key into one spanning cell, computed internally against the live (post-filter/sort/paginate) row model — no manual `groupRowSpan` wiring. A function groups this column by its own key; `true` reuses the table-level `groupRowsBy`. Takes precedence over `rowSpan`.
 - `size` / `minSize` / `maxSize` (TanStack) — rendered as `width` / `min-width` / `max-width` (px) on the column's cells, applied only when set. **Authoritative only under `[fixedLayout]="true"`** — with the default auto layout they're hints and content can stretch the column past them. Under fixed layout, leave **at least one column unsized** so it absorbs the leftover space; if every column is sized, `table-layout: fixed` scales them all up to fill the table's width.
 - `meta: TableColumnMeta` — `{ label?, align?, vAlign? }` for accessible label + cell alignment.
 
@@ -469,7 +517,7 @@ Render expandable rows open on first load (still user-collapsible):
 </ng-template>
 ```
 
-**Helpers:** `groupRowSpan(rows, keyFn)` — produces a `rowSpan` callback that auto-collapses consecutive equal keys. Pass the *currently-rendered* row set (`table.getRowModel().rows`) so spans operate on post-filter/sort rows.
+**Helpers:** `groupRowSpan(rows, keyFn)` — produces a `rowSpan` callback that auto-collapses consecutive equal keys. Pass the *currently-rendered* row set (`table.getRowModel().rows`) so spans operate on post-filter/sort rows. **Prefer the column `groupBy` option**, which does this internally against the live row model; use this helper only for a standalone `rowSpan` callback.
 
 ```typescript
 import {
@@ -852,7 +900,8 @@ statusControl = new FormControl<string | null>(null);
 **Selector:** `tedi-date-picker`
 **Model:** `selected: Date | null`, `month: Date`
 **Inputs:**
-- `disabled: DatePickerMatcher | DatePickerMatcher[] | null` — function or array of functions `(date: Date) => boolean`
+- `disabledMatchers: DatePickerMatcher | DatePickerMatcher[] | null` — disabled dates that cannot be selected (`Date`, `Date[]`, `{ before }`, `{ after }`, `{ from, to? }`, or a `(date: Date) => boolean` predicate). Prefer this over `disabled`, whose name clashes with `FormControlDirective`'s boolean `disabled` when used with `[formControl]`
+- `disabled: DatePickerMatcher | DatePickerMatcher[] | null` — **⚠️ DEPRECATED**, use `disabledMatchers` (same shape, merged with it). Binding `[disabled]` together with `[formControl]` raises a template type error (#494)
 - `showNavigation: boolean = true` — show month/year navigation
 - `monthMode: DatePickerSelectorMode = "dropdown"`
 - `yearMode: DatePickerSelectorMode = "dropdown"`
@@ -868,6 +917,121 @@ statusControl = new FormControl<string | null>(null);
 
 ```html
 <tedi-date-picker [formControl]="dateControl" [showWeekNumbers]="true" />
+```
+
+### DateField
+**Selector:** `tedi-date-field` | ControlValueAccessor
+
+Form-control wrapper around the Calendar. Exposes a typed text input paired with a popover (or modal) that renders the Calendar. On phones, single-mode fields default to the native OS date picker; an opt-in modal is also available. Supports `single`, `multiple` and `range` modes, custom formatting/parsing, and the same selection-level/header options as Calendar.
+
+**Model:** `value: Date | Date[] | DateRange | null`
+**Outputs:**
+- `openChange: boolean` — emitted when the picker (popover/modal) open state changes
+
+**Inputs:**
+- `inputId: string` (required) — unique ID for label association
+- `mode: DateFieldMode = "single"` — "single", "multiple" (tags), or "range" ({ from, to })
+- `multiRow: boolean = true` — `multiple` mode tag layout. `true` wraps tags across rows; `false` keeps a single row with a "+N" counter
+- `tagEllipsis: TagEllipsis = false` — which end `multiple`-mode tags truncate from when a label doesn't fit. `false`, `end`, or `start`
+- `isTagRemovable: boolean = true` — whether `multiple`-mode tags show a remove button
+- `placeholder: string = ""` — placeholder in the input when no value
+- `disabledMatchers: Matcher | Matcher[]` — disables specific days/dates via matchers. Named `disabledMatchers` (not `disabled`) to avoid clashing with `FormControlDirective`'s boolean `disabled` when used with `[formControl]`. Accepts `{ dayOfWeek: number[] }`, single dates, ranges or predicates
+- `inputDisabled: boolean = false` — disables the field entirely (input, icon button, and calendar)
+- `readOnly: boolean = false` — blocks typing but leaves the calendar interactive
+- `required: boolean = false` — marks input as required; in `multiple` mode prevents clearing the last date
+- `size: DateFieldSize = "default"` — "default" or "small"; should match the surrounding `tedi-form-field` size
+- `minDate: Date | undefined` — disables all dates before this date
+- `maxDate: Date | undefined` — disables all dates after this date
+- `disablePast: boolean = false` — disable all dates before today
+- `disableFuture: boolean = false` — disable all dates after today
+- `shouldDisableMonth: (month: Date) => boolean | undefined` — predicate returning true to disable a month; use `undefined` to leave it enabled
+- `shouldDisableYear: (year: Date) => boolean | undefined` — predicate returning true to disable a year; use `undefined` to leave it enabled
+- `availableDays: Date[] | ((d: Date) => boolean) | undefined` — days that ARE available (inverse of unavailableDays)
+- `unavailableDays: Date[] | ((d: Date) => boolean) | undefined` — days that are NOT available
+- `selectionLevel: CalendarView = "days"` — lowest level the user can commit to: "days", "months", or "years"
+- `monthYearSelectType: "dropdown" | "grid" = "dropdown"` — how the header exposes month/year picking
+- `initialMonth: Date | undefined` — the month to initially display in the calendar
+- `localeCode: string = "et-EE"` — BCP-47 locale for weekday/month names, first day of week, default formatDate/parseDate
+- `closeOnSelect: boolean | undefined = undefined` — whether to close picker after selection (defaults to `true` in single mode)
+- `showOutsideDays: boolean = true` — render trailing/leading days from adjacent months
+- `showWeekNumbers: boolean = false` — render an ISO week-number column on the left of the day grid
+- `numberOfMonths: BreakpointInput<number> = { xs: 1 }` — number of months shown side by side. A plain number (e.g. `2`) applies at every breakpoint (phone and modal included); pass a per-breakpoint object (e.g. `{ xs: 1, lg: 2 }`) to narrow it on small screens. The visible count is capped to what fits the viewport
+- `enableCalendar: BreakpointObject<boolean> = { xs: true }` — enables the calendar picker UI. `false` hides the icon button and popover/modal — typing only
+- `calendarTrigger: BreakpointObject<"input" | "button"> = { xs: "button" }` — what opens the calendar: `"button"` (icon) or `"input"` (the whole input)
+- `useNativePicker: boolean | "sm" | "md" | "lg" | "xl" = false` — uses the OS-native date picker instead of the custom popover (single mode only). `true` always, `false` never, a breakpoint name uses native below that breakpoint and the custom popover from it upward
+- `modal: boolean | "sm" | "md" | "lg" | "xl" = false` — opens the calendar in a centered modal (with explicit Cancel/Confirm) instead of the popover. `true` always, `false` never, a breakpoint name means modal below that breakpoint
+- `fullscreen: boolean | "sm" | "md" | "lg" | "xl" = false` — render the calendar modal fullscreen. `true` always, `false` never, a breakpoint name makes it fullscreen below that breakpoint. Only applies when the calendar opens as a modal (see `modal`)
+- `formatDate: ((value: DateFieldValue) => string) | undefined` — custom formatter for displaying the date value; callback receives the value and returns a display string
+- `parseDate: ((value: string) => DateFieldValue | undefined) | undefined` — custom parser for parsing typed input into a Date, Date array or DateRange; return `undefined` to reject the input
+
+```html
+<!-- Single mode -->
+<tedi-form-field>
+  <label tedi-label for="date">Date</label>
+  <tedi-date-field inputId="date" [formControl]="dateControl" />
+</tedi-form-field>
+
+<!-- Multiple mode with tags -->
+<tedi-form-field>
+  <label tedi-label for="dates">Dates</label>
+  <tedi-date-field
+    inputId="dates"
+    mode="multiple"
+    [formControl]="datesControl"
+    [multiRow]="false"
+    tagEllipsis="start"
+    [isTagRemovable]="true"
+  />
+</tedi-form-field>
+
+<!-- Range mode with constraints -->
+<tedi-form-field>
+  <label tedi-label for="range">Date range</label>
+  <tedi-date-field
+    inputId="range"
+    mode="range"
+    [formControl]="rangeControl"
+    [minDate]="minDate"
+    [maxDate]="maxDate"
+    [showWeekNumbers]="true"
+  />
+</tedi-form-field>
+
+<!-- Custom format/parse (US style MM/dd/yyyy) -->
+<tedi-date-field
+  inputId="us-date"
+  [formControl]="usControl"
+  [formatDate]="formatUS"
+  [parseDate]="parseUS"
+  placeholder="mm/dd/yyyy"
+/>
+
+<!-- Typing only — no picker UI -->
+<tedi-date-field inputId="typedate" [enableCalendar]="false" />
+
+<!-- Modal picker below md, popover above -->
+<tedi-date-field inputId="modal-date" [formControl]="control" modal="md" [useNativePicker]="false" />
+
+<!-- Native picker on phones, custom from md upward -->
+<tedi-date-field inputId="native-date" [formControl]="control" />
+
+<!-- Year selection with grid header -->
+<tedi-date-field
+  inputId="year-date"
+  selectionLevel="years"
+  monthYearSelectType="grid"
+  [formatDate]="(v) => v instanceof Date ? String(v.getFullYear()) : ''"
+/>
+
+<!-- Weekends unavailable (predicate) -->
+<tedi-date-field inputId="unavail" [formControl]="control" [unavailableDays]="(d) => [0, 6].includes(d.getDay())" />
+
+<!-- Disable past/future -->
+<tedi-date-field inputId="future-only" [disablePast]="true" />
+<tedi-date-field inputId="past-only" [disableFuture]="true" />
+
+<!-- Multi-month side by side -->
+<tedi-date-field inputId="multi-mo" [numberOfMonths]="2" />
 ```
 
 ### TimeField
@@ -964,6 +1128,8 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 - `feedbackText: { text, type, position }` — feedback text config
 - `maxDropdownHeight: number` — dropdown height in pixels
 - `compareWith: (a, b) => boolean` — custom equality function
+- `tagEllipsis: TagEllipsis = false` — which end a selected tag's label truncates from when it doesn't fit. Only used in multiselect mode with `multiRow="false"`. `false` never truncates; `end` → `label…`; `start` → `…label`
+- `searchFn: (term: string, item: T) => boolean` — custom search function for filtering options. Overrides the default label-based search when provided
 
 Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multiselect).
 
@@ -1177,16 +1343,53 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 ### Header
 **Selector:** `header[tedi-header]`
 
+Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language`, `tedi-header-login`, `tedi-header-logout`, `tedi-header-profile`, `tedi-header-role`, `tedi-header-search`
+
+**tedi-header-logo:**
+- `href?: string` — wraps logo in an anchor
+- `showLogo: boolean = true` — simple boolean for feature flags or custom media queries. For responsive hiding at standard breakpoints, use `*showAt` / `*hideAt` directives instead (e.g. `<tedi-header-logo *showAt="'md'">`).
+- Supports dark variant via `tedi-header-logo-dark` directive on projected content.
+
+**tedi-header-role:**
+- `representatives: Representative[]` (required) — `Representative` has `id: string`, `name: string`, `description?: string`, `icon?: string | RepresentativeIcon`
+- `currentRepresentative: Representative` (required, two-way with `model()`)
+- `label?: string` — label text in the title position
+- `description?: string` — description text
+- `showSearch?: boolean = false` — show search input above representative list
+- `searchClearable?: boolean = false` — show clear button on search input
+- `clearSearchOnSelect?: boolean = true` — clear search when a representative is selected
+- `isOrganization?: boolean = false` — affects search label
+- `searchLabel?: string` — custom search input label (falls back to i18n)
+- `organizationSearchLabel?: string` — search label when `isOrganization` is true
+- `showRoleSwitch?: boolean` — show role selection toggle (defaults to true when multiple representatives)
+- `roleSelectionToggle: OutputEmitterRef<boolean>` — emits when role selection opens/closes
+- Custom content via `[tedi-header-role-content]` directive replaces default representative list.
+- Custom no-results content via `[tedi-header-role-no-results]` directive.
+- Custom title via `[tedi-header-role-title]` directive.
+- When multiple `tedi-header-role` components are inside a `tedi-header-profile`, opening one accordion automatically closes the others on mobile/tablet.
+
+**tedi-header-language:**
+- `languages: HeaderLanguage` (required) — object with `Language` keys and display string values
+- `languageChange: OutputEmitterRef<Language>` — emits on language selection
+
+**tedi-header-login:** bp — `size?: 'default' | 'small'` (auto `'small'` on mobile), `label?: string`, `onClick?: () => void`, `href?: string`
+**tedi-header-logout:** bp — `size?: 'default' | 'small'` (auto `'small'` on mobile), `label?: string`, `onClick?: () => void`, `href?: string`
+
+**tedi-header-profile:** bp — `showPopover?: Breakpoint = 'lg'`, `label?: string`, `showLabel?: boolean = false`, `size?: HeaderProfileSize`, `noStyle?: boolean = false`
+- `noStyle` removes default padding, borders, and background from modal children. Does not affect `tedi-header-role`'s own 4px brand bottom border.
+
+**tedi-header-search:** `mobileVariant?: 'modal' | 'inline'`, `mobileLabels?: { button?, modalTitle? }`, `disabled?: boolean`
+
 ```html
 <header tedi-header>
-  <tedi-header-content>
+  <tedi-header-logo href="/">
     <img src="logo.svg" alt="Logo" />
-  </tedi-header-content>
+  </tedi-header-logo>
   <tedi-header-actions>
     <tedi-header-language [languages]="languages" (languageChange)="onLangChange($event)" />
-    <tedi-header-profile [name]="userName">
-      <tedi-header-role [role]="role" [representatives]="reps" [(currentRepresentative)]="currentRep" />
-      <tedi-header-logout />
+    <tedi-header-profile>
+      <tedi-header-role [representatives]="reps" [(currentRepresentative)]="currentRep" />
+      <tedi-header-logout href="/logout" />
     </tedi-header-profile>
   </tedi-header-actions>
 </header>
@@ -1396,6 +1599,55 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
   <tedi-horizontal-stepper-item label="Application" selected />
   <tedi-horizontal-stepper-item label="Response" />
 </tedi-horizontal-stepper>
+```
+
+### Tabs
+**Selector:** `tedi-tabs`
+**Inputs:**
+- `value: string` — controlled active tab id; bind with `[(value)]` or `[value]` + `(valueChange)`
+- `defaultValue: string = ""` — initial active tab id for uncontrolled usage
+
+**Outputs:**
+- `valueChange: string` — emitted with the new active tab id when it changes
+
+**Sub-components:**
+- `tedi-tabs-list` — the `role="tablist"` container.
+  - `aria-label: string` / `aria-labelledby: string` — accessible name for the tablist
+  - `overflowMode: "dropdown" | "scroll" = "dropdown"` — when tabs don't fit, either collapse overflowing tabs into a "More" dropdown or enable horizontal scrolling with fade indicators
+  - `dropdownLabel: string` — label for the overflow dropdown trigger; falls back to the `more` translation (`Veel` in et)
+- `button[tedi-tabs-trigger]` — a tab button (applied to a native `<button>`).
+  - `id: string` (required) — links to the matching `tedi-tabs-content` panel (`aria-controls="{id}-panel"`)
+  - `icon: string` — Material Symbols icon shown before the label
+  - `disabled: boolean = false`
+- `tedi-tabs-content` — a tab panel (`role="tabpanel"`).
+  - `id: string` — when set, shown only while that tab is active; omit to always render (e.g. for a router outlet)
+
+Keyboard: Arrow Left/Right (with wrap), Home/End move focus between enabled tabs; only the active tab is in the tab order. Disabled tabs are skipped. Full WAI-ARIA tab pattern.
+
+```html
+<tedi-tabs defaultValue="tab-1">
+  <tedi-tabs-list aria-label="Health tabs">
+    <button tedi-tabs-trigger id="tab-1">Health timeline</button>
+    <button tedi-tabs-trigger id="tab-2" icon="medication">Medication history</button>
+    <button tedi-tabs-trigger id="tab-3" [disabled]="true">Archived</button>
+  </tedi-tabs-list>
+  <tedi-tabs-content id="tab-1">Timeline content</tedi-tabs-content>
+  <tedi-tabs-content id="tab-2">Medication content</tedi-tabs-content>
+  <tedi-tabs-content id="tab-3">Archived content</tedi-tabs-content>
+</tedi-tabs>
+```
+
+Controlled usage:
+
+```html
+<tedi-tabs [(value)]="activeTab">
+  <tedi-tabs-list aria-label="Controlled tabs" overflowMode="scroll">
+    <button tedi-tabs-trigger id="tab-1">First</button>
+    <button tedi-tabs-trigger id="tab-2">Second</button>
+  </tedi-tabs-list>
+  <tedi-tabs-content id="tab-1">First panel</tedi-tabs-content>
+  <tedi-tabs-content id="tab-2">Second panel</tedi-tabs-content>
+</tedi-tabs>
 ```
 
 ## Notifications
