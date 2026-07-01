@@ -35,8 +35,12 @@ $transition-duration: 300ms;
     text-decoration: underline;
   }
 
+  &--no-underline &__text {
+    text-decoration: none;
+  }
+
   &__icon {
-    transition: transform $transition-duration ease;
+    transition: transform 0.2s ease-in-out;
   }
 
   &__icon-pad {
@@ -61,7 +65,7 @@ $transition-duration: 300ms;
   }
 
   &--open .tedi-collapse-button__icon {
-    transform: rotate(180deg);
+    transform: rotate(-180deg);
   }
 
   &--small {
