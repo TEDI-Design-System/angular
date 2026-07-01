@@ -1661,6 +1661,7 @@ Controlled usage:
 - `showClose: boolean = false`
 - `role: AlertRole = "alert"`
 - `variant: AlertVariant = "default"`
+- `size: AlertSize = "default"` — `"default"` or `"small"` (reduced padding and smaller body text)
 - `titleElement: AlertTitleType = "h2"` — HTML tag for the title
 - `closeDelay: number = 0`
 **Outputs:**
