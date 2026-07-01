@@ -1,3 +1,10 @@
+# [7.0.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0-rc.4...angular-7.0.0-rc.5) (2026-07-01)
+
+
+### Features
+
+* **select:** added tooltip, ariaLabelledby, ariaLabel [#508](https://github.com/TEDI-Design-System/angular/issues/508) ([#509](https://github.com/TEDI-Design-System/angular/issues/509)) ([0ee3572](https://github.com/TEDI-Design-System/angular/commit/0ee35721729f6e3ae7c606e6d2913c0afdd0898e))
+
 # [7.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0-rc.3...angular-7.0.0-rc.4) (2026-07-01)
 
 
