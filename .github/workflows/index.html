@@ -23,13 +23,19 @@
 
     body {
       margin: 0;
-      min-height: 100dvh;
       background: var(--general-surface-secondary);
       color: var(--general-text-primary);
       font-family: var(--family-default), system-ui, sans-serif;
       font-size: var(--body-regular-size);
       line-height: var(--body-regular-line-height);
       font-variation-settings: "wdth" 100;
+    }
+    /* Core's index.css sets `html,body{height:100%;background-color:…}` (specificity 0,0,2).
+       Override both so body grows with content and the page background fills the full scroll height. */
+    html body {
+      height: auto;
+      min-height: 100dvh;
+      background: var(--general-surface-secondary);
     }
 
     a { color: inherit; }
@@ -284,7 +290,7 @@
       <!-- Intro -->
       <div class="tsb-stack tsb-stack--16">
         <h1 class="tsb-h1" data-tsb="framework-label">TEDI</h1>
-        <p class="tsb-lead">Live Storybook builds for TEDI Angular: the Main and RC releases, plus every branch still in development.</p>
+        <p class="tsb-lead">Live Storybook builds for <span data-tsb="framework-label">TEDI</span>: the Main and RC releases, plus every branch still in development.</p>
       </div>
 
       <!-- Callout: how a component reaches you -->
@@ -312,7 +318,7 @@
             <span class="tsb-step__num">3</span>
             <div>
               <div class="tsb-step__title">Main</div>
-              <div class="tsb-step__sub">Stable &ndash; updated monthly, last Thursday</div>
+              <div class="tsb-step__sub">Stable &ndash; released monthly, last Thursday</div>
             </div>
           </div>
         </div>
@@ -321,14 +327,15 @@
       <!-- Main -->
       <section class="tsb-stack tsb-stack--8">
         <h2 class="tsb-h3">Main</h2>
-        <p class="tsb-lead">Everything here is final and won't change unexpectedly &mdash; the safe default to build against in production.</p>
+        <p class="tsb-lead">Everything here is final and won't change unexpectedly &mdash; the safe default to build against in production. It's updated every month on the last Thursday, when everything in RC is merged in.
+        <br /><b>PS:</b> the release day is subject to change (e.g. lands on a public holiday)</p>
         <div id="tsb-main-card"></div>
       </section>
 
       <!-- Release candidate -->
       <section class="tsb-stack tsb-stack--8">
         <h2 class="tsb-h3">Release candidate</h2>
-        <p class="tsb-lead">Components are ready to use, but the API can still change before release. Ideal for trying new components early and sending feedback. On the last Thursday of each month, everything here graduates to Main.</p>
+        <p class="tsb-lead">Components are ready to use, but the API can still change before release. Ideal for trying new components early and sending feedback.</p>
         <div id="tsb-rc-card"></div>
       </section>
 
@@ -360,22 +367,75 @@
       });
     }
 
-    // Release/pre-release card (Main, RC): title + version tag + timestamp + status badge
+    // Release/pre-release card (Main, RC): title + version tag + timestamp + status badge.
+    // The tag/meta spans are always rendered (hidden when empty) so the runtime npm
+    // fetch can fill or update them later.
     function releaseCard(opts) {
-      var tag = opts.version ? '<span class="tsb-tag">ver ' + esc(opts.version) + "</span>" : "";
-      var meta = opts.updated ? '<span class="tsb-card__meta">Last update: ' + esc(opts.updated) + "</span>" : "";
-      return el(
+      var card = el(
         '<a class="tsb-card" href="./' + esc(opts.branch) + '/">' +
           '<span class="tsb-card__body">' +
             '<span class="tsb-card__lead">' +
-              '<span class="tsb-card__title">' + esc(opts.title) + "</span>" + tag +
+              '<span class="tsb-card__title">' + esc(opts.title) + "</span>" +
+              '<span class="tsb-tag" hidden></span>' +
             "</span>" +
-            meta +
+            '<span class="tsb-card__meta" hidden></span>' +
             '<span class="tsb-badge tsb-badge--' + opts.badgeVariant + '">' + esc(opts.badgeLabel) + "</span>" +
           "</span>" +
           '<span class="tsb-card__arrow">' + ICON_ARROW + "</span>" +
         "</a>"
       );
+      setRelease(card, opts.version, opts.updated);
+      return card;
+    }
+
+    // Populate (or later refresh) a release card's version tag and "last update" text.
+    function setRelease(card, version, updated) {
+      if (!card) return;
+      var tag = card.querySelector(".tsb-tag");
+      var meta = card.querySelector(".tsb-card__meta");
+      if (tag) {
+        tag.hidden = !version;
+        if (version) tag.textContent = "ver " + version;
+      }
+      if (meta) {
+        meta.hidden = !updated;
+        if (updated) meta.textContent = "Last update: " + updated;
+      }
+    }
+
+    // Format an ISO date as DD.MM.YYYY HH:MM in Europe/Tallinn (mirrors pages-release-info.mjs).
+    function fmtDate(iso) {
+      if (!iso) return "";
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return "";
+      var p = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Europe/Tallinn",
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit", hour12: false,
+      }).formatToParts(d).reduce(function (acc, part) { acc[part.type] = part.value; return acc; }, {});
+      return p.day + "." + p.month + "." + p.year + " " + p.hour + ":" + p.minute;
+    }
+
+    // Progressive enhancement: the injected Main/RC versions are captured when Pages
+    // deploys, which can race ahead of the release publishing to npm. Re-read the live
+    // dist-tags on load so the numbers are always current. Any failure keeps the
+    // build-time fallback, so the page never ends up blank.
+    function refreshVersionsFromNpm(pkg) {
+      if (!pkg || typeof fetch !== "function") return;
+      fetch("https://registry.npmjs.org/" + pkg, { headers: { Accept: "application/json" } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (meta) {
+          if (!meta) return;
+          var tags = meta["dist-tags"] || {};
+          var times = meta.time || {};
+          if (tags.latest) {
+            setRelease(document.querySelector("#tsb-main-card .tsb-card"), tags.latest, fmtDate(times[tags.latest]));
+          }
+          if (tags.rc) {
+            setRelease(document.querySelector("#tsb-rc-card .tsb-card"), tags.rc, fmtDate(times[tags.rc]));
+          }
+        })
+        .catch(function () { /* keep build-time fallback */ });
     }
 
     // In-development card: branch name + "In progress" badge
@@ -432,6 +492,9 @@
           dev.forEach(function (name) { devRoot.appendChild(branchCard(name)); });
         }
       }
+
+      // Override the build-time Main/RC versions with live npm data when reachable.
+      refreshVersionsFromNpm(data.npmPackage);
     }
 
     // Data is injected between this file and index_suffix.html at deploy time.

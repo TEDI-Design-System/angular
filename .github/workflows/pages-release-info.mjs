@@ -1,7 +1,8 @@
 // Emits release info (versions + publish timestamps) for the GitHub Pages landing page.
 // Usage: node pages-release-info.mjs "<framework>" "<npm-package>"
 //   e.g. node pages-release-info.mjs "Angular" "@tedi-design-system/angular"
-// Output (stdout): {"framework":"Angular","main":{"version","updated"},"rc":{"version","updated"}}
+// Output (stdout): {"framework","npmPackage","main":{"version","updated"},"rc":{"version","updated"}}
+// npmPackage is used by the page to re-fetch live versions at runtime (build-time values are the fallback).
 //
 // Versions come from the npm dist-tags `latest` (Main) and `rc` (Release candidate).
 // "updated" is each version's npm publish time, formatted as DD.MM.YYYY HH:MM in Europe/Tallinn.
@@ -55,6 +56,7 @@ const rcVersion = distTagVersion("rc");
 process.stdout.write(
   JSON.stringify({
     framework,
+    npmPackage: pkg,
     main: { version: mainVersion, updated: publishedAt(mainVersion) },
     rc: { version: rcVersion, updated: publishedAt(rcVersion) },
   })
