@@ -69,6 +69,120 @@ export class MyControlComponent implements ControlValueAccessor {
 - Effects in constructor auto-clean up — no need for takeUntilDestroyed
 - Use effects for syncing derived state (e.g., selected date → input display value)
 
+## Responsive Inputs (Breakpoint Support)
+
+**Always check the TEDI React equivalent before settling on an API.** If the React component uses `BreakpointSupport<T>` / `useBreakpointProps` on a prop, the Angular component should expose breakpoint support on the equivalent input. Skipping this leaves the Angular library behind on responsive behavior and forces consumers to recreate it manually.
+
+Two patterns exist for this — pick by need:
+
+### Pattern A: Per-input `BreakpointInput<T>` (preferred when one or two inputs need to be responsive)
+
+Use this when a single input (e.g., a flag, count, or variant) should vary by breakpoint without restating sibling inputs. Reference: `tedi/components/content/carousel/carousel-content/carousel-content.component.ts:46-55`, `tedi/components/form/time-field/time-field.component.ts` (`useNativePicker`).
+
+```typescript
+import {
+  breakpointInput,
+  BreakpointInput,
+  BreakpointService,
+} from "../../../services/breakpoint/breakpoint.service";
+
+readonly useNativePicker = input(
+  { xs: false },
+  { transform: (v: BreakpointInput<boolean>) => breakpointInput(v) },
+);
+
+private readonly breakpointService = inject(BreakpointService);
+
+readonly useNativePickerResolved = computed(() => {
+  const v = this.useNativePicker();
+  if (v.xxl !== undefined && this.breakpointService.isAboveBreakpoint("xxl")()) return v.xxl;
+  if (v.xl  !== undefined && this.breakpointService.isAboveBreakpoint("xl")())  return v.xl;
+  if (v.lg  !== undefined && this.breakpointService.isAboveBreakpoint("lg")())  return v.lg;
+  if (v.md  !== undefined && this.breakpointService.isAboveBreakpoint("md")())  return v.md;
+  if (v.sm  !== undefined && this.breakpointService.isAboveBreakpoint("sm")())  return v.sm;
+  return v.xs;
+});
+```
+
+Consumer side:
+
+```html
+<tedi-time-field [useNativePicker]="{ xs: true, md: false }" />
+<tedi-time-field [useNativePicker]="true" />
+```
+
+Notes:
+- `breakpointInput()` wraps a plain `T` into `{ xs: T }`, so both shapes work.
+- Always compare with `!== undefined` (not truthy) — `false` and `0` are valid values that must not be skipped.
+- Iterate **largest breakpoint first** to apply mobile-first cascade correctly.
+
+### Pattern B: Per-component breakpoint inputs (preferred when many inputs need to be responsive together)
+
+Use this when several inputs commonly change together at a given breakpoint and consumers benefit from grouping them. Reference: `tedi/components/navigation/link/link.component.ts:55-105`.
+
+```typescript
+export type LinkInputs = {
+  variant: LinkVariant;
+  size: LinkSize;
+  underline: boolean;
+};
+
+export class LinkComponent implements BreakpointInputs<LinkInputs> {
+  variant = input<LinkVariant>("default");
+  size = input<LinkSize>("default");
+  underline = input<boolean>(true);
+
+  xs = input<LinkInputs>();
+  sm = input<LinkInputs>();
+  md = input<LinkInputs>();
+  lg = input<LinkInputs>();
+  xl = input<LinkInputs>();
+  xxl = input<LinkInputs>();
+
+  private breakpointService = inject(BreakpointService);
+  breakpointInputs = computed(() =>
+    this.breakpointService.getBreakpointInputs<LinkInputs>({
+      variant: this.variant(),
+      size: this.size(),
+      underline: this.underline(),
+      xs: this.xs(), sm: this.sm(), md: this.md(),
+      lg: this.lg(), xl: this.xl(), xxl: this.xxl(),
+    }),
+  );
+}
+```
+
+Consumer side:
+
+```html
+<tedi-link [md]="{ variant: 'inverted', size: 'small' }">Read more</tedi-link>
+```
+
+### Choosing between A and B
+
+| Question | Pattern |
+|---|---|
+| Only one input is responsive? | A |
+| Two unrelated inputs are responsive but never change together? | A on each |
+| Three or more inputs change as a group per breakpoint? | B |
+| React equivalent uses `BreakpointSupport<Props>` on the whole component? | B |
+| React equivalent uses `BreakpointInput<T>` on a single prop? | A |
+
+### Storybook
+
+- Add `parameters.status: { type: ["breakpointSupport"] }` to the meta so the badge shows up.
+- For pattern A inputs, set the argType `type.summary` to `"BreakpointInput<T>"` with a detail listing both shapes.
+- For pattern B, document the per-breakpoint inputs (`xs`, `sm`, `md`, `lg`, `xl`, `xxl`) in argTypes and category them under `"breakpoint inputs"`.
+- Add at least one story that demonstrates a responsive case (e.g., `WithResponsiveX`).
+
+### Consumer catalog
+
+In `skills/tedi-angular/references/components.md`, write breakpoint-aware inputs as:
+
+```markdown
+- `useNativePicker: BreakpointInput<boolean> = false` — ... Accepts a breakpoint object, e.g. `{ xs: true, md: false }`
+```
+
 ## Naming Conventions
 
 | Item | Convention | Example |
@@ -242,7 +356,7 @@ fixture.detectChanges();
 ### Structure
 ```typescript
 export default {
-  title: 'TEDI-Ready/Components/Category/ComponentName',
+  title: 'TEDI-Ready/Components/Category/ComponentName', // Content/Layout/Base groups skip the Components/ segment
   component: ComponentNameComponent,
   decorators: [
     moduleMetadata({
@@ -270,28 +384,33 @@ export const Default: StoryObj<ComponentNameComponent> = {
 };
 
 export const WithReactiveForms: StoryObj<ComponentNameComponent> = {
-  decorators: [
-    moduleMetadata({
-      imports: [MyControlComponent, ReactiveFormsModule, AlertComponent, TextComponent],
-    }),
-  ],
-  render: () => ({
-    props: { control: new FormControl('') },
-    template: `
-      <tedi-my-control [formControl]="control" />
-      <tedi-alert type="info" [showClose]="false">
-        <pre tedi-text modifiers="small" style="margin: 0;">{{ {
+  render: () => {
+    const control = new FormControl('');
+
+    return {
+      props: { control },
+      template: `
+        <tedi-row cols="1" [gapY]="3">
+          <tedi-col>
+            <tedi-my-control [formControl]="control" />
+          </tedi-col>
+          <tedi-col>
+            <tedi-alert type="info" [showClose]="false">
+              <pre tedi-text modifiers="small">{{ {
   value: control.value,
   touched: control.touched,
   dirty: control.dirty
 } | json }}</pre>
-      </tedi-alert>
-    `,
-  }),
+            </tedi-alert>
+          </tedi-col>
+        </tedi-row>
+      `,
+    };
+  },
 };
 ```
 
-> **Note:** Always display reactive form state using a `<tedi-alert type="info">` with a `<pre tedi-text modifiers="small">` block and the `json` pipe. This provides a consistent, scannable debug output across all form component stories. Import `AlertComponent` and `TextComponent` in the story's `moduleMetadata`.
+> **Note:** Always display reactive form state using `tedi-row`/`tedi-col` for layout, a `<tedi-alert type="info">` with a `<pre tedi-text modifiers="small">` block and the `json` pipe. This provides a consistent, scannable debug output across all form component stories. Import `RowComponent`, `ColComponent`, `AlertComponent`, and `TextComponent` in the story's `moduleMetadata`.
 
 ### Story Coverage
 Every story file must include:

@@ -1,22 +1,33 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { HeaderLanguageComponent, HeaderLanguage } from './header-language.component';
-import { TediTranslationService } from '../../../../services/translation/translation.service';
+import {
+  Language,
+  TediTranslationService,
+} from '../../../../services/translation/translation.service';
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from '../../../../tokens/translation.token';
 
 describe('HeaderLanguageComponent', () => {
   let fixture: ComponentFixture<HeaderLanguageComponent>;
   let component: HeaderLanguageComponent;
-  const mockTranslationService = {
-    translate: jest.fn(),
-    setLanguage: jest.fn(),
-    getLanguage: signal("et"),
-  } as Partial<TediTranslationService>;
+  let mockTranslationService: {
+    translate: jest.Mock;
+    setLanguage: jest.Mock;
+    getLanguage: ReturnType<typeof signal<Language>>;
+  };
 
   beforeEach(async () => {
+    mockTranslationService = {
+      translate: jest.fn(),
+      setLanguage: jest.fn(),
+      getLanguage: signal<Language>('et'),
+    };
+
     await TestBed.configureTestingModule({
       imports: [HeaderLanguageComponent],
       providers: [
-        { provide: TediTranslationService, useValue: mockTranslationService }
+        { provide: TediTranslationService, useValue: mockTranslationService },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: 'et' },
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
@@ -45,5 +56,35 @@ describe('HeaderLanguageComponent', () => {
   it('should compute languageKeys based on input', () => {
     const keys = component.languageKeys();
     expect(keys).toEqual(['en', 'et', "ru"]);
+  });
+
+  describe('handleChangeLang', () => {
+    it('emits languageChange with the selected language', () => {
+      const emitted: Language[] = [];
+      component.languageChange.subscribe((lang) => emitted.push(lang));
+      component.handleChangeLang('en');
+      expect(emitted).toEqual(['en']);
+    });
+
+    it('updates the translation service language', () => {
+      component.handleChangeLang('ru');
+      expect(mockTranslationService.setLanguage).toHaveBeenCalledWith('ru');
+    });
+
+    it('hides the popover when one is rendered', () => {
+      const hidePopover = jest.fn();
+      jest
+        .spyOn(component, 'popover')
+        .mockReturnValue({ hidePopover } as unknown as ReturnType<
+          typeof component.popover
+        >);
+      component.handleChangeLang('et');
+      expect(hidePopover).toHaveBeenCalledTimes(1);
+    });
+
+    it('no-ops when no popover is present', () => {
+      jest.spyOn(component, 'popover').mockReturnValue(undefined);
+      expect(() => component.handleChangeLang('en')).not.toThrow();
+    });
   });
 });

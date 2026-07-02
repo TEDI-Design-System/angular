@@ -71,6 +71,18 @@ const meta: Meta<SelectComponent> = {
       control: "text",
       description: "Label text displayed above the select.",
     },
+    tooltip: {
+      control: "text",
+      description: "When set, renders an info button next to the label that reveals this text in a tooltip.",
+    },
+    ariaLabelledby: {
+      control: false,
+      description: "Associates the select with an external visible label by its element id. A native `<label for>` cannot target the combobox (it is a `<div>`), so use this when the label lives outside the component. Ignored when `label` is set.",
+    },
+    ariaLabel: {
+      control: false,
+      description: "Accessible name used when there is no visible label to reference. Ignored when `label` or `ariaLabelledby` provides a name.",
+    },
     required: {
       control: "boolean",
       description: "Whether the field is required.",
@@ -112,6 +124,12 @@ const meta: Meta<SelectComponent> = {
     multiRow: {
       control: "boolean",
       description: "Whether selected tags wrap to multiple rows in multiselect mode.",
+    },
+    tagEllipsis: {
+      control: "radio",
+      options: [false, "start", "end"],
+      description:
+        "Which end a tag's label truncates from when it doesn't fit. `false` never truncates; `end` → `label…`; `start` → `…label`.",
     },
     searchable: {
       control: "boolean",
@@ -177,6 +195,7 @@ const meta: Meta<SelectComponent> = {
     selectableGroups: false,
     isTagRemovable: false,
     multiRow: false,
+    tagEllipsis: false,
     searchable: false,
     clearSearchOnSelect: false,
     dropdownType: "menu",
@@ -195,6 +214,7 @@ export const Default: Story = {
       <tedi-select
         [inputId]="inputId"
         [label]="label"
+        [tooltip]="tooltip"
         [required]="required"
         [placeholder]="placeholder"
         [state]="state"
@@ -485,12 +505,13 @@ export const ValueType: Story = {
         />
         <tedi-select
           inputId="value-multiselect-one-row"
-          label="Multiselect one row"
+          label="Multiselect one row (tagEllipsis=&quot;end&quot;)"
           [options]="oneRowOptions"
           [allowMultiple]="true"
           [multiRow]="false"
           [isTagRemovable]="true"
           [clearable]="true"
+          tagEllipsis="end"
           formControlName="oneRow"
         />
         <div style="width: 100px;">

@@ -438,6 +438,8 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("showClear", true);
       fixture.componentRef.setInput("showSearch", true);
       fixture.detectChanges();
+      component.dropdown()?.showDropdown();
+      fixture.detectChanges();
     });
 
     it("should render dropdown-item-value for each option", () => {
@@ -683,6 +685,8 @@ describe("FilterComponent", () => {
       fixture.componentRef.setInput("showSearch", true);
       fixture.componentRef.setInput("text", "Raviasutus");
       fixture.detectChanges();
+      component.dropdown()?.showDropdown();
+      fixture.detectChanges();
     });
 
     it("should have role=dialog on dropdown panel", () => {
@@ -892,6 +896,8 @@ describe("FilterComponent", () => {
     beforeEach(() => {
       fixture.componentRef.setInput("allowMultiple", true);
       fixture.componentRef.setInput("options", TEST_OPTIONS);
+      fixture.detectChanges();
+      component.dropdown()?.showDropdown();
       fixture.detectChanges();
     });
 
@@ -1260,6 +1266,8 @@ describe("FilterComponent", () => {
     beforeEach(() => {
       fixture.componentRef.setInput("options", TEST_OPTIONS);
       fixture.detectChanges();
+      component.dropdown()?.showDropdown();
+      fixture.detectChanges();
     });
 
     it("should show dropdown arrow", () => {
@@ -1494,6 +1502,12 @@ describe("FilterComponent", () => {
         FilterWithCustomContentHostComponent,
       );
       host = hostFixture.componentInstance;
+      hostFixture.detectChanges();
+
+      const filter = hostFixture.debugElement.query(
+        By.directive(FilterComponent),
+      ).componentInstance as FilterComponent;
+      filter.dropdown()?.showDropdown();
       hostFixture.detectChanges();
     });
 

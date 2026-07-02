@@ -11,6 +11,9 @@ import { CardPaddingDirective } from "./card-padding.directive";
 export type CardSpacing = "xs" | "sm" | "md" | "lg" | "none";
 export type CardAccentBorder = "info" | "success" | "warning" | "danger";
 
+/**
+ * @deprecated Use Card from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-card",
   standalone: true,

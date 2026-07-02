@@ -15,6 +15,7 @@ export type AlertRole = "alert" | "status" | "none";
 export type AlertType = "info" | "success" | "warning" | "danger";
 export type AlertTitleType = "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "div";
 export type AlertVariant = "default" | "global" | "noSideBorders";
+export type AlertSize = "default" | "small";
 
 @Component({
   standalone: true,
@@ -51,6 +52,9 @@ export class AlertComponent {
   icon = input<string>("");
   /**
    * If true, a close button will be displayed.
+   *
+   * Ignored when a `[tedi-alert-action]` element is projected — the action
+   * slot wins, and is responsible for any close affordance it wants to expose.
    * @default false
    */
   showClose = input<boolean>(false);
@@ -68,6 +72,13 @@ export class AlertComponent {
    * For example, 'global' for full-width alerts or 'noSideBorders' for alerts without side borders.
    */
   variant = input<AlertVariant>("default");
+  /**
+   * Alert size variant.
+   * - 'default': standard padding and body text size.
+   * - 'small': reduced padding and smaller body text.
+   * @default default
+   */
+  size = input<AlertSize>("default");
   /**
    * The HTML tag to be used for the alert title.
    * @default h2
@@ -112,6 +123,7 @@ export class AlertComponent {
     return {
       "tedi-alert": true,
       [`tedi-alert--${this.type()}`]: !!this.type(),
+      [`tedi-alert--size-${this.size()}`]: !!this.size(),
       "tedi-alert--global": this.variant() === "global",
       "tedi-alert--no-side-borders": this.variant() === "noSideBorders",
     };

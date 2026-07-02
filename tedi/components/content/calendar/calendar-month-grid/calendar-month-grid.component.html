@@ -1,0 +1,27 @@
+<div
+  class="tedi-calendar-month-grid"
+  role="grid"
+  [attr.aria-label]="gridAriaLabel()"
+>
+  @for (row of rows(); track $index) {
+    <div class="tedi-calendar-month-grid__row" role="row">
+      @for (i of row; track i) {
+        <div class="tedi-calendar-month-grid__cell" role="gridcell">
+          <button
+            type="button"
+            class="tedi-calendar-month-grid__month"
+            [class.tedi-calendar-month-grid__month--selected]="isSelected(i)"
+            [class.tedi-calendar-month-grid__month--current]="isCurrent(i)"
+            [class.tedi-calendar-month-grid__month--disabled]="isDisabled(i)"
+            [attr.aria-label]="monthLongNames()[i]"
+            [attr.aria-selected]="isSelected(i) ? 'true' : null"
+            [attr.aria-disabled]="isDisabled(i) ? 'true' : null"
+            (click)="handleClick(i)"
+          >
+            {{ monthNames()[i] }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

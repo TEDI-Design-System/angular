@@ -2,6 +2,13 @@ import { setupZoneTestEnv } from "jest-preset-angular/setup-env/zone";
 
 setupZoneTestEnv();
 
+// Mock ResizeObserver which is not implemented in jsdom
+global.ResizeObserver = class {
+  observe = jest.fn();
+  unobserve = jest.fn();
+  disconnect = jest.fn();
+} as unknown as typeof ResizeObserver;
+
 // Mock scrollIntoView which is not implemented in jsdom
 Element.prototype.scrollIntoView = jest.fn();
 

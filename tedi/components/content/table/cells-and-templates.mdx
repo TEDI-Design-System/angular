@@ -1,0 +1,414 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import * as TableStories from "./table.stories";
+
+<Meta of={TableStories} name="Cells and Templates" />
+
+# Cells and Templates
+
+`tedi-table` is **headless** — every cell, header, and footer renders through a
+`cell` / `header` / `footer` value on the column definition. That value can be
+a plain string, an Angular `TemplateRef`, or a function that returns either.
+This page collects the recipes for the most common cases.
+
+---
+
+## Column definitions
+
+Each column is a `TediColumnDef<TData>` — the Angular flavour of TanStack's
+`ColumnDef` plus a body-level `rowSpan` callback. The minimum:
+
+```ts
+columns: TediColumnDef<Person>[] = [
+  { id: "name", header: "Nimi", accessorKey: "name" },
+  { id: "role", header: "Roll", accessorKey: "role" },
+];
+```
+
+`accessorKey` reads the value from the row. For derived values use `accessorFn:
+(row) => ...`. Without either, TanStack treats the column as display-only.
+
+---
+
+## Plain text cell
+
+When the rendered cell is just the accessor value, omit `cell`. The default
+renderer prints `getValue()`.
+
+```ts
+{ id: "duration", header: "Kestus", accessorKey: "duration" }
+```
+
+---
+
+## Template cells
+
+Reach for a `TemplateRef` when the cell needs HTML, an Angular component, or
+event handlers. Declare the template in the host component and assign it to
+`cell` via a `viewChild`:
+
+```html
+<tedi-table [data]="data" [columns]="columns()" />
+
+<ng-template #personNameTpl let-ctx>
+  <a tedi-link href="#" (click)="$event.preventDefault()">
+    {{ ctx.row.original.name }}
+  </a>
+</ng-template>
+```
+
+```ts
+@Component({ /* ... */ })
+class HostComponent {
+  data = people;
+  personNameTpl = viewChild<TemplateRef<CellContext<Person, unknown>>>(
+    "personNameTpl",
+  );
+
+  columns = computed<TediColumnDef<Person>[]>(() => [
+    {
+      id: "name",
+      header: "Nimi",
+      accessorKey: "name",
+      cell: this.personNameTpl(),
+    } as TediColumnDef<Person>,
+  ]);
+}
+```
+
+The template context is `CellContext<TData, TValue>` — `ctx.row.original`,
+`ctx.row.getValue('name')`, `ctx.getValue()`, `ctx.column`, `ctx.table` are
+all available.
+
+---
+
+## Function cells
+
+For simple transformations the function form is shorter than a template:
+
+```ts
+{
+  id: "salary",
+  header: "Palk",
+  accessorKey: "salary",
+  cell: (ctx) => `${ctx.getValue<number>()} €`,
+}
+```
+
+The string return goes through the default renderer, so you only get text.
+Use a `TemplateRef` when you need elements / event bindings.
+
+---
+
+## Sortable columns (built-in)
+
+Opt a column into the built-in sort affordance with `sortable: true` on its
+`TediColumnDef`. The table auto-renders a button around the (string) header
+title, swaps the icon between `unfold_more / arrow_upward / arrow_downward`
+based on sort state, sets `aria-sort` on the `<th>`, and toggles
+`asc → desc → none` on click. No custom header template needed.
+
+```ts
+columns: TediColumnDef<Person>[] = [
+  { id: "name", header: "Nimi", accessorKey: "name", sortable: true },
+  { id: "role", header: "Roll", accessorKey: "role" },
+  {
+    id: "salary",
+    header: "Palk",
+    accessorKey: "salary",
+    sortable: true,
+    sortingFn: "alphanumeric",
+  },
+];
+```
+
+```html
+<tedi-table [data]="data" [columns]="columns" />
+```
+
+`sortable: true` is the shorthand; the comparator still comes from `sortingFn`
+(see the dedicated section below). Pair it with `manualSorting` for
+server-side sort — clicks emit `(stateChange)` and the parent re-fetches.
+
+When the shorthand isn't enough (combined filter + sort headers, tooltips
+inside the title, etc.) drop the flag and provide a custom `header` template
+instead — see the next section.
+
+---
+
+## Filterable columns (built-in)
+
+Opt a column into the built-in filter popover with `filterable: true` and
+pass the input UI through `filterTemplate`. The table renders the trigger
+button, positions the popover, owns the draft state, and renders translated
+**Apply** / **Clear** buttons in the popover footer. The consumer supplies
+only the input.
+
+```ts
+columns = computed<TediColumnDef<Person>[]>(() => [
+  {
+    id: "name",
+    header: "Nimi",
+    accessorKey: "name",
+    sortable: true,
+    filterable: true,
+    filterFn: "includesString",
+    filterTemplate: this.textFilterTpl(),
+  },
+]);
+```
+
+```html
+<tedi-table [data]="data" [columns]="columns()" />
+
+<ng-template #textFilter let-ctx>
+  <tedi-form-field size="small">
+    <input
+      tedi-text-field
+      [value]="ctx.value ?? ''"
+      (input)="ctx.setValue($any($event.target).value)"
+      [attr.aria-label]="ctx.column.columnDef.header"
+    />
+  </tedi-form-field>
+</ng-template>
+```
+
+The template context exposes:
+
+- `value` / `$implicit` — the current draft (read-only snapshot per render)
+- `setValue(next)` — write to the draft; does not apply yet
+- `apply()` — commit the draft to `column.setFilterValue` and close the popover
+- `clear()` — reset the filter to undefined and close the popover
+- `column` — the TanStack `Column<TData>` for advanced cases
+
+Pass `filterable: { clearOnClose: true }` to discard in-progress drafts every
+time the popover closes — useful for filters where stale draft state would
+confuse the user.
+
+Combined sort + filter is supported by setting both `sortable: true` and
+`filterable: true` on the same column. The title becomes the sort target and
+the filter trigger renders next to it.
+
+For filter UIs that need cross-column awareness or fully custom popover
+chrome, drop `filterable` and supply a custom `header` template instead.
+
+---
+
+## Header templates (full control)
+
+For headers that need more than a sort button — a filter popover, an info
+tooltip, custom layout — provide a `TemplateRef` for `header`. The
+`sortable: true` shorthand bows out the moment the rendered header is not a
+plain string, so the template owns the whole UI:
+
+```html
+<tedi-table [data]="data" [columns]="columns()" />
+
+<ng-template #sortHeader let-ctx>
+  <button
+    tedi-table-header-button
+    [icon]="iconFor(ctx.column.getIsSorted())"
+    [selected]="!!ctx.column.getIsSorted()"
+    (click)="ctx.column.toggleSorting()"
+  >
+    {{ ctx.column.columnDef.meta?.label }}
+  </button>
+</ng-template>
+```
+
+```ts
+columns = computed<TediColumnDef<Person>[]>(() => {
+  const header = this.sortHeaderTpl() ?? "";
+  return [
+    { id: "name", header, accessorKey: "name", meta: { label: "Nimi" } },
+    { id: "role", header, accessorKey: "role", meta: { label: "Roll" } },
+  ];
+});
+```
+
+`meta.label` is read by the table for filter `aria-label`s, the columns menu,
+etc., so keep it set on every column whose header is a non-string template.
+
+---
+
+## Custom sort comparator
+
+Set `sortingFn` per column to override the default `auto` comparator:
+
+```ts
+{
+  id: "name",
+  header,
+  accessorKey: "name",
+  sortingFn: (rowA, rowB, columnId) =>
+    rowA
+      .getValue<string>(columnId)
+      .localeCompare(rowB.getValue<string>(columnId), "et", {
+        sensitivity: "base",
+      }),
+}
+```
+
+Built-in names: `'alphanumeric'`, `'alphanumericCaseSensitive'`, `'text'`,
+`'textCaseSensitive'`, `'datetime'`, `'basic'`, `'auto'` (default). Custom
+comparators always describe ascending order — the table flips the sign on
+descending sort.
+
+---
+
+## Footer cells
+
+`footer` mirrors `header` — string, function, or `TemplateRef`. Setting any
+column's `footer` causes the table to render `<tfoot>`:
+
+```ts
+{
+  id: "salary",
+  header: "Palk",
+  accessorKey: "salary",
+  footer: (ctx) =>
+    `${ctx.table.getRowModel().rows.reduce(
+      (sum, row) => sum + row.getValue<number>("salary"),
+      0,
+    )} €`,
+}
+```
+
+---
+
+## Cell alignment & accessible label
+
+`columnDef.meta` is the Angular-specific extension. The table reads:
+
+- `meta.align: 'left' | 'center' | 'right'` — horizontal cell alignment
+- `meta.vAlign: 'top' | 'middle' | 'bottom'` — vertical cell alignment
+- `meta.label: string` — accessible name used for filter inputs, columns menu,
+  and as a fallback when `header` is a non-string template
+
+```ts
+{
+  id: "salary",
+  header: "Palk",
+  accessorKey: "salary",
+  meta: { label: "Palk", align: "right" },
+}
+```
+
+---
+
+## Row spanning
+
+Body-level `rowSpan` collapses consecutive equal values into a single visually
+spanning cell. The `rowSpan` callback returns:
+
+- `1` (or omit) — render normally
+- `0` — skip rendering, this cell is covered by the previous spanning cell
+- `N > 1` — emit `rowspan="N"` and skip the next `N - 1` rows
+
+For "group consecutive equal values" use the bundled `groupRowSpan` helper:
+
+```ts
+import { groupRowSpan } from "@tedi-design-system/angular/tedi";
+
+{
+  id: "location",
+  header: "Asukoht",
+  accessorKey: "location",
+  rowSpan: groupRowSpan<Person>((row) => row.location),
+}
+```
+
+> **Prefer `groupBy`.** For key-based grouping, the column `groupBy` option
+> computes spans internally against the live row model and also unlocks
+> table-level grouping (spanning control columns, group selection, group
+> dividers). Reach for the raw `rowSpan` callback only for fully custom span
+> logic. See <a href="?path=/docs/tedi-ready-content-table--grouping">Grouping</a>.
+
+---
+
+## Interactive controls in cells
+
+Clicks that land on an interactive control inside a cell — a link, button,
+checkbox, or form field — do **not** activate the row or toggle its expansion,
+even when the row is `interactive` or `expandTrigger="row"`. You don't need to
+add `(click)="$event.stopPropagation()"` to cell content.
+
+---
+
+## Expansion sub-rows
+
+`renderSubComponent` is a single template that renders below an expanded row.
+Combine with `getRowCanExpand` to limit which rows can open:
+
+```html
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [renderSubComponent]="subTpl()"
+  [getRowCanExpand]="canExpand"
+/>
+
+<ng-template #sub let-row>
+  <div class="my-detail-pane">{{ row.original.notes }}</div>
+</ng-template>
+```
+
+The expansion toggle column is added automatically — no need to declare it.
+
+---
+
+## Control columns
+
+Enabling selection (`enableRowSelection`), expansion (`getSubRows` /
+`renderSubComponent`) or row reordering (`reorderableRows`) auto-injects the
+matching control column — the selection checkbox, expand chevron and drag
+handle. They are fixed-width, and their content is centered and top-aligned, so
+they stay tidy next to tall or row-spanned cells.
+
+Reorder them with `controlColumnOrder` (default `["drag", "select", "expand"]`).
+Only the controls you actually enable render; any enabled control left out of
+the list is appended at the end:
+
+```html
+<!-- selection checkbox before the expand chevron -->
+<tedi-table [controlColumnOrder]="['select', 'expand']" ... />
+```
+
+When the table is grouped, these control columns span each group — see
+<a href="?path=/docs/tedi-ready-content-table--grouping">Grouping</a>.
+
+---
+
+## Editable cells
+
+The cell template can swap between display and edit modes per row. Keep the
+edit-state in a small helper (see `Editable values` story for the full
+`createEditableRows` controller). Inside the template:
+
+```html
+<ng-template #nameCell let-ctx>
+  @if (editor.isEditing(ctx.row.original.id)) {
+    <tedi-form-field size="small">
+      <input
+        tedi-text-field
+        type="text"
+        [ngModel]="editor.draftValue(ctx.row.original.id, 'name')"
+        (ngModelChange)="editor.setDraftValue(ctx.row.original.id, 'name', $event)"
+        aria-label="Nimi"
+      />
+    </tedi-form-field>
+  } @else {
+    {{ ctx.row.original.name }}
+  }
+</ng-template>
+```
+
+The columns menu, sorting, and filtering all keep working while a row is in
+edit mode — only the cell rendering changes.
+
+---
+
+## Selecting which template wins
+
+If you assign the same template ref to several columns, each column gets its
+own rendered instance bound to its own `CellContext`. Don't share a template
+between columns whose row-bound markup differs — split into separate templates.

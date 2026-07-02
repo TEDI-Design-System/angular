@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   contentChildren,
+  ElementRef,
   forwardRef,
   inject,
   input,
@@ -21,6 +22,7 @@ export type DropdownRole = "menu" | "listbox";
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
+    class: "tedi-dropdown-content",
     role: "presentation",
     "[attr.aria-labelledby]": "containerId() + '_trigger'",
   },
@@ -38,6 +40,7 @@ export class DropdownContentComponent {
    */
   readonly dropdownRole = input<DropdownRole>("menu");
 
+  readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly dropdownApi = inject(DROPDOWN_API);
   readonly containerId = computed(() => this.dropdownApi.containerId());
   readonly items = contentChildren(DropdownItemComponent);

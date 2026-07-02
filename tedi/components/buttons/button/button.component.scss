@@ -5,10 +5,10 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 @mixin button-variant-color-vars($variant, $icon-only: false, $affix: main) {
   & {
     @if $icon-only {
-      --_btn-bg: var(
-        --button-#{$affix}-#{$variant}-icon-only-background-default
-      );
-    } @else {
+      --_btn-bg: var(--button-#{$affix}-#{$variant}-icon-only-background-default);
+    }
+
+    @else {
       --_btn-bg: var(--button-#{$affix}-#{$variant}-background-default);
     }
 
@@ -23,33 +23,25 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
   }
 }
 
-@mixin button-state-color-vars(
-  $variant,
+@mixin button-state-color-vars($variant,
   $state,
   $icon-only: false,
-  $affix: main
-) {
+  $affix: main) {
   & {
     @if $icon-only {
-      --_btn-#{$state}-bg: var(
-        --button-#{$affix}-#{$variant}-icon-only-background-#{$state},
-        var(--button-#{$affix}-#{$variant}-icon-only-background-default)
-      );
-    } @else {
-      --_btn-#{$state}-bg: var(
-        --button-#{$affix}-#{$variant}-background-#{$state},
-        var(--button-#{$affix}-#{$variant}-background-default)
-      );
+      --_btn-#{$state}-bg: var(--button-#{$affix}-#{$variant}-icon-only-background-#{$state},
+        var(--button-#{$affix}-#{$variant}-icon-only-background-default));
     }
 
-    --_btn-#{$state}-border: var(
-      --button-#{$affix}-#{$variant}-border-#{$state},
-      var(--button-#{$affix}-#{$variant}-border-default)
-    );
-    --_btn-#{$state}-text: var(
-      --button-#{$affix}-#{$variant}-text-#{$state},
-      var(--button-#{$affix}-#{$variant}-text-default)
-    );
+    @else {
+      --_btn-#{$state}-bg: var(--button-#{$affix}-#{$variant}-background-#{$state},
+        var(--button-#{$affix}-#{$variant}-background-default));
+    }
+
+    --_btn-#{$state}-border: var(--button-#{$affix}-#{$variant}-border-#{$state},
+      var(--button-#{$affix}-#{$variant}-border-default));
+    --_btn-#{$state}-text: var(--button-#{$affix}-#{$variant}-text-#{$state},
+      var(--button-#{$affix}-#{$variant}-text-default));
   }
 }
 
@@ -60,7 +52,9 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     @if list.index($neutral-variants, $variant) {
       --_btn-disabled-bg: var(--button-main-disabled-neutral-background);
       --_btn-disabled-border: var(--button-main-disabled-neutral-border);
-    } @else {
+    }
+
+    @else {
       --_btn-disabled-bg: var(--button-main-disabled-general-background);
       --_btn-disabled-border: var(--button-main-disabled-general-border);
     }
@@ -68,8 +62,7 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 }
 
 @mixin button-size-vars($size) {
-  --_btn-padding: calc(var(--_btn-padding-y) - 1px)
-    calc(var(--_btn-padding-x) - 1px);
+  --_btn-padding: calc(var(--_btn-padding-y) - 1px) calc(var(--_btn-padding-x) - 1px);
   --_btn-inner-spacing: var(--button-#{$size}-inner-spacing);
   --_btn-padding-y: var(--button-#{$size}-padding-y);
   --_btn-padding-x: var(--button-#{$size}-padding-x);
@@ -115,26 +108,24 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     }
 
     &--pl {
-      &:not(
-        .tedi-button--neutral,
+
+      &:not(.tedi-button--neutral,
         .tedi-button--danger-neutral,
-        .tedi-button--neutral-inverted
-      ) {
-        padding-left: calc(
-          var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px
-        );
+        .tedi-button--neutral-inverted,
+        .tedi-button--primary-button-group,
+        .tedi-button--secondary-button-group) {
+        padding-left: calc(var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px);
       }
     }
 
     &--pr {
-      &:not(
-        .tedi-button--neutral,
+
+      &:not(.tedi-button--neutral,
         .tedi-button--danger-neutral,
-        .tedi-button--neutral-inverted
-      ) {
-        padding-right: calc(
-          var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px
-        );
+        .tedi-button--neutral-inverted,
+        .tedi-button--primary-button-group,
+        .tedi-button--secondary-button-group) {
+        padding-right: calc(var(--_btn-padding-x) + var(--_btn-inner-spacing) - 1px);
       }
     }
 
@@ -166,7 +157,8 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     }
 
     tedi-icon {
-      font-size: inherit;
+      --_tedi-icon-size: var(--icon-03);
+
       color: inherit;
     }
   }
@@ -174,7 +166,7 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
 
 @mixin button-size($size) {
   & {
-    $font-size: if($size == "md", "default", $size);
+    $font-size: if($size =="md", "default", $size);
 
     font-size: var(--button-text-size-#{$font-size});
 
@@ -232,8 +224,66 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
     @include neutral-button-padding-overrides;
   }
 
+  &--primary-button-group {
+    --_btn-text: var(--button-group-primary-inactive-text);
+    --_btn-bg: var(--button-group-primary-inactive-background);
+    --_btn-border: var(--button-group-primary-inactive-border);
+    --_btn-hover-text: var(--button-group-primary-hover-text);
+    --_btn-hover-bg: var(--button-group-primary-hover-background);
+    --_btn-hover-border: var(--button-group-primary-hover-border);
+    --_btn-active-text: var(--button-group-primary-selected-text);
+    --_btn-active-bg: var(--button-group-primary-selected-background);
+    --_btn-active-border: var(--button-group-primary-selected-border);
+    --_btn-focus-text: var(--button-group-primary-inactive-text);
+    --_btn-focus-bg: var(--button-group-primary-inactive-background);
+    --_btn-focus-border: var(--button-group-primary-inactive-border);
+    --_btn-disabled-text: var(--button-group-primary-disabled-text);
+    --_btn-disabled-bg: var(--button-group-primary-disabled-background);
+    --_btn-disabled-border: var(--button-group-primary-disabled-border);
+    --_btn-outline: var(--tedi-primary-500);
+
+    border-radius: var(--button-radius-sm);
+
+    &[aria-pressed="true"]:not(:disabled) {
+      z-index: 1;
+      color: var(--button-group-primary-selected-text);
+      background: var(--button-group-primary-selected-background);
+      border-color: var(--button-group-primary-selected-border);
+    }
+  }
+
+  &--secondary-button-group {
+    --_btn-text: var(--button-group-secondary-inactive-text);
+    --_btn-bg: var(--button-group-secondary-inactive-background);
+    --_btn-border: var(--button-group-secondary-inactive-border);
+    --_btn-hover-text: var(--button-group-secondary-hover-text);
+    --_btn-hover-bg: var(--button-group-secondary-hover-background);
+    --_btn-hover-border: var(--button-group-secondary-hover-border);
+    --_btn-active-text: var(--button-group-secondary-selected-text);
+    --_btn-active-bg: var(--button-group-secondary-selected-background);
+    --_btn-active-border: var(--button-group-secondary-selected-border);
+    --_btn-focus-text: var(--button-group-secondary-inactive-text);
+    --_btn-focus-bg: var(--button-group-secondary-inactive-background);
+    --_btn-focus-border: var(--button-group-secondary-inactive-border);
+    --_btn-disabled-text: var(--button-group-secondary-disabled-text);
+    --_btn-disabled-bg: var(--button-group-secondary-disabled-background);
+    --_btn-disabled-border: var(--button-group-secondary-disabled-border);
+    --_btn-outline: var(--tedi-primary-500);
+
+    border-radius: var(--button-radius-sm);
+
+    &[aria-pressed="true"]:not(:disabled) {
+      z-index: 1;
+      color: var(--button-group-secondary-selected-text);
+      background: var(--button-group-secondary-selected-background);
+      border-color: var(--button-group-secondary-selected-border);
+      box-shadow: inset 0 0 0 var(--tedi-borders-01) var(--button-group-secondary-selected-border);
+    }
+  }
+
   &[class*="-inverted"]:focus-visible {
     outline: none;
+    border-color: var(--tedi-neutral-100);
     box-shadow:
       0 0 0 1px var(--tedi-neutral-100),
       0 0 0 3px var(--_btn-outline);

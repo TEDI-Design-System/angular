@@ -1,5 +1,6 @@
-import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
-import { Component, inject, Input } from "@angular/core";
+import { type Meta, type StoryObj, applicationConfig, moduleMetadata } from "@storybook/angular";
+import { Component, inject, Input, signal } from "@angular/core";
+import { provideAnimations } from "@angular/platform-browser/animations";
 import { ModalComponent } from "./modal.component";
 import { ModalHeaderComponent } from "./modal-header/modal-header.component";
 import { ModalContentComponent } from "./modal-content/modal-content.component";
@@ -13,7 +14,9 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { ScrollFadeComponent } from "../../helpers/scroll-fade/scroll-fade.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
-import { DatePickerComponent } from "../../form/date-picker/date-picker.component";
+import { DateFieldComponent } from "../../form/date-field/date-field.component";
+import { ToastService } from "../../../services/toast/toast.service";
+import { formatDate } from "../../../utils/date.util";
 
 interface StoryModalData {
   title: string;
@@ -69,7 +72,7 @@ class StoryModalContentComponent {
 @Component({
   standalone: true,
   selector: "story-scrollable-content",
-  imports: [...sharedModalImports, DatePickerComponent],
+  imports: [...sharedModalImports, DateFieldComponent],
   template: `
     <tedi-modal>
       <tedi-modal-header>
@@ -98,14 +101,14 @@ class StoryModalContentComponent {
           <input tedi-text-field id="description" />
         </tedi-form-field>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-          <div>
+          <tedi-form-field>
             <label tedi-label for="start-date">Alguskuupäev</label>
-            <tedi-date-picker inputId="start-date" />
-          </div>
-          <div>
+            <tedi-date-field inputId="start-date" />
+          </tedi-form-field>
+          <tedi-form-field>
             <label tedi-label for="end-date">Lõppkuupäev</label>
-            <tedi-date-picker inputId="end-date" />
-          </div>
+            <tedi-date-field inputId="end-date" />
+          </tedi-form-field>
         </div>
         <hr style="border: none; border-top: 1px solid var(--modal-border-inner); margin: 0;" />
         <h3 style="margin: 0;">Kontaktisik</h3>
@@ -187,7 +190,7 @@ class StoryScrollableContentComponent {
 @Component({
   standalone: true,
   selector: "story-scrollable-fade-content",
-  imports: [...sharedModalImports, ScrollFadeComponent, DatePickerComponent],
+  imports: [...sharedModalImports, ScrollFadeComponent, DateFieldComponent],
   template: `
     <tedi-modal>
       <tedi-modal-header>
@@ -218,14 +221,14 @@ class StoryScrollableContentComponent {
               <input tedi-text-field id="fade-description" />
             </tedi-form-field>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-              <div>
+              <tedi-form-field>
                 <label tedi-label for="fade-start-date">Alguskuupäev</label>
-                <tedi-date-picker inputId="fade-start-date" />
-              </div>
-              <div>
+                <tedi-date-field inputId="fade-start-date" />
+              </tedi-form-field>
+              <tedi-form-field>
                 <label tedi-label for="fade-end-date">Lõppkuupäev</label>
-                <tedi-date-picker inputId="fade-end-date" />
-              </div>
+                <tedi-date-field inputId="fade-end-date" />
+              </tedi-form-field>
             </div>
             <hr style="border: none; border-top: 1px solid var(--modal-border-inner); margin: 0;" />
             <h3 style="margin: 0;">Kontaktisik</h3>
@@ -389,6 +392,52 @@ class StoryNoFooterComponent {
   readonly ref = inject(ModalRef);
 }
 
+@Component({
+  standalone: true,
+  selector: "story-modal-with-toast",
+  imports: [
+    ModalComponent,
+    ModalHeaderComponent,
+    ModalContentComponent,
+    ModalFooterComponent,
+    ButtonComponent,
+    LabelComponent,
+    FormFieldComponent,
+    DateFieldComponent,
+  ],
+  template: `
+    <tedi-modal>
+      <tedi-modal-header>
+        <h1>{{ data.title }}</h1>
+      </tedi-modal-header>
+      <tedi-modal-content>
+        <tedi-form-field>
+          <label tedi-label for="toast-date">Date</label>
+          <tedi-date-field inputId="toast-date" [(value)]="selectedDate" />
+        </tedi-form-field>
+      </tedi-modal-content>
+      <tedi-modal-footer>
+        <button tedi-button variant="secondary" (click)="ref.close()">Cancel</button>
+        <button tedi-button (click)="confirm()">Confirm</button>
+      </tedi-modal-footer>
+    </tedi-modal>
+  `,
+})
+class StoryModalWithToastComponent {
+  readonly data = inject(MODAL_DATA) as StoryModalData;
+  readonly ref = inject(ModalRef);
+  private readonly toastService = inject(ToastService);
+
+  readonly selectedDate = signal<Date | null>(null);
+
+  confirm() {
+    const date = this.selectedDate();
+    const formatted = date ? formatDate(date) : "no date selected";
+    this.toastService.success("Saved", `Selected date: ${formatted}`);
+    this.ref.close();
+  }
+}
+
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.23.38?node-id=4626-89579&m=dev" target="_blank">Figma ↗</a><br>
  * <a href="https://www.tedi.ee/1ee8444b7/p/31221b-modal" target="_blank">Zeroheight ↗</a>
@@ -465,6 +514,7 @@ class StoryNoFooterComponent {
 export default {
   title: "TEDI-Ready/Components/Overlay/Modal",
   component: ModalComponent,
+
   decorators: [
     moduleMetadata({
       imports: [
@@ -473,11 +523,11 @@ export default {
       ],
     }),
   ],
-  parameters: {},
+
   argTypes: {
     size: {
       table: { type: { summary: "'default' | 'small'" }, defaultValue: { summary: "'default'" }, category: "ModalConfig" },
-      description: "Modal size variant. Controls padding, heading size, and close button size.",
+      description: "Modal size variant. Controls padding and heading size. Close button defaults to match this variant unless `closeButtonSize` is set explicitly on `<tedi-modal-header>`.",
     },
     width: {
       table: { type: { summary: "'xs' | 'sm' | 'md' | 'lg' | 'xl' | string" }, defaultValue: { summary: "'sm'" }, category: "ModalConfig" },
@@ -488,8 +538,8 @@ export default {
       description: "Max-width cap (e.g. `'75%'`, `'60vw'`). Overrides the default 95vw limit.",
     },
     position: {
-      table: { type: { summary: "'center' | 'top' | 'left' | 'right'" }, defaultValue: { summary: "'center'" }, category: "ModalConfig" },
-      description: "Position of the modal on screen. `'left'` and `'right'` create side/drawer modals.",
+      table: { type: { summary: "'center' | 'top' | 'bottom' | 'left' | 'right'" }, defaultValue: { summary: "'center'" }, category: "ModalConfig" },
+      description: "Position of the modal on screen. `'left'` / `'right'` create side/drawer modals. `'top'` and `'bottom'` anchor the modal to the corresponding edge with a fixed margin — useful for mobile bottom-sheet patterns.",
     },
     scrollBehavior: {
       table: { type: { summary: "'content' | 'page'" }, defaultValue: { summary: "'content'" }, category: "ModalConfig" },
@@ -511,6 +561,10 @@ export default {
       table: { type: { summary: "boolean" }, defaultValue: { summary: "true" }, category: "ModalConfig" },
       description: "Whether to show a close button in the header. Set via `[showClose]` on `<tedi-modal-header>`.",
     },
+    closeButtonSize: {
+      table: { type: { summary: "ClosingButtonSize" }, category: "ModalConfig" },
+      description: "Size of the close button. When unset, tracks the modal `size` variant (default → standard, small → compact). Set via `[closeButtonSize]` on `<tedi-modal-header>` to override.",
+    },
     data: {
       table: { type: { summary: "unknown" }, category: "ModalConfig" },
       description: "Data passed to the modal content component. Accessible via `inject(MODAL_DATA)`.",
@@ -523,7 +577,7 @@ export default {
       table: { type: { summary: "string" }, category: "ModalConfig" },
       description: "ID of the element that labels the dialog.",
     },
-  },
+  }
 } as Meta<ModalComponent>;
 
 export const Default: StoryObj = {
@@ -542,7 +596,7 @@ export const Default: StoryObj = {
     size: { control: "select", options: ["default", "small"] },
     width: { control: "text" },
     maxWidth: { control: "text" },
-    position: { control: "select", options: ["center", "top", "left", "right"] },
+    position: { control: "select", options: ["center", "top", "bottom", "left", "right"] },
     scrollBehavior: { control: "select", options: ["content", "page"] },
     fullscreen: { control: "text", description: "Set `true` for always fullscreen or a breakpoint string (`sm`, `md`, `lg`, `xl`, `xxl`)." },
     closeOnBackdropClick: { control: "boolean" },
@@ -1338,8 +1392,7 @@ export const FooterVariants: StoryObj = {
 // No footer — simply omit <tedi-modal-footer>
 
 this.modalService.open(MyModalContent, {
-  data: { title: 'Title' },
-  size: 'small',
+  data: { title: 'Title' }
 });`,
         language: "typescript",
         type: "code",
@@ -1378,8 +1431,7 @@ this.modalService.open(MyModalContent, {
 
       openDefault() {
         this.modalService.open(StoryModalContentComponent, {
-          data: this.data,
-          size: "small",
+          data: this.data
         });
       }
 
@@ -1406,6 +1458,92 @@ this.modalService.open(MyModalContent, {
       template: "<story-footer-demo />",
       moduleMetadata: {
         imports: [FooterDemoComponent],
+      },
+    };
+  },
+};
+
+export const WithToast: StoryObj = {
+  name: "With date picker and toast",
+  parameters: {
+    docs: {
+      source: {
+        code: `
+@Component({
+  imports: [ModalComponent, ModalHeaderComponent, ModalContentComponent, ModalFooterComponent, ButtonComponent, LabelComponent, FormFieldComponent, DateFieldComponent],
+  template: \`
+    <tedi-modal>
+      <tedi-modal-header>
+        <h1>{{ data.title }}</h1>
+      </tedi-modal-header>
+      <tedi-modal-content>
+        <tedi-form-field>
+          <label tedi-label for="toast-date">Date</label>
+          <tedi-date-field inputId="toast-date" [(value)]="selectedDate" />
+        </tedi-form-field>
+      </tedi-modal-content>
+      <tedi-modal-footer>
+        <button tedi-button variant="secondary" (click)="ref.close()">Cancel</button>
+        <button tedi-button (click)="confirm()">Confirm</button>
+      </tedi-modal-footer>
+    </tedi-modal>
+  \`,
+})
+class MyModalContent {
+  data = inject(MODAL_DATA);
+  ref = inject(ModalRef);
+  private toastService = inject(ToastService);
+
+  selectedDate = signal<Date | null>(null);
+
+  confirm() {
+    const date = this.selectedDate();
+    this.toastService.success("Saved", \`Selected date: \${date ? formatDate(date) : "no date selected"}\`);
+  }
+}
+
+// Open from a host component:
+this.modalService.open(MyModalContent, {
+  data: { title: 'Pick a date' },
+  width: 'sm',
+});`,
+        language: "typescript",
+        type: "code",
+      },
+    },
+  },
+  decorators: [
+    applicationConfig({
+      providers: [provideAnimations()],
+    }),
+    moduleMetadata({
+      imports: [ButtonComponent, StoryModalWithToastComponent],
+    }),
+  ],
+  render: () => {
+    @Component({
+      standalone: true,
+      selector: "story-with-toast-demo",
+      imports: [ButtonComponent],
+      template: `
+        <button tedi-button variant="secondary" (click)="open()">Open modal</button>
+      `,
+    })
+    class WithToastDemoComponent {
+      private readonly modalService = inject(ModalService);
+
+      open() {
+        this.modalService.open(StoryModalWithToastComponent, {
+          data: { title: "Pick a date" },
+          width: "sm",
+        });
+      }
+    }
+
+    return {
+      template: "<story-with-toast-demo />",
+      moduleMetadata: {
+        imports: [WithToastDemoComponent],
       },
     };
   },

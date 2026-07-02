@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  OnDestroy,
   ViewEncapsulation,
   computed,
   input,
@@ -10,6 +11,7 @@ import {
   signal,
   viewChild,
 } from "@angular/core";
+import { CdkScrollable } from "@angular/cdk/scrolling";
 
 export type ScrollFadeSize = 0 | 10 | 20;
 export type ScrollFadePosition = "top" | "bottom" | "both";
@@ -18,6 +20,7 @@ export type ScrollFadeScrollbar = "default" | "custom";
 @Component({
   standalone: true,
   selector: "tedi-scroll-fade",
+  imports: [CdkScrollable],
   templateUrl: "./scroll-fade.component.html",
   styleUrl: "./scroll-fade.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -26,7 +29,7 @@ export type ScrollFadeScrollbar = "default" | "custom";
     "[class]": "classes()",
   },
 })
-export class ScrollFadeComponent implements AfterViewInit {
+export class ScrollFadeComponent implements AfterViewInit, OnDestroy {
   /** Size of the fade gradient in percentages. */
   readonly fadeSize = input<ScrollFadeSize>(20);
 
@@ -43,6 +46,7 @@ export class ScrollFadeComponent implements AfterViewInit {
   readonly scrolledToBottom = output<void>();
 
   private readonly innerRef = viewChild.required<ElementRef<HTMLDivElement>>("inner");
+  private resizeObserver: ResizeObserver | null = null;
 
   private readonly fade = signal({ top: false, bottom: false });
 
@@ -81,6 +85,17 @@ export class ScrollFadeComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     const el = this.innerRef().nativeElement;
     this.updateFade(el.scrollTop, el.scrollHeight, el.clientHeight);
+
+    if (typeof ResizeObserver !== "undefined") {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.updateFade(el.scrollTop, el.scrollHeight, el.clientHeight);
+      });
+      this.resizeObserver.observe(el);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
   }
 
   private updateFade(scrollTop: number, scrollHeight: number, clientHeight: number): void {

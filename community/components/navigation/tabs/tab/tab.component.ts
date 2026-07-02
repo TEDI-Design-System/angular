@@ -38,7 +38,13 @@ import { FocusableOption } from "@angular/cdk/a11y";
     },
   ],
 })
+/**
+ * @deprecated Use the TEDI-Ready `button[tedi-tabs-trigger]` from
+ * `@tedi-design-system/angular` instead.
+ */
 export class TabComponent implements FocusableOption {
+  private element = inject(ElementRef);
+
   tabId = input.required<string>();
   selected = model(false);
   disabledInput = input(false, {
@@ -67,7 +73,7 @@ export class TabComponent implements FocusableOption {
     this.element.nativeElement.focus();
   }
 
-  constructor(private element: ElementRef) {
+  constructor() {
     effect(() => {
       this.disabled = this.disabledInput();
     });

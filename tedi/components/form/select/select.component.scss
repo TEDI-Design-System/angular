@@ -79,6 +79,12 @@
     margin-top: var(--form-field-outer-spacing);
   }
 
+  &__label-row {
+    display: flex;
+    gap: var(--content-label-inner-spacing-x);
+    align-items: center;
+  }
+
   &__trigger {
     display: flex;
     justify-content: space-between;
@@ -107,25 +113,20 @@
     background: none;
     border: none;
 
-    & + .tedi-select__arrow {
+    &+.tedi-select__arrow {
       border-left: 1px solid var(--general-border-primary);
     }
   }
 
   &__arrow {
+    display: inline-flex;
     flex-grow: 0;
     flex-shrink: 0;
-    padding: 0;
+    align-items: center;
     padding-left: var(--form-field-inner-spacing);
     margin-left: var(--form-field-inner-spacing);
     color: inherit;
     cursor: default;
-    background: none;
-    border: none;
-
-    &:focus-visible {
-      outline: none;
-    }
   }
 
   &__dropdown {
@@ -135,7 +136,7 @@
     margin-top: var(--form-field-outer-spacing);
     margin-bottom: var(--form-field-outer-spacing);
     background: var(--card-background-primary);
-    border-radius: var(--card-border-radius);
+    border-radius: var(--card-radius-rounded);
     box-shadow: 0 1px 5px 0 var(--tedi-alpha-20);
   }
 
@@ -230,15 +231,14 @@
       display: none;
     }
 
-    &--custom-content:empty + &--label {
+    &--custom-content:empty+&--label {
       display: block;
     }
   }
 
   &__group-name {
     display: block;
-    padding: var(--dropdown-group-label-padding-y)
-      var(--dropdown-group-label-padding-x) var(--layout-grid-gutters-04);
+    padding: var(--dropdown-group-label-padding-y) var(--dropdown-group-label-padding-x) var(--layout-grid-gutters-04);
     font-size: var(--heading-subtitle-small-size);
     font-weight: var(--heading-subtitle-small-weight);
     line-height: var(--heading-subtitle-small-line-height);
@@ -253,7 +253,7 @@
       text-transform: none;
       letter-spacing: inherit;
 
-      & ~ .tedi-dropdown-item:not(.tedi-select__group-name) {
+      &~.tedi-dropdown-item:not(.tedi-select__group-name) {
         padding-left: var(--form-checkbox-radio-subitem-padding-left);
       }
     }
@@ -270,9 +270,19 @@
     flex-wrap: wrap;
     gap: var(--form-field-inner-spacing);
 
+    // Single row: the tags clip inside an inner wrapper while the +N counter
+    // and the search input sit outside it and never shrink, so the counter
+    // stays visible as the field narrows.
     &--single-row {
       flex-wrap: nowrap;
-      overflow: hidden;
+
+      .tedi-select__multiselect-tags {
+        display: flex;
+        flex: 0 1 auto;
+        gap: var(--form-field-inner-spacing);
+        min-width: 0;
+        overflow: hidden;
+      }
 
       .tedi-tag {
         flex-shrink: 0;
@@ -280,6 +290,11 @@
         &__content {
           white-space: nowrap;
         }
+      }
+
+      .tedi-select__multiselect-counter,
+      .tedi-select__search-input {
+        flex-shrink: 0;
       }
     }
   }
@@ -306,10 +321,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, var(--tedi-swatch-size));
     gap: var(--tedi-swatch-gap);
-    max-width: calc(
-      var(--tedi-swatch-columns) *
-        (var(--tedi-swatch-size) + var(--tedi-swatch-gap))
-    );
+    max-width: calc(var(--tedi-swatch-columns) * (var(--tedi-swatch-size) + var(--tedi-swatch-gap)));
     padding: var(--dropdown-body-padding-y) var(--dropdown-body-padding-x);
 
     .tedi-dropdown-item {

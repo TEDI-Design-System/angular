@@ -67,10 +67,11 @@
   }
 
   tedi-icon {
+    --_tedi-icon-size: var(--icon-03);
+
     height: fit-content;
     margin-right: var(--button-sm-inner-spacing);
     margin-left: var(--button-sm-inner-spacing);
-    font-size: 16px;
     line-height: inherit;
     color: inherit;
 
@@ -81,5 +82,9 @@
     &:last-child {
       margin-right: 0;
     }
+  }
+
+  &--small tedi-icon {
+    --_tedi-icon-size: var(--icon-02);
   }
 }

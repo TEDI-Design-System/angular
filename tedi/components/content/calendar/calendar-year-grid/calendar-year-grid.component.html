@@ -1,0 +1,26 @@
+<div
+  class="tedi-calendar-year-grid"
+  role="grid"
+  [attr.aria-label]="gridAriaLabel()"
+>
+  @for (row of rows(); track $index) {
+    <div class="tedi-calendar-year-grid__row" role="row">
+      @for (entry of row; track entry.year) {
+        <div class="tedi-calendar-year-grid__cell" role="gridcell">
+          <button
+            type="button"
+            class="tedi-calendar-year-grid__year"
+            [class.tedi-calendar-year-grid__year--selected]="isSelected(entry.year)"
+            [class.tedi-calendar-year-grid__year--current]="isCurrent(entry.year)"
+            [class.tedi-calendar-year-grid__year--disabled]="isDisabled(entry.year)"
+            [attr.aria-selected]="isSelected(entry.year) || null"
+            [attr.aria-disabled]="isDisabled(entry.year) || null"
+            (click)="handleClick(entry.year)"
+          >
+            {{ entry.year }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

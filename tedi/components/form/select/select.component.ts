@@ -1,4 +1,4 @@
-import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
+import { CdkConnectedOverlay, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
 import { CdkListbox, CdkListboxModule } from "@angular/cdk/listbox";
 import {
   AfterContentChecked,
@@ -23,12 +23,16 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { IconComponent, TextComponent } from "../../base";
-import { ClosingButtonComponent } from "../../buttons";
+import { ClosingButtonComponent, InfoButtonComponent } from "../../buttons";
+import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
+import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
+import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
 import { TediTranslationPipe } from "../../../services";
 import { ComponentInputs } from "../../../types";
+import { calculateVisibleTagCount } from "../../../utils/tag-overflow.util";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { LabelComponent } from "../label/label.component";
-import { TagComponent } from "../../tags/tag/tag.component";
+import { TagComponent, TagEllipsis } from "../../tags/tag/tag.component";
 import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
 import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
 import {
@@ -68,6 +72,10 @@ export enum SpecialOptionControls {
     OverlayModule,
     CdkListboxModule,
     ClosingButtonComponent,
+    InfoButtonComponent,
+    TooltipComponent,
+    TooltipTriggerComponent,
+    TooltipContentComponent,
     IconComponent,
     LabelComponent,
     FeedbackTextComponent,
@@ -107,6 +115,26 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   label = input<string>();
 
   /**
+   * When set, renders an info button next to the label that reveals this text
+   * in a tooltip on hover/focus.
+   */
+  tooltip = input<string>();
+
+  /**
+   * Associates the select with an external visible label by its element id.
+   * Use this when the label lives outside the component — a native
+   * `<label for>` cannot target the combobox because it is a `<div>`, not a
+   * labelable element. Ignored when the built-in `label` input is set.
+   */
+  ariaLabelledby = input<string | undefined>(undefined);
+
+  /**
+   * Accessible name for the select when there is no visible label to reference.
+   * Ignored when `label` or `ariaLabelledby` provides a name.
+   */
+  ariaLabel = input<string | undefined>(undefined);
+
+  /**
    * Whether the field is required.
    * @default false
    */
@@ -141,6 +169,14 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * When null, dropdown width matches the host element.
    */
   dropdownWidthRef = input<ElementRef | null>();
+
+  /**
+   * Which edge of the trigger the dropdown is anchored to. Use `"end"` when the
+   * select sits against the right edge of its container so the panel expands
+   * inward instead of overflowing.
+   * @default "start"
+   */
+  dropdownAlign = input<"start" | "end">("start");
 
   /**
    * Configuration for the feedback text displayed below the select.
@@ -204,6 +240,13 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * @default false
    */
   multiRow = input<boolean>(false);
+
+  /**
+   * Which end a selected tag's label truncates from when it doesn't fit.
+   * `false` (default) never truncates; `end` → `label…`; `start` → `…label`.
+   * @default false
+   */
+  tagEllipsis = input<TagEllipsis>(false);
 
   /**
    * Function used to compare option values for equality.
@@ -292,25 +335,31 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   readonly SpecialOptionControls = SpecialOptionControls;
 
-  readonly dropdownPositions: ConnectedPosition[] = [
-    // Open below, expand downward
-    {
-      originX: "start",
-      originY: "bottom",
-      overlayX: "start",
-      overlayY: "top",
-    },
-    // Fallback: open above, expand upward
-    {
-      originX: "start",
-      originY: "top",
-      overlayX: "start",
-      overlayY: "bottom",
-    },
-  ];
+  readonly dropdownPositions = computed<ConnectedPosition[]>(() => {
+    const x = this.dropdownAlign();
+    return [
+      // Open below, expand downward
+      { originX: x, originY: "bottom", overlayX: x, overlayY: "top" },
+      // Fallback: open above, expand upward
+      { originX: x, originY: "top", overlayX: x, overlayY: "bottom" },
+    ];
+  });
 
   listboxId = computed(() => this.inputId() + "-listbox");
   labelId = computed(() => this.inputId() + "-label");
+
+  /**
+   * The id(s) to expose via `aria-labelledby`: the built-in label takes
+   * precedence, falling back to a consumer-provided external label id.
+   */
+  resolvedAriaLabelledby = computed(() =>
+    this.label() ? this.labelId() : (this.ariaLabelledby() ?? null)
+  );
+
+  /** `aria-label` is only used when no labelledby reference is available. */
+  resolvedAriaLabel = computed(() =>
+    this.resolvedAriaLabelledby() ? null : (this.ariaLabel() ?? null)
+  );
 
   isOpen = signal(false);
   selectedValues = signal<unknown[]>([]);
@@ -331,7 +380,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   listboxRef = viewChild(CdkListbox, { read: ElementRef });
   cdkListboxRef = viewChild(CdkListbox);
   connectedOverlay = viewChild(CdkConnectedOverlay);
-  triggerRef = viewChild(CdkOverlayOrigin, { read: ElementRef });
+  triggerRef = viewChild("trigger", { read: ElementRef });
   searchInputRef = viewChild<ElementRef>("searchInput");
   multiselectContainerRef = viewChild<ElementRef>("multiselectContainer");
   tagRefs = viewChildren("tagElement", { read: ElementRef });
@@ -516,6 +565,33 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     } else if (this.isOpen() && this.listboxRef() && !this.searchable()) {
       this.listboxRef()?.nativeElement.focus();
     }
+  });
+
+  /**
+   * Make an external label clickable to behave like the built-in one: clicking the
+   * element referenced via `ariaLabelledby` opens the dropdown. Skipped
+   * when the built-in `label` is used.
+   */
+  bindExternalLabelClick = effect((onCleanup) => {
+    const ids = this.ariaLabelledby();
+    if (this.label() || !ids) return;
+
+    // `aria-labelledby` is a space-separated IDREF list, so resolve each id.
+    const labelEls = ids
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (labelEls.length === 0) return;
+
+    const open = (event: Event) => {
+      event.stopPropagation();
+      this.onTriggerClick();
+    };
+    labelEls.forEach((el) => el.addEventListener("click", open));
+    onCleanup(() =>
+      labelEls.forEach((el) => el.removeEventListener("click", open))
+    );
   });
 
   constructor() {
@@ -918,28 +994,8 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     const availableWidth = this.getAvailableTagWidth();
     if (availableWidth <= 0) return;
 
-    const gap = 8;
-    const counterTagWidth = 40;
-    let usedWidth = 0;
-    let visibleCount = 0;
-
-    for (let i = 0; i < tags.length; i++) {
-      const tagWidth = tags[i].nativeElement.offsetWidth;
-      const spaceNeeded = usedWidth + tagWidth + (visibleCount > 0 ? gap : 0);
-      const hasMoreItems = i < tags.length - 1;
-      const reservedSpace = hasMoreItems ? counterTagWidth + gap : 0;
-
-      if (spaceNeeded + reservedSpace <= availableWidth) {
-        usedWidth = spaceNeeded;
-        visibleCount++;
-      } else {
-        break;
-      }
-    }
-
-    if (visibleCount === 0 && tags.length > 0) {
-      visibleCount = 1;
-    }
+    const widths = tags.map((tag) => tag.nativeElement.offsetWidth);
+    const visibleCount = calculateVisibleTagCount(widths, availableWidth);
 
     this.ngZone.run(() => {
       this.visibleTagsCount.set(visibleCount);

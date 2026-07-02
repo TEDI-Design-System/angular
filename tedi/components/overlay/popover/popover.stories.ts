@@ -32,7 +32,7 @@ const POSITIONS: PopoverPosition[] = [
 ];
 
 /**
- * <a href="https://www.figma.com/design/TUjrgIdS28srN08U3J2lFe/Floating-button-adjustments?node-id=3225-21915&t=uEOTNpiJPbNICJKk-4" target="_blank">Figma ↗</a><br>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.56.78?m=dev&node-id=5797-117364" target="_blank">Figma ↗</a><br>
  * <a href="https://www.tedi.ee/1ee8444b7/p/72a3ed-popover" target="_blank">Zeroheight ↗</a>
  */
 
@@ -68,6 +68,20 @@ export default {
         },
         defaultValue: {
           summary: "top",
+        },
+      },
+    },
+    preventOverflow: {
+      control: "boolean",
+      description:
+        "Should position flip to opposite direction when overflowing screen?",
+      defaultValue: {
+        summary: "false",
+      },
+      table: {
+        category: "popover inputs",
+        type: {
+          summary: "boolean",
         },
       },
     },
@@ -201,6 +215,7 @@ type Story = StoryObj<
 export const Default: Story = {
   args: {
     position: "top",
+    preventOverflow: false,
     dismissible: true,
     hideOnScroll: false,
     withBorder: false,
@@ -213,7 +228,7 @@ export const Default: Story = {
   render: (args) => ({
     props: args,
     template: `
-      <tedi-popover [position]="position" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay">
+      <tedi-popover [position]="position" [preventOverflow]="preventOverflow" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay">
         <button tedi-button tedi-popover-trigger>
           Popover Trigger
         </button>

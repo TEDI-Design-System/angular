@@ -23,6 +23,9 @@ const getPaddingClasses = (padding: CardPadding) => {
   }
 };
 
+/**
+ * @deprecated Use the padding input on TEDI-ready Card components instead. This directive will be removed from future versions.
+ */
 @Directive({
   standalone: true,
   host: {

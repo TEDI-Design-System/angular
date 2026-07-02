@@ -52,6 +52,8 @@ export default {
         "success",
         "danger",
         "danger-neutral",
+        "primary-button-group",
+        "secondary-button-group",
       ],
       description:
         "Specifies the color theme of the button. The color should meet accessibility standards for color contrast.",
@@ -61,7 +63,7 @@ export default {
         type: {
           summary: "ButtonVariant",
           detail:
-            "primary \nsecondary \nneutral \nsuccess \ndanger \ndanger-neutral \nprimary-inverted \nsecondary-inverted \nneutral-inverted",
+            "primary \nsecondary \nneutral \nsuccess \ndanger \ndanger-neutral \nprimary-inverted \nsecondary-inverted \nneutral-inverted \nprimary-button-group \nsecondary-button-group",
         },
       },
     },
@@ -171,14 +173,21 @@ export const PrimaryInverted: StoryObj<TemplateType> = {
       hover: "#Hover",
       active: "#Active",
       focusVisible: "#Focus",
-    },
-    backgrounds: { default: "brand" },
+    }
   },
+
   args: {
     titleColor: "white",
     variant: "primary-inverted",
   },
+
   render: ButtonTemplate,
+
+  globals: {
+    backgrounds: {
+      value: "brand"
+    }
+  }
 };
 
 export const Secondary: StoryObj<TemplateType> = {
@@ -201,14 +210,21 @@ export const SecondaryInverted: StoryObj<TemplateType> = {
       hover: "#Hover",
       active: "#Active",
       focusVisible: "#Focus",
-    },
-    backgrounds: { default: "brand" },
+    }
   },
+
   args: {
     titleColor: "white",
     variant: "secondary-inverted",
   },
+
   render: ButtonTemplate,
+
+  globals: {
+    backgrounds: {
+      value: "brand"
+    }
+  }
 };
 
 export const Neutral: StoryObj<TemplateType> = {
@@ -231,14 +247,21 @@ export const NeutralInverted: StoryObj<TemplateType> = {
       hover: "#Hover",
       active: "#Active",
       focusVisible: "#Focus",
-    },
-    backgrounds: { default: "brand" },
+    }
   },
+
   args: {
     titleColor: "white",
     variant: "neutral-inverted",
   },
+
   render: ButtonTemplate,
+
+  globals: {
+    backgrounds: {
+      value: "brand"
+    }
+  }
 };
 
 export const Success: StoryObj<TemplateType> = {

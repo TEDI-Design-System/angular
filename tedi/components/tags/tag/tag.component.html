@@ -5,8 +5,16 @@
 }
 
 <span class="tedi-tag__content" [attr.id]="uniqueId">
-  <ng-content />
+  @if (ellipsis()) {
+    <tedi-ellipsis [position]="ellipsisPosition()" [lineClamp]="1">
+      <ng-container [ngTemplateOutlet]="tagContent" />
+    </tedi-ellipsis>
+  } @else {
+    <ng-container [ngTemplateOutlet]="tagContent" />
+  }
 </span>
+
+<ng-template #tagContent><ng-content /></ng-template>
 
 @if (loading()) {
   <span class="tedi-tag__spinner-wrapper">

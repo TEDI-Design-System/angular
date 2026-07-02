@@ -1,4 +1,7 @@
-<ng-content select="button[tedi-sidenav-toggle]"></ng-content>
 <div class="tedi-header__main">
+  <ng-content select="button[tedi-sidenav-toggle]"></ng-content>
+  <div class="tedi-header__main--content">
     <ng-content></ng-content>
+  </div>
 </div>
+<ng-content select="tedi-header-bottom"></ng-content>

@@ -10,7 +10,10 @@ import {
   signal,
   ViewEncapsulation,
 } from "@angular/core";
+import { CdkOverlayOrigin } from "@angular/cdk/overlay";
 import { TooltipComponent } from "../tooltip.component";
+
+const FOCUSABLE_SELECTOR = "button, a[href], [tabindex]";
 
 @Component({
   selector: "tedi-tooltip-trigger",
@@ -18,10 +21,12 @@ import { TooltipComponent } from "../tooltip.component";
   template: "<ng-content />",
   styleUrl: "../tooltip.component.scss",
   encapsulation: ViewEncapsulation.None,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  hostDirectives: [CdkOverlayOrigin],
 })
 export class TooltipTriggerComponent implements AfterContentChecked {
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  readonly overlayOrigin = inject(CdkOverlayOrigin, { self: true });
   private renderer = inject(Renderer2);
   readonly tooltip = inject(TooltipComponent);
   private interactiveElement = signal<HTMLElement | null>(null);
@@ -140,12 +145,36 @@ export class TooltipTriggerComponent implements AfterContentChecked {
       return;
     }
 
-    this.renderer.addClass(firstChild, "tedi-tooltip-trigger--focus");
+    const interactive = this.resolveInteractiveElement(firstChild);
 
-    if (!firstChild.getAttribute("tabindex")) {
-      this.renderer.setAttribute(firstChild, "tabindex", "0");
+    this.renderer.addClass(interactive, "tedi-tooltip-trigger--focus");
+
+    if (!interactive.getAttribute("tabindex")) {
+      this.renderer.setAttribute(interactive, "tabindex", "0");
     }
 
-    this.interactiveElement.set(firstChild);
+    this.interactiveElement.set(interactive);
+  }
+
+  /**
+   * The element that actually receives focus and ARIA semantics. When the
+   * projected child is itself focusable (a `<button>`/`<a href>`) it is used
+   * directly. When it is a non-focusable wrapper that renders its own
+   * interactive element (e.g. a `tedi-dropdown` projecting a trigger button),
+   * the first focusable descendant is used instead — otherwise focus and the
+   * tooltip description would land on the non-interactive wrapper.
+   */
+  private resolveInteractiveElement(child: HTMLElement): HTMLElement {
+    if (this.isFocusable(child)) {
+      return child;
+    }
+
+    return child.querySelector<HTMLElement>(FOCUSABLE_SELECTOR) ?? child;
+  }
+
+  private isFocusable(el: HTMLElement): boolean {
+    return (
+      el.tagName === "BUTTON" || (el.tagName === "A" && el.hasAttribute("href"))
+    );
   }
 }

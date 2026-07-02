@@ -1,33 +1,37 @@
 import {
   Component,
+  forwardRef,
   input,
   ViewEncapsulation,
   ChangeDetectionStrategy,
-  viewChild,
   contentChild,
   signal,
-  AfterContentChecked,
+  computed,
   OnDestroy,
   inject,
   PLATFORM_ID,
   model,
+  Renderer2,
 } from "@angular/core";
-import {
-  NgxFloatUiContentComponent,
-  NgxFloatUiModule,
-  NgxFloatUiPlacements,
-} from "ngx-float-ui";
+import { OverlayModule } from "@angular/cdk/overlay";
+import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
-import { isPlatformBrowser } from "@angular/common";
 import { DROPDOWN_API } from "./dropdown.tokens";
+import { getFocusableElements } from "../../../utils/elements.util";
+import {
+  OverlayPosition,
+  toConnectedPositions,
+} from "../overlay-position.util";
 
-export type DropdownPosition = `${NgxFloatUiPlacements}`;
+export type DropdownPosition = OverlayPosition;
+
+let dropdownIdCounter = 0;
 
 @Component({
   standalone: true,
   selector: "tedi-dropdown",
-  imports: [NgxFloatUiModule],
+  imports: [OverlayModule],
   templateUrl: "./dropdown.component.html",
   styleUrl: "./dropdown.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -35,11 +39,11 @@ export type DropdownPosition = `${NgxFloatUiPlacements}`;
   providers: [
     {
       provide: DROPDOWN_API,
-      useExisting: DropdownComponent,
+      useExisting: forwardRef(() => DropdownComponent),
     },
   ],
 })
-export class DropdownComponent implements AfterContentChecked, OnDestroy {
+export class DropdownComponent implements OnDestroy {
   /** Current value of dropdown (used with listbox) */
   readonly value = model<string>();
 
@@ -56,108 +60,143 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
   readonly preventOverflow = input(true);
 
   /**
-   * Append floating element to given selector.
-   * Use 'body' to append at the end of DOM or empty string to append next to trigger element.
-   * @default ""
+   * Gap in px between the trigger and the dropdown panel.
+   * @default 4
    */
-  readonly appendTo = input("");
+  readonly offset = input(4);
+
+  /**
+   * Does the dropdown hide when the page scrolls?
+   * @default false
+   */
+  readonly hideOnScroll = input(false);
 
   readonly dropdownTrigger = contentChild.required(DropdownTriggerDirective);
   readonly dropdownContent = contentChild.required(DropdownContentComponent);
-  readonly floatUiComponent = viewChild.required(NgxFloatUiContentComponent);
 
   private readonly activeIndex = signal<number | null>(null);
-  readonly containerId = signal("");
-  readonly isContentHovered = signal(false);
-  readonly floatUiDisplay = signal<"inline" | "block">("inline");
+  readonly containerId = signal(`tedi-dropdown-${dropdownIdCounter++}`);
+  readonly isOpen = signal(false);
+  readonly triggerWidth = signal<number | null>(null);
+
+  readonly overlayOrigin = computed(() => this.dropdownTrigger().overlayOrigin);
+
+  readonly overlayPositions = computed(() => {
+    const offset = this.offset();
+    return toConnectedPositions(this.position(), this.preventOverflow()).map(
+      (pos) => ({
+        ...pos,
+        offsetX: pos.offsetX ? Math.sign(pos.offsetX) * offset : pos.offsetX,
+        offsetY: pos.offsetY ? Math.sign(pos.offsetY) * offset : pos.offsetY,
+      }),
+    );
+  });
+
+  readonly triggerWidthVar = computed(() => {
+    const w = this.triggerWidth();
+    return w ? `${w}px` : null;
+  });
 
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly document = inject(DOCUMENT);
+  private readonly renderer = inject(Renderer2);
+  private scrollListener?: () => void;
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
-      document.addEventListener("pointerdown", this.handleOutsideClick, true);
+      document.addEventListener("focusin", this.handleFocusOut, true);
     }
   }
 
   ngOnDestroy() {
     if (isPlatformBrowser(this.platformId)) {
-      document.removeEventListener(
-        "pointerdown",
-        this.handleOutsideClick,
-        true,
-      );
+      document.removeEventListener("focusin", this.handleFocusOut, true);
     }
+    this.cleanupScrollListener();
   }
 
-  ngAfterContentChecked(): void {
-    const floatUiEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
-    const container = floatUiEl.querySelector<HTMLElement>(
-      ".float-ui-container",
-    );
+  showDropdown(initialFocus: "selected" | "first" | "last" = "selected") {
+    if (this.isOpen()) return;
 
-    if (container) {
-      container.setAttribute("tabindex", "-1");
-      container.setAttribute("aria-labelledby", container.id + "_trigger");
-      this.containerId.set(container.id);
+    const width = this.dropdownTrigger()?.host.nativeElement.offsetWidth;
+    if (width) {
+      this.triggerWidth.set(width);
     }
-  }
 
-  showDropdown() {
-    if (this.floatUiComponent().state) return;
-
-    this.floatUiComponent().show();
-    this.floatUiDisplay.set("block");
+    this.isOpen.set(true);
     this.setActiveToSelectedOrFirst();
 
-    const floatUiEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
-    const triggerWidth = this.dropdownTrigger()?.host.nativeElement.offsetWidth;
-
-    if (triggerWidth) {
-      floatUiEl.style.setProperty(
-        "--_tedi-dropdown-trigger-width",
-        `${triggerWidth}px`,
-      );
+    if (this.hideOnScroll()) {
+      this.setupScrollListener();
     }
 
-    setTimeout(() => this.focusActiveItem());
+    // Deferred so the overlay content is attached before focusing
+    setTimeout(() => {
+      if (initialFocus === "first") {
+        this.focusFirstItem();
+      } else if (initialFocus === "last") {
+        this.focusLastItem();
+      } else {
+        this.focusActiveItem();
+      }
+    });
   }
 
   hideDropdown() {
-    if (this.floatUiComponent().state) {
-      this.floatUiComponent().hide();
-      this.floatUiDisplay.set("inline");
+    if (this.isOpen()) {
+      this.cleanupScrollListener();
+      this.isOpen.set(false);
       this.activeIndex.set(null);
       this.updateTabindexes();
     }
   }
 
   toggleDropdown() {
-    if (this.floatUiComponent().state) {
+    if (this.isOpen()) {
       this.hideDropdown();
     } else {
       this.showDropdown();
     }
   }
 
-  handleOutsideClick = (event: Event) => {
-    if (!this.floatUiComponent().state) return;
+  onOutsideClick() {
+    this.hideDropdown();
+  }
+
+  handleFocusOut = (event: FocusEvent) => {
+    if (!this.isOpen()) return;
 
     const target = event.target as HTMLElement;
 
     const triggerEl = this.dropdownTrigger().host.nativeElement;
-    const contentEl = this.floatUiComponent().elRef
-      .nativeElement as HTMLElement;
+    const contentEl = this.dropdownContent().host.nativeElement;
 
-    const clickedInside =
+    const focusedInside =
       triggerEl.contains(target) || contentEl.contains(target);
 
-    if (!clickedInside) {
+    if (!focusedInside) {
       this.hideDropdown();
-      triggerEl.focus();
     }
   };
+
+  tabOutOfDropdown(shiftKey: boolean) {
+    const triggerEl = this.dropdownTrigger().focusableElement;
+    const contentEl = this.dropdownContent().host.nativeElement;
+
+    const focusable = getFocusableElements(this.document.body).filter(
+      (el) => !contentEl.contains(el),
+    );
+    const triggerIndex = focusable.indexOf(triggerEl);
+    const next = shiftKey
+      ? focusable[triggerIndex - 1]
+      : focusable[triggerIndex + 1];
+
+    this.hideDropdown();
+
+    if (next) {
+      setTimeout(() => next.focus());
+    }
+  }
 
   focusFirstItem() {
     const items = this.dropdownContent().items();
@@ -262,6 +301,28 @@ export class DropdownComponent implements AfterContentChecked, OnDestroy {
         }
       }
     });
+  }
+
+  private setupScrollListener() {
+    this.cleanupScrollListener();
+
+    this.scrollListener = this.renderer.listen(
+      this.document,
+      "scroll",
+      () => {
+        if (this.isOpen()) {
+          this.hideDropdown();
+        }
+      },
+      { capture: true, passive: true },
+    );
+  }
+
+  private cleanupScrollListener() {
+    if (this.scrollListener) {
+      this.scrollListener();
+      this.scrollListener = undefined;
+    }
   }
 
   private findIndexByElement(el: HTMLLIElement): number {

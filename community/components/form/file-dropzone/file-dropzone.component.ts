@@ -10,7 +10,6 @@ import {
   ElementRef,
   OnInit,
   output,
-  Self,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import {
@@ -21,18 +20,18 @@ import {
   ValidationErrors,
 } from "@angular/forms";
 import {
-  ClosingButtonComponent,
+  AttachmentActionsComponent,
+  AttachmentComponent,
+  ButtonComponent,
   FeedbackTextComponent,
   IconComponent,
-  TooltipComponent,
-  TooltipTriggerComponent,
-  TooltipContentComponent,
-  InfoButtonComponent,
   TediTranslationPipe,
   TediTranslationService,
+  TooltipComponent,
+  TooltipContentComponent,
+  TooltipTriggerComponent,
   VerticalSpacingDirective,
 } from "@tedi-design-system/angular/tedi";
-import { CardComponent, CardContentComponent } from "../../cards";
 import {
   DropzoneValidatorFunction,
   FeedbackTextProps,
@@ -57,13 +56,12 @@ import { FileService } from "./file.service";
   imports: [
     IconComponent,
     FeedbackTextComponent,
-    CardComponent,
-    CardContentComponent,
-    ClosingButtonComponent,
+    AttachmentComponent,
+    AttachmentActionsComponent,
+    ButtonComponent,
     TooltipComponent,
     TooltipTriggerComponent,
     TooltipContentComponent,
-    InfoButtonComponent,
     ReactiveFormsModule,
     VerticalSpacingDirective,
     TediTranslationPipe,
@@ -71,6 +69,8 @@ import { FileService } from "./file.service";
   providers: [FileService],
 })
 export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
+  _ngControl = inject(NgControl, { self: true });
+
   /**
    * Specifies the allowed file types (e.g., "image/png, image/jpeg").
    *
@@ -222,7 +222,7 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
     position: "left",
   }));
 
-  constructor(@Self() public _ngControl: NgControl) {
+  constructor() {
     this._ngControl.valueAccessor = this;
   }
 
@@ -287,23 +287,6 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
     });
     return issues;
   }
-
-  fileClasses = (file: FileDropzone): string => {
-    const classList = ["tedi-file-dropzone__file-item"];
-    if (file.className) {
-      classList.push(...file.className);
-    }
-    if (file.fileStatus != "none") {
-      classList.push(`tedi-file-dropzone__file-item--${file.fileStatus}`);
-    }
-    return classList.join(" ");
-  };
-
-  tooltipClasses = (file: FileDropzone): string => {
-    const classes = ["tedi-file-dropzone__tooltip"];
-    classes.push(`tedi-file-dropzone__tooltip--${file.helper?.type || "hint"}`);
-    return classes.join(" ");
-  };
 
   selectionChange = (event: Event) => {
     const fileList = (event.target as HTMLInputElement).files;

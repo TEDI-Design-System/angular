@@ -8,6 +8,7 @@ import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { DatePickerComponent } from "./date-picker.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 import { TextComponent } from "../../base/text/text.component";
+import { LabelComponent } from "../label/label.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.23.39?node-id=9938-87564&m=dev" target="_blank">Figma ↗</a><br>
@@ -19,12 +20,12 @@ export default {
   component: DatePickerComponent,
   parameters: {
     status: {
-      type: ["partiallyTediReady"],
+      type: ["partiallyTediReady", "deprecated"],
     },
   },
   decorators: [
     moduleMetadata({
-      imports: [DatePickerComponent, ReactiveFormsModule, AlertComponent, TextComponent],
+      imports: [DatePickerComponent, ReactiveFormsModule, AlertComponent, TextComponent, LabelComponent],
     }),
   ],
   argTypes: {
@@ -46,9 +47,23 @@ export default {
         defaultValue: { summary: "new Date()" },
       },
     },
-    disabled: {
-      description: " Disabled dates that cannot be selected.",
+    disabledMatchers: {
+      description: "Disabled dates that cannot be selected.",
       control: { type: "object" },
+      table: {
+        category: "inputs",
+        type: {
+          summary: "DatePickerMatcher | DatePickerMatcher[] | null",
+          detail: `Date \n| Date[] \n| { before: Date } \n| { after: Date } \n| { from: Date; to?: Date } \n| ((date: Date) => boolean)
+          `,
+        },
+        defaultValue: { summary: "null" },
+      },
+    },
+    disabled: {
+      description:
+        "@deprecated Use `disabledMatchers` instead. Binding `[disabled]` together with `[formControl]` clashes with the boolean reactive-forms `disabled`.",
+      control: false,
       table: {
         category: "inputs",
         type: {
@@ -209,6 +224,7 @@ export const Default: StoryObj<DatePickerComponent> = {
       showNavigation: true,
       monthMode: "dropdown",
       yearMode: "dropdown",
+      disabledMatchers: null,
       disabled: null,
       startYear: null,
       endYear: null,
@@ -275,6 +291,11 @@ export const WithLowWidth: StoryObj<DatePickerComponent> = {
           <tedi-date-picker ${argsToTemplate(args)}
             inputPlaceholder="Select a date..."
           />
+            <div>
+              <label tedi-label [required]="true" [for]="'success'">Label</label>
+              <tedi-date-picker [inputId]="'success'" ${argsToTemplate(args)}
+            inputPlaceholder="Select a date..."
+          /></div>
           <tedi-date-picker ${argsToTemplate(args)}
             inputPlaceholder="Select a date..."
           />

@@ -6,6 +6,7 @@ import {
   HostListener,
   inject,
   input,
+  output,
   ViewEncapsulation,
 } from "@angular/core";
 import {
@@ -42,6 +43,29 @@ export class DropdownItemComponent {
   /** Is item disabled? */
   readonly disabled = input(false);
 
+  /**
+   * Whether the item's label clips overflowing content (for text ellipsis).
+   * Set `false` when projecting content with decorations that intentionally
+   * sit outside the line box, e.g. status indicator.
+   * @default true
+   */
+  readonly clipContent = input(true);
+
+  /**
+   * Whether selecting this item closes the dropdown. Set `false` for items
+   * that should keep the dropdown open after selection (e.g. multi-select
+   * checkboxes).
+   * @default true
+   */
+  readonly closeOnSelect = input(true);
+
+  /**
+   * Fires when the item is activated via click or keyboard (Enter / Space).
+   * Use to react to selection without depending on click event ordering with
+   * the host's built-in `onClick` handler.
+   */
+  readonly itemSelect = output<void>();
+
   readonly host = inject<ElementRef<HTMLLIElement>>(ElementRef);
   readonly dropdown = inject<DropdownApi>(DROPDOWN_API);
   readonly dropdownContent = inject<DropdownContentApi>(DROPDOWN_CONTENT_API);
@@ -62,6 +86,14 @@ export class DropdownItemComponent {
     if (this.disabled()) return;
 
     this.onItemSelect();
+  }
+
+  // Disabled items keep `aria-disabled` (and a roving tabindex in menus) so they
+  // stay discoverable, but they must not take focus on a mouse press — that focus
+  // would otherwise trigger mouse-focus styling on a non-interactive item.
+  @HostListener("mousedown", ["$event"])
+  onMousedown(event: MouseEvent) {
+    if (this.disabled()) event.preventDefault();
   }
 
   @HostListener("keydown", ["$event"])
@@ -103,7 +135,12 @@ export class DropdownItemComponent {
       case "Escape":
         event.preventDefault();
         this.dropdown.hideDropdown();
-        this.dropdown.dropdownTrigger()?.host.nativeElement.focus();
+        this.dropdown.dropdownTrigger()?.focus();
+        break;
+
+      case "Tab":
+        event.preventDefault();
+        this.dropdown.tabOutOfDropdown(event.shiftKey);
         break;
     }
   }
@@ -113,7 +150,11 @@ export class DropdownItemComponent {
       this.dropdown.value.set(this.value());
     }
 
+    this.itemSelect.emit();
+
+    if (!this.closeOnSelect()) return;
+
     this.dropdown.hideDropdown();
-    this.dropdown.dropdownTrigger()?.host.nativeElement.focus();
+    this.dropdown.dropdownTrigger()?.focus();
   }
 }

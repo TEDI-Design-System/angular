@@ -1,4 +1,8 @@
-$percentages: (0, 10, 20);
+$percentages: (
+  0,
+  10,
+  20
+);
 
 .tedi-scroll-fade {
   --_tedi-scroll-fade-top: 0%;
@@ -15,13 +19,11 @@ $percentages: (0, 10, 20);
     min-height: 0;
     max-height: inherit;
     overflow: auto;
-    mask-image: linear-gradient(
-      to bottom,
-      transparent 0%,
-      black var(--_tedi-scroll-fade-top),
-      black calc(100% - var(--_tedi-scroll-fade-bottom)),
-      transparent 100%
-    );
+    mask-image: linear-gradient(to bottom,
+        transparent 0%,
+        black var(--_tedi-scroll-fade-top),
+        black calc(100% - var(--_tedi-scroll-fade-bottom)),
+        transparent 100%);
 
     &--custom-scroll {
       &::-webkit-scrollbar {
@@ -32,10 +34,10 @@ $percentages: (0, 10, 20);
       &::-webkit-scrollbar-thumb {
         background: var(--general-border-primary);
         border-radius: 100px;
+      }
 
-        &:hover {
-          background-color: var(--general-border-secondary);
-        }
+      &::-webkit-scrollbar-thumb:hover {
+        background-color: var(--general-border-secondary);
       }
 
       &::-webkit-scrollbar-track {

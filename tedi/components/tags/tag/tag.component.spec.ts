@@ -25,6 +25,31 @@ describe("TagComponent", () => {
     expect(component.loading()).toBe(false);
     expect(component.closable()).toBe(false);
     expect(component.type()).toBe("primary");
+    expect(component.ellipsis()).toBe(false);
+  });
+
+  it("does not render an ellipsis by default", () => {
+    expect(fixture.nativeElement.classList).not.toContain("tedi-tag--ellipsis");
+    expect(fixture.nativeElement.querySelector("tedi-ellipsis")).toBeNull();
+  });
+
+  it("renders a trailing ellipsis for ellipsis='end'", () => {
+    fixture.componentRef.setInput("ellipsis", "end");
+    fixture.detectChanges();
+    expect(fixture.nativeElement.classList).toContain("tedi-tag--ellipsis");
+    expect(fixture.nativeElement.querySelector("tedi-ellipsis")).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector(".tedi-ellipsis__content--start"),
+    ).toBeNull();
+  });
+
+  it("renders a leading ellipsis for ellipsis='start'", () => {
+    fixture.componentRef.setInput("ellipsis", "start");
+    fixture.detectChanges();
+    expect(fixture.nativeElement.classList).toContain("tedi-tag--ellipsis");
+    expect(
+      fixture.nativeElement.querySelector(".tedi-ellipsis__content--start"),
+    ).not.toBeNull();
   });
 
   it("should have tedi-tag class", () => {

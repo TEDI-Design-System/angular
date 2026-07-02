@@ -87,12 +87,22 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    clipContent: {
+      control: "boolean",
+      description:
+        "`tedi-dropdown-item-value-label` input. Whether the label clips overflowing content for text ellipsis. Set `false` when the label holds decorations that sit outside the line box (e.g. status indicator), so they are not cut off.",
+      table: {
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
   },
   args: {
     type: "default",
     layout: "horizontal",
     selected: false,
     disabled: false,
+    clipContent: true,
   },
 } as Meta<DropdownItemValueComponent>;
 
@@ -103,7 +113,7 @@ export const Default: Story = {
     props: args,
     template: `
       <tedi-dropdown-item-value [type]="type" [layout]="layout" [selected]="selected" [disabled]="disabled">
-        <tedi-dropdown-item-value-label>Option 1</tedi-dropdown-item-value-label>
+        <tedi-dropdown-item-value-label [clipContent]="clipContent">Option 1</tedi-dropdown-item-value-label>
       </tedi-dropdown-item-value>
     `,
   }),
