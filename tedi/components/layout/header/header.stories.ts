@@ -1318,6 +1318,8 @@ export const WithTopHeader: StoryObj<HeaderComponent> = {
               {{ 'notifications' | storyTranslate }}
             </a>
             <story-theme-toggle *hideAt="'lg'" />
+            <tedi-separator *showAt="'lg'" />
+            <tedi-header-logout href="#" />
           </tedi-header-profile>
         </tedi-header-actions>
       </header>
@@ -1368,6 +1370,8 @@ export const WithTopHeaderAndLanguageDropdown: StoryObj<HeaderComponent> = {
               {{ 'notifications' | storyTranslate }}
             </a>
             <story-theme-toggle *hideAt="'lg'" />
+            <tedi-separator *showAt="'lg'" />
+            <tedi-header-logout href="#" />
           </tedi-header-profile>
         </tedi-header-actions>
       </header>
