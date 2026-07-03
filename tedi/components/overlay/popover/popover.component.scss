@@ -66,11 +66,18 @@ $popover-max-width: (
 
     &::before {
       position: absolute;
+
+      // Sit above the content (z-index: 1) so the prominent bar stays visible
+      // even where it overlaps the content's top edge.
+      z-index: 2;
       content: "";
       background: var(--popover-border-prominent);
     }
 
     .tedi-popover__arrow {
+      // Sit above both the content and the ::before bar so the arrow's white
+      // body can mask the bar segment that crosses the arrow opening.
+      z-index: 3;
       box-sizing: border-box;
       width: 1.5rem;
       height: 1.5rem;
@@ -80,7 +87,7 @@ $popover-max-width: (
       border-bottom: var(--popover-border-width-lg) solid
         var(--popover-border-prominent);
       filter: drop-shadow(0 0 5px var(--tedi-alpha-20));
-      clip-path: polygon(100% 0, 100% 100%, 0 100%);
+      clip-path: polygon(75% 0, 100% 0, 100% 100%, 0 100%, 0 75%);
     }
 
     &[data-placement="top"] {
@@ -89,14 +96,15 @@ $popover-max-width: (
 
       &::before {
         right: calc(-1 * var(--popover-border-width-md));
-        bottom: calc(-1 * var(--popover-border-width-lg));
+        bottom: calc(-1 * var(--popover-border-width-md));
         left: calc(-1 * var(--popover-border-width-md));
         height: var(--popover-border-width-lg);
       }
 
       .tedi-popover__arrow {
-        bottom: -0.75rem;
-        transform: translateX(-50%) rotate(45deg);
+        bottom: -1rem;
+        transform: translateX(-50%)
+          translateY(calc(-1 * var(--popover-border-width-lg))) rotate(45deg);
       }
     }
 
@@ -105,15 +113,16 @@ $popover-max-width: (
       border-top-right-radius: var(--popover-radius-sharp);
 
       &::before {
-        top: calc(-1 * var(--popover-border-width-lg));
+        top: calc(-1 * var(--popover-border-width-md));
         right: calc(-1 * var(--popover-border-width-md));
         left: calc(-1 * var(--popover-border-width-md));
         height: var(--popover-border-width-lg);
       }
 
       .tedi-popover__arrow {
-        top: -0.75rem;
-        transform: translateX(-50%) rotate(-135deg);
+        top: -1rem;
+        transform: translateX(-50%)
+          translateY(var(--popover-border-width-lg)) rotate(-135deg);
       }
     }
 
@@ -123,14 +132,15 @@ $popover-max-width: (
 
       &::before {
         top: calc(-1 * var(--popover-border-width-md));
-        right: calc(-1 * var(--popover-border-width-lg));
+        right: calc(-1 * var(--popover-border-width-md));
         bottom: calc(-1 * var(--popover-border-width-md));
         width: var(--popover-border-width-lg);
       }
 
       .tedi-popover__arrow {
-        right: -0.75rem;
-        transform: translateY(-50%) rotate(-45deg);
+        right: -1rem;
+        transform: translateY(-50%)
+          translateX(calc(-1 * var(--popover-border-width-lg))) rotate(-45deg);
       }
     }
 
@@ -141,13 +151,14 @@ $popover-max-width: (
       &::before {
         top: calc(-1 * var(--popover-border-width-md));
         bottom: calc(-1 * var(--popover-border-width-md));
-        left: calc(-1 * var(--popover-border-width-lg));
+        left: calc(-1 * var(--popover-border-width-md));
         width: var(--popover-border-width-lg);
       }
 
       .tedi-popover__arrow {
-        left: -0.75rem;
-        transform: translateY(-50%) rotate(135deg);
+        left: -1rem;
+        transform: translateY(-50%)
+          translateX(var(--popover-border-width-lg)) rotate(135deg);
       }
     }
   }
