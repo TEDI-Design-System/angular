@@ -41,6 +41,18 @@
     var(--link-primary-focus)
   );
 
+  // A tedi-link may be applied to a <button> for actions that don't navigate.
+  // Strip the native button chrome so it renders identically to an anchor link.
+  // :where() keeps zero specificity so the size/variant modifiers still win.
+  &:where(button) {
+    padding: 0;
+    font: inherit;
+    text-align: inherit;
+    appearance: none;
+    background: none;
+    border: 0;
+  }
+
   &--inverted {
     @include link-variant(
       var(--link-inverted-default),

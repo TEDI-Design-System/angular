@@ -1,0 +1,41 @@
+:host {
+  display: block;
+}
+
+.tedi-breadcrumbs {
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--breadcrumb-inner-spacing);
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__item {
+    display: inline-flex;
+    gap: var(--breadcrumb-inner-spacing);
+    align-items: center;
+  }
+
+  &__item--current {
+    color: var(--general-text-secondary);
+  }
+
+  &__separator {
+    display: inline-flex;
+    align-items: center;
+    color: var(--general-text-secondary);
+  }
+
+  // minimum 24×24px click/touch target (WCAG 2.5.8) around the ellipsis.
+  // Negative inline margins pull the neighboring crumbs back so the enlarged
+  // hit area doesn't widen the visible gap.
+  &__ellipsis {
+    justify-content: center;
+    min-width: 1.5rem;
+    min-height: 1.5rem;
+    margin-inline: -0.25rem;
+  }
+}
