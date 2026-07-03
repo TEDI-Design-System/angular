@@ -602,10 +602,15 @@ export class DateTimeFieldComponent
     >(DateTimeFieldModalComponent, {
       data,
       size: "small",
-      width: "sm",
+      // Non-preset width makes the overlay shrink-wrap its content, so the modal
+      // is exactly as wide as the calendar + time picker sit side-by-side on wide
+      // screens and collapses to the calendar's width once they stack (see the
+      // modal's responsive `__content` layout). `maxWidth` keeps it within the
+      // viewport on narrow screens.
+      width: "fit-content",
       position: "center",
       fullscreen: this.fullscreen(),
-      maxWidth: `calc(${this.numberOfMonthsResolved()} * var(--tedi-containers-03) + 2 * var(--tedi-borders-01))`,
+      maxWidth: "95vw",
     });
     this.modalRef = ref;
 

@@ -5,6 +5,7 @@
   <tedi-modal-content class="tedi-date-time-field-modal__content">
     <tedi-calendar
       #calendar
+      class="tedi-date-time-field-modal__calendar"
       [bordered]="false"
       [value]="draft()"
       [currentMonth]="month()"
@@ -24,6 +25,10 @@
       (currentMonthChange)="month.set($event)"
       (select)="handleCalendarSelect()"
     />
+
+    <div class="tedi-date-time-field-modal__separator" aria-hidden="true">
+      <span class="tedi-date-time-field-modal__separator-line"></span>
+    </div>
 
     @if (isRange) {
       <div class="tedi-date-time-field-modal__times">
