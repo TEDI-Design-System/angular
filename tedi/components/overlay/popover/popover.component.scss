@@ -3,6 +3,7 @@ $popover-max-width: (
   "medium": 480px,
   "large": 840px,
 );
+$arrow-offset: -1rem;
 
 .tedi-popover {
   display: inline-flex;
@@ -102,7 +103,7 @@ $popover-max-width: (
       }
 
       .tedi-popover__arrow {
-        bottom: -1rem;
+        bottom: $arrow-offset;
         transform: translateX(-50%)
           translateY(calc(-1 * var(--popover-border-width-lg))) rotate(45deg);
       }
@@ -120,9 +121,9 @@ $popover-max-width: (
       }
 
       .tedi-popover__arrow {
-        top: -1rem;
-        transform: translateX(-50%)
-          translateY(var(--popover-border-width-lg)) rotate(-135deg);
+        top: $arrow-offset;
+        transform: translateX(-50%) translateY(var(--popover-border-width-lg))
+          rotate(-135deg);
       }
     }
 
@@ -138,7 +139,7 @@ $popover-max-width: (
       }
 
       .tedi-popover__arrow {
-        right: -1rem;
+        right: $arrow-offset;
         transform: translateY(-50%)
           translateX(calc(-1 * var(--popover-border-width-lg))) rotate(-45deg);
       }
@@ -156,9 +157,9 @@ $popover-max-width: (
       }
 
       .tedi-popover__arrow {
-        left: -1rem;
-        transform: translateY(-50%)
-          translateX(var(--popover-border-width-lg)) rotate(135deg);
+        left: $arrow-offset;
+        transform: translateY(-50%) translateX(var(--popover-border-width-lg))
+          rotate(135deg);
       }
     }
   }

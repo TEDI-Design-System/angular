@@ -449,12 +449,15 @@ export const WithProminentBorder: Story = {
         .story-popover-content--no-padding {
           padding: 0;
         }
+        .story-popover-content--menu {
+          padding: var(--card-padding-xxs) 0;
+        }
       </style>
       <tedi-row [cols]="12" [gap]="3">
         <tedi-col [width]="12" [lg]="{ width: 6 }" [xxl]="{ width: 4 }">
           <tedi-popover [withBorder]="true" position="bottom">
             <span tedi-popover-trigger [underline]="true">Profile menu</span>
-            <tedi-popover-content maxWidth="small" class="story-popover-content--no-padding">
+            <tedi-popover-content maxWidth="small" class="story-popover-content--menu">
               <div style="display: flex; flex-direction: column;">
                 <div style="border-bottom: 1px solid var(--general-border-primary); padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);">
                   <tedi-dropdown-item-value>
