@@ -1,3 +1,11 @@
+## [7.0.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0...angular-7.0.1) (2026-07-03)
+
+
+### Bug Fixes
+
+* **popover:** nested overlay close doesn't dismiss parent [#519](https://github.com/TEDI-Design-System/angular/issues/519) ([94bddb6](https://github.com/TEDI-Design-System/angular/commit/94bddb638d44a1b5ebed1273af656a52d3da0055))
+* **popover:** nested overlay close doesn't dismiss parent [#519](https://github.com/TEDI-Design-System/angular/issues/519) ([0d80a47](https://github.com/TEDI-Design-System/angular/commit/0d80a4786fdfe603015134150944c896f063b789))
+
 # [7.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0...angular-7.0.0) (2026-07-02)
 
 

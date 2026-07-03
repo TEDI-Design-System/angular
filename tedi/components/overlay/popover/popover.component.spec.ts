@@ -472,6 +472,39 @@ describe("PopoverComponent", () => {
       expect(hideSpy).not.toHaveBeenCalled();
     });
 
+    it("should NOT close popover on mousedown in a nested overlay (e.g. a dropdown opened inside the popover)", () => {
+      const hideSpy = jest.spyOn(component, "hidePopover");
+      // A child overlay (dropdown/select/tooltip) renders in its own pane
+      // within the shared CDK overlay container, not inside this popover's
+      // overlay element. Interacting with it must not dismiss the popover.
+      const nestedOverlayItem = document.createElement("div");
+      overlayContainerElement.appendChild(nestedOverlayItem);
+
+      const event = new MouseEvent("mousedown", { bubbles: true });
+      nestedOverlayItem.dispatchEvent(event);
+
+      expect(hideSpy).not.toHaveBeenCalled();
+
+      nestedOverlayItem.remove();
+    });
+
+    it("should NOT close popover on focusin from a nested overlay", () => {
+      const hideSpy = jest.spyOn(component, "hidePopover");
+      const nestedOverlayItem = document.createElement("button");
+      overlayContainerElement.appendChild(nestedOverlayItem);
+
+      const event = new FocusEvent("focusin", { bubbles: true });
+      Object.defineProperty(event, "target", {
+        value: nestedOverlayItem,
+        enumerable: true,
+      });
+      document.dispatchEvent(event);
+
+      expect(hideSpy).not.toHaveBeenCalled();
+
+      nestedOverlayItem.remove();
+    });
+
     it("should close popover on focusin outside", () => {
       const hideSpy = jest.spyOn(component, "hidePopover");
       const outsideElement = document.createElement("button");
