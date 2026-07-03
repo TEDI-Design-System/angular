@@ -2,7 +2,7 @@
 
 @if (!customItemValue()) {
   <tedi-dropdown-item-value>
-    <tedi-dropdown-item-value-label>
+    <tedi-dropdown-item-value-label [clipContent]="clipContent()">
       <ng-content />
     </tedi-dropdown-item-value-label>
   </tedi-dropdown-item-value>

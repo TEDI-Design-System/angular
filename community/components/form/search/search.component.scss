@@ -1,11 +1,15 @@
 @mixin textfield-focus($border-color: null) {
   @if $border-color {
+
     &:focus,
     &:active {
       border-color: $border-color;
       box-shadow: inset 0 0 0 1px $border-color;
     }
-  } @else {
+  }
+
+  @else {
+
     &:focus,
     &:active {
       box-shadow: none;
@@ -21,12 +25,12 @@
 
   &__container {
     display: flex;
-    border: 1px solid;
+    gap: var(--form-field-inner-spacing);
     align-items: center;
+    margin-bottom: var(--_form-field-outer-gap);
+    border: 1px solid;
     border-color: var(--_border-color);
     border-radius: var(--_border-radius);
-    margin-bottom: var(--_form-field-outer-gap);
-    gap: var(--form-field-inner-spacing);
 
     &:hover {
       --_border-color: var(--form-input-border-hover);
@@ -34,6 +38,7 @@
 
     &:focus-within {
       --_border-color: var(--form-input-border-active);
+
       box-shadow: 0 0 0 1px var(--form-input-border-active);
     }
 
@@ -44,8 +49,10 @@
       &:hover {
         --_border-color: var(--form-general-feedback-error-border);
       }
+
       &:focus-within {
         --_border-color: var(--form-general-feedback-error-border);
+
         box-shadow: 0 0 0 1px var(--form-general-feedback-error-border);
       }
     }
@@ -57,6 +64,7 @@
       &:hover {
         border-color: var(--form-general-feedback-success-border);
       }
+
       &:focus-within {
         border-color: var(--form-general-feedback-success-border);
         box-shadow: 0 0 0 1px var(--form-general-feedback-success-border);
@@ -65,36 +73,36 @@
   }
 
   &__input {
-    width: 100%;
     flex-grow: 1;
-    border: 0;
+    width: 100%;
     padding: var(--_padding);
     padding-right: 0;
     margin: 0;
+    font-size: var(--body-regular-size);
+    font-weight: var(--body-regular-weight);
+    line-height: var(--body-regular-line-height);
+    letter-spacing: 0;
+    border: 0;
     border-radius: var(--_border-radius);
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
-    letter-spacing: 0;
-    font-weight: var(--body-regular-weight);
-    font-size: var(--body-regular-size);
-    line-height: var(--body-regular-line-height);
   }
 
   &__trigger.tedi-button {
     --_border-radius: var(--button-radius-sm);
 
+    align-self: stretch;
     border-radius: var(--_border-radius);
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
-    align-self: stretch;
   }
 
   &__suffix {
     display: flex;
-    align-self: stretch;
-    align-items: center;
-    padding: 0 var(--_padding);
     gap: var(--layout-grid-gutters-04);
+    align-items: center;
+    align-self: stretch;
+    padding: 0 var(--_padding);
 
     .tedi-search--with-button & {
       padding: 0;
@@ -102,16 +110,16 @@
 
     &-separator {
       width: 1px;
-      border-left: 1px solid var(--general-border-primary);
       height: 1em;
+      border-left: 1px solid var(--general-border-primary);
     }
   }
 
   &__panel {
     --_form-outer-gap: var(--form-field-outer-spacing);
 
-    margin: var(--_form-outer-gap) 0;
     max-height: 300px;
+    margin: var(--_form-outer-gap) 0;
     overflow-y: auto;
   }
 
@@ -126,14 +134,8 @@
   &--large {
     &.tedi-search--with-button:not(.tedi-search--with-button-text) {
       .tedi-search__trigger.tedi-button {
-        height: auto;
         width: 56px; // not sure how to get the button width from the theme
-
-        // .material-symbols is overriding this
-        // and the icon is size "normal" instead 24
-        .tedi-icon--size-24 {
-          font-size: var(--icon-05);
-        }
+        height: auto;
       }
     }
 
@@ -147,9 +149,10 @@
       background-color: var(--form-input-background-disabled);
       border-color: var(--form-input-border-disabled);
     }
+
     .tedi-search__input {
-      background-color: var(--form-input-background-disabled);
       pointer-events: none;
+      background-color: var(--form-input-background-disabled);
     }
   }
 }

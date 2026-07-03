@@ -2,6 +2,8 @@
   class="tedi-accordion__item"
   [class.tedi-accordion__item--selected]="selected()"
   [class.tedi-accordion__item--expanded]="expanded()"
+  [class.tedi-accordion__item--disabled]="disabled()"
+  [class.tedi-accordion__item--with-icon-card]="showIconCard()"
 >
   @if (showIconCard()) {
     <ng-content select="[tedi-accordion-icon-card]"></ng-content>

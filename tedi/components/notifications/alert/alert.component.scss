@@ -8,13 +8,14 @@
 
 .tedi-alert {
   --_close-button-size: 18px;
+  --_padding-y: var(--alert-default-padding-y);
+  --_padding-x: var(--alert-default-padding-x);
 
   position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--layout-grid-gutters-04);
-  padding: var(--alert-default-padding-y) var(--alert-default-padding-x);
-  font-size: var(--body-regular-size);
+  padding: var(--_padding-y) var(--_padding-x);
   border: 1px solid;
   border-radius: var(--alert-radius);
 
@@ -32,13 +33,13 @@
   }
 
   &:has(&__close):not(:has(&__action > *)) {
-    padding-right: calc(var(--layout-grid-gutters-04) + var(--_close-button-size) + var(--alert-default-padding-x));
+    padding-right: calc(var(--layout-grid-gutters-04) + var(--_close-button-size) + var(--_padding-x));
   }
 
   &__close {
     position: absolute;
-    top: var(--alert-default-padding-y);
-    right: var(--alert-default-padding-x);
+    top: var(--_padding-y);
+    right: var(--_padding-x);
   }
 
   &__action {
@@ -63,10 +64,6 @@
       gap: var(--layout-grid-gutters-04);
     }
 
-    .tedi-alert__content {
-      align-items: center;
-    }
-
     .tedi-alert__close {
       display: none;
     }
@@ -74,10 +71,6 @@
     @include breakpoints.media-breakpoint-down(sm) {
       flex-direction: column;
       align-items: flex-start;
-
-      .tedi-alert__content {
-        align-items: flex-start;
-      }
     }
   }
 
@@ -95,6 +88,27 @@
     font-size: var(--heading-h5-size);
     font-weight: var(--heading-h5-weight);
     line-height: var(--heading-h5-line-height);
+  }
+
+  &--size-default {
+    font-size: var(--body-regular-size);
+  }
+
+  &--size-small {
+    --_padding-y: var(--alert-default-padding-y-sm);
+    --_padding-x: var(--alert-default-padding-x-sm);
+
+    gap: var(--layout-grid-gutters-02);
+    font-size: var(--body-small-regular-size);
+    line-height: var(--body-small-regular-line-height);
+
+    .tedi-alert__content {
+      gap: var(--layout-grid-gutters-04);
+
+      .tedi-alert__content-icon {
+        line-height: var(--body-small-regular-line-height);
+      }
+    }
   }
 
   &--info {

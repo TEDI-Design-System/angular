@@ -19,8 +19,8 @@ import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.t
         [showExpandLabel]="showExpandLabel"
         [headerClickable]="headerClickable"
         [headerClass]="headerClass"
-        [openLabel]="openLabel"
-        [closeLabel]="closeLabel"
+        [openText]="openText"
+        [closeText]="closeText"
       >
         <span tedi-accordion-title>{{ title }}</span>
       </tedi-accordion-item-header>
@@ -37,8 +37,8 @@ class TestHostComponent {
   showExpandLabel = true;
   headerClickable = true;
   headerClass: string | null = null;
-  openLabel = "open";
-  closeLabel = "close";
+  openText: string | undefined = undefined;
+  closeText: string | undefined = undefined;
 }
 
 describe("AccordionItemHeaderComponent", () => {
@@ -121,9 +121,9 @@ describe("AccordionItemHeaderComponent", () => {
     expect(button.getAttribute("aria-expanded")).toBe("true");
   });
 
-  it("should show open label when collapsed and close label when expanded", () => {
-    host.openLabel = "Open";
-    host.closeLabel = "Close";
+  it("should show open text when collapsed and close text when expanded", () => {
+    host.openText = "Open";
+    host.closeText = "Close";
     fixture.detectChanges();
 
     host.item.setExpanded(false);

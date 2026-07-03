@@ -17,7 +17,7 @@ All components are standalone (`standalone: true`), use `ChangeDetectionStrategy
 **Selector:** `tedi-icon`
 **Inputs:**
 - `name: string` — Material Icon name (required)
-- `size: IconSize = 24` — 8, 12, 16, 18, 24, 36, 48, or "inherit"
+- `size: IconSize` — 8, 12, 16, 18, 22, 24, 36, 48, or "inherit". When unset, the icon inherits a contextual default from its host (`tedi-button`/`tedi-link` → 18, small `tedi-link` → 16), falling back to 24 standalone. An explicit value always overrides the context.
 - `color: IconColor = "primary"`
 - `background: IconBackgroundColor` — circular background color
 - `variant: IconVariant = "outlined"` — "filled" or "outlined"
@@ -139,6 +139,7 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 - `arrowType: "default" | "secondary" = "default"` — `"secondary"` paints the bordered style (only effective in icon-only mode)
 - `size: "default" | "small" = "default"`
 - `inverted: boolean = false` — light text/icon for dark backgrounds (ignored when `arrowType="secondary"`)
+- `underline: boolean = true` — underline the visible text label (no effect in icon-only mode)
 - `ariaControls: string` — id of the disclosed region
 - `ariaLabel: string` — required when `hideText` is true
 - `id: string`
@@ -155,21 +156,30 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 **Selector:** `button[tedi-info-button]`
 **Inputs:**
 - `ariaLabel: string`
+- `color: 'primary' | 'inverted' = 'primary'` — use `inverted` on dark or colored backgrounds
 
-## Cards
+## Content
 
 ### Accordion
 **Selector:** `tedi-accordion`
 **Inputs:**
-- `allowMultiple: boolean = false`
+- `allowMultiple: boolean = false` — allow several items expanded simultaneously
+- `defaultExpanded: boolean | undefined = undefined` — group-level default for items' initial expanded state. Per-item `defaultExpanded` (including an explicit `false`) takes precedence. Typically combined with `allowMultiple` to start with all items open.
+- `itemGap: number | undefined = undefined` — vertical gap between sibling items, in **rem** (matches TEDI's layout-spacing convention; scales with user font-size). Any number is accepted. Forwarded as the `--tedi-accordion-item-gap` CSS variable — consumers needing an exact-pixel override can set that variable directly on a class. Falls back to the `:root` default (`var(--layout-grid-gutters-08)` = 0.5rem) when omitted.
+
+**Breakpoint inputs:** `allowMultiple`, `defaultExpanded`, and `itemGap` can each be overridden per breakpoint via `xs` / `sm` / `md` / `lg` / `xl` / `xxl` inputs, which accept partial `AccordionInputs` objects. Example: `<tedi-accordion [allowMultiple]="false" [lg]="{ allowMultiple: true }">` — single-expand on phone, multi-expand from lg upward. Resolved via `BreakpointService.getBreakpointInputs`; cascades smallest → largest like Bootstrap's grid.
+
 **Slots:** default (AccordionItem children)
 
 ### AccordionItem
 **Selector:** `tedi-accordion-item`
 **Inputs:**
-- `defaultExpanded: boolean = false` — initial expanded state
+- `defaultExpanded: boolean | undefined = undefined` — initial expanded state. Falls back to the parent Accordion's `defaultExpanded` when omitted; pass `false` explicitly to keep an item collapsed even when the group default is `true`.
 - `showIconCard: boolean = false` — enable the icon-card grid column
 - `selected: boolean = false` — visual selected state
+- `disabled: boolean = false` — header trigger becomes non-interactive; current expanded state is preserved
+- `itemId: string | undefined = undefined` — stable id used for hash-based deep-linking (separate from the auto-generated `headerId` / `contentId` for ARIA)
+- `openOnHashMatch: boolean = false` — when `itemId` is set and `window.location.hash === '#<itemId>'`, auto-expands the item. Listens to `hashchange` so in-page navigation also opens the matching item. Requires `itemId`; no-op otherwise.
 **Model:** `expanded: boolean`
 **Slots:** `<tedi-accordion-item-header>`, `<tedi-accordion-item-content>`, `[tedi-accordion-icon-card]` (direct child of the item, occupies its own grid column)
 
@@ -178,12 +188,17 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 **Inputs:**
 - `headerClickable: boolean = true` — when true, the whole header is the toggle button. Set to false when projecting interactive children (action buttons, checkboxes, links) so the header becomes a div with a separate small toggle button.
 - `titleLayout: "hug" | "fill" = "hug"` — `fill` makes the title flex-grow, pushing trailing siblings to the right edge of the start group
-- `openLabel: string = "open"` — label shown when collapsed (passed through `tediTranslate`)
-- `closeLabel: string = "close"` — label shown when expanded (passed through `tediTranslate`)
+- `openText: string | undefined` — text shown when collapsed, rendered literally. When omitted, falls back to the translated `"open"` label from `TediTranslationService`. Pipe through `tediTranslate` at the call site if you need a localised override.
+- `closeText: string | undefined` — text shown when expanded, rendered literally. When omitted, falls back to the translated `"close"` label from `TediTranslationService`. Pipe through `tediTranslate` at the call site if you need a localised override.
 - `showExpandLabel: boolean = true` — when false, the toggle is icon-only and uses `aria-label` for its accessible name
 - `showDefaultExpandAction: boolean = true` — when false, no default toggle button is rendered (consumer provides their own via slots and calls `item.toggle()`)
 - `expandActionPosition: "start" | "end" = "end"`
+- `expandActionArrowType: "default" | "secondary" = "default"` — chevron style passthrough to the underlying `CollapseButton`. Only effective when `headerClickable` is `false` and `showExpandLabel` is `false` (icon-only mode).
+- `expandActionSize: "default" | "small" | undefined` — size passthrough to the underlying `CollapseButton`. Only effective when `headerClickable` is `false`. When omitted, derived from `showExpandLabel` (true → `default`, false → `small`).
+- `expandActionInverted: boolean = false` — inverted palette passthrough. Only effective when `headerClickable` is `false`.
+- `expandActionUnderline: boolean = false` — underline the default expand action's text. Only effective when `headerClickable` is `false` and `showExpandLabel` is `true`.
 - `headerClass: string | null` — extra CSS class on the header element
+- `headingLevel: 1 | 2 | 3 | 4 | 5 | 6 | undefined = undefined` — wraps the trigger in a semantic `<h1>`–`<h6>` element per WAI-ARIA Accordion Pattern. Wrapper uses `display: contents` so it doesn't affect layout. Recommended for docs / FAQ pages where the accordion participates in the document outline.
 **Slots:**
 - `[tedi-accordion-title]` — the accordion title content (rendered in the title position)
 - `[tedi-accordion-start-action]` — actions at the start of the header (e.g., before the title group)
@@ -200,6 +215,10 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 **Slots:** default (the collapsible content)
 
 The content panel is automatically given `role="region"`, `aria-labelledby` pointing to the header, and `inert` + `aria-hidden` when collapsed.
+
+**Mobile icon-card layout:** below the `md` breakpoint (`< 768px`), items with `showIconCard` stack the icon-card *above* the header instead of placing it in a left column — phone-sized viewports can't fit both side-by-side without truncating the icon-card text or the header content. Borders and corner radii are redistributed accordingly. No input needed; the rule is applied via `media-breakpoint-down(md)`.
+
+**Print:** the accordion uses a `@media print` rule that forces every item to expand on paper so collapsed content isn't lost. No input needed.
 
 ```html
 <tedi-accordion>
@@ -233,7 +252,25 @@ For non-clickable headers with custom actions (the toggle stays visible at the s
 </tedi-accordion-item>
 ```
 
-## Content
+Open every item by default — group-level `defaultExpanded` cascades to each child unless the child overrides:
+
+```html
+<tedi-accordion [allowMultiple]="true" [defaultExpanded]="true">
+  <tedi-accordion-item>
+    <tedi-accordion-item-header>
+      <span tedi-accordion-title>Section 1</span>
+    </tedi-accordion-item-header>
+    <tedi-accordion-item-content>Body 1</tedi-accordion-item-content>
+  </tedi-accordion-item>
+  <!-- Per-item override: this one stays closed -->
+  <tedi-accordion-item [defaultExpanded]="false">
+    <tedi-accordion-item-header>
+      <span tedi-accordion-title>Section 2</span>
+    </tedi-accordion-item-header>
+    <tedi-accordion-item-content>Body 2</tedi-accordion-item-content>
+  </tedi-accordion-item>
+</tedi-accordion>
+```
 
 ### Calendar
 **Selector:** `tedi-calendar` | ControlValueAccessor
@@ -1104,6 +1141,9 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 **Inputs:**
 - `inputId: string` (required) — unique ID for label association and accessibility
 - `label: string` — label text above the select
+- `tooltip: string` — renders an info button next to the label that reveals this text in a tooltip
+- `ariaLabelledby: string` — associate an external visible label by its element id. A native `<label for>` cannot target the combobox (it is a `<div>`), so use this when the label lives outside the component. Ignored when `label` is set
+- `ariaLabel: string` — accessible name when there is no visible label to reference. Ignored when `label` or `ariaLabelledby` provides a name
 - `required: boolean = false`
 - `placeholder: string = ""`
 - `state: InputState = "default"` — "default", "error", "valid"
@@ -1279,7 +1319,7 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `color: SeparatorColor = "primary"`
 - `variant: SeparatorVariant`
 - `thickness: number = 1`
-- `spacing: SeparatorSpacingValue | SeparatorSpacing`
+- `spacing: SeparatorSpacingValue | SeparatorSpacing` — margins. Horizontal supports y-spacing only (number → top+bottom; object `y`/`top`/`bottom`; x ignored). Vertical supports both x and y (number → left+right; object `x`/`y` shorthands or explicit `top`/`bottom`/`left`/`right`). `x`=left+right, `y`=top+bottom; explicit side overrides the shorthand.
 - `size: string = "100%"`
 
 ### EmptyState
@@ -1614,6 +1654,55 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
 </tedi-horizontal-stepper>
 ```
 
+### Tabs
+**Selector:** `tedi-tabs`
+**Inputs:**
+- `value: string` — controlled active tab id; bind with `[(value)]` or `[value]` + `(valueChange)`
+- `defaultValue: string = ""` — initial active tab id for uncontrolled usage
+
+**Outputs:**
+- `valueChange: string` — emitted with the new active tab id when it changes
+
+**Sub-components:**
+- `tedi-tabs-list` — the `role="tablist"` container.
+  - `aria-label: string` / `aria-labelledby: string` — accessible name for the tablist
+  - `overflowMode: "dropdown" | "scroll" = "dropdown"` — when tabs don't fit, either collapse overflowing tabs into a "More" dropdown or enable horizontal scrolling with fade indicators
+  - `dropdownLabel: string` — label for the overflow dropdown trigger; falls back to the `more` translation (`Veel` in et)
+- `button[tedi-tabs-trigger]` — a tab button (applied to a native `<button>`).
+  - `id: string` (required) — links to the matching `tedi-tabs-content` panel (`aria-controls="{id}-panel"`)
+  - `icon: string` — Material Symbols icon shown before the label
+  - `disabled: boolean = false`
+- `tedi-tabs-content` — a tab panel (`role="tabpanel"`).
+  - `id: string` — when set, shown only while that tab is active; omit to always render (e.g. for a router outlet)
+
+Keyboard: Arrow Left/Right (with wrap), Home/End move focus between enabled tabs; only the active tab is in the tab order. Disabled tabs are skipped. Full WAI-ARIA tab pattern.
+
+```html
+<tedi-tabs defaultValue="tab-1">
+  <tedi-tabs-list aria-label="Health tabs">
+    <button tedi-tabs-trigger id="tab-1">Health timeline</button>
+    <button tedi-tabs-trigger id="tab-2" icon="medication">Medication history</button>
+    <button tedi-tabs-trigger id="tab-3" [disabled]="true">Archived</button>
+  </tedi-tabs-list>
+  <tedi-tabs-content id="tab-1">Timeline content</tedi-tabs-content>
+  <tedi-tabs-content id="tab-2">Medication content</tedi-tabs-content>
+  <tedi-tabs-content id="tab-3">Archived content</tedi-tabs-content>
+</tedi-tabs>
+```
+
+Controlled usage:
+
+```html
+<tedi-tabs [(value)]="activeTab">
+  <tedi-tabs-list aria-label="Controlled tabs" overflowMode="scroll">
+    <button tedi-tabs-trigger id="tab-1">First</button>
+    <button tedi-tabs-trigger id="tab-2">Second</button>
+  </tedi-tabs-list>
+  <tedi-tabs-content id="tab-1">First panel</tedi-tabs-content>
+  <tedi-tabs-content id="tab-2">Second panel</tedi-tabs-content>
+</tedi-tabs>
+```
+
 ## Notifications
 
 ### Alert
@@ -1626,6 +1715,7 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
 - `showClose: boolean = false`
 - `role: AlertRole = "alert"`
 - `variant: AlertVariant = "default"`
+- `size: AlertSize = "default"` — `"default"` or `"small"` (reduced padding and smaller body text)
 - `titleElement: AlertTitleType = "h2"` — HTML tag for the title
 - `closeDelay: number = 0`
 **Outputs:**

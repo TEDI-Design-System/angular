@@ -23,7 +23,7 @@ import { IconComponent } from "../../base";
   template: `<button tedi-button><ng-content /></button>`,
   encapsulation: ViewEncapsulation.None,
 })
-class DemoWrappingButtonComponent {}
+class DemoWrappingButtonComponent { }
 
 const POSITIONS: DropdownPosition[] = [
   "auto",
@@ -149,6 +149,16 @@ export default {
     closeOnSelect: {
       description:
         "Whether activating this item closes the dropdown. Set `false` for items that should keep the dropdown open after selection (e.g. multi-select checkboxes).",
+      control: "boolean",
+      table: {
+        category: "dropdown-item",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    clipContent: {
+      description:
+        "Whether the item's label clips overflowing content for text ellipsis. Set `false` when projecting content with decorations that intentionally sit outside the line box (e.g. status indicator), so they are not cut off.",
       control: "boolean",
       table: {
         category: "dropdown-item",

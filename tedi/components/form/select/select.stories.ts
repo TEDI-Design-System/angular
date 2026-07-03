@@ -71,6 +71,18 @@ const meta: Meta<SelectComponent> = {
       control: "text",
       description: "Label text displayed above the select.",
     },
+    tooltip: {
+      control: "text",
+      description: "When set, renders an info button next to the label that reveals this text in a tooltip.",
+    },
+    ariaLabelledby: {
+      control: false,
+      description: "Associates the select with an external visible label by its element id. A native `<label for>` cannot target the combobox (it is a `<div>`), so use this when the label lives outside the component. Ignored when `label` is set.",
+    },
+    ariaLabel: {
+      control: false,
+      description: "Accessible name used when there is no visible label to reference. Ignored when `label` or `ariaLabelledby` provides a name.",
+    },
     required: {
       control: "boolean",
       description: "Whether the field is required.",
@@ -202,6 +214,7 @@ export const Default: Story = {
       <tedi-select
         [inputId]="inputId"
         [label]="label"
+        [tooltip]="tooltip"
         [required]="required"
         [placeholder]="placeholder"
         [state]="state"
