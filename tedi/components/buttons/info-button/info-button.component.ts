@@ -6,7 +6,7 @@ import { TediTranslationService } from "../../../services";
   standalone: true,
   selector: "button[tedi-info-button]",
   imports: [IconComponent],
-  template: `<span class="tedi-info-button__ring"><tedi-icon name="info_i" size="inherit" /></span>`,
+  template: `<tedi-icon name="info" [size]="18" />`,
   styleUrl: "./info-button.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,

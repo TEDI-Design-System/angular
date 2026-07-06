@@ -4,7 +4,6 @@
   justify-content: center;
   width: var(--button-xs-icon-size);
   height: var(--button-xs-icon-size);
-  padding: 0;
   vertical-align: bottom;
   color: var(--button-main-neutral-text-default);
   cursor: pointer;
@@ -32,19 +31,6 @@
 
   tedi-icon {
     color: inherit;
-  }
-
-  &__ring {
-    box-sizing: border-box;
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    width: var(--tedi-dimensions-10);
-    height: var(--tedi-dimensions-10);
-    font-size: var(--tedi-dimensions-06);
-    border: var(--tedi-borders-02) solid currentcolor;
-    border-radius: 50%;
   }
 
   &--inverted {
