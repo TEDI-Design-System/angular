@@ -1,3 +1,10 @@
+# [7.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.1...angular-7.1.0-rc.1) (2026-07-06)
+
+
+### Features
+
+* **info-button:** focus ring offset reduced [#517](https://github.com/TEDI-Design-System/angular/issues/517) ([#521](https://github.com/TEDI-Design-System/angular/issues/521)) ([b7d06d3](https://github.com/TEDI-Design-System/angular/commit/b7d06d3b81ba3d3936a6d6f20b03f646ee41f20b))
+
 ## [7.0.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0...angular-7.0.1) (2026-07-03)
 
 
