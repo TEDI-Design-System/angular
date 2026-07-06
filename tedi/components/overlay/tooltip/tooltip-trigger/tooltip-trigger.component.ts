@@ -6,6 +6,7 @@ import {
   ElementRef,
   HostListener,
   inject,
+  input,
   Renderer2,
   signal,
   ViewEncapsulation,
@@ -28,6 +29,15 @@ const FOCUSABLE_SELECTOR = "button, a[href], [tabindex]";
   },
 })
 export class TooltipTriggerComponent implements AfterContentChecked {
+  /**
+   * When `false`, the trigger is a pure positioning anchor: it skips making its
+   * projected child focusable (no synthesized `tabindex`, focus ring or
+   * `aria-describedby`). Use for decorative or externally-controlled origins where
+   * focus and ARIA live on another element (e.g. a slider's range input).
+   * @default true
+   */
+  readonly interactive = input(true);
+
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly overlayOrigin = inject(CdkOverlayOrigin, { self: true });
   private renderer = inject(Renderer2);
@@ -52,6 +62,7 @@ export class TooltipTriggerComponent implements AfterContentChecked {
 
   @HostListener("touchend")
   onTouchEnd() {
+    if (this.tooltip.openWith() === "none") return;
     this.tooltip.toggleTooltip();
     setTimeout(() => (this.isTouch = false), 300);
   }
@@ -127,6 +138,8 @@ export class TooltipTriggerComponent implements AfterContentChecked {
   }
 
   ngAfterContentChecked(): void {
+    if (!this.interactive()) return;
+
     const element = this.host.nativeElement as HTMLElement;
     const firstChild = element.firstChild as HTMLElement | null;
 

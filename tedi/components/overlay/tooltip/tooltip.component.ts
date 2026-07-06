@@ -4,9 +4,12 @@ import {
   computed,
   contentChild,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
   input,
+  model,
+  NgZone,
   signal,
   viewChild,
   ViewEncapsulation,
@@ -29,7 +32,7 @@ import { TooltipTriggerComponent } from "./tooltip-trigger/tooltip-trigger.compo
 import { TooltipContentComponent } from "./tooltip-content/tooltip-content.component";
 
 export type TooltipPosition = OverlayPosition;
-export type TooltipOpenWith = "hover" | "click" | "both";
+export type TooltipOpenWith = "hover" | "click" | "both" | "none";
 
 let tooltipIdCounter = 0;
 
@@ -56,10 +59,26 @@ export class TooltipComponent implements AfterContentChecked {
   readonly preventOverflow = input(true);
 
   /**
-   * How tooltip can opened?
+   * How the tooltip can be opened. Use `none` for full external control via `open`
+   * (e.g. a slider or custom draggable element driving the open state itself).
    * @default both
    */
   readonly openWith = input<TooltipOpenWith>("both");
+
+  /**
+   * Controlled open state. When set (not `undefined`), it overrides the built-in
+   * trigger behavior; typically paired with `openWith="none"`. Leave unset for the
+   * default trigger-driven behavior.
+   */
+  readonly open = model<boolean | undefined>(undefined);
+
+  /**
+   * While open, continuously reposition the tooltip so it follows an origin that moves
+   * (e.g. a dragging slider thumb). Uses `requestAnimationFrame`; enable only while the
+   * origin can actually move to avoid needless work.
+   * @default false
+   */
+  readonly trackPosition = input(false);
 
   /** Delay time (in ms) for closing tooltip when not hovering trigger or content.
    * @default 100
@@ -78,7 +97,10 @@ export class TooltipComponent implements AfterContentChecked {
 
   readonly descriptionId = `tedi-tooltip-${++tooltipIdCounter}`;
   readonly contentText = signal("");
-  readonly isOpen = signal(false);
+  private readonly internalOpen = signal(false);
+  readonly isOpen = computed(() =>
+    this.open() !== undefined ? Boolean(this.open()) : this.internalOpen(),
+  );
   readonly currentPlacement = signal<OverlaySide>("top");
   readonly arrowLeft = signal<number | null>(null);
   readonly arrowTop = signal<number | null>(null);
@@ -94,6 +116,9 @@ export class TooltipComponent implements AfterContentChecked {
   readonly isContentHovered = signal(false);
   hideTimeout?: ReturnType<typeof setTimeout>;
 
+  private readonly ngZone = inject(NgZone);
+  private trackRafId: number | null = null;
+
   private readonly horizontalPush = new HorizontalPushHandler(
     () => this.connectedOverlay()?.overlayRef?.overlayElement,
     () => this.updateArrowPosition(),
@@ -103,21 +128,59 @@ export class TooltipComponent implements AfterContentChecked {
     inject(DestroyRef).onDestroy(() => {
       clearTimeout(this.hideTimeout);
       this.horizontalPush.detach();
+      this.stopTracking();
+    });
+
+    effect(() => {
+      if (this.isOpen() && this.trackPosition()) {
+        this.startTracking();
+      } else {
+        this.stopTracking();
+      }
     });
   }
 
   showTooltip() {
     clearTimeout(this.hideTimeout);
     if (!this.isOpen()) {
-      this.isOpen.set(true);
+      this.internalOpen.set(true);
     }
   }
 
   hideTooltip() {
     if (this.isOpen()) {
       clearTimeout(this.hideTimeout);
-      this.isOpen.set(false);
+      this.internalOpen.set(false);
       this.horizontalPush.detach();
+    }
+  }
+
+  /**
+   * Recomputes the overlay position against its origin. Call this when the origin has
+   * moved without a scroll/resize event (e.g. a dragged element). `trackPosition`
+   * calls it automatically each frame while open.
+   */
+  updatePosition() {
+    this.connectedOverlay()?.overlayRef?.updatePosition();
+    this.updateArrowPosition();
+  }
+
+  private startTracking() {
+    if (this.trackRafId !== null) return;
+
+    this.ngZone.runOutsideAngular(() => {
+      const loop = () => {
+        this.updatePosition();
+        this.trackRafId = requestAnimationFrame(loop);
+      };
+      this.trackRafId = requestAnimationFrame(loop);
+    });
+  }
+
+  private stopTracking() {
+    if (this.trackRafId !== null) {
+      cancelAnimationFrame(this.trackRafId);
+      this.trackRafId = null;
     }
   }
 

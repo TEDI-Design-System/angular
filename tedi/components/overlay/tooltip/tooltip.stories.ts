@@ -30,7 +30,7 @@ const POSITIONS: TooltipPosition[] = [
   "left-start",
   "left-end",
 ];
-const OPEN_WITH = ["hover", "click", "both"];
+const OPEN_WITH = ["hover", "click", "both", "none"];
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=5797-117363&amp;m=dev" target="_blank">Figma ↗</a><br>
@@ -80,7 +80,7 @@ export default {
         category: "tooltip",
         type: {
           summary: "TooltipOpenWith",
-          detail: "hover \nclick \nboth",
+          detail: "hover \nclick \nboth \nnone",
         },
         defaultValue: {
           summary: "both",
