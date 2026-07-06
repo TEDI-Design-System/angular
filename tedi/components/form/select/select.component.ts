@@ -6,6 +6,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   contentChild,
+  DestroyRef,
   effect,
   ElementRef,
   HostListener,
@@ -13,6 +14,7 @@ import {
   input,
   NgZone,
   output,
+  Renderer2,
   signal,
   viewChild,
   viewChildren,
@@ -21,17 +23,16 @@ import {
   computed,
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { CommonModule } from "@angular/common";
+import { CommonModule, DOCUMENT } from "@angular/common";
 import { IconComponent, TextComponent } from "../../base";
-import { ClosingButtonComponent, InfoButtonComponent } from "../../buttons";
-import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
-import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
-import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
+import { ClosingButtonComponent } from "../../buttons";
+import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 import { TediTranslationPipe } from "../../../services";
 import { ComponentInputs } from "../../../types";
 import { calculateVisibleTagCount } from "../../../utils/tag-overflow.util";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { LabelComponent } from "../label/label.component";
+import { LabelRowComponent } from "../label-row/label-row.component";
 import { TagComponent, TagEllipsis } from "../../tags/tag/tag.component";
 import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
 import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
@@ -72,12 +73,10 @@ export enum SpecialOptionControls {
     OverlayModule,
     CdkListboxModule,
     ClosingButtonComponent,
-    InfoButtonComponent,
-    TooltipComponent,
-    TooltipTriggerComponent,
-    TooltipContentComponent,
     IconComponent,
     LabelComponent,
+    LabelRowComponent,
+    InfoTooltipComponent,
     FeedbackTextComponent,
     TextComponent,
     TagComponent,
@@ -273,6 +272,12 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   maxDropdownHeight = input<number | undefined>();
 
   /**
+   * Does the dropdown close when the page scrolls?
+   * @default false
+   */
+  hideOnScroll = input(false);
+
+  /**
    * Layout type for the dropdown options.
    * - `"menu"` (default): vertical list of options.
    * - `"grid"`: swatch grid layout for use with custom option templates
@@ -386,6 +391,9 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   tagRefs = viewChildren("tagElement", { read: ElementRef });
   hostRef = inject(ElementRef);
   private ngZone = inject(NgZone);
+  private renderer = inject(Renderer2);
+  private document = inject(DOCUMENT);
+  private scrollListener?: () => void;
 
   // Template queries for custom rendering
   optionTemplate = contentChild(SelectOptionTemplateDirective);
@@ -610,6 +618,8 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
         (listbox as any)._setNextFocusToSelectedOption = () => { };
       }
     });
+
+    inject(DestroyRef).onDestroy(() => this.cleanupScrollListener());
   }
 
   resetVisibleTagsOnSelectionChange = effect(() => {
@@ -736,6 +746,9 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     if (this.isOpen()) return;
     this.calculateDropdownMaxHeight();
     this.isOpen.set(true);
+    if (this.hideOnScroll()) {
+      this.setupScrollListener();
+    }
     this.opened.emit();
   }
 
@@ -772,7 +785,30 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     this.isOpen.set(false);
     this.searchTerm.set("");
     this.dropdownMaxHeight.set(null);
+    this.cleanupScrollListener();
     this.closed.emit();
+  }
+
+  private setupScrollListener(): void {
+    this.cleanupScrollListener();
+
+    this.scrollListener = this.renderer.listen(
+      this.document,
+      "scroll",
+      () => {
+        if (this.isOpen()) {
+          this.closeDropdown();
+        }
+      },
+      { capture: true, passive: true },
+    );
+  }
+
+  private cleanupScrollListener(): void {
+    if (this.scrollListener) {
+      this.scrollListener();
+      this.scrollListener = undefined;
+    }
   }
 
   handleValueChange(event: { value: readonly unknown[] }): void {

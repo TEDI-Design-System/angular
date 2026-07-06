@@ -1166,6 +1166,7 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 - `dropdownAlign: "start" | "end" = "start"` — which trigger edge the dropdown anchors to; use `"end"` for right-aligned selects so the panel expands inward
 - `feedbackText: { text, type, position }` — feedback text config
 - `maxDropdownHeight: number` — dropdown height in pixels
+- `hideOnScroll: boolean = false` — close the dropdown when the page scrolls
 - `compareWith: (a, b) => boolean` — custom equality function
 - `tagEllipsis: TagEllipsis = false` — which end a selected tag's label truncates from when it doesn't fit. Only used in multiselect mode with `multiRow="false"`. `false` never truncates; `end` → `label…`; `start` → `…label`
 - `searchFn: (term: string, item: T) => boolean` — custom search function for filtering options. Overrides the default label-based search when provided
@@ -1230,6 +1231,18 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `size: LabelSize = "default"`
 - `required: boolean = false`
 - `color: LabelColor = "secondary"`
+
+### LabelRow
+**Selector:** `tedi-label-row`
+Pure inline-row layout for a form-control label plus trailing affixes (e.g. `tedi-info-tooltip`). Project your own `<label tedi-label>` and any affixes — all native label attributes (`for`, `id`, `aria-*`, handlers) keep working, and affixes sit as **siblings** of the `<label>`, never inside it, so they never leak into the control's accessible name. No inputs — composition only.
+**Slots:** the real `<label tedi-label>` followed by trailing affixes.
+
+```html
+<tedi-label-row>
+  <label tedi-label for="city" [required]="true">City</label>
+  <tedi-info-tooltip>Enter the city where you currently reside.</tedi-info-tooltip>
+</tedi-label-row>
+```
 
 ### FeedbackText
 **Selector:** `tedi-feedback-text`
@@ -1874,6 +1887,23 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
   </tedi-tooltip-trigger>
   <tedi-tooltip-content>Tooltip text</tedi-tooltip-content>
 </tedi-tooltip>
+```
+
+### InfoTooltip
+**Selector:** `tedi-info-tooltip`
+An info button paired with a tooltip — the ready-made `tedi-tooltip` + `tedi-info-button` combo. Projects the tooltip content. Use as a trailing affix in `tedi-label-row`, or standalone for any inline "more information" tooltip.
+**Inputs:**
+- `position: TooltipPosition = "top"`
+- `openWith: TooltipOpenWith = "both"` — hover, click, or both
+- `maxWidth: TooltipWidth = "medium"` — "none", "small", "medium", "large"
+- `color: "primary" | "inverted" = "primary"` — info-button color; use `inverted` on dark backgrounds
+- `ariaLabel: string` — accessible name for the info button (defaults to the translated info-button label)
+**Slots:** default — the tooltip content
+
+```html
+<tedi-info-tooltip position="right" ariaLabel="More information">
+  Enter the city where you currently reside.
+</tedi-info-tooltip>
 ```
 
 ## Tags

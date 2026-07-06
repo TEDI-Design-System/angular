@@ -181,6 +181,14 @@ const meta: Meta<SelectComponent> = {
       control: "number",
       description: "Value in pixels. When not set, fits available viewport space.",
     },
+    hideOnScroll: {
+      control: "boolean",
+      description: "Whether the dropdown closes when the page scrolls.",
+      table: {
+        defaultValue: { summary: "false" },
+        type: { summary: "boolean" },
+      },
+    },
   },
   args: {
     inputId: "select-1",
@@ -200,6 +208,7 @@ const meta: Meta<SelectComponent> = {
     clearSearchOnSelect: false,
     dropdownType: "menu",
     maxDropdownHeight: undefined,
+    hideOnScroll: false,
     options: simpleOptions as [],
   },
 };
@@ -228,6 +237,7 @@ export const Default: Story = {
         [searchable]="searchable"
         [clearSearchOnSelect]="clearSearchOnSelect"
         [maxDropdownHeight]="maxDropdownHeight"
+        [hideOnScroll]="hideOnScroll"
         [dropdownType]="dropdownType"
         [options]="options"
         bindLabel="label"

@@ -39,6 +39,7 @@ import { InputState } from "../form-field/form-field.component";
       [dropdownWidthRef]="dropdownWidthRef"
       [dropdownAlign]="dropdownAlign"
       [maxDropdownHeight]="maxDropdownHeight"
+      [hideOnScroll]="hideOnScroll"
       [searchFn]="searchFn"
       [clearSearchOnSelect]="clearSearchOnSelect"
       [formControl]="control"
@@ -87,6 +88,7 @@ class TestHostComponent {
   dropdownWidthRef: any = undefined;
   dropdownAlign: "start" | "end" = "start";
   maxDropdownHeight: number | undefined = undefined;
+  hideOnScroll = false;
   searchFn: ((term: string, item: unknown) => boolean) | undefined = undefined;
   clearSearchOnSelect = false;
   useOptionTemplate = false;
@@ -1183,6 +1185,31 @@ describe("SelectComponent", () => {
     }));
   });
 
+  describe("hideOnScroll", () => {
+    it("closes the dropdown on scroll when enabled", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      expect(select.isOpen()).toBe(true);
+
+      document.dispatchEvent(new Event("scroll"));
+      fixture.detectChanges();
+      expect(select.isOpen()).toBe(false);
+    });
+
+    it("keeps the dropdown open on scroll when disabled", () => {
+      getTrigger().click();
+      fixture.detectChanges();
+      expect(select.isOpen()).toBe(true);
+
+      document.dispatchEvent(new Event("scroll"));
+      fixture.detectChanges();
+      expect(select.isOpen()).toBe(true);
+    });
+  });
+
   describe("Computed properties", () => {
     it("dropdownPositions anchor to the start edge by default", () => {
       expect(select.dropdownPositions().every((p) => p.originX === "start")).toBe(
@@ -2145,7 +2172,7 @@ describe("SelectComponent", () => {
       host.tooltip = "More info about this field";
       fixture.detectChanges();
 
-      const labelRow = hostEl.querySelector(".tedi-select__label-row");
+      const labelRow = hostEl.querySelector("tedi-label-row");
       expect(labelRow).toBeTruthy();
       const infoButton = labelRow?.querySelector("[tedi-info-button]");
       expect(infoButton).toBeTruthy();
