@@ -67,6 +67,16 @@ tedi-tooltip-trigger {
   .tedi-tooltip-trigger__text {
     text-decoration: underline dashed var(--general-border-secondary);
     text-underline-offset: 0.5em;
+    cursor: default;
+
+    &:hover {
+      color: var(--link-primary-default);
+      text-decoration-color: var(--general-border-brand);
+    }
+  }
+
+  &.tedi-tooltip-trigger--clickable .tedi-tooltip-trigger__text {
+    cursor: pointer;
   }
 }
 
