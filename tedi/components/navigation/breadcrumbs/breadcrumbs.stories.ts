@@ -13,6 +13,7 @@ import { BreadcrumbSeparatorDirective } from "./breadcrumb-separator.directive";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.65.81?node-id=3486-65554&m=dev" target="_BLANK">Figma ↗</a><br/>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/43adad-breadcrumbs" target="_blank">Zeroheight ↗</a><br/>
  * Breadcrumbs show the user's location within the page hierarchy.
  * - Mark each crumb with `*tediBreadcrumbItem`, in order from the root to the current page.
  * - Use `a tedi-link` for navigable crumbs and a plain element (e.g. `span`) for the current page — add `aria-current="page"` to it yourself.
