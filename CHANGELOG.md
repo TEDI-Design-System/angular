@@ -1,3 +1,10 @@
+# [7.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.1...angular-7.1.0-rc.2) (2026-07-07)
+
+
+### Features
+
+* **header:** add Header top [#311](https://github.com/TEDI-Design-System/angular/issues/311) ([#504](https://github.com/TEDI-Design-System/angular/issues/504)) ([1e2eff2](https://github.com/TEDI-Design-System/angular/commit/1e2eff22bd8752332f6b50705f7e42c0c6bc625b))
+
 # [7.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.1...angular-7.1.0-rc.1) (2026-07-06)
 
 
