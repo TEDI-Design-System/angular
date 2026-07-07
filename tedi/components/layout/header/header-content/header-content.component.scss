@@ -4,18 +4,6 @@
   gap: var(--layout-header-items-center-gutter-x);
   align-items: center;
 
-  &--flex-start {
-    justify-content: flex-start;
-  }
-
-  &--center {
-    justify-content: center;
-  }
-
-  &--space-between {
-    justify-content: space-between;
-  }
-
   a,
   .tedi-link {
     color: var(--header-link-default);

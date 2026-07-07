@@ -1,4 +1,6 @@
 tedi-header-profile {
+  --header-profile-offset: var(--layout-header-height);
+
   align-content: center;
 
   [tedi-popover-trigger] .tedi-header-profile__icon--expand {
@@ -28,24 +30,24 @@ tedi-header-profile {
 
   .tedi-header-profile__overlay {
     position: absolute;
-    top: var(--layout-header-height);
+    top: var(--header-profile-offset);
     left: 0;
     z-index: calc(var(--z-index-header) - 1);
     width: 100%;
-    height: calc(100dvh - var(--layout-header-height));
+    height: calc(100dvh - var(--header-profile-offset));
     background: rgb(0 0 0 / 25%);
   }
 
   .tedi-header-profile__modal {
     position: absolute;
-    top: var(--layout-header-height);
+    top: var(--header-profile-offset);
     right: 0;
     z-index: var(--z-index-header);
     display: flex;
     flex-direction: column;
     width: var(--navigation-vertical-item-width-default);
     max-width: 100%;
-    height: calc(100dvh - var(--layout-header-height));
+    height: calc(100dvh - var(--header-profile-offset));
     overflow-y: auto;
     background: var(--general-surface-primary);
     border-top: 1px solid var(--general-border-primary);

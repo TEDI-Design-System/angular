@@ -6,7 +6,12 @@ import {
   input,
 } from "@angular/core";
 
-export type HeaderContentAlignment = "flex-start" | "center" | "space-between";
+import {
+  HeaderAlignment,
+  headerAlignmentUtility,
+} from "../header-alignment";
+
+export type HeaderContentAlignment = HeaderAlignment;
 
 @Component({
   selector: "tedi-header-content",
@@ -29,6 +34,6 @@ export class HeaderContentComponent {
   readonly alignment = input<HeaderContentAlignment>("center");
 
   protected readonly classes = computed(
-    () => `tedi-header-content tedi-header-content--${this.alignment()}`,
+    () => `tedi-header-content ${headerAlignmentUtility[this.alignment()]}`,
   );
 }

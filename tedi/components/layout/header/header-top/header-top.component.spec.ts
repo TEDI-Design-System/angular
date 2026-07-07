@@ -1,15 +1,15 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { HeaderContentAlignment, HeaderContentComponent } from "./header-content.component";
+import { HeaderTopAlignment, HeaderTopComponent } from "./header-top.component";
 
-describe("HeaderContentComponent", () => {
-  let fixture: ComponentFixture<HeaderContentComponent>;
+describe("HeaderTopComponent", () => {
+  let fixture: ComponentFixture<HeaderTopComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HeaderContentComponent],
+      imports: [HeaderTopComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(HeaderContentComponent);
+    fixture = TestBed.createComponent(HeaderTopComponent);
     fixture.detectChanges();
   });
 
@@ -18,14 +18,14 @@ describe("HeaderContentComponent", () => {
   });
 
   it("should apply the base host class", () => {
-    expect(fixture.nativeElement.classList).toContain("tedi-header-content");
+    expect(fixture.nativeElement.classList).toContain("tedi-header-top");
   });
 
-  it("should default to the center justify-content utility", () => {
-    expect(fixture.nativeElement.classList).toContain("justify-content-center");
+  it("should default to the space-between justify-content utility", () => {
+    expect(fixture.nativeElement.classList).toContain("justify-content-between");
   });
 
-  it.each<[HeaderContentAlignment, string]>([
+  it.each<[HeaderTopAlignment, string]>([
     ["flex-start", "justify-content-start"],
     ["center", "justify-content-center"],
     ["flex-end", "justify-content-end"],
@@ -40,18 +40,18 @@ describe("HeaderContentComponent", () => {
   });
 
   it("should swap the utility class when alignment changes", () => {
-    fixture.componentRef.setInput("alignment", "space-between");
+    fixture.componentRef.setInput("alignment", "center");
     fixture.detectChanges();
-    expect(fixture.nativeElement.classList).toContain("justify-content-between");
-    expect(fixture.nativeElement.classList).not.toContain(
-      "justify-content-center",
-    );
-
-    fixture.componentRef.setInput("alignment", "flex-start");
-    fixture.detectChanges();
-    expect(fixture.nativeElement.classList).toContain("justify-content-start");
+    expect(fixture.nativeElement.classList).toContain("justify-content-center");
     expect(fixture.nativeElement.classList).not.toContain(
       "justify-content-between",
+    );
+
+    fixture.componentRef.setInput("alignment", "flex-end");
+    fixture.detectChanges();
+    expect(fixture.nativeElement.classList).toContain("justify-content-end");
+    expect(fixture.nativeElement.classList).not.toContain(
+      "justify-content-center",
     );
   });
 });

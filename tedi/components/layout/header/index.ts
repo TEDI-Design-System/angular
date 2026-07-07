@@ -12,3 +12,4 @@ export * from "./header-profile/header-profile.component";
 export * from "./header-role/header-role.component";
 export * from "./header-role/header-role-title.directive";
 export * from "./header-search/header-search.component";
+export * from "./header-top/header-top.component";

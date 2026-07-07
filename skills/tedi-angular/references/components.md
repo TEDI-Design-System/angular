@@ -1382,7 +1382,15 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 ### Header
 **Selector:** `header[tedi-header]`
 
-Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language`, `tedi-header-login`, `tedi-header-logout`, `tedi-header-profile`, `tedi-header-role`, `tedi-header-search`
+Sub-components: `tedi-header-top`, `tedi-header-logo`, `tedi-header-content`, `tedi-header-actions`, `tedi-header-language`, `tedi-header-login`, `tedi-header-logout`, `tedi-header-profile`, `tedi-header-role`, `tedi-header-search`, `tedi-header-bottom`
+
+**tedi-header-top:** secondary bar projected above the main header (language picker, top-level links, dark-mode toggle).
+- bp `alignment?: HeaderTopAlignment = 'space-between'` — `justify-content` of the top bar content. `HeaderTopAlignment` = `'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly'`. Breakpoint-aware via `[xs]`–`[xxl]`, e.g. `alignment="center" [lg]="{ alignment: 'space-between' }"` to center on mobile and spread on desktop.
+
+**tedi-header-content:** center content area (nav links, search).
+- `alignment?: HeaderContentAlignment = 'center'` (`'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly'`)
+
+**tedi-header-bottom:** mobile-only secondary row below the main bar (hidden from `md` up); typically a compact search.
 
 **tedi-header-logo:**
 - `href?: string` — wraps logo in an anchor
@@ -1409,6 +1417,9 @@ Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language
 
 **tedi-header-language:**
 - `languages: HeaderLanguage` (required) — object with `Language` keys and display string values
+- `selectLabel?: string` — label for the selector (falls back to the `header.select-lang` translation)
+- `labelPosition?: 'top' | 'left' = 'top'` — position of the select label relative to the trigger
+- `languageHrefs?: Partial<Record<Language, string>>` — per-language URLs; a language with a URL renders its option as a navigation anchor (`<a href>`) instead of switching client-side
 - `languageChange: OutputEmitterRef<Language>` — emits on language selection
 
 **tedi-header-login:** bp — `size?: 'default' | 'small'` (auto `'small'` on mobile), `label?: string`, `onClick?: () => void`, `href?: string`
@@ -1421,6 +1432,9 @@ Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language
 
 ```html
 <header tedi-header>
+  <tedi-header-top alignment="center" [lg]="{ alignment: 'space-between' }">
+    <tedi-header-language [languages]="languages" (languageChange)="onLangChange($event)" />
+  </tedi-header-top>
   <tedi-header-logo href="/">
     <img src="logo.svg" alt="Logo" />
   </tedi-header-logo>
