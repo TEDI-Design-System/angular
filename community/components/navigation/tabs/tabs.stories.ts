@@ -14,6 +14,11 @@ import { TabContentComponent } from "./tab-content/tab-content.component";
 export default {
   title: "Community/Navigation/Tabs",
   component: TabComponent,
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
   decorators: [
     moduleMetadata({
       declarations: [],
@@ -83,7 +88,7 @@ const RoutedTabTemplate: StoryFn<TabComponent> = ({ ...args }) => ({
       <a tedi-tab routerLink="1" tabId="tab-1">Tab 1</a>
       <a tedi-tab routerLink="2" tabId="tab-2">Tab 2</a>
       <a tedi-tab routerLink="3">Tab 3</a>
-      
+
       router-outlet goes here
     </tedi-tabs>
   `,

@@ -195,6 +195,7 @@ export class PaginationComponent {
   /** True below `md` — pager swaps to the compact `current / total` picker. */
   protected readonly useCompactPicker = this.breakpointService.isBelowBreakpoint("md");
   protected readonly pageSizeInputId = `tedi-pagination-page-size-${generateUUID()}`;
+  protected readonly pageSizeLabelId = `${this.pageSizeInputId}-label`;
 
   protected readonly hostClasses = computed(() => {
     const classes = [

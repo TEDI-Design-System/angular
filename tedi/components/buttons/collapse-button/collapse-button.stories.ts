@@ -265,6 +265,17 @@ export const Default: DemoStory = {
   }),
 };
 
+export const States: StoryObj<StatesArgs> = {
+  parameters: PSEUDO_PARAMS,
+  args: {
+    hideText: false,
+    arrowType: "default",
+    openText: "Open",
+    closeText: "Close",
+  },
+  render: StatesTemplate,
+};
+
 export const IconOnly: StoryObj<StatesArgs> = {
   parameters: PSEUDO_PARAMS,
   args: {
@@ -312,17 +323,6 @@ export const IconOnlyInverted: StoryObj<StatesArgs> = {
     inverted: true,
     titleColor: "white",
     ariaLabel: "Toggle details",
-  },
-  render: StatesTemplate,
-};
-
-export const States: StoryObj<StatesArgs> = {
-  parameters: PSEUDO_PARAMS,
-  args: {
-    hideText: false,
-    arrowType: "default",
-    openText: "Open",
-    closeText: "Close",
   },
   render: StatesTemplate,
 };

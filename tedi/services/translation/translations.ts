@@ -4,6 +4,7 @@ export const translationsMap = {
   close: {
     description: "Used for closing",
     components: [
+      "Accordion",
       "CloseButton",
       "Collapse",
       "Notification",
@@ -18,7 +19,7 @@ export const translationsMap = {
   },
   open: {
     description: "Used for opening",
-    components: ["Collapse", "TableOfContents"],
+    components: ["Accordion", "Collapse", "TableOfContents"],
     et: "Ava",
     en: "Open",
     ru: "Открыть",

@@ -17,6 +17,9 @@ import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.t
     <tedi-accordion-item
       [defaultExpanded]="defaultExpanded"
       [selected]="selected"
+      [itemId]="itemId"
+      [openOnHashMatch]="openOnHashMatch"
+      [disabled]="disabled"
     >
       <tedi-accordion-item-header />
       <tedi-accordion-item-content>Content</tedi-accordion-item-content>
@@ -28,6 +31,9 @@ class TestHostComponent {
 
   defaultExpanded = false;
   selected = false;
+  itemId: string | undefined = undefined;
+  openOnHashMatch = false;
+  disabled = false;
 }
 
 describe("AccordionItemComponent", () => {
@@ -122,5 +128,63 @@ describe("AccordionItemComponent", () => {
 
     expect(header).not.toBeNull();
     expect(content).not.toBeNull();
+  });
+
+  describe("openOnHashMatch", () => {
+    let originalHash: string;
+
+    beforeEach(() => {
+      originalHash = window.location.hash;
+    });
+
+    afterEach(() => {
+      window.location.hash = originalHash;
+    });
+
+    it("auto-expands when the URL hash matches the itemId at init", () => {
+      window.location.hash = "#deep-link-target";
+
+      initHost((h) => {
+        h.itemId = "deep-link-target";
+        h.openOnHashMatch = true;
+      });
+
+      expect(item.expanded()).toBe(true);
+    });
+
+    it("auto-expands when the URL hash changes to match the itemId after mount", () => {
+      window.location.hash = "#other";
+
+      initHost((h) => {
+        h.itemId = "deep-link-target";
+        h.openOnHashMatch = true;
+      });
+
+      expect(item.expanded()).toBe(false);
+
+      window.location.hash = "#deep-link-target";
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+      fixture.detectChanges();
+
+      expect(item.expanded()).toBe(true);
+    });
+
+    it("removes the hashchange listener on destroy", () => {
+      window.location.hash = "#other";
+
+      initHost((h) => {
+        h.itemId = "deep-link-target";
+        h.openOnHashMatch = true;
+      });
+
+      const removeSpy = jest.spyOn(window, "removeEventListener");
+      fixture.destroy();
+
+      expect(removeSpy).toHaveBeenCalledWith(
+        "hashchange",
+        expect.any(Function),
+      );
+      removeSpy.mockRestore();
+    });
   });
 });

@@ -23,6 +23,9 @@ const FOCUSABLE_SELECTOR = "button, a[href], [tabindex]";
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   hostDirectives: [CdkOverlayOrigin],
+  host: {
+    "[class.tedi-tooltip-trigger--clickable]": "tooltip.openWith() === 'click'",
+  },
 })
 export class TooltipTriggerComponent implements AfterContentChecked {
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -147,7 +150,16 @@ export class TooltipTriggerComponent implements AfterContentChecked {
 
     const interactive = this.resolveInteractiveElement(firstChild);
 
-    this.renderer.addClass(interactive, "tedi-tooltip-trigger--focus");
+    // The `--focus` class is a fallback focus ring for triggers that have no
+    // focus styling of their own. Natively focusable elements (a real
+    // `<button>`/`<a href>`, e.g. tedi-info-button or tedi-button) already own
+    // their `:focus-visible` styles, and the tooltip's generic outline has
+    // higher specificity — adding it would override the component's own focus
+    // outline. Only synthesise a focus ring for elements that aren't already
+    // focusable in their own right.
+    if (!this.isFocusable(interactive)) {
+      this.renderer.addClass(interactive, "tedi-tooltip-trigger--focus");
+    }
 
     if (!interactive.getAttribute("tabindex")) {
       this.renderer.setAttribute(interactive, "tabindex", "0");

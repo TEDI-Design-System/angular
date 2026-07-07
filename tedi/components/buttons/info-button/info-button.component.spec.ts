@@ -40,4 +40,14 @@ describe("InfoButtonComponent", () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.getAttribute("aria-label")).toBe("Override");
   });
+
+  it("should not apply the inverted modifier by default", () => {
+    expect(fixture.nativeElement.classList).not.toContain("tedi-info-button--inverted");
+  });
+
+  it("should apply the inverted modifier when color is inverted", () => {
+    fixture.componentRef.setInput("color", "inverted");
+    fixture.detectChanges();
+    expect(fixture.nativeElement.classList).toContain("tedi-info-button--inverted");
+  });
 });

@@ -1,4 +1,4 @@
-import { CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
+import { CdkConnectedOverlay, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
 import { CdkListbox, CdkListboxModule } from "@angular/cdk/listbox";
 import {
   AfterContentChecked,
@@ -23,7 +23,10 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { IconComponent, TextComponent } from "../../base";
-import { ClosingButtonComponent } from "../../buttons";
+import { ClosingButtonComponent, InfoButtonComponent } from "../../buttons";
+import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
+import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
+import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
 import { TediTranslationPipe } from "../../../services";
 import { ComponentInputs } from "../../../types";
 import { calculateVisibleTagCount } from "../../../utils/tag-overflow.util";
@@ -69,6 +72,10 @@ export enum SpecialOptionControls {
     OverlayModule,
     CdkListboxModule,
     ClosingButtonComponent,
+    InfoButtonComponent,
+    TooltipComponent,
+    TooltipTriggerComponent,
+    TooltipContentComponent,
     IconComponent,
     LabelComponent,
     FeedbackTextComponent,
@@ -106,6 +113,26 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * Label text displayed above the select.
    */
   label = input<string>();
+
+  /**
+   * When set, renders an info button next to the label that reveals this text
+   * in a tooltip on hover/focus.
+   */
+  tooltip = input<string>();
+
+  /**
+   * Associates the select with an external visible label by its element id.
+   * Use this when the label lives outside the component — a native
+   * `<label for>` cannot target the combobox because it is a `<div>`, not a
+   * labelable element. Ignored when the built-in `label` input is set.
+   */
+  ariaLabelledby = input<string | undefined>(undefined);
+
+  /**
+   * Accessible name for the select when there is no visible label to reference.
+   * Ignored when `label` or `ariaLabelledby` provides a name.
+   */
+  ariaLabel = input<string | undefined>(undefined);
 
   /**
    * Whether the field is required.
@@ -321,6 +348,19 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   listboxId = computed(() => this.inputId() + "-listbox");
   labelId = computed(() => this.inputId() + "-label");
 
+  /**
+   * The id(s) to expose via `aria-labelledby`: the built-in label takes
+   * precedence, falling back to a consumer-provided external label id.
+   */
+  resolvedAriaLabelledby = computed(() =>
+    this.label() ? this.labelId() : (this.ariaLabelledby() ?? null)
+  );
+
+  /** `aria-label` is only used when no labelledby reference is available. */
+  resolvedAriaLabel = computed(() =>
+    this.resolvedAriaLabelledby() ? null : (this.ariaLabel() ?? null)
+  );
+
   isOpen = signal(false);
   selectedValues = signal<unknown[]>([]);
   disabled = signal(false);
@@ -340,7 +380,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   listboxRef = viewChild(CdkListbox, { read: ElementRef });
   cdkListboxRef = viewChild(CdkListbox);
   connectedOverlay = viewChild(CdkConnectedOverlay);
-  triggerRef = viewChild(CdkOverlayOrigin, { read: ElementRef });
+  triggerRef = viewChild("trigger", { read: ElementRef });
   searchInputRef = viewChild<ElementRef>("searchInput");
   multiselectContainerRef = viewChild<ElementRef>("multiselectContainer");
   tagRefs = viewChildren("tagElement", { read: ElementRef });
@@ -525,6 +565,33 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     } else if (this.isOpen() && this.listboxRef() && !this.searchable()) {
       this.listboxRef()?.nativeElement.focus();
     }
+  });
+
+  /**
+   * Make an external label clickable to behave like the built-in one: clicking the
+   * element referenced via `ariaLabelledby` opens the dropdown. Skipped
+   * when the built-in `label` is used.
+   */
+  bindExternalLabelClick = effect((onCleanup) => {
+    const ids = this.ariaLabelledby();
+    if (this.label() || !ids) return;
+
+    // `aria-labelledby` is a space-separated IDREF list, so resolve each id.
+    const labelEls = ids
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (labelEls.length === 0) return;
+
+    const open = (event: Event) => {
+      event.stopPropagation();
+      this.onTriggerClick();
+    };
+    labelEls.forEach((el) => el.addEventListener("click", open));
+    onCleanup(() =>
+      labelEls.forEach((el) => el.removeEventListener("click", open))
+    );
   });
 
   constructor() {

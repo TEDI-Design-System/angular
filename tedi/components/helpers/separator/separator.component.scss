@@ -82,11 +82,11 @@ $sizes: (
 }
 
 @each $size, $value in $sizes {
-  .tedi-separator--horizontal.tedi-separator--top-#{$size} {
+  .tedi-separator--top-#{$size} {
     margin-top: #{$value};
   }
 
-  .tedi-separator--horizontal.tedi-separator--bottom-#{$size} {
+  .tedi-separator--bottom-#{$size} {
     margin-bottom: #{$value};
   }
 

@@ -44,15 +44,6 @@ const themeDecorator = (storyFn: any, context: StoryContext) => {
     } else {
       html.classList.add(`${prefix}${newTheme}`);
     }
-
-    const bg = newTheme === "dark" ? "var(--color-bg-inverted, #1a1a1a)" : "";
-    const selectors = ".sb-show-main, .docs-story > div";
-
-    requestAnimationFrame(() => {
-      document.querySelectorAll<HTMLElement>(selectors).forEach((el) => {
-        el.style.backgroundColor = bg;
-      });
-    });
   };
 
   applyTheme(theme);
@@ -91,7 +82,7 @@ const preview: Preview = {
         black: { name: "black", value: "var(--tedi-neutral-900)" },
         inverted: { name: "inverted", value: "var(--general-surface-inverted-primary)" },
         "inverted-contrast": { name: "inverted-contrast", value: "var(--general-surface-inverted-secondary)" },
-        brand: { name: "brand", value: "var(--tedi-primary-600)" },
+        brand: { name: "brand", value: "var(--general-surface-brand-primary)" },
       },
     },
     docs: {
