@@ -2286,6 +2286,7 @@ export class TediTableComponent<TData> {
     this.handleFilterTriggerClick(col);
     this.modalService.open(TableFilterModalComponent, {
       size: "small",
+      position: "bottom",
       fullscreen: this.filterModalFullscreen(),
       ariaLabel: this.filterAriaLabel(col),
       data: {

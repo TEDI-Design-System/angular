@@ -14,15 +14,22 @@
     grid-template-columns: 1fr auto;
   }
 
-  // Below md the pager collapses to the compact current/total picker, but the
-  // slots stay laid out horizontally (results · pager · page-size) and wrap
-  // when there isn't room. Flex (not grid) lets hidden slots collapse out
-  // instead of reserving an empty track.
+  // Below md the pager collapses to the compact current/total picker. At tablet
+  // widths the slots stay laid out horizontally (results · pager · page-size);
+  // flex (not grid) lets hidden slots collapse out instead of reserving a track.
   @include breakpoints.media-breakpoint-down(md) {
     display: flex;
     flex-flow: row wrap;
     gap: var(--layout-grid-gutters-16);
     justify-content: space-between;
+  }
+
+  // On phones the horizontal row no longer fits, so stack the slots and center
+  // each one (results still on top via the slot `order`s below).
+  @include breakpoints.media-breakpoint-down(sm) {
+    flex-direction: column;
+    gap: var(--layout-grid-gutters-08);
+    align-items: center;
   }
 
   &--bg-white {
@@ -84,6 +91,12 @@
     @include breakpoints.media-breakpoint-down(md) {
       order: 2;
     }
+
+    // Stretch full width in the stacked layout so the pager grid below can
+    // reserve the arrow columns.
+    @include breakpoints.media-breakpoint-down(sm) {
+      align-self: stretch;
+    }
   }
 
   &__slot-end {
@@ -119,6 +132,15 @@
     gap: var(--layout-grid-gutters-08);
     align-items: center;
     justify-content: center;
+
+    // Symmetric grid in the stacked layout: the compact trigger stays centered
+    // and the next button holds its column even when the previous button is
+    // hidden on the first page — otherwise the row shifts left when paging.
+    @include breakpoints.media-breakpoint-down(sm) {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      width: 100%;
+    }
   }
 
   &__list {
@@ -203,6 +225,22 @@
     }
   }
 
+  // Pin the arrows to the outer columns of the stacked pager grid so their
+  // presence/absence never shifts the centered trigger (see `&__nav`).
+  &__nav-button--previous {
+    @include breakpoints.media-breakpoint-down(sm) {
+      grid-column: 1;
+      justify-self: end;
+    }
+  }
+
+  &__nav-button--next {
+    @include breakpoints.media-breakpoint-down(sm) {
+      grid-column: 3;
+      justify-self: start;
+    }
+  }
+
   &__mobile-trigger {
     display: inline-flex;
     gap: var(--form-field-inner-spacing);
@@ -215,6 +253,10 @@
     background: var(--form-input-background-default);
     border: var(--tedi-borders-01) solid var(--form-input-border-default);
     border-radius: var(--form-field-radius);
+
+    @include breakpoints.media-breakpoint-down(sm) {
+      grid-column: 2;
+    }
 
     &:focus-visible {
       outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
