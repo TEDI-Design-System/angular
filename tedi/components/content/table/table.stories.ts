@@ -61,7 +61,10 @@ import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-conten
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
 import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
 import { EmptyStateComponent } from "../../helpers/empty-state/empty-state.component";
-import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
+import {
+  BreakpointService,
+  type Breakpoint,
+} from "../../../services/breakpoint/breakpoint.service";
 import { TextGroupComponent } from "../text-group/text-group.component";
 import { TextGroupLabelComponent } from "../text-group/text-group-label.component";
 import { TextGroupValueComponent } from "../text-group/text-group-value.component";
@@ -136,6 +139,8 @@ abstract class TableStoryHostBase {
     "select",
     "expand",
   ]);
+  readonly filterModalBreakpoint = input<Breakpoint | false>("sm");
+  readonly filterModalFullscreen = input<boolean | Breakpoint>(false);
   readonly maxHeight = input<number | undefined>(undefined);
   readonly activeRowId = input<string | undefined>(undefined);
   readonly placeholderRole = input<"alert" | "status" | undefined>(undefined);
@@ -159,6 +164,8 @@ type TediTableStoryArgs = {
   enableColumnFilters: boolean;
   rowGroupDividers: "all" | "between" | "none";
   controlColumnOrder: TableControlColumnOrder[];
+  filterModalBreakpoint: Breakpoint | false;
+  filterModalFullscreen: boolean | Breakpoint;
   maxHeight: number | undefined;
   activeRowId: string | undefined;
   placeholderRole: "alert" | "status" | undefined;
@@ -239,6 +246,8 @@ const meta: Meta<TediTableStoryArgs> = {
     enableColumnFilters: false,
     rowGroupDividers: "all",
     controlColumnOrder: ["drag", "select", "expand"],
+    filterModalBreakpoint: "sm",
+    filterModalFullscreen: false,
     maxHeight: undefined,
     activeRowId: undefined,
     placeholderRole: undefined,
@@ -415,6 +424,28 @@ const meta: Meta<TediTableStoryArgs> = {
         category: "grouping",
         type: { summary: "('drag' | 'select' | 'expand' | 'content')[]" },
         defaultValue: { summary: '["drag", "select", "expand"]' },
+      },
+    },
+    filterModalBreakpoint: {
+      description:
+        "Below this breakpoint the column filter opens in a modal instead of the popover. Set false to always use the popover.",
+      control: { type: "select" },
+      options: ["xs", "sm", "md", "lg", "xl", "xxl", false],
+      table: {
+        category: "behavior",
+        type: { summary: "Breakpoint | false" },
+        defaultValue: { summary: '"sm"' },
+      },
+    },
+    filterModalFullscreen: {
+      description:
+        "Fullscreen behaviour of the filter modal: true always, false never, a breakpoint = fullscreen below it.",
+      control: { type: "select" },
+      options: [true, false, "sm", "md", "lg", "xl", "xxl"],
+      table: {
+        category: "behavior",
+        type: { summary: "boolean | Breakpoint" },
+        defaultValue: { summary: "false" },
       },
     },
     activeRowId: {
@@ -2129,6 +2160,15 @@ export const Filters: Story = {
     docs: {
       description: {
         story:
+          "Each column supplies its own filter UI via `filterable: true` + " +
+          "`filterTemplate` — here a text field (Nimi), a `tedi-date-field` range " +
+          "(Tööalguse kuupäev) and a checkbox group (Tõendi staatus). \n\n" +
+          "Below `filterModalBreakpoint` (default `\"sm\"`) the filter opens in a " +
+          "**modal** instead of the popover — resize below ~576px to see it. " +
+          "`filterModalFullscreen` (default `false`) controls whether that modal " +
+          "is fullscreen; set `false` for a centered dialog, `true` or a breakpoint " +
+          "for fullscreen. Set `filterModalBreakpoint` to `false` to always use the " +
+          "popover. \n\n" +
           'The page-size dropdown includes a **"Näita kõiki"** (show all) option, built with the ' +
           "`{ value, label }` form of `pageSizeOptions`. Its `value` is the page " +
           "size used when the option is picked, so make it large enough to hold " +

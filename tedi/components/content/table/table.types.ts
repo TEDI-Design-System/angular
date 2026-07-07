@@ -175,6 +175,22 @@ export interface TediTableFilterContext<TValue = unknown, TData = unknown> {
 }
 
 /**
+ * Data passed (via `MODAL_DATA`) to the filter modal rendered below the
+ * `filterModalBreakpoint`. Carries the consumer's filter template plus the
+ * labels and context builder the modal needs to render and commit the filter.
+ */
+export interface TableFilterModalData {
+  /** Column label shown as the modal title. */
+  columnLabel: string;
+  applyLabel: string;
+  clearLabel: string;
+  /** Consumer-provided filter template. */
+  template: TemplateRef<TediTableFilterContext<unknown, unknown>>;
+  /** Builds the filter context, wiring `apply` / `clear` to close the modal. */
+  buildContext: (close: () => void) => TediTableFilterContext<unknown, unknown>;
+}
+
+/**
  * Angular-only extension to TanStack's `ColumnDef`. Supports body-level row
  * spanning via the `rowSpan` callback and a one-flag opt-in to the built-in
  * sort affordance via `sortable`.

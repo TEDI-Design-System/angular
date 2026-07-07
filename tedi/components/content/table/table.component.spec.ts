@@ -30,6 +30,14 @@ import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { TediPaginationResultsDirective } from "../../navigation/pagination/pagination-results.directive";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { TediTranslationService } from "../../../services/translation/translation.service";
+import {
+  BreakpointService,
+  type Breakpoint,
+} from "../../../services/breakpoint/breakpoint.service";
+import { ModalService } from "../../overlay/modal/modal.service";
+import { ModalRef } from "../../overlay/modal/modal-ref";
+import { MODAL_DATA } from "../../overlay/modal/modal.types";
+import { TableFilterModalComponent } from "./table-filter-modal/table-filter-modal.component";
 
 type Translator = (...args: unknown[]) => string;
 const TRANSLATIONS: Record<string, Translator> = {
@@ -1600,6 +1608,174 @@ describe("TediTableComponent", () => {
       expect(filterBtn).not.toBeNull();
       expect(sortBtn?.textContent).toContain("Name");
     });
+  });
+});
+
+// ── Filter modal (below filterModalBreakpoint) ──────────────────────────────
+
+describe("Table: filter modal", () => {
+  @Component({
+    standalone: true,
+    imports: [TediTableComponent, TextFieldComponent, FormFieldComponent],
+    template: `
+      <tedi-table
+        [data]="data()"
+        [columns]="columns()"
+        [filterModalBreakpoint]="breakpoint()"
+      />
+      <ng-template #textFilter let-ctx>
+        <tedi-form-field size="small">
+          <input
+            tedi-text-field
+            type="text"
+            [value]="ctx.value ?? ''"
+            (input)="ctx.setValue($any($event.target).value)"
+            aria-label="Name filter input"
+          />
+        </tedi-form-field>
+      </ng-template>
+    `,
+  })
+  class FilterModalHostComponent {
+    readonly data = signal<Person[]>(data);
+    readonly breakpoint = signal<Breakpoint | false>("sm");
+    readonly textFilterTpl =
+      viewChild<TemplateRef<TediTableFilterContext<string, Person>>>(
+        "textFilter",
+      );
+    readonly columns = signal<TediColumnDef<Person>[]>([]);
+    build(): void {
+      this.columns.set([
+        {
+          id: "name",
+          header: "Name",
+          accessorKey: "name",
+          filterable: true,
+          filterFn: "includesString",
+          filterTemplate: this.textFilterTpl() ?? undefined,
+        } as TediColumnDef<Person>,
+      ]);
+    }
+  }
+
+  class BreakpointServiceStub {
+    private readonly bp = signal<Breakpoint>("xs");
+    setBreakpoint(value: Breakpoint): void {
+      this.bp.set(value);
+    }
+    currentBreakpoint() {
+      return this.bp;
+    }
+  }
+
+  let modalOpen: jest.Mock;
+
+  function setup(current: Breakpoint): ComponentFixture<FilterModalHostComponent> {
+    modalOpen = jest.fn();
+    const stub = new BreakpointServiceStub();
+    stub.setBreakpoint(current);
+    TestBed.configureTestingModule({
+      imports: [FilterModalHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        { provide: BreakpointService, useValue: stub },
+        { provide: ModalService, useValue: { open: modalOpen } },
+      ],
+    });
+    const fixture = TestBed.createComponent(FilterModalHostComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.build();
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  function trigger(
+    fixture: ComponentFixture<FilterModalHostComponent>,
+  ): HTMLButtonElement {
+    return fixture.nativeElement.querySelector(
+      'button.tedi-table-header-button[aria-label="Filter Name"]',
+    ) as HTMLButtonElement;
+  }
+
+  afterEach(() => {
+    document.body
+      .querySelectorAll(".tedi-popover__container")
+      .forEach((node) => node.remove());
+  });
+
+  it("opens the filter in a modal below the breakpoint", () => {
+    const fixture = setup("xs");
+    trigger(fixture).click();
+    fixture.detectChanges();
+    expect(modalOpen).toHaveBeenCalledTimes(1);
+    expect(modalOpen.mock.calls[0][0]).toBe(TableFilterModalComponent);
+    expect(modalOpen.mock.calls[0][1].data.columnLabel).toBe("Name");
+  });
+
+  it("uses the popover (no modal) at or above the breakpoint", () => {
+    const fixture = setup("lg");
+    trigger(fixture).click();
+    fixture.detectChanges();
+    expect(modalOpen).not.toHaveBeenCalled();
+  });
+});
+
+describe("TableFilterModalComponent", () => {
+  // Reads the modal's `context` getter without a change-detection pass, so the
+  // modal chrome (header / footer) doesn't need the full ModalService harness.
+  function createModal(draft: ReturnType<typeof signal<unknown>>) {
+    const buildContext = (close: () => void) => {
+      const ctx = {
+        get value() {
+          return draft();
+        },
+        setValue: (next: unknown) => draft.set(next),
+        apply: () => close(),
+        clear: () => {
+          draft.set(undefined);
+          close();
+        },
+        column: {},
+      } as unknown as TediTableFilterContext<unknown, unknown>;
+      (ctx as { $implicit: unknown }).$implicit = ctx;
+      return ctx;
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: MODAL_DATA,
+          useValue: {
+            columnLabel: "Status",
+            applyLabel: "Apply",
+            clearLabel: "Clear",
+            template: null,
+            buildContext,
+          },
+        },
+        { provide: ModalRef, useValue: { close: jest.fn() } },
+      ],
+    });
+    const fixture = TestBed.createComponent(TableFilterModalComponent);
+    return fixture.componentInstance as unknown as {
+      context: TediTableFilterContext<unknown, unknown>;
+    };
+  }
+
+  it("rebuilds the context on each access so value tracks the live draft", () => {
+    const draft = signal<unknown>(undefined);
+    const modal = createModal(draft);
+    // A frozen (built-once) context would return the same instance every time.
+    expect(modal.context).not.toBe(modal.context);
+  });
+
+  it("accumulates multi-value edits instead of keeping only the last", () => {
+    const draft = signal<unknown>(undefined);
+    const modal = createModal(draft);
+    // Mimic a checkbox group toggling two options, each reading the live value.
+    modal.context.setValue([...((modal.context.value as string[]) ?? []), "a"]);
+    modal.context.setValue([...((modal.context.value as string[]) ?? []), "b"]);
+    expect(draft()).toEqual(["a", "b"]);
   });
 });
 

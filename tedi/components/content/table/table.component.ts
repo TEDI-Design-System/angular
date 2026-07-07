@@ -68,6 +68,13 @@ import { PopoverComponent } from "../../overlay/popover/popover.component";
 import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
 import { PopoverTriggerDirective } from "../../overlay/popover/popover-trigger/popover-trigger.directive";
 import { TediTranslationService } from "../../../services/translation/translation.service";
+import {
+  BreakpointService,
+  type Breakpoint,
+} from "../../../services/breakpoint/breakpoint.service";
+import { ModalService } from "../../overlay/modal/modal.service";
+import type { ModalFullscreen } from "../../overlay/modal/modal.types";
+import { TableFilterModalComponent } from "./table-filter-modal/table-filter-modal.component";
 import { TEDI_TABLE_CONTEXT } from "./table.context";
 import { computeGroupSpans } from "./row-span.utils";
 import {
@@ -79,6 +86,7 @@ import type {
   TableControlColumn,
   TableControlColumnOrder,
   TableExpandTrigger,
+  TableFilterModalData,
   TableFilterOptions,
   TablePaginationOptions,
   TablePersistOptions,
@@ -437,6 +445,19 @@ export class TediTableComponent<TData> {
     "expand",
   ]);
   /**
+   * Below this breakpoint the column filter opens in a modal instead of the
+   * popover (which can be cramped or drift off-screen on small viewports).
+   * Set `false` to always use the popover.
+   * @default "sm"
+   */
+  readonly filterModalBreakpoint = input<Breakpoint | false>("sm");
+  /**
+   * Fullscreen behaviour of the filter modal (see `filterModalBreakpoint`):
+   * `true` always fullscreen, `false` never, a breakpoint = fullscreen below it.
+   * @default false
+   */
+  readonly filterModalFullscreen = input<ModalFullscreen>(false);
+  /**
    * Enables pagination and configures the bottom paginator slot. This is also
    * the source of truth for `pageSize` / `pageSizeOptions` — the top slot
    * (if any) shares the same state. Pass `true` to enable with defaults,
@@ -575,6 +596,9 @@ export class TediTableComponent<TData> {
 
   protected readonly injector = inject(Injector);
   private readonly translation = inject(TediTranslationService);
+  private readonly breakpointService = inject(BreakpointService);
+  private readonly modalService = inject(ModalService);
+  private readonly currentBreakpoint = this.breakpointService.currentBreakpoint();
 
   private readonly _hoveredRowId = signal<string | null>(null);
   /**
@@ -2208,24 +2232,74 @@ export class TediTableComponent<TData> {
     col: Column<TData, unknown>,
     popover: PopoverComponent,
   ): TediTableFilterContext<unknown, TData> {
+    return this.buildFilterContext(col, () => popover.hidePopover(true));
+  }
+
+  /**
+   * Builds the filter context, wiring `apply` / `clear` to commit the draft and
+   * then run `close` (hide the popover, or close the modal — whichever opened
+   * the filter). Shared by the popover and the modal renderers.
+   */
+  private buildFilterContext(
+    col: Column<TData, unknown>,
+    close: () => void,
+  ): TediTableFilterContext<unknown, TData> {
     const draft = this.getFilterDraft(col.id, col.getFilterValue());
     const ctx = {
       value: draft(),
       setValue: (next: unknown) => draft.set(next),
       apply: () => {
         col.setFilterValue(draft());
-        popover.hidePopover(true);
+        close();
       },
       clear: () => {
         draft.set(undefined);
         col.setFilterValue(undefined);
-        popover.hidePopover(true);
+        close();
       },
       column: col,
     } as Omit<TediTableFilterContext<unknown, TData>, "$implicit">;
     (ctx as TediTableFilterContext<unknown, TData>).$implicit =
       ctx as TediTableFilterContext<unknown, TData>;
     return ctx as TediTableFilterContext<unknown, TData>;
+  }
+
+  /** True when the filter should open as a modal (viewport below
+   *  `filterModalBreakpoint`) rather than the popover. */
+  protected readonly filterUsesModal = computed<boolean>(() => {
+    const bp = this.filterModalBreakpoint();
+    if (!bp) return false;
+    const current = this.currentBreakpoint();
+    if (!current) return false;
+    const order: Breakpoint[] = ["xs", "sm", "md", "lg", "xl", "xxl"];
+    return order.indexOf(current) < order.indexOf(bp);
+  });
+
+  /**
+   * Opens the column filter in a modal (below `filterModalBreakpoint`). Reuses
+   * the same draft reset (`clearOnClose`) and context as the popover, but
+   * `apply` / `clear` close the modal instead.
+   */
+  protected openFilterModal(col: Column<TData, unknown>): void {
+    const tpl = this.filterTemplateFor(col);
+    if (!tpl) return;
+    this.handleFilterTriggerClick(col);
+    this.modalService.open(TableFilterModalComponent, {
+      size: "small",
+      fullscreen: this.filterModalFullscreen(),
+      ariaLabel: this.filterAriaLabel(col),
+      data: {
+        columnLabel: this.resolveColumnLabel(col),
+        applyLabel: this.filterApplyLabel(),
+        clearLabel: this.filterClearLabel(),
+        template: tpl as TemplateRef<TediTableFilterContext<unknown, unknown>>,
+        buildContext: (close: () => void) =>
+          this.buildFilterContext(col, close) as TediTableFilterContext<
+            unknown,
+            unknown
+          >,
+      } satisfies TableFilterModalData,
+    });
   }
 
   protected handleFilterApply(

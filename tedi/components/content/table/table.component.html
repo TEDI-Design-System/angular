@@ -192,6 +192,16 @@
                       }
                     </ng-container>
                     @if (shouldRenderFilterButton(header.column)) {
+                      @if (filterUsesModal()) {
+                        <button
+                          tedi-table-header-button
+                          icon="filter_alt"
+                          [selected]="filterIsActive(header.column)"
+                          [filled]="filterIsActive(header.column)"
+                          [aria-label]="filterAriaLabel(header.column)"
+                          (click)="openFilterModal(header.column)"
+                        ></button>
+                      } @else {
                       <tedi-popover
                         #filterPopover
                         class="tedi-table__filter-popover"
@@ -255,6 +265,7 @@
                           </div>
                         </tedi-popover-content>
                       </tedi-popover>
+                      }
                     }
                   </span>
                 }
