@@ -113,6 +113,7 @@ const columns: TediColumnDef<Person>[] = [
       [pageCount]="pageCount()"
       [rowCount]="rowCount()"
       [renderSubComponent]="subTemplate()"
+      [expandButtonLabel]="expandButtonLabel()"
       [getSubRows]="getSubRows()"
       [groupRowsBy]="groupRowsBy()"
       [rowGroupDividers]="rowGroupDividers()"
@@ -162,6 +163,9 @@ class HostComponent {
   readonly subTemplate = signal<
     TemplateRef<{ $implicit: Row<Person> }> | undefined
   >(undefined);
+  readonly expandButtonLabel = signal<
+    string | { open: string; close: string } | undefined
+  >(undefined);
   readonly getSubRows = signal<
     ((row: Person) => Person[] | undefined) | undefined
   >(undefined);
@@ -169,11 +173,9 @@ class HostComponent {
     undefined,
   );
   readonly rowGroupDividers = signal<"all" | "between" | "none">("all");
-  readonly controlColumnOrder = signal<("drag" | "select" | "expand")[]>([
-    "drag",
-    "select",
-    "expand",
-  ]);
+  readonly controlColumnOrder = signal<
+    ("drag" | "select" | "expand" | "content")[]
+  >(["drag", "select", "expand"]);
   readonly interactive = signal(false);
   readonly rowAriaLabel = signal<((row: Row<Person>) => string) | undefined>(
     undefined,
@@ -328,6 +330,18 @@ describe("TediTableComponent", () => {
         rows.some((r) => r.classList.contains("tedi-table__row--selected")),
       ).toBe(false);
     });
+
+    it("marks the selection control cells with tedi-table__cell--control", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.enableRowSelection.set(true);
+      fixture.detectChanges();
+      const selectHeader = fixture.nativeElement
+        .querySelector('input[aria-label="Select all"]')
+        ?.closest("th");
+      expect(selectHeader?.classList.contains("tedi-table__cell--control")).toBe(
+        true,
+      );
+    });
   });
 
   describe("expansion", () => {
@@ -341,6 +355,54 @@ describe("TediTableComponent", () => {
         'button[aria-label="Expand row"]',
       );
       expect(expandButton).not.toBeNull();
+    });
+
+    it("marks the icon-only expand cell with tedi-table__cell--control", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.subTemplate.set(
+        fixture.componentInstance.subTemplateRef()!,
+      );
+      fixture.detectChanges();
+      const expandHeader = fixture.nativeElement
+        .querySelector('.tedi-table__body button[aria-label="Expand row"]')
+        ?.closest("td");
+      expect(expandHeader?.classList.contains("tedi-table__cell--control")).toBe(
+        true,
+      );
+    });
+
+    it("does not narrow the expand column when it has a visible label", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.subTemplate.set(
+        fixture.componentInstance.subTemplateRef()!,
+      );
+      fixture.componentInstance.expandButtonLabel.set({
+        open: "Näita",
+        close: "Peida",
+      });
+      fixture.detectChanges();
+      const expandCell = fixture.nativeElement
+        .querySelector(".tedi-table__body .tedi-table__expand-toggle")
+        ?.closest("td");
+      expect(expandCell?.classList.contains("tedi-table__cell--control")).toBe(
+        false,
+      );
+    });
+
+    it("renders the expand control as a trailing column with the 'content' sentinel", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.subTemplate.set(
+        fixture.componentInstance.subTemplateRef()!,
+      );
+      fixture.componentInstance.controlColumnOrder.set(["content", "expand"]);
+      fixture.detectChanges();
+      const firstRow = fixture.nativeElement.querySelector(
+        ".tedi-table__body .tedi-table__row",
+      ) as HTMLTableRowElement;
+      const lastCell = firstRow.querySelector("td:last-child");
+      expect(
+        lastCell?.querySelector('button[aria-label="Expand row"]'),
+      ).not.toBeNull();
     });
 
     it("renders the sub component when the expand toggle is clicked", () => {

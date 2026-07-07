@@ -77,6 +77,7 @@ import {
 import type {
   TableColumnMeta,
   TableControlColumn,
+  TableControlColumnOrder,
   TableExpandTrigger,
   TableFilterOptions,
   TablePaginationOptions,
@@ -96,9 +97,10 @@ const DRAG_COLUMN_ID = "__drag__";
 
 /**
  * Fixed width (px) for the icon-only control columns (drag / select / expand).
- * Accounts for the cell's horizontal padding so the control still gets room.
+ * Kept as narrow as the control + its reduced cell padding allows (see the
+ * `tedi-table__cell--control` padding override), matching the React table.
  */
-const CONTROL_COLUMN_WIDTH = 60;
+const CONTROL_COLUMN_WIDTH = 40;
 
 /** Interactive controls inside a cell that should not trigger row activation. */
 const INTERACTIVE_CELL_SELECTOR =
@@ -255,7 +257,9 @@ export class TediTableComponent<TData> {
    */
   readonly verticalBorders = input(false, { transform: booleanAttribute });
   /**
-   * Removes the table's outer border and corner radius.
+   * Removes only the table's **outer** border (the frame around the table) and
+   * its corner radius. Borders between rows and columns — including the
+   * `verticalBorders` separators — are unaffected.
    * @default false
    */
   readonly borderless = input(false, { transform: booleanAttribute });
@@ -301,7 +305,10 @@ export class TediTableComponent<TData> {
   /**
    * Forces the row hover background on (`true`) or off (`false`). When omitted,
    * hover styling tracks whether rows are interactive — on when `interactive`
-   * is set or `expandTrigger` is `'row'`, off otherwise.
+   * is set or `expandTrigger` is `'row'`, off otherwise. This only affects the
+   * hover background; the pointer cursor is driven separately by row-level
+   * interactivity (`interactive` / click-to-expand), not by whether a cell
+   * happens to contain a link or button.
    * @default undefined
    */
   readonly rowHover = input<boolean | undefined>(undefined);
@@ -417,11 +424,14 @@ export class TediTableComponent<TData> {
   /**
    * Order of the auto-injected control columns (drag handle, selection
    * checkbox, expand chevron). Only the controls that are actually enabled
-   * render; any enabled control omitted from this list is appended at the end.
-   * Use it to e.g. place the checkbox before the expand chevron.
+   * render; any enabled control omitted from this list is appended after the
+   * other leading controls. Use it to e.g. place the checkbox before the expand
+   * chevron. Include the `"content"` sentinel to split leading vs trailing: any
+   * control listed after `"content"` renders after the data columns — e.g.
+   * `["content", "expand"]` puts the expand toggle in the last column.
    * @default ["drag", "select", "expand"]
    */
-  readonly controlColumnOrder = input<TableControlColumn[]>([
+  readonly controlColumnOrder = input<TableControlColumnOrder[]>([
     "drag",
     "select",
     "expand",
@@ -789,18 +799,28 @@ export class TediTableComponent<TData> {
     }
 
     const order = [...new Set(this.controlColumnOrder())];
-    const ordered = order
-      .map((key) => controls[key])
-      .filter((col): col is TediColumnDef<TData> => col !== undefined);
-    // Append any enabled control the consumer left out of the order list.
-    const leading = [
-      ...ordered,
-      ...(Object.keys(controls) as TableControlColumn[])
-        .filter((key) => !order.includes(key))
-        .map((key) => controls[key]!),
-    ];
+    const toCols = (keys: TableControlColumnOrder[]): TediColumnDef<TData>[] =>
+      keys
+        .map((key) => (key === "content" ? undefined : controls[key]))
+        .filter((col): col is TediColumnDef<TData> => col !== undefined);
 
-    return [...leading, ...cols];
+    // The `"content"` sentinel splits leading (before) from trailing (after)
+    // controls; without it every listed control is leading.
+    const contentIndex = order.indexOf("content");
+    const beforeContent =
+      contentIndex === -1 ? order : order.slice(0, contentIndex);
+    const afterContent =
+      contentIndex === -1 ? [] : order.slice(contentIndex + 1);
+
+    // Enabled controls the consumer left out of the order stay leading.
+    const omitted = (Object.keys(controls) as TableControlColumn[])
+      .filter((key) => !order.includes(key))
+      .map((key) => controls[key]!);
+
+    const leading = [...toCols(beforeContent), ...omitted];
+    const trailing = toCols(afterContent);
+
+    return [...leading, ...cols, ...trailing];
   });
 
   /**
@@ -1310,6 +1330,10 @@ export class TediTableComponent<TData> {
     id: string;
     getSize: () => number;
   }): number | null {
+    // Labeled expand column hugs its content (see `--control-fit`) instead of
+    // taking TanStack's default width and absorbing the table's slack.
+    if (column.id === EXPAND_COLUMN_ID && this.expandButtonHasLabel())
+      return null;
     if (this.fixedLayout() && !this.authoredColumnSizing().get(column.id)?.hasSize)
       return null;
     return column.getSize() || null;
@@ -1366,6 +1390,22 @@ export class TediTableComponent<TData> {
   /** Sticky `left` (px) for a frozen column; `null` when the column isn't frozen. */
   protected stickyLeft(id: string): number | null {
     return this.stickyLeftColumns().get(id)?.left ?? null;
+  }
+
+  /**
+   * Class fragment for the auto-injected control columns. Icon-only controls
+   * (drag / select, and expand without a visible label) drop to reduced padding
+   * and stay as narrow as the control needs; a labeled expand column hugs its
+   * content instead of absorbing the table's slack. `""` otherwise.
+   */
+  protected controlCellClass(id: string): string {
+    const iconOnlyControl =
+      id === DRAG_COLUMN_ID ||
+      id === SELECT_COLUMN_ID ||
+      (id === EXPAND_COLUMN_ID && !this.expandButtonHasLabel());
+    if (iconOnlyControl) return " tedi-table__cell--control";
+    if (id === EXPAND_COLUMN_ID) return " tedi-table__cell--control-fit";
+    return "";
   }
 
   /** Sticky-column class fragment for a cell (`""` when not frozen). */

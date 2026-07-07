@@ -109,6 +109,7 @@
                   (pickedUpColumnId() === header.column.id
                     ? ' tedi-table__header-cell--picked-up'
                     : '') +
+                  controlCellClass(header.column.id) +
                   stickyLeftClass(header.column.id)
                 "
                 [attr.colspan]="header.colSpan > 1 ? header.colSpan : null"
@@ -387,6 +388,7 @@
                     (cellMeta?.vAlign
                       ? ' tedi-table__cell--valign-' + cellMeta?.vAlign
                       : '') +
+                    controlCellClass(cell.column.id) +
                     stickyLeftClass(cell.column.id)
                   "
                   [style.left.px]="stickyLeft(cell.column.id)"

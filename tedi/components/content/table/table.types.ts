@@ -27,6 +27,14 @@ export type TableSize = "medium" | "small";
  */
 export type TableControlColumn = "drag" | "select" | "expand";
 
+/**
+ * An entry in `controlColumnOrder`: a control column, or the `"content"`
+ * sentinel marking where the data columns sit. Controls listed after
+ * `"content"` render as trailing columns (after the data); everything else is
+ * leading. Omit the sentinel to keep all controls leading.
+ */
+export type TableControlColumnOrder = TableControlColumn | "content";
+
 /** Phases of keyboard-driven column reordering. */
 export type ColumnReorderPhase = "idle" | "picked-up" | "moving";
 

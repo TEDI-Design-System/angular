@@ -92,6 +92,16 @@
   background: var(--table-default);
 }
 
+.tedi-table__cell--control {
+  padding-right: var(--table-data-padding-x-sm);
+  padding-left: var(--table-data-padding-x-sm);
+}
+
+.tedi-table__cell--control-fit {
+  width: 1%;
+  white-space: nowrap;
+}
+
 .tedi-table__cell--align-left {
   text-align: left;
 }
@@ -282,6 +292,7 @@
 }
 
 .tedi-table__pagination {
+  overflow: hidden;
   border: var(--tedi-borders-01) solid var(--table-border);
 }
 

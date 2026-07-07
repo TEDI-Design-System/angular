@@ -14,19 +14,15 @@
     grid-template-columns: 1fr auto;
   }
 
-  // Mobile uses flex (not grid) so hidden slots actually collapse out of the
-  // layout — named grid areas would otherwise reserve an empty row even when
-  // the only visible slot is the pager.
+  // Below md the pager collapses to the compact current/total picker, but the
+  // slots stay laid out horizontally (results · pager · page-size) and wrap
+  // when there isn't room. Flex (not grid) lets hidden slots collapse out
+  // instead of reserving an empty track.
   @include breakpoints.media-breakpoint-down(md) {
     display: flex;
-    flex-direction: column;
-    gap: var(--layout-grid-gutters-08);
-
-    &.tedi-pagination--no-pager {
-      flex-direction: row;
-      gap: var(--layout-grid-gutters-16);
-      justify-content: space-between;
-    }
+    flex-flow: row wrap;
+    gap: var(--layout-grid-gutters-16);
+    justify-content: space-between;
   }
 
   &--bg-white {
@@ -75,17 +71,7 @@
     min-width: 0;
 
     @include breakpoints.media-breakpoint-down(md) {
-      justify-content: center;
-      justify-self: center;
-      order: 2;
-    }
-
-    .tedi-pagination--no-pager & {
-      @include breakpoints.media-breakpoint-down(md) {
-        justify-content: flex-start;
-        justify-self: start;
-        order: 0;
-      }
+      order: 1;
     }
   }
 
@@ -96,7 +82,7 @@
     justify-self: center;
 
     @include breakpoints.media-breakpoint-down(md) {
-      order: 3;
+      order: 2;
     }
   }
 
@@ -108,20 +94,7 @@
     min-width: 0;
 
     @include breakpoints.media-breakpoint-down(md) {
-      flex-direction: column;
-      gap: var(--layout-grid-gutters-04);
-      justify-content: center;
-      justify-self: center;
-      order: 1;
-    }
-
-    .tedi-pagination--no-pager & {
-      @include breakpoints.media-breakpoint-down(md) {
-        flex-direction: row;
-        gap: var(--form-field-inner-spacing);
-        justify-content: flex-end;
-        justify-self: end;
-      }
+      order: 3;
     }
   }
 
@@ -146,12 +119,6 @@
     gap: var(--layout-grid-gutters-08);
     align-items: center;
     justify-content: center;
-
-    @include breakpoints.media-breakpoint-down(md) {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: var(--layout-grid-gutters-16);
-    }
   }
 
   &__list {
@@ -236,20 +203,6 @@
     }
   }
 
-  &__nav-button--previous {
-    @include breakpoints.media-breakpoint-down(md) {
-      grid-column: 1;
-      justify-self: end;
-    }
-  }
-
-  &__nav-button--next {
-    @include breakpoints.media-breakpoint-down(md) {
-      grid-column: 3;
-      justify-self: start;
-    }
-  }
-
   &__mobile-trigger {
     display: inline-flex;
     gap: var(--form-field-inner-spacing);
@@ -262,10 +215,6 @@
     background: var(--form-input-background-default);
     border: var(--tedi-borders-01) solid var(--form-input-border-default);
     border-radius: var(--form-field-radius);
-
-    @include breakpoints.media-breakpoint-down(md) {
-      grid-column: 2;
-    }
 
     &:focus-visible {
       outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
@@ -295,19 +244,6 @@
     align-items: center;
     justify-content: flex-end;
     min-width: 0;
-
-    @include breakpoints.media-breakpoint-down(md) {
-      flex-direction: column;
-      gap: var(--layout-grid-gutters-04);
-      align-items: center;
-    }
-
-    .tedi-pagination--no-pager & {
-      @include breakpoints.media-breakpoint-down(md) {
-        flex-direction: row;
-        gap: var(--form-field-inner-spacing);
-      }
-    }
   }
 
   &__page-size-label {
@@ -328,7 +264,7 @@
 
   &__page-size-select.tedi-select {
     width: auto;
-    min-width: 64px;
+    min-width: 96px;
   }
 
   &__page-size-trigger {
