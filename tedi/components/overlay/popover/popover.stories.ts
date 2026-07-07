@@ -37,6 +37,9 @@ const POSITIONS: PopoverPosition[] = [
   "left-end",
 ];
 
+const POLAR_BEAR_TEXT =
+  "Jääkaru (Ursus maritimus) on suur karu, kes elab Arktikas ja selle lähialadel.";
+
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.56.78?m=dev&node-id=5797-117364" target="_blank">Figma ↗</a><br>
  * <a href="https://www.tedi.ee/1ee8444b7/p/72a3ed-popover" target="_blank">Zeroheight ↗</a>
@@ -234,7 +237,7 @@ export const Default: Story = {
     lockScroll: false,
     timeoutDelay: 100,
     maxWidth: "small",
-    title: "Heading",
+    title: "Pealkiri",
     showClose: true,
   },
   render: (args) => ({
@@ -245,7 +248,7 @@ export const Default: Story = {
           Popover Trigger
         </button>
         <tedi-popover-content [maxWidth]="maxWidth" [title]="title" [showClose]="showClose">
-            The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.
+            ${POLAR_BEAR_TEXT}
         </tedi-popover-content>
       </tedi-popover>
     `,
@@ -262,11 +265,11 @@ export const ContentExamples: Story = {
             <button tedi-button tedi-popover-trigger>
               Buttons & heading
             </button>
-            <tedi-popover-content title="Heading" [showClose]="true">
-              <p>The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.</p>
+            <tedi-popover-content title="Pealkiri" [showClose]="true">
+              <p>${POLAR_BEAR_TEXT}</p>
               <div style="display: flex; gap: 0.5rem;">
-                <button tedi-button variant="secondary">Cancel</button>
-                <button tedi-button>Submit</button>
+                <button tedi-button variant="secondary">Tühista</button>
+                <button tedi-button>Esita</button>
               </div>
             </tedi-popover-content>
           </tedi-popover>
@@ -277,10 +280,10 @@ export const ContentExamples: Story = {
               Buttons
             </button>
             <tedi-popover-content [showClose]="true">
-              <p>The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.</p>
+              <p>${POLAR_BEAR_TEXT}</p>
               <div style="display: flex; gap: 0.5rem;">
-                <button tedi-button variant="secondary">Cancel</button>
-                <button tedi-button>Submit</button>
+                <button tedi-button variant="secondary">Tühista</button>
+                <button tedi-button>Esita</button>
               </div>
             </tedi-popover-content>
           </tedi-popover>
@@ -291,9 +294,9 @@ export const ContentExamples: Story = {
               Link
             </button>
             <tedi-popover-content>
-              <p>The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.</p>
+              <p>${POLAR_BEAR_TEXT}</p>
               <a tedi-link style="margin-left: auto;">
-                Read more
+                Loe rohkem
                 <tedi-icon name="north_east" />
               </a>
             </tedi-popover-content>
@@ -305,7 +308,7 @@ export const ContentExamples: Story = {
               Text
             </button>
             <tedi-popover-content>
-              The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.
+              ${POLAR_BEAR_TEXT}
             </tedi-popover-content>
           </tedi-popover>
         </tedi-col>
@@ -324,11 +327,11 @@ export const Heading: Story = {
             <button tedi-button tedi-popover-trigger variant="secondary">
               Heading & close
             </button>
-            <tedi-popover-content position="top" maxWidth="medium" title="Heading" [showClose]="true">
+            <tedi-popover-content position="top" maxWidth="medium" title="Pealkiri" [showClose]="true">
               <p>This popover is with title and close button.</p>
               <div style="margin-left: auto; display: flex; gap: 0.5rem;">
-                <button tedi-button variant="secondary">Cancel</button>
-                <button tedi-button>Submit</button>
+                <button tedi-button variant="secondary">Tühista</button>
+                <button tedi-button>Esita</button>
               </div>
             </tedi-popover-content>
           </tedi-popover>
@@ -338,11 +341,11 @@ export const Heading: Story = {
             <button tedi-button tedi-popover-trigger variant="secondary">
               Heading
             </button>
-            <tedi-popover-content position="top" maxWidth="medium" title="Heading">
+            <tedi-popover-content position="top" maxWidth="medium" title="Pealkiri">
               <p>This popover is with title.</p>
               <div style="margin-left: auto; display: flex; gap: 0.5rem;">
-                <button tedi-button variant="secondary">Cancel</button>
-                <button tedi-button>Submit</button>
+                <button tedi-button variant="secondary">Tühista</button>
+                <button tedi-button>Esita</button>
               </div>
             </tedi-popover-content>
           </tedi-popover>
@@ -355,8 +358,8 @@ export const Heading: Story = {
             <tedi-popover-content position="top" maxWidth="medium" [showClose]="true">
               <p>This popover is with content and close button.</p>
               <div style="margin-left: auto; display: flex; gap: 0.5rem;">
-                <button tedi-button variant="secondary">Cancel</button>
-                <button tedi-button>Submit</button>
+                <button tedi-button variant="secondary">Tühista</button>
+                <button tedi-button>Esita</button>
               </div>
             </tedi-popover-content>
           </tedi-popover>
@@ -369,8 +372,8 @@ export const Heading: Story = {
             <tedi-popover-content position="top" maxWidth="medium">
               <p>This popover is with content only.</p>
               <div style="margin-left: auto; display: flex; gap: 0.5rem;">
-                <button tedi-button variant="secondary">Cancel</button>
-                <button tedi-button>Submit</button>
+                <button tedi-button variant="secondary">Tühista</button>
+                <button tedi-button>Esita</button>
               </div>
             </tedi-popover-content>
           </tedi-popover>
@@ -432,7 +435,7 @@ export const ArrowPosition: Story = {
               {{ pos.charAt(0).toUpperCase() + pos.slice(1) }}
             </span>
             <tedi-popover-content>
-              The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.
+              ${POLAR_BEAR_TEXT}
             </tedi-popover-content>
           </tedi-popover>
         </tedi-col>
@@ -566,16 +569,16 @@ export const WithProminentBorder: Story = {
         <tedi-col [width]="12" [lg]="{ width: 6 }" [xxl]="{ width: 4 }">
           <tedi-popover [withBorder]="true" position="right">
             <span tedi-popover-trigger [underline]="true">Right center</span>
-            <tedi-popover-content maxWidth="small" title="Heading" [showClose]="true">
-              <p>The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.</p>
+            <tedi-popover-content maxWidth="small" title="Pealkiri" [showClose]="true">
+              <p>${POLAR_BEAR_TEXT}</p>
             </tedi-popover-content>
           </tedi-popover>
         </tedi-col>
         <tedi-col [width]="12" [lg]="{ width: 6 }" [xxl]="{ width: 4 }">
           <tedi-popover [withBorder]="true" position="top">
             <span tedi-popover-trigger [underline]="true">Top center</span>
-            <tedi-popover-content maxWidth="small" title="Heading" [showClose]="true">
-              <p>The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.</p>
+            <tedi-popover-content maxWidth="small" title="Pealkiri" [showClose]="true">
+              <p>${POLAR_BEAR_TEXT}</p>
             </tedi-popover-content>
           </tedi-popover>
         </tedi-col>
@@ -598,7 +601,7 @@ export const Size: Story = {
               {{ width.charAt(0).toUpperCase() + width.slice(1) }}
             </span>
             <tedi-popover-content [maxWidth]="width">
-              The polar bear (Ursus maritimus) is a large bear native to the Arctic and nearby areas.
+              ${POLAR_BEAR_TEXT}
             </tedi-popover-content>
           </tedi-popover>
         </tedi-col>

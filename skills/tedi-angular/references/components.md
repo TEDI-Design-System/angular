@@ -1858,6 +1858,7 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `position: PopoverPosition = "top"`
 - `dismissible: boolean = true`
 - `withArrow: boolean = true`
+- `withBorder: boolean = false` — illustrative prominent border on the arrow side
 - `lockScroll: boolean = false`
 
 ### Tooltip

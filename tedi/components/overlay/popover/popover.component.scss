@@ -22,7 +22,7 @@ $arrow-offset: -1rem;
 .tedi-popover__container {
   position: relative;
   z-index: var(--z-index-dropdown);
-  border: var(--tedi-borders-01) solid var(--popover-border);
+  border: var(--popover-border-width-md) solid var(--popover-border-default);
   border-radius: var(--popover-radius-rounded);
   box-shadow: 0 1px 5px 0 var(--tedi-alpha-20);
 
