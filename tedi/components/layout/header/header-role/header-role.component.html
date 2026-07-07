@@ -78,7 +78,11 @@
         class="tedi-link tedi-header__link-button"
       >
         <span>{{ currentRepresentative().name }}</span>
-        <tedi-icon name="expand_more" class="tedi-header-role__chevron" />
+        <tedi-icon
+          name="expand_more"
+          [size]="16"
+          class="tedi-header-role__chevron"
+        />
       </button>
       <tedi-popover-content maxWidth="small" class="tedi-header-role__dropdown">
         @if (hasCustomContent()) {
