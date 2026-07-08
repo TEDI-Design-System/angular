@@ -8,6 +8,7 @@ import { SliderComponent } from "./slider.component";
 import { NumberFieldComponent } from "../number-field/number-field.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
+import { TextComponent } from "../../base/text/text.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.65.83?node-id=19071-105925&m=dev" target="_blank">Figma ↗</a>
@@ -18,7 +19,7 @@ export default {
   component: SliderComponent,
   decorators: [
     moduleMetadata({
-      imports: [NumberFieldComponent, RowComponent, ColComponent],
+      imports: [NumberFieldComponent, RowComponent, ColComponent, TextComponent],
     }),
   ],
   args: {
@@ -318,37 +319,61 @@ export const States: Story = {
   render: () => ({
     template: `
       <tedi-row cols="1" gapY="3">
-        <tedi-row cols="2" alignItems="center">
-          <b>Default</b>
-          <tedi-slider inputId="state-default" ariaLabel="Väärtus" [value]="50" minLabel="0%" maxLabel="100%" />
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Default</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-slider inputId="state-default" ariaLabel="Väärtus" [value]="50" minLabel="0%" maxLabel="100%" />
+          </tedi-col>
         </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>Hover</b>
-          <tedi-slider data-state="hover" inputId="state-hover" ariaLabel="Väärtus" [value]="50" minLabel="0%" maxLabel="100%" />
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Hover</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-slider data-state="hover" inputId="state-hover" ariaLabel="Väärtus" [value]="50" minLabel="0%" maxLabel="100%" />
+          </tedi-col>
         </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>Active</b>
-          <tedi-slider data-state="active" inputId="state-active" ariaLabel="Väärtus" [value]="50" minLabel="0%" maxLabel="100%" />
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Active</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-slider data-state="active" inputId="state-active" ariaLabel="Väärtus" [value]="50" minLabel="0%" maxLabel="100%" />
+          </tedi-col>
         </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>Disabled</b>
-          <tedi-slider inputId="state-disabled" ariaLabel="Väärtus" [value]="50" [disabled]="true" minLabel="0%" maxLabel="100%" />
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Disabled</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-slider inputId="state-disabled" ariaLabel="Väärtus" [value]="50" [disabled]="true" minLabel="0%" maxLabel="100%" />
+          </tedi-col>
         </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>Focus</b>
-          <tedi-slider inputId="state-focus" ariaLabel="Väärtus" [value]="50" minLabel="0%" maxLabel="100%" />
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Focus</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-slider inputId="state-focus" ariaLabel="Väärtus" [value]="50" minLabel="0%" maxLabel="100%" />
+          </tedi-col>
         </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>Error</b>
-          <tedi-slider
-            inputId="state-error"
-            ariaLabel="Väärtus"
-            [value]="50"
-            [invalid]="true"
-            minLabel="0%"
-            maxLabel="100%"
-            [feedbackText]="{ text: 'See väli on kohustuslik', type: 'error', position: 'left' }"
-          />
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Error</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-slider
+              inputId="state-error"
+              ariaLabel="Väärtus"
+              [value]="50"
+              [invalid]="true"
+              minLabel="0%"
+              maxLabel="100%"
+              [feedbackText]="{ text: 'See väli on kohustuslik', type: 'error', position: 'left' }"
+            />
+          </tedi-col>
         </tedi-row>
       </tedi-row>
     `,

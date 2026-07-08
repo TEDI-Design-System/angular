@@ -62,8 +62,9 @@ export class TooltipTriggerComponent implements AfterContentChecked {
 
   @HostListener("touchend")
   onTouchEnd() {
-    if (this.tooltip.openWith() === "none") return;
-    this.tooltip.toggleTooltip();
+    if (this.tooltip.openWith() !== "none") {
+      this.tooltip.toggleTooltip();
+    }
     setTimeout(() => (this.isTouch = false), 300);
   }
 

@@ -5,7 +5,9 @@
 }
 
 .tedi-slider__label--reserve-space {
-  visibility: hidden;
+  min-height: var(--body-regular-line-height);
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 
 .tedi-slider__container {

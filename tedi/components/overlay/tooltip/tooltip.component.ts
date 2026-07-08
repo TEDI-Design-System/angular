@@ -149,6 +149,7 @@ export class TooltipComponent implements AfterContentChecked {
   }
 
   showTooltip() {
+    if (this.open() !== undefined) return;
     clearTimeout(this.hideTimeout);
     if (!this.isOpen()) {
       this.internalOpen.set(true);
@@ -156,6 +157,7 @@ export class TooltipComponent implements AfterContentChecked {
   }
 
   hideTooltip() {
+    if (this.open() !== undefined) return;
     if (this.isOpen()) {
       clearTimeout(this.hideTimeout);
       this.internalOpen.set(false);
