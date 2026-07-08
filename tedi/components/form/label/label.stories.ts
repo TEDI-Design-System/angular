@@ -124,21 +124,21 @@ export const Structure: LabelStory = {
     template: `
       <tedi-row [cols]="1" [gapY]="3">
         <tedi-col>
-          <label tedi-label for="ingredient-1">Active ingredient</label>
+          <label tedi-label for="ingredient-1">Toimeaine</label>
         </tedi-col>
         <tedi-col>
-          <label tedi-label for="ingredient-2" [required]="true">Active ingredient</label>
+          <label tedi-label for="ingredient-2" [required]="true">Toimeaine</label>
         </tedi-col>
         <tedi-col>
           <tedi-label-row>
-            <label tedi-label for="ingredient-3">Active ingredient</label>
-            <tedi-info-tooltip>Tooltip content</tedi-info-tooltip>
+            <label tedi-label for="ingredient-3">Toimeaine</label>
+            <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
           </tedi-label-row>
         </tedi-col>
         <tedi-col>
           <tedi-label-row>
-            <label tedi-label for="ingredient-4" [required]="true">Active ingredient</label>
-            <tedi-info-tooltip>Tooltip content</tedi-info-tooltip>
+            <label tedi-label for="ingredient-4" [required]="true">Toimeaine</label>
+            <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
           </tedi-label-row>
         </tedi-col>
       </tedi-row>

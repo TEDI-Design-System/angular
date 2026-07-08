@@ -105,7 +105,7 @@ type InfoTooltipStory = StoryObj<InfoTooltipComponent & { ngContent: string }>;
 
 export const Default: InfoTooltipStory = {
   args: {
-    ngContent: "This field is used to verify your identity.",
+    ngContent: "Seda välja kasutatakse teie isikusamasuse tuvastamiseks.",
     position: "top",
     openWith: "both",
     maxWidth: "medium",
@@ -123,8 +123,8 @@ export const InLabelRow: InfoTooltipStory = {
   render: () => ({
     template: `
       <tedi-label-row>
-        <label tedi-label for="city" [required]="true">City</label>
-        <tedi-info-tooltip>Enter the city where you currently reside.</tedi-info-tooltip>
+        <label tedi-label for="city" [required]="true">Linn</label>
+        <tedi-info-tooltip>Sisestage linn, kus te praegu elate.</tedi-info-tooltip>
       </tedi-label-row>
     `,
   }),
