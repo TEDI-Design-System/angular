@@ -115,6 +115,20 @@ export default {
         },
       },
     },
+    offset: {
+      control: "number",
+      description:
+        "Extra distance (px) between the tooltip and its trigger, on top of the arrow allowance. Set to 0 to sit the tooltip directly against the trigger.",
+      table: {
+        category: "tooltip",
+        type: {
+          summary: "number",
+        },
+        defaultValue: {
+          summary: "4",
+        },
+      },
+    },
     maxWidth: {
       control: "select",
       options: MAXWIDTH,
@@ -144,13 +158,14 @@ export const Default: Story = {
     position: "top",
     preventOverflow: true,
     timeoutDelay: 100,
+    offset: 4,
     maxWidth: "medium",
     openWith: "both",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-tooltip [position]="position" [timeoutDelay]="timeoutDelay" [preventOverflow]="preventOverflow" [openWith]="openWith">
+      <tedi-tooltip [position]="position" [timeoutDelay]="timeoutDelay" [offset]="offset" [preventOverflow]="preventOverflow" [openWith]="openWith">
         <tedi-tooltip-trigger>
           <button tedi-info-button></button>
         </tedi-tooltip-trigger>

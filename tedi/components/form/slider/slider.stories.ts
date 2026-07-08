@@ -32,85 +32,35 @@ export default {
     maxLabel: "100%",
   },
   render: (args) => ({
-    props: args,
+    props: { ...args, valueFormatter: (value: number) => `${value}%` },
     template: `
       <tedi-row>
         <tedi-col [width]="6">
-          <tedi-slider ${argsToTemplate(args)} />
+          <tedi-slider ${argsToTemplate(args)} [valueFormatter]="valueFormatter" />
         </tedi-col>
       </tedi-row>
     `,
   }),
   argTypes: {
+    inputId: {
+      description:
+        "Identifier for the underlying range input; associates the label with the input.",
+      control: false,
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    name: {
+      description: "Name attribute of the underlying input.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
     label: {
+      description: "Label rendered above the slider.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
-    },
-    value: {
-      control: "number",
-      table: { category: "inputs", type: { summary: "number" } },
-    },
-    min: {
-      control: "number",
-      table: { category: "inputs", type: { summary: "number" } },
-    },
-    max: {
-      control: "number",
-      table: { category: "inputs", type: { summary: "number" } },
-    },
-    step: {
-      control: "number",
-      table: { category: "inputs", type: { summary: "number" } },
-    },
-    minLabel: {
-      control: "text",
-      table: { category: "inputs", type: { summary: "string" } },
-    },
-    maxLabel: {
-      control: "text",
-      table: { category: "inputs", type: { summary: "string" } },
-    },
-    showCurrentValue: {
-      control: "boolean",
-      table: {
-        category: "inputs",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
-      },
-    },
-    tooltip: {
-      control: "boolean",
-      table: {
-        category: "inputs",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "true" },
-      },
-    },
-    required: {
-      control: "boolean",
-      table: {
-        category: "inputs",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
-      },
-    },
-    disabled: {
-      control: "boolean",
-      table: {
-        category: "inputs",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
-      },
-    },
-    invalid: {
-      control: "boolean",
-      table: {
-        category: "inputs",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
-      },
     },
     hideLabel: {
+      description:
+        "Hide the label visually while keeping it for assistive tech; 'keep-space' also reserves its vertical space.",
       control: "select",
       options: [false, true, "keep-space"],
       table: {
@@ -119,15 +69,133 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    required: {
+      description: "Marks the field as required.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    min: {
+      description: "Minimum allowed value.",
+      control: "number",
+      table: {
+        category: "inputs",
+        type: { summary: "number" },
+        defaultValue: { summary: "0" },
+      },
+    },
+    max: {
+      description: "Maximum allowed value.",
+      control: "number",
+      table: {
+        category: "inputs",
+        type: { summary: "number" },
+        defaultValue: { summary: "100" },
+      },
+    },
+    step: {
+      description: "Step size.",
+      control: "number",
+      table: {
+        category: "inputs",
+        type: { summary: "number" },
+        defaultValue: { summary: "1" },
+      },
+    },
+    value: {
+      description: "Current value. Supports two-way binding and reactive forms.",
+      control: "number",
+      table: {
+        category: "inputs",
+        type: { summary: "number" },
+        defaultValue: { summary: "0" },
+      },
+    },
+    disabled: {
+      description: "Disables the slider.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    invalid: {
+      description: "Marks the slider as invalid for validation purposes.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    minLabel: {
+      description: "Text rendered to the left of the track (e.g. the minimum value).",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    maxLabel: {
+      description:
+        "Text rendered to the right of the track. Ignored when showCurrentValue is true.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    showCurrentValue: {
+      description:
+        "Render the current value to the right of the track instead of maxLabel.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    valueFormatter: {
+      description:
+        "Formats the current value for the thumb tooltip and the showCurrentValue label.",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "(value: number) => string" },
+      },
+    },
+    tooltip: {
+      description:
+        "Show a tooltip with the current value above the thumb while hovered, focused or dragged.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
     feedbackText: {
+      description: "FeedbackText component inputs, rendered below the slider.",
       control: "object",
       table: {
         category: "inputs",
         type: { summary: "ComponentInputs<FeedbackTextComponent>" },
       },
     },
-    valueFormatter: { control: false },
-    inputId: { control: false },
+    ariaLabel: {
+      description: "Accessible label used when no visible label is provided.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    ariaLabelledby: {
+      description:
+        "ID of an element that labels the slider, used when no visible label is provided.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    ariaValuetext: {
+      description: "Human-readable text alternative of the current value.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
   },
 } as Meta<SliderComponent>;
 
@@ -151,16 +219,23 @@ export const WithCurrentValue: Story = {
     showCurrentValue: true,
     maxLabel: undefined,
   },
-  render: (args) => ({
-    props: { ...args, valueFormatter: (value: number) => `${value}%` },
-    template: `
-      <tedi-row>
-        <tedi-col [width]="6">
-          <tedi-slider ${argsToTemplate(args)} [valueFormatter]="valueFormatter" />
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+};
+
+export const WithHint: Story = {
+  args: {
+    inputId: "slider-hint",
+    label: undefined,
+    ariaLabel: "Väärtus",
+    value: 50,
+    showCurrentValue: true,
+    minLabel: undefined,
+    maxLabel: undefined,
+    feedbackText: {
+      text: "Hint text",
+      type: "hint",
+      position: "left",
+    },
+  },
 };
 
 /**
@@ -285,17 +360,5 @@ export const WithoutTooltip: Story = {
     inputId: "slider-no-tooltip",
     tooltip: false,
     value: 40,
-  },
-};
-
-export const WithHelper: Story = {
-  args: {
-    inputId: "slider-helper",
-    value: 40,
-    feedbackText: {
-      text: "Liiguta nuppu, et väärtust muuta",
-      type: "hint",
-      position: "left",
-    },
   },
 };

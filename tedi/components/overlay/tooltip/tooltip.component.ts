@@ -85,6 +85,14 @@ export class TooltipComponent implements AfterContentChecked {
    */
   readonly timeoutDelay = input(100);
 
+  /**
+   * Extra distance (in px) between the tooltip and its trigger, added on top of the
+   * arrow allowance. Set to `0` to sit the tooltip directly against the trigger
+   * (e.g. a slider thumb).
+   * @default 4
+   */
+  readonly offset = input(4);
+
   /** Dropdown trigger button */
   readonly tooltipTrigger = contentChild.required(TooltipTriggerComponent);
 
@@ -106,7 +114,7 @@ export class TooltipComponent implements AfterContentChecked {
   readonly arrowTop = signal<number | null>(null);
 
   readonly overlayPositions = computed(() =>
-    toConnectedPositions(this.position(), this.preventOverflow(), 4),
+    toConnectedPositions(this.position(), this.preventOverflow(), this.offset()),
   );
 
   readonly overlayOrigin = computed(

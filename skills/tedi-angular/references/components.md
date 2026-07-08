@@ -1895,6 +1895,7 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `preventOverflow: boolean = true`
 - `openWith: TooltipOpenWith = "both"` — `"hover"`, `"click"`, `"both"`, or `"none"`. Use `"none"` to disable the built-in triggers and control visibility yourself via `open`.
 - `timeoutDelay: number = 100` — ms before closing when the pointer leaves the trigger/content
+- `offset: number = 4` — extra distance (px) between the tooltip and its trigger, on top of the arrow allowance. Set `0` to sit the tooltip directly against the trigger (e.g. a slider thumb).
 - `trackPosition: boolean = false` — while open, follow a moving origin (e.g. a dragging handle) with a `requestAnimationFrame` reposition loop. Enable only while the origin can actually move.
 **Models:**
 - `open: boolean | undefined` — controlled open state (two-way). Leave unset for the default trigger-driven behavior; typically paired with `openWith="none"`.
