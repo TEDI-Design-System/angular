@@ -1,3 +1,10 @@
+# [7.1.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.3...angular-7.1.0-rc.4) (2026-07-09)
+
+
+### Bug Fixes
+
+* **textgroup:** label doesn't shrink when width is fixed [#506](https://github.com/TEDI-Design-System/angular/issues/506) ([#531](https://github.com/TEDI-Design-System/angular/issues/531)) ([4e9d713](https://github.com/TEDI-Design-System/angular/commit/4e9d713c6a1d262a9e9748e86422428222568032))
+
 # [7.1.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.2...angular-7.1.0-rc.3) (2026-07-09)
 
 
