@@ -1,4 +1,3 @@
-import { NgFor } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -28,7 +27,6 @@ export type HeaderLanguage = {
   selector: "tedi-header-language",
   standalone: true,
   imports: [
-    NgFor,
     IconComponent,
     TextComponent,
     PopoverComponent,

@@ -22,16 +22,6 @@ import { ColComponent } from "../../helpers/grid/col/col.component";
 import type { DateRange } from "../../content/calendar/types";
 import type { Matcher } from "../../../utils/matchers.util";
 
-/**
- * <a href="https://www.tedi.ee/1ee8444b7/p/15bd6e-date-field" target="_blank">Zeroheight ↗</a>
- *
- * DateField is the form-control wrapper around the Calendar. It exposes a typed text input
- * paired with a popover that renders the Calendar. On phones, single-mode fields default to the
- * native OS date picker; an opt-in modal is also available. It supports `single`, `multiple` and
- * `range` modes, custom `formatDate`/`parseDate` callbacks, and the same selection-level/header
- * options as Calendar.
- */
-
 const today = new Date();
 const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 const inThreeDays = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3);
@@ -178,6 +168,17 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
     `,
   };
 };
+
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.65.83?node-id=4620-82915&m=dev" target="_blank">Figma ↗</a><br>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/15bd6e-date-field" target="_blank">Zeroheight ↗</a>
+ *
+ * DateField is the form-control wrapper around the Calendar. It exposes a typed text input
+ * paired with a popover that renders the Calendar. On phones, single-mode fields default to the
+ * native OS date picker; an opt-in modal is also available. It supports `single`, `multiple` and
+ * `range` modes, custom `formatDate`/`parseDate` callbacks, and the same selection-level/header
+ * options as Calendar.
+ */
 
 export default {
   title: "TEDI-Ready/Components/Form/DateField",

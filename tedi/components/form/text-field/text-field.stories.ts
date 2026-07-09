@@ -11,6 +11,7 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { TextFieldComponent } from "./text-field.component";
+import { AlertComponent } from "../../notifications/alert/alert.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -36,6 +37,7 @@ export default {
         ColComponent,
         LabelComponent,
         TextComponent,
+        AlertComponent,
         FormFieldComponent,
         FeedbackTextComponent,
         ReactiveFormsModule,
@@ -255,25 +257,27 @@ export const WithTemplateDrivenForms: StoryObj<TextFieldComponent> = {
       inputValue: "",
     },
     template: `
-      <form #form="ngForm" style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
-        <tedi-form-field>
+      <form #form="ngForm">
+        <tedi-row [cols]="1" [gap]="3">
+          <tedi-col>
+            <tedi-form-field>
               <label tedi-label for="example-template-form" [required]="true">Label</label>
-          <input
-            tedi-text-field
+              <input
+                tedi-text-field
                 id="example-template-form"
                 name="example"
-            required
-            [(ngModel)]="inputValue"
-            #inputModel="ngModel"
-          />
-        </tedi-form-field>
-
-        <div>
-          <p>Value: {{ inputValue }}</p>
-          <p>Touched: {{ inputModel.touched }}</p>
-          <p>Dirty: {{ inputModel.dirty }}</p>
-          <p>Invalid: {{ inputModel.invalid }}</p>
-        </div>
+                required
+                [(ngModel)]="inputValue"
+                #inputModel="ngModel"
+              />
+            </tedi-form-field>
+          </tedi-col>
+          <tedi-col>
+            <tedi-alert type="info" [showClose]="false">
+              <pre tedi-text modifiers="small">{{ { value: inputValue, touched: inputModel.touched, dirty: inputModel.dirty, invalid: inputModel.invalid } | json }}</pre>
+            </tedi-alert>
+          </tedi-col>
+        </tedi-row>
       </form>
     `,
   }),
@@ -289,19 +293,19 @@ export const WithReactiveForms: StoryObj<TextFieldComponent> = {
     return {
       props: { control },
       template: `
-        <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
-          <tedi-form-field>
-            <label tedi-label [for]="'example-reactive-form'" [required]="true">Label</label>
-            <input tedi-text-field id="example-reactive-form" [formControl]="control" />
-          </tedi-form-field>
-
-          <div>
-            <p>Value: {{ control.value }}</p>
-            <p>Touched: {{ control.touched }}</p>
-            <p>Dirty: {{ control.dirty }}</p>
-            <p>Invalid: {{ control.invalid }}</p>
-          </div>
-        </div>
+        <tedi-row [cols]="1" [gap]="3">
+          <tedi-col>
+            <tedi-form-field>
+              <label tedi-label [for]="'example-reactive-form'" [required]="true">Label</label>
+              <input tedi-text-field id="example-reactive-form" [formControl]="control" />
+            </tedi-form-field>
+          </tedi-col>
+          <tedi-col>
+            <tedi-alert type="info" [showClose]="false">
+              <pre tedi-text modifiers="small">{{ { value: control.value, touched: control.touched, dirty: control.dirty, invalid: control.invalid } | json }}</pre>
+            </tedi-alert>
+          </tedi-col>
+        </tedi-row>
       `,
     };
   },

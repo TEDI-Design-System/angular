@@ -48,10 +48,7 @@ import { HeaderBottomComponent } from "./header-bottom/header-bottom.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { LabelComponent } from "../../form/label/label.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
-// TODO: replace with TEDI-Ready Search component once it lands. Community Search is
-// used here only to demo HeaderSearch consumption — do NOT mirror this import from
-// any non-story file inside `tedi/`.
-import { SearchComponent } from "community/components/form";
+import { SearchComponent } from "../../form/search/search.component";
 import { TextComponent } from "../../base/text/text.component";
 import { TagComponent } from "../../tags/tag/tag.component";
 import { ToggleComponent } from "../../form/toggle/toggle.component";

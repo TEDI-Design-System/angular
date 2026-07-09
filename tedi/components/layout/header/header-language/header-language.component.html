@@ -19,13 +19,14 @@
     />
   </button>
   <tedi-popover-content maxWidth="none">
-    <button
-      *ngFor="let language of languageKeys()"
-      type="button"
-      class="tedi-link tedi-header__link-button"
-      (click)="handleChangeLang(language)"
-    >
-      <span>{{ languages()[language] }}</span>
-    </button>
+    @for (language of languageKeys(); track language) {
+      <button
+        type="button"
+        class="tedi-link tedi-header__link-button"
+        (click)="handleChangeLang(language)"
+      >
+        <span>{{ languages()[language] }}</span>
+      </button>
+    }
   </tedi-popover-content>
 </tedi-popover>

@@ -144,16 +144,6 @@
     }
   }
 
-  &__input {
-    gap: var(--form-field-inner-spacing);
-    width: 100%;
-    padding: var(--form-field-padding-y-md-default)
-      var(--form-field-padding-x-md-default);
-    background: var(--form-input-background-default);
-    border: var(--tedi-borders-01) solid var(--form-input-border-default);
-    border-radius: var(--form-field-radius);
-  }
-
   &__no-results {
     padding-top: var(--layout-grid-gutters-08);
     color: var(--general-text-secondary);
