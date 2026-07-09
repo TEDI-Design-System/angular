@@ -69,6 +69,7 @@ export class TextFieldComponent
    * Disables the input from a parent template (e.g. a wrapping field component).
    * Combined with the reactive-forms disabled state and any input-group state.
    */
+  // eslint-disable-next-line @angular-eslint/no-input-rename
   readonly disabledInput = input<boolean>(false, { alias: "disabled" });
 
   readonly disabled = computed(
