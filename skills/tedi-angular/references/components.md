@@ -2067,7 +2067,7 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 - `inputId: string`, `label: string`, `clearable: boolean = true`, `state: InputState`, `size: InputSize`
 
 ### Search — **DEPRECATED** (use TEDI-Ready Search)
-**⚠️ DEPRECATED** — use the TEDI-Ready `tedi-search` from `@tedi-design-system/angular/tedi`. Same selector; the API differs (`autocompleteOptions`/`withButton`/`buttonText` are replaced by the `button: SearchButton` object plus `tedi-dropdown` for suggestions, and hints/validation move to `feedbackText`).
+**⚠️ DEPRECATED** — use the TEDI-Ready `tedi-search` from `@tedi-design-system/angular/tedi`. Same selector; the TEDI-Ready version exposes a trailing `button` (`SearchButton`), a `feedbackText` input for hints/validation, and `searchEvent` / `clear` outputs.
 **Selector:** `tedi-search` | ControlValueAccessor
 - `inputId: string`, `autocompleteOptions: AutocompleteOption[]`, `size: SearchSize`, `withButton: boolean`
 
