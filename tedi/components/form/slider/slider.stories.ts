@@ -6,6 +6,10 @@ import {
 } from "@storybook/angular";
 import { SliderComponent } from "./slider.component";
 import { NumberFieldComponent } from "../number-field/number-field.component";
+import { InputGroupComponent } from "../input-group/input-group.component";
+import { InputGroupSuffixDirective } from "../input-group/input-group-suffix.directive";
+import { FormFieldComponent } from "../form-field/form-field.component";
+import { TextFieldComponent } from "../text-field/text-field.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { TextComponent } from "../../base/text/text.component";
@@ -19,7 +23,16 @@ export default {
   component: SliderComponent,
   decorators: [
     moduleMetadata({
-      imports: [NumberFieldComponent, RowComponent, ColComponent, TextComponent],
+      imports: [
+        NumberFieldComponent,
+        InputGroupComponent,
+        InputGroupSuffixDirective,
+        FormFieldComponent,
+        TextFieldComponent,
+        RowComponent,
+        ColComponent,
+        TextComponent,
+      ],
     }),
   ],
   args: {
@@ -203,6 +216,42 @@ export default {
 type Story = StoryObj<SliderComponent>;
 
 export const Default: Story = {};
+
+export const WithInputGroup: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => ({
+    props: { value: 20 },
+    template: `
+      <tedi-row>
+        <tedi-col [width]="6">
+          <tedi-slider
+            inputId="slider-input-group"
+            label="Väärtus"
+            [min]="0"
+            [max]="100"
+            [step]="1"
+            [(value)]="value"
+            minLabel="0%"
+            maxLabel="100%"
+          >
+            <tedi-input-group sliderAddon style="width: 100px">
+              <tedi-form-field>
+                <input
+                  tedi-text-field
+                  type="number"
+                  aria-label="Väärtus"
+                  [value]="value"
+                  (input)="value = +$any($event.target).value"
+                />
+              </tedi-form-field>
+              <span tediInputGroupSuffix>%</span>
+            </tedi-input-group>
+          </tedi-slider>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
 
 export const MinAndMaxValues: Story = {
   args: {
