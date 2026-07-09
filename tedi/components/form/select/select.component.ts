@@ -39,6 +39,7 @@ import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown
 import {
   SelectOptionTemplateDirective,
   SelectValueTemplateDirective,
+  SelectTooltipTemplateDirective,
   SelectOptionContext,
   SelectValueContext,
 } from "./select-templates.directive";
@@ -115,7 +116,8 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   /**
    * When set, renders an info button next to the label that reveals this text
-   * in a tooltip on hover/focus.
+   * in a tooltip on hover/focus. For formatted content, project a
+   * `*tediSelectTooltip` template instead, which takes precedence over this.
    */
   tooltip = input<string>();
 
@@ -398,6 +400,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   // Template queries for custom rendering
   optionTemplate = contentChild(SelectOptionTemplateDirective);
   valueTemplate = contentChild(SelectValueTemplateDirective);
+  tooltipTemplate = contentChild(SelectTooltipTemplateDirective);
 
   normalizedOptions = computed<SelectOption<T>[]>(() => {
     const items = this.options();

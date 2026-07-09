@@ -7,6 +7,7 @@ import { SelectComponent, SelectInputSize, SelectOption, SpecialOptionControls }
 import {
   SelectOptionTemplateDirective,
   SelectValueTemplateDirective,
+  SelectTooltipTemplateDirective,
 } from "./select-templates.directive";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { InputState } from "../form-field/form-field.component";
@@ -54,12 +55,18 @@ import { InputState } from "../form-field/form-field.component";
           <span class="custom-value">{{ item.name }}</span>
         </ng-template>
       }
+      @if (useTooltipTemplate) {
+        <ng-template tediSelectTooltip>
+          <span class="custom-tooltip">Formatted <b>tooltip</b></span>
+        </ng-template>
+      }
     </tedi-select>
   `,
   imports: [
     SelectComponent,
     SelectOptionTemplateDirective,
     SelectValueTemplateDirective,
+    SelectTooltipTemplateDirective,
     ReactiveFormsModule,
   ],
 })
@@ -93,6 +100,7 @@ class TestHostComponent {
   clearSearchOnSelect = false;
   useOptionTemplate = false;
   useValueTemplate = false;
+  useTooltipTemplate = false;
   control = new FormControl<unknown>(null);
 }
 
@@ -1064,6 +1072,40 @@ describe("SelectComponent", () => {
       const context = select.getValueContext(option as SelectOption<unknown>);
 
       expect(context.label).toBe("Test");
+    });
+
+    it("should render string tooltip when no tooltip template is projected", () => {
+      host.tooltip = "Plain tooltip";
+      fixture.detectChanges();
+
+      expect(hostEl.querySelector("tedi-info-tooltip")).toBeTruthy();
+      expect(select.tooltipTemplate()).toBeFalsy();
+      expect(
+        hostEl.querySelector("tedi-info-tooltip .sr-only")?.textContent,
+      ).toContain("Plain tooltip");
+    });
+
+    it("should render projected tooltip template content", () => {
+      host.useTooltipTemplate = true;
+      fixture.detectChanges();
+
+      expect(select.tooltipTemplate()).toBeTruthy();
+      expect(hostEl.querySelector("tedi-info-tooltip")).toBeTruthy();
+      expect(
+        hostEl.querySelector("tedi-info-tooltip .sr-only")?.textContent,
+      ).toContain("Formatted tooltip");
+    });
+
+    it("should prefer the tooltip template over the tooltip string input", () => {
+      host.tooltip = "Plain tooltip";
+      host.useTooltipTemplate = true;
+      fixture.detectChanges();
+
+      const srText = hostEl.querySelector(
+        "tedi-info-tooltip .sr-only",
+      )?.textContent;
+      expect(srText).toContain("Formatted tooltip");
+      expect(srText).not.toContain("Plain tooltip");
     });
   });
 

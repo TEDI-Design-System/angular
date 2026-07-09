@@ -1141,7 +1141,7 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 **Inputs:**
 - `inputId: string` (required) — unique ID for label association and accessibility
 - `label: string` — label text above the select
-- `tooltip: string` — renders an info button next to the label that reveals this text in a tooltip
+- `tooltip: string` — renders an info button next to the label that reveals this text in a tooltip. For formatted content, project a `*tediSelectTooltip` template instead (takes precedence)
 - `ariaLabelledby: string` — associate an external visible label by its element id. A native `<label for>` cannot target the combobox (it is a `<div>`), so use this when the label lives outside the component. Ignored when `label` is set
 - `ariaLabel: string` — accessible name when there is no visible label to reference. Ignored when `label` or `ariaLabelledby` provides a name
 - `required: boolean = false`
@@ -1205,6 +1205,16 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
       <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
       <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
     </tedi-dropdown-item-value>
+  </ng-template>
+</tedi-select>
+```
+
+**Formatted label tooltip** via `tediSelectTooltip` directive (overrides the `tooltip` string input):
+
+```html
+<tedi-select [options]="items" label="City">
+  <ng-template tediSelectTooltip>
+    Pick the <b>city</b> where you <i>currently</i> reside.
   </ng-template>
 </tedi-select>
 ```

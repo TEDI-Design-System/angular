@@ -10,6 +10,7 @@ import { SelectComponent } from "./select.component";
 import {
   SelectOptionTemplateDirective,
   SelectValueTemplateDirective,
+  SelectTooltipTemplateDirective,
 } from "./select-templates.directive";
 import { IconComponent } from "../../base";
 import { ButtonComponent } from "../../buttons/button/button.component";
@@ -47,6 +48,7 @@ const meta: Meta<SelectComponent> = {
         SelectComponent,
         SelectOptionTemplateDirective,
         SelectValueTemplateDirective,
+        SelectTooltipTemplateDirective,
         FormsModule,
         ReactiveFormsModule,
         JsonPipe,
@@ -970,6 +972,43 @@ class SelectReactiveFormsDemoComponent {
     this.toastService.success("Success", "Form submitted successfully");
   }
 }
+
+/**
+ * The `tooltip` string input covers the common case. When the tooltip needs
+ * formatting the plain string cannot express, project a `*tediSelectTooltip`
+ * template instead — it takes precedence over the `tooltip` input.
+ */
+export const Tooltip: Story = {
+  render: () => ({
+    props: {
+      options: simpleOptions,
+    },
+    template: `
+      <div style="display: flex; flex-direction: column;" [tediVerticalSpacing]="3">
+        <tedi-select
+          inputId="tooltip-string"
+          label="Elukoht"
+          tooltip="Vali linn, kus sa praegu elad."
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+        />
+        <tedi-select
+          inputId="tooltip-template"
+          label="Elukoht"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+        >
+          <ng-template tediSelectTooltip>
+            Vali <b>linn</b>, kus sa <i>praegu</i> elad, mitte
+            <u>rahvastikuregistri</u> aadress.
+          </ng-template>
+        </tedi-select>
+      </div>
+    `,
+  }),
+};
 
 export const ReactiveForms: Story = {
   render: () => ({

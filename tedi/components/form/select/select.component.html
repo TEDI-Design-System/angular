@@ -10,7 +10,11 @@
     >
       {{ label() }}
     </label>
-    @if (tooltip(); as tooltipText) {
+    @if (tooltipTemplate()?.template; as tooltipTpl) {
+      <tedi-info-tooltip>
+        <ng-container [ngTemplateOutlet]="tooltipTpl" />
+      </tedi-info-tooltip>
+    } @else if (tooltip(); as tooltipText) {
       <tedi-info-tooltip>{{ tooltipText }}</tedi-info-tooltip>
     }
   </tedi-label-row>
