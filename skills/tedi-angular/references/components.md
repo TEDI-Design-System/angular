@@ -787,6 +787,34 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 - `required: boolean = false`
 - `invalid: boolean = false`
 
+### Slider
+**Selector:** `tedi-slider` | ControlValueAccessor
+**Model:** `value: number`
+**Inputs:**
+- `inputId: string` (required) — id for the range input + label association
+- `label: string`, `hideLabel: boolean | "keep-space" = false`
+- `min: number = 0`, `max: number = 100`, `step: number = 1`
+- `name: string`
+- `minLabel: string`, `maxLabel: string` — text flanking the track
+- `showCurrentValue: boolean = false` — render the current value on the right instead of `maxLabel`
+- `valueFormatter: (value: number) => string` — formats the tooltip + current-value label
+- `tooltip: boolean = true` — live-value tooltip above the thumb (while hovered/focused/dragged)
+- `disabled: boolean = false`, `required: boolean = false`, `invalid: boolean = false`
+- `feedbackText: ComponentInputs<FeedbackTextComponent>` — helper/error below
+- `ariaLabel`, `ariaLabelledby`, `ariaValuetext: string`
+**Content projection:** `[sliderAddon]` — a right-hand element, typically a `tedi-number-field` editing the same value.
+
+```html
+<tedi-slider inputId="volume" label="Volume" [formControl]="volume"
+  minLabel="0%" maxLabel="100%" [max]="100" />
+
+<!-- Paired with a number field editing the same value -->
+<tedi-slider inputId="pct" label="Percent" [(value)]="pct" minLabel="0%" [showCurrentValue]="true"
+  [valueFormatter]="formatPct">
+  <tedi-number-field sliderAddon inputId="pct-field" [(value)]="pct" suffix="%" />
+</tedi-slider>
+```
+
 ### Checkbox
 **Selector:** `input[type=checkbox][tedi-checkbox]`
 **Inputs:**
@@ -1880,7 +1908,17 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 **Inputs:**
 - `position: TooltipPosition = "top"`
 - `preventOverflow: boolean = true`
-- `openWith: TooltipOpenWith = "both"` — hover, focus, or both
+- `openWith: TooltipOpenWith = "both"` — `"hover"`, `"click"`, `"both"`, or `"none"`. Use `"none"` to disable the built-in triggers and control visibility yourself via `open`.
+- `timeoutDelay: number = 100` — ms before closing when the pointer leaves the trigger/content
+- `offset: number = 4` — extra distance (px) between the tooltip and its trigger, on top of the arrow allowance. Set `0` to sit the tooltip directly against the trigger (e.g. a slider thumb).
+- `trackPosition: boolean = false` — while open, follow a moving origin (e.g. a dragging handle) with a `requestAnimationFrame` reposition loop. Enable only while the origin can actually move.
+**Models:**
+- `open: boolean | undefined` — controlled open state (two-way). Leave unset for the default trigger-driven behavior; typically paired with `openWith="none"`.
+**Methods:**
+- `updatePosition()` — manually reposition against the origin (the imperative alternative to `trackPosition`).
+
+**`tedi-tooltip-trigger` inputs:**
+- `interactive: boolean = true` — when `false`, skips focus/`tabindex`/`aria-describedby` synthesis so the trigger is a pure positioning anchor for a decorative or externally-controlled element (focus/ARIA live elsewhere). The overlay anchors to the trigger's host element.
 
 ```html
 <tedi-tooltip position="top">
@@ -1888,6 +1926,14 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
     <button tedi-button>Hover me</button>
   </tedi-tooltip-trigger>
   <tedi-tooltip-content>Tooltip text</tedi-tooltip-content>
+</tedi-tooltip>
+
+<!-- Controlled + following a custom draggable element -->
+<tedi-tooltip openWith="none" [open]="isDragging" [trackPosition]="isDragging">
+  <tedi-tooltip-trigger [interactive]="false">
+    <span class="my-handle" aria-hidden="true"></span>
+  </tedi-tooltip-trigger>
+  <tedi-tooltip-content>{{ value }}</tedi-tooltip-content>
 </tedi-tooltip>
 ```
 
