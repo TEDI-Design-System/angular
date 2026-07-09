@@ -9,6 +9,10 @@ tedi-text-group {
     align-items: flex-start;
   }
 
+  &--fixed-label>dt {
+    flex-shrink: 0;
+  }
+
   >dt {
     width: var(--_label-width);
   }
