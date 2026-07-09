@@ -30,7 +30,7 @@ const POSITIONS: TooltipPosition[] = [
   "left-start",
   "left-end",
 ];
-const OPEN_WITH = ["hover", "click", "both"];
+const OPEN_WITH = ["hover", "click", "both", "none"];
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=5797-117363&amp;m=dev" target="_blank">Figma ↗</a><br>
@@ -74,13 +74,14 @@ export default {
     },
     openWith: {
       control: "radio",
-      description: "How tooltip can opened?",
+      description:
+        "Which interactions open the tooltip. Use 'none' for full external control via `open`.",
       options: OPEN_WITH,
       table: {
         category: "tooltip",
         type: {
           summary: "TooltipOpenWith",
-          detail: "hover \nclick \nboth",
+          detail: "hover \nclick \nboth \nnone",
         },
         defaultValue: {
           summary: "both",
@@ -115,6 +116,62 @@ export default {
         },
       },
     },
+    offset: {
+      control: "number",
+      description:
+        "Extra distance (px) between the tooltip and its trigger, on top of the arrow allowance. Set to 0 to sit the tooltip directly against the trigger.",
+      table: {
+        category: "tooltip",
+        type: {
+          summary: "number",
+        },
+        defaultValue: {
+          summary: "4",
+        },
+      },
+    },
+    open: {
+      control: "boolean",
+      description:
+        "Controlled open state. When set, overrides the built-in triggers; typically paired with openWith='none'.",
+      table: {
+        category: "tooltip",
+        type: {
+          summary: "boolean | undefined",
+        },
+        defaultValue: {
+          summary: "undefined",
+        },
+      },
+    },
+    trackPosition: {
+      control: "boolean",
+      description:
+        "While open, continuously reposition the tooltip so it follows a moving origin (e.g. a dragging slider thumb).",
+      table: {
+        category: "tooltip",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: {
+          summary: "false",
+        },
+      },
+    },
+    interactive: {
+      control: "boolean",
+      description:
+        "When false, the trigger is a pure positioning anchor (no synthesized tabindex, focus ring or aria-describedby). Set on tedi-tooltip-trigger.",
+      table: {
+        category: "tooltip-trigger inputs",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: {
+          summary: "true",
+        },
+      },
+    },
     maxWidth: {
       control: "select",
       options: MAXWIDTH,
@@ -136,6 +193,7 @@ export default {
 type Story = StoryObj<
   TooltipComponent & {
     maxWidth: TooltipWidth;
+    interactive: boolean;
   }
 >;
 
@@ -144,14 +202,16 @@ export const Default: Story = {
     position: "top",
     preventOverflow: true,
     timeoutDelay: 100,
+    offset: 4,
+    interactive: true,
     maxWidth: "medium",
     openWith: "both",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-tooltip [position]="position" [timeoutDelay]="timeoutDelay" [preventOverflow]="preventOverflow" [openWith]="openWith">
-        <tedi-tooltip-trigger>
+      <tedi-tooltip [position]="position" [timeoutDelay]="timeoutDelay" [offset]="offset" [preventOverflow]="preventOverflow" [openWith]="openWith">
+        <tedi-tooltip-trigger [interactive]="interactive">
           <button tedi-info-button></button>
         </tedi-tooltip-trigger>
         <tedi-tooltip-content [maxWidth]="maxWidth">
@@ -272,4 +332,40 @@ export const CustomContent: Story = {
       </tedi-tooltip>
     `,
   }),
+};
+
+/**
+ * With `openWith="none"` the built-in triggers are disabled and visibility is driven
+ * entirely by the `open` model. Enable `trackPosition` when the origin can move (e.g. a
+ * dragging slider thumb) so the tooltip follows it.
+ */
+export const Controlled: Story = {
+  name: "Controlled (open + trackPosition)",
+  args: {
+    position: "top",
+    open: false,
+    trackPosition: false,
+  },
+  render: (args) => {
+    const state = { isOpen: args.open ?? false };
+    return {
+      props: {
+        ...args,
+        state,
+        toggle: () => (state.isOpen = !state.isOpen),
+      },
+      template: `
+        <tedi-row justifyItems="center">
+          <tedi-col>
+            <tedi-tooltip openWith="none" [position]="position" [open]="state.isOpen" [trackPosition]="trackPosition">
+              <tedi-tooltip-trigger>
+                <button tedi-button (click)="toggle()">{{ state.isOpen ? 'Hide' : 'Show' }} tooltip</button>
+              </tedi-tooltip-trigger>
+              <tedi-tooltip-content>Controlled tooltip content</tedi-tooltip-content>
+            </tedi-tooltip>
+          </tedi-col>
+        </tedi-row>
+      `,
+    };
+  },
 };

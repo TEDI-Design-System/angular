@@ -811,6 +811,34 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 <tedi-search inputId="q" label="Otsing" [button]="{ text: 'Otsi' }" [formControl]="queryControl" />
 ```
 
+### Slider
+**Selector:** `tedi-slider` | ControlValueAccessor
+**Model:** `value: number`
+**Inputs:**
+- `inputId: string` (required) — id for the range input + label association
+- `label: string`, `hideLabel: boolean | "keep-space" = false`
+- `min: number = 0`, `max: number = 100`, `step: number = 1`
+- `name: string`
+- `minLabel: string`, `maxLabel: string` — text flanking the track
+- `showCurrentValue: boolean = false` — render the current value on the right instead of `maxLabel`
+- `valueFormatter: (value: number) => string` — formats the tooltip + current-value label
+- `tooltip: boolean = true` — live-value tooltip above the thumb (while hovered/focused/dragged)
+- `disabled: boolean = false`, `required: boolean = false`, `invalid: boolean = false`
+- `feedbackText: ComponentInputs<FeedbackTextComponent>` — helper/error below
+- `ariaLabel`, `ariaLabelledby`, `ariaValuetext: string`
+**Content projection:** `[sliderAddon]` — a right-hand element, typically a `tedi-number-field` editing the same value.
+
+```html
+<tedi-slider inputId="volume" label="Volume" [formControl]="volume"
+  minLabel="0%" maxLabel="100%" [max]="100" />
+
+<!-- Paired with a number field editing the same value -->
+<tedi-slider inputId="pct" label="Percent" [(value)]="pct" minLabel="0%" [showCurrentValue]="true"
+  [valueFormatter]="formatPct">
+  <tedi-number-field sliderAddon inputId="pct-field" [(value)]="pct" suffix="%" />
+</tedi-slider>
+```
+
 ### Checkbox
 **Selector:** `input[type=checkbox][tedi-checkbox]`
 **Inputs:**
@@ -1406,7 +1434,15 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 ### Header
 **Selector:** `header[tedi-header]`
 
-Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language`, `tedi-header-login`, `tedi-header-logout`, `tedi-header-profile`, `tedi-header-role`, `tedi-header-search`
+Sub-components: `tedi-header-top`, `tedi-header-logo`, `tedi-header-content`, `tedi-header-actions`, `tedi-header-language`, `tedi-header-login`, `tedi-header-logout`, `tedi-header-profile`, `tedi-header-role`, `tedi-header-search`, `tedi-header-bottom`
+
+**tedi-header-top:** secondary bar projected above the main header (language picker, top-level links, dark-mode toggle).
+- bp `alignment?: HeaderTopAlignment = 'space-between'` — `justify-content` of the top bar content. `HeaderTopAlignment` = `'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly'`. Breakpoint-aware via `[xs]`–`[xxl]`, e.g. `alignment="center" [lg]="{ alignment: 'space-between' }"` to center on mobile and spread on desktop.
+
+**tedi-header-content:** center content area (nav links, search).
+- `alignment?: HeaderContentAlignment = 'center'` (`'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly'`)
+
+**tedi-header-bottom:** mobile-only secondary row below the main bar (hidden from `md` up); typically a compact search.
 
 **tedi-header-logo:**
 - `href?: string` — wraps logo in an anchor
@@ -1433,6 +1469,9 @@ Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language
 
 **tedi-header-language:**
 - `languages: HeaderLanguage` (required) — object with `Language` keys and display string values
+- `selectLabel?: string` — label for the selector (falls back to the `header.select-lang` translation)
+- `labelPosition?: 'top' | 'left' = 'top'` — position of the select label relative to the trigger
+- `languageHrefs?: Partial<Record<Language, string>>` — per-language URLs; a language with a URL renders its option as a navigation anchor (`<a href>`) instead of switching client-side
 - `languageChange: OutputEmitterRef<Language>` — emits on language selection
 
 **tedi-header-login:** bp — `size?: 'default' | 'small'` (auto `'small'` on mobile), `label?: string`, `onClick?: () => void`, `href?: string`
@@ -1445,6 +1484,9 @@ Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language
 
 ```html
 <header tedi-header>
+  <tedi-header-top alignment="center" [lg]="{ alignment: 'space-between' }">
+    <tedi-header-language [languages]="languages" (languageChange)="onLangChange($event)" />
+  </tedi-header-top>
   <tedi-header-logo href="/">
     <img src="logo.svg" alt="Logo" />
   </tedi-header-logo>
@@ -1882,6 +1924,7 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `position: PopoverPosition = "top"`
 - `dismissible: boolean = true`
 - `withArrow: boolean = true`
+- `withBorder: boolean = false` — illustrative prominent border on the arrow side
 - `lockScroll: boolean = false`
 
 ### Tooltip
@@ -1889,7 +1932,17 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 **Inputs:**
 - `position: TooltipPosition = "top"`
 - `preventOverflow: boolean = true`
-- `openWith: TooltipOpenWith = "both"` — hover, focus, or both
+- `openWith: TooltipOpenWith = "both"` — `"hover"`, `"click"`, `"both"`, or `"none"`. Use `"none"` to disable the built-in triggers and control visibility yourself via `open`.
+- `timeoutDelay: number = 100` — ms before closing when the pointer leaves the trigger/content
+- `offset: number = 4` — extra distance (px) between the tooltip and its trigger, on top of the arrow allowance. Set `0` to sit the tooltip directly against the trigger (e.g. a slider thumb).
+- `trackPosition: boolean = false` — while open, follow a moving origin (e.g. a dragging handle) with a `requestAnimationFrame` reposition loop. Enable only while the origin can actually move.
+**Models:**
+- `open: boolean | undefined` — controlled open state (two-way). Leave unset for the default trigger-driven behavior; typically paired with `openWith="none"`.
+**Methods:**
+- `updatePosition()` — manually reposition against the origin (the imperative alternative to `trackPosition`).
+
+**`tedi-tooltip-trigger` inputs:**
+- `interactive: boolean = true` — when `false`, skips focus/`tabindex`/`aria-describedby` synthesis so the trigger is a pure positioning anchor for a decorative or externally-controlled element (focus/ARIA live elsewhere). The overlay anchors to the trigger's host element.
 
 ```html
 <tedi-tooltip position="top">
@@ -1897,6 +1950,14 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
     <button tedi-button>Hover me</button>
   </tedi-tooltip-trigger>
   <tedi-tooltip-content>Tooltip text</tedi-tooltip-content>
+</tedi-tooltip>
+
+<!-- Controlled + following a custom draggable element -->
+<tedi-tooltip openWith="none" [open]="isDragging" [trackPosition]="isDragging">
+  <tedi-tooltip-trigger [interactive]="false">
+    <span class="my-handle" aria-hidden="true"></span>
+  </tedi-tooltip-trigger>
+  <tedi-tooltip-content>{{ value }}</tedi-tooltip-content>
 </tedi-tooltip>
 ```
 

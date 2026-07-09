@@ -1,3 +1,32 @@
+# [7.1.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.3...angular-7.1.0-rc.4) (2026-07-09)
+
+
+### Bug Fixes
+
+* **textgroup:** label doesn't shrink when width is fixed [#506](https://github.com/TEDI-Design-System/angular/issues/506) ([#531](https://github.com/TEDI-Design-System/angular/issues/531)) ([4e9d713](https://github.com/TEDI-Design-System/angular/commit/4e9d713c6a1d262a9e9748e86422428222568032))
+
+# [7.1.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.2...angular-7.1.0-rc.3) (2026-07-09)
+
+
+### Features
+
+* **popover:** add Header popover variant under Popover [#442](https://github.com/TEDI-Design-System/angular/issues/442) ([#523](https://github.com/TEDI-Design-System/angular/issues/523)) ([a668b55](https://github.com/TEDI-Design-System/angular/commit/a668b55d9e89a976c571ba62f269cfe914392aa5))
+* **slider:** new TEDI-ready component [#3](https://github.com/TEDI-Design-System/angular/issues/3) ([#526](https://github.com/TEDI-Design-System/angular/issues/526)) ([d2bf13a](https://github.com/TEDI-Design-System/angular/commit/d2bf13accf86184d71b80ece7e8f8ef44e9c5a1f))
+
+# [7.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.1...angular-7.1.0-rc.2) (2026-07-07)
+
+
+### Features
+
+* **header:** add Header top [#311](https://github.com/TEDI-Design-System/angular/issues/311) ([#504](https://github.com/TEDI-Design-System/angular/issues/504)) ([1e2eff2](https://github.com/TEDI-Design-System/angular/commit/1e2eff22bd8752332f6b50705f7e42c0c6bc625b))
+
+# [7.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.1...angular-7.1.0-rc.1) (2026-07-06)
+
+
+### Features
+
+* **info-button:** focus ring offset reduced [#517](https://github.com/TEDI-Design-System/angular/issues/517) ([#521](https://github.com/TEDI-Design-System/angular/issues/521)) ([b7d06d3](https://github.com/TEDI-Design-System/angular/commit/b7d06d3b81ba3d3936a6d6f20b03f646ee41f20b))
+
 ## [7.0.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0...angular-7.0.1) (2026-07-03)
 
 
