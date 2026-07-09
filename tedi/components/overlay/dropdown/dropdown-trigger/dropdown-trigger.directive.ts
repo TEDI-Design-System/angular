@@ -103,21 +103,6 @@ export class DropdownTriggerDirective implements AfterViewInit {
         this.dropdown.hideDropdown();
         this.focus();
         break;
-
-      case " ":
-      case "Enter": {
-        // Native <button>/<a href> already synthesise a click on Space/Enter
-        // (handled by onClick). For a non-native element promoted to
-        // role="button" (e.g. a wrapper around a search field), replicate that
-        // activation so the dropdown can be opened from the keyboard — including
-        // when focus sits on a control nested inside the trigger.
-        const trigger = this.triggerElement();
-        if (trigger && !this.isNativelyFocusable(trigger)) {
-          event.preventDefault();
-          this.dropdown.toggleDropdown();
-        }
-        break;
-      }
     }
   }
 
