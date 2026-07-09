@@ -17,6 +17,7 @@ import {
   FormFieldControl,
   TEDI_FORM_FIELD_CONTROL,
 } from "../form-field/form-field-control";
+import { TEDI_INPUT_GROUP } from "../input-group/input-group.token";
 
 @Component({
   selector: "input[tedi-text-field]",
@@ -40,6 +41,7 @@ import {
     class: "tedi-text-field",
     "[class.tedi-text-field--arrows-hidden]": "arrowsHidden()",
     "[attr.aria-invalid]": "invalid() || null",
+    "[disabled]": "disabled()",
     "(input)": "handleInputChange($event)",
     "(blur)": "handleBlur()",
   },
@@ -47,6 +49,7 @@ import {
 export class TextFieldComponent
   implements ControlValueAccessor, FormFieldControl {
   private el = inject<ElementRef<HTMLInputElement>>(ElementRef);
+  private group = inject(TEDI_INPUT_GROUP, { optional: true });
 
   /**
    * Value of the input field. Supports two-way binding, use with form controls.
@@ -62,7 +65,9 @@ export class TextFieldComponent
    */
   readonly clear = output<void>();
 
-  readonly disabled = computed(() => this.formDisabled());
+  readonly disabled = computed(
+    () => this.formDisabled() || (this.group?.disabled() ?? false),
+  );
 
   readonly invalid = signal(false);
 
@@ -101,7 +106,6 @@ export class TextFieldComponent
 
   setDisabledState(isDisabled: boolean): void {
     this.formDisabled.set(isDisabled);
-    this.el.nativeElement.disabled = isDisabled;
   }
 
   handleInputChange(event: Event) {

@@ -1196,6 +1196,7 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 - `maxDropdownHeight: number` — dropdown height in pixels
 - `compareWith: (a, b) => boolean` — custom equality function
 - `tagEllipsis: TagEllipsis = false` — which end a selected tag's label truncates from when it doesn't fit. Only used in multiselect mode with `multiRow="false"`. `false` never truncates; `end` → `label…`; `start` → `…label`
+- `ellipsis: "start" | "end" | false = false` — single-select mode: which end the selected value truncates from when it doesn't fit, revealing the full value in a hover/focus tooltip. `false` (default) never truncates
 - `searchFn: (term: string, item: T) => boolean` — custom search function for filtering options. Overrides the default label-based search when provided
 
 Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multiselect).
@@ -1265,6 +1266,25 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `text: string` (required)
 - `type: FeedbackTextType = "hint"` — "hint", "valid", "error"
 - `position: FeedbackTextPosition = "left"`
+
+### InputGroup
+**Selector:** `tedi-input-group`
+Wraps a form control with leading/trailing addons. Project a `label[tedi-label]`, a control, optional addons via the `[tediInputGroupPrefix]` / `[tediInputGroupSuffix]` directives, and an optional `tedi-feedback-text`. The control slot accepts `tedi-form-field` (which itself wraps a text/date/time field) or `tedi-select` — any single-line bordered control. Addons merge their border with the control; put an interactive addon (e.g. a `tedi-dropdown`) directly in the prefix/suffix slot and its trigger button fills the whole addon.
+**Inputs:**
+- `addons: boolean = true` — merges addon and control borders into one visual unit; disable for detached addons (e.g. an action button)
+- `disabled: boolean = false` — disables the group and propagates to the control
+- `invalid: boolean = false` — marks the whole group invalid and propagates to the control; pair with an error `tedi-feedback-text`
+
+```html
+<tedi-input-group [invalid]="amountInvalid">
+  <label tedi-label [for]="'amount'">Amount</label>
+  <tedi-form-field>
+    <input tedi-text-field id="amount" [formControl]="amountControl" />
+  </tedi-form-field>
+  <span tediInputGroupSuffix>EUR</span>
+  <tedi-feedback-text type="error" text="This field is required" />
+</tedi-input-group>
+```
 
 ## Helpers
 
