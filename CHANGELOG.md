@@ -1,3 +1,11 @@
+# [7.1.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.2...angular-7.1.0-rc.3) (2026-07-09)
+
+
+### Features
+
+* **popover:** add Header popover variant under Popover [#442](https://github.com/TEDI-Design-System/angular/issues/442) ([#523](https://github.com/TEDI-Design-System/angular/issues/523)) ([a668b55](https://github.com/TEDI-Design-System/angular/commit/a668b55d9e89a976c571ba62f269cfe914392aa5))
+* **slider:** new TEDI-ready component [#3](https://github.com/TEDI-Design-System/angular/issues/3) ([#526](https://github.com/TEDI-Design-System/angular/issues/526)) ([d2bf13a](https://github.com/TEDI-Design-System/angular/commit/d2bf13accf86184d71b80ece7e8f8ef44e9c5a1f))
+
 # [7.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.1...angular-7.1.0-rc.2) (2026-07-07)
 
 
