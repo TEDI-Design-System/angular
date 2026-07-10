@@ -66,6 +66,13 @@ export const translationsMap = {
     en: "Breadcrumbs",
     ru: "Навигационная цепочка",
   },
+  "breadcrumbs.show-more": {
+    description: "Label for the collapsed-crumbs ellipsis button in breadcrumbs",
+    components: ["Breadcrumbs"],
+    et: "Näita rohkem",
+    en: "Show more",
+    ru: "Показать больше",
+  },
   more: {
     components: ["Tabs"],
     et: "Veel",
