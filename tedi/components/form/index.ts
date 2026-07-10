@@ -13,6 +13,7 @@ export * from "./feedback-text/feedback-text.component";
 export * from "./label/label.component";
 export * from "./number-field/number-field.component";
 export * from "./select";
+export * from "./slider/slider.component";
 export * from "./toggle/toggle.component";
 export * from "./form-field/form-field.component";
 export * from "./form-field/form-field-control";

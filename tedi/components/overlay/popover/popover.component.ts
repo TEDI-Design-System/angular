@@ -383,6 +383,16 @@ export class PopoverComponent {
       return;
     }
 
+    // Nested overlays opened from inside the popover (e.g. a month/year
+    // dropdown in the date-picker header) render in their own pane within the
+    // shared CDK overlay container, not inside this popover's overlayElement.
+    // Interacting with — or focusing into — such a child overlay must not
+    // dismiss the popover, so ignore events originating anywhere inside the
+    // overlay container.
+    if (target.closest(".cdk-overlay-container")) {
+      return;
+    }
+
     this.hidePopover(true);
   }
 }

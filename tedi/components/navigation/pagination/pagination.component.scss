@@ -317,6 +317,7 @@
     line-height: var(--body-small-regular-line-height);
     color: var(--general-text-secondary);
     white-space: nowrap;
+    cursor: default;
 
     @include breakpoints.media-breakpoint-down(md) {
       font-size: var(--body-regular-size);

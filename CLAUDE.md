@@ -80,7 +80,7 @@ Path aliases:
 ## Storybook
 
 - Stories at `tedi/**/*.stories.ts`
-- Title format: `"TEDI-Ready/Components/Category/ComponentName"`
+- Title format: `"TEDI-Ready/Components/<Category>/<ComponentName>"` (e.g. `Buttons`, `Form`, `Navigation`). Top-level groups `Content`, `Layout`, and `Base` skip the `Components` segment — `"TEDI-Ready/Content/<ComponentName>"`, etc. Check sibling stories in the same folder to confirm the prefix.
 - Uses `moduleMetadata` decorator for imports
 - Status parameters: `partiallyTediReady`, `existsInTediReady`, `devComponent`, etc.
 - Compodoc integration enabled for auto-generated docs

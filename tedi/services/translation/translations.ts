@@ -4,6 +4,7 @@ export const translationsMap = {
   close: {
     description: "Used for closing",
     components: [
+      "Accordion",
       "CloseButton",
       "Collapse",
       "Notification",
@@ -18,7 +19,7 @@ export const translationsMap = {
   },
   open: {
     description: "Used for opening",
-    components: ["Collapse", "TableOfContents"],
+    components: ["Accordion", "Collapse", "TableOfContents"],
     et: "Ava",
     en: "Open",
     ru: "Открыть",
@@ -65,6 +66,13 @@ export const translationsMap = {
     en: "Breadcrumbs",
     ru: "Навигационная цепочка",
   },
+  "breadcrumbs.show-more": {
+    description: "Label for the collapsed-crumbs ellipsis button in breadcrumbs",
+    components: ["Breadcrumbs"],
+    et: "Näita rohkem",
+    en: "Show more",
+    ru: "Показать больше",
+  },
   more: {
     components: ["Tabs"],
     et: "Veel",
@@ -95,9 +103,9 @@ export const translationsMap = {
   "header.select-lang": {
     description: "Label for HeaderLanguage label and Modal Heading",
     components: ["HeaderLanguage"],
-    et: "Keel:",
-    en: "Language:",
-    ru: "Язык:",
+    et: "Keel",
+    en: "Language",
+    ru: "Язык",
   },
   "header.role-label": {
     description: "Label for Role selection",

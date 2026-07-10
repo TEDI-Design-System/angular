@@ -139,6 +139,7 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 - `arrowType: "default" | "secondary" = "default"` — `"secondary"` paints the bordered style (only effective in icon-only mode)
 - `size: "default" | "small" = "default"`
 - `inverted: boolean = false` — light text/icon for dark backgrounds (ignored when `arrowType="secondary"`)
+- `underline: boolean = true` — underline the visible text label (no effect in icon-only mode)
 - `ariaControls: string` — id of the disclosed region
 - `ariaLabel: string` — required when `hideText` is true
 - `id: string`
@@ -155,21 +156,30 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 **Selector:** `button[tedi-info-button]`
 **Inputs:**
 - `ariaLabel: string`
+- `color: 'primary' | 'inverted' = 'primary'` — use `inverted` on dark or colored backgrounds
 
-## Cards
+## Content
 
 ### Accordion
 **Selector:** `tedi-accordion`
 **Inputs:**
-- `allowMultiple: boolean = false`
+- `allowMultiple: boolean = false` — allow several items expanded simultaneously
+- `defaultExpanded: boolean | undefined = undefined` — group-level default for items' initial expanded state. Per-item `defaultExpanded` (including an explicit `false`) takes precedence. Typically combined with `allowMultiple` to start with all items open.
+- `itemGap: number | undefined = undefined` — vertical gap between sibling items, in **rem** (matches TEDI's layout-spacing convention; scales with user font-size). Any number is accepted. Forwarded as the `--tedi-accordion-item-gap` CSS variable — consumers needing an exact-pixel override can set that variable directly on a class. Falls back to the `:root` default (`var(--layout-grid-gutters-08)` = 0.5rem) when omitted.
+
+**Breakpoint inputs:** `allowMultiple`, `defaultExpanded`, and `itemGap` can each be overridden per breakpoint via `xs` / `sm` / `md` / `lg` / `xl` / `xxl` inputs, which accept partial `AccordionInputs` objects. Example: `<tedi-accordion [allowMultiple]="false" [lg]="{ allowMultiple: true }">` — single-expand on phone, multi-expand from lg upward. Resolved via `BreakpointService.getBreakpointInputs`; cascades smallest → largest like Bootstrap's grid.
+
 **Slots:** default (AccordionItem children)
 
 ### AccordionItem
 **Selector:** `tedi-accordion-item`
 **Inputs:**
-- `defaultExpanded: boolean = false` — initial expanded state
+- `defaultExpanded: boolean | undefined = undefined` — initial expanded state. Falls back to the parent Accordion's `defaultExpanded` when omitted; pass `false` explicitly to keep an item collapsed even when the group default is `true`.
 - `showIconCard: boolean = false` — enable the icon-card grid column
 - `selected: boolean = false` — visual selected state
+- `disabled: boolean = false` — header trigger becomes non-interactive; current expanded state is preserved
+- `itemId: string | undefined = undefined` — stable id used for hash-based deep-linking (separate from the auto-generated `headerId` / `contentId` for ARIA)
+- `openOnHashMatch: boolean = false` — when `itemId` is set and `window.location.hash === '#<itemId>'`, auto-expands the item. Listens to `hashchange` so in-page navigation also opens the matching item. Requires `itemId`; no-op otherwise.
 **Model:** `expanded: boolean`
 **Slots:** `<tedi-accordion-item-header>`, `<tedi-accordion-item-content>`, `[tedi-accordion-icon-card]` (direct child of the item, occupies its own grid column)
 
@@ -178,12 +188,17 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 **Inputs:**
 - `headerClickable: boolean = true` — when true, the whole header is the toggle button. Set to false when projecting interactive children (action buttons, checkboxes, links) so the header becomes a div with a separate small toggle button.
 - `titleLayout: "hug" | "fill" = "hug"` — `fill` makes the title flex-grow, pushing trailing siblings to the right edge of the start group
-- `openLabel: string = "open"` — label shown when collapsed (passed through `tediTranslate`)
-- `closeLabel: string = "close"` — label shown when expanded (passed through `tediTranslate`)
+- `openText: string | undefined` — text shown when collapsed, rendered literally. When omitted, falls back to the translated `"open"` label from `TediTranslationService`. Pipe through `tediTranslate` at the call site if you need a localised override.
+- `closeText: string | undefined` — text shown when expanded, rendered literally. When omitted, falls back to the translated `"close"` label from `TediTranslationService`. Pipe through `tediTranslate` at the call site if you need a localised override.
 - `showExpandLabel: boolean = true` — when false, the toggle is icon-only and uses `aria-label` for its accessible name
 - `showDefaultExpandAction: boolean = true` — when false, no default toggle button is rendered (consumer provides their own via slots and calls `item.toggle()`)
 - `expandActionPosition: "start" | "end" = "end"`
+- `expandActionArrowType: "default" | "secondary" = "default"` — chevron style passthrough to the underlying `CollapseButton`. Only effective when `headerClickable` is `false` and `showExpandLabel` is `false` (icon-only mode).
+- `expandActionSize: "default" | "small" | undefined` — size passthrough to the underlying `CollapseButton`. Only effective when `headerClickable` is `false`. When omitted, derived from `showExpandLabel` (true → `default`, false → `small`).
+- `expandActionInverted: boolean = false` — inverted palette passthrough. Only effective when `headerClickable` is `false`.
+- `expandActionUnderline: boolean = false` — underline the default expand action's text. Only effective when `headerClickable` is `false` and `showExpandLabel` is `true`.
 - `headerClass: string | null` — extra CSS class on the header element
+- `headingLevel: 1 | 2 | 3 | 4 | 5 | 6 | undefined = undefined` — wraps the trigger in a semantic `<h1>`–`<h6>` element per WAI-ARIA Accordion Pattern. Wrapper uses `display: contents` so it doesn't affect layout. Recommended for docs / FAQ pages where the accordion participates in the document outline.
 **Slots:**
 - `[tedi-accordion-title]` — the accordion title content (rendered in the title position)
 - `[tedi-accordion-start-action]` — actions at the start of the header (e.g., before the title group)
@@ -200,6 +215,10 @@ Headless chevron toggle extracted from `Collapse` for cases where you only need 
 **Slots:** default (the collapsible content)
 
 The content panel is automatically given `role="region"`, `aria-labelledby` pointing to the header, and `inert` + `aria-hidden` when collapsed.
+
+**Mobile icon-card layout:** below the `md` breakpoint (`< 768px`), items with `showIconCard` stack the icon-card *above* the header instead of placing it in a left column — phone-sized viewports can't fit both side-by-side without truncating the icon-card text or the header content. Borders and corner radii are redistributed accordingly. No input needed; the rule is applied via `media-breakpoint-down(md)`.
+
+**Print:** the accordion uses a `@media print` rule that forces every item to expand on paper so collapsed content isn't lost. No input needed.
 
 ```html
 <tedi-accordion>
@@ -233,7 +252,25 @@ For non-clickable headers with custom actions (the toggle stays visible at the s
 </tedi-accordion-item>
 ```
 
-## Content
+Open every item by default — group-level `defaultExpanded` cascades to each child unless the child overrides:
+
+```html
+<tedi-accordion [allowMultiple]="true" [defaultExpanded]="true">
+  <tedi-accordion-item>
+    <tedi-accordion-item-header>
+      <span tedi-accordion-title>Section 1</span>
+    </tedi-accordion-item-header>
+    <tedi-accordion-item-content>Body 1</tedi-accordion-item-content>
+  </tedi-accordion-item>
+  <!-- Per-item override: this one stays closed -->
+  <tedi-accordion-item [defaultExpanded]="false">
+    <tedi-accordion-item-header>
+      <span tedi-accordion-title>Section 2</span>
+    </tedi-accordion-item-header>
+    <tedi-accordion-item-content>Body 2</tedi-accordion-item-content>
+  </tedi-accordion-item>
+</tedi-accordion>
+```
 
 ### Calendar
 **Selector:** `tedi-calendar` | ControlValueAccessor
@@ -750,6 +787,34 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 - `required: boolean = false`
 - `invalid: boolean = false`
 
+### Slider
+**Selector:** `tedi-slider` | ControlValueAccessor
+**Model:** `value: number`
+**Inputs:**
+- `inputId: string` (required) — id for the range input + label association
+- `label: string`, `hideLabel: boolean | "keep-space" = false`
+- `min: number = 0`, `max: number = 100`, `step: number = 1`
+- `name: string`
+- `minLabel: string`, `maxLabel: string` — text flanking the track
+- `showCurrentValue: boolean = false` — render the current value on the right instead of `maxLabel`
+- `valueFormatter: (value: number) => string` — formats the tooltip + current-value label
+- `tooltip: boolean = true` — live-value tooltip above the thumb (while hovered/focused/dragged)
+- `disabled: boolean = false`, `required: boolean = false`, `invalid: boolean = false`
+- `feedbackText: ComponentInputs<FeedbackTextComponent>` — helper/error below
+- `ariaLabel`, `ariaLabelledby`, `ariaValuetext: string`
+**Content projection:** `[sliderAddon]` — a right-hand element, typically a `tedi-number-field` editing the same value.
+
+```html
+<tedi-slider inputId="volume" label="Volume" [formControl]="volume"
+  minLabel="0%" maxLabel="100%" [max]="100" />
+
+<!-- Paired with a number field editing the same value -->
+<tedi-slider inputId="pct" label="Percent" [(value)]="pct" minLabel="0%" [showCurrentValue]="true"
+  [valueFormatter]="formatPct">
+  <tedi-number-field sliderAddon inputId="pct-field" [(value)]="pct" suffix="%" />
+</tedi-slider>
+```
+
 ### Checkbox
 **Selector:** `input[type=checkbox][tedi-checkbox]`
 **Inputs:**
@@ -1163,6 +1228,9 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 **Inputs:**
 - `inputId: string` (required) — unique ID for label association and accessibility
 - `label: string` — label text above the select
+- `tooltip: string` — renders an info button next to the label that reveals this text in a tooltip
+- `ariaLabelledby: string` — associate an external visible label by its element id. A native `<label for>` cannot target the combobox (it is a `<div>`), so use this when the label lives outside the component. Ignored when `label` is set
+- `ariaLabel: string` — accessible name when there is no visible label to reference. Ignored when `label` or `ariaLabelledby` provides a name
 - `required: boolean = false`
 - `placeholder: string = ""`
 - `state: InputState = "default"` — "default", "error", "valid"
@@ -1338,7 +1406,7 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `color: SeparatorColor = "primary"`
 - `variant: SeparatorVariant`
 - `thickness: number = 1`
-- `spacing: SeparatorSpacingValue | SeparatorSpacing`
+- `spacing: SeparatorSpacingValue | SeparatorSpacing` — margins. Horizontal supports y-spacing only (number → top+bottom; object `y`/`top`/`bottom`; x ignored). Vertical supports both x and y (number → left+right; object `x`/`y` shorthands or explicit `top`/`bottom`/`left`/`right`). `x`=left+right, `y`=top+bottom; explicit side overrides the shorthand.
 - `size: string = "100%"`
 
 ### EmptyState
@@ -1401,7 +1469,15 @@ Description is projected via `<ng-content>`. Actions slot is projected via `<ng-
 ### Header
 **Selector:** `header[tedi-header]`
 
-Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language`, `tedi-header-login`, `tedi-header-logout`, `tedi-header-profile`, `tedi-header-role`, `tedi-header-search`
+Sub-components: `tedi-header-top`, `tedi-header-logo`, `tedi-header-content`, `tedi-header-actions`, `tedi-header-language`, `tedi-header-login`, `tedi-header-logout`, `tedi-header-profile`, `tedi-header-role`, `tedi-header-search`, `tedi-header-bottom`
+
+**tedi-header-top:** secondary bar projected above the main header (language picker, top-level links, dark-mode toggle).
+- bp `alignment?: HeaderTopAlignment = 'space-between'` — `justify-content` of the top bar content. `HeaderTopAlignment` = `'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly'`. Breakpoint-aware via `[xs]`–`[xxl]`, e.g. `alignment="center" [lg]="{ alignment: 'space-between' }"` to center on mobile and spread on desktop.
+
+**tedi-header-content:** center content area (nav links, search).
+- `alignment?: HeaderContentAlignment = 'center'` (`'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly'`)
+
+**tedi-header-bottom:** mobile-only secondary row below the main bar (hidden from `md` up); typically a compact search.
 
 **tedi-header-logo:**
 - `href?: string` — wraps logo in an anchor
@@ -1428,6 +1504,9 @@ Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language
 
 **tedi-header-language:**
 - `languages: HeaderLanguage` (required) — object with `Language` keys and display string values
+- `selectLabel?: string` — label for the selector (falls back to the `header.select-lang` translation)
+- `labelPosition?: 'top' | 'left' = 'top'` — position of the select label relative to the trigger
+- `languageHrefs?: Partial<Record<Language, string>>` — per-language URLs; a language with a URL renders its option as a navigation anchor (`<a href>`) instead of switching client-side
 - `languageChange: OutputEmitterRef<Language>` — emits on language selection
 
 **tedi-header-login:** bp — `size?: 'default' | 'small'` (auto `'small'` on mobile), `label?: string`, `onClick?: () => void`, `href?: string`
@@ -1440,6 +1519,9 @@ Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language
 
 ```html
 <header tedi-header>
+  <tedi-header-top alignment="center" [lg]="{ alignment: 'space-between' }">
+    <tedi-header-language [languages]="languages" (languageChange)="onLangChange($event)" />
+  </tedi-header-top>
   <tedi-header-logo href="/">
     <img src="logo.svg" alt="Logo" />
   </tedi-header-logo>
@@ -1524,6 +1606,31 @@ Sub-components: `tedi-header-logo`, `tedi-header-actions`, `tedi-header-language
 - `label: string` — screen reader label
 
 ## Navigation
+
+### Breadcrumbs
+**Selector:** `tedi-breadcrumbs`
+**Composition:** mark each crumb with the `*tediBreadcrumbItem` structural directive, in order from root to current page. Use `a tedi-link` for navigable crumbs and a plain element (e.g. `span`) for the current page — add `aria-current="page"` to it yourself. Chevron separators are inserted automatically.
+**Inputs:**
+- `variant: "long" | "short" = "long"` — `long` shows the full trail; `short` shows only the parent crumb as a back-link (mobile)
+- `maxItems: number` — collapse the middle of a long trail into an ellipsis dropdown when the crumb count exceeds this. Long variant only
+- `itemsBeforeCollapse: number = 1` — crumbs kept at the start when collapsed
+- `itemsAfterCollapse: number = 1` — crumbs kept at the end when collapsed
+- `separator: string` — text separator (e.g. `"/"`); defaults to a chevron icon
+- `ariaLabel: string` — `nav` landmark label; falls back to the `breadcrumbs` translation
+- `showMoreLabel: string` — ellipsis button label; falls back to the `breadcrumbs.show-more` translation
+- Responsive: `xs, sm, md, lg, xl, xxl: BreadcrumbsInputs` (`variant`, `maxItems`, `itemsBeforeCollapse`, `itemsAfterCollapse`)
+
+**Content projection:**
+- `*tediBreadcrumbItem` — one per crumb
+- `*tediBreadcrumbSeparator` — optional custom separator template (overrides `separator` and the default icon)
+
+```html
+<tedi-breadcrumbs [maxItems]="4" variant="short" [md]="{ variant: 'long' }">
+  <a *tediBreadcrumbItem tedi-link href="/">Töölaud</a>
+  <a *tediBreadcrumbItem tedi-link href="/apps">Taotlused</a>
+  <span *tediBreadcrumbItem aria-current="page">Taotlus nr 506</span>
+</tedi-breadcrumbs>
+```
 
 ### Link
 **Selector:** `[tedi-link]`
@@ -1720,6 +1827,7 @@ Controlled usage:
 - `showClose: boolean = false`
 - `role: AlertRole = "alert"`
 - `variant: AlertVariant = "default"`
+- `size: AlertSize = "default"` — `"default"` or `"small"` (reduced padding and smaller body text)
 - `titleElement: AlertTitleType = "h2"` — HTML tag for the title
 - `closeDelay: number = 0`
 **Outputs:**
@@ -1876,6 +1984,7 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `position: PopoverPosition = "top"`
 - `dismissible: boolean = true`
 - `withArrow: boolean = true`
+- `withBorder: boolean = false` — illustrative prominent border on the arrow side
 - `lockScroll: boolean = false`
 
 ### Tooltip
@@ -1883,7 +1992,17 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 **Inputs:**
 - `position: TooltipPosition = "top"`
 - `preventOverflow: boolean = true`
-- `openWith: TooltipOpenWith = "both"` — hover, focus, or both
+- `openWith: TooltipOpenWith = "both"` — `"hover"`, `"click"`, `"both"`, or `"none"`. Use `"none"` to disable the built-in triggers and control visibility yourself via `open`.
+- `timeoutDelay: number = 100` — ms before closing when the pointer leaves the trigger/content
+- `offset: number = 4` — extra distance (px) between the tooltip and its trigger, on top of the arrow allowance. Set `0` to sit the tooltip directly against the trigger (e.g. a slider thumb).
+- `trackPosition: boolean = false` — while open, follow a moving origin (e.g. a dragging handle) with a `requestAnimationFrame` reposition loop. Enable only while the origin can actually move.
+**Models:**
+- `open: boolean | undefined` — controlled open state (two-way). Leave unset for the default trigger-driven behavior; typically paired with `openWith="none"`.
+**Methods:**
+- `updatePosition()` — manually reposition against the origin (the imperative alternative to `trackPosition`).
+
+**`tedi-tooltip-trigger` inputs:**
+- `interactive: boolean = true` — when `false`, skips focus/`tabindex`/`aria-describedby` synthesis so the trigger is a pure positioning anchor for a decorative or externally-controlled element (focus/ARIA live elsewhere). The overlay anchors to the trigger's host element.
 
 ```html
 <tedi-tooltip position="top">
@@ -1891,6 +2010,14 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
     <button tedi-button>Hover me</button>
   </tedi-tooltip-trigger>
   <tedi-tooltip-content>Tooltip text</tedi-tooltip-content>
+</tedi-tooltip>
+
+<!-- Controlled + following a custom draggable element -->
+<tedi-tooltip openWith="none" [open]="isDragging" [trackPosition]="isDragging">
+  <tedi-tooltip-trigger [interactive]="false">
+    <span class="my-handle" aria-hidden="true"></span>
+  </tedi-tooltip-trigger>
+  <tedi-tooltip-content>{{ value }}</tedi-tooltip-content>
 </tedi-tooltip>
 ```
 
@@ -2022,6 +2149,7 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 ## Navigation
 
 ### Breadcrumbs
+**⚠️ DEPRECATED** — use the TEDI-Ready `tedi-breadcrumbs` from `@tedi-design-system/angular/tedi` (composition API with `*tediBreadcrumbItem`, custom separators and collapse). This community version will be removed in a future release.
 **Selector:** `tedi-breadcrumbs`
 - `crumbs: Breadcrumb[]`, `shortCrumbs: boolean` | Breakpoint support
 
