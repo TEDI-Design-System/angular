@@ -51,7 +51,7 @@
               @if (separatorTemplate(); as sep) {
                 <ng-container [ngTemplateOutlet]="sep.templateRef" />
               } @else if (separator()) {
-                {{ separator() }}
+                <span tedi-text color="brand">{{ separator() }}</span>
               } @else {
                 <tedi-icon name="chevron_right" [size]="16" color="brand" />
               }

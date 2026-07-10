@@ -10,6 +10,7 @@ import {
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
 import { IconComponent } from "../../base/icon/icon.component";
+import { TextComponent } from "../../base/text/text.component";
 import { LinkComponent } from "../link/link.component";
 import { DropdownComponent } from "../../overlay/dropdown/dropdown.component";
 import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
@@ -55,6 +56,7 @@ type RenderToken =
   imports: [
     NgTemplateOutlet,
     IconComponent,
+    TextComponent,
     LinkComponent,
     DropdownComponent,
     DropdownTriggerDirective,
