@@ -17,6 +17,7 @@ import { BreadcrumbSeparatorDirective } from "./breadcrumb-separator.directive";
  * Breadcrumbs show the user's location within the page hierarchy.
  * - Mark each crumb with `*tediBreadcrumbItem`, in order from the root to the current page.
  * - Use `a tedi-link` for navigable crumbs and a plain element (e.g. `span`) for the current page — add `aria-current="page"` to it yourself.
+ * - Crumb links are underlined by default; set `[underline]="false"` on the `tedi-link` for non-underlined crumbs (recommended for the `short` back-link). Crumbs collapsed into the ellipsis dropdown are always non-underlined.
  * - `long` shows the full trail; `short` shows only the parent crumb as a back-link (mobile).
  * - Set `maxItems` to collapse the middle of a long trail into an ellipsis dropdown.
  */
@@ -111,6 +112,10 @@ export const Default: Story = {
   }),
 };
 
+/**
+ * The `short` back-link reads better without an underline — set
+ * `[underline]="false"` on its `tedi-link`.
+ */
 export const Short: Story = {
   args: {
     variant: "short",
@@ -119,7 +124,7 @@ export const Short: Story = {
     props: args,
     template: `
       <tedi-breadcrumbs ${argsToTemplate(args)}>
-        <a *tediBreadcrumbItem tedi-link href="#">Töölaud</a>
+        <a *tediBreadcrumbItem tedi-link [underline]="false" href="#">Töölaud</a>
         <span *tediBreadcrumbItem aria-current="page">Taotlus nr 506</span>
       </tedi-breadcrumbs>
     `,

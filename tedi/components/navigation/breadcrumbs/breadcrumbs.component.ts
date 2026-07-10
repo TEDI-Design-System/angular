@@ -43,6 +43,11 @@ type RenderToken =
  *
  * Use a link (e.g. `a tedi-link`) for navigable crumbs and a plain element for
  * the current page — add `aria-current="page"` to it yourself.
+ *
+ * Crumb links are underlined by default. Set `[underline]="false"` on the
+ * `tedi-link` for non-underlined crumbs — recommended for the `short` back-link.
+ * Crumbs collapsed into the ellipsis dropdown are always rendered without an
+ * underline, regardless of their `[underline]` setting.
  */
 @Component({
   selector: "tedi-breadcrumbs",

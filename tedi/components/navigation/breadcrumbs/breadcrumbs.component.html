@@ -34,7 +34,11 @@
                 </button>
                 <tedi-dropdown-content dropdownRole="menu">
                   @for (hidden of token.hidden; track $index) {
-                    <li tedi-dropdown-item [clipContent]="false">
+                    <li
+                      tedi-dropdown-item
+                      [clipContent]="false"
+                      class="tedi-breadcrumbs__dropdown-item"
+                    >
                       <ng-container [ngTemplateOutlet]="hidden.templateRef" />
                     </li>
                   }
