@@ -674,4 +674,108 @@ describe("DateTimeFieldComponent", () => {
       ).toBe(9);
     });
   });
+
+  describe("native time input on narrow screens", () => {
+    it("resolves to a native input below md and the wheel from md up", () => {
+      const { component, breakpoint, fixture } = createField();
+      expect(component.useNativeTimeInput()).toBe(false);
+      breakpoint.setBreakpoint("sm");
+      fixture.detectChanges();
+      expect(component.useNativeTimeInput()).toBe(true);
+    });
+
+    it("renders a native time-field in the popover below md", () => {
+      const { component, breakpoint, fixture } = createField();
+      breakpoint.setBreakpoint("sm");
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(document.querySelector("tedi-time-field")).toBeTruthy();
+      expect(document.querySelector(".tedi-time-picker--scroll")).toBeNull();
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("renders the scroll wheel in the popover from md up", () => {
+      const { component, fixture } = createField();
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(document.querySelector("tedi-time-field")).toBeNull();
+      expect(document.querySelector("tedi-time-picker")).toBeTruthy();
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("keeps the slot grid (not a native input) when availableTimes is set", () => {
+      const { component, breakpoint, fixture } = createField({
+        availableTimes: ["09:00", "10:00"],
+      });
+      breakpoint.setBreakpoint("sm");
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(document.querySelector("tedi-time-field")).toBeNull();
+      expect(document.querySelector(".tedi-time-picker--slots")).toBeTruthy();
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+  });
+
+  describe("range time headings", () => {
+    it("labels the two ends with distinct start/end headings", () => {
+      const { component, fixture } = createField({ mode: "range" });
+      component.handleIconClick();
+      fixture.detectChanges();
+      const headings = Array.from(
+        document.querySelectorAll(".tedi-date-time-field__split-heading"),
+      ).map((h) => h.textContent?.trim());
+      expect(headings).toContain("date-time-field.time-heading-from");
+      expect(headings).toContain("date-time-field.time-heading-to");
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("uses native time inputs (not scroll wheels) for both ends even on desktop", () => {
+      const { component, fixture } = createField({ mode: "range" });
+      expect(component.useNativeTimeInput()).toBe(false);
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(document.querySelectorAll("tedi-time-field").length).toBe(2);
+      expect(document.querySelector(".tedi-time-picker--scroll")).toBeNull();
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("keeps the slot grid for both ends when availableTimes is set", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        availableTimes: ["09:00", "10:00"],
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(document.querySelector("tedi-time-field")).toBeNull();
+      expect(
+        document.querySelectorAll(".tedi-time-picker--slots").length,
+      ).toBe(2);
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("shows each end's selected date under its heading", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        value: {
+          from: new Date(2025, 8, 1, 9, 0),
+          to: new Date(2025, 8, 5, 17, 0),
+        },
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      const dates = Array.from(
+        document.querySelectorAll(".tedi-date-time-field__range-date"),
+      ).map((d) => d.textContent?.trim());
+      expect(dates.length).toBe(2);
+      expect(dates.every((d) => !!d)).toBe(true);
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+  });
 });

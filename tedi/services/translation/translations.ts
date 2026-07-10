@@ -1289,6 +1289,22 @@ export const translationsMap = {
     en: "Time",
     ru: "Время",
   },
+  "date-time-field.time-heading-from": {
+    description:
+      "Heading above the start-time picker in the date-time field range mode.",
+    components: ["DateTimeField"],
+    et: "Algusaeg",
+    en: "Start time",
+    ru: "Время начала",
+  },
+  "date-time-field.time-heading-to": {
+    description:
+      "Heading above the end-time picker in the date-time field range mode.",
+    components: ["DateTimeField"],
+    et: "Lõppaeg",
+    en: "End time",
+    ru: "Время окончания",
+  },
   "date-time-field.select-time": {
     description:
       "Footer link in the multi-step date-time field calendar that advances to the time picker.",

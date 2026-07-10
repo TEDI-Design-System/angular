@@ -42,6 +42,7 @@ function makeData(
     gridVariant: "button",
     timeHeading: undefined,
     availableTimes: undefined,
+    size: "default",
     ...overrides,
   };
 }

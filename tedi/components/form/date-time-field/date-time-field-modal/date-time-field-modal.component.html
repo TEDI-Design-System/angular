@@ -2,7 +2,10 @@
   <tedi-modal-header>
     <h2>{{ "date-time-field.modal-title" | tediTranslate }}</h2>
   </tedi-modal-header>
-  <tedi-modal-content class="tedi-date-time-field-modal__content">
+  <tedi-modal-content
+    class="tedi-date-time-field-modal__content"
+    [class.tedi-date-time-field-modal__content--range]="isRange"
+  >
     <tedi-calendar
       #calendar
       class="tedi-date-time-field-modal__calendar"
@@ -34,11 +37,23 @@
       <div class="tedi-date-time-field-modal__times">
         <ng-container
           [ngTemplateOutlet]="rangeTimeTpl"
-          [ngTemplateOutletContext]="{ kind: 'from', time: fromTime(), slots: fromSlots() }"
+          [ngTemplateOutletContext]="{
+            kind: 'from',
+            time: fromTime(),
+            slots: fromSlots(),
+            heading: data.timeHeading ?? ('date-time-field.time-heading-from' | tediTranslate),
+            dateLabel: fromDateLabel(),
+          }"
         />
         <ng-container
           [ngTemplateOutlet]="rangeTimeTpl"
-          [ngTemplateOutletContext]="{ kind: 'to', time: toTime(), slots: toSlots() }"
+          [ngTemplateOutletContext]="{
+            kind: 'to',
+            time: toTime(),
+            slots: toSlots(),
+            heading: data.timeHeading ?? ('date-time-field.time-heading-to' | tediTranslate),
+            dateLabel: toDateLabel(),
+          }"
         />
       </div>
     } @else {
@@ -46,15 +61,30 @@
         <span class="tedi-date-time-field-modal__heading">
           {{ data.timeHeading ?? ("date-time-field.time-heading" | tediTranslate) }}
         </span>
-        <tedi-time-picker
-          [value]="singleTime()"
-          [variant]="singleSlots()?.length ? 'slots' : 'scroll'"
-          [timeSlots]="singleSlots() ?? []"
-          [showSlotIndicator]="data.gridVariant === 'radio'"
-          [columns]="data.slotColumns"
-          [minuteStep]="data.minuteStep"
-          (valueChange)="handleTimeSelect($event)"
-        />
+        @if (!singleSlots()?.length && useNativeTimeInput()) {
+          <tedi-form-field
+            class="tedi-date-time-field-modal__native-time"
+            [size]="data.size"
+          >
+            <tedi-time-field
+              inputId="dtf-modal-time"
+              [useNativePicker]="true"
+              [clearable]="false"
+              [value]="singleTime()"
+              (valueChange)="handleTimeSelect($event)"
+            />
+          </tedi-form-field>
+        } @else {
+          <tedi-time-picker
+            [value]="singleTime()"
+            [variant]="singleSlots()?.length ? 'slots' : 'scroll'"
+            [timeSlots]="singleSlots() ?? []"
+            [showSlotIndicator]="data.gridVariant === 'radio'"
+            [columns]="data.slotColumns"
+            [minuteStep]="data.minuteStep"
+            (valueChange)="handleTimeSelect($event)"
+          />
+        }
       </div>
     }
   </tedi-modal-content>
@@ -68,19 +98,44 @@
   </tedi-modal-footer>
 </tedi-modal>
 
-<ng-template #rangeTimeTpl let-kind="kind" let-time="time" let-slots="slots">
+<ng-template
+  #rangeTimeTpl
+  let-kind="kind"
+  let-time="time"
+  let-slots="slots"
+  let-heading="heading"
+  let-dateLabel="dateLabel"
+>
   <div class="tedi-date-time-field-modal__time">
-    <span class="tedi-date-time-field-modal__heading">
-      {{ data.timeHeading ?? ("date-time-field.time-heading" | tediTranslate) }}
-    </span>
-    <tedi-time-picker
-      [value]="time"
-      [variant]="slots?.length ? 'slots' : 'scroll'"
-      [timeSlots]="slots ?? []"
-      [showSlotIndicator]="data.gridVariant === 'radio'"
-      [columns]="data.slotColumns"
-      [minuteStep]="data.minuteStep"
-      (valueChange)="handleRangeTimeSelect(kind, $event)"
-    />
+    <div class="tedi-date-time-field-modal__time-header">
+      <span class="tedi-date-time-field-modal__heading">{{ heading }}</span>
+      @if (dateLabel) {
+        <span class="tedi-date-time-field-modal__date">{{ dateLabel }}</span>
+      }
+    </div>
+    @if (!slots?.length) {
+      <tedi-form-field
+        class="tedi-date-time-field-modal__native-time"
+        [size]="data.size"
+      >
+        <tedi-time-field
+          [inputId]="'dtf-modal-time-' + kind"
+          [useNativePicker]="true"
+          [clearable]="false"
+          [value]="time"
+          (valueChange)="handleRangeTimeSelect(kind, $event)"
+        />
+      </tedi-form-field>
+    } @else {
+      <tedi-time-picker
+        [value]="time"
+        variant="slots"
+        [timeSlots]="slots"
+        [showSlotIndicator]="data.gridVariant === 'radio'"
+        [columns]="data.slotColumns"
+        [minuteStep]="data.minuteStep"
+        (valueChange)="handleRangeTimeSelect(kind, $event)"
+      />
+    }
   </div>
 </ng-template>

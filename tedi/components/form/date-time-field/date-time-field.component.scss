@@ -1,3 +1,5 @@
+@use "@tedi-design-system/core/bootstrap-utility/breakpoints";
+
 .tedi-date-time-field {
   display: flex;
   flex: 1;
@@ -5,15 +7,30 @@
   align-items: center;
   min-width: 0;
 
+  // Keep the popover within the viewport on narrow screens. `max-height` is set
+  // in TS from the room around the trigger; `overflow-y: auto` lets tall content
+  // (e.g. many predefined slots stacked in range mode) scroll inside the popover.
+  // Only the height is bounded — never the width — so the calendar never
+  // re-measures narrower and wraps its months.
   &__overlay {
+    max-width: calc(100vw - var(--layout-grid-gutters-08));
+    overflow-y: auto;
     background: var(--card-background-primary);
     border-radius: var(--card-radius-rounded);
     box-shadow: 0 1px 5px 0 var(--tedi-alpha-20);
   }
 
+  // Single side-by-side popover. Calendar and time picker sit in a row on wider
+  // viewports (as designed) and stack once the row no longer fits on a phone, so
+  // the time picker never spills off-screen.
   &__split {
     display: flex;
     align-items: stretch;
+
+    @include breakpoints.media-breakpoint-down(sm) {
+      flex-direction: column;
+      align-items: center;
+    }
   }
 
   // Side-by-side layout: grow the scroll-wheel so its height lines up with the calendar
@@ -27,6 +44,11 @@
     flex: 0 0 var(--tedi-borders-01);
     align-self: stretch;
     background: var(--general-border-primary);
+
+    // Once the panels stack, the vertical divider just adds a stray line.
+    @include breakpoints.media-breakpoint-down(sm) {
+      display: none;
+    }
   }
 
   &__split-time {
@@ -45,6 +67,11 @@
   &__overlay .tedi-time-picker__grid {
     display: grid;
     padding: 0;
+  }
+
+  &__native-time {
+    width: 100%;
+    max-width: var(--tedi-containers-01);
   }
 
   &__split-heading {
@@ -68,13 +95,45 @@
     background: var(--general-border-primary);
   }
 
+  // The two ends sit side-by-side beneath the calendar on wider viewports and
+  // stack (start over end) once they no longer fit, so neither picker spills off
+  // the popover.
   &__range-times {
     display: flex;
     justify-content: center;
+
+    @include breakpoints.media-breakpoint-down(md) {
+      flex-direction: column;
+      align-items: center;
+    }
   }
 
   &__range-times .tedi-date-time-field__split-time {
     flex: 1 1 0;
+  }
+
+  // Groups the heading with its start/end date so they read as one label, and
+  // owns the gap down to the picker (so the spacing is the same whether or not a
+  // date is shown).
+  &__range-time-header {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    padding-top: var(--card-padding-md-default);
+    padding-bottom: var(--card-padding-xs);
+  }
+
+  &__range-time-header &__split-heading {
+    padding: 0;
+  }
+
+  // Echoes the start/end date under each heading so it stays clear which
+  // calendar end the picker below drives — the calendar↔time link is otherwise
+  // ambiguous with a single calendar and two pickers.
+  &__range-date {
+    font-size: var(--body-small-regular-size);
+    color: var(--general-text-secondary);
+    text-align: center;
   }
 
   &__time-step {

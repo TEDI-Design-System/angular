@@ -18,11 +18,15 @@ import { MODAL_DATA } from "../../../overlay/modal/modal.types";
 import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
 import { CalendarComponent } from "../../../content/calendar/calendar.component";
 import { TimePickerComponent } from "../../time-picker/time-picker.component";
+import { TimeFieldComponent } from "../../time-field/time-field.component";
+import { FormFieldComponent } from "../../form-field/form-field.component";
+import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
 import {
   CalendarView,
   DateRange,
 } from "../../../content/calendar/types";
 import { Matcher } from "../../../../utils/matchers.util";
+import { formatLocaleDate } from "../../../../utils/date.util";
 import {
   DateTimeFieldMode,
   DateTimeFieldTimeGridVariant,
@@ -64,6 +68,7 @@ export interface DateTimeFieldModalData {
   gridVariant: DateTimeFieldTimeGridVariant;
   timeHeading: string | undefined;
   availableTimes: DateTimeFieldAvailableTimes;
+  size: "default" | "small";
 }
 
 @Component({
@@ -76,6 +81,8 @@ export interface DateTimeFieldModalData {
     ButtonComponent,
     CalendarComponent,
     TimePickerComponent,
+    TimeFieldComponent,
+    FormFieldComponent,
     ModalComponent,
     ModalContentComponent,
     ModalFooterComponent,
@@ -88,8 +95,13 @@ export interface DateTimeFieldModalData {
 export class DateTimeFieldModalComponent {
   readonly data = inject(MODAL_DATA) as DateTimeFieldModalData;
   private readonly ref = inject(ModalRef<DateTimeFieldValue>);
+  private readonly breakpointService = inject(BreakpointService);
 
   readonly calendar = viewChild<CalendarComponent>("calendar");
+
+  // See date-time-field.component.ts: swap the scroll wheels for a native
+  // `type="time"` input on phones/small tablets.
+  readonly useNativeTimeInput = this.breakpointService.isBelowBreakpoint("md");
 
   readonly draft = signal<DateTimeFieldValue>(this.data.value);
   readonly month = signal<Date>(this.data.currentMonth);
@@ -102,6 +114,13 @@ export class DateTimeFieldModalComponent {
   readonly singleTime = computed(() => getTimeOf(this.singleValue()));
   readonly fromTime = computed(() => getTimeOf(this.rangeValue().from));
   readonly toTime = computed(() => getTimeOf(this.rangeValue().to));
+
+  readonly fromDateLabel = computed(() =>
+    this.formatRangeDate(this.rangeValue().from),
+  );
+  readonly toDateLabel = computed(() =>
+    this.formatRangeDate(this.rangeValue().to),
+  );
 
   readonly singleSlots = computed(() =>
     resolveAvailableTimes(this.data.availableTimes, this.singleValue()),
@@ -145,5 +164,9 @@ export class DateTimeFieldModalComponent {
     this.draft.set(
       applyRangeTime(kind, time, this.rangeValue(), new Date()) as DateRange,
     );
+  }
+
+  private formatRangeDate(date: Date | undefined): string {
+    return date ? formatLocaleDate(date, this.data.localeCode) : "";
   }
 }

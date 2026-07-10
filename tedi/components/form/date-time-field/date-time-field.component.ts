@@ -22,6 +22,8 @@ import { DateInputComponent } from "../date-field/date-input/date-input.componen
 import { CalendarComponent } from "../../content/calendar/calendar.component";
 import { CalendarView, DateRange } from "../../content/calendar/types";
 import { TimePickerComponent } from "../time-picker/time-picker.component";
+import { TimeFieldComponent } from "../time-field/time-field.component";
+import { FormFieldComponent } from "../form-field/form-field.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import {
@@ -89,6 +91,8 @@ type DateTimeFieldFormatter = (value: DateTimeFieldValue) => string;
     DateInputComponent,
     CalendarComponent,
     TimePickerComponent,
+    TimeFieldComponent,
+    FormFieldComponent,
     ButtonComponent,
     IconComponent,
     NgTemplateOutlet,
@@ -225,6 +229,7 @@ export class DateTimeFieldComponent
   readonly currentMonth = signal<Date>(new Date());
   readonly overlayOpen = signal<boolean>(false);
   readonly step = signal<DateTimeFieldStep>("date");
+  readonly overlayMaxHeight = signal<number | null>(null);
 
   readonly overlayPositions = computed<ConnectedPosition[]>(() => [
     { originX: "end", overlayX: "end", originY: "bottom", overlayY: "top", offsetY: 4 },
@@ -248,6 +253,14 @@ export class DateTimeFieldComponent
 
   readonly effectiveLayout = computed<DateTimeFieldLayout>(() =>
     this.mode() === "range" ? "side-by-side" : this.layout(),
+  );
+
+  // Below `md` the hour/minute scroll wheels are cramped and, stacked in range
+  // mode, force the popover to scroll — so swap them for a native `type="time"`
+  // input on phones/small tablets. Predefined slot grids stay as-is (they're
+  // already touch-friendly buttons).
+  readonly useNativeTimeInput = computed(() =>
+    this.breakpointService.isBelowBreakpoint("md")(),
   );
 
   readonly resolvedGridVariant = computed<DateTimeFieldTimeGridVariant>(
@@ -314,6 +327,13 @@ export class DateTimeFieldComponent
   readonly singleTime = computed(() => getTimeOf(this.singleValue()));
   readonly fromTime = computed(() => getTimeOf(this.rangeValue().from));
   readonly toTime = computed(() => getTimeOf(this.rangeValue().to));
+
+  readonly fromDateLabel = computed(() =>
+    this.formatRangeDate(this.rangeValue().from),
+  );
+  readonly toDateLabel = computed(() =>
+    this.formatRangeDate(this.rangeValue().to),
+  );
 
   readonly singleAvailableTimes = computed(() =>
     resolveAvailableTimes(this.availableTimes(), this.singleValue()),
@@ -534,11 +554,24 @@ export class DateTimeFieldComponent
   }
 
   handleOverlayAttached(): void {
+    this.updateOverlayMaxHeight();
     if (this.step() === "time") {
       this.stepTimePicker()?.focusActiveItem();
       return;
     }
     this.calendar()?.focusActiveCell();
+  }
+
+  // Cap the popover to whichever side of the trigger has more room and let it
+  // scroll (only its height — never its width, which would make the calendar
+  // re-measure and wrap its months). Without this a tall content set — e.g. many
+  // predefined slots stacked in range mode — spills past the viewport.
+  private updateOverlayMaxHeight(): void {
+    const rect = this.hostEl.nativeElement.getBoundingClientRect();
+    const margin = 8;
+    const spaceBelow = window.innerHeight - rect.bottom - margin;
+    const spaceAbove = rect.top - margin;
+    this.overlayMaxHeight.set(Math.max(spaceBelow, spaceAbove));
   }
 
   handleOverlayKeydown(event: KeyboardEvent): void {
@@ -594,6 +627,7 @@ export class DateTimeFieldComponent
       gridVariant: this.resolvedGridVariant(),
       timeHeading: this.timeHeading(),
       availableTimes: this.availableTimes(),
+      size: this.size(),
     };
 
     const ref = this.modalService.open<
@@ -682,6 +716,10 @@ export class DateTimeFieldComponent
 
   private formatSingle(date: Date): string {
     return `${formatLocaleDate(date, this.localeCode())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
+  private formatRangeDate(date: Date | undefined): string {
+    return date ? formatLocaleDate(date, this.localeCode()) : "";
   }
 
   private deriveAnchor(value: DateTimeFieldValue): Date | null {
