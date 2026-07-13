@@ -129,7 +129,8 @@ export class FormFieldComponent implements AfterContentInit {
     const invalid = !!this.ngControl?.invalid;
     const touched = !!this.ngControl?.touched;
     const dirty = !!this.ngControl?.dirty;
-    const fieldInvalid = invalid && (touched || dirty);
+    const fieldInvalid =
+      (invalid && (touched || dirty)) || this.characterCountExceeded();
 
     this.control?.setInvalidState(fieldInvalid);
   }

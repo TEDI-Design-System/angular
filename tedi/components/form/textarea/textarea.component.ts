@@ -8,6 +8,7 @@ import {
   inject,
   input,
   model,
+  Renderer2,
   signal,
   ViewEncapsulation,
 } from "@angular/core";
@@ -49,6 +50,7 @@ import {
 })
 export class TextareaComponent implements ControlValueAccessor, FormFieldControl {
   private el = inject<ElementRef<HTMLTextAreaElement>>(ElementRef);
+  private renderer = inject(Renderer2);
 
   /**
    * Value of the textarea. Supports two-way binding, use with form controls.
@@ -148,7 +150,7 @@ export class TextareaComponent implements ControlValueAccessor, FormFieldControl
     effect(() => {
       const value = this.value();
       if (this.el.nativeElement.value !== value) {
-        this.el.nativeElement.value = value;
+        this.renderer.setProperty(this.el.nativeElement, "value", value);
       }
     });
   }
@@ -171,7 +173,7 @@ export class TextareaComponent implements ControlValueAccessor, FormFieldControl
 
   setDisabledState(isDisabled: boolean): void {
     this.formDisabled.set(isDisabled);
-    this.el.nativeElement.disabled = isDisabled;
+    this.renderer.setProperty(this.el.nativeElement, "disabled", isDisabled);
   }
 
   handleInputChange(event: Event) {

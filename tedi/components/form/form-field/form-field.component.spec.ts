@@ -51,6 +51,7 @@ export class MockFeedbackComponent extends FeedbackTextComponent {}
       [icon]="icon"
       [clearable]="clearable"
       [inputClass]="inputClass"
+      [characterLimit]="characterLimit"
     >
       <mock-control #mockControl></mock-control>
       <mock-feedback
@@ -71,6 +72,7 @@ class TestHostComponent {
   icon?: string | FormFieldIcon;
   clearable = false;
   inputClass?: string;
+  characterLimit?: number;
   feedbackType: "valid" | "error" | "default" = "default";
 }
 
@@ -206,6 +208,34 @@ describe("FormFieldComponent", () => {
     expect(classes["custom-class"]).toBe(true);
   });
 
+  it("should count the characters of the control value", () => {
+    host.mockControl.value.set("hello");
+    fixture.detectChanges();
+
+    expect(formField.characterCount()).toBe(5);
+  });
+
+  it("should report a character count of 0 when there is no control", () => {
+    const bare = TestBed.createComponent(FormFieldComponent);
+    bare.detectChanges();
+
+    expect(bare.componentInstance.characterCount()).toBe(0);
+  });
+
+  it("should force the control invalid when the character limit is exceeded", () => {
+    host.characterLimit = 3;
+    host.mockControl.value.set("hello");
+    fixture.detectChanges();
+
+    const spy = jest.spyOn(host.mockControl, "setInvalidState");
+    spy.mockClear();
+
+    formField.ngAfterContentInit();
+
+    expect(spy).toHaveBeenCalledWith(true);
+    expect(formField.validationState()).toBe("invalid");
+  });
+
   it("should react to control.events and call setInvalidState", () => {
     const events = new Subject<void>();
 
@@ -276,5 +306,79 @@ describe("FormFieldComponent wrapping a textarea", () => {
         "tedi-form-field--with-icon"
       ],
     ).toBe(false);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextareaComponent],
+  template: `
+    <tedi-form-field #formField [characterLimit]="characterLimit">
+      <textarea tedi-textarea [value]="value"></textarea>
+    </tedi-form-field>
+  `,
+})
+class TextareaCharacterLimitHostComponent {
+  @ViewChild("formField", { static: true }) formField!: FormFieldComponent;
+  characterLimit = 5;
+  value = "";
+}
+
+describe("FormFieldComponent character limit with a textarea", () => {
+  let fixture: ComponentFixture<TextareaCharacterLimitHostComponent>;
+  let host: TextareaCharacterLimitHostComponent;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TextareaCharacterLimitHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(TextareaCharacterLimitHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  const counter = () =>
+    fixture.nativeElement.querySelector(".tedi-form-field__character-count");
+  const textarea = (): HTMLTextAreaElement =>
+    fixture.nativeElement.querySelector("textarea");
+
+  it("displays the current/limit character count", () => {
+    host.value = "abc";
+    fixture.detectChanges();
+
+    expect(counter().textContent?.trim()).toBe("3/5");
+  });
+
+  it("stays neutral without the error class when within the limit", () => {
+    host.value = "abc";
+    fixture.detectChanges();
+
+    expect(
+      counter().classList.contains("tedi-form-field__character-count--error"),
+    ).toBe(false);
+    expect(host.formField.validationState()).toBe("neutral");
+  });
+
+  it("applies the error class and invalid state when the limit is exceeded", () => {
+    host.value = "abcdef";
+    fixture.detectChanges();
+
+    expect(
+      counter().classList.contains("tedi-form-field__character-count--error"),
+    ).toBe(true);
+    expect(host.formField.validationState()).toBe("invalid");
+  });
+
+  it("sets aria-invalid on the textarea after the validation-state update", () => {
+    expect(textarea().getAttribute("aria-invalid")).toBeNull();
+
+    host.value = "abcdef";
+    fixture.detectChanges();
+    host.formField.ngAfterContentInit();
+    fixture.detectChanges();
+
+    expect(textarea().getAttribute("aria-invalid")).toBe("true");
   });
 });
