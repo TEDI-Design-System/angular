@@ -1,35 +1,52 @@
 @use "@tedi-design-system/core/bootstrap-utility/breakpoints";
 
 .tedi-pagination {
-  display: grid;
-  grid-template-areas: "results pager page-size";
-  grid-template-columns: 1fr auto 1fr;
+  // Flexbox (not grid) so that when the row runs out of space a whole slot wraps
+  // to a new line — the pager's number list itself never breaks. The results /
+  // page-size slots share the free space equally (flex-basis 0), which keeps the
+  // pager centered when everything fits and makes the last slot wrap, rather
+  // than the numbers, when it doesn't.
+  display: flex;
+  flex-flow: row wrap;
   gap: var(--layout-grid-gutters-16);
   align-items: center;
+  justify-content: center;
   width: 100%;
   padding: var(--pagination-padding-y) var(--pagination-padding-x);
 
-  &.tedi-pagination--no-pager {
-    grid-template-areas: "results page-size";
-    grid-template-columns: 1fr auto;
-  }
-
-  // Below md the pager collapses to the compact current/total picker. At tablet
-  // widths the slots stay laid out horizontally (results · pager · page-size);
-  // flex (not grid) lets hidden slots collapse out instead of reserving a track.
-  @include breakpoints.media-breakpoint-down(md) {
-    display: flex;
-    flex-flow: row wrap;
-    gap: var(--layout-grid-gutters-16);
-    justify-content: space-between;
-  }
-
-  // On phones the horizontal row no longer fits, so stack the slots and center
-  // each one (results still on top via the slot `order`s below).
+  // On phones stack the slots vertically and center them.
   @include breakpoints.media-breakpoint-down(sm) {
     flex-direction: column;
     gap: var(--layout-grid-gutters-08);
-    align-items: center;
+  }
+
+  // Left / right variants group the slots at the start / end instead of letting
+  // the results / page-size stretch and push the pager to the centre. Opt-in
+  // per instance so the shared component can differ top vs bottom (e.g. a
+  // left-aligned strip above a table).
+  &--align-left,
+  &--align-right {
+    .tedi-pagination__slot-start,
+    .tedi-pagination__slot-end {
+      flex: 0 0 auto;
+      justify-content: flex-start;
+    }
+  }
+
+  &--align-left {
+    justify-content: flex-start;
+
+    @include breakpoints.media-breakpoint-down(sm) {
+      align-items: flex-start;
+    }
+  }
+
+  &--align-right {
+    justify-content: flex-end;
+
+    @include breakpoints.media-breakpoint-down(sm) {
+      align-items: flex-end;
+    }
   }
 
   &--bg-white {
@@ -50,12 +67,22 @@
     border-bottom: var(--tedi-borders-01) solid var(--general-border-secondary);
   }
 
-  // Empty grid slots would otherwise reserve an implicit row/column, so hide
-  // their wrappers when the modifier class indicates the content is absent.
-  &--no-results .tedi-pagination__slot-start,
-  &--no-pager .tedi-pagination__slot-center,
-  &--no-page-size .tedi-pagination__slot-end {
+  // A hidden pager collapses out entirely. Hidden results / page-size slots
+  // stay in the layout as empty placeholders so the centered pager keeps a
+  // symmetric growing slot on each side — otherwise the remaining side grows
+  // alone and shoves the pager to the opposite edge.
+  &--no-pager .tedi-pagination__slot-center {
     display: none;
+  }
+
+  // The left / right variants group the slots to content width, so an empty
+  // placeholder would only add a phantom gap — collapse it instead.
+  &--align-left,
+  &--align-right {
+    &.tedi-pagination--no-results .tedi-pagination__slot-start,
+    &.tedi-pagination--no-page-size .tedi-pagination__slot-end {
+      display: none;
+    }
   }
 
   &__status {
@@ -70,27 +97,21 @@
     clip-path: inset(50%);
   }
 
+  // The two outer slots share free space equally (flex-basis 0) so the pager
+  // stays centered; their auto min-width means they wrap to a new line rather
+  // than shrink into the pager when space is tight.
   &__slot-start {
     display: inline-flex;
-    grid-area: results;
+    flex: 1 1 0;
     align-items: center;
-    justify-self: start;
-    min-width: 0;
-
-    @include breakpoints.media-breakpoint-down(md) {
-      order: 1;
-    }
+    justify-content: flex-start;
   }
 
   &__slot-center {
     display: inline-flex;
-    grid-area: pager;
+    flex: 0 0 auto;
     align-items: center;
-    justify-self: center;
-
-    @include breakpoints.media-breakpoint-down(md) {
-      order: 2;
-    }
+    justify-content: center;
 
     // Stretch full width in the stacked layout so the pager grid below can
     // reserve the arrow columns.
@@ -101,14 +122,9 @@
 
   &__slot-end {
     display: flex;
-    grid-area: page-size;
+    flex: 1 1 0;
     align-items: center;
     justify-content: flex-end;
-    min-width: 0;
-
-    @include breakpoints.media-breakpoint-down(md) {
-      order: 3;
-    }
   }
 
   &__results {
@@ -133,19 +149,37 @@
     align-items: center;
     justify-content: center;
 
-    // Symmetric grid in the stacked layout: the compact trigger stays centered
-    // and the next button holds its column even when the previous button is
-    // hidden on the first page — otherwise the row shifts left when paging.
-    @include breakpoints.media-breakpoint-down(sm) {
+    // Compact-picker range (below md): reserve a fixed column for each arrow so
+    // an arrow appearing/disappearing at the first/last page never changes the
+    // pager's width. Otherwise the surrounding flex-wrap row reflows and the
+    // slots jump between rows as you page. The trigger stays centered between
+    // the reserved arrow columns.
+    @include breakpoints.media-breakpoint-down(md) {
       display: grid;
+      grid-template-columns:
+        var(--button-sm-icon-size) auto var(--button-sm-icon-size);
+    }
+
+    // Stacked layout: the pager spans the full row, so the arrow columns flex
+    // to keep the trigger centered.
+    @include breakpoints.media-breakpoint-down(sm) {
       grid-template-columns: 1fr auto 1fr;
       width: 100%;
     }
   }
 
+  // Visible arrow labels make the prev/next buttons far wider than the reserved
+  // icon columns, so below md let the nav flow as flex — the labelled buttons
+  // size to their content instead of overflowing into the neighbouring slots.
+  &--arrow-labels &__nav {
+    @include breakpoints.media-breakpoint-down(md) {
+      display: flex;
+    }
+  }
+
   &__list {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: var(--layout-grid-gutters-08);
     align-items: center;
     padding: 0;
@@ -225,17 +259,17 @@
     }
   }
 
-  // Pin the arrows to the outer columns of the stacked pager grid so their
+  // Pin the arrows to the outer columns of the compact pager grid so their
   // presence/absence never shifts the centered trigger (see `&__nav`).
   &__nav-button--previous {
-    @include breakpoints.media-breakpoint-down(sm) {
+    @include breakpoints.media-breakpoint-down(md) {
       grid-column: 1;
       justify-self: end;
     }
   }
 
   &__nav-button--next {
-    @include breakpoints.media-breakpoint-down(sm) {
+    @include breakpoints.media-breakpoint-down(md) {
       grid-column: 3;
       justify-self: start;
     }
@@ -254,7 +288,7 @@
     border: var(--tedi-borders-01) solid var(--form-input-border-default);
     border-radius: var(--form-field-radius);
 
-    @include breakpoints.media-breakpoint-down(sm) {
+    @include breakpoints.media-breakpoint-down(md) {
       grid-column: 2;
     }
 
@@ -281,7 +315,6 @@
 
   &__page-size {
     display: flex;
-    flex-wrap: wrap;
     gap: var(--form-field-inner-spacing);
     align-items: center;
     justify-content: flex-end;

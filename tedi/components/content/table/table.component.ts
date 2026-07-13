@@ -149,6 +149,7 @@ interface ResolvedPaginationSlot {
   siblingCount: number;
   labels: TablePaginationOptions["labels"];
   background: NonNullable<TablePaginationOptions["background"]>;
+  align: NonNullable<TablePaginationOptions["align"]>;
   dividerPosition: NonNullable<TablePaginationOptions["dividerPosition"]>;
   hideResults: NonNullable<TablePaginationOptions["hideResults"]>;
   hidePageSize: NonNullable<TablePaginationOptions["hidePageSize"]>;
@@ -160,6 +161,12 @@ interface ResolvedPaginationSlot {
   previousIcon: NonNullable<TablePaginationOptions["previousIcon"]>;
   nextIcon: NonNullable<TablePaginationOptions["nextIcon"]>;
   showModalTitle: boolean;
+  xs: TablePaginationOptions["xs"];
+  sm: TablePaginationOptions["sm"];
+  md: TablePaginationOptions["md"];
+  lg: TablePaginationOptions["lg"];
+  xl: TablePaginationOptions["xl"];
+  xxl: TablePaginationOptions["xxl"];
 }
 
 const SLOT_DEFAULTS_BOTTOM: ResolvedPaginationSlot = {
@@ -167,6 +174,7 @@ const SLOT_DEFAULTS_BOTTOM: ResolvedPaginationSlot = {
   siblingCount: 1,
   labels: undefined,
   background: "white",
+  align: "between",
   dividerPosition: "top",
   hideResults: false,
   hidePageSize: false,
@@ -178,6 +186,12 @@ const SLOT_DEFAULTS_BOTTOM: ResolvedPaginationSlot = {
   previousIcon: "arrow_back",
   nextIcon: "arrow_forward",
   showModalTitle: true,
+  xs: undefined,
+  sm: undefined,
+  md: undefined,
+  lg: undefined,
+  xl: undefined,
+  xxl: undefined,
 };
 
 const SLOT_DEFAULTS_TOP: ResolvedPaginationSlot = {

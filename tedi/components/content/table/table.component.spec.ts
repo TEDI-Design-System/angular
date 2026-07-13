@@ -729,7 +729,8 @@ describe("TediTableComponent", () => {
       const initialPages = paginators.map((el) => el.componentInstance.page());
       expect(initialPages).toEqual([1, 1]);
 
-      paginators[0].componentInstance.pageChange.emit(2);
+      // `page` is a model, so setting it emits the `pageChange` output.
+      paginators[0].componentInstance.page.set(2);
       fixture.detectChanges();
 
       const updatedPages = paginators.map((el) => el.componentInstance.page());
