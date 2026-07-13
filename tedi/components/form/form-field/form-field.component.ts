@@ -3,7 +3,10 @@ import {
   Component,
   computed,
   ContentChild,
+  ElementRef,
   input,
+  isDevMode,
+  signal,
   ViewEncapsulation,
   AfterContentInit,
   inject,
@@ -77,9 +80,18 @@ export class FormFieldComponent implements AfterContentInit {
    * Custom CSS classes for the input.
    */
   inputClass = input<string | null>(null);
+  /**
+   * Maximum number of characters the control should hold. When set, a live
+   * character counter (`current/limit`) is shown in the feedback row and the
+   * field enters an error state once the limit is exceeded.
+   */
+  characterLimit = input<number | undefined>();
 
   @ContentChild(TEDI_FORM_FIELD_CONTROL)
   control?: FormFieldControl;
+
+  @ContentChild(TEDI_FORM_FIELD_CONTROL, { read: ElementRef })
+  controlElement?: ElementRef<HTMLElement>;
 
   @ContentChild(NgControl)
   ngControl?: NgControl;
@@ -89,7 +101,23 @@ export class FormFieldComponent implements AfterContentInit {
 
   private readonly destroyRef = inject(DestroyRef);
 
+  /**
+   * A textarea has no room for the trailing clear button / icon (per design),
+   * so the form field suppresses both when it wraps one.
+   */
+  readonly isTextarea = signal(false);
+
   ngAfterContentInit() {
+    this.isTextarea.set(
+      this.controlElement?.nativeElement.tagName === "TEXTAREA",
+    );
+
+    if (isDevMode() && this.isTextarea() && (this.clearable() || !!this.icon())) {
+      console.warn(
+        "[tedi-form-field] `clearable` and `icon` are not supported with a textarea and are ignored.",
+      );
+    }
+
     this.ngControl?.control?.events
       ?.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateValidationState());
@@ -108,16 +136,26 @@ export class FormFieldComponent implements AfterContentInit {
 
   readonly resolvedIcon = computed<FormFieldIcon | undefined>(() => {
     const icon = this.icon();
-    if (!icon) return undefined;
+    if (!icon || this.isTextarea()) return undefined;
 
     return typeof icon === "string" ? { name: icon } : icon;
+  });
+
+  readonly characterCount = computed(
+    () => this.control?.value()?.toString().length ?? 0,
+  );
+
+  readonly characterCountExceeded = computed(() => {
+    const limit = this.characterLimit();
+    return limit != null && this.characterCount() > limit;
   });
 
   readonly validationState = computed<ValidationState>(() => {
     const feedbackType = this.feedback?.type();
     const fieldInvalid = this.control?.invalid?.() ?? false;
 
-    if (fieldInvalid || feedbackType === "error") return "invalid";
+    if (fieldInvalid || feedbackType === "error" || this.characterCountExceeded())
+      return "invalid";
     if (feedbackType === "valid") return "valid";
 
     return "neutral";
@@ -125,7 +163,7 @@ export class FormFieldComponent implements AfterContentInit {
 
   showClearButton = computed(() => {
     const value = this.control?.value();
-    return this.clearable() && !!value;
+    return this.clearable() && !!value && !this.isTextarea();
   });
 
   readonly isDisabled = computed(() => this.control?.disabled() ?? false);
@@ -138,7 +176,8 @@ export class FormFieldComponent implements AfterContentInit {
       "tedi-form-field--disabled": this.control?.disabled(),
       "tedi-form-field--small": this.size() === "small",
       "tedi-form-field--large": this.size() === "large",
-      "tedi-form-field--with-icon": this.clearable() || !!this.icon(),
+      "tedi-form-field--with-icon":
+        !this.isTextarea() && (this.clearable() || !!this.icon()),
     };
   });
 

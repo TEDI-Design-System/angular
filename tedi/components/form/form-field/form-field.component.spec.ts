@@ -10,6 +10,7 @@ import {
   FormFieldControl,
 } from "./form-field-control";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
+import { TextareaComponent } from "../textarea/textarea.component";
 import { NgControl } from "@angular/forms";
 import { Subject } from "rxjs";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
@@ -226,5 +227,54 @@ describe("FormFieldComponent", () => {
 
     expect(spy).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenCalledWith(true);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextareaComponent],
+  template: `
+    <tedi-form-field #formField [clearable]="true" [icon]="'search'">
+      <textarea tedi-textarea [value]="'hello'"></textarea>
+    </tedi-form-field>
+  `,
+})
+class TextareaHostComponent {
+  @ViewChild("formField", { static: true }) formField!: FormFieldComponent;
+}
+
+describe("FormFieldComponent wrapping a textarea", () => {
+  let fixture: ComponentFixture<TextareaHostComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TextareaHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(TextareaHostComponent);
+    fixture.detectChanges();
+  });
+
+  it("detects the projected textarea", () => {
+    expect(fixture.componentInstance.formField.isTextarea()).toBe(true);
+  });
+
+  it("suppresses the clear button even when clearable with a value", () => {
+    expect(
+      fixture.nativeElement.querySelector(".tedi-form-field__clear"),
+    ).toBeNull();
+  });
+
+  it("suppresses the icon", () => {
+    expect(fixture.nativeElement.querySelector("tedi-icon")).toBeNull();
+  });
+
+  it("does not apply the --with-icon class", () => {
+    expect(
+      fixture.componentInstance.formField.hostClasses()[
+        "tedi-form-field--with-icon"
+      ],
+    ).toBe(false);
   });
 });
