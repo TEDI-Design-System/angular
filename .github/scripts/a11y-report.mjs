@@ -16,6 +16,21 @@ const logPath = process.argv[3] ?? "a11y-report/output.log";
 const outFile = process.argv[4] ?? "a11y-report/summary.md";
 
 const stripAnsi = (s) => s.replace(/\x1b?\[[0-9;]*m/g, "");
+
+// Deep-link stories to the deployed Storybook (a11y panel open) when the base
+// URL is known. Story ids are derived the same way Storybook's `toId` does.
+const storybookBase = process.env.STORYBOOK_BASE_URL?.replace(/\/+$/, "");
+const sanitize = (s) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+const storyId = (component, story) => `${sanitize(component)}--${sanitize(story)}`;
+const storyLink = (component, story) => {
+  if (!storybookBase) return story;
+  const url = `${storybookBase}/?path=/story/${storyId(component, story)}&addonPanel=storybook/a11y/panel`;
+  return `[${story}](${url})`;
+};
 const unescapeXml = (s) =>
   s
     .replace(/&lt;/g, "<")
@@ -103,14 +118,9 @@ if (blockingStories === 0) {
   out.push(`All TEDI-Ready stories pass automated axe checks${todoStories ? " (known issues tracked below)" : ""}.`);
 } else {
   const comps = blocking.size;
-  const ruleTotals = new Map();
-  for (const { rules } of blocking.values())
-    for (const [r, c] of rules) ruleTotals.set(r, (ruleTotals.get(r) ?? 0) + c);
   out.push(`## ♿ Accessibility — ❌ ${blockingStories} blocking violation${blockingStories === 1 ? "" : "s"} across ${comps} component${comps === 1 ? "" : "s"}`);
   out.push("");
   out.push("Fix these, or mark a known issue with `parameters: { a11y: { test: 'todo' } }`.");
-  out.push("");
-  out.push("**By rule:** " + [...ruleTotals.entries()].sort((a, b) => b[1] - a[1]).map(([r, c]) => `\`${r}\` ×${c}`).join(" · "));
   out.push("");
   out.push("| Component | Rules | Stories |");
   out.push("|---|---|---|");
@@ -121,7 +131,7 @@ if (blockingStories === 0) {
   out.push("");
   out.push("<details><summary>Failing stories</summary>\n");
   for (const [component, { stories }] of [...blocking.entries()].sort())
-    out.push(`- **${component}** — ${[...stories].sort().join(", ")}`);
+    out.push(`- **${component}** — ${[...stories].sort().map((s) => storyLink(component, s)).join(", ")}`);
   out.push("\n</details>");
 }
 
@@ -135,6 +145,11 @@ if (todoStories > 0) {
     const total = [...stories.values()].reduce((a, b) => a + b, 0);
     out.push(`| ${component} | ${stories.size} | ${total} |`);
   }
+  out.push("");
+  out.push("<details><summary>Stories</summary>\n");
+  for (const [component, stories] of [...todos.entries()].sort())
+    out.push(`- **${component}** — ${[...stories.keys()].sort().map((s) => storyLink(component, s)).join(", ")}`);
+  out.push("\n</details>");
   out.push("");
   out.push("_These are deliberately deferred (e.g. pending a design/token decision or another migration). Open the story's a11y panel in Storybook for details._");
 }

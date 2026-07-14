@@ -98,14 +98,19 @@ jobs:
         id: a11y
         run: |
           mkdir -p a11y-report
+          set +e
           npm run test-storybook:ci 2>&1 | tee a11y-report/output.log
-        continue-on-error: true
+          code=${PIPESTATUS[0]}
+          echo "test-storybook exit code: $code"
+          exit "$code"
         env:
           JEST_JUNIT_OUTPUT_DIR: a11y-report
           JEST_JUNIT_OUTPUT_NAME: junit.xml
       - name: Build accessibility summary
         if: always()
         run: node .github/scripts/a11y-report.mjs a11y-report/junit.xml a11y-report/output.log a11y-report/summary.md
+        env:
+          STORYBOOK_BASE_URL: https://storybook.tedi.ee/angular/${{ github.head_ref || github.ref_name }}
       - name: Comment a11y summary on PR
         if: always() && github.event_name == 'pull_request'
         continue-on-error: true
@@ -136,11 +141,6 @@ jobs:
           name: a11y-report
           path: a11y-report/
           retention-days: 7
-      - name: Fail if accessibility violations
-        if: always() && steps.a11y.outcome == 'failure'
-        run: |
-          echo "::error::Accessibility violations detected — see the PR comment and job summary."
-          exit 1
 
   compatibility:
     needs: build
