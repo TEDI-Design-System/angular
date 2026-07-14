@@ -16,6 +16,7 @@
  * (fail-closed on infra errors); otherwise 0.
  */
 import fs from "fs";
+import path from "path";
 
 const [, , junitPath, logPath, outFile, changedPath, indexPath] = process.argv;
 const OUT = outFile ?? "a11y-report/summary.md";
@@ -113,7 +114,7 @@ const readTodos = () => {
 const failures = readFailures();
 if (failures === null) {
   const md = "## ♿ Accessibility — ⚠️ report unavailable\n\nNo JUnit output was produced; the test run likely failed before completing.\n";
-  fs.mkdirSync(OUT.replace(/\/[^/]*$/, "") || ".", { recursive: true });
+  fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, md);
   if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
   console.error(md);
@@ -179,7 +180,7 @@ if (todos.size > 0) {
 }
 
 const md = out.join("\n") + "\n";
-fs.mkdirSync(OUT.replace(/\/[^/]*$/, "") || ".", { recursive: true });
+fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, md);
 if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
 console.log(md);
