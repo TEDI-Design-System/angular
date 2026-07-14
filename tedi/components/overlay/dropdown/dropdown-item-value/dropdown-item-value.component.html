@@ -4,6 +4,7 @@
     tedi-checkbox
     class="tedi-dropdown-item-value__checkbox"
     tabindex="-1"
+    aria-hidden="true"
     [checked]="selected()"
     [indeterminate]="indeterminate()"
     [disabled]="disabled()"
@@ -14,6 +15,7 @@
     type="radio"
     class="tedi-dropdown-item-value__radio"
     tabindex="-1"
+    aria-hidden="true"
     [checked]="selected()"
     [disabled]="disabled()"
     (click)="$event.stopPropagation()"

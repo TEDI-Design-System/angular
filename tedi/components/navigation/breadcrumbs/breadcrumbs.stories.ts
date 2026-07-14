@@ -191,12 +191,12 @@ export const CustomSeparator: Story = {
     props: args,
     template: `
       <div class="flex flex-column gap-3">
-        <tedi-breadcrumbs ${argsToTemplate(args)} separator="/">
+        <tedi-breadcrumbs ${argsToTemplate(args)} separator="/" ariaLabel="Jäljerida (kaldkriipsu eraldaja)">
           <a *tediBreadcrumbItem tedi-link href="#">Töölaud</a>
           <a *tediBreadcrumbItem tedi-link href="#">Dokumendid</a>
           <span *tediBreadcrumbItem aria-current="page">Piirangud</span>
         </tedi-breadcrumbs>
-        <tedi-breadcrumbs ${argsToTemplate(args)}>
+        <tedi-breadcrumbs ${argsToTemplate(args)} ariaLabel="Jäljerida (noole eraldaja)">
           <a *tediBreadcrumbItem tedi-link href="#">Töölaud</a>
           <a *tediBreadcrumbItem tedi-link href="#">Dokumendid</a>
           <span *tediBreadcrumbItem aria-current="page">Piirangud</span>

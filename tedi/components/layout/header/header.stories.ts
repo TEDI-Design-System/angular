@@ -1465,8 +1465,6 @@ This demo uses hash fragments (\`#et\`, \`#en\`, \`#ru\`) so selecting a languag
 };
 
 export const LoggedInWithSidenav: StoryObj<HeaderComponent> = {
-  // TODO(a11y): embedded sidenav item text fails color-contrast in this context; pending review.
-  parameters: { a11y: { test: "todo" } },
   render: (args) => ({
     props: args,
     styles: [mobileSidenavWrapperStyles],

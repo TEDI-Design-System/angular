@@ -226,6 +226,10 @@ export const States: Story = {
       active: "#Active",
       focusVisible: "#Focus",
     },
+    // This story only demonstrates the trigger's visual states, so the triggers
+    // intentionally have no panels — the resulting dangling `aria-controls` is a
+    // demo artifact, not a real defect.
+    a11y: { config: { rules: [{ id: "aria-valid-attr-value", enabled: false }] } },
   },
   render: () => ({
     props: { PSEUDO_STATE },

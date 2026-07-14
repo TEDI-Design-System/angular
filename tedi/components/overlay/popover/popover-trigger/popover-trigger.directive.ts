@@ -14,11 +14,11 @@ import { PopoverComponent } from "../popover.component";
   hostDirectives: [CdkOverlayOrigin],
   host: {
     tabindex: "0",
-    role: "button",
-    "aria-haspopup": "dialog",
+    "[attr.role]": "interactive() ? 'button' : null",
+    "[attr.aria-haspopup]": "interactive() ? 'dialog' : null",
     "[id]": "popover.containerId() + '_trigger'",
-    "[attr.aria-expanded]": "popover.isOpen()",
-    "[attr.aria-controls]": "popover.containerId() || null",
+    "[attr.aria-expanded]": "interactive() ? popover.isOpen() : null",
+    "[attr.aria-controls]": "interactive() ? (popover.containerId() || null) : null",
     "[class.tedi-popover-trigger__text]": "underline()",
   },
 })
@@ -28,6 +28,14 @@ export class PopoverTriggerDirective {
    * @default false
    */
   readonly underline = input(false);
+  /**
+   * When `false`, the trigger drops its `button` role and dialog ARIA
+   * (`aria-haspopup`, `aria-expanded`, `aria-controls`). Use this when the element
+   * is only a positioning anchor and an inner control is the real, labelled trigger
+   * — e.g. a field wrapper whose icon button opens the popover.
+   * @default true
+   */
+  readonly interactive = input(true);
 
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly popover = inject(PopoverComponent);

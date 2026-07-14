@@ -63,6 +63,7 @@
     <div
       class="tedi-time-picker__dropdown"
       role="listbox"
+      [attr.aria-label]="'time-picker.times' | tediTranslate"
       [attr.aria-disabled]="isDisabled() ? true : null"
     >
       @for (slot of timeSlots(); track slot; let i = $index) {

@@ -642,7 +642,7 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item>
               <tedi-accordion-item-header>
-                <span tedi-accordion-title>Pealkiri</span>
+                <span tedi-accordion-title>Klõpsatav päis</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -650,7 +650,7 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item [defaultExpanded]="true">
               <tedi-accordion-item-header>
-                <span tedi-accordion-title>Pealkiri</span>
+                <span tedi-accordion-title>Klõpsatav päis</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -663,8 +663,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openText="Pealkiri"
-                closeText="Pealkiri"
+                openText="Eraldi nupp alguses"
+                closeText="Eraldi nupp alguses"
               />
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -674,8 +674,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openText="Pealkiri"
-                closeText="Pealkiri"
+                openText="Eraldi nupp alguses"
+                closeText="Eraldi nupp alguses"
               />
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -686,7 +686,7 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item>
               <tedi-accordion-item-header [showExpandLabel]="false">
-                <span tedi-accordion-title>Pealkiri</span>
+                <span tedi-accordion-title>Ilma sildita nool</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -694,7 +694,7 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item [defaultExpanded]="true">
               <tedi-accordion-item-header [showExpandLabel]="false">
-                <span tedi-accordion-title>Pealkiri</span>
+                <span tedi-accordion-title>Ilma sildita nool</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -705,7 +705,7 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item>
               <tedi-accordion-item-header [showExpandLabel]="false" [expandActionPosition]="'start'">
-                <span tedi-accordion-title>Pealkiri</span>
+                <span tedi-accordion-title>Ikoonnool alguses</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -713,7 +713,7 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item [defaultExpanded]="true">
               <tedi-accordion-item-header [showExpandLabel]="false" [expandActionPosition]="'start'">
-                <span tedi-accordion-title>Pealkiri</span>
+                <span tedi-accordion-title>Ikoonnool alguses</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -726,8 +726,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openText="Pealkiri"
-                closeText="Pealkiri"
+                openText="Kohandatud tegevusega"
+                closeText="Kohandatud tegevusega"
               >
                 ${actionButtonTemplate("selectedA", "toggleA")}
               </tedi-accordion-item-header>
@@ -740,8 +740,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openText="Pealkiri"
-                closeText="Pealkiri"
+                openText="Kohandatud tegevusega"
+                closeText="Kohandatud tegevusega"
               >
                 ${actionButtonTemplate("selectedB", "toggleB")}
               </tedi-accordion-item-header>
@@ -756,8 +756,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openText="Pealkiri"
-                closeText="Pealkiri"
+                openText="Valitud olekus"
+                closeText="Valitud olekus"
               >
                 ${actionButtonTemplate("selectedC", "toggleC")}
               </tedi-accordion-item-header>
@@ -770,8 +770,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openText="Pealkiri"
-                closeText="Pealkiri"
+                openText="Valitud olekus"
+                closeText="Valitud olekus"
               >
                 ${actionButtonTemplate("selectedD", "toggleD")}
               </tedi-accordion-item-header>
@@ -801,13 +801,6 @@ export const ActionTypes: StoryObj = {
       },
     },
   }),
-  parameters: {
-    a11y: {
-      config: {
-        rules: [{ id: "landmark-unique", enabled: false }],
-      },
-    },
-  },
 };
 
 export const WithIconCard: StoryObj = {

@@ -41,6 +41,10 @@ const TRANSLATIONS: Record<string, Translator> = {
   "table.filter-clear": () => "Clear",
   "table.filter-button-aria": (col) => `Filter ${col ?? ""}`.trim(),
   "table.columns": () => "Columns",
+  "table.select-column": () => "Select",
+  "table.expand-column": () => "Expand",
+  "table.reorder-column": () => "Reorder",
+  "table.scroll-region": () => "Table content",
   "table.expand-row": () => "Expand row",
   "table.collapse-row": () => "Collapse row",
   "table.select-all": (selected) => (selected ? "Deselect all" : "Select all"),
@@ -753,6 +757,27 @@ describe("TediTableComponent", () => {
         ".tedi-table__body .tedi-table__row",
       );
       expect(firstRow?.getAttribute("role")).toBe("button");
+      expect(firstRow?.getAttribute("tabindex")).toBe("0");
+    });
+
+    it("drops role=button but keeps tabindex when an interactive row nests controls", () => {
+      const nested: Person[] = [
+        {
+          id: "p",
+          name: "Parent",
+          role: "Role",
+          subRows: [{ id: "c", name: "Child", role: "Role" }],
+        },
+      ];
+      const fixture = setupHost((host) => {
+        host.data.set(nested);
+        host.getSubRows.set((row) => row.subRows);
+        host.interactive.set(true);
+      });
+      const firstRow = fixture.nativeElement.querySelector(
+        ".tedi-table__body .tedi-table__row",
+      );
+      expect(firstRow?.getAttribute("role")).toBeNull();
       expect(firstRow?.getAttribute("tabindex")).toBe("0");
     });
 

@@ -1,5 +1,6 @@
-<nav
+<div
   class="tedi-calendar-header"
+  role="group"
   [class.tedi-calendar-header--disabled]="inputDisabled()"
   [attr.aria-label]="navAriaLabel()"
 >
@@ -205,4 +206,4 @@
   <span class="sr-only" role="status" aria-live="polite" aria-atomic="true">
     {{ captionAnnouncement() }}
   </span>
-</nav>
+</div>

@@ -274,6 +274,7 @@ export const CustomValue: Story = {
             <tedi-number-field
               sliderAddon
               inputId="slider-custom-input-field"
+              ariaLabel="Väärtus"
               [(value)]="inputValue"
               [min]="0"
               [max]="100"
@@ -295,6 +296,7 @@ export const CustomValue: Story = {
             <tedi-number-field
               sliderAddon
               inputId="slider-custom-number-field"
+              ariaLabel="Väärtus"
               [(value)]="numberValue"
               [min]="1"
               [max]="10"
