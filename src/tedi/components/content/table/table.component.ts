@@ -69,12 +69,14 @@ import { PopoverContentComponent } from "../../overlay/popover/popover-content/p
 import { PopoverTriggerDirective } from "../../overlay/popover/popover-trigger/popover-trigger.directive";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { TEDI_TABLE_CONTEXT } from "./table.context";
+import { computeGroupSpans } from "./row-span.utils";
 import {
   createTablePersistence,
   type TablePersistenceController,
 } from "./table.persistence";
 import type {
   TableColumnMeta,
+  TableControlColumn,
   TableExpandTrigger,
   TableFilterOptions,
   TablePaginationOptions,
@@ -91,6 +93,16 @@ import type {
 const SELECT_COLUMN_ID = "__select__";
 const EXPAND_COLUMN_ID = "__expand__";
 const DRAG_COLUMN_ID = "__drag__";
+
+/**
+ * Fixed width (px) for the icon-only control columns (drag / select / expand).
+ * Accounts for the cell's horizontal padding so the control still gets room.
+ */
+const CONTROL_COLUMN_WIDTH = 60;
+
+/** Interactive controls inside a cell that should not trigger row activation. */
+const INTERACTIVE_CELL_SELECTOR =
+  "a, button, input, select, textarea, [role='button'], [role='checkbox'], [role='link'], [contenteditable='true']";
 
 const passthroughFilter: FilterFn<unknown> = () => true;
 const DEFAULT_FILTER_FNS = {
@@ -376,6 +388,44 @@ export class TediTableComponent<TData> {
   readonly getSubRows = input<
     ((row: TData) => TData[] | undefined) | undefined
   >(undefined);
+  /**
+   * Table-level row grouping key. When set, consecutive rendered rows with an
+   * equal key form a group, and:
+   * - the control columns (select / expand / drag) span each group — one
+   *   checkbox and one chevron per group instead of per row,
+   * - row selection operates per group (see `enableRowSelection`),
+   * - group boundaries drive `rowGroupDividers`.
+   *
+   * Data columns opt into spanning the same groups with `groupBy: true`; a
+   * column can also group independently with its own `groupBy: (row) => key`.
+   * @default undefined
+   */
+  readonly groupRowsBy = input<((row: Row<TData>) => unknown) | undefined>(
+    undefined,
+  );
+  /**
+   * How row dividers are drawn when the table is grouped via `groupRowsBy`:
+   * - `"all"` (default) — a divider under every row, as usual.
+   * - `"between"` — dividers only at group boundaries; rows within a group
+   *   read as one block.
+   * - `"none"` — no row dividers.
+   *
+   * No effect when `groupRowsBy` is not set.
+   * @default "all"
+   */
+  readonly rowGroupDividers = input<"all" | "between" | "none">("all");
+  /**
+   * Order of the auto-injected control columns (drag handle, selection
+   * checkbox, expand chevron). Only the controls that are actually enabled
+   * render; any enabled control omitted from this list is appended at the end.
+   * Use it to e.g. place the checkbox before the expand chevron.
+   * @default ["drag", "select", "expand"]
+   */
+  readonly controlColumnOrder = input<TableControlColumn[]>([
+    "drag",
+    "select",
+    "expand",
+  ]);
   /**
    * Enables pagination and configures the bottom paginator slot. This is also
    * the source of truth for `pageSize` / `pageSizeOptions` — the top slot
@@ -674,47 +724,132 @@ export class TediTableComponent<TData> {
 
   private readonly augmentedColumns = computed<TediColumnDef<TData>[]>(() => {
     const cols = this.columns();
-    const leading: TediColumnDef<TData>[] = [];
+    // When the table is grouped, the control columns span each group too —
+    // one checkbox / chevron / drag handle per group instead of per row.
+    const controlGroupBy = this.groupRowsBy() !== undefined ? true : undefined;
+
+    const controls: Partial<Record<TableControlColumn, TediColumnDef<TData>>> =
+      {};
 
     if (this.reorderableRows()) {
-      leading.push({
+      controls.drag = {
         id: DRAG_COLUMN_ID,
         enableSorting: false,
         enableHiding: false,
         enableColumnFilter: false,
-        size: 40,
+        size: CONTROL_COLUMN_WIDTH,
+        minSize: CONTROL_COLUMN_WIDTH,
+        maxSize: CONTROL_COLUMN_WIDTH,
         header: "",
         cell: () => "",
-      } as TediColumnDef<TData>);
+        meta: { align: "center", vAlign: "top" },
+        groupBy: controlGroupBy,
+      } as TediColumnDef<TData>;
     }
 
     if (this.hasSelection()) {
-      leading.push({
+      controls.select = {
         id: SELECT_COLUMN_ID,
         enableSorting: false,
         enableHiding: false,
         enableColumnFilter: false,
-        size: 40,
+        size: CONTROL_COLUMN_WIDTH,
+        minSize: CONTROL_COLUMN_WIDTH,
+        maxSize: CONTROL_COLUMN_WIDTH,
         header: "",
         cell: () => "",
-      } as TediColumnDef<TData>);
+        meta: { align: "center", vAlign: "top" },
+        groupBy: controlGroupBy,
+      } as TediColumnDef<TData>;
     }
 
     if (this.hasExpansion()) {
-      leading.push({
+      // Icon-only toggles are pinned to the control-column width; a visible
+      // label needs room, so fall back to TanStack's default sizing then.
+      const iconOnly = !this.expandButtonHasLabel();
+      controls.expand = {
         id: EXPAND_COLUMN_ID,
         enableSorting: false,
         enableHiding: false,
         enableColumnFilter: false,
-        // Icon-only toggles fit the 40px control column; a visible label needs
-        // room, so fall back to TanStack's default sizing in label mode.
-        size: this.expandButtonHasLabel() ? undefined : 40,
+        size: iconOnly ? CONTROL_COLUMN_WIDTH : undefined,
+        minSize: iconOnly ? CONTROL_COLUMN_WIDTH : undefined,
+        maxSize: iconOnly ? CONTROL_COLUMN_WIDTH : undefined,
         header: "",
         cell: () => "",
-      } as TediColumnDef<TData>);
+        meta: iconOnly ? { align: "center", vAlign: "top" } : { vAlign: "top" },
+        groupBy: controlGroupBy,
+      } as TediColumnDef<TData>;
     }
 
+    const order = [...new Set(this.controlColumnOrder())];
+    const ordered = order
+      .map((key) => controls[key])
+      .filter((col): col is TediColumnDef<TData> => col !== undefined);
+    // Append any enabled control the consumer left out of the order list.
+    const leading = [
+      ...ordered,
+      ...(Object.keys(controls) as TableControlColumn[])
+        .filter((key) => !order.includes(key))
+        .map((key) => controls[key]!),
+    ];
+
     return [...leading, ...cols];
+  });
+
+  /**
+   * Per-column group spans (`columnId → (rowId → span)`), computed from the
+   * live row model for every column that opts into grouping via `groupBy`.
+   * A `groupBy: true` column reuses the table-level `groupRowsBy` key.
+   */
+  protected readonly groupSpansByColumn = computed<
+    Map<string, Map<string, number>>
+  >(() => {
+    const rows = this.rows();
+    const tableKey = this.groupRowsBy();
+    const result = new Map<string, Map<string, number>>();
+
+    for (const col of this.leafColumns()) {
+      const groupBy = (col.columnDef as TediColumnDef<TData>).groupBy;
+      if (!groupBy) continue;
+      const keyFn = groupBy === true ? tableKey : groupBy;
+      if (!keyFn) continue;
+      result.set(col.id, computeGroupSpans(rows, keyFn));
+    }
+
+    return result;
+  });
+
+  /**
+   * Table-level row groups keyed by `groupRowsBy`: maps every row id to the
+   * full set of rows in its (consecutive) group. Empty when the table is not
+   * grouped. Drives group selection and group dividers.
+   */
+  protected readonly rowGroups = computed<Map<string, Row<TData>[]>>(() => {
+    const keyFn = this.groupRowsBy();
+    const rows = this.rows();
+    const map = new Map<string, Row<TData>[]>();
+    if (!keyFn) return map;
+
+    let i = 0;
+    while (i < rows.length) {
+      const key = keyFn(rows[i]);
+      let j = i + 1;
+      while (j < rows.length && keyFn(rows[j]) === key) j++;
+      const members = rows.slice(i, j);
+      for (const member of members) map.set(member.id, members);
+      i = j;
+    }
+    return map;
+  });
+
+  /** Row ids that start a group — used to draw dividers at group boundaries. */
+  protected readonly groupStartRowIds = computed<Set<string>>(() => {
+    const ids = new Set<string>();
+    for (const members of this.rowGroups().values()) {
+      if (members.length > 0) ids.add(members[0].id);
+    }
+    return ids;
   });
 
   private buildStateChangeHandlers() {
@@ -830,6 +965,10 @@ export class TediTableComponent<TData> {
           ? (this.getRowCanExpand() ?? (() => true))
           : this.getRowCanExpand(),
         getSubRows: this.getSubRows(),
+        // For tree data, keep a parent (and show only the matching descendants)
+        // when a leaf matches — otherwise a filter that doesn't match the parent
+        // row drops its whole subtree. No-op for flat data (every row is a leaf).
+        filterFromLeafRows: true,
         ...this.buildStateChangeHandlers(),
         filterFns: DEFAULT_FILTER_FNS as Record<string, FilterFn<TData>>,
         getCoreRowModel: getCoreRowModel(),
@@ -896,6 +1035,9 @@ export class TediTableComponent<TData> {
     ];
     const classes = ["tedi-table", `tedi-table--${this.size()}`];
     for (const [on, name] of flags) if (on) classes.push(name);
+    if (this.groupRowsBy() && this.rowGroupDividers() !== "all") {
+      classes.push(`tedi-table--group-dividers-${this.rowGroupDividers()}`);
+    }
     classes.push(...this.paginationHostClasses());
     this.trackTableInputs();
     if (untracked(() => this.table.getHeaderGroups().length) > 1)
@@ -1064,7 +1206,11 @@ export class TediTableComponent<TData> {
     });
   }
 
-  protected handleRowClick(row: Row<TData>): void {
+  protected handleRowClick(event: Event, row: Row<TData>): void {
+    // Clicks that land on an interactive control inside a cell (checkbox,
+    // link, button, form field, …) must not also activate the row or toggle
+    // its expansion — so consumers don't need to add `stopPropagation` by hand.
+    if (this.isInteractiveTarget(event)) return;
     // A click that ends a text drag-select shouldn't activate the row —
     // otherwise copying cell text inadvertently fires the row action.
     if (this.hasTextSelection()) return;
@@ -1074,6 +1220,24 @@ export class TediTableComponent<TData> {
     if (this.interactive()) {
       this.rowClick.emit(row);
     }
+  }
+
+  /**
+   * True when the click originated on an interactive control between the event
+   * target and the row element (exclusive), so row-level handlers can bow out.
+   */
+  private isInteractiveTarget(event: Event): boolean {
+    const row = event.currentTarget as Element | null;
+    let el = event.target as Element | null;
+    while (el && el !== row) {
+      if (el instanceof HTMLLabelElement) {
+        if (el.control) return true;
+      } else if (el.matches(INTERACTIVE_CELL_SELECTOR)) {
+        return true;
+      }
+      el = el.parentElement;
+    }
+    return false;
   }
 
   private hasTextSelection(): boolean {
@@ -1162,6 +1326,62 @@ export class TediTableComponent<TData> {
    *  `Number.MAX_SAFE_INTEGER` is not emitted as CSS). */
   protected columnMaxWidth(column: { id: string }): number | null {
     return this.authoredColumnSizing().get(column.id)?.maxSize ?? null;
+  }
+
+  /**
+   * Columns frozen by `stickyFirstColumn`, keyed by id: the leading control
+   * columns (select / expand / drag) plus the first content column, pinned
+   * together as one block. `left` is the cumulative offset; `start` / `edge`
+   * mark the block's left and right edges (the right edge draws the divider).
+   * Empty when `stickyFirstColumn` is off.
+   */
+  protected readonly stickyLeftColumns = computed<
+    Map<string, { left: number; start: boolean; edge: boolean }>
+  >(() => {
+    const map = new Map<
+      string,
+      { left: number; start: boolean; edge: boolean }
+    >();
+    if (!this.stickyFirstColumn()) return map;
+
+    const leaf = this.leafColumns();
+    const controlIds = new Set<string>([
+      DRAG_COLUMN_ID,
+      SELECT_COLUMN_ID,
+      EXPAND_COLUMN_ID,
+    ]);
+    const frozen: typeof leaf = [];
+    let i = 0;
+    while (i < leaf.length && controlIds.has(leaf[i].id))
+      frozen.push(leaf[i++]);
+    if (i < leaf.length) frozen.push(leaf[i]); // first content column
+
+    let left = 0;
+    frozen.forEach((col, idx) => {
+      map.set(col.id, {
+        left,
+        start: idx === 0,
+        edge: idx === frozen.length - 1,
+      });
+      left += col.getSize();
+    });
+    return map;
+  });
+
+  /** Sticky `left` (px) for a frozen column; `null` when the column isn't frozen. */
+  protected stickyLeft(id: string): number | null {
+    return this.stickyLeftColumns().get(id)?.left ?? null;
+  }
+
+  /** Sticky-column class fragment for a cell (`""` when not frozen). */
+  protected stickyLeftClass(id: string): string {
+    const info = this.stickyLeftColumns().get(id);
+    if (!info) return "";
+    return (
+      " tedi-table__cell--sticky-left" +
+      (info.start ? " tedi-table__cell--sticky-left-start" : "") +
+      (info.edge ? " tedi-table__cell--sticky-left-edge" : "")
+    );
   }
 
   protected handleRowKeydown(event: KeyboardEvent, row: Row<TData>): void {
@@ -1683,8 +1903,54 @@ export class TediTableComponent<TData> {
     this.table.toggleAllPageRowsSelected(checked);
   }
 
+  /**
+   * Selectable rows that a single checkbox controls. For a real group (>1
+   * member) that's the whole group; otherwise it's the row itself — which
+   * keeps TanStack's parent→sub-row cascade (`row.toggleSelected`) intact for
+   * `getSubRows` parents that happen to be singleton groups.
+   */
+  private selectionGroup(row: Row<TData>): Row<TData>[] | null {
+    const members = this.rowGroups().get(row.id);
+    return members && members.length > 1 ? members : null;
+  }
+
   protected handleSelectRow(row: Row<TData>, checked: boolean): void {
-    row.toggleSelected(checked);
+    const group = this.selectionGroup(row);
+    if (!group) {
+      row.toggleSelected(checked);
+      return;
+    }
+    const ids = group.filter((r) => r.getCanSelect()).map((r) => r.id);
+    this.table.setRowSelection((prev) => {
+      const next = { ...prev };
+      for (const id of ids) {
+        if (checked) {
+          next[id] = true;
+        } else {
+          delete next[id];
+        }
+      }
+      return next;
+    });
+  }
+
+  /** Whether the (group) checkbox for `row` should render as checked. */
+  protected isRowSelected(row: Row<TData>): boolean {
+    const group = this.selectionGroup(row);
+    if (!group) return row.getIsSelected();
+    const selectable = group.filter((r) => r.getCanSelect());
+    return selectable.length > 0 && selectable.every((r) => r.getIsSelected());
+  }
+
+  /** Whether the (group) checkbox for `row` should render as indeterminate. */
+  protected isRowIndeterminate(row: Row<TData>): boolean {
+    const group = this.selectionGroup(row);
+    if (!group) return row.getIsSomeSelected();
+    const selectable = group.filter((r) => r.getCanSelect());
+    return (
+      selectable.some((r) => r.getIsSelected()) &&
+      !selectable.every((r) => r.getIsSelected())
+    );
   }
 
   protected handleExpandToggle(row: Row<TData>): void {
@@ -1952,9 +2218,15 @@ export class TediTableComponent<TData> {
    *  - `N>1`  → emit `rowspan="N"`
    */
   protected resolveRowSpan(
-    cell: { column: { columnDef: TediColumnDef<TData> } },
+    cell: { column: { id: string; columnDef: TediColumnDef<TData> } },
     cellContext: CellContext<TData, unknown>,
   ): number | null {
+    const groupSpans = this.groupSpansByColumn().get(cell.column.id);
+    if (groupSpans) {
+      const span = groupSpans.get(cellContext.row.id) ?? 1;
+      return span === 1 ? null : span;
+    }
+
     const columnDef = cell.column.columnDef;
     if (!columnDef.rowSpan) return null;
     const value =

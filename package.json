@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@tanstack/angular-table": "^8.21.4",
-    "@tedi-design-system/core": "^6.2.1"
+    "@tedi-design-system/core": "^6.4.3"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "20.3.27",
@@ -81,14 +81,14 @@
     "jest-preset-angular": "^14.6.2",
     "lint-staged": "^16.4.0",
     "ng-packagr": "^20.3.2",
-    "prettier": "^3.4.2",
+    "prettier": "^3.9.4",
     "readdirp": "4.1.2",
     "replace-in-file": "^8.4.0",
     "sass": "^1.86.1",
     "semantic-release": "^25.0.3",
     "storybook": "^10.4.3",
     "storybook-addon-pseudo-states": "^10.4.3",
-    "stylelint": "^17.9.1",
+    "stylelint": "^17.14.0",
     "stylelint-config-prettier-scss": "^1.0.0",
     "stylelint-config-recess-order": "^7.4.0",
     "stylelint-config-standard-scss": "^17.0.0",

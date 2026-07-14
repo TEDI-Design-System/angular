@@ -1,3 +1,170 @@
+# [7.1.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.4...angular-7.1.0-rc.5) (2026-07-10)
+
+
+### Features
+
+* **breadcrumbs:** new TEDI-ready component [#512](https://github.com/TEDI-Design-System/angular/issues/512) ([#518](https://github.com/TEDI-Design-System/angular/issues/518)) ([6691cd2](https://github.com/TEDI-Design-System/angular/commit/6691cd25a1c93ad286b75a84e65fe212ae089457))
+
+# [7.1.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.3...angular-7.1.0-rc.4) (2026-07-09)
+
+
+### Bug Fixes
+
+* **textgroup:** label doesn't shrink when width is fixed [#506](https://github.com/TEDI-Design-System/angular/issues/506) ([#531](https://github.com/TEDI-Design-System/angular/issues/531)) ([4e9d713](https://github.com/TEDI-Design-System/angular/commit/4e9d713c6a1d262a9e9748e86422428222568032))
+
+# [7.1.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.2...angular-7.1.0-rc.3) (2026-07-09)
+
+
+### Features
+
+* **popover:** add Header popover variant under Popover [#442](https://github.com/TEDI-Design-System/angular/issues/442) ([#523](https://github.com/TEDI-Design-System/angular/issues/523)) ([a668b55](https://github.com/TEDI-Design-System/angular/commit/a668b55d9e89a976c571ba62f269cfe914392aa5))
+* **slider:** new TEDI-ready component [#3](https://github.com/TEDI-Design-System/angular/issues/3) ([#526](https://github.com/TEDI-Design-System/angular/issues/526)) ([d2bf13a](https://github.com/TEDI-Design-System/angular/commit/d2bf13accf86184d71b80ece7e8f8ef44e9c5a1f))
+
+# [7.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.1...angular-7.1.0-rc.2) (2026-07-07)
+
+
+### Features
+
+* **header:** add Header top [#311](https://github.com/TEDI-Design-System/angular/issues/311) ([#504](https://github.com/TEDI-Design-System/angular/issues/504)) ([1e2eff2](https://github.com/TEDI-Design-System/angular/commit/1e2eff22bd8752332f6b50705f7e42c0c6bc625b))
+
+# [7.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.1...angular-7.1.0-rc.1) (2026-07-06)
+
+
+### Features
+
+* **info-button:** focus ring offset reduced [#517](https://github.com/TEDI-Design-System/angular/issues/517) ([#521](https://github.com/TEDI-Design-System/angular/issues/521)) ([b7d06d3](https://github.com/TEDI-Design-System/angular/commit/b7d06d3b81ba3d3936a6d6f20b03f646ee41f20b))
+
+## [7.0.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0...angular-7.0.1) (2026-07-03)
+
+
+### Bug Fixes
+
+* **popover:** nested overlay close doesn't dismiss parent [#519](https://github.com/TEDI-Design-System/angular/issues/519) ([94bddb6](https://github.com/TEDI-Design-System/angular/commit/94bddb638d44a1b5ebed1273af656a52d3da0055))
+* **popover:** nested overlay close doesn't dismiss parent [#519](https://github.com/TEDI-Design-System/angular/issues/519) ([0d80a47](https://github.com/TEDI-Design-System/angular/commit/0d80a4786fdfe603015134150944c896f063b789))
+
+# [7.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-6.4.0...angular-7.0.0) (2026-07-02)
+
+
+### Bug Fixes
+
+* **date-field,date-picker:** resolved conflict with formcontrol [#494](https://github.com/TEDI-Design-System/angular/issues/494) ([#501](https://github.com/TEDI-Design-System/angular/issues/501)) ([7721071](https://github.com/TEDI-Design-System/angular/commit/7721071204cbd0b7009720925e3be84046d451ad))
+* **dropdown:** overridden browser-default padding on dropdown-content [#498](https://github.com/TEDI-Design-System/angular/issues/498) ([#499](https://github.com/TEDI-Design-System/angular/issues/499)) ([1219cde](https://github.com/TEDI-Design-System/angular/commit/1219cde830ecb55e978870994b46bfda24b0e051))
+* **icon:** size input now works inside buttons and links [#435](https://github.com/TEDI-Design-System/angular/issues/435) ([#497](https://github.com/TEDI-Design-System/angular/issues/497)) ([e2b6a70](https://github.com/TEDI-Design-System/angular/commit/e2b6a701cd928827d4ed68931cca4de2b9a03042))
+* **table:** state is correctly forwarded + added state docs [#477](https://github.com/TEDI-Design-System/angular/issues/477) ([#478](https://github.com/TEDI-Design-System/angular/issues/478)) ([9282b60](https://github.com/TEDI-Design-System/angular/commit/9282b60e2c984a619d50594b3b02285b196001eb))
+
+
+### Features
+
+* **accordion:** fix mobile examples, add new inputs and stories [#467](https://github.com/TEDI-Design-System/angular/issues/467) ([#483](https://github.com/TEDI-Design-System/angular/issues/483)) ([c45e3e7](https://github.com/TEDI-Design-System/angular/commit/c45e3e7bdee1dc244bf1b6d5a57458f516e7dc6a))
+* Added angular v22 support [#466](https://github.com/TEDI-Design-System/angular/issues/466) ([#476](https://github.com/TEDI-Design-System/angular/issues/476)) ([36b1266](https://github.com/TEDI-Design-System/angular/commit/36b12666ffbbb9a51d58cc57559581b3aaf31588))
+* **alert:** add tedi-alert-action slot [#460](https://github.com/TEDI-Design-System/angular/issues/460) ([#461](https://github.com/TEDI-Design-System/angular/issues/461)) ([ca8fc86](https://github.com/TEDI-Design-System/angular/commit/ca8fc86447979044e973e9423459faf765a707a8))
+* **alert:** Added small size [#502](https://github.com/TEDI-Design-System/angular/issues/502) ([#503](https://github.com/TEDI-Design-System/angular/issues/503)) ([c6bd5aa](https://github.com/TEDI-Design-System/angular/commit/c6bd5aa028dee0da175982d208bbc16c91cfbbc7))
+* **button-group:** new tedi-ready component [#9](https://github.com/TEDI-Design-System/angular/issues/9) ([#450](https://github.com/TEDI-Design-System/angular/issues/450)) ([37a4d3b](https://github.com/TEDI-Design-System/angular/commit/37a4d3b5c4f3d031634b56298a70596aebe34f64))
+* **card,card-button,timeline-card:** new tedi-ready components [#453](https://github.com/TEDI-Design-System/angular/issues/453) ([#479](https://github.com/TEDI-Design-System/angular/issues/479)) ([7c13043](https://github.com/TEDI-Design-System/angular/commit/7c13043bca246e241bd381f8444bb9670a9413e7))
+* **date-field,calendar:** calendar tedi-ready [#6](https://github.com/TEDI-Design-System/angular/issues/6) ([#443](https://github.com/TEDI-Design-System/angular/issues/443)) ([467271a](https://github.com/TEDI-Design-System/angular/commit/467271a16b943501115547695be45131f9256246))
+* **dropdown:** Added support for wrapped buttons [#468](https://github.com/TEDI-Design-System/angular/issues/468) ([#469](https://github.com/TEDI-Design-System/angular/issues/469)) ([056340a](https://github.com/TEDI-Design-System/angular/commit/056340adadfa6c3cae22ce18f1911f529d2892a6))
+* **ellipsis:** new tedi-ready component [#472](https://github.com/TEDI-Design-System/angular/issues/472) ([#475](https://github.com/TEDI-Design-System/angular/issues/475)) ([a38d594](https://github.com/TEDI-Design-System/angular/commit/a38d5945f3a598cbbe669693fc7fc52702279fa3))
+* **float-ui:** replaced float-ui usage in relevant components [#380](https://github.com/TEDI-Design-System/angular/issues/380) ([#401](https://github.com/TEDI-Design-System/angular/issues/401)) ([7aee67b](https://github.com/TEDI-Design-System/angular/commit/7aee67bfb1b5dad13b756540282a242ff3770e6a))
+* **header:** update Header component against Figma [#312](https://github.com/TEDI-Design-System/angular/issues/312) ([#440](https://github.com/TEDI-Design-System/angular/issues/440)) ([81b1c18](https://github.com/TEDI-Design-System/angular/commit/81b1c1875dc1506d7135f63f0fcaf104957f54b5))
+* **info-button:** added inverted variant [#236](https://github.com/TEDI-Design-System/angular/issues/236) ([#496](https://github.com/TEDI-Design-System/angular/issues/496)) ([0a67fa8](https://github.com/TEDI-Design-System/angular/commit/0a67fa87824be62e0726e3873c83843457194eff))
+* **pagination:** tedi-ready component [#446](https://github.com/TEDI-Design-System/angular/issues/446) ([#447](https://github.com/TEDI-Design-System/angular/issues/447)) ([47af78b](https://github.com/TEDI-Design-System/angular/commit/47af78bcaf990aa874a9f9812d60c53e72352dd3))
+* **progressbar,attachment:** new tedi-ready components [#253](https://github.com/TEDI-Design-System/angular/issues/253) ([#451](https://github.com/TEDI-Design-System/angular/issues/451)) ([b2b9b5b](https://github.com/TEDI-Design-System/angular/commit/b2b9b5b47b33c19b5efcd719d79409d606aff573)), closes [#482](https://github.com/TEDI-Design-System/angular/issues/482)
+* **select:** added tooltip, ariaLabelledby, ariaLabel [#508](https://github.com/TEDI-Design-System/angular/issues/508) ([#509](https://github.com/TEDI-Design-System/angular/issues/509)) ([0ee3572](https://github.com/TEDI-Design-System/angular/commit/0ee35721729f6e3ae7c606e6d2913c0afdd0898e))
+* **table:** added new features [#480](https://github.com/TEDI-Design-System/angular/issues/480) ([#485](https://github.com/TEDI-Design-System/angular/issues/485)) ([1ca8a2d](https://github.com/TEDI-Design-System/angular/commit/1ca8a2da9deb615ece8d89a1b09276177ef97c2c))
+* **table:** added selectedRowHighlight input and updated stories [#445](https://github.com/TEDI-Design-System/angular/issues/445) ([c7aeb1b](https://github.com/TEDI-Design-System/angular/commit/c7aeb1bd7cece79c0654879020cd6ea2f3abebb9))
+* **table:** behavioural improvements [#470](https://github.com/TEDI-Design-System/angular/issues/470) ([#473](https://github.com/TEDI-Design-System/angular/issues/473)) ([098a616](https://github.com/TEDI-Design-System/angular/commit/098a61656d11238deb59550c1e37ec0ea9e3f960))
+* **table:** new tedi-ready component [#445](https://github.com/TEDI-Design-System/angular/issues/445) ([#448](https://github.com/TEDI-Design-System/angular/issues/448)) ([2d9480e](https://github.com/TEDI-Design-System/angular/commit/2d9480e2de4733f3a7352a204c9125923dcc478d))
+* **tabs:** new tedi-ready component [#14](https://github.com/TEDI-Design-System/angular/issues/14) ([#481](https://github.com/TEDI-Design-System/angular/issues/481)) ([5f37a32](https://github.com/TEDI-Design-System/angular/commit/5f37a32b73bf34e0b76ce4228aaec84d010bc6cf))
+* **time-field,time-picker,scroll-fade:** new tedi-ready components [#374](https://github.com/TEDI-Design-System/angular/issues/374) ([#397](https://github.com/TEDI-Design-System/angular/issues/397)) ([0040e62](https://github.com/TEDI-Design-System/angular/commit/0040e621f55310c6b4909d92d5787766c39f00c6))
+
+
+### BREAKING CHANGES
+
+* **icon:** button and link icon size changed, tedi-icon--size-* overrides no longer work
+
+# [7.0.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0-rc.4...angular-7.0.0-rc.5) (2026-07-01)
+
+
+### Features
+
+* **select:** added tooltip, ariaLabelledby, ariaLabel [#508](https://github.com/TEDI-Design-System/angular/issues/508) ([#509](https://github.com/TEDI-Design-System/angular/issues/509)) ([0ee3572](https://github.com/TEDI-Design-System/angular/commit/0ee35721729f6e3ae7c606e6d2913c0afdd0898e))
+
+# [7.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0-rc.3...angular-7.0.0-rc.4) (2026-07-01)
+
+
+### Features
+
+* **accordion:** fix mobile examples, add new inputs and stories [#467](https://github.com/TEDI-Design-System/angular/issues/467) ([#483](https://github.com/TEDI-Design-System/angular/issues/483)) ([c45e3e7](https://github.com/TEDI-Design-System/angular/commit/c45e3e7bdee1dc244bf1b6d5a57458f516e7dc6a))
+
+# [7.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0-rc.2...angular-7.0.0-rc.3) (2026-07-01)
+
+
+### Features
+
+* **alert:** Added small size [#502](https://github.com/TEDI-Design-System/angular/issues/502) ([#503](https://github.com/TEDI-Design-System/angular/issues/503)) ([c6bd5aa](https://github.com/TEDI-Design-System/angular/commit/c6bd5aa028dee0da175982d208bbc16c91cfbbc7))
+* **info-button:** added inverted variant [#236](https://github.com/TEDI-Design-System/angular/issues/236) ([#496](https://github.com/TEDI-Design-System/angular/issues/496)) ([0a67fa8](https://github.com/TEDI-Design-System/angular/commit/0a67fa87824be62e0726e3873c83843457194eff))
+
+# [7.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.0-rc.1...angular-7.0.0-rc.2) (2026-06-30)
+
+
+### Features
+
+* **tabs:** new tedi-ready component [#14](https://github.com/TEDI-Design-System/angular/issues/14) ([#481](https://github.com/TEDI-Design-System/angular/issues/481)) ([5f37a32](https://github.com/TEDI-Design-System/angular/commit/5f37a32b73bf34e0b76ce4228aaec84d010bc6cf))
+
+# [7.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.19...angular-7.0.0-rc.1) (2026-06-30)
+
+
+### Bug Fixes
+
+* **icon:** size input now works inside buttons and links [#435](https://github.com/TEDI-Design-System/angular/issues/435) ([#497](https://github.com/TEDI-Design-System/angular/issues/497)) ([e2b6a70](https://github.com/TEDI-Design-System/angular/commit/e2b6a701cd928827d4ed68931cca4de2b9a03042))
+
+
+### BREAKING CHANGES
+
+* **icon:** button and link icon size changed, tedi-icon--size-* overrides no longer work
+
+# [6.5.0-rc.19](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.18...angular-6.5.0-rc.19) (2026-06-26)
+
+
+### Bug Fixes
+
+* **date-field,date-picker:** resolved conflict with formcontrol [#494](https://github.com/TEDI-Design-System/angular/issues/494) ([#501](https://github.com/TEDI-Design-System/angular/issues/501)) ([7721071](https://github.com/TEDI-Design-System/angular/commit/7721071204cbd0b7009720925e3be84046d451ad))
+
+# [6.5.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.17...angular-6.5.0-rc.18) (2026-06-26)
+
+
+### Features
+
+* **date-field,calendar:** calendar tedi-ready [#6](https://github.com/TEDI-Design-System/angular/issues/6) ([#443](https://github.com/TEDI-Design-System/angular/issues/443)) ([467271a](https://github.com/TEDI-Design-System/angular/commit/467271a16b943501115547695be45131f9256246))
+
+# [6.5.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.16...angular-6.5.0-rc.17) (2026-06-26)
+
+
+### Bug Fixes
+
+* **dropdown:** overridden browser-default padding on dropdown-content [#498](https://github.com/TEDI-Design-System/angular/issues/498) ([#499](https://github.com/TEDI-Design-System/angular/issues/499)) ([1219cde](https://github.com/TEDI-Design-System/angular/commit/1219cde830ecb55e978870994b46bfda24b0e051))
+
+# [6.5.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.15...angular-6.5.0-rc.16) (2026-06-25)
+
+
+### Features
+
+* **table:** added new features [#480](https://github.com/TEDI-Design-System/angular/issues/480) ([#485](https://github.com/TEDI-Design-System/angular/issues/485)) ([1ca8a2d](https://github.com/TEDI-Design-System/angular/commit/1ca8a2da9deb615ece8d89a1b09276177ef97c2c))
+
+# [6.5.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.14...angular-6.5.0-rc.15) (2026-06-25)
+
+
+### Features
+
+* **header:** update Header component against Figma [#312](https://github.com/TEDI-Design-System/angular/issues/312) ([#440](https://github.com/TEDI-Design-System/angular/issues/440)) ([81b1c18](https://github.com/TEDI-Design-System/angular/commit/81b1c1875dc1506d7135f63f0fcaf104957f54b5))
+
+# [6.5.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.13...angular-6.5.0-rc.14) (2026-06-19)
+
+
+### Features
+
+* **button-group:** new tedi-ready component [#9](https://github.com/TEDI-Design-System/angular/issues/9) ([#450](https://github.com/TEDI-Design-System/angular/issues/450)) ([37a4d3b](https://github.com/TEDI-Design-System/angular/commit/37a4d3b5c4f3d031634b56298a70596aebe34f64))
+
 # [6.5.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-6.5.0-rc.12...angular-6.5.0-rc.13) (2026-06-18)
 
 

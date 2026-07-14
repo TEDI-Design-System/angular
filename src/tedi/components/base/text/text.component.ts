@@ -14,6 +14,7 @@ export type TextModifiers =
   | "h6"
   | "normal"
   | "small"
+  | "extra-small"
   | "bold"
   | "thin"
   | "italic"
@@ -45,7 +46,8 @@ export type TextColor =
   | "warning"
   | "danger"
   | "info"
-  | "neutral";
+  | "neutral"
+  | "inherit";
 
 @Component({
   selector: "[tedi-text]",

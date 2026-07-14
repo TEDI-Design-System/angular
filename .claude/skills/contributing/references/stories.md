@@ -98,7 +98,12 @@ Find where the component lives under `src/tedi/components/` and map to the Story
 | `src/tedi/components/buttons/` | `TEDI-Ready/Components/Buttons/` |
 | `src/tedi/components/overlay/` | `TEDI-Ready/Components/Overlay/` |
 | `src/tedi/components/navigation/` | `TEDI-Ready/Components/Navigation/` |
+| `src/tedi/components/content/` | `TEDI-Ready/Content/` (no `Components/` segment) |
+| `src/tedi/components/layout/` | `TEDI-Ready/Layout/` (no `Components/` segment) |
+| `src/tedi/components/base/` | `TEDI-Ready/Base/` (no `Components/` segment) |
 | Other category | `TEDI-Ready/Components/<Category>/` |
+
+**Note:** the `Content`, `Layout`, and `Base` groups sit directly under `TEDI-Ready/` — they skip the `Components/` segment. Check sibling stories in the same folder before picking a title.
 
 ### 4. Create the Stories File
 
@@ -113,7 +118,7 @@ import { ComponentName } from './index';
  * <a href="https://www.figma.com/design/..." target="_blank">Figma ↗</a>
  */
 export default {
-  title: 'TEDI-Ready/Components/Category/ComponentName',
+  title: 'TEDI-Ready/Components/Category/ComponentName', // or 'TEDI-Ready/<Content|Layout|Base>/ComponentName' for those groups
   component: ComponentName,
   decorators: [
     moduleMetadata({
@@ -216,7 +221,7 @@ render: (args) => ({
 **Every public input/model must have an argTypes entry.** Do not skip any — all props must appear in the Storybook controls panel with correct typing and descriptions.
 
 Each entry must include:
-- `description` — brief explanation of what the input controls
+- `description` — concise, developer-friendly explanation of what the input does. Don't restate the name/type, pad with the obvious, or add usage examples. If there's nothing non-obvious to say, a short factual line is enough.
 - `control` — appropriate control type (`'radio'`, `'select'`, `'boolean'`, `'text'`, `'number'`, `'object'`)
 - `options` — for enum/union type inputs, list all possible values
 - `table.category` — always `'inputs'`

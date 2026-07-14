@@ -55,7 +55,8 @@ When you add, remove, rename, or change the API of a component, update the consu
 
 ### Communication
 - Be direct and concise.
-- No unnecessary comments in code — code should be self-documenting. Do not add comments that restate what a selector, class name, or variable already says (e.g., `// Secondary variant` above `&.tedi-checkbox-card--secondary`). This applies to styles, templates, and code equally. Only add comments when the logic isn't self-evident.
+- **Never add self-explanatory comments** — code should be self-documenting. Do not add comments that restate what a selector, class name, variable, function, or method already says (e.g., `// Secondary variant` above `&.tedi-checkbox-card--secondary`, or `/** Toggles the value. */` above a `toggle()` method). This applies to styles, templates, code, and JSDoc equally. Only comment when the logic isn't self-evident, and when you do, keep it short and on point.
+- **Keep JSDoc, Storybook `argTypes` descriptions, and story descriptions concise and developer-friendly.** Readers are developers — explain what an input does, but don't restate its name/type, don't pad with the obvious, and don't add usage examples or example code in descriptions. If there's nothing non-obvious to say, a short factual line is enough.
 - When explaining decisions, focus on the "why" not the "what".
 
 ## Commands

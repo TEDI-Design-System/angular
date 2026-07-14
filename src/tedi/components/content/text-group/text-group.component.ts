@@ -73,10 +73,11 @@ export class TextGroupComponent
   });
 
   classes = computed(() => {
-    const classList = [
-      "tedi-text-group",
-      `tedi-text-group--${this.breakpointInputs().type}`,
-    ];
+    const { type, labelWidth } = this.breakpointInputs();
+    const classList = ["tedi-text-group", `tedi-text-group--${type}`];
+    if (labelWidth) {
+      classList.push("tedi-text-group--fixed-label");
+    }
     return classList.join(" ");
   });
 

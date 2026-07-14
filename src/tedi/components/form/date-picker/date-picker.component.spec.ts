@@ -209,6 +209,25 @@ describe("DatePickerComponent", () => {
     expect(component.isDisabled(new Date(2024, 1, 11))).toBe(false);
   });
 
+  it("disabledMatchers should disable a day like the deprecated disabled input", () => {
+    const disabledDate = new Date(2024, 1, 10);
+    fixture.componentRef.setInput("disabledMatchers", disabledDate);
+    fixture.detectChanges();
+
+    expect(component.isDisabled(disabledDate)).toBe(true);
+    expect(component.isDisabled(new Date(2024, 1, 11))).toBe(false);
+  });
+
+  it("merges matchers from both disabled and disabledMatchers", () => {
+    fixture.componentRef.setInput("disabled", new Date(2024, 1, 10));
+    fixture.componentRef.setInput("disabledMatchers", new Date(2024, 1, 12));
+    fixture.detectChanges();
+
+    expect(component.isDisabled(new Date(2024, 1, 10))).toBe(true);
+    expect(component.isDisabled(new Date(2024, 1, 12))).toBe(true);
+    expect(component.isDisabled(new Date(2024, 1, 11))).toBe(false);
+  });
+
   it("Escape in day grid should hide popover and focus input", () => {
     const hideSpy = jest.spyOn(component.popover(), "hidePopover");
     component.popover().isOpen.set(true);

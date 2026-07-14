@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import {
   IconComponent,
-  IconSize,
   IconType,
   IconColor,
   IconBackgroundColor,
@@ -31,22 +30,48 @@ describe("IconComponent", () => {
     expect(iconElement.classList).toContain("material-symbols--outlined");
     expect(iconElement.classList).toContain("notranslate");
     expect(iconElement.classList).toContain("tedi-icon");
-    expect(iconElement.classList).toContain("tedi-icon--size-24");
+    expect(iconElement.className).not.toMatch(/tedi-icon--size-/);
     expect(iconElement.classList).toContain("tedi-icon--color-primary");
     expect(iconElement.textContent?.trim()).toBe("search");
     expect(iconElement.getAttribute("role")).toBe("img");
     expect(iconElement.getAttribute("aria-hidden")).toBe("true");
   });
 
-  it("should apply different icon sizes", () => {
-    const sizes: IconSize[] = [8, 12, 16, 18, 24, 36, 48];
+  it("should drive font-size from the size variable, without a size class", () => {
+    const sizeTokens: Record<number, string> = {
+      8: "--icon-00",
+      12: "--icon-01",
+      16: "--icon-02",
+      18: "--icon-03",
+      22: "--icon-04",
+      24: "--icon-05",
+      36: "--icon-06",
+      48: "--icon-07",
+    };
 
-    for (const size of sizes) {
-      fixture.componentRef.setInput("size", size);
+    for (const [size, token] of Object.entries(sizeTokens)) {
+      fixture.componentRef.setInput("size", Number(size));
       fixture.detectChanges();
 
-      expect(iconElement.classList).toContain(`tedi-icon--size-${size}`);
+      expect(iconElement.style.getPropertyValue("--_tedi-icon-size")).toBe(
+        `var(${token})`,
+      );
+      expect(iconElement.className).not.toMatch(/tedi-icon--size-/);
     }
+  });
+
+  it("should set the size CSS variable only when size is explicit", () => {
+    expect(iconElement.style.getPropertyValue("--_tedi-icon-size")).toBe("");
+
+    fixture.componentRef.setInput("size", 18);
+    fixture.detectChanges();
+    expect(iconElement.style.getPropertyValue("--_tedi-icon-size")).toBe(
+      "var(--icon-03)",
+    );
+
+    fixture.componentRef.setInput("size", "inherit");
+    fixture.detectChanges();
+    expect(iconElement.style.getPropertyValue("--_tedi-icon-size")).toBe("");
   });
 
   it("should apply different icon colors", () => {
@@ -89,24 +114,33 @@ describe("IconComponent", () => {
     }
   });
 
-  it("should enforce size constraint with background", () => {
-    fixture.componentRef.setInput("size", 8);
+  it("should clamp size and set padding for background icons", () => {
     fixture.componentRef.setInput("background", "primary");
-    fixture.detectChanges();
 
-    expect(iconElement.classList).toContain("tedi-icon--size-24");
-    expect(iconElement.classList).not.toContain("tedi-icon--size-8");
+    fixture.componentRef.setInput("size", 8);
+    fixture.detectChanges();
+    expect(iconElement.style.getPropertyValue("--_tedi-icon-size")).toBe(
+      "var(--icon-05)",
+    );
+    expect(iconElement.style.getPropertyValue("--_tedi-icon-bg-padding")).toBe(
+      "var(--icon-background-padding-lg)",
+    );
+    expect(iconElement.className).not.toMatch(/tedi-icon--size-/);
 
     fixture.componentRef.setInput("size", "inherit");
     fixture.detectChanges();
-
-    expect(iconElement.classList).toContain("tedi-icon--size-24");
-    expect(iconElement.classList).not.toContain("tedi-icon--size-inherit");
+    expect(iconElement.style.getPropertyValue("--_tedi-icon-size")).toBe(
+      "var(--icon-05)",
+    );
 
     fixture.componentRef.setInput("size", 16);
     fixture.detectChanges();
-
-    expect(iconElement.classList).toContain("tedi-icon--size-16");
+    expect(iconElement.style.getPropertyValue("--_tedi-icon-size")).toBe(
+      "var(--icon-02)",
+    );
+    expect(iconElement.style.getPropertyValue("--_tedi-icon-bg-padding")).toBe(
+      "var(--icon-background-padding-sm)",
+    );
   });
 
   it("should apply filled variant", () => {

@@ -156,6 +156,16 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
+    clipContent: {
+      description:
+        "Whether the item's label clips overflowing content for text ellipsis. Set `false` when projecting content with decorations that intentionally sit outside the line box (e.g. status indicator), so they are not cut off.",
+      control: "boolean",
+      table: {
+        category: "dropdown-item",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
     itemSelect: {
       description:
         "Fires on click or keyboard (Enter / Space) activation. Use to react to selection without depending on click ordering.",

@@ -33,7 +33,9 @@ describe("ClosingButtonComponent", () => {
 
     const icon = fixture.nativeElement.querySelector(".tedi-icon");
 
-    expect(icon.classList).toContain("tedi-icon--size-18");
+    expect(icon.style.getPropertyValue("--_tedi-icon-size")).toBe(
+      "var(--icon-03)",
+    );
   });
 
   it("should render the close icon by default and allow overriding it", () => {

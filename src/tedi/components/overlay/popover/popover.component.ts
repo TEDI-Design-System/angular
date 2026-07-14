@@ -41,6 +41,9 @@ let popoverIdCounter = 0;
   styleUrl: "./popover.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: "tedi-popover",
+  },
 })
 export class PopoverComponent {
   /**
@@ -99,9 +102,7 @@ export class PopoverComponent {
   readonly arrowTop = signal<number | null>(null);
 
   readonly overlayOrigin = computed(() => this.popoverTrigger().overlayOrigin);
-  private readonly arrowOffset = computed(() =>
-    this.withArrow() ? (this.withBorder() ? 9 : 12) : 0,
-  );
+  private readonly arrowOffset = computed(() => (this.withArrow() ? 12 : 0));
 
   readonly overlayPositions = computed(() =>
     toConnectedPositions(
@@ -223,12 +224,21 @@ export class PopoverComponent {
     const triggerEl = this.popoverTrigger().host.nativeElement;
     if (!overlayEl || !triggerEl) return;
 
-    const arrowSize = this.withBorder() ? 18 : 24;
+    // Read the arrow's actual rendered size so the calculation stays correct
+    // regardless of whether the SCSS uses px or rem and regardless of root
+    // font-size. If the arrow isn't in the DOM yet (e.g. first
+    // `updateArrowPosition` before the template projects it), bail out — the
+    // subsequent `(positionChange)` call will retry with the real size.
+    const arrowEl = overlayEl.querySelector<HTMLElement>(
+      ".tedi-popover__arrow",
+    );
+    if (!arrowEl) return;
+
     const offset = calculateArrowOffset(
       this.currentPlacement(),
       triggerEl,
       overlayEl,
-      arrowSize,
+      arrowEl.offsetWidth,
     );
     this.arrowLeft.set(offset.left);
     this.arrowTop.set(offset.top);
@@ -374,6 +384,16 @@ export class PopoverComponent {
       triggerEl.contains(target) ||
       containerEl?.contains(target)
     ) {
+      return;
+    }
+
+    // Nested overlays opened from inside the popover (e.g. a month/year
+    // dropdown in the date-picker header) render in their own pane within the
+    // shared CDK overlay container, not inside this popover's overlayElement.
+    // Interacting with — or focusing into — such a child overlay must not
+    // dismiss the popover, so ignore events originating anywhere inside the
+    // overlay container.
+    if (target.closest(".cdk-overlay-container")) {
       return;
     }
 

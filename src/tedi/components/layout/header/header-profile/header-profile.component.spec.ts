@@ -2,20 +2,33 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { NO_ERRORS_SCHEMA, signal } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 import { HeaderProfileComponent } from "./header-profile.component";
+import { TediTranslationService } from "../../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
 
 describe("HeaderProfileComponent", () => {
   let fixture: ComponentFixture<HeaderProfileComponent>;
   let component: HeaderProfileComponent;
   let documentMock: Document;
+  let mockTranslationService: {
+    translate: jest.Mock;
+    track: jest.Mock;
+  };
 
   beforeEach(() => {
     documentMock = document;
+    mockTranslationService = {
+      translate: jest.fn((key: string) => key),
+      track: jest.fn((key: string) => () => key),
+    };
 
     TestBed.configureTestingModule({
       imports: [HeaderProfileComponent],
       providers: [
         { provide: DOCUMENT, useValue: documentMock },
+        {
+          provide: TediTranslationService,
+          useValue: mockTranslationService,
+        },
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
       ],
       schemas: [NO_ERRORS_SCHEMA],
@@ -25,8 +38,8 @@ describe("HeaderProfileComponent", () => {
     component = fixture.componentInstance;
 
     // set required inputs
-    fixture.componentRef.setInput("name", "John Doe");
-    fixture.componentRef.setInput("showDropdown", "lg");
+    fixture.componentRef.setInput("label", "John Doe");
+    fixture.componentRef.setInput("showPopover", "lg");
 
     fixture.detectChanges();
   });
@@ -66,8 +79,162 @@ describe("HeaderProfileComponent", () => {
     expect(component.modalOpen()).toBe(false);
   });
 
+  describe("resolvedLabel", () => {
+    it("returns the custom label as-is when `label` is set", () => {
+      expect(component.resolvedLabel()).toBe("John Doe");
+    });
+
+    it("falls back to `header.profile` on desktop when `label` is empty", () => {
+      jest
+        .spyOn(component.breakpointService, "isBelowBreakpoint")
+        .mockReturnValue(signal(false));
+      mockTranslationService.translate.mockImplementation(
+        (key: string) => `__${key}__`,
+      );
+
+      fixture.componentRef.setInput("label", "");
+      fixture.detectChanges();
+
+      expect(component.resolvedLabel()).toBe("__header.profile__");
+      expect(mockTranslationService.translate).toHaveBeenCalledWith(
+        "header.profile",
+      );
+    });
+
+    it("falls back to `header.profile.mobile` on mobile when `label` is empty", () => {
+      jest
+        .spyOn(component.breakpointService, "isBelowBreakpoint")
+        .mockReturnValue(signal(true));
+      mockTranslationService.translate.mockImplementation(
+        (key: string) => `__${key}__`,
+      );
+
+      fixture.componentRef.setInput("label", "");
+      fixture.detectChanges();
+
+      expect(component.resolvedLabel()).toBe("__header.profile.mobile__");
+      expect(mockTranslationService.translate).toHaveBeenCalledWith(
+        "header.profile.mobile",
+      );
+    });
+
+    it("uses the breakpoint-override label when its tier is active", () => {
+      jest
+        .spyOn(component.breakpointService, "getBreakpointInputs")
+        .mockReturnValue({
+          label: "Mari Maasikas",
+          showPopover: "lg",
+        });
+
+      fixture.componentRef.setInput("label", "");
+      fixture.componentRef.setInput("md", { label: "Mari Maasikas" });
+      fixture.detectChanges();
+
+      expect(component.resolvedLabel()).toBe("Mari Maasikas");
+    });
+  });
+
+  describe("body scroll lock effect", () => {
+    afterEach(() => {
+      documentMock.body.style.removeProperty("overflow");
+    });
+
+    it("locks body scroll when the modal opens", () => {
+      component.modalOpen.set(true);
+      fixture.detectChanges();
+      expect(documentMock.body.style.overflow).toBe("hidden");
+    });
+
+    it("restores body scroll when the modal closes", () => {
+      component.modalOpen.set(true);
+      fixture.detectChanges();
+      component.modalOpen.set(false);
+      fixture.detectChanges();
+      expect(documentMock.body.style.overflow).toBe("");
+    });
+  });
+
+  describe("header offset (--header-profile-offset)", () => {
+    let headerEl: HTMLElement;
+    let resizeCallback: ResizeObserverCallback | undefined;
+    let observeSpy: jest.Mock;
+    let disconnectSpy: jest.Mock;
+    let originalResizeObserver: typeof globalThis.ResizeObserver;
+
+    const rectWithHeight = (height: number): DOMRect => ({
+      height,
+      width: 0,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: height,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+
+    const host = () => fixture.nativeElement as HTMLElement;
+
+    beforeEach(() => {
+      observeSpy = jest.fn();
+      disconnectSpy = jest.fn();
+      resizeCallback = undefined;
+      originalResizeObserver = globalThis.ResizeObserver;
+
+      class MockResizeObserver {
+        constructor(callback: ResizeObserverCallback) {
+          resizeCallback = callback;
+        }
+        observe = observeSpy;
+        unobserve = jest.fn();
+        disconnect = disconnectSpy;
+      }
+      globalThis.ResizeObserver =
+        MockResizeObserver as unknown as typeof ResizeObserver;
+
+      headerEl = document.createElement("header");
+      headerEl.getBoundingClientRect = jest.fn(() => rectWithHeight(120));
+      headerEl.appendChild(host());
+      documentMock.body.appendChild(headerEl);
+    });
+
+    afterEach(() => {
+      headerEl.remove();
+      globalThis.ResizeObserver = originalResizeObserver;
+    });
+
+    it("sets --header-profile-offset to the header height and observes the header", () => {
+      component.ngAfterContentInit();
+
+      expect(host().style.getPropertyValue("--header-profile-offset")).toBe(
+        "120px",
+      );
+      expect(observeSpy).toHaveBeenCalledWith(headerEl);
+    });
+
+    it("updates the offset when the header resizes", () => {
+      component.ngAfterContentInit();
+      (headerEl.getBoundingClientRect as jest.Mock).mockReturnValue(
+        rectWithHeight(64),
+      );
+
+      resizeCallback?.([], {} as unknown as ResizeObserver);
+
+      expect(host().style.getPropertyValue("--header-profile-offset")).toBe(
+        "64px",
+      );
+    });
+
+    it("disconnects the observer when the component is destroyed", () => {
+      component.ngAfterContentInit();
+      fixture.destroy();
+
+      expect(disconnectSpy).toHaveBeenCalled();
+    });
+  });
+
   describe("buttonVariant", () => {
-    it("should return 'neutral' when below 'sm' breakpoint", () => {
+    it("should return 'neutral' when below 'md' breakpoint", () => {
       const mockSignal = signal(true);
       jest
         .spyOn(component.breakpointService, "isBelowBreakpoint")
@@ -76,23 +243,23 @@ describe("HeaderProfileComponent", () => {
       expect(component.buttonVariant()).toBe("neutral");
     });
 
-    it("should return 'neutral' when name is empty", () => {
+    it("should return 'neutral' when showLabel is false", () => {
       const mockSignal = signal(false);
       jest
         .spyOn(component.breakpointService, "isBelowBreakpoint")
         .mockReturnValue(mockSignal);
-      fixture.componentRef.setInput("name", "");
+      fixture.componentRef.setInput("showLabel", false);
       fixture.detectChanges();
 
       expect(component.buttonVariant()).toBe("neutral");
     });
 
-    it("should return 'secondary' when above 'sm' breakpoint and name is provided", () => {
+    it("should return 'secondary' when above 'md' breakpoint and showLabel is true", () => {
       const mockSignal = signal(false);
       jest
         .spyOn(component.breakpointService, "isBelowBreakpoint")
         .mockReturnValue(mockSignal);
-      fixture.componentRef.setInput("name", "John Doe");
+      fixture.componentRef.setInput("showLabel", true);
       fixture.detectChanges();
 
       expect(component.buttonVariant()).toBe("secondary");

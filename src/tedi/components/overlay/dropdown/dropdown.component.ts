@@ -60,6 +60,12 @@ export class DropdownComponent implements OnDestroy {
   readonly preventOverflow = input(true);
 
   /**
+   * Gap in px between the trigger and the dropdown panel.
+   * @default 4
+   */
+  readonly offset = input(4);
+
+  /**
    * Does the dropdown hide when the page scrolls?
    * @default false
    */
@@ -75,9 +81,16 @@ export class DropdownComponent implements OnDestroy {
 
   readonly overlayOrigin = computed(() => this.dropdownTrigger().overlayOrigin);
 
-  readonly overlayPositions = computed(() =>
-    toConnectedPositions(this.position(), this.preventOverflow()),
-  );
+  readonly overlayPositions = computed(() => {
+    const offset = this.offset();
+    return toConnectedPositions(this.position(), this.preventOverflow()).map(
+      (pos) => ({
+        ...pos,
+        offsetX: pos.offsetX ? Math.sign(pos.offsetX) * offset : pos.offsetX,
+        offsetY: pos.offsetY ? Math.sign(pos.offsetY) * offset : pos.offsetY,
+      }),
+    );
+  });
 
   readonly triggerWidthVar = computed(() => {
     const w = this.triggerWidth();

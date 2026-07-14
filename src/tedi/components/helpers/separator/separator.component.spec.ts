@@ -20,6 +20,7 @@ import {
       [color]="color"
       [variant]="variant"
       [dotSize]="dotSize"
+      [dotFilled]="dotFilled"
       [thickness]="thickness"
       [spacing]="spacing"
       [size]="size"
@@ -31,6 +32,7 @@ class TestHostComponent {
   color: SeparatorColor = "primary";
   variant?: SeparatorVariant;
   dotSize?: SeparatorDotSize;
+  dotFilled = true;
   thickness: SeparatorThickness = 1;
   spacing?: SeparatorSpacingValue | SeparatorSpacing;
   size: string = "100%";
@@ -59,6 +61,22 @@ describe("SeparatorComponent", () => {
     expect(element.classList).toContain("tedi-separator--thickness-1");
     expect(element.style.width).toBe("100%");
     expect(element.style.height).toBe("0px");
+  });
+
+  it("should not add filled/outlined classes when no variant is set", () => {
+    expect(element.classList).not.toContain(
+      "tedi-separator--undefined-outlined",
+    );
+    expect(element.className).not.toContain("-outlined");
+    expect(element.className).not.toContain("-filled");
+  });
+
+  it("should add the outlined modifier only for an unfilled dot-only variant", () => {
+    host.variant = "dot-only";
+    host.dotFilled = false;
+    fixture.detectChanges();
+
+    expect(element.classList).toContain("tedi-separator--dot-only-outlined");
   });
 
   it("should update axis to vertical", () => {
@@ -115,6 +133,47 @@ describe("SeparatorComponent", () => {
 
     expect(element.classList).toContain("tedi-separator--left-0-5");
     expect(element.classList).toContain("tedi-separator--right-5");
+  });
+
+  it("should apply both x- and y-spacing for vertical axis", () => {
+    host.axis = "vertical";
+    host.spacing = { left: 1.5, right: 1.5, top: 0.25, bottom: 0.25 };
+    fixture.detectChanges();
+
+    expect(element.classList).toContain("tedi-separator--left-1-5");
+    expect(element.classList).toContain("tedi-separator--right-1-5");
+    expect(element.classList).toContain("tedi-separator--top-0-25");
+    expect(element.classList).toContain("tedi-separator--bottom-0-25");
+  });
+
+  it("should ignore x-spacing for horizontal axis", () => {
+    host.spacing = { top: 0.5, left: 2, right: 2 };
+    fixture.detectChanges();
+
+    expect(element.classList).toContain("tedi-separator--top-0-5");
+    expect(element.classList).not.toContain("tedi-separator--left-2");
+    expect(element.classList).not.toContain("tedi-separator--right-2");
+  });
+
+  it("should expand x and y shorthands into both sides", () => {
+    host.axis = "vertical";
+    host.spacing = { x: 1.5, y: 0.25 };
+    fixture.detectChanges();
+
+    expect(element.classList).toContain("tedi-separator--left-1-5");
+    expect(element.classList).toContain("tedi-separator--right-1-5");
+    expect(element.classList).toContain("tedi-separator--top-0-25");
+    expect(element.classList).toContain("tedi-separator--bottom-0-25");
+  });
+
+  it("should let an explicit side override the matching shorthand", () => {
+    host.axis = "vertical";
+    host.spacing = { x: 1.5, right: 0.5 };
+    fixture.detectChanges();
+
+    expect(element.classList).toContain("tedi-separator--left-1-5");
+    expect(element.classList).toContain("tedi-separator--right-0-5");
+    expect(element.classList).not.toContain("tedi-separator--right-1-5");
   });
 
   it("should apply custom size", () => {

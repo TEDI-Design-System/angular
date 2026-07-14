@@ -10,7 +10,7 @@ import {
   FormsModule,
   ReactiveFormsModule,
 } from "@angular/forms";
-import { indexId } from "src/community/helpers/unique-id";
+import { indexId } from "community/helpers/unique-id";
 
 interface StoryArgs {
   disabled: boolean;

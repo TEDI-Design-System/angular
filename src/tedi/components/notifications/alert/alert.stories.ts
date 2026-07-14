@@ -9,6 +9,7 @@ import { AlertComponent } from "./alert.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { IconComponent } from "../../base";
+import { TextComponent } from "../../base/text/text.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=4438-86446&t=lPIIY0laoX80DnVD-4" target="_blank">Figma ↗</a><br>
@@ -20,7 +21,13 @@ export default {
   component: AlertComponent,
   decorators: [
     moduleMetadata({
-      imports: [AlertComponent, ButtonComponent, RowComponent, IconComponent],
+      imports: [
+        AlertComponent,
+        ButtonComponent,
+        RowComponent,
+        IconComponent,
+        TextComponent,
+      ],
     }),
   ],
   argTypes: {
@@ -74,6 +81,16 @@ export default {
       description:
         "Defines the visual and contextual type of the alert. \n - <b>global</b> indicates that the alert is intended to span the full width of the page, typically for critical or prominent messages. \n - <b>noSideBorders</b> removes the side borders from the alert for a cleaner appearance. This also sets the border radius to 0.",
     },
+    size: {
+      control: "radio",
+      options: ["default", "small"],
+      description:
+        "Alert size variant. \n - <b>default</b> standard padding and body text size. \n - <b>small</b> reduced padding and smaller body text.",
+      table: {
+        type: { summary: "AlertSize" },
+        defaultValue: { summary: "default" },
+      },
+    },
     open: {
       control: "boolean",
       description: "Is alert open?",
@@ -89,20 +106,39 @@ type Story = StoryObj<AlertComponent>;
 
 export const Default: Story = {
   args: {
-    title: "Title",
+    title: "Pealkiri",
     type: "info",
     icon: "",
     showClose: false,
     role: "alert",
     titleElement: "h2",
+    size: "default",
     open: true,
   },
   render: (args) => ({
     props: args,
     template: `
     <tedi-alert ${argsToTemplate(args)}>
-      Content description. <a href="#">Inline link example</a>
+      Sisu kirjeldus. <a href="#">Tekstisisene lingi näide</a>
     </tedi-alert>`,
+  }),
+};
+
+export const Size: Story = {
+  render: (args) => ({
+    props: args,
+    template: `
+    <tedi-row [cols]="1" [gap]="3">
+      <p tedi-text modifiers="bold">Default</p>
+      <tedi-alert type="info" size="default">
+        Sisu kirjeldus
+      </tedi-alert>
+      <p tedi-text modifiers="bold">Small</p>
+      <tedi-alert type="info" size="small">
+        Sisu kirjeldus
+      </tedi-alert>
+    </tedi-row>
+    `,
   }),
 };
 
@@ -111,7 +147,7 @@ export const Headless: Story = {
     props: args,
     template: `
     <tedi-alert>
-      Content description
+      Sisu kirjeldus
     </tedi-alert>
     `,
   }),
@@ -122,11 +158,11 @@ export const Global: Story = {
     props: args,
     template: `
       <tedi-row [cols]="1" [gap]="3">
-        <tedi-alert title="Title" variant="global">
-          Content description
+        <tedi-alert title="Pealkiri" variant="global">
+          Sisu kirjeldus
         </tedi-alert>
         <tedi-alert variant="global">
-          Content description
+          Sisu kirjeldus
         </tedi-alert>
       </tedi-row>
     `,
@@ -138,11 +174,11 @@ export const WithoutSideBorders: Story = {
     props: args,
     template: `
       <tedi-row [cols]="1" [gap]="3">
-        <tedi-alert variant="noSideBorders" title="Title">
-          Content description
+        <tedi-alert variant="noSideBorders" title="Pealkiri">
+          Sisu kirjeldus
         </tedi-alert>
         <tedi-alert variant="noSideBorders">
-          Content description
+          Sisu kirjeldus
         </tedi-alert>
       </tedi-row>
     `,
@@ -154,11 +190,11 @@ export const WithIcon: Story = {
     props: args,
     template: `
       <tedi-row [cols]="1" [gap]="3">
-        <tedi-alert title="Title" icon="check_circle">
-          Content description
+        <tedi-alert title="Pealkiri" icon="check_circle">
+          Sisu kirjeldus
         </tedi-alert>
         <tedi-alert icon="check_circle">
-          Content description
+          Sisu kirjeldus
         </tedi-alert>
       </tedi-row>
     `,
@@ -170,11 +206,11 @@ export const WithCloseButton: Story = {
     props: args,
     template: `
       <tedi-row [cols]="1" [gap]="3">
-        <tedi-alert title="Title" [showClose]="true">
-          Content description
+        <tedi-alert title="Pealkiri" [showClose]="true">
+          Sisu kirjeldus
         </tedi-alert>
         <tedi-alert [showClose]="true">
-          Content description
+          Sisu kirjeldus
         </tedi-alert>
       </tedi-row>
     `,
@@ -187,16 +223,16 @@ export const AlertTypes: Story = {
     template: `
     <tedi-row [cols]="1" [gap]="3">
       <tedi-alert type="info" icon="info">
-        This is a info alert.
+        See on infoteade.
       </tedi-alert>
       <tedi-alert type="success" icon="check_circle">
-        This is a success alert.
+        See on õnnestumisteade.
       </tedi-alert>
       <tedi-alert type="warning" icon="warning">
-        This is a warning alert.
+        See on hoiatusteade.
       </tedi-alert>
       <tedi-alert type="danger" icon="error">
-        This is a danger alert.
+        See on veateade.
       </tedi-alert>
     </tedi-row>
     `,
@@ -208,10 +244,10 @@ export const WithoutTitleLongText: Story = {
     props: args,
     template: `
       <tedi-alert type="warning" icon="warning">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque facilisis nisi purus, quis bibendum lectus finibus in.
-        Sed sed tellus eu augue finibus efficitur sit amet a velit. Donec vitae ex et ligula commodo luctus.
-        Phasellus accumsan ligula quis nibh hendrerit, ac rutrum velit dictum. Curabitur ut vulputate justo.
-        Proin eu sapien tellus. Morbi quis dapibus felis. Quisque commodo tempus vulputate.
+        Teie kontol on mitu lahendamata teadet, mis vajavad tähelepanu. Palun vaadake üle oma profiili andmed ja kinnitage need enne jätkamist.
+        Süsteem salvestab muudatused automaatselt, kuid soovitame need siiski üle kontrollida.
+        Mõned väljad võivad olla puudulikud või vananenud ning vajavad täiendamist.
+        Kui teil on küsimusi, võtke palun ühendust klienditoega.
       </tedi-alert>
     `,
   }),
@@ -222,10 +258,10 @@ export const WithoutTitleLongTextAndClosingButton: Story = {
     props: args,
     template: `
       <tedi-alert type="info" icon="info" [showClose]="true">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque facilisis nisi purus, quis bibendum lectus finibus in.
-        Sed sed tellus eu augue finibus efficitur sit amet a velit. Donec vitae ex et ligula commodo luctus.
-        Phasellus accumsan ligula quis nibh hendrerit, ac rutrum velit dictum. Curabitur ut vulputate justo.
-        Proin eu sapien tellus. Morbi quis dapibus felis. Quisque commodo tempus vulputate.
+        Teie kontol on mitu lahendamata teadet, mis vajavad tähelepanu. Palun vaadake üle oma profiili andmed ja kinnitage need enne jätkamist.
+        Süsteem salvestab muudatused automaatselt, kuid soovitame need siiski üle kontrollida.
+        Mõned väljad võivad olla puudulikud või vananenud ning vajavad täiendamist.
+        Kui teil on küsimusi, võtke palun ühendust klienditoega.
       </tedi-alert>
     `,
   }),
@@ -235,11 +271,11 @@ export const WithTitleLongTextAndClosingButton: Story = {
   render: (args) => ({
     props: args,
     template: `
-      <tedi-alert type="danger" icon="error" [showClose]="true" title="Title">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque facilisis nisi purus, quis bibendum lectus finibus in.
-        Sed sed tellus eu augue finibus efficitur sit amet a velit. Donec vitae ex et ligula commodo luctus.
-        Phasellus accumsan ligula quis nibh hendrerit, ac rutrum velit dictum. Curabitur ut vulputate justo.
-        Proin eu sapien tellus. Morbi quis dapibus felis. Quisque commodo tempus vulputate.
+      <tedi-alert type="danger" icon="error" [showClose]="true" title="Pealkiri">
+        Teie kontol on mitu lahendamata teadet, mis vajavad tähelepanu. Palun vaadake üle oma profiili andmed ja kinnitage need enne jätkamist.
+        Süsteem salvestab muudatused automaatselt, kuid soovitame need siiski üle kontrollida.
+        Mõned väljad võivad olla puudulikud või vananenud ning vajavad täiendamist.
+        Kui teil on küsimusi, võtke palun ühendust klienditoega.
       </tedi-alert>
     `,
   }),
@@ -256,8 +292,8 @@ export const WithActionButton: Story = {
     props: args,
     template: `
       <tedi-alert type="warning" icon="warning">
-        Your account is missing a profile photo — add one so colleagues can recognise you in shared documents.
-        <button tedi-button tedi-alert-action variant="secondary">Open profile <tedi-icon name="arrow_forward" [size]="24" /></button>
+        Teie profiililt puudub foto — lisage see, et kolleegid saaksid teid jagatud dokumentides ära tunda.
+        <button tedi-button tedi-alert-action variant="secondary">Ava profiil <tedi-icon name="arrow_forward" [size]="24" /></button>
       </tedi-alert>
     `,
   }),

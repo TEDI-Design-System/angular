@@ -32,7 +32,6 @@
 
 .tedi-table__head {
   background: var(--table-default);
-  border-bottom: 1px solid var(--table-border-th);
 }
 
 .tedi-table__header-cell {
@@ -43,6 +42,10 @@
   text-align: left;
   white-space: nowrap;
   background: var(--table-default);
+
+  // Border on the cell (not the <thead>) so it spans the full scroll width —
+  // section/row borders clip to the table's `width: 100%` on horizontal scroll.
+  border-bottom: 1px solid var(--table-border-th);
 }
 
 .tedi-table__header-content {
@@ -56,18 +59,37 @@
   align-items: center;
 }
 
-.tedi-table__row {
+.tedi-table__body .tedi-table__row>.tedi-table__cell {
   border-bottom: var(--tedi-borders-01) solid var(--table-border);
+}
 
-  &:last-child {
+.tedi-table__body .tedi-table__row:last-child>.tedi-table__cell {
+  border-bottom: 0;
+}
+
+.tedi-table--group-dividers-between {
+  .tedi-table__body .tedi-table__row>.tedi-table__cell {
     border-bottom: 0;
   }
+
+  .tedi-table__body .tedi-table__row--group-start>.tedi-table__cell {
+    border-top: var(--tedi-borders-01) solid var(--table-border);
+  }
+}
+
+.tedi-table--group-dividers-none .tedi-table__body .tedi-table__row>.tedi-table__cell {
+  border-bottom: 0;
 }
 
 .tedi-table__cell {
   padding: var(--table-data-padding-y) var(--table-data-padding-x);
   vertical-align: middle;
   color: var(--general-text-primary);
+
+  // Backgrounds live on cells (not <tr>/<tbody>) so they span the full scroll
+  // width — table-section/row backgrounds clip to `width: 100%` on horizontal
+  // scroll. Row-state rules below override per cell.
+  background: var(--table-default);
 }
 
 .tedi-table__cell--align-left {
@@ -76,6 +98,10 @@
 
 .tedi-table__cell--align-center {
   text-align: center;
+
+  .tedi-table__expand-toggle {
+    justify-content: center;
+  }
 }
 
 .tedi-table__cell--align-right {
@@ -129,14 +155,14 @@
 .tedi-table__foot {
   font-weight: var(--heading-weight);
   background: var(--table-default);
-  border-top: var(--tedi-borders-01) solid var(--table-border-th);
 }
 
 .tedi-table__cell--footer {
   color: var(--general-text-primary);
+  border-top: var(--tedi-borders-01) solid var(--table-border-th);
 }
 
-.tedi-table__row--selected {
+.tedi-table__row--selected>.tedi-table__cell {
   background: var(--table-active);
 }
 
@@ -152,16 +178,16 @@
   }
 }
 
-.tedi-table__row--sub-component {
+.tedi-table__body .tedi-table__row--sub-component>.tedi-table__cell {
   background: var(--table-striped);
   border-bottom: 0;
-
-  &-open {
-    border-bottom: var(--tedi-borders-01) solid var(--table-border);
-  }
 }
 
-.tedi-table__row--sub-row {
+.tedi-table__body .tedi-table__row--sub-component-open>.tedi-table__cell {
+  border-bottom: var(--tedi-borders-01) solid var(--table-border);
+}
+
+.tedi-table__row--sub-row>.tedi-table__cell {
   background: var(--table-striped);
 }
 
@@ -199,22 +225,22 @@
   background: var(--general-surface-primary);
 }
 
-.tedi-table--striped .tedi-table__body .tedi-table__row:nth-of-type(even) {
+.tedi-table--striped .tedi-table__body .tedi-table__row:nth-of-type(even)>.tedi-table__cell {
   background: var(--table-striped);
 }
 
-.tedi-table.tedi-table--row-hover .tedi-table__body .tedi-table__row:hover {
+.tedi-table.tedi-table--row-hover .tedi-table__body .tedi-table__row:hover>.tedi-table__cell {
   background: var(--table-hover);
 }
 
-.tedi-table .tedi-table__body .tedi-table__row.tedi-table__row--active,
-.tedi-table .tedi-table__body .tedi-table__row.tedi-table__row--active:hover {
+.tedi-table .tedi-table__body .tedi-table__row.tedi-table__row--active>.tedi-table__cell,
+.tedi-table .tedi-table__body .tedi-table__row.tedi-table__row--active:hover>.tedi-table__cell {
   background: var(--table-hover);
 }
 
 // Keyboard-reorder picked-up row — same highlight as the drag-hover state.
 // Scoped with enough specificity to win over striped / active backgrounds.
-.tedi-table .tedi-table__body .tedi-table__row.tedi-table__row--picked-up {
+.tedi-table .tedi-table__body .tedi-table__row.tedi-table__row--picked-up>.tedi-table__cell {
   background: var(--table-hover);
 }
 
@@ -277,43 +303,73 @@
 }
 
 .tedi-table--sticky-first-column {
-  .tedi-table__row>.tedi-table__header-cell:first-child {
+  // The frozen block = leading control columns + the first content column.
+  // Per-cell `left` offsets come from the component; the divider is drawn only
+  // on the block's right edge. Targeting the frozen columns by class (not
+  // `:first-child`) keeps rowspan-covered rows — whose first *rendered* cell is
+  // a later column — from picking up sticky styling.
+  .tedi-table__header-cell.tedi-table__cell--sticky-left {
     position: sticky;
-    left: 0;
     z-index: 2;
     background: var(--table-default);
-    box-shadow: inset -1px 0 0 var(--table-border);
   }
 
-  .tedi-table__row>.tedi-table__cell:first-child {
+  .tedi-table__cell--sticky-left {
     position: sticky;
-    left: 0;
     z-index: 1;
     background: var(--table-default);
+  }
+
+  .tedi-table__cell--sticky-left-edge {
     box-shadow: inset -1px 0 0 var(--table-border);
   }
 
-  &.tedi-table--striped .tedi-table__body .tedi-table__row:nth-of-type(even)>.tedi-table__cell:first-child {
+  // Sticky cells must match their row's background so the scrolled body never
+  // shows through.
+  .tedi-table__body .tedi-table__row--sub-row>.tedi-table__cell--sticky-left {
     background: var(--table-striped);
   }
 
-  .tedi-table__body .tedi-table__row--picked-up>.tedi-table__cell:first-child {
+  &.tedi-table--striped .tedi-table__body .tedi-table__row:nth-of-type(even)>.tedi-table__cell--sticky-left {
+    background: var(--table-striped);
+  }
+
+  .tedi-table__body .tedi-table__row--picked-up>.tedi-table__cell--sticky-left {
     background: var(--table-hover);
   }
 
-  &.tedi-table--striped .tedi-table__body .tedi-table__row--picked-up:nth-of-type(even)>.tedi-table__cell:first-child {
+  &.tedi-table--striped .tedi-table__body .tedi-table__row--picked-up:nth-of-type(even)>.tedi-table__cell--sticky-left {
     background: var(--table-hover);
   }
 
-  .tedi-table__head .tedi-table__header-cell--picked-up:first-child {
+  .tedi-table__head .tedi-table__header-cell--picked-up.tedi-table__cell--sticky-left {
     background: var(--table-hover);
   }
 
-  // The sticky first cell paints above the row (z-index), covering the row's
-  // inset focus outline along the left, top and bottom edges. Re-draw those
-  // three edges of the ring on the cell itself (box-shadow survives the
-  // stacking that clips the row's outline), keeping the column divider.
-  .tedi-table__row--clickable:focus-visible>.tedi-table__cell:first-child {
+  // The sticky cells paint above the row (z-index), clipping the row's inset
+  // focus outline. Re-draw the ring on the frozen block: top/bottom on every
+  // sticky cell, the left edge on the start cell, the divider on the edge cell.
+  .tedi-table__row--clickable:focus-visible>.tedi-table__cell--sticky-left {
+    box-shadow:
+      inset 0 var(--tedi-borders-02) 0 var(--tedi-primary-500),
+      inset 0 calc(var(--tedi-borders-02) * -1) 0 var(--tedi-primary-500);
+  }
+
+  .tedi-table__row--clickable:focus-visible>.tedi-table__cell--sticky-left-start {
+    box-shadow:
+      inset var(--tedi-borders-02) 0 0 var(--tedi-primary-500),
+      inset 0 var(--tedi-borders-02) 0 var(--tedi-primary-500),
+      inset 0 calc(var(--tedi-borders-02) * -1) 0 var(--tedi-primary-500);
+  }
+
+  .tedi-table__row--clickable:focus-visible>.tedi-table__cell--sticky-left-edge {
+    box-shadow:
+      inset -1px 0 0 var(--table-border),
+      inset 0 var(--tedi-borders-02) 0 var(--tedi-primary-500),
+      inset 0 calc(var(--tedi-borders-02) * -1) 0 var(--tedi-primary-500);
+  }
+
+  .tedi-table__row--clickable:focus-visible>.tedi-table__cell--sticky-left-start.tedi-table__cell--sticky-left-edge {
     box-shadow:
       inset -1px 0 0 var(--table-border),
       inset var(--tedi-borders-02) 0 0 var(--tedi-primary-500),
@@ -350,8 +406,11 @@
     box-shadow: inset 0 -1px 0 var(--table-border-th);
   }
 
-  &.tedi-table--sticky-first-column .tedi-table__head .tedi-table__header-cell:first-child {
+  &.tedi-table--sticky-first-column .tedi-table__head .tedi-table__header-cell.tedi-table__cell--sticky-left {
     z-index: 3;
+  }
+
+  &.tedi-table--sticky-first-column .tedi-table__head .tedi-table__header-cell.tedi-table__cell--sticky-left-edge {
     box-shadow:
       inset -1px 0 0 var(--table-border),
       inset 0 -1px 0 var(--table-border-th);

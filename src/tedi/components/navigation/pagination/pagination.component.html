@@ -135,15 +135,13 @@
           <tedi-icon name="arrow_drop_down" />
         </button>
       } @else {
-        <label
-          class="tedi-pagination__page-size-label"
-          [attr.for]="pageSizeInputId"
-        >
+        <span class="tedi-pagination__page-size-label" [id]="pageSizeLabelId">
           {{ mergedLabels().pageSize }}
-        </label>
+        </span>
         <tedi-select
           class="tedi-pagination__page-size-select"
           [inputId]="pageSizeInputId"
+          [ariaLabelledby]="pageSizeLabelId"
           size="small"
           [options]="pageSizeSelectOptions()"
           bindLabel="label"

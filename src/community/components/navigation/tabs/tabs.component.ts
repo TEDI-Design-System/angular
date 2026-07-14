@@ -41,6 +41,10 @@ import { CardComponent, CardContentComponent } from "../../cards";
     "(keydown)": "onKeyDown($event)",
   },
 })
+/**
+ * @deprecated Use the TEDI-Ready Tabs from `@tedi-design-system/angular` instead:
+ * `tedi-tabs` with `tedi-tabs-list`, `tedi-tabs-trigger` and `tedi-tabs-content`.
+ */
 export class TabsComponent implements OnInit {
   private injector = inject(Injector);
   mobileTabsOpened = signal(false);

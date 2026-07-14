@@ -201,6 +201,7 @@ export class PaginationComponent {
   protected readonly useCompactPicker =
     this.breakpointService.isBelowBreakpoint("md");
   protected readonly pageSizeInputId = `tedi-pagination-page-size-${generateUUID()}`;
+  protected readonly pageSizeLabelId = `${this.pageSizeInputId}-label`;
 
   protected readonly hostClasses = computed(() => {
     const classes = [

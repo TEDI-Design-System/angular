@@ -3,24 +3,38 @@
   color="secondary"
   modifiers="small"
   class="tedi-header-language__label"
-  >{{ "header.select-lang" | tediTranslate }}</span
+  >{{ selectLabel() || ("header.select-lang" | tediTranslate) }}</span
 >
 <tedi-popover [withBorder]="true" position="bottom" [preventOverflow]="true">
   <button
     type="button"
     tedi-popover-trigger
     class="tedi-link tedi-header__link-button"
+    [attr.aria-label]="triggerAriaLabel()"
   >
-    <span>{{ languages()[translationService.getLanguage()] }}</span>
-    <tedi-icon name="expand_more" />
+    <span>{{ displayedLanguage() }}</span>
+    <tedi-icon
+      name="expand_more"
+      [size]="18"
+      color="inherit"
+      class="tedi-header-language__chevron"
+    />
   </button>
   <tedi-popover-content maxWidth="none">
-    <button
-      *ngFor="let language of languageKeys()"
-      class="tedi-link tedi-header__link-button"
-      (click)="handleChangeLang(language)"
-    >
-      <span>{{ languages()[language] }}</span>
-    </button>
+    @for (language of languageKeys(); track language) {
+      @if (languageHrefs()?.[language]; as href) {
+        <a class="tedi-link tedi-header__link-button" [href]="href">
+          <span>{{ languages()[language] }}</span>
+        </a>
+      } @else {
+        <button
+          type="button"
+          class="tedi-link tedi-header__link-button"
+          (click)="handleChangeLang(language)"
+        >
+          <span>{{ languages()[language] }}</span>
+        </button>
+      }
+    }
   </tedi-popover-content>
 </tedi-popover>

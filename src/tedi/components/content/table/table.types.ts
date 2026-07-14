@@ -8,6 +8,7 @@ import type {
   ColumnSizingState,
   ExpandedState,
   PaginationState,
+  Row,
   RowSelectionState,
   SortingState,
   Table as TanstackTable,
@@ -18,6 +19,13 @@ import type { PaginationPageSizeOption } from "../../navigation/pagination/pagin
 import type { ComponentInputs } from "../../../types/inputs.type";
 
 export type TableSize = "medium" | "small";
+
+/**
+ * The auto-injected control columns, in the order they may appear. Used by the
+ * table's `controlColumnOrder` input to let consumers reorder them (e.g. place
+ * the selection checkbox before the expand chevron).
+ */
+export type TableControlColumn = "drag" | "select" | "expand";
 
 /** Phases of keyboard-driven column reordering. */
 export type ColumnReorderPhase = "idle" | "picked-up" | "moving";
@@ -176,6 +184,19 @@ export type TediColumnDef<TData, TValue = unknown> = ColumnDef<
    * entirely (covered by a previous spanning cell). Defaults to `1`.
    */
   rowSpan?: number | ((info: CellContext<TData, TValue>) => number);
+  /**
+   * Row grouping for this column: consecutive rendered rows with an equal key
+   * are merged into a single spanning cell (computed internally against the
+   * live, post-filter / sort / pagination row model — no manual
+   * `groupRowSpan` wiring).
+   *
+   * - A function `(row) => key` groups this column by its own key.
+   * - `true` reuses the table-level `groupRowsBy` key (shared grouping that
+   *   also drives the control columns, group selection, and group borders).
+   *
+   * Takes precedence over `rowSpan` when both are set.
+   */
+  groupBy?: boolean | ((row: Row<TData>) => unknown);
   /**
    * Opts the column into the built-in sort affordance. When `true` and the
    * column's `header` is a string, the table renders a clickable sort button

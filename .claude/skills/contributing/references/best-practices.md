@@ -356,7 +356,7 @@ fixture.detectChanges();
 ### Structure
 ```typescript
 export default {
-  title: 'TEDI-Ready/Components/Category/ComponentName',
+  title: 'TEDI-Ready/Components/Category/ComponentName', // Content/Layout/Base groups skip the Components/ segment
   component: ComponentNameComponent,
   decorators: [
     moduleMetadata({

@@ -1,5 +1,6 @@
 import {
   Component,
+  computed,
   signal,
   TemplateRef,
   viewChild,
@@ -111,6 +112,9 @@ const columns: TediColumnDef<Person>[] = [
       [rowCount]="rowCount()"
       [renderSubComponent]="subTemplate()"
       [getSubRows]="getSubRows()"
+      [groupRowsBy]="groupRowsBy()"
+      [rowGroupDividers]="rowGroupDividers()"
+      [controlColumnOrder]="controlColumnOrder()"
       [interactive]="interactive()"
       [rowAriaLabel]="rowAriaLabel()"
       [activeRowId]="activeRowId()"
@@ -157,6 +161,15 @@ class HostComponent {
   readonly getSubRows = signal<
     ((row: Person) => Person[] | undefined) | undefined
   >(undefined);
+  readonly groupRowsBy = signal<((row: Row<Person>) => unknown) | undefined>(
+    undefined,
+  );
+  readonly rowGroupDividers = signal<"all" | "between" | "none">("all");
+  readonly controlColumnOrder = signal<("drag" | "select" | "expand")[]>([
+    "drag",
+    "select",
+    "expand",
+  ]);
   readonly interactive = signal(false);
   readonly rowAriaLabel = signal<((row: Row<Person>) => string) | undefined>(
     undefined,
@@ -952,6 +965,172 @@ describe("TediTableComponent", () => {
       expect(
         fn({ row: tableRows[2] } as CellContext<{ key: string }, unknown>),
       ).toBe(1);
+    });
+  });
+
+  describe("grouping", () => {
+    const groupedRows: Person[] = [
+      { id: "a", name: "Anna", role: "Eng" },
+      { id: "b", name: "Bob", role: "Eng" },
+      { id: "c", name: "Cara", role: "Design" },
+    ];
+    const byRole = (row: Row<Person>) => row.original.role;
+
+    function setupGrouped(
+      extra?: (host: HostComponent) => void,
+    ): ComponentFixture<HostComponent> {
+      return setupHost((host) => {
+        host.data.set(groupedRows);
+        host.groupRowsBy.set(byRole);
+        extra?.(host);
+      });
+    }
+
+    it("spans a groupBy:true column across consecutive rows of a group", () => {
+      const fixture = setupGrouped((host) => {
+        host.columns.set([
+          { id: "name", header: "Name", accessorKey: "name", groupBy: true },
+          { id: "role", header: "Role", accessorKey: "role" },
+        ]);
+      });
+      const bodyRows = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__body tr.tedi-table__row",
+      );
+      // Group "Eng" (rows 0,1): first row's name cell spans 2; row 1 omits it.
+      expect(bodyRows[0].querySelector("td")?.getAttribute("rowspan")).toBe(
+        "2",
+      );
+      expect(bodyRows[1].querySelectorAll("td").length).toBe(1);
+      // Group "Design" (row 2): single row, no rowspan.
+      expect(
+        bodyRows[2].querySelector("td")?.getAttribute("rowspan"),
+      ).toBeNull();
+    });
+
+    it("spans the select control column per group — one checkbox per group", () => {
+      const fixture = setupGrouped((host) => host.enableRowSelection.set(true));
+      const bodyCheckboxes = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__body input[type=checkbox]",
+      );
+      expect(bodyCheckboxes.length).toBe(2);
+    });
+
+    it("selects every row in a group from its single checkbox", () => {
+      const fixture = setupGrouped((host) => host.enableRowSelection.set(true));
+      const firstGroupCheckbox = fixture.nativeElement.querySelector(
+        ".tedi-table__body input[type=checkbox]",
+      ) as HTMLInputElement;
+      firstGroupCheckbox.click();
+      fixture.detectChanges();
+      const lastEmit =
+        fixture.componentInstance.onStateChange.mock.calls.at(-1);
+      expect(lastEmit?.[0].rowSelection).toEqual({ "0": true, "1": true });
+    });
+
+    it("renders the group checkbox indeterminate when only part of the group is selected", () => {
+      const fixture = setupGrouped((host) => {
+        host.enableRowSelection.set(true);
+        host.state.set({ rowSelection: { "0": true } });
+      });
+      const firstGroupCheckbox = fixture.nativeElement.querySelector(
+        ".tedi-table__body input[type=checkbox]",
+      ) as HTMLInputElement;
+      expect(firstGroupCheckbox.indeterminate).toBe(true);
+      expect(firstGroupCheckbox.checked).toBe(false);
+    });
+
+    it("draws group dividers only between groups when rowGroupDividers='between'", () => {
+      const fixture = setupGrouped((host) =>
+        host.rowGroupDividers.set("between"),
+      );
+      expect(
+        fixture.nativeElement.querySelector(".tedi-table")?.className,
+      ).toContain("tedi-table--group-dividers-between");
+      const startRows = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__row--group-start",
+      );
+      // One group-start row per group (Eng, Design).
+      expect(startRows.length).toBe(2);
+    });
+
+    it("orders the control columns per controlColumnOrder", () => {
+      const fixture = setupGrouped((host) => {
+        host.enableRowSelection.set(true);
+        host.getSubRows.set((row) => row.subRows);
+        host.controlColumnOrder.set(["expand", "select"]);
+      });
+      const headerCells = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__head th",
+      );
+      // expand control first, select second
+      expect(headerCells[0].querySelector("input[type=checkbox]")).toBeNull();
+      expect(
+        headerCells[1].querySelector("input[type=checkbox]"),
+      ).not.toBeNull();
+    });
+  });
+
+  describe("interactive cell click guarding", () => {
+    @Component({
+      standalone: true,
+      imports: [TediTableComponent],
+      template: `
+        <tedi-table
+          [data]="data"
+          [columns]="columns()"
+          [interactive]="true"
+          (rowClick)="onRowClick($event)"
+        />
+        <ng-template #linkCell>
+          <a class="cell-link" href="#">link</a>
+        </ng-template>
+      `,
+    })
+    class ClickGuardHostComponent {
+      readonly data: Person[] = [{ id: "1", name: "Anna", role: "Eng" }];
+      readonly linkTpl = viewChild<TemplateRef<unknown>>("linkCell");
+      readonly onRowClick = jest.fn();
+      readonly columns = computed<TediColumnDef<Person>[]>(() => [
+        { id: "name", header: "Name", accessorKey: "name" },
+        {
+          id: "link",
+          header: "Link",
+          cell: this.linkTpl() ?? "",
+        } as TediColumnDef<Person>,
+      ]);
+    }
+
+    function setupGuard(): ComponentFixture<ClickGuardHostComponent> {
+      TestBed.configureTestingModule({
+        imports: [ClickGuardHostComponent],
+        providers: [
+          { provide: TediTranslationService, useClass: TranslationMock },
+          { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        ],
+      });
+      const fixture = TestBed.createComponent(ClickGuardHostComponent);
+      fixture.detectChanges();
+      return fixture;
+    }
+
+    it("does not activate the row when an interactive control in a cell is clicked", () => {
+      const fixture = setupGuard();
+      const link = fixture.nativeElement.querySelector(
+        ".cell-link",
+      ) as HTMLAnchorElement;
+      link.click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.onRowClick).not.toHaveBeenCalled();
+    });
+
+    it("still activates the row when a non-interactive cell is clicked", () => {
+      const fixture = setupGuard();
+      const cell = fixture.nativeElement.querySelector(
+        ".tedi-table__body td",
+      ) as HTMLTableCellElement;
+      cell.click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.onRowClick).toHaveBeenCalled();
     });
   });
 

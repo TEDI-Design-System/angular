@@ -5,7 +5,7 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { FloatingButtonComponent } from "./floating-button.component";
-import { IconComponent } from "src/tedi/components";
+import { IconComponent } from "tedi/components";
 
 const buttonSizeArray = ["default", "large"];
 const buttonStateArray = ["Default", "Hover", "Active", "Focus"];

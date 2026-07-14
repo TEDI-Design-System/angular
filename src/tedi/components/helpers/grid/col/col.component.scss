@@ -15,6 +15,11 @@ $align-self: (
 .tedi-col {
   display: block;
 
+  // Grid items default to min-width:auto (min-content), which lets wide content
+  // (e.g. a field full of tags) push the column past its track instead of
+  // shrinking. Allow the column to shrink to its track so content wraps.
+  min-width: 0;
+
   @for $i from 1 through $column-width {
     &--width-#{$i} {
       grid-column: span #{$i};

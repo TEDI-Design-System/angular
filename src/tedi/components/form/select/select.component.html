@@ -1,14 +1,24 @@
 @if (label()) {
-  <label
-    [id]="labelId()"
-    tedi-label
-    [for]="inputId()"
-    [required]="required()"
-    [size]="size()"
-    (click)="onTriggerClick()"
-  >
-    {{ label() }}
-  </label>
+  <div class="tedi-select__label-row">
+    <label
+      [id]="labelId()"
+      tedi-label
+      [for]="inputId()"
+      [required]="required()"
+      [size]="size()"
+      (click)="onTriggerClick()"
+    >
+      {{ label() }}
+    </label>
+    @if (tooltip(); as tooltipText) {
+      <tedi-tooltip>
+        <tedi-tooltip-trigger>
+          <button tedi-info-button></button>
+        </tedi-tooltip-trigger>
+        <tedi-tooltip-content>{{ tooltipText }}</tedi-tooltip-content>
+      </tedi-tooltip>
+    }
+  </div>
 }
 <div
   [id]="searchable() ? null : inputId()"
@@ -25,7 +35,8 @@
   [attr.aria-haspopup]="searchable() ? null : 'listbox'"
   [attr.aria-expanded]="searchable() ? null : isOpen()"
   [attr.aria-controls]="searchable() ? null : listboxId()"
-  [attr.aria-labelledby]="!searchable() && label() ? labelId() : null"
+  [attr.aria-labelledby]="!searchable() ? resolvedAriaLabelledby() : null"
+  [attr.aria-label]="!searchable() ? resolvedAriaLabel() : null"
   [tabindex]="searchable() || disabled() ? -1 : 0"
   (click)="onTriggerClick()"
   (keydown.enter)="onTriggerEnter()"
@@ -73,7 +84,8 @@
           aria-autocomplete="list"
           [attr.aria-expanded]="isOpen()"
           [attr.aria-controls]="listboxId()"
-          [attr.aria-labelledby]="label() ? labelId() : null"
+          [attr.aria-labelledby]="resolvedAriaLabelledby()"
+          [attr.aria-label]="resolvedAriaLabel()"
         />
       }
     </div>
@@ -120,14 +132,13 @@
     ></button>
   }
 
-  <button
+  <span
     class="tedi-select__arrow"
-    type="button"
-    tabindex="-1"
+    aria-hidden="true"
     (click)="onArrowClick($event)"
   >
     <tedi-icon name="arrow_drop_down" />
-  </button>
+  </span>
 </div>
 @if (feedbackText(); as feedback) {
   <tedi-feedback-text
@@ -146,6 +157,7 @@
     @if (multiRow()) {
       @for (value of selectedValues(); track value) {
         <tedi-tag
+          [ellipsis]="tagEllipsis()"
           [closable]="isTagRemovable()"
           (closed)="deselect($event, value)"
         >
@@ -153,19 +165,24 @@
         </tedi-tag>
       }
     } @else {
-      @for (value of selectedValues(); track value; let i = $index) {
-        @if (visibleTagsCount() === null || i < visibleTagsCount()!) {
-          <tedi-tag
-            #tagElement
-            [closable]="isTagRemovable()"
-            (closed)="deselect($event, value)"
-          >
-            {{ getLabel(value) }}
-          </tedi-tag>
+      <div class="tedi-select__multiselect-tags">
+        @for (value of selectedValues(); track value; let i = $index) {
+          @if (visibleTagsCount() === null || i < visibleTagsCount()!) {
+            <tedi-tag
+              #tagElement
+              [ellipsis]="tagEllipsis()"
+              [closable]="isTagRemovable()"
+              (closed)="deselect($event, value)"
+            >
+              {{ getLabel(value) }}
+            </tedi-tag>
+          }
         }
-      }
+      </div>
       @if (hiddenTagsCount() > 0) {
-        <tedi-tag>+{{ hiddenTagsCount() }}</tedi-tag>
+        <tedi-tag class="tedi-select__multiselect-counter"
+          >+{{ hiddenTagsCount() }}</tedi-tag
+        >
       }
     }
     @if (searchable()) {
@@ -185,7 +202,8 @@
         aria-autocomplete="list"
         [attr.aria-expanded]="isOpen()"
         [attr.aria-controls]="listboxId()"
-        [attr.aria-labelledby]="label() ? labelId() : null"
+        [attr.aria-labelledby]="resolvedAriaLabelledby()"
+        [attr.aria-label]="resolvedAriaLabel()"
       />
     }
   </div>

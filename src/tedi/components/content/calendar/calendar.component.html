@@ -1,0 +1,117 @@
+@switch (view()) {
+  @case ("days") {
+    <div class="tedi-calendar__months">
+      @for (monthDate of monthDates(); track $index; let i = $index) {
+        <div class="tedi-calendar__month">
+          <tedi-calendar-header
+            [currentMonth]="monthDate"
+            [view]="view()"
+            [localeCode]="localeCode()"
+            [showNavigation]="showNavigation()"
+            [monthYearSelectType]="monthYearSelectType()"
+            [disabledMatchers]="computedDisabledMatchers()"
+            [minYear]="resolvedMinYear()"
+            [maxYear]="resolvedMaxYear()"
+            [isMonthDisabled]="effectiveIsMonthDisabled()"
+            [isYearDisabled]="effectiveIsYearDisabled()"
+            [yearPageStart]="yearPageStart()"
+            [yearPageSize]="yearPageSize"
+            [numberOfMonths]="numberOfMonths()"
+            [inputDisabled]="effectiveDisabled()"
+            (prevClick)="handlePrev()"
+            (nextClick)="handleNext()"
+            (monthChange)="handleHeaderMonthChange($event, i)"
+            (yearChange)="handleHeaderYearChange($event, i)"
+            (viewChange)="handleHeaderViewChange($event)"
+          />
+          <tedi-calendar-day-grid
+            [month]="monthDate"
+            [mode]="mode()"
+            [value]="value()"
+            [localeCode]="localeCode()"
+            [firstDayOfWeek]="firstDayOfWeek()"
+            [showOutsideDays]="showOutsideDays()"
+            [showWeekNumbers]="showWeekNumbers()"
+            [disabledMatchers]="disabledMatchers()"
+            [availableDays]="availableDays()"
+            [unavailableDays]="unavailableDays()"
+            [dayStatus]="dayStatus()"
+            [inputDisabled]="effectiveDisabled()"
+            [(hoveredDate)]="hoveredDay"
+            (daySelect)="handleDaySelect($event)"
+          />
+        </div>
+      }
+    </div>
+  }
+  @case ("months") {
+    <div class="tedi-calendar__month">
+      <tedi-calendar-header
+        [currentMonth]="currentMonth()"
+        [view]="view()"
+        [localeCode]="localeCode()"
+        [showNavigation]="showNavigation()"
+        [monthYearSelectType]="monthYearSelectType()"
+        [disabledMatchers]="computedDisabledMatchers()"
+        [minYear]="resolvedMinYear()"
+        [maxYear]="resolvedMaxYear()"
+        [isMonthDisabled]="effectiveIsMonthDisabled()"
+        [isYearDisabled]="effectiveIsYearDisabled()"
+        [yearPageStart]="yearPageStart()"
+        [yearPageSize]="yearPageSize"
+        [numberOfMonths]="numberOfMonths()"
+        [inputDisabled]="effectiveDisabled()"
+        (prevClick)="handlePrev()"
+        (nextClick)="handleNext()"
+        (monthChange)="handleHeaderMonthChange($event)"
+        (yearChange)="handleHeaderYearChange($event)"
+        (viewChange)="handleHeaderViewChange($event)"
+      />
+      <tedi-calendar-month-grid
+        [year]="currentMonth().getFullYear()"
+        [selectedMonth]="selectedSingle()"
+        [localeCode]="localeCode()"
+        [isMonthDisabled]="effectiveIsMonthDisabled()"
+        [inputDisabled]="effectiveDisabled()"
+        (monthSelect)="handleMonthSelect($event)"
+      />
+    </div>
+  }
+  @case ("years") {
+    <div class="tedi-calendar__month">
+      <tedi-calendar-header
+        [currentMonth]="currentMonth()"
+        [view]="view()"
+        [localeCode]="localeCode()"
+        [showNavigation]="showNavigation()"
+        [monthYearSelectType]="monthYearSelectType()"
+        [disabledMatchers]="computedDisabledMatchers()"
+        [minYear]="resolvedMinYear()"
+        [maxYear]="resolvedMaxYear()"
+        [isMonthDisabled]="effectiveIsMonthDisabled()"
+        [isYearDisabled]="effectiveIsYearDisabled()"
+        [yearPageStart]="yearPageStart()"
+        [yearPageSize]="yearPageSize"
+        [numberOfMonths]="numberOfMonths()"
+        [inputDisabled]="effectiveDisabled()"
+        (prevClick)="handlePrev()"
+        (nextClick)="handleNext()"
+        (monthChange)="handleHeaderMonthChange($event)"
+        (yearChange)="handleHeaderYearChange($event)"
+        (viewChange)="handleHeaderViewChange($event)"
+      />
+      <tedi-calendar-year-grid
+        [pageStart]="yearPageStart()"
+        [pageSize]="yearPageSize"
+        [selectedYear]="selectedSingle()"
+        [isYearDisabled]="effectiveIsYearDisabled()"
+        [inputDisabled]="effectiveDisabled()"
+        (yearSelect)="handleYearSelect($event)"
+      />
+    </div>
+  }
+}
+
+<div class="tedi-calendar__footer">
+  <ng-content select="[tediCalendarFooter]" />
+</div>

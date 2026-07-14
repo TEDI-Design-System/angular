@@ -6,6 +6,7 @@ import {
   ElementRef,
   HostListener,
   inject,
+  input,
   Renderer2,
   signal,
   ViewEncapsulation,
@@ -23,8 +24,20 @@ const FOCUSABLE_SELECTOR = "button, a[href], [tabindex]";
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   hostDirectives: [CdkOverlayOrigin],
+  host: {
+    "[class.tedi-tooltip-trigger--clickable]": "tooltip.openWith() === 'click'",
+  },
 })
 export class TooltipTriggerComponent implements AfterContentChecked {
+  /**
+   * When `false`, the trigger is a pure positioning anchor: it skips making its
+   * projected child focusable (no synthesized `tabindex`, focus ring or
+   * `aria-describedby`). Use for decorative or externally-controlled origins where
+   * focus and ARIA live on another element (e.g. a slider's range input).
+   * @default true
+   */
+  readonly interactive = input(true);
+
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly overlayOrigin = inject(CdkOverlayOrigin, { self: true });
   private renderer = inject(Renderer2);
@@ -49,7 +62,9 @@ export class TooltipTriggerComponent implements AfterContentChecked {
 
   @HostListener("touchend")
   onTouchEnd() {
-    this.tooltip.toggleTooltip();
+    if (this.tooltip.openWith() !== "none") {
+      this.tooltip.toggleTooltip();
+    }
     setTimeout(() => (this.isTouch = false), 300);
   }
 
@@ -124,6 +139,8 @@ export class TooltipTriggerComponent implements AfterContentChecked {
   }
 
   ngAfterContentChecked(): void {
+    if (!this.interactive()) return;
+
     const element = this.host.nativeElement as HTMLElement;
     const firstChild = element.firstChild as HTMLElement | null;
 
@@ -147,7 +164,16 @@ export class TooltipTriggerComponent implements AfterContentChecked {
 
     const interactive = this.resolveInteractiveElement(firstChild);
 
-    this.renderer.addClass(interactive, "tedi-tooltip-trigger--focus");
+    // The `--focus` class is a fallback focus ring for triggers that have no
+    // focus styling of their own. Natively focusable elements (a real
+    // `<button>`/`<a href>`, e.g. tedi-info-button or tedi-button) already own
+    // their `:focus-visible` styles, and the tooltip's generic outline has
+    // higher specificity — adding it would override the component's own focus
+    // outline. Only synthesise a focus ring for elements that aren't already
+    // focusable in their own right.
+    if (!this.isFocusable(interactive)) {
+      this.renderer.addClass(interactive, "tedi-tooltip-trigger--focus");
+    }
 
     if (!interactive.getAttribute("tabindex")) {
       this.renderer.setAttribute(interactive, "tabindex", "0");
