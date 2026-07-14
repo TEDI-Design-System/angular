@@ -1,3 +1,10 @@
+# [7.1.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.5...angular-7.1.0-rc.6) (2026-07-14)
+
+
+### Bug Fixes
+
+* **dropdown:** skip close on certain events [#544](https://github.com/TEDI-Design-System/angular/issues/544) ([#545](https://github.com/TEDI-Design-System/angular/issues/545)) ([f9be659](https://github.com/TEDI-Design-System/angular/commit/f9be659821097949648c7896a77cc8d116af1169))
+
 # [7.1.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.4...angular-7.1.0-rc.5) (2026-07-10)
 
 
