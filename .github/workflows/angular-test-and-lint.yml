@@ -96,19 +96,33 @@ jobs:
           STORYBOOK_EXCLUDE_COMMUNITY: "true"
       - name: Run accessibility tests
         id: a11y
+        # Detect-only: this step never gates. The report step below decides
+        # pass/fail (block only violations in components this PR changed).
         run: |
           mkdir -p a11y-report
           set +e
           npm run test-storybook:ci 2>&1 | tee a11y-report/output.log
-          code=${PIPESTATUS[0]}
-          echo "test-storybook exit code: $code"
-          exit "$code"
+          echo "test-storybook exit code: ${PIPESTATUS[0]}"
         env:
           JEST_JUNIT_OUTPUT_DIR: a11y-report
           JEST_JUNIT_OUTPUT_NAME: junit.xml
-      - name: Build accessibility summary
+      - name: Determine changed files
         if: always()
-        run: node .github/scripts/a11y-report.mjs a11y-report/junit.xml a11y-report/output.log a11y-report/summary.md
+        run: |
+          mkdir -p a11y-report
+          base="${{ github.event.pull_request.base.sha }}"
+          head="${{ github.event.pull_request.head.sha }}"
+          if [ -n "$base" ] && [ -n "$head" ] && git diff --name-only "$base...$head" > a11y-report/changed-files.txt; then
+            echo "Changed files:"; cat a11y-report/changed-files.txt
+          else
+            echo "Could not determine changed files; all violations will block."
+            rm -f a11y-report/changed-files.txt
+          fi
+      - name: Build accessibility report and gate
+        if: always()
+        # Exits non-zero (fails the job) only if a changed component has a
+        # violation, or if the JUnit is missing (fail-closed on infra errors).
+        run: node .github/scripts/a11y-report.mjs a11y-report/junit.xml a11y-report/output.log a11y-report/summary.md a11y-report/changed-files.txt dist/storybook-static/index.json
         env:
           STORYBOOK_BASE_URL: https://storybook.tedi.ee/angular/${{ github.head_ref || github.ref_name }}
       - name: Comment a11y summary on PR

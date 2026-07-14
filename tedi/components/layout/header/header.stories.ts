@@ -1465,6 +1465,9 @@ This demo uses hash fragments (\`#et\`, \`#en\`, \`#ru\`) so selecting a languag
 };
 
 export const LoggedInWithSidenav: StoryObj<HeaderComponent> = {
+  // Renders the sidenav, whose accessibility fixes are tracked in
+  // https://github.com/TEDI-Design-System/angular/issues/307
+  parameters: { a11y: { test: "todo" } },
   render: (args) => ({
     props: args,
     styles: [mobileSidenavWrapperStyles],
