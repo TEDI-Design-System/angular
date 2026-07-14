@@ -101,6 +101,7 @@ export class DropdownComponent implements OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly renderer = inject(Renderer2);
   private scrollListener?: () => void;
+  private skipNextGestureOutsideClick = false;
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
@@ -124,6 +125,7 @@ export class DropdownComponent implements OnDestroy {
     }
 
     this.isOpen.set(true);
+    this.skipNextGestureOutsideClick = true;
     this.setActiveToSelectedOrFirst();
 
     if (this.hideOnScroll()) {
@@ -146,6 +148,7 @@ export class DropdownComponent implements OnDestroy {
     if (this.isOpen()) {
       this.cleanupScrollListener();
       this.isOpen.set(false);
+      this.skipNextGestureOutsideClick = false;
       this.activeIndex.set(null);
       this.updateTabindexes();
     }
@@ -159,7 +162,13 @@ export class DropdownComponent implements OnDestroy {
     }
   }
 
-  onOutsideClick() {
+  onOutsideClick(event?: MouseEvent) {
+    const isGestureEnd = !!event && (event.type !== "click" || event.ctrlKey);
+    if (this.skipNextGestureOutsideClick) {
+      this.skipNextGestureOutsideClick = false;
+      if (isGestureEnd) return;
+    }
+
     this.hideDropdown();
   }
 
