@@ -10,7 +10,7 @@ import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { TextComponent, TextColor } from "../../base/text/text.component";
 import { IconComponent } from "../../base/icon/icon.component";
-import { createBreakpointArgTypes } from "../../../../src/dev-tools/createBreakpointArgTypes";
+import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 

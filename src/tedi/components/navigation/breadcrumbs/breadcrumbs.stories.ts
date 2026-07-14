@@ -6,7 +6,7 @@ import {
 } from "@storybook/angular";
 import { LinkComponent } from "../link/link.component";
 import { IconComponent } from "../../base/icon/icon.component";
-import { createBreakpointArgTypes } from "../../../../src/dev-tools/createBreakpointArgTypes";
+import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
 import { BreadcrumbsComponent } from "./breadcrumbs.component";
 import { BreadcrumbItemDirective } from "./breadcrumb-item.directive";
 import { BreadcrumbSeparatorDirective } from "./breadcrumb-separator.directive";

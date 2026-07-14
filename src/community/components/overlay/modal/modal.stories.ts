@@ -4,7 +4,7 @@ import {
   ButtonComponent,
   FeedbackTextComponent,
   LabelComponent,
-} from "tedi/components";
+} from "../../../../tedi/components";
 import { Dialog } from "@angular/cdk/dialog";
 import {
   DialogData,

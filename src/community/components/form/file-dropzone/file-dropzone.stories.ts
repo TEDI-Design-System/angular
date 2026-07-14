@@ -1,4 +1,4 @@
-import { ComponentInputs } from "tedi/types";
+import { ComponentInputs } from "../../../../tedi/types";
 import { FileDropzoneComponent } from "./file-dropzone.component";
 import {
   argsToTemplate,
@@ -8,7 +8,7 @@ import {
 } from "@storybook/angular";
 import { validateFileSize, validateFileType } from "./utils";
 import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
-import { ButtonComponent } from "tedi/components";
+import { ButtonComponent } from "../../../../tedi/components";
 
 /**
  * FileDropzoneComponent is a component that allows users to drag and drop files or select them through a file input.
