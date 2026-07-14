@@ -22,6 +22,12 @@
     white-space: nowrap;
   }
 
+  &__prefix--text,
+  &__suffix--text {
+    padding: calc(var(--form-field-padding-y-md-default) - var(--tedi-borders-01))
+      var(--form-field-padding-x-md-default);
+  }
+
   &--addons {
     .tedi-input-group__prefix,
     .tedi-input-group__suffix {
@@ -36,12 +42,6 @@
         background-color 120ms ease,
         border-color 120ms ease,
         color 120ms ease;
-    }
-
-    .tedi-input-group__prefix--text,
-    .tedi-input-group__suffix--text {
-      padding: calc(var(--form-field-padding-y-md-default) - var(--tedi-borders-01))
-        var(--form-field-padding-x-md-default);
     }
 
     .tedi-input-group__prefix:not(.tedi-input-group__prefix--text) > *,
@@ -135,13 +135,6 @@
     .tedi-input {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
-    }
-  }
-
-  &--invalid {
-    .tedi-input-group__prefix,
-    .tedi-input-group__suffix {
-      border-color: var(--form-general-feedback-error-border);
     }
   }
 

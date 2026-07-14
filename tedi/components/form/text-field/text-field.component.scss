@@ -1,5 +1,6 @@
 .tedi-text-field {
   flex: 1;
+  min-width: 0;
   height: 100%;
   padding: var(--form-field-padding-y-md-default)
     var(--form-field-padding-x-md-default);

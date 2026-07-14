@@ -56,8 +56,8 @@ export class InputGroupComponent implements InputGroupContext {
    */
   disabled = input<boolean>(false);
   /**
-   * Marks the whole group as invalid. Applies the error border to the addons
-   * and propagates `invalid` to the wrapped control. Pair with an error
+   * Marks the whole group as invalid. Propagates `invalid` to the wrapped
+   * control so it shows the error border. Pair with an error
    * `tedi-feedback-text`.
    * @default false
    */

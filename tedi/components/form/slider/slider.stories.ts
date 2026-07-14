@@ -222,9 +222,8 @@ export const WithInputGroup: Story = {
   render: () => ({
     props: { value: 20 },
     template: `
-      <tedi-row>
-        <tedi-col [width]="6">
           <tedi-slider
+            style="width: 100%"
             inputId="slider-input-group"
             label="Väärtus"
             [min]="0"
@@ -247,8 +246,6 @@ export const WithInputGroup: Story = {
               <span tediInputGroupSuffix>%</span>
             </tedi-input-group>
           </tedi-slider>
-        </tedi-col>
-      </tedi-row>
     `,
   }),
 };

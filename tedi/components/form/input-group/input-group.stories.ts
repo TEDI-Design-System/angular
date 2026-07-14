@@ -21,13 +21,13 @@ import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-conten
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
 
 /**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY?node-id=4968-94396&m=dev" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.tedi.ee/1ee8444b7/p/18b6b5-input-group" target="_blank">Zeroheight ↗</a>
+ *
  * InputGroup is a flexible wrapper that composes a form control with prefixes
  * and suffixes. Project a `label[tedi-label]`, a control (`tedi-form-field`,
  * `tedi-select`, …), optional `[tediInputGroupPrefix]` / `[tediInputGroupSuffix]`
  * addons, and an optional `tedi-feedback-text`.
- *
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY?node-id=4968-94396&m=dev" target="_blank">Figma ↗</a><br />
- * <a href="https://www.tedi.ee/1ee8444b7/p/18b6b5-input-group" target="_blank">Zeroheight ↗</a>
  */
 const meta: Meta<InputGroupComponent> = {
   title: "TEDI-Ready/Components/Form/InputGroup",
@@ -137,7 +137,7 @@ export const StartDynamic: Story = {
     },
     template: `
       <tedi-row [cols]="1" [gapY]="2">
-        <tedi-row cols="1" [md]="{ cols: 2 }" [lg]="{ cols: 3 }">
+        <tedi-row cols="1" [md]="{ cols: 2 }">
           <tedi-col>
             <tedi-input-group>
               <label tedi-label [for]="'start-phone'">Telefoninumber</label>
@@ -157,7 +157,7 @@ export const StartDynamic: Story = {
             </tedi-input-group>
           </tedi-col>
         </tedi-row>
-        <tedi-row cols="1" [md]="{ cols: 2 }" [lg]="{ cols: 3 }">
+        <tedi-row cols="1" [md]="{ cols: 2 }">
           <tedi-col>
             <tedi-input-group>
               <label tedi-label [for]="'start-transfer'">Maksja konto</label>
@@ -211,7 +211,7 @@ export const EndDynamic: Story = {
     },
     template: `
       <tedi-row [cols]="1" [gapY]="2">
-        <tedi-row cols="1" [md]="{ cols: 2 }" [lg]="{ cols: 3 }">
+        <tedi-row cols="1" [md]="{ cols: 2 }">
           <tedi-col>
             <tedi-input-group>
               <label tedi-label [for]="'end-cost'">Hind</label>
@@ -231,7 +231,7 @@ export const EndDynamic: Story = {
             </tedi-input-group>
           </tedi-col>
         </tedi-row>
-        <tedi-row cols="1" [md]="{ cols: 2 }" [lg]="{ cols: 3 }">
+        <tedi-row cols="1" [md]="{ cols: 2 }">
           <tedi-col>
             <tedi-input-group>
               <label tedi-label [for]="'end-schedule'">Ajakava</label>
@@ -340,7 +340,7 @@ export const States: StoryObj = {
   parameters: {
     pseudo: {
       hover: ["#Hover-start", "#Hover-end"],
-      focus: ["#Focus-start", "#Focus-end"],
+      focusVisible: ["#Focus-start", "#Focus-end"],
       active: ["#Active-start", "#Active-end"],
     },
   },

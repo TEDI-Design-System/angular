@@ -131,6 +131,12 @@ const meta: Meta<SelectComponent> = {
       description:
         "Which end a tag's label truncates from when it doesn't fit. `false` never truncates; `end` → `label…`; `start` → `…label`.",
     },
+    ellipsis: {
+      control: "radio",
+      options: [false, "start", "end"],
+      description:
+        "Which end the single selected value truncates from when it doesn't fit. The full value is revealed in a tooltip on hover/focus. `false` never truncates. Applies to single-select mode; multiselect tags use `tagEllipsis`.",
+    },
     searchable: {
       control: "boolean",
       description: "Whether the select has a search input for filtering options.",
@@ -196,6 +202,7 @@ const meta: Meta<SelectComponent> = {
     isTagRemovable: false,
     multiRow: false,
     tagEllipsis: false,
+    ellipsis: false,
     searchable: false,
     clearSearchOnSelect: false,
     dropdownType: "menu",
@@ -225,6 +232,7 @@ export const Default: Story = {
         [selectableGroups]="selectableGroups"
         [isTagRemovable]="isTagRemovable"
         [multiRow]="multiRow"
+        [ellipsis]="ellipsis"
         [searchable]="searchable"
         [clearSearchOnSelect]="clearSearchOnSelect"
         [maxDropdownHeight]="maxDropdownHeight"
