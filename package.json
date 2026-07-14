@@ -20,7 +20,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --config ./jest.config.ts --coverage",
     "test-storybook": "test-storybook",
-    "test-storybook:ci": "npx -y concurrently -k -s first -n \"SB,A11Y\" -c \"magenta,blue\" \"npx -y http-server dist/storybook-static --port 6006 --silent\" \"npx -y wait-on tcp:127.0.0.1:6006 && test-storybook --index-json --url http://127.0.0.1:6006\"",
+    "test-storybook:ci": "npx -y concurrently -k -s first -n \"SB,A11Y\" -c \"magenta,blue\" \"npx -y http-server dist/storybook-static --port 6006 --silent\" \"npx -y wait-on tcp:127.0.0.1:6006 && test-storybook --index-json --url http://127.0.0.1:6006 --junit\"",
     "install:clean": "rm -rf node_modules && npm install",
     "release": "npx semantic-release",
     "chromatic": "npm run build:sb:chromatic && npx chromatic --project-token=$CHROMATIC_PROJECT_TOKEN"

@@ -74,6 +74,9 @@ jobs:
 
   accessibility:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -92,7 +95,52 @@ jobs:
         env:
           STORYBOOK_EXCLUDE_COMMUNITY: "true"
       - name: Run accessibility tests
-        run: npm run test-storybook:ci
+        id: a11y
+        run: |
+          mkdir -p a11y-report
+          npm run test-storybook:ci 2>&1 | tee a11y-report/output.log
+        continue-on-error: true
+        env:
+          JEST_JUNIT_OUTPUT_DIR: a11y-report
+          JEST_JUNIT_OUTPUT_NAME: junit.xml
+      - name: Build accessibility summary
+        if: always()
+        run: node .github/scripts/a11y-report.mjs a11y-report/junit.xml a11y-report/output.log a11y-report/summary.md
+      - name: Comment a11y summary on PR
+        if: always() && github.event_name == 'pull_request'
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const marker = "<!-- a11y-report -->";
+            let body = marker + "\n";
+            try {
+              body += fs.readFileSync("a11y-report/summary.md", "utf8");
+            } catch {
+              body += "## ♿ Accessibility\n\nNo report was produced (the run may have failed before testing).";
+            }
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const { data: comments } = await github.rest.issues.listComments({ owner, repo, issue_number });
+            const existing = comments.find((c) => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+      - name: Upload a11y report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-report
+          path: a11y-report/
+          retention-days: 7
+      - name: Fail if accessibility violations
+        if: always() && steps.a11y.outcome == 'failure'
+        run: |
+          echo "::error::Accessibility violations detected — see the PR comment and job summary."
+          exit 1
 
   compatibility:
     needs: build
