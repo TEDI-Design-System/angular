@@ -1,3 +1,10 @@
+# [7.1.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.6...angular-7.1.0-rc.7) (2026-07-15)
+
+
+### Bug Fixes
+
+* **pagination:** community pagination results rendered twice [#548](https://github.com/TEDI-Design-System/angular/issues/548) ([2ba2bb3](https://github.com/TEDI-Design-System/angular/commit/2ba2bb36b1805dac18adf1c5c929962b7ec7146c))
+
 # [7.1.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.5...angular-7.1.0-rc.6) (2026-07-14)
 
 
