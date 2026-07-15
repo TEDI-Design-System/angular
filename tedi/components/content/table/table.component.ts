@@ -6,6 +6,7 @@ import {
   computed,
   contentChild,
   effect,
+  type ElementRef,
   inject,
   Injector,
   input,
@@ -14,6 +15,7 @@ import {
   TemplateRef,
   untracked,
   ViewEncapsulation,
+  viewChild,
   output,
   type WritableSignal,
 } from "@angular/core";
@@ -1790,13 +1792,29 @@ export class TediTableComponent<TData> {
     }
   }
 
+  private readonly scrollContainer =
+    viewChild<ElementRef<HTMLElement>>("scrollContainer");
+
+  /**
+   * Resets the table's own vertical scroll to the top. Only affects the
+   * internal scroll container (used when `maxHeight` is set); the horizontal
+   * scroll position is preserved since columns are identical across pages, and
+   * the window scroll is intentionally left untouched.
+   */
+  private resetScrollTop(): void {
+    const element = this.scrollContainer()?.nativeElement;
+    if (element) element.scrollTop = 0;
+  }
+
   protected handlePaginationPageChange(nextPage: number): void {
     this.table.setPageIndex(nextPage - 1);
+    this.resetScrollTop();
   }
 
   protected handlePaginationPageSizeChange(nextSize: number | undefined): void {
     if (nextSize === undefined) return;
     this.table.setPageSize(nextSize);
+    this.resetScrollTop();
   }
 
   protected getColumnMeta(column: {
