@@ -4,6 +4,7 @@ import {
   Component,
   ElementRef,
   inject,
+  OnDestroy,
   PLATFORM_ID,
   signal,
   viewChild,
@@ -152,7 +153,7 @@ const SECTIONS = [
     `,
   ],
 })
-class TocStickyDemoComponent {
+class TocStickyDemoComponent implements OnDestroy {
   readonly sections = SECTIONS;
   readonly lorem = LOREM;
   readonly activeId = signal("sec-1");
@@ -163,9 +164,20 @@ class TocStickyDemoComponent {
 
   private seeking = false;
   private seekEndTimeout?: ReturnType<typeof setTimeout>;
+  private observer?: IntersectionObserver;
+  private scrollTarget?: HTMLElement;
+  private scrollHandler?: () => void;
 
   constructor() {
     afterNextRender(() => this.trackActiveSection());
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+    if (this.scrollHandler) {
+      this.scrollTarget?.removeEventListener("scroll", this.scrollHandler);
+    }
+    clearTimeout(this.seekEndTimeout);
   }
 
   sectionId(index: number): string {
@@ -222,24 +234,24 @@ class TocStickyDemoComponent {
       },
       { root, rootMargin: "0px 0px -55% 0px" },
     );
+    this.observer = observer;
 
     ids.forEach((id) => {
       const element = root.querySelector(`#${id}`);
       if (element) observer.observe(element);
     });
 
-    root.addEventListener(
-      "scroll",
-      () => {
-        if (!this.seeking) return;
-        clearTimeout(this.seekEndTimeout);
-        this.seekEndTimeout = setTimeout(() => {
-          this.seeking = false;
-          pickActive();
-        }, 120);
-      },
-      { passive: true },
-    );
+    const scrollHandler = () => {
+      if (!this.seeking) return;
+      clearTimeout(this.seekEndTimeout);
+      this.seekEndTimeout = setTimeout(() => {
+        this.seeking = false;
+        pickActive();
+      }, 120);
+    };
+    this.scrollTarget = root;
+    this.scrollHandler = scrollHandler;
+    root.addEventListener("scroll", scrollHandler, { passive: true });
   }
 }
 
@@ -796,15 +808,22 @@ const STICKY_LAYOUT_SOURCE = `@Component({
     </tedi-table-of-contents-collapsible>
   \`,
 })
-export class ArticleWithTocComponent {
+export class ArticleWithTocComponent implements OnDestroy {
   readonly sections = ["Sissejuhatus", "Taust", "Meetodid", "Tulemused", "Arutelu", "Kokkuvõte"];
   readonly activeId = signal("sec-1");
 
   private readonly scroller = viewChild.required<ElementRef<HTMLDivElement>>("scroller");
   private seeking = false;
+  private observer?: IntersectionObserver;
+  private seekTimeout?: ReturnType<typeof setTimeout>;
 
   constructor() {
     afterNextRender(() => this.trackActiveSection());
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
+    clearTimeout(this.seekTimeout);
   }
 
   // Smooth-scroll to the section on click; guard the observer during the scroll
@@ -816,7 +835,7 @@ export class ArticleWithTocComponent {
     this.scroller().nativeElement
       .querySelector("#" + id)
       ?.scrollIntoView({ behavior: "smooth" });
-    setTimeout(() => (this.seeking = false), 700);
+    this.seekTimeout = setTimeout(() => (this.seeking = false), 700);
   }
 
   // Scroll-spy: highlight the section currently in view.
@@ -830,6 +849,7 @@ export class ArticleWithTocComponent {
       },
       { root, rootMargin: "0px 0px -55% 0px" },
     );
+    this.observer = observer;
     this.sections.forEach((_, i) => {
       const el = root.querySelector("#sec-" + (i + 1));
       if (el) observer.observe(el);

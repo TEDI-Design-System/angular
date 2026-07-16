@@ -8,6 +8,7 @@ import {
   forwardRef,
   inject,
   input,
+  OnDestroy,
   signal,
   TemplateRef,
   viewChild,
@@ -48,7 +49,7 @@ import { TableOfContentsItemComponent } from "../table-of-contents-item/table-of
     },
   ],
 })
-export class TableOfContentsCollapsibleComponent {
+export class TableOfContentsCollapsibleComponent implements OnDestroy {
   /**
    * Heading shown on the bar and sheet. Defaults to the localised "Table of
    * contents" label.
@@ -90,11 +91,7 @@ export class TableOfContentsCollapsibleComponent {
   readonly openLabel = this.translations.track("open");
   readonly closeLabel = this.translations.track("close");
 
-  readonly title = computed(() => {
-    const heading = this.heading();
-    const resolved = heading === undefined ? this.titleLabel() : heading;
-    return resolved ?? this.titleLabel();
-  });
+  readonly title = computed(() => this.heading() ?? this.titleLabel());
   /** Accessible name for the nav/dialog — the `ariaLabel` override or the title. */
   readonly navLabel = computed(() => this.ariaLabel() || this.title());
 
@@ -108,6 +105,10 @@ export class TableOfContentsCollapsibleComponent {
 
   close(): void {
     this.dialogRef?.close();
+  }
+
+  ngOnDestroy(): void {
+    this.close();
   }
 
   onListClick(event: Event): void {
