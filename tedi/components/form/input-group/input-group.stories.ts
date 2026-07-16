@@ -19,6 +19,10 @@ import { DropdownComponent } from "../../overlay/dropdown/dropdown.component";
 import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-content/dropdown-content.component";
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
+import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
+import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
+import { DropdownItemValueMetaComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-meta.component";
+import { SelectOptionTemplateDirective } from "../select/select-templates.directive";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY?node-id=4968-94396&m=dev" target="_blank">Figma ↗</a><br />
@@ -55,6 +59,10 @@ const meta: Meta<InputGroupComponent> = {
         DropdownTriggerDirective,
         DropdownContentComponent,
         DropdownItemComponent,
+        DropdownItemValueComponent,
+        DropdownItemValueLabelComponent,
+        DropdownItemValueMetaComponent,
+        SelectOptionTemplateDirective,
       ],
     }),
   ],
@@ -95,9 +103,9 @@ const CURRENCIES = ["EUR", "USD", "GBP", "SEK"];
 const DIAL_CODES = ["372", "371", "370", "358"];
 const TIMEZONES = ["UTC", "EET", "CET", "EST"];
 const ACCOUNTS = [
-  { value: "checking", label: "Arvelduskonto · EE38 2200 2210 2014 5685" },
-  { value: "savings", label: "Kogumiskonto · EE96 2200 2210 2014 7283" },
-  { value: "investment", label: "Investeerimiskonto · EE27 2200 2210 2014 8120" },
+  { value: "checking", name: "Arvelduskonto", number: "EE38 2200 2210 2014 5685" },
+  { value: "savings", name: "Kogumiskonto", number: "EE96 2200 2210 2014 7283" },
+  { value: "investment", name: "Investeerimiskonto", number: "EE27 2200 2210 2014 8120" },
 ];
 const MEETINGS = [
   { value: "weekly-sync", label: "Iganädalane koosolek · E 09:00" },
@@ -171,7 +179,21 @@ export const StartDynamic: Story = {
                   }
                 </tedi-dropdown-content>
               </tedi-dropdown>
-              <tedi-select inputId="start-transfer" [options]="accounts" placeholder="Vali konto" ellipsis="end" />
+              <tedi-select
+                inputId="start-transfer"
+                [options]="accounts"
+                bindLabel="name"
+                bindValue="value"
+                placeholder="Vali konto"
+                ellipsis="end"
+              >
+                <ng-template tediSelectOption let-item>
+                  <tedi-dropdown-item-value layout="vertical">
+                    <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
+                    <tedi-dropdown-item-value-meta>{{ item.number }}</tedi-dropdown-item-value-meta>
+                  </tedi-dropdown-item-value>
+                </ng-template>
+              </tedi-select>
             </tedi-input-group>
           </tedi-col>
         </tedi-row>
@@ -435,7 +457,22 @@ export const AllControls: StoryObj = {
           <tedi-input-group [invalid]="true">
             <label tedi-label [for]="'all-select'">Valikmenüü</label>
             <span tediInputGroupPrefix>€</span>
-            <tedi-select inputId="all-select" [options]="accounts" placeholder="Vali konto" state="error" ellipsis="end" />
+            <tedi-select
+              inputId="all-select"
+              [options]="accounts"
+              bindLabel="name"
+              bindValue="value"
+              placeholder="Vali konto"
+              state="error"
+              ellipsis="end"
+            >
+              <ng-template tediSelectOption let-item>
+                <tedi-dropdown-item-value layout="vertical">
+                  <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
+                  <tedi-dropdown-item-value-meta>{{ item.number }}</tedi-dropdown-item-value-meta>
+                </tedi-dropdown-item-value>
+              </ng-template>
+            </tedi-select>
             <span tediInputGroupSuffix>EUR</span>
             <tedi-feedback-text text="Vali makset kandev konto" type="error" />
           </tedi-input-group>
