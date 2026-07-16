@@ -12,7 +12,7 @@ import { InfoButtonComponent } from "../../buttons/info-button/info-button.compo
 import { IconComponent } from "../../base/icon/icon.component";
 
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.17.25?node-id=136-14995&m=dev&focus-id=25945-119670" target="_BLANK">Figma ↗</a><br/>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.17.25?node-id=136-14995&m=dev&focus-id=25945-119670" target="_BLANK">Figma ↗</a><br />
  * <a href="https://www.tedi.ee/1ee8444b7/p/27208b-timeline" target="_BLANK">Zeroheight ↗</a>
  *
  * This component is responsive and adapts to mobile layout when below LG (992px) breakpoint.<br />

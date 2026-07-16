@@ -1,8 +1,4 @@
-import {
-  type Meta,
-  type StoryObj,
-  moduleMetadata,
-} from "@storybook/angular";
+import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
 import {
   FormControl,
   FormGroup,
@@ -23,9 +19,21 @@ import type { DateRange } from "../../content/calendar/types";
 import type { Matcher } from "../../../utils/matchers.util";
 
 const today = new Date();
-const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-const inThreeDays = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 3);
-const inTenDays = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 10);
+const tomorrow = new Date(
+  today.getFullYear(),
+  today.getMonth(),
+  today.getDate() + 1,
+);
+const inThreeDays = new Date(
+  today.getFullYear(),
+  today.getMonth(),
+  today.getDate() + 3,
+);
+const inTenDays = new Date(
+  today.getFullYear(),
+  today.getMonth(),
+  today.getDate() + 10,
+);
 
 const pad = (n: number): string => n.toString().padStart(2, "0");
 
@@ -36,7 +44,10 @@ const formatUS = (value: Date | Date[] | DateRange | null): string => {
   }
   if (Array.isArray(value)) {
     return value
-      .map((d) => `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}`)
+      .map(
+        (d) =>
+          `${pad(d.getMonth() + 1)}/${pad(d.getDate())}/${d.getFullYear()}`,
+      )
       .join(", ");
   }
   const from = `${pad(value.from.getMonth() + 1)}/${pad(value.from.getDate())}/${value.from.getFullYear()}`;
@@ -170,7 +181,7 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
 };
 
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.65.83?node-id=4620-82915&m=dev" target="_blank">Figma ↗</a><br>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.65.83?node-id=4620-82915&m=dev" target="_blank">Figma ↗</a><br />
  * <a href="https://www.tedi.ee/1ee8444b7/p/15bd6e-date-field" target="_blank">Zeroheight ↗</a>
  *
  * DateField is the form-control wrapper around the Calendar. It exposes a typed text input
@@ -179,7 +190,6 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
  * `range` modes, custom `formatDate`/`parseDate` callbacks, and the same selection-level/header
  * options as Calendar.
  */
-
 export default {
   title: "TEDI-Ready/Components/Form/DateField",
   component: DateFieldComponent,
@@ -451,21 +461,22 @@ export default {
         category: "inputs",
         type: {
           summary: "BreakpointInput<number>",
-          detail: "number \n{ xs: number; sm?: number; md?: number; lg?: number; xl?: number; xxl?: number }",
+          detail:
+            "number \n{ xs: number; sm?: number; md?: number; lg?: number; xl?: number; xxl?: number }",
         },
         defaultValue: { summary: "1" },
       },
     },
     useNativePicker: {
       description:
-        "Swaps the custom popover for the browser's native `<input type=\"date\">` UI (single mode only). `true` always uses native, `false` never; a breakpoint name (`sm | md | lg | xl`) uses native below that breakpoint and the custom popover from it upward. Defaults to `false`.",
+        'Swaps the custom popover for the browser\'s native `<input type="date">` UI (single mode only). `true` always uses native, `false` never; a breakpoint name (`sm | md | lg | xl`) uses native below that breakpoint and the custom popover from it upward. Defaults to `false`.',
       control: { type: "select" },
       options: [true, false, "sm", "md", "lg", "xl"],
       table: {
         category: "inputs",
         type: {
           summary: "DateFieldUseNativePicker",
-          detail: "boolean \n\"sm\" | \"md\" | \"lg\" | \"xl\"",
+          detail: 'boolean \n"sm" | "md" | "lg" | "xl"',
         },
         defaultValue: { summary: "false" },
       },
@@ -479,7 +490,7 @@ export default {
         category: "inputs",
         type: {
           summary: "DateFieldModalInput",
-          detail: "boolean \n\"sm\" | \"md\" | \"lg\" | \"xl\"",
+          detail: 'boolean \n"sm" | "md" | "lg" | "xl"',
         },
         defaultValue: { summary: "false" },
       },
@@ -493,7 +504,7 @@ export default {
         category: "inputs",
         type: {
           summary: "ModalFullscreen",
-          detail: "boolean \n\"sm\" | \"md\" | \"lg\" | \"xl\"",
+          detail: 'boolean \n"sm" | "md" | "lg" | "xl"',
         },
         defaultValue: { summary: "false" },
       },
@@ -615,7 +626,7 @@ export const States: Story = {
     docs: {
       description: {
         story:
-          "Persistent field states. Disabled is driven by the form control; the success/error states come from a `tedi-feedback-text` with `type=\"valid\"`/`\"error\"`, which the surrounding `tedi-form-field` reflects on the input border.",
+          'Persistent field states. Disabled is driven by the form control; the success/error states come from a `tedi-feedback-text` with `type="valid"`/`"error"`, which the surrounding `tedi-form-field` reflects on the input border.',
       },
     },
   },
@@ -725,7 +736,8 @@ export const MultipleTagLayout: Story = {
   render: (args) => {
     const dates = Array.from(
       { length: 6 },
-      (_, i) => new Date(today.getFullYear(), today.getMonth(), today.getDate() + i),
+      (_, i) =>
+        new Date(today.getFullYear(), today.getMonth(), today.getDate() + i),
     );
     const wrapControl = new FormControl<Date[] | null>(dates);
     const singleRowControl = new FormControl<Date[] | null>(dates);
@@ -789,7 +801,7 @@ export const OnClickType: Story = {
     docs: {
       description: {
         story:
-          "`calendarTrigger` decides what opens the calendar: `\"button\"` (the icon, default) or `\"input\"` (the whole input — typing is then blocked).",
+          '`calendarTrigger` decides what opens the calendar: `"button"` (the icon, default) or `"input"` (the whole input — typing is then blocked).',
       },
     },
   },
@@ -889,7 +901,8 @@ export const ShowWeekCount: Story = {
   parameters: {
     docs: {
       description: {
-        story: "`showWeekNumbers` adds an ISO week-number column to the day grid.",
+        story:
+          "`showWeekNumbers` adds an ISO week-number column to the day grid.",
       },
     },
   },
@@ -905,7 +918,7 @@ export const MultipleMonths: Story = {
     docs: {
       description: {
         story:
-          "`numberOfMonths` shows several months side by side. A plain number is honoured at every breakpoint — `2` stays two months even on a phone or in a modal. To narrow it on small screens, pass a per-breakpoint object instead, e.g. `[numberOfMonths]=\"{ xs: 1, lg: 2 }\"`.",
+          '`numberOfMonths` shows several months side by side. A plain number is honoured at every breakpoint — `2` stays two months even on a phone or in a modal. To narrow it on small screens, pass a per-breakpoint object instead, e.g. `[numberOfMonths]="{ xs: 1, lg: 2 }"`.',
       },
     },
   },
@@ -926,7 +939,7 @@ export const YearGrid: Story = {
     docs: {
       description: {
         story:
-          "`monthYearSelectType=\"grid\"` replaces the header dropdowns with a clickable label that drills into a year/month grid; `selectionLevel=\"years\"` commits at year granularity. A custom `formatDate` collapses the committed `Date` (Jan 1 of the year) to just the year number.",
+          '`monthYearSelectType="grid"` replaces the header dropdowns with a clickable label that drills into a year/month grid; `selectionLevel="years"` commits at year granularity. A custom `formatDate` collapses the committed `Date` (Jan 1 of the year) to just the year number.',
       },
     },
   },
@@ -1009,13 +1022,14 @@ export const NativePicker: Story = {
   args: {
     inputId: "date-native",
     useNativePicker: true,
-    feedback: "Kasutab operatsioonisüsteemi kuupäevavalijat igal ekraanilaiusel.",
+    feedback:
+      "Kasutab operatsioonisüsteemi kuupäevavalijat igal ekraanilaiusel.",
   },
   parameters: {
     docs: {
       description: {
         story:
-          "`[useNativePicker]=\"true\"` swaps the popover for the browser's built-in `<input type=\"date\">` UI (single mode only). The prop accepts `boolean | sm | md | lg | xl` and **defaults to `false`**. Pass a breakpoint name like `\"md\"` for native on phones and the custom popover from `md` upward.",
+          '`[useNativePicker]="true"` swaps the popover for the browser\'s built-in `<input type="date">` UI (single mode only). The prop accepts `boolean | sm | md | lg | xl` and **defaults to `false`**. Pass a breakpoint name like `"md"` for native on phones and the custom popover from `md` upward.',
       },
     },
   },
@@ -1063,7 +1077,7 @@ export const MobileModal: Story = {
     docs: {
       description: {
         story:
-          "`[modal]=\"true\"` opens the calendar in a modal (with explicit Cancel/Confirm) instead of the popover, holding the selection as a draft until Confirm. By default the modal is centered; add `[fullscreen]=\"true\"` to make it fill the screen — useful on small phones where vertical space is tight. Both `modal` and `fullscreen` accept the same union (`true | false | sm | md | lg | xl`), so e.g. `fullscreen=\"md\"` only goes fullscreen below `md`.",
+          '`[modal]="true"` opens the calendar in a modal (with explicit Cancel/Confirm) instead of the popover, holding the selection as a draft until Confirm. By default the modal is centered; add `[fullscreen]="true"` to make it fill the screen — useful on small phones where vertical space is tight. Both `modal` and `fullscreen` accept the same union (`true | false | sm | md | lg | xl`), so e.g. `fullscreen="md"` only goes fullscreen below `md`.',
       },
     },
   },
@@ -1112,7 +1126,8 @@ export const CustomLocale: Story = {
     localeCode: "en-US",
     useNativePicker: false,
     initialValue: inThreeDays,
-    feedback: "Vahetab kuude nimed, nädalapäevade nimed ja nädala esimese päeva.",
+    feedback:
+      "Vahetab kuude nimed, nädalapäevade nimed ja nädala esimese päeva.",
   },
   parameters: {
     docs: {
@@ -1177,7 +1192,7 @@ export const WithReactiveForms: Story = {
     docs: {
       description: {
         story:
-          "DateField implements `ControlValueAccessor`, so it slots into a `FormGroup` like any reactive control — including `mode=\"range\"`, whose value is a `{ from, to }` object. The block below the fields echoes the live `form.value`.",
+          'DateField implements `ControlValueAccessor`, so it slots into a `FormGroup` like any reactive control — including `mode="range"`, whose value is a `{ from, to }` object. The block below the fields echoes the live `form.value`.',
       },
     },
   },

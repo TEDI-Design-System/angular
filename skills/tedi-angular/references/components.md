@@ -1572,6 +1572,31 @@ Sub-components: `tedi-header-top`, `tedi-header-logo`, `tedi-header-content`, `t
 
 ## Navigation
 
+### Breadcrumbs
+**Selector:** `tedi-breadcrumbs`
+**Composition:** mark each crumb with the `*tediBreadcrumbItem` structural directive, in order from root to current page. Use `a tedi-link` for navigable crumbs and a plain element (e.g. `span`) for the current page — add `aria-current="page"` to it yourself. Chevron separators are inserted automatically.
+**Inputs:**
+- `variant: "long" | "short" = "long"` — `long` shows the full trail; `short` shows only the parent crumb as a back-link (mobile)
+- `maxItems: number` — collapse the middle of a long trail into an ellipsis dropdown when the crumb count exceeds this. Long variant only
+- `itemsBeforeCollapse: number = 1` — crumbs kept at the start when collapsed
+- `itemsAfterCollapse: number = 1` — crumbs kept at the end when collapsed
+- `separator: string` — text separator (e.g. `"/"`); defaults to a chevron icon
+- `ariaLabel: string` — `nav` landmark label; falls back to the `breadcrumbs` translation
+- `showMoreLabel: string` — ellipsis button label; falls back to the `breadcrumbs.show-more` translation
+- Responsive: `xs, sm, md, lg, xl, xxl: BreadcrumbsInputs` (`variant`, `maxItems`, `itemsBeforeCollapse`, `itemsAfterCollapse`)
+
+**Content projection:**
+- `*tediBreadcrumbItem` — one per crumb
+- `*tediBreadcrumbSeparator` — optional custom separator template (overrides `separator` and the default icon)
+
+```html
+<tedi-breadcrumbs [maxItems]="4" variant="short" [md]="{ variant: 'long' }">
+  <a *tediBreadcrumbItem tedi-link href="/">Töölaud</a>
+  <a *tediBreadcrumbItem tedi-link href="/apps">Taotlused</a>
+  <span *tediBreadcrumbItem aria-current="page">Taotlus nr 506</span>
+</tedi-breadcrumbs>
+```
+
 ### Link
 **Selector:** `[tedi-link]`
 **Inputs:**
@@ -2090,6 +2115,7 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 ## Navigation
 
 ### Breadcrumbs
+**⚠️ DEPRECATED** — use the TEDI-Ready `tedi-breadcrumbs` from `@tedi-design-system/angular/tedi` (composition API with `*tediBreadcrumbItem`, custom separators and collapse). This community version will be removed in a future release.
 **Selector:** `tedi-breadcrumbs`
 - `crumbs: Breadcrumb[]`, `shortCrumbs: boolean` | Breakpoint support
 

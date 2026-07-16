@@ -3,16 +3,21 @@ import { argsToTemplate, type Meta, type StoryObj } from "@storybook/angular";
 import { BreadcrumbsComponent } from "./breadcrumbs.component";
 import { createBreakpointArgTypes } from "../../../../src/dev-tools/createBreakpointArgTypes";
 /**
-<a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.8.9--work-in-progress-?node-id=2370-14804&m=dev" target="_BLANK">Figma ↗</a><br/>
-* Breadcrumbs provide users with a clear path of where they are within the application.
-* - Each item includes a **label** (display text) and a **href** (navigation link).
-* - The **final breadcrumb** indicates the current page and is displayed as **plain text**, without a link.
-* - Breadcrumbs are rendered **in the order they are passed**, representing the page hierarchy.
-* <br>
-*/
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.8.9--work-in-progress-?node-id=2370-14804&m=dev" target="_BLANK">Figma ↗</a><br/>
+ * Breadcrumbs provide users with a clear path of where they are within the application.
+ * - Each item includes a **label** (display text) and a **href** (navigation link).
+ * - The **final breadcrumb** indicates the current page and is displayed as **plain text**, without a link.
+ * - Breadcrumbs are rendered **in the order they are passed**, representing the page hierarchy.
+ * <br>
+ */
 export default {
   title: "Community/Navigation/Breadcrumbs",
   component: BreadcrumbsComponent,
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
   render: (args) => ({
     props: args,
     template: `
