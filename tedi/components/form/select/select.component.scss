@@ -209,7 +209,8 @@
     .tedi-dropdown-item {
       outline: none;
 
-      &.cdk-option-active:not(.tedi-dropdown-item--disabled) {
+      &.cdk-option-active:not(.tedi-dropdown-item--disabled),
+      &.tedi-dropdown-item--active:not(.tedi-dropdown-item--disabled) {
         outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
         outline-offset: calc(-1 * var(--tedi-borders-02));
       }
@@ -223,6 +224,20 @@
           color: inherit;
         }
       }
+    }
+  }
+
+  &__options--virtual {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  &__viewport {
+    width: 100%;
+
+    .tedi-dropdown-item {
+      box-sizing: border-box;
     }
   }
 

@@ -27,6 +27,8 @@ import { InputState } from "../form-field/form-field.component";
       [showSelectAll]="showSelectAll"
       [selectableGroups]="selectableGroups"
       [groupBy]="groupBy"
+      [virtualScroll]="virtualScroll"
+      [virtualItemSize]="virtualItemSize"
       [bindLabel]="bindLabel"
       [bindValue]="bindValue"
       [placeholder]="placeholder"
@@ -75,6 +77,8 @@ class TestHostComponent {
   showSelectAll = false;
   selectableGroups = false;
   groupBy: string | undefined = undefined;
+  virtualScroll = false;
+  virtualItemSize: number | undefined = undefined;
   bindLabel = "label";
   bindValue: string | undefined = undefined;
   placeholder = "Select an option...";
@@ -2653,6 +2657,221 @@ describe("SelectComponent", () => {
       tick();
 
       expect(spy).not.toHaveBeenCalled();
+    }));
+  });
+
+  describe("Virtual scroll", () => {
+    const getVirtualListbox = () =>
+      document.querySelector(".tedi-select__options--virtual") as HTMLElement;
+
+    beforeEach(() => {
+      // jsdom does not implement Element.scrollTo, which CdkVirtualScrollViewport
+      // calls from scrollToIndex during keyboard navigation.
+      (Element.prototype as any).scrollTo = jest.fn();
+      host.virtualScroll = true;
+      host.virtualItemSize = 40;
+      fixture.detectChanges();
+    });
+
+    it("virtualize is true for a flat menu list", () => {
+      expect(select.virtualize()).toBe(true);
+    });
+
+    it("virtualize is false when groupBy is set", () => {
+      host.items = [{ id: 1, name: "A", cat: "X" }];
+      host.bindLabel = "name";
+      host.bindValue = "id";
+      host.groupBy = "cat";
+      fixture.detectChanges();
+
+      expect(select.virtualize()).toBe(false);
+    });
+
+    it("renders a listbox with a virtual scroll viewport when open", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const listbox = getVirtualListbox();
+      expect(listbox).toBeTruthy();
+      expect(listbox.getAttribute("role")).toBe("listbox");
+      expect(document.querySelector("cdk-virtual-scroll-viewport")).toBeTruthy();
+    }));
+
+    it("does not instantiate a cdkListbox in virtual mode", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(document.querySelector("[cdkListbox]")).toBeFalsy();
+    }));
+
+    it("marks the first option active on open and exposes aria-activedescendant", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.activeIndex()).toBe(0);
+      expect(select.activeDescendantId()).toBe("test-select-listbox-option-0");
+      expect(getVirtualListbox().getAttribute("aria-activedescendant")).toBe(
+        "test-select-listbox-option-0",
+      );
+    }));
+
+    it("ArrowDown moves the active option forward", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      getVirtualListbox().dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }),
+      );
+      fixture.detectChanges();
+      tick();
+
+      expect(select.activeIndex()).toBe(1);
+      expect(select.activeDescendantId()).toBe("test-select-listbox-option-1");
+    }));
+
+    it("ArrowUp wraps from the first option to the last", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      getVirtualListbox().dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }),
+      );
+      fixture.detectChanges();
+      tick();
+
+      expect(select.activeIndex()).toBe(2);
+    }));
+
+    it("skips disabled options during navigation", fakeAsync(() => {
+      host.items = [
+        { id: 1, name: "A", disabled: false },
+        { id: 2, name: "B", disabled: true },
+        { id: 3, name: "C", disabled: false },
+      ];
+      host.bindLabel = "name";
+      host.bindValue = "id";
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      getVirtualListbox().dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }),
+      );
+      fixture.detectChanges();
+      tick();
+
+      expect(select.activeIndex()).toBe(2);
+    }));
+
+    it("selects an option on click and closes in single select", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      select.onVirtualOptionClick(select.filteredOptions()[0]);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 1"]);
+      expect(select.isOpen()).toBe(false);
+    }));
+
+    it("Enter selects the active option", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      getVirtualListbox().dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
+      );
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 1"]);
+    }));
+
+    it("toggles options in multiselect without closing", fakeAsync(() => {
+      host.allowMultiple = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      select.onVirtualOptionClick(select.filteredOptions()[0]);
+      select.onVirtualOptionClick(select.filteredOptions()[1]);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 1", "Option 2"]);
+      expect(select.isOpen()).toBe(true);
+
+      select.onVirtualOptionClick(select.filteredOptions()[0]);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 2"]);
+    }));
+
+    it("renders and toggles a pinned select-all row", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.showSelectAll = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const selectAll = document.querySelector(
+        '[id="test-select-listbox-select-all"]',
+      ) as HTMLElement;
+      expect(selectAll).toBeTruthy();
+      expect(selectAll.getAttribute("role")).toBe("option");
+
+      selectAll.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 1", "Option 2", "Option 3"]);
+    }));
+
+    it("filters options via search while staying virtualized", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      expect(select.filteredOptions().length).toBe(1);
+      expect(select.virtualize()).toBe(true);
+      expect(select.activeIndex()).toBe(0);
+    }));
+
+    it("closing resets the active index", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.activeIndex()).toBe(0);
+
+      select.toggleIsOpen(true);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.activeIndex()).toBe(-1);
     }));
   });
 });
