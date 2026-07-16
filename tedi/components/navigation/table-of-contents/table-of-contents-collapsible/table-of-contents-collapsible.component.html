@@ -1,0 +1,44 @@
+<div
+  class="tedi-table-of-contents__bar"
+  [class.tedi-table-of-contents__bar--static]="!sticky()"
+  [class.tedi-table-of-contents__bar--hidden]="open()"
+>
+  <span tedi-text modifiers="bold" class="tedi-table-of-contents__bar-title">
+    {{ title() }}
+  </span>
+  <button
+    tedi-collapse-button
+    aria-haspopup="dialog"
+    [open]="open()"
+    [openText]="openLabel()"
+    [closeText]="closeLabel()"
+    [underline]="false"
+    (openChange)="toggle($event)"
+  ></button>
+</div>
+
+<ng-template #sheet>
+  <div class="tedi-table-of-contents tedi-table-of-contents__sheet">
+    <div class="tedi-table-of-contents__sheet-header">
+      <span tedi-text modifiers="bold" class="tedi-table-of-contents__bar-title">
+        {{ title() }}
+      </span>
+      <button
+        tedi-collapse-button
+        [open]="true"
+        [openText]="openLabel()"
+        [closeText]="closeLabel()"
+        [underline]="false"
+        (openChange)="close()"
+      ></button>
+    </div>
+    <nav [attr.aria-label]="navLabel()" (click)="onListClick($event)">
+      <ul
+        class="tedi-table-of-contents__list tedi-table-of-contents__list--headless"
+        role="list"
+      >
+        <ng-content select="tedi-table-of-contents-item" />
+      </ul>
+    </nav>
+  </div>
+</ng-template>

@@ -1,0 +1,32 @@
+<span
+  class="tedi-table-of-contents__row"
+  [class]="'tedi-table-of-contents__row--level-' + level()"
+>
+  @if (showIcons() && !hideIcon()) {
+    <tedi-icon
+      class="tedi-table-of-contents__icon"
+      [name]="iconName()"
+      [color]="iconColor()"
+      [label]="iconLabel()"
+      [size]="18"
+    />
+  }
+  @if (numbered()) {
+    <span class="tedi-table-of-contents__number" aria-hidden="true">{{
+      numberLabel()
+    }}</span>
+  }
+  <span class="tedi-table-of-contents__content">
+    <ng-content />
+  </span>
+</span>
+
+@if (isOpen()) {
+  <ul class="tedi-table-of-contents__group" role="list">
+    <ng-content select="tedi-table-of-contents-item" />
+  </ul>
+}
+
+@if (separator()) {
+  <tedi-separator />
+}

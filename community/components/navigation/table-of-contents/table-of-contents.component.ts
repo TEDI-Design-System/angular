@@ -48,6 +48,10 @@ export type TableOfContentsBreakpoint =
     NgTemplateOutlet,
   ],
 })
+/**
+ * @deprecated Use the TEDI-Ready TableOfContents from `@tedi-design-system/angular` instead:
+ * `tedi-table-of-contents` with `tedi-table-of-contents-item`.
+ */
 export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   /**
    * Heading of the table of contents

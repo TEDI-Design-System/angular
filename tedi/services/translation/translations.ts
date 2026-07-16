@@ -770,6 +770,27 @@ export const translationsMap = {
     en: (count: string | number) => `${count} invalid`,
     ru: (count: string | number) => `${count} неверный`,
   },
+  "table-of-contents.step-valid": {
+    description: "Text alternative for the valid step icon",
+    components: ["TableOfContents"],
+    et: "Korrektne",
+    en: "Valid",
+    ru: "Действительный",
+  },
+  "table-of-contents.step-invalid": {
+    description: "Text alternative for the invalid step icon",
+    components: ["TableOfContents"],
+    et: "Vigane",
+    en: "Invalid",
+    ru: "Недействительный",
+  },
+  "table-of-contents.step-incomplete": {
+    description: "Text alternative for the not-completed step icon",
+    components: ["TableOfContents"],
+    et: "Täitmata",
+    en: "Not completed",
+    ru: "Не заполнено",
+  },
   "truncate.see-more": {
     description: "See more button label",
     components: ["Truncate"],
