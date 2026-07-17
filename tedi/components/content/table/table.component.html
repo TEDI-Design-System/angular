@@ -46,7 +46,12 @@
   </div>
 }
 
-<div class="tedi-table__scroll" [attr.style]="maxHeightStyle()" cdkScrollable>
+<div
+  #scrollContainer
+  class="tedi-table__scroll"
+  [attr.style]="maxHeightStyle()"
+  cdkScrollable
+>
   <table
     class="tedi-table__table"
     [attr.id]="id() || null"
