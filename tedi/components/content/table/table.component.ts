@@ -10,6 +10,7 @@ import {
   inject,
   Injector,
   input,
+  PLATFORM_ID,
   signal,
   Signal,
   TemplateRef,
@@ -19,7 +20,7 @@ import {
   output,
   type WritableSignal,
 } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { CommonModule, isPlatformBrowser } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import {
   CdkDrag,
@@ -566,6 +567,7 @@ export class TediTableComponent<TData> {
   readonly rowDrop = output<CdkDragDrop<TData[]>>();
 
   protected readonly injector = inject(Injector);
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly translation = inject(TediTranslationService);
 
   private readonly _hoveredRowId = signal<string | null>(null);
@@ -1802,6 +1804,7 @@ export class TediTableComponent<TData> {
    * the window scroll is intentionally left untouched.
    */
   private resetScrollTop(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
     const element = this.scrollContainer()?.nativeElement;
     if (element) element.scrollTop = 0;
   }
