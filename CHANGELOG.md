@@ -1,3 +1,10 @@
+# [7.1.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.8...angular-7.1.0-rc.9) (2026-07-17)
+
+
+### Bug Fixes
+
+* **table:** scrollable table now scrolls top on page change [#549](https://github.com/TEDI-Design-System/angular/issues/549) ([#550](https://github.com/TEDI-Design-System/angular/issues/550)) ([9771fc3](https://github.com/TEDI-Design-System/angular/commit/9771fc3bfdb10ff2064cf37d50d16704112d0468))
+
 # [7.1.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.7...angular-7.1.0-rc.8) (2026-07-17)
 
 
