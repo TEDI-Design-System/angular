@@ -16,6 +16,7 @@ export * from "./slider/slider.component";
 export * from "./toggle/toggle.component";
 export * from "./form-field/form-field.component";
 export * from "./form-field/form-field-control";
+export * from "./input-group";
 export * from "./text-field/text-field.component";
 export * from "./time-field";
 export * from "./time-picker";

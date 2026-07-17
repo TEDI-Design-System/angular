@@ -33,6 +33,7 @@ import { calculateVisibleTagCount } from "../../../utils/tag-overflow.util";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { LabelComponent } from "../label/label.component";
 import { TagComponent, TagEllipsis } from "../../tags/tag/tag.component";
+import { EllipsisComponent, EllipsisPosition } from "../../helpers/ellipsis";
 import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
 import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
 import {
@@ -84,6 +85,7 @@ export enum SpecialOptionControls {
     TediTranslationPipe,
     DropdownItemValueComponent,
     DropdownItemValueLabelComponent,
+    EllipsisComponent,
   ],
   templateUrl: "./select.component.html",
   styleUrl: "./select.component.scss",
@@ -247,6 +249,15 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * @default false
    */
   tagEllipsis = input<TagEllipsis>(false);
+
+  /**
+   * Which end the single selected value truncates from when it doesn't fit.
+   * The full value is revealed in a tooltip on hover/focus. `false` (default)
+   * never truncates. Applies to single-select mode; multiselect tags use
+   * `tagEllipsis`.
+   * @default false
+   */
+  ellipsis = input<EllipsisPosition | false>(false);
 
   /**
    * Function used to compare option values for equality.
