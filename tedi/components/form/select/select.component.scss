@@ -79,12 +79,6 @@
     margin-top: var(--form-field-outer-spacing);
   }
 
-  &__label-row {
-    display: flex;
-    gap: var(--content-label-inner-spacing-x);
-    align-items: center;
-  }
-
   &__trigger {
     display: flex;
     justify-content: space-between;
