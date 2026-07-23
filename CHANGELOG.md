@@ -1,3 +1,10 @@
+# [7.1.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.9...angular-7.1.0-rc.10) (2026-07-23)
+
+
+### Features
+
+* **label-row,info-tooltip:** new components [#515](https://github.com/TEDI-Design-System/angular/issues/515) ([#525](https://github.com/TEDI-Design-System/angular/issues/525)) ([1e33865](https://github.com/TEDI-Design-System/angular/commit/1e338659344b68e9573e9f5a606839973f948a1e))
+
 # [7.1.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.8...angular-7.1.0-rc.9) (2026-07-17)
 
 
