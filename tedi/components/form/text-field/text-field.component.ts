@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -69,8 +70,11 @@ export class TextFieldComponent
    * Disables the input from a parent template (e.g. a wrapping field component).
    * Combined with the reactive-forms disabled state and any input-group state.
    */
-  // eslint-disable-next-line @angular-eslint/no-input-rename
-  readonly disabledInput = input<boolean>(false, { alias: "disabled" });
+  readonly disabledInput = input(false, {
+    // eslint-disable-next-line @angular-eslint/no-input-rename
+    alias: "disabled",
+    transform: booleanAttribute,
+  });
 
   readonly disabled = computed(
     () =>
@@ -86,8 +90,8 @@ export class TextFieldComponent
   }
 
   private formDisabled = signal(false);
-  private onChange: (value: string) => void = () => { };
-  private onTouched: () => void = () => { };
+  private onChange: (value: string) => void = () => {};
+  private onTouched: () => void = () => {};
 
   constructor() {
     effect(() => {
