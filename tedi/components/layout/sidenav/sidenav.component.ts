@@ -3,10 +3,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChildren,
   effect,
   inject,
   Injector,
   input,
+  OnInit,
   ViewEncapsulation,
 } from "@angular/core";
 
@@ -14,6 +16,7 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 import { SideNavService } from "../../../services/sidenav/sidenav.service";
 import { Breakpoint } from "../../../services/breakpoint/breakpoint.service";
+import { SideNavItemComponent } from "./sidenav-item/sidenav-item.component";
 
 export type SideNavItemSize = "small" | "medium" | "large";
 
@@ -27,10 +30,19 @@ export type SideNavItemSize = "small" | "medium" | "large";
   imports: [IconComponent, TediTranslationPipe],
   host: {
     "[class]": "classes()",
+    "[attr.aria-label]": "ariaLabel()",
   },
 })
-export class SideNavComponent {
+export class SideNavComponent implements OnInit {
   sidenavService = inject(SideNavService);
+
+  // Deprecated element-form items placed directly in the nav; when present the
+  // nav still wraps them in its own `<ul>`. The native API instead nests
+  // `li[tedi-sidenav-item]` inside a consumer-provided `<ul tedi-sidenav-list>`.
+  protected readonly legacyItems = contentChildren(SideNavItemComponent);
+  protected readonly hasLegacyItems = computed(
+    () => this.legacyItems().length > 0,
+  );
 
   /**
    * Show dividers between items
@@ -47,10 +59,21 @@ export class SideNavComponent {
    * @default false
    */
   collapsible = input<boolean>(false);
+  /**
+   * Whether the (collapsible) nav starts collapsed on desktop. Requires
+   * `collapsible` to be able to expand it again via the toggle.
+   * @default false
+   */
+  defaultCollapsed = input<boolean>(false);
   /** Breakpoint when to show desktop navigation
    * @default lg
    */
   desktopBreakpoint = input<Breakpoint>("lg");
+  /**
+   * Accessible name for the `<nav>` landmark. Recommended when the page has more
+   * than one navigation landmark (e.g. a header nav and this sidenav).
+   */
+  ariaLabel = input<string>();
 
   private readonly injector = inject(Injector);
 
@@ -58,6 +81,12 @@ export class SideNavComponent {
     effect(() => {
       this.sidenavService.desktopBreakpoint.set(this.desktopBreakpoint());
     });
+  }
+
+  ngOnInit() {
+    if (this.defaultCollapsed()) {
+      this.sidenavService.isCollapsed.set(true);
+    }
   }
 
   handleBackToMainMenu() {
@@ -82,6 +111,23 @@ export class SideNavComponent {
     );
   }
 
+  handleBackToParentMenu() {
+    const groupEl = this.sidenavService.openGroup()?.["host"]
+      ?.nativeElement as HTMLElement | undefined;
+
+    this.sidenavService.handleBackToParentMenu();
+
+    afterNextRender(
+      () => {
+        const trigger = groupEl?.querySelector(
+          ".tedi-sidenav-dropdown-group__parent",
+        ) as HTMLElement | null;
+        trigger?.focus();
+      },
+      { injector: this.injector },
+    );
+  }
+
   classes = computed(() => {
     const classList = ["tedi-sidenav", `tedi-sidenav--${this.size()}`];
 
@@ -99,6 +145,10 @@ export class SideNavComponent {
 
     if (this.sidenavService.isMobileItemOpen()) {
       classList.push("tedi-sidenav--mobile-item-open");
+    }
+
+    if (this.sidenavService.isMobileGroupOpen()) {
+      classList.push("tedi-sidenav--mobile-group-open");
     }
 
     if (this.sidenavService.isMobile() && !this.sidenavService.isMobileOpen()) {

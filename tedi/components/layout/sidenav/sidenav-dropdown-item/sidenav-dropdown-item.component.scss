@@ -65,8 +65,8 @@
   }
 }
 
-tedi-sidenav-dropdown-item:last-child > .tedi-sidenav-dropdown-item::before,
-tedi-sidenav-dropdown-item:has(+ tedi-sidenav-dropdown-group)
-  > .tedi-sidenav-dropdown-item::before {
+.tedi-sidenav-dropdown-item:last-child::before,
+.tedi-sidenav-dropdown-item:has(+ li[tedi-sidenav-dropdown-group])::before,
+.tedi-sidenav-dropdown-item:has(+ li[tedi-sidenav-group-title])::before {
   height: 50%;
 }

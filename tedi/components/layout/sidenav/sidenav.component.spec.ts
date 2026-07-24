@@ -26,11 +26,15 @@ describe("SideNavComponent", () => {
     desktopBreakpoint: ReturnType<typeof signal>;
     isMobile: ReturnType<typeof signal>;
     isMobileItemOpen: ReturnType<typeof signal>;
+    isMobileGroupOpen: ReturnType<typeof signal>;
     isMobileOpen: ReturnType<typeof signal>;
+    openGroup: ReturnType<typeof signal>;
+    openItemText: ReturnType<typeof signal>;
     tooltipEnabled: ReturnType<typeof signal>;
     registerItem: jest.Mock;
     unregisterItem: jest.Mock;
     handleGoToMainMenu: jest.Mock;
+    handleBackToParentMenu: jest.Mock;
     handleCollapse: jest.Mock;
   };
 
@@ -41,11 +45,15 @@ describe("SideNavComponent", () => {
       desktopBreakpoint: signal("lg"),
       isMobile: signal(false),
       isMobileItemOpen: signal(false),
+      isMobileGroupOpen: signal(false),
       isMobileOpen: signal(false),
+      openGroup: signal(null),
+      openItemText: signal(""),
       tooltipEnabled: signal(false),
       registerItem: jest.fn(),
       unregisterItem: jest.fn(),
       handleGoToMainMenu: jest.fn(),
+      handleBackToParentMenu: jest.fn(),
       handleCollapse: jest.fn(),
     };
 
@@ -65,6 +73,13 @@ describe("SideNavComponent", () => {
 
   it("should create component", () => {
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it("sets aria-label on the nav landmark from the ariaLabel input", () => {
+    expect(sidenavElement.hasAttribute("aria-label")).toBe(false);
+    fixture.componentRef.setInput("ariaLabel", "Peamenüü");
+    fixture.detectChanges();
+    expect(sidenavElement.getAttribute("aria-label")).toBe("Peamenüü");
   });
 
   it("should have default classes (large + dividers)", () => {

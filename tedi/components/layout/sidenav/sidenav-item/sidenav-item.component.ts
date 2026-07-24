@@ -18,9 +18,8 @@ import {
 } from "@angular/core";
 import { IconComponent } from "../../../base/icon/icon.component";
 import { RouterLink } from "@angular/router";
-import { NgIf, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import { SideNavDropdownComponent } from "../sidenav-dropdown/sidenav-dropdown.component";
-import { SideNavGroupTitleComponent } from "../sidenav-group-title/sidenav-group-title.component";
 import { SideNavService } from "../../../../services/sidenav/sidenav.service";
 import { TooltipComponent } from "../../../overlay/tooltip/tooltip.component";
 import { TooltipContentComponent } from "../../../overlay/tooltip/tooltip-content/tooltip-content.component";
@@ -28,7 +27,7 @@ import { TooltipTriggerComponent } from "../../../overlay/tooltip/tooltip-trigge
 import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
 
 @Component({
-  selector: "tedi-sidenav-item",
+  selector: "li[tedi-sidenav-item]",
   standalone: true,
   templateUrl: "./sidenav-item.component.html",
   styleUrl: "./sidenav-item.component.scss",
@@ -38,16 +37,13 @@ import { TediTranslationPipe } from "../../../../services/translation/translatio
     IconComponent,
     RouterLink,
     NgTemplateOutlet,
-    NgIf,
-    SideNavGroupTitleComponent,
     TooltipComponent,
     TooltipTriggerComponent,
     TooltipContentComponent,
     TediTranslationPipe,
   ],
   host: {
-    "role": "presentation",
-    "style": "display: contents",
+    "[class]": "classes()",
   },
 })
 export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
@@ -68,6 +64,17 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
    * Router link
    */
   route = input<string>();
+  /**
+   * Whether the item's dropdown is expanded initially (desktop only).
+   * @default false
+   */
+  defaultOpen = input<boolean>(false);
+  /**
+   * Shorter label shown in place of the full text when the desktop nav is
+   * collapsed to the narrow rail. Falls back to the full text when not set;
+   * the hover tooltip always shows the full text.
+   */
+  collapsedText = input<string>();
 
   @ContentChild(forwardRef(() => SideNavDropdownComponent))
   dropdown?: SideNavDropdownComponent;
@@ -103,6 +110,14 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
 
     if (!dropdown) {
       return;
+    }
+
+    // Seed the initial expanded state after render to avoid changing a
+    // just-checked binding during the same change-detection pass.
+    if (this.defaultOpen()) {
+      afterNextRender(() => dropdown.open.set(true), {
+        injector: this.injector,
+      });
     }
 
     this.eventListeners.push(
@@ -160,9 +175,8 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
     if (this.sidenavService.isCollapsed() || this.sidenavService.isMobile()) {
       afterNextRender(() => {
         if (!wasOpen) {
-          // Opening - focus first item in dropdown
-          const dropdownEl = dropdown.element();
-          const openDropdown = dropdownEl?.querySelector('ul.tedi-sidenav-dropdown');
+          // Opening - focus first item in the dropdown `<ul>`.
+          const openDropdown = dropdown.element();
           const allTriggers = openDropdown?.querySelectorAll('.tedi-sidenav-dropdown-item__trigger');
           const firstFocusable = Array.from(allTriggers ?? []).find(
             (el) => (el as HTMLElement).offsetParent !== null

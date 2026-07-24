@@ -58,7 +58,7 @@ describe("SideNavItemComponent", () => {
 
     fixture = TestBed.createComponent(SideNavItemComponent);
     fixture.detectChanges();
-    itemElement = fixture.nativeElement.querySelector("li");
+    itemElement = fixture.nativeElement;
   });
 
   it("should register on init and unregister on destroy", () => {
@@ -83,14 +83,14 @@ describe("SideNavItemComponent", () => {
   it("should add selected class when selected input is true", () => {
     fixture.componentRef.setInput("selected", true);
     fixture.detectChanges();
-    itemElement = fixture.nativeElement.querySelector("li");
+    itemElement = fixture.nativeElement;
     expect(itemElement.classList.contains("tedi-sidenav-item--selected")).toBe(true);
   });
 
   it("should add hidden class when mobile item open and no dropdown open", () => {
     sidenavService.isMobileItemOpen.set(true);
     fixture.detectChanges();
-    itemElement = fixture.nativeElement.querySelector("li");
+    itemElement = fixture.nativeElement;
     expect(itemElement.classList.contains("tedi-sidenav-item--hidden")).toBe(true);
   });
 
@@ -100,7 +100,7 @@ describe("SideNavItemComponent", () => {
     fixture.componentInstance.dropdown = dropdownStub as any;
     sidenavService.isMobileItemOpen.set(true);
     fixture.detectChanges();
-    itemElement = fixture.nativeElement.querySelector("li");
+    itemElement = fixture.nativeElement;
     expect(itemElement.classList.contains("tedi-sidenav-item--hidden")).toBe(false);
   });
 

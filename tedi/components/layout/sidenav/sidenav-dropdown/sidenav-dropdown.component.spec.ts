@@ -52,15 +52,11 @@ describe("SideNavDropdownComponent", () => {
 
     fixture = TestBed.createComponent(SideNavDropdownComponent);
     fixture.detectChanges();
-    dropdownElement = fixture.nativeElement.querySelector("ul");
+    dropdownElement = fixture.nativeElement;
   });
 
   it("should create the component", () => {
     expect(fixture.componentInstance).toBeTruthy();
-  });
-
-  it("should have wrapper class on host element", () => {
-    expect(fixture.nativeElement.classList.contains("tedi-sidenav-dropdown-wrapper")).toBe(true);
   });
 
   it("should have the base CSS class on ul element", () => {
