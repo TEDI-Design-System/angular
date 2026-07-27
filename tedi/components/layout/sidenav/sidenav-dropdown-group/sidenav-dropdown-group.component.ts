@@ -41,6 +41,15 @@ export class SideNavDropdownGroupComponent implements AfterViewInit, OnDestroy {
     () => this.sidenavService.isMobile() && !this.isParentLink(),
   );
 
+  /**
+   * The parent is an interactive drill trigger only while it's still collapsed.
+   * Once drilled open it becomes the panel's static heading — not clickable and
+   * with no hover — so navigating back happens via the back buttons.
+   */
+  protected readonly isDrillTrigger = computed(
+    () => this.isDrillable() && !this.open(),
+  );
+
   protected readonly hostClass = computed(() => {
     const classList = [
       "tedi-sidenav-dropdown-group",

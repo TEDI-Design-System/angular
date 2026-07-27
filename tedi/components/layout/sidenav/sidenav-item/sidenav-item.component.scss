@@ -22,6 +22,12 @@
   &--selected {
     .tedi-sidenav-item__trigger {
       background: var(--navigation-vertical-item-background-active);
+
+      &:hover,
+      &:has(> .tedi-sidenav-item__caret-button:hover),
+      &:has(> .tedi-sidenav-item__title:focus-visible) {
+        background: var(--navigation-vertical-item-background-active);
+      }
     }
 
     .tedi-sidenav-item__text {

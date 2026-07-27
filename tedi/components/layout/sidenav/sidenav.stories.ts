@@ -116,6 +116,24 @@ export default {
         type: { summary: "string" },
       },
     },
+    backToMainMenuLabel: {
+      description:
+        "Override for the mobile 'back to main menu' button text. Falls back to the translated `sidenav.backToMainMenu` label. Visible once the mobile drawer drills into an item's submenu.",
+      control: "text",
+      table: {
+        category: "sidenav",
+        type: { summary: "string" },
+      },
+    },
+    backToParentMenuLabel: {
+      description:
+        "Override for the mobile 'back to parent menu' button text. Falls back to the translated `sidenav.backToParentMenu` label (which includes the parent item's name). Visible when a non-link group is drilled open.",
+      control: "text",
+      table: {
+        category: "sidenav",
+        type: { summary: "string" },
+      },
+    },
     itemSelected: {
       name: "selected",
       description: "Mark the item as the current page.",
@@ -331,6 +349,8 @@ It consists of several sub-components:
           "collapsible",
           "defaultCollapsed",
           "desktopBreakpoint",
+          "backToMainMenuLabel",
+          "backToParentMenuLabel",
         ],
       })}>
         <ul tedi-sidenav-list>

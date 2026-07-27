@@ -13,6 +13,7 @@ import {
 
 import { IconComponent } from "../../base/icon/icon.component";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
+import { TediTranslationService } from "../../../services/translation/translation.service";
 import { SideNavService } from "../../../services/sidenav/sidenav.service";
 import { Breakpoint } from "../../../services/breakpoint/breakpoint.service";
 
@@ -33,6 +34,7 @@ export type SideNavItemSize = "small" | "medium" | "large";
 })
 export class SideNavComponent implements OnInit {
   sidenavService = inject(SideNavService);
+  private readonly translationService = inject(TediTranslationService);
 
   /**
    * Show dividers between items
@@ -64,6 +66,31 @@ export class SideNavComponent implements OnInit {
    * than one navigation landmark (e.g. a header nav and this sidenav).
    */
   ariaLabel = input<string>();
+  /**
+   * Overrides the mobile "back to main menu" button text. When omitted, falls
+   * back to the translated `sidenav.backToMainMenu` label.
+   */
+  backToMainMenuLabel = input<string>();
+  /**
+   * Overrides the mobile "back to parent menu" button text shown when a group is
+   * drilled open. When omitted, falls back to the translated
+   * `sidenav.backToParentMenu` label (which includes the parent item's name).
+   */
+  backToParentMenuLabel = input<string>();
+
+  protected readonly backToMainText = computed(
+    () =>
+      this.backToMainMenuLabel() ??
+      this.translationService.translate("sidenav.backToMainMenu"),
+  );
+  protected readonly backToParentText = computed(
+    () =>
+      this.backToParentMenuLabel() ??
+      this.translationService.translate(
+        "sidenav.backToParentMenu",
+        this.sidenavService.openItemText(),
+      ),
+  );
 
   private readonly injector = inject(Injector);
 
@@ -102,8 +129,9 @@ export class SideNavComponent implements OnInit {
   }
 
   handleBackToParentMenu() {
-    const groupEl = this.sidenavService.openGroup()?.["host"]
-      ?.nativeElement as HTMLElement | undefined;
+    const groupEl = this.sidenavService.openGroup()?.["host"]?.nativeElement as
+      | HTMLElement
+      | undefined;
 
     this.sidenavService.handleBackToParentMenu();
 

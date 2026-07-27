@@ -1,12 +1,12 @@
 <div
   class="tedi-sidenav-dropdown-item tedi-sidenav-dropdown-group__parent"
   [class.tedi-sidenav-dropdown-group__parent--drillable]="isDrillable()"
-  [attr.role]="isDrillable() ? 'button' : null"
-  [attr.tabindex]="isDrillable() ? 0 : null"
-  [attr.aria-expanded]="isDrillable() ? open() : null"
-  (click)="isDrillable() && toggle()"
-  (keydown.enter)="isDrillable() && toggle()"
-  (keydown.space)="isDrillable() && $event.preventDefault(); isDrillable() && toggle()"
+  [attr.role]="isDrillTrigger() ? 'button' : null"
+  [attr.tabindex]="isDrillTrigger() ? 0 : null"
+  [attr.aria-expanded]="isDrillTrigger() ? open() : null"
+  (click)="isDrillTrigger() && toggle()"
+  (keydown.enter)="isDrillTrigger() && toggle()"
+  (keydown.space)="isDrillTrigger() && $event.preventDefault(); isDrillTrigger() && toggle()"
 >
   <ng-content select="[tedi-sidenav-dropdown-group-parent]"></ng-content>
   @if (isDrillable()) {

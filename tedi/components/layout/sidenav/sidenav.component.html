@@ -15,15 +15,13 @@
 @if (sidenavService.isMobileItemOpen()) {
   <button class="tedi-sidenav-back" (click)="handleBackToMainMenu()">
     <tedi-icon name="arrow_back" color="white" />
-    {{ "sidenav.backToMainMenu" | tediTranslate }}
+    {{ backToMainText() }}
   </button>
 }
 @if (sidenavService.isMobileGroupOpen()) {
   <button class="tedi-sidenav-back" (click)="handleBackToParentMenu()">
     <tedi-icon name="arrow_back" color="white" />
-    {{
-      "sidenav.backToParentMenu" | tediTranslate: sidenavService.openItemText()
-    }}
+    {{ backToParentText() }}
   </button>
 }
 

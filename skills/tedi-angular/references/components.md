@@ -1531,6 +1531,8 @@ markup is valid; the `nav` also accepts your own sibling content (header/footer)
 - `defaultCollapsed: boolean = false` — start collapsed on desktop (requires `collapsible`)
 - `desktopBreakpoint: Breakpoint = "lg"`
 - `ariaLabel: string` — accessible name for the `<nav>` landmark
+- `backToMainMenuLabel: string` — override for the mobile "back to main menu" button text; falls back to the translated `sidenav.backToMainMenu` label
+- `backToParentMenuLabel: string` — override for the mobile "back to parent menu" button text; falls back to the translated `sidenav.backToParentMenu` label (which interpolates the parent item's name)
 
 **Sub-components:**
 - `ul[tedi-sidenav-list]` — the menu container (holds the items).

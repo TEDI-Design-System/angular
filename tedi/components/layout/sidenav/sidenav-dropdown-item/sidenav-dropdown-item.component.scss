@@ -14,6 +14,14 @@
   &--selected {
     font-weight: var(--body-bold-weight);
     background: var(--navigation-vertical-item-background-active);
+
+    &:hover {
+      background: var(--navigation-vertical-item-background-active);
+    }
+
+    .tedi-sidenav-dropdown-item__trigger:focus-visible {
+      background: var(--navigation-vertical-item-background-active);
+    }
   }
 
   &__trigger {

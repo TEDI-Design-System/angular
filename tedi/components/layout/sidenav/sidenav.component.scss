@@ -317,6 +317,10 @@
       .tedi-sidenav-dropdown-group--open
         .tedi-sidenav-dropdown-group__parent--drillable {
         cursor: default;
+
+        &:hover {
+          background: transparent;
+        }
       }
 
       .tedi-sidenav-dropdown-group--open

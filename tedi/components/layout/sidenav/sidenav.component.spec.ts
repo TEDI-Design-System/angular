@@ -4,7 +4,9 @@ import { SideNavService } from "../../../services/sidenav/sidenav.service";
 import { signal } from "@angular/core";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
-const mockCallbackHolder: { callback: (() => void) | null } = { callback: null };
+const mockCallbackHolder: { callback: (() => void) | null } = {
+  callback: null,
+};
 
 jest.mock("@angular/core", () => {
   const actual = jest.requireActual("@angular/core");
@@ -147,6 +149,41 @@ describe("SideNavComponent", () => {
     expect(
       sidenavElement.classList.contains(`tedi-sidenav--mobile-group-open`),
     ).toBe(true);
+  });
+
+  describe("back button labels", () => {
+    const backText = () =>
+      sidenavElement.querySelector(".tedi-sidenav-back")?.textContent?.trim();
+
+    it("shows the translated back-to-main-menu label by default", () => {
+      sidenavService.isMobileItemOpen.set(true);
+      fixture.detectChanges();
+      expect(backText()).toContain("Tagasi peamenüüsse");
+    });
+
+    it("overrides the back-to-main-menu label via backToMainMenuLabel", () => {
+      sidenavService.isMobileItemOpen.set(true);
+      fixture.componentRef.setInput("backToMainMenuLabel", "Tagasi");
+      fixture.detectChanges();
+      expect(backText()).toContain("Tagasi");
+      expect(backText()).not.toContain("peamenüüsse");
+    });
+
+    it("shows the translated back-to-parent-menu label with the parent name by default", () => {
+      sidenavService.isMobileGroupOpen.set(true);
+      sidenavService.openItemText.set("Tervise ajalugu");
+      fixture.detectChanges();
+      expect(backText()).toContain("Tervise ajalugu menüüsse");
+    });
+
+    it("overrides the back-to-parent-menu label via backToParentMenuLabel", () => {
+      sidenavService.isMobileGroupOpen.set(true);
+      sidenavService.openItemText.set("Tervise ajalugu");
+      fixture.componentRef.setInput("backToParentMenuLabel", "Üks tase tagasi");
+      fixture.detectChanges();
+      expect(backText()).toContain("Üks tase tagasi");
+      expect(backText()).not.toContain("menüüsse");
+    });
   });
 
   it("collapses on init when defaultCollapsed is true", () => {
