@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  AfterContentInit,
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
@@ -46,7 +47,9 @@ import { TediTranslationPipe } from "../../../../services/translation/translatio
     "[class]": "classes()",
   },
 })
-export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
+export class SideNavItemComponent
+  implements AfterContentInit, AfterViewInit, OnInit, OnDestroy
+{
   /**
    * Is navigation item selected
    * @default false
@@ -79,7 +82,7 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
   @ContentChild(forwardRef(() => SideNavDropdownComponent))
   dropdown?: SideNavDropdownComponent;
 
-  textContent = signal('');
+  textContent = signal("");
 
   sidenavService = inject(SideNavService);
   private readonly host = inject(ElementRef);
@@ -94,6 +97,14 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
   ngOnDestroy() {
     this.sidenavService.unregisterItem(this);
     this.eventListeners.forEach((unlisten) => unlisten());
+  }
+
+  ngAfterContentInit(): void {
+    // Seed the initial expanded state before the first render so the dropdown
+    // paints open without changing a just-checked binding.
+    if (this.defaultOpen() && this.dropdown) {
+      this.dropdown.open.set(true);
+    }
   }
 
   ngAfterViewInit(): void {
@@ -112,14 +123,6 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
       return;
     }
 
-    // Seed the initial expanded state after render to avoid changing a
-    // just-checked binding during the same change-detection pass.
-    if (this.defaultOpen()) {
-      afterNextRender(() => dropdown.open.set(true), {
-        injector: this.injector,
-      });
-    }
-
     this.eventListeners.push(
       this.renderer.listen("document", "click", (event: MouseEvent) => {
         if (this.sidenavService.isCollapsed()) {
@@ -136,11 +139,17 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
 
     this.eventListeners.push(
       this.renderer.listen("document", "keydown", (event: KeyboardEvent) => {
-        if (event.key === "Escape" && this.sidenavService.isCollapsed() && dropdown.open()) {
+        if (
+          event.key === "Escape" &&
+          this.sidenavService.isCollapsed() &&
+          dropdown.open()
+        ) {
           dropdown.open.set(false);
           setTimeout(() => {
             const hostEl = this.host.nativeElement as HTMLElement;
-            const trigger = hostEl.querySelector('.tedi-sidenav-item__title') as HTMLElement | null;
+            const trigger = hostEl.querySelector(
+              ".tedi-sidenav-item__title",
+            ) as HTMLElement | null;
             trigger?.focus();
           }, 0);
         }
@@ -173,22 +182,29 @@ export class SideNavItemComponent implements AfterViewInit, OnInit, OnDestroy {
     this.dropdown.open.update((prev) => !prev);
 
     if (this.sidenavService.isCollapsed() || this.sidenavService.isMobile()) {
-      afterNextRender(() => {
-        if (!wasOpen) {
-          // Opening - focus first item in the dropdown `<ul>`.
-          const openDropdown = dropdown.element();
-          const allTriggers = openDropdown?.querySelectorAll('.tedi-sidenav-dropdown-item__trigger');
-          const firstFocusable = Array.from(allTriggers ?? []).find(
-            (el) => (el as HTMLElement).offsetParent !== null
-          ) as HTMLElement | null;
-          firstFocusable?.focus();
-        } else {
-          // Closing - focus on parent item
-          const hostEl = this.host.nativeElement as HTMLElement;
-          const trigger = hostEl.querySelector('.tedi-sidenav-item__title') as HTMLElement | null;
-          trigger?.focus();
-        }
-      }, { injector: this.injector });
+      afterNextRender(
+        () => {
+          if (!wasOpen) {
+            // Opening - focus first item in the dropdown `<ul>`.
+            const openDropdown = dropdown.element();
+            const allTriggers = openDropdown?.querySelectorAll(
+              ".tedi-sidenav-dropdown-item__trigger",
+            );
+            const firstFocusable = Array.from(allTriggers ?? []).find(
+              (el) => (el as HTMLElement).offsetParent !== null,
+            ) as HTMLElement | null;
+            firstFocusable?.focus();
+          } else {
+            // Closing - focus on parent item
+            const hostEl = this.host.nativeElement as HTMLElement;
+            const trigger = hostEl.querySelector(
+              ".tedi-sidenav-item__title",
+            ) as HTMLElement | null;
+            trigger?.focus();
+          }
+        },
+        { injector: this.injector },
+      );
     }
   }
 }

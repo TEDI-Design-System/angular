@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  contentChildren,
   effect,
   inject,
   Injector,
@@ -16,7 +15,6 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 import { SideNavService } from "../../../services/sidenav/sidenav.service";
 import { Breakpoint } from "../../../services/breakpoint/breakpoint.service";
-import { SideNavItemComponent } from "./sidenav-item/sidenav-item.component";
 
 export type SideNavItemSize = "small" | "medium" | "large";
 
@@ -35,14 +33,6 @@ export type SideNavItemSize = "small" | "medium" | "large";
 })
 export class SideNavComponent implements OnInit {
   sidenavService = inject(SideNavService);
-
-  // Deprecated element-form items placed directly in the nav; when present the
-  // nav still wraps them in its own `<ul>`. The native API instead nests
-  // `li[tedi-sidenav-item]` inside a consumer-provided `<ul tedi-sidenav-list>`.
-  protected readonly legacyItems = contentChildren(SideNavItemComponent);
-  protected readonly hasLegacyItems = computed(
-    () => this.legacyItems().length > 0,
-  );
 
   /**
    * Show dividers between items

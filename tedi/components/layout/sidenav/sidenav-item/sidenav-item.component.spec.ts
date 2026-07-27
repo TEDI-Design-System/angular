@@ -241,6 +241,29 @@ describe("SideNavItemComponent", () => {
     expect(mockCallbackHolder.callback).not.toBeNull();
   });
 
+  it("should open the dropdown on content init when defaultOpen is true", () => {
+    const openSignal = signal(false);
+    const dropdownStub = { open: openSignal, element: jest.fn() };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fixture.componentInstance.dropdown = dropdownStub as any;
+    fixture.componentRef.setInput("defaultOpen", true);
+
+    fixture.componentInstance.ngAfterContentInit();
+
+    expect(openSignal()).toBe(true);
+  });
+
+  it("should not open the dropdown on content init when defaultOpen is false", () => {
+    const openSignal = signal(false);
+    const dropdownStub = { open: openSignal, element: jest.fn() };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fixture.componentInstance.dropdown = dropdownStub as any;
+
+    fixture.componentInstance.ngAfterContentInit();
+
+    expect(openSignal()).toBe(false);
+  });
+
   it("Escape key handler should focus trigger after closing", () => {
     jest.useFakeTimers();
 

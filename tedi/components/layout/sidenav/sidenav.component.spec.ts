@@ -141,6 +141,25 @@ describe("SideNavComponent", () => {
     );
   });
 
+  it("should include mobile group open class when service.isMobileGroupOpen is true", () => {
+    sidenavService.isMobileGroupOpen.set(true);
+    fixture.detectChanges();
+    expect(
+      sidenavElement.classList.contains(`tedi-sidenav--mobile-group-open`),
+    ).toBe(true);
+  });
+
+  it("collapses on init when defaultCollapsed is true", () => {
+    fixture.componentRef.setInput("defaultCollapsed", true);
+    fixture.componentInstance.ngOnInit();
+    expect(sidenavService.isCollapsed()).toBe(true);
+  });
+
+  it("does not collapse on init when defaultCollapsed is false", () => {
+    fixture.componentInstance.ngOnInit();
+    expect(sidenavService.isCollapsed()).toBe(false);
+  });
+
   describe("handleBackToMainMenu", () => {
     afterEach(() => {
       mockCallbackHolder.callback = null;
@@ -199,6 +218,49 @@ describe("SideNavComponent", () => {
       }
 
       expect(sidenavService.handleGoToMainMenu).toHaveBeenCalled();
+    });
+  });
+
+  describe("handleBackToParentMenu", () => {
+    afterEach(() => {
+      mockCallbackHolder.callback = null;
+    });
+
+    it("should call service.handleBackToParentMenu", () => {
+      fixture.componentInstance.handleBackToParentMenu();
+      expect(sidenavService.handleBackToParentMenu).toHaveBeenCalled();
+    });
+
+    it("should focus the open group's parent trigger after going back", () => {
+      const mockGroupEl = document.createElement("div");
+      const mockParent = document.createElement("a");
+      mockParent.className = "tedi-sidenav-dropdown-group__parent";
+      mockGroupEl.appendChild(mockParent);
+      const focusSpy = jest.spyOn(mockParent, "focus");
+
+      sidenavService.openGroup.set({
+        host: { nativeElement: mockGroupEl },
+      } as never);
+
+      fixture.componentInstance.handleBackToParentMenu();
+
+      if (mockCallbackHolder.callback) {
+        mockCallbackHolder.callback();
+      }
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should not throw when no group is open", () => {
+      sidenavService.openGroup.set(null);
+
+      fixture.componentInstance.handleBackToParentMenu();
+
+      if (mockCallbackHolder.callback) {
+        mockCallbackHolder.callback();
+      }
+
+      expect(sidenavService.handleBackToParentMenu).toHaveBeenCalled();
     });
   });
 });

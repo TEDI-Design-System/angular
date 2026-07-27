@@ -9,14 +9,46 @@
     2;
   --_sidenav-dropdown-collapsed-min-width: 16.5rem;
   --_sidenav-dropdown-collapsed-left: 4px;
-  --_sidenav-dropdown-item-large-height: 48px;
-  --_sidenav-dropdown-item-medium-height: 44px;
-  --_sidenav-dropdown-item-small-height: 36px;
   --_sidenav-dropdown-item-collapsed-height: 40px;
   --_sidenav-collapsed-text-width: 4.5rem;
   --_sidenav-transition-duration: 300ms;
   --_sidenav-focus-ring:
     0 0 0 1px var(--tedi-neutral-100), 0 0 0 3px var(--tedi-primary-400);
+}
+
+@mixin sidenav-group-title-typography {
+  font-size: var(--body-extra-small-bold-size);
+  font-weight: var(--body-extra-small-bold-weight);
+  line-height: var(--body-extra-small-bold-line-height);
+  color: var(--navigation-vertical-group-title-text);
+  text-transform: uppercase;
+}
+
+@mixin sidenav-collapsed-tree-connector-neutral {
+  .tedi-sidenav-dropdown-item__trigger {
+    padding-left: calc(
+      var(--dropdown-item-padding-x) + var(--_sidenav-tree-container) +
+        var(--_gap)
+    );
+  }
+
+  &::after {
+    top: 50%;
+    width: var(--_sidenav-tree-branch-width);
+    height: var(--_sidenav-tree-trunk-width);
+    background-color: var(--navigation-vertical-tree-neutral-default);
+    transform: translateY(-50%);
+  }
+
+  &::before {
+    width: var(--_sidenav-tree-trunk-width);
+    height: 100%;
+    background-color: var(--navigation-vertical-tree-neutral-default);
+  }
+
+  &:last-of-type::before {
+    height: 50%;
+  }
 }
 
 .tedi-sidenav {
@@ -34,11 +66,8 @@
       var(--navigation-vertical-item-padding-right)
       var(--layout-grid-gutters-04)
       var(--navigation-vertical-item-padding-left-level-1);
-    font-size: var(--body-extra-small-bold-size);
-    font-weight: var(--body-extra-small-bold-weight);
-    line-height: var(--body-extra-small-bold-line-height);
-    color: var(--navigation-vertical-group-title-text);
-    text-transform: uppercase;
+
+    @include sidenav-group-title-typography;
   }
 
   &--mobile .tedi-sidenav-group-title__text {
@@ -303,12 +332,9 @@
           var(--navigation-vertical-item-padding-right)
           var(--layout-grid-gutters-08)
           var(--navigation-vertical-item-padding-left-level-1);
-        font-size: var(--body-extra-small-bold-size);
-        font-weight: var(--body-extra-small-bold-weight);
-        line-height: var(--body-extra-small-bold-line-height);
-        color: var(--navigation-vertical-group-title-text);
-        text-transform: uppercase;
         cursor: default;
+
+        @include sidenav-group-title-typography;
       }
 
       .tedi-sidenav-dropdown-group--open
@@ -486,61 +512,13 @@
       }
 
       .tedi-sidenav-dropdown-group__list > .tedi-sidenav-dropdown-item {
-        .tedi-sidenav-dropdown-item__trigger {
-          padding-left: calc(
-            var(--dropdown-item-padding-x) + var(--_sidenav-tree-container) +
-              var(--_gap)
-          );
-        }
-
-        &::after {
-          top: 50%;
-          width: var(--_sidenav-tree-branch-width);
-          height: var(--_sidenav-tree-trunk-width);
-          background-color: var(--navigation-vertical-tree-neutral-default);
-          transform: translateY(-50%);
-        }
-
-        &::before {
-          width: var(--_sidenav-tree-trunk-width);
-          height: 100%;
-          background-color: var(--navigation-vertical-tree-neutral-default);
-        }
-
-        &:last-of-type {
-          &::before {
-            height: 50%;
-          }
-        }
+        @include sidenav-collapsed-tree-connector-neutral;
       }
     }
 
     .tedi-sidenav-dropdown:has(> .tedi-sidenav-dropdown-item--parent)
       > .tedi-sidenav-dropdown-item:not(.tedi-sidenav-dropdown-item--parent) {
-      .tedi-sidenav-dropdown-item__trigger {
-        padding-left: calc(
-          var(--dropdown-item-padding-x) + var(--_sidenav-tree-container) +
-            var(--_gap)
-        );
-      }
-
-      &::after {
-        top: 50%;
-        width: var(--_sidenav-tree-branch-width);
-        height: var(--_sidenav-tree-trunk-width);
-        background-color: var(--navigation-vertical-tree-neutral-default);
-        transform: translateY(-50%);
-      }
-
-      &::before {
-        width: var(--_sidenav-tree-trunk-width);
-        height: 100%;
-        background-color: var(--navigation-vertical-tree-neutral-default);
-      }
-
-      &:last-of-type::before {
-        height: 50%;
-      }
+      @include sidenav-collapsed-tree-connector-neutral;
     }
   }
 

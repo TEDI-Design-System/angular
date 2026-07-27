@@ -1540,7 +1540,7 @@ or group parent that is not a link becomes an uppercase heading at the top of it
       <ul tedi-sidenav-dropdown>
         <li tedi-sidenav-dropdown-item route="/docs/recent">Recent</li>
         <li tedi-sidenav-dropdown-group>
-          <a tedi-sidenav-dropdown-group-parent route="/docs">All docs</a>
+          <a tedi-sidenav-dropdown-group-parent href="/docs">All docs</a>
           <ul tedi-sidenav-dropdown-group-list>
             <li tedi-sidenav-dropdown-item route="/docs/shared">Shared</li>
             <li tedi-sidenav-dropdown-item route="/docs/archived">Archived</li>
