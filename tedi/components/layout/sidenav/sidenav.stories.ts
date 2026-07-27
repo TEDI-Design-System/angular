@@ -17,9 +17,7 @@ import { SideNavToggleComponent } from "./sidenav-toggle/sidenav-toggle.componen
 import { SideNavOverlayComponent } from "./sidenav-overlay/sidenav-overlay.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
-import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
-import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
-import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
+import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 
 /** Args for the arg-driven `Default` story: the SideNav inputs plus a single
  * driveable item and dropdown item (mapped into the template by `render`). */
@@ -57,9 +55,7 @@ export default {
         SideNavOverlayComponent,
         RowComponent,
         InfoButtonComponent,
-        TooltipComponent,
-        TooltipTriggerComponent,
-        TooltipContentComponent,
+        InfoTooltipComponent,
       ],
     }),
   ],
@@ -729,14 +725,7 @@ export const WithGroupTitle: StoryObj<SideNavComponent> = {
           <li tedi-sidenav-item icon="business_center" href="#">Töövõime</li>
           <li tedi-sidenav-group-title>
             Seaded
-            <tedi-tooltip>
-              <tedi-tooltip-trigger>
-                <button tedi-info-button color="inverted" aria-label="Lisainfo"></button>
-              </tedi-tooltip-trigger>
-              <tedi-tooltip-content>
-                Sinu konto ja rakenduse seaded.
-              </tedi-tooltip-content>
-            </tedi-tooltip>
+            <tedi-info-tooltip color="inverted">Sinu konto ja rakenduse seaded.</tedi-info-tooltip>
           </li>
           <li tedi-sidenav-item icon="credit_card" href="#" collapsedText="Arved">Raviarved</li>
           <li tedi-sidenav-item icon="settings" href="#" collapsedText="Seaded">Minu seaded</li>
