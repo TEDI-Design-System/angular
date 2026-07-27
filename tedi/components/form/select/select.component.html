@@ -1,5 +1,5 @@
 @if (label()) {
-  <div class="tedi-select__label-row">
+  <tedi-label-row>
     <label
       [id]="labelId()"
       tedi-label
@@ -10,15 +10,14 @@
     >
       {{ label() }}
     </label>
-    @if (tooltip(); as tooltipText) {
-      <tedi-tooltip>
-        <tedi-tooltip-trigger>
-          <button tedi-info-button></button>
-        </tedi-tooltip-trigger>
-        <tedi-tooltip-content>{{ tooltipText }}</tedi-tooltip-content>
-      </tedi-tooltip>
+    @if (tooltipTemplate()?.template; as tooltipTpl) {
+      <tedi-info-tooltip>
+        <ng-container [ngTemplateOutlet]="tooltipTpl" />
+      </tedi-info-tooltip>
+    } @else if (tooltip(); as tooltipText) {
+      <tedi-info-tooltip>{{ tooltipText }}</tedi-info-tooltip>
     }
-  </div>
+  </tedi-label-row>
 }
 <div
   [id]="searchable() ? null : inputId()"
