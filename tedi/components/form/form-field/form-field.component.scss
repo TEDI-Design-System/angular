@@ -52,8 +52,12 @@
     box-shadow: none;
   }
 
-  &--disabled .tedi-form-field__icon .tedi-icon,
-  &__input:has(input:disabled) .tedi-form-field__icon .tedi-icon {
+  &__icon {
+    color: var(--general-icon-secondary);
+  }
+
+  &--disabled &__icon,
+  &__input:has(input:disabled) &__icon {
     color: var(--general-text-disabled);
   }
 
