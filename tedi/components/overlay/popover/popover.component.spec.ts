@@ -424,6 +424,27 @@ describe("PopoverComponent", () => {
 
       expect(hideSpy).toHaveBeenCalledWith(false);
     });
+
+    it("should keep popover open when content inside it is scrolled", () => {
+      hostComponent.hideOnScroll = true;
+      hostComponent.dismissible = false;
+      fixture.detectChanges();
+
+      component.showPopover();
+      fixture.detectChanges();
+      component.onOverlayAttach();
+
+      const container = overlayContainerElement.querySelector(
+        ".tedi-popover__container",
+      ) as HTMLElement;
+      expect(container).toBeTruthy();
+
+      const hideSpy = jest.spyOn(component, "hidePopover");
+      container.dispatchEvent(new Event("scroll", { bubbles: false }));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+      expect(component.isOpen()).toBe(true);
+    });
   });
 
   describe("Dismissible (click/focus outside)", () => {

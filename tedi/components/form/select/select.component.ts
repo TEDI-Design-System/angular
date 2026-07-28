@@ -809,10 +809,15 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     this.scrollListener = this.renderer.listen(
       this.document,
       "scroll",
-      () => {
-        if (this.isOpen()) {
-          this.closeDropdown();
-        }
+      (event: Event) => {
+        if (!this.isOpen()) return;
+
+        // Scrolling the option list itself must not close the dropdown
+        const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+        const target = event.target as Node | null;
+        if (overlayEl && target && overlayEl.contains(target)) return;
+
+        this.closeDropdown();
       },
       { capture: true, passive: true },
     );

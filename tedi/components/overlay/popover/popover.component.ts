@@ -294,10 +294,15 @@ export class PopoverComponent {
     this.scrollListener = this.renderer.listen(
       this.document,
       "scroll",
-      () => {
-        if (this.isOpen()) {
-          this.hidePopover(false);
-        }
+      (event: Event) => {
+        if (!this.isOpen()) return;
+
+        // Scrolling content inside the popover must not close it
+        const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+        const target = event.target as Node | null;
+        if (overlayEl && target && overlayEl.contains(target)) return;
+
+        this.hidePopover(false);
       },
       { capture: true, passive: true },
     );
