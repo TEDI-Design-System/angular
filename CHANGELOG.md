@@ -1,3 +1,31 @@
+# [7.1.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.10...angular-7.1.0-rc.11) (2026-07-23)
+
+
+### Bug Fixes
+
+* **text-field:** support bare disabled attribute via booleanAttribute transform [#558](https://github.com/TEDI-Design-System/angular/issues/558) ([#559](https://github.com/TEDI-Design-System/angular/issues/559)) ([fad56f8](https://github.com/TEDI-Design-System/angular/commit/fad56f8f57915fb7f4b785c248f7c4a5e24d7f43))
+
+# [7.1.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.9...angular-7.1.0-rc.10) (2026-07-23)
+
+
+### Features
+
+* **label-row,info-tooltip:** new components [#515](https://github.com/TEDI-Design-System/angular/issues/515) ([#525](https://github.com/TEDI-Design-System/angular/issues/525)) ([1e33865](https://github.com/TEDI-Design-System/angular/commit/1e338659344b68e9573e9f5a606839973f948a1e))
+
+# [7.1.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.8...angular-7.1.0-rc.9) (2026-07-17)
+
+
+### Bug Fixes
+
+* **table:** scrollable table now scrolls top on page change [#549](https://github.com/TEDI-Design-System/angular/issues/549) ([#550](https://github.com/TEDI-Design-System/angular/issues/550)) ([9771fc3](https://github.com/TEDI-Design-System/angular/commit/9771fc3bfdb10ff2064cf37d50d16704112d0468))
+
+# [7.1.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.7...angular-7.1.0-rc.8) (2026-07-17)
+
+
+### Features
+
+* **input-group:** new TEDI-ready component [#18](https://github.com/TEDI-Design-System/angular/issues/18) ([#532](https://github.com/TEDI-Design-System/angular/issues/532)) ([c1728c0](https://github.com/TEDI-Design-System/angular/commit/c1728c03d039ea2f3e2bc463b96641883631cc45))
+
 # [7.1.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.6...angular-7.1.0-rc.7) (2026-07-15)
 
 

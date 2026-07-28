@@ -85,3 +85,25 @@ export class SelectValueTemplateDirective<T = unknown> {
     return true;
   }
 }
+
+/**
+ * Directive for custom tooltip content next to the label. Use when the tooltip
+ * needs formatting the plain `tooltip` string input cannot express (bold,
+ * italic, links). Takes precedence over the `tooltip` input.
+ *
+ * @example
+ * ```html
+ * <tedi-select [options]="options" label="Ravim">
+ *   <ng-template tediSelectTooltip>
+ *     Vali <b>toimeaine</b>, mitte ravimi nimi.
+ *   </ng-template>
+ * </tedi-select>
+ * ```
+ */
+@Directive({
+  selector: "[tediSelectTooltip]",
+  standalone: true,
+})
+export class SelectTooltipTemplateDirective {
+  template = inject<TemplateRef<unknown>>(TemplateRef);
+}

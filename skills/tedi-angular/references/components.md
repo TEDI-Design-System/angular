@@ -1193,7 +1193,7 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 **Inputs:**
 - `inputId: string` (required) — unique ID for label association and accessibility
 - `label: string` — label text above the select
-- `tooltip: string` — renders an info button next to the label that reveals this text in a tooltip
+- `tooltip: string` — renders an info button next to the label that reveals this text in a tooltip. For formatted content, project a `*tediSelectTooltip` template instead (takes precedence)
 - `ariaLabelledby: string` — associate an external visible label by its element id. A native `<label for>` cannot target the combobox (it is a `<div>`), so use this when the label lives outside the component. Ignored when `label` is set
 - `ariaLabel: string` — accessible name when there is no visible label to reference. Ignored when `label` or `ariaLabelledby` provides a name
 - `required: boolean = false`
@@ -1218,8 +1218,10 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 - `dropdownAlign: "start" | "end" = "start"` — which trigger edge the dropdown anchors to; use `"end"` for right-aligned selects so the panel expands inward
 - `feedbackText: { text, type, position }` — feedback text config
 - `maxDropdownHeight: number` — dropdown height in pixels
+- `hideOnScroll: boolean = false` — close the dropdown when the page scrolls
 - `compareWith: (a, b) => boolean` — custom equality function
 - `tagEllipsis: TagEllipsis = false` — which end a selected tag's label truncates from when it doesn't fit. Only used in multiselect mode with `multiRow="false"`. `false` never truncates; `end` → `label…`; `start` → `…label`
+- `ellipsis: "start" | "end" | false = false` — single-select mode: which end the selected value truncates from when it doesn't fit, revealing the full value in a hover/focus tooltip. `false` (default) never truncates
 - `searchFn: (term: string, item: T) => boolean` — custom search function for filtering options. Overrides the default label-based search when provided
 
 Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multiselect).
@@ -1260,6 +1262,16 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 </tedi-select>
 ```
 
+**Formatted label tooltip** via `tediSelectTooltip` directive (overrides the `tooltip` string input):
+
+```html
+<tedi-select [options]="items" label="City">
+  <ng-template tediSelectTooltip>
+    Pick the <b>city</b> where you <i>currently</i> reside.
+  </ng-template>
+</tedi-select>
+```
+
 ### FormField
 **Selector:** `tedi-form-field`
 **Inputs:**
@@ -1283,12 +1295,43 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `required: boolean = false`
 - `color: LabelColor = "secondary"`
 
+### LabelRow
+**Selector:** `tedi-label-row`
+Pure inline-row layout for a form-control label plus trailing affixes (e.g. `tedi-info-tooltip`). Project your own `<label tedi-label>` and any affixes — all native label attributes (`for`, `id`, `aria-*`, handlers) keep working, and affixes sit as **siblings** of the `<label>`, never inside it, so they never leak into the control's accessible name. No inputs — composition only.
+**Slots:** the real `<label tedi-label>` followed by trailing affixes.
+
+```html
+<tedi-label-row>
+  <label tedi-label for="city" [required]="true">City</label>
+  <tedi-info-tooltip>Enter the city where you currently reside.</tedi-info-tooltip>
+</tedi-label-row>
+```
+
 ### FeedbackText
 **Selector:** `tedi-feedback-text`
 **Inputs:**
 - `text: string` (required)
 - `type: FeedbackTextType = "hint"` — "hint", "valid", "error"
 - `position: FeedbackTextPosition = "left"`
+
+### InputGroup
+**Selector:** `tedi-input-group`
+Wraps a form control with leading/trailing addons. Project a `label[tedi-label]`, a control, optional addons via the `[tediInputGroupPrefix]` / `[tediInputGroupSuffix]` directives, and an optional `tedi-feedback-text`. The control slot accepts `tedi-form-field` (which itself wraps a text/date/time field) or `tedi-select` — any single-line bordered control. Addons merge their border with the control; put an interactive addon (e.g. a `tedi-dropdown`) directly in the prefix/suffix slot and its trigger button fills the whole addon.
+**Inputs:**
+- `addons: boolean = true` — merges addon and control borders into one visual unit; disable for detached addons (e.g. an action button)
+- `disabled: boolean = false` — disables the group and propagates to the control
+- `invalid: boolean = false` — marks the whole group invalid and propagates to the control; pair with an error `tedi-feedback-text`
+
+```html
+<tedi-input-group [invalid]="amountInvalid">
+  <label tedi-label [for]="'amount'">Amount</label>
+  <tedi-form-field>
+    <input tedi-text-field id="amount" [formControl]="amountControl" />
+  </tedi-form-field>
+  <span tediInputGroupSuffix>EUR</span>
+  <tedi-feedback-text type="error" text="This field is required" />
+</tedi-input-group>
+```
 
 ## Helpers
 
@@ -1984,6 +2027,23 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
   </tedi-tooltip-trigger>
   <tedi-tooltip-content>{{ value }}</tedi-tooltip-content>
 </tedi-tooltip>
+```
+
+### InfoTooltip
+**Selector:** `tedi-info-tooltip`
+An info button paired with a tooltip — the ready-made `tedi-tooltip` + `tedi-info-button` combo. Projects the tooltip content. Use as a trailing affix in `tedi-label-row`, or standalone for any inline "more information" tooltip.
+**Inputs:**
+- `position: TooltipPosition = "top"`
+- `openWith: TooltipOpenWith = "both"` — hover, click, or both
+- `maxWidth: TooltipWidth = "medium"` — "none", "small", "medium", "large"
+- `color: "primary" | "inverted" = "primary"` — info-button color; use `inverted` on dark backgrounds
+- `ariaLabel: string` — accessible name for the info button (defaults to the translated info-button label)
+**Slots:** default — the tooltip content
+
+```html
+<tedi-info-tooltip position="right" ariaLabel="More information">
+  Enter the city where you currently reside.
+</tedi-info-tooltip>
 ```
 
 ## Tags

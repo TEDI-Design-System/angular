@@ -32,7 +32,7 @@
     border-color: var(--form-general-feedback-success-border);
 
     &:focus-within {
-      box-shadow: 0 0 0 1px var(--form-general-feedback-success-border);
+      box-shadow: inset 0 0 0 1px var(--form-general-feedback-success-border);
     }
   }
 
@@ -40,7 +40,7 @@
     border-color: var(--form-general-feedback-error-border);
 
     &:focus-within {
-      box-shadow: 0 0 0 1px var(--form-general-feedback-error-border);
+      box-shadow: inset 0 0 0 1px var(--form-general-feedback-error-border);
     }
   }
 
@@ -79,13 +79,13 @@
     &:active,
     &:has(input:active) {
       border-color: var(--form-input-border-active);
-      box-shadow: 0 0 0 1px var(--form-input-border-active);
+      box-shadow: inset 0 0 0 1px var(--form-input-border-active);
     }
 
     &:focus-within,
     &:has(input:focus-visible) {
       border-color: var(--form-input-border-focus);
-      box-shadow: 0 0 0 1px var(--form-input-border-focus);
+      box-shadow: inset 0 0 0 1px var(--form-input-border-focus);
     }
   }
 
