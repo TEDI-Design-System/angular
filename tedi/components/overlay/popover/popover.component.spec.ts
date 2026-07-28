@@ -445,6 +445,27 @@ describe("PopoverComponent", () => {
       expect(hideSpy).not.toHaveBeenCalled();
       expect(component.isOpen()).toBe(true);
     });
+
+    it("should keep popover open when a nested overlay is scrolled", () => {
+      hostComponent.hideOnScroll = true;
+      hostComponent.dismissible = false;
+      fixture.detectChanges();
+
+      component.showPopover();
+      fixture.detectChanges();
+      component.onOverlayAttach();
+
+      const nestedOverlayItem = document.createElement("div");
+      overlayContainerElement.appendChild(nestedOverlayItem);
+
+      const hideSpy = jest.spyOn(component, "hidePopover");
+      nestedOverlayItem.dispatchEvent(new Event("scroll", { bubbles: false }));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+      expect(component.isOpen()).toBe(true);
+
+      nestedOverlayItem.remove();
+    });
   });
 
   describe("Dismissible (click/focus outside)", () => {

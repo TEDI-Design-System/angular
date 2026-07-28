@@ -297,10 +297,9 @@ export class PopoverComponent {
       (event: Event) => {
         if (!this.isOpen()) return;
 
-        // Scrolling content inside the popover must not close it
-        const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
-        const target = event.target as Node | null;
-        if (overlayEl && target && overlayEl.contains(target)) return;
+        // Scrolling content inside the popover — or inside a nested overlay
+        // opened from it — must not close it
+        if (this.isInsideOverlay(event.target as Node | null)) return;
 
         this.hidePopover(false);
       },
@@ -378,23 +377,32 @@ export class PopoverComponent {
     }
   }
 
+  /**
+   * Whether the event target belongs to this popover's own overlay, or to a
+   * nested overlay opened from inside it.
+   *
+   * Nested overlays (e.g. a month/year dropdown in the date-picker header)
+   * render in their own pane within the shared CDK overlay container, not
+   * inside this popover's overlayElement. Interacting with, focusing into or
+   * scrolling such a child overlay must not dismiss the popover, so anything
+   * inside the overlay container counts as internal.
+   */
+  private isInsideOverlay(target: Node | null): boolean {
+    if (!target) return false;
+
+    const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+    if (overlayEl?.contains(target)) return true;
+
+    return (
+      target instanceof Element && !!target.closest(".cdk-overlay-container")
+    );
+  }
+
   private handleClosePopoverEvent(e: Event) {
     const triggerEl = this.popoverTrigger().host.nativeElement;
-    const containerEl =
-      this.connectedOverlay()?.overlayRef?.overlayElement as HTMLElement;
     const target = e.target as HTMLElement | null;
 
-    if (!target || triggerEl.contains(target) || containerEl?.contains(target)) {
-      return;
-    }
-
-    // Nested overlays opened from inside the popover (e.g. a month/year
-    // dropdown in the date-picker header) render in their own pane within the
-    // shared CDK overlay container, not inside this popover's overlayElement.
-    // Interacting with — or focusing into — such a child overlay must not
-    // dismiss the popover, so ignore events originating anywhere inside the
-    // overlay container.
-    if (target.closest(".cdk-overlay-container")) {
+    if (!target || triggerEl.contains(target) || this.isInsideOverlay(target)) {
       return;
     }
 
