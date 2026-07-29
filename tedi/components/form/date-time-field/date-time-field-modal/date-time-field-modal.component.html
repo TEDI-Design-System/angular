@@ -1,0 +1,141 @@
+<tedi-modal class="tedi-date-time-field-modal">
+  <tedi-modal-header>
+    <h2>{{ "date-time-field.modal-title" | tediTranslate }}</h2>
+  </tedi-modal-header>
+  <tedi-modal-content
+    class="tedi-date-time-field-modal__content"
+    [class.tedi-date-time-field-modal__content--range]="isRange"
+  >
+    <tedi-calendar
+      #calendar
+      class="tedi-date-time-field-modal__calendar"
+      [bordered]="false"
+      [value]="draft()"
+      [currentMonth]="month()"
+      [mode]="data.mode"
+      [selectionLevel]="data.selectionLevel"
+      [localeCode]="data.localeCode"
+      [showOutsideDays]="data.showOutsideDays"
+      [showWeekNumbers]="data.showWeekNumbers"
+      [numberOfMonths]="data.numberOfMonths"
+      [monthYearSelectType]="data.monthYearSelectType"
+      [required]="data.required"
+      [disabledMatchers]="data.disabledMatchers"
+      [availableDays]="data.availableDays"
+      [unavailableDays]="data.unavailableDays"
+      [shouldDisableMonth]="data.shouldDisableMonth"
+      [shouldDisableYear]="data.shouldDisableYear"
+      (currentMonthChange)="month.set($event)"
+      (select)="handleCalendarSelect()"
+    />
+
+    <div class="tedi-date-time-field-modal__separator" aria-hidden="true">
+      <span class="tedi-date-time-field-modal__separator-line"></span>
+    </div>
+
+    @if (isRange) {
+      <div class="tedi-date-time-field-modal__times">
+        <ng-container
+          [ngTemplateOutlet]="rangeTimeTpl"
+          [ngTemplateOutletContext]="{
+            kind: 'from',
+            time: fromTime(),
+            slots: fromSlots(),
+            heading: data.timeHeading ?? ('date-time-field.time-heading-from' | tediTranslate),
+            dateLabel: fromDateLabel(),
+          }"
+        />
+        <ng-container
+          [ngTemplateOutlet]="rangeTimeTpl"
+          [ngTemplateOutletContext]="{
+            kind: 'to',
+            time: toTime(),
+            slots: toSlots(),
+            heading: data.timeHeading ?? ('date-time-field.time-heading-to' | tediTranslate),
+            dateLabel: toDateLabel(),
+          }"
+        />
+      </div>
+    } @else {
+      <div class="tedi-date-time-field-modal__time">
+        <span class="tedi-date-time-field-modal__heading">
+          {{ data.timeHeading ?? ("date-time-field.time-heading" | tediTranslate) }}
+        </span>
+        @if (!singleSlots()?.length && useNativeTimeInput()) {
+          <tedi-form-field
+            class="tedi-date-time-field-modal__native-time"
+            [size]="data.size"
+          >
+            <tedi-time-field
+              inputId="dtf-modal-time"
+              [useNativePicker]="true"
+              [clearable]="false"
+              [value]="singleTime()"
+              (valueChange)="handleTimeSelect($event)"
+            />
+          </tedi-form-field>
+        } @else {
+          <tedi-time-picker
+            [value]="singleTime()"
+            [variant]="singleSlots()?.length ? 'slots' : 'scroll'"
+            [timeSlots]="singleSlots() ?? []"
+            [showSlotIndicator]="data.gridVariant === 'radio'"
+            [columns]="data.slotColumns"
+            [minuteStep]="data.minuteStep"
+            (valueChange)="handleTimeSelect($event)"
+          />
+        }
+      </div>
+    }
+  </tedi-modal-content>
+  <tedi-modal-footer>
+    <button tedi-button type="button" variant="secondary" (click)="cancel()">
+      {{ "date-field.cancel" | tediTranslate }}
+    </button>
+    <button tedi-button type="button" (click)="confirm()">
+      {{ "date-field.confirm" | tediTranslate }}
+    </button>
+  </tedi-modal-footer>
+</tedi-modal>
+
+<ng-template
+  #rangeTimeTpl
+  let-kind="kind"
+  let-time="time"
+  let-slots="slots"
+  let-heading="heading"
+  let-dateLabel="dateLabel"
+>
+  <div class="tedi-date-time-field-modal__time">
+    <div class="tedi-date-time-field-modal__time-header">
+      <span class="tedi-date-time-field-modal__heading">{{ heading }}</span>
+      @if (dateLabel) {
+        <span class="tedi-date-time-field-modal__date">{{ dateLabel }}</span>
+      }
+    </div>
+    @if (!slots?.length) {
+      <tedi-form-field
+        class="tedi-date-time-field-modal__native-time"
+        [size]="data.size"
+      >
+        <tedi-time-field
+          [inputId]="'dtf-modal-time-' + kind"
+          [useNativePicker]="true"
+          [clearable]="false"
+          [value]="time"
+          (valueChange)="handleRangeTimeSelect(kind, $event)"
+        />
+      </tedi-form-field>
+    } @else {
+      <tedi-time-picker
+        [value]="time"
+        variant="slots"
+        [timeSlots]="slots"
+        [showSlotIndicator]="data.gridVariant === 'radio'"
+        [columns]="data.slotColumns"
+        [minuteStep]="data.minuteStep"
+        (valueChange)="handleRangeTimeSelect(kind, $event)"
+      />
+    }
+  </div>
+</ng-template>

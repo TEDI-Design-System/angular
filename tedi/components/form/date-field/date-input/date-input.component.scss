@@ -75,13 +75,14 @@
     min-width: 0;
   }
 
-  // When useNativePicker is active the input swaps to type=date. WebKit/Blink
-  // (Chrome, Safari, Edge) render their own calendar-picker indicator on the
-  // right, plus inner spin/clear buttons — we replace them with our own icon
-  // button, so suppress the browser-default ones. Firefox does not render a
-  // native indicator on <input type="date"> so no Firefox-specific rule is
-  // needed.
-  &__input[type="date"] {
+  // When useNativePicker is active the input swaps to type=date (date-field)
+  // or type=datetime-local (date-time-field). WebKit/Blink (Chrome, Safari,
+  // Edge) render their own calendar-picker indicator on the right, plus inner
+  // spin/clear buttons — we replace them with our own icon button, so suppress
+  // the browser-default ones. Firefox does not render a native indicator on
+  // these inputs so no Firefox-specific rule is needed.
+  &__input[type="date"],
+  &__input[type="datetime-local"] {
     &::-webkit-calendar-picker-indicator {
       display: none;
       appearance: none;

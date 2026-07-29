@@ -1098,6 +1098,65 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 <tedi-date-field inputId="multi-mo" [numberOfMonths]="2" />
 ```
 
+### DateTimeField
+**Selector:** `tedi-date-time-field` | ControlValueAccessor
+
+Form-control wrapper that pairs a typed text input with a popover holding the Calendar and a TimePicker. `side-by-side` shows both together; `multi-step` picks the date first, then advances to a separate time step. Setting `availableTimes` swaps the scroll-wheel for a grid of predefined slots. Supports `single` and `range` modes, a native `datetime-local` fallback, and a mobile modal. Like DateField it owns no label — compose with `tedi-form-field` + `tedi-label`. Inherits the same calendar options as DateField (`minDate`, `maxDate`, `disablePast`/`disableFuture`, `disabledMatchers`, `availableDays`/`unavailableDays`, `selectionLevel`, `monthYearSelectType`, `initialMonth`, `showOutsideDays`, `showWeekNumbers`).
+
+**Model:** `value: Date | DateRange | null` (range carries a time on each end)
+**Outputs:**
+- `openChange: boolean` — emitted when the picker (popover/modal) open state changes
+
+**Inputs:**
+- `inputId: string` (required) — unique ID for label association
+- `mode: DateTimeFieldMode = "single"` — "single" (one Date) or "range" ({ from, to })
+- `layout: DateTimeFieldLayout = "side-by-side"` — "side-by-side" or "multi-step"; `range` always renders side-by-side
+- `availableTimes: string[] | ((date: Date) => string[]) | undefined` — predefined `HH:mm` slots (static or per-date); renders a slot grid instead of the wheel
+- `timeGridVariant: "button" | "radio" | undefined` — slot grid style; defaults to "button" for side-by-side, "radio" for multi-step
+- `minuteStep: number = 15` — minute interval for the scroll-wheel; ignored when `availableTimes` is set
+- `slotColumns: number = 3` — columns in the slot grid
+- `timeHeading / selectTimeLabel / backLabel: string | undefined` — label overrides (default to translated strings)
+- `placeholder: string = ""` — placeholder when no value
+- `localeCode: string = "et-EE"` — BCP-47 locale for the calendar and date/time formatting
+- `inputDisabled / readOnly / required: boolean = false`
+- `size: "default" | "small" = "default"` — should match the surrounding `tedi-form-field`
+- `numberOfMonths: BreakpointInput<number> = { xs: 1, md: 2 }` — months side by side in `range` mode (single is always 1)
+- `useNativePicker: boolean | "sm" | "md" | "lg" | "xl" = false` — OS-native `datetime-local` picker (single mode only); `true` always, breakpoint name uses native below it
+- `modal: boolean | "sm" | "md" | "lg" | "xl" = false` — open in a centered modal (with Cancel/Confirm) instead of the popover; breakpoint name means modal below it
+- `fullscreen: boolean | "sm" | "md" | "lg" | "xl" = false` — render the modal fullscreen; only applies when it opens as a modal
+- `formatDate: ((value: DateTimeFieldValue) => string) | undefined` — custom display formatter
+
+```html
+<!-- Default: calendar + scroll-wheel time -->
+<tedi-form-field>
+  <label tedi-label for="dt">Date and time</label>
+  <tedi-date-time-field inputId="dt" [formControl]="control" placeholder="pp.kk.aaaa tt:mm" />
+</tedi-form-field>
+
+<!-- Predefined time slots (button grid) -->
+<tedi-date-time-field
+  inputId="dt-slots"
+  [formControl]="control"
+  [availableTimes]="['09:30', '10:00', '11:30', '15:30']"
+  timeGridVariant="button"
+/>
+
+<!-- Multi-step: pick the date, then the time (radio slots) -->
+<tedi-date-time-field
+  inputId="dt-steps"
+  [formControl]="control"
+  layout="multi-step"
+  [availableTimes]="slotsForDate"
+/>
+
+<!-- Range with a time picker per end -->
+<tedi-date-time-field inputId="dt-range" mode="range" [formControl]="rangeControl" />
+
+<!-- Native datetime-local on phones, modal below md, popover above -->
+<tedi-date-time-field inputId="dt-native" [formControl]="control" useNativePicker="sm" />
+<tedi-date-time-field inputId="dt-modal" [formControl]="control" modal="md" />
+```
+
 ### TimeField
 **Selector:** `tedi-time-field`
 **Model:** `value: string | null` — `HH:mm`

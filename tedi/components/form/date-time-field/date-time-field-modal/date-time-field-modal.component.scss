@@ -1,0 +1,133 @@
+@use "@tedi-design-system/core/bootstrap-utility/breakpoints";
+
+.tedi-date-time-field-modal {
+  --_tedi-modal-body-padding: 0;
+
+  // Calendar and time picker sit side-by-side on wider screens and stack (time
+  // below calendar) once the row no longer fits — the modal itself shrink-wraps
+  // this content (see `width: "fit-content"` in date-time-field.component.ts).
+  //
+  // `.tedi-modal-dialog .tedi-modal-content` (modal.component.scss) forces a
+  // column layout with a large gap; the selector below (ancestor + compound
+  // classes) outweighs it so the row layout and the tight, separator-driven
+  // spacing win.
+  .tedi-date-time-field-modal__content.tedi-modal-content {
+    flex-direction: row;
+    gap: 0;
+    align-items: stretch;
+
+    @include breakpoints.media-breakpoint-down(md) {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  // Range: stack the calendar over the two ends. Side-mounting the two time
+  // pickers left the calendar with a tall empty gap and overflowed into a
+  // horizontal scroll on tablet, and the calendar↔time link was lost. Stacking
+  // keeps the ends grouped as a set beneath the shared calendar.
+  .tedi-date-time-field-modal__content--range.tedi-modal-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__calendar {
+    flex-shrink: 0;
+  }
+
+  // The separator only makes sense while the calendar and time picker sit
+  // side-by-side. Once they stack, hide it — a horizontal line plus its padding
+  // just adds dead space between the two.
+  &__separator {
+    display: flex;
+    flex-shrink: 0;
+    align-items: stretch;
+    padding: var(--card-padding-md-default) var(--separator-spacing-x-01);
+
+    @include breakpoints.media-breakpoint-down(md) {
+      display: none;
+    }
+  }
+
+  &__separator-line {
+    width: var(--tedi-borders-01);
+    background: var(--general-separator-primary);
+  }
+
+  // The vertical separator belongs to the single side-by-side layout; range
+  // stacks vertically, so the two ends carry their own top divider instead.
+  &__content--range &__separator {
+    display: none;
+  }
+
+  &__times {
+    display: flex;
+    gap: var(--layout-grid-gutters-04);
+    justify-content: center;
+
+    @include breakpoints.media-breakpoint-down(md) {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+  }
+
+  &__content--range &__times {
+    align-self: stretch;
+    padding-top: var(--card-padding-md-default);
+    border-top: var(--tedi-borders-01) solid var(--general-separator-primary);
+  }
+
+  // Groups the heading with its start/end date so they read as one label, and
+  // owns the gap down to the picker (same spacing whether or not a date shows).
+  &__time-header {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    padding-top: var(--card-padding-md-default);
+    padding-bottom: var(--card-padding-xs);
+  }
+
+  &__time-header &__heading {
+    padding: 0;
+  }
+
+  // Echoes the start/end date under each heading so it stays clear which
+  // calendar end the picker below drives.
+  &__date {
+    font-size: var(--body-small-regular-size);
+    color: var(--general-text-secondary);
+    text-align: center;
+  }
+
+  &__time {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 var(--card-padding-md-default) var(--card-padding-md-default);
+  }
+
+  &__native-time {
+    width: 100%;
+    max-width: var(--tedi-containers-01);
+  }
+
+  &__heading {
+    align-self: stretch;
+    padding-top: var(--card-padding-md-default);
+    padding-bottom: var(--card-padding-xs);
+    font-size: var(--body-bold-size);
+    font-weight: var(--body-bold-weight);
+    line-height: var(--body-bold-line-height);
+    color: var(--general-text-primary);
+    text-align: center;
+  }
+
+  // See date-time-field.component.scss: re-assert the slot grid's `display: grid` (which
+  // tedi-radio-card-group's flex can override by injection order) and drop its own
+  // padding since `&__time` already provides it.
+  .tedi-time-picker__grid {
+    display: grid;
+    padding: 0;
+  }
+}

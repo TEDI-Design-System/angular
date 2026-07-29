@@ -1290,6 +1290,52 @@ export const translationsMap = {
     en: "Cancel",
     ru: "Отмена",
   },
+  "date-time-field.time-heading": {
+    description: "Heading rendered above the time picker in the date-time field.",
+    components: ["DateTimeField"],
+    et: "Kellaaeg",
+    en: "Time",
+    ru: "Время",
+  },
+  "date-time-field.time-heading-from": {
+    description:
+      "Heading above the start-time picker in the date-time field range mode.",
+    components: ["DateTimeField"],
+    et: "Algusaeg",
+    en: "Start time",
+    ru: "Время начала",
+  },
+  "date-time-field.time-heading-to": {
+    description:
+      "Heading above the end-time picker in the date-time field range mode.",
+    components: ["DateTimeField"],
+    et: "Lõppaeg",
+    en: "End time",
+    ru: "Время окончания",
+  },
+  "date-time-field.select-time": {
+    description:
+      "Footer link in the multi-step date-time field calendar that advances to the time picker.",
+    components: ["DateTimeField"],
+    et: "Vali kellaaeg",
+    en: "Select time",
+    ru: "Выбрать время",
+  },
+  "date-time-field.back": {
+    description:
+      "Back link in the multi-step date-time field time picker that returns to the calendar.",
+    components: ["DateTimeField"],
+    et: "Tagasi",
+    en: "Back",
+    ru: "Назад",
+  },
+  "date-time-field.modal-title": {
+    description: "Title shown in the mobile date-time picker modal header.",
+    components: ["DateTimeField"],
+    et: "Kuupäev ja kellaaeg",
+    en: "Date and time",
+    ru: "Дата и время",
+  },
   "time-picker.hours": {
     description: "Aria label for the hours listbox in the time picker.",
     components: ["TimePicker"],
