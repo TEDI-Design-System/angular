@@ -168,9 +168,7 @@ export class SearchComponent implements ControlValueAccessor {
     this.size() === "small" ? "small" : "default"
   );
 
-  readonly buttonIconSize = computed(() =>
-    this.size() === "large" && !this.button()?.text ? 24 : 18
-  );
+  readonly buttonIconSize = computed(() => (this.size() === "large" ? 24 : 18));
 
   readonly buttonAriaLabel = computed(() => {
     const button = this.button();

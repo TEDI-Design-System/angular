@@ -263,6 +263,29 @@ describe("SearchComponent", () => {
       expect(heightVar()).toBe("var(--form-field-height)");
     });
   });
+
+  describe("button sizing", () => {
+    it("should use a small button with an 18px icon for size small", () => {
+      fixture.componentRef.setInput("size", "small");
+      fixture.detectChanges();
+
+      expect(component.buttonSize()).toBe("small");
+      expect(component.buttonIconSize()).toBe(18);
+    });
+
+    it("should use a default button with an 18px icon for the default size", () => {
+      expect(component.buttonSize()).toBe("default");
+      expect(component.buttonIconSize()).toBe(18);
+    });
+
+    it("should use a default button with a 24px icon for size large", () => {
+      fixture.componentRef.setInput("size", "large");
+      fixture.detectChanges();
+
+      expect(component.buttonSize()).toBe("default");
+      expect(component.buttonIconSize()).toBe(24);
+    });
+  });
 });
 
 @Component({
