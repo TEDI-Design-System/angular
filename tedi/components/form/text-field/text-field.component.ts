@@ -134,6 +134,11 @@ export class TextFieldComponent
     this.onTouched();
   }
 
+  focus() {
+    if (this.disabled()) return;
+    this.el.nativeElement.focus();
+  }
+
   clearField() {
     if (this.disabled()) return;
 

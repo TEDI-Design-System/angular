@@ -202,6 +202,29 @@ describe("DateFieldComponent", () => {
       expect(component.invalid()).toBe(true);
     });
 
+    it("focus moves focus to the text input", () => {
+      const { component, el } = createField();
+      const input = el.querySelector(
+        ".tedi-date-input__input",
+      ) as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+
+      component.focus();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("focus does nothing when the field is disabled", () => {
+      const { component, el, fixture } = createField({ inputDisabled: true });
+      const input = el.querySelector(
+        ".tedi-date-input__input",
+      ) as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+      fixture.detectChanges();
+
+      component.focus();
+      expect(focusSpy).not.toHaveBeenCalled();
+    });
+
     it("clearField clears value and emits null", () => {
       const { component } = createField();
       const onChange = jest.fn();
@@ -1078,6 +1101,37 @@ describe("DateFieldComponent", () => {
       component.clearField();
       expect(component.value()).toBeInstanceOf(Date);
       expect(onChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("clearable", () => {
+    it("renders the clear button once the field has a value", () => {
+      const { component, el, fixture } = createField();
+      expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
+
+      component.value.set(new Date(2026, 4, 14));
+      fixture.detectChanges();
+
+      expect(component.canClear()).toBe(true);
+      expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
+    });
+
+    it("hides the clear button when clearable is false", () => {
+      const { component, el, fixture } = createField({ clearable: false });
+      component.value.set(new Date(2026, 4, 14));
+      fixture.detectChanges();
+
+      expect(component.canClear()).toBe(false);
+      expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
+    });
+
+    it("still allows clearing programmatically when clearable is false", () => {
+      const { component } = createField({ clearable: false });
+      component.value.set(new Date(2026, 4, 14));
+
+      component.clearField();
+
+      expect(component.value()).toBeNull();
     });
   });
 

@@ -17,7 +17,6 @@
     gap: var(--form-field-inner-spacing);
     align-items: center;
     min-width: 0;
-    padding-right: var(--form-field-padding-x-md-default);
 
     &:focus,
     &:focus-visible {
@@ -41,7 +40,7 @@
   &__input {
     flex: 1;
     min-width: 0;
-    padding-left: var(--form-field-padding-x-md-default);
+    padding: 0;
     font-family: inherit;
     font-size: var(--body-regular-size);
     color: var(--form-input-text-filled);

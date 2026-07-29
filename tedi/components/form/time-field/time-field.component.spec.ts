@@ -286,6 +286,28 @@ describe("TimeFieldComponent", () => {
       expect(component.invalid()).toBe(true);
     });
 
+    it("should provide focus method that focuses the input", () => {
+      const input = el.querySelector(
+        ".tedi-time-field__input",
+      ) as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+
+      component.focus();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should not focus the input when disabled", () => {
+      const input = el.querySelector(
+        ".tedi-time-field__input",
+      ) as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+      component.setDisabledState(true);
+      fixture.detectChanges();
+
+      component.focus();
+      expect(focusSpy).not.toHaveBeenCalled();
+    });
+
     it("should provide clearField method", () => {
       component.writeValue("14:30");
       fixture.detectChanges();
