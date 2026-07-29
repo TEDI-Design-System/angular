@@ -1,3 +1,10 @@
+# [7.1.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.11...angular-7.1.0-rc.12) (2026-07-28)
+
+
+### Bug Fixes
+
+* **select,dropdown,popover:** hideOnScroll no longer closes overlay when scrolling its content [#562](https://github.com/TEDI-Design-System/angular/issues/562) ([#567](https://github.com/TEDI-Design-System/angular/issues/567)) ([3120825](https://github.com/TEDI-Design-System/angular/commit/3120825684b14799ce11c66e7be393679631c143))
+
 # [7.1.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.10...angular-7.1.0-rc.11) (2026-07-23)
 
 
