@@ -1104,34 +1104,16 @@ describe("DateFieldComponent", () => {
     });
   });
 
-  describe("clearable", () => {
-    it("renders the clear button once the field has a value", () => {
+  describe("clear button", () => {
+    it("renders once the field has a value", () => {
       const { component, el, fixture } = createField();
       expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
 
-      component.value.set(new Date(2026, 4, 14));
+      fixture.componentRef.setInput("value", new Date(2026, 4, 14));
       fixture.detectChanges();
 
       expect(component.canClear()).toBe(true);
       expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
-    });
-
-    it("hides the clear button when clearable is false", () => {
-      const { component, el, fixture } = createField({ clearable: false });
-      component.value.set(new Date(2026, 4, 14));
-      fixture.detectChanges();
-
-      expect(component.canClear()).toBe(false);
-      expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
-    });
-
-    it("still allows clearing programmatically when clearable is false", () => {
-      const { component } = createField({ clearable: false });
-      component.value.set(new Date(2026, 4, 14));
-
-      component.clearField();
-
-      expect(component.value()).toBeNull();
     });
   });
 

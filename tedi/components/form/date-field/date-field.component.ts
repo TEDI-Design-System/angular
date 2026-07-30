@@ -135,8 +135,6 @@ export class DateFieldComponent
   readonly isTagRemovable = input<boolean>(true);
   /** Placeholder rendered in the input when there is no value. */
   readonly placeholder = input<string>("");
-  /** Show a clear button when the field has a value. */
-  readonly clearable = input<boolean>(true);
   /**
    * Disables specific days via matchers (does not disable the whole field).
    * Accepts a `Date`, `Date[]`, `{ before }`, `{ after }`, `{ from, to? }`,
@@ -429,11 +427,7 @@ export class DateFieldComponent
   });
 
   readonly canClear = computed(
-    () =>
-      this.clearable() &&
-      !!this.value() &&
-      !this.fieldDisabled() &&
-      !this.readOnly(),
+    () => !!this.value() && !this.fieldDisabled() && !this.readOnly(),
   );
 
   readonly inputIsTrigger = computed(

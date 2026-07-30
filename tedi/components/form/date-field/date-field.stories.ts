@@ -73,7 +73,6 @@ const COMMON_INPUTS = [
   "monthYearSelectType",
   "localeCode",
   "placeholder",
-  "clearable",
   "inputDisabled",
   "readOnly",
   "required",
@@ -137,7 +136,6 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
           [monthYearSelectType]="monthYearSelectType"
           [localeCode]="localeCode"
           [placeholder]="placeholder"
-          [clearable]="clearable"
           [inputDisabled]="inputDisabled"
           [readOnly]="readOnly"
           [required]="required"
@@ -215,7 +213,6 @@ export default {
     monthYearSelectType: "dropdown",
     localeCode: "et-EE",
     placeholder: "",
-    clearable: true,
     inputDisabled: false,
     readOnly: false,
     required: false,
@@ -350,15 +347,6 @@ export default {
         category: "inputs",
         type: { summary: "string" },
         defaultValue: { summary: '""' },
-      },
-    },
-    clearable: {
-      description: "Show a clear button when the field has a value.",
-      control: { type: "boolean" },
-      table: {
-        category: "inputs",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "true" },
       },
     },
     inputDisabled: {
