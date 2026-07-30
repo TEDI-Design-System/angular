@@ -1,3 +1,10 @@
+# [7.1.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.12...angular-7.1.0-rc.13) (2026-07-30)
+
+
+### Bug Fixes
+
+* **form-field,date-field,text-field,time-field:** value no longer cuts early [#561](https://github.com/TEDI-Design-System/angular/issues/561) ([#571](https://github.com/TEDI-Design-System/angular/issues/571)) ([17322fc](https://github.com/TEDI-Design-System/angular/commit/17322fc02b99e860ec7ea0a59dd6201dbdb293dd))
+
 # [7.1.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.11...angular-7.1.0-rc.12) (2026-07-28)
 
 

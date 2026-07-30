@@ -2,8 +2,7 @@
   flex: 1;
   min-width: 0;
   height: 100%;
-  padding: var(--form-field-padding-y-md-default)
-    var(--form-field-padding-x-md-default);
+  padding: 0;
   font-size: var(--body-regular-size);
   font-weight: var(--body-regular-weight);
   line-height: var(--body-regular-line-height);
@@ -32,27 +31,5 @@
   /* Firefox */
   &--arrows-hidden[type="number"] {
     appearance: textfield;
-  }
-}
-
-.tedi-form-field {
-  &--with-icon {
-    .tedi-text-field {
-      padding-right: 0;
-    }
-  }
-
-  &--small {
-    .tedi-text-field {
-      padding-block: var(--form-field-padding-y-sm);
-      padding-inline: var(--form-field-padding-x-md-default);
-    }
-  }
-
-  &--large {
-    .tedi-text-field {
-      padding-block: var(--form-field-padding-y-lg);
-      padding-inline: var(--form-field-padding-x-lg);
-    }
   }
 }
