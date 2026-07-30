@@ -156,6 +156,31 @@ describe("TextFieldComponent", () => {
     });
   });
 
+  describe("focus", () => {
+    it("should focus the input element", () => {
+      const focusFixture = TestBed.createComponent(TextFieldComponent);
+      const focusEl: HTMLInputElement = focusFixture.nativeElement;
+      const focusSpy = jest.spyOn(focusEl, "focus");
+      focusFixture.detectChanges();
+
+      focusFixture.componentInstance.focus();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should not focus the input element when disabled", () => {
+      const focusFixture = TestBed.createComponent(TextFieldComponent);
+      const focusEl: HTMLInputElement = focusFixture.nativeElement;
+      const focusSpy = jest.spyOn(focusEl, "focus");
+      focusFixture.componentRef.setInput("disabled", true);
+      focusFixture.detectChanges();
+
+      focusFixture.componentInstance.focus();
+
+      expect(focusSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe("when bound to a reactive FormControl", () => {
     let fcFixture: ComponentFixture<FormControlHostComponent>;
     let fcTextField: TextFieldComponent;

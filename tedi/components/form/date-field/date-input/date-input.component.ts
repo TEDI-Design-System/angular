@@ -172,6 +172,14 @@ export class DateInputComponent implements AfterViewChecked {
     "date-picker.clear-date",
   );
 
+  /** Moves focus to the text input. Used by the wrapping field. */
+  focusInput(): void {
+    const target = this.inputElement()?.nativeElement as
+      | HTMLInputElement
+      | undefined;
+    target?.focus();
+  }
+
   handleInput(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.inputChange.emit(target.value);
