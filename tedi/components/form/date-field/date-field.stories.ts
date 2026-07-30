@@ -564,13 +564,13 @@ export const Size: Story = {
     template: `
       <tedi-row [cols]="1" [gap]="3">
         <tedi-col>
-          <tedi-form-field size="default">
+          <tedi-form-field size="default" [clearable]="clearable">
             <label tedi-label for="date-size-default">Vaikimisi</label>
             <tedi-date-field inputId="date-size-default" ${argBindings()} />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
-          <tedi-form-field size="small">
+          <tedi-form-field size="small" [clearable]="clearable">
             <label tedi-label for="date-size-small">Väike</label>
             <tedi-date-field inputId="date-size-small" ${argBindings()} />
           </tedi-form-field>
