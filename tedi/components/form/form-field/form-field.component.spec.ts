@@ -32,6 +32,7 @@ class MockControlComponent implements FormFieldControl<string> {
   setInvalidState = jest.fn();
   clearField = jest.fn();
   focus = jest.fn();
+  ownsClearButton = false;
 }
 
 @Component({
@@ -72,6 +73,20 @@ class TestHostComponent {
   clearable = false;
   inputClass?: string;
   feedbackType: "valid" | "error" | "default" = "default";
+}
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, MockControlComponent],
+  template: `
+    <tedi-form-field clearable>
+      <mock-control #mockControl></mock-control>
+    </tedi-form-field>
+  `,
+})
+class BareClearableHostComponent {
+  @ViewChild("mockControl", { static: true })
+  mockControl!: MockControlComponent;
 }
 
 describe("FormFieldComponent", () => {
@@ -172,6 +187,33 @@ describe("FormFieldComponent", () => {
       ".tedi-form-field__buttons",
     );
     expect(buttons).toBeNull();
+  });
+
+  it("should not render its own clear button when the control renders one", () => {
+    host.clearable = true;
+    host.mockControl.value.set("text");
+    host.mockControl.ownsClearButton = true;
+    formField.ngAfterContentInit();
+    fixture.detectChanges();
+
+    expect(formField.renderClearButton()).toBe(false);
+    expect(
+      fixture.nativeElement.querySelector(".tedi-form-field__clear"),
+    ).toBeNull();
+  });
+
+  it("should not be clearable by default", () => {
+    expect(formField.clearable()).toBe(false);
+    expect(formField.renderClearButton()).toBe(false);
+  });
+
+  it("should treat a bare clearable attribute as true", () => {
+    const bare = TestBed.createComponent(BareClearableHostComponent);
+    bare.detectChanges();
+
+    expect(
+      bare.nativeElement.querySelector(".tedi-form-field__clear"),
+    ).toBeTruthy();
   });
 
   it("should call control.clearField when clear is triggered", () => {

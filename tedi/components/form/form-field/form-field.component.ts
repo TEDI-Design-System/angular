@@ -9,8 +9,12 @@ import {
   inject,
   DestroyRef,
   effect,
+  forwardRef,
+  signal,
+  booleanAttribute,
 } from "@angular/core";
 import { TEDI_INPUT_GROUP } from "../input-group/input-group.token";
+import { TEDI_FORM_FIELD } from "./form-field-context";
 import { NgClass } from "@angular/common";
 import {
   FormFieldControl,
@@ -56,6 +60,12 @@ export interface FormFieldIcon {
     SeparatorComponent,
     TediTranslationPipe,
   ],
+  providers: [
+    {
+      provide: TEDI_FORM_FIELD,
+      useExisting: forwardRef(() => FormFieldComponent),
+    },
+  ],
   host: {
     "[class]": "hostClasses()",
   },
@@ -71,10 +81,12 @@ export class FormFieldComponent implements AfterContentInit {
    */
   icon = input<string | FormFieldIcon | undefined>();
   /**
-   * Whether the form field includes a clear button.
+   * Whether the field shows a clear button. The single source of truth for every
+   * control inside it — date and time fields read it too instead of declaring
+   * their own input.
    * @default false
    */
-  clearable = input<boolean>(false);
+  clearable = input(false, { transform: booleanAttribute });
   /**
    * Custom CSS classes for the input.
    */
@@ -100,6 +112,8 @@ export class FormFieldComponent implements AfterContentInit {
   }
 
   ngAfterContentInit() {
+    this.controlRef.set(this.control);
+
     this.ngControl?.control?.events
       ?.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateValidationState());
@@ -137,9 +151,24 @@ export class FormFieldComponent implements AfterContentInit {
     return "neutral";
   });
 
+  /**
+   * The resolved `ContentChild`, mirrored into a signal. A plain property read
+   * is not a reactive dependency, so the computeds below would cache whatever
+   * they saw before `ngAfterContentInit` and never re-evaluate.
+   */
+  private readonly controlRef = signal<FormFieldControl | undefined>(undefined);
+
+  /**
+   * Whether the field renders its own clear button. Controls that render one
+   * themselves opt out, so `clearable` drives them without producing two.
+   */
+  readonly renderClearButton = computed(
+    () => this.clearable() && !this.controlRef()?.ownsClearButton,
+  );
+
   showClearButton = computed(() => {
-    const value = this.control?.value();
-    return this.clearable() && !!value;
+    const value = this.controlRef()?.value();
+    return this.renderClearButton() && !!value;
   });
 
   readonly isDisabled = computed(
@@ -154,7 +183,7 @@ export class FormFieldComponent implements AfterContentInit {
       "tedi-form-field--disabled": this.isDisabled(),
       "tedi-form-field--small": this.size() === "small",
       "tedi-form-field--large": this.size() === "large",
-      "tedi-form-field--with-icon": this.clearable() || !!this.icon(),
+      "tedi-form-field--with-icon": this.renderClearButton() || !!this.icon(),
     };
   });
 

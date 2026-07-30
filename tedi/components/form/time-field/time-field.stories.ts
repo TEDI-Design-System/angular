@@ -5,7 +5,10 @@ import {
 } from "@storybook/angular";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { TimeFieldComponent } from "./time-field.component";
-import { FormFieldComponent } from "../form-field/form-field.component";
+import {
+  FormFieldComponent,
+  type InputSize,
+} from "../form-field/form-field.component";
 import { LabelComponent } from "../label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -19,6 +22,13 @@ const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.41.64?node-id=4662-91741&m=dev" target="_blank">Figma ↗</a><br />
  * <a href="https://www.tedi.ee/1ee8444b7/p/73629d-time-field" target="_blank">Zeroheight ↗</a>
  */
+
+type TimeFieldStoryArgs = TimeFieldComponent & {
+  /** Story-only: size applied to the wrapping `tedi-form-field`. */
+  size?: InputSize;
+  /** Story-only: clearable applied to the wrapping `tedi-form-field`. */
+  clearable?: boolean;
+};
 
 export default {
   title: "TEDI-Ready/Components/Form/TimeField",
@@ -47,7 +57,7 @@ export default {
       description: "Unique ID for label association and accessibility.",
       control: { type: "text" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "string" },
       },
     },
@@ -55,7 +65,7 @@ export default {
       description: "Selected time in HH:mm format. Two-way bindable.",
       control: { type: "text" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "string | null" },
         defaultValue: { summary: "null" },
       },
@@ -64,7 +74,7 @@ export default {
       description: "Placeholder shown when the input is empty.",
       control: { type: "text" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "string" },
       },
     },
@@ -73,7 +83,7 @@ export default {
         "Manually mark the field as invalid. Sets `aria-invalid` on the input and triggers the form-field's invalid styling. Combines with the form-control validity state from reactive forms.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
@@ -82,18 +92,30 @@ export default {
       description: "Disables interaction. Combines with the form-control disabled state.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
     },
+    size: {
+      description:
+        "Size of the surrounding `tedi-form-field` — the time field inherits it.",
+      control: { type: "radio" },
+      options: ["default", "small"],
+      table: {
+        category: "Form Field inputs",
+        type: { summary: "InputSize", detail: "default \nsmall" },
+        defaultValue: { summary: "default" },
+      },
+    },
     clearable: {
-      description: "Show a clear button when the field has a value.",
+      description:
+        "Set on the wrapping `tedi-form-field`. Opt in to show a clear button once the field has a value.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Form Field inputs",
         type: { summary: "boolean" },
-        defaultValue: { summary: "true" },
+        defaultValue: { summary: "false" },
       },
     },
     pickerVariant: {
@@ -102,7 +124,7 @@ export default {
       control: { type: "radio" },
       options: ["scroll", "slots", "dropdown", "none"],
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: {
           summary: "TimeFieldPickerVariant",
           detail: "scroll \nslots \ndropdown \nnone",
@@ -116,7 +138,7 @@ export default {
       control: { type: "select" },
       options: [true, false, "sm", "md", "lg", "xl"],
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: {
           summary: "TimeFieldUseNativePicker",
           detail: "boolean \nsm \nmd \nlg \nxl",
@@ -130,7 +152,7 @@ export default {
       control: { type: "radio" },
       options: ["button", "input"],
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "TimeFieldPickerTrigger", detail: "button \ninput" },
         defaultValue: { summary: "button" },
       },
@@ -139,7 +161,7 @@ export default {
       description: "Close the popover/modal as soon as the user picks a value.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
@@ -148,7 +170,7 @@ export default {
       description: "Predefined HH:mm strings for the slots and dropdown variants.",
       control: { type: "object" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "string[]" },
         defaultValue: { summary: "[]" },
       },
@@ -157,7 +179,7 @@ export default {
       description: "Grid columns for the slots variant.",
       control: { type: "number" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "number" },
         defaultValue: { summary: "3" },
       },
@@ -166,7 +188,7 @@ export default {
       description: "Minute step for the scroll variant — e.g. 5 renders 00, 05, 10…",
       control: { type: "number" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "number" },
         defaultValue: { summary: "1" },
       },
@@ -177,7 +199,7 @@ export default {
       control: { type: "select" },
       options: [true, false, "sm", "md", "lg", "xl"],
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: {
           summary: "TimeFieldModal",
           detail: "boolean \nsm \nmd \nlg \nxl",
@@ -191,7 +213,7 @@ export default {
       control: { type: "select" },
       options: [true, false, "sm", "md", "lg", "xl"],
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: {
           summary: "TimeFieldFullscreen",
           detail: "boolean \nsm \nmd \nlg \nxl",
@@ -200,16 +222,17 @@ export default {
       },
     },
   },
-} as Meta<TimeFieldComponent>;
+} as Meta<TimeFieldStoryArgs>;
 
 export const Default: StoryObj = {
   args: {
     inputId: "example-id",
+    size: "default",
     value: null,
     placeholder: "tt:mm",
     invalid: false,
     disabled: false,
-    clearable: true,
+    clearable: false,
     pickerVariant: "scroll",
     useNativePicker: false,
     pickerTrigger: "button",
@@ -225,7 +248,7 @@ export const Default: StoryObj = {
     template: `
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
-          <tedi-form-field>
+          <tedi-form-field [size]="size" [clearable]="clearable">
             <label tedi-label for="example-id">Aeg</label>
             <tedi-time-field
               [inputId]="inputId"
@@ -233,7 +256,6 @@ export const Default: StoryObj = {
               [placeholder]="placeholder"
               [invalid]="invalid"
               [disabled]="disabled"
-              [clearable]="clearable"
               [pickerVariant]="pickerVariant"
               [useNativePicker]="useNativePicker"
               [pickerTrigger]="pickerTrigger"
