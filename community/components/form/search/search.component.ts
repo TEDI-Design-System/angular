@@ -39,6 +39,10 @@ export type AutocompleteOption = {
 };
 export type SearchState = "valid" | "error" | "default";
 
+/**
+ * @deprecated Use the TEDI-Ready `SearchComponent` from
+ * `@tedi-design-system/angular/tedi` instead. This component will be removed in a future version.
+ */
 @Component({
   selector: "tedi-search",
   standalone: true,

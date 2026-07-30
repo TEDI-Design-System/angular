@@ -12,6 +12,7 @@ export * from "./feedback-text/feedback-text.component";
 export * from "./label/label.component";
 export * from "./label-row";
 export * from "./number-field/number-field.component";
+export * from "./search";
 export * from "./select";
 export * from "./slider/slider.component";
 export * from "./toggle/toggle.component";

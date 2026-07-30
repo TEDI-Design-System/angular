@@ -31,8 +31,8 @@
     <div class="tedi-form-field__icon">
       <tedi-icon
         [name]="icon.name"
-        [size]="icon.size ?? (size() === 'small' ? 16 : 18)"
-        [color]="icon.color ?? 'secondary'"
+        [size]="icon.size ?? (size() === 'small' ? 16 : size() === 'large' ? 24 : 18)"
+        [color]="icon.color ?? 'inherit'"
         [type]="icon.type ?? 'outlined'"
         [variant]="icon.variant ?? 'outlined'"
         [attr.aria-hidden]="true"

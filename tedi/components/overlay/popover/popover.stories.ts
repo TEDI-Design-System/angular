@@ -17,6 +17,7 @@ import { EmptyStateComponent } from "../../helpers/empty-state/empty-state.compo
 import { LabelComponent } from "../../form/label/label.component";
 import { DropdownItemValueComponent } from "../dropdown/dropdown-item-value/dropdown-item-value.component";
 import { DropdownItemValueLabelComponent } from "../dropdown/dropdown-item-value/dropdown-item-value-label.component";
+import { SearchComponent } from "../../form/search/search.component";
 
 const MAXWIDTH = ["none", "small", "medium", "large"];
 const POSITIONS: PopoverPosition[] = [
@@ -64,6 +65,7 @@ export default {
         SeparatorComponent,
         EmptyStateComponent,
         LabelComponent,
+        SearchComponent,
         DropdownItemValueComponent,
         DropdownItemValueLabelComponent,
       ],
@@ -515,13 +517,7 @@ export const WithProminentBorder: Story = {
           <tedi-popover [withBorder]="true" position="bottom">
             <span tedi-popover-trigger [underline]="true">Representatives</span>
             <tedi-popover-content maxWidth="small">
-              <div>
-                <label tedi-label for="header-popover-search">Otsi isikut</label>
-                <input
-                  id="header-popover-search"
-                  style="width: 100%; padding: var(--form-field-padding-y-md-default) var(--form-field-padding-x-md-default); background: var(--form-input-background-default); border: var(--tedi-borders-01) solid var(--form-input-border-default); border-radius: var(--form-field-radius);"
-                />
-              </div>
+              <tedi-search inputId="header-popover-search" label="Otsi isikut" />
               <tedi-separator />
               <button
                 type="button"
