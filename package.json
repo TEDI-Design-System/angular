@@ -37,7 +37,7 @@
   "devDependencies": {
     "@angular-devkit/build-angular": "20.3.27",
     "@angular-devkit/core": "20.3.27",
-    "@angular-devkit/schematics": "20.3.27",
+    "@angular-devkit/schematics": "22.0.8",
     "@angular-eslint/builder": "20.7.0",
     "@angular-eslint/eslint-plugin": "20.7.0",
     "@angular-eslint/eslint-plugin-template": "20.7.0",
