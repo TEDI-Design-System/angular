@@ -1,3 +1,10 @@
+# [7.1.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.15...angular-7.1.0-rc.16) (2026-08-03)
+
+
+### Bug Fixes
+
+* **popover:** fixed popover outside-click inside modal being registered as inside [#582](https://github.com/TEDI-Design-System/angular/issues/582) ([#583](https://github.com/TEDI-Design-System/angular/issues/583)) ([139406b](https://github.com/TEDI-Design-System/angular/commit/139406b502011780becef69bfd15fb5e300cc5e5))
+
 # [7.1.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.14...angular-7.1.0-rc.15) (2026-08-03)
 
 
