@@ -1,3 +1,10 @@
+# [7.1.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.14...angular-7.1.0-rc.15) (2026-08-03)
+
+
+### Bug Fixes
+
+* **text-field,time-field:** caret no longer clipped at the start of the input [#575](https://github.com/TEDI-Design-System/angular/issues/575) ([#576](https://github.com/TEDI-Design-System/angular/issues/576)) ([644d3f5](https://github.com/TEDI-Design-System/angular/commit/644d3f5fe005fa42d13bbe88f2d8d1f21de01212))
+
 # [7.1.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.13...angular-7.1.0-rc.14) (2026-07-30)
 
 
