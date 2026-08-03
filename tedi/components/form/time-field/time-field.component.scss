@@ -40,7 +40,13 @@
   &__input {
     flex: 1;
     min-width: 0;
-    padding: 0;
+
+    // Chrome straddles the caret across the insertion point, so with no left
+    // padding most of it falls outside the input's clip box at offset 0. Give it a
+    // pixel of room and pull the box back by the same amount so the value's
+    // position is unchanged — the field's own padding still sets the inset.
+    padding-inline-start: 1px;
+    margin-inline-start: -1px;
     font-family: inherit;
     font-size: var(--body-regular-size);
     color: var(--form-input-text-filled);
