@@ -530,6 +530,25 @@ describe("PopoverComponent", () => {
       nestedOverlayItem.remove();
     });
 
+    it("should close popover on mousedown in a parent overlay hosting it (e.g. inside a modal)", () => {
+      const hideSpy = jest.spyOn(component, "hidePopover");
+      // A parent overlay (e.g. a tedi-modal that hosts this popover) shares the
+      // CDK overlay container but is stacked BELOW — its pane precedes this
+      // popover's pane in DOM order. Clicking it must dismiss the popover.
+      const parentOverlayItem = document.createElement("div");
+      overlayContainerElement.insertBefore(
+        parentOverlayItem,
+        overlayContainerElement.firstChild,
+      );
+
+      const event = new MouseEvent("mousedown", { bubbles: true });
+      parentOverlayItem.dispatchEvent(event);
+
+      expect(hideSpy).toHaveBeenCalledWith(true);
+
+      parentOverlayItem.remove();
+    });
+
     it("should NOT close popover on focusin from a nested overlay", () => {
       const hideSpy = jest.spyOn(component, "hidePopover");
       const nestedOverlayItem = document.createElement("button");
