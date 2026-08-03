@@ -21,21 +21,7 @@
       align-items: stretch;
       height: auto;
       min-height: var(--form-textarea-min-height);
-      overflow: hidden;
-      resize: vertical;
-    }
-
-    &:has(.tedi-textarea--not-resizable) {
-      resize: none;
-    }
-
-    // While auto-growing, the height is driven by content, so manual resizing is
-    // disabled — but only where `field-sizing` actually works, so unsupported
-    // browsers keep manual resize as a fallback.
-    @supports (field-sizing: content) {
-      &:has(.tedi-textarea--auto-grow) {
-        resize: none;
-      }
+      padding: 0;
     }
   }
 

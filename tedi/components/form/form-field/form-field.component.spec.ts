@@ -344,6 +344,15 @@ describe("FormFieldComponent wrapping a textarea", () => {
     expect(fixture.componentInstance.formField.isTextarea()).toBe(true);
   });
 
+  it("makes the textarea the resizable element with the resting height", () => {
+    const box = fixture.nativeElement.querySelector(".tedi-form-field__input");
+    const ta = fixture.nativeElement.querySelector("textarea");
+
+    expect(ta.style.height).toBe("7.5rem");
+    expect(box.style.height).toBe("");
+    expect(ta.classList.contains("tedi-textarea--not-resizable")).toBe(false);
+  });
+
   it("suppresses the clear button even when clearable with a value", () => {
     expect(
       fixture.nativeElement.querySelector(".tedi-form-field__clear"),
@@ -425,14 +434,65 @@ describe("FormFieldComponent character limit with a textarea", () => {
     expect(host.formField.validationState()).toBe("invalid");
   });
 
-  it("sets aria-invalid on the textarea after the validation-state update", () => {
+  it("sets aria-invalid on the textarea when the limit is exceeded", () => {
     expect(textarea().getAttribute("aria-invalid")).toBeNull();
 
     host.value = "abcdef";
     fixture.detectChanges();
-    host.formField.ngAfterContentInit();
-    fixture.detectChanges();
 
     expect(textarea().getAttribute("aria-invalid")).toBe("true");
+  });
+
+  it("exposes the counter to assistive tech via the textarea's aria-describedby", () => {
+    const countId = counter().id;
+
+    expect(countId).toBeTruthy();
+    expect(textarea().getAttribute("aria-describedby") ?? "").toContain(countId);
+  });
+
+  it("marks the counter as a live region so updates are announced", () => {
+    // A live region means updates are spoken as they happen. The polite/assertive
+    // switch on overflow is covered by the browser/a11y-tree verification.
+    expect(counter().getAttribute("aria-live")).toBe("polite");
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextareaComponent, FeedbackTextComponent],
+  template: `
+    <tedi-form-field [characterLimit]="5">
+      <textarea tedi-textarea></textarea>
+      <tedi-feedback-text [text]="'Hint text'" />
+    </tedi-form-field>
+  `,
+})
+class TextareaFeedbackAndCounterHostComponent {}
+
+describe("FormFieldComponent aria-describedby aggregation", () => {
+  let fixture: ComponentFixture<TextareaFeedbackAndCounterHostComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TextareaFeedbackAndCounterHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(TextareaFeedbackAndCounterHostComponent);
+    fixture.detectChanges();
+  });
+
+  it("links both the feedback text and the counter", () => {
+    const describedBy =
+      fixture.nativeElement.querySelector("textarea").getAttribute("aria-describedby") ?? "";
+    const feedbackId = fixture.nativeElement.querySelector("tedi-feedback-text").id;
+    const counterId = fixture.nativeElement.querySelector(
+      ".tedi-form-field__character-count",
+    ).id;
+
+    expect(feedbackId).toBeTruthy();
+    expect(counterId).toBeTruthy();
+    expect(describedBy).toContain(feedbackId);
+    expect(describedBy).toContain(counterId);
   });
 });

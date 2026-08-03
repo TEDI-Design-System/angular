@@ -55,6 +55,8 @@
         [class.tedi-form-field__character-count--error]="
           characterCountExceeded()
         "
+        [id]="characterCountId()"
+        [attr.aria-live]="characterCountExceeded() ? 'assertive' : 'polite'"
       >
         {{ characterCount() }}/{{ characterLimit() }}
       </span>
