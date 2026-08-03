@@ -3,14 +3,14 @@ import { ScrollFadeComponent } from "./scroll-fade.component";
 import { ColComponent } from "../grid/col/col.component";
 import { RowComponent } from "../grid/row/row.component";
 
-/**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.39.64?node-id=10758-111141&m=dev" target="_blank">Figma ↗</a><br>
- * <a href="https://www.tedi.ee/1ee8444b7/p/32b155-scroll-fade" target="_blank">Zeroheight ↗</a>
- */
-
 const loremIpsum = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
   magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris Lorem ipsum dolor sit amet,
   consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.`;
+
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.39.64?node-id=10758-111141&m=dev" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.tedi.ee/1ee8444b7/p/32b155-scroll-fade" target="_blank">Zeroheight ↗</a>
+ */
 
 export default {
   title: "TEDI-Ready/Components/Helpers/ScrollFade",

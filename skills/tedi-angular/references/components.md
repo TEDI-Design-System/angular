@@ -787,6 +787,30 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 - `required: boolean = false`
 - `invalid: boolean = false`
 
+### Search
+**Selector:** `tedi-search`
+**Model:** `value: string`
+**Inputs:**
+- `inputId: string` (required)
+- `label: string`
+- `placeholder: string = ""`
+- `size: SearchSize = "default"` — "small" | "default" | "large"
+- `clearable: boolean = true`
+- `searchIcon: string | FormFieldIcon = "search"` — ignored when `button` is set
+- `button: SearchButton` — when set, renders a trailing search button (hides the inline icon). `{ text?, icon?, variant?, ariaLabel? }`; omit `text` for an icon-only button
+- `feedbackText: ComponentInputs<FeedbackTextComponent>` — hint / validation message
+- `disabled: boolean = false`
+- `ariaLabel: string` — accessible name fallback when no visible `label`
+
+**Outputs:**
+- `searchEvent: string` — emitted on Enter or search-button click
+- `clear: void` — emitted when the clear button is clicked
+
+```html
+<tedi-search inputId="q" label="Otsing" [(value)]="query" (searchEvent)="onSearch($event)" />
+<tedi-search inputId="q" label="Otsing" [button]="{ text: 'Otsi' }" [formControl]="queryControl" />
+```
+
 ### Textarea
 **Selector:** `textarea[tedi-textarea]` | ControlValueAccessor
 **Model:** `value: string`
@@ -1188,7 +1212,7 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 **Inputs:**
 - `inputId: string` (required) — unique ID for label association and accessibility
 - `label: string` — label text above the select
-- `tooltip: string` — renders an info button next to the label that reveals this text in a tooltip
+- `tooltip: string` — renders an info button next to the label that reveals this text in a tooltip. For formatted content, project a `*tediSelectTooltip` template instead (takes precedence)
 - `ariaLabelledby: string` — associate an external visible label by its element id. A native `<label for>` cannot target the combobox (it is a `<div>`), so use this when the label lives outside the component. Ignored when `label` is set
 - `ariaLabel: string` — accessible name when there is no visible label to reference. Ignored when `label` or `ariaLabelledby` provides a name
 - `required: boolean = false`
@@ -1213,8 +1237,10 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 - `dropdownAlign: "start" | "end" = "start"` — which trigger edge the dropdown anchors to; use `"end"` for right-aligned selects so the panel expands inward
 - `feedbackText: { text, type, position }` — feedback text config
 - `maxDropdownHeight: number` — dropdown height in pixels
+- `hideOnScroll: boolean = false` — close the dropdown when the page scrolls
 - `compareWith: (a, b) => boolean` — custom equality function
 - `tagEllipsis: TagEllipsis = false` — which end a selected tag's label truncates from when it doesn't fit. Only used in multiselect mode with `multiRow="false"`. `false` never truncates; `end` → `label…`; `start` → `…label`
+- `ellipsis: "start" | "end" | false = false` — single-select mode: which end the selected value truncates from when it doesn't fit, revealing the full value in a hover/focus tooltip. `false` (default) never truncates
 - `searchFn: (term: string, item: T) => boolean` — custom search function for filtering options. Overrides the default label-based search when provided
 
 Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multiselect).
@@ -1255,6 +1281,16 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 </tedi-select>
 ```
 
+**Formatted label tooltip** via `tediSelectTooltip` directive (overrides the `tooltip` string input):
+
+```html
+<tedi-select [options]="items" label="City">
+  <ng-template tediSelectTooltip>
+    Pick the <b>city</b> where you <i>currently</i> reside.
+  </ng-template>
+</tedi-select>
+```
+
 ### FormField
 **Selector:** `tedi-form-field`
 **Inputs:**
@@ -1278,12 +1314,43 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 - `required: boolean = false`
 - `color: LabelColor = "secondary"`
 
+### LabelRow
+**Selector:** `tedi-label-row`
+Pure inline-row layout for a form-control label plus trailing affixes (e.g. `tedi-info-tooltip`). Project your own `<label tedi-label>` and any affixes — all native label attributes (`for`, `id`, `aria-*`, handlers) keep working, and affixes sit as **siblings** of the `<label>`, never inside it, so they never leak into the control's accessible name. No inputs — composition only.
+**Slots:** the real `<label tedi-label>` followed by trailing affixes.
+
+```html
+<tedi-label-row>
+  <label tedi-label for="city" [required]="true">City</label>
+  <tedi-info-tooltip>Enter the city where you currently reside.</tedi-info-tooltip>
+</tedi-label-row>
+```
+
 ### FeedbackText
 **Selector:** `tedi-feedback-text`
 **Inputs:**
 - `text: string` (required)
 - `type: FeedbackTextType = "hint"` — "hint", "valid", "error"
 - `position: FeedbackTextPosition = "left"`
+
+### InputGroup
+**Selector:** `tedi-input-group`
+Wraps a form control with leading/trailing addons. Project a `label[tedi-label]`, a control, optional addons via the `[tediInputGroupPrefix]` / `[tediInputGroupSuffix]` directives, and an optional `tedi-feedback-text`. The control slot accepts `tedi-form-field` (which itself wraps a text/date/time field) or `tedi-select` — any single-line bordered control. Addons merge their border with the control; put an interactive addon (e.g. a `tedi-dropdown`) directly in the prefix/suffix slot and its trigger button fills the whole addon.
+**Inputs:**
+- `addons: boolean = true` — merges addon and control borders into one visual unit; disable for detached addons (e.g. an action button)
+- `disabled: boolean = false` — disables the group and propagates to the control
+- `invalid: boolean = false` — marks the whole group invalid and propagates to the control; pair with an error `tedi-feedback-text`
+
+```html
+<tedi-input-group [invalid]="amountInvalid">
+  <label tedi-label [for]="'amount'">Amount</label>
+  <tedi-form-field>
+    <input tedi-text-field id="amount" [formControl]="amountControl" />
+  </tedi-form-field>
+  <span tediInputGroupSuffix>EUR</span>
+  <tedi-feedback-text type="error" text="This field is required" />
+</tedi-input-group>
+```
 
 ## Helpers
 
@@ -1566,6 +1633,31 @@ Sub-components: `tedi-header-top`, `tedi-header-logo`, `tedi-header-content`, `t
 - `label: string` — screen reader label
 
 ## Navigation
+
+### Breadcrumbs
+**Selector:** `tedi-breadcrumbs`
+**Composition:** mark each crumb with the `*tediBreadcrumbItem` structural directive, in order from root to current page. Use `a tedi-link` for navigable crumbs and a plain element (e.g. `span`) for the current page — add `aria-current="page"` to it yourself. Chevron separators are inserted automatically.
+**Inputs:**
+- `variant: "long" | "short" = "long"` — `long` shows the full trail; `short` shows only the parent crumb as a back-link (mobile)
+- `maxItems: number` — collapse the middle of a long trail into an ellipsis dropdown when the crumb count exceeds this. Long variant only
+- `itemsBeforeCollapse: number = 1` — crumbs kept at the start when collapsed
+- `itemsAfterCollapse: number = 1` — crumbs kept at the end when collapsed
+- `separator: string` — text separator (e.g. `"/"`); defaults to a chevron icon
+- `ariaLabel: string` — `nav` landmark label; falls back to the `breadcrumbs` translation
+- `showMoreLabel: string` — ellipsis button label; falls back to the `breadcrumbs.show-more` translation
+- Responsive: `xs, sm, md, lg, xl, xxl: BreadcrumbsInputs` (`variant`, `maxItems`, `itemsBeforeCollapse`, `itemsAfterCollapse`)
+
+**Content projection:**
+- `*tediBreadcrumbItem` — one per crumb
+- `*tediBreadcrumbSeparator` — optional custom separator template (overrides `separator` and the default icon)
+
+```html
+<tedi-breadcrumbs [maxItems]="4" variant="short" [md]="{ variant: 'long' }">
+  <a *tediBreadcrumbItem tedi-link href="/">Töölaud</a>
+  <a *tediBreadcrumbItem tedi-link href="/apps">Taotlused</a>
+  <span *tediBreadcrumbItem aria-current="page">Taotlus nr 506</span>
+</tedi-breadcrumbs>
+```
 
 ### Link
 **Selector:** `[tedi-link]`
@@ -1956,6 +2048,23 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 </tedi-tooltip>
 ```
 
+### InfoTooltip
+**Selector:** `tedi-info-tooltip`
+An info button paired with a tooltip — the ready-made `tedi-tooltip` + `tedi-info-button` combo. Projects the tooltip content. Use as a trailing affix in `tedi-label-row`, or standalone for any inline "more information" tooltip.
+**Inputs:**
+- `position: TooltipPosition = "top"`
+- `openWith: TooltipOpenWith = "both"` — hover, click, or both
+- `maxWidth: TooltipWidth = "medium"` — "none", "small", "medium", "large"
+- `color: "primary" | "inverted" = "primary"` — info-button color; use `inverted` on dark backgrounds
+- `ariaLabel: string` — accessible name for the info button (defaults to the translated info-button label)
+**Slots:** default — the tooltip content
+
+```html
+<tedi-info-tooltip position="right" ariaLabel="More information">
+  Enter the city where you currently reside.
+</tedi-info-tooltip>
+```
+
 ## Tags
 
 ### Tag
@@ -2061,7 +2170,8 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 **Selector:** `tedi-select`, `tedi-multiselect` | ControlValueAccessor
 - `inputId: string`, `label: string`, `clearable: boolean = true`, `state: InputState`, `size: InputSize`
 
-### Search
+### Search — **DEPRECATED** (use TEDI-Ready Search)
+**⚠️ DEPRECATED** — use the TEDI-Ready `tedi-search` from `@tedi-design-system/angular/tedi`. Same selector; the TEDI-Ready version exposes a trailing `button` (`SearchButton`), a `feedbackText` input for hints/validation, and `searchEvent` / `clear` outputs.
 **Selector:** `tedi-search` | ControlValueAccessor
 - `inputId: string`, `autocompleteOptions: AutocompleteOption[]`, `size: SearchSize`, `withButton: boolean`
 
@@ -2085,6 +2195,7 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 ## Navigation
 
 ### Breadcrumbs
+**⚠️ DEPRECATED** — use the TEDI-Ready `tedi-breadcrumbs` from `@tedi-design-system/angular/tedi` (composition API with `*tediBreadcrumbItem`, custom separators and collapse). This community version will be removed in a future release.
 **Selector:** `tedi-breadcrumbs`
 - `crumbs: Breadcrumb[]`, `shortCrumbs: boolean` | Breakpoint support
 

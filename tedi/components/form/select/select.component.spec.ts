@@ -7,6 +7,7 @@ import { SelectComponent, SelectInputSize, SelectOption, SpecialOptionControls }
 import {
   SelectOptionTemplateDirective,
   SelectValueTemplateDirective,
+  SelectTooltipTemplateDirective,
 } from "./select-templates.directive";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { InputState } from "../form-field/form-field.component";
@@ -39,6 +40,7 @@ import { InputState } from "../form-field/form-field.component";
       [dropdownWidthRef]="dropdownWidthRef"
       [dropdownAlign]="dropdownAlign"
       [maxDropdownHeight]="maxDropdownHeight"
+      [hideOnScroll]="hideOnScroll"
       [searchFn]="searchFn"
       [clearSearchOnSelect]="clearSearchOnSelect"
       [formControl]="control"
@@ -53,12 +55,18 @@ import { InputState } from "../form-field/form-field.component";
           <span class="custom-value">{{ item.name }}</span>
         </ng-template>
       }
+      @if (useTooltipTemplate) {
+        <ng-template tediSelectTooltip>
+          <span class="custom-tooltip">Formatted <b>tooltip</b></span>
+        </ng-template>
+      }
     </tedi-select>
   `,
   imports: [
     SelectComponent,
     SelectOptionTemplateDirective,
     SelectValueTemplateDirective,
+    SelectTooltipTemplateDirective,
     ReactiveFormsModule,
   ],
 })
@@ -87,10 +95,12 @@ class TestHostComponent {
   dropdownWidthRef: any = undefined;
   dropdownAlign: "start" | "end" = "start";
   maxDropdownHeight: number | undefined = undefined;
+  hideOnScroll = false;
   searchFn: ((term: string, item: unknown) => boolean) | undefined = undefined;
   clearSearchOnSelect = false;
   useOptionTemplate = false;
   useValueTemplate = false;
+  useTooltipTemplate = false;
   control = new FormControl<unknown>(null);
 }
 
@@ -1063,6 +1073,40 @@ describe("SelectComponent", () => {
 
       expect(context.label).toBe("Test");
     });
+
+    it("should render string tooltip when no tooltip template is projected", () => {
+      host.tooltip = "Plain tooltip";
+      fixture.detectChanges();
+
+      expect(hostEl.querySelector("tedi-info-tooltip")).toBeTruthy();
+      expect(select.tooltipTemplate()).toBeFalsy();
+      expect(
+        hostEl.querySelector("tedi-info-tooltip .sr-only")?.textContent,
+      ).toContain("Plain tooltip");
+    });
+
+    it("should render projected tooltip template content", () => {
+      host.useTooltipTemplate = true;
+      fixture.detectChanges();
+
+      expect(select.tooltipTemplate()).toBeTruthy();
+      expect(hostEl.querySelector("tedi-info-tooltip")).toBeTruthy();
+      expect(
+        hostEl.querySelector("tedi-info-tooltip .sr-only")?.textContent,
+      ).toContain("Formatted tooltip");
+    });
+
+    it("should prefer the tooltip template over the tooltip string input", () => {
+      host.tooltip = "Plain tooltip";
+      host.useTooltipTemplate = true;
+      fixture.detectChanges();
+
+      const srText = hostEl.querySelector(
+        "tedi-info-tooltip .sr-only",
+      )?.textContent;
+      expect(srText).toContain("Formatted tooltip");
+      expect(srText).not.toContain("Plain tooltip");
+    });
   });
 
   describe("Data binding", () => {
@@ -1181,6 +1225,45 @@ describe("SelectComponent", () => {
 
       document.body.removeChild(outsideElement);
     }));
+  });
+
+  describe("hideOnScroll", () => {
+    it("closes the dropdown on scroll when enabled", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      expect(select.isOpen()).toBe(true);
+
+      document.dispatchEvent(new Event("scroll"));
+      fixture.detectChanges();
+      expect(select.isOpen()).toBe(false);
+    });
+
+    it("keeps the dropdown open when the option list itself is scrolled", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      expect(select.isOpen()).toBe(true);
+
+      const listbox = select.listboxRef()!.nativeElement as HTMLElement;
+      listbox.dispatchEvent(new Event("scroll", { bubbles: false }));
+      fixture.detectChanges();
+      expect(select.isOpen()).toBe(true);
+    });
+
+    it("keeps the dropdown open on scroll when disabled", () => {
+      getTrigger().click();
+      fixture.detectChanges();
+      expect(select.isOpen()).toBe(true);
+
+      document.dispatchEvent(new Event("scroll"));
+      fixture.detectChanges();
+      expect(select.isOpen()).toBe(true);
+    });
   });
 
   describe("Computed properties", () => {
@@ -2145,7 +2228,7 @@ describe("SelectComponent", () => {
       host.tooltip = "More info about this field";
       fixture.detectChanges();
 
-      const labelRow = hostEl.querySelector(".tedi-select__label-row");
+      const labelRow = hostEl.querySelector("tedi-label-row");
       expect(labelRow).toBeTruthy();
       const infoButton = labelRow?.querySelector("[tedi-info-button]");
       expect(infoButton).toBeTruthy();

@@ -32,6 +32,7 @@ class MockControlComponent implements FormFieldControl<string> {
   invalid = signal(false);
   setInvalidState = jest.fn();
   clearField = jest.fn();
+  focus = jest.fn();
 }
 
 @Component({
@@ -180,6 +181,59 @@ describe("FormFieldComponent", () => {
     formField.clear();
 
     expect(host.mockControl.clearField).toHaveBeenCalled();
+  });
+
+  describe("clicking the field box", () => {
+    const mouseDownOn = (element: Element) => {
+      const event = new MouseEvent("mousedown", {
+        bubbles: true,
+        cancelable: true,
+      });
+      element.dispatchEvent(event);
+      return event;
+    };
+
+    const box = (): HTMLElement =>
+      fixture.nativeElement.querySelector(".tedi-form-field__input");
+
+    it("should focus the control when the box padding is clicked", () => {
+      const event = mouseDownOn(box());
+
+      expect(host.mockControl.focus).toHaveBeenCalled();
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it("should focus the control when a non-interactive wrapper is clicked", () => {
+      const wrapper = document.createElement("div");
+      box().appendChild(wrapper);
+
+      mouseDownOn(wrapper);
+
+      expect(host.mockControl.focus).toHaveBeenCalled();
+    });
+
+    it("should not focus the control when an interactive element is clicked", () => {
+      host.clearable = true;
+      host.mockControl.value.set("text");
+      fixture.detectChanges();
+
+      const clearButton = fixture.nativeElement.querySelector(
+        ".tedi-form-field__clear",
+      );
+      const event = mouseDownOn(clearButton);
+
+      expect(host.mockControl.focus).not.toHaveBeenCalled();
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    it("should not focus the control when disabled", () => {
+      host.mockControl.disabled.set(true);
+      fixture.detectChanges();
+
+      mouseDownOn(box());
+
+      expect(host.mockControl.focus).not.toHaveBeenCalled();
+    });
   });
 
   it("should be invalid when control invalid", () => {
