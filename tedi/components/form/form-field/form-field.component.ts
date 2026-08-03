@@ -195,15 +195,23 @@ export class FormFieldComponent implements AfterContentInit {
       return;
     }
 
-    const ids: string[] = [];
-
     const feedbackEl = this.feedbackElement?.nativeElement;
-    if (feedbackEl) {
-      if (!feedbackEl.id) feedbackEl.id = `${this.baseId}-feedback`;
-      ids.push(feedbackEl.id);
-    }
-
+    if (feedbackEl && !feedbackEl.id) feedbackEl.id = `${this.baseId}-feedback`;
+    const feedbackId = feedbackEl?.id ?? null;
     const countId = this.characterCountId();
+
+    const managed = new Set([
+      `${this.baseId}-feedback`,
+      `${this.baseId}-character-count`,
+    ]);
+    const ids = ((control.getAttribute("aria-describedby") as string | null) ?? "")
+      .split(/\s+/)
+      .filter(
+        (id: string) =>
+          id && !managed.has(id) && id !== feedbackId && id !== countId,
+      );
+
+    if (feedbackId) ids.push(feedbackId);
     if (countId) ids.push(countId);
 
     if (ids.length) control.setAttribute("aria-describedby", ids.join(" "));

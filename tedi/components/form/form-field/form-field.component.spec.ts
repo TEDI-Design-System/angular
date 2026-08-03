@@ -277,14 +277,11 @@ describe("FormFieldComponent", () => {
   });
 
   it("should force the control invalid when the character limit is exceeded", () => {
+    const spy = jest.spyOn(host.mockControl, "setInvalidState");
+
     host.characterLimit = 3;
     host.mockControl.value.set("hello");
     fixture.detectChanges();
-
-    const spy = jest.spyOn(host.mockControl, "setInvalidState");
-    spy.mockClear();
-
-    formField.ngAfterContentInit();
 
     expect(spy).toHaveBeenCalledWith(true);
     expect(formField.validationState()).toBe("invalid");
@@ -493,6 +490,42 @@ describe("FormFieldComponent aria-describedby aggregation", () => {
     expect(feedbackId).toBeTruthy();
     expect(counterId).toBeTruthy();
     expect(describedBy).toContain(feedbackId);
+    expect(describedBy).toContain(counterId);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextareaComponent],
+  template: `
+    <tedi-form-field [characterLimit]="5">
+      <textarea tedi-textarea aria-describedby="external-hint"></textarea>
+    </tedi-form-field>
+  `,
+})
+class TextareaCallerDescribedByHostComponent {}
+
+describe("FormFieldComponent aria-describedby with a caller-provided id", () => {
+  let fixture: ComponentFixture<TextareaCallerDescribedByHostComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TextareaCallerDescribedByHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(TextareaCallerDescribedByHostComponent);
+    fixture.detectChanges();
+  });
+
+  it("keeps the caller's id and appends the managed counter id", () => {
+    const describedBy =
+      fixture.nativeElement.querySelector("textarea").getAttribute("aria-describedby") ?? "";
+    const counterId = fixture.nativeElement.querySelector(
+      ".tedi-form-field__character-count",
+    ).id;
+
+    expect(describedBy).toContain("external-hint");
     expect(describedBy).toContain(counterId);
   });
 });
