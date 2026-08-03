@@ -378,23 +378,26 @@ export class PopoverComponent {
   }
 
   /**
-   * Whether the event target belongs to this popover's own overlay, or to a
-   * nested overlay opened from inside it.
+   * Whether the target is inside this popover's own overlay or a child overlay
+   * opened from within it — such interactions must not dismiss the popover.
    *
-   * Nested overlays (e.g. a month/year dropdown in the date-picker header)
-   * render in their own pane within the shared CDK overlay container, not
-   * inside this popover's overlayElement. Interacting with, focusing into or
-   * scrolling such a child overlay must not dismiss the popover, so anything
-   * inside the overlay container counts as internal.
+   * Child overlays (e.g. a date-picker month dropdown) share the CDK overlay
+   * container but render in their own pane, stacked ON TOP (after this pane in
+   * DOM order). An overlay stacked BELOW (e.g. a tedi-modal hosting this
+   * popover) precedes this pane, so clicking it must dismiss.
    */
   private isInsideOverlay(target: Node | null): boolean {
-    if (!target) return false;
+    if (!target || !(target instanceof Element)) return false;
 
     const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
-    if (overlayEl?.contains(target)) return true;
+    if (!overlayEl) return false;
+    if (overlayEl.contains(target)) return true;
 
-    return (
-      target instanceof Element && !!target.closest(".cdk-overlay-container")
+    if (!target.closest(".cdk-overlay-container")) return false;
+
+    return !!(
+      overlayEl.compareDocumentPosition(target) &
+      Node.DOCUMENT_POSITION_FOLLOWING
     );
   }
 
