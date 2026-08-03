@@ -1,3 +1,10 @@
+# [7.1.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.16...angular-7.1.0-rc.17) (2026-08-03)
+
+
+### Bug Fixes
+
+* **date-picker:** fix DatePicker focus ring [#560](https://github.com/TEDI-Design-System/angular/issues/560) ([#574](https://github.com/TEDI-Design-System/angular/issues/574)) ([17f675d](https://github.com/TEDI-Design-System/angular/commit/17f675d1016f1df0b2ebf48fa2ee43c820e6c873))
+
 # [7.1.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.15...angular-7.1.0-rc.16) (2026-08-03)
 
 
