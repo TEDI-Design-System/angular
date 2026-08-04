@@ -275,6 +275,11 @@ export class TimeFieldComponent
     this.inputElement().nativeElement.focus();
   }
 
+  focus() {
+    if (this.isDisabled()) return;
+    this.inputElement().nativeElement.focus();
+  }
+
   clearField() {
     this.clearInput();
   }

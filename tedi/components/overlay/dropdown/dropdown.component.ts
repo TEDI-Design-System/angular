@@ -318,10 +318,15 @@ export class DropdownComponent implements OnDestroy {
     this.scrollListener = this.renderer.listen(
       this.document,
       "scroll",
-      () => {
-        if (this.isOpen()) {
-          this.hideDropdown();
-        }
+      (event: Event) => {
+        if (!this.isOpen()) return;
+
+        // Scrolling the dropdown panel itself must not close it
+        const contentEl = this.dropdownContent().host.nativeElement;
+        const target = event.target as Node | null;
+        if (target && contentEl.contains(target)) return;
+
+        this.hideDropdown();
       },
       { capture: true, passive: true },
     );

@@ -787,6 +787,30 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 - `required: boolean = false`
 - `invalid: boolean = false`
 
+### Search
+**Selector:** `tedi-search`
+**Model:** `value: string`
+**Inputs:**
+- `inputId: string` (required)
+- `label: string`
+- `placeholder: string = ""`
+- `size: SearchSize = "default"` — "small" | "default" | "large"
+- `clearable: boolean = true`
+- `searchIcon: string | FormFieldIcon = "search"` — ignored when `button` is set
+- `button: SearchButton` — when set, renders a trailing search button (hides the inline icon). `{ text?, icon?, variant?, ariaLabel? }`; omit `text` for an icon-only button
+- `feedbackText: ComponentInputs<FeedbackTextComponent>` — hint / validation message
+- `disabled: boolean = false`
+- `ariaLabel: string` — accessible name fallback when no visible `label`
+
+**Outputs:**
+- `searchEvent: string` — emitted on Enter or search-button click
+- `clear: void` — emitted when the clear button is clicked
+
+```html
+<tedi-search inputId="q" label="Otsing" [(value)]="query" (searchEvent)="onSearch($event)" />
+<tedi-search inputId="q" label="Otsing" [button]="{ text: 'Otsi' }" [formControl]="queryControl" />
+```
+
 ### Slider
 **Selector:** `tedi-slider` | ControlValueAccessor
 **Model:** `value: number`
@@ -2127,7 +2151,8 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 **Selector:** `tedi-select`, `tedi-multiselect` | ControlValueAccessor
 - `inputId: string`, `label: string`, `clearable: boolean = true`, `state: InputState`, `size: InputSize`
 
-### Search
+### Search — **DEPRECATED** (use TEDI-Ready Search)
+**⚠️ DEPRECATED** — use the TEDI-Ready `tedi-search` from `@tedi-design-system/angular/tedi`. Same selector; the TEDI-Ready version exposes a trailing `button` (`SearchButton`), a `feedbackText` input for hints/validation, and `searchEvent` / `clear` outputs.
 **Selector:** `tedi-search` | ControlValueAccessor
 - `inputId: string`, `autocompleteOptions: AutocompleteOption[]`, `size: SearchSize`, `withButton: boolean`
 

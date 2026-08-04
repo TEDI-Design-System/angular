@@ -2,8 +2,13 @@
   flex: 1;
   min-width: 0;
   height: 100%;
-  padding: var(--form-field-padding-y-md-default)
-    var(--form-field-padding-x-md-default);
+
+  // Chrome straddles the caret across the insertion point, so with no left
+  // padding most of it falls outside the input's clip box at offset 0. Give it a
+  // pixel of room and pull the box back by the same amount so the value's
+  // position is unchanged — the field's own padding still sets the inset.
+  padding-inline-start: 1px;
+  margin-inline-start: -1px;
   font-size: var(--body-regular-size);
   font-weight: var(--body-regular-weight);
   line-height: var(--body-regular-line-height);
@@ -32,27 +37,5 @@
   /* Firefox */
   &--arrows-hidden[type="number"] {
     appearance: textfield;
-  }
-}
-
-.tedi-form-field {
-  &--with-icon {
-    .tedi-text-field {
-      padding-right: 0;
-    }
-  }
-
-  &--small {
-    .tedi-text-field {
-      padding-block: var(--form-field-padding-y-sm);
-      padding-inline: var(--form-field-padding-x-md-default);
-    }
-  }
-
-  &--large {
-    .tedi-text-field {
-      padding-block: var(--form-field-padding-y-lg);
-      padding-inline: var(--form-field-padding-x-lg);
-    }
   }
 }

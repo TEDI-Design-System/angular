@@ -1,3 +1,45 @@
+# [7.1.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.16...angular-7.1.0-rc.17) (2026-08-03)
+
+
+### Bug Fixes
+
+* **date-picker:** fix DatePicker focus ring [#560](https://github.com/TEDI-Design-System/angular/issues/560) ([#574](https://github.com/TEDI-Design-System/angular/issues/574)) ([17f675d](https://github.com/TEDI-Design-System/angular/commit/17f675d1016f1df0b2ebf48fa2ee43c820e6c873))
+
+# [7.1.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.15...angular-7.1.0-rc.16) (2026-08-03)
+
+
+### Bug Fixes
+
+* **popover:** fixed popover outside-click inside modal being registered as inside [#582](https://github.com/TEDI-Design-System/angular/issues/582) ([#583](https://github.com/TEDI-Design-System/angular/issues/583)) ([139406b](https://github.com/TEDI-Design-System/angular/commit/139406b502011780becef69bfd15fb5e300cc5e5))
+
+# [7.1.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.14...angular-7.1.0-rc.15) (2026-08-03)
+
+
+### Bug Fixes
+
+* **text-field,time-field:** caret no longer clipped at the start of the input [#575](https://github.com/TEDI-Design-System/angular/issues/575) ([#576](https://github.com/TEDI-Design-System/angular/issues/576)) ([644d3f5](https://github.com/TEDI-Design-System/angular/commit/644d3f5fe005fa42d13bbe88f2d8d1f21de01212))
+
+# [7.1.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.13...angular-7.1.0-rc.14) (2026-07-30)
+
+
+### Features
+
+* **search:** add new TEDI-ready component [#524](https://github.com/TEDI-Design-System/angular/issues/524) ([#539](https://github.com/TEDI-Design-System/angular/issues/539)) ([f637542](https://github.com/TEDI-Design-System/angular/commit/f6375420e02ad0972e7901b4013e658851d2167a))
+
+# [7.1.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.12...angular-7.1.0-rc.13) (2026-07-30)
+
+
+### Bug Fixes
+
+* **form-field,date-field,text-field,time-field:** value no longer cuts early [#561](https://github.com/TEDI-Design-System/angular/issues/561) ([#571](https://github.com/TEDI-Design-System/angular/issues/571)) ([17322fc](https://github.com/TEDI-Design-System/angular/commit/17322fc02b99e860ec7ea0a59dd6201dbdb293dd))
+
+# [7.1.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.11...angular-7.1.0-rc.12) (2026-07-28)
+
+
+### Bug Fixes
+
+* **select,dropdown,popover:** hideOnScroll no longer closes overlay when scrolling its content [#562](https://github.com/TEDI-Design-System/angular/issues/562) ([#567](https://github.com/TEDI-Design-System/angular/issues/567)) ([3120825](https://github.com/TEDI-Design-System/angular/commit/3120825684b14799ce11c66e7be393679631c143))
+
 # [7.1.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.10...angular-7.1.0-rc.11) (2026-07-23)
 
 

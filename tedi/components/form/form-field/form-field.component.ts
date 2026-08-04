@@ -170,4 +170,22 @@ export class FormFieldComponent implements AfterContentInit {
   clear() {
     this.control?.clearField?.();
   }
+
+  /**
+   * The control never fills the whole box — the box padding and the layout
+   * wrappers around the control are outside its hit area — so clicking there
+   * would otherwise leave the field unfocused. Focus the control instead, unless
+   * the click landed on something interactive that handles it itself (the
+   * control, the clear/calendar buttons, a tag's close button).
+   */
+  handleBoxMouseDown(event: MouseEvent) {
+    if (this.isDisabled()) return;
+
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("button, input, textarea, select, a")) return;
+
+    // Keep the browser from moving focus off the control we are about to focus.
+    event.preventDefault();
+    this.control?.focus?.();
+  }
 }

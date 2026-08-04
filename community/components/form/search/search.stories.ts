@@ -37,7 +37,7 @@ export default {
   ],
   parameters: {
     status: {
-      type: ["devComponent"],
+      type: ["deprecated", "existsInTediReady"],
     },
   },
   argTypes: {

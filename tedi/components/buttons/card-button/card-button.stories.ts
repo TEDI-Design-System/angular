@@ -17,7 +17,8 @@ import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/v
 import { ShowAtDirective } from "../../../directives/show-at/show-at.directive";
 
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.54.76?node-id=4620-85618&m=dev" target="_blank">Figma ↗</a>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.54.76?node-id=4620-85618&m=dev" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.tedi.ee/1ee8444b7/p/4191c7-card-button" target="_BLANK">Zeroheight ↗</a>
  *
  * CardButton is an interactive wrapper around a `tedi-card`. The host anchor
  * or button provides the semantics and applies hover, active, focus and

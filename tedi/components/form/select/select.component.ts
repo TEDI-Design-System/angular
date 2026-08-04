@@ -812,8 +812,15 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       (event: Event) => {
         if (!this.isOpen()) return;
 
+        // Scrolling inside the select is not the page moving away from it: the
+        // option list scrolls its own items, and a search input whose text no
+        // longer fits scrolls its own content.
         const target = event.target as Node | null;
-        if (target && this.hostRef.nativeElement.contains(target)) return;
+        const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+        const insideSelect =
+          !!target &&
+          (this.hostRef.nativeElement.contains(target) || !!overlayEl?.contains(target));
+        if (insideSelect) return;
 
         this.closeDropdown();
       },
