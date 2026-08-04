@@ -1242,7 +1242,9 @@ export class TediTableComponent<TData> {
    * a template ref `#table` or `viewChild`) to call it from consumer code.
    */
   clearFilters(): void {
-    this.table.resetColumnFilters();
+    // `true` forces the empty state rather than TanStack's `initialState`
+    // filters, so a controlled table always resets to no filters.
+    this.table.resetColumnFilters(true);
   }
 
   protected handleRowClick(event: Event, row: Row<TData>): void {
@@ -2195,11 +2197,21 @@ export class TediTableComponent<TData> {
     return s;
   }
 
-  /** Structural equality for filter values (strings, arrays, objects). */
+  /**
+   * Structural equality for filter values (strings, numbers, bigints, arrays,
+   * plain objects). Filter values are consumer-supplied `unknown`, so the
+   * comparison must never throw: reference-equal values (including equal
+   * primitives and bigints) short-circuit, and anything JSON can't serialise
+   * (bigint mismatches, cyclic structures) falls back to "changed".
+   */
   private filterValuesEqual(a: unknown, b: unknown): boolean {
     if (a === b) return true;
     if (a === undefined || b === undefined) return false;
-    return JSON.stringify(a) === JSON.stringify(b);
+    try {
+      return JSON.stringify(a) === JSON.stringify(b);
+    } catch {
+      return false;
+    }
   }
 
   /**

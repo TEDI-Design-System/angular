@@ -513,6 +513,29 @@ describe("TediTableComponent", () => {
       const lastEmit = fixture.componentInstance.onStateChange.mock.calls.at(-1);
       expect(lastEmit?.[0].columnFilters).toEqual([]);
     });
+
+    it("clearFilters() resets controlled initial filters to an empty state", () => {
+      const fixture = setupHost((host) => {
+        host.enableColumnFilters.set(true);
+        host.state.set({ columnFilters: [{ id: "name", value: "Anna" }] });
+      });
+      // Controlled: the seeded filter is applied (only Anna renders).
+      expect(
+        fixture.nativeElement.querySelectorAll(
+          ".tedi-table__body .tedi-table__row",
+        ).length,
+      ).toBe(1);
+
+      const table = fixture.debugElement.query(
+        By.directive(TediTableComponent),
+      ).componentInstance as TediTableComponent<Person>;
+      table.clearFilters();
+      fixture.detectChanges();
+
+      // Emits an empty columnFilters even though the initial state had one.
+      const lastEmit = fixture.componentInstance.onStateChange.mock.calls.at(-1);
+      expect(lastEmit?.[0].columnFilters).toEqual([]);
+    });
   });
 
   describe("pagination", () => {
@@ -1685,6 +1708,30 @@ describe("TediTableComponent", () => {
         'input[aria-label="Name filter input"]',
       ) as HTMLInputElement;
       expect(input.value).toBe("half-typed");
+    });
+
+    it("reconciles drafts without throwing for non-JSON-serialisable filter values (bigint)", () => {
+      const fixture = setupFilterableHost();
+      const table = getTableComponent(fixture);
+      const column = table["table"].getColumn("name")!;
+
+      // Seed a bigint filter and open the popover so a draft (baseline = 5n)
+      // exists for the name column.
+      column.setFilterValue(5n);
+      fixture.detectChanges();
+      findTriggerButton(fixture)!.click();
+      fixture.detectChanges();
+
+      // Change the applied value to a different bigint — the draft reconcile
+      // must compare 6n vs 5n without JSON.stringify throwing on the bigint.
+      expect(() => {
+        column.setFilterValue(6n);
+        fixture.detectChanges();
+      }).not.toThrow();
+
+      // Draft resynced to the new applied value.
+      const draft = table["filterDrafts"].get("name");
+      expect(draft?.()).toBe(6n);
     });
 
     it("renders both the sort button and the filter trigger when both shorthands are set", () => {

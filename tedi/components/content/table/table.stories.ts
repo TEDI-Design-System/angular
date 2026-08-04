@@ -465,6 +465,18 @@ const meta: Meta<TediTableStoryArgs> = {
         type: { summary: "(row) => TData[] | undefined" },
       },
     },
+    getRowId: {
+      description:
+        "Accessor returning a stable, unique id per row (e.g. `(row) => row.id`), passed straight through to TanStack's `getRowId`. Key selection / expansion state by an entity id instead of the row index so it survives filtering, sorting and data changes. Must return a unique, stable id for every row.",
+      control: false,
+      table: {
+        category: "behavior",
+        type: {
+          summary:
+            "(originalRow: TData, index: number, parent?: Row<TData>) => string",
+        },
+      },
+    },
     groupRowsBy: {
       description:
         "Table-level row grouping key. Consecutive rows with an equal key form a group; control columns span each group, selection is per group, and group boundaries drive `rowGroupDividers`.",
@@ -1897,7 +1909,7 @@ export const Sortable: Story = {
           <tedi-tag [closable]="true" (closed)="removeFilter(chip.id)">{{ chip.label }}</tedi-tag>
         }
         <button tedi-button variant="neutral" size="small" type="button" (click)="tediTable.clearFilters()">
-          <tedi-icon name="refresh" />
+          <tedi-icon name="refresh" color="inherit" />
           Tühjenda filtrid
         </button>
       </div>
@@ -2144,7 +2156,7 @@ export const Filters: Story = {
       <tedi-tag [closable]="true" (closed)="removeFilter(chip.id)">{{ chip.label }}</tedi-tag>
     }
     <button tedi-button variant="neutral" size="small" type="button" (click)="tediTable.clearFilters()">
-      <tedi-icon name="refresh" />
+      <tedi-icon name="refresh" color="inherit" />
       Tühjenda filtrid
     </button>
   </div>
