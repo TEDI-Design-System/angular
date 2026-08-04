@@ -38,6 +38,7 @@ import { ShowAtDirective } from "../../../directives/show-at/show-at.directive";
 import { HideAtDirective } from "../../../directives/hide-at/hide-at.directive";
 import { SideNavToggleComponent } from "../sidenav/sidenav-toggle/sidenav-toggle.component";
 import { SideNavComponent } from "../sidenav/sidenav.component";
+import { SideNavListComponent } from "../sidenav/sidenav-list/sidenav-list.component";
 import { SideNavItemComponent } from "../sidenav/sidenav-item/sidenav-item.component";
 import { SideNavOverlayComponent } from "../sidenav/sidenav-overlay/sidenav-overlay.component";
 import { SideNavDropdownComponent } from "../sidenav/sidenav-dropdown/sidenav-dropdown.component";
@@ -234,6 +235,7 @@ export default {
         ShowAtDirective,
         HideAtDirective,
         SideNavComponent,
+        SideNavListComponent,
         SideNavItemComponent,
         SideNavToggleComponent,
         SideNavOverlayComponent,
@@ -704,15 +706,11 @@ Example with theme-aware logo:
         </header>
         <tedi-sidenav-overlay></tedi-sidenav-overlay>
         <nav tedi-sidenav *hideAt="'lg'" style="flex: 1;">
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
+          <ul tedi-sidenav-list>
+            <li tedi-sidenav-item href="#">Link text</li>
+            <li tedi-sidenav-item href="#">Link text</li>
+            <li tedi-sidenav-item href="#">Link text</li>
+          </ul>
         </nav>
       </div>
     `,
@@ -743,21 +741,13 @@ export const LoggedOut: StoryObj<HeaderComponent> = {
         </header>
         <tedi-sidenav-overlay></tedi-sidenav-overlay>
         <nav tedi-sidenav *hideAt="'lg'" style="flex: 1;">
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
+          <ul tedi-sidenav-list>
+            <li tedi-sidenav-item href="#">Link text</li>
+            <li tedi-sidenav-item href="#">Link text</li>
+            <li tedi-sidenav-item href="#">Link text</li>
+            <li tedi-sidenav-item href="#">Link text</li>
+            <li tedi-sidenav-item href="#">Link text</li>
+          </ul>
         </nav>
       </div>
     `,
@@ -830,10 +820,12 @@ Use \`[showLogo]\` whenever you need to hide the logo at a custom breakpoint tha
         </header>
         <tedi-sidenav-overlay></tedi-sidenav-overlay>
         <nav tedi-sidenav *hideAt="'lg'" style="flex: 1;">
-          <tedi-sidenav-item href="#">{{ 'home' | storyTranslate }}</tedi-sidenav-item>
-          <tedi-sidenav-item href="#">{{ 'services' | storyTranslate }}</tedi-sidenav-item>
-          <tedi-sidenav-item href="#">{{ 'blog' | storyTranslate }}</tedi-sidenav-item>
-          <tedi-sidenav-item href="#">{{ 'contact' | storyTranslate }}</tedi-sidenav-item>
+          <ul tedi-sidenav-list>
+            <li tedi-sidenav-item href="#">{{ 'home' | storyTranslate }}</li>
+            <li tedi-sidenav-item href="#">{{ 'services' | storyTranslate }}</li>
+            <li tedi-sidenav-item href="#">{{ 'blog' | storyTranslate }}</li>
+            <li tedi-sidenav-item href="#">{{ 'contact' | storyTranslate }}</li>
+          </ul>
         </nav>
       </div>
     `,
@@ -1495,44 +1487,24 @@ export const LoggedInWithSidenav: StoryObj<HeaderComponent> = {
         </header>
         <tedi-sidenav-overlay></tedi-sidenav-overlay>
         <nav tedi-sidenav style="flex: 1;">
-          <tedi-sidenav-item icon="account_circle">
-            Minu andmed
-            <tedi-sidenav-dropdown>
-              <tedi-sidenav-dropdown-item href="#">
-                Seadistused
-              </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item href="#">
-                Esindusõigused
-              </tedi-sidenav-dropdown-item>
-              <tedi-sidenav-dropdown-item href="#">
-                Minu seotud isikud
-              </tedi-sidenav-dropdown-item>
-            </tedi-sidenav-dropdown>
-          </tedi-sidenav-item>
-          <tedi-sidenav-item icon="dashboard" href="#">
-            Minu töölaud
-          </tedi-sidenav-item>
-          <tedi-sidenav-item icon="calendar_today" href="#">
-            Vastuvõtud ja saatekirjad
-          </tedi-sidenav-item>
-          <tedi-sidenav-item icon="medication" href="#">
-            Retseptid ja meditsiiniseadmed
-          </tedi-sidenav-item>
-          <tedi-sidenav-item icon="history" href="#">
-            Minu tervise ajalugu
-          </tedi-sidenav-item>
-          <tedi-sidenav-item icon="dentistry" href="#">
-            Hammaste tervis
-          </tedi-sidenav-item>
-          <tedi-sidenav-item icon="vaccines" href="#">
-            Vaktsineerimine
-          </tedi-sidenav-item>
-          <tedi-sidenav-item icon="business_center" href="#">
-            Töövõime
-          </tedi-sidenav-item>
-          <tedi-sidenav-item icon="credit_card" href="#">
-            Raviarved
-          </tedi-sidenav-item>
+          <ul tedi-sidenav-list>
+            <li tedi-sidenav-item icon="account_circle">
+              Minu andmed
+              <ul tedi-sidenav-dropdown>
+                <li tedi-sidenav-dropdown-item href="#">Seadistused</li>
+                <li tedi-sidenav-dropdown-item href="#">Esindusõigused</li>
+                <li tedi-sidenav-dropdown-item href="#">Minu seotud isikud</li>
+              </ul>
+            </li>
+            <li tedi-sidenav-item icon="dashboard" href="#">Minu töölaud</li>
+            <li tedi-sidenav-item icon="event" href="#">Vastuvõtud ja saatekirjad</li>
+            <li tedi-sidenav-item icon="medication" href="#">Retseptid ja meditsiiniseadmed</li>
+            <li tedi-sidenav-item icon="history" href="#">Minu tervise ajalugu</li>
+            <li tedi-sidenav-item icon="dentistry" href="#">Hammaste tervis</li>
+            <li tedi-sidenav-item icon="vaccines" href="#">Vaktsineerimine</li>
+            <li tedi-sidenav-item icon="business_center" href="#">Töövõime</li>
+            <li tedi-sidenav-item icon="credit_card" href="#">Raviarved</li>
+          </ul>
         </nav>
       </div>
     `,

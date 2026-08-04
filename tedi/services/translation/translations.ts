@@ -820,6 +820,14 @@ export const translationsMap = {
     en: "Back to main menu",
     ru: "Назад в главное меню",
   },
+  "sidenav.backToParentMenu": {
+    description:
+      "Side navigation label for going back one level to the parent menu",
+    components: ["Sidenav"],
+    et: (parent: string) => `${parent} menüüsse`,
+    en: (parent: string) => `Back to ${parent} menu`,
+    ru: (parent: string) => `Назад в меню ${parent}`,
+  },
   "sidenav.toggle": {
     description: "Label for sidenav toggle on mobile",
     components: ["Sidenav"],

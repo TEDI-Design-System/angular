@@ -13,14 +13,16 @@
   </button>
 }
 @if (sidenavService.isMobileItemOpen()) {
-  <button
-    class="tedi-sidenav-back"
-    (click)="handleBackToMainMenu()"
-  >
+  <button class="tedi-sidenav-back" (click)="handleBackToMainMenu()">
     <tedi-icon name="arrow_back" color="white" />
-    {{ "sidenav.backToMainMenu" | tediTranslate }}
+    {{ backToMainText() }}
   </button>
 }
-<ul class="tedi-sidenav__list">
-  <ng-content></ng-content>
-</ul>
+@if (sidenavService.isMobileGroupOpen()) {
+  <button class="tedi-sidenav-back" (click)="handleBackToParentMenu()">
+    <tedi-icon name="arrow_back" color="white" />
+    {{ backToParentText() }}
+  </button>
+}
+
+<ng-content></ng-content>

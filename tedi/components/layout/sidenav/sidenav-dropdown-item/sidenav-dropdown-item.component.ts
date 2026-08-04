@@ -13,7 +13,7 @@ import {
 import { RouterLink } from "@angular/router";
 
 @Component({
-  selector: "tedi-sidenav-dropdown-item",
+  selector: "li[tedi-sidenav-dropdown-item]",
   standalone: true,
   templateUrl: "./sidenav-dropdown-item.component.html",
   styleUrl: "./sidenav-dropdown-item.component.scss",
@@ -21,8 +21,7 @@ import { RouterLink } from "@angular/router";
   encapsulation: ViewEncapsulation.None,
   imports: [RouterLink, NgTemplateOutlet],
   host: {
-    "role": "presentation",
-    "style": "display: contents",
+    "[class]": "classes()",
   },
 })
 export class SideNavDropdownItemComponent implements AfterViewInit {

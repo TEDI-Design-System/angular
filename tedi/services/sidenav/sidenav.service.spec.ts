@@ -122,6 +122,73 @@ describe("SideNavService", () => {
     });
   });
 
+  describe("group drill (3rd-level mobile)", () => {
+    const makeGroup = () =>
+      ({ open: signal(false) }) as unknown as Parameters<
+        SideNavService["setOpenGroup"]
+      >[0];
+
+    it("isMobileGroupOpen is false until a group is opened", () => {
+      isBelowBreakpointSignal.set(true);
+      expect(service.isMobileGroupOpen()).toBe(false);
+
+      service.setOpenGroup(makeGroup());
+      expect(service.isMobileGroupOpen()).toBe(true);
+    });
+
+    it("isMobileGroupOpen is false on desktop even with an open group", () => {
+      isBelowBreakpointSignal.set(false);
+      service.setOpenGroup(makeGroup());
+      expect(service.isMobileGroupOpen()).toBe(false);
+    });
+
+    it("setOpenGroup closes a previously open group (one panel deep)", () => {
+      const first = makeGroup();
+      const second = makeGroup();
+      first.open.set(true);
+
+      service.setOpenGroup(first);
+      service.setOpenGroup(second);
+
+      expect(first.open()).toBe(false);
+      expect(service.openGroup()).toBe(second);
+    });
+
+    it("handleBackToParentMenu closes the group and clears the pointer", () => {
+      isBelowBreakpointSignal.set(true);
+      const group = makeGroup();
+      group.open.set(true);
+      service.setOpenGroup(group);
+
+      service.handleBackToParentMenu();
+
+      expect(group.open()).toBe(false);
+      expect(service.openGroup()).toBeNull();
+      expect(service.isMobileGroupOpen()).toBe(false);
+    });
+
+    it("handleGoToMainMenu also closes any open group", () => {
+      const group = makeGroup();
+      group.open.set(true);
+      service.setOpenGroup(group);
+
+      service.handleGoToMainMenu();
+
+      expect(group.open()).toBe(false);
+      expect(service.openGroup()).toBeNull();
+    });
+
+    it("openItemText reflects the open item that owns the drilled menu", () => {
+      const item = {
+        dropdown: { open: signal(true) },
+        textContent: signal("Parent 1"),
+      } as unknown as SideNavItemComponent;
+      service.registerItem(item);
+
+      expect(service.openItemText()).toBe("Parent 1");
+    });
+  });
+
   describe("tooltipEnabled", () => {
     it("should return false when not collapsed", () => {
       service.isCollapsed.set(false);

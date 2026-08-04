@@ -1,52 +1,16 @@
-@if (firstItem(); as first) {
-  <li class="tedi-sidenav-dropdown-group__parent-wrapper">
-    <div
-      class="tedi-sidenav-dropdown-item tedi-sidenav-dropdown-group__parent"
-      [class.tedi-sidenav-dropdown-item--selected]="first.selected()"
-    >
-      @if (first.href()) {
-        <a [href]="first.href()" class="tedi-sidenav-dropdown-item__trigger">
-          {{ first.textContent() }}
-        </a>
-      } @else if (first.route()) {
-        <a [routerLink]="first.route()" class="tedi-sidenav-dropdown-item__trigger">
-          {{ first.textContent() }}
-        </a>
-      } @else {
-        <span class="tedi-sidenav-dropdown-item__trigger">
-          {{ first.textContent() }}
-        </span>
-      }
-    </div>
-
-    @if (restItems().length > 0) {
-      <ul class="tedi-sidenav-dropdown-group__list">
-        @for (item of restItems(); track item) {
-          <li
-            class="tedi-sidenav-dropdown-item tedi-sidenav-dropdown-group__item"
-            [class.tedi-sidenav-dropdown-item--selected]="item.selected()"
-          >
-            @if (item.href()) {
-              <a [href]="item.href()" class="tedi-sidenav-dropdown-item__trigger">
-                {{ item.textContent() }}
-              </a>
-            } @else if (item.route()) {
-              <a [routerLink]="item.route()" class="tedi-sidenav-dropdown-item__trigger">
-                {{ item.textContent() }}
-              </a>
-            } @else {
-              <span class="tedi-sidenav-dropdown-item__trigger">
-                {{ item.textContent() }}
-              </span>
-            }
-          </li>
-        }
-      </ul>
-    }
-  </li>
-}
-
-<!-- Hidden container for @ContentChildren query -->
-<div style="display: none" aria-hidden="true">
-  <ng-content></ng-content>
+<div
+  class="tedi-sidenav-dropdown-item tedi-sidenav-dropdown-group__parent"
+  [class.tedi-sidenav-dropdown-group__parent--drillable]="isDrillable()"
+  [attr.role]="isDrillTrigger() ? 'button' : null"
+  [attr.tabindex]="isDrillTrigger() ? 0 : null"
+  [attr.aria-expanded]="isDrillTrigger() ? open() : null"
+  (click)="isDrillTrigger() && toggle()"
+  (keydown.enter)="isDrillTrigger() && toggle()"
+  (keydown.space)="isDrillTrigger() && $event.preventDefault(); isDrillTrigger() && toggle()"
+>
+  <ng-content select="[tedi-sidenav-dropdown-group-parent]"></ng-content>
+  @if (isDrillable()) {
+    <tedi-icon name="expand_more" class="tedi-sidenav-item__caret" color="inherit" />
+  }
 </div>
+<ng-content select="[tedi-sidenav-dropdown-group-list]"></ng-content>

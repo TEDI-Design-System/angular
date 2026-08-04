@@ -1,45 +1,93 @@
 import {
-  AfterContentInit,
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
-  ContentChildren,
-  QueryList,
+  ElementRef,
+  inject,
+  OnDestroy,
   signal,
   ViewEncapsulation,
 } from "@angular/core";
-import { RouterLink } from "@angular/router";
-import { SideNavDropdownItemComponent } from "../sidenav-dropdown-item/sidenav-dropdown-item.component";
+import { IconComponent } from "../../../base/icon/icon.component";
+import { SideNavService } from "../../../../services/sidenav/sidenav.service";
 
 @Component({
-  selector: "tedi-sidenav-dropdown-group",
+  selector: "li[tedi-sidenav-dropdown-group]",
   standalone: true,
   templateUrl: "./sidenav-dropdown-group.component.html",
   styleUrl: "./sidenav-dropdown-group.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [RouterLink],
+  imports: [IconComponent],
   host: {
-    "class": "tedi-sidenav-dropdown-group",
-    "role": "presentation",
-    "style": "display: contents",
+    "[class]": "hostClass()",
   },
 })
-export class SideNavDropdownGroupComponent implements AfterContentInit {
-  @ContentChildren(SideNavDropdownItemComponent)
-  items!: QueryList<SideNavDropdownItemComponent>;
+export class SideNavDropdownGroupComponent implements AfterViewInit, OnDestroy {
+  private readonly host = inject(ElementRef);
+  protected readonly sidenavService = inject(SideNavService);
 
-  private itemsArray = signal<SideNavDropdownItemComponent[]>([]);
+  /** Whether the group is drilled open (3rd-level mobile panel). */
+  open = signal(false);
+  /** Whether the projected parent is a link (`<a>`) rather than a plain heading. */
+  protected readonly isParentLink = signal(false);
 
-  firstItem = computed(() => this.itemsArray()[0]);
-  restItems = computed(() => this.itemsArray().slice(1));
+  /**
+   * A non-link group parent is a drillable heading on mobile — tapping it opens
+   * a 3rd-level panel. A link parent stays inline with its children.
+   */
+  protected readonly isDrillable = computed(
+    () => this.sidenavService.isMobile() && !this.isParentLink(),
+  );
 
-  // to keep same component composition structure but rearrange dom elements inside the group for correct html semantics
-  ngAfterContentInit(): void {
-    this.itemsArray.set(this.items.toArray());
+  /**
+   * The parent is an interactive drill trigger only while it's still collapsed.
+   * Once drilled open it becomes the panel's static heading — not clickable and
+   * with no hover — so navigating back happens via the back buttons.
+   */
+  protected readonly isDrillTrigger = computed(
+    () => this.isDrillable() && !this.open(),
+  );
 
-    this.items.changes.subscribe(() => {
-      this.itemsArray.set(this.items.toArray());
-    });
+  protected readonly hostClass = computed(() => {
+    const classList = [
+      "tedi-sidenav-dropdown-group",
+      "tedi-sidenav-dropdown-group__parent-wrapper",
+    ];
+
+    if (!this.isParentLink()) {
+      classList.push("tedi-sidenav-dropdown-group--parent-plain");
+    }
+
+    if (this.open()) {
+      classList.push("tedi-sidenav-dropdown-group--open");
+    }
+
+    return classList.join(" ");
+  });
+
+  // Detect whether the projected parent is a link so the group can decide between
+  // inline (link) and drillable (non-link) mobile modes.
+  ngAfterViewInit(): void {
+    const trigger = (this.host.nativeElement as HTMLElement).querySelector(
+      ".tedi-sidenav-dropdown-group__parent .tedi-sidenav-dropdown-item__trigger",
+    );
+    this.isParentLink.set(trigger?.tagName === "A");
+  }
+
+  ngOnDestroy(): void {
+    this.sidenavService.clearOpenGroup(this);
+  }
+
+  toggle(): void {
+    const next = !this.open();
+    this.open.set(next);
+
+    if (next) {
+      this.sidenavService.setOpenGroup(this);
+    } else {
+      this.sidenavService.clearOpenGroup(this);
+    }
   }
 }

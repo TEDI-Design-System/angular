@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from "@angular/common";
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -14,15 +15,15 @@ import { SideNavItemComponent } from "../sidenav-item/sidenav-item.component";
 import { SideNavService } from "../../../../services/sidenav/sidenav.service";
 
 @Component({
-  selector: "tedi-sidenav-dropdown",
+  selector: "ul[tedi-sidenav-dropdown]",
   standalone: true,
   templateUrl: "./sidenav-dropdown.component.html",
   styleUrl: "./sidenav-dropdown.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  imports: [SideNavDropdownItemComponent],
+  imports: [SideNavDropdownItemComponent, NgTemplateOutlet],
   host: {
-    "class": "tedi-sidenav-dropdown-wrapper",
+    "[class]": "classes()",
   },
 })
 export class SideNavDropdownComponent implements AfterViewInit {

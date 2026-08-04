@@ -1,3 +1,12 @@
 @use "@angular/cdk" as cdk;
 
 @include cdk.a11y-visually-hidden;
+
+// CDK portals overlays (tooltips, dropdowns) into `.cdk-overlay-container` on
+// `<body>`, where the prebuilt styles give it `z-index: 1000` — below the
+// sidenav (`--z-index-sidenav: 1030`). The container establishes its own
+// stacking context, so an overlay's own `z-index` (e.g. `--z-index-tooltip`)
+// can't lift it past the sidenav. Raise the container itself above the chrome.
+.cdk-overlay-container {
+  z-index: var(--z-index-tooltip);
+}

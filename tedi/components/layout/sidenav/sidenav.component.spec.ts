@@ -4,7 +4,9 @@ import { SideNavService } from "../../../services/sidenav/sidenav.service";
 import { signal } from "@angular/core";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
-const mockCallbackHolder: { callback: (() => void) | null } = { callback: null };
+const mockCallbackHolder: { callback: (() => void) | null } = {
+  callback: null,
+};
 
 jest.mock("@angular/core", () => {
   const actual = jest.requireActual("@angular/core");
@@ -26,11 +28,15 @@ describe("SideNavComponent", () => {
     desktopBreakpoint: ReturnType<typeof signal>;
     isMobile: ReturnType<typeof signal>;
     isMobileItemOpen: ReturnType<typeof signal>;
+    isMobileGroupOpen: ReturnType<typeof signal>;
     isMobileOpen: ReturnType<typeof signal>;
+    openGroup: ReturnType<typeof signal>;
+    openItemText: ReturnType<typeof signal>;
     tooltipEnabled: ReturnType<typeof signal>;
     registerItem: jest.Mock;
     unregisterItem: jest.Mock;
     handleGoToMainMenu: jest.Mock;
+    handleBackToParentMenu: jest.Mock;
     handleCollapse: jest.Mock;
   };
 
@@ -41,11 +47,15 @@ describe("SideNavComponent", () => {
       desktopBreakpoint: signal("lg"),
       isMobile: signal(false),
       isMobileItemOpen: signal(false),
+      isMobileGroupOpen: signal(false),
       isMobileOpen: signal(false),
+      openGroup: signal(null),
+      openItemText: signal(""),
       tooltipEnabled: signal(false),
       registerItem: jest.fn(),
       unregisterItem: jest.fn(),
       handleGoToMainMenu: jest.fn(),
+      handleBackToParentMenu: jest.fn(),
       handleCollapse: jest.fn(),
     };
 
@@ -65,6 +75,13 @@ describe("SideNavComponent", () => {
 
   it("should create component", () => {
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it("sets aria-label on the nav landmark from the ariaLabel input", () => {
+    expect(sidenavElement.hasAttribute("aria-label")).toBe(false);
+    fixture.componentRef.setInput("ariaLabel", "Peamenüü");
+    fixture.detectChanges();
+    expect(sidenavElement.getAttribute("aria-label")).toBe("Peamenüü");
   });
 
   it("should have default classes (large + dividers)", () => {
@@ -126,6 +143,60 @@ describe("SideNavComponent", () => {
     );
   });
 
+  it("should include mobile group open class when service.isMobileGroupOpen is true", () => {
+    sidenavService.isMobileGroupOpen.set(true);
+    fixture.detectChanges();
+    expect(
+      sidenavElement.classList.contains(`tedi-sidenav--mobile-group-open`),
+    ).toBe(true);
+  });
+
+  describe("back button labels", () => {
+    const backText = () =>
+      sidenavElement.querySelector(".tedi-sidenav-back")?.textContent?.trim();
+
+    it("shows the translated back-to-main-menu label by default", () => {
+      sidenavService.isMobileItemOpen.set(true);
+      fixture.detectChanges();
+      expect(backText()).toContain("Tagasi peamenüüsse");
+    });
+
+    it("overrides the back-to-main-menu label via backToMainMenuLabel", () => {
+      sidenavService.isMobileItemOpen.set(true);
+      fixture.componentRef.setInput("backToMainMenuLabel", "Tagasi");
+      fixture.detectChanges();
+      expect(backText()).toContain("Tagasi");
+      expect(backText()).not.toContain("peamenüüsse");
+    });
+
+    it("shows the translated back-to-parent-menu label with the parent name by default", () => {
+      sidenavService.isMobileGroupOpen.set(true);
+      sidenavService.openItemText.set("Tervise ajalugu");
+      fixture.detectChanges();
+      expect(backText()).toContain("Tervise ajalugu menüüsse");
+    });
+
+    it("overrides the back-to-parent-menu label via backToParentMenuLabel", () => {
+      sidenavService.isMobileGroupOpen.set(true);
+      sidenavService.openItemText.set("Tervise ajalugu");
+      fixture.componentRef.setInput("backToParentMenuLabel", "Üks tase tagasi");
+      fixture.detectChanges();
+      expect(backText()).toContain("Üks tase tagasi");
+      expect(backText()).not.toContain("menüüsse");
+    });
+  });
+
+  it("collapses on init when defaultCollapsed is true", () => {
+    fixture.componentRef.setInput("defaultCollapsed", true);
+    fixture.componentInstance.ngOnInit();
+    expect(sidenavService.isCollapsed()).toBe(true);
+  });
+
+  it("does not collapse on init when defaultCollapsed is false", () => {
+    fixture.componentInstance.ngOnInit();
+    expect(sidenavService.isCollapsed()).toBe(false);
+  });
+
   describe("handleBackToMainMenu", () => {
     afterEach(() => {
       mockCallbackHolder.callback = null;
@@ -184,6 +255,49 @@ describe("SideNavComponent", () => {
       }
 
       expect(sidenavService.handleGoToMainMenu).toHaveBeenCalled();
+    });
+  });
+
+  describe("handleBackToParentMenu", () => {
+    afterEach(() => {
+      mockCallbackHolder.callback = null;
+    });
+
+    it("should call service.handleBackToParentMenu", () => {
+      fixture.componentInstance.handleBackToParentMenu();
+      expect(sidenavService.handleBackToParentMenu).toHaveBeenCalled();
+    });
+
+    it("should focus the open group's parent trigger after going back", () => {
+      const mockGroupEl = document.createElement("div");
+      const mockParent = document.createElement("a");
+      mockParent.className = "tedi-sidenav-dropdown-group__parent";
+      mockGroupEl.appendChild(mockParent);
+      const focusSpy = jest.spyOn(mockParent, "focus");
+
+      sidenavService.openGroup.set({
+        host: { nativeElement: mockGroupEl },
+      } as never);
+
+      fixture.componentInstance.handleBackToParentMenu();
+
+      if (mockCallbackHolder.callback) {
+        mockCallbackHolder.callback();
+      }
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should not throw when no group is open", () => {
+      sidenavService.openGroup.set(null);
+
+      fixture.componentInstance.handleBackToParentMenu();
+
+      if (mockCallbackHolder.callback) {
+        mockCallbackHolder.callback();
+      }
+
+      expect(sidenavService.handleBackToParentMenu).toHaveBeenCalled();
     });
   });
 });

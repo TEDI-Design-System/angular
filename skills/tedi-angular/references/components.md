@@ -1544,26 +1544,65 @@ Sub-components: `tedi-header-top`, `tedi-header-logo`, `tedi-header-content`, `t
 ```
 
 ### SideNav
+Semantic list navigation. Author it as a real `<ul>`/`<li>` tree so the rendered
+markup is valid; the `nav` also accepts your own sibling content (header/footer).
+
 **Selector:** `nav[tedi-sidenav]`
 **Inputs:**
 - `dividers: boolean = true`
 - `size: SideNavItemSize = "large"`
 - `collapsible: boolean = false`
+- `defaultCollapsed: boolean = false` — start collapsed on desktop (requires `collapsible`)
 - `desktopBreakpoint: Breakpoint = "lg"`
+- `ariaLabel: string` — accessible name for the `<nav>` landmark
+- `backToMainMenuLabel: string` — override for the mobile "back to main menu" button text; falls back to the translated `sidenav.backToMainMenu` label
+- `backToParentMenuLabel: string` — override for the mobile "back to parent menu" button text; falls back to the translated `sidenav.backToParentMenu` label (which interpolates the parent item's name)
+
+**Sub-components:**
+- `ul[tedi-sidenav-list]` — the menu container (holds the items).
+- `li[tedi-sidenav-item]` — item. Inputs: `icon`, `href`, `route`, `selected = false`, `defaultOpen = false` (expand its dropdown initially, desktop), `collapsedText` (shorter label shown in the narrow rail when collapsed; the full text still shows expanded and in the tooltip). May contain a dropdown.
+- `ul[tedi-sidenav-dropdown]` — submenu list (nested inside an item).
+- `li[tedi-sidenav-dropdown-item]` — submenu link. Inputs: `href`, `route`, `selected = false`.
+- `li[tedi-sidenav-dropdown-group]` — a parent + nested list, composed of
+  `[tedi-sidenav-dropdown-group-parent]` (on an `<a>` for a link parent, or any
+  non-anchor element like `<span>` for a non-link parent) and
+  `ul[tedi-sidenav-dropdown-group-list]`. Link vs non-link parent changes the mobile
+  behaviour (see below).
+- `li[tedi-sidenav-group-title]` — a section heading.
+- `button[tedi-sidenav-toggle]`, `tedi-sidenav-overlay` — mobile drawer controls.
+
+**Mobile drill-down:** below `desktopBreakpoint` the nav is a drawer that drills one
+panel at a time. Tapping an item with a dropdown opens its submenu ("Back to main
+menu" appears). Inside a submenu, a **link** dropdown-group (`<a …-parent>`) renders
+inline — a plain heading with its children shown as a tree. A **non-link** group
+(`<span …-parent>`) instead becomes a drillable row that opens a further panel showing
+the group's children flat, with a second back button ("`<parent>` menüüsse"). An item
+or group parent that is not a link becomes an uppercase heading at the top of its panel.
 
 ```html
 <nav tedi-sidenav [collapsible]="true">
-  <tedi-sidenav-item icon="home" route="/home" [selected]="true">Home</tedi-sidenav-item>
-  <tedi-sidenav-item icon="settings" route="/settings">Settings</tedi-sidenav-item>
-  <tedi-sidenav-dropdown>
-    <tedi-sidenav-item icon="folder">Documents</tedi-sidenav-item>
-    <tedi-sidenav-dropdown-group>
-      <tedi-sidenav-dropdown-item route="/docs/recent">Recent</tedi-sidenav-dropdown-item>
-      <tedi-sidenav-dropdown-item route="/docs/shared">Shared</tedi-sidenav-dropdown-item>
-    </tedi-sidenav-dropdown-group>
-  </tedi-sidenav-dropdown>
+  <ul tedi-sidenav-list>
+    <li tedi-sidenav-item icon="home" route="/home" [selected]="true">Home</li>
+    <li tedi-sidenav-item icon="settings" route="/settings">Settings</li>
+    <li tedi-sidenav-item icon="folder">
+      Documents
+      <ul tedi-sidenav-dropdown>
+        <li tedi-sidenav-dropdown-item route="/docs/recent">Recent</li>
+        <li tedi-sidenav-dropdown-group>
+          <a tedi-sidenav-dropdown-group-parent href="/docs">All docs</a>
+          <ul tedi-sidenav-dropdown-group-list>
+            <li tedi-sidenav-dropdown-item route="/docs/shared">Shared</li>
+            <li tedi-sidenav-dropdown-item route="/docs/archived">Archived</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
 </nav>
 ```
+
+The API is the semantic `ul`/`li` attribute form shown above. (The old
+`<tedi-sidenav-*>` custom-element forms have been removed.)
 
 ### Footer
 **Selector:** `tedi-footer`
