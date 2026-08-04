@@ -809,10 +809,13 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     this.scrollListener = this.renderer.listen(
       this.document,
       "scroll",
-      () => {
-        if (this.isOpen()) {
-          this.closeDropdown();
-        }
+      (event: Event) => {
+        if (!this.isOpen()) return;
+
+        const target = event.target as Node | null;
+        if (target && this.hostRef.nativeElement.contains(target)) return;
+
+        this.closeDropdown();
       },
       { capture: true, passive: true },
     );
@@ -1032,7 +1035,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     const searchInput: HTMLElement | null = trigger.querySelector(".tedi-select__search-input");
     if (arrow) nonTagWidth += arrow.offsetWidth + (parseFloat(getComputedStyle(arrow).marginLeft) || 0) + (parseFloat(getComputedStyle(arrow).paddingLeft) || 0);
     if (clear) nonTagWidth += clear.offsetWidth;
-    if (searchInput) nonTagWidth += parseFloat(getComputedStyle(searchInput).minWidth) || 0;
+    if (searchInput) nonTagWidth += parseFloat(getComputedStyle(searchInput).flexBasis) || 0;
 
     return triggerWidth - padding - nonTagWidth;
   }

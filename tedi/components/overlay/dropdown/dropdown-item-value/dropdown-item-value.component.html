@@ -7,7 +7,7 @@
     [checked]="selected()"
     [indeterminate]="indeterminate()"
     [disabled]="disabled()"
-    (click)="$event.stopPropagation()"
+    (click)="onIndicatorClick($event)"
   />
 } @else if (type() === 'radio') {
   <input
@@ -16,7 +16,7 @@
     tabindex="-1"
     [checked]="selected()"
     [disabled]="disabled()"
-    (click)="$event.stopPropagation()"
+    (click)="onIndicatorClick($event)"
   />
 }
 <ng-content select="tedi-icon, [tediIcon]" />
