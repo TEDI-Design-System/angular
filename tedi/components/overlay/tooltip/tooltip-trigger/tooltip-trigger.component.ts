@@ -138,6 +138,26 @@ export class TooltipTriggerComponent implements AfterContentChecked {
     this.tooltip.hideTooltip();
   }
 
+  @HostListener("keydown.enter", ["$event"])
+  @HostListener("keydown.space", ["$event"])
+  onActivateKey(event: KeyboardEvent) {
+    const element = this.interactiveElement();
+
+    // Native buttons/anchors already synthesize a `click` from Enter/Space, so
+    // handling the key here as well would toggle twice. Only the non-native
+    // elements we made focusable ourselves (a `role="button"` span/wrapper)
+    // need explicit keyboard activation.
+    if (!element || this.isFocusable(element)) return;
+
+    if (
+      this.tooltip.openWith() === "both" ||
+      this.tooltip.openWith() === "click"
+    ) {
+      event.preventDefault();
+      this.tooltip.toggleTooltip();
+    }
+  }
+
   ngAfterContentChecked(): void {
     if (!this.interactive()) return;
 
@@ -156,6 +176,7 @@ export class TooltipTriggerComponent implements AfterContentChecked {
       this.renderer.addClass(span, "tedi-tooltip-trigger__text");
       this.renderer.addClass(span, "tedi-tooltip-trigger--focus");
       this.renderer.setAttribute(span, "tabindex", "0");
+      this.renderer.setAttribute(span, "role", "button");
       this.renderer.insertBefore(element, span, firstChild);
       this.renderer.appendChild(span, firstChild);
       this.interactiveElement.set(span);
@@ -173,6 +194,9 @@ export class TooltipTriggerComponent implements AfterContentChecked {
     // focusable in their own right.
     if (!this.isFocusable(interactive)) {
       this.renderer.addClass(interactive, "tedi-tooltip-trigger--focus");
+      if (!interactive.getAttribute("role")) {
+        this.renderer.setAttribute(interactive, "role", "button");
+      }
     }
 
     if (!interactive.getAttribute("tabindex")) {

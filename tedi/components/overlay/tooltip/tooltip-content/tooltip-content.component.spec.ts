@@ -7,6 +7,7 @@ import { TooltipComponent } from "../tooltip.component";
 import { Component, input, viewChild } from "@angular/core";
 
 class MockTooltipComponent {
+  descriptionId = "mock-tooltip-id";
   hideTooltip = jest.fn();
   hideTimeout?: ReturnType<typeof setTimeout>;
   isContentHovered = {
@@ -72,6 +73,19 @@ describe("TooltipContentComponent", () => {
     expect(component.classes()).toBe(
       "tedi-tooltip-content tedi-tooltip-content--large",
     );
+  });
+
+  describe("accessibility", () => {
+    it("exposes the visible content as the tooltip description target", () => {
+      // The description must live on the visible role="tooltip" element that the
+      // trigger's aria-describedby references — not a duplicated .sr-only node.
+      expect(hostEl.getAttribute("role")).toBe("tooltip");
+      expect(hostEl.getAttribute("id")).toBe("mock-tooltip-id");
+    });
+
+    it("is not hidden from assistive technology", () => {
+      expect(hostEl.getAttribute("aria-hidden")).toBeNull();
+    });
   });
 
   describe("Event listeners", () => {
