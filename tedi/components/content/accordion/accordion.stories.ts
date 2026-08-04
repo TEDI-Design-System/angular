@@ -638,11 +638,12 @@ export const ActionTypes: StoryObj = {
         }
       </style>
       <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
+        <h4 tedi-text>Clickable header</h4>
         <div class="story-row">
           <tedi-accordion>
             <tedi-accordion-item>
               <tedi-accordion-item-header>
-                <span tedi-accordion-title>Klõpsatav päis</span>
+                <span tedi-accordion-title>Pealkiri 1</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -650,13 +651,14 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item [defaultExpanded]="true">
               <tedi-accordion-item-header>
-                <span tedi-accordion-title>Klõpsatav päis</span>
+                <span tedi-accordion-title>Pealkiri 2</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
+        <h4 tedi-text>Separate button at start</h4>
         <div class="story-row">
           <tedi-accordion>
             <tedi-accordion-item>
@@ -682,11 +684,12 @@ export const ActionTypes: StoryObj = {
           </tedi-accordion>
         </div>
 
+        <h4 tedi-text>Arrow without label</h4>
         <div class="story-row">
           <tedi-accordion>
             <tedi-accordion-item>
               <tedi-accordion-item-header [showExpandLabel]="false">
-                <span tedi-accordion-title>Ilma sildita nool</span>
+                <span tedi-accordion-title>Pealkiri 1</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -694,18 +697,19 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item [defaultExpanded]="true">
               <tedi-accordion-item-header [showExpandLabel]="false">
-                <span tedi-accordion-title>Ilma sildita nool</span>
+                <span tedi-accordion-title>Pealkiri 2</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
+        <h4 tedi-text>Icon arrow at start</h4>
         <div class="story-row">
           <tedi-accordion>
             <tedi-accordion-item>
               <tedi-accordion-item-header [showExpandLabel]="false" [expandActionPosition]="'start'">
-                <span tedi-accordion-title>Ikoonnool alguses</span>
+                <span tedi-accordion-title>Pealkiri 1</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -713,13 +717,14 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item [defaultExpanded]="true">
               <tedi-accordion-item-header [showExpandLabel]="false" [expandActionPosition]="'start'">
-                <span tedi-accordion-title>Ikoonnool alguses</span>
+                <span tedi-accordion-title>Pealkiri 2</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
+        <h4 tedi-text>Custom action</h4>
         <div class="story-row">
           <tedi-accordion>
             <tedi-accordion-item [selected]="selectedA">
@@ -750,6 +755,7 @@ export const ActionTypes: StoryObj = {
           </tedi-accordion>
         </div>
 
+        <h4 tedi-text>Selected state</h4>
         <div class="story-row">
           <tedi-accordion>
             <tedi-accordion-item [selected]="selectedC">

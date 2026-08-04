@@ -218,6 +218,19 @@ export default {
         },
       },
     },
+    interactive: {
+      description:
+        "When `false`, the trigger drops its `button` role and dialog ARIA (`aria-haspopup`, `aria-expanded`, `aria-controls`). Use this when the element is only a positioning anchor and an inner control is the real, labelled trigger.",
+      defaultValue: {
+        summary: "true",
+      },
+      table: {
+        category: "popover-trigger inputs",
+        type: {
+          summary: "boolean",
+        },
+      },
+    },
   },
 } as Meta<PopoverComponent>;
 
@@ -226,6 +239,7 @@ type Story = StoryObj<
     maxWidth: PopoverWidth;
     title: string;
     showClose: boolean;
+    interactive: boolean;
   }
 >;
 
@@ -241,12 +255,13 @@ export const Default: Story = {
     maxWidth: "small",
     title: "Pealkiri",
     showClose: true,
+    interactive: true,
   },
   render: (args) => ({
     props: args,
     template: `
       <tedi-popover [position]="position" [preventOverflow]="preventOverflow" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay">
-        <button tedi-button tedi-popover-trigger>
+        <button tedi-button tedi-popover-trigger [interactive]="interactive">
           Popover Trigger
         </button>
         <tedi-popover-content [maxWidth]="maxWidth" [title]="title" [showClose]="showClose">
