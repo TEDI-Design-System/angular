@@ -1275,10 +1275,13 @@ describe("SelectComponent", () => {
       fixture.detectChanges();
       expect(select.isOpen()).toBe(true);
 
+      select.searchTerm.set("Option");
+
       const listbox = select.listboxRef()!.nativeElement as HTMLElement;
       listbox.dispatchEvent(new Event("scroll", { bubbles: false }));
       fixture.detectChanges();
       expect(select.isOpen()).toBe(true);
+      expect(select.searchTerm()).toBe("Option");
     });
 
     it("keeps the dropdown open on scroll when disabled", () => {
