@@ -279,7 +279,7 @@ describe("DateInputComponent", () => {
     expect(label?.length).toBeGreaterThan(0);
   });
 
-  it("renders a labelled tag close button that is described by the tag label", () => {
+  it("renders a tag close button whose accessible name includes the tag label", () => {
     fixture.componentRef.setInput("mode", "multiple");
     fixture.componentRef.setInput("tags", [{ id: "a", label: "01.01.2026" }]);
     fixture.detectChanges();
@@ -290,10 +290,17 @@ describe("DateInputComponent", () => {
     ) as HTMLButtonElement;
     expect(removeBtn.getAttribute("aria-label")).toBeTruthy();
 
-    const describedById = removeBtn.getAttribute("aria-describedby");
-    expect(describedById).toBeTruthy();
-    const describedBy = tag.querySelector(`#${describedById}`);
-    expect(describedBy?.textContent).toContain("01.01.2026");
+    // The name is composed via aria-labelledby (hidden "remove" word + the tag
+    // label) so each tag's close button is distinguishable, e.g. "Eemalda 01.01.2026".
+    const labelledBy = removeBtn.getAttribute("aria-labelledby");
+    expect(labelledBy).toBeTruthy();
+    const referencedText = labelledBy!
+      .split(" ")
+      .map((id) => tag.querySelector(`[id="${id}"]`)?.textContent ?? "")
+      .join(" ");
+    expect(referencedText).toContain("01.01.2026");
+    // The label must not also be a redundant description that double-reads it.
+    expect(removeBtn.getAttribute("aria-describedby")).toBeNull();
   });
 
   it("renders a clear button only when clearable and value is non-empty", () => {
