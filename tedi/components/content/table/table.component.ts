@@ -6,18 +6,21 @@ import {
   computed,
   contentChild,
   effect,
+  type ElementRef,
   inject,
   Injector,
   input,
+  PLATFORM_ID,
   signal,
   Signal,
   TemplateRef,
   untracked,
   ViewEncapsulation,
+  viewChild,
   output,
   type WritableSignal,
 } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { CommonModule, isPlatformBrowser } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import {
   CdkDrag,
@@ -564,6 +567,7 @@ export class TediTableComponent<TData> {
   readonly rowDrop = output<CdkDragDrop<TData[]>>();
 
   protected readonly injector = inject(Injector);
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly translation = inject(TediTranslationService);
 
   private readonly _hoveredRowId = signal<string | null>(null);
@@ -1810,13 +1814,30 @@ export class TediTableComponent<TData> {
     }
   }
 
+  private readonly scrollContainer =
+    viewChild<ElementRef<HTMLElement>>("scrollContainer");
+
+  /**
+   * Resets the table's own vertical scroll to the top. Only affects the
+   * internal scroll container (used when `maxHeight` is set); the horizontal
+   * scroll position is preserved since columns are identical across pages, and
+   * the window scroll is intentionally left untouched.
+   */
+  private resetScrollTop(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const element = this.scrollContainer()?.nativeElement;
+    if (element) element.scrollTop = 0;
+  }
+
   protected handlePaginationPageChange(nextPage: number): void {
     this.table.setPageIndex(nextPage - 1);
+    this.resetScrollTop();
   }
 
   protected handlePaginationPageSizeChange(nextSize: number | undefined): void {
     if (nextSize === undefined) return;
     this.table.setPageSize(nextSize);
+    this.resetScrollTop();
   }
 
   protected getColumnMeta(column: {

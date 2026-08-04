@@ -669,6 +669,57 @@ describe("TediTableComponent", () => {
       const updatedPages = paginators.map((el) => el.componentInstance.page());
       expect(updatedPages).toEqual([2, 2]);
     });
+
+    it("resets the scroll container to the top on page change", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.data.set(
+        Array.from({ length: 15 }, (_, i) => ({
+          id: String(i),
+          name: `Person ${i}`,
+          role: "Role",
+        })),
+      );
+      fixture.componentInstance.pagination.set({ pageSize: 5 });
+      fixture.detectChanges();
+
+      const scroll = fixture.nativeElement.querySelector(
+        ".tedi-table__scroll",
+      ) as HTMLElement;
+      scroll.scrollTop = 120;
+
+      const paginator = fixture.debugElement.query(By.css("tedi-pagination"));
+      paginator.componentInstance.pageChange.emit(2);
+      fixture.detectChanges();
+
+      expect(scroll.scrollTop).toBe(0);
+    });
+
+    it("resets the scroll container to the top on page size change", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.data.set(
+        Array.from({ length: 15 }, (_, i) => ({
+          id: String(i),
+          name: `Person ${i}`,
+          role: "Role",
+        })),
+      );
+      fixture.componentInstance.pagination.set({ pageSize: 5 });
+      fixture.detectChanges();
+
+      const scroll = fixture.nativeElement.querySelector(
+        ".tedi-table__scroll",
+      ) as HTMLElement;
+      scroll.scrollTop = 120;
+
+      const table = fixture.debugElement.query(By.directive(TediTableComponent))
+        .componentInstance as unknown as {
+        handlePaginationPageSizeChange: (size: number) => void;
+      };
+      table.handlePaginationPageSizeChange(10);
+      fixture.detectChanges();
+
+      expect(scroll.scrollTop).toBe(0);
+    });
   });
 
   describe("pagination results slot", () => {

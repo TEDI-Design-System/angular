@@ -21,6 +21,13 @@ class FormControlHostComponent {
   control = new FormControl<string>("", { nonNullable: true });
 }
 
+@Component({
+  standalone: true,
+  imports: [TextFieldComponent],
+  template: `<input tedi-text-field disabled />`,
+})
+class DisabledAttrHostComponent {}
+
 describe("TextFieldComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let input: HTMLInputElement;
@@ -116,6 +123,62 @@ describe("TextFieldComponent", () => {
 
     component.setInvalidState(false);
     expect(component.invalid()).toBe(false);
+  });
+
+  describe("disabled input", () => {
+    it("should be disabled with a bare `disabled` attribute", () => {
+      const attrFixture = TestBed.createComponent(DisabledAttrHostComponent);
+      attrFixture.detectChanges();
+
+      const debug = attrFixture.debugElement.query(
+        By.directive(TextFieldComponent),
+      );
+      const attrTextField: TextFieldComponent = debug.componentInstance;
+      const attrInput: HTMLInputElement = debug.nativeElement;
+
+      expect(attrTextField.disabled()).toBe(true);
+      expect(attrInput.disabled).toBe(true);
+    });
+
+    it("should reflect the aliased disabled input set programmatically", () => {
+      const inputFixture = TestBed.createComponent(TextFieldComponent);
+      const inputEl: HTMLInputElement = inputFixture.nativeElement;
+
+      inputFixture.componentRef.setInput("disabled", true);
+      inputFixture.detectChanges();
+      expect(inputFixture.componentInstance.disabled()).toBe(true);
+      expect(inputEl.disabled).toBe(true);
+
+      inputFixture.componentRef.setInput("disabled", false);
+      inputFixture.detectChanges();
+      expect(inputFixture.componentInstance.disabled()).toBe(false);
+      expect(inputEl.disabled).toBe(false);
+    });
+  });
+
+  describe("focus", () => {
+    it("should focus the input element", () => {
+      const focusFixture = TestBed.createComponent(TextFieldComponent);
+      const focusEl: HTMLInputElement = focusFixture.nativeElement;
+      const focusSpy = jest.spyOn(focusEl, "focus");
+      focusFixture.detectChanges();
+
+      focusFixture.componentInstance.focus();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should not focus the input element when disabled", () => {
+      const focusFixture = TestBed.createComponent(TextFieldComponent);
+      const focusEl: HTMLInputElement = focusFixture.nativeElement;
+      const focusSpy = jest.spyOn(focusEl, "focus");
+      focusFixture.componentRef.setInput("disabled", true);
+      focusFixture.detectChanges();
+
+      focusFixture.componentInstance.focus();
+
+      expect(focusSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe("when bound to a reactive FormControl", () => {

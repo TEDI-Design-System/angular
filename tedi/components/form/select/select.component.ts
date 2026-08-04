@@ -6,6 +6,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   contentChild,
+  DestroyRef,
   effect,
   ElementRef,
   HostListener,
@@ -13,6 +14,7 @@ import {
   input,
   NgZone,
   output,
+  Renderer2,
   signal,
   viewChild,
   viewChildren,
@@ -21,23 +23,24 @@ import {
   computed,
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { CommonModule } from "@angular/common";
+import { CommonModule, DOCUMENT } from "@angular/common";
 import { IconComponent, TextComponent } from "../../base";
-import { ClosingButtonComponent, InfoButtonComponent } from "../../buttons";
-import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
-import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
-import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
+import { ClosingButtonComponent } from "../../buttons";
+import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 import { TediTranslationPipe } from "../../../services";
 import { ComponentInputs } from "../../../types";
 import { calculateVisibleTagCount } from "../../../utils/tag-overflow.util";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { LabelComponent } from "../label/label.component";
+import { LabelRowComponent } from "../label-row/label-row.component";
 import { TagComponent, TagEllipsis } from "../../tags/tag/tag.component";
+import { EllipsisComponent, EllipsisPosition } from "../../helpers/ellipsis";
 import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
 import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
 import {
   SelectOptionTemplateDirective,
   SelectValueTemplateDirective,
+  SelectTooltipTemplateDirective,
   SelectOptionContext,
   SelectValueContext,
 } from "./select-templates.directive";
@@ -72,18 +75,17 @@ export enum SpecialOptionControls {
     OverlayModule,
     CdkListboxModule,
     ClosingButtonComponent,
-    InfoButtonComponent,
-    TooltipComponent,
-    TooltipTriggerComponent,
-    TooltipContentComponent,
     IconComponent,
     LabelComponent,
+    LabelRowComponent,
+    InfoTooltipComponent,
     FeedbackTextComponent,
     TextComponent,
     TagComponent,
     TediTranslationPipe,
     DropdownItemValueComponent,
     DropdownItemValueLabelComponent,
+    EllipsisComponent,
   ],
   templateUrl: "./select.component.html",
   styleUrl: "./select.component.scss",
@@ -116,7 +118,8 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
 
   /**
    * When set, renders an info button next to the label that reveals this text
-   * in a tooltip on hover/focus.
+   * in a tooltip on hover/focus. For formatted content, project a
+   * `*tediSelectTooltip` template instead, which takes precedence over this.
    */
   tooltip = input<string>();
 
@@ -249,6 +252,15 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   tagEllipsis = input<TagEllipsis>(false);
 
   /**
+   * Which end the single selected value truncates from when it doesn't fit.
+   * The full value is revealed in a tooltip on hover/focus. `false` (default)
+   * never truncates. Applies to single-select mode; multiselect tags use
+   * `tagEllipsis`.
+   * @default false
+   */
+  ellipsis = input<EllipsisPosition | false>(false);
+
+  /**
    * Function used to compare option values for equality.
    * Used to determine which options are selected.
    * @default (a, b) => a === b
@@ -271,6 +283,12 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * When not set, the dropdown height is calculated based on available viewport space.
    */
   maxDropdownHeight = input<number | undefined>();
+
+  /**
+   * Does the dropdown close when the page scrolls?
+   * @default false
+   */
+  hideOnScroll = input(false);
 
   /**
    * Layout type for the dropdown options.
@@ -386,10 +404,14 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   tagRefs = viewChildren("tagElement", { read: ElementRef });
   hostRef = inject(ElementRef);
   private ngZone = inject(NgZone);
+  private renderer = inject(Renderer2);
+  private document = inject(DOCUMENT);
+  private scrollListener?: () => void;
 
   // Template queries for custom rendering
   optionTemplate = contentChild(SelectOptionTemplateDirective);
   valueTemplate = contentChild(SelectValueTemplateDirective);
+  tooltipTemplate = contentChild(SelectTooltipTemplateDirective);
 
   normalizedOptions = computed<SelectOption<T>[]>(() => {
     const items = this.options();
@@ -610,6 +632,8 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
         (listbox as any)._setNextFocusToSelectedOption = () => { };
       }
     });
+
+    inject(DestroyRef).onDestroy(() => this.cleanupScrollListener());
   }
 
   resetVisibleTagsOnSelectionChange = effect(() => {
@@ -736,6 +760,9 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     if (this.isOpen()) return;
     this.calculateDropdownMaxHeight();
     this.isOpen.set(true);
+    if (this.hideOnScroll()) {
+      this.setupScrollListener();
+    }
     this.opened.emit();
   }
 
@@ -772,7 +799,35 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     this.isOpen.set(false);
     this.searchTerm.set("");
     this.dropdownMaxHeight.set(null);
+    this.cleanupScrollListener();
     this.closed.emit();
+  }
+
+  private setupScrollListener(): void {
+    this.cleanupScrollListener();
+
+    this.scrollListener = this.renderer.listen(
+      this.document,
+      "scroll",
+      (event: Event) => {
+        if (!this.isOpen()) return;
+
+        // Scrolling the option list itself must not close the dropdown
+        const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+        const target = event.target as Node | null;
+        if (overlayEl && target && overlayEl.contains(target)) return;
+
+        this.closeDropdown();
+      },
+      { capture: true, passive: true },
+    );
+  }
+
+  private cleanupScrollListener(): void {
+    if (this.scrollListener) {
+      this.scrollListener();
+      this.scrollListener = undefined;
+    }
   }
 
   handleValueChange(event: { value: readonly unknown[] }): void {

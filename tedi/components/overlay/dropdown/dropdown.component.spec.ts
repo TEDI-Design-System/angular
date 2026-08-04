@@ -191,6 +191,20 @@ describe("DropdownComponent", () => {
       expect((dropdown as any).scrollListener).toBeUndefined();
     });
 
+    it("keeps the dropdown open when the panel itself is scrolled", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      dropdown.showDropdown();
+      fixture.detectChanges();
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      const contentEl = dropdown.dropdownContent().host.nativeElement;
+      contentEl.dispatchEvent(new Event("scroll", { bubbles: false }));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+      expect(dropdown.isOpen()).toBe(true);
+    });
+
     it("cleans up the scroll listener on destroy", () => {
       host.hideOnScroll = true;
       fixture.detectChanges();

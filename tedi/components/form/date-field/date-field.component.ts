@@ -492,6 +492,11 @@ export class DateFieldComponent
     this.formInvalid.set(isInvalid);
   }
 
+  focus(): void {
+    if (this.fieldDisabled()) return;
+    this.dateInput().focusInput();
+  }
+
   clearField(): void {
     if (this.fieldDisabled() || this.readOnly()) return;
     this.commitValue(null);

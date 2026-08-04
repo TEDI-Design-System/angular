@@ -1,5 +1,5 @@
 @if (label()) {
-  <div class="tedi-select__label-row">
+  <tedi-label-row>
     <label
       [id]="labelId()"
       tedi-label
@@ -10,15 +10,14 @@
     >
       {{ label() }}
     </label>
-    @if (tooltip(); as tooltipText) {
-      <tedi-tooltip>
-        <tedi-tooltip-trigger>
-          <button tedi-info-button></button>
-        </tedi-tooltip-trigger>
-        <tedi-tooltip-content>{{ tooltipText }}</tedi-tooltip-content>
-      </tedi-tooltip>
+    @if (tooltipTemplate()?.template; as tooltipTpl) {
+      <tedi-info-tooltip>
+        <ng-container [ngTemplateOutlet]="tooltipTpl" />
+      </tedi-info-tooltip>
+    } @else if (tooltip(); as tooltipText) {
+      <tedi-info-tooltip>{{ tooltipText }}</tedi-info-tooltip>
     }
-  </div>
+  </tedi-label-row>
 }
 <div
   [id]="searchable() ? null : inputId()"
@@ -97,17 +96,12 @@
             [ngTemplateOutlet]="multiselectTags"
             [ngTemplateOutletContext]="{ $implicit: multiselectContainerRef }"
           />
+        } @else if (ellipsis(); as ellipsisPos) {
+          <tedi-ellipsis [position]="ellipsisPos" [lineClamp]="1">
+            <ng-container [ngTemplateOutlet]="singleValue" />
+          </tedi-ellipsis>
         } @else {
-          @if (valueTemplate(); as tpl) {
-            @if (selectedOptions()[0]; as option) {
-              <ng-container
-                [ngTemplateOutlet]="tpl.template"
-                [ngTemplateOutletContext]="getValueContext(option)"
-              />
-            }
-          } @else {
-            {{ selectedLabels().join(", ") }}
-          }
+          <ng-container [ngTemplateOutlet]="singleValue" />
         }
       } @else {
         <span class="tedi-select__label--placeholder">
@@ -147,6 +141,19 @@
     [position]="feedback.position"
   />
 }
+
+<ng-template #singleValue>
+  @if (valueTemplate(); as tpl) {
+    @if (selectedOptions()[0]; as option) {
+      <ng-container
+        [ngTemplateOutlet]="tpl.template"
+        [ngTemplateOutletContext]="getValueContext(option)"
+      />
+    }
+  } @else {
+    {{ selectedLabels().join(", ") }}
+  }
+</ng-template>
 
 <ng-template #multiselectTags>
   <div

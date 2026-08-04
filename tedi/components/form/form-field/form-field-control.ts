@@ -23,6 +23,12 @@ export interface FormFieldControl<T = unknown> {
    * If implemented, the form field can trigger clearing the value.
    */
   clearField?(): void;
+  /**
+   * Optional method used when the field box itself is clicked. If implemented,
+   * clicking the box padding — which is not part of the control's own hit area —
+   * moves focus into the control, the way clicking the value does.
+   */
+  focus?(): void;
 }
 
 /**
