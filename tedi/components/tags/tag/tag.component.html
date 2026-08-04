@@ -18,16 +18,17 @@
 
 @if (loading()) {
   <span class="tedi-tag__spinner-wrapper">
-    <tedi-spinner [size]="48" />
+    <tedi-spinner [size]="48" [label]="'loading' | tediTranslate" />
   </span>
 } @else if (closable()) {
+  <span [id]="removeLabelId" hidden>{{ "remove" | tediTranslate }}</span>
   <button
     type="button"
     tedi-closing-button
     size="small"
     [iconSize]="18"
     (click)="handleClose($event)"
-    [attr.aria-describedby]="uniqueId"
+    [attr.aria-labelledby]="removeLabelId + ' ' + uniqueId"
     [ariaLabel]="'remove' | tediTranslate"
   >
   </button>

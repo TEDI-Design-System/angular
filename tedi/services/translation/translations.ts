@@ -31,6 +31,13 @@ export const translationsMap = {
     en: "Remove",
     ru: "Удалить",
   },
+  loading: {
+    description: "Announces a loading state to assistive technology",
+    components: ["Tag", "Spinner"],
+    et: "Laadimine",
+    en: "Loading",
+    ru: "Загрузка",
+  },
   cancel: {
     description: "For canceling an action",
     components: ["TableFilter"],

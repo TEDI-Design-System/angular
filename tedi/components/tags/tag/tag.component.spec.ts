@@ -148,4 +148,39 @@ describe("TagComponent", () => {
     const contentElement = fixture.nativeElement.querySelector(".tedi-tag__content");
     expect(contentElement).toBeTruthy();
   });
+
+  it("gives the loading spinner an accessible label so the state is announced", () => {
+    fixture.componentRef.setInput("loading", true);
+    fixture.detectChanges();
+
+    const spinner = fixture.nativeElement.querySelector("tedi-spinner");
+    // With a label the spinner is exposed (role=status/aria-live) instead of
+    // aria-hidden="true", and carries the translated loading label.
+    expect(spinner.getAttribute("aria-hidden")).not.toBe("true");
+    expect(spinner.getAttribute("aria-label")).toBe("Laadimine");
+  });
+
+  it("names the remove button with distinguishing context via aria-labelledby", () => {
+    fixture.componentRef.setInput("closable", true);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector("[tedi-closing-button]");
+    expect(button.getAttribute("aria-labelledby")).toBe(
+      `${component.removeLabelId} ${component.uniqueId}`,
+    );
+    // The label must not also be a description, which would double-read it.
+    expect(button.getAttribute("aria-describedby")).toBeNull();
+  });
+
+  it("provides a hidden 'remove' label source referenced by the button name", () => {
+    fixture.componentRef.setInput("closable", true);
+    fixture.detectChanges();
+
+    const removeLabel = fixture.nativeElement.querySelector(
+      `[id="${component.removeLabelId}"]`,
+    );
+    expect(removeLabel).toBeTruthy();
+    expect(removeLabel.textContent.trim()).toBe("Eemalda");
+    expect(removeLabel.hasAttribute("hidden")).toBe(true);
+  });
 });

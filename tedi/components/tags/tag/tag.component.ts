@@ -43,6 +43,7 @@ export type TagEllipsis = "start" | "end" | false;
 export class TagComponent {
   readonly idGenerator = inject(_IdGenerator);
   readonly uniqueId = this.idGenerator.getId('tedi-tag');
+  readonly removeLabelId = this.idGenerator.getId('tedi-tag-remove');
   /**
    * Whether the tag is in loading state.
    * When true, a spinner will be displayed inside the tag.
