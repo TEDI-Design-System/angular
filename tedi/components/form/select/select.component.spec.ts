@@ -10,6 +10,7 @@ import {
   SelectTooltipTemplateDirective,
 } from "./select-templates.directive";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
+import { COUNTER_TAG_WIDTH, TAG_GAP } from "../../../utils/tag-overflow.util";
 import { InputState } from "../form-field/form-field.component";
 
 @Component({
@@ -2474,11 +2475,24 @@ describe("SelectComponent", () => {
   describe("calculateVisibleTags", () => {
     let clientWidthSpy: jest.SpyInstance;
     let offsetWidthSpy: jest.SpyInstance;
+    let styleSpy: jest.SpyInstance;
 
     afterEach(() => {
       clientWidthSpy?.mockRestore();
       offsetWidthSpy?.mockRestore();
+      styleSpy?.mockRestore();
     });
+
+    const mockSearchInputBasis = (basis: string) => {
+      const real = window.getComputedStyle.bind(window);
+      styleSpy = jest.spyOn(window, "getComputedStyle").mockImplementation(((
+        el: Element,
+        pseudo?: string | null,
+      ) =>
+        (el as HTMLElement).classList?.contains("tedi-select__search-input")
+          ? ({ flexBasis: basis } as unknown as CSSStyleDeclaration)
+          : real(el as HTMLElement, pseudo ?? undefined)) as typeof window.getComputedStyle);
+    };
 
     it("should calculate visible tags for single-row multiselect", fakeAsync(() => {
       host.allowMultiple =true;
@@ -2526,6 +2540,45 @@ describe("SelectComponent", () => {
       tick();
 
       expect(select.visibleTagsCount()).toBe(1);
+    }));
+
+    it("should hold back the search input's reserve so long tags, the counter and the gaps still fit a narrow trigger", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.multiRow = false;
+      host.searchable = true;
+      host.clearableTags = true;
+      host.items = [
+        "A very long tag label",
+        "Another very long tag label",
+        "A third very long tag label",
+      ];
+      fixture.detectChanges();
+      host.control.setValue([...host.items]);
+
+      const TRIGGER = 300;
+      const ARROW = 24;
+      const TAG = 100;
+      const RESERVE = 80;
+      mockSearchInputBasis(`${RESERVE}px`);
+      clientWidthSpy = jest.spyOn(HTMLElement.prototype, "clientWidth", "get").mockImplementation(function (this: HTMLElement) {
+        if (this.classList.contains("tedi-select__trigger")) return TRIGGER;
+        return 0;
+      });
+      offsetWidthSpy = jest.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockImplementation(function (this: HTMLElement) {
+        if (this.classList.contains("tedi-select__arrow")) return ARROW;
+        if (this.tagName === "TEDI-TAG") return TAG;
+        return 0;
+      });
+
+      select.searchTerm.set("long");
+      fixture.detectChanges();
+      tick();
+
+      expect(select.visibleTagsCount()).toBe(1);
+      expect(select.hiddenTagsCount()).toBe(2);
+
+      const demand = TAG + TAG_GAP + COUNTER_TAG_WIDTH + TAG_GAP + RESERVE;
+      expect(demand).toBeLessThanOrEqual(TRIGGER - ARROW);
     }));
 
     it("should keep the same tags visible when the search input gains or loses focus", fakeAsync(() => {
