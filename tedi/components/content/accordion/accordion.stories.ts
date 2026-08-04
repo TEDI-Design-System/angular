@@ -689,7 +689,7 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item>
               <tedi-accordion-item-header [showExpandLabel]="false">
-                <span tedi-accordion-title>Pealkiri 1</span>
+                <span tedi-accordion-title>Pealkiri 3</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -697,7 +697,7 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item [defaultExpanded]="true">
               <tedi-accordion-item-header [showExpandLabel]="false">
-                <span tedi-accordion-title>Pealkiri 2</span>
+                <span tedi-accordion-title>Pealkiri 4</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -709,7 +709,7 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item>
               <tedi-accordion-item-header [showExpandLabel]="false" [expandActionPosition]="'start'">
-                <span tedi-accordion-title>Pealkiri 1</span>
+                <span tedi-accordion-title>Pealkiri 5</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -717,7 +717,7 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item [defaultExpanded]="true">
               <tedi-accordion-item-header [showExpandLabel]="false" [expandActionPosition]="'start'">
-                <span tedi-accordion-title>Pealkiri 2</span>
+                <span tedi-accordion-title>Pealkiri 6</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
