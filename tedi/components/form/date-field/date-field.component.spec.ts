@@ -603,6 +603,26 @@ describe("DateFieldComponent", () => {
       expect(modalService.open).toHaveBeenCalled();
     });
 
+    it("forwards minYear/maxYear into the modal calendar data", () => {
+      const { component, modalService } = createField({
+        modal: "md",
+        minYear: 1950,
+        maxYear: 1970,
+      });
+      const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
+      bp.setBreakpoint("sm");
+
+      const ref = {
+        closed: { subscribe: jest.fn() },
+      };
+      modalService.open.mockReturnValue(ref);
+
+      component.handleIconClick();
+      const data = modalService.open.mock.calls[0][1].data;
+      expect(data.minYear).toBe(1950);
+      expect(data.maxYear).toBe(1970);
+    });
+
     it("does NOT open a modal when above the configured breakpoint", () => {
       const { component, modalService } = createField({ modal: "md" });
       const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
