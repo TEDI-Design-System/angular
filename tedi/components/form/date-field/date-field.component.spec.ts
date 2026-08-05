@@ -3,6 +3,7 @@ import { Component, signal } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
 import { DateFieldComponent } from "./date-field.component";
+import { TextFieldComponent } from "../text-field/text-field.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
 import { LabelComponent } from "../label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
@@ -1298,6 +1299,30 @@ describe("DateFieldComponent with ReactiveFormsModule", () => {
       "input.tedi-date-input__input",
     ) as HTMLInputElement;
     expect(input.value).toBe("14.05.2026");
+  });
+
+  it("keeps the nested text-field model in sync with external updates (issue #592)", () => {
+    const textField = fixture.debugElement.query(
+      By.directive(TextFieldComponent),
+    ).componentInstance as TextFieldComponent;
+
+    // Starts empty, before any value is set.
+    expect(textField.value()).toBe("");
+
+    // Programmatic prefill after the field has already rendered.
+    host.control.setValue(new Date(2026, 4, 14));
+    fixture.detectChanges();
+    expect(textField.value()).toBe("14.05.2026");
+
+    // A subsequent out-of-band change is reflected too.
+    host.control.setValue(new Date(2026, 0, 1));
+    fixture.detectChanges();
+    expect(textField.value()).toBe("01.01.2026");
+
+    const input = fixture.nativeElement.querySelector(
+      "input.tedi-date-input__input",
+    ) as HTMLInputElement;
+    expect(input.value).toBe("01.01.2026");
   });
 
   it("disables the input when FormControl is disabled", () => {
