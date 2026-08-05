@@ -39,6 +39,7 @@ import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
+import { TagComponent } from "../../tags/tag/tag.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { EllipsisComponent } from "../../helpers/ellipsis/ellipsis.component";
@@ -162,6 +163,7 @@ type TediTableStoryArgs = {
   renderSubComponent?: unknown;
   getRowCanExpand?: unknown;
   getSubRows?: unknown;
+  getRowId?: unknown;
   expandButtonVariant?: "default" | "secondary";
   expandButtonLabel?: string | { open: string; close: string };
   pagination?: unknown;
@@ -461,6 +463,18 @@ const meta: Meta<TediTableStoryArgs> = {
       table: {
         category: "expansion",
         type: { summary: "(row) => TData[] | undefined" },
+      },
+    },
+    getRowId: {
+      description:
+        "Accessor returning a stable, unique id per row (e.g. `(row) => row.id`), passed straight through to TanStack's `getRowId`. Key selection / expansion state by an entity id instead of the row index so it survives filtering, sorting and data changes. Must return a unique, stable id for every row.",
+      control: false,
+      table: {
+        category: "behavior",
+        type: {
+          summary:
+            "(originalRow: TData, index: number, parent?: Row<TData>) => string",
+        },
       },
     },
     groupRowsBy: {
@@ -1886,6 +1900,14 @@ export const Sortable: Story = {
         gap: var(--tedi-dimensions-04);
         align-items: center;
       }
+
+      .tedi-filters-story__cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--tedi-dimensions-04);
+        align-items: center;
+        margin-bottom: var(--tedi-dimensions-04);
+      }
     `,
   ],
   imports: [
@@ -1894,13 +1916,30 @@ export const Sortable: Story = {
     TextFieldComponent,
     FormFieldComponent,
     CheckboxComponent,
+    ButtonComponent,
+    IconComponent,
+    TagComponent,
     FormsModule,
   ],
   template: `
+    @if (filterChips().length) {
+      <div class="tedi-filters-story__cloud">
+        @for (chip of filterChips(); track chip.id) {
+          <tedi-tag [closable]="true" (closed)="removeFilter(chip.id)">{{ chip.label }}</tedi-tag>
+        }
+        <button tedi-button variant="neutral" size="small" type="button" (click)="tediTable.clearFilters()">
+          <tedi-icon name="refresh" color="inherit" />
+          Tühjenda filtrid
+        </button>
+      </div>
+    }
     <tedi-table
+      #tediTable
       id="tedi-table-filters"
       [data]="data"
       [columns]="columns()"
+      [state]="state()"
+      (stateChange)="state.set($event)"
       [pagination]="pagination"
       ${TABLE_APPEARANCE_BINDINGS}
     />
@@ -1962,6 +2001,52 @@ class FiltersStoryHostComponent extends TableStoryHostBase {
   };
   certStatuses = CERT_STATUSES;
   statusColor = certStatusColor;
+
+  // Controlled filter state — the table writes every filter change back
+  // through (stateChange), so the tag cloud can be derived straight from it.
+  // Seeded with two active filters so the story opens showing the chips.
+  state = signal<Partial<TableState>>({
+    columnFilters: [
+      { id: "jobStart", value: "2019" },
+      { id: "status", value: ["Kehtiv"] as CertStatus[] },
+    ],
+  });
+
+  // String column headers keyed by id, so a chip can label itself from the
+  // real column header rather than a hardcoded map.
+  private readonly columnHeaders = computed(() => {
+    const map = new Map<string, string>();
+    for (const col of this.columns()) {
+      if (col.id && typeof col.header === "string") map.set(col.id, col.header);
+    }
+    return map;
+  });
+
+  // One removable chip per active column filter, labelled "Header: value".
+  filterChips = computed(() => {
+    const headers = this.columnHeaders();
+    return (this.state().columnFilters ?? [])
+      .map((filter) => ({
+        id: filter.id,
+        label: `${headers.get(filter.id) ?? filter.id}: ${
+          Array.isArray(filter.value)
+            ? filter.value.join(", ")
+            : String(filter.value ?? "")
+        }`,
+      }))
+      .filter((chip) => !chip.label.endsWith(": "));
+  });
+
+  // Drop a single column's filter — clearing all at once is the table's
+  // clearFilters() method wired to the button above.
+  removeFilter(id: string): void {
+    this.state.update((current) => ({
+      ...current,
+      columnFilters: (current.columnFilters ?? []).filter(
+        (filter) => filter.id !== id,
+      ),
+    }));
+  }
 
   textFilterTpl =
     viewChild<TemplateRef<TediTableFilterContext<string, PersonRecord>>>(
@@ -2042,13 +2127,24 @@ export const Filters: Story = {
     docs: {
       description: {
         story:
-          'The page-size dropdown includes a **"Show all"** option, built with the ' +
-          "`{ value, label }` form of `pageSizeOptions`. Its `value` is the page " +
-          "size used when the option is picked, so make it large enough to hold " +
-          "every row: when you know the row total, pass it (here `data.length`); " +
-          "when you don't, pass `Number.MAX_SAFE_INTEGER`. Either way the table " +
-          "renders all rows on one page and the pager collapses — filtering only " +
-          "shrinks the row count, so a large page size always fits the result.",
+          "Demonstrates the built-in filter popover (`filterable: true` + a " +
+          "`filterTemplate` per column), and it also demonstrates the usage of a " +
+          "**tag cloud** above the table to surface the currently active filters. " +
+          "Each filter renders as one removable `tedi-tag` (labelled " +
+          "`Header: value`); closing a chip removes that one column's filter, and " +
+          "the small **Tühjenda filtrid** button calls the table's " +
+          "**`clearFilters()`** to reset them all at once. The filter state is " +
+          "controlled (`[state]` + `(stateChange)`), so the chips derive straight " +
+          "from `state().columnFilters` — applying a filter through a header " +
+          "popover adds a chip.\n\n" +
+          'The page-size dropdown also includes a **"Show all"** option, built ' +
+          "with the `{ value, label }` form of `pageSizeOptions`. Its `value` is " +
+          "the page size used when the option is picked, so make it large enough " +
+          "to hold every row: when you know the row total, pass it (here " +
+          "`data.length`); when you don't, pass `Number.MAX_SAFE_INTEGER`. Either " +
+          "way the table renders all rows on one page and the pager collapses — " +
+          "filtering only shrinks the row count, so a large page size always fits " +
+          "the result.",
       },
       source: {
         language: "html",
@@ -2069,13 +2165,48 @@ export const Filters: Story = {
       pageSize: 10,
       pageSizeOptions: [10, 25, { value: data.length, label: 'Näita kõiki' }],
     };
+
+  tag cloud — control the filter state so the chips can be derived from it.
+  Each chip removes one column's filter; clearFilters() resets them all:
 -->
+@if (filterChips().length) {
+  <div class="filter-cloud">
+    @for (chip of filterChips(); track chip.id) {
+      <tedi-tag [closable]="true" (closed)="removeFilter(chip.id)">{{ chip.label }}</tedi-tag>
+    }
+    <button tedi-button variant="neutral" size="small" type="button" (click)="tediTable.clearFilters()">
+      <tedi-icon name="refresh" color="inherit" />
+      Tühjenda filtrid
+    </button>
+  </div>
+}
+
 <tedi-table
+  #tediTable
   [data]="data"
   [columns]="columns"
+  [state]="state()"
+  (stateChange)="state.set($event)"
   [pagination]="pagination"
   [maxHeight]="480"
 />
+
+<!--
+  filterChips = computed(() =>
+    (state().columnFilters ?? []).map((f) => ({
+      id: f.id,
+      label: headers.get(f.id) + ': ' +
+        (Array.isArray(f.value) ? f.value.join(', ') : f.value),
+    })),
+  );
+
+  removeFilter(id: string) {
+    state.update((s) => ({
+      ...s,
+      columnFilters: (s.columnFilters ?? []).filter((f) => f.id !== id),
+    }));
+  }
+-->
 
 <ng-template #textFilter let-ctx>
   <tedi-form-field size="small">
@@ -2427,6 +2558,7 @@ export const CollapsibleRowsExpandedByDefault: Story = {
       id="tedi-table-selectable"
       [data]="data"
       [columns]="columns()"
+      [getRowId]="getRowId"
       [pagination]="pagination"
       ${TABLE_APPEARANCE_BINDINGS}
     />
@@ -2446,6 +2578,9 @@ class SelectableRowsStoryHostComponent extends TableStoryHostBase {
   data = filterablePeople;
   pagination = DEFAULT_PAGINATION;
   statusColor = certStatusColor;
+  // Key selection by a stable entity id instead of the row index, so
+  // rowSelection survives sorting / filtering / data changes.
+  getRowId = (row: PersonRecord) => row.id;
 
   personNameTpl =
     viewChild<TemplateRef<CellContext<PersonRecord, unknown>>>("personName");
@@ -2479,6 +2614,16 @@ export const SelectableRows: Story = {
   }),
   parameters: {
     docs: {
+      description: {
+        story:
+          "Default `selectionMode` is `'multiple'` — a checkbox per row plus a " +
+          "select-all checkbox in the header.\n\nPass **`getRowId`** to key " +
+          "`rowSelection` by a stable entity id (`(row) => row.id`) instead of " +
+          "the row index. Without it, selection is index-based and breaks as " +
+          "soon as the data changes (sorting, filtering, adding / removing " +
+          "rows) — with it, the selection state stays correct and is " +
+          "controllable from the outside by that id.",
+      },
       source: {
         language: "html",
         code: `<!-- Default selectionMode is 'multiple' — checkbox per row plus
@@ -2486,14 +2631,21 @@ export const SelectableRows: Story = {
   (row) => boolean to enableRowSelection to allow only some rows.
   The status cell reacts to per-row selection via ctx.row.getIsSelected()
   — bordering the badge while the row is selected.
+
+  getRowId keys rowSelection by a stable entity id instead of the row
+  index, so the selection survives sorting / filtering / data changes:
 -->
 <tedi-table
   [data]="data"
   [columns]="columns"
   [enableRowSelection]="true"
   [selectedRowHighlight]="false"
+  [getRowId]="getRowId"
   [pagination]="pagination"
 />
+
+<!-- getRowId = (row) => row.id; -->
+
 
 <ng-template #personStatus let-ctx>
   <tedi-status-badge

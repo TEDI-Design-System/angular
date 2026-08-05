@@ -118,6 +118,7 @@ const columns: TediColumnDef<Person>[] = [
       [rowCount]="rowCount()"
       [renderSubComponent]="subTemplate()"
       [getSubRows]="getSubRows()"
+      [getRowId]="getRowId()"
       [groupRowsBy]="groupRowsBy()"
       [rowGroupDividers]="rowGroupDividers()"
       [controlColumnOrder]="controlColumnOrder()"
@@ -168,6 +169,9 @@ class HostComponent {
   >(undefined);
   readonly getSubRows = signal<
     ((row: Person) => Person[] | undefined) | undefined
+  >(undefined);
+  readonly getRowId = signal<
+    ((originalRow: Person, index: number) => string) | undefined
   >(undefined);
   readonly groupRowsBy = signal<((row: Row<Person>) => unknown) | undefined>(
     undefined,
@@ -332,6 +336,33 @@ describe("TediTableComponent", () => {
         rows.some((r) => r.classList.contains("tedi-table__row--selected")),
       ).toBe(false);
     });
+
+    it("keys rowSelection by index by default", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.enableRowSelection.set(true);
+      fixture.detectChanges();
+      const selectAll = fixture.nativeElement.querySelector(
+        'input[aria-label="Select all"]',
+      ) as HTMLInputElement;
+      selectAll.click();
+      fixture.detectChanges();
+      const lastEmit = fixture.componentInstance.onStateChange.mock.calls.at(-1);
+      expect(lastEmit?.[0].rowSelection).toEqual({ "0": true, "1": true });
+    });
+
+    it("keys rowSelection by getRowId when provided", () => {
+      const fixture = setupHost((host) => {
+        host.getRowId.set((row) => row.id);
+        host.enableRowSelection.set(true);
+      });
+      const selectAll = fixture.nativeElement.querySelector(
+        'input[aria-label="Select all"]',
+      ) as HTMLInputElement;
+      selectAll.click();
+      fixture.detectChanges();
+      const lastEmit = fixture.componentInstance.onStateChange.mock.calls.at(-1);
+      expect(lastEmit?.[0].rowSelection).toEqual({ "1": true, "2": true });
+    });
   });
 
   describe("expansion", () => {
@@ -454,6 +485,60 @@ describe("TediTableComponent", () => {
       );
       expect(rows.length).toBe(1);
       expect(rows[0].textContent).toContain("Anna");
+    });
+
+    it("clearFilters() resets every column filter at once", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.enableColumnFilters.set(true);
+      fixture.detectChanges();
+      const input = fixture.nativeElement.querySelector(
+        'tr.tedi-table__row--filter input[aria-label="Filter Name"]',
+      ) as HTMLInputElement;
+      input.value = "Anna";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      expect(
+        fixture.nativeElement.querySelectorAll(
+          ".tedi-table__body .tedi-table__row",
+        ).length,
+      ).toBe(1);
+
+      const table = fixture.debugElement.query(
+        By.directive(TediTableComponent),
+      ).componentInstance as TediTableComponent<Person>;
+      table.clearFilters();
+      fixture.detectChanges();
+
+      expect(
+        fixture.nativeElement.querySelectorAll(
+          ".tedi-table__body .tedi-table__row",
+        ).length,
+      ).toBe(2);
+      const lastEmit = fixture.componentInstance.onStateChange.mock.calls.at(-1);
+      expect(lastEmit?.[0].columnFilters).toEqual([]);
+    });
+
+    it("clearFilters() resets controlled initial filters to an empty state", () => {
+      const fixture = setupHost((host) => {
+        host.enableColumnFilters.set(true);
+        host.state.set({ columnFilters: [{ id: "name", value: "Anna" }] });
+      });
+      // Controlled: the seeded filter is applied (only Anna renders).
+      expect(
+        fixture.nativeElement.querySelectorAll(
+          ".tedi-table__body .tedi-table__row",
+        ).length,
+      ).toBe(1);
+
+      const table = fixture.debugElement.query(
+        By.directive(TediTableComponent),
+      ).componentInstance as TediTableComponent<Person>;
+      table.clearFilters();
+      fixture.detectChanges();
+
+      // Emits an empty columnFilters even though the initial state had one.
+      const lastEmit = fixture.componentInstance.onStateChange.mock.calls.at(-1);
+      expect(lastEmit?.[0].columnFilters).toEqual([]);
     });
   });
 
@@ -1581,6 +1666,97 @@ describe("TediTableComponent", () => {
       ) as HTMLInputElement;
       expect(input.value).toBe("");
       expect(column.getFilterValue()).toBeUndefined();
+    });
+
+    it("clearFilters() resets the popover draft so a reopened popover shows empty inputs", () => {
+      const fixture = setupFilterableHost();
+      const table = getTableComponent(fixture);
+      const column = table["table"].getColumn("name")!;
+
+      // Apply a filter, then open the popover so its draft is seeded with the
+      // applied value ("Anna" shows in the input).
+      column.setFilterValue("Anna");
+      fixture.detectChanges();
+      let trigger = findTriggerButton(fixture)!;
+      trigger.click();
+      fixture.detectChanges();
+      let input = getPopoverContent()!.querySelector(
+        'input[aria-label="Name filter input"]',
+      ) as HTMLInputElement;
+      expect(input.value).toBe("Anna");
+
+      // Close, then clear all filters through the public API.
+      trigger = findTriggerButton(fixture)!;
+      trigger.click();
+      fixture.detectChanges();
+      table.clearFilters();
+      fixture.detectChanges();
+      expect(column.getFilterValue()).toBeUndefined();
+
+      // Reopen — the stale "Anna" draft must have been reconciled to empty.
+      trigger = findTriggerButton(fixture)!;
+      trigger.click();
+      fixture.detectChanges();
+      input = getPopoverContent()!.querySelector(
+        'input[aria-label="Name filter input"]',
+      ) as HTMLInputElement;
+      expect(input.value).toBe("");
+    });
+
+    it("preserves an unapplied draft across an unrelated state change", () => {
+      const fixture = setupFilterableHost();
+      const table = getTableComponent(fixture);
+
+      // Open, type a draft, do NOT apply.
+      let trigger = findTriggerButton(fixture)!;
+      trigger.click();
+      fixture.detectChanges();
+      let input = getPopoverContent()!.querySelector(
+        'input[aria-label="Name filter input"]',
+      ) as HTMLInputElement;
+      input.value = "half-typed";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+
+      // A different column's filter changes — must not wipe the in-progress
+      // (still unapplied) draft on the name column.
+      table["table"].getColumn("role")!.setFilterValue("Designer");
+      fixture.detectChanges();
+
+      // Close and reopen the name popover — the half-typed draft survives.
+      trigger = findTriggerButton(fixture)!;
+      trigger.click();
+      fixture.detectChanges();
+      trigger.click();
+      fixture.detectChanges();
+      input = getPopoverContent()!.querySelector(
+        'input[aria-label="Name filter input"]',
+      ) as HTMLInputElement;
+      expect(input.value).toBe("half-typed");
+    });
+
+    it("reconciles drafts without throwing for non-JSON-serialisable filter values (bigint)", () => {
+      const fixture = setupFilterableHost();
+      const table = getTableComponent(fixture);
+      const column = table["table"].getColumn("name")!;
+
+      // Seed a bigint filter and open the popover so a draft (baseline = 5n)
+      // exists for the name column.
+      column.setFilterValue(5n);
+      fixture.detectChanges();
+      findTriggerButton(fixture)!.click();
+      fixture.detectChanges();
+
+      // Change the applied value to a different bigint — the draft reconcile
+      // must compare 6n vs 5n without JSON.stringify throwing on the bigint.
+      expect(() => {
+        column.setFilterValue(6n);
+        fixture.detectChanges();
+      }).not.toThrow();
+
+      // Draft resynced to the new applied value.
+      const draft = table["filterDrafts"].get("name");
+      expect(draft?.()).toBe(6n);
     });
 
     it("renders both the sort button and the filter trigger when both shorthands are set", () => {

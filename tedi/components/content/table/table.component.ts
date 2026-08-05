@@ -392,6 +392,18 @@ export class TediTableComponent<TData> {
     ((row: TData) => TData[] | undefined) | undefined
   >(undefined);
   /**
+   * Accessor returning a stable, unique id for a row, passed straight through
+   * to TanStack's `getRowId`. By default rows are keyed by their index, so
+   * selection / expansion state breaks as soon as the data changes (filtering,
+   * adding, removing, reordering rows). Key by an entity id instead — e.g.
+   * `getRowId: (row) => row.id` — to keep `rowSelection` / `expanded` stable
+   * across data updates and controllable from the outside by that id.
+   * @default undefined
+   */
+  readonly getRowId = input<
+    ((originalRow: TData, index: number, parent?: Row<TData>) => string) | undefined
+  >(undefined);
+  /**
    * Table-level row grouping key. When set, consecutive rendered rows with an
    * equal key form a group, and:
    * - the control columns (select / expand / drag) span each group — one
@@ -983,6 +995,7 @@ export class TediTableComponent<TData> {
           manualPagination && pageCount !== undefined ? pageCount : undefined,
         rowCount:
           manualPagination && rowCount !== undefined ? rowCount : undefined,
+        getRowId: this.getRowId(),
         getRowCanExpand: renderSub
           ? (this.getRowCanExpand() ?? (() => true))
           : this.getRowCanExpand(),
@@ -1036,6 +1049,7 @@ export class TediTableComponent<TData> {
     this.hasFilterableColumns();
     this.enableRowSelection();
     this.paginationOptions();
+    this.getRowId();
   }
 
   protected readonly hostClasses = computed(() => {
@@ -1208,6 +1222,13 @@ export class TediTableComponent<TData> {
 
     effect(() => this.persistence.setControlled(this.state()));
     effect(() => this.persistence.setPersist(this.persist()));
+    // Keep the filter-popover drafts aligned with the applied filter state so a
+    // reset (clearFilters(), controlled state, a removed chip) doesn't leave a
+    // reopened popover showing stale inputs / checkboxes.
+    effect(() => {
+      const filters = this.tableState().columnFilters ?? [];
+      untracked(() => this.reconcileFilterDrafts(filters));
+    });
   }
 
   private applyPatch<T>(
@@ -1223,6 +1244,19 @@ export class TediTableComponent<TData> {
           : updater;
       return toPatch(next);
     });
+  }
+
+  /**
+   * Clears every active column filter in one call, resetting all `filterable`
+   * columns at once. Routes through the same state machinery as the per-column
+   * **Clear** buttons, so it updates internal state, respects a controlled
+   * `state` input, and emits `(stateChange)`. Grab a component reference (e.g.
+   * a template ref `#table` or `viewChild`) to call it from consumer code.
+   */
+  clearFilters(): void {
+    // `true` forces the empty state rather than TanStack's `initialState`
+    // filters, so a controlled table always resets to no filters.
+    this.table.resetColumnFilters(true);
   }
 
   protected handleRowClick(event: Event, row: Row<TData>): void {
@@ -2117,6 +2151,12 @@ export class TediTableComponent<TData> {
    * nothing.
    */
   private readonly filterDrafts = new Map<string, WritableSignal<unknown>>();
+  // The applied filter value each draft was last synced from. Lets
+  // `reconcileFilterDrafts` tell an external filter reset (clearFilters(),
+  // controlled `state`, a removed filter chip) — where the applied value
+  // changed out from under the draft — apart from a half-typed draft the user
+  // is mid-editing (applied value unchanged), which must be preserved.
+  private readonly filterDraftBaselines = new Map<string, unknown>();
 
   /**
    * Normalises `filterable: true | TableFilterOptions | undefined | false`
@@ -2188,8 +2228,44 @@ export class TediTableComponent<TData> {
     if (!s) {
       s = signal<unknown>(initial);
       this.filterDrafts.set(columnId, s);
+      this.filterDraftBaselines.set(columnId, initial);
     }
     return s;
+  }
+
+  /**
+   * Structural equality for filter values (strings, numbers, bigints, arrays,
+   * plain objects). Filter values are consumer-supplied `unknown`, so the
+   * comparison must never throw: reference-equal values (including equal
+   * primitives and bigints) short-circuit, and anything JSON can't serialise
+   * (bigint mismatches, cyclic structures) falls back to "changed".
+   */
+  private filterValuesEqual(a: unknown, b: unknown): boolean {
+    if (a === b) return true;
+    if (a === undefined || b === undefined) return false;
+    try {
+      return JSON.stringify(a) === JSON.stringify(b);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Realigns each open/created filter draft with the applied filter state
+   * whenever the latter changes externally (`clearFilters()`, controlled
+   * `state`, a removed filter chip). A draft is only overwritten when its
+   * column's applied value actually moved since the draft last synced — so an
+   * in-progress, unapplied draft (applied value unchanged) is left intact.
+   */
+  private reconcileFilterDrafts(filters: ColumnFiltersState): void {
+    const appliedById = new Map(filters.map((f) => [f.id, f.value]));
+    for (const [id, draft] of this.filterDrafts) {
+      const applied = appliedById.get(id);
+      if (!this.filterValuesEqual(applied, this.filterDraftBaselines.get(id))) {
+        draft.set(applied);
+        this.filterDraftBaselines.set(id, applied);
+      }
+    }
   }
 
   /**
