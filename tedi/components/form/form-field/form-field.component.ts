@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   ContentChild,
+  contentChild,
   input,
   ViewEncapsulation,
   AfterContentInit,
@@ -10,7 +11,6 @@ import {
   DestroyRef,
   effect,
   forwardRef,
-  signal,
   booleanAttribute,
 } from "@angular/core";
 import { TEDI_INPUT_GROUP } from "../input-group/input-group.token";
@@ -112,8 +112,6 @@ export class FormFieldComponent implements AfterContentInit {
   }
 
   ngAfterContentInit() {
-    this.controlRef.set(this.control);
-
     this.ngControl?.control?.events
       ?.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateValidationState());
@@ -152,11 +150,12 @@ export class FormFieldComponent implements AfterContentInit {
   });
 
   /**
-   * The resolved `ContentChild`, mirrored into a signal. A plain property read
-   * is not a reactive dependency, so the computeds below would cache whatever
-   * they saw before `ngAfterContentInit` and never re-evaluate.
+   * The projected control as a signal query. A plain `ContentChild` property read
+   * is not a reactive dependency, and mirroring it once in `ngAfterContentInit`
+   * froze it — a control swapped by conditional projection, or projected after
+   * init, left the computeds below describing a control that was no longer there.
    */
-  private readonly controlRef = signal<FormFieldControl | undefined>(undefined);
+  private readonly controlRef = contentChild<FormFieldControl>(TEDI_FORM_FIELD_CONTROL);
 
   /**
    * Whether the field renders its own clear button. Controls that render one
