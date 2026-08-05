@@ -755,6 +755,19 @@ describe("TimeFieldComponent", () => {
       const iconBtn = el.querySelector(".tedi-time-field__icon");
       expect(iconBtn?.getAttribute("aria-label")).toBeTruthy();
     });
+
+    it("should not expose button/dialog ARIA on the field wrapper (it is only a positioning anchor)", () => {
+      const field = el.querySelector(".tedi-time-field__field") as HTMLElement;
+      expect(field.hasAttribute("role")).toBe(false);
+      expect(field.hasAttribute("aria-haspopup")).toBe(false);
+      expect(field.hasAttribute("aria-expanded")).toBe(false);
+      expect(field.hasAttribute("aria-controls")).toBe(false);
+    });
+
+    it("should expose the dialog trigger ARIA on the icon button", () => {
+      const iconBtn = el.querySelector(".tedi-time-field__icon") as HTMLElement;
+      expect(iconBtn.getAttribute("aria-haspopup")).toBe("dialog");
+    });
   });
 
   describe("ControlValueAccessor", () => {

@@ -592,6 +592,18 @@ export class TediTableComponent<TData> {
     "table.drag-column",
   );
   protected readonly dragRowLabel = this.translation.track("table.drag-row");
+  protected readonly selectColumnLabel = this.translation.track(
+    "table.select-column",
+  );
+  protected readonly expandColumnLabel = this.translation.track(
+    "table.expand-column",
+  );
+  protected readonly reorderColumnLabel = this.translation.track(
+    "table.reorder-column",
+  );
+  protected readonly scrollRegionLabel = this.translation.track(
+    "table.scroll-region",
+  );
 
   // ── Keyboard column-reorder state machine ──────────────────────────────────
   /** Currently picked-up column id (during keyboard reordering), or `null`. */
@@ -1268,6 +1280,14 @@ export class TediTableComponent<TData> {
     return this.expandTrigger() === "row" && row.getCanExpand();
   }
 
+  protected rowHasNestedInteractive(row: Row<TData>): boolean {
+    return (
+      this.hasSelection() ||
+      this.reorderableRows() ||
+      (this.hasExpansion() && row.getCanExpand())
+    );
+  }
+
   protected handleRowMouseEnter(row: Row<TData>): void {
     this._hoveredRowId.set(row.id);
   }
@@ -1835,12 +1855,28 @@ export class TediTableComponent<TData> {
     return dir === "asc" ? "ascending" : dir === "desc" ? "descending" : "none";
   }
 
-  protected getHeaderLabel(
+  protected getSrOnlyHeaderLabel(
     column: ReturnType<TanstackTable<TData>["getAllLeafColumns"]>[number],
   ): string | null {
-    const meta = this.getColumnMeta(column);
+    switch (column.id) {
+      case SELECT_COLUMN_ID:
+        return this.selectColumnLabel();
+      case EXPAND_COLUMN_ID:
+        return this.expandColumnLabel();
+      case DRAG_COLUMN_ID:
+        return this.reorderColumnLabel();
+    }
+    // Only provide a screen-reader-only name when the header renders no visible
+    // text (an empty `<th>` fails WCAG "empty-table-header"). Columns with a
+    // visible header are already named by their own text — adding an sr-only
+    // copy would double-announce them.
     const header = column.columnDef.header;
-    return meta?.label ?? (typeof header === "string" ? header : null);
+    const isEmptyHeader =
+      header == null || (typeof header === "string" && header.trim() === "");
+    if (!isEmptyHeader) {
+      return null;
+    }
+    return this.getColumnMeta(column)?.label ?? null;
   }
 
   protected resolveColumnLabel(

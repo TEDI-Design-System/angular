@@ -420,6 +420,7 @@ Composed of sub-components:
 - `gap: BreakpointInput<number> = {xs: 16}`
 - `fade: boolean = false`
 - `transitionMs: number = 400`
+- `ariaLabel: string` — accessible name for the carousel `region`; falls back to the `carousel` translation ("Karussell")
 
 ### CarouselIndicators
 **Selector:** `tedi-carousel-indicators`
@@ -1757,7 +1758,7 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
 ### HorizontalStepper
 **Selector:** `tedi-horizontal-stepper`
 **Inputs:**
-- `ariaLabel: string`
+- `ariaLabel: string` — accessible name for the `navigation` landmark
 - `background: "default" | "transparent" = "default"`
 - `compact: boolean | "sm" | "md" | "lg" | "xl" | "xxl" = "sm"` — collapse labels to show only indicators plus the selected step's label. `true` = always collapsed; a breakpoint = collapsed below that breakpoint.
 

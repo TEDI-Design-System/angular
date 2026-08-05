@@ -129,23 +129,16 @@ describe("TextGroupComponent", () => {
       expect(dl.className).toContain("tedi-text-group--fixed-label");
     });
 
-    it("should set aria-label on dt from label content", () => {
-      const dt = fixture.debugElement.query(By.css("dt")).nativeElement;
-      expect(dt.getAttribute("aria-label")).toBe("Test Label");
-    });
-
-    it("should hide label content from screen readers", () => {
+    it("should not hide label content from screen readers", () => {
       const labelSpan = fixture.debugElement.query(
-        By.css("dt > span[aria-hidden]"),
+        By.css("dt > span[tedi-label]"),
       ).nativeElement;
-      expect(labelSpan.getAttribute("aria-hidden")).toBe("true");
+      expect(labelSpan.getAttribute("aria-hidden")).toBeNull();
     });
 
-    it("should update aria-label when label content changes", () => {
-      fixture.componentInstance.label = "Updated Label";
-      fixture.detectChanges();
+    it("should not set aria-label on dt", () => {
       const dt = fixture.debugElement.query(By.css("dt")).nativeElement;
-      expect(dt.getAttribute("aria-label")).toBe("Updated Label");
+      expect(dt.getAttribute("aria-label")).toBeNull();
     });
   });
 

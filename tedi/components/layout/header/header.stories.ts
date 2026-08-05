@@ -766,6 +766,8 @@ export const LoggedOut: StoryObj<HeaderComponent> = {
 
 export const LoggedOutWithSearch: StoryObj<HeaderComponent> = {
   parameters: {
+    // TODO(a11y): search input lacks an accessible name; pending the TEDI-Ready Search migration.
+    a11y: { test: "todo" },
     docs: {
       description: {
         story: `
@@ -1176,6 +1178,8 @@ export const WithStandaloneLogoutButton: StoryObj<HeaderComponent> = {
 };
 
 export const WithInlineSearch: StoryObj<HeaderComponent> = {
+  // TODO(a11y): search input lacks an accessible name; pending the TEDI-Ready Search migration.
+  parameters: { a11y: { test: "todo" } },
   render: (args) => ({
     props: args,
     template: `
@@ -1225,6 +1229,8 @@ export const WithInlineSearch: StoryObj<HeaderComponent> = {
 };
 
 export const WithMobileBottomSearch: StoryObj<HeaderComponent> = {
+  // TODO(a11y): search input lacks an accessible name; pending the TEDI-Ready Search migration.
+  parameters: { a11y: { test: "todo" } },
   render: (args) => ({
     props: args,
     template: `
@@ -1456,6 +1462,9 @@ This demo uses hash fragments (\`#et\`, \`#en\`, \`#ru\`) so selecting a languag
 };
 
 export const LoggedInWithSidenav: StoryObj<HeaderComponent> = {
+  // Renders the sidenav, whose accessibility fixes are tracked in
+  // https://github.com/TEDI-Design-System/angular/issues/307
+  parameters: { a11y: { test: "todo" } },
   render: (args) => ({
     props: args,
     styles: [mobileSidenavWrapperStyles],

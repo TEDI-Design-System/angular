@@ -331,6 +331,11 @@ describe("TimePickerComponent", () => {
       expect(list?.getAttribute("role")).toBe("listbox");
     });
 
+    it("should have an accessible name on the listbox", () => {
+      const list = el.querySelector(".tedi-time-picker__dropdown");
+      expect(list?.getAttribute("aria-label")).toBeTruthy();
+    });
+
     it("should select item on click", () => {
       const onChange = jest.fn();
       component.registerOnChange(onChange);

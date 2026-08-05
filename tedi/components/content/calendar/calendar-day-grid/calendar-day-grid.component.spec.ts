@@ -587,40 +587,51 @@ describe("CalendarDayGridComponent", () => {
       }
     });
 
-    it("hides the visual narrow weekday text from screen readers", () => {
+    it("keeps the narrow weekday abbreviation as visible header text (not aria-hidden) so headers aren't empty, while the full name is the accessible name via aria-label", () => {
       const headers = fixture.debugElement.queryAll(
-        By.css(".tedi-calendar-day-grid__weekday span"),
+        By.css(".tedi-calendar-day-grid__weekday"),
       );
       for (const h of headers) {
-        expect((h.nativeElement as HTMLElement).getAttribute("aria-hidden")).toBe(
-          "true",
-        );
+        const el = h.nativeElement as HTMLElement;
+        expect(el.textContent?.trim().length).toBeGreaterThan(0);
+        expect(el.querySelector("[aria-hidden='true']")).toBeNull();
+        expect((el.getAttribute("aria-label") ?? "").length).toBeGreaterThan(3);
       }
     });
 
-    it("week number cell is a rowheader with translated aria-label", () => {
+    it("selected state is exposed on the interactive day (role=gridcell button), not a plain button", () => {
+      fixture.componentRef.setInput("value", new Date(2024, 4, 15));
+      fixture.detectChanges();
+      const selected = buttonForDay(new Date(2024, 4, 15));
+      expect(selected?.getAttribute("role")).toBe("gridcell");
+      expect(selected?.getAttribute("aria-selected")).toBe("true");
+    });
+
+    it("week number cell is a <th> rowheader with translated aria-label and visible number", () => {
       fixture.componentRef.setInput("showWeekNumbers", true);
       fixture.detectChanges();
       const cell = fixture.debugElement.query(
         By.css(".tedi-calendar-day-grid__week-number"),
       );
+      expect(cell.nativeElement.tagName).toBe("TH");
       expect(cell.nativeElement.getAttribute("role")).toBe("rowheader");
       expect(cell.nativeElement.getAttribute("scope")).toBe("row");
       expect(cell.nativeElement.getAttribute("aria-label")).toBe(
         "date-picker.week-number",
       );
+      expect((cell.nativeElement.textContent as string).trim().length).toBeGreaterThan(0);
     });
 
-    it("week number column header has scope=col and translated aria-label", () => {
+    it("week number column header has scope=col and a visually hidden translated label", () => {
       fixture.componentRef.setInput("showWeekNumbers", true);
       fixture.detectChanges();
       const header = fixture.debugElement.query(
         By.css(".tedi-calendar-day-grid__week-number-header"),
       );
       expect(header.nativeElement.getAttribute("scope")).toBe("col");
-      expect(header.nativeElement.getAttribute("aria-label")).toBe(
-        "date-picker.week-number-header",
-      );
+      const srOnly = header.nativeElement.querySelector(".sr-only") as HTMLElement;
+      expect(srOnly).not.toBeNull();
+      expect(srOnly.textContent?.trim()).toBe("date-picker.week-number-header");
     });
   });
 });

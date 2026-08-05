@@ -674,6 +674,7 @@ class DefaultStoryHostComponent extends TableStoryHostBase {
       header: "",
       size: 1,
       cell: this.actionsTpl() ?? "",
+      meta: { label: "Tegevused" },
     } as TediColumnDef<Booking>,
   ]);
 }
@@ -713,7 +714,7 @@ export const Default: Story = {
         id="tedi-table-sizes-default"
         [data]="data"
         [columns]="columns"
-        [pagination]="pagination"
+        [pagination]="paginationDefault"
         ${TABLE_APPEARANCE_BINDINGS}
       />
       <h3 style="margin:0;">Small</h3>
@@ -722,7 +723,7 @@ export const Default: Story = {
         size="small"
         [data]="data"
         [columns]="columns"
-        [pagination]="pagination"
+        [pagination]="paginationSmall"
         [striped]="striped()"
         [verticalBorders]="verticalBorders()"
         [borderless]="borderless()"
@@ -741,7 +742,14 @@ export const Default: Story = {
 })
 class SizesStoryHostComponent extends TableStoryHostBase {
   data = bookings;
-  pagination = SHOWCASE_PAGINATION_3;
+  paginationDefault = {
+    ...SHOWCASE_PAGINATION_3,
+    labels: { ariaLabel: "Leheküljed – vaikimisi suurus" },
+  };
+  paginationSmall = {
+    ...SHOWCASE_PAGINATION_3,
+    labels: { ariaLabel: "Leheküljed – väike suurus" },
+  };
   columns: TediColumnDef<Booking>[] = [
     { id: "dateRange", header: "Kuupäev", accessorKey: "dateRange" },
     { id: "hour", header: "Kellaaeg", accessorKey: "hour" },
@@ -781,7 +789,7 @@ export const Sizes: Story = {
         id="tedi-table-simple-bookings"
         [data]="bookings"
         [columns]="bookingColumns"
-        [pagination]="paginationBooking"
+        [pagination]="paginationBookings"
         ${TABLE_APPEARANCE_BINDINGS}
       />
       <tedi-table
@@ -795,7 +803,7 @@ export const Sizes: Story = {
         id="tedi-table-simple-doctors"
         [data]="doctors"
         [columns]="doctorColumns()"
-        [pagination]="paginationBooking"
+        [pagination]="paginationDoctors"
         ${TABLE_APPEARANCE_BINDINGS}
       />
     </div>
@@ -823,8 +831,18 @@ class SimpleStoryHostComponent extends TableStoryHostBase {
   bookings = bookings;
   people = filterablePeople;
   doctors = doctors;
-  paginationBooking = SHOWCASE_PAGINATION_3;
-  paginationPeople = SHOWCASE_PAGINATION_4;
+  paginationBookings = {
+    ...SHOWCASE_PAGINATION_3,
+    labels: { ariaLabel: "Broneeringute leheküljed" },
+  };
+  paginationPeople = {
+    ...SHOWCASE_PAGINATION_4,
+    labels: { ariaLabel: "Isikute leheküljed" },
+  };
+  paginationDoctors = {
+    ...SHOWCASE_PAGINATION_3,
+    labels: { ariaLabel: "Arstide leheküljed" },
+  };
   statusColor = certStatusColor;
 
   personNameTpl =
@@ -1664,6 +1682,7 @@ class EditableValuesStoryHostComponent extends TableStoryHostBase {
       header: "",
       size: 1,
       cell: this.editActionsTpl() ?? "",
+      meta: { label: "Tegevused" },
     } as TediColumnDef<Booking>,
   ]);
 }
@@ -3410,6 +3429,7 @@ class ActionsStoryHostComponent extends TableStoryHostBase {
       header: "",
       size: 1,
       cell: this.actionsTpl() ?? "",
+      meta: { label: "Tegevused" },
     } as TediColumnDef<Doctor>,
   ]);
 }
@@ -3566,6 +3586,7 @@ class CustomStoryHostComponent extends TableStoryHostBase {
       id: "note",
       header: "",
       cell: this.noteCellTpl() ?? "",
+      meta: { label: "Märkus" },
     } as TediColumnDef<CustomDoctor>,
     { id: "location", header: "Asukoht", accessorKey: "location" },
     {
@@ -3573,6 +3594,7 @@ class CustomStoryHostComponent extends TableStoryHostBase {
       header: "",
       size: 1,
       cell: this.actionsTpl() ?? "",
+      meta: { label: "Tegevused" },
     } as TediColumnDef<CustomDoctor>,
   ]);
 }

@@ -119,7 +119,7 @@ const ButtonTemplate: StoryFn<TemplateType> = ({
               <tedi-icon name="edit" />
               Edit
             </button>
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'">
+            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" aria-label="Edasi">
               <tedi-icon name="arrow_forward" />
             </button>
           </tedi-col>
@@ -141,7 +141,7 @@ const ButtonTemplate: StoryFn<TemplateType> = ({
               <tedi-icon name="edit" />
               Edit
             </button>
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" [size]="'small'">
+            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" [size]="'small'" aria-label="Edasi">
               <tedi-icon name="arrow_forward" />
             </button>
           </tedi-col>
