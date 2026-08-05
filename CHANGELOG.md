@@ -1,3 +1,10 @@
+# [7.1.0-rc.19](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.18...angular-7.1.0-rc.19) (2026-08-05)
+
+
+### Features
+
+* **table:** added getRowId and clearFilters [#565](https://github.com/TEDI-Design-System/angular/issues/565) ([#589](https://github.com/TEDI-Design-System/angular/issues/589)) ([1cf94a1](https://github.com/TEDI-Design-System/angular/commit/1cf94a148fb6deaa65fb2d0c324785b71a739623))
+
 # [7.1.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.17...angular-7.1.0-rc.18) (2026-08-05)
 
 
