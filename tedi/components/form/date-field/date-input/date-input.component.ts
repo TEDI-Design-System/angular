@@ -102,16 +102,6 @@ export class DateInputComponent implements AfterViewChecked {
 
   constructor() {
     effect(() => {
-      const ref = this.inputElement();
-      const target = ref?.nativeElement as HTMLInputElement | undefined;
-      if (!target) return;
-      const next = this.inputValue();
-      if (target.value !== next) {
-        target.value = next;
-      }
-    });
-
-    effect(() => {
       // Re-measure whenever the tag set changes.
       this.tags();
       this.visibleTagsCount.set(null);
