@@ -287,9 +287,9 @@ export const AsLinks: Story = {
     template: `
       <tedi-tabs defaultValue="link-1">
         <tedi-tabs-list aria-label="Lingina sakid">
-          <a tedi-tabs-trigger id="link-1" href="#terviseteekond">Terviseteekond</a>
-          <a tedi-tabs-trigger id="link-2" href="#haiguste-kulg">Haiguste kulg</a>
-          <a tedi-tabs-trigger id="link-3" href="#ravimite-ajalugu">Ravimite ajalugu</a>
+          <a tedi-tabs-trigger id="link-1" href="#link-1-panel">Terviseteekond</a>
+          <a tedi-tabs-trigger id="link-2" href="#link-2-panel">Haiguste kulg</a>
+          <a tedi-tabs-trigger id="link-3" href="#link-3-panel">Ravimite ajalugu</a>
         </tedi-tabs-list>
         <tedi-tabs-content id="link-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
         <tedi-tabs-content id="link-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>

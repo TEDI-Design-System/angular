@@ -87,12 +87,34 @@ export class TabsTriggerComponent {
 
   handleClick(event?: Event): void {
     if (this.disabled()) {
-      // Buttons are inert via the disabled attribute, but a disabled anchor
-      // would still navigate — block it.
+      // Buttons are inert via the disabled attribute; a disabled anchor is kept
+      // unreachable via `pointer-events: none` + `tabindex="-1"`. preventDefault
+      // is a final guard against native href traversal. (A consumer-supplied
+      // `routerLink` navigates from its own click handler and can't be blocked
+      // here — bind `[routerLink]` to null while disabled, see docs.)
       event?.preventDefault();
       return;
     }
+
+    // An anchor opened in another browsing context — a modifier/middle click or
+    // target="_blank" — must not change the active tab in this view. Let the
+    // browser (or RouterLink, which also skips modifier clicks) handle it.
+    if (this.isAnchor && this.opensInNewBrowsingContext(event)) {
+      return;
+    }
+
     this.tabs.select(this.id());
+  }
+
+  private opensInNewBrowsingContext(event?: Event): boolean {
+    if (
+      event instanceof MouseEvent &&
+      (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey)
+    ) {
+      return true;
+    }
+    const target = (this.host.nativeElement as HTMLAnchorElement).target;
+    return target !== "" && target !== "_self";
   }
 
   handleKeydown(event: KeyboardEvent): void {

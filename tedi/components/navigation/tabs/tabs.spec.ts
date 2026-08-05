@@ -376,6 +376,22 @@ describe("Tabs", () => {
       expect(anchors[0].getAttribute("aria-selected")).toBe("true");
     });
 
+    it("does not activate the tab when an anchor is opened in a new context (modifier click)", () => {
+      const { fixture, anchors } = setupAnchors();
+      anchors[1].dispatchEvent(
+        new MouseEvent("click", {
+          button: 0,
+          metaKey: true,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      fixture.detectChanges();
+      expect(fixture.componentInstance.onChange).not.toHaveBeenCalled();
+      expect(anchors[0].getAttribute("aria-selected")).toBe("true");
+      expect(anchors[1].getAttribute("aria-selected")).toBe("false");
+    });
+
     it("activates a focused anchor on Space", () => {
       const { fixture, anchors } = setupAnchors();
       anchors[1].dispatchEvent(

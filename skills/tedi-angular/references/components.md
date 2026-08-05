@@ -1794,7 +1794,7 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
   - `aria-label: string` / `aria-labelledby: string` — accessible name for the tablist
   - `overflowMode: "dropdown" | "scroll" = "dropdown"` — when tabs don't fit, either collapse overflowing tabs into a "More" dropdown or enable horizontal scrolling with fade indicators
   - `dropdownLabel: string` — label for the overflow dropdown trigger; falls back to the `more` translation (`Veel` in et)
-- `button[tedi-tabs-trigger]`, `a[tedi-tabs-trigger]` — a tab trigger. Use `<button>` for in-page tabs, or `<a>` (with `href`/`routerLink`) for a tab that navigates to a route — the anchor keeps `role="tab"` semantics but is a real link (WCAG-friendly: open-in-new-tab, copy address, keyboard). A disabled `<a>` gets `aria-disabled` instead of the `disabled` attribute.
+- `button[tedi-tabs-trigger]`, `a[tedi-tabs-trigger]` — a tab trigger. Use `<button>` for in-page tabs, or `<a>` (with `href`/`routerLink`) for a tab that navigates to a route — the anchor keeps `role="tab"` semantics but is a real link (WCAG-friendly: open-in-new-tab, copy address, keyboard). A disabled `<a>` gets `aria-disabled` instead of the `disabled` attribute. Modifier/middle clicks and `target="_blank"` open the link without changing the active tab in the current view. Note: a disabled anchor stays unreachable via pointer/keyboard, but `routerLink` navigates from its own click handler — bind `[routerLink]="disabled ? null : path"` so a disabled routed tab can't navigate.
   - `id: string` (required) — links to the matching `tedi-tabs-content` panel (`aria-controls="{id}-panel"`)
   - `icon: string` — Material Symbols icon shown before the label
   - `disabled: boolean = false`
