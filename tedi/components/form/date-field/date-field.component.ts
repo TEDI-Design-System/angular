@@ -178,6 +178,16 @@ export class DateFieldComponent
    */
   readonly shouldDisableYear = input<YearPredicate | undefined>(undefined);
   /**
+   * Earliest year offered in the calendar's year grid/dropdown. Defaults to 100
+   * years before the current year when `null`.
+   */
+  readonly minYear = input<number | null>(null);
+  /**
+   * Latest year offered in the calendar's year grid/dropdown. Defaults to 20
+   * years after the current year when `null`.
+   */
+  readonly maxYear = input<number | null>(null);
+  /**
    * Whitelist of selectable days — an explicit `Date[]` or a predicate
    * `(date) => boolean`. Every other day is disabled.
    */
@@ -667,6 +677,8 @@ export class DateFieldComponent
       unavailableDays: this.unavailableDays(),
       shouldDisableMonth: this.shouldDisableMonth(),
       shouldDisableYear: this.shouldDisableYear(),
+      minYear: this.minYear(),
+      maxYear: this.maxYear(),
       closeOnSelect: this.closeOnSelectEffective(),
     };
 

@@ -303,8 +303,8 @@ The standalone date-selection surface used inside DateField, and embeddable dire
 - `dayStatus: ((date: Date) => DayStatus | null | undefined) | undefined` — overlays a `tedi-status-indicator` dot on days; the returned `label` is surfaced on the day's `aria-label`
 - `shouldDisableMonth: ((month: Date) => boolean) | undefined` — disable a whole month
 - `shouldDisableYear: ((year: Date) => boolean) | undefined` — disable a whole year
-- `minYear: number | null = null` — earliest year offered (defaults to 10 years before the current year)
-- `maxYear: number | null = null` — latest year offered (defaults to 10 years after the current year)
+- `minYear: number | null = null` — earliest year offered (defaults to 100 years before the current year)
+- `maxYear: number | null = null` — latest year offered (defaults to 20 years after the current year)
 
 ```html
 <!-- Embedded range picker, two months -->
@@ -1039,6 +1039,8 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 - `unavailableDays: Date[] | ((d: Date) => boolean) | undefined` — days that are NOT available
 - `selectionLevel: CalendarView = "days"` — lowest level the user can commit to: "days", "months", or "years"
 - `monthYearSelectType: "dropdown" | "grid" = "dropdown"` — how the header exposes month/year picking
+- `minYear: number | null = null` — earliest year offered in the calendar's year grid/dropdown. `null` defaults to 100 years before the current year
+- `maxYear: number | null = null` — latest year offered in the calendar's year grid/dropdown. `null` defaults to 20 years after the current year
 - `initialMonth: Date | undefined` — the month to initially display in the calendar
 - `localeCode: string = "et-EE"` — BCP-47 locale for weekday/month names, first day of week, default formatDate/parseDate
 - `closeOnSelect: boolean | undefined = undefined` — whether to close picker after selection (defaults to `true` in single mode)
@@ -1121,6 +1123,9 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 
 <!-- Multi-month side by side -->
 <tedi-date-field inputId="multi-mo" [numberOfMonths]="2" />
+
+<!-- Custom year range in the calendar's year dropdown/grid (default is 100 years back, 20 forward) -->
+<tedi-date-field inputId="dob" [formControl]="control" [minYear]="1900" [maxYear]="2010" />
 ```
 
 ### TimeField
