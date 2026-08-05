@@ -1,3 +1,10 @@
+# [7.1.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.17...angular-7.1.0-rc.18) (2026-08-05)
+
+
+### Bug Fixes
+
+* **select:** keep typed text and tags in view while searching [#566](https://github.com/TEDI-Design-System/angular/issues/566) ([#584](https://github.com/TEDI-Design-System/angular/issues/584)) ([6afc148](https://github.com/TEDI-Design-System/angular/commit/6afc14809d697333a8145c653a5c4b1f8f845dda))
+
 # [7.1.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.16...angular-7.1.0-rc.17) (2026-08-03)
 
 
