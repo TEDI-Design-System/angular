@@ -1,3 +1,10 @@
+# [7.1.0-rc.21](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.20...angular-7.1.0-rc.21) (2026-08-05)
+
+
+### Bug Fixes
+
+* **date-field:** date-field now passes value correctly to text-field [#592](https://github.com/TEDI-Design-System/angular/issues/592) ([#593](https://github.com/TEDI-Design-System/angular/issues/593)) ([5bc496e](https://github.com/TEDI-Design-System/angular/commit/5bc496eef285762b24dd16f07bb8ce4f4148849d))
+
 # [7.1.0-rc.20](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.19...angular-7.1.0-rc.20) (2026-08-05)
 
 
