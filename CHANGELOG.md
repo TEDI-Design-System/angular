@@ -1,3 +1,10 @@
+# [7.1.0-rc.20](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.19...angular-7.1.0-rc.20) (2026-08-05)
+
+
+### Bug Fixes
+
+* **date-field:** changed min and max date defaults, exposed inputs [#590](https://github.com/TEDI-Design-System/angular/issues/590) ([#591](https://github.com/TEDI-Design-System/angular/issues/591)) ([30edbb3](https://github.com/TEDI-Design-System/angular/commit/30edbb3f34f27a56d3c1c00e70e146c65503cefc))
+
 # [7.1.0-rc.19](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.18...angular-7.1.0-rc.19) (2026-08-05)
 
 
