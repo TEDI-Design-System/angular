@@ -291,6 +291,15 @@
       .tedi-select__multiselect-counter {
         flex-shrink: 0;
       }
+
+      // With `tagEllipsis` an over-wide label truncates rather than being dropped
+      // behind the counter, and the tag's own `max-width: 100%` can only resolve
+      // against a wrapper that is allowed to shrink. Without it the wrapper stays
+      // as wide as its content and the row overflows, cutting the tag — and its
+      // remove button — off instead.
+      &.tedi-select__multiselect-container--ellipsis .tedi-select__multiselect-tags {
+        flex: 0 1 auto;
+      }
     }
   }
 

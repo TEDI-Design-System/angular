@@ -437,6 +437,27 @@ describe("SelectComponent", () => {
       expect(tags.length).toBe(2);
     }));
 
+    it("should let the tags row shrink only when tagEllipsis is set", fakeAsync(() => {
+      host.control.setValue(["Option 1", "Option 2"]);
+      fixture.detectChanges();
+      tick();
+
+      const container = () =>
+        hostEl.querySelector(".tedi-select__multiselect-container") as HTMLElement;
+
+      expect(container().classList).not.toContain(
+        "tedi-select__multiselect-container--ellipsis",
+      );
+
+      host.tagEllipsis = "end";
+      fixture.detectChanges();
+      tick();
+
+      expect(container().classList).toContain(
+        "tedi-select__multiselect-container--ellipsis",
+      );
+    }));
+
     it("forwards tagEllipsis to the rendered tags", fakeAsync(() => {
       host.control.setValue(["Option 1", "Option 2"]);
       fixture.detectChanges();
@@ -977,6 +998,12 @@ describe("SelectComponent", () => {
     it("trigger should have aria-haspopup", () => {
       const trigger = getTrigger();
       expect(trigger.getAttribute("aria-haspopup")).toBe("listbox");
+    });
+
+    it("trigger should not have aria-controls while closed", () => {
+      // The listbox only exists inside the open overlay, so keeping the
+      // reference while closed would point at a missing element.
+      expect(getTrigger().getAttribute("aria-controls")).toBeNull();
     });
 
     it("trigger should have aria-controls referencing listbox", fakeAsync(() => {

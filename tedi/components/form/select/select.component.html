@@ -33,7 +33,7 @@
   [attr.role]="searchable() ? null : 'combobox'"
   [attr.aria-haspopup]="searchable() ? null : 'listbox'"
   [attr.aria-expanded]="searchable() ? null : isOpen()"
-  [attr.aria-controls]="searchable() ? null : listboxId()"
+  [attr.aria-controls]="!searchable() && isOpen() ? listboxId() : null"
   [attr.aria-labelledby]="!searchable() ? resolvedAriaLabelledby() : null"
   [attr.aria-label]="!searchable() ? resolvedAriaLabel() : null"
   [tabindex]="searchable() || disabled() ? -1 : 0"
@@ -82,7 +82,7 @@
           role="combobox"
           aria-autocomplete="list"
           [attr.aria-expanded]="isOpen()"
-          [attr.aria-controls]="listboxId()"
+          [attr.aria-controls]="isOpen() ? listboxId() : null"
           [attr.aria-labelledby]="resolvedAriaLabelledby()"
           [attr.aria-label]="resolvedAriaLabel()"
         />
@@ -159,6 +159,7 @@
   <div
     class="tedi-select__multiselect-container"
     [class.tedi-select__multiselect-container--single-row]="!multiRow()"
+    [class.tedi-select__multiselect-container--ellipsis]="tagEllipsis()"
     #multiselectContainer
   >
     @if (multiRow()) {
@@ -206,7 +207,7 @@
         role="combobox"
         aria-autocomplete="list"
         [attr.aria-expanded]="isOpen()"
-        [attr.aria-controls]="listboxId()"
+        [attr.aria-controls]="isOpen() ? listboxId() : null"
         [attr.aria-labelledby]="resolvedAriaLabelledby()"
         [attr.aria-label]="resolvedAriaLabel()"
       />
