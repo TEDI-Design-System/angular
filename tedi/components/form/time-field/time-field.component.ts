@@ -158,7 +158,7 @@ export class TimeFieldComponent
   readonly ownsClearButton = true;
   /** Driven by the wrapping `tedi-form-field`'s `clearable`. */
   readonly clearableResolved = computed(
-    () => this.formField?.clearable() ?? false,
+    () => this.formField?.clearable() ?? true,
   );
   readonly useNativePickerResolved = computed(() => {
     const v = this.useNativePicker();

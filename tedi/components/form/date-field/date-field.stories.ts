@@ -218,7 +218,7 @@ export default {
     monthYearSelectType: "dropdown",
     localeCode: "et-EE",
     placeholder: "",
-    clearable: false,
+    clearable: true,
     inputDisabled: false,
     readOnly: false,
     required: false,
@@ -357,12 +357,12 @@ export default {
     },
     clearable: {
       description:
-        "Set on the wrapping `tedi-form-field`. Opt in to show a clear button once the field has a value.",
+        "Set on the wrapping `tedi-form-field`. Shows a clear button once the field has a value; set `false` to opt out.",
       control: { type: "boolean" },
       table: {
         category: "Form Field inputs",
         type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
+        defaultValue: { summary: "true" },
       },
     },
     inputDisabled: {

@@ -202,9 +202,11 @@ describe("FormFieldComponent", () => {
     ).toBeNull();
   });
 
-  it("should not be clearable by default", () => {
-    expect(formField.clearable()).toBe(false);
-    expect(formField.renderClearButton()).toBe(false);
+  it("should be clearable by default", () => {
+    const bare = TestBed.createComponent(FormFieldComponent);
+    bare.detectChanges();
+
+    expect(bare.componentInstance.clearable()).toBe(true);
   });
 
   it("should treat a bare clearable attribute as true", () => {

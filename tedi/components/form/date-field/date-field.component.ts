@@ -322,7 +322,7 @@ export class DateFieldComponent
 
   /** Driven by the wrapping `tedi-form-field`'s `clearable`. */
   readonly clearableResolved = computed(
-    () => this.formField?.clearable() ?? false,
+    () => this.formField?.clearable() ?? true,
   );
 
   readonly resolvedDisabledMatchers = computed<Matcher[]>(() => {

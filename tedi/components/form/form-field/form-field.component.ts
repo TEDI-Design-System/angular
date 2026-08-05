@@ -84,9 +84,9 @@ export class FormFieldComponent implements AfterContentInit {
    * Whether the field shows a clear button. The single source of truth for every
    * control inside it — date and time fields read it too instead of declaring
    * their own input.
-   * @default false
+   * @default true
    */
-  clearable = input(false, { transform: booleanAttribute });
+  clearable = input(true, { transform: booleanAttribute });
   /**
    * Custom CSS classes for the input.
    */

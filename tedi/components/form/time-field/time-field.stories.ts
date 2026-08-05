@@ -110,12 +110,12 @@ export default {
     },
     clearable: {
       description:
-        "Set on the wrapping `tedi-form-field`. Opt in to show a clear button once the field has a value.",
+        "Set on the wrapping `tedi-form-field`. Shows a clear button once the field has a value; set `false` to opt out.",
       control: { type: "boolean" },
       table: {
         category: "Form Field inputs",
         type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
+        defaultValue: { summary: "true" },
       },
     },
     pickerVariant: {
@@ -232,7 +232,7 @@ export const Default: StoryObj = {
     placeholder: "tt:mm",
     invalid: false,
     disabled: false,
-    clearable: false,
+    clearable: true,
     pickerVariant: "scroll",
     useNativePicker: false,
     pickerTrigger: "button",

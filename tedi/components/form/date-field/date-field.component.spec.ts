@@ -1105,14 +1105,16 @@ describe("DateFieldComponent", () => {
   });
 
   describe("clearable", () => {
-    it("renders no clear button until the form field opts in", () => {
+    it("renders a clear button once it has a value when used without a form field", () => {
       const { component, el, fixture } = createField();
+      expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
+
       fixture.componentRef.setInput("value", new Date(2026, 4, 14));
       fixture.detectChanges();
 
-      expect(component.clearableResolved()).toBe(false);
-      expect(component.canClear()).toBe(false);
-      expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
+      expect(component.clearableResolved()).toBe(true);
+      expect(component.canClear()).toBe(true);
+      expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
     });
   });
 
