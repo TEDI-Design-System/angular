@@ -11,7 +11,7 @@ import {
   ElementRef,
   effect,
 } from "@angular/core";
-import { RouterLinkActive } from "@angular/router";
+import { RouterLink, RouterLinkActive } from "@angular/router";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { startWith } from "rxjs";
 import { FocusableOption } from "@angular/cdk/a11y";
@@ -25,7 +25,7 @@ import { FocusableOption } from "@angular/cdk/a11y";
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     "[class.tedi-tab]": "true",
-    "[class.tedi-tab--selected]": "selected()",
+    "[class.tedi-tab--selected]": "isTabActive()",
     "[class.tedi-tab--disabled]": "disabledInput()",
     "[attr.role]": "'tab'",
     "(click)": "selectTab()",
@@ -56,16 +56,24 @@ export class TabComponent implements FocusableOption {
   tabSelected = output<void>();
 
   private readonly routerLinkActive = inject(RouterLinkActive, { self: true });
+  private readonly routerLink = inject(RouterLink, {
+    optional: true,
+    self: true,
+  });
   private linkActive = toSignal(
     this.routerLinkActive.isActiveChange.pipe(
       startWith(this.routerLinkActive.isActive),
     ),
   );
 
-  isTabActive = computed(() => this.selected() || this.linkActive());
+  isTabActive = computed(() =>
+    this.routerLink ? !!this.linkActive() : this.selected(),
+  );
 
   selectTab() {
-    this.selected.set(true);
+    if (!this.routerLink) {
+      this.selected.set(true);
+    }
     this.tabSelected.emit();
   }
 
