@@ -487,6 +487,93 @@ describe("DateFieldComponent", () => {
     });
   });
 
+  describe("hideOnScroll", () => {
+    function openAndAttach(
+      component: DateFieldComponent,
+      fixture: ComponentFixture<DateFieldComponent>,
+    ): void {
+      component.overlayOpen.set(true);
+      fixture.detectChanges();
+      component.handleOverlayAttached();
+    }
+
+    function closeAndDetach(
+      component: DateFieldComponent,
+      fixture: ComponentFixture<DateFieldComponent>,
+    ): void {
+      component.handleOverlayDetached();
+      fixture.detectChanges();
+    }
+
+    it("does not close on document scroll when disabled (default)", () => {
+      const { component, fixture } = createField();
+      openAndAttach(component, fixture);
+
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(component.overlayOpen()).toBe(true);
+      closeAndDetach(component, fixture);
+    });
+
+    it("closes on document scroll when enabled", () => {
+      const { component, fixture } = createField({ hideOnScroll: true });
+      const onTouched = jest.fn();
+      component.registerOnTouched(onTouched);
+      openAndAttach(component, fixture);
+
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(component.overlayOpen()).toBe(false);
+      expect(onTouched).toHaveBeenCalled();
+      closeAndDetach(component, fixture);
+    });
+
+    it("stays open when scrolling inside the calendar overlay", () => {
+      const { component, fixture } = createField({ hideOnScroll: true });
+      openAndAttach(component, fixture);
+
+      const overlay = document.querySelector(".tedi-date-field__overlay");
+      expect(overlay).toBeTruthy();
+      overlay!.dispatchEvent(new Event("scroll", { bubbles: false }));
+
+      expect(component.overlayOpen()).toBe(true);
+      closeAndDetach(component, fixture);
+    });
+
+    it("stays open when scrolling inside a nested overlay stacked above it", () => {
+      const { component, fixture } = createField({ hideOnScroll: true });
+      openAndAttach(component, fixture);
+
+      const container = document.querySelector(".cdk-overlay-container");
+      expect(container).toBeTruthy();
+      const nestedPane = document.createElement("div");
+      const nestedTarget = document.createElement("div");
+      nestedPane.appendChild(nestedTarget);
+      container!.appendChild(nestedPane);
+
+      nestedTarget.dispatchEvent(new Event("scroll", { bubbles: false }));
+
+      expect(component.overlayOpen()).toBe(true);
+      container!.removeChild(nestedPane);
+      closeAndDetach(component, fixture);
+    });
+
+    it("removes the scroll listener after the overlay closes", () => {
+      const { component, fixture } = createField({ hideOnScroll: true });
+      openAndAttach(component, fixture);
+      closeAndDetach(component, fixture);
+
+      const onTouched = jest.fn();
+      component.registerOnTouched(onTouched);
+      component.overlayOpen.set(true);
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(component.overlayOpen()).toBe(true);
+      expect(onTouched).not.toHaveBeenCalled();
+      closeAndDetach(component, fixture);
+    });
+  });
+
   describe("overlay focus management", () => {
     function openOverlay(component: DateFieldComponent): void {
       component.overlayOpen.set(true);
