@@ -171,7 +171,7 @@ const LIVE_RESULTS_STYLES = `
         type="text"
         role="combobox"
         aria-autocomplete="list"
-        aria-controls="search-combobox-listbox"
+        [attr.aria-controls]="isOpen() ? 'search-combobox-listbox' : null"
         [attr.aria-expanded]="isOpen()"
         [attr.aria-activedescendant]="activeOptionId()"
         [value]="value()"
@@ -319,6 +319,11 @@ class SearchSuggestionsDemoComponent {
  * field (not in an overlay), so focus flows naturally: Tab from the field moves
  * through the action buttons. Opens on focus, closes on Esc or when focus leaves
  * the field and its panel.
+ *
+ * The panel mixes a result with actions, so it is not a listbox: the input is a
+ * `role="combobox"` with `aria-haspopup="dialog"` pointing at a `role="dialog"`
+ * panel. `aria-expanded` / `aria-controls` are only valid on a combobox — on a
+ * plain textbox they fail the `aria-allowed-attr` rule.
  */
 @Component({
   standalone: true,
@@ -345,7 +350,9 @@ class SearchSuggestionsDemoComponent {
           tedi-text-field
           id="search-result"
           type="text"
-          aria-controls="search-result-panel"
+          role="combobox"
+          aria-haspopup="dialog"
+          [attr.aria-controls]="open() ? 'search-result-panel' : null"
           [attr.aria-expanded]="open()"
           [value]="value()"
           (valueChange)="value.set($event)"
@@ -357,7 +364,7 @@ class SearchSuggestionsDemoComponent {
       @if (open()) {
         <div
           id="search-result-panel"
-          role="group"
+          role="dialog"
           aria-label="Otsingutulemus"
           class="tedi-search-demo__results"
         >
@@ -791,17 +798,24 @@ export const Sizes: Story = {
         <div class="tedi-search-sizes__row" *ngFor="let size of SIZES">
           <p tedi-text modifiers="bold" class="tedi-search-sizes__label">{{ size | titlecase }}</p>
           <div class="tedi-search-sizes__fields">
-            <tedi-search [inputId]="'size-' + size + '-plain'" [size]="size" label="Otsing" />
+            <tedi-search
+              [inputId]="'size-' + size + '-plain'"
+              [size]="size"
+              label="Otsing"
+              [ariaLabel]="'Otsing – ' + size + ', ilma nuputa'"
+            />
             <tedi-search
               [inputId]="'size-' + size + '-icon'"
               [size]="size"
               label="Otsing"
+              [ariaLabel]="'Otsing – ' + size + ', nupp ikooniga'"
               [button]="{ ariaLabel: 'Otsi' }"
             />
             <tedi-search
               [inputId]="'size-' + size + '-button'"
               [size]="size"
               label="Otsing"
+              [ariaLabel]="'Otsing – ' + size + ', nupp ikooni ja tekstiga'"
               [button]="{ text: 'Otsi' }"
             />
           </div>
@@ -826,25 +840,29 @@ export const States: Story = {
         <tedi-row *ngFor="let state of PSEUDO_STATE" cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search [inputId]="'search-states-' + state" label="Otsing" />
+            <tedi-search
+              [inputId]="'search-states-' + state"
+              label="Otsing"
+              [ariaLabel]="'Otsing – ' + state"
+            />
           </tedi-col>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">Disabled</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search inputId="search-states-disabled" label="Otsing" [disabled]="true" />
+            <tedi-search inputId="search-states-disabled" label="Otsing" ariaLabel="Otsing – Disabled" [disabled]="true" />
           </tedi-col>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">Success</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search inputId="search-states-success" label="Otsing" [feedbackText]="{ text: 'Tagasiside tekst', type: 'valid' }" />
+            <tedi-search inputId="search-states-success" label="Otsing" ariaLabel="Otsing – Success" [feedbackText]="{ text: 'Tagasiside tekst', type: 'valid' }" />
           </tedi-col>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">Error</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search inputId="search-states-error" label="Otsing" [feedbackText]="{ text: 'Tagasiside tekst', type: 'error' }" />
+            <tedi-search inputId="search-states-error" label="Otsing" ariaLabel="Otsing – Error" [feedbackText]="{ text: 'Tagasiside tekst', type: 'error' }" />
           </tedi-col>
         </tedi-row>
       </tedi-row>

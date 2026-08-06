@@ -8,7 +8,8 @@ TEDI form controls implement Angular's `ControlValueAccessor` interface, integra
 |-----------|----------|------------|
 | TextFieldComponent | `input[tedi-text-field]` | `string` |
 | NumberFieldComponent | `tedi-number-field` | `number` |
-| CheckboxComponent | `input[tedi-checkbox]` | `boolean` |
+| SearchComponent | `tedi-search` | `string` |
+| SliderComponent | `tedi-slider` | `number` |
 | CheckboxGroupComponent | `tedi-checkbox-group` | `string[]` |
 | RadioGroupComponent | `tedi-radio-group` | `string \| null` |
 | ToggleComponent | `tedi-toggle` | `boolean` |
@@ -16,8 +17,9 @@ TEDI form controls implement Angular's `ControlValueAccessor` interface, integra
 | DatePickerComponent | `tedi-date-picker` | `Date \| null` — **deprecated**, use `DateFieldComponent` |
 | TimeFieldComponent | `tedi-time-field` | `string \| null` (HH:mm) |
 | TimePickerComponent | `tedi-time-picker` | `string \| null` (HH:mm) |
-| DropdownComponent | `tedi-dropdown` | `string` |
 | SelectComponent | `tedi-select` | `T \| T[]` |
+
+`CheckboxComponent` (`input[type=checkbox][tedi-checkbox]`) is **not** a TEDI value accessor — it styles a native checkbox, so `[formControl]` on it is handled by Angular's built-in `CheckboxControlValueAccessor` and yields a `boolean`. Inside a managed `<tedi-checkbox-group>`, its `value` input is a `string` identity instead. `DropdownComponent` (`tedi-dropdown`) lives in `overlay/` and is not a form control — it exposes `[(value)]` but implements no `ControlValueAccessor`.
 
 ## Basic Usage with Reactive Forms
 
@@ -56,7 +58,7 @@ import {
         <input tedi-text-field formControlName="email" type="email" />
       </tedi-form-field>
 
-      <input tedi-checkbox formControlName="agree" />
+      <input tedi-checkbox type="checkbox" formControlName="agree" />
     </form>
   `,
 })
@@ -142,6 +144,18 @@ this.control.disable();
 ```
 
 The component combines native disabled state with form-disabled state internally.
+
+## Search
+
+`SearchComponent` (`tedi-search`) is a `string` value accessor that renders its own `tedi-form-field` — do not wrap it in one. It requires `inputId`, and takes an optional trailing `button` (`{ text?, icon?, variant?, ariaLabel? }`); `searchEvent` fires on Enter or button click.
+
+```html
+<tedi-search inputId="search" label="Otsing" [formControl]="query" (searchEvent)="run($event)" />
+```
+
+The host is a `role="search"` landmark whose accessible name falls back to `ariaLabel` → `label` → `placeholder` → the translated "search". **When a page renders more than one `tedi-search`, give each a distinct `ariaLabel`** — identically named landmarks of the same type fail axe's `landmark-unique` rule. The visible `<label>` is unaffected; `ariaLabel` names only the landmark.
+
+If you build a suggestion panel around the field, `aria-expanded` / `aria-controls` belong on an element with `role="combobox"` — they are not permitted on a plain textbox (`aria-allowed-attr`). Point `aria-controls` at a `role="listbox"` popup for a list of options, or a `role="dialog"` popup (with `aria-haspopup="dialog"`) when the panel mixes results with other controls. Bind it conditionally — `[attr.aria-controls]="open() ? 'panel-id' : null"` — since a popup rendered with `@if` or a CDK overlay is absent while closed, and a reference to a missing id fails `aria-valid-attr-value`.
 
 ## Date Selection
 
