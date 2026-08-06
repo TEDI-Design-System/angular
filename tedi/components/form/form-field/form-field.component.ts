@@ -8,7 +8,9 @@ import {
   AfterContentInit,
   inject,
   DestroyRef,
+  effect,
 } from "@angular/core";
+import { TEDI_INPUT_GROUP } from "../input-group/input-group.token";
 import { NgClass } from "@angular/common";
 import {
   FormFieldControl,
@@ -88,6 +90,14 @@ export class FormFieldComponent implements AfterContentInit {
   feedback?: FeedbackTextComponent;
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly inputGroup = inject(TEDI_INPUT_GROUP, { optional: true });
+
+  constructor() {
+    effect(() => {
+      const invalid = this.computeInvalid();
+      this.control?.setInvalidState(invalid);
+    });
+  }
 
   ngAfterContentInit() {
     this.ngControl?.control?.events
@@ -98,12 +108,16 @@ export class FormFieldComponent implements AfterContentInit {
   }
 
   private updateValidationState() {
+    this.control?.setInvalidState(this.computeInvalid());
+  }
+
+  private computeInvalid(): boolean {
     const invalid = !!this.ngControl?.invalid;
     const touched = !!this.ngControl?.touched;
     const dirty = !!this.ngControl?.dirty;
     const fieldInvalid = invalid && (touched || dirty);
 
-    this.control?.setInvalidState(fieldInvalid);
+    return fieldInvalid || (this.inputGroup?.invalid() ?? false);
   }
 
   readonly resolvedIcon = computed<FormFieldIcon | undefined>(() => {
@@ -128,14 +142,16 @@ export class FormFieldComponent implements AfterContentInit {
     return this.clearable() && !!value;
   });
 
-  readonly isDisabled = computed(() => this.control?.disabled() ?? false);
+  readonly isDisabled = computed(
+    () => (this.control?.disabled() ?? false) || (this.inputGroup?.disabled() ?? false),
+  );
 
   readonly hostClasses = computed(() => {
     return {
       "tedi-form-field": true,
       "tedi-form-field--valid": this.validationState() === "valid",
       "tedi-form-field--invalid": this.validationState() === "invalid",
-      "tedi-form-field--disabled": this.control?.disabled(),
+      "tedi-form-field--disabled": this.isDisabled(),
       "tedi-form-field--small": this.size() === "small",
       "tedi-form-field--large": this.size() === "large",
       "tedi-form-field--with-icon": this.clearable() || !!this.icon(),
@@ -153,5 +169,23 @@ export class FormFieldComponent implements AfterContentInit {
 
   clear() {
     this.control?.clearField?.();
+  }
+
+  /**
+   * The control never fills the whole box — the box padding and the layout
+   * wrappers around the control are outside its hit area — so clicking there
+   * would otherwise leave the field unfocused. Focus the control instead, unless
+   * the click landed on something interactive that handles it itself (the
+   * control, the clear/calendar buttons, a tag's close button).
+   */
+  handleBoxMouseDown(event: MouseEvent) {
+    if (this.isDisabled()) return;
+
+    const target = event.target as HTMLElement | null;
+    if (target?.closest("button, input, textarea, select, a")) return;
+
+    // Keep the browser from moving focus off the control we are about to focus.
+    event.preventDefault();
+    this.control?.focus?.();
   }
 }

@@ -96,6 +96,16 @@ export default {
         defaultValue: { summary: "400" },
       },
     },
+    ariaLabel: {
+      name: "ariaLabel",
+      description:
+        "Accessible label for the carousel region. Falls back to the `carousel` translation.",
+      control: "text",
+      table: {
+        category: "Carousel Content",
+        type: { summary: "string" },
+      },
+    },
     withArrows: {
       description:
         "Should show indicators with arrows? If yes, don't use carousel-navigation component",
@@ -545,7 +555,7 @@ export const Fade: StoryObj<CarouselType> = {
         <tedi-carousel-header>
           <h2 tedi-text modifiers="h1">Title</h2>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView" [fade]="fade">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [fade]="fade" [ariaLabel]="'Karussell (mitu slaidi vaates)'">
           @for (i of [0, 1, 2, 3, 4]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -563,7 +573,7 @@ export const Fade: StoryObj<CarouselType> = {
         </tedi-carousel-footer>
       </tedi-carousel>
       <tedi-carousel style="max-width: 400px;">
-        <tedi-carousel-content [slidesPerView]="1" [fade]="fade">
+        <tedi-carousel-content [slidesPerView]="1" [fade]="fade" [ariaLabel]="'Karussell (üks slaid vaates)'">
           @for (i of [0, 1, 2, 3, 4]; track $index) {
             <ng-template tediCarouselSlide>
               <div

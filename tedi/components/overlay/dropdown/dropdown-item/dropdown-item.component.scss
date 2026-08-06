@@ -9,7 +9,9 @@
   cursor: pointer;
   background: var(--dropdown-item-default-background);
 
-  &:hover:not(.tedi-dropdown-item--disabled, [aria-disabled="true"]) {
+  // A selected item keeps its active styling on hover — hover must not override
+  // the active state, so selected items are excluded from the hover rule.
+  &:hover:not(.tedi-dropdown-item--disabled, [aria-disabled="true"], .tedi-dropdown-item--selected, [aria-selected="true"]) {
     color: var(--dropdown-item-hover-text);
     background: var(--dropdown-item-hover-background);
   }

@@ -116,7 +116,7 @@ describe("TooltipComponent", () => {
 
   it("should not show tooltip again if already visible", () => {
     const tooltip = component.tooltip();
-    tooltip.isOpen.set(true);
+    tooltip.showTooltip();
 
     tooltip.showTooltip();
 
@@ -125,7 +125,7 @@ describe("TooltipComponent", () => {
 
   it("should hide tooltip when visible", () => {
     const tooltip = component.tooltip();
-    tooltip.isOpen.set(true);
+    tooltip.showTooltip();
 
     tooltip.hideTooltip();
 
@@ -143,7 +143,7 @@ describe("TooltipComponent", () => {
 
   it("should call hideTooltip when tooltip is visible", () => {
     const tooltip = component.tooltip();
-    tooltip.isOpen.set(true);
+    tooltip.showTooltip();
 
     const hideSpy = jest.spyOn(tooltip, "hideTooltip");
     const showSpy = jest.spyOn(tooltip, "showTooltip");
@@ -165,5 +165,126 @@ describe("TooltipComponent", () => {
 
     expect(showSpy).toHaveBeenCalled();
     expect(hideSpy).not.toHaveBeenCalled();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [TooltipComponent, TooltipTriggerComponent, TooltipContentComponent],
+  template: `
+    <tedi-tooltip
+      [open]="open()"
+      [openWith]="openWith()"
+      [trackPosition]="trackPosition()"
+    >
+      <tedi-tooltip-trigger [interactive]="interactive()">
+        <span>Anchor</span>
+      </tedi-tooltip-trigger>
+      <tedi-tooltip-content>Content</tedi-tooltip-content>
+    </tedi-tooltip>
+  `,
+})
+class ControlledTooltipComponent {
+  open = input<boolean | undefined>(undefined);
+  openWith = input<"hover" | "click" | "both" | "none">("none");
+  trackPosition = input(false);
+  interactive = input(true);
+
+  tooltip = viewChild.required(TooltipComponent);
+  trigger = viewChild.required(TooltipTriggerComponent);
+}
+
+describe("TooltipComponent controlled/tracking", () => {
+  let fixture: ComponentFixture<ControlledTooltipComponent>;
+  let component: ControlledTooltipComponent;
+  let overlayContainer: OverlayContainer;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [ControlledTooltipComponent] });
+    fixture = TestBed.createComponent(ControlledTooltipComponent);
+    component = fixture.componentInstance;
+    overlayContainer = TestBed.inject(OverlayContainer);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    overlayContainer.ngOnDestroy();
+  });
+
+  it("reflects the controlled open input", () => {
+    const tooltip = component.tooltip();
+    expect(tooltip.isOpen()).toBe(false);
+
+    fixture.componentRef.setInput("open", true);
+    fixture.detectChanges();
+    expect(tooltip.isOpen()).toBe(true);
+
+    fixture.componentRef.setInput("open", false);
+    fixture.detectChanges();
+    expect(tooltip.isOpen()).toBe(false);
+  });
+
+  it("ignores internal show/hide while controlled", () => {
+    const tooltip = component.tooltip();
+    fixture.componentRef.setInput("open", false);
+    fixture.detectChanges();
+
+    tooltip.showTooltip();
+    expect(tooltip.isOpen()).toBe(false);
+  });
+
+  it("skips focus/tabindex synthesis when interactive is false", () => {
+    const freshFixture = TestBed.createComponent(ControlledTooltipComponent);
+    freshFixture.componentRef.setInput("interactive", false);
+    freshFixture.detectChanges();
+
+    const anchor = freshFixture.nativeElement.querySelector("span");
+    expect(anchor.getAttribute("tabindex")).toBeNull();
+    expect(anchor.classList.contains("tedi-tooltip-trigger--focus")).toBe(false);
+  });
+
+  it("synthesizes focusability when interactive is true", () => {
+    fixture.componentRef.setInput("interactive", true);
+    fixture.detectChanges();
+
+    const anchor = fixture.nativeElement.querySelector("span");
+    expect(anchor.getAttribute("tabindex")).toBe("0");
+  });
+
+  it("updatePosition delegates to the overlayRef", () => {
+    const tooltip = component.tooltip();
+    fixture.componentRef.setInput("open", true);
+    fixture.detectChanges();
+
+    const overlayRef = (
+      tooltip as unknown as {
+        connectedOverlay: () => { overlayRef?: { updatePosition: () => void } };
+      }
+    ).connectedOverlay()?.overlayRef;
+    const spy = jest.spyOn(overlayRef!, "updatePosition");
+
+    tooltip.updatePosition();
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it("starts a rAF loop while open with trackPosition, and stops when closed", () => {
+    const rafSpy = jest
+      .spyOn(global, "requestAnimationFrame")
+      .mockImplementation(() => 1 as unknown as number);
+    const cancelSpy = jest
+      .spyOn(global, "cancelAnimationFrame")
+      .mockImplementation(() => undefined);
+
+    fixture.componentRef.setInput("trackPosition", true);
+    fixture.componentRef.setInput("open", true);
+    fixture.detectChanges();
+    expect(rafSpy).toHaveBeenCalled();
+
+    fixture.componentRef.setInput("open", false);
+    fixture.detectChanges();
+    expect(cancelSpy).toHaveBeenCalled();
+
+    rafSpy.mockRestore();
+    cancelSpy.mockRestore();
   });
 });

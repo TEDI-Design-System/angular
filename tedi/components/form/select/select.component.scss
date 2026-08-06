@@ -10,7 +10,7 @@
   --_line-height: var(--body-regular-line-height);
   --_padding-y: var(--form-field-padding-y-md-default);
   --_padding-x: var(--form-field-padding-x-md-default);
-  --_search-input-min-width: 1px;
+  --_search-input-reserve: 5rem;
 
   min-height: var(--form-field-height);
   padding: calc(var(--_padding-y) - var(--tedi-borders-01)) var(--_padding-x);
@@ -77,12 +77,6 @@
 
   .tedi-feedback-text {
     margin-top: var(--form-field-outer-spacing);
-  }
-
-  &__label-row {
-    display: flex;
-    gap: var(--content-label-inner-spacing-x);
-    align-items: center;
   }
 
   &__trigger {
@@ -192,9 +186,9 @@
 
   &__search-input:not(&__search-input--hidden) {
     position: relative;
-    flex: 1;
+    flex: 1 1 var(--_search-input-reserve);
     width: auto;
-    min-width: var(--_search-input-min-width);
+    min-width: 0;
     height: auto;
   }
 
@@ -209,7 +203,8 @@
     .tedi-dropdown-item {
       outline: none;
 
-      &.cdk-option-active:not(.tedi-dropdown-item--disabled) {
+      &.cdk-option-active:not(.tedi-dropdown-item--disabled),
+      &.tedi-dropdown-item--active:not(.tedi-dropdown-item--disabled) {
         outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
         outline-offset: calc(-1 * var(--tedi-borders-02));
       }
@@ -223,6 +218,20 @@
           color: inherit;
         }
       }
+    }
+  }
+
+  &__options--virtual {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  &__viewport {
+    width: 100%;
+
+    .tedi-dropdown-item {
+      box-sizing: border-box;
     }
   }
 
@@ -267,18 +276,20 @@
 
   &__multiselect-container {
     display: flex;
+    flex: 1;
     flex-wrap: wrap;
     gap: var(--form-field-inner-spacing);
+    min-width: 0;
 
-    // Single row: the tags clip inside an inner wrapper while the +N counter
-    // and the search input sit outside it and never shrink, so the counter
-    // stays visible as the field narrows.
+    // Single row: the tags sit in an inner wrapper with the "+N" counter and the
+    // search input beside it. The counter never shrinks, so it stays visible as
+    // the field narrows.
     &--single-row {
       flex-wrap: nowrap;
 
       .tedi-select__multiselect-tags {
         display: flex;
-        flex: 0 1 auto;
+        flex: 0 0 auto;
         gap: var(--form-field-inner-spacing);
         min-width: 0;
         overflow: hidden;
@@ -292,9 +303,17 @@
         }
       }
 
-      .tedi-select__multiselect-counter,
-      .tedi-select__search-input {
+      .tedi-select__multiselect-counter {
         flex-shrink: 0;
+      }
+
+      // With `tagEllipsis` an over-wide label truncates rather than being dropped
+      // behind the counter, and the tag's own `max-width: 100%` can only resolve
+      // against a wrapper that is allowed to shrink. Without it the wrapper stays
+      // as wide as its content and the row overflows, cutting the tag — and its
+      // remove button — off instead.
+      &.tedi-select__multiselect-container--ellipsis .tedi-select__multiselect-tags {
+        flex: 0 1 auto;
       }
     }
   }

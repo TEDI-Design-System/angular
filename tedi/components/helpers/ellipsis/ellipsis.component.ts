@@ -69,10 +69,12 @@ export class EllipsisComponent {
   });
 
   private updateEllipsedState(el: HTMLElement): void {
+    // Truncation may be horizontal (single-line `text-overflow: ellipsis`, e.g.
+    // Tag) or vertical (`-webkit-line-clamp`, multi-line). Checking only one axis
+    // misses the other — a single-line `end` truncation overflows horizontally,
+    // not vertically — so detect either.
     const isTruncated =
-      this.position() === "start"
-        ? el.scrollWidth > el.clientWidth
-        : el.scrollHeight > el.clientHeight;
+      el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight;
 
     this.isEllipsed.set(isTruncated);
     this.fullText.set(el.textContent?.trim() ?? "");

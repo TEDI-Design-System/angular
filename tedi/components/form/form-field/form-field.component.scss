@@ -3,12 +3,16 @@
   flex-direction: column;
 
   &__input {
+    --_field-padding-y: var(--form-field-padding-y-md-default);
+    --_field-padding-x: var(--form-field-padding-x-md-default);
+
     position: relative;
     display: flex;
     gap: var(--form-field-inner-spacing);
     align-items: center;
     width: 100%;
     height: var(--form-field-height);
+    padding: var(--_field-padding-y) var(--_field-padding-x);
     background: var(--form-input-background-default);
     border: 1px solid var(--form-input-border-default);
     border-radius: var(--form-field-radius);
@@ -20,11 +24,16 @@
     }
 
     .tedi-form-field__input {
+      --_field-padding-y: var(--form-field-padding-y-sm);
+
       height: var(--form-field-height-sm);
     }
   }
 
   &--large .tedi-form-field__input {
+    --_field-padding-y: var(--form-field-padding-y-lg);
+    --_field-padding-x: var(--form-field-padding-x-lg);
+
     height: var(--form-field-height-lg);
   }
 
@@ -32,7 +41,7 @@
     border-color: var(--form-general-feedback-success-border);
 
     &:focus-within {
-      box-shadow: 0 0 0 1px var(--form-general-feedback-success-border);
+      box-shadow: inset 0 0 0 1px var(--form-general-feedback-success-border);
     }
   }
 
@@ -40,7 +49,7 @@
     border-color: var(--form-general-feedback-error-border);
 
     &:focus-within {
-      box-shadow: 0 0 0 1px var(--form-general-feedback-error-border);
+      box-shadow: inset 0 0 0 1px var(--form-general-feedback-error-border);
     }
   }
 
@@ -50,14 +59,6 @@
     background: var(--form-input-background-disabled);
     border-color: var(--form-input-border-disabled);
     box-shadow: none;
-  }
-
-  &--with-icon .tedi-form-field__input {
-    padding-right: var(--form-field-padding-x-md-default);
-  }
-
-  &--with-icon.tedi-form-field--large .tedi-form-field__input {
-    padding-right: var(--form-field-padding-x-lg);
   }
 
   &:not(
@@ -74,13 +75,13 @@
     &:active,
     &:has(input:active) {
       border-color: var(--form-input-border-active);
-      box-shadow: 0 0 0 1px var(--form-input-border-active);
+      box-shadow: inset 0 0 0 1px var(--form-input-border-active);
     }
 
     &:focus-within,
     &:has(input:focus-visible) {
       border-color: var(--form-input-border-focus);
-      box-shadow: 0 0 0 1px var(--form-input-border-focus);
+      box-shadow: inset 0 0 0 1px var(--form-input-border-focus);
     }
   }
 

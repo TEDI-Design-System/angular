@@ -269,12 +269,20 @@ describe("TooltipTriggerComponent", () => {
       expect(span?.getAttribute("tabindex")).toBe("0");
     });
 
-    it("should add focus class and tabindex to element child", () => {
+    it("should NOT add the fallback focus class to a natively focusable child (it keeps its own focus styles)", () => {
       hostEl.innerHTML = `<button>Click me</button>`;
       const btn = hostEl.querySelector("button")!;
       component.ngAfterContentChecked();
-      expect(btn.classList.contains("tedi-tooltip-trigger--focus")).toBe(true);
+      expect(btn.classList.contains("tedi-tooltip-trigger--focus")).toBe(false);
       expect(btn.getAttribute("tabindex")).toBe("0");
+    });
+
+    it("should add the fallback focus class and tabindex to a non-focusable child", () => {
+      hostEl.innerHTML = `<span>Not focusable</span>`;
+      const span = hostEl.querySelector("span")!;
+      component.ngAfterContentChecked();
+      expect(span.classList.contains("tedi-tooltip-trigger--focus")).toBe(true);
+      expect(span.getAttribute("tabindex")).toBe("0");
     });
 
     it("should not override existing tabindex on child", () => {
@@ -300,7 +308,7 @@ describe("TooltipTriggerComponent", () => {
       component.ngAfterContentChecked();
       fixture.detectChanges();
 
-      expect(btn.classList.contains("tedi-tooltip-trigger--focus")).toBe(true);
+      expect(btn.classList.contains("tedi-tooltip-trigger--focus")).toBe(false);
       expect(btn.getAttribute("tabindex")).toBe("0");
       expect(btn.getAttribute("aria-describedby")).toBe("mock-tooltip-id");
       expect(wrapper.getAttribute("tabindex")).toBeNull();

@@ -119,23 +119,26 @@ describe("TextGroupComponent", () => {
       ).toBe("50%");
     });
 
-    it("should set aria-label on dt from label content", () => {
-      const dt = fixture.debugElement.query(By.css("dt")).nativeElement;
-      expect(dt.getAttribute("aria-label")).toBe("Test Label");
-    });
+    it("should add fixed-label modifier only when labelWidth is set", () => {
+      let dl = fixture.debugElement.query(By.css("dl")).nativeElement;
+      expect(dl.className).not.toContain("tedi-text-group--fixed-label");
 
-    it("should hide label content from screen readers", () => {
-      const labelSpan = fixture.debugElement.query(
-        By.css("dt > span[aria-hidden]"),
-      ).nativeElement;
-      expect(labelSpan.getAttribute("aria-hidden")).toBe("true");
-    });
-
-    it("should update aria-label when label content changes", () => {
-      fixture.componentInstance.label = "Updated Label";
+      fixture.componentInstance.labelWidth = "150px";
       fixture.detectChanges();
+      dl = fixture.debugElement.query(By.css("dl")).nativeElement;
+      expect(dl.className).toContain("tedi-text-group--fixed-label");
+    });
+
+    it("should not hide label content from screen readers", () => {
+      const labelSpan = fixture.debugElement.query(
+        By.css("dt > span[tedi-label]"),
+      ).nativeElement;
+      expect(labelSpan.getAttribute("aria-hidden")).toBeNull();
+    });
+
+    it("should not set aria-label on dt", () => {
       const dt = fixture.debugElement.query(By.css("dt")).nativeElement;
-      expect(dt.getAttribute("aria-label")).toBe("Updated Label");
+      expect(dt.getAttribute("aria-label")).toBeNull();
     });
   });
 

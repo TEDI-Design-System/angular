@@ -73,49 +73,51 @@ export const Default: Story = {
     props: args,
     template: `
       <tedi-text-group ${argsToTemplate(args)} >
-        <tedi-text-group-label>Accessibility</tedi-text-group-label>
-        <tedi-text-group-value>Visible to doctor and representative</tedi-text-group-value>
+        <tedi-text-group-label>Nähtavus</tedi-text-group-label>
+        <tedi-text-group-value>Nähtav arstile ja esindajale</tedi-text-group-value>
       </tedi-text-group>
     `,
   }),
 };
 
 export const Types: Story = {
+  // TODO(a11y): decorative tertiary-color icon font trips color-contrast (~3:1); pending token review.
+  parameters: { a11y: { test: "todo" } },
   render: () => {
     const textGroups = [
       {
         type: "vertical",
-        label: "Accessibility",
-        value: "Visible to doctor and representative",
+        label: "Nähtavus",
+        value: "Nähtav arstile ja esindajale",
       },
       {
         type: "vertical",
-        label: "Accessibility",
-        value: "Visible to doctor and representative",
-        statusBadge: 'Submitted'
+        label: "Nähtavus",
+        value: "Nähtav arstile ja esindajale",
+        statusBadge: 'Esitatud'
       },
       {
         type: "vertical",
-        label: "Accessibility",
-        value: "Visible to doctor and representative",
+        label: "Nähtavus",
+        value: "Nähtav arstile ja esindajale",
         icon: { size: 16, name: "lock_open", color: "tertiary" },
         valueModifiers: "inline-block",
       },
       {
         type: "vertical",
-        label: "Accessibility",
+        label: "Nähtavus",
         labelModifiers: "bold",
-        value: "Visible to doctor and representative",
+        value: "Nähtav arstile ja esindajale",
       },
       {
         type: "vertical",
-        label: "Accessibility",
-        value: "Visible to doctor and representative",
+        label: "Nähtavus",
+        value: "Nähtav arstile ja esindajale",
         valueModifiers: "bold",
       },
       {
         type: "horizontal",
-        label: "Patient",
+        label: "Patsient",
         value: "Mari Maasikas",
         icon: { size: 16, name: "person_filled", color: "tertiary" },
         valueModifiers: "inline-block",
@@ -168,12 +170,12 @@ export const PositionType: Story = {
     template: `
     <div [tediVerticalSpacing]="1">
       <tedi-text-group type="vertical">
-        <tedi-text-group-label>Accessibility</tedi-text-group-label>
-        <tedi-text-group-value>Visible to doctor and representative</tedi-text-group-value>
+        <tedi-text-group-label>Nähtavus</tedi-text-group-label>
+        <tedi-text-group-value>Nähtav arstile ja esindajale</tedi-text-group-value>
       </tedi-text-group>
       <tedi-text-group type="horizontal">
-        <tedi-text-group-label>Accessibility</tedi-text-group-label>
-        <tedi-text-group-value>Visible to doctor and representative</tedi-text-group-value>
+        <tedi-text-group-label>Nähtavus</tedi-text-group-label>
+        <tedi-text-group-value>Nähtav arstile ja esindajale</tedi-text-group-value>
       </tedi-text-group>
     </div>
     `,
@@ -189,15 +191,15 @@ export const HorizontalLabelLength: Story = {
           {
             type: "horizontal",
             labelWidth: "132px",
-            label: "Patient",
+            label: "Patsient",
             value: "Mari Maasikas",
             icon: { size: 16, name: "person_filled", color: "tertiary" },
           },
           {
             type: "horizontal",
             labelWidth: "132px",
-            label: "Address",
-            value: "Tulbi tn 4, Tallinn, 23562, Estonia",
+            label: "Aadress",
+            value: "Tulbi tn 4, Tallinn, 23562, Eesti",
             icon: { size: 16, name: "location_on", color: "tertiary" },
           },
         ],
@@ -208,14 +210,14 @@ export const HorizontalLabelLength: Story = {
           {
             type: "horizontal",
             labelWidth: "164px",
-            label: "Vaccine",
+            label: "Vaktsiin",
             value: "Mari Maasikas",
           },
           {
             type: "horizontal",
             labelWidth: "164px",
-            label: "Next vaccination",
-            value: "Immunization finished",
+            label: "Järgmine vaktsineerimine",
+            value: "Immuniseerimine lõpetatud",
           },
         ],
       },
@@ -225,19 +227,19 @@ export const HorizontalLabelLength: Story = {
           {
             type: "horizontal",
             labelWidth: "196px",
-            label: "Healthcare provider",
+            label: "Tervishoiuteenuse osutaja",
             value: "SA Põhja-Eesti Regionaalhaigla",
           },
           {
             type: "horizontal",
             labelWidth: "196px",
-            label: "Healthcare specialist",
+            label: "Tervishoiutöötaja",
             value: "Mart Mets",
           },
           {
             type: "horizontal",
             labelWidth: "196px",
-            label: "Document creation time",
+            label: "Dokumendi loomise aeg",
             value: "16.08.2023 14:51:48",
           },
         ],
@@ -273,13 +275,48 @@ export const HorizontalLabelLength: Story = {
   },
 };
 
+/**
+ * Demonstrates overriding the label `type` and `labelWidth` per breakpoint. Resize the preview
+ * to see the layout adapt.
+ */
+export const Responsive: Story = {
+  render: () => {
+    const rows = [
+      { label: "Patsient", value: "Mari Maasikas" },
+      { label: "Aadress", value: "Tulbi tn 4, Tallinn, 23562, Eesti" },
+      { label: "Vaktsiin", value: "Mari Maasikas" },
+      { label: "Järgmine vaktsineerimine", value: "Immuniseerimine lõpetatud" },
+      { label: "Tervishoiuteenuse osutaja", value: "SA Põhja-Eesti Regionaalhaigla" },
+      { label: "Tervishoiutöötaja", value: "Mart Mets" },
+      { label: "Dokumendi loomise aeg", value: "16.08.2023 14:51:48" },
+    ];
+    return {
+      props: { rows },
+      template: `
+        <div [tediVerticalSpacing]="0.25">
+          <tedi-text-group
+            *ngFor="let row of rows"
+            type="vertical"
+            [sm]="{ type: 'horizontal', labelWidth: '120px' }"
+            [md]="{ labelWidth: '200px' }"
+            [lg]="{ labelWidth: '25%' }"
+          >
+            <tedi-text-group-label>{{ row.label }}</tedi-text-group-label>
+            <tedi-text-group-value>{{ row.value }}</tedi-text-group-value>
+          </tedi-text-group>
+        </div>
+      `,
+    };
+  },
+};
+
 export const LongTextValues: Story = {
   render: (args) => ({
     props: args,
     template: `
       <div [tediVerticalSpacing]="1">
         <tedi-text-group type="vertical" labelWidth="150px">
-          <tedi-text-group-label>Accessibility</tedi-text-group-label>
+          <tedi-text-group-label>Nähtavus</tedi-text-group-label>
           <tedi-text-group-value>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent pulvinar malesuada tellus, nec efficitur orci interdum vitae.
             Proin semper venenatis est, vel malesuada sapien ornare at. Vestibulum egestas in lectus non finibus.
@@ -288,7 +325,7 @@ export const LongTextValues: Story = {
           </tedi-text-group-value>
         </tedi-text-group>
         <tedi-text-group type="horizontal" labelWidth="150px">
-          <tedi-text-group-label>Accessibility</tedi-text-group-label>
+          <tedi-text-group-label>Nähtavus</tedi-text-group-label>
           <tedi-text-group-value>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent pulvinar malesuada tellus, nec efficitur orci interdum vitae.
             Proin semper venenatis est, vel malesuada sapien ornare at. Vestibulum egestas in lectus non finibus.

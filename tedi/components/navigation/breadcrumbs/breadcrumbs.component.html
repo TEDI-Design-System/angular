@@ -1,0 +1,64 @@
+@if (visible()) {
+  <nav [attr.aria-label]="ariaLabel() || ('breadcrumbs' | tediTranslate)">
+    <ol class="tedi-breadcrumbs__list">
+      @if (currentVariant() === "short") {
+        @if (parentItem(); as parent) {
+          <li class="tedi-breadcrumbs__item">
+            <tedi-icon name="arrow_back" [size]="16" color="brand" />
+            <ng-container [ngTemplateOutlet]="parent.templateRef" />
+          </li>
+        }
+      } @else {
+        @for (token of tokens(); track $index; let last = $last) {
+          @if (token.kind === "item") {
+            <li
+              class="tedi-breadcrumbs__item"
+              [class.tedi-breadcrumbs__item--current]="token.current"
+            >
+              <ng-container [ngTemplateOutlet]="token.item.templateRef" />
+            </li>
+          } @else {
+            <li class="tedi-breadcrumbs__item">
+              <tedi-dropdown position="bottom-start">
+                <button
+                  type="button"
+                  tedi-link
+                  [underline]="false"
+                  tedi-dropdown-trigger
+                  class="tedi-breadcrumbs__ellipsis"
+                  [attr.aria-label]="
+                    showMoreLabel() || ('breadcrumbs.show-more' | tediTranslate)
+                  "
+                >
+                  <span aria-hidden="true">…</span>
+                </button>
+                <tedi-dropdown-content dropdownRole="menu">
+                  @for (hidden of token.hidden; track $index) {
+                    <li
+                      tedi-dropdown-item
+                      [clipContent]="false"
+                      class="tedi-breadcrumbs__dropdown-item"
+                    >
+                      <ng-container [ngTemplateOutlet]="hidden.templateRef" />
+                    </li>
+                  }
+                </tedi-dropdown-content>
+              </tedi-dropdown>
+            </li>
+          }
+          @if (!last) {
+            <li class="tedi-breadcrumbs__separator" aria-hidden="true">
+              @if (separatorTemplate(); as sep) {
+                <ng-container [ngTemplateOutlet]="sep.templateRef" />
+              } @else if (separator()) {
+                <span tedi-text color="brand">{{ separator() }}</span>
+              } @else {
+                <tedi-icon name="chevron_right" [size]="16" color="brand" />
+              }
+            </li>
+          }
+        }
+      }
+    </ol>
+  </nav>
+}

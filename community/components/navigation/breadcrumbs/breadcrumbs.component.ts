@@ -40,6 +40,13 @@ export type Breadcrumbs = {
   shortCrumbs: boolean;
 };
 
+/**
+ * @deprecated Use the TEDI-Ready `tedi-breadcrumbs` from
+ * `@tedi-design-system/angular/tedi` instead. That version uses a composition
+ * API (`*tediBreadcrumbItem`) that supports arbitrary crumb content, custom
+ * separators and a collapse dropdown. This community component will be removed
+ * in a future release.
+ */
 @Component({
   selector: "tedi-breadcrumbs",
   standalone: true,

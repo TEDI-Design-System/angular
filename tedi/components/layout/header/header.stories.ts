@@ -45,13 +45,11 @@ import { SideNavDropdownItemComponent } from "../sidenav/sidenav-dropdown-item/s
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { HeaderSearchComponent } from "./header-search/header-search.component";
 import { HeaderBottomComponent } from "./header-bottom/header-bottom.component";
+import { HeaderTopComponent } from "./header-top/header-top.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { LabelComponent } from "../../form/label/label.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
-// TODO: replace with TEDI-Ready Search component once it lands. Community Search is
-// used here only to demo HeaderSearch consumption — do NOT mirror this import from
-// any non-story file inside `tedi/`.
-import { SearchComponent } from "community/components/form";
+import { SearchComponent } from "../../form/search/search.component";
 import { TextComponent } from "../../base/text/text.component";
 import { TagComponent } from "../../tags/tag/tag.component";
 import { ToggleComponent } from "../../form/toggle/toggle.component";
@@ -87,6 +85,8 @@ const profileTranslations = {
     en: "Representative",
     ru: "Представитель",
   },
+  individual: { et: "Eraisik", en: "Individual", ru: "Частное лицо" },
+  business: { et: "Ettevõtja", en: "Business", ru: "Предприниматель" },
 } as const satisfies Record<string, Record<Language, string>>;
 
 type ProfileTranslationKey = keyof typeof profileTranslations;
@@ -133,6 +133,54 @@ class StoryThemeToggleComponent {
 
   handleToggle(checked: boolean) {
     this.themeService.theme.set(checked ? "dark" : "default");
+  }
+}
+
+/**
+ * Story-local inline language switcher for the top bar: renders the inactive
+ * languages as links and switches via the translation service on click.
+ */
+@Component({
+  selector: "story-language-links",
+  standalone: true,
+  imports: [LinkComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  template: `
+    <div
+      style="display: flex; gap: var(--layout-grid-gutters-16); align-items: center;"
+    >
+      @for (lang of visibleLanguages(); track lang.code) {
+        <a
+          tedi-link
+          href="#"
+          [underline]="true"
+          (click)="select($event, lang.code)"
+          >{{ lang.label }}</a
+        >
+      }
+    </div>
+  `,
+})
+class StoryLanguageLinksComponent {
+  private translation = inject(TediTranslationService);
+
+  private readonly labels: Record<Language, string> = {
+    et: "Eesti keeles",
+    en: "In English",
+    ru: "На русском",
+  };
+
+  readonly visibleLanguages = computed(() => {
+    const current = this.translation.getLanguage();
+    return (Object.keys(this.labels) as Language[])
+      .filter((code) => code !== current)
+      .map((code) => ({ code, label: this.labels[code] }));
+  });
+
+  select(event: Event, lang: Language) {
+    event.preventDefault();
+    this.translation.setLanguage(lang);
   }
 }
 
@@ -193,6 +241,7 @@ export default {
         SideNavDropdownItemComponent,
         HeaderSearchComponent,
         HeaderBottomComponent,
+        HeaderTopComponent,
         FormFieldComponent,
         LabelComponent,
         TextFieldComponent,
@@ -204,6 +253,7 @@ export default {
         TextComponent,
         ToggleComponent,
         StoryThemeToggleComponent,
+        StoryLanguageLinksComponent,
         StoryResponsiveLogoDirective,
         StoryTranslatePipe,
       ],
@@ -214,6 +264,19 @@ export default {
     docs: { toc: false },
   },
   argTypes: {
+    topAlignment: {
+      name: "alignment",
+      description:
+        'Horizontal alignment of the top bar content. Supports per-breakpoint overrides via the `[xs]`–`[xxl]` inputs, e.g. `alignment="center" [lg]="{ alignment: \'space-between\' }"`.',
+      table: {
+        category: "header-top",
+        type: {
+          summary:
+            "'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly'",
+        },
+        defaultValue: { summary: "'space-between'" },
+      },
+    },
     logoHref: {
       name: "href",
       description:
@@ -231,9 +294,21 @@ export default {
     },
     alignment: {
       description: "Horizontal alignment of content area.",
+      control: { type: "select" },
+      options: [
+        "flex-start",
+        "center",
+        "flex-end",
+        "space-between",
+        "space-around",
+        "space-evenly",
+      ],
       table: {
         category: "header-content",
-        type: { summary: "'flex-start' | 'center' | 'space-between'" },
+        type: {
+          summary:
+            "'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly'",
+        },
         defaultValue: { summary: "'center'" },
       },
     },
@@ -250,6 +325,21 @@ export default {
       table: {
         category: "header-language",
         type: { summary: "EventEmitter<Language>" },
+      },
+    },
+    selectLabel: {
+      description:
+        "Label for the language selector. Falls back to the `header.select-lang` translation.",
+      table: { category: "header-language", type: { summary: "string" } },
+    },
+    labelPosition: {
+      description: "Position of the select label relative to the trigger.",
+      control: { type: "inline-radio" },
+      options: ["top", "left"],
+      table: {
+        category: "header-language",
+        type: { summary: "'top' | 'left'" },
+        defaultValue: { summary: "'top'" },
       },
     },
     loginSize: {
@@ -555,6 +645,7 @@ Header is responsive and adapts to mobile layouts automatically, but some subcom
 To preview the mobile layout, resize the browser window or use Storybook's viewport tools.
 
 Header consists of several sub-components:
+- \`HeaderTopComponent\`: Optional secondary bar rendered above the main header bar (typically language selection, top-level links or a theme toggle).
 - \`HeaderLogoComponent\`: Wraps the project logo. Project the light/default logo as direct content; optionally project a dark-theme variant marked with \`tedi-header-logo-dark\` for automatic swap when the active theme is \`dark\`.
 - \`HeaderContentComponent\`: Used for showing links in desktop view.
 - \`HeaderActionsComponent\`: Used for showing and styling actions in header (placed at the right side).
@@ -589,6 +680,8 @@ Example with theme-aware logo:
     showLogo: true,
     alignment: "center",
     languages: { et: "EST", en: "ENG", ru: "RUS" },
+    selectLabel: "",
+    labelPosition: "top",
     loginHref: undefined,
     loginLabel: "",
     loginSize: undefined,
@@ -610,7 +703,11 @@ Example with theme-aware logo:
             <a tedi-link href="#" [underline]="false">Link text</a>
           </tedi-header-content>
           <tedi-header-actions>
-            <tedi-header-language [languages]="languages" />
+            <tedi-header-language
+              [languages]="languages"
+              [selectLabel]="selectLabel"
+              [labelPosition]="labelPosition"
+            />
             <tedi-separator axis="vertical" />
             <tedi-header-login
               [href]="loginHref"
@@ -1142,6 +1239,17 @@ export const WithInlineSearch: StoryObj<HeaderComponent> = {
 };
 
 export const WithMobileBottomSearch: StoryObj<HeaderComponent> = {
+  parameters: {
+    docs: {
+      description: {
+        story: `
+\`HeaderBottomComponent\` (\`tedi-header-bottom\`) adds a secondary row below the main header bar — typically a compact search or mobile-only navigation. Place it as a direct child of \`<header tedi-header>\`; the header projects it by selector, so its position in your template does not matter.
+
+It is hidden from the \`md\` breakpoint up in CSS, so you can include it unconditionally — no \`*hideAt\` needed.
+        `,
+      },
+    },
+  },
   render: (args) => ({
     props: args,
     template: `
@@ -1184,6 +1292,121 @@ export const WithMobileBottomSearch: StoryObj<HeaderComponent> = {
             <tedi-search inputId="search-5" />
           </tedi-header-search>
         </tedi-header-bottom>
+      </header>
+    `,
+  }),
+};
+
+export const WithTopHeader: StoryObj<HeaderComponent> = {
+  parameters: {
+    docs: {
+      description: {
+        story: `
+\`HeaderTopComponent\` (\`tedi-header-top\`) adds a secondary bar above the main header — language selection, top-level links or a theme toggle. Place it as a direct child of \`<header tedi-header>\`; the header projects it by selector, so its position in your template does not matter.
+
+Unlike \`HeaderBottomComponent\` it is never hidden by breakpoint — use \`*showAt\` / \`*hideAt\` on its children instead.
+        `,
+      },
+    },
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <header tedi-header>
+        <tedi-header-top alignment="center" [lg]="{ alignment: 'space-between' }">
+          <story-language-links *showAt="'lg'" />
+          <div style="display: flex; gap: var(--layout-grid-gutters-08); align-items: center;">
+            <a tedi-link href="#" [underline]="false" aria-current="page" style="color: var(--link-primary-active); font-weight: var(--body-bold-weight);">
+              {{ 'individual' | storyTranslate }}
+            </a>
+            <a tedi-link href="#">{{ 'business' | storyTranslate }}</a>
+          </div>
+          <story-theme-toggle *showAt="'lg'" />
+        </tedi-header-top>
+        ${logo}
+        <tedi-header-actions>
+          <ng-container *showAt="'lg'">
+            ${accessibilityLink}
+            <tedi-separator axis="vertical" />
+            <tedi-header-role
+              [label]="('organization' | storyTranslate)"
+              [representatives]="${organizations}"
+              [currentRepresentative]="${currentOrganization}"
+              [isOrganization]="true"
+              [showSearch]="true"
+            />
+            <tedi-separator axis="vertical" />
+          </ng-container>
+          <ng-container *hideAt="'lg'">
+            <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
+            <tedi-separator axis="vertical" />
+          </ng-container>
+          <tedi-header-profile [showLabel]="true" [md]="{ label: 'Mari Maasikas' }">
+            <a tedi-link href="#" [underline]="false">{{ 'myData' | storyTranslate }}</a>
+            <a tedi-link href="#" [underline]="false">{{ 'representatives' | storyTranslate }}</a>
+            <a tedi-link href="#" [underline]="false">{{ 'contacts' | storyTranslate }}</a>
+            <tedi-separator *showAt="'lg'" />
+            <a tedi-link href="#" [underline]="false">
+              <tedi-icon name="notifications" />
+              {{ 'notifications' | storyTranslate }}
+            </a>
+            <story-theme-toggle *hideAt="'lg'" />
+            <tedi-separator *showAt="'lg'" />
+            <tedi-header-logout href="#" />
+          </tedi-header-profile>
+        </tedi-header-actions>
+      </header>
+    `,
+  }),
+};
+
+export const WithTopHeaderAndLanguageDropdown: StoryObj<HeaderComponent> = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <header tedi-header>
+        <tedi-header-top alignment="center" [lg]="{ alignment: 'space-between' }">
+          <tedi-header-language *showAt="'lg'" labelPosition="left" [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
+          <div style="display: flex; gap: var(--layout-grid-gutters-08); align-items: center;">
+            <a tedi-link href="#" [underline]="false" aria-current="page" style="color: var(--link-primary-active); font-weight: var(--body-bold-weight);">
+              {{ 'individual' | storyTranslate }}
+            </a>
+            <a tedi-link href="#">{{ 'business' | storyTranslate }}</a>
+          </div>
+          <story-theme-toggle *showAt="'lg'" />
+        </tedi-header-top>
+        ${logo}
+        <tedi-header-actions>
+          <ng-container *showAt="'lg'">
+            ${accessibilityLink}
+            <tedi-separator axis="vertical" />
+            <tedi-header-role
+              [label]="('organization' | storyTranslate)"
+              [representatives]="${organizations}"
+              [currentRepresentative]="${currentOrganization}"
+              [isOrganization]="true"
+              [showSearch]="true"
+            />
+            <tedi-separator axis="vertical" />
+          </ng-container>
+          <ng-container *hideAt="'lg'">
+            <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
+            <tedi-separator axis="vertical" />
+          </ng-container>
+          <tedi-header-profile [showLabel]="true" [md]="{ label: 'Mari Maasikas' }">
+            <a tedi-link href="#" [underline]="false">{{ 'myData' | storyTranslate }}</a>
+            <a tedi-link href="#" [underline]="false">{{ 'representatives' | storyTranslate }}</a>
+            <a tedi-link href="#" [underline]="false">{{ 'contacts' | storyTranslate }}</a>
+            <tedi-separator *showAt="'lg'" />
+            <a tedi-link href="#" [underline]="false">
+              <tedi-icon name="notifications" />
+              {{ 'notifications' | storyTranslate }}
+            </a>
+            <story-theme-toggle *hideAt="'lg'" />
+            <tedi-separator *showAt="'lg'" />
+            <tedi-header-logout href="#" />
+          </tedi-header-profile>
+        </tedi-header-actions>
       </header>
     `,
   }),
@@ -1242,7 +1465,36 @@ export const WithCustomRoleContent: StoryObj<HeaderComponent> = {
   }),
 };
 
+export const LanguageWithNavigationLinks: StoryObj<HeaderComponent> = {
+  parameters: {
+    docs: {
+      description: {
+        story: `By default each language option switches the language client-side. For apps that switch language by navigating to a localized URL, pass \`[languageHrefs]\` — each option then renders as a real \`<a href>\` anchor, keeping native link behavior (open in new tab, middle-click, works without JS).
+
+This demo uses hash fragments (\`#et\`, \`#en\`, \`#ru\`) so selecting a language stays within Storybook; real apps would point these at localized URLs (e.g. \`/et\`, \`/en\`).`,
+      },
+    },
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <header tedi-header>
+        ${logo}
+        <tedi-header-actions>
+          <tedi-header-language
+            [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }"
+            [languageHrefs]="{ et: '#et', en: '#en', ru: '#ru' }"
+          />
+        </tedi-header-actions>
+      </header>
+    `,
+  }),
+};
+
 export const LoggedInWithSidenav: StoryObj<HeaderComponent> = {
+  // Renders the sidenav, whose accessibility fixes are tracked in
+  // https://github.com/TEDI-Design-System/angular/issues/307
+  parameters: { a11y: { test: "todo" } },
   render: (args) => ({
     props: args,
     styles: [mobileSidenavWrapperStyles],
