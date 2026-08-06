@@ -1,3 +1,10 @@
+# [7.1.0-rc.26](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.25...angular-7.1.0-rc.26) (2026-08-06)
+
+
+### Bug Fixes
+
+* **popover,search,header:** fix Header a11y violations and document HeaderTop [#601](https://github.com/TEDI-Design-System/angular/issues/601) ([#602](https://github.com/TEDI-Design-System/angular/issues/602)) ([86312a9](https://github.com/TEDI-Design-System/angular/commit/86312a91f145c1a8368938676fa9991ee754b29a))
+
 # [7.1.0-rc.25](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.24...angular-7.1.0-rc.25) (2026-08-06)
 
 
