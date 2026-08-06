@@ -3292,6 +3292,7 @@ class StickyLastColumnStoryHostComponent extends TableStoryHostBase {
       header: "",
       size: 120,
       enableSorting: false,
+      meta: { label: "Tegevused" },
       cell: this.actionsCellTpl() ?? "",
     } as TediColumnDef<StickyDoctor>,
   ]);
@@ -3508,6 +3509,7 @@ class StickyHeaderAndLastColumnStoryHostComponent extends TableStoryHostBase {
       header: "",
       size: 120,
       enableSorting: false,
+      meta: { label: "Tegevused" },
       cell: this.actionsCellTpl() ?? "",
     } as TediColumnDef<StickyDoctor>,
   ]);
