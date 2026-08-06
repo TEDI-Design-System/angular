@@ -1,9 +1,11 @@
 import { TitleCasePipe } from "@angular/common";
 import {
+  afterNextRender,
   Component,
   computed,
   ElementRef,
   inject,
+  Injector,
   OnDestroy,
   signal,
   viewChild,
@@ -171,7 +173,7 @@ const LIVE_RESULTS_STYLES = `
         type="text"
         role="combobox"
         aria-autocomplete="list"
-        aria-controls="search-combobox-listbox"
+        [attr.aria-controls]="isOpen() ? 'search-combobox-listbox' : null"
         [attr.aria-expanded]="isOpen()"
         [attr.aria-activedescendant]="activeOptionId()"
         [value]="value()"
@@ -317,8 +319,17 @@ class SearchSuggestionsDemoComponent {
  * A single matched result with fallback actions and a hint — e.g. a
  * national-registry person lookup. The result panel renders inline below the
  * field (not in an overlay), so focus flows naturally: Tab from the field moves
- * through the action buttons. Opens on focus, closes on Esc or when focus leaves
- * the field and its panel.
+ * through the action buttons. It opens on focus, and ArrowDown moves focus into
+ * the dialog. Esc closes it from either the field or the dialog, and selecting a
+ * result closes it too — both hand focus back to the input rather than dropping
+ * it when the panel unmounts. It also closes when focus leaves the field and
+ * its panel.
+ *
+ * The panel mixes a result with actions, so it is not a listbox: the input is a
+ * `role="combobox"` with `aria-haspopup="dialog"` pointing at a `role="dialog"`
+ * panel. The combobox role is what makes `aria-expanded` legal — on a plain
+ * textbox it fails the `aria-allowed-attr` rule. `aria-controls` and
+ * `aria-haspopup` are global attributes, so those were valid either way.
  */
 @Component({
   standalone: true,
@@ -342,14 +353,18 @@ class SearchSuggestionsDemoComponent {
       <tedi-form-field>
         <label tedi-label for="search-result">Otsi</label>
         <input
+          #comboboxInput
           tedi-text-field
           id="search-result"
           type="text"
-          aria-controls="search-result-panel"
+          role="combobox"
+          aria-haspopup="dialog"
+          [attr.aria-controls]="open() ? 'search-result-panel' : null"
           [attr.aria-expanded]="open()"
           [value]="value()"
           (valueChange)="value.set($event)"
-          (focus)="open.set(true)"
+          (focus)="onInputFocus()"
+          (keydown.arrowdown)="onArrowDown($event)"
           (keydown.escape)="open.set(false)"
         />
       </tedi-form-field>
@@ -357,14 +372,15 @@ class SearchSuggestionsDemoComponent {
       @if (open()) {
         <div
           id="search-result-panel"
-          role="group"
+          role="dialog"
           aria-label="Otsingutulemus"
           class="tedi-search-demo__results"
+          (keydown.escape)="closeAndRestoreFocus()"
         >
           <button
             type="button"
             class="tedi-search-demo__result"
-            (click)="open.set(false)"
+            (click)="closeAndRestoreFocus()"
           >
             <tedi-dropdown-item-value>
               <tedi-dropdown-item-value-label
@@ -432,8 +448,45 @@ class SearchSuggestionsDemoComponent {
 })
 class SearchResultActionsDemoComponent {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+  private readonly input =
+    viewChild.required<ElementRef<HTMLInputElement>>("comboboxInput");
+
+  /** Set while focus is moved back to the input, so it does not reopen the dialog. */
+  private restoringFocus = false;
+
   readonly value = signal("4954080254");
   readonly open = signal(false);
+
+  onInputFocus(): void {
+    if (this.restoringFocus) {
+      this.restoringFocus = false;
+      return;
+    }
+    this.open.set(true);
+  }
+
+  /** ArrowDown moves focus into the dialog, as the combobox pattern expects. */
+  onArrowDown(event: Event): void {
+    event.preventDefault();
+    this.open.set(true);
+
+    // The panel renders on the next change-detection tick.
+    afterNextRender(
+      () =>
+        this.host.nativeElement
+          .querySelector<HTMLElement>(".tedi-search-demo__result")
+          ?.focus(),
+      { injector: this.injector },
+    );
+  }
+
+  /** Closing from inside the dialog must hand focus back to the input. */
+  closeAndRestoreFocus(): void {
+    this.open.set(false);
+    this.restoringFocus = true;
+    this.input().nativeElement.focus();
+  }
 
   onFocusOut(event: FocusEvent): void {
     const next = event.relatedTarget as Node | null;
@@ -791,17 +844,24 @@ export const Sizes: Story = {
         <div class="tedi-search-sizes__row" *ngFor="let size of SIZES">
           <p tedi-text modifiers="bold" class="tedi-search-sizes__label">{{ size | titlecase }}</p>
           <div class="tedi-search-sizes__fields">
-            <tedi-search [inputId]="'size-' + size + '-plain'" [size]="size" label="Otsing" />
+            <tedi-search
+              [inputId]="'size-' + size + '-plain'"
+              [size]="size"
+              label="Otsing"
+              [ariaLabel]="'Otsing – ' + size + ', ilma nuputa'"
+            />
             <tedi-search
               [inputId]="'size-' + size + '-icon'"
               [size]="size"
               label="Otsing"
+              [ariaLabel]="'Otsing – ' + size + ', nupp ikooniga'"
               [button]="{ ariaLabel: 'Otsi' }"
             />
             <tedi-search
               [inputId]="'size-' + size + '-button'"
               [size]="size"
               label="Otsing"
+              [ariaLabel]="'Otsing – ' + size + ', nupp ikooni ja tekstiga'"
               [button]="{ text: 'Otsi' }"
             />
           </div>
@@ -826,25 +886,29 @@ export const States: Story = {
         <tedi-row *ngFor="let state of PSEUDO_STATE" cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search [inputId]="'search-states-' + state" label="Otsing" />
+            <tedi-search
+              [inputId]="'search-states-' + state"
+              label="Otsing"
+              [ariaLabel]="'Otsing – ' + state"
+            />
           </tedi-col>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">Disabled</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search inputId="search-states-disabled" label="Otsing" [disabled]="true" />
+            <tedi-search inputId="search-states-disabled" label="Otsing" ariaLabel="Otsing – Disabled" [disabled]="true" />
           </tedi-col>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">Success</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search inputId="search-states-success" label="Otsing" [feedbackText]="{ text: 'Tagasiside tekst', type: 'valid' }" />
+            <tedi-search inputId="search-states-success" label="Otsing" ariaLabel="Otsing – Success" [feedbackText]="{ text: 'Tagasiside tekst', type: 'valid' }" />
           </tedi-col>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">Error</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search inputId="search-states-error" label="Otsing" [feedbackText]="{ text: 'Tagasiside tekst', type: 'error' }" />
+            <tedi-search inputId="search-states-error" label="Otsing" ariaLabel="Otsing – Error" [feedbackText]="{ text: 'Tagasiside tekst', type: 'error' }" />
           </tedi-col>
         </tedi-row>
       </tedi-row>
