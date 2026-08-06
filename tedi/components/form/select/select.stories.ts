@@ -1159,7 +1159,7 @@ export const CustomSearchFunction: Story = {
         "
       >
         @if (events().length === 0) {
-          <span style="color: var(--general-text-tertiary);">Suhtle valikuga, et näha sündmusi.</span>
+          <span style="color: var(--general-text-tertiary);">Kasuta valikmenüüd, et näha sündmusi.</span>
         } @else {
           @for (event of events(); track $index) {
             <div>

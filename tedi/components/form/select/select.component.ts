@@ -69,11 +69,6 @@ export type VirtualRow<T = unknown> =
 export type GroupByFn<T = unknown> = (item: T) => string | undefined;
 export type CompareWithFn<T = unknown> = (a: T, b: T) => boolean;
 
-/**
- * Default value comparator. Kept as a stable module-level reference so the
- * component can detect when the identity comparison is in use and take O(1)
- * Set/Map lookup paths instead of O(n) scans (see issue #552).
- */
 const defaultCompareWith: CompareWithFn = (a, b) => a === b;
 
 export enum SpecialOptionControls {
@@ -324,9 +319,17 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   virtualScroll = input<boolean>(false);
 
   /**
-   * Row height in pixels used by the virtual scroll viewport. Only relevant when
-   * `virtualScroll` is enabled. When not set, the height is measured from the
-   * first rendered option, which covers taller custom option templates.
+   * Fixed row height in pixels for the virtual scroll viewport. Virtual scrolling
+   * assumes every row is the same height and uses this value to compute how many
+   * rows fit, the total scroll height, and where to jump when scrolling. Only
+   * relevant when `virtualScroll` is enabled.
+   *
+   * Leave unset by default: the height is auto-measured from the first rendered
+   * option, which covers the standard option template. Set it only when that
+   * measurement is unreliable — typically a custom `optionTemplate` whose rows
+   * have a known uniform height that the first row doesn't represent (e.g. only
+   * some rows carry a description line). Setting a wrong value makes rows overlap
+   * or leave gaps, so prefer auto-measurement unless you hit one of these cases.
    */
   virtualItemSize = input<number | undefined>();
 
