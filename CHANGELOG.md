@@ -1,3 +1,10 @@
+# [7.1.0-rc.25](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.24...angular-7.1.0-rc.25) (2026-08-06)
+
+
+### Features
+
+* **select:** added virtual scroll [#552](https://github.com/TEDI-Design-System/angular/issues/552) ([#553](https://github.com/TEDI-Design-System/angular/issues/553)) ([26e10ee](https://github.com/TEDI-Design-System/angular/commit/26e10ee46b196a6390a8fb399a60124b3a79c03e))
+
 # [7.1.0-rc.24](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.23...angular-7.1.0-rc.24) (2026-08-06)
 
 
