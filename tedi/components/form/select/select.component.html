@@ -222,6 +222,7 @@
   [cdkConnectedOverlayPositions]="dropdownPositions()"
   [cdkConnectedOverlayFlexibleDimensions]="true"
   [cdkConnectedOverlayGrowAfterOpen]="true"
+  (attach)="onOverlayAttached()"
   (detach)="toggleIsOpen(true)"
 >
   <div
@@ -229,6 +230,78 @@
     [style.width]="!!dropdownWidth() ? dropdownWidth() + 'px' : 'auto'"
     [style.max-height]="dropdownMaxHeight() ? dropdownMaxHeight() + 'px' : null"
   >
+    @if (virtualize()) {
+      <div
+        #virtualListbox
+        [id]="listboxId()"
+        class="tedi-select__options tedi-select__options--virtual"
+        [class.tedi-select__options--multiselect]="allowMultiple()"
+        role="listbox"
+        [attr.aria-multiselectable]="allowMultiple() ? true : null"
+        [attr.aria-labelledby]="!searchable() ? resolvedAriaLabelledby() : null"
+        [attr.aria-label]="!searchable() ? resolvedAriaLabel() : null"
+        [attr.aria-activedescendant]="activeDescendantId()"
+        [tabindex]="searchable() ? -1 : 0"
+        (keydown)="onVirtualListboxKeydown($event)"
+      >
+        @if (filteredOptions().length) {
+          @if (showSelectAllRow()) {
+            <div
+              class="tedi-dropdown-item"
+              [id]="listboxId() + '-select-all'"
+              role="option"
+              [attr.aria-selected]="allOptionsSelected()"
+              [class.tedi-dropdown-item--active]="activeIndex() === 0"
+              (click)="onVirtualSelectAllClick()"
+            >
+              <tedi-dropdown-item-value type="checkbox" [selected]="allOptionsSelected()" [indeterminate]="someOptionsSelected()">
+                <tedi-dropdown-item-value-label>{{ "select.select-all" | tediTranslate }}</tedi-dropdown-item-value-label>
+              </tedi-dropdown-item-value>
+            </div>
+          }
+          <cdk-virtual-scroll-viewport
+            class="tedi-select__viewport"
+            [itemSize]="virtualRowHeight()"
+            [style.height.px]="virtualViewportHeight()"
+            [minBufferPx]="virtualRowHeight() * 6"
+            [maxBufferPx]="virtualRowHeight() * 12"
+          >
+            <div
+              *cdkVirtualFor="let option of filteredOptions(); let i = index; trackBy: trackByOptionValue"
+              class="tedi-dropdown-item"
+              [id]="virtualOptionId(i)"
+              role="option"
+              [attr.aria-selected]="isOptionSelected(option.value)"
+              [attr.aria-disabled]="option.disabled ? true : null"
+              [class.tedi-dropdown-item--selected]="!allowMultiple() && isOptionSelected(option.value)"
+              [class.tedi-dropdown-item--disabled]="option.disabled"
+              [class.tedi-dropdown-item--custom]="optionTemplate()"
+              [class.tedi-dropdown-item--active]="activeIndex() - (showSelectAllRow() ? 1 : 0) === i"
+              (click)="onVirtualOptionClick(option)"
+            >
+              @if (optionTemplate(); as tpl) {
+                <ng-container
+                  [ngTemplateOutlet]="tpl.template"
+                  [ngTemplateOutletContext]="getOptionContext(option, i)"
+                />
+              } @else {
+                <tedi-dropdown-item-value
+                  [type]="allowMultiple() ? 'checkbox' : 'default'"
+                  [selected]="isOptionSelected(option.value)"
+                  [disabled]="!!option.disabled"
+                >
+                  <tedi-dropdown-item-value-label>{{ option.label }}</tedi-dropdown-item-value-label>
+                </tedi-dropdown-item-value>
+              }
+            </div>
+          </cdk-virtual-scroll-viewport>
+        } @else {
+          <div class="tedi-dropdown-item tedi-select__no-options" role="option" aria-disabled="true">
+            {{ noOptionsMessage() || ("select.no-options" | tediTranslate) }}
+          </div>
+        }
+      </div>
+    } @else {
     <ul
       [id]="listboxId()"
       class="tedi-select__options"
@@ -308,5 +381,6 @@
         </li>
       }
     </ul>
+    }
   </div>
 </ng-template>
