@@ -96,6 +96,7 @@ const COMMON_INPUTS = [
   "tagEllipsis",
   "isTagRemovable",
   "useNativePicker",
+  "hideOnScroll",
   "modal",
   "fullscreen",
   "calendarTrigger",
@@ -159,6 +160,7 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
           [tagEllipsis]="tagEllipsis"
           [isTagRemovable]="isTagRemovable"
           [useNativePicker]="useNativePicker"
+          [hideOnScroll]="hideOnScroll"
           [modal]="modal"
           [fullscreen]="fullscreen"
           [calendarTrigger]="calendarTrigger"
@@ -241,6 +243,7 @@ export default {
     tagEllipsis: false,
     isTagRemovable: true,
     useNativePicker: false,
+    hideOnScroll: false,
     modal: false,
     fullscreen: false,
     calendarTrigger: "button",
@@ -565,6 +568,16 @@ export default {
           summary: "DateFieldUseNativePicker",
           detail: 'boolean \n"sm" | "md" | "lg" | "xl"',
         },
+        defaultValue: { summary: "false" },
+      },
+    },
+    hideOnScroll: {
+      description:
+        "Closes the calendar popover when the page (or a scrollable ancestor) scrolls. Scrolling inside the calendar or its nested year/month dropdown keeps it open. Only affects the popover, not the modal.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
     },

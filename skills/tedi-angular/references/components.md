@@ -1050,6 +1050,7 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 - `enableCalendar: BreakpointObject<boolean> = { xs: true }` — enables the calendar picker UI. `false` hides the icon button and popover/modal — typing only
 - `calendarTrigger: BreakpointObject<"input" | "button"> = { xs: "button" }` — what opens the calendar: `"button"` (icon) or `"input"` (the whole input)
 - `useNativePicker: boolean | "sm" | "md" | "lg" | "xl" = false` — uses the OS-native date picker instead of the custom popover (single mode only). `true` always, `false` never, a breakpoint name uses native below that breakpoint and the custom popover from it upward
+- `hideOnScroll: boolean = false` — closes the calendar popover when the page (or a scrollable ancestor) scrolls. Scrolling inside the calendar or its nested year/month dropdown keeps it open. Only affects the popover, not the modal
 - `modal: boolean | "sm" | "md" | "lg" | "xl" = false` — opens the calendar in a centered modal (with explicit Cancel/Confirm) instead of the popover. `true` always, `false` never, a breakpoint name means modal below that breakpoint
 - `fullscreen: boolean | "sm" | "md" | "lg" | "xl" = false` — render the calendar modal fullscreen. `true` always, `false` never, a breakpoint name makes it fullscreen below that breakpoint. Only applies when the calendar opens as a modal (see `modal`)
 - `formatDate: ((value: DateFieldValue) => string) | undefined` — custom formatter for displaying the date value; callback receives the value and returns a display string
