@@ -1044,6 +1044,39 @@ describe("SelectComponent", () => {
       expect(activeElement!.getAttribute("role")).toBe("option");
     }));
 
+    it("search input should reference the listbox only while open", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+
+      expect(getSearchInput().getAttribute("aria-controls")).toBeNull();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const ariaControls = getSearchInput().getAttribute("aria-controls");
+      expect(ariaControls).toBe("test-select-listbox");
+      expect(document.getElementById(ariaControls!)).toBeTruthy();
+    }));
+
+    it("multiselect search input should reference the listbox only while open", fakeAsync(() => {
+      host.searchable = true;
+      host.allowMultiple = true;
+      host.control.setValue(["Option 1"]);
+      fixture.detectChanges();
+      tick();
+
+      expect(getSearchInput().getAttribute("aria-controls")).toBeNull();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const ariaControls = getSearchInput().getAttribute("aria-controls");
+      expect(ariaControls).toBe("test-select-listbox");
+      expect(document.getElementById(ariaControls!)).toBeTruthy();
+    }));
+
     it("should mark active option on navigation", fakeAsync(() => {
       host.searchable = true;
       fixture.detectChanges();
