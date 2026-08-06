@@ -273,6 +273,32 @@ export const Controlled: Story = {
   }),
 };
 
+export const AsLinks: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Render triggers as `<a>` instead of `<button>` when a tab navigates to a route — this gives real link affordances (open in new tab, copy address, works without JS) as WCAG expects for navigation. The anchor keeps `role=\"tab\"` semantics. Unlike button tabs (automatic activation), anchor tabs use **manual activation**: arrow keys only move focus and Enter/Space follows the link, so arrowing across route-links doesn't navigate on every keypress. Use `routerLink` for Angular routing and bind `[value]` to the current route; this demo uses plain `href` hash links with in-page panels.",
+      },
+    },
+  },
+  render: () => ({
+    props: { content },
+    template: `
+      <tedi-tabs defaultValue="link-1">
+        <tedi-tabs-list aria-label="Lingina sakid">
+          <a tedi-tabs-trigger id="link-1" href="#link-1-panel">Terviseteekond</a>
+          <a tedi-tabs-trigger id="link-2" href="#link-2-panel">Haiguste kulg</a>
+          <a tedi-tabs-trigger id="link-3" href="#link-3-panel">Ravimite ajalugu</a>
+        </tedi-tabs-list>
+        <tedi-tabs-content id="link-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="link-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="link-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
+      </tedi-tabs>
+    `,
+  }),
+};
+
 export const WithDisabledTab: Story = {
   render: () => ({
     props: { content },

@@ -1794,14 +1794,14 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
   - `aria-label: string` / `aria-labelledby: string` — accessible name for the tablist
   - `overflowMode: "dropdown" | "scroll" = "dropdown"` — when tabs don't fit, either collapse overflowing tabs into a "More" dropdown or enable horizontal scrolling with fade indicators
   - `dropdownLabel: string` — label for the overflow dropdown trigger; falls back to the `more` translation (`Veel` in et)
-- `button[tedi-tabs-trigger]` — a tab button (applied to a native `<button>`).
+- `button[tedi-tabs-trigger]`, `a[tedi-tabs-trigger]` — a tab trigger. Use `<button>` for in-page tabs, or `<a>` (with `href`/`routerLink`) for a tab that navigates to a route — the anchor keeps `role="tab"` semantics but is a real link (WCAG-friendly: open-in-new-tab, copy address, keyboard). A disabled `<a>` gets `aria-disabled` instead of the `disabled` attribute. Modifier/middle clicks and `target="_blank"` open the link without changing the active tab in the current view. Note: a disabled anchor stays unreachable via pointer/keyboard, but `routerLink` navigates from its own click handler — bind `[routerLink]="disabled ? null : path"` so a disabled routed tab can't navigate.
   - `id: string` (required) — links to the matching `tedi-tabs-content` panel (`aria-controls="{id}-panel"`)
   - `icon: string` — Material Symbols icon shown before the label
   - `disabled: boolean = false`
 - `tedi-tabs-content` — a tab panel (`role="tabpanel"`).
   - `id: string` — when set, shown only while that tab is active; omit to always render (e.g. for a router outlet)
 
-Keyboard: Arrow Left/Right (with wrap), Home/End move focus between enabled tabs; only the active tab is in the tab order. Disabled tabs are skipped. Full WAI-ARIA tab pattern.
+Keyboard: Arrow Left/Right (with wrap), Home/End move focus between enabled tabs; only the active tab is in the tab order. Disabled tabs are skipped. Full WAI-ARIA tab pattern. Activation mode differs by element: `<button>` tabs use **automatic activation** (arrow keys move focus and activate), while `<a>` tabs use **manual activation** (arrows only move focus; Enter/Space follows the link) so arrowing across route-links doesn't navigate on every keypress.
 
 ```html
 <tedi-tabs defaultValue="tab-1">
@@ -1826,6 +1826,18 @@ Controlled usage:
   </tedi-tabs-list>
   <tedi-tabs-content id="tab-1">First panel</tedi-tabs-content>
   <tedi-tabs-content id="tab-2">Second panel</tedi-tabs-content>
+</tedi-tabs>
+```
+
+Routed tabs (anchors) — bind `[value]` to the current route and let each link navigate; use an id-less `tedi-tabs-content` to wrap the router outlet:
+
+```html
+<tedi-tabs [value]="router.url">
+  <tedi-tabs-list aria-label="Section tabs">
+    <a tedi-tabs-trigger id="/toimingud" routerLink="/toimingud">Toimingud</a>
+    <a tedi-tabs-trigger id="/dokumendid" routerLink="/dokumendid">Dokumendid</a>
+  </tedi-tabs-list>
+  <tedi-tabs-content><router-outlet /></tedi-tabs-content>
 </tedi-tabs>
 ```
 
