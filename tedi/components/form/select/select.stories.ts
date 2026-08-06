@@ -27,6 +27,12 @@ import { Component, signal } from "@angular/core";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 import { TextComponent } from "../../base/text/text.component";
 
+const longLabelOptions = [
+  { value: "a", label: "A fairly long option label that does not fit" },
+  { value: "b", label: "Another rather long option label" },
+  { value: "c", label: "2026-06-25 kvartaalne finantsaruanne" },
+];
+
 const simpleOptions = [
   { value: "tallinn", label: "Tallinn" },
   { value: "narva", label: "Narva" },
@@ -132,7 +138,7 @@ const meta: Meta<SelectComponent> = {
       control: "radio",
       options: [false, "start", "end"],
       description:
-        "Which end a tag's label truncates from when it doesn't fit. `false` never truncates; `end` → `label…`; `start` → `…label`.",
+        "Which end a tag's label truncates from: `end` → `label…`, `start` → `…label`; `false` never truncates. In a single row the tags share the row with the \"+N\" counter, so an over-wide label truncates to fit; with `multiRow` the tags wrap first, so a label only truncates when it is wider than the field on its own.",
     },
     ellipsis: {
       control: "radio",
@@ -526,13 +532,12 @@ export const ValueType: Story = {
         />
         <tedi-select
           inputId="value-multiselect-one-row"
-          label="Multiselect one row (tagEllipsis=&quot;end&quot;)"
+          label="Multiselect one row"
           [options]="oneRowOptions"
           [allowMultiple]="true"
           [multiRow]="false"
           [isTagRemovable]="true"
           [clearable]="true"
-          tagEllipsis="end"
           formControlName="oneRow"
         />
         <div style="width: 100px;">
@@ -592,6 +597,66 @@ export const ValueType: Story = {
           </tedi-select>
         </div>
       </form>
+    `,
+  }),
+};
+
+/**
+ * `tagEllipsis` truncates a selected tag's label: `end` → `label…`, `start` →
+ * `…label`, which keeps the most significant part of values like dates readable.
+ * The remove button stays in place.
+ *
+ * In a single row the tags share the row with the "+N" counter, so an over-wide
+ * label truncates to fit. With `multiRow` the tags wrap first, so a label only
+ * truncates when it is wider than the field on its own.
+ */
+export const EllipsisTags: Story = {
+  render: () => ({
+    props: {
+      options: longLabelOptions,
+      endControl: new FormControl(longLabelOptions.map((option) => option.value)),
+      startControl: new FormControl(longLabelOptions.map((option) => option.value)),
+      multiRowControl: new FormControl(longLabelOptions.map((option) => option.value)),
+    },
+    template: `
+      <div style="max-width: 20rem; display: flex; flex-direction: column;" [tediVerticalSpacing]="1">
+        <tedi-select
+          inputId="ellipsis-tags-end"
+          label="Truncate the end"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+          [allowMultiple]="true"
+          tagEllipsis="end"
+          [isTagRemovable]="true"
+          [clearable]="true"
+          [formControl]="endControl"
+        />
+        <tedi-select
+          inputId="ellipsis-tags-start"
+          label="Truncate the start"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+          [allowMultiple]="true"
+          tagEllipsis="start"
+          [isTagRemovable]="true"
+          [clearable]="true"
+          [formControl]="startControl"
+        />
+        <tedi-select
+          inputId="ellipsis-tags-multi-row"
+          label="Truncate the end, stacked"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+          [allowMultiple]="true"
+          [multiRow]="true"
+          tagEllipsis="end"
+          [isTagRemovable]="true"
+          [formControl]="multiRowControl"
+        />
+      </div>
     `,
   }),
 };

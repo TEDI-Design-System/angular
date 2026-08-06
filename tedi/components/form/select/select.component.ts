@@ -245,8 +245,13 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   multiRow = input<boolean>(false);
 
   /**
-   * Which end a selected tag's label truncates from when it doesn't fit.
-   * `false` (default) never truncates; `end` → `label…`; `start` → `…label`.
+   * Which end a selected tag's label truncates from: `end` → `label…`, `start` →
+   * `…label`. `false` (default) never truncates.
+   *
+   * Truncation needs the tag to be width-constrained: in a single row the tags
+   * share the row with the `+N` counter, so an over-wide label truncates to fit.
+   * With `multiRow` the tags wrap first, so a label truncates only when it is
+   * wider than the field on its own.
    * @default false
    */
   tagEllipsis = input<TagEllipsis>(false);

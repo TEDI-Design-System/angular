@@ -437,6 +437,27 @@ describe("SelectComponent", () => {
       expect(tags.length).toBe(2);
     }));
 
+    it("should let the tags row shrink only when tagEllipsis is set", fakeAsync(() => {
+      host.control.setValue(["Option 1", "Option 2"]);
+      fixture.detectChanges();
+      tick();
+
+      const container = () =>
+        hostEl.querySelector(".tedi-select__multiselect-container") as HTMLElement;
+
+      expect(container().classList).not.toContain(
+        "tedi-select__multiselect-container--ellipsis",
+      );
+
+      host.tagEllipsis = "end";
+      fixture.detectChanges();
+      tick();
+
+      expect(container().classList).toContain(
+        "tedi-select__multiselect-container--ellipsis",
+      );
+    }));
+
     it("forwards tagEllipsis to the rendered tags", fakeAsync(() => {
       host.control.setValue(["Option 1", "Option 2"]);
       fixture.detectChanges();
@@ -979,6 +1000,12 @@ describe("SelectComponent", () => {
       expect(trigger.getAttribute("aria-haspopup")).toBe("listbox");
     });
 
+    it("trigger should not have aria-controls while closed", () => {
+      // The listbox only exists inside the open overlay, so keeping the
+      // reference while closed would point at a missing element.
+      expect(getTrigger().getAttribute("aria-controls")).toBeNull();
+    });
+
     it("trigger should have aria-controls referencing listbox", fakeAsync(() => {
       const trigger = getTrigger();
       trigger.click();
@@ -1015,6 +1042,39 @@ describe("SelectComponent", () => {
       const activeElement = document.querySelector(`[id="${activeDescendantId}"]`);
       expect(activeElement).toBeTruthy();
       expect(activeElement!.getAttribute("role")).toBe("option");
+    }));
+
+    it("search input should reference the listbox only while open", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+
+      expect(getSearchInput().getAttribute("aria-controls")).toBeNull();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const ariaControls = getSearchInput().getAttribute("aria-controls");
+      expect(ariaControls).toBe("test-select-listbox");
+      expect(document.getElementById(ariaControls!)).toBeTruthy();
+    }));
+
+    it("multiselect search input should reference the listbox only while open", fakeAsync(() => {
+      host.searchable = true;
+      host.allowMultiple = true;
+      host.control.setValue(["Option 1"]);
+      fixture.detectChanges();
+      tick();
+
+      expect(getSearchInput().getAttribute("aria-controls")).toBeNull();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const ariaControls = getSearchInput().getAttribute("aria-controls");
+      expect(ariaControls).toBe("test-select-listbox");
+      expect(document.getElementById(ariaControls!)).toBeTruthy();
     }));
 
     it("should mark active option on navigation", fakeAsync(() => {
