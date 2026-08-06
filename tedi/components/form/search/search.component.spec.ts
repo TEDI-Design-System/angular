@@ -99,10 +99,24 @@ describe("SearchComponent", () => {
       expect(getInput().getAttribute("aria-label")).toBe("Otsi tooteid");
     });
 
+    it("should fall back to the placeholder when that is all there is", () => {
+      fixture.componentRef.setInput("placeholder", "Otsi siit");
+      fixture.detectChanges();
+      expect(getInput().getAttribute("aria-label")).toBe("Otsi siit");
+    });
+
     it("should leave naming to the visible label when one is rendered", () => {
       fixture.componentRef.setInput("label", "Otsing");
       fixture.detectChanges();
       expect(getInput().getAttribute("aria-label")).toBeNull();
+    });
+
+    it("should keep the visible label even when ariaLabel is also set", () => {
+      fixture.componentRef.setInput("label", "Otsing");
+      fixture.componentRef.setInput("ariaLabel", "Otsi tooteid");
+      fixture.detectChanges();
+      expect(getInput().getAttribute("aria-label")).toBeNull();
+      expect(el.getAttribute("aria-label")).toBe("Otsi tooteid");
     });
   });
 
