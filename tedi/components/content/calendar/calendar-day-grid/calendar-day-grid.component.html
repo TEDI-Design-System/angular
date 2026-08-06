@@ -8,11 +8,9 @@
   <thead>
     <tr class="tedi-calendar-day-grid__header" role="row">
       @if (showWeekNumbers()) {
-        <th
-          class="tedi-calendar-day-grid__week-number-header"
-          scope="col"
-          [attr.aria-label]="weekNumberHeaderLabel()"
-        ></th>
+        <th class="tedi-calendar-day-grid__week-number-header" scope="col">
+          <span class="sr-only">{{ weekNumberHeaderLabel() }}</span>
+        </th>
       }
       @for (name of weekdayNames(); track $index; let i = $index) {
         <th
@@ -21,7 +19,7 @@
           scope="col"
           [attr.aria-label]="weekdayFullNames()[i]"
         >
-          <span aria-hidden="true">{{ name }}</span>
+          {{ name }}
         </th>
       }
     </tr>
@@ -30,20 +28,24 @@
     @for (row of grid(); track rowKey(row, $index)) {
       <tr class="tedi-calendar-day-grid__row" role="row">
         @if (showWeekNumbers()) {
-          <td
+          <th
             class="tedi-calendar-day-grid__week-number"
             role="rowheader"
             scope="row"
             [attr.aria-label]="weekNumberLabel(row)"
           >
-            <span aria-hidden="true">{{ weekNumber(row) }}</span>
-          </td>
+            {{ weekNumber(row) }}
+          </th>
         }
         @for (day of row; track cellKey(day, $index)) {
-          <td class="tedi-calendar-day-grid__cell" role="gridcell">
+          <td
+            class="tedi-calendar-day-grid__cell"
+            [attr.role]="day ? 'presentation' : 'gridcell'"
+          >
             @if (day) {
               <button
                 type="button"
+                role="gridcell"
                 [class]="cellState(day)"
                 [attr.aria-selected]="isSelected(day) ? 'true' : null"
                 [attr.aria-disabled]="isDisabled(day) ? 'true' : null"

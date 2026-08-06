@@ -1,4 +1,4 @@
-import { NgFor, NgIf, NgTemplateOutlet } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,7 +6,6 @@ import {
   contentChild,
   Directive,
   effect,
-  ElementRef,
   inject,
   input,
   model,
@@ -30,6 +29,7 @@ import { PopoverContentComponent } from "../../../overlay/popover/popover-conten
 import { SeparatorComponent } from "../../../helpers/separator/separator.component";
 import { IconSize } from "../../../base/icon/icon.component";
 import { HeaderProfileComponent } from "../header-profile/header-profile.component";
+import { SearchComponent } from "../../../form/search/search.component";
 
 export type RepresentativeIcon = {
   /** Material Icon name. */
@@ -108,8 +108,6 @@ let nextHeaderRoleInputId = 0;
   selector: "tedi-header-role",
   standalone: true,
   imports: [
-    NgFor,
-    NgIf,
     NgTemplateOutlet,
     PopoverComponent,
     PopoverTriggerDirective,
@@ -120,6 +118,7 @@ let nextHeaderRoleInputId = 0;
     ShowAtDirective,
     HideAtDirective,
     SeparatorComponent,
+    SearchComponent,
   ],
   templateUrl: "./header-role.component.html",
   styleUrl: "./header-role.component.scss",
@@ -229,8 +228,7 @@ export class HeaderRoleComponent {
 
   private readonly popover = viewChild(PopoverComponent);
 
-  private readonly searchInput =
-    viewChild<ElementRef<HTMLInputElement>>("searchInput");
+  private readonly searchInput = viewChild(SearchComponent);
 
   private previousPopoverOpen: boolean | undefined;
 
@@ -249,7 +247,7 @@ export class HeaderRoleComponent {
     // popover's setTimeout and cause focus loss.
     effect(() => {
       if (this.popover()?.isOpen() && this.showSearch()) {
-        setTimeout(() => this.searchInput()?.nativeElement.focus());
+        setTimeout(() => this.searchInput()?.focus());
       }
     });
 
@@ -346,12 +344,9 @@ export class HeaderRoleComponent {
     this.popover()?.hidePopover();
   }
 
-  handleInputChange(event: Event) {
-    const value = (event.target as HTMLInputElement).value;
+  handleInputChange(value: string) {
     this.inputValue.set(value);
   }
-
-  trackById = (_: number, r: Representative) => r.id;
 
   protected resolveIcon(
     icon: string | RepresentativeIcon | undefined,

@@ -638,11 +638,12 @@ export const ActionTypes: StoryObj = {
         }
       </style>
       <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
+        <h4 tedi-text>Clickable header</h4>
         <div class="story-row">
           <tedi-accordion>
             <tedi-accordion-item>
               <tedi-accordion-item-header>
-                <span tedi-accordion-title>Pealkiri</span>
+                <span tedi-accordion-title>Pealkiri 1</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -650,21 +651,22 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item [defaultExpanded]="true">
               <tedi-accordion-item-header>
-                <span tedi-accordion-title>Pealkiri</span>
+                <span tedi-accordion-title>Pealkiri 2</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
+        <h4 tedi-text>Separate button at start</h4>
         <div class="story-row">
           <tedi-accordion>
             <tedi-accordion-item>
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openText="Pealkiri"
-                closeText="Pealkiri"
+                openText="Pealkiri 3"
+                closeText="Pealkiri 3"
               />
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -674,19 +676,20 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openText="Pealkiri"
-                closeText="Pealkiri"
+                openText="Pealkiri 4"
+                closeText="Pealkiri 4"
               />
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
+        <h4 tedi-text>Arrow without label</h4>
         <div class="story-row">
           <tedi-accordion>
             <tedi-accordion-item>
               <tedi-accordion-item-header [showExpandLabel]="false">
-                <span tedi-accordion-title>Pealkiri</span>
+                <span tedi-accordion-title>Pealkiri 5</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -694,18 +697,19 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item [defaultExpanded]="true">
               <tedi-accordion-item-header [showExpandLabel]="false">
-                <span tedi-accordion-title>Pealkiri</span>
+                <span tedi-accordion-title>Pealkiri 6</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
+        <h4 tedi-text>Icon arrow at start</h4>
         <div class="story-row">
           <tedi-accordion>
             <tedi-accordion-item>
               <tedi-accordion-item-header [showExpandLabel]="false" [expandActionPosition]="'start'">
-                <span tedi-accordion-title>Pealkiri</span>
+                <span tedi-accordion-title>Pealkiri 7</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
@@ -713,21 +717,22 @@ export const ActionTypes: StoryObj = {
           <tedi-accordion>
             <tedi-accordion-item [defaultExpanded]="true">
               <tedi-accordion-item-header [showExpandLabel]="false" [expandActionPosition]="'start'">
-                <span tedi-accordion-title>Pealkiri</span>
+                <span tedi-accordion-title>Pealkiri 8</span>
               </tedi-accordion-item-header>
               <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
             </tedi-accordion-item>
           </tedi-accordion>
         </div>
 
+        <h4 tedi-text>Custom action</h4>
         <div class="story-row">
           <tedi-accordion>
             <tedi-accordion-item [selected]="selectedA">
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openText="Pealkiri"
-                closeText="Pealkiri"
+                openText="Pealkiri 9"
+                closeText="Pealkiri 9"
               >
                 ${actionButtonTemplate("selectedA", "toggleA")}
               </tedi-accordion-item-header>
@@ -740,8 +745,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openText="Pealkiri"
-                closeText="Pealkiri"
+                openText="Pealkiri 10"
+                closeText="Pealkiri 10"
               >
                 ${actionButtonTemplate("selectedB", "toggleB")}
               </tedi-accordion-item-header>
@@ -750,14 +755,15 @@ export const ActionTypes: StoryObj = {
           </tedi-accordion>
         </div>
 
+        <h4 tedi-text>Selected state</h4>
         <div class="story-row">
           <tedi-accordion>
             <tedi-accordion-item [selected]="selectedC">
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openText="Pealkiri"
-                closeText="Pealkiri"
+                openText="Pealkiri 11"
+                closeText="Pealkiri 11"
               >
                 ${actionButtonTemplate("selectedC", "toggleC")}
               </tedi-accordion-item-header>
@@ -770,8 +776,8 @@ export const ActionTypes: StoryObj = {
               <tedi-accordion-item-header
                 [headerClickable]="false"
                 expandActionPosition="start"
-                openText="Pealkiri"
-                closeText="Pealkiri"
+                openText="Pealkiri 12"
+                closeText="Pealkiri 12"
               >
                 ${actionButtonTemplate("selectedD", "toggleD")}
               </tedi-accordion-item-header>
@@ -801,13 +807,6 @@ export const ActionTypes: StoryObj = {
       },
     },
   }),
-  parameters: {
-    a11y: {
-      config: {
-        rules: [{ id: "landmark-unique", enabled: false }],
-      },
-    },
-  },
 };
 
 export const WithIconCard: StoryObj = {

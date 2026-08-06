@@ -1,6 +1,6 @@
 <ng-content select="label[tedi-label]"></ng-content>
 
-<div [ngClass]="inputClasses()">
+<div [ngClass]="inputClasses()" (mousedown)="handleBoxMouseDown($event)">
   <ng-content select="input[tedi-text-field], tedi-time-field, tedi-date-field"></ng-content>
 
   @if (clearable()) {
@@ -31,8 +31,8 @@
     <div class="tedi-form-field__icon">
       <tedi-icon
         [name]="icon.name"
-        [size]="icon.size ?? (size() === 'small' ? 16 : 18)"
-        [color]="icon.color ?? 'secondary'"
+        [size]="icon.size ?? (size() === 'small' ? 16 : size() === 'large' ? 24 : 18)"
+        [color]="icon.color ?? 'inherit'"
         [type]="icon.type ?? 'outlined'"
         [variant]="icon.variant ?? 'outlined'"
         [attr.aria-hidden]="true"

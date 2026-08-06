@@ -14,9 +14,9 @@
     <div
       #fieldEl
       tedi-popover-trigger
+      [interactive]="false"
       class="tedi-time-field__field"
       [class.tedi-time-field__field--button-trigger]="!inputIsTrigger()"
-      [attr.role]="null"
       [attr.tabindex]="-1"
       (focus)="onFieldFocus($event)"
       (click)="onFieldClick()"

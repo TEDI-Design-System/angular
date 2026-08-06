@@ -102,16 +102,6 @@ export class DateInputComponent implements AfterViewChecked {
 
   constructor() {
     effect(() => {
-      const ref = this.inputElement();
-      const target = ref?.nativeElement as HTMLInputElement | undefined;
-      if (!target) return;
-      const next = this.inputValue();
-      if (target.value !== next) {
-        target.value = next;
-      }
-    });
-
-    effect(() => {
       // Re-measure whenever the tag set changes.
       this.tags();
       this.visibleTagsCount.set(null);
@@ -171,6 +161,14 @@ export class DateInputComponent implements AfterViewChecked {
   readonly clearAriaLabel = this.translationService.track(
     "date-picker.clear-date",
   );
+
+  /** Moves focus to the text input. Used by the wrapping field. */
+  focusInput(): void {
+    const target = this.inputElement()?.nativeElement as
+      | HTMLInputElement
+      | undefined;
+    target?.focus();
+  }
 
   handleInput(event: Event): void {
     const target = event.target as HTMLInputElement;

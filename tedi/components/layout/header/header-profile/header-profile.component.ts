@@ -9,6 +9,7 @@ import {
   inject,
   input,
   Renderer2,
+  RendererStyleFlags2,
   signal,
   ViewEncapsulation,
 } from "@angular/core";
@@ -210,6 +211,29 @@ export class HeaderProfileComponent
     );
 
     this.destroyRef.onDestroy(cleanup);
+
+    // The modal/overlay sit below the header. Its height varies with the optional
+    // top/bottom bars, so track the actual rendered header height and expose it as
+    // `--header-profile-offset`. Keeping it always up to date (not just on open) means
+    // the modal opens at the correct position with no jump.
+    const headerEl = element.closest("header");
+
+    if (headerEl && typeof ResizeObserver !== "undefined") {
+      const updateOffset = () => {
+        this.renderer.setStyle(
+          element,
+          "--header-profile-offset",
+          `${headerEl.getBoundingClientRect().height}px`,
+          RendererStyleFlags2.DashCase,
+        );
+      };
+
+      updateOffset();
+
+      const resizeObserver = new ResizeObserver(updateOffset);
+      resizeObserver.observe(headerEl);
+      this.destroyRef.onDestroy(() => resizeObserver.disconnect());
+    }
   }
 
   handleModalOpen() {

@@ -154,6 +154,85 @@ describe("HeaderProfileComponent", () => {
     });
   });
 
+  describe("header offset (--header-profile-offset)", () => {
+    let headerEl: HTMLElement;
+    let resizeCallback: ResizeObserverCallback | undefined;
+    let observeSpy: jest.Mock;
+    let disconnectSpy: jest.Mock;
+    let originalResizeObserver: typeof globalThis.ResizeObserver;
+
+    const rectWithHeight = (height: number): DOMRect => ({
+      height,
+      width: 0,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: height,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+
+    const host = () => fixture.nativeElement as HTMLElement;
+
+    beforeEach(() => {
+      observeSpy = jest.fn();
+      disconnectSpy = jest.fn();
+      resizeCallback = undefined;
+      originalResizeObserver = globalThis.ResizeObserver;
+
+      class MockResizeObserver {
+        constructor(callback: ResizeObserverCallback) {
+          resizeCallback = callback;
+        }
+        observe = observeSpy;
+        unobserve = jest.fn();
+        disconnect = disconnectSpy;
+      }
+      globalThis.ResizeObserver =
+        MockResizeObserver as unknown as typeof ResizeObserver;
+
+      headerEl = document.createElement("header");
+      headerEl.getBoundingClientRect = jest.fn(() => rectWithHeight(120));
+      headerEl.appendChild(host());
+      documentMock.body.appendChild(headerEl);
+    });
+
+    afterEach(() => {
+      headerEl.remove();
+      globalThis.ResizeObserver = originalResizeObserver;
+    });
+
+    it("sets --header-profile-offset to the header height and observes the header", () => {
+      component.ngAfterContentInit();
+
+      expect(host().style.getPropertyValue("--header-profile-offset")).toBe(
+        "120px",
+      );
+      expect(observeSpy).toHaveBeenCalledWith(headerEl);
+    });
+
+    it("updates the offset when the header resizes", () => {
+      component.ngAfterContentInit();
+      (headerEl.getBoundingClientRect as jest.Mock).mockReturnValue(
+        rectWithHeight(64),
+      );
+
+      resizeCallback?.([], {} as unknown as ResizeObserver);
+
+      expect(host().style.getPropertyValue("--header-profile-offset")).toBe(
+        "64px",
+      );
+    });
+
+    it("disconnects the observer when the component is destroyed", () => {
+      component.ngAfterContentInit();
+      fixture.destroy();
+
+      expect(disconnectSpy).toHaveBeenCalled();
+    });
+  });
+
   describe("buttonVariant", () => {
     it("should return 'neutral' when below 'md' breakpoint", () => {
       const mockSignal = signal(true);

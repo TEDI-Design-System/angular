@@ -53,7 +53,15 @@
   </div>
 }
 
-<div class="tedi-table__scroll" [attr.style]="maxHeightStyle()" cdkScrollable>
+<div
+  #scrollContainer
+  class="tedi-table__scroll"
+  [attr.style]="maxHeightStyle()"
+  cdkScrollable
+  tabindex="0"
+  role="group"
+  [attr.aria-label]="scrollRegionLabel()"
+>
   <table
     class="tedi-table__table"
     [attr.id]="id() || null"
@@ -89,7 +97,7 @@
             @if (shouldRenderHeader(header, rowIndex)) {
               @let meta = getColumnMeta(header.column);
               @let ariaSort = getHeaderAriaSort(header.column);
-              @let headerLabel = getHeaderLabel(header.column);
+              @let srHeaderLabel = getSrOnlyHeaderLabel(header.column);
               @let rowSpan = getHeaderRowSpan(header, rowIndex);
               <th
                 scope="col"
@@ -122,12 +130,14 @@
                 [attr.colspan]="header.colSpan > 1 ? header.colSpan : null"
                 [attr.rowspan]="rowSpan"
                 [attr.aria-sort]="ariaSort"
-                [attr.aria-label]="headerLabel"
                 [style.width.px]="headerCellWidth(header.column)"
                 [style.min-width.px]="columnMinWidth(header.column)"
                 [style.max-width.px]="columnMaxWidth(header.column)"
                 [style.left.px]="stickyLeft(header.column.id)"
               >
+                @if (srHeaderLabel) {
+                  <span class="tedi-table__sr-only">{{ srHeaderLabel }}</span>
+                }
                 @if (header.column.id === SELECT_COLUMN_ID) {
                   @if (selectionMode() === "multiple") {
                     <input
@@ -380,7 +390,9 @@
                 ? ' tedi-table__row--picked-up'
                 : '')
             "
-            [attr.role]="interactive() ? 'button' : null"
+            [attr.role]="
+              interactive() && !rowHasNestedInteractive(row) ? 'button' : null
+            "
             [attr.tabindex]="interactive() ? 0 : null"
             [attr.aria-label]="rowAriaLabelFor(row)"
             [attr.aria-rowindex]="ariaRowIndex"
@@ -488,7 +500,9 @@
                           [closeText]="expandButtonCloseText()"
                           [open]="expandOpen"
                           [id]="resolvedId() + '-expand-' + row.id"
-                          [ariaControls]="subRowId"
+                          [ariaControls]="
+                            renderSubComponent() ? subRowId : undefined
+                          "
                           [ariaLabel]="
                             expandButtonHasLabel()
                               ? undefined

@@ -21,41 +21,37 @@ describe("HeaderContentComponent", () => {
     expect(fixture.nativeElement.classList).toContain("tedi-header-content");
   });
 
-  it("should default to the center alignment modifier", () => {
-    expect(fixture.nativeElement.classList).toContain(
-      "tedi-header-content--center",
-    );
+  it("should default to the center justify-content utility", () => {
+    expect(fixture.nativeElement.classList).toContain("justify-content-center");
   });
 
-  it.each<HeaderContentAlignment>(["flex-start", "center", "space-between"])(
-    "should apply the %s alignment modifier when set",
-    (alignment) => {
-      fixture.componentRef.setInput("alignment", alignment);
-      fixture.detectChanges();
+  it.each<[HeaderContentAlignment, string]>([
+    ["flex-start", "justify-content-start"],
+    ["center", "justify-content-center"],
+    ["flex-end", "justify-content-end"],
+    ["space-between", "justify-content-between"],
+    ["space-around", "justify-content-around"],
+    ["space-evenly", "justify-content-evenly"],
+  ])("applies the %s alignment as the %s utility", (alignment, utility) => {
+    fixture.componentRef.setInput("alignment", alignment);
+    fixture.detectChanges();
 
-      expect(fixture.nativeElement.classList).toContain(
-        `tedi-header-content--${alignment}`,
-      );
-    },
-  );
+    expect(fixture.nativeElement.classList).toContain(utility);
+  });
 
-  it("should swap the modifier class when alignment changes", () => {
+  it("should swap the utility class when alignment changes", () => {
     fixture.componentRef.setInput("alignment", "space-between");
     fixture.detectChanges();
-    expect(fixture.nativeElement.classList).toContain(
-      "tedi-header-content--space-between",
-    );
+    expect(fixture.nativeElement.classList).toContain("justify-content-between");
     expect(fixture.nativeElement.classList).not.toContain(
-      "tedi-header-content--center",
+      "justify-content-center",
     );
 
     fixture.componentRef.setInput("alignment", "flex-start");
     fixture.detectChanges();
-    expect(fixture.nativeElement.classList).toContain(
-      "tedi-header-content--flex-start",
-    );
+    expect(fixture.nativeElement.classList).toContain("justify-content-start");
     expect(fixture.nativeElement.classList).not.toContain(
-      "tedi-header-content--space-between",
+      "justify-content-between",
     );
   });
 });
