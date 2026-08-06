@@ -115,6 +115,8 @@ const columns: TediColumnDef<Person>[] = [
       [columns]="columns()"
       [size]="size()"
       [striped]="striped()"
+      [stickyFirstColumn]="stickyFirstColumn()"
+      [stickyLastColumn]="stickyLastColumn()"
       [enableRowSelection]="enableRowSelection()"
       [enableColumnFilters]="enableColumnFilters()"
       [pagination]="pagination()"
@@ -158,6 +160,8 @@ class HostComponent {
     signal<TediColumnDef<Person>[]>(columns);
   readonly size = signal<"medium" | "small">("medium");
   readonly striped = signal(false);
+  readonly stickyFirstColumn = signal(false);
+  readonly stickyLastColumn = signal(false);
   readonly enableRowSelection = signal<
     boolean | ((row: Row<Person>) => boolean) | undefined
   >(undefined);
@@ -281,6 +285,61 @@ describe("TediTableComponent", () => {
       fixture.detectChanges();
       const host = fixture.debugElement.query(By.css("tedi-table"));
       expect(host.nativeElement.className).toContain("tedi-table--striped");
+    });
+  });
+
+  describe("sticky columns", () => {
+    it("marks no cell sticky by default", () => {
+      const fixture = setupHost();
+      expect(
+        fixture.nativeElement.querySelector(".tedi-table__cell--sticky-left"),
+      ).toBeNull();
+      expect(
+        fixture.nativeElement.querySelector(".tedi-table__cell--sticky-right"),
+      ).toBeNull();
+    });
+
+    it("freezes the last column when stickyLastColumn is set", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.stickyLastColumn.set(true);
+      fixture.detectChanges();
+      const host = fixture.debugElement.query(By.css("tedi-table"));
+      expect(host.nativeElement.className).toContain(
+        "tedi-table--sticky-last-column",
+      );
+      const headers = Array.from(
+        fixture.nativeElement.querySelectorAll(".tedi-table__header-cell"),
+      ) as HTMLElement[];
+      const lastHeader = headers[headers.length - 1];
+      expect(lastHeader.classList).toContain("tedi-table__cell--sticky-right");
+      // single-column frozen block sits on both its edges
+      expect(lastHeader.classList).toContain(
+        "tedi-table__cell--sticky-right-start",
+      );
+      expect(lastHeader.classList).toContain(
+        "tedi-table__cell--sticky-right-edge",
+      );
+      expect(lastHeader.style.right).toBe("0px");
+      expect(headers[0].classList).not.toContain(
+        "tedi-table__cell--sticky-right",
+      );
+    });
+
+    it("freezes the first column when stickyFirstColumn is set", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.stickyFirstColumn.set(true);
+      fixture.detectChanges();
+      const host = fixture.debugElement.query(By.css("tedi-table"));
+      expect(host.nativeElement.className).toContain(
+        "tedi-table--sticky-first-column",
+      );
+      const headers = Array.from(
+        fixture.nativeElement.querySelectorAll(".tedi-table__header-cell"),
+      ) as HTMLElement[];
+      expect(headers[0].classList).toContain("tedi-table__cell--sticky-left");
+      expect(headers[headers.length - 1].classList).not.toContain(
+        "tedi-table__cell--sticky-left",
+      );
     });
   });
 
@@ -844,7 +903,8 @@ describe("TediTableComponent", () => {
       scroll.scrollTop = 120;
 
       const paginator = fixture.debugElement.query(By.css("tedi-pagination"));
-      paginator.componentInstance.pageChange.emit(2);
+      // `page` is a model() — setting it emits the (pageChange) output to the table.
+      paginator.componentInstance.page.set(2);
       fixture.detectChanges();
 
       expect(scroll.scrollTop).toBe(0);

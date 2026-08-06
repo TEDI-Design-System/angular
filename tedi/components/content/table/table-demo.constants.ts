@@ -260,6 +260,7 @@ const TABLE_APPEARANCE_BINDINGS = `
   [verticalBorders]="verticalBorders()"
   [borderless]="borderless()"
   [stickyFirstColumn]="stickyFirstColumn()"
+  [stickyLastColumn]="stickyLastColumn()"
   [stickyHeader]="stickyHeader()"
   [fixedLayout]="fixedLayout()"
   [rowHover]="rowHover()"

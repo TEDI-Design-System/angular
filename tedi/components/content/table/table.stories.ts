@@ -125,6 +125,7 @@ abstract class TableStoryHostBase {
   readonly verticalBorders = input(false, { transform: booleanAttribute });
   readonly borderless = input(false, { transform: booleanAttribute });
   readonly stickyFirstColumn = input(false, { transform: booleanAttribute });
+  readonly stickyLastColumn = input(false, { transform: booleanAttribute });
   readonly stickyHeader = input(false, { transform: booleanAttribute });
   readonly fixedLayout = input(false, { transform: booleanAttribute });
   readonly rowHover = input(false, { transform: booleanAttribute });
@@ -154,6 +155,7 @@ type TediTableStoryArgs = {
   verticalBorders: boolean;
   borderless: boolean;
   stickyFirstColumn: boolean;
+  stickyLastColumn: boolean;
   stickyHeader: boolean;
   fixedLayout: boolean;
   rowHover: boolean;
@@ -238,6 +240,7 @@ const meta: Meta<TediTableStoryArgs> = {
     verticalBorders: false,
     borderless: false,
     stickyFirstColumn: false,
+    stickyLastColumn: false,
     stickyHeader: false,
     fixedLayout: false,
     rowHover: false,
@@ -300,6 +303,15 @@ const meta: Meta<TediTableStoryArgs> = {
     },
     stickyFirstColumn: {
       description: "Freeze the first column during horizontal scroll.",
+      control: "boolean",
+      table: {
+        category: "appearance",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    stickyLastColumn: {
+      description: "Freeze the last column during horizontal scroll.",
       control: "boolean",
       table: {
         category: "appearance",
@@ -1148,11 +1160,11 @@ export const GroupedRows: Story = {
   via groupBy. The span is computed internally — no manual rowSpan wiring.
   meta.vAlign: 'top' anchors the merged cell's content to the top:
   columns = [
-    { id: 'date', header: 'Date', accessorKey: 'date',
+    { id: 'date', header: 'Kuupäev', accessorKey: 'date',
       meta: { vAlign: 'top' },
       groupBy: (row) => row.original.date },
-    { id: 'doctor', header: 'Doctor', accessorKey: 'doctor' },
-    { id: 'procedure', header: 'Procedure', accessorKey: 'procedure' },
+    { id: 'doctor', header: 'Arst', accessorKey: 'doctor' },
+    { id: 'procedure', header: 'Protseduur', accessorKey: 'procedure' },
   ]
 -->
 <tedi-table [data]="data" [columns]="columns" verticalBorders />`,
@@ -2147,11 +2159,10 @@ class FiltersStoryHostComponent extends TableStoryHostBase {
     return (this.state().columnFilters ?? [])
       .map((filter) => ({
         id: filter.id,
-        label: `${headers.get(filter.id) ?? filter.id}: ${
-          Array.isArray(filter.value)
+        label: `${headers.get(filter.id) ?? filter.id}: ${Array.isArray(filter.value)
             ? filter.value.join(", ")
             : String(filter.value ?? "")
-        }`,
+          }`,
       }))
       .filter((chip) => !chip.label.endsWith(": "));
   });
@@ -2548,7 +2559,7 @@ export const CollapsibleRowsRowTrigger: Story = {
       [data]="data"
       [columns]="columns()"
       [getSubRows]="getSubRows"
-      [expandButtonLabel]="{ open: 'Näita', close: 'Peida' }"
+      [expandButtonLabel]="{ open: 'Kuva rohkem', close: 'Kuva vähem' }"
       [pagination]="pagination"
       ${TABLE_APPEARANCE_BINDINGS}
     />
@@ -2728,7 +2739,7 @@ export const CollapsibleRowsExpandedByDefault: Story = {
       <tedi-status-badge
         [color]="statusColor[ctx.row.original.status]"
         [text]="ctx.row.original.status"
-        [variant]="ctx.row.getIsSelected() ? 'filled-bordered' : 'filled'"
+        variant="filled"
       />
     </ng-template>
   `,
@@ -2788,8 +2799,6 @@ export const SelectableRows: Story = {
         code: `<!-- Default selectionMode is 'multiple' — checkbox per row plus
   a select-all checkbox in the header. Pass a predicate
   (row) => boolean to enableRowSelection to allow only some rows.
-  The status cell reacts to per-row selection via ctx.row.getIsSelected()
-  — bordering the badge while the row is selected.
 
   getRowId keys rowSelection by a stable entity id instead of the row
   index, so the selection survives sorting / filtering / data changes:
@@ -3241,6 +3250,87 @@ export const StickyFirstColumn: Story = {
   },
 };
 
+// ---------- StickyLastColumn ----------
+@Component({
+  standalone: true,
+  selector: "tedi-sticky-last-story",
+  imports: [TediTableComponent, IconComponent, LinkComponent],
+  template: `
+    <div style="width: 100%;">
+      <tedi-table
+        id="tedi-table-sticky-last"
+        [data]="data"
+        [columns]="columns()"
+        [pagination]="pagination"
+        ${TABLE_APPEARANCE_BINDINGS}
+      />
+    </div>
+    <ng-template #actionsCell let-ctx>
+      <a tedi-link href="#" (click)="$event.preventDefault()">
+        <tedi-icon name="edit" [size]="16" color="inherit" />
+        Muuda
+      </a>
+    </ng-template>
+  `,
+})
+class StickyLastColumnStoryHostComponent extends TableStoryHostBase {
+  data = stickyDoctors;
+  pagination = DEFAULT_PAGINATION;
+  actionsCellTpl =
+    viewChild<TemplateRef<CellContext<StickyDoctor, unknown>>>("actionsCell");
+
+  columns = computed<TediColumnDef<StickyDoctor>[]>(() => [
+    { id: "name", header: "Arst", accessorKey: "name", size: 220, minSize: 144 },
+    { id: "specialty", header: "Eriala", accessorKey: "specialty", size: 240 },
+    { id: "experience", header: "Tööstaaž", accessorKey: "experience", size: 160 },
+    { id: "location", header: "Asukoht", accessorKey: "location", size: 160 },
+    { id: "email", header: "E-post", accessorKey: "email", size: 240 },
+    { id: "phone", header: "Telefon", accessorKey: "phone", size: 200, minSize: 144 },
+    { id: "room", header: "Kabinet", accessorKey: "room", size: 160 },
+    {
+      id: "actions",
+      header: "",
+      size: 120,
+      enableSorting: false,
+      cell: this.actionsCellTpl() ?? "",
+    } as TediColumnDef<StickyDoctor>,
+  ]);
+}
+
+export const StickyLastColumn: Story = {
+  args: { stickyLastColumn: true },
+  render: (args) => ({
+    moduleMetadata: { imports: [StickyLastColumnStoryHostComponent] },
+    props: args,
+    template: `<tedi-sticky-last-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`stickyLastColumn` mirrors `stickyFirstColumn` on the trailing edge — " +
+          "it freezes the last column (here a **Muuda** actions column) against " +
+          "the right edge while the body scrolls horizontally underneath. The " +
+          "divider is drawn on the frozen block's left edge. Any trailing control " +
+          "columns (e.g. an expand toggle placed after the `'content'` sentinel " +
+          "via `controlColumnOrder`) freeze together with the last content column.",
+      },
+      source: {
+        language: "html",
+        code: `<!-- Add 'stickyLastColumn' to freeze the rightmost column (e.g. a
+  trailing actions column) during horizontal scroll.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  stickyLastColumn
+  [pagination]="pagination"
+/>`,
+      },
+    },
+  },
+};
+
 // ---------- StickyHeader ----------
 @Component({
   standalone: true,
@@ -3372,6 +3462,85 @@ export const StickyHeaderAndFirstColumn: Story = {
   stickyHeader
   stickyFirstColumn
   [maxHeight]="280"
+/>`,
+      },
+    },
+  },
+};
+
+// ---------- StickyHeaderAndLastColumn ----------
+@Component({
+  standalone: true,
+  selector: "tedi-sticky-both-last-story",
+  imports: [TediTableComponent, IconComponent, LinkComponent],
+  template: `
+    <div style="width: 100%;">
+      <tedi-table
+        id="tedi-table-sticky-both-last"
+        [data]="data"
+        [columns]="columns()"
+        ${TABLE_APPEARANCE_BINDINGS}
+      />
+    </div>
+    <ng-template #actionsCell let-ctx>
+      <a tedi-link href="#" (click)="$event.preventDefault()">
+        <tedi-icon name="edit" [size]="16" color="inherit" />
+        Muuda
+      </a>
+    </ng-template>
+  `,
+})
+class StickyHeaderAndLastColumnStoryHostComponent extends TableStoryHostBase {
+  data = stickyDoctors;
+  actionsCellTpl =
+    viewChild<TemplateRef<CellContext<StickyDoctor, unknown>>>("actionsCell");
+
+  columns = computed<TediColumnDef<StickyDoctor>[]>(() => [
+    { id: "name", header: "Arst", accessorKey: "name", size: 220, minSize: 144 },
+    { id: "specialty", header: "Eriala", accessorKey: "specialty", size: 240 },
+    { id: "experience", header: "Tööstaaž", accessorKey: "experience", size: 160 },
+    { id: "location", header: "Asukoht", accessorKey: "location", size: 160 },
+    { id: "email", header: "E-post", accessorKey: "email", size: 240 },
+    { id: "phone", header: "Telefon", accessorKey: "phone", size: 200, minSize: 144 },
+    { id: "room", header: "Kabinet", accessorKey: "room", size: 160 },
+    {
+      id: "actions",
+      header: "",
+      size: 120,
+      enableSorting: false,
+      cell: this.actionsCellTpl() ?? "",
+    } as TediColumnDef<StickyDoctor>,
+  ]);
+}
+
+export const StickyHeaderAndLastColumn: Story = {
+  args: { stickyLastColumn: true, stickyHeader: true, maxHeight: 480 },
+  render: (args) => ({
+    moduleMetadata: { imports: [StickyHeaderAndLastColumnStoryHostComponent] },
+    props: args,
+    template: `<tedi-sticky-both-last-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Combine `stickyHeader` with `stickyLastColumn` to keep both the " +
+          "header and a trailing actions column (here **Muuda**) in view. Each " +
+          "edge casts its own elevation shadow while there is off-edge content: " +
+          "the header downward, the frozen column to its left. Scroll both ways " +
+          "to see the shadows meet at the top-right corner.",
+      },
+      source: {
+        language: "html",
+        code: `<!-- Combine 'stickyHeader' and 'stickyLastColumn'. The trailing
+  actions column stays pinned to the right and the header to the top.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  stickyHeader
+  stickyLastColumn
+  [maxHeight]="480"
 />`,
       },
     },
@@ -3990,7 +4159,7 @@ export const Custom: Story = {
     <ng-template #salaryCell let-ctx>
       {{ format(ctx.row.original.salary) }}
     </ng-template>
-    <ng-template #salaryFooter>Total €{{ totalLabel() }}</ng-template>
+    <ng-template #salaryFooter>Kokku €{{ totalLabel() }}</ng-template>
   `,
 })
 class WithFooterStoryHostComponent extends TableStoryHostBase {
@@ -4031,10 +4200,10 @@ export const WithFooter: Story = {
         language: "html",
         code: `<!-- Each column may declare a 'footer' as a string or a TemplateRef.
   columns = [
-    id: 'name', header: 'Name', accessorKey: 'name', footer: '28 people',
-    id: 'role', header: 'Role', accessorKey: 'role',
-    id: 'location', header: 'Location', accessorKey: 'location',
-    id: 'salary', header: 'Salary (€)', accessorKey: 'salary',
+    id: 'name', header: 'Nimi', accessorKey: 'name', footer: '28 inimest',
+    id: 'role', header: 'Roll', accessorKey: 'role',
+    id: 'location', header: 'Asukoht', accessorKey: 'location',
+    id: 'salary', header: 'Palk (€)', accessorKey: 'salary',
       meta: align right, cell: salaryCellTpl, footer: salaryFooterTpl,
   ]
 -->
@@ -4044,7 +4213,7 @@ export const WithFooter: Story = {
   [pagination]="pagination"
 />
 
-<ng-template #salaryFooter>Total €{{ totalLabel() }}</ng-template>`,
+<ng-template #salaryFooter>Kokku €{{ totalLabel() }}</ng-template>`,
       },
     },
   },
@@ -4799,7 +4968,7 @@ export const Responsive: Story = {
       source: {
         language: "html",
         code: `<!-- TS sketch:
-  hiddenColumns = [{ id: 'email', key: 'email', header: 'Email' }, ...];
+  hiddenColumns = [{ id: 'email', key: 'email', header: 'E-post' }, ...];
   isBelowMd = inject(BreakpointService).isBelowBreakpoint('md');
   responsiveSubRow = computed(() =>
     this.isBelowMd() ? this.detailsTpl() : undefined,

@@ -56,13 +56,18 @@
 <div
   #scrollContainer
   class="tedi-table__scroll"
+  [class.tedi-table__scroll--shadow-start]="hasStartShadow()"
+  [class.tedi-table__scroll--shadow-end]="hasEndShadow()"
+  [class.tedi-table__scroll--shadow-header]="hasHeaderShadow()"
   [attr.style]="maxHeightStyle()"
   cdkScrollable
   tabindex="0"
   role="group"
   [attr.aria-label]="scrollRegionLabel()"
+  (scroll)="onHorizontalScroll()"
 >
   <table
+    #tableElement
     class="tedi-table__table"
     [attr.id]="id() || null"
     [attr.aria-rowcount]="ariaRowCount()"
@@ -125,7 +130,8 @@
                     ? ' tedi-table__header-cell--picked-up'
                     : '') +
                   controlCellClass(header.column.id) +
-                  stickyLeftClass(header.column.id)
+                  stickyLeftClass(header.column.id) +
+                  stickyRightClass(header.column.id)
                 "
                 [attr.colspan]="header.colSpan > 1 ? header.colSpan : null"
                 [attr.rowspan]="rowSpan"
@@ -134,6 +140,7 @@
                 [style.min-width.px]="columnMinWidth(header.column)"
                 [style.max-width.px]="columnMaxWidth(header.column)"
                 [style.left.px]="stickyLeft(header.column.id)"
+                [style.right.px]="stickyRight(header.column.id)"
               >
                 @if (srHeaderLabel) {
                   <span class="tedi-table__sr-only">{{ srHeaderLabel }}</span>
@@ -419,9 +426,11 @@
                       ? ' tedi-table__cell--valign-' + cellMeta?.vAlign
                       : '') +
                     controlCellClass(cell.column.id) +
-                    stickyLeftClass(cell.column.id)
+                    stickyLeftClass(cell.column.id) +
+                    stickyRightClass(cell.column.id)
                   "
                   [style.left.px]="stickyLeft(cell.column.id)"
+                  [style.right.px]="stickyRight(cell.column.id)"
                   [attr.rowspan]="
                     resolvedSpan !== null && resolvedSpan > 1
                       ? resolvedSpan

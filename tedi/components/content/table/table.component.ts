@@ -5,6 +5,7 @@ import {
   Component,
   computed,
   contentChild,
+  DestroyRef,
   effect,
   type ElementRef,
   inject,
@@ -293,6 +294,13 @@ export class TediTableComponent<TData> {
    * @default false
    */
   readonly stickyFirstColumn = input(false, { transform: booleanAttribute });
+  /**
+   * Freezes the last column in place during horizontal scroll. Mirrors
+   * `stickyFirstColumn` on the trailing edge — useful for keeping a trailing
+   * actions column (e.g. an "Edit" link) visible while the body scrolls.
+   * @default false
+   */
+  readonly stickyLastColumn = input(false, { transform: booleanAttribute });
   /**
    * Pins `<thead>` to the top during vertical scroll. Requires `maxHeight` to
    * be set so the table has a scroll container.
@@ -1118,6 +1126,7 @@ export class TediTableComponent<TData> {
       [this.verticalBorders(), "tedi-table--vertical-borders"],
       [this.borderless(), "tedi-table--borderless"],
       [this.stickyFirstColumn(), "tedi-table--sticky-first-column"],
+      [this.stickyLastColumn(), "tedi-table--sticky-last-column"],
       [this.stickyHeader(), "tedi-table--sticky-header"],
       [this.fixedLayout(), "tedi-table--fixed-layout"],
       [this.interactive() || rowExpand, "tedi-table--clickable-rows"],
@@ -1287,6 +1296,23 @@ export class TediTableComponent<TData> {
       const filters = this.tableState().columnFilters ?? [];
       untracked(() => this.reconcileFilterDrafts(filters));
     });
+
+    // Measure the horizontal scroll extents so the sticky-column shadows only
+    // show while there's off-edge content. Observe the container (viewport
+    // changes) and the inner table (content-width changes, e.g. toggled
+    // columns); the observer fires once on connect, covering the initial state.
+    afterNextRender(
+      () => {
+        const container = this.scrollContainer()?.nativeElement;
+        if (!container) return;
+        const observer = new ResizeObserver(() => this.measureScrollShadows());
+        observer.observe(container);
+        const table = this.tableElement()?.nativeElement;
+        if (table) observer.observe(table);
+        this.destroyRef.onDestroy(() => observer.disconnect());
+      },
+      { injector: this.injector },
+    );
   }
 
   private applyPatch<T>(
@@ -1489,6 +1515,50 @@ export class TediTableComponent<TData> {
   }
 
   /**
+   * Columns frozen by `stickyLastColumn`, keyed by id: the last content column
+   * plus any trailing control columns (e.g. an expand toggle placed after the
+   * `'content'` sentinel), pinned together as one block. `right` is the
+   * cumulative offset; `start` / `edge` mark the block's right and left edges
+   * (the left edge draws the divider). Empty when `stickyLastColumn` is off.
+   */
+  protected readonly stickyRightColumns = computed<
+    Map<string, { right: number; start: boolean; edge: boolean }>
+  >(() => {
+    const map = new Map<
+      string,
+      { right: number; start: boolean; edge: boolean }
+    >();
+    if (!this.stickyLastColumn()) return map;
+
+    const leaf = this.leafColumns();
+    const controlIds = new Set<string>([
+      DRAG_COLUMN_ID,
+      SELECT_COLUMN_ID,
+      EXPAND_COLUMN_ID,
+    ]);
+    const frozen: typeof leaf = [];
+    let i = leaf.length - 1;
+    while (i >= 0 && controlIds.has(leaf[i].id)) frozen.push(leaf[i--]); // trailing controls
+    if (i >= 0) frozen.push(leaf[i]); // last content column
+
+    let right = 0;
+    frozen.forEach((col, idx) => {
+      map.set(col.id, {
+        right,
+        start: idx === 0,
+        edge: idx === frozen.length - 1,
+      });
+      right += col.getSize();
+    });
+    return map;
+  });
+
+  /** Sticky `right` (px) for a frozen column; `null` when the column isn't frozen. */
+  protected stickyRight(id: string): number | null {
+    return this.stickyRightColumns().get(id)?.right ?? null;
+  }
+
+  /**
    * Class fragment for the auto-injected control columns. Icon-only controls
    * (drag / select, and expand without a visible label) drop to reduced padding
    * and stay as narrow as the control needs; a labeled expand column hugs its
@@ -1512,6 +1582,17 @@ export class TediTableComponent<TData> {
       " tedi-table__cell--sticky-left" +
       (info.start ? " tedi-table__cell--sticky-left-start" : "") +
       (info.edge ? " tedi-table__cell--sticky-left-edge" : "")
+    );
+  }
+
+  /** Sticky-right-column class fragment for a cell (`""` when not frozen). */
+  protected stickyRightClass(id: string): string {
+    const info = this.stickyRightColumns().get(id);
+    if (!info) return "";
+    return (
+      " tedi-table__cell--sticky-right" +
+      (info.start ? " tedi-table__cell--sticky-right-start" : "") +
+      (info.edge ? " tedi-table__cell--sticky-right-edge" : "")
     );
   }
 
@@ -1928,6 +2009,35 @@ export class TediTableComponent<TData> {
 
   private readonly scrollContainer =
     viewChild<ElementRef<HTMLElement>>("scrollContainer");
+  private readonly tableElement =
+    viewChild<ElementRef<HTMLElement>>("tableElement");
+  private readonly destroyRef = inject(DestroyRef);
+
+  /**
+   * Elevation shadows only make sense when the body is actually scrolled off
+   * that edge: `hasStartShadow` gates the leading (sticky-first) column shadow,
+   * `hasEndShadow` the trailing (sticky-last) one, and `hasHeaderShadow` the
+   * sticky-header shadow (scrolled down). Toggled from a scroll listener plus a
+   * ResizeObserver so viewport / content-size changes re-measure without a
+   * scroll event.
+   */
+  protected readonly hasStartShadow = signal(false);
+  protected readonly hasEndShadow = signal(false);
+  protected readonly hasHeaderShadow = signal(false);
+
+  private measureScrollShadows(): void {
+    const element = this.scrollContainer()?.nativeElement;
+    if (!element) return;
+    const maxScroll = element.scrollWidth - element.clientWidth;
+    // ~1px tolerance absorbs sub-pixel rounding at the scroll extremes.
+    this.hasStartShadow.set(element.scrollLeft > 1);
+    this.hasEndShadow.set(element.scrollLeft < maxScroll - 1);
+    this.hasHeaderShadow.set(element.scrollTop > 1);
+  }
+
+  protected onHorizontalScroll(): void {
+    this.measureScrollShadows();
+  }
 
   /**
    * Resets the table's own vertical scroll to the top. Only affects the

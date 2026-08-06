@@ -472,7 +472,8 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `striped: boolean = false`
 - `verticalBorders: boolean = false`
 - `borderless: boolean = false`
-- `stickyFirstColumn: boolean = false`
+- `stickyFirstColumn: boolean = false` — freezes the leading column(s) during horizontal scroll
+- `stickyLastColumn: boolean = false` — freezes the trailing column (e.g. an actions column) during horizontal scroll
 - `stickyHeader: boolean = false`
 - `fixedLayout: boolean = false` — `table-layout: fixed`; makes column `size`/`minSize`/`maxSize` authoritative (content wraps instead of stretching the column). Required for column width caps to hold.
 - `maxHeight: number | string` — wraps the table in a scrollable container (pair with `stickyHeader`)
