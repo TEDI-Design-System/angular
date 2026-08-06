@@ -1,3 +1,10 @@
+# [7.1.0-rc.22](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.21...angular-7.1.0-rc.22) (2026-08-06)
+
+
+### Bug Fixes
+
+* **tabs:** added anchor support [#594](https://github.com/TEDI-Design-System/angular/issues/594) ([#597](https://github.com/TEDI-Design-System/angular/issues/597)) ([c9a3a98](https://github.com/TEDI-Design-System/angular/commit/c9a3a9838932b2396ff7921d96a820a14fdda041))
+
 # [7.1.0-rc.21](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.20...angular-7.1.0-rc.21) (2026-08-05)
 
 
