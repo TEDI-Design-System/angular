@@ -1,3 +1,10 @@
+# [7.1.0-rc.24](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.23...angular-7.1.0-rc.24) (2026-08-06)
+
+
+### Bug Fixes
+
+* **select:** truncate over-wide tags in a single row [#586](https://github.com/TEDI-Design-System/angular/issues/586) ([#598](https://github.com/TEDI-Design-System/angular/issues/598)) ([68dcb27](https://github.com/TEDI-Design-System/angular/commit/68dcb27f7640d5c1978af697f6f8cc3b53bdedaf))
+
 # [7.1.0-rc.23](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.22...angular-7.1.0-rc.23) (2026-08-06)
 
 
