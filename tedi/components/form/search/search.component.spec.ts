@@ -88,6 +88,24 @@ describe("SearchComponent", () => {
     });
   });
 
+  describe("input accessible name", () => {
+    it("should name the input even without a label or placeholder", () => {
+      expect(getInput().getAttribute("aria-label")).toBe("Otsi");
+    });
+
+    it("should use ariaLabel when there is no visible label", () => {
+      fixture.componentRef.setInput("ariaLabel", "Otsi tooteid");
+      fixture.detectChanges();
+      expect(getInput().getAttribute("aria-label")).toBe("Otsi tooteid");
+    });
+
+    it("should leave naming to the visible label when one is rendered", () => {
+      fixture.componentRef.setInput("label", "Otsing");
+      fixture.detectChanges();
+      expect(getInput().getAttribute("aria-label")).toBeNull();
+    });
+  });
+
   it("should show the search icon when there is no button", () => {
     expect(el.querySelector(".tedi-form-field__icon tedi-icon")).not.toBeNull();
     expect(el.querySelector("button.tedi-search__button")).toBeNull();
