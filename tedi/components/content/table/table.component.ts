@@ -6,18 +6,21 @@ import {
   computed,
   contentChild,
   effect,
+  type ElementRef,
   inject,
   Injector,
   input,
+  PLATFORM_ID,
   signal,
   Signal,
   TemplateRef,
   untracked,
   ViewEncapsulation,
+  viewChild,
   output,
   type WritableSignal,
 } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { CommonModule, isPlatformBrowser } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import {
   CdkDrag,
@@ -389,6 +392,18 @@ export class TediTableComponent<TData> {
     ((row: TData) => TData[] | undefined) | undefined
   >(undefined);
   /**
+   * Accessor returning a stable, unique id for a row, passed straight through
+   * to TanStack's `getRowId`. By default rows are keyed by their index, so
+   * selection / expansion state breaks as soon as the data changes (filtering,
+   * adding, removing, reordering rows). Key by an entity id instead — e.g.
+   * `getRowId: (row) => row.id` — to keep `rowSelection` / `expanded` stable
+   * across data updates and controllable from the outside by that id.
+   * @default undefined
+   */
+  readonly getRowId = input<
+    ((originalRow: TData, index: number, parent?: Row<TData>) => string) | undefined
+  >(undefined);
+  /**
    * Table-level row grouping key. When set, consecutive rendered rows with an
    * equal key form a group, and:
    * - the control columns (select / expand / drag) span each group — one
@@ -564,6 +579,7 @@ export class TediTableComponent<TData> {
   readonly rowDrop = output<CdkDragDrop<TData[]>>();
 
   protected readonly injector = inject(Injector);
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly translation = inject(TediTranslationService);
 
   private readonly _hoveredRowId = signal<string | null>(null);
@@ -588,6 +604,18 @@ export class TediTableComponent<TData> {
     "table.drag-column",
   );
   protected readonly dragRowLabel = this.translation.track("table.drag-row");
+  protected readonly selectColumnLabel = this.translation.track(
+    "table.select-column",
+  );
+  protected readonly expandColumnLabel = this.translation.track(
+    "table.expand-column",
+  );
+  protected readonly reorderColumnLabel = this.translation.track(
+    "table.reorder-column",
+  );
+  protected readonly scrollRegionLabel = this.translation.track(
+    "table.scroll-region",
+  );
 
   // ── Keyboard column-reorder state machine ──────────────────────────────────
   /** Currently picked-up column id (during keyboard reordering), or `null`. */
@@ -967,6 +995,7 @@ export class TediTableComponent<TData> {
           manualPagination && pageCount !== undefined ? pageCount : undefined,
         rowCount:
           manualPagination && rowCount !== undefined ? rowCount : undefined,
+        getRowId: this.getRowId(),
         getRowCanExpand: renderSub
           ? (this.getRowCanExpand() ?? (() => true))
           : this.getRowCanExpand(),
@@ -1020,6 +1049,7 @@ export class TediTableComponent<TData> {
     this.hasFilterableColumns();
     this.enableRowSelection();
     this.paginationOptions();
+    this.getRowId();
   }
 
   protected readonly hostClasses = computed(() => {
@@ -1192,6 +1222,13 @@ export class TediTableComponent<TData> {
 
     effect(() => this.persistence.setControlled(this.state()));
     effect(() => this.persistence.setPersist(this.persist()));
+    // Keep the filter-popover drafts aligned with the applied filter state so a
+    // reset (clearFilters(), controlled state, a removed chip) doesn't leave a
+    // reopened popover showing stale inputs / checkboxes.
+    effect(() => {
+      const filters = this.tableState().columnFilters ?? [];
+      untracked(() => this.reconcileFilterDrafts(filters));
+    });
   }
 
   private applyPatch<T>(
@@ -1207,6 +1244,19 @@ export class TediTableComponent<TData> {
           : updater;
       return toPatch(next);
     });
+  }
+
+  /**
+   * Clears every active column filter in one call, resetting all `filterable`
+   * columns at once. Routes through the same state machinery as the per-column
+   * **Clear** buttons, so it updates internal state, respects a controlled
+   * `state` input, and emits `(stateChange)`. Grab a component reference (e.g.
+   * a template ref `#table` or `viewChild`) to call it from consumer code.
+   */
+  clearFilters(): void {
+    // `true` forces the empty state rather than TanStack's `initialState`
+    // filters, so a controlled table always resets to no filters.
+    this.table.resetColumnFilters(true);
   }
 
   protected handleRowClick(event: Event, row: Row<TData>): void {
@@ -1262,6 +1312,14 @@ export class TediTableComponent<TData> {
 
   protected rowExpandsOnClick(row: Row<TData>): boolean {
     return this.expandTrigger() === "row" && row.getCanExpand();
+  }
+
+  protected rowHasNestedInteractive(row: Row<TData>): boolean {
+    return (
+      this.hasSelection() ||
+      this.reorderableRows() ||
+      (this.hasExpansion() && row.getCanExpand())
+    );
   }
 
   protected handleRowMouseEnter(row: Row<TData>): void {
@@ -1790,13 +1848,30 @@ export class TediTableComponent<TData> {
     }
   }
 
+  private readonly scrollContainer =
+    viewChild<ElementRef<HTMLElement>>("scrollContainer");
+
+  /**
+   * Resets the table's own vertical scroll to the top. Only affects the
+   * internal scroll container (used when `maxHeight` is set); the horizontal
+   * scroll position is preserved since columns are identical across pages, and
+   * the window scroll is intentionally left untouched.
+   */
+  private resetScrollTop(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const element = this.scrollContainer()?.nativeElement;
+    if (element) element.scrollTop = 0;
+  }
+
   protected handlePaginationPageChange(nextPage: number): void {
     this.table.setPageIndex(nextPage - 1);
+    this.resetScrollTop();
   }
 
   protected handlePaginationPageSizeChange(nextSize: number | undefined): void {
     if (nextSize === undefined) return;
     this.table.setPageSize(nextSize);
+    this.resetScrollTop();
   }
 
   protected getColumnMeta(column: {
@@ -1814,12 +1889,28 @@ export class TediTableComponent<TData> {
     return dir === "asc" ? "ascending" : dir === "desc" ? "descending" : "none";
   }
 
-  protected getHeaderLabel(
+  protected getSrOnlyHeaderLabel(
     column: ReturnType<TanstackTable<TData>["getAllLeafColumns"]>[number],
   ): string | null {
-    const meta = this.getColumnMeta(column);
+    switch (column.id) {
+      case SELECT_COLUMN_ID:
+        return this.selectColumnLabel();
+      case EXPAND_COLUMN_ID:
+        return this.expandColumnLabel();
+      case DRAG_COLUMN_ID:
+        return this.reorderColumnLabel();
+    }
+    // Only provide a screen-reader-only name when the header renders no visible
+    // text (an empty `<th>` fails WCAG "empty-table-header"). Columns with a
+    // visible header are already named by their own text — adding an sr-only
+    // copy would double-announce them.
     const header = column.columnDef.header;
-    return meta?.label ?? (typeof header === "string" ? header : null);
+    const isEmptyHeader =
+      header == null || (typeof header === "string" && header.trim() === "");
+    if (!isEmptyHeader) {
+      return null;
+    }
+    return this.getColumnMeta(column)?.label ?? null;
   }
 
   protected resolveColumnLabel(
@@ -2060,6 +2151,12 @@ export class TediTableComponent<TData> {
    * nothing.
    */
   private readonly filterDrafts = new Map<string, WritableSignal<unknown>>();
+  // The applied filter value each draft was last synced from. Lets
+  // `reconcileFilterDrafts` tell an external filter reset (clearFilters(),
+  // controlled `state`, a removed filter chip) — where the applied value
+  // changed out from under the draft — apart from a half-typed draft the user
+  // is mid-editing (applied value unchanged), which must be preserved.
+  private readonly filterDraftBaselines = new Map<string, unknown>();
 
   /**
    * Normalises `filterable: true | TableFilterOptions | undefined | false`
@@ -2131,8 +2228,44 @@ export class TediTableComponent<TData> {
     if (!s) {
       s = signal<unknown>(initial);
       this.filterDrafts.set(columnId, s);
+      this.filterDraftBaselines.set(columnId, initial);
     }
     return s;
+  }
+
+  /**
+   * Structural equality for filter values (strings, numbers, bigints, arrays,
+   * plain objects). Filter values are consumer-supplied `unknown`, so the
+   * comparison must never throw: reference-equal values (including equal
+   * primitives and bigints) short-circuit, and anything JSON can't serialise
+   * (bigint mismatches, cyclic structures) falls back to "changed".
+   */
+  private filterValuesEqual(a: unknown, b: unknown): boolean {
+    if (a === b) return true;
+    if (a === undefined || b === undefined) return false;
+    try {
+      return JSON.stringify(a) === JSON.stringify(b);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Realigns each open/created filter draft with the applied filter state
+   * whenever the latter changes externally (`clearFilters()`, controlled
+   * `state`, a removed filter chip). A draft is only overwritten when its
+   * column's applied value actually moved since the draft last synced — so an
+   * in-progress, unapplied draft (applied value unchanged) is left intact.
+   */
+  private reconcileFilterDrafts(filters: ColumnFiltersState): void {
+    const appliedById = new Map(filters.map((f) => [f.id, f.value]));
+    for (const [id, draft] of this.filterDrafts) {
+      const applied = appliedById.get(id);
+      if (!this.filterValuesEqual(applied, this.filterDraftBaselines.get(id))) {
+        draft.set(applied);
+        this.filterDraftBaselines.set(id, applied);
+      }
+    }
   }
 
   /**

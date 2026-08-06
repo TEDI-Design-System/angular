@@ -36,6 +36,8 @@ function makeData(
     unavailableDays: undefined,
     shouldDisableMonth: undefined,
     shouldDisableYear: undefined,
+    minYear: null,
+    maxYear: null,
     closeOnSelect: true,
     ...overrides,
   };

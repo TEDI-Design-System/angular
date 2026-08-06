@@ -10,7 +10,7 @@
   --_line-height: var(--body-regular-line-height);
   --_padding-y: var(--form-field-padding-y-md-default);
   --_padding-x: var(--form-field-padding-x-md-default);
-  --_search-input-min-width: 1px;
+  --_search-input-reserve: 5rem;
 
   min-height: var(--form-field-height);
   padding: calc(var(--_padding-y) - var(--tedi-borders-01)) var(--_padding-x);
@@ -77,12 +77,6 @@
 
   .tedi-feedback-text {
     margin-top: var(--form-field-outer-spacing);
-  }
-
-  &__label-row {
-    display: flex;
-    gap: var(--content-label-inner-spacing-x);
-    align-items: center;
   }
 
   &__trigger {
@@ -192,9 +186,9 @@
 
   &__search-input:not(&__search-input--hidden) {
     position: relative;
-    flex: 1;
+    flex: 1 1 var(--_search-input-reserve);
     width: auto;
-    min-width: var(--_search-input-min-width);
+    min-width: 0;
     height: auto;
   }
 
@@ -282,18 +276,20 @@
 
   &__multiselect-container {
     display: flex;
+    flex: 1;
     flex-wrap: wrap;
     gap: var(--form-field-inner-spacing);
+    min-width: 0;
 
-    // Single row: the tags clip inside an inner wrapper while the +N counter
-    // and the search input sit outside it and never shrink, so the counter
-    // stays visible as the field narrows.
+    // Single row: the tags sit in an inner wrapper with the "+N" counter and the
+    // search input beside it. The counter never shrinks, so it stays visible as
+    // the field narrows.
     &--single-row {
       flex-wrap: nowrap;
 
       .tedi-select__multiselect-tags {
         display: flex;
-        flex: 0 1 auto;
+        flex: 0 0 auto;
         gap: var(--form-field-inner-spacing);
         min-width: 0;
         overflow: hidden;
@@ -307,8 +303,7 @@
         }
       }
 
-      .tedi-select__multiselect-counter,
-      .tedi-select__search-input {
+      .tedi-select__multiselect-counter {
         flex-shrink: 0;
       }
     }

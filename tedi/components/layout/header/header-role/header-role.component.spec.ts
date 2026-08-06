@@ -127,10 +127,9 @@ describe("HeaderRoleComponent", () => {
     expect(comp.currentRepresentative()).toBe(newRep);
   });
 
-  it("should set inputValue from the event target on handleInputChange()", () => {
+  it("should set inputValue on handleInputChange()", () => {
     const comp = fixture.componentInstance;
-    const event = { target: { value: "foo" } } as unknown as Event;
-    comp.handleInputChange(event);
+    comp.handleInputChange("foo");
     expect(comp.inputValue()).toBe("foo");
   });
 
@@ -392,11 +391,11 @@ describe("HeaderRoleComponent desktop popover effects", () => {
       ).popover();
       const searchInput = (
         headerRole as unknown as {
-          searchInput: () => { nativeElement: HTMLInputElement } | undefined;
+          searchInput: () => { focus: () => void } | undefined;
         }
       ).searchInput();
       expect(searchInput).toBeDefined();
-      const focusSpy = jest.spyOn(searchInput!.nativeElement, "focus");
+      const focusSpy = jest.spyOn(searchInput!, "focus");
 
       popover!.isOpen.set(true);
       fixture.detectChanges();

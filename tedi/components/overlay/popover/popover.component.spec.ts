@@ -424,6 +424,48 @@ describe("PopoverComponent", () => {
 
       expect(hideSpy).toHaveBeenCalledWith(false);
     });
+
+    it("should keep popover open when content inside it is scrolled", () => {
+      hostComponent.hideOnScroll = true;
+      hostComponent.dismissible = false;
+      fixture.detectChanges();
+
+      component.showPopover();
+      fixture.detectChanges();
+      component.onOverlayAttach();
+
+      const container = overlayContainerElement.querySelector(
+        ".tedi-popover__container",
+      ) as HTMLElement;
+      expect(container).toBeTruthy();
+
+      const hideSpy = jest.spyOn(component, "hidePopover");
+      container.dispatchEvent(new Event("scroll", { bubbles: false }));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+      expect(component.isOpen()).toBe(true);
+    });
+
+    it("should keep popover open when a nested overlay is scrolled", () => {
+      hostComponent.hideOnScroll = true;
+      hostComponent.dismissible = false;
+      fixture.detectChanges();
+
+      component.showPopover();
+      fixture.detectChanges();
+      component.onOverlayAttach();
+
+      const nestedOverlayItem = document.createElement("div");
+      overlayContainerElement.appendChild(nestedOverlayItem);
+
+      const hideSpy = jest.spyOn(component, "hidePopover");
+      nestedOverlayItem.dispatchEvent(new Event("scroll", { bubbles: false }));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+      expect(component.isOpen()).toBe(true);
+
+      nestedOverlayItem.remove();
+    });
   });
 
   describe("Dismissible (click/focus outside)", () => {
@@ -486,6 +528,25 @@ describe("PopoverComponent", () => {
       expect(hideSpy).not.toHaveBeenCalled();
 
       nestedOverlayItem.remove();
+    });
+
+    it("should close popover on mousedown in a parent overlay hosting it (e.g. inside a modal)", () => {
+      const hideSpy = jest.spyOn(component, "hidePopover");
+      // A parent overlay (e.g. a tedi-modal that hosts this popover) shares the
+      // CDK overlay container but is stacked BELOW — its pane precedes this
+      // popover's pane in DOM order. Clicking it must dismiss the popover.
+      const parentOverlayItem = document.createElement("div");
+      overlayContainerElement.insertBefore(
+        parentOverlayItem,
+        overlayContainerElement.firstChild,
+      );
+
+      const event = new MouseEvent("mousedown", { bubbles: true });
+      parentOverlayItem.dispatchEvent(event);
+
+      expect(hideSpy).toHaveBeenCalledWith(true);
+
+      parentOverlayItem.remove();
     });
 
     it("should NOT close popover on focusin from a nested overlay", () => {

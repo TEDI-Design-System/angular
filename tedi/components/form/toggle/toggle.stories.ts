@@ -119,6 +119,17 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    ariaLabel: {
+      description:
+        "Accessible label for the toggle, used when there is no visible label.",
+      control: {
+        type: "text",
+      },
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+      },
+    },
   },
 } as Meta<ToggleComponent>;
 
@@ -179,16 +190,16 @@ const Template: StoryFn<ToggleComponent> = (args) => ({
         <b>{{ state }}</b>
         <tedi-col [width]="3" style="display: flex; flex-wrap: wrap; align-items: center; column-gap: 2rem; row-gap: 0.75rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" />
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" ariaLabel="Vaikimisi lüliti, väljas" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" ariaLabel="Vaikimisi lüliti, sees" [checked]="true" />
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" />
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" ariaLabel="Suur lüliti, väljas" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" ariaLabel="Suur lüliti, sees" [checked]="true" />
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" />
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" ariaLabel="Suur lüliti ikooniga, väljas" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" ariaLabel="Suur lüliti ikooniga, sees" [checked]="true" />
           </div>
         </tedi-col>
       </tedi-row>

@@ -286,6 +286,28 @@ describe("TimeFieldComponent", () => {
       expect(component.invalid()).toBe(true);
     });
 
+    it("should provide focus method that focuses the input", () => {
+      const input = el.querySelector(
+        ".tedi-time-field__input",
+      ) as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+
+      component.focus();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should not focus the input when disabled", () => {
+      const input = el.querySelector(
+        ".tedi-time-field__input",
+      ) as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+      component.setDisabledState(true);
+      fixture.detectChanges();
+
+      component.focus();
+      expect(focusSpy).not.toHaveBeenCalled();
+    });
+
     it("should provide clearField method", () => {
       component.writeValue("14:30");
       fixture.detectChanges();
@@ -732,6 +754,19 @@ describe("TimeFieldComponent", () => {
     it("should have aria-label on icon button", () => {
       const iconBtn = el.querySelector(".tedi-time-field__icon");
       expect(iconBtn?.getAttribute("aria-label")).toBeTruthy();
+    });
+
+    it("should not expose button/dialog ARIA on the field wrapper (it is only a positioning anchor)", () => {
+      const field = el.querySelector(".tedi-time-field__field") as HTMLElement;
+      expect(field.hasAttribute("role")).toBe(false);
+      expect(field.hasAttribute("aria-haspopup")).toBe(false);
+      expect(field.hasAttribute("aria-expanded")).toBe(false);
+      expect(field.hasAttribute("aria-controls")).toBe(false);
+    });
+
+    it("should expose the dialog trigger ARIA on the icon button", () => {
+      const iconBtn = el.querySelector(".tedi-time-field__icon") as HTMLElement;
+      expect(iconBtn.getAttribute("aria-haspopup")).toBe("dialog");
     });
   });
 

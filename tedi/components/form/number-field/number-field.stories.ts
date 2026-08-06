@@ -161,6 +161,17 @@ export default {
         type: { summary: "ComponentInputs<FeedbackTextComponent>" },
       },
     },
+    ariaLabel: {
+      description:
+        "Accessible label for the input, used when no visible label is provided.",
+      control: {
+        type: "text",
+      },
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+      },
+    },
   },
 } as Meta<NumberFieldComponent>;
 

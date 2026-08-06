@@ -10,6 +10,7 @@ import { SelectComponent } from "./select.component";
 import {
   SelectOptionTemplateDirective,
   SelectValueTemplateDirective,
+  SelectTooltipTemplateDirective,
 } from "./select-templates.directive";
 import { IconComponent } from "../../base";
 import {
@@ -24,6 +25,7 @@ import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/v
 import { Component, signal } from "@angular/core";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 import { TextComponent } from "../../base/text/text.component";
+import { ButtonComponent } from "../../buttons/button/button.component";
 
 const simpleOptions = [
   { value: "tallinn", label: "Tallinn" },
@@ -55,6 +57,7 @@ const meta: Meta<SelectComponent> = {
         SelectComponent,
         SelectOptionTemplateDirective,
         SelectValueTemplateDirective,
+        SelectTooltipTemplateDirective,
         FormsModule,
         ReactiveFormsModule,
         JsonPipe,
@@ -65,6 +68,7 @@ const meta: Meta<SelectComponent> = {
         DropdownItemValueLabelComponent,
         DropdownItemValueMetaComponent,
         IconComponent,
+        ButtonComponent,
         VerticalSpacingDirective,
       ],
     }),
@@ -138,6 +142,12 @@ const meta: Meta<SelectComponent> = {
       description:
         "Which end a tag's label truncates from when it doesn't fit. `false` never truncates; `end` → `label…`; `start` → `…label`.",
     },
+    ellipsis: {
+      control: "radio",
+      options: [false, "start", "end"],
+      description:
+        "Which end the single selected value truncates from when it doesn't fit. The full value is revealed in a tooltip on hover/focus. `false` never truncates. Applies to single-select mode; multiselect tags use `tagEllipsis`.",
+    },
     searchable: {
       control: "boolean",
       description: "Whether the select has a search input for filtering options.",
@@ -198,6 +208,14 @@ const meta: Meta<SelectComponent> = {
       description:
         "Row height in pixels for the virtual scroll viewport. When unset, it is measured from the first rendered option.",
     },
+    hideOnScroll: {
+      control: "boolean",
+      description: "Whether the dropdown closes when the page scrolls.",
+      table: {
+        defaultValue: { summary: "false" },
+        type: { summary: "boolean" },
+      },
+    },
   },
   args: {
     inputId: "select-1",
@@ -213,11 +231,13 @@ const meta: Meta<SelectComponent> = {
     isTagRemovable: false,
     multiRow: false,
     tagEllipsis: false,
+    ellipsis: false,
     searchable: false,
     clearSearchOnSelect: false,
     dropdownType: "menu",
     maxDropdownHeight: undefined,
     virtualScroll: false,
+    hideOnScroll: false,
     options: simpleOptions as [],
   },
 };
@@ -243,9 +263,11 @@ export const Default: Story = {
         [selectableGroups]="selectableGroups"
         [isTagRemovable]="isTagRemovable"
         [multiRow]="multiRow"
+        [ellipsis]="ellipsis"
         [searchable]="searchable"
         [clearSearchOnSelect]="clearSearchOnSelect"
         [maxDropdownHeight]="maxDropdownHeight"
+        [hideOnScroll]="hideOnScroll"
         [dropdownType]="dropdownType"
         [virtualScroll]="virtualScroll"
         [virtualItemSize]="virtualItemSize"
@@ -433,17 +455,17 @@ export const ValueType: Story = {
         { id: 1, name: "Läbipaistev", color: "transparent" },
         { id: 2, name: "Valge", color: "#ffffff" },
         { id: 3, name: "Punane", color: "#f42a25" },
-        { id: 4, name: "Fuksia", color: "#e81e63" },
+        { id: 4, name: "Magenta", color: "#e81e63" },
         { id: 5, name: "Lilla", color: "#b21f7e" },
         { id: 6, name: "Violetne", color: "#673ab7" },
         { id: 7, name: "Indigo", color: "#3f51b5" },
         { id: 8, name: "Sinine", color: "#3f88c5" },
         { id: 9, name: "Helesinine", color: "#03a9f3" },
         { id: 10, name: "Tsüaan", color: "#00bcd3" },
-        { id: 11, name: "Rohekassinine", color: "#009688" },
+        { id: 11, name: "Sinakasroheline", color: "#009688" },
         { id: 12, name: "Roheline", color: "#4caf50" },
         { id: 13, name: "Heleroheline", color: "#8bc24a" },
-        { id: 14, name: "Laimikollane", color: "#ccdb39" },
+        { id: 14, name: "Laimiroheline", color: "#ccdb39" },
         { id: 15, name: "Kollane", color: "#f2d611" },
         { id: 16, name: "Merevaigukollane", color: "#ffc107" },
         { id: 17, name: "Oranž", color: "#ff9800" },
@@ -606,7 +628,7 @@ export const Examples: Story = {
       ],
       // Example 2 - Scrollable list
       scrollableOptions: [
-        "Erakorraline meditsiin",
+        "Erakorralise meditsiini osakond",
         "Sisehaigused",
         "Kardioloogia",
         "Neuroloogia",
@@ -628,7 +650,7 @@ export const Examples: Story = {
         "Allergoloogia ja immunoloogia",
         "Geriaatria",
         "Neonatoloogia",
-        "Palliatiivne ravi",
+        "Palliatiivravi",
         "Taastusravi",
         "Anestesioloogia",
         "Patoloogia",
@@ -650,8 +672,8 @@ export const Examples: Story = {
       ],
       // Example 3 & 5 & 6 - Grouped options
       groupedOptions: [
-        { id: 1, name: "Erakorraline meditsiin", category: "Erakorraline" },
-        { id: 2, name: "Kiirabi", category: "Erakorraline" },
+        { id: 1, name: "Erakorralise meditsiini osakond", category: "Erakorraline" },
+        { id: 2, name: "Valvevastuvõtt", category: "Erakorraline" },
         { id: 3, name: "Sisehaigused", category: "Sisehaigused" },
         { id: 4, name: "Kardioloogia", category: "Sisehaigused" },
         { id: 5, name: "Neuroloogia", category: "Sisehaigused" },
@@ -663,19 +685,19 @@ export const Examples: Story = {
       descriptionOptions: [
         {
           id: 1,
-          title: "Ligipääs terviseandmetele",
-          description: "Arstid näevad sinu terviseandmeid",
+          title: "Juurdepääs terviseandmetele",
+          description: "Arstid näevad teie terviseandmeid",
         },
         {
           id: 2,
-          title: "Ligipääs ravimitele ja terviseandmetele",
+          title: "Juurdepääs ravimitele ja terviseandmetele",
           description:
-            "Arstid näevad sinu ravimeid ja terviseandmeid",
+            "Arstid näevad teie ravimeid ja terviseandmeid",
         },
         {
           id: 3,
-          title: "Ligipääs kõigele",
-          description: "Arstid näevad kogu sinu infot",
+          title: "Juurdepääs kõigele",
+          description: "Arstid näevad kogu teie teavet",
         },
       ],
       // Example 7 - Options with horizontal meta
@@ -701,7 +723,7 @@ export const Examples: Story = {
         {
           id: 3,
           title: "Administraatoriõigused",
-          description: "Täielik ligipääs kõigile funktsioonidele",
+          description: "Täielik juurdepääs kõigile funktsioonidele",
         },
       ],
     },
@@ -728,14 +750,14 @@ export const Examples: Story = {
         <tedi-select
           inputId="example-2b"
           label="Searchable select"
-          placeholder="Otsi osakonda..."
+          placeholder="Otsi osakondi..."
           [options]="scrollableOptions"
           [searchable]="true"
           [clearable]="true"
         />
         <tedi-select
           inputId="example-2c"
-          label="Searchable multiselect"
+          label="Osakonnad"
           placeholder="Otsi ja vali osakondi..."
           [options]="scrollableOptions"
           [searchable]="true"
@@ -767,7 +789,7 @@ export const Examples: Story = {
         <tedi-select
           inputId="example-4"
           label="Options with descriptions"
-          placeholder="Vali juurdepääsu tase..."
+          placeholder="Vali juurdepääsutase..."
           [options]="descriptionOptions"
           bindLabel="title"
           bindValue="id"
@@ -783,7 +805,7 @@ export const Examples: Story = {
         <tedi-select
           inputId="example-5"
           label="Grouped multiselect"
-          placeholder="Vali osakondi..."
+          placeholder="Vali osakonnad..."
           [options]="groupedOptions"
           bindLabel="name"
           bindValue="id"
@@ -794,7 +816,7 @@ export const Examples: Story = {
         <tedi-select
           inputId="example-5b"
           label="Grouped multiselect with selectable groups"
-          placeholder="Vali osakondi..."
+          placeholder="Vali osakonnad..."
           [options]="groupedOptions"
           bindLabel="name"
           bindValue="id"
@@ -806,7 +828,7 @@ export const Examples: Story = {
         <tedi-select
           inputId="example-6"
           label="Grouped multiselect with Select All"
-          placeholder="Vali osakondi..."
+          placeholder="Vali osakonnad..."
           [options]="groupedOptions"
           bindLabel="name"
           bindValue="id"
@@ -835,7 +857,7 @@ export const Examples: Story = {
         <tedi-select
           inputId="example-8"
           label="Single select with radio buttons"
-          placeholder="Vali juurdepääsu tase..."
+          placeholder="Vali juurdepääsutase..."
           [options]="descriptionOptions"
           bindLabel="title"
           bindValue="id"
@@ -876,13 +898,13 @@ export const Examples: Story = {
     SelectComponent,
     SelectOptionTemplateDirective,
     ReactiveFormsModule,
-    JsonPipe,
-    AlertComponent,
-    TextComponent,
     DropdownItemValueComponent,
     DropdownItemValueLabelComponent,
     DropdownItemValueMetaComponent,
     VerticalSpacingDirective,
+    AlertComponent,
+    TextComponent,
+    JsonPipe,
   ],
   template: `
     <form
@@ -909,7 +931,7 @@ export const Examples: Story = {
 
       <tedi-select
         inputId="rf-access"
-        label="Juurdepääsu tase"
+        label="Juurdepääsutase"
         placeholder="Vali juurdepääs..."
         [options]="accessOptions"
         bindLabel="title"
@@ -958,15 +980,15 @@ class SelectReactiveFormsDemoComponent {
   ];
 
   accessOptions = [
-    { id: 1, title: "Terviseandmed", description: "Ligipääs terviseandmetele" },
-    { id: 2, title: "Ravimid", description: "Ligipääs ravimiajaloole" },
-    { id: 3, title: "Analüüsitulemused", description: "Ligipääs laborianalüüsidele" },
+    { id: 1, title: "Terviseandmed", description: "Juurdepääs terviseandmetele" },
+    { id: 2, title: "Ravimid", description: "Juurdepääs ravimite ajaloole" },
+    { id: 3, title: "Analüüside tulemused", description: "Juurdepääs laborianalüüside tulemustele" },
   ];
 
   permissionOptions = [
     { id: 1, title: "Lugemine", description: "Saab vaadata dokumente" },
     { id: 2, title: "Kirjutamine", description: "Saab luua ja muuta" },
-    { id: 3, title: "Administraator", description: "Täielik ligipääs" },
+    { id: 3, title: "Administraator", description: "Täielik juurdepääs" },
   ];
 
   form = new FormGroup({
@@ -976,7 +998,44 @@ class SelectReactiveFormsDemoComponent {
   });
 }
 
-export const WithReactiveForms: Story = {
+/**
+ * The `tooltip` string input covers the common case. When the tooltip needs
+ * formatting the plain string cannot express, project a `*tediSelectTooltip`
+ * template instead — it takes precedence over the `tooltip` input.
+ */
+export const Tooltip: Story = {
+  render: () => ({
+    props: {
+      options: simpleOptions,
+    },
+    template: `
+      <div style="display: flex; flex-direction: column;" [tediVerticalSpacing]="3">
+        <tedi-select
+          inputId="tooltip-string"
+          label="Elukoht"
+          tooltip="Vali linn, kus sa praegu elad."
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+        />
+        <tedi-select
+          inputId="tooltip-template"
+          label="Elukoht"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+        >
+          <ng-template tediSelectTooltip>
+            Vali <b>linn</b>, kus sa <i>praegu</i> elad, mitte
+            <u>rahvastikuregistri</u> aadress.
+          </ng-template>
+        </tedi-select>
+      </div>
+    `,
+  }),
+};
+
+export const ReactiveForms: Story = {
   render: () => ({
     moduleMetadata: {
       imports: [SelectReactiveFormsDemoComponent],
@@ -1004,8 +1063,8 @@ interface PermissionOption {
   template: `
     <tedi-select
       inputId="custom-search"
-      label="Searchable with custom search function"
-      placeholder="Otsi nime või kirjelduse järgi..."
+      label="Dokumendiõigused"
+      placeholder="Otsi pealkirja või kirjelduse järgi..."
       [options]="options"
       bindLabel="title"
       bindValue="id"
@@ -1028,8 +1087,8 @@ class SelectCustomSearchDemoComponent {
   options: PermissionOption[] = [
     { id: 1, title: "Lugemisõigused", description: "Saab vaadata dokumente ja faile" },
     { id: 2, title: "Kirjutamisõigused", description: "Saab luua ja muuta dokumente" },
-    { id: 3, title: "Administraatoriõigused", description: "Täielik ligipääs kõigile funktsioonidele" },
-    { id: 4, title: "Kustutamisõigused", description: "Saab kustutada dokumente ja andmeid" },
+    { id: 3, title: "Administraatoriõigused", description: "Täielik juurdepääs kõigile funktsioonidele" },
+    { id: 4, title: "Kustutamisõigused", description: "Saab eemaldada dokumente ja andmeid" },
   ];
 
   searchFn = (term: string, item: PermissionOption): boolean => {
@@ -1063,26 +1122,29 @@ export const CustomSearchFunction: Story = {
 @Component({
   selector: "storybook-select-outputs-demo",
   standalone: true,
-  imports: [SelectComponent],
+  imports: [SelectComponent, ButtonComponent, VerticalSpacingDirective],
   template: `
     <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start;">
-      <tedi-select
-        inputId="outputs-demo"
-        label="Linnad"
-        placeholder="Vali linn..."
-        [options]="options"
-        bindLabel="label"
-        bindValue="value"
-        [searchable]="true"
-        [allowMultiple]="true"
-        [clearable]="true"
-        [isTagRemovable]="true"
-        (selectionChange)="logEvent('selectionChange', $event)"
-        (searchChange)="logEvent('searchChange', $event)"
-        (opened)="logEvent('opened')"
-        (closed)="logEvent('closed')"
-        (cleared)="logEvent('cleared')"
-      />
+      <div style="display: flex; flex-direction: column;" [tediVerticalSpacing]="1">
+        <tedi-select
+          inputId="outputs-demo"
+          label="Linnad"
+          placeholder="Vali linn..."
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+          [searchable]="true"
+          [allowMultiple]="true"
+          [clearable]="true"
+          [isTagRemovable]="true"
+          (selectionChange)="logEvent('selectionChange', $event)"
+          (searchChange)="logEvent('searchChange', $event)"
+          (opened)="logEvent('opened')"
+          (closed)="logEvent('closed')"
+          (cleared)="logEvent('cleared')"
+        />
+        <button tedi-button variant="secondary" (click)="clearLog()">Tühjenda logi</button>
+      </div>
       <div
         style="
           font-family: monospace;
@@ -1127,6 +1189,10 @@ class SelectOutputsDemoComponent {
   logEvent(name: string, payload?: unknown): void {
     const formatted = payload === undefined ? undefined : JSON.stringify(payload);
     this.events.update((list) => [{ name, payload: formatted }, ...list].slice(0, 50));
+  }
+
+  clearLog(): void {
+    this.events.set([]);
   }
 }
 

@@ -480,18 +480,19 @@ describe("CalendarHeaderComponent", () => {
 
   describe("a11y", () => {
     function nav(): HTMLElement {
-      return fixture.debugElement.query(By.css("nav.tedi-calendar-header"))
+      return fixture.debugElement.query(By.css("div.tedi-calendar-header"))
         .nativeElement as HTMLElement;
     }
 
     function liveRegion(): HTMLElement {
       return fixture.debugElement.query(
-        By.css("nav.tedi-calendar-header .sr-only[role='status']"),
+        By.css(".tedi-calendar-header .sr-only[role='status']"),
       ).nativeElement as HTMLElement;
     }
 
-    it("renders the header as a <nav> with translated aria-label", () => {
-      expect(nav().tagName).toBe("NAV");
+    it("renders the header as a labelled group (not a landmark) so multiple months/calendars don't clash", () => {
+      expect(nav().tagName).toBe("DIV");
+      expect(nav().getAttribute("role")).toBe("group");
       expect(nav().getAttribute("aria-label")).toBe(
         "date-picker.calendar-nav",
       );

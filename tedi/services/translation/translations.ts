@@ -567,6 +567,34 @@ export const translationsMap = {
     en: "Columns",
     ru: "Колонки",
   },
+  "table.select-column": {
+    description: "Accessible name of the row-selection control column header",
+    components: ["Table"],
+    et: "Vali",
+    en: "Select",
+    ru: "Выбрать",
+  },
+  "table.expand-column": {
+    description: "Accessible name of the row-expansion control column header",
+    components: ["Table"],
+    et: "Laienda",
+    en: "Expand",
+    ru: "Развернуть",
+  },
+  "table.reorder-column": {
+    description: "Accessible name of the row-reorder control column header",
+    components: ["Table"],
+    et: "Järjesta",
+    en: "Reorder",
+    ru: "Изменить порядок",
+  },
+  "table.scroll-region": {
+    description: "Accessible name of the horizontally scrollable table region",
+    components: ["Table"],
+    et: "Tabeli sisu",
+    en: "Table content",
+    ru: "Содержимое таблицы",
+  },
   "table.expand-row": {
     description: "Label for the expand row toggle (collapsed state)",
     components: ["Table"],
@@ -676,6 +704,13 @@ export const translationsMap = {
     et: "Lisainfo",
     en: "More information",
     ru: "Дополнительная информация",
+  },
+  "scroll-fade.label": {
+    description: "Default label for the scrollable region",
+    components: ["ScrollFade"],
+    et: "Keritav sisu",
+    en: "Scrollable content",
+    ru: "Прокручиваемая область",
   },
   "pagination.title": {
     description: "Label of the pagination",
@@ -1303,6 +1338,13 @@ export const translationsMap = {
     et: "Minutid",
     en: "Minutes",
     ru: "Минуты",
+  },
+  "time-picker.times": {
+    description: "Aria label for the dropdown listbox of time slots in the time picker.",
+    components: ["TimePicker"],
+    et: "Kellaajad",
+    en: "Times",
+    ru: "Время",
   },
   "time-field.clear": {
     description:

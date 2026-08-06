@@ -58,4 +58,15 @@ export class DropdownItemValueComponent {
    * @default false
    */
   readonly disabled = input<boolean>(false);
+
+  /**
+   * The checkbox/radio only pictures the item's state — the item itself owns the
+   * interaction. Cancelling the default action keeps the browser from toggling the
+   * indicator on its own, which would leave it showing the opposite of `selected`.
+   * The click is left to bubble, so hitting the indicator selects the item just
+   * like hitting anywhere else on it.
+   */
+  onIndicatorClick(event: MouseEvent): void {
+    event.preventDefault();
+  }
 }
