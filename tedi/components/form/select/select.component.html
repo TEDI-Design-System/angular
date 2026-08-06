@@ -295,7 +295,7 @@
             </div>
           </cdk-virtual-scroll-viewport>
         } @else {
-          <div class="tedi-dropdown-item tedi-select__no-options" role="option">
+          <div class="tedi-dropdown-item tedi-select__no-options" role="option" aria-disabled="true">
             {{ noOptionsMessage() || ("select.no-options" | tediTranslate) }}
           </div>
         }

@@ -654,8 +654,12 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   /** Ordered navigable rows for the virtual listbox (pinned select-all + options). */
   readonly virtualRows = computed<VirtualRow<T>[]>(() => {
     const rows: VirtualRow<T>[] = [];
-    if (this.showSelectAllRow()) rows.push({ kind: "select-all" });
-    for (const option of this.filteredOptions()) {
+    const options = this.filteredOptions();
+    // Mirror the template: the select-all row is only rendered when at least
+    // one option is visible, so it must not appear in the navigable row model
+    // when the filtered list is empty.
+    if (this.showSelectAllRow() && options.length) rows.push({ kind: "select-all" });
+    for (const option of options) {
       rows.push({ kind: "option", option });
     }
     return rows;
@@ -1052,7 +1056,10 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   private initVirtualActive(): void {
     const rows = this.virtualRows();
     const selectedIndex = rows.findIndex(
-      (row) => row.kind === "option" && this.isOptionSelected(row.option.value)
+      (row) =>
+        row.kind === "option" &&
+        !row.option.disabled &&
+        this.isOptionSelected(row.option.value)
     );
     this.activeIndex.set(
       selectedIndex >= 0
@@ -1084,9 +1091,21 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     if (this.disabled() || option.disabled) return;
     if (this.allowMultiple()) {
       this.toggleOptionValue(option.value);
+      // Selection may clear the search and rebuild the rows, so re-resolve the
+      // active index against the current rows to keep the clicked option (not a
+      // stale row) as the target of a subsequent Enter/Space.
+      this.syncActiveToOptionValue(option.value);
     } else {
       this.selectSingleValue(option.value);
     }
+  }
+
+  private syncActiveToOptionValue(value: unknown): void {
+    const compareWith = this.compareWith();
+    const index = this.virtualRows().findIndex(
+      (row) => row.kind === "option" && compareWith(row.option.value, value)
+    );
+    if (index >= 0) this.setActiveIndex(index);
   }
 
   onVirtualSelectAllClick(): void {
@@ -1467,28 +1486,45 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       ? this.filteredOptions()
       : this.normalizedOptions();
     const enabledOptions = options.filter((o) => !o.disabled);
-    const compareWith = this.compareWith();
+    const deselecting = this.allOptionsSelected();
 
-    if (this.allOptionsSelected()) {
-      // Deselect: remove only the visible enabled options, keep the rest
-      const newSelection = this.selectedValues().filter(
-        (val) => !enabledOptions.some((o) => compareWith(val, o.value))
-      );
-      this.selectedValues.set(newSelection);
-      this.onChange(newSelection);
-      this.selectionChange.emit(newSelection as T[]);
-    } else {
-      // Select: add visible enabled options to current selection
-      const newSelection = [...this.selectedValues()];
-      for (const option of enabledOptions) {
-        if (!newSelection.some((val) => compareWith(val, option.value))) {
-          newSelection.push(option.value);
+    let newSelection: unknown[];
+    if (this.usesDefaultCompare()) {
+      // Identity comparison lets bulk operations stay linear in the row count.
+      if (deselecting) {
+        const enabledSet = new Set<unknown>(enabledOptions.map((o) => o.value));
+        newSelection = this.selectedValues().filter((val) => !enabledSet.has(val));
+      } else {
+        const seen = new Set<unknown>(this.selectedValues());
+        newSelection = [...this.selectedValues()];
+        for (const option of enabledOptions) {
+          if (!seen.has(option.value)) {
+            seen.add(option.value);
+            newSelection.push(option.value);
+          }
         }
       }
-      this.selectedValues.set(newSelection);
-      this.onChange(newSelection);
-      this.selectionChange.emit(newSelection as T[]);
+    } else {
+      const compareWith = this.compareWith();
+      if (deselecting) {
+        // Deselect: remove only the visible enabled options, keep the rest
+        newSelection = this.selectedValues().filter(
+          (val) => !enabledOptions.some((o) => compareWith(val, o.value))
+        );
+      } else {
+        // Select: add visible enabled options to current selection
+        newSelection = [...this.selectedValues()];
+        for (const option of enabledOptions) {
+          if (!newSelection.some((val) => compareWith(val, option.value))) {
+            newSelection.push(option.value);
+          }
+        }
+      }
     }
+
+    this.selectedValues.set(newSelection);
+    this.onChange(newSelection);
+    this.selectionChange.emit(newSelection as T[]);
   }
 
   private toggleGroupSelection(groupLabel: string): void {
