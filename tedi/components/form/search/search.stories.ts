@@ -1,9 +1,11 @@
 import { TitleCasePipe } from "@angular/common";
 import {
+  afterNextRender,
   Component,
   computed,
   ElementRef,
   inject,
+  Injector,
   OnDestroy,
   signal,
   viewChild,
@@ -317,13 +319,17 @@ class SearchSuggestionsDemoComponent {
  * A single matched result with fallback actions and a hint — e.g. a
  * national-registry person lookup. The result panel renders inline below the
  * field (not in an overlay), so focus flows naturally: Tab from the field moves
- * through the action buttons. Opens on focus, closes on Esc or when focus leaves
- * the field and its panel.
+ * through the action buttons. It opens on focus, and ArrowDown moves focus into
+ * the dialog. Esc closes it from either the field or the dialog, and selecting a
+ * result closes it too — both hand focus back to the input rather than dropping
+ * it when the panel unmounts. It also closes when focus leaves the field and
+ * its panel.
  *
  * The panel mixes a result with actions, so it is not a listbox: the input is a
  * `role="combobox"` with `aria-haspopup="dialog"` pointing at a `role="dialog"`
- * panel. `aria-expanded` / `aria-controls` are only valid on a combobox — on a
- * plain textbox they fail the `aria-allowed-attr` rule.
+ * panel. The combobox role is what makes `aria-expanded` legal — on a plain
+ * textbox it fails the `aria-allowed-attr` rule. `aria-controls` and
+ * `aria-haspopup` are global attributes, so those were valid either way.
  */
 @Component({
   standalone: true,
@@ -347,6 +353,7 @@ class SearchSuggestionsDemoComponent {
       <tedi-form-field>
         <label tedi-label for="search-result">Otsi</label>
         <input
+          #comboboxInput
           tedi-text-field
           id="search-result"
           type="text"
@@ -356,7 +363,8 @@ class SearchSuggestionsDemoComponent {
           [attr.aria-expanded]="open()"
           [value]="value()"
           (valueChange)="value.set($event)"
-          (focus)="open.set(true)"
+          (focus)="onInputFocus()"
+          (keydown.arrowdown)="onArrowDown($event)"
           (keydown.escape)="open.set(false)"
         />
       </tedi-form-field>
@@ -367,11 +375,12 @@ class SearchSuggestionsDemoComponent {
           role="dialog"
           aria-label="Otsingutulemus"
           class="tedi-search-demo__results"
+          (keydown.escape)="closeAndRestoreFocus()"
         >
           <button
             type="button"
             class="tedi-search-demo__result"
-            (click)="open.set(false)"
+            (click)="closeAndRestoreFocus()"
           >
             <tedi-dropdown-item-value>
               <tedi-dropdown-item-value-label
@@ -439,8 +448,45 @@ class SearchSuggestionsDemoComponent {
 })
 class SearchResultActionsDemoComponent {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+  private readonly input =
+    viewChild.required<ElementRef<HTMLInputElement>>("comboboxInput");
+
+  /** Set while focus is moved back to the input, so it does not reopen the dialog. */
+  private restoringFocus = false;
+
   readonly value = signal("4954080254");
   readonly open = signal(false);
+
+  onInputFocus(): void {
+    if (this.restoringFocus) {
+      this.restoringFocus = false;
+      return;
+    }
+    this.open.set(true);
+  }
+
+  /** ArrowDown moves focus into the dialog, as the combobox pattern expects. */
+  onArrowDown(event: Event): void {
+    event.preventDefault();
+    this.open.set(true);
+
+    // The panel renders on the next change-detection tick.
+    afterNextRender(
+      () =>
+        this.host.nativeElement
+          .querySelector<HTMLElement>(".tedi-search-demo__result")
+          ?.focus(),
+      { injector: this.injector },
+    );
+  }
+
+  /** Closing from inside the dialog must hand focus back to the input. */
+  closeAndRestoreFocus(): void {
+    this.open.set(false);
+    this.restoringFocus = true;
+    this.input().nativeElement.focus();
+  }
 
   onFocusOut(event: FocusEvent): void {
     const next = event.relatedTarget as Node | null;
