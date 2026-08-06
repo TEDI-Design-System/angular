@@ -98,6 +98,25 @@ describe("PopoverComponent", () => {
     expect(trigger?.getAttribute("aria-haspopup")).toBe("dialog");
   });
 
+  it("should only set aria-controls on the trigger while the popover is open", () => {
+    const trigger = hostEl.querySelector("[tedi-popover-trigger]");
+    expect(trigger?.getAttribute("aria-controls")).toBeNull();
+
+    component.showPopover();
+    fixture.detectChanges();
+
+    const containerId = component.containerId();
+    expect(trigger?.getAttribute("aria-controls")).toBe(containerId);
+    expect(
+      overlayContainerElement.querySelector(`#${containerId}`),
+    ).toBeTruthy();
+
+    component.hidePopover();
+    fixture.detectChanges();
+
+    expect(trigger?.getAttribute("aria-controls")).toBeNull();
+  });
+
   it("should not include the border class by default", () => {
     expect(component.panelClasses()).not.toContain("border");
   });

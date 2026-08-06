@@ -18,7 +18,8 @@ import { PopoverComponent } from "../popover.component";
     "[attr.aria-haspopup]": "interactive() ? 'dialog' : null",
     "[id]": "popover.containerId() + '_trigger'",
     "[attr.aria-expanded]": "interactive() ? popover.isOpen() : null",
-    "[attr.aria-controls]": "interactive() ? (popover.containerId() || null) : null",
+    "[attr.aria-controls]":
+      "interactive() && popover.isOpen() ? (popover.containerId() || null) : null",
     "[class.tedi-popover-trigger__text]": "underline()",
   },
 })
