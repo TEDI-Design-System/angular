@@ -1,3 +1,10 @@
+# [7.1.0-rc.23](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.22...angular-7.1.0-rc.23) (2026-08-06)
+
+
+### Features
+
+* **date-field:** added hideOnScroll [#563](https://github.com/TEDI-Design-System/angular/issues/563) ([#595](https://github.com/TEDI-Design-System/angular/issues/595)) ([0dfad0f](https://github.com/TEDI-Design-System/angular/commit/0dfad0f400344d4a06603c9e6eff18fab731b1f4))
+
 # [7.1.0-rc.22](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0-rc.21...angular-7.1.0-rc.22) (2026-08-06)
 
 
