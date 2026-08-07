@@ -740,8 +740,6 @@ const BACKGROUND_EXAMPLES: { name: CardBackground; light: boolean }[] =
       "info-secondary",
       "success-secondary",
       "danger-secondary",
-      "warning-secondary",
-      "neutral-secondary",
     ].includes(name),
   }));
 

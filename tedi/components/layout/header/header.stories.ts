@@ -264,6 +264,19 @@ export default {
     docs: { toc: false },
   },
   argTypes: {
+    topAlignment: {
+      name: "alignment",
+      description:
+        'Horizontal alignment of the top bar content. Supports per-breakpoint overrides via the `[xs]`–`[xxl]` inputs, e.g. `alignment="center" [lg]="{ alignment: \'space-between\' }"`.',
+      table: {
+        category: "header-top",
+        type: {
+          summary:
+            "'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly'",
+        },
+        defaultValue: { summary: "'space-between'" },
+      },
+    },
     logoHref: {
       name: "href",
       description:
@@ -632,6 +645,7 @@ Header is responsive and adapts to mobile layouts automatically, but some subcom
 To preview the mobile layout, resize the browser window or use Storybook's viewport tools.
 
 Header consists of several sub-components:
+- \`HeaderTopComponent\`: Optional secondary bar rendered above the main header bar (typically language selection, top-level links or a theme toggle).
 - \`HeaderLogoComponent\`: Wraps the project logo. Project the light/default logo as direct content; optionally project a dark-theme variant marked with \`tedi-header-logo-dark\` for automatic swap when the active theme is \`dark\`.
 - \`HeaderContentComponent\`: Used for showing links in desktop view.
 - \`HeaderActionsComponent\`: Used for showing and styling actions in header (placed at the right side).
@@ -1225,6 +1239,17 @@ export const WithInlineSearch: StoryObj<HeaderComponent> = {
 };
 
 export const WithMobileBottomSearch: StoryObj<HeaderComponent> = {
+  parameters: {
+    docs: {
+      description: {
+        story: `
+\`HeaderBottomComponent\` (\`tedi-header-bottom\`) adds a secondary row below the main header bar — typically a compact search or mobile-only navigation. Place it as a direct child of \`<header tedi-header>\`; the header projects it by selector, so its position in your template does not matter.
+
+It is hidden from the \`md\` breakpoint up in CSS, so you can include it unconditionally — no \`*hideAt\` needed.
+        `,
+      },
+    },
+  },
   render: (args) => ({
     props: args,
     template: `
@@ -1273,6 +1298,17 @@ export const WithMobileBottomSearch: StoryObj<HeaderComponent> = {
 };
 
 export const WithTopHeader: StoryObj<HeaderComponent> = {
+  parameters: {
+    docs: {
+      description: {
+        story: `
+\`HeaderTopComponent\` (\`tedi-header-top\`) adds a secondary bar above the main header — language selection, top-level links or a theme toggle. Place it as a direct child of \`<header tedi-header>\`; the header projects it by selector, so its position in your template does not matter.
+
+Unlike \`HeaderBottomComponent\` it is never hidden by breakpoint — use \`*showAt\` / \`*hideAt\` on its children instead.
+        `,
+      },
+    },
+  },
   render: (args) => ({
     props: args,
     template: `
@@ -1456,6 +1492,9 @@ This demo uses hash fragments (\`#et\`, \`#en\`, \`#ru\`) so selecting a languag
 };
 
 export const LoggedInWithSidenav: StoryObj<HeaderComponent> = {
+  // Renders the sidenav, whose accessibility fixes are tracked in
+  // https://github.com/TEDI-Design-System/angular/issues/307
+  parameters: { a11y: { test: "todo" } },
   render: (args) => ({
     props: args,
     styles: [mobileSidenavWrapperStyles],

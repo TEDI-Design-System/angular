@@ -1,5 +1,6 @@
 import { CdkConnectedOverlay, ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
 import { CdkListbox, CdkListboxModule } from "@angular/cdk/listbox";
+import { CdkVirtualScrollViewport, ScrollingModule } from "@angular/cdk/scrolling";
 import {
   AfterContentChecked,
   AfterViewChecked,
@@ -60,8 +61,15 @@ export interface SelectOptionGroup<T = unknown> {
   options: SelectOption<T>[];
 }
 
+/** A navigable row in the virtual-scroll listbox: the pinned select-all row or an option. */
+export type VirtualRow<T = unknown> =
+  | { kind: "select-all" }
+  | { kind: "option"; option: SelectOption<T> };
+
 export type GroupByFn<T = unknown> = (item: T) => string | undefined;
 export type CompareWithFn<T = unknown> = (a: T, b: T) => boolean;
+
+const defaultCompareWith: CompareWithFn = (a, b) => a === b;
 
 export enum SpecialOptionControls {
   SELECT_ALL = "\0SELECT_ALL",
@@ -74,6 +82,7 @@ export enum SpecialOptionControls {
     CommonModule,
     OverlayModule,
     CdkListboxModule,
+    ScrollingModule,
     ClosingButtonComponent,
     IconComponent,
     LabelComponent,
@@ -245,8 +254,13 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   multiRow = input<boolean>(false);
 
   /**
-   * Which end a selected tag's label truncates from when it doesn't fit.
-   * `false` (default) never truncates; `end` → `label…`; `start` → `…label`.
+   * Which end a selected tag's label truncates from: `end` → `label…`, `start` →
+   * `…label`. `false` (default) never truncates.
+   *
+   * Truncation needs the tag to be width-constrained: in a single row the tags
+   * share the row with the `+N` counter, so an over-wide label truncates to fit.
+   * With `multiRow` the tags wrap first, so a label truncates only when it is
+   * wider than the field on its own.
    * @default false
    */
   tagEllipsis = input<TagEllipsis>(false);
@@ -265,7 +279,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * Used to determine which options are selected.
    * @default (a, b) => a === b
    */
-  compareWith = input<CompareWithFn>((a, b) => a === b);
+  compareWith = input<CompareWithFn>(defaultCompareWith);
 
   /**
    * Property name to check for disabled state on items.
@@ -299,6 +313,30 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * @default "menu"
    */
   dropdownType = input<'menu' | 'grid'>('menu');
+
+  /**
+   * Renders options with virtual scrolling so only the rows in view exist in the
+   * DOM. Enable for very large option lists (hundreds or more) to keep opening
+   * and scrolling fast. Takes effect only for the default `menu` dropdown type
+   * without `groupBy`; grid and grouped lists fall back to full rendering.
+   * @default false
+   */
+  virtualScroll = input<boolean>(false);
+
+  /**
+   * Fixed row height in pixels for the virtual scroll viewport. Virtual scrolling
+   * assumes every row is the same height and uses this value to compute how many
+   * rows fit, the total scroll height, and where to jump when scrolling. Only
+   * relevant when `virtualScroll` is enabled.
+   *
+   * Leave unset by default: the height is auto-measured from the first rendered
+   * option, which covers the standard option template. Set it only when that
+   * measurement is unreliable — typically a custom `optionTemplate` whose rows
+   * have a known uniform height that the first row doesn't represent (e.g. only
+   * some rows carry a description line). Setting a wrong value makes rows overlap
+   * or leave gaps, so prefer auto-measurement unless you hit one of these cases.
+   */
+  virtualItemSize = input<number | undefined>();
 
   /**
    * Whether the select has a search input for filtering options.
@@ -388,6 +426,14 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   searchTerm = signal<string>("");
   searchFocused = signal<boolean>(false);
 
+  /** Index into `virtualRows()` of the keyboard-active row (-1 when none). */
+  activeIndex = signal<number>(-1);
+  /** Measured row height for the virtual scroll viewport. */
+  measuredRowHeight = signal<number | null>(null);
+
+  private static readonly DEFAULT_ROW_HEIGHT = 40;
+  private static readonly SMALL_ROW_HEIGHT = 36;
+
   hiddenTagsCount = computed(() => {
     const visible = this.visibleTagsCount();
     const total = this.selectedValues().length;
@@ -395,8 +441,43 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     return total - visible;
   });
 
+  /**
+   * Whether the default identity comparator is in use. When true, selection and
+   * item lookups can use O(1) Set/Map paths instead of O(n) scans with the
+   * user-supplied comparator. See issue #552.
+   */
+  private readonly usesDefaultCompare = computed(
+    () => this.compareWith() === defaultCompareWith
+  );
+
+  /** O(1) membership set of selected values for the identity-comparison path. */
+  private readonly selectedValueSet = computed(() => new Set(this.selectedValues()));
+
+  /** value → normalized option, for O(1) label lookups. */
+  private readonly optionByValue = computed(() => {
+    const map = new Map<unknown, SelectOption<T>>();
+    for (const option of this.normalizedOptions()) {
+      if (!map.has(option.value)) map.set(option.value, option);
+    }
+    return map;
+  });
+
+  /** value → original item, for O(1) custom-template context lookups. */
+  private readonly itemByValue = computed(() => {
+    const map = new Map<unknown, T>();
+    const bindValue = this.bindValue();
+    if (!bindValue) return map;
+    for (const item of this.options()) {
+      const value = (item as Record<string, unknown>)[bindValue];
+      if (!map.has(value)) map.set(value, item);
+    }
+    return map;
+  });
+
   listboxRef = viewChild(CdkListbox, { read: ElementRef });
   cdkListboxRef = viewChild(CdkListbox);
+  viewport = viewChild(CdkVirtualScrollViewport);
+  virtualListboxRef = viewChild<ElementRef>("virtualListbox");
   connectedOverlay = viewChild(CdkConnectedOverlay);
   triggerRef = viewChild("trigger", { read: ElementRef });
   searchInputRef = viewChild<ElementRef>("searchInput");
@@ -489,8 +570,13 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   selectedOptions = computed<SelectOption<T>[]>(() => {
     const values = this.selectedValues();
     const options = this.normalizedOptions();
-    const compareWith = this.compareWith();
 
+    if (this.usesDefaultCompare()) {
+      const set = this.selectedValueSet();
+      return options.filter((option) => set.has(option.value));
+    }
+
+    const compareWith = this.compareWith();
     return options.filter((option) =>
       values.some((val) => compareWith(option.value, val))
     );
@@ -499,8 +585,13 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   visibleSelectedValues = computed<unknown[]>(() => {
     const selected = this.selectedValues();
     const filtered = this.filteredOptions();
-    const compareWith = this.compareWith();
 
+    if (this.usesDefaultCompare()) {
+      const filteredSet = new Set<unknown>(filtered.map((opt) => opt.value));
+      return selected.filter((val) => filteredSet.has(val));
+    }
+
+    const compareWith = this.compareWith();
     return selected.filter((val) =>
       filtered.some((opt) => compareWith(opt.value, val))
     );
@@ -519,14 +610,17 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       ? this.filteredOptions()
       : this.normalizedOptions();
     const enabledOptions = options.filter((o) => !o.disabled);
+    if (enabledOptions.length === 0) return false;
+
+    if (this.usesDefaultCompare()) {
+      const set = this.selectedValueSet();
+      return enabledOptions.every((option) => set.has(option.value));
+    }
+
     const selected = this.selectedValues();
     const compareWith = this.compareWith();
-
-    return (
-      enabledOptions.length > 0 &&
-      enabledOptions.every((option) =>
-        selected.some((val) => compareWith(option.value, val))
-      )
+    return enabledOptions.every((option) =>
+      selected.some((val) => compareWith(option.value, val))
     );
   });
 
@@ -535,14 +629,80 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       ? this.filteredOptions()
       : this.normalizedOptions();
     const enabledOptions = options.filter((o) => !o.disabled);
-    const selected = this.selectedValues();
-    const compareWith = this.compareWith();
+    if (enabledOptions.length === 0) return false;
 
-    const selectedCount = enabledOptions.filter((option) =>
-      selected.some((val) => compareWith(option.value, val))
-    ).length;
+    let selectedCount: number;
+    if (this.usesDefaultCompare()) {
+      const set = this.selectedValueSet();
+      selectedCount = enabledOptions.filter((option) => set.has(option.value)).length;
+    } else {
+      const selected = this.selectedValues();
+      const compareWith = this.compareWith();
+      selectedCount = enabledOptions.filter((option) =>
+        selected.some((val) => compareWith(option.value, val))
+      ).length;
+    }
 
     return selectedCount > 0 && selectedCount < enabledOptions.length;
+  });
+
+  /** Whether virtual scrolling is active: opt-in, flat `menu` lists only. */
+  readonly virtualize = computed(
+    () =>
+      this.virtualScroll() &&
+      this.dropdownType() === "menu" &&
+      !this.groupBy()
+  );
+
+  /** Whether the pinned select-all row is shown above the virtual viewport. */
+  readonly showSelectAllRow = computed(
+    () => this.allowMultiple() && this.showSelectAll()
+  );
+
+  /** Ordered navigable rows for the virtual listbox (pinned select-all + options). */
+  readonly virtualRows = computed<VirtualRow<T>[]>(() => {
+    const rows: VirtualRow<T>[] = [];
+    const options = this.filteredOptions();
+    // Mirror the template: the select-all row is only rendered when at least
+    // one option is visible, so it must not appear in the navigable row model
+    // when the filtered list is empty.
+    if (this.showSelectAllRow() && options.length) rows.push({ kind: "select-all" });
+    for (const option of options) {
+      rows.push({ kind: "option", option });
+    }
+    return rows;
+  });
+
+  /** Effective row height for the viewport: explicit input, measured, or size default. */
+  readonly virtualRowHeight = computed(() => {
+    const explicit = this.virtualItemSize();
+    if (explicit != null) return explicit;
+    const measured = this.measuredRowHeight();
+    if (measured != null) return measured;
+    return this.size() === "small"
+      ? SelectComponent.SMALL_ROW_HEIGHT
+      : SelectComponent.DEFAULT_ROW_HEIGHT;
+  });
+
+  /** Height of the scrolling viewport: content-sized, capped at available space. */
+  readonly virtualViewportHeight = computed(() => {
+    const rowHeight = this.virtualRowHeight();
+    const contentHeight = this.filteredOptions().length * rowHeight;
+    const selectAllHeight = this.showSelectAllRow() ? rowHeight : 0;
+    const available = (this.dropdownMaxHeight() ?? rowHeight * 10) - selectAllHeight;
+    return Math.max(rowHeight, Math.min(contentHeight, available));
+  });
+
+  trackByOptionValue = (_: number, option: SelectOption<T>): unknown => option.value;
+
+  /** id of the active row, exposed via aria-activedescendant on the listbox. */
+  readonly activeDescendantId = computed<string | null>(() => {
+    const rows = this.virtualRows();
+    const index = this.activeIndex();
+    const row = rows[index];
+    if (!row) return null;
+    if (row.kind === "select-all") return this.listboxId() + "-select-all";
+    return this.virtualOptionId(index - (this.showSelectAllRow() ? 1 : 0));
   });
 
   ngAfterContentChecked(): void {
@@ -573,8 +733,12 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     const target = event.target as HTMLElement;
     const hostElement = this.hostRef.nativeElement;
     const listboxElement = this.listboxRef()?.nativeElement;
+    const overlayElement = this.connectedOverlay()?.overlayRef?.overlayElement;
 
-    const clickedInside = hostElement.contains(target) || listboxElement?.contains(target);
+    const clickedInside =
+      hostElement.contains(target) ||
+      listboxElement?.contains(target) ||
+      overlayElement?.contains(target);
 
     if (!clickedInside) {
       this.closeDropdown();
@@ -582,9 +746,12 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   }
 
   focusListboxWhenVisible = effect(() => {
-    if (this.isOpen() && this.searchable() && this.searchInputRef()) {
+    if (!this.isOpen()) return;
+    if (this.searchable()) {
       this.searchInputRef()?.nativeElement.focus();
-    } else if (this.isOpen() && this.listboxRef() && !this.searchable()) {
+    } else if (this.virtualize()) {
+      this.virtualListboxRef()?.nativeElement.focus();
+    } else {
       this.listboxRef()?.nativeElement.focus();
     }
   });
@@ -665,6 +832,10 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     if (!this.isOpen()) {
       this.openDropdown();
     }
+
+    if (this.virtualize()) {
+      this.initVirtualActive();
+    }
   }
 
   onSearchFocus(): void {
@@ -709,19 +880,11 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       case "Home":
       case "End":
         event.preventDefault();
-        if (this.isOpen()) {
-          this.forwardToCdkListbox(event.key);
-        } else {
-          this.openDropdown();
-        }
+        this.navigateOrOpen(event.key);
         break;
       case "Enter":
         event.preventDefault();
-        if (this.isOpen()) {
-          this.forwardToCdkListbox(event.key);
-        } else {
-          this.openDropdown();
-        }
+        this.confirmActiveOrOpen();
         break;
       case " ":
         if (!this.isOpen()) {
@@ -735,6 +898,32 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
           this.closeDropdown();
         }
         break;
+    }
+  }
+
+  /** Navigate the open list (virtual or CDK), or open the dropdown when closed. */
+  private navigateOrOpen(key: string): void {
+    if (!this.isOpen()) {
+      this.openDropdown();
+      return;
+    }
+    if (this.virtualize()) {
+      this.handleVirtualNavKey(key);
+    } else {
+      this.forwardToCdkListbox(key);
+    }
+  }
+
+  /** Activate the active option (virtual or CDK), or open the dropdown when closed. */
+  private confirmActiveOrOpen(): void {
+    if (!this.isOpen()) {
+      this.openDropdown();
+      return;
+    }
+    if (this.virtualize()) {
+      this.activateActiveRow();
+    } else {
+      this.forwardToCdkListbox("Enter");
     }
   }
 
@@ -756,10 +945,225 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     }
   }
 
+  // ---- Virtual scroll listbox (opt-in, replaces cdkListbox for flat menus) ----
+
+  virtualOptionId(index: number): string {
+    return this.listboxId() + "-option-" + index;
+  }
+
+  /** Keyboard handler for the non-searchable virtual listbox element. */
+  onVirtualListboxKeydown(event: KeyboardEvent): void {
+    switch (event.key) {
+      case "ArrowDown":
+      case "ArrowUp":
+      case "Home":
+      case "End":
+        event.preventDefault();
+        this.handleVirtualNavKey(event.key);
+        break;
+      case "Enter":
+      case " ":
+        event.preventDefault();
+        this.activateActiveRow();
+        break;
+      case "Escape":
+      case "Tab":
+        this.toggleIsOpen(true);
+        break;
+    }
+  }
+
+  private handleVirtualNavKey(key: string): void {
+    switch (key) {
+      case "ArrowDown":
+        this.moveActive(1);
+        break;
+      case "ArrowUp":
+        this.moveActive(-1);
+        break;
+      case "Home":
+        this.moveActiveToEdge("first");
+        break;
+      case "End":
+        this.moveActiveToEdge("last");
+        break;
+    }
+  }
+
+  private moveActive(delta: 1 | -1): void {
+    const rows = this.virtualRows();
+    const n = rows.length;
+    if (n === 0) {
+      this.activeIndex.set(-1);
+      return;
+    }
+    let i = this.activeIndex();
+    for (let step = 0; step < n; step++) {
+      i = i < 0 ? (delta > 0 ? 0 : n - 1) : (i + delta + n) % n;
+      if (this.isRowNavigable(rows[i])) {
+        this.setActiveIndex(i);
+        return;
+      }
+    }
+    this.activeIndex.set(-1);
+  }
+
+  private moveActiveToEdge(edge: "first" | "last"): void {
+    const rows = this.virtualRows();
+    const n = rows.length;
+    for (let step = 0; step < n; step++) {
+      const i = edge === "first" ? step : n - 1 - step;
+      if (this.isRowNavigable(rows[i])) {
+        this.setActiveIndex(i);
+        return;
+      }
+    }
+    this.activeIndex.set(-1);
+  }
+
+  private isRowNavigable(row: VirtualRow<T> | undefined): boolean {
+    if (!row) return false;
+    if (row.kind === "select-all") return true;
+    return !row.option.disabled;
+  }
+
+  private setActiveIndex(index: number): void {
+    this.activeIndex.set(index);
+    this.scrollActiveIntoView();
+  }
+
+  private scrollActiveIntoView(): void {
+    const index = this.activeIndex();
+    const row = this.virtualRows()[index];
+    if (row?.kind === "option") {
+      const optionIndex = index - (this.showSelectAllRow() ? 1 : 0);
+      this.viewport()?.scrollToIndex(optionIndex);
+    }
+  }
+
+  /**
+   * Scroll the initially-active option into view once the overlay has attached.
+   * Driven by the overlay's `(attach)` event because the virtual viewport (a
+   * viewChild inside the overlay portal) only resolves after attachment.
+   *
+   * The scroll is deferred one macrotask: at attach time the CDK viewport has not
+   * yet established its scrollable content size, so `scrollToIndex` would clamp to
+   * 0. By the next macrotask the content size is set and the measured row height
+   * (for taller custom templates) has been applied to `itemSize`.
+   */
+  onOverlayAttached(): void {
+    if (!this.virtualize()) return;
+    setTimeout(() => {
+      this.measureVirtualRowHeight();
+      this.viewport()?.checkViewportSize();
+      this.scrollActiveIntoView();
+    });
+  }
+
+  /** Set the active row on open: the first selected option, else the first navigable row. */
+  private initVirtualActive(): void {
+    const rows = this.virtualRows();
+    const selectedIndex = rows.findIndex(
+      (row) =>
+        row.kind === "option" &&
+        !row.option.disabled &&
+        this.isOptionSelected(row.option.value)
+    );
+    this.activeIndex.set(
+      selectedIndex >= 0
+        ? selectedIndex
+        : rows.findIndex((row) => this.isRowNavigable(row))
+    );
+  }
+
+  activateActiveRow(): void {
+    const row = this.virtualRows()[this.activeIndex()];
+    if (row) this.activateRow(row);
+  }
+
+  private activateRow(row: VirtualRow<T>): void {
+    if (row.kind === "select-all") {
+      this.toggleSelectAll();
+      this.onTouched();
+      return;
+    }
+    if (row.option.disabled) return;
+    if (this.allowMultiple()) {
+      this.toggleOptionValue(row.option.value);
+    } else {
+      this.selectSingleValue(row.option.value);
+    }
+  }
+
+  onVirtualOptionClick(option: SelectOption<T>): void {
+    if (this.disabled() || option.disabled) return;
+    if (this.allowMultiple()) {
+      this.toggleOptionValue(option.value);
+      // Selection may clear the search and rebuild the rows, so re-resolve the
+      // active index against the current rows to keep the clicked option (not a
+      // stale row) as the target of a subsequent Enter/Space.
+      this.syncActiveToOptionValue(option.value);
+    } else {
+      this.selectSingleValue(option.value);
+    }
+  }
+
+  private syncActiveToOptionValue(value: unknown): void {
+    const compareWith = this.compareWith();
+    const index = this.virtualRows().findIndex(
+      (row) => row.kind === "option" && compareWith(row.option.value, value)
+    );
+    if (index >= 0) this.setActiveIndex(index);
+  }
+
+  onVirtualSelectAllClick(): void {
+    if (this.disabled()) return;
+    this.toggleSelectAll();
+    this.onTouched();
+  }
+
+  private toggleOptionValue(value: unknown): void {
+    const compareWith = this.compareWith();
+    const selected = this.selectedValues();
+    const isSelected = selected.some((v) => compareWith(v, value));
+    const newSelection = isSelected
+      ? selected.filter((v) => !compareWith(v, value))
+      : [...selected, value];
+
+    this.selectedValues.set(newSelection);
+    this.onChange(newSelection);
+    this.selectionChange.emit(newSelection as T[]);
+    if (this.clearSearchOnSelect()) this.searchTerm.set("");
+    if (this.searchable()) this.searchInputRef()?.nativeElement.focus();
+    this.onTouched();
+  }
+
+  private selectSingleValue(value: unknown): void {
+    this.selectedValues.set([value]);
+    this.onChange(value);
+    this.selectionChange.emit(value as T);
+    if (this.clearSearchOnSelect()) this.searchTerm.set("");
+    this.toggleIsOpen(true);
+    this.onTouched();
+  }
+
+  private measureVirtualRowHeight(): void {
+    if (this.virtualItemSize() != null) return;
+    const viewportEl = this.viewport()?.elementRef.nativeElement;
+    const row = viewportEl?.querySelector<HTMLElement>(".tedi-dropdown-item");
+    const height = row?.offsetHeight;
+    if (height && height !== this.measuredRowHeight()) {
+      this.measuredRowHeight.set(height);
+    }
+  }
+
   private openDropdown(): void {
     if (this.isOpen()) return;
     this.calculateDropdownMaxHeight();
     this.isOpen.set(true);
+    if (this.virtualize()) {
+      this.initVirtualActive();
+    }
     if (this.hideOnScroll()) {
       this.setupScrollListener();
     }
@@ -799,6 +1203,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     this.isOpen.set(false);
     this.searchTerm.set("");
     this.dropdownMaxHeight.set(null);
+    this.activeIndex.set(-1);
     this.cleanupScrollListener();
     this.closed.emit();
   }
@@ -812,10 +1217,15 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       (event: Event) => {
         if (!this.isOpen()) return;
 
-        // Scrolling the option list itself must not close the dropdown
-        const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+        // Scrolling inside the select is not the page moving away from it: the
+        // option list scrolls its own items, and a search input whose text no
+        // longer fits scrolls its own content.
         const target = event.target as Node | null;
-        if (overlayEl && target && overlayEl.contains(target)) return;
+        const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+        const insideSelect =
+          !!target &&
+          (this.hostRef.nativeElement.contains(target) || !!overlayEl?.contains(target));
+        if (insideSelect) return;
 
         this.closeDropdown();
       },
@@ -929,11 +1339,17 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
   }
 
   isOptionSelected(optionValue: unknown): boolean {
+    if (this.usesDefaultCompare()) {
+      return this.selectedValueSet().has(optionValue);
+    }
     const compareWith = this.compareWith();
     return this.selectedValues().some((val) => compareWith(val, optionValue));
   }
 
   getLabel(value: unknown): string {
+    if (this.usesDefaultCompare()) {
+      return this.optionByValue().get(value)?.label ?? String(value);
+    }
     const compareWith = this.compareWith();
     const option = this.normalizedOptions().find((o) =>
       compareWith(o.value, value)
@@ -946,16 +1362,19 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
    * Used for custom templates that need access to the full item data.
    */
   getOriginalItem(option: SelectOption<T>): T {
-    const compareWith = this.compareWith();
     const bindValue = this.bindValue();
 
     if (!bindValue) {
       return option.value as T;
     }
 
+    if (this.usesDefaultCompare()) {
+      return this.itemByValue().get(option.value) ?? (option as unknown as T);
+    }
+
     // Find the original item by matching the value
-    const items = this.options();
-    const found = items.find((item) => {
+    const compareWith = this.compareWith();
+    const found = this.options().find((item) => {
       const itemRecord = item as Record<string, unknown>;
       return compareWith(itemRecord[bindValue], option.value);
     });
@@ -1037,7 +1456,7 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
     const searchInput: HTMLElement | null = trigger.querySelector(".tedi-select__search-input");
     if (arrow) nonTagWidth += arrow.offsetWidth + (parseFloat(getComputedStyle(arrow).marginLeft) || 0) + (parseFloat(getComputedStyle(arrow).paddingLeft) || 0);
     if (clear) nonTagWidth += clear.offsetWidth;
-    if (searchInput) nonTagWidth += parseFloat(getComputedStyle(searchInput).minWidth) || 0;
+    if (searchInput) nonTagWidth += parseFloat(getComputedStyle(searchInput).flexBasis) || 0;
 
     return triggerWidth - padding - nonTagWidth;
   }
@@ -1075,28 +1494,45 @@ export class SelectComponent<T = unknown> implements AfterContentChecked, AfterV
       ? this.filteredOptions()
       : this.normalizedOptions();
     const enabledOptions = options.filter((o) => !o.disabled);
-    const compareWith = this.compareWith();
+    const deselecting = this.allOptionsSelected();
 
-    if (this.allOptionsSelected()) {
-      // Deselect: remove only the visible enabled options, keep the rest
-      const newSelection = this.selectedValues().filter(
-        (val) => !enabledOptions.some((o) => compareWith(val, o.value))
-      );
-      this.selectedValues.set(newSelection);
-      this.onChange(newSelection);
-      this.selectionChange.emit(newSelection as T[]);
-    } else {
-      // Select: add visible enabled options to current selection
-      const newSelection = [...this.selectedValues()];
-      for (const option of enabledOptions) {
-        if (!newSelection.some((val) => compareWith(val, option.value))) {
-          newSelection.push(option.value);
+    let newSelection: unknown[];
+    if (this.usesDefaultCompare()) {
+      // Identity comparison lets bulk operations stay linear in the row count.
+      if (deselecting) {
+        const enabledSet = new Set<unknown>(enabledOptions.map((o) => o.value));
+        newSelection = this.selectedValues().filter((val) => !enabledSet.has(val));
+      } else {
+        const seen = new Set<unknown>(this.selectedValues());
+        newSelection = [...this.selectedValues()];
+        for (const option of enabledOptions) {
+          if (!seen.has(option.value)) {
+            seen.add(option.value);
+            newSelection.push(option.value);
+          }
         }
       }
-      this.selectedValues.set(newSelection);
-      this.onChange(newSelection);
-      this.selectionChange.emit(newSelection as T[]);
+    } else {
+      const compareWith = this.compareWith();
+      if (deselecting) {
+        // Deselect: remove only the visible enabled options, keep the rest
+        newSelection = this.selectedValues().filter(
+          (val) => !enabledOptions.some((o) => compareWith(val, o.value))
+        );
+      } else {
+        // Select: add visible enabled options to current selection
+        newSelection = [...this.selectedValues()];
+        for (const option of enabledOptions) {
+          if (!newSelection.some((val) => compareWith(val, option.value))) {
+            newSelection.push(option.value);
+          }
+        }
+      }
     }
+
+    this.selectedValues.set(newSelection);
+    this.onChange(newSelection);
+    this.selectionChange.emit(newSelection as T[]);
   }
 
   private toggleGroupSelection(groupLabel: string): void {

@@ -24,6 +24,7 @@
     [value]="value()"
     [placeholder]="placeholder()"
     [disabled]="isDisabled()"
+    [attr.aria-label]="inputAriaLabel()"
     [attr.aria-describedby]="feedbackId()"
     (valueChange)="onInputValue($event)"
     (clear)="onClear()"

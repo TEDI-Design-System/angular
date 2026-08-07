@@ -48,6 +48,7 @@
       [attr.max]="max()"
       [attr.step]="step()"
       [attr.aria-invalid]="isInvalid()"
+      [attr.aria-label]="label() ? null : (ariaLabel() || null)"
       [attr.aria-describedby]="feedbackId()"
       (input)="handleInputChange($event)"
       (blur)="handleBlur()"

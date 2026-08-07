@@ -1,5 +1,7 @@
 import { StorybookConfig } from "@storybook/angular";
 
+const excludeCommunity = process.env.STORYBOOK_EXCLUDE_COMMUNITY === "true";
+
 const config: StorybookConfig = {
   stories: [
     "../src/docs/welcome.mdx",
@@ -12,7 +14,7 @@ const config: StorybookConfig = {
     "../src/docs/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "../tedi/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "../tedi/**/*.mdx",
-    "../community/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    ...(excludeCommunity ? [] : ["../community/**/*.stories.@(js|jsx|mjs|ts|tsx)"]),
   ],
   addons: [
     "@storybook/addon-docs",

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   forwardRef,
@@ -9,12 +10,15 @@ import {
   input,
   model,
   output,
+  Renderer2,
   signal,
   untracked,
   viewChild,
   ViewEncapsulation,
 } from "@angular/core";
+import { DOCUMENT } from "@angular/common";
 import {
+  CdkConnectedOverlay,
   ConnectedPosition,
   OverlayModule,
 } from "@angular/cdk/overlay";
@@ -178,6 +182,16 @@ export class DateFieldComponent
    */
   readonly shouldDisableYear = input<YearPredicate | undefined>(undefined);
   /**
+   * Earliest year offered in the calendar's year grid/dropdown. Defaults to 100
+   * years before the current year when `null`.
+   */
+  readonly minYear = input<number | null>(null);
+  /**
+   * Latest year offered in the calendar's year grid/dropdown. Defaults to 20
+   * years after the current year when `null`.
+   */
+  readonly maxYear = input<number | null>(null);
+  /**
    * Whitelist of selectable days — an explicit `Date[]` or a predicate
    * `(date) => boolean`. Every other day is disabled.
    */
@@ -256,6 +270,12 @@ export class DateFieldComponent
    * (custom popover from that breakpoint up).
    */
   readonly useNativePicker = input<DateFieldUseNativePicker>(false);
+  /**
+   * Close the calendar popover when the page (or a scrollable ancestor) scrolls.
+   * Scrolling inside the calendar itself — or its nested year/month dropdown —
+   * keeps it open. Only applies to the popover; the modal is unaffected.
+   */
+  readonly hideOnScroll = input(false);
   /** Open the calendar in a modal: `true` always, `false` never, breakpoint name → modal below that breakpoint. */
   readonly modal = input<DateFieldModalInput>(false);
   /** Make the modal fullscreen: `true` always, `false` never, breakpoint name → fullscreen below that breakpoint. Only applies when the calendar actually opens as a modal. */
@@ -278,9 +298,12 @@ export class DateFieldComponent
   private readonly breakpointService = inject(BreakpointService);
   private readonly modalService = inject(ModalService);
   private readonly hostEl = inject(ElementRef<HTMLElement>);
+  private readonly renderer = inject(Renderer2);
+  private readonly document = inject(DOCUMENT);
 
   readonly calendar = viewChild<CalendarComponent>("calendar");
   readonly dateInput = viewChild.required<DateInputComponent>("dateInput");
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
 
   readonly currentMonth = signal<Date>(new Date());
   readonly overlayOpen = signal<boolean>(false);
@@ -307,6 +330,7 @@ export class DateFieldComponent
   private readonly cvaDisabled = signal(false);
   private readonly formInvalid = signal(false);
   private modalRef: ModalRef<DateFieldValue> | null = null;
+  private scrollListener?: () => void;
 
   private onChange: (value: DateFieldValue) => void = () => { };
   private onTouched: () => void = () => { };
@@ -438,6 +462,8 @@ export class DateFieldComponent
   private initialOpenEmit = true;
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.cleanupScrollListener());
+
     effect(() => {
       const v = this.value();
       const anchor = this.deriveAnchor(v) ?? this.initialMonth() ?? null;
@@ -619,6 +645,14 @@ export class DateFieldComponent
 
   handleOverlayAttached(): void {
     this.calendar()?.focusActiveCell();
+    if (this.hideOnScroll()) {
+      this.setupScrollListener();
+    }
+  }
+
+  handleOverlayDetached(): void {
+    this.cleanupScrollListener();
+    this.closeOverlay();
   }
 
   handleOverlayKeydown(event: KeyboardEvent): void {
@@ -633,6 +667,51 @@ export class DateFieldComponent
     const host = this.hostEl.nativeElement as HTMLElement;
     const icon = host.querySelector<HTMLElement>(".tedi-date-input__icon");
     icon?.focus();
+  }
+
+  private setupScrollListener(): void {
+    this.cleanupScrollListener();
+
+    this.scrollListener = this.renderer.listen(
+      this.document,
+      "scroll",
+      (event: Event) => {
+        if (!this.overlayOpen()) return;
+        if (this.isInsideOverlay(event.target as Node | null)) return;
+        this.overlayOpen.set(false);
+        this.onTouched();
+      },
+      { capture: true, passive: true },
+    );
+  }
+
+  private cleanupScrollListener(): void {
+    if (this.scrollListener) {
+      this.scrollListener();
+      this.scrollListener = undefined;
+    }
+  }
+
+  /**
+   * Whether the scroll target is inside this field's own calendar overlay or a
+   * nested overlay opened from within it (e.g. the year/month dropdown). Nested
+   * overlays share the CDK overlay container but render in their own pane
+   * stacked after this one in DOM order, so a `DOCUMENT_POSITION_FOLLOWING`
+   * check distinguishes them from unrelated ancestors that should dismiss.
+   */
+  private isInsideOverlay(target: Node | null): boolean {
+    if (!target || !(target instanceof Element)) return false;
+
+    const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+    if (!overlayEl) return false;
+    if (overlayEl.contains(target)) return true;
+
+    if (!target.closest(".cdk-overlay-container")) return false;
+
+    return !!(
+      overlayEl.compareDocumentPosition(target) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   }
 
   private openNativePicker(): void {
@@ -667,6 +746,8 @@ export class DateFieldComponent
       unavailableDays: this.unavailableDays(),
       shouldDisableMonth: this.shouldDisableMonth(),
       shouldDisableYear: this.shouldDisableYear(),
+      minYear: this.minYear(),
+      maxYear: this.maxYear(),
       closeOnSelect: this.closeOnSelectEffective(),
     };
 
