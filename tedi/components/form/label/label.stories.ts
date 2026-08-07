@@ -5,12 +5,10 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { LabelComponent } from "./label.component";
+import { LabelRowComponent } from "../label-row/label-row.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
-import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
-import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
-import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
-import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
+import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=2137-19322&m=dev" target="_blank">Figma ↗</a><br />
@@ -24,12 +22,10 @@ export default {
     moduleMetadata({
       imports: [
         LabelComponent,
+        LabelRowComponent,
         RowComponent,
         ColComponent,
-        TooltipComponent,
-        TooltipTriggerComponent,
-        TooltipContentComponent,
-        InfoButtonComponent,
+        InfoTooltipComponent,
       ],
     }),
   ],
@@ -119,42 +115,31 @@ export const Size: StoryObj<LabelComponent> = {
   }),
 };
 
+/**
+ * If a tooltip is needed, use the `tedi-label-row` component together with `tedi-info-tooltip`.
+ */
 export const Structure: LabelStory = {
   render: (args) => ({
     props: args,
     template: `
       <tedi-row [cols]="1" [gapY]="3">
         <tedi-col>
-          <label tedi-label>Active ingredient</label>
+          <label tedi-label for="ingredient-1">Toimeaine</label>
         </tedi-col>
         <tedi-col>
-          <label tedi-label [required]="true">Active ingredient</label>
+          <label tedi-label for="ingredient-2" [required]="true">Toimeaine</label>
         </tedi-col>
         <tedi-col>
-          <div style="display: flex; gap: 2px;">
-            <label tedi-label>Active ingredient</label>
-            <tedi-tooltip>
-              <tedi-tooltip-trigger>
-                <button tedi-info-button></button>
-              </tedi-tooltip-trigger>
-              <tedi-tooltip-content>
-                Tooltip content
-              </tedi-tooltip-content>
-            </tedi-tooltip>
-          </div>
+          <tedi-label-row>
+            <label tedi-label for="ingredient-3">Toimeaine</label>
+            <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
+          </tedi-label-row>
         </tedi-col>
         <tedi-col>
-          <div style="display: flex; gap: 2px;">
-            <label tedi-label [required]="true">Active ingredient</label>
-            <tedi-tooltip>
-              <tedi-tooltip-trigger>
-                <button tedi-info-button></button>
-              </tedi-tooltip-trigger>
-              <tedi-tooltip-content>
-                Tooltip content
-              </tedi-tooltip-content>
-            </tedi-tooltip>
-          </div>
+          <tedi-label-row>
+            <label tedi-label for="ingredient-4" [required]="true">Toimeaine</label>
+            <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
+          </tedi-label-row>
         </tedi-col>
       </tedi-row>
     `,

@@ -3,6 +3,7 @@ import { Component, signal } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
 import { DateFieldComponent } from "./date-field.component";
+import { TextFieldComponent } from "../text-field/text-field.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
 import { LabelComponent } from "../label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
@@ -200,6 +201,29 @@ describe("DateFieldComponent", () => {
       expect(component.invalid()).toBe(false);
       component.setInvalidState(true);
       expect(component.invalid()).toBe(true);
+    });
+
+    it("focus moves focus to the text input", () => {
+      const { component, el } = createField();
+      const input = el.querySelector(
+        ".tedi-date-input__input",
+      ) as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+
+      component.focus();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("focus does nothing when the field is disabled", () => {
+      const { component, el, fixture } = createField({ inputDisabled: true });
+      const input = el.querySelector(
+        ".tedi-date-input__input",
+      ) as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+      fixture.detectChanges();
+
+      component.focus();
+      expect(focusSpy).not.toHaveBeenCalled();
     });
 
     it("clearField clears value and emits null", () => {
@@ -464,6 +488,93 @@ describe("DateFieldComponent", () => {
     });
   });
 
+  describe("hideOnScroll", () => {
+    function openAndAttach(
+      component: DateFieldComponent,
+      fixture: ComponentFixture<DateFieldComponent>,
+    ): void {
+      component.overlayOpen.set(true);
+      fixture.detectChanges();
+      component.handleOverlayAttached();
+    }
+
+    function closeAndDetach(
+      component: DateFieldComponent,
+      fixture: ComponentFixture<DateFieldComponent>,
+    ): void {
+      component.handleOverlayDetached();
+      fixture.detectChanges();
+    }
+
+    it("does not close on document scroll when disabled (default)", () => {
+      const { component, fixture } = createField();
+      openAndAttach(component, fixture);
+
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(component.overlayOpen()).toBe(true);
+      closeAndDetach(component, fixture);
+    });
+
+    it("closes on document scroll when enabled", () => {
+      const { component, fixture } = createField({ hideOnScroll: true });
+      const onTouched = jest.fn();
+      component.registerOnTouched(onTouched);
+      openAndAttach(component, fixture);
+
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(component.overlayOpen()).toBe(false);
+      expect(onTouched).toHaveBeenCalled();
+      closeAndDetach(component, fixture);
+    });
+
+    it("stays open when scrolling inside the calendar overlay", () => {
+      const { component, fixture } = createField({ hideOnScroll: true });
+      openAndAttach(component, fixture);
+
+      const overlay = document.querySelector(".tedi-date-field__overlay");
+      expect(overlay).toBeTruthy();
+      overlay!.dispatchEvent(new Event("scroll", { bubbles: false }));
+
+      expect(component.overlayOpen()).toBe(true);
+      closeAndDetach(component, fixture);
+    });
+
+    it("stays open when scrolling inside a nested overlay stacked above it", () => {
+      const { component, fixture } = createField({ hideOnScroll: true });
+      openAndAttach(component, fixture);
+
+      const container = document.querySelector(".cdk-overlay-container");
+      expect(container).toBeTruthy();
+      const nestedPane = document.createElement("div");
+      const nestedTarget = document.createElement("div");
+      nestedPane.appendChild(nestedTarget);
+      container!.appendChild(nestedPane);
+
+      nestedTarget.dispatchEvent(new Event("scroll", { bubbles: false }));
+
+      expect(component.overlayOpen()).toBe(true);
+      container!.removeChild(nestedPane);
+      closeAndDetach(component, fixture);
+    });
+
+    it("removes the scroll listener after the overlay closes", () => {
+      const { component, fixture } = createField({ hideOnScroll: true });
+      openAndAttach(component, fixture);
+      closeAndDetach(component, fixture);
+
+      const onTouched = jest.fn();
+      component.registerOnTouched(onTouched);
+      component.overlayOpen.set(true);
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(component.overlayOpen()).toBe(true);
+      expect(onTouched).not.toHaveBeenCalled();
+      closeAndDetach(component, fixture);
+    });
+  });
+
   describe("overlay focus management", () => {
     function openOverlay(component: DateFieldComponent): void {
       component.overlayOpen.set(true);
@@ -578,6 +689,26 @@ describe("DateFieldComponent", () => {
 
       component.handleIconClick();
       expect(modalService.open).toHaveBeenCalled();
+    });
+
+    it("forwards minYear/maxYear into the modal calendar data", () => {
+      const { component, modalService } = createField({
+        modal: "md",
+        minYear: 1950,
+        maxYear: 1970,
+      });
+      const bp = TestBed.inject(BreakpointService) as unknown as BreakpointServiceMock;
+      bp.setBreakpoint("sm");
+
+      const ref = {
+        closed: { subscribe: jest.fn() },
+      };
+      modalService.open.mockReturnValue(ref);
+
+      component.handleIconClick();
+      const data = modalService.open.mock.calls[0][1].data;
+      expect(data.minYear).toBe(1950);
+      expect(data.maxYear).toBe(1970);
     });
 
     it("does NOT open a modal when above the configured breakpoint", () => {
@@ -1081,6 +1212,19 @@ describe("DateFieldComponent", () => {
     });
   });
 
+  describe("clear button", () => {
+    it("renders once the field has a value", () => {
+      const { component, el, fixture } = createField();
+      expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
+
+      fixture.componentRef.setInput("value", new Date(2026, 4, 14));
+      fixture.detectChanges();
+
+      expect(component.canClear()).toBe(true);
+      expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
+    });
+  });
+
   describe("native picker parse rejection", () => {
     it("rejects when parts.length !== 3 (no dashes)", () => {
       const { component } = createField({
@@ -1242,6 +1386,30 @@ describe("DateFieldComponent with ReactiveFormsModule", () => {
       "input.tedi-date-input__input",
     ) as HTMLInputElement;
     expect(input.value).toBe("14.05.2026");
+  });
+
+  it("keeps the nested text-field model in sync with external updates (issue #592)", () => {
+    const textField = fixture.debugElement.query(
+      By.directive(TextFieldComponent),
+    ).componentInstance as TextFieldComponent;
+
+    // Starts empty, before any value is set.
+    expect(textField.value()).toBe("");
+
+    // Programmatic prefill after the field has already rendered.
+    host.control.setValue(new Date(2026, 4, 14));
+    fixture.detectChanges();
+    expect(textField.value()).toBe("14.05.2026");
+
+    // A subsequent out-of-band change is reflected too.
+    host.control.setValue(new Date(2026, 0, 1));
+    fixture.detectChanges();
+    expect(textField.value()).toBe("01.01.2026");
+
+    const input = fixture.nativeElement.querySelector(
+      "input.tedi-date-input__input",
+    ) as HTMLInputElement;
+    expect(input.value).toBe("01.01.2026");
   });
 
   it("disables the input when FormControl is disabled", () => {

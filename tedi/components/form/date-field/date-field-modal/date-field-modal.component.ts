@@ -42,6 +42,8 @@ export interface DateFieldModalData {
   unavailableDays: DayAvailabilityInput;
   shouldDisableMonth: MonthPredicate | undefined;
   shouldDisableYear: YearPredicate | undefined;
+  minYear: number | null;
+  maxYear: number | null;
   closeOnSelect: boolean;
 }
 
@@ -82,6 +84,8 @@ export interface DateFieldModalData {
           [unavailableDays]="data.unavailableDays"
           [shouldDisableMonth]="data.shouldDisableMonth"
           [shouldDisableYear]="data.shouldDisableYear"
+          [minYear]="data.minYear"
+          [maxYear]="data.maxYear"
           (valueChange)="draft.set($event)"
           (currentMonthChange)="month.set($event)"
           (select)="handleSelect()"

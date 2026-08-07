@@ -1011,11 +1011,31 @@ describe("CalendarComponent", () => {
     });
   });
 
+  describe("year range defaults", () => {
+    it("defaults to 100 years before and 20 years after the current year", () => {
+      const fixture = createComponent();
+      const component = fixture.componentInstance;
+      const thisYear = new Date().getFullYear();
+      expect(component.resolvedMinYear()).toBe(thisYear - 100);
+      expect(component.resolvedMaxYear()).toBe(thisYear + 20);
+    });
+
+    it("honours explicit minYear/maxYear overrides", () => {
+      const fixture = createComponent();
+      const component = fixture.componentInstance;
+      fixture.componentRef.setInput("minYear", 1950);
+      fixture.componentRef.setInput("maxYear", 1970);
+      fixture.detectChanges();
+      expect(component.resolvedMinYear()).toBe(1950);
+      expect(component.resolvedMaxYear()).toBe(1970);
+    });
+  });
+
   describe("prev/next via internal handlers", () => {
     it("prev in years view decrements yearPageStart", () => {
       const fixture = createComponent();
-      // Widen the year bounds so the prev page isn't blocked by the default
-      // ±10 window — this test only cares about page-decrement math.
+      // Pin the year bounds so the prev page isn't blocked by the default
+      // window — this test only cares about page-decrement math.
       fixture.componentRef.setInput("minYear", 1900);
       fixture.componentRef.setInput("maxYear", 2200);
       const component = fixture.componentInstance;

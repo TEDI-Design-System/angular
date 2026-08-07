@@ -5,6 +5,7 @@
   [disabled]="disabled()"
   [required]="required()"
   [attr.aria-checked]="checked()"
+  [attr.aria-label]="ariaLabel() || null"
   type="checkbox"
   class="tedi-toggle__input"
   role="switch"
