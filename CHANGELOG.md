@@ -1,3 +1,10 @@
+# [7.2.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0...angular-7.2.0-rc.1) (2026-08-07)
+
+
+### Features
+
+* **textarea:** add new TEDI-ready component [#540](https://github.com/TEDI-Design-System/angular/issues/540) ([#542](https://github.com/TEDI-Design-System/angular/issues/542)) ([28e8b04](https://github.com/TEDI-Design-System/angular/commit/28e8b04a2ce5c8110b657814d880606eaab22b1a))
+
 # [7.1.0](https://github.com/TEDI-Design-System/angular/compare/angular-7.0.1...angular-7.1.0) (2026-08-06)
 
 
