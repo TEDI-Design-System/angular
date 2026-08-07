@@ -1816,7 +1816,7 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
 - `ariaLabel: string` — accessible name for the `nav` landmark; overrides the default (the heading via `aria-labelledby`, or the localised title when headless)
 
 **Sub-component:** `tedi-table-of-contents-item`
-- `itemId: string` — required to mark the item active (via the parent's `activeId`) and to parent nested items (named `itemId`, not `id`, to avoid shadowing the native attribute)
+- `itemId: string` — required to mark the item active when it matches the parent's `activeId` (named `itemId`, not `id`, to avoid shadowing the native attribute)
 - `separator: boolean = false` — render a separator below the item
 
 ```html
