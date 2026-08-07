@@ -3,7 +3,11 @@ import {
   Component,
   computed,
   ContentChild,
+  contentChild,
+  ElementRef,
   input,
+  isDevMode,
+  signal,
   ViewEncapsulation,
   AfterContentInit,
   inject,
@@ -33,6 +37,8 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 export type InputSize = "small" | "large" | "default";
 export type InputState = "valid" | "error" | "default";
 type ValidationState = "invalid" | "valid" | "neutral";
+
+let formFieldIdCounter = 0;
 
 export interface FormFieldIcon {
   name: string;
@@ -79,9 +85,18 @@ export class FormFieldComponent implements AfterContentInit {
    * Custom CSS classes for the input.
    */
   inputClass = input<string | null>(null);
+  /**
+   * Maximum number of characters the control should hold. When set, a live
+   * character counter (`current/limit`) is shown in the feedback row and the
+   * field enters an error state once the limit is exceeded.
+   */
+  characterLimit = input<number | undefined>();
 
-  @ContentChild(TEDI_FORM_FIELD_CONTROL)
-  control?: FormFieldControl;
+  readonly control = contentChild<FormFieldControl>(TEDI_FORM_FIELD_CONTROL);
+
+  readonly controlElement = contentChild(TEDI_FORM_FIELD_CONTROL, {
+    read: ElementRef,
+  });
 
   @ContentChild(NgControl)
   ngControl?: NgControl;
@@ -89,61 +104,140 @@ export class FormFieldComponent implements AfterContentInit {
   @ContentChild(FeedbackTextComponent)
   feedback?: FeedbackTextComponent;
 
+  @ContentChild(FeedbackTextComponent, { read: ElementRef })
+  feedbackElement?: ElementRef<HTMLElement>;
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly inputGroup = inject(TEDI_INPUT_GROUP, { optional: true });
+  private readonly fallbackId = `tedi-form-field-${formFieldIdCounter++}`;
 
   constructor() {
     effect(() => {
       const invalid = this.computeInvalid();
-      this.control?.setInvalidState(invalid);
+      this.control()?.setInvalidState(invalid);
     });
+
+    effect(() => this.syncAriaDescribedBy());
   }
 
+  /**
+   * A textarea has no room for the trailing clear button / icon (per design),
+   * so the form field suppresses both when it wraps one.
+   */
+  readonly isTextarea = signal(false);
+
   ngAfterContentInit() {
+    this.isTextarea.set(
+      this.controlElement()?.nativeElement.tagName === "TEXTAREA",
+    );
+
+    if (isDevMode() && this.isTextarea() && (this.clearable() || !!this.icon())) {
+      console.warn(
+        "[tedi-form-field] `clearable` and `icon` are not supported with a textarea and are ignored.",
+      );
+    }
+
     this.ngControl?.control?.events
       ?.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.updateValidationState());
 
     this.updateValidationState();
+    this.syncAriaDescribedBy();
   }
 
   private updateValidationState() {
-    this.control?.setInvalidState(this.computeInvalid());
+    this.control()?.setInvalidState(this.computeInvalid());
   }
 
   private computeInvalid(): boolean {
     const invalid = !!this.ngControl?.invalid;
     const touched = !!this.ngControl?.touched;
     const dirty = !!this.ngControl?.dirty;
-    const fieldInvalid = invalid && (touched || dirty);
+    const fieldInvalid =
+      (invalid && (touched || dirty)) || this.characterCountExceeded();
 
     return fieldInvalid || (this.inputGroup?.invalid() ?? false);
   }
 
   readonly resolvedIcon = computed<FormFieldIcon | undefined>(() => {
     const icon = this.icon();
-    if (!icon) return undefined;
+    if (!icon || this.isTextarea()) return undefined;
 
     return typeof icon === "string" ? { name: icon } : icon;
   });
 
+  readonly characterCount = computed(
+    () => this.control()?.value()?.toString().length ?? 0,
+  );
+
+  readonly characterCountExceeded = computed(() => {
+    const limit = this.characterLimit();
+    return limit != null && this.characterCount() > limit;
+  });
+
+  /** Base for the generated feedback / counter ids — the control's own id, or a fallback. */
+  private get baseId(): string {
+    return this.controlElement()?.nativeElement.id || this.fallbackId;
+  }
+
+  readonly characterCountId = computed<string | null>(() =>
+    this.characterLimit() != null ? `${this.baseId}-character-count` : null,
+  );
+
+  private syncAriaDescribedBy() {
+    const control = this.controlElement()?.nativeElement;
+    // Only manage `aria-describedby` for the native inputs — composite controls
+    // (date/time fields) own their internal descriptions.
+    if (
+      !control ||
+      (control.tagName !== "INPUT" && control.tagName !== "TEXTAREA")
+    ) {
+      return;
+    }
+
+    const feedbackEl = this.feedbackElement?.nativeElement;
+    if (feedbackEl && !feedbackEl.id) feedbackEl.id = `${this.baseId}-feedback`;
+    const feedbackId = feedbackEl?.id ?? null;
+    const countId = this.characterCountId();
+
+    const managed = new Set([
+      `${this.baseId}-feedback`,
+      `${this.baseId}-character-count`,
+    ]);
+    const ids = ((control.getAttribute("aria-describedby") as string | null) ?? "")
+      .split(/\s+/)
+      .filter(
+        (id: string) =>
+          id && !managed.has(id) && id !== feedbackId && id !== countId,
+      );
+
+    if (feedbackId) ids.push(feedbackId);
+    if (countId) ids.push(countId);
+
+    if (ids.length) control.setAttribute("aria-describedby", ids.join(" "));
+    else control.removeAttribute("aria-describedby");
+  }
+
   readonly validationState = computed<ValidationState>(() => {
     const feedbackType = this.feedback?.type();
-    const fieldInvalid = this.control?.invalid?.() ?? false;
+    const fieldInvalid = this.control()?.invalid?.() ?? false;
 
-    if (fieldInvalid || feedbackType === "error") return "invalid";
+    if (fieldInvalid || feedbackType === "error" || this.characterCountExceeded())
+      return "invalid";
     if (feedbackType === "valid") return "valid";
 
     return "neutral";
   });
 
   showClearButton = computed(() => {
-    const value = this.control?.value();
-    return this.clearable() && !!value;
+    const value = this.control()?.value();
+    return this.clearable() && !!value && !this.isTextarea();
   });
 
   readonly isDisabled = computed(
-    () => (this.control?.disabled() ?? false) || (this.inputGroup?.disabled() ?? false),
+    () =>
+      (this.control()?.disabled() ?? false) ||
+      (this.inputGroup?.disabled() ?? false),
   );
 
   readonly hostClasses = computed(() => {
@@ -154,7 +248,8 @@ export class FormFieldComponent implements AfterContentInit {
       "tedi-form-field--disabled": this.isDisabled(),
       "tedi-form-field--small": this.size() === "small",
       "tedi-form-field--large": this.size() === "large",
-      "tedi-form-field--with-icon": this.clearable() || !!this.icon(),
+      "tedi-form-field--with-icon":
+        !this.isTextarea() && (this.clearable() || !!this.icon()),
     };
   });
 
@@ -168,7 +263,7 @@ export class FormFieldComponent implements AfterContentInit {
   });
 
   clear() {
-    this.control?.clearField?.();
+    this.control()?.clearField?.();
   }
 
   /**
@@ -186,6 +281,6 @@ export class FormFieldComponent implements AfterContentInit {
 
     // Keep the browser from moving focus off the control we are about to focus.
     event.preventDefault();
-    this.control?.focus?.();
+    this.control()?.focus?.();
   }
 }
