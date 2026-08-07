@@ -8,17 +8,22 @@ import { FeedbackTextComponent } from "../feedback-text/feedback-text.component"
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
 import { ModalService } from "../../overlay/modal/modal.service";
+import { TEDI_FORM_FIELD } from "../form-field/form-field-context";
 
 describe("TimeFieldComponent", () => {
   let fixture: ComponentFixture<TimeFieldComponent>;
   let component: TimeFieldComponent;
   let el: HTMLElement;
+  /** Stands in for the wrapping `tedi-form-field`, which owns `clearable`. */
+  let fieldClearable: ReturnType<typeof signal<boolean>>;
 
   beforeEach(() => {
+    fieldClearable = signal(false);
     TestBed.configureTestingModule({
       imports: [TimeFieldComponent],
       providers: [
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        { provide: TEDI_FORM_FIELD, useValue: { clearable: fieldClearable } },
       ],
     });
 
@@ -180,6 +185,19 @@ describe("TimeFieldComponent", () => {
   });
 
   describe("clear button", () => {
+    beforeEach(() => {
+      fieldClearable.set(true);
+      fixture.detectChanges();
+    });
+
+    it("should not show clear button when the form field has not opted in", () => {
+      fieldClearable.set(false);
+      component.writeValue("14:30");
+      fixture.detectChanges();
+
+      expect(el.querySelector(".tedi-time-field__clear")).toBeNull();
+    });
+
     it("should not show clear button when value is null", () => {
       expect(el.querySelector(".tedi-time-field__clear")).toBeNull();
     });
@@ -373,6 +391,8 @@ describe("TimeFieldComponent", () => {
     });
 
     it("should show the clear button immediately after a value is picked (no blur required)", () => {
+      fieldClearable.set(true);
+      fixture.detectChanges();
       expect(el.querySelector(".tedi-time-field__clear")).toBeNull();
 
       const input = el.querySelector(".tedi-time-field__input") as HTMLInputElement;

@@ -29,6 +29,13 @@ export interface FormFieldControl<T = unknown> {
    * moves focus into the control, the way clicking the value does.
    */
   focus?(): void;
+  /**
+   * Set by controls that render their own clear button — date and time put one in
+   * their action row beside the picker button, which cannot leave the control
+   * because the overlay anchors to it. The field then skips its generic clear
+   * button so a single `clearable` never yields two.
+   */
+  readonly ownsClearButton?: boolean;
 }
 
 /**

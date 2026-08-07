@@ -32,6 +32,52 @@ class MockControlComponent implements FormFieldControl<string> {
   setInvalidState = jest.fn();
   clearField = jest.fn();
   focus = jest.fn();
+  ownsClearButton = false;
+}
+
+@Component({
+  selector: "mock-owning-control",
+  standalone: true,
+  template: "",
+  providers: [
+    {
+      provide: TEDI_FORM_FIELD_CONTROL,
+      useExisting: MockOwningControlComponent,
+    },
+  ],
+})
+class MockOwningControlComponent implements FormFieldControl<string> {
+  value = signal("");
+  disabled = signal(false);
+  invalid = signal(false);
+  setInvalidState = jest.fn();
+  clearField = jest.fn();
+  focus = jest.fn();
+  /** Like date and time fields, which put a clear button in their own action row. */
+  readonly ownsClearButton = true;
+}
+
+/** Conditional projection: the control can be swapped or arrive after init. */
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, MockControlComponent, MockOwningControlComponent],
+  template: `
+    <tedi-form-field #formField clearable>
+      @if (showControl) {
+        @if (owning) {
+          <mock-owning-control />
+        } @else {
+          <mock-control #mockControl />
+        }
+      }
+    </tedi-form-field>
+  `,
+})
+class ConditionalProjectionHostComponent {
+  @ViewChild("formField", { static: true }) formField!: FormFieldComponent;
+  @ViewChild("mockControl") mockControl?: MockControlComponent;
+  showControl = true;
+  owning = false;
 }
 
 @Component({
@@ -72,6 +118,20 @@ class TestHostComponent {
   clearable = false;
   inputClass?: string;
   feedbackType: "valid" | "error" | "default" = "default";
+}
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, MockControlComponent],
+  template: `
+    <tedi-form-field clearable>
+      <mock-control #mockControl></mock-control>
+    </tedi-form-field>
+  `,
+})
+class BareClearableHostComponent {
+  @ViewChild("mockControl", { static: true })
+  mockControl!: MockControlComponent;
 }
 
 describe("FormFieldComponent", () => {
@@ -172,6 +232,71 @@ describe("FormFieldComponent", () => {
       ".tedi-form-field__buttons",
     );
     expect(buttons).toBeNull();
+  });
+
+  it("should not render its own clear button when the control renders one", () => {
+    host.clearable = true;
+    host.mockControl.value.set("text");
+    host.mockControl.ownsClearButton = true;
+    formField.ngAfterContentInit();
+    fixture.detectChanges();
+
+    expect(formField.renderClearButton()).toBe(false);
+    expect(
+      fixture.nativeElement.querySelector(".tedi-form-field__clear"),
+    ).toBeNull();
+  });
+
+  describe("conditional projection", () => {
+    let conditional: ComponentFixture<ConditionalProjectionHostComponent>;
+    let conditionalHost: ConditionalProjectionHostComponent;
+
+    beforeEach(() => {
+      conditional = TestBed.createComponent(ConditionalProjectionHostComponent);
+      conditionalHost = conditional.componentInstance;
+      conditional.detectChanges();
+    });
+
+    it("should stop rendering its own clear button when the projected control is replaced by one that owns it", () => {
+      expect(conditionalHost.formField.renderClearButton()).toBe(true);
+
+      conditionalHost.owning = true;
+      conditional.detectChanges();
+
+      expect(conditionalHost.formField.renderClearButton()).toBe(false);
+      expect(
+        conditional.nativeElement.querySelector(".tedi-form-field__clear"),
+      ).toBeNull();
+    });
+
+    it("should pick up a control that is projected after init", () => {
+      conditionalHost.showControl = false;
+      conditional.detectChanges();
+      expect(conditionalHost.formField.showClearButton()).toBe(false);
+
+      conditionalHost.showControl = true;
+      conditional.detectChanges();
+      conditionalHost.mockControl!.value.set("text");
+      conditional.detectChanges();
+
+      expect(conditionalHost.formField.showClearButton()).toBe(true);
+    });
+  });
+
+  it("should be clearable by default", () => {
+    const bare = TestBed.createComponent(FormFieldComponent);
+    bare.detectChanges();
+
+    expect(bare.componentInstance.clearable()).toBe(true);
+  });
+
+  it("should treat a bare clearable attribute as true", () => {
+    const bare = TestBed.createComponent(BareClearableHostComponent);
+    bare.detectChanges();
+
+    expect(
+      bare.nativeElement.querySelector(".tedi-form-field__clear"),
+    ).toBeTruthy();
   });
 
   it("should call control.clearField when clear is triggered", () => {

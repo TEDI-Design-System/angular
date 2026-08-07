@@ -3,7 +3,7 @@
 <div [ngClass]="inputClasses()" (mousedown)="handleBoxMouseDown($event)">
   <ng-content select="input[tedi-text-field], tedi-time-field, tedi-date-field"></ng-content>
 
-  @if (clearable()) {
+  @if (renderClearButton()) {
     <div
       class="tedi-form-field__buttons"
       [class.tedi-form-field__buttons--hidden]="!showClearButton()"

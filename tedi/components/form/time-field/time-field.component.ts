@@ -35,6 +35,7 @@ import {
   FormFieldControl,
   TEDI_FORM_FIELD_CONTROL,
 } from "../form-field/form-field-control";
+import { TEDI_FORM_FIELD } from "../form-field/form-field-context";
 import {
   TimePickerModalComponent,
   TimePickerModalData,
@@ -99,8 +100,6 @@ export class TimeFieldComponent
   protected readonly invalidInput = input<boolean>(false, { alias: "invalid" });
   /** Disables interaction. Combines with the form-control disabled state. */
   readonly disabled = input<boolean>(false);
-  /** Show a clear button when the field has a value. */
-  readonly clearable = input<boolean>(true);
   /** Picker variant. `none` renders just the input with no picker UI — typed input is still normalized on blur. */
   readonly pickerVariant = input<TimeFieldPickerVariant>("scroll");
   /**
@@ -125,6 +124,7 @@ export class TimeFieldComponent
   /** Make the mobile modal fullscreen: `true` always, `false` never, breakpoint name → fullscreen below that breakpoint. Only applies when the picker actually opens as a modal. */
   readonly fullscreen = input<TimeFieldFullscreen>(false);
 
+  private readonly formField = inject(TEDI_FORM_FIELD, { optional: true });
   private readonly breakpointService = inject(BreakpointService);
   private readonly modalService = inject(ModalService);
   private readonly injector = inject(Injector);
@@ -151,7 +151,15 @@ export class TimeFieldComponent
   readonly hasValue = computed(
     () => this.value() !== null && this.value() !== "",
   );
-  readonly showClear = computed(() => this.hasValue() && this.clearable());
+  readonly showClear = computed(
+    () => this.hasValue() && this.clearableResolved(),
+  );
+  /** The clear button sits in the time field's action row, beside the picker. */
+  readonly ownsClearButton = true;
+  /** Driven by the wrapping `tedi-form-field`'s `clearable`. */
+  readonly clearableResolved = computed(
+    () => this.formField?.clearable() ?? true,
+  );
   readonly useNativePickerResolved = computed(() => {
     const v = this.useNativePicker();
     return typeof v === "boolean"

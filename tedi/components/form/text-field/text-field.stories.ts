@@ -69,14 +69,15 @@ export default {
       },
     },
     clearable: {
-      description: "Whether the input includes a clear button.",
+      description:
+        "Whether the field shows a clear button once it has a value. Set `false` to opt out.",
       control: {
         type: "boolean",
       },
       table: {
         category: "Form Field inputs",
         type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
+        defaultValue: { summary: "true" },
       },
     },
     inputClass: {
@@ -113,7 +114,7 @@ export default {
 export const Default: StoryObj = {
   args: {
     size: "default",
-    clearable: false,
+    clearable: true,
     arrowsHidden: true,
   },
   render: ({ arrowsHidden, ...formFieldArgs }) => ({

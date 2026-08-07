@@ -36,6 +36,7 @@ import {
   FormFieldControl,
   TEDI_FORM_FIELD_CONTROL,
 } from "../form-field/form-field-control";
+import { TEDI_FORM_FIELD } from "../form-field/form-field-context";
 import {
   breakpointInput,
   BreakpointInput,
@@ -57,7 +58,6 @@ import {
   DateFieldModalComponent,
   DateFieldModalData,
 } from "./date-field-modal/date-field-modal.component";
-import { ButtonComponent } from "../../buttons";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 
 type DateFieldValue = Date | Date[] | DateRange | null;
@@ -69,7 +69,6 @@ type YearPredicate = (year: Date) => boolean;
 type DateFieldCalendarTrigger = "input" | "button";
 type DateFieldModalInput = boolean | "sm" | "md" | "lg" | "xl";
 export type DateFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
-export type DateFieldSize = "default" | "small";
 
 @Component({
   selector: "tedi-date-field",
@@ -81,7 +80,6 @@ export type DateFieldSize = "default" | "small";
   imports: [
     CalendarComponent,
     DateInputComponent,
-    ButtonComponent,
     OverlayModule,
     A11yModule,
     TediTranslationPipe,
@@ -161,8 +159,6 @@ export class DateFieldComponent
    * bind it there too, since DateField owns no label.
    */
   readonly required = input<boolean>(false);
-  /** Field size — matches the surrounding `tedi-form-field`. */
-  readonly size = input<DateFieldSize>("default");
   /** Disables all dates before this date (inclusive boundary stays enabled). */
   readonly minDate = input<Date | undefined>(undefined);
   /** Disables all dates after this date (inclusive boundary stays enabled). */
@@ -343,6 +339,16 @@ export class DateFieldComponent
 
   readonly invalid = computed(() => this.formInvalid());
 
+  private readonly formField = inject(TEDI_FORM_FIELD, { optional: true });
+
+  /** The clear button sits in the date input's action row, beside the calendar. */
+  readonly ownsClearButton = true;
+
+  /** Driven by the wrapping `tedi-form-field`'s `clearable`. */
+  readonly clearableResolved = computed(
+    () => this.formField?.clearable() ?? true,
+  );
+
   readonly resolvedDisabledMatchers = computed<Matcher[]>(() => {
     const result: Matcher[] = [];
     const explicit = this.disabledMatchers();
@@ -451,7 +457,11 @@ export class DateFieldComponent
   });
 
   readonly canClear = computed(
-    () => !!this.value() && !this.fieldDisabled() && !this.readOnly(),
+    () =>
+      this.clearableResolved() &&
+      !!this.value() &&
+      !this.fieldDisabled() &&
+      !this.readOnly(),
   );
 
   readonly inputIsTrigger = computed(

@@ -1212,14 +1212,15 @@ describe("DateFieldComponent", () => {
     });
   });
 
-  describe("clear button", () => {
-    it("renders once the field has a value", () => {
+  describe("clearable", () => {
+    it("renders a clear button once it has a value when used without a form field", () => {
       const { component, el, fixture } = createField();
       expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
 
       fixture.componentRef.setInput("value", new Date(2026, 4, 14));
       fixture.detectChanges();
 
+      expect(component.clearableResolved()).toBe(true);
       expect(component.canClear()).toBe(true);
       expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
     });
@@ -1440,7 +1441,7 @@ describe("DateFieldComponent with ReactiveFormsModule", () => {
     ReactiveFormsModule,
   ],
   template: `
-    <tedi-form-field>
+    <tedi-form-field [clearable]="clearable">
       <label tedi-label for="composite-date">Date</label>
       <tedi-date-field inputId="composite-date" [formControl]="control" />
       <tedi-feedback-text text="Error" type="error" />
@@ -1449,6 +1450,7 @@ describe("DateFieldComponent with ReactiveFormsModule", () => {
 })
 class CompositeHostComponent {
   control = new FormControl<Date | Date[] | DateRange | null>(null);
+  clearable = false;
 }
 
 describe("DateFieldComponent inside FormFieldComponent", () => {
@@ -1481,6 +1483,36 @@ describe("DateFieldComponent inside FormFieldComponent", () => {
 
   it("renders feedback text", () => {
     expect(el.querySelector("tedi-feedback-text")).toBeTruthy();
+  });
+
+  describe("clearable driven by the form field", () => {
+    const seed = (clearable: boolean) => {
+      fixture.componentInstance.clearable = clearable;
+      fixture.componentInstance.control.setValue(new Date(2026, 4, 14));
+      fixture.detectChanges();
+    };
+
+    it("renders none when the form field opts out", () => {
+      seed(false);
+      expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(0);
+      expect(el.querySelectorAll(".tedi-form-field__clear")).toHaveLength(0);
+    });
+
+    it("renders exactly one when the form field opts in", () => {
+      seed(true);
+      expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(1);
+      expect(el.querySelectorAll(".tedi-form-field__clear")).toHaveLength(0);
+    });
+
+    it("still clears programmatically when opted out", () => {
+      seed(false);
+      const component = fixture.debugElement.query(
+        By.directive(DateFieldComponent),
+      ).componentInstance as DateFieldComponent;
+
+      component.clearField();
+      expect(component.value()).toBeNull();
+    });
   });
 });
 
