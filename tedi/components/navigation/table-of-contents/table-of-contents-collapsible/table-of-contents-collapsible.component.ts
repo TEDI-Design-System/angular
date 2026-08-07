@@ -27,8 +27,8 @@ import { TableOfContentsItemComponent } from "../table-of-contents-item/table-of
  * children as the desktop card; render it on small viewports.
  *
  * It provides itself as `TableOfContentsComponent` so the projected items
- * resolve their context (`activeId`, `showIcons`, `numbered`, `items`) exactly
- * as they do inside the desktop component.
+ * resolve their context (`activeId`, `numbered`, `items`) exactly as they do
+ * inside the desktop component.
  */
 @Component({
   selector: "tedi-table-of-contents-collapsible",
@@ -57,8 +57,6 @@ export class TableOfContentsCollapsibleComponent implements OnDestroy {
   readonly heading = input<string | null | undefined>(undefined);
   /** Id of the currently active item. */
   readonly activeId = input<string>();
-  /** Show a validation glyph before each item (multistep-form usage). */
-  readonly showIcons = input<boolean>(false);
   /** Show auto-generated hierarchical numbers (`1.`, `2.`, `2.1`, …). */
   readonly numbered = input<boolean>(false);
   /**

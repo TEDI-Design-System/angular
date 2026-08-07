@@ -20,7 +20,6 @@ import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-
       [activeId]="activeId()"
       [variant]="variant()"
       [numbered]="numbered()"
-      [showIcons]="showIcons()"
       [sticky]="sticky()"
       [ariaLabel]="ariaLabel()"
     >
@@ -48,29 +47,9 @@ class TreeHostComponent {
   readonly activeId = input<string>();
   readonly variant = input<TableOfContentsVariant>("default");
   readonly numbered = input(false);
-  readonly showIcons = input(false);
   readonly sticky = input(true);
   readonly ariaLabel = input<string>();
 }
-
-@Component({
-  standalone: true,
-  imports: [TableOfContentsComponent, TableOfContentsItemComponent],
-  template: `
-    <tedi-table-of-contents [showIcons]="true">
-      <tedi-table-of-contents-item itemId="x" [isValid]="true">
-        <a href="#x">Valid</a>
-      </tedi-table-of-contents-item>
-      <tedi-table-of-contents-item itemId="y" [isValid]="false">
-        <a href="#y">Invalid</a>
-      </tedi-table-of-contents-item>
-      <tedi-table-of-contents-item itemId="z">
-        <a href="#z">Untouched</a>
-      </tedi-table-of-contents-item>
-    </tedi-table-of-contents>
-  `,
-})
-class IconHostComponent {}
 
 const setup = async (component: unknown) => {
   await TestBed.configureTestingModule({
@@ -213,20 +192,5 @@ describe("TableOfContentsComponent", () => {
     fixture.componentRef.setInput("sticky", false);
     fixture.detectChanges();
     expect(fixture.debugElement.query(By.css(".tedi-table-of-contents--sticky"))).toBeNull();
-  });
-
-  it("renders a distinct icon shape and text alternative per validation state", async () => {
-    await setup(IconHostComponent);
-    const iconFixture = TestBed.createComponent(IconHostComponent);
-    iconFixture.detectChanges();
-
-    const icons = iconFixture.debugElement
-      .queryAll(By.css("tedi-icon"))
-      .map((de) => de.nativeElement as HTMLElement);
-    const names = icons.map((el) => el.textContent?.trim());
-    const labels = icons.map((el) => el.getAttribute("aria-label"));
-
-    expect(names).toEqual(["check", "warning", "circle"]);
-    expect(labels).toEqual(["Valid", "Invalid", "Not completed"]);
   });
 });

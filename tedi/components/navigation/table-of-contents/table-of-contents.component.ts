@@ -75,11 +75,6 @@ export class TableOfContentsComponent {
   readonly padding = input<number>();
   /** Id of the currently active item. */
   readonly activeId = input<string>();
-  /**
-   * Show a validation glyph before each item (multistep-form usage). Each state
-   * uses a distinct icon shape with a localised text alternative.
-   */
-  readonly showIcons = input<boolean>(false);
   /** Show auto-generated hierarchical numbers (`1.`, `2.`, `2.1`, …). */
   readonly numbered = input<boolean>(false);
   /** Stick the container to the viewport while scrolling. */

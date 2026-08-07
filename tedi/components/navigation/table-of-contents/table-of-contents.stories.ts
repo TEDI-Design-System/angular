@@ -458,16 +458,6 @@ const meta = {
         defaultValue: { summary: "card-padding-md-default" },
       },
     },
-    showIcons: {
-      description:
-        "Show a validation glyph before each item (multistep-form usage).",
-      control: "boolean",
-      table: {
-        category: "Table of Contents",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
-      },
-    },
     numbered: {
       description:
         "Show auto-generated hierarchical numbers (`1.`, `2.`, `2.1`, …).",
@@ -507,31 +497,9 @@ const meta = {
         type: { summary: "string" },
       },
     },
-    isValid: {
-      name: "isValid",
-      description:
-        "Validation state rendered when `showIcons` is on: `true` valid, `false` invalid, `undefined` not yet validated.",
-      control: { type: "radio" },
-      options: [true, false, undefined],
-      table: {
-        category: "Table of Contents Item",
-        type: { summary: "boolean | undefined" },
-      },
-    },
     separator: {
       name: "separator",
       description: "Render a separator below the item.",
-      control: "boolean",
-      table: {
-        category: "Table of Contents Item",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
-      },
-    },
-    hideIcon: {
-      name: "hideIcon",
-      description:
-        "Hide the validation glyph for this item even when `showIcons` is on.",
       control: "boolean",
       table: {
         category: "Table of Contents Item",
@@ -546,9 +514,7 @@ export default meta;
 
 type Story = StoryObj<
   TableOfContentsComponent & {
-    isValid?: boolean;
     separator?: boolean;
-    hideIcon?: boolean;
   }
 >;
 
@@ -605,9 +571,7 @@ const controllableItems = SECTIONS.map(
   (label, index) => `
       <tedi-table-of-contents-item
         itemId="section-${index + 1}"
-        [isValid]="isValid"
         [separator]="separator"
-        [hideIcon]="hideIcon"
       >
         <a tedi-link href="#section-${index + 1}" [underline]="false">${label}</a>
       </tedi-table-of-contents-item>`,
@@ -619,15 +583,12 @@ export const Default: Story = {
     headingLevel: "h3",
     variant: "default",
     activeId: "section-3",
-    showIcons: false,
     numbered: false,
     sticky: false,
-    isValid: true,
     separator: false,
-    hideIcon: false,
   },
   render: (args) => ({
-    props: { ...args, isValid: args.isValid ?? null },
+    props: args,
     template: `
       <tedi-table-of-contents
         [heading]="heading"
@@ -635,7 +596,6 @@ export const Default: Story = {
         [variant]="variant"
         [activeId]="activeId"
         [padding]="padding"
-        [showIcons]="showIcons"
         [numbered]="numbered"
         [sticky]="sticky"
       >
@@ -868,37 +828,38 @@ export const StickyInLayout: Story = {
     layout: "fullscreen",
     fullWidth: true,
     docs: { source: { language: "typescript", code: STICKY_LAYOUT_SOURCE } },
+    a11y: { config: { rules: [{ id: "color-contrast", enabled: false }] } },
   },
   render: () => ({
     template: `<toc-sticky-demo />`,
   }),
 };
 
-// Nested items whose `isValid` / `separator` / `hideIcon` inputs are bound to the
-// story args, so the "Table of Contents Item" controls drive the Collapsible story too.
+// Nested items whose `separator` input is bound to the story args, so the
+// "Table of Contents Item" control drives the Collapsible story too.
 const controllableNestedItems = `
-  <tedi-table-of-contents-item itemId="intro" [isValid]="isValid" [separator]="separator" [hideIcon]="hideIcon">
+  <tedi-table-of-contents-item itemId="intro" [separator]="separator">
     <a tedi-link href="#intro" [underline]="false">Sissejuhatus</a>
   </tedi-table-of-contents-item>
-  <tedi-table-of-contents-item itemId="methods" [isValid]="isValid" [separator]="separator" [hideIcon]="hideIcon">
+  <tedi-table-of-contents-item itemId="methods" [separator]="separator">
     <a tedi-link href="#methods" [underline]="false">Meetodid</a>
-    <tedi-table-of-contents-item itemId="methods-1" [isValid]="isValid" [separator]="separator" [hideIcon]="hideIcon">
+    <tedi-table-of-contents-item itemId="methods-1" [separator]="separator">
       <a tedi-link href="#methods-1" [underline]="false">Andmete kogumine</a>
     </tedi-table-of-contents-item>
-    <tedi-table-of-contents-item itemId="methods-2" [isValid]="isValid" [separator]="separator" [hideIcon]="hideIcon">
+    <tedi-table-of-contents-item itemId="methods-2" [separator]="separator">
       <a tedi-link href="#methods-2" [underline]="false">Analüüs</a>
     </tedi-table-of-contents-item>
   </tedi-table-of-contents-item>
-  <tedi-table-of-contents-item itemId="results" [isValid]="isValid" [separator]="separator" [hideIcon]="hideIcon">
+  <tedi-table-of-contents-item itemId="results" [separator]="separator">
     <a tedi-link href="#results" [underline]="false">Tulemused</a>
-    <tedi-table-of-contents-item itemId="results-1" [isValid]="isValid" [separator]="separator" [hideIcon]="hideIcon">
+    <tedi-table-of-contents-item itemId="results-1" [separator]="separator">
       <a tedi-link href="#results-1" [underline]="false">Joonised</a>
     </tedi-table-of-contents-item>
   </tedi-table-of-contents-item>
-  <tedi-table-of-contents-item itemId="discussion" [isValid]="isValid" [separator]="separator" [hideIcon]="hideIcon">
+  <tedi-table-of-contents-item itemId="discussion" [separator]="separator">
     <a tedi-link href="#discussion" [underline]="false">Arutelu</a>
   </tedi-table-of-contents-item>
-  <tedi-table-of-contents-item itemId="conclusion" [isValid]="isValid" [separator]="separator" [hideIcon]="hideIcon">
+  <tedi-table-of-contents-item itemId="conclusion" [separator]="separator">
     <a tedi-link href="#conclusion" [underline]="false">Kokkuvõte</a>
   </tedi-table-of-contents-item>
 `;
@@ -910,9 +871,9 @@ const controllableNestedItems = `
  * bottom-sheet overlay. Resize the canvas to switch between the two.
  *
  * `tedi-table-of-contents-collapsible` accepts the same inputs as the root
- * component (`heading`, `activeId`, `showIcons`, `numbered`, `sticky`,
- * `ariaLabel`) — everything except `variant`, `padding` and `headingLevel` — so
- * the controls above apply here too.
+ * component (`heading`, `activeId`, `numbered`, `sticky`, `ariaLabel`) —
+ * everything except `variant`, `padding` and `headingLevel` — so the controls
+ * above apply here too.
  */
 export const Collapsible: Story = {
   // The collapsible takes the same inputs as the root, so this story reuses the
@@ -925,15 +886,12 @@ export const Collapsible: Story = {
   args: {
     heading: "Sisukord",
     activeId: "methods",
-    showIcons: false,
     numbered: false,
     sticky: false,
-    isValid: undefined,
     separator: false,
-    hideIcon: false,
   },
   render: (args) => ({
-    props: { ...args, isValid: args.isValid ?? null },
+    props: args,
     template: `
       <div *showAt="'md'" style="background: var(--general-surface-primary); padding: 2rem;">
         <h2 tedi-text modifiers="h1">Tervisedeklaratsioon</h2>
@@ -947,7 +905,6 @@ export const Collapsible: Story = {
             [heading]="heading"
             [sticky]="false"
             [activeId]="activeId"
-            [showIcons]="showIcons"
             [numbered]="numbered"
             [ariaLabel]="ariaLabel"
           >
@@ -978,7 +935,6 @@ export const Collapsible: Story = {
         <tedi-table-of-contents-collapsible
           [heading]="heading"
           [activeId]="activeId"
-          [showIcons]="showIcons"
           [numbered]="numbered"
           [sticky]="sticky"
           [ariaLabel]="ariaLabel"

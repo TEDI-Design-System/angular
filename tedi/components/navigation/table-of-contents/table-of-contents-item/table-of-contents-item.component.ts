@@ -9,9 +9,7 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 
-import { IconColor, IconComponent } from "../../../base/icon/icon.component";
 import { SeparatorComponent } from "../../../helpers/separator/separator.component";
-import { TediTranslationService } from "../../../../services/translation/translation.service";
 import { TableOfContentsComponent } from "../table-of-contents.component";
 
 /**
@@ -23,7 +21,7 @@ import { TableOfContentsComponent } from "../table-of-contents.component";
 @Component({
   selector: "tedi-table-of-contents-item",
   standalone: true,
-  imports: [IconComponent, SeparatorComponent],
+  imports: [SeparatorComponent],
   templateUrl: "./table-of-contents-item.component.html",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,28 +40,18 @@ export class TableOfContentsItemComponent {
    * shadowing the native `id` attribute.
    */
   readonly itemId = input<string>();
-  /**
-   * Validation state for multistep-form usage (only rendered with `showIcons`
-   * on the parent): `true` = valid, `false` = invalid, `undefined` = not yet
-   * validated.
-   */
-  readonly isValid = input<boolean | undefined>(undefined);
   /** Render a separator below the item. */
   readonly separator = input<boolean>(false);
-  /** Hide the validation glyph for this item even when `showIcons` is on. */
-  readonly hideIcon = input<boolean>(false);
 
   private readonly root = inject(TableOfContentsComponent);
   private readonly parent = inject(TableOfContentsItemComponent, {
     optional: true,
     skipSelf: true,
   });
-  private readonly translations = inject(TediTranslationService);
 
   /** Direct nested items (a single level down). */
   readonly childItems = contentChildren(TableOfContentsItemComponent);
 
-  readonly showIcons = computed(() => this.root.showIcons());
   readonly numbered = computed(() => this.root.numbered());
 
   readonly depth: Signal<number> = computed(() =>
@@ -102,27 +90,4 @@ export class TableOfContentsItemComponent {
   readonly numberLabel = computed(() =>
     this.numberPrefix() ? this.numberBase() : `${this.numberBase()}.`,
   );
-
-  readonly iconName = computed(() => {
-    const valid = this.isValid();
-    if (valid === false) return "warning";
-    if (valid === true) return "check";
-    return "circle";
-  });
-  readonly iconColor = computed<IconColor>(() => {
-    const valid = this.isValid();
-    if (valid === false) return "danger";
-    if (valid === true) return "success";
-    return "tertiary";
-  });
-  readonly iconLabel = computed(() => {
-    const valid = this.isValid();
-    const key =
-      valid === false
-        ? "table-of-contents.step-invalid"
-        : valid === true
-          ? "table-of-contents.step-valid"
-          : "table-of-contents.step-incomplete";
-    return this.translations.translate(key);
-  });
 }

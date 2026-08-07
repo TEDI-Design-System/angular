@@ -1811,16 +1811,13 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
 - `variant: TableOfContentsVariant = "default"` — `default` renders inside a bordered card; `transparent` drops the card chrome and shows a continuous grey left rail
 - `activeId: string` — id of the active item; it gets the accent bar + active colour, and the branch leading to it auto-expands
 - `padding: number` — inner padding in rem; defaults to the card medium padding token
-- `showIcons: boolean = false` — show a validation glyph before each item (check / warning / empty circle) with a localised text alternative; for multistep forms
 - `numbered: boolean = false` — render an auto-generated hierarchical number before each item (`1.`, `2.`, `2.1`)
 - `sticky: boolean = true` — stick the container to the viewport while scrolling
 - `ariaLabel: string` — accessible name for the `nav` landmark; overrides the default (the heading via `aria-labelledby`, or the localised title when headless)
 
 **Sub-component:** `tedi-table-of-contents-item`
 - `itemId: string` — required to mark the item active (via the parent's `activeId`) and to parent nested items (named `itemId`, not `id`, to avoid shadowing the native attribute)
-- `isValid: boolean | undefined` — validation state rendered when `showIcons` is on (`true` valid, `false` invalid, `undefined` not yet validated)
 - `separator: boolean = false` — render a separator below the item
-- `hideIcon: boolean = false` — hide the validation glyph for this item even when `showIcons` is on
 
 ```html
 <tedi-table-of-contents heading="Sisukord" activeId="methods">
@@ -1838,7 +1835,7 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
 
 **Mobile variant:** `tedi-table-of-contents-collapsible` — a bottom bar that opens the list in a bottom-sheet overlay; takes the same `tedi-table-of-contents-item` children. Render it on small viewports (e.g. behind a `tedi-show-at` / `tedi-hide-at`).
 - `heading: string | null` — bar/sheet title; defaults to the `table-of-contents.title` translation
-- `activeId: string`, `showIcons: boolean = false`, `numbered: boolean = false` — same behavior as the desktop component
+- `activeId: string`, `numbered: boolean = false` — same behavior as the desktop component
 - `sticky: boolean = true` — pin the bar to the bottom of the viewport; set `false` to render it inline
 - `ariaLabel: string` — accessible name for the sheet's navigation landmark and dialog; defaults to the visible title
 
