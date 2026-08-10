@@ -12,6 +12,11 @@
   &--disabled {
     pointer-events: none;
     opacity: 0.5;
+
+    .tedi-time-picker__column,
+    .tedi-time-picker__dropdown {
+      overflow: hidden;
+    }
   }
 
   &--bordered {

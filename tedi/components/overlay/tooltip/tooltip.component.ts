@@ -1,5 +1,4 @@
 import {
-  AfterContentChecked,
   Component,
   computed,
   contentChild,
@@ -15,6 +14,7 @@ import {
   ViewEncapsulation,
   ChangeDetectionStrategy,
 } from "@angular/core";
+import { DOCUMENT } from "@angular/common";
 import {
   OverlayModule,
   CdkConnectedOverlay,
@@ -45,7 +45,7 @@ let tooltipIdCounter = 0;
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TooltipComponent implements AfterContentChecked {
+export class TooltipComponent {
   /**
    * The position of the tooltip relative to the trigger element.
    * @default top
@@ -104,7 +104,6 @@ export class TooltipComponent implements AfterContentChecked {
   private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
 
   readonly descriptionId = `tedi-tooltip-${++tooltipIdCounter}`;
-  readonly contentText = signal("");
   private readonly internalOpen = signal(false);
   readonly isOpen = computed(() =>
     this.open() !== undefined ? Boolean(this.open()) : this.internalOpen(),
@@ -125,7 +124,14 @@ export class TooltipComponent implements AfterContentChecked {
   hideTimeout?: ReturnType<typeof setTimeout>;
 
   private readonly ngZone = inject(NgZone);
+  private readonly document = inject(DOCUMENT);
   private trackRafId: number | null = null;
+
+  private readonly onDocumentKeydown = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      this.hideTooltip();
+    }
+  };
 
   private readonly horizontalPush = new HorizontalPushHandler(
     () => this.connectedOverlay()?.overlayRef?.overlayElement,
@@ -137,6 +143,7 @@ export class TooltipComponent implements AfterContentChecked {
       clearTimeout(this.hideTimeout);
       this.horizontalPush.detach();
       this.stopTracking();
+      this.document.removeEventListener("keydown", this.onDocumentKeydown);
     });
 
     effect(() => {
@@ -144,6 +151,14 @@ export class TooltipComponent implements AfterContentChecked {
         this.startTracking();
       } else {
         this.stopTracking();
+      }
+    });
+
+    effect(() => {
+      if (this.isOpen()) {
+        this.document.addEventListener("keydown", this.onDocumentKeydown);
+      } else {
+        this.document.removeEventListener("keydown", this.onDocumentKeydown);
       }
     });
   }
@@ -209,7 +224,6 @@ export class TooltipComponent implements AfterContentChecked {
   }
 
   onOverlayAttach() {
-    this.syncContentText();
     this.horizontalPush.attach();
     this.updateArrowPosition();
   }
@@ -227,19 +241,5 @@ export class TooltipComponent implements AfterContentChecked {
     );
     this.arrowLeft.set(offset.left);
     this.arrowTop.set(offset.top);
-  }
-
-  ngAfterContentChecked(): void {
-    this.syncContentText();
-  }
-
-  private syncContentText(): void {
-    const contentEl = this.tooltipContent()?.nativeElement as HTMLElement;
-    if (contentEl) {
-      const text = contentEl.textContent?.trim() ?? "";
-      if (text !== this.contentText()) {
-        this.contentText.set(text);
-      }
-    }
   }
 }

@@ -20,6 +20,13 @@ export default {
       imports: [ScrollFadeComponent, RowComponent, ColComponent],
     }),
   ],
+  argTypes: {
+    ariaLabel: {
+      control: "text",
+      description:
+        "Accessible label for the scrollable region. Falls back to a translated default.",
+    },
+  },
   parameters: {
     status: {
       type: ["devComponent"],

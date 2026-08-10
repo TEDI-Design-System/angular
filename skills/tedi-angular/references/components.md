@@ -303,8 +303,8 @@ The standalone date-selection surface used inside DateField, and embeddable dire
 - `dayStatus: ((date: Date) => DayStatus | null | undefined) | undefined` — overlays a `tedi-status-indicator` dot on days; the returned `label` is surfaced on the day's `aria-label`
 - `shouldDisableMonth: ((month: Date) => boolean) | undefined` — disable a whole month
 - `shouldDisableYear: ((year: Date) => boolean) | undefined` — disable a whole year
-- `minYear: number | null = null` — earliest year offered (defaults to 10 years before the current year)
-- `maxYear: number | null = null` — latest year offered (defaults to 10 years after the current year)
+- `minYear: number | null = null` — earliest year offered (defaults to 100 years before the current year)
+- `maxYear: number | null = null` — latest year offered (defaults to 20 years after the current year)
 
 ```html
 <!-- Embedded range picker, two months -->
@@ -420,6 +420,7 @@ Composed of sub-components:
 - `gap: BreakpointInput<number> = {xs: 16}`
 - `fade: boolean = false`
 - `transitionMs: number = 400`
+- `ariaLabel: string` — accessible name for the carousel `region`; falls back to the `carousel` translation ("Karussell")
 
 ### CarouselIndicators
 **Selector:** `tedi-carousel-indicators`
@@ -811,6 +812,25 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 <tedi-search inputId="q" label="Otsing" [button]="{ text: 'Otsi' }" [formControl]="queryControl" />
 ```
 
+### Textarea
+**Selector:** `textarea[tedi-textarea]` | ControlValueAccessor
+**Model:** `value: string`
+**Inputs:**
+- `resizable: boolean = true` — allow manual (vertical-only) resizing; `false` disables it
+- `autoGrow: boolean = false` — grow to fit content via CSS `field-sizing` (disables manual resize)
+- `minRows: number = 3`, `maxRows: number = 12` — bounds while `autoGrow` is on
+- `height: string | number | undefined = "7.5rem"` — fixed height when `autoGrow` is off; set `undefined` to fall back to the native `rows` attribute
+- `maxHeight: string | number | undefined` — cap the height before it scrolls
+
+Compose inside a `tedi-form-field` (which owns `size`, `characterLimit`, `inputClass`, etc.).
+
+```html
+<tedi-form-field>
+  <label tedi-label for="notes">Notes</label>
+  <textarea tedi-textarea id="notes" [(value)]="notes"></textarea>
+</tedi-form-field>
+```
+
 ### Slider
 **Selector:** `tedi-slider` | ControlValueAccessor
 **Model:** `value: number`
@@ -1038,6 +1058,8 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 - `unavailableDays: Date[] | ((d: Date) => boolean) | undefined` — days that are NOT available
 - `selectionLevel: CalendarView = "days"` — lowest level the user can commit to: "days", "months", or "years"
 - `monthYearSelectType: "dropdown" | "grid" = "dropdown"` — how the header exposes month/year picking
+- `minYear: number | null = null` — earliest year offered in the calendar's year grid/dropdown. `null` defaults to 100 years before the current year
+- `maxYear: number | null = null` — latest year offered in the calendar's year grid/dropdown. `null` defaults to 20 years after the current year
 - `initialMonth: Date | undefined` — the month to initially display in the calendar
 - `localeCode: string = "et-EE"` — BCP-47 locale for weekday/month names, first day of week, default formatDate/parseDate
 - `closeOnSelect: boolean | undefined = undefined` — whether to close picker after selection (defaults to `true` in single mode)
@@ -1047,6 +1069,7 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 - `enableCalendar: BreakpointObject<boolean> = { xs: true }` — enables the calendar picker UI. `false` hides the icon button and popover/modal — typing only
 - `calendarTrigger: BreakpointObject<"input" | "button"> = { xs: "button" }` — what opens the calendar: `"button"` (icon) or `"input"` (the whole input)
 - `useNativePicker: boolean | "sm" | "md" | "lg" | "xl" = false` — uses the OS-native date picker instead of the custom popover (single mode only). `true` always, `false` never, a breakpoint name uses native below that breakpoint and the custom popover from it upward
+- `hideOnScroll: boolean = false` — closes the calendar popover when the page (or a scrollable ancestor) scrolls. Scrolling inside the calendar or its nested year/month dropdown keeps it open. Only affects the popover, not the modal
 - `modal: boolean | "sm" | "md" | "lg" | "xl" = false` — opens the calendar in a centered modal (with explicit Cancel/Confirm) instead of the popover. `true` always, `false` never, a breakpoint name means modal below that breakpoint
 - `fullscreen: boolean | "sm" | "md" | "lg" | "xl" = false` — render the calendar modal fullscreen. `true` always, `false` never, a breakpoint name makes it fullscreen below that breakpoint. Only applies when the calendar opens as a modal (see `modal`)
 - `formatDate: ((value: DateFieldValue) => string) | undefined` — custom formatter for displaying the date value; callback receives the value and returns a display string
@@ -1120,6 +1143,9 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 
 <!-- Multi-month side by side -->
 <tedi-date-field inputId="multi-mo" [numberOfMonths]="2" />
+
+<!-- Custom year range in the calendar's year dropdown/grid (default is 100 years back, 20 forward) -->
+<tedi-date-field inputId="dob" [formControl]="control" [minYear]="1900" [maxYear]="2010" />
 ```
 
 ### TimeField
@@ -1218,6 +1244,8 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 - `dropdownAlign: "start" | "end" = "start"` — which trigger edge the dropdown anchors to; use `"end"` for right-aligned selects so the panel expands inward
 - `feedbackText: { text, type, position }` — feedback text config
 - `maxDropdownHeight: number` — dropdown height in pixels
+- `virtualScroll: boolean = false` — render options with virtual scrolling so only visible rows are in the DOM; enable for very large lists. Applies only to `dropdownType="menu"` without `groupBy`
+- `virtualItemSize: number` — row height in pixels for the virtual scroll viewport; measured from the first option when unset
 - `hideOnScroll: boolean = false` — close the dropdown when the page scrolls
 - `compareWith: (a, b) => boolean` — custom equality function
 - `tagEllipsis: TagEllipsis = false` — which end a selected tag's label truncates from when it doesn't fit. Only used in multiselect mode with `multiRow="false"`. `false` never truncates; `end` → `label…`; `start` → `…label`
@@ -1757,7 +1785,7 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
 ### HorizontalStepper
 **Selector:** `tedi-horizontal-stepper`
 **Inputs:**
-- `ariaLabel: string`
+- `ariaLabel: string` — accessible name for the `navigation` landmark
 - `background: "default" | "transparent" = "default"`
 - `compact: boolean | "sm" | "md" | "lg" | "xl" | "xxl" = "sm"` — collapse labels to show only indicators plus the selected step's label. `true` = always collapsed; a breakpoint = collapsed below that breakpoint.
 
@@ -1788,14 +1816,14 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
   - `aria-label: string` / `aria-labelledby: string` — accessible name for the tablist
   - `overflowMode: "dropdown" | "scroll" = "dropdown"` — when tabs don't fit, either collapse overflowing tabs into a "More" dropdown or enable horizontal scrolling with fade indicators
   - `dropdownLabel: string` — label for the overflow dropdown trigger; falls back to the `more` translation (`Veel` in et)
-- `button[tedi-tabs-trigger]` — a tab button (applied to a native `<button>`).
+- `button[tedi-tabs-trigger]`, `a[tedi-tabs-trigger]` — a tab trigger. Use `<button>` for in-page tabs, or `<a>` (with `href`/`routerLink`) for a tab that navigates to a route — the anchor keeps `role="tab"` semantics but is a real link (WCAG-friendly: open-in-new-tab, copy address, keyboard). A disabled `<a>` gets `aria-disabled` instead of the `disabled` attribute. Modifier/middle clicks and `target="_blank"` open the link without changing the active tab in the current view. Note: a disabled anchor stays unreachable via pointer/keyboard, but `routerLink` navigates from its own click handler — bind `[routerLink]="disabled ? null : path"` so a disabled routed tab can't navigate.
   - `id: string` (required) — links to the matching `tedi-tabs-content` panel (`aria-controls="{id}-panel"`)
   - `icon: string` — Material Symbols icon shown before the label
   - `disabled: boolean = false`
 - `tedi-tabs-content` — a tab panel (`role="tabpanel"`).
   - `id: string` — when set, shown only while that tab is active; omit to always render (e.g. for a router outlet)
 
-Keyboard: Arrow Left/Right (with wrap), Home/End move focus between enabled tabs; only the active tab is in the tab order. Disabled tabs are skipped. Full WAI-ARIA tab pattern.
+Keyboard: Arrow Left/Right (with wrap), Home/End move focus between enabled tabs; only the active tab is in the tab order. Disabled tabs are skipped. Full WAI-ARIA tab pattern. Activation mode differs by element: `<button>` tabs use **automatic activation** (arrow keys move focus and activate), while `<a>` tabs use **manual activation** (arrows only move focus; Enter/Space follows the link) so arrowing across route-links doesn't navigate on every keypress.
 
 ```html
 <tedi-tabs defaultValue="tab-1">
@@ -1820,6 +1848,18 @@ Controlled usage:
   </tedi-tabs-list>
   <tedi-tabs-content id="tab-1">First panel</tedi-tabs-content>
   <tedi-tabs-content id="tab-2">Second panel</tedi-tabs-content>
+</tedi-tabs>
+```
+
+Routed tabs (anchors) — bind `[value]` to the current route and let each link navigate; use an id-less `tedi-tabs-content` to wrap the router outlet:
+
+```html
+<tedi-tabs [value]="router.url">
+  <tedi-tabs-list aria-label="Section tabs">
+    <a tedi-tabs-trigger id="/toimingud" routerLink="/toimingud">Toimingud</a>
+    <a tedi-tabs-trigger id="/dokumendid" routerLink="/dokumendid">Dokumendid</a>
+  </tedi-tabs-list>
+  <tedi-tabs-content><router-outlet /></tedi-tabs-content>
 </tedi-tabs>
 ```
 
@@ -2156,9 +2196,10 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 **Selector:** `tedi-search` | ControlValueAccessor
 - `inputId: string`, `autocompleteOptions: AutocompleteOption[]`, `size: SearchSize`, `withButton: boolean`
 
-### Textarea
+### Textarea — **DEPRECATED** (use TEDI-Ready Textarea)
 **Selector:** `[tedi-textarea]` (extends Input)
 - `resizeX: boolean = false`, `resizeY: boolean = true`
+- Migrate to the TEDI-Ready `textarea[tedi-textarea]`: `resizeX`/`resizeY` become a single `resizable` (vertical only), composed inside `tedi-form-field`.
 
 ### FileDropzone
 **Selector:** `tedi-file-dropzone` | ControlValueAccessor

@@ -16,6 +16,13 @@
     background: var(--form-input-background-default);
     border: 1px solid var(--form-input-border-default);
     border-radius: var(--form-field-radius);
+
+    &:has(.tedi-textarea) {
+      align-items: stretch;
+      height: auto;
+      min-height: var(--form-textarea-min-height);
+      padding: 0;
+    }
   }
 
   &--small {
@@ -23,14 +30,14 @@
       font-size: var(--body-small-regular-size);
     }
 
-    .tedi-form-field__input {
+    .tedi-form-field__input:not(:has(.tedi-textarea)) {
       --_field-padding-y: var(--form-field-padding-y-sm);
 
       height: var(--form-field-height-sm);
     }
   }
 
-  &--large .tedi-form-field__input {
+  &--large .tedi-form-field__input:not(:has(.tedi-textarea)) {
     --_field-padding-y: var(--form-field-padding-y-lg);
     --_field-padding-x: var(--form-field-padding-x-lg);
 
@@ -54,8 +61,10 @@
   }
 
   &--disabled .tedi-form-field__input,
-  &__input:has(input:disabled) {
+  &__input:has(input:disabled),
+  &__input:has(.tedi-textarea:disabled) {
     cursor: not-allowed;
+    resize: none;
     background: var(--form-input-background-disabled);
     border-color: var(--form-input-border-disabled);
     box-shadow: none;
@@ -66,20 +75,20 @@
       .tedi-form-field--valid,
       .tedi-form-field--invalid
     )
-    .tedi-form-field__input:not(:has(input:disabled)) {
+    .tedi-form-field__input:not(:has(input:disabled, .tedi-textarea:disabled)) {
     &:hover,
-    &:has(input:hover) {
+    &:has(input:hover, .tedi-textarea:hover) {
       border-color: var(--form-input-border-hover);
     }
 
     &:active,
-    &:has(input:active) {
+    &:has(input:active, .tedi-textarea:active) {
       border-color: var(--form-input-border-active);
       box-shadow: inset 0 0 0 1px var(--form-input-border-active);
     }
 
     &:focus-within,
-    &:has(input:focus-visible) {
+    &:has(input:focus-visible, .tedi-textarea:focus-visible) {
       border-color: var(--form-input-border-focus);
       box-shadow: inset 0 0 0 1px var(--form-input-border-focus);
     }
@@ -92,7 +101,21 @@
   }
 
   &__feedback {
+    display: flex;
+    gap: var(--layout-grid-gutters-16);
+    align-items: flex-start;
     margin-top: var(--form-field-outer-spacing);
+  }
+
+  &__character-count {
+    margin-left: auto;
+    font-size: var(--body-small-regular-size);
+    color: var(--general-text-tertiary);
+    white-space: nowrap;
+
+    &--error {
+      color: var(--form-general-feedback-error-text);
+    }
   }
 
   &__extra {
