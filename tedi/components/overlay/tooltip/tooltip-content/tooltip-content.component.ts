@@ -20,7 +20,8 @@ export type TooltipWidth = "none" | "small" | "medium" | "large";
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     "[class]": "classes()",
-    "aria-hidden": "true"
+    "[id]": "tooltip.descriptionId",
+    role: "tooltip",
   },
 })
 export class TooltipContentComponent {
@@ -30,7 +31,7 @@ export class TooltipContentComponent {
    */
   maxWidth = input<TooltipWidth>("medium");
 
-  private tooltip = inject(TooltipComponent);
+  protected readonly tooltip = inject(TooltipComponent);
 
   classes = computed(() => {
     return [
