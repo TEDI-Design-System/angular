@@ -1,3 +1,10 @@
+# [7.2.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.1...angular-7.2.0-rc.2) (2026-08-10)
+
+
+### Bug Fixes
+
+* **tooltip:** better screen reader support [#45](https://github.com/TEDI-Design-System/angular/issues/45) ([#585](https://github.com/TEDI-Design-System/angular/issues/585)) ([f067bb2](https://github.com/TEDI-Design-System/angular/commit/f067bb26a5e1b04c57307b26b106aef1a96bc917))
+
 # [7.2.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0...angular-7.2.0-rc.1) (2026-08-07)
 
 
