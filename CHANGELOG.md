@@ -1,3 +1,10 @@
+# [7.2.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.2...angular-7.2.0-rc.3) (2026-08-12)
+
+
+### Bug Fixes
+
+* **community-tabs-fix:** community tabs will no longer allow multiple elements to be selected [#112](https://github.com/TEDI-Design-System/angular/issues/112) ([9e1c43a](https://github.com/TEDI-Design-System/angular/commit/9e1c43ae3439d12a3147a0c41bda639022f2b573))
+
 # [7.2.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.1...angular-7.2.0-rc.2) (2026-08-10)
 
 
