@@ -1,3 +1,10 @@
+# [7.2.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.3...angular-7.2.0-rc.4) (2026-08-13)
+
+
+### Features
+
+* **icons:** bump core to 6.5.0 for expanded material symbols set [#604](https://github.com/TEDI-Design-System/angular/issues/604) ([#605](https://github.com/TEDI-Design-System/angular/issues/605)) ([72f64c7](https://github.com/TEDI-Design-System/angular/commit/72f64c7909f850a936cce7bdf82951373726d07f))
+
 # [7.2.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.2...angular-7.2.0-rc.3) (2026-08-12)
 
 
