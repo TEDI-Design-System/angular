@@ -4,7 +4,7 @@ export default create({
   base: "light",
   brandTitle: "Tehik Angular components",
   brandUrl: "https://storybook.tedi.ee/angular",
-  brandImage: "tehik_logo.png",
+  brandImage: "TEDI-logo-sinine.svg",
   brandTarget: "_self",
 
   appBg: "#e7f0f6",
