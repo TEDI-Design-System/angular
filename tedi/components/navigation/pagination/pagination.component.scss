@@ -26,6 +26,7 @@
   // left-aligned strip above a table).
   &--align-left,
   &--align-right {
+
     .tedi-pagination__slot-start,
     .tedi-pagination__slot-end {
       flex: 0 0 auto;
@@ -79,6 +80,7 @@
   // placeholder would only add a phantom gap — collapse it instead.
   &--align-left,
   &--align-right {
+
     &.tedi-pagination--no-results .tedi-pagination__slot-start,
     &.tedi-pagination--no-page-size .tedi-pagination__slot-end {
       display: none;
@@ -319,6 +321,25 @@
     align-items: center;
     justify-content: flex-end;
     min-width: 0;
+
+    @include breakpoints.media-breakpoint-down(sm) {
+      flex-direction: column;
+      gap: var(--layout-grid-gutters-04);
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  &--align-left &__page-size {
+    @include breakpoints.media-breakpoint-down(sm) {
+      align-items: flex-start;
+    }
+  }
+
+  &--align-right &__page-size {
+    @include breakpoints.media-breakpoint-down(sm) {
+      align-items: flex-end;
+    }
   }
 
   &__page-size-label {
