@@ -31,6 +31,7 @@ import type {
   TediColumnDef,
   TediTableFilterContext,
 } from "./table.types";
+import type { PopoverWidth } from "../../overlay/popover/popover-content/popover-content.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { LinkComponent } from "../../navigation/link/link.component";
@@ -41,6 +42,7 @@ import { LabelComponent } from "../../form/label/label.component";
 import { DateFieldComponent } from "../../form/date-field/date-field.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import {
+  formatLocaleDate,
   isAfterDay,
   isBeforeDay,
   parseLocaleDate,
@@ -143,6 +145,7 @@ abstract class TableStoryHostBase {
   ]);
   readonly filterModalBreakpoint = input<Breakpoint | false>("sm");
   readonly filterModalFullscreen = input<boolean | Breakpoint>(false);
+  readonly filterPopoverWidth = input<PopoverWidth>("small");
   readonly maxHeight = input<number | undefined>(undefined);
   readonly activeRowId = input<string | undefined>(undefined);
   readonly placeholderRole = input<"alert" | "status" | undefined>(undefined);
@@ -169,6 +172,7 @@ type TediTableStoryArgs = {
   controlColumnOrder: TableControlColumnOrder[];
   filterModalBreakpoint: Breakpoint | false;
   filterModalFullscreen: boolean | Breakpoint;
+  filterPopoverWidth: PopoverWidth;
   maxHeight: number | undefined;
   activeRowId: string | undefined;
   placeholderRole: "alert" | "status" | undefined;
@@ -253,6 +257,7 @@ const meta: Meta<TediTableStoryArgs> = {
     controlColumnOrder: ["drag", "select", "expand"],
     filterModalBreakpoint: "sm",
     filterModalFullscreen: false,
+    filterPopoverWidth: "small",
     maxHeight: undefined,
     activeRowId: undefined,
     placeholderRole: undefined,
@@ -460,6 +465,19 @@ const meta: Meta<TediTableStoryArgs> = {
         category: "behavior",
         type: { summary: "boolean | Breakpoint" },
         defaultValue: { summary: "false" },
+      },
+    },
+    filterPopoverWidth: {
+      description:
+        "Width of the column filter popover: a preset, or any CSS length. 'none' sizes the panel to its content. A single column overrides it through `filterable: { popoverWidth }`.",
+      control: { type: "text" },
+      table: {
+        category: "appearance",
+        type: {
+          summary: "PopoverWidth",
+          detail: "none \nsmall \nmedium \nlarge \nany CSS length (e.g. 20rem)",
+        },
+        defaultValue: { summary: '"small"' },
       },
     },
     activeRowId: {
@@ -2138,7 +2156,13 @@ class FiltersStoryHostComponent extends TableStoryHostBase {
   // Seeded with two active filters so the story opens showing the chips.
   state = signal<Partial<TableState>>({
     columnFilters: [
-      { id: "jobStart", value: "2019" },
+      {
+        id: "jobStart",
+        value: {
+          from: new Date(2019, 0, 1),
+          to: new Date(2019, 11, 31),
+        } as DateRange,
+      },
       { id: "status", value: ["Kehtiv"] as CertStatus[] },
     ],
   });
@@ -2159,13 +2183,21 @@ class FiltersStoryHostComponent extends TableStoryHostBase {
     return (this.state().columnFilters ?? [])
       .map((filter) => ({
         id: filter.id,
-        label: `${headers.get(filter.id) ?? filter.id}: ${Array.isArray(filter.value)
-            ? filter.value.join(", ")
-            : String(filter.value ?? "")
-          }`,
+        label: `${headers.get(filter.id) ?? filter.id}: ${this.formatFilterValue(filter.value)}`,
       }))
       .filter((chip) => !chip.label.endsWith(": "));
   });
+
+  private formatFilterValue(value: unknown): string {
+    if (Array.isArray(value)) return value.join(", ");
+    if (value instanceof Date) return formatLocaleDate(value, "et");
+    if (value && typeof value === "object" && "from" in value) {
+      const range = value as DateRange;
+      const from = formatLocaleDate(range.from, "et");
+      return range.to ? `${from} – ${formatLocaleDate(range.to, "et")}` : from;
+    }
+    return String(value ?? "");
+  }
 
   // Drop a single column's filter — clearing all at once is the table's
   // clearFilters() method wired to the button above.
@@ -2233,7 +2265,7 @@ class FiltersStoryHostComponent extends TableStoryHostBase {
       header: "Tööalguse kuupäev",
       accessorKey: "jobStart",
       sortable: true,
-      filterable: true,
+      filterable: { popoverWidth: "19rem" },
       filterFn: this.jobStartInRange,
       filterTemplate: this.dateFilterTpl() ?? undefined,
     } as TediColumnDef<PersonRecord>,
@@ -2278,6 +2310,10 @@ export const Filters: Story = {
           "Each column supplies its own filter UI via `filterable: true` + " +
           "`filterTemplate` — here a text field (Nimi), a `tedi-date-field` range " +
           "(Tööalguse kuupäev) and a checkbox group (Tõendi staatus). \n\n" +
+          "`filterPopoverWidth` sets the popover width for every column, and " +
+          "`filterable: { popoverWidth }` overrides it for one — the date column " +
+          "uses `\"medium\"` here, since a range value needs more room than the " +
+          "default `\"small\"` panel. \n\n" +
           "Below `filterModalBreakpoint` (default `\"sm\"`) the filter opens in a " +
           "**modal** instead of the popover — resize below ~576px to see it. " +
           "`filterModalFullscreen` (default `false`) controls whether that modal " +

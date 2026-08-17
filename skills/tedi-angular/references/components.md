@@ -496,6 +496,7 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `enableColumnFilters: boolean = false` — force TanStack's filter machinery (auto-on when any column sets `filterable`)
 - `filterModalBreakpoint: Breakpoint | false = "sm"` — below this breakpoint the column filter opens in a modal instead of the popover (avoids a cramped/off-screen popover on small viewports). Set `false` to always use the popover.
 - `filterModalFullscreen: boolean | Breakpoint = false` — fullscreen behaviour of that filter modal: `true` always fullscreen, `false` never, a breakpoint = fullscreen below it.
+- `filterPopoverWidth: PopoverWidth = "small"` — width of the column filter popover. Takes a preset (`"none" | "small" | "medium" | "large"`, where `"none"` sizes the panel to its content) or any CSS length (`"20rem"`). Override per column with `filterable: { popoverWidth }`.
 - `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `align`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`, and the `xs`–`xxl` per-breakpoint overrides). Set `align: "left"` on `paginationTop` to group its results + page-size at the start while the bottom pager stays spread; use e.g. `paginationTop: { align: 'left', md: { align: 'between' } }` for a responsive strip. `pageSizeOptions` accepts plain numbers or `{ value, label }` objects — use the object form for a **"Show all"** entry whose `value` is large enough to hold every row: pass the row total when you know it (`data.length`), or `Number.MAX_SAFE_INTEGER` when you don't. Filtering only shrinks the row count, so a large page size always collapses the result to a single page. (Don't use `-1` — TanStack clamps `setPageSize` to `≥ 1`.)
 - `paginationTop: boolean | TablePaginationOptions` — opt-in top paginator; shares page / page-size state with bottom but has independent visual config (its own arrow + `hide*` settings). Requires `pagination` to be truthy.
 - `manualPagination: boolean = false` — server-side pagination; supply `pageCount` or `rowCount`
@@ -532,7 +533,7 @@ Render expandable rows open on first load (still user-collapsible):
 
 **Column definition (`TediColumnDef<TData>`):** extends TanStack's `ColumnDef` with Angular-specific fields:
 - `sortable: boolean` — opt the column into the built-in sort affordance (string `header` only). Pair with `sortingFn` to override the comparator. For custom UIs, pass a `TemplateRef` for `header` and call `column.toggleSorting()` yourself.
-- `filterable: boolean | { clearOnClose?: boolean }` — opt into the built-in filter popover (icon `filter_alt`). Requires `filterTemplate`.
+- `filterable: boolean | { clearOnClose?: boolean; popoverWidth?: PopoverWidth }` — opt into the built-in filter popover (icon `filter_alt`). Requires `filterTemplate`. `popoverWidth` overrides the table's `filterPopoverWidth` for this column — use it when one control (a date range, a wide option list) needs more room than the rest.
 - `filterTemplate: TemplateRef<TediTableFilterContext>` — UI rendered inside the filter popover. The context exposes `value`, `setValue`, `apply()`, `clear()`, and `column`. Apply/Clear footer buttons are wired automatically.
 - `rowSpan: number | ((info: CellContext) => number)` — body-level row spanning. Return `>1` to emit `rowspan="N"`; return `0` to skip the `<td>`. Prefer `groupBy` for key-based grouping; reach for `rowSpan` only for fully custom span logic.
 - `groupBy: boolean | ((row: Row<TData>) => unknown)` — merge consecutive rendered rows with an equal key into one spanning cell, computed internally against the live (post-filter/sort/paginate) row model — no manual `groupRowSpan` wiring. A function groups this column by its own key; `true` reuses the table-level `groupRowsBy`. Takes precedence over `rowSpan`.
@@ -2018,6 +2019,10 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `withArrow: boolean = true`
 - `withBorder: boolean = false` — illustrative prominent border on the arrow side
 - `lockScroll: boolean = false`
+
+**`tedi-popover-content` inputs:**
+- `maxWidth: PopoverWidth = "small"` — panel width. Takes a preset (`"none" | "small" | "medium" | "large"`, where `"none"` sizes the panel to its content) or any CSS length (`"20rem"`, `"min(90vw, 30rem)"`), applied inline.
+- `title: string` / `showClose: boolean = false`
 
 ### Tooltip
 **Selector:** `tedi-tooltip`

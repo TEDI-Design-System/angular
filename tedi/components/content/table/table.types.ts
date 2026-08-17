@@ -14,6 +14,7 @@ import type {
   Table as TanstackTable,
   VisibilityState,
 } from "@tanstack/angular-table";
+import type { PopoverWidth } from "../../overlay/popover/popover-content/popover-content.component";
 import type { PaginationComponent } from "../../navigation/pagination/pagination.component";
 import type { PaginationPageSizeOption } from "../../navigation/pagination/pagination.types";
 import type { ComponentInputs } from "../../../types/inputs.type";
@@ -143,6 +144,12 @@ export interface TableFilterOptions {
    * @default false
    */
   clearOnClose?: boolean;
+  /**
+   * Popover width for this column, overriding the table's
+   * `filterPopoverWidth`. Use it when one filter control needs more room than
+   * the rest (a date range, a wide option list).
+   */
+  popoverWidth?: PopoverWidth;
 }
 
 /**

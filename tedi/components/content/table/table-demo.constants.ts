@@ -274,6 +274,7 @@ const TABLE_APPEARANCE_BINDINGS = `
   [controlColumnOrder]="controlColumnOrder()"
   [filterModalBreakpoint]="filterModalBreakpoint()"
   [filterModalFullscreen]="filterModalFullscreen()"
+  [filterPopoverWidth]="filterPopoverWidth()"
   [maxHeight]="maxHeight()"
   [activeRowId]="activeRowId()"
   [placeholderRole]="placeholderRole()"

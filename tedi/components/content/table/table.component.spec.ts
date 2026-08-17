@@ -25,6 +25,7 @@ import type {
   TediColumnDef,
   TediTableFilterContext,
 } from "./table.types";
+import type { PopoverWidth } from "../../overlay/popover/popover-content/popover-content.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { TediPaginationResultsDirective } from "../../navigation/pagination/pagination-results.directive";
@@ -1525,7 +1526,11 @@ describe("TediTableComponent", () => {
       standalone: true,
       imports: [TediTableComponent, TextFieldComponent, FormFieldComponent],
       template: `
-        <tedi-table [data]="data()" [columns]="columns()" />
+        <tedi-table
+          [data]="data()"
+          [columns]="columns()"
+          [filterPopoverWidth]="popoverWidth()"
+        />
         <ng-template #textFilter let-ctx>
           <tedi-form-field size="small">
             <input
@@ -1545,6 +1550,7 @@ describe("TediTableComponent", () => {
         TemplateRef<TediTableFilterContext<string, Person>>
       >("textFilter");
       readonly filterableOption = signal<boolean | TableFilterOptions>(true);
+      readonly popoverWidth = signal<PopoverWidth>("small");
 
       readonly columns = signal<TediColumnDef<Person>[]>([]);
 
@@ -1662,6 +1668,65 @@ describe("TediTableComponent", () => {
         b.textContent?.trim(),
       );
       expect(labels).toEqual(expect.arrayContaining(["Apply", "Clear"]));
+    });
+
+    function openFilterPanel(
+      fixture: ComponentFixture<FilterableHostComponent>,
+    ): HTMLElement | null {
+      findTriggerButton(fixture)?.click();
+      fixture.detectChanges();
+      return getPopoverContent()?.querySelector("tedi-popover-content") ?? null;
+    }
+
+    function openFilterPanelClass(
+      fixture: ComponentFixture<FilterableHostComponent>,
+    ): string {
+      return openFilterPanel(fixture)?.className ?? "";
+    }
+
+    it("renders the filter popover at the small width by default", () => {
+      const fixture = setupFilterableHost();
+      expect(openFilterPanelClass(fixture)).toContain(
+        "tedi-popover-content--small",
+      );
+    });
+
+    it("applies filterPopoverWidth to the filter popover", () => {
+      const fixture = setupFilterableHost((host) =>
+        host.popoverWidth.set("medium"),
+      );
+      expect(openFilterPanelClass(fixture)).toContain(
+        "tedi-popover-content--medium",
+      );
+    });
+
+    it("lets a column override filterPopoverWidth through filterable", () => {
+      const fixture = setupFilterableHost((host) =>
+        host.popoverWidth.set("medium"),
+      );
+      fixture.componentInstance.build({ popoverWidth: "large" });
+      fixture.detectChanges();
+      const classes = openFilterPanelClass(fixture);
+      expect(classes).toContain("tedi-popover-content--large");
+      expect(classes).not.toContain("tedi-popover-content--medium");
+    });
+
+    it("drops the width class when the popover width is none", () => {
+      const fixture = setupFilterableHost((host) =>
+        host.popoverWidth.set("none"),
+      );
+      const classes = openFilterPanelClass(fixture);
+      expect(classes).toContain("tedi-popover-content");
+      expect(classes).not.toMatch(/tedi-popover-content--/);
+    });
+
+    it("accepts a CSS length as the popover width", () => {
+      const fixture = setupFilterableHost((host) =>
+        host.popoverWidth.set("22rem"),
+      );
+      const panel = openFilterPanel(fixture);
+      expect(panel?.style.width).toBe("22rem");
+      expect(panel?.className).not.toMatch(/tedi-popover-content--/);
     });
 
     it("commits the draft to column.setFilterValue on Apply and closes the popover", () => {

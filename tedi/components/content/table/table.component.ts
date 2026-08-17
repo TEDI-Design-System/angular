@@ -69,7 +69,10 @@ import {
   type CollapseButtonArrowType,
 } from "../../buttons/collapse-button/collapse-button.component";
 import { PopoverComponent } from "../../overlay/popover/popover.component";
-import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
+import {
+  PopoverContentComponent,
+  PopoverWidth,
+} from "../../overlay/popover/popover-content/popover-content.component";
 import { PopoverTriggerDirective } from "../../overlay/popover/popover-trigger/popover-trigger.directive";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import {
@@ -494,6 +497,13 @@ export class TediTableComponent<TData> {
    * @default false
    */
   readonly filterModalFullscreen = input<ModalFullscreen>(false);
+  /**
+   * Width of the column filter popover: a popover preset, or any CSS length
+   * (`"20rem"`). `"none"` lets the panel size to its content. A single column
+   * can opt out through `filterable: { popoverWidth }`.
+   * @default "small"
+   */
+  readonly filterPopoverWidth = input<PopoverWidth>("small");
   /**
    * Enables pagination and configures the bottom paginator slot. This is also
    * the source of truth for `pageSize` / `pageSizeOptions` — the top slot
@@ -2373,6 +2383,12 @@ export class TediTableComponent<TData> {
     return def.filterTemplate as
       | TemplateRef<TediTableFilterContext<unknown, TData>>
       | undefined;
+  }
+
+  protected filterPopoverWidthFor(col: Column<TData, unknown>): PopoverWidth {
+    return (
+      this.resolveFilterOptions(col)?.popoverWidth ?? this.filterPopoverWidth()
+    );
   }
 
   /**

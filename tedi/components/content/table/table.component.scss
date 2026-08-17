@@ -557,11 +557,15 @@
   }
 
   // The pinned header casts a full-width downward elevation shadow over the
-  // scrolled body once scrolled down — across every header cell, including a
-  // frozen column's header cell. Drawn with a gradient pseudo (a drop-shadow on
-  // a border-collapse cell would be clipped). The column side-shadow (::after,
-  // defined with the sticky columns) already spans full height, header included.
-  .tedi-table__scroll--shadow-header .tedi-table__head .tedi-table__header-cell::before {
+  // scrolled body once scrolled down. Drawn with a gradient pseudo (a
+  // drop-shadow on a border-collapse cell would be clipped) on the row rather
+  // than on each cell: a per-cell pseudo is redrawn by every header cell that
+  // scrolls underneath a frozen column, and the two gradients composite there
+  // into a visibly darker band. The row spans the table's full scroll width, so
+  // one strip covers the viewport at any horizontal offset. The column
+  // side-shadow (::after, defined with the sticky columns) already spans full
+  // height, header included.
+  .tedi-table__scroll--shadow-header .tedi-table__head .tedi-table__row::after {
     position: absolute;
     top: 100%;
     right: 0;
