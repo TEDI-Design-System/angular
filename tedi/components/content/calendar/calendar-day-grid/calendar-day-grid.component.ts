@@ -231,7 +231,10 @@ export class CalendarDayGridComponent {
       return value instanceof Date && isSameDay(day, value);
     }
     if (mode === "multiple") {
-      return Array.isArray(value) && value.some((d) => isSameDay(d, day));
+      return (
+        Array.isArray(value) &&
+        value.some((d) => d instanceof Date && isSameDay(d, day))
+      );
     }
     if (mode === "range") {
       const range = this.asRange(value);
@@ -328,11 +331,15 @@ export class CalendarDayGridComponent {
     return this.asRange(this.value());
   }
 
+  // Validates the shape at runtime, not just at compile time: a consumer
+  // (or a form control) can hand the calendar any value, and an object whose
+  // `from` isn't a Date would otherwise reach isSameDay() and throw mid-render,
+  // aborting change detection and leaving the grid blank.
   private asRange(value: CalendarValue): DateRange | null {
-    if (value && !Array.isArray(value) && !(value instanceof Date)) {
-      return value;
-    }
-    return null;
+    if (!value || Array.isArray(value) || value instanceof Date) return null;
+    if (!(value.from instanceof Date)) return null;
+    if (value.to && !(value.to instanceof Date)) return { from: value.from };
+    return value;
   }
 
   private isInCommittedRangeMiddle(day: Date, range: DateRange): boolean {

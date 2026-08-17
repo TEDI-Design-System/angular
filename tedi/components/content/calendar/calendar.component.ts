@@ -725,6 +725,7 @@ export class CalendarComponent implements ControlValueAccessor {
       value &&
       !(value instanceof Date) &&
       !Array.isArray(value) &&
+      value.from instanceof Date &&
       value.to === undefined
     ) {
       return value;
@@ -736,8 +737,8 @@ export class CalendarComponent implements ControlValueAccessor {
     if (!value) return null;
     if (value instanceof Date) return value;
     if (Array.isArray(value)) {
-      return value.length > 0 ? value[0] : null;
+      return value[0] instanceof Date ? value[0] : null;
     }
-    return value.from;
+    return value.from instanceof Date ? value.from : null;
   }
 }
