@@ -73,6 +73,54 @@ describe("PopoverContentComponent", () => {
     expect(classes).not.toContain("tedi-popover-content--small");
   });
 
+  it("should drop the width class for maxWidth 'none'", () => {
+    fixture.componentInstance.width = "none";
+    fixture.detectChanges();
+
+    const classes = hostDE.nativeElement.className;
+    expect(classes).toContain("tedi-popover-content");
+    expect(classes).not.toMatch(/tedi-popover-content--/);
+    expect(hostDE.nativeElement.style.width).toBe("");
+  });
+
+  it.each(["20rem", "340px", "50%"])(
+    "should apply a CSS length maxWidth (%s) inline instead of a preset class",
+    (length) => {
+      fixture.componentInstance.width = length;
+      fixture.detectChanges();
+
+      expect(hostDE.nativeElement.style.width).toBe(length);
+      expect(hostDE.nativeElement.className).not.toMatch(
+        /tedi-popover-content--/,
+      );
+    },
+  );
+
+  // jsdom's CSS parser rejects function values, so assert the resolved binding
+  // rather than the written style — browsers accept it.
+  it("should pass a function-value length through as the width", () => {
+    fixture.componentInstance.width = "min(90vw, 30rem)";
+    fixture.detectChanges();
+
+    const comp = hostDE.componentInstance as PopoverContentComponent;
+    expect(comp.customWidth()).toBe("min(90vw, 30rem)");
+    expect(hostDE.nativeElement.className).not.toMatch(
+      /tedi-popover-content--/,
+    );
+  });
+
+  it("should clear the inline width when switching back to a preset", () => {
+    fixture.componentInstance.width = "20rem";
+    fixture.detectChanges();
+    fixture.componentInstance.width = "medium";
+    fixture.detectChanges();
+
+    expect(hostDE.nativeElement.style.width).toBe("");
+    expect(hostDE.nativeElement.className).toContain(
+      "tedi-popover-content--medium",
+    );
+  });
+
   describe("template branches", () => {
     it("renders only projected content when no title & no close", () => {
       // default: title = '', showClose = false
