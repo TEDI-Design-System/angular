@@ -840,7 +840,7 @@ export class TediTableComponent<TData> {
         maxSize: CONTROL_COLUMN_WIDTH,
         header: "",
         cell: () => "",
-        meta: { align: "center", vAlign: "top" },
+        meta: { vAlign: "top" },
         groupBy: controlGroupBy,
       } as TediColumnDef<TData>;
     }
@@ -856,7 +856,7 @@ export class TediTableComponent<TData> {
         maxSize: CONTROL_COLUMN_WIDTH,
         header: "",
         cell: () => "",
-        meta: { align: "center", vAlign: "top" },
+        meta: { vAlign: "top" },
         groupBy: controlGroupBy,
       } as TediColumnDef<TData>;
     }
@@ -875,9 +875,7 @@ export class TediTableComponent<TData> {
         maxSize: iconOnly ? CONTROL_COLUMN_WIDTH : undefined,
         header: "",
         cell: () => "",
-        meta: iconOnly
-          ? { align: "center", vAlign: "top" }
-          : { vAlign: "top" },
+        meta: { vAlign: "top" },
         groupBy: controlGroupBy,
       } as TediColumnDef<TData>;
     }
