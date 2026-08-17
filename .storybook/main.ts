@@ -28,7 +28,10 @@ const config: StorybookConfig = {
       builder: "angular",
     },
   },
-  staticDirs: ["../public"],
+  staticDirs: [
+    "../public",
+    { from: "../node_modules/@tedi-design-system/core/fonts", to: "/fonts" },
+  ],
   core: {
     disableTelemetry: true,
   },

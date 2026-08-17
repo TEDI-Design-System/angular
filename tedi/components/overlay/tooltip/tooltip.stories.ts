@@ -338,6 +338,13 @@ export const CustomContent: Story = {
  * With `openWith="none"` the built-in triggers are disabled and visibility is driven
  * entirely by the `open` model. Enable `trackPosition` when the origin can move (e.g. a
  * dragging slider thumb) so the tooltip follows it.
+ *
+ * Because focus never opens a controlled tooltip, its content cannot be announced via
+ * the trigger's `aria-describedby` — so the anchor is marked `[interactive]="false"`
+ * (a pure positioning origin, matching the slider) and accessibility lives on the real
+ * control instead: here the toggle button conveys its own state with `aria-expanded`,
+ * and the tooltip is a purely visual bubble. If the revealed content must be read by a
+ * screen reader, use `tedi-popover` (a focus-managed dialog), not a tooltip.
  */
 export const Controlled: Story = {
   name: "Controlled (open + trackPosition)",
@@ -358,8 +365,8 @@ export const Controlled: Story = {
         <tedi-row justifyItems="center">
           <tedi-col>
             <tedi-tooltip openWith="none" [position]="position" [open]="state.isOpen" [trackPosition]="trackPosition">
-              <tedi-tooltip-trigger>
-                <button tedi-button (click)="toggle()">{{ state.isOpen ? 'Hide' : 'Show' }} tooltip</button>
+              <tedi-tooltip-trigger [interactive]="false">
+                <button tedi-button (click)="toggle()" [attr.aria-expanded]="state.isOpen">{{ state.isOpen ? 'Hide' : 'Show' }} tooltip</button>
               </tedi-tooltip-trigger>
               <tedi-tooltip-content>Controlled tooltip content</tedi-tooltip-content>
             </tedi-tooltip>

@@ -6,6 +6,14 @@ import {
 } from "@angular/core";
 import { InputComponent } from "../input/input.component";
 
+/**
+ * @deprecated Use the TEDI-Ready `TextareaComponent` from
+ * `@tedi-design-system/angular/tedi` instead. Same `textarea[tedi-textarea]`
+ * selector, but the API differs: the `resizeX`/`resizeY` booleans are replaced
+ * by a single `resizable` boolean (only vertical resizing is supported), and
+ * the field is composed inside a `<tedi-form-field>` wrapper. The TEDI-Ready
+ * version also adds `autoGrow`, `minRows`, `maxRows`, `height`, and `maxHeight`.
+ */
 @Component({
   selector: "[tedi-textarea]",
   standalone: true,

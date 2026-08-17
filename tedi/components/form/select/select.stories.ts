@@ -13,7 +13,6 @@ import {
   SelectTooltipTemplateDirective,
 } from "./select-templates.directive";
 import { IconComponent } from "../../base";
-import { ButtonComponent } from "../../buttons/button/button.component";
 import {
   TextGroupComponent,
   TextGroupLabelComponent,
@@ -26,6 +25,13 @@ import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/v
 import { Component, signal } from "@angular/core";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 import { TextComponent } from "../../base/text/text.component";
+import { ButtonComponent } from "../../buttons/button/button.component";
+
+const longLabelOptions = [
+  { value: "a", label: "A fairly long option label that does not fit" },
+  { value: "b", label: "Another rather long option label" },
+  { value: "c", label: "2026-06-25 kvartaalne finantsaruanne" },
+];
 
 const simpleOptions = [
   { value: "tallinn", label: "Tallinn" },
@@ -35,6 +41,14 @@ const simpleOptions = [
   { value: "rakvere", label: "Rakvere" },
   { value: "haapsalu", label: "Haapsalu" },
 ];
+
+const virtualScrollIcons = ["computer", "smartphone", "tablet_mac", "watch", "tv"];
+const virtualScrollOptions = Array.from({ length: 5000 }, (_, i) => ({
+  value: i + 1,
+  label: `Valik ${i + 1}`,
+  description: `${i + 1}. valiku kirjeldus`,
+  icon: virtualScrollIcons[i % virtualScrollIcons.length],
+}));
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.38.59?node-id=4449-69807&m=dev" target="_blank">Figma ↗</a><br />
@@ -132,7 +146,7 @@ const meta: Meta<SelectComponent> = {
       control: "radio",
       options: [false, "start", "end"],
       description:
-        "Which end a tag's label truncates from when it doesn't fit. `false` never truncates; `end` → `label…`; `start` → `…label`.",
+        "Which end a tag's label truncates from: `end` → `label…`, `start` → `…label`; `false` never truncates. In a single row the tags share the row with the \"+N\" counter, so an over-wide label truncates to fit; with `multiRow` the tags wrap first, so a label only truncates when it is wider than the field on its own.",
     },
     ellipsis: {
       control: "radio",
@@ -190,6 +204,16 @@ const meta: Meta<SelectComponent> = {
       control: "number",
       description: "Value in pixels. When not set, fits available viewport space.",
     },
+    virtualScroll: {
+      control: "boolean",
+      description:
+        "Renders options with virtual scrolling so only the visible rows exist in the DOM. Enable for very large lists. Applies only to the default `menu` type without `groupBy`.",
+    },
+    virtualItemSize: {
+      control: "number",
+      description:
+        "Row height in pixels for the virtual scroll viewport. When unset, it is measured from the first rendered option.",
+    },
     hideOnScroll: {
       control: "boolean",
       description: "Whether the dropdown closes when the page scrolls.",
@@ -218,6 +242,7 @@ const meta: Meta<SelectComponent> = {
     clearSearchOnSelect: false,
     dropdownType: "menu",
     maxDropdownHeight: undefined,
+    virtualScroll: false,
     hideOnScroll: false,
     options: simpleOptions as [],
   },
@@ -250,6 +275,8 @@ export const Default: Story = {
         [maxDropdownHeight]="maxDropdownHeight"
         [hideOnScroll]="hideOnScroll"
         [dropdownType]="dropdownType"
+        [virtualScroll]="virtualScroll"
+        [virtualItemSize]="virtualItemSize"
         [options]="options"
         bindLabel="label"
         bindValue="value"
@@ -297,7 +324,7 @@ export const Type: Story = {
       options: simpleOptions,
       feedbackText: {
         type: "hint",
-        text: "Hint text",
+        text: "Vihjetekst",
         position: "left",
       },
     },
@@ -412,16 +439,16 @@ export const ValueType: Story = {
     props: {
       options: simpleOptions,
       multiselectOptions: [
-        "Tag 1",
-        "Tag 2",
-        "Tag 3",
-        "Tag 4",
-        "Tag 5",
-        "Tag 6",
-        "Tag 7",
-        "Tag 8",
-        "Tag 9",
-        "Tag 10",
+        "Silt 1",
+        "Silt 2",
+        "Silt 3",
+        "Silt 4",
+        "Silt 5",
+        "Silt 6",
+        "Silt 7",
+        "Silt 8",
+        "Silt 9",
+        "Silt 10",
       ],
       oneRowOptions: [
         "Pikem tekst",
@@ -464,16 +491,16 @@ export const ValueType: Story = {
       form: new FormGroup({
         default: new FormControl("tallinn"),
         multiselect: new FormControl([
-          "Tag 1",
-          "Tag 2",
-          "Tag 3",
-          "Tag 4",
-          "Tag 5",
-          "Tag 6",
-          "Tag 7",
-          "Tag 8",
-          "Tag 9",
-          "Tag 10",
+          "Silt 1",
+          "Silt 2",
+          "Silt 3",
+          "Silt 4",
+          "Silt 5",
+          "Silt 6",
+          "Silt 7",
+          "Silt 8",
+          "Silt 9",
+          "Silt 10",
         ]),
         oneRow: new FormControl([
           "Pikem tekst",
@@ -508,7 +535,7 @@ export const ValueType: Story = {
         <tedi-select
           inputId="value-placeholder"
           label="Placeholder"
-          placeholder="Text value"
+          placeholder="Tekstiväärtus"
           [options]="options"
           bindLabel="label"
           bindValue="value"
@@ -526,13 +553,12 @@ export const ValueType: Story = {
         />
         <tedi-select
           inputId="value-multiselect-one-row"
-          label="Multiselect one row (tagEllipsis=&quot;end&quot;)"
+          label="Multiselect one row"
           [options]="oneRowOptions"
           [allowMultiple]="true"
           [multiRow]="false"
           [isTagRemovable]="true"
           [clearable]="true"
-          tagEllipsis="end"
           formControlName="oneRow"
         />
         <div style="width: 100px;">
@@ -592,6 +618,66 @@ export const ValueType: Story = {
           </tedi-select>
         </div>
       </form>
+    `,
+  }),
+};
+
+/**
+ * `tagEllipsis` truncates a selected tag's label: `end` → `label…`, `start` →
+ * `…label`, which keeps the most significant part of values like dates readable.
+ * The remove button stays in place.
+ *
+ * In a single row the tags share the row with the "+N" counter, so an over-wide
+ * label truncates to fit. With `multiRow` the tags wrap first, so a label only
+ * truncates when it is wider than the field on its own.
+ */
+export const EllipsisTags: Story = {
+  render: () => ({
+    props: {
+      options: longLabelOptions,
+      endControl: new FormControl(longLabelOptions.map((option) => option.value)),
+      startControl: new FormControl(longLabelOptions.map((option) => option.value)),
+      multiRowControl: new FormControl(longLabelOptions.map((option) => option.value)),
+    },
+    template: `
+      <div style="max-width: 20rem; display: flex; flex-direction: column;" [tediVerticalSpacing]="1">
+        <tedi-select
+          inputId="ellipsis-tags-end"
+          label="Truncate the end"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+          [allowMultiple]="true"
+          tagEllipsis="end"
+          [isTagRemovable]="true"
+          [clearable]="true"
+          [formControl]="endControl"
+        />
+        <tedi-select
+          inputId="ellipsis-tags-start"
+          label="Truncate the start"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+          [allowMultiple]="true"
+          tagEllipsis="start"
+          [isTagRemovable]="true"
+          [clearable]="true"
+          [formControl]="startControl"
+        />
+        <tedi-select
+          inputId="ellipsis-tags-multi-row"
+          label="Truncate the end, stacked"
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+          [allowMultiple]="true"
+          [multiRow]="true"
+          tagEllipsis="end"
+          [isTagRemovable]="true"
+          [formControl]="multiRowControl"
+        />
+      </div>
     `,
   }),
 };
@@ -1138,7 +1224,7 @@ export const CustomSearchFunction: Story = {
         "
       >
         @if (events().length === 0) {
-          <span style="color: var(--general-text-tertiary);">Interact with the select to see events.</span>
+          <span style="color: var(--general-text-tertiary);">Kasuta valikmenüüd, et näha sündmusi.</span>
         } @else {
           @for (event of events(); track $index) {
             <div>
@@ -1185,5 +1271,87 @@ export const Outputs: Story = {
       imports: [SelectOutputsDemoComponent],
     },
     template: `<storybook-select-outputs-demo />`,
+  }),
+};
+
+export const VirtualScroll: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Renders a select with **5000 options** in single, searchable and multiselect modes, with " +
+          "`virtualScroll` enabled so only the rows in view exist in the DOM. Each option uses a full " +
+          "`tedi-dropdown-item-value` template (icon + label + meta, plus a radio/checkbox indicator) " +
+          "to mirror real-world usage.",
+      },
+    },
+  },
+  render: () => ({
+    props: {
+      options: virtualScrollOptions,
+    },
+    template: `
+      <div style="display: flex; flex-direction: column;" [tediVerticalSpacing]="1">
+        <tedi-select
+          inputId="stress-single"
+          label="Single select"
+          placeholder="Vali..."
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+          [clearable]="true"
+          [virtualScroll]="true"
+        >
+          <ng-template tediSelectOption let-item let-selected="selected">
+            <tedi-dropdown-item-value type="radio" [selected]="selected">
+              <tedi-icon [name]="item.icon" [size]="18" />
+              <tedi-dropdown-item-value-label>{{ item.label }}</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </ng-template>
+        </tedi-select>
+        <tedi-select
+          inputId="stress-searchable"
+          label="Searchable single select"
+          placeholder="Otsi..."
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+          [searchable]="true"
+          [clearable]="true"
+          [virtualScroll]="true"
+        >
+          <ng-template tediSelectOption let-item let-selected="selected">
+            <tedi-dropdown-item-value type="radio" [selected]="selected">
+              <tedi-icon [name]="item.icon" [size]="18" />
+              <tedi-dropdown-item-value-label>{{ item.label }}</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </ng-template>
+        </tedi-select>
+        <tedi-select
+          inputId="stress-multiselect"
+          label="Searchable multiselect"
+          placeholder="Otsi ja vali..."
+          [options]="options"
+          bindLabel="label"
+          bindValue="value"
+          [searchable]="true"
+          [allowMultiple]="true"
+          [clearable]="true"
+          [isTagRemovable]="true"
+          [multiRow]="true"
+          [virtualScroll]="true"
+        >
+          <ng-template tediSelectOption let-item let-selected="selected">
+            <tedi-dropdown-item-value type="checkbox" [selected]="selected">
+              <tedi-icon [name]="item.icon" [size]="18" />
+              <tedi-dropdown-item-value-label>{{ item.label }}</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </ng-template>
+        </tedi-select>
+      </div>
+    `,
   }),
 };

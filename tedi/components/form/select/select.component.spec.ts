@@ -3,6 +3,7 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed, fakeAsync, tick } from "@angular/core/testing";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
+import { OverlayContainer } from "@angular/cdk/overlay";
 import { SelectComponent, SelectInputSize, SelectOption, SpecialOptionControls } from "./select.component";
 import {
   SelectOptionTemplateDirective,
@@ -29,6 +30,8 @@ import { InputState } from "../form-field/form-field.component";
       [showSelectAll]="showSelectAll"
       [selectableGroups]="selectableGroups"
       [groupBy]="groupBy"
+      [virtualScroll]="virtualScroll"
+      [virtualItemSize]="virtualItemSize"
       [bindLabel]="bindLabel"
       [bindValue]="bindValue"
       [placeholder]="placeholder"
@@ -84,6 +87,8 @@ class TestHostComponent {
   showSelectAll = false;
   selectableGroups = false;
   groupBy: string | undefined = undefined;
+  virtualScroll = false;
+  virtualItemSize: number | undefined = undefined;
   bindLabel = "label";
   bindValue: string | undefined = undefined;
   placeholder = "Select an option...";
@@ -435,6 +440,27 @@ describe("SelectComponent", () => {
 
       const tags = getTags();
       expect(tags.length).toBe(2);
+    }));
+
+    it("should let the tags row shrink only when tagEllipsis is set", fakeAsync(() => {
+      host.control.setValue(["Option 1", "Option 2"]);
+      fixture.detectChanges();
+      tick();
+
+      const container = () =>
+        hostEl.querySelector(".tedi-select__multiselect-container") as HTMLElement;
+
+      expect(container().classList).not.toContain(
+        "tedi-select__multiselect-container--ellipsis",
+      );
+
+      host.tagEllipsis = "end";
+      fixture.detectChanges();
+      tick();
+
+      expect(container().classList).toContain(
+        "tedi-select__multiselect-container--ellipsis",
+      );
     }));
 
     it("forwards tagEllipsis to the rendered tags", fakeAsync(() => {
@@ -979,6 +1005,12 @@ describe("SelectComponent", () => {
       expect(trigger.getAttribute("aria-haspopup")).toBe("listbox");
     });
 
+    it("trigger should not have aria-controls while closed", () => {
+      // The listbox only exists inside the open overlay, so keeping the
+      // reference while closed would point at a missing element.
+      expect(getTrigger().getAttribute("aria-controls")).toBeNull();
+    });
+
     it("trigger should have aria-controls referencing listbox", fakeAsync(() => {
       const trigger = getTrigger();
       trigger.click();
@@ -1015,6 +1047,39 @@ describe("SelectComponent", () => {
       const activeElement = document.querySelector(`[id="${activeDescendantId}"]`);
       expect(activeElement).toBeTruthy();
       expect(activeElement!.getAttribute("role")).toBe("option");
+    }));
+
+    it("search input should reference the listbox only while open", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+
+      expect(getSearchInput().getAttribute("aria-controls")).toBeNull();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const ariaControls = getSearchInput().getAttribute("aria-controls");
+      expect(ariaControls).toBe("test-select-listbox");
+      expect(document.getElementById(ariaControls!)).toBeTruthy();
+    }));
+
+    it("multiselect search input should reference the listbox only while open", fakeAsync(() => {
+      host.searchable = true;
+      host.allowMultiple = true;
+      host.control.setValue(["Option 1"]);
+      fixture.detectChanges();
+      tick();
+
+      expect(getSearchInput().getAttribute("aria-controls")).toBeNull();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const ariaControls = getSearchInput().getAttribute("aria-controls");
+      expect(ariaControls).toBe("test-select-listbox");
+      expect(document.getElementById(ariaControls!)).toBeTruthy();
     }));
 
     it("should mark active option on navigation", fakeAsync(() => {
@@ -1100,15 +1165,27 @@ describe("SelectComponent", () => {
       expect(context.label).toBe("Test");
     });
 
+    // Opens the info-tooltip and returns the overlay's rendered text. The tooltip
+    // description now lives on the visible role="tooltip" content in the overlay
+    // (shown on hover/focus), not a duplicated always-present .sr-only span.
+    const openTooltipText = (): string => {
+      const trigger = hostEl.querySelector(
+        "tedi-info-tooltip tedi-tooltip-trigger",
+      )!;
+      trigger.dispatchEvent(new MouseEvent("mouseenter"));
+      fixture.detectChanges();
+      return (
+        TestBed.inject(OverlayContainer).getContainerElement().textContent ?? ""
+      );
+    };
+
     it("should render string tooltip when no tooltip template is projected", () => {
       host.tooltip = "Plain tooltip";
       fixture.detectChanges();
 
       expect(hostEl.querySelector("tedi-info-tooltip")).toBeTruthy();
       expect(select.tooltipTemplate()).toBeFalsy();
-      expect(
-        hostEl.querySelector("tedi-info-tooltip .sr-only")?.textContent,
-      ).toContain("Plain tooltip");
+      expect(openTooltipText()).toContain("Plain tooltip");
     });
 
     it("should render projected tooltip template content", () => {
@@ -1117,9 +1194,7 @@ describe("SelectComponent", () => {
 
       expect(select.tooltipTemplate()).toBeTruthy();
       expect(hostEl.querySelector("tedi-info-tooltip")).toBeTruthy();
-      expect(
-        hostEl.querySelector("tedi-info-tooltip .sr-only")?.textContent,
-      ).toContain("Formatted tooltip");
+      expect(openTooltipText()).toContain("Formatted tooltip");
     });
 
     it("should prefer the tooltip template over the tooltip string input", () => {
@@ -1127,11 +1202,9 @@ describe("SelectComponent", () => {
       host.useTooltipTemplate = true;
       fixture.detectChanges();
 
-      const srText = hostEl.querySelector(
-        "tedi-info-tooltip .sr-only",
-      )?.textContent;
-      expect(srText).toContain("Formatted tooltip");
-      expect(srText).not.toContain("Plain tooltip");
+      const tooltipText = openTooltipText();
+      expect(tooltipText).toContain("Formatted tooltip");
+      expect(tooltipText).not.toContain("Plain tooltip");
     });
   });
 
@@ -2924,6 +2997,221 @@ describe("SelectComponent", () => {
       tick();
 
       expect(spy).not.toHaveBeenCalled();
+    }));
+  });
+
+  describe("Virtual scroll", () => {
+    const getVirtualListbox = () =>
+      document.querySelector(".tedi-select__options--virtual") as HTMLElement;
+
+    beforeEach(() => {
+      // jsdom does not implement Element.scrollTo, which CdkVirtualScrollViewport
+      // calls from scrollToIndex during keyboard navigation.
+      (Element.prototype as any).scrollTo = jest.fn();
+      host.virtualScroll = true;
+      host.virtualItemSize = 40;
+      fixture.detectChanges();
+    });
+
+    it("virtualize is true for a flat menu list", () => {
+      expect(select.virtualize()).toBe(true);
+    });
+
+    it("virtualize is false when groupBy is set", () => {
+      host.items = [{ id: 1, name: "A", cat: "X" }];
+      host.bindLabel = "name";
+      host.bindValue = "id";
+      host.groupBy = "cat";
+      fixture.detectChanges();
+
+      expect(select.virtualize()).toBe(false);
+    });
+
+    it("renders a listbox with a virtual scroll viewport when open", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const listbox = getVirtualListbox();
+      expect(listbox).toBeTruthy();
+      expect(listbox.getAttribute("role")).toBe("listbox");
+      expect(document.querySelector("cdk-virtual-scroll-viewport")).toBeTruthy();
+    }));
+
+    it("does not instantiate a cdkListbox in virtual mode", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(document.querySelector("[cdkListbox]")).toBeFalsy();
+    }));
+
+    it("marks the first option active on open and exposes aria-activedescendant", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.activeIndex()).toBe(0);
+      expect(select.activeDescendantId()).toBe("test-select-listbox-option-0");
+      expect(getVirtualListbox().getAttribute("aria-activedescendant")).toBe(
+        "test-select-listbox-option-0",
+      );
+    }));
+
+    it("ArrowDown moves the active option forward", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      getVirtualListbox().dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }),
+      );
+      fixture.detectChanges();
+      tick();
+
+      expect(select.activeIndex()).toBe(1);
+      expect(select.activeDescendantId()).toBe("test-select-listbox-option-1");
+    }));
+
+    it("ArrowUp wraps from the first option to the last", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      getVirtualListbox().dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }),
+      );
+      fixture.detectChanges();
+      tick();
+
+      expect(select.activeIndex()).toBe(2);
+    }));
+
+    it("skips disabled options during navigation", fakeAsync(() => {
+      host.items = [
+        { id: 1, name: "A", disabled: false },
+        { id: 2, name: "B", disabled: true },
+        { id: 3, name: "C", disabled: false },
+      ];
+      host.bindLabel = "name";
+      host.bindValue = "id";
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      getVirtualListbox().dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }),
+      );
+      fixture.detectChanges();
+      tick();
+
+      expect(select.activeIndex()).toBe(2);
+    }));
+
+    it("selects an option on click and closes in single select", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      select.onVirtualOptionClick(select.filteredOptions()[0]);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 1"]);
+      expect(select.isOpen()).toBe(false);
+    }));
+
+    it("Enter selects the active option", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      getVirtualListbox().dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
+      );
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 1"]);
+    }));
+
+    it("toggles options in multiselect without closing", fakeAsync(() => {
+      host.allowMultiple = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      select.onVirtualOptionClick(select.filteredOptions()[0]);
+      select.onVirtualOptionClick(select.filteredOptions()[1]);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 1", "Option 2"]);
+      expect(select.isOpen()).toBe(true);
+
+      select.onVirtualOptionClick(select.filteredOptions()[0]);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 2"]);
+    }));
+
+    it("renders and toggles a pinned select-all row", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.showSelectAll = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const selectAll = document.querySelector(
+        '[id="test-select-listbox-select-all"]',
+      ) as HTMLElement;
+      expect(selectAll).toBeTruthy();
+      expect(selectAll.getAttribute("role")).toBe("option");
+
+      selectAll.click();
+      fixture.detectChanges();
+      tick();
+
+      expect(select.selectedValues()).toEqual(["Option 1", "Option 2", "Option 3"]);
+    }));
+
+    it("filters options via search while staying virtualized", fakeAsync(() => {
+      host.searchable = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const input = getSearchInput();
+      input.value = "Option 1";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      tick();
+
+      expect(select.filteredOptions().length).toBe(1);
+      expect(select.virtualize()).toBe(true);
+      expect(select.activeIndex()).toBe(0);
+    }));
+
+    it("closing resets the active index", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.activeIndex()).toBe(0);
+
+      select.toggleIsOpen(true);
+      fixture.detectChanges();
+      tick();
+
+      expect(select.activeIndex()).toBe(-1);
     }));
   });
 });

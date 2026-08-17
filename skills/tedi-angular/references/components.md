@@ -816,6 +816,25 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 <tedi-search inputId="q" label="Otsing" [button]="{ text: 'Otsi' }" [formControl]="queryControl" />
 ```
 
+### Textarea
+**Selector:** `textarea[tedi-textarea]` | ControlValueAccessor
+**Model:** `value: string`
+**Inputs:**
+- `resizable: boolean = true` — allow manual (vertical-only) resizing; `false` disables it
+- `autoGrow: boolean = false` — grow to fit content via CSS `field-sizing` (disables manual resize)
+- `minRows: number = 3`, `maxRows: number = 12` — bounds while `autoGrow` is on
+- `height: string | number | undefined = "7.5rem"` — fixed height when `autoGrow` is off; set `undefined` to fall back to the native `rows` attribute
+- `maxHeight: string | number | undefined` — cap the height before it scrolls
+
+Compose inside a `tedi-form-field` (which owns `size`, `characterLimit`, `inputClass`, etc.).
+
+```html
+<tedi-form-field>
+  <label tedi-label for="notes">Notes</label>
+  <textarea tedi-textarea id="notes" [(value)]="notes"></textarea>
+</tedi-form-field>
+```
+
 ### Slider
 **Selector:** `tedi-slider` | ControlValueAccessor
 **Model:** `value: number`
@@ -1229,6 +1248,8 @@ Standalone time picker. Most consumers should use `tedi-time-field` instead — 
 - `dropdownAlign: "start" | "end" = "start"` — which trigger edge the dropdown anchors to; use `"end"` for right-aligned selects so the panel expands inward
 - `feedbackText: { text, type, position }` — feedback text config
 - `maxDropdownHeight: number` — dropdown height in pixels
+- `virtualScroll: boolean = false` — render options with virtual scrolling so only visible rows are in the DOM; enable for very large lists. Applies only to `dropdownType="menu"` without `groupBy`
+- `virtualItemSize: number` — row height in pixels for the virtual scroll viewport; measured from the first option when unset
 - `hideOnScroll: boolean = false` — close the dropdown when the page scrolls
 - `compareWith: (a, b) => boolean` — custom equality function
 - `tagEllipsis: TagEllipsis = false` — which end a selected tag's label truncates from when it doesn't fit. Only used in multiselect mode with `multiRow="false"`. `false` never truncates; `end` → `label…`; `start` → `…label`
@@ -2185,9 +2206,10 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 **Selector:** `tedi-search` | ControlValueAccessor
 - `inputId: string`, `autocompleteOptions: AutocompleteOption[]`, `size: SearchSize`, `withButton: boolean`
 
-### Textarea
+### Textarea — **DEPRECATED** (use TEDI-Ready Textarea)
 **Selector:** `[tedi-textarea]` (extends Input)
 - `resizeX: boolean = false`, `resizeY: boolean = true`
+- Migrate to the TEDI-Ready `textarea[tedi-textarea]`: `resizeX`/`resizeY` become a single `resizable` (vertical only), composed inside `tedi-form-field`.
 
 ### FileDropzone
 **Selector:** `tedi-file-dropzone` | ControlValueAccessor

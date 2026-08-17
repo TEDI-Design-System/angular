@@ -130,6 +130,11 @@ describe("EllipsisComponent", () => {
       expect(component.isEllipsed()).toBe(true);
     });
 
+    it("should detect end-mode truncation via scrollWidth when the content cannot wrap", () => {
+      mockTruncated("width");
+      expect(component.isEllipsed()).toBe(true);
+    });
+
     it("should detect start-mode truncation via scrollWidth", () => {
       host.position = "start";
       fixture.detectChanges();

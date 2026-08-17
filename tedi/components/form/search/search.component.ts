@@ -188,6 +188,15 @@ export class SearchComponent implements ControlValueAccessor {
       this.translationService.translate("search")
   );
 
+  /**
+   * Accessible name for the input itself. A visible `label` already names it
+   * via `for`/`id`, so the attribute is only emitted when there is none —
+   * otherwise `aria-label` would silently override the visible text.
+   */
+  readonly inputAriaLabel = computed(() =>
+    this.label() ? null : this.searchAriaLabel()
+  );
+
   onInputValue(value: string): void {
     this.value.set(value);
     this.onChange(value);
