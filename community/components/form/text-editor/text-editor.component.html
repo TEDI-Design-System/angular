@@ -1,0 +1,14 @@
+<quill-editor
+  [formControl]="control()"
+  [id]="inputId()"
+  [modules]="modules()"
+  [placeholder]="placeholder()"
+  [class.tedi-text-editor__editor--disabled]="control().disabled"
+  [class.tedi-text-editor__editor--error]="hasErrors"
+  [class.tedi-text-editor__editor--focused]="focused()"
+  [attr.aria-describedby]="hasErrors ? feedbackErrorId() : feedbackHintId()"
+  [attr.aria-required]="required() || null"
+  class="tedi-text-editor__editor"
+  (onFocus)="focused.set(true)"
+  (onBlur)="focused.set(false)"
+></quill-editor>

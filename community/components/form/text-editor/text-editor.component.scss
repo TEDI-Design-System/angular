@@ -1,0 +1,119 @@
+@mixin text-editor-focus($border-color: null) {
+  &.tedi-text-editor__editor--focused:not(
+      .tedi-text-editor__editor--error,
+      .tedi-text-editor__editor--disabled
+    ) {
+    @if $border-color {
+      border-color: $border-color;
+      box-shadow:
+        inset 0 0 0 1px $border-color,
+        0 0 0 1px $border-color;
+    } @else {
+      box-shadow: none;
+    }
+  }
+}
+
+.tedi-text-editor__editor {
+  --_border-radius: var(--form-field-radius);
+  --_border-color: var(--form-input-border-default);
+  --_color: var(--form-input-text-filled);
+  --_background-color: var(--form-input-background-default);
+  --_placeholder-color: var(--form-input-text-placeholder);
+
+  width: 100%;
+  color: var(--_color);
+  border: 1px solid var(--_border-color);
+  border-radius: var(--_border-radius);
+
+  @include text-editor-focus(var(--form-input-border-hover));
+
+  &:hover {
+    --_border-color: var(--form-input-border-hover);
+  }
+
+  &--disabled {
+    --_border-color: var(--form-input-border-disabled);
+
+    color: var(--form-input-text-disabled);
+    pointer-events: none;
+    background-color: var(--form-input-background-disabled);
+  }
+
+  &--error:not(.tedi-text-editor__editor--disabled) {
+    --_border-color: var(--form-general-feedback-error-border);
+
+    @include text-editor-focus(var(--form-general-feedback-error-border));
+  }
+}
+
+/* stylelint-disable selector-class-pattern -- .ql-* classes are rendered by Quill and cannot be renamed. */
+.tedi-text-editor__editor {
+  // Snow draws its own 1px #ccc border on both the toolbar and the container,
+  // which would stack inside this element's border and ignore its state colours.
+  // Reset both and keep a single divider between toolbar and editing area.
+  // `.ql-snow` is matched to outspecify Quill's own two-class selectors.
+  .ql-toolbar.ql-snow {
+    border: 0;
+    border-bottom: 1px solid var(--_border-color);
+  }
+
+  .ql-container.ql-snow {
+    border: 0;
+  }
+
+  .ql-toolbar .ql-formats {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+
+    // Quill renders 7 <button>s plus 2 .ql-picker spans (whose .ql-picker-label
+    // carries role="button"). Matched explicitly rather than with `> *`: the
+    // universal selector breaks storybook-addon-pseudo-states, which rewrites
+    // `> *:hover` into the invalid `> ` and drops the whole rule.
+    > button,
+    > .ql-picker,
+    > .ql-picker > [role="button"] {
+      border-radius: var(--radius-02-default);
+
+      &:hover {
+        background-color: var(--general-surface-hover);
+      }
+
+      &.ql-active {
+        background-color: var(--general-icon-background-brand-primary);
+      }
+    }
+  }
+
+  .ql-toolbar .ql-formats .ql-stroke {
+    stroke: var(--general-icon-brand);
+  }
+
+  .ql-toolbar .ql-formats .ql-active .ql-stroke {
+    stroke: var(--general-icon-white);
+  }
+
+  .ql-container .ql-editor {
+    --_font-size: var(--body-regular-size);
+    --_line-height: var(--body-regular-line-height);
+    --_padding-y: var(--form-field-padding-y-md-default);
+    --_padding-x: var(--form-field-padding-x-md-default);
+    --_form-field-outer-gap: var(--form-field-outer-spacing);
+
+    min-height: 20rem;
+    padding: var(--_padding-y) var(--_padding-x);
+    font-family: var(--family-default);
+    font-size: var(--_font-size);
+    line-height: var(--_line-height);
+    resize: vertical;
+    border-radius: var(--_border-radius);
+  }
+
+  .ql-editor.ql-blank::before {
+    font-style: normal;
+    color: var(--_placeholder-color);
+  }
+}
+/* stylelint-enable selector-class-pattern */

@@ -28,7 +28,9 @@
     "@angular/common": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/forms": "^20.0.0 || ^21.0.0 || ^22.0.0",
-    "@angular/platform-browser": "^20.0.0 || ^21.0.0 || ^22.0.0"
+    "@angular/platform-browser": "^20.0.0 || ^21.0.0 || ^22.0.0",
+    "ngx-quill": "^28.0.2",
+    "quill": "^2.0.3"
   },
   "dependencies": {
     "@tanstack/angular-table": "^8.21.4",
@@ -81,7 +83,9 @@
     "jest-preset-angular": "^14.6.2",
     "lint-staged": "^16.4.0",
     "ng-packagr": "^20.3.2",
+    "ngx-quill": "^28.0.2",
     "prettier": "^3.9.4",
+    "quill": "^2.0.3",
     "readdirp": "4.1.2",
     "replace-in-file": "^8.4.0",
     "sass": "^1.86.1",

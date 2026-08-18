@@ -2167,6 +2167,14 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 ### FormField / InputGroup
 **Selector:** `tedi-form-field`, `tedi-input-group`
 
+### TextEditor
+**Selector:** `tedi-text-editor`
+- Required: `control: FormControl` (value is Quill HTML), `inputId: string`
+- `placeholder: string` (not translated), `modules: QuillModules` (replaces the default toolbar)
+
+Rich text editor wrapping `ngx-quill`. Requires the `ngx-quill` and `quill` peer dependencies plus Quill's `snow` theme stylesheet in the consuming app. Takes a `FormControl` directly rather than acting as a ControlValueAccessor, so it is bound as `[control]="myControl"`, not `[formControl]`.
+
+
 ## Helpers
 
 ### ProgressBar
