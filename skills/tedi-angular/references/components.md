@@ -802,14 +802,67 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 - `feedbackText: ComponentInputs<FeedbackTextComponent>` — hint / validation message
 - `disabled: boolean = false`
 - `ariaLabel: string` — accessible name fallback when no visible `label`
+- `suggestions: T[] | undefined = undefined` — suggestions for the panel, **already filtered by you**. Bind `[]` to keep combobox behaviour while nothing matches; leave unbound for a plain search field
+- `bindLabel: string = "label"` — property holding the display label when suggestions are objects
+- `minQueryLength: number = 0` — characters required before the panel opens. Below it nothing renders (not even the no-results row) and nothing is announced. Gate your own fetch on the same number so short queries cost no requests. Community Search called this `autocompleteFrom`
+- `loading: boolean = false` — shows a loading row instead of results
+- `panelOpen: boolean = false` — whether the panel is open (two-way bindable)
 
 **Outputs:**
-- `searchEvent: string` — emitted on Enter or search-button click
+- `searchEvent: string` — emitted on Enter or search-button click. Suppressed when Enter accepts a highlighted suggestion
 - `clear: void` — emitted when the clear button is clicked
+- `suggestionSelect: T` — emitted when a suggestion is accepted; the field is filled with its label
+
+**Content directives:**
+- `<ng-template tediSearchSuggestion let-item let-label="label" let-query="query">` — custom suggestion row. Without it, rows show the label with the matched substring bolded
+- `<ng-template tediSearchFooter>` — extra content pinned below the suggestions, e.g. fallback actions and a hint. Shown whenever the panel is open, **including the no-results state**, which is what makes it useful for "nothing matched, try this instead"
+- `tedi-search-footer-actions` — centred, wrapping button row for use inside the footer
+
+There is only **one** suggestion behaviour. Adding a footer does not change it: filtering, arrow-key navigation, Enter to select and `suggestionSelect` work identically with or without one. Focus always stays in the input (`aria-activedescendant`); the footer's own controls are reached with Tab from the field, and Tab past the last one closes the panel and moves on.
+
+Search does **not** filter. Pass filtered `suggestions` and react to `valueChange` — sync and async work identically. Enter emits `searchEvent`, except when an option is highlighted, where it accepts that suggestion instead. With neither `suggestions` nor a panel template bound, the input stays a plain `role="searchbox"`.
 
 ```html
 <tedi-search inputId="q" label="Otsing" [(value)]="query" (searchEvent)="onSearch($event)" />
 <tedi-search inputId="q" label="Otsing" [button]="{ text: 'Otsi' }" [formControl]="queryControl" />
+
+<!-- suggestions (filter them yourself) -->
+<tedi-search
+  inputId="q"
+  label="Otsi"
+  [value]="query()"
+  [suggestions]="matches()"
+  [loading]="loading()"
+  (valueChange)="query.set($event)"
+  (suggestionSelect)="onPick($event)"
+/>
+
+<!-- results plus fallback actions: ordinary suggestions with a footer -->
+<tedi-search
+  inputId="q"
+  label="Otsi"
+  bindLabel="name"
+  [value]="value()"
+  [suggestions]="matches()"
+  (valueChange)="value.set($event)"
+  (suggestionSelect)="onPick($event)"
+>
+  <ng-template tediSearchSuggestion let-item>
+    <span tedi-text modifiers="bold">{{ item.name }}</span>
+    <tedi-separator axis="vertical" variant="dot-only" dotSize="extra-small" color="secondary" />
+    <span tedi-text color="tertiary">{{ item.code }}</span>
+  </ng-template>
+
+  <ng-template tediSearchFooter>
+    <tedi-search-footer-actions>
+      <button tedi-button variant="secondary">Isik teadmata</button>
+      <button tedi-button variant="secondary">Puudub Eesti isikukood</button>
+    </tedi-search-footer-actions>
+    <p tedi-text color="tertiary" [modifiers]="['small', 'center']">
+      Rahvastikuregistri andmete päringuks sisesta isikukood täismahus
+    </p>
+  </ng-template>
+</tedi-search>
 ```
 
 ### Textarea

@@ -47,10 +47,32 @@ export const translationsMap = {
   },
   search: {
     description: "For searching",
-    components: ["TableFilter"],
+    components: ["TableFilter", "Search"],
     et: "Otsi",
     en: "Search",
     ru: "Поиск",
+  },
+  "search.no-results": {
+    description: "Shown in the search suggestions panel when nothing matched",
+    components: ["Search"],
+    et: "Tulemusi ei leitud",
+    en: "No results found",
+    ru: "Результаты не найдены",
+  },
+  "search.searching": {
+    description: "Shown in the search suggestions panel while results load",
+    components: ["Search"],
+    et: "Otsin...",
+    en: "Searching...",
+    ru: "Поиск...",
+  },
+  "search.results-count": {
+    description:
+      "Announced to screen readers when the number of search suggestions changes",
+    components: ["Search"],
+    et: (count: number) => `${count} vastet`,
+    en: (count: number) => `${count} results`,
+    ru: (count: number) => `${count} результатов`,
   },
   required: {
     description: "Required field",
