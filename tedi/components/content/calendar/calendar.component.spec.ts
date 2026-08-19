@@ -409,6 +409,43 @@ describe("CalendarComponent", () => {
     });
   });
 
+  // A value that isn't a Date reaches the grid whenever a form control is
+  // seeded from an untyped source. Rendering must survive it — a throw here
+  // aborts change detection, which leaves the grid blank and any surrounding
+  // overlay unpositioned.
+  describe("range mode with a malformed value", () => {
+    let fixture: ComponentFixture<CalendarComponent>;
+
+    beforeEach(() => {
+      fixture = createComponent();
+      fixture.componentRef.setInput("mode", "range");
+      fixture.detectChanges();
+    });
+
+    it.each([
+      ["a plain string", "2019"],
+      ["a range without dates", { from: "2019", to: "2020" }],
+      ["a range with a non-Date end", { from: MAY_15_2024, to: "2020" }],
+      ["an array of non-Dates", ["2019"]],
+    ])("renders the day grid given %s", (_label, value) => {
+      expect(() => {
+        fixture.componentRef.setInput("value", value);
+        fixture.detectChanges();
+      }).not.toThrow();
+      expect(dayButtons(fixture).length).toBeGreaterThan(0);
+    });
+
+    it("keeps a valid start date selected when the end is malformed", () => {
+      fixture.componentRef.setInput("value", {
+        from: new Date(2024, 4, 10),
+        to: "2020",
+      });
+      fixture.detectChanges();
+      const day = dayButtonForDate(fixture, new Date(2024, 4, 10));
+      expect(day?.className).toContain("tedi-calendar-day-grid__day--selected");
+    });
+  });
+
   describe("selectionLevel='months'", () => {
     let fixture: ComponentFixture<CalendarComponent>;
     let component: CalendarComponent;

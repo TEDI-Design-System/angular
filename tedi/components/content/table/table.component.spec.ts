@@ -25,11 +25,20 @@ import type {
   TediColumnDef,
   TediTableFilterContext,
 } from "./table.types";
+import type { PopoverWidth } from "../../overlay/popover/popover-content/popover-content.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { TediPaginationResultsDirective } from "../../navigation/pagination/pagination-results.directive";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { TediTranslationService } from "../../../services/translation/translation.service";
+import {
+  BreakpointService,
+  type Breakpoint,
+} from "../../../services/breakpoint/breakpoint.service";
+import { ModalService } from "../../overlay/modal/modal.service";
+import { ModalRef } from "../../overlay/modal/modal-ref";
+import { MODAL_DATA } from "../../overlay/modal/modal.types";
+import { TableFilterModalComponent } from "./table-filter-modal/table-filter-modal.component";
 
 type Translator = (...args: unknown[]) => string;
 const TRANSLATIONS: Record<string, Translator> = {
@@ -107,6 +116,8 @@ const columns: TediColumnDef<Person>[] = [
       [columns]="columns()"
       [size]="size()"
       [striped]="striped()"
+      [stickyFirstColumn]="stickyFirstColumn()"
+      [stickyLastColumn]="stickyLastColumn()"
       [enableRowSelection]="enableRowSelection()"
       [enableColumnFilters]="enableColumnFilters()"
       [pagination]="pagination()"
@@ -117,6 +128,7 @@ const columns: TediColumnDef<Person>[] = [
       [pageCount]="pageCount()"
       [rowCount]="rowCount()"
       [renderSubComponent]="subTemplate()"
+      [expandButtonLabel]="expandButtonLabel()"
       [getSubRows]="getSubRows()"
       [getRowId]="getRowId()"
       [groupRowsBy]="groupRowsBy()"
@@ -149,6 +161,8 @@ class HostComponent {
     signal<TediColumnDef<Person>[]>(columns);
   readonly size = signal<"medium" | "small">("medium");
   readonly striped = signal(false);
+  readonly stickyFirstColumn = signal(false);
+  readonly stickyLastColumn = signal(false);
   readonly enableRowSelection = signal<
     boolean | ((row: Row<Person>) => boolean) | undefined
   >(undefined);
@@ -167,6 +181,9 @@ class HostComponent {
   readonly subTemplate = signal<
     TemplateRef<{ $implicit: Row<Person> }> | undefined
   >(undefined);
+  readonly expandButtonLabel = signal<
+    string | { open: string; close: string } | undefined
+  >(undefined);
   readonly getSubRows = signal<
     ((row: Person) => Person[] | undefined) | undefined
   >(undefined);
@@ -177,11 +194,9 @@ class HostComponent {
     undefined,
   );
   readonly rowGroupDividers = signal<"all" | "between" | "none">("all");
-  readonly controlColumnOrder = signal<("drag" | "select" | "expand")[]>([
-    "drag",
-    "select",
-    "expand",
-  ]);
+  readonly controlColumnOrder = signal<
+    ("drag" | "select" | "expand" | "content")[]
+  >(["drag", "select", "expand"]);
   readonly interactive = signal(false);
   readonly rowAriaLabel = signal<((row: Row<Person>) => string) | undefined>(
     undefined,
@@ -274,6 +289,61 @@ describe("TediTableComponent", () => {
     });
   });
 
+  describe("sticky columns", () => {
+    it("marks no cell sticky by default", () => {
+      const fixture = setupHost();
+      expect(
+        fixture.nativeElement.querySelector(".tedi-table__cell--sticky-left"),
+      ).toBeNull();
+      expect(
+        fixture.nativeElement.querySelector(".tedi-table__cell--sticky-right"),
+      ).toBeNull();
+    });
+
+    it("freezes the last column when stickyLastColumn is set", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.stickyLastColumn.set(true);
+      fixture.detectChanges();
+      const host = fixture.debugElement.query(By.css("tedi-table"));
+      expect(host.nativeElement.className).toContain(
+        "tedi-table--sticky-last-column",
+      );
+      const headers = Array.from(
+        fixture.nativeElement.querySelectorAll(".tedi-table__header-cell"),
+      ) as HTMLElement[];
+      const lastHeader = headers[headers.length - 1];
+      expect(lastHeader.classList).toContain("tedi-table__cell--sticky-right");
+      // single-column frozen block sits on both its edges
+      expect(lastHeader.classList).toContain(
+        "tedi-table__cell--sticky-right-start",
+      );
+      expect(lastHeader.classList).toContain(
+        "tedi-table__cell--sticky-right-edge",
+      );
+      expect(lastHeader.style.right).toBe("0px");
+      expect(headers[0].classList).not.toContain(
+        "tedi-table__cell--sticky-right",
+      );
+    });
+
+    it("freezes the first column when stickyFirstColumn is set", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.stickyFirstColumn.set(true);
+      fixture.detectChanges();
+      const host = fixture.debugElement.query(By.css("tedi-table"));
+      expect(host.nativeElement.className).toContain(
+        "tedi-table--sticky-first-column",
+      );
+      const headers = Array.from(
+        fixture.nativeElement.querySelectorAll(".tedi-table__header-cell"),
+      ) as HTMLElement[];
+      expect(headers[0].classList).toContain("tedi-table__cell--sticky-left");
+      expect(headers[headers.length - 1].classList).not.toContain(
+        "tedi-table__cell--sticky-left",
+      );
+    });
+  });
+
   describe("selection", () => {
     it("renders a select-all checkbox when enableRowSelection is true", () => {
       const fixture = setupHost();
@@ -337,6 +407,18 @@ describe("TediTableComponent", () => {
       ).toBe(false);
     });
 
+    it("marks the selection control cells with tedi-table__cell--control", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.enableRowSelection.set(true);
+      fixture.detectChanges();
+      const selectHeader = fixture.nativeElement
+        .querySelector('input[aria-label="Select all"]')
+        ?.closest("th");
+      expect(selectHeader?.classList.contains("tedi-table__cell--control")).toBe(
+        true,
+      );
+    });
+
     it("keys rowSelection by index by default", () => {
       const fixture = setupHost();
       fixture.componentInstance.enableRowSelection.set(true);
@@ -376,6 +458,54 @@ describe("TediTableComponent", () => {
         'button[aria-label="Expand row"]',
       );
       expect(expandButton).not.toBeNull();
+    });
+
+    it("marks the icon-only expand cell with tedi-table__cell--control", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.subTemplate.set(
+        fixture.componentInstance.subTemplateRef()!,
+      );
+      fixture.detectChanges();
+      const expandHeader = fixture.nativeElement
+        .querySelector('.tedi-table__body button[aria-label="Expand row"]')
+        ?.closest("td");
+      expect(expandHeader?.classList.contains("tedi-table__cell--control")).toBe(
+        true,
+      );
+    });
+
+    it("does not narrow the expand column when it has a visible label", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.subTemplate.set(
+        fixture.componentInstance.subTemplateRef()!,
+      );
+      fixture.componentInstance.expandButtonLabel.set({
+        open: "Näita",
+        close: "Peida",
+      });
+      fixture.detectChanges();
+      const expandCell = fixture.nativeElement
+        .querySelector(".tedi-table__body .tedi-table__expand-toggle")
+        ?.closest("td");
+      expect(expandCell?.classList.contains("tedi-table__cell--control")).toBe(
+        false,
+      );
+    });
+
+    it("renders the expand control as a trailing column with the 'content' sentinel", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.subTemplate.set(
+        fixture.componentInstance.subTemplateRef()!,
+      );
+      fixture.componentInstance.controlColumnOrder.set(["content", "expand"]);
+      fixture.detectChanges();
+      const firstRow = fixture.nativeElement.querySelector(
+        ".tedi-table__body .tedi-table__row",
+      ) as HTMLTableRowElement;
+      const lastCell = firstRow.querySelector("td:last-child");
+      expect(
+        lastCell?.querySelector('button[aria-label="Expand row"]'),
+      ).not.toBeNull();
     });
 
     it("renders the sub component when the expand toggle is clicked", () => {
@@ -748,7 +878,8 @@ describe("TediTableComponent", () => {
       const initialPages = paginators.map((el) => el.componentInstance.page());
       expect(initialPages).toEqual([1, 1]);
 
-      paginators[0].componentInstance.pageChange.emit(2);
+      // `page` is a model, so setting it emits the `pageChange` output.
+      paginators[0].componentInstance.page.set(2);
       fixture.detectChanges();
 
       const updatedPages = paginators.map((el) => el.componentInstance.page());
@@ -773,7 +904,8 @@ describe("TediTableComponent", () => {
       scroll.scrollTop = 120;
 
       const paginator = fixture.debugElement.query(By.css("tedi-pagination"));
-      paginator.componentInstance.pageChange.emit(2);
+      // `page` is a model() — setting it emits the (pageChange) output to the table.
+      paginator.componentInstance.page.set(2);
       fixture.detectChanges();
 
       expect(scroll.scrollTop).toBe(0);
@@ -1394,7 +1526,11 @@ describe("TediTableComponent", () => {
       standalone: true,
       imports: [TediTableComponent, TextFieldComponent, FormFieldComponent],
       template: `
-        <tedi-table [data]="data()" [columns]="columns()" />
+        <tedi-table
+          [data]="data()"
+          [columns]="columns()"
+          [filterPopoverWidth]="popoverWidth()"
+        />
         <ng-template #textFilter let-ctx>
           <tedi-form-field size="small">
             <input
@@ -1414,6 +1550,7 @@ describe("TediTableComponent", () => {
         TemplateRef<TediTableFilterContext<string, Person>>
       >("textFilter");
       readonly filterableOption = signal<boolean | TableFilterOptions>(true);
+      readonly popoverWidth = signal<PopoverWidth>("small");
 
       readonly columns = signal<TediColumnDef<Person>[]>([]);
 
@@ -1531,6 +1668,65 @@ describe("TediTableComponent", () => {
         b.textContent?.trim(),
       );
       expect(labels).toEqual(expect.arrayContaining(["Apply", "Clear"]));
+    });
+
+    function openFilterPanel(
+      fixture: ComponentFixture<FilterableHostComponent>,
+    ): HTMLElement | null {
+      findTriggerButton(fixture)?.click();
+      fixture.detectChanges();
+      return getPopoverContent()?.querySelector("tedi-popover-content") ?? null;
+    }
+
+    function openFilterPanelClass(
+      fixture: ComponentFixture<FilterableHostComponent>,
+    ): string {
+      return openFilterPanel(fixture)?.className ?? "";
+    }
+
+    it("renders the filter popover at the small width by default", () => {
+      const fixture = setupFilterableHost();
+      expect(openFilterPanelClass(fixture)).toContain(
+        "tedi-popover-content--small",
+      );
+    });
+
+    it("applies filterPopoverWidth to the filter popover", () => {
+      const fixture = setupFilterableHost((host) =>
+        host.popoverWidth.set("medium"),
+      );
+      expect(openFilterPanelClass(fixture)).toContain(
+        "tedi-popover-content--medium",
+      );
+    });
+
+    it("lets a column override filterPopoverWidth through filterable", () => {
+      const fixture = setupFilterableHost((host) =>
+        host.popoverWidth.set("medium"),
+      );
+      fixture.componentInstance.build({ popoverWidth: "large" });
+      fixture.detectChanges();
+      const classes = openFilterPanelClass(fixture);
+      expect(classes).toContain("tedi-popover-content--large");
+      expect(classes).not.toContain("tedi-popover-content--medium");
+    });
+
+    it("drops the width class when the popover width is none", () => {
+      const fixture = setupFilterableHost((host) =>
+        host.popoverWidth.set("none"),
+      );
+      const classes = openFilterPanelClass(fixture);
+      expect(classes).toContain("tedi-popover-content");
+      expect(classes).not.toMatch(/tedi-popover-content--/);
+    });
+
+    it("accepts a CSS length as the popover width", () => {
+      const fixture = setupFilterableHost((host) =>
+        host.popoverWidth.set("22rem"),
+      );
+      const panel = openFilterPanel(fixture);
+      expect(panel?.style.width).toBe("22rem");
+      expect(panel?.className).not.toMatch(/tedi-popover-content--/);
     });
 
     it("commits the draft to column.setFilterValue on Apply and closes the popover", () => {
@@ -1790,6 +1986,174 @@ describe("TediTableComponent", () => {
       expect(filterBtn).not.toBeNull();
       expect(sortBtn?.textContent).toContain("Name");
     });
+  });
+});
+
+// ── Filter modal (below filterModalBreakpoint) ──────────────────────────────
+
+describe("Table: filter modal", () => {
+  @Component({
+    standalone: true,
+    imports: [TediTableComponent, TextFieldComponent, FormFieldComponent],
+    template: `
+      <tedi-table
+        [data]="data()"
+        [columns]="columns()"
+        [filterModalBreakpoint]="breakpoint()"
+      />
+      <ng-template #textFilter let-ctx>
+        <tedi-form-field size="small">
+          <input
+            tedi-text-field
+            type="text"
+            [value]="ctx.value ?? ''"
+            (input)="ctx.setValue($any($event.target).value)"
+            aria-label="Name filter input"
+          />
+        </tedi-form-field>
+      </ng-template>
+    `,
+  })
+  class FilterModalHostComponent {
+    readonly data = signal<Person[]>(data);
+    readonly breakpoint = signal<Breakpoint | false>("sm");
+    readonly textFilterTpl =
+      viewChild<TemplateRef<TediTableFilterContext<string, Person>>>(
+        "textFilter",
+      );
+    readonly columns = signal<TediColumnDef<Person>[]>([]);
+    build(): void {
+      this.columns.set([
+        {
+          id: "name",
+          header: "Name",
+          accessorKey: "name",
+          filterable: true,
+          filterFn: "includesString",
+          filterTemplate: this.textFilterTpl() ?? undefined,
+        } as TediColumnDef<Person>,
+      ]);
+    }
+  }
+
+  class BreakpointServiceStub {
+    private readonly bp = signal<Breakpoint>("xs");
+    setBreakpoint(value: Breakpoint): void {
+      this.bp.set(value);
+    }
+    currentBreakpoint() {
+      return this.bp;
+    }
+  }
+
+  let modalOpen: jest.Mock;
+
+  function setup(current: Breakpoint): ComponentFixture<FilterModalHostComponent> {
+    modalOpen = jest.fn();
+    const stub = new BreakpointServiceStub();
+    stub.setBreakpoint(current);
+    TestBed.configureTestingModule({
+      imports: [FilterModalHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        { provide: BreakpointService, useValue: stub },
+        { provide: ModalService, useValue: { open: modalOpen } },
+      ],
+    });
+    const fixture = TestBed.createComponent(FilterModalHostComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.build();
+    fixture.detectChanges();
+    return fixture;
+  }
+
+  function trigger(
+    fixture: ComponentFixture<FilterModalHostComponent>,
+  ): HTMLButtonElement {
+    return fixture.nativeElement.querySelector(
+      'button.tedi-table-header-button[aria-label="Filter Name"]',
+    ) as HTMLButtonElement;
+  }
+
+  afterEach(() => {
+    document.body
+      .querySelectorAll(".tedi-popover__container")
+      .forEach((node) => node.remove());
+  });
+
+  it("opens the filter in a modal below the breakpoint", () => {
+    const fixture = setup("xs");
+    trigger(fixture).click();
+    fixture.detectChanges();
+    expect(modalOpen).toHaveBeenCalledTimes(1);
+    expect(modalOpen.mock.calls[0][0]).toBe(TableFilterModalComponent);
+    expect(modalOpen.mock.calls[0][1].data.columnLabel).toBe("Name");
+  });
+
+  it("uses the popover (no modal) at or above the breakpoint", () => {
+    const fixture = setup("lg");
+    trigger(fixture).click();
+    fixture.detectChanges();
+    expect(modalOpen).not.toHaveBeenCalled();
+  });
+});
+
+describe("TableFilterModalComponent", () => {
+  // Reads the modal's `context` getter without a change-detection pass, so the
+  // modal chrome (header / footer) doesn't need the full ModalService harness.
+  function createModal(draft: ReturnType<typeof signal<unknown>>) {
+    const buildContext = (close: () => void) => {
+      const ctx = {
+        get value() {
+          return draft();
+        },
+        setValue: (next: unknown) => draft.set(next),
+        apply: () => close(),
+        clear: () => {
+          draft.set(undefined);
+          close();
+        },
+        column: {},
+      } as unknown as TediTableFilterContext<unknown, unknown>;
+      (ctx as { $implicit: unknown }).$implicit = ctx;
+      return ctx;
+    };
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: MODAL_DATA,
+          useValue: {
+            columnLabel: "Status",
+            applyLabel: "Apply",
+            clearLabel: "Clear",
+            template: null,
+            buildContext,
+          },
+        },
+        { provide: ModalRef, useValue: { close: jest.fn() } },
+      ],
+    });
+    const fixture = TestBed.createComponent(TableFilterModalComponent);
+    return fixture.componentInstance as unknown as {
+      context: TediTableFilterContext<unknown, unknown>;
+    };
+  }
+
+  it("rebuilds the context on each access so value tracks the live draft", () => {
+    const draft = signal<unknown>(undefined);
+    const modal = createModal(draft);
+    // A frozen (built-once) context would return the same instance every time.
+    expect(modal.context).not.toBe(modal.context);
+  });
+
+  it("accumulates multi-value edits instead of keeping only the last", () => {
+    const draft = signal<unknown>(undefined);
+    const modal = createModal(draft);
+    // Mimic a checkbox group toggling two options, each reading the live value.
+    modal.context.setValue([...((modal.context.value as string[]) ?? []), "a"]);
+    modal.context.setValue([...((modal.context.value as string[]) ?? []), "b"]);
+    expect(draft()).toEqual(["a", "b"]);
   });
 });
 

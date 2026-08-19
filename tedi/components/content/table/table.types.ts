@@ -14,6 +14,7 @@ import type {
   Table as TanstackTable,
   VisibilityState,
 } from "@tanstack/angular-table";
+import type { PopoverWidth } from "../../overlay/popover/popover-content/popover-content.component";
 import type { PaginationComponent } from "../../navigation/pagination/pagination.component";
 import type { PaginationPageSizeOption } from "../../navigation/pagination/pagination.types";
 import type { ComponentInputs } from "../../../types/inputs.type";
@@ -26,6 +27,14 @@ export type TableSize = "medium" | "small";
  * the selection checkbox before the expand chevron).
  */
 export type TableControlColumn = "drag" | "select" | "expand";
+
+/**
+ * An entry in `controlColumnOrder`: a control column, or the `"content"`
+ * sentinel marking where the data columns sit. Controls listed after
+ * `"content"` render as trailing columns (after the data); everything else is
+ * leading. Omit the sentinel to keep all controls leading.
+ */
+export type TableControlColumnOrder = TableControlColumn | "content";
 
 /** Phases of keyboard-driven column reordering. */
 export type ColumnReorderPhase = "idle" | "picked-up" | "moving";
@@ -135,6 +144,12 @@ export interface TableFilterOptions {
    * @default false
    */
   clearOnClose?: boolean;
+  /**
+   * Popover width for this column, overriding the table's
+   * `filterPopoverWidth`. Use it when one filter control needs more room than
+   * the rest (a date range, a wide option list).
+   */
+  popoverWidth?: PopoverWidth;
 }
 
 /**
@@ -164,6 +179,22 @@ export interface TediTableFilterContext<TValue = unknown, TData = unknown> {
   clear: () => void;
   /** TanStack `Column` for the column whose filter popover is open. */
   column: Column<TData>;
+}
+
+/**
+ * Data passed (via `MODAL_DATA`) to the filter modal rendered below the
+ * `filterModalBreakpoint`. Carries the consumer's filter template plus the
+ * labels and context builder the modal needs to render and commit the filter.
+ */
+export interface TableFilterModalData {
+  /** Column label shown as the modal title. */
+  columnLabel: string;
+  applyLabel: string;
+  clearLabel: string;
+  /** Consumer-provided filter template. */
+  template: TemplateRef<TediTableFilterContext<unknown, unknown>>;
+  /** Builds the filter context, wiring `apply` / `clear` to close the modal. */
+  buildContext: (close: () => void) => TediTableFilterContext<unknown, unknown>;
 }
 
 /**

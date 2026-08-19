@@ -184,6 +184,13 @@ Pass `filterable: { clearOnClose: true }` to discard in-progress drafts every
 time the popover closes — useful for filters where stale draft state would
 confuse the user.
 
+The popover is `small` by default. Widen it for the whole table with
+`filterPopoverWidth`, or for one column with
+`filterable: { popoverWidth: "medium" }` — a date range or a wide option list
+needs more room than a text field. Both take a preset (`"none" | "small" |
+"medium" | "large"`, where `"none"` sizes the panel to its content) or any CSS
+length (`"20rem"`, `"min(90vw, 30rem)"`).
+
 Combined sort + filter is supported by setting both `sortable: true` and
 `filterable: true` on the same column. The title becomes the sort target and
 the filter trigger renders next to it.

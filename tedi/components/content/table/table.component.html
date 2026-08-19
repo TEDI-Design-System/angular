@@ -23,6 +23,7 @@
       [siblingCount]="top.siblingCount"
       [labels]="top.labels"
       [background]="top.background"
+      [align]="top.align"
       [dividerPosition]="top.dividerPosition"
       [hideResults]="top.hideResults"
       [hidePageSize]="top.hidePageSize"
@@ -34,6 +35,12 @@
       [previousIcon]="top.previousIcon"
       [nextIcon]="top.nextIcon"
       [showModalTitle]="top.showModalTitle"
+      [xs]="top.xs"
+      [sm]="top.sm"
+      [md]="top.md"
+      [lg]="top.lg"
+      [xl]="top.xl"
+      [xxl]="top.xxl"
       (pageChange)="handlePaginationPageChange($event)"
       (pageSizeChange)="handlePaginationPageSizeChange($event)"
     >
@@ -49,13 +56,18 @@
 <div
   #scrollContainer
   class="tedi-table__scroll"
+  [class.tedi-table__scroll--shadow-start]="hasStartShadow()"
+  [class.tedi-table__scroll--shadow-end]="hasEndShadow()"
+  [class.tedi-table__scroll--shadow-header]="hasHeaderShadow()"
   [attr.style]="maxHeightStyle()"
   cdkScrollable
   tabindex="0"
   role="group"
   [attr.aria-label]="scrollRegionLabel()"
+  (scroll)="onHorizontalScroll()"
 >
   <table
+    #tableElement
     class="tedi-table__table"
     [attr.id]="id() || null"
     [attr.aria-rowcount]="ariaRowCount()"
@@ -117,7 +129,9 @@
                   (pickedUpColumnId() === header.column.id
                     ? ' tedi-table__header-cell--picked-up'
                     : '') +
-                  stickyLeftClass(header.column.id)
+                  controlCellClass(header.column.id) +
+                  stickyLeftClass(header.column.id) +
+                  stickyRightClass(header.column.id)
                 "
                 [attr.colspan]="header.colSpan > 1 ? header.colSpan : null"
                 [attr.rowspan]="rowSpan"
@@ -126,6 +140,7 @@
                 [style.min-width.px]="columnMinWidth(header.column)"
                 [style.max-width.px]="columnMaxWidth(header.column)"
                 [style.left.px]="stickyLeft(header.column.id)"
+                [style.right.px]="stickyRight(header.column.id)"
               >
                 @if (srHeaderLabel) {
                   <span class="tedi-table__sr-only">{{ srHeaderLabel }}</span>
@@ -201,6 +216,16 @@
                       }
                     </ng-container>
                     @if (shouldRenderFilterButton(header.column)) {
+                      @if (filterUsesModal()) {
+                        <button
+                          tedi-table-header-button
+                          icon="filter_alt"
+                          [selected]="filterIsActive(header.column)"
+                          [filled]="filterIsActive(header.column)"
+                          [aria-label]="filterAriaLabel(header.column)"
+                          (click)="openFilterModal(header.column)"
+                        ></button>
+                      } @else {
                       <tedi-popover
                         #filterPopover
                         class="tedi-table__filter-popover"
@@ -216,7 +241,9 @@
                           [aria-label]="filterAriaLabel(header.column)"
                           (click)="handleFilterTriggerClick(header.column)"
                         ></button>
-                        <tedi-popover-content>
+                        <tedi-popover-content
+                          [maxWidth]="filterPopoverWidthFor(header.column)"
+                        >
                           <div class="tedi-table__filter">
                             <div class="tedi-table__filter-body">
                               @if (filterTemplateFor(header.column); as tpl) {
@@ -264,6 +291,7 @@
                           </div>
                         </tedi-popover-content>
                       </tedi-popover>
+                      }
                     }
                   </span>
                 }
@@ -399,9 +427,12 @@
                     (cellMeta?.vAlign
                       ? ' tedi-table__cell--valign-' + cellMeta?.vAlign
                       : '') +
-                    stickyLeftClass(cell.column.id)
+                    controlCellClass(cell.column.id) +
+                    stickyLeftClass(cell.column.id) +
+                    stickyRightClass(cell.column.id)
                   "
                   [style.left.px]="stickyLeft(cell.column.id)"
+                  [style.right.px]="stickyRight(cell.column.id)"
                   [attr.rowspan]="
                     resolvedSpan !== null && resolvedSpan > 1
                       ? resolvedSpan
@@ -593,6 +624,7 @@
       [siblingCount]="bottom.siblingCount"
       [labels]="bottom.labels"
       [background]="bottom.background"
+      [align]="bottom.align"
       [dividerPosition]="bottom.dividerPosition"
       [hideResults]="bottom.hideResults"
       [hidePageSize]="bottom.hidePageSize"
@@ -604,6 +636,12 @@
       [previousIcon]="bottom.previousIcon"
       [nextIcon]="bottom.nextIcon"
       [showModalTitle]="bottom.showModalTitle"
+      [xs]="bottom.xs"
+      [sm]="bottom.sm"
+      [md]="bottom.md"
+      [lg]="bottom.lg"
+      [xl]="bottom.xl"
+      [xxl]="bottom.xxl"
       (pageChange)="handlePaginationPageChange($event)"
       (pageSizeChange)="handlePaginationPageSizeChange($event)"
     >
