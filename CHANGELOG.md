@@ -1,3 +1,10 @@
+# [7.2.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.4...angular-7.2.0-rc.5) (2026-08-19)
+
+
+### Bug Fixes
+
+* **table:** design review changes [#463](https://github.com/TEDI-Design-System/angular/issues/463) ([74b16a5](https://github.com/TEDI-Design-System/angular/commit/74b16a5afa30f193459a9a80896086dbd67cae1f))
+
 # [7.2.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.3...angular-7.2.0-rc.4) (2026-08-13)
 
 
