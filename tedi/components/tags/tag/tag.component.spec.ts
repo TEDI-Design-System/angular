@@ -149,38 +149,75 @@ describe("TagComponent", () => {
     expect(contentElement).toBeTruthy();
   });
 
-  it("gives the loading spinner an accessible label so the state is announced", () => {
+  it("keeps the spinner hidden from assistive tech and announces loading via the live region", () => {
     fixture.componentRef.setInput("loading", true);
     fixture.detectChanges();
 
+    // The spinner is decorative: a labelled spinner would be a *second* live
+    // region and double-announce alongside the tag's own status region.
     const spinner = fixture.nativeElement.querySelector("tedi-spinner");
-    // With a label the spinner is exposed (role=status/aria-live) instead of
-    // aria-hidden="true", and carries the translated loading label.
-    expect(spinner.getAttribute("aria-hidden")).not.toBe("true");
-    expect(spinner.getAttribute("aria-label")).toBe("Laadimine");
+    expect(spinner.getAttribute("aria-hidden")).toBe("true");
+    expect(spinner.getAttribute("aria-label")).toBeNull();
   });
 
-  it("names the remove button with distinguishing context via aria-labelledby", () => {
+  it("keeps an empty status live region in the DOM while idle", () => {
+    // The region must pre-exist the state change: a role="status" node inserted
+    // already-complete is not announced by Windows Chrome/Firefox, iOS Safari or
+    // TalkBack. Only a text change inside a present region is.
+    const region = fixture.nativeElement.querySelector(
+      ".sr-only[role='status']",
+    );
+    expect(region).toBeTruthy();
+    expect(region.getAttribute("aria-live")).toBe("polite");
+    expect(region.getAttribute("aria-atomic")).toBe("true");
+    expect(region.textContent.trim()).toBe("");
+  });
+
+  it("puts the loading text into the existing status region when loading starts", () => {
+    const region = fixture.nativeElement.querySelector(
+      ".sr-only[role='status']",
+    );
+
+    fixture.componentRef.setInput("loading", true);
+    fixture.detectChanges();
+
+    // Same node as before the change — the region is never re-created.
+    expect(fixture.nativeElement.querySelector(".sr-only[role='status']")).toBe(
+      region,
+    );
+    expect(region.textContent.trim()).toBe("Laadimine");
+  });
+
+  it("clears the status region when loading finishes", () => {
+    fixture.componentRef.setInput("loading", true);
+    fixture.detectChanges();
+    fixture.componentRef.setInput("loading", false);
+    fixture.detectChanges();
+
+    const region = fixture.nativeElement.querySelector(
+      ".sr-only[role='status']",
+    );
+    expect(region.textContent.trim()).toBe("");
+  });
+
+  it("names the remove button 'Eemalda' and describes it with the tag text", () => {
     fixture.componentRef.setInput("closable", true);
     fixture.detectChanges();
 
     const button = fixture.nativeElement.querySelector("[tedi-closing-button]");
-    expect(button.getAttribute("aria-labelledby")).toBe(
-      `${component.removeLabelId} ${component.uniqueId}`,
-    );
-    // The label must not also be a description, which would double-read it.
-    expect(button.getAttribute("aria-describedby")).toBeNull();
+    expect(button.getAttribute("aria-label")).toBe("Eemalda");
+    // The tag text is the *description*, which distinguishes which tag is being
+    // removed when several are on screen. TalkBack does not surface a name
+    // computed via aria-labelledby, so the name stays a plain aria-label.
+    expect(button.getAttribute("aria-describedby")).toBe(component.uniqueId);
+    expect(button.getAttribute("aria-labelledby")).toBeNull();
   });
 
-  it("provides a hidden 'remove' label source referenced by the button name", () => {
+  it("does not render a hidden label source for the remove button", () => {
     fixture.componentRef.setInput("closable", true);
     fixture.detectChanges();
 
-    const removeLabel = fixture.nativeElement.querySelector(
-      `[id="${component.removeLabelId}"]`,
-    );
-    expect(removeLabel).toBeTruthy();
-    expect(removeLabel.textContent.trim()).toBe("Eemalda");
-    expect(removeLabel.hasAttribute("hidden")).toBe(true);
+    // Nothing referenced by aria-labelledby survives, so no hidden span either.
+    expect(fixture.nativeElement.querySelector("span[hidden]")).toBeNull();
   });
 });

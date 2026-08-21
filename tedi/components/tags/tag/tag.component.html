@@ -18,18 +18,23 @@
 
 @if (loading()) {
   <span class="tedi-tag__spinner-wrapper">
-    <tedi-spinner [size]="48" [label]="'loading' | tediTranslate" />
+    <tedi-spinner [size]="48" />
   </span>
 } @else if (closable()) {
-  <span [id]="removeLabelId" hidden>{{ "remove" | tediTranslate }}</span>
   <button
     type="button"
     tedi-closing-button
     size="small"
     [iconSize]="18"
     (click)="handleClose($event)"
-    [attr.aria-labelledby]="removeLabelId + ' ' + uniqueId"
+    [attr.aria-describedby]="uniqueId"
     [ariaLabel]="'remove' | tediTranslate"
   >
   </button>
 }
+
+<span class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+  @if (loading()) {
+    {{ "loading" | tediTranslate }}
+  }
+</span>
