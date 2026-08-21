@@ -1,5 +1,7 @@
 <tedi-form-field
   class="tedi-search__field"
+  cdkOverlayOrigin
+  #origin="cdkOverlayOrigin"
   [size]="size()"
   [icon]="fieldIcon()"
   [clearable]="clearable() && !isDisabled()"
@@ -19,7 +21,11 @@
     #searchInput
     tedi-text-field
     type="text"
-    role="searchbox"
+    [attr.role]="inputRole()"
+    [attr.aria-autocomplete]="ariaAutocomplete()"
+    [attr.aria-expanded]="ariaExpanded()"
+    [attr.aria-controls]="ariaControls()"
+    [attr.aria-activedescendant]="activeOptionId()"
     [id]="inputId()"
     [value]="value()"
     [placeholder]="placeholder()"
@@ -28,7 +34,8 @@
     [attr.aria-describedby]="feedbackId()"
     (valueChange)="onInputValue($event)"
     (clear)="onClear()"
-    (keydown.enter)="emitSearch()"
+    (focus)="onInputFocus()"
+    (keydown)="onKeydown($event)"
     (blur)="onBlur()"
   />
 
@@ -59,3 +66,85 @@
     }
   </button>
 }
+
+<span
+  class="tedi-search__announcement sr-only"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+  >{{ announcement() }}</span
+>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="origin"
+  [cdkConnectedOverlayOpen]="panelVisible()"
+  [cdkConnectedOverlayWidth]="panelWidth()"
+  [cdkConnectedOverlayPositions]="overlayPositions"
+  [cdkConnectedOverlayDisableClose]="true"
+  (overlayOutsideClick)="closePanel()"
+  (positionChange)="onPositionChange($event)"
+  (attach)="onOverlayAttach()"
+  (detach)="onOverlayDetach()"
+>
+  <div
+    class="tedi-search__panel"
+    [class.tedi-search__panel--above]="panelAbove()"
+  >
+    @if (loading()) {
+      <div class="tedi-search__panel-status">
+        <tedi-spinner [size]="16" />
+        <span tedi-text color="tertiary">{{ searchingText() }}</span>
+      </div>
+    } @else if (hasSuggestions()) {
+      <ul
+        class="tedi-search__panel-list"
+        role="listbox"
+        [id]="listboxId()"
+      >
+        @for (
+          suggestion of resolvedSuggestions();
+          track suggestion.label + $index;
+          let i = $index
+        ) {
+          <li
+            tedi-search-option
+            [label]="suggestion.label"
+            [query]="query()"
+            [custom]="!!suggestionTemplate()"
+            [id]="optionId(i)"
+            (mousedown)="$event.preventDefault()"
+            (click)="selectSuggestion(suggestion)"
+          >
+            @if (suggestionTemplate(); as tpl) {
+              <ng-container
+                [ngTemplateOutlet]="tpl.template"
+                [ngTemplateOutletContext]="{
+                  $implicit: suggestion.item,
+                  item: suggestion.item,
+                  index: i,
+                  label: suggestion.label,
+                  query: query(),
+                }"
+              />
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <div class="tedi-search__panel-status">
+        <span tedi-text color="tertiary">{{ noResultsText() }}</span>
+      </div>
+    }
+
+    @if (footerTemplate(); as footer) {
+      <div
+        class="tedi-search__footer"
+        (keydown)="onFooterKeydown($event)"
+        (focusout)="onFocusOut($event)"
+      >
+        <ng-container [ngTemplateOutlet]="footer.template" />
+      </div>
+    }
+  </div>
+</ng-template>

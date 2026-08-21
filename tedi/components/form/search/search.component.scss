@@ -59,3 +59,60 @@
     box-shadow: inset 0 0 0 1px var(--form-general-feedback-error-border);
   }
 }
+
+.tedi-search__panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: var(--form-select-area-max-height);
+  overflow: hidden;
+  background: var(--dropdown-item-default-background);
+  border: 1px solid var(--card-border-primary);
+  border-radius: 0 0 var(--form-select-area-radius)
+    var(--form-select-area-radius);
+  box-shadow: 0 1px 5px 0 var(--tedi-alpha-20);
+
+  // On the fallback position the panel sits above the field, so the joined edge
+  // — and with it the square corners — moves to the bottom.
+  &--above {
+    border-radius: var(--form-select-area-radius) var(--form-select-area-radius) 0
+      0;
+  }
+
+  // The list scrolls, not the panel, so its scrollport ends where the footer
+  // begins. Scrolling the panel instead would let `scrollIntoView` leave the
+  // active option underneath the footer, which it cannot detect.
+  &-list {
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    list-style: none;
+  }
+}
+
+.tedi-search__footer {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: var(--dropdown-item-inner-spacing);
+  align-items: center;
+  padding: var(--card-padding-md-default);
+  background: var(--dropdown-item-default-background);
+  border-top: 1px solid var(--card-border-primary);
+}
+
+.tedi-search-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--button-gutter-x);
+  justify-content: center;
+}
+
+.tedi-search__panel-status {
+  display: flex;
+  gap: var(--dropdown-item-inner-spacing);
+  align-items: center;
+  justify-content: center;
+  padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
+}

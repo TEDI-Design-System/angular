@@ -1,15 +1,5 @@
 import { TitleCasePipe } from "@angular/common";
-import {
-  afterNextRender,
-  Component,
-  computed,
-  ElementRef,
-  inject,
-  Injector,
-  OnDestroy,
-  signal,
-  viewChild,
-} from "@angular/core";
+import { computed, signal } from "@angular/core";
 import { FormControl, ReactiveFormsModule, Validators } from "@angular/forms";
 import {
   argsToTemplate,
@@ -19,20 +9,16 @@ import {
 } from "@storybook/angular";
 import { SearchComponent } from "./search.component";
 import {
-  CdkOverlayOrigin,
-  ConnectedPosition,
-  OverlayModule,
-} from "@angular/cdk/overlay";
-import { FormFieldComponent } from "../form-field/form-field.component";
-import { LabelComponent } from "../label/label.component";
-import { TextFieldComponent } from "../text-field/text-field.component";
+  SearchFooterTemplateDirective,
+  SearchSuggestionTemplateDirective,
+} from "./search-templates.directive";
+import { SearchFooterActionsComponent } from "./search-footer-actions.component";
+import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { TextComponent } from "../../base/text/text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
-import { SeparatorComponent } from "../../helpers/separator/separator.component";
-import { SpinnerComponent } from "../../loader/spinner/spinner.component";
 import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
 import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
 import { DropdownItemValueMetaComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-meta.component";
@@ -40,627 +26,70 @@ import { DropdownItemValueMetaComponent } from "../../overlay/dropdown/dropdown-
 const SIZES = ["small", "default", "large"] as const;
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 
-// Floating panel below the field, flipping above when it would overflow.
-const OVERLAY_POSITIONS: ConnectedPosition[] = [
-  {
-    originX: "start",
-    originY: "bottom",
-    overlayX: "start",
-    overlayY: "top",
-    offsetY: 4,
-  },
-  {
-    originX: "start",
-    originY: "top",
-    overlayX: "start",
-    overlayY: "bottom",
-    offsetY: -4,
-  },
-];
+const MIN_QUERY_LENGTH = 3;
 
+// Deliberately long, and with many "Mar" entries, so the default query overflows
+// the panel's max height and the examples exercise scrolling.
 const PEOPLE = [
   "Mari Maasikas",
   "Marelle Mets",
   "Marjanne Meri",
   "Mart Mesi",
   "Martin Saar",
+  "Margit Mänd",
+  "Marko Mägi",
+  "Maris Metsis",
+  "Marta Mölder",
+  "Marek Muru",
   "Kalle Kask",
   "Kati Kuusk",
   "Tõnu Tamm",
   "Liisa Lepp",
   "Jaan Järv",
+  "Piret Pärn",
+  "Siim Sepp",
+  "Anu Aasa",
+  "Rein Rand",
+  "Tiiu Tuul",
 ];
 
-interface HighlightPart {
-  text: string;
-  match: boolean;
+interface RegistryPerson {
+  name: string;
+  code: string;
 }
 
-/** Splits `text` into segments so the part matching `query` can be bolded. */
-function highlightParts(text: string, query: string): HighlightPart[] {
-  const q = query.trim();
-  const index = q ? text.toLowerCase().indexOf(q.toLowerCase()) : -1;
+// Several "Lau" entries on purpose: with the footer present, that default query
+// overflows the panel so the examples show the footer staying pinned while the
+// list scrolls.
+const REGISTRY_PEOPLE: RegistryPerson[] = [
+  { name: "Laura Kassisaba", code: "49504080254" },
+  { name: "Laur Lepik", code: "38207120211" },
+  { name: "Laura Kask", code: "48611230123" },
+  { name: "Lauri Laan", code: "38905170234" },
+  { name: "Lauris Vaher", code: "37905240312" },
+  { name: "Laur Kivi", code: "39207310423" },
+  { name: "Laura Ojala", code: "48802190534" },
+  { name: "Laine Laas", code: "45711120645" },
+  { name: "Mari Maasikas", code: "46803150147" },
+  { name: "Marten Mets", code: "39408090456" },
+  { name: "Kadri Kuusk", code: "47102280345" },
+  { name: "Piret Pärn", code: "46512040567" },
+  { name: "Siim Sepp", code: "38703260678" },
+  { name: "Anu Aasa", code: "45009110789" },
+  { name: "Rein Rand", code: "35406180890" },
+  { name: "Tiiu Tuul", code: "44711050901" },
+];
 
-  if (index === -1) {
-    return [{ text, match: false }];
-  }
+/** Matches either field, so the examples search by name *or* personal code. */
+function matchRegistry(query: string): RegistryPerson[] {
+  const q = query.trim().toLowerCase();
 
-  const parts: HighlightPart[] = [];
-  if (index > 0) {
-    parts.push({ text: text.slice(0, index), match: false });
-  }
-  parts.push({ text: text.slice(index, index + q.length), match: true });
-  if (index + q.length < text.length) {
-    parts.push({ text: text.slice(index + q.length), match: false });
-  }
-  return parts;
-}
-
-// Live "suggest as you type" needs focus to stay in the input. The floating
-// `tedi-dropdown` moves focus into the list when it opens (it is a menu, not a
-// combobox), which would interrupt typing — so the typeahead/async examples
-// render results in an inline region instead. These shared styles mirror the
-// `.tedi-dropdown` surface and item padding so the inline panel looks native.
-const LIVE_RESULTS_STYLES = `
-  .tedi-search-demo__wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .tedi-search-demo__results {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    overflow: hidden;
-    background: var(--dropdown-item-default-background);
-    border: 1px solid var(--card-border-primary);
-    border-radius: var(--form-select-area-radius);
-    box-shadow: 0 1px 5px 0 var(--tedi-alpha-20);
-  }
-
-  .tedi-search-demo__option {
-    display: block;
-    width: 100%;
-    padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
-    font: inherit;
-    color: inherit;
-    text-align: left;
-    cursor: pointer;
-    background: transparent;
-    border: 0;
-  }
-
-  .tedi-search-demo__option:hover,
-  .tedi-search-demo__option:focus-visible {
-    background: var(--dropdown-item-hover-background);
-  }
-
-  .tedi-search-demo__status {
-    display: flex;
-    gap: var(--dropdown-item-inner-spacing);
-    align-items: center;
-    justify-content: center;
-    padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
-  }
-`;
-
-/**
- * Suggestions as a proper ARIA combobox: `role="combobox"` on the input with a
- * `role="listbox"` popup. Focus stays in the input, so typing (spaces included)
- * always works; ArrowUp/Down move the highlighted option via
- * `aria-activedescendant`, Enter selects it and Esc closes. Opens on focus,
- * typing or ArrowDown. This is the recommended pattern for a text field with
- * suggestions, rather than the menu-style `tedi-dropdown`.
- */
-@Component({
-  standalone: true,
-  selector: "tedi-search-suggestions-demo",
-  imports: [
-    FormFieldComponent,
-    LabelComponent,
-    TextFieldComponent,
-    OverlayModule,
-  ],
-  template: `
-    <tedi-form-field>
-      <label tedi-label for="search-combobox">Otsi</label>
-      <input
-        tedi-text-field
-        cdkOverlayOrigin
-        #origin="cdkOverlayOrigin"
-        id="search-combobox"
-        type="text"
-        role="combobox"
-        aria-autocomplete="list"
-        [attr.aria-controls]="isOpen() ? 'search-combobox-listbox' : null"
-        [attr.aria-expanded]="isOpen()"
-        [attr.aria-activedescendant]="activeOptionId()"
-        [value]="value()"
-        (valueChange)="onInput($event)"
-        (focus)="openPanel()"
-        (blur)="open.set(false)"
-        (keydown)="onKeydown($event)"
-      />
-    </tedi-form-field>
-
-    <ng-template
-      cdkConnectedOverlay
-      [cdkConnectedOverlayOrigin]="origin"
-      [cdkConnectedOverlayOpen]="isOpen()"
-      [cdkConnectedOverlayWidth]="panelWidth()"
-      [cdkConnectedOverlayPositions]="overlayPositions"
-    >
-      <ul
-        id="search-combobox-listbox"
-        role="listbox"
-        class="tedi-search-demo__results"
-      >
-        @for (name of matches(); track name; let i = $index) {
-          <li
-            role="option"
-            [id]="optionId(i)"
-            class="tedi-search-demo__option"
-            [class.tedi-search-demo__option--active]="i === activeIndex()"
-            [attr.aria-selected]="i === activeIndex()"
-            (mousedown)="$event.preventDefault()"
-            (click)="select(name)"
-          >
-            {{ name }}
-          </li>
-        }
-      </ul>
-    </ng-template>
-  `,
-  styles: [
-    LIVE_RESULTS_STYLES +
-      `
-      .tedi-search-demo__results {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-
-      .tedi-search-demo__option--active {
-        background: var(--dropdown-item-hover-background);
-      }
-    `,
-  ],
-})
-class SearchSuggestionsDemoComponent {
-  private readonly overlayOrigin = viewChild.required(CdkOverlayOrigin);
-  readonly overlayPositions = OVERLAY_POSITIONS;
-  readonly panelWidth = signal(0);
-
-  readonly value = signal("Mar");
-  readonly open = signal(false);
-  readonly activeIndex = signal(-1);
-
-  private readonly names = [
-    "Mari Maasikas",
-    "Marelle Mets",
-    "Marjanne Meri",
-    "Mart Mesi",
-    "Martin Saar",
-  ];
-  readonly matches = computed(() =>
-    this.names.filter((name) =>
-      name.toLowerCase().includes(this.value().toLowerCase()),
-    ),
+  return REGISTRY_PEOPLE.filter(
+    (person) =>
+      person.name.toLowerCase().includes(q) || person.code.includes(q),
   );
-  readonly isOpen = computed(() => this.open() && this.matches().length > 0);
-  readonly activeOptionId = computed(() =>
-    this.isOpen() && this.activeIndex() >= 0
-      ? this.optionId(this.activeIndex())
-      : null,
-  );
-
-  optionId(index: number): string {
-    return `search-combobox-opt-${index}`;
-  }
-
-  openPanel(): void {
-    this.panelWidth.set(
-      this.overlayOrigin().elementRef.nativeElement.offsetWidth,
-    );
-    this.open.set(true);
-  }
-
-  onInput(next: string): void {
-    this.value.set(next);
-    this.activeIndex.set(-1);
-    this.openPanel();
-  }
-
-  onKeydown(event: KeyboardEvent): void {
-    const items = this.matches();
-    switch (event.key) {
-      case "ArrowDown":
-        event.preventDefault();
-        if (!this.isOpen()) {
-          this.openPanel();
-          return;
-        }
-        this.activeIndex.set(
-          this.activeIndex() >= items.length - 1 ? 0 : this.activeIndex() + 1,
-        );
-        break;
-      case "ArrowUp":
-        event.preventDefault();
-        if (!this.isOpen()) {
-          this.openPanel();
-          return;
-        }
-        this.activeIndex.set(
-          this.activeIndex() <= 0 ? items.length - 1 : this.activeIndex() - 1,
-        );
-        break;
-      case "Enter":
-        if (this.isOpen() && this.activeIndex() >= 0) {
-          event.preventDefault();
-          this.select(items[this.activeIndex()]);
-        }
-        break;
-      case "Escape":
-        this.open.set(false);
-        this.activeIndex.set(-1);
-        break;
-    }
-  }
-
-  select(name: string): void {
-    this.value.set(name);
-    this.open.set(false);
-    this.activeIndex.set(-1);
-  }
 }
 
-/**
- * A single matched result with fallback actions and a hint — e.g. a
- * national-registry person lookup. The result panel renders inline below the
- * field (not in an overlay), so focus flows naturally: Tab from the field moves
- * through the action buttons. It opens on focus, and ArrowDown moves focus into
- * the dialog. Esc closes it from either the field or the dialog, and selecting a
- * result closes it too — both hand focus back to the input rather than dropping
- * it when the panel unmounts. It also closes when focus leaves the field and
- * its panel.
- *
- * The panel mixes a result with actions, so it is not a listbox: the input is a
- * `role="combobox"` with `aria-haspopup="dialog"` pointing at a `role="dialog"`
- * panel. The combobox role is what makes `aria-expanded` legal — on a plain
- * textbox it fails the `aria-allowed-attr` rule. `aria-controls` and
- * `aria-haspopup` are global attributes, so those were valid either way.
- */
-@Component({
-  standalone: true,
-  selector: "tedi-search-result-actions-demo",
-  imports: [
-    FormFieldComponent,
-    LabelComponent,
-    TextFieldComponent,
-    SeparatorComponent,
-    ButtonComponent,
-    TextComponent,
-    DropdownItemValueComponent,
-    DropdownItemValueLabelComponent,
-    DropdownItemValueMetaComponent,
-  ],
-  host: {
-    "(focusout)": "onFocusOut($event)",
-  },
-  template: `
-    <div class="tedi-search-demo__wrap">
-      <tedi-form-field>
-        <label tedi-label for="search-result">Otsi</label>
-        <input
-          #comboboxInput
-          tedi-text-field
-          id="search-result"
-          type="text"
-          role="combobox"
-          aria-haspopup="dialog"
-          [attr.aria-controls]="open() ? 'search-result-panel' : null"
-          [attr.aria-expanded]="open()"
-          [value]="value()"
-          (valueChange)="value.set($event)"
-          (focus)="onInputFocus()"
-          (keydown.arrowdown)="onArrowDown($event)"
-          (keydown.escape)="open.set(false)"
-        />
-      </tedi-form-field>
-
-      @if (open()) {
-        <div
-          id="search-result-panel"
-          role="dialog"
-          aria-label="Otsingutulemus"
-          class="tedi-search-demo__results"
-          (keydown.escape)="closeAndRestoreFocus()"
-        >
-          <button
-            type="button"
-            class="tedi-search-demo__result"
-            (click)="closeAndRestoreFocus()"
-          >
-            <tedi-dropdown-item-value>
-              <tedi-dropdown-item-value-label
-                >Laura Kassisaba</tedi-dropdown-item-value-label
-              >
-              <tedi-dropdown-item-value-meta
-                >49504080254</tedi-dropdown-item-value-meta
-              >
-            </tedi-dropdown-item-value>
-          </button>
-
-          <tedi-separator color="secondary" />
-
-          <div class="tedi-search-demo__actions">
-            <div class="tedi-search-demo__buttons">
-              <button tedi-button variant="secondary" size="small">
-                Isik teadmata
-              </button>
-              <button tedi-button variant="secondary" size="small">
-                Puudub Eesti isikukood
-              </button>
-            </div>
-            <p tedi-text color="tertiary" [modifiers]="['small', 'center']">
-              Rahvastikuregistri andmete päringuks sisesta isikukood täismahus
-            </p>
-          </div>
-        </div>
-      }
-    </div>
-  `,
-  styles: [
-    LIVE_RESULTS_STYLES +
-      `
-      .tedi-search-demo__result {
-        display: block;
-        width: 100%;
-        padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
-        font: inherit;
-        color: inherit;
-        text-align: left;
-        cursor: pointer;
-        background: transparent;
-        border: 0;
-      }
-
-      .tedi-search-demo__result:hover,
-      .tedi-search-demo__result:focus-visible {
-        background: var(--dropdown-item-hover-background);
-      }
-
-      .tedi-search-demo__actions {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-        padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
-      }
-
-      .tedi-search-demo__buttons {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: center;
-      }
-    `,
-  ],
-})
-class SearchResultActionsDemoComponent {
-  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
-  private readonly injector = inject(Injector);
-  private readonly input =
-    viewChild.required<ElementRef<HTMLInputElement>>("comboboxInput");
-
-  /** Set while focus is moved back to the input, so it does not reopen the dialog. */
-  private restoringFocus = false;
-
-  readonly value = signal("4954080254");
-  readonly open = signal(false);
-
-  onInputFocus(): void {
-    if (this.restoringFocus) {
-      this.restoringFocus = false;
-      return;
-    }
-    this.open.set(true);
-  }
-
-  /** ArrowDown moves focus into the dialog, as the combobox pattern expects. */
-  onArrowDown(event: Event): void {
-    event.preventDefault();
-    this.open.set(true);
-
-    // The panel renders on the next change-detection tick.
-    afterNextRender(
-      () =>
-        this.host.nativeElement
-          .querySelector<HTMLElement>(".tedi-search-demo__result")
-          ?.focus(),
-      { injector: this.injector },
-    );
-  }
-
-  /** Closing from inside the dialog must hand focus back to the input. */
-  closeAndRestoreFocus(): void {
-    this.open.set(false);
-    this.restoringFocus = true;
-    this.input().nativeElement.focus();
-  }
-
-  onFocusOut(event: FocusEvent): void {
-    const next = event.relatedTarget as Node | null;
-    if (!next || !this.host.nativeElement.contains(next)) {
-      this.open.set(false);
-    }
-  }
-}
-
-/**
- * Live typeahead — results filter as you type and the matched text is bolded.
- * The panel appears once the field is non-empty and shows a "no results" row
- * when nothing matches. Focus stays in the input (inline region, not the
- * floating menu), so typing is never interrupted.
- */
-@Component({
-  standalone: true,
-  selector: "tedi-search-typeahead-demo",
-  imports: [SearchComponent, TextComponent],
-  template: `
-    <div class="tedi-search-demo__wrap">
-      <tedi-search
-        inputId="search-typeahead"
-        label="Otsi"
-        placeholder="Hakka nime trükkima…"
-        [value]="value()"
-        (valueChange)="onChange($event)"
-      />
-      @if (open() && query().length > 0) {
-        <div class="tedi-search-demo__results">
-          @if (matches().length > 0) {
-            @for (name of matches(); track name) {
-              <button
-                type="button"
-                class="tedi-search-demo__option"
-                (click)="select(name)"
-              >
-                @for (part of highlight(name); track $index) {
-                  <span
-                    tedi-text
-                    [modifiers]="part.match ? 'bold' : undefined"
-                    >{{ part.text }}</span
-                  >
-                }
-              </button>
-            }
-          } @else {
-            <div class="tedi-search-demo__status">
-              <span tedi-text color="tertiary">Tulemusi ei leitud</span>
-            </div>
-          }
-        </div>
-      }
-    </div>
-  `,
-  styles: [LIVE_RESULTS_STYLES],
-})
-class SearchTypeaheadDemoComponent {
-  readonly value = signal("");
-  readonly open = signal(false);
-  readonly query = computed(() => this.value().trim());
-  readonly matches = computed(() => {
-    const q = this.query().toLowerCase();
-    return q ? PEOPLE.filter((name) => name.toLowerCase().includes(q)) : [];
-  });
-
-  onChange(next: string): void {
-    this.value.set(next);
-    this.open.set(true);
-  }
-
-  select(name: string): void {
-    this.value.set(name);
-    this.open.set(false);
-  }
-
-  highlight(text: string): HighlightPart[] {
-    return highlightParts(text, this.query());
-  }
-}
-
-/**
- * Asynchronous suggestions — typing debounces a fake request that shows a
- * spinner while "loading", then the matched results (or an empty state).
- */
-@Component({
-  standalone: true,
-  selector: "tedi-search-async-demo",
-  imports: [SearchComponent, TextComponent, SpinnerComponent],
-  template: `
-    <div class="tedi-search-demo__wrap">
-      <tedi-search
-        inputId="search-async"
-        label="Otsi"
-        placeholder="Hakka nime trükkima…"
-        [value]="value()"
-        (valueChange)="onChange($event)"
-      />
-      @if (open() && query().length > 0) {
-        <div class="tedi-search-demo__results">
-          @if (loading()) {
-            <div class="tedi-search-demo__status">
-              <tedi-spinner [size]="16" />
-              <span tedi-text color="tertiary">Otsin…</span>
-            </div>
-          } @else if (results().length > 0) {
-            @for (name of results(); track name) {
-              <button
-                type="button"
-                class="tedi-search-demo__option"
-                (click)="select(name)"
-              >
-                @for (part of highlight(name); track $index) {
-                  <span
-                    tedi-text
-                    [modifiers]="part.match ? 'bold' : undefined"
-                    >{{ part.text }}</span
-                  >
-                }
-              </button>
-            }
-          } @else {
-            <div class="tedi-search-demo__status">
-              <span tedi-text color="tertiary">Tulemusi ei leitud</span>
-            </div>
-          }
-        </div>
-      }
-    </div>
-  `,
-  styles: [LIVE_RESULTS_STYLES],
-})
-class SearchAsyncDemoComponent implements OnDestroy {
-  readonly value = signal("");
-  readonly open = signal(false);
-  readonly loading = signal(false);
-  readonly results = signal<string[]>([]);
-  readonly query = computed(() => this.value().trim());
-  private timer?: ReturnType<typeof setTimeout>;
-
-  onChange(next: string): void {
-    this.value.set(next);
-    this.open.set(true);
-    clearTimeout(this.timer);
-
-    if (!next.trim()) {
-      this.loading.set(false);
-      this.results.set([]);
-      return;
-    }
-
-    this.loading.set(true);
-    this.timer = setTimeout(() => {
-      const q = next.trim().toLowerCase();
-      this.results.set(PEOPLE.filter((name) => name.toLowerCase().includes(q)));
-      this.loading.set(false);
-    }, 600);
-  }
-
-  select(name: string): void {
-    clearTimeout(this.timer);
-    this.value.set(name);
-    this.loading.set(false);
-    this.open.set(false);
-  }
-
-  highlight(text: string): HighlightPart[] {
-    return highlightParts(text, this.query());
-  }
-
-  ngOnDestroy(): void {
-    clearTimeout(this.timer);
-  }
-}
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.65.83?node-id=4620-82860&m=dev" target="_blank">Figma ↗</a><br />
@@ -682,6 +111,14 @@ export default {
         AlertComponent,
         TitleCasePipe,
         ReactiveFormsModule,
+        SearchSuggestionTemplateDirective,
+        SearchFooterTemplateDirective,
+        SearchFooterActionsComponent,
+        SeparatorComponent,
+        ButtonComponent,
+        DropdownItemValueComponent,
+        DropdownItemValueLabelComponent,
+        DropdownItemValueMetaComponent,
       ],
     }),
   ],
@@ -770,12 +207,73 @@ export default {
       control: { type: "text" },
       table: { category: "inputs", type: { summary: "string" } },
     },
+    suggestions: {
+      description:
+        "Suggestions to show in the panel, already filtered by the consumer. Bind an empty array to keep combobox behaviour while nothing matches; leave unbound for a plain search field.",
+      control: { type: "object" },
+      table: { category: "inputs", type: { summary: "T[] | undefined" } },
+    },
+    bindLabel: {
+      description:
+        "Property holding the display label when suggestions are objects.",
+      control: { type: "text" },
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+        defaultValue: { summary: "label" },
+      },
+    },
+    minQueryLength: {
+      description:
+        "Characters required before the panel opens. Below it nothing is shown, not even the no-results row.",
+      control: { type: "number" },
+      table: {
+        category: "inputs",
+        type: { summary: "number" },
+        defaultValue: { summary: "0" },
+      },
+    },
+    loading: {
+      description: "Shows a loading row instead of results.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    panelOpen: {
+      description: "Whether the suggestion panel is open.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    hideOnScroll: {
+      description:
+        "Closes the suggestion panel when the page (or a scrollable ancestor) scrolls. Scrolling the option list itself keeps the panel open.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     searchEvent: {
       description:
-        "Emitted when the search is executed (Enter key or button click).",
+        "Emitted when the search is executed (Enter key or button click). Suppressed when Enter accepts a highlighted suggestion.",
       control: false,
       action: "searchEvent",
       table: { category: "outputs", type: { summary: "string" } },
+    },
+    suggestionSelect: {
+      description:
+        "Emitted when a suggestion is accepted. The field is filled with its label.",
+      control: false,
+      action: "suggestionSelect",
+      table: { category: "outputs", type: { summary: "T" } },
     },
     clear: {
       description: "Emitted when the clear button is clicked.",
@@ -965,56 +463,286 @@ export const WithHint: Story = {
 };
 
 /**
- * Suggestions filtered by the current value, shown in a floating panel anchored
- * to the field. Closed by default — it opens on focus or click and closes on
- * outside-click or Esc. Click a match to select it.
+ * Suggestions filter live against the field value, with the matched substring
+ * bolded and a "no results" row when nothing matches. Focus stays in the input;
+ * ArrowUp/Down highlight an option, Enter accepts it, Esc closes. Enter with
+ * nothing highlighted emits `searchEvent` instead.
+ *
+ * Search does not filter — pass already-filtered `suggestions` and react to
+ * `valueChange`, so sync and async work the same way.
  */
 export const WithSuggestions: Story = {
   name: "With suggestions",
-  render: () => ({
-    moduleMetadata: { imports: [SearchSuggestionsDemoComponent] },
-    template: `<tedi-search-suggestions-demo />`,
-  }),
+  args: { hideOnScroll: false },
+  render: (args) => {
+    const value = signal("Mar");
+    const suggestions = computed(() => {
+      const q = value().trim().toLowerCase();
+      return q ? PEOPLE.filter((n) => n.toLowerCase().includes(q)) : [];
+    });
+
+    return {
+      props: { ...args, value, suggestions, minQueryLength: MIN_QUERY_LENGTH },
+      template: `
+        <tedi-search
+          inputId="search-suggestions"
+          label="Otsi"
+          placeholder="Trüki vähemalt 3 tähemärki…"
+          [minQueryLength]="minQueryLength"
+          [hideOnScroll]="hideOnScroll"
+          [value]="value()"
+          [suggestions]="suggestions()"
+          (valueChange)="value.set($event)"
+        />
+      `,
+    };
+  },
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<tedi-search
+  inputId="search"
+  label="Otsi"
+  [minQueryLength]="3"
+  [value]="value()"
+  [suggestions]="suggestions()"
+  (valueChange)="value.set($event)"
+  (suggestionSelect)="onSelect($event)"
+/>`,
+      },
+    },
+  },
 };
 
 /**
- * A single matched result followed by fallback actions and a hint — e.g. a
- * national-registry person lookup. Closed by default; it opens on focus or click
- * and closes on outside-click or Esc.
- */
-export const WithResultAndActions: Story = {
-  name: "With result and actions",
-  render: () => ({
-    moduleMetadata: { imports: [SearchResultActionsDemoComponent] },
-    template: `<tedi-search-result-actions-demo />`,
-  }),
-};
-
-/**
- * Live typeahead — results filter as you type and the matched text is bolded.
- * The panel appears once the field is non-empty and shows a "no results" row
- * when nothing matches. Focus stays in the input (inline region, not the
- * floating menu), so typing is never interrupted.
- */
-export const Typeahead: Story = {
-  name: "Typeahead (live filtering)",
-  render: () => ({
-    moduleMetadata: { imports: [SearchTypeaheadDemoComponent] },
-    template: `<tedi-search-typeahead-demo />`,
-  }),
-};
-
-/**
- * Asynchronous suggestions — typing debounces a fake request that shows a
- * spinner while "loading", then the matched results (or an empty state).
+ * Asynchronous suggestions — typing debounces a request that shows a spinner via
+ * `loading`, then the results. Identical markup to the sync example; only the
+ * source of `suggestions` differs.
+ *
+ * `minQueryLength` is set to 3 here, which is the usual pairing for a remote
+ * lookup: the panel stays shut and no request goes out until the query is worth
+ * searching for.
  */
 export const AsyncSuggestions: Story = {
   name: "Async suggestions (loading)",
-  render: () => ({
-    moduleMetadata: { imports: [SearchAsyncDemoComponent] },
-    template: `<tedi-search-async-demo />`,
-  }),
+  render: () => {
+    const value = signal("");
+    const loading = signal(false);
+    const results = signal<string[]>([]);
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const onValueChange = (next: string) => {
+      value.set(next);
+      clearTimeout(timer);
+
+      if (next.trim().length < MIN_QUERY_LENGTH) {
+        loading.set(false);
+        results.set([]);
+        return;
+      }
+
+      loading.set(true);
+      timer = setTimeout(() => {
+        const q = next.trim().toLowerCase();
+        results.set(PEOPLE.filter((n) => n.toLowerCase().includes(q)));
+        loading.set(false);
+      }, 600);
+    };
+
+    return {
+      props: { value, loading, results, onValueChange, minQueryLength: MIN_QUERY_LENGTH },
+      template: `
+        <tedi-search
+          inputId="search-async"
+          label="Otsi"
+          placeholder="Trüki vähemalt 3 tähemärki…"
+          [minQueryLength]="minQueryLength"
+          [value]="value()"
+          [suggestions]="results()"
+          [loading]="loading()"
+          (valueChange)="onValueChange($event)"
+        />
+      `,
+    };
+  },
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<tedi-search
+  inputId="search"
+  label="Otsi"
+  [minQueryLength]="3"
+  [value]="value()"
+  [suggestions]="results()"
+  [loading]="loading()"
+  (valueChange)="onValueChange($event)"
+/>
+
+// Gate the request on the same threshold so nothing is fetched for short queries.
+onValueChange(next: string): void {
+  this.value.set(next);
+  clearTimeout(this.timer);
+
+  if (next.trim().length < 3) {
+    this.loading.set(false);
+    this.results.set([]);
+    return;
+  }
+
+  this.loading.set(true);
+  this.timer = setTimeout(() => { /* fetch and set results */ }, 600);
+}`,
+      },
+    },
+  },
 };
+
+/**
+ * Objects instead of strings — `bindLabel` names the display property and
+ * `tediSearchSuggestion` renders a richer row. `suggestionSelect` emits the whole
+ * object, while the field is filled with the resolved label.
+ */
+export const WithCustomSuggestionTemplate: Story = {
+  name: "With custom suggestion template",
+  render: () => {
+    const value = signal("Lau");
+    const suggestions = computed(() => matchRegistry(value()));
+
+    return {
+      props: { value, suggestions, minQueryLength: MIN_QUERY_LENGTH },
+      template: `
+        <tedi-search
+          inputId="search-custom"
+          label="Otsi"
+          bindLabel="name"
+          placeholder="Trüki vähemalt 3 tähemärki…"
+          [minQueryLength]="minQueryLength"
+          [value]="value()"
+          [suggestions]="suggestions()"
+          (valueChange)="value.set($event)"
+        >
+          <ng-template tediSearchSuggestion let-item>
+            <tedi-dropdown-item-value>
+              <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>{{ item.code }}</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </ng-template>
+        </tedi-search>
+      `,
+    };
+  },
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<tedi-search inputId="search" label="Otsi" bindLabel="name" [minQueryLength]="3"
+  [value]="value()" [suggestions]="suggestions()" (valueChange)="value.set($event)">
+  <ng-template tediSearchSuggestion let-item>
+    <tedi-dropdown-item-value>
+      <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
+      <tedi-dropdown-item-value-meta>{{ item.code }}</tedi-dropdown-item-value-meta>
+    </tedi-dropdown-item-value>
+  </ng-template>
+</tedi-search>`,
+      },
+    },
+  },
+};
+
+/**
+ * National-registry person lookup — results plus fallback actions in a
+ * `tediSearchFooter`. The footer also shows when nothing matched, which is where
+ * those actions matter most. Filtering matches name or personal code.
+ */
+export const WithResultAndActions: Story = {
+  name: "With result and actions",
+  render: () => {
+    const value = signal("4950");
+    const suggestions = computed(() => matchRegistry(value()));
+
+    return {
+      props: { value, suggestions, minQueryLength: MIN_QUERY_LENGTH },
+      template: `
+        <tedi-search
+          inputId="search-result"
+          label="Otsi"
+          bindLabel="name"
+          [clearable]="true"
+          [minQueryLength]="minQueryLength"
+          [value]="value()"
+          [suggestions]="suggestions()"
+          (valueChange)="value.set($event)"
+        >
+          <ng-template tediSearchSuggestion let-item>
+            <span tedi-text modifiers="bold">{{ item.name }}</span>
+            <tedi-separator axis="vertical" variant="dot-only" dotSize="extra-small" color="secondary" />
+            <span tedi-text color="tertiary">{{ item.code }}</span>
+          </ng-template>
+
+          <ng-template tediSearchFooter>
+            <tedi-search-footer-actions>
+              <button tedi-button variant="secondary">Isik teadmata</button>
+              <button tedi-button variant="secondary">Puudub Eesti isikukood</button>
+            </tedi-search-footer-actions>
+            <p tedi-text color="tertiary" [modifiers]="['small', 'center']">
+              Rahvastikuregistri andmete päringuks sisesta isikukood täismahus
+            </p>
+          </ng-template>
+        </tedi-search>
+      `,
+    };
+  },
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<tedi-search
+  inputId="search"
+  label="Otsi"
+  bindLabel="name"
+  [minQueryLength]="3"
+  [value]="value()"
+  [suggestions]="suggestions()"
+  (valueChange)="value.set($event)"
+  (suggestionSelect)="onSelect($event)"
+>
+  <ng-template tediSearchSuggestion let-item>
+    <span tedi-text modifiers="bold">{{ item.name }}</span>
+    <tedi-separator axis="vertical" variant="dot-only" dotSize="extra-small" color="secondary" />
+    <span tedi-text color="tertiary">{{ item.code }}</span>
+  </ng-template>
+
+  <ng-template tediSearchFooter>
+    <tedi-search-footer-actions>
+      <button tedi-button variant="secondary">Isik teadmata</button>
+      <button tedi-button variant="secondary">Puudub Eesti isikukood</button>
+    </tedi-search-footer-actions>
+    <p tedi-text color="tertiary" [modifiers]="['small', 'center']">
+      Rahvastikuregistri andmete päringuks sisesta isikukood täismahus
+    </p>
+  </ng-template>
+</tedi-search>
+
+// There is no searchFn input — Search never filters, so matching is your own
+// computed. Widen the predicate to search as many fields as you need.
+readonly value = signal("");
+
+readonly suggestions = computed(() => {
+  const query = this.value().trim().toLowerCase();
+
+  return this.people.filter(
+    (person) =>
+      person.name.toLowerCase().includes(query) ||
+      person.code.includes(query),
+  );
+});`,
+      },
+    },
+  },
+};
+
 
 export const WithReactiveForms: Story = {
   render: () => {
