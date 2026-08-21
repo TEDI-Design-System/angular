@@ -27,8 +27,6 @@ export type AlertSize = "default" | "small";
   encapsulation: ViewEncapsulation.None,
   host: {
     "[style.display]": "open() ? 'flex' : 'none'",
-    "[attr.aria-live]": "getAriaLive()",
-    "[attr.aria-label]": "getAriaLabel()",
     "[class]": "classes()",
     "[attr.role]": "role() === 'none' ? null : role()",
   },
@@ -60,10 +58,11 @@ export class AlertComponent {
   showClose = input<boolean>(false);
   /**
    * The ARIA role of the alert, informing screen readers about the alert's purpose.
+   * The role carries its own live-region semantics, so no separate `aria-live` is set.
    * Options:
-   * - 'alert': For high-priority messages that demand immediate attention.
-   * - 'status': For less urgent messages providing feedback or updates.
-   * - 'none': Used when no ARIA role is needed.
+   * - 'alert': For high-priority messages that demand immediate attention (announced assertively).
+   * - 'status': For less urgent messages providing feedback or updates (announced politely).
+   * - 'none': No role and no announcement.
    * @default alert
    */
   role = input<AlertRole>("alert");
@@ -100,24 +99,6 @@ export class AlertComponent {
    * Close click output
    */
   readonly closeClick = output<void>();
-
-  getAriaLive = computed(() => {
-    switch (this.role()) {
-      case "alert":
-        return "assertive";
-      case "status":
-        return "polite";
-      case "none":
-        return "off";
-    }
-  });
-
-  getAriaLabel = computed(() => {
-    if (this.title()) {
-      return `${this.type()} alert: ${this.title()}`;
-    }
-    return `${this.type()} alert`;
-  });
 
   classes = computed(() => {
     return {

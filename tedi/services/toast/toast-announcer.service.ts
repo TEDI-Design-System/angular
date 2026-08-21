@@ -1,12 +1,20 @@
 import { Injectable, inject, OnDestroy } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 
+export type ToastPoliteness = "polite" | "assertive";
+
+const ANNOUNCE_DELAY = 100;
+const DEFAULT_CLEAR_DELAY = 1000;
+
 /**
- * Custom announcer service for toast notifications that uses the `sr-only` class
- * instead of CDK's LiveAnnouncer which requires CDK styles.
+ * Announcer for toast notifications. Deliberately not CDK's `LiveAnnouncer`:
+ * that one needs `cdk-visually-hidden` from CDK's prebuilt stylesheet, which
+ * this library does not ship, and it reuses a single element whose `aria-live`
+ * is rewritten per announcement — TalkBack ignores regions mutated that way.
  *
- * Creates a visually hidden element that screen readers can access to announce
- * toast messages with appropriate politeness levels.
+ * Instead, one region per politeness level is created up front and kept for the
+ * application's lifetime, and each message is appended as its own child so that
+ * rapid successive toasts queue instead of overwriting each other.
  *
  * @internal
  */
@@ -14,73 +22,84 @@ import { DOCUMENT } from "@angular/common";
 export class ToastAnnouncerService implements OnDestroy {
   private readonly document = inject(DOCUMENT);
 
-  private politeElement: HTMLElement | null = null;
-  private assertiveElement: HTMLElement | null = null;
+  private readonly regions = new Map<ToastPoliteness, HTMLElement>();
+  private readonly timeouts = new Set<ReturnType<typeof setTimeout>>();
+
+  constructor() {
+    this.getRegion("polite");
+    this.getRegion("assertive");
+  }
 
   /**
    * Announce a message to screen readers.
    * @param message The message to announce
    * @param politeness The politeness level: 'polite' (default) or 'assertive'
-   * @param clearAfterMs Time in ms after which to clear the message (default: 1000ms)
+   * @param clearAfterMs Time in ms after which to remove the message (default: 1000ms)
    */
-  announce(message: string, politeness: "polite" | "assertive" = "polite", clearAfterMs: number = 1000): void {
-    const element = this.getOrCreateElement(politeness);
-    element.textContent = "";
+  announce(
+    message: string,
+    politeness: ToastPoliteness = "polite",
+    clearAfterMs: number = DEFAULT_CLEAR_DELAY
+  ): void {
+    const region = this.getRegion(politeness);
+    const entry = this.document.createElement("div");
+    entry.textContent = message;
 
-    // Use a small timeout to ensure screen readers detect the change
-    setTimeout(() => {
-      element.textContent = message;
-      setTimeout(() => {
-        element.textContent = "";
-      }, clearAfterMs);
-    }, 100);
+    this.schedule(() => {
+      region.appendChild(entry);
+      this.schedule(() => entry.remove(), clearAfterMs);
+    }, ANNOUNCE_DELAY);
   }
 
   /**
-   * Clear all announcements text content.
+   * Remove all pending and announced messages, keeping the live regions in place.
    */
   clear(): void {
-    if (this.politeElement) {
-      this.politeElement.textContent = "";
-    }
-    if (this.assertiveElement) {
-      this.assertiveElement.textContent = "";
-    }
+    this.cancelPending();
+    this.regions.forEach((region) => {
+      region.textContent = "";
+    });
   }
 
   destroy(): void {
-    this.politeElement?.remove();
-    this.assertiveElement?.remove();
-    this.politeElement = null;
-    this.assertiveElement = null;
+    this.cancelPending();
+    this.regions.forEach((region) => region.remove());
+    this.regions.clear();
   }
 
   ngOnDestroy(): void {
     this.destroy();
   }
 
-  private getOrCreateElement(politeness: "polite" | "assertive"): HTMLElement {
-    if (politeness === "assertive") {
-      if (!this.assertiveElement) {
-        this.assertiveElement = this.createAnnouncerElement("assertive");
-      }
-      return this.assertiveElement;
-    } else {
-      if (!this.politeElement) {
-        this.politeElement = this.createAnnouncerElement("polite");
-      }
-      return this.politeElement;
-    }
+  private schedule(callback: () => void, delay: number): void {
+    const timeout = setTimeout(() => {
+      this.timeouts.delete(timeout);
+      callback();
+    }, delay);
+    this.timeouts.add(timeout);
   }
 
-  private createAnnouncerElement(politeness: "polite" | "assertive"): HTMLElement {
-    const element = this.document.createElement("span");
-    element.setAttribute("aria-live", politeness);
-    element.setAttribute("aria-atomic", "true");
-    element.setAttribute("role", politeness === "assertive" ? "alert" : "status");
-    element.classList.add("sr-only");
-    element.id = `tedi-toast-announcer-${politeness}`;
-    this.document.body.appendChild(element);
-    return element;
+  private cancelPending(): void {
+    this.timeouts.forEach((timeout) => clearTimeout(timeout));
+    this.timeouts.clear();
+  }
+
+  private getRegion(politeness: ToastPoliteness): HTMLElement {
+    const existing = this.regions.get(politeness);
+    if (existing) {
+      return existing;
+    }
+
+    const region = this.document.createElement("div");
+    region.setAttribute("aria-live", politeness);
+    // Messages are appended as children, so the region must not be atomic —
+    // otherwise every append re-announces the messages already present.
+    region.setAttribute("aria-atomic", "false");
+    region.classList.add("sr-only");
+    region.id = `tedi-toast-announcer-${politeness}`;
+    this.document.body.appendChild(region);
+    this.regions.set(politeness, region);
+
+    return region;
   }
 }

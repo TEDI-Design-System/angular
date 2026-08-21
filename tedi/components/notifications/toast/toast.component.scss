@@ -17,9 +17,9 @@ tedi-toast {
 
 .tedi-toast__progress {
   position: absolute;
+  right: var(--toast-outer-spacing);
   bottom: var(--toast-outer-spacing);
   left: var(--toast-outer-spacing);
-  width: calc(100% - var(--toast-outer-spacing) * 2);
   height: 4px;
   background: var(--toast-progress-color);
   border-radius: 0 var(--alert-radius) 0 var(--alert-radius);
@@ -61,7 +61,7 @@ tedi-toast {
     max-height: calc(100vh - calc(var(--toast-margin-bottom) * 2));
     overflow: visible;
 
-    > * {
+    >* {
       pointer-events: auto;
     }
 
@@ -125,6 +125,7 @@ tedi-toast {
 
     // Mobile: center all positions and use full width with padding
     @include breakpoints.media-breakpoint-down(sm) {
+
       &--top-left,
       &--top-right,
       &--bottom-left,
@@ -144,6 +145,14 @@ tedi-toast {
         }
       }
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .tedi-toast-container__position tedi-toast,
+  .tedi-toast-container__position tedi-toast.tedi-toast--exiting {
+    animation: none;
   }
 }
 

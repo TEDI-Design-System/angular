@@ -62,66 +62,6 @@ describe("ToastContainerComponent", () => {
     ]);
   });
 
-  describe("hasToastsForPosition", () => {
-    it("should return true when there are toasts for position", () => {
-      toastsSignal.set([createMockToast({ position: "top-left" })]);
-
-      expect(component.hasToastsForPosition("top-left")).toBe(true);
-    });
-
-    it("should return false when there are no toasts for position", () => {
-      toastsSignal.set([createMockToast({ position: "top-left" })]);
-
-      expect(component.hasToastsForPosition("bottom-right")).toBe(false);
-    });
-
-    it("should return false when there are no toasts at all", () => {
-      toastsSignal.set([]);
-
-      expect(component.hasToastsForPosition("top-left")).toBe(false);
-    });
-  });
-
-  describe("getToastsForPosition", () => {
-    it("should return toasts for specific position", () => {
-      const topLeftToast = createMockToast({
-        id: "toast-1",
-        position: "top-left",
-      });
-      const bottomRightToast = createMockToast({
-        id: "toast-2",
-        position: "bottom-right",
-      });
-
-      toastsSignal.set([topLeftToast, bottomRightToast]);
-
-      const result = component.getToastsForPosition("top-left");
-
-      expect(result).toHaveLength(1);
-      expect(result[0]).toEqual(topLeftToast);
-    });
-
-    it("should return empty array when no toasts for position", () => {
-      toastsSignal.set([createMockToast({ position: "top-left" })]);
-
-      const result = component.getToastsForPosition("bottom-right");
-
-      expect(result).toHaveLength(0);
-    });
-
-    it("should return multiple toasts for same position", () => {
-      toastsSignal.set([
-        createMockToast({ id: "toast-1", position: "top-left" }),
-        createMockToast({ id: "toast-2", position: "top-left" }),
-        createMockToast({ id: "toast-3", position: "top-left" }),
-      ]);
-
-      const result = component.getToastsForPosition("top-left");
-
-      expect(result).toHaveLength(3);
-    });
-  });
-
   describe("event handlers", () => {
     it("should call toastService.close when onClosed is called", () => {
       const toastId = "test-toast-id";
@@ -131,18 +71,18 @@ describe("ToastContainerComponent", () => {
       expect(mockToastService.close).toHaveBeenCalledWith(toastId);
     });
 
-    it("should call toastService.pause when onMouseEnter is called", () => {
+    it("should call toastService.pause when onPause is called", () => {
       const toastId = "test-toast-id";
 
-      component.onMouseEnter(toastId);
+      component.onPause(toastId);
 
       expect(mockToastService.pause).toHaveBeenCalledWith(toastId);
     });
 
-    it("should call toastService.resume when onMouseLeave is called", () => {
+    it("should call toastService.resume when onResume is called", () => {
       const toastId = "test-toast-id";
 
-      component.onMouseLeave(toastId);
+      component.onResume(toastId);
 
       expect(mockToastService.resume).toHaveBeenCalledWith(toastId);
     });

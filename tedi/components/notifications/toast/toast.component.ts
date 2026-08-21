@@ -50,10 +50,10 @@ export interface ToastConfig {
    */
   pauseOnHover?: boolean;
   /**
-   * The ARIA role of the toast, informing screen readers about the notification's priority.
-   * - 'status': For non-critical notifications.
-   * - 'alert': For critical errors.
-   * - 'none': Used when no ARIA role is needed.
+   * Politeness of the screen reader announcement.
+   * - 'status': For non-critical notifications (announced politely).
+   * - 'alert': For critical errors (announced immediately).
+   * - 'none': No announcement.
    * @default status
    */
   role?: ToastRole;
@@ -100,10 +100,12 @@ export class ToastComponent {
   readonly icon = input<string>("");
 
   /**
-   * The ARIA role of the toast, informing screen readers about the notification's priority.
-   * - 'status': For non-critical notifications (screen readers announce politely).
-   * - 'alert': For critical errors (screen readers announce immediately).
-   * - 'none': Used when no ARIA role is needed.
+   * Politeness of the screen reader announcement made by `ToastService`.
+   * The visible toast itself is never a live region — announcing from both it
+   * and the announcer made screen readers read every toast two or three times.
+   * - 'status': For non-critical notifications (announced politely).
+   * - 'alert': For critical errors (announced immediately).
+   * - 'none': No announcement.
    * @default status
    */
   readonly role = input<ToastRole>("status");
@@ -134,6 +136,16 @@ export class ToastComponent {
   readonly mouseEnter = output<void>();
   readonly mouseLeave = output<void>();
 
+  /**
+   * Emits when focus enters the toast, so the auto-close timer can be paused.
+   */
+  readonly focusIn = output<void>();
+
+  /**
+   * Emits when focus leaves the toast entirely.
+   */
+  readonly focusOut = output<void>();
+
   handleClose(): void {
     this.closed.emit();
   }
@@ -144,5 +156,20 @@ export class ToastComponent {
 
   onMouseLeave(): void {
     this.mouseLeave.emit();
+  }
+
+  onFocusIn(): void {
+    this.focusIn.emit();
+  }
+
+  onFocusOut(event: FocusEvent): void {
+    const wrapper = event.currentTarget as HTMLElement | null;
+    const nextTarget = event.relatedTarget as Node | null;
+
+    if (wrapper && nextTarget && wrapper.contains(nextTarget)) {
+      return;
+    }
+
+    this.focusOut.emit();
   }
 }

@@ -1879,7 +1879,7 @@ Routed tabs (anchors) — bind `[value]` to the current route and let each link 
 - `type: AlertType = "info"`
 - `icon: string = ""`
 - `showClose: boolean = false`
-- `role: AlertRole = "alert"`
+- `role: AlertRole = "alert"` — `"alert"` (assertive), `"status"` (polite) or `"none"`. The role carries its own live-region semantics; no `aria-live` or `aria-label` is added, so the visible title and content are what screen readers read.
 - `variant: AlertVariant = "default"`
 - `size: AlertSize = "default"` — `"default"` or `"small"` (reduced padding and smaller body text)
 - `titleElement: AlertTitleType = "h2"` — HTML tag for the title
@@ -1903,16 +1903,21 @@ export class MyComponent {
   private toastService = inject(ToastService);
 
   showToast() {
-    this.toastService.open({
-      title: 'Success',
-      type: 'success',
+    this.toastService.success('Saved', 'Your changes have been saved.', {
       duration: 6000,
+      showProgressBar: true,
     });
   }
 }
 ```
 
-Add `<tedi-toast-container />` to your root template.
+**Methods:** `info(title, content?, options?)`, `success(...)`, `warning(...)`, `danger(...)` (defaults to `role: "alert"`) and `show(config)` all return the new toast's id; `close(id)` dismisses one.
+
+**Options** (`ToastConfig`): `type`, `icon`, `duration` (ms, `0` for persistent), `showProgressBar`, `pauseOnHover`, `role`, `position` (`"top-left" | "top-right" | "bottom-left" | "bottom-right"`, default `"bottom-right"`), `id`.
+
+No container element is needed — the service creates one via CDK Overlay on first use.
+
+Accessibility: every toast is announced once through a dedicated visually hidden live region, and `role` picks the politeness (`"status"` polite, `"alert"` assertive, `"none"` silent). The visible toast is not a live region itself. The auto-close timer pauses while the toast is hovered or holds keyboard focus.
 
 ## Overlay
 
