@@ -23,7 +23,7 @@ import { IconComponent } from "../../base";
   template: `<button tedi-button><ng-content /></button>`,
   encapsulation: ViewEncapsulation.None,
 })
-class DemoWrappingButtonComponent { }
+class DemoWrappingButtonComponent {}
 
 const POSITIONS: DropdownPosition[] = [
   "auto",
@@ -164,6 +164,15 @@ export default {
         category: "dropdown-item",
         type: { summary: "boolean" },
         defaultValue: { summary: "true" },
+      },
+    },
+    interactiveContent: {
+      description:
+        "Whether the projected content is itself the interactive control, e.g. a link or a button. The item role and the roving tabindex move onto that element, so assistive technology reports one control per item and the control keeps its own activation behaviour.",
+      table: {
+        category: "dropdown-item",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
       },
     },
     itemSelect: {

@@ -258,7 +258,7 @@ export class DropdownComponent implements OnDestroy {
     const items = this.dropdownContent().items();
     if (!items[index]) return;
 
-    const el = items[index].host.nativeElement;
+    const el = items[index].focusTarget();
     el.focus();
     el.scrollIntoView({
       block: "nearest",
@@ -298,16 +298,12 @@ export class DropdownComponent implements OnDestroy {
     const active = this.activeIndex();
 
     items.forEach((item, i) => {
-      const el = item.host.nativeElement;
-
       if (i === active && !item.disabled()) {
-        el.setAttribute("tabindex", "0");
+        item.setTabindex("0");
+      } else if (role === "listbox" && item.disabled()) {
+        item.setTabindex(null);
       } else {
-        if (role === "listbox" && item.disabled()) {
-          el.removeAttribute("tabindex");
-        } else {
-          el.setAttribute("tabindex", "-1");
-        }
+        item.setTabindex("-1");
       }
     });
   }

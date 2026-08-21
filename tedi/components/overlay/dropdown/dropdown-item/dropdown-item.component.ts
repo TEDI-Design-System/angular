@@ -1,4 +1,5 @@
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   contentChild,
@@ -18,6 +19,8 @@ import {
 import { DropdownItemValueComponent } from "../dropdown-item-value/dropdown-item-value.component";
 import { DropdownItemValueLabelComponent } from "../dropdown-item-value/dropdown-item-value-label.component";
 
+const INTERACTIVE_CONTENT_SELECTOR = "a[href], button";
+
 @Component({
   selector: "li[tedi-dropdown-item]",
   standalone: true,
@@ -27,13 +30,12 @@ import { DropdownItemValueLabelComponent } from "../dropdown-item-value/dropdown
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    "[attr.role]":
-      "dropdownContent.dropdownRole() === 'menu' ? 'menuitem' : 'option'",
+    "[attr.role]": "interactiveContent() ? 'none' : itemRole()",
     "[attr.aria-selected]":
-      "dropdownContent.dropdownRole() === 'listbox' ? isSelected() : null",
-    "[attr.aria-disabled]": "disabled() ? 'true' : null",
-    "[tabindex]":
-      "dropdownContent.dropdownRole() === 'menu' ? '-1' : (disabled() ? null : '-1')",
+      "!interactiveContent() && dropdownContent.dropdownRole() === 'listbox' ? isSelected() : null",
+    "[attr.aria-disabled]":
+      "!interactiveContent() && disabled() ? 'true' : null",
+    "[attr.tabindex]": "interactiveContent() ? null : hostTabindex()",
   },
 })
 export class DropdownItemComponent {
@@ -42,6 +44,16 @@ export class DropdownItemComponent {
 
   /** Is item disabled? */
   readonly disabled = input(false);
+
+  /**
+   * Whether the projected content is itself the interactive control, e.g. a
+   * link or a button. The item then exposes the menu semantics and the roving
+   * tabindex on that element instead of the host `li`, so assistive technology
+   * reports one control per item and the control keeps its own activation
+   * behaviour (a link navigates on Enter, including with modifier keys).
+   * @default false
+   */
+  readonly interactiveContent = input(false);
 
   /**
    * Whether the item's label clips overflowing content (for text ellipsis).
@@ -73,17 +85,81 @@ export class DropdownItemComponent {
   /** Check if custom dropdown-item-value is provided */
   readonly customItemValue = contentChild(DropdownItemValueComponent);
 
+  private control: HTMLElement | null = null;
+
+  constructor() {
+    afterRenderEffect(() => {
+      const control = this.controlElement();
+      if (!control) return;
+
+      control.setAttribute("role", this.itemRole());
+
+      if (this.disabled()) {
+        control.setAttribute("aria-disabled", "true");
+      } else {
+        control.removeAttribute("aria-disabled");
+      }
+    });
+  }
+
+  itemRole() {
+    return this.dropdownContent.dropdownRole() === "menu"
+      ? "menuitem"
+      : "option";
+  }
+
+  hostTabindex() {
+    return this.dropdownContent.dropdownRole() === "menu"
+      ? "-1"
+      : this.disabled()
+        ? null
+        : "-1";
+  }
+
   isSelected() {
     return this.dropdown.value() === this.value();
   }
 
-  focus() {
-    this.host.nativeElement.focus();
+  /**
+   * The element that carries the item's role, roving tabindex and focus — the
+   * projected control when `interactiveContent` is set, the host `li` otherwise.
+   */
+  focusTarget(): HTMLElement {
+    return this.controlElement() ?? this.host.nativeElement;
   }
 
-  @HostListener("click")
-  onClick() {
-    if (this.disabled()) return;
+  focus() {
+    this.focusTarget().focus();
+  }
+
+  setTabindex(value: string | null) {
+    const element = this.focusTarget();
+
+    if (value === null) {
+      element.removeAttribute("tabindex");
+    } else {
+      element.setAttribute("tabindex", value);
+    }
+  }
+
+  private controlElement(): HTMLElement | null {
+    if (!this.interactiveContent()) return null;
+
+    this.control ??= this.host.nativeElement.querySelector<HTMLElement>(
+      INTERACTIVE_CONTENT_SELECTOR,
+    );
+
+    return this.control;
+  }
+
+  @HostListener("click", ["$event"])
+  onClick(event: MouseEvent) {
+    if (this.disabled()) {
+      // A disabled item's own control would otherwise still act on the click
+      // (a link would navigate) — nothing else here prevents it.
+      if (this.interactiveContent()) event.preventDefault();
+      return;
+    }
 
     this.onItemSelect();
   }
@@ -127,8 +203,20 @@ export class DropdownItemComponent {
         break;
 
       case "Enter":
+        // An interactive item's control activates itself — preventing the
+        // default would swallow a link's navigation. The resulting click
+        // bubbles here and closes the dropdown.
+        if (this.interactiveContent()) break;
+        event.preventDefault();
+        this.onItemSelect();
+        break;
+
       case " ":
         event.preventDefault();
+        if (this.interactiveContent()) {
+          this.controlElement()?.click();
+          break;
+        }
         this.onItemSelect();
         break;
 

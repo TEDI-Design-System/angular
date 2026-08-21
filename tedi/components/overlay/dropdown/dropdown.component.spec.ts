@@ -70,6 +70,34 @@ class MockButtonComponent {}
 })
 class WrappingButtonHostComponent {}
 
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content dropdownRole="menu">
+        <li tedi-dropdown-item [interactiveContent]="true">
+          <a href="/a">Link A</a>
+        </li>
+        <li tedi-dropdown-item [interactiveContent]="true">
+          <a href="/b">Link B</a>
+        </li>
+        <li tedi-dropdown-item [interactiveContent]="true" [disabled]="true">
+          <a href="/c">Link C</a>
+        </li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class InteractiveContentHostComponent {}
+
 describe("DropdownComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let host: TestHostComponent;
@@ -812,6 +840,102 @@ describe("DropdownComponent", () => {
       wrappedDropdown.dropdownTrigger().focus();
 
       expect(focusSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("interactiveContent items", () => {
+    let interactiveFixture: ComponentFixture<InteractiveContentHostComponent>;
+    let interactiveDropdown: DropdownComponent;
+    let links: HTMLAnchorElement[];
+    let itemEls: HTMLLIElement[];
+
+    beforeEach(() => {
+      interactiveFixture = TestBed.createComponent(
+        InteractiveContentHostComponent,
+      );
+      interactiveFixture.detectChanges();
+
+      interactiveDropdown = interactiveFixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      interactiveDropdown.showDropdown();
+      interactiveFixture.detectChanges();
+
+      itemEls = Array.from(
+        overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+      ) as HTMLLIElement[];
+      links = itemEls.map((el) => el.querySelector("a") as HTMLAnchorElement);
+    });
+
+    afterEach(() => {
+      interactiveDropdown.hideDropdown();
+    });
+
+    it("exposes the item role on the link and leaves the li presentational", () => {
+      itemEls.forEach((el) => {
+        expect(el.getAttribute("role")).toBe("none");
+        expect(el.getAttribute("tabindex")).toBeNull();
+      });
+
+      links.forEach((link) =>
+        expect(link.getAttribute("role")).toBe("menuitem"),
+      );
+      expect(links[2].getAttribute("aria-disabled")).toBe("true");
+      expect(links[0].getAttribute("aria-disabled")).toBeNull();
+    });
+
+    it("keeps the roving tabindex on the links", () => {
+      expect(links.map((link) => link.getAttribute("tabindex"))).toEqual([
+        "0",
+        "-1",
+        "-1",
+      ]);
+
+      interactiveDropdown.focusNextItem(itemEls[0]);
+      interactiveFixture.detectChanges();
+
+      expect(links.map((link) => link.getAttribute("tabindex"))).toEqual([
+        "-1",
+        "0",
+        "-1",
+      ]);
+      expect(document.activeElement).toBe(links[1]);
+    });
+
+    it("keydown: Enter is left to the link so it navigates", () => {
+      const event = new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+      });
+      links[0].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    it("keydown: Space activates the link", () => {
+      const clickSpy = jest.spyOn(links[0], "click");
+      const event = new KeyboardEvent("keydown", {
+        key: " ",
+        bubbles: true,
+        cancelable: true,
+      });
+      links[0].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(clickSpy).toHaveBeenCalled();
+    });
+
+    it("prevents activation of a disabled item's link", () => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+      });
+      links[2].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(interactiveDropdown.isOpen()).toBe(true);
     });
   });
 });
