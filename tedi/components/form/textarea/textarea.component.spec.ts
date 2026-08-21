@@ -14,6 +14,13 @@ class TestHostComponent {}
 
 @Component({
   standalone: true,
+  imports: [TextareaComponent],
+  template: `<textarea tedi-textarea [invalid]="true"></textarea>`,
+})
+class InvalidHostComponent {}
+
+@Component({
+  standalone: true,
   imports: [TextareaComponent, ReactiveFormsModule],
   template: `<textarea tedi-textarea [formControl]="control"></textarea>`,
 })
@@ -90,12 +97,23 @@ describe("TextareaComponent", () => {
     expect(onTouchedSpy).toHaveBeenCalled();
   });
 
-  it("should update invalid signal via setInvalidState", () => {
-    component.setInvalidState(true);
-    expect(component.invalid()).toBe(true);
+  it("should reflect the invalid input", () => {
+    const invalidFixture = TestBed.createComponent(InvalidHostComponent);
+    invalidFixture.detectChanges();
+    const invalidTextarea = invalidFixture.debugElement.query(
+      By.directive(TextareaComponent),
+    ).componentInstance as TextareaComponent;
 
-    component.setInvalidState(false);
-    expect(component.invalid()).toBe(false);
+    expect(invalidTextarea.invalid()).toBe(true);
+    expect(
+      invalidFixture.nativeElement
+        .querySelector("textarea")
+        .getAttribute("aria-invalid"),
+    ).toBe("true");
+  });
+
+  it("should paint its own surface when not inside a field box", () => {
+    expect(textarea.classList.contains("tedi-field-surface")).toBe(true);
   });
 
   describe("resizable", () => {
@@ -140,46 +158,48 @@ describe("TextareaComponent", () => {
       return f.componentInstance;
     };
 
-    it("derives min-height from minRows while auto-growing", () => {
+    it("derives min-height from minRows in both modes", () => {
       expect(makeFixture({ autoGrow: true, minRows: 4 }).minHeightStyle()).toBe(
-        "calc(4 * 1lh + 2 * var(--_tedi-textarea-padding-y))",
+        "calc(4 * 1lh + 2 * var(--_field-padding-y))",
+      );
+      expect(makeFixture({ autoGrow: false, minRows: 4 }).minHeightStyle()).toBe(
+        "calc(4 * 1lh + 2 * var(--_field-padding-y))",
       );
     });
 
-    it("does not set a min-height when not auto-growing", () => {
-      expect(makeFixture({ autoGrow: false, minRows: 4 }).minHeightStyle()).toBeNull();
+    it("rests at minRows when no height is set", () => {
+      const component = makeFixture({});
+
+      expect(component.heightStyle()).toBeNull();
+      expect(component.minHeightStyle()).toBe(
+        "calc(3 * 1lh + 2 * var(--_field-padding-y))",
+      );
     });
 
-    it("derives max-height from maxRows while auto-growing", () => {
+    it("derives max-height from maxRows in both modes", () => {
       expect(makeFixture({ autoGrow: true, maxRows: 10 }).maxHeightStyle()).toBe(
-        "calc(10 * 1lh + 2 * var(--_tedi-textarea-padding-y))",
+        "calc(10 * 1lh + 2 * var(--_field-padding-y))",
+      );
+      expect(makeFixture({ autoGrow: false, maxRows: 10 }).maxHeightStyle()).toBe(
+        "calc(10 * 1lh + 2 * var(--_field-padding-y))",
       );
     });
 
-    it("combines maxRows and maxHeight with min() while auto-growing", () => {
+    it("combines maxRows and maxHeight with min()", () => {
       expect(
         makeFixture({ autoGrow: true, maxRows: 12, maxHeight: "200px" }).maxHeightStyle(),
-      ).toBe("min(calc(12 * 1lh + 2 * var(--_tedi-textarea-padding-y)), 200px)");
+      ).toBe("min(calc(12 * 1lh + 2 * var(--_field-padding-y)), 200px)");
+      expect(makeFixture({ maxRows: 12, maxHeight: 200 }).maxHeightStyle()).toBe(
+        "min(calc(12 * 1lh + 2 * var(--_field-padding-y)), 200px)",
+      );
     });
 
-    it("applies maxHeight alone (number → px) when not auto-growing", () => {
-      expect(makeFixture({ maxHeight: 200 }).maxHeightStyle()).toBe("200px");
-    });
-
-    it("applies a fixed height when not auto-growing", () => {
+    it("applies an explicit height when not auto-growing", () => {
       expect(makeFixture({ height: "7.5rem" }).heightStyle()).toBe("7.5rem");
       expect(makeFixture({ height: 200 }).heightStyle()).toBe("200px");
     });
 
-    it("defaults the fixed height to 7.5rem", () => {
-      expect(makeFixture({}).heightStyle()).toBe("7.5rem");
-    });
-
-    it("falls back to rows-based height when height is undefined", () => {
-      expect(makeFixture({ height: undefined }).heightStyle()).toBeNull();
-    });
-
-    it("ignores fixed height while auto-growing", () => {
+    it("ignores an explicit height while auto-growing", () => {
       expect(makeFixture({ autoGrow: true, height: "7.5rem" }).heightStyle()).toBeNull();
     });
   });

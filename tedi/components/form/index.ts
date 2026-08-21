@@ -18,6 +18,8 @@ export * from "./slider/slider.component";
 export * from "./toggle/toggle.component";
 export * from "./form-field/form-field.component";
 export * from "./form-field/form-field-control";
+export * from "./form-field/form-field-extra.directive";
+export * from "./form-field/field-context.token";
 export * from "./input-group";
 export * from "./text-field/text-field.component";
 export * from "./textarea/textarea.component";

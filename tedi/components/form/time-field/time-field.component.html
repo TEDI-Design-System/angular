@@ -17,6 +17,10 @@
       [interactive]="false"
       class="tedi-time-field__field"
       [class.tedi-time-field__field--button-trigger]="!inputIsTrigger()"
+      [class.tedi-field-surface]="paintsSurface()"
+      [class.tedi-field-surface--invalid]="paintsSurface() && invalid()"
+      [class.tedi-field-surface--valid]="paintsSurface() && valid()"
+      [class.tedi-field-surface--disabled]="paintsSurface() && disabled()"
       [attr.tabindex]="-1"
       (focus)="onFieldFocus($event)"
       (click)="onFieldClick()"
@@ -46,7 +50,14 @@
   </tedi-popover>
 } @else {
   <!-- No picker / native picker / mobile-modal / disabled: plain field, no popover. -->
-  <div #fieldEl class="tedi-time-field__field">
+  <div
+    #fieldEl
+    class="tedi-time-field__field"
+    [class.tedi-field-surface]="paintsSurface()"
+    [class.tedi-field-surface--invalid]="paintsSurface() && invalid()"
+    [class.tedi-field-surface--valid]="paintsSurface() && valid()"
+    [class.tedi-field-surface--disabled]="paintsSurface() && disabled()"
+  >
     <ng-container *ngTemplateOutlet="timeInput" />
     <div class="tedi-time-field__actions">
       <ng-container *ngTemplateOutlet="clearButton" />

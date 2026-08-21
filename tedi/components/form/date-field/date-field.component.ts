@@ -9,6 +9,7 @@ import {
   inject,
   input,
   model,
+  OnInit,
   output,
   Renderer2,
   signal,
@@ -36,6 +37,12 @@ import {
   FormFieldControl,
   TEDI_FORM_FIELD_CONTROL,
 } from "../form-field/form-field-control";
+import {
+  FieldContext,
+  InputSize,
+  TEDI_FIELD_CONTEXT,
+} from "../form-field/field-context.token";
+import { deriveControlState } from "../form-field/derive-control-state";
 import {
   breakpointInput,
   BreakpointInput,
@@ -96,13 +103,29 @@ export type DateFieldSize = "default" | "small";
       provide: TEDI_FORM_FIELD_CONTROL,
       useExisting: forwardRef(() => DateFieldComponent),
     },
+    {
+      provide: TEDI_FIELD_CONTEXT,
+      useFactory: (field: DateFieldComponent) => field.childContext,
+      deps: [forwardRef(() => DateFieldComponent)],
+    },
   ],
   host: {
     class: "tedi-date-field",
+    "[class.tedi-field-surface]": "paintsSurface()",
+    "[class.tedi-field-surface--invalid]": "paintsSurface() && invalid()",
+    "[class.tedi-field-surface--valid]": "paintsSurface() && valid()",
+    "[class.tedi-field-surface--disabled]": "paintsSurface() && disabled()",
+    "[class.tedi-date-field--small]": "resolvedSize() === 'small'",
+    "[class.tedi-date-field--large]": "resolvedSize() === 'large'",
   },
 })
 export class DateFieldComponent
-  implements ControlValueAccessor, FormFieldControl<DateFieldValue> {
+  implements OnInit, ControlValueAccessor, FormFieldControl<DateFieldValue> {
+  private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
+    optional: true,
+    skipSelf: true,
+  });
+  private readonly derived = deriveControlState();
   /**
    * Unique ID for label association and accessibility. Bind the sibling
    * `<label tedi-label [for]>` to the same value.
@@ -161,8 +184,17 @@ export class DateFieldComponent
    * bind it there too, since DateField owns no label.
    */
   readonly required = input<boolean>(false);
-  /** Field size — matches the surrounding `tedi-form-field`. */
-  readonly size = input<DateFieldSize>("default");
+  /**
+   * Field size. Falls back to the size of a wrapping `tedi-form-field` when not
+   * set here.
+   */
+  readonly size = input<DateFieldSize | undefined>();
+  /**
+   * Forces the error state on, or off, regardless of the reactive-forms state.
+   * Leave unset to let the control derive it.
+   */
+  // eslint-disable-next-line @angular-eslint/no-input-rename
+  readonly invalidInput = input<boolean>(false, { alias: "invalid" });
   /** Disables all dates before this date (inclusive boundary stays enabled). */
   readonly minDate = input<Date | undefined>(undefined);
   /** Disables all dates after this date (inclusive boundary stays enabled). */
@@ -328,7 +360,6 @@ export class DateFieldComponent
   });
 
   private readonly cvaDisabled = signal(false);
-  private readonly formInvalid = signal(false);
   private modalRef: ModalRef<DateFieldValue> | null = null;
   private scrollListener?: () => void;
 
@@ -336,12 +367,46 @@ export class DateFieldComponent
   private onTouched: () => void = () => { };
 
   readonly fieldDisabled = computed(
-    () => this.inputDisabled() || this.cvaDisabled(),
+    () =>
+      this.inputDisabled() ||
+      this.cvaDisabled() ||
+      (this.fieldContext?.disabled() ?? false),
   );
 
   readonly disabled = computed(() => this.fieldDisabled());
 
-  readonly invalid = computed(() => this.formInvalid());
+  readonly touched = this.derived.touched;
+
+  readonly dirty = this.derived.dirty;
+
+  readonly invalid = computed(
+    () =>
+      this.invalidInput() ||
+      this.derived.invalid() ||
+      (this.fieldContext?.invalid() ?? false),
+  );
+
+  readonly resolvedSize = computed<InputSize>(
+    () => this.size() ?? this.fieldContext?.size() ?? "default",
+  );
+
+  readonly paintsSurface = computed(
+    () => !(this.fieldContext?.ownsSurface() ?? false),
+  );
+
+  readonly valid = computed(() => this.fieldContext?.valid() ?? false);
+
+  readonly childContext: FieldContext = {
+    size: computed(() => this.resolvedSize()),
+    ownsSurface: computed(() => true),
+    invalid: computed(() => this.invalid()),
+    valid: computed(() => this.valid()),
+    disabled: computed(() => this.disabled()),
+  };
+
+  ngOnInit(): void {
+    this.derived.connect();
+  }
 
   readonly resolvedDisabledMatchers = computed<Matcher[]>(() => {
     const result: Matcher[] = [];
@@ -514,22 +579,18 @@ export class DateFieldComponent
     this.cvaDisabled.set(isDisabled);
   }
 
-  setInvalidState(isInvalid: boolean): void {
-    this.formInvalid.set(isInvalid);
-  }
-
   focus(): void {
     if (this.fieldDisabled()) return;
     this.dateInput().focusInput();
   }
 
-  clearField(): void {
+  reset(): void {
     if (this.fieldDisabled() || this.readOnly()) return;
     this.commitValue(null);
   }
 
   handleClear(): void {
-    this.clearField();
+    this.reset();
   }
 
   handleIconClick(): void {

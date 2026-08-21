@@ -11,8 +11,8 @@ import {
 } from "./form-field-control";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { TextareaComponent } from "../textarea/textarea.component";
-import { NgControl } from "@angular/forms";
-import { Subject } from "rxjs";
+import { LabelComponent } from "../label/label.component";
+import { LabelRowComponent } from "../label-row/label-row.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 @Component({
@@ -30,21 +30,14 @@ class MockControlComponent implements FormFieldControl<string> {
   value = signal("");
   disabled = signal(false);
   invalid = signal(false);
-  setInvalidState = jest.fn();
-  clearField = jest.fn();
+  reset = jest.fn();
   focus = jest.fn();
+  setDescribedBy = jest.fn();
 }
 
 @Component({
-  selector: "mock-feedback",
   standalone: true,
-  template: "",
-})
-export class MockFeedbackComponent extends FeedbackTextComponent {}
-
-@Component({
-  standalone: true,
-  imports: [FormFieldComponent, MockControlComponent, MockFeedbackComponent],
+  imports: [FormFieldComponent, MockControlComponent, FeedbackTextComponent],
   template: `
     <tedi-form-field
       #formField
@@ -55,11 +48,11 @@ export class MockFeedbackComponent extends FeedbackTextComponent {}
       [characterLimit]="characterLimit"
     >
       <mock-control #mockControl></mock-control>
-      <mock-feedback
+      <tedi-feedback-text
         #feedback
         [text]="'Feedback text'"
         [type]="feedbackType"
-      ></mock-feedback>
+      ></tedi-feedback-text>
     </tedi-form-field>
   `,
 })
@@ -74,7 +67,7 @@ class TestHostComponent {
   clearable = false;
   inputClass?: string;
   characterLimit?: number;
-  feedbackType: "valid" | "error" | "default" = "default";
+  feedbackType: "valid" | "error" | "hint" = "hint";
 }
 
 describe("FormFieldComponent", () => {
@@ -103,6 +96,20 @@ describe("FormFieldComponent", () => {
     host.size = "small";
     fixture.detectChanges();
     expect(formField.hostClasses()["tedi-form-field--small"]).toBe(true);
+  });
+
+  it("should accept a control it has no prior knowledge of", () => {
+    host.mockControl.value.set("hello");
+    fixture.detectChanges();
+
+    expect(formField.control()).toBe(host.mockControl);
+    expect(formField.characterCount()).toBe(5);
+  });
+
+  it("should not render a field box without inline additions", () => {
+    expect(
+      fixture.nativeElement.querySelector(".tedi-form-field__box"),
+    ).toBeNull();
   });
 
   it("should resolve string icon to config object", () => {
@@ -138,9 +145,9 @@ describe("FormFieldComponent", () => {
       ".tedi-form-field__buttons",
     );
     expect(buttons).toBeTruthy();
-    expect(buttons.classList.contains("tedi-form-field__buttons--hidden")).toBe(
-      true,
-    );
+    expect(
+      buttons.classList.contains("tedi-form-field__buttons--hidden"),
+    ).toBe(true);
     expect(buttons.getAttribute("aria-hidden")).toBe("true");
 
     const button = buttons.querySelector("button");
@@ -157,9 +164,9 @@ describe("FormFieldComponent", () => {
       ".tedi-form-field__buttons",
     );
     expect(buttons).toBeTruthy();
-    expect(buttons.classList.contains("tedi-form-field__buttons--hidden")).toBe(
-      false,
-    );
+    expect(
+      buttons.classList.contains("tedi-form-field__buttons--hidden"),
+    ).toBe(false);
     expect(buttons.getAttribute("aria-hidden")).toBeNull();
 
     const button = buttons.querySelector("button");
@@ -177,10 +184,16 @@ describe("FormFieldComponent", () => {
     expect(buttons).toBeNull();
   });
 
-  it("should call control.clearField when clear is triggered", () => {
-    formField.clear();
+  it("should reset the control when the clear button is clicked", () => {
+    host.clearable = true;
+    host.mockControl.value.set("Test");
+    fixture.detectChanges();
 
-    expect(host.mockControl.clearField).toHaveBeenCalled();
+    fixture.nativeElement
+      .querySelector(".tedi-form-field__clear")
+      .click();
+
+    expect(host.mockControl.reset).toHaveBeenCalled();
   });
 
   describe("clicking the field box", () => {
@@ -194,7 +207,12 @@ describe("FormFieldComponent", () => {
     };
 
     const box = (): HTMLElement =>
-      fixture.nativeElement.querySelector(".tedi-form-field__input");
+      fixture.nativeElement.querySelector(".tedi-form-field__box");
+
+    beforeEach(() => {
+      host.icon = "search";
+      fixture.detectChanges();
+    });
 
     it("should focus the control when the box padding is clicked", () => {
       const event = mouseDownOn(box());
@@ -254,12 +272,37 @@ describe("FormFieldComponent", () => {
     expect(formField.isDisabled()).toBe(false);
   });
 
-  it("should apply custom class", () => {
+  it("should apply the deprecated inputClass to the field box", () => {
+    host.icon = "search";
     host.inputClass = "custom-class";
     fixture.detectChanges();
 
-    const classes = formField.inputClasses() as Record<string, boolean>;
-    expect(classes["custom-class"]).toBe(true);
+    const box = fixture.nativeElement.querySelector(".tedi-form-field__box");
+    expect(box.classList.contains("custom-class")).toBe(true);
+  });
+
+  it("should scale the icon with the size", () => {
+    expect(formField.iconSize()).toBe(18);
+
+    host.size = "small";
+    fixture.detectChanges();
+    expect(formField.iconSize()).toBe(16);
+
+    host.size = "large";
+    fixture.detectChanges();
+    expect(formField.iconSize()).toBe(24);
+  });
+
+  it("should mirror the validation and disabled state onto the box surface", () => {
+    host.icon = "search";
+    host.mockControl.invalid.set(true);
+    host.mockControl.disabled.set(true);
+    fixture.detectChanges();
+
+    const box = fixture.nativeElement.querySelector(".tedi-form-field__box");
+    expect(box.classList).toContain("tedi-field-surface");
+    expect(box.classList).toContain("tedi-field-surface--invalid");
+    expect(box.classList).toContain("tedi-field-surface--disabled");
   });
 
   it("should count the characters of the control value", () => {
@@ -276,38 +319,20 @@ describe("FormFieldComponent", () => {
     expect(bare.componentInstance.characterCount()).toBe(0);
   });
 
-  it("should force the control invalid when the character limit is exceeded", () => {
-    const spy = jest.spyOn(host.mockControl, "setInvalidState");
-
+  it("should contribute the exceeded character limit to the control's invalid state", () => {
     host.characterLimit = 3;
     host.mockControl.value.set("hello");
     fixture.detectChanges();
 
-    expect(spy).toHaveBeenCalledWith(true);
+    expect(formField.invalid()).toBe(true);
     expect(formField.validationState()).toBe("invalid");
   });
 
-  it("should react to control.events and call setInvalidState", () => {
-    const events = new Subject<void>();
+  it("should contribute an error feedback text to the control's invalid state", () => {
+    host.feedbackType = "error";
+    fixture.detectChanges();
 
-    formField.ngControl = {
-      control: {
-        events: events.asObservable(),
-      },
-      invalid: true,
-      touched: true,
-      dirty: false,
-    } as unknown as NgControl;
-
-    formField.ngAfterContentInit();
-
-    const spy = jest.spyOn(host.mockControl, "setInvalidState");
-    spy.mockClear();
-
-    events.next();
-
-    expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith(true);
+    expect(formField.invalid()).toBe(true);
   });
 });
 
@@ -315,7 +340,7 @@ describe("FormFieldComponent", () => {
   standalone: true,
   imports: [FormFieldComponent, TextareaComponent],
   template: `
-    <tedi-form-field #formField [clearable]="true" [icon]="'search'">
+    <tedi-form-field #formField>
       <textarea tedi-textarea [value]="'hello'"></textarea>
     </tedi-form-field>
   `,
@@ -324,12 +349,50 @@ class TextareaHostComponent {
   @ViewChild("formField", { static: true }) formField!: FormFieldComponent;
 }
 
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextareaComponent],
+  template: `
+    <tedi-form-field icon="search">
+      <textarea tedi-textarea></textarea>
+    </tedi-form-field>
+  `,
+})
+class TextareaInBoxHostComponent {}
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextareaComponent],
+  template: `
+    <tedi-form-field icon="search">
+      <textarea tedi-textarea height="7.5rem"></textarea>
+    </tedi-form-field>
+  `,
+})
+class FixedHeightTextareaInBoxHostComponent {}
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextareaComponent],
+  template: `
+    <tedi-form-field [clearable]="true">
+      <textarea tedi-textarea [value]="'hello'"></textarea>
+    </tedi-form-field>
+  `,
+})
+class ClearableTextareaHostComponent {}
+
 describe("FormFieldComponent wrapping a textarea", () => {
   let fixture: ComponentFixture<TextareaHostComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TextareaHostComponent],
+      imports: [
+        TextareaHostComponent,
+        TextareaInBoxHostComponent,
+        FixedHeightTextareaInBoxHostComponent,
+        ClearableTextareaHostComponent,
+      ],
       providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
     }).compileComponents();
 
@@ -337,35 +400,56 @@ describe("FormFieldComponent wrapping a textarea", () => {
     fixture.detectChanges();
   });
 
-  it("detects the projected textarea", () => {
-    expect(fixture.componentInstance.formField.isTextarea()).toBe(true);
-  });
-
-  it("makes the textarea the resizable element with the resting height", () => {
-    const box = fixture.nativeElement.querySelector(".tedi-form-field__input");
+  it("leaves the surface to the textarea", () => {
     const ta = fixture.nativeElement.querySelector("textarea");
 
-    expect(ta.style.height).toBe("7.5rem");
-    expect(box.style.height).toBe("");
+    expect(fixture.nativeElement.querySelector(".tedi-form-field__box")).toBeNull();
+    expect(ta.classList.contains("tedi-field-surface")).toBe(true);
+  });
+
+  it("hands the surface to the box when an inline addition is asked for", () => {
+    const boxFixture = TestBed.createComponent(TextareaInBoxHostComponent);
+    boxFixture.detectChanges();
+
+    const box = boxFixture.nativeElement.querySelector(".tedi-form-field__box");
+    const ta = boxFixture.nativeElement.querySelector("textarea");
+
+    expect(box.classList.contains("tedi-field-surface")).toBe(true);
+    expect(ta.classList.contains("tedi-field-surface")).toBe(false);
+    expect(box.contains(ta)).toBe(true);
+  });
+
+  it("makes the textarea the resizable element resting at minRows", () => {
+    const ta = fixture.nativeElement.querySelector("textarea");
+
+    expect(ta.style.height).toBe("");
+    expect(ta.style.minHeight).toBe("calc(3 * 1lh + 2 * var(--_field-padding-y))");
     expect(ta.classList.contains("tedi-textarea--not-resizable")).toBe(false);
   });
 
-  it("suppresses the clear button even when clearable with a value", () => {
-    expect(
-      fixture.nativeElement.querySelector(".tedi-form-field__clear"),
-    ).toBeNull();
+  it("keeps its own sizing when the box owns the surface", () => {
+    const boxFixture = TestBed.createComponent(FixedHeightTextareaInBoxHostComponent);
+    boxFixture.detectChanges();
+
+    // The textarea reaches under the box's additions to the border, so it keeps
+    // its own grip and its own height — boxed and standalone size alike.
+    const ta = boxFixture.nativeElement.querySelector("textarea");
+    expect(ta.style.height).toBe("7.5rem");
+    expect(ta.style.minHeight).toBe("calc(3 * 1lh + 2 * var(--_field-padding-y))");
   });
 
-  it("suppresses the icon", () => {
-    expect(fixture.nativeElement.querySelector("tedi-icon")).toBeNull();
-  });
+  it("clears the textarea from the box's clear button", () => {
+    const clearFixture = TestBed.createComponent(ClearableTextareaHostComponent);
+    clearFixture.detectChanges();
 
-  it("does not apply the --with-icon class", () => {
-    expect(
-      fixture.componentInstance.formField.hostClasses()[
-        "tedi-form-field--with-icon"
-      ],
-    ).toBe(false);
+    const ta: HTMLTextAreaElement =
+      clearFixture.nativeElement.querySelector("textarea");
+    expect(ta.value).toBe("hello");
+
+    clearFixture.nativeElement.querySelector(".tedi-form-field__clear").click();
+    clearFixture.detectChanges();
+
+    expect(ta.value).toBe("");
   });
 });
 
@@ -448,8 +532,6 @@ describe("FormFieldComponent character limit with a textarea", () => {
   });
 
   it("marks the counter as a live region so updates are announced", () => {
-    // A live region means updates are spoken as they happen. The polite/assertive
-    // switch on overflow is covered by the browser/a11y-tree verification.
     expect(counter().getAttribute("aria-live")).toBe("polite");
   });
 });
@@ -460,14 +542,19 @@ describe("FormFieldComponent character limit with a textarea", () => {
   template: `
     <tedi-form-field [characterLimit]="5">
       <textarea tedi-textarea></textarea>
-      <tedi-feedback-text [text]="'Hint text'" />
+      @if (showFeedback) {
+        <tedi-feedback-text [text]="'Hint text'" />
+      }
     </tedi-form-field>
   `,
 })
-class TextareaFeedbackAndCounterHostComponent {}
+class TextareaFeedbackAndCounterHostComponent {
+  showFeedback = true;
+}
 
 describe("FormFieldComponent aria-describedby aggregation", () => {
   let fixture: ComponentFixture<TextareaFeedbackAndCounterHostComponent>;
+  let host: TextareaFeedbackAndCounterHostComponent;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -476,21 +563,50 @@ describe("FormFieldComponent aria-describedby aggregation", () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(TextareaFeedbackAndCounterHostComponent);
+    host = fixture.componentInstance;
     fixture.detectChanges();
   });
 
+  const describedBy = () =>
+    fixture.nativeElement
+      .querySelector("textarea")
+      .getAttribute("aria-describedby") ?? "";
+  const counterId = () =>
+    fixture.nativeElement.querySelector(".tedi-form-field__character-count").id;
+
   it("links both the feedback text and the counter", () => {
-    const describedBy =
-      fixture.nativeElement.querySelector("textarea").getAttribute("aria-describedby") ?? "";
-    const feedbackId = fixture.nativeElement.querySelector("tedi-feedback-text").id;
-    const counterId = fixture.nativeElement.querySelector(
-      ".tedi-form-field__character-count",
-    ).id;
+    const feedbackId =
+      fixture.nativeElement.querySelector("tedi-feedback-text").id;
 
     expect(feedbackId).toBeTruthy();
-    expect(counterId).toBeTruthy();
-    expect(describedBy).toContain(feedbackId);
-    expect(describedBy).toContain(counterId);
+    expect(counterId()).toBeTruthy();
+    expect(describedBy()).toContain(feedbackId);
+    expect(describedBy()).toContain(counterId());
+  });
+
+  it("links feedback that appears after the first render", () => {
+    host.showFeedback = false;
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector("tedi-feedback-text")).toBeNull();
+
+    host.showFeedback = true;
+    fixture.detectChanges();
+
+    const feedbackId =
+      fixture.nativeElement.querySelector("tedi-feedback-text").id;
+    expect(feedbackId).toBeTruthy();
+    expect(describedBy()).toContain(feedbackId);
+  });
+
+  it("unlinks feedback that is removed again", () => {
+    const feedbackId =
+      fixture.nativeElement.querySelector("tedi-feedback-text").id;
+
+    host.showFeedback = false;
+    fixture.detectChanges();
+
+    expect(describedBy()).not.toContain(feedbackId);
+    expect(describedBy()).toContain(counterId());
   });
 });
 
@@ -520,12 +636,78 @@ describe("FormFieldComponent aria-describedby with a caller-provided id", () => 
 
   it("keeps the caller's id and appends the managed counter id", () => {
     const describedBy =
-      fixture.nativeElement.querySelector("textarea").getAttribute("aria-describedby") ?? "";
+      fixture.nativeElement
+        .querySelector("textarea")
+        .getAttribute("aria-describedby") ?? "";
     const counterId = fixture.nativeElement.querySelector(
       ".tedi-form-field__character-count",
     ).id;
 
     expect(describedBy).toContain("external-hint");
     expect(describedBy).toContain(counterId);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [
+    FormFieldComponent,
+    TextareaComponent,
+    LabelComponent,
+    LabelRowComponent,
+  ],
+  template: `
+    <tedi-form-field [icon]="icon">
+      <tedi-label-row>
+        <label tedi-label for="notes">Märkused</label>
+        <span class="tooltip-stub">?</span>
+      </tedi-label-row>
+      <textarea tedi-textarea id="notes"></textarea>
+    </tedi-form-field>
+  `,
+})
+class LabelRowHostComponent {
+  icon?: string;
+}
+
+describe("FormFieldComponent with a tedi-label-row", () => {
+  let fixture: ComponentFixture<LabelRowHostComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [LabelRowHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(LabelRowHostComponent);
+    fixture.detectChanges();
+  });
+
+  const labelRow = (): HTMLElement =>
+    fixture.nativeElement.querySelector("tedi-label-row");
+
+  it("projects the label row above the control, not into the control slot", () => {
+    const formField = fixture.nativeElement.querySelector("tedi-form-field");
+    const textarea = fixture.nativeElement.querySelector("textarea");
+
+    expect(labelRow().parentElement).toBe(formField);
+    expect(
+      labelRow().compareDocumentPosition(textarea) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("keeps the label row out of the field box", () => {
+    fixture.componentInstance.icon = "search";
+    fixture.detectChanges();
+
+    const box = fixture.nativeElement.querySelector(".tedi-form-field__box");
+    expect(box).not.toBeNull();
+    expect(box.contains(labelRow())).toBe(false);
+  });
+
+  it("keeps the label and its affix together in the row", () => {
+    expect(labelRow().querySelector("label[tedi-label]")).not.toBeNull();
+    expect(labelRow().querySelector(".tooltip-stub")).not.toBeNull();
   });
 });

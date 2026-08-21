@@ -280,9 +280,10 @@ describe("TimeFieldComponent", () => {
       expect(component.invalid()).toBe(true);
     });
 
-    it("should expose invalid signal driven by setInvalidState", () => {
+    it("should expose invalid signal driven by the invalid input", () => {
       expect(component.invalid()).toBe(false);
-      component.setInvalidState(true);
+      fixture.componentRef.setInput("invalid", true);
+      fixture.detectChanges();
       expect(component.invalid()).toBe(true);
     });
 
@@ -308,11 +309,11 @@ describe("TimeFieldComponent", () => {
       expect(focusSpy).not.toHaveBeenCalled();
     });
 
-    it("should provide clearField method", () => {
+    it("should provide reset method", () => {
       component.writeValue("14:30");
       fixture.detectChanges();
 
-      component.clearField();
+      component.reset();
       expect(component.value()).toBeNull();
       expect(component.inputValue()).toBe("");
     });
@@ -727,8 +728,8 @@ describe("TimeFieldComponent", () => {
   });
 
   describe("accessibility", () => {
-    it("should set aria-invalid when setInvalidState(true) is called", () => {
-      component.setInvalidState(true);
+    it("should set aria-invalid when the invalid input is set", () => {
+      fixture.componentRef.setInput("invalid", true);
       fixture.detectChanges();
 
       expect(el.querySelector("input")?.getAttribute("aria-invalid")).toBe(

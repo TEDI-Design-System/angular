@@ -18,6 +18,8 @@ import { RowComponent } from "../../helpers/grid/row/row.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { TextComponent } from "../../base/text/text.component";
 import { LabelComponent } from "../label/label.component";
+import { LabelRowComponent } from "../label-row/label-row.component";
+import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];
 
@@ -39,6 +41,8 @@ export default {
         TextComponent,
         AlertComponent,
         FormFieldComponent,
+        LabelRowComponent,
+        InfoTooltipComponent,
         FeedbackTextComponent,
         ReactiveFormsModule,
         FormsModule,
@@ -47,29 +51,44 @@ export default {
   ],
   argTypes: {
     size: {
-      description: "Input field size.",
+      description:
+        "Size of the field. Falls back to the size of a wrapping form field.",
       control: {
         type: "radio",
       },
       options: ["default", "small", "large"],
       table: {
-        category: "Form Field inputs",
+        category: "Text Field inputs",
         type: { summary: "InputSize", detail: "default \nsmall \nlarge" },
         defaultValue: { summary: "default" },
       },
     },
+    invalid: {
+      description:
+        "Forces the error state on. Combines with the state derived from reactive forms.",
+      control: {
+        type: "boolean",
+      },
+      table: {
+        category: "Text Field inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     icon: {
-      description: "Icon name or configuration for the input field.",
+      description:
+        "Icon name or configuration, shown at the end of the field.",
       control: {
         type: "object",
       },
       table: {
         category: "Form Field inputs",
-        type: { summary: "string | TextFieldIcon" },
+        type: { summary: "string | FormFieldIcon" },
       },
     },
     clearable: {
-      description: "Whether the input includes a clear button.",
+      description:
+        "Whether the field shows a clear button once it holds a value.",
       control: {
         type: "boolean",
       },
@@ -77,14 +96,6 @@ export default {
         category: "Form Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
-      },
-    },
-    inputClass: {
-      control: "text",
-      description: "Custom CSS classes for the input.",
-      table: {
-        category: "Form Field inputs",
-        type: { summary: "string" },
       },
     },
     arrowsHidden: {
@@ -309,4 +320,48 @@ export const WithReactiveForms: StoryObj<TextFieldComponent> = {
       `,
     };
   },
+};
+
+/**
+ * The text field paints its own surface, so it renders correctly with no wrapper.
+ * Wrap it in a `tedi-form-field` when it needs a label, feedback text, a character
+ * counter, an icon or a clear button.
+ */
+export const Standalone: StoryObj<TextFieldComponent> = {
+  render: () => ({
+    template: `<input tedi-text-field placeholder="No wrapper" />`,
+  }),
+};
+
+/**
+ * A label that needs a tooltip is composed as `tedi-label-row` + `tedi-info-tooltip`, per the
+ * Label documentation. The form field's label slot accepts the row as well as a bare label, so the
+ * tooltip stays a sibling of the label rather than part of its accessible name.
+ */
+export const WithLabelTooltip: StoryObj<TextFieldComponent> = {
+  render: () => ({
+    template: `
+      <tedi-row cols="1" [gapY]="3">
+        <tedi-col>
+          <tedi-form-field>
+            <tedi-label-row>
+              <label tedi-label for="tooltip-plain" [required]="true">Toimeaine</label>
+              <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
+            </tedi-label-row>
+            <input tedi-text-field id="tooltip-plain" />
+            <tedi-feedback-text [text]="'Vihjetekst'" />
+          </tedi-form-field>
+        </tedi-col>
+        <tedi-col>
+          <tedi-form-field icon="search" [clearable]="true">
+            <tedi-label-row>
+              <label tedi-label for="tooltip-box">Otsi</label>
+              <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
+            </tedi-label-row>
+            <input tedi-text-field id="tooltip-box" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
 };

@@ -196,10 +196,11 @@ describe("DateFieldComponent", () => {
       expect(component.disabled()).toBe(true);
     });
 
-    it("setInvalidState toggles invalid signal", () => {
-      const { component } = createField();
+    it("invalid input toggles invalid signal", () => {
+      const { component, fixture } = createField();
       expect(component.invalid()).toBe(false);
-      component.setInvalidState(true);
+      fixture.componentRef.setInput("invalid", true);
+      fixture.detectChanges();
       expect(component.invalid()).toBe(true);
     });
 
@@ -226,13 +227,13 @@ describe("DateFieldComponent", () => {
       expect(focusSpy).not.toHaveBeenCalled();
     });
 
-    it("clearField clears value and emits null", () => {
+    it("reset clears value and emits null", () => {
       const { component } = createField();
       const onChange = jest.fn();
       component.writeValue(new Date(2026, 0, 1));
       component.registerOnChange(onChange);
 
-      component.clearField();
+      component.reset();
       expect(component.value()).toBeNull();
       expect(onChange).toHaveBeenCalledWith(null);
     });
@@ -1190,13 +1191,13 @@ describe("DateFieldComponent", () => {
     });
   });
 
-  describe("clearField behavior", () => {
+  describe("reset behavior", () => {
     it("does nothing when disabled", () => {
       const { component } = createField({ inputDisabled: true });
       component.value.set(new Date(2026, 4, 14));
       const onChange = jest.fn();
       component.registerOnChange(onChange);
-      component.clearField();
+      component.reset();
       expect(component.value()).toBeInstanceOf(Date);
       expect(onChange).not.toHaveBeenCalled();
     });
@@ -1206,7 +1207,7 @@ describe("DateFieldComponent", () => {
       component.value.set(new Date(2026, 4, 14));
       const onChange = jest.fn();
       component.registerOnChange(onChange);
-      component.clearField();
+      component.reset();
       expect(component.value()).toBeInstanceOf(Date);
       expect(onChange).not.toHaveBeenCalled();
     });

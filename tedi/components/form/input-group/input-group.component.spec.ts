@@ -7,6 +7,7 @@ import { FormFieldComponent } from "../form-field/form-field.component";
 import { TextFieldComponent } from "../text-field/text-field.component";
 import { LabelComponent } from "../label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
+import { LabelRowComponent } from "../label-row/label-row.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 @Component({
@@ -168,5 +169,57 @@ describe("InputGroupComponent", () => {
 
   it("renders no feedback text when omitted", () => {
     expect(root().querySelector("tedi-feedback-text")).toBeNull();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [
+    InputGroupComponent,
+    InputGroupSuffixDirective,
+    FormFieldComponent,
+    TextFieldComponent,
+    LabelComponent,
+    LabelRowComponent,
+  ],
+  template: `
+    <tedi-input-group>
+      <tedi-label-row>
+        <label tedi-label for="ig-label-row">Summa</label>
+        <span class="tooltip-stub">?</span>
+      </tedi-label-row>
+      <tedi-form-field>
+        <input tedi-text-field id="ig-label-row" />
+      </tedi-form-field>
+      <span tediInputGroupSuffix>EUR</span>
+    </tedi-input-group>
+  `,
+})
+class LabelRowHostComponent {}
+
+describe("InputGroupComponent with a tedi-label-row", () => {
+  let fixture: ComponentFixture<LabelRowHostComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [LabelRowHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(LabelRowHostComponent);
+    fixture.detectChanges();
+  });
+
+  it("projects the label row above the control row", () => {
+    const group = fixture.nativeElement.querySelector("tedi-input-group");
+    const labelRow = fixture.nativeElement.querySelector("tedi-label-row");
+    const row = fixture.nativeElement.querySelector(".tedi-input-group__row");
+
+    expect(labelRow.parentElement).toBe(group);
+    expect(row.contains(labelRow)).toBe(false);
+    expect(
+      labelRow.compareDocumentPosition(row) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 });
