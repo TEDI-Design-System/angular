@@ -826,7 +826,7 @@ icon or a clear button.
 - `resizable: boolean = true` — allow manual (vertical-only) resizing; `false` disables it
 - `autoGrow: boolean = false` — grow to fit content via CSS `field-sizing` (disables manual resize)
 - `minRows: number = 3`, `maxRows: number = 12` — bounds while `autoGrow` is on
-- `height: string | number | undefined = "7.5rem"` — fixed height when `autoGrow` is off; set `undefined` to fall back to the native `rows` attribute
+- `height: string | number | undefined` — exact resting height (e.g. `"7.5rem"`, `200` → `200px`) when `autoGrow` is off; unset by default, so `minRows` sizes the field
 - `maxHeight: string | number | undefined` — cap the height before it scrolls
 - `size: TextareaSize` — "default" or "small"; falls back to a wrapping `tedi-form-field`'s size
 - `invalid: boolean = false` — forces the error state on; combines with the state derived from reactive forms
@@ -1319,9 +1319,12 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 
 Stacks the additions that sit *outside* a field — a label above, feedback text and
 a character counter below — and wires `aria-describedby` between them and the
-control. It does not paint the field; the control does that itself, so the wrapper
-is only needed when one of those additions is present. Any control that provides
-`TEDI_FORM_FIELD_CONTROL` can be projected, including one you wrote yourself.
+control. Controls paint their own surface, so the wrapper is only needed when one
+of those additions is present. The one exception is `icon` or `clearable`: those
+sit *inside* the field, so with either set the form field renders the surface
+itself (a `.tedi-form-field__box` around the control) and the control stands
+down. Any control that provides `TEDI_FORM_FIELD_CONTROL` can be projected,
+including one you wrote yourself.
 Content that belongs below the feedback row is marked with `[tediFormFieldExtra]`.
 
 The label slot accepts a bare `label[tedi-label]` or a `tedi-label-row`, so a label with an info

@@ -13,6 +13,7 @@ import { FeedbackTextComponent } from "../feedback-text/feedback-text.component"
 import { TextareaComponent } from "../textarea/textarea.component";
 import { LabelComponent } from "../label/label.component";
 import { LabelRowComponent } from "../label-row/label-row.component";
+import { FormFieldExtraDirective } from "./form-field-extra.directive";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 @Component({
@@ -709,5 +710,77 @@ describe("FormFieldComponent with a tedi-label-row", () => {
   it("keeps the label and its affix together in the row", () => {
     expect(labelRow().querySelector("label[tedi-label]")).not.toBeNull();
     expect(labelRow().querySelector(".tooltip-stub")).not.toBeNull();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [
+    FormFieldComponent,
+    TextareaComponent,
+    FeedbackTextComponent,
+    FormFieldExtraDirective,
+  ],
+  template: `
+    <tedi-form-field [icon]="icon">
+      <textarea tedi-textarea></textarea>
+      <tedi-feedback-text [text]="'Hint text'" />
+      <p tediFormFieldExtra class="extra-stub">Lisainfo</p>
+    </tedi-form-field>
+  `,
+})
+class ProjectionSlotHostComponent {
+  icon?: string;
+}
+
+describe("FormFieldComponent projection slots", () => {
+  let fixture: ComponentFixture<ProjectionSlotHostComponent>;
+  let host: ProjectionSlotHostComponent;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ProjectionSlotHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(ProjectionSlotHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  const feedback = (): HTMLElement =>
+    fixture.nativeElement.querySelector("tedi-feedback-text");
+  const extra = (): HTMLElement =>
+    fixture.nativeElement.querySelector(".extra-stub");
+
+  it("projects the feedback text into the feedback row", () => {
+    expect(feedback().parentElement?.classList).toContain(
+      "tedi-form-field__feedback",
+    );
+  });
+
+  it("projects [tediFormFieldExtra] content into the extra row", () => {
+    expect(extra().parentElement?.classList).toContain(
+      "tedi-form-field__extra",
+    );
+  });
+
+  it("keeps unmarked content out of the extra row", () => {
+    const extraRow = fixture.nativeElement.querySelector(
+      ".tedi-form-field__extra",
+    );
+
+    expect(extraRow.querySelector("textarea")).toBeNull();
+    expect(extraRow.querySelector("tedi-feedback-text")).toBeNull();
+  });
+
+  it("keeps the feedback and extra rows outside the field box", () => {
+    host.icon = "person";
+    fixture.detectChanges();
+
+    const box = fixture.nativeElement.querySelector(".tedi-form-field__box");
+    expect(box).toBeTruthy();
+    expect(box.contains(feedback())).toBe(false);
+    expect(box.contains(extra())).toBe(false);
   });
 });

@@ -316,6 +316,8 @@ export class TimeFieldComponent
   }
 
   reset() {
+    if (this.isDisabled()) return;
+
     this.clearInput();
   }
 

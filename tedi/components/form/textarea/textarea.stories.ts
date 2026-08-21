@@ -504,7 +504,10 @@ export const Standalone: StoryObj<TextareaComponent> = {
  */
 export const WithIconAndClearButton: StoryObj<TextareaComponent> = {
   render: () => ({
-    props: { clearableValue: "The clear button empties this." },
+    props: {
+      clearableValue: "The clear button empties this.",
+      bothValue: "The clear button empties this one too.",
+    },
     template: `
       <tedi-row cols="1" [gapY]="5">
         <tedi-col>
@@ -525,7 +528,7 @@ export const WithIconAndClearButton: StoryObj<TextareaComponent> = {
           <p tedi-text modifiers="bold">Both, and not resizable</p>
           <tedi-form-field icon="search" [clearable]="true">
             <label tedi-label for="textarea-box-both">Icon and clear button</label>
-            <textarea tedi-textarea id="textarea-box-both" [resizable]="false" [(ngModel)]="clearableValue"></textarea>
+            <textarea tedi-textarea id="textarea-box-both" [resizable]="false" [(ngModel)]="bothValue"></textarea>
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
