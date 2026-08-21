@@ -70,9 +70,18 @@ export const translationsMap = {
     description:
       "Announced to screen readers when the number of search suggestions changes",
     components: ["Search"],
-    et: (count: number) => `${count} vastet`,
-    en: (count: number) => `${count} results`,
-    ru: (count: number) => `${count} результатов`,
+    et: (count: number) => `${count} ${count === 1 ? "vaste" : "vastet"}`,
+    en: (count: number) => `${count} ${count === 1 ? "result" : "results"}`,
+    ru: (count: number) => {
+      const one = count % 10 === 1 && count % 100 !== 11;
+      const few =
+        count % 10 >= 2 &&
+        count % 10 <= 4 &&
+        (count % 100 < 12 || count % 100 > 14);
+
+      if (one) return `${count} результат`;
+      return `${count} ${few ? "результата" : "результатов"}`;
+    },
   },
   required: {
     description: "Required field",

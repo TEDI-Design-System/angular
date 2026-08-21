@@ -251,6 +251,16 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    hideOnScroll: {
+      description:
+        "Closes the suggestion panel when the page (or a scrollable ancestor) scrolls. Scrolling the option list itself keeps the panel open.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     searchEvent: {
       description:
         "Emitted when the search is executed (Enter key or button click). Suppressed when Enter accepts a highlighted suggestion.",
@@ -463,7 +473,8 @@ export const WithHint: Story = {
  */
 export const WithSuggestions: Story = {
   name: "With suggestions",
-  render: () => {
+  args: { hideOnScroll: false },
+  render: (args) => {
     const value = signal("Mar");
     const suggestions = computed(() => {
       const q = value().trim().toLowerCase();
@@ -471,13 +482,14 @@ export const WithSuggestions: Story = {
     });
 
     return {
-      props: { value, suggestions, minQueryLength: MIN_QUERY_LENGTH },
+      props: { ...args, value, suggestions, minQueryLength: MIN_QUERY_LENGTH },
       template: `
         <tedi-search
           inputId="search-suggestions"
           label="Otsi"
           placeholder="Trüki vähemalt 3 tähemärki…"
           [minQueryLength]="minQueryLength"
+          [hideOnScroll]="hideOnScroll"
           [value]="value()"
           [suggestions]="suggestions()"
           (valueChange)="value.set($event)"

@@ -13,6 +13,7 @@ import {
   model,
   numberAttribute,
   output,
+  Renderer2,
   signal,
   untracked,
   viewChild,
@@ -25,10 +26,11 @@ import { ActiveDescendantKeyManager } from "@angular/cdk/a11y";
 import {
   CdkConnectedOverlay,
   CdkOverlayOrigin,
+  ConnectedOverlayPositionChange,
   ConnectedPosition,
   OverlayModule,
 } from "@angular/cdk/overlay";
-import { NgTemplateOutlet } from "@angular/common";
+import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import { ButtonComponent, ButtonVariant } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
@@ -197,6 +199,12 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
    */
   loading = input(false, { transform: booleanAttribute });
   /**
+   * Closes the suggestion panel when the page (or a scrollable ancestor)
+   * scrolls. Scrolling the option list itself keeps the panel open.
+   * @default false
+   */
+  hideOnScroll = input(false, { transform: booleanAttribute });
+  /**
    * Whether the suggestion panel is open.
    * @default false
    */
@@ -226,7 +234,10 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
   private readonly formDisabled = signal(false);
   private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly translationService = inject(TediTranslationService);
+  private readonly renderer = inject(Renderer2);
+  private readonly document = inject(DOCUMENT);
   private readonly injector = inject(Injector);
+  private scrollListener?: () => void;
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
 
@@ -246,6 +257,11 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
 
   readonly overlayPositions = SEARCH_OVERLAY_POSITIONS;
   readonly panelWidth = signal(0);
+  /**
+   * True while the panel sits above the field on the fallback position, so the
+   * rounded edge can move to the side that is not joined to the field.
+   */
+  readonly panelAbove = signal(false);
 
   readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
 
@@ -430,7 +446,60 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
   }
 
   closePanel(): void {
+    this.cleanupScrollListener();
     this.panelOpen.set(false);
+    // The options leave the DOM with the panel, so a lingering active index
+    // would leave `aria-activedescendant` pointing at a removed element.
+    this.resetActiveOption();
+  }
+
+  onPositionChange(change: ConnectedOverlayPositionChange): void {
+    this.panelAbove.set(change.connectionPair.overlayY === "bottom");
+  }
+
+  onOverlayAttach(): void {
+    if (this.hideOnScroll()) {
+      this.setupScrollListener();
+    }
+  }
+
+  onOverlayDetach(): void {
+    this.cleanupScrollListener();
+  }
+
+  /**
+   * Listens on the document in the capture phase so scrolls in any ancestor are
+   * seen — a scroll event does not bubble past the element that scrolled.
+   */
+  private setupScrollListener(): void {
+    this.cleanupScrollListener();
+
+    this.scrollListener = this.renderer.listen(
+      this.document,
+      "scroll",
+      (event: Event) => {
+        if (!this.panelVisible()) return;
+
+        // Scrolling inside the component is not the page moving away from it:
+        // the option list scrolls its own rows.
+        const target = event.target as Node | null;
+        const insideSearch =
+          !!target &&
+          (this.hostElement.nativeElement.contains(target) ||
+            !!this.panelElement()?.contains(target));
+        if (insideSearch) return;
+
+        this.closePanel();
+      },
+      { capture: true, passive: true },
+    );
+  }
+
+  private cleanupScrollListener(): void {
+    if (this.scrollListener) {
+      this.scrollListener();
+      this.scrollListener = undefined;
+    }
   }
 
   /** Closes the panel and hands focus back to the input. */
@@ -449,7 +518,6 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
     switch (event.key) {
       case "Escape":
         this.closePanel();
-        this.resetActiveOption();
         return;
 
       case "ArrowDown":
@@ -551,7 +619,6 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
     this.onChange(suggestion.label);
     this.suggestionSelect.emit(suggestion.item);
     this.closePanel();
-    this.resetActiveOption();
   }
 
   /**

@@ -422,6 +422,85 @@ describe("SearchComponent", () => {
     });
   });
 
+  describe("hideOnScroll", () => {
+    const panel = () =>
+      document.querySelector(".tedi-search__panel") as HTMLElement | null;
+
+    const open = () => {
+      fixture.componentRef.setInput("suggestions", ["Mari Maasikas"]);
+      fixture.componentRef.setInput("value", "Mar");
+      fixture.detectChanges();
+      component.openPanel();
+      fixture.detectChanges();
+    };
+
+    afterEach(() => {
+      component.closePanel();
+      fixture.detectChanges();
+    });
+
+    it("closes the panel on scroll when enabled", () => {
+      fixture.componentRef.setInput("hideOnScroll", true);
+      open();
+      expect(component.panelVisible()).toBe(true);
+
+      document.dispatchEvent(new Event("scroll"));
+      fixture.detectChanges();
+
+      expect(component.panelOpen()).toBe(false);
+      expect(panel()).toBeNull();
+    });
+
+    it("keeps the panel open on scroll when disabled", () => {
+      open();
+
+      document.dispatchEvent(new Event("scroll"));
+      fixture.detectChanges();
+
+      expect(component.panelVisible()).toBe(true);
+    });
+
+    it("keeps the panel open when the option list itself is scrolled", () => {
+      fixture.componentRef.setInput("hideOnScroll", true);
+      open();
+
+      const list = panel()?.querySelector(
+        ".tedi-search__panel-list",
+      ) as HTMLElement;
+      list.dispatchEvent(new Event("scroll", { bubbles: false }));
+      fixture.detectChanges();
+
+      expect(component.panelVisible()).toBe(true);
+    });
+
+    it("keeps the panel open when the input scrolls its own text", () => {
+      fixture.componentRef.setInput("hideOnScroll", true);
+      open();
+
+      getInput().dispatchEvent(new Event("scroll", { bubbles: false }));
+      fixture.detectChanges();
+
+      expect(component.panelVisible()).toBe(true);
+    });
+
+    it("re-arms the listener when the panel is reopened", () => {
+      fixture.componentRef.setInput("hideOnScroll", true);
+      open();
+      document.dispatchEvent(new Event("scroll"));
+      fixture.detectChanges();
+      expect(component.panelVisible()).toBe(false);
+
+      component.openPanel();
+      fixture.detectChanges();
+      expect(component.panelVisible()).toBe(true);
+
+      document.dispatchEvent(new Event("scroll"));
+      fixture.detectChanges();
+
+      expect(component.panelVisible()).toBe(false);
+    });
+  });
+
   describe("minQueryLength", () => {
     const panel = () =>
       document.querySelector(".tedi-search__panel") as HTMLElement | null;
@@ -579,6 +658,16 @@ describe("SearchComponent", () => {
       expect(getInput().getAttribute("aria-activedescendant")).not.toBeNull();
 
       fixture.componentRef.setInput("suggestions", ["Kalle"]);
+      fixture.detectChanges();
+
+      expect(getInput().getAttribute("aria-activedescendant")).toBeNull();
+    });
+
+    it("clears the active option when the panel closes", () => {
+      press("ArrowDown");
+      expect(getInput().getAttribute("aria-activedescendant")).not.toBeNull();
+
+      component.closePanel();
       fixture.detectChanges();
 
       expect(getInput().getAttribute("aria-activedescendant")).toBeNull();

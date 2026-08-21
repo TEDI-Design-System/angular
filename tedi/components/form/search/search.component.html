@@ -83,8 +83,14 @@
   [cdkConnectedOverlayPositions]="overlayPositions"
   [cdkConnectedOverlayDisableClose]="true"
   (overlayOutsideClick)="closePanel()"
+  (positionChange)="onPositionChange($event)"
+  (attach)="onOverlayAttach()"
+  (detach)="onOverlayDetach()"
 >
-  <div class="tedi-search__panel">
+  <div
+    class="tedi-search__panel"
+    [class.tedi-search__panel--above]="panelAbove()"
+  >
     @if (loading()) {
       <div class="tedi-search__panel-status">
         <tedi-spinner [size]="16" />
