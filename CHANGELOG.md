@@ -1,3 +1,24 @@
+# [7.2.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.4...angular-7.2.0-rc.5) (2026-08-19)
+
+
+### Bug Fixes
+
+* **table:** design review changes [#463](https://github.com/TEDI-Design-System/angular/issues/463) ([74b16a5](https://github.com/TEDI-Design-System/angular/commit/74b16a5afa30f193459a9a80896086dbd67cae1f))
+
+# [7.2.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.3...angular-7.2.0-rc.4) (2026-08-13)
+
+
+### Features
+
+* **icons:** bump core to 6.5.0 for expanded material symbols set [#604](https://github.com/TEDI-Design-System/angular/issues/604) ([#605](https://github.com/TEDI-Design-System/angular/issues/605)) ([72f64c7](https://github.com/TEDI-Design-System/angular/commit/72f64c7909f850a936cce7bdf82951373726d07f))
+
+# [7.2.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.2...angular-7.2.0-rc.3) (2026-08-12)
+
+
+### Bug Fixes
+
+* **community-tabs-fix:** community tabs will no longer allow multiple elements to be selected [#112](https://github.com/TEDI-Design-System/angular/issues/112) ([9e1c43a](https://github.com/TEDI-Design-System/angular/commit/9e1c43ae3439d12a3147a0c41bda639022f2b573))
+
 # [7.2.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.1...angular-7.2.0-rc.2) (2026-08-10)
 
 

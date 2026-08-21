@@ -1,4 +1,14 @@
+import type { ButtonVariant } from "../../buttons/button/button.component";
+
 export type PaginationBackground = "white" | "transparent";
+
+/**
+ * Horizontal alignment of the results / pager / page-size slots.
+ * - `'between'` (default) — spread across the full width
+ * - `'left'` — grouped at the start
+ * - `'right'` — grouped at the end
+ */
+export type PaginationAlign = "between" | "left" | "right";
 
 /**
  * Visibility toggle for the results / page-size / pager / arrow slots.
@@ -18,6 +28,19 @@ export type PaginationVisibility = boolean | "sm" | "md" | "lg" | "xl" | "xxl";
  * - `'none'` — no divider, useful when the surrounding container already has one
  */
 export type PaginationDividerPosition = "top" | "bottom" | "none";
+
+/**
+ * Layout inputs that can be overridden per breakpoint via the `xs`–`xxl`
+ * inputs. Applied mobile-first: an override set on `md` takes effect at `md`
+ * and every larger breakpoint, on top of the base inputs.
+ */
+export interface PaginationBreakpointInputs {
+  align?: PaginationAlign;
+  showArrowLabels?: boolean;
+  arrowVariant?: ButtonVariant;
+  dividerPosition?: PaginationDividerPosition;
+  background?: PaginationBackground;
+}
 
 export type PaginationItemType = "page" | "previous" | "next" | "ellipsis";
 

@@ -472,7 +472,8 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `striped: boolean = false`
 - `verticalBorders: boolean = false`
 - `borderless: boolean = false`
-- `stickyFirstColumn: boolean = false`
+- `stickyFirstColumn: boolean = false` — freezes the leading column(s) during horizontal scroll
+- `stickyLastColumn: boolean = false` — freezes the trailing column (e.g. an actions column) during horizontal scroll
 - `stickyHeader: boolean = false`
 - `fixedLayout: boolean = false` — `table-layout: fixed`; makes column `size`/`minSize`/`maxSize` authoritative (content wraps instead of stretching the column). Required for column width caps to hold.
 - `maxHeight: number | string` — wraps the table in a scrollable container (pair with `stickyHeader`)
@@ -491,9 +492,12 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `getSubRows: (row) => TData[] | undefined` — hierarchical / tree rows
 - `groupRowsBy: (row: Row<TData>) => unknown` — table-level row grouping. Consecutive rendered rows with an equal key form a group; the control columns (select / expand / drag) span each group (one checkbox + one chevron per group), row selection works per group (the group's single checkbox toggles all its rows and goes indeterminate when partial), and group boundaries drive `rowGroupDividers`. Data columns opt into spanning the same groups with `groupBy: true`.
 - `rowGroupDividers: "all" | "between" | "none" = "all"` — when grouped, controls row dividers: `"between"` draws them only at group boundaries (rows within a group read as one block); `"none"` removes them. No effect without `groupRowsBy`.
-- `controlColumnOrder: ("drag" | "select" | "expand")[] = ["drag", "select", "expand"]` — order of the auto-injected control columns. Only enabled controls render; any enabled control omitted from the list is appended. Use it to place the selection checkbox before the expand chevron, etc.
+- `controlColumnOrder: ("drag" | "select" | "expand" | "content")[] = ["drag", "select", "expand"]` — order of the auto-injected control columns. Only enabled controls render; any enabled control omitted from the list is appended. Use it to place the selection checkbox before the expand chevron, etc. Include the `"content"` sentinel to split leading vs trailing: controls listed after `"content"` render **after** the data columns — e.g. `["content", "expand"]` puts the expand toggle in the last column.
 - `enableColumnFilters: boolean = false` — force TanStack's filter machinery (auto-on when any column sets `filterable`)
-- `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`). `pageSizeOptions` accepts plain numbers or `{ value, label }` objects — use the object form for a **"Show all"** entry whose `value` is large enough to hold every row: pass the row total when you know it (`data.length`), or `Number.MAX_SAFE_INTEGER` when you don't. Filtering only shrinks the row count, so a large page size always collapses the result to a single page. (Don't use `-1` — TanStack clamps `setPageSize` to `≥ 1`.)
+- `filterModalBreakpoint: Breakpoint | false = "sm"` — below this breakpoint the column filter opens in a modal instead of the popover (avoids a cramped/off-screen popover on small viewports). Set `false` to always use the popover.
+- `filterModalFullscreen: boolean | Breakpoint = false` — fullscreen behaviour of that filter modal: `true` always fullscreen, `false` never, a breakpoint = fullscreen below it.
+- `filterPopoverWidth: PopoverWidth = "small"` — width of the column filter popover. Takes a preset (`"none" | "small" | "medium" | "large"`, where `"none"` sizes the panel to its content) or any CSS length (`"20rem"`). Override per column with `filterable: { popoverWidth }`.
+- `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `align`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`, and the `xs`–`xxl` per-breakpoint overrides). Set `align: "left"` on `paginationTop` to group its results + page-size at the start while the bottom pager stays spread; use e.g. `paginationTop: { align: 'left', md: { align: 'between' } }` for a responsive strip. `pageSizeOptions` accepts plain numbers or `{ value, label }` objects — use the object form for a **"Show all"** entry whose `value` is large enough to hold every row: pass the row total when you know it (`data.length`), or `Number.MAX_SAFE_INTEGER` when you don't. Filtering only shrinks the row count, so a large page size always collapses the result to a single page. (Don't use `-1` — TanStack clamps `setPageSize` to `≥ 1`.)
 - `paginationTop: boolean | TablePaginationOptions` — opt-in top paginator; shares page / page-size state with bottom but has independent visual config (its own arrow + `hide*` settings). Requires `pagination` to be truthy.
 - `manualPagination: boolean = false` — server-side pagination; supply `pageCount` or `rowCount`
 - `manualSorting: boolean = false`
@@ -529,7 +533,7 @@ Render expandable rows open on first load (still user-collapsible):
 
 **Column definition (`TediColumnDef<TData>`):** extends TanStack's `ColumnDef` with Angular-specific fields:
 - `sortable: boolean` — opt the column into the built-in sort affordance (string `header` only). Pair with `sortingFn` to override the comparator. For custom UIs, pass a `TemplateRef` for `header` and call `column.toggleSorting()` yourself.
-- `filterable: boolean | { clearOnClose?: boolean }` — opt into the built-in filter popover (icon `filter_alt`). Requires `filterTemplate`.
+- `filterable: boolean | { clearOnClose?: boolean; popoverWidth?: PopoverWidth }` — opt into the built-in filter popover (icon `filter_alt`). Requires `filterTemplate`. `popoverWidth` overrides the table's `filterPopoverWidth` for this column — use it when one control (a date range, a wide option list) needs more room than the rest.
 - `filterTemplate: TemplateRef<TediTableFilterContext>` — UI rendered inside the filter popover. The context exposes `value`, `setValue`, `apply()`, `clear()`, and `column`. Apply/Clear footer buttons are wired automatically.
 - `rowSpan: number | ((info: CellContext) => number)` — body-level row spanning. Return `>1` to emit `rowspan="N"`; return `0` to skip the `<td>`. Prefer `groupBy` for key-based grouping; reach for `rowSpan` only for fully custom span logic.
 - `groupBy: boolean | ((row: Row<TData>) => unknown)` — merge consecutive rendered rows with an equal key into one spanning cell, computed internally against the live (post-filter/sort/paginate) row model — no manual `groupRowSpan` wiring. A function groups this column by its own key; `true` reuses the table-level `groupRowsBy`. Takes precedence over `rowSpan`.
@@ -1693,6 +1697,8 @@ Sub-components: `tedi-header-top`, `tedi-header-logo`, `tedi-header-content`, `t
 - `labels: Partial<PaginationLabels>` — override any of the default text/aria labels
 - `background: "white" | "transparent" = "white"` — `transparent` removes the surface fill + divider for use on non-white containers
 - `dividerPosition: "top" | "bottom" | "none" = "top"` — where the divider line sits (or removed entirely)
+- `align: "between" | "left" | "right" = "between"` — `"between"` spreads the results / pager / page-size slots across the full width; `"left"` / `"right"` group them at the start / end. Handy for a top strip above a table while the bottom pager keeps `between`. Override per breakpoint with the `xs`–`xxl` inputs (see below).
+- `xs` / `sm` / `md` / `lg` / `xl` / `xxl: PaginationBreakpointInputs` — per-breakpoint overrides for the layout inputs (`align`, `showArrowLabels`, `arrowVariant`, `dividerPosition`, `background`), applied mobile-first (an override on `md` takes effect at `md` and every larger breakpoint). Example: `align="left"` with `[md]="{ align: 'between' }"` reads left on mobile/tablet, spread on desktop.
 - `disableArrowsAtBoundary: boolean = false` — keep the prev/next button **rendered** (as a disabled `tedi-button`) at the first/last page instead of removing it from the DOM. By default the boundary arrow is removed entirely so the pager looks balanced.
 - `arrowVariant: ButtonVariant = "neutral"` — variant for the prev/next buttons; accepts any `tedi-button` variant (`primary`, `secondary`, `danger`, `success`, `neutral-inverted`, etc.). The arrows are rendered as actual `tedi-button`s under the hood, so all variant styling/states come for free.
 - `showArrowLabels: boolean = false` — render the `previous` / `next` translated labels as visible button text next to the icon. When `false` (default) the buttons are icon-only and the labels are exposed only via `aria-label`. Use the `labels` input to override the wording (e.g. shorter `"Previous"` instead of `"Previous page"`).
@@ -2034,6 +2040,10 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `withArrow: boolean = true`
 - `withBorder: boolean = false` — illustrative prominent border on the arrow side
 - `lockScroll: boolean = false`
+
+**`tedi-popover-content` inputs:**
+- `maxWidth: PopoverWidth = "small"` — panel width. Takes a preset (`"none" | "small" | "medium" | "large"`, where `"none"` sizes the panel to its content) or any CSS length (`"20rem"`, `"min(90vw, 30rem)"`), applied inline.
+- `title: string` / `showClose: boolean = false`
 
 ### Tooltip
 **Selector:** `tedi-tooltip`
