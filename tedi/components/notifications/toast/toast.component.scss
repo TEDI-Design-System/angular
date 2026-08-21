@@ -8,7 +8,7 @@ tedi-toast {
 
 .tedi-toast__wrapper {
   position: relative;
-  padding: var(--toast-outer-spacing, 4px);
+  padding: var(--toast-outer-spacing);
 
   tedi-alert {
     box-shadow: 0 4px 10px 0 var(--tedi-alpha-14, rgb(0 0 0 / 14%));
@@ -20,7 +20,7 @@ tedi-toast {
   right: var(--toast-outer-spacing);
   bottom: var(--toast-outer-spacing);
   left: var(--toast-outer-spacing);
-  height: 4px;
+  height: var(--progress-bar-height-sm);
   background: var(--toast-progress-color);
   border-radius: 0 var(--alert-radius) 0 var(--alert-radius);
   transform-origin: left;
@@ -50,7 +50,7 @@ tedi-toast {
 .tedi-toast-container {
   position: fixed;
   inset: 0;
-  z-index: var(--z-index-toast, 1050);
+  z-index: var(--z-index-toast);
   pointer-events: none;
 
   &__position {
