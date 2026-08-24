@@ -3,11 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   contentChild,
+  DestroyRef,
   ElementRef,
   HostListener,
   inject,
   input,
   output,
+  Renderer2,
   ViewEncapsulation,
 } from "@angular/core";
 import {
@@ -51,6 +53,10 @@ export class DropdownItemComponent {
    * tabindex on that element instead of the host `li`, so assistive technology
    * reports one control per item and the control keeps its own activation
    * behaviour (a link navigates on Enter, including with modifier keys).
+   *
+   * Intended for `dropdownRole="menu"`. In a listbox the control also carries
+   * `aria-selected`, but a link's navigation is not an option's activation
+   * behaviour — project plain content into listbox items instead.
    * @default false
    */
   readonly interactiveContent = input(false);
@@ -85,9 +91,26 @@ export class DropdownItemComponent {
   /** Check if custom dropdown-item-value is provided */
   readonly customItemValue = contentChild(DropdownItemValueComponent);
 
+  private readonly renderer = inject(Renderer2);
+  private readonly destroyRef = inject(DestroyRef);
+
   private control: HTMLElement | null = null;
 
   constructor() {
+    this.destroyRef.onDestroy(
+      this.renderer.listen(
+        this.host.nativeElement,
+        "click",
+        (event: MouseEvent) => {
+          if (!this.disabled()) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+        },
+        { capture: true },
+      ),
+    );
+
     afterRenderEffect(() => {
       const control = this.controlElement();
       if (!control) return;
@@ -98,6 +121,15 @@ export class DropdownItemComponent {
         control.setAttribute("aria-disabled", "true");
       } else {
         control.removeAttribute("aria-disabled");
+      }
+
+      // The control carries `role="option"` in a listbox, so the selection
+      // state has to travel with it instead of staying on the presentational
+      // host `li`.
+      if (this.dropdownContent.dropdownRole() === "listbox") {
+        control.setAttribute("aria-selected", String(this.isSelected()));
+      } else {
+        control.removeAttribute("aria-selected");
       }
     });
   }
@@ -152,14 +184,10 @@ export class DropdownItemComponent {
     return this.control;
   }
 
-  @HostListener("click", ["$event"])
-  onClick(event: MouseEvent) {
-    if (this.disabled()) {
-      // A disabled item's own control would otherwise still act on the click
-      // (a link would navigate) — nothing else here prevents it.
-      if (this.interactiveContent()) event.preventDefault();
-      return;
-    }
+  @HostListener("click")
+  onClick() {
+    // Clicks on a disabled item are already cancelled during capture.
+    if (this.disabled()) return;
 
     this.onItemSelect();
   }

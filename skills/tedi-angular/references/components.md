@@ -2024,7 +2024,7 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 
 **`[tedi-dropdown-item]` inputs:**
 - `value: string`, `disabled: boolean = false`, `closeOnSelect: boolean = true`, `clipContent: boolean = true`
-- `interactiveContent: boolean = false` — the projected content is itself the control (a link or button). The item role and roving tabindex move onto that element, so assistive technology reports one control per item and the control keeps its own activation behaviour. Required when projecting links.
+- `interactiveContent: boolean = false` — the projected content is itself the control (a link or button). The item role and roving tabindex move onto that element, so assistive technology reports one control per item and the control keeps its own activation behaviour. Required when projecting links. Intended for `dropdownRole="menu"` — a link's navigation is not an option's activation behaviour, so keep listbox items as plain content.
 
 ```html
 <tedi-dropdown [(value)]="selected">
