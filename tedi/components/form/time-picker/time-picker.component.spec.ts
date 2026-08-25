@@ -514,6 +514,7 @@ describe("TimePickerComponent", () => {
       fixture.detectChanges();
 
       const grid = el.querySelector(".tedi-time-picker__grid") as HTMLElement;
+      expect(getComputedStyle(grid).display).toBe("grid");
       expect(grid.style.gridTemplateColumns).toBe("repeat(2, 1fr)");
     });
 
