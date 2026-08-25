@@ -82,13 +82,17 @@
   (overlayKeydown)="$event.key === 'Escape' ? closeOverlay(true) : null"
   #searchPanel
 >
-  <tedi-card class="tedi-search__panel" [style.width.px]="_width()">
+  <tedi-card
+    class="tedi-search__panel"
+    background="primary"
+    [style.width.px]="_width()"
+  >
     @if (loading()) {
-      <tedi-card-content padding="md" [hasSeparator]="true">
+      <tedi-card-content [padding]="1">
         <tedi-spinner />
       </tedi-card-content>
     } @else if (_foundOptions().length) {
-      <tedi-card-content padding="none" [hasSeparator]="true" cdkMenu>
+      <tedi-card-content [padding]="0" cdkMenu>
         @for (option of _foundOptions(); track option.value) {
           <button
             cdkMenuItem
@@ -107,12 +111,12 @@
         }
       </tedi-card-content>
     } @else {
-      <tedi-card-content [hasSeparator]="true" padding="md">
+      <tedi-card-content [padding]="1">
         {{ noResultText() }}
       </tedi-card-content>
     }
 
-    <tedi-card-content class="tedi-search__footer-content" padding="md">
+    <tedi-card-content class="tedi-search__footer-content" [padding]="1">
       <ng-content></ng-content>
     </tedi-card-content>
   </tedi-card>
