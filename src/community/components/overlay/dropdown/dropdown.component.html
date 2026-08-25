@@ -11,13 +11,18 @@
   (overlayOutsideClick)="close()"
 >
   <tedi-card
-    padding="none"
     class="tedi-dropdown__card"
+    background="primary"
+    [padding]="0"
     [attr.role]="dropdownRole()"
     [attr.id]="dropdownId()"
   >
     @if (isMobile()) {
-      <tedi-card-content hasSeparator autoWidth padding="xs">
+      <tedi-card-content
+        class="tedi-dropdown__mobile-header"
+        [autoWidth]="true"
+        [padding]="0.5"
+      >
         <button
           tedi-closing-button
           (click)="close()"
