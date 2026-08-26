@@ -1,3 +1,15 @@
+# [8.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.5...angular-8.0.0-rc.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* **form-field:** wrapper is not required by controls anymore [#612](https://github.com/TEDI-Design-System/angular/issues/612) ([#617](https://github.com/TEDI-Design-System/angular/issues/617)) ([4594f0a](https://github.com/TEDI-Design-System/angular/commit/4594f0a5d606af6c73fcd5bc37074f8986ce7138))
+
+
+### BREAKING CHANGES
+
+* **form-field:** form-field behavior changed, refer to migration guide
+
 # [7.2.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.4...angular-7.2.0-rc.5) (2026-08-19)
 
 
