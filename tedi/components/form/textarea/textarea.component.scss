@@ -87,15 +87,11 @@
 // wherever an addon column happened to end. The matching padding holds the text
 // clear of what it is reaching under, and the additions paint over it — they
 // come later in the box.
-.tedi-form-field__box > .tedi-textarea {
+.tedi-form-field__box>.tedi-textarea {
   // The lane plus the box's trailing padding is exactly the room the additions
   // take out of the row, so giving it back as a negative margin lands the
   // trailing edge — and with it the grip — on the border. The same figure as
   // padding holds the text one inner gap clear of the additions.
-  padding-inline-end: calc(
-    var(--form-field-padding-x-md-default) + var(--tedi-form-field-addon-lane)
-  );
-  margin-inline-end: calc(
-    -1 * (var(--form-field-padding-x-md-default) + var(--tedi-form-field-addon-lane))
-  );
+  padding-inline-end: calc(var(--form-field-padding-x-md-default) + var(--tedi-form-field-addon-lane));
+  margin-inline-end: calc(-1 * (var(--form-field-padding-x-md-default) + var(--tedi-form-field-addon-lane)));
 }
