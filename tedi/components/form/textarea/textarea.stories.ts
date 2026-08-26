@@ -48,15 +48,28 @@ export default {
   ],
   argTypes: {
     size: {
-      description: "Size of the form field.",
+      description:
+        "Size of the field. Falls back to the size of a wrapping form field.",
       control: {
         type: "radio",
       },
       options: ["default", "small"],
       table: {
-        category: "Form Field inputs",
-        type: { summary: "InputSize", detail: "default \nsmall" },
+        category: "Textarea inputs",
+        type: { summary: "TextareaSize", detail: "default \nsmall" },
         defaultValue: { summary: "default" },
+      },
+    },
+    invalid: {
+      description:
+        "Forces the error state on. Combines with the state derived from reactive forms.",
+      control: {
+        type: "boolean",
+      },
+      table: {
+        category: "Textarea inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
       },
     },
     characterLimit: {
@@ -68,15 +81,6 @@ export default {
       table: {
         category: "Form Field inputs",
         type: { summary: "number | undefined" },
-      },
-    },
-    inputClass: {
-      control: "text",
-      description: "Custom CSS classes for the field.",
-      table: {
-        category: "Form Field inputs",
-        type: { summary: "string | null" },
-        defaultValue: { summary: "null" },
       },
     },
     placeholder: {
@@ -113,7 +117,8 @@ export default {
     },
     minRows: {
       control: "number",
-      description: "Minimum number of visible rows while auto-growing.",
+      description:
+        "Rows the field rests at, and the fewest it can ever show. With no `height` set this is what sizes the textarea, in every mode — reach for it first when a field needs to be taller or shorter.",
       table: {
         category: "Textarea inputs",
         type: { summary: "number" },
@@ -123,7 +128,7 @@ export default {
     maxRows: {
       control: "number",
       description:
-        "Maximum number of visible rows before scrolling, while auto-growing.",
+        "Most rows the field shows before it scrolls. Caps `autoGrow`'s growth and how far the resize grip can be dragged.",
       table: {
         category: "Textarea inputs",
         type: { summary: "number" },
@@ -133,17 +138,16 @@ export default {
     height: {
       control: "text",
       description:
-        "Fixed height (e.g. `7.5rem`, `200`). Applied only when `autoGrow` is off; set `undefined` to fall back to the native `rows` attribute.",
+        "Exact resting height (e.g. `7.5rem`, `200`), for the rare field that has to match something other than a whole number of rows. Prefer `minRows`. Ignored while `autoGrow` is on, and still bounded by `minRows` and `maxRows`.",
       table: {
         category: "Textarea inputs",
         type: { summary: "string | number | undefined" },
-        defaultValue: { summary: "7.5rem" },
       },
     },
     maxHeight: {
       control: "text",
       description:
-        "Maximum height before the field scrolls (e.g. `200px`, `12rem`). Limits both `autoGrow` growth and manual resizing.",
+        "Maximum height before the field scrolls (e.g. `200px`, `12rem`). Applied on top of `maxRows`, whichever is smaller.",
       table: {
         category: "Textarea inputs",
         type: { summary: "string | number | undefined" },
@@ -186,7 +190,6 @@ export const Default: StoryObj = {
         <textarea
           tedi-textarea
           id="default"
-          rows="5"
           [resizable]="resizable"
           [autoGrow]="autoGrow"
           [minRows]="minRows"
@@ -208,14 +211,14 @@ export const Size: StoryObj<TextareaComponent> = {
           <p tedi-text modifiers="bold">Default</p>
           <tedi-form-field>
             <label tedi-label [for]="'size-default'">Label</label>
-            <textarea tedi-textarea id="size-default" rows="5"></textarea>
+            <textarea tedi-textarea id="size-default" [minRows]="5"></textarea>
           </tedi-form-field>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 2 }" gap="3" alignItems="center" class="padding-14-16">
           <p tedi-text modifiers="bold">Small</p>
           <tedi-form-field size="small">
             <label tedi-label [for]="'size-small'">Label</label>
-            <textarea tedi-textarea id="size-small" rows="5"></textarea>
+            <textarea tedi-textarea id="size-small" [minRows]="5"></textarea>
           </tedi-form-field>
         </tedi-row>
       </tedi-row>
@@ -244,7 +247,7 @@ export const States: StoryObj<TextareaComponent> = {
               <label tedi-label [for]="state">Label</label>
               <textarea tedi-textarea
                 [id]="state"
-                rows="3"
+                [minRows]="3"
                 [disabled]="state === 'Disabled'"
               ></textarea>
             </tedi-form-field>
@@ -257,7 +260,7 @@ export const States: StoryObj<TextareaComponent> = {
           <tedi-col width="5">
             <tedi-form-field>
               <label tedi-label [for]="'error'">Label</label>
-              <textarea tedi-textarea id="error" rows="3"></textarea>
+              <textarea tedi-textarea id="error" [minRows]="3"></textarea>
               <tedi-feedback-text [text]="'Tagasiside tekst'" [type]="'error'" />
             </tedi-form-field>
           </tedi-col>
@@ -269,7 +272,7 @@ export const States: StoryObj<TextareaComponent> = {
           <tedi-col width="5">
             <tedi-form-field>
               <label tedi-label [for]="'success'">Label</label>
-              <textarea tedi-textarea id="success" rows="3"></textarea>
+              <textarea tedi-textarea id="success" [minRows]="3"></textarea>
               <tedi-feedback-text [text]="'Tagasiside tekst'" [type]="'valid'" />
             </tedi-form-field>
           </tedi-col>
@@ -284,7 +287,7 @@ export const WithHint: StoryObj<TextareaComponent> = {
     template: `
       <tedi-form-field>
         <label tedi-label [for]="'example-hint'">Label</label>
-        <textarea tedi-textarea id="example-hint" rows="5"></textarea>
+        <textarea tedi-textarea id="example-hint" [minRows]="5"></textarea>
         <tedi-feedback-text [text]="'Vihjetekst'" />
       </tedi-form-field>
     `,
@@ -299,7 +302,7 @@ export const WithHintAndCharacterCount: StoryObj<TextareaComponent> = {
     template: `
       <tedi-form-field [characterLimit]="400">
         <label tedi-label [for]="'example-char-count'">Label</label>
-        <textarea tedi-textarea id="example-char-count" rows="5" [(ngModel)]="value"></textarea>
+        <textarea tedi-textarea id="example-char-count" [minRows]="5" [(ngModel)]="value"></textarea>
         <tedi-feedback-text [text]="'Vihjetekst'" />
       </tedi-form-field>
     `,
@@ -314,7 +317,7 @@ export const CharacterCount: StoryObj<TextareaComponent> = {
     template: `
       <tedi-form-field [characterLimit]="400">
         <label tedi-label [for]="'example-only-char-count'">Label</label>
-        <textarea tedi-textarea id="example-only-char-count" rows="5" [(ngModel)]="value"></textarea>
+        <textarea tedi-textarea id="example-only-char-count" [minRows]="5" [(ngModel)]="value"></textarea>
       </tedi-form-field>
     `,
   }),
@@ -325,7 +328,7 @@ export const Placeholder: StoryObj<TextareaComponent> = {
     template: `
       <tedi-form-field>
         <label tedi-label [for]="'example-placeholder'">Label</label>
-        <textarea tedi-textarea id="example-placeholder" rows="5" placeholder="Placeholder"></textarea>
+        <textarea tedi-textarea id="example-placeholder" [minRows]="5" placeholder="Placeholder"></textarea>
       </tedi-form-field>
     `,
   }),
@@ -335,7 +338,8 @@ export const HeightExamples: StoryObj<TextareaComponent> = {
   parameters: {
     docs: {
       description: {
-        story: "Examples showing different height configurations for Textarea.",
+        story:
+          "`minRows` is the field's resting height — it sizes the textarea whether or not `autoGrow` is on, and is the floor a resize drag stops at. `maxRows` is the ceiling, for the drag and for `autoGrow` alike. `height` is the escape hatch for a field that has to match an exact measurement.",
       },
     },
   },
@@ -343,43 +347,41 @@ export const HeightExamples: StoryObj<TextareaComponent> = {
     props: {
       heightExamples: [
         {
-          label: "Fixed Height (7.5rem default)",
-          id: "fixed-height-default",
-          height: "7.5rem",
+          label: "Default (minRows 3)",
+          id: "sizing-default",
+          placeholder: "Rests at three rows, drag to grow",
+        },
+        {
+          label: "Taller (minRows 6)",
+          id: "sizing-tall",
+          minRows: 6,
+          placeholder: "Rests at six rows",
+        },
+        {
+          label: "Bounded drag (minRows 3, maxRows 5)",
+          id: "sizing-bounded",
+          maxRows: 5,
+          placeholder: "The grip stops at five rows",
+        },
+        {
+          label: "Exact height (10rem, not resizable)",
+          id: "sizing-exact",
+          height: "10rem",
           resizable: false,
-          placeholder: "This textarea has a fixed height of 7.5rem",
+          placeholder: "Only when a row count will not do",
         },
         {
-          label: "Custom Fixed Height",
-          id: "custom-height",
-          height: "4rem",
-          resizable: false,
-          placeholder: "This textarea has a fixed height of 4rem",
-        },
-        {
-          label: "Auto Grow (minRows: 3, maxRows: 12)",
-          id: "auto-grow",
+          label: "Auto grow (minRows 3 to maxRows 12)",
+          id: "sizing-auto-grow",
           autoGrow: true,
-          minRows: 3,
-          maxRows: 12,
-          placeholder: "Type multiple lines to see it grow automatically",
+          placeholder: "Type multiple lines to see it grow",
         },
         {
-          label: "Auto Grow with Custom Rows",
-          id: "auto-grow-custom",
+          label: "Auto grow, capped at 200px",
+          id: "sizing-auto-grow-capped",
           autoGrow: true,
-          minRows: 5,
-          maxRows: 8,
-          placeholder: "This will grow from 5 to 8 rows maximum",
-        },
-        {
-          label: "Auto Grow with Max Height",
-          id: "auto-grow-max-height",
-          autoGrow: true,
-          minRows: 3,
-          maxRows: 12,
           maxHeight: "200px",
-          placeholder: "This will grow but max height is limited to 200px",
+          placeholder: "Grows until 200px, then scrolls",
         },
       ],
     },
@@ -397,8 +399,8 @@ export const HeightExamples: StoryObj<TextareaComponent> = {
                 [id]="example.id"
                 [resizable]="example.resizable ?? true"
                 [autoGrow]="example.autoGrow || false"
-                [minRows]="example.minRows"
-                [maxRows]="example.maxRows"
+                [minRows]="example.minRows ?? 3"
+                [maxRows]="example.maxRows ?? 12"
                 [height]="example.height"
                 [maxHeight]="example.maxHeight"
                 [attr.placeholder]="example.placeholder"
@@ -424,7 +426,7 @@ export const WithTemplateDrivenForms: StoryObj<TextareaComponent> = {
             tedi-textarea
             id="example-template-form"
             name="example"
-            rows="5"
+            [minRows]="5"
             required
             [(ngModel)]="inputValue"
             #inputModel="ngModel"
@@ -457,7 +459,7 @@ export const WithReactiveForms: StoryObj<TextareaComponent> = {
         <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
           <tedi-form-field>
             <label tedi-label [for]="'example-reactive-form'" [required]="true">Label</label>
-            <textarea tedi-textarea id="example-reactive-form" rows="5" [formControl]="control"></textarea>
+            <textarea tedi-textarea id="example-reactive-form" [minRows]="5" [formControl]="control"></textarea>
           </tedi-form-field>
 
           <tedi-alert type="info" [showClose]="false">
@@ -472,4 +474,15 @@ export const WithReactiveForms: StoryObj<TextareaComponent> = {
       `,
     };
   },
+};
+
+/**
+ * The textarea paints its own surface, so it renders correctly with no wrapper
+ * at all. A `tedi-form-field` is only needed for a label, feedback text or a
+ * character counter.
+ */
+export const Standalone: StoryObj<TextareaComponent> = {
+  render: () => ({
+    template: `<textarea tedi-textarea placeholder="No wrapper"></textarea>`,
+  }),
 };

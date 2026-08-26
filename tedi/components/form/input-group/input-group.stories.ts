@@ -32,6 +32,11 @@ import { SelectOptionTemplateDirective } from "../select/select-templates.direct
  * and suffixes. Project a `label[tedi-label]`, a control (`tedi-form-field`,
  * `tedi-select`, …), optional `[tediInputGroupPrefix]` / `[tediInputGroupSuffix]`
  * addons, and an optional `tedi-feedback-text`.
+ *
+ * The projected label names a native control through `[for]`. `tedi-select`'s
+ * trigger is not a labelable element, so give the label an `id` and pass it to
+ * the select's `ariaLabelledby` — that names the combobox and makes the label
+ * open the dropdown.
  */
 const meta: Meta<InputGroupComponent> = {
   title: "TEDI-Ready/Components/Form/InputGroup",
@@ -168,7 +173,7 @@ export const StartDynamic: Story = {
         <tedi-row cols="1" [md]="{ cols: 2 }">
           <tedi-col>
             <tedi-input-group>
-              <label tedi-label [for]="'start-transfer'">Maksja konto</label>
+              <label tedi-label id="start-transfer-label" [for]="'start-transfer'">Maksja konto</label>
               <tedi-dropdown tediInputGroupPrefix [(value)]="currency">
                 <button type="button" tedi-dropdown-trigger>
                   {{ currency }} <tedi-icon name="arrow_drop_down" color="inherit" />
@@ -181,6 +186,7 @@ export const StartDynamic: Story = {
               </tedi-dropdown>
               <tedi-select
                 inputId="start-transfer"
+                ariaLabelledby="start-transfer-label"
                 [options]="accounts"
                 bindLabel="name"
                 bindValue="value"
@@ -256,8 +262,14 @@ export const EndDynamic: Story = {
         <tedi-row cols="1" [md]="{ cols: 2 }">
           <tedi-col>
             <tedi-input-group>
-              <label tedi-label [for]="'end-schedule'">Ajakava</label>
-              <tedi-select inputId="end-schedule" [options]="meetings" placeholder="Vali kohtumine" ellipsis="end" />
+              <label tedi-label id="end-schedule-label" [for]="'end-schedule'">Ajakava</label>
+              <tedi-select
+                inputId="end-schedule"
+                ariaLabelledby="end-schedule-label"
+                [options]="meetings"
+                placeholder="Vali kohtumine"
+                ellipsis="end"
+              />
               <tedi-dropdown tediInputGroupSuffix [(value)]="timezone">
                 <button type="button" tedi-dropdown-trigger>
                   {{ timezone }} <tedi-icon name="arrow_drop_down" color="inherit" />
@@ -455,10 +467,11 @@ export const AllControls: StoryObj = {
         </tedi-col>
         <tedi-col>
           <tedi-input-group [invalid]="true">
-            <label tedi-label [for]="'all-select'">Valikmenüü</label>
+            <label tedi-label id="all-select-label" [for]="'all-select'">Valikmenüü</label>
             <span tediInputGroupPrefix>€</span>
             <tedi-select
               inputId="all-select"
+              ariaLabelledby="all-select-label"
               [options]="accounts"
               bindLabel="name"
               bindValue="value"

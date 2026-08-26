@@ -78,6 +78,7 @@ export interface SearchButton {
     "[attr.aria-label]": "searchAriaLabel()",
     "[style.--tedi-search-field-height]": "fieldHeight()",
     "[class.tedi-search--button-icon-only]": "!!button() && !button()?.text",
+    "[class.tedi-search--has-button]": "!!button()",
   },
 })
 export class SearchComponent implements ControlValueAccessor {

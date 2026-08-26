@@ -123,7 +123,7 @@
   }
 
   &--has-prefix {
-    .tedi-form-field__input,
+    .tedi-field-surface,
     .tedi-input {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
@@ -131,7 +131,7 @@
   }
 
   &--has-suffix {
-    .tedi-form-field__input,
+    .tedi-field-surface,
     .tedi-input {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;

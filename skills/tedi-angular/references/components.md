@@ -769,13 +769,20 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 **Selector:** `input[tedi-text-field]`
 **Model:** `value: string`
 **Inputs:**
+- `size: InputSize` — "default", "small" or "large"; falls back to a wrapping `tedi-form-field`'s size
+- `invalid: boolean = false` — forces the error state on; combines with the state derived from reactive forms
 - `arrowsHidden: boolean = true`
 **Outputs:**
 - `clear: void`
 
+Paints its own field surface, so it works with no wrapper. Wrap it in a
+`tedi-form-field` when it needs a label, feedback text, a character counter, an
+icon or a clear button.
+
 ```html
 <input tedi-text-field [(value)]="name" />
 <input tedi-text-field [formControl]="nameControl" />
+<input tedi-text-field [formControl]="nameControl" [invalid]="submitted && nameControl.invalid" />
 ```
 
 ### NumberField
@@ -823,15 +830,21 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 - `resizable: boolean = true` — allow manual (vertical-only) resizing; `false` disables it
 - `autoGrow: boolean = false` — grow to fit content via CSS `field-sizing` (disables manual resize)
 - `minRows: number = 3`, `maxRows: number = 12` — bounds while `autoGrow` is on
-- `height: string | number | undefined = "7.5rem"` — fixed height when `autoGrow` is off; set `undefined` to fall back to the native `rows` attribute
+- `height: string | number | undefined` — exact resting height (e.g. `"7.5rem"`, `200` → `200px`) when `autoGrow` is off; unset by default, so `minRows` sizes the field
 - `maxHeight: string | number | undefined` — cap the height before it scrolls
+- `size: TextareaSize` — "default" or "small"; falls back to a wrapping `tedi-form-field`'s size
+- `invalid: boolean = false` — forces the error state on; combines with the state derived from reactive forms
 
-Compose inside a `tedi-form-field` (which owns `size`, `characterLimit`, `inputClass`, etc.).
+Paints its own field surface, so it works with no wrapper. Wrap it in a
+`tedi-form-field` only for a label, feedback text or `characterLimit` counter.
 
 ```html
-<tedi-form-field>
+<textarea tedi-textarea [(value)]="notes"></textarea>
+
+<tedi-form-field [characterLimit]="500">
   <label tedi-label for="notes">Notes</label>
   <textarea tedi-textarea id="notes" [(value)]="notes"></textarea>
+  <tedi-feedback-text type="error" text="Required" />
 </tedi-form-field>
 ```
 
@@ -1051,7 +1064,8 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 - `inputDisabled: boolean = false` — disables the field entirely (input, icon button, and calendar)
 - `readOnly: boolean = false` — blocks typing but leaves the calendar interactive
 - `required: boolean = false` — marks input as required; in `multiple` mode prevents clearing the last date
-- `size: DateFieldSize = "default"` — "default" or "small"; should match the surrounding `tedi-form-field` size
+- `size: DateFieldSize` — "default" or "small"; falls back to a wrapping `tedi-form-field`'s size
+- `invalid: boolean = false` — forces the error state on; combines with the state derived from reactive forms
 - `minDate: Date | undefined` — disables all dates before this date
 - `maxDate: Date | undefined` — disables all dates after this date
 - `disablePast: boolean = false` — disable all dates before today
@@ -1172,7 +1186,7 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 - `modal: TimeFieldModal = "md"` — open the picker in a modal: `true` always, `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl"`) means modal below that breakpoint
 - `fullscreen: TimeFieldFullscreen = false` — make the modal fullscreen: `true` always, `false` never, breakpoint name means fullscreen below that breakpoint. Only applies when the picker opens as a modal
 
-Sizing and validation styling come from the wrapping `tedi-form-field` — set them there, not on `tedi-time-field`. Free-typed values are normalized on blur (digits-only → `HH:mm`); invalid input reverts to the previous value.
+Paints its own field surface. Set `size` and `invalid` on `tedi-time-field` itself; both fall back to a wrapping `tedi-form-field`. Free-typed values are normalized on blur (digits-only → `HH:mm`); invalid input reverts to the previous value.
 
 ```html
 <tedi-form-field>
@@ -1306,16 +1320,41 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 
 ### FormField
 **Selector:** `tedi-form-field`
+
+Stacks the additions that sit *outside* a field — a label above, feedback text and
+a character counter below — and wires `aria-describedby` between them and the
+control. Controls paint their own surface, so the wrapper is only needed when one
+of those additions is present. The one exception is `icon` or `clearable`: those
+sit *inside* the field, so with either set the form field renders the surface
+itself (a `.tedi-form-field__box` around the control) and the control stands
+down. Any control that provides `TEDI_FORM_FIELD_CONTROL` can be projected,
+including one you wrote yourself.
+Content that belongs below the feedback row is marked with `[tediFormFieldExtra]`.
+
+The label slot accepts a bare `label[tedi-label]` or a `tedi-label-row`, so a label with an info
+tooltip composes the documented way:
+
+```html
+<tedi-form-field>
+  <tedi-label-row>
+    <label tedi-label for="x" [required]="true">Toimeaine</label>
+    <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
+  </tedi-label-row>
+  <input tedi-text-field id="x" />
+</tedi-form-field>
+```
+
 **Inputs:**
-- `size: InputSize = "default"`
-- `icon: string | FormFieldIcon`
-- `clearable: boolean = false`
-- `inputClass: string | null`
+- `characterLimit: number | undefined` — live `current/limit` counter below the field; the field goes into an error state once exceeded
+- `icon: string | FormFieldIcon` — icon shown at the end of the field
+- `clearable: boolean = false` — clear button, shown once the control holds a value
+- `size: InputSize = "default"` — size of the whole field; the label, control and box row scale together. A control's own `size` overrides it
+- `inputClass: string | null` — **⚠️ DEPRECATED**, style the control directly
 
 ```html
 <tedi-form-field [clearable]="true" icon="search">
-  <tedi-label>Search</tedi-label>
-  <input tedi-text-field [formControl]="searchControl" />
+  <label tedi-label for="q">Search</label>
+  <input tedi-text-field id="q" [formControl]="searchControl" />
   <tedi-feedback-text type="hint" text="Type to search" />
 </tedi-form-field>
 ```
@@ -1323,9 +1362,10 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 ### Label
 **Selector:** `[tedi-label]`
 **Inputs:**
-- `size: LabelSize = "default"`
 - `required: boolean = false`
 - `color: LabelColor = "secondary"`
+- `size: LabelSize` — falls back to the size of a wrapping `tedi-form-field`, so it only needs setting when it should differ
+- `visuallyHidden: boolean | "reserve-space" = false` — hides the label visually while keeping it in the accessibility tree, so the control stays named. `"reserve-space"` also keeps the label's line of layout, to align a field with labelled siblings in the same row
 
 ### LabelRow
 **Selector:** `tedi-label-row`
@@ -1348,7 +1388,7 @@ Pure inline-row layout for a form-control label plus trailing affixes (e.g. `ted
 
 ### InputGroup
 **Selector:** `tedi-input-group`
-Wraps a form control with leading/trailing addons. Project a `label[tedi-label]`, a control, optional addons via the `[tediInputGroupPrefix]` / `[tediInputGroupSuffix]` directives, and an optional `tedi-feedback-text`. The control slot accepts `tedi-form-field` (which itself wraps a text/date/time field) or `tedi-select` — any single-line bordered control. Addons merge their border with the control; put an interactive addon (e.g. a `tedi-dropdown`) directly in the prefix/suffix slot and its trigger button fills the whole addon.
+Wraps a form control with leading/trailing addons. Project a `label[tedi-label]` or a `tedi-label-row`, a control, optional addons via the `[tediInputGroupPrefix]` / `[tediInputGroupSuffix]` directives, and an optional `tedi-feedback-text`. The control slot accepts `tedi-form-field` (which itself wraps a text/date/time field) or `tedi-select` — any single-line bordered control. Addon border merging hooks the `.tedi-field-surface` class that every surface owner carries. Addons merge their border with the control; put an interactive addon (e.g. a `tedi-dropdown`) directly in the prefix/suffix slot and its trigger button fills the whole addon.
 **Inputs:**
 - `addons: boolean = true` — merges addon and control borders into one visual unit; disable for detached addons (e.g. an action button)
 - `disabled: boolean = false` — disables the group and propagates to the control

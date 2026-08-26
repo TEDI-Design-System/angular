@@ -8,6 +8,7 @@ import {
   inject,
   input,
   model,
+  OnInit,
   Renderer2,
   signal,
   ViewEncapsulation,
@@ -17,6 +18,14 @@ import {
   FormFieldControl,
   TEDI_FORM_FIELD_CONTROL,
 } from "../form-field/form-field-control";
+import {
+  InputSize,
+  TEDI_FIELD_CONTEXT,
+} from "../form-field/field-context.token";
+import { deriveControlState } from "../form-field/derive-control-state";
+import { controlDescribedBy } from "../form-field/control-described-by";
+
+export type TextareaSize = Exclude<InputSize, "large">;
 
 @Component({
   selector: "textarea[tedi-textarea]",
@@ -38,31 +47,47 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: "tedi-textarea",
+    "[class.tedi-field-surface]": "paintsSurface()",
+    "[class.tedi-field-surface--valid]": "paintsSurface() && valid()",
+    "[class.tedi-textarea--small]": "resolvedSize() === 'small'",
     "[class.tedi-textarea--not-resizable]": "!resizable()",
     "[class.tedi-textarea--auto-grow]": "autoGrow()",
     "[style.height]": "heightStyle()",
     "[style.min-height]": "minHeightStyle()",
     "[style.max-height]": "maxHeightStyle()",
     "[attr.aria-invalid]": "invalid() || null",
+    "[attr.aria-describedby]": "describedBy.attribute()",
     "(input)": "handleInputChange($event)",
     "(blur)": "handleBlur()",
   },
 })
-export class TextareaComponent implements ControlValueAccessor, FormFieldControl {
+export class TextareaComponent
+  implements OnInit, ControlValueAccessor, FormFieldControl
+{
   private el = inject<ElementRef<HTMLTextAreaElement>>(ElementRef);
   private renderer = inject(Renderer2);
+  private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
+    optional: true,
+  });
 
   /**
    * Value of the textarea. Supports two-way binding, use with form controls.
    */
   value = model<string>("");
   /**
+   * Size of the field. Falls back to the size of a wrapping `tedi-form-field`
+   * when not set here.
+   */
+  size = input<TextareaSize | undefined>();
+  /**
+   * Forces the error state on, or off, regardless of the reactive-forms state.
+   * Leave unset to let the control derive it.
+   */
+  // eslint-disable-next-line @angular-eslint/no-input-rename
+  readonly invalidInput = input<boolean>(false, { alias: "invalid" });
+  /**
    * Whether the user can resize the textarea. Only vertical resizing is
    * supported; set to `false` to disable resizing entirely.
-   *
-   * The resize is applied to the surrounding `tedi-form-field` box (which owns
-   * the border) while the textarea fills it, so the visible field resizes with
-   * the drag.
    *
    * @default true
    */
@@ -80,29 +105,32 @@ export class TextareaComponent implements ControlValueAccessor, FormFieldControl
    */
   autoGrow = input<boolean>(false);
   /**
-   * Minimum number of visible rows while `autoGrow` is enabled.
+   * Number of rows the field rests at, and the fewest it can ever show. With no
+   * `height` set this is what sizes the textarea, so it is the input to reach
+   * for when a field needs to be taller or shorter — in every mode, not just
+   * while `autoGrow` is on.
+   *
    * @default 3
    */
   minRows = input<number>(3);
   /**
-   * Maximum number of visible rows before the field scrolls, while `autoGrow`
-   * is enabled.
+   * Most rows the field shows before it starts scrolling. Caps `autoGrow`'s
+   * growth and how far the resize grip can be dragged.
+   *
    * @default 12
    */
   maxRows = input<number>(12);
   /**
-   * Fixed height of the textarea (e.g. `'7.5rem'`, `200` → `200px`). Applied
-   * only when `autoGrow` is disabled; otherwise the height is content-driven.
-   * Set to `undefined` to let the resting height come from the native `rows`
-   * attribute instead.
-   *
-   * @default "7.5rem"
+   * Exact resting height (e.g. `'7.5rem'`, `200` → `200px`), for the rare field
+   * that has to match something other than a whole number of rows. Prefer
+   * `minRows`. Ignored while `autoGrow` is on, and still bounded by `minRows`
+   * and `maxRows`.
    */
-  height = input<string | number | undefined>("7.5rem");
+  height = input<string | number | undefined>();
   /**
    * Maximum height the textarea may grow to (e.g. `'200px'`, `12` → `12px`,
-   * `'12rem'`). Beyond it the field scrolls. Limits `autoGrow` growth (in
-   * addition to `maxRows`) and manual resizing.
+   * `'12rem'`). Beyond it the field scrolls. Applied on top of `maxRows`,
+   * whichever is smaller.
    */
   maxHeight = input<string | number | undefined>();
 
@@ -111,8 +139,18 @@ export class TextareaComponent implements ControlValueAccessor, FormFieldControl
   }
 
   private rowsToHeight(rows: number): string {
-    return `calc(${rows} * 1lh + 2 * var(--_tedi-textarea-padding-y))`;
+    return `calc(${rows} * 1lh + 2 * var(--_field-padding-y))`;
   }
+
+  readonly resolvedSize = computed<InputSize>(
+    () => this.size() ?? this.fieldContext?.size() ?? "default",
+  );
+
+  readonly paintsSurface = computed(
+    () => !(this.fieldContext?.ownsSurface() ?? false),
+  );
+
+  readonly valid = computed(() => this.fieldContext?.valid() ?? false);
 
   readonly heightStyle = computed<string | null>(() => {
     const height = this.height();
@@ -120,26 +158,48 @@ export class TextareaComponent implements ControlValueAccessor, FormFieldControl
     return this.toCssSize(height);
   });
 
-  readonly minHeightStyle = computed<string | null>(() =>
-    this.autoGrow() ? this.rowsToHeight(this.minRows()) : null,
+  /**
+   * `minRows` is the resting height as much as it is the floor: with no `height`
+   * the textarea has nothing else to size to, so the floor is what it settles
+   * at. That makes it the one number a consumer has to change.
+   */
+  readonly minHeightStyle = computed<string>(() =>
+    this.rowsToHeight(this.minRows()),
   );
 
-  readonly maxHeightStyle = computed<string | null>(() => {
-    const limits: string[] = [];
-    if (this.autoGrow()) limits.push(this.rowsToHeight(this.maxRows()));
+  readonly maxHeightStyle = computed<string>(() => {
+    const limits = [this.rowsToHeight(this.maxRows())];
     const maxHeight = this.maxHeight();
     if (maxHeight != null) limits.push(this.toCssSize(maxHeight));
 
-    if (limits.length === 0) return null;
     return limits.length === 1 ? limits[0] : `min(${limits.join(", ")})`;
   });
 
-  readonly disabled = computed(() => this.formDisabled());
+  readonly disabled = computed(
+    () => this.formDisabled() || (this.fieldContext?.disabled() ?? false),
+  );
 
-  readonly invalid = signal(false);
+  private readonly derived = deriveControlState();
 
-  setInvalidState(isInvalid: boolean) {
-    this.invalid.set(isInvalid);
+  readonly describedBy = controlDescribedBy();
+
+  readonly touched = this.derived.touched;
+
+  readonly dirty = this.derived.dirty;
+
+  readonly invalid = computed(
+    () =>
+      this.invalidInput() ||
+      this.derived.invalid() ||
+      (this.fieldContext?.invalid() ?? false),
+  );
+
+  ngOnInit() {
+    this.derived.connect();
+  }
+
+  setDescribedBy(ids: string[]) {
+    this.describedBy.set(ids);
   }
 
   private formDisabled = signal(false);
@@ -185,6 +245,19 @@ export class TextareaComponent implements ControlValueAccessor, FormFieldControl
   }
 
   handleBlur() {
+    this.onTouched();
+  }
+
+  focus() {
+    if (this.disabled()) return;
+    this.el.nativeElement.focus();
+  }
+
+  reset() {
+    if (this.disabled()) return;
+
+    this.setValue("");
+    this.onChange("");
     this.onTouched();
   }
 }

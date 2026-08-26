@@ -3,14 +3,9 @@
   [size]="size()"
   [icon]="fieldIcon()"
   [clearable]="clearable() && !isDisabled()"
-  [inputClass]="button() ? 'tedi-search__input--has-button' : null"
 >
   @if (label()) {
-    <label
-      tedi-label
-      [for]="inputId()"
-      [size]="size() === 'small' ? 'small' : 'default'"
-    >
+    <label tedi-label [for]="inputId()">
       {{ label() }}
     </label>
   }
@@ -25,7 +20,6 @@
     [placeholder]="placeholder()"
     [disabled]="isDisabled()"
     [attr.aria-label]="inputAriaLabel()"
-    [attr.aria-describedby]="feedbackId()"
     (valueChange)="onInputValue($event)"
     (clear)="onClear()"
     (keydown.enter)="emitSearch()"
@@ -34,7 +28,7 @@
 
   @if (feedbackText(); as feedback) {
     <tedi-feedback-text
-      [attr.id]="feedbackId()"
+      [id]="feedbackId()"
       [text]="feedback.text"
       [type]="feedback.type"
       [position]="feedback.position"
