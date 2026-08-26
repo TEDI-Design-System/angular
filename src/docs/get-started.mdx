@@ -2,7 +2,7 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 <Meta name="Get Started" title="Documentation/Get started" />
 
-# Get started with @tehik-design-system/angular
+# Get started with @tedi-design-system/angular
 
 ---
 
@@ -11,6 +11,11 @@ import { Meta } from "@storybook/addon-docs/blocks";
 ```bash
 npm install @tedi-design-system/angular
 ```
+
+Supported Angular versions are **Angular 20, 21 and 22** — the three latest majors, following
+[Angular's own release model](https://angular.dev/reference/releases). See
+[Supported versions](https://github.com/TEDI-Design-System/general/wiki/Supported-versions) for the
+support policy.
 
 ### 2. Add TEDI Provider (Theme + Language)
 
@@ -51,22 +56,29 @@ This will:
 
 ### 4. Import components from the design system
 
-Components come from the tedi or community folders:
+Components are published as two separate entry points:
 
 ```ts
-import { SomeComponent } from "@tedi-design-system/angular/tedi";
-import { SomeComponent } from "@tedi-design-system/angular/community";
+import { ButtonComponent } from "@tedi-design-system/angular/tedi";
+import { FloatingButtonComponent } from "@tedi-design-system/angular/community";
 ```
 
+**TEDI-Ready** components are maintained by the TEDI team and meet the full
+[Definition of Done](https://github.com/TEDI-Design-System/general/wiki/Definition-of-Done).
+**Community** components are contributed and held to a lighter standard. Prefer a TEDI-Ready
+component where one exists.
+
 ### 5. Use the imported components in your standalone components
+
+Most TEDI components are attribute selectors, applied to a native element rather than used as a
+tag of their own:
 
 ```ts
 @Component({
   selector: "app-example",
-  imports: [SomeComponent],
-  template: <SomeComponent />
+  imports: [ButtonComponent],
+  template: `<button tedi-button>Create</button>`,
 })
-
 export class ExampleComponent {}
 ```
 
@@ -136,7 +148,7 @@ Available languages are defined in your translation service, e.g.:
 
 ```ts
 import { ApplicationConfig } from "@angular/core";
-import { provideTedi } from "@tedi-design-system/angular";
+import { provideTedi } from "@tedi-design-system/angular/tedi";
 
 export const appConfig: ApplicationConfig = {
   providers: [
