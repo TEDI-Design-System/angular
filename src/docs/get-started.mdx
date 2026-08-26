@@ -86,32 +86,39 @@ export class ExampleComponent {}
 
 # Theming
 
-TEDI uses a theme class applied directly to the `<html>` element. Theme value is stored in **"tedi-theme"** cookie.
+TEDI applies the active theme as a class on the `<html>` element. The value is stored in the
+**"tedi-theme"** cookie and managed by `provideTedi` and `ThemeService`.
 
-Available themes:
+Only two themes ship with the library's CSS:
 
-- `default`
-- `dark`
-- `rit`
+| Theme     | Class                 |
+| --------- | --------------------- |
+| `default` | `tedi-theme--default` |
+| `dark`    | `tedi-theme--dark`    |
 
-Classes applied:
+Any other theme is a **custom theme and is not bundled** — you generate it from your project's Figma
+variables with the [TEDI Figma Variable Exporter plugin](https://www.figma.com/community/plugin/1612732083806730958),
+add the generated CSS to your `angular.json` styles, and then pass its name. `ThemeService` accepts
+any string, so a missing stylesheet fails silently — the class lands on `<html>` with no variables
+behind it and components keep rendering with the default theme's values that `:root` provides. See
+[Custom theming](/docs/documentation-custom-theming--docs) for the full walkthrough.
 
-- `tedi-theme--default`
-- `tedi-theme--dark`
-- `tedi-theme--rit`
-
-Theme switching with ThemeService
+Theme switching with `ThemeService`:
 
 ```ts
-import { Component } from "@angular/core";
-import { ThemeService, Theme } from "@tedi-design-system/angular/tedi";
+import { Component, inject } from "@angular/core";
+import {
+  ThemeService,
+  Theme,
+  ButtonComponent,
+} from "@tedi-design-system/angular/tedi";
 
 @Component({
   selector: "app-theme-toggle",
+  imports: [ButtonComponent],
   template: `
-    <button (click)="setTheme('default')">Default</button>
-    <button (click)="setTheme('dark')">Dark</button>
-    <button (click)="setTheme('rit')">Rit</button>
+    <button tedi-button (click)="setTheme('default')">Default</button>
+    <button tedi-button (click)="setTheme('dark')">Dark</button>
   `,
 })
 export class ThemeToggleComponent {
