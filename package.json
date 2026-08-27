@@ -142,5 +142,13 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TEDI-Design-System/angular.git"
-  }
+  },
+  "description": "[![codecov](https://codecov.io/gh/TEHIK-EE/tedi-design-system/graph/badge.svg?token=NKNNJSG19D)](https://codecov.io/gh/TEHIK-EE/tedi-design-system) [![semantic-release](https://img.shields.io/badge/semantic--release-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TEDI-Design-System/angular/issues"
+  },
+  "homepage": "https://github.com/TEDI-Design-System/angular#readme"
 }

@@ -8,4 +8,3 @@ export * from "./select";
 export * from "./textarea/textarea.component";
 export * from "./search/search.component";
 export * from "./file-dropzone";
-export * from "./text-editor";
