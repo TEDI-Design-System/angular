@@ -32,7 +32,7 @@ export const TEXT_EDITOR_DEFAULT_MODULES: QuillModules = {
  *
  * @example
  * ```scss
- * @forward 'quill/dist/quill.snow.css';
+ * @forward 'quill/dist/quill.core.css';
  * @forward 'quill/dist/quill.snow.css';
  * ```
  */
