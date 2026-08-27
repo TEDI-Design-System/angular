@@ -32,6 +32,14 @@
     "ngx-quill": "^28.0.2",
     "quill": "^2.0.3"
   },
+  "peerDependenciesMeta": {
+    "ngx-quill": {
+      "optional": true
+    },
+    "quill": {
+      "optional": true
+    }
+  },
   "dependencies": {
     "@tanstack/angular-table": "^8.21.4",
     "@tedi-design-system/core": "^6.4.3"
