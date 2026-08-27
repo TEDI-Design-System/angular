@@ -1,3 +1,26 @@
+# [8.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0...angular-8.0.0) (2026-08-27)
+
+
+### Bug Fixes
+
+* **community-tabs-fix:** community tabs will no longer allow multiple elements to be selected [#112](https://github.com/TEDI-Design-System/angular/issues/112) ([9e1c43a](https://github.com/TEDI-Design-System/angular/commit/9e1c43ae3439d12a3147a0c41bda639022f2b573))
+* **date-picker:** reject manually entered disabled date [#610](https://github.com/TEDI-Design-System/angular/issues/610) ([#622](https://github.com/TEDI-Design-System/angular/issues/622)) ([a214973](https://github.com/TEDI-Design-System/angular/commit/a21497391f95891b34af944b8a88318385341dca))
+* **ellipsis:** prevent inherited nowrap from hiding ellipsis [#606](https://github.com/TEDI-Design-System/angular/issues/606) ([#623](https://github.com/TEDI-Design-System/angular/issues/623)) ([ae8fc6b](https://github.com/TEDI-Design-System/angular/commit/ae8fc6b709b21ef0b8fcd51f3e6d1d5d363a51ad))
+* **form-field:** wrapper is not required by controls anymore [#612](https://github.com/TEDI-Design-System/angular/issues/612) ([#617](https://github.com/TEDI-Design-System/angular/issues/617)) ([4594f0a](https://github.com/TEDI-Design-System/angular/commit/4594f0a5d606af6c73fcd5bc37074f8986ce7138))
+* **table:** design review changes [#463](https://github.com/TEDI-Design-System/angular/issues/463) ([74b16a5](https://github.com/TEDI-Design-System/angular/commit/74b16a5afa30f193459a9a80896086dbd67cae1f))
+* **tooltip:** better screen reader support [#45](https://github.com/TEDI-Design-System/angular/issues/45) ([#585](https://github.com/TEDI-Design-System/angular/issues/585)) ([f067bb2](https://github.com/TEDI-Design-System/angular/commit/f067bb26a5e1b04c57307b26b106aef1a96bc917))
+
+
+### Features
+
+* **icons:** bump core to 6.5.0 for expanded material symbols set [#604](https://github.com/TEDI-Design-System/angular/issues/604) ([#605](https://github.com/TEDI-Design-System/angular/issues/605)) ([72f64c7](https://github.com/TEDI-Design-System/angular/commit/72f64c7909f850a936cce7bdf82951373726d07f))
+* **textarea:** add new TEDI-ready component [#540](https://github.com/TEDI-Design-System/angular/issues/540) ([#542](https://github.com/TEDI-Design-System/angular/issues/542)) ([28e8b04](https://github.com/TEDI-Design-System/angular/commit/28e8b04a2ce5c8110b657814d880606eaab22b1a))
+
+
+### BREAKING CHANGES
+
+* **form-field:** form-field behavior changed, refer to migration guide
+
 # [8.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.0-rc.2...angular-8.0.0-rc.3) (2026-08-27)
 
 
