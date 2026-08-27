@@ -169,9 +169,9 @@ export default {
       },
     },
     maxWidth: {
-      control: "select",
-      options: MAXWIDTH,
-      description: "The width of the popover.",
+      control: "text",
+      description:
+        "The width of the popover: a preset, or any CSS length for a panel the presets don't cover.",
       defaultValue: {
         summary: "small",
       },
@@ -179,7 +179,7 @@ export default {
         category: "popover-content inputs",
         type: {
           summary: "PopoverWidth",
-          detail: "none \nsmall \nmedium \nlarge",
+          detail: "none \nsmall \nmedium \nlarge \nany CSS length (e.g. 20rem)",
         },
       },
     },
@@ -599,10 +599,21 @@ export const WithProminentBorder: Story = {
 };
 
 export const Size: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`maxWidth` takes a preset — `none` sizes the panel to its content, " +
+          "`small` / `medium` / `large` are the fixed scale — or any CSS length " +
+          "(`20rem`, `340px`, `min(90vw, 30rem)`) when the scale doesn't fit. A " +
+          "length is applied inline, so no preset class competes with it.",
+      },
+    },
+  },
   render: (args) => ({
     props: {
       ...args,
-      widths: MAXWIDTH,
+      widths: [...MAXWIDTH, "20rem"],
     },
     template: `
       <tedi-row [gap]="3">

@@ -183,6 +183,28 @@ describe("DatePickerComponent", () => {
     expect(component.selected()).toEqual(new Date(2025, 1, 5));
   });
 
+  it("manual input matching disabledMatchers restores previous selected date", () => {
+    const previousDate = new Date(2024, 0, 1);
+    const disabledDate = new Date(2025, 1, 5);
+    const onChange = jest.fn();
+    
+    fixture.componentRef.setInput("disabledMatchers", disabledDate);
+    component.selected.set(previousDate);
+    component.inputValue.set("01.01.2024");
+    component.registerOnChange(onChange);
+    fixture.detectChanges();
+
+    const input = getInput();
+    input.value = "05.02.2025";
+    input.dispatchEvent(new Event("input"));
+    input.dispatchEvent(new Event("blur"));
+    fixture.detectChanges();
+
+    expect(component.selected()).toEqual(previousDate);
+    expect(component.inputValue()).toBe("01.01.2024");
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it("invalid manual input restores previous selected date", () => {
     component.selected.set(new Date(2024, 0, 1));
     component.inputValue.set("01.01.2024");

@@ -7,6 +7,8 @@ import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { SelectComponent } from "../../form/select/select.component";
+import { DateFieldComponent } from "../../form/date-field/date-field.component";
+import { TimeFieldComponent } from "../../form/time-field/time-field.component";
 
 const priceFormatter = new Intl.NumberFormat("et-EE", {
   minimumFractionDigits: 2,
@@ -105,6 +107,50 @@ function editableLocationCellTemplate(tplName = "locationCell"): string {
 </ng-template>`;
 }
 
+// Inline-edit cell for a date range: the value is a `DateRange` object, edited
+// with `tedi-date-field` in range mode. The read view formats via the host's
+// `formatDateRange` reference.
+function editableDateRangeCellTemplate(tplName = "dateRangeCell"): string {
+  return `
+<ng-template #${tplName} let-ctx>
+  @if (editor.isEditing(ctx.row.original.id)) {
+    <tedi-form-field size="small">
+      <tedi-date-field
+        [inputId]="'dateRange-' + ctx.row.original.id"
+        size="small"
+        mode="range"
+        placeholder="pp.kk.aaaa – pp.kk.aaaa"
+        [ngModel]="editor.draftValueRaw(ctx.row.original.id, 'dateRange')"
+        (ngModelChange)="editor.setDraftValueRaw(ctx.row.original.id, 'dateRange', $event)"
+      />
+    </tedi-form-field>
+  } @else {
+    {{ formatDateRange(ctx.row.original.dateRange) }}
+  }
+</ng-template>`;
+}
+
+// Inline-edit cell for an `HH:mm` time string, edited with `tedi-time-field`.
+function editableTimeCellTemplate(
+  tplName: string,
+  field: string,
+): string {
+  return `
+<ng-template #${tplName} let-ctx>
+  @if (editor.isEditing(ctx.row.original.id)) {
+    <tedi-form-field size="small">
+      <tedi-time-field
+        [inputId]="'${field}-' + ctx.row.original.id"
+        [ngModel]="editor.draftValueRaw(ctx.row.original.id, '${field}')"
+        (ngModelChange)="editor.setDraftValueRaw(ctx.row.original.id, '${field}', $event)"
+      />
+    </tedi-form-field>
+  } @else {
+    {{ ctx.row.original.${field} }}
+  }
+</ng-template>`;
+}
+
 const EDITABLE_ACTIONS_TEMPLATE = `
 <ng-template #editActions let-ctx>
   <span style="display:inline-flex; gap:8px; justify-content:flex-end; align-items:center; width:100%;">
@@ -127,8 +173,8 @@ const EDITABLE_ACTIONS_TEMPLATE = `
 </ng-template>`;
 
 const BOOKING_EDIT_TEMPLATES =
-  editableTextCellTemplate("dateRangeCell", "dateRange", "Kuupäev") +
-  editableTextCellTemplate("hourCell", "hour", "Kellaaeg", "schedule") +
+  editableDateRangeCellTemplate("dateRangeCell") +
+  editableTimeCellTemplate("hourCell", "hour") +
   editableTextCellTemplate("durationCell", "duration", "Kestus") +
   editableLocationCellTemplate("locationCell") +
   EDITABLE_ACTIONS_TEMPLATE;
@@ -141,6 +187,8 @@ const EDIT_IMPORTS = [
   ClosingButtonComponent,
   FormFieldComponent,
   SelectComponent,
+  DateFieldComponent,
+  TimeFieldComponent,
   FormsModule,
 ];
 
@@ -164,6 +212,22 @@ function createEditableRows<T extends { id: string }>(initial: T[]) {
       return String(d[field] ?? "");
     },
     setDraftValue: (id: string, field: keyof T, value: string): void => {
+      draft.update((prev) =>
+        prev && prev.id === id ? { ...prev, [field]: value } : prev,
+      );
+    },
+    // Typed accessors for non-string fields (e.g. a DateRange edited via
+    // tedi-date-field) — the string variants above are only for text inputs.
+    draftValueRaw: <K extends keyof T>(id: string, field: K): T[K] | null => {
+      const d = draft();
+      if (!d || d.id !== id) return null;
+      return d[field];
+    },
+    setDraftValueRaw: <K extends keyof T>(
+      id: string,
+      field: K,
+      value: T[K],
+    ): void => {
       draft.update((prev) =>
         prev && prev.id === id ? { ...prev, [field]: value } : prev,
       );
@@ -196,6 +260,7 @@ const TABLE_APPEARANCE_BINDINGS = `
   [verticalBorders]="verticalBorders()"
   [borderless]="borderless()"
   [stickyFirstColumn]="stickyFirstColumn()"
+  [stickyLastColumn]="stickyLastColumn()"
   [stickyHeader]="stickyHeader()"
   [fixedLayout]="fixedLayout()"
   [rowHover]="rowHover()"
@@ -207,6 +272,9 @@ const TABLE_APPEARANCE_BINDINGS = `
   [enableColumnFilters]="enableColumnFilters()"
   [rowGroupDividers]="rowGroupDividers()"
   [controlColumnOrder]="controlColumnOrder()"
+  [filterModalBreakpoint]="filterModalBreakpoint()"
+  [filterModalFullscreen]="filterModalFullscreen()"
+  [filterPopoverWidth]="filterPopoverWidth()"
   [maxHeight]="maxHeight()"
   [activeRowId]="activeRowId()"
   [placeholderRole]="placeholderRole()"

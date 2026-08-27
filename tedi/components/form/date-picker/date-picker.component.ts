@@ -614,7 +614,7 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
     const selected = this.selected();
     const parsed = parseDate(this.inputValue());
 
-    if (parsed) {
+    if (parsed && !this.isDisabled(parsed)) {
       this.emitIfChanged(parsed);
       this.selected.set(parsed);
       this.month.set(parsed);

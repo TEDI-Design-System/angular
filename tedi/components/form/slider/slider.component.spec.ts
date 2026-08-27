@@ -177,6 +177,36 @@ describe("SliderComponent", () => {
     component.handlePointerDown();
     expect(component.isDragging()).toBe(false);
   });
+
+  describe("hideLabel", () => {
+    const label = (): HTMLElement =>
+      fixture.nativeElement.querySelector("label[tedi-label]");
+
+    beforeEach(() => {
+      fixture.componentRef.setInput("label", "Maht");
+      fixture.detectChanges();
+    });
+
+    it("shows the label by default", () => {
+      expect(label().classList).not.toContain("sr-only");
+      expect(label().classList).not.toContain("tedi-label--reserve-space");
+    });
+
+    it("hides the label visually when true", () => {
+      fixture.componentRef.setInput("hideLabel", true);
+      fixture.detectChanges();
+
+      expect(label().classList).toContain("sr-only");
+    });
+
+    it("maps keep-space onto the label's reserve-space treatment", () => {
+      fixture.componentRef.setInput("hideLabel", "keep-space");
+      fixture.detectChanges();
+
+      expect(label().classList).toContain("tedi-label--reserve-space");
+      expect(label().classList).not.toContain("sr-only");
+    });
+  });
 });
 
 @Component({

@@ -472,7 +472,8 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `striped: boolean = false`
 - `verticalBorders: boolean = false`
 - `borderless: boolean = false`
-- `stickyFirstColumn: boolean = false`
+- `stickyFirstColumn: boolean = false` — freezes the leading column(s) during horizontal scroll
+- `stickyLastColumn: boolean = false` — freezes the trailing column (e.g. an actions column) during horizontal scroll
 - `stickyHeader: boolean = false`
 - `fixedLayout: boolean = false` — `table-layout: fixed`; makes column `size`/`minSize`/`maxSize` authoritative (content wraps instead of stretching the column). Required for column width caps to hold.
 - `maxHeight: number | string` — wraps the table in a scrollable container (pair with `stickyHeader`)
@@ -491,9 +492,12 @@ Generic data table built on top of [`@tanstack/angular-table`](https://tanstack.
 - `getSubRows: (row) => TData[] | undefined` — hierarchical / tree rows
 - `groupRowsBy: (row: Row<TData>) => unknown` — table-level row grouping. Consecutive rendered rows with an equal key form a group; the control columns (select / expand / drag) span each group (one checkbox + one chevron per group), row selection works per group (the group's single checkbox toggles all its rows and goes indeterminate when partial), and group boundaries drive `rowGroupDividers`. Data columns opt into spanning the same groups with `groupBy: true`.
 - `rowGroupDividers: "all" | "between" | "none" = "all"` — when grouped, controls row dividers: `"between"` draws them only at group boundaries (rows within a group read as one block); `"none"` removes them. No effect without `groupRowsBy`.
-- `controlColumnOrder: ("drag" | "select" | "expand")[] = ["drag", "select", "expand"]` — order of the auto-injected control columns. Only enabled controls render; any enabled control omitted from the list is appended. Use it to place the selection checkbox before the expand chevron, etc.
+- `controlColumnOrder: ("drag" | "select" | "expand" | "content")[] = ["drag", "select", "expand"]` — order of the auto-injected control columns. Only enabled controls render; any enabled control omitted from the list is appended. Use it to place the selection checkbox before the expand chevron, etc. Include the `"content"` sentinel to split leading vs trailing: controls listed after `"content"` render **after** the data columns — e.g. `["content", "expand"]` puts the expand toggle in the last column.
 - `enableColumnFilters: boolean = false` — force TanStack's filter machinery (auto-on when any column sets `filterable`)
-- `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`). `pageSizeOptions` accepts plain numbers or `{ value, label }` objects — use the object form for a **"Show all"** entry whose `value` is large enough to hold every row: pass the row total when you know it (`data.length`), or `Number.MAX_SAFE_INTEGER` when you don't. Filtering only shrinks the row count, so a large page size always collapses the result to a single page. (Don't use `-1` — TanStack clamps `setPageSize` to `≥ 1`.)
+- `filterModalBreakpoint: Breakpoint | false = "sm"` — below this breakpoint the column filter opens in a modal instead of the popover (avoids a cramped/off-screen popover on small viewports). Set `false` to always use the popover.
+- `filterModalFullscreen: boolean | Breakpoint = false` — fullscreen behaviour of that filter modal: `true` always fullscreen, `false` never, a breakpoint = fullscreen below it.
+- `filterPopoverWidth: PopoverWidth = "small"` — width of the column filter popover. Takes a preset (`"none" | "small" | "medium" | "large"`, where `"none"` sizes the panel to its content) or any CSS length (`"20rem"`). Override per column with `filterable: { popoverWidth }`.
+- `pagination: boolean | TablePaginationOptions` — enables the bottom paginator and is the source of truth for `pageSize`/`pageSizeOptions`. Pass `true` for defaults (`pageSize: 10`, `pageSizeOptions: [10, 25, 50]`) or an options object to tune. `TablePaginationOptions` forwards the `tedi-pagination` visual inputs, including arrow config: `arrowVariant`, `showArrowLabels`, `previousIcon`, `nextIcon` (plus `boundaryCount`, `siblingCount`, `labels`, `background`, `align`, `dividerPosition`, the `hide*` toggles, `disableArrowsAtBoundary`, `showModalTitle`, and the `xs`–`xxl` per-breakpoint overrides). Set `align: "left"` on `paginationTop` to group its results + page-size at the start while the bottom pager stays spread; use e.g. `paginationTop: { align: 'left', md: { align: 'between' } }` for a responsive strip. `pageSizeOptions` accepts plain numbers or `{ value, label }` objects — use the object form for a **"Show all"** entry whose `value` is large enough to hold every row: pass the row total when you know it (`data.length`), or `Number.MAX_SAFE_INTEGER` when you don't. Filtering only shrinks the row count, so a large page size always collapses the result to a single page. (Don't use `-1` — TanStack clamps `setPageSize` to `≥ 1`.)
 - `paginationTop: boolean | TablePaginationOptions` — opt-in top paginator; shares page / page-size state with bottom but has independent visual config (its own arrow + `hide*` settings). Requires `pagination` to be truthy.
 - `manualPagination: boolean = false` — server-side pagination; supply `pageCount` or `rowCount`
 - `manualSorting: boolean = false`
@@ -529,7 +533,7 @@ Render expandable rows open on first load (still user-collapsible):
 
 **Column definition (`TediColumnDef<TData>`):** extends TanStack's `ColumnDef` with Angular-specific fields:
 - `sortable: boolean` — opt the column into the built-in sort affordance (string `header` only). Pair with `sortingFn` to override the comparator. For custom UIs, pass a `TemplateRef` for `header` and call `column.toggleSorting()` yourself.
-- `filterable: boolean | { clearOnClose?: boolean }` — opt into the built-in filter popover (icon `filter_alt`). Requires `filterTemplate`.
+- `filterable: boolean | { clearOnClose?: boolean; popoverWidth?: PopoverWidth }` — opt into the built-in filter popover (icon `filter_alt`). Requires `filterTemplate`. `popoverWidth` overrides the table's `filterPopoverWidth` for this column — use it when one control (a date range, a wide option list) needs more room than the rest.
 - `filterTemplate: TemplateRef<TediTableFilterContext>` — UI rendered inside the filter popover. The context exposes `value`, `setValue`, `apply()`, `clear()`, and `column`. Apply/Clear footer buttons are wired automatically.
 - `rowSpan: number | ((info: CellContext) => number)` — body-level row spanning. Return `>1` to emit `rowspan="N"`; return `0` to skip the `<td>`. Prefer `groupBy` for key-based grouping; reach for `rowSpan` only for fully custom span logic.
 - `groupBy: boolean | ((row: Row<TData>) => unknown)` — merge consecutive rendered rows with an equal key into one spanning cell, computed internally against the live (post-filter/sort/paginate) row model — no manual `groupRowSpan` wiring. A function groups this column by its own key; `true` reuses the table-level `groupRowsBy`. Takes precedence over `rowSpan`.
@@ -765,13 +769,20 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 **Selector:** `input[tedi-text-field]`
 **Model:** `value: string`
 **Inputs:**
+- `size: InputSize` — "default", "small" or "large"; falls back to a wrapping `tedi-form-field`'s size
+- `invalid: boolean = false` — forces the error state on; combines with the state derived from reactive forms
 - `arrowsHidden: boolean = true`
 **Outputs:**
 - `clear: void`
 
+Paints its own field surface, so it works with no wrapper. Wrap it in a
+`tedi-form-field` when it needs a label, feedback text, a character counter, an
+icon or a clear button.
+
 ```html
 <input tedi-text-field [(value)]="name" />
 <input tedi-text-field [formControl]="nameControl" />
+<input tedi-text-field [formControl]="nameControl" [invalid]="submitted && nameControl.invalid" />
 ```
 
 ### NumberField
@@ -810,6 +821,31 @@ Wrapper that joins filters into a connected button group with collapsed borders 
 ```html
 <tedi-search inputId="q" label="Otsing" [(value)]="query" (searchEvent)="onSearch($event)" />
 <tedi-search inputId="q" label="Otsing" [button]="{ text: 'Otsi' }" [formControl]="queryControl" />
+```
+
+### Textarea
+**Selector:** `textarea[tedi-textarea]` | ControlValueAccessor
+**Model:** `value: string`
+**Inputs:**
+- `resizable: boolean = true` — allow manual (vertical-only) resizing; `false` disables it
+- `autoGrow: boolean = false` — grow to fit content via CSS `field-sizing` (disables manual resize)
+- `minRows: number = 3`, `maxRows: number = 12` — bounds while `autoGrow` is on
+- `height: string | number | undefined` — exact resting height (e.g. `"7.5rem"`, `200` → `200px`) when `autoGrow` is off; unset by default, so `minRows` sizes the field
+- `maxHeight: string | number | undefined` — cap the height before it scrolls
+- `size: TextareaSize` — "default" or "small"; falls back to a wrapping `tedi-form-field`'s size
+- `invalid: boolean = false` — forces the error state on; combines with the state derived from reactive forms
+
+Paints its own field surface, so it works with no wrapper. Wrap it in a
+`tedi-form-field` only for a label, feedback text or `characterLimit` counter.
+
+```html
+<textarea tedi-textarea [(value)]="notes"></textarea>
+
+<tedi-form-field [characterLimit]="500">
+  <label tedi-label for="notes">Notes</label>
+  <textarea tedi-textarea id="notes" [(value)]="notes"></textarea>
+  <tedi-feedback-text type="error" text="Required" />
+</tedi-form-field>
 ```
 
 ### Slider
@@ -1028,7 +1064,8 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 - `inputDisabled: boolean = false` — disables the field entirely (input, icon button, and calendar)
 - `readOnly: boolean = false` — blocks typing but leaves the calendar interactive
 - `required: boolean = false` — marks input as required; in `multiple` mode prevents clearing the last date
-- `size: DateFieldSize = "default"` — "default" or "small"; should match the surrounding `tedi-form-field` size
+- `size: DateFieldSize` — "default" or "small"; falls back to a wrapping `tedi-form-field`'s size
+- `invalid: boolean = false` — forces the error state on; combines with the state derived from reactive forms
 - `minDate: Date | undefined` — disables all dates before this date
 - `maxDate: Date | undefined` — disables all dates after this date
 - `disablePast: boolean = false` — disable all dates before today
@@ -1149,7 +1186,7 @@ Form-control wrapper around the Calendar. Exposes a typed text input paired with
 - `modal: TimeFieldModal = "md"` — open the picker in a modal: `true` always, `false` never, breakpoint name (`"sm" | "md" | "lg" | "xl"`) means modal below that breakpoint
 - `fullscreen: TimeFieldFullscreen = false` — make the modal fullscreen: `true` always, `false` never, breakpoint name means fullscreen below that breakpoint. Only applies when the picker opens as a modal
 
-Sizing and validation styling come from the wrapping `tedi-form-field` — set them there, not on `tedi-time-field`. Free-typed values are normalized on blur (digits-only → `HH:mm`); invalid input reverts to the previous value.
+Paints its own field surface. Set `size` and `invalid` on `tedi-time-field` itself; both fall back to a wrapping `tedi-form-field`. Free-typed values are normalized on blur (digits-only → `HH:mm`); invalid input reverts to the previous value.
 
 ```html
 <tedi-form-field>
@@ -1283,16 +1320,41 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 
 ### FormField
 **Selector:** `tedi-form-field`
+
+Stacks the additions that sit *outside* a field — a label above, feedback text and
+a character counter below — and wires `aria-describedby` between them and the
+control. Controls paint their own surface, so the wrapper is only needed when one
+of those additions is present. The one exception is `icon` or `clearable`: those
+sit *inside* the field, so with either set the form field renders the surface
+itself (a `.tedi-form-field__box` around the control) and the control stands
+down. Any control that provides `TEDI_FORM_FIELD_CONTROL` can be projected,
+including one you wrote yourself.
+Content that belongs below the feedback row is marked with `[tediFormFieldExtra]`.
+
+The label slot accepts a bare `label[tedi-label]` or a `tedi-label-row`, so a label with an info
+tooltip composes the documented way:
+
+```html
+<tedi-form-field>
+  <tedi-label-row>
+    <label tedi-label for="x" [required]="true">Toimeaine</label>
+    <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
+  </tedi-label-row>
+  <input tedi-text-field id="x" />
+</tedi-form-field>
+```
+
 **Inputs:**
-- `size: InputSize = "default"`
-- `icon: string | FormFieldIcon`
-- `clearable: boolean = false`
-- `inputClass: string | null`
+- `characterLimit: number | undefined` — live `current/limit` counter below the field; the field goes into an error state once exceeded
+- `icon: string | FormFieldIcon` — icon shown at the end of the field
+- `clearable: boolean = false` — clear button, shown once the control holds a value
+- `size: InputSize = "default"` — size of the whole field; the label, control and box row scale together. A control's own `size` overrides it
+- `inputClass: string | null` — **⚠️ DEPRECATED**, style the control directly
 
 ```html
 <tedi-form-field [clearable]="true" icon="search">
-  <tedi-label>Search</tedi-label>
-  <input tedi-text-field [formControl]="searchControl" />
+  <label tedi-label for="q">Search</label>
+  <input tedi-text-field id="q" [formControl]="searchControl" />
   <tedi-feedback-text type="hint" text="Type to search" />
 </tedi-form-field>
 ```
@@ -1300,9 +1362,10 @@ Implements `ControlValueAccessor`. Value type is `T` (single) or `T[]` (multisel
 ### Label
 **Selector:** `[tedi-label]`
 **Inputs:**
-- `size: LabelSize = "default"`
 - `required: boolean = false`
 - `color: LabelColor = "secondary"`
+- `size: LabelSize` — falls back to the size of a wrapping `tedi-form-field`, so it only needs setting when it should differ
+- `visuallyHidden: boolean | "reserve-space" = false` — hides the label visually while keeping it in the accessibility tree, so the control stays named. `"reserve-space"` also keeps the label's line of layout, to align a field with labelled siblings in the same row
 
 ### LabelRow
 **Selector:** `tedi-label-row`
@@ -1325,7 +1388,7 @@ Pure inline-row layout for a form-control label plus trailing affixes (e.g. `ted
 
 ### InputGroup
 **Selector:** `tedi-input-group`
-Wraps a form control with leading/trailing addons. Project a `label[tedi-label]`, a control, optional addons via the `[tediInputGroupPrefix]` / `[tediInputGroupSuffix]` directives, and an optional `tedi-feedback-text`. The control slot accepts `tedi-form-field` (which itself wraps a text/date/time field) or `tedi-select` — any single-line bordered control. Addons merge their border with the control; put an interactive addon (e.g. a `tedi-dropdown`) directly in the prefix/suffix slot and its trigger button fills the whole addon.
+Wraps a form control with leading/trailing addons. Project a `label[tedi-label]` or a `tedi-label-row`, a control, optional addons via the `[tediInputGroupPrefix]` / `[tediInputGroupSuffix]` directives, and an optional `tedi-feedback-text`. The control slot accepts `tedi-form-field` (which itself wraps a text/date/time field) or `tedi-select` — any single-line bordered control. Addon border merging hooks the `.tedi-field-surface` class that every surface owner carries. Addons merge their border with the control; put an interactive addon (e.g. a `tedi-dropdown`) directly in the prefix/suffix slot and its trigger button fills the whole addon.
 **Inputs:**
 - `addons: boolean = true` — merges addon and control borders into one visual unit; disable for detached addons (e.g. an action button)
 - `disabled: boolean = false` — disables the group and propagates to the control
@@ -1674,6 +1737,8 @@ Sub-components: `tedi-header-top`, `tedi-header-logo`, `tedi-header-content`, `t
 - `labels: Partial<PaginationLabels>` — override any of the default text/aria labels
 - `background: "white" | "transparent" = "white"` — `transparent` removes the surface fill + divider for use on non-white containers
 - `dividerPosition: "top" | "bottom" | "none" = "top"` — where the divider line sits (or removed entirely)
+- `align: "between" | "left" | "right" = "between"` — `"between"` spreads the results / pager / page-size slots across the full width; `"left"` / `"right"` group them at the start / end. Handy for a top strip above a table while the bottom pager keeps `between`. Override per breakpoint with the `xs`–`xxl` inputs (see below).
+- `xs` / `sm` / `md` / `lg` / `xl` / `xxl: PaginationBreakpointInputs` — per-breakpoint overrides for the layout inputs (`align`, `showArrowLabels`, `arrowVariant`, `dividerPosition`, `background`), applied mobile-first (an override on `md` takes effect at `md` and every larger breakpoint). Example: `align="left"` with `[md]="{ align: 'between' }"` reads left on mobile/tablet, spread on desktop.
 - `disableArrowsAtBoundary: boolean = false` — keep the prev/next button **rendered** (as a disabled `tedi-button`) at the first/last page instead of removing it from the DOM. By default the boundary arrow is removed entirely so the pager looks balanced.
 - `arrowVariant: ButtonVariant = "neutral"` — variant for the prev/next buttons; accepts any `tedi-button` variant (`primary`, `secondary`, `danger`, `success`, `neutral-inverted`, etc.). The arrows are rendered as actual `tedi-button`s under the hood, so all variant styling/states come for free.
 - `showArrowLabels: boolean = false` — render the `previous` / `next` translated labels as visible button text next to the icon. When `false` (default) the buttons are icon-only and the labels are exposed only via `aria-label`. Use the `labels` input to override the wording (e.g. shorter `"Previous"` instead of `"Previous page"`).
@@ -2016,6 +2081,10 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `withBorder: boolean = false` — illustrative prominent border on the arrow side
 - `lockScroll: boolean = false`
 
+**`tedi-popover-content` inputs:**
+- `maxWidth: PopoverWidth = "small"` — panel width. Takes a preset (`"none" | "small" | "medium" | "large"`, where `"none"` sizes the panel to its content) or any CSS length (`"20rem"`, `"min(90vw, 30rem)"`), applied inline.
+- `title: string` / `showClose: boolean = false`
+
 ### Tooltip
 **Selector:** `tedi-tooltip`
 **Inputs:**
@@ -2177,9 +2246,10 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 **Selector:** `tedi-search` | ControlValueAccessor
 - `inputId: string`, `autocompleteOptions: AutocompleteOption[]`, `size: SearchSize`, `withButton: boolean`
 
-### Textarea
+### Textarea — **DEPRECATED** (use TEDI-Ready Textarea)
 **Selector:** `[tedi-textarea]` (extends Input)
 - `resizeX: boolean = false`, `resizeY: boolean = true`
+- Migrate to the TEDI-Ready `textarea[tedi-textarea]`: `resizeX`/`resizeY` become a single `resizable` (vertical only), composed inside `tedi-form-field`.
 
 ### FileDropzone
 **Selector:** `tedi-file-dropzone` | ControlValueAccessor

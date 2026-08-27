@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Component } from "@angular/core";
-import { FormControl, ReactiveFormsModule } from "@angular/forms";
+import { FormControl, ReactiveFormsModule, Validators } from "@angular/forms";
 import { SearchComponent } from "./search.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
 import { TextFieldComponent } from "../text-field/text-field.component";
@@ -362,5 +362,18 @@ describe("SearchComponent with reactive forms", () => {
     hostFixture.detectChanges();
 
     expect(host.control.value).toBe("typed");
+  });
+
+  it("should keep the search's own control off the input it renders", () => {
+    // The inner `input[tedi-text-field]` holds no control of its own; picking up
+    // the search's would have it claim an error state for a value it never sees.
+    host.control.setValidators(Validators.required);
+    host.control.markAsTouched();
+    host.control.updateValueAndValidity();
+    hostFixture.detectChanges();
+
+    const input = getInput();
+    expect(input.getAttribute("aria-invalid")).toBeNull();
+    expect(input.classList.contains("tedi-field-surface--invalid")).toBe(false);
   });
 });

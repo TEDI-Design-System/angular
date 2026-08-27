@@ -1,106 +1,67 @@
+@use "../field-surface-mixins" as field-surface;
+
 .tedi-form-field {
+  // What `FormFieldComponent.iconSize()` renders at. Stated here because the
+  // addon lane below has to be a length, and an icon's is only otherwise known
+  // to the component. Keep the two in step.
+  --_icon-size: 1.125rem;
+
   display: flex;
   flex-direction: column;
 
-  &__input {
-    --_field-padding-y: var(--form-field-padding-y-md-default);
-    --_field-padding-x: var(--form-field-padding-x-md-default);
+  &--small {
+    --_icon-size: 1rem;
+  }
+
+  &--large {
+    --_icon-size: 1.5rem;
+  }
+
+  &__box {
+    @include field-surface.tokens;
+    @include field-surface.surface;
+    @include field-surface.surface-states(":focus-within", true);
+
+    // How much of the box's trailing edge its own additions occupy, the gap in
+    // front of them included. Published for a control that fills the box from
+    // border to border and so has to hold its content clear of them — the box
+    // states what it renders and assumes nothing about who reads it.
+    --tedi-form-field-addon-lane: 0rem;
 
     position: relative;
     display: flex;
     gap: var(--form-field-inner-spacing);
     align-items: center;
     width: 100%;
-    height: var(--form-field-height);
-    padding: var(--_field-padding-y) var(--_field-padding-x);
-    background: var(--form-input-background-default);
-    border: 1px solid var(--form-input-border-default);
-    border-radius: var(--form-field-radius);
-  }
 
-  &--small {
-    .tedi-label {
-      font-size: var(--body-small-regular-size);
+    &:has(.tedi-form-field__icon) {
+      --tedi-form-field-addon-lane: calc(
+        var(--form-field-inner-spacing) + var(--_icon-size)
+      );
     }
 
-    .tedi-form-field__input {
-      --_field-padding-y: var(--form-field-padding-y-sm);
-
-      height: var(--form-field-height-sm);
+    // The clear button and, when an icon follows it, the separator between them.
+    &:has(.tedi-form-field__buttons) {
+      --tedi-form-field-addon-lane: calc(
+        var(--form-field-inner-spacing) + var(--form-field-button-height-sm)
+      );
     }
-  }
 
-  &--large .tedi-form-field__input {
-    --_field-padding-y: var(--form-field-padding-y-lg);
-    --_field-padding-x: var(--form-field-padding-x-lg);
-
-    height: var(--form-field-height-lg);
-  }
-
-  &--valid .tedi-form-field__input {
-    border-color: var(--form-general-feedback-success-border);
-
-    &:focus-within {
-      box-shadow: inset 0 0 0 1px var(--form-general-feedback-success-border);
+    &:has(.tedi-form-field__buttons):has(.tedi-form-field__icon) {
+      --tedi-form-field-addon-lane: calc(
+        var(--form-field-inner-spacing) + var(--form-field-button-height-sm) +
+          var(--layout-grid-gutters-04) + var(--tedi-borders-01) +
+          var(--form-field-inner-spacing) + var(--_icon-size)
+      );
     }
   }
 
-  &--invalid .tedi-form-field__input {
-    border-color: var(--form-general-feedback-error-border);
-
-    &:focus-within {
-      box-shadow: inset 0 0 0 1px var(--form-general-feedback-error-border);
-    }
+  &--small &__box {
+    @include field-surface.size(small);
   }
 
-  &--disabled .tedi-form-field__input,
-  &__input:has(input:disabled) {
-    cursor: not-allowed;
-    background: var(--form-input-background-disabled);
-    border-color: var(--form-input-border-disabled);
-    box-shadow: none;
-  }
-
-  &:not(
-      .tedi-form-field--disabled,
-      .tedi-form-field--valid,
-      .tedi-form-field--invalid
-    )
-    .tedi-form-field__input:not(:has(input:disabled)) {
-    &:hover,
-    &:has(input:hover) {
-      border-color: var(--form-input-border-hover);
-    }
-
-    &:active,
-    &:has(input:active) {
-      border-color: var(--form-input-border-active);
-      box-shadow: inset 0 0 0 1px var(--form-input-border-active);
-    }
-
-    &:focus-within,
-    &:has(input:focus-visible) {
-      border-color: var(--form-input-border-focus);
-      box-shadow: inset 0 0 0 1px var(--form-input-border-focus);
-    }
-  }
-
-  &__clear {
-    &:disabled {
-      cursor: not-allowed;
-    }
-  }
-
-  &__feedback {
-    margin-top: var(--form-field-outer-spacing);
-  }
-
-  &__extra {
-    margin-top: var(--form-field-outer-spacing);
-
-    &:empty {
-      display: none;
-    }
+  &--large &__box {
+    @include field-surface.size(large);
   }
 
   &__buttons {
@@ -110,6 +71,36 @@
 
     &--hidden {
       visibility: hidden;
+    }
+  }
+
+  &__clear:disabled {
+    cursor: not-allowed;
+  }
+
+  &__feedback {
+    display: flex;
+    gap: var(--layout-grid-gutters-16);
+    align-items: flex-start;
+    margin-top: var(--form-field-outer-spacing);
+  }
+
+  &__character-count {
+    margin-left: auto;
+    font-size: var(--body-small-regular-size);
+    color: var(--general-text-tertiary);
+    white-space: nowrap;
+
+    &--error {
+      color: var(--form-general-feedback-error-text);
+    }
+  }
+
+  &__extra {
+    margin-top: var(--form-field-outer-spacing);
+
+    &:empty {
+      display: none;
     }
   }
 }

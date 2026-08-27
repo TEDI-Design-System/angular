@@ -23,7 +23,7 @@ import { TediTableColumnsMenuComponent } from "./table-columns-menu/table-column
 import { TediTableHeaderButtonComponent } from "./table-header-button/table-header-button.component";
 import { TediPaginationResultsDirective } from "../../navigation/pagination/pagination-results.directive";
 import type {
-  TableControlColumn,
+  TableControlColumnOrder,
   TableExpandTrigger,
   TableSelectionMode,
   TableSize,
@@ -31,13 +31,23 @@ import type {
   TediColumnDef,
   TediTableFilterContext,
 } from "./table.types";
+import type { PopoverWidth } from "../../overlay/popover/popover-content/popover-content.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { LinkComponent } from "../../navigation/link/link.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
+import { LabelComponent } from "../../form/label/label.component";
+import { DateFieldComponent } from "../../form/date-field/date-field.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
+import {
+  formatLocaleDate,
+  isAfterDay,
+  isBeforeDay,
+  parseLocaleDate,
+  type DateRange,
+} from "../../../utils/date.util";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { TagComponent } from "../../tags/tag/tag.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
@@ -54,7 +64,10 @@ import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-conten
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
 import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
 import { EmptyStateComponent } from "../../helpers/empty-state/empty-state.component";
-import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
+import {
+  BreakpointService,
+  type Breakpoint,
+} from "../../../services/breakpoint/breakpoint.service";
 import { TextGroupComponent } from "../text-group/text-group.component";
 import { TextGroupLabelComponent } from "../text-group/text-group-label.component";
 import { TextGroupValueComponent } from "../text-group/text-group-value.component";
@@ -62,6 +75,8 @@ import {
   people,
   personColumns,
   bookings,
+  bookingDateRangeCell,
+  formatBookingDateRange,
   doctors,
   CERT_STATUSES,
   certStatusColor,
@@ -112,6 +127,7 @@ abstract class TableStoryHostBase {
   readonly verticalBorders = input(false, { transform: booleanAttribute });
   readonly borderless = input(false, { transform: booleanAttribute });
   readonly stickyFirstColumn = input(false, { transform: booleanAttribute });
+  readonly stickyLastColumn = input(false, { transform: booleanAttribute });
   readonly stickyHeader = input(false, { transform: booleanAttribute });
   readonly fixedLayout = input(false, { transform: booleanAttribute });
   readonly rowHover = input(false, { transform: booleanAttribute });
@@ -122,11 +138,14 @@ abstract class TableStoryHostBase {
   readonly selectionMode = input<TableSelectionMode>("multiple");
   readonly enableColumnFilters = input(false, { transform: booleanAttribute });
   readonly rowGroupDividers = input<"all" | "between" | "none">("all");
-  readonly controlColumnOrder = input<TableControlColumn[]>([
+  readonly controlColumnOrder = input<TableControlColumnOrder[]>([
     "drag",
     "select",
     "expand",
   ]);
+  readonly filterModalBreakpoint = input<Breakpoint | false>("sm");
+  readonly filterModalFullscreen = input<boolean | Breakpoint>(false);
+  readonly filterPopoverWidth = input<PopoverWidth>("small");
   readonly maxHeight = input<number | undefined>(undefined);
   readonly activeRowId = input<string | undefined>(undefined);
   readonly placeholderRole = input<"alert" | "status" | undefined>(undefined);
@@ -139,6 +158,7 @@ type TediTableStoryArgs = {
   verticalBorders: boolean;
   borderless: boolean;
   stickyFirstColumn: boolean;
+  stickyLastColumn: boolean;
   stickyHeader: boolean;
   fixedLayout: boolean;
   rowHover: boolean;
@@ -149,7 +169,10 @@ type TediTableStoryArgs = {
   selectionMode: TableSelectionMode;
   enableColumnFilters: boolean;
   rowGroupDividers: "all" | "between" | "none";
-  controlColumnOrder: TableControlColumn[];
+  controlColumnOrder: TableControlColumnOrder[];
+  filterModalBreakpoint: Breakpoint | false;
+  filterModalFullscreen: boolean | Breakpoint;
+  filterPopoverWidth: PopoverWidth;
   maxHeight: number | undefined;
   activeRowId: string | undefined;
   placeholderRole: "alert" | "status" | undefined;
@@ -202,9 +225,6 @@ const meta: Meta<TediTableStoryArgs> = {
   title: "TEDI-Ready/Content/Table",
   component: TediTableComponent,
   parameters: {
-    status: {
-      type: ["partiallyTediReady"],
-    },
     design: {
       type: "figma",
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=11335-186161&m=dev",
@@ -221,6 +241,7 @@ const meta: Meta<TediTableStoryArgs> = {
     verticalBorders: false,
     borderless: false,
     stickyFirstColumn: false,
+    stickyLastColumn: false,
     stickyHeader: false,
     fixedLayout: false,
     rowHover: false,
@@ -231,6 +252,9 @@ const meta: Meta<TediTableStoryArgs> = {
     enableColumnFilters: false,
     rowGroupDividers: "all",
     controlColumnOrder: ["drag", "select", "expand"],
+    filterModalBreakpoint: "sm",
+    filterModalFullscreen: false,
+    filterPopoverWidth: "small",
     maxHeight: undefined,
     activeRowId: undefined,
     placeholderRole: undefined,
@@ -257,7 +281,10 @@ const meta: Meta<TediTableStoryArgs> = {
       },
     },
     verticalBorders: {
-      description: "Vertical separators between columns.",
+      description:
+        "Vertical separators between columns. Border colors are theme tokens, " +
+        "not inputs: override `--table-border` (row + column borders) and " +
+        "`--table-border-th` (header / footer separators) to recolor them.",
       control: "boolean",
       table: {
         category: "appearance",
@@ -266,7 +293,9 @@ const meta: Meta<TediTableStoryArgs> = {
       },
     },
     borderless: {
-      description: "Remove the outer border + radius.",
+      description:
+        "Remove only the outer border + corner radius. Borders between rows " +
+        "and columns are unaffected.",
       control: "boolean",
       table: {
         category: "appearance",
@@ -276,6 +305,15 @@ const meta: Meta<TediTableStoryArgs> = {
     },
     stickyFirstColumn: {
       description: "Freeze the first column during horizontal scroll.",
+      control: "boolean",
+      table: {
+        category: "appearance",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    stickyLastColumn: {
+      description: "Freeze the last column during horizontal scroll.",
       control: "boolean",
       table: {
         category: "appearance",
@@ -396,12 +434,47 @@ const meta: Meta<TediTableStoryArgs> = {
     },
     controlColumnOrder: {
       description:
-        "Order of the auto-injected control columns. Only enabled controls render; any omitted enabled control is appended.",
+        "Order of the auto-injected control columns. Only enabled controls render; any omitted enabled control is appended. Include the 'content' sentinel to render controls listed after it as trailing columns, e.g. ['content', 'expand'].",
       control: { type: "object" },
       table: {
         category: "grouping",
-        type: { summary: "('drag' | 'select' | 'expand')[]" },
+        type: { summary: "('drag' | 'select' | 'expand' | 'content')[]" },
         defaultValue: { summary: '["drag", "select", "expand"]' },
+      },
+    },
+    filterModalBreakpoint: {
+      description:
+        "Below this breakpoint the column filter opens in a modal instead of the popover. Set false to always use the popover.",
+      control: { type: "select" },
+      options: ["xs", "sm", "md", "lg", "xl", "xxl", false],
+      table: {
+        category: "behavior",
+        type: { summary: "Breakpoint | false" },
+        defaultValue: { summary: '"sm"' },
+      },
+    },
+    filterModalFullscreen: {
+      description:
+        "Fullscreen behaviour of the filter modal: true always, false never, a breakpoint = fullscreen below it.",
+      control: { type: "select" },
+      options: [true, false, "sm", "md", "lg", "xl", "xxl"],
+      table: {
+        category: "behavior",
+        type: { summary: "boolean | Breakpoint" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    filterPopoverWidth: {
+      description:
+        "Width of the column filter popover: a preset, or any CSS length. 'none' sizes the panel to its content. A single column overrides it through `filterable: { popoverWidth }`.",
+      control: { type: "text" },
+      table: {
+        category: "appearance",
+        type: {
+          summary: "PopoverWidth",
+          detail: "none \nsmall \nmedium \nlarge \nany CSS length (e.g. 20rem)",
+        },
+        defaultValue: { summary: '"small"' },
       },
     },
     activeRowId: {
@@ -679,7 +752,13 @@ class DefaultStoryHostComponent extends TableStoryHostBase {
   actionsTpl = viewChild<TemplateRef<CellContext<Booking, unknown>>>("actions");
 
   columns = computed<TediColumnDef<Booking>[]>(() => [
-    { id: "dateRange", header: "Kuupäev", accessorKey: "dateRange" },
+    {
+      id: "dateRange",
+      header: "Kuupäev",
+      accessorKey: "dateRange",
+      minSize: 210,
+      cell: bookingDateRangeCell,
+    } as TediColumnDef<Booking>,
     { id: "hour", header: "Kellaaeg", accessorKey: "hour" },
     { id: "duration", header: "Kestus", accessorKey: "duration" },
     { id: "location", header: "Asukoht", accessorKey: "location" },
@@ -765,7 +844,13 @@ class SizesStoryHostComponent extends TableStoryHostBase {
     labels: { ariaLabel: "Leheküljed – väike suurus" },
   };
   columns: TediColumnDef<Booking>[] = [
-    { id: "dateRange", header: "Kuupäev", accessorKey: "dateRange" },
+    {
+      id: "dateRange",
+      header: "Kuupäev",
+      accessorKey: "dateRange",
+      minSize: 210,
+      cell: bookingDateRangeCell,
+    } as TediColumnDef<Booking>,
     { id: "hour", header: "Kellaaeg", accessorKey: "hour" },
     { id: "duration", header: "Kestus", accessorKey: "duration" },
     { id: "location", header: "Asukoht", accessorKey: "location" },
@@ -867,7 +952,13 @@ class SimpleStoryHostComponent extends TableStoryHostBase {
     viewChild<TemplateRef<CellContext<Doctor, unknown>>>("doctorName");
 
   bookingColumns: TediColumnDef<Booking>[] = [
-    { id: "dateRange", header: "Kuupäev", accessorKey: "dateRange" },
+    {
+      id: "dateRange",
+      header: "Kuupäev",
+      accessorKey: "dateRange",
+      minSize: 210,
+      cell: bookingDateRangeCell,
+    } as TediColumnDef<Booking>,
     { id: "hour", header: "Kellaaeg", accessorKey: "hour" },
     { id: "duration", header: "Kestus", accessorKey: "duration" },
     { id: "location", header: "Asukoht", accessorKey: "location" },
@@ -963,8 +1054,13 @@ class MergedCellsStoryHostComponent extends TableStoryHostBase {
       header: "Kuupäev",
       accessorKey: "dateRange",
       size: 240,
+      minSize: 210,
       sortable: true,
-    },
+      sortingFn: (a, b) =>
+        (a.original.dateRange.from?.getTime() ?? 0) -
+        (b.original.dateRange.from?.getTime() ?? 0),
+      cell: bookingDateRangeCell,
+    } as TediColumnDef<Booking>,
     {
       id: "aeg",
       header: "Aeg",
@@ -1018,10 +1114,10 @@ interface PatientRow {
   procedure: string;
 }
 const patientRows: PatientRow[] = [
-  { id: "1", date: "20.05.2026", doctor: "Dr Tamm", procedure: "Consultation" },
-  { id: "2", date: "20.05.2026", doctor: "Dr Tamm", procedure: "Follow-up" },
-  { id: "3", date: "21.05.2026", doctor: "Dr Kask", procedure: "X-ray" },
-  { id: "4", date: "21.05.2026", doctor: "Dr Kask", procedure: "Consultation" },
+  { id: "1", date: "20.05.2026", doctor: "Dr Tamm", procedure: "Konsultatsioon" },
+  { id: "2", date: "20.05.2026", doctor: "Dr Tamm", procedure: "Järelkontroll" },
+  { id: "3", date: "21.05.2026", doctor: "Dr Kask", procedure: "Röntgen" },
+  { id: "4", date: "21.05.2026", doctor: "Dr Kask", procedure: "Konsultatsioon" },
 ];
 
 @Component({
@@ -1035,7 +1131,7 @@ class GroupedRowsStoryHostComponent extends TableStoryHostBase {
   columns: TediColumnDef<PatientRow>[] = [
     {
       id: "date",
-      header: "Date",
+      header: "Kuupäev",
       accessorKey: "date",
       meta: { vAlign: "top" },
       // Merge consecutive rows that share a date into one spanning cell. The
@@ -1043,8 +1139,8 @@ class GroupedRowsStoryHostComponent extends TableStoryHostBase {
       // pagination) row model — no manual rowSpan wiring.
       groupBy: (row) => row.original.date,
     },
-    { id: "doctor", header: "Doctor", accessorKey: "doctor" },
-    { id: "procedure", header: "Procedure", accessorKey: "procedure" },
+    { id: "doctor", header: "Arst", accessorKey: "doctor" },
+    { id: "procedure", header: "Protseduur", accessorKey: "procedure" },
   ];
 }
 
@@ -1079,11 +1175,11 @@ export const GroupedRows: Story = {
   via groupBy. The span is computed internally — no manual rowSpan wiring.
   meta.vAlign: 'top' anchors the merged cell's content to the top:
   columns = [
-    { id: 'date', header: 'Date', accessorKey: 'date',
+    { id: 'date', header: 'Kuupäev', accessorKey: 'date',
       meta: { vAlign: 'top' },
       groupBy: (row) => row.original.date },
-    { id: 'doctor', header: 'Doctor', accessorKey: 'doctor' },
-    { id: 'procedure', header: 'Procedure', accessorKey: 'procedure' },
+    { id: 'doctor', header: 'Arst', accessorKey: 'doctor' },
+    { id: 'procedure', header: 'Protseduur', accessorKey: 'procedure' },
   ]
 -->
 <tedi-table [data]="data" [columns]="columns" verticalBorders />`,
@@ -1116,6 +1212,12 @@ export const GroupedRows: Story = {
         display: block;
         width: fit-content;
       }
+
+      .tedi-error-rows-story__field {
+        display: flex;
+        flex-direction: column;
+        gap: var(--tedi-dimensions-02);
+      }
     `,
   ],
   imports: [
@@ -1126,6 +1228,7 @@ export const GroupedRows: Story = {
     EllipsisComponent,
     FormFieldComponent,
     TextFieldComponent,
+    LabelComponent,
     FormsModule,
   ],
   template: `
@@ -1196,16 +1299,21 @@ export const GroupedRows: Story = {
     </ng-template>
 
     <ng-template #textFilter let-ctx>
-      <tedi-form-field size="small">
-        <input
-          tedi-text-field
-          type="text"
-          [ngModel]="ctx.value ?? ''"
-          [ngModelOptions]="{ standalone: true }"
-          (ngModelChange)="ctx.setValue($event)"
-          [attr.aria-label]="ctx.column.columnDef.header"
-        />
-      </tedi-form-field>
+      <div class="tedi-error-rows-story__field">
+        <label tedi-label size="small" [attr.for]="ctx.column.id + '-filter'">
+          {{ ctx.column.columnDef.header }}
+        </label>
+        <tedi-form-field size="small">
+          <input
+            tedi-text-field
+            [id]="ctx.column.id + '-filter'"
+            type="text"
+            [ngModel]="ctx.value ?? ''"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="ctx.setValue($event)"
+          />
+        </tedi-form-field>
+      </div>
     </ng-template>
   `,
 })
@@ -1394,9 +1502,10 @@ class ColumnSizingStoryHostComponent extends TableStoryHostBase {
     { id: "code", header: "Kood", accessorKey: "code", maxSize: 72 },
     { id: "count", header: "Arv", accessorKey: "count", size: 64, minSize: 120 },
     { id: "name", header: "Nimi", accessorKey: "name", maxSize: 140 },
-    // No size set → flexes to absorb leftover space, so the long description
-    // extends to fill the table while the other columns hold their widths.
-    { id: "description", header: "Kirjeldus", accessorKey: "description" },
+    // Only a minSize → flexes to absorb leftover space on wide screens, but
+    // keeps a floor so it can't collapse (and drop its row border) as the
+    // viewport narrows; the table scrolls horizontally instead.
+    { id: "description", header: "Kirjeldus", accessorKey: "description", minSize: 200 },
   ];
 }
 
@@ -1653,6 +1762,7 @@ export const NoOutsideBorder: Story = {
 class EditableValuesStoryHostComponent extends TableStoryHostBase {
   protected readonly counties = ESTONIAN_COUNTIES;
   protected readonly editor = createEditableRows<Booking>(bookings);
+  protected readonly formatDateRange = formatBookingDateRange;
   pagination = DEFAULT_PAGINATION;
 
   dateRangeCellTpl =
@@ -1671,24 +1781,28 @@ class EditableValuesStoryHostComponent extends TableStoryHostBase {
       id: "dateRange",
       header: "Kuupäev",
       accessorKey: "dateRange",
+      minSize: 260,
       cell: this.dateRangeCellTpl() ?? "",
     } as TediColumnDef<Booking>,
     {
       id: "hour",
       header: "Kellaaeg",
       accessorKey: "hour",
+      minSize: 140,
       cell: this.hourCellTpl() ?? "",
     } as TediColumnDef<Booking>,
     {
       id: "duration",
       header: "Kestus",
       accessorKey: "duration",
+      minSize: 140,
       cell: this.durationCellTpl() ?? "",
     } as TediColumnDef<Booking>,
     {
       id: "location",
       header: "Asukoht",
       accessorKey: "location",
+      minSize: 200,
       cell: this.locationCellTpl() ?? "",
     } as TediColumnDef<Booking>,
     {
@@ -1826,26 +1940,26 @@ class SortableStoryHostComponent extends TableStoryHostBase {
   columns: TediColumnDef<Person>[] = [
     {
       id: "name",
-      header: "Name",
+      header: "Nimi",
       accessorKey: "name",
       sortable: true,
       sortingFn: this.nameLocaleCompare,
     },
     {
       id: "role",
-      header: "Role",
+      header: "Roll",
       accessorKey: "role",
       sortable: true,
     },
     {
       id: "location",
-      header: "Location",
+      header: "Asukoht",
       accessorKey: "location",
       sortable: true,
     },
     {
       id: "salary",
-      header: "Salary",
+      header: "Palk",
       accessorKey: "salary",
       sortable: true,
       sortingFn: "alphanumeric",
@@ -1872,10 +1986,10 @@ export const Sortable: Story = {
     'text', 'textCaseSensitive', 'datetime', 'basic', 'auto'.
 
   columns:
-    - id 'name'     header 'Name'     sortable: true   sortingFn: localeCompare
-    - id 'role'     header 'Role'     sortable: true
-    - id 'location' header 'Location' sortable: true
-    - id 'salary'   header 'Salary'   sortable: true   sortingFn: 'alphanumeric'
+    - id 'name'     header 'Nimi'     sortable: true   sortingFn: localeCompare
+    - id 'role'     header 'Roll'     sortable: true
+    - id 'location' header 'Asukoht'  sortable: true
+    - id 'salary'   header 'Palk'     sortable: true   sortingFn: 'alphanumeric'
 -->
 <tedi-table [data]="data" [columns]="columns" [pagination]="pagination" />`,
       },
@@ -1901,6 +2015,12 @@ export const Sortable: Story = {
         align-items: center;
       }
 
+      .tedi-filters-story__field {
+        display: flex;
+        flex-direction: column;
+        gap: var(--tedi-dimensions-02);
+      }
+
       .tedi-filters-story__cloud {
         display: flex;
         flex-wrap: wrap;
@@ -1915,6 +2035,8 @@ export const Sortable: Story = {
     StatusBadgeComponent,
     TextFieldComponent,
     FormFieldComponent,
+    LabelComponent,
+    DateFieldComponent,
     CheckboxComponent,
     ButtonComponent,
     IconComponent,
@@ -1944,17 +2066,41 @@ export const Sortable: Story = {
       ${TABLE_APPEARANCE_BINDINGS}
     />
 
+    <ng-template #dateFilter let-ctx>
+      <div class="tedi-filters-story__field">
+        <label tedi-label size="small" [attr.for]="ctx.column.id + '-filter'">
+          {{ ctx.column.columnDef.header }}
+        </label>
+        <tedi-form-field size="small">
+          <tedi-date-field
+            [inputId]="ctx.column.id + '-filter'"
+            size="small"
+            mode="range"
+            placeholder="pp.kk.aaaa – pp.kk.aaaa"
+            [ngModel]="ctx.value ?? null"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="ctx.setValue($event)"
+          />
+        </tedi-form-field>
+      </div>
+    </ng-template>
+
     <ng-template #textFilter let-ctx>
-      <tedi-form-field size="small">
-        <input
-          tedi-text-field
-          type="text"
-          [ngModel]="ctx.value ?? ''"
-          [ngModelOptions]="{ standalone: true }"
-          (ngModelChange)="ctx.setValue($event)"
-          [attr.aria-label]="ctx.column.columnDef.header"
-        />
-      </tedi-form-field>
+      <div class="tedi-filters-story__field">
+        <label tedi-label size="small" [attr.for]="ctx.column.id + '-filter'">
+          {{ ctx.column.columnDef.header }}
+        </label>
+        <tedi-form-field size="small">
+          <input
+            tedi-text-field
+            [id]="ctx.column.id + '-filter'"
+            type="text"
+            [ngModel]="ctx.value ?? ''"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="ctx.setValue($event)"
+          />
+        </tedi-form-field>
+      </div>
     </ng-template>
 
     <ng-template #statusFilter let-ctx>
@@ -2007,7 +2153,13 @@ class FiltersStoryHostComponent extends TableStoryHostBase {
   // Seeded with two active filters so the story opens showing the chips.
   state = signal<Partial<TableState>>({
     columnFilters: [
-      { id: "jobStart", value: "2019" },
+      {
+        id: "jobStart",
+        value: {
+          from: new Date(2019, 0, 1),
+          to: new Date(2019, 11, 31),
+        } as DateRange,
+      },
       { id: "status", value: ["Kehtiv"] as CertStatus[] },
     ],
   });
@@ -2028,14 +2180,21 @@ class FiltersStoryHostComponent extends TableStoryHostBase {
     return (this.state().columnFilters ?? [])
       .map((filter) => ({
         id: filter.id,
-        label: `${headers.get(filter.id) ?? filter.id}: ${
-          Array.isArray(filter.value)
-            ? filter.value.join(", ")
-            : String(filter.value ?? "")
-        }`,
+        label: `${headers.get(filter.id) ?? filter.id}: ${this.formatFilterValue(filter.value)}`,
       }))
       .filter((chip) => !chip.label.endsWith(": "));
   });
+
+  private formatFilterValue(value: unknown): string {
+    if (Array.isArray(value)) return value.join(", ");
+    if (value instanceof Date) return formatLocaleDate(value, "et");
+    if (value && typeof value === "object" && "from" in value) {
+      const range = value as DateRange;
+      const from = formatLocaleDate(range.from, "et");
+      return range.to ? `${from} – ${formatLocaleDate(range.to, "et")}` : from;
+    }
+    return String(value ?? "");
+  }
 
   // Drop a single column's filter — clearing all at once is the table's
   // clearFilters() method wired to the button above.
@@ -2051,6 +2210,10 @@ class FiltersStoryHostComponent extends TableStoryHostBase {
   textFilterTpl =
     viewChild<TemplateRef<TediTableFilterContext<string, PersonRecord>>>(
       "textFilter",
+    );
+  dateFilterTpl =
+    viewChild<TemplateRef<TediTableFilterContext<DateRange, PersonRecord>>>(
+      "dateFilter",
     );
   statusFilterTpl =
     viewChild<
@@ -2070,6 +2233,20 @@ class FiltersStoryHostComponent extends TableStoryHostBase {
     return next.length ? next : undefined;
   }
 
+  // Keeps rows whose (Estonian-formatted) date value falls within the
+  // date-field range filter, inclusive of both ends.
+  jobStartInRange = (
+    row: Row<PersonRecord>,
+    columnId: string,
+    value: DateRange | undefined,
+  ): boolean => {
+    if (!value?.from) return true;
+    const parsed = parseLocaleDate(row.getValue<string>(columnId), "et");
+    if (!parsed) return false;
+    const to = value.to ?? value.from;
+    return !isBeforeDay(parsed, value.from) && !isAfterDay(parsed, to);
+  };
+
   columns = computed<TediColumnDef<PersonRecord>[]>(() => [
     {
       id: "name",
@@ -2082,12 +2259,12 @@ class FiltersStoryHostComponent extends TableStoryHostBase {
     } as TediColumnDef<PersonRecord>,
     {
       id: "jobStart",
-      header: "Töökoht",
+      header: "Tööalguse kuupäev",
       accessorKey: "jobStart",
       sortable: true,
-      filterable: true,
-      filterFn: "includesString",
-      filterTemplate: this.textFilterTpl() ?? undefined,
+      filterable: { popoverWidth: "19rem" },
+      filterFn: this.jobStartInRange,
+      filterTemplate: this.dateFilterTpl() ?? undefined,
     } as TediColumnDef<PersonRecord>,
     {
       id: "age",
@@ -2127,24 +2304,34 @@ export const Filters: Story = {
     docs: {
       description: {
         story:
-          "Demonstrates the built-in filter popover (`filterable: true` + a " +
-          "`filterTemplate` per column), and it also demonstrates the usage of a " +
-          "**tag cloud** above the table to surface the currently active filters. " +
+          "Each column supplies its own filter UI via `filterable: true` + " +
+          "`filterTemplate` — here a text field (Nimi), a `tedi-date-field` range " +
+          "(Tööalguse kuupäev) and a checkbox group (Tõendi staatus). \n\n" +
+          "`filterPopoverWidth` sets the popover width for every column, and " +
+          "`filterable: { popoverWidth }` overrides it for one — the date column " +
+          "uses `\"medium\"` here, since a range value needs more room than the " +
+          "default `\"small\"` panel. \n\n" +
+          "Below `filterModalBreakpoint` (default `\"sm\"`) the filter opens in a " +
+          "**modal** instead of the popover — resize below ~576px to see it. " +
+          "`filterModalFullscreen` (default `false`) controls whether that modal " +
+          "is fullscreen; set `false` for a centered dialog, `true` or a breakpoint " +
+          "for fullscreen. Set `filterModalBreakpoint` to `false` to always use the " +
+          "popover. \n\n" +
+          "A **tag cloud** above the table surfaces the currently active filters. " +
           "Each filter renders as one removable `tedi-tag` (labelled " +
           "`Header: value`); closing a chip removes that one column's filter, and " +
           "the small **Tühjenda filtrid** button calls the table's " +
           "**`clearFilters()`** to reset them all at once. The filter state is " +
           "controlled (`[state]` + `(stateChange)`), so the chips derive straight " +
           "from `state().columnFilters` — applying a filter through a header " +
-          "popover adds a chip.\n\n" +
-          'The page-size dropdown also includes a **"Show all"** option, built ' +
-          "with the `{ value, label }` form of `pageSizeOptions`. Its `value` is " +
-          "the page size used when the option is picked, so make it large enough " +
-          "to hold every row: when you know the row total, pass it (here " +
-          "`data.length`); when you don't, pass `Number.MAX_SAFE_INTEGER`. Either " +
-          "way the table renders all rows on one page and the pager collapses — " +
-          "filtering only shrinks the row count, so a large page size always fits " +
-          "the result.",
+          "popover or modal adds a chip.\n\n" +
+          'The page-size dropdown includes a **"Näita kõiki"** (show all) option, built with the ' +
+          "`{ value, label }` form of `pageSizeOptions`. Its `value` is the page " +
+          "size used when the option is picked, so make it large enough to hold " +
+          "every row: when you know the row total, pass it (here `data.length`); " +
+          "when you don't, pass `Number.MAX_SAFE_INTEGER`. Either way the table " +
+          "renders all rows on one page and the pager collapses — filtering only " +
+          "shrinks the row count, so a large page size always fits the result.",
       },
       source: {
         language: "html",
@@ -2158,7 +2345,7 @@ export const Filters: Story = {
     id 'name'   header 'Nimi'   sortable filterable filterFn 'includesString'
     id 'status' header 'Tõendi staatus' sortable filterable filterFn 'arrIncludesSome'
 
-  pagination — a "Show all" page size is just a { value, label } option whose
+  pagination — a "Näita kõiki" page size is just a { value, label } option whose
   value is large enough to hold every row. Use the row total when you know it
   (data.length), or Number.MAX_SAFE_INTEGER when you don't:
     pagination = {
@@ -2405,7 +2592,7 @@ export const CollapsibleRowsRowTrigger: Story = {
       [data]="data"
       [columns]="columns()"
       [getSubRows]="getSubRows"
-      [expandButtonLabel]="{ open: 'Näita', close: 'Peida' }"
+      [expandButtonLabel]="{ open: 'Kuva rohkem', close: 'Kuva vähem' }"
       [pagination]="pagination"
       ${TABLE_APPEARANCE_BINDINGS}
     />
@@ -2441,6 +2628,7 @@ class CollapsibleRowsLabeledToggleStoryHostComponent extends TableStoryHostBase 
 }
 
 export const CollapsibleRowsLabeledToggle: Story = {
+  args: { controlColumnOrder: ["content", "expand"] },
   render: (args) => ({
     moduleMetadata: {
       imports: [CollapsibleRowsLabeledToggleStoryHostComponent],
@@ -2452,6 +2640,17 @@ export const CollapsibleRowsLabeledToggle: Story = {
   }),
   parameters: {
     docs: {
+      description: {
+        story:
+          "The expand toggle is moved to the **last column** via " +
+          "`controlColumnOrder`. By default control columns (drag / select / " +
+          "expand) render leading, before the data. Insert the `'content'` " +
+          "sentinel to mark where the data columns sit — any control listed " +
+          "after it renders trailing. Here `['content', 'expand']` keeps the " +
+          "data columns first and pushes the expand toggle to the end; e.g. " +
+          "`['select', 'content', 'expand']` would keep the checkbox leading " +
+          "while trailing the toggle.",
+      },
       source: {
         language: "html",
         code: `<!-- expandButtonLabel switches the expand toggle from an icon-only
@@ -2461,12 +2660,16 @@ export const CollapsibleRowsLabeledToggle: Story = {
   expand column widens automatically to fit the label.
   expandButtonVariant can still override the chevron style when no
   label is set (icon-only mode).
+
+  controlColumnOrder with the "content" sentinel puts the toggle in
+  the last column: everything after "content" renders after the data.
 -->
 <tedi-table
   [data]="data"
   [columns]="columns"
   [getSubRows]="getSubRows"
   [expandButtonLabel]="{ open: 'Näita', close: 'Peida' }"
+  [controlColumnOrder]="['content', 'expand']"
 />`,
       },
     },
@@ -2569,7 +2772,7 @@ export const CollapsibleRowsExpandedByDefault: Story = {
       <tedi-status-badge
         [color]="statusColor[ctx.row.original.status]"
         [text]="ctx.row.original.status"
-        [variant]="ctx.row.getIsSelected() ? 'filled-bordered' : 'filled'"
+        variant="filled"
       />
     </ng-template>
   `,
@@ -2629,8 +2832,6 @@ export const SelectableRows: Story = {
         code: `<!-- Default selectionMode is 'multiple' — checkbox per row plus
   a select-all checkbox in the header. Pass a predicate
   (row) => boolean to enableRowSelection to allow only some rows.
-  The status cell reacts to per-row selection via ctx.row.getIsSelected()
-  — bordering the badge while the row is selected.
 
   getRowId keys rowSelection by a stable entity id instead of the row
   index, so the selection survives sorting / filtering / data changes:
@@ -3004,7 +3205,7 @@ export const Striped: Story = {
       />
     </div>
     <ng-template #nameCell let-ctx>
-      <span style="display:inline-flex; align-items:center; gap:16px;">
+      <span style="display:inline-flex; flex-direction:column;">
         {{ ctx.row.original.name }}
         <span style="color: var(--general-text-tertiary);">
           {{ ctx.row.original.personalId }}
@@ -3024,14 +3225,15 @@ class StickyFirstColumnStoryHostComponent extends TableStoryHostBase {
       id: "name",
       header: "Arst",
       accessorKey: "name",
-      size: 280,
+      size: 320,
+      minSize: 144,
       cell: this.nameCellTpl() ?? "",
     } as TediColumnDef<StickyDoctor>,
     { id: "specialty", header: "Eriala", accessorKey: "specialty", size: 240 },
     { id: "experience", header: "Tööstaaž", accessorKey: "experience", size: 160 },
     { id: "location", header: "Asukoht", accessorKey: "location", size: 160 },
     { id: "email", header: "E-post", accessorKey: "email", size: 240 },
-    { id: "phone", header: "Telefon", accessorKey: "phone", size: 180 },
+    { id: "phone", header: "Telefon", accessorKey: "phone", size: 200, minSize: 144 },
     { id: "room", header: "Kabinet", accessorKey: "room", size: 160 },
     {
       id: "nextAvailable",
@@ -3074,6 +3276,88 @@ export const StickyFirstColumn: Story = {
   [data]="data"
   [columns]="columns"
   stickyFirstColumn
+  [pagination]="pagination"
+/>`,
+      },
+    },
+  },
+};
+
+// ---------- StickyLastColumn ----------
+@Component({
+  standalone: true,
+  selector: "tedi-sticky-last-story",
+  imports: [TediTableComponent, IconComponent, LinkComponent],
+  template: `
+    <div style="width: 100%;">
+      <tedi-table
+        id="tedi-table-sticky-last"
+        [data]="data"
+        [columns]="columns()"
+        [pagination]="pagination"
+        ${TABLE_APPEARANCE_BINDINGS}
+      />
+    </div>
+    <ng-template #actionsCell let-ctx>
+      <a tedi-link href="#" (click)="$event.preventDefault()">
+        <tedi-icon name="edit" [size]="16" color="inherit" />
+        Muuda
+      </a>
+    </ng-template>
+  `,
+})
+class StickyLastColumnStoryHostComponent extends TableStoryHostBase {
+  data = stickyDoctors;
+  pagination = DEFAULT_PAGINATION;
+  actionsCellTpl =
+    viewChild<TemplateRef<CellContext<StickyDoctor, unknown>>>("actionsCell");
+
+  columns = computed<TediColumnDef<StickyDoctor>[]>(() => [
+    { id: "name", header: "Arst", accessorKey: "name", size: 220, minSize: 144 },
+    { id: "specialty", header: "Eriala", accessorKey: "specialty", size: 240 },
+    { id: "experience", header: "Tööstaaž", accessorKey: "experience", size: 160 },
+    { id: "location", header: "Asukoht", accessorKey: "location", size: 160 },
+    { id: "email", header: "E-post", accessorKey: "email", size: 240 },
+    { id: "phone", header: "Telefon", accessorKey: "phone", size: 200, minSize: 144 },
+    { id: "room", header: "Kabinet", accessorKey: "room", size: 160 },
+    {
+      id: "actions",
+      header: "",
+      size: 120,
+      enableSorting: false,
+      meta: { label: "Tegevused" },
+      cell: this.actionsCellTpl() ?? "",
+    } as TediColumnDef<StickyDoctor>,
+  ]);
+}
+
+export const StickyLastColumn: Story = {
+  args: { stickyLastColumn: true },
+  render: (args) => ({
+    moduleMetadata: { imports: [StickyLastColumnStoryHostComponent] },
+    props: args,
+    template: `<tedi-sticky-last-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`stickyLastColumn` mirrors `stickyFirstColumn` on the trailing edge — " +
+          "it freezes the last column (here a **Muuda** actions column) against " +
+          "the right edge while the body scrolls horizontally underneath. The " +
+          "divider is drawn on the frozen block's left edge. Any trailing control " +
+          "columns (e.g. an expand toggle placed after the `'content'` sentinel " +
+          "via `controlColumnOrder`) freeze together with the last content column.",
+      },
+      source: {
+        language: "html",
+        code: `<!-- Add 'stickyLastColumn' to freeze the rightmost column (e.g. a
+  trailing actions column) during horizontal scroll.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  stickyLastColumn
   [pagination]="pagination"
 />`,
       },
@@ -3140,7 +3424,7 @@ export const StickyHeader: Story = {
       />
     </div>
     <ng-template #nameCell let-ctx>
-      <span style="display:inline-flex; align-items:center; gap:16px;">
+      <span style="display:inline-flex; flex-direction:column;">
         {{ ctx.row.original.name }}
         <span style="color: var(--general-text-tertiary);">
           {{ ctx.row.original.personalId }}
@@ -3159,14 +3443,15 @@ class StickyHeaderAndFirstColumnStoryHostComponent extends TableStoryHostBase {
       id: "name",
       header: "Arst",
       accessorKey: "name",
-      size: 280,
+      size: 320,
+      minSize: 144,
       cell: this.nameCellTpl() ?? "",
     } as TediColumnDef<StickyDoctor>,
     { id: "specialty", header: "Eriala", accessorKey: "specialty", size: 240 },
     { id: "experience", header: "Tööstaaž", accessorKey: "experience", size: 160 },
     { id: "location", header: "Asukoht", accessorKey: "location", size: 160 },
     { id: "email", header: "E-post", accessorKey: "email", size: 240 },
-    { id: "phone", header: "Telefon", accessorKey: "phone", size: 180 },
+    { id: "phone", header: "Telefon", accessorKey: "phone", size: 200, minSize: 144 },
     { id: "room", header: "Kabinet", accessorKey: "room", size: 160 },
     {
       id: "nextAvailable",
@@ -3217,6 +3502,86 @@ export const StickyHeaderAndFirstColumn: Story = {
   },
 };
 
+// ---------- StickyHeaderAndLastColumn ----------
+@Component({
+  standalone: true,
+  selector: "tedi-sticky-both-last-story",
+  imports: [TediTableComponent, IconComponent, LinkComponent],
+  template: `
+    <div style="width: 100%;">
+      <tedi-table
+        id="tedi-table-sticky-both-last"
+        [data]="data"
+        [columns]="columns()"
+        ${TABLE_APPEARANCE_BINDINGS}
+      />
+    </div>
+    <ng-template #actionsCell let-ctx>
+      <a tedi-link href="#" (click)="$event.preventDefault()">
+        <tedi-icon name="edit" [size]="16" color="inherit" />
+        Muuda
+      </a>
+    </ng-template>
+  `,
+})
+class StickyHeaderAndLastColumnStoryHostComponent extends TableStoryHostBase {
+  data = stickyDoctors;
+  actionsCellTpl =
+    viewChild<TemplateRef<CellContext<StickyDoctor, unknown>>>("actionsCell");
+
+  columns = computed<TediColumnDef<StickyDoctor>[]>(() => [
+    { id: "name", header: "Arst", accessorKey: "name", size: 220, minSize: 144 },
+    { id: "specialty", header: "Eriala", accessorKey: "specialty", size: 240 },
+    { id: "experience", header: "Tööstaaž", accessorKey: "experience", size: 160 },
+    { id: "location", header: "Asukoht", accessorKey: "location", size: 160 },
+    { id: "email", header: "E-post", accessorKey: "email", size: 240 },
+    { id: "phone", header: "Telefon", accessorKey: "phone", size: 200, minSize: 144 },
+    { id: "room", header: "Kabinet", accessorKey: "room", size: 160 },
+    {
+      id: "actions",
+      header: "",
+      size: 120,
+      enableSorting: false,
+      meta: { label: "Tegevused" },
+      cell: this.actionsCellTpl() ?? "",
+    } as TediColumnDef<StickyDoctor>,
+  ]);
+}
+
+export const StickyHeaderAndLastColumn: Story = {
+  args: { stickyLastColumn: true, stickyHeader: true, maxHeight: 480 },
+  render: (args) => ({
+    moduleMetadata: { imports: [StickyHeaderAndLastColumnStoryHostComponent] },
+    props: args,
+    template: `<tedi-sticky-both-last-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Combine `stickyHeader` with `stickyLastColumn` to keep both the " +
+          "header and a trailing actions column (here **Muuda**) in view. Each " +
+          "edge casts its own elevation shadow while there is off-edge content: " +
+          "the header downward, the frozen column to its left. Scroll both ways " +
+          "to see the shadows meet at the top-right corner.",
+      },
+      source: {
+        language: "html",
+        code: `<!-- Combine 'stickyHeader' and 'stickyLastColumn'. The trailing
+  actions column stays pinned to the right and the header to the top.
+-->
+<tedi-table
+  [data]="data"
+  [columns]="columns"
+  stickyHeader
+  stickyLastColumn
+  [maxHeight]="480"
+/>`,
+      },
+    },
+  },
+};
+
 // ---------- ClickableStickyFirstColumn ----------
 @Component({
   standalone: true,
@@ -3237,7 +3602,7 @@ export const StickyHeaderAndFirstColumn: Story = {
       />
     </div>
     <ng-template #nameCell let-ctx>
-      <span style="display:inline-flex; align-items:center; gap:16px;">
+      <span style="display:inline-flex; flex-direction:column;">
         {{ ctx.row.original.name }}
         <span style="color: var(--general-text-tertiary);">
           {{ ctx.row.original.personalId }}
@@ -3263,14 +3628,15 @@ class ClickableStickyFirstColumnStoryHostComponent extends TableStoryHostBase {
       id: "name",
       header: "Arst",
       accessorKey: "name",
-      size: 280,
+      size: 320,
+      minSize: 144,
       cell: this.nameCellTpl() ?? "",
     } as TediColumnDef<StickyDoctor>,
     { id: "specialty", header: "Eriala", accessorKey: "specialty", size: 240 },
     { id: "experience", header: "Tööstaaž", accessorKey: "experience", size: 160 },
     { id: "location", header: "Asukoht", accessorKey: "location", size: 160 },
     { id: "email", header: "E-post", accessorKey: "email", size: 240 },
-    { id: "phone", header: "Telefon", accessorKey: "phone", size: 180 },
+    { id: "phone", header: "Telefon", accessorKey: "phone", size: 200, minSize: 144 },
     { id: "room", header: "Kabinet", accessorKey: "room", size: 160 },
   ]);
 }
@@ -3328,7 +3694,7 @@ export const ClickableStickyFirstColumn: Story = {
     />
     <ng-template #emptyTpl>
       <tedi-empty-state type="inside" icon="spa" iconColor="tertiary">
-        No results found
+        Tulemusi ei leitud
       </tedi-empty-state>
     </ng-template>
   `,
@@ -3362,7 +3728,7 @@ export const WithEmptyState: Story = {
 
 <ng-template #emptyTpl>
   <tedi-empty-state type="inside" icon="spa" iconColor="tertiary">
-    No results found
+    Tulemusi ei leitud
   </tedi-empty-state>
 </ng-template>`,
       },
@@ -3678,6 +4044,7 @@ export const Actions: Story = {
         <tedi-alert
           [type]="ctx.row.original.noteColor === 'danger' ? 'error' : 'warning'"
           variant="default"
+          size="small"
           role="status"
         >
           {{ ctx.row.original.note }}
@@ -3686,13 +4053,13 @@ export const Actions: Story = {
     </ng-template>
     <ng-template #actions let-ctx>
       <span style="display:inline-flex; gap:8px; justify-content:flex-end; width:100%;">
-        <tedi-popover>
+        <tedi-popover position="top-end" [preventOverflow]="true">
           <button
             tedi-popover-trigger
             tedi-info-button
             [attr.aria-label]="ctx.row.original.name + ' eelvaade'"
           ></button>
-          <tedi-popover-content>
+          <tedi-popover-content maxWidth="none">
             <div style="display:flex; flex-direction:column; gap:8px;">
               <div style="font-weight: var(--heading-weight);">{{ ctx.row.original.name }}</div>
               <div style="color: var(--general-text-secondary);">
@@ -3700,11 +4067,11 @@ export const Actions: Story = {
               </div>
               <tedi-separator color="primary" axis="horizontal" />
               <div style="display:flex; gap:8px; justify-content:flex-end;">
-                <button tedi-button variant="secondary" size="small" type="button">
+                <button tedi-button variant="secondary" size="small" type="button" class="text-nowrap">
                   <tedi-icon name="edit" [size]="16" color="inherit" />
                   Muuda
                 </button>
-                <button tedi-button variant="primary" size="small" type="button">
+                <button tedi-button variant="primary" size="small" type="button" class="text-nowrap">
                   <tedi-icon name="open_in_new" [size]="16" color="inherit" />
                   Ava profiil
                 </button>
@@ -3786,6 +4153,7 @@ export const Custom: Story = {
     <tedi-alert
       [type]="ctx.row.original.noteColor === 'danger' ? 'error' : 'warning'"
       variant="default"
+      size="small"
       role="status"
     >
       {{ ctx.row.original.note }}
@@ -3826,7 +4194,7 @@ export const Custom: Story = {
     <ng-template #salaryCell let-ctx>
       {{ format(ctx.row.original.salary) }}
     </ng-template>
-    <ng-template #salaryFooter>Total €{{ totalLabel() }}</ng-template>
+    <ng-template #salaryFooter>Kokku €{{ totalLabel() }}</ng-template>
   `,
 })
 class WithFooterStoryHostComponent extends TableStoryHostBase {
@@ -3841,13 +4209,13 @@ class WithFooterStoryHostComponent extends TableStoryHostBase {
   salaryFooterTpl = viewChild<TemplateRef<unknown>>("salaryFooter");
 
   columns = computed<TediColumnDef<Person>[]>(() => [
-    { id: "name", header: "Name", accessorKey: "name", footer: `${people.length} people` },
-    { id: "role", header: "Role", accessorKey: "role" },
-    { id: "location", header: "Location", accessorKey: "location" },
+    { id: "name", header: "Nimi", accessorKey: "name", footer: `${people.length} inimest` },
+    { id: "role", header: "Roll", accessorKey: "role" },
+    { id: "location", header: "Asukoht", accessorKey: "location" },
     {
       id: "salary",
       accessorKey: "salary",
-      header: "Salary (€)",
+      header: "Palk (€)",
       meta: { align: "right" },
       cell: this.salaryCellTpl() ?? "",
       footer: this.salaryFooterTpl() ?? "",
@@ -3867,10 +4235,10 @@ export const WithFooter: Story = {
         language: "html",
         code: `<!-- Each column may declare a 'footer' as a string or a TemplateRef.
   columns = [
-    id: 'name', header: 'Name', accessorKey: 'name', footer: '28 people',
-    id: 'role', header: 'Role', accessorKey: 'role',
-    id: 'location', header: 'Location', accessorKey: 'location',
-    id: 'salary', header: 'Salary (€)', accessorKey: 'salary',
+    id: 'name', header: 'Nimi', accessorKey: 'name', footer: '28 inimest',
+    id: 'role', header: 'Roll', accessorKey: 'role',
+    id: 'location', header: 'Asukoht', accessorKey: 'location',
+    id: 'salary', header: 'Palk (€)', accessorKey: 'salary',
       meta: align right, cell: salaryCellTpl, footer: salaryFooterTpl,
   ]
 -->
@@ -3880,7 +4248,7 @@ export const WithFooter: Story = {
   [pagination]="pagination"
 />
 
-<ng-template #salaryFooter>Total €{{ totalLabel() }}</ng-template>`,
+<ng-template #salaryFooter>Kokku €{{ totalLabel() }}</ng-template>`,
       },
     },
   },
@@ -3984,10 +4352,10 @@ class ReorderableRowsStoryHostComponent extends TableStoryHostBase {
   protected readonly rows = signal<Person[]>(people.slice(0, 8));
   pagination = SHOWCASE_PAGINATION_4;
   columns: TediColumnDef<Person>[] = [
-    { id: "name", header: "Name", accessorKey: "name", size: 200 },
-    { id: "email", header: "Email", accessorKey: "email", size: 260 },
-    { id: "role", header: "Role", accessorKey: "role", size: 160 },
-    { id: "location", header: "Location", accessorKey: "location", size: 160 },
+    { id: "name", header: "Nimi", accessorKey: "name", size: 200 },
+    { id: "email", header: "E-post", accessorKey: "email", size: 260 },
+    { id: "role", header: "Roll", accessorKey: "role", size: 160 },
+    { id: "location", header: "Asukoht", accessorKey: "location", size: 160 },
   ];
 
   onRowDrop(event: CdkDragDrop<Person[]>) {
@@ -4078,10 +4446,10 @@ class ReorderableColumnsStoryHostComponent extends TableStoryHostBase {
   data = people;
   pagination = DEFAULT_PAGINATION;
   columns: TediColumnDef<Person>[] = [
-    { id: "name", header: "Name", accessorKey: "name", size: 200 },
-    { id: "email", header: "Email", accessorKey: "email", size: 260 },
-    { id: "role", header: "Role", accessorKey: "role", size: 160 },
-    { id: "location", header: "Location", accessorKey: "location", size: 160 },
+    { id: "name", header: "Nimi", accessorKey: "name", size: 200 },
+    { id: "email", header: "E-post", accessorKey: "email", size: 260 },
+    { id: "role", header: "Roll", accessorKey: "role", size: 160 },
+    { id: "location", header: "Asukoht", accessorKey: "location", size: 160 },
   ];
 }
 
@@ -4289,7 +4657,13 @@ export const ServerSide: Story = {
 class PaginationTopAndBottomStoryHostComponent extends TableStoryHostBase {
   data = bookings;
   columns: TediColumnDef<Booking>[] = [
-    { id: "dateRange", header: "Kuupäev", accessorKey: "dateRange" },
+    {
+      id: "dateRange",
+      header: "Kuupäev",
+      accessorKey: "dateRange",
+      minSize: 210,
+      cell: bookingDateRangeCell,
+    } as TediColumnDef<Booking>,
     { id: "hour", header: "Kellaaeg", accessorKey: "hour" },
     { id: "duration", header: "Kestus", accessorKey: "duration" },
     { id: "location", header: "Asukoht", accessorKey: "location" },
@@ -4356,7 +4730,13 @@ class PaginationCustomResultsStoryHostComponent extends TableStoryHostBase {
   data = bookings;
   pagination = SHOWCASE_PAGINATION_3;
   columns: TediColumnDef<Booking>[] = [
-    { id: "dateRange", header: "Kuupäev", accessorKey: "dateRange" },
+    {
+      id: "dateRange",
+      header: "Kuupäev",
+      accessorKey: "dateRange",
+      minSize: 210,
+      cell: bookingDateRangeCell,
+    } as TediColumnDef<Booking>,
     { id: "hour", header: "Kellaaeg", accessorKey: "hour" },
     { id: "duration", header: "Kestus", accessorKey: "duration" },
     { id: "location", header: "Asukoht", accessorKey: "location" },
@@ -4413,7 +4793,13 @@ class PaginationFullyConfiguredStoryHostComponent extends TableStoryHostBase {
     id: String(index + 1),
   }));
   columns: TediColumnDef<Booking>[] = [
-    { id: "dateRange", header: "Kuupäev", accessorKey: "dateRange" },
+    {
+      id: "dateRange",
+      header: "Kuupäev",
+      accessorKey: "dateRange",
+      minSize: 210,
+      cell: bookingDateRangeCell,
+    } as TediColumnDef<Booking>,
     { id: "hour", header: "Kellaaeg", accessorKey: "hour" },
     { id: "duration", header: "Kestus", accessorKey: "duration" },
     { id: "location", header: "Asukoht", accessorKey: "location" },
@@ -4500,9 +4886,9 @@ export const PaginationFullyConfigured: Story = {
   ],
   template: `
     <p class="tedi-responsive-story__hint">
-      Resize the viewport across the <code>md</code> breakpoint to
-      see the email / role / location columns collapse into an expandable
-      sub-row. The expand column itself only appears below the breakpoint.
+      Muuda vaateava laiust üle <code>md</code> murdepunkti, et näha,
+      kuidas e-posti / rolli / asukoha veerud koonduvad laiendatavaks
+      alamreaks. Laienduse veerg ise ilmub ainult murdepunktist allpool.
     </p>
     <tedi-table
       id="tedi-table-responsive"
@@ -4538,19 +4924,19 @@ class ResponsiveStoryHostComponent extends TableStoryHostBase {
 
   /** Columns hidden when the viewport is below `md`. Visible everywhere else. */
   protected readonly hiddenColumns = [
-    { id: "email", key: "email", header: "Email" },
-    { id: "role", key: "role", header: "Role" },
-    { id: "location", key: "location", header: "Location" },
+    { id: "email", key: "email", header: "E-post" },
+    { id: "role", key: "role", header: "Roll" },
+    { id: "location", key: "location", header: "Asukoht" },
   ] as const;
 
   columns: TediColumnDef<Person>[] = [
-    { id: "name", header: "Name", accessorKey: "name", sortable: true },
-    { id: "email", header: "Email", accessorKey: "email" },
-    { id: "role", header: "Role", accessorKey: "role" },
-    { id: "location", header: "Location", accessorKey: "location" },
+    { id: "name", header: "Nimi", accessorKey: "name", sortable: true },
+    { id: "email", header: "E-post", accessorKey: "email" },
+    { id: "role", header: "Roll", accessorKey: "role" },
+    { id: "location", header: "Asukoht", accessorKey: "location" },
     {
       id: "salary",
-      header: "Salary",
+      header: "Palk",
       accessorKey: "salary",
       sortable: true,
       sortingFn: "alphanumeric",
@@ -4617,7 +5003,7 @@ export const Responsive: Story = {
       source: {
         language: "html",
         code: `<!-- TS sketch:
-  hiddenColumns = [{ id: 'email', key: 'email', header: 'Email' }, ...];
+  hiddenColumns = [{ id: 'email', key: 'email', header: 'E-post' }, ...];
   isBelowMd = inject(BreakpointService).isBelowBreakpoint('md');
   responsiveSubRow = computed(() =>
     this.isBelowMd() ? this.detailsTpl() : undefined,

@@ -3,6 +3,7 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed, fakeAsync, tick } from "@angular/core/testing";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
+import { OverlayContainer } from "@angular/cdk/overlay";
 import { SelectComponent, SelectInputSize, SelectOption, SpecialOptionControls } from "./select.component";
 import {
   SelectOptionTemplateDirective,
@@ -1164,15 +1165,27 @@ describe("SelectComponent", () => {
       expect(context.label).toBe("Test");
     });
 
+    // Opens the info-tooltip and returns the overlay's rendered text. The tooltip
+    // description now lives on the visible role="tooltip" content in the overlay
+    // (shown on hover/focus), not a duplicated always-present .sr-only span.
+    const openTooltipText = (): string => {
+      const trigger = hostEl.querySelector(
+        "tedi-info-tooltip tedi-tooltip-trigger",
+      )!;
+      trigger.dispatchEvent(new MouseEvent("mouseenter"));
+      fixture.detectChanges();
+      return (
+        TestBed.inject(OverlayContainer).getContainerElement().textContent ?? ""
+      );
+    };
+
     it("should render string tooltip when no tooltip template is projected", () => {
       host.tooltip = "Plain tooltip";
       fixture.detectChanges();
 
       expect(hostEl.querySelector("tedi-info-tooltip")).toBeTruthy();
       expect(select.tooltipTemplate()).toBeFalsy();
-      expect(
-        hostEl.querySelector("tedi-info-tooltip .sr-only")?.textContent,
-      ).toContain("Plain tooltip");
+      expect(openTooltipText()).toContain("Plain tooltip");
     });
 
     it("should render projected tooltip template content", () => {
@@ -1181,9 +1194,7 @@ describe("SelectComponent", () => {
 
       expect(select.tooltipTemplate()).toBeTruthy();
       expect(hostEl.querySelector("tedi-info-tooltip")).toBeTruthy();
-      expect(
-        hostEl.querySelector("tedi-info-tooltip .sr-only")?.textContent,
-      ).toContain("Formatted tooltip");
+      expect(openTooltipText()).toContain("Formatted tooltip");
     });
 
     it("should prefer the tooltip template over the tooltip string input", () => {
@@ -1191,11 +1202,9 @@ describe("SelectComponent", () => {
       host.useTooltipTemplate = true;
       fixture.detectChanges();
 
-      const srText = hostEl.querySelector(
-        "tedi-info-tooltip .sr-only",
-      )?.textContent;
-      expect(srText).toContain("Formatted tooltip");
-      expect(srText).not.toContain("Plain tooltip");
+      const tooltipText = openTooltipText();
+      expect(tooltipText).toContain("Formatted tooltip");
+      expect(tooltipText).not.toContain("Plain tooltip");
     });
   });
 

@@ -83,10 +83,10 @@ describe("TextFieldComponent", () => {
     expect(onTouchedSpy).toHaveBeenCalled();
   });
 
-  it("clearField() should clear value", () => {
+  it("reset() should clear value", () => {
     textField.writeValue("test");
 
-    textField.clearField();
+    textField.reset();
 
     expect(textField.value()).toBe("");
     expect(input.value).toBe("");
@@ -114,14 +114,16 @@ describe("TextFieldComponent", () => {
     expect(onTouchedSpy).toHaveBeenCalled();
   });
 
-  it("should update invalid signal via setInvalidState", () => {
+  it("should reflect the invalid input", () => {
     const fixture = TestBed.createComponent(TextFieldComponent);
     const component = fixture.componentInstance;
 
-    component.setInvalidState(true);
+    fixture.componentRef.setInput("invalid", true);
+    fixture.detectChanges();
     expect(component.invalid()).toBe(true);
 
-    component.setInvalidState(false);
+    fixture.componentRef.setInput("invalid", false);
+    fixture.detectChanges();
     expect(component.invalid()).toBe(false);
   });
 
@@ -219,12 +221,12 @@ describe("TextFieldComponent", () => {
       expect(fcInput.disabled).toBe(false);
     });
 
-    it("clearField() should not clear when control is disabled", () => {
+    it("reset() should not clear when control is disabled", () => {
       control.setValue("test");
       control.disable();
       fcFixture.detectChanges();
 
-      fcTextField.clearField();
+      fcTextField.reset();
 
       expect(fcTextField.value()).toBe("test");
       expect(control.value).toBe("test");
