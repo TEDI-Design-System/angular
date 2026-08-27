@@ -1,3 +1,10 @@
+# [8.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.0-rc.2...angular-8.0.0-rc.3) (2026-08-27)
+
+
+### Bug Fixes
+
+* **date-picker:** reject manually entered disabled date [#610](https://github.com/TEDI-Design-System/angular/issues/610) ([#622](https://github.com/TEDI-Design-System/angular/issues/622)) ([a214973](https://github.com/TEDI-Design-System/angular/commit/a21497391f95891b34af944b8a88318385341dca))
+
 # [8.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.0-rc.1...angular-8.0.0-rc.2) (2026-08-27)
 
 
