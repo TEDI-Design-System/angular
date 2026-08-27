@@ -4,8 +4,9 @@ import { TextEditorComponent } from "./text-editor.component";
 
 /**
  * Rich text editor built on <a href="https://github.com/KillerCodeMonkey/ngx-quill" target="_blank">ngx-quill ↗</a>.
- * `ngx-quill` and `quill` are peer dependencies and must be installed by the consumer,
- * along with Quill's `snow` theme stylesheet.
+ * Import it from `@tedi-design-system/angular/community/text-editor`. Its optional
+ * `ngx-quill` and `quill` peer dependencies, plus Quill's `snow` theme stylesheet,
+ * are required only when using this component.
  */
 export default {
   title: "Community/Form/TextEditor",
