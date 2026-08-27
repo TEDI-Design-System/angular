@@ -340,6 +340,8 @@ Composed of sub-components:
 
 All dividers are plain `tedi-separator` elements: horizontal between blocks/rows, vertical with `size="auto"` between cells inside a `tedi-card-row`. For an in-card notification place a `tedi-alert variant="noSideBorders"` directly inside the card.
 
+The card does not clip its content — overlays (tooltips, popovers, select dropdowns) and absolutely positioned elements can escape it, and you can make it scrollable yourself with an `overflow` utility. The card is `position: relative`, so a `tedi-status-indicator position="top-right"` placed directly inside it pins to the card corner and hangs over the edge. Corner rounding is carried by the first and last block instead, so the blocks that sit at a card edge must be direct children of the card or of a `tedi-card-row`.
+
 The card itself is non-interactive. To make a whole card clickable, wrap it in **CardButton** (`a[tedi-card-button]` / `button[tedi-card-button]`, Buttons section), which adds hover/active/focus/disabled states.
 
 ### CardContent
@@ -369,8 +371,10 @@ Top-aligned icon cell for a card row; the projected `tedi-icon` inherits the cel
 
 ### CardRow
 **Selector:** `tedi-card-row`
+**Inputs:**
+- `direction: CardRowDirection = "row"` — `"row"` or `"column"`; breakpoint overrides via `xs`…`xxl`
 
-Lays out `tedi-card-content` / `tedi-card-icon` cells horizontally. No inputs — dividers are plain `tedi-separator` elements:
+Lays out `tedi-card-content` / `tedi-card-icon` cells. Use `direction` rather than flex-direction utility classes to stack the cells — the row rounds the corners it shares with the card based on it. Dividers are plain `tedi-separator` elements:
 
 ```html
 <tedi-card>

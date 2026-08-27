@@ -21,6 +21,7 @@ import { InfoButtonComponent } from "../../buttons/info-button/info-button.compo
 import { CollapseComponent } from "../../buttons/collapse/collapse.component";
 import { LinkComponent } from "../../navigation/link/link.component";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
+import { StatusIndicatorComponent } from "../../tags/status-indicator/status-indicator.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
@@ -122,7 +123,19 @@ const CARD_ICON_ARG_TYPES = named({
   padding: inputArg("CardPadding", "Content padding.", "1 (0.75 for the small size)"),
 });
 
-const CARD_ROW_ARG_TYPES = named({});
+const CARD_ROW_ARG_TYPES = named({
+  direction: inputArg(
+    '"row" | "column"',
+    "Direction the cells are laid out in. Use this instead of flex utility classes — the row rounds the corners it shares with the card based on it.",
+    "row",
+  ),
+  xs: inputArg("CardRowInputs", "Overrides inputs on the xs breakpoint (<576px)."),
+  sm: inputArg("CardRowInputs", "Overrides inputs on the sm breakpoint (≥576px)."),
+  md: inputArg("CardRowInputs", "Overrides inputs on the md breakpoint (≥768px)."),
+  lg: inputArg("CardRowInputs", "Overrides inputs on the lg breakpoint (≥992px)."),
+  xl: inputArg("CardRowInputs", "Overrides inputs on the xl breakpoint (≥1200px)."),
+  xxl: inputArg("CardRowInputs", "Overrides inputs on the xxl breakpoint (≥1400px)."),
+});
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.53.75?node-id=4442-91315&m=dev" target="_blank">Figma ↗</a><br>
@@ -156,6 +169,7 @@ export default {
         CollapseComponent,
         LinkComponent,
         StatusBadgeComponent,
+        StatusIndicatorComponent,
         SeparatorComponent,
         RowComponent,
         ColComponent,
@@ -1149,14 +1163,14 @@ export const SplitCardBody: Story = {
     docs: {
       description: {
         story:
-          "**Tip**: `tedi-card-row` lays its blocks out in a row by default. Since it is a flex container, you can change its direction at lower breakpoints with flex-direction utility classes. Here `class=\"flex-column flex-sm-row\"` stacks the two content blocks vertically below the `sm` breakpoint",
+          "**Tip**: `tedi-card-row` lays its blocks out in a row by default. Use its `direction` input to stack the blocks instead — here `direction=\"column\"` with `[sm]=\"{ direction: 'row' }\"` stacks them vertically below the `sm` breakpoint. Prefer this over flex-direction utility classes, since the row rounds the corners it shares with the card based on the input",
       },
     },
   },
   render: () => ({
     template: `
       <tedi-card>
-        <tedi-card-row class="flex-column flex-sm-row">
+        <tedi-card-row direction="column" [sm]="{ direction: 'row' }">
           <tedi-card-content>
             <p tedi-text>Vasak</p>
             <p tedi-text>
@@ -1259,6 +1273,57 @@ export const WithNotification: Story = {
           <p tedi-text color="secondary">Kirjeldus</p>
         </tedi-card-content>
       </tedi-card>
+    `,
+  }),
+};
+
+export const WithStatusIndicator: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`tedi-status-indicator` marks the state of what a card describes. Place it inline in a content block, or as a direct child of the card with `position=\"top-right\"` to pin it to the card corner — the card does not clip its content, so the dot hangs over the edge. Give it a `label` when the dot is the only thing carrying the status.",
+      },
+    },
+  },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [md]="{ cols: 2 }" [gap]="3">
+        <tedi-col>
+          <tedi-card>
+            <tedi-card-row>
+              <tedi-card-icon>
+                <tedi-icon name="stethoscope" />
+              </tedi-card-icon>
+              <tedi-separator axis="vertical" size="auto" />
+              <tedi-card-content class="flex align-items-center justify-content-between gap-3">
+                <tedi-text-group type="vertical">
+                  <tedi-text-group-label>Perearsti vastuvõtt</tedi-text-group-label>
+                  <tedi-text-group-value>08.12.2024 kell 10:15</tedi-text-group-value>
+                </tedi-text-group>
+                <tedi-status-indicator type="success" size="lg" label="Kinnitatud" />
+              </tedi-card-content>
+            </tedi-card-row>
+          </tedi-card>
+        </tedi-col>
+        <tedi-col>
+          <tedi-card>
+            <tedi-status-indicator
+              type="danger"
+              size="lg"
+              [hasBorder]="true"
+              position="top-right"
+              label="Lugemata teade"
+            />
+            <tedi-card-header background="brand-primary">
+              <h3 tedi-text color="inverted">Terviseandmed</h3>
+            </tedi-card-header>
+            <tedi-card-content>
+              <p tedi-text color="secondary">Sul on üks lugemata teade.</p>
+            </tedi-card-content>
+          </tedi-card>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };

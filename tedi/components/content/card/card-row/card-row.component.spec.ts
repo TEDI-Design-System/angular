@@ -4,14 +4,14 @@ import { BreakpointObserver } from "@angular/cdk/layout";
 import { of } from "rxjs";
 import { CardComponent } from "../card.component";
 import { CardContentComponent } from "../card-content/card-content.component";
-import { CardRowComponent } from "./card-row.component";
+import { CardRowComponent, CardRowDirection } from "./card-row.component";
 
 @Component({
   standalone: true,
   imports: [CardComponent, CardContentComponent, CardRowComponent],
   template: `
     <tedi-card>
-      <tedi-card-row>
+      <tedi-card-row [direction]="direction">
         <tedi-card-content [autoWidth]="true">Left</tedi-card-content>
         <tedi-card-content>Right</tedi-card-content>
       </tedi-card-row>
@@ -21,7 +21,9 @@ import { CardRowComponent } from "./card-row.component";
     </tedi-card>
   `,
 })
-class TestHostComponent {}
+class TestHostComponent {
+  direction: CardRowDirection = "row";
+}
 
 describe("CardRowComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
@@ -55,5 +57,14 @@ describe("CardRowComponent", () => {
   it("should apply auto-width class on content blocks", () => {
     const content = rowElement().querySelector("tedi-card-content");
     expect(content?.classList).toContain("tedi-card-content--auto-width");
+  });
+
+  it("should apply column modifier when direction is column", () => {
+    expect(rowElement().classList).not.toContain("tedi-card-row--column");
+
+    fixture.componentInstance.direction = "column";
+    fixture.detectChanges();
+
+    expect(rowElement().classList).toContain("tedi-card-row--column");
   });
 });
