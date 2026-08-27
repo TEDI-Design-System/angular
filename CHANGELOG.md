@@ -1,3 +1,10 @@
+# [8.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.0-rc.1...angular-8.0.0-rc.2) (2026-08-27)
+
+
+### Bug Fixes
+
+* **ellipsis:** prevent inherited nowrap from hiding ellipsis [#606](https://github.com/TEDI-Design-System/angular/issues/606) ([#623](https://github.com/TEDI-Design-System/angular/issues/623)) ([ae8fc6b](https://github.com/TEDI-Design-System/angular/commit/ae8fc6b709b21ef0b8fcd51f3e6d1d5d363a51ad))
+
 # [8.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.5...angular-8.0.0-rc.1) (2026-08-26)
 
 
