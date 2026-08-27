@@ -21,7 +21,6 @@ import { InfoButtonComponent } from "../../buttons/info-button/info-button.compo
 import { CollapseComponent } from "../../buttons/collapse/collapse.component";
 import { LinkComponent } from "../../navigation/link/link.component";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
-import { StatusIndicatorComponent } from "../../tags/status-indicator/status-indicator.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
@@ -169,7 +168,6 @@ export default {
         CollapseComponent,
         LinkComponent,
         StatusBadgeComponent,
-        StatusIndicatorComponent,
         SeparatorComponent,
         RowComponent,
         ColComponent,
@@ -1273,57 +1271,6 @@ export const WithNotification: Story = {
           <p tedi-text color="secondary">Kirjeldus</p>
         </tedi-card-content>
       </tedi-card>
-    `,
-  }),
-};
-
-export const WithStatusIndicator: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "`tedi-status-indicator` marks the state of what a card describes. Place it inline in a content block, or as a direct child of the card with `position=\"top-right\"` to pin it to the card corner — the card does not clip its content, so the dot hangs over the edge. Give it a `label` when the dot is the only thing carrying the status.",
-      },
-    },
-  },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [md]="{ cols: 2 }" [gap]="3">
-        <tedi-col>
-          <tedi-card>
-            <tedi-card-row>
-              <tedi-card-icon>
-                <tedi-icon name="stethoscope" />
-              </tedi-card-icon>
-              <tedi-separator axis="vertical" size="auto" />
-              <tedi-card-content class="flex align-items-center justify-content-between gap-3">
-                <tedi-text-group type="vertical">
-                  <tedi-text-group-label>Perearsti vastuvõtt</tedi-text-group-label>
-                  <tedi-text-group-value>08.12.2024 kell 10:15</tedi-text-group-value>
-                </tedi-text-group>
-                <tedi-status-indicator type="success" size="lg" label="Kinnitatud" />
-              </tedi-card-content>
-            </tedi-card-row>
-          </tedi-card>
-        </tedi-col>
-        <tedi-col>
-          <tedi-card>
-            <tedi-status-indicator
-              type="danger"
-              size="lg"
-              [hasBorder]="true"
-              position="top-right"
-              label="Lugemata teade"
-            />
-            <tedi-card-header background="brand-primary">
-              <h3 tedi-text color="inverted">Terviseandmed</h3>
-            </tedi-card-header>
-            <tedi-card-content>
-              <p tedi-text color="secondary">Sul on üks lugemata teade.</p>
-            </tedi-card-content>
-          </tedi-card>
-        </tedi-col>
-      </tedi-row>
     `,
   }),
 };
