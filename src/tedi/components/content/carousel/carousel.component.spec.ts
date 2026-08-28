@@ -100,6 +100,13 @@ describe("CarouselContentComponent", () => {
     expect(mockTranslationService.track).toHaveBeenCalledWith("carousel");
   });
 
+  it("should use the custom aria-label when provided", () => {
+    fixture.componentRef.setInput("ariaLabel", "Minu karussell");
+    fixture.detectChanges();
+
+    expect(hostElement.getAttribute("aria-label")).toBe("Minu karussell");
+  });
+
   it("should compute correct flex style for slides", () => {
     const flex = component.slideFlex();
     expect(flex).toContain("calc(");

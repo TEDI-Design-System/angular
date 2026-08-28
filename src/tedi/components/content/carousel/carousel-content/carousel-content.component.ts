@@ -36,7 +36,7 @@ import { TediTranslationService } from "../../../../services";
     tabindex: "0",
     role: "region",
     "aria-roledescription": "carousel",
-    "[attr.aria-label]": "translationService.track('carousel')()",
+    "[attr.aria-label]": "resolvedAriaLabel()",
     "aria-live": "off",
     "[class]": "classes()",
   },
@@ -60,6 +60,9 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   /** Transition duration in ms */
   readonly transitionMs = input(400);
 
+  /** Accessible label for the carousel region. Falls back to the `carousel` translation. */
+  readonly ariaLabel = input<string>();
+
   readonly translationService = inject(TediTranslationService);
   private readonly breakpointService = inject(BreakpointService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -68,6 +71,10 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   readonly track = viewChild.required<ElementRef<HTMLDivElement>>("track");
   readonly slideElements = viewChildren<ElementRef<HTMLDivElement>>("slide");
   readonly slides = contentChildren(CarouselSlideDirective);
+
+  readonly resolvedAriaLabel = computed(
+    () => this.ariaLabel() ?? this.translationService.track("carousel")(),
+  );
 
   readonly trackIndex = signal(0);
   readonly animate = signal(false);

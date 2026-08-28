@@ -105,7 +105,7 @@ describe("PaginationComponent", () => {
     const fixture = setup({ pageCount: 5, page: 1 });
     const component = fixture.componentInstance;
     let emitted: number | undefined;
-    component.pageChange.subscribe((v) => (emitted = v));
+    component.page.subscribe((v) => (emitted = v));
 
     const button = fixture.debugElement
       .queryAll(By.css(".tedi-pagination__page"))
@@ -121,7 +121,7 @@ describe("PaginationComponent", () => {
     const fixture = setup({ pageCount: 5, page: 3 });
     const component = fixture.componentInstance;
     let emitted = false;
-    component.pageChange.subscribe(() => (emitted = true));
+    component.page.subscribe(() => (emitted = true));
 
     const current = fixture.debugElement
       .queryAll(By.css(".tedi-pagination__page"))
@@ -185,7 +185,7 @@ describe("PaginationComponent", () => {
     const fixture = setup({ pageCount: 5, page: 2 });
     const component = fixture.componentInstance;
     const emitted: number[] = [];
-    component.pageChange.subscribe((v) => emitted.push(v));
+    component.page.subscribe((v) => emitted.push(v));
 
     const next: HTMLButtonElement | null = fixture.nativeElement.querySelector(
       'button[aria-label="Next page"]',
@@ -413,6 +413,43 @@ describe("PaginationComponent", () => {
     );
   });
 
+  it("applies the between alignment class by default", () => {
+    const fixture = setup();
+    expect((fixture.nativeElement as HTMLElement).classList).toContain(
+      "tedi-pagination--align-between",
+    );
+  });
+
+  it("applies the left alignment class when align is left", () => {
+    const fixture = setup();
+    fixture.componentRef.setInput("align", "left");
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).classList).toContain(
+      "tedi-pagination--align-left",
+    );
+  });
+
+  it("applies the right alignment class when align is right", () => {
+    const fixture = setup();
+    fixture.componentRef.setInput("align", "right");
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).classList).toContain(
+      "tedi-pagination--align-right",
+    );
+  });
+
+  it("applies the arrow-labels class when showArrowLabels is true", () => {
+    const fixture = setup();
+    expect((fixture.nativeElement as HTMLElement).classList).not.toContain(
+      "tedi-pagination--arrow-labels",
+    );
+    fixture.componentRef.setInput("showArrowLabels", true);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).classList).toContain(
+      "tedi-pagination--arrow-labels",
+    );
+  });
+
   it("hides the prev/next arrows entirely when hideArrows is true", () => {
     const fixture = setup({ pageCount: 5, page: 3 });
     fixture.componentRef.setInput("hideArrows", true);
@@ -512,6 +549,14 @@ describe("PaginationComponent mobile layout", () => {
     const mockBreakpointService = {
       isBelowBreakpoint: jest.fn().mockReturnValue(signal(true)),
       currentBreakpoint: jest.fn().mockReturnValue(signal("xs")),
+      // Current breakpoint is "xs", so only the base + xs override apply.
+      getBreakpointInputs: jest.fn((inputs) => {
+        const bpKeys = ["xs", "sm", "md", "lg", "xl", "xxl"];
+        const base = Object.fromEntries(
+          Object.entries(inputs).filter(([key]) => !bpKeys.includes(key)),
+        );
+        return { ...base, ...(inputs.xs ?? {}) };
+      }),
     } as unknown as jest.Mocked<BreakpointService>;
 
     const mockModalService = {
@@ -541,6 +586,18 @@ describe("PaginationComponent mobile layout", () => {
     expect(
       fixture.nativeElement.querySelector(".tedi-pagination__list"),
     ).toBeNull();
+  });
+
+  it("keeps the base align below a breakpoint override (mobile-first)", () => {
+    const fixture = TestBed.createComponent(PaginationComponent);
+    fixture.componentRef.setInput("pageCount", 10);
+    fixture.componentRef.setInput("align", "left");
+    fixture.componentRef.setInput("md", { align: "between" });
+    fixture.detectChanges();
+    // current breakpoint is "xs": the md override does not apply yet
+    expect((fixture.nativeElement as HTMLElement).classList).toContain(
+      "tedi-pagination--align-left",
+    );
   });
 
   it("opens the picker modal on trigger click with computed options + selectedValue", () => {
@@ -601,7 +658,7 @@ describe("PaginationComponent mobile layout", () => {
     fixture.detectChanges();
 
     let emitted: number | undefined;
-    fixture.componentInstance.pageChange.subscribe((v) => (emitted = v));
+    fixture.componentInstance.page.subscribe((v) => (emitted = v));
 
     const trigger: HTMLButtonElement = fixture.nativeElement.querySelector(
       ".tedi-pagination__mobile-trigger",
@@ -621,7 +678,7 @@ describe("PaginationComponent mobile layout", () => {
     fixture.detectChanges();
 
     let emitted = false;
-    fixture.componentInstance.pageChange.subscribe(() => (emitted = true));
+    fixture.componentInstance.page.subscribe(() => (emitted = true));
 
     const trigger: HTMLButtonElement = fixture.nativeElement.querySelector(
       ".tedi-pagination__mobile-trigger",
@@ -659,7 +716,7 @@ describe("PaginationComponent mobile layout", () => {
     fixture.detectChanges();
 
     let emitted: number | undefined;
-    fixture.componentInstance.pageSizeChange.subscribe((v) => (emitted = v));
+    fixture.componentInstance.pageSize.subscribe((v) => (emitted = v));
 
     const trigger: HTMLButtonElement = fixture.nativeElement.querySelector(
       ".tedi-pagination__page-size-trigger",
@@ -710,7 +767,7 @@ describe("PaginationComponent mobile layout", () => {
     fixture.detectChanges();
 
     let emitted: number | undefined;
-    fixture.componentInstance.pageSizeChange.subscribe((v) => (emitted = v));
+    fixture.componentInstance.pageSize.subscribe((v) => (emitted = v));
 
     (
       fixture.nativeElement.querySelector(

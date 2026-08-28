@@ -1,13 +1,9 @@
 import {
-  AfterContentChecked,
   ChangeDetectionStrategy,
   Component,
   computed,
-  contentChild,
-  ElementRef,
   inject,
   input,
-  signal,
   ViewEncapsulation,
 } from "@angular/core";
 import {
@@ -15,7 +11,6 @@ import {
   BreakpointService,
 } from "../../../services/breakpoint/breakpoint.service";
 import { LabelComponent } from "../../../components/form";
-import { TextGroupLabelComponent } from "./text-group-label.component";
 
 export type TextGroupType = "vertical" | "horizontal";
 
@@ -39,17 +34,10 @@ export type TextGroupInputs = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class TextGroupComponent
-  implements BreakpointInputs<TextGroupInputs>, AfterContentChecked
-{
+export class TextGroupComponent implements BreakpointInputs<TextGroupInputs> {
   type = input<TextGroupType>("horizontal");
   labelWidth = input<string>();
   breakpointService = inject(BreakpointService);
-
-  readonly textGroupLabel = contentChild(TextGroupLabelComponent, {
-    read: ElementRef,
-  });
-  readonly labelText = signal<string | null>(null);
 
   xs = input<TextGroupInputs>();
   sm = input<TextGroupInputs>();
@@ -80,14 +68,4 @@ export class TextGroupComponent
     }
     return classList.join(" ");
   });
-
-  ngAfterContentChecked(): void {
-    const labelEl = this.textGroupLabel()?.nativeElement as HTMLElement;
-    if (labelEl) {
-      const text = labelEl.textContent?.trim() || null;
-      if (text !== this.labelText()) {
-        this.labelText.set(text);
-      }
-    }
-  }
 }

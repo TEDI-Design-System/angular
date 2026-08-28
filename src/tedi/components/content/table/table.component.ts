@@ -5,19 +5,23 @@ import {
   Component,
   computed,
   contentChild,
+  DestroyRef,
   effect,
+  type ElementRef,
   inject,
   Injector,
   input,
+  PLATFORM_ID,
   signal,
   Signal,
   TemplateRef,
   untracked,
   ViewEncapsulation,
+  viewChild,
   output,
   type WritableSignal,
 } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { CommonModule, isPlatformBrowser } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 import {
   CdkDrag,
@@ -65,9 +69,19 @@ import {
   type CollapseButtonArrowType,
 } from "../../buttons/collapse-button/collapse-button.component";
 import { PopoverComponent } from "../../overlay/popover/popover.component";
-import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
+import {
+  PopoverContentComponent,
+  PopoverWidth,
+} from "../../overlay/popover/popover-content/popover-content.component";
 import { PopoverTriggerDirective } from "../../overlay/popover/popover-trigger/popover-trigger.directive";
 import { TediTranslationService } from "../../../services/translation/translation.service";
+import {
+  BreakpointService,
+  type Breakpoint,
+} from "../../../services/breakpoint/breakpoint.service";
+import { ModalService } from "../../overlay/modal/modal.service";
+import type { ModalFullscreen } from "../../overlay/modal/modal.types";
+import { TableFilterModalComponent } from "./table-filter-modal/table-filter-modal.component";
 import { TEDI_TABLE_CONTEXT } from "./table.context";
 import { computeGroupSpans } from "./row-span.utils";
 import {
@@ -77,7 +91,9 @@ import {
 import type {
   TableColumnMeta,
   TableControlColumn,
+  TableControlColumnOrder,
   TableExpandTrigger,
+  TableFilterModalData,
   TableFilterOptions,
   TablePaginationOptions,
   TablePersistOptions,
@@ -96,9 +112,10 @@ const DRAG_COLUMN_ID = "__drag__";
 
 /**
  * Fixed width (px) for the icon-only control columns (drag / select / expand).
- * Accounts for the cell's horizontal padding so the control still gets room.
+ * Kept as narrow as the control + its reduced cell padding allows (see the
+ * `tedi-table__cell--control` padding override), matching the React table.
  */
-const CONTROL_COLUMN_WIDTH = 60;
+const CONTROL_COLUMN_WIDTH = 40;
 
 /** Interactive controls inside a cell that should not trigger row activation. */
 const INTERACTIVE_CELL_SELECTOR =
@@ -139,6 +156,7 @@ interface ResolvedPaginationSlot {
   siblingCount: number;
   labels: TablePaginationOptions["labels"];
   background: NonNullable<TablePaginationOptions["background"]>;
+  align: NonNullable<TablePaginationOptions["align"]>;
   dividerPosition: NonNullable<TablePaginationOptions["dividerPosition"]>;
   hideResults: NonNullable<TablePaginationOptions["hideResults"]>;
   hidePageSize: NonNullable<TablePaginationOptions["hidePageSize"]>;
@@ -150,6 +168,12 @@ interface ResolvedPaginationSlot {
   previousIcon: NonNullable<TablePaginationOptions["previousIcon"]>;
   nextIcon: NonNullable<TablePaginationOptions["nextIcon"]>;
   showModalTitle: boolean;
+  xs: TablePaginationOptions["xs"];
+  sm: TablePaginationOptions["sm"];
+  md: TablePaginationOptions["md"];
+  lg: TablePaginationOptions["lg"];
+  xl: TablePaginationOptions["xl"];
+  xxl: TablePaginationOptions["xxl"];
 }
 
 const SLOT_DEFAULTS_BOTTOM: ResolvedPaginationSlot = {
@@ -157,6 +181,7 @@ const SLOT_DEFAULTS_BOTTOM: ResolvedPaginationSlot = {
   siblingCount: 1,
   labels: undefined,
   background: "white",
+  align: "between",
   dividerPosition: "top",
   hideResults: false,
   hidePageSize: false,
@@ -168,6 +193,12 @@ const SLOT_DEFAULTS_BOTTOM: ResolvedPaginationSlot = {
   previousIcon: "arrow_back",
   nextIcon: "arrow_forward",
   showModalTitle: true,
+  xs: undefined,
+  sm: undefined,
+  md: undefined,
+  lg: undefined,
+  xl: undefined,
+  xxl: undefined,
 };
 
 const SLOT_DEFAULTS_TOP: ResolvedPaginationSlot = {
@@ -255,7 +286,9 @@ export class TediTableComponent<TData> {
    */
   readonly verticalBorders = input(false, { transform: booleanAttribute });
   /**
-   * Removes the table's outer border and corner radius.
+   * Removes only the table's **outer** border (the frame around the table) and
+   * its corner radius. Borders between rows and columns — including the
+   * `verticalBorders` separators — are unaffected.
    * @default false
    */
   readonly borderless = input(false, { transform: booleanAttribute });
@@ -264,6 +297,13 @@ export class TediTableComponent<TData> {
    * @default false
    */
   readonly stickyFirstColumn = input(false, { transform: booleanAttribute });
+  /**
+   * Freezes the last column in place during horizontal scroll. Mirrors
+   * `stickyFirstColumn` on the trailing edge — useful for keeping a trailing
+   * actions column (e.g. an "Edit" link) visible while the body scrolls.
+   * @default false
+   */
+  readonly stickyLastColumn = input(false, { transform: booleanAttribute });
   /**
    * Pins `<thead>` to the top during vertical scroll. Requires `maxHeight` to
    * be set so the table has a scroll container.
@@ -301,7 +341,10 @@ export class TediTableComponent<TData> {
   /**
    * Forces the row hover background on (`true`) or off (`false`). When omitted,
    * hover styling tracks whether rows are interactive — on when `interactive`
-   * is set or `expandTrigger` is `'row'`, off otherwise.
+   * is set or `expandTrigger` is `'row'`, off otherwise. This only affects the
+   * hover background; the pointer cursor is driven separately by row-level
+   * interactivity (`interactive` / click-to-expand), not by whether a cell
+   * happens to contain a link or button.
    * @default undefined
    */
   readonly rowHover = input<boolean | undefined>(undefined);
@@ -389,6 +432,19 @@ export class TediTableComponent<TData> {
     ((row: TData) => TData[] | undefined) | undefined
   >(undefined);
   /**
+   * Accessor returning a stable, unique id for a row, passed straight through
+   * to TanStack's `getRowId`. By default rows are keyed by their index, so
+   * selection / expansion state breaks as soon as the data changes (filtering,
+   * adding, removing, reordering rows). Key by an entity id instead — e.g.
+   * `getRowId: (row) => row.id` — to keep `rowSelection` / `expanded` stable
+   * across data updates and controllable from the outside by that id.
+   * @default undefined
+   */
+  readonly getRowId = input<
+    | ((originalRow: TData, index: number, parent?: Row<TData>) => string)
+    | undefined
+  >(undefined);
+  /**
    * Table-level row grouping key. When set, consecutive rendered rows with an
    * equal key form a group, and:
    * - the control columns (select / expand / drag) span each group — one
@@ -417,15 +473,38 @@ export class TediTableComponent<TData> {
   /**
    * Order of the auto-injected control columns (drag handle, selection
    * checkbox, expand chevron). Only the controls that are actually enabled
-   * render; any enabled control omitted from this list is appended at the end.
-   * Use it to e.g. place the checkbox before the expand chevron.
+   * render; any enabled control omitted from this list is appended after the
+   * other leading controls. Use it to e.g. place the checkbox before the expand
+   * chevron. Include the `"content"` sentinel to split leading vs trailing: any
+   * control listed after `"content"` renders after the data columns — e.g.
+   * `["content", "expand"]` puts the expand toggle in the last column.
    * @default ["drag", "select", "expand"]
    */
-  readonly controlColumnOrder = input<TableControlColumn[]>([
+  readonly controlColumnOrder = input<TableControlColumnOrder[]>([
     "drag",
     "select",
     "expand",
   ]);
+  /**
+   * Below this breakpoint the column filter opens in a modal instead of the
+   * popover (which can be cramped or drift off-screen on small viewports).
+   * Set `false` to always use the popover.
+   * @default "sm"
+   */
+  readonly filterModalBreakpoint = input<Breakpoint | false>("sm");
+  /**
+   * Fullscreen behaviour of the filter modal (see `filterModalBreakpoint`):
+   * `true` always fullscreen, `false` never, a breakpoint = fullscreen below it.
+   * @default false
+   */
+  readonly filterModalFullscreen = input<ModalFullscreen>(false);
+  /**
+   * Width of the column filter popover: a popover preset, or any CSS length
+   * (`"20rem"`). `"none"` lets the panel size to its content. A single column
+   * can opt out through `filterable: { popoverWidth }`.
+   * @default "small"
+   */
+  readonly filterPopoverWidth = input<PopoverWidth>("small");
   /**
    * Enables pagination and configures the bottom paginator slot. This is also
    * the source of truth for `pageSize` / `pageSizeOptions` — the top slot
@@ -564,7 +643,12 @@ export class TediTableComponent<TData> {
   readonly rowDrop = output<CdkDragDrop<TData[]>>();
 
   protected readonly injector = inject(Injector);
+  private readonly platformId = inject(PLATFORM_ID);
   private readonly translation = inject(TediTranslationService);
+  private readonly breakpointService = inject(BreakpointService);
+  private readonly modalService = inject(ModalService);
+  private readonly currentBreakpoint =
+    this.breakpointService.currentBreakpoint();
 
   private readonly _hoveredRowId = signal<string | null>(null);
   /**
@@ -586,6 +670,18 @@ export class TediTableComponent<TData> {
   protected readonly dragColumnLabel =
     this.translation.track("table.drag-column");
   protected readonly dragRowLabel = this.translation.track("table.drag-row");
+  protected readonly selectColumnLabel = this.translation.track(
+    "table.select-column",
+  );
+  protected readonly expandColumnLabel = this.translation.track(
+    "table.expand-column",
+  );
+  protected readonly reorderColumnLabel = this.translation.track(
+    "table.reorder-column",
+  );
+  protected readonly scrollRegionLabel = this.translation.track(
+    "table.scroll-region",
+  );
 
   // ── Keyboard column-reorder state machine ──────────────────────────────────
   /** Currently picked-up column id (during keyboard reordering), or `null`. */
@@ -742,7 +838,7 @@ export class TediTableComponent<TData> {
         maxSize: CONTROL_COLUMN_WIDTH,
         header: "",
         cell: () => "",
-        meta: { align: "center", vAlign: "top" },
+        meta: { vAlign: "top" },
         groupBy: controlGroupBy,
       } as TediColumnDef<TData>;
     }
@@ -758,7 +854,7 @@ export class TediTableComponent<TData> {
         maxSize: CONTROL_COLUMN_WIDTH,
         header: "",
         cell: () => "",
-        meta: { align: "center", vAlign: "top" },
+        meta: { vAlign: "top" },
         groupBy: controlGroupBy,
       } as TediColumnDef<TData>;
     }
@@ -777,24 +873,34 @@ export class TediTableComponent<TData> {
         maxSize: iconOnly ? CONTROL_COLUMN_WIDTH : undefined,
         header: "",
         cell: () => "",
-        meta: iconOnly ? { align: "center", vAlign: "top" } : { vAlign: "top" },
+        meta: { vAlign: "top" },
         groupBy: controlGroupBy,
       } as TediColumnDef<TData>;
     }
 
     const order = [...new Set(this.controlColumnOrder())];
-    const ordered = order
-      .map((key) => controls[key])
-      .filter((col): col is TediColumnDef<TData> => col !== undefined);
-    // Append any enabled control the consumer left out of the order list.
-    const leading = [
-      ...ordered,
-      ...(Object.keys(controls) as TableControlColumn[])
-        .filter((key) => !order.includes(key))
-        .map((key) => controls[key]!),
-    ];
+    const toCols = (keys: TableControlColumnOrder[]): TediColumnDef<TData>[] =>
+      keys
+        .map((key) => (key === "content" ? undefined : controls[key]))
+        .filter((col): col is TediColumnDef<TData> => col !== undefined);
 
-    return [...leading, ...cols];
+    // The `"content"` sentinel splits leading (before) from trailing (after)
+    // controls; without it every listed control is leading.
+    const contentIndex = order.indexOf("content");
+    const beforeContent =
+      contentIndex === -1 ? order : order.slice(0, contentIndex);
+    const afterContent =
+      contentIndex === -1 ? [] : order.slice(contentIndex + 1);
+
+    // Enabled controls the consumer left out of the order stay leading.
+    const omitted = (Object.keys(controls) as TableControlColumn[])
+      .filter((key) => !order.includes(key))
+      .map((key) => controls[key]!);
+
+    const leading = [...toCols(beforeContent), ...omitted];
+    const trailing = toCols(afterContent);
+
+    return [...leading, ...cols, ...trailing];
   });
 
   /**
@@ -961,6 +1067,7 @@ export class TediTableComponent<TData> {
           manualPagination && pageCount !== undefined ? pageCount : undefined,
         rowCount:
           manualPagination && rowCount !== undefined ? rowCount : undefined,
+        getRowId: this.getRowId(),
         getRowCanExpand: renderSub
           ? (this.getRowCanExpand() ?? (() => true))
           : this.getRowCanExpand(),
@@ -1014,6 +1121,7 @@ export class TediTableComponent<TData> {
     this.hasFilterableColumns();
     this.enableRowSelection();
     this.paginationOptions();
+    this.getRowId();
   }
 
   protected readonly hostClasses = computed(() => {
@@ -1024,6 +1132,7 @@ export class TediTableComponent<TData> {
       [this.verticalBorders(), "tedi-table--vertical-borders"],
       [this.borderless(), "tedi-table--borderless"],
       [this.stickyFirstColumn(), "tedi-table--sticky-first-column"],
+      [this.stickyLastColumn(), "tedi-table--sticky-last-column"],
       [this.stickyHeader(), "tedi-table--sticky-header"],
       [this.fixedLayout(), "tedi-table--fixed-layout"],
       [this.interactive() || rowExpand, "tedi-table--clickable-rows"],
@@ -1189,6 +1298,30 @@ export class TediTableComponent<TData> {
 
     effect(() => this.persistence.setControlled(this.state()));
     effect(() => this.persistence.setPersist(this.persist()));
+    // Keep the filter-popover drafts aligned with the applied filter state so a
+    // reset (clearFilters(), controlled state, a removed chip) doesn't leave a
+    // reopened popover showing stale inputs / checkboxes.
+    effect(() => {
+      const filters = this.tableState().columnFilters ?? [];
+      untracked(() => this.reconcileFilterDrafts(filters));
+    });
+
+    // Measure the horizontal scroll extents so the sticky-column shadows only
+    // show while there's off-edge content. Observe the container (viewport
+    // changes) and the inner table (content-width changes, e.g. toggled
+    // columns); the observer fires once on connect, covering the initial state.
+    afterNextRender(
+      () => {
+        const container = this.scrollContainer()?.nativeElement;
+        if (!container) return;
+        const observer = new ResizeObserver(() => this.measureScrollShadows());
+        observer.observe(container);
+        const table = this.tableElement()?.nativeElement;
+        if (table) observer.observe(table);
+        this.destroyRef.onDestroy(() => observer.disconnect());
+      },
+      { injector: this.injector },
+    );
   }
 
   private applyPatch<T>(
@@ -1204,6 +1337,19 @@ export class TediTableComponent<TData> {
           : updater;
       return toPatch(next);
     });
+  }
+
+  /**
+   * Clears every active column filter in one call, resetting all `filterable`
+   * columns at once. Routes through the same state machinery as the per-column
+   * **Clear** buttons, so it updates internal state, respects a controlled
+   * `state` input, and emits `(stateChange)`. Grab a component reference (e.g.
+   * a template ref `#table` or `viewChild`) to call it from consumer code.
+   */
+  clearFilters(): void {
+    // `true` forces the empty state rather than TanStack's `initialState`
+    // filters, so a controlled table always resets to no filters.
+    this.table.resetColumnFilters(true);
   }
 
   protected handleRowClick(event: Event, row: Row<TData>): void {
@@ -1261,6 +1407,14 @@ export class TediTableComponent<TData> {
     return this.expandTrigger() === "row" && row.getCanExpand();
   }
 
+  protected rowHasNestedInteractive(row: Row<TData>): boolean {
+    return (
+      this.hasSelection() ||
+      this.reorderableRows() ||
+      (this.hasExpansion() && row.getCanExpand())
+    );
+  }
+
   protected handleRowMouseEnter(row: Row<TData>): void {
     this._hoveredRowId.set(row.id);
   }
@@ -1308,6 +1462,10 @@ export class TediTableComponent<TData> {
     id: string;
     getSize: () => number;
   }): number | null {
+    // Labeled expand column hugs its content (see `--control-fit`) instead of
+    // taking TanStack's default width and absorbing the table's slack.
+    if (column.id === EXPAND_COLUMN_ID && this.expandButtonHasLabel())
+      return null;
     if (
       this.fixedLayout() &&
       !this.authoredColumnSizing().get(column.id)?.hasSize
@@ -1373,6 +1531,66 @@ export class TediTableComponent<TData> {
     return this.stickyLeftColumns().get(id)?.left ?? null;
   }
 
+  /**
+   * Columns frozen by `stickyLastColumn`, keyed by id: the last content column
+   * plus any trailing control columns (e.g. an expand toggle placed after the
+   * `'content'` sentinel), pinned together as one block. `right` is the
+   * cumulative offset; `start` / `edge` mark the block's right and left edges
+   * (the left edge draws the divider). Empty when `stickyLastColumn` is off.
+   */
+  protected readonly stickyRightColumns = computed<
+    Map<string, { right: number; start: boolean; edge: boolean }>
+  >(() => {
+    const map = new Map<
+      string,
+      { right: number; start: boolean; edge: boolean }
+    >();
+    if (!this.stickyLastColumn()) return map;
+
+    const leaf = this.leafColumns();
+    const controlIds = new Set<string>([
+      DRAG_COLUMN_ID,
+      SELECT_COLUMN_ID,
+      EXPAND_COLUMN_ID,
+    ]);
+    const frozen: typeof leaf = [];
+    let i = leaf.length - 1;
+    while (i >= 0 && controlIds.has(leaf[i].id)) frozen.push(leaf[i--]); // trailing controls
+    if (i >= 0) frozen.push(leaf[i]); // last content column
+
+    let right = 0;
+    frozen.forEach((col, idx) => {
+      map.set(col.id, {
+        right,
+        start: idx === 0,
+        edge: idx === frozen.length - 1,
+      });
+      right += col.getSize();
+    });
+    return map;
+  });
+
+  /** Sticky `right` (px) for a frozen column; `null` when the column isn't frozen. */
+  protected stickyRight(id: string): number | null {
+    return this.stickyRightColumns().get(id)?.right ?? null;
+  }
+
+  /**
+   * Class fragment for the auto-injected control columns. Icon-only controls
+   * (drag / select, and expand without a visible label) drop to reduced padding
+   * and stay as narrow as the control needs; a labeled expand column hugs its
+   * content instead of absorbing the table's slack. `""` otherwise.
+   */
+  protected controlCellClass(id: string): string {
+    const iconOnlyControl =
+      id === DRAG_COLUMN_ID ||
+      id === SELECT_COLUMN_ID ||
+      (id === EXPAND_COLUMN_ID && !this.expandButtonHasLabel());
+    if (iconOnlyControl) return " tedi-table__cell--control";
+    if (id === EXPAND_COLUMN_ID) return " tedi-table__cell--control-fit";
+    return "";
+  }
+
   /** Sticky-column class fragment for a cell (`""` when not frozen). */
   protected stickyLeftClass(id: string): string {
     const info = this.stickyLeftColumns().get(id);
@@ -1381,6 +1599,17 @@ export class TediTableComponent<TData> {
       " tedi-table__cell--sticky-left" +
       (info.start ? " tedi-table__cell--sticky-left-start" : "") +
       (info.edge ? " tedi-table__cell--sticky-left-edge" : "")
+    );
+  }
+
+  /** Sticky-right-column class fragment for a cell (`""` when not frozen). */
+  protected stickyRightClass(id: string): string {
+    const info = this.stickyRightColumns().get(id);
+    if (!info) return "";
+    return (
+      " tedi-table__cell--sticky-right" +
+      (info.start ? " tedi-table__cell--sticky-right-start" : "") +
+      (info.edge ? " tedi-table__cell--sticky-right-edge" : "")
     );
   }
 
@@ -1795,13 +2024,59 @@ export class TediTableComponent<TData> {
     }
   }
 
+  private readonly scrollContainer =
+    viewChild<ElementRef<HTMLElement>>("scrollContainer");
+  private readonly tableElement =
+    viewChild<ElementRef<HTMLElement>>("tableElement");
+  private readonly destroyRef = inject(DestroyRef);
+
+  /**
+   * Elevation shadows only make sense when the body is actually scrolled off
+   * that edge: `hasStartShadow` gates the leading (sticky-first) column shadow,
+   * `hasEndShadow` the trailing (sticky-last) one, and `hasHeaderShadow` the
+   * sticky-header shadow (scrolled down). Toggled from a scroll listener plus a
+   * ResizeObserver so viewport / content-size changes re-measure without a
+   * scroll event.
+   */
+  protected readonly hasStartShadow = signal(false);
+  protected readonly hasEndShadow = signal(false);
+  protected readonly hasHeaderShadow = signal(false);
+
+  private measureScrollShadows(): void {
+    const element = this.scrollContainer()?.nativeElement;
+    if (!element) return;
+    const maxScroll = element.scrollWidth - element.clientWidth;
+    // ~1px tolerance absorbs sub-pixel rounding at the scroll extremes.
+    this.hasStartShadow.set(element.scrollLeft > 1);
+    this.hasEndShadow.set(element.scrollLeft < maxScroll - 1);
+    this.hasHeaderShadow.set(element.scrollTop > 1);
+  }
+
+  protected onHorizontalScroll(): void {
+    this.measureScrollShadows();
+  }
+
+  /**
+   * Resets the table's own vertical scroll to the top. Only affects the
+   * internal scroll container (used when `maxHeight` is set); the horizontal
+   * scroll position is preserved since columns are identical across pages, and
+   * the window scroll is intentionally left untouched.
+   */
+  private resetScrollTop(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const element = this.scrollContainer()?.nativeElement;
+    if (element) element.scrollTop = 0;
+  }
+
   protected handlePaginationPageChange(nextPage: number): void {
     this.table.setPageIndex(nextPage - 1);
+    this.resetScrollTop();
   }
 
   protected handlePaginationPageSizeChange(nextSize: number | undefined): void {
     if (nextSize === undefined) return;
     this.table.setPageSize(nextSize);
+    this.resetScrollTop();
   }
 
   protected getColumnMeta(column: {
@@ -1819,12 +2094,28 @@ export class TediTableComponent<TData> {
     return dir === "asc" ? "ascending" : dir === "desc" ? "descending" : "none";
   }
 
-  protected getHeaderLabel(
+  protected getSrOnlyHeaderLabel(
     column: ReturnType<TanstackTable<TData>["getAllLeafColumns"]>[number],
   ): string | null {
-    const meta = this.getColumnMeta(column);
+    switch (column.id) {
+      case SELECT_COLUMN_ID:
+        return this.selectColumnLabel();
+      case EXPAND_COLUMN_ID:
+        return this.expandColumnLabel();
+      case DRAG_COLUMN_ID:
+        return this.reorderColumnLabel();
+    }
+    // Only provide a screen-reader-only name when the header renders no visible
+    // text (an empty `<th>` fails WCAG "empty-table-header"). Columns with a
+    // visible header are already named by their own text — adding an sr-only
+    // copy would double-announce them.
     const header = column.columnDef.header;
-    return meta?.label ?? (typeof header === "string" ? header : null);
+    const isEmptyHeader =
+      header == null || (typeof header === "string" && header.trim() === "");
+    if (!isEmptyHeader) {
+      return null;
+    }
+    return this.getColumnMeta(column)?.label ?? null;
   }
 
   protected resolveColumnLabel(
@@ -2065,6 +2356,12 @@ export class TediTableComponent<TData> {
    * nothing.
    */
   private readonly filterDrafts = new Map<string, WritableSignal<unknown>>();
+  // The applied filter value each draft was last synced from. Lets
+  // `reconcileFilterDrafts` tell an external filter reset (clearFilters(),
+  // controlled `state`, a removed filter chip) — where the applied value
+  // changed out from under the draft — apart from a half-typed draft the user
+  // is mid-editing (applied value unchanged), which must be preserved.
+  private readonly filterDraftBaselines = new Map<string, unknown>();
 
   /**
    * Normalises `filterable: true | TableFilterOptions | undefined | false`
@@ -2091,8 +2388,13 @@ export class TediTableComponent<TData> {
   ): TemplateRef<TediTableFilterContext<unknown, TData>> | undefined {
     const def = col.columnDef as TediColumnDef<TData>;
     return def.filterTemplate as
-      | TemplateRef<TediTableFilterContext<unknown, TData>>
-      | undefined;
+      TemplateRef<TediTableFilterContext<unknown, TData>> | undefined;
+  }
+
+  protected filterPopoverWidthFor(col: Column<TData, unknown>): PopoverWidth {
+    return (
+      this.resolveFilterOptions(col)?.popoverWidth ?? this.filterPopoverWidth()
+    );
   }
 
   /**
@@ -2136,8 +2438,44 @@ export class TediTableComponent<TData> {
     if (!s) {
       s = signal<unknown>(initial);
       this.filterDrafts.set(columnId, s);
+      this.filterDraftBaselines.set(columnId, initial);
     }
     return s;
+  }
+
+  /**
+   * Structural equality for filter values (strings, numbers, bigints, arrays,
+   * plain objects). Filter values are consumer-supplied `unknown`, so the
+   * comparison must never throw: reference-equal values (including equal
+   * primitives and bigints) short-circuit, and anything JSON can't serialise
+   * (bigint mismatches, cyclic structures) falls back to "changed".
+   */
+  private filterValuesEqual(a: unknown, b: unknown): boolean {
+    if (a === b) return true;
+    if (a === undefined || b === undefined) return false;
+    try {
+      return JSON.stringify(a) === JSON.stringify(b);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Realigns each open/created filter draft with the applied filter state
+   * whenever the latter changes externally (`clearFilters()`, controlled
+   * `state`, a removed filter chip). A draft is only overwritten when its
+   * column's applied value actually moved since the draft last synced — so an
+   * in-progress, unapplied draft (applied value unchanged) is left intact.
+   */
+  private reconcileFilterDrafts(filters: ColumnFiltersState): void {
+    const appliedById = new Map(filters.map((f) => [f.id, f.value]));
+    for (const [id, draft] of this.filterDrafts) {
+      const applied = appliedById.get(id);
+      if (!this.filterValuesEqual(applied, this.filterDraftBaselines.get(id))) {
+        draft.set(applied);
+        this.filterDraftBaselines.set(id, applied);
+      }
+    }
   }
 
   /**
@@ -2173,24 +2511,75 @@ export class TediTableComponent<TData> {
     col: Column<TData, unknown>,
     popover: PopoverComponent,
   ): TediTableFilterContext<unknown, TData> {
+    return this.buildFilterContext(col, () => popover.hidePopover(true));
+  }
+
+  /**
+   * Builds the filter context, wiring `apply` / `clear` to commit the draft and
+   * then run `close` (hide the popover, or close the modal — whichever opened
+   * the filter). Shared by the popover and the modal renderers.
+   */
+  private buildFilterContext(
+    col: Column<TData, unknown>,
+    close: () => void,
+  ): TediTableFilterContext<unknown, TData> {
     const draft = this.getFilterDraft(col.id, col.getFilterValue());
     const ctx = {
       value: draft(),
       setValue: (next: unknown) => draft.set(next),
       apply: () => {
         col.setFilterValue(draft());
-        popover.hidePopover(true);
+        close();
       },
       clear: () => {
         draft.set(undefined);
         col.setFilterValue(undefined);
-        popover.hidePopover(true);
+        close();
       },
       column: col,
     } as Omit<TediTableFilterContext<unknown, TData>, "$implicit">;
     (ctx as TediTableFilterContext<unknown, TData>).$implicit =
       ctx as TediTableFilterContext<unknown, TData>;
     return ctx as TediTableFilterContext<unknown, TData>;
+  }
+
+  /** True when the filter should open as a modal (viewport below
+   *  `filterModalBreakpoint`) rather than the popover. */
+  protected readonly filterUsesModal = computed<boolean>(() => {
+    const bp = this.filterModalBreakpoint();
+    if (!bp) return false;
+    const current = this.currentBreakpoint();
+    if (!current) return false;
+    const order: Breakpoint[] = ["xs", "sm", "md", "lg", "xl", "xxl"];
+    return order.indexOf(current) < order.indexOf(bp);
+  });
+
+  /**
+   * Opens the column filter in a modal (below `filterModalBreakpoint`). Reuses
+   * the same draft reset (`clearOnClose`) and context as the popover, but
+   * `apply` / `clear` close the modal instead.
+   */
+  protected openFilterModal(col: Column<TData, unknown>): void {
+    const tpl = this.filterTemplateFor(col);
+    if (!tpl) return;
+    this.handleFilterTriggerClick(col);
+    this.modalService.open(TableFilterModalComponent, {
+      size: "small",
+      position: "bottom",
+      fullscreen: this.filterModalFullscreen(),
+      ariaLabel: this.filterAriaLabel(col),
+      data: {
+        columnLabel: this.resolveColumnLabel(col),
+        applyLabel: this.filterApplyLabel(),
+        clearLabel: this.filterClearLabel(),
+        template: tpl as TemplateRef<TediTableFilterContext<unknown, unknown>>,
+        buildContext: (close: () => void) =>
+          this.buildFilterContext(col, close) as TediTableFilterContext<
+            unknown,
+            unknown
+          >,
+      } satisfies TableFilterModalData,
+    });
   }
 
   protected handleFilterApply(

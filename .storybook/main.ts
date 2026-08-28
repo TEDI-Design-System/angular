@@ -1,5 +1,7 @@
 import { StorybookConfig } from "@storybook/angular";
 
+const excludeCommunity = process.env.STORYBOOK_EXCLUDE_COMMUNITY === "true";
+
 const config: StorybookConfig = {
   stories: [
     "../src/docs/welcome.mdx",
@@ -12,7 +14,9 @@ const config: StorybookConfig = {
     "../src/docs/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "../src/tedi/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     "../src/tedi/**/*.mdx",
-    "../src/community/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    ...(excludeCommunity
+      ? []
+      : ["../src/community/**/*.stories.@(js|jsx|mjs|ts|tsx)"]),
   ],
   addons: [
     "@storybook/addon-docs",
@@ -26,7 +30,10 @@ const config: StorybookConfig = {
       builder: "angular",
     },
   },
-  staticDirs: ["../public"],
+  staticDirs: [
+    "../public",
+    { from: "../node_modules/@tedi-design-system/core/fonts", to: "/fonts" },
+  ],
   core: {
     disableTelemetry: true,
   },

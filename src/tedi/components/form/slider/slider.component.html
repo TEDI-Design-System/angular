@@ -3,8 +3,7 @@
     tedi-label
     [for]="inputId()"
     [required]="required()"
-    [class.sr-only]="hideLabel() === true"
-    [class.tedi-slider__label--reserve-space]="hideLabel() === 'keep-space'"
+    [visuallyHidden]="labelVisuallyHidden()"
     >{{ label() }}</label
   >
 }
@@ -71,7 +70,7 @@
 </div>
 @if (feedbackText(); as feedback) {
   <tedi-feedback-text
-    [attr.id]="feedbackId()"
+    [id]="feedbackId()"
     [text]="feedback.text"
     [type]="feedback.type"
     [position]="feedback.position"

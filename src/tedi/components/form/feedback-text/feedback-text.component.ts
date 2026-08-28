@@ -6,6 +6,8 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 
+let feedbackTextIdCounter = 0;
+
 export type FeedbackTextType = "hint" | "valid" | "error";
 export type FeedbackTextPosition = "left" | "right";
 
@@ -18,11 +20,22 @@ export type FeedbackTextPosition = "left" | "right";
   encapsulation: ViewEncapsulation.None,
   host: {
     "[class]": "classes()",
+    "[attr.id]": "elementId()",
     "[attr.role]": "role()",
     "[attr.aria-live]": "ariaLive()",
   },
 })
 export class FeedbackTextComponent {
+  /**
+   * Id of the element. Generated when not set, so a container can reference this
+   * text from a control's `aria-describedby`.
+   */
+  readonly id = input<string | null | undefined>();
+
+  private readonly fallbackId = `tedi-feedback-text-${feedbackTextIdCounter++}`;
+
+  readonly elementId = computed(() => this.id() ?? this.fallbackId);
+
   /**
    * Helper text
    */

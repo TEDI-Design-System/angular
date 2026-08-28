@@ -7,7 +7,6 @@ import {
   inject,
   input,
   model,
-  output,
   signal,
   ViewEncapsulation,
 } from "@angular/core";
@@ -24,7 +23,9 @@ import { ModalService } from "../../overlay/modal/modal.service";
 import { generateUUID } from "../../../helpers/generate-uuid";
 import { usePagination } from "./pagination.utils";
 import {
+  PaginationAlign,
   PaginationBackground,
+  PaginationBreakpointInputs,
   PaginationDividerPosition,
   PaginationItem,
   PaginationLabels,
@@ -110,6 +111,15 @@ export class PaginationComponent {
   readonly dividerPosition = input<PaginationDividerPosition>("top");
 
   /**
+   * Horizontal alignment of the results / pager / page-size slots. `'left'`
+   * groups them at the start instead of spreading them across the full width.
+   * Override per breakpoint via the `xs`–`xxl` inputs (e.g. `align="left"` with
+   * `[md]="{ align: 'between' }"` reads left on mobile, spread on desktop).
+   * @default 'between'
+   */
+  readonly align = input<PaginationAlign>("between");
+
+  /**
    * Hide the "X results" label even when `totalItems` is set or content is
    * projected via `[tediPaginationResults]`. Pass a breakpoint name to hide
    * only below that breakpoint.
@@ -182,11 +192,18 @@ export class PaginationComponent {
    */
   readonly showModalTitle = input<boolean>(true);
 
-  /** Emits whenever the user navigates to a different page. */
-  readonly pageChange = output<number>();
-
-  /** Emits when the user picks a different page size. */
-  readonly pageSizeChange = output<number>();
+  /**
+   * Per-breakpoint overrides for the layout inputs (`align`, `showArrowLabels`,
+   * `arrowVariant`, `dividerPosition`, `background`). Applied mobile-first: an
+   * override set here takes effect at this breakpoint and every larger one, on
+   * top of the base inputs.
+   */
+  readonly xs = input<PaginationBreakpointInputs>();
+  readonly sm = input<PaginationBreakpointInputs>();
+  readonly md = input<PaginationBreakpointInputs>();
+  readonly lg = input<PaginationBreakpointInputs>();
+  readonly xl = input<PaginationBreakpointInputs>();
+  readonly xxl = input<PaginationBreakpointInputs>();
 
   /** Detects the `[tediPaginationResults]` content-projection slot, if any. */
   protected readonly customResults = contentChild(
@@ -203,17 +220,52 @@ export class PaginationComponent {
   protected readonly pageSizeInputId = `tedi-pagination-page-size-${generateUUID()}`;
   protected readonly pageSizeLabelId = `${this.pageSizeInputId}-label`;
 
+  /**
+   * Base layout inputs merged with the active `xs`–`xxl` overrides for the
+   * current breakpoint. Read these (not the raw inputs) anywhere the value can
+   * be overridden per breakpoint.
+   */
+  protected readonly breakpointInputs = computed(() =>
+    this.breakpointService.getBreakpointInputs<PaginationBreakpointInputs>({
+      align: this.align(),
+      showArrowLabels: this.showArrowLabels(),
+      arrowVariant: this.arrowVariant(),
+      dividerPosition: this.dividerPosition(),
+      background: this.background(),
+      xs: this.xs(),
+      sm: this.sm(),
+      md: this.md(),
+      lg: this.lg(),
+      xl: this.xl(),
+      xxl: this.xxl(),
+    }),
+  );
+
+  /** Resolved arrow variant (base merged with breakpoint overrides). */
+  protected readonly resolvedArrowVariant = computed<ButtonVariant>(
+    () => this.breakpointInputs().arrowVariant ?? this.arrowVariant(),
+  );
+
+  /** Resolved visible-arrow-labels flag (base merged with breakpoint overrides). */
+  protected readonly resolvedShowArrowLabels = computed<boolean>(
+    () => this.breakpointInputs().showArrowLabels ?? this.showArrowLabels(),
+  );
+
   protected readonly hostClasses = computed(() => {
+    const inputs = this.breakpointInputs();
     const classes = [
       "tedi-pagination",
-      `tedi-pagination--bg-${this.background()}`,
-      `tedi-pagination--divider-${this.dividerPosition()}`,
+      `tedi-pagination--bg-${inputs.background}`,
+      `tedi-pagination--divider-${inputs.dividerPosition}`,
+      `tedi-pagination--align-${inputs.align}`,
     ];
     if (!this.showPager()) classes.push("tedi-pagination--no-pager");
     if (!this.showResults()) classes.push("tedi-pagination--no-results");
     if (!this.showPageSizeSelect())
       classes.push("tedi-pagination--no-page-size");
     if (!this.showArrows()) classes.push("tedi-pagination--no-arrows");
+    if (this.resolvedShowArrowLabels())
+      classes.push("tedi-pagination--arrow-labels");
     return classes.join(" ");
   });
 
@@ -413,14 +465,14 @@ export class PaginationComponent {
     const total = this.pageCount();
     if (nextPage < 1 || nextPage > total || nextPage === this.currentPage())
       return;
+    // `page` is a model, so setting it emits the `pageChange` output.
     this.page.set(nextPage);
-    this.pageChange.emit(nextPage);
   }
 
   protected handlePageSizeChange(value: number | null): void {
     if (value == null || value === this.pageSize()) return;
+    // `pageSize` is a model, so setting it emits the `pageSizeChange` output.
     this.pageSize.set(value);
-    this.pageSizeChange.emit(value);
   }
 
   protected openMobilePicker(): void {

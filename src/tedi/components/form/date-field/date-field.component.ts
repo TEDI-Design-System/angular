@@ -2,19 +2,27 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   forwardRef,
   inject,
   input,
   model,
+  OnInit,
   output,
+  Renderer2,
   signal,
   untracked,
   viewChild,
   ViewEncapsulation,
 } from "@angular/core";
-import { ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
+import { DOCUMENT } from "@angular/common";
+import {
+  CdkConnectedOverlay,
+  ConnectedPosition,
+  OverlayModule,
+} from "@angular/cdk/overlay";
 import { A11yModule } from "@angular/cdk/a11y";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import {
@@ -32,6 +40,12 @@ import {
   FormFieldControl,
   TEDI_FORM_FIELD_CONTROL,
 } from "../form-field/form-field-control";
+import {
+  FieldContext,
+  InputSize,
+  TEDI_FIELD_CONTEXT,
+} from "../form-field/field-context.token";
+import { deriveControlState } from "../form-field/derive-control-state";
 import {
   breakpointInput,
   BreakpointInput,
@@ -92,14 +106,30 @@ export type DateFieldSize = "default" | "small";
       provide: TEDI_FORM_FIELD_CONTROL,
       useExisting: forwardRef(() => DateFieldComponent),
     },
+    {
+      provide: TEDI_FIELD_CONTEXT,
+      useFactory: (field: DateFieldComponent) => field.childContext,
+      deps: [forwardRef(() => DateFieldComponent)],
+    },
   ],
   host: {
     class: "tedi-date-field",
+    "[class.tedi-field-surface]": "paintsSurface()",
+    "[class.tedi-field-surface--invalid]": "paintsSurface() && invalid()",
+    "[class.tedi-field-surface--valid]": "paintsSurface() && valid()",
+    "[class.tedi-field-surface--disabled]": "paintsSurface() && disabled()",
+    "[class.tedi-date-field--small]": "resolvedSize() === 'small'",
+    "[class.tedi-date-field--large]": "resolvedSize() === 'large'",
   },
 })
 export class DateFieldComponent
-  implements ControlValueAccessor, FormFieldControl<DateFieldValue>
+  implements OnInit, ControlValueAccessor, FormFieldControl<DateFieldValue>
 {
+  private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
+    optional: true,
+    skipSelf: true,
+  });
+  private readonly derived = deriveControlState();
   /**
    * Unique ID for label association and accessibility. Bind the sibling
    * `<label tedi-label [for]>` to the same value.
@@ -158,8 +188,17 @@ export class DateFieldComponent
    * bind it there too, since DateField owns no label.
    */
   readonly required = input<boolean>(false);
-  /** Field size — matches the surrounding `tedi-form-field`. */
-  readonly size = input<DateFieldSize>("default");
+  /**
+   * Field size. Falls back to the size of a wrapping `tedi-form-field` when not
+   * set here.
+   */
+  readonly size = input<DateFieldSize | undefined>();
+  /**
+   * Forces the error state on, or off, regardless of the reactive-forms state.
+   * Leave unset to let the control derive it.
+   */
+  // eslint-disable-next-line @angular-eslint/no-input-rename
+  readonly invalidInput = input<boolean>(false, { alias: "invalid" });
   /** Disables all dates before this date (inclusive boundary stays enabled). */
   readonly minDate = input<Date | undefined>(undefined);
   /** Disables all dates after this date (inclusive boundary stays enabled). */
@@ -178,6 +217,16 @@ export class DateFieldComponent
    * the calendar's year navigation/grid. Leave `undefined` to disable nothing.
    */
   readonly shouldDisableYear = input<YearPredicate | undefined>(undefined);
+  /**
+   * Earliest year offered in the calendar's year grid/dropdown. Defaults to 100
+   * years before the current year when `null`.
+   */
+  readonly minYear = input<number | null>(null);
+  /**
+   * Latest year offered in the calendar's year grid/dropdown. Defaults to 20
+   * years after the current year when `null`.
+   */
+  readonly maxYear = input<number | null>(null);
   /**
    * Whitelist of selectable days — an explicit `Date[]` or a predicate
    * `(date) => boolean`. Every other day is disabled.
@@ -257,6 +306,12 @@ export class DateFieldComponent
    * (custom popover from that breakpoint up).
    */
   readonly useNativePicker = input<DateFieldUseNativePicker>(false);
+  /**
+   * Close the calendar popover when the page (or a scrollable ancestor) scrolls.
+   * Scrolling inside the calendar itself — or its nested year/month dropdown —
+   * keeps it open. Only applies to the popover; the modal is unaffected.
+   */
+  readonly hideOnScroll = input(false);
   /** Open the calendar in a modal: `true` always, `false` never, breakpoint name → modal below that breakpoint. */
   readonly modal = input<DateFieldModalInput>(false);
   /** Make the modal fullscreen: `true` always, `false` never, breakpoint name → fullscreen below that breakpoint. Only applies when the calendar actually opens as a modal. */
@@ -279,9 +334,12 @@ export class DateFieldComponent
   private readonly breakpointService = inject(BreakpointService);
   private readonly modalService = inject(ModalService);
   private readonly hostEl = inject(ElementRef<HTMLElement>);
+  private readonly renderer = inject(Renderer2);
+  private readonly document = inject(DOCUMENT);
 
   readonly calendar = viewChild<CalendarComponent>("calendar");
   readonly dateInput = viewChild.required<DateInputComponent>("dateInput");
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
 
   readonly currentMonth = signal<Date>(new Date());
   readonly overlayOpen = signal<boolean>(false);
@@ -306,19 +364,53 @@ export class DateFieldComponent
   });
 
   private readonly cvaDisabled = signal(false);
-  private readonly formInvalid = signal(false);
   private modalRef: ModalRef<DateFieldValue> | null = null;
+  private scrollListener?: () => void;
 
   private onChange: (value: DateFieldValue) => void = () => {};
   private onTouched: () => void = () => {};
 
   readonly fieldDisabled = computed(
-    () => this.inputDisabled() || this.cvaDisabled(),
+    () =>
+      this.inputDisabled() ||
+      this.cvaDisabled() ||
+      (this.fieldContext?.disabled() ?? false),
   );
 
   readonly disabled = computed(() => this.fieldDisabled());
 
-  readonly invalid = computed(() => this.formInvalid());
+  readonly touched = this.derived.touched;
+
+  readonly dirty = this.derived.dirty;
+
+  readonly invalid = computed(
+    () =>
+      this.invalidInput() ||
+      this.derived.invalid() ||
+      (this.fieldContext?.invalid() ?? false),
+  );
+
+  readonly resolvedSize = computed<InputSize>(
+    () => this.size() ?? this.fieldContext?.size() ?? "default",
+  );
+
+  readonly paintsSurface = computed(
+    () => !(this.fieldContext?.ownsSurface() ?? false),
+  );
+
+  readonly valid = computed(() => this.fieldContext?.valid() ?? false);
+
+  readonly childContext: FieldContext = {
+    size: computed(() => this.resolvedSize()),
+    ownsSurface: computed(() => true),
+    invalid: computed(() => this.invalid()),
+    valid: computed(() => this.valid()),
+    disabled: computed(() => this.disabled()),
+  };
+
+  ngOnInit(): void {
+    this.derived.connect();
+  }
 
   readonly resolvedDisabledMatchers = computed<Matcher[]>(() => {
     const result: Matcher[] = [];
@@ -438,6 +530,8 @@ export class DateFieldComponent
   private initialOpenEmit = true;
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.cleanupScrollListener());
+
     effect(() => {
       const v = this.value();
       const anchor = this.deriveAnchor(v) ?? this.initialMonth() ?? null;
@@ -488,17 +582,18 @@ export class DateFieldComponent
     this.cvaDisabled.set(isDisabled);
   }
 
-  setInvalidState(isInvalid: boolean): void {
-    this.formInvalid.set(isInvalid);
+  focus(): void {
+    if (this.fieldDisabled()) return;
+    this.dateInput().focusInput();
   }
 
-  clearField(): void {
+  reset(): void {
     if (this.fieldDisabled() || this.readOnly()) return;
     this.commitValue(null);
   }
 
   handleClear(): void {
-    this.clearField();
+    this.reset();
   }
 
   handleIconClick(): void {
@@ -614,6 +709,14 @@ export class DateFieldComponent
 
   handleOverlayAttached(): void {
     this.calendar()?.focusActiveCell();
+    if (this.hideOnScroll()) {
+      this.setupScrollListener();
+    }
+  }
+
+  handleOverlayDetached(): void {
+    this.cleanupScrollListener();
+    this.closeOverlay();
   }
 
   handleOverlayKeydown(event: KeyboardEvent): void {
@@ -628,6 +731,51 @@ export class DateFieldComponent
     const host = this.hostEl.nativeElement as HTMLElement;
     const icon = host.querySelector<HTMLElement>(".tedi-date-input__icon");
     icon?.focus();
+  }
+
+  private setupScrollListener(): void {
+    this.cleanupScrollListener();
+
+    this.scrollListener = this.renderer.listen(
+      this.document,
+      "scroll",
+      (event: Event) => {
+        if (!this.overlayOpen()) return;
+        if (this.isInsideOverlay(event.target as Node | null)) return;
+        this.overlayOpen.set(false);
+        this.onTouched();
+      },
+      { capture: true, passive: true },
+    );
+  }
+
+  private cleanupScrollListener(): void {
+    if (this.scrollListener) {
+      this.scrollListener();
+      this.scrollListener = undefined;
+    }
+  }
+
+  /**
+   * Whether the scroll target is inside this field's own calendar overlay or a
+   * nested overlay opened from within it (e.g. the year/month dropdown). Nested
+   * overlays share the CDK overlay container but render in their own pane
+   * stacked after this one in DOM order, so a `DOCUMENT_POSITION_FOLLOWING`
+   * check distinguishes them from unrelated ancestors that should dismiss.
+   */
+  private isInsideOverlay(target: Node | null): boolean {
+    if (!target || !(target instanceof Element)) return false;
+
+    const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+    if (!overlayEl) return false;
+    if (overlayEl.contains(target)) return true;
+
+    if (!target.closest(".cdk-overlay-container")) return false;
+
+    return !!(
+      overlayEl.compareDocumentPosition(target) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   }
 
   private openNativePicker(): void {
@@ -662,6 +810,8 @@ export class DateFieldComponent
       unavailableDays: this.unavailableDays(),
       shouldDisableMonth: this.shouldDisableMonth(),
       shouldDisableYear: this.shouldDisableYear(),
+      minYear: this.minYear(),
+      maxYear: this.maxYear(),
       closeOnSelect: this.closeOnSelectEffective(),
     };
 

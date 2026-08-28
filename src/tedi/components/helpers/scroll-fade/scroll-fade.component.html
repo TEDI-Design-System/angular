@@ -1,3 +1,11 @@
-<div #inner cdkScrollable [class]="innerClasses()" (scroll)="onScroll()">
+<div
+  #inner
+  cdkScrollable
+  [class]="innerClasses()"
+  tabindex="0"
+  role="group"
+  [attr.aria-label]="ariaLabel() || _defaultLabel()"
+  (scroll)="onScroll()"
+>
   <ng-content />
 </div>

@@ -240,6 +240,34 @@ describe("TooltipTriggerComponent", () => {
         expect(tooltip.hideTooltip).toHaveBeenCalled();
       });
     });
+
+    describe("keyboard activation", () => {
+      it("should toggle on Enter for a non-native trigger when openWith is 'click'", () => {
+        tooltip.openWith = jest.fn(() => "click");
+        hostEl.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+        expect(tooltip.toggleTooltip).toHaveBeenCalled();
+      });
+
+      it("should toggle on Space for a non-native trigger when openWith is 'both'", () => {
+        tooltip.openWith = jest.fn(() => "both");
+        hostEl.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
+        expect(tooltip.toggleTooltip).toHaveBeenCalled();
+      });
+
+      it("should not toggle on Enter when openWith is 'hover'", () => {
+        tooltip.openWith = jest.fn(() => "hover");
+        hostEl.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+        expect(tooltip.toggleTooltip).not.toHaveBeenCalled();
+      });
+
+      it("should not toggle on Enter for a native button trigger (native click handles it)", () => {
+        hostEl.innerHTML = "<button>Native</button>";
+        component.ngAfterContentChecked();
+        tooltip.openWith = jest.fn(() => "click");
+        hostEl.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+        expect(tooltip.toggleTooltip).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe("ngAfterContentChecked", () => {
@@ -283,6 +311,34 @@ describe("TooltipTriggerComponent", () => {
       component.ngAfterContentChecked();
       expect(span.classList.contains("tedi-tooltip-trigger--focus")).toBe(true);
       expect(span.getAttribute("tabindex")).toBe("0");
+    });
+
+    it("should give a synthesized text-node trigger role='button'", () => {
+      hostEl.innerHTML = "Just text";
+      component.ngAfterContentChecked();
+      const span = hostEl.querySelector("span");
+      expect(span?.getAttribute("role")).toBe("button");
+    });
+
+    it("should give a non-focusable child trigger role='button'", () => {
+      hostEl.innerHTML = `<span>Not focusable</span>`;
+      const span = hostEl.querySelector("span")!;
+      component.ngAfterContentChecked();
+      expect(span.getAttribute("role")).toBe("button");
+    });
+
+    it("should not override an existing role on a non-focusable child", () => {
+      hostEl.innerHTML = `<span role="link">Custom</span>`;
+      const span = hostEl.querySelector("span")!;
+      component.ngAfterContentChecked();
+      expect(span.getAttribute("role")).toBe("link");
+    });
+
+    it("should NOT add a role to a natively focusable child", () => {
+      hostEl.innerHTML = `<button>Click me</button>`;
+      const btn = hostEl.querySelector("button")!;
+      component.ngAfterContentChecked();
+      expect(btn.getAttribute("role")).toBeNull();
     });
 
     it("should not override existing tabindex on child", () => {

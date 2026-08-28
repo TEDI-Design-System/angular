@@ -1,9 +1,18 @@
 @use "@tedi-design-system/core/bootstrap-utility/breakpoints";
+@use "../field-surface-mixins" as field-surface;
 
 .tedi-time-field {
   display: flex;
   flex: 1;
   min-width: 0;
+
+  &--small &__field {
+    @include field-surface.size(small);
+  }
+
+  &--large &__field {
+    @include field-surface.size(large);
+  }
 
   &__popover {
     display: flex;
@@ -12,16 +21,27 @@
   }
 
   &__field {
+    @include field-surface.tokens;
+
     display: flex;
     flex: 1;
     gap: var(--form-field-inner-spacing);
     align-items: center;
     min-width: 0;
-    padding-right: var(--form-field-padding-x-md-default);
 
     &:focus,
     &:focus-visible {
       outline: none;
+    }
+
+    // `:where` keeps the paint at one class, so a neighbour reshaping the
+    // field's edges — an input group's addon — reaches it with two.
+    &:where(.tedi-field-surface) {
+      @include field-surface.surface;
+    }
+
+    &.tedi-field-surface {
+      @include field-surface.surface-states(":focus-within", true);
     }
 
     // Button-trigger: the wrapper anchors the popover but only the icon opens it.
@@ -41,7 +61,13 @@
   &__input {
     flex: 1;
     min-width: 0;
-    padding-left: var(--form-field-padding-x-md-default);
+
+    // Chrome straddles the caret across the insertion point, so with no left
+    // padding most of it falls outside the input's clip box at offset 0. Give it a
+    // pixel of room and pull the box back by the same amount so the value's
+    // position is unchanged — the field's own padding still sets the inset.
+    padding-inline-start: 1px;
+    margin-inline-start: -1px;
     font-family: inherit;
     font-size: var(--body-regular-size);
     color: var(--form-input-text-filled);

@@ -30,14 +30,16 @@
           tedi-button
           type="button"
           size="small"
-          [variant]="arrowVariant()"
+          [variant]="resolvedArrowVariant()"
           class="tedi-pagination__nav-button tedi-pagination__nav-button--previous"
-          [attr.aria-label]="showArrowLabels() ? null : mergedLabels().previous"
+          [attr.aria-label]="
+            resolvedShowArrowLabels() ? null : mergedLabels().previous
+          "
           [disabled]="previousItem().disabled"
           (click)="handlePageChange(previousItem().page)"
         >
           <tedi-icon [name]="previousIcon()" />
-          @if (showArrowLabels()) {
+          @if (resolvedShowArrowLabels()) {
             <span>{{ mergedLabels().previous }}</span>
           }
         </button>
@@ -100,13 +102,15 @@
           tedi-button
           type="button"
           size="small"
-          [variant]="arrowVariant()"
+          [variant]="resolvedArrowVariant()"
           class="tedi-pagination__nav-button tedi-pagination__nav-button--next"
-          [attr.aria-label]="showArrowLabels() ? null : mergedLabels().next"
+          [attr.aria-label]="
+            resolvedShowArrowLabels() ? null : mergedLabels().next
+          "
           [disabled]="nextItem().disabled"
           (click)="handlePageChange(nextItem().page)"
         >
-          @if (showArrowLabels()) {
+          @if (resolvedShowArrowLabels()) {
             <span>{{ mergedLabels().next }}</span>
           }
           <tedi-icon [name]="nextIcon()" />
@@ -146,7 +150,6 @@
           [options]="pageSizeSelectOptions()"
           bindLabel="label"
           bindValue="value"
-          [dropdownWidthRef]="null"
           dropdownAlign="end"
           [ngModel]="pageSize()"
           (ngModelChange)="handlePageSizeChange($event)"

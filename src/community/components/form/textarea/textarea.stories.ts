@@ -4,6 +4,11 @@ import { TextareaComponent } from "./textarea.component";
 export default {
   title: "Community/Form/TextArea",
   component: TextareaComponent,
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
   render: (props) => ({
     props,
     template: `<textarea tedi-textarea [placeholder]="placeholder" [disabled]="disabled" [size]="size" [state]="state" [resizeX]="resizeX" [resizeY]="resizeY"></textarea>`,

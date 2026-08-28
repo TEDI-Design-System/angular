@@ -4,7 +4,7 @@
   [cdkConnectedOverlayOrigin]="overlayOrigin()"
   [cdkConnectedOverlayOpen]="isOpen()"
   [cdkConnectedOverlayPositions]="overlayPositions()"
-  (overlayOutsideClick)="onOutsideClick()"
+  (overlayOutsideClick)="onOutsideClick($event)"
 >
   <div
     class="tedi-dropdown__panel"

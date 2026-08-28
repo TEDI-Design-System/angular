@@ -10,7 +10,7 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent, LabelVisuallyHidden } from "../label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { ComponentInputs } from "../../../types/inputs.type";
 import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
@@ -63,6 +63,11 @@ export class SliderComponent implements ControlValueAccessor, OnDestroy {
    * @default false
    */
   hideLabel = input<SliderHideLabel>(false);
+
+  readonly labelVisuallyHidden = computed<LabelVisuallyHidden>(() => {
+    const hideLabel = this.hideLabel();
+    return hideLabel === "keep-space" ? "reserve-space" : hideLabel;
+  });
   /**
    * Marks the field as required.
    * @default false

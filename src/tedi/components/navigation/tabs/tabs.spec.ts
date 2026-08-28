@@ -359,6 +359,139 @@ describe("Tabs", () => {
     });
   });
 
+  describe("anchor triggers", () => {
+    @Component({
+      standalone: true,
+      imports: [
+        TabsComponent,
+        TabsListComponent,
+        TabsTriggerComponent,
+        TabsContentComponent,
+      ],
+      template: `
+        <tedi-tabs defaultValue="/a" (valueChange)="onChange($event)">
+          <tedi-tabs-list aria-label="Router tabs">
+            <a tedi-tabs-trigger id="/a" href="#a">A</a>
+            <a tedi-tabs-trigger id="/b" href="#b">B</a>
+            <a tedi-tabs-trigger id="/c" href="#c" [disabled]="true">C</a>
+          </tedi-tabs-list>
+        </tedi-tabs>
+      `,
+    })
+    class AnchorHost {
+      onChange = jest.fn();
+    }
+
+    const setupAnchors = () => {
+      TestBed.configureTestingModule({
+        imports: [AnchorHost],
+        providers: [
+          { provide: TediTranslationService, useClass: TranslationMock },
+          { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        ],
+      });
+      const fixture = TestBed.createComponent(AnchorHost);
+      fixture.detectChanges();
+      const anchors = fixture.debugElement
+        .queryAll(By.css('[role="tab"]'))
+        .map((d) => d.nativeElement as HTMLAnchorElement);
+      return { fixture, anchors };
+    };
+
+    it("renders anchors as role=tab links without button-only attributes", () => {
+      const { anchors } = setupAnchors();
+      expect(anchors).toHaveLength(3);
+      expect(anchors[0].tagName).toBe("A");
+      expect(anchors[0].getAttribute("href")).toBe("#a");
+      expect(anchors[0].getAttribute("role")).toBe("tab");
+      expect(anchors[0].hasAttribute("type")).toBe(false);
+      expect(anchors[0].getAttribute("aria-controls")).toBe("/a-panel");
+    });
+
+    it("marks a disabled anchor with aria-disabled and removes it from tab order", () => {
+      const { anchors } = setupAnchors();
+      const disabled = anchors[2];
+      expect(disabled.getAttribute("aria-disabled")).toBe("true");
+      expect(disabled.hasAttribute("disabled")).toBe(false);
+      expect(disabled.getAttribute("tabindex")).toBe("-1");
+    });
+
+    it("activates an anchor on click", () => {
+      const { fixture, anchors } = setupAnchors();
+      anchors[1].click();
+      fixture.detectChanges();
+      expect(anchors[0].getAttribute("aria-selected")).toBe("false");
+      expect(anchors[1].getAttribute("aria-selected")).toBe("true");
+      expect(fixture.componentInstance.onChange).toHaveBeenCalledWith("/b");
+    });
+
+    it("does not activate a disabled anchor and blocks its navigation", () => {
+      const { fixture, anchors } = setupAnchors();
+      const event = new MouseEvent("click", {
+        cancelable: true,
+        bubbles: true,
+      });
+      anchors[2].dispatchEvent(event);
+      fixture.detectChanges();
+      expect(event.defaultPrevented).toBe(true);
+      expect(fixture.componentInstance.onChange).not.toHaveBeenCalled();
+      expect(anchors[0].getAttribute("aria-selected")).toBe("true");
+    });
+
+    it("does not activate the tab when an anchor is opened in a new context (modifier click)", () => {
+      const { fixture, anchors } = setupAnchors();
+      anchors[1].dispatchEvent(
+        new MouseEvent("click", {
+          button: 0,
+          metaKey: true,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      fixture.detectChanges();
+      expect(fixture.componentInstance.onChange).not.toHaveBeenCalled();
+      expect(anchors[0].getAttribute("aria-selected")).toBe("true");
+      expect(anchors[1].getAttribute("aria-selected")).toBe("false");
+    });
+
+    it("activates a focused anchor on Space", () => {
+      const { fixture, anchors } = setupAnchors();
+      anchors[1].dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: " ",
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      fixture.detectChanges();
+      expect(fixture.componentInstance.onChange).toHaveBeenCalledWith("/b");
+    });
+
+    it("arrow navigation skips an aria-disabled anchor", () => {
+      const { fixture, anchors } = setupAnchors();
+      anchors[1].click();
+      fixture.detectChanges();
+      anchors[1].dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }),
+      );
+      fixture.detectChanges();
+      expect(document.activeElement).toBe(anchors[0]);
+    });
+
+    it("arrow navigation moves focus without activating an anchor (manual activation)", () => {
+      const { fixture, anchors } = setupAnchors();
+      anchors[0].focus();
+      anchors[0].dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }),
+      );
+      fixture.detectChanges();
+      expect(document.activeElement).toBe(anchors[1]);
+      expect(anchors[0].getAttribute("aria-selected")).toBe("true");
+      expect(anchors[1].getAttribute("aria-selected")).toBe("false");
+      expect(fixture.componentInstance.onChange).not.toHaveBeenCalled();
+    });
+  });
+
   describe("overflow", () => {
     it("does not show the More button without overflow", () => {
       const fixture = setup();

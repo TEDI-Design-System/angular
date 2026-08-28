@@ -181,12 +181,12 @@ export class CalendarComponent implements ControlValueAccessor {
    */
   readonly shouldDisableYear = input<YearPredicate | undefined>(undefined);
   /**
-   * Earliest year offered in the year grid/dropdown. Defaults to 10 years before
-   * the current year when `null`.
+   * Earliest year offered in the year grid/dropdown. Defaults to 100 years
+   * before the current year when `null`.
    */
   readonly minYear = input<number | null>(null);
   /**
-   * Latest year offered in the year grid/dropdown. Defaults to 10 years after
+   * Latest year offered in the year grid/dropdown. Defaults to 20 years after
    * the current year when `null`.
    */
   readonly maxYear = input<number | null>(null);
@@ -290,13 +290,13 @@ export class CalendarComponent implements ControlValueAccessor {
   readonly resolvedMinYear = computed(() => {
     const explicit = this.minYear();
     if (explicit !== null) return explicit;
-    return new Date().getFullYear() - 10;
+    return new Date().getFullYear() - 100;
   });
 
   readonly resolvedMaxYear = computed(() => {
     const explicit = this.maxYear();
     if (explicit !== null) return explicit;
-    return new Date().getFullYear() + 10;
+    return new Date().getFullYear() + 20;
   });
 
   readonly yearPageStart = computed(() => {
@@ -718,6 +718,7 @@ export class CalendarComponent implements ControlValueAccessor {
       value &&
       !(value instanceof Date) &&
       !Array.isArray(value) &&
+      value.from instanceof Date &&
       value.to === undefined
     ) {
       return value;
@@ -729,8 +730,8 @@ export class CalendarComponent implements ControlValueAccessor {
     if (!value) return null;
     if (value instanceof Date) return value;
     if (Array.isArray(value)) {
-      return value.length > 0 ? value[0] : null;
+      return value[0] instanceof Date ? value[0] : null;
     }
-    return value.from;
+    return value.from instanceof Date ? value.from : null;
   }
 }

@@ -74,6 +74,11 @@ export class ToggleComponent implements ControlValueAccessor {
    * @default false
    */
   icon = input<boolean>(false);
+  /**
+   * Accessible label for the toggle. Provide this when there is no associated
+   * visible `<label>` element, so the switch has an accessible name.
+   */
+  ariaLabel = input<string>();
 
   @ViewChild("inputElement") inputRef!: ElementRef<HTMLInputElement>;
   private onChange: (checked: boolean) => void = () => {};

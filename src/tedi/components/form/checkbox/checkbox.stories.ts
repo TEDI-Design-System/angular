@@ -187,9 +187,9 @@ export const Size: StoryObj<CheckboxComponent> = {
     template: `
       <tedi-row [cols]="2" [gapY]="3">
         <div>Default</div>
-        <input tedi-checkbox type="checkbox" />
+        <input tedi-checkbox type="checkbox" aria-label="Vaikimisi" />
         <div>Large</div>
-        <input tedi-checkbox type="checkbox" size="large" />
+        <input tedi-checkbox type="checkbox" size="large" aria-label="Suur" />
       </tedi-row>
     `,
   }),

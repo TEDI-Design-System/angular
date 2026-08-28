@@ -289,17 +289,40 @@ describe("TimeFieldComponent", () => {
       expect(component.invalid()).toBe(true);
     });
 
-    it("should expose invalid signal driven by setInvalidState", () => {
+    it("should expose invalid signal driven by the invalid input", () => {
       expect(component.invalid()).toBe(false);
-      component.setInvalidState(true);
+      fixture.componentRef.setInput("invalid", true);
+      fixture.detectChanges();
       expect(component.invalid()).toBe(true);
     });
 
-    it("should provide clearField method", () => {
+    it("should provide focus method that focuses the input", () => {
+      const input = el.querySelector(
+        ".tedi-time-field__input",
+      ) as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+
+      component.focus();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should not focus the input when disabled", () => {
+      const input = el.querySelector(
+        ".tedi-time-field__input",
+      ) as HTMLInputElement;
+      const focusSpy = jest.spyOn(input, "focus");
+      component.setDisabledState(true);
+      fixture.detectChanges();
+
+      component.focus();
+      expect(focusSpy).not.toHaveBeenCalled();
+    });
+
+    it("should provide reset method", () => {
       component.writeValue("14:30");
       fixture.detectChanges();
 
-      component.clearField();
+      component.reset();
       expect(component.value()).toBeNull();
       expect(component.inputValue()).toBe("");
     });
@@ -736,8 +759,8 @@ describe("TimeFieldComponent", () => {
   });
 
   describe("accessibility", () => {
-    it("should set aria-invalid when setInvalidState(true) is called", () => {
-      component.setInvalidState(true);
+    it("should set aria-invalid when the invalid input is set", () => {
+      fixture.componentRef.setInput("invalid", true);
       fixture.detectChanges();
 
       expect(el.querySelector("input")?.getAttribute("aria-invalid")).toBe(
@@ -763,6 +786,19 @@ describe("TimeFieldComponent", () => {
     it("should have aria-label on icon button", () => {
       const iconBtn = el.querySelector(".tedi-time-field__icon");
       expect(iconBtn?.getAttribute("aria-label")).toBeTruthy();
+    });
+
+    it("should not expose button/dialog ARIA on the field wrapper (it is only a positioning anchor)", () => {
+      const field = el.querySelector(".tedi-time-field__field") as HTMLElement;
+      expect(field.hasAttribute("role")).toBe(false);
+      expect(field.hasAttribute("aria-haspopup")).toBe(false);
+      expect(field.hasAttribute("aria-expanded")).toBe(false);
+      expect(field.hasAttribute("aria-controls")).toBe(false);
+    });
+
+    it("should expose the dialog trigger ARIA on the icon button", () => {
+      const iconBtn = el.querySelector(".tedi-time-field__icon") as HTMLElement;
+      expect(iconBtn.getAttribute("aria-haspopup")).toBe("dialog");
     });
   });
 

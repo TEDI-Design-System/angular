@@ -166,6 +166,30 @@ describe("TooltipComponent", () => {
     expect(showSpy).toHaveBeenCalled();
     expect(hideSpy).not.toHaveBeenCalled();
   });
+
+  it("closes on a document-level Escape while open, even when focus is off the trigger", () => {
+    const tooltip = component.tooltip();
+    tooltip.showTooltip();
+    fixture.detectChanges();
+    expect(tooltip.isOpen()).toBe(true);
+
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    expect(tooltip.isOpen()).toBe(false);
+
+    fixture.detectChanges();
+  });
+
+  it("does not react to a document-level Escape once closed", () => {
+    const tooltip = component.tooltip();
+    tooltip.showTooltip();
+    fixture.detectChanges();
+    tooltip.hideTooltip();
+    fixture.detectChanges();
+
+    const hideSpy = jest.spyOn(tooltip, "hideTooltip");
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    expect(hideSpy).not.toHaveBeenCalled();
+  });
 });
 
 @Component({

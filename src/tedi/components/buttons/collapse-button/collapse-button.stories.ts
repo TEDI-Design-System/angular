@@ -153,7 +153,8 @@ const PSEUDO_PARAMS = {
 };
 
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.49.74?node-id=15433-138256&m=dev" target="_blank">Figma ↗</a>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.49.74?node-id=15433-138256&m=dev" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.tedi.ee/1ee8444b7/p/9469bf-collapse-button" target="_BLANK">Zeroheight ↗</a>
  *
  * <p>
  *   Standalone toggle button used by <code>tedi-collapse</code> and the table's

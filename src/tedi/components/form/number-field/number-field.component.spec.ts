@@ -50,6 +50,23 @@ describe("NumberFieldComponent", () => {
     expect(component.value()).toBe(0);
   });
 
+  it("should render aria-label on the input when ariaLabel is set and no visible label", () => {
+    fixture.componentRef.setInput("ariaLabel", "Väärtus");
+    fixture.detectChanges();
+
+    const input = el.querySelector("input") as HTMLInputElement;
+    expect(input.getAttribute("aria-label")).toBe("Väärtus");
+  });
+
+  it("should not render aria-label when a visible label is provided", () => {
+    fixture.componentRef.setInput("label", "Kogus");
+    fixture.componentRef.setInput("ariaLabel", "Väärtus");
+    fixture.detectChanges();
+
+    const input = el.querySelector("input") as HTMLInputElement;
+    expect(input.hasAttribute("aria-label")).toBe(false);
+  });
+
   it("should increment the value on increment button click", () => {
     const onChange = jest.fn<number, [number]>();
     const onTouched = jest.fn();

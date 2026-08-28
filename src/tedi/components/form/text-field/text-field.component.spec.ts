@@ -21,6 +21,13 @@ class FormControlHostComponent {
   control = new FormControl<string>("", { nonNullable: true });
 }
 
+@Component({
+  standalone: true,
+  imports: [TextFieldComponent],
+  template: `<input tedi-text-field disabled />`,
+})
+class DisabledAttrHostComponent {}
+
 describe("TextFieldComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let input: HTMLInputElement;
@@ -76,10 +83,10 @@ describe("TextFieldComponent", () => {
     expect(onTouchedSpy).toHaveBeenCalled();
   });
 
-  it("clearField() should clear value", () => {
+  it("reset() should clear value", () => {
     textField.writeValue("test");
 
-    textField.clearField();
+    textField.reset();
 
     expect(textField.value()).toBe("");
     expect(input.value).toBe("");
@@ -107,15 +114,73 @@ describe("TextFieldComponent", () => {
     expect(onTouchedSpy).toHaveBeenCalled();
   });
 
-  it("should update invalid signal via setInvalidState", () => {
+  it("should reflect the invalid input", () => {
     const fixture = TestBed.createComponent(TextFieldComponent);
     const component = fixture.componentInstance;
 
-    component.setInvalidState(true);
+    fixture.componentRef.setInput("invalid", true);
+    fixture.detectChanges();
     expect(component.invalid()).toBe(true);
 
-    component.setInvalidState(false);
+    fixture.componentRef.setInput("invalid", false);
+    fixture.detectChanges();
     expect(component.invalid()).toBe(false);
+  });
+
+  describe("disabled input", () => {
+    it("should be disabled with a bare `disabled` attribute", () => {
+      const attrFixture = TestBed.createComponent(DisabledAttrHostComponent);
+      attrFixture.detectChanges();
+
+      const debug = attrFixture.debugElement.query(
+        By.directive(TextFieldComponent),
+      );
+      const attrTextField: TextFieldComponent = debug.componentInstance;
+      const attrInput: HTMLInputElement = debug.nativeElement;
+
+      expect(attrTextField.disabled()).toBe(true);
+      expect(attrInput.disabled).toBe(true);
+    });
+
+    it("should reflect the aliased disabled input set programmatically", () => {
+      const inputFixture = TestBed.createComponent(TextFieldComponent);
+      const inputEl: HTMLInputElement = inputFixture.nativeElement;
+
+      inputFixture.componentRef.setInput("disabled", true);
+      inputFixture.detectChanges();
+      expect(inputFixture.componentInstance.disabled()).toBe(true);
+      expect(inputEl.disabled).toBe(true);
+
+      inputFixture.componentRef.setInput("disabled", false);
+      inputFixture.detectChanges();
+      expect(inputFixture.componentInstance.disabled()).toBe(false);
+      expect(inputEl.disabled).toBe(false);
+    });
+  });
+
+  describe("focus", () => {
+    it("should focus the input element", () => {
+      const focusFixture = TestBed.createComponent(TextFieldComponent);
+      const focusEl: HTMLInputElement = focusFixture.nativeElement;
+      const focusSpy = jest.spyOn(focusEl, "focus");
+      focusFixture.detectChanges();
+
+      focusFixture.componentInstance.focus();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should not focus the input element when disabled", () => {
+      const focusFixture = TestBed.createComponent(TextFieldComponent);
+      const focusEl: HTMLInputElement = focusFixture.nativeElement;
+      const focusSpy = jest.spyOn(focusEl, "focus");
+      focusFixture.componentRef.setInput("disabled", true);
+      focusFixture.detectChanges();
+
+      focusFixture.componentInstance.focus();
+
+      expect(focusSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe("when bound to a reactive FormControl", () => {
@@ -156,12 +221,12 @@ describe("TextFieldComponent", () => {
       expect(fcInput.disabled).toBe(false);
     });
 
-    it("clearField() should not clear when control is disabled", () => {
+    it("reset() should not clear when control is disabled", () => {
       control.setValue("test");
       control.disable();
       fcFixture.detectChanges();
 
-      fcTextField.clearField();
+      fcTextField.reset();
 
       expect(fcTextField.value()).toBe("test");
       expect(control.value).toBe("test");

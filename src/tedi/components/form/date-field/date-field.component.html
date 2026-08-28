@@ -33,7 +33,7 @@
     [cdkConnectedOverlayHasBackdrop]="false"
     (attach)="handleOverlayAttached()"
     (overlayOutsideClick)="handleOverlayOutsideClick($event)"
-    (detach)="closeOverlay()"
+    (detach)="handleOverlayDetached()"
   >
     <div
       class="tedi-date-field__overlay"
@@ -60,6 +60,8 @@
         [unavailableDays]="unavailableDays()"
         [shouldDisableMonth]="shouldDisableMonth()"
         [shouldDisableYear]="shouldDisableYear()"
+        [minYear]="minYear()"
+        [maxYear]="maxYear()"
         [inputDisabled]="fieldDisabled()"
         (currentMonthChange)="handleCurrentMonthChange($event)"
         (select)="handleCalendarSelect()"

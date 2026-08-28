@@ -23,6 +23,7 @@
       [siblingCount]="top.siblingCount"
       [labels]="top.labels"
       [background]="top.background"
+      [align]="top.align"
       [dividerPosition]="top.dividerPosition"
       [hideResults]="top.hideResults"
       [hidePageSize]="top.hidePageSize"
@@ -34,6 +35,12 @@
       [previousIcon]="top.previousIcon"
       [nextIcon]="top.nextIcon"
       [showModalTitle]="top.showModalTitle"
+      [xs]="top.xs"
+      [sm]="top.sm"
+      [md]="top.md"
+      [lg]="top.lg"
+      [xl]="top.xl"
+      [xxl]="top.xxl"
       (pageChange)="handlePaginationPageChange($event)"
       (pageSizeChange)="handlePaginationPageSizeChange($event)"
     >
@@ -46,8 +53,21 @@
   </div>
 }
 
-<div class="tedi-table__scroll" [attr.style]="maxHeightStyle()" cdkScrollable>
+<div
+  #scrollContainer
+  class="tedi-table__scroll"
+  [class.tedi-table__scroll--shadow-start]="hasStartShadow()"
+  [class.tedi-table__scroll--shadow-end]="hasEndShadow()"
+  [class.tedi-table__scroll--shadow-header]="hasHeaderShadow()"
+  [attr.style]="maxHeightStyle()"
+  cdkScrollable
+  tabindex="0"
+  role="group"
+  [attr.aria-label]="scrollRegionLabel()"
+  (scroll)="onHorizontalScroll()"
+>
   <table
+    #tableElement
     class="tedi-table__table"
     [attr.id]="id() || null"
     [attr.aria-rowcount]="ariaRowCount()"
@@ -82,7 +102,7 @@
             @if (shouldRenderHeader(header, rowIndex)) {
               @let meta = getColumnMeta(header.column);
               @let ariaSort = getHeaderAriaSort(header.column);
-              @let headerLabel = getHeaderLabel(header.column);
+              @let srHeaderLabel = getSrOnlyHeaderLabel(header.column);
               @let rowSpan = getHeaderRowSpan(header, rowIndex);
               <th
                 scope="col"
@@ -109,17 +129,22 @@
                   (pickedUpColumnId() === header.column.id
                     ? ' tedi-table__header-cell--picked-up'
                     : '') +
-                  stickyLeftClass(header.column.id)
+                  controlCellClass(header.column.id) +
+                  stickyLeftClass(header.column.id) +
+                  stickyRightClass(header.column.id)
                 "
                 [attr.colspan]="header.colSpan > 1 ? header.colSpan : null"
                 [attr.rowspan]="rowSpan"
                 [attr.aria-sort]="ariaSort"
-                [attr.aria-label]="headerLabel"
                 [style.width.px]="headerCellWidth(header.column)"
                 [style.min-width.px]="columnMinWidth(header.column)"
                 [style.max-width.px]="columnMaxWidth(header.column)"
                 [style.left.px]="stickyLeft(header.column.id)"
+                [style.right.px]="stickyRight(header.column.id)"
               >
+                @if (srHeaderLabel) {
+                  <span class="tedi-table__sr-only">{{ srHeaderLabel }}</span>
+                }
                 @if (header.column.id === SELECT_COLUMN_ID) {
                   @if (selectionMode() === "multiple") {
                     <input
@@ -191,69 +216,82 @@
                       }
                     </ng-container>
                     @if (shouldRenderFilterButton(header.column)) {
-                      <tedi-popover
-                        #filterPopover
-                        class="tedi-table__filter-popover"
-                        position="bottom-end"
-                        [preventOverflow]="true"
-                      >
+                      @if (filterUsesModal()) {
                         <button
-                          tedi-popover-trigger
                           tedi-table-header-button
                           icon="filter_alt"
                           [selected]="filterIsActive(header.column)"
                           [filled]="filterIsActive(header.column)"
                           [aria-label]="filterAriaLabel(header.column)"
-                          (click)="handleFilterTriggerClick(header.column)"
+                          (click)="openFilterModal(header.column)"
                         ></button>
-                        <tedi-popover-content>
-                          <div class="tedi-table__filter">
-                            <div class="tedi-table__filter-body">
-                              @if (filterTemplateFor(header.column); as tpl) {
-                                <ng-container
-                                  *ngTemplateOutlet="
-                                    tpl;
-                                    context: filterContextFor(
+                      } @else {
+                        <tedi-popover
+                          #filterPopover
+                          class="tedi-table__filter-popover"
+                          position="bottom-end"
+                          [preventOverflow]="true"
+                        >
+                          <button
+                            tedi-popover-trigger
+                            tedi-table-header-button
+                            icon="filter_alt"
+                            [selected]="filterIsActive(header.column)"
+                            [filled]="filterIsActive(header.column)"
+                            [aria-label]="filterAriaLabel(header.column)"
+                            (click)="handleFilterTriggerClick(header.column)"
+                          ></button>
+                          <tedi-popover-content
+                            [maxWidth]="filterPopoverWidthFor(header.column)"
+                          >
+                            <div class="tedi-table__filter">
+                              <div class="tedi-table__filter-body">
+                                @if (filterTemplateFor(header.column); as tpl) {
+                                  <ng-container
+                                    *ngTemplateOutlet="
+                                      tpl;
+                                      context: filterContextFor(
+                                        header.column,
+                                        filterPopover
+                                      )
+                                    "
+                                  />
+                                }
+                              </div>
+                              <div class="tedi-table__filter-actions">
+                                <button
+                                  tedi-button
+                                  variant="secondary"
+                                  size="small"
+                                  type="button"
+                                  (click)="
+                                    handleFilterClear(
                                       header.column,
                                       filterPopover
                                     )
                                   "
-                                />
-                              }
+                                >
+                                  {{ filterClearLabel() }}
+                                </button>
+                                <button
+                                  tedi-button
+                                  variant="primary"
+                                  size="small"
+                                  type="button"
+                                  (click)="
+                                    handleFilterApply(
+                                      header.column,
+                                      filterPopover
+                                    )
+                                  "
+                                >
+                                  {{ filterApplyLabel() }}
+                                </button>
+                              </div>
                             </div>
-                            <div class="tedi-table__filter-actions">
-                              <button
-                                tedi-button
-                                variant="secondary"
-                                size="small"
-                                type="button"
-                                (click)="
-                                  handleFilterClear(
-                                    header.column,
-                                    filterPopover
-                                  )
-                                "
-                              >
-                                {{ filterClearLabel() }}
-                              </button>
-                              <button
-                                tedi-button
-                                variant="primary"
-                                size="small"
-                                type="button"
-                                (click)="
-                                  handleFilterApply(
-                                    header.column,
-                                    filterPopover
-                                  )
-                                "
-                              >
-                                {{ filterApplyLabel() }}
-                              </button>
-                            </div>
-                          </div>
-                        </tedi-popover-content>
-                      </tedi-popover>
+                          </tedi-popover-content>
+                        </tedi-popover>
+                      }
                     }
                   </span>
                 }
@@ -361,7 +399,9 @@
                 ? ' tedi-table__row--picked-up'
                 : '')
             "
-            [attr.role]="interactive() ? 'button' : null"
+            [attr.role]="
+              interactive() && !rowHasNestedInteractive(row) ? 'button' : null
+            "
             [attr.tabindex]="interactive() ? 0 : null"
             [attr.aria-label]="rowAriaLabelFor(row)"
             [attr.aria-rowindex]="ariaRowIndex"
@@ -387,9 +427,12 @@
                     (cellMeta?.vAlign
                       ? ' tedi-table__cell--valign-' + cellMeta?.vAlign
                       : '') +
-                    stickyLeftClass(cell.column.id)
+                    controlCellClass(cell.column.id) +
+                    stickyLeftClass(cell.column.id) +
+                    stickyRightClass(cell.column.id)
                   "
                   [style.left.px]="stickyLeft(cell.column.id)"
+                  [style.right.px]="stickyRight(cell.column.id)"
                   [attr.rowspan]="
                     resolvedSpan !== null && resolvedSpan > 1
                       ? resolvedSpan
@@ -468,7 +511,9 @@
                           [closeText]="expandButtonCloseText()"
                           [open]="expandOpen"
                           [id]="resolvedId() + '-expand-' + row.id"
-                          [ariaControls]="subRowId"
+                          [ariaControls]="
+                            renderSubComponent() ? subRowId : undefined
+                          "
                           [ariaLabel]="
                             expandButtonHasLabel()
                               ? undefined
@@ -582,6 +627,7 @@
       [siblingCount]="bottom.siblingCount"
       [labels]="bottom.labels"
       [background]="bottom.background"
+      [align]="bottom.align"
       [dividerPosition]="bottom.dividerPosition"
       [hideResults]="bottom.hideResults"
       [hidePageSize]="bottom.hidePageSize"
@@ -593,6 +639,12 @@
       [previousIcon]="bottom.previousIcon"
       [nextIcon]="bottom.nextIcon"
       [showModalTitle]="bottom.showModalTitle"
+      [xs]="bottom.xs"
+      [sm]="bottom.sm"
+      [md]="bottom.md"
+      [lg]="bottom.lg"
+      [xl]="bottom.xl"
+      [xxl]="bottom.xxl"
       (pageChange)="handlePaginationPageChange($event)"
       (pageSizeChange)="handlePaginationPageSizeChange($event)"
     >

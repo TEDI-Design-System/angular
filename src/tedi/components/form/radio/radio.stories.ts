@@ -186,9 +186,9 @@ export const Size: StoryObj<RadioComponent> = {
     template: `
       <tedi-row [cols]="2" [gapY]="3">
         <div>Default</div>
-        <input tedi-radio type="radio" name="size-demo" />
+        <input tedi-radio type="radio" name="size-demo" aria-label="Vaikimisi" />
         <div>Large</div>
-        <input tedi-radio type="radio" name="size-demo" size="large" />
+        <input tedi-radio type="radio" name="size-demo" size="large" aria-label="Suur" />
       </tedi-row>
     `,
   }),

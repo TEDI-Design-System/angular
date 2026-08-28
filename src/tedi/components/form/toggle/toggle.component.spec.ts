@@ -69,6 +69,17 @@ describe("ToggleComponent", () => {
     expect(toggleElement.classList).not.toContain("undefined");
   });
 
+  it("should not render aria-label attribute by default", () => {
+    expect(inputEl.hasAttribute("aria-label")).toBe(false);
+  });
+
+  it("should render aria-label on the input when ariaLabel is set", () => {
+    fixture.componentRef.setInput("ariaLabel", "Teavituste lüliti");
+    fixture.detectChanges();
+
+    expect(inputEl.getAttribute("aria-label")).toBe("Teavituste lüliti");
+  });
+
   it("should render lock icon when icon=true and size=large", () => {
     fixture.componentRef.setInput("icon", true);
     fixture.componentRef.setInput("size", "large");

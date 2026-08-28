@@ -96,6 +96,7 @@ const COMMON_INPUTS = [
   "tagEllipsis",
   "isTagRemovable",
   "useNativePicker",
+  "hideOnScroll",
   "modal",
   "fullscreen",
   "calendarTrigger",
@@ -159,16 +160,22 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
           [tagEllipsis]="tagEllipsis"
           [isTagRemovable]="isTagRemovable"
           [useNativePicker]="useNativePicker"
+          [hideOnScroll]="hideOnScroll"
           [modal]="modal"
           [fullscreen]="fullscreen"
           [calendarTrigger]="calendarTrigger"
           [numberOfMonths]="numberOfMonths"
           [minDate]="minDate"
           [maxDate]="maxDate"
+          [minYear]="minYear"
+          [maxYear]="maxYear"
           [initialMonth]="initialMonth"
+          [closeOnSelect]="closeOnSelect"
           [disabledMatchers]="disabledMatcher"
           [availableDays]="availableDays"
           [unavailableDays]="unavailableDays"
+          [shouldDisableMonth]="shouldDisableMonth"
+          [shouldDisableYear]="shouldDisableYear"
           [formatDate]="formatDate"
           [parseDate]="parseDate"
         />
@@ -181,7 +188,7 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
 };
 
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.37.57?node-id=4620-82915&m=dev" target="_blank">Figma ↗</a><br/>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.65.83?node-id=4620-82915&m=dev" target="_blank">Figma ↗</a><br />
  * <a href="https://www.tedi.ee/1ee8444b7/p/15bd6e-date-field" target="_blank">Zeroheight ↗</a>
  *
  * DateField is the form-control wrapper around the Calendar. It exposes a typed text input
@@ -236,10 +243,13 @@ export default {
     tagEllipsis: false,
     isTagRemovable: true,
     useNativePicker: false,
+    hideOnScroll: false,
     modal: false,
     fullscreen: false,
     calendarTrigger: "button",
     numberOfMonths: 1,
+    minYear: null,
+    maxYear: null,
   },
   argTypes: {
     inputId: {
@@ -341,6 +351,26 @@ export default {
         defaultValue: { summary: "dropdown" },
       },
     },
+    minYear: {
+      description:
+        "Earliest year offered in the calendar's year grid/dropdown. Leave `null` to default to 100 years before the current year.",
+      control: { type: "number" },
+      table: {
+        category: "inputs",
+        type: { summary: "number | null" },
+        defaultValue: { summary: "null" },
+      },
+    },
+    maxYear: {
+      description:
+        "Latest year offered in the calendar's year grid/dropdown. Leave `null` to default to 20 years after the current year.",
+      control: { type: "number" },
+      table: {
+        category: "inputs",
+        type: { summary: "number | null" },
+        defaultValue: { summary: "null" },
+      },
+    },
     localeCode: {
       description:
         "BCP-47 locale for weekday/month names, the first day of the week, and the default `formatDate`/`parseDate` behaviour.",
@@ -402,6 +432,66 @@ export default {
           detail: `Date \n| Date[] \n| { before: Date } \n| { after: Date } \n| { from: Date; to?: Date } \n| { dayOfWeek: number[] } \n| ((date: Date) => boolean)
           `,
         },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    minDate: {
+      description:
+        "Disables all dates before this date (the boundary date itself stays enabled).",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "Date" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    maxDate: {
+      description:
+        "Disables all dates after this date (the boundary date itself stays enabled).",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "Date" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    shouldDisableMonth: {
+      description:
+        "Predicate `(month) => boolean` returning `true` to disable a whole month in the calendar's month navigation/grid. Leave `undefined` to disable nothing.",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "(month: Date) => boolean" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    shouldDisableYear: {
+      description:
+        "Predicate `(year) => boolean` returning `true` to disable a whole year in the calendar's year navigation/grid. Leave `undefined` to disable nothing.",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "(year: Date) => boolean" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    availableDays: {
+      description:
+        "Whitelist of selectable days — an explicit `Date[]` or a predicate `(date) => boolean`. Every other day is disabled.",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "Date[] | ((date: Date) => boolean)" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    unavailableDays: {
+      description:
+        "Blacklist of unavailable days — a `Date[]` or a predicate `(date) => boolean`. Takes precedence over `availableDays`.",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "Date[] | ((date: Date) => boolean)" },
         defaultValue: { summary: "undefined" },
       },
     },
@@ -481,6 +571,16 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    hideOnScroll: {
+      description:
+        "Closes the calendar popover when the page (or a scrollable ancestor) scrolls. Scrolling inside the calendar or its nested year/month dropdown keeps it open. Only affects the popover, not the modal.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     modal: {
       description:
         "Opens the calendar in a modal (with explicit Cancel/Confirm) instead of the popover. `true` always uses the modal, `false` never; a breakpoint name (`sm | md | lg | xl`) uses the modal below that breakpoint and the popover from it upward.",
@@ -520,6 +620,26 @@ export default {
           detail: '"input" | "button" \n{ xs: ...; sm?: ...; md?: ... }',
         },
         defaultValue: { summary: '{ xs: "button" }' },
+      },
+    },
+    initialMonth: {
+      description:
+        "Month the calendar opens on when there is no value. Ignored once a value is set (the calendar anchors to the selected date).",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "Date" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    closeOnSelect: {
+      description:
+        "Whether to close the picker after a selection. Defaults to `true` in `single` mode and `false` in `multiple`/`range` when left `undefined`.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean | undefined" },
+        defaultValue: { summary: "undefined" },
       },
     },
     formatDate: {

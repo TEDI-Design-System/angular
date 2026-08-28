@@ -6,12 +6,14 @@ import {
   OnDestroy,
   ViewEncapsulation,
   computed,
+  inject,
   input,
   output,
   signal,
   viewChild,
 } from "@angular/core";
 import { CdkScrollable } from "@angular/cdk/scrolling";
+import { TediTranslationService } from "../../../services";
 
 export type ScrollFadeSize = 0 | 10 | 20;
 export type ScrollFadePosition = "top" | "bottom" | "both";
@@ -39,15 +41,22 @@ export class ScrollFadeComponent implements AfterViewInit, OnDestroy {
   /** Scrollbar style. */
   readonly scrollBar = input<ScrollFadeScrollbar>("custom");
 
+  /** Accessible label for the scrollable region. Falls back to a translated default. */
+  readonly ariaLabel = input<string>();
+
   /** Emitted when scrolled to the top. */
   readonly scrolledToTop = output<void>();
 
   /** Emitted when scrolled to the bottom. */
   readonly scrolledToBottom = output<void>();
 
+  private readonly translationService = inject(TediTranslationService);
+
   private readonly innerRef =
     viewChild.required<ElementRef<HTMLDivElement>>("inner");
   private resizeObserver: ResizeObserver | null = null;
+
+  readonly _defaultLabel = this.translationService.track("scroll-fade.label");
 
   private readonly fade = signal({ top: false, bottom: false });
 

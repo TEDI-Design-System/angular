@@ -401,6 +401,43 @@ describe("CalendarComponent", () => {
     });
   });
 
+  // A value that isn't a Date reaches the grid whenever a form control is
+  // seeded from an untyped source. Rendering must survive it — a throw here
+  // aborts change detection, which leaves the grid blank and any surrounding
+  // overlay unpositioned.
+  describe("range mode with a malformed value", () => {
+    let fixture: ComponentFixture<CalendarComponent>;
+
+    beforeEach(() => {
+      fixture = createComponent();
+      fixture.componentRef.setInput("mode", "range");
+      fixture.detectChanges();
+    });
+
+    it.each([
+      ["a plain string", "2019"],
+      ["a range without dates", { from: "2019", to: "2020" }],
+      ["a range with a non-Date end", { from: MAY_15_2024, to: "2020" }],
+      ["an array of non-Dates", ["2019"]],
+    ])("renders the day grid given %s", (_label, value) => {
+      expect(() => {
+        fixture.componentRef.setInput("value", value);
+        fixture.detectChanges();
+      }).not.toThrow();
+      expect(dayButtons(fixture).length).toBeGreaterThan(0);
+    });
+
+    it("keeps a valid start date selected when the end is malformed", () => {
+      fixture.componentRef.setInput("value", {
+        from: new Date(2024, 4, 10),
+        to: "2020",
+      });
+      fixture.detectChanges();
+      const day = dayButtonForDate(fixture, new Date(2024, 4, 10));
+      expect(day?.className).toContain("tedi-calendar-day-grid__day--selected");
+    });
+  });
+
   describe("selectionLevel='months'", () => {
     let fixture: ComponentFixture<CalendarComponent>;
     let component: CalendarComponent;
@@ -1010,11 +1047,31 @@ describe("CalendarComponent", () => {
     });
   });
 
+  describe("year range defaults", () => {
+    it("defaults to 100 years before and 20 years after the current year", () => {
+      const fixture = createComponent();
+      const component = fixture.componentInstance;
+      const thisYear = new Date().getFullYear();
+      expect(component.resolvedMinYear()).toBe(thisYear - 100);
+      expect(component.resolvedMaxYear()).toBe(thisYear + 20);
+    });
+
+    it("honours explicit minYear/maxYear overrides", () => {
+      const fixture = createComponent();
+      const component = fixture.componentInstance;
+      fixture.componentRef.setInput("minYear", 1950);
+      fixture.componentRef.setInput("maxYear", 1970);
+      fixture.detectChanges();
+      expect(component.resolvedMinYear()).toBe(1950);
+      expect(component.resolvedMaxYear()).toBe(1970);
+    });
+  });
+
   describe("prev/next via internal handlers", () => {
     it("prev in years view decrements yearPageStart", () => {
       const fixture = createComponent();
-      // Widen the year bounds so the prev page isn't blocked by the default
-      // ±10 window — this test only cares about page-decrement math.
+      // Pin the year bounds so the prev page isn't blocked by the default
+      // window — this test only cares about page-decrement math.
       fixture.componentRef.setInput("minYear", 1900);
       fixture.componentRef.setInput("maxYear", 2200);
       const component = fixture.componentInstance;

@@ -1,3 +1,5 @@
+import type { CellContext } from "@tanstack/angular-table";
+import type { DateRange } from "../../../utils/date.util";
 import type { TediColumnDef } from "./table.types";
 
 // ---------------------------------------------------------------------------
@@ -19,7 +21,7 @@ const personSeed: Omit<Person, "id">[] = [
   {
     name: "Anna Tamm",
     email: "anna.tamm@example.ee",
-    role: "Engineer",
+    role: "Insener",
     location: "Tallinn",
     salary: 4200,
     status: "active",
@@ -27,7 +29,7 @@ const personSeed: Omit<Person, "id">[] = [
   {
     name: "Jüri Kask",
     email: "juri.kask@example.ee",
-    role: "Designer",
+    role: "Disainer",
     location: "Tartu",
     salary: 3800,
     status: "active",
@@ -35,7 +37,7 @@ const personSeed: Omit<Person, "id">[] = [
   {
     name: "Maria Saar",
     email: "maria.saar@example.ee",
-    role: "Product",
+    role: "Tootejuht",
     location: "Pärnu",
     salary: 4600,
     status: "active",
@@ -43,7 +45,7 @@ const personSeed: Omit<Person, "id">[] = [
   {
     name: "Mart Mets",
     email: "mart.mets@example.ee",
-    role: "Engineer",
+    role: "Insener",
     location: "Tallinn",
     salary: 4100,
     status: "inactive",
@@ -51,7 +53,7 @@ const personSeed: Omit<Person, "id">[] = [
   {
     name: "Liis Lepp",
     email: "liis.lepp@example.ee",
-    role: "Ops",
+    role: "Haldus",
     location: "Narva",
     salary: 3600,
     status: "active",
@@ -59,7 +61,7 @@ const personSeed: Omit<Person, "id">[] = [
   {
     name: "Kadri Kask",
     email: "kadri.kask@example.ee",
-    role: "Engineer",
+    role: "Insener",
     location: "Viljandi",
     salary: 4000,
     status: "active",
@@ -67,7 +69,7 @@ const personSeed: Omit<Person, "id">[] = [
   {
     name: "Rain Roos",
     email: "rain.roos@example.ee",
-    role: "Designer",
+    role: "Disainer",
     location: "Rakvere",
     salary: 3900,
     status: "inactive",
@@ -85,29 +87,49 @@ const people: Person[] = Array.from({ length: 28 }, (_, index) => {
 });
 
 const personColumns: TediColumnDef<Person>[] = [
-  { id: "name", header: "Name", accessorKey: "name" },
-  { id: "email", header: "Email", accessorKey: "email" },
-  { id: "role", header: "Role", accessorKey: "role" },
-  { id: "location", header: "Location", accessorKey: "location" },
+  { id: "name", header: "Nimi", accessorKey: "name" },
+  { id: "email", header: "E-post", accessorKey: "email" },
+  { id: "role", header: "Roll", accessorKey: "role" },
+  { id: "location", header: "Asukoht", accessorKey: "location" },
 ];
 
 interface Booking {
   id: string;
-  dateRange: string;
+  dateRange: DateRange;
   hour: string;
   duration: string;
   location: string;
 }
 
-const bookingDateRange = "22.03.2029 – 29.03.2029";
+const bookingDateRange: DateRange = {
+  from: new Date(2029, 2, 22),
+  to: new Date(2029, 2, 29),
+};
 
 const bookings: Booking[] = Array.from({ length: 28 }, (_, index) => ({
   id: String(index + 1),
-  dateRange: bookingDateRange,
+  dateRange: { ...bookingDateRange },
   hour: "11:14",
   duration: "6 min",
   location: "Harjumaa",
 }));
+
+const padDatePart = (value: number): string => String(value).padStart(2, "0");
+
+const formatBookingDate = (date: Date): string =>
+  `${padDatePart(date.getDate())}.${padDatePart(date.getMonth() + 1)}.${date.getFullYear()}`;
+
+const formatBookingDateRange = (
+  range: DateRange | null | undefined,
+): string => {
+  if (!range?.from) return "";
+  return range.to
+    ? `${formatBookingDate(range.from)} – ${formatBookingDate(range.to)}`
+    : formatBookingDate(range.from);
+};
+
+const bookingDateRangeCell = (ctx: CellContext<Booking, unknown>): string =>
+  formatBookingDateRange(ctx.getValue<DateRange>());
 
 interface Doctor {
   id: string;
@@ -597,6 +619,8 @@ export {
   personColumns,
   bookingDateRange,
   bookings,
+  formatBookingDateRange,
+  bookingDateRangeCell,
   doctors,
   CERT_STATUSES,
   certStatusColor,

@@ -5,12 +5,11 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { LabelComponent } from "./label.component";
+import { LabelRowComponent } from "../label-row/label-row.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
-import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
-import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
-import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
-import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
+import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
+import { TextFieldComponent } from "../text-field/text-field.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=2137-19322&m=dev" target="_blank">Figma ↗</a><br />
@@ -24,12 +23,11 @@ export default {
     moduleMetadata({
       imports: [
         LabelComponent,
+        LabelRowComponent,
         RowComponent,
         ColComponent,
-        TooltipComponent,
-        TooltipTriggerComponent,
-        TooltipContentComponent,
-        InfoButtonComponent,
+        InfoTooltipComponent,
+        TextFieldComponent,
       ],
     }),
   ],
@@ -50,6 +48,20 @@ export default {
         category: "inputs",
         defaultValue: { summary: "default" },
         type: { summary: "LabelSize", detail: "default \nsmall" },
+      },
+    },
+    visuallyHidden: {
+      control: "radio",
+      options: [false, true, "reserve-space"],
+      description:
+        'Hides the label visually while keeping it in the accessibility tree. `"reserve-space"` also keeps the label\'s line of layout.',
+      table: {
+        category: "inputs",
+        defaultValue: { summary: "false" },
+        type: {
+          summary: "LabelVisuallyHidden",
+          detail: "false \ntrue \nreserve-space",
+        },
       },
     },
     required: {
@@ -119,42 +131,59 @@ export const Size: StoryObj<LabelComponent> = {
   }),
 };
 
+/**
+ * If a tooltip is needed, use the `tedi-label-row` component together with `tedi-info-tooltip`.
+ */
 export const Structure: LabelStory = {
   render: (args) => ({
     props: args,
     template: `
       <tedi-row [cols]="1" [gapY]="3">
         <tedi-col>
-          <label tedi-label>Active ingredient</label>
+          <label tedi-label for="ingredient-1">Toimeaine</label>
         </tedi-col>
         <tedi-col>
-          <label tedi-label [required]="true">Active ingredient</label>
+          <label tedi-label for="ingredient-2" [required]="true">Toimeaine</label>
         </tedi-col>
         <tedi-col>
-          <div style="display: flex; gap: 2px;">
-            <label tedi-label>Active ingredient</label>
-            <tedi-tooltip>
-              <tedi-tooltip-trigger>
-                <button tedi-info-button></button>
-              </tedi-tooltip-trigger>
-              <tedi-tooltip-content>
-                Tooltip content
-              </tedi-tooltip-content>
-            </tedi-tooltip>
-          </div>
+          <tedi-label-row>
+            <label tedi-label for="ingredient-3">Toimeaine</label>
+            <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
+          </tedi-label-row>
         </tedi-col>
         <tedi-col>
-          <div style="display: flex; gap: 2px;">
-            <label tedi-label [required]="true">Active ingredient</label>
-            <tedi-tooltip>
-              <tedi-tooltip-trigger>
-                <button tedi-info-button></button>
-              </tedi-tooltip-trigger>
-              <tedi-tooltip-content>
-                Tooltip content
-              </tedi-tooltip-content>
-            </tedi-tooltip>
-          </div>
+          <tedi-label-row>
+            <label tedi-label for="ingredient-4" [required]="true">Toimeaine</label>
+            <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
+          </tedi-label-row>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * A label that should not be shown must still name its control, so it is hidden
+ * visually rather than removed — the control keeps its accessible name.
+ *
+ * `"reserve-space"` hides the text but holds the line the label would occupy, which
+ * keeps a field aligned with labelled siblings in the same row.
+ */
+export const VisuallyHidden: LabelStory = {
+  render: () => ({
+    template: `
+      <tedi-row cols="1" [gapY]="3">
+        <tedi-col>
+          <label tedi-label for="vh-visible">Nähtav silt</label>
+          <input tedi-text-field id="vh-visible" placeholder="Nähtav silt" />
+        </tedi-col>
+        <tedi-col>
+          <label tedi-label for="vh-hidden" [visuallyHidden]="true">Peidetud silt</label>
+          <input tedi-text-field id="vh-hidden" placeholder="Silt on ainult ekraanilugejale" />
+        </tedi-col>
+        <tedi-col>
+          <label tedi-label for="vh-reserved" visuallyHidden="reserve-space">Peidetud silt</label>
+          <input tedi-text-field id="vh-reserved" placeholder="Silt peidetud, rida alles" />
         </tedi-col>
       </tedi-row>
     `,

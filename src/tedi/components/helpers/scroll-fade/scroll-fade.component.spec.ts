@@ -1,6 +1,17 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Component } from "@angular/core";
 import { ScrollFadeComponent } from "./scroll-fade.component";
+import { TediTranslationService } from "../../../services";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
+
+class TranslationMock {
+  translate(key: string) {
+    return key;
+  }
+  track(key: string) {
+    return () => key;
+  }
+}
 
 @Component({
   standalone: true,
@@ -10,6 +21,7 @@ import { ScrollFadeComponent } from "./scroll-fade.component";
       [fadeSize]="fadeSize"
       [fadePosition]="fadePosition"
       [scrollBar]="scrollBar"
+      [ariaLabel]="ariaLabel"
       (scrolledToTop)="onScrolledToTop()"
       (scrolledToBottom)="onScrolledToBottom()"
     >
@@ -21,6 +33,7 @@ class TestHostComponent {
   fadeSize: 0 | 10 | 20 = 20;
   fadePosition: "top" | "bottom" | "both" = "both";
   scrollBar: "default" | "custom" = "custom";
+  ariaLabel: string | undefined = undefined;
   contentHeight = 100;
   onScrolledToTop = jest.fn();
   onScrolledToBottom = jest.fn();
@@ -34,6 +47,10 @@ describe("ScrollFadeComponent", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TestHostComponent);
@@ -53,6 +70,30 @@ describe("ScrollFadeComponent", () => {
   it("should have inner wrapper element", () => {
     const inner = scrollFadeEl.querySelector(".tedi-scroll-fade__inner");
     expect(inner).toBeTruthy();
+  });
+
+  it("should make the scrollable region keyboard focusable", () => {
+    const inner = scrollFadeEl.querySelector<HTMLElement>(
+      ".tedi-scroll-fade__inner",
+    );
+    expect(inner?.getAttribute("tabindex")).toBe("0");
+  });
+
+  it("should expose the scrollable region with a role and default label", () => {
+    const inner = scrollFadeEl.querySelector<HTMLElement>(
+      ".tedi-scroll-fade__inner",
+    );
+    expect(inner?.getAttribute("role")).toBe("group");
+    expect(inner?.getAttribute("aria-label")).toBe("scroll-fade.label");
+  });
+
+  it("should use a custom aria-label when provided", () => {
+    host.ariaLabel = "Kuupäevad";
+    fixture.detectChanges();
+    const inner = scrollFadeEl.querySelector<HTMLElement>(
+      ".tedi-scroll-fade__inner",
+    );
+    expect(inner?.getAttribute("aria-label")).toBe("Kuupäevad");
   });
 
   it("should apply custom scrollbar class by default", () => {

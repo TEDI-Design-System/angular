@@ -6,6 +6,7 @@ import {
 } from "@storybook/angular";
 import { PaginationComponent } from "./pagination.component";
 import { TediPaginationResultsDirective } from "./pagination-results.directive";
+import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
 
 /**
  * Navigation between paginated sets of content. Renders a row of page buttons
@@ -23,6 +24,9 @@ export default {
     }),
   ],
   parameters: {
+    status: {
+      type: ["breakpointSupport"],
+    },
     design: {
       type: "figma",
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=8478-72385&m=dev",
@@ -108,6 +112,17 @@ export default {
           detail: "white \ntransparent",
         },
         defaultValue: { summary: "white" },
+      },
+    },
+    align: {
+      description:
+        "Horizontal alignment of the slots. `'left'` / `'right'` group them at the start / end instead of spreading them across the full width. Override per breakpoint via the `xs`–`xxl` inputs.",
+      control: { type: "radio" },
+      options: ["between", "left", "right"],
+      table: {
+        category: "inputs",
+        type: { summary: "PaginationAlign", detail: "between \nleft \nright" },
+        defaultValue: { summary: "between" },
       },
     },
     dividerPosition: {
@@ -242,6 +257,7 @@ export default {
       description: "Emits the new page size when the dropdown changes.",
       table: { category: "outputs", type: { summary: "EventEmitter<number>" } },
     },
+    ...createBreakpointArgTypes("PaginationBreakpointInputs"),
   },
 } as Meta<PaginationComponent>;
 
@@ -394,6 +410,63 @@ export const TopBottomSplit: Story = {
   },
 };
 
+export const LeftAligned: Story = {
+  args: {
+    pageCount: 10,
+    page: 3,
+    totalItems: 97,
+    pageSize: 10,
+    pageSizeOptions: [10, 25, 50, 100],
+    align: "left",
+    hidePager: true,
+    dividerPosition: "bottom",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-pagination ${argsToTemplate(args)} />
+      <div style="padding: 24px 0; color: var(--general-text-tertiary); text-align: center;">— table content goes here —</div>
+    `,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Set `align="left"` (or `"right"`) to group the results / page-size slots at the start / end instead of spreading them across the full width. Useful for a strip above a table where the bottom pager stays `align="between"`.',
+      },
+    },
+  },
+};
+
+export const ResponsiveAlign: Story = {
+  args: {
+    pageCount: 10,
+    page: 3,
+    totalItems: 97,
+    pageSize: 10,
+    pageSizeOptions: [10, 25, 50, 100],
+    align: "left",
+    md: { align: "between" },
+    hidePager: true,
+    dividerPosition: "bottom",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-pagination ${argsToTemplate(args)} />
+      <div style="padding: 24px 0; color: var(--general-text-tertiary); text-align: center;">— table content goes here —</div>
+    `,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Override `align` (and the other layout inputs) per breakpoint with the `xs`–`xxl` inputs, applied mobile-first. Here `align="left"` with `[md]="{ align: \'between\' }"` reads left on mobile / tablet and spreads on desktop. Resize the viewport to see it switch at `md` (768px).',
+      },
+    },
+  },
+};
+
 export const ResponsiveVisibility: Story = {
   args: {
     pageCount: 10,
@@ -473,7 +546,8 @@ export const ArrowsWithLabels: Story = {
     totalItems: 97,
     pageSize: 10,
     pageSizeOptions: [10, 25, 50, 100],
-    showArrowLabels: true,
+    showArrowLabels: false,
+    md: { showArrowLabels: true },
   },
   render: (args) => ({
     props: args,
@@ -483,7 +557,7 @@ export const ArrowsWithLabels: Story = {
     docs: {
       description: {
         story:
-          'Set `showArrowLabels=true` to render the `previous` / `next` translation labels as visible text next to the icon. Use the `labels` input to override the wording (e.g. "Previous" instead of "Previous page") when shorter button text is preferred.',
+          'Set `showArrowLabels=true` to render the `previous` / `next` translation labels as visible text next to the icon. Labels widen the buttons, so hide them on narrow screens with a breakpoint override: here `showArrowLabels` is `false` by default and `[md]="{ showArrowLabels: true }"` turns them on from `md` up. Resize below 768px to see the arrows fall back to icon-only. Use the `labels` input to override the wording.',
       },
     },
   },
@@ -521,7 +595,8 @@ export const ArrowsPrimaryVariant: Story = {
     pageSize: 10,
     pageSizeOptions: [10, 25, 50, 100],
     arrowVariant: "primary",
-    showArrowLabels: true,
+    showArrowLabels: false,
+    md: { showArrowLabels: true },
   },
   render: (args) => ({
     props: args,
@@ -531,7 +606,7 @@ export const ArrowsPrimaryVariant: Story = {
     docs: {
       description: {
         story:
-          "Use `arrowVariant` to apply any `tedi-button` variant to the prev/next buttons. Pair with `showArrowLabels` to render a regular labelled button — useful when the pager needs to read as a primary navigation action rather than a subtle icon-only control.",
+          'Use `arrowVariant` to apply any `tedi-button` variant to the prev/next buttons. Pair with `showArrowLabels` to render a regular labelled button — useful when the pager needs to read as a primary navigation action. Labels are hidden below `md` here (`[md]="{ showArrowLabels: true }"`) so narrow screens keep compact icon-only arrows.',
       },
     },
   },
@@ -569,7 +644,7 @@ export const ShowAll: Story = {
       page: 1,
       pageSize: 10,
       pageCount: 10,
-      pageSizeOptions: [10, 25, 50, { value: 97, label: "Show all" }],
+      pageSizeOptions: [10, 25, 50, { value: 97, label: "Kuva kõik" }],
       onPageSizeChange(
         this: {
           totalItems: number;

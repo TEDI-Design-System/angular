@@ -1,0 +1,20 @@
+import { create } from "storybook/theming";
+
+export default create({
+  base: "light",
+  brandTitle: "TEDI Angular components",
+  brandUrl: "https://storybook.tedi.ee/angular",
+  brandImage: "TEDI-logo-sinine.svg",
+  brandTarget: "_self",
+
+  appBg: "#e7f0f6",
+  colorPrimary: "#ffe6cc",
+  colorSecondary: "#005aa3",
+
+  textColor: "#151926",
+  currentColor: "#151926",
+  textInverseColor: "#151926",
+
+  barTextColor: "#151926",
+  textMutedColor: "#151926",
+});

@@ -191,6 +191,20 @@ describe("DropdownComponent", () => {
       expect((dropdown as any).scrollListener).toBeUndefined();
     });
 
+    it("keeps the dropdown open when the panel itself is scrolled", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      dropdown.showDropdown();
+      fixture.detectChanges();
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      const contentEl = dropdown.dropdownContent().host.nativeElement;
+      contentEl.dispatchEvent(new Event("scroll", { bubbles: false }));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+      expect(dropdown.isOpen()).toBe(true);
+    });
+
     it("cleans up the scroll listener on destroy", () => {
       host.hideOnScroll = true;
       fixture.detectChanges();
@@ -315,6 +329,40 @@ describe("DropdownComponent", () => {
 
       expect(hideSpy).toHaveBeenCalled();
       expect(focusSpy).not.toHaveBeenCalled();
+    });
+
+    it("should close on a plain left click outside", () => {
+      openDropdown();
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.onOutsideClick(new MouseEvent("click"));
+
+      expect(hideSpy).toHaveBeenCalled();
+    });
+
+    it("should ignore the auxclick that ends the right-click gesture that opened it", () => {
+      openDropdown();
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      // The mouseup ending the opening right-click arrives as an outside `auxclick`.
+      dropdown.onOutsideClick(new MouseEvent("auxclick"));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+      expect(dropdown.isOpen()).toBe(true);
+
+      // A subsequent outside interaction still closes it.
+      dropdown.onOutsideClick(new MouseEvent("auxclick"));
+      expect(hideSpy).toHaveBeenCalled();
+    });
+
+    it("should ignore the ctrl+click that ends a macOS ctrl-click gesture", () => {
+      openDropdown();
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.onOutsideClick(new MouseEvent("click", { ctrlKey: true }));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+      expect(dropdown.isOpen()).toBe(true);
     });
   });
 

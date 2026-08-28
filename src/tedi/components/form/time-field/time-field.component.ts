@@ -9,6 +9,7 @@ import {
   Injector,
   input,
   model,
+  OnInit,
   signal,
   ViewEncapsulation,
   viewChild,
@@ -35,6 +36,11 @@ import {
   FormFieldControl,
   TEDI_FORM_FIELD_CONTROL,
 } from "../form-field/form-field-control";
+import {
+  InputSize,
+  TEDI_FIELD_CONTEXT,
+} from "../form-field/field-context.token";
+import { deriveControlState } from "../form-field/derive-control-state";
 import {
   TimePickerModalComponent,
   TimePickerModalData,
@@ -79,11 +85,18 @@ export type TimeFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
   ],
   host: {
     class: "tedi-time-field",
+    "[class.tedi-time-field--small]": "resolvedSize() === 'small'",
+    "[class.tedi-time-field--large]": "resolvedSize() === 'large'",
   },
 })
 export class TimeFieldComponent
-  implements ControlValueAccessor, FormFieldControl<string | null>
+  implements OnInit, ControlValueAccessor, FormFieldControl<string | null>
 {
+  private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
+    optional: true,
+  });
+  private readonly derived = deriveControlState();
+
   /** Unique ID for label association and accessibility. */
   readonly inputId = input.required<string>();
   /** Selected time in `HH:mm` format. Two-way bindable. */
@@ -91,14 +104,19 @@ export class TimeFieldComponent
   /** Placeholder shown when the input is empty. */
   readonly placeholder = input<string>();
   /**
-   * Manually mark the field as invalid. Sets `aria-invalid` on the input and triggers
-   * the form-field's invalid styling. Combines with reactive-form validity reported
-   * via `setInvalidState`.
+   * Marks the field as invalid. Sets `aria-invalid` on the input and triggers
+   * the error styling. Combines with the state derived from reactive forms.
    */
   // eslint-disable-next-line @angular-eslint/no-input-rename
   protected readonly invalidInput = input<boolean>(false, { alias: "invalid" });
   /** Disables interaction. Combines with the form-control disabled state. */
-  readonly disabled = input<boolean>(false);
+  // eslint-disable-next-line @angular-eslint/no-input-rename
+  readonly disabledInput = input<boolean>(false, { alias: "disabled" });
+  /**
+   * Field size. Falls back to the size of a wrapping `tedi-form-field` when not
+   * set here.
+   */
+  readonly size = input<Exclude<InputSize, "large"> | undefined>();
   /** Show a clear button when the field has a value. */
   readonly clearable = input<boolean>(true);
   /** Picker variant. `none` renders just the input with no picker UI — typed input is still normalized on blur. */
@@ -140,12 +158,35 @@ export class TimeFieldComponent
   readonly inputValue = signal("");
 
   private formDisabled = signal(false);
-  private formInvalid = signal(false);
   private onChange: (value: string | null) => void = () => {};
   private onTouched: () => void = () => {};
 
-  readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
-  readonly invalid = computed(() => this.invalidInput() || this.formInvalid());
+  readonly disabled = computed(
+    () =>
+      this.disabledInput() ||
+      this.formDisabled() ||
+      (this.fieldContext?.disabled() ?? false),
+  );
+  readonly isDisabled = this.disabled;
+  readonly touched = this.derived.touched;
+  readonly dirty = this.derived.dirty;
+  readonly invalid = computed(
+    () =>
+      this.invalidInput() ||
+      this.derived.invalid() ||
+      (this.fieldContext?.invalid() ?? false),
+  );
+  readonly resolvedSize = computed<InputSize>(
+    () => this.size() ?? this.fieldContext?.size() ?? "default",
+  );
+  readonly paintsSurface = computed(
+    () => !(this.fieldContext?.ownsSurface() ?? false),
+  );
+  readonly valid = computed(() => this.fieldContext?.valid() ?? false);
+
+  ngOnInit(): void {
+    this.derived.connect();
+  }
   readonly hasValue = computed(
     () => this.value() !== null && this.value() !== "",
   );
@@ -224,10 +265,6 @@ export class TimeFieldComponent
     this.formDisabled.set(disabled);
   }
 
-  setInvalidState(isInvalid: boolean): void {
-    this.formInvalid.set(isInvalid);
-  }
-
   handleInput(event: Event) {
     const value = (event.target as HTMLInputElement).value;
     this.inputValue.set(value);
@@ -273,7 +310,14 @@ export class TimeFieldComponent
     this.inputElement().nativeElement.focus();
   }
 
-  clearField() {
+  focus() {
+    if (this.isDisabled()) return;
+    this.inputElement().nativeElement.focus();
+  }
+
+  reset() {
+    if (this.isDisabled()) return;
+
     this.clearInput();
   }
 

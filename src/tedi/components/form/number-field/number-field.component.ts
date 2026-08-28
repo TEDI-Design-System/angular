@@ -106,6 +106,11 @@ export class NumberFieldComponent implements ControlValueAccessor {
    * @default false
    */
   fullWidth = input(false);
+  /**
+   * Accessible label for the input, used when no visible `label` is provided
+   * (e.g. when the field is embedded as a compact addon of another control).
+   */
+  ariaLabel = input<string>();
 
   @ViewChild("inputElement") inputRef!: ElementRef<HTMLInputElement>;
 
