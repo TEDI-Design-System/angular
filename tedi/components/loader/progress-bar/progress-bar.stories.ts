@@ -69,7 +69,7 @@ export default {
   argTypes: {
     progressId: {
       description:
-        "Optional id for the underlying `<progress>` element. Useful when an external `<label for>` should bind to it.",
+        "Optional id for the underlying `<progress>` element. Useful when an external `<label for>` should bind to it. Falls back to a generated id.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },

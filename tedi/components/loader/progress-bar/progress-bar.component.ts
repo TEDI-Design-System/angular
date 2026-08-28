@@ -7,6 +7,7 @@ import {
   input,
   ViewEncapsulation,
 } from "@angular/core";
+import { _IdGenerator } from "@angular/cdk/a11y";
 import { LabelComponent } from "../../form/label/label.component";
 import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
 
@@ -52,7 +53,8 @@ export type ProgressBarInputs = {
 export class ProgressBarComponent {
   /**
    * Optional id for the underlying `<progress>` element. Useful when an
-   * external `<label for=…>` should bind to it.
+   * external `<label for=…>` should bind to it. When omitted, a unique id is
+   * generated so the internal label stays bound to the bar.
    */
   progressId = input<string>();
   /**
@@ -156,6 +158,11 @@ export class ProgressBarComponent {
   xxl = input<ProgressBarInputs>();
 
   private breakpointService = inject(BreakpointService);
+  private readonly fallbackId = inject(_IdGenerator).getId(
+    "tedi-progress-bar-",
+  );
+
+  protected resolvedId = computed(() => this.progressId() ?? this.fallbackId);
 
   protected currentProps = computed(() =>
     this.breakpointService.getBreakpointInputs<ProgressBarInputs>({

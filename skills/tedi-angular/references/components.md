@@ -1659,7 +1659,7 @@ Sub-components: `tedi-header-top`, `tedi-header-logo`, `tedi-header-content`, `t
 **Selector:** `tedi-progress-bar`
 **Inputs:**
 - `value: number = 0` — 0–100, clamped
-- `progressId: string` — id for the underlying `<progress>` element
+- `progressId: string` — id for the underlying `<progress>` element (generated when omitted)
 - `size: "default" | "small" = "default"` — `small` renders a 4px bar height instead of 8px
 - `label: string` — optional title (top or horizontal)
 - `labelPosition: "top" | "horizontal" = "top"`
