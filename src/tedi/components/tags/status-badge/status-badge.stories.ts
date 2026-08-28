@@ -326,7 +326,7 @@ export const WithTooltip: StoryObj<StatusBadgeComponent> = {
     template: `
       <tedi-tooltip>
         <tedi-tooltip-trigger>
-          <tedi-status-badge ${argsToTemplate(args)} />
+          <tedi-status-badge aria-label="Warning" ${argsToTemplate(args)} />
         </tedi-tooltip-trigger>
         <tedi-tooltip-content>
           Icon-only badges should always have a tooltip to provide context and ensure accessibility.
