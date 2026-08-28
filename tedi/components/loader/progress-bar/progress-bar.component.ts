@@ -162,7 +162,7 @@ export class ProgressBarComponent {
     "tedi-progress-bar-",
   );
 
-  protected resolvedId = computed(() => this.progressId() ?? this.fallbackId);
+  protected resolvedId = computed(() => this.progressId() || this.fallbackId);
 
   protected currentProps = computed(() =>
     this.breakpointService.getBreakpointInputs<ProgressBarInputs>({

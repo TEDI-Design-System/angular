@@ -259,6 +259,18 @@ describe("ProgressBarComponent", () => {
     expect(label.getAttribute("for")).toBe(id);
   });
 
+  it("should fall back to a generated id when `progressId` is empty", () => {
+    fixture.componentRef.setInput("label", "Upload");
+    fixture.componentRef.setInput("progressId", "");
+    fixture.detectChanges();
+
+    const progress = host.querySelector("progress") as HTMLProgressElement;
+    const label = host.querySelector("label") as HTMLLabelElement;
+
+    expect(progress.getAttribute("id")).toMatch(/^tedi-progress-bar-/);
+    expect(label.getAttribute("for")).toBe(progress.getAttribute("id"));
+  });
+
   it("should keep the label bound to the bar when `labelPosition` is horizontal", () => {
     fixture.componentRef.setInput("label", "Upload");
     fixture.componentRef.setInput("labelPosition", "horizontal");
