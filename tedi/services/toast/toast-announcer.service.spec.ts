@@ -6,6 +6,9 @@ describe("ToastAnnouncerService", () => {
   let service: ToastAnnouncerService;
   let document: Document;
 
+  const region = (politeness: "polite" | "assertive") =>
+    document.getElementById(`tedi-toast-announcer-${politeness}`);
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [ToastAnnouncerService],
@@ -19,233 +22,173 @@ describe("ToastAnnouncerService", () => {
     service.destroy();
   });
 
+  describe("live regions", () => {
+    it("should create both live regions up front, before anything is announced", () => {
+      expect(region("polite")).toBeTruthy();
+      expect(region("assertive")).toBeTruthy();
+      expect(region("polite")?.textContent).toBe("");
+      expect(region("assertive")?.textContent).toBe("");
+    });
+
+    it("should set a fixed aria-live and non-atomic semantics on each region", () => {
+      expect(region("polite")?.getAttribute("aria-live")).toBe("polite");
+      expect(region("assertive")?.getAttribute("aria-live")).toBe("assertive");
+
+      for (const politeness of ["polite", "assertive"] as const) {
+        expect(region(politeness)?.getAttribute("aria-atomic")).toBe("false");
+        expect(region(politeness)?.classList.contains("sr-only")).toBe(true);
+      }
+    });
+
+    it("should not set a role that would duplicate the aria-live semantics", () => {
+      expect(region("polite")?.getAttribute("role")).toBeNull();
+      expect(region("assertive")?.getAttribute("role")).toBeNull();
+    });
+  });
+
   describe("announce", () => {
-    it("should create polite announcer element", fakeAsync(() => {
+    it("should append the message to the matching region after a short delay", fakeAsync(() => {
       service.announce("Test message", "polite");
 
-      tick(100);
-
-      const element = document.getElementById("tedi-toast-announcer-polite");
-      expect(element).toBeTruthy();
-      expect(element?.getAttribute("aria-live")).toBe("polite");
-      expect(element?.getAttribute("aria-atomic")).toBe("true");
-      expect(element?.getAttribute("role")).toBe("status");
-      expect(element?.classList.contains("sr-only")).toBe(true);
-    }));
-
-    it("should create assertive announcer element", fakeAsync(() => {
-      service.announce("Test message", "assertive");
+      expect(region("polite")?.textContent).toBe("");
 
       tick(100);
 
-      const element = document.getElementById("tedi-toast-announcer-assertive");
-      expect(element).toBeTruthy();
-      expect(element?.getAttribute("aria-live")).toBe("assertive");
-      expect(element?.getAttribute("aria-atomic")).toBe("true");
-      expect(element?.getAttribute("role")).toBe("alert");
-      expect(element?.classList.contains("sr-only")).toBe(true);
+      expect(region("polite")?.textContent).toBe("Test message");
+      expect(region("assertive")?.textContent).toBe("");
     }));
 
-    it("should set message content after delay", fakeAsync(() => {
-      service.announce("Test message", "polite");
-
-      const element = document.getElementById("tedi-toast-announcer-polite");
-      expect(element?.textContent).toBe("");
-
-      tick(100);
-
-      expect(element?.textContent).toBe("Test message");
-    }));
-
-    it("should clear message after clearAfterMs", fakeAsync(() => {
-      service.announce("Test message", "polite", 500);
-
-      tick(100);
-      expect(
-        document.getElementById("tedi-toast-announcer-polite")?.textContent
-      ).toBe("Test message");
-
-      tick(500);
-      expect(
-        document.getElementById("tedi-toast-announcer-polite")?.textContent
-      ).toBe("");
-    }));
-
-    it("should use default polite politeness", fakeAsync(() => {
+    it("should default to polite", fakeAsync(() => {
       service.announce("Test message");
 
       tick(100);
 
-      const politeElement = document.getElementById(
-        "tedi-toast-announcer-polite"
-      );
-      expect(politeElement?.textContent).toBe("Test message");
+      expect(region("polite")?.textContent).toBe("Test message");
     }));
 
-    it("should reuse existing element for same politeness", fakeAsync(() => {
-      service.announce("First message", "polite");
+    it("should route assertive messages to the assertive region", fakeAsync(() => {
+      service.announce("Test message", "assertive");
+
       tick(100);
 
-      const firstElement = document.getElementById(
-        "tedi-toast-announcer-polite"
-      );
+      expect(region("assertive")?.textContent).toBe("Test message");
+      expect(region("polite")?.textContent).toBe("");
+    }));
 
+    it("should remove the message after clearAfterMs", fakeAsync(() => {
+      service.announce("Test message", "polite", 500);
+
+      tick(100);
+      expect(region("polite")?.textContent).toBe("Test message");
+
+      tick(500);
+      expect(region("polite")?.textContent).toBe("");
+    }));
+
+    it("should keep the region in place after the message is removed", fakeAsync(() => {
+      const before = region("polite");
+
+      service.announce("Test message", "polite", 500);
+      tick(600);
+
+      expect(region("polite")).toBe(before);
+    }));
+
+    it("should announce both messages when two toasts arrive in quick succession", fakeAsync(() => {
+      service.announce("First message", "polite");
+      tick(50);
       service.announce("Second message", "polite");
       tick(100);
 
-      const secondElement = document.getElementById(
-        "tedi-toast-announcer-polite"
-      );
-      expect(firstElement).toBe(secondElement);
-      expect(secondElement?.textContent).toBe("Second message");
+      const text = region("polite")?.textContent ?? "";
+      expect(text).toContain("First message");
+      expect(text).toContain("Second message");
+
+      tick(1000);
+      expect(region("polite")?.textContent).toBe("");
     }));
 
-    it("should create separate elements for different politeness levels", fakeAsync(() => {
-      service.announce("Polite message", "polite");
-      service.announce("Assertive message", "assertive");
+    it("should announce a repeated message as a new addition", fakeAsync(() => {
+      service.announce("Same message", "polite");
+      tick(1100);
+      expect(region("polite")?.textContent).toBe("");
 
+      service.announce("Same message", "polite");
       tick(100);
 
-      const politeElement = document.getElementById(
-        "tedi-toast-announcer-polite"
-      );
-      const assertiveElement = document.getElementById(
-        "tedi-toast-announcer-assertive"
-      );
-
-      expect(politeElement).toBeTruthy();
-      expect(assertiveElement).toBeTruthy();
-      expect(politeElement).not.toBe(assertiveElement);
-    }));
-
-    it("should clear content before setting new message for re-announcement", fakeAsync(() => {
-      service.announce("First message", "polite");
-      tick(100);
-
-      const element = document.getElementById("tedi-toast-announcer-polite");
-      expect(element?.textContent).toBe("First message");
-
-      // Announce same message again
-      service.announce("First message", "polite");
-
-      expect(element?.textContent).toBe("");
-
-      tick(100);
-      expect(element?.textContent).toBe("First message");
+      expect(region("polite")?.textContent).toBe("Same message");
     }));
   });
 
   describe("clear", () => {
-    it("should clear polite element content", fakeAsync(() => {
-      service.announce("Test message", "polite");
-      tick(100);
-
-      service.clear();
-
-      const element = document.getElementById("tedi-toast-announcer-polite");
-      expect(element?.textContent).toBe("");
-    }));
-
-    it("should clear assertive element content", fakeAsync(() => {
-      service.announce("Test message", "assertive");
-      tick(100);
-
-      service.clear();
-
-      const element = document.getElementById("tedi-toast-announcer-assertive");
-      expect(element?.textContent).toBe("");
-    }));
-
-    it("should clear both elements", fakeAsync(() => {
+    it("should remove announced messages from both regions", fakeAsync(() => {
       service.announce("Polite message", "polite");
       service.announce("Assertive message", "assertive");
       tick(100);
 
       service.clear();
 
-      expect(
-        document.getElementById("tedi-toast-announcer-polite")?.textContent
-      ).toBe("");
-      expect(
-        document.getElementById("tedi-toast-announcer-assertive")?.textContent
-      ).toBe("");
+      expect(region("polite")?.textContent).toBe("");
+      expect(region("assertive")?.textContent).toBe("");
     }));
 
-    it("should not throw when no elements exist", () => {
-      expect(() => service.clear()).not.toThrow();
+    it("should cancel messages that have not been announced yet", fakeAsync(() => {
+      service.announce("Test message", "polite");
+
+      service.clear();
+      tick(100);
+
+      expect(region("polite")?.textContent).toBe("");
+    }));
+
+    it("should keep the regions in the DOM", () => {
+      service.clear();
+
+      expect(region("polite")).toBeTruthy();
+      expect(region("assertive")).toBeTruthy();
     });
   });
 
   describe("destroy", () => {
-    it("should remove polite element from DOM", fakeAsync(() => {
-      service.announce("Test message", "polite");
-      tick(100);
-
-      expect(
-        document.getElementById("tedi-toast-announcer-polite")
-      ).toBeTruthy();
-
+    it("should remove both regions from the DOM", () => {
       service.destroy();
 
-      expect(document.getElementById("tedi-toast-announcer-polite")).toBeNull();
-    }));
+      expect(region("polite")).toBeNull();
+      expect(region("assertive")).toBeNull();
+    });
 
-    it("should remove assertive element from DOM", fakeAsync(() => {
-      service.announce("Test message", "assertive");
-      tick(100);
-
-      expect(
-        document.getElementById("tedi-toast-announcer-assertive")
-      ).toBeTruthy();
-
+    it("should not throw when called twice", () => {
       service.destroy();
 
-      expect(
-        document.getElementById("tedi-toast-announcer-assertive")
-      ).toBeNull();
-    }));
-
-    it("should remove both elements", fakeAsync(() => {
-      service.announce("Polite", "polite");
-      service.announce("Assertive", "assertive");
-      tick(100);
-
-      service.destroy();
-
-      expect(document.getElementById("tedi-toast-announcer-polite")).toBeNull();
-      expect(
-        document.getElementById("tedi-toast-announcer-assertive")
-      ).toBeNull();
-    }));
-
-    it("should not throw when no elements exist", () => {
       expect(() => service.destroy()).not.toThrow();
     });
 
-    it("should allow creating new elements after destroy", fakeAsync(() => {
-      service.announce("First", "polite");
+    it("should cancel pending announcements", fakeAsync(() => {
+      service.announce("Test message", "polite");
+
+      service.destroy();
       tick(100);
+
+      expect(region("polite")).toBeNull();
+    }));
+
+    it("should recreate regions when announcing after destroy", fakeAsync(() => {
       service.destroy();
 
       service.announce("Second", "polite");
       tick(100);
 
-      const element = document.getElementById("tedi-toast-announcer-polite");
-      expect(element).toBeTruthy();
-      expect(element?.textContent).toBe("Second");
+      expect(region("polite")?.textContent).toBe("Second");
     }));
   });
 
   describe("ngOnDestroy", () => {
-    it("should call destroy on ngOnDestroy", fakeAsync(() => {
+    it("should call destroy on ngOnDestroy", () => {
       const destroySpy = jest.spyOn(service, "destroy");
-
-      service.announce("Test", "polite");
-      tick(100);
 
       service.ngOnDestroy();
 
       expect(destroySpy).toHaveBeenCalled();
-    }));
+    });
   });
 });

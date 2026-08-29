@@ -55,8 +55,10 @@ const POSITIONS: ToastPosition[] = [
               [paused]="toast.paused ?? false"
               [class.tedi-toast--exiting]="toast.exiting"
               (closed)="onClosed(toast.id)"
-              (mouseEnter)="onMouseEnter(toast.id)"
-              (mouseLeave)="onMouseLeave(toast.id)"
+              (mouseEnter)="onPause(toast.id)"
+              (mouseLeave)="onResume(toast.id)"
+              (focusIn)="onPause(toast.id)"
+              (focusOut)="onResume(toast.id)"
             >
               @if (toast.content) {
                 {{ toast.content }}
@@ -94,23 +96,15 @@ export class ToastContainerComponent {
     return grouped;
   });
 
-  hasToastsForPosition(position: ToastPosition): boolean {
-    return this.toastService.getToasts().some((t) => t.position === position);
-  }
-
-  getToastsForPosition(position: ToastPosition): ToastItem[] {
-    return this.toastService.getToasts().filter((t) => t.position === position);
-  }
-
   onClosed(id: string): void {
     this.toastService.close(id);
   }
 
-  onMouseEnter(id: string): void {
+  onPause(id: string): void {
     this.toastService.pause(id);
   }
 
-  onMouseLeave(id: string): void {
+  onResume(id: string): void {
     this.toastService.resume(id);
   }
 }

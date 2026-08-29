@@ -34,10 +34,14 @@ import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/v
  *
  * ## Accessibility
  *
- * Toasts use CDK live announcer for accessibility:
+ * `ToastService` announces every toast through a dedicated visually hidden live
+ * region, and the visible toast is not a live region itself — otherwise screen
+ * readers read each toast twice. `role` picks the politeness of that announcement:
  * - `role="status"` (default): For non-critical notifications. Screen readers announce politely.
  * - `role="alert"` (default for danger): For critical errors. Screen readers announce immediately.
  * - `role="none"`: When no screen reader announcement is needed.
+ *
+ * The auto-close timer pauses while the toast is hovered or holds keyboard focus.
  */
 export default {
   title: "TEDI-Ready/Components/Notifications/Toast",
@@ -66,7 +70,7 @@ export default {
     },
     type: {
       control: "radio",
-      options: ["info", "success", "warning", "error"],
+      options: ["info", "success", "warning", "danger"],
       description:
         "Type of the toast notification determining its color scheme.",
       defaultValue: {
@@ -97,9 +101,9 @@ export default {
       control: "select",
       options: ["alert", "status", "none"],
       description:
-        "The ARIA role of the toast, informing screen readers about the notification's priority. Options: \n - <b>alert</b> for high-priority messages that demand immediate attention. \n - <b>status</b> for less urgent messages providing feedback or updates.\n - <b>none</b> used when no ARIA role is needed.",
+        "Politeness of the screen reader announcement. Options: \n - <b>alert</b> for high-priority messages that demand immediate attention. \n - <b>status</b> for less urgent messages providing feedback or updates.\n - <b>none</b> for no announcement.",
       defaultValue: {
-        summary: "alert",
+        summary: "status",
       },
     },
   },

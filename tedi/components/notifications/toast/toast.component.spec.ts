@@ -79,17 +79,20 @@ describe("ToastComponent", () => {
     expect(closedSpy).toHaveBeenCalled();
   });
 
-  it("should have status role by default", () => {
+  it("should not render the visible toast as a live region", () => {
     const alertElement = fixture.nativeElement.querySelector("tedi-alert");
-    expect(alertElement.getAttribute("role")).toBe("status");
+
+    expect(alertElement.getAttribute("role")).toBeNull();
+    expect(alertElement.getAttribute("aria-live")).toBeNull();
+    expect(alertElement.getAttribute("aria-label")).toBeNull();
   });
 
-  it("should apply custom role when provided", () => {
+  it("should not turn the role input into an ARIA role on the alert", () => {
     fixture.componentRef.setInput("role", "alert");
     fixture.detectChanges();
 
     const alertElement = fixture.nativeElement.querySelector("tedi-alert");
-    expect(alertElement.getAttribute("role")).toBe("alert");
+    expect(alertElement.getAttribute("role")).toBeNull();
   });
 
   it("should show progress bar when showProgressBar is true and duration > 0", () => {
@@ -163,5 +166,43 @@ describe("ToastComponent", () => {
     fixture.detectChanges();
 
     expect(mouseLeaveSpy).toHaveBeenCalled();
+  });
+
+  it("should emit focusIn event when focus enters the toast", () => {
+    const focusInSpy = jest.fn();
+    component.focusIn.subscribe(focusInSpy);
+
+    const wrapper = fixture.nativeElement.querySelector(".tedi-toast__wrapper");
+    wrapper.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(focusInSpy).toHaveBeenCalled();
+  });
+
+  it("should emit focusOut event when focus leaves the toast", () => {
+    const focusOutSpy = jest.fn();
+    component.focusOut.subscribe(focusOutSpy);
+
+    const wrapper = fixture.nativeElement.querySelector(".tedi-toast__wrapper");
+    wrapper.dispatchEvent(
+      new FocusEvent("focusout", { bubbles: true, relatedTarget: null })
+    );
+    fixture.detectChanges();
+
+    expect(focusOutSpy).toHaveBeenCalled();
+  });
+
+  it("should not emit focusOut when focus moves within the toast", () => {
+    const focusOutSpy = jest.fn();
+    component.focusOut.subscribe(focusOutSpy);
+
+    const wrapper = fixture.nativeElement.querySelector(".tedi-toast__wrapper");
+    const closeButton = fixture.nativeElement.querySelector(".tedi-alert__close");
+    wrapper.dispatchEvent(
+      new FocusEvent("focusout", { bubbles: true, relatedTarget: closeButton })
+    );
+    fixture.detectChanges();
+
+    expect(focusOutSpy).not.toHaveBeenCalled();
   });
 });

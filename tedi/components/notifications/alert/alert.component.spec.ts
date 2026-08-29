@@ -79,16 +79,14 @@ describe("AlertComponent", () => {
     }
   });
 
-  it("should set the correct aria-live attribute based on the role input", () => {
+  it("should not set a redundant aria-live attribute alongside the role", () => {
     const roles: AlertRole[] = ["alert", "none", "status"];
 
     for (const role of roles) {
       fixture.componentRef.setInput("role", role);
       fixture.detectChanges();
 
-      const ariaLive =
-        role === "alert" ? "assertive" : role === "status" ? "polite" : "off";
-      expect(element.getAttribute("aria-live")).toBe(ariaLive);
+      expect(element.getAttribute("aria-live")).toBeNull();
     }
   });
 
@@ -281,22 +279,20 @@ describe("AlertComponent", () => {
   });
 
   describe("aria-label", () => {
-    it("should set aria-label with type only when no title", () => {
-      fixture.componentRef.setInput("type", "warning");
-      fixture.componentRef.setInput("title", undefined);
-      fixture.detectChanges();
-
-      expect(element.getAttribute("aria-label")).toBe("warning alert");
-    });
-
-    it("should set aria-label with type and title when title is provided", () => {
+    it("should not set an aria-label that repeats the visible title", () => {
       fixture.componentRef.setInput("type", "danger");
       fixture.componentRef.setInput("title", "Error occurred");
       fixture.detectChanges();
 
-      expect(element.getAttribute("aria-label")).toBe(
-        "danger alert: Error occurred"
-      );
+      expect(element.getAttribute("aria-label")).toBeNull();
+    });
+
+    it("should not set an aria-label when there is no title", () => {
+      fixture.componentRef.setInput("type", "warning");
+      fixture.componentRef.setInput("title", undefined);
+      fixture.detectChanges();
+
+      expect(element.getAttribute("aria-label")).toBeNull();
     });
   });
 
