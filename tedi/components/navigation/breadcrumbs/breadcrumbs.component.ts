@@ -49,6 +49,10 @@ type RenderToken =
  * `tedi-link` for non-underlined crumbs — recommended for the `short` back-link.
  * Crumbs collapsed into the ellipsis dropdown are always rendered without an
  * underline, regardless of their `[underline]` setting.
+ *
+ * Collapsed crumbs are exposed as the menu items of the ellipsis menu: the role
+ * and the roving tabindex sit on the projected link itself, so it stays a single
+ * control that keyboard and screen readers can activate.
  */
 @Component({
   selector: "tedi-breadcrumbs",
@@ -72,9 +76,7 @@ type RenderToken =
     class: "tedi-breadcrumbs",
   },
 })
-export class BreadcrumbsComponent
-  implements BreakpointInputs<BreadcrumbsInputs>
-{
+export class BreadcrumbsComponent implements BreakpointInputs<BreadcrumbsInputs> {
   private readonly breakpointService = inject(BreakpointService);
 
   readonly items = contentChildren(BreadcrumbItemDirective);

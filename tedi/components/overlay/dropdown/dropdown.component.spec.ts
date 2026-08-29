@@ -70,6 +70,59 @@ class MockButtonComponent {}
 })
 class WrappingButtonHostComponent {}
 
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content dropdownRole="menu">
+        <li tedi-dropdown-item [interactiveContent]="true">
+          <a href="/a">Link A</a>
+        </li>
+        <li tedi-dropdown-item [interactiveContent]="true">
+          <a href="/b">Link B</a>
+        </li>
+        <li tedi-dropdown-item [interactiveContent]="true" [disabled]="true">
+          <a href="/c">Link C</a>
+        </li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class InteractiveContentHostComponent {}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown value="b">
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content dropdownRole="listbox">
+        <li tedi-dropdown-item value="a" [interactiveContent]="true">
+          <a href="/a">Link A</a>
+        </li>
+        <li tedi-dropdown-item value="b" [interactiveContent]="true">
+          <a href="/b">Link B</a>
+        </li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class InteractiveListboxHostComponent {}
+
 describe("DropdownComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let host: TestHostComponent;
@@ -812,6 +865,169 @@ describe("DropdownComponent", () => {
       wrappedDropdown.dropdownTrigger().focus();
 
       expect(focusSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("interactiveContent items", () => {
+    let interactiveFixture: ComponentFixture<InteractiveContentHostComponent>;
+    let interactiveDropdown: DropdownComponent;
+    let links: HTMLAnchorElement[];
+    let itemEls: HTMLLIElement[];
+
+    beforeEach(() => {
+      interactiveFixture = TestBed.createComponent(
+        InteractiveContentHostComponent,
+      );
+      interactiveFixture.detectChanges();
+
+      interactiveDropdown = interactiveFixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      interactiveDropdown.showDropdown();
+      interactiveFixture.detectChanges();
+
+      itemEls = Array.from(
+        overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+      ) as HTMLLIElement[];
+      links = itemEls.map((el) => el.querySelector("a") as HTMLAnchorElement);
+    });
+
+    afterEach(() => {
+      interactiveDropdown.hideDropdown();
+    });
+
+    it("exposes the item role on the link and leaves the li presentational", () => {
+      itemEls.forEach((el) => {
+        expect(el.getAttribute("role")).toBe("none");
+        expect(el.getAttribute("tabindex")).toBeNull();
+      });
+
+      links.forEach((link) =>
+        expect(link.getAttribute("role")).toBe("menuitem"),
+      );
+      expect(links[2].getAttribute("aria-disabled")).toBe("true");
+      expect(links[0].getAttribute("aria-disabled")).toBeNull();
+    });
+
+    it("keeps the roving tabindex on the links", () => {
+      expect(links.map((link) => link.getAttribute("tabindex"))).toEqual([
+        "0",
+        "-1",
+        "-1",
+      ]);
+
+      interactiveDropdown.focusNextItem(itemEls[0]);
+      interactiveFixture.detectChanges();
+
+      expect(links.map((link) => link.getAttribute("tabindex"))).toEqual([
+        "-1",
+        "0",
+        "-1",
+      ]);
+      expect(document.activeElement).toBe(links[1]);
+    });
+
+    it("keydown: Enter is left to the link so it navigates", () => {
+      const event = new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+      });
+      links[0].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    it("keydown: Space activates the link", () => {
+      const clickSpy = jest.spyOn(links[0], "click");
+      const event = new KeyboardEvent("keydown", {
+        key: " ",
+        bubbles: true,
+        cancelable: true,
+      });
+      links[0].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(clickSpy).toHaveBeenCalled();
+    });
+
+    it("prevents activation of a disabled item's link", () => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+      });
+      links[2].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(interactiveDropdown.isOpen()).toBe(true);
+    });
+
+    it("stops a disabled item's click before target-level handlers run", () => {
+      const targetHandler = jest.fn();
+      links[2].addEventListener("click", targetHandler);
+
+      links[2].dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+
+      expect(targetHandler).not.toHaveBeenCalled();
+
+      links[2].removeEventListener("click", targetHandler);
+    });
+
+    it("leaves an enabled item's target-level handler alone", () => {
+      const targetHandler = jest.fn();
+      links[0].addEventListener("click", targetHandler);
+
+      links[0].dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+
+      expect(targetHandler).toHaveBeenCalled();
+
+      links[0].removeEventListener("click", targetHandler);
+    });
+  });
+
+  describe("interactiveContent items in a listbox", () => {
+    let listboxFixture: ComponentFixture<InteractiveListboxHostComponent>;
+    let listboxDropdown: DropdownComponent;
+
+    beforeEach(() => {
+      listboxFixture = TestBed.createComponent(InteractiveListboxHostComponent);
+      listboxFixture.detectChanges();
+
+      listboxDropdown = listboxFixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      listboxDropdown.showDropdown();
+      listboxFixture.detectChanges();
+    });
+
+    afterEach(() => {
+      listboxDropdown.hideDropdown();
+    });
+
+    it("moves the option selection contract onto the control", () => {
+      const itemEls = Array.from(
+        overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+      ) as HTMLLIElement[];
+      const optionLinks = itemEls.map(
+        (el) => el.querySelector("a") as HTMLAnchorElement,
+      );
+
+      itemEls.forEach((el) => {
+        expect(el.getAttribute("role")).toBe("none");
+        expect(el.getAttribute("aria-selected")).toBeNull();
+      });
+
+      optionLinks.forEach((link) =>
+        expect(link.getAttribute("role")).toBe("option"),
+      );
+      expect(optionLinks[0].getAttribute("aria-selected")).toBe("false");
+      expect(optionLinks[1].getAttribute("aria-selected")).toBe("true");
     });
   });
 });

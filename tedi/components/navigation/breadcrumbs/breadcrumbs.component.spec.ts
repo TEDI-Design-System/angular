@@ -233,6 +233,74 @@ describe("Breadcrumbs", () => {
       expect(listText).toContain("Restrictions");
     });
 
+    const openCollapsed = async (fixture: ComponentFixture<HostComponent>) => {
+      const trigger = fixture.debugElement.query(
+        By.css("button[tedi-dropdown-trigger]"),
+      ).nativeElement as HTMLButtonElement;
+      trigger.click();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve));
+      fixture.detectChanges();
+
+      const overlay = document.querySelector(
+        ".cdk-overlay-container",
+      ) as HTMLElement;
+      return Array.from(
+        overlay.querySelectorAll("li.tedi-breadcrumbs__dropdown-item"),
+      ) as HTMLLIElement[];
+    };
+
+    it("exposes the collapsed crumb links themselves as the menu items", async () => {
+      const fixture = setup({
+        crumbs: longTrail,
+        maxItems: 4,
+        itemsBeforeCollapse: 1,
+        itemsAfterCollapse: 2,
+      });
+
+      const dropdownItems = await openCollapsed(fixture);
+      expect(dropdownItems).toHaveLength(3);
+
+      const links = dropdownItems.map(
+        (item) => item.querySelector("a") as HTMLAnchorElement,
+      );
+
+      dropdownItems.forEach((item) => {
+        expect(item.getAttribute("role")).toBe("none");
+        expect(item.getAttribute("tabindex")).toBeNull();
+      });
+      links.forEach((link) =>
+        expect(link.getAttribute("role")).toBe("menuitem"),
+      );
+      expect(links.map((link) => link.getAttribute("tabindex"))).toEqual([
+        "0",
+        "-1",
+        "-1",
+      ]);
+      expect(document.activeElement).toBe(links[0]);
+    });
+
+    it("lets Enter follow a collapsed crumb link", async () => {
+      const fixture = setup({
+        crumbs: longTrail,
+        maxItems: 4,
+        itemsBeforeCollapse: 1,
+        itemsAfterCollapse: 2,
+      });
+
+      const link = (await openCollapsed(fixture))[0].querySelector(
+        "a",
+      ) as HTMLAnchorElement;
+      const event = new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+      });
+      link.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(false);
+    });
+
     it("does not collapse when the crumb count is within maxItems", () => {
       const fixture = setup({ crumbs: longTrail, maxItems: 10 });
       expect(

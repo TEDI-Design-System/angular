@@ -2062,12 +2062,26 @@ The `[(open)]` binding approach is deprecated. Use `ModalService.open()` for new
 - `preventOverflow: boolean = true`
 - `hideOnScroll: boolean = false` — close the dropdown when the page scrolls
 
+**`[tedi-dropdown-item]` inputs:**
+- `value: string`, `disabled: boolean = false`, `closeOnSelect: boolean = true`, `clipContent: boolean = true`
+- `interactiveContent: boolean = false` — the projected content is itself the control (a link or button). The item role and roving tabindex move onto that element, so assistive technology reports one control per item and the control keeps its own activation behaviour. Required when projecting links. Intended for `dropdownRole="menu"` — a link's navigation is not an option's activation behaviour, so keep listbox items as plain content.
+
 ```html
 <tedi-dropdown [(value)]="selected">
   <button tedi-button>Select option</button>
   <tedi-dropdown-content dropdownRole="listbox">
     <li tedi-dropdown-item value="a">Option A</li>
     <li tedi-dropdown-item value="b">Option B</li>
+  </tedi-dropdown-content>
+</tedi-dropdown>
+
+<!-- Links as items -->
+<tedi-dropdown>
+  <button tedi-button tedi-dropdown-trigger>Pages</button>
+  <tedi-dropdown-content dropdownRole="menu">
+    <li tedi-dropdown-item [interactiveContent]="true">
+      <a tedi-link href="/patients">Patients</a>
+    </li>
   </tedi-dropdown-content>
 </tedi-dropdown>
 ```
