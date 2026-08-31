@@ -131,6 +131,7 @@ describe("DatePickerComponent", () => {
   });
 
   it("onMonthSelect should update month & return to calendar-grid", () => {
+    component.month.set(new Date(2024, 4, 15));
     component.currentView.set("month-grid");
 
     component.onMonthSelect("5");
@@ -140,7 +141,18 @@ describe("DatePickerComponent", () => {
     expect(component.currentView()).toBe("calendar-grid");
   });
 
+  it("onMonthSelect should not overflow when the shown day exceeds the target month", () => {
+    component.month.set(new Date(2024, 7, 31));
+
+    component.onMonthSelect("5");
+    fixture.detectChanges();
+
+    expect(component.month().getMonth()).toBe(5);
+    expect(component.month().getFullYear()).toBe(2024);
+  });
+
   it("onYearSelect should update year & return to calendar-grid", () => {
+    component.month.set(new Date(2024, 4, 15));
     component.currentView.set("year-grid");
 
     component.onYearSelect("2030");
@@ -148,6 +160,16 @@ describe("DatePickerComponent", () => {
 
     expect(component.month().getFullYear()).toBe(2030);
     expect(component.currentView()).toBe("calendar-grid");
+  });
+
+  it("onYearSelect should not overflow when Feb 29 moves to a non-leap year", () => {
+    component.month.set(new Date(2024, 1, 29));
+
+    component.onYearSelect("2025");
+    fixture.detectChanges();
+
+    expect(component.month().getFullYear()).toBe(2025);
+    expect(component.month().getMonth()).toBe(1);
   });
 
   it("manual input should update inputValue", () => {
@@ -471,6 +493,22 @@ describe("DatePickerComponent", () => {
     it("PageDown should move one month forward", () => {
       trigger("PageDown");
       expect(focusSpy).toHaveBeenCalledWith(new Date(2024, 5, 15));
+    });
+
+    it("PageUp should clamp the day to the last day of the shorter month", () => {
+      component.onDayKeydown(
+        new KeyboardEvent("keydown", { key: "PageUp" }),
+        new Date(2024, 2, 31),
+      );
+      expect(focusSpy).toHaveBeenCalledWith(new Date(2024, 1, 29));
+    });
+
+    it("PageDown should clamp the day to the last day of the shorter month", () => {
+      component.onDayKeydown(
+        new KeyboardEvent("keydown", { key: "PageDown" }),
+        new Date(2024, 0, 31),
+      );
+      expect(focusSpy).toHaveBeenCalledWith(new Date(2024, 1, 29));
     });
 
     it("Enter selects the date", () => {
