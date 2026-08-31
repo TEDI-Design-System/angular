@@ -152,7 +152,37 @@ const CARD_ICON_ARG_TYPES = named({
   ),
 });
 
-const CARD_ROW_ARG_TYPES = named({});
+const CARD_ROW_ARG_TYPES = named({
+  direction: inputArg(
+    '"row" | "column"',
+    "Direction the cells are laid out in. Use this instead of flex utility classes — the row rounds the corners it shares with the card based on it.",
+    "row",
+  ),
+  xs: inputArg(
+    "CardRowInputs",
+    "Overrides inputs on the xs breakpoint (<576px).",
+  ),
+  sm: inputArg(
+    "CardRowInputs",
+    "Overrides inputs on the sm breakpoint (≥576px).",
+  ),
+  md: inputArg(
+    "CardRowInputs",
+    "Overrides inputs on the md breakpoint (≥768px).",
+  ),
+  lg: inputArg(
+    "CardRowInputs",
+    "Overrides inputs on the lg breakpoint (≥992px).",
+  ),
+  xl: inputArg(
+    "CardRowInputs",
+    "Overrides inputs on the xl breakpoint (≥1200px).",
+  ),
+  xxl: inputArg(
+    "CardRowInputs",
+    "Overrides inputs on the xxl breakpoint (≥1400px).",
+  ),
+});
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.53.75?node-id=4442-91315&m=dev" target="_blank">Figma ↗</a><br>
@@ -1179,14 +1209,14 @@ export const SplitCardBody: Story = {
     docs: {
       description: {
         story:
-          '**Tip**: `tedi-card-row` lays its blocks out in a row by default. Since it is a flex container, you can change its direction at lower breakpoints with flex-direction utility classes. Here `class="flex-column flex-sm-row"` stacks the two content blocks vertically below the `sm` breakpoint',
+          '**Tip**: `tedi-card-row` lays its blocks out in a row by default. Use its `direction` input to stack the blocks instead — here `direction="column"` with `[sm]="{ direction: \'row\' }"` stacks them vertically below the `sm` breakpoint. Prefer this over flex-direction utility classes, since the row rounds the corners it shares with the card based on the input',
       },
     },
   },
   render: () => ({
     template: `
       <tedi-card>
-        <tedi-card-row class="flex-column flex-sm-row">
+        <tedi-card-row direction="column" [sm]="{ direction: 'row' }">
           <tedi-card-content>
             <p tedi-text>Vasak</p>
             <p tedi-text>

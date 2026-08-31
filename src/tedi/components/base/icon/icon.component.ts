@@ -35,10 +35,7 @@ export type IconColor =
   | "white"
   | "inherit";
 export type IconBackgroundColor =
-  | "primary"
-  | "secondary"
-  | "brand-primary"
-  | "brand-secondary";
+  "primary" | "secondary" | "brand-primary" | "brand-secondary";
 
 @Component({
   selector: "tedi-icon",

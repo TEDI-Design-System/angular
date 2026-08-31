@@ -38,11 +38,11 @@ export class TediTranslationService {
   translate<
     TLang extends Language,
     TKey extends keyof TediTranslationsMap<TLang> | (string & {}),
-    TArgs extends TKey extends keyof TediTranslationsMap<TLang>
+    TArgs extends (TKey extends keyof TediTranslationsMap<TLang>
       ? TediTranslationsMap<TLang>[TKey] extends (...args: infer P) => string
         ? P
         : []
-      : unknown[],
+      : unknown[]),
   >(key: TKey, ...args: TArgs): string {
     const lang = this.currentLang();
     const entry = this.translations()[key];
@@ -63,11 +63,11 @@ export class TediTranslationService {
   track<
     TLang extends Language,
     TKey extends keyof TediTranslationsMap<TLang> | (string & {}),
-    TArgs extends TKey extends keyof TediTranslationsMap<TLang>
+    TArgs extends (TKey extends keyof TediTranslationsMap<TLang>
       ? TediTranslationsMap<TLang>[TKey] extends (...args: infer P) => string
         ? P
         : []
-      : unknown[],
+      : unknown[]),
   >(key: TKey, ...args: (TArgs[number] | Signal<TArgs[number]>)[]) {
     return computed(() => {
       const resolvedArgs = args.map((arg) =>

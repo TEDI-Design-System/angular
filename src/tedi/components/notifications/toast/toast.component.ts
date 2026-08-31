@@ -12,10 +12,7 @@ export const TOAST_DEFAULT_DURATION = 6000;
 export type ToastType = AlertType;
 export type ToastRole = AlertRole;
 export type ToastPosition =
-  | "top-left"
-  | "top-right"
-  | "bottom-left"
-  | "bottom-right";
+  "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
 export interface ToastConfig {
   /**

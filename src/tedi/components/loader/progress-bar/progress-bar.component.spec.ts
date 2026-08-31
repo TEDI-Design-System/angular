@@ -46,8 +46,7 @@ class BreakpointMock {
 
     for (let i = 0; i <= BREAKPOINT_ORDER.indexOf(current); i++) {
       const override = inputs[BREAKPOINT_ORDER[i]] as
-        | Record<string, unknown>
-        | undefined;
+        Record<string, unknown> | undefined;
       if (override) {
         resolved = { ...resolved, ...override };
       }

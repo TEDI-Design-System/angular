@@ -158,9 +158,8 @@ export class ProgressBarComponent {
   xxl = input<ProgressBarInputs>();
 
   private breakpointService = inject(BreakpointService);
-  private readonly fallbackId = inject(_IdGenerator).getId(
-    "tedi-progress-bar-",
-  );
+  private readonly fallbackId =
+    inject(_IdGenerator).getId("tedi-progress-bar-");
 
   protected resolvedId = computed(() => this.progressId() || this.fallbackId);
 

@@ -12,17 +12,7 @@ export type SeparatorVariant = "dotted" | "dotted-small" | "dot-only";
 export type SeparatorDotSize = "large" | "medium" | "small" | "extra-small";
 export type SeparatorThickness = 1 | 2;
 export type SeparatorSpacingValue =
-  | 0
-  | 0.25
-  | 0.5
-  | 0.75
-  | 1
-  | 1.25
-  | 1.5
-  | 1.75
-  | 2
-  | 2.5
-  | 5;
+  0 | 0.25 | 0.5 | 0.75 | 1 | 1.25 | 1.5 | 1.75 | 2 | 2.5 | 5;
 export type SeparatorSpacing = {
   /** Shorthand for `left` and `right`. Overridden by an explicit side. */
   x?: SeparatorSpacingValue;

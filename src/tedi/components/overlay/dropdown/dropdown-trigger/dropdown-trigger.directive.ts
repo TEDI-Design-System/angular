@@ -13,10 +13,7 @@ import { CdkOverlayOrigin } from "@angular/cdk/overlay";
 import { DropdownComponent } from "../dropdown.component";
 
 export type DropdownTriggerAriaHasPopup =
-  | "menu"
-  | "listbox"
-  | "dialog"
-  | "true";
+  "menu" | "listbox" | "dialog" | "true";
 
 const FOCUSABLE_SELECTOR = "button, a[href], [tabindex]";
 
