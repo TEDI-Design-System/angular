@@ -235,6 +235,51 @@ describe("ProgressBarComponent", () => {
     progress = host.querySelector("progress") as HTMLProgressElement;
     expect(progress.getAttribute("aria-label")).toBe("Override");
   });
+
+  it("should use `progressId` on the progress element and the label", () => {
+    fixture.componentRef.setInput("label", "Upload");
+    fixture.componentRef.setInput("progressId", "my-progress");
+    fixture.detectChanges();
+
+    const progress = host.querySelector("progress") as HTMLProgressElement;
+    const label = host.querySelector("label") as HTMLLabelElement;
+    expect(progress.getAttribute("id")).toBe("my-progress");
+    expect(label.getAttribute("for")).toBe("my-progress");
+  });
+
+  it("should fall back to a generated id instead of rendering `undefined`", () => {
+    fixture.componentRef.setInput("label", "Upload");
+    fixture.detectChanges();
+
+    const progress = host.querySelector("progress") as HTMLProgressElement;
+    const label = host.querySelector("label") as HTMLLabelElement;
+    const id = progress.getAttribute("id");
+
+    expect(id).toMatch(/^tedi-progress-bar-/);
+    expect(label.getAttribute("for")).toBe(id);
+  });
+
+  it("should fall back to a generated id when `progressId` is empty", () => {
+    fixture.componentRef.setInput("label", "Upload");
+    fixture.componentRef.setInput("progressId", "");
+    fixture.detectChanges();
+
+    const progress = host.querySelector("progress") as HTMLProgressElement;
+    const label = host.querySelector("label") as HTMLLabelElement;
+
+    expect(progress.getAttribute("id")).toMatch(/^tedi-progress-bar-/);
+    expect(label.getAttribute("for")).toBe(progress.getAttribute("id"));
+  });
+
+  it("should keep the label bound to the bar when `labelPosition` is horizontal", () => {
+    fixture.componentRef.setInput("label", "Upload");
+    fixture.componentRef.setInput("labelPosition", "horizontal");
+    fixture.detectChanges();
+
+    const progress = host.querySelector("progress") as HTMLProgressElement;
+    const label = host.querySelector("label") as HTMLLabelElement;
+    expect(label.getAttribute("for")).toBe(progress.getAttribute("id"));
+  });
 });
 
 describe("ProgressBarComponent — content projection", () => {

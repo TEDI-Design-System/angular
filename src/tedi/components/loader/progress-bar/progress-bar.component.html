@@ -3,7 +3,7 @@
     tedi-label
     color="primary"
     [required]="required()"
-    [for]="progressId()"
+    [attr.for]="resolvedId()"
     class="tedi-progress-bar__label"
   >
     {{ label() }}
@@ -16,7 +16,7 @@
       tedi-label
       color="primary"
       [required]="required()"
-      [for]="progressId()"
+      [attr.for]="resolvedId()"
       class="tedi-progress-bar__label"
     >
       {{ label() }}
@@ -27,7 +27,7 @@
     <div class="tedi-progress-bar__track-row">
       <progress
         class="tedi-progress-bar__track"
-        [id]="progressId()"
+        [attr.id]="resolvedId()"
         [max]="100"
         [value]="value()"
         [attr.aria-label]="accessibleLabel()"
