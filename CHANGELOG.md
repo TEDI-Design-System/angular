@@ -1,3 +1,10 @@
+## [8.0.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.1...angular-8.0.1-rc.2) (2026-08-31)
+
+
+### Bug Fixes
+
+* **date-picker:** fixed overflow when next month has fewer days [#635](https://github.com/TEDI-Design-System/angular/issues/635) ([#636](https://github.com/TEDI-Design-System/angular/issues/636)) ([dcbb05c](https://github.com/TEDI-Design-System/angular/commit/dcbb05c4b649f6430903dac91656add57c1c38ae))
+
 ## [8.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.0...angular-8.0.1-rc.1) (2026-08-28)
 
 
