@@ -15,7 +15,7 @@
     "build": "ng build angular-components --configuration production && sass --load-path=node_modules src/styles/index.scss dist/index.css --style=compressed --no-source-map && replace-in-file //fonts//g \"./fonts/\" dist/index.css --isRegex && mkdir -p dist/fonts && cp -a node_modules/@tedi-design-system/core/fonts/* dist/fonts/",
     "build:sb": "ng run angular-components:build-storybook && replace-in-file //fonts//g \"./fonts/\" \"dist/storybook-static/*.css\" --isRegex",
     "build:sb:chromatic": "ng run angular-components:build-storybook",
-    "lint": "stylelint \"tedi/**/*.scss\" --fix && ng lint angular-components --fix",
+    "lint": "stylelint \"src/tedi/**/*.scss\" --fix && ng lint angular-components --fix",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --config ./jest.config.ts --coverage",
@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@tanstack/angular-table": "^8.21.4",
-    "@tedi-design-system/core": "^6.5.0"
+    "@tedi-design-system/core": "^6.8.1"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "20.3.27",
@@ -120,10 +120,10 @@
     }
   },
   "lint-staged": {
-    "{src,tedi}/**/*.{css,scss}": [
+    "src/!(community)/**/*.{css,scss}": [
       "stylelint --fix"
     ],
-    "src/**/*.{ts,html}": [
+    "src/!(community)/**/*.{ts,html}": [
       "prettier --write"
     ]
   },
