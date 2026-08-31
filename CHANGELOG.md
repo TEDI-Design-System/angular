@@ -1,3 +1,17 @@
+## [8.0.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.1...angular-8.0.1-rc.2) (2026-08-31)
+
+
+### Bug Fixes
+
+* **date-picker:** fixed overflow when next month has fewer days [#635](https://github.com/TEDI-Design-System/angular/issues/635) ([#636](https://github.com/TEDI-Design-System/angular/issues/636)) ([dcbb05c](https://github.com/TEDI-Design-System/angular/commit/dcbb05c4b649f6430903dac91656add57c1c38ae))
+
+## [8.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.0...angular-8.0.1-rc.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* **time-picker:** apply columns layout to slots variant [#609](https://github.com/TEDI-Design-System/angular/issues/609) ([#621](https://github.com/TEDI-Design-System/angular/issues/621)) ([cb3b625](https://github.com/TEDI-Design-System/angular/commit/cb3b62510b46e586ea5aaa8b76e35a8d259dc9c2))
+
 # [8.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0...angular-8.0.0) (2026-08-27)
 
 

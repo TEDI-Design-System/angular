@@ -21,13 +21,15 @@ npm run build          # Build library to dist/
 
 ### Directory Layout
 
-- `tedi/components/` — All UI components, organized by category (form, buttons, overlay, etc.)
-- `tedi/directives/` — Attribute/structural directives
-- `tedi/services/` — Services (translation, theme, breakpoint, toast)
-- `tedi/utils/` — Utility functions (date, cookies, elements)
-- `tedi/tokens/` — Injection tokens (theme, translation)
-- `tedi/providers/` — Angular providers
-- `community/` — Community-contributed components (separate entry point, NOT a reference for TEDI patterns)
+- `src/tedi/components/` — All UI components, organized by category (form, buttons, overlay, etc.)
+- `src/tedi/directives/` — Attribute/structural directives
+- `src/tedi/services/` — Services (translation, theme, breakpoint, toast)
+- `src/tedi/utils/` — Utility functions (date, cookies, elements)
+- `src/tedi/tokens/` — Injection tokens (theme, translation)
+- `src/tedi/providers/` — Angular providers
+- `src/community/` — Community-contributed components (separate entry point, NOT a reference for TEDI patterns)
+
+> The library lives under `src/` (`src/tedi`, `src/community`), with `src/package.json` + `src/ng-package.json` as the ng-packagr primary entry point. The root `package.json` is the workspace/tooling manifest. This mirrors the React repo's `src/` layout — see issue #166.
 
 ### Component File Convention
 
@@ -54,11 +56,11 @@ Form controls implement `ControlValueAccessor` with `NG_VALUE_ACCESSOR` provider
 
 ### Export Chain
 
-`public-api.ts` → `tedi/index.ts` → category `index.ts` → component `index.ts`
+`src/public-api.ts` → `src/tedi/index.ts` → category `index.ts` → component `index.ts`
 
 Path aliases:
-- `@tedi-design-system/angular/tedi` → `./tedi/index.ts`
-- `@tedi-design-system/angular/community` → `./community/index.ts`
+- `@tedi-design-system/angular/tedi` → `./src/tedi/index.ts`
+- `@tedi-design-system/angular/community` → `./src/community/index.ts`
 
 ## Styling
 
@@ -79,7 +81,7 @@ Path aliases:
 
 ## Storybook
 
-- Stories at `tedi/**/*.stories.ts`
+- Stories at `src/tedi/**/*.stories.ts`
 - Title format: `"TEDI-Ready/Components/<Category>/<ComponentName>"` (e.g. `Buttons`, `Form`, `Navigation`). Top-level groups `Content`, `Layout`, and `Base` skip the `Components` segment — `"TEDI-Ready/Content/<ComponentName>"`, etc. Check sibling stories in the same folder to confirm the prefix.
 - Uses `moduleMetadata` decorator for imports
 - Status parameters: `partiallyTediReady`, `existsInTediReady`, `devComponent`, etc.
@@ -117,7 +119,7 @@ Path aliases:
 - Use regular methods for event handlers that need cleanup — use `handleX = (e: Event) => {}` property syntax
 - Forget to provide `TediTranslationService` mock and `TEDI_TRANSLATION_DEFAULT_TOKEN` in tests
 - Use `fakeAsync`/`tick` without cleaning up in `afterEach`
-- Use `community/` components as reference for coding patterns or style — they are community-contributed and not always reviewed
+- Use `src/community/` components as reference for coding patterns or style — they are community-contributed and not always reviewed
 - Forget to add `.parent__button:hover .tedi-icon { color: inherit; }` (and similar for selected/active states) in components that contain icons and change text color on state — without this, the icon's color modifier class wins over the parent's color. Use `color="inherit"` for component-owned icons; for projected icons, the CSS override ensures the consumer's color applies in default state but inherits on hover/selected
 - Style Angular element selectors directly (e.g., `tedi-modal-header { ... }`) — add a CSS class to the host and style the class instead. Exception: third-party elements you can't add classes to (e.g., `cdk-dialog-container`)
 
