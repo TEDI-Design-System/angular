@@ -1,3 +1,10 @@
+## [8.0.1-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.2...angular-8.0.1-rc.3) (2026-08-31)
+
+
+### Bug Fixes
+
+* **progress-bar:** fall back to generated id [#633](https://github.com/TEDI-Design-System/angular/issues/633) ([#634](https://github.com/TEDI-Design-System/angular/issues/634)) ([6115cd4](https://github.com/TEDI-Design-System/angular/commit/6115cd41f2d0f15b9e3c4084e69e15c87a3e7a40))
+
 ## [8.0.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.1...angular-8.0.1-rc.2) (2026-08-31)
 
 
