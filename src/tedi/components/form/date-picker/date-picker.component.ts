@@ -31,6 +31,7 @@ import {
   isBeforeDay,
   isAfterDay,
   getISOWeek,
+  addMonths,
 } from "../../../utils/date.util";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 
@@ -446,9 +447,7 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
       return;
     }
 
-    const updated = new Date(this.month());
-    updated.setMonth(monthIndex);
-    this.month.set(updated);
+    this.month.set(this.monthAnchor(year, monthIndex));
     this.updateActiveDateForMonth(year, monthIndex);
 
     if (this.currentView() === "month-grid") {
@@ -472,22 +471,18 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
       return;
     }
 
-    const updated = new Date(this.month());
-    updated.setFullYear(year);
-
     // If the current month is disabled in the new year, find the first enabled month
-    let targetMonth = updated.getMonth();
+    let targetMonth = this.month().getMonth();
     if (this.getFirstEnabledDayOfMonth(year, targetMonth) === null) {
       for (let month = 0; month < 12; month++) {
         if (this.getFirstEnabledDayOfMonth(year, month) !== null) {
           targetMonth = month;
-          updated.setMonth(month);
           break;
         }
       }
     }
 
-    this.month.set(updated);
+    this.month.set(this.monthAnchor(year, targetMonth));
     this.updateActiveDateForMonth(year, targetMonth);
 
     if (this.currentView() === "year-grid") {
@@ -543,8 +538,7 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
     }
 
     if (key === "PageUp") {
-      const target = new Date(current);
-      target.setMonth(current.getMonth() - 1);
+      const target = addMonths(current, -1);
       return this.isDisabled(target)
         ? (this.findNextEnabledDate(target, 1) ??
             this.findNextEnabledDate(target, -1))
@@ -552,8 +546,7 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
     }
 
     if (key === "PageDown") {
-      const target = new Date(current);
-      target.setMonth(current.getMonth() + 1);
+      const target = addMonths(current, 1);
       return this.isDisabled(target)
         ? (this.findNextEnabledDate(target, -1) ??
             this.findNextEnabledDate(target, 1))
@@ -776,6 +769,18 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
     }
 
     return true;
+  }
+
+  /**
+   * Builds the shown-month anchor. The day is always set to 1 first, so
+   * switching to a shorter month can never overflow into the next one
+   * (e.g. on 31 Aug, picking June would otherwise land on 1 Jul).
+   */
+  private monthAnchor(year: number, month: number): Date {
+    const anchor = new Date(this.month());
+    anchor.setDate(1);
+    anchor.setFullYear(year, month);
+    return anchor;
   }
 
   private findPrevEnabledMonth(): Date | null {
