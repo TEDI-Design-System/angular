@@ -1,3 +1,10 @@
+## [8.0.1-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.3...angular-8.0.1-rc.4) (2026-08-31)
+
+
+### Bug Fixes
+
+* **card:** replaced overflow with proper handling of border radii [#624](https://github.com/TEDI-Design-System/angular/issues/624) ([#629](https://github.com/TEDI-Design-System/angular/issues/629)) ([c5f611b](https://github.com/TEDI-Design-System/angular/commit/c5f611b5f9423b6b7af8de76fb7cacbbb4cbc4d1))
+
 ## [8.0.1-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.2...angular-8.0.1-rc.3) (2026-08-31)
 
 
