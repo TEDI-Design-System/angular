@@ -12,9 +12,11 @@ const config: StorybookConfig = {
     "../src/docs/css-utilities.mdx",
     "../src/docs/colors/colors.mdx",
     "../src/docs/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-    "../tedi/**/*.stories.@(js|jsx|mjs|ts|tsx)",
-    "../tedi/**/*.mdx",
-    ...(excludeCommunity ? [] : ["../community/**/*.stories.@(js|jsx|mjs|ts|tsx)"]),
+    "../src/tedi/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    "../src/tedi/**/*.mdx",
+    ...(excludeCommunity
+      ? []
+      : ["../src/community/**/*.stories.@(js|jsx|mjs|ts|tsx)"]),
   ],
   addons: [
     "@storybook/addon-docs",

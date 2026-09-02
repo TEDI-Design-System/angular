@@ -17,7 +17,7 @@ If no Figma link was provided, stop immediately and ask the user for one. Do not
 Enter plan mode and create a detailed plan covering:
 
 - **Component name** and selector (`tedi-` prefix)
-- **Category** — which folder under `tedi/components/` it belongs to
+- **Category** — which folder under `src/tedi/components/` it belongs to
 - **API design** — all inputs (with types and defaults), outputs, content projection slots
 - **Responsive inputs** — for each input, check if the React equivalent uses `BreakpointSupport<T>` or `BreakpointInput<T>`. If yes, plan the Angular equivalent (see "Responsive Inputs (Breakpoint Support)" in best-practices.md for pattern A vs B). Even without a React reference, ask: would consumers reasonably need to vary this input per breakpoint? If so, add breakpoint support up front — retrofitting later is a breaking change.
 - **Accessibility** — ARIA roles, keyboard interactions, screen reader behavior, focus management
@@ -30,7 +30,7 @@ If a new dependency is needed, stop and ask the user for permission.
 
 ## Step 3: Scaffold Files
 
-Create the following files in `tedi/components/<category>/<component-name>/`:
+Create the following files in `src/tedi/components/<category>/<component-name>/`:
 
 ```text
 component-name.component.ts
@@ -53,7 +53,7 @@ Follow all patterns from best-practices:
 ## Step 5: Export
 
 1. Create barrel export in `index.ts`
-2. Add export to the parent category `index.ts` (e.g., `tedi/components/form/index.ts`)
+2. Add export to the parent category `index.ts` (e.g., `src/tedi/components/form/index.ts`)
 
 ## Step 6: Code Review
 
@@ -63,7 +63,7 @@ A finding is **valid** when it is confirmed against the current code (not stale 
 
 ## Step 7: Verify
 
-1. Run tests: `npx jest tedi/components/<category>/<component-name>/`
+1. Run tests: `npx jest src/tedi/components/<category>/<component-name>/`
 2. Fix any failures.
 3. Run lint: `npm run lint`
 4. Fix any lint errors.

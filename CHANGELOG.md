@@ -1,3 +1,80 @@
+## [8.0.1-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.3...angular-8.0.1-rc.4) (2026-08-31)
+
+
+### Bug Fixes
+
+* **card:** replaced overflow with proper handling of border radii [#624](https://github.com/TEDI-Design-System/angular/issues/624) ([#629](https://github.com/TEDI-Design-System/angular/issues/629)) ([c5f611b](https://github.com/TEDI-Design-System/angular/commit/c5f611b5f9423b6b7af8de76fb7cacbbb4cbc4d1))
+
+## [8.0.1-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.2...angular-8.0.1-rc.3) (2026-08-31)
+
+
+### Bug Fixes
+
+* **progress-bar:** fall back to generated id [#633](https://github.com/TEDI-Design-System/angular/issues/633) ([#634](https://github.com/TEDI-Design-System/angular/issues/634)) ([6115cd4](https://github.com/TEDI-Design-System/angular/commit/6115cd41f2d0f15b9e3c4084e69e15c87a3e7a40))
+
+## [8.0.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.1...angular-8.0.1-rc.2) (2026-08-31)
+
+
+### Bug Fixes
+
+* **date-picker:** fixed overflow when next month has fewer days [#635](https://github.com/TEDI-Design-System/angular/issues/635) ([#636](https://github.com/TEDI-Design-System/angular/issues/636)) ([dcbb05c](https://github.com/TEDI-Design-System/angular/commit/dcbb05c4b649f6430903dac91656add57c1c38ae))
+
+## [8.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.0...angular-8.0.1-rc.1) (2026-08-28)
+
+
+### Bug Fixes
+
+* **time-picker:** apply columns layout to slots variant [#609](https://github.com/TEDI-Design-System/angular/issues/609) ([#621](https://github.com/TEDI-Design-System/angular/issues/621)) ([cb3b625](https://github.com/TEDI-Design-System/angular/commit/cb3b62510b46e586ea5aaa8b76e35a8d259dc9c2))
+
+# [8.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-7.1.0...angular-8.0.0) (2026-08-27)
+
+
+### Bug Fixes
+
+* **community-tabs-fix:** community tabs will no longer allow multiple elements to be selected [#112](https://github.com/TEDI-Design-System/angular/issues/112) ([9e1c43a](https://github.com/TEDI-Design-System/angular/commit/9e1c43ae3439d12a3147a0c41bda639022f2b573))
+* **date-picker:** reject manually entered disabled date [#610](https://github.com/TEDI-Design-System/angular/issues/610) ([#622](https://github.com/TEDI-Design-System/angular/issues/622)) ([a214973](https://github.com/TEDI-Design-System/angular/commit/a21497391f95891b34af944b8a88318385341dca))
+* **ellipsis:** prevent inherited nowrap from hiding ellipsis [#606](https://github.com/TEDI-Design-System/angular/issues/606) ([#623](https://github.com/TEDI-Design-System/angular/issues/623)) ([ae8fc6b](https://github.com/TEDI-Design-System/angular/commit/ae8fc6b709b21ef0b8fcd51f3e6d1d5d363a51ad))
+* **form-field:** wrapper is not required by controls anymore [#612](https://github.com/TEDI-Design-System/angular/issues/612) ([#617](https://github.com/TEDI-Design-System/angular/issues/617)) ([4594f0a](https://github.com/TEDI-Design-System/angular/commit/4594f0a5d606af6c73fcd5bc37074f8986ce7138))
+* **table:** design review changes [#463](https://github.com/TEDI-Design-System/angular/issues/463) ([74b16a5](https://github.com/TEDI-Design-System/angular/commit/74b16a5afa30f193459a9a80896086dbd67cae1f))
+* **tooltip:** better screen reader support [#45](https://github.com/TEDI-Design-System/angular/issues/45) ([#585](https://github.com/TEDI-Design-System/angular/issues/585)) ([f067bb2](https://github.com/TEDI-Design-System/angular/commit/f067bb26a5e1b04c57307b26b106aef1a96bc917))
+
+
+### Features
+
+* **icons:** bump core to 6.5.0 for expanded material symbols set [#604](https://github.com/TEDI-Design-System/angular/issues/604) ([#605](https://github.com/TEDI-Design-System/angular/issues/605)) ([72f64c7](https://github.com/TEDI-Design-System/angular/commit/72f64c7909f850a936cce7bdf82951373726d07f))
+* **textarea:** add new TEDI-ready component [#540](https://github.com/TEDI-Design-System/angular/issues/540) ([#542](https://github.com/TEDI-Design-System/angular/issues/542)) ([28e8b04](https://github.com/TEDI-Design-System/angular/commit/28e8b04a2ce5c8110b657814d880606eaab22b1a))
+
+
+### BREAKING CHANGES
+
+* **form-field:** form-field behavior changed, refer to migration guide
+
+# [8.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.0-rc.2...angular-8.0.0-rc.3) (2026-08-27)
+
+
+### Bug Fixes
+
+* **date-picker:** reject manually entered disabled date [#610](https://github.com/TEDI-Design-System/angular/issues/610) ([#622](https://github.com/TEDI-Design-System/angular/issues/622)) ([a214973](https://github.com/TEDI-Design-System/angular/commit/a21497391f95891b34af944b8a88318385341dca))
+
+# [8.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.0-rc.1...angular-8.0.0-rc.2) (2026-08-27)
+
+
+### Bug Fixes
+
+* **ellipsis:** prevent inherited nowrap from hiding ellipsis [#606](https://github.com/TEDI-Design-System/angular/issues/606) ([#623](https://github.com/TEDI-Design-System/angular/issues/623)) ([ae8fc6b](https://github.com/TEDI-Design-System/angular/commit/ae8fc6b709b21ef0b8fcd51f3e6d1d5d363a51ad))
+
+# [8.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.5...angular-8.0.0-rc.1) (2026-08-26)
+
+
+### Bug Fixes
+
+* **form-field:** wrapper is not required by controls anymore [#612](https://github.com/TEDI-Design-System/angular/issues/612) ([#617](https://github.com/TEDI-Design-System/angular/issues/617)) ([4594f0a](https://github.com/TEDI-Design-System/angular/commit/4594f0a5d606af6c73fcd5bc37074f8986ce7138))
+
+
+### BREAKING CHANGES
+
+* **form-field:** form-field behavior changed, refer to migration guide
+
 # [7.2.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-7.2.0-rc.4...angular-7.2.0-rc.5) (2026-08-19)
 
 
