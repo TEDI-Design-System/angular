@@ -291,7 +291,7 @@ describe("DateInputComponent", () => {
     expect(label?.length).toBeGreaterThan(0);
   });
 
-  it("renders a labelled tag close button that is described by the tag label", () => {
+  it("renders a tag close button named 'remove' and described by the tag label", () => {
     fixture.componentRef.setInput("mode", "multiple");
     fixture.componentRef.setInput("tags", [{ id: "a", label: "01.01.2026" }]);
     fixture.detectChanges();
@@ -302,10 +302,15 @@ describe("DateInputComponent", () => {
     ) as HTMLButtonElement;
     expect(removeBtn.getAttribute("aria-label")).toBeTruthy();
 
-    const describedById = removeBtn.getAttribute("aria-describedby");
-    expect(describedById).toBeTruthy();
-    const describedBy = tag.querySelector(`#${describedById}`);
-    expect(describedBy?.textContent).toContain("01.01.2026");
+    // The tag label is the button's *description*, not part of its name:
+    // TalkBack does not surface a name computed via aria-labelledby, so the
+    // distinguishing context is carried by aria-describedby instead.
+    expect(removeBtn.getAttribute("aria-labelledby")).toBeNull();
+    const describedBy = removeBtn.getAttribute("aria-describedby");
+    expect(describedBy).toBeTruthy();
+    expect(tag.querySelector(`[id="${describedBy}"]`)?.textContent).toContain(
+      "01.01.2026",
+    );
   });
 
   it("renders a clear button only when clearable and value is non-empty", () => {

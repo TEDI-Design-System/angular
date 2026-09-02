@@ -31,3 +31,9 @@
     [ariaLabel]="'remove' | tediTranslate"
   ></button>
 }
+
+<span class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+  @if (loading()) {
+    {{ "loading" | tediTranslate }}
+  }
+</span>
