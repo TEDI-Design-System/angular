@@ -1,0 +1,189 @@
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { Component, DebugElement } from "@angular/core";
+import { By } from "@angular/platform-browser";
+import {
+  PopoverContentComponent,
+  PopoverWidth,
+} from "./popover-content.component";
+import { PopoverComponent } from "../popover.component";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
+
+@Component({
+  template: `
+    <tedi-popover-content
+      [maxWidth]="width"
+      [title]="title"
+      [showClose]="showClose"
+    >
+      <span class="projected">Hello!</span>
+    </tedi-popover-content>
+  `,
+  standalone: true,
+  imports: [PopoverContentComponent],
+})
+class TestHostComponent {
+  width: PopoverWidth = "small";
+  title = "";
+  showClose = false;
+}
+
+describe("PopoverContentComponent", () => {
+  let fixture: ComponentFixture<TestHostComponent>;
+  let hostDE: DebugElement;
+  let popoverMock: Partial<PopoverComponent>;
+  let hidePopoverSpy: jest.Mock;
+
+  beforeEach(() => {
+    hidePopoverSpy = jest.fn();
+
+    popoverMock = {
+      hidePopover: hidePopoverSpy,
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: PopoverComponent, useValue: popoverMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+      imports: [TestHostComponent],
+    });
+
+    fixture = TestBed.createComponent(TestHostComponent);
+    hostDE = fixture.debugElement.query(By.directive(PopoverContentComponent));
+    fixture.detectChanges();
+  });
+
+  it("should create component", () => {
+    const comp = hostDE.componentInstance as PopoverContentComponent;
+    expect(comp).toBeTruthy();
+  });
+
+  it("should apply default classes (small)", () => {
+    const classList = hostDE.nativeElement.className.split(" ");
+    expect(classList).toContain("tedi-popover-content");
+    expect(classList).toContain("tedi-popover-content--small");
+  });
+
+  it("should update classes when maxWidth input changes", () => {
+    fixture.componentInstance.width = "large";
+    fixture.detectChanges();
+
+    const classes = hostDE.nativeElement.className;
+    expect(classes).toContain("tedi-popover-content--large");
+    expect(classes).not.toContain("tedi-popover-content--small");
+  });
+
+  it("should drop the width class for maxWidth 'none'", () => {
+    fixture.componentInstance.width = "none";
+    fixture.detectChanges();
+
+    const classes = hostDE.nativeElement.className;
+    expect(classes).toContain("tedi-popover-content");
+    expect(classes).not.toMatch(/tedi-popover-content--/);
+    expect(hostDE.nativeElement.style.width).toBe("");
+  });
+
+  it.each(["20rem", "340px", "50%"])(
+    "should apply a CSS length maxWidth (%s) inline instead of a preset class",
+    (length) => {
+      fixture.componentInstance.width = length;
+      fixture.detectChanges();
+
+      expect(hostDE.nativeElement.style.width).toBe(length);
+      expect(hostDE.nativeElement.className).not.toMatch(
+        /tedi-popover-content--/,
+      );
+    },
+  );
+
+  // jsdom's CSS parser rejects function values, so assert the resolved binding
+  // rather than the written style — browsers accept it.
+  it("should pass a function-value length through as the width", () => {
+    fixture.componentInstance.width = "min(90vw, 30rem)";
+    fixture.detectChanges();
+
+    const comp = hostDE.componentInstance as PopoverContentComponent;
+    expect(comp.customWidth()).toBe("min(90vw, 30rem)");
+    expect(hostDE.nativeElement.className).not.toMatch(
+      /tedi-popover-content--/,
+    );
+  });
+
+  it("should clear the inline width when switching back to a preset", () => {
+    fixture.componentInstance.width = "20rem";
+    fixture.detectChanges();
+    fixture.componentInstance.width = "medium";
+    fixture.detectChanges();
+
+    expect(hostDE.nativeElement.style.width).toBe("");
+    expect(hostDE.nativeElement.className).toContain(
+      "tedi-popover-content--medium",
+    );
+  });
+
+  describe("template branches", () => {
+    it("renders only projected content when no title & no close", () => {
+      // default: title = '', showClose = false
+      const projected = hostDE.query(By.css(".projected"));
+      expect(projected).toBeTruthy();
+      // no <h4> or button
+      expect(hostDE.query(By.css("h4"))).toBeNull();
+      expect(hostDE.query(By.css("button"))).toBeNull();
+    });
+
+    it("renders title only when title set, showClose = false", () => {
+      fixture.componentInstance.title = "My Title";
+      fixture.componentInstance.showClose = false;
+      fixture.detectChanges();
+
+      const h4 = hostDE.query(By.css("h4"));
+      expect(h4).toBeTruthy();
+      expect(h4.nativeElement.textContent).toBe("My Title");
+      const id = h4.attributes["id"];
+      expect(id).toBeTruthy();
+      expect(id).toMatch(/^popover-title-\d+$/);
+      // no button
+      expect(hostDE.query(By.css("button"))).toBeNull();
+    });
+
+    it("renders close only when showClose = true & no title", () => {
+      fixture.componentInstance.title = "";
+      fixture.componentInstance.showClose = true;
+      fixture.detectChanges();
+
+      const head = hostDE.query(By.css(".tedi-popover-content__head"));
+      expect(head).toBeTruthy();
+      // projected inside a div
+      expect(head.query(By.css(".projected"))).toBeTruthy();
+      const btn = head.query(By.css("button"));
+      expect(btn).toBeTruthy();
+      // closing-button default size is small
+      expect(btn.attributes["size"]).toBe("small");
+    });
+
+    it("renders title + close when both set", () => {
+      fixture.componentInstance.title = "T";
+      fixture.componentInstance.showClose = true;
+      fixture.detectChanges();
+
+      const head = hostDE.query(By.css(".tedi-popover-content__head"));
+      expect(head).toBeTruthy();
+      const h4 = head.query(By.css("h4"));
+      expect(h4.nativeElement.textContent).toBe("T");
+      const btn = head.query(By.css("button"));
+      expect(btn).toBeTruthy();
+      // when title present, button has no size attr
+      expect(btn.attributes["size"]).toBeUndefined();
+    });
+  });
+
+  it("should call popover.hidePopover(true) on close click", () => {
+    fixture.componentInstance.showClose = true;
+    fixture.detectChanges();
+
+    const btnDe = hostDE.query(By.css("button"));
+    btnDe.triggerEventHandler("click", {});
+
+    expect(hidePopoverSpy).toHaveBeenCalledWith(true);
+  });
+});
