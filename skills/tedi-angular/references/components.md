@@ -1852,6 +1852,56 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
 </tedi-horizontal-stepper>
 ```
 
+### TableOfContents
+**Selector:** `tedi-table-of-contents`
+**Composition:** compose from `tedi-table-of-contents-item` elements. An item's non-item content (a `tedi-link`, anchor or button) is its label; nested `tedi-table-of-contents-item` children become its sub-items (two levels, distinguished by indent). Renders a `nav` landmark wrapping a `role="list"` list; the active item carries `aria-current="true"`.
+**Inputs:**
+- `heading: string | null` — heading above the list; defaults to the `table-of-contents.title` translation (`Sisukord` in et). Pass `null` (or empty) to render headless — the `nav` keeps an accessible name via `aria-label`
+- `headingLevel: "h1"–"h6" = "h3"` — semantic level of the heading element; the visual style stays H4. Set it to match the surrounding page's heading outline (avoids skipped levels)
+- `variant: TableOfContentsVariant = "default"` — `default` renders inside a bordered card; `transparent` drops the card chrome and shows a continuous grey left rail
+- `activeId: string` — id of the active item; it gets the accent bar + active colour
+- `defaultOpen: boolean = true` — whether nested items are expanded by default; when `false`, a branch reveals its sub-items only while it is on the active trail (the active item or one of its ancestors)
+- `numbered: boolean = false` — render an auto-generated hierarchical number before each item (`1.`, `2.`, `2.1`)
+- `bordered: boolean = false` — draw a divider under each item except the last (sub-items included) so the list reads as separated rows
+- `sticky: boolean = true` — stick the container to the viewport while scrolling
+- `ariaLabel: string` — accessible name for the `nav` landmark; overrides the default (the heading via `aria-labelledby`, or the localised title when headless)
+
+**Sub-component:** `tedi-table-of-contents-item`
+- `itemId: string` — required to mark the item active when it matches the parent's `activeId` (named `itemId`, not `id`, to avoid shadowing the native attribute)
+- `separator: boolean = false` — render a separator below the item
+- Content projection: the item's link/label is the default slot; project trailing content (e.g. a `tedi-tag`) with the `[tediTocItemSuffix]` directive (`TableOfContentsItemSuffixDirective`) to render it right-aligned at the end of the row
+
+```html
+<tedi-table-of-contents heading="Sisukord" activeId="methods">
+  <tedi-table-of-contents-item itemId="intro">
+    <a tedi-link href="#intro" [underline]="false">Sissejuhatus</a>
+  </tedi-table-of-contents-item>
+  <tedi-table-of-contents-item itemId="methods">
+    <a tedi-link href="#methods" [underline]="false">Meetodid</a>
+    <tedi-table-of-contents-item itemId="methods-1">
+      <a tedi-link href="#methods-1" [underline]="false">Andmete kogumine</a>
+    </tedi-table-of-contents-item>
+  </tedi-table-of-contents-item>
+</tedi-table-of-contents>
+```
+
+**Mobile variant:** `tedi-table-of-contents-collapsible` — a bottom bar that opens the list in a bottom-sheet overlay; takes the same `tedi-table-of-contents-item` children. Render it on small viewports (e.g. behind a `tedi-show-at` / `tedi-hide-at`).
+- `heading: string | null` — bar/sheet title; defaults to the `table-of-contents.title` translation
+- `activeId: string`, `numbered: boolean = false` — same behavior as the desktop component
+- `sticky: boolean = true` — pin the bar to the bottom of the viewport; set `false` to render it inline
+- `ariaLabel: string` — accessible name for the sheet's navigation landmark and dialog; defaults to the visible title
+
+```html
+<tedi-table-of-contents-collapsible heading="Sisukord" activeId="methods">
+  <tedi-table-of-contents-item itemId="intro">
+    <a tedi-link href="#intro" [underline]="false">Sissejuhatus</a>
+  </tedi-table-of-contents-item>
+  <tedi-table-of-contents-item itemId="methods">
+    <a tedi-link href="#methods" [underline]="false">Meetodid</a>
+  </tedi-table-of-contents-item>
+</tedi-table-of-contents-collapsible>
+```
+
 ### Tabs
 **Selector:** `tedi-tabs`
 **Inputs:**

@@ -20,6 +20,11 @@ type StoryTableOfContentsComponent = TableOfContentsComponent & {
  **/
 const meta: Meta<StoryTableOfContentsComponent> = {
   title: "Community/Navigation/Table of Contents",
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
   argTypes: {
     heading: {
       control: "text",
