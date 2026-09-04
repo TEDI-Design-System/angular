@@ -17,12 +17,7 @@ import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-
 
 export type TableOfContentsVariant = "default" | "transparent";
 export type TableOfContentsHeadingLevel =
-  | "h1"
-  | "h2"
-  | "h3"
-  | "h4"
-  | "h5"
-  | "h6";
+  "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
 
 let nextUniqueId = 0;
 
@@ -41,7 +36,12 @@ let nextUniqueId = 0;
 @Component({
   selector: "tedi-table-of-contents",
   standalone: true,
-  imports: [CardComponent, CardContentComponent, TextComponent, NgTemplateOutlet],
+  imports: [
+    CardComponent,
+    CardContentComponent,
+    TextComponent,
+    NgTemplateOutlet,
+  ],
   templateUrl: "./table-of-contents.component.html",
   styleUrl: "./table-of-contents.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -123,7 +123,9 @@ export class TableOfContentsComponent {
     forwardRef(() => TableOfContentsItemComponent),
   );
 
-  private readonly titleLabel = this.translations.track("table-of-contents.title");
+  private readonly titleLabel = this.translations.track(
+    "table-of-contents.title",
+  );
 
   readonly resolvedHeading = computed(() => {
     const heading = this.heading();

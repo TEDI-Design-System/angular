@@ -2,39 +2,71 @@
   @if (resolvedHeading()) {
     @switch (headingLevel()) {
       @case ("h1") {
-        <h1 tedi-text modifiers="h4" class="tedi-table-of-contents__heading" [id]="headingId">
+        <h1
+          tedi-text
+          modifiers="h4"
+          class="tedi-table-of-contents__heading"
+          [id]="headingId"
+        >
           {{ resolvedHeading() }}
         </h1>
       }
       @case ("h2") {
-        <h2 tedi-text modifiers="h4" class="tedi-table-of-contents__heading" [id]="headingId">
+        <h2
+          tedi-text
+          modifiers="h4"
+          class="tedi-table-of-contents__heading"
+          [id]="headingId"
+        >
           {{ resolvedHeading() }}
         </h2>
       }
       @case ("h4") {
-        <h4 tedi-text modifiers="h4" class="tedi-table-of-contents__heading" [id]="headingId">
+        <h4
+          tedi-text
+          modifiers="h4"
+          class="tedi-table-of-contents__heading"
+          [id]="headingId"
+        >
           {{ resolvedHeading() }}
         </h4>
       }
       @case ("h5") {
-        <h5 tedi-text modifiers="h4" class="tedi-table-of-contents__heading" [id]="headingId">
+        <h5
+          tedi-text
+          modifiers="h4"
+          class="tedi-table-of-contents__heading"
+          [id]="headingId"
+        >
           {{ resolvedHeading() }}
         </h5>
       }
       @case ("h6") {
-        <h6 tedi-text modifiers="h4" class="tedi-table-of-contents__heading" [id]="headingId">
+        <h6
+          tedi-text
+          modifiers="h4"
+          class="tedi-table-of-contents__heading"
+          [id]="headingId"
+        >
           {{ resolvedHeading() }}
         </h6>
       }
       @default {
-        <h3 tedi-text modifiers="h4" class="tedi-table-of-contents__heading" [id]="headingId">
+        <h3
+          tedi-text
+          modifiers="h4"
+          class="tedi-table-of-contents__heading"
+          [id]="headingId"
+        >
           {{ resolvedHeading() }}
         </h3>
       }
     }
   }
   <nav
-    [attr.aria-labelledby]="!ariaLabel() && resolvedHeading() ? headingId : null"
+    [attr.aria-labelledby]="
+      !ariaLabel() && resolvedHeading() ? headingId : null
+    "
     [attr.aria-label]="ariaLabel() || (resolvedHeading() ? null : navLabel())"
   >
     <ul

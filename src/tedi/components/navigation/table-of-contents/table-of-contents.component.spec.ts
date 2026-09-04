@@ -95,7 +95,9 @@ describe("TableOfContentsComponent", () => {
     await createTree();
     fixture.componentRef.setInput("heading", "Sisukord");
     fixture.detectChanges();
-    const h3 = fixture.debugElement.query(By.css("h3.tedi-table-of-contents__heading"));
+    const h3 = fixture.debugElement.query(
+      By.css("h3.tedi-table-of-contents__heading"),
+    );
     expect(text(h3?.nativeElement)).toBe("Sisukord");
   });
 
@@ -104,10 +106,15 @@ describe("TableOfContentsComponent", () => {
     fixture.componentRef.setInput("heading", "Sisukord");
     fixture.componentRef.setInput("headingLevel", "h2");
     fixture.detectChanges();
-    expect(fixture.debugElement.query(By.css("h3.tedi-table-of-contents__heading"))).toBeNull();
-    const h2 = fixture.debugElement.query(By.css("h2.tedi-table-of-contents__heading")).nativeElement as HTMLElement;
+    expect(
+      fixture.debugElement.query(By.css("h3.tedi-table-of-contents__heading")),
+    ).toBeNull();
+    const h2 = fixture.debugElement.query(
+      By.css("h2.tedi-table-of-contents__heading"),
+    ).nativeElement as HTMLElement;
     expect(text(h2)).toBe("Sisukord");
-    const nav = fixture.debugElement.query(By.css("nav")).nativeElement as HTMLElement;
+    const nav = fixture.debugElement.query(By.css("nav"))
+      .nativeElement as HTMLElement;
     expect(nav.getAttribute("aria-labelledby")).toBe(h2.id);
   });
 
@@ -138,8 +145,10 @@ describe("TableOfContentsComponent", () => {
     await createTree();
     fixture.componentRef.setInput("heading", "Sisukord");
     fixture.detectChanges();
-    const nav = fixture.debugElement.query(By.css("nav")).nativeElement as HTMLElement;
-    const heading = fixture.debugElement.query(By.css("h3")).nativeElement as HTMLElement;
+    const nav = fixture.debugElement.query(By.css("nav"))
+      .nativeElement as HTMLElement;
+    const heading = fixture.debugElement.query(By.css("h3"))
+      .nativeElement as HTMLElement;
     expect(text(heading)).toBe("Sisukord");
     expect(nav.getAttribute("aria-labelledby")).toBe(heading.id);
     expect(nav.getAttribute("aria-label")).toBeNull();
@@ -150,7 +159,8 @@ describe("TableOfContentsComponent", () => {
     fixture.componentRef.setInput("heading", "Sisukord");
     fixture.componentRef.setInput("ariaLabel", "Lehe sisukord");
     fixture.detectChanges();
-    const nav = fixture.debugElement.query(By.css("nav")).nativeElement as HTMLElement;
+    const nav = fixture.debugElement.query(By.css("nav"))
+      .nativeElement as HTMLElement;
     expect(nav.getAttribute("aria-label")).toBe("Lehe sisukord");
     expect(nav.getAttribute("aria-labelledby")).toBeNull();
   });
@@ -159,7 +169,9 @@ describe("TableOfContentsComponent", () => {
     await createTree();
     expect(fixture.debugElement.query(By.css('[role="tree"]'))).toBeNull();
     expect(fixture.debugElement.query(By.css('[role="treeitem"]'))).toBeNull();
-    expect(fixture.debugElement.queryAll(By.css('[role="list"]')).length).toBeGreaterThan(0);
+    expect(
+      fixture.debugElement.queryAll(By.css('[role="list"]')).length,
+    ).toBeGreaterThan(0);
     expect(itemByLabel("Alpha")?.getAttribute("role")).toBe("listitem");
   });
 
@@ -168,7 +180,8 @@ describe("TableOfContentsComponent", () => {
     fixture.componentRef.setInput("heading", null);
     fixture.detectChanges();
     expect(fixture.debugElement.query(By.css("h3"))).toBeNull();
-    const nav = fixture.debugElement.query(By.css("nav")).nativeElement as HTMLElement;
+    const nav = fixture.debugElement.query(By.css("nav"))
+      .nativeElement as HTMLElement;
     expect(nav.getAttribute("aria-label")).toBe("Table of contents");
   });
 
@@ -192,25 +205,37 @@ describe("TableOfContentsComponent", () => {
     fixture.componentRef.setInput("variant", "transparent");
     fixture.detectChanges();
     expect(fixture.debugElement.query(By.css("tedi-card"))).toBeNull();
-    expect(fixture.debugElement.query(By.css(".tedi-table-of-contents--transparent"))).toBeTruthy();
+    expect(
+      fixture.debugElement.query(
+        By.css(".tedi-table-of-contents--transparent"),
+      ),
+    ).toBeTruthy();
     expect(linkByText("Alpha")).toBeTruthy();
   });
 
   it("applies the sticky modifier only when sticky", async () => {
     await createTree();
-    expect(fixture.debugElement.query(By.css(".tedi-table-of-contents--sticky"))).toBeTruthy();
+    expect(
+      fixture.debugElement.query(By.css(".tedi-table-of-contents--sticky")),
+    ).toBeTruthy();
 
     fixture.componentRef.setInput("sticky", false);
     fixture.detectChanges();
-    expect(fixture.debugElement.query(By.css(".tedi-table-of-contents--sticky"))).toBeNull();
+    expect(
+      fixture.debugElement.query(By.css(".tedi-table-of-contents--sticky")),
+    ).toBeNull();
   });
 
   it("applies the bordered modifier only when bordered", async () => {
     await createTree();
-    expect(fixture.debugElement.query(By.css(".tedi-table-of-contents--bordered"))).toBeNull();
+    expect(
+      fixture.debugElement.query(By.css(".tedi-table-of-contents--bordered")),
+    ).toBeNull();
 
     fixture.componentRef.setInput("bordered", true);
     fixture.detectChanges();
-    expect(fixture.debugElement.query(By.css(".tedi-table-of-contents--bordered"))).toBeTruthy();
+    expect(
+      fixture.debugElement.query(By.css(".tedi-table-of-contents--bordered")),
+    ).toBeTruthy();
   });
 });

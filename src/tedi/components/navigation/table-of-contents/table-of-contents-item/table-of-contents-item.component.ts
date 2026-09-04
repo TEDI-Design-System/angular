@@ -76,8 +76,7 @@ export class TableOfContentsItemComponent {
    */
   readonly isOpen = computed(
     () =>
-      this.hasChildren() &&
-      (this.root.defaultOpen() || this.containsActive()),
+      this.hasChildren() && (this.root.defaultOpen() || this.containsActive()),
   );
 
   private readonly siblings = computed(() =>

@@ -1,5 +1,10 @@
 import { Component, input } from "@angular/core";
-import { ComponentFixture, fakeAsync, flush, TestBed } from "@angular/core/testing";
+import {
+  ComponentFixture,
+  fakeAsync,
+  flush,
+  TestBed,
+} from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
@@ -10,7 +15,10 @@ import { TableOfContentsItemComponent } from "../table-of-contents-item/table-of
   standalone: true,
   imports: [TableOfContentsCollapsibleComponent, TableOfContentsItemComponent],
   template: `
-    <tedi-table-of-contents-collapsible [heading]="heading()" activeId="methods">
+    <tedi-table-of-contents-collapsible
+      [heading]="heading()"
+      activeId="methods"
+    >
       <tedi-table-of-contents-item itemId="intro">
         <a href="#intro">Sissejuhatus</a>
       </tedi-table-of-contents-item>
@@ -52,8 +60,9 @@ describe("TableOfContentsCollapsibleComponent", () => {
     document.querySelector(".tedi-table-of-contents__sheet");
 
   const collapsible = (): TableOfContentsCollapsibleComponent =>
-    fixture.debugElement.query(By.directive(TableOfContentsCollapsibleComponent))
-      .componentInstance;
+    fixture.debugElement.query(
+      By.directive(TableOfContentsCollapsibleComponent),
+    ).componentInstance;
 
   const openSheet = () => {
     barButton().click();
@@ -72,7 +81,9 @@ describe("TableOfContentsCollapsibleComponent", () => {
   }));
 
   it("renders the bottom bar with the heading and a closed trigger", () => {
-    expect(fixture.debugElement.query(By.css(".tedi-table-of-contents__bar"))).toBeTruthy();
+    expect(
+      fixture.debugElement.query(By.css(".tedi-table-of-contents__bar")),
+    ).toBeTruthy();
     expect(fixture.nativeElement.textContent).toContain("Sisukord");
     expect(barButton().getAttribute("aria-haspopup")).toBe("dialog");
     expect(sheet()).toBeNull();
@@ -83,7 +94,9 @@ describe("TableOfContentsCollapsibleComponent", () => {
 
     const panel = sheet();
     expect(panel).toBeTruthy();
-    const links = Array.from(panel!.querySelectorAll("a")).map((a) => a.textContent?.trim());
+    const links = Array.from(panel!.querySelectorAll("a")).map((a) =>
+      a.textContent?.trim(),
+    );
     expect(links).toContain("Sissejuhatus");
     expect(links).toContain("Andmete kogumine");
   }));
@@ -150,13 +163,17 @@ describe("TableOfContentsCollapsibleComponent", () => {
 
   it("ignores a second open request while the sheet is already open", fakeAsync(() => {
     openSheet();
-    expect(document.querySelectorAll(".tedi-table-of-contents__sheet")).toHaveLength(1);
+    expect(
+      document.querySelectorAll(".tedi-table-of-contents__sheet"),
+    ).toHaveLength(1);
 
     collapsible().toggle(true);
     fixture.detectChanges();
     flush();
 
-    expect(document.querySelectorAll(".tedi-table-of-contents__sheet")).toHaveLength(1);
+    expect(
+      document.querySelectorAll(".tedi-table-of-contents__sheet"),
+    ).toHaveLength(1);
     expect(sheet()).toBeTruthy();
   }));
 });
