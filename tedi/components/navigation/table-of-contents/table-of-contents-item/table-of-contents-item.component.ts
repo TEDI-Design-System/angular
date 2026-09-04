@@ -70,8 +70,15 @@ export class TableOfContentsItemComponent {
       this.isSelected() ||
       this.childItems().some((child) => child.containsActive()),
   );
-  /** Expand nested items only along the branch leading to the active item. */
-  readonly isOpen = computed(() => this.hasChildren() && this.containsActive());
+  /**
+   * Whether this item's nested group is expanded: always when the TOC is
+   * `defaultOpen`, otherwise only along the branch leading to the active item.
+   */
+  readonly isOpen = computed(
+    () =>
+      this.hasChildren() &&
+      (this.root.defaultOpen() || this.containsActive()),
+  );
 
   private readonly siblings = computed(() =>
     this.parent ? this.parent.childItems() : this.root.items(),

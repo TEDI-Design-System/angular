@@ -1809,15 +1809,17 @@ Render the prev/next arrows as labelled primary buttons with custom icons:
 - `heading: string | null` — heading above the list; defaults to the `table-of-contents.title` translation (`Sisukord` in et). Pass `null` (or empty) to render headless — the `nav` keeps an accessible name via `aria-label`
 - `headingLevel: "h1"–"h6" = "h3"` — semantic level of the heading element; the visual style stays H4. Set it to match the surrounding page's heading outline (avoids skipped levels)
 - `variant: TableOfContentsVariant = "default"` — `default` renders inside a bordered card; `transparent` drops the card chrome and shows a continuous grey left rail
-- `activeId: string` — id of the active item; it gets the accent bar + active colour, and the branch leading to it auto-expands
-- `padding: number` — inner padding in rem; defaults to the card medium padding token
+- `activeId: string` — id of the active item; it gets the accent bar + active colour
+- `defaultOpen: boolean = true` — whether nested items are expanded by default; when `false`, a branch reveals its sub-items only while it is on the active trail (the active item or one of its ancestors)
 - `numbered: boolean = false` — render an auto-generated hierarchical number before each item (`1.`, `2.`, `2.1`)
+- `bordered: boolean = false` — draw a divider under each item except the last (sub-items included) so the list reads as separated rows
 - `sticky: boolean = true` — stick the container to the viewport while scrolling
 - `ariaLabel: string` — accessible name for the `nav` landmark; overrides the default (the heading via `aria-labelledby`, or the localised title when headless)
 
 **Sub-component:** `tedi-table-of-contents-item`
 - `itemId: string` — required to mark the item active when it matches the parent's `activeId` (named `itemId`, not `id`, to avoid shadowing the native attribute)
 - `separator: boolean = false` — render a separator below the item
+- Content projection: the item's link/label is the default slot; project trailing content (e.g. a `tedi-tag`) with the `[tediTocItemSuffix]` directive (`TableOfContentsItemSuffixDirective`) to render it right-aligned at the end of the row
 
 ```html
 <tedi-table-of-contents heading="Sisukord" activeId="methods">

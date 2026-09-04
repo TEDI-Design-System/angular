@@ -78,7 +78,7 @@ describe("TableOfContentsCollapsibleComponent", () => {
     expect(sheet()).toBeNull();
   });
 
-  it("opens the sheet, listing the items and auto-expanding the active branch", fakeAsync(() => {
+  it("opens the sheet, listing the items including nested ones", fakeAsync(() => {
     openSheet();
 
     const panel = sheet();

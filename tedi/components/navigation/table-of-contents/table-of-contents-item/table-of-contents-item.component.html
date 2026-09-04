@@ -10,14 +10,17 @@
   <span class="tedi-table-of-contents__content">
     <ng-content />
   </span>
+  <ng-content select="[tediTocItemSuffix]" />
 </span>
+
+@if (separator()) {
+  <div class="tedi-table-of-contents__separator">
+    <tedi-separator />
+  </div>
+}
 
 @if (isOpen()) {
   <ul class="tedi-table-of-contents__group" role="list">
     <ng-content select="tedi-table-of-contents-item" />
   </ul>
-}
-
-@if (separator()) {
-  <tedi-separator />
 }

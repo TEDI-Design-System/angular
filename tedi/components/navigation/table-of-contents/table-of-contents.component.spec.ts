@@ -18,8 +18,10 @@ import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-
       [heading]="heading()"
       [headingLevel]="headingLevel()"
       [activeId]="activeId()"
+      [defaultOpen]="defaultOpen()"
       [variant]="variant()"
       [numbered]="numbered()"
+      [bordered]="bordered()"
       [sticky]="sticky()"
       [ariaLabel]="ariaLabel()"
     >
@@ -45,8 +47,10 @@ class TreeHostComponent {
   readonly heading = input<string | null | undefined>(undefined);
   readonly headingLevel = input<TableOfContentsHeadingLevel>("h3");
   readonly activeId = input<string>();
+  readonly defaultOpen = input(true);
   readonly variant = input<TableOfContentsVariant>("default");
   readonly numbered = input(false);
+  readonly bordered = input(false);
   readonly sticky = input(true);
   readonly ariaLabel = input<string>();
 }
@@ -115,8 +119,15 @@ describe("TableOfContentsComponent", () => {
     expect(itemByLabel("Bravo")?.getAttribute("aria-current")).toBeNull();
   });
 
-  it("expands only the active branch and keeps other branches collapsed", async () => {
+  it("always renders nested items, even when nothing is active", async () => {
     await createTree();
+    expect(linkByText("Alpha 1")).toBeTruthy();
+    expect(linkByText("Bravo 1")).toBeTruthy();
+  });
+
+  it("with defaultOpen=false, shows nested items only on the active branch", async () => {
+    await createTree();
+    fixture.componentRef.setInput("defaultOpen", false);
     fixture.componentRef.setInput("activeId", "a1");
     fixture.detectChanges();
     expect(linkByText("Alpha 1")).toBeTruthy();
@@ -192,5 +203,14 @@ describe("TableOfContentsComponent", () => {
     fixture.componentRef.setInput("sticky", false);
     fixture.detectChanges();
     expect(fixture.debugElement.query(By.css(".tedi-table-of-contents--sticky"))).toBeNull();
+  });
+
+  it("applies the bordered modifier only when bordered", async () => {
+    await createTree();
+    expect(fixture.debugElement.query(By.css(".tedi-table-of-contents--bordered"))).toBeNull();
+
+    fixture.componentRef.setInput("bordered", true);
+    fixture.detectChanges();
+    expect(fixture.debugElement.query(By.css(".tedi-table-of-contents--bordered"))).toBeTruthy();
   });
 });

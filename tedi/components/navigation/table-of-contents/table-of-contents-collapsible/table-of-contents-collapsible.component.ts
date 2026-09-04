@@ -57,6 +57,13 @@ export class TableOfContentsCollapsibleComponent implements OnDestroy {
   readonly heading = input<string | null | undefined>(undefined);
   /** Id of the currently active item. */
   readonly activeId = input<string>();
+  /**
+   * Whether nested items are expanded by default. When `false`, a branch reveals
+   * its sub-items only while it is on the active trail. Mirrors
+   * `tedi-table-of-contents` so projected items resolve it via the shared root.
+   * @default true
+   */
+  readonly defaultOpen = input<boolean>(true);
   /** Show auto-generated hierarchical numbers (`1.`, `2.`, `2.1`, …). */
   readonly numbered = input<boolean>(false);
   /**
