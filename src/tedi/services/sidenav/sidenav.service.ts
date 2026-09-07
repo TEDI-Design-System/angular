@@ -25,8 +25,11 @@ export class SideNavService {
   isCollapsed = signal(false);
   isMobileDrawerOpen = computed(() => this.isMobile() && this.isMobileOpen());
 
-  /** Last registered toggle. Registering a second one supersedes the first. */
-  private toggle: HTMLElement | null = null;
+  /**
+   * Last registered toggle. Registering a second one supersedes the first. Reactive so
+   * that (un)registering while the drawer is open re-resolves the measured anchor.
+   */
+  private readonly toggle = signal<HTMLElement | null>(null);
   private readonly offsetTop = signal(0);
 
   /**
