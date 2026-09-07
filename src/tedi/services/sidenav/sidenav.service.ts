@@ -54,7 +54,8 @@ export class SideNavService {
         return;
       }
 
-      const anchor = this.toggle?.closest("header") ?? this.toggle;
+      const toggle = this.toggle();
+      const anchor = toggle?.closest("header") ?? toggle;
 
       if (!anchor) {
         this.offsetTop.set(0);
@@ -86,12 +87,12 @@ export class SideNavService {
   }
 
   registerToggle(element: HTMLElement) {
-    this.toggle = element;
+    this.toggle.set(element);
   }
 
   unregisterToggle(element: HTMLElement) {
-    if (this.toggle === element) {
-      this.toggle = null;
+    if (this.toggle() === element) {
+      this.toggle.set(null);
     }
   }
 

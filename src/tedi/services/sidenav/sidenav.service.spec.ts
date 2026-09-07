@@ -255,5 +255,63 @@ describe("SideNavService", () => {
 
       expect(service.drawerTop()).toBe(0);
     });
+
+    it("should re-resolve the anchor when the toggle changes while open", () => {
+      jest
+        .spyOn(header, "getBoundingClientRect")
+        .mockReturnValue({ bottom: 56 } as DOMRect);
+      service.registerToggle(toggle);
+      openDrawer();
+      expect(service.drawerTop()).toBe(56);
+
+      const otherHeader = document.createElement("header");
+      const otherToggle = document.createElement("button");
+      otherHeader.appendChild(otherToggle);
+      document.body.appendChild(otherHeader);
+      jest
+        .spyOn(otherHeader, "getBoundingClientRect")
+        .mockReturnValue({ bottom: 120 } as DOMRect);
+
+      service.registerToggle(otherToggle);
+      TestBed.tick();
+
+      expect(service.drawerTop()).toBe(120);
+      otherHeader.remove();
+    });
+
+    it("should disconnect the observer and reset the offset when the toggle unregisters while open", () => {
+      const observers: { observe: jest.Mock; disconnect: jest.Mock }[] = [];
+      const originalResizeObserver = global.ResizeObserver;
+
+      global.ResizeObserver = class {
+        observe = jest.fn();
+        unobserve = jest.fn();
+        disconnect = jest.fn();
+
+        constructor() {
+          observers.push(this as unknown as (typeof observers)[number]);
+        }
+      } as unknown as typeof ResizeObserver;
+
+      try {
+        jest
+          .spyOn(header, "getBoundingClientRect")
+          .mockReturnValue({ bottom: 56 } as DOMRect);
+        service.registerToggle(toggle);
+        openDrawer();
+
+        expect(observers).toHaveLength(1);
+        expect(observers[0].observe).toHaveBeenCalledWith(header);
+        expect(observers[0].disconnect).not.toHaveBeenCalled();
+
+        service.unregisterToggle(toggle);
+        TestBed.tick();
+
+        expect(observers[0].disconnect).toHaveBeenCalled();
+        expect(service.drawerTop()).toBe(0);
+      } finally {
+        global.ResizeObserver = originalResizeObserver;
+      }
+    });
   });
 });
