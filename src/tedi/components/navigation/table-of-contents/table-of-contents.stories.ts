@@ -1,7 +1,7 @@
-import { isPlatformBrowser } from "@angular/common";
+import { isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
 import {
-  afterNextRender,
   Component,
+  effect,
   ElementRef,
   inject,
   OnDestroy,
@@ -190,6 +190,19 @@ const meta = {
         type: { summary: "string" },
       },
     },
+    hideOnScroll: {
+      description:
+        "`tedi-table-of-contents-collapsible` only: hide the bar when the user scrolls down and reveal it when they scroll up. Watches window scroll by default; set `scrollContainer` to watch a scrollable region instead.",
+      control: "boolean",
+      table: {
+        category: "Table of Contents",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    scrollContainer: {
+      table: { disable: true },
+    },
     ariaLabel: {
       description:
         "Accessible name for the `nav` landmark. Overrides the default (the heading, or the localised title when headless).",
@@ -227,6 +240,7 @@ export default meta;
 type Story = StoryObj<
   TableOfContentsComponent & {
     separator?: boolean;
+    hideOnScroll?: boolean;
   }
 >;
 
@@ -561,27 +575,36 @@ const CHAPTERS: DemoSection[] = Array.from({ length: 30 }, (_, i) => {
   imports: [
     TableOfContentsComponent,
     TableOfContentsItemComponent,
+    TableOfContentsCollapsibleComponent,
     LinkComponent,
     TextComponent,
+    ShowAtDirective,
+    HideAtDirective,
+    NgTemplateOutlet,
   ],
   template: `
-    <div #page class="scroll-page">
+    <ng-template #articleTpl>
+      <h1 tedi-text modifiers="h1">Pealkiri</h1>
+      @for (chapter of chapters; track chapter.id) {
+        <section [id]="chapter.id" class="scroll-page__section">
+          <h2 tedi-text modifiers="h3">{{ chapter.label }}</h2>
+          <p tedi-text>{{ lorem }}</p>
+          <p tedi-text>{{ lorem }}</p>
+        </section>
+        @for (child of chapter.children ?? []; track child.id) {
+          <section [id]="child.id" class="scroll-page__section">
+            <h3 tedi-text modifiers="h4">{{ child.label }}</h3>
+            <p tedi-text>{{ lorem }}</p>
+          </section>
+        }
+      }
+    </ng-template>
+
+    <!-- Desktop (lg and up): sticky sidebar inside a bounded scroll region. -->
+    <div *showAt="'lg'" #page class="scroll-page">
       <div class="scroll-page__grid">
         <article>
-          <h1 tedi-text modifiers="h1">Pealkiri</h1>
-          @for (chapter of chapters; track chapter.id) {
-            <section [id]="chapter.id" class="scroll-page__section">
-              <h2 tedi-text modifiers="h3">{{ chapter.label }}</h2>
-              <p tedi-text>{{ lorem }}</p>
-              <p tedi-text>{{ lorem }}</p>
-            </section>
-            @for (child of chapter.children ?? []; track child.id) {
-              <section [id]="child.id" class="scroll-page__section">
-                <h3 tedi-text modifiers="h4">{{ child.label }}</h3>
-                <p tedi-text>{{ lorem }}</p>
-              </section>
-            }
-          }
+          <ng-container [ngTemplateOutlet]="articleTpl" />
         </article>
         <tedi-table-of-contents
           heading="Sisukord"
@@ -613,6 +636,43 @@ const CHAPTERS: DemoSection[] = Array.from({ length: 30 }, (_, i) => {
         </tedi-table-of-contents>
       </div>
     </div>
+
+    <!-- Below lg: the sidebar collapses into a bottom bar + sheet. -->
+    <div *hideAt="'lg'" class="mobile-shell">
+      <div #page class="mobile-scroll">
+        <article>
+          <ng-container [ngTemplateOutlet]="articleTpl" />
+        </article>
+      </div>
+      <tedi-table-of-contents-collapsible
+        heading="Sisukord"
+        [activeId]="activeId()"
+        [sticky]="false"
+      >
+        @for (chapter of chapters; track chapter.id) {
+          <tedi-table-of-contents-item [itemId]="chapter.id">
+            <a
+              tedi-link
+              [href]="'#' + chapter.id"
+              [underline]="false"
+              (click)="selectSection(chapter.id, $event)"
+              >{{ chapter.label }}</a
+            >
+            @for (child of chapter.children ?? []; track child.id) {
+              <tedi-table-of-contents-item [itemId]="child.id">
+                <a
+                  tedi-link
+                  [href]="'#' + child.id"
+                  [underline]="false"
+                  (click)="selectSection(child.id, $event)"
+                  >{{ child.label }}</a
+                >
+              </tedi-table-of-contents-item>
+            }
+          </tedi-table-of-contents-item>
+        }
+      </tedi-table-of-contents-collapsible>
+    </div>
   `,
   styles: [
     `
@@ -628,7 +688,8 @@ const CHAPTERS: DemoSection[] = Array.from({ length: 30 }, (_, i) => {
         gap: 2rem;
         padding: 2rem;
       }
-      .scroll-page article > h1 {
+      .scroll-page article > h1,
+      .mobile-scroll article > h1 {
         margin-bottom: 1rem;
       }
       .scroll-page__section {
@@ -636,6 +697,17 @@ const CHAPTERS: DemoSection[] = Array.from({ length: 30 }, (_, i) => {
       }
       .scroll-page__section p {
         margin: 0.25rem 0 0;
+      }
+      .mobile-shell {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      .mobile-scroll {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 2rem;
       }
     `,
   ],
@@ -645,15 +717,24 @@ class TocStickyDemoComponent implements OnDestroy {
   readonly lorem = LOREM;
   readonly activeId = signal(CHAPTERS[0].id);
 
-  private readonly page =
-    viewChild.required<ElementRef<HTMLDivElement>>("page");
+  // Resolves to whichever layout is rendered — the desktop scroll box or the
+  // mobile scroll area.
+  private readonly page = viewChild<ElementRef<HTMLDivElement>>("page");
   private readonly platformId = inject(PLATFORM_ID);
   private seeking = false;
   private seekTimeout?: ReturnType<typeof setTimeout>;
   private observer?: IntersectionObserver;
 
   constructor() {
-    afterNextRender(() => this.trackActiveSection());
+    // Re-attach the scroll-spy to the active scroll container whenever the
+    // layout swaps between the desktop sidebar and the mobile collapsible.
+    effect(() => {
+      const root = this.page()?.nativeElement;
+      this.observer?.disconnect();
+      if (root && isPlatformBrowser(this.platformId)) {
+        this.observeSections(root);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -661,13 +742,13 @@ class TocStickyDemoComponent implements OnDestroy {
     clearTimeout(this.seekTimeout);
   }
 
-  // Smooth-scroll the page to the clicked section; guard the observer during the
-  // scroll so the active marker doesn't flicker through the sections it passes.
+  // Smooth-scroll the active scroll container to the clicked section; guard the
+  // observer during the scroll so the marker doesn't flicker through sections.
   selectSection(id: string, event: Event): void {
     event.preventDefault();
-    const root = this.page().nativeElement;
-    const target = root.querySelector<HTMLElement>(`#${id}`);
-    if (!target) return;
+    const root = this.page()?.nativeElement;
+    const target = root?.querySelector<HTMLElement>(`#${id}`);
+    if (!root || !target) return;
     this.seeking = true;
     this.activeId.set(id);
     clearTimeout(this.seekTimeout);
@@ -681,10 +762,8 @@ class TocStickyDemoComponent implements OnDestroy {
     });
   }
 
-  // Scroll-spy: highlight the chapter currently in view.
-  private trackActiveSection(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    const root = this.page().nativeElement;
+  // Scroll-spy: highlight the chapter currently in view within `root`.
+  private observeSections(root: HTMLElement): void {
     const ids = this.chapters.flatMap((c) => [
       c.id,
       ...(c.children ?? []).map((child) => child.id),
@@ -903,6 +982,7 @@ export const Collapsible: Story = {
     activeId: "methods",
     numbered: false,
     sticky: false,
+    hideOnScroll: false,
     separator: false,
   },
   render: (args) => ({
@@ -952,7 +1032,45 @@ export const Collapsible: Story = {
           [activeId]="activeId"
           [numbered]="numbered"
           [sticky]="sticky"
+          [hideOnScroll]="hideOnScroll"
           [ariaLabel]="ariaLabel"
+        >
+          ${controllableNestedItems}
+        </tedi-table-of-contents-collapsible>
+      </div>
+    `,
+  }),
+};
+
+/**
+ * `hideOnScroll` on `tedi-table-of-contents-collapsible`: the bar floats over the
+ * bottom of the content and slides away as the reader scrolls down, returning on
+ * scroll up (or at the top).
+ */
+export const CollapsibleHideOnScroll: Story = {
+  parameters: {
+    layout: "fullscreen",
+    fullWidth: true,
+    controls: { exclude: ["variant", "itemId", "headingLevel"] },
+  },
+  render: () => ({
+    props: { separator: false },
+    template: `
+      <div style="position: relative; height: 100vh;">
+        <div #scroll style="height: 100%; overflow-y: auto; padding: var(--layout-page-spacing-top) var(--layout-page-spacing-x) 5rem; background: var(--general-surface-tertiary);">
+          <h2 tedi-text modifiers="h1">Tervisedeklaratsioon</h2>
+          <p tedi-text color="secondary" style="margin: 0.5rem 0 2rem;">
+            Scroll down, the bar hides. Scroll up, it reappears.
+          </p>
+          ${Array(6)
+            .fill(`<p tedi-text style="margin-bottom: 1.5rem;">${LOREM}</p>`)
+            .join("")}
+        </div>
+        <tedi-table-of-contents-collapsible
+          heading="Sisukord"
+          activeId="methods"
+          [hideOnScroll]="true"
+          [scrollContainer]="scroll"
         >
           ${controllableNestedItems}
         </tedi-table-of-contents-collapsible>

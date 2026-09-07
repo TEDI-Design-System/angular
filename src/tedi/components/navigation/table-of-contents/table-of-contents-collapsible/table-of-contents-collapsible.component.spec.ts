@@ -1,4 +1,4 @@
-import { Component, input } from "@angular/core";
+import { ApplicationRef, Component, input } from "@angular/core";
 import {
   ComponentFixture,
   fakeAsync,
@@ -176,4 +176,197 @@ describe("TableOfContentsCollapsibleComponent", () => {
     ).toHaveLength(1);
     expect(sheet()).toBeTruthy();
   }));
+});
+
+@Component({
+  standalone: true,
+  imports: [TableOfContentsCollapsibleComponent, TableOfContentsItemComponent],
+  template: `
+    <tedi-table-of-contents-collapsible
+      heading="Sisukord"
+      [hideOnScroll]="hideOnScroll()"
+    >
+      <tedi-table-of-contents-item itemId="intro">
+        <a href="#intro">Sissejuhatus</a>
+      </tedi-table-of-contents-item>
+    </tedi-table-of-contents-collapsible>
+  `,
+})
+class ScrollHostComponent {
+  readonly hideOnScroll = input(true);
+}
+
+describe("TableOfContentsCollapsibleComponent hideOnScroll", () => {
+  let fixture: ComponentFixture<ScrollHostComponent>;
+  let collapsible: TableOfContentsCollapsibleComponent;
+  let realRaf: typeof window.requestAnimationFrame;
+  let scrollY = 0;
+
+  // Run each requestAnimationFrame callback synchronously so a scroll event
+  // resolves to a bar state within the same tick.
+  const runFramesSynchronously = () => {
+    window.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    }) as typeof window.requestAnimationFrame;
+  };
+
+  beforeEach(() => {
+    scrollY = 0;
+    Object.defineProperty(window, "scrollY", {
+      configurable: true,
+      get: () => scrollY,
+    });
+    realRaf = window.requestAnimationFrame;
+    runFramesSynchronously();
+
+    TestBed.configureTestingModule({
+      imports: [ScrollHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "en" }],
+    });
+
+    fixture = TestBed.createComponent(ScrollHostComponent);
+    fixture.detectChanges();
+    // Flush afterNextRender so the component attaches its scroll listener.
+    TestBed.inject(ApplicationRef).tick();
+    collapsible = fixture.debugElement.query(
+      By.directive(TableOfContentsCollapsibleComponent),
+    ).componentInstance;
+  });
+
+  afterEach(() => {
+    window.requestAnimationFrame = realRaf;
+    Object.defineProperty(window, "scrollY", { configurable: true, value: 0 });
+  });
+
+  const scrollTo = (y: number) => {
+    scrollY = y;
+    window.dispatchEvent(new Event("scroll"));
+  };
+
+  it("hides the bar when scrolling down", () => {
+    scrollTo(50);
+    expect(collapsible.barHidden()).toBe(true);
+  });
+
+  it("reveals the bar when scrolling back up", () => {
+    scrollTo(50);
+    expect(collapsible.barHidden()).toBe(true);
+
+    scrollTo(20);
+    expect(collapsible.barHidden()).toBe(false);
+  });
+
+  it("keeps the bar visible for downward scrolls near the top", () => {
+    // Moved down, but still within the top zone (<= 8px), so the bar stays.
+    scrollTo(7);
+    expect(collapsible.barHidden()).toBe(false);
+  });
+
+  it("ignores sub-pixel scroll jitter", () => {
+    scrollTo(100);
+    scrollTo(50);
+    expect(collapsible.barHidden()).toBe(false);
+
+    // A 2px delta is below the 4px threshold, so the bar state is untouched.
+    scrollTo(52);
+    expect(collapsible.barHidden()).toBe(false);
+  });
+
+  it("keeps the bar visible while hideOnScroll is off", () => {
+    scrollTo(50);
+    expect(collapsible.barHidden()).toBe(true);
+
+    fixture.componentRef.setInput("hideOnScroll", false);
+    fixture.detectChanges();
+
+    scrollTo(120);
+    expect(collapsible.barHidden()).toBe(false);
+  });
+
+  it("coalesces bursts of scroll events into a single frame", () => {
+    const frames: FrameRequestCallback[] = [];
+    window.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+      frames.push(callback);
+      return frames.length;
+    }) as typeof window.requestAnimationFrame;
+
+    scrollTo(50);
+    scrollTo(90);
+    expect(frames).toHaveLength(1);
+
+    frames[0](0);
+    expect(collapsible.barHidden()).toBe(true);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [TableOfContentsCollapsibleComponent, TableOfContentsItemComponent],
+  template: `
+    <div #scroll class="scroll-region"></div>
+    <tedi-table-of-contents-collapsible
+      heading="Sisukord"
+      [hideOnScroll]="true"
+      [scrollContainer]="scroll"
+    >
+      <tedi-table-of-contents-item itemId="intro">
+        <a href="#intro">Sissejuhatus</a>
+      </tedi-table-of-contents-item>
+    </tedi-table-of-contents-collapsible>
+  `,
+})
+class ScrollContainerHostComponent {}
+
+describe("TableOfContentsCollapsibleComponent hideOnScroll with a scrollContainer", () => {
+  let fixture: ComponentFixture<ScrollContainerHostComponent>;
+  let collapsible: TableOfContentsCollapsibleComponent;
+  let region: HTMLElement;
+  let realRaf: typeof window.requestAnimationFrame;
+  let scrollTop = 0;
+
+  beforeEach(() => {
+    scrollTop = 0;
+    realRaf = window.requestAnimationFrame;
+    window.requestAnimationFrame = ((callback: FrameRequestCallback) => {
+      callback(0);
+      return 0;
+    }) as typeof window.requestAnimationFrame;
+
+    TestBed.configureTestingModule({
+      imports: [ScrollContainerHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "en" }],
+    });
+
+    fixture = TestBed.createComponent(ScrollContainerHostComponent);
+    fixture.detectChanges();
+    region = fixture.nativeElement.querySelector(".scroll-region");
+    // jsdom has no layout, so script the container's scrollTop. Define it before
+    // ApplicationRef.tick() runs the setup, which reads it to seed the position.
+    Object.defineProperty(region, "scrollTop", {
+      configurable: true,
+      get: () => scrollTop,
+    });
+    TestBed.inject(ApplicationRef).tick();
+    collapsible = fixture.debugElement.query(
+      By.directive(TableOfContentsCollapsibleComponent),
+    ).componentInstance;
+  });
+
+  afterEach(() => {
+    window.requestAnimationFrame = realRaf;
+  });
+
+  const scrollTo = (y: number) => {
+    scrollTop = y;
+    region.dispatchEvent(new Event("scroll"));
+  };
+
+  it("hides on the container's scroll-down and reveals on scroll-up", () => {
+    scrollTo(50);
+    expect(collapsible.barHidden()).toBe(true);
+
+    scrollTo(10);
+    expect(collapsible.barHidden()).toBe(false);
+  });
 });

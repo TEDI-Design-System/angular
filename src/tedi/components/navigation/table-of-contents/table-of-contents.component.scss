@@ -177,6 +177,7 @@
   border-top: var(--tedi-borders-01) solid var(--card-border-primary);
   border-top-left-radius: var(--card-radius-rounded);
   border-top-right-radius: var(--card-radius-rounded);
+  transition: transform 0.3s ease;
 }
 
 .tedi-table-of-contents__bar--static {
@@ -185,6 +186,16 @@
 
 .tedi-table-of-contents__bar--hidden {
   display: none;
+}
+
+.tedi-table-of-contents__bar--tucked {
+  transform: translateY(100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tedi-table-of-contents__bar {
+    transition: none;
+  }
 }
 
 .tedi-table-of-contents__bar-title {
