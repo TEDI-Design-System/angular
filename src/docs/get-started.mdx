@@ -2,7 +2,7 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 <Meta name="Get Started" title="Documentation/Get started" />
 
-# Get started with @tehik-design-system/angular
+# Get started with @tedi-design-system/angular
 
 ---
 
@@ -11,6 +11,11 @@ import { Meta } from "@storybook/addon-docs/blocks";
 ```bash
 npm install @tedi-design-system/angular
 ```
+
+Supported Angular versions are **Angular 20, 21 and 22** — the three latest majors, following
+[Angular's own release model](https://angular.dev/reference/releases). See
+[Supported versions](https://github.com/TEDI-Design-System/general/wiki/Supported-versions) for the
+support policy.
 
 ### 2. Add TEDI Provider (Theme + Language)
 
@@ -51,22 +56,29 @@ This will:
 
 ### 4. Import components from the design system
 
-Components come from the tedi or community folders:
+Components are published as two separate entry points:
 
 ```ts
-import { SomeComponent } from "@tedi-design-system/angular/tedi";
-import { SomeComponent } from "@tedi-design-system/angular/community";
+import { ButtonComponent } from "@tedi-design-system/angular/tedi";
+import { FloatingButtonComponent } from "@tedi-design-system/angular/community";
 ```
 
+**TEDI-Ready** components are maintained by the TEDI team and meet the full
+[Definition of Done](https://github.com/TEDI-Design-System/general/wiki/Definition-of-Done).
+**Community** components are contributed and held to a lighter standard. Prefer a TEDI-Ready
+component where one exists.
+
 ### 5. Use the imported components in your standalone components
+
+Most TEDI components are attribute selectors, applied to a native element rather than used as a
+tag of their own:
 
 ```ts
 @Component({
   selector: "app-example",
-  imports: [SomeComponent],
-  template: <SomeComponent />
+  imports: [ButtonComponent],
+  template: `<button tedi-button>Create</button>`,
 })
-
 export class ExampleComponent {}
 ```
 
@@ -74,32 +86,39 @@ export class ExampleComponent {}
 
 # Theming
 
-TEDI uses a theme class applied directly to the `<html>` element. Theme value is stored in **"tedi-theme"** cookie.
+TEDI applies the active theme as a class on the `<html>` element. The value is stored in the
+**"tedi-theme"** cookie and managed by `provideTedi` and `ThemeService`.
 
-Available themes:
+Only two themes ship with the library's CSS:
 
-- `default`
-- `dark`
-- `rit`
+| Theme     | Class                 |
+| --------- | --------------------- |
+| `default` | `tedi-theme--default` |
+| `dark`    | `tedi-theme--dark`    |
 
-Classes applied:
+Any other theme is a **custom theme and is not bundled** — you generate it from your project's Figma
+variables with the [TEDI Figma Variable Exporter plugin](https://www.figma.com/community/plugin/1612732083806730958),
+add the generated CSS to your `angular.json` styles, and then pass its name. `ThemeService` accepts
+any string, so a missing stylesheet fails silently — the class lands on `<html>` with no variables
+behind it and components keep rendering with the default theme's values that `:root` provides. See
+[Custom theming](/docs/documentation-custom-theming--docs) for the full walkthrough.
 
-- `tedi-theme--default`
-- `tedi-theme--dark`
-- `tedi-theme--rit`
-
-Theme switching with ThemeService
+Theme switching with `ThemeService`:
 
 ```ts
-import { Component } from "@angular/core";
-import { ThemeService, Theme } from "@tedi-design-system/angular/tedi";
+import { Component, inject } from "@angular/core";
+import {
+  ThemeService,
+  Theme,
+  ButtonComponent,
+} from "@tedi-design-system/angular/tedi";
 
 @Component({
   selector: "app-theme-toggle",
+  imports: [ButtonComponent],
   template: `
-    <button (click)="setTheme('default')">Default</button>
-    <button (click)="setTheme('dark')">Dark</button>
-    <button (click)="setTheme('rit')">Rit</button>
+    <button tedi-button (click)="setTheme('default')">Default</button>
+    <button tedi-button (click)="setTheme('dark')">Dark</button>
   `,
 })
 export class ThemeToggleComponent {
@@ -136,7 +155,7 @@ Available languages are defined in your translation service, e.g.:
 
 ```ts
 import { ApplicationConfig } from "@angular/core";
-import { provideTedi } from "@tedi-design-system/angular";
+import { provideTedi } from "@tedi-design-system/angular/tedi";
 
 export const appConfig: ApplicationConfig = {
   providers: [

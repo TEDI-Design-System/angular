@@ -18,31 +18,70 @@ Angular component library with 40+ accessible, standalone components. Built on A
 
 ## Authoritative Sources
 
-This skill bundles a snapshot of the API and patterns, but the library is public and ships fast. When a component, input, or default listed below feels stale or absent, treat these as the source of truth and fetch from them.
+This skill teaches the integration idiom and the traps. It is **not** an input reference: the
+library ships fast and any input list here would be stale. Read inputs from the installed package.
 
-### Pin to the consumer's installed version
+### Read the installed package, not the internet
 
-Before fetching source, **determine which version of `@tedi-design-system/angular` the project actually has installed** and browse the matching git tag — not `main`. The repo's release tags follow the pattern `angular-<version>` (e.g. `angular-7.1.0-rc.9`, `angular-7.1.0-rc.4`).
+The consumer's `node_modules` is the best source available: it is the exact version their code
+compiles against, it needs no network, and it is greppable with ordinary tools. Prefer it over
+GitHub and Storybook in every case.
 
-1. Read the resolved version from the project — `package.json`'s `dependencies."@tedi-design-system/angular"`, or `npm ls @tedi-design-system/angular`, or the lockfile entry. Strip any range prefix (`^`, `~`).
-2. Construct the tag URL: `https://github.com/TEDI-Design-System/angular/tree/angular-<version>/...`
-3. If the resolved version is a pre-release or the tag doesn't exist (rare), fall back to `main` and note the version mismatch when answering.
+```
+node_modules/@tedi-design-system/angular/tedi/index.d.ts       # TEDI-Ready: every component
+node_modules/@tedi-design-system/angular/community/index.d.ts  # Community
+node_modules/@tedi-design-system/core/tokens.json              # every design token, resolved
+```
 
-**Example** for a project on `7.1.0-rc.9`:
-- TEDI-Ready components: `https://github.com/TEDI-Design-System/angular/tree/angular-7.1.0-rc.9/tedi/components`
-- Barrel export: `https://github.com/TEDI-Design-System/angular/blob/angular-7.1.0-rc.9/tedi/index.ts`
-- Specific component: `https://github.com/TEDI-Design-System/angular/blob/angular-7.1.0-rc.9/tedi/components/buttons/button/button.component.ts`
+ng-packagr rolls each entry point into **one flattened declaration file** rather than a
+per-component tree, so `tedi/index.d.ts` is a single greppable catalog of the whole library. JSDoc
+is preserved, and Angular's compiler metadata makes each component's **selector** and **required
+inputs** machine-readable. That matters more here than in React: a selector cannot be inferred from
+a class name, and getting it wrong renders nothing with no error.
+[references/components.md](references/components.md) has the commands.
+
+Confirm the version you are reading, so you can say what your answer applies to:
+
+```bash
+npm ls @tedi-design-system/angular @tedi-design-system/core
+```
+
+### When there is no install to read
+
+Only when `node_modules` is unavailable (planning before install, or reviewing a diff), fall back to
+the public repo, pinned to the version in `package.json`.
+
+**Tag format is `angular-<version>`** (e.g. `angular-8.0.1-rc.5`). Every release, pre-releases
+included, is tagged, so use the tag rather than `main`.
+
+> **Ignore the legacy `v*` tags.** The repo also carries ~430 old `v<version>` tags, the newest of
+> which (`v11.0.0-rc.5`, January 2025) has a *higher* version number than any current release. They
+> predate the package as it ships today. Sorting tags by version and taking the highest gets you
+> year-old code. Match `angular-*` only.
+
+**Source lives under `src/`**: TEDI-Ready in `src/tedi/components/`, Community in
+`src/community/components/`, barrels at `src/tedi/index.ts` and `src/community/index.ts`. Fetch raw
+files, not blob pages:
+
+```
+https://raw.githubusercontent.com/TEDI-Design-System/angular/angular-8.0.1-rc.5/src/tedi/index.ts
+https://raw.githubusercontent.com/TEDI-Design-System/angular/angular-8.0.1-rc.5/src/tedi/components/buttons/button/button.component.ts
+```
+
+In source, a component's spec is its `selector`, its `input()` / `model()` / `output()` declarations
+with their JSDoc, its exported type aliases, and its `hostDirectives`.
 
 ### Canonical references
 
-- **Source code & releases**: [github.com/TEDI-Design-System/angular](https://github.com/TEDI-Design-System/angular) — TEDI-Ready components live under `tedi/components/`, community under `community/components/` (note: no `src/` prefix). The barrel export `tedi/index.ts` is the canonical list of TEDI-Ready exports. Always prefer the version-pinned tag URLs (see above) over `main` when consulting source.
-- **Live Storybook (interactive docs + prop tables)**: [storybook.tedi.ee/angular/main](https://storybook.tedi.ee/angular/main/?path=/docs/documentation-get-started--get-started) — has every component's args table, default values, and runnable examples (Compodoc-generated). Note that the public Storybook tracks `main`; if it disagrees with the consumer's installed tag, the tag wins.
+- **Source & tags**: [github.com/TEDI-Design-System/angular](https://github.com/TEDI-Design-System/angular)
+- **Live Storybook (Compodoc args tables + runnable examples)**: [storybook.tedi.ee/angular/main](https://storybook.tedi.ee/angular/main/?path=/docs/documentation-get-started--get-started). It tracks `main`, so the installed bundle wins on any disagreement.
 - **Design system wiki** (cross-framework guidelines): [github.com/TEDI-Design-System/general/wiki](https://github.com/TEDI-Design-System/general/wiki)
-- **Releases & changelog**: [github.com/TEDI-Design-System/angular/releases](https://github.com/TEDI-Design-System/angular/releases), [CHANGELOG.md](https://github.com/TEDI-Design-System/angular/blob/main/CHANGELOG.md), [Issues](https://github.com/TEDI-Design-System/angular/issues)
+- **Releases & changelog**: [releases](https://github.com/TEDI-Design-System/angular/releases), [CHANGELOG.md](https://github.com/TEDI-Design-System/angular/blob/main/CHANGELOG.md), [issues](https://github.com/TEDI-Design-System/angular/issues)
 - **npm**: [@tedi-design-system/angular](https://www.npmjs.com/package/@tedi-design-system/angular)
-- **Sibling packages**: [@tedi-design-system/core](https://www.npmjs.com/package/@tedi-design-system/core) (tokens, SCSS, icons), [@tedi-design-system/react](https://www.npmjs.com/package/@tedi-design-system/react) (React counterpart — useful for behavioral parity questions)
+- **Sibling packages**: [@tedi-design-system/core](https://www.npmjs.com/package/@tedi-design-system/core) (tokens, SCSS, icons), [@tedi-design-system/react](https://www.npmjs.com/package/@tedi-design-system/react) (useful for behavioural parity questions)
 
-**Verification tip**: if the user asks about a recently added component or an input you're unsure of, fetch the relevant `.component.ts` file from the version-pinned tag (e.g. `tedi/components/<category>/<name>/<name>.component.ts`) — the `input()` / `model()` / `output()` declarations and their JSDoc, plus the component's exported type aliases, are the canonical spec.
+**Never invent an input or a selector.** If you can't find it in the type bundle, it doesn't exist.
+Say so instead of guessing a plausible name.
 
 ## Installation
 
@@ -138,7 +177,9 @@ TEDI uses two selector styles, and mixing them up is the most common integration
 - **Element selectors** are standalone wrappers — use them as their own tag:
   - `tedi-icon`, `tedi-modal`, `tedi-date-picker`, `tedi-form-field`, `tedi-alert`, `tedi-select`, `tedi-card`
 
-When in doubt, check the `selector` in the component's `.component.ts` at the pinned tag.
+Never guess: the selector is machine-readable in the installed type bundle. See
+[references/components.md](references/components.md) for the one-line command that prints every
+component's real selector.
 
 ### Signal-based inputs
 
@@ -151,6 +192,7 @@ Inputs are signals. Bind them like any Angular input; two-way `model()` inputs s
 <!-- two-way model() -->
 <tedi-modal [(open)]="isOpen">…</tedi-modal>
 <input tedi-text-field [(value)]="email" />
+<tedi-date-field inputId="date" [(value)]="selectedDate" />
 ```
 
 Some components accept breakpoint-aware input values (e.g. an object keyed by breakpoint) — verify the input type against the component source.
@@ -185,7 +227,12 @@ export class SignupComponent {
 }
 ```
 
-TEDI ships a full set of form controls (text, number, select, checkbox/radio groups, toggle, date/time, etc.). For the current roster, the form-field structure, and per-control usage, see [references/forms.md](references/forms.md) and the barrel export (`tedi/index.ts`).
+Form controls: `TextFieldComponent`, `NumberFieldComponent`, `SearchComponent`, `SliderComponent`,
+`CheckboxGroupComponent`, `RadioGroupComponent`, `ToggleComponent`, `SelectComponent`,
+`DateFieldComponent`, `TimeFieldComponent`. Note that `CheckboxComponent` styles a native
+checkbox rather than implementing `ControlValueAccessor`, and `DropdownComponent` is an overlay,
+not a form control. See [references/forms.md](references/forms.md) for the form-field structure,
+value shapes, and per-control usage.
 
 ## Theming
 
@@ -241,17 +288,17 @@ Verify the exact `ToastService.open` config and `tedi-alert` inputs against the 
 A handful of mistakes account for most TEDI integration issues. Avoid them up front:
 
 - **Import from `/tedi` or `/community`, never the package root.** `@tedi-design-system/angular` is not a valid runtime import path — the package has explicit entry points (`@tedi-design-system/angular/tedi`, `@tedi-design-system/angular/community`, `@tedi-design-system/angular/index.css`). Importing from the root will fail.
-- **Prefer TEDI-Ready over Community whenever possible.** Several Community components are deprecated in favor of TEDI-Ready equivalents, and the set with no TEDI-Ready alternative yet shifts over time — check the barrel exports / component JSDoc / Storybook for the current deprecation status before reaching into Community. See [references/components.md](references/components.md).
+- **Prefer TEDI-Ready over Community, and always write the entry point explicitly.** In Angular the two namespaces genuinely collide: 24 selectors are declared in *both*, under *identical class names* (`tedi-card`, `tedi-modal`, `tedi-accordion`, `tedi-tabs`, `tedi-dropdown`, `tedi-form-field`, `tedi-pagination`, `tedi-search`, `tedi-tag`, the checkbox/radio groups). `CardComponent` from `/community` and from `/tedi` are different components with different inputs behind the same `<tedi-card>` tag, so nothing at the usage site tells you which you got and it still compiles. An auto-import picks whichever it finds first. See [references/components.md](references/components.md).
 - **Match the selector style.** Attribute selectors go on native elements (`<button tedi-button>`, `<input tedi-text-field>`, `<label tedi-label>` — never `<tedi-label>`); element selectors are their own tags (`<tedi-modal>`, `<tedi-icon>`). Getting this wrong yields a silent no-op or a template error.
-- **Use design tokens, not hardcoded colors.** Reach for `var(--tedi-color-*)`, `var(--tedi-spacing-*)`, etc. from `@tedi-design-system/core` instead of hex codes. This is what makes theme switching and brand overrides work.
-- **Do not add CSS `var()` fallbacks.** Write `var(--tedi-spacing-4)`, not `var(--tedi-spacing-4, 16px)` — fallbacks defeat token-driven theming.
+- **Use design tokens, not hardcoded colors.** Prefer the semantic roles (`var(--general-surface-primary)`, `var(--general-text-secondary)`) and drop to a `--tedi-*` primitive only when no semantic role fits. The legacy `--tedi-color-*` / `--tedi-spacing-*` names are gone: look names up in `node_modules/@tedi-design-system/core/tokens.json`, see [references/theming.md](references/theming.md).
+- **Do not add CSS `var()` fallbacks.** Write `var(--tedi-dimensions-04)`, not `var(--tedi-dimensions-04, 16px)`; fallbacks defeat token-driven theming.
 - **Override styles via BEM classes, not `::ng-deep`.** Components use `ViewEncapsulation.None`, so their BEM classes (`.tedi-button--primary`, `.tedi-form-field`) are globally targetable — no `::ng-deep` or `:host` piercing needed.
 - **Mock `TediTranslationService` (with `TEDI_TRANSLATION_DEFAULT_TOKEN`) and the breakpoint service in tests.** Translated components need the service provided; jsdom won't answer media queries, so breakpoint-driven behavior must be mocked.
 
 ## Additional References
 
-Load based on your task — **do not load all at once**:
+Load based on your task, **not all at once**:
 
-- [references/components.md](references/components.md) — How to discover the current components and read their real inputs from the authoritative sources (barrel exports, source signals/JSDoc, Storybook)
-- [references/theming.md](references/theming.md) — Design tokens, SCSS customization, `ThemeService`, style overrides
-- [references/forms.md](references/forms.md) — Form controls, reactive forms + two-way binding, validation
+- [references/components.md](references/components.md) — Listing every component and its real selector out of the installed type bundle, reading one component's inputs, and the behaviour those types don't tell you (the `/tedi` vs `/community` selector collision, composition constraints, responsive quirks, a11y requirements)
+- [references/theming.md](references/theming.md) — Design tokens and how to look them up, `ThemeService`, BEM style overrides, custom themes
+- [references/forms.md](references/forms.md) — `ControlValueAccessor` integration, the form-field structure, per-control selectors and value shapes

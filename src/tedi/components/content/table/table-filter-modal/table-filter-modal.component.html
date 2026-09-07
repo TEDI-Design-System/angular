@@ -1,0 +1,28 @@
+<tedi-modal>
+  <tedi-modal-header>
+    <h2>{{ data.columnLabel }}</h2>
+  </tedi-modal-header>
+  <tedi-modal-content>
+    <ng-container *ngTemplateOutlet="data.template; context: context" />
+  </tedi-modal-content>
+  <tedi-modal-footer>
+    <button
+      tedi-button
+      variant="secondary"
+      size="small"
+      type="button"
+      (click)="context.clear()"
+    >
+      {{ data.clearLabel }}
+    </button>
+    <button
+      tedi-button
+      variant="primary"
+      size="small"
+      type="button"
+      (click)="context.apply()"
+    >
+      {{ data.applyLabel }}
+    </button>
+  </tedi-modal-footer>
+</tedi-modal>

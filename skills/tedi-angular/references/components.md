@@ -1,55 +1,204 @@
 # Discovering Components
 
-**This is a discovery guide, not a component snapshot.** The list of components and their exact inputs change on every release, so this file deliberately does **not** enumerate them. Instead it tells you how to read the always-current roster and input specs from the authoritative sources.
+**This is a discovery guide, not a component snapshot.** The roster and the exact inputs change
+every release, so this file does not enumerate them. It tells you where to read the always-current
+catalog, and then documents the behaviour that reading the types *won't* tell you.
 
-> For _where_ to fetch (version-pinned GitHub tags, live Storybook) and _how_ to pin to the consumer's installed version, see **SKILL.md → Authoritative Sources**. Don't guess input names or defaults from memory — fetch them.
+Read in this order:
+
+1. **The installed type bundle**: what exists, its selector, and its real inputs.
+2. **[Behaviour the types don't tell you](#behaviour-the-types-dont-tell-you)**: the traps, below.
+
+The type bundle lives in the consumer's own `node_modules`, so it is version-exact by construction
+and needs no network. Reach for GitHub or Storybook only when there is no install to read (see
+SKILL.md → Authoritative Sources).
 
 ## Two namespaces
 
 `@tedi-design-system/angular` ships components under two entry points:
 
-- **`/tedi`** — TEDI-Ready components. Production-grade, stricter rules. **Prefer these.**
-- **`/community`** — Community/extended components. Relaxed linting, not a reference for TEDI patterns.
+- **`/tedi`**: TEDI-Ready components. Production-grade, stricter rules. **Prefer these.**
+- **`/community`**: Community/extended components. Relaxed linting, not a reference for TEDI patterns.
 
-Several Community components are **deprecated** in favor of TEDI-Ready equivalents, and the set that has no TEDI-Ready alternative yet shifts over time. Don't rely on a memorized list — check the barrel export / component JSDoc / Storybook for the current deprecation status and whether a TEDI-Ready alternative exists before reaching into `/community`.
+Several Community components are **deprecated** in favour of TEDI-Ready equivalents, and the set
+with no TEDI-Ready alternative shifts over time. The component's JSDoc carries the current
+deprecation state.
+
+**Read the entry-point warning in the traps section before you import from `/community`.** In
+Angular the two namespaces collide in a way they cannot in React: they share class names *and*
+selectors.
+
+## The type bundle is the catalog
+
+Angular libraries are rolled up by ng-packagr, so unlike React there is no per-component `.d.ts`
+tree. Each entry point ships **one flattened declaration file**:
+
+```
+node_modules/@tedi-design-system/angular/tedi/index.d.ts       # TEDI-Ready, ~500 KB
+node_modules/@tedi-design-system/angular/community/index.d.ts  # Community
+```
+
+One file sounds worse than a tree. It is better: it is a single greppable index, JSDoc is preserved,
+and Angular's compiler metadata makes the **selector** machine-readable, which no amount of reading
+the class name will give you.
+
+### List every component and its selector
+
+Each component carries a `static ɵcmp: ɵɵComponentDeclaration<Class, "selector", ...>`. That second
+type argument is the real selector:
+
+```bash
+D=node_modules/@tedi-design-system/angular/tedi/index.d.ts
+grep -oE 'ɵɵComponentDeclaration<[A-Za-z0-9_]+, "[^"]+"' $D \
+  | sed 's/.*Declaration<//; s/, "/  ->  /; s/"$//'
+```
+
+That prints the whole roster, for example:
+
+```
+IconComponent        ->  tedi-icon
+TextComponent        ->  [tedi-text]
+ButtonComponent      ->  [tedi-button]
+CardButtonComponent  ->  a[tedi-card-button], button[tedi-card-button]
+```
+
+**Never guess a selector from the class name.** `ButtonComponent` is `[tedi-button]`, an attribute
+you put on a real `<button>`, not `<tedi-button>`. `TextComponent` is `[tedi-text]`. `CheckboxComponent`
+is `input[type=checkbox][tedi-checkbox]`, which means it only matches a native checkbox input. A
+component used with the wrong selector shape renders nothing, silently, with no template error.
+
+### Read one component's real inputs
+
+Find the class and read to its `ɵcmp` line. The type aliases sitting just above the class give you
+the enum members:
+
+```bash
+D=node_modules/@tedi-design-system/angular/tedi/index.d.ts
+awk '/^declare class AlertComponent/{f=1} f{print} f&&/static ɵcmp/{exit}' $D
+```
+
+What you get back per input:
+
+- **JSDoc** with prose and `@default`.
+- **`InputSignal<T>`** for a one-way `input()`, **`ModelSignal<T>`** for a two-way `model()` (bind it
+  with `[(name)]`), **`OutputEmitterRef<T>`** for an `output()`.
+- The `ɵcmp` line's input map repeats each input with a `"required": true|false` flag, which is the
+  quickest way to see what you must pass.
+- `hostDirectives` in the `ɵcmp` line, which contribute further inputs from a shared base directive.
+
+Storybook (`storybook.tedi.ee/angular`) renders the same information via Compodoc. Convenient for a
+human, but it tracks `main`, so the installed bundle wins on any disagreement.
 
 ## Category map
 
-TEDI-Ready components are organized by category under `tedi/components/`. Current top-level categories (verify against the repo tree — categories can be added or renamed):
-
-`base` · `buttons` · `content` · `filter` · `form` · `helpers` · `layout` · `loader` · `navigation` · `notifications` · `overlay` · `tags`
-
-This tells you _where_ to look; it does not enumerate what's inside.
-
-## Enumerate the current components
-
-The barrel exports are the authoritative, machine-readable component lists — they double as a source-path index:
-
-- TEDI-Ready: `tedi/index.ts`
-- Community: `community/index.ts`
-
-Fetch the barrel **at the consumer's pinned tag** (see SKILL.md → Authoritative Sources) to get the exact roster for their version.
-
-**Resolving a source path from a barrel line** — the Angular file convention is a per-component folder:
-
-- Standard: `export * from './components/<category>/<name>'` → the folder `tedi/components/<category>/<name>/` holds `<name>.component.ts` (class), `.html`, `.scss`, `.spec.ts`, `.stories.ts`, and an `index.ts` barrel.
-- Some entries are **directory-index barrels** that re-export a family of sub-components from one folder (e.g. a modal exporting `ModalComponent`, `ModalHeaderComponent`, `ModalFooterComponent`; a table exporting its toolbar/menu pieces). Open the folder's `index.ts` to see what it re-exports.
-
-## Read a component's real inputs
-
-1. **Source signals + JSDoc (canonical).** Open the `<name>.component.ts` and read its `input()` / `model()` / `output()` declarations and the JSDoc above them. The signature tells you the type, default (the argument to `input(default)`), whether it's required (`input.required()`), and whether it's two-way (`model()`). Follow any imported type aliases / union types for enum members (e.g. `ButtonVariant`, `IconSize`). Host directives and shared base directives can add further inputs — check the `hostDirectives` array.
-2. **Storybook ArgTypes (rendered).** The live Storybook generates its props tables (via Compodoc) from that same source, with default values and enum members resolved. Good for a quick, readable view of one component.
+Source categories under `src/tedi/components/`: `base` · `buttons` · `content` · `filter` · `form` ·
+`helpers` · `layout` · `loader` · `navigation` · `notifications` · `overlay` · `tags`. Useful for
+orientation when reading the repo; for the consumer roster use the selector listing above.
 
 ## Capability patterns
 
-Components commonly opt into shared capabilities — attribute vs element selectors, signal `input()` binding, two-way `model()` binding, and breakpoint-aware input values. See **SKILL.md → Component Patterns** for how each works; the component's selector and input types tell you which a given component supports.
+Components opt into shared capabilities: attribute versus element selectors, signal `input()`
+binding, two-way `model()` binding, content projection slots, and breakpoint-aware input values. See
+**SKILL.md → Component Patterns** for how each works; the selector and input types tell you which a
+given component supports.
 
-## Data-table accessibility
+## Behaviour the types don't tell you
 
-When building data tables (the TEDI table is TanStack-based), the durable guidance (independent of exact input names):
+Selectors, input names, types and defaults are all in the type bundle, so go read them. What follows
+is the opposite: behaviour that is invisible in the declaration, or spread across components. This is
+the part of this document worth maintaining by hand.
 
-- Give interactive cells and controls accessible names — don't rely on visual position alone.
-- Don't signal errors or state by color only; pair color with text/icon so it survives for screen-reader and low-vision users.
-- Provide labels for sorting, pagination, row expansion, and reordering controls (these are translated via `TediTranslationService`).
+### The `/tedi` and `/community` entry points collide
 
-For the exact inputs, option names, and default label keys that wire this up, read the Table source/story (`content/table`) at the pinned tag — they change across versions.
+This is the highest-value trap in the Angular library and it has no React equivalent. **24 selectors
+are declared in both entry points, under identical class names**, including `tedi-card`,
+`tedi-modal`, `tedi-accordion`, `tedi-tabs`, `tedi-dropdown`, `tedi-form-field`, `tedi-pagination`,
+`tedi-search`, `tedi-tag`, and the checkbox/radio group family.
+
+`CardComponent` from `/community` and `CardComponent` from `/tedi` are different components with
+different input APIs behind the same `<tedi-card>` tag. Consequences:
+
+- The template is **identical either way**, so nothing at the usage site reveals which one you got.
+  Only the `imports` array does.
+- An IDE auto-import or an agent completing from memory picks whichever it finds first, and the
+  result still compiles.
+- The failure is a runtime one: inputs the other version doesn't declare are silently ignored, or
+  Angular reports an unknown property on a tag that clearly exists.
+
+So: **always write the entry point explicitly** when importing, check it when editing an existing
+template that misbehaves, and never copy an `imports` line between a `/tedi` and a `/community`
+example. Where the same component exists in both, the `/tedi` one is the answer.
+
+The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `border`, plus
+`tedi-card-icon` and breakpoint inputs; Community takes named `spacing` and `accentBorder`.
+
+### Composition constraints
+
+- **`[tedi-card-button]` projects a `tedi-card` and nothing else.** Other content is not projected.
+  The host element supplies the semantics: an anchor for `href` / `routerLink`, a button for actions
+  and the disabled state.
+- **`button[tedi-collapse-button]` goes on a native `<button>`.** The host *is* the button, so don't
+  nest another one inside.
+- **`tedi-table-columns-menu` must be a descendant of `<tedi-table>`.** It finds the table through
+  DI (`TEDI_TABLE_CONTEXT`), so rendering it outside the table gives you nothing useful.
+- **`tedi-card` does not clip its content.** Tooltips, popovers, select dropdowns and absolutely
+  positioned children escape it by design. Add an `overflow` utility yourself if you need clipping
+  or scrolling. Corner rounding is carried by the first and last block, not the card.
+- **`tedi-card-row` stacks via its `direction` input**, not a flex-direction utility class, because
+  the row uses `direction` to decide which corners it rounds.
+- **`tedi-card-icon` does not inherit the card's background.** Its `background` defaults to
+  `brand-primary` independently.
+- **`[tedi-label-row]` projects your own `<label tedi-label>`** plus trailing affixes as siblings, so
+  native label attributes (`for`, `id`, `aria-*`, handlers) keep working.
+- **`tedi-attachment` has no built-in action buttons.** Project neutral `tedi-button`s inside a single
+  `<tedi-attachment-actions>` and wire `(click)` and `disabled` yourself.
+
+### Choosing the right component
+
+- **`tedi-date-field`, not `tedi-date-picker`.** DatePicker is deprecated; DateField wraps a typed
+  input with a popover or modal calendar and supports `single`, `multiple` and `range`.
+- **`tedi-time-field`, not `tedi-time-picker`.** TimePicker is the bare picker surface behind
+  TimeField. On its own, with no value, the `scroll` wheel parks on `12:00` as display only, and
+  nothing is selected until the user picks.
+- **`tedi-table`, not `tedi-table-styles`.** The Community `tedi-table-styles` only paints a
+  hand-rolled `<table>`; the TEDI-Ready `tedi-table` brings TanStack sorting, filtering and
+  pagination.
+- **`tedi-form-field` is only needed for a label, feedback text, or a `characterLimit` counter.**
+  Controls paint their own field surface, so wrapping is otherwise redundant. `tedi-search` renders
+  its own and must **not** be wrapped.
+
+### Responsive behaviour that isn't an input
+
+- **Accordion icon-cards restack, not resize.** Below `md` (768px), items with `showIconCard` put the
+  icon-card *above* the header instead of in a left column; both won't fit on a phone without
+  truncating one.
+- **`tedi-header-bottom` is mobile-only.** It is hidden from `md` up, so don't put anything there
+  that desktop users need.
+
+### Accessibility that the types won't get right for you
+
+- **Give each `tedi-search` on a page a distinct `ariaLabel`.** The host is a `role="search"`
+  landmark whose name falls back to `ariaLabel`, then `label`, then `placeholder`, then the
+  translated default. Two identically named landmarks of the same type fail axe's `landmark-unique`.
+- **A suggestion panel needs `role="combobox"` on the input.** `aria-expanded` is not permitted on a
+  plain textbox and fails `aria-allowed-attr`. Bind `aria-controls` conditionally
+  (`[attr.aria-controls]="open() ? 'panel-id' : null"`), because a popup rendered with `@if` or a CDK
+  overlay is absent while closed and a dangling idref fails `aria-valid-attr-value`.
+- **Tabs activate differently depending on the host element.** `<button>` tabs use automatic
+  activation (arrow keys select), anchor tabs use manual. Arrow Left/Right wrap, Home/End jump, only
+  the active tab is in the tab order, and disabled tabs are skipped.
+- **Icon-only controls need an accessible name**, and don't signal state by colour alone. Sorting,
+  pagination, expansion and reordering controls all need labels; those come from
+  `TediTranslationService`, so check the translation keys rather than hardcoding Estonian.
+
+### Table specifics
+
+- **Cell templates receive the TanStack `CellContext`.** A `TemplateRef` cell (commonly
+  `let-ctx`) exposes live row state: `ctx.row.getIsSelected()`, `ctx.row.getIsExpanded()`,
+  `ctx.row.original`. Use that rather than tracking row state in parallel.
+- **`groupRowSpan(rows, keyFn)` needs the currently-rendered rows.** Pass
+  `table.getRowModel().rows` so spans are computed after filtering and sorting. Prefer the column's
+  `groupBy` where it fits.
+- **`tedi-tabs` `overflowMode`** decides what happens when tabs don't fit: `"dropdown"` (default)
+  collapses the overflow into a More menu, `"scroll"` gives horizontal scrolling with fade
+  indicators.

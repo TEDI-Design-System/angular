@@ -43,29 +43,59 @@ The selection is persisted across reloads in the `tedi-theme` cookie. The availa
 
 ## Design Tokens
 
-Tokens follow the naming pattern `--tedi-{category}-{name}`:
+Tokens come in two tiers: **semantic** role tokens (`--general-*`, `--form-*`) and **primitive**
+base tokens (`--tedi-*`, the raw scale). Prefer semantic; reach for a primitive only when no
+semantic role fits.
 
-| Category | Example (illustrative) |
-|----------|------------------------|
-| Color | `--tedi-color-primary` |
-| Spacing | `--tedi-spacing-4` |
-| Typography | `--tedi-font-size-sm` |
-| Border | `--tedi-border-radius-sm` |
-| Shadow | `--tedi-shadow-sm` |
+| Category | Examples |
+|----------|----------|
+| Text | `--general-text-primary`, `--general-text-secondary`, `--general-text-brand` |
+| Surface | `--general-surface-primary`, `--general-surface-secondary`, `--general-surface-brand-primary` |
+| Border | `--general-border-primary`, `--general-border-secondary`, `--general-border-brand` |
+| Status | `--general-status-danger-text`, `--general-status-success-border` |
+| Icon | `--general-icon-brand`, `--general-icon-accent` |
+| Form | `--form-field-height`, `--form-input-background-default`, `--form-field-radius` |
+| Primitives | `--tedi-primary-600`, `--tedi-neutral-900`, `--tedi-green-600` |
+| Spacing | `--tedi-dimensions-02`, `--tedi-dimensions-04` |
+| Radius | `--tedi-radius-02-default`, `--tedi-radius-08` |
+| Typography | `--family-default`, `--heading-h3-size`, `--heading-h3-weight` |
 
-The examples above illustrate the **pattern** — they are not the full set. The authoritative list of token names lives in `@tedi-design-system/core`; look them up there (or via a browser devtools inspection of the rendered CSS custom properties) rather than assuming a specific token exists.
+**Look token names up, don't recall them.** The old `--tedi-color-*`, `--tedi-spacing-*` and
+`--tedi-border-radius-*` names no longer exist. The authoritative, machine-readable list ships with
+the consumer's installed core:
+
+```
+node_modules/@tedi-design-system/core/tokens.json
+```
+
+It is generated from Figma. `themes.default` holds both tiers; `themes.dark` holds only the semantic
+overrides, and `breakpoints.mobile` / `.tablet` the responsive ones. Each entry is
+`{ value, resolved }`, giving you both the `var()` chain and the computed value:
+
+```bash
+T=node_modules/@tedi-design-system/core/tokens.json
+# does a token exist, and what does it resolve to?
+python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['themes']['default']['semantic']['general-surface-primary'])" $T
+# find every surface token
+python3 -c "import json,sys;print([k for k in json.load(open(sys.argv[1]))['themes']['default']['semantic'] if 'surface' in k])" $T
+```
+
+Because `themes.dark` overrides only the semantic tier, a default-theme value is not *the* value:
+treat every role token as theme-dependent unless you have checked. Never invent a token name, and
+never fall back to a hex value because a guessed token didn't work.
 
 Use tokens in your own SCSS:
 
 ```scss
 .my-custom-section {
-  padding: var(--tedi-spacing-4);
-  background-color: var(--tedi-color-bg-default);
-  border-radius: var(--tedi-border-radius-sm);
+  padding: var(--tedi-dimensions-04);
+  background-color: var(--general-surface-primary);
+  border-radius: var(--tedi-radius-02-default);
 }
 ```
 
-**Important:** Do NOT use fallback values in `var()`. Write `var(--tedi-spacing-4)`, not `var(--tedi-spacing-4, 16px)`.
+**Important:** Do NOT use fallback values in `var()`. Write `var(--general-surface-primary)`, not
+`var(--general-surface-primary, #fff)`.
 
 ## Overriding Component Styles
 
@@ -84,8 +114,8 @@ Create a custom theme by defining token values under a theme class, then activat
 
 ```scss
 .tedi-theme--my-brand {
-  --tedi-color-primary: #1a73e8;
-  --tedi-color-bg-default: #fafafa;
+  --general-surface-brand-primary: #1a73e8;
+  --general-surface-primary: #fafafa;
   // ... override tokens as needed
 }
 ```
@@ -102,10 +132,10 @@ For responsive breakpoints in SCSS (verify the import path against `@tedi-design
 @use '@tedi-design-system/core/bootstrap-utility/breakpoints' as bp;
 
 .my-component {
-  padding: var(--tedi-spacing-2);
+  padding: var(--tedi-dimensions-02);
 
   @include bp.media-breakpoint-up(md) {
-    padding: var(--tedi-spacing-4);
+    padding: var(--tedi-dimensions-04);
   }
 }
 ```

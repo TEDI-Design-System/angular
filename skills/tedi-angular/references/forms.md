@@ -2,31 +2,37 @@
 
 TEDI form controls implement Angular's `ControlValueAccessor`, so they integrate with `ReactiveFormsModule` (`[formControl]` / `formControlName`) and `FormsModule` (`[(ngModel)]`) with no adapter. Many also expose a two-way `model()` input for use without a form.
 
-> The control names, selectors, value types, and input names in this file are **illustrative** — they teach the integration idiom, not the exact current API. Verify against the control's `.component.ts` (its `input()`/`model()` signals) or Storybook before relying on a specific input (see SKILL.md → Authoritative Sources).
+> The control names, selectors, value types, and input names in this file are **illustrative**: they
+> teach the integration idiom, not the exact current API. Before relying on a specific input or
+> selector, verify it against the installed package's type bundle,
+> `node_modules/@tedi-design-system/angular/tedi/index.d.ts` (see SKILL.md → Authoritative Sources).
+> Selectors especially: several controls are attribute selectors on a native element, and getting
+> that wrong produces a template that renders nothing.
 
 ## Available Form Controls
 
-Orientation only — verify the current roster and selectors against the barrel export (`tedi/index.ts`):
+Orientation only. Verify the current roster and selectors against the installed type bundle (each
+component's `ɵɵComponentDeclaration` carries its real selector; see
+[references/components.md](components.md)):
 
 | Component | Selector | Value type |
 |-----------|----------|------------|
-| TextField | `input[tedi-text-field]` | string |
-| NumberField | `input[tedi-number-field]` | number |
-| Checkbox | `tedi-checkbox` | boolean |
-| CheckboxGroup | `tedi-checkbox-group` | string[] |
-| RadioGroup | `tedi-radio-group` | string |
-| Toggle | `tedi-toggle` | boolean |
-| Select | `tedi-select` | option / option[] |
-| DatePicker | `tedi-date-picker` | Date |
-| DateField | `tedi-date-field` | Date |
-| TimeField | `tedi-time-field` | string (`"HH:mm"`) |
-| TimePicker | `tedi-time-picker` | string (`"HH:mm"`) |
-| FormField | `tedi-form-field` | — (layout wrapper) |
-| Label | `[tedi-label]` | — (on a `<label>`) |
-| FeedbackText | `tedi-feedback-text` | — (helper/error text) |
-| InputGroup | `tedi-input-group` | — (composes adjacent controls) |
+| TextFieldComponent | `input[tedi-text-field]` | `string` |
+| NumberFieldComponent | `tedi-number-field` | `number` |
+| SearchComponent | `tedi-search` | `string` |
+| SliderComponent | `tedi-slider` | `number` |
+| CheckboxGroupComponent | `tedi-checkbox-group` | `string[]` |
+| RadioGroupComponent | `tedi-radio-group` | `string \| null` |
+| ToggleComponent | `tedi-toggle` | `boolean` |
+| DateFieldComponent | `tedi-date-field` | `Date \| Date[] \| DateRange \| null` |
+| DatePickerComponent | `tedi-date-picker` | `Date \| null` — **deprecated**, use `DateFieldComponent` |
+| TimeFieldComponent | `tedi-time-field` | `string \| null` (HH:mm) |
+| TimePickerComponent | `tedi-time-picker` | `string \| null` (HH:mm) |
+| SelectComponent | `tedi-select` | `T \| T[]` |
 
-## Reactive Forms (primary idiom)
+`CheckboxComponent` (`input[type=checkbox][tedi-checkbox]`) is **not** a TEDI value accessor — it styles a native checkbox, so `[formControl]` on it is handled by Angular's built-in `CheckboxControlValueAccessor` and yields a `boolean`. Inside a managed `<tedi-checkbox-group>`, its `value` input is a `string` identity instead. `DropdownComponent` (`tedi-dropdown`) lives in `overlay/` and is not a form control — it exposes `[(value)]` but implements no `ControlValueAccessor`.
+
+## Basic Usage with Reactive Forms
 
 ```ts
 import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
@@ -45,8 +51,17 @@ form = new FormGroup({
     <input tedi-text-field formControlName="email" />
   </tedi-form-field>
 
-  <tedi-checkbox formControlName="agree">I agree to terms</tedi-checkbox>
-</form>
+      <input tedi-checkbox type="checkbox" formControlName="agree" />
+    </form>
+  `,
+})
+export class MyFormComponent {
+  form = new FormGroup({
+    name: new FormControl('', Validators.required),
+    email: new FormControl(''),
+    agree: new FormControl(false),
+  });
+}
 ```
 
 ## Form Field Structure
@@ -90,18 +105,79 @@ this.form.controls.email.disable();
 
 A `[disabled]` template input also exists on most controls for non-form usage. Do not assume a given `disabled`-style input is or isn't deprecated — verify against the component source at the pinned tag.
 
-## Date Picker
+## Search
 
-The date picker supports single-date selection with a calendar popover and (optionally) manual text entry. Constrain selectable dates with a matcher-style input (conceptually `disabledMatchers` / a `DatePickerMatcher`) rather than a bare min/max where available.
+`SearchComponent` (`tedi-search`) is a `string` value accessor that renders its own `tedi-form-field` — do not wrap it in one. It requires `inputId`, and takes an optional trailing `button` (`{ text?, icon?, variant?, ariaLabel? }`); `searchEvent` fires on Enter or button click.
 
-Treat the specific input names, value shape, and matcher API as **concepts to verify** — read `form/date-picker` (and related `date-field` / `time-field`) source and stories at the pinned tag for the exact current props.
+```html
+<tedi-search inputId="search" label="Otsing" [formControl]="query" (searchEvent)="run($event)" />
+```
 
-## Event / value conventions
+The host is a `role="search"` landmark whose accessible name falls back to `ariaLabel` → `label` → `placeholder` → the translated "search". **When a page renders more than one `tedi-search`, give each a distinct `ariaLabel`** — identically named landmarks of the same type fail axe's `landmark-unique` rule. The visible `<label>` is unaffected; `ariaLabel` names only the landmark.
+
+If you build a suggestion panel around the field, `aria-expanded` is the attribute to watch: it is not permitted on a plain textbox (`aria-allowed-attr`), so the input needs `role="combobox"`. `aria-controls` and `aria-haspopup` are global attributes and are valid on a plain text input either way. Point `aria-controls` at a `role="listbox"` popup for a list of options, or a `role="dialog"` popup (with `aria-haspopup="dialog"`) when the panel mixes results with other controls. Bind it conditionally — `[attr.aria-controls]="open() ? 'panel-id' : null"` — since a popup rendered with `@if` or a CDK overlay is absent while closed, and a reference to a missing id fails `aria-valid-attr-value`.
+
+## Date Selection
+
+Use `DateFieldComponent` (`tedi-date-field`) — it is the successor to the now-deprecated `DatePickerComponent`. It wraps a typed text input with a popover (or modal) calendar, and supports `single`, `multiple` and `range` modes.
+
+```html
+<tedi-form-field>
+  <label tedi-label for="date">Kuupäev</label>
+  <tedi-date-field
+    inputId="date"
+    [formControl]="dateControl"
+    [showWeekNumbers]="true"
+    monthYearSelectType="dropdown"
+  />
+</tedi-form-field>
+```
+
+By default the calendar's year dropdown/grid offers **100 years back and 20 years forward**. Override the range with `minYear`/`maxYear` (e.g. a date-of-birth field):
+
+```html
+<tedi-date-field inputId="dob" [formControl]="dobControl" [minYear]="1900" [maxYear]="2010" />
+```
+
+Disable specific dates with `disabledMatchers`, which accepts a `Matcher` — a single `Date`, `Date[]`, `{ before }`, `{ after }`, `{ from, to? }`, `{ dayOfWeek: number[] }`, or a `(date: Date) => boolean` predicate. See the DateField section in `references/components.md` for the full input list.
+
+> **Deprecated:** `tedi-date-picker` still works but is deprecated — prefer `tedi-date-field` for new code.
+
+## Time Selection
+
+Use `TimeFieldComponent` (`tedi-time-field`) for picking a time of day. Its value is an `HH:mm` string (or `null`). It wraps a typed input with a popover/modal picker; free-typed values are normalized on blur (`9` → `09:00`, `930` → `09:30`), and invalid input reverts to the previous value.
+
+```html
+<tedi-form-field>
+  <label tedi-label for="time">Kellaaeg</label>
+  <tedi-time-field inputId="time" [formControl]="timeControl" pickerTrigger="input" />
+</tedi-form-field>
+```
+
+Pick the picker style with `pickerVariant` (`"scroll" | "slots" | "dropdown" | "none"`), set the minute granularity with `minuteStep`, or supply explicit `timeSlots` (a `string[]` of `HH:mm` values) for the `"slots"` variant. Set `useNativePicker` to fall back to the OS `<input type="time">`. Sizing and validation styling come from the wrapping `tedi-form-field`, not from `tedi-time-field`. See the TimeField section in `references/components.md` for the full input list.
+
+`TimePickerComponent` (`tedi-time-picker`) is the standalone picker surface behind TimeField — most consumers should reach for `tedi-time-field` instead.
+
+## Value and event conventions
 
 TEDI form controls hand you the **parsed value**, not a raw DOM event:
 
-- Bound to a `FormControl` / `formControlName`, the control writes the typed value into the form model directly.
-- Bound via a two-way `model()` input, the control emits the typed value on change (`[(value)]`, `[(checked)]`, etc.).
-- Time controls use `"HH:mm"` 24-hour strings; date controls use `Date` (or a mode-shaped value where multiple/range modes exist).
+- Bound to a `FormControl` or `formControlName`, the control writes its typed value straight into the
+  form model.
+- Bound through a two-way `model()` input, it emits the typed value on change (`[(value)]`,
+  `[(checked)]`, and so on).
+- Time controls use `"HH:mm"` 24-hour strings. Date controls use `Date`, or a mode-shaped value where
+  `multiple` / `range` modes exist.
 
-Confirm the exact value shape for any control against its `.component.ts` / Storybook.
+Two exceptions worth knowing, both easy to get wrong:
+
+- **`CheckboxComponent` is not a TEDI value accessor.** Its selector is
+  `input[type=checkbox][tedi-checkbox]`, so it styles a native checkbox and `[formControl]` on it is
+  handled by Angular's own `CheckboxControlValueAccessor`, yielding a `boolean`. Inside a managed
+  `<tedi-checkbox-group>` its `value` input is a `string` identity instead.
+- **`DropdownComponent` is not a form control at all.** It lives in `overlay/` and exposes
+  `[(value)]` without implementing `ControlValueAccessor`, so `formControlName` on it does nothing.
+  Reach for `tedi-select` when you want a form-bound picker.
+
+Confirm the value shape for any other control from its `InputSignal<T>` / `ModelSignal<T>` type in the
+installed `index.d.ts`.

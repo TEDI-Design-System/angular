@@ -1,0 +1,30 @@
+{
+  "name": "@tedi-design-system/angular",
+  "version": "0.0.0-semantic-version",
+  "type": "module",
+  "main": "community.mjs",
+  "module": "community.mjs",
+  "exports": {
+    "./index.css": {
+      "default": "./index.css"
+    }
+  },
+  "peerDependencies": {
+    "@angular/cdk": "^20.0.0 || ^21.0.0 || ^22.0.0",
+    "@angular/common": "^20.0.0 || ^21.0.0 || ^22.0.0",
+    "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0",
+    "@angular/forms": "^20.0.0 || ^21.0.0 || ^22.0.0",
+    "@angular/platform-browser": "^20.0.0 || ^21.0.0 || ^22.0.0"
+  },
+  "dependencies": {
+    "@tanstack/angular-table": "^8.21.4",
+    "@tedi-design-system/core": "^6.8.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TEDI-Design-System/angular.git"
+  }
+}

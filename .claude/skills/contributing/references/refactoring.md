@@ -53,9 +53,24 @@ A finding is **valid** when it is confirmed against the current code (not stale 
 3. Run lint: `npm run lint`
 4. Compare test results with the baseline from Step 2 — no new failures allowed.
 
-## Step 7: Update Consumer Catalog
+## Step 7: Update Consumer-Facing Docs
 
-If the refactor changed the public API (renamed selector, inputs/outputs, removed or deprecated a component), update `skills/tedi-angular/references/components.md` to match.
+Only if the refactor changed the public API. See **SKILL.md → Consumer-Facing Docs** for the
+contract.
+
+1. **Update the JSDoc** on every input you renamed, retyped, or whose default changed. Add
+   `@deprecated` with the replacement to anything you deprecated rather than removed.
+2. **Renamed a selector?** That is the highest-risk change in this library, because a stale selector
+   in a consumer template renders nothing with no error. Check whether the new selector collides with
+   a Community one, and grep `skills/tedi-angular/references/` for the old selector string.
+3. **Reconcile `references/components.md`.** Its "Behaviour the types don't tell you" entries name
+   components, selectors and inputs, so a rename can leave them pointing at nothing. Two cases are
+   easy to miss:
+   - **You fixed the trap.** If the refactor makes a documented gotcha impossible, or moves the fact
+     into JSDoc where it belongs, **delete the entry**. Stale traps are worse than no traps.
+   - **You created one.** A behaviour change callers cannot see in the types needs a new entry.
+4. **Renamed or removed a token?** Update `references/theming.md`.
+5. **Breaking change?** It also needs a consumer migration guide rather than a buried reference edit.
 
 ## Step 8: Report
 

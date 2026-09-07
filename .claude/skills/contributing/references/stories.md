@@ -90,17 +90,17 @@ Rules:
 
 ### 3. Determine the Story Category
 
-Find where the component lives under `tedi/components/` and map to the Storybook title:
+Find where the component lives under `src/tedi/components/` and map to the Storybook title:
 
 | Component path | Story title prefix |
 |---|---|
-| `tedi/components/form/` | `TEDI-Ready/Components/Form/` |
-| `tedi/components/buttons/` | `TEDI-Ready/Components/Buttons/` |
-| `tedi/components/overlay/` | `TEDI-Ready/Components/Overlay/` |
-| `tedi/components/navigation/` | `TEDI-Ready/Components/Navigation/` |
-| `tedi/components/content/` | `TEDI-Ready/Content/` (no `Components/` segment) |
-| `tedi/components/layout/` | `TEDI-Ready/Layout/` (no `Components/` segment) |
-| `tedi/components/base/` | `TEDI-Ready/Base/` (no `Components/` segment) |
+| `src/tedi/components/form/` | `TEDI-Ready/Components/Form/` |
+| `src/tedi/components/buttons/` | `TEDI-Ready/Components/Buttons/` |
+| `src/tedi/components/overlay/` | `TEDI-Ready/Components/Overlay/` |
+| `src/tedi/components/navigation/` | `TEDI-Ready/Components/Navigation/` |
+| `src/tedi/components/content/` | `TEDI-Ready/Content/` (no `Components/` segment) |
+| `src/tedi/components/layout/` | `TEDI-Ready/Layout/` (no `Components/` segment) |
+| `src/tedi/components/base/` | `TEDI-Ready/Base/` (no `Components/` segment) |
 | Other category | `TEDI-Ready/Components/<Category>/` |
 
 **Note:** the `Content`, `Layout`, and `Base` groups sit directly under `TEDI-Ready/` — they skip the `Components/` segment. Check sibling stories in the same folder before picking a title.
@@ -150,17 +150,73 @@ If the component also has a Zeroheight page, add it on the next line with `<br>`
 
 Applies equally to new components and retrofits — if an existing story lacks the link, add it.
 
-### 5. Story Checklist
+### 5. Make the `Default` Story's Controls Functional
+
+**The `Default` story's controls must actually drive the rendered component — always, including when the component is nested or composed of sub-components.** Changing a control in the panel must visibly change the rendered output. A `Default` story whose template ignores `args` (so the controls do nothing) is wrong, even if it looks correct at a glance.
+
+**Bind args directly as template props in `render` — never build a host-wrapper component.** Storybook passes args into the `props` object and re-renders on every control change; template expressions reference the arg names directly.
+
+```typescript
+export const Default: StoryObj<ComponentName> = {
+  args: { variant: 'primary', size: 'medium', disabled: false },
+  render: (args) => ({
+    props: { ...args },
+    template: `<tedi-component [variant]="variant" [size]="size" [disabled]="disabled" />`,
+  }),
+};
+```
+
+Prefer `argsToTemplate(args)` to forward every arg as a binding without restating each one — this keeps the story functional as inputs are added:
+
+```typescript
+import { argsToTemplate } from '@storybook/angular';
+
+render: (args) => ({
+  props: { ...args },
+  template: `<tedi-component ${argsToTemplate(args)} />`,
+}),
+```
+
+**Nested / composed components.** The args belong to the **outer component under test** (`component:` in the default export). Bind them to that component's element and let it pass them down to its sub-components internally — do **not** redirect the controls to a child.
+
+- If the rendered example wraps the component or projects content, still bind the args to the component being documented, and bind any arg-dependent projected content too:
+
+  ```typescript
+  // Component under test is <tedi-card>, which composes header/body sub-components.
+  render: (args) => ({
+    props: { ...args },
+    template: `
+      <tedi-card ${argsToTemplate(args)}>
+        <tedi-card-content>
+          <p tedi-text [modifiers]="textModifier">{{ label }}</p>
+        </tedi-card-content>
+      </tedi-card>
+    `,
+  }),
+  ```
+
+- For two-way / local state (e.g. selection, open/close), keep a local `signal` in `props` and bind it via `[value]`/`(valueChange)` — leave the rest of the args spread in:
+
+  ```typescript
+  render: (args) => ({
+    props: { ...args, value: signal('2') },
+    template: `<tedi-select ${argsToTemplate(args)} [value]="value()" (valueChange)="value.set($event)" />`,
+  }),
+  ```
+
+**Showcase stories are the exception.** Stories that render several fixed configurations at once (all variants/sizes/states) should **disable** the panel rather than fake controls: `parameters: { controls: { disable: true } }`. Only the `Default` (single-instance) story must have working controls.
+
+### 6. Story Checklist
 
 - [ ] Every Figma section has a corresponding story export, in the same order
 - [ ] Example content (labels, data, item count) matches Figma exactly
 - [ ] Every public input/model has a corresponding `argTypes` entry with description, control, type summary, and default value
-- [ ] `Default` story has all controls wired up via `args`
+- [ ] `Default` story has all controls wired up via `args` and they **functionally drive the rendered component** — verified by changing a control and seeing the output update, including for nested/composed components (see section 5)
 - [ ] States story covers all visual states shown in Figma (default, hover, active, focus, disabled)
 - [ ] Reactive forms example included if the component implements ControlValueAccessor
 - [ ] Figma link is in the JSDoc comment above `export default` (format: `<a href="..." target="_blank">Figma ↗</a>`)
 
-### 6. argTypes Convention
+### 7. argTypes Convention
 
 **Every public input/model must have an argTypes entry.** Do not skip any — all props must appear in the Storybook controls panel with correct typing and descriptions.
 
@@ -187,7 +243,7 @@ argTypes: {
 }
 ```
 
-### 7. Verify
+### 8. Verify
 
 Run Storybook to visually confirm stories render correctly:
 ```bash
@@ -198,5 +254,5 @@ Check that:
 - All stories appear in the correct category
 - Story order matches Figma section order
 - Example content matches Figma
-- Controls work interactively
+- Controls work interactively — change a control in the `Default` story and confirm the rendered component updates (including nested/composed components)
 - No console errors
