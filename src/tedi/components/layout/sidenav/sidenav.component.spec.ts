@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { SideNavComponent, SideNavItemSize } from "./sidenav.component";
 import { SideNavService } from "../../../services/sidenav/sidenav.service";
-import { signal } from "@angular/core";
+import { computed, signal, Signal } from "@angular/core";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 const mockCallbackHolder: { callback: (() => void) | null } = {
@@ -29,6 +29,8 @@ describe("SideNavComponent", () => {
     isMobile: ReturnType<typeof signal>;
     isMobileItemOpen: ReturnType<typeof signal>;
     isMobileOpen: ReturnType<typeof signal>;
+    isMobileDrawerOpen: Signal<boolean>;
+    drawerTop: ReturnType<typeof signal>;
     tooltipEnabled: ReturnType<typeof signal>;
     registerItem: jest.Mock;
     unregisterItem: jest.Mock;
@@ -37,13 +39,18 @@ describe("SideNavComponent", () => {
   };
 
   beforeEach(() => {
+    const isMobile = signal(false);
+    const isMobileOpen = signal(false);
+
     sidenavService = {
       items: signal([]),
       isCollapsed: signal(false),
       desktopBreakpoint: signal("lg"),
-      isMobile: signal(false),
+      isMobile,
       isMobileItemOpen: signal(false),
-      isMobileOpen: signal(false),
+      isMobileOpen,
+      isMobileDrawerOpen: computed(() => isMobile() && isMobileOpen()),
+      drawerTop: signal<number | null>(null),
       tooltipEnabled: signal(false),
       registerItem: jest.fn(),
       unregisterItem: jest.fn(),
@@ -186,6 +193,49 @@ describe("SideNavComponent", () => {
       }
 
       expect(sidenavService.handleGoToMainMenu).toHaveBeenCalled();
+    });
+  });
+
+  describe("mobile drawer", () => {
+    it("should apply the drawer offset as an inline top style", () => {
+      expect(sidenavElement.style.top).toBe("");
+
+      sidenavService.drawerTop.set(56);
+      fixture.detectChanges();
+
+      expect(sidenavElement.style.top).toBe("56px");
+
+      sidenavService.drawerTop.set(null);
+      fixture.detectChanges();
+
+      expect(sidenavElement.style.top).toBe("");
+    });
+
+    it("should lock and restore body scroll while open on mobile", () => {
+      document.body.style.overflow = "scroll";
+
+      sidenavService.isMobile.set(true);
+      sidenavService.isMobileOpen.set(true);
+      fixture.detectChanges();
+
+      expect(document.body.style.overflow).toBe("hidden");
+
+      sidenavService.isMobileOpen.set(false);
+      fixture.detectChanges();
+
+      expect(document.body.style.overflow).toBe("scroll");
+      document.body.style.overflow = "";
+    });
+
+    it("should restore body scroll when destroyed while open", () => {
+      sidenavService.isMobile.set(true);
+      sidenavService.isMobileOpen.set(true);
+      fixture.detectChanges();
+      expect(document.body.style.overflow).toBe("hidden");
+
+      fixture.destroy();
+
+      expect(document.body.style.overflow).toBe("");
     });
   });
 });

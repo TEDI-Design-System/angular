@@ -172,4 +172,88 @@ describe("SideNavService", () => {
       expect(service.isCollapsed()).toBe(false);
     });
   });
+
+  describe("drawerTop", () => {
+    let header: HTMLElement;
+    let toggle: HTMLElement;
+
+    const openDrawer = () => {
+      isBelowBreakpointSignal.set(true);
+      service.isMobileOpen.set(true);
+      TestBed.tick();
+    };
+
+    beforeEach(() => {
+      header = document.createElement("header");
+      toggle = document.createElement("button");
+      header.appendChild(toggle);
+      document.body.appendChild(header);
+    });
+
+    afterEach(() => {
+      header.remove();
+    });
+
+    it("should be null while the mobile navigation is closed", () => {
+      service.registerToggle(toggle);
+      isBelowBreakpointSignal.set(true);
+      TestBed.tick();
+
+      expect(service.drawerTop()).toBeNull();
+    });
+
+    it("should measure the bottom of the header holding the toggle", () => {
+      jest
+        .spyOn(header, "getBoundingClientRect")
+        .mockReturnValue({ bottom: 56 } as DOMRect);
+      service.registerToggle(toggle);
+
+      openDrawer();
+
+      expect(service.drawerTop()).toBe(56);
+    });
+
+    it("should fall back to the toggle when it is not inside a header", () => {
+      const standaloneToggle = document.createElement("button");
+      document.body.appendChild(standaloneToggle);
+      jest
+        .spyOn(standaloneToggle, "getBoundingClientRect")
+        .mockReturnValue({ bottom: 40 } as DOMRect);
+      service.registerToggle(standaloneToggle);
+
+      openDrawer();
+
+      expect(service.drawerTop()).toBe(40);
+      standaloneToggle.remove();
+    });
+
+    it("should clamp a header scrolled above the viewport to zero", () => {
+      jest
+        .spyOn(header, "getBoundingClientRect")
+        .mockReturnValue({ bottom: -20 } as DOMRect);
+      service.registerToggle(toggle);
+
+      openDrawer();
+
+      expect(service.drawerTop()).toBe(0);
+    });
+
+    it("should be 0 when no toggle is registered", () => {
+      openDrawer();
+
+      expect(service.drawerTop()).toBe(0);
+    });
+
+    it("should stop measuring the toggle once it is unregistered", () => {
+      jest
+        .spyOn(header, "getBoundingClientRect")
+        .mockReturnValue({ bottom: 56 } as DOMRect);
+      service.registerToggle(toggle);
+      service.unregisterToggle(toggle);
+
+      openDrawer();
+
+      expect(service.drawerTop()).toBe(0);
+    });
+  });
 });

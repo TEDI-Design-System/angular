@@ -7,8 +7,10 @@ import {
   inject,
   Injector,
   input,
+  PLATFORM_ID,
   ViewEncapsulation,
 } from "@angular/core";
+import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 
 import { IconComponent } from "../../base/icon/icon.component";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
@@ -27,6 +29,7 @@ export type SideNavItemSize = "small" | "medium" | "large";
   imports: [IconComponent, TediTranslationPipe],
   host: {
     "[class]": "classes()",
+    "[style.top.px]": "sidenavService.drawerTop()",
   },
 })
 export class SideNavComponent {
@@ -53,10 +56,29 @@ export class SideNavComponent {
   desktopBreakpoint = input<Breakpoint>("lg");
 
   private readonly injector = inject(Injector);
+  private readonly document = inject(DOCUMENT);
+  private readonly platformId = inject(PLATFORM_ID);
 
   constructor() {
     effect(() => {
       this.sidenavService.desktopBreakpoint.set(this.desktopBreakpoint());
+    });
+
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    effect((onCleanup) => {
+      if (!this.sidenavService.isMobileDrawerOpen()) {
+        return;
+      }
+
+      const previousOverflow = this.document.body.style.overflow;
+
+      this.document.body.style.overflow = "hidden";
+      onCleanup(() => {
+        this.document.body.style.overflow = previousOverflow;
+      });
     });
   }
 
@@ -101,7 +123,10 @@ export class SideNavComponent {
       classList.push("tedi-sidenav--mobile-item-open");
     }
 
-    if (this.sidenavService.isMobile() && !this.sidenavService.isMobileOpen()) {
+    if (
+      this.sidenavService.isMobile() &&
+      !this.sidenavService.isMobileDrawerOpen()
+    ) {
       classList.push("tedi-sidenav--hidden");
     }
 

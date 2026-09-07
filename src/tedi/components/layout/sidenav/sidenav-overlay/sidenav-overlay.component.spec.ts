@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { signal } from "@angular/core";
+import { computed, signal, Signal } from "@angular/core";
 import { SideNavOverlayComponent } from "./sidenav-overlay.component";
 import { SideNavService } from "../../../../services/sidenav/sidenav.service";
 
@@ -12,23 +12,34 @@ describe("SideNavOverlayComponent", () => {
     isMobile: ReturnType<typeof signal>;
     isMobileItemOpen: ReturnType<typeof signal>;
     isMobileOpen: ReturnType<typeof signal>;
+    isMobileDrawerOpen: Signal<boolean>;
+    drawerTop: ReturnType<typeof signal>;
     tooltipEnabled: ReturnType<typeof signal>;
     registerItem: jest.Mock;
     unregisterItem: jest.Mock;
+    registerToggle: jest.Mock;
+    unregisterToggle: jest.Mock;
     handleGoToMainMenu: jest.Mock;
     handleCollapse: jest.Mock;
   };
 
   beforeEach(() => {
+    const isMobile = signal(false);
+    const isMobileOpen = signal(false);
+
     sidenavService = {
       items: signal([]),
       isCollapsed: signal(false),
-      isMobile: signal(false),
+      isMobile,
       isMobileItemOpen: signal(false),
-      isMobileOpen: signal(false),
+      isMobileOpen,
+      isMobileDrawerOpen: computed(() => isMobile() && isMobileOpen()),
+      drawerTop: signal<number | null>(null),
       tooltipEnabled: signal(false),
       registerItem: jest.fn(),
       unregisterItem: jest.fn(),
+      registerToggle: jest.fn(),
+      unregisterToggle: jest.fn(),
       handleGoToMainMenu: jest.fn(),
       handleCollapse: jest.fn(),
     };
@@ -79,6 +90,15 @@ describe("SideNavOverlayComponent", () => {
     expect(
       overlayElement.classList.contains("tedi-sidenav-overlay--visible"),
     ).toBe(false);
+  });
+
+  it("should apply the drawer offset as an inline top style", () => {
+    expect(overlayElement.style.top).toBe("");
+
+    sidenavService.drawerTop.set(56);
+    fixture.detectChanges();
+
+    expect(overlayElement.style.top).toBe("56px");
   });
 
   it("should close mobile on click and call handleGoToMainMenu", () => {
