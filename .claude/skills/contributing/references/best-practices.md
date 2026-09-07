@@ -186,8 +186,15 @@ what ships in the type bundle. Say which shapes the input accepts and give the o
  * Accepts a plain value or a breakpoint object, e.g. `{ xs: true, md: false }`.
  * @default false
  */
-useNativePicker = input<BreakpointInput<boolean>>(false);
+readonly useNativePicker = input(
+  { xs: false },
+  { transform: (v: BreakpointInput<boolean>) => breakpointInput(v) },
+);
 ```
+
+Keep the `breakpointInput()` transform from Pattern A. Declaring the input as a bare
+`input<BreakpointInput<boolean>>(false)` skips normalization, so a consumer passing a plain `true`
+leaves the value un-normalized and the resolver's `v.xs` lookup reads `undefined`.
 
 The consumer skill covers the *pattern* once (SKILL.md → Component Patterns) and does not repeat it
 per component. See **contributing SKILL.md → Consumer-Facing Docs**.

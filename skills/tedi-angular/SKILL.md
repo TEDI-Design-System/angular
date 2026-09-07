@@ -49,10 +49,18 @@ npm ls @tedi-design-system/angular @tedi-design-system/core
 ### When there is no install to read
 
 Only when `node_modules` is unavailable (planning before install, or reviewing a diff), fall back to
-the public repo, pinned to the version in `package.json`.
+the public repo, pinned to the **resolved** version from the lockfile. `package.json` holds a semver
+range (`^8.0.1`), which is not a tag; the lockfile records the exact version that was installed:
 
-**Tag format is `angular-<version>`** (e.g. `angular-8.0.1-rc.5`). Every release, pre-releases
-included, is tagged, so use the tag rather than `main`.
+```bash
+# npm
+grep -A2 '"node_modules/@tedi-design-system/angular"' package-lock.json
+# pnpm / yarn: search the lockfile for the @tedi-design-system/angular entry
+grep -A2 '@tedi-design-system/angular' pnpm-lock.yaml yarn.lock
+```
+
+**Tag format is `angular-<resolved version>`** (e.g. `angular-8.0.1-rc.5`). Every release,
+pre-releases included, is tagged, so use the tag rather than `main`.
 
 > **Ignore the legacy `v*` tags.** The repo also carries ~430 old `v<version>` tags, the newest of
 > which (`v11.0.0-rc.5`, January 2025) has a *higher* version number than any current release. They
@@ -126,10 +134,12 @@ Add the precompiled stylesheet (fonts, tokens, and component styles bundled) to 
 ```jsonc
 // angular.json → projects.<app>.architect.build.options.styles
 "styles": [
-  "node_modules/@tedi-design-system/angular/index.css",
-  "src/styles.scss"
+  "node_modules/@tedi-design-system/angular/index.css"
 ]
 ```
+
+Add the TEDI entry alongside whatever global stylesheet your app already lists (`src/styles.css` or
+`src/styles.scss`) — do not replace it, and do not add an entry for a file you have not created.
 
 Or, to consume tokens/mixins in SCSS:
 

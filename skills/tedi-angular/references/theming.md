@@ -121,7 +121,11 @@ Create a custom theme by defining token values under a theme class, then activat
 ```
 
 ```ts
-themeService.theme.set('my-brand');
+import { inject } from '@angular/core';
+import { ThemeService } from '@tedi-design-system/angular/tedi';
+
+const theme = inject(ThemeService);
+theme.theme.set('my-brand');
 ```
 
 ## Responsive Styles

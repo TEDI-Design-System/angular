@@ -48,14 +48,15 @@ A finding is **valid** when it is confirmed against the current code (not stale 
 
 ## Step 6: Verify
 
-1. Run the specific component test: `npx jest <component-path>`
+1. Run the specific component test: `npm test -- <component-path> --coverage=false`
 2. Run the full test suite: `npm test`
 3. Run lint: `npm run lint`
 4. Compare test results with the baseline from Step 2 — no new failures allowed.
 
 ## Step 7: Update Consumer-Facing Docs
 
-Only if the refactor changed the public API. See **SKILL.md → Consumer-Facing Docs** for the
+Only if the refactor changed anything a consumer can observe — the public API, or behavior that
+callers can see but the types cannot express. See **SKILL.md → Consumer-Facing Docs** for the
 contract.
 
 1. **Update the JSDoc** on every input you renamed, retyped, or whose default changed. Add

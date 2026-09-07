@@ -109,7 +109,7 @@ as well as grows.
 ```bash
 npm start              # Storybook dev server (port 6006)
 npm test               # Run all tests (Jest)
-npx jest path/to/file  # Run a single test file
+npm test -- path/to/file --coverage=false  # Run a single test file
 npm run lint           # Stylelint + ESLint with --fix
 npm run build          # Build library to dist/
 ```

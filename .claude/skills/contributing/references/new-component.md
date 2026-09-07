@@ -63,7 +63,7 @@ A finding is **valid** when it is confirmed against the current code (not stale 
 
 ## Step 7: Verify
 
-1. Run tests: `npx jest src/tedi/components/<category>/<component-name>/`
+1. Run tests: `npm test -- src/tedi/components/<category>/<component-name>/ --coverage=false`
 2. Fix any failures.
 3. Run lint: `npm run lint`
 4. Fix any lint errors.

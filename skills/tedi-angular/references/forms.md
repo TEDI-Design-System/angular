@@ -47,32 +47,25 @@ form = new FormGroup({
 ```html
 <form [formGroup]="form">
   <tedi-form-field>
-    <label tedi-label>Email</label>
-    <input tedi-text-field formControlName="email" />
+    <label tedi-label for="email">Email</label>
+    <input tedi-text-field id="email" formControlName="email" />
   </tedi-form-field>
 
-      <input tedi-checkbox type="checkbox" formControlName="agree" />
-    </form>
-  `,
-})
-export class MyFormComponent {
-  form = new FormGroup({
-    name: new FormControl('', Validators.required),
-    email: new FormControl(''),
-    agree: new FormControl(false),
-  });
-}
+  <input tedi-checkbox type="checkbox" formControlName="agree" />
+</form>
 ```
 
 ## Form Field Structure
 
-Wrap a control with `tedi-form-field` to compose the label, control, and feedback text into one accessible field. `tedi-form-field` links the label and messages to the control for you.
+Wrap a control with `tedi-form-field` to compose the label, control, and feedback text into one accessible field. `tedi-form-field` wires the feedback text to the control's `aria-describedby` for you. It does **not** associate the label: give the label a `for` and the control a matching `id` yourself.
+
+`tedi-feedback-text` takes its message through the required `text` input, not projected content.
 
 ```html
 <tedi-form-field>
-  <label tedi-label>Email</label>
-  <input tedi-text-field formControlName="email" />
-  <tedi-feedback-text>Enter your work email</tedi-feedback-text>
+  <label tedi-label for="email">Email</label>
+  <input tedi-text-field id="email" formControlName="email" />
+  <tedi-feedback-text text="Enter your work email" type="hint" />
 </tedi-form-field>
 ```
 
@@ -176,7 +169,8 @@ Two exceptions worth knowing, both easy to get wrong:
   handled by Angular's own `CheckboxControlValueAccessor`, yielding a `boolean`. Inside a managed
   `<tedi-checkbox-group>` its `value` input is a `string` identity instead.
 - **`DropdownComponent` is not a form control at all.** It lives in `overlay/` and exposes
-  `[(value)]` without implementing `ControlValueAccessor`, so `formControlName` on it does nothing.
+  `[(value)]` without implementing `ControlValueAccessor`, so `formControlName` on it throws
+  Angular's `NG01203: No value accessor for form control` at runtime.
   Reach for `tedi-select` when you want a form-bound picker.
 
 Confirm the value shape for any other control from its `InputSignal<T>` / `ModelSignal<T>` type in the
