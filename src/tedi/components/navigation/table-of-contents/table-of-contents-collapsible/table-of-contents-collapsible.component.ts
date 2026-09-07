@@ -113,18 +113,19 @@ export class TableOfContentsCollapsibleComponent implements OnDestroy {
 
   private lastScrollY = 0;
   private ticking = false;
-  private scrollTarget: HTMLElement | Window = window;
+  private scrollTarget?: HTMLElement | Window;
   private readonly onScroll = () => this.handleScroll();
 
   constructor() {
     // Runs client-side only; drives the scroll-away behaviour for `hideOnScroll`.
     afterNextRender(() => {
-      this.scrollTarget = this.scrollContainer() ?? window;
+      const target = this.scrollContainer() ?? window;
+      this.scrollTarget = target;
       this.lastScrollY = this.currentScrollY();
       // Outside Angular so scroll events don't trigger change detection; the
       // `barHidden` signal updates the view on its own when it actually changes.
       this.zone.runOutsideAngular(() => {
-        this.scrollTarget.addEventListener("scroll", this.onScroll, {
+        target.addEventListener("scroll", this.onScroll, {
           passive: true,
         });
       });
@@ -161,7 +162,7 @@ export class TableOfContentsCollapsibleComponent implements OnDestroy {
   ngOnDestroy(): void {
     this.close();
     if (isPlatformBrowser(this.platformId)) {
-      this.scrollTarget.removeEventListener("scroll", this.onScroll);
+      this.scrollTarget?.removeEventListener("scroll", this.onScroll);
     }
   }
 

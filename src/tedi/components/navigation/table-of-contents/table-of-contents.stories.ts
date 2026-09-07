@@ -201,7 +201,13 @@ const meta = {
       },
     },
     scrollContainer: {
-      table: { disable: true },
+      description:
+        "`tedi-table-of-contents-collapsible` only: the element whose scroll drives `hideOnScroll`. Defaults to the window; set it to the scrollable region when the content scrolls inside a container rather than the whole page.",
+      control: false,
+      table: {
+        category: "Table of Contents",
+        type: { summary: "HTMLElement" },
+      },
     },
     ariaLabel: {
       description:
@@ -1045,7 +1051,8 @@ export const Collapsible: Story = {
 /**
  * `hideOnScroll` on `tedi-table-of-contents-collapsible`: the bar floats over the
  * bottom of the content and slides away as the reader scrolls down, returning on
- * scroll up (or at the top).
+ * scroll up. The collapsible is intended for narrow layouts, so this demo only
+ * renders it below `lg`. Resize the canvas below `lg` to try it.
  */
 export const CollapsibleHideOnScroll: Story = {
   parameters: {
@@ -1056,15 +1063,35 @@ export const CollapsibleHideOnScroll: Story = {
   render: () => ({
     props: { separator: false },
     template: `
-      <div style="position: relative; height: 100vh;">
+      <div *showAt="'lg'" style="background: var(--general-surface-primary); padding: 2rem;">
+        <h2 tedi-text modifiers="h1">Tervisedeklaratsioon</h2>
+        <p tedi-text color="secondary" style="margin: 0.5rem 0 0;">
+          Tervisedeklaratsioon koosneb 22 kohustuslikust küsimusest. Alusta või
+          jätka selle koostamisega allpool.
+        </p>
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 1.5rem; align-items: start; margin-top: 1.5rem;">
+          <div style="min-height: 35rem; background: var(--general-surface-primary); border: 1px solid var(--general-border-primary); border-radius: var(--card-radius-rounded);"></div>
+          <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods">
+            ${controllableNestedItems}
+          </tedi-table-of-contents>
+        </div>
+      </div>
+
+      <div *hideAt="'lg'" style="position: relative; height: 100vh;">
         <div #scroll style="height: 100%; overflow-y: auto; padding: var(--layout-page-spacing-top) var(--layout-page-spacing-x) 5rem; background: var(--general-surface-tertiary);">
-          <h2 tedi-text modifiers="h1">Tervisedeklaratsioon</h2>
-          <p tedi-text color="secondary" style="margin: 0.5rem 0 2rem;">
-            Scroll down, the bar hides. Scroll up, it reappears.
-          </p>
-          ${Array(6)
-            .fill(`<p tedi-text style="margin-bottom: 1.5rem;">${LOREM}</p>`)
-            .join("")}
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <a tedi-link href="#" [underline]="false">
+              <tedi-icon name="arrow_back" [size]="18" />Tervisetõendid ja -deklaratsioonid
+            </a>
+            <div>
+              <h2 tedi-text modifiers="h1">Tervisedeklaratsioon</h2>
+              <p tedi-text color="secondary">
+                Tervisedeklaratsioon koosneb 22 kohustuslikust küsimusest. Alusta või
+                jätka selle koostamisega allpool.
+              </p>
+            </div>
+          </div>
+          <div style="min-height: 70rem; margin-top: 1rem; background: var(--general-surface-primary); border: 1px solid var(--general-border-primary); border-radius: var(--card-radius-rounded);"></div>
         </div>
         <tedi-table-of-contents-collapsible
           heading="Sisukord"
