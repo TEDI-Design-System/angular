@@ -1,3 +1,10 @@
+## [8.0.1-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.5...angular-8.0.1-rc.6) (2026-09-08)
+
+
+### Bug Fixes
+
+* **tooltip:** update design tokens [#646](https://github.com/TEDI-Design-System/angular/issues/646) ([#647](https://github.com/TEDI-Design-System/angular/issues/647)) ([7958b00](https://github.com/TEDI-Design-System/angular/commit/7958b000e8bb44325162a8a982a6daae7473a1a5))
+
 ## [8.0.1-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.4...angular-8.0.1-rc.5) (2026-09-02)
 
 
