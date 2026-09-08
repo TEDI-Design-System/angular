@@ -71,6 +71,12 @@ export class TableOfContentsCollapsibleComponent implements OnDestroy {
   /** Show auto-generated hierarchical numbers (`1.`, `2.`, `2.1`, …). */
   readonly numbered = input<boolean>(false);
   /**
+   * Draws a divider under each item except the last — sub-items included — so the
+   * sheet's list reads as a set of separated rows. Mirrors `tedi-table-of-contents`.
+   * @default false
+   */
+  readonly bordered = input<boolean>(false);
+  /**
    * Pin the bar to the bottom of the viewport. Set `false` to render it inline.
    */
   readonly sticky = input<boolean>(true);

@@ -145,6 +145,14 @@
 
   .tedi-table-of-contents__content :is(a, button) {
     color: var(--link-primary-active);
+
+    &:hover {
+      color: var(--link-primary-active);
+
+      :not(tedi-icon) {
+        text-decoration: none;
+      }
+    }
   }
 }
 
@@ -207,7 +215,7 @@
 
   display: flex;
   flex-direction: column;
-  max-height: 45dvh;
+  max-height: 85dvh;
 }
 
 .tedi-table-of-contents__sheet-header {

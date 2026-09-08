@@ -972,10 +972,12 @@ const controllableNestedItems = `
  * `tedi-table-of-contents-collapsible` — a bottom bar that opens the list in a
  * bottom-sheet overlay. Resize the canvas to switch between the two.
  *
- * `tedi-table-of-contents-collapsible` accepts the same inputs as the root
- * component (`heading`, `activeId`, `numbered`, `sticky`, `ariaLabel`) —
- * everything except `variant` and `headingLevel` — so the controls above apply
- * here too.
+ * `tedi-table-of-contents-collapsible` shares the list-level inputs with the root
+ * component — `heading`, `activeId`, `defaultOpen`, `numbered`, `bordered`,
+ * `sticky` and `ariaLabel` — so the controls above apply here too. It leaves out
+ * the desktop-card-only inputs (`variant`, `headingLevel`, `stickyOffset`,
+ * `stickyMaxHeight`) and adds `hideOnScroll` + `scrollContainer` (see the
+ * "Collapsible: hide on scroll" story).
  */
 export const Collapsible: Story = {
   parameters: {
@@ -987,6 +989,7 @@ export const Collapsible: Story = {
     heading: "Sisukord",
     activeId: "methods",
     numbered: false,
+    bordered: false,
     sticky: false,
     hideOnScroll: false,
     separator: false,
@@ -1007,6 +1010,7 @@ export const Collapsible: Story = {
             [sticky]="false"
             [activeId]="activeId"
             [numbered]="numbered"
+            [bordered]="bordered"
             [ariaLabel]="ariaLabel"
           >
             ${controllableNestedItems}
@@ -1037,6 +1041,7 @@ export const Collapsible: Story = {
           [heading]="heading"
           [activeId]="activeId"
           [numbered]="numbered"
+          [bordered]="bordered"
           [sticky]="sticky"
           [hideOnScroll]="hideOnScroll"
           [ariaLabel]="ariaLabel"
@@ -1055,6 +1060,7 @@ export const Collapsible: Story = {
  * renders it below `lg`. Resize the canvas below `lg` to try it.
  */
 export const CollapsibleHideOnScroll: Story = {
+  name: "Collapsible: hide on scroll",
   parameters: {
     layout: "fullscreen",
     fullWidth: true,
@@ -1077,8 +1083,8 @@ export const CollapsibleHideOnScroll: Story = {
         </div>
       </div>
 
-      <div *hideAt="'lg'" style="position: relative; height: 100vh;">
-        <div #scroll style="height: 100%; overflow-y: auto; padding: var(--layout-page-spacing-top) var(--layout-page-spacing-x) 5rem; background: var(--general-surface-tertiary);">
+      <div *hideAt="'lg'" style="position: relative; height: 100dvh; overflow: hidden; transform: translateZ(0); background: var(--general-surface-tertiary);">
+        <div #scroll style="height: 100%; overflow-y: auto; padding: var(--layout-page-spacing-top) var(--layout-page-spacing-x) 5rem;">
           <div style="display: flex; flex-direction: column; gap: 1rem;">
             <a tedi-link href="#" [underline]="false">
               <tedi-icon name="arrow_back" [size]="18" />Tervisetõendid ja -deklaratsioonid

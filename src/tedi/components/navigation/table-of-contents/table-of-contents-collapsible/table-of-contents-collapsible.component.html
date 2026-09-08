@@ -19,7 +19,10 @@
 </div>
 
 <ng-template #sheet>
-  <div class="tedi-table-of-contents tedi-table-of-contents__sheet">
+  <div
+    class="tedi-table-of-contents tedi-table-of-contents__sheet"
+    [class.tedi-table-of-contents--bordered]="bordered()"
+  >
     <div class="tedi-table-of-contents__sheet-header">
       <span
         tedi-text
