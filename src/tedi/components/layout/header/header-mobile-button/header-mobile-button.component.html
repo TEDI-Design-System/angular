@@ -1,0 +1,31 @@
+@if (renderAsLink()) {
+  <a [href]="href()" [class]="classes()" [attr.aria-label]="ariaLabel()">
+    <ng-container *ngTemplateOutlet="inner" />
+  </a>
+} @else {
+  <button
+    type="button"
+    [disabled]="disabled()"
+    [class]="classes()"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-haspopup]="ariaHasPopup()"
+    [attr.aria-expanded]="ariaExpanded()"
+  >
+    <ng-container *ngTemplateOutlet="inner" />
+  </button>
+}
+
+<ng-template #inner>
+  <span class="tedi-header-mobile-button__inner">
+    <tedi-icon [name]="icon()" color="inherit" />
+    @if (label()) {
+      <span
+        tedi-text
+        modifiers="extra-small"
+        class="tedi-header-mobile-button__text"
+      >
+        {{ label() }}
+      </span>
+    }
+  </span>
+</ng-template>
