@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   forwardRef,
@@ -18,6 +19,7 @@ import {
 import { ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
 import { A11yModule } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { DateInputComponent } from "../date-field/date-input/date-input.component";
 import { CalendarComponent } from "../../content/calendar/calendar.component";
@@ -77,6 +79,8 @@ import {
 export type {
   DateTimeFieldAvailableTimes,
   DayAvailabilityInput,
+  MonthPredicate,
+  YearPredicate,
 } from "./date-time-field.util";
 export type DateTimeFieldValue = Date | DateRange | null;
 export type DateTimeFieldMode = "single" | "range";
@@ -86,7 +90,7 @@ export type DateTimeFieldTimeGridVariant = "button" | "radio";
 export type DateTimeFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
 export type DateTimeFieldModalInput = boolean | "sm" | "md" | "lg" | "xl";
 export type DateTimeFieldSize = "default" | "small";
-type DateTimeFieldFormatter = (value: DateTimeFieldValue) => string;
+export type DateTimeFieldFormatter = (value: DateTimeFieldValue) => string;
 
 @Component({
   selector: "tedi-date-time-field",
@@ -255,6 +259,7 @@ export class DateTimeFieldComponent
   private readonly breakpointService = inject(BreakpointService);
   private readonly modalService = inject(ModalService);
   private readonly hostEl = inject(ElementRef<HTMLElement>);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly dateInput = viewChild.required<DateInputComponent>("dateInput");
   readonly calendar = viewChild<CalendarComponent>("calendar");
@@ -351,6 +356,12 @@ export class DateTimeFieldComponent
   // mode, force the popover to scroll — so swap them for a native `type="time"`
   // input on phones/small tablets. Predefined slot grids stay as-is (they're
   // already touch-friendly buttons).
+  //
+  // Single mode is the only caller: range takes the native input at every
+  // width, so `rangeTimeTpl` deliberately omits this check. Two wheels side by
+  // side under the calendar would dwarf it on desktop too, and the range layout
+  // (`__range-times`) is built around the inputs. Its `@else` branch covers the
+  // predefined-slots case alone and would render an empty grid without them.
   readonly useNativeTimeInput = computed(() =>
     this.breakpointService.isBelowBreakpoint("md")(),
   );
@@ -742,7 +753,10 @@ export class DateTimeFieldComponent
     });
     this.modalRef = ref;
 
-    ref.closed.subscribe((result) => {
+    // The modal outlives this component's view — it renders in the CDK overlay
+    // container — so without this the callback can still run after the field is
+    // destroyed and write to a torn-down control.
+    ref.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((result) => {
       this.modalRef = null;
       this.overlayOpen.set(false);
       this.onTouched();

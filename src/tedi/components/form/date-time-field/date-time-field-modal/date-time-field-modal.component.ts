@@ -98,7 +98,8 @@ export class DateTimeFieldModalComponent {
   readonly calendar = viewChild<CalendarComponent>("calendar");
 
   // See date-time-field.component.ts: swap the scroll wheels for a native
-  // `type="time"` input on phones/small tablets.
+  // `type="time"` input on phones/small tablets, and why `rangeTimeTpl`
+  // deliberately takes the native input at every width instead.
   readonly useNativeTimeInput = this.breakpointService.isBelowBreakpoint("md");
 
   readonly draft = signal<DateTimeFieldValue>(this.data.value);

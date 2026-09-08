@@ -35,6 +35,9 @@ import {
   CalendarView,
   DateFieldMode,
   DateRange,
+  DayAvailabilityInput,
+  MonthPredicate,
+  YearPredicate,
 } from "../../content/calendar/types";
 import {
   FormFieldControl,
@@ -70,14 +73,11 @@ import {
 import { ButtonComponent } from "../../buttons";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 
-type DateFieldValue = Date | Date[] | DateRange | null;
-type DateFieldFormatter = (value: DateFieldValue) => string;
-type DateFieldParser = (value: string) => DateFieldValue | undefined;
-type DayAvailabilityInput = Date[] | ((d: Date) => boolean) | undefined;
-type MonthPredicate = (month: Date) => boolean;
-type YearPredicate = (year: Date) => boolean;
-type DateFieldCalendarTrigger = "input" | "button";
-type DateFieldModalInput = boolean | "sm" | "md" | "lg" | "xl";
+export type DateFieldValue = Date | Date[] | DateRange | null;
+export type DateFieldFormatter = (value: DateFieldValue) => string;
+export type DateFieldParser = (value: string) => DateFieldValue | undefined;
+export type DateFieldCalendarTrigger = "input" | "button";
+export type DateFieldModalInput = boolean | "sm" | "md" | "lg" | "xl";
 export type DateFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
 export type DateFieldSize = "default" | "small";
 

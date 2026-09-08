@@ -2,9 +2,11 @@ export type DateTimeFieldAvailableTimes =
   string[] | ((date: Date) => string[]) | undefined;
 
 export type RangeParts = { from?: Date; to?: Date };
-export type DayAvailabilityInput = Date[] | ((d: Date) => boolean) | undefined;
-export type MonthPredicate = (month: Date) => boolean;
-export type YearPredicate = (year: Date) => boolean;
+export type {
+  DayAvailabilityInput,
+  MonthPredicate,
+  YearPredicate,
+} from "../../content/calendar/types";
 
 export const toSingle = (
   value: Date | RangeParts | null | undefined,

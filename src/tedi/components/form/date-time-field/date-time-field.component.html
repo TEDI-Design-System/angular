@@ -213,6 +213,7 @@
         <span class="tedi-date-time-field__range-date">{{ dateLabel }}</span>
       }
     </div>
+    <!-- No `useNativeTimeInput()` check here on purpose — see its doc comment. -->
     @if (!slots?.length) {
       <tedi-form-field
         class="tedi-date-time-field__native-time"

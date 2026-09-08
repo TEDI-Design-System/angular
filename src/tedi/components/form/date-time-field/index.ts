@@ -7,5 +7,10 @@ export type {
   DateTimeFieldTimeGridVariant,
   DateTimeFieldUseNativePicker,
   DateTimeFieldModalInput,
+  DateTimeFieldSize,
+  DateTimeFieldFormatter,
   DateTimeFieldAvailableTimes,
+  DayAvailabilityInput,
+  MonthPredicate,
+  YearPredicate,
 } from "./date-time-field.component";

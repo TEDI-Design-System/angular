@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { Subject } from "rxjs";
 import { Component, signal } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
@@ -56,6 +57,14 @@ class BreakpointServiceMock {
 class ModalServiceStub {
   open = jest.fn();
   closeAll = jest.fn();
+}
+
+/**
+ * Stands in for a `ModalRef`. `closed` has to be a real Observable — the field
+ * pipes it through `takeUntilDestroyed`.
+ */
+function stubModalRef(): { closed: Subject<DateTimeFieldValue | undefined> } {
+  return { closed: new Subject<DateTimeFieldValue | undefined>() };
 }
 
 function configureBaseModule(
@@ -357,7 +366,7 @@ describe("DateTimeFieldComponent", () => {
   describe("modal", () => {
     it("opens a modal when modal is enabled", () => {
       const { component, modalService } = createField({ modal: true });
-      modalService.open.mockReturnValue({ closed: { subscribe: jest.fn() } });
+      modalService.open.mockReturnValue(stubModalRef());
       component.handleIconClick();
       expect(modalService.open).toHaveBeenCalled();
     });
@@ -549,17 +558,25 @@ describe("DateTimeFieldComponent", () => {
   describe("modal lifecycle", () => {
     it("commits the value returned when the modal closes", () => {
       const { component, modalService } = createField({ modal: true });
-      let closedCb: ((v: DateTimeFieldValue) => void) | undefined;
-      modalService.open.mockReturnValue({
-        closed: {
-          subscribe: (cb: (v: DateTimeFieldValue) => void) => (closedCb = cb),
-        },
-      });
+      const ref = stubModalRef();
+      modalService.open.mockReturnValue(ref);
       component.handleIconClick();
       const result = new Date(2025, 8, 1, 12, 0);
-      closedCb!(result);
+      ref.closed.next(result);
       expect(component.value()).toBe(result);
       expect(component.overlayOpen()).toBe(false);
+    });
+
+    it("ignores a close that lands after the field is destroyed", () => {
+      const { component, fixture, modalService } = createField({ modal: true });
+      const ref = stubModalRef();
+      modalService.open.mockReturnValue(ref);
+      component.handleIconClick();
+
+      fixture.destroy();
+      ref.closed.next(new Date(2025, 8, 1, 12, 0));
+
+      expect(component.value()).toBeNull();
     });
 
     it("keeps the value when the modal is dismissed", () => {
@@ -568,14 +585,10 @@ describe("DateTimeFieldComponent", () => {
         modal: true,
         value: existing,
       });
-      let closedCb: ((v: DateTimeFieldValue) => void) | undefined;
-      modalService.open.mockReturnValue({
-        closed: {
-          subscribe: (cb: (v: DateTimeFieldValue) => void) => (closedCb = cb),
-        },
-      });
+      const ref = stubModalRef();
+      modalService.open.mockReturnValue(ref);
       component.handleIconClick();
-      closedCb!(undefined as unknown as DateTimeFieldValue);
+      ref.closed.next(undefined);
       expect(component.value()).toBe(existing);
     });
   });
