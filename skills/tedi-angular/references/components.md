@@ -194,6 +194,10 @@ The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `bord
   moves from the trigger into the panel and out past its last link, and Escape closes it. Use
   `[tedi-dropdown-item][interactiveContent]="true"` only inside a `menu` or `listbox`, where the
   projected control is a button and a widget role is the right answer.
+- **A plain `list` item takes exactly one control.** The row is painted as a single target (hover
+  background, pointer cursor) but only the projected control navigates, so the item stretches that
+  control's click area over the whole row. A second control in the same item would sit under that
+  overlay and become unclickable; split it into its own item instead.
 - **Icon-only controls need an accessible name**, and don't signal state by colour alone. Sorting,
   pagination, expansion and reordering controls all need labels; those come from
   `TediTranslationService`, so check the translation keys rather than hardcoding Estonian.
