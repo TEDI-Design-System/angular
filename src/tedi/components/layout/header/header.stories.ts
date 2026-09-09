@@ -624,17 +624,6 @@ const responsiveLogo = `
   </tedi-header-logo>
 `;
 
-const mobileSidenavWrapperStyles = `
-  .story-mobile-sidenav-wrapper {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .story-mobile-sidenav-wrapper:has(.tedi-sidenav:not(.tedi-sidenav--hidden):not(.tedi-sidenav--collapsed)) {
-    min-height: 100dvh;
-  }
-`;
-
 export const Default: StoryObj<HeaderComponent> = {
   parameters: {
     docs: {
@@ -688,47 +677,44 @@ Example with theme-aware logo:
   } as Record<string, unknown>,
   render: (args) => ({
     props: args,
-    styles: [mobileSidenavWrapperStyles],
     template: `
-      <div class="story-mobile-sidenav-wrapper">
-        <header tedi-header>
-          <button tedi-sidenav-toggle></button>
-          <tedi-header-logo [href]="logoHref" [showLogo]="showLogo">
-            <img src="header-logo.svg" alt="Logo" />
-            <img tedi-header-logo-dark src="header-logo-white.svg" alt="Logo (Dark Mode)" />
-          </tedi-header-logo>
-          <tedi-header-content *showAt="'lg'" [alignment]="alignment">
-            <a tedi-link href="#" [underline]="false">Link text</a>
-            <a tedi-link href="#" [underline]="false">Link text</a>
-            <a tedi-link href="#" [underline]="false">Link text</a>
-          </tedi-header-content>
-          <tedi-header-actions>
-            <tedi-header-language
-              [languages]="languages"
-              [selectLabel]="selectLabel"
-              [labelPosition]="labelPosition"
-            />
-            <tedi-separator axis="vertical" />
-            <tedi-header-login
-              [href]="loginHref"
-              [label]="loginLabel"
-              [size]="loginSize"
-            />
-          </tedi-header-actions>
-        </header>
-        <tedi-sidenav-overlay></tedi-sidenav-overlay>
-        <nav tedi-sidenav *hideAt="'lg'" style="flex: 1;">
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-        </nav>
-      </div>
+      <header tedi-header>
+        <button tedi-sidenav-toggle></button>
+        <tedi-header-logo [href]="logoHref" [showLogo]="showLogo">
+          <img src="header-logo.svg" alt="Logo" />
+          <img tedi-header-logo-dark src="header-logo-white.svg" alt="Logo (Dark Mode)" />
+        </tedi-header-logo>
+        <tedi-header-content *showAt="'lg'" [alignment]="alignment">
+          <a tedi-link href="#" [underline]="false">Link text</a>
+          <a tedi-link href="#" [underline]="false">Link text</a>
+          <a tedi-link href="#" [underline]="false">Link text</a>
+        </tedi-header-content>
+        <tedi-header-actions>
+          <tedi-header-language
+            [languages]="languages"
+            [selectLabel]="selectLabel"
+            [labelPosition]="labelPosition"
+          />
+          <tedi-separator axis="vertical" />
+          <tedi-header-login
+            [href]="loginHref"
+            [label]="loginLabel"
+            [size]="loginSize"
+          />
+        </tedi-header-actions>
+      </header>
+      <tedi-sidenav-overlay></tedi-sidenav-overlay>
+      <nav tedi-sidenav *hideAt="'lg'">
+        <tedi-sidenav-item href="#">
+          Link text
+        </tedi-sidenav-item>
+        <tedi-sidenav-item href="#">
+          Link text
+        </tedi-sidenav-item>
+        <tedi-sidenav-item href="#">
+          Link text
+        </tedi-sidenav-item>
+      </nav>
     `,
   }),
 };
@@ -736,44 +722,41 @@ Example with theme-aware logo:
 export const LoggedOut: StoryObj<HeaderComponent> = {
   render: (args) => ({
     props: args,
-    styles: [mobileSidenavWrapperStyles],
     template: `
-      <div class="story-mobile-sidenav-wrapper">
-        <header tedi-header>
-          <button tedi-sidenav-toggle></button>
-          ${logo}
-          <tedi-header-content *showAt="'lg'">
-            <a tedi-link href="#" [underline]="false">Link text</a>
-            <a tedi-link href="#" [underline]="false">Link text</a>
-            <a tedi-link href="#" [underline]="false">Link text</a>
-            <a tedi-link href="#" [underline]="false">Link text</a>
-            <a tedi-link href="#" [underline]="false">Link text</a>
-          </tedi-header-content>
-          <tedi-header-actions>
-            <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
-            <tedi-separator axis="vertical" />
-            <tedi-header-login />
-          </tedi-header-actions>
-        </header>
-        <tedi-sidenav-overlay></tedi-sidenav-overlay>
-        <nav tedi-sidenav *hideAt="'lg'" style="flex: 1;">
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-          <tedi-sidenav-item href="#">
-            Link text
-          </tedi-sidenav-item>
-        </nav>
-      </div>
+      <header tedi-header>
+        <button tedi-sidenav-toggle></button>
+        ${logo}
+        <tedi-header-content *showAt="'lg'">
+          <a tedi-link href="#" [underline]="false">Link text</a>
+          <a tedi-link href="#" [underline]="false">Link text</a>
+          <a tedi-link href="#" [underline]="false">Link text</a>
+          <a tedi-link href="#" [underline]="false">Link text</a>
+          <a tedi-link href="#" [underline]="false">Link text</a>
+        </tedi-header-content>
+        <tedi-header-actions>
+          <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
+          <tedi-separator axis="vertical" />
+          <tedi-header-login />
+        </tedi-header-actions>
+      </header>
+      <tedi-sidenav-overlay></tedi-sidenav-overlay>
+      <nav tedi-sidenav *hideAt="'lg'">
+        <tedi-sidenav-item href="#">
+          Link text
+        </tedi-sidenav-item>
+        <tedi-sidenav-item href="#">
+          Link text
+        </tedi-sidenav-item>
+        <tedi-sidenav-item href="#">
+          Link text
+        </tedi-sidenav-item>
+        <tedi-sidenav-item href="#">
+          Link text
+        </tedi-sidenav-item>
+        <tedi-sidenav-item href="#">
+          Link text
+        </tedi-sidenav-item>
+      </nav>
     `,
   }),
 };
@@ -803,53 +786,50 @@ Use \`[showLogo]\` whenever you need to hide the logo at a custom breakpoint tha
   },
   render: (args) => ({
     props: args,
-    styles: [mobileSidenavWrapperStyles],
     template: `
-      <div class="story-mobile-sidenav-wrapper">
-        <header tedi-header>
-          <button tedi-sidenav-toggle></button>
-          ${responsiveLogo}
-          <tedi-header-content alignment="space-between" *showAt="'lg'">
-            <div>
-              <a tedi-link href="#" [underline]="false">{{ 'home' | storyTranslate }}</a>
-              <a tedi-link href="#" [underline]="false">{{ 'services' | storyTranslate }}</a>
-              <a tedi-link href="#" [underline]="false">{{ 'blog' | storyTranslate }}</a>
-              <a tedi-link href="#" [underline]="false">{{ 'contact' | storyTranslate }}</a>
+      <header tedi-header>
+        <button tedi-sidenav-toggle></button>
+        ${responsiveLogo}
+        <tedi-header-content alignment="space-between" *showAt="'lg'">
+          <div>
+            <a tedi-link href="#" [underline]="false">{{ 'home' | storyTranslate }}</a>
+            <a tedi-link href="#" [underline]="false">{{ 'services' | storyTranslate }}</a>
+            <a tedi-link href="#" [underline]="false">{{ 'blog' | storyTranslate }}</a>
+            <a tedi-link href="#" [underline]="false">{{ 'contact' | storyTranslate }}</a>
+          </div>
+          <tedi-header-search>
+            <div style="width: 100%; max-width: 22.5rem;">
+              <tedi-search inputId="logged-out-2-search" />
             </div>
-            <tedi-header-search>
-              <div style="width: 100%; max-width: 22.5rem;">
-                <tedi-search inputId="logged-out-2-search" />
-              </div>
-            </tedi-header-search>
-          </tedi-header-content>
-          <tedi-header-actions>
-            <ng-container *showAt="'md'">
-              <ng-container *hideAt="'lg'">
-                <tedi-header-search>
-                  <tedi-search inputId="logged-out-2-search-tablet" />
-                </tedi-header-search>
-                <tedi-separator axis="vertical" />
-              </ng-container>
-            </ng-container>
-            <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
-            <tedi-separator axis="vertical" />
-            <ng-container *hideAt="'md'">
+          </tedi-header-search>
+        </tedi-header-content>
+        <tedi-header-actions>
+          <ng-container *showAt="'md'">
+            <ng-container *hideAt="'lg'">
               <tedi-header-search>
-                <tedi-search inputId="logged-out-2-search-mobile" />
+                <tedi-search inputId="logged-out-2-search-tablet" />
               </tedi-header-search>
               <tedi-separator axis="vertical" />
             </ng-container>
-            <tedi-header-login />
-          </tedi-header-actions>
-        </header>
-        <tedi-sidenav-overlay></tedi-sidenav-overlay>
-        <nav tedi-sidenav *hideAt="'lg'" style="flex: 1;">
-          <tedi-sidenav-item href="#">{{ 'home' | storyTranslate }}</tedi-sidenav-item>
-          <tedi-sidenav-item href="#">{{ 'services' | storyTranslate }}</tedi-sidenav-item>
-          <tedi-sidenav-item href="#">{{ 'blog' | storyTranslate }}</tedi-sidenav-item>
-          <tedi-sidenav-item href="#">{{ 'contact' | storyTranslate }}</tedi-sidenav-item>
-        </nav>
-      </div>
+          </ng-container>
+          <tedi-header-language [languages]="{ et: 'EST', en: 'ENG', ru: 'RUS' }" />
+          <tedi-separator axis="vertical" />
+          <ng-container *hideAt="'md'">
+            <tedi-header-search>
+              <tedi-search inputId="logged-out-2-search-mobile" />
+            </tedi-header-search>
+            <tedi-separator axis="vertical" />
+          </ng-container>
+          <tedi-header-login />
+        </tedi-header-actions>
+      </header>
+      <tedi-sidenav-overlay></tedi-sidenav-overlay>
+      <nav tedi-sidenav *hideAt="'lg'">
+        <tedi-sidenav-item href="#">{{ 'home' | storyTranslate }}</tedi-sidenav-item>
+        <tedi-sidenav-item href="#">{{ 'services' | storyTranslate }}</tedi-sidenav-item>
+        <tedi-sidenav-item href="#">{{ 'blog' | storyTranslate }}</tedi-sidenav-item>
+        <tedi-sidenav-item href="#">{{ 'contact' | storyTranslate }}</tedi-sidenav-item>
+      </nav>
     `,
   }),
 };
@@ -1491,15 +1471,21 @@ This demo uses hash fragments (\`#et\`, \`#en\`, \`#ru\`) so selecting a languag
   }),
 };
 
+const appShellStyles = `
+  .story-app-shell {
+    min-height: 100dvh;
+  }
+`;
+
 export const LoggedInWithSidenav: StoryObj<HeaderComponent> = {
   // Renders the sidenav, whose accessibility fixes are tracked in
   // https://github.com/TEDI-Design-System/angular/issues/307
   parameters: { a11y: { test: "todo" } },
   render: (args) => ({
     props: args,
-    styles: [mobileSidenavWrapperStyles],
+    styles: [appShellStyles],
     template: `
-      <div class="story-mobile-sidenav-wrapper">
+      <div class="story-app-shell flex flex-column">
         <header tedi-header>
           <button tedi-sidenav-toggle></button>
           ${logo}
@@ -1533,7 +1519,7 @@ export const LoggedInWithSidenav: StoryObj<HeaderComponent> = {
           </tedi-header-actions>
         </header>
         <tedi-sidenav-overlay></tedi-sidenav-overlay>
-        <nav tedi-sidenav style="flex: 1;">
+        <nav tedi-sidenav class="flex-fill">
           <tedi-sidenav-item icon="account_circle">
             Minu andmed
             <tedi-sidenav-dropdown>

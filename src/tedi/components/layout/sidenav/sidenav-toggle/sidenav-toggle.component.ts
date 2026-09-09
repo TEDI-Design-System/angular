@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  ElementRef,
   HostListener,
   inject,
   ViewEncapsulation,
@@ -26,6 +28,17 @@ import { TediTranslationService } from "../../../../services/translation/transla
 export class SideNavToggleComponent {
   sidenavService = inject(SideNavService);
   translationService = inject(TediTranslationService);
+
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  constructor() {
+    const element = this.host.nativeElement;
+
+    this.sidenavService.registerToggle(element);
+    inject(DestroyRef).onDestroy(() =>
+      this.sidenavService.unregisterToggle(element),
+    );
+  }
 
   @HostListener("click")
   onClick() {

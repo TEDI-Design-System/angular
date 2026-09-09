@@ -172,4 +172,146 @@ describe("SideNavService", () => {
       expect(service.isCollapsed()).toBe(false);
     });
   });
+
+  describe("drawerTop", () => {
+    let header: HTMLElement;
+    let toggle: HTMLElement;
+
+    const openDrawer = () => {
+      isBelowBreakpointSignal.set(true);
+      service.isMobileOpen.set(true);
+      TestBed.tick();
+    };
+
+    beforeEach(() => {
+      header = document.createElement("header");
+      toggle = document.createElement("button");
+      header.appendChild(toggle);
+      document.body.appendChild(header);
+    });
+
+    afterEach(() => {
+      header.remove();
+    });
+
+    it("should be null while the mobile navigation is closed", () => {
+      service.registerToggle(toggle);
+      isBelowBreakpointSignal.set(true);
+      TestBed.tick();
+
+      expect(service.drawerTop()).toBeNull();
+    });
+
+    it("should measure the bottom of the header holding the toggle", () => {
+      jest
+        .spyOn(header, "getBoundingClientRect")
+        .mockReturnValue({ bottom: 56 } as DOMRect);
+      service.registerToggle(toggle);
+
+      openDrawer();
+
+      expect(service.drawerTop()).toBe(56);
+    });
+
+    it("should fall back to the toggle when it is not inside a header", () => {
+      const standaloneToggle = document.createElement("button");
+      document.body.appendChild(standaloneToggle);
+      jest
+        .spyOn(standaloneToggle, "getBoundingClientRect")
+        .mockReturnValue({ bottom: 40 } as DOMRect);
+      service.registerToggle(standaloneToggle);
+
+      openDrawer();
+
+      expect(service.drawerTop()).toBe(40);
+      standaloneToggle.remove();
+    });
+
+    it("should clamp a header scrolled above the viewport to zero", () => {
+      jest
+        .spyOn(header, "getBoundingClientRect")
+        .mockReturnValue({ bottom: -20 } as DOMRect);
+      service.registerToggle(toggle);
+
+      openDrawer();
+
+      expect(service.drawerTop()).toBe(0);
+    });
+
+    it("should be 0 when no toggle is registered", () => {
+      openDrawer();
+
+      expect(service.drawerTop()).toBe(0);
+    });
+
+    it("should stop measuring the toggle once it is unregistered", () => {
+      jest
+        .spyOn(header, "getBoundingClientRect")
+        .mockReturnValue({ bottom: 56 } as DOMRect);
+      service.registerToggle(toggle);
+      service.unregisterToggle(toggle);
+
+      openDrawer();
+
+      expect(service.drawerTop()).toBe(0);
+    });
+
+    it("should re-resolve the anchor when the toggle changes while open", () => {
+      jest
+        .spyOn(header, "getBoundingClientRect")
+        .mockReturnValue({ bottom: 56 } as DOMRect);
+      service.registerToggle(toggle);
+      openDrawer();
+      expect(service.drawerTop()).toBe(56);
+
+      const otherHeader = document.createElement("header");
+      const otherToggle = document.createElement("button");
+      otherHeader.appendChild(otherToggle);
+      document.body.appendChild(otherHeader);
+      jest
+        .spyOn(otherHeader, "getBoundingClientRect")
+        .mockReturnValue({ bottom: 120 } as DOMRect);
+
+      service.registerToggle(otherToggle);
+      TestBed.tick();
+
+      expect(service.drawerTop()).toBe(120);
+      otherHeader.remove();
+    });
+
+    it("should disconnect the observer and reset the offset when the toggle unregisters while open", () => {
+      const observers: { observe: jest.Mock; disconnect: jest.Mock }[] = [];
+      const originalResizeObserver = global.ResizeObserver;
+
+      global.ResizeObserver = class {
+        observe = jest.fn();
+        unobserve = jest.fn();
+        disconnect = jest.fn();
+
+        constructor() {
+          observers.push(this as unknown as (typeof observers)[number]);
+        }
+      } as unknown as typeof ResizeObserver;
+
+      try {
+        jest
+          .spyOn(header, "getBoundingClientRect")
+          .mockReturnValue({ bottom: 56 } as DOMRect);
+        service.registerToggle(toggle);
+        openDrawer();
+
+        expect(observers).toHaveLength(1);
+        expect(observers[0].observe).toHaveBeenCalledWith(header);
+        expect(observers[0].disconnect).not.toHaveBeenCalled();
+
+        service.unregisterToggle(toggle);
+        TestBed.tick();
+
+        expect(observers[0].disconnect).toHaveBeenCalled();
+        expect(service.drawerTop()).toBe(0);
+      } finally {
+        global.ResizeObserver = originalResizeObserver;
+      }
+    });
+  });
 });
