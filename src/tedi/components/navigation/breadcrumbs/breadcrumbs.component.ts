@@ -46,13 +46,16 @@ type RenderToken =
  * the current page — add `aria-current="page"` to it yourself.
  *
  * Crumb links are underlined by default. Set `[underline]="false"` on the
- * `tedi-link` for non-underlined crumbs — recommended for the `short` back-link.
- * Crumbs collapsed into the ellipsis dropdown are always rendered without an
- * underline, regardless of their `[underline]` setting.
+ * `tedi-link` for non-underlined crumbs, which is recommended for the `short`
+ * back-link. A collapsed crumb keeps its own `[underline]` setting, so it looks
+ * the same in the ellipsis dropdown as it does in the trail. To restyle the
+ * collapsed rows, target `.tedi-breadcrumbs__dropdown-item`, which travels with
+ * them into the overlay.
  *
- * Collapsed crumbs are exposed as the menu items of the ellipsis menu: the role
- * and the roving tabindex sit on the projected link itself, so it stays a single
- * control that keyboard and screen readers can activate.
+ * The ellipsis dropdown is a plain list (`dropdownRole="list"`), not a menu, so
+ * the collapsed crumbs stay links: screen readers announce them as links and
+ * each one is its own tab stop. Tab moves from the ellipsis button into the
+ * list and out of its last link; Escape closes it and returns focus.
  */
 @Component({
   selector: "tedi-breadcrumbs",

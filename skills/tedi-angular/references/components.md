@@ -150,11 +150,6 @@ The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `bord
   `brand-primary` independently.
 - **`[tedi-label-row]` projects your own `<label tedi-label>`** plus trailing affixes as siblings, so
   native label attributes (`for`, `id`, `aria-*`, handlers) keep working.
-- **A `[tedi-dropdown-item]` that projects a link or button needs `[interactiveContent]="true"`.**
-  The item role and roving tabindex then move onto the projected control, so assistive technology
-  reports one control per item and the control keeps its own activation behaviour. Intended for
-  `dropdownRole="menu"`: a link's navigation is not an option's activation behaviour, so keep
-  listbox items as plain content.
 - **`tedi-attachment` has no built-in action buttons.** Project neutral `tedi-button`s inside a single
   `<tedi-attachment-actions>` and wire `(click)` and `disabled` yourself.
 
@@ -192,6 +187,13 @@ The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `bord
 - **Tabs activate differently depending on the host element.** `<button>` tabs use automatic
   activation (arrow keys select), anchor tabs use manual. Arrow Left/Right wrap, Home/End jump, only
   the active tab is in the tab order, and disabled tabs are skipped.
+- **A dropdown of links belongs in `dropdownRole="list"`, not `menu`.** `menu` and `listbox` are
+  composite widget roles, and the `menuitem` / `option` role replaces the role of the control it
+  lands on, so a projected link stops being announced as a link. `list` adds no roles and no key
+  handling: links stay links, each is its own tab stop, and the trigger drops `aria-haspopup`. Tab
+  moves from the trigger into the panel and out past its last link, and Escape closes it. Use
+  `[tedi-dropdown-item][interactiveContent]="true"` only inside a `menu` or `listbox`, where the
+  projected control is a button and a widget role is the right answer.
 - **Icon-only controls need an accessible name**, and don't signal state by colour alone. Sorting,
   pagination, expansion and reordering controls all need labels; those come from
   `TediTranslationService`, so check the translation keys rather than hardcoding Estonian.

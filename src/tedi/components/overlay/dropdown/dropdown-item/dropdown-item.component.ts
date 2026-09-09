@@ -32,12 +32,10 @@ const INTERACTIVE_CONTENT_SELECTOR = "a[href], button";
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    "[attr.role]": "interactiveContent() ? 'none' : itemRole()",
-    "[attr.aria-selected]":
-      "!interactiveContent() && dropdownContent.dropdownRole() === 'listbox' ? isSelected() : null",
-    "[attr.aria-disabled]":
-      "!interactiveContent() && disabled() ? 'true' : null",
-    "[attr.tabindex]": "interactiveContent() ? null : hostTabindex()",
+    "[attr.role]": "hostRole()",
+    "[attr.aria-selected]": "hostAriaSelected()",
+    "[attr.aria-disabled]": "hostAriaDisabled()",
+    "[attr.tabindex]": "hostTabindex()",
   },
 })
 export class DropdownItemComponent {
@@ -49,14 +47,15 @@ export class DropdownItemComponent {
 
   /**
    * Whether the projected content is itself the interactive control, e.g. a
-   * link or a button. The item then exposes the menu semantics and the roving
-   * tabindex on that element instead of the host `li`, so assistive technology
+   * button. In a `menu` or `listbox` the item role and the roving tabindex then
+   * move onto that element instead of the host `li`, so assistive technology
    * reports one control per item and the control keeps its own activation
-   * behaviour (a link navigates on Enter, including with modifier keys).
+   * behaviour.
    *
-   * Intended for `dropdownRole="menu"`. In a listbox the control also carries
-   * `aria-selected`, but a link's navigation is not an option's activation
-   * behaviour — project plain content into listbox items instead.
+   * A widget role replaces the control's own role, so a projected link stops
+   * being announced as a link. For navigation links use
+   * `dropdownRole="list"` instead, where this input is not needed: a plain list
+   * adds no roles, and the links stay links and stay in the tab order.
    * @default false
    */
   readonly interactiveContent = input(false);
@@ -115,13 +114,18 @@ export class DropdownItemComponent {
       const control = this.controlElement();
       if (!control) return;
 
-      control.setAttribute("role", this.itemRole());
-
       if (this.disabled()) {
         control.setAttribute("aria-disabled", "true");
       } else {
         control.removeAttribute("aria-disabled");
       }
+
+      // A plain `list` assigns no role, so the control keeps the semantics it
+      // came with and a link is still announced as a link.
+      const role = this.itemRole();
+      if (!role) return;
+
+      control.setAttribute("role", role);
 
       // The control carries `role="option"` in a listbox, so the selection
       // state has to travel with it instead of staying on the presentational
@@ -134,18 +138,56 @@ export class DropdownItemComponent {
     });
   }
 
-  itemRole() {
-    return this.dropdownContent.dropdownRole() === "menu"
-      ? "menuitem"
-      : "option";
+  /** The widget role for this item, or `null` in a plain `list`. */
+  itemRole(): "menuitem" | "option" | null {
+    switch (this.dropdownContent.dropdownRole()) {
+      case "menu":
+        return "menuitem";
+      case "listbox":
+        return "option";
+      default:
+        return null;
+    }
+  }
+
+  hostRole() {
+    if (!this.dropdownContent.isWidget()) return null;
+
+    return this.controlOwnsSemantics() ? "none" : this.itemRole();
+  }
+
+  hostAriaSelected() {
+    if (this.controlOwnsSemantics()) return null;
+
+    return this.dropdownContent.dropdownRole() === "listbox"
+      ? this.isSelected()
+      : null;
+  }
+
+  hostAriaDisabled() {
+    if (this.controlOwnsSemantics()) return null;
+
+    return this.disabled() ? "true" : null;
   }
 
   hostTabindex() {
-    return this.dropdownContent.dropdownRole() === "menu"
-      ? "-1"
-      : this.disabled()
-        ? null
-        : "-1";
+    if (this.controlOwnsSemantics()) return null;
+
+    switch (this.dropdownContent.dropdownRole()) {
+      case "menu":
+        return "-1";
+      default:
+        return this.disabled() ? null : "-1";
+    }
+  }
+
+  /**
+   * Whether the item's ARIA state and focus belong on the projected control
+   * rather than the host `li`. Always true in a plain `list`, where the
+   * projected control is what the item is.
+   */
+  private controlOwnsSemantics() {
+    return this.interactiveContent() || !this.dropdownContent.isWidget();
   }
 
   isSelected() {
@@ -153,8 +195,9 @@ export class DropdownItemComponent {
   }
 
   /**
-   * The element that carries the item's role, roving tabindex and focus — the
-   * projected control when `interactiveContent` is set, the host `li` otherwise.
+   * The element that carries the item's role, roving tabindex and focus: the
+   * projected control when it owns the item's semantics, the host `li`
+   * otherwise.
    */
   focusTarget(): HTMLElement {
     return this.controlElement() ?? this.host.nativeElement;
@@ -175,7 +218,7 @@ export class DropdownItemComponent {
   }
 
   private controlElement(): HTMLElement | null {
-    if (!this.interactiveContent()) return null;
+    if (!this.controlOwnsSemantics()) return null;
 
     this.control ??= this.host.nativeElement.querySelector<HTMLElement>(
       INTERACTIVE_CONTENT_SELECTOR,
@@ -193,7 +236,7 @@ export class DropdownItemComponent {
   }
 
   // Disabled items keep `aria-disabled` (and a roving tabindex in menus) so they
-  // stay discoverable, but they must not take focus on a mouse press — that focus
+  // stay discoverable, but they must not take focus on a mouse press: that focus
   // would otherwise trigger mouse-focus styling on a non-interactive item.
   @HostListener("mousedown", ["$event"])
   onMousedown(event: MouseEvent) {
@@ -202,12 +245,18 @@ export class DropdownItemComponent {
 
   @HostListener("keydown", ["$event"])
   onKeydown(event: KeyboardEvent) {
+    // A plain `list` is not a composite widget: arrow keys, Enter and Space
+    // belong to the projected control, and the panel takes Escape and Tab.
+    if (!this.dropdownContent.isWidget()) return;
+
     const key = event.key;
 
     if (this.disabled()) {
       event.preventDefault();
       return;
     }
+
+    if (this.handleActivationKey(event)) return;
 
     switch (key) {
       case "ArrowDown":
@@ -230,24 +279,6 @@ export class DropdownItemComponent {
         this.dropdown.focusLastItem();
         break;
 
-      case "Enter":
-        // An interactive item's control activates itself — preventing the
-        // default would swallow a link's navigation. The resulting click
-        // bubbles here and closes the dropdown.
-        if (this.interactiveContent()) break;
-        event.preventDefault();
-        this.onItemSelect();
-        break;
-
-      case " ":
-        event.preventDefault();
-        if (this.interactiveContent()) {
-          this.controlElement()?.click();
-          break;
-        }
-        this.onItemSelect();
-        break;
-
       case "Escape":
         event.preventDefault();
         this.dropdown.hideDropdown();
@@ -259,6 +290,33 @@ export class DropdownItemComponent {
         this.dropdown.tabOutOfDropdown(event.shiftKey);
         break;
     }
+  }
+
+  /** Returns whether the key was an activation key and has been dealt with. */
+  private handleActivationKey(event: KeyboardEvent): boolean {
+    if (event.key === "Enter") {
+      // An interactive item's control activates itself, and preventing the
+      // default would swallow a link's navigation. The resulting click bubbles
+      // here and closes the dropdown.
+      if (!this.controlOwnsSemantics()) {
+        event.preventDefault();
+        this.onItemSelect();
+      }
+
+      return true;
+    }
+
+    if (event.key !== " ") return false;
+
+    event.preventDefault();
+
+    if (this.controlOwnsSemantics()) {
+      this.controlElement()?.click();
+    } else {
+      this.onItemSelect();
+    }
+
+    return true;
   }
 
   private onItemSelect() {

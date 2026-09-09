@@ -32,12 +32,11 @@
                 >
                   <span aria-hidden="true">…</span>
                 </button>
-                <tedi-dropdown-content dropdownRole="menu">
+                <tedi-dropdown-content dropdownRole="list">
                   @for (hidden of token.hidden; track $index) {
                     <li
                       tedi-dropdown-item
                       [clipContent]="false"
-                      [interactiveContent]="true"
                       class="tedi-breadcrumbs__dropdown-item"
                     >
                       <ng-container [ngTemplateOutlet]="hidden.templateRef" />

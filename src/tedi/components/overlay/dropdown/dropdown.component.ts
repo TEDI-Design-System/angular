@@ -126,11 +126,16 @@ export class DropdownComponent implements OnDestroy {
 
     this.isOpen.set(true);
     this.skipNextGestureOutsideClick = true;
-    this.setActiveToSelectedOrFirst();
 
     if (this.hideOnScroll()) {
       this.setupScrollListener();
     }
+
+    // A plain `list` has no active item and no roving tabindex, and focus stays
+    // on the trigger until the user tabs into the panel.
+    if (!this.dropdownContent().isWidget()) return;
+
+    this.setActiveToSelectedOrFirst();
 
     // Deferred so the overlay content is attached before focusing
     setTimeout(() => {
@@ -293,6 +298,8 @@ export class DropdownComponent implements OnDestroy {
   }
 
   updateTabindexes() {
+    if (!this.dropdownContent().isWidget()) return;
+
     const items = this.dropdownContent().items();
     const role = this.dropdownContent().dropdownRole();
     const active = this.activeIndex();
@@ -306,6 +313,55 @@ export class DropdownComponent implements OnDestroy {
         item.setTabindex("-1");
       }
     });
+  }
+
+  /**
+   * Moves focus to the first focusable element in the panel. Returns `false`
+   * when the panel has none, so the caller can leave the key event alone.
+   */
+  focusPanelStart(): boolean {
+    const first = this.panelFocusables()[0];
+    if (!first) return false;
+
+    first.focus();
+    return true;
+  }
+
+  onPanelKeydown(event: KeyboardEvent) {
+    // Widget content is driven by its items' own key handling.
+    if (this.dropdownContent().isWidget()) return;
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      this.closeAndFocusTrigger();
+      return;
+    }
+
+    if (event.key !== "Tab") return;
+
+    // The panel is rendered in an overlay at the end of the document, so at its
+    // edges the tab order has to be stitched back onto the trigger's.
+    const focusables = this.panelFocusables();
+    const index = focusables.indexOf(
+      this.document.activeElement as HTMLElement,
+    );
+
+    if (event.shiftKey && index === 0) {
+      event.preventDefault();
+      this.closeAndFocusTrigger();
+    } else if (!event.shiftKey && index === focusables.length - 1) {
+      event.preventDefault();
+      this.tabOutOfDropdown(false);
+    }
+  }
+
+  private panelFocusables(): HTMLElement[] {
+    return getFocusableElements(this.dropdownContent().host.nativeElement);
+  }
+
+  private closeAndFocusTrigger() {
+    this.hideDropdown();
+    this.dropdownTrigger().focus();
   }
 
   private setupScrollListener() {
