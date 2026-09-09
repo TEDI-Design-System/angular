@@ -1,3 +1,10 @@
+## [8.0.1-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.6...angular-8.0.1-rc.7) (2026-09-09)
+
+
+### Bug Fixes
+
+* **sidenav:** now overlays the content instead of squishing it [#642](https://github.com/TEDI-Design-System/angular/issues/642) ([#644](https://github.com/TEDI-Design-System/angular/issues/644)) ([3207a38](https://github.com/TEDI-Design-System/angular/commit/3207a38180c7531c2284bfe1b85c8b2fb1a2ae7d))
+
 ## [8.0.1-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.5...angular-8.0.1-rc.6) (2026-09-08)
 
 
