@@ -8,10 +8,11 @@ import {
 } from "@angular/core";
 import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
 
-export type SkeletonBlockWidth = number | "auto" | `${number}px`;
+export type SkeletonBlockWidth = number | `${number}` | "auto" | `${number}px`;
 export type SkeletonBlockTextHeight =
   "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-export type SkeletonBlockHeight = SkeletonBlockTextHeight | number;
+export type SkeletonBlockHeight =
+  SkeletonBlockTextHeight | number | `${number}`;
 
 /**
  * Angular hands an attribute binding through as a string, so `width="50"` and

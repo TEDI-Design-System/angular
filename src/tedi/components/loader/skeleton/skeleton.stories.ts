@@ -6,6 +6,7 @@ import {
   moduleMetadata,
 } from "@storybook/angular";
 import { ComponentInputs } from "../../../types/inputs.type";
+import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
 import { SkeletonComponent } from "./skeleton.component";
 import {
   SkeletonBlockComponent,
@@ -21,7 +22,12 @@ import { ColComponent } from "../../helpers/grid/col/col.component";
  * drive a single block from the controls panel.
  */
 type StoryArgs = ComponentInputs<SkeletonComponent> &
-  Partial<Pick<ComponentInputs<SkeletonBlockComponent>, "width" | "height">>;
+  Partial<
+    Pick<
+      ComponentInputs<SkeletonBlockComponent>,
+      "width" | "height" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl"
+    >
+  >;
 
 const TEXT_HEIGHTS: SkeletonBlockTextHeight[] = [
   "p",
@@ -57,8 +63,8 @@ type AccessibilityLoader = {
       <tedi-col>
         <tedi-row [cols]="3" [gapX]="2" [gapY]="2">
           <tedi-col>
-            <button tedi-button (click)="add({ duration: 900 })">
-              Add a short loading block
+            <button tedi-button (click)="add({ duration: 150 })">
+              Add a block that loads before the delay
             </button>
           </tedi-col>
           <tedi-col>
@@ -206,7 +212,7 @@ export default {
         category: "SkeletonBlock inputs",
         type: {
           summary: "SkeletonBlockWidth",
-          detail: "number \n'auto' \n`${number}px`",
+          detail: "number \n`${number}` \n'auto' \n`${number}px`",
         },
         defaultValue: { summary: "auto" },
       },
@@ -220,11 +226,13 @@ export default {
         category: "SkeletonBlock inputs",
         type: {
           summary: "SkeletonBlockHeight",
-          detail: "'p' \n'h1' \n'h2' \n'h3' \n'h4' \n'h5' \n'h6' \nnumber",
+          detail:
+            "'p' \n'h1' \n'h2' \n'h3' \n'h4' \n'h5' \n'h6' \nnumber \n`${number}`",
         },
         defaultValue: { summary: "p" },
       },
     },
+    ...createBreakpointArgTypes("SkeletonBlockInputs"),
   },
 } as Meta<StoryArgs>;
 
@@ -236,11 +244,20 @@ export const Default: Story = {
     width: 50,
     height: "h2",
   },
-  render: ({ width, height, ...args }) => ({
-    props: { ...args, width, height },
+  render: ({ width, height, xs, sm, md, lg, xl, xxl, ...args }) => ({
+    props: { ...args, width, height, xs, sm, md, lg, xl, xxl },
     template: `
       <tedi-skeleton ${argsToTemplate(args)}>
-        <tedi-skeleton-block [width]="width" [height]="height" />
+        <tedi-skeleton-block
+          [width]="width"
+          [height]="height"
+          [xs]="xs"
+          [sm]="sm"
+          [md]="md"
+          [lg]="lg"
+          [xl]="xl"
+          [xxl]="xxl"
+        />
       </tedi-skeleton>
     `,
   }),
