@@ -1,10 +1,21 @@
 # Form Controls
 
-TEDI form controls implement Angular's `ControlValueAccessor` interface, integrating seamlessly with `ReactiveFormsModule` and `FormsModule`.
+TEDI form controls implement Angular's `ControlValueAccessor`, so they integrate with `ReactiveFormsModule` (`[formControl]` / `formControlName`) and `FormsModule` (`[(ngModel)]`) with no adapter. Many also expose a two-way `model()` input for use without a form.
+
+> The control names, selectors, value types, and input names in this file are **illustrative**: they
+> teach the integration idiom, not the exact current API. Before relying on a specific input or
+> selector, verify it against the installed package's type bundle,
+> `node_modules/@tedi-design-system/angular/tedi/index.d.ts` (see SKILL.md → Authoritative Sources).
+> Selectors especially: several controls are attribute selectors on a native element, and getting
+> that wrong produces a template that renders nothing.
 
 ## Available Form Controls
 
-| Component | Selector | Value Type |
+Orientation only. Verify the current roster and selectors against the installed type bundle (each
+component's `ɵɵComponentDeclaration` carries its real selector; see
+[references/components.md](components.md)):
+
+| Component | Selector | Value type |
 |-----------|----------|------------|
 | TextFieldComponent | `input[tedi-text-field]` | `string` |
 | NumberFieldComponent | `tedi-number-field` | `number` |
@@ -23,127 +34,69 @@ TEDI form controls implement Angular's `ControlValueAccessor` interface, integra
 
 ## Basic Usage with Reactive Forms
 
-```typescript
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import {
-  TextFieldComponent,
-  FormFieldComponent,
-  LabelComponent,
-  FeedbackTextComponent,
-  CheckboxComponent,
-} from '@tedi-design-system/angular/tedi';
+```ts
+import { ReactiveFormsModule, FormGroup, FormControl } from '@angular/forms';
+// import the TEDI control components you use into the component's `imports`
 
-@Component({
-  standalone: true,
-  imports: [
-    ReactiveFormsModule,
-    TextFieldComponent,
-    FormFieldComponent,
-    LabelComponent,
-    FeedbackTextComponent,
-    CheckboxComponent,
-  ],
-  template: `
-    <form [formGroup]="form">
-      <tedi-form-field>
-        <tedi-label>Full name</tedi-label>
-        <input tedi-text-field formControlName="name" />
-        <tedi-feedback-text type="error" *ngIf="form.controls.name.invalid">
-          Name is required
-        </tedi-feedback-text>
-      </tedi-form-field>
+form = new FormGroup({
+  email: new FormControl(''),
+  agree: new FormControl(false),
+});
+```
 
-      <tedi-form-field>
-        <tedi-label>Email</tedi-label>
-        <input tedi-text-field formControlName="email" type="email" />
-      </tedi-form-field>
+```html
+<form [formGroup]="form">
+  <tedi-form-field>
+    <label tedi-label for="email">Email</label>
+    <input tedi-text-field id="email" formControlName="email" />
+  </tedi-form-field>
 
-      <input tedi-checkbox type="checkbox" formControlName="agree" />
-    </form>
-  `,
-})
-export class MyFormComponent {
-  form = new FormGroup({
-    name: new FormControl('', Validators.required),
-    email: new FormControl(''),
-    agree: new FormControl(false),
-  });
-}
+  <input tedi-checkbox type="checkbox" formControlName="agree" />
+</form>
 ```
 
 ## Form Field Structure
 
-The recommended structure for a form field:
+Wrap a control with `tedi-form-field` to compose the label, control, and feedback text into one accessible field. `tedi-form-field` wires the feedback text to the control's `aria-describedby` for you. It does **not** associate the label: give the label a `for` and the control a matching `id` yourself.
+
+`tedi-feedback-text` takes its message through the required `text` input, not projected content.
 
 ```html
 <tedi-form-field>
-  <tedi-label>Field label</tedi-label>
-  <input tedi-text-field [formControl]="control" />
-  <tedi-feedback-text type="error">Error message</tedi-feedback-text>
-  <tedi-feedback-text type="hint">Help text</tedi-feedback-text>
+  <label tedi-label for="email">Email</label>
+  <input tedi-text-field id="email" formControlName="email" />
+  <tedi-feedback-text text="Enter your work email" type="hint" />
 </tedi-form-field>
 ```
 
-`FormFieldComponent` wraps the input with optional label, icon, clear button, and feedback text. Key inputs:
-
-- `size: 'default' | 'small'` — field size
-- `icon: string | FormFieldIcon` — icon name or config
-- `clearable: boolean` — show clear button when value exists
+`tedi-form-field` accepts layout/behavior inputs (conceptually `size`, `icon`, `clearable`, …) — verify the current input names against the source.
 
 ## Two-Way Binding (without forms)
 
-TEDI controls also support two-way binding via `model()` signals:
+Controls that expose a `model()` input can be bound directly, no `FormControl` needed:
 
 ```html
-<!-- Template-driven two-way binding -->
-<tedi-date-picker [(selected)]="selectedDate" />
-<tedi-dropdown [(value)]="selectedOption" />
-<tedi-toggle [(value)]="isEnabled" />
-
-<!-- Checkbox / radio groups — children identified by [value] -->
-<tedi-checkbox-group [(values)]="selectedTags">
-  <input type="checkbox" tedi-checkbox value="a" />
-  <input type="checkbox" tedi-checkbox value="b" />
-</tedi-checkbox-group>
-
-<tedi-radio-group [(value)]="status">
-  <input type="radio" tedi-radio value="active" />
-  <input type="radio" tedi-radio value="archived" />
-</tedi-radio-group>
+<input tedi-text-field [(value)]="email" />
+<tedi-toggle [(checked)]="enabled" />
 ```
 
-**Note:** `tedi-checkbox-group` / `tedi-radio-group` activate their form-control behavior only when a `FormControl` is bound or the two-way-bound value is non-null / non-empty. For null/empty initial values, prefer a `FormControl` — `new FormControl<string[]>([])` or `new FormControl<string | null>(null)`. Without any binding, the group is a passive visual wrapper.
+Group controls (`tedi-checkbox-group`, `tedi-radio-group`) coordinate their children's selected state; they activate the full `ControlValueAccessor` behavior when bound to a form control, and expose a two-way model otherwise. Verify the exact model input name against the source.
 
 ## Validation States
 
-Form fields automatically reflect validation state from the `FormControl`:
+When a control is bound to a `FormControl`, error styling is driven automatically by the control's validity (`invalid` + touched/dirty), so wiring validators on the `FormControl` is enough.
 
-```typescript
-// The form field shows error styling when control is invalid + touched
-this.emailControl = new FormControl('', [Validators.required, Validators.email]);
-```
-
-You can also set validation state explicitly on date-picker:
-
-```html
-<tedi-date-picker [inputState]="'error'" />
-```
-
-States: `'default'`, `'error'`, `'valid'`.
+Some controls also expose an explicit state input (e.g. an input that forces `default` / `error` / `valid`) for cases where validity isn't form-driven — check the component source for the input name and enum members.
 
 ## Disabled State
 
-Both programmatic and form-level disable work:
+Prefer the reactive-forms API — `control.disable()` / `control.enable()` — which keeps the disabled state in the model:
 
-```typescript
-// Via FormControl
-this.control.disable();
-
-// Via input
-<input tedi-text-field [formControl]="control" [disabled]="true" />
+```ts
+this.form.controls.email.disable();
 ```
 
-The component combines native disabled state with form-disabled state internally.
+A `[disabled]` template input also exists on most controls for non-form usage. Do not assume a given `disabled`-style input is or isn't deprecated — verify against the component source at the pinned tag.
 
 ## Search
 
@@ -197,3 +150,28 @@ Use `TimeFieldComponent` (`tedi-time-field`) for picking a time of day. Its valu
 Pick the picker style with `pickerVariant` (`"scroll" | "slots" | "dropdown" | "none"`), set the minute granularity with `minuteStep`, or supply explicit `timeSlots` (a `string[]` of `HH:mm` values) for the `"slots"` variant. Set `useNativePicker` to fall back to the OS `<input type="time">`. Sizing and validation styling come from the wrapping `tedi-form-field`, not from `tedi-time-field`. See the TimeField section in `references/components.md` for the full input list.
 
 `TimePickerComponent` (`tedi-time-picker`) is the standalone picker surface behind TimeField — most consumers should reach for `tedi-time-field` instead.
+
+## Value and event conventions
+
+TEDI form controls hand you the **parsed value**, not a raw DOM event:
+
+- Bound to a `FormControl` or `formControlName`, the control writes its typed value straight into the
+  form model.
+- Bound through a two-way `model()` input, it emits the typed value on change (`[(value)]`,
+  `[(checked)]`, and so on).
+- Time controls use `"HH:mm"` 24-hour strings. Date controls use `Date`, or a mode-shaped value where
+  `multiple` / `range` modes exist.
+
+Two exceptions worth knowing, both easy to get wrong:
+
+- **`CheckboxComponent` is not a TEDI value accessor.** Its selector is
+  `input[type=checkbox][tedi-checkbox]`, so it styles a native checkbox and `[formControl]` on it is
+  handled by Angular's own `CheckboxControlValueAccessor`, yielding a `boolean`. Inside a managed
+  `<tedi-checkbox-group>` its `value` input is a `string` identity instead.
+- **`DropdownComponent` is not a form control at all.** It lives in `overlay/` and exposes
+  `[(value)]` without implementing `ControlValueAccessor`, so `formControlName` on it throws
+  Angular's `NG01203: No value accessor for form control` at runtime.
+  Reach for `tedi-select` when you want a form-bound picker.
+
+Confirm the value shape for any other control from its `InputSignal<T>` / `ModelSignal<T>` type in the
+installed `index.d.ts`.

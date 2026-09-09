@@ -1,0 +1,5 @@
+<ng-content />
+@if (required()) {
+  <span class="tedi-label--required" aria-hidden="true">*</span>
+  <span class="sr-only">, {{ "required" | tediTranslate }}</span>
+}
