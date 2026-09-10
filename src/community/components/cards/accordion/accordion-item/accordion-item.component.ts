@@ -7,7 +7,7 @@ import {
   model,
   ViewEncapsulation,
 } from "@angular/core";
-import { CardComponent } from "../../card/card.component";
+import { CardComponent } from "@tedi-design-system/angular/tedi";
 import { _IdGenerator } from "@angular/cdk/a11y";
 
 @Component({

@@ -1,4 +1,13 @@
 .tedi-accordion-item {
+  // Inherited by this accordion's header, content and icon styles.
+  --_card-radius: var(--card-radius-rounded);
+  --_card-border: var(--card-border-primary);
+  --_card-bg: var(--card-background-primary);
+  --_card-padding-top: var(--card-padding-md-default);
+  --_card-padding-right: var(--card-padding-md-default);
+  --_card-padding-bottom: var(--card-padding-md-default);
+  --_card-padding-left: var(--card-padding-md-default);
+
   --_accordion-columns: minmax(auto, 200px) auto;
   --_accordion-header-spacing: 16px;
   --_accordion-header-title-spacing: 8px;
@@ -12,6 +21,11 @@
     grid-template-rows: max-content 0fr;
     transition: grid-template-rows 0.3s;
 
+    #{$accordion-header},
+    #{$accordion-content} {
+      border: 1px solid var(--_card-border);
+    }
+
     #{$accordion-header} {
       border-top-left-radius: var(--_card-radius);
       border-top-right-radius: var(--_card-radius);
@@ -23,6 +37,11 @@
       border-top: transparent;
       border-bottom-left-radius: var(--_card-radius);
       border-bottom-right-radius: var(--_card-radius);
+    }
+
+    &--selected {
+      outline: 1px solid var(--card-border-selected);
+      outline-offset: -1px;
     }
 
     &--expanded {

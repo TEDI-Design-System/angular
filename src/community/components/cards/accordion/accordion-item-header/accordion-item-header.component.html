@@ -1,10 +1,9 @@
 <button
   [id]="headerId()"
-  tedi-card-header
-  [variant]="variant()"
-  [background]="background()"
   class="tedi-accordion-item-header"
+  [class]="_modifierClasses()"
   [class.tedi-accordion-item-header--opened]="opened()"
+  [class.tedi-accordion-item-header--brand]="variant() === 'brand'"
   [attr.aria-expanded]="opened()"
   [attr.aria-controls]="contentId()"
   (click)="toggle()"
