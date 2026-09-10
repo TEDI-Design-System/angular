@@ -36,8 +36,11 @@ export class TimelineComponent {
    */
   variant = input<TimelineVariant>("default");
   /**
-   * Item padding in rems for the card variant.
-   * @default 1
+   * Vertical padding of each item in the "card" variant, in rems (same scale
+   * as Card). Both the gaps between items and the card's top/bottom edges
+   * resolve to twice this value. Horizontal item padding is fixed at the card
+   * default.
+   * @default 0.5
    */
   cardPadding = input<TimelineCardPadding>();
 
