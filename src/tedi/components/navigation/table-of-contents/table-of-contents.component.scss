@@ -137,7 +137,7 @@
 }
 
 .tedi-table-of-contents__item--selected > .tedi-table-of-contents__row {
-  border-left-color: var(--table-of-content-border-active);
+  border-left-color: var(--table-of-contents-border-active);
 
   .tedi-table-of-contents__number {
     color: var(--link-primary-active);
@@ -157,7 +157,7 @@
 }
 
 .tedi-table-of-contents__item--selected > .tedi-table-of-contents__separator {
-  border-left-color: var(--table-of-content-border-active);
+  border-left-color: var(--table-of-contents-border-active);
 }
 
 .tedi-table-of-contents--bordered .tedi-table-of-contents__row {
@@ -215,7 +215,7 @@
 
   display: flex;
   flex-direction: column;
-  max-height: 85dvh;
+  max-height: 80dvh;
 }
 
 .tedi-table-of-contents__sheet-header {
