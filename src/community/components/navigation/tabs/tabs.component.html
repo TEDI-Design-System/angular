@@ -1,6 +1,6 @@
 <ng-template #tabsList><ng-content select="[tedi-tab]" /></ng-template>
 
-<tedi-card padding="none">
+<tedi-card background="primary" [padding]="0">
   <tedi-card-content>
     <div role="tablist" class="tedi-tabs__tab-list">
       @if (!mobileTabsOpened()) {
@@ -20,7 +20,7 @@
   <tedi-card-content
     role="tabpanel"
     [attr.aria-labelledby]="activeTabId()"
-    [padding]="{ horizontal: 'md', vertical: 'lg' }"
+    [padding]="{ horizontal: 1, vertical: 1.5 }"
   >
     @if (activeTabContent(); as activeContent) {
       <ng-container *ngTemplateOutlet="activeContent" />
@@ -30,8 +30,16 @@
 </tedi-card>
 
 @if (mobileTabsOpened()) {
-  <tedi-card padding="none" class="tedi-tabs__mobile-dropdown">
-    <tedi-card-content hasSeparator autoWidth padding="xs">
+  <tedi-card
+    class="tedi-tabs__mobile-dropdown"
+    background="primary"
+    [padding]="0"
+  >
+    <tedi-card-content
+      class="tedi-tabs__mobile-header"
+      [autoWidth]="true"
+      [padding]="0.5"
+    >
       <button
         tedi-closing-button
         size="small"

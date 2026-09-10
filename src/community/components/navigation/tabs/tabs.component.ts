@@ -15,12 +15,13 @@ import {
   ClosingButtonComponent,
   IconComponent,
   TediTranslationPipe,
+  CardComponent,
+  CardContentComponent,
 } from "@tedi-design-system/angular/tedi";
 
 import { TabContentComponent } from "./tab-content/tab-content.component";
 import { TabComponent } from "./tab/tab.component";
 import { FocusKeyManager } from "@angular/cdk/a11y";
-import { CardComponent, CardContentComponent } from "../../cards";
 
 @Component({
   selector: "tedi-tabs",
