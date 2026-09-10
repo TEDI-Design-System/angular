@@ -9,7 +9,6 @@ import {
 import { AccordionItemComponent } from "../accordion-item/accordion-item.component";
 import { CardColors } from "../../card/card-colors.directive";
 import {
-  CardHeaderComponent,
   CardHeaderVariant,
 } from "../../card/card-header/card-header.component";
 import {
@@ -25,7 +24,6 @@ const WHITE_ICON_VARIANTS = ["brand", "brand-dark"];
   selector: "tedi-accordion-item-header",
   standalone: true,
   imports: [
-    CardHeaderComponent,
     IconComponent,
     ButtonComponent,
     NgTemplateOutlet,
@@ -60,6 +58,21 @@ export class AccordionItemHeaderComponent {
    * Accordion header background
    */
   background = input<CardColors>();
+
+  _modifierClasses = computed(() => {
+    const classes: string[] = [];
+    const variant = this.variant();
+    const background = this.background();
+
+    if (variant) {
+      classes.push(`tedi-accordion-item-header--variant--${variant}`);
+    }
+    if (background) {
+      classes.push(`tedi-accordion-item-header--background--${background}`);
+    }
+
+    return classes.join(" ");
+  });
   /**
    * Color of the indicator arrow
    */

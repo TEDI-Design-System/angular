@@ -6,7 +6,7 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { CardColors } from "../../card/card-colors.directive";
-import { CardContentComponent } from "../../card/card-content/card-content.component";
+import { CardContentComponent } from "@tedi-design-system/angular/tedi";
 import { AccordionItemComponent } from "../accordion-item/accordion-item.component";
 
 @Component({
