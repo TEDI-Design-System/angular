@@ -13,6 +13,9 @@ import { ButtonComponent } from "@tedi-design-system/angular/tedi";
   styleUrl: "./table-of-contents-item.component.scss",
   imports: [ButtonComponent],
 })
+/**
+ * @deprecated Use the TEDI-Ready `tedi-table-of-contents-item` from `@tedi-design-system/angular` instead.
+ */
 export class TableOfContentsItemComponent {
   idTo = input.required<string>();
 
