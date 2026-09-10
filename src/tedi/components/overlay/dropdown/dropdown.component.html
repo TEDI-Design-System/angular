@@ -9,6 +9,7 @@
   <div
     class="tedi-dropdown__panel"
     [style.--_tedi-dropdown-trigger-width]="triggerWidthVar()"
+    (keydown)="onPanelKeydown($event)"
   >
     <ng-content select="tedi-dropdown-content" />
   </div>
