@@ -1,5 +1,6 @@
 <tedi-card-content
-  [background]="background()"
+  [background]="background() ?? 'primary'"
+  [padding]="1"
   [id]="contentId()"
   role="region"
   [attr.aria-labelledby]="headerId()"
