@@ -22,11 +22,6 @@ $breakpoints: (
     }
   }
 
-  &__content {
-    padding: 0;
-    padding-bottom: var(--tedi-dimensions-10);
-  }
-
   &__header {
     width: 100%;
     padding: var(--tedi-dimensions-10);
@@ -60,10 +55,6 @@ $breakpoints: (
     right: 0;
     z-index: var(--z-index-fixed);
     padding: 0;
-    --_card-padding-top: 0;
-    --_card-padding-left: 0;
-    --_card-padding-bottom: 0;
-    --_card-padding-right: 0;
 
     &-trigger {
       border: none;
