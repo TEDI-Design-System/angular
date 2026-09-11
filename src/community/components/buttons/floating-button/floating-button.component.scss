@@ -1,7 +1,6 @@
 @use "@tedi-design-system/core/mixins";
 @use "@tedi-design-system/core/bootstrap-utility/breakpoints";
-@use "../../../../tedi/components/buttons/button/button.component.scss" as
-  buttonMixins;
+@use "../../../../tedi/components/buttons/button/button-mixins" as buttonMixins;
 
 button.tedi-floating-button {
   box-shadow: 0 4px 10px 0 var(--tedi-alpha-14);
