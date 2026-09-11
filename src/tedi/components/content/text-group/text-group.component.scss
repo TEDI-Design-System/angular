@@ -28,3 +28,10 @@ tedi-text-group-value {
   gap: var(--text-group-value-inner-spacing);
   align-items: center;
 }
+
+.tedi-text-group-slot {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: var(--text-group-value-inner-spacing);
+  align-items: center;
+}
