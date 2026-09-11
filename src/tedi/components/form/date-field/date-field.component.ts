@@ -35,6 +35,9 @@ import {
   CalendarView,
   DateFieldMode,
   DateRange,
+  DayAvailabilityInput,
+  MonthPredicate,
+  YearPredicate,
 } from "../../content/calendar/types";
 import {
   FormFieldControl,
@@ -70,14 +73,11 @@ import {
 import { ButtonComponent } from "../../buttons";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 
-type DateFieldValue = Date | Date[] | DateRange | null;
-type DateFieldFormatter = (value: DateFieldValue) => string;
-type DateFieldParser = (value: string) => DateFieldValue | undefined;
-type DayAvailabilityInput = Date[] | ((d: Date) => boolean) | undefined;
-type MonthPredicate = (month: Date) => boolean;
-type YearPredicate = (year: Date) => boolean;
-type DateFieldCalendarTrigger = "input" | "button";
-type DateFieldModalInput = boolean | "sm" | "md" | "lg" | "xl";
+export type DateFieldValue = Date | Date[] | DateRange | null;
+export type DateFieldFormatter = (value: DateFieldValue) => string;
+export type DateFieldParser = (value: string) => DateFieldValue | undefined;
+export type DateFieldCalendarTrigger = "input" | "button";
+export type DateFieldModalInput = boolean | "sm" | "md" | "lg" | "xl";
 export type DateFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
 export type DateFieldSize = "default" | "small";
 
@@ -343,6 +343,7 @@ export class DateFieldComponent
 
   readonly currentMonth = signal<Date>(new Date());
   readonly overlayOpen = signal<boolean>(false);
+  readonly overlayMaxHeight = signal<number | null>(null);
 
   private readonly openedBy = signal<DateFieldCalendarTrigger>("button");
 
@@ -708,10 +709,25 @@ export class DateFieldComponent
   }
 
   handleOverlayAttached(): void {
+    this.updateOverlayMaxHeight();
     this.calendar()?.focusActiveCell();
     if (this.hideOnScroll()) {
       this.setupScrollListener();
     }
+  }
+
+  // Cap the popover to whichever side of the trigger has more room and let it
+  // scroll (only its height — never its width, which would make the calendar
+  // re-measure and wrap its months). Without this a tall calendar — e.g. two
+  // months stacked into a column on a phone — is laid out past the viewport
+  // edge, and because the overlay is fixed-positioned the page cannot scroll
+  // to it, leaving the far month unreachable.
+  private updateOverlayMaxHeight(): void {
+    const rect = this.hostEl.nativeElement.getBoundingClientRect();
+    const margin = 8;
+    const spaceBelow = window.innerHeight - rect.bottom - margin;
+    const spaceAbove = rect.top - margin;
+    this.overlayMaxHeight.set(Math.max(spaceBelow, spaceAbove));
   }
 
   handleOverlayDetached(): void {

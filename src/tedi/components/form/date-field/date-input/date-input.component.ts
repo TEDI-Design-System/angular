@@ -76,6 +76,8 @@ export class DateInputComponent implements AfterViewChecked {
   readonly iconActive = input<boolean>(false);
   readonly iconDisabled = input<boolean>(false);
   readonly useNativePicker = input<boolean>(false);
+  /** Native input type used when `useNativePicker` is `true`. `date` for date-only fields, `datetime-local` for date-and-time fields. */
+  readonly nativeInputType = input<"date" | "datetime-local">("date");
   readonly nativeIsoValue = input<string>("");
   readonly clearable = input<boolean>(false);
 
@@ -140,7 +142,7 @@ export class DateInputComponent implements AfterViewChecked {
   });
 
   readonly inputType = computed(() =>
-    this.useNativePicker() ? "date" : "text",
+    this.useNativePicker() ? this.nativeInputType() : "text",
   );
 
   readonly inputValue = computed(() =>

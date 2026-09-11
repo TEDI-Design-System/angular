@@ -25,6 +25,7 @@ component's `ɵɵComponentDeclaration` carries its real selector; see
 | RadioGroupComponent | `tedi-radio-group` | `string \| null` |
 | ToggleComponent | `tedi-toggle` | `boolean` |
 | DateFieldComponent | `tedi-date-field` | `Date \| Date[] \| DateRange \| null` |
+| DateTimeFieldComponent | `tedi-date-time-field` | `Date \| DateRange \| null` (each end carries a time) |
 | DatePickerComponent | `tedi-date-picker` | `Date \| null` — **deprecated**, use `DateFieldComponent` |
 | TimeFieldComponent | `tedi-time-field` | `string \| null` (HH:mm) |
 | TimePickerComponent | `tedi-time-picker` | `string \| null` (HH:mm) |
@@ -150,6 +151,46 @@ Use `TimeFieldComponent` (`tedi-time-field`) for picking a time of day. Its valu
 Pick the picker style with `pickerVariant` (`"scroll" | "slots" | "dropdown" | "none"`), set the minute granularity with `minuteStep`, or supply explicit `timeSlots` (a `string[]` of `HH:mm` values) for the `"slots"` variant. Set `useNativePicker` to fall back to the OS `<input type="time">`. Sizing and validation styling come from the wrapping `tedi-form-field`, not from `tedi-time-field`. See the TimeField section in `references/components.md` for the full input list.
 
 `TimePickerComponent` (`tedi-time-picker`) is the standalone picker surface behind TimeField — most consumers should reach for `tedi-time-field` instead.
+
+## Date and Time Selection
+
+Use `DateTimeFieldComponent` (`tedi-date-time-field`) when one value carries both a date and a time
+— don't wire a DateField and a TimeField together by hand. It pairs the same typed input with a
+popover holding the calendar and a TimePicker, in `single` or `range` mode (a range carries a time
+on each end).
+
+```html
+<tedi-form-field>
+  <label tedi-label for="dt">Kuupäev ja kellaaeg</label>
+  <tedi-date-time-field inputId="dt" [formControl]="dateTimeControl" placeholder="pp.kk.aaaa tt:mm" />
+</tedi-form-field>
+```
+
+`layout` picks how the two halves are arranged: `"side-by-side"` (default) shows the calendar and
+the time picker together, `"multi-step"` asks for the date first and then advances to a separate
+time step. `range` always renders side by side.
+
+Set `availableTimes` — a `string[]` of `HH:mm` values, or a `(date: Date) => string[]` for
+per-date slots — to replace the scroll wheel with a grid of predefined slots; `timeGridVariant`
+(`"button" | "radio"`) and `slotColumns` shape that grid. Without it, `minuteStep` sets the wheel's
+granularity.
+
+```html
+<tedi-date-time-field
+  inputId="dt-slots"
+  [formControl]="dateTimeControl"
+  layout="multi-step"
+  [availableTimes]="slotsForDate"
+/>
+```
+
+It takes the same calendar inputs as DateField (`minDate`/`maxDate`, `disablePast`/`disableFuture`,
+`disabledMatchers`, `availableDays`/`unavailableDays`, `selectionLevel`, `monthYearSelectType`,
+`showWeekNumbers`, `numberOfMonths`). `useNativePicker` falls back to the OS
+`<input type="datetime-local">` (single mode only) and `modal`/`fullscreen` open the picker in a
+modal instead of the popover; both accept a breakpoint name (`"sm"`, `"md"`, ...) to switch below
+that breakpoint. Like DateField it owns no label — compose it with `tedi-form-field` and
+`tedi-label`.
 
 ## Value and event conventions
 
