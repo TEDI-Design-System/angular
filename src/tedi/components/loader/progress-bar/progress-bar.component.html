@@ -61,3 +61,14 @@
     </div>
   </div>
 </div>
+
+@if (announce() !== "off") {
+  <span
+    class="sr-only"
+    [attr.role]="announceRole()"
+    [attr.aria-live]="announce()"
+    aria-atomic="true"
+  >
+    {{ announcedValue() }}
+  </span>
+}
