@@ -2202,7 +2202,7 @@ Standalone colored dot indicator. Used internally by `StatusBadge` and can be us
 
 # Community Components
 
-Import from `@tedi-design-system/angular/community`. These are community-contributed, have relaxed review standards, and are **not recommended** when a TEDI-Ready equivalent exists.
+Import from `@tedi-design-system/angular/community`. These are community-contributed, have relaxed review standards, and are **not recommended** when a TEDI-Ready equivalent exists. The TextEditor is imported separately from `@tedi-design-system/angular/community/text-editor`.
 
 ## Buttons
 
@@ -2261,6 +2261,14 @@ Import from `@tedi-design-system/angular/community`. These are community-contrib
 
 ### FormField / InputGroup
 **Selector:** `tedi-form-field`, `tedi-input-group`
+
+### TextEditor
+**Selector:** `tedi-text-editor`
+- Required: `control: FormControl` (value is Quill HTML), `inputId: string`
+- `placeholder: string` (not translated), `modules: QuillModules` (replaces the default toolbar)
+
+Import from `@tedi-design-system/angular/community/text-editor`. This is the only entry point that needs the optional `ngx-quill` and `quill` peer dependencies, plus Quill's `snow` theme stylesheet. Takes a `FormControl` directly rather than acting as a ControlValueAccessor, so it is bound as `[control]="myControl"`, not `[formControl]`.
+
 
 ## Helpers
 

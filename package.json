@@ -30,7 +30,17 @@
     "@angular/common": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/forms": "^20.0.0 || ^21.0.0 || ^22.0.0",
-    "@angular/platform-browser": "^20.0.0 || ^21.0.0 || ^22.0.0"
+    "@angular/platform-browser": "^20.0.0 || ^21.0.0 || ^22.0.0",
+    "ngx-quill": "^28.0.2",
+    "quill": "^2.0.3"
+  },
+  "peerDependenciesMeta": {
+    "ngx-quill": {
+      "optional": true
+    },
+    "quill": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@tanstack/angular-table": "^8.21.4",
@@ -84,7 +94,9 @@
     "jest-preset-angular": "^14.6.2",
     "lint-staged": "^16.4.0",
     "ng-packagr": "^20.3.2",
+    "ngx-quill": "^28.0.2",
     "prettier": "^3.9.4",
+    "quill": "^2.0.3",
     "readdirp": "4.1.2",
     "replace-in-file": "^8.4.0",
     "sass": "^1.103.1",
@@ -133,5 +145,13 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TEDI-Design-System/angular.git"
-  }
+  },
+  "description": "[![codecov](https://codecov.io/gh/TEHIK-EE/tedi-design-system/graph/badge.svg?token=NKNNJSG19D)](https://codecov.io/gh/TEHIK-EE/tedi-design-system) [![semantic-release](https://img.shields.io/badge/semantic--release-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TEDI-Design-System/angular/issues"
+  },
+  "homepage": "https://github.com/TEDI-Design-System/angular#readme"
 }
