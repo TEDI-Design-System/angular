@@ -8,15 +8,18 @@ TEDI form controls implement Angular's `ControlValueAccessor` interface, integra
 |-----------|----------|------------|
 | TextFieldComponent | `input[tedi-text-field]` | `string` |
 | NumberFieldComponent | `tedi-number-field` | `number` |
-| CheckboxComponent | `input[tedi-checkbox]` | `boolean` |
+| SearchComponent | `tedi-search` | `string` |
+| SliderComponent | `tedi-slider` | `number` |
 | CheckboxGroupComponent | `tedi-checkbox-group` | `string[]` |
 | RadioGroupComponent | `tedi-radio-group` | `string \| null` |
 | ToggleComponent | `tedi-toggle` | `boolean` |
-| DatePickerComponent | `tedi-date-picker` | `Date \| null` |
+| DateFieldComponent | `tedi-date-field` | `Date \| Date[] \| DateRange \| null` |
+| DatePickerComponent | `tedi-date-picker` | `Date \| null` — **deprecated**, use `DateFieldComponent` |
 | TimeFieldComponent | `tedi-time-field` | `string \| null` (HH:mm) |
 | TimePickerComponent | `tedi-time-picker` | `string \| null` (HH:mm) |
-| DropdownComponent | `tedi-dropdown` | `string` |
 | SelectComponent | `tedi-select` | `T \| T[]` |
+
+`CheckboxComponent` (`input[type=checkbox][tedi-checkbox]`) is **not** a TEDI value accessor — it styles a native checkbox, so `[formControl]` on it is handled by Angular's built-in `CheckboxControlValueAccessor` and yields a `boolean`. Inside a managed `<tedi-checkbox-group>`, its `value` input is a `string` identity instead. `DropdownComponent` (`tedi-dropdown`) lives in `overlay/` and is not a form control — it exposes `[(value)]` but implements no `ControlValueAccessor`.
 
 ## Basic Usage with Reactive Forms
 
@@ -55,7 +58,7 @@ import {
         <input tedi-text-field formControlName="email" type="email" />
       </tedi-form-field>
 
-      <input tedi-checkbox formControlName="agree" />
+      <input tedi-checkbox type="checkbox" formControlName="agree" />
     </form>
   `,
 })
@@ -142,22 +145,55 @@ this.control.disable();
 
 The component combines native disabled state with form-disabled state internally.
 
-## Date Picker
+## Search
 
-The date picker has extensive configuration:
+`SearchComponent` (`tedi-search`) is a `string` value accessor that renders its own `tedi-form-field` — do not wrap it in one. It requires `inputId`, and takes an optional trailing `button` (`{ text?, icon?, variant?, ariaLabel? }`); `searchEvent` fires on Enter or button click.
 
 ```html
-<tedi-date-picker
-  [formControl]="dateControl"
-  [showWeekNumbers]="true"
-  [allowManualInput]="true"
-  [closeOnSelect]="true"
-  [monthMode]="'dropdown'"
-  [yearMode]="'dropdown'"
-  [inputSize]="'default'"
-  [inputState]="'default'"
-  [disabled]="disabledDateMatcher"
-/>
+<tedi-search inputId="search" label="Otsing" [formControl]="query" (searchEvent)="run($event)" />
 ```
 
-The `disabled` input accepts a `DatePickerMatcher` — a function `(date: Date) => boolean` that returns true for dates that should be disabled.
+The host is a `role="search"` landmark whose accessible name falls back to `ariaLabel` → `label` → `placeholder` → the translated "search". **When a page renders more than one `tedi-search`, give each a distinct `ariaLabel`** — identically named landmarks of the same type fail axe's `landmark-unique` rule. The visible `<label>` is unaffected; `ariaLabel` names only the landmark.
+
+If you build a suggestion panel around the field, `aria-expanded` is the attribute to watch: it is not permitted on a plain textbox (`aria-allowed-attr`), so the input needs `role="combobox"`. `aria-controls` and `aria-haspopup` are global attributes and are valid on a plain text input either way. Point `aria-controls` at a `role="listbox"` popup for a list of options, or a `role="dialog"` popup (with `aria-haspopup="dialog"`) when the panel mixes results with other controls. Bind it conditionally — `[attr.aria-controls]="open() ? 'panel-id' : null"` — since a popup rendered with `@if` or a CDK overlay is absent while closed, and a reference to a missing id fails `aria-valid-attr-value`.
+
+## Date Selection
+
+Use `DateFieldComponent` (`tedi-date-field`) — it is the successor to the now-deprecated `DatePickerComponent`. It wraps a typed text input with a popover (or modal) calendar, and supports `single`, `multiple` and `range` modes.
+
+```html
+<tedi-form-field>
+  <label tedi-label for="date">Kuupäev</label>
+  <tedi-date-field
+    inputId="date"
+    [formControl]="dateControl"
+    [showWeekNumbers]="true"
+    monthYearSelectType="dropdown"
+  />
+</tedi-form-field>
+```
+
+By default the calendar's year dropdown/grid offers **100 years back and 20 years forward**. Override the range with `minYear`/`maxYear` (e.g. a date-of-birth field):
+
+```html
+<tedi-date-field inputId="dob" [formControl]="dobControl" [minYear]="1900" [maxYear]="2010" />
+```
+
+Disable specific dates with `disabledMatchers`, which accepts a `Matcher` — a single `Date`, `Date[]`, `{ before }`, `{ after }`, `{ from, to? }`, `{ dayOfWeek: number[] }`, or a `(date: Date) => boolean` predicate. See the DateField section in `references/components.md` for the full input list.
+
+> **Deprecated:** `tedi-date-picker` still works but is deprecated — prefer `tedi-date-field` for new code.
+
+## Time Selection
+
+Use `TimeFieldComponent` (`tedi-time-field`) for picking a time of day. Its value is an `HH:mm` string (or `null`). It wraps a typed input with a popover/modal picker; free-typed values are normalized on blur (`9` → `09:00`, `930` → `09:30`), and invalid input reverts to the previous value.
+
+```html
+<tedi-form-field>
+  <label tedi-label for="time">Kellaaeg</label>
+  <tedi-time-field inputId="time" [formControl]="timeControl" pickerTrigger="input" />
+</tedi-form-field>
+```
+
+Pick the picker style with `pickerVariant` (`"scroll" | "slots" | "dropdown" | "none"`), set the minute granularity with `minuteStep`, or supply explicit `timeSlots` (a `string[]` of `HH:mm` values) for the `"slots"` variant. Set `useNativePicker` to fall back to the OS `<input type="time">`. Sizing and validation styling come from the wrapping `tedi-form-field`, not from `tedi-time-field`. See the TimeField section in `references/components.md` for the full input list.
+
+`TimePickerComponent` (`tedi-time-picker`) is the standalone picker surface behind TimeField — most consumers should reach for `tedi-time-field` instead.

@@ -77,7 +77,7 @@ Two patterns exist for this — pick by need:
 
 ### Pattern A: Per-input `BreakpointInput<T>` (preferred when one or two inputs need to be responsive)
 
-Use this when a single input (e.g., a flag, count, or variant) should vary by breakpoint without restating sibling inputs. Reference: `tedi/components/content/carousel/carousel-content/carousel-content.component.ts:46-55`, `tedi/components/form/time-field/time-field.component.ts` (`useNativePicker`).
+Use this when a single input (e.g., a flag, count, or variant) should vary by breakpoint without restating sibling inputs. Reference: `src/tedi/components/content/carousel/carousel-content/carousel-content.component.ts:46-55`, `src/tedi/components/form/time-field/time-field.component.ts` (`useNativePicker`).
 
 ```typescript
 import {
@@ -118,7 +118,7 @@ Notes:
 
 ### Pattern B: Per-component breakpoint inputs (preferred when many inputs need to be responsive together)
 
-Use this when several inputs commonly change together at a given breakpoint and consumers benefit from grouping them. Reference: `tedi/components/navigation/link/link.component.ts:55-105`.
+Use this when several inputs commonly change together at a given breakpoint and consumers benefit from grouping them. Reference: `src/tedi/components/navigation/link/link.component.ts:55-105`.
 
 ```typescript
 export type LinkInputs = {
@@ -429,27 +429,27 @@ export { ComponentNameType } from './component-name.types'; // if applicable
 ```
 
 ### Register in Category `index.ts`
-Add the new component export to the parent category barrel file (e.g., `tedi/components/form/index.ts`).
+Add the new component export to the parent category barrel file (e.g., `src/tedi/components/form/index.ts`).
 
 ## Key File Locations
 
 ### Services
-- Translation: `tedi/services/translation/translation.service.ts` (root-provided)
-- Theme: `tedi/services/theme/theme.service.ts` (root-provided)
-- Toast: `tedi/services/toast/toast.service.ts` (root-provided, has static state)
-- Breakpoint: `tedi/services/breakpoint/breakpoint.service.ts`
+- Translation: `src/tedi/services/translation/translation.service.ts` (root-provided)
+- Theme: `src/tedi/services/theme/theme.service.ts` (root-provided)
+- Toast: `src/tedi/services/toast/toast.service.ts` (root-provided, has static state)
+- Breakpoint: `src/tedi/services/breakpoint/breakpoint.service.ts`
 
 ### Configuration
-- App-level provider: `tedi/providers/tedi.provider.ts` → `provideTedi(config)`
-- Translation token: `tedi/tokens/translation.token.ts`
-- Theme token: `tedi/tokens/theme.token.ts`
-- Translations map: `tedi/services/translation/translations.ts` (et, en, ru)
+- App-level provider: `src/tedi/providers/tedi.provider.ts` → `provideTedi(config)`
+- Translation token: `src/tedi/tokens/translation.token.ts`
+- Theme token: `src/tedi/tokens/theme.token.ts`
+- Translations map: `src/tedi/services/translation/translations.ts` (et, en, ru)
 
 ### Utilities
-- Date formatting: `tedi/utils/date.util.ts`
-- Cookie signal: `tedi/utils/cookies.util.ts`
-- DOM helpers: `tedi/utils/elements.util.ts`
-- UUID generation: `tedi/helpers/generate-uuid.ts`
+- Date formatting: `src/tedi/utils/date.util.ts`
+- Cookie signal: `src/tedi/utils/cookies.util.ts`
+- DOM helpers: `src/tedi/utils/elements.util.ts`
+- UUID generation: `src/tedi/helpers/generate-uuid.ts`
 
 ## Known Quirks
 - `toggle.component.ts` still uses old `@ViewChild` decorator — should be migrated to `viewChild()` signal

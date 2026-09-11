@@ -1,0 +1,42 @@
+<div class="tedi-attachment__card">
+  <div class="tedi-attachment__title-row">
+    <div class="tedi-attachment__title-group">
+      @if (icon()) {
+        <tedi-icon [name]="icon()!" [size]="18" class="tedi-attachment__icon" />
+      }
+      <span class="tedi-attachment__title">{{ name() }}</span>
+      @if (hasErrorVisual()) {
+        <tedi-icon
+          name="error"
+          color="danger"
+          [size]="18"
+          [label]="error()"
+          class="tedi-attachment__error-icon"
+        />
+      }
+    </div>
+    @if (fileSize()) {
+      <span class="tedi-attachment__size">{{ fileSize() }}</span>
+    }
+  </div>
+
+  <div
+    class="tedi-attachment__progress"
+    [class.tedi-attachment__progress--empty]="!projectedProgress()"
+  >
+    <ng-content select="tedi-progress-bar" />
+  </div>
+
+  <div class="tedi-attachment__actions">
+    <ng-content select="tedi-attachment-actions" />
+  </div>
+</div>
+
+@if (error()) {
+  <tedi-feedback-text
+    class="tedi-attachment__feedback"
+    [text]="error()!"
+    type="error"
+    position="left"
+  />
+}

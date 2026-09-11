@@ -15,10 +15,12 @@
     "build": "ng build angular-components --configuration production && sass --load-path=node_modules src/styles/index.scss dist/index.css --style=compressed --no-source-map && replace-in-file //fonts//g \"./fonts/\" dist/index.css --isRegex && mkdir -p dist/fonts && cp -a node_modules/@tedi-design-system/core/fonts/* dist/fonts/",
     "build:sb": "ng run angular-components:build-storybook && replace-in-file //fonts//g \"./fonts/\" \"dist/storybook-static/*.css\" --isRegex",
     "build:sb:chromatic": "ng run angular-components:build-storybook",
-    "lint": "stylelint \"tedi/**/*.scss\" --fix && ng lint angular-components --fix",
+    "lint": "stylelint \"src/tedi/**/*.scss\" --fix && ng lint angular-components --fix",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "test:coverage": "jest --config ./jest.config.ts --coverage",
+    "test-storybook": "test-storybook",
+    "test-storybook:ci": "npx -y concurrently -k -s first -n \"SB,A11Y\" -c \"magenta,blue\" \"npx -y http-server dist/storybook-static --port 6006 --silent\" \"npx -y wait-on tcp:127.0.0.1:6006 && test-storybook --index-json --url http://127.0.0.1:6006 --junit\"",
     "install:clean": "rm -rf node_modules && npm install",
     "release": "npx semantic-release",
     "chromatic": "npm run build:sb:chromatic && npx chromatic --project-token=$CHROMATIC_PROJECT_TOKEN"
@@ -42,7 +44,7 @@
   },
   "dependencies": {
     "@tanstack/angular-table": "^8.21.4",
-    "@tedi-design-system/core": "^6.4.3"
+    "@tedi-design-system/core": "^6.8.1"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "20.3.27",
@@ -74,8 +76,9 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/npm": "^13.1.5",
     "@storybook/addon-a11y": "^10.4.3",
-    "@storybook/addon-docs": "^10.4.3",
-    "@storybook/angular": "^10.4.3",
+    "@storybook/addon-docs": "^10.5.10",
+    "@storybook/angular": "^10.5.10",
+    "@storybook/test-runner": "^0.24.4",
     "@testing-library/angular": "^17.3.7",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.5",
@@ -96,7 +99,7 @@
     "quill": "^2.0.3",
     "readdirp": "4.1.2",
     "replace-in-file": "^8.4.0",
-    "sass": "^1.86.1",
+    "sass": "^1.103.1",
     "semantic-release": "^25.0.3",
     "storybook": "^10.4.3",
     "storybook-addon-pseudo-states": "^10.4.3",
@@ -107,7 +110,7 @@
     "ts-node": "^10.9.2",
     "tslib": "^2.5.0",
     "typescript": "5.8",
-    "zone.js": "~0.16.2"
+    "zone.js": "~0.15.1"
   },
   "commitlint": {
     "extends": "@commitlint/config-conventional",
@@ -129,10 +132,10 @@
     }
   },
   "lint-staged": {
-    "{src,tedi}/**/*.{css,scss}": [
+    "src/!(community)/**/*.{css,scss}": [
       "stylelint --fix"
     ],
-    "src/**/*.{ts,html}": [
+    "src/!(community)/**/*.{ts,html}": [
       "prettier --write"
     ]
   },

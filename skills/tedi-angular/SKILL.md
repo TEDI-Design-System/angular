@@ -94,7 +94,7 @@ Some components use attribute selectors to enhance native elements:
 
 <!-- Element selector — wrapper component -->
 <tedi-modal [open]="isOpen">...</tedi-modal>
-<tedi-date-picker [formControl]="dateControl" />
+<tedi-date-field inputId="date" [formControl]="dateControl" />
 ```
 
 ### Signal-based inputs
@@ -105,7 +105,7 @@ All component APIs use Angular signals (`input()`, `model()`, `output()`):
 <button tedi-button [variant]="variant()" [size]="size()">Action</button>
 
 <!-- Two-way binding (model inputs) -->
-<tedi-date-picker [(selected)]="selectedDate" />
+<tedi-date-field inputId="date" [(value)]="selectedDate" />
 <tedi-modal [(open)]="isModalOpen">...</tedi-modal>
 ```
 
@@ -132,7 +132,7 @@ export class MyFormComponent {
 }
 ```
 
-Form controls: `TextFieldComponent`, `NumberFieldComponent`, `CheckboxComponent`, `ToggleComponent`, `DatePickerComponent`, `DropdownComponent`.
+Form controls: `TextFieldComponent`, `NumberFieldComponent`, `CheckboxComponent`, `ToggleComponent`, `DateFieldComponent`, `TimeFieldComponent`, `DropdownComponent`.
 
 ## Theming
 

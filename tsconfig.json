@@ -13,11 +13,11 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "@tedi-design-system/angular/tedi": ["./tedi/index.ts"],
-      "@tedi-design-system/angular/community": ["./community/index.ts"]
+      "@tedi-design-system/angular/tedi": ["./src/tedi/index.ts"],
+      "@tedi-design-system/angular/community": ["./src/community/index.ts"]
     }
   },
-  "include": ["src/**/*.ts", "tedi/**/*.ts", "community/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "references": [
     { "path": "./tsconfig.lib.json" },
     { "path": "./tsconfig.spec.json" },
