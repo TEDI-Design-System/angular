@@ -152,6 +152,10 @@ The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `bord
   native label attributes (`for`, `id`, `aria-*`, handlers) keep working.
 - **`tedi-attachment` has no built-in action buttons.** Project neutral `tedi-button`s inside a single
   `<tedi-attachment-actions>` and wire `(click)` and `disabled` yourself.
+- **`tedi-text-group-slot` is the last child of `tedi-text-group-value`, not its sibling.** It holds
+  the trailing element of a value row — an info tooltip, status badge or tag — and does not shrink
+  when the row runs out of space; the text beside it gives way instead, as far as it can. Put the
+  slot outside the value and it loses both the row's spacing and that protection.
 
 ### Choosing the right component
 

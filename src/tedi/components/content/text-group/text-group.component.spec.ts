@@ -4,6 +4,7 @@ import { By } from "@angular/platform-browser";
 import { TextGroupComponent } from "./text-group.component";
 import { TextGroupLabelComponent } from "./text-group-label.component";
 import { TextGroupValueComponent } from "./text-group-value.component";
+import { TextGroupSlotComponent } from "./text-group-slot.component";
 
 @Component({
   standalone: true,
@@ -51,6 +52,34 @@ class TextGroupNormalComponent {
   value = "Test Value";
   type?: "horizontal" | "vertical";
   labelWidth?: string;
+}
+
+@Component({
+  standalone: true,
+  imports: [
+    TextGroupComponent,
+    TextGroupLabelComponent,
+    TextGroupValueComponent,
+    TextGroupSlotComponent,
+  ],
+  template: `
+    <tedi-text-group>
+      <tedi-text-group-label
+        ><span class="label">{{ label }}</span></tedi-text-group-label
+      >
+      <tedi-text-group-value>
+        <span class="value">{{ value }}</span>
+        <tedi-text-group-slot
+          ><span class="slot">{{ slot }}</span></tedi-text-group-slot
+        >
+      </tedi-text-group-value>
+    </tedi-text-group>
+  `,
+})
+class TextGroupWithSlotComponent {
+  label = "Test Label";
+  value = "Test Value";
+  slot = "Test Slot";
 }
 
 describe("TextGroupComponent", () => {
@@ -169,6 +198,39 @@ describe("TextGroupComponent", () => {
 
       expect(labelEl.textContent).toBe("Test Label");
       expect(valueEl.textContent).toBe("Test Value");
+    });
+  });
+
+  describe("With Slot", () => {
+    let fixture: ComponentFixture<TextGroupWithSlotComponent>;
+
+    beforeEach(() => {
+      TestBed.configureTestingModule({
+        imports: [TextGroupWithSlotComponent],
+      }).compileComponents();
+
+      fixture = TestBed.createComponent(TextGroupWithSlotComponent);
+      fixture.detectChanges();
+    });
+
+    it("should render projected slot content", () => {
+      const slotEl = fixture.debugElement.query(By.css(".slot")).nativeElement;
+
+      expect(slotEl.textContent).toBe("Test Slot");
+    });
+
+    it("should apply the slot block class to the host element", () => {
+      const slotHost = fixture.debugElement.query(
+        By.css("tedi-text-group-slot"),
+      ).nativeElement;
+
+      expect(slotHost.className).toContain("tedi-text-group-slot");
+    });
+
+    it("should keep the slot inside the dd element", () => {
+      const dd = fixture.debugElement.query(By.css("dd")).nativeElement;
+
+      expect(dd.querySelector("tedi-text-group-slot")).not.toBeNull();
     });
   });
 });
