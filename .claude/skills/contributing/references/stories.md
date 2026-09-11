@@ -213,6 +213,7 @@ render: (args) => ({
 - [ ] Every public input/model has a corresponding `argTypes` entry with description, control, type summary, and default value
 - [ ] `Default` story has all controls wired up via `args` and they **functionally drive the rendered component** — verified by changing a control and seeing the output update, including for nested/composed components (see section 5)
 - [ ] States story covers all visual states shown in Figma (default, hover, active, focus, disabled)
+- [ ] Every icon-only control shown in a story has both an `aria-label` and a `tedi-tooltip` — the label names it for screen readers, the tooltip shows the same wording on hover or keyboard focus
 - [ ] Reactive forms example included if the component implements ControlValueAccessor
 - [ ] Figma link is in the JSDoc comment above `export default` (format: `<a href="..." target="_blank">Figma ↗</a>`)
 
