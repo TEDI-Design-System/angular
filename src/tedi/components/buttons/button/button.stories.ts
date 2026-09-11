@@ -11,6 +11,9 @@ import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { BaseButtonDirective } from "./base-button.directive";
+import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
+import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
+import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus", "Disabled"];
 
@@ -30,6 +33,9 @@ export default {
         ColComponent,
         TextComponent,
         IconComponent,
+        TooltipComponent,
+        TooltipTriggerComponent,
+        TooltipContentComponent,
       ],
     }),
   ],
@@ -119,9 +125,14 @@ const ButtonTemplate: StoryFn<TemplateType> = ({
               <tedi-icon name="edit" />
               Edit
             </button>
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" aria-label="Edasi">
-              <tedi-icon name="arrow_forward" />
-            </button>
+            <tedi-tooltip>
+              <tedi-tooltip-trigger>
+                <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" aria-label="Edasi">
+                  <tedi-icon name="arrow_forward" />
+                </button>
+              </tedi-tooltip-trigger>
+              <tedi-tooltip-content>Edasi</tedi-tooltip-content>
+            </tedi-tooltip>
           </tedi-col>
         </tedi-row>
       </tedi-col>
@@ -141,9 +152,14 @@ const ButtonTemplate: StoryFn<TemplateType> = ({
               <tedi-icon name="edit" />
               Edit
             </button>
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" [size]="'small'" aria-label="Edasi">
-              <tedi-icon name="arrow_forward" />
-            </button>
+            <tedi-tooltip>
+              <tedi-tooltip-trigger>
+                <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" [size]="'small'" aria-label="Edasi">
+                  <tedi-icon name="arrow_forward" />
+                </button>
+              </tedi-tooltip-trigger>
+              <tedi-tooltip-content>Edasi</tedi-tooltip-content>
+            </tedi-tooltip>
           </tedi-col>
         </tedi-row>
       </tedi-col>
