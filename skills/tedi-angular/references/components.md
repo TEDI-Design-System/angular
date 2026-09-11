@@ -110,10 +110,10 @@ the part of this document worth maintaining by hand.
 
 ### The `/tedi` and `/community` entry points collide
 
-This is the highest-value trap in the Angular library and it has no React equivalent. **24 selectors
+This is the highest-value trap in the Angular library and it has no React equivalent. **25 selectors
 are declared in both entry points, under identical class names**, including `tedi-card`,
 `tedi-modal`, `tedi-accordion`, `tedi-tabs`, `tedi-dropdown`, `tedi-form-field`, `tedi-pagination`,
-`tedi-search`, `tedi-tag`, and the checkbox/radio group family.
+`tedi-search`, `tedi-tag`, `[tedi-floating-button]`, and the checkbox/radio group family.
 
 `CardComponent` from `/community` and `CardComponent` from `/tedi` are different components with
 different input APIs behind the same `<tedi-card>` tag. Consequences:
@@ -131,6 +131,10 @@ example. Where the same component exists in both, the `/tedi` one is the answer.
 
 The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `border`, plus
 `tedi-card-icon` and breakpoint inputs; Community takes named `spacing` and `accentBorder`.
+
+Both entry points declare `[tedi-floating-button]`. The Community component is
+**deprecated**: it has only `variant` / `size` / `axis`. The TEDI-Ready one adds `position`,
+`placement`, `offset` and `zIndex`. Import from `/tedi`.
 
 ### Composition constraints
 

@@ -13,6 +13,11 @@ export type FloatingButtonVariant = "primary" | "secondary";
 export type FloatingButtonSize = "default" | "large";
 export type FloatingButtonAxis = "horizontal" | "vertical";
 
+/**
+ * @deprecated Use `FloatingButtonComponent` from `@tedi-design-system/angular/tedi`.
+ * Both components use the same selector, so update the TypeScript import to use
+ * the TEDI-Ready component.
+ */
 @Component({
   selector: "[tedi-floating-button]",
   template: `<ng-content />`,

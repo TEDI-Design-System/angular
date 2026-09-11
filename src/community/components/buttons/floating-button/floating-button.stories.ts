@@ -19,10 +19,20 @@ type StoryFloatingButtonArgs = FloatingButtonComponent & StoryArgs;
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.15.23?node-id=4515-65391&t=PIbEsGEGsONqRIrN-0" target="_BLANK">Figma ↗</a><br/>
  * <a href="https://www.tedi.ee/1ee8444b7/p/546461-floating-button" target="_BLANK">Zeroheight ↗</a><hr/>
+ *
+ * <strong>Deprecated.</strong> Use the TEDI-Ready <code>FloatingButtonComponent</code> from
+ * <code>@tedi-design-system/angular/tedi</code> instead. Both declare the same
+ * <code>[tedi-floating-button]</code> selector, so update the TypeScript import to use
+ * the TEDI-Ready component.
  **/
 const meta: Meta<StoryFloatingButtonArgs> = {
   title: "Community/Buttons/Floating Button",
   component: FloatingButtonComponent,
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
 
   decorators: [
     moduleMetadata({
