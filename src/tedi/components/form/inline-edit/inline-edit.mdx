@@ -1,0 +1,74 @@
+import { Meta, Canvas } from "@storybook/addon-docs/blocks";
+import * as InlineEditStories from "./inline-edit.stories";
+
+<Meta of={InlineEditStories} name="Documentation" />
+
+# Inline edit
+
+`tedi-inline-edit` displays a value that becomes editable when clicked. It
+manages switching between display and edit modes, focus, and keyboard
+interaction. The form control keeps its own value binding.
+
+## Adding an editor
+
+Place the form control inside an `ng-template tediInlineEditControl`. The control
+is created when editing starts and removed when editing ends.
+
+```html
+<tedi-inline-edit [displayValue]="name" label="Nimi">
+  <ng-template tediInlineEditControl>
+    <input tedi-text-field id="name" [(value)]="name" aria-label="Nimi" />
+  </ng-template>
+</tedi-inline-edit>
+```
+
+Bind `displayValue` to the value shown outside edit mode, formatting it if needed.
+The editor updates the underlying value through its own binding.
+
+## Supported controls
+
+The following TEDI controls can be used as editors with their existing value or
+form bindings:
+
+- **Text** — `input[tedi-text-field]`, `textarea[tedi-textarea]`, `tedi-search`
+- **Numeric** — `tedi-number-field`, `tedi-slider`
+- **Choice** — `tedi-select` (single or multiple), `tedi-checkbox-group`,
+  `tedi-radio-group`
+- **Date & time** — `tedi-date-field`, `tedi-time-field`, `tedi-time-picker`
+- **Boolean** — `tedi-toggle`
+
+<Canvas of={InlineEditStories.SupportedControls} />
+
+**Not a fit:** `tedi-file-upload` and `tedi-file-dropzone` manage a collection
+of files rather than a single value, and standalone `tedi-checkbox` /
+`tedi-radio` carry an identity rather than a value — use the group components.
+
+### Two things to set per control
+
+- **An accessible label.** The trigger's `label` names the read view only; it
+  is not forwarded to the control. Give the control its own `id` paired with a
+  `<label>`, or an `aria-label`.
+- **`[closeOnEnter]="false"` where Enter belongs to the control** — a textarea
+  needs it for newlines, and a select needs it to open the dropdown.
+
+### Controls that open an overlay
+
+Moving focus into the editor's dropdown or picker panel keeps editing open.
+With the default `closeOnBlur` setting, moving focus elsewhere, including back
+into a surrounding modal, commits the edit.
+
+## Committing and cancelling
+
+By default, Enter or moving focus outside the editor ends editing and emits
+`editCommit`. Escape ends editing and emits `editCancel`.
+
+To discard changes, save the original value on `editStart` and restore it on
+`editCancel`.
+
+<Canvas of={InlineEditStories.CancelEdit} />
+
+## Read-only values
+
+For a value that is never editable, use <a href="?path=/docs/tedi-ready-content-textgroup--docs">`tedi-text-group`</a>
+rather than a disabled inline edit — it carries no button semantics and no edit
+affordance.
