@@ -215,13 +215,14 @@ render: (args) => ({
 - [ ] States story covers all visual states shown in Figma (default, hover, active, focus, disabled)
 - [ ] Reactive forms example included if the component implements ControlValueAccessor
 - [ ] Figma link is in the JSDoc comment above `export default` (format: `<a href="..." target="_blank">Figma ↗</a>`)
+- [ ] Every `argTypes` description is one sentence; every story docblock either says something invisible in the rendered story or does not exist (see section 8)
 
 ### 7. argTypes Convention
 
 **Every public input/model must have an argTypes entry.** Do not skip any — all props must appear in the Storybook controls panel with correct typing and descriptions.
 
 Each entry must include:
-- `description` — concise, developer-friendly explanation of what the input does. Don't restate the name/type, pad with the obvious, or add usage examples. If there's nothing non-obvious to say, a short factual line is enough.
+- `description` — **one sentence.** What the input does, nothing else. See section 8.
 - `control` — appropriate control type (`'radio'`, `'select'`, `'boolean'`, `'text'`, `'number'`, `'object'`)
 - `options` — for enum/union type inputs, list all possible values
 - `table.category` — always `'inputs'`
@@ -243,7 +244,38 @@ argTypes: {
 }
 ```
 
-### 8. Verify
+### 8. Descriptions: default to none
+
+Descriptions are the most consistently over-written part of a stories file. The bar is not "is this
+true and useful?" — almost anything is. The bar is **"is this invisible in the rendered story?"**
+
+**Story docblocks: write none unless the story has a catch.** A story that looks like what its name
+says needs no prose — `Disabled`, `Default`, `WithCharacterCount` and `Standalone` all explain
+themselves on screen. Add a docblock only for behaviour the reader cannot see: a state that only
+appears after an interaction, a value that replaces rather than extends, a required input with no
+visible consequence. One sentence, two at the absolute most.
+
+**argTypes `description`: one sentence.** What it does. Stop.
+
+Before writing any description, apply the deletion test: *if I delete this, what does the reader get
+wrong?* No concrete answer means delete it.
+
+Specific things not to write, all of which have shipped and been sent back:
+
+| Don't | Why |
+|---|---|
+| "Works like `tedi-textarea`, except…" | Comparisons to other components age badly and help nobody reading this page. |
+| "Counts the visible text, not the HTML." | Logically necessary behaviour. Stating it implies the opposite was plausible. |
+| "The feedback element's id is pushed into `aria-describedby`." | Internal plumbing. Document the contract, never the wiring. |
+| "It paints its own surface, so you only give up the label, feedback text and counter." | Enumerating what a story is *not* doing. |
+| A numbered "### 1. Install … ### 2. Import …" setup guide in the meta docblock | Setup is at most a short paragraph plus one code block. |
+| "Shows the disabled state." above `export const Disabled` | Restates the story name. |
+
+Keep in the meta docblock only what a consumer cannot discover from the types: required peer
+dependencies, a global stylesheet import, and accessibility wiring that silently does nothing if
+done the usual way.
+
+### 9. Verify
 
 Run Storybook to visually confirm stories render correctly:
 ```bash

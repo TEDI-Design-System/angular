@@ -175,13 +175,29 @@ Consumer side:
 - For pattern B, document the per-breakpoint inputs (`xs`, `sm`, `md`, `lg`, `xl`, `xxl`) in argTypes and category them under `"breakpoint inputs"`.
 - Add at least one story that demonstrates a responsive case (e.g., `WithResponsiveX`).
 
-### Consumer catalog
+### Documenting it for consumers
 
-In `skills/tedi-angular/references/components.md`, write breakpoint-aware inputs as:
+Breakpoint-aware inputs are documented in the **JSDoc**, not in the consumer skill, because that is
+what ships in the type bundle. Say which shapes the input accepts and give the object form once:
 
-```markdown
-- `useNativePicker: BreakpointInput<boolean> = false` — ... Accepts a breakpoint object, e.g. `{ xs: true, md: false }`
+```ts
+/**
+ * Use the OS-native picker instead of the custom calendar.
+ * Accepts a plain value or a breakpoint object, e.g. `{ xs: true, md: false }`.
+ * @default false
+ */
+readonly useNativePicker = input(
+  { xs: false },
+  { transform: (v: BreakpointInput<boolean>) => breakpointInput(v) },
+);
 ```
+
+Keep the `breakpointInput()` transform from Pattern A. Declaring the input as a bare
+`input<BreakpointInput<boolean>>(false)` skips normalization, so a consumer passing a plain `true`
+leaves the value un-normalized and the resolver's `v.xs` lookup reads `undefined`.
+
+The consumer skill covers the *pattern* once (SKILL.md → Component Patterns) and does not repeat it
+per component. See **contributing SKILL.md → Consumer-Facing Docs**.
 
 ## Naming Conventions
 

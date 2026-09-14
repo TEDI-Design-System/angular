@@ -16,6 +16,8 @@ describe("SideNavToggleComponent", () => {
     tooltipEnabled: ReturnType<typeof signal>;
     registerItem: jest.Mock;
     unregisterItem: jest.Mock;
+    registerToggle: jest.Mock;
+    unregisterToggle: jest.Mock;
     handleGoToMainMenu: jest.Mock;
     handleCollapse: jest.Mock;
   };
@@ -37,6 +39,8 @@ describe("SideNavToggleComponent", () => {
       tooltipEnabled: signal(false),
       registerItem: jest.fn(),
       unregisterItem: jest.fn(),
+      registerToggle: jest.fn(),
+      unregisterToggle: jest.fn(),
       handleGoToMainMenu: jest.fn(),
       handleCollapse: jest.fn(),
     };
@@ -62,6 +66,14 @@ describe("SideNavToggleComponent", () => {
     expect(toggleElement.classList).toContain("tedi-sidenav-toggle");
     expect(translationTrackSpy).toHaveBeenCalledWith("sidenav.toggle");
     expect(toggleElement.getAttribute("aria-label")).toBe("Translated Label");
+  });
+
+  it("should register itself as the toggle and unregister on destroy", () => {
+    expect(sidenavService.registerToggle).toHaveBeenCalledWith(toggleElement);
+
+    fixture.destroy();
+
+    expect(sidenavService.unregisterToggle).toHaveBeenCalledWith(toggleElement);
   });
 
   it("should toggle isMobileOpen and call handleGoToMainMenu on click", () => {

@@ -63,13 +63,25 @@ A finding is **valid** when it is confirmed against the current code (not stale 
 
 ## Step 7: Verify
 
-1. Run tests: `npx jest src/tedi/components/<category>/<component-name>/`
+1. Run tests: `npm test -- src/tedi/components/<category>/<component-name>/ --coverage=false`
 2. Fix any failures.
 3. Run lint: `npm run lint`
 4. Fix any lint errors.
 
-## Step 8: Update Consumer Catalog
+## Step 8: Publish It to Consumers
 
-Update `skills/tedi-angular/references/components.md` with the new component:
-1. Add an entry to the appropriate section (TEDI-Ready or Community) with selector, key inputs/outputs, and a usage example.
-2. Follow the format of existing entries in the file.
+Consumers read the component out of the published type bundle, so most of the work here is making
+sure that bundle says the right thing. See **SKILL.md → Consumer-Facing Docs** for the full contract.
+
+1. **Check the JSDoc is complete** before anything else. Every public `input()` / `model()` /
+   `output()` needs a one-line description and an `@default` where it has a default. This JSDoc is
+   what a consuming agent reads to write correct code, so an undocumented input is an invisible one.
+2. **Check the selector for a collision with `/community`.** If a Community component already uses
+   the same selector, you have created an ambiguity that no template reveals; add it to the collision
+   list in `skills/tedi-angular/references/components.md`.
+3. **Add a hand-written entry to `references/components.md` only if** the component has behaviour the
+   types cannot express: a projection constraint, a required ancestor, layout that restacks at a
+   breakpoint, an accessible name that is optional in the types but required in practice. A
+   well-documented component with no surprises needs **no** entry. Do not add an input table.
+4. **If it is a form control**, add its selector and value shape to `references/forms.md`, and say
+   whether it implements `ControlValueAccessor` itself.

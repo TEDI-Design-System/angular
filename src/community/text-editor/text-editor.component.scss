@@ -14,6 +14,19 @@
   }
 }
 
+.tedi-text-editor {
+  display: block;
+
+  // ngx-quill sets `display: inline-block` on its own host, which parks the
+  // editor on the host's text baseline and leaves a descender-sized gap below
+  // it (6px at the default 16px/24px), pushing the feedback text away. Matched
+  // at two classes because a single one only ties with that host rule, leaving
+  // the winner to stylesheet insertion order.
+  .tedi-text-editor__editor {
+    display: block;
+  }
+}
+
 .tedi-text-editor__editor {
   --_border-radius: var(--form-field-radius);
   --_border-color: var(--form-input-border-default);
@@ -75,7 +88,7 @@
     > button,
     > .ql-picker,
     > .ql-picker > [role="button"] {
-      border-radius: var(--radius-02-default);
+      border-radius: var(--tedi-radius-02-default);
 
       &:hover {
         background-color: var(--general-surface-hover);
@@ -102,7 +115,11 @@
     --_padding-x: var(--form-field-padding-x-md-default);
     --_form-field-outer-gap: var(--form-field-outer-spacing);
 
-    min-height: 20rem;
+    // The row count comes from the host; the height is computed here so that
+    // `1lh` and `--_padding-y` resolve against the editing area itself.
+    min-height: calc(
+      var(--_tedi-text-editor-min-rows) * 1lh + 2 * var(--_padding-y)
+    );
     padding: var(--_padding-y) var(--_padding-x);
     font-family: var(--family-default);
     font-size: var(--_font-size);
