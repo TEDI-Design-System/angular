@@ -25,6 +25,7 @@ import {
   FormFieldControl,
   TEDI_FIELD_CONTEXT,
   TEDI_FORM_FIELD_CONTROL,
+  TediTranslationService,
 } from "@tedi-design-system/angular/tedi";
 import { QuillEditorComponent, QuillModules } from "ngx-quill";
 import type Quill from "quill";
@@ -59,6 +60,58 @@ const NO_KEYBOARD_TRAP_BINDINGS = {
   indent: null,
   outdent: null,
 };
+
+/**
+ * Translation key per toolbar control, keyed by Quill's format name and, where
+ * one format drives several buttons, its value. Quill names the buttons itself
+ * but only from the raw format (`aria-label="indent: +1"`), so every control
+ * listed here is relabelled; anything absent keeps Quill's own name.
+ */
+const TOOLBAR_LABEL_KEYS: Record<string, string> = {
+  bold: "text-editor.bold",
+  italic: "text-editor.italic",
+  underline: "text-editor.underline",
+  strike: "text-editor.strike",
+  blockquote: "text-editor.blockquote",
+  link: "text-editor.link",
+  clean: "text-editor.clean",
+  color: "text-editor.color",
+  background: "text-editor.background",
+  align: "text-editor.align.left",
+  "align:center": "text-editor.align.center",
+  "align:right": "text-editor.align.right",
+  "align:justify": "text-editor.align.justify",
+  "list:bullet": "text-editor.list.bullet",
+  "list:ordered": "text-editor.list.ordered",
+  "indent:+1": "text-editor.indent.increase",
+  "indent:-1": "text-editor.indent.decrease",
+};
+
+const STRUCTURAL_TOOLBAR_CLASSES = new Set([
+  "ql-picker",
+  "ql-color-picker",
+  "ql-icon-picker",
+  "ql-expanded",
+  "ql-active",
+]);
+
+/**
+ * Quill tags a control with `ql-<format>` alongside its structural classes, and
+ * puts the discriminating value in `value` where one format drives several
+ * buttons. Left align is given an empty value, so it falls back to the bare
+ * format name.
+ */
+function toolbarLabelKey(control: HTMLElement): string | undefined {
+  const format = Array.from(control.classList).find(
+    (name) => name.startsWith("ql-") && !STRUCTURAL_TOOLBAR_CLASSES.has(name),
+  );
+  if (!format) return undefined;
+
+  const value = control.getAttribute("value");
+  const base = format.slice("ql-".length);
+
+  return TOOLBAR_LABEL_KEYS[value ? `${base}:${value}` : base];
+}
 
 /**
  * Length of the text a reader actually sees, with the markup stripped. Parsed
@@ -114,6 +167,7 @@ function visibleTextLength(html: string): number {
 export class TextEditorComponent
   implements OnInit, ControlValueAccessor, FormFieldControl<string> {
   private readonly renderer = inject(Renderer2);
+  private readonly translationService = inject(TediTranslationService);
   private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
     optional: true,
   });
@@ -178,6 +232,7 @@ export class TextEditorComponent
   });
 
   private readonly editorRoot = signal<HTMLElement | null>(null);
+  private readonly toolbar = signal<HTMLElement | null>(null);
   private readonly formDisabled = signal(false);
   private onChange: (value: string) => void = () => { };
   private onTouched: () => void = () => { };
@@ -257,6 +312,7 @@ export class TextEditorComponent
     });
 
     this.syncEditorAttributes();
+    this.syncToolbarLabels();
   }
 
   ngOnInit() {
@@ -265,6 +321,10 @@ export class TextEditorComponent
 
   handleEditorCreated = (quill: Quill): void => {
     this.editorRoot.set(quill.root);
+    this.toolbar.set(
+      (quill.getModule("toolbar") as { container?: HTMLElement } | undefined)
+        ?.container ?? null,
+    );
   };
 
   handleBlur() {
@@ -303,6 +363,37 @@ export class TextEditorComponent
 
   setDisabledState(isDisabled: boolean): void {
     this.formDisabled.set(isDisabled);
+  }
+
+  /**
+   * Names the toolbar controls and gives them a hover tooltip. Quill's own
+   * `aria-label` is the untranslated format string, and it leaves the pickers
+   * nameless entirely, so both attributes are rewritten from the translations.
+   * Re-runs on a language change.
+   */
+  private syncToolbarLabels() {
+    effect(() => {
+      const toolbar = this.toolbar();
+      if (!toolbar) return;
+
+      const controls = Array.from(
+        toolbar.querySelectorAll<HTMLElement>("button, .ql-picker"),
+      );
+
+      for (const control of controls) {
+        const key = toolbarLabelKey(control);
+        if (!key) continue;
+
+        const label = this.translationService.translate(key);
+        // A picker's own node is a `span`; the focusable, hoverable part is its
+        // label child, so that is what has to carry the name and the tooltip.
+        const target =
+          control.querySelector<HTMLElement>(".ql-picker-label") ?? control;
+
+        this.renderer.setAttribute(target, "title", label);
+        this.renderer.setAttribute(target, "aria-label", label);
+      }
+    });
   }
 
   /**

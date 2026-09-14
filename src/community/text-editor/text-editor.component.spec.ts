@@ -5,9 +5,45 @@ import { By } from "@angular/platform-browser";
 import { QuillModules } from "ngx-quill";
 import type Quill from "quill";
 import {
+  TEDI_TRANSLATION_DEFAULT_TOKEN,
+  TediTranslationService,
+} from "@tedi-design-system/angular/tedi";
+import {
   TEXT_EDITOR_DEFAULT_MODULES,
   TextEditorComponent,
 } from "./text-editor.component";
+
+class TranslationMock {
+  translate(key: string) {
+    return key;
+  }
+  track(key: string) {
+    return () => key;
+  }
+}
+
+/**
+ * Stands in for the toolbar Quill would have rendered, in the markup Quill's own
+ * `addControls` produces: a `<button>` per plain format, a `value` attribute
+ * where one format drives several buttons, and a `.ql-picker` span whose
+ * `.ql-picker-label` child is the focusable part.
+ */
+function buildToolbar(): HTMLElement {
+  const container = document.createElement("div");
+  container.className = "ql-toolbar";
+  container.innerHTML = `
+    <span class="ql-formats">
+      <button type="button" class="ql-bold" aria-label="bold"></button>
+      <button type="button" class="ql-indent" value="+1" aria-label="indent: +1"></button>
+      <button type="button" class="ql-formula" aria-label="formula"></button>
+      <span class="ql-color ql-picker ql-color-picker">
+        <span class="ql-picker-label" role="button"></span>
+      </span>
+    </span>
+  `;
+
+  return container;
+}
 
 @Component({
   standalone: true,
@@ -38,10 +74,15 @@ describe("TextEditorComponent", () => {
   let component: TextEditorComponent;
   let hostEl: HTMLElement;
   let contentEl: HTMLElement;
+  let toolbarEl: HTMLElement;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TestHostComponent);
@@ -59,7 +100,11 @@ describe("TextEditorComponent", () => {
     // component the element Quill would have given it and assert on that.
     contentEl = document.createElement("div");
     contentEl.className = "ql-editor";
-    component.handleEditorCreated({ root: contentEl } as Quill);
+    toolbarEl = buildToolbar();
+    component.handleEditorCreated({
+      root: contentEl,
+      getModule: () => ({ container: toolbarEl }),
+    } as unknown as Quill);
     fixture.detectChanges();
   });
 
@@ -268,6 +313,48 @@ describe("TextEditorComponent", () => {
 
       expect(contentEl.getAttribute("aria-required")).toBe("true");
       expect(contentEl.getAttribute("aria-invalid")).toBe("true");
+    });
+  });
+
+  describe("toolbar labels", () => {
+    const labelOf = (selector: string) => {
+      const control = toolbarEl.querySelector(selector);
+
+      return {
+        title: control?.getAttribute("title"),
+        ariaLabel: control?.getAttribute("aria-label"),
+      };
+    };
+
+    it("should label a plain format button", () => {
+      expect(labelOf(".ql-bold")).toEqual({
+        title: "text-editor.bold",
+        ariaLabel: "text-editor.bold",
+      });
+    });
+
+    it("should tell apart the buttons a single format drives", () => {
+      expect(labelOf('.ql-indent[value="+1"]')).toEqual({
+        title: "text-editor.indent.increase",
+        ariaLabel: "text-editor.indent.increase",
+      });
+    });
+
+    it("should label a picker on its focusable label, not its wrapper span", () => {
+      expect(labelOf(".ql-color .ql-picker-label")).toEqual({
+        title: "text-editor.color",
+        ariaLabel: "text-editor.color",
+      });
+      expect(toolbarEl.querySelector(".ql-color")?.hasAttribute("title")).toBe(
+        false,
+      );
+    });
+
+    it("should leave a control with no translation on Quill's own name", () => {
+      expect(labelOf(".ql-formula")).toEqual({
+        title: null,
+        ariaLabel: "formula",
+      });
     });
   });
 });

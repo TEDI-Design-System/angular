@@ -108,6 +108,37 @@
     stroke: var(--general-icon-white);
   }
 
+  // While a picker is open Snow greys its label out (#ccc on colour, fill and
+  // stroke) and borders label and panel in #ccc, none of which survives a theme
+  // change. An open picker is a pressed control, so it gets the .ql-active
+  // treatment. Quill's rules here are five classes deep, so these have to be
+  // written out in full rather than nested under the .ql-formats block.
+  .ql-toolbar .ql-formats .ql-picker.ql-expanded > .ql-picker-label {
+    color: var(--general-icon-white);
+    background-color: var(--general-icon-background-brand-primary);
+    border-color: transparent;
+
+    .ql-stroke {
+      stroke: var(--general-icon-white);
+    }
+
+    .ql-fill {
+      fill: var(--general-icon-white);
+    }
+  }
+
+  .ql-toolbar .ql-formats .ql-picker.ql-expanded > .ql-picker-options {
+    background-color: var(--card-background-primary);
+    border-color: var(--general-border-primary);
+    border-radius: var(--tedi-radius-02-default);
+    box-shadow: 0 1px 5px 0 var(--tedi-alpha-20);
+  }
+
+  .ql-toolbar .ql-color-picker .ql-picker-item.ql-selected,
+  .ql-toolbar .ql-color-picker .ql-picker-item:hover {
+    border-color: var(--general-border-brand);
+  }
+
   .ql-container .ql-editor {
     --_font-size: var(--body-regular-size);
     --_line-height: var(--body-regular-line-height);
