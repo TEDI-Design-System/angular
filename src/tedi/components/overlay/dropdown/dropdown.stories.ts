@@ -108,27 +108,27 @@ export default {
     },
     dropdownRole: {
       control: "radio",
-      options: ["menu", "listbox"],
+      options: ["menu", "listbox", "list"],
       description:
-        "Role for content, use listbox for list and menu for actions",
+        "How the panel is exposed to assistive technology: `menu` for actions, `listbox` for selectable options, `list` for a plain list of links. `menu` and `listbox` are composite widgets (one tab stop, arrow-key navigation, `menuitem` / `option` items); `list` adds no roles or key handling, so projected links stay links and stay in the tab order.",
       table: {
         category: "dropdown-content",
-        type: { summary: "DropdownRole", detail: "menu \nlistbox" },
+        type: { summary: "DropdownRole", detail: "menu \nlistbox \nlist" },
         defaultValue: { summary: "menu" },
       },
     },
     ariaHaspopup: {
       control: "radio",
-      options: ["menu", "listbox", "true"],
+      options: ["menu", "listbox", "dialog", "true", "false"],
       description:
-        "Defines the aria-haspopup attribute for the trigger, informing assistive technologies whether it opens a menu or listbox. Improves accessibility by describing the type of popup.",
+        "The `aria-haspopup` value for the trigger. Defaults to the content's `dropdownRole`, and a plain `list` gets no attribute at all, since ARIA has no token for it. `false` also omits the attribute.",
       table: {
         category: "dropdown-trigger",
         type: {
           summary: "DropdownTriggerAriaHasPopup",
-          detail: "menu \nlistbox \ntrue",
+          detail: "menu \nlistbox \ndialog \ntrue \nfalse",
         },
-        defaultValue: { summary: "menu" },
+        defaultValue: { summary: "dropdownRole" },
       },
     },
     itemValue: {
@@ -164,6 +164,15 @@ export default {
         category: "dropdown-item",
         type: { summary: "boolean" },
         defaultValue: { summary: "true" },
+      },
+    },
+    interactiveContent: {
+      description:
+        'Whether the projected content is itself the interactive control, e.g. a button. In a `menu` or `listbox` the item role and the roving tabindex move onto that element, so assistive technology reports one control per item. For navigation links use `dropdownRole="list"` instead, where a widget role would replace the link role.',
+      table: {
+        category: "dropdown-item",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
       },
     },
     itemSelect: {

@@ -4,6 +4,7 @@ import {
   ElementRef,
   HostListener,
   Renderer2,
+  computed,
   effect,
   inject,
   input,
@@ -13,7 +14,7 @@ import { CdkOverlayOrigin } from "@angular/cdk/overlay";
 import { DropdownComponent } from "../dropdown.component";
 
 export type DropdownTriggerAriaHasPopup =
-  "menu" | "listbox" | "dialog" | "true";
+  "menu" | "listbox" | "dialog" | "true" | "false";
 
 const FOCUSABLE_SELECTOR = "button, a[href], [tabindex]";
 
@@ -23,8 +24,15 @@ const FOCUSABLE_SELECTOR = "button, a[href], [tabindex]";
   hostDirectives: [CdkOverlayOrigin],
 })
 export class DropdownTriggerDirective implements AfterViewInit {
-  /** Defines the aria-haspopup attribute for the trigger, informing assistive technologies whether it opens a menu or listbox. Improves accessibility by describing the type of popup. */
-  readonly ariaHaspopup = input<DropdownTriggerAriaHasPopup>("menu");
+  /**
+   * The `aria-haspopup` value for the trigger, telling assistive technology
+   * what kind of popup it opens.
+   *
+   * Defaults to the content's `dropdownRole`: `menu` for a menu, `listbox` for
+   * a listbox, and no attribute for a plain `list`, which ARIA has no
+   * `aria-haspopup` token for. `false` also omits the attribute.
+   */
+  readonly ariaHaspopup = input<DropdownTriggerAriaHasPopup>();
 
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   readonly dropdown = inject(DropdownComponent);
@@ -40,6 +48,20 @@ export class DropdownTriggerDirective implements AfterViewInit {
    */
   private readonly triggerElement = signal<HTMLElement | null>(null);
 
+  private readonly haspopup = computed<DropdownTriggerAriaHasPopup>(() => {
+    const explicit = this.ariaHaspopup();
+    if (explicit) return explicit;
+
+    switch (this.dropdown.dropdownContent().dropdownRole()) {
+      case "menu":
+        return "menu";
+      case "listbox":
+        return "listbox";
+      default:
+        return "false";
+    }
+  });
+
   constructor() {
     effect(() => {
       const el = this.triggerElement();
@@ -50,12 +72,26 @@ export class DropdownTriggerDirective implements AfterViewInit {
         "id",
         `${this.dropdown.containerId()}_trigger`,
       );
-      this.renderer.setAttribute(
-        el,
-        "aria-controls",
-        this.dropdown.containerId(),
-      );
-      this.renderer.setAttribute(el, "aria-haspopup", this.ariaHaspopup());
+
+      // The panel only exists while open, so a permanent `aria-controls` would
+      // point at nothing.
+      if (this.dropdown.isOpen()) {
+        this.renderer.setAttribute(
+          el,
+          "aria-controls",
+          this.dropdown.containerId(),
+        );
+      } else {
+        this.renderer.removeAttribute(el, "aria-controls");
+      }
+
+      const haspopup = this.haspopup();
+      if (haspopup === "false") {
+        this.renderer.removeAttribute(el, "aria-haspopup");
+      } else {
+        this.renderer.setAttribute(el, "aria-haspopup", haspopup);
+      }
+
       this.renderer.setAttribute(
         el,
         "aria-expanded",
@@ -94,13 +130,24 @@ export class DropdownTriggerDirective implements AfterViewInit {
 
     switch (key) {
       case "ArrowDown":
+        if (!this.isWidgetContent()) break;
         event.preventDefault();
         this.openAndFocusFirst();
         break;
 
       case "ArrowUp":
+        if (!this.isWidgetContent()) break;
         event.preventDefault();
         this.openAndFocusLast();
+        break;
+
+      case "Tab":
+        // A widget panel is entered with the arrow keys. A plain `list` is not
+        // entered at all by default, because the overlay renders it at the end
+        // of the document, so tabbing off the trigger has to be redirected.
+        if (this.isWidgetContent() || event.shiftKey) break;
+        if (!this.dropdown.isOpen()) break;
+        if (this.dropdown.focusPanelStart()) event.preventDefault();
         break;
 
       case "Escape":
@@ -109,6 +156,10 @@ export class DropdownTriggerDirective implements AfterViewInit {
         this.focus();
         break;
     }
+  }
+
+  private isWidgetContent(): boolean {
+    return this.dropdown.dropdownContent().isWidget();
   }
 
   private resolveTriggerElement(): HTMLElement {
