@@ -18,6 +18,7 @@ export * from "./slider/slider.component";
 export * from "./toggle/toggle.component";
 export * from "./form-field";
 export * from "./input-group";
+export * from "./inline-edit";
 export * from "./text-field/text-field.component";
 export * from "./textarea/textarea.component";
 export * from "./time-field";
