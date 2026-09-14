@@ -1,0 +1,29 @@
+.tedi-search-option {
+  display: block;
+  padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+
+  &:hover,
+  &--active {
+    background: var(--dropdown-item-hover-background);
+  }
+
+  // Only projected rows get a gap. The default row is a run of highlighted and
+  // unhighlighted label segments, which must stay visually joined.
+  &--custom {
+    display: flex;
+    gap: var(--dropdown-item-inner-spacing);
+    align-items: center;
+  }
+
+  &--disabled {
+    color: var(--form-general-text-disabled);
+    cursor: not-allowed;
+  }
+
+  &--disabled:hover {
+    background: transparent;
+  }
+}

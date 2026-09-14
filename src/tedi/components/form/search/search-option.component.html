@@ -1,0 +1,9 @@
+@if (custom()) {
+  <ng-content />
+} @else {
+  @for (part of parts(); track $index) {
+    <span tedi-text [modifiers]="part.match ? 'bold' : undefined">{{
+      part.text
+    }}</span>
+  }
+}
