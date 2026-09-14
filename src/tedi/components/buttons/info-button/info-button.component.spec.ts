@@ -55,4 +55,8 @@ describe("InfoButtonComponent", () => {
       "tedi-info-button--inverted",
     );
   });
+
+  it("should hide the info button when printing", () => {
+    expect(fixture.nativeElement.classList).toContain("no-print");
+  });
 });
