@@ -75,4 +75,8 @@ describe("ClosingButtonComponent", () => {
     expect(buttonElement.getAttribute("title")).toBeNull();
     expect(buttonElement.getAttribute("aria-label")).toBe("Sulge");
   });
+
+  it("should hide the closing button when printing", () => {
+    expect(buttonElement.classList).toContain("no-print");
+  });
 });
