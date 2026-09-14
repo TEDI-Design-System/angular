@@ -38,6 +38,8 @@ export const TEXT_EDITOR_DEFAULT_MODULES: QuillModules = {
       { align: "justify" },
       { list: "bullet" },
       { list: "ordered" },
+      { indent: "-1" },
+      { indent: "+1" },
       { background: [] },
       { color: [] },
       "clean",
@@ -50,8 +52,7 @@ export const TEXT_EDITOR_DEFAULT_MODULES: QuillModules = {
  * outdent. All three swallow the key and leave the user unable to tab out of the
  * editor, which is a keyboard trap (WCAG 2.1.2). Quill skips any binding whose
  * value is `null`, so nulling them lets Tab fall through to the browser's normal
- * focus move. List indenting stays available from the toolbar and via
- * `Ctrl+]` / `Ctrl+[`.
+ * focus move. List indenting stays available from the toolbar`.
  */
 const NO_KEYBOARD_TRAP_BINDINGS = {
   tab: null,
@@ -111,8 +112,7 @@ function visibleTextLength(html: string): number {
   },
 })
 export class TextEditorComponent
-  implements OnInit, ControlValueAccessor, FormFieldControl<string>
-{
+  implements OnInit, ControlValueAccessor, FormFieldControl<string> {
   private readonly renderer = inject(Renderer2);
   private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
     optional: true,
@@ -179,8 +179,8 @@ export class TextEditorComponent
 
   private readonly editorRoot = signal<HTMLElement | null>(null);
   private readonly formDisabled = signal(false);
-  private onChange: (value: string) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: string) => void = () => { };
+  private onTouched: () => void = () => { };
 
   private readonly derived = deriveControlState();
   readonly describedBy = controlDescribedBy();

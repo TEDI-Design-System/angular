@@ -81,6 +81,16 @@ describe("TextEditorComponent", () => {
     });
   });
 
+  it("should offer list nesting from the toolbar, since Tab no longer indents", () => {
+    const toolbar = (
+      TEXT_EDITOR_DEFAULT_MODULES.toolbar as Record<string, unknown>[][]
+    )[0];
+
+    expect(toolbar).toEqual(
+      expect.arrayContaining([{ indent: "-1" }, { indent: "+1" }]),
+    );
+  });
+
   it("should keep the resolved toolbar and let a caller's own tab binding win", () => {
     const tab = { key: "Tab", handler: () => true };
     host.modules = {
