@@ -1,0 +1,30 @@
+<div class="tedi-empty-state__text">
+  @if (icon(); as iconName) {
+    <div class="tedi-empty-state__icon">
+      <tedi-icon [name]="iconName" [size]="iconSize()" [color]="iconColor()" />
+    </div>
+  }
+  <div class="tedi-empty-state__content">
+    @if (heading(); as headingText) {
+      <h3
+        tedi-text
+        color="brand"
+        modifiers="h3"
+        class="tedi-empty-state__heading"
+      >
+        {{ headingText }}
+      </h3>
+    }
+    <div
+      tedi-text
+      color="secondary"
+      modifiers="center"
+      class="tedi-empty-state__description"
+    >
+      <ng-content />
+    </div>
+  </div>
+</div>
+<div class="tedi-empty-state__actions">
+  <ng-content select="[tedi-empty-state-actions]" />
+</div>

@@ -11,7 +11,7 @@
         "build": {
           "builder": "@angular/build:ng-packagr",
           "options": {
-            "project": "ng-package.json",
+            "project": "src/ng-package.json",
             "tsConfig": "tsconfig.json"
           },
           "configurations": {
@@ -63,10 +63,10 @@
             "lintFilePatterns": [
               "./src/docs/**/*.ts",
               "./src/docs/**/*.html",
-              "./tedi/**/*.ts",
-              "./tedi/**/*.html",
-              "./community/**/*.ts",
-              "./community/**/*.html"
+              "./src/tedi/**/*.ts",
+              "./src/tedi/**/*.html",
+              "./src/community/**/*.ts",
+              "./src/community/**/*.html"
             ]
           }
         }

@@ -1,0 +1,59 @@
+<div class="tedi-date-input__field" #fieldElement>
+  @if (hasTags()) {
+    <div class="tedi-date-input__tags">
+      @for (tag of visibleTags(); track tag.id) {
+        <tedi-tag
+          #tagElement
+          [ellipsis]="ellipsis()"
+          [closable]="removable() && !disabled() && !readOnly()"
+          (closed)="handleTagRemove(tag.id)"
+        >
+          {{ tag.label }}
+        </tedi-tag>
+      }
+    </div>
+    @if (hiddenTagsCount() > 0) {
+      <tedi-tag class="tedi-date-input__tags-counter"
+        >+{{ hiddenTagsCount() }}</tedi-tag
+      >
+    }
+  }
+  <input
+    #inputElement
+    tedi-text-field
+    class="tedi-date-input__input"
+    [id]="inputId()"
+    [type]="inputType()"
+    [value]="inputValue()"
+    [attr.placeholder]="placeholder() || null"
+    [disabled]="disabled()"
+    [readOnly]="readOnly()"
+    [required]="required()"
+    (input)="handleInput($event)"
+  />
+</div>
+<div class="tedi-date-input__actions">
+  @if (showClear()) {
+    <button
+      tedi-closing-button
+      type="button"
+      size="small"
+      class="tedi-date-input__clear"
+      [iconSize]="18"
+      [ariaLabel]="clearAriaLabel()"
+      (click)="handleClear()"
+    ></button>
+    <tedi-separator axis="vertical" size="1rem" />
+  }
+  <button
+    type="button"
+    class="tedi-date-input__icon"
+    [class.tedi-date-input__icon--active]="iconActive()"
+    [disabled]="disabled() || iconDisabled()"
+    [attr.aria-label]="iconAriaLabel()"
+    [attr.aria-expanded]="iconActive()"
+    (click)="handleIconClick()"
+  >
+    <tedi-icon name="calendar_today" [size]="18" color="inherit" />
+  </button>
+</div>

@@ -1,0 +1,37 @@
+<button
+  class="tedi-horizontal-stepper-item__step"
+  type="button"
+  [disabled]="disabled()"
+  [attr.aria-current]="selected() ? 'step' : null"
+  (click)="onClick()"
+>
+  <span class="tedi-horizontal-stepper-item__indicator">
+    @if (completed() && !error()) {
+      <tedi-icon
+        name="check"
+        color="white"
+        [size]="18"
+        [label]="'stepper.completed' | tediTranslate"
+      />
+    } @else if (error()) {
+      <tedi-icon
+        name="exclamation"
+        color="white"
+        [size]="18"
+        [label]="'stepper.error' | tediTranslate"
+      />
+    } @else {
+      <span class="tedi-horizontal-stepper-item__number">{{
+        _stepNumber()
+      }}</span>
+    }
+  </span>
+  <span class="tedi-horizontal-stepper-item__content">
+    <span class="tedi-horizontal-stepper-item__label">{{ label() }}</span>
+    @if (description()) {
+      <span class="tedi-horizontal-stepper-item__description">{{
+        description()
+      }}</span>
+    }
+  </span>
+</button>
