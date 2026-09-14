@@ -12,8 +12,8 @@ const BREAKS = ["auto", "avoid", "avoid-column", "avoid-page", "avoid-region"];
  * so **open the browser's print preview** to see what any of these stories do.
  *
  * `tediPrint="show"` cancels a `no-print` on the same element — that is how you
- * opt a component that hides itself when printing (buttons, links, header,
- * sidenav, footer, breadcrumbs) back into the printed page. It cannot reveal an
+ * opt a component that hides itself when printing (buttons, header, sidenav,
+ * footer, breadcrumbs) back into the printed page. It cannot reveal an
  * element that an ancestor hid.
  *
  * The break inputs need the attribute present, so use a bare `tediPrint` when
@@ -83,7 +83,7 @@ export const Default: StoryObj<PrintDirective> = {
 };
 
 /**
- * Buttons, links and the layout components hide themselves when printing.
+ * Buttons and the layout components hide themselves when printing.
  * `tediPrint="show"` puts one back on the page.
  */
 export const Visibility: StoryObj<PrintDirective> = {

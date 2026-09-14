@@ -73,7 +73,7 @@ export class PrintDirective {
      * Classes are synced through Renderer2 rather than host bindings so the
      * directive never fights the element's own classes. A host binding takes
      * precedence over a component's `[class]` binding and would strip classes
-     * that component set — e.g. the `no-print` that buttons and links apply to
+     * that component set — e.g. the `no-print` that buttons apply to
      * themselves. Here a class that is already on the element is left alone:
      * the directive only removes what it added.
      */
