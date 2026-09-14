@@ -152,6 +152,12 @@ The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `bord
   native label attributes (`for`, `id`, `aria-*`, handlers) keep working.
 - **`tedi-attachment` has no built-in action buttons.** Project neutral `tedi-button`s inside a single
   `<tedi-attachment-actions>` and wire `(click)` and `disabled` yourself.
+- **`tedi-skeleton-block` belongs inside `tedi-skeleton`.** The wrapper stacks whatever is projected
+  into it as a flex column gapped by `--loader-skeleton-inner-spacing-y`, and it owns the loading
+  announcement. A block on its own is `aria-hidden` decoration that announces nothing; put a
+  `tedi-row`/`tedi-col` grid inside the wrapper when blocks need to sit side by side. Use **one
+  wrapper per loading region**, not one per block: the announcement is per wrapper, so several
+  wrappers mounting together compete for the same live region.
 
 ### Choosing the right component
 
@@ -187,6 +193,14 @@ The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `bord
 - **Tabs activate differently depending on the host element.** `<button>` tabs use automatic
   activation (arrow keys select), anchor tabs use manual. Arrow Left/Right wrap, Home/End jump, only
   the active tab is in the tab order, and disabled tabs are skipped.
+- **Name what a `tedi-skeleton` is loading.** `label` and `completedLabel` are optional in the types
+  but the generic translated fallbacks ("Laadimine") tell a screen-reader user nothing about what
+  they are waiting for. The completion message is only announced if the skeleton outlived
+  `labelDelay` (200ms), so a placeholder that flashes by stays silent on purpose.
+- **`aria-busy="false"` after loading is the consumer's job.** The skeleton sets `aria-busy="true"`
+  on itself and hosts the `role="status"` live region, but it is removed the moment content arrives,
+  so it cannot report its own completion. Bind `[attr.aria-busy]="loading()"` on the region that
+  swaps skeleton for content; without it a screen reader may announce the region mid-update.
 - **Icon-only controls need an accessible name**, and don't signal state by colour alone. Sorting,
   pagination, expansion and reordering controls all need labels; those come from
   `TediTranslationService`, so check the translation keys rather than hardcoding Estonian.
