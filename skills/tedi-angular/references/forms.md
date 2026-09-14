@@ -31,7 +31,7 @@ component's `ɵɵComponentDeclaration` carries its real selector; see
 | SelectComponent | `tedi-select` | `T \| T[]` |
 | TextEditorComponent | `tedi-text-editor` | `string` (Quill HTML) — `/community/text-editor` entry point |
 
-`CheckboxComponent` (`input[type=checkbox][tedi-checkbox]`) is **not** a TEDI value accessor — it styles a native checkbox, so `[formControl]` on it is handled by Angular's built-in `CheckboxControlValueAccessor` and yields a `boolean`. Inside a managed `<tedi-checkbox-group>`, its `value` input is a `string` identity instead. `DropdownComponent` (`tedi-dropdown`) lives in `overlay/` and is not a form control — it exposes `[(value)]` but implements no `ControlValueAccessor`.
+`CheckboxComponent` (`input[type=checkbox][tedi-checkbox]`) is **not** a TEDI value accessor — it styles a native checkbox, so `[formControl]` on it is handled by Angular's built-in `CheckboxControlValueAccessor` and yields a `boolean`. Inside a managed `<tedi-checkbox-group>`, its `value` input is a `string` identity instead. `DropdownComponent` (`tedi-dropdown`) lives in `overlay/` and is not a form control — it exposes `[(value)]` but implements no `ControlValueAccessor`. `InlineEditComponent` (`tedi-inline-edit`) lives in `form/` but is likewise not a value accessor — it wraps a control you project into an `<ng-template tediInlineEditControl>`, and that control keeps its own `[formControl]` / `[(ngModel)]` binding.
 
 ## Basic Usage with Reactive Forms
 
