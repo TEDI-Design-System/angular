@@ -216,6 +216,7 @@ render: (args) => ({
 - [ ] Reactive forms example included if the component implements ControlValueAccessor
 - [ ] Figma link is in the JSDoc comment above `export default` (format: `<a href="..." target="_blank">Figma ↗</a>`)
 - [ ] Every `argTypes` description is one sentence; every story docblock either says something invisible in the rendered story or does not exist (see section 8)
+- [ ] No public input is missing an `argTypes` entry — aliased inputs are keyed by their alias (`invalid`, not `invalidInput`)
 
 ### 7. argTypes Convention
 
@@ -244,10 +245,15 @@ argTypes: {
 }
 ```
 
-### 8. Descriptions: default to none
+### 8. Prose: default to none
 
-Descriptions are the most consistently over-written part of a stories file. The bar is not "is this
-true and useful?" — almost anything is. The bar is **"is this invisible in the rendered story?"**
+Prose — story docblocks and the meta docblock — is the most consistently over-written part of a
+stories file. The bar is not "is this true and useful?" — almost anything is. The bar is
+**"is this invisible in the rendered story?"**
+
+This section is about prose, not about `argTypes`. Every public input still keeps its one-sentence
+description (section 7): there is no compodoc fallback wired in this repo, so an omitted description
+renders as a blank cell in the controls table rather than picking up the input's JSDoc.
 
 **Story docblocks: write none unless the story has a catch.** A story that looks like what its name
 says needs no prose — `Disabled`, `Default`, `WithCharacterCount` and `Standalone` all explain
@@ -255,10 +261,9 @@ themselves on screen. Add a docblock only for behaviour the reader cannot see: a
 appears after an interaction, a value that replaces rather than extends, a required input with no
 visible consequence. One sentence, two at the absolute most.
 
-**argTypes `description`: one sentence.** What it does. Stop.
-
-Before writing any description, apply the deletion test: *if I delete this, what does the reader get
-wrong?* No concrete answer means delete it.
+Before writing any docblock, apply the deletion test: *if I delete this, what does the reader get
+wrong?* No concrete answer means delete it. The same test decides how long an `argTypes` description
+is — never whether it exists.
 
 Specific things not to write, all of which have shipped and been sent back:
 

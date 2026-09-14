@@ -70,7 +70,7 @@ export default {
     ariaLabel: {
       control: "text",
       description:
-        "Accessible name when there is no visible label. Ignored when `ariaLabelledby` is set.",
+        "Accessible name for when there is no visible label, ignored when `ariaLabelledby` is set.",
       table: { category: "inputs", type: { summary: "string" } },
     },
     placeholder: {
@@ -85,8 +85,28 @@ export default {
     modules: {
       control: "object",
       description:
-        "Quill module configuration. Replaces the default toolbar rather than extending it; Tab is always left to the browser.",
+        "Quill module configuration that replaces the default toolbar rather than extending it; Tab is left to the browser unless you rebind it.",
       table: { category: "inputs", type: { summary: "QuillModules" } },
+    },
+    invalid: {
+      control: "boolean",
+      description:
+        "Forces the error state on, combining with the state derived from the bound control.",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    required: {
+      control: "boolean",
+      description:
+        "Marks the editor as required, combining with the bound control's validators.",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
     },
     characterLimit: {
       control: "number",

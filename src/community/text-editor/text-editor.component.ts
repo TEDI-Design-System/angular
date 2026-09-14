@@ -139,14 +139,14 @@ export class TextEditorComponent
    */
   ariaLabel = input<string>();
   /**
-   * Forces the error state on, or off, regardless of the reactive-forms state.
-   * Leave unset to let the control derive it.
+   * Forces the error state on. Combines with the state derived from the bound
+   * control, so `false` does not switch a derived error off.
    */
   // eslint-disable-next-line @angular-eslint/no-input-rename
   readonly invalidInput = input<boolean>(false, { alias: "invalid" });
   /**
-   * Marks the editor as required for assistive technology. Derived from the
-   * bound control's validators when it is not set here.
+   * Marks the editor as required for assistive technology. Combines with the
+   * bound control's `Validators.required`.
    */
   // eslint-disable-next-line @angular-eslint/no-input-rename
   readonly requiredInput = input<boolean>(false, { alias: "required" });
