@@ -238,4 +238,8 @@ describe("SideNavComponent", () => {
       expect(document.body.style.overflow).toBe("");
     });
   });
+
+  it("should hide the sidenav when printing", () => {
+    expect(sidenavElement.classList).toContain("no-print");
+  });
 });
