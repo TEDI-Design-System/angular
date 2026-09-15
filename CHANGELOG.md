@@ -1,3 +1,10 @@
+# [8.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.7...angular-8.1.0-rc.1) (2026-09-15)
+
+
+### Features
+
+* **progress-bar:** add opt-in value announcements [#655](https://github.com/TEDI-Design-System/angular/issues/655) ([#663](https://github.com/TEDI-Design-System/angular/issues/663)) ([c680429](https://github.com/TEDI-Design-System/angular/commit/c680429c9a1554f87bd9ede03042eff4ffd66420))
+
 ## [8.0.1-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.6...angular-8.0.1-rc.7) (2026-09-09)
 
 
