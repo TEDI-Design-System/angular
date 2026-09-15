@@ -1,0 +1,33 @@
+@if (editing() && template(); as controlTemplate) {
+  <div #editor class="tedi-inline-edit__editor">
+    <ng-container [ngTemplateOutlet]="controlTemplate" />
+  </div>
+} @else {
+  <button
+    #trigger
+    type="button"
+    class="tedi-inline-edit__trigger"
+    [disabled]="disabled()"
+    [attr.aria-label]="triggerLabel()"
+    [attr.aria-describedby]="hasFeedback() ? feedbackId : null"
+    (click)="startEditing()"
+  >
+    <span
+      class="tedi-inline-edit__value"
+      [class.tedi-inline-edit__value--placeholder]="!hasValue()"
+      >{{ displayText() }}</span
+    >
+    @if (editIcon(); as icon) {
+      <tedi-icon
+        class="tedi-inline-edit__icon"
+        [name]="icon"
+        [size]="18"
+        color="brand"
+      />
+    }
+  </button>
+}
+
+<div [id]="feedbackId" class="tedi-inline-edit__feedback">
+  <ng-content select="tedi-feedback-text" />
+</div>

@@ -1,0 +1,84 @@
+@use "@tedi-design-system/core/mixins";
+
+.tedi-inline-edit {
+  --_inline-edit-font-size: var(--body-regular-size);
+  --_inline-edit-line-height: var(--body-regular-line-height);
+
+  display: block;
+  width: 100%;
+}
+
+.tedi-inline-edit--small {
+  --_inline-edit-font-size: var(--body-small-regular-size);
+  --_inline-edit-line-height: var(--body-small-regular-line-height);
+}
+
+// Reserve space for the error border and subtract its width from the padding
+// to keep the row dimensions unchanged.
+.tedi-inline-edit__trigger {
+  @include mixins.button-reset;
+
+  display: flex;
+  gap: var(--tedi-dimensions-05);
+  align-items: center;
+  width: 100%;
+  padding: calc(var(--form-field-padding-y-sm) - var(--tedi-borders-01))
+    calc(var(--tedi-dimensions-03) - var(--tedi-borders-01));
+  font-size: var(--_inline-edit-font-size);
+  line-height: var(--_inline-edit-line-height);
+  color: var(--form-input-text-filled);
+  text-align: left;
+  background-color: var(--form-hidden-default);
+  border: var(--tedi-borders-01) solid transparent;
+  border-radius: var(--form-field-radius);
+}
+
+.tedi-inline-edit__trigger:hover:not(:disabled) {
+  background-color: var(--form-hidden-hover);
+}
+
+.tedi-inline-edit__trigger:focus-visible {
+  outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+  outline-offset: var(--tedi-borders-01);
+}
+
+.tedi-inline-edit__trigger:disabled {
+  color: var(--form-input-text-disabled);
+  cursor: not-allowed;
+}
+
+.tedi-inline-edit__value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.tedi-inline-edit__value--placeholder {
+  color: var(--form-input-text-placeholder);
+}
+
+.tedi-inline-edit__icon {
+  flex-shrink: 0;
+}
+
+.tedi-inline-edit__trigger:disabled .tedi-inline-edit__icon {
+  color: inherit;
+}
+
+.tedi-inline-edit--icon-inline .tedi-inline-edit__value {
+  flex: 0 1 auto;
+}
+
+.tedi-inline-edit--icon-hover .tedi-inline-edit__icon {
+  visibility: hidden;
+}
+
+.tedi-inline-edit--icon-hover
+  .tedi-inline-edit__trigger:is(:hover, :focus-visible)
+  .tedi-inline-edit__icon {
+  visibility: visible;
+}
+
+.tedi-inline-edit--invalid .tedi-inline-edit__trigger {
+  border-color: var(--form-general-feedback-error-border);
+}
