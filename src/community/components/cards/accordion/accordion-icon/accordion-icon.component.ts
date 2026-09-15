@@ -1,9 +1,11 @@
 import {
   ChangeDetectionStrategy,
+  computed,
+  input,
   Component,
   ViewEncapsulation,
 } from "@angular/core";
-import { CardColorsDirective } from "../../card/card-colors.directive";
+import { CardColors } from "../../card/card-colors.directive";
 
 @Component({
   standalone: true,
@@ -14,12 +16,18 @@ import { CardColorsDirective } from "../../card/card-colors.directive";
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     "[class.tedi-accordion-icon]": "true",
+    "[class]": "_backgroundClass()",
   },
-  hostDirectives: [
-    {
-      directive: CardColorsDirective,
-      inputs: ["background"],
-    },
-  ],
 })
-export class AccordionIconComponent {}
+export class AccordionIconComponent {
+  /**
+   * Background colour of the icon column.
+   */
+  background = input<CardColors>();
+
+  _backgroundClass = computed(() => {
+    const background = this.background();
+
+    return background ? `tedi-accordion-icon--background--${background}` : "";
+  });
+}

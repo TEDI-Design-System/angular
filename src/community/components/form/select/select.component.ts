@@ -33,8 +33,9 @@ import {
   LabelComponent,
   TediTranslationPipe,
   TextComponent,
+  CardComponent,
+  CardContentComponent,
 } from "@tedi-design-system/angular/tedi";
-import { CardComponent, CardContentComponent } from "../../../components/cards";
 
 /**
  * @deprecated Use Select from TEDI-ready instead. This component will be removed from future versions.

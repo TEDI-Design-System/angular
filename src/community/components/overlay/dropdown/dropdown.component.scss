@@ -11,6 +11,11 @@
     }
   }
 
+  // Replaces the community CardContent `hasSeparator` input.
+  &__mobile-header {
+    border-bottom: 1px solid var(--card-border-primary);
+  }
+
   &__close-button {
     margin-left: auto;
   }

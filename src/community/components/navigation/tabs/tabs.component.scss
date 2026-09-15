@@ -36,6 +36,11 @@
     z-index: 1050;
   }
 
+  // Replaces the community CardContent `hasSeparator` input.
+  &__mobile-header {
+    border-bottom: 1px solid var(--card-border-primary);
+  }
+
   &__mobile-list.tedi-card-content {
     display: flex;
     flex-direction: column;
