@@ -105,7 +105,7 @@ export class LinkComponent
   });
 
   classes = computed(() => {
-    const classList = ["tedi-link"];
+    const classList = ["tedi-link", "no-print"];
 
     if (this.breakpointInputs().variant === "inverted") {
       classList.push("tedi-link--inverted");
