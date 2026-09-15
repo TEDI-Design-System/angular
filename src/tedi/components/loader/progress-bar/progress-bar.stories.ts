@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal } from "@angular/core";
+import { Component, computed, OnDestroy, OnInit, signal } from "@angular/core";
 import {
   Meta,
   StoryObj,
@@ -28,6 +28,11 @@ type StoryArgs = ComponentInputs<ProgressBarComponent>;
  * the smallest viewport; each breakpoint input takes a **partial** set of inputs
  * that layers on top from that breakpoint **and up** (mobile-first). See the
  * **Responsive** story below.
+ *
+ * ### Announcing changes
+ *
+ * Progress bars are not live regions by default. Enable announcements when
+ * users need updates without navigating back to the bar. See the **Announced** story.
  *
  * ```html
  * <tedi-progress-bar
@@ -144,6 +149,27 @@ export default {
         "Accessible label for the progress bar. Falls back to `label()` when omitted.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
+    },
+    announce: {
+      description:
+        "Publishes changes to the formatted value (`valueLabel`, or the percentage) in a visually hidden live region, independently of `showValue`. The current value is skipped when announcements are enabled. Use `polite` for routine updates and `assertive` for urgent updates that may interrupt speech.",
+      control: { type: "radio" },
+      options: ["off", "polite", "assertive"],
+      table: {
+        category: "inputs",
+        type: { summary: "ProgressBarAnnounce" },
+        defaultValue: { summary: "off" },
+      },
+    },
+    announceInterval: {
+      description:
+        "Minimum time in milliseconds between live-region updates. The first change is published immediately; changes during the interval are combined into one update with the latest value. Changing the interval reschedules pending updates. Zero disables throttling. Negative values become zero; non-finite values use 1000ms. Ignored when `announce` is `off`.",
+      control: { type: "number" },
+      table: {
+        category: "inputs",
+        type: { summary: "number" },
+        defaultValue: { summary: "1000" },
+      },
     },
   },
   args: {
@@ -401,5 +427,69 @@ export const Animated: Story = {
   render: () => ({
     moduleMetadata: { imports: [AnimatedProgressBarDemo] },
     template: `<tedi-animated-progress-bar-demo />`,
+  }),
+};
+
+@Component({
+  standalone: true,
+  selector: "tedi-announced-progress-bar-demo",
+  imports: [ProgressBarComponent],
+  template: `
+    <tedi-progress-bar
+      [value]="percentage()"
+      label="Sessioon lõpeb"
+      [valueLabel]="remaining()"
+      announce="polite"
+      [announceInterval]="10000"
+    />
+  `,
+})
+class AnnouncedProgressBarDemo implements OnInit, OnDestroy {
+  private readonly totalSeconds = 300;
+  private secondsLeft = signal(this.totalSeconds);
+  private intervalId?: ReturnType<typeof setInterval>;
+
+  protected percentage = computed(
+    () => (this.secondsLeft() / this.totalSeconds) * 100,
+  );
+
+  protected remaining = computed(() => {
+    const left = this.secondsLeft();
+    return `${Math.floor(left / 60)}:${`${left % 60}`.padStart(2, "0")}`;
+  });
+
+  ngOnInit() {
+    this.intervalId = setInterval(() => {
+      this.secondsLeft.update((s) => Math.max(0, s - 1));
+      if (this.secondsLeft() === 0) {
+        clearInterval(this.intervalId);
+        this.intervalId = undefined;
+      }
+    }, 1000);
+  }
+
+  ngOnDestroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  }
+}
+
+/**
+ * This countdown updates every second and stops at zero. The first change is
+ * published immediately; later live-region updates occur at most once every
+ * 10 seconds, using `announce="polite"` and `[announceInterval]="10000"`.
+ * The final value is published when the pending interval ends.
+ *
+ * Use a screen reader to check the announcements. The live region is visually hidden.
+ */
+export const Announced: Story = {
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: true },
+  },
+  render: () => ({
+    moduleMetadata: { imports: [AnnouncedProgressBarDemo] },
+    template: `<tedi-announced-progress-bar-demo />`,
   }),
 };

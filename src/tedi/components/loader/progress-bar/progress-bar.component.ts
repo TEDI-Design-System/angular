@@ -3,8 +3,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  effect,
   inject,
   input,
+  signal,
+  untracked,
   ViewEncapsulation,
 } from "@angular/core";
 import { _IdGenerator } from "@angular/cdk/a11y";
@@ -14,6 +18,7 @@ import { BreakpointService } from "../../../services/breakpoint/breakpoint.servi
 export type ProgressBarSize = "default" | "small";
 export type ProgressBarLabelPosition = "top" | "horizontal";
 export type ProgressBarValuePosition = "horizontal" | "bottom";
+export type ProgressBarAnnounce = "off" | "polite" | "assertive";
 
 /**
  * The subset of inputs that can be overridden per breakpoint via the
@@ -111,6 +116,29 @@ export class ProgressBarComponent {
    * Accessible label for the progress bar. Falls back to `label()` when omitted.
    */
   ariaLabel = input<string>();
+  /**
+   * Publishes changes to the formatted value (`valueLabel`, or the percentage)
+   * in a visually hidden live region, independently of `showValue`.
+   * The current value is skipped when announcements are enabled.
+   *
+   * Progress bars are not live regions by default. Enable announcements when
+   * users need updates without navigating back to the bar. Use `polite` for
+   * routine updates and `assertive` for urgent updates that may interrupt speech.
+   * @default off
+   */
+  announce = input<ProgressBarAnnounce>("off");
+  /**
+   * Minimum time in milliseconds between live-region updates. The first change
+   * is published immediately; changes during the interval are combined into one
+   * update with the latest value. Changing the interval reschedules pending updates.
+   * Zero disables throttling. Negative values become zero; non-finite values use 1000ms.
+   * Ignored when `announce` is `off`.
+   * @default 1000
+   */
+  announceInterval = input(1000, {
+    transform: (value: number) =>
+      Number.isFinite(value) ? Math.max(0, value) : 1000,
+  });
 
   /*
    * Per-breakpoint overrides (`xs`–`xxl`).
@@ -186,4 +214,71 @@ export class ProgressBarComponent {
   protected accessibleLabel = computed(
     () => this.ariaLabel() ?? this.label() ?? undefined,
   );
+
+  protected announcedValue = signal("");
+
+  protected announceRole = computed(() =>
+    this.announce() === "assertive" ? "alert" : "status",
+  );
+
+  private lastAnnouncedAt?: number;
+  private announceTimeout?: ReturnType<typeof setTimeout>;
+  private previousAnnounceText?: string;
+
+  constructor() {
+    effect(() => {
+      const mode = this.announce();
+      const text = this.formattedValue();
+      const interval = this.announceInterval();
+
+      untracked(() => {
+        if (mode === "off") {
+          this.resetAnnouncement();
+        } else if (this.previousAnnounceText === undefined) {
+          this.previousAnnounceText = text;
+        } else {
+          const changed = text !== this.previousAnnounceText;
+          this.previousAnnounceText = text;
+          if (changed || this.announceTimeout !== undefined) {
+            this.queueAnnouncement(text, interval);
+          }
+        }
+      });
+    });
+
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.announceTimeout));
+  }
+
+  private queueAnnouncement(text: string, interval: number) {
+    const remaining =
+      this.lastAnnouncedAt === undefined
+        ? 0
+        : interval - (Date.now() - this.lastAnnouncedAt);
+
+    if (remaining <= 0) {
+      this.announceNow(text);
+      return;
+    }
+
+    clearTimeout(this.announceTimeout);
+    this.announceTimeout = setTimeout(
+      () => this.announceNow(this.formattedValue()),
+      remaining,
+    );
+  }
+
+  private announceNow(text: string) {
+    clearTimeout(this.announceTimeout);
+    this.announceTimeout = undefined;
+    this.lastAnnouncedAt = Date.now();
+    this.announcedValue.set(text);
+  }
+
+  private resetAnnouncement() {
+    clearTimeout(this.announceTimeout);
+    this.announceTimeout = undefined;
+    this.lastAnnouncedAt = undefined;
+    this.previousAnnounceText = undefined;
+    this.announcedValue.set("");
+  }
 }
