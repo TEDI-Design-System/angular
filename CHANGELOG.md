@@ -1,3 +1,10 @@
+# [8.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.1...angular-8.1.0-rc.2) (2026-09-15)
+
+
+### Bug Fixes
+
+* **timeline:** align card variant paddings with design [#568](https://github.com/TEDI-Design-System/angular/issues/568) ([#657](https://github.com/TEDI-Design-System/angular/issues/657)) ([1de21ab](https://github.com/TEDI-Design-System/angular/commit/1de21abd4969fb73a63ba7d4dc11cd3dc8b41ba6))
+
 # [8.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.7...angular-8.1.0-rc.1) (2026-09-15)
 
 
