@@ -1,0 +1,72 @@
+<tedi-icon
+  class="tedi-heading-with-icon__icon"
+  [name]="name()"
+  [color]="iconColor()"
+  [size]="size()"
+  [variant]="variant()"
+/>
+
+@switch (element()) {
+  @case ("h1") {
+    <h1
+      tedi-text
+      class="tedi-heading-with-icon__heading"
+      [color]="headingColor()"
+      [modifiers]="modifiers()"
+    >
+      <ng-container *ngTemplateOutlet="heading"></ng-container>
+    </h1>
+  }
+  @case ("h2") {
+    <h2
+      tedi-text
+      class="tedi-heading-with-icon__heading"
+      [color]="headingColor()"
+      [modifiers]="modifiers()"
+    >
+      <ng-container *ngTemplateOutlet="heading"></ng-container>
+    </h2>
+  }
+  @case ("h3") {
+    <h3
+      tedi-text
+      class="tedi-heading-with-icon__heading"
+      [color]="headingColor()"
+      [modifiers]="modifiers()"
+    >
+      <ng-container *ngTemplateOutlet="heading"></ng-container>
+    </h3>
+  }
+  @case ("h4") {
+    <h4
+      tedi-text
+      class="tedi-heading-with-icon__heading"
+      [color]="headingColor()"
+      [modifiers]="modifiers()"
+    >
+      <ng-container *ngTemplateOutlet="heading"></ng-container>
+    </h4>
+  }
+  @case ("h5") {
+    <h5
+      tedi-text
+      class="tedi-heading-with-icon__heading"
+      [color]="headingColor()"
+      [modifiers]="modifiers()"
+    >
+      <ng-container *ngTemplateOutlet="heading"></ng-container>
+    </h5>
+  }
+  @case ("h6") {
+    <h6
+      tedi-text
+      class="tedi-heading-with-icon__heading"
+      [color]="headingColor()"
+      [modifiers]="modifiers()"
+    >
+      <ng-container *ngTemplateOutlet="heading"></ng-container>
+    </h6>
+  }
+}
+
+<ng-template #heading><ng-content></ng-content></ng-template>
