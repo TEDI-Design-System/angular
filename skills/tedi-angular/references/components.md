@@ -218,6 +218,35 @@ Three things the types won't warn you about:
 - **Object suggestions are read through `bind*` keys, not a fixed shape.** `bindLabel` names the
   display property, `bindDescription` a secondary line under it, and `bindDisabled` (default key
   `disabled`) a row that greys out and is skipped by arrow keys, Enter and clicks.
+- **`[tedi-table-card-row]` goes on a `<div>`, as a direct child of `tedi-table-card` or
+  `tedi-table-card-group`.** It renders the `<dt>` / `<dd>` of the `<dl>` its parent owns and takes
+  its layout and label size from that parent, so it produces nothing useful anywhere else. The host
+  has to be a plain `<div>`: a `<dl>` may only group its terms in `<div>`s, and a custom element
+  there breaks the description-list semantics for assistive technology.
+- **Use `labelFor` or `labelId` to associate a row's label with its form control.**
+  Set `labelFor` to the native input's ID: `id` for `input[tedi-text-field]`, or `inputId` for
+  `tedi-date-field` and `tedi-time-field`. For `tedi-select`, whose trigger is a
+  `div[role="combobox"]`, set the row's `labelId` and reference it through the select's
+  `ariaLabelledby`. These inputs apply to the row's `label` text; projected custom labels
+  manage their own attributes. Use one visible label per control.
+- **`[tediTableCardEndSlot]` takes non-interactive content only.** A `collapsible` card renders
+  its header inside the toggle `<button>`, so a link or button in the end slot is nested
+  interactive content — invalid markup that keyboard and screen-reader users cannot reach. Badges,
+  tags and text are fine.
+- **`[tediTableCardEndSlot]` is a directive, not just a projection selector.** `tedi-table-card`
+  queries for it to decide whether it has a header at all, so import
+  `TableCardEndSlotDirective` wherever the attribute is used. Leave it out and a card whose header
+  holds only a badge renders no header, dropping the badge silently.
+- **`tedi-table-card-actions` reads its footer from where it sits.** Inside a
+  `tedi-table-card-group` it joins that group on the muted background; directly under the card it
+  becomes the card's own footer. The card and each of its groups can have one each.
+- **`columns` splits the width equally; `columnSizing="auto"` sizes each column to its
+  content.** Equal columns can wrap a long label inside its share — `auto` keeps it on one
+  line and shares only the leftover space, at the cost of uneven columns.
+- **`tedi-table-card`'s layout inputs are the responsive ones.** `layout`, `columns`, `labelWidth`,
+  `labelAlign`, `valueAlign`, `rowAlign`, `labelSize`, `padding` and `rowGap` are all settable per
+  breakpoint (`[md]="{ columns: 2 }"`); a group inherits every one it does not set itself. Note that
+  `columns` needs the room for them — two horizontal columns want roughly `lg` and up.
 
 ### Choosing the right component
 
