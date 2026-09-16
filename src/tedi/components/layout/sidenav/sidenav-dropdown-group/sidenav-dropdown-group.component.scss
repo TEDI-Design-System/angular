@@ -53,11 +53,7 @@
     }
   }
 
-  &__item {
-    &:last-of-type {
-      &::before {
-        height: 50%;
-      }
-    }
+  &__list > .tedi-sidenav-dropdown-item:last-of-type::before {
+    height: 50%;
   }
 }
