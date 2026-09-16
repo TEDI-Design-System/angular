@@ -1,0 +1,24 @@
+<dt class="tedi-table-card-row__label">
+  @if (label()) {
+    @if (labelFor()) {
+      <label
+        tedi-label
+        [attr.id]="labelId()"
+        [for]="labelFor()"
+        [size]="labelSize()"
+        >{{ label() }}</label
+      >
+    } @else {
+      <span tedi-label [attr.id]="labelId()" [size]="labelSize()">{{
+        label()
+      }}</span>
+    }
+  }
+  <ng-content select="[tediTableCardRowLabel]"></ng-content>
+</dt>
+<dd class="tedi-table-card-row__value">
+  @if (value()) {
+    {{ value() }}
+  }
+  <ng-content></ng-content>
+</dd>
