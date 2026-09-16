@@ -1,0 +1,33 @@
+.tedi-table-card-actions {
+  display: block;
+  border-top: 1px solid var(--card-border-primary);
+
+  /* A group's footer belongs to that group's section. */
+  &--in-group {
+    border-top: 0;
+  }
+
+  /* Override CardContent's display without depending on stylesheet order. */
+  & &__content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--button-gutter-x);
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  & &__content .tedi-button {
+    flex: 1 0 auto;
+    justify-content: center;
+    max-width: min(100%, var(--button-width-max));
+    overflow-wrap: anywhere;
+  }
+
+  & &__content .tedi-button--icon-only {
+    flex: 0 0 auto;
+  }
+
+  & &__content .tedi-button--icon-only:only-child {
+    margin-inline: auto;
+  }
+}
