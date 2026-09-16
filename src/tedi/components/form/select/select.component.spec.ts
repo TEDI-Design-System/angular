@@ -6,7 +6,7 @@ import {
   fakeAsync,
   tick,
 } from "@angular/core/testing";
-import { FormControl, ReactiveFormsModule } from "@angular/forms";
+import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
 import { OverlayContainer } from "@angular/cdk/overlay";
 import {
@@ -3311,5 +3311,318 @@ describe("SelectComponent", () => {
 
       expect(select.activeIndex()).toBe(-1);
     }));
+  });
+});
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-select
+      inputId="ngmodel-select"
+      [options]="items"
+      bindLabel="label"
+      bindValue="value"
+      [ngModel]="selected"
+    />
+  `,
+  imports: [SelectComponent, FormsModule],
+})
+class NgModelHostComponent {
+  items = [
+    { value: 10, label: "10" },
+    { value: 25, label: "25" },
+  ];
+  selected: number | undefined = 10;
+}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-select
+      inputId="value-select"
+      [options]="items"
+      bindLabel="label"
+      bindValue="value"
+      placeholder="Pick one"
+      [allowMultiple]="allowMultiple"
+      [value]="selected"
+      (selectionChange)="emitted = $event"
+    />
+  `,
+  imports: [SelectComponent],
+})
+class ValueHostComponent {
+  items = [
+    { value: 10, label: "10" },
+    { value: 25, label: "25" },
+    { value: 50, label: "50" },
+  ];
+  allowMultiple = false;
+  selected: unknown = 10;
+  emitted: unknown = undefined;
+}
+
+describe("SelectComponent [value] input", () => {
+  const createHost = (setUp: (host: ValueHostComponent) => void = () => {}) => {
+    TestBed.configureTestingModule({
+      imports: [ValueHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    const fixture = TestBed.createComponent(ValueHostComponent);
+    setUp(fixture.componentInstance);
+    return fixture;
+  };
+
+  const labelText = (fixture: ComponentFixture<unknown>) =>
+    (
+      fixture.nativeElement.querySelector(
+        ".tedi-select__label",
+      ) as HTMLElement | null
+    )?.textContent?.trim();
+
+  const selectOf = (fixture: ComponentFixture<unknown>) =>
+    fixture.debugElement.query(By.directive(SelectComponent))
+      .componentInstance as SelectComponent;
+
+  it("renders the bound value's label on the first change-detection pass", () => {
+    const fixture = createHost();
+
+    // No await, no tick: this is what the browser paints on the first frame,
+    // before any microtask has run.
+    fixture.detectChanges();
+
+    expect(labelText(fixture)).toBe("10");
+  });
+
+  it("resolves the label through bindLabel/bindValue, not the raw value", () => {
+    const fixture = createHost((h) => {
+      h.items = [
+        { value: 10, label: "Ten" },
+        { value: 25, label: "Twenty-five" },
+      ];
+      h.selected = 25;
+    });
+    fixture.detectChanges();
+
+    expect(labelText(fixture)).toBe("Twenty-five");
+  });
+
+  it("shows the placeholder when the value input is never set", () => {
+    const fixture = createHost((h) => (h.selected = undefined));
+    fixture.detectChanges();
+
+    expect(labelText(fixture)).toBe("Pick one");
+    expect(selectOf(fixture).selectedValues()).toEqual([]);
+  });
+
+  it("treats an explicit null as no selection", () => {
+    const fixture = createHost((h) => (h.selected = null));
+    fixture.detectChanges();
+
+    expect(labelText(fixture)).toBe("Pick one");
+  });
+
+  it("clears the selection when the value is set back to undefined", () => {
+    const fixture = createHost();
+    fixture.detectChanges();
+    expect(labelText(fixture)).toBe("10");
+
+    fixture.componentInstance.selected = undefined;
+    fixture.detectChanges();
+
+    expect(labelText(fixture)).toBe("Pick one");
+    expect(selectOf(fixture).selectedValues()).toEqual([]);
+  });
+
+  it("follows later value changes", () => {
+    const fixture = createHost();
+    fixture.detectChanges();
+
+    fixture.componentInstance.selected = 50;
+    fixture.detectChanges();
+
+    expect(labelText(fixture)).toBe("50");
+  });
+
+  it("accepts an array in multi-select mode", () => {
+    const fixture = createHost((h) => {
+      h.allowMultiple = true;
+      h.selected = [10, 50];
+    });
+    fixture.detectChanges();
+
+    expect(selectOf(fixture).selectedLabels()).toEqual(["10", "50"]);
+  });
+
+  it("keeps the selection when allowMultiple is toggled", () => {
+    const fixture = createHost();
+    fixture.detectChanges();
+    expect(selectOf(fixture).selectedValues()).toEqual([10]);
+
+    fixture.componentInstance.allowMultiple = true;
+    fixture.detectChanges();
+
+    expect(selectOf(fixture).selectedValues()).toEqual([10]);
+  });
+
+  it("emits selectionChange and updates the label when a value is picked", fakeAsync(() => {
+    const fixture = createHost();
+    fixture.detectChanges();
+
+    (
+      fixture.nativeElement.querySelector(
+        ".tedi-select__trigger",
+      ) as HTMLElement
+    ).click();
+    fixture.detectChanges();
+    tick();
+
+    (
+      document.querySelectorAll(".tedi-dropdown-item")[1] as HTMLElement
+    ).click();
+    fixture.detectChanges();
+    tick();
+
+    expect(fixture.componentInstance.emitted).toBe(25);
+    expect(labelText(fixture)).toBe("25");
+  }));
+
+  it("re-applies the bound value when the consumer ignores selectionChange", fakeAsync(() => {
+    const fixture = createHost();
+    fixture.detectChanges();
+
+    selectOf(fixture).selectedValues.set([50]);
+    fixture.detectChanges();
+    expect(labelText(fixture)).toBe("50");
+
+    fixture.componentInstance.selected = 25;
+    fixture.detectChanges();
+
+    expect(labelText(fixture)).toBe("25");
+  }));
+});
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-select
+      inputId="guard-select"
+      [options]="items"
+      bindLabel="label"
+      bindValue="value"
+      [allowMultiple]="allowMultiple"
+      [formControl]="control"
+      (selectionChange)="emitted = $event"
+    />
+  `,
+  imports: [SelectComponent, ReactiveFormsModule],
+})
+class CvaGuardHostComponent {
+  items = [
+    { value: 10, label: "10" },
+    { value: 25, label: "25" },
+    { value: 50, label: "50" },
+  ];
+  allowMultiple = false;
+  control = new FormControl<unknown>(null);
+  emitted: unknown = undefined;
+}
+
+describe("SelectComponent existing-behaviour guards", () => {
+  const createHost = (
+    setUp: (host: CvaGuardHostComponent) => void = () => {},
+  ) => {
+    TestBed.configureTestingModule({
+      imports: [CvaGuardHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    const fixture = TestBed.createComponent(CvaGuardHostComponent);
+    setUp(fixture.componentInstance);
+    return fixture;
+  };
+
+  const labelText = (fixture: ComponentFixture<unknown>) =>
+    (
+      fixture.nativeElement.querySelector(
+        ".tedi-select__label",
+      ) as HTMLElement | null
+    )?.textContent?.trim();
+
+  it("renders a formControl's initial value on the first change-detection pass", () => {
+    const fixture = createHost((h) => h.control.setValue(25));
+    fixture.detectChanges();
+
+    expect(labelText(fixture)).toBe("25");
+  });
+
+  it("reflects later formControl writes", () => {
+    const fixture = createHost();
+    fixture.detectChanges();
+    fixture.componentInstance.control.setValue(50);
+    fixture.detectChanges();
+
+    expect(labelText(fixture)).toBe("50");
+  });
+
+  it("renders every selected label in multi-select mode", () => {
+    const fixture = createHost((h) => {
+      h.allowMultiple = true;
+      h.control.setValue([10, 50]);
+    });
+    fixture.detectChanges();
+
+    const select = fixture.debugElement.query(By.directive(SelectComponent))
+      .componentInstance as SelectComponent;
+    expect(select.selectedLabels()).toEqual(["10", "50"]);
+  });
+
+  it("writes back to the formControl and emits selectionChange on UI selection", fakeAsync(() => {
+    const fixture = createHost();
+    fixture.detectChanges();
+
+    (
+      fixture.nativeElement.querySelector(
+        ".tedi-select__trigger",
+      ) as HTMLElement
+    ).click();
+    fixture.detectChanges();
+    tick();
+
+    (
+      document.querySelectorAll(".tedi-dropdown-item")[1] as HTMLElement
+    ).click();
+    fixture.detectChanges();
+    tick();
+
+    expect(fixture.componentInstance.control.value).toBe(25);
+    expect(fixture.componentInstance.emitted).toBe(25);
+    expect(labelText(fixture)).toBe("25");
+  }));
+
+  it("keeps the current selection when allowMultiple is toggled", () => {
+    const fixture = createHost((h) => h.control.setValue(25));
+    fixture.detectChanges();
+
+    const select = fixture.debugElement.query(By.directive(SelectComponent))
+      .componentInstance as SelectComponent;
+    expect(select.selectedValues()).toEqual([25]);
+
+    fixture.componentInstance.allowMultiple = true;
+    fixture.detectChanges();
+
+    expect(select.selectedValues()).toEqual([25]);
+  });
+
+  it("still supports [ngModel] once the microtask queue has flushed", async () => {
+    TestBed.configureTestingModule({
+      imports: [NgModelHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    const fixture = TestBed.createComponent(NgModelHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(labelText(fixture)).toBe("10");
   });
 });
