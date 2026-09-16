@@ -1,0 +1,19 @@
+<tedi-card-content
+  class="tedi-table-card-summary__content"
+  background="tertiary"
+  [padding]="resolvedPadding()"
+>
+  <dl [class]="rowsClasses()" [style]="rowsStyles()">
+    <div class="tedi-table-card-row tedi-table-card-row--bold">
+      <dt class="tedi-table-card-row__label">
+        @if (label()) {
+          <span tedi-label [size]="resolvedLabelSize()">{{ label() }}</span>
+        }
+        <ng-content select="[tediTableCardRowLabel]"></ng-content>
+      </dt>
+      <dd class="tedi-table-card-row__value">
+        <ng-content></ng-content>
+      </dd>
+    </div>
+  </dl>
+</tedi-card-content>

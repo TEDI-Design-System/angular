@@ -1,0 +1,155 @@
+<tedi-card
+  class="tedi-table-card__card"
+  [padding]="0"
+  [attr.role]="ariaLabel() ? 'group' : null"
+  [attr.aria-label]="ariaLabel()"
+>
+  @if (hasHeader()) {
+    <tedi-card-content
+      class="tedi-table-card__header"
+      [padding]="headerPadding()"
+    >
+      @if (selectable()) {
+        <input
+          type="checkbox"
+          tedi-checkbox
+          class="tedi-table-card__select"
+          [id]="selectId"
+          [checked]="selected()"
+          (change)="handleSelectedChange($event)"
+          [attr.aria-label]="
+            titleLabelsSelection() ? null : resolvedSelectionLabel()
+          "
+        />
+      }
+
+      @if (collapsible()) {
+        @if (hasTitleGroup()) {
+          <ng-container
+            *ngTemplateOutlet="heading; context: { $implicit: toggle }"
+          ></ng-container>
+        } @else {
+          <ng-container *ngTemplateOutlet="toggle"></ng-container>
+        }
+      } @else {
+        @if (hasTitleGroup()) {
+          <ng-container
+            *ngTemplateOutlet="heading; context: { $implicit: titleGroup }"
+          ></ng-container>
+        }
+        <ng-container *ngTemplateOutlet="endSlot"></ng-container>
+      }
+    </tedi-card-content>
+  }
+
+  <div
+    class="tedi-table-card__body"
+    [class.tedi-table-card__body--separator]="bodyHasSeparator()"
+    [class.tedi-table-card__body--no-rows]="!hasRows()"
+    [id]="bodyId"
+    [hidden]="collapsible() && !open()"
+  >
+    <tedi-card-content
+      class="tedi-table-card__rows-content"
+      [hidden]="!hasRows()"
+      [padding]="resolvedPadding()"
+    >
+      <dl [class]="rowsClasses()" [style]="rowsStyles()">
+        <ng-content select="[tedi-table-card-row]"></ng-content>
+      </dl>
+    </tedi-card-content>
+
+    <ng-content select="tedi-table-card-group"></ng-content>
+    <ng-content select="tedi-table-card-summary"></ng-content>
+  </div>
+
+  <ng-content select="tedi-table-card-actions"></ng-content>
+</tedi-card>
+
+<ng-template #heading let-content>
+  @switch (titleElement()) {
+    @case ("h2") {
+      <h2 class="tedi-table-card__heading">
+        <ng-container *ngTemplateOutlet="content"></ng-container>
+      </h2>
+    }
+    @case ("h4") {
+      <h4 class="tedi-table-card__heading">
+        <ng-container *ngTemplateOutlet="content"></ng-container>
+      </h4>
+    }
+    @case ("h5") {
+      <h5 class="tedi-table-card__heading">
+        <ng-container *ngTemplateOutlet="content"></ng-container>
+      </h5>
+    }
+    @case ("h6") {
+      <h6 class="tedi-table-card__heading">
+        <ng-container *ngTemplateOutlet="content"></ng-container>
+      </h6>
+    }
+    @default {
+      <h3 class="tedi-table-card__heading">
+        <ng-container *ngTemplateOutlet="content"></ng-container>
+      </h3>
+    }
+  }
+</ng-template>
+
+<ng-template #toggle>
+  <button
+    type="button"
+    class="tedi-table-card__toggle"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="bodyId"
+    [attr.aria-label]="title() ? null : toggleLabel()"
+    (click)="handleToggle()"
+  >
+    <ng-container *ngTemplateOutlet="titleGroup"></ng-container>
+    <ng-container *ngTemplateOutlet="endSlot"></ng-container>
+    <span
+      class="tedi-table-card__chevron"
+      [class.tedi-table-card__chevron--open]="open()"
+    >
+      <tedi-icon name="expand_more" [size]="24" color="inherit" />
+    </span>
+  </button>
+</ng-template>
+
+<ng-template #titleGroup>
+  <span class="tedi-table-card__title-group">
+    @if (title()) {
+      @if (titleLabelsSelection()) {
+        <label
+          tedi-text
+          [id]="titleId"
+          [attr.for]="selectId"
+          [color]="titleColor()"
+          [modifiers]="titleModifiers()"
+          [class]="titleClasses()"
+          >{{ title() }}</label
+        >
+      } @else {
+        <span
+          tedi-text
+          [id]="titleId"
+          [color]="titleColor()"
+          [modifiers]="titleModifiers()"
+          [class]="titleClasses()"
+          >{{ title() }}</span
+        >
+      }
+    }
+    @if (subtitle()) {
+      <span tedi-text color="secondary" modifiers="small">{{
+        subtitle()
+      }}</span>
+    }
+  </span>
+</ng-template>
+
+<ng-template #endSlot>
+  <span class="tedi-table-card__end-slot">
+    <ng-content select="[tediTableCardEndSlot]"></ng-content>
+  </span>
+</ng-template>
