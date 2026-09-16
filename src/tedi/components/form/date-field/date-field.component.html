@@ -39,6 +39,7 @@
       class="tedi-date-field__overlay"
       role="dialog"
       [attr.aria-label]="'date-field.calendar-dialog' | tediTranslate"
+      [style.max-height.px]="overlayMaxHeight()"
       cdkTrapFocus
       (keydown)="handleOverlayKeydown($event)"
     >

@@ -157,6 +157,9 @@ The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `bord
 
 - **`tedi-date-field`, not `tedi-date-picker`.** DatePicker is deprecated; DateField wraps a typed
   input with a popover or modal calendar and supports `single`, `multiple` and `range`.
+- **`tedi-date-time-field` when the value needs a date *and* a time.** It pairs the same typed
+  input with a calendar plus a TimePicker (side by side, or as a two-step date-then-time flow), in
+  `single` or `range` mode. Don't compose a DateField and a TimeField by hand.
 - **`tedi-time-field`, not `tedi-time-picker`.** TimePicker is the bare picker surface behind
   TimeField. On its own, with no value, the `scroll` wheel parks on `12:00` as display only, and
   nothing is selected until the user picks.

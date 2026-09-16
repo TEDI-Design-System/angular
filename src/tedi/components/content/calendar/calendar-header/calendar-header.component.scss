@@ -26,8 +26,8 @@
     align-items: center;
     padding-left: var(--layout-grid-gutters-04);
     font-family: inherit;
-    font-size: var(--body-regular-size);
-    font-weight: 500;
+    font-size: var(--heading-h6-size);
+    font-weight: var(--heading-h6-weight);
     color: var(--general-text-primary);
     text-transform: capitalize;
     cursor: pointer;
@@ -66,7 +66,7 @@
 
   &__select-arrow.tedi-icon {
     flex-shrink: 0;
-    font-size: var(--tedi-size-09);
+    font-size: var(--icon-05);
     color: var(--general-icon-tertiary);
   }
 
@@ -75,13 +75,14 @@
   }
 
   &__static-label {
-    font-size: var(--body-regular-size);
-    font-weight: 500;
+    font-size: var(--heading-h6-size);
+    font-weight: var(--heading-h6-weight);
     color: var(--general-text-primary);
     text-transform: capitalize;
   }
 
   &--disabled {
+
     .tedi-calendar-header__select,
     .tedi-calendar-header__label-button {
       pointer-events: none;
