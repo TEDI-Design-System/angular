@@ -113,6 +113,15 @@ function toolbarLabelKey(control: HTMLElement): string | undefined {
   return TOOLBAR_LABEL_KEYS[value ? `${base}:${value}` : base];
 }
 
+const SERIALIZED_ENTITIES: Record<string, string> = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&#39;": "'",
+  "&nbsp;": "\u00a0",
+};
+
 /**
  * Length of the text a reader actually sees, with the markup stripped. Parsed
  * rather than regex-stripped so entities (`&nbsp;`) count as the one character
@@ -123,7 +132,12 @@ function visibleTextLength(html: string): number {
   if (!html) return 0;
 
   if (typeof DOMParser === "undefined") {
-    return html.replace(/<[^>]*>/g, "").length;
+    return html
+      .replace(/<[^>]*>/g, "")
+      .replace(
+        /&(?:amp|lt|gt|quot|nbsp|#39);/g,
+        (entity) => SERIALIZED_ENTITIES[entity],
+      ).length;
   }
 
   const text =

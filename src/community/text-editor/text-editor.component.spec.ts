@@ -250,6 +250,21 @@ describe("TextEditorComponent", () => {
       expect(component.characterCount()).toBe(3);
     });
 
+    it("should count the same without a DOMParser (server-side)", () => {
+      const parser = globalThis.DOMParser;
+      // @ts-expect-error there is no DOMParser on the server; this is that.
+      delete globalThis.DOMParser;
+
+      try {
+        host.control.setValue("<p><strong>a&nbsp;b</strong> &amp; c</p>");
+        fixture.detectChanges();
+
+        expect(component.characterCount()).toBe(7);
+      } finally {
+        globalThis.DOMParser = parser;
+      }
+    });
+
     it("should report zero for an empty editor", () => {
       host.control.setValue("");
       fixture.detectChanges();
