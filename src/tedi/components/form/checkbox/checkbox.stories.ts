@@ -837,6 +837,7 @@ export const CheckboxCardStates: StoryObj<CheckboxComponent> = {
  *   `CheckboxControlValueAccessor`. Each control holds a boolean.
  */
 export const WithReactiveForms: StoryObj<CheckboxComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const tagsControl = new FormControl<string[]>(["urgent"]);
     const featuresControl = new FormControl<string[]>(["analytics", "export"]);

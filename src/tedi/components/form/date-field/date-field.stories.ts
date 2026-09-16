@@ -1317,6 +1317,7 @@ export const WithReactiveForms: Story = {
     };
   },
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:

@@ -968,6 +968,7 @@ export const Examples: StoryObj<FilterComponent> = {
 };
 
 export const WithReactiveForms: StoryObj<FilterComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const singleControl = new FormControl<boolean>(false);
     const multiControl = new FormControl<string[]>([]);

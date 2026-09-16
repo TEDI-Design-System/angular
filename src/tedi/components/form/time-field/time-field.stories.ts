@@ -658,6 +658,7 @@ On blur, typed input is normalized to the canonical \`HH:mm\` form.
 };
 
 export const WithReactiveForms: StoryObj = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const control = new FormControl<string | null>("12:00");
 

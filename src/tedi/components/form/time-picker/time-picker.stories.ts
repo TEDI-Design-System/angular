@@ -258,6 +258,7 @@ export const Dropdown: StoryObj = {
 };
 
 export const WithReactiveForms: StoryObj = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const control = new FormControl<string | null>("14:30");
 

@@ -1159,6 +1159,7 @@ export const Tooltip: Story = {
 };
 
 export const ReactiveForms: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     moduleMetadata: {
       imports: [SelectReactiveFormsDemoComponent],

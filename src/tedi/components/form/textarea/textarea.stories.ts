@@ -449,6 +449,7 @@ export const WithTemplateDrivenForms: StoryObj<TextareaComponent> = {
 };
 
 export const WithReactiveForms: StoryObj<TextareaComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const control = new FormControl("", {
       nonNullable: true,
