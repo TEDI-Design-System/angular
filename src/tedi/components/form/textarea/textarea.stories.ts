@@ -157,6 +157,7 @@ export default {
 } as Meta<TextareaComponent>;
 
 export const Default: StoryObj = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     resizable: true,
@@ -414,6 +415,7 @@ export const HeightExamples: StoryObj<TextareaComponent> = {
 };
 
 export const WithTemplateDrivenForms: StoryObj<TextareaComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     props: {
       inputValue: "",

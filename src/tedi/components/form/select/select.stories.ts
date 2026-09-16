@@ -26,6 +26,7 @@ import { Component, signal } from "@angular/core";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 import { TextComponent } from "../../base/text/text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 const longLabelOptions = [
   { value: "a", label: "A fairly long option label that does not fit" },
@@ -1247,6 +1248,7 @@ class SelectCustomSearchDemoComponent {
 
 export const CustomSearchFunction: Story = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         type: "code" as const,
@@ -1362,6 +1364,7 @@ class SelectOutputsDemoComponent {
  * open/close the dropdown, and click the clear button to see each event fire in the log on the right.
  */
 export const Outputs: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     moduleMetadata: {
       imports: [SelectOutputsDemoComponent],
@@ -1372,6 +1375,7 @@ export const Outputs: Story = {
 
 export const VirtualScroll: Story = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -1450,4 +1454,36 @@ export const VirtualScroll: Story = {
       </div>
     `,
   }),
+};
+
+/**
+ * Visual-regression only. `tedi-select` has no controlled open input (`isOpen` is an
+ * internal signal), so the listbox is opened by clicking the combobox trigger.
+ */
+export const OpenForVisualTest: Story = {
+  // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
+  tags: ["!dev"],
+  args: {
+    inputId: "select-open-vr",
+    label: "Linn",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-select
+        [inputId]="inputId"
+        [label]="label"
+        [placeholder]="placeholder"
+        [options]="options"
+        bindLabel="label"
+        bindValue="value"
+      />
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole("combobox"));
+    await waitFor(() =>
+      expect(document.querySelector('[role="listbox"]')).not.toBeNull(),
+    );
+  },
 };

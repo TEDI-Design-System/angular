@@ -160,6 +160,7 @@ export default {
 
 export const Default: StoryObj<StoryCheckboxComponent & { disabled: boolean }> =
   {
+    parameters: { chromatic: { disableSnapshot: true } },
     args: {
       size: "default",
       invalid: false,

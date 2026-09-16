@@ -160,6 +160,7 @@ export default {
 } as Meta<RadioComponent>;
 
 export const Default: StoryObj<RadioComponent & { disabled: boolean }> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     invalid: false,

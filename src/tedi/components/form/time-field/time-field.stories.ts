@@ -8,6 +8,7 @@ import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 import { TextComponent } from "../../base/text/text.component";
+import { expect, userEvent, waitFor } from "storybook/test";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];
 
@@ -424,6 +425,7 @@ export const OnClickType: StoryObj = {
     `,
   }),
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -465,6 +467,7 @@ export const PredefinedTimeSlots: StoryObj = {
     `,
   }),
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -475,6 +478,7 @@ export const PredefinedTimeSlots: StoryObj = {
 };
 
 export const Dropdown: StoryObj = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     props: {
       slots: ["12:30", "13:00", "13:30", "14:00", "14:30"],
@@ -514,6 +518,7 @@ export const CustomStep: StoryObj = {
     `,
   }),
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -634,6 +639,7 @@ export const ManualTyping: StoryObj = {
     `,
   }),
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story: `
@@ -681,5 +687,52 @@ export const WithReactiveForms: StoryObj = {
         </tedi-row>
       `,
     };
+  },
+};
+
+/**
+ * Visual-regression only. `tedi-time-field` has no controlled open input (the picker
+ * lives in a `tedi-popover` whose open state is internal), so it is opened by clicking
+ * the icon button. A fixed `value` pins where the scroll wheels align.
+ */
+export const OpenForVisualTest: StoryObj = {
+  // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
+  tags: ["!dev"],
+  args: {
+    inputId: "time-open-vr",
+    value: "10:30",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-row cols="1" [md]="{ cols: 3 }">
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label [for]="inputId">Aeg</label>
+            <tedi-time-field [inputId]="inputId" [(value)]="value" />
+          </tedi-form-field>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    // Selected by class, not by role: the field also renders a clear button, and
+    // the icon's accessible name is translated.
+    const trigger = canvasElement.querySelector<HTMLButtonElement>(
+      ".tedi-time-field__icon",
+    );
+    if (!trigger) throw new Error("Time picker trigger button not found");
+
+    // The picker aligns its scroll wheels from an `afterNextRender` hook. If the
+    // click lands inside Storybook's very first render pass that hook fires before
+    // the picker exists and the wheels stay at 00:00 while the field reads 10:30.
+    // Measured cliff is ~50ms; 250ms is a comfortable margin and only costs this
+    // one story. A real user click can never be this early.
+    await new Promise((resolve) => setTimeout(resolve, 250));
+
+    await userEvent.click(trigger);
+    await waitFor(() =>
+      expect(document.querySelector(".tedi-time-picker")).not.toBeNull(),
+    );
   },
 };

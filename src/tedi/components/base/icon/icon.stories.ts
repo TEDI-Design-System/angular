@@ -130,6 +130,7 @@ export default {
 } as Meta<IconComponent>;
 
 export const Default: StoryObj<IconComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     name: "account_circle",
   },

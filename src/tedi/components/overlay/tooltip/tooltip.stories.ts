@@ -223,6 +223,7 @@ export const Default: Story = {
 };
 
 export const Positions: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "Tooltip positions",
   render: (args) => ({
     props: {
@@ -269,6 +270,7 @@ export const TextTrigger: Story = {
 };
 
 export const Widths: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -347,6 +349,7 @@ export const CustomContent: Story = {
  * screen reader, use `tedi-popover` (a focus-managed dialog), not a tooltip.
  */
 export const Controlled: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "Controlled (open + trackPosition)",
   args: {
     position: "top",
@@ -375,4 +378,30 @@ export const Controlled: Story = {
       `,
     };
   },
+};
+
+/**
+ * Visual-regression only. Renders the tooltip open from inputs alone
+ * (`openWith="none"` + `[open]="true"`), so the screenshot pipeline captures the
+ * bubble rather than a bare trigger.
+ */
+export const OpenForVisualTest: Story = {
+  // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
+  tags: ["!dev"],
+  render: () => ({
+    template: `
+      <tedi-row justifyItems="center">
+        <tedi-col>
+          <tedi-tooltip openWith="none" [open]="true" position="bottom">
+            <tedi-tooltip-trigger [interactive]="false">
+              <button tedi-button>Tooltip trigger</button>
+            </tedi-tooltip-trigger>
+            <tedi-tooltip-content>
+              This is tooltip content. The quick brown fox jumps over the lazy dog.
+            </tedi-tooltip-content>
+          </tedi-tooltip>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
 };

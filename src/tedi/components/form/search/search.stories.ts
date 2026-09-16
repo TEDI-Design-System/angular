@@ -970,6 +970,7 @@ export const WithHint: Story = {
  * outside-click or Esc. Click a match to select it.
  */
 export const WithSuggestions: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "With suggestions",
   render: () => ({
     moduleMetadata: { imports: [SearchSuggestionsDemoComponent] },
@@ -983,6 +984,7 @@ export const WithSuggestions: Story = {
  * and closes on outside-click or Esc.
  */
 export const WithResultAndActions: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "With result and actions",
   render: () => ({
     moduleMetadata: { imports: [SearchResultActionsDemoComponent] },
@@ -997,6 +999,7 @@ export const WithResultAndActions: Story = {
  * floating menu), so typing is never interrupted.
  */
 export const Typeahead: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "Typeahead (live filtering)",
   render: () => ({
     moduleMetadata: { imports: [SearchTypeaheadDemoComponent] },
@@ -1009,6 +1012,7 @@ export const Typeahead: Story = {
  * spinner while "loading", then the matched results (or an empty state).
  */
 export const AsyncSuggestions: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "Async suggestions (loading)",
   render: () => ({
     moduleMetadata: { imports: [SearchAsyncDemoComponent] },

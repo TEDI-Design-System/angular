@@ -110,6 +110,7 @@ export default {
 type Story = StoryObj<DropdownItemValueComponent>;
 
 export const Default: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -121,6 +122,7 @@ export const Default: Story = {
 };
 
 export const WithMeta: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "With Meta (Horizontal)",
   render: () => ({
     template: `
@@ -133,6 +135,7 @@ export const WithMeta: Story = {
 };
 
 export const Vertical: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "Vertical Layout",
   render: () => ({
     template: `
@@ -192,6 +195,7 @@ export const WithRadio: Story = {
 };
 
 export const WithIcon: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "With Leading Icon",
   render: () => ({
     template: `

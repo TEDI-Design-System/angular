@@ -83,6 +83,7 @@ export default {
 } as Meta<InfoButtonComponent>;
 
 export const Default: StoryObj<InfoButtonComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `

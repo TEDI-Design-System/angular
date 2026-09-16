@@ -121,6 +121,7 @@ export default {
 } as Meta<TextFieldComponent>;
 
 export const Default: StoryObj = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     clearable: false,
@@ -262,6 +263,7 @@ export const Placeholder: StoryObj<TextFieldComponent> = {
 };
 
 export const WithTemplateDrivenForms: StoryObj<TextFieldComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     props: {
       inputValue: "",

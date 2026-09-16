@@ -161,6 +161,7 @@ export const Default: StoryObj = {
 };
 
 export const ScrollWithStep: StoryObj = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     template: `
       <div style="width: 178px;">

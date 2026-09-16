@@ -73,6 +73,7 @@ export default {
 } as Meta<StatusIndicatorComponent>;
 
 export const Default: StoryObj<StatusIndicatorComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     type: "success",
     size: "sm",

@@ -7,6 +7,7 @@ import {
 import { InfoTooltipComponent } from "./info-tooltip.component";
 import { LabelComponent } from "../../form/label/label.component";
 import { LabelRowComponent } from "../../form/label-row/label-row.component";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 /**
  * `tedi-info-tooltip` pairs an info button with a tooltip. It projects the tooltip
@@ -129,4 +130,28 @@ export const InLabelRow: InfoTooltipStory = {
       </tedi-label-row>
     `,
   }),
+};
+
+/**
+ * Visual-regression only. `tedi-info-tooltip` has no controlled `open` input, so the
+ * tooltip is opened by clicking the info button. `openWith="click"` keeps the pointer
+ * events that `userEvent.click` synthesises from opening on hover and then closing
+ * again on the click itself.
+ */
+export const OpenForVisualTest: InfoTooltipStory = {
+  // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
+  tags: ["!dev"],
+  render: () => ({
+    template: `
+      <tedi-info-tooltip position="bottom" openWith="click">
+        Seda välja kasutatakse teie isikusamasuse tuvastamiseks.
+      </tedi-info-tooltip>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByRole("button"));
+    await waitFor(() =>
+      expect(document.querySelector('[role="tooltip"]')).not.toBeNull(),
+    );
+  },
 };

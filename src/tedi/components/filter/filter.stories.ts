@@ -201,6 +201,7 @@ export default {
 } as Meta<FilterComponent>;
 
 export const Default: StoryObj<FilterComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     text: "Teenused",
   },

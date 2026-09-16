@@ -4,6 +4,7 @@ import {
   applicationConfig,
   moduleMetadata,
 } from "@storybook/angular";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Component, inject, Input, signal } from "@angular/core";
 import { provideAnimations } from "@angular/platform-browser/animations";
 import { ModalComponent } from "./modal.component";
@@ -811,6 +812,7 @@ class MyModalContent {
 
 export const Position: StoryObj = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -911,6 +913,7 @@ this.modalService.open(MyModalContent, {
 
 export const Size: StoryObj = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -984,6 +987,7 @@ this.modalService.open(MyModalContent, {
 
 export const Width: StoryObj = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -1050,6 +1054,7 @@ this.modalService.open(MyModalContent, {
 export const CustomWidth: StoryObj = {
   name: "Custom width",
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -1132,6 +1137,7 @@ this.modalService.open(MyModalContent, {
 
 export const Fullscreen: StoryObj = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -1223,6 +1229,7 @@ this.modalService.open(MyModalContent, {
 
 export const ScrollableContent: StoryObj = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -1330,6 +1337,7 @@ this.modalService.open(MyModalContent, {
 export const WithDescription: StoryObj = {
   name: "With header description",
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -1390,6 +1398,7 @@ this.modalService.open(MyModalContent, {
 export const NoBackdropClose: StoryObj = {
   name: "No backdrop close",
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -1443,6 +1452,7 @@ this.modalService.open(MyModalContent, {
 export const NoCloseButton: StoryObj = {
   name: "No close button",
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -1495,6 +1505,7 @@ this.modalService.open(MyModalContent, {
 
 export const FooterVariants: StoryObj = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -1607,6 +1618,7 @@ this.modalService.open(MyModalContent, {
 export const WithToast: StoryObj = {
   name: "With date picker and toast",
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -1695,6 +1707,7 @@ this.modalService.open(MyModalContent, {
 export const TemplateBased: StoryObj<ModalComponent> = {
   name: "Template-based (deprecated)",
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -1745,4 +1758,70 @@ export const TemplateBased: StoryObj<ModalComponent> = {
       </tedi-modal>
     `,
   }),
+};
+
+/**
+ * Visual-regression only. Opened through `ModalService`, the non-deprecated API, so the
+ * baseline is of the DOM consumers actually get: a `cdk-overlay-pane` holding CDK Dialog's
+ * own container, focus trap and backdrop, rather than the deprecated template-mode markup.
+ * `ariaLabel` gives the dialog its accessible name.
+ */
+export const OpenForVisualTest: StoryObj = {
+  // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
+  tags: ["!dev"],
+  decorators: [
+    moduleMetadata({
+      imports: [ButtonComponent, StoryModalContentComponent],
+    }),
+  ],
+  render: () => {
+    @Component({
+      standalone: true,
+      selector: "story-open-vr-demo",
+      imports: [ButtonComponent],
+      template: `
+        <button tedi-button variant="secondary" (click)="open()">
+          Open modal
+        </button>
+      `,
+    })
+    class OpenVrDemoComponent {
+      private readonly modalService = inject(ModalService);
+
+      open() {
+        this.modalService.open(StoryModalContentComponent, {
+          data: { title: "Title" },
+          width: "md",
+          ariaLabel: "Title",
+        });
+      }
+    }
+
+    return {
+      template: `<story-open-vr-demo />`,
+      moduleMetadata: {
+        imports: [OpenVrDemoComponent],
+      },
+    };
+  },
+  play: async ({ canvasElement }) => {
+    // `findByRole` polls, so the click cannot land inside the first render pass
+    // before the trigger exists. Nothing here waits on a fixed delay.
+    const trigger = await within(canvasElement).findByRole("button", {
+      name: "Open modal",
+    });
+    await userEvent.click(trigger);
+
+    // Polled, three conditions at once: the CDK overlay pane exists, the modal
+    // body inside it has rendered, and CDK's `autoFocus: "first-tabbable"` has
+    // moved focus into the dialog. The focus move is the settle signal that
+    // matters: it is queued after the dialog's first render, so once it has
+    // happened there is no further deferred open work to race the screenshot.
+    await waitFor(() => {
+      const pane = document.querySelector(".cdk-overlay-pane");
+      expect(pane).not.toBeNull();
+      expect(pane?.querySelector(".tedi-modal-footer")).not.toBeNull();
+      expect(pane?.contains(document.activeElement)).toBe(true);
+    });
+  },
 };

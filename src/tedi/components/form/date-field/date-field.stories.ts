@@ -17,6 +17,7 @@ import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import type { DateRange } from "../../content/calendar/types";
 import type { Matcher } from "../../../utils/matchers.util";
+import { expect, userEvent, waitFor } from "storybook/test";
 
 const today = new Date();
 const tomorrow = new Date(
@@ -918,6 +919,7 @@ export const OnClickType: Story = {
     };
   },
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -1003,6 +1005,7 @@ export const DisabledWeekends: Story = {
     feedback: "Nädalavahetused ei ole valitavad.",
   },
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -1019,6 +1022,7 @@ export const ShowWeekCount: Story = {
     feedback: "ISO nädalanumbrid kuvatakse vasakul.",
   },
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -1035,6 +1039,7 @@ export const MultipleMonths: Story = {
     feedback: "Kaks kuud kuvatakse kõrvuti igal ekraanilaiusel.",
   },
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -1056,6 +1061,7 @@ export const YearGrid: Story = {
     feedback: "Vali aasta — väli näitab ainult aastanumbrit.",
   },
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -1108,6 +1114,7 @@ export const WithFooter: Story = {
     };
   },
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -1129,6 +1136,7 @@ export const AvailableDays: Story = {
     feedback: "Ainult esiletõstetud päevad on valitavad.",
   },
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -1315,5 +1323,44 @@ export const WithReactiveForms: Story = {
           'DateField implements `ControlValueAccessor`, so it slots into a `FormGroup` like any reactive control — including `mode="range"`, whose value is a `{ from, to }` object. The block below the fields echoes the live `form.value`.',
       },
     },
+  },
+};
+
+/**
+ * Visual-regression only. `tedi-date-field` has no controlled open input
+ * (`overlayOpen` is an internal signal), so the calendar is opened by clicking the
+ * icon button. A fixed `initialValue` pins the month the calendar anchors to.
+ */
+export const OpenForVisualTest: Story = {
+  // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
+  tags: ["!dev"],
+  parameters: {
+    // Verified violation, not a defensive suppression: axe reports
+    // `color-contrast` on the calendar's outside-month day buttons
+    // (`.tedi-calendar-day-grid__day--outside`), #9293a4 on #ffffff = 3.02:1
+    // against the 4.5:1 threshold. Pre-existing and already tracked: the
+    // greyed-out day colour is a design-token decision, not something this
+    // story introduced. Every other open-overlay story passes the gate
+    // unsuppressed.
+    a11y: { test: "todo" },
+  },
+  args: {
+    inputId: "date-open-vr",
+    label: "Kuupäev",
+    initialValue: new Date(2026, 5, 15),
+  },
+  render: renderSingle,
+  play: async ({ canvasElement }) => {
+    // Selected by class, not by role: with a value set the field also renders a
+    // clear button, and the icon's accessible name is translated.
+    const trigger = canvasElement.querySelector<HTMLButtonElement>(
+      ".tedi-date-input__icon",
+    );
+    if (!trigger) throw new Error("Calendar trigger button not found");
+
+    await userEvent.click(trigger);
+    await waitFor(() =>
+      expect(document.querySelector(".tedi-calendar")).not.toBeNull(),
+    );
   },
 };

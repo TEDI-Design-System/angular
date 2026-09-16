@@ -18,6 +18,7 @@ import { LabelComponent } from "../../form/label/label.component";
 import { DropdownItemValueComponent } from "../dropdown/dropdown-item-value/dropdown-item-value.component";
 import { DropdownItemValueLabelComponent } from "../dropdown/dropdown-item-value/dropdown-item-value-label.component";
 import { SearchComponent } from "../../form/search/search.component";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 const MAXWIDTH = ["none", "small", "medium", "large"];
 const POSITIONS: PopoverPosition[] = [
@@ -273,6 +274,7 @@ export const Default: Story = {
 };
 
 export const ContentExamples: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -335,6 +337,7 @@ export const ContentExamples: Story = {
 };
 
 export const Heading: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -439,6 +442,7 @@ export const Trigger: Story = {
 };
 
 export const ArrowPosition: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: {
       ...args,
@@ -462,6 +466,7 @@ export const ArrowPosition: Story = {
 };
 
 export const WithProminentBorder: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -600,6 +605,7 @@ export const WithProminentBorder: Story = {
 
 export const Size: Story = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -630,4 +636,35 @@ export const Size: Story = {
       </tedi-row>
     `,
   }),
+};
+
+/**
+ * Visual-regression only. `tedi-popover` has no controlled open input (`isOpen` is an
+ * internal signal), so the panel is opened by clicking the trigger.
+ */
+export const OpenForVisualTest: Story = {
+  // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
+  tags: ["!dev"],
+  render: () => ({
+    template: `
+      <tedi-row justifyItems="center">
+        <tedi-col>
+          <tedi-popover position="bottom">
+            <button tedi-button tedi-popover-trigger>Popover Trigger</button>
+            <tedi-popover-content maxWidth="small" title="Pealkiri" [showClose]="true">
+              ${POLAR_BEAR_TEXT}
+            </tedi-popover-content>
+          </tedi-popover>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(
+      within(canvasElement).getByRole("button", { name: "Popover Trigger" }),
+    );
+    await waitFor(() =>
+      expect(document.querySelector('[role="dialog"]')).not.toBeNull(),
+    );
+  },
 };

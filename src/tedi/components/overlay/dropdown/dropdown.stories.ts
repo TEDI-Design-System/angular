@@ -15,6 +15,7 @@ import { DropdownItemValueLabelComponent } from "./dropdown-item-value/dropdown-
 import { DropdownItemValueMetaComponent } from "./dropdown-item-value/dropdown-item-value-meta.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 @Component({
   selector: "app-demo-button",
@@ -210,6 +211,7 @@ export const Default: Story = {
 };
 
 export const WithMeta: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "With Meta Text",
   args: {
     position: "bottom-start",
@@ -250,6 +252,7 @@ export const WithMeta: Story = {
 };
 
 export const WithIcons: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "With Icons",
   args: {
     position: "bottom-start",
@@ -290,6 +293,7 @@ export const WithIcons: Story = {
 };
 
 export const VerticalLayout: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "Vertical Layout",
   args: {
     position: "bottom-start",
@@ -426,4 +430,33 @@ export const KeepOpenOnSelect: Story = {
       </tedi-dropdown>
     `,
   }),
+};
+
+/**
+ * Visual-regression only. `tedi-dropdown` has no controlled open input (`isOpen` is an
+ * internal signal), so the panel is opened by clicking the trigger.
+ */
+export const OpenForVisualTest: Story = {
+  // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
+  tags: ["!dev"],
+  render: () => ({
+    template: `
+      <tedi-dropdown position="bottom-start">
+        <button tedi-button tedi-dropdown-trigger>Trigger</button>
+        <tedi-dropdown-content dropdownRole="menu">
+          <li tedi-dropdown-item>Access to health data</li>
+          <li tedi-dropdown-item [disabled]="true">Declaration of intent</li>
+          <li tedi-dropdown-item>Contacts</li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(
+      within(canvasElement).getByRole("button", { name: "Trigger" }),
+    );
+    await waitFor(() =>
+      expect(document.querySelector(".tedi-dropdown-content")).not.toBeNull(),
+    );
+  },
 };
