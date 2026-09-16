@@ -495,6 +495,13 @@ export const translationsMap = {
     ru: (isSelected: boolean) =>
       isSelected ? "Отменить выбор строки" : "Выбрать ряд",
   },
+  "table-card.select-row": {
+    description: "Accessible label for the TableCard selection checkbox",
+    components: ["TableCard"],
+    et: "Vali rida",
+    en: "Select row",
+    ru: "Выбрать строку",
+  },
   "table.sort": {
     description: "Label for sort button",
     components: ["Table"],
