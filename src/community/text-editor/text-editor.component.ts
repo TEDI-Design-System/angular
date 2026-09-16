@@ -121,7 +121,10 @@ function toolbarLabelKey(control: HTMLElement): string | undefined {
  */
 function visibleTextLength(html: string): number {
   if (!html) return 0;
-  if (typeof DOMParser === "undefined") return html.length;
+
+  if (typeof DOMParser === "undefined") {
+    return html.replace(/<[^>]*>/g, "").length;
+  }
 
   const text =
     new DOMParser().parseFromString(html, "text/html").body.textContent ?? "";
