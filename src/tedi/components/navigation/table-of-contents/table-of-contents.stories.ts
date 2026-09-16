@@ -131,6 +131,16 @@ const meta = {
         type: { summary: "string" },
       },
     },
+    scrollActiveIntoView: {
+      description:
+        "Keep the active item visible inside the TOC's own scroll area: when the list is taller than a bounded/sticky container and `activeId` changes, the TOC scrolls its internal scroll region to reveal it. No-op when the list isn't scrollable.",
+      control: "boolean",
+      table: {
+        category: "Table of Contents",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     defaultOpen: {
       description:
         "Whether nested items are expanded by default. When `false`, a branch reveals its sub-items only while it is on the active trail.",
@@ -615,6 +625,7 @@ const CHAPTERS: DemoSection[] = Array.from({ length: 30 }, (_, i) => {
         <tedi-table-of-contents
           heading="Sisukord"
           [activeId]="activeId()"
+          [scrollActiveIntoView]="true"
           stickyMaxHeight="calc(30rem - 3rem)"
         >
           @for (chapter of chapters; track chapter.id) {

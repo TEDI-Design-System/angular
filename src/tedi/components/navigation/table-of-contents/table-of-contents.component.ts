@@ -1,14 +1,17 @@
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
   contentChildren,
+  ElementRef,
   forwardRef,
   inject,
   input,
+  PLATFORM_ID,
   ViewEncapsulation,
 } from "@angular/core";
-import { NgTemplateOutlet } from "@angular/common";
+import { isPlatformBrowser, NgTemplateOutlet } from "@angular/common";
 
 import { CardComponent, CardContentComponent } from "../../content/card";
 import { TextComponent } from "../../base/text/text.component";
@@ -83,6 +86,14 @@ export class TableOfContentsComponent {
   /** Id of the currently active item. */
   readonly activeId = input<string>();
   /**
+   * Keep the active item visible inside the TOC's own scroll area. When the list
+   * is taller than a bounded or sticky container and `activeId` changes, the TOC
+   * scrolls its internal scroll region just enough to reveal the active item.
+   * No-op when the list isn't scrollable (short lists, unbounded layouts).
+   * @default false
+   */
+  readonly scrollActiveIntoView = input<boolean>(false);
+  /**
    * Whether nested items are expanded by default. When `true` (default) the full
    * outline is always visible. When `false`, a branch reveals its sub-items only
    * while it is on the active trail (the active item or one of its ancestors).
@@ -117,6 +128,19 @@ export class TableOfContentsComponent {
   readonly ariaLabel = input<string>();
 
   private readonly translations = inject(TediTranslationService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly platformId = inject(PLATFORM_ID);
+
+  constructor() {
+    // Reveal the active item within the TOC's own scroll region whenever it
+    // changes. Runs after render so nested items have finished expanding.
+    afterRenderEffect(() => {
+      const activeId = this.activeId();
+      if (!this.scrollActiveIntoView() || !activeId) return;
+      if (!isPlatformBrowser(this.platformId)) return;
+      this.revealActiveItem();
+    });
+  }
 
   /** Top-level items, used by items to compute their hierarchical numbers. */
   readonly items = contentChildren(
@@ -134,4 +158,58 @@ export class TableOfContentsComponent {
   readonly navLabel = computed(() => this.ariaLabel() || this.titleLabel());
 
   readonly headingId = `tedi-table-of-contents-heading-${(nextUniqueId += 1)}`;
+
+  /** Scroll the TOC's own scroll region so the active item's row is visible. */
+  private revealActiveItem(): void {
+    const hostEl = this.host.nativeElement;
+    const activeItem = hostEl.querySelector<HTMLElement>(
+      '[aria-current="location"]',
+    );
+    if (!activeItem) return;
+    // Position by the item's own row, not the whole subtree (which may include
+    // expanded children).
+    const target =
+      activeItem.querySelector<HTMLElement>(
+        ":scope > .tedi-table-of-contents__row",
+      ) ?? activeItem;
+    const scroller = this.findScrollParent(target);
+    if (!scroller) return;
+
+    const scrollerRect = scroller.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const margin = 8;
+    const behavior: ScrollBehavior = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches
+      ? "auto"
+      : "smooth";
+    if (targetRect.top < scrollerRect.top + margin) {
+      scroller.scrollBy({
+        top: targetRect.top - scrollerRect.top - margin,
+        behavior,
+      });
+    } else if (targetRect.bottom > scrollerRect.bottom - margin) {
+      scroller.scrollBy({
+        top: targetRect.bottom - scrollerRect.bottom + margin,
+        behavior,
+      });
+    }
+  }
+
+  /** Nearest scrollable ancestor within this component (e.g. the sticky `nav`). */
+  private findScrollParent(el: HTMLElement): HTMLElement | null {
+    const hostEl = this.host.nativeElement;
+    let node = el.parentElement;
+    while (node && hostEl.contains(node)) {
+      const overflowY = getComputedStyle(node).overflowY;
+      if (
+        (overflowY === "auto" || overflowY === "scroll") &&
+        node.scrollHeight > node.clientHeight
+      ) {
+        return node;
+      }
+      node = node.parentElement;
+    }
+    return null;
+  }
 }

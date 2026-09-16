@@ -29,7 +29,7 @@ import { TableOfContentsComponent } from "../table-of-contents.component";
     class: "tedi-table-of-contents__item",
     role: "listitem",
     "[class.tedi-table-of-contents__item--selected]": "isSelected()",
-    "[attr.aria-current]": "isSelected() ? 'true' : null",
+    "[attr.aria-current]": "isSelected() ? 'location' : null",
     "[attr.data-name]": "'table-of-contents-item'",
   },
 })

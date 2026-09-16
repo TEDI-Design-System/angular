@@ -149,7 +149,7 @@ export class TableOfContentsCollapsibleComponent implements OnDestroy {
   readonly openLabel = this.translations.track("open");
   readonly closeLabel = this.translations.track("close");
 
-  readonly title = computed(() => this.heading() ?? this.titleLabel());
+  readonly title = computed(() => this.heading() || this.titleLabel());
   /** Accessible name for the nav/dialog — the `ariaLabel` override or the title. */
   readonly navLabel = computed(() => this.ariaLabel() || this.title());
 

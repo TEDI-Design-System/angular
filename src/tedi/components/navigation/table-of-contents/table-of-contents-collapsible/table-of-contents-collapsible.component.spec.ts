@@ -161,6 +161,12 @@ describe("TableOfContentsCollapsibleComponent", () => {
     expect(fixture.nativeElement.textContent).toContain("Table of contents");
   });
 
+  it("falls back to the localized title when heading is an empty string", () => {
+    fixture.componentRef.setInput("heading", "");
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain("Table of contents");
+  });
+
   it("ignores a second open request while the sheet is already open", fakeAsync(() => {
     openSheet();
     expect(

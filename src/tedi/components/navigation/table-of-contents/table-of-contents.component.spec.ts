@@ -122,7 +122,7 @@ describe("TableOfContentsComponent", () => {
     await createTree();
     fixture.componentRef.setInput("activeId", "a");
     fixture.detectChanges();
-    expect(itemByLabel("Alpha")?.getAttribute("aria-current")).toBe("true");
+    expect(itemByLabel("Alpha")?.getAttribute("aria-current")).toBe("location");
     expect(itemByLabel("Bravo")?.getAttribute("aria-current")).toBeNull();
   });
 
