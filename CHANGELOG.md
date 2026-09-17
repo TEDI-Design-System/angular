@@ -1,3 +1,10 @@
+# [8.1.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.3...angular-8.1.0-rc.4) (2026-09-17)
+
+
+### Features
+
+* **truncate:** add TEDI-Ready Truncate component [#652](https://github.com/TEDI-Design-System/angular/issues/652) ([#664](https://github.com/TEDI-Design-System/angular/issues/664)) ([ddb319e](https://github.com/TEDI-Design-System/angular/commit/ddb319e50e004f84c6a0cc3889ecf861a74652d3))
+
 # [8.1.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.2...angular-8.1.0-rc.3) (2026-09-17)
 
 
