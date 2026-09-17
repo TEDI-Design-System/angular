@@ -13,6 +13,8 @@ import { RowComponent } from "../../helpers/grid/row/row.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
 import { StatusBadgeComponent } from "@tedi-design-system/angular/community";
+import { StatusBadgeComponent as TediStatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
+import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 
 /**
  * <a href="https://www.figma.com/file/jWiRIXhHRxwVdMSimKX2FF/TEDI-Design-System-(draft)?type=design&node-id=45-30752&mode=dev" target="_BLANK">Figma ↗</a><br/>
@@ -40,6 +42,8 @@ export default {
         IconComponent,
         RowComponent,
         StatusBadgeComponent,
+        TediStatusBadgeComponent,
+        InfoTooltipComponent,
       ],
     }),
   ],
@@ -176,6 +180,37 @@ export const PositionType: Story = {
       <tedi-text-group type="horizontal">
         <tedi-text-group-label>Nähtavus</tedi-text-group-label>
         <tedi-text-group-value>Nähtav arstile ja esindajale</tedi-text-group-value>
+      </tedi-text-group>
+    </div>
+    `,
+  }),
+};
+
+/**
+ * `tedi-text-group-value` is a flex row that takes any content, so a trailing info tooltip,
+ * status badge or tag sits inline beside the text with the design system's inner spacing
+ * already applied.
+ */
+export const HasSlot: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => ({
+    template: `
+    <div [tediVerticalSpacing]="1">
+      <tedi-text-group type="vertical">
+        <tedi-text-group-label>Ligipääs</tedi-text-group-label>
+        <tedi-text-group-value>
+          Arstile ja esindajale nähtav
+          <tedi-info-tooltip ariaLabel="Lisainfo ligipääsu kohta">
+            Dokumenti näevad sinu raviarst ja esindajaks määratud isik.
+          </tedi-info-tooltip>
+        </tedi-text-group-value>
+      </tedi-text-group>
+      <tedi-text-group type="vertical">
+        <tedi-text-group-label>Nimi</tedi-text-group-label>
+        <tedi-text-group-value>
+          Mari Maasikas
+          <tedi-status-badge color="success" text="Ligipääs lubatud" />
+        </tedi-text-group-value>
       </tedi-text-group>
     </div>
     `,
