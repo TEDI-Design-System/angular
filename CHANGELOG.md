@@ -1,3 +1,10 @@
+# [8.1.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.2...angular-8.1.0-rc.3) (2026-09-17)
+
+
+### Bug Fixes
+
+* **alert:** apply type-specific text color variables [#611](https://github.com/TEDI-Design-System/angular/issues/611) ([#676](https://github.com/TEDI-Design-System/angular/issues/676)) ([d8a984a](https://github.com/TEDI-Design-System/angular/commit/d8a984ab38566f682c3996310bce66fcffa0e6fd))
+
 # [8.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.1...angular-8.1.0-rc.2) (2026-09-15)
 
 
