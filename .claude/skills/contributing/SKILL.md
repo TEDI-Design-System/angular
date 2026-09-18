@@ -101,7 +101,7 @@ as well as grows.
 ### Communication
 - Be direct and concise.
 - **Never add self-explanatory comments** — code should be self-documenting. Do not add comments that restate what a selector, class name, variable, function, or method already says (e.g., `// Secondary variant` above `&.tedi-checkbox-card--secondary`, or `/** Toggles the value. */` above a `toggle()` method). This applies to styles, templates, code, and JSDoc equally. Only comment when the logic isn't self-evident, and when you do, keep it short and on point.
-- **Keep JSDoc, Storybook `argTypes` descriptions, and story descriptions concise and developer-friendly.** Readers are developers — explain what an input does, but don't restate its name/type, don't pad with the obvious, and don't add usage examples or example code in descriptions. If there's nothing non-obvious to say, a short factual line is enough.
+- **Prose defaults to nothing.** Apply the deletion test to every comment, JSDoc line and story docblock you are about to write: *if I delete this, what does the reader get wrong?* If there is no concrete answer, do not write it — a story docblock is usually zero lines. The exception is `argTypes`: every public input keeps a description, because nothing falls back to fill an empty one, but it is one sentence. Never state behaviour that is logically necessary ("counts characters, not markup"), compare the component to another one, describe internal wiring, or restate the name of the thing you are annotating. Over-describing is the single most common note on this repo's reviews — when in doubt, cut it. See [stories.md](references/stories.md) section 8.
 - When explaining decisions, focus on the "why" not the "what".
 
 ## Commands
