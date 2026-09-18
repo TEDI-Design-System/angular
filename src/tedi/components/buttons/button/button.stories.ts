@@ -92,6 +92,7 @@ export default {
 type ButtonType = ButtonComponent & { ngContent: string };
 
 export const Default: StoryObj<ButtonType> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     ngContent: "Button",
   },

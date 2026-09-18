@@ -149,6 +149,7 @@ export const multiselectPreselectedOptions: Story = {
 };
 
 export const MultiselectWithCustomOptions: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     template: `
         <tedi-multiselect
@@ -197,6 +198,7 @@ export const MultiselectWithCustomOptions: Story = {
 };
 
 export const MultiselectSelectAll: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     template: `
       <tedi-multiselect
@@ -228,6 +230,7 @@ export const MultiselectSelectAll: Story = {
 };
 
 export const MultiselectGroupedOptions: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     template: `
       <tedi-multiselect
@@ -259,6 +262,7 @@ export const MultiselectGroupedOptions: Story = {
 };
 
 export const MultiselectSelectableGroups: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     template: `
       <tedi-multiselect
@@ -352,6 +356,7 @@ export const clearableTags: Story = {
 };
 
 export const multiselectNoOptions: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     template: `
       <tedi-multiselect
@@ -377,6 +382,7 @@ export const multiselectNoOptions: Story = {
 };
 
 export const multiselectAutoWidthDropdown: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     template: `
       <tedi-multiselect

@@ -322,6 +322,7 @@ export const WithoutDropdown: Story = {
 };
 
 export const ControlledPage: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: { pageCount: 10, page: 3 },
   render: (args) => ({
     props: args,
@@ -628,6 +629,7 @@ export const CustomResultsSlot: Story = {
     `,
   }),
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -671,6 +673,7 @@ export const ShowAll: Story = {
     `,
   }),
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:

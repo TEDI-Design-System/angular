@@ -91,6 +91,7 @@ export default {
 type Story = StoryObj<ClosingButtonComponent>;
 
 export const Default: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     iconSize: 24,

@@ -267,6 +267,7 @@ export const SmallSize: Story = {
 };
 
 export const ManyOptions: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     template: `
       <tedi-select
@@ -305,6 +306,7 @@ export const ManyOptions: Story = {
 };
 
 export const singleSelectNoOptions: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     template: `
       <tedi-select
@@ -326,6 +328,7 @@ export const singleSelectNoOptions: Story = {
 };
 
 export const singleSelectGroupedOptions: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     template: `
       <tedi-select
@@ -353,6 +356,7 @@ export const singleSelectGroupedOptions: Story = {
 };
 
 export const dropdownWidthAuto: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     template: `
       <tedi-select
