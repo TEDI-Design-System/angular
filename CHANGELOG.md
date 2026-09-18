@@ -1,3 +1,10 @@
+# [8.1.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.4...angular-8.1.0-rc.5) (2026-09-18)
+
+
+### Bug Fixes
+
+* **modal:** name the dialog from its header heading [#680](https://github.com/TEDI-Design-System/angular/issues/680) ([#683](https://github.com/TEDI-Design-System/angular/issues/683)) ([368524e](https://github.com/TEDI-Design-System/angular/commit/368524e4d83a368609b92e9a654ff4bf0872a4e3))
+
 # [8.1.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.3...angular-8.1.0-rc.4) (2026-09-17)
 
 
