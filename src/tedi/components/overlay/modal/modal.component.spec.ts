@@ -1,7 +1,19 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ModalComponent } from "./modal.component";
 import { DOCUMENT } from "@angular/common";
-import { PLATFORM_ID } from "@angular/core";
+import { Component, PLATFORM_ID } from "@angular/core";
+import { ModalHeaderComponent } from "./modal-header/modal-header.component";
+import { TediTranslationService } from "../../../services/translation/translation.service";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
+
+class TranslationMock {
+  translate(key: string) {
+    return key;
+  }
+  track(key: string) {
+    return () => key;
+  }
+}
 
 describe("ModalComponent", () => {
   let fixture: ComponentFixture<ModalComponent>;
@@ -206,5 +218,131 @@ describe("ModalComponent (server platform)", () => {
     component.ngOnDestroy();
     expect(documentRef.body.childElementCount).toBe(initialChildren);
     el.remove();
+  });
+});
+
+describe("ModalComponent accessible name (standalone mode)", () => {
+  @Component({
+    standalone: true,
+    imports: [ModalComponent, ModalHeaderComponent],
+    template: `
+      <tedi-modal
+        [(open)]="open"
+        [ariaLabel]="ariaLabel"
+        [ariaLabelledBy]="ariaLabelledBy"
+      >
+        @if (showHeader) {
+          <tedi-modal-header>
+            @if (headingId) {
+              <h1 [id]="headingId">{{ title }}</h1>
+            } @else {
+              <h1>{{ title }}</h1>
+            }
+          </tedi-modal-header>
+        }
+      </tedi-modal>
+    `,
+  })
+  class TestHostComponent {
+    open = false;
+    showHeader = true;
+    headingId: string | undefined = undefined;
+    title = "Kinnita tellimus";
+    ariaLabel: string | undefined = undefined;
+    ariaLabelledBy: string | undefined = undefined;
+  }
+
+  let fixture: ComponentFixture<TestHostComponent>;
+  let host: TestHostComponent;
+
+  // Standalone mode moves its host element to document.body in
+  // ngAfterViewInit, so it is no longer inside the fixture's DOM.
+  const modalEl = () =>
+    TestBed.inject(DOCUMENT).querySelector("tedi-modal") as HTMLElement;
+
+  const dialog = () =>
+    modalEl().querySelector(".tedi-modal__dialog") as HTMLElement;
+
+  const heading = () => modalEl().querySelector("h1") as HTMLElement;
+
+  const openModal = () => {
+    host.open = true;
+    fixture.detectChanges();
+  };
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [TestHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    });
+    fixture = TestBed.createComponent(TestHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    host.open = false;
+    fixture.detectChanges();
+    fixture.destroy();
+  });
+
+  it("labels the dialog with the projected heading", () => {
+    openModal();
+
+    expect(heading().id).toBeTruthy();
+    expect(dialog().getAttribute("aria-labelledby")).toBe(heading().id);
+    expect(dialog().getAttribute("aria-label")).toBeNull();
+  });
+
+  it("keeps an id the consumer already put on the heading", () => {
+    host.headingId = "my-own-title";
+    fixture.detectChanges();
+    openModal();
+
+    expect(dialog().getAttribute("aria-labelledby")).toBe("my-own-title");
+  });
+
+  it("prefers an explicit ariaLabel and does not touch the heading", () => {
+    host.ariaLabel = "Tellimuse kinnitus";
+    fixture.detectChanges();
+    openModal();
+
+    expect(dialog().getAttribute("aria-label")).toBe("Tellimuse kinnitus");
+    expect(dialog().getAttribute("aria-labelledby")).toBeNull();
+    expect(heading().id).toBe("");
+  });
+
+  it("prefers an explicit ariaLabelledBy over the heading", () => {
+    host.ariaLabelledBy = "external-title";
+    fixture.detectChanges();
+    openModal();
+
+    expect(dialog().getAttribute("aria-labelledby")).toBe("external-title");
+  });
+
+  it("leaves both attributes off when there is no heading and no label", () => {
+    host.showHeader = false;
+    fixture.detectChanges();
+    openModal();
+
+    expect(dialog().getAttribute("aria-label")).toBeNull();
+    expect(dialog().getAttribute("aria-labelledby")).toBeNull();
+  });
+
+  it("re-resolves the heading on each open, so late content is picked up", () => {
+    host.showHeader = false;
+    fixture.detectChanges();
+    openModal();
+    expect(dialog().getAttribute("aria-labelledby")).toBeNull();
+
+    host.open = false;
+    host.showHeader = true;
+    fixture.detectChanges();
+    openModal();
+
+    expect(dialog().getAttribute("aria-labelledby")).toBe(heading().id);
   });
 });

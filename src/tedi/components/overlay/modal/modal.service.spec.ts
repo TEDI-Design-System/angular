@@ -3,6 +3,19 @@ import { Component, inject } from "@angular/core";
 import { ModalService } from "./modal.service";
 import { ModalRef } from "./modal-ref";
 import { MODAL_DATA } from "./modal.types";
+import { ModalComponent } from "./modal.component";
+import { ModalHeaderComponent } from "./modal-header/modal-header.component";
+import { TediTranslationService } from "../../../services/translation/translation.service";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
+
+class TranslationMock {
+  translate(key: string) {
+    return key;
+  }
+  track(key: string) {
+    return () => key;
+  }
+}
 
 @Component({
   standalone: true,
@@ -335,5 +348,92 @@ describe("ModalService", () => {
 
     const overlayPanes = document.querySelectorAll(".tedi-modal-dialog");
     expect(overlayPanes.length).toBe(0);
+  });
+});
+
+describe("ModalService accessible name", () => {
+  @Component({
+    standalone: true,
+    imports: [ModalComponent, ModalHeaderComponent],
+    template: `
+      <tedi-modal>
+        <tedi-modal-header [showClose]="false">
+          <h1 [attr.id]="headingId">{{ title }}</h1>
+        </tedi-modal-header>
+      </tedi-modal>
+    `,
+  })
+  class TitledContentComponent {
+    private readonly config = inject(MODAL_DATA, { optional: true }) as {
+      headingId?: string;
+    } | null;
+    title = "Kinnita tellimus";
+    headingId = this.config?.headingId;
+  }
+
+  @Component({
+    standalone: true,
+    template: `<p>No heading here</p>`,
+  })
+  class UntitledContentComponent {}
+
+  let service: ModalService;
+
+  const container = () =>
+    document.querySelector("cdk-dialog-container") as HTMLElement;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    });
+    service = TestBed.inject(ModalService);
+  });
+
+  afterEach(() => {
+    service.closeAll();
+    TestBed.tick();
+  });
+
+  it("labels the dialog with the heading from tedi-modal-header", () => {
+    service.open(TitledContentComponent);
+    TestBed.tick();
+
+    const heading = container().querySelector("h1") as HTMLElement;
+    expect(heading.id).toBeTruthy();
+    expect(container().getAttribute("aria-labelledby")).toBe(heading.id);
+  });
+
+  it("keeps an id the consumer already put on the heading", () => {
+    service.open(TitledContentComponent, { data: { headingId: "my-title" } });
+    TestBed.tick();
+
+    expect(container().getAttribute("aria-labelledby")).toBe("my-title");
+  });
+
+  it("leaves an explicit ariaLabel alone and adds no labelledby", () => {
+    service.open(TitledContentComponent, { ariaLabel: "Tellimuse kinnitus" });
+    TestBed.tick();
+
+    const heading = container().querySelector("h1") as HTMLElement;
+    expect(container().getAttribute("aria-label")).toBe("Tellimuse kinnitus");
+    expect(container().getAttribute("aria-labelledby")).toBeNull();
+    expect(heading.id).toBe("");
+  });
+
+  it("leaves an explicit ariaLabelledBy alone", () => {
+    service.open(TitledContentComponent, { ariaLabelledBy: "external-title" });
+    TestBed.tick();
+
+    expect(container().getAttribute("aria-labelledby")).toBe("external-title");
+  });
+
+  it("writes no dangling labelledby when the content has no heading", () => {
+    service.open(UntitledContentComponent);
+    TestBed.tick();
+
+    expect(container().getAttribute("aria-labelledby")).toBeNull();
   });
 });
