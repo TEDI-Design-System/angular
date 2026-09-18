@@ -10,7 +10,6 @@ import {
   signal,
   ViewEncapsulation,
 } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import {
   ButtonComponent,
   ButtonVariant,
@@ -42,7 +41,7 @@ import {
 @Component({
   selector: "tedi-pagination",
   standalone: true,
-  imports: [FormsModule, ButtonComponent, IconComponent, SelectComponent],
+  imports: [ButtonComponent, IconComponent, SelectComponent],
   templateUrl: "./pagination.component.html",
   styleUrl: "./pagination.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -469,8 +468,8 @@ export class PaginationComponent {
     this.page.set(nextPage);
   }
 
-  protected handlePageSizeChange(value: number | null): void {
-    if (value == null || value === this.pageSize()) return;
+  protected handlePageSizeChange(value: unknown): void {
+    if (typeof value !== "number" || value === this.pageSize()) return;
     // `pageSize` is a model, so setting it emits the `pageSizeChange` output.
     this.pageSize.set(value);
   }

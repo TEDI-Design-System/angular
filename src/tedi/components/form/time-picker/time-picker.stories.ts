@@ -161,6 +161,7 @@ export const Default: StoryObj = {
 };
 
 export const ScrollWithStep: StoryObj = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     template: `
       <div style="width: 178px;">
@@ -257,6 +258,7 @@ export const Dropdown: StoryObj = {
 };
 
 export const WithReactiveForms: StoryObj = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const control = new FormControl<string | null>("14:30");
 

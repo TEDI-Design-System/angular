@@ -4,11 +4,18 @@ import { Directive, TemplateRef, inject } from "@angular/core";
  * Context passed to a custom suggestion row template.
  */
 export interface SearchSuggestionContext<T = unknown> {
+  /** The suggestion, so `let-item` works without naming a context key. */
   $implicit: T;
+  /** The same suggestion under a name, for `let-item="item"`. */
   item: T;
+  /** Position in the rendered list, matching the row's `aria-activedescendant` id. */
   index: number;
   /** Resolved display label, via `bindLabel`. */
   label: string;
+  /** Resolved secondary line, via `bindDescription`. Empty when unbound. */
+  description: string;
+  /** Whether the row is unselectable, via `bindDisabled`. */
+  disabled: boolean;
   /** Current trimmed field value, for custom match highlighting. */
   query: string;
 }

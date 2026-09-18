@@ -118,9 +118,19 @@
   &__panel {
     --_form-outer-gap: var(--form-field-outer-spacing);
 
-    max-height: 300px;
     margin: var(--_form-outer-gap) 0;
+  }
+
+  // Needs the compound selector to override Card's `overflow: hidden`.
+  &__panel.tedi-card {
+    max-height: 300px;
     overflow-y: auto;
+  }
+
+  // Replaces the community CardContent `hasSeparator` input. On the footer
+  // so it disappears with an empty footer instead of doubling Card's border.
+  &__footer-content:not(:empty) {
+    border-top: 1px solid var(--card-border-primary);
   }
 
   &__footer-content:empty {

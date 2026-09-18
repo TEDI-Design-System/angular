@@ -178,6 +178,7 @@ export default {
 } as Meta;
 
 export const Default: StoryObj<StatusBadgeComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     color: "neutral",
     variant: "filled",

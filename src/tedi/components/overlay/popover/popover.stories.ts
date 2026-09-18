@@ -18,8 +18,46 @@ import { LabelComponent } from "../../form/label/label.component";
 import { DropdownItemValueComponent } from "../dropdown/dropdown-item-value/dropdown-item-value.component";
 import { DropdownItemValueLabelComponent } from "../dropdown/dropdown-item-value/dropdown-item-value-label.component";
 import { SearchComponent } from "../../form/search/search.component";
+import { expect, userEvent, waitFor, within } from "storybook/test";
+
+const SHORT_TEXT = "Jääkaru elab Arktikas.";
 
 const MAXWIDTH = ["none", "small", "medium", "large"];
+const VERTICAL_POSITIONS: PopoverPosition[] = [
+  "top-start",
+  "top",
+  "top-end",
+  "bottom-start",
+  "bottom",
+  "bottom-end",
+];
+
+const HORIZONTAL_POSITIONS: PopoverPosition[] = [
+  "left-start",
+  "left",
+  "left-end",
+  "right-start",
+  "right",
+  "right-end",
+];
+
+/**
+ * Opens every trigger in the canvas and waits until all of their panels are on
+ * screen. `dismissible` is off on these stories, so opening the second panel
+ * does not close the first and they can all be captured in one snapshot.
+ */
+const openEveryTrigger = async (canvasElement: HTMLElement) => {
+  const triggers = within(canvasElement).getAllByRole("button");
+  for (const trigger of triggers) {
+    await userEvent.click(trigger);
+  }
+  await waitFor(() =>
+    expect(document.querySelectorAll('[role="dialog"]').length).toBe(
+      triggers.length,
+    ),
+  );
+};
+
 const POSITIONS: PopoverPosition[] = [
   "auto",
   "auto-start",
@@ -273,6 +311,7 @@ export const Default: Story = {
 };
 
 export const ContentExamples: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -335,6 +374,7 @@ export const ContentExamples: Story = {
 };
 
 export const Heading: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -439,6 +479,7 @@ export const Trigger: Story = {
 };
 
 export const ArrowPosition: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: {
       ...args,
@@ -462,6 +503,7 @@ export const ArrowPosition: Story = {
 };
 
 export const WithProminentBorder: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -600,6 +642,7 @@ export const WithProminentBorder: Story = {
 
 export const Size: Story = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -630,4 +673,157 @@ export const Size: Story = {
       </tedi-row>
     `,
   }),
+};
+
+/**
+ * Visual-regression only. `tedi-popover` has no controlled open input (`isOpen` is an
+ * internal signal), so the panel is opened by clicking the trigger.
+ */
+export const OpenForVisualTest: Story = {
+  // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
+  tags: ["!dev", "!autodocs"],
+  render: () => ({
+    template: `
+      <tedi-row justifyItems="center">
+        <tedi-col>
+          <tedi-popover position="bottom">
+            <button tedi-button tedi-popover-trigger>Popover Trigger</button>
+            <tedi-popover-content maxWidth="small" title="Pealkiri" [showClose]="true">
+              ${POLAR_BEAR_TEXT}
+            </tedi-popover-content>
+          </tedi-popover>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+  play: async ({ canvasElement }) => {
+    await userEvent.click(
+      within(canvasElement).getByRole("button", { name: "Popover Trigger" }),
+    );
+    await waitFor(() =>
+      expect(document.querySelector('[role="dialog"]')).not.toBeNull(),
+    );
+  },
+};
+
+/**
+ * Visual-regression only. The arrow is drawn per position and its offset from the corner differs
+ * on `-start` / `-end`, none of which is captured while the popover is closed.
+ *
+ * Vertical and horizontal positions are split across two stories because the overlay is kept
+ * inside the viewport: a story taller than the canvas would drag its lowest panels back up and
+ * the position under test would not be the one rendered.
+ */
+export const OpenVerticalPlacementsForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  render: () => ({
+    props: { positions: VERTICAL_POSITIONS },
+    template: `
+      <tedi-row [cols]="3" [gapY]="6" [gapX]="6" justifyItems="center" class="py-6">
+        @for (pos of positions; track pos) {
+          <tedi-col>
+            <tedi-popover [position]="pos" [dismissible]="false">
+              <button tedi-button tedi-popover-trigger>{{ pos }}</button>
+              <tedi-popover-content maxWidth="small" [title]="pos">
+                ${SHORT_TEXT}
+              </tedi-popover-content>
+            </tedi-popover>
+          </tedi-col>
+        }
+      </tedi-row>
+    `,
+  }),
+  play: async ({ canvasElement }) => openEveryTrigger(canvasElement),
+};
+
+/**
+ * Visual-regression only. Side positions put the arrow on the left or right edge, where
+ * `-start` / `-end` align it against the panel's height rather than its width.
+ */
+export const OpenHorizontalPlacementsForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  render: () => ({
+    props: { positions: HORIZONTAL_POSITIONS },
+    template: `
+      <tedi-row [cols]="2" [gapY]="6" [gapX]="6" justifyItems="center" class="py-6">
+        @for (pos of positions; track pos) {
+          <tedi-col>
+            <tedi-popover [position]="pos" [dismissible]="false">
+              <button tedi-button tedi-popover-trigger>{{ pos }}</button>
+              <tedi-popover-content maxWidth="small" [title]="pos">
+                ${SHORT_TEXT}
+              </tedi-popover-content>
+            </tedi-popover>
+          </tedi-col>
+        }
+      </tedi-row>
+    `,
+  }),
+  play: async ({ canvasElement }) => openEveryTrigger(canvasElement),
+};
+
+/**
+ * Visual-regression only. `maxWidth` only takes effect on an open panel. Stacked rather than
+ * side by side, because `none` and `large` are wider than a quarter of the canvas.
+ */
+export const OpenWidthsForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  render: () => ({
+    props: { widths: MAXWIDTH },
+    template: `
+      <tedi-row [cols]="1" [gapY]="6" class="py-6">
+        @for (width of widths; track width) {
+          <tedi-col>
+            <tedi-popover position="bottom-start" [dismissible]="false">
+              <button tedi-button tedi-popover-trigger>{{ width }}</button>
+              <tedi-popover-content [maxWidth]="width" [title]="width">
+                ${POLAR_BEAR_TEXT}
+              </tedi-popover-content>
+            </tedi-popover>
+          </tedi-col>
+        }
+      </tedi-row>
+    `,
+  }),
+  play: async ({ canvasElement }) => openEveryTrigger(canvasElement),
+};
+
+/**
+ * Visual-regression only. `withBorder` draws the prominent border and widens the arrow padding so
+ * the arrow clears the rounded corner; both show only while open, and `-start` / `-end` is where
+ * the extra padding matters. `withArrow` off is the other chrome variant, so it rides along.
+ */
+export const OpenChromeForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  render: () => ({
+    template: `
+      <tedi-row [cols]="3" [gapY]="6" [gapX]="6" justifyItems="center" class="py-6">
+        <tedi-col>
+          <tedi-popover position="bottom-start" [withBorder]="true" [dismissible]="false">
+            <button tedi-button tedi-popover-trigger>withBorder</button>
+            <tedi-popover-content maxWidth="small" title="Pealkiri" [showClose]="true">
+              ${SHORT_TEXT}
+            </tedi-popover-content>
+          </tedi-popover>
+        </tedi-col>
+        <tedi-col>
+          <tedi-popover position="bottom" [withArrow]="false" [dismissible]="false">
+            <button tedi-button tedi-popover-trigger>no arrow</button>
+            <tedi-popover-content maxWidth="small" title="Pealkiri">
+              ${SHORT_TEXT}
+            </tedi-popover-content>
+          </tedi-popover>
+        </tedi-col>
+        <tedi-col>
+          <tedi-popover position="top-end" [withBorder]="true" [dismissible]="false">
+            <button tedi-button tedi-popover-trigger>border top-end</button>
+            <tedi-popover-content maxWidth="small" title="Pealkiri" [showClose]="true">
+              ${SHORT_TEXT}
+            </tedi-popover-content>
+          </tedi-popover>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+  play: async ({ canvasElement }) => openEveryTrigger(canvasElement),
 };

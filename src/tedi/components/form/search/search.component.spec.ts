@@ -400,17 +400,17 @@ describe("SearchComponent", () => {
 
       const listbox = document.querySelector(`#${component.listboxId()}`);
       expect(listbox?.getAttribute("role")).toBe("listbox");
-      expect(document.querySelectorAll("li[tedi-search-option]").length).toBe(
-        2,
-      );
+      expect(
+        document.querySelectorAll("li[tedi-search-suggestion]").length,
+      ).toBe(2);
     });
 
     it("renders the no-results row when the query matched nothing", () => {
       openWith([]);
 
-      expect(document.querySelectorAll("li[tedi-search-option]").length).toBe(
-        0,
-      );
+      expect(
+        document.querySelectorAll("li[tedi-search-suggestion]").length,
+      ).toBe(0);
       expect(panel()?.textContent).toContain("Tulemusi ei leitud");
     });
 
@@ -423,9 +423,9 @@ describe("SearchComponent", () => {
       fixture.detectChanges();
 
       expect(panel()?.textContent).toContain("Otsin...");
-      expect(document.querySelectorAll("li[tedi-search-option]").length).toBe(
-        0,
-      );
+      expect(
+        document.querySelectorAll("li[tedi-search-suggestion]").length,
+      ).toBe(0);
     });
 
     it("stays closed for an empty query with no suggestions", () => {
@@ -433,6 +433,86 @@ describe("SearchComponent", () => {
 
       expect(component.panelVisible()).toBe(false);
       expect(panel()).toBeNull();
+    });
+
+    it("renders a description line under the label when bound", () => {
+      fixture.componentRef.setInput("bindDescription", "code");
+      openWith([{ label: "Mari Maasikas", code: "49501234567" }]);
+
+      const row = document.querySelector("li[tedi-search-suggestion]");
+      expect(
+        row?.querySelector(".tedi-search-suggestion__description")?.textContent,
+      ).toContain("49501234567");
+    });
+
+    it("leaves the description out when bindDescription is unset", () => {
+      openWith([{ label: "Mari Maasikas", code: "49501234567" }]);
+
+      expect(
+        document.querySelector(".tedi-search-suggestion__description"),
+      ).toBeNull();
+    });
+
+    it("marks a disabled suggestion and keeps it out of the a11y tree", () => {
+      openWith([
+        { label: "Mari Maasikas" },
+        { label: "Mart Mesi", disabled: true },
+      ]);
+
+      const rows = document.querySelectorAll("li[tedi-search-suggestion]");
+      expect(rows[1].classList).toContain("tedi-search-suggestion--disabled");
+      expect(rows[1].getAttribute("aria-disabled")).toBe("true");
+      expect(rows[0].getAttribute("aria-disabled")).toBeNull();
+    });
+
+    it("reads the disabled flag from bindDisabled", () => {
+      fixture.componentRef.setInput("bindDisabled", "unavailable");
+      openWith([{ label: "Mart Mesi", unavailable: true }]);
+
+      expect(
+        document.querySelector("li[tedi-search-suggestion]")?.classList,
+      ).toContain("tedi-search-suggestion--disabled");
+    });
+
+    it("ignores a click on a disabled suggestion", () => {
+      const select = jest.fn();
+      component.suggestionSelect.subscribe(select);
+      openWith([{ label: "Mart Mesi", disabled: true }]);
+
+      (
+        document.querySelector("li[tedi-search-suggestion]") as HTMLElement
+      ).click();
+      fixture.detectChanges();
+
+      expect(select).not.toHaveBeenCalled();
+      expect(component.value()).toBe("Mar");
+    });
+
+    it("skips disabled suggestions during keyboard navigation", () => {
+      openWith([
+        { label: "Mart Mesi", disabled: true },
+        { label: "Mari Maasikas" },
+      ]);
+
+      getInput().dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }),
+      );
+      fixture.detectChanges();
+
+      expect(getInput().getAttribute("aria-activedescendant")).toBe(
+        component.optionId(1),
+      );
+    });
+
+    it("prefers the noResultsText and loadingText overrides", () => {
+      fixture.componentRef.setInput("noResultsText", "Midagi ei leitud");
+      openWith([]);
+      expect(panel()?.textContent).toContain("Midagi ei leitud");
+
+      fixture.componentRef.setInput("loadingText", "Palun oota");
+      fixture.componentRef.setInput("loading", true);
+      fixture.detectChanges();
+      expect(panel()?.textContent).toContain("Palun oota");
     });
   });
 
@@ -759,7 +839,7 @@ describe("SearchComponent", () => {
       component.suggestionSelect.subscribe(selectSpy);
 
       const option = document.querySelector(
-        "li[tedi-search-option]",
+        "li[tedi-search-suggestion]",
       ) as HTMLElement;
       option.click();
       fixture.detectChanges();
@@ -901,6 +981,20 @@ describe("SearchComponent", () => {
       fixture.detectChanges();
 
       expect(liveRegion().textContent).toContain("Otsin...");
+    });
+
+    it("prefers the resultsCountText override", () => {
+      fixture.componentRef.setInput(
+        "resultsCountText",
+        (count: number) => `${count} leitud`,
+      );
+      fixture.componentRef.setInput("suggestions", ["Mari", "Mart"]);
+      fixture.componentRef.setInput("value", "Mar");
+      fixture.detectChanges();
+      component.openPanel();
+      fixture.detectChanges();
+
+      expect(liveRegion().textContent).toContain("2 leitud");
     });
 
     it("is a polite status region", () => {

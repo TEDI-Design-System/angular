@@ -14,11 +14,12 @@ import {
 } from "@angular/core";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
 import { OverlayModule } from "@angular/cdk/overlay";
-import { CardComponent, CardContentComponent } from "../../cards";
 import { DropdownItemComponent } from "../dropdown-item/dropdown-item.component";
 import {
   BreakpointService,
   ClosingButtonComponent,
+  CardComponent,
+  CardContentComponent,
 } from "@tedi-design-system/angular/tedi";
 import { FocusKeyManager } from "@angular/cdk/a11y";
 

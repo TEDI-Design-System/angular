@@ -14,27 +14,30 @@ import { TextComponent } from "../../base/text/text.component";
 import { highlightParts } from "./search-highlight.util";
 
 @Component({
-  selector: "li[tedi-search-option]",
+  selector: "li[tedi-search-suggestion]",
   standalone: true,
-  templateUrl: "./search-option.component.html",
-  styleUrl: "./search-option.component.scss",
+  templateUrl: "./search-suggestion.component.html",
+  styleUrl: "./search-suggestion.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TextComponent],
   host: {
-    class: "tedi-search-option",
+    class: "tedi-search-suggestion",
     role: "option",
     tabindex: "-1",
-    "[class.tedi-search-option--active]": "isActive()",
-    "[class.tedi-search-option--custom]": "custom()",
-    "[class.tedi-search-option--disabled]": "disabledInput()",
+    "[class.tedi-search-suggestion--active]": "isActive()",
+    "[class.tedi-search-suggestion--custom]": "custom()",
+    "[class.tedi-search-suggestion--disabled]": "disabledInput()",
     "[attr.aria-selected]": "isActive()",
     "[attr.aria-disabled]": "disabledInput() || null",
   },
 })
-export class SearchOptionComponent implements Highlightable {
+export class SearchSuggestionComponent implements Highlightable {
   /** Resolved display label. */
   readonly label = input<string>("");
+
+  /** Secondary line under the label. */
+  readonly description = input<string>("");
 
   /** Current field value, used to bold the matching segment. */
   readonly query = input<string>("");

@@ -43,7 +43,8 @@
   border: 1px solid var(--card-border-primary);
   border-radius: 0 0 var(--form-select-area-radius)
     var(--form-select-area-radius);
-  box-shadow: 0 1px 5px 0 var(--tedi-alpha-20);
+  box-shadow: 0 1px 5px 0
+    var(--general-effect-colors-elevation-dropdown-area-drop-shadow);
 
   // On the fallback position the panel sits above the field, so the joined edge
   // — and with it the square corners — moves to the bottom.

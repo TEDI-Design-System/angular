@@ -119,6 +119,7 @@ export default {
 } as Meta<TextComponent>;
 
 export const Default: StoryObj<TextComponent & { ngContent: string }> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     ngContent: "Text",
   },

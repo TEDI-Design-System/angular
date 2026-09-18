@@ -1,4 +1,4 @@
-.tedi-search-option {
+.tedi-search-suggestion {
   display: block;
   padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
   color: inherit;
@@ -25,5 +25,16 @@
 
   &--disabled:hover {
     background: transparent;
+  }
+
+  // The description sets its own `tedi-text` colour, which would otherwise keep
+  // its normal tone on a disabled row.
+  &--disabled &__description {
+    color: inherit;
+  }
+
+  &__label,
+  &__description {
+    display: block;
   }
 }

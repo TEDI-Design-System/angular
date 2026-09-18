@@ -222,6 +222,40 @@ export default {
         defaultValue: { summary: "label" },
       },
     },
+    bindDescription: {
+      description:
+        "Property holding a secondary line shown under the label. Unset by default, so rows are a single line.",
+      control: { type: "text" },
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    bindDisabled: {
+      description:
+        "Property marking a suggestion as unselectable. Disabled rows are greyed out and skipped by keyboard navigation.",
+      control: { type: "text" },
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+        defaultValue: { summary: "disabled" },
+      },
+    },
+    noResultsText: {
+      description: 'Overrides the translated "no results" row.',
+      control: { type: "text" },
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    loadingText: {
+      description: "Overrides the translated loading row.",
+      control: { type: "text" },
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    resultsCountText: {
+      description: "Overrides the translated screen-reader result count.",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "(count: number) => string" },
+      },
+    },
     minQueryLength: {
       description:
         "Characters required before the panel opens. Below it nothing is shown, not even the no-results row.",
@@ -470,8 +504,7 @@ export const WithHint: Story = {
  * Search does not filter — pass already-filtered `suggestions` and react to
  * `valueChange`, so sync and async work the same way.
  */
-export const WithSuggestions: Story = {
-  name: "With suggestions",
+export const Autocomplete: Story = {
   args: { hideOnScroll: false },
   render: (args) => {
     const value = signal("Mar");
@@ -497,6 +530,7 @@ export const WithSuggestions: Story = {
     };
   },
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         language: "html",
@@ -515,6 +549,58 @@ export const WithSuggestions: Story = {
 };
 
 /**
+ * Objects instead of strings — `bindLabel` names the display property and
+ * `tediSearchSuggestion` renders a richer row. `suggestionSelect` emits the whole
+ * object, while the field is filled with the resolved label.
+ */
+export const AutocompleteCustomRow: Story = {
+  name: "Autocomplete: custom row",
+  render: () => {
+    const value = signal("Lau");
+    const suggestions = computed(() => matchRegistry(value()));
+
+    return {
+      props: { value, suggestions, minQueryLength: MIN_QUERY_LENGTH },
+      template: `
+        <tedi-search
+          inputId="search-custom"
+          label="Otsi"
+          bindLabel="name"
+          placeholder="Trüki vähemalt 3 tähemärki…"
+          [minQueryLength]="minQueryLength"
+          [value]="value()"
+          [suggestions]="suggestions()"
+          (valueChange)="value.set($event)"
+        >
+          <ng-template tediSearchSuggestion let-item>
+            <tedi-dropdown-item-value>
+              <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>{{ item.code }}</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </ng-template>
+        </tedi-search>
+      `,
+    };
+  },
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<tedi-search inputId="search" label="Otsi" bindLabel="name" [minQueryLength]="3"
+  [value]="value()" [suggestions]="suggestions()" (valueChange)="value.set($event)">
+  <ng-template tediSearchSuggestion let-item>
+    <tedi-dropdown-item-value>
+      <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
+      <tedi-dropdown-item-value-meta>{{ item.code }}</tedi-dropdown-item-value-meta>
+    </tedi-dropdown-item-value>
+  </ng-template>
+</tedi-search>`,
+      },
+    },
+  },
+};
+
+/**
  * Asynchronous suggestions — typing debounces a request that shows a spinner via
  * `loading`, then the results. Identical markup to the sync example; only the
  * source of `suggestions` differs.
@@ -523,8 +609,8 @@ export const WithSuggestions: Story = {
  * lookup: the panel stays shut and no request goes out until the query is worth
  * searching for.
  */
-export const AsyncSuggestions: Story = {
-  name: "Async suggestions (loading)",
+export const AutocompleteAsync: Story = {
+  name: "Autocomplete: async",
   render: () => {
     const value = signal("");
     const loading = signal(false);
@@ -572,6 +658,7 @@ export const AsyncSuggestions: Story = {
     };
   },
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         language: "html",
@@ -605,64 +692,126 @@ onValueChange(next: string): void {
 };
 
 /**
- * Objects instead of strings — `bindLabel` names the display property and
- * `tediSearchSuggestion` renders a richer row. `suggestionSelect` emits the whole
- * object, while the field is filled with the resolved label.
+ * `bindDisabled` names the property that marks a suggestion unselectable. Those
+ * rows stay visible but are greyed out, skipped by ArrowUp/ArrowDown, and ignore
+ * clicks. `bindDescription` adds the secondary line under each label.
  */
-export const WithCustomSuggestionTemplate: Story = {
-  name: "With custom suggestion template",
+export const AutocompleteDisabledSuggestions: Story = {
+  name: "Autocomplete: disabled suggestions",
   render: () => {
     const value = signal("Lau");
-    const suggestions = computed(() => matchRegistry(value()));
+    const suggestions = computed(() =>
+      matchRegistry(value()).map((person, index) => ({
+        ...person,
+        disabled: index % 3 === 0,
+      })),
+    );
 
     return {
       props: { value, suggestions, minQueryLength: MIN_QUERY_LENGTH },
       template: `
         <tedi-search
-          inputId="search-custom"
+          inputId="search-disabled-suggestions"
           label="Otsi"
           bindLabel="name"
+          bindDescription="code"
           placeholder="Trüki vähemalt 3 tähemärki…"
           [minQueryLength]="minQueryLength"
           [value]="value()"
           [suggestions]="suggestions()"
+          [feedbackText]="{ text: 'Iga kolmas vaste on keelatud.' }"
           (valueChange)="value.set($event)"
-        >
-          <ng-template tediSearchSuggestion let-item>
-            <tedi-dropdown-item-value>
-              <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>{{ item.code }}</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
-          </ng-template>
-        </tedi-search>
+        />
       `,
     };
   },
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         language: "html",
-        code: `<tedi-search inputId="search" label="Otsi" bindLabel="name" [minQueryLength]="3"
-  [value]="value()" [suggestions]="suggestions()" (valueChange)="value.set($event)">
-  <ng-template tediSearchSuggestion let-item>
-    <tedi-dropdown-item-value>
-      <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
-      <tedi-dropdown-item-value-meta>{{ item.code }}</tedi-dropdown-item-value-meta>
-    </tedi-dropdown-item-value>
-  </ng-template>
-</tedi-search>`,
+        code: `<tedi-search
+  inputId="search"
+  label="Otsi"
+  bindLabel="name"
+  bindDescription="code"
+  bindDisabled="disabled"
+  [minQueryLength]="3"
+  [value]="value()"
+  [suggestions]="suggestions()"
+  (valueChange)="value.set($event)"
+/>`,
       },
     },
   },
 };
 
 /**
- * National-registry person lookup — results plus fallback actions in a
- * `tediSearchFooter`. The footer also shows when nothing matched, which is where
- * those actions matter most. Filtering matches name or personal code.
+ * Enter with no suggestion highlighted emits `searchEvent` with the raw field
+ * value instead of selecting, so the combobox doubles as a plain search box.
+ * ArrowDown first, then Enter, selects the highlighted suggestion instead.
  */
-export const WithResultAndActions: Story = {
-  name: "With result and actions",
+export const AutocompleteFreeText: Story = {
+  name: "Autocomplete: free-text search",
+  render: () => {
+    const value = signal("");
+    const submitted = signal<string | undefined>(undefined);
+    const suggestions = computed(() => {
+      const q = value().trim().toLowerCase();
+      return q ? PEOPLE.filter((n) => n.toLowerCase().includes(q)) : [];
+    });
+
+    return {
+      props: { value, suggestions, submitted },
+      template: `
+        <tedi-row [cols]="1" [gap]="2">
+          <tedi-col>
+            <tedi-search
+              inputId="search-free-text"
+              label="Otsi"
+              placeholder="Otsi ja vajuta Enter…"
+              [value]="value()"
+              [suggestions]="suggestions()"
+              (valueChange)="value.set($event)"
+              (searchEvent)="submitted.set($event)"
+            />
+          </tedi-col>
+          @if (submitted() !== undefined) {
+            <tedi-col>
+              <span tedi-text color="tertiary" modifiers="small">Otsisid: „{{ submitted() }}”</span>
+            </tedi-col>
+          }
+        </tedi-row>
+      `,
+    };
+  },
+  parameters: {
+    chromatic: { disableSnapshot: true },
+    docs: {
+      source: {
+        language: "html",
+        code: `<tedi-search
+  inputId="search"
+  label="Otsi"
+  [value]="value()"
+  [suggestions]="suggestions()"
+  (valueChange)="value.set($event)"
+  (searchEvent)="onSearch($event)"
+  (suggestionSelect)="onSelect($event)"
+/>`,
+      },
+    },
+  },
+};
+
+/**
+ * `tediSearchFooter` pins content below the suggestions. It also shows when
+ * nothing matched, which is where fallback actions matter most. Tab from the
+ * field moves into the footer's buttons, Shift+Tab returns, and Tab past the last
+ * one closes the panel and carries on in document order.
+ */
+export const AutocompleteWithFooter: Story = {
+  name: "Autocomplete: with footer actions",
   render: () => {
     const value = signal("4950");
     const suggestions = computed(() => matchRegistry(value()));
@@ -748,6 +897,62 @@ readonly suggestions = computed(() => {
   },
 };
 
+/**
+ * With `hideOnScroll`, scrolling the page or any scrollable ancestor closes the
+ * panel; scrolling the suggestion list itself keeps it open. Type to open the
+ * list, then scroll this page.
+ */
+export const AutocompleteHideOnScroll: Story = {
+  name: "Autocomplete: hide on scroll",
+  render: () => {
+    const value = signal("");
+    const suggestions = computed(() => {
+      const q = value().trim().toLowerCase();
+      return q ? PEOPLE.filter((n) => n.toLowerCase().includes(q)) : [];
+    });
+
+    return {
+      props: { value, suggestions, filler: PEOPLE },
+      template: `
+        <tedi-row [cols]="1" [gap]="3">
+          <tedi-col>
+            <tedi-search
+              inputId="search-hide-on-scroll"
+              label="Otsi"
+              placeholder="Hakka nime trükkima…"
+              [hideOnScroll]="true"
+              [value]="value()"
+              [suggestions]="suggestions()"
+              (valueChange)="value.set($event)"
+            />
+          </tedi-col>
+          @for (person of filler; track person) {
+            <tedi-col>
+              <span tedi-text color="tertiary">{{ person }}</span>
+            </tedi-col>
+          }
+        </tedi-row>
+      `,
+    };
+  },
+  parameters: {
+    chromatic: { disableSnapshot: true },
+    docs: {
+      source: {
+        language: "html",
+        code: `<tedi-search
+  inputId="search"
+  label="Otsi"
+  [hideOnScroll]="true"
+  [value]="value()"
+  [suggestions]="suggestions()"
+  (valueChange)="value.set($event)"
+/>`,
+      },
+    },
+  },
+};
+
 export const WithReactiveForms: Story = {
   render: () => {
     const control = new FormControl("", {
@@ -772,6 +977,7 @@ export const WithReactiveForms: Story = {
     };
   },
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:

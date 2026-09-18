@@ -61,13 +61,14 @@
   </button>
 }
 
-<span
+<div
   class="tedi-search__announcement sr-only"
   role="status"
   aria-live="polite"
   aria-atomic="true"
-  >{{ announcement() }}</span
 >
+  {{ announcement() }}
+</div>
 
 <ng-template
   cdkConnectedOverlay
@@ -88,7 +89,7 @@
     @if (loading()) {
       <div class="tedi-search__panel-status">
         <tedi-spinner [size]="16" />
-        <span tedi-text color="tertiary">{{ searchingText() }}</span>
+        <span tedi-text color="tertiary">{{ resolvedLoadingText() }}</span>
       </div>
     } @else if (hasSuggestions()) {
       <ul class="tedi-search__panel-list" role="listbox" [id]="listboxId()">
@@ -98,8 +99,10 @@
           let i = $index
         ) {
           <li
-            tedi-search-option
+            tedi-search-suggestion
             [label]="suggestion.label"
+            [description]="suggestion.description"
+            [disabled]="suggestion.disabled"
             [query]="query()"
             [custom]="!!suggestionTemplate()"
             [id]="optionId(i)"
@@ -114,6 +117,8 @@
                   item: suggestion.item,
                   index: i,
                   label: suggestion.label,
+                  description: suggestion.description,
+                  disabled: suggestion.disabled,
                   query: query(),
                 }"
               />
@@ -123,7 +128,7 @@
       </ul>
     } @else {
       <div class="tedi-search__panel-status">
-        <span tedi-text color="tertiary">{{ noResultsText() }}</span>
+        <span tedi-text color="tertiary">{{ resolvedNoResultsText() }}</span>
       </div>
     }
 

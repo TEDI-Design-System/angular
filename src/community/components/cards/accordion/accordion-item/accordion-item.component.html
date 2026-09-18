@@ -1,7 +1,9 @@
 <tedi-card
-  [selected]="selected()"
   class="tedi-accordion-item__card"
+  [borderless]="true"
+  [padding]="0"
   [class.tedi-accordion-item__card--expanded]="opened()"
+  [class.tedi-accordion-item__card--selected]="selected()"
 >
   <ng-content></ng-content>
 </tedi-card>

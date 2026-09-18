@@ -279,6 +279,237 @@ describe("ProgressBarComponent", () => {
     const label = host.querySelector("label") as HTMLLabelElement;
     expect(label.getAttribute("for")).toBe(progress.getAttribute("id"));
   });
+
+  describe("value announcements", () => {
+    const liveRegion = () => host.querySelector<HTMLElement>("span.sr-only");
+    const announced = () => liveRegion()?.textContent?.trim();
+
+    const setInput = (name: string, value: unknown) => {
+      fixture.componentRef.setInput(name, value);
+      fixture.detectChanges();
+    };
+
+    const advance = (ms: number) => {
+      jest.advanceTimersByTime(ms);
+      fixture.detectChanges();
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("should not render a live region while announce is off", () => {
+      setInput("value", 50);
+
+      expect(liveRegion()).toBeNull();
+    });
+
+    it("should render a polite status region when announce is polite", () => {
+      setInput("announce", "polite");
+
+      const region = liveRegion();
+      expect(region).toBeTruthy();
+      expect(region?.getAttribute("role")).toBe("status");
+      expect(region?.getAttribute("aria-live")).toBe("polite");
+      expect(region?.getAttribute("aria-atomic")).toBe("true");
+    });
+
+    it("should render an alert region when announce is assertive", () => {
+      setInput("announce", "assertive");
+
+      expect(liveRegion()?.getAttribute("role")).toBe("alert");
+      expect(liveRegion()?.getAttribute("aria-live")).toBe("assertive");
+    });
+
+    it("should skip the current value when announcements are enabled", () => {
+      setInput("value", 40);
+      setInput("announce", "polite");
+
+      expect(announced()).toBe("");
+
+      advance(5000);
+      expect(announced()).toBe("");
+    });
+
+    it("should skip the initial value when mounted with announcements enabled", () => {
+      fixture.destroy();
+      fixture = TestBed.createComponent(ProgressBarComponent);
+      host = fixture.nativeElement;
+      fixture.componentRef.setInput("value", 40);
+      fixture.componentRef.setInput("announce", "polite");
+      fixture.detectChanges();
+
+      advance(5000);
+      expect(announced()).toBe("");
+      setInput("value", 50);
+      expect(announced()).toBe("50%");
+    });
+
+    it("should not publish an unchanged value when the mode changes", () => {
+      setInput("value", 40);
+      setInput("announce", "polite");
+      setInput("announce", "assertive");
+      advance(5000);
+      expect(announced()).toBe("");
+      expect(liveRegion()?.getAttribute("role")).toBe("alert");
+      setInput("announce", "polite");
+      setInput("value", 50);
+      expect(announced()).toBe("50%");
+    });
+
+    it("should extend a pending deadline when the interval increases", () => {
+      setInput("announce", "polite");
+      setInput("value", 10);
+      setInput("value", 20);
+      advance(500);
+      setInput("announceInterval", 10000);
+      advance(9499);
+      expect(announced()).toBe("10%");
+      advance(1);
+      expect(announced()).toBe("20%");
+    });
+
+    it("should shorten a pending deadline when the interval decreases", () => {
+      setInput("announceInterval", 10000);
+      setInput("announce", "polite");
+      setInput("value", 10);
+      setInput("value", 20);
+      advance(500);
+      setInput("announceInterval", 1000);
+      advance(499);
+      expect(announced()).toBe("10%");
+      advance(1);
+      expect(announced()).toBe("20%");
+    });
+
+    it("should publish a pending value immediately when the new interval has elapsed", () => {
+      setInput("announceInterval", 10000);
+      setInput("announce", "polite");
+      setInput("value", 10);
+      setInput("value", 20);
+      advance(2000);
+      setInput("announceInterval", 1000);
+      expect(announced()).toBe("20%");
+    });
+
+    it("should cancel pending updates when announcements are disabled", () => {
+      setInput("announce", "polite");
+      setInput("value", 10);
+      setInput("value", 20);
+      setInput("announce", "off");
+      setInput("value", 30);
+      setInput("announce", "polite");
+      advance(5000);
+      expect(announced()).toBe("");
+      setInput("value", 40);
+      expect(announced()).toBe("40%");
+    });
+
+    it("should announce the first change right away", () => {
+      setInput("announce", "polite");
+      setInput("value", 60);
+
+      expect(announced()).toBe("60%");
+    });
+
+    it("should announce at most once per interval and settle on the last value", () => {
+      setInput("announce", "polite");
+      setInput("value", 10);
+      expect(announced()).toBe("10%");
+
+      setInput("value", 20);
+      setInput("value", 30);
+      expect(announced()).toBe("10%");
+
+      advance(1000);
+      expect(announced()).toBe("30%");
+    });
+
+    it.each([-100, 0])(
+      "should disable throttling for an interval of %s",
+      (interval) => {
+        setInput("announceInterval", interval);
+        expect(fixture.componentInstance.announceInterval()).toBe(0);
+        setInput("announce", "polite");
+        setInput("value", 10);
+        expect(announced()).toBe("10%");
+        setInput("value", 20);
+        expect(announced()).toBe("20%");
+      },
+    );
+
+    it.each([NaN, Infinity, -Infinity])(
+      "should use the default interval for %s",
+      (interval) => {
+        setInput("announceInterval", interval);
+        expect(fixture.componentInstance.announceInterval()).toBe(1000);
+        setInput("announce", "polite");
+        setInput("value", 10);
+        setInput("value", 20);
+        advance(999);
+        expect(announced()).toBe("10%");
+        advance(1);
+        expect(announced()).toBe("20%");
+      },
+    );
+
+    it("should honour a custom announceInterval", () => {
+      setInput("announceInterval", 5000);
+      setInput("announce", "polite");
+      setInput("value", 10);
+      expect(announced()).toBe("10%");
+
+      setInput("value", 20);
+      advance(1000);
+      expect(announced()).toBe("10%");
+
+      advance(4000);
+      expect(announced()).toBe("20%");
+    });
+
+    it("should announce the custom value label instead of the percentage", () => {
+      setInput("announce", "polite");
+      setInput("valueLabel", "2 / 5");
+
+      expect(announced()).toBe("2 / 5");
+    });
+
+    it("should announce even when the value is visually hidden", () => {
+      setInput("showValue", false);
+      setInput("announce", "polite");
+      setInput("value", 75);
+
+      expect(host.querySelector(".tedi-progress-bar__value")).toBeNull();
+      expect(announced()).toBe("75%");
+    });
+
+    it("should drop the region and its content when announce returns to off", () => {
+      setInput("announce", "polite");
+      setInput("value", 80);
+      expect(announced()).toBe("80%");
+
+      setInput("announce", "off");
+      expect(liveRegion()).toBeNull();
+
+      setInput("announce", "polite");
+      expect(announced()).toBe("");
+    });
+
+    it("should clear a pending announcement when destroyed", () => {
+      setInput("announce", "polite");
+      setInput("value", 10);
+      setInput("value", 20);
+
+      const pending = jest.getTimerCount();
+      fixture.destroy();
+
+      expect(jest.getTimerCount()).toBe(pending - 1);
+    });
+  });
 });
 
 describe("ProgressBarComponent — content projection", () => {

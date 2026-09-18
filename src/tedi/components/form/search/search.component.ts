@@ -49,7 +49,7 @@ import {
 import { TextFieldComponent } from "../text-field/text-field.component";
 import { LabelComponent } from "../label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
-import { SearchOptionComponent } from "./search-option.component";
+import { SearchSuggestionComponent } from "./search-suggestion.component";
 import {
   SearchFooterTemplateDirective,
   SearchSuggestionTemplateDirective,
@@ -60,6 +60,8 @@ export type SearchSize = InputSize;
 export interface SearchSuggestionView<T = unknown> {
   item: T;
   label: string;
+  description: string;
+  disabled: boolean;
 }
 
 export interface SearchButton {
@@ -85,8 +87,8 @@ export interface SearchButton {
 }
 
 /**
- * Flush against the field, flipping above when it would overflow. Figma draws
- * the panel border meeting the field border, so there is no offset.
+ * Flush against the field, flipping above when it would overflow. The panel
+ * border meets the field border, so there is no offset.
  */
 const SEARCH_OVERLAY_POSITIONS: ConnectedPosition[] = [
   { originX: "start", originY: "bottom", overlayX: "start", overlayY: "top" },
@@ -109,7 +111,7 @@ const SEARCH_OVERLAY_POSITIONS: ConnectedPosition[] = [
     IconComponent,
     TextComponent,
     SpinnerComponent,
-    SearchOptionComponent,
+    SearchSuggestionComponent,
     OverlayModule,
     NgTemplateOutlet,
   ],
@@ -192,6 +194,17 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
    */
   bindLabel = input<string>("label");
   /**
+   * Property holding a secondary line shown under the label. Unset by default,
+   * so rows are a single line unless asked for.
+   */
+  bindDescription = input<string>();
+  /**
+   * Property marking a suggestion as unselectable. Disabled rows are greyed out
+   * and skipped by keyboard navigation.
+   * @default "disabled"
+   */
+  bindDisabled = input<string>("disabled");
+  /**
    * Characters required before the panel opens. Below it nothing is shown, not
    * even the no-results row, so short queries stay quiet.
    * @default 0
@@ -213,6 +226,18 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
    * @default false
    */
   panelOpen = model<boolean>(false);
+  /**
+   * Overrides the translated "no results" row.
+   */
+  noResultsText = input<string>();
+  /**
+   * Overrides the translated loading row.
+   */
+  loadingText = input<string>();
+  /**
+   * Overrides the translated screen-reader result count.
+   */
+  resultsCountText = input<(count: number) => string>();
 
   /**
    * Emitted when the search is executed (Enter key or button click).
@@ -233,7 +258,7 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
   private readonly inputRef = viewChild("searchInput", { read: ElementRef });
   private readonly overlayOrigin = viewChild.required(CdkOverlayOrigin);
   private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
-  private readonly options = viewChildren(SearchOptionComponent);
+  private readonly suggestionRows = viewChildren(SearchSuggestionComponent);
 
   private readonly formDisabled = signal(false);
   private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -253,7 +278,7 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
    * `event.keyCode` and so ignores synthesised events.
    */
   private readonly keyManager = new ActiveDescendantKeyManager(
-    this.options,
+    this.suggestionRows,
     this.injector,
   ).withWrap();
 
@@ -326,14 +351,25 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
   readonly resolvedSuggestions = computed<SearchSuggestionView<T>[]>(() => {
     const items = this.suggestions() ?? [];
     const bindLabel = this.bindLabel();
+    const bindDescription = this.bindDescription();
+    const bindDisabled = this.bindDisabled();
 
-    return items.map((item) => ({
-      item,
-      label:
+    return items.map((item) => {
+      const record =
         item !== null && typeof item === "object"
-          ? String((item as Record<string, unknown>)[bindLabel] ?? item)
-          : String(item),
-    }));
+          ? (item as Record<string, unknown>)
+          : undefined;
+
+      return {
+        item,
+        label: record ? String(record[bindLabel] ?? item) : String(item),
+        description:
+          record && bindDescription
+            ? String(record[bindDescription] ?? "")
+            : "",
+        disabled: !!record?.[bindDisabled],
+      };
+    });
   });
 
   readonly query = computed(() => this.value().trim());
@@ -376,22 +412,28 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
     return index >= 0 ? this.optionId(index) : null;
   });
 
-  readonly noResultsText = computed(() =>
-    this.translationService.translate("search.no-results"),
+  readonly resolvedNoResultsText = computed(
+    () =>
+      this.noResultsText() ??
+      this.translationService.translate("search.no-results"),
   );
 
-  readonly searchingText = computed(() =>
-    this.translationService.translate("search.searching"),
+  readonly resolvedLoadingText = computed(
+    () =>
+      this.loadingText() ?? this.translationService.translate("search.loading"),
   );
 
   readonly announcement = computed(() => {
     if (!this.panelVisible()) return "";
-    if (this.loading()) return this.searchingText();
+    if (this.loading()) return this.resolvedLoadingText();
 
     const count = this.resolvedSuggestions().length;
-    return count
-      ? this.translationService.translate("search.results-count", count)
-      : this.noResultsText();
+    if (!count) return this.resolvedNoResultsText();
+
+    const override = this.resultsCountText();
+    return override
+      ? override(count)
+      : this.translationService.translate("search.results-count", count);
   });
 
   constructor() {
@@ -618,6 +660,8 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
   }
 
   selectSuggestion(suggestion: SearchSuggestionView<T>): void {
+    if (suggestion.disabled) return;
+
     this.justSelected = true;
     this.value.set(suggestion.label);
     this.onChange(suggestion.label);

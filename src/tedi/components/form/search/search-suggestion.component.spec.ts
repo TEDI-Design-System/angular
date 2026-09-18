@@ -1,14 +1,14 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { SearchOptionComponent } from "./search-option.component";
+import { SearchSuggestionComponent } from "./search-suggestion.component";
 
-describe("SearchOptionComponent", () => {
-  let fixture: ComponentFixture<SearchOptionComponent>;
-  let component: SearchOptionComponent;
+describe("SearchSuggestionComponent", () => {
+  let fixture: ComponentFixture<SearchSuggestionComponent>;
+  let component: SearchSuggestionComponent;
   let el: HTMLElement;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [SearchOptionComponent] });
-    fixture = TestBed.createComponent(SearchOptionComponent);
+    TestBed.configureTestingModule({ imports: [SearchSuggestionComponent] });
+    fixture = TestBed.createComponent(SearchSuggestionComponent);
     component = fixture.componentInstance;
     el = fixture.nativeElement as HTMLElement;
     fixture.componentRef.setInput("label", "Mari Maasikas");
@@ -44,7 +44,7 @@ describe("SearchOptionComponent", () => {
 
     expect(component.isActive()).toBe(true);
     expect(el.getAttribute("aria-selected")).toBe("true");
-    expect(el.classList).toContain("tedi-search-option--active");
+    expect(el.classList).toContain("tedi-search-suggestion--active");
   });
 
   it("setInactiveStyles clears the active state", () => {
@@ -54,7 +54,7 @@ describe("SearchOptionComponent", () => {
     fixture.detectChanges();
 
     expect(component.isActive()).toBe(false);
-    expect(el.classList).not.toContain("tedi-search-option--active");
+    expect(el.classList).not.toContain("tedi-search-suggestion--active");
   });
 
   it("exposes the label to the key manager via getLabel", () => {
