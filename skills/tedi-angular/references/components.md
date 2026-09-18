@@ -150,6 +150,18 @@ The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `bord
   `brand-primary` independently.
 - **`[tedi-label-row]` projects your own `<label tedi-label>`** plus trailing affixes as siblings, so
   native label attributes (`for`, `id`, `aria-*`, handlers) keep working.
+- **Configure the inline editor for its control.** Set `[closeOnEnter]="false"
+  when Enter belongs to the control, such as a textarea or select. The edit icon
+  is visible by default; use `hideEditIcon` only when another visible cue identifies
+  the value as editable. Use `fullWidth` to fill the container.
+- **`tedi-inline-edit` needs an `<ng-template tediInlineEditControl>`.** The control goes in that
+  template, not as plain content — it is instantiated on entering edit mode and destroyed on
+  leaving. Without the template the value never becomes editable. The inline edit does **not** own
+  the value: your control keeps its own binding, and `displayValue` has to be bound to the same
+  source. `(editCancel)` therefore only reports that Escape was pressed; restoring the previous
+  value is yours to do. A projected `tedi-feedback-text` is linked to the trigger for you. Give the editor control its
+  own accessible label and feedback association. Use `updateOn: "change"` or `"blur"` when
+  persisting the bound value in `editCommit`; `"submit"` remains the parent form's responsibility.
 - **`tedi-attachment` has no built-in action buttons.** Project neutral `tedi-button`s inside a single
   `<tedi-attachment-actions>` and wire `(click)` and `disabled` yourself.
 
