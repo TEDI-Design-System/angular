@@ -24,11 +24,13 @@ import {
   output,
   Renderer2,
   signal,
+  untracked,
   viewChild,
   viewChildren,
   ViewEncapsulation,
   forwardRef,
   computed,
+  linkedSignal,
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { CommonModule, DOCUMENT } from "@angular/common";
@@ -221,6 +223,13 @@ export class SelectComponent<T = unknown>
    * When undefined, the entire object is used as the value.
    */
   bindValue = input<string | undefined>(undefined);
+
+  /**
+   * Selected value, for use without a form directive. An array in multi-select
+   * mode, the bare value otherwise. Unlike `[ngModel]` it applies on the first
+   * render rather than a frame later. Do not combine with a form directive.
+   */
+  value = input<unknown>(undefined);
 
   /**
    * Whether multiple items can be selected.
@@ -426,7 +435,13 @@ export class SelectComponent<T = unknown>
   );
 
   isOpen = signal(false);
-  selectedValues = signal<unknown[]>([]);
+  /** `allowMultiple` untracked, so flipping the mode cannot wipe the selection. */
+  selectedValues = linkedSignal<unknown[]>(() =>
+    this.toSelection(
+      this.value(),
+      untracked(() => this.allowMultiple()),
+    ),
+  );
   disabled = signal(false);
   dropdownWidth = signal<number | null>(null);
   dropdownMaxHeight = signal<number | null>(null);
@@ -1611,12 +1626,15 @@ export class SelectComponent<T = unknown>
   onChange: (value: unknown) => void = () => {};
   onTouched: () => void = () => {};
 
-  writeValue(value: unknown): void {
-    if (this.allowMultiple()) {
-      this.selectedValues.set(Array.isArray(value) ? value : []);
-    } else {
-      this.selectedValues.set(value != null ? [value] : []);
+  private toSelection(value: unknown, allowMultiple: boolean): unknown[] {
+    if (allowMultiple) {
+      return Array.isArray(value) ? value : [];
     }
+    return value != null ? [value] : [];
+  }
+
+  writeValue(value: unknown): void {
+    this.selectedValues.set(this.toSelection(value, this.allowMultiple()));
   }
 
   registerOnChange(fn: (value: unknown) => void): void {
