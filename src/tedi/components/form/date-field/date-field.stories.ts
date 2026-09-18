@@ -1334,7 +1334,7 @@ export const WithReactiveForms: Story = {
  */
 export const OpenForVisualTest: Story = {
   // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
-  tags: ["!dev"],
+  tags: ["!dev", "!autodocs"],
   parameters: {
     // Verified violation, not a defensive suppression: axe reports
     // `color-contrast` on the calendar's outside-month day buttons

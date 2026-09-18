@@ -436,27 +436,165 @@ export const KeepOpenOnSelect: Story = {
  * Visual-regression only. `tedi-dropdown` has no controlled open input (`isOpen` is an
  * internal signal), so the panel is opened by clicking the trigger.
  */
+/**
+ * Builds a visual-regression story that opens one menu and waits for it to render.
+ *
+ * One open menu per snapshot, not a grid of them: the dropdown closes on outside click and on
+ * focus-out with no opt-out, so clicking a second trigger would close the first.
+ */
+const vrRender = (template: string) => () => ({ template });
+
+const vrPlay = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+  await userEvent.click(within(canvasElement).getByRole("button"));
+  await waitFor(() =>
+    expect(document.querySelector(".tedi-dropdown-content")).not.toBeNull(),
+  );
+};
+
+/**
+ * Visual-regression only. Every other story renders a closed trigger, so the menu, its items and
+ * their spacing were never captured. These render the variants that exist only while open.
+ */
 export const OpenForVisualTest: Story = {
-  // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
-  tags: ["!dev"],
-  render: () => ({
-    template: `
-      <tedi-dropdown position="bottom-start">
-        <button tedi-button tedi-dropdown-trigger>Trigger</button>
-        <tedi-dropdown-content dropdownRole="menu">
-          <li tedi-dropdown-item>Access to health data</li>
-          <li tedi-dropdown-item [disabled]="true">Declaration of intent</li>
-          <li tedi-dropdown-item>Contacts</li>
-        </tedi-dropdown-content>
-      </tedi-dropdown>
-    `,
-  }),
-  play: async ({ canvasElement }) => {
-    await userEvent.click(
-      within(canvasElement).getByRole("button", { name: "Trigger" }),
-    );
-    await waitFor(() =>
-      expect(document.querySelector(".tedi-dropdown-content")).not.toBeNull(),
-    );
+  tags: ["!dev", "!autodocs"],
+  render: vrRender(`
+  <tedi-dropdown position="bottom-start">
+    <button tedi-button tedi-dropdown-trigger>Trigger</button>
+    <tedi-dropdown-content dropdownRole="menu">
+      <li tedi-dropdown-item>Access to health data</li>
+      <li tedi-dropdown-item [disabled]="true">Declaration of intent</li>
+      <li tedi-dropdown-item>Contacts</li>
+    </tedi-dropdown-content>
+  </tedi-dropdown>
+`),
+  play: vrPlay,
+};
+
+/** Visual-regression only. Icon rows set the item's content layout and its icon gap. */
+export const OpenWithIconsForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  render: vrRender(`
+  <tedi-dropdown position="bottom-start">
+    <button tedi-button tedi-dropdown-trigger ariaHaspopup="menu">Actions</button>
+    <tedi-dropdown-content dropdownRole="menu">
+      <li tedi-dropdown-item>
+        <tedi-dropdown-item-value>
+          <tedi-icon name="edit" [size]="18" />
+          <tedi-dropdown-item-value-label>Edit</tedi-dropdown-item-value-label>
+        </tedi-dropdown-item-value>
+      </li>
+      <li tedi-dropdown-item>
+        <tedi-dropdown-item-value>
+          <tedi-icon name="content_copy" [size]="18" />
+          <tedi-dropdown-item-value-label>Duplicate</tedi-dropdown-item-value-label>
+        </tedi-dropdown-item-value>
+      </li>
+      <li tedi-dropdown-item [disabled]="true">
+        <tedi-dropdown-item-value>
+          <tedi-icon name="delete" [size]="18" />
+          <tedi-dropdown-item-value-label>Delete</tedi-dropdown-item-value-label>
+        </tedi-dropdown-item-value>
+      </li>
+    </tedi-dropdown-content>
+  </tedi-dropdown>
+`),
+  play: vrPlay,
+};
+
+/**
+ * Visual-regression only. A `listbox` menu with meta text: the meta column is what sets the
+ * item's two-line height and the panel's width.
+ */
+export const OpenListboxMetaForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    a11y: {
+      config: {
+        // Measured, not defensive. One component bug with two faces:
+        // `dropdownRole="listbox"` puts role="listbox" on the inner `<ul>`,
+        // while the `aria-labelledby` meant to name it sits on the host — which
+        // is `role="presentation"`, so it carries no semantics. The listbox is
+        // left unnamed (`aria-input-field-name`) and the label attribute is
+        // prohibited where it is (`aria-prohibited-attr`). Real in every open
+        // listbox dropdown; these are the first stories that render one open,
+        // so the gate could not see it before.
+        rules: [
+          { id: "aria-input-field-name", enabled: false },
+          { id: "aria-prohibited-attr", enabled: false },
+        ],
+      },
+    },
   },
+  render: vrRender(`
+  <tedi-dropdown position="bottom-start">
+    <button tedi-button tedi-dropdown-trigger ariaHaspopup="listbox">Select location</button>
+    <tedi-dropdown-content dropdownRole="listbox">
+      <li tedi-dropdown-item value="tallinn">
+        <tedi-dropdown-item-value>
+          <tedi-dropdown-item-value-label>Tallinn</tedi-dropdown-item-value-label>
+          <tedi-dropdown-item-value-meta>3 timeslots</tedi-dropdown-item-value-meta>
+        </tedi-dropdown-item-value>
+      </li>
+      <li tedi-dropdown-item value="tartu">
+        <tedi-dropdown-item-value>
+          <tedi-dropdown-item-value-label>Tartu</tedi-dropdown-item-value-label>
+          <tedi-dropdown-item-value-meta>5 timeslots</tedi-dropdown-item-value-meta>
+        </tedi-dropdown-item-value>
+      </li>
+      <li tedi-dropdown-item value="parnu">
+        <tedi-dropdown-item-value>
+          <tedi-dropdown-item-value-label>Pärnu</tedi-dropdown-item-value-label>
+          <tedi-dropdown-item-value-meta>2 timeslots</tedi-dropdown-item-value-meta>
+        </tedi-dropdown-item-value>
+      </li>
+    </tedi-dropdown-content>
+  </tedi-dropdown>
+`),
+  play: vrPlay,
+};
+
+/**
+ * Visual-regression only. A long list is where the panel's max height and its scrollbar show,
+ * and `clipContent` is what decides whether a long label truncates or wraps.
+ */
+export const OpenScrollingForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    a11y: {
+      config: {
+        // Measured, not defensive. One component bug with two faces:
+        // `dropdownRole="listbox"` puts role="listbox" on the inner `<ul>`,
+        // while the `aria-labelledby` meant to name it sits on the host — which
+        // is `role="presentation"`, so it carries no semantics. The listbox is
+        // left unnamed (`aria-input-field-name`) and the label attribute is
+        // prohibited where it is (`aria-prohibited-attr`). Real in every open
+        // listbox dropdown; these are the first stories that render one open,
+        // so the gate could not see it before.
+        rules: [
+          { id: "aria-input-field-name", enabled: false },
+          { id: "aria-prohibited-attr", enabled: false },
+        ],
+      },
+    },
+  },
+  render: vrRender(`
+  <tedi-dropdown position="bottom-start">
+    <button tedi-button tedi-dropdown-trigger>Long list</button>
+    <tedi-dropdown-content dropdownRole="listbox">
+      <li tedi-dropdown-item [clipContent]="true">
+        A very long option label that runs past the width of the panel and has to be clipped
+      </li>
+      <li tedi-dropdown-item>Teine valik</li>
+      <li tedi-dropdown-item>Kolmas valik</li>
+      <li tedi-dropdown-item>Neljas valik</li>
+      <li tedi-dropdown-item>Viies valik</li>
+      <li tedi-dropdown-item>Kuues valik</li>
+      <li tedi-dropdown-item>Seitsmes valik</li>
+      <li tedi-dropdown-item>Kaheksas valik</li>
+      <li tedi-dropdown-item>Üheksas valik</li>
+      <li tedi-dropdown-item>Kümnes valik</li>
+    </tedi-dropdown-content>
+  </tedi-dropdown>
+`),
+  play: vrPlay,
 };

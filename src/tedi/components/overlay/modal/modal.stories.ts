@@ -13,7 +13,7 @@ import { ModalContentComponent } from "./modal-content/modal-content.component";
 import { ModalFooterComponent } from "./modal-footer/modal-footer.component";
 import { ModalService } from "./modal.service";
 import { ModalRef } from "./modal-ref";
-import { MODAL_DATA, ModalFullscreen } from "./modal.types";
+import { MODAL_DATA, ModalConfig, ModalFullscreen } from "./modal.types";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { LabelComponent } from "../../form/label/label.component";
 import { IconComponent } from "../../base/icon/icon.component";
@@ -1766,62 +1766,129 @@ export const TemplateBased: StoryObj<ModalComponent> = {
  * own container, focus trap and backdrop, rather than the deprecated template-mode markup.
  * `ariaLabel` gives the dialog its accessible name.
  */
-export const OpenForVisualTest: StoryObj = {
-  // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
-  tags: ["!dev"],
-  decorators: [
-    moduleMetadata({
-      imports: [ButtonComponent, StoryModalContentComponent],
-    }),
-  ],
-  render: () => {
-    @Component({
-      standalone: true,
-      selector: "story-open-vr-demo",
-      imports: [ButtonComponent],
-      template: `
-        <button tedi-button variant="secondary" (click)="open()">
-          Open modal
-        </button>
-      `,
-    })
-    class OpenVrDemoComponent {
-      private readonly modalService = inject(ModalService);
+const VR_DATA: StoryModalData = {
+  title: "Title",
+  description: "Supporting description text.",
+};
 
-      open() {
-        this.modalService.open(StoryModalContentComponent, {
-          data: { title: "Title" },
-          width: "md",
-          ariaLabel: "Title",
-        });
-      }
+// `ariaLabel` is what names the dialog: without it CDK renders `role="dialog"`
+// with no accessible name and the a11y gate fails every story below.
+const VR_CONFIG = { data: VR_DATA, ariaLabel: VR_DATA.title } as const;
+
+/**
+ * The trigger for a visual-regression story: one button that opens a modal from a `ModalConfig`.
+ * Every variant below differs only in that config, so the component is built per story rather
+ * than copied.
+ */
+const vrRender = (config: ModalConfig<StoryModalData>) => () => {
+  @Component({
+    standalone: true,
+    selector: "story-open-vr-demo",
+    imports: [ButtonComponent],
+    template: `
+      <button tedi-button variant="secondary" (click)="open()">
+        Open modal
+      </button>
+    `,
+  })
+  class OpenVrDemoComponent {
+    private readonly modalService = inject(ModalService);
+
+    open() {
+      this.modalService.open(StoryModalContentComponent, config);
     }
+  }
 
-    return {
-      template: `<story-open-vr-demo />`,
-      moduleMetadata: {
-        imports: [OpenVrDemoComponent],
-      },
-    };
-  },
-  play: async ({ canvasElement }) => {
-    // `findByRole` polls, so the click cannot land inside the first render pass
-    // before the trigger exists. Nothing here waits on a fixed delay.
-    const trigger = await within(canvasElement).findByRole("button", {
-      name: "Open modal",
-    });
-    await userEvent.click(trigger);
+  return {
+    template: `<story-open-vr-demo />`,
+    moduleMetadata: { imports: [OpenVrDemoComponent] },
+  };
+};
 
-    // Polled, three conditions at once: the CDK overlay pane exists, the modal
-    // body inside it has rendered, and CDK's `autoFocus: "first-tabbable"` has
-    // moved focus into the dialog. The focus move is the settle signal that
-    // matters: it is queued after the dialog's first render, so once it has
-    // happened there is no further deferred open work to race the screenshot.
-    await waitFor(() => {
-      const pane = document.querySelector(".cdk-overlay-pane");
-      expect(pane).not.toBeNull();
-      expect(pane?.querySelector(".tedi-modal-footer")).not.toBeNull();
-      expect(pane?.contains(document.activeElement)).toBe(true);
-    });
-  },
+const VR_DECORATORS = [
+  moduleMetadata({ imports: [ButtonComponent, StoryModalContentComponent] }),
+];
+
+const vrPlay = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+  // `findByRole` polls, so the click cannot land inside the first render pass
+  // before the trigger exists. Nothing here waits on a fixed delay.
+  const trigger = await within(canvasElement).findByRole("button", {
+    name: "Open modal",
+  });
+  await userEvent.click(trigger);
+
+  // Polled, three conditions at once: the CDK overlay pane exists, the modal
+  // body inside it has rendered, and CDK's `autoFocus: "first-tabbable"` has
+  // moved focus into the dialog. The focus move is the settle signal that
+  // matters: it is queued after the dialog's first render, so once it has
+  // happened there is no further deferred open work to race the screenshot.
+  await waitFor(() => {
+    const pane = document.querySelector(".cdk-overlay-pane");
+    expect(pane).not.toBeNull();
+    expect(pane?.querySelector(".tedi-modal-footer")).not.toBeNull();
+    expect(pane?.contains(document.activeElement)).toBe(true);
+  });
+};
+
+/**
+ * Visual-regression only. Every other story renders a closed trigger, so the dialog itself was
+ * never captured. These render the variants that exist only while open, one snapshot each.
+ *
+ * `tags` has to be a literal on each story: the CSF indexer reads it statically, so a tag
+ * returned from a helper is silently ignored and the story lands in the sidebar anyway.
+ */
+export const OpenForVisualTest: StoryObj = {
+  tags: ["!dev", "!autodocs"],
+  decorators: VR_DECORATORS,
+  render: vrRender({ ...VR_CONFIG, width: "md" }),
+  play: vrPlay,
+};
+
+/** Visual-regression only. `size: "small"` tightens the header, body and footer padding. */
+export const OpenSmallForVisualTest: StoryObj = {
+  tags: ["!dev", "!autodocs"],
+  decorators: VR_DECORATORS,
+  render: vrRender({ ...VR_CONFIG, width: "sm", size: "small" }),
+  play: vrPlay,
+};
+
+/** Visual-regression only. `position: "top"` pins the dialog to the top of the backdrop. */
+export const OpenPositionTopForVisualTest: StoryObj = {
+  tags: ["!dev", "!autodocs"],
+  decorators: VR_DECORATORS,
+  render: vrRender({ ...VR_CONFIG, width: "sm", position: "top" }),
+  play: vrPlay,
+};
+
+/**
+ * Visual-regression only. A side position turns the modal into a full-height drawer, which is a
+ * different frame rather than a different width.
+ */
+export const OpenPositionDrawerForVisualTest: StoryObj = {
+  tags: ["!dev", "!autodocs"],
+  decorators: VR_DECORATORS,
+  render: vrRender({ ...VR_CONFIG, width: "sm", position: "right" }),
+  play: vrPlay,
+};
+
+/**
+ * Visual-regression only. Fullscreen drops the backdrop padding and the radius, so it changes
+ * more than the dialog's size.
+ */
+export const OpenFullscreenForVisualTest: StoryObj = {
+  tags: ["!dev", "!autodocs"],
+  decorators: VR_DECORATORS,
+  render: vrRender({ ...VR_CONFIG, fullscreen: true }),
+  play: vrPlay,
+};
+
+/**
+ * Visual-regression only. The widest preset with `scrollBehavior: "page"`: the frame keeps its
+ * edges while the overlay scrolls, which is the other scrolling frame.
+ */
+export const OpenWidePageScrollForVisualTest: StoryObj = {
+  tags: ["!dev", "!autodocs"],
+  decorators: VR_DECORATORS,
+  render: vrRender({ ...VR_CONFIG, width: "xl", scrollBehavior: "page" }),
+  play: vrPlay,
 };

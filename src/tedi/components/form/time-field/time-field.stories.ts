@@ -698,7 +698,7 @@ export const WithReactiveForms: StoryObj = {
  */
 export const OpenForVisualTest: StoryObj = {
   // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
-  tags: ["!dev"],
+  tags: ["!dev", "!autodocs"],
   args: {
     inputId: "time-open-vr",
     value: "10:30",

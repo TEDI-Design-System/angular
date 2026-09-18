@@ -140,7 +140,7 @@ export const InLabelRow: InfoTooltipStory = {
  */
 export const OpenForVisualTest: InfoTooltipStory = {
   // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
-  tags: ["!dev"],
+  tags: ["!dev", "!autodocs"],
   render: () => ({
     template: `
       <tedi-info-tooltip position="bottom" openWith="click">

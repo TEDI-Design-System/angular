@@ -1463,7 +1463,7 @@ export const VirtualScroll: Story = {
  */
 export const OpenForVisualTest: Story = {
   // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
-  tags: ["!dev"],
+  tags: ["!dev", "!autodocs"],
   args: {
     inputId: "select-open-vr",
     label: "Linn",
