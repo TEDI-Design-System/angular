@@ -29,6 +29,7 @@ component's `ɵɵComponentDeclaration` carries its real selector; see
 | TimeFieldComponent | `tedi-time-field` | `string \| null` (HH:mm) |
 | TimePickerComponent | `tedi-time-picker` | `string \| null` (HH:mm) |
 | SelectComponent | `tedi-select` | `T \| T[]` |
+| TextEditorComponent | `tedi-text-editor` | `string` (Quill HTML) — `/community/text-editor` entry point |
 
 `CheckboxComponent` (`input[type=checkbox][tedi-checkbox]`) is **not** a TEDI value accessor — it styles a native checkbox, so `[formControl]` on it is handled by Angular's built-in `CheckboxControlValueAccessor` and yields a `boolean`. Inside a managed `<tedi-checkbox-group>`, its `value` input is a `string` identity instead. `DropdownComponent` (`tedi-dropdown`) lives in `overlay/` and is not a form control — it exposes `[(value)]` but implements no `ControlValueAccessor`.
 
@@ -58,6 +59,8 @@ form = new FormGroup({
 ## Form Field Structure
 
 Wrap a control with `tedi-form-field` to compose the label, control, and feedback text into one accessible field. `tedi-form-field` wires the feedback text to the control's `aria-describedby` for you. It does **not** associate the label: give the label a `for` and the control a matching `id` yourself.
+
+`TextEditorComponent` is the exception to the `for`/`id` rule: its editing area is a `contenteditable` div, which `for` cannot target. Give the label an `id` and point the control's `ariaLabelledby` at it instead.
 
 `tedi-feedback-text` takes its message through the required `text` input, not projected content.
 
@@ -116,11 +119,14 @@ It does not filter. Pass a list you have already filtered and react to `valueCha
 
 The opt-in is `suggestions` being bound at all, not its length. Bind `[]` to keep combobox behaviour while nothing matches; leave it unbound for a plain `role="searchbox"`.
 
+When suggestions are objects, `bindLabel` names the display property, `bindDescription` adds a secondary line under it, and `bindDisabled` (default key `disabled`) greys a row out and takes it out of keyboard navigation and selection. `noResultsText`, `loadingText` and `resultsCountText` override the translated panel and live-region copy where the defaults do not fit.
+
 ```html
 <tedi-search
   inputId="search"
   label="Otsing"
   bindLabel="name"
+  bindDescription="code"
   [value]="value()"
   [suggestions]="matches()"
   [loading]="loading()"
@@ -139,7 +145,7 @@ The opt-in is `suggestions` being bound at all, not its length. Bind `[]` to kee
 </tedi-search>
 ```
 
-`tediSearchSuggestion` replaces the default row, which bolds the substring matching the query; its context gives you `$implicit`/`item`, `label`, `query` and `index`. `tediSearchFooter` pins content below the list and renders in the no-results state too, which is what makes it the place for "nothing matched, try this instead" actions; `tedi-search-footer-actions` lays its buttons out. Navigating suggestions never moves focus off the input, so footer controls are reached with Tab, and Tab past the last one closes the panel.
+`tediSearchSuggestion` replaces the default row, which bolds the substring matching the query; its context gives you `$implicit`/`item`, `label`, `description`, `disabled`, `query` and `index`. `tediSearchFooter` pins content below the list and renders in the no-results state too, which is what makes it the place for "nothing matched, try this instead" actions; `tedi-search-footer-actions` lays its buttons out. Navigating suggestions never moves focus off the input, so footer controls are reached with Tab, and Tab past the last one closes the panel.
 
 Building a combobox out of some *other* control? `aria-expanded` is the attribute to watch: it is not permitted on a plain textbox (`aria-allowed-attr`), so the input needs `role="combobox"`. `aria-controls` and `aria-haspopup` are global attributes and are valid on a plain text input either way. Point `aria-controls` at a `role="listbox"` popup for a list of options, or a `role="dialog"` popup (with `aria-haspopup="dialog"`) when the panel mixes results with other controls. Bind it conditionally, `[attr.aria-controls]="open() ? 'panel-id' : null"`, since a popup rendered with `@if` or a CDK overlay is absent while closed, and a reference to a missing id fails `aria-valid-attr-value`.
 

@@ -66,7 +66,7 @@ export const translationsMap = {
     en: "No results found",
     ru: "Результаты не найдены",
   },
-  "search.searching": {
+  "search.loading": {
     description: "Shown in the search suggestions panel while results load",
     components: ["Search"],
     et: "Otsin...",

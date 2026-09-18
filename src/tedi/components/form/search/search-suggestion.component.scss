@@ -18,18 +18,16 @@
     align-items: center;
   }
 
-  &--disabled {
-    color: var(--form-general-text-disabled);
-    cursor: not-allowed;
-  }
-
+  &--disabled,
   &--disabled:hover {
-    background: transparent;
+    color: var(--general-text-disabled);
+    cursor: not-allowed;
+    background: var(--dropdown-item-disabled-background);
   }
 
-  // The description sets its own `tedi-text` colour, which would otherwise keep
-  // its normal tone on a disabled row.
-  &--disabled &__description {
+  // The label segments and the description are `tedi-text`, whose colour
+  // modifier class would otherwise outrank the row's disabled colour.
+  &--disabled [class*="tedi-text--"] {
     color: inherit;
   }
 

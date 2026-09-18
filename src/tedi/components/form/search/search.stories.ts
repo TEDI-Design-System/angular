@@ -28,30 +28,44 @@ const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 
 const MIN_QUERY_LENGTH = 3;
 
+interface Person {
+  label: string;
+  description: string;
+}
+
 // Deliberately long, and with many "Mar" entries, so the default query overflows
 // the panel's max height and the examples exercise scrolling.
-const PEOPLE = [
-  "Mari Maasikas",
-  "Marelle Mets",
-  "Marjanne Meri",
-  "Mart Mesi",
-  "Martin Saar",
-  "Margit Mänd",
-  "Marko Mägi",
-  "Maris Metsis",
-  "Marta Mölder",
-  "Marek Muru",
-  "Kalle Kask",
-  "Kati Kuusk",
-  "Tõnu Tamm",
-  "Liisa Lepp",
-  "Jaan Järv",
-  "Piret Pärn",
-  "Siim Sepp",
-  "Anu Aasa",
-  "Rein Rand",
-  "Tiiu Tuul",
+const PEOPLE: Person[] = [
+  { label: "Mari Maasikas", description: "Tootejuht" },
+  { label: "Marelle Mets", description: "Disainer" },
+  { label: "Marjanne Meri", description: "Arendaja" },
+  { label: "Mart Mesi", description: "Analüütik" },
+  { label: "Martin Saar", description: "Arendaja" },
+  { label: "Margit Mänd", description: "Testija" },
+  { label: "Marko Mägi", description: "Tootejuht" },
+  { label: "Maris Metsis", description: "Disainer" },
+  { label: "Marta Mölder", description: "Analüütik" },
+  { label: "Marek Muru", description: "Arendaja" },
+  { label: "Kalle Kask", description: "Testija" },
+  { label: "Kati Kuusk", description: "Tootejuht" },
+  { label: "Tõnu Tamm", description: "Disainer" },
+  { label: "Liisa Lepp", description: "Arendaja" },
+  { label: "Jaan Järv", description: "Analüütik" },
+  { label: "Piret Pärn", description: "Testija" },
+  { label: "Siim Sepp", description: "Arendaja" },
+  { label: "Anu Aasa", description: "Tootejuht" },
+  { label: "Rein Rand", description: "Disainer" },
+  { label: "Tiiu Tuul", description: "Analüütik" },
 ];
+
+/** Matches the display label, so the examples search by name. */
+function matchPeople(query: string): Person[] {
+  const q = query.trim().toLowerCase();
+
+  return q
+    ? PEOPLE.filter((person) => person.label.toLowerCase().includes(q))
+    : [];
+}
 
 interface RegistryPerson {
   name: string;
@@ -508,10 +522,7 @@ export const Autocomplete: Story = {
   args: { hideOnScroll: false },
   render: (args) => {
     const value = signal("Mar");
-    const suggestions = computed(() => {
-      const q = value().trim().toLowerCase();
-      return q ? PEOPLE.filter((n) => n.toLowerCase().includes(q)) : [];
-    });
+    const suggestions = computed(() => matchPeople(value()));
 
     return {
       props: { ...args, value, suggestions, minQueryLength: MIN_QUERY_LENGTH },
@@ -519,6 +530,7 @@ export const Autocomplete: Story = {
         <tedi-search
           inputId="search-suggestions"
           label="Otsi"
+          bindDescription="description"
           placeholder="Trüki vähemalt 3 tähemärki…"
           [minQueryLength]="minQueryLength"
           [hideOnScroll]="hideOnScroll"
@@ -537,6 +549,7 @@ export const Autocomplete: Story = {
         code: `<tedi-search
   inputId="search"
   label="Otsi"
+  bindDescription="description"
   [minQueryLength]="3"
   [value]="value()"
   [suggestions]="suggestions()"
@@ -614,7 +627,7 @@ export const AutocompleteAsync: Story = {
   render: () => {
     const value = signal("");
     const loading = signal(false);
-    const results = signal<string[]>([]);
+    const results = signal<Person[]>([]);
     let timer: ReturnType<typeof setTimeout> | undefined;
 
     const onValueChange = (next: string) => {
@@ -629,8 +642,7 @@ export const AutocompleteAsync: Story = {
 
       loading.set(true);
       timer = setTimeout(() => {
-        const q = next.trim().toLowerCase();
-        results.set(PEOPLE.filter((n) => n.toLowerCase().includes(q)));
+        results.set(matchPeople(next));
         loading.set(false);
       }, 600);
     };
@@ -647,6 +659,7 @@ export const AutocompleteAsync: Story = {
         <tedi-search
           inputId="search-async"
           label="Otsi"
+          bindDescription="description"
           placeholder="Trüki vähemalt 3 tähemärki…"
           [minQueryLength]="minQueryLength"
           [value]="value()"
@@ -665,6 +678,7 @@ export const AutocompleteAsync: Story = {
         code: `<tedi-search
   inputId="search"
   label="Otsi"
+  bindDescription="description"
   [minQueryLength]="3"
   [value]="value()"
   [suggestions]="results()"
@@ -756,10 +770,7 @@ export const AutocompleteFreeText: Story = {
   render: () => {
     const value = signal("");
     const submitted = signal<string | undefined>(undefined);
-    const suggestions = computed(() => {
-      const q = value().trim().toLowerCase();
-      return q ? PEOPLE.filter((n) => n.toLowerCase().includes(q)) : [];
-    });
+    const suggestions = computed(() => matchPeople(value()));
 
     return {
       props: { value, suggestions, submitted },
@@ -769,6 +780,7 @@ export const AutocompleteFreeText: Story = {
             <tedi-search
               inputId="search-free-text"
               label="Otsi"
+              bindDescription="description"
               placeholder="Otsi ja vajuta Enter…"
               [value]="value()"
               [suggestions]="suggestions()"
@@ -793,6 +805,7 @@ export const AutocompleteFreeText: Story = {
         code: `<tedi-search
   inputId="search"
   label="Otsi"
+  bindDescription="description"
   [value]="value()"
   [suggestions]="suggestions()"
   (valueChange)="value.set($event)"
@@ -899,39 +912,28 @@ readonly suggestions = computed(() => {
 
 /**
  * With `hideOnScroll`, scrolling the page or any scrollable ancestor closes the
- * panel; scrolling the suggestion list itself keeps it open. Type to open the
- * list, then scroll this page.
+ * panel; scrolling the suggestion list itself keeps it open. Open the list here on
+ * the docs page, then scroll it.
  */
 export const AutocompleteHideOnScroll: Story = {
   name: "Autocomplete: hide on scroll",
   render: () => {
     const value = signal("");
-    const suggestions = computed(() => {
-      const q = value().trim().toLowerCase();
-      return q ? PEOPLE.filter((n) => n.toLowerCase().includes(q)) : [];
-    });
+    const suggestions = computed(() => matchPeople(value()));
 
     return {
-      props: { value, suggestions, filler: PEOPLE },
+      props: { value, suggestions },
       template: `
-        <tedi-row [cols]="1" [gap]="3">
-          <tedi-col>
-            <tedi-search
-              inputId="search-hide-on-scroll"
-              label="Otsi"
-              placeholder="Hakka nime trükkima…"
-              [hideOnScroll]="true"
-              [value]="value()"
-              [suggestions]="suggestions()"
-              (valueChange)="value.set($event)"
-            />
-          </tedi-col>
-          @for (person of filler; track person) {
-            <tedi-col>
-              <span tedi-text color="tertiary">{{ person }}</span>
-            </tedi-col>
-          }
-        </tedi-row>
+        <tedi-search
+          inputId="search-hide-on-scroll"
+          label="Otsi"
+          bindDescription="description"
+          placeholder="Hakka nime trükkima…"
+          [hideOnScroll]="true"
+          [value]="value()"
+          [suggestions]="suggestions()"
+          (valueChange)="value.set($event)"
+        />
       `,
     };
   },
@@ -943,6 +945,7 @@ export const AutocompleteHideOnScroll: Story = {
         code: `<tedi-search
   inputId="search"
   label="Otsi"
+  bindDescription="description"
   [hideOnScroll]="true"
   [value]="value()"
   [suggestions]="suggestions()"

@@ -132,6 +132,40 @@ example. Where the same component exists in both, the `/tedi` one is the answer.
 The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `border`, plus
 `tedi-card-icon` and breakpoint inputs; Community takes named `spacing` and `accentBorder`.
 
+### `tedi-text-editor` lives behind its own entry point
+
+The rich text editor is the one component that is **not** in the `/community` barrel. It ships as its
+own secondary entry point so the rest of the library stays free of its dependencies:
+
+```ts
+import { TextEditorComponent } from "@tedi-design-system/angular/community/text-editor";
+```
+
+`ngx-quill` and `quill` are **optional** peer dependencies, declared in `peerDependenciesMeta`, so
+installing the library does not pull them in. Install them yourself, and load Quill's `snow` theme
+stylesheet globally, or the editor renders unstyled:
+
+```scss
+// styles.scss
+@forward "quill/dist/quill.core.css";
+@forward "quill/dist/quill.snow.css";
+```
+
+It is a normal TEDI form control otherwise: a `ControlValueAccessor` that works with
+`formControl`, `formControlName` and `ngModel`, and that composes with `tedi-form-field`.
+
+Three things the types won't warn you about:
+
+- **`<label for>` cannot name it.** Quill's editing area is a `contenteditable` div, and `for` only
+  resolves to labelable elements. Give the label an `id` and point `ariaLabelledby` at it (or set
+  `ariaLabel`). This is the one control where the usual `for`/`id` pairing silently does nothing.
+- `modules` **replaces** the default toolbar rather than extending it. Copy
+  `TEXT_EDITOR_DEFAULT_MODULES` and edit it if you only want to add a button.
+- `tedi-form-field`'s `characterLimit` counts the **visible text**, not the Quill markup behind it,
+  so formatting a word bold adds no characters. It is the one control that reports its own count
+  (the optional `characterCount` member of `FormFieldControl`) rather than letting the field measure
+  its value.
+
 ### Composition constraints
 
 - **`[tedi-card-button]` projects a `tedi-card` and nothing else.** Other content is not projected.
@@ -168,6 +202,9 @@ The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `bord
   the place for "nothing matched, try this instead" actions. Navigating suggestions never moves focus
   off the input (`aria-activedescendant`), so the footer's own controls are reached with Tab; Tab past
   the last one closes the panel and continues after the field.
+- **Object suggestions are read through `bind*` keys, not a fixed shape.** `bindLabel` names the
+  display property, `bindDescription` a secondary line under it, and `bindDisabled` (default key
+  `disabled`) a row that greys out and is skipped by arrow keys, Enter and clicks.
 
 ### Choosing the right component
 
