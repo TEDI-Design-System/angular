@@ -1,0 +1,154 @@
+@use "../vertical-stepper.mixins" as *;
+
+.tedi-vertical-stepper-sub-item {
+  --tedi-vertical-stepper-sub-item-fill: var(--stepper-step-default-bg);
+  --tedi-vertical-stepper-sub-item-stroke: var(--stepper-step-default-border);
+
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--tedi-vertical-stepper-step-size) minmax(0, 1fr);
+  column-gap: var(--tedi-vertical-stepper-gap);
+  padding-top: var(--stepper-item-vertical-padding-y-sm);
+  padding-bottom: var(--stepper-item-vertical-padding-y-sm);
+
+  &::before {
+    @include stepper-line;
+  }
+}
+
+.tedi-vertical-stepper-item:last-child
+  .tedi-vertical-stepper-sub-item:last-child::before {
+  bottom: auto;
+  height: calc(
+    var(--stepper-item-vertical-padding-y-sm) +
+      var(--body-regular-line-height) / 2
+  );
+}
+
+.tedi-vertical-stepper-sub-item__indicator {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  align-self: start;
+  justify-content: center;
+  width: var(--tedi-vertical-stepper-step-size);
+  height: var(--body-regular-line-height);
+}
+
+.tedi-vertical-stepper-sub-item__dot {
+  width: var(--tedi-vertical-stepper-dot-size);
+  height: var(--tedi-vertical-stepper-dot-size);
+  background-color: var(--tedi-vertical-stepper-sub-item-fill);
+  border: var(--tedi-borders-01) solid
+    var(--tedi-vertical-stepper-sub-item-stroke);
+  border-radius: 50%;
+}
+
+.tedi-vertical-stepper-sub-item__content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tedi-vertical-stepper-sub-item__link {
+  @include stepper-link(".tedi-vertical-stepper-sub-item__label-text");
+}
+
+.tedi-vertical-stepper-sub-item__label {
+  display: flex;
+  gap: var(--layout-grid-gutters-04);
+  align-items: center;
+  color: var(--stepper-item-vertical-text-default);
+  overflow-wrap: anywhere;
+}
+
+.tedi-vertical-stepper-sub-item__label-icon {
+  flex-shrink: 0;
+}
+
+.tedi-vertical-stepper-sub-item__end:not(:empty) {
+  @include stepper-related-content;
+}
+
+.tedi-vertical-stepper-sub-item--completed {
+  --tedi-vertical-stepper-sub-item-fill: var(--stepper-step-completed-bg);
+  --tedi-vertical-stepper-sub-item-stroke: var(--stepper-step-completed-bg);
+}
+
+.tedi-vertical-stepper-sub-item--error {
+  --tedi-vertical-stepper-sub-item-fill: var(--stepper-step-danger-bg);
+  --tedi-vertical-stepper-sub-item-stroke: var(--stepper-step-danger-bg);
+}
+
+.tedi-vertical-stepper-sub-item--informative {
+  --tedi-vertical-stepper-sub-item-fill: var(--stepper-step-disabled-bg);
+  --tedi-vertical-stepper-sub-item-stroke: var(--stepper-step-disabled-border);
+
+  .tedi-vertical-stepper-sub-item__label {
+    padding-block: calc(
+      (
+          var(--body-regular-line-height) - var(
+              --body-small-regular-line-height
+            )
+        ) /
+        2
+    );
+    color: var(--general-text-tertiary);
+  }
+}
+
+.tedi-vertical-stepper-sub-item--current {
+  --tedi-vertical-stepper-sub-item-fill: var(--stepper-step-selected-bg);
+  --tedi-vertical-stepper-sub-item-stroke: var(--stepper-step-selected-border);
+
+  .tedi-vertical-stepper-sub-item__dot {
+    border-width: var(--tedi-borders-02);
+  }
+
+  .tedi-vertical-stepper-sub-item__label {
+    font-weight: var(--body-bold-weight);
+    color: var(--stepper-item-vertical-text-selected);
+  }
+}
+
+.tedi-vertical-stepper-sub-item--disabled {
+  --tedi-vertical-stepper-sub-item-fill: var(--stepper-step-disabled-bg);
+  --tedi-vertical-stepper-sub-item-stroke: var(--stepper-step-disabled-border);
+
+  .tedi-vertical-stepper-sub-item__label {
+    color: var(--stepper-item-vertical-text-disabled);
+  }
+}
+
+.tedi-vertical-stepper-sub-item--default:not(
+    .tedi-vertical-stepper-sub-item--current
+  ):has(.tedi-vertical-stepper-sub-item__link:hover) {
+  --tedi-vertical-stepper-sub-item-stroke: var(
+    --stepper-step-default-border-hover
+  );
+}
+
+.tedi-vertical-stepper-sub-item--completed:not(
+    .tedi-vertical-stepper-sub-item--current
+  ):has(.tedi-vertical-stepper-sub-item__link:hover) {
+  --tedi-vertical-stepper-sub-item-fill: var(--stepper-step-completed-bg-hover);
+  --tedi-vertical-stepper-sub-item-stroke: var(
+    --stepper-step-completed-bg-hover
+  );
+}
+
+.tedi-vertical-stepper-sub-item--error:not(
+    .tedi-vertical-stepper-sub-item--current
+  ):has(.tedi-vertical-stepper-sub-item__link:hover) {
+  --tedi-vertical-stepper-sub-item-fill: var(--stepper-step-danger-bg-hover);
+  --tedi-vertical-stepper-sub-item-stroke: var(--stepper-step-danger-bg-hover);
+}
+
+.tedi-vertical-stepper-sub-item--current:has(
+  .tedi-vertical-stepper-sub-item__link:hover
+) {
+  --tedi-vertical-stepper-sub-item-stroke: var(
+    --stepper-step-selected-border-hover
+  );
+}
