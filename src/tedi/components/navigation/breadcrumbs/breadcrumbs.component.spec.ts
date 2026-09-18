@@ -269,4 +269,12 @@ describe("Breadcrumbs", () => {
       expect(separators(fixture)).toHaveLength(2);
     });
   });
+
+  it("hides the breadcrumbs when printing", () => {
+    const fixture = setup();
+    const breadcrumbs = fixture.debugElement.query(By.css("tedi-breadcrumbs"))
+      .nativeElement as HTMLElement;
+
+    expect(breadcrumbs.classList).toContain("no-print");
+  });
 });
