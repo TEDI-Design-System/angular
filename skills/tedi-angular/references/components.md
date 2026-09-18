@@ -192,6 +192,10 @@ Three things the types won't warn you about:
   `tedi-row`/`tedi-col` grid inside the wrapper when blocks need to sit side by side. Use **one
   wrapper per loading region**, not one per block: the announcement is per wrapper, so several
   wrappers mounting together compete for the same live region.
+- **`tedi-heading-with-icon` projects the heading text and nothing else.** The icon comes from the
+  `icon` input, not from projection, so you cannot swap in your own `tedi-icon` or add trailing
+  content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
+  name — if the icon carries meaning the text doesn't, compose a heading and an icon yourself.
 
 ### Choosing the right component
 
@@ -206,6 +210,10 @@ Three things the types won't warn you about:
 - **`tedi-form-field` is only needed for a label, feedback text, or a `characterLimit` counter.**
   Controls paint their own field surface, so wrapping is otherwise redundant. `tedi-search` renders
   its own and must **not** be wrapped.
+- **`tedi-heading-with-icon` over a hand-composed `<hN tedi-text>` plus `tedi-icon`** when the heading
+  can wrap: it centres the icon on the *first line* rather than the middle of the block. A heading
+  value in `modifiers` overrides `element`'s typography and the icon follows it, so
+  `element="h2" modifiers="h4"` is an `<h2>` that looks like an `h4` throughout.
 
 ### Responsive behaviour that isn't an input
 
