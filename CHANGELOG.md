@@ -1,3 +1,10 @@
+# [8.1.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.6...angular-8.1.0-rc.7) (2026-09-18)
+
+
+### Features
+
+* **skeleton:** New TEDI-ready component [#8](https://github.com/TEDI-Design-System/angular/issues/8) ([#645](https://github.com/TEDI-Design-System/angular/issues/645)) ([9cee6d8](https://github.com/TEDI-Design-System/angular/commit/9cee6d8a4d5d3520c84d990f45a58fe455c018cb))
+
 # [8.1.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.5...angular-8.1.0-rc.6) (2026-09-18)
 
 
