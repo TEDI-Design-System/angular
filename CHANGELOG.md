@@ -1,3 +1,10 @@
+# [8.1.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.5...angular-8.1.0-rc.6) (2026-09-18)
+
+
+### Features
+
+* **select:** add value input to apply selection on first render [#679](https://github.com/TEDI-Design-System/angular/issues/679) ([#682](https://github.com/TEDI-Design-System/angular/issues/682)) ([5f563fe](https://github.com/TEDI-Design-System/angular/commit/5f563fe0933d994c5a1e9e269eeef4a8c69fb4a4))
+
 # [8.1.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.4...angular-8.1.0-rc.5) (2026-09-18)
 
 
