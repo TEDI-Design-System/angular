@@ -6,3 +6,4 @@ export * from "./carousel";
 export * from "./calendar";
 export * from "./table";
 export * from "./truncate";
+export * from "./table-card";
