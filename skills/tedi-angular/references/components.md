@@ -187,6 +187,25 @@ Three things the types won't warn you about:
 - **`tedi-attachment` has no built-in action buttons.** Project neutral `tedi-button`s inside a single
   `<tedi-attachment-actions>` and wire `(click)` and `disabled` yourself.
 
+### Search suggestions
+
+- **`tedi-search` does not filter.** Bind `suggestions` to a list you have already filtered and react
+  to `valueChange`; sync and async sources work the same. `minQueryLength` only gates the panel, so
+  gate your own fetch on the same number. It is the TEDI-Ready name for Community Search's
+  `autocompleteFrom`.
+- **The combobox is opt-in through `suggestions` being bound at all**, not through it having items.
+  Left unbound, the input stays a plain `role="searchbox"`; bind `[]` to keep combobox behaviour
+  while nothing matches.
+- **Enter means search, except when an option is highlighted**, where it accepts that suggestion and
+  emits `suggestionSelect` instead of `searchEvent`.
+- **`<ng-template tediSearchFooter>` also renders in the no-results state**, which is what makes it
+  the place for "nothing matched, try this instead" actions. Navigating suggestions never moves focus
+  off the input (`aria-activedescendant`), so the footer's own controls are reached with Tab; Tab past
+  the last one closes the panel and continues after the field.
+- **Object suggestions are read through `bind*` keys, not a fixed shape.** `bindLabel` names the
+  display property, `bindDescription` a secondary line under it, and `bindDisabled` (default key
+  `disabled`) a row that greys out and is skipped by arrow keys, Enter and clicks.
+
 ### Choosing the right component
 
 - **`tedi-date-field`, not `tedi-date-picker`.** DatePicker is deprecated; DateField wraps a typed
@@ -214,8 +233,11 @@ Three things the types won't warn you about:
 - **Give each `tedi-search` on a page a distinct `ariaLabel`.** The host is a `role="search"`
   landmark whose name falls back to `ariaLabel`, then `label`, then `placeholder`, then the
   translated default. Two identically named landmarks of the same type fail axe's `landmark-unique`.
-- **A suggestion panel needs `role="combobox"` on the input.** `aria-expanded` is not permitted on a
-  plain textbox and fails `aria-allowed-attr`. Bind `aria-controls` conditionally
+- **Don't hand-roll a suggestion panel around `tedi-search`.** It owns the combobox wiring itself
+  (see Search suggestions above), and a second panel bolted on top fights it. The rules below apply
+  when you are building a combobox out of some *other* control: the input needs `role="combobox"`,
+  because `aria-expanded` is not permitted on a plain textbox and fails `aria-allowed-attr`; and
+  `aria-controls` has to be bound conditionally
   (`[attr.aria-controls]="open() ? 'panel-id' : null"`), because a popup rendered with `@if` or a CDK
   overlay is absent while closed and a dangling idref fails `aria-valid-attr-value`.
 - **Tabs activate differently depending on the host element.** `<button>` tabs use automatic

@@ -111,7 +111,43 @@ A `[disabled]` template input also exists on most controls for non-form usage. D
 
 The host is a `role="search"` landmark whose accessible name falls back to `ariaLabel` → `label` → `placeholder` → the translated "search". **When a page renders more than one `tedi-search`, give each a distinct `ariaLabel`** — identically named landmarks of the same type fail axe's `landmark-unique` rule. The visible `<label>` is unaffected; `ariaLabel` names only the landmark.
 
-If you build a suggestion panel around the field, `aria-expanded` is the attribute to watch: it is not permitted on a plain textbox (`aria-allowed-attr`), so the input needs `role="combobox"`. `aria-controls` and `aria-haspopup` are global attributes and are valid on a plain text input either way. Point `aria-controls` at a `role="listbox"` popup for a list of options, or a `role="dialog"` popup (with `aria-haspopup="dialog"`) when the panel mixes results with other controls. Bind it conditionally — `[attr.aria-controls]="open() ? 'panel-id' : null"` — since a popup rendered with `@if` or a CDK overlay is absent while closed, and a reference to a missing id fails `aria-valid-attr-value`.
+### Suggestions
+
+Bind `suggestions` and the field becomes a combobox: `role="combobox"` on the input, a CDK overlay panel flush against the field, and arrow keys, `Home`/`End`, `Escape` and `aria-activedescendant` wired for you. Do not build a panel of your own on top of it.
+
+It does not filter. Pass a list you have already filtered and react to `valueChange`; sync and async sources work the same. `minQueryLength` gates only the panel, so gate your own fetch on the same number (Community Search called this `autocompleteFrom`). Enter runs the search as before, except when an option is highlighted, where it accepts that suggestion and emits `suggestionSelect` instead of `searchEvent`.
+
+The opt-in is `suggestions` being bound at all, not its length. Bind `[]` to keep combobox behaviour while nothing matches; leave it unbound for a plain `role="searchbox"`.
+
+When suggestions are objects, `bindLabel` names the display property, `bindDescription` adds a secondary line under it, and `bindDisabled` (default key `disabled`) greys a row out and takes it out of keyboard navigation and selection. `noResultsText`, `loadingText` and `resultsCountText` override the translated panel and live-region copy where the defaults do not fit.
+
+```html
+<tedi-search
+  inputId="search"
+  label="Otsing"
+  bindLabel="name"
+  bindDescription="code"
+  [value]="value()"
+  [suggestions]="matches()"
+  [loading]="loading()"
+  (valueChange)="value.set($event)"
+  (suggestionSelect)="pick($event)"
+>
+  <ng-template tediSearchSuggestion let-item>
+    <span tedi-text modifiers="bold">{{ item.name }}</span>
+  </ng-template>
+
+  <ng-template tediSearchFooter>
+    <tedi-search-footer-actions>
+      <button tedi-button variant="secondary">Isik teadmata</button>
+    </tedi-search-footer-actions>
+  </ng-template>
+</tedi-search>
+```
+
+`tediSearchSuggestion` replaces the default row, which bolds the substring matching the query; its context gives you `$implicit`/`item`, `label`, `description`, `disabled`, `query` and `index`. `tediSearchFooter` pins content below the list and renders in the no-results state too, which is what makes it the place for "nothing matched, try this instead" actions; `tedi-search-footer-actions` lays its buttons out. Navigating suggestions never moves focus off the input, so footer controls are reached with Tab, and Tab past the last one closes the panel.
+
+Building a combobox out of some *other* control? `aria-expanded` is the attribute to watch: it is not permitted on a plain textbox (`aria-allowed-attr`), so the input needs `role="combobox"`. `aria-controls` and `aria-haspopup` are global attributes and are valid on a plain text input either way. Point `aria-controls` at a `role="listbox"` popup for a list of options, or a `role="dialog"` popup (with `aria-haspopup="dialog"`) when the panel mixes results with other controls. Bind it conditionally, `[attr.aria-controls]="open() ? 'panel-id' : null"`, since a popup rendered with `@if` or a CDK overlay is absent while closed, and a reference to a missing id fails `aria-valid-attr-value`.
 
 ## Date Selection
 
