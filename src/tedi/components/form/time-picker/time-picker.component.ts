@@ -144,6 +144,8 @@ export class TimePickerComponent
   private readonly scrollLockTimer: Partial<
     Record<WheelType, ReturnType<typeof setTimeout>>
   > = {};
+  /** Latest moment a programmatic scroll may still own its column. */
+  private readonly scrollLockDeadline: Partial<Record<WheelType, number>> = {};
   private readonly scrollDebounceTimer: Partial<
     Record<WheelType, ReturnType<typeof setTimeout>>
   > = {};
@@ -563,16 +565,16 @@ export class TimePickerComponent
     if (existing) clearTimeout(existing);
 
     this.scrollDebounceTimer[type] = setTimeout(() => {
+      delete this.scrollDebounceTimer[type];
+
+      this.hasUserGesture[type] = false;
+      this.clearGestureTimer(type);
+
       const column = this.getColumnElement(type);
       if (!column) return;
 
       const list = type === "hour" ? this.hours : this.minutes();
       const index = this.indexFromScroll(type, column);
-
-      // The gesture has produced its value. Whatever scrolls the column next
-      // has to come with a gesture of its own to be read as a selection.
-      this.hasUserGesture[type] = false;
-      this.clearGestureTimer(type);
 
       if (type === "hour") this.selectHour(list[index]);
       else this.selectMinute(list[index]);
@@ -757,6 +759,7 @@ export class TimePickerComponent
       column.scrollTop = target;
     }
 
+    this.scrollLockDeadline[type] = Date.now() + SCROLL_SETTLE_MAX_WAIT_MS;
     this.releaseScrollLockAfter(type, SCROLL_SETTLE_MAX_WAIT_MS);
     return true;
   }
@@ -765,12 +768,19 @@ export class TimePickerComponent
     const existing = this.scrollLockTimer[type];
     if (existing) clearTimeout(existing);
 
+    const deadline = this.scrollLockDeadline[type];
+    const wait =
+      deadline === undefined
+        ? delay
+        : Math.max(0, Math.min(delay, deadline - Date.now()));
+
     this.scrollLockTimer[type] = setTimeout(() => {
       this.isProgrammaticScroll[type] = false;
       this.isSmoothProgrammaticScroll[type] = false;
       delete this.programmaticScrollTarget[type];
       delete this.scrollLockTimer[type];
-    }, delay);
+      delete this.scrollLockDeadline[type];
+    }, wait);
   }
 
   /** Drops every trace of a programmatic scroll, target offset included. */
@@ -778,6 +788,7 @@ export class TimePickerComponent
     const existing = this.scrollLockTimer[type];
     if (existing) clearTimeout(existing);
     delete this.scrollLockTimer[type];
+    delete this.scrollLockDeadline[type];
     this.isProgrammaticScroll[type] = false;
     this.isSmoothProgrammaticScroll[type] = false;
     delete this.programmaticScrollTarget[type];
