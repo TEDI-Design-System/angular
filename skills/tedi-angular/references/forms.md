@@ -30,6 +30,7 @@ component's `ɵɵComponentDeclaration` carries its real selector; see
 | TimeFieldComponent | `tedi-time-field` | `string \| null` (HH:mm) |
 | TimePickerComponent | `tedi-time-picker` | `string \| null` (HH:mm) |
 | SelectComponent | `tedi-select` | `T \| T[]` |
+| TextEditorComponent | `tedi-text-editor` | `string` (Quill HTML) — `/community/text-editor` entry point |
 
 `CheckboxComponent` (`input[type=checkbox][tedi-checkbox]`) is **not** a TEDI value accessor — it styles a native checkbox, so `[formControl]` on it is handled by Angular's built-in `CheckboxControlValueAccessor` and yields a `boolean`. Inside a managed `<tedi-checkbox-group>`, its `value` input is a `string` identity instead. `DropdownComponent` (`tedi-dropdown`) lives in `overlay/` and is not a form control — it exposes `[(value)]` but implements no `ControlValueAccessor`.
 
@@ -59,6 +60,8 @@ form = new FormGroup({
 ## Form Field Structure
 
 Wrap a control with `tedi-form-field` to compose the label, control, and feedback text into one accessible field. `tedi-form-field` wires the feedback text to the control's `aria-describedby` for you. It does **not** associate the label: give the label a `for` and the control a matching `id` yourself.
+
+`TextEditorComponent` is the exception to the `for`/`id` rule: its editing area is a `contenteditable` div, which `for` cannot target. Give the label an `id` and point the control's `ariaLabelledby` at it instead.
 
 `tedi-feedback-text` takes its message through the required `text` input, not projected content.
 

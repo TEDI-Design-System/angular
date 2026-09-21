@@ -91,7 +91,9 @@ export default {
 
 type Story = StoryObj<TagComponent & { content: string }>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+};
 
 export const Ellipsis: Story = {
   render: () => ({

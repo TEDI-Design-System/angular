@@ -1,7 +1,10 @@
 <ng-template #defaultTemplate>
   <nav [attr.aria-label]="ariaLabel()" [class]="classes()">
-    <tedi-card>
-      <tedi-card-content class="table-of-contents__content">
+    <tedi-card background="primary" [padding]="0">
+      <tedi-card-content
+        class="table-of-contents__content"
+        [padding]="{ top: 0, right: 0, bottom: 1, left: 0 }"
+      >
         <h1 tedi-text modifiers="h4" class="table-of-contents__header">
           {{ heading() }}
         </h1>
@@ -16,7 +19,7 @@
 @if (!isOpen()) {
   <ng-container *ngTemplateOutlet="defaultTemplate" />
 
-  <tedi-card [class]="footerClasses()">
+  <tedi-card [class]="footerClasses()" background="primary" [padding]="0">
     <tedi-card-content>
       <button
         class="table-of-contents__footer-trigger"

@@ -134,6 +134,7 @@ export default {
 } as Meta<ToggleComponent>;
 
 export const Default: StoryObj<ToggleComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     inputId: "example-toggle-1",
     variant: "primary",

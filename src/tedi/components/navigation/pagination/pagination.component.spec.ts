@@ -303,6 +303,34 @@ describe("PaginationComponent", () => {
     ).toBeNull();
   });
 
+  it("renders the selected page size on the very first change-detection pass", () => {
+    const fixture = setup({
+      pageCount: 5,
+      pageSize: 25,
+      pageSizeOptions: [10, 25, 50],
+    });
+
+    // No await, no tick: this asserts what the browser paints on the first
+    // frame, before any microtask has had a chance to run.
+    const label = fixture.nativeElement.querySelector(
+      ".tedi-pagination__page-size-select .tedi-select__label",
+    );
+    expect(label?.textContent?.trim()).toBe("25");
+  });
+
+  it("renders a labelled page-size option's text on the first change-detection pass", () => {
+    const fixture = setup({
+      pageCount: 5,
+      pageSize: 1000,
+      pageSizeOptions: [10, 25, { value: 1000, label: "Show all" }],
+    });
+
+    const label = fixture.nativeElement.querySelector(
+      ".tedi-pagination__page-size-select .tedi-select__label",
+    );
+    expect(label?.textContent?.trim()).toBe("Show all");
+  });
+
   it("still renders the page-size selector when given labelled options", () => {
     const fixture = setup({
       pageCount: 5,

@@ -132,6 +132,40 @@ example. Where the same component exists in both, the `/tedi` one is the answer.
 The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `border`, plus
 `tedi-card-icon` and breakpoint inputs; Community takes named `spacing` and `accentBorder`.
 
+### `tedi-text-editor` lives behind its own entry point
+
+The rich text editor is the one component that is **not** in the `/community` barrel. It ships as its
+own secondary entry point so the rest of the library stays free of its dependencies:
+
+```ts
+import { TextEditorComponent } from "@tedi-design-system/angular/community/text-editor";
+```
+
+`ngx-quill` and `quill` are **optional** peer dependencies, declared in `peerDependenciesMeta`, so
+installing the library does not pull them in. Install them yourself, and load Quill's `snow` theme
+stylesheet globally, or the editor renders unstyled:
+
+```scss
+// styles.scss
+@forward "quill/dist/quill.core.css";
+@forward "quill/dist/quill.snow.css";
+```
+
+It is a normal TEDI form control otherwise: a `ControlValueAccessor` that works with
+`formControl`, `formControlName` and `ngModel`, and that composes with `tedi-form-field`.
+
+Three things the types won't warn you about:
+
+- **`<label for>` cannot name it.** Quill's editing area is a `contenteditable` div, and `for` only
+  resolves to labelable elements. Give the label an `id` and point `ariaLabelledby` at it (or set
+  `ariaLabel`). This is the one control where the usual `for`/`id` pairing silently does nothing.
+- `modules` **replaces** the default toolbar rather than extending it. Copy
+  `TEXT_EDITOR_DEFAULT_MODULES` and edit it if you only want to add a button.
+- `tedi-form-field`'s `characterLimit` counts the **visible text**, not the Quill markup behind it,
+  so formatting a word bold adds no characters. It is the one control that reports its own count
+  (the optional `characterCount` member of `FormFieldControl`) rather than letting the field measure
+  its value.
+
 ### Composition constraints
 
 - **`[tedi-card-button]` projects a `tedi-card` and nothing else.** Other content is not projected.
@@ -152,6 +186,16 @@ The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `bord
   native label attributes (`for`, `id`, `aria-*`, handlers) keep working.
 - **`tedi-attachment` has no built-in action buttons.** Project neutral `tedi-button`s inside a single
   `<tedi-attachment-actions>` and wire `(click)` and `disabled` yourself.
+- **`tedi-skeleton-block` belongs inside `tedi-skeleton`.** The wrapper stacks whatever is projected
+  into it as a flex column gapped by `--loader-skeleton-inner-spacing-y`, and it owns the loading
+  announcement. A block on its own is `aria-hidden` decoration that announces nothing; put a
+  `tedi-row`/`tedi-col` grid inside the wrapper when blocks need to sit side by side. Use **one
+  wrapper per loading region**, not one per block: the announcement is per wrapper, so several
+  wrappers mounting together compete for the same live region.
+- **`tedi-heading-with-icon` projects the heading text and nothing else.** The icon comes from the
+  `icon` input, not from projection, so you cannot swap in your own `tedi-icon` or add trailing
+  content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
+  name — if the icon carries meaning the text doesn't, compose a heading and an icon yourself.
 
 ### Choosing the right component
 
@@ -169,6 +213,10 @@ The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `bord
 - **`tedi-form-field` is only needed for a label, feedback text, or a `characterLimit` counter.**
   Controls paint their own field surface, so wrapping is otherwise redundant. `tedi-search` renders
   its own and must **not** be wrapped.
+- **`tedi-heading-with-icon` over a hand-composed `<hN tedi-text>` plus `tedi-icon`** when the heading
+  can wrap: it centres the icon on the *first line* rather than the middle of the block. A heading
+  value in `modifiers` overrides `element`'s typography and the icon follows it, so
+  `element="h2" modifiers="h4"` is an `<h2>` that looks like an `h4` throughout.
 
 ### Responsive behaviour that isn't an input
 
@@ -190,6 +238,14 @@ The two Card APIs differ concretely: TEDI-Ready takes `padding` in rem and `bord
 - **Tabs activate differently depending on the host element.** `<button>` tabs use automatic
   activation (arrow keys select), anchor tabs use manual. Arrow Left/Right wrap, Home/End jump, only
   the active tab is in the tab order, and disabled tabs are skipped.
+- **Name what a `tedi-skeleton` is loading.** `label` and `completedLabel` are optional in the types
+  but the generic translated fallbacks ("Laadimine") tell a screen-reader user nothing about what
+  they are waiting for. The completion message is only announced if the skeleton outlived
+  `labelDelay` (200ms), so a placeholder that flashes by stays silent on purpose.
+- **`aria-busy="false"` after loading is the consumer's job.** The skeleton sets `aria-busy="true"`
+  on itself and hosts the `role="status"` live region, but it is removed the moment content arrives,
+  so it cannot report its own completion. Bind `[attr.aria-busy]="loading()"` on the region that
+  swaps skeleton for content; without it a screen reader may announce the region mid-update.
 - **Icon-only controls need an accessible name**, and don't signal state by colour alone. Sorting,
   pagination, expansion and reordering controls all need labels; those come from
   `TediTranslationService`, so check the translation keys rather than hardcoding Estonian.

@@ -14,7 +14,17 @@
     "@angular/common": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/core": "^20.0.0 || ^21.0.0 || ^22.0.0",
     "@angular/forms": "^20.0.0 || ^21.0.0 || ^22.0.0",
-    "@angular/platform-browser": "^20.0.0 || ^21.0.0 || ^22.0.0"
+    "@angular/platform-browser": "^20.0.0 || ^21.0.0 || ^22.0.0",
+    "ngx-quill": "^28.0.2",
+    "quill": "^2.0.3"
+  },
+  "peerDependenciesMeta": {
+    "ngx-quill": {
+      "optional": true
+    },
+    "quill": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@tanstack/angular-table": "^8.21.4",
