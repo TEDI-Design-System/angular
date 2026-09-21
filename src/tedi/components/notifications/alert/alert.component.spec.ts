@@ -301,6 +301,36 @@ describe("AlertComponent", () => {
     });
   });
 
+  describe("closeAriaLabel", () => {
+    it("should name the close button with the generic default", () => {
+      fixture.componentRef.setInput("showClose", true);
+      fixture.detectChanges();
+
+      const closeButton = fixture.debugElement.query(
+        By.css(".tedi-alert__close"),
+      ).nativeElement as HTMLButtonElement;
+
+      expect(closeButton.getAttribute("aria-label")).toBe("Sulge");
+    });
+
+    it("should name the close button with the provided label", () => {
+      fixture.componentRef.setInput("showClose", true);
+      fixture.componentRef.setInput(
+        "closeAriaLabel",
+        "Sulge teavitus: Salvestatud",
+      );
+      fixture.detectChanges();
+
+      const closeButton = fixture.debugElement.query(
+        By.css(".tedi-alert__close"),
+      ).nativeElement as HTMLButtonElement;
+
+      expect(closeButton.getAttribute("aria-label")).toBe(
+        "Sulge teavitus: Salvestatud",
+      );
+    });
+  });
+
   describe("action slot", () => {
     @Component({
       standalone: true,

@@ -74,6 +74,25 @@ describe("ToastComponent", () => {
     expect(closeButton).toBeTruthy();
   });
 
+  it("should name the close button after the toast it closes", () => {
+    const closeButton =
+      fixture.nativeElement.querySelector(".tedi-alert__close");
+
+    expect(closeButton.getAttribute("aria-label")).toBe(
+      "Sulge teavitus: Test Title",
+    );
+  });
+
+  it("should fall back to the generic close label without a title", () => {
+    fixture.componentRef.setInput("title", undefined);
+    fixture.detectChanges();
+
+    const closeButton =
+      fixture.nativeElement.querySelector(".tedi-alert__close");
+
+    expect(closeButton.getAttribute("aria-label")).toBe("Sulge");
+  });
+
   it("should emit closed event when close button is clicked", () => {
     const closedSpy = jest.fn();
     component.closed.subscribe(closedSpy);

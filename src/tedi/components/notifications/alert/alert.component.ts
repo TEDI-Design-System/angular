@@ -57,6 +57,12 @@ export class AlertComponent {
    */
   showClose = input<boolean>(false);
   /**
+   * Accessible name for the close button. Override the generic default
+   * ("Close") when several alerts can be on screen at once, so the button
+   * says which one it closes.
+   */
+  closeAriaLabel = input<string>();
+  /**
    * The ARIA role of the alert, informing screen readers about the alert's purpose.
    * The role carries its own live-region semantics, so no separate `aria-live` is set.
    * Options:

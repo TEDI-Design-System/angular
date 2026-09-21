@@ -2,10 +2,13 @@ import {
   Component,
   ChangeDetectionStrategy,
   ViewEncapsulation,
+  computed,
+  inject,
   input,
   output,
 } from "@angular/core";
 import { AlertComponent, AlertType, AlertRole } from "../alert/alert.component";
+import { TediTranslationService } from "../../../services/translation/translation.service";
 
 export const TOAST_DEFAULT_DURATION = 6000;
 
@@ -130,6 +133,15 @@ export class ToastComponent {
    * Emits when the toast is closed by the user.
    */
   readonly closed = output<void>();
+
+  private readonly translationService = inject(TediTranslationService);
+
+  protected readonly closeLabel = computed(() => {
+    const title = this.title();
+    return title
+      ? this.translationService.translate("toast.close", title)
+      : this.translationService.translate("close");
+  });
 
   readonly mouseEnter = output<void>();
   readonly mouseLeave = output<void>();
