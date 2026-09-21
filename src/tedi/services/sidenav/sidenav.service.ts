@@ -1,4 +1,12 @@
-import { computed, effect, inject, Injectable, signal } from "@angular/core";
+import {
+  computed,
+  effect,
+  inject,
+  Injectable,
+  PLATFORM_ID,
+  signal,
+} from "@angular/core";
+import { isPlatformBrowser } from "@angular/common";
 import {
   Breakpoint,
   BreakpointService,
@@ -8,18 +16,68 @@ import { SideNavItemComponent } from "../../components/layout/sidenav/sidenav-it
 @Injectable({ providedIn: "root" })
 export class SideNavService {
   private readonly breakpointService = inject(BreakpointService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   items = signal<SideNavItemComponent[]>([]);
   desktopBreakpoint = signal<Breakpoint>("lg");
   isMobile = this.breakpointService.isBelowBreakpoint(this.desktopBreakpoint);
   isMobileOpen = signal(false);
   isCollapsed = signal(false);
+  isMobileDrawerOpen = computed(() => this.isMobile() && this.isMobileOpen());
+
+  /**
+   * Last registered toggle. Registering a second one supersedes the first. Reactive so
+   * that (un)registering while the drawer is open re-resolves the measured anchor.
+   */
+  private readonly toggle = signal<HTMLElement | null>(null);
+  private readonly offsetTop = signal(0);
+
+  /**
+   * Distance in pixels from the top of the viewport where the mobile navigation and
+   * its overlay start, so both open below the header that holds the toggle.
+   * `null` whenever the mobile navigation is not open.
+   */
+  drawerTop = computed(() =>
+    this.isMobileDrawerOpen() ? this.offsetTop() : null,
+  );
 
   constructor() {
     effect(() => {
       if (this.isMobile() && this.isCollapsed()) {
         this.isCollapsed.set(false);
       }
+    });
+
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    effect((onCleanup) => {
+      if (!this.isMobileDrawerOpen()) {
+        return;
+      }
+
+      const toggle = this.toggle();
+      const anchor = toggle?.closest("header") ?? toggle;
+
+      if (!anchor) {
+        this.offsetTop.set(0);
+        return;
+      }
+
+      const measure = () =>
+        this.offsetTop.set(Math.max(0, anchor.getBoundingClientRect().bottom));
+
+      measure();
+
+      if (typeof ResizeObserver === "undefined") {
+        return;
+      }
+
+      const observer = new ResizeObserver(measure);
+
+      observer.observe(anchor);
+      onCleanup(() => observer.disconnect());
     });
   }
 
@@ -29,6 +87,16 @@ export class SideNavService {
 
   unregisterItem(item: SideNavItemComponent) {
     this.items.update((list) => list.filter((i) => i !== item));
+  }
+
+  registerToggle(element: HTMLElement) {
+    this.toggle.set(element);
+  }
+
+  unregisterToggle(element: HTMLElement) {
+    if (this.toggle() === element) {
+      this.toggle.set(null);
+    }
   }
 
   handleGoToMainMenu() {

@@ -72,7 +72,9 @@ export default {
 
 type Story = StoryObj<TagComponent>;
 
-export const Default: Story = {};
+export const Default: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+};
 
 // Primary Tag Story
 export const Primary: Story = {

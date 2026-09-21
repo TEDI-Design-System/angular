@@ -1,8 +1,16 @@
-import { Injectable, inject, signal } from "@angular/core";
+import {
+  Injectable,
+  Injector,
+  afterNextRender,
+  inject,
+  signal,
+} from "@angular/core";
 import { Dialog, DialogRef } from "@angular/cdk/dialog";
+import { _IdGenerator } from "@angular/cdk/a11y";
 import { GlobalPositionStrategy, Overlay } from "@angular/cdk/overlay";
 import { ComponentType } from "@angular/cdk/portal";
 import { ModalRef } from "./modal-ref";
+import { resolveModalHeadingId } from "./modal-label";
 import {
   ModalConfig,
   ModalFullscreen,
@@ -18,6 +26,8 @@ const WIDTH_PRESETS: readonly string[] = ["xs", "sm", "md", "lg", "xl"];
 export class ModalService {
   private readonly dialog = inject(Dialog);
   private readonly overlay = inject(Overlay);
+  private readonly injector = inject(Injector);
+  private readonly idGenerator = inject(_IdGenerator);
 
   /**
    * Open a modal dialog with the given component as content.
@@ -102,12 +112,46 @@ export class ModalService {
       closeOnEscape,
     );
 
+    if (!ariaLabel && !ariaLabelledBy) {
+      this.labelFromHeading(dialogRef);
+    }
+
     return new ModalRef<R>(dialogRef);
   }
 
   /** Close all open modals. */
   closeAll(): void {
     this.dialog.closeAll();
+  }
+
+  /**
+   * Names the dialog from the heading in its `<tedi-modal-header>` when the
+   * caller passed no label of their own. Deferred, because `Dialog.open`
+   * returns before the content renders and the heading does not exist yet.
+   *
+   * Written onto the container rather than passed as
+   * `DialogConfig.ariaLabelledBy`, which would commit to an id before knowing
+   * whether a heading exists and leave a dangling reference when none does.
+   */
+  private labelFromHeading<R>(dialogRef: DialogRef<R>): void {
+    afterNextRender(
+      () => {
+        // The container, not the pane, is what carries role="dialog".
+        const container =
+          dialogRef.overlayRef.overlayElement.querySelector<HTMLElement>(
+            "cdk-dialog-container",
+          );
+
+        if (!container) return;
+
+        const headingId = resolveModalHeadingId(container, this.idGenerator);
+
+        if (headingId) {
+          container.setAttribute("aria-labelledby", headingId);
+        }
+      },
+      { injector: this.injector },
+    );
   }
 
   private buildPanelClasses(

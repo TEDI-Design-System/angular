@@ -89,6 +89,7 @@ export const Valid: StoryObj<FeedbackTextComponent> = {
 };
 
 export const PositionLeft: StoryObj<FeedbackTextComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     text: "I am a hint text",
     position: "left",

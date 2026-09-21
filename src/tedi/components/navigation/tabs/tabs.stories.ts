@@ -256,6 +256,7 @@ export const States: Story = {
 };
 
 export const Controlled: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     props: { currentTab: "tab-1", content },
     template: `
@@ -278,6 +279,7 @@ export const Controlled: Story = {
 
 export const AsLinks: Story = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:

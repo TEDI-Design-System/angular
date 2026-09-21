@@ -1,13 +1,46 @@
+@use "../../card/card-mixins";
+
 .tedi-accordion-item-header-host {
   display: contents;
 }
 
 .tedi-accordion-item-header {
+  &--variant--primary {
+    --_card-bg: var(--card-background-primary);
+    --_card-border: var(--card-border-primary);
+  }
+
+  &--variant--secondary {
+    --_card-bg: var(--card-background-secondary);
+    --_card-border: var(--card-border-primary);
+  }
+
+  &--variant--tertiary {
+    --_card-bg: var(--card-background-tertiary);
+    --_card-border: var(--card-border-primary);
+  }
+
+  &--variant--brand {
+    --_card-bg: linear-gradient(140deg, #005295 -17.66%, #1769ab 71.2%);
+    --_card-border: transparent;
+  }
+
+  &--variant--brand-dark {
+    --_card-bg: var(--card-background-brand-secondary);
+    --_card-border: transparent;
+  }
+
+  // Emitted after the variants, so `background` wins when both are set.
+  @include card-mixins.card-color-classes;
+
+  padding: var(--_card-padding-top) var(--_card-padding-right)
+    var(--_card-padding-bottom) var(--_card-padding-left);
   font-size: inherit;
   display: flex;
   gap: var(--_accordion-header-spacing);
   align-items: center;
   text-align: start;
+  background: var(--_card-bg);
 
   &:not([disabled]) {
     cursor: pointer;

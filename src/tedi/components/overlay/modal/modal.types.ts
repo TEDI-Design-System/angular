@@ -29,9 +29,18 @@ export interface ModalConfig<D = unknown> {
   fullscreen?: ModalFullscreen;
   /** Max-width cap (e.g. '75%', '60vw'). Overrides the default 95vw limit. */
   maxWidth?: string;
-  /** ARIA label for the dialog. */
+  /**
+   * Accessible name for the dialog. Set this only when the modal has no
+   * visible heading, or when the heading is not the name you want announced:
+   * a modal whose content renders a heading inside `<tedi-modal-header>` is
+   * labelled by that heading automatically.
+   */
   ariaLabel?: string;
-  /** ID of the element that labels the dialog. */
+  /**
+   * Id of the element that labels the dialog, for a label that lives outside
+   * `<tedi-modal-header>`. Ignored when `ariaLabel` is set, and takes
+   * precedence over the automatic heading lookup.
+   */
   ariaLabelledBy?: string;
 }
 

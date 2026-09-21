@@ -14,10 +14,12 @@ import {
   SkipSelf,
   Signal,
   effect,
+  signal,
 } from "@angular/core";
 import { DOCUMENT, isPlatformBrowser } from "@angular/common";
-import { CdkTrapFocus } from "@angular/cdk/a11y";
+import { CdkTrapFocus, _IdGenerator } from "@angular/cdk/a11y";
 import { ModalRef } from "./modal-ref";
+import { resolveModalHeadingId } from "./modal-label";
 import { MODAL_SIZE } from "./modal.types";
 import type { ModalSize, ModalWidth, ModalPosition } from "./modal.types";
 
@@ -72,9 +74,23 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
   /** @deprecated Whether clicking the backdrop closes the modal. Only used in standalone mode. */
   readonly closeOnBackdropClick = input(true);
 
+  /**
+   * Accessible name for the dialog. Only needed when the modal has no heading
+   * in `<tedi-modal-header>`, or that heading is not the name to announce.
+   * Standalone mode only; service mode uses `ModalConfig.ariaLabel`.
+   */
+  readonly ariaLabel = input<string | undefined>(undefined);
+
+  /**
+   * Id of an element labelling the dialog, for a label outside
+   * `<tedi-modal-header>`. Ignored when `ariaLabel` is set.
+   */
+  readonly ariaLabelledBy = input<string | undefined>(undefined);
+
   private readonly document = inject(DOCUMENT);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly idGenerator = inject(_IdGenerator);
 
   /**
    * When a ModalRef is available, this component is inside a CDK Dialog
@@ -93,6 +109,20 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
   readonly customWidth = computed(() =>
     !this.serviceMode && !this.isPresetWidth() ? this.width() : null,
   );
+
+  /** Re-resolved on every open, since the heading is projected content. */
+  private readonly headingLabelId = signal<string | null>(null);
+
+  /** @internal */
+  protected readonly dialogAriaLabel = computed(() =>
+    this.serviceMode ? null : (this.ariaLabel() ?? null),
+  );
+
+  /** @internal `aria-label` wins, so it is never paired with a labelledby. */
+  protected readonly dialogAriaLabelledBy = computed(() => {
+    if (this.serviceMode || this.ariaLabel()) return null;
+    return this.ariaLabelledBy() ?? this.headingLabelId();
+  });
 
   readonly classes = computed(() => {
     const classList = ["tedi-modal"];
@@ -155,10 +185,27 @@ export class ModalComponent implements AfterViewInit, OnDestroy {
   }
 
   private onOpen() {
+    this.resolveHeadingLabel();
     this.prevFocusedElement = this.document.activeElement as HTMLElement;
     this.prevBodyOverflow = this.document.body.style.overflow;
     this.document.body.style.overflow = "hidden";
     this.document.addEventListener("keydown", this.handleKeydown);
+  }
+
+  /**
+   * A DOM query rather than a `contentChild`, because the header injects this
+   * component (importing it back would close a cycle) and the heading is
+   * double-projected, out of reach of any query here.
+   */
+  private resolveHeadingLabel(): void {
+    if (this.ariaLabel() || this.ariaLabelledBy()) {
+      this.headingLabelId.set(null);
+      return;
+    }
+
+    this.headingLabelId.set(
+      resolveModalHeadingId(this.host.nativeElement, this.idGenerator),
+    );
   }
 
   private onClose() {

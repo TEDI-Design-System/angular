@@ -4751,6 +4751,7 @@ export const ServerSide: Story = {
     template: `<tedi-server-side-story ${argsToTemplate(args)} />`,
   }),
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         language: "html",

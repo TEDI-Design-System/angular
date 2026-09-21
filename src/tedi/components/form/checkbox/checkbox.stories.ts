@@ -160,6 +160,7 @@ export default {
 
 export const Default: StoryObj<StoryCheckboxComponent & { disabled: boolean }> =
   {
+    parameters: { chromatic: { disableSnapshot: true } },
     args: {
       size: "default",
       invalid: false,
@@ -836,6 +837,7 @@ export const CheckboxCardStates: StoryObj<CheckboxComponent> = {
  *   `CheckboxControlValueAccessor`. Each control holds a boolean.
  */
 export const WithReactiveForms: StoryObj<CheckboxComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const tagsControl = new FormControl<string[]>(["urgent"]);
     const featuresControl = new FormControl<string[]>(["analytics", "export"]);

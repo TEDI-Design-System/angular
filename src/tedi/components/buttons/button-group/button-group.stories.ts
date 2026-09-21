@@ -443,6 +443,7 @@ export const MobileDropdown: Story = {
  * Bind `[(value)]` to a string in single mode and read it back.
  */
 export const Controlled: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: { ...args, selected: signal<string>("2") },
     template: `

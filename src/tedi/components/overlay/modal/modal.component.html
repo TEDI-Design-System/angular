@@ -5,6 +5,8 @@
   [class.tedi-modal__dialog]="!serviceMode"
   [attr.role]="serviceMode ? null : 'dialog'"
   [attr.aria-modal]="serviceMode ? null : true"
+  [attr.aria-label]="dialogAriaLabel()"
+  [attr.aria-labelledby]="dialogAriaLabelledBy()"
   [attr.tabindex]="serviceMode ? null : -1"
   [cdkTrapFocus]="!serviceMode"
   [cdkTrapFocusAutoCapture]="!serviceMode && open()"

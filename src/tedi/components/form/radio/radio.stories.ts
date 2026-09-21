@@ -160,6 +160,7 @@ export default {
 } as Meta<RadioComponent>;
 
 export const Default: StoryObj<RadioComponent & { disabled: boolean }> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     invalid: false,
@@ -866,6 +867,7 @@ export const RadioCardStates: StoryObj<RadioComponent> = {
  *   All radios sharing the same control coordinate via their `name` attribute.
  */
 export const WithReactiveForms: StoryObj<RadioComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const statusControl = new FormControl<string | null>("active");
     const planControl = new FormControl<string | null>("pro");

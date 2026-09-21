@@ -33,8 +33,9 @@ import {
   LabelComponent,
   TediTranslationPipe,
   TextComponent,
+  CardComponent,
+  CardContentComponent,
 } from "@tedi-design-system/angular/tedi";
-import { CardComponent, CardContentComponent } from "../../../components/cards";
 import { DropdownItemComponent } from "../../../components/overlay";
 import { TagComponent } from "../../../components/tags";
 

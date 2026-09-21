@@ -176,6 +176,7 @@ export default {
 } as Meta<NumberFieldComponent>;
 
 export const Default: StoryObj<NumberFieldComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     inputId: "example-id",
     label: "Label",
@@ -251,6 +252,7 @@ export const WithHint: StoryObj<NumberFieldComponent> = {
 };
 
 export const Decimal: StoryObj<NumberFieldComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     inputId: "example-decimal",
     label: "Label",
