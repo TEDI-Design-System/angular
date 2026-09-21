@@ -1,0 +1,14 @@
+// Approximates React's Sheet — a modal with `position="bottom"` and
+// `fullscreen="edge"` — until the Angular Sheet component ships. The overlay
+// pane is styled from here because ModalService takes no panel class.
+.cdk-overlay-pane:has(.tedi-card-stepper-list-modal) {
+  // CDK sets `margin-bottom: var(--modal-top-margin)` inline, so redefining the
+  // token is what overrides it.
+  --modal-top-margin: 0;
+
+  .tedi-modal {
+    max-height: 80dvh;
+    border-top: var(--tedi-borders-01) solid var(--card-border-primary);
+    border-radius: var(--modal-radius) var(--modal-radius) 0 0;
+  }
+}

@@ -1,0 +1,180 @@
+@if (current(); as step) {
+  <div
+    class="tedi-card-stepper__main"
+    [class.tedi-card-stepper__main--no-lead]="!hasLead()"
+  >
+    @if (showNavigation()) {
+      <button
+        tedi-button
+        type="button"
+        variant="neutral"
+        class="tedi-card-stepper__lead tedi-card-stepper__nav-previous"
+        [attr.aria-label]="'card-stepper.previous' | tediTranslate"
+        [disabled]="previousIndex() === -1"
+        (click)="goTo(previousIndex())"
+      >
+        <tedi-icon name="arrow_back" />
+      </button>
+    }
+
+    @if (showIndicator()) {
+      <span
+        class="tedi-card-stepper__lead tedi-card-stepper__indicator"
+        aria-hidden="true"
+        >{{ active() + 1 }}</span
+      >
+    }
+
+    <div class="tedi-card-stepper__body">
+      @if (showTopRow()) {
+        <div class="tedi-card-stepper__top">
+          @if (counterPosition() === "top") {
+            <ng-container [ngTemplateOutlet]="counterTemplate" />
+          }
+          @if (showTopDescription()) {
+            <span
+              tedi-text
+              modifiers="small"
+              color="tertiary"
+              class="tedi-card-stepper__description"
+              >{{ step.description() }}</span
+            >
+          }
+        </div>
+      }
+
+      @switch (headingLevel()) {
+        @case (1) {
+          <h1 class="tedi-card-stepper__title">
+            <ng-container [ngTemplateOutlet]="titleTemplate" />
+          </h1>
+        }
+        @case (2) {
+          <h2 class="tedi-card-stepper__title">
+            <ng-container [ngTemplateOutlet]="titleTemplate" />
+          </h2>
+        }
+        @case (3) {
+          <h3 class="tedi-card-stepper__title">
+            <ng-container [ngTemplateOutlet]="titleTemplate" />
+          </h3>
+        }
+        @case (5) {
+          <h5 class="tedi-card-stepper__title">
+            <ng-container [ngTemplateOutlet]="titleTemplate" />
+          </h5>
+        }
+        @case (6) {
+          <h6 class="tedi-card-stepper__title">
+            <ng-container [ngTemplateOutlet]="titleTemplate" />
+          </h6>
+        }
+        @default {
+          <h4 class="tedi-card-stepper__title">
+            <ng-container [ngTemplateOutlet]="titleTemplate" />
+          </h4>
+        }
+      }
+
+      @if (descriptionPosition() === "bottom" && step.description()) {
+        <span
+          tedi-text
+          modifiers="small"
+          color="tertiary"
+          class="tedi-card-stepper__description"
+          >{{ step.description() }}</span
+        >
+      }
+
+      @if (counterPosition() === "bottom") {
+        <ng-container [ngTemplateOutlet]="counterTemplate" />
+      }
+    </div>
+
+    <div class="tedi-card-stepper__trail">
+      @if (counterPosition() === "inline") {
+        <ng-container [ngTemplateOutlet]="counterTemplate" />
+      }
+
+      @if (showStepList()) {
+        <button
+          tedi-button
+          type="button"
+          variant="neutral"
+          aria-haspopup="dialog"
+          [attr.aria-expanded]="listOpen()"
+          [attr.aria-label]="'card-stepper.open-steps' | tediTranslate"
+          (click)="openStepList()"
+        >
+          <tedi-icon name="list" />
+        </button>
+      }
+
+      @if (showNavigation()) {
+        <button
+          tedi-button
+          type="button"
+          variant="neutral"
+          class="tedi-card-stepper__nav-next"
+          [attr.aria-label]="'card-stepper.next' | tediTranslate"
+          [disabled]="nextIndex() === -1"
+          (click)="goTo(nextIndex())"
+        >
+          <tedi-icon name="arrow_forward" />
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (showProgress()) {
+    <ol class="tedi-card-stepper__progress" aria-hidden="true">
+      @for (progressStep of steps(); track $index) {
+        <li
+          class="tedi-card-stepper__segment"
+          [class.tedi-card-stepper__segment--done]="$index <= active()"
+        ></li>
+      }
+    </ol>
+  }
+
+  @if (step.content(); as content) {
+    <div class="tedi-card-stepper__bottom-slot">
+      <ng-container [ngTemplateOutlet]="content.templateRef" />
+    </div>
+  }
+}
+
+<ng-template #counterTemplate>
+  <span class="tedi-card-stepper__counter">
+    <span aria-hidden="true">{{ active() + 1 }} / {{ total() }}</span>
+    <span class="sr-only" role="status" aria-live="polite" aria-atomic="true">{{
+      "card-stepper.status" | tediTranslate: active() + 1 : total()
+    }}</span>
+  </span>
+</ng-template>
+
+<ng-template #titleTemplate>
+  {{ current()?.label() }}
+  @if (showStatusIcon() && current()?.state() === "completed") {
+    <tedi-icon
+      class="tedi-card-stepper__status-icon"
+      name="check"
+      color="success"
+      [size]="18"
+    />
+    <span class="sr-only"
+      >({{ "vertical-stepper.completed" | tediTranslate }})</span
+    >
+  }
+  @if (showStatusIcon() && current()?.state() === "error") {
+    <tedi-icon
+      class="tedi-card-stepper__status-icon"
+      name="error"
+      color="danger"
+      [size]="18"
+    />
+    <span class="sr-only"
+      >({{ "vertical-stepper.error" | tediTranslate }})</span
+    >
+  }
+</ng-template>
