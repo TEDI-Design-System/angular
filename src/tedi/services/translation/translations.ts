@@ -1563,6 +1563,42 @@ export const translationsMap = {
     en: "No times available",
     ru: "Нет доступных вариантов",
   },
+  "card-stepper.previous": {
+    description: "Accessible label for the previous-step button",
+    components: ["CardStepper"],
+    et: "Eelmine samm",
+    en: "Previous step",
+    ru: "Предыдущий шаг",
+  },
+  "card-stepper.next": {
+    description: "Accessible label for the next-step button",
+    components: ["CardStepper"],
+    et: "Järgmine samm",
+    en: "Next step",
+    ru: "Следующий шаг",
+  },
+  "card-stepper.open-steps": {
+    description: "Accessible label for the button that opens the step list",
+    components: ["CardStepper"],
+    et: "Ava sammud",
+    en: "Open steps",
+    ru: "Открыть шаги",
+  },
+  "card-stepper.steps": {
+    description: "Heading of the step-list modal",
+    components: ["CardStepper"],
+    et: "Sammud",
+    en: "Steps",
+    ru: "Шаги",
+  },
+  "card-stepper.status": {
+    description:
+      'Screen-reader phrasing for the visible "N / M" counter, which reads poorly on its own',
+    components: ["CardStepper"],
+    et: (current: number, total: number) => `Samm ${current} / ${total}`,
+    en: (current: number, total: number) => `Step ${current} of ${total}`,
+    ru: (current: number, total: number) => `Шаг ${current} из ${total}`,
+  },
   "vertical-stepper.completed": {
     description:
       "Label for screen-reader that this step is completed (visually hidden)",
