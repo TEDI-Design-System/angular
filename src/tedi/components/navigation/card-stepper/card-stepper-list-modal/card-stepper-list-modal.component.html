@@ -1,0 +1,31 @@
+<tedi-modal>
+  <tedi-modal-header>
+    <h2 tedi-text modifiers="h5">{{ data.title }}</h2>
+  </tedi-modal-header>
+  <tedi-modal-content>
+    <tedi-vertical-stepper [ariaLabel]="data.title">
+      @for (step of data.steps; track $index; let stepIndex = $index) {
+        <tedi-vertical-stepper-item
+          [label]="step.label"
+          [description]="step.description"
+          [state]="step.disabled ? 'disabled' : step.state"
+          [current]="step.current"
+          [labelAs]="step.navigable ? 'button' : 'text'"
+          [open]="step.expanded"
+          (stepSelect)="selectStep(stepIndex)"
+        >
+          @for (subStep of step.subSteps; track $index; let subIndex = $index) {
+            <tedi-vertical-stepper-sub-item
+              [label]="subStep.label"
+              [state]="subStep.disabled ? 'disabled' : subStep.state"
+              [current]="subStep.current"
+              [href]="subStep.href"
+              [labelAs]="subStep.labelAs"
+              (stepSelect)="selectSubStep(stepIndex, subIndex)"
+            />
+          }
+        </tedi-vertical-stepper-item>
+      }
+    </tedi-vertical-stepper>
+  </tedi-modal-content>
+</tedi-modal>
