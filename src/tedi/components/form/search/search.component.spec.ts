@@ -595,6 +595,27 @@ describe("SearchComponent", () => {
     });
   });
 
+  describe("scroll listener cleanup", () => {
+    it("removes the document listener when the component is destroyed", () => {
+      const remove = jest.spyOn(document, "removeEventListener");
+      fixture.componentRef.setInput("hideOnScroll", true);
+      fixture.componentRef.setInput("suggestions", ["Mari Maasikas"]);
+      fixture.componentRef.setInput("value", "Mar");
+      fixture.detectChanges();
+      component.openPanel();
+      fixture.detectChanges();
+
+      fixture.destroy();
+
+      expect(remove).toHaveBeenCalledWith(
+        "scroll",
+        expect.any(Function),
+        expect.objectContaining({ capture: true }),
+      );
+      remove.mockRestore();
+    });
+  });
+
   describe("minQueryLength", () => {
     const panel = () =>
       document.querySelector(".tedi-search__panel") as HTMLElement | null;
@@ -727,13 +748,19 @@ describe("SearchComponent", () => {
       );
     });
 
-    it("End activates the last option and Home the first", () => {
-      press("End");
-      expect(getInput().getAttribute("aria-activedescendant")).toBe(
-        component.optionId(2),
-      );
+    it("leaves Home and End to the text cursor", () => {
+      press("ArrowDown");
 
-      press("Home");
+      const home = new KeyboardEvent("keydown", {
+        key: "Home",
+        bubbles: true,
+        cancelable: true,
+      });
+      getInput().dispatchEvent(home);
+      fixture.detectChanges();
+
+      // Not swallowed, and the active option is left where it was.
+      expect(home.defaultPrevented).toBe(false);
       expect(getInput().getAttribute("aria-activedescendant")).toBe(
         component.optionId(0),
       );

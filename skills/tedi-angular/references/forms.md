@@ -113,7 +113,7 @@ The host is a `role="search"` landmark whose accessible name falls back to `aria
 
 ### Suggestions
 
-Bind `suggestions` and the field becomes a combobox: `role="combobox"` on the input, a CDK overlay panel flush against the field, and arrow keys, `Home`/`End`, `Escape` and `aria-activedescendant` wired for you. Do not build a panel of your own on top of it.
+Bind `suggestions` and the field becomes a combobox: `role="combobox"` on the input, a CDK overlay panel flush against the field, and arrow keys, `Escape` and `aria-activedescendant` wired for you. Do not build a panel of your own on top of it. `Home` and `End` are deliberately left to the browser: the input is editable, so they move the text cursor. `ArrowUp` from the first suggestion wraps to the last.
 
 It does not filter. Pass a list you have already filtered and react to `valueChange`; sync and async sources work the same. `minQueryLength` gates only the panel, so gate your own fetch on the same number (Community Search called this `autocompleteFrom`). Enter runs the search as before, except when an option is highlighted, where it accepts that suggestion and emits `suggestionSelect` instead of `searchEvent`.
 

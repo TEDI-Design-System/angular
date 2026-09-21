@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   contentChild,
+  DestroyRef,
   effect,
   ElementRef,
   forwardRef,
@@ -450,6 +451,8 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
       this.resolvedSuggestions();
       untracked(() => this.resetActiveOption());
     });
+
+    inject(DestroyRef).onDestroy(() => this.cleanupScrollListener());
   }
 
   optionId(index: number): string {
@@ -570,17 +573,6 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
       case "ArrowUp":
         event.preventDefault();
         this.onArrowKey(event);
-        return;
-
-      case "Home":
-      case "End":
-        if (!this.panelVisible() || !this.hasSuggestions()) return;
-        event.preventDefault();
-        if (event.key === "Home") {
-          this.keyManager.setFirstItemActive();
-        } else {
-          this.keyManager.setLastItemActive();
-        }
         return;
 
       case "Tab":

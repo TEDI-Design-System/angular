@@ -202,6 +202,9 @@ Three things the types won't warn you about:
   the place for "nothing matched, try this instead" actions. Navigating suggestions never moves focus
   off the input (`aria-activedescendant`), so the footer's own controls are reached with Tab; Tab past
   the last one closes the panel and continues after the field.
+- **`Home`/`End` stay with the text cursor.** The combobox input is editable, so those keys must keep
+  editing text; WAI-ARIA APG offers first/last-option navigation only as the non-editable
+  alternative. `ArrowUp` wraps to the last suggestion, so nothing is unreachable.
 - **Object suggestions are read through `bind*` keys, not a fixed shape.** `bindLabel` names the
   display property, `bindDescription` a secondary line under it, and `bindDisabled` (default key
   `disabled`) a row that greys out and is skipped by arrow keys, Enter and clicks.

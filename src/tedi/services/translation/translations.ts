@@ -75,20 +75,11 @@ export const translationsMap = {
   },
   "search.results-count": {
     description:
-      "Announced to screen readers when the number of search suggestions changes",
+      "Announced politely to screen readers when the number of Search suggestions changes",
     components: ["Search"],
     et: (count: number) => `${count} ${count === 1 ? "vaste" : "vastet"}`,
     en: (count: number) => `${count} ${count === 1 ? "result" : "results"}`,
-    ru: (count: number) => {
-      const one = count % 10 === 1 && count % 100 !== 11;
-      const few =
-        count % 10 >= 2 &&
-        count % 10 <= 4 &&
-        (count % 100 < 12 || count % 100 > 14);
-
-      if (one) return `${count} результат`;
-      return `${count} ${few ? "результата" : "результатов"}`;
-    },
+    ru: (count: number) => `Совпадений: ${count}`,
   },
   required: {
     description: "Required field",
@@ -795,8 +786,7 @@ export const translationsMap = {
       `${count ?? 0} ${count === 1 ? "tulemus" : "tulemust"}`,
     en: (count?: number) =>
       `${count ?? 0} ${count === 1 ? "result" : "results"}`,
-    ru: (count?: number) =>
-      `${count ?? 0} ${count === 1 ? "результат" : "результа"}`,
+    ru: (count?: number) => `Результатов: ${count ?? 0}`,
   },
   "pagination.page-size": {
     description: "Label of page size select",
