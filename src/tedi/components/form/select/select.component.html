@@ -1,0 +1,424 @@
+@if (label()) {
+  <tedi-label-row>
+    <label
+      [id]="labelId()"
+      tedi-label
+      [for]="inputId()"
+      [required]="required()"
+      [size]="size()"
+      (click)="onTriggerClick()"
+    >
+      {{ label() }}
+    </label>
+    @if (tooltipTemplate()?.template; as tooltipTpl) {
+      <tedi-info-tooltip>
+        <ng-container [ngTemplateOutlet]="tooltipTpl" />
+      </tedi-info-tooltip>
+    } @else if (tooltip(); as tooltipText) {
+      <tedi-info-tooltip>{{ tooltipText }}</tedi-info-tooltip>
+    }
+  </tedi-label-row>
+}
+<div
+  [id]="searchable() ? null : inputId()"
+  class="tedi-select__trigger tedi-input"
+  [class.tedi-input--disabled]="disabled()"
+  [class.tedi-input--small]="size() === 'small'"
+  [class.tedi-input--error]="state() === 'error'"
+  [class.tedi-input--valid]="state() === 'valid'"
+  [class.tedi-select__trigger--searchable]="searchable()"
+  [class.tedi-select__trigger--search-focused]="searchFocused()"
+  cdkOverlayOrigin
+  #trigger="cdkOverlayOrigin"
+  [attr.role]="searchable() ? null : 'combobox'"
+  [attr.aria-haspopup]="searchable() ? null : 'listbox'"
+  [attr.aria-expanded]="searchable() ? null : isOpen()"
+  [attr.aria-controls]="!searchable() && isOpen() ? listboxId() : null"
+  [attr.aria-labelledby]="!searchable() ? resolvedAriaLabelledby() : null"
+  [attr.aria-label]="!searchable() ? resolvedAriaLabel() : null"
+  [tabindex]="searchable() || disabled() ? -1 : 0"
+  (click)="onTriggerClick()"
+  (keydown.enter)="onTriggerEnter()"
+  (keydown.space)="$event.preventDefault(); toggleIsOpen()"
+  (keydown.arrowdown)="$event.preventDefault(); toggleIsOpen()"
+  (blur)="onTouched()"
+>
+  @if (searchable()) {
+    <div class="tedi-select__search-wrapper">
+      @if (showSingleSelectedValue()) {
+        <span class="tedi-select__selected-value">
+          @if (valueTemplate(); as tpl) {
+            @if (selectedOptions()[0]; as option) {
+              <ng-container
+                [ngTemplateOutlet]="tpl.template"
+                [ngTemplateOutletContext]="getValueContext(option)"
+              />
+            }
+          } @else {
+            {{ selectedLabels().join(", ") }}
+          }
+        </span>
+      }
+      @if (allowMultiple() && selectedValues().length) {
+        <ng-container
+          [ngTemplateOutlet]="multiselectTags"
+          [ngTemplateOutletContext]="{ $implicit: multiselectContainerRef }"
+        />
+      } @else {
+        <input
+          #searchInput
+          [id]="inputId()"
+          type="text"
+          class="tedi-select__search-input"
+          [class.tedi-select__search-input--hidden]="showSingleSelectedValue()"
+          [placeholder]="showSingleSelectedValue() ? '' : placeholder()"
+          [value]="searchTerm()"
+          [disabled]="disabled()"
+          (input)="onSearchInput($event)"
+          (focus)="onSearchFocus()"
+          (blur)="onSearchBlur()"
+          (keydown)="onSearchKeydown($event)"
+          autocomplete="off"
+          role="combobox"
+          aria-autocomplete="list"
+          [attr.aria-expanded]="isOpen()"
+          [attr.aria-controls]="isOpen() ? listboxId() : null"
+          [attr.aria-labelledby]="resolvedAriaLabelledby()"
+          [attr.aria-label]="resolvedAriaLabel()"
+        />
+      }
+    </div>
+  } @else {
+    <span class="tedi-select__label">
+      @if (selectedValues().length) {
+        @if (allowMultiple()) {
+          <ng-container
+            [ngTemplateOutlet]="multiselectTags"
+            [ngTemplateOutletContext]="{ $implicit: multiselectContainerRef }"
+          />
+        } @else if (ellipsis(); as ellipsisPos) {
+          <tedi-ellipsis [position]="ellipsisPos" [lineClamp]="1">
+            <ng-container [ngTemplateOutlet]="singleValue" />
+          </tedi-ellipsis>
+        } @else {
+          <ng-container [ngTemplateOutlet]="singleValue" />
+        }
+      } @else {
+        <span class="tedi-select__label--placeholder">
+          {{ placeholder() }}
+        </span>
+      }
+    </span>
+  }
+
+  @if (clearable() && selectedValues().length) {
+    <button
+      class="tedi-select__clear"
+      tedi-closing-button
+      type="button"
+      size="small"
+      [iconSize]="18"
+      [ariaLabel]="'clear' | tediTranslate"
+      (click)="clear($event)"
+      (keydown.enter)="clear($event)"
+      (keydown.space)="clear($event)"
+      [attr.aria-describedby]="label() ? labelId() : null"
+    ></button>
+  }
+
+  <span
+    class="tedi-select__arrow"
+    aria-hidden="true"
+    (click)="onArrowClick($event)"
+  >
+    <tedi-icon name="arrow_drop_down" />
+  </span>
+</div>
+@if (feedbackText(); as feedback) {
+  <tedi-feedback-text
+    [text]="feedback.text"
+    [type]="feedback.type"
+    [position]="feedback.position"
+  />
+}
+
+<ng-template #singleValue>
+  @if (valueTemplate(); as tpl) {
+    @if (selectedOptions()[0]; as option) {
+      <ng-container
+        [ngTemplateOutlet]="tpl.template"
+        [ngTemplateOutletContext]="getValueContext(option)"
+      />
+    }
+  } @else {
+    {{ selectedLabels().join(", ") }}
+  }
+</ng-template>
+
+<ng-template #multiselectTags>
+  <div
+    class="tedi-select__multiselect-container"
+    [class.tedi-select__multiselect-container--single-row]="!multiRow()"
+    [class.tedi-select__multiselect-container--ellipsis]="tagEllipsis()"
+    #multiselectContainer
+  >
+    @if (multiRow()) {
+      @for (value of selectedValues(); track value) {
+        <tedi-tag
+          [ellipsis]="tagEllipsis()"
+          [closable]="isTagRemovable()"
+          (closed)="deselect($event, value)"
+        >
+          {{ getLabel(value) }}
+        </tedi-tag>
+      }
+    } @else {
+      <div class="tedi-select__multiselect-tags">
+        @for (value of selectedValues(); track value; let i = $index) {
+          @if (visibleTagsCount() === null || i < visibleTagsCount()!) {
+            <tedi-tag
+              #tagElement
+              [ellipsis]="tagEllipsis()"
+              [closable]="isTagRemovable()"
+              (closed)="deselect($event, value)"
+            >
+              {{ getLabel(value) }}
+            </tedi-tag>
+          }
+        }
+      </div>
+      @if (hiddenTagsCount() > 0) {
+        <tedi-tag class="tedi-select__multiselect-counter"
+          >+{{ hiddenTagsCount() }}</tedi-tag
+        >
+      }
+    }
+    @if (searchable()) {
+      <input
+        #searchInput
+        [id]="inputId()"
+        type="text"
+        class="tedi-select__search-input"
+        [value]="searchTerm()"
+        [disabled]="disabled()"
+        (input)="onSearchInput($event)"
+        (focus)="onSearchFocus()"
+        (blur)="onSearchBlur()"
+        (keydown)="onSearchKeydown($event)"
+        autocomplete="off"
+        role="combobox"
+        aria-autocomplete="list"
+        [attr.aria-expanded]="isOpen()"
+        [attr.aria-controls]="isOpen() ? listboxId() : null"
+        [attr.aria-labelledby]="resolvedAriaLabelledby()"
+        [attr.aria-label]="resolvedAriaLabel()"
+      />
+    }
+  </div>
+</ng-template>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="trigger"
+  [cdkConnectedOverlayOpen]="isOpen()"
+  [cdkConnectedOverlayPositions]="dropdownPositions()"
+  [cdkConnectedOverlayFlexibleDimensions]="true"
+  [cdkConnectedOverlayGrowAfterOpen]="true"
+  (attach)="onOverlayAttached()"
+  (detach)="toggleIsOpen(true)"
+>
+  <div
+    class="tedi-select__dropdown"
+    [style.width]="!!dropdownWidth() ? dropdownWidth() + 'px' : 'auto'"
+    [style.max-height]="dropdownMaxHeight() ? dropdownMaxHeight() + 'px' : null"
+  >
+    @if (virtualize()) {
+      <div
+        #virtualListbox
+        [id]="listboxId()"
+        class="tedi-select__options tedi-select__options--virtual"
+        [class.tedi-select__options--multiselect]="allowMultiple()"
+        role="listbox"
+        [attr.aria-multiselectable]="allowMultiple() ? true : null"
+        [attr.aria-labelledby]="!searchable() ? resolvedAriaLabelledby() : null"
+        [attr.aria-label]="!searchable() ? resolvedAriaLabel() : null"
+        [attr.aria-activedescendant]="activeDescendantId()"
+        [tabindex]="searchable() ? -1 : 0"
+        (keydown)="onVirtualListboxKeydown($event)"
+      >
+        @if (filteredOptions().length) {
+          @if (showSelectAllRow()) {
+            <div
+              class="tedi-dropdown-item"
+              [id]="listboxId() + '-select-all'"
+              role="option"
+              [attr.aria-selected]="allOptionsSelected()"
+              [class.tedi-dropdown-item--active]="activeIndex() === 0"
+              (click)="onVirtualSelectAllClick()"
+            >
+              <tedi-dropdown-item-value
+                type="checkbox"
+                [selected]="allOptionsSelected()"
+                [indeterminate]="someOptionsSelected()"
+              >
+                <tedi-dropdown-item-value-label>{{
+                  "select.select-all" | tediTranslate
+                }}</tedi-dropdown-item-value-label>
+              </tedi-dropdown-item-value>
+            </div>
+          }
+          <cdk-virtual-scroll-viewport
+            class="tedi-select__viewport"
+            [itemSize]="virtualRowHeight()"
+            [style.height.px]="virtualViewportHeight()"
+            [minBufferPx]="virtualRowHeight() * 6"
+            [maxBufferPx]="virtualRowHeight() * 12"
+          >
+            <div
+              *cdkVirtualFor="
+                let option of filteredOptions();
+                let i = index;
+                trackBy: trackByOptionValue
+              "
+              class="tedi-dropdown-item"
+              [id]="virtualOptionId(i)"
+              role="option"
+              [attr.aria-selected]="isOptionSelected(option.value)"
+              [attr.aria-disabled]="option.disabled ? true : null"
+              [class.tedi-dropdown-item--selected]="
+                !allowMultiple() && isOptionSelected(option.value)
+              "
+              [class.tedi-dropdown-item--disabled]="option.disabled"
+              [class.tedi-dropdown-item--custom]="optionTemplate()"
+              [class.tedi-dropdown-item--active]="
+                activeIndex() - (showSelectAllRow() ? 1 : 0) === i
+              "
+              (click)="onVirtualOptionClick(option)"
+            >
+              @if (optionTemplate(); as tpl) {
+                <ng-container
+                  [ngTemplateOutlet]="tpl.template"
+                  [ngTemplateOutletContext]="getOptionContext(option, i)"
+                />
+              } @else {
+                <tedi-dropdown-item-value
+                  [type]="allowMultiple() ? 'checkbox' : 'default'"
+                  [selected]="isOptionSelected(option.value)"
+                  [disabled]="!!option.disabled"
+                >
+                  <tedi-dropdown-item-value-label>{{
+                    option.label
+                  }}</tedi-dropdown-item-value-label>
+                </tedi-dropdown-item-value>
+              }
+            </div>
+          </cdk-virtual-scroll-viewport>
+        } @else {
+          <div
+            class="tedi-dropdown-item tedi-select__no-options"
+            role="option"
+            aria-disabled="true"
+          >
+            {{ noOptionsMessage() || ("select.no-options" | tediTranslate) }}
+          </div>
+        }
+      </div>
+    } @else {
+      <ul
+        [id]="listboxId()"
+        class="tedi-select__options"
+        [class.tedi-select__options--multiselect]="allowMultiple()"
+        [class.tedi-select__options--swatch-grid]="dropdownType() === 'grid'"
+        cdkListbox
+        [cdkListboxMultiple]="allowMultiple()"
+        [cdkListboxValue]="visibleSelectedValues()"
+        [cdkListboxNavigatesDisabledOptions]="false"
+        [cdkListboxUseActiveDescendant]="true"
+        (cdkListboxValueChange)="handleValueChange($event)"
+        (keydown.tab)="toggleIsOpen(true)"
+        (keydown.escape)="toggleIsOpen(true)"
+        #listbox="cdkListbox"
+      >
+        @if (filteredOptions().length) {
+          @if (allowMultiple() && showSelectAll()) {
+            <li
+              class="tedi-dropdown-item"
+              [cdkOption]="SpecialOptionControls.SELECT_ALL"
+            >
+              <tedi-dropdown-item-value
+                type="checkbox"
+                [selected]="allOptionsSelected()"
+                [indeterminate]="someOptionsSelected()"
+              >
+                <tedi-dropdown-item-value-label>{{
+                  "select.select-all" | tediTranslate
+                }}</tedi-dropdown-item-value-label>
+              </tedi-dropdown-item-value>
+            </li>
+          }
+
+          @for (group of optionGroups(); track group.label) {
+            @if (group.label.length > 0) {
+              @if (allowMultiple() && selectableGroups()) {
+                <li
+                  class="tedi-dropdown-item tedi-select__group-name tedi-select__group-name--selectable"
+                  [cdkOption]="SpecialOptionControls.SELECT_GROUP + group.label"
+                >
+                  <tedi-dropdown-item-value
+                    type="checkbox"
+                    [selected]="isGroupSelected(group.label)"
+                    [indeterminate]="isGroupIndeterminate(group.label)"
+                  >
+                    <tedi-dropdown-item-value-label>{{
+                      group.label
+                    }}</tedi-dropdown-item-value-label>
+                  </tedi-dropdown-item-value>
+                </li>
+              } @else {
+                <li class="tedi-select__group-name" role="presentation">
+                  <span tedi-text color="tertiary">
+                    {{ group.label }}
+                  </span>
+                </li>
+              }
+            }
+
+            @for (option of group.options; track option.value; let i = $index) {
+              <li
+                class="tedi-dropdown-item"
+                [class.tedi-dropdown-item--selected]="
+                  !allowMultiple() && isOptionSelected(option.value)
+                "
+                [class.tedi-dropdown-item--disabled]="option.disabled"
+                [class.tedi-dropdown-item--custom]="optionTemplate()"
+                [cdkOption]="option.value"
+                [cdkOptionDisabled]="option.disabled"
+              >
+                @if (optionTemplate(); as tpl) {
+                  <ng-container
+                    [ngTemplateOutlet]="tpl.template"
+                    [ngTemplateOutletContext]="getOptionContext(option, i)"
+                  />
+                } @else {
+                  <tedi-dropdown-item-value
+                    [type]="allowMultiple() ? 'checkbox' : 'default'"
+                    [selected]="isOptionSelected(option.value)"
+                    [disabled]="!!option.disabled"
+                  >
+                    <tedi-dropdown-item-value-label>{{
+                      option.label
+                    }}</tedi-dropdown-item-value-label>
+                  </tedi-dropdown-item-value>
+                }
+              </li>
+            }
+          }
+        } @else {
+          <li class="tedi-dropdown-item tedi-select__no-options">
+            {{ noOptionsMessage() || ("select.no-options" | tediTranslate) }}
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</ng-template>

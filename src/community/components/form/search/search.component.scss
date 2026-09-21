@@ -1,0 +1,168 @@
+@mixin textfield-focus($border-color: null) {
+  @if $border-color {
+
+    &:focus,
+    &:active {
+      border-color: $border-color;
+      box-shadow: inset 0 0 0 1px $border-color;
+    }
+  }
+
+  @else {
+
+    &:focus,
+    &:active {
+      box-shadow: none;
+    }
+  }
+}
+
+.tedi-search {
+  --_border-color: var(--form-input-border-default);
+  --_form-field-outer-gap: var(--form-field-outer-spacing);
+  --_border-radius: var(--form-field-radius);
+  --_padding: var(--form-field-padding-y-md-default);
+
+  &__container {
+    display: flex;
+    gap: var(--form-field-inner-spacing);
+    align-items: center;
+    margin-bottom: var(--_form-field-outer-gap);
+    border: 1px solid;
+    border-color: var(--_border-color);
+    border-radius: var(--_border-radius);
+
+    &:hover {
+      --_border-color: var(--form-input-border-hover);
+    }
+
+    &:focus-within {
+      --_border-color: var(--form-input-border-active);
+
+      box-shadow: 0 0 0 1px var(--form-input-border-active);
+    }
+
+    .tedi-search--error:not(.tedi-search--disabled) & {
+      --_border-color: var(--form-general-feedback-error-border);
+      @include textfield-focus(var(--form-general-feedback-error-border));
+
+      &:hover {
+        --_border-color: var(--form-general-feedback-error-border);
+      }
+
+      &:focus-within {
+        --_border-color: var(--form-general-feedback-error-border);
+
+        box-shadow: 0 0 0 1px var(--form-general-feedback-error-border);
+      }
+    }
+
+    .tedi-search--valid:not(.tedi-search--disabled) & {
+      --_border-color: var(--form-general-feedback-success-border);
+      @include textfield-focus(var(--form-general-feedback-success-border));
+
+      &:hover {
+        border-color: var(--form-general-feedback-success-border);
+      }
+
+      &:focus-within {
+        border-color: var(--form-general-feedback-success-border);
+        box-shadow: 0 0 0 1px var(--form-general-feedback-success-border);
+      }
+    }
+  }
+
+  &__input {
+    flex-grow: 1;
+    width: 100%;
+    padding: var(--_padding);
+    padding-right: 0;
+    margin: 0;
+    font-size: var(--body-regular-size);
+    font-weight: var(--body-regular-weight);
+    line-height: var(--body-regular-line-height);
+    letter-spacing: 0;
+    border: 0;
+    border-radius: var(--_border-radius);
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  &__trigger.tedi-button {
+    --_border-radius: var(--button-radius-sm);
+
+    align-self: stretch;
+    border-radius: var(--_border-radius);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  &__suffix {
+    display: flex;
+    gap: var(--layout-grid-gutters-04);
+    align-items: center;
+    align-self: stretch;
+    padding: 0 var(--_padding);
+
+    .tedi-search--with-button & {
+      padding: 0;
+    }
+
+    &-separator {
+      width: 1px;
+      height: 1em;
+      border-left: 1px solid var(--general-border-primary);
+    }
+  }
+
+  &__panel {
+    --_form-outer-gap: var(--form-field-outer-spacing);
+
+    margin: var(--_form-outer-gap) 0;
+  }
+
+  // Needs the compound selector to override Card's `overflow: hidden`.
+  &__panel.tedi-card {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  // Replaces the community CardContent `hasSeparator` input. On the footer
+  // so it disappears with an empty footer instead of doubling Card's border.
+  &__footer-content:not(:empty) {
+    border-top: 1px solid var(--card-border-primary);
+  }
+
+  &__footer-content:empty {
+    display: none;
+  }
+
+  &--small .tedi-search__container {
+    --_padding: var(--form-field-padding-y-sm);
+  }
+
+  &--large {
+    &.tedi-search--with-button:not(.tedi-search--with-button-text) {
+      .tedi-search__trigger.tedi-button {
+        width: 56px; // not sure how to get the button width from the theme
+        height: auto;
+      }
+    }
+
+    & .tedi-search__container {
+      --_padding: var(--form-field-padding-y-lg);
+    }
+  }
+
+  &--disabled {
+    .tedi-search__container {
+      background-color: var(--form-input-background-disabled);
+      border-color: var(--form-input-border-disabled);
+    }
+
+    .tedi-search__input {
+      pointer-events: none;
+      background-color: var(--form-input-background-disabled);
+    }
+  }
+}

@@ -1,0 +1,12 @@
+<quill-editor
+  [formControl]="innerControl"
+  [modules]="resolvedModules()"
+  [placeholder]="placeholder()"
+  [class.tedi-text-editor__editor--disabled]="disabled()"
+  [class.tedi-text-editor__editor--error]="invalid()"
+  [class.tedi-text-editor__editor--focused]="focused()"
+  class="tedi-text-editor__editor"
+  (onEditorCreated)="handleEditorCreated($event)"
+  (onFocus)="focused.set(true)"
+  (onBlur)="handleBlur()"
+/>
