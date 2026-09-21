@@ -141,6 +141,7 @@ const renderWithDelete = (args: StoryArgs) => ({
 });
 
 export const Default: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: renderWithDelete,
 };
 

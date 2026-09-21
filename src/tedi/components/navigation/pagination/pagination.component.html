@@ -151,8 +151,8 @@
           bindLabel="label"
           bindValue="value"
           dropdownAlign="end"
-          [ngModel]="pageSize()"
-          (ngModelChange)="handlePageSizeChange($event)"
+          [value]="pageSize()"
+          (selectionChange)="handlePageSizeChange($event)"
         />
       }
     </div>

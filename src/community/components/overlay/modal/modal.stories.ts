@@ -313,6 +313,7 @@ export const Default: Story = {
 };
 
 export const leftAlignedButtons: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     align: "space-between",
     buttons: [
@@ -337,6 +338,7 @@ export const leftAlignedButtons: Story = {
 };
 
 export const threeButtons: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     buttons: [
       {

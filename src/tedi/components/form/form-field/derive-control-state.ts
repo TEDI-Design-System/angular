@@ -7,12 +7,14 @@ import {
   signal,
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NgControl } from "@angular/forms";
+import { NgControl, Validators } from "@angular/forms";
 
 export interface DerivedControlState {
   invalid: Signal<boolean>;
   touched: Signal<boolean>;
   dirty: Signal<boolean>;
+  /** Whether the bound control carries `Validators.required`. */
+  required: Signal<boolean>;
   /**
    * Call from `ngOnInit`: a control that is its own `NG_VALUE_ACCESSOR` cannot
    * inject `NgControl` in the constructor, because the accessor is what
@@ -44,6 +46,11 @@ export function deriveControlState(): DerivedControlState {
     }),
     touched: computed(() => read((control) => control.touched) ?? false),
     dirty: computed(() => read((control) => control.dirty) ?? false),
+    required: computed(
+      () =>
+        read((control) => control.control?.hasValidator(Validators.required)) ??
+        false,
+    ),
     connect: () => {
       // `self` is what keeps this from becoming a leak: without it the lookup
       // walks the whole element-injector chain and a control picks up the

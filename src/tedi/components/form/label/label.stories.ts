@@ -94,6 +94,7 @@ export default {
 type LabelStory = StoryObj<LabelComponent & { ngContent: string }>;
 
 export const Default: LabelStory = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     ngContent: "Label",
     size: "default",

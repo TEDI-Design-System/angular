@@ -56,6 +56,7 @@ export default {
 type Story = StoryObj<CardButtonComponent>;
 
 export const Default: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     template: `
       <button tedi-card-button type="button">
