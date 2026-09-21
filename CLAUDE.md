@@ -157,4 +157,5 @@ Key things to **not** flag:
 - `ViewEncapsulation.None` — intentional, not a security concern.
 - Missing CSS `var()` fallback values — intentionally omitted.
 - CdkListbox private API access (`_setNextFocusToSelectedOption`, `_handleKeydown`) in the select component — intentional workarounds, no public CDK alternative exists.
+- Unprefixed class names inside Storybook `styles: []` blocks (e.g. `.story-row`, `.step-ring`) — these are story-scoped demo helpers, not shipped library classes. Stylelint's `selector-class-pattern` runs only over `src/tedi/**/*.scss`, so the `tedi-` prefix rule does not apply to them, and prefixing would imply a public class the package does not ship.
 - `parameters.status: { type: ["breakpointSupport"] }` on a story — this is a valid, registered status badge (see `.storybook/preview.tsx` and `best-practices.md`). Keep it on components with breakpoint-dependent behavior or inputs that accept breakpoint values. Do not suggest removing it.
