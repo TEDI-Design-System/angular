@@ -1,3 +1,10 @@
+# [8.1.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.8...angular-8.1.0-rc.9) (2026-09-21)
+
+
+### Features
+
+* **search:** added built-in autocomplete [#613](https://github.com/TEDI-Design-System/angular/issues/613) ([#616](https://github.com/TEDI-Design-System/angular/issues/616)) ([0ee342c](https://github.com/TEDI-Design-System/angular/commit/0ee342c49ab7c97f11421dd1629cbe617ce5f6f2))
+
 # [8.1.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.7...angular-8.1.0-rc.8) (2026-09-18)
 
 
