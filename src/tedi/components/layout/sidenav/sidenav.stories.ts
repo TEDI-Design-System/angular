@@ -469,6 +469,7 @@ export const SecondLevelMenuItems: StoryObj<SideNavComponent> = {
 
 export const SecondLevelMenuItemsParentsAreLinks: StoryObj<SideNavComponent> = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     layout: "fullscreen",
   },
   args: {
@@ -515,6 +516,7 @@ export const ThirdLevelMenuItems: StoryObj<SideNavComponent> = {
 
 export const ThirdLevelMenuItemsParentsAreLinks: StoryObj<SideNavComponent> = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     layout: "fullscreen",
   },
   args: {

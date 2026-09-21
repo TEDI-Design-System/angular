@@ -24,6 +24,12 @@ export interface FormFieldControl<T = unknown> {
   required?: Signal<boolean>;
   maxLength?: Signal<number | undefined>;
   /**
+   * Number of characters `tedi-form-field`'s counter should report. Implemented
+   * by controls whose value is not the text the user sees — a rich text editor
+   * holding markup, say. Falls back to the length of `value`.
+   */
+  characterCount?: Signal<number>;
+  /**
    * Clears the value. Implemented by controls that can be cleared, and called
    * by `tedi-form-field`'s clear button.
    */

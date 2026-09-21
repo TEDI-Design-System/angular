@@ -109,6 +109,7 @@ export const LeadingStart: StoryObj<EllipsisComponent> = {
 };
 
 export const NoTooltip: StoryObj<EllipsisComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `

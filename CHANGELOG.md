@@ -1,3 +1,59 @@
+# [8.1.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.7...angular-8.1.0-rc.8) (2026-09-18)
+
+
+### Features
+
+* **heading-with-icon:** new TEDI-Ready component [#1](https://github.com/TEDI-Design-System/angular/issues/1) ([#660](https://github.com/TEDI-Design-System/angular/issues/660)) ([7215693](https://github.com/TEDI-Design-System/angular/commit/72156933f7a028ee435fe125c0e7f91b79009f2f))
+
+# [8.1.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.6...angular-8.1.0-rc.7) (2026-09-18)
+
+
+### Features
+
+* **skeleton:** New TEDI-ready component [#8](https://github.com/TEDI-Design-System/angular/issues/8) ([#645](https://github.com/TEDI-Design-System/angular/issues/645)) ([9cee6d8](https://github.com/TEDI-Design-System/angular/commit/9cee6d8a4d5d3520c84d990f45a58fe455c018cb))
+
+# [8.1.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.5...angular-8.1.0-rc.6) (2026-09-18)
+
+
+### Features
+
+* **select:** add value input to apply selection on first render [#679](https://github.com/TEDI-Design-System/angular/issues/679) ([#682](https://github.com/TEDI-Design-System/angular/issues/682)) ([5f563fe](https://github.com/TEDI-Design-System/angular/commit/5f563fe0933d994c5a1e9e269eeef4a8c69fb4a4))
+
+# [8.1.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.4...angular-8.1.0-rc.5) (2026-09-18)
+
+
+### Bug Fixes
+
+* **modal:** name the dialog from its header heading [#680](https://github.com/TEDI-Design-System/angular/issues/680) ([#683](https://github.com/TEDI-Design-System/angular/issues/683)) ([368524e](https://github.com/TEDI-Design-System/angular/commit/368524e4d83a368609b92e9a654ff4bf0872a4e3))
+
+# [8.1.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.3...angular-8.1.0-rc.4) (2026-09-17)
+
+
+### Features
+
+* **truncate:** add TEDI-Ready Truncate component [#652](https://github.com/TEDI-Design-System/angular/issues/652) ([#664](https://github.com/TEDI-Design-System/angular/issues/664)) ([ddb319e](https://github.com/TEDI-Design-System/angular/commit/ddb319e50e004f84c6a0cc3889ecf861a74652d3))
+
+# [8.1.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.2...angular-8.1.0-rc.3) (2026-09-17)
+
+
+### Bug Fixes
+
+* **alert:** apply type-specific text color variables [#611](https://github.com/TEDI-Design-System/angular/issues/611) ([#676](https://github.com/TEDI-Design-System/angular/issues/676)) ([d8a984a](https://github.com/TEDI-Design-System/angular/commit/d8a984ab38566f682c3996310bce66fcffa0e6fd))
+
+# [8.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.1...angular-8.1.0-rc.2) (2026-09-15)
+
+
+### Bug Fixes
+
+* **timeline:** align card variant paddings with design [#568](https://github.com/TEDI-Design-System/angular/issues/568) ([#657](https://github.com/TEDI-Design-System/angular/issues/657)) ([1de21ab](https://github.com/TEDI-Design-System/angular/commit/1de21abd4969fb73a63ba7d4dc11cd3dc8b41ba6))
+
+# [8.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.7...angular-8.1.0-rc.1) (2026-09-15)
+
+
+### Features
+
+* **progress-bar:** add opt-in value announcements [#655](https://github.com/TEDI-Design-System/angular/issues/655) ([#663](https://github.com/TEDI-Design-System/angular/issues/663)) ([c680429](https://github.com/TEDI-Design-System/angular/commit/c680429c9a1554f87bd9ede03042eff4ffd66420))
+
 ## [8.0.1-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.1-rc.6...angular-8.0.1-rc.7) (2026-09-09)
 
 

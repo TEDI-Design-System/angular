@@ -13,6 +13,24 @@ import {
 } from "./tooltip-content/tooltip-content.component";
 
 const MAXWIDTH = ["none", "small", "medium", "large"];
+const VERTICAL_POSITIONS: TooltipPosition[] = [
+  "top-start",
+  "top",
+  "top-end",
+  "bottom-start",
+  "bottom",
+  "bottom-end",
+];
+
+const HORIZONTAL_POSITIONS: TooltipPosition[] = [
+  "left-start",
+  "left",
+  "left-end",
+  "right-start",
+  "right",
+  "right-end",
+];
+
 const POSITIONS: TooltipPosition[] = [
   "auto",
   "auto-start",
@@ -223,6 +241,7 @@ export const Default: Story = {
 };
 
 export const Positions: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "Tooltip positions",
   render: (args) => ({
     props: {
@@ -269,6 +288,7 @@ export const TextTrigger: Story = {
 };
 
 export const Widths: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -347,6 +367,7 @@ export const CustomContent: Story = {
  * screen reader, use `tedi-popover` (a focus-managed dialog), not a tooltip.
  */
 export const Controlled: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "Controlled (open + trackPosition)",
   args: {
     position: "top",
@@ -375,4 +396,87 @@ export const Controlled: Story = {
       `,
     };
   },
+};
+
+/**
+ * Visual-regression only. Renders the tooltip open from inputs alone
+ * (`openWith="none"` + `[open]="true"`), so the screenshot pipeline captures the
+ * bubble rather than a bare trigger.
+ */
+/**
+ * Visual-regression only. `Tooltip positions` renders closed triggers, so the bubble and its
+ * arrow were never captured. `openWith="none"` + `[open]="true"` renders them open from inputs
+ * alone, with no interaction to drive.
+ *
+ * Vertical and horizontal placements are split across two stories because the overlay is kept
+ * inside the viewport: a story taller than the canvas would drag its lowest bubbles back up and
+ * the placement under test would not be the one rendered.
+ */
+export const OpenVerticalPlacementsForVisualTest: Story = {
+  // Hidden from the sidebar; still indexed, so test-runner and Chromatic see it.
+  tags: ["!dev", "!autodocs"],
+  render: () => ({
+    props: { positions: VERTICAL_POSITIONS },
+    template: `
+      <tedi-row [cols]="3" [gapY]="5" [gapX]="5" justifyItems="center" class="py-5">
+        @for (pos of positions; track pos) {
+          <tedi-col>
+            <tedi-tooltip openWith="none" [open]="true" [position]="pos">
+              <tedi-tooltip-trigger [interactive]="false">{{ pos }}</tedi-tooltip-trigger>
+              <tedi-tooltip-content>Tooltip content</tedi-tooltip-content>
+            </tedi-tooltip>
+          </tedi-col>
+        }
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * Visual-regression only. Side placements put the arrow on the left or right edge of the bubble,
+ * where `-start` / `-end` align it against the content's height rather than its width.
+ */
+export const OpenHorizontalPlacementsForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  render: () => ({
+    props: { positions: HORIZONTAL_POSITIONS },
+    template: `
+      <tedi-row [cols]="2" [gapY]="5" [gapX]="5" justifyItems="center" class="py-5">
+        @for (pos of positions; track pos) {
+          <tedi-col>
+            <tedi-tooltip openWith="none" [open]="true" [position]="pos">
+              <tedi-tooltip-trigger [interactive]="false">{{ pos }}</tedi-tooltip-trigger>
+              <tedi-tooltip-content>Tooltip content</tedi-tooltip-content>
+            </tedi-tooltip>
+          </tedi-col>
+        }
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * Visual-regression only. `maxWidth` decides where the text wraps, which only shows once the
+ * bubble is open. Stacked rather than side by side, because `none` and `large` are wider than a
+ * quarter of the canvas.
+ */
+export const OpenWidthsForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  render: () => ({
+    props: { widths: ["none", "small", "medium", "large"] },
+    template: `
+      <tedi-row [cols]="1" [gapY]="5" class="py-5">
+        @for (width of widths; track width) {
+          <tedi-col>
+            <tedi-tooltip openWith="none" [open]="true" position="bottom-start">
+              <tedi-tooltip-trigger [interactive]="false">{{ width }}</tedi-tooltip-trigger>
+              <tedi-tooltip-content [maxWidth]="width">
+                This is tooltip content. The quick brown fox jumps over the lazy dog.
+              </tedi-tooltip-content>
+            </tedi-tooltip>
+          </tedi-col>
+        }
+      </tedi-row>
+    `,
+  }),
 };

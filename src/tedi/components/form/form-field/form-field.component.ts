@@ -135,9 +135,14 @@ export class FormFieldComponent implements FieldContext {
 
   readonly valid = computed(() => this.validationState() === "valid");
 
-  readonly characterCount = computed(
-    () => this.control()?.value()?.toString().length ?? 0,
-  );
+  readonly characterCount = computed(() => {
+    const control = this.control();
+    if (!control) return 0;
+
+    return (
+      control.characterCount?.() ?? control.value()?.toString().length ?? 0
+    );
+  });
 
   readonly characterCountExceeded = computed(() => {
     const limit = this.characterLimit();

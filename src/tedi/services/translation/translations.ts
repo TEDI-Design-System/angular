@@ -1348,6 +1348,133 @@ export const translationsMap = {
     en: "Cancel",
     ru: "Отмена",
   },
+  "text-editor.bold": {
+    description: "Label for the bold button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Paks kiri",
+    en: "Bold",
+    ru: "Полужирный",
+  },
+  "text-editor.italic": {
+    description: "Label for the italic button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Kaldkiri",
+    en: "Italic",
+    ru: "Курсив",
+  },
+  "text-editor.underline": {
+    description: "Label for the underline button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Allakriipsutus",
+    en: "Underline",
+    ru: "Подчёркнутый",
+  },
+  "text-editor.strike": {
+    description:
+      "Label for the strikethrough button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Läbikriipsutus",
+    en: "Strikethrough",
+    ru: "Зачёркнутый",
+  },
+  "text-editor.align.left": {
+    description: "Label for the align left button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Joonda vasakule",
+    en: "Align left",
+    ru: "По левому краю",
+  },
+  "text-editor.align.center": {
+    description:
+      "Label for the align center button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Joonda keskele",
+    en: "Align center",
+    ru: "По центру",
+  },
+  "text-editor.align.right": {
+    description: "Label for the align right button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Joonda paremale",
+    en: "Align right",
+    ru: "По правому краю",
+  },
+  "text-editor.align.justify": {
+    description: "Label for the justify button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Rööpjoondus",
+    en: "Justify",
+    ru: "По ширине",
+  },
+  "text-editor.list.bullet": {
+    description:
+      "Label for the bulleted list button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Täpploend",
+    en: "Bulleted list",
+    ru: "Маркированный список",
+  },
+  "text-editor.list.ordered": {
+    description:
+      "Label for the numbered list button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Nummerdatud loend",
+    en: "Numbered list",
+    ru: "Нумерованный список",
+  },
+  "text-editor.indent.increase": {
+    description:
+      "Label for the increase indent button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Suurenda taanet",
+    en: "Increase indent",
+    ru: "Увеличить отступ",
+  },
+  "text-editor.indent.decrease": {
+    description:
+      "Label for the decrease indent button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Vähenda taanet",
+    en: "Decrease indent",
+    ru: "Уменьшить отступ",
+  },
+  "text-editor.color": {
+    description: "Label for the text colour picker in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Tekstivärv",
+    en: "Text color",
+    ru: "Цвет текста",
+  },
+  "text-editor.background": {
+    description:
+      "Label for the background colour picker in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Taustavärv",
+    en: "Background color",
+    ru: "Цвет фона",
+  },
+  "text-editor.link": {
+    description: "Label for the link button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Lisa link",
+    en: "Insert link",
+    ru: "Вставить ссылку",
+  },
+  "text-editor.blockquote": {
+    description: "Label for the blockquote button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Tsitaat",
+    en: "Blockquote",
+    ru: "Цитата",
+  },
+  "text-editor.clean": {
+    description:
+      "Label for the clear formatting button in the text editor toolbar.",
+    components: ["TextEditor"],
+    et: "Eemalda vormindus",
+    en: "Clear formatting",
+    ru: "Очистить форматирование",
+  },
   "time-picker.hours": {
     description: "Aria label for the hours listbox in the time picker.",
     components: ["TimePicker"],
