@@ -48,7 +48,10 @@ export class DropdownContentComponent {
    * panel of navigation links belongs in `list`, because a widget role would
    * replace the link role and screen readers would stop announcing them as
    * links. The `role="list"` it puts on the `ul` is redundant on paper but not
-   * in Safari, which drops list semantics from a list with no marker.
+   * in Safari, which drops list semantics from a list with no marker. Opening a
+   * `list` panel still moves focus to its first focusable element, so the panel
+   * is not read last just because the overlay renders it at the end of the
+   * document.
    * @default menu
    */
   readonly dropdownRole = input<DropdownRole>("menu");

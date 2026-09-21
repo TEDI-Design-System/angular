@@ -54,8 +54,11 @@ type RenderToken =
  *
  * The ellipsis dropdown is a plain list (`dropdownRole="list"`), not a menu, so
  * the collapsed crumbs stay links: screen readers announce them as links and
- * each one is its own tab stop. Tab moves from the ellipsis button into the
- * list and out of its last link; Escape closes it and returns focus.
+ * each one is its own tab stop. Opening it moves focus to the first collapsed
+ * crumb, because the panel renders at the end of the document and would
+ * otherwise come after the rest of the trail in reading order. Tab leaves it
+ * past the ellipsis button; Escape and Shift+Tab off the first crumb close it
+ * and return focus to the button.
  */
 @Component({
   selector: "tedi-breadcrumbs",

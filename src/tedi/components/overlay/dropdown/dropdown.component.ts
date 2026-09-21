@@ -131,9 +131,15 @@ export class DropdownComponent implements OnDestroy {
       this.setupScrollListener();
     }
 
-    // A plain `list` has no active item and no roving tabindex, and focus stays
-    // on the trigger until the user tabs into the panel.
-    if (!this.dropdownContent().isWidget()) return;
+    // A plain `list` has no active item and no roving tabindex, but the panel is
+    // rendered at the end of the document, so leaving focus on the trigger puts
+    // it last in the order a screen reader reads and swipes through.
+    if (!this.dropdownContent().isWidget()) {
+      setTimeout(() => {
+        if (this.isOpen()) this.focusPanelStart();
+      });
+      return;
+    }
 
     this.setActiveToSelectedOrFirst();
 

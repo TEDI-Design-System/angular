@@ -296,7 +296,23 @@ describe("Breadcrumbs", () => {
       });
     });
 
-    it("keeps focus on the ellipsis button and lets Tab reach the crumb links", async () => {
+    // The panel is rendered at the end of the document, so focus has to be moved
+    // into it: otherwise a screen reader reaches the collapsed crumbs only after
+    // the rest of the trail and the rest of the page.
+    it("moves focus to the first collapsed crumb when the dropdown opens", async () => {
+      const fixture = setup({
+        crumbs: longTrail,
+        maxItems: 4,
+        itemsBeforeCollapse: 1,
+        itemsAfterCollapse: 2,
+      });
+
+      const dropdownItems = await openCollapsed(fixture);
+
+      expect(document.activeElement).toBe(dropdownItems[0].querySelector("a"));
+    });
+
+    it("returns focus to the ellipsis button on Escape", async () => {
       const fixture = setup({
         crumbs: longTrail,
         maxItems: 4,
@@ -307,17 +323,19 @@ describe("Breadcrumbs", () => {
       const dropdownItems = await openCollapsed(fixture);
       const trigger = ellipsisTrigger(fixture);
 
-      expect(document.activeElement).toBe(trigger);
-
-      trigger.dispatchEvent(
+      dropdownItems[0].querySelector("a")?.dispatchEvent(
         new KeyboardEvent("keydown", {
-          key: "Tab",
+          key: "Escape",
           bubbles: true,
           cancelable: true,
         }),
       );
+      fixture.detectChanges();
 
-      expect(document.activeElement).toBe(dropdownItems[0].querySelector("a"));
+      expect(document.activeElement).toBe(trigger);
+      expect(
+        document.querySelector("li.tedi-breadcrumbs__dropdown-item"),
+      ).toBeNull();
     });
 
     it("lets Enter follow a collapsed crumb link", async () => {

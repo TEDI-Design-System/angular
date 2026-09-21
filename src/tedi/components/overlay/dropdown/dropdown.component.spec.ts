@@ -1169,16 +1169,19 @@ describe("DropdownComponent", () => {
       expect(links[0].getAttribute("aria-disabled")).toBeNull();
     });
 
-    it("keeps focus on the trigger when it opens", () => {
+    // The panel is rendered at the end of the document, so leaving focus on the
+    // trigger would put it after the rest of the page in reading order.
+    it("moves focus to the first link when it opens", fakeAsync(() => {
       listTrigger.focus();
       open();
+      tick();
 
-      expect(document.activeElement).toBe(listTrigger);
-    });
+      expect(document.activeElement).toBe(links[0]);
+      expect(listDropdown.isOpen()).toBe(true);
+    }));
 
-    it("leaves the arrow keys alone instead of navigating items", () => {
+    it("leaves the arrow keys alone instead of opening and navigating items", () => {
       listTrigger.focus();
-      open();
 
       const event = new KeyboardEvent("keydown", {
         key: "ArrowDown",
@@ -1188,17 +1191,20 @@ describe("DropdownComponent", () => {
       listTrigger.dispatchEvent(event);
 
       expect(event.defaultPrevented).toBe(false);
+      expect(listDropdown.isOpen()).toBe(false);
       expect(document.activeElement).toBe(listTrigger);
     });
 
-    it("Tab from the trigger moves focus into the list", () => {
+    it("Tab from the trigger moves focus into the list", fakeAsync(() => {
       listTrigger.focus();
       open();
+      tick();
+      listTrigger.focus();
 
       expect(keydown(listTrigger, { key: "Tab" })).toBe(false);
       expect(document.activeElement).toBe(links[0]);
       expect(listDropdown.isOpen()).toBe(true);
-    });
+    }));
 
     it("Tab within the list is left to the browser", () => {
       open();
