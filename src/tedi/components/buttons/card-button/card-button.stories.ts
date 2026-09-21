@@ -531,3 +531,119 @@ export const ComplexCard: Story = {
     `,
   }),
 };
+
+export const StepList: Story = {
+  render: () => ({
+    styles: [
+      `
+        .step-list {
+          max-width: 360px;
+        }
+        .step-ring {
+          display: flex;
+          flex-shrink: 0;
+          align-self: flex-start;
+          align-items: center;
+          justify-content: center;
+          width: var(--stepper-item-vertical-step-size-lg);
+          height: var(--stepper-item-vertical-step-size-lg);
+          font-size: var(--body-small-regular-size);
+          font-weight: var(--body-bold-weight);
+          line-height: 1;
+          border-radius: 50%;
+          background-color: var(--stepper-step-default-bg);
+          border: var(--tedi-borders-01) solid var(--stepper-step-default-border);
+          color: var(--general-text-secondary);
+        }
+        .step-ring--completed {
+          background-color: var(--stepper-step-completed-bg);
+          border-color: var(--stepper-step-completed-bg);
+          color: var(--general-text-white);
+        }
+        .step-ring--current {
+          background-color: var(--stepper-step-selected-bg);
+          border: var(--tedi-borders-02) solid var(--stepper-step-selected-border);
+          color: var(--stepper-item-vertical-text-selected);
+        }
+        .step-ring--upcoming {
+          background-color: var(--stepper-step-disabled-bg);
+          border-color: var(--stepper-step-disabled-border);
+          color: var(--stepper-item-vertical-text-disabled);
+        }
+      `,
+    ],
+    template: `
+      <div class="step-list" [tediVerticalSpacing]="0.5">
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center gap-3">
+              <span class="step-ring step-ring--completed" aria-hidden="true">1</span>
+              <span tedi-text class="flex-fill flex align-items-center gap-2">
+                Minu andmed
+                <tedi-icon name="check" color="success" [size]="18" label="Lõpetatud" />
+              </span>
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+
+        <button tedi-card-button type="button">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center gap-3">
+              <span class="step-ring step-ring--completed" aria-hidden="true">2</span>
+              <span tedi-text class="flex-fill flex align-items-center gap-2">
+                Tervise ajalugu
+                <tedi-icon name="check" color="success" [size]="18" label="Lõpetatud" />
+              </span>
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+
+        <button tedi-card-button type="button" aria-current="step">
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center gap-3">
+              <span class="step-ring step-ring--current" aria-hidden="true">3</span>
+              <span class="flex-fill">
+                <span tedi-text class="block">Analüüside tulemused</span>
+                <span tedi-text modifiers="small" color="tertiary">Täidab meditsiini töötaja</span>
+              </span>
+              <span tedi-text modifiers="small" color="tertiary">15p</span>
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+
+        <button tedi-card-button type="button" disabled>
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center gap-3">
+              <span class="step-ring step-ring--upcoming" aria-hidden="true">4</span>
+              <span tedi-text class="flex-fill">Harjumused</span>
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+
+        <button tedi-card-button type="button" disabled>
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center gap-3">
+              <span class="step-ring step-ring--upcoming" aria-hidden="true">5</span>
+              <span tedi-text class="flex-fill">Praegune terviseseisund</span>
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+
+        <button tedi-card-button type="button" disabled>
+          <tedi-card>
+            <tedi-card-content class="flex align-items-center gap-3">
+              <span class="step-ring step-ring--upcoming" aria-hidden="true">6</span>
+              <span tedi-text class="flex-fill">Ülevaade</span>
+              <tedi-icon name="arrow_right_alt" color="secondary" />
+            </tedi-card-content>
+          </tedi-card>
+        </button>
+      </div>
+    `,
+  }),
+};
