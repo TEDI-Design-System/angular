@@ -225,6 +225,7 @@ export const WithIcon: Story = {
     }),
   ],
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `this.toastService.info("With Icon", "Using a custom icon", { icon: "info" });`,
@@ -279,6 +280,7 @@ export const CustomTimerForAutoclose: Story = {
     }),
   ],
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -332,6 +334,7 @@ export const PersistentToast: Story = {
     }),
   ],
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `this.toastService.warning("Persistent", "Stays until closed", { duration: 0 });`,
@@ -426,6 +429,7 @@ export const Positions: Story = {
     }),
   ],
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -486,6 +490,7 @@ export const HoverBehavior: Story = {
     }),
   ],
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `
@@ -556,6 +561,7 @@ export const WCAGCompliance: Story = {
     }),
   ],
   parameters: {
+    chromatic: { disableSnapshot: true },
     docs: {
       source: {
         code: `

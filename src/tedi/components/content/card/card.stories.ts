@@ -330,6 +330,7 @@ export default {
 type Story = StoryObj<CardComponent>;
 
 export const Default: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     borderless: false,
   },

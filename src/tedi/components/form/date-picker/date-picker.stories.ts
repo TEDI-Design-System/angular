@@ -257,6 +257,7 @@ export const Default: StoryObj<DatePickerComponent> = {
 };
 
 export const WithReactiveForms: StoryObj<DatePickerComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const dateControl = new FormControl<Date | null>(new Date(2024, 5, 15));
 

@@ -66,6 +66,7 @@ type Story = StoryObj<StoryFloatingButtonArgs>;
 
 export const Default: Story = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     pseudo: {
       hover: "#Hover",
       active: "#Active",

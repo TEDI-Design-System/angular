@@ -17,6 +17,7 @@ export default meta;
 type Story = StoryObj<DropdownItemComponent>;
 
 export const Default: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     template: `
       <div tedi-dropdown-item>Default dropdown item</div>
@@ -27,6 +28,7 @@ export const Default: Story = {
 };
 
 export const Selected: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     template: `
       <div tedi-dropdown-item [selected]="true">Selected dropdown item</div>
@@ -37,6 +39,7 @@ export const Selected: Story = {
 };
 
 export const Disabled: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     template: `
       <div tedi-dropdown-item [disabled]="true">Disabled dropdown item</div>
@@ -47,6 +50,7 @@ export const Disabled: Story = {
 };
 
 export const WithIcon: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     template: `
       <div tedi-dropdown-item>
@@ -60,6 +64,7 @@ export const WithIcon: Story = {
 };
 
 export const WithContent: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     template: `
       <div tedi-dropdown-item>

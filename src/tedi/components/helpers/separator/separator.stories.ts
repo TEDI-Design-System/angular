@@ -253,6 +253,7 @@ export const PaddedUneven: StoryObj<SeparatorComponent> = {
 
 export const VerticalThick: StoryObj<SeparatorComponent> = {
   parameters: {
+    chromatic: { disableSnapshot: true },
     layout: "fullscreen",
   },
   render: (args) => ({

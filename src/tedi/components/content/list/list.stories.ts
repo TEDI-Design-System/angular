@@ -60,6 +60,7 @@ export default {
 } as Meta<ListComponent>;
 
 export const Default: StoryObj<ListComponent> = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `

@@ -17,6 +17,7 @@ import { SideNavService } from "../../../../services/sidenav/sidenav.service";
   encapsulation: ViewEncapsulation.None,
   host: {
     "[class]": "classes()",
+    "[style.top.px]": "sidenavService.drawerTop()",
   },
 })
 export class SideNavOverlayComponent {
@@ -31,7 +32,7 @@ export class SideNavOverlayComponent {
   classes = computed(() => {
     const classList = ["tedi-sidenav-overlay"];
 
-    if (this.sidenavService.isMobile() && this.sidenavService.isMobileOpen()) {
+    if (this.sidenavService.isMobileDrawerOpen()) {
       classList.push("tedi-sidenav-overlay--visible");
     }
 

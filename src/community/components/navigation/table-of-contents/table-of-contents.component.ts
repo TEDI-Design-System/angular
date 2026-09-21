@@ -12,14 +12,12 @@ import {
   AfterContentInit,
 } from "@angular/core";
 import {
-  CardComponent,
-  CardContentComponent,
-} from "../../cards/card";
-import {
   TextComponent,
   IconComponent,
   ButtonComponent,
   TediTranslationPipe,
+  CardComponent,
+  CardContentComponent,
 } from "@tedi-design-system/angular/tedi";
 import { Dialog, DialogRef } from "@angular/cdk/dialog";
 import { NgTemplateOutlet } from "@angular/common";

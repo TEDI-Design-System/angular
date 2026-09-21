@@ -1,0 +1,17 @@
+<span tedi-text color="secondary" class="tedi-truncate__text" [id]="textId">{{
+  displayText()
+}}</span>
+@if (showToggle()) {
+  <button
+    tedi-link
+    type="button"
+    class="tedi-truncate__toggle"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-controls]="textId"
+    (click)="toggle()"
+  >
+    {{
+      (expanded() ? "truncate.see-less" : "truncate.see-more") | tediTranslate
+    }}
+  </button>
+}
