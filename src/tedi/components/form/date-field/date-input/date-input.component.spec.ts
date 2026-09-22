@@ -50,6 +50,17 @@ describe("DateInputComponent", () => {
     expect(input.id).toBe("test-date-input");
   });
 
+  it("sets the name attribute on the underlying input", () => {
+    fixture.componentRef.setInput("name", "birth-date");
+    fixture.detectChanges();
+
+    expect(getInput().getAttribute("name")).toBe("birth-date");
+  });
+
+  it("omits the name attribute when no name is set", () => {
+    expect(getInput().hasAttribute("name")).toBe(false);
+  });
+
   it("renders the value in single mode (type=text)", () => {
     fixture.componentRef.setInput("value", "14.05.2026");
     fixture.detectChanges();

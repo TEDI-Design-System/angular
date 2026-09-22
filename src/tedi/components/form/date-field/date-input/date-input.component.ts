@@ -56,6 +56,8 @@ export interface DateInputTag {
 })
 export class DateInputComponent implements AfterViewChecked {
   readonly inputId = input.required<string>();
+  /** `name` attribute of the text input; omitted from the DOM when not set. */
+  readonly name = input<string>();
   readonly value = input<string>("");
   readonly tags = input<readonly DateInputTag[]>([]);
   readonly mode = input<DateFieldMode>("single");

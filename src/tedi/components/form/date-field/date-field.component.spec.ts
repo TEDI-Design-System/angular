@@ -111,6 +111,22 @@ describe("DateFieldComponent", () => {
       expect(input?.id).toBe("test-date-field");
     });
 
+    it("assigns the name to the date-input", () => {
+      const { el } = createField({ name: "birth-date" });
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.getAttribute("name")).toBe("birth-date");
+    });
+
+    it("omits the name attribute when no name is set", () => {
+      const { el } = createField();
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.hasAttribute("name")).toBe(false);
+    });
+
     it("shows placeholder", () => {
       const { el } = createField({ placeholder: "dd.mm.yyyy" });
       const input = el.querySelector(
