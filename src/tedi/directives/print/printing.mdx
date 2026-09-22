@@ -1,0 +1,81 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+import * as PrintStories from "./print.stories";
+
+<Meta of={PrintStories} name="Printing" />
+
+# Printing in TEDI-Ready
+
+TEDI components include print styles for browser printing and saving as PDF.
+These styles apply automatically. Use the `tediPrint` directive to customise
+print visibility and page breaks.
+
+## What happens automatically
+
+Global, from `@tedi-design-system/core`:
+
+- Base font size is set to **14px**, with headings, spacing and line heights
+  scaling with it.
+- The page uses a light neutral background. Core sets `print-color-adjust: exact`
+  to ask browsers to preserve the colours defined by the print styles.
+- Links and body text are greyscaled. Links are still printed: they usually carry
+  the content itself, and a page saved as PDF keeps them clickable.
+
+**Hidden when printing** — action controls and page navigation:
+
+- Buttons: `tedi-button`, button group buttons, `tedi-collapse-button`,
+  `tedi-closing-button`, `tedi-info-button`
+- `header[tedi-header]`, `tedi-footer`, `nav[tedi-sidenav]`, `tedi-breadcrumbs`
+
+**Visible when printing** — components whose content remains useful in print:
+
+- `tedi-card-button` — keeps the card content visible.
+- `a[tedi-link]` — preserves linked text within the content.
+- Tabs, including the tab list. Hide it with `printVisibility="hide"` on
+  `tedi-tabs-list` if the tabs are pure navigation.
+
+**Expanded when printing** — collapsed content is shown automatically:
+
+- `tedi-accordion` items
+- `tedi-collapse` — the content prints, the toggle button does not
+
+Cards, card headers and alerts print, switching to neutral borders and
+backgrounds rather than disappearing.
+
+**Browser support and page breaks**
+
+Modern browsers support CSS page-break controls, but complex layouts can still
+paginate differently. Firefox continues to track
+[flex layout pagination issues](https://bugzilla.mozilla.org/show_bug.cgi?id=939897).
+Check multi-page content in both Firefox and Chrome print preview, especially
+long flex layouts and tables. If content is clipped or breaks in an awkward
+place, consider simplifying the layout for print or applying break controls to
+smaller sections. See [MDN's `break-inside` reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/break-inside)
+for how break rules are resolved.
+
+## Overriding: the `tediPrint` directive
+
+Apply `tediPrint` directly to an element. It adds the core print classes without
+rendering an additional element.
+
+```html
+<!-- Hide something that would otherwise print -->
+<div tediPrint="hide">Filters, toolbars, anything interactive</div>
+
+<!-- Print something that hides itself by default -->
+<button tedi-button tediPrint="show">Reference number</button>
+
+<!-- Keep a section from splitting across pages -->
+<section tediPrint breakInside="avoid">
+  <h3>Stays on one page</h3>
+</section>
+```
+
+Note the bare `tediPrint` in the last example: the break inputs only apply when
+the attribute is present.
+
+- `tediPrint`: `show` or `hide` adds `show-print` or `no-print` to the element.
+  `show` overrides `no-print` on the same element; it cannot reveal content inside
+  a hidden parent or make content visible only when printing.
+- `breakBefore`, `breakAfter` and `breakInside` control breaks before, after and
+  inside the element. Supported values are `auto`, `avoid`, `avoid-column`,
+  `avoid-page` and `avoid-region`. These inputs cannot force a new page.
