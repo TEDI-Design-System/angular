@@ -13,6 +13,7 @@ import {
 } from "./breadcrumbs.component";
 import { BreadcrumbItemDirective } from "./breadcrumb-item.directive";
 import { BreadcrumbSeparatorDirective } from "./breadcrumb-separator.directive";
+import { getFocusableElements } from "../../../utils/elements.util";
 
 class TranslationMock {
   translate(key: string) {
@@ -256,11 +257,10 @@ describe("Breadcrumbs", () => {
       await new Promise((resolve) => setTimeout(resolve));
       fixture.detectChanges();
 
-      const overlay = document.querySelector(
-        ".cdk-overlay-container",
-      ) as HTMLElement;
       return Array.from(
-        overlay.querySelectorAll("li.tedi-breadcrumbs__dropdown-item"),
+        fixture.nativeElement.querySelectorAll(
+          "li.tedi-breadcrumbs__dropdown-item",
+        ),
       ) as HTMLLIElement[];
     };
 
@@ -296,9 +296,33 @@ describe("Breadcrumbs", () => {
       });
     });
 
-    // The panel is rendered at the end of the document, so focus has to be moved
-    // into it: otherwise a screen reader reaches the collapsed crumbs only after
-    // the rest of the trail and the rest of the page.
+    // iOS VoiceOver and TalkBack swipe through the document and send no Tab key,
+    // so the collapsed crumbs have to sit between the ellipsis and the next
+    // crumb in the DOM itself, not only in the panel's key handling.
+    it("renders the collapsed crumbs between the ellipsis and the next crumb", async () => {
+      const fixture = setup({
+        crumbs: longTrail,
+        maxItems: 4,
+        itemsBeforeCollapse: 1,
+        itemsAfterCollapse: 2,
+      });
+
+      await openCollapsed(fixture);
+
+      const order = getFocusableElements(fixture.nativeElement).map((el) =>
+        el.textContent?.trim(),
+      );
+
+      expect(order).toEqual([
+        "Dashboard",
+        "…",
+        "Patients",
+        "Anna Tamm",
+        "Visits",
+        "2024-05-12",
+      ]);
+    });
+
     it("moves focus to the first collapsed crumb when the dropdown opens", async () => {
       const fixture = setup({
         crumbs: longTrail,

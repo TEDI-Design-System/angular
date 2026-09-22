@@ -141,15 +141,6 @@ export class DropdownTriggerDirective implements AfterViewInit {
         this.openAndFocusLast();
         break;
 
-      case "Tab":
-        // A widget panel is entered with the arrow keys. A plain `list` is not
-        // entered at all by default, because the overlay renders it at the end
-        // of the document, so tabbing off the trigger has to be redirected.
-        if (this.isWidgetContent() || event.shiftKey) break;
-        if (!this.dropdown.isOpen()) break;
-        if (this.dropdown.focusPanelStart()) event.preventDefault();
-        break;
-
       case "Escape":
         event.preventDefault();
         this.dropdown.hideDropdown();

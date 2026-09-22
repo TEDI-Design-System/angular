@@ -16,6 +16,7 @@ import {
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
 import { DropdownRole } from "./dropdown.tokens";
 import { DropdownItemComponent } from "./dropdown-item/dropdown-item.component";
+import { getFocusableElements } from "../../../utils/elements.util";
 
 @Component({
   standalone: true,
@@ -1118,10 +1119,12 @@ describe("DropdownComponent", () => {
       listFixture.detectChanges();
 
       itemEls = Array.from(
-        overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+        listFixture.nativeElement.querySelectorAll("li[tedi-dropdown-item]"),
       ) as HTMLLIElement[];
       links = itemEls.map((el) => el.querySelector("a") as HTMLAnchorElement);
-      listEl = overlayContainerElement.querySelector("ul") as HTMLUListElement;
+      listEl = listFixture.nativeElement.querySelector(
+        "ul",
+      ) as HTMLUListElement;
     };
 
     const keydown = (el: HTMLElement, init: KeyboardEventInit) =>
@@ -1188,8 +1191,6 @@ describe("DropdownComponent", () => {
       expect(links[0].getAttribute("aria-disabled")).toBeNull();
     });
 
-    // The panel is rendered at the end of the document, so leaving focus on the
-    // trigger would put it after the rest of the page in reading order.
     it("moves focus to the first link when it opens", fakeAsync(() => {
       listTrigger.focus();
       open();
@@ -1214,44 +1215,48 @@ describe("DropdownComponent", () => {
       expect(document.activeElement).toBe(listTrigger);
     });
 
-    it("Tab from the trigger moves focus into the list", fakeAsync(() => {
-      listTrigger.focus();
+    // A mobile screen reader walks the page in DOM order and sends no Tab key,
+    // so a panel at the end of the body is reached after the whole page rather
+    // than after the trigger.
+    it("renders the panel where the dropdown sits in the DOM", () => {
       open();
-      tick();
-      listTrigger.focus();
 
-      expect(keydown(listTrigger, { key: "Tab" })).toBe(false);
-      expect(document.activeElement).toBe(links[0]);
-      expect(listDropdown.isOpen()).toBe(true);
-    }));
+      expect(listFixture.nativeElement.contains(listEl)).toBe(true);
+      expect(overlayContainerElement.contains(listEl)).toBe(false);
+    });
 
-    it("Tab within the list is left to the browser", () => {
+    it("places the links between the trigger and the rest of the page", () => {
+      open();
+
+      const focusable = getFocusableElements(document.body);
+      const from = focusable.indexOf(listTrigger);
+
+      expect(focusable.slice(from, from + 5)).toEqual([
+        listTrigger,
+        links[0],
+        links[1],
+        links[2],
+        after,
+      ]);
+    });
+
+    it("leaves Tab to the browser at both ends of the list", () => {
       open();
       links[0].focus();
+      expect(keydown(links[0], { key: "Tab", shiftKey: true })).toBe(true);
 
-      expect(keydown(links[0], { key: "Tab" })).toBe(true);
+      links[2].focus();
+      expect(keydown(links[2], { key: "Tab" })).toBe(true);
       expect(listDropdown.isOpen()).toBe(true);
     });
 
-    it("Tab off the last link closes the list and continues past the trigger", fakeAsync(() => {
+    it("closes once focus lands past the panel", () => {
       open();
       links[2].focus();
 
-      expect(keydown(links[2], { key: "Tab" })).toBe(false);
-      tick();
+      after.focus();
 
       expect(listDropdown.isOpen()).toBe(false);
-      expect(document.activeElement).toBe(after);
-    }));
-
-    it("Shift+Tab off the first link closes the list and returns to the trigger", () => {
-      open();
-      links[0].focus();
-
-      expect(keydown(links[0], { key: "Tab", shiftKey: true })).toBe(false);
-
-      expect(listDropdown.isOpen()).toBe(false);
-      expect(document.activeElement).toBe(listTrigger);
     });
 
     it("Escape closes the list and returns focus to the trigger", () => {

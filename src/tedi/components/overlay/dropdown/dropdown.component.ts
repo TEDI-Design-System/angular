@@ -13,11 +13,12 @@ import {
   model,
   Renderer2,
 } from "@angular/core";
-import { OverlayModule } from "@angular/cdk/overlay";
+import { OverlayContainer, OverlayModule } from "@angular/cdk/overlay";
 import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
 import { DROPDOWN_API } from "./dropdown.tokens";
+import { DropdownOverlayContainer } from "./dropdown-overlay-container";
 import { getFocusableElements } from "../../../utils/elements.util";
 import {
   OverlayPosition,
@@ -40,6 +41,11 @@ let dropdownIdCounter = 0;
     {
       provide: DROPDOWN_API,
       useExisting: forwardRef(() => DropdownComponent),
+    },
+    DropdownOverlayContainer,
+    {
+      provide: OverlayContainer,
+      useExisting: DropdownOverlayContainer,
     },
   ],
 })
@@ -100,6 +106,7 @@ export class DropdownComponent implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
   private readonly renderer = inject(Renderer2);
+  private readonly overlayContainer = inject(DropdownOverlayContainer);
   private scrollListener?: () => void;
   private skipNextGestureOutsideClick = false;
 
@@ -119,6 +126,10 @@ export class DropdownComponent implements OnDestroy {
   showDropdown(initialFocus: "selected" | "first" | "last" = "selected") {
     if (this.isOpen()) return;
 
+    // A plain `list` is content, not a widget, so it renders where it sits in
+    // the DOM and keeps its place in reading order.
+    this.overlayContainer.setInline(!this.dropdownContent().isWidget());
+
     const width = this.dropdownTrigger()?.host.nativeElement.offsetWidth;
     if (width) {
       this.triggerWidth.set(width);
@@ -131,9 +142,8 @@ export class DropdownComponent implements OnDestroy {
       this.setupScrollListener();
     }
 
-    // A plain `list` has no active item and no roving tabindex, but the panel is
-    // rendered at the end of the document, so leaving focus on the trigger puts
-    // it last in the order a screen reader reads and swipes through.
+    // A plain `list` has no active item and no roving tabindex: opening it just
+    // moves focus to its first link.
     if (!this.dropdownContent().isWidget()) {
       setTimeout(() => {
         if (this.isOpen()) this.focusPanelStart();
@@ -331,44 +341,19 @@ export class DropdownComponent implements OnDestroy {
     });
   }
 
-  /**
-   * Moves focus to the first focusable element in the panel. Returns `false`
-   * when the panel has none, so the caller can leave the key event alone.
-   */
-  focusPanelStart(): boolean {
-    const first = this.panelFocusables()[0];
-    if (!first) return false;
-
-    first.focus();
-    return true;
+  /** Moves focus to the first focusable element in the panel. */
+  focusPanelStart() {
+    this.panelFocusables()[0]?.focus();
   }
 
   onPanelKeydown(event: KeyboardEvent) {
-    // Widget content is driven by its items' own key handling.
-    if (this.dropdownContent().isWidget()) return;
+    // Widget content is driven by its items' own key handling, and a plain
+    // `list` renders in document order, so Tab out of it belongs to the
+    // browser.
+    if (this.dropdownContent().isWidget() || event.key !== "Escape") return;
 
-    if (event.key === "Escape") {
-      event.preventDefault();
-      this.closeAndFocusTrigger();
-      return;
-    }
-
-    if (event.key !== "Tab") return;
-
-    // The panel is rendered in an overlay at the end of the document, so at its
-    // edges the tab order has to be stitched back onto the trigger's.
-    const focusables = this.panelFocusables();
-    const index = focusables.indexOf(
-      this.document.activeElement as HTMLElement,
-    );
-
-    if (event.shiftKey && index === 0) {
-      event.preventDefault();
-      this.closeAndFocusTrigger();
-    } else if (!event.shiftKey && index === focusables.length - 1) {
-      event.preventDefault();
-      this.tabOutOfDropdown(false);
-    }
+    event.preventDefault();
+    this.closeAndFocusTrigger();
   }
 
   private panelFocusables(): HTMLElement[] {
