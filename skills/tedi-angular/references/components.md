@@ -180,6 +180,10 @@ slot instead of the sub-step list.
   and the disabled state.
 - **`button[tedi-collapse-button]` goes on a native `<button>`.** The host *is* the button, so don't
   nest another one inside.
+- **`tedi-card-stepper-step` and `tedi-card-stepper-sub-step` render nothing themselves.** They are
+  configuration the stepper reads to build the card, the progress bar and the step-list modal, so
+  their host elements never reach the DOM. A step's own bottom content goes in an
+  `<ng-template tediCardStepperStepContent>` inside it, and renders only while that step is active.
 - **`tedi-vertical-stepper-sub-item` must be projected straight into its step**, not wrapped in an
   element. Anything else an item receives is treated as the step's related asset (status badge,
   button, link) and rendered under the label. `@for` / `@if` around either tag is fine — items are
