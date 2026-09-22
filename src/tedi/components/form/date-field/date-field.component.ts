@@ -47,6 +47,7 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { deriveControlState } from "../form-field/derive-control-state";
+import { controlDescribedBy } from "../form-field/control-described-by";
 import {
   breakpointInput,
   BreakpointInput,
@@ -369,6 +370,12 @@ export class DateFieldComponent
     ];
   });
 
+  /**
+   * `aria-describedby` ids for the inner input — the wrapping form-field's
+   * feedback text, plus any set on `<tedi-date-field>` itself.
+   */
+  readonly describedBy = controlDescribedBy();
+
   private readonly cvaDisabled = signal(false);
   /**
    * Uncommitted input text, tracked separately so resets clear it even when
@@ -602,6 +609,10 @@ export class DateFieldComponent
 
   setDisabledState(isDisabled: boolean): void {
     this.cvaDisabled.set(isDisabled);
+  }
+
+  setDescribedBy(ids: string[]): void {
+    this.describedBy.set(ids);
   }
 
   focus(): void {

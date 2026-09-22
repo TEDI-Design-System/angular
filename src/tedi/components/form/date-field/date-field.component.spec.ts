@@ -127,6 +127,14 @@ describe("DateFieldComponent", () => {
       expect(input.hasAttribute("name")).toBe(false);
     });
 
+    it("sets no aria-describedby when nothing describes the field", () => {
+      const { el } = createField();
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.hasAttribute("aria-describedby")).toBe(false);
+    });
+
     it("shows placeholder", () => {
       const { el } = createField({ placeholder: "dd.mm.yyyy" });
       const input = el.querySelector(
@@ -1608,6 +1616,73 @@ describe("DateFieldComponent inside FormFieldComponent", () => {
 
   it("renders feedback text", () => {
     expect(el.querySelector("tedi-feedback-text")).toBeTruthy();
+  });
+
+  it("associates the feedback text with the input via aria-describedby", () => {
+    const input = el.querySelector(
+      "input.tedi-date-input__input",
+    ) as HTMLInputElement;
+    const feedbackId = el
+      .querySelector("tedi-feedback-text")
+      ?.getAttribute("id");
+
+    expect(feedbackId).toBeTruthy();
+    expect(input.getAttribute("aria-describedby")).toBe(feedbackId);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [
+    DateFieldComponent,
+    FormFieldComponent,
+    LabelComponent,
+    FeedbackTextComponent,
+  ],
+  template: `
+    <p id="own-hint">Own hint</p>
+    <tedi-form-field>
+      <label tedi-label for="described-date">Date</label>
+      <tedi-date-field inputId="described-date" aria-describedby="own-hint" />
+      @if (showFeedback) {
+        <tedi-feedback-text id="fb" text="Error" type="error" />
+      }
+    </tedi-form-field>
+  `,
+})
+class DescribedByHostComponent {
+  showFeedback = false;
+}
+
+describe("DateFieldComponent aria-describedby", () => {
+  function createHost(showFeedback: boolean): HTMLElement {
+    TestBed.configureTestingModule({
+      imports: [DescribedByHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    });
+    const fixture = TestBed.createComponent(DescribedByHostComponent);
+    fixture.componentInstance.showFeedback = showFeedback;
+    fixture.detectChanges();
+    return fixture.nativeElement;
+  }
+
+  function describedBy(el: HTMLElement): string | null {
+    return (
+      el.querySelector("input.tedi-date-input__input") as HTMLInputElement
+    ).getAttribute("aria-describedby");
+  }
+
+  it("forwards an aria-describedby set on the host to the input", () => {
+    expect(describedBy(createHost(false))).toBe("own-hint");
+  });
+
+  it("merges the host's own ids with the ones form-field pushes", () => {
+    const ids = describedBy(createHost(true))?.split(" ") ?? [];
+    expect(ids).toContain("own-hint");
+    expect(ids).toContain("fb");
   });
 });
 
