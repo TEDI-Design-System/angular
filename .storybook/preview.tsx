@@ -81,16 +81,28 @@ const preview: Preview = {
         default: { name: "default", value: "var(--general-surface-primary)" },
         muted: { name: "muted", value: "var(--general-surface-secondary)" },
         subtle: { name: "subtle", value: "var(--general-surface-tertiary)" },
-        disabled: { name: "disabled", value: "var(--general-surface-disabled)" },
+        disabled: {
+          name: "disabled",
+          value: "var(--general-surface-disabled)",
+        },
         black: { name: "black", value: "var(--tedi-neutral-900)" },
-        inverted: { name: "inverted", value: "var(--general-surface-inverted-primary)" },
-        "inverted-contrast": { name: "inverted-contrast", value: "var(--general-surface-inverted-secondary)" },
+        inverted: {
+          name: "inverted",
+          value: "var(--general-surface-inverted-primary)",
+        },
+        "inverted-contrast": {
+          name: "inverted-contrast",
+          value: "var(--general-surface-inverted-secondary)",
+        },
         brand: { name: "brand", value: "var(--general-surface-brand-primary)" },
       },
     },
     docs: {
       codePanel: true,
-      toc: true,
+      // The default is `h3` alone, so `h2` sections never reach the TOC.
+      // Excluding `#stories` keeps autodocs' own heading from nesting every
+      // story beneath it.
+      toc: { headingSelector: "h2:not(#stories), h3" },
       page: () => (
         <>
           <Title />
