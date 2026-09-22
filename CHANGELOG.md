@@ -1,3 +1,10 @@
+# [8.1.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.10...angular-8.1.0-rc.11) (2026-09-22)
+
+
+### Features
+
+* **floating-button:** new TEDI-Ready component [#649](https://github.com/TEDI-Design-System/angular/issues/649) ([#659](https://github.com/TEDI-Design-System/angular/issues/659)) ([078dcc0](https://github.com/TEDI-Design-System/angular/commit/078dcc028e97b1ce734cf5171f1d53428934269c))
+
 # [8.1.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.9...angular-8.1.0-rc.10) (2026-09-22)
 
 
