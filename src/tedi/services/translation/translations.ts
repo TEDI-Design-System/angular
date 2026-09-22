@@ -312,6 +312,14 @@ export const translationsMap = {
     en: "Uploading",
     ru: "Загрузка",
   },
+  "toast.close": {
+    description:
+      "Accessible label for a toast's close button, naming which toast it closes",
+    components: ["Toast"],
+    et: (title: string) => `Sulge teavitus: ${title}`,
+    en: (title: string) => `Close notification: ${title}`,
+    ru: (title: string) => `Закрыть уведомление: ${title}`,
+  },
   "modal.close": {
     description: "Label for modals close button",
     components: ["Modal"],
