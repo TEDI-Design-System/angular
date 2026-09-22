@@ -1,3 +1,10 @@
+# [8.1.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.9...angular-8.1.0-rc.10) (2026-09-22)
+
+
+### Bug Fixes
+
+* **toast:** WCAG corrections [#295](https://github.com/TEDI-Design-System/angular/issues/295) ([#618](https://github.com/TEDI-Design-System/angular/issues/618)) ([b87c8b8](https://github.com/TEDI-Design-System/angular/commit/b87c8b8f8e63cd1f11c4e4da94c32adfa7528224))
+
 # [8.1.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.8...angular-8.1.0-rc.9) (2026-09-21)
 
 
