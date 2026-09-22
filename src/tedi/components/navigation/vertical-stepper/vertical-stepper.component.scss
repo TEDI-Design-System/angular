@@ -1,0 +1,45 @@
+.tedi-vertical-stepper {
+  --tedi-vertical-stepper-step-size: var(--stepper-item-vertical-step-size-lg);
+  --tedi-vertical-stepper-gap: var(--stepper-item-vertical-lg-inner-spacing);
+  --tedi-vertical-stepper-min-height: var(
+    --stepper-item-vertical-lg-min-height
+  );
+  --tedi-vertical-stepper-min-height-first: var(
+    --stepper-item-vertical-lg-min-height-first-item
+  );
+  --tedi-vertical-stepper-padding-top: var(
+    --stepper-item-vertical-lg-padding-top
+  );
+  --tedi-vertical-stepper-dot-size: var(--stepper-item-vertical-step-size-sm);
+  --tedi-vertical-stepper-line-x: calc(
+    var(--tedi-vertical-stepper-step-size) / 2 - var(--tedi-borders-01) / 2
+  );
+
+  display: block;
+
+  &--compact {
+    --tedi-vertical-stepper-step-size: var(
+      --stepper-item-vertical-step-size-md
+    );
+    --tedi-vertical-stepper-gap: var(
+      --stepper-item-vertical-compact-inner-spacing
+    );
+    --tedi-vertical-stepper-min-height: var(
+      --stepper-item-vertical-compact-min-height
+    );
+    --tedi-vertical-stepper-min-height-first: var(
+      --stepper-item-vertical-compact-min-height-first-item
+    );
+    --tedi-vertical-stepper-padding-top: var(
+      --stepper-item-vertical-compact-padding-top
+    );
+  }
+}
+
+.tedi-vertical-stepper__list {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
