@@ -48,7 +48,7 @@ export class DropdownTriggerDirective implements AfterViewInit {
    */
   private readonly triggerElement = signal<HTMLElement | null>(null);
 
-  private readonly haspopup = computed<DropdownTriggerAriaHasPopup>(() => {
+  private readonly hasPopup = computed<DropdownTriggerAriaHasPopup>(() => {
     const explicit = this.ariaHaspopup();
     if (explicit) return explicit;
 
@@ -85,11 +85,11 @@ export class DropdownTriggerDirective implements AfterViewInit {
         this.renderer.removeAttribute(el, "aria-controls");
       }
 
-      const haspopup = this.haspopup();
-      if (haspopup === "false") {
+      const hasPopup = this.hasPopup();
+      if (hasPopup === "false") {
         this.renderer.removeAttribute(el, "aria-haspopup");
       } else {
-        this.renderer.setAttribute(el, "aria-haspopup", haspopup);
+        this.renderer.setAttribute(el, "aria-haspopup", hasPopup);
       }
 
       this.renderer.setAttribute(
