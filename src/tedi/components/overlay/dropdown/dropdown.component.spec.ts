@@ -547,6 +547,25 @@ describe("DropdownComponent", () => {
       const items = getItems();
       expect(items).not.toContain(document.activeElement);
     }));
+
+    it("focuses the next element synchronously, so focus never lands on body in between", () => {
+      // No tick(): deferring the focus leaves the detached panel item focused,
+      // so focus falls to body and a screen reader reads the container before
+      // it reaches the next element.
+      dropdown.tabOutOfDropdown(false);
+
+      expect(document.activeElement).toBe(after);
+    });
+
+    it("falls back to the trigger when nothing follows it in the tab order", () => {
+      after.remove();
+
+      dropdown.tabOutOfDropdown(false);
+
+      expect(document.activeElement).toBe(
+        dropdown.dropdownTrigger().focusableElement,
+      );
+    });
   });
 
   describe("setActiveToSelectedOrFirst()", () => {

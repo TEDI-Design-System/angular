@@ -211,11 +211,21 @@ export class DropdownComponent implements OnDestroy {
       ? focusable[triggerIndex - 1]
       : focusable[triggerIndex + 1];
 
-    this.hideDropdown();
+    // Move focus first, then close. Closing while the panel still holds focus
+    // detaches the focused element, which drops focus to `body` until the next
+    // task runs, and a screen reader reads that gap as the whole page/container
+    // before it reaches the real target.
+    this.moveFocusOut(next ?? triggerEl);
+  }
 
-    if (next) {
-      setTimeout(() => next.focus());
-    }
+  /**
+   * Focuses `target` and only then tears the panel down, so focus is never on a
+   * detached element. `handleFocusOut` already closes on the resulting
+   * `focusin`; the explicit call covers a target that refuses focus.
+   */
+  private moveFocusOut(target: HTMLElement) {
+    target.focus();
+    this.hideDropdown();
   }
 
   focusFirstItem() {
@@ -366,8 +376,7 @@ export class DropdownComponent implements OnDestroy {
   }
 
   private closeAndFocusTrigger() {
-    this.hideDropdown();
-    this.dropdownTrigger().focus();
+    this.moveFocusOut(this.dropdownTrigger().focusableElement);
   }
 
   private setupScrollListener() {

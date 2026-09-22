@@ -281,8 +281,11 @@ export class DropdownItemComponent {
 
       case "Escape":
         event.preventDefault();
-        this.dropdown.hideDropdown();
+        // Focus first, close second: closing detaches the focused item and
+        // focus falls to `body` until the trigger takes it, which a screen
+        // reader announces as a step out to the container.
         this.dropdown.dropdownTrigger()?.focus();
+        this.dropdown.hideDropdown();
         break;
 
       case "Tab":
