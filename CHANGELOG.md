@@ -1,3 +1,38 @@
+# [8.1.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.10...angular-8.1.0-rc.11) (2026-09-22)
+
+
+### Features
+
+* **floating-button:** new TEDI-Ready component [#649](https://github.com/TEDI-Design-System/angular/issues/649) ([#659](https://github.com/TEDI-Design-System/angular/issues/659)) ([078dcc0](https://github.com/TEDI-Design-System/angular/commit/078dcc028e97b1ce734cf5171f1d53428934269c))
+
+# [8.1.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.9...angular-8.1.0-rc.10) (2026-09-22)
+
+
+### Bug Fixes
+
+* **toast:** WCAG corrections [#295](https://github.com/TEDI-Design-System/angular/issues/295) ([#618](https://github.com/TEDI-Design-System/angular/issues/618)) ([b87c8b8](https://github.com/TEDI-Design-System/angular/commit/b87c8b8f8e63cd1f11c4e4da94c32adfa7528224))
+
+# [8.1.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.8...angular-8.1.0-rc.9) (2026-09-21)
+
+
+### Features
+
+* **search:** added built-in autocomplete [#613](https://github.com/TEDI-Design-System/angular/issues/613) ([#616](https://github.com/TEDI-Design-System/angular/issues/616)) ([0ee342c](https://github.com/TEDI-Design-System/angular/commit/0ee342c49ab7c97f11421dd1629cbe617ce5f6f2))
+
+# [8.1.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.7...angular-8.1.0-rc.8) (2026-09-18)
+
+
+### Features
+
+* **heading-with-icon:** new TEDI-Ready component [#1](https://github.com/TEDI-Design-System/angular/issues/1) ([#660](https://github.com/TEDI-Design-System/angular/issues/660)) ([7215693](https://github.com/TEDI-Design-System/angular/commit/72156933f7a028ee435fe125c0e7f91b79009f2f))
+
+# [8.1.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.6...angular-8.1.0-rc.7) (2026-09-18)
+
+
+### Features
+
+* **skeleton:** New TEDI-ready component [#8](https://github.com/TEDI-Design-System/angular/issues/8) ([#645](https://github.com/TEDI-Design-System/angular/issues/645)) ([9cee6d8](https://github.com/TEDI-Design-System/angular/commit/9cee6d8a4d5d3520c84d990f45a58fe455c018cb))
+
 # [8.1.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.5...angular-8.1.0-rc.6) (2026-09-18)
 
 

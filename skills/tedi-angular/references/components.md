@@ -110,10 +110,10 @@ the part of this document worth maintaining by hand.
 
 ### The `/tedi` and `/community` entry points collide
 
-This is the highest-value trap in the Angular library and it has no React equivalent. **24 selectors
+This is the highest-value trap in the Angular library and it has no React equivalent. **25 selectors
 are declared in both entry points, under identical class names**, including `tedi-card`,
 `tedi-modal`, `tedi-accordion`, `tedi-tabs`, `tedi-dropdown`, `tedi-form-field`, `tedi-pagination`,
-`tedi-search`, `tedi-tag`, and the checkbox/radio group family.
+`tedi-search`, `tedi-tag`, `[tedi-floating-button]`, and the checkbox/radio group family.
 
 `CardComponent` from `/community` and `CardComponent` from `/tedi` are different components with
 different input APIs behind the same `<tedi-card>` tag. Consequences:
@@ -165,6 +165,10 @@ Three things the types won't warn you about:
   so formatting a word bold adds no characters. It is the one control that reports its own count
   (the optional `characterCount` member of `FormFieldControl`) rather than letting the field measure
   its value.
+  
+Both entry points declare `[tedi-floating-button]`. The Community component is
+**deprecated**: it has only `variant` / `size` / `axis`. The TEDI-Ready one adds `position`,
+`placement`, `offset` and `zIndex`. Import from `/tedi`.
 
 ### Composition constraints
 
@@ -186,6 +190,38 @@ Three things the types won't warn you about:
   native label attributes (`for`, `id`, `aria-*`, handlers) keep working.
 - **`tedi-attachment` has no built-in action buttons.** Project neutral `tedi-button`s inside a single
   `<tedi-attachment-actions>` and wire `(click)` and `disabled` yourself.
+- **`tedi-skeleton-block` belongs inside `tedi-skeleton`.** The wrapper stacks whatever is projected
+  into it as a flex column gapped by `--loader-skeleton-inner-spacing-y`, and it owns the loading
+  announcement. A block on its own is `aria-hidden` decoration that announces nothing; put a
+  `tedi-row`/`tedi-col` grid inside the wrapper when blocks need to sit side by side. Use **one
+  wrapper per loading region**, not one per block: the announcement is per wrapper, so several
+  wrappers mounting together compete for the same live region.
+- **`tedi-heading-with-icon` projects the heading text and nothing else.** The icon comes from the
+  `icon` input, not from projection, so you cannot swap in your own `tedi-icon` or add trailing
+  content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
+  name — if the icon carries meaning the text doesn't, compose a heading and an icon yourself.
+
+### Search suggestions
+
+- **`tedi-search` does not filter.** Bind `suggestions` to a list you have already filtered and react
+  to `valueChange`; sync and async sources work the same. `minQueryLength` only gates the panel, so
+  gate your own fetch on the same number. It is the TEDI-Ready name for Community Search's
+  `autocompleteFrom`.
+- **The combobox is opt-in through `suggestions` being bound at all**, not through it having items.
+  Left unbound, the input stays a plain `role="searchbox"`; bind `[]` to keep combobox behaviour
+  while nothing matches.
+- **Enter means search, except when an option is highlighted**, where it accepts that suggestion and
+  emits `suggestionSelect` instead of `searchEvent`.
+- **`<ng-template tediSearchFooter>` also renders in the no-results state**, which is what makes it
+  the place for "nothing matched, try this instead" actions. Navigating suggestions never moves focus
+  off the input (`aria-activedescendant`), so the footer's own controls are reached with Tab; Tab past
+  the last one closes the panel and continues after the field.
+- **`Home`/`End` stay with the text cursor.** The combobox input is editable, so those keys must keep
+  editing text; WAI-ARIA APG offers first/last-option navigation only as the non-editable
+  alternative. `ArrowUp` wraps to the last suggestion, so nothing is unreachable.
+- **Object suggestions are read through `bind*` keys, not a fixed shape.** `bindLabel` names the
+  display property, `bindDescription` a secondary line under it, and `bindDisabled` (default key
+  `disabled`) a row that greys out and is skipped by arrow keys, Enter and clicks.
 
 ### Choosing the right component
 
@@ -200,6 +236,10 @@ Three things the types won't warn you about:
 - **`tedi-form-field` is only needed for a label, feedback text, or a `characterLimit` counter.**
   Controls paint their own field surface, so wrapping is otherwise redundant. `tedi-search` renders
   its own and must **not** be wrapped.
+- **`tedi-heading-with-icon` over a hand-composed `<hN tedi-text>` plus `tedi-icon`** when the heading
+  can wrap: it centres the icon on the *first line* rather than the middle of the block. A heading
+  value in `modifiers` overrides `element`'s typography and the icon follows it, so
+  `element="h2" modifiers="h4"` is an `<h2>` that looks like an `h4` throughout.
 
 ### Responsive behaviour that isn't an input
 
@@ -214,8 +254,11 @@ Three things the types won't warn you about:
 - **Give each `tedi-search` on a page a distinct `ariaLabel`.** The host is a `role="search"`
   landmark whose name falls back to `ariaLabel`, then `label`, then `placeholder`, then the
   translated default. Two identically named landmarks of the same type fail axe's `landmark-unique`.
-- **A suggestion panel needs `role="combobox"` on the input.** `aria-expanded` is not permitted on a
-  plain textbox and fails `aria-allowed-attr`. Bind `aria-controls` conditionally
+- **Don't hand-roll a suggestion panel around `tedi-search`.** It owns the combobox wiring itself
+  (see Search suggestions above), and a second panel bolted on top fights it. The rules below apply
+  when you are building a combobox out of some *other* control: the input needs `role="combobox"`,
+  because `aria-expanded` is not permitted on a plain textbox and fails `aria-allowed-attr`; and
+  `aria-controls` has to be bound conditionally
   (`[attr.aria-controls]="open() ? 'panel-id' : null"`), because a popup rendered with `@if` or a CDK
   overlay is absent while closed and a dangling idref fails `aria-valid-attr-value`.
 - **Tabs activate differently depending on the host element.** `<button>` tabs use automatic
@@ -227,11 +270,23 @@ Three things the types won't warn you about:
   handling: links stay links, each is its own tab stop, and the trigger drops `aria-haspopup`. Tab
   moves from the trigger into the panel and out past its last link, and Escape closes it. Use
   `[tedi-dropdown-item][interactiveContent]="true"` only inside a `menu` or `listbox`, where the
-  projected control is a button and a widget role is the right answer.
+  projected control is a button and a widget role is the right answer. A `list` panel also renders
+  in the dropdown's own place in the DOM rather than in the overlay container at the end of
+  `<body>`, so that mobile screen readers, which walk the document and send no `Tab`, reach its
+  links between the trigger and whatever follows it. Query it from the trigger's subtree, not from
+  `OverlayContainer`; `menu` and `listbox` panels are still in the shared container.
 - **A plain `list` item takes exactly one control.** The row is painted as a single target (hover
   background, pointer cursor) but only the projected control navigates, so the item stretches that
   control's click area over the whole row. A second control in the same item would sit under that
   overlay and become unclickable; split it into its own item instead.
+- **Name what a `tedi-skeleton` is loading.** `label` and `completedLabel` are optional in the types
+  but the generic translated fallbacks ("Laadimine") tell a screen-reader user nothing about what
+  they are waiting for. The completion message is only announced if the skeleton outlived
+  `labelDelay` (200ms), so a placeholder that flashes by stays silent on purpose.
+- **`aria-busy="false"` after loading is the consumer's job.** The skeleton sets `aria-busy="true"`
+  on itself and hosts the `role="status"` live region, but it is removed the moment content arrives,
+  so it cannot report its own completion. Bind `[attr.aria-busy]="loading()"` on the region that
+  swaps skeleton for content; without it a screen reader may announce the region mid-update.
 - **Icon-only controls need an accessible name**, and don't signal state by colour alone. Sorting,
   pagination, expansion and reordering controls all need labels; those come from
   `TediTranslationService`, so check the translation keys rather than hardcoding Estonian.
