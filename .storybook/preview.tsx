@@ -92,7 +92,10 @@ const preview: Preview = {
     },
     docs: {
       codePanel: true,
-      toc: true,
+      // The default is `h3` alone, so `h2` sections never reach the TOC.
+      // Excluding `#stories` keeps autodocs' own heading from nesting every
+      // story beneath it.
+      toc: { headingSelector: "h2:not(#stories), h3" },
       page: () => (
         <>
           <Title />
