@@ -6,6 +6,11 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 
+/**
+ * @deprecated Use the TEDI-Ready `tedi-vertical-stepper` from
+ * `@tedi-design-system/angular/tedi` instead. This community component
+ * will be removed in a future release.
+ */
 @Component({
   selector: "tedi-vertical-stepper",
   imports: [],
