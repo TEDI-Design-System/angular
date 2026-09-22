@@ -1,0 +1,73 @@
+.tedi-file-dropzone {
+  display: flex;
+  flex-direction: column;
+  gap: var(--layout-grid-gutters-04);
+}
+
+.tedi-file-dropzone__zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--file-dropzone-padding-y) var(--file-dropzone-padding-x);
+  color: var(--file-dropzone-text-default);
+  text-align: center;
+  cursor: pointer;
+  background-color: var(--file-dropzone-background-default);
+  border: var(--tedi-borders-02) dotted var(--file-dropzone-border-default);
+  border-radius: var(--form-field-radius);
+  transition:
+    color 0.2s ease-in-out,
+    background-color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: var(--file-dropzone-background-hover);
+    border-color: var(--file-dropzone-border-hover);
+  }
+
+  &:active {
+    border-color: var(--file-dropzone-border-active);
+  }
+
+  &:has(input:focus-visible) {
+    outline: var(--tedi-borders-02) solid var(--file-dropzone-border-focus);
+    outline-offset: var(--tedi-borders-01);
+    border-color: var(--file-dropzone-border-focus);
+  }
+}
+
+.tedi-file-dropzone__input {
+  // Core's .sr-only ships an invalid `clip-path: rect(0, 0, 0, 0)`, so nothing
+  // clips it and axe cannot resolve the file input's background. Drop once fixed.
+  clip-path: inset(50%);
+}
+
+.tedi-file-dropzone__zone--drop-over.tedi-file-dropzone__zone {
+  color: var(--file-dropzone-text-drop-over);
+  background-color: var(--file-dropzone-background-drop-over);
+  border-color: var(--file-dropzone-border-drop-over);
+}
+
+.tedi-file-dropzone__zone--invalid.tedi-file-dropzone__zone {
+  border-color: var(--form-general-feedback-error-border);
+}
+
+.tedi-file-dropzone__zone--valid.tedi-file-dropzone__zone {
+  border-color: var(--form-general-feedback-success-border);
+}
+
+.tedi-file-dropzone--disabled .tedi-file-dropzone__zone {
+  color: var(--general-text-disabled);
+  cursor: not-allowed;
+  background-color: var(--file-dropzone-background-disabled);
+  border-color: var(--file-dropzone-border-disabled);
+}
+
+.tedi-file-dropzone__files {
+  display: flex;
+  flex-direction: column;
+  gap: var(--layout-grid-gutters-08);
+  padding-left: 0;
+  margin: var(--layout-grid-gutters-04) 0 0;
+  list-style: none;
+}
