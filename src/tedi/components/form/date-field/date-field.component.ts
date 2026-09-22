@@ -8,6 +8,7 @@ import {
   forwardRef,
   inject,
   input,
+  linkedSignal,
   model,
   OnInit,
   output,
@@ -369,6 +370,15 @@ export class DateFieldComponent
   });
 
   private readonly cvaDisabled = signal(false);
+  /**
+   * Uncommitted input text, tracked separately so resets clear it even when
+   * `value` is unchanged. Value changes discard it; `null` shows the formatted value.
+   */
+  private readonly typedText = linkedSignal<DateFieldValue, string | null>({
+    source: this.value,
+    computation: () => null,
+  });
+
   private modalRef: ModalRef<DateFieldValue> | null = null;
   private scrollListener?: () => void;
 
@@ -513,6 +523,12 @@ export class DateFieldComponent
     return this.defaultFormat(v);
   });
 
+  /**
+   * What the text input actually shows: uncommitted typed text when there is
+   * any, otherwise the formatted `value`.
+   */
+  readonly inputText = computed(() => this.typedText() ?? this.displayValue());
+
   readonly tagsForMultipleMode = computed<DateInputTag[]>(() => {
     if (this.mode() !== "multiple") return [];
     const v = this.value();
@@ -572,6 +588,7 @@ export class DateFieldComponent
   }
 
   writeValue(value: DateFieldValue): void {
+    this.typedText.set(null);
     this.value.set(value);
   }
 
@@ -640,6 +657,8 @@ export class DateFieldComponent
       return;
     }
 
+    this.typedText.set(value);
+
     if (value === "") {
       this.commitValue(null);
       return;
@@ -684,6 +703,7 @@ export class DateFieldComponent
     const calendar = this.calendar();
     if (!calendar) return;
     const newValue = calendar.value();
+    this.typedText.set(null);
     this.value.set(newValue);
     this.onChange(newValue);
     this.onTouched();
@@ -898,6 +918,7 @@ export class DateFieldComponent
   }
 
   private commitValue(next: DateFieldValue): void {
+    this.typedText.set(null);
     this.value.set(next);
     this.onChange(next);
     this.onTouched();
