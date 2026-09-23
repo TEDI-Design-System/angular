@@ -1,3 +1,10 @@
+# [8.1.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.17...angular-8.1.0-rc.18) (2026-09-23)
+
+
+### Features
+
+* **table-of-contents:** add new TEDI-Ready component [#543](https://github.com/TEDI-Design-System/angular/issues/543) ([#551](https://github.com/TEDI-Design-System/angular/issues/551)) ([0378eb8](https://github.com/TEDI-Design-System/angular/commit/0378eb8417d3f956d50c6613e66a11df34cec23b))
+
 # [8.1.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.16...angular-8.1.0-rc.17) (2026-09-23)
 
 
