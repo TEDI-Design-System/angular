@@ -38,13 +38,15 @@ import {
 import { CalendarMonthGridComponent } from "./calendar-month-grid/calendar-month-grid.component";
 import { CalendarYearGridComponent } from "./calendar-year-grid/calendar-year-grid.component";
 import { CalendarHeaderComponent } from "./calendar-header/calendar-header.component";
-import { CalendarView, DateFieldMode } from "./types";
+import {
+  CalendarView,
+  DateFieldMode,
+  DayAvailabilityInput,
+  MonthPredicate,
+  YearPredicate,
+} from "./types";
 
 type CalendarValue = Date | Date[] | DateRange | null;
-type DayPredicate = (date: Date) => boolean;
-type DayAvailabilityInput = Date[] | DayPredicate | undefined;
-type MonthPredicate = (month: Date) => boolean;
-type YearPredicate = (year: Date) => boolean;
 
 const YEAR_PAGE_SIZE = 12;
 

@@ -623,6 +623,42 @@ describe("DateFieldComponent", () => {
       expect(() => component.handleOverlayAttached()).not.toThrow();
     });
 
+    it("caps the popover to the roomier side of the trigger so a tall calendar scrolls", () => {
+      const { fixture, component } = createField();
+      openOverlay(component);
+      fixture.detectChanges();
+
+      jest
+        .spyOn(component["hostEl"].nativeElement, "getBoundingClientRect")
+        .mockReturnValue({ top: 600, bottom: 640 } as DOMRect);
+      const originalHeight = window.innerHeight;
+      Object.defineProperty(window, "innerHeight", {
+        value: 800,
+        configurable: true,
+      });
+
+      try {
+        component.handleOverlayAttached();
+        fixture.detectChanges();
+
+        // More room above (600 - 8) than below (800 - 640 - 8).
+        expect(component.overlayMaxHeight()).toBe(592);
+
+        const overlay = document.querySelector<HTMLElement>(
+          ".tedi-date-field__overlay",
+        );
+        expect(overlay?.style.maxHeight).toBe("592px");
+      } finally {
+        Object.defineProperty(window, "innerHeight", {
+          value: originalHeight,
+          configurable: true,
+        });
+      }
+
+      component.overlayOpen.set(false);
+      fixture.detectChanges();
+    });
+
     it("moves DOM focus into the calendar when opened via the icon (real flow)", () => {
       const { fixture, el, component } = createField();
       const iconBtn = el.querySelector(
