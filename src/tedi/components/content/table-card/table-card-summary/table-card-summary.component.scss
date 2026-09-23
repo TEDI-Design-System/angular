@@ -1,0 +1,7 @@
+.tedi-table-card-summary {
+  display: block;
+
+  &__content {
+    border-top: 1px solid var(--card-border-primary);
+  }
+}
