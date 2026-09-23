@@ -1,3 +1,10 @@
+# [8.1.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.14...angular-8.1.0-rc.15) (2026-09-23)
+
+
+### Bug Fixes
+
+* **date-field:** clear uncommitted typed text on reset [#677](https://github.com/TEDI-Design-System/angular/issues/677) ([#695](https://github.com/TEDI-Design-System/angular/issues/695)) ([a28467d](https://github.com/TEDI-Design-System/angular/commit/a28467db692ec715d3bc0cc81870a7078eb1797f))
+
 # [8.1.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.13...angular-8.1.0-rc.14) (2026-09-23)
 
 
