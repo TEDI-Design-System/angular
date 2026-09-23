@@ -47,6 +47,7 @@ import { InputState } from "../form-field/form-field.component";
       [bindValue]="bindValue"
       [placeholder]="placeholder"
       [state]="state"
+      [feedbackText]="feedbackText"
       [size]="size"
       [required]="required"
       [isTagRemovable]="clearableTags"
@@ -108,6 +109,8 @@ class TestHostComponent {
   bindValue: string | undefined = undefined;
   placeholder = "Select an option...";
   state: InputState = "default";
+  feedbackText:
+    { text: string; type?: "hint" | "valid" | "error" } | undefined = undefined;
   size: SelectInputSize = "default";
   required = false;
   clearableTags = false;
@@ -3167,6 +3170,62 @@ describe("SelectComponent", () => {
 
       expect(hiddenInputs()[0].disabled).toBe(true);
     });
+  });
+
+  describe("combobox aria-invalid / aria-describedby", () => {
+    function combobox(): HTMLElement {
+      const all = hostEl.querySelectorAll<HTMLElement>('[role="combobox"]');
+      expect(all).toHaveLength(1);
+      return all[0];
+    }
+
+    it("sets neither attribute by default", () => {
+      expect(combobox().hasAttribute("aria-invalid")).toBe(false);
+      expect(combobox().hasAttribute("aria-describedby")).toBe(false);
+    });
+
+    it("marks the combobox invalid in the error state", () => {
+      host.state = "error";
+      fixture.detectChanges();
+
+      expect(combobox().getAttribute("aria-invalid")).toBe("true");
+    });
+
+    it("does not mark the combobox invalid in the valid state", () => {
+      host.state = "valid";
+      fixture.detectChanges();
+
+      expect(combobox().hasAttribute("aria-invalid")).toBe(false);
+    });
+
+    it("describes the combobox with its feedback text", () => {
+      host.feedbackText = { text: "Pick a city", type: "error" };
+      fixture.detectChanges();
+
+      const feedback = hostEl.querySelector("tedi-feedback-text");
+      expect(feedback?.id).toBe("test-select-feedback");
+      expect(combobox().getAttribute("aria-describedby")).toBe(
+        "test-select-feedback",
+      );
+    });
+
+    it.each([false, true])(
+      "sets both attributes on the searchable input (multiselect: %s)",
+      (allowMultiple) => {
+        host.searchable = true;
+        host.allowMultiple = allowMultiple;
+        host.state = "error";
+        host.feedbackText = { text: "Pick a city", type: "error" };
+        fixture.detectChanges();
+
+        const box = combobox();
+        expect(box.tagName).toBe("INPUT");
+        expect(box.getAttribute("aria-invalid")).toBe("true");
+        expect(box.getAttribute("aria-describedby")).toBe(
+          "test-select-feedback",
+        );
+      },
+    );
   });
 
   describe("Virtual scroll", () => {
