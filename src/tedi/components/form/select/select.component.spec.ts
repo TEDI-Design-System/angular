@@ -29,6 +29,7 @@ import { InputState } from "../form-field/form-field.component";
   template: `
     <tedi-select
       [inputId]="inputId"
+      [name]="name"
       [label]="label"
       [tooltip]="tooltip"
       [ariaLabelledby]="ariaLabelledby"
@@ -89,6 +90,7 @@ import { InputState } from "../form-field/form-field.component";
 })
 class TestHostComponent {
   inputId = "test-select";
+  name: string | undefined = undefined;
   label = "Test Label";
   tooltip: string | undefined = undefined;
   ariaLabelledby: string | undefined = undefined;
@@ -3090,6 +3092,81 @@ describe("SelectComponent", () => {
 
       expect(spy).not.toHaveBeenCalled();
     }));
+  });
+
+  describe("name / hidden form inputs", () => {
+    function hiddenInputs(): HTMLInputElement[] {
+      return Array.from(
+        hostEl.querySelectorAll<HTMLInputElement>('input[type="hidden"]'),
+      );
+    }
+
+    it("renders no hidden input when name is not set", () => {
+      host.control.setValue("Option 1");
+      fixture.detectChanges();
+
+      expect(hiddenInputs()).toHaveLength(0);
+    });
+
+    it("submits the selected value under the given name", () => {
+      host.name = "country";
+      host.control.setValue("Option 2");
+      fixture.detectChanges();
+
+      const inputs = hiddenInputs();
+      expect(inputs).toHaveLength(1);
+      expect(inputs[0].name).toBe("country");
+      expect(inputs[0].value).toBe("Option 2");
+    });
+
+    it("renders one empty hidden input when nothing is selected", () => {
+      host.name = "country";
+      fixture.detectChanges();
+
+      const inputs = hiddenInputs();
+      expect(inputs).toHaveLength(1);
+      expect(inputs[0].value).toBe("");
+    });
+
+    it("renders one hidden input per selected value in multiselect", () => {
+      host.name = "countries";
+      host.allowMultiple = true;
+      fixture.detectChanges();
+      host.control.setValue(["Option 1", "Option 3"]);
+      fixture.detectChanges();
+
+      expect(hiddenInputs().map((i) => i.value)).toEqual([
+        "Option 1",
+        "Option 3",
+      ]);
+      expect(hiddenInputs().every((i) => i.name === "countries")).toBe(true);
+    });
+
+    it("uses the bound value rather than the whole option object", () => {
+      host.name = "country";
+      host.items = [
+        { label: "Estonia", id: "EE" },
+        { label: "Finland", id: "FI" },
+      ];
+      host.bindValue = "id";
+      fixture.detectChanges();
+      host.control.setValue("FI");
+      fixture.detectChanges();
+
+      expect(hiddenInputs()[0].value).toBe("FI");
+    });
+
+    it("disables the hidden input while the select is disabled, so it is not submitted", () => {
+      host.name = "country";
+      host.control.setValue("Option 1");
+      fixture.detectChanges();
+      expect(hiddenInputs()[0].disabled).toBe(false);
+
+      host.control.disable();
+      fixture.detectChanges();
+
+      expect(hiddenInputs()[0].disabled).toBe(true);
+    });
   });
 
   describe("Virtual scroll", () => {

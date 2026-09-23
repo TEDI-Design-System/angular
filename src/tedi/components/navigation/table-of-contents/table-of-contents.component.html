@@ -1,0 +1,98 @@
+<ng-template #inner>
+  @if (resolvedHeading()) {
+    @switch (headingLevel()) {
+      @case ("h1") {
+        <h1
+          tedi-text
+          modifiers="h4"
+          class="tedi-table-of-contents__heading"
+          [id]="headingId"
+        >
+          {{ resolvedHeading() }}
+        </h1>
+      }
+      @case ("h2") {
+        <h2
+          tedi-text
+          modifiers="h4"
+          class="tedi-table-of-contents__heading"
+          [id]="headingId"
+        >
+          {{ resolvedHeading() }}
+        </h2>
+      }
+      @case ("h4") {
+        <h4
+          tedi-text
+          modifiers="h4"
+          class="tedi-table-of-contents__heading"
+          [id]="headingId"
+        >
+          {{ resolvedHeading() }}
+        </h4>
+      }
+      @case ("h5") {
+        <h5
+          tedi-text
+          modifiers="h4"
+          class="tedi-table-of-contents__heading"
+          [id]="headingId"
+        >
+          {{ resolvedHeading() }}
+        </h5>
+      }
+      @case ("h6") {
+        <h6
+          tedi-text
+          modifiers="h4"
+          class="tedi-table-of-contents__heading"
+          [id]="headingId"
+        >
+          {{ resolvedHeading() }}
+        </h6>
+      }
+      @default {
+        <h3
+          tedi-text
+          modifiers="h4"
+          class="tedi-table-of-contents__heading"
+          [id]="headingId"
+        >
+          {{ resolvedHeading() }}
+        </h3>
+      }
+    }
+  }
+  <nav
+    [attr.aria-labelledby]="
+      !ariaLabel() && resolvedHeading() ? headingId : null
+    "
+    [attr.aria-label]="ariaLabel() || (resolvedHeading() ? null : navLabel())"
+  >
+    <ul
+      class="tedi-table-of-contents__list"
+      role="list"
+      [class.tedi-table-of-contents__list--headless]="!resolvedHeading()"
+    >
+      <ng-content select="tedi-table-of-contents-item" />
+    </ul>
+  </nav>
+</ng-template>
+
+@if (variant() === "transparent") {
+  <div
+    class="tedi-table-of-contents__container tedi-table-of-contents--transparent"
+    [class.tedi-table-of-contents--sticky]="sticky()"
+  >
+    <ng-container [ngTemplateOutlet]="inner" />
+  </div>
+} @else {
+  <tedi-card
+    class="tedi-table-of-contents__container"
+    [class.tedi-table-of-contents--sticky]="sticky()"
+  >
+    <tedi-card-content [padding]="0">
+      <ng-container [ngTemplateOutlet]="inner" />
+    </tedi-card-content>
+  </tedi-card>
+}

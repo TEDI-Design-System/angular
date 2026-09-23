@@ -13,6 +13,7 @@ import {
 } from "./breadcrumbs.component";
 import { BreadcrumbItemDirective } from "./breadcrumb-item.directive";
 import { BreadcrumbSeparatorDirective } from "./breadcrumb-separator.directive";
+import { getFocusableElements } from "../../../utils/elements.util";
 
 class TranslationMock {
   translate(key: string) {
@@ -197,6 +198,13 @@ describe("Breadcrumbs", () => {
   });
 
   describe("collapse", () => {
+    let attached: HTMLElement | null = null;
+
+    afterEach(() => {
+      attached?.remove();
+      attached = null;
+    });
+
     const longTrail = [
       "Dashboard",
       "Patients",
@@ -231,6 +239,148 @@ describe("Breadcrumbs", () => {
       expect(listText).not.toContain("Anna Tamm");
       expect(listText).toContain("Dashboard");
       expect(listText).toContain("Restrictions");
+    });
+
+    const ellipsisTrigger = (fixture: ComponentFixture<HostComponent>) =>
+      fixture.debugElement.query(By.css("button[tedi-dropdown-trigger]"))
+        .nativeElement as HTMLButtonElement;
+
+    const openCollapsed = async (fixture: ComponentFixture<HostComponent>) => {
+      // Attached to the document so focus assertions see the real active element.
+      document.body.appendChild(fixture.nativeElement);
+      attached = fixture.nativeElement;
+
+      const trigger = ellipsisTrigger(fixture);
+      trigger.focus();
+      trigger.click();
+      fixture.detectChanges();
+      await new Promise((resolve) => setTimeout(resolve));
+      fixture.detectChanges();
+
+      return Array.from(
+        fixture.nativeElement.querySelectorAll(
+          "li.tedi-breadcrumbs__dropdown-item",
+        ),
+      ) as HTMLLIElement[];
+    };
+
+    it("exposes the collapsed crumbs as a plain list of links, not a menu", async () => {
+      const fixture = setup({
+        crumbs: longTrail,
+        maxItems: 4,
+        itemsBeforeCollapse: 1,
+        itemsAfterCollapse: 2,
+      });
+
+      const dropdownItems = await openCollapsed(fixture);
+      expect(dropdownItems).toHaveLength(3);
+
+      const links = dropdownItems.map(
+        (item) => item.querySelector("a") as HTMLAnchorElement,
+      );
+      const list = dropdownItems[0].closest("ul") as HTMLUListElement;
+
+      expect(list.getAttribute("role")).toBe("list");
+      expect(ellipsisTrigger(fixture).getAttribute("aria-haspopup")).toBeNull();
+
+      // A widget role on the item or the link would stop screen readers
+      // announcing the crumbs as links.
+      dropdownItems.forEach((item) => {
+        expect(item.getAttribute("role")).toBeNull();
+        expect(item.getAttribute("tabindex")).toBeNull();
+      });
+      links.forEach((link) => {
+        expect(link.getAttribute("role")).toBeNull();
+        // No roving tabindex, so every crumb link stays in the tab order.
+        expect(link.getAttribute("tabindex")).not.toBe("-1");
+      });
+    });
+
+    // iOS VoiceOver and TalkBack swipe through the document and send no Tab key,
+    // so the collapsed crumbs have to sit between the ellipsis and the next
+    // crumb in the DOM itself, not only in the panel's key handling.
+    it("renders the collapsed crumbs between the ellipsis and the next crumb", async () => {
+      const fixture = setup({
+        crumbs: longTrail,
+        maxItems: 4,
+        itemsBeforeCollapse: 1,
+        itemsAfterCollapse: 2,
+      });
+
+      await openCollapsed(fixture);
+
+      const order = getFocusableElements(fixture.nativeElement).map((el) =>
+        el.textContent?.trim(),
+      );
+
+      expect(order).toEqual([
+        "Dashboard",
+        "…",
+        "Patients",
+        "Anna Tamm",
+        "Visits",
+        "2024-05-12",
+      ]);
+    });
+
+    it("moves focus to the first collapsed crumb when the dropdown opens", async () => {
+      const fixture = setup({
+        crumbs: longTrail,
+        maxItems: 4,
+        itemsBeforeCollapse: 1,
+        itemsAfterCollapse: 2,
+      });
+
+      const dropdownItems = await openCollapsed(fixture);
+
+      expect(document.activeElement).toBe(dropdownItems[0].querySelector("a"));
+    });
+
+    it("returns focus to the ellipsis button on Escape", async () => {
+      const fixture = setup({
+        crumbs: longTrail,
+        maxItems: 4,
+        itemsBeforeCollapse: 1,
+        itemsAfterCollapse: 2,
+      });
+
+      const dropdownItems = await openCollapsed(fixture);
+      const trigger = ellipsisTrigger(fixture);
+
+      dropdownItems[0].querySelector("a")?.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Escape",
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      fixture.detectChanges();
+
+      expect(document.activeElement).toBe(trigger);
+      expect(
+        document.querySelector("li.tedi-breadcrumbs__dropdown-item"),
+      ).toBeNull();
+    });
+
+    it("lets Enter follow a collapsed crumb link", async () => {
+      const fixture = setup({
+        crumbs: longTrail,
+        maxItems: 4,
+        itemsBeforeCollapse: 1,
+        itemsAfterCollapse: 2,
+      });
+
+      const link = (await openCollapsed(fixture))[0].querySelector(
+        "a",
+      ) as HTMLAnchorElement;
+      const event = new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+      });
+      link.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(false);
     });
 
     it("does not collapse when the crumb count is within maxItems", () => {

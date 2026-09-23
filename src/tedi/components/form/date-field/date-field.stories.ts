@@ -142,6 +142,7 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
         <label tedi-label [for]="inputId" [required]="required">{{ label }}</label>
         <tedi-date-field
           [inputId]="inputId"
+          [name]="name"
           [formControl]="control"
           [mode]="mode"
           [size]="size"
@@ -225,6 +226,7 @@ export default {
   render: renderSingle,
   args: {
     inputId: "date-field",
+    name: "",
     label: "Kuupäev",
     mode: "single",
     size: "default",
@@ -256,6 +258,15 @@ export default {
     inputId: {
       description:
         "Unique ID for label association and accessibility. Bind the sibling `<label tedi-label [for]>` to the same value.",
+      control: { type: "text" },
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+      },
+    },
+    name: {
+      description:
+        "`name` attribute of the underlying text input, used by native form submission. Omitted from the DOM when not set.",
       control: { type: "text" },
       table: {
         category: "inputs",

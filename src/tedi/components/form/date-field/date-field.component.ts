@@ -8,6 +8,7 @@ import {
   forwardRef,
   inject,
   input,
+  linkedSignal,
   model,
   OnInit,
   output,
@@ -46,6 +47,7 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { deriveControlState } from "../form-field/derive-control-state";
+import { controlDescribedBy } from "../form-field/control-described-by";
 import {
   breakpointInput,
   BreakpointInput,
@@ -135,6 +137,11 @@ export class DateFieldComponent
    * `<label tedi-label [for]>` to the same value.
    */
   readonly inputId = input.required<string>();
+  /**
+   * `name` attribute of the underlying text input, used by native form
+   * submission. Omitted from the DOM when not set.
+   */
+  readonly name = input<string>();
   /**
    * The selected value (two-way / `ControlValueAccessor`). Shape follows `mode`:
    * `single` → `Date | null`, `multiple` → `Date[]`, `range` → `{ from, to }`.
@@ -363,7 +370,22 @@ export class DateFieldComponent
     ];
   });
 
+  /**
+   * `aria-describedby` ids for the inner input — the wrapping form-field's
+   * feedback text, plus any set on `<tedi-date-field>` itself.
+   */
+  readonly describedBy = controlDescribedBy();
+
   private readonly cvaDisabled = signal(false);
+  /**
+   * Uncommitted input text, tracked separately so resets clear it even when
+   * `value` is unchanged. Value changes discard it; `null` shows the formatted value.
+   */
+  private readonly typedText = linkedSignal<DateFieldValue, string | null>({
+    source: this.value,
+    computation: () => null,
+  });
+
   private modalRef: ModalRef<DateFieldValue> | null = null;
   private scrollListener?: () => void;
 
@@ -508,6 +530,12 @@ export class DateFieldComponent
     return this.defaultFormat(v);
   });
 
+  /**
+   * What the text input actually shows: uncommitted typed text when there is
+   * any, otherwise the formatted `value`.
+   */
+  readonly inputText = computed(() => this.typedText() ?? this.displayValue());
+
   readonly tagsForMultipleMode = computed<DateInputTag[]>(() => {
     if (this.mode() !== "multiple") return [];
     const v = this.value();
@@ -567,6 +595,7 @@ export class DateFieldComponent
   }
 
   writeValue(value: DateFieldValue): void {
+    this.typedText.set(null);
     this.value.set(value);
   }
 
@@ -580,6 +609,10 @@ export class DateFieldComponent
 
   setDisabledState(isDisabled: boolean): void {
     this.cvaDisabled.set(isDisabled);
+  }
+
+  setDescribedBy(ids: string[]): void {
+    this.describedBy.set(ids);
   }
 
   focus(): void {
@@ -635,6 +668,8 @@ export class DateFieldComponent
       return;
     }
 
+    this.typedText.set(value);
+
     if (value === "") {
       this.commitValue(null);
       return;
@@ -679,6 +714,7 @@ export class DateFieldComponent
     const calendar = this.calendar();
     if (!calendar) return;
     const newValue = calendar.value();
+    this.typedText.set(null);
     this.value.set(newValue);
     this.onChange(newValue);
     this.onTouched();
@@ -893,6 +929,7 @@ export class DateFieldComponent
   }
 
   private commitValue(next: DateFieldValue): void {
+    this.typedText.set(null);
     this.value.set(next);
     this.onChange(next);
     this.onTouched();

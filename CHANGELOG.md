@@ -1,3 +1,52 @@
+# [8.1.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.17...angular-8.1.0-rc.18) (2026-09-23)
+
+
+### Features
+
+* **table-of-contents:** add new TEDI-Ready component [#543](https://github.com/TEDI-Design-System/angular/issues/543) ([#551](https://github.com/TEDI-Design-System/angular/issues/551)) ([0378eb8](https://github.com/TEDI-Design-System/angular/commit/0378eb8417d3f956d50c6613e66a11df34cec23b))
+
+# [8.1.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.16...angular-8.1.0-rc.17) (2026-09-23)
+
+
+### Bug Fixes
+
+* **select:** add name input for native form submission [#672](https://github.com/TEDI-Design-System/angular/issues/672) ([#701](https://github.com/TEDI-Design-System/angular/issues/701)) ([8eae4ea](https://github.com/TEDI-Design-System/angular/commit/8eae4ea28c1f1966b04799545bef89c4e8d02655))
+
+# [8.1.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.15...angular-8.1.0-rc.16) (2026-09-23)
+
+
+### Bug Fixes
+
+* **date-field:** forward aria-describedby to the input [#675](https://github.com/TEDI-Design-System/angular/issues/675) ([#696](https://github.com/TEDI-Design-System/angular/issues/696)) ([7fd89ac](https://github.com/TEDI-Design-System/angular/commit/7fd89ac10b89b17ebd59c6c8f1a77f4b95837866))
+
+# [8.1.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.14...angular-8.1.0-rc.15) (2026-09-23)
+
+
+### Bug Fixes
+
+* **date-field:** clear uncommitted typed text on reset [#677](https://github.com/TEDI-Design-System/angular/issues/677) ([#695](https://github.com/TEDI-Design-System/angular/issues/695)) ([a28467d](https://github.com/TEDI-Design-System/angular/commit/a28467db692ec715d3bc0cc81870a7078eb1797f))
+
+# [8.1.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.13...angular-8.1.0-rc.14) (2026-09-23)
+
+
+### Bug Fixes
+
+* **date-field:** add name input for native form submission [#686](https://github.com/TEDI-Design-System/angular/issues/686) ([#694](https://github.com/TEDI-Design-System/angular/issues/694)) ([54e5cf2](https://github.com/TEDI-Design-System/angular/commit/54e5cf2ddc19dd0f5e1d4ce63c17171c3b012ee0))
+
+# [8.1.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.12...angular-8.1.0-rc.13) (2026-09-23)
+
+
+### Bug Fixes
+
+* **button-group:** restore button styles import [#698](https://github.com/TEDI-Design-System/angular/issues/698) ([#699](https://github.com/TEDI-Design-System/angular/issues/699)) ([8c7b0af](https://github.com/TEDI-Design-System/angular/commit/8c7b0af9d8287f884f8bea31bb7c6c5557d9a82b))
+
+# [8.1.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.11...angular-8.1.0-rc.12) (2026-09-23)
+
+
+### Bug Fixes
+
+* **breadcrumbs:** better wcag support [#541](https://github.com/TEDI-Design-System/angular/issues/541) ([#619](https://github.com/TEDI-Design-System/angular/issues/619)) ([fe5d897](https://github.com/TEDI-Design-System/angular/commit/fe5d897592446c6085308a9d1b8923795e9d8272))
+
 # [8.1.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.10...angular-8.1.0-rc.11) (2026-09-22)
 
 
