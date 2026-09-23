@@ -11,7 +11,6 @@ import {
   ElementRef,
   effect,
 } from "@angular/core";
-import { warnDeprecated } from "@tedi-design-system/angular/tedi";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { startWith } from "rxjs";
@@ -83,10 +82,6 @@ export class TabComponent implements FocusableOption {
   }
 
   constructor() {
-    warnDeprecated(
-      "Community [tedi-tab]",
-      "Use the TEDI-Ready `button[tedi-tabs-trigger]` from `@tedi-design-system/angular/tedi` instead.",
-    );
     effect(() => {
       this.disabled = this.disabledInput();
     });

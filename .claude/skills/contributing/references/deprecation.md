@@ -51,8 +51,11 @@ All in the same PR:
    - **Base classes** that other components extend: start the constructor with
      `if (new.target !== InputComponent) return;` so a subclass only logs its own warning, not its
      parent's as well.
-   - **Selectorless directives** that only serve as `hostDirectives` of deprecated components get no
-     warning. The host component already warns.
+   - **Child components and directives get no warning** when they only work inside the deprecated
+     parent: parts it collects with `contentChildren` or that are meant to be projected into it
+     (`[tedi-tab]`, `tedi-tab-content`, `tedi-card-header`/`-row`/`-content`), and selectorless
+     `hostDirectives`. The parent already warns. A child that is also used on its own (`tedi-radio`
+     with an optional group) does warn.
    - **Rendered by other library code?** Its warning then reaches consumers who never used it. Switch
      that code to the replacement where it is a drop-in; otherwise flag it in the PR. The only case
      today is community `tedi-multiselect` rendering community `[tedi-input]`, `tedi-checkbox` and
