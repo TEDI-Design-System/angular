@@ -1,3 +1,10 @@
+# [8.1.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.11...angular-8.1.0-rc.12) (2026-09-23)
+
+
+### Bug Fixes
+
+* **breadcrumbs:** better wcag support [#541](https://github.com/TEDI-Design-System/angular/issues/541) ([#619](https://github.com/TEDI-Design-System/angular/issues/619)) ([fe5d897](https://github.com/TEDI-Design-System/angular/commit/fe5d897592446c6085308a9d1b8923795e9d8272))
+
 # [8.1.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.10...angular-8.1.0-rc.11) (2026-09-22)
 
 
