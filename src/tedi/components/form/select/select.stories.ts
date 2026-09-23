@@ -92,6 +92,11 @@ const meta: Meta<SelectComponent> = {
       description:
         "Unique identifier for the select input element. Used for label association and accessibility.",
     },
+    name: {
+      control: "text",
+      description:
+        "Name the selection is submitted under in a native form, one entry per selected value. With object options, set `bindValue` to pick what is sent.",
+    },
     label: {
       control: "text",
       description: "Label text displayed above the select.",
@@ -246,6 +251,7 @@ const meta: Meta<SelectComponent> = {
   },
   args: {
     inputId: "select-1",
+    name: "",
     label: "Label",
     required: false,
     placeholder: "Vali...",
@@ -278,6 +284,7 @@ export const Default: Story = {
     template: `
       <tedi-select
         [inputId]="inputId"
+        [name]="name"
         [label]="label"
         [tooltip]="tooltip"
         [required]="required"
