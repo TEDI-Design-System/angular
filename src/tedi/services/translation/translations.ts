@@ -54,10 +54,32 @@ export const translationsMap = {
   },
   search: {
     description: "For searching",
-    components: ["TableFilter"],
+    components: ["TableFilter", "Search"],
     et: "Otsi",
     en: "Search",
     ru: "Поиск",
+  },
+  "search.no-results": {
+    description: "Shown in the search suggestions panel when nothing matched",
+    components: ["Search"],
+    et: "Tulemusi ei leitud",
+    en: "No results found",
+    ru: "Результаты не найдены",
+  },
+  "search.loading": {
+    description: "Shown in the search suggestions panel while results load",
+    components: ["Search"],
+    et: "Otsin...",
+    en: "Searching...",
+    ru: "Поиск...",
+  },
+  "search.results-count": {
+    description:
+      "Announced politely to screen readers when the number of Search suggestions changes",
+    components: ["Search"],
+    et: (count: number) => `${count} ${count === 1 ? "vaste" : "vastet"}`,
+    en: (count: number) => `${count} ${count === 1 ? "result" : "results"}`,
+    ru: (count: number) => `Совпадений: ${count}`,
   },
   required: {
     description: "Required field",
@@ -289,6 +311,14 @@ export const translationsMap = {
     et: "Üleslaadimine",
     en: "Uploading",
     ru: "Загрузка",
+  },
+  "toast.close": {
+    description:
+      "Accessible label for a toast's close button, naming which toast it closes",
+    components: ["Toast"],
+    et: (title: string) => `Sulge teavitus: ${title}`,
+    en: (title: string) => `Close notification: ${title}`,
+    ru: (title: string) => `Закрыть уведомление: ${title}`,
   },
   "modal.close": {
     description: "Label for modals close button",
@@ -764,8 +794,7 @@ export const translationsMap = {
       `${count ?? 0} ${count === 1 ? "tulemus" : "tulemust"}`,
     en: (count?: number) =>
       `${count ?? 0} ${count === 1 ? "result" : "results"}`,
-    ru: (count?: number) =>
-      `${count ?? 0} ${count === 1 ? "результат" : "результа"}`,
+    ru: (count?: number) => `Результатов: ${count ?? 0}`,
   },
   "pagination.page-size": {
     description: "Label of page size select",

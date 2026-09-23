@@ -13,11 +13,12 @@ import {
   model,
   Renderer2,
 } from "@angular/core";
-import { OverlayModule } from "@angular/cdk/overlay";
+import { OverlayContainer, OverlayModule } from "@angular/cdk/overlay";
 import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
 import { DROPDOWN_API } from "./dropdown.tokens";
+import { DropdownOverlayContainer } from "./dropdown-overlay-container";
 import { getFocusableElements } from "../../../utils/elements.util";
 import {
   OverlayPosition,
@@ -40,6 +41,11 @@ let dropdownIdCounter = 0;
     {
       provide: DROPDOWN_API,
       useExisting: forwardRef(() => DropdownComponent),
+    },
+    DropdownOverlayContainer,
+    {
+      provide: OverlayContainer,
+      useExisting: DropdownOverlayContainer,
     },
   ],
 })
@@ -100,6 +106,7 @@ export class DropdownComponent implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
   private readonly renderer = inject(Renderer2);
+  private readonly overlayContainer = inject(DropdownOverlayContainer);
   private scrollListener?: () => void;
   private skipNextGestureOutsideClick = false;
 
@@ -119,6 +126,10 @@ export class DropdownComponent implements OnDestroy {
   showDropdown(initialFocus: "selected" | "first" | "last" = "selected") {
     if (this.isOpen()) return;
 
+    // A plain `list` is content, not a widget, so it renders where it sits in
+    // the DOM and keeps its place in reading order.
+    this.overlayContainer.setInline(!this.dropdownContent().isWidget());
+
     const width = this.dropdownTrigger()?.host.nativeElement.offsetWidth;
     if (width) {
       this.triggerWidth.set(width);
@@ -126,11 +137,21 @@ export class DropdownComponent implements OnDestroy {
 
     this.isOpen.set(true);
     this.skipNextGestureOutsideClick = true;
-    this.setActiveToSelectedOrFirst();
 
     if (this.hideOnScroll()) {
       this.setupScrollListener();
     }
+
+    // A plain `list` has no active item and no roving tabindex: opening it just
+    // moves focus to its first link.
+    if (!this.dropdownContent().isWidget()) {
+      setTimeout(() => {
+        if (this.isOpen()) this.focusPanelStart();
+      });
+      return;
+    }
+
+    this.setActiveToSelectedOrFirst();
 
     // Deferred so the overlay content is attached before focusing
     setTimeout(() => {
@@ -200,11 +221,21 @@ export class DropdownComponent implements OnDestroy {
       ? focusable[triggerIndex - 1]
       : focusable[triggerIndex + 1];
 
-    this.hideDropdown();
+    // Move focus first, then close. Closing while the panel still holds focus
+    // detaches the focused element, which drops focus to `body` until the next
+    // task runs, and a screen reader reads that gap as the whole page/container
+    // before it reaches the real target.
+    this.moveFocusOut(next ?? triggerEl);
+  }
 
-    if (next) {
-      setTimeout(() => next.focus());
-    }
+  /**
+   * Focuses `target` and only then tears the panel down, so focus is never on a
+   * detached element. `handleFocusOut` already closes on the resulting
+   * `focusin`; the explicit call covers a target that refuses focus.
+   */
+  private moveFocusOut(target: HTMLElement) {
+    target.focus();
+    this.hideDropdown();
   }
 
   focusFirstItem() {
@@ -258,7 +289,7 @@ export class DropdownComponent implements OnDestroy {
     const items = this.dropdownContent().items();
     if (!items[index]) return;
 
-    const el = items[index].host.nativeElement;
+    const el = items[index].focusTarget();
     el.focus();
     el.scrollIntoView({
       block: "nearest",
@@ -293,23 +324,44 @@ export class DropdownComponent implements OnDestroy {
   }
 
   updateTabindexes() {
+    if (!this.dropdownContent().isWidget()) return;
+
     const items = this.dropdownContent().items();
     const role = this.dropdownContent().dropdownRole();
     const active = this.activeIndex();
 
     items.forEach((item, i) => {
-      const el = item.host.nativeElement;
-
       if (i === active && !item.disabled()) {
-        el.setAttribute("tabindex", "0");
+        item.setTabindex("0");
+      } else if (role === "listbox" && item.disabled()) {
+        item.setTabindex(null);
       } else {
-        if (role === "listbox" && item.disabled()) {
-          el.removeAttribute("tabindex");
-        } else {
-          el.setAttribute("tabindex", "-1");
-        }
+        item.setTabindex("-1");
       }
     });
+  }
+
+  /** Moves focus to the first focusable element in the panel. */
+  focusPanelStart() {
+    this.panelFocusables()[0]?.focus();
+  }
+
+  onPanelKeydown(event: KeyboardEvent) {
+    // Widget content is driven by its items' own key handling, and a plain
+    // `list` renders in document order, so Tab out of it belongs to the
+    // browser.
+    if (this.dropdownContent().isWidget() || event.key !== "Escape") return;
+
+    event.preventDefault();
+    this.closeAndFocusTrigger();
+  }
+
+  private panelFocusables(): HTMLElement[] {
+    return getFocusableElements(this.dropdownContent().host.nativeElement);
+  }
+
+  private closeAndFocusTrigger() {
+    this.moveFocusOut(this.dropdownTrigger().focusableElement);
   }
 
   private setupScrollListener() {

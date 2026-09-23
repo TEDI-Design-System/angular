@@ -66,6 +66,11 @@ export default {
         summary: false,
       },
     },
+    closeAriaLabel: {
+      control: "text",
+      description:
+        "Accessible name for the close button, replacing the generic default when several alerts can be on screen at once.",
+    },
     role: {
       control: "select",
       options: ["alert", "status", "none"],
