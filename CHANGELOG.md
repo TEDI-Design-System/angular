@@ -1,3 +1,10 @@
+# [8.1.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.12...angular-8.1.0-rc.13) (2026-09-23)
+
+
+### Bug Fixes
+
+* **button-group:** restore button styles import [#698](https://github.com/TEDI-Design-System/angular/issues/698) ([#699](https://github.com/TEDI-Design-System/angular/issues/699)) ([8c7b0af](https://github.com/TEDI-Design-System/angular/commit/8c7b0af9d8287f884f8bea31bb7c6c5557d9a82b))
+
 # [8.1.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.11...angular-8.1.0-rc.12) (2026-09-23)
 
 
