@@ -131,6 +131,12 @@ export class SelectComponent<T = unknown>
   inputId = input.required<string>();
 
   /**
+   * Name the selection is submitted under in a native form, one entry per
+   * selected value. With object options, set `bindValue` to pick what is sent.
+   */
+  name = input<string>();
+
+  /**
    * Label text displayed above the select.
    */
   label = input<string>();
@@ -456,6 +462,18 @@ export class SelectComponent<T = unknown>
 
   private static readonly DEFAULT_ROW_HEIGHT = 40;
   private static readonly SMALL_ROW_HEIGHT = 36;
+
+  /**
+   * Values written to the hidden form inputs — one entry per selected value,
+   * and a single empty entry when nothing is selected, so the field is still
+   * submitted.
+   */
+  readonly formValues = computed<string[]>(() => {
+    const values = this.selectedValues();
+    if (!values.length) return [""];
+
+    return values.map((value) => (value == null ? "" : String(value)));
+  });
 
   hiddenTagsCount = computed(() => {
     const visible = this.visibleTagsCount();

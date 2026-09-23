@@ -134,6 +134,16 @@
     <tedi-icon name="arrow_drop_down" />
   </span>
 </div>
+@if (name(); as fieldName) {
+  @for (formValue of formValues(); track $index) {
+    <input
+      type="hidden"
+      [name]="fieldName"
+      [value]="formValue"
+      [disabled]="disabled()"
+    />
+  }
+}
 @if (feedbackText(); as feedback) {
   <tedi-feedback-text
     [text]="feedback.text"
