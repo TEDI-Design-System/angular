@@ -1,3 +1,10 @@
+# [8.1.0-rc.20](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.19...angular-8.1.0-rc.20) (2026-09-23)
+
+
+### Bug Fixes
+
+* **select:** set aria-invalid and aria-describedby on the combobox [#673](https://github.com/TEDI-Design-System/angular/issues/673) ([#702](https://github.com/TEDI-Design-System/angular/issues/702)) ([d67b67d](https://github.com/TEDI-Design-System/angular/commit/d67b67d8a36cd3e499cb4c18a70fdeab50ddd5f4))
+
 # [8.1.0-rc.19](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.18...angular-8.1.0-rc.19) (2026-09-23)
 
 
