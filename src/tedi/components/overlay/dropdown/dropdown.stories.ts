@@ -1,0 +1,609 @@
+import { Component, ViewEncapsulation } from "@angular/core";
+import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
+import { DropdownComponent, DropdownPosition } from "./dropdown.component";
+import {
+  DropdownTriggerAriaHasPopup,
+  DropdownTriggerDirective,
+} from "./dropdown-trigger/dropdown-trigger.directive";
+import {
+  DropdownContentComponent,
+  DropdownRole,
+} from "./dropdown-content/dropdown-content.component";
+import { DropdownItemComponent } from "./dropdown-item/dropdown-item.component";
+import { DropdownItemValueComponent } from "./dropdown-item-value/dropdown-item-value.component";
+import { DropdownItemValueLabelComponent } from "./dropdown-item-value/dropdown-item-value-label.component";
+import { DropdownItemValueMetaComponent } from "./dropdown-item-value/dropdown-item-value-meta.component";
+import { ButtonComponent } from "../../buttons/button/button.component";
+import { IconComponent } from "../../base";
+import { expect, userEvent, waitFor, within } from "storybook/test";
+
+@Component({
+  selector: "app-demo-button",
+  standalone: true,
+  imports: [ButtonComponent],
+  template: `<button tedi-button><ng-content /></button>`,
+  encapsulation: ViewEncapsulation.None,
+})
+class DemoWrappingButtonComponent {}
+
+const POSITIONS: DropdownPosition[] = [
+  "auto",
+  "auto-start",
+  "auto-end",
+  "top",
+  "top-start",
+  "top-end",
+  "bottom",
+  "bottom-start",
+  "bottom-end",
+  "right",
+  "right-start",
+  "right-end",
+  "left",
+  "left-start",
+  "left-end",
+];
+
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.23.39?node-id=2319-64439&m=dev" target="_blank">Figma ↗</a><br>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/0930a9-dropdown-item" target="_blank">Zeroheight ↗</a>
+ */
+
+export default {
+  title: "TEDI-Ready/Components/Overlay/Dropdown",
+  component: DropdownComponent,
+  decorators: [
+    moduleMetadata({
+      imports: [
+        DropdownComponent,
+        DropdownTriggerDirective,
+        DropdownContentComponent,
+        DropdownItemComponent,
+        DropdownItemValueComponent,
+        DropdownItemValueLabelComponent,
+        DropdownItemValueMetaComponent,
+        ButtonComponent,
+        IconComponent,
+        DemoWrappingButtonComponent,
+      ],
+    }),
+  ],
+  argTypes: {
+    value: {
+      control: "text",
+      description: "Current value of dropdown (used with listbox)",
+      table: {
+        category: "dropdown",
+        type: { summary: "string" },
+      },
+    },
+    position: {
+      control: "select",
+      options: POSITIONS,
+      description:
+        "The position of the dropdown relative to the trigger element.",
+      table: {
+        category: "dropdown",
+        type: { summary: "DropdownPosition" },
+        defaultValue: { summary: "bottom-start" },
+      },
+    },
+    preventOverflow: {
+      control: "boolean",
+      description:
+        "Should position to opposite direction when overflowing screen?",
+      table: {
+        category: "dropdown",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    hideOnScroll: {
+      control: "boolean",
+      description: "Does the dropdown hide when the page scrolls?",
+      table: {
+        category: "dropdown",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    dropdownRole: {
+      control: "radio",
+      options: ["menu", "listbox", "list"],
+      description:
+        "How the panel is exposed to assistive technology: `menu` for actions, `listbox` for selectable options, `list` for a plain list of links. `menu` and `listbox` are composite widgets (one tab stop, arrow-key navigation, `menuitem` / `option` items); `list` adds no roles or key handling, so projected links stay links and stay in the tab order. Every role moves focus into the panel when it opens, so the panel is not read last because of where the overlay renders.",
+      table: {
+        category: "dropdown-content",
+        type: { summary: "DropdownRole", detail: "menu \nlistbox \nlist" },
+        defaultValue: { summary: "menu" },
+      },
+    },
+    ariaHaspopup: {
+      control: "radio",
+      options: ["menu", "listbox", "dialog", "true", "false"],
+      description:
+        "The `aria-haspopup` value for the trigger. Defaults to the content's `dropdownRole`, and a plain `list` gets no attribute at all, since ARIA has no token for it. `false` also omits the attribute.",
+      table: {
+        category: "dropdown-trigger",
+        type: {
+          summary: "DropdownTriggerAriaHasPopup",
+          detail: "menu \nlistbox \ndialog \ntrue \nfalse",
+        },
+        defaultValue: { summary: "dropdownRole" },
+      },
+    },
+    itemValue: {
+      name: "value",
+      description: "Item value",
+      table: {
+        category: "dropdown-item",
+        type: { summary: "string" },
+      },
+    },
+    disabled: {
+      description: "Is item disabled?",
+      table: {
+        category: "dropdown-item",
+        type: { summary: "boolean" },
+      },
+    },
+    closeOnSelect: {
+      description:
+        "Whether activating this item closes the dropdown. Set `false` for items that should keep the dropdown open after selection (e.g. multi-select checkboxes).",
+      control: "boolean",
+      table: {
+        category: "dropdown-item",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    clipContent: {
+      description:
+        "Whether the item's label clips overflowing content for text ellipsis. Set `false` when projecting content with decorations that intentionally sit outside the line box (e.g. status indicator), so they are not cut off.",
+      control: "boolean",
+      table: {
+        category: "dropdown-item",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    interactiveContent: {
+      description:
+        'Whether the projected content is itself the interactive control, e.g. a button. In a `menu` or `listbox` the item role and the roving tabindex move onto that element, so assistive technology reports one control per item. For navigation links use `dropdownRole="list"` instead, where a widget role would replace the link role.',
+      table: {
+        category: "dropdown-item",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    itemSelect: {
+      description:
+        "Fires on click or keyboard (Enter / Space) activation. Use to react to selection without depending on click ordering.",
+      table: {
+        category: "dropdown-item",
+        type: { summary: "EventEmitter<void>" },
+      },
+    },
+  },
+} as Meta<DropdownComponent>;
+
+type Story = StoryObj<
+  DropdownComponent & {
+    dropdownRole: DropdownRole;
+    ariaHaspopup: DropdownTriggerAriaHasPopup;
+  }
+>;
+
+export const Default: Story = {
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+    hideOnScroll: false,
+    dropdownRole: "menu",
+    ariaHaspopup: "menu",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [hideOnScroll]="hideOnScroll">
+        <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
+          Trigger
+        </button>
+        <tedi-dropdown-content [dropdownRole]="dropdownRole">
+          <li tedi-dropdown-item>Access to health data</li>
+          <li tedi-dropdown-item [disabled]="true">Declaration of intent</li>
+          <li tedi-dropdown-item>Contacts</li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+export const WithMeta: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  name: "With Meta Text",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+    dropdownRole: "listbox",
+    ariaHaspopup: "listbox",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
+          Select location
+        </button>
+        <tedi-dropdown-content [dropdownRole]="dropdownRole">
+          <li tedi-dropdown-item value="tallinn">
+            <tedi-dropdown-item-value>
+              <tedi-dropdown-item-value-label>Tallinn</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>3 timeslots</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </li>
+          <li tedi-dropdown-item value="tartu">
+            <tedi-dropdown-item-value>
+              <tedi-dropdown-item-value-label>Tartu</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>5 timeslots</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </li>
+          <li tedi-dropdown-item value="parnu">
+            <tedi-dropdown-item-value>
+              <tedi-dropdown-item-value-label>Pärnu</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>2 timeslots</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+export const WithIcons: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  name: "With Icons",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+    dropdownRole: "menu",
+    ariaHaspopup: "menu",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
+          Actions
+        </button>
+        <tedi-dropdown-content [dropdownRole]="dropdownRole">
+          <li tedi-dropdown-item>
+            <tedi-dropdown-item-value>
+              <tedi-icon name="edit" [size]="18" />
+              <tedi-dropdown-item-value-label>Edit</tedi-dropdown-item-value-label>
+            </tedi-dropdown-item-value>
+          </li>
+          <li tedi-dropdown-item>
+            <tedi-dropdown-item-value>
+              <tedi-icon name="content_copy" [size]="18" />
+              <tedi-dropdown-item-value-label>Duplicate</tedi-dropdown-item-value-label>
+            </tedi-dropdown-item-value>
+          </li>
+          <li tedi-dropdown-item>
+            <tedi-dropdown-item-value>
+              <tedi-icon name="delete" [size]="18" />
+              <tedi-dropdown-item-value-label>Delete</tedi-dropdown-item-value-label>
+            </tedi-dropdown-item-value>
+          </li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+export const VerticalLayout: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  name: "Vertical Layout",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+    dropdownRole: "listbox",
+    ariaHaspopup: "listbox",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
+          Select access level
+        </button>
+        <tedi-dropdown-content [dropdownRole]="dropdownRole">
+          <li tedi-dropdown-item value="health">
+            <tedi-dropdown-item-value layout="vertical">
+              <tedi-dropdown-item-value-label>Access to health data</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>Doctors will be able to see your health data</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </li>
+          <li tedi-dropdown-item value="medications">
+            <tedi-dropdown-item-value layout="vertical">
+              <tedi-dropdown-item-value-label>Access to medications</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>Doctors will be able to see your medications</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </li>
+          <li tedi-dropdown-item value="all">
+            <tedi-dropdown-item-value layout="vertical">
+              <tedi-dropdown-item-value-label>Access to all</tedi-dropdown-item-value-label>
+              <tedi-dropdown-item-value-meta>Doctors will be able to see all your information</tedi-dropdown-item-value-meta>
+            </tedi-dropdown-item-value>
+          </li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+/**
+ * When the trigger sits on a component that wraps its own `<button>` (here
+ * `<app-demo-button>`), the directive resolves that inner button and applies the
+ * `id`, `aria-*`, focus, and keyboard handling there — keeping a single tab stop
+ * with correct screen-reader announcements.
+ */
+export const WithWrappingButtonComponent: Story = {
+  name: "Trigger on a Wrapping Button Component",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+    dropdownRole: "menu",
+    ariaHaspopup: "menu",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <app-demo-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
+          Actions
+        </app-demo-button>
+        <tedi-dropdown-content [dropdownRole]="dropdownRole">
+          <li tedi-dropdown-item>Access to health data</li>
+          <li tedi-dropdown-item [disabled]="true">Declaration of intent</li>
+          <li tedi-dropdown-item>Contacts</li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+/**
+ * Items with `[closeOnSelect]="false"` keep the dropdown open after activation
+ * and emit `(itemSelect)` for both mouse click and keyboard (Enter / Space).
+ * Useful for multi-select checkbox menus where the user toggles several
+ * options in a row — e.g. a column-visibility chooser. Disabled items don't
+ * emit `itemSelect`, so consumers don't need to guard against them in their
+ * handlers.
+ */
+export const KeepOpenOnSelect: Story = {
+  name: "Keep Open on Select (multi-select)",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+    dropdownRole: "menu",
+    ariaHaspopup: "menu",
+  },
+  render: (args) => ({
+    props: {
+      ...args,
+      filters: [
+        { id: "active", label: "Active", selected: true },
+        { id: "inactive", label: "Inactive", selected: false },
+        { id: "archived", label: "Archived", selected: false },
+        { id: "drafts", label: "Drafts", selected: true, disabled: true },
+      ] as Array<{
+        id: string;
+        label: string;
+        selected: boolean;
+        disabled?: boolean;
+      }>,
+      toggleFilter(
+        filters: Array<{ id: string; selected: boolean }>,
+        id: string,
+      ) {
+        const target = filters.find((f) => f.id === id);
+        if (target) target.selected = !target.selected;
+      },
+    },
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <button tedi-button tedi-dropdown-trigger variant="neutral" [ariaHaspopup]="ariaHaspopup">
+          <tedi-icon name="filter_list" [size]="18" color="inherit" />
+          Filters
+        </button>
+        <tedi-dropdown-content [dropdownRole]="dropdownRole">
+          @for (filter of filters; track filter.id) {
+            <li
+              tedi-dropdown-item
+              [value]="filter.id"
+              [disabled]="!!filter.disabled"
+              [closeOnSelect]="false"
+              (itemSelect)="toggleFilter(filters, filter.id)"
+            >
+              <tedi-dropdown-item-value
+                type="checkbox"
+                [selected]="filter.selected"
+                [disabled]="!!filter.disabled"
+              >
+                <tedi-dropdown-item-value-label>{{ filter.label }}</tedi-dropdown-item-value-label>
+              </tedi-dropdown-item-value>
+            </li>
+          }
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+/**
+ * Visual-regression only. `tedi-dropdown` has no controlled open input (`isOpen` is an
+ * internal signal), so the panel is opened by clicking the trigger.
+ */
+/**
+ * Builds a visual-regression story that opens one menu and waits for it to render.
+ *
+ * One open menu per snapshot, not a grid of them: the dropdown closes on outside click and on
+ * focus-out with no opt-out, so clicking a second trigger would close the first.
+ */
+const vrRender = (template: string) => () => ({ template });
+
+const vrPlay = async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+  await userEvent.click(within(canvasElement).getByRole("button"));
+  await waitFor(() =>
+    expect(document.querySelector(".tedi-dropdown-content")).not.toBeNull(),
+  );
+};
+
+/**
+ * Visual-regression only. Every other story renders a closed trigger, so the menu, its items and
+ * their spacing were never captured. These render the variants that exist only while open.
+ */
+export const OpenForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  render: vrRender(`
+  <tedi-dropdown position="bottom-start">
+    <button tedi-button tedi-dropdown-trigger>Trigger</button>
+    <tedi-dropdown-content dropdownRole="menu">
+      <li tedi-dropdown-item>Access to health data</li>
+      <li tedi-dropdown-item [disabled]="true">Declaration of intent</li>
+      <li tedi-dropdown-item>Contacts</li>
+    </tedi-dropdown-content>
+  </tedi-dropdown>
+`),
+  play: vrPlay,
+};
+
+/** Visual-regression only. Icon rows set the item's content layout and its icon gap. */
+export const OpenWithIconsForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  render: vrRender(`
+  <tedi-dropdown position="bottom-start">
+    <button tedi-button tedi-dropdown-trigger ariaHaspopup="menu">Actions</button>
+    <tedi-dropdown-content dropdownRole="menu">
+      <li tedi-dropdown-item>
+        <tedi-dropdown-item-value>
+          <tedi-icon name="edit" [size]="18" />
+          <tedi-dropdown-item-value-label>Edit</tedi-dropdown-item-value-label>
+        </tedi-dropdown-item-value>
+      </li>
+      <li tedi-dropdown-item>
+        <tedi-dropdown-item-value>
+          <tedi-icon name="content_copy" [size]="18" />
+          <tedi-dropdown-item-value-label>Duplicate</tedi-dropdown-item-value-label>
+        </tedi-dropdown-item-value>
+      </li>
+      <li tedi-dropdown-item [disabled]="true">
+        <tedi-dropdown-item-value>
+          <tedi-icon name="delete" [size]="18" />
+          <tedi-dropdown-item-value-label>Delete</tedi-dropdown-item-value-label>
+        </tedi-dropdown-item-value>
+      </li>
+    </tedi-dropdown-content>
+  </tedi-dropdown>
+`),
+  play: vrPlay,
+};
+
+/**
+ * Visual-regression only. A `listbox` menu with meta text: the meta column is what sets the
+ * item's two-line height and the panel's width.
+ */
+export const OpenListboxMetaForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    a11y: {
+      config: {
+        // Measured, not defensive. One component bug with two faces:
+        // `dropdownRole="listbox"` puts role="listbox" on the inner `<ul>`,
+        // while the `aria-labelledby` meant to name it sits on the host — which
+        // is `role="presentation"`, so it carries no semantics. The listbox is
+        // left unnamed (`aria-input-field-name`) and the label attribute is
+        // prohibited where it is (`aria-prohibited-attr`). Real in every open
+        // listbox dropdown; these are the first stories that render one open,
+        // so the gate could not see it before.
+        rules: [
+          { id: "aria-input-field-name", enabled: false },
+          { id: "aria-prohibited-attr", enabled: false },
+        ],
+      },
+    },
+  },
+  render: vrRender(`
+  <tedi-dropdown position="bottom-start">
+    <button tedi-button tedi-dropdown-trigger ariaHaspopup="listbox">Select location</button>
+    <tedi-dropdown-content dropdownRole="listbox">
+      <li tedi-dropdown-item value="tallinn">
+        <tedi-dropdown-item-value>
+          <tedi-dropdown-item-value-label>Tallinn</tedi-dropdown-item-value-label>
+          <tedi-dropdown-item-value-meta>3 timeslots</tedi-dropdown-item-value-meta>
+        </tedi-dropdown-item-value>
+      </li>
+      <li tedi-dropdown-item value="tartu">
+        <tedi-dropdown-item-value>
+          <tedi-dropdown-item-value-label>Tartu</tedi-dropdown-item-value-label>
+          <tedi-dropdown-item-value-meta>5 timeslots</tedi-dropdown-item-value-meta>
+        </tedi-dropdown-item-value>
+      </li>
+      <li tedi-dropdown-item value="parnu">
+        <tedi-dropdown-item-value>
+          <tedi-dropdown-item-value-label>Pärnu</tedi-dropdown-item-value-label>
+          <tedi-dropdown-item-value-meta>2 timeslots</tedi-dropdown-item-value-meta>
+        </tedi-dropdown-item-value>
+      </li>
+    </tedi-dropdown-content>
+  </tedi-dropdown>
+`),
+  play: vrPlay,
+};
+
+/**
+ * Visual-regression only. A long list is where the panel's max height and its scrollbar show,
+ * and `clipContent` is what decides whether a long label truncates or wraps.
+ */
+export const OpenScrollingForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    a11y: {
+      config: {
+        // Measured, not defensive. One component bug with two faces:
+        // `dropdownRole="listbox"` puts role="listbox" on the inner `<ul>`,
+        // while the `aria-labelledby` meant to name it sits on the host — which
+        // is `role="presentation"`, so it carries no semantics. The listbox is
+        // left unnamed (`aria-input-field-name`) and the label attribute is
+        // prohibited where it is (`aria-prohibited-attr`). Real in every open
+        // listbox dropdown; these are the first stories that render one open,
+        // so the gate could not see it before.
+        rules: [
+          { id: "aria-input-field-name", enabled: false },
+          { id: "aria-prohibited-attr", enabled: false },
+        ],
+      },
+    },
+  },
+  render: vrRender(`
+  <tedi-dropdown position="bottom-start">
+    <button tedi-button tedi-dropdown-trigger>Long list</button>
+    <tedi-dropdown-content dropdownRole="listbox">
+      <li tedi-dropdown-item [clipContent]="true">
+        A very long option label that runs past the width of the panel and has to be clipped
+      </li>
+      <li tedi-dropdown-item>Teine valik</li>
+      <li tedi-dropdown-item>Kolmas valik</li>
+      <li tedi-dropdown-item>Neljas valik</li>
+      <li tedi-dropdown-item>Viies valik</li>
+      <li tedi-dropdown-item>Kuues valik</li>
+      <li tedi-dropdown-item>Seitsmes valik</li>
+      <li tedi-dropdown-item>Kaheksas valik</li>
+      <li tedi-dropdown-item>Üheksas valik</li>
+      <li tedi-dropdown-item>Kümnes valik</li>
+    </tedi-dropdown-content>
+  </tedi-dropdown>
+`),
+  play: vrPlay,
+};

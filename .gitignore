@@ -56,3 +56,6 @@ documentation.json
 # Coverage
 /coverage
 noop-out
+
+# Generated a11y report (CI)
+a11y-report/
