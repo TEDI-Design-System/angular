@@ -15,6 +15,7 @@ import { DropdownItemValueLabelComponent } from "./dropdown-item-value/dropdown-
 import { DropdownItemValueMetaComponent } from "./dropdown-item-value/dropdown-item-value-meta.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base";
+import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
 @Component({
@@ -65,6 +66,7 @@ export default {
         ButtonComponent,
         IconComponent,
         DemoWrappingButtonComponent,
+        CheckboxComponent,
       ],
     }),
   ],
@@ -369,6 +371,46 @@ export const WithWrappingButtonComponent: Story = {
           <li tedi-dropdown-item>Contacts</li>
         </tedi-dropdown-content>
       </tedi-dropdown>
+    `,
+  }),
+};
+
+/**
+ * A checkbox trigger keeps its native role and checked or mixed state. Enter
+ * opens the menu; Space uses the checkbox's native click. The click is cancelled
+ * so selection changes only through menu actions.
+ */
+export const WithCheckboxTrigger: Story = {
+  name: "Checkbox Trigger",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+  },
+  render: (args) => ({
+    props: {
+      ...args,
+      selection: { count: 3 },
+      total: 10,
+      pageSize: 5,
+    },
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <input
+          tedi-checkbox
+          tedi-dropdown-trigger
+          type="checkbox"
+          aria-label="Select rows"
+          [checked]="selection.count === total"
+          [indeterminate]="selection.count > 0 && selection.count < total"
+          (click)="$event.preventDefault()"
+        />
+        <tedi-dropdown-content dropdownRole="menu">
+          <li tedi-dropdown-item (itemSelect)="selection.count = pageSize">Select page</li>
+          <li tedi-dropdown-item (itemSelect)="selection.count = total">Select all</li>
+          <li tedi-dropdown-item (itemSelect)="selection.count = 0">Clear selection</li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+      <p>{{ selection.count }} of {{ total }} rows selected</p>
     `,
   }),
 };
