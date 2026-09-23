@@ -264,6 +264,21 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 - **Tabs activate differently depending on the host element.** `<button>` tabs use automatic
   activation (arrow keys select), anchor tabs use manual. Arrow Left/Right wrap, Home/End jump, only
   the active tab is in the tab order, and disabled tabs are skipped.
+- **A dropdown of links belongs in `dropdownRole="list"`, not `menu`.** `menu` and `listbox` are
+  composite widget roles, and the `menuitem` / `option` role replaces the role of the control it
+  lands on, so a projected link stops being announced as a link. `list` adds no roles and no key
+  handling: links stay links, each is its own tab stop, and the trigger drops `aria-haspopup`. Tab
+  moves from the trigger into the panel and out past its last link, and Escape closes it. Use
+  `[tedi-dropdown-item][interactiveContent]="true"` only inside a `menu` or `listbox`, where the
+  projected control is a button and a widget role is the right answer. A `list` panel also renders
+  in the dropdown's own place in the DOM rather than in the overlay container at the end of
+  `<body>`, so that mobile screen readers, which walk the document and send no `Tab`, reach its
+  links between the trigger and whatever follows it. Query it from the trigger's subtree, not from
+  `OverlayContainer`; `menu` and `listbox` panels are still in the shared container.
+- **A plain `list` item takes exactly one control.** The row is painted as a single target (hover
+  background, pointer cursor) but only the projected control navigates, so the item stretches that
+  control's click area over the whole row. A second control in the same item would sit under that
+  overlay and become unclickable; split it into its own item instead.
 - **Name what a `tedi-skeleton` is loading.** `label` and `completedLabel` are optional in the types
   but the generic translated fallbacks ("Laadimine") tell a screen-reader user nothing about what
   they are waiting for. The completion message is only announced if the skeleton outlived
