@@ -393,17 +393,21 @@ export const FieldOptions: StoryObj = {
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
           <tedi-row cols="1" gapY="3">
-            <p tedi-text>Default time field</p>
-            <tedi-form-field>
-              <label tedi-label for="opts-default">Aeg</label>
-              <tedi-time-field inputId="opts-default" />
-            </tedi-form-field>
-            <p tedi-text>Time field with hint</p>
-            <tedi-form-field>
-              <label tedi-label for="opts-hint">Aeg</label>
-              <tedi-time-field inputId="opts-hint" />
-              <tedi-feedback-text text="Vihjetekst" type="hint" />
-            </tedi-form-field>
+            <tedi-col>
+              <p tedi-text>Default time field</p>
+              <tedi-form-field>
+                <label tedi-label for="opts-default">Aeg</label>
+                <tedi-time-field inputId="opts-default" />
+              </tedi-form-field>
+            </tedi-col>
+            <tedi-col>
+              <p tedi-text>Time field with hint</p>
+              <tedi-form-field>
+                <label tedi-label for="opts-hint">Aeg</label>
+                <tedi-time-field inputId="opts-hint" />
+                <tedi-feedback-text text="Vihjetekst" type="hint" />
+              </tedi-form-field>
+            </tedi-col>
           </tedi-row>
         </tedi-col>
       </tedi-row>
@@ -417,21 +421,27 @@ export const ValueType: StoryObj = {
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
           <tedi-row cols="1" gapY="3">
-            <p tedi-text>Empty</p>
-            <tedi-form-field>
-              <label tedi-label for="value-default">Aeg</label>
-              <tedi-time-field inputId="value-default" />
-            </tedi-form-field>
-            <p tedi-text>With placeholder</p>
-            <tedi-form-field>
-              <label tedi-label for="value-placeholder">Aeg</label>
-              <tedi-time-field inputId="value-placeholder" placeholder="tt:mm" />
-            </tedi-form-field>
-            <p tedi-text>With a value</p>
-            <tedi-form-field>
-              <label tedi-label for="value-set">Aeg</label>
-              <tedi-time-field inputId="value-set" value="13:00" />
-            </tedi-form-field>
+            <tedi-col>
+              <p tedi-text>Empty</p>
+              <tedi-form-field>
+                <label tedi-label for="value-default">Aeg</label>
+                <tedi-time-field inputId="value-default" />
+              </tedi-form-field>
+            </tedi-col>
+            <tedi-col>
+              <p tedi-text>With placeholder</p>
+              <tedi-form-field>
+                <label tedi-label for="value-placeholder">Aeg</label>
+                <tedi-time-field inputId="value-placeholder" placeholder="tt:mm" />
+              </tedi-form-field>
+            </tedi-col>
+            <tedi-col>
+              <p tedi-text>With a value</p>
+              <tedi-form-field>
+                <label tedi-label for="value-set">Aeg</label>
+                <tedi-time-field inputId="value-set" value="13:00" />
+              </tedi-form-field>
+            </tedi-col>
           </tedi-row>
         </tedi-col>
       </tedi-row>
