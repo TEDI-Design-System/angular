@@ -6,6 +6,7 @@ import {
   viewChild,
   ViewEncapsulation,
 } from "@angular/core";
+import { warnDeprecated } from "@tedi-design-system/angular/tedi";
 
 @Component({
   selector: "tedi-tab-content",
@@ -21,4 +22,11 @@ import {
 export class TabContentComponent {
   tabId = input.required<string>();
   content = viewChild.required<TemplateRef<unknown>>("content");
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-tab-content",
+      "Use the TEDI-Ready `tedi-tabs-content` from `@tedi-design-system/angular/tedi` instead.",
+    );
+  }
 }

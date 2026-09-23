@@ -5,6 +5,7 @@ import {
   input,
   ViewEncapsulation,
 } from "@angular/core";
+import { warnDeprecated } from "@tedi-design-system/angular/tedi";
 import { CardPaddingDirective } from "../card-padding.directive";
 import { CardColorsDirective } from "../card-colors.directive";
 
@@ -50,4 +51,11 @@ export class CardHeaderComponent {
   modifierClasses = computed(() => {
     return `tedi-card-header--${this.variant()}`;
   });
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-card-header",
+      "Use CardHeader from TEDI-ready instead.",
+    );
+  }
 }

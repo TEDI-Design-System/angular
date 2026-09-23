@@ -5,6 +5,7 @@ import {
   input,
   ViewEncapsulation,
 } from "@angular/core";
+import { warnDeprecated } from "@tedi-design-system/angular/tedi";
 import { CardColorsDirective } from "../card-colors.directive";
 import { CardPaddingDirective } from "../card-padding.directive";
 
@@ -54,4 +55,11 @@ export class CardContentComponent {
    * @default false
    */
   timeline = input(false, { transform: booleanAttribute });
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-card-content",
+      "Use CardContent from TEDI-ready instead.",
+    );
+  }
 }

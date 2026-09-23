@@ -5,6 +5,7 @@ import {
   input,
   ViewEncapsulation,
 } from "@angular/core";
+import { warnDeprecated } from "@tedi-design-system/angular/tedi";
 
 /**
  * @deprecated Use CardRow from TEDI-ready instead. This component will be removed from future versions.
@@ -28,4 +29,11 @@ export class CardRowComponent {
    * @default false
    */
   hasSeparator = input(false, { transform: booleanAttribute });
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-card-row",
+      "Use CardRow from TEDI-ready instead.",
+    );
+  }
 }

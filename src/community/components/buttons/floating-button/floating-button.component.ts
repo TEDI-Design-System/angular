@@ -6,7 +6,10 @@ import {
   OnInit,
   inject,
 } from "@angular/core";
-import { BaseButtonDirective } from "@tedi-design-system/angular/tedi";
+import {
+  BaseButtonDirective,
+  warnDeprecated,
+} from "@tedi-design-system/angular/tedi";
 
 export type FloatingButtonVariant = "primary" | "secondary";
 
@@ -50,6 +53,13 @@ export class FloatingButtonComponent implements OnInit {
   axis = input<FloatingButtonAxis>("horizontal");
 
   buttonDirective = inject(BaseButtonDirective);
+
+  constructor() {
+    warnDeprecated(
+      "Community [tedi-floating-button]",
+      "Use `FloatingButtonComponent` from `@tedi-design-system/angular/tedi` instead.",
+    );
+  }
 
   ngOnInit() {
     this.buttonDirective.classNamePrefix.set("tedi-floating-button");
