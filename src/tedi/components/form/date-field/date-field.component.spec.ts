@@ -1239,7 +1239,77 @@ describe("DateFieldComponent", () => {
     });
   });
 
-  describe("reset behavior", () => {
+  describe("uncommitted text and reset behavior", () => {
+    function typeUnparsableText(
+      el: HTMLElement,
+      fixture: ComponentFixture<DateFieldComponent>,
+    ): HTMLInputElement {
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      input.value = "abc";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      return input;
+    }
+
+    it("clears typed text on reset() when the value was already null", () => {
+      const { component, el, fixture } = createField({ mode: "single" });
+      const input = typeUnparsableText(el, fixture);
+
+      expect(component.value()).toBeNull();
+      expect(input.value).toBe("abc");
+
+      component.reset();
+      fixture.detectChanges();
+
+      expect(input.value).toBe("");
+    });
+
+    it("clears typed text on writeValue(null) when the value was already null", () => {
+      const { component, el, fixture } = createField({ mode: "single" });
+      const input = typeUnparsableText(el, fixture);
+
+      component.writeValue(null);
+      fixture.detectChanges();
+
+      expect(input.value).toBe("");
+    });
+
+    it("replaces typed text when the value input changes", () => {
+      const { component, el, fixture } = createField({ mode: "single" });
+      const input = typeUnparsableText(el, fixture);
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      fixture.componentRef.setInput("value", new Date(2026, 4, 14));
+      fixture.detectChanges();
+
+      expect(input.value).toBe("14.05.2026");
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it.each([false, true])(
+      "replaces typed text on calendar selection (same value: %s)",
+      (sameValue) => {
+        const date = new Date(2026, 4, 14);
+        const { component, el, fixture } = createField({
+          mode: "single",
+          value: sameValue ? date : null,
+        });
+        const input = typeUnparsableText(el, fixture);
+        const fakeCalendar = { value: () => date };
+        (
+          component as unknown as { calendar: () => typeof fakeCalendar }
+        ).calendar = () => fakeCalendar;
+
+        component.handleCalendarSelect();
+        fixture.detectChanges();
+
+        expect(input.value).toBe("14.05.2026");
+      },
+    );
+
     it("does nothing when disabled", () => {
       const { component } = createField({ inputDisabled: true });
       component.value.set(new Date(2026, 4, 14));
