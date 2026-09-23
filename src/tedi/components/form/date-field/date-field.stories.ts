@@ -22,6 +22,8 @@ import type { DateRange } from "../../content/calendar/types";
 import type { Matcher } from "../../../utils/matchers.util";
 import { expect, userEvent, waitFor } from "storybook/test";
 
+const PSEUDO_STATE = ["Default", "Hover", "Focus", "Active"];
+
 const today = new Date();
 const tomorrow = new Date(
   today.getFullYear(),
@@ -736,19 +738,21 @@ export const Size: Story = {
   render: (args) => ({
     props: { ...args },
     template: `
-      <tedi-row [cols]="1" [gap]="3">
-        <tedi-col>
+      <tedi-row class="example-list" cols="1" gapY="3">
+        <tedi-row cols="1" [md]="{ cols: 2 }" alignItems="center" class="padding-14-16 border-bottom">
+          <b>Default</b>
           <tedi-form-field size="default" [clearable]="formFieldClearable">
-            <label tedi-label for="date-size-default">Vaikimisi</label>
+            <label tedi-label for="date-size-default">Kuupäev</label>
             <tedi-date-field inputId="date-size-default" ${argBindings()} />
           </tedi-form-field>
-        </tedi-col>
-        <tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [md]="{ cols: 2 }" alignItems="center" class="padding-14-16">
+          <b>Small</b>
           <tedi-form-field size="small" [clearable]="formFieldClearable">
-            <label tedi-label for="date-size-small">Väike</label>
+            <label tedi-label for="date-size-small">Kuupäev</label>
             <tedi-date-field inputId="date-size-small" ${argBindings()} />
           </tedi-form-field>
-        </tedi-col>
+        </tedi-row>
       </tedi-row>
     `,
   }),
@@ -767,45 +771,66 @@ export const States: Story = {
     const disabledControl = new FormControl<Date | null>(inThreeDays);
     disabledControl.disable();
     return {
-      props: { ...args, disabledControl },
+      props: { ...args, disabledControl, PSEUDO_STATE },
       template: `
-        <tedi-row [cols]="1" [gap]="3">
-          <tedi-col>
-            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-state-default">Vaikimisi</label>
-              <tedi-date-field inputId="date-state-default" ${argBindings()} />
-            </tedi-form-field>
-          </tedi-col>
-          <tedi-col>
-            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-state-disabled">Mitteaktiivne</label>
-              <tedi-date-field inputId="date-state-disabled" [formControl]="disabledControl" ${argBindings()} />
-            </tedi-form-field>
-          </tedi-col>
-          <tedi-col>
-            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-state-valid">Õnnestumine</label>
-              <tedi-date-field inputId="date-state-valid" ${argBindings()} />
-              <tedi-feedback-text text="Tagasiside tekst" type="valid" />
-            </tedi-form-field>
-          </tedi-col>
-          <tedi-col>
-            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-state-error">Viga</label>
-              <tedi-date-field inputId="date-state-error" ${argBindings()} />
-              <tedi-feedback-text text="Tagasiside tekst" type="error" />
-            </tedi-form-field>
-          </tedi-col>
+        <tedi-row [cols]="1" [gapY]="3">
+          @for (state of PSEUDO_STATE; track state) {
+            <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+              <tedi-col width="1">
+                <p tedi-text modifiers="bold">{{ state }}</p>
+              </tedi-col>
+              <tedi-col width="5">
+                <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+                  <label tedi-label [for]="state">Kuupäev</label>
+                  <tedi-date-field [inputId]="state" ${argBindings()} />
+                </tedi-form-field>
+              </tedi-col>
+            </tedi-row>
+          }
+          <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+            <tedi-col width="1">
+              <p tedi-text modifiers="bold">Disabled</p>
+            </tedi-col>
+            <tedi-col width="5">
+              <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+                <label tedi-label for="date-state-disabled">Kuupäev</label>
+                <tedi-date-field inputId="date-state-disabled" [formControl]="disabledControl" ${argBindings()} />
+              </tedi-form-field>
+            </tedi-col>
+          </tedi-row>
+          <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+            <tedi-col width="1">
+              <p tedi-text modifiers="bold">Success</p>
+            </tedi-col>
+            <tedi-col width="5">
+              <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+                <label tedi-label for="date-state-valid">Kuupäev</label>
+                <tedi-date-field inputId="date-state-valid" ${argBindings()} />
+                <tedi-feedback-text text="Tagasiside tekst" type="valid" />
+              </tedi-form-field>
+            </tedi-col>
+          </tedi-row>
+          <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+            <tedi-col width="1">
+              <p tedi-text modifiers="bold">Error</p>
+            </tedi-col>
+            <tedi-col width="5">
+              <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+                <label tedi-label for="date-state-error">Kuupäev</label>
+                <tedi-date-field inputId="date-state-error" ${argBindings()} />
+                <tedi-feedback-text text="Tagasiside tekst" type="error" />
+              </tedi-form-field>
+            </tedi-col>
+          </tedi-row>
         </tedi-row>
       `,
     };
   },
   parameters: {
-    docs: {
-      description: {
-        story:
-          'Persistent field states. Disabled is driven by the form control; the success/error states come from a `tedi-feedback-text` with `type="valid"`/`"error"`, which the surrounding `tedi-form-field` reflects on the input border.',
-      },
+    pseudo: {
+      hover: "#Hover",
+      active: "#Active",
+      focusVisible: "#Focus",
     },
   },
 };
@@ -823,21 +848,24 @@ export const FieldOptions: Story = {
       template: `
         <tedi-row [cols]="1" [gap]="3">
           <tedi-col>
+            <p tedi-text>Default date field</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-opt-default">Vaikimisi kuupäevaväli</label>
+              <label tedi-label for="date-opt-default">Kuupäev</label>
               <tedi-date-field inputId="date-opt-default" ${argBindings(["placeholder"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
+            <p tedi-text>Date field with helper text</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-opt-hint">Kuupäevaväli vihjega</label>
+              <label tedi-label for="date-opt-hint">Kuupäev</label>
               <tedi-date-field inputId="date-opt-hint" placeholder="pp.kk.aaaa" ${argBindings(["placeholder"])} />
               <tedi-feedback-text text="pp.kk.aaaa" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
+            <p tedi-text>Date field with quick-select shortcuts</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-opt-shortcuts">Kuupäevaväli otseteedega</label>
+              <label tedi-label for="date-opt-shortcuts">Kuupäev</label>
               <tedi-date-field inputId="date-opt-shortcuts" [formControl]="shortcutControl" ${argBindings(["placeholder"])} />
               <div class="flex gap-2">
                 <button tedi-button variant="neutral" size="small" type="button" (click)="setToday()">Täna</button>
@@ -873,24 +901,28 @@ export const ValueType: Story = {
       template: `
         <tedi-row [cols]="1" [gap]="3">
           <tedi-col>
+            <p tedi-text>Single date</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-vt-single">Üksik kuupäev</label>
+              <label tedi-label for="date-vt-single">Kuupäev</label>
               <tedi-date-field inputId="date-vt-single" [formControl]="single" placeholder="pp.kk.aaaa" ${argBindings(["mode", "placeholder"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
+            <p tedi-text>Single date with a default value</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-vt-single-value">Üksik kuupäev vaikeväärtusega</label>
+              <label tedi-label for="date-vt-single-value">Kuupäev</label>
               <tedi-date-field inputId="date-vt-single-value" [formControl]="singleWithValue" ${argBindings(["mode", "placeholder"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
+            <p tedi-text>Multiple dates</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-vt-multiple">Mitu kuupäeva</label>
+              <label tedi-label for="date-vt-multiple">Kuupäevad</label>
               <tedi-date-field inputId="date-vt-multiple" mode="multiple" [formControl]="multiple" ${argBindings(["mode", "placeholder"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
+            <p tedi-text>Date range</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
               <label tedi-label for="date-vt-range">Vahemik</label>
               <tedi-date-field inputId="date-vt-range" mode="range" [formControl]="range" ${argBindings(["mode", "placeholder"])} />
@@ -924,17 +956,19 @@ export const MultipleTagLayout: Story = {
       template: `
         <tedi-row [cols]="1" [gap]="3">
           <tedi-col>
+            <p tedi-text>Multiple rows (default)</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-tags-wrap">Mitmerealine (vaikimisi)</label>
+              <label tedi-label for="date-tags-wrap">Kuupäevad</label>
               <tedi-date-field inputId="date-tags-wrap" mode="multiple" [multiRow]="true" [formControl]="wrapControl" ${argBindings(["mode", "multiRow", "tagEllipsis"])} />
-              <tedi-feedback-text text="Sildid murduvad uutele ridadele; välja kõrgus kasvab." />
+              <tedi-feedback-text text="Tags wrap onto new lines and the field grows in height." />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
+            <p tedi-text>Single row</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-tags-single">Üherealine + loendur</label>
+              <label tedi-label for="date-tags-single">Kuupäevad</label>
               <tedi-date-field inputId="date-tags-single" mode="multiple" [multiRow]="false" tagEllipsis="start" [formControl]="singleRowControl" ${argBindings(["mode", "multiRow", "tagEllipsis"])} />
-              <tedi-feedback-text text="Sildid püsivad ühel real; ülejääk koondub +N loendurisse. Kitsad sildid lühenevad algusest (…06.2026)." />
+              <tedi-feedback-text text="Overflow collapses into a +N counter; narrow tags are truncated from the start." />
             </tedi-form-field>
           </tedi-col>
         </tedi-row>
@@ -960,14 +994,16 @@ export const OnClickType: Story = {
       template: `
         <tedi-row [gap]="3" [xs]="{ cols: 1 }" [lg]="{ cols: 2 }">
           <tedi-col>
+            <p tedi-text>Calendar button is clickable</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-trigger-button">Kalendriikoon on klõpsatav</label>
+              <label tedi-label for="date-trigger-button">Kuupäev</label>
               <tedi-date-field inputId="date-trigger-button" [formControl]="buttonControl" calendarTrigger="button" ${argBindings(["calendarTrigger"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
+            <p tedi-text>Input is clickable</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="date-trigger-input">Sisestusväli on klõpsatav</label>
+              <label tedi-label for="date-trigger-input">Kuupäev</label>
               <tedi-date-field inputId="date-trigger-input" [formControl]="inputControl" calendarTrigger="input" ${argBindings(["calendarTrigger"])} />
             </tedi-form-field>
           </tedi-col>
@@ -1012,32 +1048,37 @@ export const Range: Story = {
       template: `
         <tedi-row [gap]="3" [xs]="{ cols: 1 }" [lg]="{ cols: 2 }">
           <tedi-col>
+            <p tedi-text>Default range</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="range-default">Vaikimisi vahemik</label>
+              <label tedi-label for="range-default">Vahemik</label>
               <tedi-date-field inputId="range-default" [formControl]="defaultRange" ${argBindings(["numberOfMonths", "disablePast"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
+            <p tedi-text>Range with min/max limits</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="range-limits">Vahemik min/max piiranguga</label>
+              <label tedi-label for="range-limits">Vahemik</label>
               <tedi-date-field inputId="range-limits" [formControl]="limitsRange" [minDate]="twoMonthsAgo" [maxDate]="rangeMaxDate" ${argBindings(["numberOfMonths", "disablePast"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
+            <p tedi-text>Start date only (no end selected)</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="range-start-only">Ainult alguskuupäev</label>
+              <label tedi-label for="range-start-only">Vahemik</label>
               <tedi-date-field inputId="range-start-only" [formControl]="startOnly" ${argBindings(["numberOfMonths", "disablePast"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
+            <p tedi-text>Past dates disabled</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="range-disabled-past">Vahemik keelatud minevikuga</label>
+              <label tedi-label for="range-disabled-past">Vahemik</label>
               <tedi-date-field inputId="range-disabled-past" [formControl]="disabledPastRange" [disablePast]="true" ${argBindings(["numberOfMonths", "disablePast"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
+            <p tedi-text>Range with multiple months</p>
             <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
-              <label tedi-label for="range-multiple-months">Vahemik mitme kuuga</label>
+              <label tedi-label for="range-multiple-months">Vahemik</label>
               <tedi-date-field inputId="range-multiple-months" [formControl]="multipleMonthsRange" [numberOfMonths]="2" ${argBindings(["numberOfMonths", "disablePast"])} />
             </tedi-form-field>
           </tedi-col>
@@ -1229,7 +1270,7 @@ export const MobileModal: Story = {
       template: `
         <tedi-row cols="1" [md]="{ cols: 2 }" [gap]="3">
           <tedi-col>
-            <p tedi-text modifiers="small bold">Centered modal (modal=true)</p>
+            <p tedi-text>Centered modal (modal=true)</p>
             <tedi-form-field>
               <label tedi-label for="date-modal-centered">Kuupäev</label>
               <tedi-date-field
@@ -1241,7 +1282,7 @@ export const MobileModal: Story = {
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <p tedi-text modifiers="small bold">Fullscreen modal (modal=true, fullscreen=true)</p>
+            <p tedi-text>Fullscreen modal (modal=true, fullscreen=true)</p>
             <tedi-form-field>
               <label tedi-label for="date-modal-fullscreen">Kuupäev</label>
               <tedi-date-field
