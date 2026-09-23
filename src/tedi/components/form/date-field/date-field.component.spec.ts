@@ -1351,6 +1351,16 @@ describe("DateFieldComponent", () => {
       expect(component.canClear()).toBe(true);
       expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
     });
+
+    it("hides the clear button when a standalone field opts out", () => {
+      const { component, el, fixture } = createField();
+      fixture.componentRef.setInput("clearable", false);
+      fixture.componentRef.setInput("value", new Date(2026, 4, 14));
+      fixture.detectChanges();
+
+      expect(component.canClear()).toBe(false);
+      expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
+    });
   });
 
   describe("native picker parse rejection", () => {
@@ -1578,7 +1588,11 @@ describe("DateFieldComponent with ReactiveFormsModule", () => {
   template: `
     <tedi-form-field [clearable]="clearable">
       <label tedi-label for="composite-date">Date</label>
-      <tedi-date-field inputId="composite-date" [formControl]="control" />
+      <tedi-date-field
+        inputId="composite-date"
+        [formControl]="control"
+        [clearable]="fieldClearable"
+      />
       <tedi-feedback-text text="Error" type="error" />
     </tedi-form-field>
   `,
@@ -1586,6 +1600,7 @@ describe("DateFieldComponent with ReactiveFormsModule", () => {
 class CompositeHostComponent {
   control = new FormControl<Date | Date[] | DateRange | null>(null);
   clearable = false;
+  fieldClearable?: boolean;
 }
 
 describe("DateFieldComponent inside FormFieldComponent", () => {
@@ -1637,6 +1652,16 @@ describe("DateFieldComponent inside FormFieldComponent", () => {
       seed(true);
       expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(1);
       expect(el.querySelectorAll(".tedi-form-field__clear")).toHaveLength(0);
+    });
+
+    it("lets the date field's own clearable override the form field", () => {
+      fixture.componentInstance.fieldClearable = true;
+      seed(false);
+      expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(1);
+
+      fixture.componentInstance.fieldClearable = false;
+      seed(true);
+      expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(0);
     });
 
     it("still clears programmatically when opted out", () => {

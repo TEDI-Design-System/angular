@@ -208,6 +208,18 @@ describe("TimeFieldComponent", () => {
       expect(el.querySelector(".tedi-time-field__clear")).toBeNull();
     });
 
+    it("should let its own clearable override the form field", () => {
+      component.writeValue("14:30");
+      fixture.componentRef.setInput("clearable", false);
+      fixture.detectChanges();
+      expect(el.querySelector(".tedi-time-field__clear")).toBeNull();
+
+      fieldClearable.set(false);
+      fixture.componentRef.setInput("clearable", true);
+      fixture.detectChanges();
+      expect(el.querySelector(".tedi-time-field__clear")).not.toBeNull();
+    });
+
     it("should not show clear button when value is null", () => {
       expect(el.querySelector(".tedi-time-field__clear")).toBeNull();
     });
@@ -1186,5 +1198,32 @@ describe("TimeFieldComponent inside FormFieldComponent", () => {
 
     const input = el.querySelector("input");
     expect(input?.value).toBe("09:00");
+  });
+});
+
+describe("TimeFieldComponent standalone", () => {
+  let fixture: ComponentFixture<TimeFieldComponent>;
+  let el: HTMLElement;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [TimeFieldComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    fixture = TestBed.createComponent(TimeFieldComponent);
+    fixture.componentRef.setInput("inputId", "standalone-id");
+    el = fixture.nativeElement;
+    fixture.componentInstance.writeValue("14:30");
+    fixture.detectChanges();
+  });
+
+  it("shows a clear button by default", () => {
+    expect(el.querySelector(".tedi-time-field__clear")).not.toBeNull();
+  });
+
+  it("hides the clear button when it opts out", () => {
+    fixture.componentRef.setInput("clearable", false);
+    fixture.detectChanges();
+    expect(el.querySelector(".tedi-time-field__clear")).toBeNull();
   });
 });

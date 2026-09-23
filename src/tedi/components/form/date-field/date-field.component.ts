@@ -199,6 +199,12 @@ export class DateFieldComponent
    */
   readonly size = input<DateFieldSize | undefined>();
   /**
+   * Whether the clear button shows once the field has a value. Falls back to the
+   * wrapping `tedi-form-field`'s `clearable` when not set here — set it on the
+   * wrapper, and use this only for a standalone field.
+   */
+  readonly clearable = input<boolean | undefined>();
+  /**
    * Forces the error state on, or off, regardless of the reactive-forms state.
    * Leave unset to let the control derive it.
    */
@@ -436,9 +442,9 @@ export class DateFieldComponent
   /** The clear button sits in the date input's action row, beside the calendar. */
   readonly ownsClearButton = true;
 
-  /** Driven by the wrapping `tedi-form-field`'s `clearable`. */
+  /** Own `clearable` wins, then the wrapping `tedi-form-field`'s. */
   readonly clearableResolved = computed(
-    () => this.fieldContext?.clearable() ?? true,
+    () => this.clearable() ?? this.fieldContext?.clearable() ?? true,
   );
 
   readonly resolvedDisabledMatchers = computed<Matcher[]>(() => {
