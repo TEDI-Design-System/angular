@@ -1,3 +1,10 @@
+# [8.1.0-rc.19](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.18...angular-8.1.0-rc.19) (2026-09-23)
+
+
+### Bug Fixes
+
+* **modal:** remove unused provideAnimations from stories [#706](https://github.com/TEDI-Design-System/angular/issues/706) ([#708](https://github.com/TEDI-Design-System/angular/issues/708)) ([7452ce6](https://github.com/TEDI-Design-System/angular/commit/7452ce6b505c51f694a48b3343f4e0b8b0461945))
+
 # [8.1.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.17...angular-8.1.0-rc.18) (2026-09-23)
 
 
