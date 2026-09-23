@@ -35,6 +35,10 @@ let nextUniqueId = 0;
  * adapt it to the surrounding layout: `stickyOffset` moves where it pins (raise
  * it to clear a fixed header), and `stickyMaxHeight` overrides the height cap
  * for when the TOC scrolls inside a fixed-height container rather than the window.
+ *
+ * The gap the sticky TOC leaves above the viewport bottom has no input — override
+ * the `--tedi-table-of-contents-sticky-bottom` CSS custom property (default
+ * `1.5rem`) from any ancestor when you need to clear a fixed footer.
  */
 @Component({
   selector: "tedi-table-of-contents",

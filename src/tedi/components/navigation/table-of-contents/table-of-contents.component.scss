@@ -1,6 +1,16 @@
 .tedi-table-of-contents {
   --tedi-table-of-contents-padding: var(--card-padding-md-default);
 
+  // Sticky geometry. `stickyOffset` / `stickyMaxHeight` inputs override the top
+  // and max-height custom properties; because the default max-height reads the
+  // top and bottom vars, changing the offset keeps the calculation in sync.
+  --tedi-table-of-contents-sticky-top: 1.5rem;
+  --tedi-table-of-contents-sticky-bottom: 1.5rem;
+  --tedi-table-of-contents-sticky-max-height: calc(
+    100dvh - var(--tedi-table-of-contents-sticky-top) -
+      var(--tedi-table-of-contents-sticky-bottom)
+  );
+
   display: block;
 }
 
@@ -10,17 +20,14 @@
 
 .tedi-table-of-contents__container.tedi-table-of-contents--sticky {
   position: sticky;
-  top: var(--tedi-table-of-contents-sticky-top, 1.5rem);
+  top: var(--tedi-table-of-contents-sticky-top);
   display: flex;
   flex-direction: column;
 
   // Fill the viewport minus the top offset and a matching bottom gap. Override
   // via `stickyMaxHeight` when the TOC scrolls inside a fixed-height container
   // rather than the window (then 100dvh is the wrong basis).
-  max-height: var(
-    --tedi-table-of-contents-sticky-max-height,
-    calc(100dvh - var(--tedi-table-of-contents-sticky-top, 1.5rem) - 1.5rem)
-  );
+  max-height: var(--tedi-table-of-contents-sticky-max-height);
 }
 
 .tedi-table-of-contents--sticky > .tedi-card-content {
