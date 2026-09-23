@@ -22,9 +22,9 @@ const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];
 
 type TimeFieldStoryArgs = TimeFieldComponent & {
   /** Story-only: size applied to the wrapping `tedi-form-field`. */
-  size?: InputSize;
+  formFieldSize?: InputSize;
   /** Story-only: clearable applied to the wrapping `tedi-form-field`. */
-  clearable?: boolean;
+  formFieldClearable?: boolean;
 };
 
 export default {
@@ -97,7 +97,19 @@ export default {
     },
     size: {
       description:
-        "Size of the surrounding `tedi-form-field` — the time field inherits it.",
+        "Overrides the wrapping `tedi-form-field`'s `size` for this field. Leave unset to inherit it — set `size` on the form field instead, so the label scales too. Use it for a standalone time field, where it defaults to `default`.",
+      control: { type: "radio" },
+      options: [undefined, "default", "small"],
+      table: {
+        category: "Time Field inputs",
+        type: { summary: "InputSize | undefined", detail: "default \nsmall" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    formFieldSize: {
+      name: "size",
+      description:
+        "Set on the wrapping `tedi-form-field` — the label and the time field scale together. The time field reads it unless its own `size` is set.",
       control: { type: "radio" },
       options: ["default", "small"],
       table: {
@@ -108,7 +120,18 @@ export default {
     },
     clearable: {
       description:
-        "Set on the wrapping `tedi-form-field`. Shows a clear button once the field has a value; set `false` to opt out.",
+        "Overrides the wrapping `tedi-form-field`'s `clearable` for this field. Leave unset to inherit it — set `clearable` on the form field instead. Use it for a standalone time field, where it defaults to `true`.",
+      control: { type: "boolean" },
+      table: {
+        category: "Time Field inputs",
+        type: { summary: "boolean | undefined" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    formFieldClearable: {
+      name: "clearable",
+      description:
+        "Set on the wrapping `tedi-form-field`. Shows a clear button once the field has a value; set `false` to opt out. The time field reads it unless its own `clearable` is set.",
       control: { type: "boolean" },
       table: {
         category: "Form Field inputs",
@@ -227,12 +250,12 @@ export default {
 export const Default: StoryObj = {
   args: {
     inputId: "example-id",
-    size: "default",
+    formFieldSize: "default",
     value: null,
     placeholder: "tt:mm",
     invalid: false,
     disabled: false,
-    clearable: true,
+    formFieldClearable: true,
     pickerVariant: "scroll",
     useNativePicker: false,
     pickerTrigger: "button",
@@ -248,7 +271,7 @@ export const Default: StoryObj = {
     template: `
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
-          <tedi-form-field [size]="size" [clearable]="clearable">
+          <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
             <label tedi-label for="example-id">Aeg</label>
             <tedi-time-field
               [inputId]="inputId"
@@ -265,6 +288,8 @@ export const Default: StoryObj = {
               [minuteStep]="minuteStep"
               [modal]="modal"
               [fullscreen]="fullscreen"
+              [clearable]="clearable"
+              [size]="size"
             />
           </tedi-form-field>
         </tedi-col>
@@ -298,7 +323,7 @@ export const Sizes: StoryObj = {
     docs: {
       description: {
         story:
-          'Field size is controlled by the surrounding `<tedi-form-field size="small">` — the `tedi-time-field` itself has no `size` input.',
+          'Set the size on the surrounding `<tedi-form-field size="small">` so the label and the field scale together. The `tedi-time-field`\'s own `size` input overrides it — use that for a standalone field.',
       },
     },
   },
