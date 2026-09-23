@@ -40,7 +40,11 @@
         (openChange)="close()"
       ></button>
     </div>
-    <nav [attr.aria-label]="navLabel()" (click)="onListClick($event)">
+    <nav
+      class="tedi-table-of-contents__sheet-nav"
+      [attr.aria-label]="navLabel()"
+      (click)="onListClick($event)"
+    >
       <ul
         class="tedi-table-of-contents__list tedi-table-of-contents__list--headless"
         role="list"
