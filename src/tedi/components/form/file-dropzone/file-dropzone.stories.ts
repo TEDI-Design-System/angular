@@ -144,7 +144,7 @@ export default {
     },
     name: {
       description:
-        "`name` attribute of the file input, for native form submits.",
+        "`name` attribute of the file input. The files do not travel with a native form submit: dropped files never reach the input, and its value is cleared after each selection so the same file can be picked again. Read them from `files` or the bound control.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
@@ -215,7 +215,8 @@ export default {
       },
     },
     disabled: {
-      description: "Disables the dropzone.",
+      description:
+        "Disables the dropzone from a parent template. Combined with the reactive-forms disabled state, so this only forces it on.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -225,7 +226,7 @@ export default {
     },
     invalid: {
       description:
-        "Forces the error state on, or off, regardless of the reactive-forms state.",
+        "Marks the dropzone as invalid. The error state is also derived from the bound control and from rejected files, so this only forces it on.",
       control: "boolean",
       table: {
         category: "inputs",

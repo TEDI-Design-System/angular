@@ -786,7 +786,20 @@ describe("FileDropzoneComponent", () => {
       );
     });
 
-    it("ignores drag events while disabled", () => {
+    it("leaves a non-file dragover to the browser", () => {
+      const event = new Event("dragover", {
+        bubbles: true,
+        cancelable: true,
+      }) as Event & { dataTransfer: { types: string[]; dropEffect: string } };
+      event.dataTransfer = { types: ["text/plain"], dropEffect: "copy" };
+      zoneEl().dispatchEvent(event);
+      fixture.detectChanges();
+
+      expect(event.defaultPrevented).toBe(false);
+      expect(event.dataTransfer.dropEffect).toBe("copy");
+    });
+
+    it("refuses the drag while disabled without letting the browser take it", () => {
       fixture.componentRef.setInput("disabled", true);
       fixture.detectChanges();
 
@@ -794,14 +807,36 @@ describe("FileDropzoneComponent", () => {
       const overEvent = new Event("dragover", {
         bubbles: true,
         cancelable: true,
-      }) as Event & { dataTransfer: unknown };
-      overEvent.dataTransfer = { types: ["Files"], dropEffect: "none" };
+      }) as Event & { dataTransfer: { types: string[]; dropEffect: string } };
+      overEvent.dataTransfer = { types: ["Files"], dropEffect: "copy" };
       zoneEl().dispatchEvent(overEvent);
 
       expect(zoneEl().classList).not.toContain(
         "tedi-file-dropzone__zone--drop-over",
       );
-      expect(overEvent.defaultPrevented).toBe(false);
+      // Claimed, so the browser cannot navigate to the file, but refused.
+      expect(overEvent.defaultPrevented).toBe(true);
+      expect(overEvent.dataTransfer.dropEffect).toBe("none");
+    });
+
+    it("swallows a drop while disabled instead of opening the file", () => {
+      fixture.componentRef.setInput("disabled", true);
+      fixture.detectChanges();
+
+      const dropEvent = new Event("drop", {
+        bubbles: true,
+        cancelable: true,
+      }) as Event & { dataTransfer: unknown };
+      dropEvent.dataTransfer = {
+        files: [makeFile("report.pdf")],
+        types: ["Files"],
+        dropEffect: "none",
+      };
+      zoneEl().dispatchEvent(dropEvent);
+      fixture.detectChanges();
+
+      expect(component.files()).toEqual([]);
+      expect(dropEvent.defaultPrevented).toBe(true);
     });
 
     it("renders a file that has no name", () => {

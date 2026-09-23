@@ -116,8 +116,10 @@ export class FileDropzoneComponent
    */
   readonly inputId = input<string>();
   /**
-   * `name` attribute of the file input, used when the surrounding form is
-   * submitted natively.
+   * `name` attribute of the file input. The files do not travel with a native
+   * form submit: dropped files never reach the input, and its value is cleared
+   * after each selection so the same file can be picked again. Read them from
+   * `files` or the bound control.
    */
   readonly name = input<string>();
   /**
@@ -174,8 +176,9 @@ export class FileDropzoneComponent
    */
   readonly disabled = input(false, { transform: booleanAttribute });
   /**
-   * Forces the error state on, or off, regardless of the reactive-forms state.
-   * Leave unset to let the control derive it.
+   * Marks the dropzone as invalid. The error state is also derived from the
+   * bound control and from rejected files, so this only forces it on.
+   * @default false
    */
   readonly invalid = input(false, { transform: booleanAttribute });
   /**
@@ -376,11 +379,14 @@ export class FileDropzoneComponent
   }
 
   protected handleDragOver(event: DragEvent): void {
-    if (this.isDisabled() || !this.hasFiles(event)) return;
+    if (!this.hasFiles(event)) return;
 
-    // Without preventDefault the browser opens the dropped file in the tab.
+    // Without preventDefault the browser opens the dropped file in the tab, so
+    // a disabled zone has to claim the drag too — and then refuse it.
     event.preventDefault();
-    if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = this.isDisabled() ? "none" : "copy";
+    }
   }
 
   protected handleDragLeave(): void {
@@ -389,9 +395,9 @@ export class FileDropzoneComponent
 
   protected handleDrop(event: DragEvent): void {
     this.dragDepth.set(0);
+    event.preventDefault();
     if (this.isDisabled()) return;
 
-    event.preventDefault();
     this.addFiles(Array.from(event.dataTransfer?.files ?? []));
     this.onTouched();
   }
