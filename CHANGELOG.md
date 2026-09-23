@@ -1,3 +1,10 @@
+# [8.1.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.13...angular-8.1.0-rc.14) (2026-09-23)
+
+
+### Bug Fixes
+
+* **date-field:** add name input for native form submission [#686](https://github.com/TEDI-Design-System/angular/issues/686) ([#694](https://github.com/TEDI-Design-System/angular/issues/694)) ([54e5cf2](https://github.com/TEDI-Design-System/angular/commit/54e5cf2ddc19dd0f5e1d4ce63c17171c3b012ee0))
+
 # [8.1.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.12...angular-8.1.0-rc.13) (2026-09-23)
 
 
