@@ -36,12 +36,6 @@
   }
 }
 
-.tedi-file-dropzone__input {
-  // Core's .sr-only ships an invalid `clip-path: rect(0, 0, 0, 0)`, so nothing
-  // clips it and axe cannot resolve the file input's background. Drop once fixed.
-  clip-path: inset(50%);
-}
-
 .tedi-file-dropzone__zone--drop-over.tedi-file-dropzone__zone {
   color: var(--file-dropzone-text-drop-over);
   background-color: var(--file-dropzone-background-drop-over);
