@@ -127,11 +127,13 @@ export class FormFieldComponent implements FieldContext {
 
   /**
    * Whether the field renders its own clear button. Controls that render one
-   * themselves opt out, so `clearable` drives them without producing two.
+   * themselves opt out, so `clearable` drives them without producing two, and
+   * a control that cannot be reset gets none.
    */
-  readonly renderClearButton = computed(
-    () => this.clearable() && !this.control()?.ownsClearButton,
-  );
+  readonly renderClearButton = computed(() => {
+    const control = this.control();
+    return this.clearable() && !control?.ownsClearButton && !!control?.reset;
+  });
 
   readonly ownsSurface = computed(() => this.hasBox());
 

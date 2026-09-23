@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -122,7 +123,10 @@ export class TimeFieldComponent
    * wrapping `tedi-form-field`'s `clearable` when not set here — set it on the
    * wrapper, and use this only for a standalone field.
    */
-  readonly clearable = input<boolean | undefined>();
+  readonly clearable = input<boolean | undefined, unknown>(undefined, {
+    // Unset stays `undefined` so the wrapper's `clearable` still applies.
+    transform: (v: unknown) => (v == null ? undefined : booleanAttribute(v)),
+  });
   /** Picker variant. `none` renders just the input with no picker UI — typed input is still normalized on blur. */
   readonly pickerVariant = input<TimeFieldPickerVariant>("scroll");
   /**

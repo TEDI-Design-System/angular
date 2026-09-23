@@ -1221,6 +1221,22 @@ describe("TimeFieldComponent standalone", () => {
     expect(el.querySelector(".tedi-time-field__clear")).not.toBeNull();
   });
 
+  it("converts static attribute values to booleans", () => {
+    fixture.componentRef.setInput("clearable", "false");
+    fixture.detectChanges();
+    expect(el.querySelector(".tedi-time-field__clear")).toBeNull();
+
+    fixture.componentRef.setInput("clearable", "");
+    fixture.detectChanges();
+    expect(el.querySelector(".tedi-time-field__clear")).not.toBeNull();
+  });
+
+  it("keeps inheriting when clearable is unset", () => {
+    fixture.componentRef.setInput("clearable", undefined);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.clearable()).toBeUndefined();
+  });
+
   it("hides the clear button when it opts out", () => {
     fixture.componentRef.setInput("clearable", false);
     fixture.detectChanges();

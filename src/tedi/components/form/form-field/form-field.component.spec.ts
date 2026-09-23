@@ -58,6 +58,36 @@ class MockOwningControlComponent implements FormFieldControl<string> {
   readonly ownsClearButton = true;
 }
 
+@Component({
+  selector: "mock-unresettable-control",
+  standalone: true,
+  template: "",
+  providers: [
+    {
+      provide: TEDI_FORM_FIELD_CONTROL,
+      useExisting: MockUnresettableControlComponent,
+    },
+  ],
+})
+class MockUnresettableControlComponent implements FormFieldControl<string> {
+  value = signal("text");
+  disabled = signal(false);
+  invalid = signal(false);
+}
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, MockUnresettableControlComponent],
+  template: `
+    <tedi-form-field #formField clearable>
+      <mock-unresettable-control />
+    </tedi-form-field>
+  `,
+})
+class UnresettableHostComponent {
+  @ViewChild("formField", { static: true }) formField!: FormFieldComponent;
+}
+
 /** Conditional projection: the control can be swapped or arrive after init. */
 @Component({
   standalone: true,
@@ -294,6 +324,18 @@ describe("FormFieldComponent", () => {
 
       expect(conditionalHost.formField.showClearButton()).toBe(true);
     });
+  });
+
+  it("should not render a clear button for a control that cannot be reset", () => {
+    const unresettable = TestBed.createComponent(UnresettableHostComponent);
+    unresettable.detectChanges();
+
+    expect(unresettable.componentInstance.formField.renderClearButton()).toBe(
+      false,
+    );
+    expect(
+      unresettable.nativeElement.querySelector(".tedi-form-field__clear"),
+    ).toBeNull();
   });
 
   it("should be clearable by default", () => {

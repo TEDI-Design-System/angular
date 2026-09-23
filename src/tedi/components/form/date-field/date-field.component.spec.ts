@@ -1352,6 +1352,21 @@ describe("DateFieldComponent", () => {
       expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
     });
 
+    it("converts static attribute values to booleans", () => {
+      const { component, fixture } = createField();
+      fixture.componentRef.setInput("value", new Date(2026, 4, 14));
+
+      fixture.componentRef.setInput("clearable", "false");
+      fixture.detectChanges();
+      expect(component.clearable()).toBe(false);
+      expect(component.canClear()).toBe(false);
+
+      fixture.componentRef.setInput("clearable", "");
+      fixture.detectChanges();
+      expect(component.clearable()).toBe(true);
+      expect(component.canClear()).toBe(true);
+    });
+
     it("hides the clear button when a standalone field opts out", () => {
       const { component, el, fixture } = createField();
       fixture.componentRef.setInput("clearable", false);

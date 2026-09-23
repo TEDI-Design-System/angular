@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -203,7 +204,10 @@ export class DateFieldComponent
    * wrapping `tedi-form-field`'s `clearable` when not set here — set it on the
    * wrapper, and use this only for a standalone field.
    */
-  readonly clearable = input<boolean | undefined>();
+  readonly clearable = input<boolean | undefined, unknown>(undefined, {
+    // Unset stays `undefined` so the wrapper's `clearable` still applies.
+    transform: (v: unknown) => (v == null ? undefined : booleanAttribute(v)),
+  });
   /**
    * Forces the error state on, or off, regardless of the reactive-forms state.
    * Leave unset to let the control derive it.
