@@ -1,12 +1,6 @@
-import {
-  type Meta,
-  type StoryObj,
-  applicationConfig,
-  moduleMetadata,
-} from "@storybook/angular";
+import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Component, inject, Input, signal } from "@angular/core";
-import { provideAnimations } from "@angular/platform-browser/animations";
 import { ModalComponent } from "./modal.component";
 import { ModalHeaderComponent } from "./modal-header/modal-header.component";
 import { ModalContentComponent } from "./modal-content/modal-content.component";
@@ -1666,9 +1660,6 @@ this.modalService.open(MyModalContent, {
     },
   },
   decorators: [
-    applicationConfig({
-      providers: [provideAnimations()],
-    }),
     moduleMetadata({
       imports: [ButtonComponent, StoryModalWithToastComponent],
     }),
