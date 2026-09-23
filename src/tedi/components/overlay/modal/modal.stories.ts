@@ -1,6 +1,8 @@
 import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Component, inject, Input, signal } from "@angular/core";
+import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { map } from "rxjs";
 import { ModalComponent } from "./modal.component";
 import { ModalHeaderComponent } from "./modal-header/modal-header.component";
 import { ModalContentComponent } from "./modal-content/modal-content.component";
@@ -469,6 +471,95 @@ class StoryModalWithToastComponent {
     const formatted = date ? formatDate(date) : "no date selected";
     this.toastService.success("Saved", `Selected date: ${formatted}`);
     this.ref.close();
+  }
+}
+
+@Component({
+  standalone: true,
+  selector: "story-discard-changes",
+  imports: [
+    ModalComponent,
+    ModalHeaderComponent,
+    ModalFooterComponent,
+    ButtonComponent,
+  ],
+  template: `
+    <tedi-modal>
+      <tedi-modal-header [showClose]="false">
+        <h2>Discard changes?</h2>
+        <p tedi-modal-description>Your edits will be lost.</p>
+      </tedi-modal-header>
+      <tedi-modal-footer>
+        <button tedi-button variant="secondary" (click)="ref.close(false)">
+          Keep editing
+        </button>
+        <button tedi-button variant="danger" (click)="ref.close(true)">
+          Discard
+        </button>
+      </tedi-modal-footer>
+    </tedi-modal>
+  `,
+})
+class StoryDiscardChangesComponent {
+  readonly ref = inject<ModalRef<boolean>>(ModalRef);
+}
+
+@Component({
+  standalone: true,
+  selector: "story-guarded-form",
+  imports: [...sharedModalImports, ReactiveFormsModule],
+  template: `
+    <tedi-modal>
+      <tedi-modal-header>
+        <h1>Edit contact</h1>
+        <p tedi-modal-description>Edit a field, then close the modal.</p>
+      </tedi-modal-header>
+      <tedi-modal-content>
+        <form [formGroup]="form" id="guarded-form" (ngSubmit)="save()">
+          <tedi-form-field>
+            <label tedi-label for="guarded-name">Name</label>
+            <input tedi-text-field id="guarded-name" formControlName="name" />
+          </tedi-form-field>
+          <tedi-form-field>
+            <label tedi-label for="guarded-email">E-mail</label>
+            <input
+              tedi-text-field
+              id="guarded-email"
+              type="email"
+              formControlName="email"
+            />
+          </tedi-form-field>
+        </form>
+      </tedi-modal-content>
+      <tedi-modal-footer>
+        <button tedi-button variant="secondary" (click)="ref.close()">
+          Cancel
+        </button>
+        <button tedi-button type="submit" form="guarded-form">Save</button>
+      </tedi-modal-footer>
+    </tedi-modal>
+  `,
+})
+class StoryGuardedFormComponent {
+  readonly ref = inject(ModalRef);
+  private readonly modalService = inject(ModalService);
+
+  readonly form = new FormGroup({
+    name: new FormControl("Mari Maasikas"),
+    email: new FormControl("mari@example.com"),
+  });
+
+  constructor() {
+    this.ref.canClose = () =>
+      this.form.pristine ||
+      this.modalService
+        .open<boolean>(StoryDiscardChangesComponent, { size: "small" })
+        .closed.pipe(map(Boolean));
+  }
+
+  save() {
+    this.form.markAsPristine();
+    this.ref.close(this.form.getRawValue());
   }
 }
 
@@ -1692,6 +1783,116 @@ this.modalService.open(MyModalContent, {
         imports: [WithToastDemoComponent],
       },
     };
+  },
+};
+
+export const ConfirmBeforeClosing: StoryObj = {
+  name: "Confirm before closing",
+  parameters: {
+    chromatic: { disableSnapshot: true },
+    docs: {
+      description: {
+        story:
+          "Set `ModalRef.canClose` to keep the modal open until the user confirms. It runs on every close except `ModalService.closeAll()` and browser navigation, which needs a `canDeactivate` route guard.",
+      },
+      source: {
+        code: `
+class EditContactComponent {
+  ref = inject(ModalRef);
+  private modalService = inject(ModalService);
+
+  form = new FormGroup({
+    name: new FormControl('Mari Maasikas'),
+    email: new FormControl('mari@example.com'),
+  });
+
+  constructor() {
+    this.ref.canClose = () =>
+      this.form.pristine ||
+      this.modalService
+        .open<boolean>(DiscardChangesComponent, { size: 'small' })
+        .closed.pipe(map(Boolean));
+  }
+
+  save() {
+    this.form.markAsPristine();
+    this.ref.close(this.form.getRawValue());
+  }
+}
+
+class DiscardChangesComponent {
+  ref = inject<ModalRef<boolean>>(ModalRef);
+  // Keep editing → ref.close(false), Discard → ref.close(true)
+}`,
+        language: "typescript",
+        type: "code",
+      },
+    },
+  },
+  decorators: [
+    moduleMetadata({
+      imports: [ButtonComponent, StoryGuardedFormComponent],
+    }),
+  ],
+  render: () => {
+    @Component({
+      standalone: true,
+      selector: "story-confirm-close-demo",
+      imports: [ButtonComponent],
+      template: `
+        <button tedi-button variant="secondary" (click)="open()">
+          Edit contact
+        </button>
+      `,
+    })
+    class ConfirmCloseDemoComponent {
+      private readonly modalService = inject(ModalService);
+
+      open() {
+        this.modalService.open(StoryGuardedFormComponent, { width: "md" });
+      }
+    }
+
+    return {
+      template: "<story-confirm-close-demo />",
+      moduleMetadata: {
+        imports: [ConfirmCloseDemoComponent],
+      },
+    };
+  },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(
+      await within(canvasElement).findByRole("button", {
+        name: "Edit contact",
+      }),
+    );
+    const dialog = within(
+      await within(document.body).findByRole("dialog", {
+        name: "Edit contact",
+      }),
+    );
+
+    const confirmDialog = () =>
+      within(document.body).findByRole("dialog", { name: "Discard changes?" });
+    const openDialogs = () => document.querySelectorAll("cdk-dialog-container");
+
+    await userEvent.type(dialog.getByLabelText("Name"), " Jr");
+    await userEvent.keyboard("{Escape}");
+    await userEvent.click(
+      within(await confirmDialog()).getByRole("button", {
+        name: "Keep editing",
+      }),
+    );
+
+    await waitFor(() => expect(openDialogs()).toHaveLength(1));
+    await expect(dialog.getByLabelText("Name")).toHaveValue("Mari Maasikas Jr");
+
+    await userEvent.keyboard("{Escape}");
+    await userEvent.click(
+      within(await confirmDialog()).getByRole("button", { name: "Discard" }),
+    );
+
+    await waitFor(() => expect(openDialogs()).toHaveLength(0));
   },
 };
 

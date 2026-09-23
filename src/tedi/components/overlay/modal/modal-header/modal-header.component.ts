@@ -60,7 +60,7 @@ export class ModalHeaderComponent {
 
   closeModal() {
     if (this.modalRef) {
-      this.modalRef.close();
+      this.modalRef.requestClose("close-button");
     } else if (this.modal) {
       this.modal.open.set(false);
     }
