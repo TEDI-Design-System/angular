@@ -475,6 +475,12 @@ export class SelectComponent<T = unknown>
     return values.map((value) => (value == null ? "" : String(value)));
   });
 
+  readonly isInvalid = computed(() => this.state() === "error");
+
+  readonly feedbackId = computed(() =>
+    this.feedbackText() ? `${this.inputId()}-feedback` : null,
+  );
+
   hiddenTagsCount = computed(() => {
     const visible = this.visibleTagsCount();
     const total = this.selectedValues().length;

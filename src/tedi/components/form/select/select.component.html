@@ -36,6 +36,8 @@
   [attr.aria-controls]="!searchable() && isOpen() ? listboxId() : null"
   [attr.aria-labelledby]="!searchable() ? resolvedAriaLabelledby() : null"
   [attr.aria-label]="!searchable() ? resolvedAriaLabel() : null"
+  [attr.aria-invalid]="!searchable() ? isInvalid() || null : null"
+  [attr.aria-describedby]="!searchable() ? feedbackId() : null"
   [tabindex]="searchable() || disabled() ? -1 : 0"
   (click)="onTriggerClick()"
   (keydown.enter)="onTriggerEnter()"
@@ -85,6 +87,8 @@
           [attr.aria-controls]="isOpen() ? listboxId() : null"
           [attr.aria-labelledby]="resolvedAriaLabelledby()"
           [attr.aria-label]="resolvedAriaLabel()"
+          [attr.aria-invalid]="isInvalid() || null"
+          [attr.aria-describedby]="feedbackId()"
         />
       }
     </div>
@@ -146,6 +150,7 @@
 }
 @if (feedbackText(); as feedback) {
   <tedi-feedback-text
+    [id]="feedbackId()"
     [text]="feedback.text"
     [type]="feedback.type"
     [position]="feedback.position"
@@ -222,6 +227,8 @@
         [attr.aria-controls]="isOpen() ? listboxId() : null"
         [attr.aria-labelledby]="resolvedAriaLabelledby()"
         [attr.aria-label]="resolvedAriaLabel()"
+        [attr.aria-invalid]="isInvalid() || null"
+        [attr.aria-describedby]="feedbackId()"
       />
     }
   </div>
