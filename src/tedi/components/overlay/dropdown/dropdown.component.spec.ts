@@ -9,15 +9,20 @@ import {
 import { By } from "@angular/platform-browser";
 import { OverlayContainer } from "@angular/cdk/overlay";
 import { DropdownComponent } from "./dropdown.component";
-import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
+import {
+  DropdownTriggerAriaHasPopup,
+  DropdownTriggerDirective,
+} from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
+import { DropdownRole } from "./dropdown.tokens";
 import { DropdownItemComponent } from "./dropdown-item/dropdown-item.component";
+import { getFocusableElements } from "../../../utils/elements.util";
 
 @Component({
   standalone: true,
   template: `
     <tedi-dropdown [value]="value" [hideOnScroll]="hideOnScroll">
-      <button tedi-dropdown-trigger>Trigger</button>
+      <button tedi-dropdown-trigger [ariaHaspopup]="haspopup">Trigger</button>
 
       <tedi-dropdown-content [dropdownRole]="role">
         <li tedi-dropdown-item value="a">Item A</li>
@@ -37,7 +42,8 @@ import { DropdownItemComponent } from "./dropdown-item/dropdown-item.component";
 })
 class TestHostComponent {
   value = "b";
-  role: "menu" | "listbox" = "listbox";
+  role: DropdownRole = "listbox";
+  haspopup?: DropdownTriggerAriaHasPopup;
   hideOnScroll = false;
 }
 
@@ -69,6 +75,81 @@ class MockButtonComponent {}
   ],
 })
 class WrappingButtonHostComponent {}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content dropdownRole="menu">
+        <li tedi-dropdown-item [interactiveContent]="true">
+          <a href="/a">Link A</a>
+        </li>
+        <li tedi-dropdown-item [interactiveContent]="true">
+          <a href="/b">Link B</a>
+        </li>
+        <li tedi-dropdown-item [interactiveContent]="true" [disabled]="true">
+          <a href="/c">Link C</a>
+        </li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class InteractiveContentHostComponent {}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown value="b">
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content dropdownRole="listbox">
+        <li tedi-dropdown-item value="a" [interactiveContent]="true">
+          <a href="/a">Link A</a>
+        </li>
+        <li tedi-dropdown-item value="b" [interactiveContent]="true">
+          <a href="/b">Link B</a>
+        </li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class InteractiveListboxHostComponent {}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content dropdownRole="list">
+        <li tedi-dropdown-item><a href="/a">Link A</a></li>
+        <li tedi-dropdown-item><a href="/b">Link B</a></li>
+        <li tedi-dropdown-item [disabled]="true"><a href="/c">Link C</a></li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class ListRoleHostComponent {}
 
 describe("DropdownComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
@@ -467,6 +548,25 @@ describe("DropdownComponent", () => {
       const items = getItems();
       expect(items).not.toContain(document.activeElement);
     }));
+
+    it("focuses the next element synchronously, so focus never lands on body in between", () => {
+      // No tick(): deferring the focus leaves the detached panel item focused,
+      // so focus falls to body and a screen reader reads the container before
+      // it reaches the next element.
+      dropdown.tabOutOfDropdown(false);
+
+      expect(document.activeElement).toBe(after);
+    });
+
+    it("falls back to the trigger when nothing follows it in the tab order", () => {
+      after.remove();
+
+      dropdown.tabOutOfDropdown(false);
+
+      expect(document.activeElement).toBe(
+        dropdown.dropdownTrigger().focusableElement,
+      );
+    });
   });
 
   describe("setActiveToSelectedOrFirst()", () => {
@@ -747,10 +847,40 @@ describe("DropdownComponent", () => {
     });
 
     it("should set correct ARIA attributes", () => {
-      expect(trigger.getAttribute("aria-haspopup")).toBe("menu");
+      expect(trigger.getAttribute("aria-haspopup")).toBe("listbox");
       expect(trigger.getAttribute("aria-expanded")).toBe("false");
       expect(trigger.getAttribute("role")).toBeNull();
       expect(trigger.getAttribute("tabindex")).toBeNull();
+    });
+
+    it("takes aria-haspopup from the content role, and an explicit value wins", () => {
+      host.role = "menu";
+      fixture.detectChanges();
+
+      expect(trigger.getAttribute("aria-haspopup")).toBe("menu");
+
+      fixture.componentInstance.haspopup = "dialog";
+      fixture.detectChanges();
+
+      expect(trigger.getAttribute("aria-haspopup")).toBe("dialog");
+    });
+
+    it("only points aria-controls at the panel while it exists", () => {
+      expect(trigger.getAttribute("aria-controls")).toBeNull();
+
+      openDropdown();
+
+      expect(trigger.getAttribute("aria-controls")).toBe(
+        dropdown.containerId(),
+      );
+      expect(overlayContainerElement.querySelector("ul")?.id).toBe(
+        dropdown.containerId(),
+      );
+
+      dropdown.hideDropdown();
+      fixture.detectChanges();
+
+      expect(trigger.getAttribute("aria-controls")).toBeNull();
     });
   });
 
@@ -779,9 +909,6 @@ describe("DropdownComponent", () => {
 
       expect(innerButton.getAttribute("aria-haspopup")).toBe("menu");
       expect(innerButton.getAttribute("aria-expanded")).toBe("false");
-      expect(innerButton.getAttribute("aria-controls")).toBe(
-        wrappedDropdown.containerId(),
-      );
       expect(innerButton.getAttribute("id")).toBe(
         `${wrappedDropdown.containerId()}_trigger`,
       );
@@ -812,6 +939,363 @@ describe("DropdownComponent", () => {
       wrappedDropdown.dropdownTrigger().focus();
 
       expect(focusSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("interactiveContent items", () => {
+    let interactiveFixture: ComponentFixture<InteractiveContentHostComponent>;
+    let interactiveDropdown: DropdownComponent;
+    let links: HTMLAnchorElement[];
+    let itemEls: HTMLLIElement[];
+
+    beforeEach(() => {
+      interactiveFixture = TestBed.createComponent(
+        InteractiveContentHostComponent,
+      );
+      interactiveFixture.detectChanges();
+
+      interactiveDropdown = interactiveFixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      interactiveDropdown.showDropdown();
+      interactiveFixture.detectChanges();
+
+      itemEls = Array.from(
+        overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+      ) as HTMLLIElement[];
+      links = itemEls.map((el) => el.querySelector("a") as HTMLAnchorElement);
+    });
+
+    afterEach(() => {
+      interactiveDropdown.hideDropdown();
+    });
+
+    it("exposes the item role on the link and leaves the li presentational", () => {
+      itemEls.forEach((el) => {
+        expect(el.getAttribute("role")).toBe("none");
+        expect(el.getAttribute("tabindex")).toBeNull();
+      });
+
+      links.forEach((link) =>
+        expect(link.getAttribute("role")).toBe("menuitem"),
+      );
+      expect(links[2].getAttribute("aria-disabled")).toBe("true");
+      expect(links[0].getAttribute("aria-disabled")).toBeNull();
+    });
+
+    it("keeps the roving tabindex on the links", () => {
+      expect(links.map((link) => link.getAttribute("tabindex"))).toEqual([
+        "0",
+        "-1",
+        "-1",
+      ]);
+
+      interactiveDropdown.focusNextItem(itemEls[0]);
+      interactiveFixture.detectChanges();
+
+      expect(links.map((link) => link.getAttribute("tabindex"))).toEqual([
+        "-1",
+        "0",
+        "-1",
+      ]);
+      expect(document.activeElement).toBe(links[1]);
+    });
+
+    it("keydown: Enter is left to the link so it navigates", () => {
+      const event = new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+      });
+      links[0].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    it("keydown: Space activates the link", () => {
+      const clickSpy = jest.spyOn(links[0], "click");
+      const event = new KeyboardEvent("keydown", {
+        key: " ",
+        bubbles: true,
+        cancelable: true,
+      });
+      links[0].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(clickSpy).toHaveBeenCalled();
+    });
+
+    it("prevents activation of a disabled item's link", () => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+      });
+      links[2].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(interactiveDropdown.isOpen()).toBe(true);
+    });
+
+    it("stops a disabled item's click before target-level handlers run", () => {
+      const targetHandler = jest.fn();
+      links[2].addEventListener("click", targetHandler);
+
+      links[2].dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+
+      expect(targetHandler).not.toHaveBeenCalled();
+
+      links[2].removeEventListener("click", targetHandler);
+    });
+
+    it("leaves an enabled item's target-level handler alone", () => {
+      const targetHandler = jest.fn();
+      links[0].addEventListener("click", targetHandler);
+
+      links[0].dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+
+      expect(targetHandler).toHaveBeenCalled();
+
+      links[0].removeEventListener("click", targetHandler);
+    });
+  });
+
+  describe("interactiveContent items in a listbox", () => {
+    let listboxFixture: ComponentFixture<InteractiveListboxHostComponent>;
+    let listboxDropdown: DropdownComponent;
+
+    beforeEach(() => {
+      listboxFixture = TestBed.createComponent(InteractiveListboxHostComponent);
+      listboxFixture.detectChanges();
+
+      listboxDropdown = listboxFixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      listboxDropdown.showDropdown();
+      listboxFixture.detectChanges();
+    });
+
+    afterEach(() => {
+      listboxDropdown.hideDropdown();
+    });
+
+    it("moves the option selection contract onto the control", () => {
+      const itemEls = Array.from(
+        overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+      ) as HTMLLIElement[];
+      const optionLinks = itemEls.map(
+        (el) => el.querySelector("a") as HTMLAnchorElement,
+      );
+
+      itemEls.forEach((el) => {
+        expect(el.getAttribute("role")).toBe("none");
+        expect(el.getAttribute("aria-selected")).toBeNull();
+      });
+
+      optionLinks.forEach((link) =>
+        expect(link.getAttribute("role")).toBe("option"),
+      );
+      expect(optionLinks[0].getAttribute("aria-selected")).toBe("false");
+      expect(optionLinks[1].getAttribute("aria-selected")).toBe("true");
+    });
+  });
+
+  describe('dropdownRole="list"', () => {
+    let listFixture: ComponentFixture<ListRoleHostComponent>;
+    let listDropdown: DropdownComponent;
+    let listTrigger: HTMLButtonElement;
+    let listEl: HTMLUListElement;
+    let links: HTMLAnchorElement[];
+    let itemEls: HTMLLIElement[];
+    let after: HTMLButtonElement;
+
+    const open = () => {
+      listDropdown.showDropdown();
+      listFixture.detectChanges();
+
+      itemEls = Array.from(
+        listFixture.nativeElement.querySelectorAll("li[tedi-dropdown-item]"),
+      ) as HTMLLIElement[];
+      links = itemEls.map((el) => el.querySelector("a") as HTMLAnchorElement);
+      listEl = listFixture.nativeElement.querySelector(
+        "ul",
+      ) as HTMLUListElement;
+    };
+
+    const keydown = (el: HTMLElement, init: KeyboardEventInit) =>
+      el.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          cancelable: true,
+          ...init,
+        }),
+      );
+
+    beforeEach(() => {
+      listFixture = TestBed.createComponent(ListRoleHostComponent);
+      listFixture.detectChanges();
+      document.body.appendChild(listFixture.nativeElement);
+
+      after = document.createElement("button");
+      document.body.appendChild(after);
+
+      listDropdown = listFixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+      listTrigger = listFixture.nativeElement.querySelector(
+        "[tedi-dropdown-trigger]",
+      ) as HTMLButtonElement;
+    });
+
+    afterEach(() => {
+      listDropdown.hideDropdown();
+      after.remove();
+      listFixture.nativeElement.remove();
+    });
+
+    it("exposes the panel as a plain list that the trigger points at", () => {
+      expect(listTrigger.getAttribute("aria-haspopup")).toBeNull();
+      expect(listTrigger.getAttribute("aria-controls")).toBeNull();
+
+      open();
+
+      expect(listEl.getAttribute("role")).toBe("list");
+      expect(listEl.id).toBe(listDropdown.containerId());
+      expect(listEl.getAttribute("aria-labelledby")).toBe(listTrigger.id);
+      expect(listTrigger.getAttribute("aria-controls")).toBe(listEl.id);
+      expect(listTrigger.getAttribute("aria-expanded")).toBe("true");
+    });
+
+    it("leaves the items and their links free of widget semantics", () => {
+      open();
+
+      itemEls.forEach((el) => {
+        expect(el.getAttribute("role")).toBeNull();
+        expect(el.getAttribute("tabindex")).toBeNull();
+        expect(el.getAttribute("aria-selected")).toBeNull();
+        expect(el.getAttribute("aria-disabled")).toBeNull();
+      });
+
+      links.forEach((link) => {
+        expect(link.getAttribute("role")).toBeNull();
+        expect(link.getAttribute("tabindex")).toBeNull();
+        expect(link.getAttribute("aria-selected")).toBeNull();
+      });
+
+      expect(links[2].getAttribute("aria-disabled")).toBe("true");
+      expect(links[0].getAttribute("aria-disabled")).toBeNull();
+    });
+
+    it("moves focus to the first link when it opens", fakeAsync(() => {
+      listTrigger.focus();
+      open();
+      tick();
+
+      expect(document.activeElement).toBe(links[0]);
+      expect(listDropdown.isOpen()).toBe(true);
+    }));
+
+    it("leaves the arrow keys alone instead of opening and navigating items", () => {
+      listTrigger.focus();
+
+      const event = new KeyboardEvent("keydown", {
+        key: "ArrowDown",
+        bubbles: true,
+        cancelable: true,
+      });
+      listTrigger.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(false);
+      expect(listDropdown.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(listTrigger);
+    });
+
+    // A mobile screen reader walks the page in DOM order and sends no Tab key,
+    // so a panel at the end of the body is reached after the whole page rather
+    // than after the trigger.
+    it("renders the panel where the dropdown sits in the DOM", () => {
+      open();
+
+      expect(listFixture.nativeElement.contains(listEl)).toBe(true);
+      expect(overlayContainerElement.contains(listEl)).toBe(false);
+    });
+
+    it("places the links between the trigger and the rest of the page", () => {
+      open();
+
+      const focusable = getFocusableElements(document.body);
+      const from = focusable.indexOf(listTrigger);
+
+      expect(focusable.slice(from, from + 5)).toEqual([
+        listTrigger,
+        links[0],
+        links[1],
+        links[2],
+        after,
+      ]);
+    });
+
+    it("leaves Tab to the browser at both ends of the list", () => {
+      open();
+      links[0].focus();
+      expect(keydown(links[0], { key: "Tab", shiftKey: true })).toBe(true);
+
+      links[2].focus();
+      expect(keydown(links[2], { key: "Tab" })).toBe(true);
+      expect(listDropdown.isOpen()).toBe(true);
+    });
+
+    it("closes once focus lands past the panel", () => {
+      open();
+      links[2].focus();
+
+      after.focus();
+
+      expect(listDropdown.isOpen()).toBe(false);
+    });
+
+    it("Escape closes the list and returns focus to the trigger", () => {
+      open();
+      links[1].focus();
+
+      expect(keydown(links[1], { key: "Escape" })).toBe(false);
+
+      expect(listDropdown.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(listTrigger);
+    });
+
+    it("leaves Enter and Space to the link", () => {
+      open();
+      links[0].focus();
+
+      expect(keydown(links[0], { key: "Enter" })).toBe(true);
+      expect(keydown(links[0], { key: " " })).toBe(true);
+    });
+
+    it("closes when a link is activated", () => {
+      open();
+
+      links[0].dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+      expect(listDropdown.isOpen()).toBe(false);
+    });
+
+    it("blocks activation of a disabled item's link", () => {
+      open();
+
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+      });
+      links[2].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(listDropdown.isOpen()).toBe(true);
     });
   });
 });

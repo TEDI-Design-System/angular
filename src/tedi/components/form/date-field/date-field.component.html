@@ -3,7 +3,9 @@
   cdkOverlayOrigin
   #overlayOrigin="cdkOverlayOrigin"
   [inputId]="inputId()"
-  [value]="displayValue()"
+  [name]="name()"
+  [value]="inputText()"
+  [ariaDescribedby]="describedBy.attribute()"
   [tags]="tagsForMultipleMode()"
   [mode]="mode()"
   [multiRow]="multiRow()"
