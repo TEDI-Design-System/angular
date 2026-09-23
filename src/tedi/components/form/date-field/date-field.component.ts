@@ -136,6 +136,11 @@ export class DateFieldComponent
    */
   readonly inputId = input.required<string>();
   /**
+   * `name` attribute of the underlying text input, used by native form
+   * submission. Omitted from the DOM when not set.
+   */
+  readonly name = input<string>();
+  /**
    * The selected value (two-way / `ControlValueAccessor`). Shape follows `mode`:
    * `single` → `Date | null`, `multiple` → `Date[]`, `range` → `{ from, to }`.
    */

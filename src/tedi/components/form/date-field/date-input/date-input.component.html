@@ -23,6 +23,7 @@
     tedi-text-field
     class="tedi-date-input__input"
     [id]="inputId()"
+    [attr.name]="name() || null"
     [type]="inputType()"
     [value]="inputValue()"
     [attr.placeholder]="placeholder() || null"
