@@ -58,6 +58,11 @@ export class DateInputComponent implements AfterViewChecked {
   readonly inputId = input.required<string>();
   /** `name` attribute of the text input; omitted from the DOM when not set. */
   readonly name = input<string>();
+  /**
+   * `aria-describedby` ids for the input. Handed to the `tedi-text-field`
+   * directive, which owns the input's `aria-describedby` attribute.
+   */
+  readonly ariaDescribedby = input<string | null>(null);
   readonly value = input<string>("");
   readonly tags = input<readonly DateInputTag[]>([]);
   readonly mode = input<DateFieldMode>("single");
@@ -98,6 +103,8 @@ export class DateInputComponent implements AfterViewChecked {
     read: ElementRef,
   });
 
+  private readonly textField = viewChild(TextFieldComponent);
+
   /** Number of tags that fit on a single row; `null` until measured. */
   readonly visibleTagsCount = signal<number | null>(null);
 
@@ -106,6 +113,13 @@ export class DateInputComponent implements AfterViewChecked {
       // Re-measure whenever the tag set changes.
       this.tags();
       this.visibleTagsCount.set(null);
+    });
+
+    effect(() => {
+      const ids = this.ariaDescribedby();
+      this.textField()?.setDescribedBy(
+        ids ? ids.split(/\s+/).filter(Boolean) : [],
+      );
     });
   }
 
