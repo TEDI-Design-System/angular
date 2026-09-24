@@ -270,11 +270,11 @@ describe("Breadcrumbs", () => {
     });
   });
 
-  it("hides the breadcrumbs when printing", () => {
+  it("stays printable — breadcrumbs are context, not a control", () => {
     const fixture = setup();
     const breadcrumbs = fixture.debugElement.query(By.css("tedi-breadcrumbs"))
       .nativeElement as HTMLElement;
 
-    expect(breadcrumbs.classList).toContain("no-print");
+    expect(breadcrumbs.classList).not.toContain("no-print");
   });
 });

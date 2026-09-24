@@ -69,7 +69,7 @@ type RenderToken =
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    class: "tedi-breadcrumbs no-print",
+    class: "tedi-breadcrumbs",
   },
 })
 export class BreadcrumbsComponent implements BreakpointInputs<BreadcrumbsInputs> {
