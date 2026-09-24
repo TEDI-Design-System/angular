@@ -70,6 +70,8 @@
     #tableElement
     class="tedi-table__table"
     [attr.id]="id() || null"
+    [attr.aria-label]="ariaLabel() || null"
+    [attr.aria-labelledby]="ariaLabelledby() || null"
     [attr.aria-rowcount]="ariaRowCount()"
     [attr.aria-colcount]="leafColumnCount() > 0 ? leafColumnCount() : null"
   >

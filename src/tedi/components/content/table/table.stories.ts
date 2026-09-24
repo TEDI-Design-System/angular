@@ -177,6 +177,8 @@ type TediTableStoryArgs = {
   columns?: unknown[];
   id?: string;
   caption?: unknown;
+  ariaLabel?: string;
+  ariaLabelledby?: string;
   renderSubComponent?: unknown;
   getRowCanExpand?: unknown;
   getSubRows?: unknown;
@@ -509,6 +511,18 @@ const meta: Meta<TediTableStoryArgs> = {
       description: "Caption rendered above the table.",
       control: false,
       table: { category: "data", type: { summary: "string | TemplateRef" } },
+    },
+    ariaLabel: {
+      description:
+        "Accessible name for the `<table>` when no visible `caption` is rendered. Overrides `caption` as the accessible name; ignored when `ariaLabelledby` is set.",
+      control: false,
+      table: { category: "data", type: { summary: "string" } },
+    },
+    ariaLabelledby: {
+      description:
+        "ID of an external element that names the `<table>`, e.g. a heading above it. Takes precedence over `ariaLabel` and `caption`.",
+      control: false,
+      table: { category: "data", type: { summary: "string" } },
     },
     renderSubComponent: {
       description:
