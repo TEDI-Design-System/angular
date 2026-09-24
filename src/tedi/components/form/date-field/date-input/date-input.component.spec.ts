@@ -145,7 +145,7 @@ describe("DateInputComponent", () => {
     expect(removeBtn).toBeNull();
   });
 
-  it("does not render a tag close button when readOnly", () => {
+  it("keeps the tag close button when readOnly — removal is gated by removable", () => {
     fixture.componentRef.setInput("mode", "multiple");
     fixture.componentRef.setInput("tags", [
       { id: "tag-1", label: "01.01.2026" },
@@ -154,7 +154,7 @@ describe("DateInputComponent", () => {
     fixture.detectChanges();
 
     const removeBtn = el.querySelector("tedi-tag .tedi-closing-button");
-    expect(removeBtn).toBeNull();
+    expect(removeBtn).not.toBeNull();
   });
 
   it("does not render a tag close button when removable is false", () => {
@@ -328,6 +328,14 @@ describe("DateInputComponent", () => {
     expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
 
     fixture.componentRef.setInput("clearable", true);
+    fixture.componentRef.setInput("value", "14.05.2026");
+    fixture.detectChanges();
+    expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
+  });
+
+  it("keeps the clear button when readOnly — clearing is gated by clearable", () => {
+    fixture.componentRef.setInput("clearable", true);
+    fixture.componentRef.setInput("readOnly", true);
     fixture.componentRef.setInput("value", "14.05.2026");
     fixture.detectChanges();
     expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
