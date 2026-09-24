@@ -1,3 +1,10 @@
+# [8.1.0-rc.22](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.21...angular-8.1.0-rc.22) (2026-09-24)
+
+
+### Features
+
+* added deprecation console warnings to deprecated components [#705](https://github.com/TEDI-Design-System/angular/issues/705) ([#710](https://github.com/TEDI-Design-System/angular/issues/710)) ([b635a18](https://github.com/TEDI-Design-System/angular/commit/b635a186e263df8fdc55018995622b42ec23e732))
+
 # [8.1.0-rc.21](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.20...angular-8.1.0-rc.21) (2026-09-24)
 
 
