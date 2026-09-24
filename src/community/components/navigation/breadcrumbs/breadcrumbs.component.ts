@@ -5,7 +5,8 @@ import {
   TextComponent,
   BreakpointService,
   BreakpointInputs,
-  LinkComponent
+  LinkComponent,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 
 export type Breadcrumb = {
@@ -82,6 +83,13 @@ export class BreadcrumbsComponent implements BreakpointInputs<Breadcrumbs> {
       xxl: this.xxl(),
     });
   });
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-breadcrumbs",
+      "Use the TEDI-Ready `tedi-breadcrumbs` from `@tedi-design-system/angular/tedi` instead.",
+    );
+  }
 
   getSecondLastCrumb(): Breadcrumb | null {
     const crumbs = this.breakpointInputs().crumbs;

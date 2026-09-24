@@ -33,6 +33,7 @@ import {
   getISOWeek,
   addMonths,
 } from "../../../utils/date.util";
+import { warnDeprecated } from "../../../utils/deprecation.util";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 
 export interface DatePickerDay {
@@ -56,6 +57,9 @@ export type DatePickerMatcher =
 
 let datePickerId = 0;
 
+/**
+ * @deprecated Use `tedi-date-field` from `@tedi-design-system/angular/tedi` instead.
+ */
 @Component({
   standalone: true,
   selector: "tedi-date-picker",
@@ -326,6 +330,10 @@ export class DatePickerComponent implements OnInit, ControlValueAccessor {
   readonly popover = viewChild.required(PopoverComponent);
 
   constructor() {
+    warnDeprecated(
+      "tedi-date-picker",
+      "Use `tedi-date-field` from `@tedi-design-system/angular/tedi` instead.",
+    );
     effect(() => {
       const selected = this.selected();
       this.inputValue.set(selected ? formatDate(selected) : "");

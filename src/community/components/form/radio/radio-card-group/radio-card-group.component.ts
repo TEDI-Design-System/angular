@@ -7,7 +7,11 @@ import {
 } from "@angular/core";
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
 import { ChoiceGroupDirective } from "../../choicegroup/choicegroup.directive";
-import { LabelComponent, FeedbackTextComponent } from "@tedi-design-system/angular/tedi";
+import {
+  LabelComponent,
+  FeedbackTextComponent,
+  warnDeprecated,
+} from "@tedi-design-system/angular/tedi";
 import { RadioGroupComponent } from "../radio-group/radio-group.component";
 
 /**
@@ -48,4 +52,12 @@ export class RadioCardGroupComponent extends RadioGroupComponent {
    * Direction in which radios flow.
    */
   override direction = input<"row" | "column">("row");
+
+  constructor() {
+    super();
+    warnDeprecated(
+      "Community tedi-radio-card-group",
+      "Use Radio with RadioCard label from TEDI-ready instead.",
+    );
+  }
 }
