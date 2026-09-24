@@ -7,7 +7,7 @@
     [id]="liveRegionId"
     aria-live="polite"
     aria-atomic="true"
-    class="tedi-table__sr-only"
+    class="sr-only"
   ></div>
 }
 
@@ -143,7 +143,7 @@
                 [style.right.px]="stickyRight(header.column.id)"
               >
                 @if (srHeaderLabel) {
-                  <span class="tedi-table__sr-only">{{ srHeaderLabel }}</span>
+                  <span class="sr-only">{{ srHeaderLabel }}</span>
                 }
                 @if (header.column.id === SELECT_COLUMN_ID) {
                   @if (selectionMode() === "multiple") {
