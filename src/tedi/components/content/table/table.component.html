@@ -104,6 +104,7 @@
               @let ariaSort = getHeaderAriaSort(header.column);
               @let srHeaderLabel = getSrOnlyHeaderLabel(header.column);
               @let rowSpan = getHeaderRowSpan(header, rowIndex);
+              @let headerAlign = meta?.headerAlign ?? meta?.align;
               <th
                 scope="col"
                 cdkDrag
@@ -120,8 +121,8 @@
                   (isHeaderGroup(header)
                     ? ' tedi-table__header-cell--group'
                     : '') +
-                  (meta?.align
-                    ? ' tedi-table__cell--align-' + meta?.align
+                  (headerAlign
+                    ? ' tedi-table__cell--align-' + headerAlign
                     : '') +
                   (meta?.vAlign
                     ? ' tedi-table__cell--valign-' + meta?.vAlign
