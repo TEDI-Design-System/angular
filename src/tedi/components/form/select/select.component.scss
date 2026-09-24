@@ -73,6 +73,9 @@
     justify-content: space-between;
     width: 100%;
     cursor: pointer;
+
+    // The trigger draws its own focus ring; core's global one would double it.
+    outline: none;
   }
 
   &__label {
