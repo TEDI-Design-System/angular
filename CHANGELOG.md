@@ -1,3 +1,10 @@
+# [8.1.0-rc.21](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.20...angular-8.1.0-rc.21) (2026-09-24)
+
+
+### Bug Fixes
+
+* **floating-button:** use tedi-floating-button class names [#649](https://github.com/TEDI-Design-System/angular/issues/649) ([#712](https://github.com/TEDI-Design-System/angular/issues/712)) ([400dd9a](https://github.com/TEDI-Design-System/angular/commit/400dd9a1807dc4384ffe9c14c60975ce818bba0e))
+
 # [8.1.0-rc.20](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0-rc.19...angular-8.1.0-rc.20) (2026-09-23)
 
 
