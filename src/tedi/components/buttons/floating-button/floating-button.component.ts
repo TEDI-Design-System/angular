@@ -103,13 +103,12 @@ export class FloatingButtonComponent implements OnInit {
    */
   readonly zIndex = input<number>();
 
-  // Keep CSS classes distinct while the Community FloatingButton is still available.
   readonly classes = computed(() =>
     [
-      "tedi-ready-floating-button",
-      `tedi-ready-floating-button--${this.variant()}`,
-      `tedi-ready-floating-button--${this.size()}`,
-      `tedi-ready-floating-button--${this.axis()}`,
+      "tedi-floating-button",
+      `tedi-floating-button--${this.variant()}`,
+      `tedi-floating-button--${this.size()}`,
+      `tedi-floating-button--${this.axis()}`,
     ].join(" "),
   );
 
@@ -142,6 +141,6 @@ export class FloatingButtonComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.baseButton.classNamePrefix.set("tedi-ready-floating-button");
+    this.baseButton.classNamePrefix.set("tedi-floating-button");
   }
 }
