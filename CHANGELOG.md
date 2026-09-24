@@ -1,3 +1,10 @@
+## [8.1.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0...angular-8.1.1) (2026-09-24)
+
+
+### Bug Fixes
+
+* **table-of-contents, filter, number-field:** replaced invalid css vars [#717](https://github.com/TEDI-Design-System/angular/issues/717) ([4d5c107](https://github.com/TEDI-Design-System/angular/commit/4d5c1079a6acea2feffbe56d549e446a7fa44a32))
+
 # [8.1.0](https://github.com/TEDI-Design-System/angular/compare/angular-8.0.0...angular-8.1.0) (2026-09-24)
 
 
