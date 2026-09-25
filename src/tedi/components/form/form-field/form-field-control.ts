@@ -46,6 +46,13 @@ export interface FormFieldControl<T = unknown> {
    * `aria-describedby`; nothing is pushed when the control stands alone.
    */
   setDescribedBy?(ids: string[]): void;
+  /**
+   * Set by controls that render their own clear button — date and time put one in
+   * their action row beside the picker button, which cannot leave the control
+   * because the overlay anchors to it. The field then skips its generic clear
+   * button so a single `clearable` never yields two.
+   */
+  readonly ownsClearButton?: boolean;
 }
 
 /**

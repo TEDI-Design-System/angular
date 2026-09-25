@@ -6,7 +6,10 @@ import {
   Validators,
 } from "@angular/forms";
 import { DateFieldComponent } from "./date-field.component";
-import { FormFieldComponent } from "../form-field/form-field.component";
+import {
+  FormFieldComponent,
+  type InputSize,
+} from "../form-field/form-field.component";
 import { LabelComponent } from "../label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
@@ -18,6 +21,8 @@ import { ColComponent } from "../../helpers/grid/col/col.component";
 import type { DateRange } from "../../content/calendar/types";
 import type { Matcher } from "../../../utils/matchers.util";
 import { expect, userEvent, waitFor } from "storybook/test";
+
+const PSEUDO_STATE = ["Default", "Hover", "Focus", "Active"];
 
 const referenceDate = new Date(2026, 5, 15);
 const inThreeDays = new Date(2026, 5, 18);
@@ -75,7 +80,6 @@ const parseUS = (value: string): Date | undefined => {
  */
 const COMMON_INPUTS = [
   "mode",
-  "size",
   "selectionLevel",
   "monthYearSelectType",
   "localeCode",
@@ -97,6 +101,8 @@ const COMMON_INPUTS = [
   "fullscreen",
   "calendarTrigger",
   "numberOfMonths",
+  "clearable",
+  "size",
 ];
 
 /**
@@ -109,6 +115,10 @@ const argBindings = (exclude: string[] = []): string =>
     .join("\n          ");
 
 type DateFieldStoryArgs = DateFieldComponent & {
+  /** Story-only: size applied to the wrapping `tedi-form-field`. */
+  formFieldSize?: InputSize;
+  /** Story-only: clearable applied to the wrapping `tedi-form-field`. */
+  formFieldClearable?: boolean;
   /** Story-only: text rendered in the sibling `<label tedi-label>`. */
   label?: string;
   /** Story-only: text rendered in a `tedi-feedback-text` below the field. */
@@ -133,14 +143,13 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
   return {
     props: { ...args, control },
     template: `
-      <tedi-form-field [size]="size">
+      <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
         <label tedi-label [for]="inputId" [required]="required">{{ label }}</label>
         <tedi-date-field
           [inputId]="inputId"
           [name]="name"
           [formControl]="control"
           [mode]="mode"
-          [size]="size"
           [selectionLevel]="selectionLevel"
           [monthYearSelectType]="monthYearSelectType"
           [localeCode]="localeCode"
@@ -162,6 +171,8 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
           [fullscreen]="fullscreen"
           [calendarTrigger]="calendarTrigger"
           [numberOfMonths]="numberOfMonths"
+          [clearable]="clearable"
+          [size]="size"
           [minDate]="minDate"
           [maxDate]="maxDate"
           [minYear]="minYear"
@@ -224,11 +235,12 @@ export default {
     name: "",
     label: "Kuupäev",
     mode: "single",
-    size: "default",
+    formFieldSize: "default",
     selectionLevel: "days",
     monthYearSelectType: "dropdown",
     localeCode: "et-EE",
     placeholder: "",
+    formFieldClearable: true,
     inputDisabled: false,
     readOnly: false,
     required: false,
@@ -255,7 +267,7 @@ export default {
         "Unique ID for label association and accessibility. Bind the sibling `<label tedi-label [for]>` to the same value.",
       control: { type: "text" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "string" },
       },
     },
@@ -264,7 +276,7 @@ export default {
         "`name` attribute of the underlying text input, used by native form submission. Omitted from the DOM when not set.",
       control: { type: "text" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "string" },
       },
     },
@@ -283,7 +295,7 @@ export default {
       control: { type: "radio" },
       options: ["single", "multiple", "range"],
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: {
           summary: "DateFieldMode",
           detail: "single \nmultiple \nrange",
@@ -296,7 +308,7 @@ export default {
         "`multiple` mode tag layout. `true` wraps tags across rows and grows the field height; `false` keeps a single row and collapses overflow into a `+N` counter.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "true" },
       },
@@ -307,7 +319,7 @@ export default {
       control: { type: "radio" },
       options: [false, "start", "end"],
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "TagEllipsis", detail: "false \nstart \nend" },
         defaultValue: { summary: "false" },
       },
@@ -317,19 +329,34 @@ export default {
         "In `multiple` mode, whether tags show a remove button. `false` renders them as read-only chips.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "true" },
       },
     },
     size: {
       description:
-        "Field size — should match the surrounding `tedi-form-field`'s `size`.",
+        "Overrides the wrapping `tedi-form-field`'s `size` for this field. Leave unset to inherit it — set `size` on the form field instead, so the label scales too. Use it for a standalone date field, where it defaults to `default`.",
+      control: { type: "radio" },
+      options: [undefined, "default", "small"],
+      table: {
+        category: "Date Field inputs",
+        type: {
+          summary: "DateFieldSize | undefined",
+          detail: "default \nsmall",
+        },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    formFieldSize: {
+      name: "size",
+      description:
+        "Set on the wrapping `tedi-form-field` — the label and the date field scale together. The date field reads it unless its own `size` is set.",
       control: { type: "radio" },
       options: ["default", "small"],
       table: {
-        category: "inputs",
-        type: { summary: "DateFieldSize", detail: "default \nsmall" },
+        category: "Form Field inputs",
+        type: { summary: "InputSize", detail: "default \nsmall" },
         defaultValue: { summary: "default" },
       },
     },
@@ -339,7 +366,7 @@ export default {
       control: { type: "radio" },
       options: ["days", "months", "years"],
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: {
           summary: "CalendarView",
           detail: "days \nmonths \nyears",
@@ -353,7 +380,7 @@ export default {
       control: { type: "radio" },
       options: ["dropdown", "grid"],
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: '"dropdown" | "grid"' },
         defaultValue: { summary: "dropdown" },
       },
@@ -363,7 +390,7 @@ export default {
         "Earliest year offered in the calendar's year grid/dropdown. Leave `null` to default to 100 years before the current year.",
       control: { type: "number" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "number | null" },
         defaultValue: { summary: "null" },
       },
@@ -373,7 +400,7 @@ export default {
         "Latest year offered in the calendar's year grid/dropdown. Leave `null` to default to 20 years after the current year.",
       control: { type: "number" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "number | null" },
         defaultValue: { summary: "null" },
       },
@@ -383,7 +410,7 @@ export default {
         "BCP-47 locale for weekday/month names, the first day of the week, and the default `formatDate`/`parseDate` behaviour.",
       control: { type: "text" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "string" },
         defaultValue: { summary: "et-EE" },
       },
@@ -392,9 +419,30 @@ export default {
       description: "Placeholder rendered in the input when there is no value.",
       control: { type: "text" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "string" },
         defaultValue: { summary: '""' },
+      },
+    },
+    clearable: {
+      description:
+        "Overrides the wrapping `tedi-form-field`'s `clearable` for this field. Leave unset to inherit it — set `clearable` on the form field instead. Use it for a standalone date field, where it defaults to `true`.",
+      control: { type: "boolean" },
+      table: {
+        category: "Date Field inputs",
+        type: { summary: "boolean | undefined" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    formFieldClearable: {
+      name: "clearable",
+      description:
+        "Set on the wrapping `tedi-form-field`. Shows a clear button once the field has a value; set `false` to opt out. The date field reads it unless its own `clearable` is set.",
+      control: { type: "boolean" },
+      table: {
+        category: "Form Field inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
       },
     },
     inputDisabled: {
@@ -402,7 +450,7 @@ export default {
         "Disables the field entirely — input, icon button, and calendar.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
@@ -412,7 +460,7 @@ export default {
         "Blocks typing into the input but leaves the calendar interactive — useful for guided picking. The value stays clearable while the calendar is available.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
@@ -422,7 +470,7 @@ export default {
         "Marks the input as required (sets the native `required` attribute for validation). In `multiple` mode it also prevents clearing the last selected date. The asterisk indicator lives on the sibling `<label tedi-label [required]>` — bind it there too, since DateField owns no label.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
@@ -433,7 +481,7 @@ export default {
         "Disables specific days via matchers (does not disable the whole field).",
       control: { type: "object" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: {
           summary: "Matcher | Matcher[]",
           detail: `Date \n| Date[] \n| { before: Date } \n| { after: Date } \n| { from: Date; to?: Date } \n| { dayOfWeek: number[] } \n| ((date: Date) => boolean)
@@ -447,7 +495,7 @@ export default {
         "Disables all dates before this date (the boundary date itself stays enabled).",
       control: false,
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "Date" },
         defaultValue: { summary: "undefined" },
       },
@@ -457,7 +505,7 @@ export default {
         "Disables all dates after this date (the boundary date itself stays enabled).",
       control: false,
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "Date" },
         defaultValue: { summary: "undefined" },
       },
@@ -467,7 +515,7 @@ export default {
         "Predicate `(month) => boolean` returning `true` to disable a whole month in the calendar's month navigation/grid. Leave `undefined` to disable nothing.",
       control: false,
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "(month: Date) => boolean" },
         defaultValue: { summary: "undefined" },
       },
@@ -477,7 +525,7 @@ export default {
         "Predicate `(year) => boolean` returning `true` to disable a whole year in the calendar's year navigation/grid. Leave `undefined` to disable nothing.",
       control: false,
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "(year: Date) => boolean" },
         defaultValue: { summary: "undefined" },
       },
@@ -487,7 +535,7 @@ export default {
         "Whitelist of selectable days — an explicit `Date[]` or a predicate `(date) => boolean`. Every other day is disabled.",
       control: false,
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "Date[] | ((date: Date) => boolean)" },
         defaultValue: { summary: "undefined" },
       },
@@ -497,7 +545,7 @@ export default {
         "Blacklist of unavailable days — a `Date[]` or a predicate `(date) => boolean`. Takes precedence over `availableDays`.",
       control: false,
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "Date[] | ((date: Date) => boolean)" },
         defaultValue: { summary: "undefined" },
       },
@@ -506,7 +554,7 @@ export default {
       description: "Disable all dates before today.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
@@ -515,7 +563,7 @@ export default {
       description: "Disable all dates after today.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
@@ -525,7 +573,7 @@ export default {
         "Render the trailing/leading days from the adjacent month inside the current month's grid.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "true" },
       },
@@ -535,7 +583,7 @@ export default {
         "Render an ISO week-number column on the left of the day grid.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
@@ -545,7 +593,7 @@ export default {
         "Enables the calendar picker UI. When `false`, hides the icon button and disables the popover/modal — the user can only type a date.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "true" },
       },
@@ -555,7 +603,7 @@ export default {
         "Number of month grids shown side by side. Accepts a `BreakpointInput<number>` — a plain number (e.g. `2`) is honoured at every breakpoint (including mobile/modal); pass a per-breakpoint object (e.g. `{ xs: 1, lg: 2 }`) to narrow it on small screens yourself.",
       control: { type: "number", min: 1, max: 4 },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: {
           summary: "BreakpointInput<number>",
           detail:
@@ -570,7 +618,7 @@ export default {
       control: { type: "select" },
       options: [true, false, "sm", "md", "lg", "xl"],
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: {
           summary: "DateFieldUseNativePicker",
           detail: 'boolean \n"sm" | "md" | "lg" | "xl"',
@@ -583,7 +631,7 @@ export default {
         "Closes the calendar popover when the page (or a scrollable ancestor) scrolls. Scrolling inside the calendar or its nested year/month dropdown keeps it open. Only affects the popover, not the modal.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
@@ -594,7 +642,7 @@ export default {
       control: { type: "select" },
       options: [true, false, "sm", "md", "lg", "xl"],
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: {
           summary: "DateFieldModalInput",
           detail: 'boolean \n"sm" | "md" | "lg" | "xl"',
@@ -608,7 +656,7 @@ export default {
       control: { type: "select" },
       options: [true, false, "sm", "md", "lg", "xl"],
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: {
           summary: "ModalFullscreen",
           detail: 'boolean \n"sm" | "md" | "lg" | "xl"',
@@ -621,7 +669,7 @@ export default {
         "What opens the calendar. `button` opens it from the icon button; `input` also opens it when the text input is focused. Accepts a `BreakpointInput` for per-breakpoint behaviour.",
       control: { type: "object" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: {
           summary: "BreakpointInput<DateFieldCalendarTrigger>",
           detail: '"input" | "button" \n{ xs: ...; sm?: ...; md?: ... }',
@@ -634,7 +682,7 @@ export default {
         "Month the calendar opens on when there is no value. Ignored once a value is set (the calendar anchors to the selected date).",
       control: false,
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "Date" },
         defaultValue: { summary: "undefined" },
       },
@@ -644,7 +692,7 @@ export default {
         "Whether to close the picker after a selection. Defaults to `true` in `single` mode and `false` in `multiple`/`range` when left `undefined`.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "boolean | undefined" },
         defaultValue: { summary: "undefined" },
       },
@@ -654,7 +702,7 @@ export default {
         "Custom formatter for rendering the selected value as the input's display string. Overrides the locale-aware default. Receives the `DateFieldValue` and returns a string.",
       control: false,
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "(value: DateFieldValue) => string" },
         defaultValue: { summary: "undefined" },
       },
@@ -664,7 +712,7 @@ export default {
         "Custom parser for turning typed input into a value. Overrides the locale-aware default. Receives the raw string and returns a `DateFieldValue`, or `undefined` when the input can't be parsed.",
       control: false,
       table: {
-        category: "inputs",
+        category: "Date Field inputs",
         type: { summary: "(value: string) => DateFieldValue | undefined" },
         defaultValue: { summary: "undefined" },
       },
@@ -685,19 +733,21 @@ export const Size: Story = {
   render: (args) => ({
     props: { ...args },
     template: `
-      <tedi-row [cols]="1" [gap]="3">
-        <tedi-col>
-          <tedi-form-field size="default">
-            <label tedi-label for="date-size-default">Vaikimisi</label>
-            <tedi-date-field inputId="date-size-default" size="default" ${argBindings(["size"])} />
+      <tedi-row class="example-list" cols="1" gapY="3">
+        <tedi-row cols="1" [md]="{ cols: 2 }" alignItems="center" class="padding-14-16 border-bottom">
+          <b>Default</b>
+          <tedi-form-field size="default" [clearable]="formFieldClearable">
+            <label tedi-label for="date-size-default">Kuupäev</label>
+            <tedi-date-field inputId="date-size-default" ${argBindings()} />
           </tedi-form-field>
-        </tedi-col>
-        <tedi-col>
-          <tedi-form-field size="small">
-            <label tedi-label for="date-size-small">Väike</label>
-            <tedi-date-field inputId="date-size-small" size="small" ${argBindings(["size"])} />
+        </tedi-row>
+        <tedi-row cols="1" [md]="{ cols: 2 }" alignItems="center" class="padding-14-16">
+          <b>Small</b>
+          <tedi-form-field size="small" [clearable]="formFieldClearable">
+            <label tedi-label for="date-size-small">Kuupäev</label>
+            <tedi-date-field inputId="date-size-small" ${argBindings()} />
           </tedi-form-field>
-        </tedi-col>
+        </tedi-row>
       </tedi-row>
     `,
   }),
@@ -705,7 +755,7 @@ export const Size: Story = {
     docs: {
       description: {
         story:
-          "Set `size` on both the `tedi-form-field` wrapper and the `tedi-date-field` so the input height and the field chrome stay in sync.",
+          'Set the size on the surrounding `<tedi-form-field size="small">` so the label and the field scale together. The `tedi-date-field`\'s own `size` input overrides it — use that for a standalone field.',
       },
     },
   },
@@ -716,45 +766,66 @@ export const States: Story = {
     const disabledControl = new FormControl<Date | null>(inThreeDays);
     disabledControl.disable();
     return {
-      props: { ...args, disabledControl },
+      props: { ...args, disabledControl, PSEUDO_STATE },
       template: `
-        <tedi-row [cols]="1" [gap]="3">
-          <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-state-default">Vaikimisi</label>
-              <tedi-date-field inputId="date-state-default" ${argBindings()} />
-            </tedi-form-field>
-          </tedi-col>
-          <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-state-disabled">Mitteaktiivne</label>
-              <tedi-date-field inputId="date-state-disabled" [formControl]="disabledControl" ${argBindings()} />
-            </tedi-form-field>
-          </tedi-col>
-          <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-state-valid">Õnnestumine</label>
-              <tedi-date-field inputId="date-state-valid" ${argBindings()} />
-              <tedi-feedback-text text="Tagasiside tekst" type="valid" />
-            </tedi-form-field>
-          </tedi-col>
-          <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-state-error">Viga</label>
-              <tedi-date-field inputId="date-state-error" ${argBindings()} />
-              <tedi-feedback-text text="Tagasiside tekst" type="error" />
-            </tedi-form-field>
-          </tedi-col>
+        <tedi-row [cols]="1" [gapY]="3">
+          @for (state of PSEUDO_STATE; track state) {
+            <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+              <tedi-col width="1">
+                <p tedi-text modifiers="bold">{{ state }}</p>
+              </tedi-col>
+              <tedi-col width="5">
+                <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+                  <label tedi-label [for]="state">Kuupäev</label>
+                  <tedi-date-field [inputId]="state" ${argBindings()} />
+                </tedi-form-field>
+              </tedi-col>
+            </tedi-row>
+          }
+          <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+            <tedi-col width="1">
+              <p tedi-text modifiers="bold">Disabled</p>
+            </tedi-col>
+            <tedi-col width="5">
+              <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+                <label tedi-label for="date-state-disabled">Kuupäev</label>
+                <tedi-date-field inputId="date-state-disabled" [formControl]="disabledControl" ${argBindings()} />
+              </tedi-form-field>
+            </tedi-col>
+          </tedi-row>
+          <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+            <tedi-col width="1">
+              <p tedi-text modifiers="bold">Success</p>
+            </tedi-col>
+            <tedi-col width="5">
+              <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+                <label tedi-label for="date-state-valid">Kuupäev</label>
+                <tedi-date-field inputId="date-state-valid" ${argBindings()} />
+                <tedi-feedback-text text="Tagasiside tekst" type="valid" />
+              </tedi-form-field>
+            </tedi-col>
+          </tedi-row>
+          <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+            <tedi-col width="1">
+              <p tedi-text modifiers="bold">Error</p>
+            </tedi-col>
+            <tedi-col width="5">
+              <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+                <label tedi-label for="date-state-error">Kuupäev</label>
+                <tedi-date-field inputId="date-state-error" ${argBindings()} />
+                <tedi-feedback-text text="Tagasiside tekst" type="error" />
+              </tedi-form-field>
+            </tedi-col>
+          </tedi-row>
         </tedi-row>
       `,
     };
   },
   parameters: {
-    docs: {
-      description: {
-        story:
-          'Persistent field states. Disabled is driven by the form control; the success/error states come from a `tedi-feedback-text` with `type="valid"`/`"error"`, which the surrounding `tedi-form-field` reflects on the input border.',
-      },
+    pseudo: {
+      hover: "#Hover",
+      active: "#Active",
+      focusVisible: "#Focus",
     },
   },
 };
@@ -772,21 +843,24 @@ export const FieldOptions: Story = {
       template: `
         <tedi-row [cols]="1" [gap]="3">
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-opt-default">Vaikimisi kuupäevaväli</label>
+            <p tedi-text>Default date field</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="date-opt-default">Kuupäev</label>
               <tedi-date-field inputId="date-opt-default" ${argBindings(["placeholder"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-opt-hint">Kuupäevaväli vihjega</label>
+            <p tedi-text>Date field with helper text</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="date-opt-hint">Kuupäev</label>
               <tedi-date-field inputId="date-opt-hint" placeholder="pp.kk.aaaa" ${argBindings(["placeholder"])} />
               <tedi-feedback-text text="pp.kk.aaaa" />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-opt-shortcuts">Kuupäevaväli otseteedega</label>
+            <p tedi-text>Date field with quick-select shortcuts</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="date-opt-shortcuts">Kuupäev</label>
               <tedi-date-field inputId="date-opt-shortcuts" [formControl]="shortcutControl" ${argBindings(["placeholder"])} />
               <div class="flex gap-2">
                 <button tedi-button variant="neutral" size="small" type="button" (click)="setToday()">Täna</button>
@@ -822,25 +896,29 @@ export const ValueType: Story = {
       template: `
         <tedi-row [cols]="1" [gap]="3">
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-vt-single">Üksik kuupäev</label>
+            <p tedi-text>Single date</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="date-vt-single">Kuupäev</label>
               <tedi-date-field inputId="date-vt-single" [formControl]="single" placeholder="pp.kk.aaaa" ${argBindings(["mode", "placeholder"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-vt-single-value">Üksik kuupäev vaikeväärtusega</label>
+            <p tedi-text>Single date with a default value</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="date-vt-single-value">Kuupäev</label>
               <tedi-date-field inputId="date-vt-single-value" [formControl]="singleWithValue" ${argBindings(["mode", "placeholder"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-vt-multiple">Mitu kuupäeva</label>
+            <p tedi-text>Multiple dates</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="date-vt-multiple">Kuupäevad</label>
               <tedi-date-field inputId="date-vt-multiple" mode="multiple" [formControl]="multiple" ${argBindings(["mode", "placeholder"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <tedi-form-field [size]="size">
+            <p tedi-text>Date range</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
               <label tedi-label for="date-vt-range">Vahemik</label>
               <tedi-date-field inputId="date-vt-range" mode="range" [formControl]="range" ${argBindings(["mode", "placeholder"])} />
             </tedi-form-field>
@@ -877,17 +955,19 @@ export const MultipleTagLayout: Story = {
       template: `
         <tedi-row [cols]="1" [gap]="3">
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-tags-wrap">Mitmerealine (vaikimisi)</label>
+            <p tedi-text>Multiple rows (default)</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="date-tags-wrap">Kuupäevad</label>
               <tedi-date-field inputId="date-tags-wrap" mode="multiple" [multiRow]="true" [formControl]="wrapControl" ${argBindings(["mode", "multiRow", "tagEllipsis"])} />
-              <tedi-feedback-text text="Sildid murduvad uutele ridadele; välja kõrgus kasvab." />
+              <tedi-feedback-text text="Tags wrap onto new lines and the field grows in height." />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-tags-single">Üherealine + loendur</label>
+            <p tedi-text>Single row</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="date-tags-single">Kuupäevad</label>
               <tedi-date-field inputId="date-tags-single" mode="multiple" [multiRow]="false" tagEllipsis="start" [formControl]="singleRowControl" ${argBindings(["mode", "multiRow", "tagEllipsis"])} />
-              <tedi-feedback-text text="Sildid püsivad ühel real; ülejääk koondub +N loendurisse. Kitsad sildid lühenevad algusest (…06.2026)." />
+              <tedi-feedback-text text="Overflow collapses into a +N counter; narrow tags are truncated from the start." />
             </tedi-form-field>
           </tedi-col>
         </tedi-row>
@@ -913,14 +993,16 @@ export const OnClickType: Story = {
       template: `
         <tedi-row [gap]="3" [xs]="{ cols: 1 }" [lg]="{ cols: 2 }">
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-trigger-button">Kalendriikoon on klõpsatav</label>
+            <p tedi-text>Calendar button is clickable</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="date-trigger-button">Kuupäev</label>
               <tedi-date-field inputId="date-trigger-button" [formControl]="buttonControl" calendarTrigger="button" ${argBindings(["calendarTrigger"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="date-trigger-input">Sisestusväli on klõpsatav</label>
+            <p tedi-text>Input is clickable</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="date-trigger-input">Kuupäev</label>
               <tedi-date-field inputId="date-trigger-input" [formControl]="inputControl" calendarTrigger="input" ${argBindings(["calendarTrigger"])} />
             </tedi-form-field>
           </tedi-col>
@@ -965,32 +1047,37 @@ export const Range: Story = {
       template: `
         <tedi-row [gap]="3" [xs]="{ cols: 1 }" [lg]="{ cols: 2 }">
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="range-default">Vaikimisi vahemik</label>
+            <p tedi-text>Default range</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="range-default">Vahemik</label>
               <tedi-date-field inputId="range-default" [formControl]="defaultRange" ${argBindings(["numberOfMonths", "disablePast"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="range-limits">Vahemik min/max piiranguga</label>
+            <p tedi-text>Range with min/max limits</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="range-limits">Vahemik</label>
               <tedi-date-field inputId="range-limits" [formControl]="limitsRange" [minDate]="twoMonthsAgo" [maxDate]="rangeMaxDate" ${argBindings(["numberOfMonths", "disablePast"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="range-start-only">Ainult alguskuupäev</label>
+            <p tedi-text>Start date only (no end selected)</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="range-start-only">Vahemik</label>
               <tedi-date-field inputId="range-start-only" [formControl]="startOnly" ${argBindings(["numberOfMonths", "disablePast"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="range-disabled-past">Vahemik keelatud minevikuga</label>
+            <p tedi-text>Past dates disabled</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="range-disabled-past">Vahemik</label>
               <tedi-date-field inputId="range-disabled-past" [formControl]="disabledPastRange" [disablePast]="true" ${argBindings(["numberOfMonths", "disablePast"])} />
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <tedi-form-field [size]="size">
-              <label tedi-label for="range-multiple-months">Vahemik mitme kuuga</label>
+            <p tedi-text>Range with multiple months</p>
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
+              <label tedi-label for="range-multiple-months">Vahemik</label>
               <tedi-date-field inputId="range-multiple-months" [formControl]="multipleMonthsRange" [numberOfMonths]="2" ${argBindings(["numberOfMonths", "disablePast"])} />
             </tedi-form-field>
           </tedi-col>
@@ -1090,7 +1177,7 @@ export const WithFooter: Story = {
       template: `
         <tedi-row [gap]="3" [xs]="{ cols: 1 }" [lg]="{ cols: 2 }">
           <tedi-col>
-            <tedi-form-field [size]="size">
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
               <label tedi-label for="date-footer-time">Kellaaeg</label>
               <tedi-date-field inputId="date-footer-time" [formControl]="timeControl" ${argBindings()}>
                 <tedi-row tediCalendarFooter justifyItems="center">
@@ -1105,7 +1192,7 @@ export const WithFooter: Story = {
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <tedi-form-field [size]="size">
+            <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
               <label tedi-label for="date-footer-save">Kuupäev</label>
               <tedi-date-field inputId="date-footer-save" [formControl]="saveControl" ${argBindings()}>
                 <tedi-row tediCalendarFooter [cols]="2" [gapX]="2">
@@ -1181,7 +1268,7 @@ export const MobileModal: Story = {
       template: `
         <tedi-row cols="1" [md]="{ cols: 2 }" [gap]="3">
           <tedi-col>
-            <p tedi-text modifiers="small bold">Centered modal (modal=true)</p>
+            <p tedi-text>Centered modal (modal=true)</p>
             <tedi-form-field>
               <label tedi-label for="date-modal-centered">Kuupäev</label>
               <tedi-date-field
@@ -1193,7 +1280,7 @@ export const MobileModal: Story = {
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <p tedi-text modifiers="small bold">Fullscreen modal (modal=true, fullscreen=true)</p>
+            <p tedi-text>Fullscreen modal (modal=true, fullscreen=true)</p>
             <tedi-form-field>
               <label tedi-label for="date-modal-fullscreen">Kuupäev</label>
               <tedi-date-field
@@ -1295,21 +1382,21 @@ export const WithReactiveForms: Story = {
         <form [formGroup]="form">
           <tedi-row [cols]="1" [gap]="3">
             <tedi-col>
-              <tedi-form-field [size]="size">
+              <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
                 <label tedi-label for="date-form-start" [required]="true">Alguskuupäev</label>
                 <tedi-date-field inputId="date-form-start" formControlName="start" [required]="true" ${argBindings(["mode", "required"])} />
                 <tedi-feedback-text text="Vali alguskuupäev." />
               </tedi-form-field>
             </tedi-col>
             <tedi-col>
-              <tedi-form-field [size]="size">
+              <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
                 <label tedi-label for="date-form-end">Lõppkuupäev</label>
                 <tedi-date-field inputId="date-form-end" formControlName="end" ${argBindings(["mode", "required"])} />
                 <tedi-feedback-text text="Vali lõppkuupäev." />
               </tedi-form-field>
             </tedi-col>
             <tedi-col>
-              <tedi-form-field [size]="size">
+              <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
                 <label tedi-label for="date-form-range" [required]="true">Kuupäevavahemik</label>
                 <tedi-date-field inputId="date-form-range" formControlName="range" mode="range" [required]="true" ${argBindings(["mode", "required"])} />
                 <tedi-feedback-text text="Vali algus- ja lõppkuupäev." />

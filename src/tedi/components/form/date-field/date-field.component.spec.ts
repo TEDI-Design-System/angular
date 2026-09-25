@@ -1426,6 +1426,7 @@ describe("DateFieldComponent", () => {
       fixture.componentRef.setInput("value", new Date(2026, 4, 14));
       fixture.detectChanges();
 
+      expect(component.clearableResolved()).toBe(true);
       expect(component.canClear()).toBe(true);
       expect(getClear(el)).not.toBeNull();
     });
@@ -1469,6 +1470,31 @@ describe("DateFieldComponent", () => {
       });
       expect(component.useNativePickerEffective()).toBe(false);
       expect(getClear(el)).not.toBeNull();
+    });
+
+    it("converts static attribute values to booleans", () => {
+      const { component, fixture } = createField();
+      fixture.componentRef.setInput("value", new Date(2026, 4, 14));
+
+      fixture.componentRef.setInput("clearable", "false");
+      fixture.detectChanges();
+      expect(component.clearable()).toBe(false);
+      expect(component.canClear()).toBe(false);
+
+      fixture.componentRef.setInput("clearable", "");
+      fixture.detectChanges();
+      expect(component.clearable()).toBe(true);
+      expect(component.canClear()).toBe(true);
+    });
+
+    it("hides the clear button when a standalone field opts out", () => {
+      const { component, el, fixture } = createField();
+      fixture.componentRef.setInput("clearable", false);
+      fixture.componentRef.setInput("value", new Date(2026, 4, 14));
+      fixture.detectChanges();
+
+      expect(component.canClear()).toBe(false);
+      expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
     });
   });
 
@@ -1695,15 +1721,21 @@ describe("DateFieldComponent with ReactiveFormsModule", () => {
     ReactiveFormsModule,
   ],
   template: `
-    <tedi-form-field>
+    <tedi-form-field [clearable]="clearable">
       <label tedi-label for="composite-date">Date</label>
-      <tedi-date-field inputId="composite-date" [formControl]="control" />
+      <tedi-date-field
+        inputId="composite-date"
+        [formControl]="control"
+        [clearable]="fieldClearable"
+      />
       <tedi-feedback-text text="Error" type="error" />
     </tedi-form-field>
   `,
 })
 class CompositeHostComponent {
   control = new FormControl<Date | Date[] | DateRange | null>(null);
+  clearable = false;
+  fieldClearable?: boolean;
 }
 
 describe("DateFieldComponent inside FormFieldComponent", () => {
@@ -1736,6 +1768,46 @@ describe("DateFieldComponent inside FormFieldComponent", () => {
 
   it("renders feedback text", () => {
     expect(el.querySelector("tedi-feedback-text")).toBeTruthy();
+  });
+
+  describe("clearable driven by the form field", () => {
+    const seed = (clearable: boolean) => {
+      fixture.componentInstance.clearable = clearable;
+      fixture.componentInstance.control.setValue(new Date(2026, 4, 14));
+      fixture.detectChanges();
+    };
+
+    it("renders none when the form field opts out", () => {
+      seed(false);
+      expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(0);
+      expect(el.querySelectorAll(".tedi-form-field__clear")).toHaveLength(0);
+    });
+
+    it("renders exactly one when the form field opts in", () => {
+      seed(true);
+      expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(1);
+      expect(el.querySelectorAll(".tedi-form-field__clear")).toHaveLength(0);
+    });
+
+    it("lets the date field's own clearable override the form field", () => {
+      fixture.componentInstance.fieldClearable = true;
+      seed(false);
+      expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(1);
+
+      fixture.componentInstance.fieldClearable = false;
+      seed(true);
+      expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(0);
+    });
+
+    it("still clears programmatically when opted out", () => {
+      seed(false);
+      const component = fixture.debugElement.query(
+        By.directive(DateFieldComponent),
+      ).componentInstance as DateFieldComponent;
+
+      component.reset();
+      expect(component.value()).toBeNull();
+    });
   });
 
   it("associates the feedback text with the input via aria-describedby", () => {

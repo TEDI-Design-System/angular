@@ -1,7 +1,10 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { TimeFieldComponent } from "./time-field.component";
-import { FormFieldComponent } from "../form-field/form-field.component";
+import {
+  FormFieldComponent,
+  type InputSize,
+} from "../form-field/form-field.component";
 import { LabelComponent } from "../label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -10,12 +13,19 @@ import { AlertComponent } from "../../notifications/alert/alert.component";
 import { TextComponent } from "../../base/text/text.component";
 import { expect, userEvent, waitFor } from "storybook/test";
 
-const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];
+const PSEUDO_STATE = ["Default", "Hover", "Focus", "Active", "Disabled"];
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.41.64?node-id=4662-91741&m=dev" target="_blank">Figma ↗</a><br />
  * <a href="https://www.tedi.ee/1ee8444b7/p/73629d-time-field" target="_blank">Zeroheight ↗</a>
  */
+
+type TimeFieldStoryArgs = TimeFieldComponent & {
+  /** Story-only: size applied to the wrapping `tedi-form-field`. */
+  formFieldSize?: InputSize;
+  /** Story-only: clearable applied to the wrapping `tedi-form-field`. */
+  formFieldClearable?: boolean;
+};
 
 export default {
   title: "TEDI-Ready/Components/Form/TimeField",
@@ -44,7 +54,7 @@ export default {
       description: "Unique ID for label association and accessibility.",
       control: { type: "text" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "string" },
       },
     },
@@ -52,7 +62,7 @@ export default {
       description: "Selected time in HH:mm format. Two-way bindable.",
       control: { type: "text" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "string | null" },
         defaultValue: { summary: "null" },
       },
@@ -61,7 +71,7 @@ export default {
       description: "Placeholder shown when the input is empty.",
       control: { type: "text" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "string" },
       },
     },
@@ -70,7 +80,7 @@ export default {
         "Manually mark the field as invalid. Sets `aria-invalid` on the input and triggers the form-field's invalid styling. Combines with the form-control validity state from reactive forms.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
@@ -80,16 +90,51 @@ export default {
         "Disables interaction. Combines with the form-control disabled state.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
     },
+    size: {
+      description:
+        "Overrides the wrapping `tedi-form-field`'s `size` for this field. Leave unset to inherit it — set `size` on the form field instead, so the label scales too. Use it for a standalone time field, where it defaults to `default`.",
+      control: { type: "radio" },
+      options: [undefined, "default", "small"],
+      table: {
+        category: "Time Field inputs",
+        type: { summary: "InputSize | undefined", detail: "default \nsmall" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    formFieldSize: {
+      name: "size",
+      description:
+        "Set on the wrapping `tedi-form-field` — the label and the time field scale together. The time field reads it unless its own `size` is set.",
+      control: { type: "radio" },
+      options: ["default", "small"],
+      table: {
+        category: "Form Field inputs",
+        type: { summary: "InputSize", detail: "default \nsmall" },
+        defaultValue: { summary: "default" },
+      },
+    },
     clearable: {
-      description: "Show a clear button when the field has a value.",
+      description:
+        "Overrides the wrapping `tedi-form-field`'s `clearable` for this field. Leave unset to inherit it — set `clearable` on the form field instead. Use it for a standalone time field, where it defaults to `true`.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
+        type: { summary: "boolean | undefined" },
+        defaultValue: { summary: "undefined" },
+      },
+    },
+    formFieldClearable: {
+      name: "clearable",
+      description:
+        "Set on the wrapping `tedi-form-field`. Shows a clear button once the field has a value; set `false` to opt out. The time field reads it unless its own `clearable` is set.",
+      control: { type: "boolean" },
+      table: {
+        category: "Form Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "true" },
       },
@@ -100,7 +145,7 @@ export default {
       control: { type: "radio" },
       options: ["scroll", "slots", "dropdown", "none"],
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: {
           summary: "TimeFieldPickerVariant",
           detail: "scroll \nslots \ndropdown \nnone",
@@ -114,7 +159,7 @@ export default {
       control: { type: "select" },
       options: [true, false, "sm", "md", "lg", "xl"],
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: {
           summary: "TimeFieldUseNativePicker",
           detail: "boolean \nsm \nmd \nlg \nxl",
@@ -128,7 +173,7 @@ export default {
       control: { type: "radio" },
       options: ["button", "input"],
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "TimeFieldPickerTrigger", detail: "button \ninput" },
         defaultValue: { summary: "button" },
       },
@@ -137,7 +182,7 @@ export default {
       description: "Close the popover/modal as soon as the user picks a value.",
       control: { type: "boolean" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
@@ -147,7 +192,7 @@ export default {
         "Predefined HH:mm strings for the slots and dropdown variants.",
       control: { type: "object" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "string[]" },
         defaultValue: { summary: "[]" },
       },
@@ -156,7 +201,7 @@ export default {
       description: "Grid columns for the slots variant.",
       control: { type: "number" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "number" },
         defaultValue: { summary: "3" },
       },
@@ -166,7 +211,7 @@ export default {
         "Minute step for the scroll variant — e.g. 5 renders 00, 05, 10…",
       control: { type: "number" },
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: { summary: "number" },
         defaultValue: { summary: "1" },
       },
@@ -177,7 +222,7 @@ export default {
       control: { type: "select" },
       options: [true, false, "sm", "md", "lg", "xl"],
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: {
           summary: "TimeFieldModal",
           detail: "boolean \nsm \nmd \nlg \nxl",
@@ -191,7 +236,7 @@ export default {
       control: { type: "select" },
       options: [true, false, "sm", "md", "lg", "xl"],
       table: {
-        category: "inputs",
+        category: "Time Field inputs",
         type: {
           summary: "TimeFieldFullscreen",
           detail: "boolean \nsm \nmd \nlg \nxl",
@@ -200,16 +245,17 @@ export default {
       },
     },
   },
-} as Meta<TimeFieldComponent>;
+} as Meta<TimeFieldStoryArgs>;
 
 export const Default: StoryObj = {
   args: {
     inputId: "example-id",
+    formFieldSize: "default",
     value: null,
     placeholder: "tt:mm",
     invalid: false,
     disabled: false,
-    clearable: true,
+    formFieldClearable: true,
     pickerVariant: "scroll",
     useNativePicker: false,
     pickerTrigger: "button",
@@ -225,7 +271,7 @@ export const Default: StoryObj = {
     template: `
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
-          <tedi-form-field>
+          <tedi-form-field [size]="formFieldSize" [clearable]="formFieldClearable">
             <label tedi-label for="example-id">Aeg</label>
             <tedi-time-field
               [inputId]="inputId"
@@ -233,7 +279,6 @@ export const Default: StoryObj = {
               [placeholder]="placeholder"
               [invalid]="invalid"
               [disabled]="disabled"
-              [clearable]="clearable"
               [pickerVariant]="pickerVariant"
               [useNativePicker]="useNativePicker"
               [pickerTrigger]="pickerTrigger"
@@ -243,6 +288,8 @@ export const Default: StoryObj = {
               [minuteStep]="minuteStep"
               [modal]="modal"
               [fullscreen]="fullscreen"
+              [clearable]="clearable"
+              [size]="size"
             />
           </tedi-form-field>
         </tedi-col>
@@ -276,7 +323,7 @@ export const Sizes: StoryObj = {
     docs: {
       description: {
         story:
-          'Field size is controlled by the surrounding `<tedi-form-field size="small">` — the `tedi-time-field` itself has no `size` input.',
+          'Set the size on the surrounding `<tedi-form-field size="small">` so the label and the field scale together. The `tedi-time-field`\'s own `size` input overrides it — use that for a standalone field.',
       },
     },
   },
@@ -313,18 +360,6 @@ export const States: StoryObj = {
         }
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1">
-            <p tedi-text modifiers="bold">Error</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field>
-              <label tedi-label for="state-error">Aeg</label>
-              <tedi-time-field inputId="state-error" [invalid]="true" value="12:00" />
-              <tedi-feedback-text text="Tagasiside tekst" type="error" />
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
             <p tedi-text modifiers="bold">Success</p>
           </tedi-col>
           <tedi-col width="5">
@@ -332,6 +367,18 @@ export const States: StoryObj = {
               <label tedi-label for="state-success">Aeg</label>
               <tedi-time-field inputId="state-success" value="12:00" />
               <tedi-feedback-text text="Tagasiside tekst" type="valid" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Error</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field>
+              <label tedi-label for="state-error">Aeg</label>
+              <tedi-time-field inputId="state-error" [invalid]="true" value="12:00" />
+              <tedi-feedback-text text="Tagasiside tekst" type="error" />
             </tedi-form-field>
           </tedi-col>
         </tedi-row>
@@ -346,15 +393,21 @@ export const FieldOptions: StoryObj = {
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
           <tedi-row cols="1" gapY="3">
-            <tedi-form-field>
-              <label tedi-label for="opts-default">Default time field</label>
-              <tedi-time-field inputId="opts-default" />
-            </tedi-form-field>
-            <tedi-form-field>
-              <label tedi-label for="opts-hint">Time field with hint</label>
-              <tedi-time-field inputId="opts-hint" />
-              <tedi-feedback-text text="Vihjetekst" type="hint" />
-            </tedi-form-field>
+            <tedi-col>
+              <p tedi-text>Default time field</p>
+              <tedi-form-field>
+                <label tedi-label for="opts-default">Aeg</label>
+                <tedi-time-field inputId="opts-default" />
+              </tedi-form-field>
+            </tedi-col>
+            <tedi-col>
+              <p tedi-text>Time field with hint</p>
+              <tedi-form-field>
+                <label tedi-label for="opts-hint">Aeg</label>
+                <tedi-time-field inputId="opts-hint" />
+                <tedi-feedback-text text="Vihjetekst" type="hint" />
+              </tedi-form-field>
+            </tedi-col>
           </tedi-row>
         </tedi-col>
       </tedi-row>
@@ -368,31 +421,32 @@ export const ValueType: StoryObj = {
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
           <tedi-row cols="1" gapY="3">
-            <tedi-form-field>
-              <label tedi-label for="value-default">Aeg</label>
-              <tedi-time-field inputId="value-default" />
-            </tedi-form-field>
-            <tedi-form-field>
-              <label tedi-label for="value-placeholder">Aeg</label>
-              <tedi-time-field inputId="value-placeholder" placeholder="tt:mm" />
-            </tedi-form-field>
-            <tedi-form-field>
-              <label tedi-label for="value-set">Aeg</label>
-              <tedi-time-field inputId="value-set" value="13:00" />
-            </tedi-form-field>
+            <tedi-col>
+              <p tedi-text>Empty</p>
+              <tedi-form-field>
+                <label tedi-label for="value-default">Aeg</label>
+                <tedi-time-field inputId="value-default" />
+              </tedi-form-field>
+            </tedi-col>
+            <tedi-col>
+              <p tedi-text>With placeholder</p>
+              <tedi-form-field>
+                <label tedi-label for="value-placeholder">Aeg</label>
+                <tedi-time-field inputId="value-placeholder" placeholder="tt:mm" />
+              </tedi-form-field>
+            </tedi-col>
+            <tedi-col>
+              <p tedi-text>With a value</p>
+              <tedi-form-field>
+                <label tedi-label for="value-set">Aeg</label>
+                <tedi-time-field inputId="value-set" value="13:00" />
+              </tedi-form-field>
+            </tedi-col>
           </tedi-row>
         </tedi-col>
       </tedi-row>
     `,
   }),
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Default empty field, with placeholder, and with a pre-filled value.",
-      },
-    },
-  },
 };
 
 export const OnClickType: StoryObj = {
@@ -443,21 +497,21 @@ export const PredefinedTimeSlots: StoryObj = {
     template: `
       <tedi-row cols="1" [md]="{ cols: 3 }" [gap]="3">
         <tedi-col>
-          <p tedi-text modifiers="small bold">Input trigger (recommended)</p>
+          <p tedi-text>Input trigger (recommended)</p>
           <tedi-form-field>
             <label tedi-label for="slots-picker-input">Aeg</label>
             <tedi-time-field inputId="slots-picker-input" value="11:30" pickerVariant="slots" [timeSlots]="slots" [columns]="3" pickerTrigger="input" />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
-          <p tedi-text modifiers="small bold">Radio buttons (showSlotIndicator)</p>
+          <p tedi-text>Radio buttons (showSlotIndicator)</p>
           <tedi-form-field>
             <label tedi-label for="slots-picker-radio">Aeg</label>
             <tedi-time-field inputId="slots-picker-radio" value="11:30" pickerVariant="slots" [timeSlots]="slots" [columns]="3" [showSlotIndicator]="true" pickerTrigger="input" />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
-          <p tedi-text modifiers="small bold">Button trigger</p>
+          <p tedi-text>Button trigger</p>
           <tedi-form-field>
             <label tedi-label for="slots-picker-button">Aeg</label>
             <tedi-time-field inputId="slots-picker-button" value="11:30" pickerVariant="slots" [timeSlots]="slots" [columns]="3" pickerTrigger="button" />
@@ -486,14 +540,14 @@ export const Dropdown: StoryObj = {
     template: `
       <tedi-row cols="1" [md]="{ cols: 2 }" [gap]="3">
         <tedi-col>
-          <p tedi-text modifiers="small bold">Button trigger</p>
+          <p tedi-text>Button trigger</p>
           <tedi-form-field>
             <label tedi-label for="dropdown-picker-button">Aeg</label>
             <tedi-time-field inputId="dropdown-picker-button" value="13:30" pickerVariant="dropdown" [timeSlots]="slots" [closeOnSelect]="true" pickerTrigger="button" />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
-          <p tedi-text modifiers="small bold">Input trigger (recommended for dropdown)</p>
+          <p tedi-text>Input trigger (recommended for dropdown)</p>
           <tedi-form-field>
             <label tedi-label for="dropdown-picker-input">Aeg</label>
             <tedi-time-field inputId="dropdown-picker-input" value="13:30" pickerVariant="dropdown" [timeSlots]="slots" [closeOnSelect]="true" pickerTrigger="input" />
@@ -510,7 +564,7 @@ export const CustomStep: StoryObj = {
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
           <tedi-form-field>
-            <label tedi-label for="scroll-picker-step">Time with 15-min steps</label>
+            <label tedi-label for="scroll-picker-step">Aeg</label>
             <tedi-time-field inputId="scroll-picker-step" value="14:30" pickerVariant="scroll" [minuteStep]="15" />
           </tedi-form-field>
         </tedi-col>
@@ -533,14 +587,14 @@ export const NativePicker: StoryObj = {
     template: `
       <tedi-row cols="1" [md]="{ cols: 2 }" [gap]="3">
         <tedi-col>
-          <p tedi-text modifiers="small bold">Always native (useNativePicker=true)</p>
+          <p tedi-text>Always native (useNativePicker=true)</p>
           <tedi-form-field>
             <label tedi-label for="native-picker">Aeg</label>
             <tedi-time-field inputId="native-picker" value="09:30" [useNativePicker]="true" />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
-          <p tedi-text modifiers="small bold">Responsive (useNativePicker=md)</p>
+          <p tedi-text>Responsive (useNativePicker=md)</p>
           <tedi-form-field>
             <label tedi-label for="responsive-native">Aeg</label>
             <tedi-time-field
@@ -592,14 +646,14 @@ export const MobileModal: StoryObj = {
     template: `
       <tedi-row cols="1" [md]="{ cols: 2 }" [gap]="3">
         <tedi-col>
-          <p tedi-text modifiers="small bold">Centered modal</p>
+          <p tedi-text>Centered modal</p>
           <tedi-form-field>
             <label tedi-label for="mobile-modal">Aeg</label>
             <tedi-time-field inputId="mobile-modal" pickerTrigger="input" />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
-          <p tedi-text modifiers="small bold">Fullscreen modal (fullscreen=md)</p>
+          <p tedi-text>Fullscreen modal (fullscreen=md)</p>
           <tedi-form-field>
             <label tedi-label for="fullscreen-modal">Aeg</label>
             <tedi-time-field
@@ -630,9 +684,9 @@ export const ManualTyping: StoryObj = {
       <tedi-row cols="1" [md]="{ cols: 3 }">
         <tedi-col>
           <tedi-form-field>
-            <label tedi-label for="input-formatting">Type a time and tab out</label>
+            <label tedi-label for="input-formatting">Aeg</label>
             <tedi-time-field inputId="input-formatting" placeholder="tt:mm" pickerVariant="none" />
-            <tedi-feedback-text text="Try 1155, 930, 11.55, or 9:5" type="hint" position="left" />
+            <tedi-feedback-text text="Type a time and tab out — try 1155, 930, 11.55, or 9:5" type="hint" position="left" />
           </tedi-form-field>
         </tedi-col>
       </tedi-row>
