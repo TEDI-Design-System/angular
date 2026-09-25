@@ -378,6 +378,21 @@ describe("DateFieldComponent", () => {
       expect(input.type).toBe("text");
     });
 
+    it("uses the custom calendar when readOnly, even if native picker is requested", () => {
+      const { component, el } = createField({
+        readOnly: true,
+        useNativePicker: true,
+      });
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.type).toBe("text");
+      expect(input.readOnly).toBe(true);
+      expect(component.usePopover()).toBe(true);
+      component.handleIconClick();
+      expect(component.overlayOpen()).toBe(true);
+    });
+
     it("renders nativeIsoValue from value() when in native-picker mode", () => {
       const { el, component, fixture } = createField({
         useNativePicker: true,
@@ -858,6 +873,32 @@ describe("DateFieldComponent", () => {
       expect(el.querySelector("tedi-tag .tedi-closing-button")).toBeNull();
     });
 
+    it("removes a date through the tag when readOnly, since the calendar can still change the value (#726)", () => {
+      const { el, component, fixture } = createField({
+        mode: "multiple",
+        readOnly: true,
+      });
+      component.value.set([new Date(2026, 4, 14), new Date(2026, 5, 1)]);
+      fixture.detectChanges();
+      const removeBtn = el.querySelector(
+        "tedi-tag .tedi-closing-button",
+      ) as HTMLButtonElement;
+      removeBtn.click();
+      expect((component.value() as Date[]).length).toBe(1);
+    });
+
+    it("renders tags without a close button when readOnly and the calendar is disabled", () => {
+      const { el, component, fixture } = createField({
+        mode: "multiple",
+        readOnly: true,
+        enableCalendar: false,
+      });
+      component.value.set([new Date(2026, 4, 14), new Date(2026, 5, 1)]);
+      fixture.detectChanges();
+      expect(el.querySelectorAll("tedi-tag").length).toBe(2);
+      expect(el.querySelector("tedi-tag .tedi-closing-button")).toBeNull();
+    });
+
     it("forwards tagEllipsis to the rendered tags", () => {
       const { el, component, fixture } = createField({
         mode: "multiple",
@@ -1172,6 +1213,28 @@ describe("DateFieldComponent", () => {
       fixture.detectChanges();
       expect(component.overlayOpen()).toBe(false);
     });
+
+    it("keeps the custom calendar available at native breakpoints when readOnly", () => {
+      const { component, el, fixture, breakpoint } = createField({
+        readOnly: true,
+        useNativePicker: "md",
+        value: new Date(2026, 4, 14),
+      });
+      breakpoint.setBreakpoint("sm");
+      fixture.detectChanges();
+
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.type).toBe("text");
+      expect(component.usePopover()).toBe(true);
+      const clear = el.querySelector(
+        ".tedi-date-input__clear",
+      ) as HTMLButtonElement;
+      expect(clear).not.toBeNull();
+      clear.click();
+      expect(component.value()).toBeNull();
+    });
   });
 
   describe("modal commit", () => {
@@ -1328,8 +1391,11 @@ describe("DateFieldComponent", () => {
       expect(onChange).not.toHaveBeenCalled();
     });
 
-    it("does nothing when readOnly", () => {
-      const { component } = createField({ readOnly: true });
+    it("does nothing when readOnly and the calendar is disabled", () => {
+      const { component } = createField({
+        readOnly: true,
+        enableCalendar: false,
+      });
       component.value.set(new Date(2026, 4, 14));
       const onChange = jest.fn();
       component.registerOnChange(onChange);
@@ -1337,18 +1403,72 @@ describe("DateFieldComponent", () => {
       expect(component.value()).toBeInstanceOf(Date);
       expect(onChange).not.toHaveBeenCalled();
     });
+
+    it("clears when readOnly but the calendar is available (#726)", () => {
+      const { component } = createField({ readOnly: true });
+      component.value.set(new Date(2026, 4, 14));
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+      component.reset();
+      expect(component.value()).toBeNull();
+      expect(onChange).toHaveBeenCalledWith(null);
+    });
   });
 
   describe("clear button", () => {
+    const getClear = (el: HTMLElement) =>
+      el.querySelector(".tedi-date-input__clear") as HTMLButtonElement | null;
+
     it("renders once the field has a value", () => {
       const { component, el, fixture } = createField();
-      expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
+      expect(getClear(el)).toBeNull();
 
       fixture.componentRef.setInput("value", new Date(2026, 4, 14));
       fixture.detectChanges();
 
       expect(component.canClear()).toBe(true);
-      expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
+      expect(getClear(el)).not.toBeNull();
+    });
+
+    it("renders and clears when readOnly, since the calendar can still change the value (#726)", () => {
+      const { component, el } = createField({
+        readOnly: true,
+        value: new Date(2026, 4, 14),
+      });
+      const clear = getClear(el);
+      expect(clear).not.toBeNull();
+      clear!.click();
+      expect(component.value()).toBeNull();
+    });
+
+    it("renders and clears when calendarTrigger=input (#726)", () => {
+      const { component, el } = createField({
+        calendarTrigger: "input",
+        value: new Date(2026, 4, 14),
+      });
+      const clear = getClear(el);
+      expect(clear).not.toBeNull();
+      clear!.click();
+      expect(component.value()).toBeNull();
+    });
+
+    it("does not render when readOnly and the calendar is disabled", () => {
+      const { el } = createField({
+        readOnly: true,
+        enableCalendar: false,
+        value: new Date(2026, 4, 14),
+      });
+      expect(getClear(el)).toBeNull();
+    });
+
+    it("renders when readOnly requests the native picker, using the custom calendar", () => {
+      const { el, component } = createField({
+        readOnly: true,
+        useNativePicker: true,
+        value: new Date(2026, 4, 14),
+      });
+      expect(component.useNativePickerEffective()).toBe(false);
+      expect(getClear(el)).not.toBeNull();
     });
   });
 
