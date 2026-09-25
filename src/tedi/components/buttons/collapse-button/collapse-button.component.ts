@@ -121,7 +121,7 @@ export class CollapseButtonComponent {
   });
 
   protected readonly hostClasses = computed(() => {
-    const classes = ["tedi-collapse-button"];
+    const classes = ["tedi-collapse-button", "no-print"];
     if (this.open()) classes.push("tedi-collapse-button--open");
     if (this.size() === "small") classes.push("tedi-collapse-button--small");
     if (this.inverted() && this.arrowType() !== "secondary") {

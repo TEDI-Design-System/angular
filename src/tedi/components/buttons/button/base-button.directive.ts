@@ -47,7 +47,7 @@ export class BaseButtonDirective implements AfterContentChecked {
   }
 
   classes = computed(() => {
-    const classList = [this.classNamePrefix()];
+    const classList = [this.classNamePrefix(), "no-print"];
 
     if (this.iconOnly()) {
       classList.push(`${this.classNamePrefix()}--icon-only`);

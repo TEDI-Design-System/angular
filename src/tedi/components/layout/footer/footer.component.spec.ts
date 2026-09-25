@@ -52,4 +52,12 @@ describe("FooterComponent", () => {
     );
     expect(containerElement.classList).toContain("tedi-footer--mobile");
   });
+
+  it("should hide the footer when printing", () => {
+    mockBreakpointService.isBelowBreakpoint.mockReturnValue(signal(false));
+    const fixture = TestBed.createComponent(FooterComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.classList).toContain("no-print");
+  });
 });
