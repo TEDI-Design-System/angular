@@ -1,3 +1,10 @@
+# [8.2.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.1...angular-8.2.0-rc.2) (2026-09-25)
+
+
+### Bug Fixes
+
+* **table:** show custom pagination results in both paginators [#667](https://github.com/TEDI-Design-System/angular/issues/667) ([#720](https://github.com/TEDI-Design-System/angular/issues/720)) ([bdf68ea](https://github.com/TEDI-Design-System/angular/commit/bdf68eab049c5ef8e043e9f1bd3e1b32242dc38c))
+
 # [8.2.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.1...angular-8.2.0-rc.1) (2026-09-25)
 
 
