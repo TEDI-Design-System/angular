@@ -4903,8 +4903,10 @@ export const PaginationCustomResults: Story = {
         story:
           'Replace the default `"X results"` label with arbitrary content ' +
           "by projecting an `<ng-template tediPaginationResults>` inside " +
-          "`<tedi-table>`. The table captures the template and routes it to " +
-          "whichever paginator slot is currently displaying results.",
+          "`<tedi-table>`. The table captures the template and renders it " +
+          "in every paginator slot that displays results — with both " +
+          "`pagination` and `paginationTop` set, the top and bottom " +
+          "paginators show the same content.",
       },
       source: {
         language: "html",

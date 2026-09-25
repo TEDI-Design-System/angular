@@ -220,6 +220,10 @@ function resolveSlotOptions(
   return merged as unknown as ResolvedPaginationSlot;
 }
 
+function slotShowsResults(slot: ResolvedPaginationSlot | null): boolean {
+  return slot !== null && slot.hideResults !== true;
+}
+
 @Component({
   standalone: true,
   selector: "tedi-table",
@@ -755,27 +759,11 @@ export class TediTableComponent<TData> {
   );
 
   /**
-   * Which slot the `[tediPaginationResults]` projection should be rendered in.
-   * Picks whichever paginator actually shows results; defaults to the bottom
-   * when both do, falls back to the top when bottom hides results.
-   */
-  protected readonly resultsRenderTarget = computed<"top" | "bottom" | null>(
-    () => {
-      const top = this.resolvedTopSlot();
-      const bottom = this.resolvedBottomSlot();
-      const topShows = top !== null && top.hideResults !== true;
-      const bottomShows = bottom !== null && bottom.hideResults !== true;
-      if (bottomShows) return "bottom";
-      if (topShows) return "top";
-      return null;
-    },
-  );
-
-  /**
    * Captures a `<ng-template tediPaginationResults>` declared inside the
    * `<tedi-table>` host. Read as a `TemplateRef` (the directive is a bare
    * marker) and forwarded — projected as `<span tediPaginationResults>` — into
-   * whichever paginator slot is set to display results.
+   * every paginator slot that displays results, so the top and bottom
+   * paginators show the same label.
    */
   private readonly customResultsTemplateRef = contentChild(
     TediPaginationResultsDirective,
@@ -785,10 +773,12 @@ export class TediTableComponent<TData> {
     () => this.customResultsTemplateRef() ?? null,
   );
   protected readonly topResultsTemplate = computed(() =>
-    this.resultsRenderTarget() === "top" ? this.customResultsTemplate() : null,
+    slotShowsResults(this.resolvedTopSlot())
+      ? this.customResultsTemplate()
+      : null,
   );
   protected readonly bottomResultsTemplate = computed(() =>
-    this.resultsRenderTarget() === "bottom"
+    slotShowsResults(this.resolvedBottomSlot())
       ? this.customResultsTemplate()
       : null,
   );

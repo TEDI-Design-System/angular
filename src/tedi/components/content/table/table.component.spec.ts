@@ -1084,6 +1084,37 @@ describe("TediTableComponent", () => {
       expect(topProjected).not.toBeNull();
       expect(bottomProjected).toBeNull();
     });
+
+    it("projects the results slot into both paginators when both show results", () => {
+      const fixture = setupResultsHost();
+      fixture.componentInstance.paginationTop = true;
+      fixture.detectChanges();
+      const wrappers: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll(".tedi-table__pagination"),
+      );
+      expect(wrappers.length).toBe(2);
+      for (const wrapper of wrappers) {
+        expect(
+          wrapper.querySelector('[data-testid="custom-results"]'),
+        ).not.toBeNull();
+      }
+    });
+
+    it("projects the results slot into the bottom paginator only when top hides results", () => {
+      const fixture = setupResultsHost();
+      fixture.componentInstance.paginationTop = { hideResults: true };
+      fixture.detectChanges();
+      const wrappers = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__pagination",
+      );
+      expect(wrappers.length).toBe(2);
+      expect(
+        wrappers[0].querySelector('[data-testid="custom-results"]'),
+      ).toBeNull();
+      expect(
+        wrappers[1].querySelector('[data-testid="custom-results"]'),
+      ).not.toBeNull();
+    });
   });
 
   describe("clickable rows", () => {
