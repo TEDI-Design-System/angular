@@ -1,3 +1,10 @@
+# [8.2.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.1...angular-8.2.0-rc.1) (2026-09-25)
+
+
+### Features
+
+* **table:** allow header alignment separate from column cells [#670](https://github.com/TEDI-Design-System/angular/issues/670) ([#718](https://github.com/TEDI-Design-System/angular/issues/718)) ([6165dcc](https://github.com/TEDI-Design-System/angular/commit/6165dcce746312c765b1da16c6754f99238b91a0))
+
 ## [8.1.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.0...angular-8.1.1) (2026-09-24)
 
 
