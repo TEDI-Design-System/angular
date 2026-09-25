@@ -1,18 +1,45 @@
-<button
-  tedi-button
-  type="button"
-  variant="secondary"
-  [attr.aria-label]="translationService.track('carousel.moveBack')()"
-  (click)="handlePrev()"
->
-  <tedi-icon name="arrow_back" [size]="18" />
-</button>
-<button
-  tedi-button
-  type="button"
-  variant="secondary"
-  [attr.aria-label]="translationService.track('carousel.moveForward')()"
-  (click)="handleNext()"
->
-  <tedi-icon name="arrow_forward" [size]="18" />
-</button>
+@if (overlay()) {
+  <button
+    tedi-floating-button
+    type="button"
+    variant="secondary"
+    position="static"
+    [attr.aria-label]="translationService.track('carousel.moveBack')()"
+    [disabled]="!canPrev()"
+    (click)="handlePrev()"
+  >
+    <tedi-icon name="arrow_back" [size]="18" />
+  </button>
+  <button
+    tedi-floating-button
+    type="button"
+    variant="secondary"
+    position="static"
+    [attr.aria-label]="translationService.track('carousel.moveForward')()"
+    [disabled]="!canNext()"
+    (click)="handleNext()"
+  >
+    <tedi-icon name="arrow_forward" [size]="18" />
+  </button>
+} @else {
+  <button
+    tedi-button
+    type="button"
+    variant="secondary"
+    [attr.aria-label]="translationService.track('carousel.moveBack')()"
+    [disabled]="!canPrev()"
+    (click)="handlePrev()"
+  >
+    <tedi-icon name="arrow_back" [size]="18" />
+  </button>
+  <button
+    tedi-button
+    type="button"
+    variant="secondary"
+    [attr.aria-label]="translationService.track('carousel.moveForward')()"
+    [disabled]="!canNext()"
+    (click)="handleNext()"
+  >
+    <tedi-icon name="arrow_forward" [size]="18" />
+  </button>
+}
