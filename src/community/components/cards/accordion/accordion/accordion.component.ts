@@ -6,6 +6,7 @@ import {
   input,
   OnInit,
 } from "@angular/core";
+import { warnDeprecated } from "@tedi-design-system/angular/tedi";
 import { AccordionItemComponent } from "../accordion-item/accordion-item.component";
 
 /**
@@ -37,6 +38,10 @@ export class AccordionComponent implements OnInit {
   private prevOpens: boolean[] = [];
 
   constructor() {
+    warnDeprecated(
+      "Community tedi-accordion",
+      "Use Accordion from TEDI-ready instead.",
+    );
     effect(() => {
       const single = this.singleOpen();
       const items = this.accordionItems();

@@ -141,6 +141,8 @@ const columns: TediColumnDef<Person>[] = [
       [defaultState]="defaultState()"
       [placeholder]="placeholder()"
       [placeholderRole]="placeholderRole()"
+      [ariaLabel]="ariaLabel()"
+      [ariaLabelledby]="ariaLabelledby()"
       (stateChange)="onStateChange($event)"
       (rowClick)="onRowClick($event)"
     />
@@ -204,6 +206,8 @@ class HostComponent {
   readonly defaultState = signal<Partial<TableState> | undefined>(undefined);
   readonly placeholder = signal<string | undefined>(undefined);
   readonly placeholderRole = signal<"alert" | "status" | undefined>(undefined);
+  readonly ariaLabel = signal<string | undefined>(undefined);
+  readonly ariaLabelledby = signal<string | undefined>(undefined);
 
   readonly onStateChange = jest.fn();
   readonly onRowClick = jest.fn();
@@ -282,6 +286,75 @@ describe("TediTableComponent", () => {
       fixture.detectChanges();
       const host = fixture.debugElement.query(By.css("tedi-table"));
       expect(host.nativeElement.className).toContain("tedi-table--striped");
+    });
+  });
+
+  describe("column alignment", () => {
+    function setupAligned(meta: TediColumnDef<Person>["meta"]) {
+      return setupHost((host) =>
+        host.columns.set([
+          { id: "name", header: "Name", accessorKey: "name" },
+          {
+            id: "role",
+            header: "Role",
+            footer: "Total",
+            accessorKey: "role",
+            meta,
+          },
+        ]),
+      );
+    }
+
+    function roleCells(fixture: ComponentFixture<HostComponent>) {
+      const el: HTMLElement = fixture.nativeElement;
+      return {
+        header: el.querySelectorAll<HTMLElement>(
+          "thead .tedi-table__header-cell",
+        )[1],
+        body: Array.from(
+          el.querySelectorAll<HTMLElement>(
+            "tbody .tedi-table__row > .tedi-table__cell:nth-child(2)",
+          ),
+        ),
+        footer: el.querySelectorAll<HTMLElement>(
+          "tfoot .tedi-table__cell--footer",
+        )[1],
+      };
+    }
+
+    it("applies align to the header, body and footer cells", () => {
+      const { header, body, footer } = roleCells(
+        setupAligned({ align: "right" }),
+      );
+      expect(header.classList).toContain("tedi-table__cell--align-right");
+      expect(body).toHaveLength(2);
+      body.forEach((cell) =>
+        expect(cell.classList).toContain("tedi-table__cell--align-right"),
+      );
+      expect(footer.classList).toContain("tedi-table__cell--align-right");
+    });
+
+    it("uses headerAlign for the header cell only", () => {
+      const { header, body, footer } = roleCells(
+        setupAligned({ align: "right", headerAlign: "left" }),
+      );
+      expect(header.classList).toContain("tedi-table__cell--align-left");
+      expect(header.classList).not.toContain("tedi-table__cell--align-right");
+      body.forEach((cell) =>
+        expect(cell.classList).toContain("tedi-table__cell--align-right"),
+      );
+      expect(footer.classList).toContain("tedi-table__cell--align-right");
+    });
+
+    it("applies headerAlign without align to the header cell only", () => {
+      const { header, body, footer } = roleCells(
+        setupAligned({ headerAlign: "center" }),
+      );
+      expect(header.classList).toContain("tedi-table__cell--align-center");
+      body.forEach((cell) =>
+        expect(cell.className).not.toContain("tedi-table__cell--align-"),
+      );
+      expect(footer.className).not.toContain("tedi-table__cell--align-");
     });
   });
 
@@ -1015,6 +1088,37 @@ describe("TediTableComponent", () => {
       expect(topProjected).not.toBeNull();
       expect(bottomProjected).toBeNull();
     });
+
+    it("projects the results slot into both paginators when both show results", () => {
+      const fixture = setupResultsHost();
+      fixture.componentInstance.paginationTop = true;
+      fixture.detectChanges();
+      const wrappers: HTMLElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll(".tedi-table__pagination"),
+      );
+      expect(wrappers.length).toBe(2);
+      for (const wrapper of wrappers) {
+        expect(
+          wrapper.querySelector('[data-testid="custom-results"]'),
+        ).not.toBeNull();
+      }
+    });
+
+    it("projects the results slot into the bottom paginator only when top hides results", () => {
+      const fixture = setupResultsHost();
+      fixture.componentInstance.paginationTop = { hideResults: true };
+      fixture.detectChanges();
+      const wrappers = fixture.nativeElement.querySelectorAll(
+        ".tedi-table__pagination",
+      );
+      expect(wrappers.length).toBe(2);
+      expect(
+        wrappers[0].querySelector('[data-testid="custom-results"]'),
+      ).toBeNull();
+      expect(
+        wrappers[1].querySelector('[data-testid="custom-results"]'),
+      ).not.toBeNull();
+    });
   });
 
   describe("clickable rows", () => {
@@ -1205,6 +1309,34 @@ describe("TediTableComponent", () => {
       const fixture = setupHost();
       const table = fixture.nativeElement.querySelector("table");
       expect(table?.getAttribute("aria-colcount")).toBe("2");
+    });
+
+    it("leaves the table unnamed by default", () => {
+      const fixture = setupHost();
+      const table = fixture.nativeElement.querySelector("table");
+      expect(table?.hasAttribute("aria-label")).toBe(false);
+      expect(table?.hasAttribute("aria-labelledby")).toBe(false);
+    });
+
+    it("names the table with ariaLabel", () => {
+      const fixture = setupHost((host) => host.ariaLabel.set("Employees"));
+      const table = fixture.nativeElement.querySelector("table");
+      expect(table?.getAttribute("aria-label")).toBe("Employees");
+      expect(fixture.nativeElement.querySelector("caption")).toBeNull();
+    });
+
+    it("points the table at an external label with ariaLabelledby", () => {
+      const fixture = setupHost((host) =>
+        host.ariaLabelledby.set("employees-heading"),
+      );
+      const table = fixture.nativeElement.querySelector("table");
+      expect(table?.getAttribute("aria-labelledby")).toBe("employees-heading");
+    });
+
+    it("sets the name on the <table>, not the host element", () => {
+      const fixture = setupHost((host) => host.ariaLabel.set("Employees"));
+      const host = fixture.nativeElement.querySelector("tedi-table");
+      expect(host?.hasAttribute("aria-label")).toBe(false);
     });
   });
 

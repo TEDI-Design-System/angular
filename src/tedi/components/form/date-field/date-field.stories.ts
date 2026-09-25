@@ -24,21 +24,16 @@ import { expect, userEvent, waitFor } from "storybook/test";
 
 const PSEUDO_STATE = ["Default", "Hover", "Focus", "Active"];
 
+const referenceDate = new Date(2026, 5, 15);
+const inThreeDays = new Date(2026, 5, 18);
+const inTenDays = new Date(2026, 5, 25);
+
+// Real current date: only for behaviour (shortcuts, limits), never for rendered values.
 const today = new Date();
 const tomorrow = new Date(
   today.getFullYear(),
   today.getMonth(),
   today.getDate() + 1,
-);
-const inThreeDays = new Date(
-  today.getFullYear(),
-  today.getMonth(),
-  today.getDate() + 3,
-);
-const inTenDays = new Date(
-  today.getFullYear(),
-  today.getMonth(),
-  today.getDate() + 10,
 );
 
 const pad = (n: number): string => n.toString().padStart(2, "0");
@@ -462,7 +457,7 @@ export default {
     },
     readOnly: {
       description:
-        "Blocks typing into the input but leaves the calendar interactive — useful for guided picking.",
+        "Blocks typing into the input but leaves the calendar interactive — useful for guided picking. The value stays clearable while the calendar is available.",
       control: { type: "boolean" },
       table: {
         category: "Date Field inputs",
@@ -619,7 +614,7 @@ export default {
     },
     useNativePicker: {
       description:
-        'Swaps the custom popover for the browser\'s native `<input type="date">` UI (single mode only). `true` always uses native, `false` never; a breakpoint name (`sm | md | lg | xl`) uses native below that breakpoint and the custom popover from it upward. Defaults to `false`.',
+        'Swaps the custom popover for the browser\'s native `<input type="date">` UI (single mode only). `true` uses native unless `readOnly` is set; a breakpoint name (`sm | md | lg | xl`) uses native below that breakpoint and the custom popover from it upward. `readOnly` always uses the custom calendar so dates can still be picked and cleared. Defaults to `false`.',
       control: { type: "select" },
       options: [true, false, "sm", "md", "lg", "xl"],
       table: {
@@ -947,7 +942,11 @@ export const MultipleTagLayout: Story = {
     const dates = Array.from(
       { length: 6 },
       (_, i) =>
-        new Date(today.getFullYear(), today.getMonth(), today.getDate() + i),
+        new Date(
+          referenceDate.getFullYear(),
+          referenceDate.getMonth(),
+          referenceDate.getDate() + i,
+        ),
     );
     const wrapControl = new FormControl<Date[] | null>(dates);
     const singleRowControl = new FormControl<Date[] | null>(dates);
@@ -1028,7 +1027,7 @@ export const Range: Story = {
     const defaultRange = new FormControl<DateRange | null>(null);
     const limitsRange = new FormControl<DateRange | null>(null);
     const startOnly = new FormControl<DateRange | null>({
-      from: today,
+      from: referenceDate,
       to: undefined,
     });
     const disabledPastRange = new FormControl<DateRange | null>(null);
@@ -1248,14 +1247,13 @@ export const NativePicker: Story = {
   args: {
     inputId: "date-native",
     useNativePicker: true,
-    feedback:
-      "Kasutab operatsioonisüsteemi kuupäevavalijat igal ekraanilaiusel.",
+    feedback: "Kasutab operatsioonisüsteemi kuupäevavalijat.",
   },
   parameters: {
     docs: {
       description: {
         story:
-          '`[useNativePicker]="true"` swaps the popover for the browser\'s built-in `<input type="date">` UI (single mode only). The prop accepts `boolean | sm | md | lg | xl` and **defaults to `false`**. Pass a breakpoint name like `"md"` for native on phones and the custom popover from `md` upward.',
+          '`[useNativePicker]="true"` swaps the popover for the browser\'s built-in `<input type="date">` UI (single mode only). The prop accepts `boolean | sm | md | lg | xl` and **defaults to `false`**. Pass a breakpoint name like `"md"` for native on phones and the custom popover from `md` upward. When `readOnly` is set, the custom calendar is used at every breakpoint so selection and clearing remain available.',
       },
     },
   },
@@ -1446,7 +1444,7 @@ export const OpenForVisualTest: Story = {
   args: {
     inputId: "date-open-vr",
     label: "Kuupäev",
-    initialValue: new Date(2026, 5, 15),
+    initialValue: referenceDate,
   },
   render: renderSingle,
   play: async ({ canvasElement }) => {

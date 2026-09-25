@@ -5,7 +5,7 @@
         <tedi-tag
           #tagElement
           [ellipsis]="ellipsis()"
-          [closable]="removable() && !disabled() && !readOnly()"
+          [closable]="removable() && !disabled()"
           (closed)="handleTagRemove(tag.id)"
         >
           {{ tag.label }}

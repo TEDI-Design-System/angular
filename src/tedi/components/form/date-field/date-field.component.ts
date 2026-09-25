@@ -184,7 +184,8 @@ export class DateFieldComponent
   readonly inputDisabled = input<boolean>(false);
   /**
    * Blocks typing into the input but leaves the calendar interactive — useful
-   * for guided picking.
+   * for guided picking. The value can still be cleared while the calendar is
+   * available, since the user can change it there anyway.
    */
   readonly readOnly = input<boolean>(false);
   /**
@@ -318,7 +319,8 @@ export class DateFieldComponent
   /**
    * Use the OS native date picker instead of the custom popover (single mode only).
    * `true` always, `false` never, breakpoint name → native below that breakpoint
-   * (custom popover from that breakpoint up).
+   * (custom popover from that breakpoint up). `readOnly` uses the custom
+   * calendar so picking and clearing remain available without manual input.
    */
   readonly useNativePicker = input<DateFieldUseNativePicker>(false);
   /**
@@ -483,7 +485,8 @@ export class DateFieldComponent
     () =>
       this.useNativePickerResolved() &&
       this.mode() === "single" &&
-      !this.modalEnabled(),
+      !this.modalEnabled() &&
+      !this.readOnly(),
   );
 
   readonly numberOfMonthsResolved = computed(() =>
@@ -564,12 +567,17 @@ export class DateFieldComponent
     }));
   });
 
+  /**
+   * Whether the user can change the value at all. `readOnly` only locks the
+   * text input: while the calendar is available the user can still pick dates,
+   * so they must also be able to remove them (clear button, tag close).
+   */
+  readonly valueEditable = computed(
+    () => !this.fieldDisabled() && (!this.readOnly() || this.showCalendar()),
+  );
+
   readonly canClear = computed(
-    () =>
-      this.clearableResolved() &&
-      !!this.value() &&
-      !this.fieldDisabled() &&
-      !this.readOnly(),
+    () => this.clearableResolved() && !!this.value() && this.valueEditable(),
   );
 
   readonly inputIsTrigger = computed(
@@ -642,7 +650,7 @@ export class DateFieldComponent
   }
 
   reset(): void {
-    if (this.fieldDisabled() || this.readOnly()) return;
+    if (!this.valueEditable()) return;
     this.commitValue(null);
   }
 
@@ -710,7 +718,7 @@ export class DateFieldComponent
   }
 
   handleTagRemove(id: string): void {
-    if (this.fieldDisabled() || this.readOnly()) return;
+    if (!this.valueEditable()) return;
     const v = this.value();
     if (!Array.isArray(v)) return;
 
