@@ -19,21 +19,16 @@ import type { DateRange } from "../../content/calendar/types";
 import type { Matcher } from "../../../utils/matchers.util";
 import { expect, userEvent, waitFor } from "storybook/test";
 
+const referenceDate = new Date(2026, 5, 15);
+const inThreeDays = new Date(2026, 5, 18);
+const inTenDays = new Date(2026, 5, 25);
+
+// Real current date: only for behaviour (shortcuts, limits), never for rendered values.
 const today = new Date();
 const tomorrow = new Date(
   today.getFullYear(),
   today.getMonth(),
   today.getDate() + 1,
-);
-const inThreeDays = new Date(
-  today.getFullYear(),
-  today.getMonth(),
-  today.getDate() + 3,
-);
-const inTenDays = new Date(
-  today.getFullYear(),
-  today.getMonth(),
-  today.getDate() + 10,
 );
 
 const pad = (n: number): string => n.toString().padStart(2, "0");
@@ -869,7 +864,11 @@ export const MultipleTagLayout: Story = {
     const dates = Array.from(
       { length: 6 },
       (_, i) =>
-        new Date(today.getFullYear(), today.getMonth(), today.getDate() + i),
+        new Date(
+          referenceDate.getFullYear(),
+          referenceDate.getMonth(),
+          referenceDate.getDate() + i,
+        ),
     );
     const wrapControl = new FormControl<Date[] | null>(dates);
     const singleRowControl = new FormControl<Date[] | null>(dates);
@@ -946,7 +945,7 @@ export const Range: Story = {
     const defaultRange = new FormControl<DateRange | null>(null);
     const limitsRange = new FormControl<DateRange | null>(null);
     const startOnly = new FormControl<DateRange | null>({
-      from: today,
+      from: referenceDate,
       to: undefined,
     });
     const disabledPastRange = new FormControl<DateRange | null>(null);
@@ -1359,7 +1358,7 @@ export const OpenForVisualTest: Story = {
   args: {
     inputId: "date-open-vr",
     label: "Kuupäev",
-    initialValue: new Date(2026, 5, 15),
+    initialValue: referenceDate,
   },
   render: renderSingle,
   play: async ({ canvasElement }) => {
