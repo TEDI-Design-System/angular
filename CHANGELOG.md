@@ -1,3 +1,10 @@
+# [8.2.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.3...angular-8.2.0-rc.4) (2026-09-25)
+
+
+### Bug Fixes
+
+* **date-field:** allow clearing the value in readOnly mode [#726](https://github.com/TEDI-Design-System/angular/issues/726) ([#728](https://github.com/TEDI-Design-System/angular/issues/728)) ([9eca712](https://github.com/TEDI-Design-System/angular/commit/9eca712e8f413e33b94134d2e5b80da8cbcacbc8))
+
 # [8.2.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.2...angular-8.2.0-rc.3) (2026-09-25)
 
 
