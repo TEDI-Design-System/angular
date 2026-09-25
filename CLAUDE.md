@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TEDI Design System Angular component library (`@tedi-design-system/angular`). Angular 19 standalone component library published via ng-packagr, with Storybook for documentation.
+TEDI Design System Angular component library (`@tedi-design-system/angular`). Angular 20 standalone component library published via ng-packagr, with Storybook for documentation.
+
+Supported Angular versions: **20, 21 and 22** — the published peer range is `^20.0.0 || ^21.0.0 || ^22.0.0` (declared in both `package.json` and `src/package.json`). The repo itself develops against Angular 20, which is also the floor consumers may be on, so do not rely on APIs introduced after Angular 20.
 
 ## Commands
 

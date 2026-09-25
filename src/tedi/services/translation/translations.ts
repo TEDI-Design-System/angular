@@ -1557,6 +1557,14 @@ export const translationsMap = {
     en: "Completed",
     ru: "Завершено",
   },
+  "inline-edit.edit": {
+    description:
+      "Action appended to the inline edit trigger's accessible name, so a screen reader announces the value as editable",
+    components: ["InlineEdit"],
+    et: "Muuda",
+    en: "Edit",
+    ru: "Редактировать",
+  },
   "vertical-stepper.error": {
     description:
       "Label for screen-reader that this step has error (visually hidden)",
