@@ -285,6 +285,75 @@ describe("TediTableComponent", () => {
     });
   });
 
+  describe("column alignment", () => {
+    function setupAligned(meta: TediColumnDef<Person>["meta"]) {
+      return setupHost((host) =>
+        host.columns.set([
+          { id: "name", header: "Name", accessorKey: "name" },
+          {
+            id: "role",
+            header: "Role",
+            footer: "Total",
+            accessorKey: "role",
+            meta,
+          },
+        ]),
+      );
+    }
+
+    function roleCells(fixture: ComponentFixture<HostComponent>) {
+      const el: HTMLElement = fixture.nativeElement;
+      return {
+        header: el.querySelectorAll<HTMLElement>(
+          "thead .tedi-table__header-cell",
+        )[1],
+        body: Array.from(
+          el.querySelectorAll<HTMLElement>(
+            "tbody .tedi-table__row > .tedi-table__cell:nth-child(2)",
+          ),
+        ),
+        footer: el.querySelectorAll<HTMLElement>(
+          "tfoot .tedi-table__cell--footer",
+        )[1],
+      };
+    }
+
+    it("applies align to the header, body and footer cells", () => {
+      const { header, body, footer } = roleCells(
+        setupAligned({ align: "right" }),
+      );
+      expect(header.classList).toContain("tedi-table__cell--align-right");
+      expect(body).toHaveLength(2);
+      body.forEach((cell) =>
+        expect(cell.classList).toContain("tedi-table__cell--align-right"),
+      );
+      expect(footer.classList).toContain("tedi-table__cell--align-right");
+    });
+
+    it("uses headerAlign for the header cell only", () => {
+      const { header, body, footer } = roleCells(
+        setupAligned({ align: "right", headerAlign: "left" }),
+      );
+      expect(header.classList).toContain("tedi-table__cell--align-left");
+      expect(header.classList).not.toContain("tedi-table__cell--align-right");
+      body.forEach((cell) =>
+        expect(cell.classList).toContain("tedi-table__cell--align-right"),
+      );
+      expect(footer.classList).toContain("tedi-table__cell--align-right");
+    });
+
+    it("applies headerAlign without align to the header cell only", () => {
+      const { header, body, footer } = roleCells(
+        setupAligned({ headerAlign: "center" }),
+      );
+      expect(header.classList).toContain("tedi-table__cell--align-center");
+      body.forEach((cell) =>
+        expect(cell.className).not.toContain("tedi-table__cell--align-"),
+      );
+      expect(footer.className).not.toContain("tedi-table__cell--align-");
+    });
+  });
+
   describe("sticky columns", () => {
     it("marks no cell sticky by default", () => {
       const fixture = setupHost();
