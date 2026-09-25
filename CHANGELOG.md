@@ -1,3 +1,10 @@
+# [8.2.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.2...angular-8.2.0-rc.3) (2026-09-25)
+
+
+### Features
+
+* **table:** allow an accessible name on tables with no caption [#656](https://github.com/TEDI-Design-System/angular/issues/656) ([#721](https://github.com/TEDI-Design-System/angular/issues/721)) ([73712e9](https://github.com/TEDI-Design-System/angular/commit/73712e91956c8c07471c59c8df337cdf21dabb59))
+
 # [8.2.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.1...angular-8.2.0-rc.2) (2026-09-25)
 
 
