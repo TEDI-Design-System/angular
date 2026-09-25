@@ -141,6 +141,8 @@ const columns: TediColumnDef<Person>[] = [
       [defaultState]="defaultState()"
       [placeholder]="placeholder()"
       [placeholderRole]="placeholderRole()"
+      [ariaLabel]="ariaLabel()"
+      [ariaLabelledby]="ariaLabelledby()"
       (stateChange)="onStateChange($event)"
       (rowClick)="onRowClick($event)"
     />
@@ -204,6 +206,8 @@ class HostComponent {
   readonly defaultState = signal<Partial<TableState> | undefined>(undefined);
   readonly placeholder = signal<string | undefined>(undefined);
   readonly placeholderRole = signal<"alert" | "status" | undefined>(undefined);
+  readonly ariaLabel = signal<string | undefined>(undefined);
+  readonly ariaLabelledby = signal<string | undefined>(undefined);
 
   readonly onStateChange = jest.fn();
   readonly onRowClick = jest.fn();
@@ -1305,6 +1309,34 @@ describe("TediTableComponent", () => {
       const fixture = setupHost();
       const table = fixture.nativeElement.querySelector("table");
       expect(table?.getAttribute("aria-colcount")).toBe("2");
+    });
+
+    it("leaves the table unnamed by default", () => {
+      const fixture = setupHost();
+      const table = fixture.nativeElement.querySelector("table");
+      expect(table?.hasAttribute("aria-label")).toBe(false);
+      expect(table?.hasAttribute("aria-labelledby")).toBe(false);
+    });
+
+    it("names the table with ariaLabel", () => {
+      const fixture = setupHost((host) => host.ariaLabel.set("Employees"));
+      const table = fixture.nativeElement.querySelector("table");
+      expect(table?.getAttribute("aria-label")).toBe("Employees");
+      expect(fixture.nativeElement.querySelector("caption")).toBeNull();
+    });
+
+    it("points the table at an external label with ariaLabelledby", () => {
+      const fixture = setupHost((host) =>
+        host.ariaLabelledby.set("employees-heading"),
+      );
+      const table = fixture.nativeElement.querySelector("table");
+      expect(table?.getAttribute("aria-labelledby")).toBe("employees-heading");
+    });
+
+    it("sets the name on the <table>, not the host element", () => {
+      const fixture = setupHost((host) => host.ariaLabel.set("Employees"));
+      const host = fixture.nativeElement.querySelector("tedi-table");
+      expect(host?.hasAttribute("aria-label")).toBe(false);
     });
   });
 

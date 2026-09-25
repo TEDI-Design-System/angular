@@ -280,6 +280,18 @@ export class TediTableComponent<TData> {
     undefined,
   );
   /**
+   * Accessible name for the `<table>`. Use when no visible `caption` is
+   * rendered, so screen readers can announce the table and tell it apart from
+   * other tables on the page. Overrides `caption` as the accessible name;
+   * ignored when `ariaLabelledby` is provided.
+   */
+  readonly ariaLabel = input<string>();
+  /**
+   * ID of an external element that names the `<table>` (e.g. a heading above
+   * it). Takes precedence over `ariaLabel` and `caption`.
+   */
+  readonly ariaLabelledby = input<string>();
+  /**
    * Alternating row backgrounds (zebra striping).
    * @default false
    */
