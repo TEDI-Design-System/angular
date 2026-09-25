@@ -1,0 +1,101 @@
+<label
+  class="tedi-file-dropzone__zone"
+  [class.tedi-file-dropzone__zone--invalid]="isInvalid()"
+  [class.tedi-file-dropzone__zone--valid]="isValid()"
+  [class.tedi-file-dropzone__zone--drop-over]="isDragActive()"
+  (dragenter)="handleDragEnter($event)"
+  (dragover)="handleDragOver($event)"
+  (dragleave)="handleDragLeave()"
+  (drop)="handleDrop($event)"
+>
+  <input
+    #fileInput
+    class="tedi-file-dropzone__input sr-only"
+    type="file"
+    [id]="resolvedId()"
+    [attr.name]="name()"
+    [attr.accept]="accept()"
+    [multiple]="multiple()"
+    [disabled]="isDisabled()"
+    [attr.aria-invalid]="isInvalid() || null"
+    [attr.aria-describedby]="describedBy.attribute()"
+    (change)="handleSelection($event)"
+    (blur)="handleBlur()"
+  />
+  <tedi-icon
+    class="tedi-file-dropzone__icon"
+    name="attach_file"
+    [size]="24"
+    [color]="isDisabled() ? 'inherit' : 'secondary'"
+  />
+  <span class="tedi-file-dropzone__label">{{ resolvedLabel() }}</span>
+</label>
+
+@if (rejectionError(); as error) {
+  <tedi-feedback-text [id]="feedbackIds().error" [text]="error" type="error" />
+}
+
+@if (feedbackText(); as feedback) {
+  <tedi-feedback-text
+    [id]="feedbackIds().feedback"
+    [text]="feedback.text"
+    [type]="feedback.type ?? 'hint'"
+    [position]="feedback.position ?? 'left'"
+  />
+}
+
+@if (restrictionsHint(); as hint) {
+  <tedi-feedback-text [id]="feedbackIds().hint" [text]="hint" />
+}
+
+@if (files().length) {
+  <ul
+    class="tedi-file-dropzone__files"
+    [attr.aria-label]="selectedFilesLabel()"
+  >
+    @for (row of fileRows(); track row.file) {
+      <li class="tedi-file-dropzone__file">
+        @if (fileTemplate(); as template) {
+          <ng-container
+            [ngTemplateOutlet]="template.template"
+            [ngTemplateOutletContext]="row.context"
+          />
+        } @else {
+          <tedi-attachment
+            [name]="row.name"
+            [fileSize]="row.size"
+            [error]="row.file.error"
+            [invalid]="row.file.isValid === false"
+          >
+            <tedi-attachment-actions>
+              <button
+                tedi-button
+                type="button"
+                variant="neutral"
+                [disabled]="isDisabled()"
+                [attr.aria-label]="row.removeLabel"
+                (click)="removeFile(row.file)"
+              >
+                <tedi-icon name="delete" [size]="18" color="inherit" />
+              </button>
+            </tedi-attachment-actions>
+          </tedi-attachment>
+        }
+        @if (row.file.isValid === false) {
+          <span class="sr-only">{{ rejectedLabel() }}: {{ row.name }}</span>
+        }
+      </li>
+    }
+  </ul>
+}
+
+<div
+  class="tedi-file-dropzone__announcement sr-only"
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+>
+  @for (entry of announcements(); track entry.id) {
+    <span>{{ entry.text }}</span>
+  }
+</div>

@@ -293,9 +293,62 @@ export const translationsMap = {
   "file-dropzone.label": {
     description: "Default label for dropzone",
     components: ["FileDropzone"],
-    et: "Lohista failid siia või klõpsa, et sirvida",
+    et: "Lohista failid siia või klõpsa failide valimiseks",
     en: "Drop files here, or click to browse",
     ru: "Перетащите файлы сюда или нажмите, чтобы выбрать",
+  },
+  "file-dropzone.selected-files": {
+    description: "Accessible name for the list of selected files",
+    components: ["FileDropzone"],
+    et: "Valitud failid",
+    en: "Selected files",
+    ru: "Выбранные файлы",
+  },
+  "file-dropzone.rejected": {
+    description:
+      "Screen-reader only label marking a file in the list that failed validation",
+    components: ["FileDropzone"],
+    et: "Vigane fail",
+    en: "Invalid file",
+    ru: "Недопустимый файл",
+  },
+  "file-dropzone.file-rejected-extension": {
+    description:
+      "Validation message shown under a single file that has a disallowed type",
+    components: ["FileDropzone"],
+    et: "Failiformaat ei ole lubatud",
+    en: "File format is not allowed",
+    ru: "Формат файла не разрешен",
+  },
+  "file-dropzone.file-rejected-size": {
+    description:
+      "Validation message shown under a single file that is too large",
+    components: ["FileDropzone"],
+    et: "Fail on liiga suur",
+    en: "File is too large",
+    ru: "Файл слишком велик",
+  },
+  "file-upload.added": {
+    description: "Announced to assistive technology when files are added",
+    components: ["FileDropzone"],
+    et: (count: string) => `Lisatud ${count} fail(i)`,
+    en: (count: string) => `${count} file(s) added`,
+    ru: (count: string) => `Добавлено файлов: ${count}`,
+  },
+  "file-upload.duplicates-skipped": {
+    description:
+      "Announced when files already in the list are skipped on a repeat selection",
+    components: ["FileDropzone"],
+    et: (files: string) => `Fail(id) ${files} on juba lisatud`,
+    en: (files: string) => `File(s) ${files} have already been added`,
+    ru: (files: string) => `Файл(ы) ${files} уже добавлены`,
+  },
+  "file-upload.removed": {
+    description: "Announced to assistive technology when a file is removed",
+    components: ["FileDropzone"],
+    et: (file: string) => `Fail ${file} eemaldatud`,
+    en: (file: string) => `File ${file} removed`,
+    ru: (file: string) => `Файл ${file} удален`,
   },
   "file-dropzone.error": {
     description: "Error label for dropzone",
