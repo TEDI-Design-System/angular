@@ -156,13 +156,15 @@ export default {
     },
     accept: {
       description:
-        "Allowed file types as a comma-separated list of extensions and MIME types. Re-checked on drop, which bypasses the `accept` attribute.",
+        "Allowed file types as a comma-separated list of extensions and MIME types. Re-checked on drop, which bypasses the `accept` attribute." +
+        " Applies to what is picked next — files already listed keep the verdict they were given.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     maxSize: {
       description:
-        "Largest accepted file size, in bytes. The restrictions hint renders it in whichever unit reads best.",
+        "Largest accepted file size, in bytes. The restrictions hint renders it in whichever unit reads best." +
+        " Applies to what is picked next — files already listed keep the verdict they were given.",
       control: "number",
       table: { category: "inputs", type: { summary: "number" } },
     },
@@ -395,13 +397,14 @@ export const WithCustomFileTemplate: Story = {
 
 export const States: Story = {
   parameters: {
-    // The states live on the dropzone's inner label, not on the component host,
-    // and the addon only rewrites `:hover` to a class on the styled element
-    // itself — so these selectors have to reach that label.
+    // The states live on the drop zone, not on the component host, and the addon
+    // only rewrites a pseudo-class to a class on the styled element itself — so
+    // every selector has to reach the zone. It is also the focusable element:
+    // the file input is `display: none` and out of the tab order.
     pseudo: {
       hover: "#Hover .tedi-file-dropzone__zone",
       active: "#Active .tedi-file-dropzone__zone",
-      focusVisible: "#Focus input",
+      focusVisible: "#Focus .tedi-file-dropzone__zone",
     },
   },
   render: () => ({

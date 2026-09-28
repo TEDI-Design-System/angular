@@ -144,12 +144,20 @@ export class FileDropzoneComponent
    * Allowed file types as a comma-separated list of extensions and MIME types
    * (`".pdf,.txt"`, `"image/png"`, `"image/*"`). Forwarded to the input's
    * `accept` attribute and re-checked on drop, which bypasses it.
+   *
+   * Applies to what is picked next. Files already listed keep the verdict they
+   * were given, so clear them yourself if you tighten this while they are
+   * listed.
    */
   readonly accept = input<string>();
   /**
    * Largest accepted file size, in bytes — the unit `File.size` is in. The
    * restrictions hint renders it in whichever unit reads best, so a sub-megabyte
    * limit still shows as e.g. `500 KB`.
+   *
+   * Applies to what is picked next. Files already listed keep the verdict they
+   * were given, so clear them yourself if you tighten this while they are
+   * listed.
    */
   readonly maxSize = input<number>();
   /**

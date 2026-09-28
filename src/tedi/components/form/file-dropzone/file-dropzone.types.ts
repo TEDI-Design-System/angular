@@ -32,9 +32,9 @@ export interface FileDropzoneFile extends Partial<File> {
    * rejects itself; set it yourself on preloaded files, or to surface an error
    * the upload returned.
    *
-   * Required whenever you set `isValid: false`. The error visual — red card and
-   * icon — carries no text alternative, so without a message the failure is
-   * conveyed by colour alone and never reaches a screen reader.
+   * Worth setting whenever you set `isValid: false`: without it the error icon
+   * falls back to a generic "invalid file" label, so the failure is announced
+   * but its reason is not.
    */
   error?: string;
 }
