@@ -4,6 +4,10 @@ import {
   ChangeDetectionStrategy,
 } from "@angular/core";
 
+/**
+ * Right-aligns its content. Add `tedi-modal-footer-start` to an element to
+ * place it on the left instead.
+ */
 @Component({
   standalone: true,
   selector: "tedi-modal-footer",

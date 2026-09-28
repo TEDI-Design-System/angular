@@ -1,6 +1,7 @@
 import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Component, inject, Input, signal } from "@angular/core";
+import { ComponentType } from "@angular/cdk/portal";
 import { ModalComponent } from "./modal.component";
 import { ModalHeaderComponent } from "./modal-header/modal-header.component";
 import { ModalContentComponent } from "./modal-content/modal-content.component";
@@ -352,8 +353,13 @@ class StoryScrollableFadeContentComponent {
           <input tedi-text-field id="field-1" />
         </tedi-form-field>
       </tedi-modal-content>
-      <tedi-modal-footer style="justify-content: space-between;">
-        <button tedi-button variant="secondary" (click)="ref.close()">
+      <tedi-modal-footer>
+        <button
+          tedi-button
+          tedi-modal-footer-start
+          variant="secondary"
+          (click)="ref.close()"
+        >
           Cancel
         </button>
         <button tedi-button (click)="ref.close()">Continue</button>
@@ -381,17 +387,20 @@ class StoryFooterLeftRightComponent {
           <input tedi-text-field id="field-1" />
         </tedi-form-field>
       </tedi-modal-content>
-      <tedi-modal-footer style="justify-content: space-between;">
-        <button tedi-button variant="neutral" (click)="ref.close()">
+      <tedi-modal-footer>
+        <button
+          tedi-button
+          tedi-modal-footer-start
+          variant="neutral"
+          (click)="ref.close()"
+        >
           <tedi-icon name="arrow_back" />
           Back
         </button>
-        <div class="flex gap-3">
-          <button tedi-button variant="secondary" (click)="ref.close()">
-            Cancel
-          </button>
-          <button tedi-button (click)="ref.close()">Continue</button>
-        </div>
+        <button tedi-button variant="secondary" (click)="ref.close()">
+          Cancel
+        </button>
+        <button tedi-button (click)="ref.close()">Continue</button>
       </tedi-modal-footer>
     </tedi-modal>
   `,
@@ -1509,22 +1518,20 @@ export const FooterVariants: StoryObj = {
 //   <button tedi-button (click)="ref.close()">Continue</button>
 // </tedi-modal-footer>
 
-// Left-right footer — space-between alignment
-// <tedi-modal-footer style="justify-content: space-between;">
-//   <button tedi-button variant="secondary" (click)="ref.close()">Cancel</button>
+// Left-right footer — tedi-modal-footer-start moves a button to the left
+// <tedi-modal-footer>
+//   <button tedi-button tedi-modal-footer-start variant="secondary" (click)="ref.close()">Cancel</button>
 //   <button tedi-button (click)="ref.close()">Continue</button>
 // </tedi-modal-footer>
 
 // Three buttons — back button on the left, cancel + continue on the right
-// <tedi-modal-footer style="justify-content: space-between;">
-//   <button tedi-button variant="neutral" (click)="ref.close()">
+// <tedi-modal-footer>
+//   <button tedi-button tedi-modal-footer-start variant="neutral" (click)="ref.close()">
 //     <tedi-icon name="arrow_back" />
 //     Back
 //   </button>
-//   <div class="flex gap-3">
-//     <button tedi-button variant="secondary" (click)="ref.close()">Cancel</button>
-//     <button tedi-button (click)="ref.close()">Continue</button>
-//   </div>
+//   <button tedi-button variant="secondary" (click)="ref.close()">Cancel</button>
+//   <button tedi-button (click)="ref.close()">Continue</button>
 // </tedi-modal-footer>
 
 // No footer — simply omit <tedi-modal-footer>
@@ -1771,30 +1778,35 @@ const VR_CONFIG = { data: VR_DATA, ariaLabel: VR_DATA.title } as const;
  * Every variant below differs only in that config, so the component is built per story rather
  * than copied.
  */
-const vrRender = (config: ModalConfig<StoryModalData>) => () => {
-  @Component({
-    standalone: true,
-    selector: "story-open-vr-demo",
-    imports: [ButtonComponent],
-    template: `
-      <button tedi-button variant="secondary" (click)="open()">
-        Open modal
-      </button>
-    `,
-  })
-  class OpenVrDemoComponent {
-    private readonly modalService = inject(ModalService);
+const vrRender =
+  (
+    config: ModalConfig<StoryModalData>,
+    content: ComponentType<unknown> = StoryModalContentComponent,
+  ) =>
+  () => {
+    @Component({
+      standalone: true,
+      selector: "story-open-vr-demo",
+      imports: [ButtonComponent],
+      template: `
+        <button tedi-button variant="secondary" (click)="open()">
+          Open modal
+        </button>
+      `,
+    })
+    class OpenVrDemoComponent {
+      private readonly modalService = inject(ModalService);
 
-    open() {
-      this.modalService.open(StoryModalContentComponent, config);
+      open() {
+        this.modalService.open(content, config);
+      }
     }
-  }
 
-  return {
-    template: `<story-open-vr-demo />`,
-    moduleMetadata: { imports: [OpenVrDemoComponent] },
+    return {
+      template: `<story-open-vr-demo />`,
+      moduleMetadata: { imports: [OpenVrDemoComponent] },
+    };
   };
-};
 
 const VR_DECORATORS = [
   moduleMetadata({ imports: [ButtonComponent, StoryModalContentComponent] }),
@@ -1881,5 +1893,15 @@ export const OpenWidePageScrollForVisualTest: StoryObj = {
   tags: ["!dev", "!autodocs"],
   decorators: VR_DECORATORS,
   render: vrRender({ ...VR_CONFIG, width: "xl", scrollBehavior: "page" }),
+  play: vrPlay,
+};
+
+export const OpenFooterStartForVisualTest: StoryObj = {
+  tags: ["!dev", "!autodocs"],
+  decorators: VR_DECORATORS,
+  render: vrRender(
+    { ...VR_CONFIG, width: "md" },
+    StoryFooterThreeButtonsComponent,
+  ),
   play: vrPlay,
 };
