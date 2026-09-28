@@ -14,15 +14,15 @@
         [closeOnSelect]="false"
         (itemSelect)="handleToggle(column)"
       >
-        <tedi-dropdown-item-value
+        <tedi-option-content
           type="checkbox"
           [selected]="isVisible"
           [disabled]="isLastVisible"
         >
-          <tedi-dropdown-item-value-label>
+          <tedi-option-content-label>
             {{ resolveHeader(column) }}
-          </tedi-dropdown-item-value-label>
-        </tedi-dropdown-item-value>
+          </tedi-option-content-label>
+        </tedi-option-content>
       </li>
     }
   </tedi-dropdown-content>

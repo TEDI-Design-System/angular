@@ -6,17 +6,17 @@ import {
 } from "@angular/core";
 
 @Component({
-  selector: "tedi-dropdown-item-value-label",
+  selector: "tedi-option-content-label",
   template: `<ng-content />`,
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: "tedi-dropdown-item-value__label",
-    "[class.tedi-dropdown-item-value__label--no-clip]": "!clipContent()",
+    class: "tedi-option-content__label",
+    "[class.tedi-option-content__label--no-clip]": "!clipContent()",
   },
 })
-export class DropdownItemValueLabelComponent {
+export class OptionContentLabelComponent {
   /**
    * Whether the label clips overflowing content for text ellipsis. Set `false`
    * when the label holds content with decorations that intentionally sit

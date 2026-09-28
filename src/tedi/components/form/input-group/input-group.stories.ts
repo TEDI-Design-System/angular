@@ -24,9 +24,9 @@ import { DropdownComponent } from "../../overlay/dropdown/dropdown.component";
 import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-content/dropdown-content.component";
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
-import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
-import { DropdownItemValueMetaComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-meta.component";
+import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
+import { OptionContentLabelComponent } from "../../helpers/option-content/option-content-label.component";
+import { OptionContentMetaComponent } from "../../helpers/option-content/option-content-meta.component";
 import { SelectOptionTemplateDirective } from "../select/select-templates.directive";
 
 /**
@@ -69,9 +69,9 @@ const meta: Meta<InputGroupComponent> = {
         DropdownTriggerDirective,
         DropdownContentComponent,
         DropdownItemComponent,
-        DropdownItemValueComponent,
-        DropdownItemValueLabelComponent,
-        DropdownItemValueMetaComponent,
+        OptionContentComponent,
+        OptionContentLabelComponent,
+        OptionContentMetaComponent,
         SelectOptionTemplateDirective,
       ],
     }),
@@ -212,10 +212,10 @@ export const StartDynamic: Story = {
                 ellipsis="end"
               >
                 <ng-template tediSelectOption let-item>
-                  <tedi-dropdown-item-value layout="vertical">
-                    <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
-                    <tedi-dropdown-item-value-meta>{{ item.number }}</tedi-dropdown-item-value-meta>
-                  </tedi-dropdown-item-value>
+                  <tedi-option-content layout="vertical">
+                    <tedi-option-content-label>{{ item.name }}</tedi-option-content-label>
+                    <tedi-option-content-meta>{{ item.number }}</tedi-option-content-meta>
+                  </tedi-option-content>
                 </ng-template>
               </tedi-select>
             </tedi-input-group>
@@ -498,10 +498,10 @@ export const AllControls: StoryObj = {
               ellipsis="end"
             >
               <ng-template tediSelectOption let-item>
-                <tedi-dropdown-item-value layout="vertical">
-                  <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
-                  <tedi-dropdown-item-value-meta>{{ item.number }}</tedi-dropdown-item-value-meta>
-                </tedi-dropdown-item-value>
+                <tedi-option-content layout="vertical">
+                  <tedi-option-content-label>{{ item.name }}</tedi-option-content-label>
+                  <tedi-option-content-meta>{{ item.number }}</tedi-option-content-meta>
+                </tedi-option-content>
               </ng-template>
             </tedi-select>
             <span tediInputGroupSuffix>EUR</span>
