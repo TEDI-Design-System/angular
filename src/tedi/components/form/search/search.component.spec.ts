@@ -50,6 +50,21 @@ describe("SearchComponent", () => {
     expect(component).toBeTruthy();
   });
 
+  it("passes showClearOnInteraction to its filled form field", () => {
+    fixture.componentRef.setInput("showClearOnInteraction", true);
+    typeInto("Test");
+    const field = el.querySelector("tedi-form-field") as HTMLElement;
+    expect(
+      field.classList.contains("tedi-form-field--clear-on-interaction"),
+    ).toBe(true);
+
+    fixture.componentRef.setInput("clearable", false);
+    fixture.detectChanges();
+    expect(
+      field.classList.contains("tedi-form-field--clear-on-interaction"),
+    ).toBe(false);
+  });
+
   it("should render a search landmark with role and searchbox input", () => {
     expect(el.getAttribute("role")).toBe("search");
     expect(getInput().getAttribute("role")).toBe("searchbox");
