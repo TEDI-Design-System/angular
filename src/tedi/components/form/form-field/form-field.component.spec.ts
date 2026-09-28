@@ -1,5 +1,6 @@
 import { Component, signal, ViewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import {
   FormFieldComponent,
   FormFieldIcon,
@@ -11,6 +12,7 @@ import {
 } from "./form-field-control";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { TextareaComponent } from "../textarea/textarea.component";
+import { TextFieldComponent } from "../text-field/text-field.component";
 import { LabelComponent } from "../label/label.component";
 import { LabelRowComponent } from "../label-row/label-row.component";
 import { FormFieldExtraDirective } from "./form-field-extra.directive";
@@ -508,7 +510,7 @@ describe("FormFieldComponent", () => {
   standalone: true,
   imports: [FormFieldComponent, TextareaComponent],
   template: `
-    <tedi-form-field #formField [clearable]="false">
+    <tedi-form-field #formField>
       <textarea tedi-textarea [value]="'hello'"></textarea>
     </tedi-form-field>
   `,
@@ -614,20 +616,33 @@ describe("FormFieldComponent wrapping a textarea", () => {
     );
   });
 
-  it("clears the textarea from the box's clear button", () => {
+  it("gives the textarea no clear button, even when clearable", () => {
     const clearFixture = TestBed.createComponent(
       ClearableTextareaHostComponent,
     );
     clearFixture.detectChanges();
 
-    const ta: HTMLTextAreaElement =
-      clearFixture.nativeElement.querySelector("textarea");
-    expect(ta.value).toBe("hello");
+    expect(
+      clearFixture.nativeElement.querySelector(".tedi-form-field__clear"),
+    ).toBeNull();
+    expect(
+      clearFixture.nativeElement.querySelector(".tedi-form-field__box"),
+    ).toBeNull();
+  });
 
-    clearFixture.nativeElement.querySelector(".tedi-form-field__clear").click();
+  it("still clears the textarea on a programmatic reset", () => {
+    const clearFixture = TestBed.createComponent(
+      ClearableTextareaHostComponent,
+    );
     clearFixture.detectChanges();
 
-    expect(ta.value).toBe("");
+    const textarea = clearFixture.debugElement
+      .query(By.directive(TextareaComponent))
+      .injector.get(TextareaComponent);
+    textarea.reset();
+    clearFixture.detectChanges();
+
+    expect(clearFixture.nativeElement.querySelector("textarea").value).toBe("");
   });
 });
 
@@ -963,5 +978,62 @@ describe("FormFieldComponent projection slots", () => {
     expect(box).toBeTruthy();
     expect(box.contains(feedback())).toBe(false);
     expect(box.contains(extra())).toBe(false);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextFieldComponent],
+  template: `
+    <tedi-form-field #formField>
+      <input tedi-text-field [value]="'hello'" [readOnly]="readOnly" />
+    </tedi-form-field>
+  `,
+})
+class ReadOnlyTextFieldHostComponent {
+  @ViewChild("formField", { static: true }) formField!: FormFieldComponent;
+  @ViewChild(TextFieldComponent, { static: true })
+  textField!: TextFieldComponent;
+  readOnly = true;
+}
+
+describe("FormFieldComponent with a read-only text field", () => {
+  let fixture: ComponentFixture<ReadOnlyTextFieldHostComponent>;
+  let host: ReadOnlyTextFieldHostComponent;
+
+  const clearButton = () =>
+    fixture.nativeElement.querySelector(
+      ".tedi-form-field__clear",
+    ) as HTMLButtonElement;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [ReadOnlyTextFieldHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    fixture = TestBed.createComponent(ReadOnlyTextFieldHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it("hides and disables the clear button while read-only", () => {
+    expect(host.formField.showClearButton()).toBe(false);
+    expect(clearButton().disabled).toBe(true);
+    expect(
+      fixture.nativeElement.querySelector(".tedi-form-field__buttons--hidden"),
+    ).toBeTruthy();
+  });
+
+  it("shows the clear button again once editable", () => {
+    host.readOnly = false;
+    fixture.detectChanges();
+
+    expect(host.formField.showClearButton()).toBe(true);
+    expect(clearButton().disabled).toBe(false);
+  });
+
+  it("still clears on a programmatic reset", () => {
+    host.textField.reset();
+    expect(host.textField.value()).toBe("");
   });
 });

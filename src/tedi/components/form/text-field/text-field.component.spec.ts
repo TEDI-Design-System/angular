@@ -233,3 +233,48 @@ describe("TextFieldComponent", () => {
     });
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [TextFieldComponent],
+  template: `
+    <input tedi-text-field id="attr" readonly />
+    <input tedi-text-field id="prop" [readOnly]="readOnly" />
+  `,
+})
+class ReadOnlyHostComponent {
+  readOnly = true;
+}
+
+describe("TextFieldComponent readOnly", () => {
+  let fixture: ComponentFixture<ReadOnlyHostComponent>;
+
+  const field = (id: string) => fixture.debugElement.query(By.css(`#${id}`));
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [ReadOnlyHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    fixture = TestBed.createComponent(ReadOnlyHostComponent);
+    fixture.detectChanges();
+  });
+
+  it("reads the readonly attribute and keeps it on the input", () => {
+    const attr = field("attr");
+    expect(attr.injector.get(TextFieldComponent).readOnly()).toBe(true);
+    expect((attr.nativeElement as HTMLInputElement).readOnly).toBe(true);
+  });
+
+  it("reads and reflects a [readOnly] property binding", () => {
+    const prop = field("prop");
+    const component = prop.injector.get(TextFieldComponent);
+    expect(component.readOnly()).toBe(true);
+    expect((prop.nativeElement as HTMLInputElement).readOnly).toBe(true);
+
+    fixture.componentInstance.readOnly = false;
+    fixture.detectChanges();
+    expect(component.readOnly()).toBe(false);
+    expect((prop.nativeElement as HTMLInputElement).readOnly).toBe(false);
+  });
+});

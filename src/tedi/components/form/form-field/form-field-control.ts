@@ -53,6 +53,16 @@ export interface FormFieldControl<T = unknown> {
    * button so a single `clearable` never yields two.
    */
   readonly ownsClearButton?: boolean;
+  /**
+   * Whether the control is read-only. The field hides its clear button while it
+   * is, since the user cannot edit the value; a programmatic `reset()` still works.
+   */
+  readOnly?: Signal<boolean>;
+  /**
+   * Set to `false` by controls that never take a clear button — a textarea, per
+   * the design. The field then skips its button whatever `clearable` says.
+   */
+  readonly clearButton?: false;
 }
 
 /**

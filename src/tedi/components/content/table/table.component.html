@@ -326,6 +326,7 @@
                     (input)="
                       handleColumnFilter(column, $any($event.target).value)
                     "
+                    (clear)="handleColumnFilter(column, '')"
                   />
                 </tedi-form-field>
               }

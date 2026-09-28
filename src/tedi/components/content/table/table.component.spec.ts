@@ -689,6 +689,34 @@ describe("TediTableComponent", () => {
       expect(rows[0].textContent).toContain("Anna");
     });
 
+    it("resets the column filter from the clear button", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.enableColumnFilters.set(true);
+      fixture.detectChanges();
+      const rows = () =>
+        fixture.nativeElement.querySelectorAll(
+          ".tedi-table__body .tedi-table__row",
+        ).length;
+      const total = rows();
+      const input = fixture.nativeElement.querySelector(
+        'tr.tedi-table__row--filter input[aria-label="Filter Name"]',
+      ) as HTMLInputElement;
+      input.value = "Anna";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      expect(rows()).toBe(1);
+
+      (
+        input
+          .closest("tedi-form-field")!
+          .querySelector(".tedi-form-field__clear") as HTMLButtonElement
+      ).click();
+      fixture.detectChanges();
+
+      expect(input.value).toBe("");
+      expect(rows()).toBe(total);
+    });
+
     it("clearFilters() resets every column filter at once", () => {
       const fixture = setupHost();
       fixture.componentInstance.enableColumnFilters.set(true);
