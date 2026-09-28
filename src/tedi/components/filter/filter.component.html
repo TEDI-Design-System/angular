@@ -78,14 +78,14 @@
                 [id]="getOptionId(i)"
                 (click)="!option.disabled && selectOption(option.value)"
               >
-                <tedi-dropdown-item-value
+                <tedi-option-content
                   [selected]="isOptionSelected(option.value)"
                   [disabled]="!!option.disabled"
                 >
-                  <tedi-dropdown-item-value-label>{{
+                  <tedi-option-content-label>{{
                     option.label
-                  }}</tedi-dropdown-item-value-label>
-                </tedi-dropdown-item-value>
+                  }}</tedi-option-content-label>
+                </tedi-option-content>
               </div>
             }
           </div>
@@ -126,15 +126,15 @@
               (keydown.space)="$event.preventDefault(); toggleSelectAll()"
               tabindex="0"
             >
-              <tedi-dropdown-item-value
+              <tedi-option-content
                 type="checkbox"
                 [selected]="allFilteredSelected()"
                 [indeterminate]="someFilteredSelected()"
               >
-                <tedi-dropdown-item-value-label>{{
+                <tedi-option-content-label>{{
                   resolvedSelectAllLabel()
-                }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+                }}</tedi-option-content-label>
+              </tedi-option-content>
             </div>
             <tedi-separator />
           }
@@ -169,15 +169,15 @@
                 [id]="getOptionId(i)"
                 (click)="!option.disabled && toggleOption(option.value)"
               >
-                <tedi-dropdown-item-value
+                <tedi-option-content
                   type="checkbox"
                   [selected]="isOptionSelected(option.value)"
                   [disabled]="!!option.disabled"
                 >
-                  <tedi-dropdown-item-value-label>{{
+                  <tedi-option-content-label>{{
                     option.label
-                  }}</tedi-dropdown-item-value-label>
-                </tedi-dropdown-item-value>
+                  }}</tedi-option-content-label>
+                </tedi-option-content>
               </div>
             }
           </div>

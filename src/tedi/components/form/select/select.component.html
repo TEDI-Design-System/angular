@@ -273,15 +273,15 @@
               [class.tedi-dropdown-item--active]="activeIndex() === 0"
               (click)="onVirtualSelectAllClick()"
             >
-              <tedi-dropdown-item-value
+              <tedi-option-content
                 type="checkbox"
                 [selected]="allOptionsSelected()"
                 [indeterminate]="someOptionsSelected()"
               >
-                <tedi-dropdown-item-value-label>{{
+                <tedi-option-content-label>{{
                   "select.select-all" | tediTranslate
-                }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+                }}</tedi-option-content-label>
+              </tedi-option-content>
             </div>
           }
           <cdk-virtual-scroll-viewport
@@ -318,15 +318,15 @@
                   [ngTemplateOutletContext]="getOptionContext(option, i)"
                 />
               } @else {
-                <tedi-dropdown-item-value
+                <tedi-option-content
                   [type]="allowMultiple() ? 'checkbox' : 'default'"
                   [selected]="isOptionSelected(option.value)"
                   [disabled]="!!option.disabled"
                 >
-                  <tedi-dropdown-item-value-label>{{
+                  <tedi-option-content-label>{{
                     option.label
-                  }}</tedi-dropdown-item-value-label>
-                </tedi-dropdown-item-value>
+                  }}</tedi-option-content-label>
+                </tedi-option-content>
               }
             </div>
           </cdk-virtual-scroll-viewport>
@@ -362,15 +362,15 @@
               class="tedi-dropdown-item"
               [cdkOption]="SpecialOptionControls.SELECT_ALL"
             >
-              <tedi-dropdown-item-value
+              <tedi-option-content
                 type="checkbox"
                 [selected]="allOptionsSelected()"
                 [indeterminate]="someOptionsSelected()"
               >
-                <tedi-dropdown-item-value-label>{{
+                <tedi-option-content-label>{{
                   "select.select-all" | tediTranslate
-                }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+                }}</tedi-option-content-label>
+              </tedi-option-content>
             </li>
           }
 
@@ -381,15 +381,15 @@
                   class="tedi-dropdown-item tedi-select__group-name tedi-select__group-name--selectable"
                   [cdkOption]="SpecialOptionControls.SELECT_GROUP + group.label"
                 >
-                  <tedi-dropdown-item-value
+                  <tedi-option-content
                     type="checkbox"
                     [selected]="isGroupSelected(group.label)"
                     [indeterminate]="isGroupIndeterminate(group.label)"
                   >
-                    <tedi-dropdown-item-value-label>{{
+                    <tedi-option-content-label>{{
                       group.label
-                    }}</tedi-dropdown-item-value-label>
-                  </tedi-dropdown-item-value>
+                    }}</tedi-option-content-label>
+                  </tedi-option-content>
                 </li>
               } @else {
                 <li class="tedi-select__group-name" role="presentation">
@@ -417,15 +417,15 @@
                     [ngTemplateOutletContext]="getOptionContext(option, i)"
                   />
                 } @else {
-                  <tedi-dropdown-item-value
+                  <tedi-option-content
                     [type]="allowMultiple() ? 'checkbox' : 'default'"
                     [selected]="isOptionSelected(option.value)"
                     [disabled]="!!option.disabled"
                   >
-                    <tedi-dropdown-item-value-label>{{
+                    <tedi-option-content-label>{{
                       option.label
-                    }}</tedi-dropdown-item-value-label>
-                  </tedi-dropdown-item-value>
+                    }}</tedi-option-content-label>
+                  </tedi-option-content>
                 }
               </li>
             }

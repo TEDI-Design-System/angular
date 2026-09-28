@@ -24,8 +24,8 @@ import { SeparatorComponent } from "../helpers/separator/separator.component";
 import { DropdownComponent } from "../overlay/dropdown/dropdown.component";
 import { DropdownTriggerDirective } from "../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "../overlay/dropdown/dropdown-content/dropdown-content.component";
-import { DropdownItemValueComponent } from "../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
+import { OptionContentComponent } from "../helpers/option-content/option-content.component";
+import { OptionContentLabelComponent } from "../helpers/option-content/option-content-label.component";
 import { FormFieldComponent } from "../form/form-field/form-field.component";
 import { TextFieldComponent } from "../form/text-field/text-field.component";
 import { FilterContentDirective } from "./filter-content.directive";
@@ -53,8 +53,8 @@ export interface FilterOption {
     DropdownComponent,
     DropdownTriggerDirective,
     DropdownContentComponent,
-    DropdownItemValueComponent,
-    DropdownItemValueLabelComponent,
+    OptionContentComponent,
+    OptionContentLabelComponent,
     FormFieldComponent,
     TextFieldComponent,
     FilterContentDirective,
