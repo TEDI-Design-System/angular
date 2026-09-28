@@ -8,7 +8,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
   padding: var(--file-dropzone-padding-y) var(--file-dropzone-padding-x);
+  font: inherit;
   color: var(--file-dropzone-text-default);
   text-align: center;
   cursor: pointer;
@@ -29,7 +31,7 @@
     border-color: var(--file-dropzone-border-active);
   }
 
-  &:has(input:focus-visible) {
+  &:focus-visible {
     outline: var(--tedi-borders-02) solid var(--file-dropzone-border-focus);
     outline-offset: var(--tedi-borders-01);
     border-color: var(--file-dropzone-border-focus);
@@ -55,6 +57,10 @@
   cursor: not-allowed;
   background-color: var(--file-dropzone-background-disabled);
   border-color: var(--file-dropzone-border-disabled);
+}
+
+.tedi-file-dropzone__input {
+  display: none;
 }
 
 .tedi-file-dropzone__files {

@@ -304,14 +304,6 @@ export const translationsMap = {
     en: "Selected files",
     ru: "Выбранные файлы",
   },
-  "file-dropzone.rejected": {
-    description:
-      "Screen-reader only label marking a file in the list that failed validation",
-    components: ["FileDropzone"],
-    et: "Vigane fail",
-    en: "Invalid file",
-    ru: "Недопустимый файл",
-  },
   "file-dropzone.file-rejected-extension": {
     description:
       "Validation message shown under a single file that has a disallowed type",
@@ -356,6 +348,14 @@ export const translationsMap = {
     et: "Faili üleslaadimisel tekkis viga",
     en: "An error occurred while uploading the file",
     ru: "Произошла ошибка при загрузке файла",
+  },
+  "file-attachment.invalid": {
+    description:
+      "Accessible name of the error icon on an attachment marked invalid without a message of its own",
+    components: ["Attachment"],
+    et: "Vigane fail",
+    en: "Invalid file",
+    ru: "Недопустимый файл",
   },
   "file-attachment.uploading": {
     description:

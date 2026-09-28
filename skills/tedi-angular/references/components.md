@@ -229,21 +229,24 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   different files sharing a name still both land. Project an `*tediFileDropzoneFile` template to
   replace the built-in `tedi-attachment` row when a file needs a progress bar, an icon or its own
   feedback.
-- **`tedi-file-dropzone`'s `label` is the text inside the dropzone**, not a field label above it, and
-  it names the file input — so the control is never nameless. Don't add a second `<label tedi-label>`
-  for `inputId`, and don't wrap it in `tedi-form-field` (which projects one): the drop zone is itself a
-  `<label>` around the input, so another one is a `form-field-multiple-labels` finding and assistive
-  tech handles it inconsistently. Fold the field name into `label` instead. `tedi-form-field` is also
-  wrong here because it places its projected feedback text after the file list rather than under the
-  dropzone.
-- **The drop zone is a `<label>` on purpose**, which is why no field label can sit above it. It needs no
-  JS — clicking anywhere opens the picker and the input stays the focus target. Carbon, USWDS, GOV.UK
-  and Polaris all make the zone a `div`/`button` instead, precisely so a field label can sit above it,
-  and pay for it with `input.click()` plus a duplicated hidden label, an `aria-label` or an
-  `aria-labelledby`; TEDI has no label above the zone in Figma or React, so that trade isn't worth
-  making. If one is ever needed, follow GOV.UK — `<button aria-labelledby="<field label id> <zone text
-  id>">` in place of the wrapping `<label>`. Adding an `ariaLabelledby` input to the current markup
-  would not work, since `aria-labelledby` overrides the wrapping label instead of appending to it.
+- **`tedi-file-dropzone`'s `label` is the text inside the drop zone**, not a field label above it. It is
+  the accessible name of the zone, so the control is never nameless. Don't add a `<label tedi-label>`
+  for `inputId` and don't wrap it in `tedi-form-field`: the file input is `display: none` and cannot be
+  labelled, and `tedi-form-field` would also place its projected feedback after the file list rather
+  than under the dropzone. Fold the field name into `label` instead.
+- **The drop zone is a `div[role="button"]`, not a `<label>` or a native `<button>`** — the same shape
+  React and react-dropzone use, and the reason is screen readers, not styling. The file input is
+  `display: none` and out of the tab order: while it was the focus target, closing the file dialog
+  handed focus back to it and VoiceOver discarded the status message every time. A native `<button>`
+  behaves differently again and was also unreliable there. Because a `role="button"` div has no native
+  activation, Enter and Space are wired by hand in `handleKeydown`, and `disabled` is `aria-disabled`
+  plus `tabindex="-1"` with both the click and key paths guarded. Carbon, USWDS, GOV.UK and Polaris all
+  avoid making the file input the focus target for the same reason.
+- **Selections are announced assertively and on a delay; removals are polite and immediate.** Closing
+  the file dialog leaves the screen reader busy for a moment, and a message inserted during it is
+  dropped rather than queued. Removal involves no dialog, so it needs neither. Announcements go through
+  `ToastAnnouncerService`, whose regions live on `<body>`: a live region inside the component is
+  silently dropped when the rows around it re-render, which is what happens on every selection.
 
 ### Search suggestions
 

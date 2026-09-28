@@ -414,14 +414,16 @@ export const States: Story = {
               <p tedi-text modifiers="bold">{{ state.label }}</p>
             </tedi-col>
             <tedi-col width="5">
-              <tedi-file-dropzone
-                [id]="state.id"
-                [inputId]="state.id + '-input'"
-                [maxSize]="30 * 1024 ** 2"
-                [disabled]="!!state.disabled"
-                [feedbackText]="state.feedbackText"
-                [storyDropOver]="!!state.dropOver"
-              />
+              <div style="max-width: 420px">
+                <tedi-file-dropzone
+                  [id]="state.id"
+                  [inputId]="state.id + '-input'"
+                  [maxSize]="30 * 1024 ** 2"
+                  [disabled]="!!state.disabled"
+                  [feedbackText]="state.feedbackText"
+                  [storyDropOver]="!!state.dropOver"
+                />
+              </div>
             </tedi-col>
           </tedi-row>
         }
@@ -451,6 +453,7 @@ export const WithReactiveForms: Story = {
           control.value.filter((file) => file.isValid === false).length,
       },
       template: `
+        <div style="max-width: 420px">
         <tedi-row [cols]="1" [gapY]="3">
           <tedi-col>
             <tedi-file-dropzone
@@ -474,6 +477,7 @@ export const WithReactiveForms: Story = {
             </tedi-alert>
           </tedi-col>
         </tedi-row>
+        </div>
       `,
     };
   },

@@ -13,6 +13,7 @@ import {
   Injector,
   input,
   model,
+  OnDestroy,
   OnInit,
   output,
   signal,
@@ -27,6 +28,10 @@ import {
   ValidationErrors,
   Validator,
 } from "@angular/forms";
+import {
+  ToastAnnouncerService,
+  ToastPoliteness,
+} from "../../../services/toast/toast-announcer.service";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { generateUUID } from "../../../helpers/generate-uuid";
 import { formatFileSize } from "../../../utils/file.util";
@@ -46,6 +51,13 @@ import { FileDropzoneFeedback, FileDropzoneFile } from "./file-dropzone.types";
 type FileRejectionReason = "extension" | "size";
 
 let fileDropzoneIdCounter = 0;
+
+/**
+ * Closing the file dialog leaves the screen reader busy, and a message inserted
+ * during it is dropped rather than queued — even an assertive one. Kept private
+ * so it stays out of the published API; the spec mirrors it.
+ */
+const ADD_ANNOUNCE_DELAY = 300;
 
 const FOCUSABLE =
   'button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -90,15 +102,16 @@ const fileIdentity = (file: FileDropzoneFile): string =>
   },
 })
 export class FileDropzoneComponent
-  implements OnInit, ControlValueAccessor, Validator
+  implements OnInit, ControlValueAccessor, Validator, OnDestroy
 {
   private readonly translations = inject(TediTranslationService);
+  private readonly announcer = inject(ToastAnnouncerService);
+  private addAnnounceTimeout?: ReturnType<typeof setTimeout>;
   private readonly injector = inject(Injector);
-  private announceId = 0;
-  protected readonly announcements = signal<{ id: number; text: string }[]>([]);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly fileInput =
     viewChild<ElementRef<HTMLInputElement>>("fileInput");
+  private readonly dropZone = viewChild<ElementRef<HTMLElement>>("zone");
 
   /**
    * Files held by the dropzone, and the value written by `formControl` /
@@ -230,10 +243,6 @@ export class FileDropzoneComponent
     "file-dropzone.selected-files",
   );
 
-  protected readonly rejectedLabel = this.translations.track(
-    "file-dropzone.rejected",
-  );
-
   /**
    * Everything the file list binds, resolved once per `files()` change. Keeps
    * the template free of calls that would re-run — and re-allocate strings — on
@@ -359,6 +368,23 @@ export class FileDropzoneComponent
     this.formDisabled.set(isDisabled);
   }
 
+  protected openPicker(): void {
+    if (!this.isDisabled()) {
+      this.fileInput()?.nativeElement.click();
+    }
+  }
+
+  /**
+   * A `role="button"` div gets no keyboard activation of its own, so Enter and
+   * Space have to be wired up by hand. Space also scrolls the page by default.
+   */
+  protected handleKeydown(event: KeyboardEvent): void {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      this.openPicker();
+    }
+  }
+
   protected handleSelection(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.addFiles(Array.from(input.files ?? []));
@@ -410,6 +436,9 @@ export class FileDropzoneComponent
     this.commit(this.files().filter((current) => current !== file));
     this.fileRemove.emit(file);
     this.onTouched();
+    // A pending "added" is superseded by this removal; letting it fire would
+    // announce the two in the wrong order.
+    clearTimeout(this.addAnnounceTimeout);
     this.announce(
       this.translations.translate("file-upload.removed", file.name ?? ""),
     );
@@ -421,7 +450,8 @@ export class FileDropzoneComponent
    * fall to `<body>`, losing the user's place. Move it to the *previous* file's
    * remove button rather than the next one, so repeated presses cannot walk
    * destructively down the list. Removing the first file has no previous row, so
-   * focus goes to the one that replaced it; removing the last goes to the drop zone.
+   * focus goes to the one that replaced it; removing the last goes to the drop
+   * zone.
    */
   private restoreFocus(removedIndex: number): void {
     afterNextRender(
@@ -431,7 +461,7 @@ export class FileDropzoneComponent
         );
 
         if (!rows.length) {
-          this.fileInput()?.nativeElement.focus();
+          this.dropZone()?.nativeElement.focus();
           return;
         }
 
@@ -439,7 +469,7 @@ export class FileDropzoneComponent
 
         (
           row.querySelector<HTMLElement>(FOCUSABLE) ??
-          this.fileInput()?.nativeElement
+          this.dropZone()?.nativeElement
         )?.focus();
       },
       { injector: this.injector },
@@ -463,18 +493,22 @@ export class FileDropzoneComponent
     const fresh = selected.filter((file) => !listed.has(fileIdentity(file)));
 
     const candidates = fresh.map((file) => {
-      const reason = this.reasonFor(file);
-      if (reason) rejected.push({ reason, file });
+      const reasons = this.reasonsFor(file);
+      if (reasons.length) rejected.push({ reason: reasons[0], file });
 
       return Object.assign(file, {
         id: generateUUID(),
         isLoading: false,
-        isValid: !reason,
+        isValid: !reasons.length,
         error:
-          reason && keepRejected
-            ? this.translations.translate(
-                `file-dropzone.file-rejected-${reason}`,
-              )
+          reasons.length && keepRejected
+            ? reasons
+                .map((reason) =>
+                  this.translations.translate(
+                    `file-dropzone.file-rejected-${reason}`,
+                  ),
+                )
+                .join(". ")
             : undefined,
       }) as FileDropzoneFile;
     });
@@ -490,17 +524,21 @@ export class FileDropzoneComponent
       this.commit(multiple ? [...this.files(), ...kept] : [kept[0]]);
     }
 
+    // One selection can reject, skip and add all at once. The live region holds
+    // a single message, so these are gathered and announced together —
+    // announcing them one by one overwrites all but the last.
+    const messages: string[] = [];
+
     if (rejected.length) {
       const message = this.rejectionMessage(rejected);
       this.rejectionError.set(keepRejected ? undefined : message);
-      this.announce(message);
-      return;
+      messages.push(message);
+    } else {
+      this.rejectionError.set(undefined);
     }
 
-    this.rejectionError.set(undefined);
-
     if (duplicates.length) {
-      this.announce(
+      messages.push(
         this.translations.translate(
           "file-upload.duplicates-skipped",
           duplicates.map((file) => `'${file.name}'`).join(", "),
@@ -508,14 +546,31 @@ export class FileDropzoneComponent
       );
     }
 
-    if (kept.length) {
-      this.announce(
+    const added = kept.filter((file) => file.isValid);
+
+    if (added.length) {
+      messages.push(
         this.translations.translate(
           "file-upload.added",
-          String(multiple ? kept.length : 1),
+          String(multiple ? added.length : 1),
         ),
       );
     }
+
+    // Assertive and delayed, because the file dialog buries this twice over:
+    // closing it leaves the screen reader reading the drop zone button for
+    // seconds, so a polite message never gets spoken, and an assertive one
+    // inserted too early is lost in the transition. Removal needs neither — no
+    // dialog is involved there.
+    clearTimeout(this.addAnnounceTimeout);
+    this.addAnnounceTimeout = setTimeout(
+      () => this.announce(messages.join(". "), "assertive"),
+      ADD_ANNOUNCE_DELAY,
+    );
+  }
+
+  ngOnDestroy(): void {
+    clearTimeout(this.addAnnounceTimeout);
   }
 
   private commit(files: FileDropzoneFile[]): void {
@@ -556,11 +611,18 @@ export class FileDropzoneComponent
     });
   }
 
-  private reasonFor(file: FileDropzoneFile): FileRejectionReason | undefined {
-    if (!this.isAcceptedType(file as File)) return "extension";
-    if (!this.isAcceptedSize(file as File)) return "size";
+  /**
+   * Every restriction the file breaks, not just the first. A file can be both
+   * the wrong format and too large; reporting one reason at a time sends the
+   * user away to fix it, only to reject it again for the other.
+   */
+  private reasonsFor(file: FileDropzoneFile): FileRejectionReason[] {
+    const reasons: FileRejectionReason[] = [];
 
-    return undefined;
+    if (!this.isAcceptedType(file as File)) reasons.push("extension");
+    if (!this.isAcceptedSize(file as File)) reasons.push("size");
+
+    return reasons;
   }
 
   /**
@@ -588,14 +650,14 @@ export class FileDropzoneComponent
   }
 
   /**
-   * Feeds the component's own live region. CDK's `LiveAnnouncer` is deliberately
-   * not used: it rewrites `aria-live` on every call, and screen readers re-register
-   * a region mutated that way and drop the pending message. Each announcement is
-   * rendered as a fresh node so that repeating the same text still announces.
+   * Announced from the root-level regions, not a node of this component's own.
+   * Adding files rebuilds the rows beside such a node — wholesale when
+   * `multiple` is off and the row is replaced — and a live region updated in
+   * the same breath as the subtree around it is dropped by screen readers.
    */
-  private announce(text: string): void {
+  private announce(text: string, politeness: ToastPoliteness = "polite"): void {
     if (text) {
-      this.announcements.set([{ id: ++this.announceId, text }]);
+      this.announcer.announce(text, politeness);
     }
   }
 }

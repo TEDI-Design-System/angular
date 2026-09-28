@@ -2,6 +2,7 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
+import { ToastAnnouncerService } from "../../../services/toast/toast-announcer.service";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
@@ -25,11 +26,26 @@ const breakpointMock = {
 // `lastModified` is pinned because it defaults to `Date.now()`, which would make
 // two fabricated files differ by milliseconds — a real file picked twice carries
 // the same mtime, which is what the duplicate check relies on.
-const announced = (fixture: ComponentFixture<unknown>): string =>
-  (
-    fixture.debugElement.query(By.css(".tedi-file-dropzone__announcement"))
-      .nativeElement as HTMLElement
-  ).textContent?.trim() ?? "";
+const announcer = { announce: jest.fn(), clear: jest.fn(), destroy: jest.fn() };
+
+beforeEach(() => announcer.announce.mockClear());
+
+/** Last message handed to the root-level announcer. */
+/** Waits past the add-path delay, then reads the last announced message. */
+const announced = async (): Promise<string> => {
+  // Mirrors ADD_ANNOUNCE_DELAY in the component, which is deliberately private.
+  await new Promise((resolve) => setTimeout(resolve, 300 + 150));
+
+  return announcer.announce.mock.calls.at(-1)?.[0] ?? "";
+};
+
+/** Politeness of the last announcement. */
+const announcedAs = (): string | undefined =>
+  announcer.announce.mock.calls.at(-1)?.[1];
+
+const zoneOf = (fixture: ComponentFixture<unknown>): HTMLElement =>
+  fixture.debugElement.query(By.css('[role="button"].tedi-file-dropzone__zone'))
+    .nativeElement as HTMLElement;
 
 const makeFile = (
   name: string,
@@ -69,6 +85,7 @@ const dispatchDrag = (
 };
 
 const baseProviders = [
+  { provide: ToastAnnouncerService, useValue: announcer },
   { provide: TediTranslationService, useClass: TranslationMock },
   { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
   { provide: BreakpointService, useValue: breakpointMock },
@@ -116,14 +133,53 @@ describe("FileDropzoneComponent", () => {
     expect(text(".tedi-file-dropzone__label")).toBe("Lohista failid siia");
   });
 
-  it("names the input from the dropzone label", () => {
+  it("names the drop zone from the dropzone label", () => {
+    const zone = zoneOf(fixture);
     const input = fileInput(fixture);
-    const zone = fixture.debugElement.query(
-      By.css("label.tedi-file-dropzone__zone"),
-    ).nativeElement as HTMLLabelElement;
 
-    expect(zone.contains(input)).toBe(true);
     expect(zone.textContent).toContain("file-dropzone.label");
+    expect(zone.getAttribute("tabindex")).toBe("0");
+    // The input stays out of the tab order so that closing the file dialog
+    // cannot hand focus back to it — the button is the control.
+    expect(input.getAttribute("tabindex")).toBe("-1");
+    expect(input.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it("opens the file picker from the drop zone", () => {
+    const input = fileInput(fixture);
+    const click = jest.spyOn(input, "click");
+
+    // The input is display:none, so the zone has to forward the activation.
+    zoneOf(fixture).click();
+    expect(click).toHaveBeenCalledTimes(1);
+
+    // A role="button" div has no native keyboard activation.
+    for (const key of ["Enter", " "]) {
+      zoneOf(fixture).dispatchEvent(
+        new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }),
+      );
+    }
+
+    expect(click).toHaveBeenCalledTimes(3);
+  });
+
+  it("stays inert while disabled", () => {
+    fixture.componentRef.setInput("disabled", true);
+    fixture.detectChanges();
+
+    const input = fileInput(fixture);
+    const click = jest.spyOn(input, "click");
+    const zone = zoneOf(fixture);
+
+    expect(zone.getAttribute("tabindex")).toBe("-1");
+    expect(zone.getAttribute("aria-disabled")).toBe("true");
+
+    zone.click();
+    zone.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
+    );
+
+    expect(click).not.toHaveBeenCalled();
   });
 
   it("gives each instance its own generated id", () => {
@@ -142,12 +198,15 @@ describe("FileDropzoneComponent", () => {
     const [first, second] = pair.debugElement
       .queryAll(By.css("input[type=file]"))
       .map((el) => el.nativeElement as HTMLInputElement);
+    const [firstZone, secondZone] = pair.debugElement
+      .queryAll(By.css('[role="button"].tedi-file-dropzone__zone'))
+      .map((el) => el.nativeElement as HTMLElement);
 
     expect(first.id).not.toBe(second.id);
     // The feedback ids are derived from it, so a collision would cross-wire
     // one dropzone's aria-describedby to the other's hint.
-    expect(first.getAttribute("aria-describedby")).not.toBe(
-      second.getAttribute("aria-describedby"),
+    expect(firstZone.getAttribute("aria-describedby")).not.toBe(
+      secondZone.getAttribute("aria-describedby"),
     );
   });
 
@@ -182,13 +241,13 @@ describe("FileDropzoneComponent", () => {
   });
 
   describe("selection", () => {
-    it("adds a picked file and announces it", () => {
+    it("adds a picked file and announces it", async () => {
       selectFiles(fixture, [makeFile("report.pdf")]);
 
       expect(component.files().map((file) => file.name)).toEqual([
         "report.pdf",
       ]);
-      expect(announced(fixture)).toBe("file-upload.added:1");
+      expect(await announced()).toBe("file-upload.added:1");
     });
 
     it("clears the input value so the same file can be picked again", () => {
@@ -207,7 +266,46 @@ describe("FileDropzoneComponent", () => {
       ]);
     });
 
-    it("skips a file that is already listed", () => {
+    it("announces a skip alongside what was added", async () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("report.pdf")]);
+      selectFiles(fixture, [makeFile("report.pdf"), makeFile("other.pdf")]);
+
+      // Announced together: separate calls would overwrite each other and only
+      // the last would ever be read.
+      expect(await announced()).toBe(
+        "file-upload.duplicates-skipped:'report.pdf'. file-upload.added:1",
+      );
+    });
+
+    it("announces a rejection, a skip and an addition from one selection", async () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("report.pdf")]);
+      selectFiles(fixture, [
+        makeFile("report.pdf"),
+        makeFile("notes.txt", 100, "text/plain"),
+        makeFile("other.pdf"),
+      ]);
+
+      expect(await announced()).toBe(
+        "file-upload.extension-rejected:'notes.txt'. " +
+          "file-upload.duplicates-skipped:'report.pdf'. file-upload.added:1",
+      );
+    });
+
+    it("announces additions assertively so the file dialog cannot bury them", async () => {
+      selectFiles(fixture, [makeFile("report.pdf")]);
+
+      expect(await announced()).toBe("file-upload.added:1");
+      expect(announcedAs()).toBe("assertive");
+    });
+
+    it("skips a file that is already listed", async () => {
       fixture.componentRef.setInput("multiple", true);
       fixture.detectChanges();
 
@@ -217,7 +315,7 @@ describe("FileDropzoneComponent", () => {
       expect(component.files().map((file) => file.name)).toEqual([
         "report.pdf",
       ]);
-      expect(announced(fixture)).toBe(
+      expect(await announced()).toBe(
         "file-upload.duplicates-skipped:'report.pdf'",
       );
     });
@@ -389,7 +487,7 @@ describe("FileDropzoneComponent", () => {
       expect(summary()).toBeUndefined();
     });
 
-    it("drops the aggregate error when files carry their own", () => {
+    it("drops the aggregate error when files carry their own", async () => {
       fixture.componentRef.setInput("accept", ".pdf");
       fixture.componentRef.setInput("multiple", true);
       fixture.componentRef.setInput("keepRejectedFiles", true);
@@ -404,7 +502,7 @@ describe("FileDropzoneComponent", () => {
           ),
         ),
       ).toBeNull();
-      expect(announced(fixture)).toBe(
+      expect(await announced()).toBe(
         "file-upload.extension-rejected:'bad.txt'",
       );
     });
@@ -416,6 +514,33 @@ describe("FileDropzoneComponent", () => {
       fixture.detectChanges();
 
       expect(text(".tedi-attachment__feedback")).toBe("Vale formaat");
+    });
+
+    it("reports every restriction a file breaks, not just the first", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("maxSize", 50);
+      fixture.componentRef.setInput("keepRejectedFiles", true);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("notes.txt", 5000, "text/plain")]);
+
+      expect(component.files()[0].error).toBe(
+        "file-dropzone.file-rejected-extension. file-dropzone.file-rejected-size",
+      );
+    });
+
+    it("names a file breaking both restrictions once in the summary", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("maxSize", 50);
+      fixture.componentRef.setInput("keepRejectedFiles", false);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("notes.txt", 5000, "text/plain")]);
+
+      const summary = text("tedi-feedback-text");
+
+      expect(summary).toContain("'notes.txt'");
+      expect(summary.match(/'notes.txt'/g)?.length).toBe(1);
     });
 
     it("lists a rejected file so the user can see and remove it", () => {
@@ -524,10 +649,9 @@ describe("FileDropzoneComponent", () => {
       fixture.componentRef.setInput("feedbackText", { text: "Custom hint" });
       fixture.detectChanges();
 
-      const input = fileInput(fixture);
-      const id = input.id;
+      const id = fileInput(fixture).id;
 
-      expect(input.getAttribute("aria-describedby")).toBe(
+      expect(zoneOf(fixture).getAttribute("aria-describedby")).toBe(
         `${id}-feedback ${id}-hint`,
       );
     });
@@ -536,9 +660,10 @@ describe("FileDropzoneComponent", () => {
       const host = TestBed.createComponent(DescribedByHostComponent);
       host.detectChanges();
 
-      const input = fileInput(host);
-      expect(input.getAttribute("aria-describedby")).toBe(
-        `described-by-dropzone external-help ${input.id}-hint`,
+      const id = fileInput(host).id;
+
+      expect(zoneOf(host).getAttribute("aria-describedby")).toBe(
+        `described-by-dropzone external-help ${id}-hint`,
       );
     });
 
@@ -672,7 +797,7 @@ describe("FileDropzoneComponent", () => {
       expect(component.files().length).toBe(1);
     });
 
-    it("removes a file through its remove button", () => {
+    it("removes a file through its remove button", async () => {
       const remove = fixture.debugElement.query(
         By.css(".tedi-attachment__actions button"),
       ).nativeElement as HTMLButtonElement;
@@ -683,7 +808,9 @@ describe("FileDropzoneComponent", () => {
       fixture.detectChanges();
 
       expect(component.files()).toEqual([]);
-      expect(announced(fixture)).toBe("file-upload.removed:report.pdf");
+      expect(await announced()).toBe("file-upload.removed:report.pdf");
+      // Polite: no file dialog is involved, so nothing buries it.
+      expect(announcedAs()).toBe("polite");
     });
 
     it("moves focus to the previous file's remove button", async () => {
@@ -733,7 +860,7 @@ describe("FileDropzoneComponent", () => {
       fixture.detectChanges();
 
       expect(document.activeElement).toBe(
-        fixture.debugElement.query(By.css(".tedi-file-dropzone__input"))
+        fixture.debugElement.query(By.css(".tedi-file-dropzone__zone"))
           .nativeElement,
       );
     });
@@ -744,7 +871,7 @@ describe("FileDropzoneComponent", () => {
       fixture.debugElement.query(By.css(".tedi-file-dropzone__zone"))
         .nativeElement as HTMLElement;
 
-    it("ignores a selection that carries no files", () => {
+    it("ignores a selection that carries no files", async () => {
       const input = fileInput(fixture);
       Object.defineProperty(input, "files", {
         value: null,
@@ -754,7 +881,7 @@ describe("FileDropzoneComponent", () => {
       fixture.detectChanges();
 
       expect(component.files()).toEqual([]);
-      expect(announced(fixture)).toBe("");
+      expect(await announced()).toBe("");
     });
 
     it("ignores a drop that carries no dataTransfer", () => {
@@ -851,7 +978,7 @@ describe("FileDropzoneComponent", () => {
       ).toBe("remove ");
     });
 
-    it("announces a removal for a file that has no name", () => {
+    it("announces a removal for a file that has no name", async () => {
       fixture.componentRef.setInput("files", [{ id: "1" }]);
       fixture.detectChanges();
 
@@ -861,7 +988,7 @@ describe("FileDropzoneComponent", () => {
       ).click();
       fixture.detectChanges();
 
-      expect(announced(fixture)).toBe("file-upload.removed:");
+      expect(await announced()).toBe("file-upload.removed:");
     });
 
     it("matches an extensionless file on its MIME type", () => {
@@ -931,10 +1058,8 @@ describe("FileDropzoneComponent with reactive forms", () => {
   });
 
   it("marks the control touched on blur", () => {
-    const input = fileInput(fixture);
-
     expect(host.control.touched).toBe(false);
-    input.dispatchEvent(new Event("blur"));
+    zoneOf(fixture).dispatchEvent(new Event("blur"));
     fixture.detectChanges();
 
     expect(host.control.touched).toBe(true);
@@ -1115,7 +1240,7 @@ describe("FileDropzoneComponent with a template that has no focusable row", () =
     fixture.detectChanges();
 
     expect(document.activeElement).toBe(
-      fixture.debugElement.query(By.css(".tedi-file-dropzone__input"))
+      fixture.debugElement.query(By.css(".tedi-file-dropzone__zone"))
         .nativeElement,
     );
   });
