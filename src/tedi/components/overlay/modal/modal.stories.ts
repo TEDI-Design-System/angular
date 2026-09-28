@@ -11,7 +11,7 @@ import { ModalService } from "./modal.service";
 import { ModalRef } from "./modal-ref";
 import { MODAL_DATA, ModalConfig, ModalFullscreen } from "./modal.types";
 import { ButtonComponent } from "../../buttons/button/button.component";
-import { LabelComponent } from "../../form/label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { ScrollFadeComponent } from "../../helpers/scroll-fade/scroll-fade.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";

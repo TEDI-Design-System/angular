@@ -16,7 +16,7 @@ import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { TextComponent } from "../../base/text/text.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];

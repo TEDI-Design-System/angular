@@ -10,7 +10,7 @@ import {
   BreakpointInputs,
   BreakpointService,
 } from "../../../services/breakpoint/breakpoint.service";
-import { LabelComponent } from "../../../components/form";
+import { LabelComponent } from "../label/label.component";
 
 export type TextGroupType = "vertical" | "horizontal";
 

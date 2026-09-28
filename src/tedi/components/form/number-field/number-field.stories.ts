@@ -6,7 +6,7 @@ import {
 } from "@storybook/angular";
 import { NumberFieldComponent } from "./number-field.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 
 /**

@@ -41,7 +41,7 @@ import { TediTranslationPipe } from "../../../services";
 import { ComponentInputs } from "../../../types";
 import { calculateVisibleTagCount } from "../../../utils/tag-overflow.util";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { LabelRowComponent } from "../label-row/label-row.component";
 import { TagComponent, TagEllipsis } from "../../tags/tag/tag.component";
 import { EllipsisComponent, EllipsisPosition } from "../../helpers/ellipsis";

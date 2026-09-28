@@ -5,7 +5,7 @@ import { TimelineItemComponent } from "./timeline-item/timeline-item.component";
 import { TimelineTitleComponent } from "./timeline-title/timeline-title.component";
 import { TimelineDescriptionComponent } from "./timeline-description/timeline-description.component";
 import { TimelineTimingsBottomDirective } from "./timeline-timings-bottom.directive";
-import { CollapseComponent } from "../../buttons/collapse/collapse.component";
+import { CollapseComponent } from "../../content/collapse/collapse.component";
 import { TextComponent } from "../../base/text/text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";

@@ -35,7 +35,7 @@ import { LinkComponent } from "../../navigation/link/link.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
-import { LabelComponent } from "../../form/label/label.component";
+import { LabelComponent } from "../label/label.component";
 import { DateFieldComponent } from "../../form/date-field/date-field.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import {
@@ -60,7 +60,7 @@ import { DropdownComponent } from "../../overlay/dropdown/dropdown.component";
 import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-content/dropdown-content.component";
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
 import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
-import { EmptyStateComponent } from "../../helpers/empty-state/empty-state.component";
+import { EmptyStateComponent } from "../empty-state/empty-state.component";
 import {
   BreakpointService,
   type Breakpoint,

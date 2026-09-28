@@ -2,7 +2,7 @@ import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { TimeFieldComponent } from "./time-field.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
