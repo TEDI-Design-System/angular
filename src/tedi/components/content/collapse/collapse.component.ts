@@ -11,7 +11,7 @@ import {
   CollapseButtonComponent,
   type CollapseButtonArrowType,
   type CollapseButtonSize,
-} from "../collapse-button/collapse-button.component";
+} from "../../buttons/collapse-button/collapse-button.component";
 import { generateUUID } from "../../../helpers/generate-uuid";
 
 export type ArrowType = CollapseButtonArrowType;

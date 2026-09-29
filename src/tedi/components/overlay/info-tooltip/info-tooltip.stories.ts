@@ -5,7 +5,7 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { InfoTooltipComponent } from "./info-tooltip.component";
-import { LabelComponent } from "../../form/label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { LabelRowComponent } from "../../form/label-row/label-row.component";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 

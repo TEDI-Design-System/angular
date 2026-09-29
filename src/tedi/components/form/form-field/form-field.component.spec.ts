@@ -13,7 +13,7 @@ import {
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { TextareaComponent } from "../textarea/textarea.component";
 import { TextFieldComponent } from "../text-field/text-field.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { LabelRowComponent } from "../label-row/label-row.component";
 import { FormFieldExtraDirective } from "./form-field-extra.directive";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
@@ -140,6 +140,7 @@ class BareClearableHostComponent {
       [size]="size"
       [icon]="icon"
       [clearable]="clearable"
+      [showClearOnInteraction]="showClearOnInteraction"
       [inputClass]="inputClass"
       [characterLimit]="characterLimit"
     >
@@ -161,6 +162,7 @@ class TestHostComponent {
   size: InputSize = "default";
   icon?: string | FormFieldIcon;
   clearable = false;
+  showClearOnInteraction = false;
   inputClass?: string;
   characterLimit?: number;
   feedbackType: "valid" | "error" | "hint" = "hint";
@@ -267,6 +269,36 @@ describe("FormFieldComponent", () => {
 
     const button = buttons.querySelector("button");
     expect(button.hasAttribute("disabled")).toBe(false);
+  });
+
+  it("applies the interaction modifier only to a filled clearable field when opted in", () => {
+    const field = fixture.nativeElement.querySelector("tedi-form-field");
+    host.showClearOnInteraction = true;
+    fixture.detectChanges();
+    expect(
+      field.classList.contains("tedi-form-field--clear-on-interaction"),
+    ).toBe(false);
+
+    host.clearable = true;
+    host.mockControl.value.set("Test");
+    fixture.detectChanges();
+    expect(
+      field.classList.contains("tedi-form-field--clear-on-interaction"),
+    ).toBe(true);
+    expect(field.querySelector(".tedi-form-field__clear")).toBeTruthy();
+
+    host.mockControl.value.set("");
+    fixture.detectChanges();
+    expect(
+      field.classList.contains("tedi-form-field--clear-on-interaction"),
+    ).toBe(false);
+
+    host.mockControl.value.set("Test");
+    host.showClearOnInteraction = false;
+    fixture.detectChanges();
+    expect(
+      field.classList.contains("tedi-form-field--clear-on-interaction"),
+    ).toBe(false);
   });
 
   it("should not render buttons slot when clearable is false", () => {

@@ -5,7 +5,7 @@ import { By } from "@angular/platform-browser";
 import { DateFieldComponent } from "./date-field.component";
 import { TextFieldComponent } from "../text-field/text-field.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { DateRange } from "../../content/calendar/types";
 import { TediTranslationService } from "../../../services/translation/translation.service";

@@ -1,3 +1,24 @@
+# [8.2.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.6...angular-8.2.0-rc.7) (2026-09-29)
+
+
+### Features
+
+* **form-field,select,search:** add clear button interaction option [#569](https://github.com/TEDI-Design-System/angular/issues/569) ([#737](https://github.com/TEDI-Design-System/angular/issues/737)) ([4f0f119](https://github.com/TEDI-Design-System/angular/commit/4f0f1197df899581d853626a15bce6f18c104bd1))
+
+# [8.2.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.5...angular-8.2.0-rc.6) (2026-09-29)
+
+
+### Features
+
+* **carousel:** add floating buttons and bounded navigation [#528](https://github.com/TEDI-Design-System/angular/issues/528) ([#732](https://github.com/TEDI-Design-System/angular/issues/732)) ([d36eddd](https://github.com/TEDI-Design-System/angular/commit/d36eddd55ae5e80ba4ed14f558658c405f1fba55))
+
+# [8.2.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.4...angular-8.2.0-rc.5) (2026-09-29)
+
+
+### Bug Fixes
+
+* **modal:** let modals confirm before closing [#674](https://github.com/TEDI-Design-System/angular/issues/674) ([#709](https://github.com/TEDI-Design-System/angular/issues/709)) ([393e050](https://github.com/TEDI-Design-System/angular/commit/393e05048d2ac9eefd8984436cd8998efb81b52b))
+
 # [8.2.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.3...angular-8.2.0-rc.4) (2026-09-25)
 
 

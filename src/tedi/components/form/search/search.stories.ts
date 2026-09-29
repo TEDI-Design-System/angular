@@ -183,6 +183,16 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
+    showClearOnInteraction: {
+      description:
+        "Show the clear button only on hover or focus when the search field has a value. Requires clearable.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     searchIcon: {
       description: "Icon shown inside the input. Ignored when `button` is set.",
       control: { type: "object" },
@@ -477,6 +487,20 @@ export const Clearable: Story = {
   render: () => ({
     template: `
       <tedi-search inputId="search-clearable" label="Otsing" [clearable]="true" value="Lorem ipsum" />
+    `,
+  }),
+};
+
+/** The clear button appears while the filled search field is hovered or focused. */
+export const ClearButtonOnInteraction: Story = {
+  render: () => ({
+    template: `
+      <tedi-search
+        inputId="search-clear-on-interaction"
+        label="Otsing"
+        value="Lorem ipsum"
+        [showClearOnInteraction]="true"
+      />
     `,
   }),
 };

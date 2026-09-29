@@ -41,7 +41,7 @@ import { TediTranslationPipe } from "../../../services";
 import { ComponentInputs } from "../../../types";
 import { calculateVisibleTagCount } from "../../../utils/tag-overflow.util";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { LabelRowComponent } from "../label-row/label-row.component";
 import { TagComponent, TagEllipsis } from "../../tags/tag/tag.component";
 import { EllipsisComponent, EllipsisPosition } from "../../helpers/ellipsis";
@@ -112,6 +112,8 @@ export enum SpecialOptionControls {
   host: {
     class: "tedi-select",
     "[class.tedi-select--multiselect]": "allowMultiple()",
+    "[class.tedi-select--clear-on-interaction]":
+      "showClearOnInteraction() && clearable() && !!selectedValues().length",
   },
   providers: [
     {
@@ -191,6 +193,12 @@ export class SelectComponent<T = unknown>
    * @default false
    */
   clearable = input<boolean>(false);
+  /**
+   * Show the clear button only while the filled select is hovered or focused.
+   * Requires `clearable`.
+   * @default false
+   */
+  showClearOnInteraction = input<boolean>(false);
 
   /**
    * Element reference used to determine dropdown width.

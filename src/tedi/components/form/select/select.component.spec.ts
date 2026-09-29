@@ -38,6 +38,7 @@ import { InputState } from "../form-field/form-field.component";
       [allowMultiple]="allowMultiple"
       [searchable]="searchable"
       [clearable]="clearable"
+      [showClearOnInteraction]="showClearOnInteraction"
       [showSelectAll]="showSelectAll"
       [selectableGroups]="selectableGroups"
       [groupBy]="groupBy"
@@ -100,6 +101,7 @@ class TestHostComponent {
   allowMultiple = false;
   searchable = false;
   clearable = true;
+  showClearOnInteraction = false;
   showSelectAll = false;
   selectableGroups = false;
   groupBy: string | undefined = undefined;
@@ -405,6 +407,36 @@ describe("SelectComponent", () => {
       tick();
 
       expect(getClearButton()).toBeTruthy();
+    }));
+
+    it("applies the interaction modifier only to a filled clearable select when opted in", fakeAsync(() => {
+      const element = hostEl.querySelector("tedi-select") as HTMLElement;
+      host.showClearOnInteraction = true;
+      fixture.detectChanges();
+      expect(
+        element.classList.contains("tedi-select--clear-on-interaction"),
+      ).toBe(false);
+
+      host.control.setValue("Option 1");
+      fixture.detectChanges();
+      tick();
+      expect(
+        element.classList.contains("tedi-select--clear-on-interaction"),
+      ).toBe(true);
+      expect(getClearButton()).toBeTruthy();
+
+      host.clearable = false;
+      fixture.detectChanges();
+      expect(
+        element.classList.contains("tedi-select--clear-on-interaction"),
+      ).toBe(false);
+
+      host.clearable = true;
+      host.showClearOnInteraction = false;
+      fixture.detectChanges();
+      expect(
+        element.classList.contains("tedi-select--clear-on-interaction"),
+      ).toBe(false);
     }));
 
     it("should not show clear button when clearable=false", fakeAsync(() => {
