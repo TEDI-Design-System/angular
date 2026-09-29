@@ -1,3 +1,10 @@
+# [8.2.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.5...angular-8.2.0-rc.6) (2026-09-29)
+
+
+### Features
+
+* **carousel:** add floating buttons and bounded navigation [#528](https://github.com/TEDI-Design-System/angular/issues/528) ([#732](https://github.com/TEDI-Design-System/angular/issues/732)) ([d36eddd](https://github.com/TEDI-Design-System/angular/commit/d36eddd55ae5e80ba4ed14f558658c405f1fba55))
+
 # [8.2.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.4...angular-8.2.0-rc.5) (2026-09-29)
 
 
