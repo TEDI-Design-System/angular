@@ -8,7 +8,7 @@ import {
 import { ToggleComponent } from "./toggle.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 
