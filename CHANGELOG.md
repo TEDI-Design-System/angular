@@ -1,3 +1,10 @@
+# [8.2.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.4...angular-8.2.0-rc.5) (2026-09-29)
+
+
+### Bug Fixes
+
+* **modal:** let modals confirm before closing [#674](https://github.com/TEDI-Design-System/angular/issues/674) ([#709](https://github.com/TEDI-Design-System/angular/issues/709)) ([393e050](https://github.com/TEDI-Design-System/angular/commit/393e05048d2ac9eefd8984436cd8998efb81b52b))
+
 # [8.2.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.3...angular-8.2.0-rc.4) (2026-09-25)
 
 
