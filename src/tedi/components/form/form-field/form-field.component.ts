@@ -88,6 +88,12 @@ export class FormFieldComponent implements FieldContext {
    */
   clearable = input<boolean>(false);
   /**
+   * Show the clear button only while the filled field is hovered or focused.
+   * Requires `clearable`.
+   * @default false
+   */
+  showClearOnInteraction = input<boolean>(false);
+  /**
    * Custom CSS classes for the field box.
    *
    * @deprecated Style the control directly — it owns its own surface now.
@@ -232,6 +238,8 @@ export class FormFieldComponent implements FieldContext {
       "tedi-form-field--valid": this.validationState() === "valid",
       "tedi-form-field--invalid": this.validationState() === "invalid",
       "tedi-form-field--disabled": this.isDisabled(),
+      "tedi-form-field--clear-on-interaction":
+        this.showClearOnInteraction() && this.showClearButton(),
       "tedi-form-field--small": this.size() === "small",
       "tedi-form-field--large": this.size() === "large",
     };

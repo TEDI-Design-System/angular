@@ -112,6 +112,8 @@ export enum SpecialOptionControls {
   host: {
     class: "tedi-select",
     "[class.tedi-select--multiselect]": "allowMultiple()",
+    "[class.tedi-select--clear-on-interaction]":
+      "showClearOnInteraction() && clearable() && !!selectedValues().length",
   },
   providers: [
     {
@@ -191,6 +193,12 @@ export class SelectComponent<T = unknown>
    * @default false
    */
   clearable = input<boolean>(false);
+  /**
+   * Show the clear button only while the filled select is hovered or focused.
+   * Requires `clearable`.
+   * @default false
+   */
+  showClearOnInteraction = input<boolean>(false);
 
   /**
    * Element reference used to determine dropdown width.

@@ -5,6 +5,7 @@
   [size]="size()"
   [icon]="fieldIcon()"
   [clearable]="clearable() && !isDisabled()"
+  [showClearOnInteraction]="showClearOnInteraction()"
 >
   @if (label()) {
     <label tedi-label [for]="inputId()">

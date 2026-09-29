@@ -97,6 +97,16 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    showClearOnInteraction: {
+      description:
+        "Show the clear button only on hover or focus when the field has a value. Requires clearable.",
+      control: { type: "boolean" },
+      table: {
+        category: "Form Field inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     arrowsHidden: {
       description: "Whether to hide arrows for number inputs.",
       control: {
@@ -332,6 +342,18 @@ export const WithReactiveForms: StoryObj<TextFieldComponent> = {
 export const Standalone: StoryObj<TextFieldComponent> = {
   render: () => ({
     template: `<input tedi-text-field placeholder="No wrapper" />`,
+  }),
+};
+
+/** The clear button appears while the filled field is hovered or focused. */
+export const ClearButtonOnInteraction: StoryObj<TextFieldComponent> = {
+  render: () => ({
+    template: `
+      <tedi-form-field [clearable]="true" [showClearOnInteraction]="true">
+        <label tedi-label for="clear-on-interaction">Label</label>
+        <input tedi-text-field id="clear-on-interaction" [value]="'Text value'" />
+      </tedi-form-field>
+    `,
   }),
 };
 
