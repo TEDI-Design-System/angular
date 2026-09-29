@@ -1,3 +1,10 @@
+# [8.2.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.6...angular-8.2.0-rc.7) (2026-09-29)
+
+
+### Features
+
+* **form-field,select,search:** add clear button interaction option [#569](https://github.com/TEDI-Design-System/angular/issues/569) ([#737](https://github.com/TEDI-Design-System/angular/issues/737)) ([4f0f119](https://github.com/TEDI-Design-System/angular/commit/4f0f1197df899581d853626a15bce6f18c104bd1))
+
 # [8.2.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.5...angular-8.2.0-rc.6) (2026-09-29)
 
 
