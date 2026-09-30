@@ -35,7 +35,6 @@
   }
 
   &--with-week-numbers {
-
     .tedi-calendar-day-grid__header,
     .tedi-calendar-day-grid__row {
       grid-template-columns: repeat(8, var(--form-calendar-date-width));
@@ -189,5 +188,48 @@
     top: var(--tedi-borders-02);
     right: 0;
     pointer-events: none;
+  }
+}
+
+.tedi-calendar--full-width .tedi-calendar-day-grid {
+  width: 100%;
+
+  &__row {
+    min-height: var(--form-calendar-date-width);
+  }
+
+  &__header,
+  &__row {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  &--with-week-numbers {
+    .tedi-calendar-day-grid__header,
+    .tedi-calendar-day-grid__row {
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+  }
+
+  &__weekday,
+  &__week-number-header,
+  &__week-number {
+    width: 100%;
+  }
+
+  &__day {
+    width: min(100%, var(--form-calendar-date-width));
+    height: auto;
+    aspect-ratio: 1;
+
+    &--range-start,
+    &--range-end,
+    &--range-middle,
+    &--range-preview-start,
+    &--range-preview-end,
+    &--range-preview-middle {
+      width: 100%;
+      height: var(--form-calendar-date-width);
+      aspect-ratio: auto;
+    }
   }
 }

@@ -74,6 +74,7 @@ const YEAR_PAGE_SIZE = 12;
     "[class.tedi-calendar--multi-month]": "numberOfMonths() > 1",
     "[class.tedi-calendar--with-week-numbers]": "showWeekNumbers()",
     "[class.tedi-calendar--bordered]": "bordered()",
+    "[class.tedi-calendar--full-width]": "fullWidth()",
     "[style.--_tedi-calendar-month-count]": "numberOfMonths()",
   },
 })
@@ -125,6 +126,8 @@ export class CalendarComponent implements ControlValueAccessor {
    * DateField overlay).
    */
   readonly bordered = input<boolean>(true);
+  /** Fill the available container width, distributing day columns evenly. */
+  readonly fullWidth = input<boolean>(false);
   /**
    * Matchers that mark dates as disabled. Each matcher can be a `Date`, `Date[]`,
    * `{ before }`, `{ after }`, `{ before, after }`, `{ from, to? }`,

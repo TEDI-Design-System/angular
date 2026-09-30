@@ -35,6 +35,7 @@ export interface DateFieldModalData {
   showOutsideDays: boolean;
   showWeekNumbers: boolean;
   numberOfMonths: number;
+  calendarFullWidth: boolean;
   monthYearSelectType: "dropdown" | "grid";
   required: boolean;
   disabledMatchers: Matcher[];
@@ -62,7 +63,10 @@ export interface DateFieldModalData {
     TediTranslationPipe,
   ],
   template: `
-    <tedi-modal class="tedi-date-field-modal">
+    <tedi-modal
+      class="tedi-date-field-modal"
+      [class.tedi-date-field-modal--full-width]="data.calendarFullWidth"
+    >
       <tedi-modal-header>
         <h2>{{ "date-field.modal-title" | tediTranslate }}</h2>
       </tedi-modal-header>
@@ -77,6 +81,7 @@ export interface DateFieldModalData {
           [showOutsideDays]="data.showOutsideDays"
           [showWeekNumbers]="data.showWeekNumbers"
           [numberOfMonths]="data.numberOfMonths"
+          [fullWidth]="data.calendarFullWidth"
           [monthYearSelectType]="data.monthYearSelectType"
           [required]="data.required"
           [disabledMatchers]="data.disabledMatchers"
@@ -115,6 +120,10 @@ export interface DateFieldModalData {
         display: flex;
         align-items: center;
         justify-content: center;
+      }
+      .tedi-date-field-modal--full-width .tedi-date-field-modal__content {
+        align-items: stretch;
+        justify-content: flex-start;
       }
     `,
   ],
