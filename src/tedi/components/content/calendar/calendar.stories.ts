@@ -222,6 +222,16 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
+    fullWidth: {
+      description:
+        "Fill the parent width and distribute weekday/date columns evenly. Ordinary day buttons retain their usual size; range backgrounds span their columns.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     numberOfMonths: {
       description:
         "How many consecutive months to render side by side. Useful for date-range selection.",
@@ -365,6 +375,7 @@ export const Default: Story = {
     showWeekNumbers: false,
     showNavigation: true,
     numberOfMonths: 1,
+    fullWidth: false,
     required: false,
     inputDisabled: false,
   },
