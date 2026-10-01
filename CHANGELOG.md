@@ -1,3 +1,17 @@
+# [9.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.7...angular-9.0.0-rc.1) (2026-10-01)
+
+
+### Features
+
+* **form-field,date-field,time-field:** clearable set once on the form field [#572](https://github.com/TEDI-Design-System/angular/issues/572) ([#573](https://github.com/TEDI-Design-System/angular/issues/573)) ([8c98710](https://github.com/TEDI-Design-System/angular/commit/8c98710e1afecefe2518a53bd9f8c6dc6934631d))
+
+
+### BREAKING CHANGES
+
+* **form-field,date-field,time-field:** tedi-form-field's clearable now defaults to true, so text
+fields that previously showed no clear button now show one once they have a
+value. Textareas never show one. Pass [clearable]="false" to opt out.
+
 # [8.2.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.6...angular-8.2.0-rc.7) (2026-09-29)
 
 
