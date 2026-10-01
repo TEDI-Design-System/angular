@@ -3986,3 +3986,88 @@ describe("SelectComponent with an empty-string value", () => {
     expect(shownText("multiple")).toContain("Vali...");
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [SelectComponent, ReactiveFormsModule],
+  template: `
+    <tedi-select
+      inputId="multi-empty-option"
+      [allowMultiple]="true"
+      [showSelectAll]="true"
+      [selectableGroups]="true"
+      groupBy="group"
+      [options]="options"
+      bindLabel="label"
+      bindValue="value"
+      [formControl]="control"
+    />
+  `,
+})
+class MultiEmptyOptionHostComponent {
+  options = [
+    { label: "None", value: "", group: "A" },
+    { label: "One", value: "one", group: "A" },
+    { label: "Two", value: "two", group: "A" },
+  ];
+  control = new FormControl<string[]>([]);
+}
+
+describe("SelectComponent multiselect with an option whose value is ''", () => {
+  let fixture: ComponentFixture<MultiEmptyOptionHostComponent>;
+  let host: MultiEmptyOptionHostComponent;
+  let select: SelectComponent;
+
+  const render = () => {
+    fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
+  };
+
+  beforeEach(fakeAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [MultiEmptyOptionHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    fixture = TestBed.createComponent(MultiEmptyOptionHostComponent);
+    host = fixture.componentInstance;
+    render();
+    select = fixture.debugElement.query(By.directive(SelectComponent))
+      .componentInstance as SelectComponent;
+  }));
+
+  it("never selects the '' option on click", fakeAsync(() => {
+    select.onVirtualOptionClick(select.normalizedOptions()[0]);
+    render();
+    expect(select.selectedValues()).toEqual([]);
+    expect(host.control.value).toEqual([]);
+  }));
+
+  it("never selects it through the listbox either", fakeAsync(() => {
+    select.handleValueChange({ value: ["", "one"] });
+    render();
+    expect(select.selectedValues()).toEqual(["one"]);
+    expect(host.control.value).toEqual(["one"]);
+  }));
+
+  it("leaves it out of select all, so select all can be toggled off again", fakeAsync(() => {
+    select.onVirtualSelectAllClick();
+    render();
+    expect(select.selectedValues()).toEqual(["one", "two"]);
+    expect(select.allOptionsSelected()).toBe(true);
+
+    select.onVirtualSelectAllClick();
+    render();
+    expect(select.selectedValues()).toEqual([]);
+  }));
+
+  it("leaves it out of group selection", fakeAsync(() => {
+    select.handleValueChange({
+      value: [SpecialOptionControls.SELECT_GROUP + "A"],
+    });
+    render();
+    expect(select.selectedValues()).toEqual(["one", "two"]);
+    expect(select.isGroupSelected("A")).toBe(true);
+    expect(select.isGroupIndeterminate("A")).toBe(false);
+  }));
+});
