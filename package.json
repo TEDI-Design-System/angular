@@ -74,7 +74,7 @@
     "@schematics/angular": "20.3.27",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
-    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/git": "^11.0.1",
     "@semantic-release/npm": "^13.1.5",
     "@storybook/addon-a11y": "^10.4.3",
     "@storybook/addon-docs": "^10.5.10",
