@@ -45,8 +45,8 @@ import { LabelComponent } from "../../content/label/label.component";
 import { LabelRowComponent } from "../label-row/label-row.component";
 import { TagComponent, TagEllipsis } from "../../tags/tag/tag.component";
 import { EllipsisComponent, EllipsisPosition } from "../../helpers/ellipsis";
-import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
+import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
+import { OptionContentLabelComponent } from "../../helpers/option-content/option-content-label.component";
 import {
   SelectOptionTemplateDirective,
   SelectValueTemplateDirective,
@@ -100,8 +100,8 @@ export enum SpecialOptionControls {
     TextComponent,
     TagComponent,
     TediTranslationPipe,
-    DropdownItemValueComponent,
-    DropdownItemValueLabelComponent,
+    OptionContentComponent,
+    OptionContentLabelComponent,
     EllipsisComponent,
   ],
   templateUrl: "./select.component.html",

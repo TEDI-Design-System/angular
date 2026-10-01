@@ -18,9 +18,9 @@ import {
   TextGroupLabelComponent,
   TextGroupValueComponent,
 } from "../../content/text-group";
-import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
-import { DropdownItemValueMetaComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-meta.component";
+import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
+import { OptionContentLabelComponent } from "../../helpers/option-content/option-content-label.component";
+import { OptionContentMetaComponent } from "../../helpers/option-content/option-content-meta.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 import { Component, signal } from "@angular/core";
 import { AlertComponent } from "../../notifications/alert/alert.component";
@@ -77,9 +77,9 @@ const meta: Meta<SelectComponent> = {
         TextGroupComponent,
         TextGroupLabelComponent,
         TextGroupValueComponent,
-        DropdownItemValueComponent,
-        DropdownItemValueLabelComponent,
-        DropdownItemValueMetaComponent,
+        OptionContentComponent,
+        OptionContentLabelComponent,
+        OptionContentMetaComponent,
         IconComponent,
         ButtonComponent,
         VerticalSpacingDirective,
@@ -905,10 +905,10 @@ export const Examples: Story = {
           [clearable]="false"
         >
           <ng-template tediSelectOption let-item>
-            <tedi-dropdown-item-value layout="vertical">
-              <tedi-dropdown-item-value-label>{{ item.title }}</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+            <tedi-option-content layout="vertical">
+              <tedi-option-content-label>{{ item.title }}</tedi-option-content-label>
+              <tedi-option-content-meta>{{ item.description }}</tedi-option-content-meta>
+            </tedi-option-content>
           </ng-template>
         </tedi-select>
         <tedi-select
@@ -957,10 +957,10 @@ export const Examples: Story = {
           [clearable]="false"
         >
           <ng-template tediSelectOption let-item>
-            <tedi-dropdown-item-value>
-              <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>{{ item.slots }} vaba aega</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+            <tedi-option-content>
+              <tedi-option-content-label>{{ item.name }}</tedi-option-content-label>
+              <tedi-option-content-meta>{{ item.slots }} vaba aega</tedi-option-content-meta>
+            </tedi-option-content>
           </ng-template>
         </tedi-select>
         <tedi-select
@@ -973,9 +973,9 @@ export const Examples: Story = {
           [clearable]="false"
         >
           <ng-template tediSelectOption let-item let-selected="selected">
-            <tedi-dropdown-item-value type="radio" layout="vertical" [selected]="selected">
-              <tedi-dropdown-item-value-label>{{ item.title }}</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+            <tedi-option-content type="radio" layout="vertical" [selected]="selected">
+              <tedi-option-content-label>{{ item.title }}</tedi-option-content-label>
+            </tedi-option-content>
           </ng-template>
         </tedi-select>
         <tedi-select
@@ -989,10 +989,10 @@ export const Examples: Story = {
           [clearable]="true"
         >
           <ng-template tediSelectOption let-item let-selected="selected">
-            <tedi-dropdown-item-value type="checkbox" layout="vertical" [selected]="selected">
-              <tedi-dropdown-item-value-label>{{ item.title }}</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+            <tedi-option-content type="checkbox" layout="vertical" [selected]="selected">
+              <tedi-option-content-label>{{ item.title }}</tedi-option-content-label>
+              <tedi-option-content-meta>{{ item.description }}</tedi-option-content-meta>
+            </tedi-option-content>
           </ng-template>
         </tedi-select>
       </div>
@@ -1007,9 +1007,9 @@ export const Examples: Story = {
     SelectComponent,
     SelectOptionTemplateDirective,
     ReactiveFormsModule,
-    DropdownItemValueComponent,
-    DropdownItemValueLabelComponent,
-    DropdownItemValueMetaComponent,
+    OptionContentComponent,
+    OptionContentLabelComponent,
+    OptionContentMetaComponent,
     VerticalSpacingDirective,
     AlertComponent,
     TextComponent,
@@ -1031,14 +1031,14 @@ export const Examples: Story = {
         formControlName="location"
       >
         <ng-template tediSelectOption let-item>
-          <tedi-dropdown-item-value>
-            <tedi-dropdown-item-value-label>{{
+          <tedi-option-content>
+            <tedi-option-content-label>{{
               item.name
-            }}</tedi-dropdown-item-value-label>
-            <tedi-dropdown-item-value-meta
-              >{{ item.slots }} kohta</tedi-dropdown-item-value-meta
+            }}</tedi-option-content-label>
+            <tedi-option-content-meta
+              >{{ item.slots }} kohta</tedi-option-content-meta
             >
-          </tedi-dropdown-item-value>
+          </tedi-option-content>
         </ng-template>
       </tedi-select>
 
@@ -1052,18 +1052,18 @@ export const Examples: Story = {
         formControlName="access"
       >
         <ng-template tediSelectOption let-item let-selected="selected">
-          <tedi-dropdown-item-value
+          <tedi-option-content
             type="radio"
             layout="vertical"
             [selected]="selected"
           >
-            <tedi-dropdown-item-value-label>{{
+            <tedi-option-content-label>{{
               item.title
-            }}</tedi-dropdown-item-value-label>
-            <tedi-dropdown-item-value-meta>{{
+            }}</tedi-option-content-label>
+            <tedi-option-content-meta>{{
               item.description
-            }}</tedi-dropdown-item-value-meta>
-          </tedi-dropdown-item-value>
+            }}</tedi-option-content-meta>
+          </tedi-option-content>
         </ng-template>
       </tedi-select>
 
@@ -1079,18 +1079,18 @@ export const Examples: Story = {
         formControlName="permissions"
       >
         <ng-template tediSelectOption let-item let-selected="selected">
-          <tedi-dropdown-item-value
+          <tedi-option-content
             type="checkbox"
             layout="vertical"
             [selected]="selected"
           >
-            <tedi-dropdown-item-value-label>{{
+            <tedi-option-content-label>{{
               item.title
-            }}</tedi-dropdown-item-value-label>
-            <tedi-dropdown-item-value-meta>{{
+            }}</tedi-option-content-label>
+            <tedi-option-content-meta>{{
               item.description
-            }}</tedi-dropdown-item-value-meta>
-          </tedi-dropdown-item-value>
+            }}</tedi-option-content-meta>
+          </tedi-option-content>
         </ng-template>
       </tedi-select>
 
@@ -1194,9 +1194,9 @@ interface PermissionOption {
   imports: [
     SelectComponent,
     SelectOptionTemplateDirective,
-    DropdownItemValueComponent,
-    DropdownItemValueLabelComponent,
-    DropdownItemValueMetaComponent,
+    OptionContentComponent,
+    OptionContentLabelComponent,
+    OptionContentMetaComponent,
   ],
   template: `
     <tedi-select
@@ -1213,18 +1213,18 @@ interface PermissionOption {
       [searchFn]="searchFn"
     >
       <ng-template tediSelectOption let-item let-selected="selected">
-        <tedi-dropdown-item-value
+        <tedi-option-content
           type="checkbox"
           layout="vertical"
           [selected]="selected"
         >
-          <tedi-dropdown-item-value-label>{{
+          <tedi-option-content-label>{{
             item.title
-          }}</tedi-dropdown-item-value-label>
-          <tedi-dropdown-item-value-meta>{{
+          }}</tedi-option-content-label>
+          <tedi-option-content-meta>{{
             item.description
-          }}</tedi-dropdown-item-value-meta>
-        </tedi-dropdown-item-value>
+          }}</tedi-option-content-meta>
+        </tedi-option-content>
       </ng-template>
     </tedi-select>
   `,
@@ -1396,7 +1396,7 @@ export const VirtualScroll: Story = {
         story:
           "Renders a select with **5000 options** in single, searchable and multiselect modes, with " +
           "`virtualScroll` enabled so only the rows in view exist in the DOM. Each option uses a full " +
-          "`tedi-dropdown-item-value` template (icon + label + meta, plus a radio/checkbox indicator) " +
+          "`tedi-option-content` template (icon + label + meta, plus a radio/checkbox indicator) " +
           "to mirror real-world usage.",
       },
     },
@@ -1418,11 +1418,11 @@ export const VirtualScroll: Story = {
           [virtualScroll]="true"
         >
           <ng-template tediSelectOption let-item let-selected="selected">
-            <tedi-dropdown-item-value type="radio" [selected]="selected">
+            <tedi-option-content type="radio" [selected]="selected">
               <tedi-icon [name]="item.icon" [size]="18" />
-              <tedi-dropdown-item-value-label>{{ item.label }}</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+              <tedi-option-content-label>{{ item.label }}</tedi-option-content-label>
+              <tedi-option-content-meta>{{ item.description }}</tedi-option-content-meta>
+            </tedi-option-content>
           </ng-template>
         </tedi-select>
         <tedi-select
@@ -1437,11 +1437,11 @@ export const VirtualScroll: Story = {
           [virtualScroll]="true"
         >
           <ng-template tediSelectOption let-item let-selected="selected">
-            <tedi-dropdown-item-value type="radio" [selected]="selected">
+            <tedi-option-content type="radio" [selected]="selected">
               <tedi-icon [name]="item.icon" [size]="18" />
-              <tedi-dropdown-item-value-label>{{ item.label }}</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+              <tedi-option-content-label>{{ item.label }}</tedi-option-content-label>
+              <tedi-option-content-meta>{{ item.description }}</tedi-option-content-meta>
+            </tedi-option-content>
           </ng-template>
         </tedi-select>
         <tedi-select
@@ -1459,11 +1459,11 @@ export const VirtualScroll: Story = {
           [virtualScroll]="true"
         >
           <ng-template tediSelectOption let-item let-selected="selected">
-            <tedi-dropdown-item-value type="checkbox" [selected]="selected">
+            <tedi-option-content type="checkbox" [selected]="selected">
               <tedi-icon [name]="item.icon" [size]="18" />
-              <tedi-dropdown-item-value-label>{{ item.label }}</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>{{ item.description }}</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+              <tedi-option-content-label>{{ item.label }}</tedi-option-content-label>
+              <tedi-option-content-meta>{{ item.description }}</tedi-option-content-meta>
+            </tedi-option-content>
           </ng-template>
         </tedi-select>
       </div>

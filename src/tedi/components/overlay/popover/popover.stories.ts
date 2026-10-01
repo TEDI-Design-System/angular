@@ -15,8 +15,8 @@ import { ToggleComponent } from "../../form/toggle/toggle.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { EmptyStateComponent } from "../../content/empty-state/empty-state.component";
 import { LabelComponent } from "../../content/label/label.component";
-import { DropdownItemValueComponent } from "../dropdown/dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "../dropdown/dropdown-item-value/dropdown-item-value-label.component";
+import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
+import { OptionContentLabelComponent } from "../../helpers/option-content/option-content-label.component";
 import { SearchComponent } from "../../form/search/search.component";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
@@ -104,8 +104,8 @@ export default {
         EmptyStateComponent,
         LabelComponent,
         SearchComponent,
-        DropdownItemValueComponent,
-        DropdownItemValueLabelComponent,
+        OptionContentComponent,
+        OptionContentLabelComponent,
       ],
     }),
   ],
@@ -522,29 +522,29 @@ export const WithProminentBorder: Story = {
             <tedi-popover-content maxWidth="small" class="story-popover-content--menu">
               <div style="display: flex; flex-direction: column;">
                 <div style="border-bottom: 1px solid var(--general-border-primary); padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);">
-                  <tedi-dropdown-item-value>
-                    <tedi-dropdown-item-value-label>Minu profiil</tedi-dropdown-item-value-label>
-                  </tedi-dropdown-item-value>
+                  <tedi-option-content>
+                    <tedi-option-content-label>Minu profiil</tedi-option-content-label>
+                  </tedi-option-content>
                 </div>
                 <div style="border-bottom: 1px solid var(--general-border-primary); padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);">
-                  <tedi-dropdown-item-value>
-                    <tedi-dropdown-item-value-label>Esindatavad</tedi-dropdown-item-value-label>
-                  </tedi-dropdown-item-value>
+                  <tedi-option-content>
+                    <tedi-option-content-label>Esindatavad</tedi-option-content-label>
+                  </tedi-option-content>
                 </div>
                 <div style="border-bottom: 1px solid var(--general-border-primary); padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);">
-                  <tedi-dropdown-item-value>
-                    <tedi-dropdown-item-value-label>Kontaktid</tedi-dropdown-item-value-label>
-                  </tedi-dropdown-item-value>
+                  <tedi-option-content>
+                    <tedi-option-content-label>Kontaktid</tedi-option-content-label>
+                  </tedi-option-content>
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--general-border-primary); padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);">
                   <label tedi-label for="header-popover-dark-mode">Tume režiim</label>
                   <tedi-toggle inputId="header-popover-dark-mode" />
                 </div>
                 <div style="padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);">
-                  <tedi-dropdown-item-value>
+                  <tedi-option-content>
                     <tedi-icon name="logout" [size]="18" color="secondary" />
-                    <tedi-dropdown-item-value-label>Logi välja</tedi-dropdown-item-value-label>
-                  </tedi-dropdown-item-value>
+                    <tedi-option-content-label>Logi välja</tedi-option-content-label>
+                  </tedi-option-content>
                 </div>
               </div>
             </tedi-popover-content>

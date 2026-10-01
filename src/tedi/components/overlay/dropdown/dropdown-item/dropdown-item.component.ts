@@ -18,15 +18,15 @@ import {
   DropdownApi,
   DropdownContentApi,
 } from "../dropdown.tokens";
-import { DropdownItemValueComponent } from "../dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "../dropdown-item-value/dropdown-item-value-label.component";
+import { OptionContentComponent } from "../../../helpers/option-content/option-content.component";
+import { OptionContentLabelComponent } from "../../../helpers/option-content/option-content-label.component";
 
 const INTERACTIVE_CONTENT_SELECTOR = "a[href], button";
 
 @Component({
   selector: "li[tedi-dropdown-item]",
   standalone: true,
-  imports: [DropdownItemValueComponent, DropdownItemValueLabelComponent],
+  imports: [OptionContentComponent, OptionContentLabelComponent],
   templateUrl: "./dropdown-item.component.html",
   styleUrl: "./dropdown-item.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -87,8 +87,8 @@ export class DropdownItemComponent {
   readonly dropdown = inject<DropdownApi>(DROPDOWN_API);
   readonly dropdownContent = inject<DropdownContentApi>(DROPDOWN_CONTENT_API);
 
-  /** Check if custom dropdown-item-value is provided */
-  readonly customItemValue = contentChild(DropdownItemValueComponent);
+  /** Check if custom option content is provided */
+  readonly customOptionContent = contentChild(OptionContentComponent);
 
   private readonly renderer = inject(Renderer2);
   private readonly destroyRef = inject(DestroyRef);
