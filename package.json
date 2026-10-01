@@ -72,7 +72,7 @@
     "@eslint/js": "^9.39.4",
     "@etchteam/storybook-addon-status": "^8.1.0",
     "@schematics/angular": "20.3.27",
-    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/changelog": "^7.0.0",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^11.0.1",
     "@semantic-release/npm": "^13.1.5",
