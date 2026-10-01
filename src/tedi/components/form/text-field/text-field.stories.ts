@@ -87,12 +87,24 @@ export default {
     },
     clearable: {
       description:
-        "Whether the field shows a clear button once it holds a value.",
+        "Whether the field shows a clear button once it has a value. Set `false` to opt out. Hidden while the text field is read-only.",
       control: {
         type: "boolean",
       },
       table: {
         category: "Form Field inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    readOnly: {
+      description:
+        "Makes the field read-only, like the native `readonly` attribute, which is also accepted. The value can still be selected and submitted, but not edited, and a wrapping form field hides its clear button.",
+      control: {
+        type: "boolean",
+      },
+      table: {
+        category: "Text Field inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
@@ -134,18 +146,20 @@ export const Default: StoryObj = {
   parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
-    clearable: false,
+    clearable: true,
     arrowsHidden: true,
+    readOnly: false,
   },
-  render: ({ arrowsHidden, ...formFieldArgs }) => ({
+  render: ({ arrowsHidden, readOnly, ...formFieldArgs }) => ({
     props: {
       arrowsHidden,
+      readOnly,
       ...formFieldArgs,
     },
     template: `
       <tedi-form-field ${argsToTemplate(formFieldArgs)}>
         <label tedi-label [for]="'default'">Label</label>
-        <input tedi-text-field [arrowsHidden]="arrowsHidden" (clear)="clear($event)" id="default" />
+        <input tedi-text-field [arrowsHidden]="arrowsHidden" [readOnly]="readOnly" (clear)="clear($event)" id="default" />
       </tedi-form-field>
     `,
   }),

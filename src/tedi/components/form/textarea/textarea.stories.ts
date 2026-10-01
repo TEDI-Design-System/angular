@@ -83,6 +83,18 @@ export default {
         type: { summary: "number | undefined" },
       },
     },
+    readOnly: {
+      description:
+        "Makes the field read-only, like the native `readonly` attribute, which is also accepted. The value can still be selected and submitted, but not edited.",
+      control: {
+        type: "boolean",
+      },
+      table: {
+        category: "Textarea inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     placeholder: {
       control: "text",
       description: "Placeholder text shown when the textarea is empty.",
@@ -164,8 +176,10 @@ export const Default: StoryObj = {
     autoGrow: false,
     minRows: 3,
     maxRows: 12,
+    readOnly: false,
   },
   render: ({
+    readOnly,
     resizable,
     placeholder,
     autoGrow,
@@ -176,6 +190,7 @@ export const Default: StoryObj = {
     ...formFieldArgs
   }) => ({
     props: {
+      readOnly,
       resizable,
       placeholder,
       autoGrow,
@@ -197,6 +212,7 @@ export const Default: StoryObj = {
           [maxRows]="maxRows"
           [height]="height"
           [maxHeight]="maxHeight"
+          [readOnly]="readOnly"
           [attr.placeholder]="placeholder"
         ></textarea>
       </tedi-form-field>
