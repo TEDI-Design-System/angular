@@ -10,6 +10,7 @@ import {
 } from "@angular/cdk/scrolling";
 import {
   AfterContentChecked,
+  booleanAttribute,
   AfterViewChecked,
   ChangeDetectionStrategy,
   Component,
@@ -190,9 +191,9 @@ export class SelectComponent<T = unknown>
 
   /**
    * Whether to show a clear button when a value is selected.
-   * @default false
+   * @default true
    */
-  clearable = input<boolean>(false);
+  clearable = input(true, { transform: booleanAttribute });
   /**
    * Show the clear button only while the filled select is hovered or focused.
    * Requires `clearable`.
@@ -242,6 +243,10 @@ export class SelectComponent<T = unknown>
    * Selected value, for use without a form directive. An array in multi-select
    * mode, the bare value otherwise. Unlike `[ngModel]` it applies on the first
    * render rather than a frame later. Do not combine with a form directive.
+   *
+   * `null`, `undefined` and `''` all mean nothing is selected, so
+   * `new FormControl('')` and `new FormControl(null)` both start the select empty,
+   * showing its placeholder.
    */
   value = input<unknown>(undefined);
 
@@ -1211,7 +1216,7 @@ export class SelectComponent<T = unknown>
   }
 
   private selectSingleValue(value: unknown): void {
-    this.selectedValues.set([value]);
+    this.selectedValues.set(this.toSelection(value, false));
     this.onChange(value);
     this.selectionChange.emit(value as T);
     if (this.clearSearchOnSelect()) this.searchTerm.set("");
@@ -1364,7 +1369,7 @@ export class SelectComponent<T = unknown>
       }
     } else {
       const selected = values[0] ?? null;
-      this.selectedValues.set(selected != null ? [selected] : []);
+      this.selectedValues.set(this.toSelection(selected, false));
       this.onChange(selected);
       this.selectionChange.emit(selected as T | null);
       if (this.clearSearchOnSelect()) {
@@ -1658,11 +1663,16 @@ export class SelectComponent<T = unknown>
   onChange: (value: unknown) => void = () => {};
   onTouched: () => void = () => {};
 
+  /**
+   * `null`, `undefined` and `''` all mean nothing is selected, since `''` is a common
+   * form default for "no value" (`new FormControl('')`). Picking an option whose
+   * value is `''` therefore leaves nothing selected too.
+   */
   private toSelection(value: unknown, allowMultiple: boolean): unknown[] {
     if (allowMultiple) {
-      return Array.isArray(value) ? value : [];
+      return Array.isArray(value) ? value.filter((v) => v !== "") : [];
     }
-    return value != null ? [value] : [];
+    return value != null && value !== "" ? [value] : [];
   }
 
   writeValue(value: unknown): void {
