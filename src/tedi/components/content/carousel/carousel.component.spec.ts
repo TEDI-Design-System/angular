@@ -29,6 +29,63 @@ function dispatchPointerLike(
   return ev;
 }
 
+/**
+ * Simulates a released drag: the track moved from `from` to `to` (in slides), the pointer
+ * moved `dx` px (negative is towards the next slide) over `ms` milliseconds, and was
+ * released at `releasedAt` ms (defaults to right after the last move).
+ */
+function releaseDrag(
+  component: CarouselContentComponent,
+  {
+    from,
+    to,
+    dx,
+    ms,
+    releasedAt,
+  }: { from: number; to: number; dx: number; ms: number; releasedAt?: number },
+) {
+  const drag = component as unknown as Record<string, unknown>;
+  component.dragging = true;
+  drag["startIndex"] = from;
+  drag["startX"] = 500;
+  drag["lastX"] = 500 + dx;
+  drag["lastTime"] = ms;
+  drag["samples"] = [
+    { x: 500, t: 0 },
+    { x: 500 + dx, t: ms },
+  ];
+  component.trackIndex.set(to);
+  component.onPointerUp({ timeStamp: releasedAt ?? ms } as PointerEvent);
+}
+
+/**
+ * Drives the real pointer handlers: presses at the first `[x, timeStamp]` point, moves
+ * through the rest, then ends with `end` at `endAt` ms (a `pointerup` at `endX`, which
+ * defaults to the last point).
+ */
+function gesture(
+  component: CarouselContentComponent,
+  points: [number, number][],
+  end: "pointerup" | "pointercancel" | "lostpointercapture",
+  endAt: number,
+  endX = points[points.length - 1][0],
+) {
+  const [[x0, t0], ...moves] = points;
+  component.onPointerDown({
+    clientX: x0,
+    pointerId: 1,
+    timeStamp: t0,
+  } as PointerEvent);
+  for (const [x, t] of moves) {
+    component.onPointerMove({ clientX: x, timeStamp: t } as PointerEvent);
+  }
+  if (end === "pointerup") {
+    component.onPointerUp({ clientX: endX, timeStamp: endAt } as PointerEvent);
+  } else {
+    component.onPointerCancel();
+  }
+}
+
 describe("CarouselContentComponent", () => {
   let fixture: ComponentFixture<CarouselContentComponent>;
   let component: CarouselContentComponent;
@@ -288,13 +345,214 @@ describe("CarouselContentComponent", () => {
   });
 
   it("should handle pointer up and stop dragging", () => {
-    component.dragging = true;
     component.animate.set(false);
-    component.trackIndex.set(1.6);
-    component.onPointerUp();
+    releaseDrag(component, { from: 0, to: 1.6, dx: -600, ms: 2000 });
     expect(component.dragging).toBe(false);
     expect(component.animate()).toBe(true);
-    expect(component.trackIndex()).toBe(Math.round(1.6));
+    expect(component.trackIndex()).toBe(2);
+  });
+
+  describe("swipe release", () => {
+    beforeEach(() => {
+      component.viewportWidth.set(1000);
+    });
+
+    it("defaults the threshold to 0.3 of a slide", () => {
+      expect(component.swipeThreshold()).toBe(0.3);
+    });
+
+    it.each([
+      ["forwards past the threshold", 1, 1.35, -350, 2],
+      ["forwards short of the threshold", 1, 1.25, -250, 1],
+      ["backwards past the threshold", 1, 0.65, 350, 0],
+      ["backwards short of the threshold", 1, 0.75, 250, 1],
+    ])("moves on a slow drag %s", (_, from, to, dx, expected) => {
+      releaseDrag(component, { from, to, dx, ms: 2000 });
+
+      expect(component.trackIndex()).toBe(expected);
+    });
+
+    it("counts each whole slide dragged, plus the remainder past the threshold", () => {
+      releaseDrag(component, { from: 0, to: 1.2, dx: -1200, ms: 3000 });
+      expect(component.trackIndex()).toBe(1);
+
+      releaseDrag(component, { from: 0, to: 1.4, dx: -1400, ms: 3000 });
+      expect(component.trackIndex()).toBe(2);
+    });
+
+    it("moves one slide on a quick flick, however short", () => {
+      // 40px in 20ms is ~2 slides per second.
+      releaseDrag(component, { from: 1, to: 1.04, dx: -40, ms: 20 });
+      expect(component.trackIndex()).toBe(2);
+
+      releaseDrag(component, { from: 1, to: 0.96, dx: 40, ms: 20 });
+      expect(component.trackIndex()).toBe(0);
+    });
+
+    it("does not treat a slow short drag as a flick", () => {
+      releaseDrag(component, { from: 1, to: 1.04, dx: -40, ms: 400 });
+
+      expect(component.trackIndex()).toBe(1);
+    });
+
+    it("does not treat a drag without a measurable duration as a flick", () => {
+      releaseDrag(component, { from: 1, to: 1.04, dx: -40, ms: 0 });
+
+      expect(component.trackIndex()).toBe(1);
+    });
+
+    it("does not count a quick move followed by a hold as a flick", () => {
+      releaseDrag(component, {
+        from: 1,
+        to: 1.04,
+        dx: -40,
+        ms: 20,
+        releasedAt: 1000,
+      });
+
+      expect(component.trackIndex()).toBe(1);
+    });
+
+    it("does not add a step for an exact whole-slide drag at threshold 0", () => {
+      fixture.componentRef.setInput("swipeThreshold", 0);
+      fixture.detectChanges();
+      // One slide is 1000px plus the 16px gap.
+      releaseDrag(component, { from: 0, to: 1, dx: -1016, ms: 2000 });
+
+      expect(component.trackIndex()).toBe(1);
+    });
+
+    describe("with the real pointer handlers", () => {
+      beforeEach(() => {
+        Object.defineProperty(component, "slides", {
+          configurable: true,
+          value: () => Array.from({ length: 5 }, () => ({})),
+        });
+        hostElement.setPointerCapture = jest.fn();
+      });
+
+      // 80px in 40ms is ~2 slides per second; a slide is 1016px here.
+      const quickSwipe: [number, number][] = [
+        [500, 0],
+        [460, 20],
+        [420, 40],
+      ];
+
+      it("moves on a quick swipe released normally", () => {
+        gesture(component, quickSwipe, "pointerup", 41);
+
+        expect(component.trackIndex()).toBe(1);
+      });
+
+      it.each(["pointercancel", "lostpointercapture"] as const)(
+        "returns to the start when the drag ends with %s",
+        (end) => {
+          // The browser took over, e.g. to scroll the page; not a swipe.
+          gesture(component, quickSwipe, end, 41);
+
+          expect(component.dragging).toBe(false);
+          expect(component.trackIndex()).toBe(0);
+        },
+      );
+
+      it("keeps a released swipe when lostpointercapture follows pointerup", () => {
+        gesture(component, quickSwipe, "pointerup", 41);
+        component.onPointerCancel();
+
+        expect(component.trackIndex()).toBe(1);
+      });
+
+      it("detects a quick swipe after holding the pointer down", () => {
+        gesture(
+          component,
+          [
+            [500, 0],
+            [500, 600],
+            [460, 620],
+            [420, 640],
+          ],
+          "pointerup",
+          641,
+        );
+
+        expect(component.trackIndex()).toBe(1);
+      });
+
+      it("counts movement that only the release event reports", () => {
+        // After a hold, one move is seen; the pointer moves 40px more before release
+        // without another pointermove.
+        gesture(
+          component,
+          [
+            [500, 0],
+            [460, 620],
+          ],
+          "pointerup",
+          640,
+          420,
+        );
+
+        expect(component.trackIndex()).toBe(1);
+      });
+
+      it("ignores a quick jitter at the end of a slow drag", () => {
+        gesture(
+          component,
+          [
+            [500, 0],
+            [400, 1000],
+            [300, 2000],
+            [297, 2005],
+          ],
+          "pointerup",
+          2006,
+        );
+
+        expect(component.trackIndex()).toBe(0);
+      });
+
+      it("does not flick when the quick movement reverses the drag", () => {
+        gesture(
+          component,
+          [
+            [500, 0],
+            [300, 1500],
+            [340, 1530],
+            [380, 1560],
+          ],
+          "pointerup",
+          1561,
+        );
+
+        expect(component.trackIndex()).toBe(0);
+      });
+    });
+
+    it("ignores taps and jitter under 10px, even when quick", () => {
+      releaseDrag(component, { from: 1, to: 1.009, dx: -9, ms: 5 });
+
+      expect(component.trackIndex()).toBe(1);
+    });
+
+    it("uses a custom threshold", () => {
+      fixture.componentRef.setInput("swipeThreshold", 0.1);
+      fixture.detectChanges();
+
+      releaseDrag(component, { from: 1, to: 1.15, dx: -150, ms: 2000 });
+
+      expect(component.trackIndex()).toBe(2);
+    });
+
+    it.each([
+      [2, 1],
+      [-1, 0],
+      ["0.5", 0.5],
+    ])("keeps the threshold between 0 and 1 (%s → %s)", (value, expected) => {
+      fixture.componentRef.setInput("swipeThreshold", value);
+      fixture.detectChanges();
+
+      expect(component.swipeThreshold()).toBe(expected);
+    });
   });
 
   it("should compute trackStyle correctly with viewportWidth set", () => {
@@ -1226,17 +1484,27 @@ describe("CarouselContentComponent", () => {
       expect(component.trackIndex()).toBe(2.5);
     });
 
+    // The final gap, 2 → 2.5, is half a slide, so 0.3 of it is 0.15.
     it.each([
-      [2.2, 2],
-      [2.3, 2.5],
-      [0.4, 0],
-      [0.6, 1],
-    ])("snaps a drag released at %s to %s", (released, expected) => {
-      component.dragging = true;
-      component.trackIndex.set(released);
-      component.onPointerUp();
+      [2, 2.1, -50, 2],
+      [2, 2.2, -100, 2.5],
+      [2.5, 2.4, 50, 2.5],
+      [2.5, 2.3, 100, 2],
+      [0, 0.2, -100, 0],
+      [0, 0.6, -300, 1],
+    ])(
+      "settles a slow drag from %s released at %s on a stop position",
+      (from, to, dx, expected) => {
+        releaseDrag(component, { from, to, dx, ms: 2000 });
 
-      expect(component.trackIndex()).toBe(expected);
+        expect(component.trackIndex()).toBe(expected);
+      },
+    );
+
+    it("does not step past the end on a long drag", () => {
+      releaseDrag(component, { from: 2, to: 2.5, dx: -1500, ms: 2000 });
+
+      expect(component.trackIndex()).toBe(2.5);
     });
 
     it("stays at the fractional end when wheel scrolling past it", () => {
@@ -1270,6 +1538,27 @@ describe("CarouselContentComponent", () => {
       expect(component.trackIndex()).toBeCloseTo(2.1);
       expect(component.positionCount()).toBe(4);
       expect(component.activePosition()).toBe(3);
+    });
+
+    it("reaches and leaves the short final step with a slow swipe", () => {
+      component.viewportWidth.set(1000);
+
+      // Only 0.1 of a slide separates 2 and the end at 2.1.
+      releaseDrag(component, { from: 2, to: 2.1, dx: -60, ms: 2000 });
+      expect(component.trackIndex()).toBeCloseTo(2.1);
+
+      releaseDrag(component, { from: 2.1, to: 2, dx: 60, ms: 2000 });
+      expect(component.trackIndex()).toBe(2);
+    });
+
+    it("stays at the end on a quick swipe towards it", () => {
+      component.viewportWidth.set(1000);
+      component.trackIndex.set(2.1);
+
+      // The track is already clamped, so only the pointer shows the direction.
+      releaseDrag(component, { from: 2.1, to: 2.1, dx: -40, ms: 20 });
+
+      expect(component.trackIndex()).toBeCloseTo(2.1);
     });
 
     it("keeps the whole position active until the end is nearer", () => {

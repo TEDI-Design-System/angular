@@ -13,6 +13,7 @@ import {
   input,
   inject,
   booleanAttribute,
+  numberAttribute,
   effect,
   untracked,
   HostListener,
@@ -29,6 +30,15 @@ import { TediTranslationService } from "../../../../services";
 
 /** Ignore tiny calculation differences when deciding the carousel’s position. */
 const EPSILON = 0.001;
+
+/** Drag speed, in slides per ms, that counts as a flick. */
+const FLICK_VELOCITY = 0.0015;
+
+/** A flick's speed is measured over this many ms before release. */
+const FLICK_WINDOW = 100;
+
+/** Drags shorter than this (px) never move the carousel, so taps and jitter stay put. */
+const MIN_SWIPE_DISTANCE = 10;
 
 @Component({
   standalone: true,
@@ -65,6 +75,17 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
 
   /** Transition duration in ms */
   readonly transitionMs = input(400);
+
+  /**
+   * How far a drag must go to move on, as a fraction (0–1) of the distance to the next
+   * position, which is one slide except for a shorter final step when not looping.
+   * Each position fully dragged past counts; a quick flick moves one position.
+   * @default 0.3
+   */
+  readonly swipeThreshold = input(0.3, {
+    transform: (value: unknown) =>
+      Math.min(Math.max(numberAttribute(value, 0.3), 0), 1),
+  });
 
   /**
    * Whether navigation wraps around at the ends. When `false`, it stops at the
@@ -309,6 +330,10 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   private pendingFocus = false;
   private startX = 0;
   private startIndex = 0;
+  private lastX = 0;
+  private lastTime = 0;
+  /** Recent pointer positions, for measuring flick speed at release. */
+  private samples: { x: number; t: number }[] = [];
   private ro?: ResizeObserver;
   private wheelTimeout?: ReturnType<typeof setTimeout>;
   private scrollDelta = 0;
@@ -433,6 +458,9 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     this.animate.set(false);
     this.startX = ev.clientX;
     this.startIndex = this.trackIndex();
+    this.lastX = ev.clientX;
+    this.lastTime = ev.timeStamp;
+    this.samples = [{ x: ev.clientX, t: ev.timeStamp }];
 
     if (this.loop()) {
       this.windowBase.set(Math.floor(this.startIndex));
@@ -446,6 +474,12 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     }
 
     const dx = ev.clientX - this.startX;
+    this.lastX = ev.clientX;
+    this.lastTime = ev.timeStamp;
+    this.samples.push({ x: ev.clientX, t: ev.timeStamp });
+    while (this.samples[0].t < ev.timeStamp - FLICK_WINDOW) {
+      this.samples.shift();
+    }
     const cellWidth =
       (this.viewportWidth() -
         this.currentGap() * (this.currentSlidesPerView() - 1)) /
@@ -464,17 +498,137 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     this.trackIndex.set(clamped);
   }
 
-  @HostListener("pointerup")
+  /**
+   * The browser ended the drag, e.g. to scroll the page, or capture was lost mid-drag:
+   * not a swipe, so return to where it started. After a normal release this is a no-op,
+   * as `lostpointercapture` follows `pointerup`.
+   */
   @HostListener("pointercancel")
   @HostListener("lostpointercapture")
-  onPointerUp() {
+  onPointerCancel() {
     if (!this.dragging) {
       return;
     }
 
     this.dragging = false;
     this.animate.set(true);
-    this.trackIndex.set(this.snap(this.trackIndex()));
+    this.trackIndex.set(this.snap(this.startIndex));
+  }
+
+  @HostListener("pointerup", ["$event"])
+  onPointerUp(ev?: PointerEvent) {
+    if (!this.dragging) {
+      return;
+    }
+
+    // The pointer can move after the last pointermove; the release reports where it ended.
+    if (typeof ev?.clientX === "number") {
+      this.onPointerMove(ev);
+    }
+
+    this.dragging = false;
+    this.animate.set(true);
+    this.trackIndex.set(this.swipeTarget(ev?.timeStamp ?? this.lastTime));
+  }
+
+  /**
+   * Where a released drag settles. Walks stop position to stop position in the drag
+   * direction: each gap fully dragged moves on, and a partly dragged gap moves on once it
+   * reaches `swipeThreshold` of that gap (a bounded track's final gap can be short).
+   * A flick that did not move on otherwise moves one position.
+   */
+  private swipeTarget(releasedAt: number): number {
+    const dx = this.lastX - this.startX;
+
+    if (Math.abs(dx) < MIN_SWIPE_DISTANCE) {
+      return this.snap(this.startIndex);
+    }
+
+    // Take the direction from the pointer: at a bound the clamped track does not move.
+    const forward = dx < 0;
+    let remaining = Math.abs(this.trackIndex() - this.startIndex);
+    let position = this.startIndex;
+    let moved = false;
+
+    for (;;) {
+      const next = this.adjacentStop(position, forward);
+      const gap = Math.abs(next - position);
+
+      if (gap < EPSILON) {
+        break;
+      }
+
+      if (remaining >= gap - EPSILON) {
+        position = next;
+        remaining -= gap;
+        moved = true;
+        continue;
+      }
+
+      if (
+        remaining > EPSILON &&
+        remaining >= gap * this.swipeThreshold() - EPSILON
+      ) {
+        position = next;
+        moved = true;
+      }
+
+      break;
+    }
+
+    if (!moved && this.isFlick(releasedAt)) {
+      return this.adjacentStop(this.startIndex, forward);
+    }
+
+    return moved ? position : this.snap(this.startIndex);
+  }
+
+  /** The next stop position after `position` in the given direction (itself at a bound). */
+  private adjacentStop(position: number, forward: boolean): number {
+    return forward
+      ? this.clampIndex(Math.floor(position + EPSILON) + 1)
+      : this.clampIndex(Math.ceil(position - EPSILON) - 1);
+  }
+
+  /**
+   * Whether the drag ended in a flick: at least `MIN_SWIPE_DISTANCE` of movement in the
+   * drag direction within the last `FLICK_WINDOW` ms before release, fast enough. Measuring
+   * up to the release lets a pause before the swipe pass and a hold after it slow it down.
+   */
+  private isFlick(releasedAt: number): boolean {
+    // Unmeasured, the gap alone would give a tiny cell width and make any drag a flick.
+    if (!this.viewportWidth()) {
+      return false;
+    }
+
+    const recent = this.samples.find(
+      (sample) => sample.t >= releasedAt - FLICK_WINDOW,
+    );
+
+    if (!recent) {
+      return false;
+    }
+
+    const distance = this.lastX - recent.x;
+    const elapsed = releasedAt - recent.t;
+    const sameDirection =
+      Math.sign(distance) === Math.sign(this.lastX - this.startX);
+
+    if (
+      !(elapsed > 0) ||
+      !sameDirection ||
+      Math.abs(distance) < MIN_SWIPE_DISTANCE
+    ) {
+      return false;
+    }
+
+    const cellWidth =
+      (this.viewportWidth() -
+        this.currentGap() * (this.currentSlidesPerView() - 1)) /
+        this.currentSlidesPerView() +
+      this.currentGap();
+
+    return Math.abs(distance) / cellWidth / elapsed > FLICK_VELOCITY;
   }
 
   ngAfterViewInit(): void {
