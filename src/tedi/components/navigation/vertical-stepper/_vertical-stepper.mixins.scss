@@ -1,0 +1,39 @@
+@mixin stepper-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--tedi-vertical-stepper-line-x);
+  width: var(--tedi-borders-01);
+  content: "";
+  background-color: var(--stepper-item-vertical-line);
+}
+
+@mixin stepper-link($label-text) {
+  display: inline-flex;
+  width: fit-content;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: 0;
+
+  &:hover #{$label-text} {
+    color: var(--stepper-item-vertical-text-hover);
+    text-decoration: underline;
+    text-decoration-thickness: var(--tedi-borders-01);
+  }
+
+  &:focus-visible {
+    outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+    outline-offset: var(--tedi-borders-01);
+  }
+}
+
+@mixin stepper-related-content {
+  padding-top: var(--layout-grid-gutters-04);
+  padding-bottom: var(--layout-grid-gutters-04);
+}
