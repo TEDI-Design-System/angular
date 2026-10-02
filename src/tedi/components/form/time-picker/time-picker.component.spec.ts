@@ -779,6 +779,8 @@ describe("TimePickerComponent", () => {
         value: 240,
         configurable: true,
       });
+      // The wheel gesture that scrolled the column.
+      hourColumn.dispatchEvent(new Event("wheel", { bubbles: true }));
       hourColumn.dispatchEvent(new Event("scroll"));
 
       jest.runAllTimers();
@@ -794,6 +796,7 @@ describe("TimePickerComponent", () => {
         value: 100,
         configurable: true,
       });
+      hourColumn.dispatchEvent(new Event("wheel", { bubbles: true }));
       hourColumn.dispatchEvent(new Event("scroll"));
 
       const clearSpy = jest.spyOn(global, "clearTimeout");
@@ -802,6 +805,494 @@ describe("TimePickerComponent", () => {
         expect(clearSpy).toHaveBeenCalled();
       } finally {
         clearSpy.mockRestore();
+      }
+    });
+  });
+
+  describe("host gesture listeners", () => {
+    it("should detach every gesture listener it attached on destroy", () => {
+      const localFixture = TestBed.createComponent(TimePickerComponent);
+      const localHost = localFixture.nativeElement as HTMLElement;
+      const addSpy = jest.spyOn(localHost, "addEventListener");
+      const removeSpy = jest.spyOn(localHost, "removeEventListener");
+
+      localFixture.detectChanges();
+
+      const attached = addSpy.mock.calls.filter(([name]) =>
+        ["wheel", "touchstart", "pointerdown"].includes(name),
+      );
+      expect(attached.map(([name]) => name)).toEqual(
+        expect.arrayContaining(["wheel", "touchstart", "pointerdown"]),
+      );
+
+      localFixture.destroy();
+
+      // The exact same function reference and options object have to come back
+      // off the host, which is what the arrow-function handler property buys.
+      for (const [name, listener, options] of attached) {
+        expect(removeSpy).toHaveBeenCalledWith(name, listener, options);
+      }
+    });
+  });
+
+  describe("programmatic scroll echo", () => {
+    const SELECTED_CLASS = "tedi-time-picker__item--selected";
+
+    // jsdom has no layout, so scrollTop is a read-only 0 and measureItemHeight()
+    // falls back to DEFAULT_ITEM_HEIGHT (40). A writable stub lets a test place
+    // the column at an offset that rounds to a different row than the one the
+    // component scrolled to.
+    const stubScrollTop = (element: HTMLElement): void => {
+      let current = 0;
+      Object.defineProperty(element, "scrollTop", {
+        configurable: true,
+        get: () => current,
+        set: (next: number) => {
+          current = next;
+        },
+      });
+    };
+
+    const columnAt = (index: number): HTMLElement =>
+      el.querySelectorAll<HTMLElement>(".tedi-time-picker__column")[index];
+
+    const itemsIn = (column: HTMLElement): NodeListOf<HTMLElement> =>
+      column.querySelectorAll<HTMLElement>(".tedi-time-picker__item");
+
+    // A user scroll is a gesture followed by the scroll it produced. An engine
+    // scroll (Gecko handing a recreated column the offset of the one it
+    // replaced) arrives with no gesture in front of it.
+    const userScrollTo = (column: HTMLElement, top: number): void => {
+      column.dispatchEvent(new Event("wheel", { bubbles: true }));
+      column.scrollTop = top;
+      column.dispatchEvent(new Event("scroll"));
+    };
+
+    const engineScrollTo = (column: HTMLElement, top: number): void => {
+      column.scrollTop = top;
+      column.dispatchEvent(new Event("scroll"));
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it("should keep the programmatic index when an instant scroll echo rounds to another item", () => {
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      component.writeValue("09:30");
+      fixture.detectChanges();
+
+      expect(component.highlightedHourIndex()).toBe(9);
+
+      // The column settled one row away from the offset the component asked for
+      // (384 / 40 rounds to 10). The echo of an instant programmatic scroll must
+      // not move the highlight off the authoritative row.
+      hourColumn.scrollTop = 384;
+      hourColumn.dispatchEvent(new Event("scroll"));
+      fixture.detectChanges();
+
+      expect(component.highlightedHourIndex()).toBe(9);
+
+      const hourItems = itemsIn(hourColumn);
+      expect(hourItems[9].classList.contains(SELECTED_CLASS)).toBe(true);
+      expect(hourItems[10].classList.contains(SELECTED_CLASS)).toBe(false);
+    });
+
+    it("should not commit a snap-adjustment echo that lands after the scroll lock expires", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      component.writeValue("09:30");
+      fixture.detectChanges();
+
+      expect(hourColumn.scrollTop).toBe(9 * 40);
+
+      // An echo of the programmatic scroll, delivered after the old fixed 50 ms
+      // lock would have expired: with no gesture behind it and an offset the
+      // scroll never asked for, it must not become the value.
+      jest.advanceTimersByTime(60);
+
+      hourColumn.scrollTop = 560;
+      hourColumn.dispatchEvent(new Event("scroll"));
+      jest.advanceTimersByTime(200);
+      fixture.detectChanges();
+
+      expect(component.value()).toBe("09:30");
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it("should not commit a snap-adjustment echo that trickles in over several frames", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      component.writeValue("09:30");
+      fixture.detectChanges();
+
+      // A slow machine can stretch the settling well past any fixed window, so
+      // each event has to keep the scroll marked programmatic.
+      for (const offset of [420, 470, 520, 560, 600]) {
+        jest.advanceTimersByTime(120);
+        hourColumn.scrollTop = offset;
+        hourColumn.dispatchEvent(new Event("scroll"));
+      }
+
+      jest.advanceTimersByTime(1000);
+      fixture.detectChanges();
+
+      expect(component.value()).toBe("09:30");
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it("should still commit a user scroll that follows a settled programmatic scroll", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      component.writeValue("09:30");
+      fixture.detectChanges();
+
+      // Everything the programmatic scroll caused has been delivered and the
+      // column has been still since; the wheel is the user's again.
+      jest.advanceTimersByTime(1000);
+
+      userScrollTo(hourColumn, 15 * 40);
+      jest.advanceTimersByTime(200);
+      fixture.detectChanges();
+
+      expect(component.value()).toBe("15:30");
+      expect(onChange).toHaveBeenCalledWith("15:30");
+      expect(component.highlightedHourIndex()).toBe(15);
+    });
+
+    it("should put the column back when the engine scrolls it with no gesture", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      component.writeValue("09:30");
+      fixture.detectChanges();
+      jest.advanceTimersByTime(1000);
+
+      // Gecko drops the previous picker's offset onto this column.
+      engineScrollTo(hourColumn, 14 * 40);
+      jest.advanceTimersByTime(200);
+      fixture.detectChanges();
+
+      expect(component.value()).toBe("09:30");
+      expect(onChange).not.toHaveBeenCalled();
+      expect(hourColumn.scrollTop).toBe(9 * 40);
+      expect(component.highlightedHourIndex()).toBe(9);
+    });
+
+    it("should put the column back when the engine scrolls it while the programmatic scroll is settling", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      component.writeValue("09:30");
+      fixture.detectChanges();
+
+      // Inside the settle window of the alignment that the value triggered.
+      jest.advanceTimersByTime(20);
+      engineScrollTo(hourColumn, 14 * 40);
+      jest.advanceTimersByTime(200);
+      fixture.detectChanges();
+
+      expect(component.value()).toBe("09:30");
+      expect(onChange).not.toHaveBeenCalled();
+      expect(hourColumn.scrollTop).toBe(9 * 40);
+      expect(component.highlightedHourIndex()).toBe(9);
+    });
+
+    it("should leave a snap adjustment of the programmatic scroll alone", () => {
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      component.writeValue("09:30");
+      fixture.detectChanges();
+
+      // Within one row of the offset asked for, which is as far as a snap
+      // adjustment can move the column.
+      jest.advanceTimersByTime(60);
+      engineScrollTo(hourColumn, 9 * 40 + 24);
+      jest.advanceTimersByTime(200);
+      fixture.detectChanges();
+
+      expect(component.value()).toBe("09:30");
+      expect(hourColumn.scrollTop).toBe(9 * 40 + 24);
+      expect(component.highlightedHourIndex()).toBe(9);
+    });
+
+    it("should track the highlight live while a smooth programmatic scroll runs", () => {
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      itemsIn(hourColumn)[15].click();
+      fixture.detectChanges();
+
+      expect(component.highlightedHourIndex()).toBe(15);
+
+      // Mid-animation position of the smooth scroll started by the click.
+      hourColumn.scrollTop = 480;
+      hourColumn.dispatchEvent(new Event("scroll"));
+      fixture.detectChanges();
+
+      expect(component.highlightedHourIndex()).toBe(12);
+      expect(itemsIn(hourColumn)[12].classList.contains(SELECTED_CLASS)).toBe(
+        true,
+      );
+    });
+
+    it("should re-align the column for a new value while the previous scroll is still settling", () => {
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      component.writeValue("09:30");
+      fixture.detectChanges();
+
+      expect(hourColumn.scrollTop).toBe(9 * 40);
+
+      // Still inside the settle window of the first scroll.
+      jest.advanceTimersByTime(20);
+
+      component.writeValue("17:30");
+      fixture.detectChanges();
+
+      expect(hourColumn.scrollTop).toBe(17 * 40);
+      expect(component.highlightedHourIndex()).toBe(17);
+    });
+
+    it("should re-align the columns when the measured item height changes", () => {
+      let notifyResize: (() => void) | undefined;
+      class ResizeObserverMock {
+        constructor(callback: () => void) {
+          notifyResize = callback;
+        }
+        observe(): void {}
+        unobserve(): void {}
+        disconnect(): void {}
+      }
+      const originalResizeObserver = globalThis.ResizeObserver;
+      globalThis.ResizeObserver =
+        ResizeObserverMock as unknown as typeof ResizeObserver;
+
+      try {
+        const localFixture = TestBed.createComponent(TimePickerComponent);
+        const localEl = localFixture.nativeElement as HTMLElement;
+        localFixture.detectChanges();
+
+        const hourColumn = localEl.querySelectorAll<HTMLElement>(
+          ".tedi-time-picker__column",
+        )[0];
+        stubScrollTop(hourColumn);
+
+        localFixture.componentInstance.writeValue("09:30");
+        localFixture.detectChanges();
+
+        // Measured through the DEFAULT_ITEM_HEIGHT fallback jsdom forces.
+        expect(hourColumn.scrollTop).toBe(9 * 40);
+
+        const item = localEl.querySelector<HTMLElement>(
+          ".tedi-time-picker__item",
+        )!;
+        Object.defineProperty(item, "offsetHeight", {
+          value: 48,
+          configurable: true,
+        });
+        notifyResize?.();
+
+        expect(hourColumn.scrollTop).toBe(9 * 48);
+        expect(localFixture.componentInstance.highlightedHourIndex()).toBe(9);
+      } finally {
+        globalThis.ResizeObserver = originalResizeObserver;
+      }
+    });
+
+    // Every gesture in the suite used to be a wheel, so dropping "touchstart"
+    // or "pointerdown" from the gesture list changed nothing. A scroll that
+    // any of them started has to be read as the user's.
+    const expectGestureScrollCommits = (gesture: string): void => {
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      component.writeValue("09:30");
+      fixture.detectChanges();
+      jest.advanceTimersByTime(1000);
+
+      hourColumn.dispatchEvent(new Event(gesture, { bubbles: true }));
+      hourColumn.scrollTop = 15 * 40;
+      hourColumn.dispatchEvent(new Event("scroll"));
+      jest.advanceTimersByTime(200);
+      fixture.detectChanges();
+
+      expect(component.highlightedHourIndex()).toBe(15);
+      expect(component.value()).toBe("15:30");
+    };
+
+    it("should commit a scroll that a touchstart started", () => {
+      expectGestureScrollCommits("touchstart");
+    });
+
+    it("should commit a scroll that a pointerdown started", () => {
+      expectGestureScrollCommits("pointerdown");
+    });
+
+    it("should commit the user's scroll when it starts while a smooth programmatic scroll is running", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      itemsIn(hourColumn)[15].click();
+      fixture.detectChanges();
+
+      expect(component.value()).toBe("15:00");
+
+      // The wheel starts spinning before the smooth scroll to 15 has finished.
+      // The user owns the column from the first event, however many follow.
+      for (const offset of [640, 680, 720]) {
+        jest.advanceTimersByTime(16);
+        hourColumn.dispatchEvent(new Event("wheel", { bubbles: true }));
+        hourColumn.scrollTop = offset;
+        hourColumn.dispatchEvent(new Event("scroll"));
+      }
+
+      jest.advanceTimersByTime(200);
+      fixture.detectChanges();
+
+      expect(component.highlightedHourIndex()).toBe(18);
+      expect(component.value()).toBe("18:00");
+      expect(onChange).toHaveBeenLastCalledWith("18:00");
+    });
+
+    it("should not let a gesture that never scrolled anything turn a later engine scroll into a value", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      component.writeValue("09:30");
+      fixture.detectChanges();
+      jest.advanceTimersByTime(1000);
+
+      // A pointer going down on the faded padding at the end of the column:
+      // it is inside the column, it hits no item, and nothing scrolls.
+      hourColumn.dispatchEvent(new Event("pointerdown", { bubbles: true }));
+      jest.advanceTimersByTime(1000);
+
+      // Long afterwards, Gecko drops the previous picker's offset onto this
+      // column. There is no gesture behind it.
+      engineScrollTo(hourColumn, 14 * 40);
+      jest.advanceTimersByTime(200);
+      fixture.detectChanges();
+
+      expect(component.value()).toBe("09:30");
+      expect(onChange).not.toHaveBeenCalled();
+      expect(hourColumn.scrollTop).toBe(9 * 40);
+      expect(component.highlightedHourIndex()).toBe(9);
+    });
+
+    it("should commit a user scroll that lands within one row of the programmatic target", () => {
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      const hourColumn = columnAt(0);
+      stubScrollTop(hourColumn);
+
+      component.writeValue("09:30");
+      fixture.detectChanges();
+
+      // Still inside the settle window of the alignment, and one row is as
+      // close as a scroll can start to where that alignment parked.
+      jest.advanceTimersByTime(20);
+      userScrollTo(hourColumn, 10 * 40);
+      jest.advanceTimersByTime(200);
+      fixture.detectChanges();
+
+      expect(component.highlightedHourIndex()).toBe(10);
+      expect(component.value()).toBe("10:30");
+      expect(onChange).toHaveBeenCalledWith("10:30");
+    });
+
+    it("should keep the cached item height when a resize fires with no layout box", () => {
+      let notifyResize: (() => void) | undefined;
+      class ResizeObserverMock {
+        constructor(callback: () => void) {
+          notifyResize = callback;
+        }
+        observe(): void {}
+        unobserve(): void {}
+        disconnect(): void {}
+      }
+      const originalResizeObserver = globalThis.ResizeObserver;
+      globalThis.ResizeObserver =
+        ResizeObserverMock as unknown as typeof ResizeObserver;
+
+      try {
+        const localFixture = TestBed.createComponent(TimePickerComponent);
+        const localEl = localFixture.nativeElement as HTMLElement;
+        localFixture.detectChanges();
+
+        const hourColumn = localEl.querySelectorAll<HTMLElement>(
+          ".tedi-time-picker__column",
+        )[0];
+        stubScrollTop(hourColumn);
+
+        localFixture.componentInstance.writeValue("09:30");
+        localFixture.detectChanges();
+
+        const item = localEl.querySelector<HTMLElement>(
+          ".tedi-time-picker__item",
+        )!;
+        Object.defineProperty(item, "offsetHeight", {
+          value: 48,
+          configurable: true,
+        });
+        notifyResize?.();
+        expect(hourColumn.scrollTop).toBe(9 * 48);
+
+        jest.advanceTimersByTime(1000);
+
+        // The consumer hides the picker, so the observer fires with every box
+        // collapsed to 0. A row is not 40px tall because it has no box.
+        Object.defineProperty(item, "offsetHeight", {
+          value: 0,
+          configurable: true,
+        });
+        notifyResize?.();
+
+        expect(hourColumn.scrollTop).toBe(9 * 48);
+
+        // The cached height still has to be the one the rows actually have,
+        // so the next user scroll reads the right row out of the offset.
+        hourColumn.dispatchEvent(new Event("wheel", { bubbles: true }));
+        hourColumn.scrollTop = 15 * 48;
+        hourColumn.dispatchEvent(new Event("scroll"));
+        jest.advanceTimersByTime(200);
+
+        expect(localFixture.componentInstance.value()).toBe("15:30");
+      } finally {
+        globalThis.ResizeObserver = originalResizeObserver;
       }
     });
   });
