@@ -1,0 +1,23 @@
+.tedi-table-card-actions {
+  display: block;
+  border-top: 1px solid var(--card-border-primary);
+
+  /* A group's footer belongs to that group's section. */
+  &--in-group {
+    border-top: 0;
+  }
+
+  /* Override CardContent's display without depending on stylesheet order. */
+  & &__content {
+    display: flex;
+    gap: var(--button-gutter-x);
+    align-items: center;
+    justify-content: center;
+  }
+
+  & &__content .tedi-button {
+    flex: 1 1 0;
+    justify-content: center;
+    max-width: var(--button-width-max);
+  }
+}
