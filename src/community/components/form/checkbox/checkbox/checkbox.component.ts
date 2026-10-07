@@ -15,6 +15,7 @@ import {
   ComponentInputs,
   IconComponent,
   FeedbackTextComponent,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 import { CheckboxCardGroupComponent } from "../checkbox-card-group/checkbox-card-group.component";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
@@ -118,6 +119,13 @@ export class CheckboxComponent implements ControlValueAccessor, OnInit {
   checkboxDisabled = computed(() => {
     return this.disabled() || this.checkboxGroup?.groupDisabled();
   });
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-checkbox",
+      "Use Checkbox from TEDI-ready instead.",
+    );
+  }
 
   focus() {
     this._inputEl().nativeElement.focus();

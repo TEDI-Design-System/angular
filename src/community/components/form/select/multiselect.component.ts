@@ -35,6 +35,7 @@ import {
   TextComponent,
   CardComponent,
   CardContentComponent,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 import { DropdownItemComponent } from "../../../components/overlay";
 import { TagComponent } from "../../../components/tags";
@@ -44,6 +45,9 @@ export enum specialOptionControls {
   SELECTGROUP = "SELECTGROUP_",
 }
 
+/**
+ * @deprecated Use Select with `[multiple]="true"` from TEDI-ready instead.
+ */
 @Component({
   selector: "tedi-multiselect",
   imports: [
@@ -169,6 +173,13 @@ export class MultiselectComponent
     });
     return groups;
   });
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-multiselect",
+      'Use Select with `[multiple]="true"` from TEDI-ready instead.',
+    );
+  }
 
   @HostListener("window:resize")
   onWindowResize() {

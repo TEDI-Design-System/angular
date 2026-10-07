@@ -1,5 +1,6 @@
 export * from "./cookies.util";
 export * from "./date.util";
+export * from "./deprecation.util";
 export * from "./elements.util";
 export * from "./file.util";
 export * from "./matchers.util";

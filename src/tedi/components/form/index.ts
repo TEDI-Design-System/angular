@@ -10,7 +10,6 @@ export * from "./date-field";
 export * from "./date-picker/date-picker.component";
 export * from "./feedback-text/feedback-text.component";
 export * from "./file-dropzone";
-export * from "./label/label.component";
 export * from "./label-row";
 export * from "./number-field/number-field.component";
 export * from "./search";

@@ -38,6 +38,7 @@ import { InputState } from "../form-field/form-field.component";
       [allowMultiple]="allowMultiple"
       [searchable]="searchable"
       [clearable]="clearable"
+      [showClearOnInteraction]="showClearOnInteraction"
       [showSelectAll]="showSelectAll"
       [selectableGroups]="selectableGroups"
       [groupBy]="groupBy"
@@ -47,6 +48,7 @@ import { InputState } from "../form-field/form-field.component";
       [bindValue]="bindValue"
       [placeholder]="placeholder"
       [state]="state"
+      [feedbackText]="feedbackText"
       [size]="size"
       [required]="required"
       [isTagRemovable]="clearableTags"
@@ -99,6 +101,7 @@ class TestHostComponent {
   allowMultiple = false;
   searchable = false;
   clearable = true;
+  showClearOnInteraction = false;
   showSelectAll = false;
   selectableGroups = false;
   groupBy: string | undefined = undefined;
@@ -108,6 +111,8 @@ class TestHostComponent {
   bindValue: string | undefined = undefined;
   placeholder = "Select an option...";
   state: InputState = "default";
+  feedbackText:
+    { text: string; type?: "hint" | "valid" | "error" } | undefined = undefined;
   size: SelectInputSize = "default";
   required = false;
   clearableTags = false;
@@ -402,6 +407,36 @@ describe("SelectComponent", () => {
       tick();
 
       expect(getClearButton()).toBeTruthy();
+    }));
+
+    it("applies the interaction modifier only to a filled clearable select when opted in", fakeAsync(() => {
+      const element = hostEl.querySelector("tedi-select") as HTMLElement;
+      host.showClearOnInteraction = true;
+      fixture.detectChanges();
+      expect(
+        element.classList.contains("tedi-select--clear-on-interaction"),
+      ).toBe(false);
+
+      host.control.setValue("Option 1");
+      fixture.detectChanges();
+      tick();
+      expect(
+        element.classList.contains("tedi-select--clear-on-interaction"),
+      ).toBe(true);
+      expect(getClearButton()).toBeTruthy();
+
+      host.clearable = false;
+      fixture.detectChanges();
+      expect(
+        element.classList.contains("tedi-select--clear-on-interaction"),
+      ).toBe(false);
+
+      host.clearable = true;
+      host.showClearOnInteraction = false;
+      fixture.detectChanges();
+      expect(
+        element.classList.contains("tedi-select--clear-on-interaction"),
+      ).toBe(false);
     }));
 
     it("should not show clear button when clearable=false", fakeAsync(() => {
@@ -3169,6 +3204,62 @@ describe("SelectComponent", () => {
     });
   });
 
+  describe("combobox aria-invalid / aria-describedby", () => {
+    function combobox(): HTMLElement {
+      const all = hostEl.querySelectorAll<HTMLElement>('[role="combobox"]');
+      expect(all).toHaveLength(1);
+      return all[0];
+    }
+
+    it("sets neither attribute by default", () => {
+      expect(combobox().hasAttribute("aria-invalid")).toBe(false);
+      expect(combobox().hasAttribute("aria-describedby")).toBe(false);
+    });
+
+    it("marks the combobox invalid in the error state", () => {
+      host.state = "error";
+      fixture.detectChanges();
+
+      expect(combobox().getAttribute("aria-invalid")).toBe("true");
+    });
+
+    it("does not mark the combobox invalid in the valid state", () => {
+      host.state = "valid";
+      fixture.detectChanges();
+
+      expect(combobox().hasAttribute("aria-invalid")).toBe(false);
+    });
+
+    it("describes the combobox with its feedback text", () => {
+      host.feedbackText = { text: "Pick a city", type: "error" };
+      fixture.detectChanges();
+
+      const feedback = hostEl.querySelector("tedi-feedback-text");
+      expect(feedback?.id).toBe("test-select-feedback");
+      expect(combobox().getAttribute("aria-describedby")).toBe(
+        "test-select-feedback",
+      );
+    });
+
+    it.each([false, true])(
+      "sets both attributes on the searchable input (multiselect: %s)",
+      (allowMultiple) => {
+        host.searchable = true;
+        host.allowMultiple = allowMultiple;
+        host.state = "error";
+        host.feedbackText = { text: "Pick a city", type: "error" };
+        fixture.detectChanges();
+
+        const box = combobox();
+        expect(box.tagName).toBe("INPUT");
+        expect(box.getAttribute("aria-invalid")).toBe("true");
+        expect(box.getAttribute("aria-describedby")).toBe(
+          "test-select-feedback",
+        );
+      },
+    );
+  });
+
   describe("Virtual scroll", () => {
     const getVirtualListbox = () =>
       document.querySelector(".tedi-select__options--virtual") as HTMLElement;
@@ -3702,4 +3793,281 @@ describe("SelectComponent existing-behaviour guards", () => {
 
     expect(labelText(fixture)).toBe("10");
   });
+});
+
+@Component({
+  standalone: true,
+  imports: [SelectComponent, ReactiveFormsModule],
+  template: `
+    <tedi-select
+      id="default"
+      inputId="default"
+      [options]="options"
+      [formControl]="defaultControl"
+    />
+    <tedi-select
+      id="bare"
+      inputId="bare"
+      [options]="options"
+      [formControl]="bareControl"
+      clearable
+    />
+    <tedi-select
+      id="off"
+      inputId="off"
+      [options]="options"
+      [formControl]="offControl"
+      clearable="false"
+    />
+  `,
+})
+class ClearableDefaultsHostComponent {
+  options = [{ label: "Option 1", value: "Option 1" }];
+  defaultControl = new FormControl<unknown>("Option 1");
+  bareControl = new FormControl<unknown>("Option 1");
+  offControl = new FormControl<unknown>("Option 1");
+}
+
+describe("SelectComponent clearable", () => {
+  let hostEl: HTMLElement;
+
+  beforeEach(fakeAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [ClearableDefaultsHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    const fixture = TestBed.createComponent(ClearableDefaultsHostComponent);
+    hostEl = fixture.nativeElement;
+    fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
+  }));
+
+  const clearButton = (id: string) =>
+    hostEl.querySelector(`#${id} .tedi-select__clear`);
+
+  it("shows a clear button by default once a value is selected", () => {
+    expect(clearButton("default")).toBeTruthy();
+  });
+
+  it("treats a bare clearable attribute as true", () => {
+    expect(clearButton("bare")).toBeTruthy();
+  });
+
+  it('treats clearable="false" as false', () => {
+    expect(clearButton("off")).toBeNull();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SelectComponent, ReactiveFormsModule],
+  template: `
+    <tedi-select
+      id="no-empty-option"
+      inputId="no-empty-option"
+      placeholder="Vali..."
+      [options]="cities"
+      bindLabel="label"
+      bindValue="value"
+      [formControl]="emptyString"
+    />
+    <tedi-select
+      id="empty-option"
+      inputId="empty-option"
+      placeholder="Vali..."
+      [options]="statuses"
+      bindLabel="label"
+      bindValue="value"
+      [formControl]="allStatuses"
+    />
+    <tedi-select
+      id="multiple"
+      inputId="multiple"
+      placeholder="Vali..."
+      [allowMultiple]="true"
+      [options]="cities"
+      bindLabel="label"
+      bindValue="value"
+      [formControl]="multipleEmpty"
+    />
+  `,
+})
+class EmptyStringHostComponent {
+  cities = [
+    { label: "Tallinn", value: "tallinn" },
+    { label: "Tartu", value: "tartu" },
+  ];
+  statuses = [
+    { label: "Kõik", value: "" },
+    { label: "Aktiivne", value: "active" },
+  ];
+  emptyString = new FormControl<string>("");
+  allStatuses = new FormControl<string>("");
+  multipleEmpty = new FormControl<string[]>([""]);
+}
+
+describe("SelectComponent with an empty-string value", () => {
+  let fixture: ComponentFixture<EmptyStringHostComponent>;
+  let host: EmptyStringHostComponent;
+
+  const render = () => {
+    fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
+  };
+
+  beforeEach(fakeAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [EmptyStringHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    fixture = TestBed.createComponent(EmptyStringHostComponent);
+    host = fixture.componentInstance;
+    render();
+  }));
+
+  const el = (id: string) =>
+    fixture.nativeElement.querySelector(`#${id}`) as HTMLElement;
+  const clearButton = (id: string) =>
+    el(id).querySelector(".tedi-select__clear");
+  const shownText = (id: string) =>
+    el(id).querySelector(".tedi-select__trigger")?.textContent?.trim();
+
+  it("shows a '' form value as empty, with no clear button", () => {
+    expect(clearButton("no-empty-option")).toBeNull();
+    expect(shownText("no-empty-option")).toContain("Vali...");
+  });
+
+  it("leaves the stored value as ''", () => {
+    expect(host.emptyString.value).toBe("");
+  });
+
+  it("shows '' as empty even when an option has that value", () => {
+    expect(clearButton("empty-option")).toBeNull();
+    expect(shownText("empty-option")).toContain("Vali...");
+  });
+
+  it("resets when the option with value '' is picked", fakeAsync(() => {
+    host.allStatuses.setValue("active");
+    render();
+    expect(clearButton("empty-option")).toBeTruthy();
+
+    (
+      el("empty-option").querySelector(".tedi-select__trigger") as HTMLElement
+    ).click();
+    render();
+    const all = Array.from(
+      document.querySelectorAll(".tedi-dropdown-item"),
+    ).find((item) => item.textContent?.trim() === "Kõik") as HTMLElement;
+    all.click();
+    render();
+
+    expect(host.allStatuses.value).toBe("");
+    expect(clearButton("empty-option")).toBeNull();
+    expect(shownText("empty-option")).toContain("Vali...");
+  }));
+
+  it("resets through the virtual-scroll path too", fakeAsync(() => {
+    host.allStatuses.setValue("active");
+    render();
+    const select = fixture.debugElement.query(By.css("#empty-option"))
+      .componentInstance as SelectComponent;
+
+    select.onVirtualOptionClick(select.normalizedOptions()[0]);
+    render();
+
+    expect(select.selectedValues()).toEqual([]);
+    expect(host.allStatuses.value).toBe("");
+  }));
+
+  it("shows [''] as empty in a multiple select", () => {
+    expect(clearButton("multiple")).toBeNull();
+    expect(shownText("multiple")).toContain("Vali...");
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SelectComponent, ReactiveFormsModule],
+  template: `
+    <tedi-select
+      inputId="multi-empty-option"
+      [allowMultiple]="true"
+      [showSelectAll]="true"
+      [selectableGroups]="true"
+      groupBy="group"
+      [options]="options"
+      bindLabel="label"
+      bindValue="value"
+      [formControl]="control"
+    />
+  `,
+})
+class MultiEmptyOptionHostComponent {
+  options = [
+    { label: "None", value: "", group: "A" },
+    { label: "One", value: "one", group: "A" },
+    { label: "Two", value: "two", group: "A" },
+  ];
+  control = new FormControl<string[]>([]);
+}
+
+describe("SelectComponent multiselect with an option whose value is ''", () => {
+  let fixture: ComponentFixture<MultiEmptyOptionHostComponent>;
+  let host: MultiEmptyOptionHostComponent;
+  let select: SelectComponent;
+
+  const render = () => {
+    fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
+  };
+
+  beforeEach(fakeAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [MultiEmptyOptionHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    fixture = TestBed.createComponent(MultiEmptyOptionHostComponent);
+    host = fixture.componentInstance;
+    render();
+    select = fixture.debugElement.query(By.directive(SelectComponent))
+      .componentInstance as SelectComponent;
+  }));
+
+  it("never selects the '' option on click", fakeAsync(() => {
+    select.onVirtualOptionClick(select.normalizedOptions()[0]);
+    render();
+    expect(select.selectedValues()).toEqual([]);
+    expect(host.control.value).toEqual([]);
+  }));
+
+  it("never selects it through the listbox either", fakeAsync(() => {
+    select.handleValueChange({ value: ["", "one"] });
+    render();
+    expect(select.selectedValues()).toEqual(["one"]);
+    expect(host.control.value).toEqual(["one"]);
+  }));
+
+  it("leaves it out of select all, so select all can be toggled off again", fakeAsync(() => {
+    select.onVirtualSelectAllClick();
+    render();
+    expect(select.selectedValues()).toEqual(["one", "two"]);
+    expect(select.allOptionsSelected()).toBe(true);
+
+    select.onVirtualSelectAllClick();
+    render();
+    expect(select.selectedValues()).toEqual([]);
+  }));
+
+  it("leaves it out of group selection", fakeAsync(() => {
+    select.handleValueChange({
+      value: [SpecialOptionControls.SELECT_GROUP + "A"],
+    });
+    render();
+    expect(select.selectedValues()).toEqual(["one", "two"]);
+    expect(select.isGroupSelected("A")).toBe(true);
+    expect(select.isGroupIndeterminate("A")).toBe(false);
+  }));
 });

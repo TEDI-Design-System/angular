@@ -5,6 +5,7 @@ import {
   input,
   ViewEncapsulation,
 } from "@angular/core";
+import { warnDeprecated } from "@tedi-design-system/angular/tedi";
 
 export type InputSize = "small" | "default";
 export type InputState = "valid" | "error" | "default";
@@ -43,4 +44,12 @@ export class InputComponent {
     if (this.state()) modifiers.push(`tedi-input--${this.state()}`);
     return modifiers.join(" ");
   });
+
+  constructor() {
+    if (new.target !== InputComponent) return;
+    warnDeprecated(
+      "Community [tedi-input]",
+      "Use TextField from TEDI-ready instead.",
+    );
+  }
 }

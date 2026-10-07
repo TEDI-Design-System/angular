@@ -47,7 +47,7 @@ import { HeaderSearchComponent } from "./header-search/header-search.component";
 import { HeaderBottomComponent } from "./header-bottom/header-bottom.component";
 import { HeaderTopComponent } from "./header-top/header-top.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
-import { LabelComponent } from "../../form/label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { SearchComponent } from "../../form/search/search.component";
 import { TextComponent } from "../../base/text/text.component";

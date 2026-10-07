@@ -1,5 +1,6 @@
 import { Component, signal, ViewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import {
   FormFieldComponent,
   FormFieldIcon,
@@ -11,7 +12,8 @@ import {
 } from "./form-field-control";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { TextareaComponent } from "../textarea/textarea.component";
-import { LabelComponent } from "../label/label.component";
+import { TextFieldComponent } from "../text-field/text-field.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { LabelRowComponent } from "../label-row/label-row.component";
 import { FormFieldExtraDirective } from "./form-field-extra.directive";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
@@ -34,6 +36,99 @@ class MockControlComponent implements FormFieldControl<string> {
   reset = jest.fn();
   focus = jest.fn();
   setDescribedBy = jest.fn();
+  ownsClearButton = false;
+}
+
+@Component({
+  selector: "mock-owning-control",
+  standalone: true,
+  template: "",
+  providers: [
+    {
+      provide: TEDI_FORM_FIELD_CONTROL,
+      useExisting: MockOwningControlComponent,
+    },
+  ],
+})
+class MockOwningControlComponent implements FormFieldControl<string> {
+  value = signal("");
+  disabled = signal(false);
+  invalid = signal(false);
+  reset = jest.fn();
+  focus = jest.fn();
+  /** Like date and time fields, which put a clear button in their own action row. */
+  readonly ownsClearButton = true;
+}
+
+@Component({
+  selector: "mock-unresettable-control",
+  standalone: true,
+  template: "",
+  providers: [
+    {
+      provide: TEDI_FORM_FIELD_CONTROL,
+      useExisting: MockUnresettableControlComponent,
+    },
+  ],
+})
+class MockUnresettableControlComponent implements FormFieldControl<string> {
+  value = signal("text");
+  disabled = signal(false);
+  invalid = signal(false);
+}
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, MockUnresettableControlComponent],
+  template: `
+    <tedi-form-field #formField clearable>
+      <mock-unresettable-control />
+    </tedi-form-field>
+  `,
+})
+class UnresettableHostComponent {
+  @ViewChild("formField", { static: true }) formField!: FormFieldComponent;
+}
+
+/** Conditional projection: the control can be swapped or arrive after init. */
+@Component({
+  standalone: true,
+  imports: [
+    FormFieldComponent,
+    MockControlComponent,
+    MockOwningControlComponent,
+  ],
+  template: `
+    <tedi-form-field #formField clearable>
+      @if (showControl) {
+        @if (owning) {
+          <mock-owning-control />
+        } @else {
+          <mock-control #mockControl />
+        }
+      }
+    </tedi-form-field>
+  `,
+})
+class ConditionalProjectionHostComponent {
+  @ViewChild("formField", { static: true }) formField!: FormFieldComponent;
+  @ViewChild("mockControl") mockControl?: MockControlComponent;
+  showControl = true;
+  owning = false;
+}
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, MockControlComponent],
+  template: `
+    <tedi-form-field clearable>
+      <mock-control #mockControl></mock-control>
+    </tedi-form-field>
+  `,
+})
+class BareClearableHostComponent {
+  @ViewChild("mockControl", { static: true })
+  mockControl!: MockControlComponent;
 }
 
 @Component({
@@ -45,6 +140,7 @@ class MockControlComponent implements FormFieldControl<string> {
       [size]="size"
       [icon]="icon"
       [clearable]="clearable"
+      [showClearOnInteraction]="showClearOnInteraction"
       [inputClass]="inputClass"
       [characterLimit]="characterLimit"
     >
@@ -66,6 +162,7 @@ class TestHostComponent {
   size: InputSize = "default";
   icon?: string | FormFieldIcon;
   clearable = false;
+  showClearOnInteraction = false;
   inputClass?: string;
   characterLimit?: number;
   feedbackType: "valid" | "error" | "hint" = "hint";
@@ -174,6 +271,36 @@ describe("FormFieldComponent", () => {
     expect(button.hasAttribute("disabled")).toBe(false);
   });
 
+  it("applies the interaction modifier only to a filled clearable field when opted in", () => {
+    const field = fixture.nativeElement.querySelector("tedi-form-field");
+    host.showClearOnInteraction = true;
+    fixture.detectChanges();
+    expect(
+      field.classList.contains("tedi-form-field--clear-on-interaction"),
+    ).toBe(false);
+
+    host.clearable = true;
+    host.mockControl.value.set("Test");
+    fixture.detectChanges();
+    expect(
+      field.classList.contains("tedi-form-field--clear-on-interaction"),
+    ).toBe(true);
+    expect(field.querySelector(".tedi-form-field__clear")).toBeTruthy();
+
+    host.mockControl.value.set("");
+    fixture.detectChanges();
+    expect(
+      field.classList.contains("tedi-form-field--clear-on-interaction"),
+    ).toBe(false);
+
+    host.mockControl.value.set("Test");
+    host.showClearOnInteraction = false;
+    fixture.detectChanges();
+    expect(
+      field.classList.contains("tedi-form-field--clear-on-interaction"),
+    ).toBe(false);
+  });
+
   it("should not render buttons slot when clearable is false", () => {
     host.clearable = false;
     host.mockControl.value.set("Test");
@@ -183,6 +310,82 @@ describe("FormFieldComponent", () => {
       ".tedi-form-field__buttons",
     );
     expect(buttons).toBeNull();
+  });
+
+  it("should not render its own clear button when the control renders one", () => {
+    host.clearable = true;
+    host.mockControl.value.set("text");
+    host.mockControl.ownsClearButton = true;
+    fixture.detectChanges();
+
+    expect(formField.renderClearButton()).toBe(false);
+    expect(
+      fixture.nativeElement.querySelector(".tedi-form-field__clear"),
+    ).toBeNull();
+  });
+
+  describe("conditional projection", () => {
+    let conditional: ComponentFixture<ConditionalProjectionHostComponent>;
+    let conditionalHost: ConditionalProjectionHostComponent;
+
+    beforeEach(() => {
+      conditional = TestBed.createComponent(ConditionalProjectionHostComponent);
+      conditionalHost = conditional.componentInstance;
+      conditional.detectChanges();
+    });
+
+    it("should stop rendering its own clear button when the projected control is replaced by one that owns it", () => {
+      expect(conditionalHost.formField.renderClearButton()).toBe(true);
+
+      conditionalHost.owning = true;
+      conditional.detectChanges();
+
+      expect(conditionalHost.formField.renderClearButton()).toBe(false);
+      expect(
+        conditional.nativeElement.querySelector(".tedi-form-field__clear"),
+      ).toBeNull();
+    });
+
+    it("should pick up a control that is projected after init", () => {
+      conditionalHost.showControl = false;
+      conditional.detectChanges();
+      expect(conditionalHost.formField.showClearButton()).toBe(false);
+
+      conditionalHost.showControl = true;
+      conditional.detectChanges();
+      conditionalHost.mockControl!.value.set("text");
+      conditional.detectChanges();
+
+      expect(conditionalHost.formField.showClearButton()).toBe(true);
+    });
+  });
+
+  it("should not render a clear button for a control that cannot be reset", () => {
+    const unresettable = TestBed.createComponent(UnresettableHostComponent);
+    unresettable.detectChanges();
+
+    expect(unresettable.componentInstance.formField.renderClearButton()).toBe(
+      false,
+    );
+    expect(
+      unresettable.nativeElement.querySelector(".tedi-form-field__clear"),
+    ).toBeNull();
+  });
+
+  it("should be clearable by default", () => {
+    const bare = TestBed.createComponent(FormFieldComponent);
+    bare.detectChanges();
+
+    expect(bare.componentInstance.clearable()).toBe(true);
+  });
+
+  it("should treat a bare clearable attribute as true", () => {
+    const bare = TestBed.createComponent(BareClearableHostComponent);
+    bare.detectChanges();
+
+    expect(
+      bare.nativeElement.querySelector(".tedi-form-field__clear"),
+    ).toBeTruthy();
   });
 
   it("should reset the control when the clear button is clicked", () => {
@@ -445,20 +648,33 @@ describe("FormFieldComponent wrapping a textarea", () => {
     );
   });
 
-  it("clears the textarea from the box's clear button", () => {
+  it("gives the textarea no clear button, even when clearable", () => {
     const clearFixture = TestBed.createComponent(
       ClearableTextareaHostComponent,
     );
     clearFixture.detectChanges();
 
-    const ta: HTMLTextAreaElement =
-      clearFixture.nativeElement.querySelector("textarea");
-    expect(ta.value).toBe("hello");
+    expect(
+      clearFixture.nativeElement.querySelector(".tedi-form-field__clear"),
+    ).toBeNull();
+    expect(
+      clearFixture.nativeElement.querySelector(".tedi-form-field__box"),
+    ).toBeNull();
+  });
 
-    clearFixture.nativeElement.querySelector(".tedi-form-field__clear").click();
+  it("still clears the textarea on a programmatic reset", () => {
+    const clearFixture = TestBed.createComponent(
+      ClearableTextareaHostComponent,
+    );
     clearFixture.detectChanges();
 
-    expect(ta.value).toBe("");
+    const textarea = clearFixture.debugElement
+      .query(By.directive(TextareaComponent))
+      .injector.get(TextareaComponent);
+    textarea.reset();
+    clearFixture.detectChanges();
+
+    expect(clearFixture.nativeElement.querySelector("textarea").value).toBe("");
   });
 });
 
@@ -794,5 +1010,62 @@ describe("FormFieldComponent projection slots", () => {
     expect(box).toBeTruthy();
     expect(box.contains(feedback())).toBe(false);
     expect(box.contains(extra())).toBe(false);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextFieldComponent],
+  template: `
+    <tedi-form-field #formField>
+      <input tedi-text-field [value]="'hello'" [readOnly]="readOnly" />
+    </tedi-form-field>
+  `,
+})
+class ReadOnlyTextFieldHostComponent {
+  @ViewChild("formField", { static: true }) formField!: FormFieldComponent;
+  @ViewChild(TextFieldComponent, { static: true })
+  textField!: TextFieldComponent;
+  readOnly = true;
+}
+
+describe("FormFieldComponent with a read-only text field", () => {
+  let fixture: ComponentFixture<ReadOnlyTextFieldHostComponent>;
+  let host: ReadOnlyTextFieldHostComponent;
+
+  const clearButton = () =>
+    fixture.nativeElement.querySelector(
+      ".tedi-form-field__clear",
+    ) as HTMLButtonElement;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [ReadOnlyTextFieldHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    fixture = TestBed.createComponent(ReadOnlyTextFieldHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it("hides and disables the clear button while read-only", () => {
+    expect(host.formField.showClearButton()).toBe(false);
+    expect(clearButton().disabled).toBe(true);
+    expect(
+      fixture.nativeElement.querySelector(".tedi-form-field__buttons--hidden"),
+    ).toBeTruthy();
+  });
+
+  it("shows the clear button again once editable", () => {
+    host.readOnly = false;
+    fixture.detectChanges();
+
+    expect(host.formField.showClearButton()).toBe(true);
+    expect(clearButton().disabled).toBe(false);
+  });
+
+  it("still clears on a programmatic reset", () => {
+    host.textField.reset();
+    expect(host.textField.value()).toBe("");
   });
 });

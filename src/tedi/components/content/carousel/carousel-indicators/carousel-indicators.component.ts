@@ -36,16 +36,16 @@ export class CarouselIndicatorsComponent {
 
   readonly indicatorsArray = computed(() =>
     Array.from(
-      { length: this.carousel.carouselContent().slides().length },
+      { length: this.carousel.carouselContent().positionCount() },
       (_, i) => ({
         index: i,
-        active: this.carousel.carouselContent().slideIndex() === i,
+        active: this.carousel.carouselContent().activePosition() === i,
       }),
     ),
   );
 
   readonly activeSlideNumber = computed(
-    () => this.carousel.carouselContent().slideIndex() + 1,
+    () => this.carousel.carouselContent().activePosition() + 1,
   );
 
   handleNext() {

@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -117,8 +118,15 @@ export class TimeFieldComponent
    * set here.
    */
   readonly size = input<Exclude<InputSize, "large"> | undefined>();
-  /** Show a clear button when the field has a value. */
-  readonly clearable = input<boolean>(true);
+  /**
+   * Whether the clear button shows once the field has a value. Falls back to the
+   * wrapping `tedi-form-field`'s `clearable` when not set here — set it on the
+   * wrapper, and use this only for a standalone field.
+   */
+  readonly clearable = input<boolean | undefined, unknown>(undefined, {
+    // Unset stays `undefined` so the wrapper's `clearable` still applies.
+    transform: (v: unknown) => (v == null ? undefined : booleanAttribute(v)),
+  });
   /** Picker variant. `none` renders just the input with no picker UI — typed input is still normalized on blur. */
   readonly pickerVariant = input<TimeFieldPickerVariant>("scroll");
   /**
@@ -190,7 +198,15 @@ export class TimeFieldComponent
   readonly hasValue = computed(
     () => this.value() !== null && this.value() !== "",
   );
-  readonly showClear = computed(() => this.hasValue() && this.clearable());
+  readonly showClear = computed(
+    () => this.hasValue() && this.clearableResolved(),
+  );
+  /** The clear button sits in the time field's action row, beside the picker. */
+  readonly ownsClearButton = true;
+  /** Own `clearable` wins, then the wrapping `tedi-form-field`'s. */
+  readonly clearableResolved = computed(
+    () => this.clearable() ?? this.fieldContext?.clearable() ?? true,
+  );
   readonly useNativePickerResolved = computed(() => {
     const v = this.useNativePicker();
     return typeof v === "boolean"

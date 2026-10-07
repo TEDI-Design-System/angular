@@ -15,6 +15,7 @@ import {
   IconComponent,
   TediTranslationPipe,
   TextComponent,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 
 /**
@@ -56,6 +57,13 @@ export class PaginationComponent {
   hasPreviousButton = computed(() => this.page() > 1);
 
   hasNextButton = computed(() => this.page() < this.lastPage());
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-pagination",
+      "Use Pagination from TEDI-ready instead.",
+    );
+  }
 
   changePage(step: 1 | -1) {
     this.page.update((currentPage) => currentPage + step);

@@ -4,6 +4,7 @@ import {
   input,
   ViewEncapsulation,
 } from "@angular/core";
+import { warnDeprecated } from "@tedi-design-system/angular/tedi";
 import { InputComponent } from "../input/input.component";
 
 /**
@@ -38,4 +39,12 @@ export class TextareaComponent extends InputComponent {
    * @default true
    */
   resizeY = input(true);
+
+  constructor() {
+    super();
+    warnDeprecated(
+      "Community [tedi-textarea]",
+      "Use `TextareaComponent` from `@tedi-design-system/angular/tedi` instead.",
+    );
+  }
 }

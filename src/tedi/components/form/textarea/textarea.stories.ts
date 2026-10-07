@@ -16,7 +16,7 @@ import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { TextComponent } from "../../base/text/text.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];
@@ -81,6 +81,18 @@ export default {
       table: {
         category: "Form Field inputs",
         type: { summary: "number | undefined" },
+      },
+    },
+    readOnly: {
+      description:
+        "Makes the field read-only, like the native `readonly` attribute, which is also accepted. The value can still be selected and submitted, but not edited.",
+      control: {
+        type: "boolean",
+      },
+      table: {
+        category: "Textarea inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
       },
     },
     placeholder: {
@@ -164,8 +176,10 @@ export const Default: StoryObj = {
     autoGrow: false,
     minRows: 3,
     maxRows: 12,
+    readOnly: false,
   },
   render: ({
+    readOnly,
     resizable,
     placeholder,
     autoGrow,
@@ -176,6 +190,7 @@ export const Default: StoryObj = {
     ...formFieldArgs
   }) => ({
     props: {
+      readOnly,
       resizable,
       placeholder,
       autoGrow,
@@ -197,6 +212,7 @@ export const Default: StoryObj = {
           [maxRows]="maxRows"
           [height]="height"
           [maxHeight]="maxHeight"
+          [readOnly]="readOnly"
           [attr.placeholder]="placeholder"
         ></textarea>
       </tedi-form-field>

@@ -17,6 +17,7 @@ import {
   TediTranslationPipe,
   CardComponent,
   CardContentComponent,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 
 import { TabContentComponent } from "./tab-content/tab-content.component";
@@ -82,6 +83,10 @@ export class TabsComponent implements OnInit {
   }
 
   constructor() {
+    warnDeprecated(
+      "Community tedi-tabs",
+      "Use the TEDI-Ready Tabs (`tedi-tabs` with `tedi-tabs-list`, `tedi-tabs-trigger` and `tedi-tabs-content`) from `@tedi-design-system/angular/tedi` instead.",
+    );
     effect(() => {
       const tabs = this.tabs();
       this.onActiveTabChanges(tabs);
