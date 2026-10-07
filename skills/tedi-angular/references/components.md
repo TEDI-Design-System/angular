@@ -110,10 +110,11 @@ the part of this document worth maintaining by hand.
 
 ### The `/tedi` and `/community` entry points collide
 
-This is the highest-value trap in the Angular library and it has no React equivalent. **25 selectors
+This is the highest-value trap in the Angular library and it has no React equivalent. **27 selectors
 are declared in both entry points, under identical class names**, including `tedi-card`,
 `tedi-modal`, `tedi-accordion`, `tedi-tabs`, `tedi-dropdown`, `tedi-form-field`, `tedi-pagination`,
-`tedi-search`, `tedi-tag`, `[tedi-floating-button]`, and the checkbox/radio group family.
+`tedi-search`, `tedi-tag`, `[tedi-floating-button]`, `tedi-file-dropzone`, and the checkbox/radio
+group family.
 
 `CardComponent` from `/community` and `CardComponent` from `/tedi` are different components with
 different input APIs behind the same `<tedi-card>` tag. Consequences:
@@ -200,6 +201,54 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   `icon` input, not from projection, so you cannot swap in your own `tedi-icon` or add trailing
   content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
   name — if the icon carries meaning the text doesn't, compose a heading and an icon yourself.
+- **`tedi-file-dropzone`'s `files` has no separate "default" input** — unlike the React version, which
+  needs `defaultFiles` alongside `files` to distinguish uncontrolled from controlled. The binding
+  picks the mode: `[files]` seeds the list and leaves the dropzone owning it, `[(files)]` keeps the
+  parent in sync, `[formControl]` hands it to the form. Bind a stable reference, though: an inline
+  literal (`[files]="[{ name: 'a.pdf' }]"`) is a new array on every check, so it is written back each
+  time and discards whatever the user added.
+- **`tedi-file-dropzone` validates itself.** It registers on `NG_VALIDATORS`, so a `formControl` bound
+  to it fails with a `rejectedFiles` error (carrying the offending files) while any rejected file is
+  still listed — you don't add a validator for that. `Validators.required` alone would pass on a list
+  of visibly broken files whenever `keepRejectedFiles` is on and keeps them in the value. Same shape as Angular
+  Material's datepicker: the constraint comes from the component's own inputs (`accept`, `maxSize`), so
+  the component owns the rule. No `registerOnValidatorChange` is needed — `validate()` is a pure
+  function of the control value, which Angular already revalidates on every change.
+- **`tedi-file-dropzone` emits `fileRemove` alongside `filesChange`.** `filesChange` gives the new list;
+  `fileRemove` gives the single entry the user deleted, so an in-flight upload can be aborted or a blob
+  URL revoked without diffing the two arrays.
+- **`tedi-file-dropzone` selects files, it does not upload them.** It validates against `accept` and
+  `maxSize` and hands you the list; the upload, and setting each file's `isLoading` / `isValid` as it
+  progresses, is yours. A `validator` input adds a rule of your own on top, run only once the
+  built-in restrictions pass; the reason it returns lands on that file's `error` and joins the summary,
+  with the files it rejected named after it. `keepRejectedFiles` decides what happens to a file that
+  fails `accept`, `maxSize` or `validator`: off (the default) discards it and summarises every rejection in one message under the
+  dropzone, which paints the border red. On keeps it in the list with its reason in that file's
+  `error`, leaving the border neutral — so the form value holds it with `isValid: false` and you must
+  filter on `isValid` before uploading. `error` is writable, so a failure the upload
+  came back with lands on the file it belongs to.
+- **Selecting a file that is already listed is skipped**, matched on name, size and mtime — so two
+  different files sharing a name still both land. Project an `*tediFileDropzoneFile` template to
+  replace the built-in `tedi-attachment` row when a file needs a progress bar, an icon or its own
+  feedback.
+- **`tedi-file-dropzone`'s `label` is the text inside the drop zone**, not a field label above it. It is
+  the accessible name of the zone, so the control is never nameless. Don't add a `<label tedi-label>`
+  for `inputId` and don't wrap it in `tedi-form-field`: the file input is `display: none` and cannot be
+  labelled, and `tedi-form-field` would also place its projected feedback after the file list rather
+  than under the dropzone. Fold the field name into `label` instead.
+- **The drop zone is a `div[role="button"]`, not a `<label>` or a native `<button>`** — the same shape
+  React and react-dropzone use, and the reason is screen readers, not styling. The file input is
+  `display: none` and out of the tab order: while it was the focus target, closing the file dialog
+  handed focus back to it and VoiceOver discarded the status message every time. A native `<button>`
+  behaves differently again and was also unreliable there. Because a `role="button"` div has no native
+  activation, Enter and Space are wired by hand in `handleKeydown`, and `disabled` is `aria-disabled`
+  plus `tabindex="-1"` with both the click and key paths guarded. Carbon, USWDS, GOV.UK and Polaris all
+  avoid making the file input the focus target for the same reason.
+- **Selections are announced assertively and on a delay; removals are polite and immediate.** Closing
+  the file dialog leaves the screen reader busy for a moment, and a message inserted during it is
+  dropped rather than queued. Removal involves no dialog, so it needs neither. Announcements go through
+  `ToastAnnouncerService`, whose regions live on `<body>`: a live region inside the component is
+  silently dropped when the rows around it re-render, which is what happens on every selection.
 
 ### Clear buttons
 
