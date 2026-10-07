@@ -25,6 +25,7 @@ component's `ɵɵComponentDeclaration` carries its real selector; see
 | RadioGroupComponent | `tedi-radio-group` | `string \| null` |
 | ToggleComponent | `tedi-toggle` | `boolean` |
 | DateFieldComponent | `tedi-date-field` | `Date \| Date[] \| DateRange \| null` |
+| FileUploadComponent | `tedi-file-upload` | `FileUploadFile[]` — also registers on `NG_VALIDATORS` |
 | DatePickerComponent | `tedi-date-picker` | `Date \| null` — **deprecated**, use `DateFieldComponent` |
 | TimeFieldComponent | `tedi-time-field` | `string \| null` (HH:mm) |
 | TimePickerComponent | `tedi-time-picker` | `string \| null` (HH:mm) |

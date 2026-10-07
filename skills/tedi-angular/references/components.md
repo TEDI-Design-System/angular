@@ -201,6 +201,36 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
   name — if the icon carries meaning the text doesn't, compose a heading and an icon yourself.
 
+### File upload
+
+- **`tedi-file-upload`'s `inputId` names the hidden file input, but the add button is the control.**
+  Bind `<label tedi-label [for]>` to `inputId` inside a `tedi-form-field` as for any other control:
+  clicking the label opens the picker, and the field reads the label back through the input, gives it
+  an id if it has none, and names the add button by the label *and* its own text. Nothing else can
+  name the button, so a field without a label announces only "Add attachment".
+- **`tedi-file-upload` has no separate "default" input and no feedback input.** `[files]` seeds the
+  list, `[(files)]` keeps the parent in sync, `[formControl]` hands it to the form — bind a stable
+  reference, an inline literal is written back on every check. Hints and errors are projected
+  `tedi-feedback-text` on the wrapping `tedi-form-field`; the field adds its own restrictions hint
+  (from `accept` / `maxSize`, off with `showRestrictions`) and a rejection summary below them.
+- **`tedi-file-upload` validates itself.** It registers on `NG_VALIDATORS`, so a bound control fails
+  with a `rejectedFiles` error while any `isValid: false` file is listed. By default a file that
+  fails `accept`, `maxSize` or `validator` is discarded and only the summary under the field remains;
+  `keepRejectedFiles` keeps it in the list, marked invalid, instead. It shows as a danger tag only
+  while two or more files are listed; a single file shows just its name. Filter on `isValid` before
+  uploading either way.
+- **A `tedi-file-upload` `validator` adds a rule but no hint.** Its reason joins the rejection
+  summary after the built-in ones, and it only runs on files that already passed `accept` and
+  `maxSize`. The restrictions hint cannot describe it, so project a `tedi-feedback-text` that does.
+- **`maxSize` is in bytes**, the unit `File.size` is in — not megabytes as in React. The hint renders
+  it in whichever unit reads best.
+- **It selects files, it does not upload them.** `fileRemove` emits the single entry the user removed,
+  one event per file when clearing, so an in-flight upload can be aborted without diffing
+  `filesChange`. Set `isLoading` on a file yourself while it uploads: the tag shows a spinner and
+  loses its remove button.
+- **Below `md` it stacks**: files above a full-width button row, and the clear button becomes a text
+  button. There is no input for this.
+
 ### Clear buttons
 
 - **`showClearOnInteraction` belongs on the component that renders the clear button.** For a text

@@ -1,0 +1,144 @@
+<ng-template #fileList>
+  @if (files().length > 1) {
+    <ul
+      class="tedi-file-upload__tags"
+      role="list"
+      [attr.aria-labelledby]="readOnly() ? labelId() : null"
+    >
+      @for (file of files(); track file) {
+        <li class="tedi-file-upload__tag">
+          <tedi-tag
+            [type]="file.isValid === false ? 'danger' : 'primary'"
+            [loading]="!!file.isLoading"
+            [closable]="isEditable() && !file.isLoading"
+            (closed)="removeFile(file)"
+          >
+            {{ file.name }}
+            @if (file.isValid === false) {
+              <span class="sr-only"> ({{ failedLabel() }})</span>
+            }
+          </tedi-tag>
+        </li>
+      }
+    </ul>
+  } @else if (files()[0]; as file) {
+    @if (readOnly()) {
+      <ul
+        class="tedi-file-upload__tags"
+        role="list"
+        [attr.aria-labelledby]="labelId()"
+      >
+        <li class="tedi-file-upload__tag">
+          <ng-container
+            [ngTemplateOutlet]="singleFile"
+            [ngTemplateOutletContext]="{ $implicit: file }"
+          />
+        </li>
+      </ul>
+    } @else {
+      <ng-container
+        [ngTemplateOutlet]="singleFile"
+        [ngTemplateOutletContext]="{ $implicit: file }"
+      />
+    }
+  }
+</ng-template>
+
+<ng-template #singleFile let-file>
+  <span class="tedi-file-upload__name">
+    {{ file.name }}
+    @if (file.isValid === false) {
+      <span class="sr-only"> ({{ failedLabel() }})</span>
+    }
+  </span>
+</ng-template>
+
+@if (readOnly()) {
+  <ng-container [ngTemplateOutlet]="fileList" />
+} @else {
+  <div
+    class="tedi-file-upload__field"
+    [class.tedi-field-surface]="paintsSurface()"
+    [class.tedi-field-surface--invalid]="paintsSurface() && isInvalid()"
+    [class.tedi-field-surface--valid]="paintsSurface() && isValid()"
+    [class.tedi-field-surface--disabled]="paintsSurface() && isDisabled()"
+  >
+    <div class="tedi-file-upload__value">
+      <ng-container [ngTemplateOutlet]="fileList" />
+    </div>
+
+    <div class="tedi-file-upload__actions">
+      @if (showClear()) {
+        <div class="tedi-file-upload__clear-group">
+          @if (isStacked()) {
+            <button
+              tedi-button
+              type="button"
+              variant="neutral"
+              class="tedi-file-upload__clear"
+              (click)="reset()"
+            >
+              <tedi-icon name="close" [size]="18" color="inherit" />
+              {{ clearLabel() }}
+            </button>
+          } @else {
+            <button
+              tedi-closing-button
+              type="button"
+              size="small"
+              class="tedi-file-upload__clear"
+              [iconSize]="18"
+              [ariaLabel]="clearLabel()"
+              (click)="reset()"
+            ></button>
+          }
+          <tedi-separator axis="vertical" size="1.5rem" />
+        </div>
+      }
+
+      <button
+        #addButton
+        tedi-button
+        type="button"
+        variant="neutral"
+        class="tedi-file-upload__add"
+        [size]="isStacked() ? 'default' : 'small'"
+        [disabled]="isDisabled()"
+        [attr.aria-labelledby]="addLabelledBy()"
+        [attr.aria-describedby]="describedBy.attribute()"
+        (click)="openPicker()"
+        (blur)="handleBlur()"
+      >
+        <tedi-icon name="file_upload" [size]="18" color="inherit" />
+        <span [id]="addLabelId()">{{ addLabel() }}</span>
+      </button>
+    </div>
+  </div>
+
+  @if (rejectionError(); as error) {
+    <tedi-feedback-text
+      [id]="feedbackIds().error"
+      [text]="error"
+      type="error"
+    />
+  }
+
+  @if (restrictionsHint(); as hint) {
+    <tedi-feedback-text [id]="feedbackIds().hint" [text]="hint" />
+  }
+}
+
+<input
+  #fileInput
+  class="tedi-file-upload__input"
+  type="file"
+  tabindex="-1"
+  aria-hidden="true"
+  [id]="resolvedId()"
+  [attr.name]="name()"
+  [attr.accept]="accept()"
+  [multiple]="multiple()"
+  [disabled]="isDisabled() || readOnly()"
+  (change)="handleSelection($event)"
+  (cancel)="handleDialogCancel()"
+/>
