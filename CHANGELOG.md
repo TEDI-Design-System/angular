@@ -1,3 +1,20 @@
+# [9.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.1...angular-9.0.0-rc.2) (2026-10-07)
+
+
+### Features
+
+* **select:** clearable defaults to true [#745](https://github.com/TEDI-Design-System/angular/issues/745) ([#753](https://github.com/TEDI-Design-System/angular/issues/753)) ([78c907a](https://github.com/TEDI-Design-System/angular/commit/78c907a3dd9bd2fba7d6bbc0d182544f4244d728))
+
+
+### BREAKING CHANGES
+
+* **select:** tedi-select's clearable now defaults to true, so selects
+that showed no clear button now show one once they have a value. Pass
+[clearable]="false" to opt out.
+* **select:** an option with value '' now leaves the select empty
+instead of showing as selected. Use showSelectAll for "select all" in a
+multiselect, or the placeholder to label the empty state.
+
 # [9.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.7...angular-9.0.0-rc.1) (2026-10-01)
 
 
