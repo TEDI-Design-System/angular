@@ -292,11 +292,11 @@ export const translationsMap = {
   },
   "file-upload.failed": {
     description:
-      "Appended, for assistive technology only, to the name of a file that failed validation",
+      "Appended, for assistive technology only, to the name of a file marked invalid",
     components: ["FileUpload"],
-    et: "Faili üleslaadimine ebaõnnestus",
-    en: "File upload failed",
-    ru: "Загрузка файла не удалась",
+    et: "Vigane fail",
+    en: "Invalid file",
+    ru: "Недопустимый файл",
   },
   "file-upload.cleared": {
     description: "Announced to assistive technology when all files are removed",

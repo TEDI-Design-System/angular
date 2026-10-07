@@ -59,7 +59,7 @@ form = new FormGroup({
 
 ## Form Field Structure
 
-Wrap a control with `tedi-form-field` to compose the label, control, and feedback text into one accessible field. `tedi-form-field` wires the feedback text to the control's `aria-describedby` for you. It does **not** associate the label: give the label a `for` and the control a matching `id` yourself.
+Wrap a control with `tedi-form-field` to compose the label, control, and feedback text into one accessible field. `tedi-form-field` wires the feedback text to the control's `aria-describedby` for you. An `aria-describedby` of your own on the control is merged in, but read only once, when the control is created: give it a static value, since a `[attr.aria-describedby]` binding is not picked up. It does **not** associate the label: give the label a `for` and the control a matching `id` yourself.
 
 `TextEditorComponent` is the exception to the `for`/`id` rule: its editing area is a `contenteditable` div, which `for` cannot target. Give the label an `id` and point the control's `ariaLabelledby` at it instead.
 
