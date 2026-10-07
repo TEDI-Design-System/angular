@@ -741,6 +741,8 @@ describe("FileUploadComponent with reactive forms", () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => jest.restoreAllMocks());
+
   it("writes the control value into the list", () => {
     host.control.setValue([{ id: "1", name: "preloaded.pdf" }]);
     fixture.detectChanges();
@@ -767,7 +769,6 @@ describe("FileUploadComponent with reactive forms", () => {
     fixture.detectChanges();
 
     expect(host.control.touched).toBe(true);
-    jest.restoreAllMocks();
   });
 
   it("stays untouched while the file dialog has focus", () => {
@@ -777,7 +778,6 @@ describe("FileUploadComponent with reactive forms", () => {
     fixture.detectChanges();
 
     expect(host.control.touched).toBe(false);
-    jest.restoreAllMocks();
   });
 
   it("marks the control touched when the file dialog is cancelled", () => {
