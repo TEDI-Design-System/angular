@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from "@angular/common";
+import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
   booleanAttribute,
@@ -46,7 +46,11 @@ import {
   FileDropzoneFileContext,
   FileDropzoneFileDirective,
 } from "./file-dropzone-file.directive";
-import { FileDropzoneFeedback, FileDropzoneFile } from "./file-dropzone.types";
+import {
+  FileDropzoneFeedback,
+  FileDropzoneFile,
+  FileDropzoneValidator,
+} from "./file-dropzone.types";
 
 type FileRejectionReason = "extension" | "size";
 
@@ -104,6 +108,7 @@ const fileIdentity = (file: FileDropzoneFile): string =>
 export class FileDropzoneComponent
   implements OnInit, ControlValueAccessor, Validator, OnDestroy
 {
+  private readonly document = inject(DOCUMENT);
   private readonly translations = inject(TediTranslationService);
   private readonly announcer = inject(ToastAnnouncerService);
   private addAnnounceTimeout?: ReturnType<typeof setTimeout>;
@@ -161,6 +166,18 @@ export class FileDropzoneComponent
    */
   readonly maxSize = input<number>();
   /**
+   * A rule of your own for each selected file, run after `accept` and `maxSize`
+   * pass — a minimum size, a naming convention. Return the reason a file is
+   * rejected, or nothing to accept it. The reason lands on that file's `error`
+   * and joins the rejection summary, followed by the names it rejected.
+   *
+   * It is not summarised in the restrictions hint, so describe the rule in your
+   * own `feedbackText`. Applies to what is picked next, like `accept`. For
+   * checks needing a server round trip, set `isLoading` and then `isValid` on
+   * the file yourself instead.
+   */
+  readonly validator = input<FileDropzoneValidator>();
+  /**
    * Whether more than one file can be held at a time. A single-file dropzone
    * replaces its file on the next selection.
    * @default false
@@ -168,12 +185,12 @@ export class FileDropzoneComponent
   readonly multiple = input(false, { transform: booleanAttribute });
   /**
    * Keeps rejected files in the list, each carrying its own reason, so the user
-   * can see which of their files failed and remove it. Turn it off to discard a
-   * rejected file instead and summarise every rejection in one message under
-   * the dropzone.
-   * @default true
+   * can see which of their files failed and remove it. Left off, a rejected
+   * file is discarded and every rejection is summarised in one message under
+   * the dropzone instead.
+   * @default false
    */
-  readonly keepRejectedFiles = input(true, { transform: booleanAttribute });
+  readonly keepRejectedFiles = input(false, { transform: booleanAttribute });
   /**
    * Whether the allowed types and maximum size are summarised in a hint below
    * the dropzone. Turn it off when the same information is shown elsewhere —
@@ -349,6 +366,7 @@ export class FileDropzoneComponent
 
   writeValue(files: FileDropzoneFile[] | null): void {
     this.files.set(files ?? []);
+    this.clearRejectionWhenEmpty();
   }
 
   registerOnChange(fn: (files: FileDropzoneFile[]) => void): void {
@@ -358,7 +376,7 @@ export class FileDropzoneComponent
   /**
    * Fails the control while any rejected file is still listed. Without it a
    * `Validators.required` control reports valid on a list of visibly broken
-   * files, since `keepRejectedFiles` keeps them in the value.
+   * files, which `keepRejectedFiles` leaves in the value.
    */
   validate(control: AbstractControl): ValidationErrors | null {
     const rejected = ((control.value ?? []) as FileDropzoneFile[]).filter(
@@ -396,12 +414,18 @@ export class FileDropzoneComponent
   protected handleSelection(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.addFiles(Array.from(input.files ?? []));
-    // Without this the same file cannot be picked twice in a row: the input
-    // holds it, so re-selecting it fires no `change`.
+    this.onTouched();
     input.value = "";
   }
 
   protected handleBlur(): void {
+    if (this.document.hasFocus()) {
+      this.onTouched();
+    }
+  }
+
+  /** Dismissing the dialog counts as interaction, even with nothing picked. */
+  protected handleDialogCancel(): void {
     this.onTouched();
   }
 
@@ -442,6 +466,7 @@ export class FileDropzoneComponent
     const removedIndex = this.files().indexOf(file);
 
     this.commit(this.files().filter((current) => current !== file));
+    this.clearRejectionWhenEmpty();
     this.fileRemove.emit(file);
     this.onTouched();
     // A pending "added" is superseded by this removal; letting it fire would
@@ -489,6 +514,9 @@ export class FileDropzoneComponent
 
     const keepRejected = this.keepRejectedFiles();
     const rejected: { reason: FileRejectionReason; file: File }[] = [];
+    // Keyed by message so files failing the same custom rule are named together,
+    // the way the built-in reasons are.
+    const customRejections = new Map<string, string[]>();
 
     // Picking the same file twice almost always means the user lost track of
     // what they had already added, so the repeat is skipped rather than listed
@@ -502,22 +530,38 @@ export class FileDropzoneComponent
 
     const candidates = fresh.map((file) => {
       const reasons = this.reasonsFor(file);
-      if (reasons.length) rejected.push({ reason: reasons[0], file });
+      // Only run the consumer's rule once the restrictions pass; a file that is
+      // already the wrong format need not be judged on anything else.
+      const custom = reasons.length
+        ? undefined
+        : (this.validator()?.(file) ?? undefined) || undefined;
+
+      if (reasons.length) {
+        rejected.push({ reason: reasons[0], file });
+      } else if (custom) {
+        customRejections.set(custom, [
+          ...(customRejections.get(custom) ?? []),
+          `'${file.name}'`,
+        ]);
+      }
+
+      const message =
+        custom ??
+        (reasons.length
+          ? reasons
+              .map((reason) =>
+                this.translations.translate(
+                  `file-dropzone.file-rejected-${reason}`,
+                ),
+              )
+              .join(". ")
+          : undefined);
 
       return Object.assign(file, {
         id: generateUUID(),
         isLoading: false,
-        isValid: !reasons.length,
-        error:
-          reasons.length && keepRejected
-            ? reasons
-                .map((reason) =>
-                  this.translations.translate(
-                    `file-dropzone.file-rejected-${reason}`,
-                  ),
-                )
-                .join(". ")
-            : undefined,
+        isValid: !reasons.length && !custom,
+        error: keepRejected ? message : undefined,
       }) as FileDropzoneFile;
     });
 
@@ -537,13 +581,10 @@ export class FileDropzoneComponent
     // announcing them one by one overwrites all but the last.
     const messages: string[] = [];
 
-    if (rejected.length) {
-      const message = this.rejectionMessage(rejected);
-      this.rejectionError.set(keepRejected ? undefined : message);
-      messages.push(message);
-    } else {
-      this.rejectionError.set(undefined);
-    }
+    const rejection = this.rejectionMessage(rejected, customRejections);
+
+    this.rejectionError.set(rejection && !keepRejected ? rejection : undefined);
+    if (rejection) messages.push(rejection);
 
     if (duplicates.length) {
       messages.push(
@@ -579,6 +620,17 @@ export class FileDropzoneComponent
 
   ngOnDestroy(): void {
     clearTimeout(this.addAnnounceTimeout);
+  }
+
+  /**
+   * The summary names files that were never listed, so only emptying the field
+   * makes it stale — otherwise it lingers under an empty dropzone, holding the
+   * border red.
+   */
+  private clearRejectionWhenEmpty(): void {
+    if (!this.files().length) {
+      this.rejectionError.set(undefined);
+    }
   }
 
   private commit(files: FileDropzoneFile[]): void {
@@ -639,22 +691,31 @@ export class FileDropzoneComponent
    */
   private rejectionMessage(
     rejected: { reason: FileRejectionReason; file: File }[],
-  ): string {
-    return (["extension", "size"] as const)
-      .map((reason) => {
-        const names = rejected
-          .filter((rejection) => rejection.reason === reason)
-          .map((rejection) => `'${rejection.file.name}'`);
+    customRejections: Map<string, string[]>,
+  ): string | undefined {
+    return (
+      [
+        ...(["extension", "size"] as const).map((reason) => {
+          const names = rejected
+            .filter((rejection) => rejection.reason === reason)
+            .map((rejection) => `'${rejection.file.name}'`);
 
-        return names.length
-          ? this.translations.translate(
-              `file-upload.${reason}-rejected`,
-              names.join(", "),
-            )
-          : null;
-      })
-      .filter(Boolean)
-      .join(". ");
+          return names.length
+            ? this.translations.translate(
+                `file-upload.${reason}-rejected`,
+                names.join(", "),
+              )
+            : null;
+        }),
+        ...Array.from(
+          customRejections,
+          ([message, names]) =>
+            `${message.replace(/[\s.]+$/, "")}: ${names.join(", ")}`,
+        ),
+      ]
+        .filter(Boolean)
+        .join(". ") || undefined
+    );
   }
 
   /**

@@ -516,6 +516,94 @@ describe("FileDropzoneComponent", () => {
       expect(text(".tedi-attachment__feedback")).toBe("Vale formaat");
     });
 
+    const noSpaces = (file: File) =>
+      file.name.includes(" ") ? "Failinimes ei tohi olla tühikuid." : null;
+
+    it("rejects a file through a validator of the consumer's own", () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("keepRejectedFiles", true);
+      fixture.componentRef.setInput("validator", noSpaces);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("my scan.pdf")]);
+
+      expect(component.files()[0].isValid).toBe(false);
+      expect(component.files()[0].error).toBe(
+        "Failinimes ei tohi olla tühikuid.",
+      );
+    });
+
+    it("clears the summary once the last file is removed", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("multiple", true);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("ok.pdf")]);
+      selectFiles(fixture, [makeFile("bad.txt", 100, "text/plain")]);
+      expect(text("tedi-feedback-text")).toContain("extension-rejected");
+
+      (
+        fixture.debugElement.query(By.css(".tedi-attachment__actions button"))
+          .nativeElement as HTMLButtonElement
+      ).click();
+      fixture.detectChanges();
+
+      expect(component.files()).toEqual([]);
+      expect(text("tedi-feedback-text")).not.toContain("extension-rejected");
+    });
+
+    it("keeps the summary while other files are still listed", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("multiple", true);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("a.pdf"), makeFile("b.pdf")]);
+      selectFiles(fixture, [makeFile("bad.txt", 100, "text/plain")]);
+
+      (
+        fixture.debugElement.query(By.css(".tedi-attachment__actions button"))
+          .nativeElement as HTMLButtonElement
+      ).click();
+      fixture.detectChanges();
+
+      expect(component.files().length).toBe(1);
+      expect(text("tedi-feedback-text")).toContain("extension-rejected");
+    });
+
+    it("names every file a custom rule rejected in one message", () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("validator", noSpaces);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("my scan.pdf"), makeFile("a b.pdf")]);
+
+      expect(text("tedi-feedback-text")).toContain(
+        "Failinimes ei tohi olla tühikuid: 'my scan.pdf', 'a b.pdf'",
+      );
+    });
+
+    it("leaves the validator unrun on a file the restrictions already reject", () => {
+      const validator = jest.fn(noSpaces);
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("validator", validator);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("bad name.txt", 100, "text/plain")]);
+
+      expect(validator).not.toHaveBeenCalled();
+    });
+
+    it("accepts a file its validator returns nothing for", () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("validator", noSpaces);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("korras.pdf")]);
+
+      expect(component.files()[0].isValid).toBe(true);
+      expect(component.files()[0].error).toBeUndefined();
+    });
+
     it("reports every restriction a file breaks, not just the first", () => {
       fixture.componentRef.setInput("accept", ".pdf");
       fixture.componentRef.setInput("maxSize", 50);
@@ -567,6 +655,7 @@ describe("FileDropzoneComponent", () => {
     it("leaves the border alone when rejected files carry their own reason", () => {
       fixture.componentRef.setInput("accept", ".pdf");
       fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("keepRejectedFiles", true);
       fixture.detectChanges();
 
       selectFiles(fixture, [makeFile("bad.txt", 100, "text/plain")]);
@@ -1019,6 +1108,7 @@ describe("FileDropzoneComponent", () => {
     [formControl]="control"
     accept=".pdf"
     multiple
+    keepRejectedFiles
   />`,
 })
 class ReactiveFormsHostComponent {
@@ -1057,10 +1147,36 @@ describe("FileDropzoneComponent with reactive forms", () => {
     ]);
   });
 
-  it("marks the control touched on blur", () => {
+  it("marks the control touched when the user moves on from the zone", () => {
+    const hasFocus = jest.spyOn(document, "hasFocus").mockReturnValue(true);
+
     expect(host.control.touched).toBe(false);
     zoneOf(fixture).dispatchEvent(new Event("blur"));
     fixture.detectChanges();
+
+    expect(host.control.touched).toBe(true);
+    hasFocus.mockRestore();
+  });
+
+  it("ignores the blur that opening the file dialog causes", () => {
+    const hasFocus = jest.spyOn(document, "hasFocus").mockReturnValue(false);
+
+    zoneOf(fixture).dispatchEvent(new Event("blur"));
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(false);
+    hasFocus.mockRestore();
+  });
+
+  it("marks the control touched when the dialog is dismissed", () => {
+    fileInput(fixture).dispatchEvent(new Event("cancel"));
+    fixture.detectChanges();
+
+    expect(host.control.touched).toBe(true);
+  });
+
+  it("marks the control touched when files are picked", () => {
+    selectFiles(fixture, [makeFile("report.pdf")]);
 
     expect(host.control.touched).toBe(true);
   });

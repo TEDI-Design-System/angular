@@ -38,6 +38,7 @@
   [multiple]="multiple()"
   [disabled]="isDisabled()"
   (change)="handleSelection($event)"
+  (cancel)="handleDialogCancel()"
 />
 
 @if (rejectionError(); as error) {

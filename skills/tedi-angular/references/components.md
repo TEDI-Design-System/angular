@@ -210,7 +210,7 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 - **`tedi-file-dropzone` validates itself.** It registers on `NG_VALIDATORS`, so a `formControl` bound
   to it fails with a `rejectedFiles` error (carrying the offending files) while any rejected file is
   still listed — you don't add a validator for that. `Validators.required` alone would pass on a list
-  of visibly broken files, since `keepRejectedFiles` keeps them in the value. Same shape as Angular
+  of visibly broken files whenever `keepRejectedFiles` is on and keeps them in the value. Same shape as Angular
   Material's datepicker: the constraint comes from the component's own inputs (`accept`, `maxSize`), so
   the component owns the rule. No `registerOnValidatorChange` is needed — `validate()` is a pure
   function of the control value, which Angular already revalidates on every change.
@@ -219,11 +219,13 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   URL revoked without diffing the two arrays.
 - **`tedi-file-dropzone` selects files, it does not upload them.** It validates against `accept` and
   `maxSize` and hands you the list; the upload, and setting each file's `isLoading` / `isValid` as it
-  progresses, is yours. `keepRejectedFiles` decides what happens to a file that fails `accept` or
-  `maxSize`: on (the default) keeps it in the list with its reason in that file's `error`, leaving the
-  dropzone's own border neutral — so the form value holds it with `isValid: false` and you must filter
-  on `isValid` before uploading. Off discards it instead and summarises every rejection in one message
-  under the dropzone, which also paints the border red. `error` is writable, so a failure the upload
+  progresses, is yours. A `validator` input adds a rule of your own on top, run only once the
+  built-in restrictions pass; the reason it returns lands on that file's `error` and joins the summary,
+  with the files it rejected named after it. `keepRejectedFiles` decides what happens to a file that
+  fails `accept`, `maxSize` or `validator`: off (the default) discards it and summarises every rejection in one message under the
+  dropzone, which paints the border red. On keeps it in the list with its reason in that file's
+  `error`, leaving the border neutral — so the form value holds it with `isValid: false` and you must
+  filter on `isValid` before uploading. `error` is writable, so a failure the upload
   came back with lands on the file it belongs to.
 - **Selecting a file that is already listed is skipped**, matched on name, size and mtime — so two
   different files sharing a name still both land. Project an `*tediFileDropzoneFile` template to

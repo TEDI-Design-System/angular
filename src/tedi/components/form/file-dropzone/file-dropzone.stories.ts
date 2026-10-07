@@ -168,6 +168,16 @@ export default {
       control: "number",
       table: { category: "inputs", type: { summary: "number" } },
     },
+    validator: {
+      description:
+        "A rule of your own for each selected file, run after `accept` and `maxSize` pass. Return the reason a file is rejected, or nothing to accept it. The reason lands on that file's `error` and joins the rejection summary." +
+        " It is not summarised in the restrictions hint, so describe the rule in your own `feedbackText`.",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "(file: File) => string | null | undefined" },
+      },
+    },
     multiple: {
       description:
         "Whether more than one file can be held. A single-file dropzone replaces its file on the next selection.",
@@ -180,12 +190,12 @@ export default {
     },
     keepRejectedFiles: {
       description:
-        "Keeps rejected files in the list, each carrying its own reason. Turn it off to discard a rejected file instead and summarise every rejection in one message under the dropzone.",
+        "Keeps rejected files in the list, each carrying its own reason. Left off, a rejected file is discarded and every rejection is summarised in one message under the dropzone instead.",
       control: "boolean",
       table: {
         category: "inputs",
         type: { summary: "boolean" },
-        defaultValue: { summary: "true" },
+        defaultValue: { summary: "false" },
       },
     },
     showRestrictions: {
@@ -303,33 +313,9 @@ export const WithFileSize: Story = {
 };
 
 /**
- * The default. A rejected file stays in the list carrying its own reason, so the
- * user can see which file failed and remove it. The dropzone's border stays
- * neutral — the failure belongs to the file, not the field.
- */
-export const KeepingRejectedFiles: Story = {
-  name: "Validation: keeping rejected files",
-  args: {
-    multiple: true,
-    accept: ".pdf,.txt",
-    files: [
-      { id: "1", name: "Kodukülastusakt_Triin.pdf" },
-      { id: "2", name: "Kodukülastusakt_Triin_2.pdf" },
-      { id: "3", name: "Kodukülastusakt_Triin_3.pdf" },
-      {
-        id: "4",
-        name: "Kodukülastusakt_Triin.png",
-        isValid: false,
-        error: "Failiformaat ei ole lubatud",
-      },
-    ],
-  },
-};
-
-/**
- * The opt-out. With `keepRejectedFiles` turned off the rejected file is
- * discarded, so only the files that passed remain and the failure is reported
- * once under the dropzone, which turns its border red.
+ * The default. A rejected file is discarded, so only the files that passed
+ * remain and the failure is reported once under the dropzone, which turns its
+ * border red.
  */
 export const DiscardingRejectedFiles: Story = {
   name: "Validation: discarding rejected files",
@@ -348,6 +334,58 @@ export const DiscardingRejectedFiles: Story = {
     template: `
       <div style="max-width: 420px">
         <tedi-file-dropzone ${argsToTemplate(args)} storyRejectedDrop="Kodukülastusakt_Triin.png" />
+      </div>
+    `,
+  }),
+};
+
+/**
+ * The opt-in. A rejected file stays in the list carrying its own reason, so the
+ * user can see which file failed and remove it. The dropzone's border stays
+ * neutral — the failure belongs to the file, not the field.
+ */
+export const KeepingRejectedFiles: Story = {
+  name: "Validation: keeping rejected files",
+  args: {
+    multiple: true,
+    keepRejectedFiles: true,
+    accept: ".pdf,.txt",
+    files: [
+      { id: "1", name: "Kodukülastusakt_Triin.pdf" },
+      { id: "2", name: "Kodukülastusakt_Triin_2.pdf" },
+      { id: "3", name: "Kodukülastusakt_Triin_3.pdf" },
+      {
+        id: "4",
+        name: "Kodukülastusakt_Triin.png",
+        isValid: false,
+        error: "Failiformaat ei ole lubatud",
+      },
+    ],
+  },
+};
+
+/**
+ * The restrictions hint can't describe the rule, so add your own feedback text.
+ * Pick a file with a space in its name to try it.
+ */
+export const WithValidator: Story = {
+  render: () => ({
+    props: {
+      files: [],
+      noSpaces: (file: File) =>
+        file.name.includes(" ") ? "Failinimes ei tohi olla tühikuid" : null,
+      feedbackText: { text: "Failinimes ei tohi olla tühikuid." },
+    },
+    template: `
+      <div style="max-width: 420px">
+        <tedi-file-dropzone
+          multiple
+          keepRejectedFiles
+          accept=".pdf,.txt"
+          [validator]="noSpaces"
+          [feedbackText]="feedbackText"
+          [files]="files"
+        />
       </div>
     `,
   }),

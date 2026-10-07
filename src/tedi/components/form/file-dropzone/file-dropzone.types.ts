@@ -9,6 +9,12 @@ export type FileDropzoneFeedback = Partial<
 > & { text: string };
 
 /**
+ * Validates a selected file. Returns the reason it is rejected, or nothing to
+ * accept it.
+ */
+export type FileDropzoneValidator = (file: File) => string | null | undefined;
+
+/**
  * A file held by the dropzone. Real selections are `File` objects carrying the
  * extra fields; a preloaded entry only needs a `name`.
  */
