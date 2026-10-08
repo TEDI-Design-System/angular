@@ -33,7 +33,7 @@ let nextUniqueId = 0;
  *
  * When `sticky` is enabled the container pins while the page scrolls. Two knobs
  * adapt it to the surrounding layout: `stickyOffset` moves where it pins (raise
- * it to clear a fixed header), and `stickyMaxHeight` overrides the height cap
+ * it to clear a fixed header), and `stickyMaxHeight` overrides the max height
  * for when the TOC scrolls inside a fixed-height container rather than the window.
  *
  * The gap the sticky TOC leaves above the viewport bottom has no input — override
@@ -117,7 +117,7 @@ export class TableOfContentsComponent {
    */
   readonly stickyOffset = input<string>();
   /**
-   * Overrides the sticky height cap. The default keeps the TOC within the
+   * Overrides the sticky max height. The default keeps the TOC within the
    * viewport (`calc(100dvh - offset - 1.5rem)`); set this when the TOC scrolls
    * inside a fixed-height container rather than the window — e.g.
    * `"calc(30rem - 3rem)"` for a 30rem scroll region. Only applies while
@@ -200,7 +200,7 @@ export class TableOfContentsComponent {
     }
   }
 
-  /** Nearest scrollable ancestor within this component (e.g. the sticky `nav`). */
+  /** Nearest scrollable ancestor within this component (e.g. the sticky card). */
   private findScrollParent(el: HTMLElement): HTMLElement | null {
     const hostEl = this.host.nativeElement;
     let node = el.parentElement;
