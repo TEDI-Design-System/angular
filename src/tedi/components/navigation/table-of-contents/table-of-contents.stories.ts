@@ -931,7 +931,8 @@ export class DocPageComponent implements OnDestroy {
  * Tune the gap the sticky sidebar leaves above the viewport bottom with the
  * `--tedi-table-of-contents-sticky-bottom` CSS custom property (default `1.5rem`).
  * When the TOC scrolls inside a fixed-height container rather than the window,
- * set `stickyMaxHeight` to that container's height.
+ * set `stickyMaxHeight` to that container's height minus the top offset and
+ * bottom gap, e.g. `calc(30rem - 3rem)` for a 30rem container.
  */
 export const StickyInLayout: Story = {
   parameters: {
