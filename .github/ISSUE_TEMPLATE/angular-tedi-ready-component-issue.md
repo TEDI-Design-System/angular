@@ -4,7 +4,7 @@ about: Use this template if the issue is on the Angular TEDI-READY side, bug, en
   etc
 title: "[Component_name]:"
 labels: tedi-ready
-assignees: mart-sessman
+assignees: ''
 
 ---
 
