@@ -381,9 +381,24 @@ describe("FileUploadComponent", () => {
       expect(summary()).toBeUndefined();
     });
 
+    it("clears the summary when the bound control is reset", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("bad.txt", 100, "text/plain")]);
+      expect(summary()).toBeDefined();
+
+      // `reset()` covers the clear button; a form resetting the control comes
+      // through `writeValue` instead.
+      fixture.componentInstance.writeValue(null);
+      fixture.detectChanges();
+
+      expect(summary()).toBeUndefined();
+    });
+
     describe("with a validator", () => {
       const noSpaces = (file: File) =>
-        file.name.includes(" ") ? "Faili nimes ei tohi olla tühikuid." : null;
+        file.name.includes(" ") ? "Failinimes ei tohi olla tühikuid." : null;
 
       beforeEach(() => {
         fixture.componentRef.setInput("multiple", true);
@@ -404,10 +419,10 @@ describe("FileUploadComponent", () => {
           fixture.debugElement.queryAll(By.css(".tedi-tag--danger")).length,
         ).toBe(1);
         expect(summary()).toBe(
-          "Faili nimes ei tohi olla tühikuid: 'my scan.pdf'",
+          "Failinimes ei tohi olla tühikuid: 'my scan.pdf'",
         );
         expect(await announced()).toBe(
-          "Faili nimes ei tohi olla tühikuid: 'my scan.pdf'. file-upload.added:1",
+          "Failinimes ei tohi olla tühikuid: 'my scan.pdf'. file-upload.added:1",
         );
       });
 
@@ -415,7 +430,7 @@ describe("FileUploadComponent", () => {
         selectFiles(fixture, [makeFile("a b.pdf"), makeFile("c d.pdf")]);
 
         expect(summary()).toBe(
-          "Faili nimes ei tohi olla tühikuid: 'a b.pdf', 'c d.pdf'",
+          "Failinimes ei tohi olla tühikuid: 'a b.pdf', 'c d.pdf'",
         );
       });
 
@@ -433,7 +448,7 @@ describe("FileUploadComponent", () => {
         expect(validator).toHaveBeenCalledTimes(1);
         expect(summary()).toBe(
           "file-upload.extension-rejected:'bad name.txt'. " +
-            "Faili nimes ei tohi olla tühikuid: 'my scan.pdf'",
+            "Failinimes ei tohi olla tühikuid: 'my scan.pdf'",
         );
       });
 
@@ -742,6 +757,25 @@ describe("FileUploadComponent with reactive forms", () => {
   });
 
   afterEach(() => jest.restoreAllMocks());
+
+  it("clears the summary when the control is reset", () => {
+    selectFiles(fixture, [makeFile("bad.txt", 100, "text/plain")]);
+    fixture.detectChanges();
+
+    const summary = () =>
+      fixture.debugElement
+        .queryAll(By.css("tedi-feedback-text"))
+        .map((el) => (el.nativeElement as HTMLElement).textContent ?? "")
+        .find((listed) => listed.includes("rejected"));
+
+    expect(summary()).toBeDefined();
+
+    host.control.reset();
+    fixture.detectChanges();
+
+    expect(host.control.value).toBeNull();
+    expect(summary()).toBeUndefined();
+  });
 
   it("writes the control value into the list", () => {
     host.control.setValue([{ id: "1", name: "preloaded.pdf" }]);

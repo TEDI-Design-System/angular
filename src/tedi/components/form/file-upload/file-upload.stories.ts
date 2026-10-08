@@ -430,13 +430,13 @@ export const WithValidator: Story = {
   render: () => ({
     props: {
       noSpaces: (file: File) =>
-        file.name.includes(" ") ? "Faili nimes ei tohi olla tühikuid" : null,
+        file.name.includes(" ") ? "Failinimes ei tohi olla tühikuid" : null,
     },
     template: `
       <tedi-form-field>
         <label tedi-label for="validator">Label</label>
         <tedi-file-upload inputId="validator" name="file" multiple accept=".pdf,.txt" [validator]="noSpaces" />
-        <tedi-feedback-text text="Faili nimes ei tohi olla tühikuid." />
+        <tedi-feedback-text text="Failinimes ei tohi olla tühikuid." />
       </tedi-form-field>
     `,
   }),
@@ -471,7 +471,7 @@ export const ControlledClearing: Story = {
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <button tedi-button type="button" (click)="clear()">Eemalda failid</button>
+            <button tedi-button type="button" (click)="clear()">Clear files</button>
           </tedi-col>
           <tedi-col>
             <tedi-alert type="info" [showClose]="false">
@@ -488,6 +488,9 @@ export const ControlledClearing: Story = {
  * The field validates itself: with `keepRejectedFiles`, rejected files stay in
  * the value with `isValid: false` and the control fails with a `rejectedFiles`
  * error while one is listed. Still filter on `isValid` before uploading.
+ *
+ * Resetting the control clears the field, the rejection summary and the error
+ * border, so the form can return the field to its starting state.
  */
 export const WithReactiveForms: Story = {
   render: () => {
@@ -499,6 +502,7 @@ export const WithReactiveForms: Story = {
     return {
       props: {
         control,
+        reset: () => control.reset(),
         invalidCount: () =>
           control.value.filter((file) => file.isValid === false).length,
       },
@@ -509,6 +513,9 @@ export const WithReactiveForms: Story = {
               <label tedi-label for="reactive" [required]="true">Label</label>
               <tedi-file-upload inputId="reactive" name="file" multiple accept=".pdf,.txt" [maxSize]="1024 ** 2" keepRejectedFiles [formControl]="control" />
             </tedi-form-field>
+          </tedi-col>
+          <tedi-col>
+            <button tedi-button type="button" variant="secondary" (click)="reset()">Reset form</button>
           </tedi-col>
           <tedi-col>
             <tedi-alert type="info" [showClose]="false">

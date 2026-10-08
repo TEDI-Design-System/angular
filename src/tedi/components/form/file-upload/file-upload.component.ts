@@ -411,7 +411,13 @@ export class FileUploadComponent
   }
 
   writeValue(files: FileUploadFile[] | null): void {
-    this.files.set(files ?? []);
+    const next = files ?? [];
+
+    this.files.set(next);
+    // `reset()` covers the clear button, but a form resetting the control comes
+    // through here instead — without this the summary and the error border
+    // outlive the files they describe.
+    this.clearRejectionWhenResolved(next);
   }
 
   registerOnChange(fn: (files: FileUploadFile[]) => void): void {
@@ -495,12 +501,17 @@ export class FileUploadComponent
     this.onTouched();
   }
 
+  /** Drops the summary once no invalid file is left for it to describe. */
+  private clearRejectionWhenResolved(files: FileUploadFile[]): void {
+    if (!files.some((file) => file.isValid === false)) {
+      this.rejectionError.set(undefined);
+    }
+  }
+
   protected removeFile(file: FileUploadFile): void {
     const remaining = this.files().filter((current) => current !== file);
 
-    if (!remaining.some((current) => current.isValid === false)) {
-      this.rejectionError.set(undefined);
-    }
+    this.clearRejectionWhenResolved(remaining);
 
     this.removeFiles(
       [file],
