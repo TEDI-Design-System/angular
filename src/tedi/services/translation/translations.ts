@@ -290,12 +290,49 @@ export const translationsMap = {
     ru: (files: string, validTypes: string) =>
       `Файл(ы) ${files} имеют неправильное расширение. Разрешенные расширения: ${validTypes}`,
   },
+  "file-upload.failed": {
+    description:
+      "Appended, for assistive technology only, to the name of a file marked invalid",
+    components: ["FileUpload"],
+    et: "Vigane fail",
+    en: "Invalid file",
+    ru: "Недопустимый файл",
+  },
+  "file-upload.cleared": {
+    description: "Announced to assistive technology when all files are removed",
+    components: ["FileUpload"],
+    et: "Kõik failid eemaldatud",
+    en: "All files removed",
+    ru: "Все файлы удалены",
+  },
   "file-dropzone.label": {
     description: "Default label for dropzone",
     components: ["FileDropzone"],
     et: "Lohista failid siia või klõpsa, et sirvida",
     en: "Drop files here, or click to browse",
     ru: "Перетащите файлы сюда или нажмите, чтобы выбрать",
+  },
+  "file-upload.added": {
+    description: "Announced to assistive technology when files are added",
+    components: ["FileDropzone", "FileUpload"],
+    et: (count: string) => `Lisatud ${count} fail(i)`,
+    en: (count: string) => `${count} file(s) added`,
+    ru: (count: string) => `Добавлено файлов: ${count}`,
+  },
+  "file-upload.duplicates-skipped": {
+    description:
+      "Announced when files already in the list are skipped on a repeat selection",
+    components: ["FileDropzone", "FileUpload"],
+    et: (files: string) => `Fail(id) ${files} on juba lisatud`,
+    en: (files: string) => `File(s) ${files} have already been added`,
+    ru: (files: string) => `Файл(ы) ${files} уже добавлены`,
+  },
+  "file-upload.removed": {
+    description: "Announced to assistive technology when a file is removed",
+    components: ["FileDropzone", "FileUpload"],
+    et: (file: string) => `Fail ${file} eemaldatud`,
+    en: (file: string) => `File ${file} removed`,
+    ru: (file: string) => `Файл ${file} удален`,
   },
   "file-dropzone.error": {
     description: "Error label for dropzone",
