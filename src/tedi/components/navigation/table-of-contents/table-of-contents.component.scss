@@ -21,35 +21,13 @@
 .tedi-table-of-contents__container.tedi-table-of-contents--sticky {
   position: sticky;
   top: var(--tedi-table-of-contents-sticky-top);
-  display: flex;
-  flex-direction: column;
 
-  // Fill the viewport minus the top offset and a matching bottom gap. Override
-  // via `stickyMaxHeight` when the TOC scrolls inside a fixed-height container
-  // rather than the window (then 100dvh is the wrong basis).
+  // The whole card scrolls — heading included — once it exceeds the max height.
+  // Override the max height via `stickyMaxHeight` when the TOC scrolls inside a
+  // fixed-height container rather than the window (then 100dvh is the wrong basis).
   max-height: var(--tedi-table-of-contents-sticky-max-height);
-}
-
-.tedi-table-of-contents--sticky > .tedi-card-content {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.tedi-table-of-contents--sticky .tedi-table-of-contents__heading {
-  flex: none;
-}
-
-.tedi-table-of-contents--sticky nav {
-  flex: 1 1 auto;
-  min-height: 0;
-  margin-block: var(--card-padding-md-default);
   overflow-y: auto;
-}
-
-.tedi-table-of-contents--sticky .tedi-table-of-contents__list {
-  padding-block: 0;
+  overscroll-behavior: contain;
 }
 
 .tedi-table-of-contents--transparent .tedi-table-of-contents__list {
