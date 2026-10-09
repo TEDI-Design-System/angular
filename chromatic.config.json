@@ -4,6 +4,6 @@
   "autoAcceptChanges": "main",
   "skip": "dependabot/**",
   "onlyChanged": true,
-  "untraced": ["**/package-lock.json", "CHANGELOG.md"],
+  "untraced": ["CHANGELOG.md"],
   "zip": true
 }
