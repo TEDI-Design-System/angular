@@ -1,0 +1,21 @@
+@if (custom()) {
+  <ng-content />
+} @else {
+  <span class="tedi-search-suggestion__label">
+    @for (part of parts(); track $index) {
+      <span tedi-text [modifiers]="part.match ? 'bold' : undefined">{{
+        part.text
+      }}</span>
+    }
+  </span>
+
+  @if (description()) {
+    <span
+      tedi-text
+      class="tedi-search-suggestion__description"
+      color="tertiary"
+      modifiers="small"
+      >{{ description() }}</span
+    >
+  }
+}

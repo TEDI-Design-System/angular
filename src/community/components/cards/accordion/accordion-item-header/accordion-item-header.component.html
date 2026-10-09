@@ -1,0 +1,44 @@
+<button
+  [id]="headerId()"
+  class="tedi-accordion-item-header"
+  [class]="_modifierClasses()"
+  [class.tedi-accordion-item-header--opened]="opened()"
+  [class.tedi-accordion-item-header--brand]="variant() === 'brand'"
+  [attr.aria-expanded]="opened()"
+  [attr.aria-controls]="contentId()"
+  (click)="toggle()"
+  [disabled]="!clickable()"
+>
+  <div class="tedi-accordion-item-header__title">
+    @if (indicator() && indicatorPosition() === "start") {
+      <ng-container [ngTemplateOutlet]="indicatorIcon" />
+    }
+    <ng-content></ng-content>
+  </div>
+  @if (indicator() && indicatorPosition() === "end") {
+    <ng-container [ngTemplateOutlet]="indicatorIcon" />
+  }
+  @if (toggleButtonText()) {
+    <span
+      tedi-button
+      variant="neutral"
+      class="tedi-accordion-item-header__toggle"
+    >
+      {{ toggleButtonText() }}
+      <tedi-icon
+        name="keyboard_arrow_down"
+        class="tedi-accordion-item-header__indicator"
+        color="brand"
+      />
+    </span>
+  }
+  <ng-content select="[tedi-accordion-header-end]"></ng-content>
+</button>
+
+<ng-template #indicatorIcon
+  ><tedi-icon
+    name="keyboard_arrow_down"
+    class="tedi-accordion-item-header__indicator"
+    [size]="24"
+    [color]="indicatorIconColor()"
+/></ng-template>

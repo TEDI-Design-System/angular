@@ -1,0 +1,16 @@
+@use "../card-mixins";
+
+@include card-mixins.card-backgrounds("tedi-card-header");
+
+.tedi-card-header {
+  display: block;
+  flex: 0 0 auto;
+
+  @include card-mixins.card-padding;
+
+  @media print {
+    color: var(--general-text-primary);
+    background: var(--card-background-primary);
+    border-bottom: 1px solid var(--card-border-primary);
+  }
+}

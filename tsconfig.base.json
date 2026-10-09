@@ -10,14 +10,14 @@
     "importHelpers": true,
     "target": "es2018",
     "module": "esnext",
-    "lib": ["es2018", "dom", "ES2021.String"],
+    "lib": ["es2018", "dom", "ES2021.String", "ES2022.Intl"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "@tedi-design-system/angular/tedi": ["./tedi/index.ts"],
-      "@tedi-design-system/angular/community": ["./community/index.ts"]
+      "@tedi-design-system/angular/tedi": ["./src/tedi/index.ts"],
+      "@tedi-design-system/angular/community": ["./src/community/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

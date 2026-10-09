@@ -1,0 +1,14 @@
+@if (label()) {
+  <p [id]="labelId" class="tedi-radio-group__label" tedi-text color="secondary">
+    {{ label() }}
+  </p>
+}
+<div
+  class="tedi-radio-group__checks"
+  [class.tedi-radio-group__checks--vertical]="direction() === 'vertical'"
+>
+  <ng-content />
+</div>
+<div class="tedi-radio-group__subtexts">
+  <ng-content select="tedi-feedback-text" />
+</div>

@@ -1,0 +1,58 @@
+@mixin dropdown-item-base {
+  display: flex;
+  gap: var(--dropdown-item-inner-spacing);
+  align-items: center;
+  width: 100%;
+  min-height: 40px;
+  padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
+  color: var(--dropdown-item-default-text);
+  cursor: pointer;
+  background: var(--dropdown-item-default-background);
+
+  // A selected item keeps its active styling on hover — hover must not override
+  // the active state, so selected items are excluded from the hover rule.
+  &:hover:not(.tedi-dropdown-item--disabled, [aria-disabled="true"], .tedi-dropdown-item--selected, [aria-selected="true"]) {
+    color: var(--dropdown-item-hover-text);
+    background: var(--dropdown-item-hover-background);
+  }
+
+  &:focus-visible {
+    outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+    outline-offset: calc(-1 * var(--tedi-borders-02));
+  }
+
+  &[aria-selected="true"],
+  &.tedi-dropdown-item--selected {
+    color: var(--dropdown-item-active-text);
+    background: var(--dropdown-item-active-background);
+  }
+
+  &[aria-disabled="true"],
+  &.tedi-dropdown-item--disabled {
+    color: var(--general-text-disabled);
+    cursor: not-allowed;
+    background: var(--dropdown-item-disabled-background);
+  }
+}
+
+li[tedi-dropdown-item],
+.tedi-dropdown-item {
+  @include dropdown-item-base;
+}
+
+// A plain `list` row has no activation behaviour of its own: only the projected
+// control navigates. The row is styled as one target (hover background, pointer
+// cursor), so the control's activation area is stretched over it, otherwise a
+// click that lands beside the text would only close the panel. The overlay is
+// transparent and belongs to the control, so a real link click still carries
+// modifier keys, middle-click and the link context menu.
+.tedi-dropdown-content__list--plain > li[tedi-dropdown-item] {
+  position: relative;
+
+  a[href]::after,
+  button::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+  }
+}

@@ -1,0 +1,16 @@
+<ng-content select="[tedi-dropdown-trigger]" />
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="overlayOrigin()"
+  [cdkConnectedOverlayOpen]="isOpen()"
+  [cdkConnectedOverlayPositions]="overlayPositions()"
+  (overlayOutsideClick)="onOutsideClick($event)"
+>
+  <div
+    class="tedi-dropdown__panel"
+    [style.--_tedi-dropdown-trigger-width]="triggerWidthVar()"
+    (keydown)="onPanelKeydown($event)"
+  >
+    <ng-content select="tedi-dropdown-content" />
+  </div>
+</ng-template>

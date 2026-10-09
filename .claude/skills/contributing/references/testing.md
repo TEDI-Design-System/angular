@@ -8,8 +8,11 @@ Target: `$ARGUMENTS`
 
 If a path was provided, run tests for that specific component:
 ```bash
-npx jest $ARGUMENTS
+npm test -- $ARGUMENTS --coverage=false
 ```
+
+`--coverage=false` is required for a narrow run: coverage is on by default and measured against the
+whole library, so a single-component run would always trip the 80% global threshold and exit 1.
 
 If no path was provided, run the full test suite:
 ```bash

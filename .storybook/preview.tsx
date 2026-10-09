@@ -1,6 +1,6 @@
 import { applicationConfig, Preview, StoryContext } from "@storybook/angular";
 import { provideRouter, withDisabledInitialNavigation } from "@angular/router";
-import { Theme } from "../tedi/services/theme/theme.service";
+import { Theme } from "../src/tedi/services/theme/theme.service";
 import {
   Controls,
   Description,
@@ -9,9 +9,9 @@ import {
   Subtitle,
   Title,
 } from "@storybook/addon-docs/blocks";
-import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../tedi/tokens/translation.token";
-import { TEDI_THEME_DEFAULT_TOKEN } from "../tedi/tokens/theme.token";
-import { THEME_FALLBACK_VALUE } from "../tedi/services/theme/theme.service";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../src/tedi/tokens/translation.token";
+import { TEDI_THEME_DEFAULT_TOKEN } from "../src/tedi/tokens/theme.token";
+import { THEME_FALLBACK_VALUE } from "../src/tedi/services/theme/theme.service";
 
 export const globalTypes = {
   theme: {
@@ -21,8 +21,8 @@ export const globalTypes = {
     toolbar: {
       icon: "paintbrush",
       items: [
-        { value: "default", title: "Default" },
-        { value: "dark", title: "Dark" },
+        { value: "default", title: "Light mode (default)" },
+        { value: "dark", title: "Dark mode" },
       ],
       showName: true,
     },
@@ -73,16 +73,14 @@ const preview: Preview = {
   ],
   parameters: {
     viewMode: "docs",
+    a11y: {
+      test: "error",
+    },
     backgrounds: {
       options: {
-        default: { name: "default", value: "var(--general-surface-primary)" },
-        muted: { name: "muted", value: "var(--general-surface-secondary)" },
-        subtle: { name: "subtle", value: "var(--general-surface-tertiary)" },
-        disabled: { name: "disabled", value: "var(--general-surface-disabled)" },
-        black: { name: "black", value: "var(--tedi-neutral-900)" },
-        inverted: { name: "inverted", value: "var(--general-surface-inverted-primary)" },
-        "inverted-contrast": { name: "inverted-contrast", value: "var(--general-surface-inverted-secondary)" },
-        brand: { name: "brand", value: "var(--general-surface-brand-primary)" },
+        default: { name: "Default", value: "var(--general-surface-primary)" },
+        inverted: { name: "Inverted", value: "var(--general-surface-inverted-primary)" },
+        brand: { name: "Brand", value: "var(--general-surface-brand-primary)" },
       },
     },
     docs: {

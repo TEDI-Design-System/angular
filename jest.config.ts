@@ -17,7 +17,7 @@ export default {
   // in jest 29 workers on recent Node versions
   workerIdleMemoryLimit: "1GB",
   collectCoverage: true,
-  collectCoverageFrom: ["./tedi/components/**/*.{js,ts,tsx}"],
+  collectCoverageFrom: ["./src/tedi/components/**/*.{js,ts,tsx}"],
   coveragePathIgnorePatterns: ["\\.stories\\.ts$"],
   coverageThreshold: {
     global: {

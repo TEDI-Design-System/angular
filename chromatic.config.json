@@ -2,7 +2,8 @@
   "$schema": "https://www.chromatic.com/config-file.schema.json",
   "storybookBuildDir": "dist/storybook-static",
   "autoAcceptChanges": "main",
-  "exitOnceUploaded": true,
   "skip": "dependabot/**",
-  "onlyChanged": true
+  "onlyChanged": true,
+  "untraced": ["**/package-lock.json", "CHANGELOG.md"],
+  "zip": true
 }

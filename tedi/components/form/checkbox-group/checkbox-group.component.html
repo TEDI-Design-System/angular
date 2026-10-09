@@ -1,9 +1,0 @@
-@if (label()) {
-  <p [id]="labelId" class="tedi-checkbox-group__label" tedi-text color="secondary">{{ label() }}</p>
-}
-<div class="tedi-checkbox-group__checks" [class.tedi-checkbox-group__checks--vertical]="direction() === 'vertical'">
-  <ng-content />
-</div>
-<div class="tedi-checkbox-group__subtexts">
-  <ng-content select="tedi-feedback-text" />
-</div>

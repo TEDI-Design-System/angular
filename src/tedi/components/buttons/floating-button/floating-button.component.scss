@@ -1,0 +1,57 @@
+@use "../button/button-mixins" as button;
+
+.tedi-floating-button {
+  @include button.button-main-styles;
+
+  z-index: var(--z-index-feedback);
+  box-sizing: border-box;
+
+  // Allow horizontal labels to wrap even when an ancestor sets white-space: nowrap.
+  text-wrap: wrap;
+  box-shadow: 0 4px 10px 0
+    var(--general-effect-colors-elevation-general-secondary);
+
+  &--vertical {
+    flex-shrink: 0;
+    white-space: nowrap;
+    border-radius: var(--button-radius-sm) var(--button-radius-sm) 0 0;
+
+    // The rotation turns the shadow with the element, so the offset is
+    // pre-rotated: rotate(-90deg) maps (-4, 0) back onto (0, 4) on screen.
+    box-shadow: -4px 0 10px 0
+      var(--general-effect-colors-elevation-general-secondary);
+    transform-origin: center;
+    rotate: -90deg;
+  }
+
+  &--primary {
+    @include button.button-variant-color-vars("primary", false, "floating");
+  }
+
+  &--secondary {
+    @include button.button-variant-color-vars("secondary", false, "floating");
+  }
+
+  &--default {
+    @include button.button-size("md");
+  }
+
+  &--large {
+    @include button.button-size("xl");
+
+    &.tedi-floating-button--icon-only {
+      @include button.button-icon-size("xl");
+    }
+  }
+
+  &:not(.tedi-floating-button--icon-only) {
+    min-width: var(--button-width-min);
+    max-width: var(--button-width-max);
+  }
+
+  &--vertical:not(.tedi-floating-button--icon-only) {
+    // Size the button to its label so a narrow container does not compress it before rotation.
+    // An icon-only button keeps the fixed size it gets from button-icon-size.
+    width: max-content;
+  }
+}

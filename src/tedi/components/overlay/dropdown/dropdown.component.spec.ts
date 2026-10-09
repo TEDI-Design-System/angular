@@ -1,0 +1,1301 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Component, ViewEncapsulation } from "@angular/core";
+import {
+  ComponentFixture,
+  TestBed,
+  fakeAsync,
+  tick,
+} from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
+import { OverlayContainer } from "@angular/cdk/overlay";
+import { DropdownComponent } from "./dropdown.component";
+import {
+  DropdownTriggerAriaHasPopup,
+  DropdownTriggerDirective,
+} from "./dropdown-trigger/dropdown-trigger.directive";
+import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
+import { DropdownRole } from "./dropdown.tokens";
+import { DropdownItemComponent } from "./dropdown-item/dropdown-item.component";
+import { getFocusableElements } from "../../../utils/elements.util";
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown [value]="value" [hideOnScroll]="hideOnScroll">
+      <button tedi-dropdown-trigger [ariaHaspopup]="haspopup">Trigger</button>
+
+      <tedi-dropdown-content [dropdownRole]="role">
+        <li tedi-dropdown-item value="a">Item A</li>
+        <li tedi-dropdown-item value="b">Item B</li>
+        <li tedi-dropdown-item value="c" [disabled]="true">
+          Item C (disabled)
+        </li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class TestHostComponent {
+  value = "b";
+  role: DropdownRole = "listbox";
+  haspopup?: DropdownTriggerAriaHasPopup;
+  hideOnScroll = false;
+}
+
+@Component({
+  selector: "app-button",
+  standalone: true,
+  template: `<button><ng-content /></button>`,
+  encapsulation: ViewEncapsulation.None,
+})
+class MockButtonComponent {}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <app-button tedi-dropdown-trigger>Trigger</app-button>
+
+      <tedi-dropdown-content>
+        <li tedi-dropdown-item value="a">Item A</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+    MockButtonComponent,
+  ],
+})
+class WrappingButtonHostComponent {}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content dropdownRole="menu">
+        <li tedi-dropdown-item [interactiveContent]="true">
+          <a href="/a">Link A</a>
+        </li>
+        <li tedi-dropdown-item [interactiveContent]="true">
+          <a href="/b">Link B</a>
+        </li>
+        <li tedi-dropdown-item [interactiveContent]="true" [disabled]="true">
+          <a href="/c">Link C</a>
+        </li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class InteractiveContentHostComponent {}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown value="b">
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content dropdownRole="listbox">
+        <li tedi-dropdown-item value="a" [interactiveContent]="true">
+          <a href="/a">Link A</a>
+        </li>
+        <li tedi-dropdown-item value="b" [interactiveContent]="true">
+          <a href="/b">Link B</a>
+        </li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class InteractiveListboxHostComponent {}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content dropdownRole="list">
+        <li tedi-dropdown-item><a href="/a">Link A</a></li>
+        <li tedi-dropdown-item><a href="/b">Link B</a></li>
+        <li tedi-dropdown-item [disabled]="true"><a href="/c">Link C</a></li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class ListRoleHostComponent {}
+
+describe("DropdownComponent", () => {
+  let fixture: ComponentFixture<TestHostComponent>;
+  let host: TestHostComponent;
+  let hostEl: HTMLElement;
+  let dropdown: DropdownComponent;
+  let overlayContainerElement: HTMLElement;
+
+  beforeAll(() => {
+    (Element.prototype as any).scrollIntoView = jest.fn();
+  });
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [TestHostComponent],
+    });
+
+    fixture = TestBed.createComponent(TestHostComponent);
+    host = fixture.componentInstance;
+    hostEl = fixture.nativeElement;
+
+    const overlayContainer = TestBed.inject(OverlayContainer);
+    overlayContainerElement = overlayContainer.getContainerElement();
+
+    fixture.detectChanges();
+
+    const dropdownDebug = fixture.debugElement.query(
+      By.directive(DropdownComponent),
+    );
+    dropdown = dropdownDebug.componentInstance as DropdownComponent;
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    dropdown.hideDropdown();
+    overlayContainerElement.innerHTML = "";
+  });
+
+  const getTrigger = () =>
+    hostEl.querySelector("[tedi-dropdown-trigger]") as HTMLButtonElement;
+
+  const getItems = () =>
+    Array.from(
+      overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+    ) as HTMLLIElement[];
+
+  const openDropdown = () => {
+    dropdown.showDropdown();
+    fixture.detectChanges();
+  };
+
+  it("should create host & dropdown", () => {
+    expect(host).toBeTruthy();
+    expect(dropdown).toBeTruthy();
+  });
+
+  it("showDropdown() should open dropdown and set active item", () => {
+    expect(dropdown.isOpen()).toBe(false);
+
+    openDropdown();
+
+    expect(dropdown.isOpen()).toBe(true);
+
+    const items = getItems();
+    const activeItem = items.find((li) => li.getAttribute("tabindex") === "0");
+    expect(activeItem).toBeDefined();
+    expect(activeItem?.textContent).toContain("Item B");
+  });
+
+  it("hideDropdown() should close dropdown and reset tabindices", () => {
+    openDropdown();
+    expect(dropdown.isOpen()).toBe(true);
+
+    dropdown.hideDropdown();
+    fixture.detectChanges();
+
+    expect(dropdown.isOpen()).toBe(false);
+  });
+
+  it("toggleDropdown() should open when closed and close when open", () => {
+    expect(dropdown.isOpen()).toBe(false);
+
+    dropdown.toggleDropdown();
+    fixture.detectChanges();
+    expect(dropdown.isOpen()).toBe(true);
+
+    dropdown.toggleDropdown();
+    fixture.detectChanges();
+    expect(dropdown.isOpen()).toBe(false);
+  });
+
+  describe("hideOnScroll", () => {
+    it("sets up a scroll listener when opened with hideOnScroll true", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+
+      dropdown.showDropdown();
+
+      expect((dropdown as any).scrollListener).toBeDefined();
+    });
+
+    it("does not set up a scroll listener when hideOnScroll is false", () => {
+      host.hideOnScroll = false;
+      fixture.detectChanges();
+
+      dropdown.showDropdown();
+
+      expect((dropdown as any).scrollListener).toBeUndefined();
+    });
+
+    it("hides the dropdown on scroll when hideOnScroll is true", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      dropdown.showDropdown();
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect((dropdown as any).scrollListener).toBeUndefined();
+    });
+
+    it("keeps the dropdown open when the panel itself is scrolled", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      dropdown.showDropdown();
+      fixture.detectChanges();
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      const contentEl = dropdown.dropdownContent().host.nativeElement;
+      contentEl.dispatchEvent(new Event("scroll", { bubbles: false }));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+      expect(dropdown.isOpen()).toBe(true);
+    });
+
+    it("cleans up the scroll listener on destroy", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      dropdown.showDropdown();
+
+      fixture.destroy();
+
+      expect((dropdown as any).scrollListener).toBeUndefined();
+    });
+  });
+
+  it("focusFirstItem() should focus first enabled item", () => {
+    openDropdown();
+    dropdown.focusFirstItem();
+    fixture.detectChanges();
+
+    const items = getItems();
+    const first = items[0];
+
+    expect(document.activeElement).toBe(first);
+    expect(first.getAttribute("tabindex")).toBe("0");
+  });
+
+  it("focusLastItem() should focus last enabled item (skipping disabled)", () => {
+    openDropdown();
+    dropdown.focusLastItem();
+    fixture.detectChanges();
+
+    const items = getItems();
+    const expected = items[1];
+
+    expect(document.activeElement).toBe(expected);
+    expect(expected.getAttribute("tabindex")).toBe("0");
+  });
+
+  it("focusNextItem() should move focus to next enabled item", () => {
+    openDropdown();
+    const items = getItems();
+
+    dropdown.focusNextItem(items[0]);
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(items[1]);
+  });
+
+  it("focusPrevItem() should move focus to previous enabled item", () => {
+    openDropdown();
+    const items = getItems();
+
+    dropdown.focusPrevItem(items[1]);
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(items[0]);
+  });
+
+  it("DropdownTrigger: ArrowDown should open dropdown and focus first item", () => {
+    jest.useFakeTimers();
+    const trigger = getTrigger();
+
+    const event = new KeyboardEvent("keydown", { key: "ArrowDown" });
+    trigger.dispatchEvent(event);
+    fixture.detectChanges();
+    jest.runAllTimers();
+    jest.useRealTimers();
+
+    expect(dropdown.isOpen()).toBe(true);
+    const items = getItems();
+    const first = items[0];
+    expect(document.activeElement).toBe(first);
+  });
+
+  it("DropdownTrigger: Escape should hide dropdown and keep focus on trigger", () => {
+    openDropdown();
+    const trigger = getTrigger();
+    const focusSpy = jest.spyOn(trigger, "focus");
+
+    const event = new KeyboardEvent("keydown", { key: "Escape" });
+    trigger.dispatchEvent(event);
+    fixture.detectChanges();
+
+    expect(dropdown.isOpen()).toBe(false);
+    expect(focusSpy).toHaveBeenCalled();
+  });
+
+  it("DropdownItem: Enter selects value and hides dropdown in listbox mode", () => {
+    host.role = "listbox";
+    fixture.detectChanges();
+    openDropdown();
+
+    const items = getItems();
+    const second = items[1];
+
+    const event = new KeyboardEvent("keydown", { key: "Enter" });
+    second.dispatchEvent(event);
+    fixture.detectChanges();
+
+    expect(dropdown.value()).toBe("b");
+    expect(dropdown.isOpen()).toBe(false);
+  });
+
+  it("DropdownItem: disabled item should ignore click and keyboard", () => {
+    openDropdown();
+    const items = getItems();
+    const disabledItem = items[2];
+
+    disabledItem.click();
+    const event = new KeyboardEvent("keydown", { key: "Enter" });
+    disabledItem.dispatchEvent(event);
+    fixture.detectChanges();
+
+    expect(dropdown.value()).toBe("b");
+    expect(dropdown.isOpen()).toBe(true);
+  });
+
+  describe("onOutsideClick()", () => {
+    it("should hide dropdown without refocusing trigger", () => {
+      openDropdown();
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      const triggerEl = dropdown.dropdownTrigger()!.host.nativeElement;
+      const focusSpy = jest.spyOn(triggerEl, "focus");
+
+      dropdown.onOutsideClick();
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect(focusSpy).not.toHaveBeenCalled();
+    });
+
+    it("should close on a plain left click outside", () => {
+      openDropdown();
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.onOutsideClick(new MouseEvent("click"));
+
+      expect(hideSpy).toHaveBeenCalled();
+    });
+
+    it("should ignore the auxclick that ends the right-click gesture that opened it", () => {
+      openDropdown();
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      // The mouseup ending the opening right-click arrives as an outside `auxclick`.
+      dropdown.onOutsideClick(new MouseEvent("auxclick"));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+      expect(dropdown.isOpen()).toBe(true);
+
+      // A subsequent outside interaction still closes it.
+      dropdown.onOutsideClick(new MouseEvent("auxclick"));
+      expect(hideSpy).toHaveBeenCalled();
+    });
+
+    it("should ignore the ctrl+click that ends a macOS ctrl-click gesture", () => {
+      openDropdown();
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.onOutsideClick(new MouseEvent("click", { ctrlKey: true }));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+      expect(dropdown.isOpen()).toBe(true);
+    });
+  });
+
+  describe("handleFocusOut()", () => {
+    it("should return early when dropdown is closed", () => {
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.handleFocusOut({
+        target: document.createElement("div"),
+      } as unknown as FocusEvent);
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
+    it("should do nothing when focus moves inside the trigger element", () => {
+      openDropdown();
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.handleFocusOut({
+        target: dropdown.dropdownTrigger()!.host.nativeElement,
+      } as unknown as FocusEvent);
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
+    it("should do nothing when focus moves inside the content element", () => {
+      openDropdown();
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.handleFocusOut({
+        target: dropdown.dropdownContent().host.nativeElement,
+      } as unknown as FocusEvent);
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
+    it("should hide dropdown without refocusing trigger when focus leaves (e.g. Tab)", () => {
+      openDropdown();
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      const focusSpy = jest.spyOn(
+        dropdown.dropdownTrigger()!.host.nativeElement,
+        "focus",
+      );
+
+      dropdown.handleFocusOut({
+        target: document.createElement("div"),
+      } as unknown as FocusEvent);
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect(focusSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("tabOutOfDropdown()", () => {
+    let before: HTMLButtonElement;
+    let after: HTMLButtonElement;
+
+    beforeEach(() => {
+      document.body.appendChild(fixture.nativeElement);
+      before = document.createElement("button");
+      after = document.createElement("button");
+      document.body.insertBefore(before, fixture.nativeElement);
+      document.body.appendChild(after);
+      openDropdown();
+    });
+
+    afterEach(() => {
+      before.remove();
+      after.remove();
+      fixture.nativeElement.remove();
+    });
+
+    it("Tab closes the dropdown and focuses the element after the trigger", fakeAsync(() => {
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.tabOutOfDropdown(false);
+      tick();
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect(document.activeElement).toBe(after);
+    }));
+
+    it("Shift+Tab closes the dropdown and focuses the element before the trigger", fakeAsync(() => {
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+
+      dropdown.tabOutOfDropdown(true);
+      tick();
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect(document.activeElement).toBe(before);
+    }));
+
+    it("excludes dropdown content from the tab target so focus never re-enters the menu", fakeAsync(() => {
+      after.remove();
+
+      dropdown.tabOutOfDropdown(false);
+      tick();
+
+      const items = getItems();
+      expect(items).not.toContain(document.activeElement);
+    }));
+
+    it("focuses the next element synchronously, so focus never lands on body in between", () => {
+      // No tick(): deferring the focus leaves the detached panel item focused,
+      // so focus falls to body and a screen reader reads the container before
+      // it reaches the next element.
+      dropdown.tabOutOfDropdown(false);
+
+      expect(document.activeElement).toBe(after);
+    });
+
+    it("falls back to the trigger when nothing follows it in the tab order", () => {
+      after.remove();
+
+      dropdown.tabOutOfDropdown(false);
+
+      expect(document.activeElement).toBe(
+        dropdown.dropdownTrigger().focusableElement,
+      );
+    });
+  });
+
+  describe("setActiveToSelectedOrFirst()", () => {
+    it("should activate the selected item when it exists and is enabled", () => {
+      host.value = "b";
+      fixture.detectChanges();
+
+      const updateSpy = jest.spyOn(dropdown, "updateTabindexes");
+
+      dropdown.setActiveToSelectedOrFirst();
+      fixture.detectChanges();
+
+      expect((dropdown as any).activeIndex()).toBe(1);
+      expect(updateSpy).toHaveBeenCalled();
+    });
+
+    it("should fall back to first enabled item when selected item is disabled", () => {
+      host.value = "c";
+      fixture.detectChanges();
+
+      const updateSpy = jest.spyOn(dropdown, "updateTabindexes");
+
+      dropdown.setActiveToSelectedOrFirst();
+      fixture.detectChanges();
+
+      expect((dropdown as any).activeIndex()).toBe(0);
+      expect(updateSpy).toHaveBeenCalled();
+    });
+
+    it("should activate the first enabled item when selected value does not exist", () => {
+      host.value = "x";
+      fixture.detectChanges();
+
+      dropdown.setActiveToSelectedOrFirst();
+      fixture.detectChanges();
+
+      expect((dropdown as any).activeIndex()).toBe(0);
+    });
+  });
+
+  describe("DropdownItemComponent (unit behaviors)", () => {
+    let items: HTMLLIElement[];
+    let itemA: HTMLLIElement;
+    let itemB: HTMLLIElement;
+    let itemC: HTMLLIElement;
+
+    beforeEach(() => {
+      openDropdown();
+      items = getItems();
+      itemA = items[0];
+      itemB = items[1];
+      itemC = items[2];
+    });
+
+    it("onClick: enabled item should call onItemSelect()", () => {
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      const focusSpy = jest.spyOn(getTrigger(), "focus");
+      const setSpy = jest.spyOn(dropdown.value, "set");
+
+      itemA.click();
+      fixture.detectChanges();
+
+      expect(setSpy).toHaveBeenCalledWith("a");
+      expect(hideSpy).toHaveBeenCalled();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("onClick: disabled item should NOT select or hide dropdown", () => {
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      const setSpy = jest.spyOn(dropdown.value, "set");
+
+      itemC.click();
+      fixture.detectChanges();
+
+      expect(setSpy).not.toHaveBeenCalled();
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
+    it("keydown: ArrowDown should call dropdown.focusNextItem()", () => {
+      const spy = jest.spyOn(dropdown, "focusNextItem");
+
+      itemA.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalledWith(itemA);
+    });
+
+    it("keydown: ArrowUp should call dropdown.focusPrevItem()", () => {
+      const spy = jest.spyOn(dropdown, "focusPrevItem");
+
+      itemB.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalledWith(itemB);
+    });
+
+    it("keydown: Home should call dropdown.focusFirstItem()", () => {
+      const spy = jest.spyOn(dropdown, "focusFirstItem");
+
+      itemB.dispatchEvent(new KeyboardEvent("keydown", { key: "Home" }));
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it("keydown: End should call dropdown.focusLastItem()", () => {
+      const spy = jest.spyOn(dropdown, "focusLastItem");
+
+      itemA.dispatchEvent(new KeyboardEvent("keydown", { key: "End" }));
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it("keydown: Enter should select the item & hide dropdown", () => {
+      const setSpy = jest.spyOn(dropdown.value, "set");
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      const focusSpy = jest.spyOn(getTrigger(), "focus");
+
+      itemA.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter" }));
+      fixture.detectChanges();
+
+      expect(setSpy).toHaveBeenCalledWith("a");
+      expect(hideSpy).toHaveBeenCalled();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("keydown: Space should select the item & hide dropdown", () => {
+      const setSpy = jest.spyOn(dropdown.value, "set");
+
+      itemB.dispatchEvent(new KeyboardEvent("keydown", { key: " " }));
+      fixture.detectChanges();
+
+      expect(setSpy).toHaveBeenCalledWith("b");
+    });
+
+    it("keydown: Escape should hide dropdown & return focus to trigger", () => {
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      const focusSpy = jest.spyOn(getTrigger(), "focus");
+
+      itemB.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+      fixture.detectChanges();
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("keydown: Tab calls dropdown.tabOutOfDropdown(false)", () => {
+      const spy = jest.spyOn(dropdown, "tabOutOfDropdown");
+
+      itemA.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalledWith(false);
+    });
+
+    it("keydown: Shift+Tab calls dropdown.tabOutOfDropdown(true)", () => {
+      const spy = jest.spyOn(dropdown, "tabOutOfDropdown");
+
+      itemA.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Tab", shiftKey: true }),
+      );
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalledWith(true);
+    });
+
+    it("keydown: disabled item should preventDefault and NOT process", () => {
+      const event = new KeyboardEvent("keydown", { key: "Enter" });
+      const preventSpy = jest.spyOn(event, "preventDefault");
+
+      itemC.dispatchEvent(event);
+      fixture.detectChanges();
+
+      const setSpy = jest.spyOn(dropdown.value, "set");
+
+      expect(preventSpy).toHaveBeenCalled();
+      expect(setSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("DropdownTriggerDirective", () => {
+    let trigger: HTMLButtonElement;
+
+    beforeEach(() => {
+      trigger = getTrigger();
+    });
+
+    it("click should call dropdown.toggleDropdown()", () => {
+      const spy = jest.spyOn(dropdown, "toggleDropdown");
+
+      trigger.click();
+      fixture.detectChanges();
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it("ArrowDown should open dropdown (if closed) and focus first item", () => {
+      jest.useFakeTimers();
+      const showSpy = jest.spyOn(dropdown, "showDropdown");
+      const focusSpy = jest.spyOn(dropdown, "focusFirstItem");
+
+      expect(dropdown.isOpen()).toBe(false);
+
+      const event = new KeyboardEvent("keydown", { key: "ArrowDown" });
+      trigger.dispatchEvent(event);
+      fixture.detectChanges();
+      jest.runAllTimers();
+      jest.useRealTimers();
+
+      expect(showSpy).toHaveBeenCalled();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("ArrowDown should only focus first item when dropdown already open", () => {
+      jest.useFakeTimers();
+      openDropdown();
+
+      const showSpy = jest.spyOn(dropdown, "showDropdown");
+      const focusSpy = jest.spyOn(dropdown, "focusFirstItem");
+
+      const event = new KeyboardEvent("keydown", { key: "ArrowDown" });
+      trigger.dispatchEvent(event);
+      fixture.detectChanges();
+      jest.runAllTimers();
+      jest.useRealTimers();
+
+      expect(showSpy).not.toHaveBeenCalled();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("ArrowUp should open dropdown (if closed) and focus last item", () => {
+      jest.useFakeTimers();
+      const showSpy = jest.spyOn(dropdown, "showDropdown");
+      const focusSpy = jest.spyOn(dropdown, "focusLastItem");
+
+      expect(dropdown.isOpen()).toBe(false);
+
+      const event = new KeyboardEvent("keydown", { key: "ArrowUp" });
+      trigger.dispatchEvent(event);
+      fixture.detectChanges();
+      jest.runAllTimers();
+      jest.useRealTimers();
+
+      expect(showSpy).toHaveBeenCalled();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("ArrowUp should only focus last item when dropdown already open", () => {
+      jest.useFakeTimers();
+      openDropdown();
+
+      const showSpy = jest.spyOn(dropdown, "showDropdown");
+      const focusSpy = jest.spyOn(dropdown, "focusLastItem");
+
+      const event = new KeyboardEvent("keydown", { key: "ArrowUp" });
+      trigger.dispatchEvent(event);
+      fixture.detectChanges();
+      jest.runAllTimers();
+      jest.useRealTimers();
+
+      expect(showSpy).not.toHaveBeenCalled();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("Escape should hide dropdown and return focus to trigger", () => {
+      openDropdown();
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      const focusSpy = jest.spyOn(trigger, "focus");
+
+      const event = new KeyboardEvent("keydown", { key: "Escape" });
+      trigger.dispatchEvent(event);
+      fixture.detectChanges();
+
+      expect(hideSpy).toHaveBeenCalled();
+      expect(focusSpy).toHaveBeenCalled();
+    });
+
+    it("should set correct ARIA attributes", () => {
+      expect(trigger.getAttribute("aria-haspopup")).toBe("listbox");
+      expect(trigger.getAttribute("aria-expanded")).toBe("false");
+      expect(trigger.getAttribute("role")).toBeNull();
+      expect(trigger.getAttribute("tabindex")).toBeNull();
+    });
+
+    it("takes aria-haspopup from the content role, and an explicit value wins", () => {
+      host.role = "menu";
+      fixture.detectChanges();
+
+      expect(trigger.getAttribute("aria-haspopup")).toBe("menu");
+
+      fixture.componentInstance.haspopup = "dialog";
+      fixture.detectChanges();
+
+      expect(trigger.getAttribute("aria-haspopup")).toBe("dialog");
+    });
+
+    it("only points aria-controls at the panel while it exists", () => {
+      expect(trigger.getAttribute("aria-controls")).toBeNull();
+
+      openDropdown();
+
+      expect(trigger.getAttribute("aria-controls")).toBe(
+        dropdown.containerId(),
+      );
+      expect(overlayContainerElement.querySelector("ul")?.id).toBe(
+        dropdown.containerId(),
+      );
+
+      dropdown.hideDropdown();
+      fixture.detectChanges();
+
+      expect(trigger.getAttribute("aria-controls")).toBeNull();
+    });
+  });
+
+  describe("DropdownTriggerDirective on a wrapping button component", () => {
+    let wrappedFixture: ComponentFixture<WrappingButtonHostComponent>;
+    let wrappedDropdown: DropdownComponent;
+    let wrapperEl: HTMLElement;
+    let innerButton: HTMLButtonElement;
+
+    beforeEach(() => {
+      wrappedFixture = TestBed.createComponent(WrappingButtonHostComponent);
+      wrappedFixture.detectChanges();
+
+      wrappedDropdown = wrappedFixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      wrapperEl = wrappedFixture.nativeElement.querySelector(
+        "[tedi-dropdown-trigger]",
+      ) as HTMLElement;
+      innerButton = wrapperEl.querySelector("button") as HTMLButtonElement;
+    });
+
+    it("applies ARIA/role/tabindex to the inner button, not the wrapper", () => {
+      expect(wrapperEl.tagName).toBe("APP-BUTTON");
+
+      expect(innerButton.getAttribute("aria-haspopup")).toBe("menu");
+      expect(innerButton.getAttribute("aria-expanded")).toBe("false");
+      expect(innerButton.getAttribute("id")).toBe(
+        `${wrappedDropdown.containerId()}_trigger`,
+      );
+
+      expect(innerButton.getAttribute("role")).toBeNull();
+      expect(innerButton.getAttribute("tabindex")).toBeNull();
+    });
+
+    it("does not turn the wrapper into a second tab stop", () => {
+      expect(wrapperEl.getAttribute("role")).toBeNull();
+      expect(wrapperEl.getAttribute("tabindex")).toBeNull();
+      expect(wrapperEl.getAttribute("aria-expanded")).toBeNull();
+    });
+
+    it("keeps aria-expanded in sync on the inner button", () => {
+      wrappedDropdown.showDropdown();
+      wrappedFixture.detectChanges();
+      expect(innerButton.getAttribute("aria-expanded")).toBe("true");
+
+      wrappedDropdown.hideDropdown();
+      wrappedFixture.detectChanges();
+      expect(innerButton.getAttribute("aria-expanded")).toBe("false");
+    });
+
+    it("focus() targets the inner button", () => {
+      const focusSpy = jest.spyOn(innerButton, "focus");
+
+      wrappedDropdown.dropdownTrigger().focus();
+
+      expect(focusSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe("interactiveContent items", () => {
+    let interactiveFixture: ComponentFixture<InteractiveContentHostComponent>;
+    let interactiveDropdown: DropdownComponent;
+    let links: HTMLAnchorElement[];
+    let itemEls: HTMLLIElement[];
+
+    beforeEach(() => {
+      interactiveFixture = TestBed.createComponent(
+        InteractiveContentHostComponent,
+      );
+      interactiveFixture.detectChanges();
+
+      interactiveDropdown = interactiveFixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      interactiveDropdown.showDropdown();
+      interactiveFixture.detectChanges();
+
+      itemEls = Array.from(
+        overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+      ) as HTMLLIElement[];
+      links = itemEls.map((el) => el.querySelector("a") as HTMLAnchorElement);
+    });
+
+    afterEach(() => {
+      interactiveDropdown.hideDropdown();
+    });
+
+    it("exposes the item role on the link and leaves the li presentational", () => {
+      itemEls.forEach((el) => {
+        expect(el.getAttribute("role")).toBe("none");
+        expect(el.getAttribute("tabindex")).toBeNull();
+      });
+
+      links.forEach((link) =>
+        expect(link.getAttribute("role")).toBe("menuitem"),
+      );
+      expect(links[2].getAttribute("aria-disabled")).toBe("true");
+      expect(links[0].getAttribute("aria-disabled")).toBeNull();
+    });
+
+    it("keeps the roving tabindex on the links", () => {
+      expect(links.map((link) => link.getAttribute("tabindex"))).toEqual([
+        "0",
+        "-1",
+        "-1",
+      ]);
+
+      interactiveDropdown.focusNextItem(itemEls[0]);
+      interactiveFixture.detectChanges();
+
+      expect(links.map((link) => link.getAttribute("tabindex"))).toEqual([
+        "-1",
+        "0",
+        "-1",
+      ]);
+      expect(document.activeElement).toBe(links[1]);
+    });
+
+    it("keydown: Enter is left to the link so it navigates", () => {
+      const event = new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+      });
+      links[0].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    it("keydown: Space activates the link", () => {
+      const clickSpy = jest.spyOn(links[0], "click");
+      const event = new KeyboardEvent("keydown", {
+        key: " ",
+        bubbles: true,
+        cancelable: true,
+      });
+      links[0].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(clickSpy).toHaveBeenCalled();
+    });
+
+    it("prevents activation of a disabled item's link", () => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+      });
+      links[2].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(interactiveDropdown.isOpen()).toBe(true);
+    });
+
+    it("stops a disabled item's click before target-level handlers run", () => {
+      const targetHandler = jest.fn();
+      links[2].addEventListener("click", targetHandler);
+
+      links[2].dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+
+      expect(targetHandler).not.toHaveBeenCalled();
+
+      links[2].removeEventListener("click", targetHandler);
+    });
+
+    it("leaves an enabled item's target-level handler alone", () => {
+      const targetHandler = jest.fn();
+      links[0].addEventListener("click", targetHandler);
+
+      links[0].dispatchEvent(
+        new MouseEvent("click", { bubbles: true, cancelable: true }),
+      );
+
+      expect(targetHandler).toHaveBeenCalled();
+
+      links[0].removeEventListener("click", targetHandler);
+    });
+  });
+
+  describe("interactiveContent items in a listbox", () => {
+    let listboxFixture: ComponentFixture<InteractiveListboxHostComponent>;
+    let listboxDropdown: DropdownComponent;
+
+    beforeEach(() => {
+      listboxFixture = TestBed.createComponent(InteractiveListboxHostComponent);
+      listboxFixture.detectChanges();
+
+      listboxDropdown = listboxFixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      listboxDropdown.showDropdown();
+      listboxFixture.detectChanges();
+    });
+
+    afterEach(() => {
+      listboxDropdown.hideDropdown();
+    });
+
+    it("moves the option selection contract onto the control", () => {
+      const itemEls = Array.from(
+        overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+      ) as HTMLLIElement[];
+      const optionLinks = itemEls.map(
+        (el) => el.querySelector("a") as HTMLAnchorElement,
+      );
+
+      itemEls.forEach((el) => {
+        expect(el.getAttribute("role")).toBe("none");
+        expect(el.getAttribute("aria-selected")).toBeNull();
+      });
+
+      optionLinks.forEach((link) =>
+        expect(link.getAttribute("role")).toBe("option"),
+      );
+      expect(optionLinks[0].getAttribute("aria-selected")).toBe("false");
+      expect(optionLinks[1].getAttribute("aria-selected")).toBe("true");
+    });
+  });
+
+  describe('dropdownRole="list"', () => {
+    let listFixture: ComponentFixture<ListRoleHostComponent>;
+    let listDropdown: DropdownComponent;
+    let listTrigger: HTMLButtonElement;
+    let listEl: HTMLUListElement;
+    let links: HTMLAnchorElement[];
+    let itemEls: HTMLLIElement[];
+    let after: HTMLButtonElement;
+
+    const open = () => {
+      listDropdown.showDropdown();
+      listFixture.detectChanges();
+
+      itemEls = Array.from(
+        listFixture.nativeElement.querySelectorAll("li[tedi-dropdown-item]"),
+      ) as HTMLLIElement[];
+      links = itemEls.map((el) => el.querySelector("a") as HTMLAnchorElement);
+      listEl = listFixture.nativeElement.querySelector(
+        "ul",
+      ) as HTMLUListElement;
+    };
+
+    const keydown = (el: HTMLElement, init: KeyboardEventInit) =>
+      el.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          bubbles: true,
+          cancelable: true,
+          ...init,
+        }),
+      );
+
+    beforeEach(() => {
+      listFixture = TestBed.createComponent(ListRoleHostComponent);
+      listFixture.detectChanges();
+      document.body.appendChild(listFixture.nativeElement);
+
+      after = document.createElement("button");
+      document.body.appendChild(after);
+
+      listDropdown = listFixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+      listTrigger = listFixture.nativeElement.querySelector(
+        "[tedi-dropdown-trigger]",
+      ) as HTMLButtonElement;
+    });
+
+    afterEach(() => {
+      listDropdown.hideDropdown();
+      after.remove();
+      listFixture.nativeElement.remove();
+    });
+
+    it("exposes the panel as a plain list that the trigger points at", () => {
+      expect(listTrigger.getAttribute("aria-haspopup")).toBeNull();
+      expect(listTrigger.getAttribute("aria-controls")).toBeNull();
+
+      open();
+
+      expect(listEl.getAttribute("role")).toBe("list");
+      expect(listEl.id).toBe(listDropdown.containerId());
+      expect(listEl.getAttribute("aria-labelledby")).toBe(listTrigger.id);
+      expect(listTrigger.getAttribute("aria-controls")).toBe(listEl.id);
+      expect(listTrigger.getAttribute("aria-expanded")).toBe("true");
+    });
+
+    it("leaves the items and their links free of widget semantics", () => {
+      open();
+
+      itemEls.forEach((el) => {
+        expect(el.getAttribute("role")).toBeNull();
+        expect(el.getAttribute("tabindex")).toBeNull();
+        expect(el.getAttribute("aria-selected")).toBeNull();
+        expect(el.getAttribute("aria-disabled")).toBeNull();
+      });
+
+      links.forEach((link) => {
+        expect(link.getAttribute("role")).toBeNull();
+        expect(link.getAttribute("tabindex")).toBeNull();
+        expect(link.getAttribute("aria-selected")).toBeNull();
+      });
+
+      expect(links[2].getAttribute("aria-disabled")).toBe("true");
+      expect(links[0].getAttribute("aria-disabled")).toBeNull();
+    });
+
+    it("moves focus to the first link when it opens", fakeAsync(() => {
+      listTrigger.focus();
+      open();
+      tick();
+
+      expect(document.activeElement).toBe(links[0]);
+      expect(listDropdown.isOpen()).toBe(true);
+    }));
+
+    it("leaves the arrow keys alone instead of opening and navigating items", () => {
+      listTrigger.focus();
+
+      const event = new KeyboardEvent("keydown", {
+        key: "ArrowDown",
+        bubbles: true,
+        cancelable: true,
+      });
+      listTrigger.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(false);
+      expect(listDropdown.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(listTrigger);
+    });
+
+    // A mobile screen reader walks the page in DOM order and sends no Tab key,
+    // so a panel at the end of the body is reached after the whole page rather
+    // than after the trigger.
+    it("renders the panel where the dropdown sits in the DOM", () => {
+      open();
+
+      expect(listFixture.nativeElement.contains(listEl)).toBe(true);
+      expect(overlayContainerElement.contains(listEl)).toBe(false);
+    });
+
+    it("places the links between the trigger and the rest of the page", () => {
+      open();
+
+      const focusable = getFocusableElements(document.body);
+      const from = focusable.indexOf(listTrigger);
+
+      expect(focusable.slice(from, from + 5)).toEqual([
+        listTrigger,
+        links[0],
+        links[1],
+        links[2],
+        after,
+      ]);
+    });
+
+    it("leaves Tab to the browser at both ends of the list", () => {
+      open();
+      links[0].focus();
+      expect(keydown(links[0], { key: "Tab", shiftKey: true })).toBe(true);
+
+      links[2].focus();
+      expect(keydown(links[2], { key: "Tab" })).toBe(true);
+      expect(listDropdown.isOpen()).toBe(true);
+    });
+
+    it("closes once focus lands past the panel", () => {
+      open();
+      links[2].focus();
+
+      after.focus();
+
+      expect(listDropdown.isOpen()).toBe(false);
+    });
+
+    it("Escape closes the list and returns focus to the trigger", () => {
+      open();
+      links[1].focus();
+
+      expect(keydown(links[1], { key: "Escape" })).toBe(false);
+
+      expect(listDropdown.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(listTrigger);
+    });
+
+    it("leaves Enter and Space to the link", () => {
+      open();
+      links[0].focus();
+
+      expect(keydown(links[0], { key: "Enter" })).toBe(true);
+      expect(keydown(links[0], { key: " " })).toBe(true);
+    });
+
+    it("closes when a link is activated", () => {
+      open();
+
+      links[0].dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+      expect(listDropdown.isOpen()).toBe(false);
+    });
+
+    it("blocks activation of a disabled item's link", () => {
+      open();
+
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+      });
+      links[2].dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(listDropdown.isOpen()).toBe(true);
+    });
+  });
+});
