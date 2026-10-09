@@ -35,6 +35,11 @@ type Story = StoryObj<StoryComponent>;
 const meta: Meta<StoryComponent> = {
   title: "Community/Form/InputGroup",
   component: InputGroupComponent,
+  parameters: {
+    status: {
+      type: ["existsInTediReady", "deprecated"],
+    },
+  },
   argTypes: {
     label: {
       control: "text",
