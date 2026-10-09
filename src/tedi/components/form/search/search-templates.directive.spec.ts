@@ -28,6 +28,16 @@ describe("search template directives", () => {
     );
   });
 
+  it("narrows the suggestion template context", () => {
+    const fixture = TestBed.createComponent(HostComponent);
+    fixture.detectChanges();
+    const directive = fixture.componentInstance.suggestion()!;
+
+    expect(
+      SearchSuggestionTemplateDirective.ngTemplateContextGuard(directive, {}),
+    ).toBe(true);
+  });
+
   it("exposes the footer TemplateRef", () => {
     const fixture = TestBed.createComponent(HostComponent);
     fixture.detectChanges();
