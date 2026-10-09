@@ -64,6 +64,7 @@ import {
 } from "../../../utils/date.util";
 import { matchAny, Matcher } from "../../../utils/matchers.util";
 import { ModalService } from "../../overlay/modal/modal.service";
+import { FIELD_OVERLAY_GAP } from "../form-field/field-overlay";
 import { ModalRef } from "../../overlay/modal/modal-ref";
 import { ModalFullscreen } from "../../overlay/modal/modal.types";
 import {
@@ -373,10 +374,30 @@ export class DateFieldComponent
         ? { originX: "start", overlayX: "start" }
         : { originX: "end", overlayX: "end" };
     return [
-      { ...aligned, originY: "bottom", overlayY: "top", offsetY: 4 },
-      { ...aligned, originY: "top", overlayY: "bottom", offsetY: -4 },
-      { ...opposite, originY: "bottom", overlayY: "top", offsetY: 4 },
-      { ...opposite, originY: "top", overlayY: "bottom", offsetY: -4 },
+      {
+        ...aligned,
+        originY: "bottom",
+        overlayY: "top",
+        offsetY: FIELD_OVERLAY_GAP,
+      },
+      {
+        ...aligned,
+        originY: "top",
+        overlayY: "bottom",
+        offsetY: -FIELD_OVERLAY_GAP,
+      },
+      {
+        ...opposite,
+        originY: "bottom",
+        overlayY: "top",
+        offsetY: FIELD_OVERLAY_GAP,
+      },
+      {
+        ...opposite,
+        originY: "top",
+        overlayY: "bottom",
+        offsetY: -FIELD_OVERLAY_GAP,
+      },
     ];
   });
 
