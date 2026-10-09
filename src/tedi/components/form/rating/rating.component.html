@@ -1,0 +1,114 @@
+@if (readOnly()) {
+  <div class="tedi-rating__summary" aria-hidden="true">
+    @if (type() === "star" && readOnlyVariant() === "scale") {
+      <span class="tedi-rating__stars">
+        @for (fill of partialFills(); track $index) {
+          <span class="tedi-rating__star-partial">
+            <tedi-icon
+              class="tedi-rating__star"
+              [name]="starGlyph()"
+              color="inherit"
+              [size]="starIconSize"
+            />
+            @if (fill > 0) {
+              <span
+                class="tedi-rating__star-partial-fill"
+                [style.--tedi-rating-star-fill]="fill + '%'"
+              >
+                <tedi-icon
+                  class="tedi-rating__star"
+                  [name]="starGlyph()"
+                  variant="filled"
+                  color="inherit"
+                  [size]="starIconSize"
+                />
+              </span>
+            }
+          </span>
+        }
+      </span>
+    } @else if (type() === "star") {
+      <tedi-icon
+        class="tedi-rating__star"
+        [name]="starGlyph()"
+        variant="filled"
+        color="inherit"
+        [size]="starIconSize"
+      />
+    } @else if (type() === "icon") {
+      <span class="tedi-rating__circle tedi-rating__circle--filled">
+        <tedi-icon
+          [name]="readOnlyIcon()"
+          color="inherit"
+          [size]="circleIconSize"
+        />
+      </span>
+    }
+    <span class="tedi-rating__summary-text">{{ summary() }}</span>
+  </div>
+} @else {
+  <div
+    class="tedi-rating__items"
+    [class.tedi-rating__items--captioned]="hasCaptions()"
+    (mouseleave)="setHover(null)"
+  >
+    @for (item of items(); track item.position) {
+      <label class="tedi-rating__item" (mouseenter)="setHover(item.position)">
+        <input
+          type="radio"
+          class="tedi-rating__input"
+          [name]="groupName()"
+          [value]="item.position"
+          [checked]="value() === item.position"
+          [disabled]="isDisabled()"
+          [attr.aria-label]="item.accessibleName"
+          (change)="select(item.position)"
+          (blur)="handleBlur()"
+        />
+        <span
+          class="tedi-rating__visual"
+          [class.tedi-rating__visual--selected]="item.selected"
+          [class.tedi-rating__visual--hover]="item.previewed"
+          aria-hidden="true"
+        >
+          @if (type() === "star") {
+            <!-- Filled copy behind the glyph; tinted only on hover so the outlined star gets a light fill. -->
+            <tedi-icon
+              class="tedi-rating__star-backdrop"
+              [name]="starGlyph()"
+              variant="filled"
+              color="inherit"
+              [size]="starIconSize"
+            />
+            <tedi-icon
+              class="tedi-rating__star"
+              [name]="starGlyph()"
+              [variant]="item.selected ? 'filled' : 'outlined'"
+              color="inherit"
+              [size]="starIconSize"
+            />
+          } @else {
+            <span class="tedi-rating__circle">
+              @if (type() === "number") {
+                {{ item.position }}
+              } @else {
+                <tedi-icon
+                  [name]="item.icon"
+                  color="inherit"
+                  [size]="circleIconSize"
+                />
+              }
+            </span>
+          }
+        </span>
+        @if (item.caption) {
+          <span class="tedi-rating__caption">{{ item.caption }}</span>
+        }
+      </label>
+    }
+  </div>
+
+  @if (starCaption() !== undefined) {
+    <div class="tedi-rating__star-caption">{{ starCaption() }}</div>
+  }
+}
