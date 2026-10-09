@@ -10,6 +10,7 @@ import {
   ComponentInputs,
   LabelComponent,
   FeedbackTextComponent,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 import { generateUUID } from "@tedi-design-system/angular/tedi";
 
@@ -69,4 +70,12 @@ export class CheckboxGroupComponent {
   });
 
   groupDisabled = computed(() => this.disabled());
+
+  constructor() {
+    if (new.target !== CheckboxGroupComponent) return;
+    warnDeprecated(
+      "Community tedi-checkbox-group",
+      "Use Checkbox from TEDI-ready instead.",
+    );
+  }
 }

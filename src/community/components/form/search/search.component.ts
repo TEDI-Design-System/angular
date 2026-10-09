@@ -24,6 +24,7 @@ import {
   LabelComponent,
   CardComponent,
   CardContentComponent,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 import { FormsModule } from "@angular/forms";
 import { CdkOverlayOrigin, OverlayModule } from "@angular/cdk/overlay";
@@ -173,6 +174,13 @@ export class SearchComponent
 
     return modifiers.join(" ");
   });
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-search",
+      "Use `SearchComponent` from `@tedi-design-system/angular/tedi` instead.",
+    );
+  }
 
   ngAfterContentChecked(): void {
     this._width.set(this.getWidth());

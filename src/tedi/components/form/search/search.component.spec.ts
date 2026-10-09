@@ -5,7 +5,7 @@ import { SearchComponent } from "./search.component";
 import { SearchFooterTemplateDirective } from "./search-templates.directive";
 import { FormFieldComponent } from "../form-field/form-field.component";
 import { TextFieldComponent } from "../text-field/text-field.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
@@ -48,6 +48,21 @@ describe("SearchComponent", () => {
 
   it("should create component", () => {
     expect(component).toBeTruthy();
+  });
+
+  it("passes showClearOnInteraction to its filled form field", () => {
+    fixture.componentRef.setInput("showClearOnInteraction", true);
+    typeInto("Test");
+    const field = el.querySelector("tedi-form-field") as HTMLElement;
+    expect(
+      field.classList.contains("tedi-form-field--clear-on-interaction"),
+    ).toBe(true);
+
+    fixture.componentRef.setInput("clearable", false);
+    fixture.detectChanges();
+    expect(
+      field.classList.contains("tedi-form-field--clear-on-interaction"),
+    ).toBe(false);
   });
 
   it("should render a search landmark with role and searchbox input", () => {

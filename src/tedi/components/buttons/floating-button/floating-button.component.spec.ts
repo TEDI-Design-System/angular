@@ -48,16 +48,16 @@ describe("FloatingButtonComponent", () => {
   });
 
   it("renders the default variant, size and axis classes", () => {
-    expect(host.classList).toContain("tedi-ready-floating-button");
-    expect(host.classList).toContain("tedi-ready-floating-button--primary");
-    expect(host.classList).toContain("tedi-ready-floating-button--default");
-    expect(host.classList).toContain("tedi-ready-floating-button--horizontal");
+    expect(host.classList).toContain("tedi-floating-button");
+    expect(host.classList).toContain("tedi-floating-button--primary");
+    expect(host.classList).toContain("tedi-floating-button--default");
+    expect(host.classList).toContain("tedi-floating-button--horizontal");
   });
 
   it.each([
-    ["variant", "secondary", "tedi-ready-floating-button--secondary"],
-    ["size", "large", "tedi-ready-floating-button--large"],
-    ["axis", "vertical", "tedi-ready-floating-button--vertical"],
+    ["variant", "secondary", "tedi-floating-button--secondary"],
+    ["size", "large", "tedi-floating-button--large"],
+    ["axis", "vertical", "tedi-floating-button--vertical"],
   ])("applies %s=%s as a modifier class", (input, value, expected) => {
     setInputs({ [input]: value });
 
@@ -69,7 +69,7 @@ describe("FloatingButtonComponent", () => {
       axis: "vertical",
       placement: { vertical: "top", horizontal: "left" },
     });
-    expect(host.classList).toContain("tedi-ready-floating-button--vertical");
+    expect(host.classList).toContain("tedi-floating-button--vertical");
     expect(host.style.top).toBe("0px");
     expect(host.style.left).toBe("0px");
   });
@@ -170,7 +170,7 @@ describe("FloatingButtonComponent", () => {
 
     expect(host.style.top).toBe("50%");
     expect(host.style.translate).toBe("0 -50%");
-    expect(host.classList).toContain("tedi-ready-floating-button--vertical");
+    expect(host.classList).toContain("tedi-floating-button--vertical");
   });
 
   it("centers horizontally through the same property", () => {
@@ -208,31 +208,25 @@ describe("FloatingButtonComponent", () => {
     });
 
     it("pads both sides of a text-only button", () => {
-      expect(buttons[0].classList).toContain("tedi-ready-floating-button--pl");
-      expect(buttons[0].classList).toContain("tedi-ready-floating-button--pr");
+      expect(buttons[0].classList).toContain("tedi-floating-button--pl");
+      expect(buttons[0].classList).toContain("tedi-floating-button--pr");
       expect(buttons[0].classList).not.toContain(
-        "tedi-ready-floating-button--icon-only",
+        "tedi-floating-button--icon-only",
       );
     });
 
     it("drops the trailing pad when an icon comes last", () => {
-      expect(buttons[1].classList).toContain("tedi-ready-floating-button--pl");
-      expect(buttons[1].classList).not.toContain(
-        "tedi-ready-floating-button--pr",
-      );
+      expect(buttons[1].classList).toContain("tedi-floating-button--pl");
+      expect(buttons[1].classList).not.toContain("tedi-floating-button--pr");
     });
 
     it("drops the leading pad when an icon comes first", () => {
-      expect(buttons[2].classList).not.toContain(
-        "tedi-ready-floating-button--pl",
-      );
-      expect(buttons[2].classList).toContain("tedi-ready-floating-button--pr");
+      expect(buttons[2].classList).not.toContain("tedi-floating-button--pl");
+      expect(buttons[2].classList).toContain("tedi-floating-button--pr");
     });
 
     it("marks a lone icon as icon-only", () => {
-      expect(buttons[3].classList).toContain(
-        "tedi-ready-floating-button--icon-only",
-      );
+      expect(buttons[3].classList).toContain("tedi-floating-button--icon-only");
     });
   });
 });

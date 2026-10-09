@@ -1,6 +1,6 @@
 @use "../button/button-mixins" as button;
 
-.tedi-ready-floating-button {
+.tedi-floating-button {
   @include button.button-main-styles;
 
   z-index: var(--z-index-feedback);
@@ -39,17 +39,17 @@
   &--large {
     @include button.button-size("xl");
 
-    &.tedi-ready-floating-button--icon-only {
+    &.tedi-floating-button--icon-only {
       @include button.button-icon-size("xl");
     }
   }
 
-  &:not(.tedi-ready-floating-button--icon-only) {
+  &:not(.tedi-floating-button--icon-only) {
     min-width: var(--button-width-min);
     max-width: var(--button-width-max);
   }
 
-  &--vertical:not(.tedi-ready-floating-button--icon-only) {
+  &--vertical:not(.tedi-floating-button--icon-only) {
     // Size the button to its label so a narrow container does not compress it before rotation.
     // An icon-only button keeps the fixed size it gets from button-icon-size.
     width: max-content;

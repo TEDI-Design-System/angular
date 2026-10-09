@@ -31,6 +31,7 @@ Load the appropriate reference based on what you're doing:
 | WCAG audit or accessibility review | [a11y-review.md](references/a11y-review.md) |
 | Renaming, restructuring, extracting, merging | [refactoring.md](references/refactoring.md) |
 | Creating or updating Storybook stories | [stories.md](references/stories.md) |
+| Deprecating a component, removing its docs, or removing it from code | [deprecation.md](references/deprecation.md) |
 | Need to check coding patterns | [best-practices.md](references/best-practices.md) |
 
 For **compound tasks** (e.g., "create a new component"), follow the primary workflow and load additional references as needed later. Creating a component will also need testing.md and stories.md at the end.
@@ -68,7 +69,8 @@ So when you add, remove, rename, or change a component's API:
 
 1. **Document it in the source.** Every public input gets JSDoc: what it does, `@default` where it
    has one, and why the default is what it is when that isn't obvious. Add `@deprecated` with the
-   replacement rather than deleting outright.
+   replacement rather than deleting outright. Deprecating a whole component follows
+   [deprecation.md](references/deprecation.md).
 2. **Update the consumer skill only for what JSDoc cannot carry** (see below). If there is nothing in
    that category, you are done. A routine new input needs no consumer-skill edit at all.
 

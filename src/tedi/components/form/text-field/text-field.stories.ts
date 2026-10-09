@@ -17,7 +17,7 @@ import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { TextComponent } from "../../base/text/text.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { LabelRowComponent } from "../label-row/label-row.component";
 import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 
@@ -87,10 +87,32 @@ export default {
     },
     clearable: {
       description:
-        "Whether the field shows a clear button once it holds a value.",
+        "Whether the field shows a clear button once it has a value. Set `false` to opt out. Hidden while the text field is read-only.",
       control: {
         type: "boolean",
       },
+      table: {
+        category: "Form Field inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    readOnly: {
+      description:
+        "Makes the field read-only, like the native `readonly` attribute, which is also accepted. The value can still be selected and submitted, but not edited, and a wrapping form field hides its clear button.",
+      control: {
+        type: "boolean",
+      },
+      table: {
+        category: "Text Field inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    showClearOnInteraction: {
+      description:
+        "Show the clear button only on hover or focus when the field has a value. Requires clearable.",
+      control: { type: "boolean" },
       table: {
         category: "Form Field inputs",
         type: { summary: "boolean" },
@@ -124,18 +146,20 @@ export const Default: StoryObj = {
   parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
-    clearable: false,
+    clearable: true,
     arrowsHidden: true,
+    readOnly: false,
   },
-  render: ({ arrowsHidden, ...formFieldArgs }) => ({
+  render: ({ arrowsHidden, readOnly, ...formFieldArgs }) => ({
     props: {
       arrowsHidden,
+      readOnly,
       ...formFieldArgs,
     },
     template: `
       <tedi-form-field ${argsToTemplate(formFieldArgs)}>
         <label tedi-label [for]="'default'">Label</label>
-        <input tedi-text-field [arrowsHidden]="arrowsHidden" (clear)="clear($event)" id="default" />
+        <input tedi-text-field [arrowsHidden]="arrowsHidden" [readOnly]="readOnly" (clear)="clear($event)" id="default" />
       </tedi-form-field>
     `,
   }),
@@ -332,6 +356,18 @@ export const WithReactiveForms: StoryObj<TextFieldComponent> = {
 export const Standalone: StoryObj<TextFieldComponent> = {
   render: () => ({
     template: `<input tedi-text-field placeholder="No wrapper" />`,
+  }),
+};
+
+/** The clear button appears while the filled field is hovered or focused. */
+export const ClearButtonOnInteraction: StoryObj<TextFieldComponent> = {
+  render: () => ({
+    template: `
+      <tedi-form-field [clearable]="true" [showClearOnInteraction]="true">
+        <label tedi-label for="clear-on-interaction">Label</label>
+        <input tedi-text-field id="clear-on-interaction" [value]="'Text value'" />
+      </tedi-form-field>
+    `,
   }),
 };
 

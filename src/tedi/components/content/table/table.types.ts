@@ -59,13 +59,19 @@ export type TableExpandTrigger = "button" | "row";
  *
  * - drive the column-filter aria-label when the header is non-textual (`label`),
  * - align the column's `<th>` / `<td>` content horizontally (`align`) or vertically
- *   (`vAlign`) without wrapping every cell render in a styled span.
+ *   (`vAlign`) without wrapping every cell render in a styled span,
+ * - align the header cell separately from the body (`headerAlign`).
  */
 export interface TableColumnMeta {
   /** Accessible label used when the column header isn't a plain string. */
   label?: string;
-  /** Horizontal alignment applied to every header / body / footer cell. */
+  /**
+   * Horizontal alignment applied to every body / footer cell, and to the
+   * header cell unless `headerAlign` is set.
+   */
   align?: "left" | "center" | "right";
+  /** Horizontal alignment of the header cell. Falls back to `align`. */
+  headerAlign?: "left" | "center" | "right";
   /** Vertical alignment applied to every header / body / footer cell. */
   vAlign?: "top" | "middle" | "bottom";
 }

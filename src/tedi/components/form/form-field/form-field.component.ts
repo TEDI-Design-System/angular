@@ -8,6 +8,7 @@ import {
   inject,
   input,
   ViewEncapsulation,
+  booleanAttribute,
 } from "@angular/core";
 import { NgClass, NgTemplateOutlet } from "@angular/common";
 import {
@@ -83,10 +84,18 @@ export class FormFieldComponent implements FieldContext {
    */
   icon = input<string | FormFieldIcon | undefined>();
   /**
-   * Whether the field shows a clear button once the control holds a value.
+   * Whether the field shows a clear button once the control holds a value. The
+   * single source of truth for every control inside it — date and time fields
+   * read it too instead of declaring their own input. A textarea never gets one.
+   * @default true
+   */
+  clearable = input(true, { transform: booleanAttribute });
+  /**
+   * Show the clear button only while the filled field is hovered or focused.
+   * Requires `clearable`.
    * @default false
    */
-  clearable = input<boolean>(false);
+  showClearOnInteraction = input<boolean>(false);
   /**
    * Custom CSS classes for the field box.
    *
@@ -120,7 +129,22 @@ export class FormFieldComponent implements FieldContext {
    * they need a row that carries the surface. Without them the control paints
    * itself and no box is rendered at all.
    */
-  readonly hasBox = computed(() => !!this.icon() || this.clearable());
+  readonly hasBox = computed(() => !!this.icon() || this.renderClearButton());
+
+  /**
+   * Whether the field renders its own clear button. Controls that render one
+   * themselves opt out, so `clearable` drives them without producing two, and
+   * a control that cannot be reset, or never takes one, gets none.
+   */
+  readonly renderClearButton = computed(() => {
+    const control = this.control();
+    return (
+      this.clearable() &&
+      !control?.ownsClearButton &&
+      control?.clearButton !== false &&
+      !!control?.reset
+    );
+  });
 
   readonly ownsSurface = computed(() => this.hasBox());
 
@@ -204,7 +228,10 @@ export class FormFieldComponent implements FieldContext {
   });
 
   readonly showClearButton = computed(
-    () => this.clearable() && !!this.control()?.value(),
+    () =>
+      this.renderClearButton() &&
+      !!this.control()?.value() &&
+      !this.control()?.readOnly?.(),
   );
 
   clear() {
@@ -232,6 +259,8 @@ export class FormFieldComponent implements FieldContext {
       "tedi-form-field--valid": this.validationState() === "valid",
       "tedi-form-field--invalid": this.validationState() === "invalid",
       "tedi-form-field--disabled": this.isDisabled(),
+      "tedi-form-field--clear-on-interaction":
+        this.showClearOnInteraction() && this.showClearButton(),
       "tedi-form-field--small": this.size() === "small",
       "tedi-form-field--large": this.size() === "large",
     };

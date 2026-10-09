@@ -19,7 +19,7 @@ export default {
   },
   parameters: {
     status: {
-      type: ["existsInTediReady"],
+      type: ["existsInTediReady", "deprecated"],
     },
   },
   args: {

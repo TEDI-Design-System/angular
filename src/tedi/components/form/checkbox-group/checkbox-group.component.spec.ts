@@ -8,7 +8,7 @@ import {
 import { CheckboxComponent } from "../checkbox/checkbox.component";
 import { CheckboxCardComponent } from "../checkbox-card/checkbox-card.component";
 import { CheckboxCardGroupComponent } from "../checkbox-card-group/checkbox-card-group.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 
 @Component({

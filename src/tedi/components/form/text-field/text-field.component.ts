@@ -54,6 +54,7 @@ import { controlDescribedBy } from "../form-field/control-described-by";
     "[attr.aria-invalid]": "invalid() || null",
     "[attr.aria-describedby]": "describedBy.attribute()",
     "[disabled]": "disabled()",
+    "[readOnly]": "readOnly()",
     "(input)": "handleInputChange($event)",
     "(blur)": "handleBlur()",
   },
@@ -100,6 +101,23 @@ export class TextFieldComponent
     alias: "disabled",
     transform: booleanAttribute,
   });
+
+  // Native `readonly`, under both the attribute (`readonly`) and the property
+  // (`[readOnly]`) spelling, so a wrapping `tedi-form-field` can hide its clear
+  // button while the value cannot be edited.
+  readonly readOnlyAttribute = input(false, {
+    // eslint-disable-next-line @angular-eslint/no-input-rename
+    alias: "readonly",
+    transform: booleanAttribute,
+  });
+  readonly readOnlyProperty = input(false, {
+    // eslint-disable-next-line @angular-eslint/no-input-rename
+    alias: "readOnly",
+    transform: booleanAttribute,
+  });
+  readonly readOnly = computed(
+    () => this.readOnlyAttribute() || this.readOnlyProperty(),
+  );
 
   readonly disabled = computed(
     () =>

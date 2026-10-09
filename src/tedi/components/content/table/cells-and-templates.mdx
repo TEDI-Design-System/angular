@@ -287,6 +287,9 @@ column's `footer` causes the table to render `<tfoot>`:
 `columnDef.meta` is the Angular-specific extension. The table reads:
 
 - `meta.align: 'left' | 'center' | 'right'` — horizontal cell alignment
+- `meta.headerAlign: 'left' | 'center' | 'right'` — overrides `align` for the
+  header cell only. Defaults to `align`; numeric columns normally keep a
+  matching right-aligned header
 - `meta.vAlign: 'top' | 'middle' | 'bottom'` — vertical cell alignment
 - `meta.label: string` — accessible name used for filter inputs, columns menu,
   and as a fallback when `header` is a non-string template

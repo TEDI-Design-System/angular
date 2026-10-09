@@ -136,7 +136,7 @@
       --_filter-bg: var(--filter-secondary-selected-background);
       --_filter-text: var(--filter-secondary-selected-text);
       --_filter-border: var(--filter-secondary-selected-border);
-      --_filter-border-width: var(--general-selected-border-width);
+      --_filter-border-width: var(--general-border-width-selected);
     }
 
     &.tedi-filter--disabled {

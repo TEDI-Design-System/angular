@@ -201,6 +201,24 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
   name — if the icon carries meaning the text doesn't, compose a heading and an icon yourself.
 
+### Clear buttons
+
+- **`showClearOnInteraction` belongs on the component that renders the clear button.** For a text
+  field wrapped in `<tedi-form-field>`, set it on the form field, not the control (a textarea
+  never gets a clear button). `<tedi-search>` owns its form field and exposes the input itself;
+  `<tedi-select>` exposes it for its own clear button. In each case, `clearable` must be true and
+  the field must have a value.
+- With the option enabled, the clear button appears while the field is hovered, active, or contains
+  focus (including keyboard focus). The default is false, which keeps the clear button visible
+  whenever the clearable field has a value.
+
+```html
+<tedi-form-field [clearable]="true" [showClearOnInteraction]="true">
+  <label tedi-label for="query">Query</label>
+  <input tedi-text-field id="query" [(value)]="query" />
+</tedi-form-field>
+```
+
 ### Search suggestions
 
 - **`tedi-search` does not filter.** Bind `suggestions` to a list you have already filtered and react
@@ -233,9 +251,9 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 - **`tedi-table`, not `tedi-table-styles`.** The Community `tedi-table-styles` only paints a
   hand-rolled `<table>`; the TEDI-Ready `tedi-table` brings TanStack sorting, filtering and
   pagination.
-- **`tedi-form-field` is only needed for a label, feedback text, or a `characterLimit` counter.**
-  Controls paint their own field surface, so wrapping is otherwise redundant. `tedi-search` renders
-  its own and must **not** be wrapped.
+- **`tedi-form-field` adds a label, feedback text, a `characterLimit` counter, an icon, or a clear
+  button to controls that support it.** A standalone text field paints its own surface, so wrapping
+  it is otherwise redundant. `tedi-search` renders its own form field and must **not** be wrapped.
 - **`tedi-heading-with-icon` over a hand-composed `<hN tedi-text>` plus `tedi-icon`** when the heading
   can wrap: it centres the icon on the *first line* rather than the middle of the block. A heading
   value in `modifiers` overrides `element`'s typography and the icon follows it, so

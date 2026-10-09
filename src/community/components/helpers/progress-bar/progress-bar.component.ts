@@ -1,5 +1,11 @@
 import { booleanAttribute, ChangeDetectionStrategy, Component, computed, input, ViewEncapsulation } from "@angular/core";
-import { ComponentInputs, FeedbackTextComponent, generateUUID, LabelComponent } from "@tedi-design-system/angular/tedi";
+import {
+  ComponentInputs,
+  FeedbackTextComponent,
+  generateUUID,
+  LabelComponent,
+  warnDeprecated,
+} from "@tedi-design-system/angular/tedi";
 
 /**
  * @deprecated Use the TEDI-Ready `ProgressBarComponent` from
@@ -37,4 +43,11 @@ export class ProgressBarComponent {
     }
     return;
   });
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-progress-bar",
+      "Use `ProgressBarComponent` from `@tedi-design-system/angular/tedi` instead.",
+    );
+  }
 }

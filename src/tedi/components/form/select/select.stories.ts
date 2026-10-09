@@ -92,6 +92,11 @@ const meta: Meta<SelectComponent> = {
       description:
         "Unique identifier for the select input element. Used for label association and accessibility.",
     },
+    name: {
+      control: "text",
+      description:
+        "Name the selection is submitted under in a native form, one entry per selected value. With object options, set `bindValue` to pick what is sent.",
+    },
     label: {
       control: "text",
       description: "Label text displayed above the select.",
@@ -131,7 +136,14 @@ const meta: Meta<SelectComponent> = {
     },
     clearable: {
       control: "boolean",
-      description: "Whether to show a clear button when a value is selected.",
+      description:
+        "Whether to show a clear button when a value is selected. Set `false` to opt out.",
+      table: { defaultValue: { summary: "true" } },
+    },
+    showClearOnInteraction: {
+      control: "boolean",
+      description:
+        "Show the clear button only on hover or focus when a value is selected. Requires clearable.",
     },
     allowMultiple: {
       control: "boolean",
@@ -246,12 +258,14 @@ const meta: Meta<SelectComponent> = {
   },
   args: {
     inputId: "select-1",
+    name: "",
     label: "Label",
     required: false,
     placeholder: "Vali...",
     state: "default",
     size: "default",
-    clearable: false,
+    clearable: true,
+    showClearOnInteraction: false,
     allowMultiple: false,
     showSelectAll: false,
     selectableGroups: false,
@@ -278,6 +292,7 @@ export const Default: Story = {
     template: `
       <tedi-select
         [inputId]="inputId"
+        [name]="name"
         [label]="label"
         [tooltip]="tooltip"
         [required]="required"
@@ -285,6 +300,7 @@ export const Default: Story = {
         [state]="state"
         [size]="size"
         [clearable]="clearable"
+        [showClearOnInteraction]="showClearOnInteraction"
         [allowMultiple]="allowMultiple"
         [showSelectAll]="showSelectAll"
         [selectableGroups]="selectableGroups"
@@ -1487,4 +1503,23 @@ export const OpenForVisualTest: Story = {
       expect(document.querySelector('[role="listbox"]')).not.toBeNull(),
     );
   },
+};
+
+/** The clear button appears while the selected field is hovered or focused. */
+export const ClearButtonOnInteraction: Story = {
+  render: () => ({
+    props: { options: simpleOptions },
+    template: `
+      <tedi-select
+        inputId="select-clear-on-interaction"
+        label="Linn"
+        [options]="options"
+        bindLabel="label"
+        bindValue="value"
+        value="tallinn"
+        [clearable]="true"
+        [showClearOnInteraction]="true"
+      />
+    `,
+  }),
 };

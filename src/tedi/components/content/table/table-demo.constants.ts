@@ -95,6 +95,7 @@ function editableLocationCellTemplate(tplName = "locationCell"): string {
     <tedi-select
       [inputId]="'location-' + ctx.row.original.id"
       size="small"
+      [clearable]="false"
       [options]="counties"
       bindLabel="label"
       bindValue="value"

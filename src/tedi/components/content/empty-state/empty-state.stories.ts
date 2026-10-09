@@ -22,7 +22,7 @@ import { LinkComponent } from "../../navigation/link/link.component";
  * <a href="https://www.tedi.ee/1ee8444b7/p/6792c3-empty-state" target="_BLANK">Zeroheight ↗</a>
  */
 export default {
-  title: "TEDI-Ready/Components/Helpers/EmptyState",
+  title: "TEDI-Ready/Content/EmptyState",
   component: EmptyStateComponent,
   decorators: [
     moduleMetadata({

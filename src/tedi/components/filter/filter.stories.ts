@@ -16,7 +16,7 @@ import { TextComponent } from "../base/text/text.component";
 import { IconComponent } from "../base/icon/icon.component";
 import { RadioComponent } from "../form/radio/radio.component";
 import { RadioGroupComponent } from "../form/radio-group/radio-group.component";
-import { LabelComponent } from "../form/label/label.component";
+import { LabelComponent } from "../content/label/label.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=4612-83722&m=dev" target="_blank">Figma ↗</a><br />
