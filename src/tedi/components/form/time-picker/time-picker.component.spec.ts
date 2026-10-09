@@ -1099,16 +1099,20 @@ describe("TimePickerComponent", () => {
         const localEl = localFixture.nativeElement as HTMLElement;
         localFixture.detectChanges();
 
-        const hourColumn = localEl.querySelectorAll<HTMLElement>(
+        const columns = localEl.querySelectorAll<HTMLElement>(
           ".tedi-time-picker__column",
-        )[0];
+        );
+        const hourColumn = columns[0];
+        const minuteColumn = columns[1];
         stubScrollTop(hourColumn);
+        stubScrollTop(minuteColumn);
 
         localFixture.componentInstance.writeValue("09:30");
         localFixture.detectChanges();
 
         // Measured through the DEFAULT_ITEM_HEIGHT fallback jsdom forces.
         expect(hourColumn.scrollTop).toBe(9 * 40);
+        expect(minuteColumn.scrollTop).toBe(30 * 40);
 
         const item = localEl.querySelector<HTMLElement>(
           ".tedi-time-picker__item",
@@ -1120,6 +1124,7 @@ describe("TimePickerComponent", () => {
         notifyResize?.();
 
         expect(hourColumn.scrollTop).toBe(9 * 48);
+        expect(minuteColumn.scrollTop).toBe(30 * 48);
         expect(localFixture.componentInstance.highlightedHourIndex()).toBe(9);
       } finally {
         globalThis.ResizeObserver = originalResizeObserver;
