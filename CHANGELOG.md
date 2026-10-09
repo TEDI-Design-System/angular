@@ -1,3 +1,10 @@
+# [9.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.2...angular-9.0.0-rc.3) (2026-10-09)
+
+
+### Features
+
+* **input-group:** mark community InputGroup as deprecated [#762](https://github.com/TEDI-Design-System/angular/issues/762) ([#771](https://github.com/TEDI-Design-System/angular/issues/771)) ([8824272](https://github.com/TEDI-Design-System/angular/commit/8824272c4c98d3c3586fdcff4960cd62e627f785))
+
 # [9.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.1...angular-9.0.0-rc.2) (2026-10-07)
 
 
