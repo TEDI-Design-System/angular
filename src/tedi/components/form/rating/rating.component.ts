@@ -100,7 +100,8 @@ export class RatingComponent implements ControlValueAccessor {
    */
   readonly disabled = input(false, { transform: booleanAttribute });
   /**
-   * Show a compact read-only summary (visual + `{value}/{count}` text) instead of the interactive scale.
+   * Show a compact read-only summary (visual + `{value}/{count}` text; text only for `type="number"`) instead
+   * of the interactive scale.
    * @default false
    */
   readonly readOnly = input(false, { transform: booleanAttribute });
