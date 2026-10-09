@@ -7,12 +7,18 @@
   "exports": {
     "./index.css": {
       "default": "./index.css"
+    },
+    "./index-without-icons.css": {
+      "default": "./index-without-icons.css"
+    },
+    "./icons/*.css": {
+      "default": "./icons/*.css"
     }
   },
   "scripts": {
     "prepare": "husky",
     "start": "ng run angular-components:storybook",
-    "build": "ng build angular-components --configuration production && sass --load-path=node_modules src/styles/index.scss dist/index.css --style=compressed --no-source-map && replace-in-file //fonts//g \"./fonts/\" dist/index.css --isRegex && mkdir -p dist/fonts && cp -a node_modules/@tedi-design-system/core/fonts/* dist/fonts/",
+    "build": "ng build angular-components --configuration production && sass --load-path=node_modules src/styles/index.scss:dist/index.css src/styles/index-without-icons.scss:dist/index-without-icons.css --style=compressed --no-source-map && replace-in-file //fonts//g \"./fonts/\" dist/index.css dist/index-without-icons.css --isRegex && mkdir -p dist/fonts dist/icons && cp -a node_modules/@tedi-design-system/core/fonts/* dist/fonts/ && cp node_modules/@tedi-design-system/core/icons/*.css dist/icons/",
     "build:sb": "ng run angular-components:build-storybook && replace-in-file //fonts//g \"./fonts/\" \"dist/storybook-static/*.css\" --isRegex",
     "build:sb:chromatic": "ng run angular-components:build-storybook",
     "lint": "stylelint \"src/tedi/**/*.scss\" --fix && ng lint angular-components --fix",
@@ -44,7 +50,7 @@
   },
   "dependencies": {
     "@tanstack/angular-table": "^8.21.4",
-    "@tedi-design-system/core": "^6.9.0"
+    "@tedi-design-system/core": "6.11.2"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "20.3.27",
