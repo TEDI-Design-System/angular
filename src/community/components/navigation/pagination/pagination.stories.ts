@@ -6,7 +6,7 @@ export default {
   component: PaginationComponent,
   parameters: {
     status: {
-      type: ["existsInTediReady"],
+      type: ["existsInTediReady", "deprecated"],
     },
   },
   args: {
