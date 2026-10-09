@@ -92,7 +92,8 @@ export class TableOfContentsComponent {
   /**
    * Keep the active item visible inside the TOC's own scroll area. When the list
    * is taller than a bounded or sticky container and `activeId` changes, the TOC
-   * scrolls its internal scroll region just enough to reveal the active item.
+   * scrolls its internal scroll region just enough to reveal the active item;
+   * for the first item it scrolls back to the top so the heading shows too.
    * No-op when the list isn't scrollable (short lists, unbounded layouts).
    * @default false
    */
@@ -187,7 +188,10 @@ export class TableOfContentsComponent {
     ).matches
       ? "auto"
       : "smooth";
-    if (targetRect.top < scrollerRect.top + margin) {
+    const firstRow = hostEl.querySelector(".tedi-table-of-contents__row");
+    if (target === firstRow) {
+      scroller.scrollTo({ top: 0, behavior });
+    } else if (targetRect.top < scrollerRect.top + margin) {
       scroller.scrollBy({
         top: targetRect.top - scrollerRect.top - margin,
         behavior,
