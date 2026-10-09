@@ -26,8 +26,6 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { ActiveDescendantKeyManager } from "@angular/cdk/a11y";
 import {
   CdkConnectedOverlay,
-  CdkOverlayOrigin,
-  ConnectedOverlayPositionChange,
   ConnectedPosition,
   OverlayModule,
 } from "@angular/cdk/overlay";
@@ -39,6 +37,7 @@ import {
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
 import { SpinnerComponent } from "../../loader/spinner/spinner.component";
+import { FIELD_OVERLAY_GAP } from "../form-field/field-overlay";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { ComponentInputs } from "../../../types/inputs.type";
 import { getFocusableElements } from "../../../utils/elements.util";
@@ -87,13 +86,22 @@ export interface SearchButton {
   ariaLabel?: string;
 }
 
-/**
- * Flush against the field, flipping above when it would overflow. The panel
- * border meets the field border, so there is no offset.
- */
+/** Below the field, flipping above when it would overflow. */
 const SEARCH_OVERLAY_POSITIONS: ConnectedPosition[] = [
-  { originX: "start", originY: "bottom", overlayX: "start", overlayY: "top" },
-  { originX: "start", originY: "top", overlayX: "start", overlayY: "bottom" },
+  {
+    originX: "start",
+    originY: "bottom",
+    overlayX: "start",
+    overlayY: "top",
+    offsetY: FIELD_OVERLAY_GAP,
+  },
+  {
+    originX: "start",
+    originY: "top",
+    overlayX: "start",
+    overlayY: "bottom",
+    offsetY: -FIELD_OVERLAY_GAP,
+  },
 ];
 
 @Component({
@@ -263,7 +271,6 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
   readonly footerTemplate = contentChild(SearchFooterTemplateDirective);
 
   private readonly inputRef = viewChild("searchInput", { read: ElementRef });
-  private readonly overlayOrigin = viewChild.required(CdkOverlayOrigin);
   private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
   private readonly suggestionRows = viewChildren(SearchSuggestionComponent);
 
@@ -294,10 +301,10 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
   readonly overlayPositions = SEARCH_OVERLAY_POSITIONS;
   readonly panelWidth = signal(0);
   /**
-   * True while the panel sits above the field on the fallback position, so the
-   * rounded edge can move to the side that is not joined to the field.
+   * The bordered input box, not the whole form field, so the panel overlays the
+   * hint instead of opening below it.
    */
-  readonly panelAbove = signal(false);
+  readonly panelOrigin = signal<Element>(this.hostElement.nativeElement);
 
   readonly isDisabled = computed(() => this.disabled() || this.formDisabled());
 
@@ -496,8 +503,20 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
   openPanel(): void {
     if (!this.autocomplete()) return;
 
+    this.panelOrigin.set(this.fieldSurface());
     this.panelWidth.set(this.hostElement.nativeElement.offsetWidth);
     this.panelOpen.set(true);
+  }
+
+  /** The box wrapping input and icons, or the input itself when it owns the surface. */
+  private fieldSurface(): Element {
+    const input = this.inputRef()?.nativeElement as HTMLElement | undefined;
+
+    return (
+      input?.closest(".tedi-form-field__box") ??
+      input ??
+      this.hostElement.nativeElement
+    );
   }
 
   closePanel(): void {
@@ -506,10 +525,6 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
     // The options leave the DOM with the panel, so a lingering active index
     // would leave `aria-activedescendant` pointing at a removed element.
     this.resetActiveOption();
-  }
-
-  onPositionChange(change: ConnectedOverlayPositionChange): void {
-    this.panelAbove.set(change.connectionPair.overlayY === "bottom");
   }
 
   onOverlayAttach(): void {
