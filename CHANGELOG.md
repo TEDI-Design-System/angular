@@ -1,3 +1,10 @@
+# [9.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.3...angular-9.0.0-rc.4) (2026-10-09)
+
+
+### Bug Fixes
+
+* **time-picker:** correct item height and ignore engine-driven scrolls [#678](https://github.com/TEDI-Design-System/angular/issues/678) ([#681](https://github.com/TEDI-Design-System/angular/issues/681)) ([ee0d698](https://github.com/TEDI-Design-System/angular/commit/ee0d6983754a1180d0f8024da1c43bc92aedbb70))
+
 # [9.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.2...angular-9.0.0-rc.3) (2026-10-09)
 
 
