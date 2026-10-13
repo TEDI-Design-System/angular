@@ -314,13 +314,15 @@ export class FileUploadComponent
   /**
    * Kept rejected files are described from the list itself, so the summary
    * names exactly the rejected files on screen through every later selection,
-   * removal or reset.
+   * removal or reset. A file the consumer has since marked valid drops out.
    */
   protected readonly rejectionError = computed(() => {
     if (!this.keepRejectedFiles()) return this.selectionError();
 
     return this.rejectionSummary(
-      this.files().flatMap((file) => this.fileRejections.get(file) ?? []),
+      this.files().flatMap((file) =>
+        file.isValid === false ? (this.fileRejections.get(file) ?? []) : [],
+      ),
     );
   });
   private readonly fallbackId = `tedi-file-upload-${fileUploadIdCounter++}`;

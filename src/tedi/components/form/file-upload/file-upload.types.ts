@@ -17,7 +17,8 @@ export interface FileUploadFile extends Partial<File> {
   /**
    * Whether the file passed the `accept`, `maxSize` and `validator` checks. A
    * file marked `false` is shown as a danger tag while two or more files are
-   * listed; a single file shows only its name.
+   * listed; a single file shows only its name. To change it, set a new array
+   * on `files` or the bound control — the field does not see an in-place edit.
    */
   isValid?: boolean;
 }

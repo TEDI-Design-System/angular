@@ -409,6 +409,24 @@ describe("FileUploadComponent", () => {
         fixture.detectChanges();
       });
 
+      it("drops a file the consumer marks valid from the summary", () => {
+        selectFiles(fixture, [png("a.png"), png("b.png")]);
+
+        fixture.componentRef.setInput(
+          "files",
+          component
+            .files()
+            .map((file) =>
+              file.name === "a.png"
+                ? Object.assign(file, { isValid: true })
+                : file,
+            ),
+        );
+        fixture.detectChanges();
+
+        expect(summary()).toBe("file-upload.extension-rejected:'b.png',1");
+      });
+
       it("names every rejected file still listed, across selections", () => {
         selectFiles(fixture, [png("a.png")]);
         selectFiles(fixture, [png("b.png")]);
