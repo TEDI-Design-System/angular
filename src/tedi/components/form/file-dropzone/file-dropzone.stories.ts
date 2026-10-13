@@ -33,10 +33,7 @@ const STATES = [
   {
     id: "Error",
     label: "Error",
-    feedbackText: {
-      text: "Fail on liiga suur. Valige mõni teine fail või vähendage suurust.",
-      type: "error" as const,
-    },
+    error: "Fail on liiga suur. Valige mõni teine fail või vähendage suurust.",
   },
   { id: "DropOver", label: "Drop over", dropOver: true },
   { id: "Disabled", label: "Disabled", disabled: true },
@@ -73,8 +70,8 @@ class StoryDropOverDirective implements AfterViewInit {
 
 /**
  * Lets a story show the summary the dropzone writes for itself, by actually
- * dropping a file it will reject. A hardcoded `feedbackText` would be a second,
- * stale error line the moment the user selects anything.
+ * dropping a file it will reject. A hardcoded `error` would stay on screen
+ * after the user has fixed the selection.
  */
 @Directive({ selector: "[storyRejectedDrop]", standalone: true })
 class StoryRejectedDropDirective implements AfterViewInit {
@@ -170,8 +167,8 @@ export default {
     },
     validator: {
       description:
-        "A rule of your own for each selected file, run after `accept` and `maxSize` pass. Return the reason a file is rejected, or nothing to accept it. The reason lands on that file's `error` and joins the rejection summary." +
-        " It is not summarised in the restrictions hint, so describe the rule in your own `feedbackText`.",
+        "A rule of your own for each selected file, checked alongside `accept` and `maxSize`. Return the reason a file is rejected, or nothing to accept it. The reason lands on that file's `error` after the built-in ones and joins the rejection summary. It runs on every selected file, including ones `accept` or `maxSize` rejected." +
+        " The automatic hint cannot describe it, so describe the rule in `hint`.",
       control: false,
       table: {
         category: "inputs",
@@ -200,7 +197,7 @@ export default {
     },
     showRestrictions: {
       description:
-        "Whether the allowed types and maximum size are summarised in a hint below the dropzone. Rejection errors render either way.",
+        "Whether the allowed types and maximum size are summarised in the hint below the dropzone. `hint` and rejection errors render either way.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -217,14 +214,23 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
-    feedbackText: {
+    hint: {
       description:
-        "Feedback text below the dropzone. An `error` type also paints the border red.",
-      control: "object",
-      table: {
-        category: "inputs",
-        type: { summary: "ComponentInputs<FeedbackTextComponent>" },
-      },
+        "Guidance of your own, such as what a `validator` checks, shown after the allowed types and maximum size in the dropzone's hint.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    error: {
+      description:
+        "An error of your own, such as one the server returned. Shown after the dropzone's own rejection message in one error text, above the hint, and paints the border red. It does not change a bound control's validity.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    success: {
+      description:
+        "A success message, shown in the error's place above the hint and painting the border green. Shown only while the dropzone has no error.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
     },
     disabled: {
       description:
@@ -277,14 +283,15 @@ export const Default: Story = {
 };
 
 /**
- * `accept` and `maxSize` are summarised in a hint below the dropzone. Set
- * `showRestrictions` to `false` when the same information is already shown
- * elsewhere, or pass your own `feedbackText`.
+ * `accept` and `maxSize` are summarised in a hint below the dropzone, and
+ * `hint` adds guidance of your own after them. Set `showRestrictions` to
+ * `false` when the same information is already shown elsewhere.
  */
 export const WithHint: Story = {
   args: {
     accept: ".jpg,.png,.pdf",
     maxSize: 1024 ** 2,
+    hint: "Lisa allkirjastatud avalduse koopia.",
   },
 };
 
@@ -365,8 +372,8 @@ export const KeepingRejectedFiles: Story = {
 };
 
 /**
- * The restrictions hint can't describe the rule, so add your own feedback text.
- * Pick a file with a space in its name to try it.
+ * Describe the validator's rule in `hint`; the dropzone shows it after the
+ * allowed types. Pick a file with a space in its name to try it.
  */
 export const WithValidator: Story = {
   render: () => ({
@@ -374,7 +381,6 @@ export const WithValidator: Story = {
       files: [],
       noSpaces: (file: File) =>
         file.name.includes(" ") ? "Failinimes ei tohi olla tühikuid" : null,
-      feedbackText: { text: "Failinimes ei tohi olla tühikuid." },
     },
     template: `
       <div style="max-width: 420px">
@@ -383,7 +389,7 @@ export const WithValidator: Story = {
           keepRejectedFiles
           accept=".pdf,.txt"
           [validator]="noSpaces"
-          [feedbackText]="feedbackText"
+          hint="Failinimes ei tohi olla tühikuid."
           [files]="files"
         />
       </div>
@@ -461,7 +467,7 @@ export const States: Story = {
                   [inputId]="state.id + '-input'"
                   [maxSize]="30 * 1024 ** 2"
                   [disabled]="!!state.disabled"
-                  [feedbackText]="state.feedbackText"
+                  [error]="state.error"
                   [storyDropOver]="!!state.dropOver"
                 />
               </div>

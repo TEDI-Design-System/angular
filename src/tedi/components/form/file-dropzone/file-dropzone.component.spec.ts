@@ -276,7 +276,7 @@ describe("FileDropzoneComponent", () => {
       // Announced together: separate calls would overwrite each other and only
       // the last would ever be read.
       expect(await announced()).toBe(
-        "file-upload.duplicates-skipped:'report.pdf'. file-upload.added:1",
+        "file-upload.duplicates-skipped:'report.pdf',1. file-upload.added:1",
       );
     });
 
@@ -293,8 +293,8 @@ describe("FileDropzoneComponent", () => {
       ]);
 
       expect(await announced()).toBe(
-        "file-upload.extension-rejected:'notes.txt'. " +
-          "file-upload.duplicates-skipped:'report.pdf'. file-upload.added:1",
+        "file-upload.extension-rejected:'notes.txt',1. " +
+          "file-upload.duplicates-skipped:'report.pdf',1. file-upload.added:1",
       );
     });
 
@@ -316,7 +316,7 @@ describe("FileDropzoneComponent", () => {
         "report.pdf",
       ]);
       expect(await announced()).toBe(
-        "file-upload.duplicates-skipped:'report.pdf'",
+        "file-upload.duplicates-skipped:'report.pdf',1",
       );
     });
 
@@ -503,7 +503,7 @@ describe("FileDropzoneComponent", () => {
         ),
       ).toBeNull();
       expect(await announced()).toBe(
-        "file-upload.extension-rejected:'bad.txt'",
+        "file-upload.extension-rejected:'bad.txt',1",
       );
     });
 
@@ -582,15 +582,30 @@ describe("FileDropzoneComponent", () => {
       );
     });
 
-    it("leaves the validator unrun on a file the restrictions already reject", () => {
-      const validator = jest.fn(noSpaces);
+    it("runs the validator on a file the restrictions already reject", () => {
       fixture.componentRef.setInput("accept", ".pdf");
-      fixture.componentRef.setInput("validator", validator);
+      fixture.componentRef.setInput("validator", noSpaces);
       fixture.detectChanges();
 
       selectFiles(fixture, [makeFile("bad name.txt", 100, "text/plain")]);
 
-      expect(validator).not.toHaveBeenCalled();
+      expect(text("tedi-feedback-text")).toBe(
+        "file-upload.extension-rejected:'bad name.txt',1. " +
+          "Failinimes ei tohi olla tühikuid: 'bad name.txt'",
+      );
+    });
+
+    it("gives a kept file every reason it was rejected for", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("keepRejectedFiles", true);
+      fixture.componentRef.setInput("validator", noSpaces);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("bad name.txt", 100, "text/plain")]);
+
+      expect(component.files()[0].error).toBe(
+        "file-dropzone.file-rejected-extension. Failinimes ei tohi olla tühikuid.",
+      );
     });
 
     it("accepts a file its validator returns nothing for", () => {
@@ -617,7 +632,7 @@ describe("FileDropzoneComponent", () => {
       );
     });
 
-    it("names a file breaking both restrictions once in the summary", () => {
+    it("names a file breaking both restrictions under each reason", () => {
       fixture.componentRef.setInput("accept", ".pdf");
       fixture.componentRef.setInput("maxSize", 50);
       fixture.componentRef.setInput("keepRejectedFiles", false);
@@ -625,10 +640,10 @@ describe("FileDropzoneComponent", () => {
 
       selectFiles(fixture, [makeFile("notes.txt", 5000, "text/plain")]);
 
-      const summary = text("tedi-feedback-text");
-
-      expect(summary).toContain("'notes.txt'");
-      expect(summary.match(/'notes.txt'/g)?.length).toBe(1);
+      expect(text("tedi-feedback-text")).toBe(
+        "file-upload.extension-rejected:'notes.txt',1. " +
+          "file-upload.size-rejected:'notes.txt',1",
+      );
     });
 
     it("lists a rejected file so the user can see and remove it", () => {
@@ -733,15 +748,87 @@ describe("FileDropzoneComponent", () => {
       );
     });
 
-    it("describes the input by every message below it", () => {
+    it("describes the zone by the error and then the hint", () => {
       fixture.componentRef.setInput("maxSize", 1024 ** 2);
-      fixture.componentRef.setInput("feedbackText", { text: "Custom hint" });
+      fixture.componentRef.setInput("error", "Üleslaadimine ebaõnnestus");
       fixture.detectChanges();
 
       const id = fileInput(fixture).id;
 
       expect(zoneOf(fixture).getAttribute("aria-describedby")).toBe(
-        `${id}-feedback ${id}-hint`,
+        `${id}-error ${id}-hint`,
+      );
+    });
+
+    it("appends the consumer's hint to the restrictions in one hint", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("hint", "Lisa allkirjastatud koopia.");
+      fixture.detectChanges();
+
+      const messages = fixture.debugElement.queryAll(
+        By.css("tedi-feedback-text"),
+      );
+      expect(messages.length).toBe(1);
+      expect(messages[0].nativeElement.textContent.trim()).toBe(
+        "file-upload.accept .pdf. Lisa allkirjastatud koopia.",
+      );
+    });
+
+    it("keeps the consumer's hint when showRestrictions is off", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("showRestrictions", false);
+      fixture.componentRef.setInput("hint", "Lisa allkirjastatud koopia.");
+      fixture.detectChanges();
+
+      expect(text("tedi-feedback-text")).toBe("Lisa allkirjastatud koopia.");
+    });
+
+    it("joins the consumer's error to its own rejection in one error", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("keepRejectedFiles", false);
+      fixture.componentRef.setInput("error", "Üleslaadimine ebaõnnestus");
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("notes.txt", 100, "text/plain")]);
+
+      const errors = fixture.debugElement.queryAll(
+        By.css("tedi-feedback-text.tedi-feedback-text--error"),
+      );
+      expect(errors.length).toBe(1);
+      expect(errors[0].nativeElement.textContent.trim()).toBe(
+        "file-upload.extension-rejected:'notes.txt',1. Üleslaadimine ebaõnnestus",
+      );
+    });
+
+    it("shows success in the error's place and paints the zone valid", () => {
+      fixture.componentRef.setInput("success", "Fail on üles laaditud");
+      fixture.detectChanges();
+
+      const id = fileInput(fixture).id;
+
+      expect(text("tedi-feedback-text.tedi-feedback-text--valid")).toBe(
+        "Fail on üles laaditud",
+      );
+      expect(zoneOf(fixture).classList).toContain(
+        "tedi-file-dropzone__zone--valid",
+      );
+      expect(zoneOf(fixture).getAttribute("aria-describedby")).toBe(
+        `${id}-success`,
+      );
+    });
+
+    it("hides success while there is an error", () => {
+      fixture.componentRef.setInput("success", "Fail on üles laaditud");
+      fixture.componentRef.setInput("error", "Üleslaadimine ebaõnnestus");
+      fixture.detectChanges();
+
+      expect(
+        fixture.debugElement.query(
+          By.css("tedi-feedback-text.tedi-feedback-text--valid"),
+        ),
+      ).toBeNull();
+      expect(zoneOf(fixture).classList).not.toContain(
+        "tedi-file-dropzone__zone--valid",
       );
     });
 
@@ -756,11 +843,8 @@ describe("FileDropzoneComponent", () => {
       );
     });
 
-    it("marks the zone invalid from an error feedbackText", () => {
-      fixture.componentRef.setInput("feedbackText", {
-        text: "Sobimatu fail",
-        type: "error",
-      });
+    it("marks the zone invalid from the consumer's error", () => {
+      fixture.componentRef.setInput("error", "Üleslaadimine ebaõnnestus");
       fixture.detectChanges();
 
       expect(
@@ -845,6 +929,8 @@ describe("FileDropzoneComponent", () => {
       expect(list.getAttribute("aria-label")).toBe(
         "file-dropzone.selected-files",
       );
+      // Safari drops list semantics from a bullet-less list without it.
+      expect(list.getAttribute("role")).toBe("list");
       expect(list.querySelectorAll("tedi-attachment").length).toBe(1);
     });
 

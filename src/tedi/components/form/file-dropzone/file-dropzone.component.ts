@@ -46,13 +46,15 @@ import {
   FileDropzoneFileContext,
   FileDropzoneFileDirective,
 } from "./file-dropzone-file.directive";
-import {
-  FileDropzoneFeedback,
-  FileDropzoneFile,
-  FileDropzoneValidator,
-} from "./file-dropzone.types";
+import { FileDropzoneFile, FileDropzoneValidator } from "./file-dropzone.types";
 
 type FileRejectionReason = "extension" | "size";
+
+interface FileRejection {
+  name: string;
+  reasons: FileRejectionReason[];
+  message?: string;
+}
 
 let fileDropzoneIdCounter = 0;
 
@@ -166,15 +168,18 @@ export class FileDropzoneComponent
    */
   readonly maxSize = input<number>();
   /**
-   * A rule of your own for each selected file, run after `accept` and `maxSize`
-   * pass — a minimum size, a naming convention. Return the reason a file is
-   * rejected, or nothing to accept it. The reason lands on that file's `error`
-   * and joins the rejection summary, followed by the names it rejected.
+   * A rule of your own for each selected file, checked alongside `accept` and
+   * `maxSize` — a minimum size, a naming convention. Return the reason a file
+   * is rejected, or nothing to accept it. The reason lands on that file's
+   * `error` after the built-in ones, and joins the rejection summary followed
+   * by the names of the files it rejected. It runs on every selected file,
+   * including ones `accept` or `maxSize` rejected, so it may receive a file of
+   * the wrong type or size.
    *
-   * It is not summarised in the restrictions hint, so describe the rule in your
-   * own `feedbackText`. Applies to what is picked next, like `accept`. For
-   * checks needing a server round trip, set `isLoading` and then `isValid` on
-   * the file yourself instead.
+   * The automatic hint cannot describe it, so describe the rule in `hint`.
+   * Applies to what is picked next, like `accept`. For checks that need a
+   * server round trip, set `isLoading` and then `isValid` on the file yourself
+   * instead.
    */
   readonly validator = input<FileDropzoneValidator>();
   /**
@@ -192,9 +197,9 @@ export class FileDropzoneComponent
    */
   readonly keepRejectedFiles = input(false, { transform: booleanAttribute });
   /**
-   * Whether the allowed types and maximum size are summarised in a hint below
-   * the dropzone. Turn it off when the same information is shown elsewhere —
-   * rejection errors still render.
+   * Whether the allowed types and maximum size are summarised in the hint below
+   * the dropzone. Turn it off when the same information is shown elsewhere;
+   * `hint` and rejection errors still render.
    * @default true
    */
   readonly showRestrictions = input(true, { transform: booleanAttribute });
@@ -204,10 +209,23 @@ export class FileDropzoneComponent
    */
   readonly showFileSize = input(false, { transform: booleanAttribute });
   /**
-   * Feedback text below the dropzone. An `error` type also paints the dropzone
-   * border red.
+   * Guidance of your own, such as what a `validator` checks, shown after the
+   * allowed types and maximum size in the dropzone's hint.
    */
-  readonly feedbackText = input<FileDropzoneFeedback>();
+  readonly hint = input<string>();
+  /**
+   * An error of your own, such as one the server returned. Shown in the
+   * dropzone's error text after its own rejection message, above the hint, and
+   * paints the border red. It does not change a bound control's validity. For
+   * an error that belongs to one file, set that file's `error` instead.
+   */
+  readonly error = input<string>();
+  /**
+   * A success message, shown in the error's place above the hint and painting
+   * the border green. Shown only while the dropzone has no error: an error
+   * means the user still has something to fix.
+   */
+  readonly success = input<string>();
   /**
    * Disables the dropzone from a parent template. Combined with the
    * reactive-forms disabled state.
@@ -243,15 +261,11 @@ export class FileDropzoneComponent
   );
 
   protected readonly isInvalid = computed(
-    () =>
-      this.invalid() ||
-      !!this.rejectionError() ||
-      this.feedbackText()?.type === "error" ||
-      this.derived.invalid(),
+    () => this.invalid() || !!this.errorText() || this.derived.invalid(),
   );
 
   protected readonly isValid = computed(
-    () => !this.isInvalid() && this.feedbackText()?.type === "valid",
+    () => !this.isInvalid() && !!this.success(),
   );
 
   protected readonly resolvedId = computed(
@@ -313,26 +327,36 @@ export class FileDropzoneComponent
    * Rendered alongside — not instead of — a rejection error, so an error never
    * hides the restrictions the user has to satisfy.
    */
-  protected readonly restrictionsHint = computed(() => {
-    if (!this.showRestrictions()) return undefined;
-
-    const accept = this.accept();
-    const maxSize = this.maxSize();
+  protected readonly hintText = computed(() => {
+    const accept = this.showRestrictions() && this.accept();
+    const maxSize = this.showRestrictions() && this.maxSize();
     const parts = [
       accept &&
         `${this.translations.translate("file-upload.accept")} ${accept.replaceAll(",", ", ")}`,
       maxSize &&
         `${this.translations.translate("file-upload.max-size")} ${formatFileSize(maxSize)}`,
+      this.hint(),
     ].filter(Boolean);
 
     return parts.join(". ") || undefined;
   });
 
+  /** The dropzone shows at most one error, so both sources share one text. */
+  protected readonly errorText = computed(
+    () =>
+      [this.rejectionError(), this.error()].filter(Boolean).join(". ") ||
+      undefined,
+  );
+
+  protected readonly successText = computed(() =>
+    this.errorText() ? undefined : this.success(),
+  );
+
   protected readonly feedbackIds = computed(() => {
     const id = this.resolvedId();
     return {
       error: `${id}-error`,
-      feedback: `${id}-feedback`,
+      success: `${id}-success`,
       hint: `${id}-hint`,
     };
   });
@@ -352,9 +376,9 @@ export class FileDropzoneComponent
       const ids = this.feedbackIds();
       this.describedBy.set(
         [
-          this.rejectionError() ? ids.error : null,
-          this.feedbackText() ? ids.feedback : null,
-          this.restrictionsHint() ? ids.hint : null,
+          this.errorText() ? ids.error : null,
+          this.successText() ? ids.success : null,
+          this.hintText() ? ids.hint : null,
         ].filter((id): id is string => !!id),
       );
     });
@@ -513,10 +537,6 @@ export class FileDropzoneComponent
     if (!selected.length) return;
 
     const keepRejected = this.keepRejectedFiles();
-    const rejected: { reason: FileRejectionReason; file: File }[] = [];
-    // Keyed by message so files failing the same custom rule are named together,
-    // the way the built-in reasons are.
-    const customRejections = new Map<string, string[]>();
 
     // Picking the same file twice almost always means the user lost track of
     // what they had already added, so the repeat is skipped rather than listed
@@ -528,40 +548,33 @@ export class FileDropzoneComponent
     );
     const fresh = selected.filter((file) => !listed.has(fileIdentity(file)));
 
+    // Every rule a file breaks is reported, not just the first: fixing one
+    // reason only to be rejected for the next sends the user round twice.
+    const rejections: FileRejection[] = [];
     const candidates = fresh.map((file) => {
-      const reasons = this.reasonsFor(file);
-      // Only run the consumer's rule once the restrictions pass; a file that is
-      // already the wrong format need not be judged on anything else.
-      const custom = reasons.length
-        ? undefined
-        : (this.validator()?.(file) ?? undefined) || undefined;
+      const rejection: FileRejection = {
+        name: file.name,
+        reasons: this.reasonsFor(file),
+        message: this.validator()?.(file) || undefined,
+      };
+      const isValid = !rejection.reasons.length && !rejection.message;
 
-      if (reasons.length) {
-        rejected.push({ reason: reasons[0], file });
-      } else if (custom) {
-        customRejections.set(custom, [
-          ...(customRejections.get(custom) ?? []),
-          `'${file.name}'`,
-        ]);
-      }
+      if (!isValid) rejections.push(rejection);
 
-      const message =
-        custom ??
-        (reasons.length
-          ? reasons
-              .map((reason) =>
-                this.translations.translate(
-                  `file-dropzone.file-rejected-${reason}`,
-                ),
-              )
-              .join(". ")
-          : undefined);
+      const error = [
+        ...rejection.reasons.map((reason) =>
+          this.translations.translate(`file-dropzone.file-rejected-${reason}`),
+        ),
+        rejection.message,
+      ]
+        .filter(Boolean)
+        .join(". ");
 
       return Object.assign(file, {
         id: generateUUID(),
         isLoading: false,
-        isValid: !reasons.length && !custom,
-        error: keepRejected ? message : undefined,
+        isValid,
+        error: keepRejected && error ? error : undefined,
       }) as FileDropzoneFile;
     });
 
@@ -581,7 +594,7 @@ export class FileDropzoneComponent
     // announcing them one by one overwrites all but the last.
     const messages: string[] = [];
 
-    const rejection = this.rejectionMessage(rejected, customRejections);
+    const rejection = this.rejectionSummary(rejections);
 
     this.rejectionError.set(rejection && !keepRejected ? rejection : undefined);
     if (rejection) messages.push(rejection);
@@ -591,6 +604,7 @@ export class FileDropzoneComponent
         this.translations.translate(
           "file-upload.duplicates-skipped",
           duplicates.map((file) => `'${file.name}'`).join(", "),
+          String(duplicates.length),
         ),
       );
     }
@@ -686,35 +700,40 @@ export class FileDropzoneComponent
   }
 
   /**
-   * Groups the rejected files by reason into one message. Returns `undefined`
-   * when none of them is a file the dropzone itself rejected.
+   * One message for every rejection: built-in reasons first, grouped by
+   * reason, then each validator message followed by the files it refused.
    */
-  private rejectionMessage(
-    rejected: { reason: FileRejectionReason; file: File }[],
-    customRejections: Map<string, string[]>,
-  ): string | undefined {
+  private rejectionSummary(rejections: FileRejection[]): string | undefined {
+    const builtIn: Record<FileRejectionReason, string[]> = {
+      extension: [],
+      size: [],
+    };
+    const custom = new Map<string, string[]>();
+
+    for (const { name, reasons, message } of rejections) {
+      const quoted = `'${name}'`;
+      reasons.forEach((reason) => builtIn[reason].push(quoted));
+      if (message)
+        custom.set(message, [...(custom.get(message) ?? []), quoted]);
+    }
+
     return (
       [
-        ...(["extension", "size"] as const).map((reason) => {
-          const names = rejected
-            .filter((rejection) => rejection.reason === reason)
-            .map((rejection) => `'${rejection.file.name}'`);
-
-          return names.length
-            ? this.translations.translate(
-                `file-upload.${reason}-rejected`,
-                names.join(", "),
-              )
-            : null;
-        }),
+        ...Object.entries(builtIn)
+          .filter(([, names]) => names.length)
+          .map(([reason, names]) =>
+            this.translations.translate(
+              `file-upload.${reason}-rejected`,
+              names.join(", "),
+              String(names.length),
+            ),
+          ),
         ...Array.from(
-          customRejections,
+          custom,
           ([message, names]) =>
             `${message.replace(/[\s.]+$/, "")}: ${names.join(", ")}`,
         ),
-      ]
-        .filter(Boolean)
-        .join(". ") || undefined
+      ].join(". ") || undefined
     );
   }
 

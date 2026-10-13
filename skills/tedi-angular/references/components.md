@@ -219,14 +219,19 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   URL revoked without diffing the two arrays.
 - **`tedi-file-dropzone` selects files, it does not upload them.** It validates against `accept` and
   `maxSize` and hands you the list; the upload, and setting each file's `isLoading` / `isValid` as it
-  progresses, is yours. A `validator` input adds a rule of your own on top, run only once the
-  built-in restrictions pass; the reason it returns lands on that file's `error` and joins the summary,
-  with the files it rejected named after it. `keepRejectedFiles` decides what happens to a file that
+  progresses, is yours. A `validator` input adds a rule of your own on top, run on every selected file;
+  the reason it returns lands on that file's `error` after the built-in ones and joins the summary,
+  with the files it rejected named after it. Describe the rule in `hint`, which follows the allowed
+  types and size in the one hint. `keepRejectedFiles` decides what happens to a file that
   fails `accept`, `maxSize` or `validator`: off (the default) discards it and summarises every rejection in one message under the
   dropzone, which paints the border red. On keeps it in the list with its reason in that file's
   `error`, leaving the border neutral — so the form value holds it with `isValid: false` and you must
   filter on `isValid` before uploading. `error` is writable, so a failure the upload
   came back with lands on the file it belongs to.
+- **`tedi-file-dropzone` shows at most one hint and one validation message, error first.** Pass your
+  own text through `hint`, `error` and `success`, not projected `tedi-feedback-text`. `error` joins
+  the dropzone's own rejection summary in one error, and `success` takes the error's place while
+  there is none.
 - **Selecting a file that is already listed is skipped**, matched on name, size and mtime — so two
   different files sharing a name still both land. Project an `*tediFileDropzoneFile` template to
   replace the built-in `tedi-attachment` row when a file needs a progress bar, an icon or its own

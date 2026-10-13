@@ -41,26 +41,24 @@
   (cancel)="handleDialogCancel()"
 />
 
-@if (rejectionError(); as error) {
+@if (errorText(); as error) {
   <tedi-feedback-text [id]="feedbackIds().error" [text]="error" type="error" />
-}
-
-@if (feedbackText(); as feedback) {
+} @else if (successText(); as success) {
   <tedi-feedback-text
-    [id]="feedbackIds().feedback"
-    [text]="feedback.text"
-    [type]="feedback.type ?? 'hint'"
-    [position]="feedback.position ?? 'left'"
+    [id]="feedbackIds().success"
+    [text]="success"
+    type="valid"
   />
 }
 
-@if (restrictionsHint(); as hint) {
+@if (hintText(); as hint) {
   <tedi-feedback-text [id]="feedbackIds().hint" [text]="hint" />
 }
 
 @if (files().length) {
   <ul
     class="tedi-file-dropzone__files"
+    role="list"
     [attr.aria-label]="selectedFilesLabel()"
   >
     @for (row of fileRows(); track row.file) {

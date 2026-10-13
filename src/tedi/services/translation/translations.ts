@@ -252,9 +252,18 @@ export const translationsMap = {
   "file-upload.size-rejected": {
     description: "Error label for rejected size",
     components: ["FileUpload"],
-    et: (files: string) => `Fail(id) ${files} on liiga suured`,
-    en: (files: string) => `File(s) ${files} are too large`,
-    ru: (files: string) => `Файл(ы) ${files} слишком велики`,
+    et: (files: string, count: string) =>
+      count === "1"
+        ? `Fail ${files} on liiga suur`
+        : `Failid ${files} on liiga suured`,
+    en: (files: string, count: string) =>
+      count === "1"
+        ? `File ${files} is too large`
+        : `Files ${files} are too large`,
+    ru: (files: string, count: string) =>
+      count === "1"
+        ? `Файл ${files} слишком велик`
+        : `Файлы ${files} слишком велики`,
   },
   "file-upload.size-rejected-extended": {
     description: "Error label for rejected size",
@@ -276,9 +285,18 @@ export const translationsMap = {
   "file-upload.extension-rejected": {
     description: "Error label for rejected extension",
     components: ["FileUpload"],
-    et: (files: string) => `Fail(id) ${files} on vale laiendiga`,
-    en: (files: string) => `File(s) ${files} have the wrong extension`,
-    ru: (files: string) => `Файл(ы) ${files} имеют неправильное расширение`,
+    et: (files: string, count: string) =>
+      count === "1"
+        ? `Fail ${files} on vale laiendiga`
+        : `Failid ${files} on vale laiendiga`,
+    en: (files: string, count: string) =>
+      count === "1"
+        ? `File ${files} has the wrong extension`
+        : `Files ${files} have the wrong extension`,
+    ru: (files: string, count: string) =>
+      count === "1"
+        ? `Файл ${files} имеет неправильное расширение`
+        : `Файлы ${files} имеют неправильное расширение`,
   },
   "file-upload.extension-rejected-extended": {
     description: "Error label for rejected extension",
@@ -322,22 +340,33 @@ export const translationsMap = {
   },
   "file-upload.added": {
     description: "Announced to assistive technology when files are added",
-    components: ["FileDropzone"],
-    et: (count: string) => `Lisatud ${count} fail(i)`,
-    en: (count: string) => `${count} file(s) added`,
+    components: ["FileDropzone", "FileUpload"],
+    et: (count: string) =>
+      count === "1" ? "Lisatud 1 fail" : `Lisatud ${count} faili`,
+    en: (count: string) =>
+      count === "1" ? "1 file added" : `${count} files added`,
     ru: (count: string) => `Добавлено файлов: ${count}`,
   },
   "file-upload.duplicates-skipped": {
     description:
       "Announced when files already in the list are skipped on a repeat selection",
-    components: ["FileDropzone"],
-    et: (files: string) => `Fail(id) ${files} on juba lisatud`,
-    en: (files: string) => `File(s) ${files} have already been added`,
-    ru: (files: string) => `Файл(ы) ${files} уже добавлены`,
+    components: ["FileDropzone", "FileUpload"],
+    et: (files: string, count: string) =>
+      count === "1"
+        ? `Fail ${files} on juba lisatud`
+        : `Failid ${files} on juba lisatud`,
+    en: (files: string, count: string) =>
+      count === "1"
+        ? `File ${files} has already been added`
+        : `Files ${files} have already been added`,
+    ru: (files: string, count: string) =>
+      count === "1"
+        ? `Файл ${files} уже добавлен`
+        : `Файлы ${files} уже добавлены`,
   },
   "file-upload.removed": {
     description: "Announced to assistive technology when a file is removed",
-    components: ["FileDropzone"],
+    components: ["FileDropzone", "FileUpload"],
     et: (file: string) => `Fail ${file} eemaldatud`,
     en: (file: string) => `File ${file} removed`,
     ru: (file: string) => `Файл ${file} удален`,
@@ -353,7 +382,7 @@ export const translationsMap = {
     description:
       "Accessible name of the error icon on an attachment marked invalid without a message of its own",
     components: ["Attachment"],
-    et: "Vigane fail",
+    et: "Sobimatu fail",
     en: "Invalid file",
     ru: "Недопустимый файл",
   },

@@ -1,13 +1,3 @@
-import { ComponentInputs } from "../../../types/inputs.type";
-import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
-
-/**
- * `tedi-feedback-text` inputs, with everything but the message optional.
- */
-export type FileDropzoneFeedback = Partial<
-  ComponentInputs<FeedbackTextComponent>
-> & { text: string };
-
 /**
  * Validates a selected file. Returns the reason it is rejected, or nothing to
  * accept it.
@@ -30,7 +20,9 @@ export interface FileDropzoneFile extends Partial<File> {
    */
   isLoading?: boolean;
   /**
-   * Whether the file passed the `accept` and `maxSize` checks.
+   * Whether the file passed the `accept`, `maxSize` and `validator` checks. To
+   * change it, set a new array on `files` or the bound control — the dropzone
+   * does not see an in-place edit.
    */
   isValid?: boolean;
   /**
