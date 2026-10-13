@@ -59,9 +59,9 @@
   <div
     class="tedi-file-upload__field"
     [class.tedi-field-surface]="paintsSurface()"
-    [class.tedi-field-surface--invalid]="paintsSurface() && isInvalid()"
-    [class.tedi-field-surface--valid]="paintsSurface() && isValid()"
-    [class.tedi-field-surface--disabled]="paintsSurface() && isDisabled()"
+    [class.tedi-field-surface--invalid]="paintsSurface() && invalid()"
+    [class.tedi-field-surface--valid]="paintsSurface() && valid()"
+    [class.tedi-field-surface--disabled]="paintsSurface() && disabled()"
   >
     <div class="tedi-file-upload__value">
       <ng-container [ngTemplateOutlet]="fileList" />
@@ -103,7 +103,7 @@
         variant="neutral"
         class="tedi-file-upload__add"
         [size]="isStacked() ? 'default' : 'small'"
-        [disabled]="isDisabled()"
+        [disabled]="disabled()"
         [attr.aria-labelledby]="addLabelledBy()"
         [attr.aria-describedby]="describedBy.attribute()"
         (click)="openPicker()"
@@ -115,15 +115,21 @@
     </div>
   </div>
 
-  @if (rejectionError(); as error) {
+  @if (errorText(); as error) {
     <tedi-feedback-text
       [id]="feedbackIds().error"
       [text]="error"
       type="error"
     />
+  } @else if (successText(); as success) {
+    <tedi-feedback-text
+      [id]="feedbackIds().success"
+      [text]="success"
+      type="valid"
+    />
   }
 
-  @if (restrictionsHint(); as hint) {
+  @if (hintText(); as hint) {
     <tedi-feedback-text [id]="feedbackIds().hint" [text]="hint" />
   }
 }
@@ -138,7 +144,7 @@
   [attr.name]="name()"
   [attr.accept]="accept()"
   [multiple]="multiple()"
-  [disabled]="isDisabled() || readOnly()"
+  [disabled]="disabled() || readOnly()"
   (change)="handleSelection($event)"
   (cancel)="handleDialogCancel()"
 />

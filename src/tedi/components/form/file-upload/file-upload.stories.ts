@@ -145,7 +145,7 @@ export default {
     },
     validator: {
       description:
-        "A rule of your own for each selected file, run after `accept` and `maxSize` pass. Return the reason a file is rejected, or nothing to accept it.",
+        "A rule of your own for each selected file, checked alongside `accept` and `maxSize`. Return the reason a file is rejected, or nothing to accept it.",
       control: false,
       table: {
         category: "inputs",
@@ -157,13 +157,31 @@ export default {
     },
     showRestrictions: {
       description:
-        "Whether the allowed types and maximum size are summarised in a hint below the field. Rejection errors render either way.",
+        "Whether the allowed types and maximum size are summarised in the hint below the field. `hint` and rejection errors render either way.",
       control: "boolean",
       table: {
         category: "inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "true" },
       },
+    },
+    error: {
+      description:
+        "An error of your own, such as a server error, shown after the field's rejection message and above the hint.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    success: {
+      description:
+        "A success message, shown in the error's place above the hint while the field has no error.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    hint: {
+      description:
+        "Guidance of your own, shown after the allowed types and maximum size in the field's hint.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
     },
     clearable: {
       description:
@@ -295,10 +313,13 @@ export const States: Story = {
             <tedi-col width="5">
               <tedi-form-field>
                 <label tedi-label [for]="state.label">Label</label>
-                <tedi-file-upload [inputId]="state.label" name="file" [disabled]="!!state.disabled" />
-                @if (state.feedback) {
-                  <tedi-feedback-text text="Feedback text" [type]="state.feedback" />
-                }
+                <tedi-file-upload
+                  [inputId]="state.label"
+                  name="file"
+                  [disabled]="!!state.disabled"
+                  [error]="state.feedback === 'error' ? 'Feedback text' : undefined"
+                  [success]="state.feedback === 'valid' ? 'Feedback text' : undefined"
+                />
               </tedi-form-field>
             </tedi-col>
           </tedi-row>
@@ -333,8 +354,9 @@ export const Multiple: Story = {
 };
 
 /**
- * `accept` and `maxSize` are summarised in a hint of their own. Turn
- * `showRestrictions` off when a projected `tedi-feedback-text` already says it.
+ * `accept` and `maxSize` are summarised in the field's hint, and `hint` adds
+ * guidance of your own after them. Turn `showRestrictions` off when a projected
+ * `tedi-feedback-text` already says it all.
  */
 export const WithHint: Story = {
   render: () => ({
@@ -344,6 +366,12 @@ export const WithHint: Story = {
           <tedi-form-field>
             <label tedi-label for="hint-own">Label</label>
             <tedi-file-upload inputId="hint-own" name="file" accept=".jpg,.png,.pdf" [maxSize]="1024 ** 2" />
+          </tedi-form-field>
+        </tedi-col>
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="hint-extra">Label</label>
+            <tedi-file-upload inputId="hint-extra" name="file" accept=".jpg,.png,.pdf" [maxSize]="1024 ** 2" hint="Lisa allkirjastatud avalduse koopia." />
           </tedi-form-field>
         </tedi-col>
         <tedi-col>
@@ -423,8 +451,9 @@ export const KeepingRejectedFiles: Story = {
 };
 
 /**
- * The restrictions hint can't describe the rule, so add your own feedback text.
- * Pick a file with a space in its name to try it.
+ * Describe the validator's rule in `hint`; the field shows it after the allowed
+ * types and size. When the story opens, it selects a `.png` with a space in its
+ * name, which breaks two rules.
  */
 export const WithValidator: Story = {
   render: () => ({
@@ -435,8 +464,16 @@ export const WithValidator: Story = {
     template: `
       <tedi-form-field>
         <label tedi-label for="validator">Label</label>
-        <tedi-file-upload inputId="validator" name="file" multiple accept=".pdf,.txt" [validator]="noSpaces" />
-        <tedi-feedback-text text="Failinimes ei tohi olla tühikuid." />
+        <tedi-file-upload
+          inputId="validator"
+          name="file"
+          multiple
+          accept=".pdf,.txt"
+          [maxSize]="100 * 1024"
+          [validator]="noSpaces"
+          hint="Failinimes ei tohi olla tühikuid."
+          storyRejectedFile="taotlus scan lk 1.png"
+        />
       </tedi-form-field>
     `,
   }),
@@ -537,10 +574,10 @@ export const WithReactiveForms: Story = {
 };
 
 /**
- * The field paints its own surface and renders its own clear button and
- * restrictions hint, so it works with no wrapper, and a sibling label still
- * names the add button. Wrap it in a `tedi-form-field` for feedback text that
- * sets the error or success border.
+ * The field paints its own surface and renders its own clear button, hint,
+ * error and success text, so it works with no wrapper, and a sibling label
+ * still names the add button. Wrap it in a `tedi-form-field` to lay out the
+ * label and share `size` and `clearable` with it.
  */
 export const Standalone: Story = {
   render: () => ({

@@ -243,7 +243,7 @@ describe("FileUploadComponent", () => {
       // Announced together: separate calls would overwrite each other and only
       // the last would ever be read.
       expect(await announced()).toBe(
-        "file-upload.duplicates-skipped:'report.pdf'. file-upload.added:1",
+        "file-upload.duplicates-skipped:'report.pdf',1. file-upload.added:1",
       );
     });
 
@@ -293,12 +293,12 @@ describe("FileUploadComponent", () => {
         fixture.debugElement.queryAll(By.css(".tedi-tag--danger")).length,
       ).toBe(1);
       expect(text(".tedi-tag--danger .sr-only")).toBe("(file-upload.failed)");
-      expect(summary()).toBe("file-upload.extension-rejected:'bad.txt'");
+      expect(summary()).toBe("file-upload.extension-rejected:'bad.txt',1");
       expect(fieldOf(fixture).classList).toContain(
         "tedi-field-surface--invalid",
       );
       expect(await announced()).toBe(
-        "file-upload.extension-rejected:'bad.txt'. file-upload.added:1",
+        "file-upload.extension-rejected:'bad.txt',1. file-upload.added:1",
       );
     });
 
@@ -309,7 +309,7 @@ describe("FileUploadComponent", () => {
       selectFiles(fixture, [makeFile("notes.txt", 100, "text/plain")]);
 
       expect(component.files()).toEqual([]);
-      expect(summary()).toBe("file-upload.extension-rejected:'notes.txt'");
+      expect(summary()).toBe("file-upload.extension-rejected:'notes.txt',1");
     });
 
     it("rejects a file over maxSize", () => {
@@ -319,17 +319,20 @@ describe("FileUploadComponent", () => {
       selectFiles(fixture, [makeFile("big.pdf", 2 * 1024 ** 2)]);
 
       expect(component.files()).toEqual([]);
-      expect(summary()).toBe("file-upload.size-rejected:'big.pdf'");
+      expect(summary()).toBe("file-upload.size-rejected:'big.pdf',1");
     });
 
-    it("names a file breaking both restrictions once, by its first reason", () => {
+    it("reports every restriction a file breaks", () => {
       fixture.componentRef.setInput("accept", ".pdf");
       fixture.componentRef.setInput("maxSize", 50);
       fixture.detectChanges();
 
       selectFiles(fixture, [makeFile("notes.txt", 5000, "text/plain")]);
 
-      expect(summary()).toBe("file-upload.extension-rejected:'notes.txt'");
+      expect(summary()).toBe(
+        "file-upload.extension-rejected:'notes.txt',1. " +
+          "file-upload.size-rejected:'notes.txt',1",
+      );
     });
 
     it("accepts a wildcard MIME group and an exact MIME type", () => {
@@ -396,6 +399,59 @@ describe("FileUploadComponent", () => {
       expect(summary()).toBeUndefined();
     });
 
+    describe("keeping rejected files", () => {
+      const png = (name: string) => makeFile(name, 100, "image/png");
+
+      beforeEach(() => {
+        fixture.componentRef.setInput("keepRejectedFiles", true);
+        fixture.componentRef.setInput("multiple", true);
+        fixture.componentRef.setInput("accept", ".pdf");
+        fixture.detectChanges();
+      });
+
+      it("names every rejected file still listed, across selections", () => {
+        selectFiles(fixture, [png("a.png")]);
+        selectFiles(fixture, [png("b.png")]);
+
+        expect(summary()).toBe(
+          "file-upload.extension-rejected:'a.png', 'b.png',2",
+        );
+
+        selectFiles(fixture, [makeFile("ok.pdf")]);
+
+        expect(summary()).toBe(
+          "file-upload.extension-rejected:'a.png', 'b.png',2",
+        );
+      });
+
+      it("drops a removed file from the summary", () => {
+        selectFiles(fixture, [png("a.png"), png("b.png")]);
+
+        tagRemoveButtons(fixture)[0].click();
+        fixture.detectChanges();
+
+        expect(summary()).toBe("file-upload.extension-rejected:'b.png',1");
+      });
+
+      it("announces only what the latest selection rejected", async () => {
+        selectFiles(fixture, [png("a.png")]);
+        selectFiles(fixture, [png("b.png")]);
+
+        expect(await announced()).toBe(
+          "file-upload.extension-rejected:'b.png',1",
+        );
+      });
+
+      it("clears the summary when every file is cleared", () => {
+        selectFiles(fixture, [png("a.png")]);
+
+        component.reset();
+        fixture.detectChanges();
+
+        expect(summary()).toBeUndefined();
+      });
+    });
+
     describe("with a validator", () => {
       const noSpaces = (file: File) =>
         file.name.includes(" ") ? "Failinimes ei tohi olla tühikuid." : null;
@@ -434,7 +490,7 @@ describe("FileUploadComponent", () => {
         );
       });
 
-      it("lists the built-in reasons first and skips the validator for those files", () => {
+      it("checks every file and lists the built-in reasons first", () => {
         const validator = jest.fn(noSpaces);
         fixture.componentRef.setInput("validator", validator);
         fixture.componentRef.setInput("accept", ".pdf");
@@ -445,10 +501,10 @@ describe("FileUploadComponent", () => {
           makeFile("my scan.pdf"),
         ]);
 
-        expect(validator).toHaveBeenCalledTimes(1);
+        expect(validator).toHaveBeenCalledTimes(2);
         expect(summary()).toBe(
-          "file-upload.extension-rejected:'bad name.txt'. " +
-            "Failinimes ei tohi olla tühikuid: 'my scan.pdf'",
+          "file-upload.extension-rejected:'bad name.txt',1. " +
+            "Failinimes ei tohi olla tühikuid: 'bad name.txt', 'my scan.pdf'",
         );
       });
 
@@ -484,6 +540,123 @@ describe("FileUploadComponent", () => {
   });
 
   describe("feedback", () => {
+    describe("with a success message", () => {
+      const feedback = () =>
+        fixture.debugElement
+          .queryAll(By.css("tedi-feedback-text"))
+          .map((el) => el.nativeElement.textContent.trim());
+
+      it("shows it above the hint, paints the field valid and describes the button by it", () => {
+        fixture.componentRef.setInput("accept", ".pdf");
+        fixture.componentRef.setInput("success", "Fail vastab nõuetele");
+        fixture.detectChanges();
+
+        const id = fileInput(fixture).id;
+
+        expect(feedback()).toEqual([
+          "Fail vastab nõuetele",
+          "file-upload.accept .pdf",
+        ]);
+        expect(fieldOf(fixture).classList).toContain(
+          "tedi-field-surface--valid",
+        );
+        expect(addButton(fixture).getAttribute("aria-describedby")).toBe(
+          `${id}-success ${id}-hint`,
+        );
+      });
+
+      it("gives way to an error", () => {
+        fixture.componentRef.setInput("success", "Fail vastab nõuetele");
+        fixture.componentRef.setInput("error", "Serveri viga");
+        fixture.detectChanges();
+
+        expect(feedback()).toEqual(["Serveri viga"]);
+        expect(fieldOf(fixture).classList).not.toContain(
+          "tedi-field-surface--valid",
+        );
+      });
+
+      it("gives way to a rejection", () => {
+        fixture.componentRef.setInput("accept", ".pdf");
+        fixture.componentRef.setInput("showRestrictions", false);
+        fixture.componentRef.setInput("success", "Fail vastab nõuetele");
+        fixture.detectChanges();
+
+        selectFiles(fixture, [makeFile("notes.txt", 100, "text/plain")]);
+
+        expect(feedback()).toEqual([
+          "file-upload.extension-rejected:'notes.txt',1",
+        ]);
+      });
+    });
+
+    describe("with an error of its own", () => {
+      const feedback = () =>
+        fixture.debugElement
+          .queryAll(By.css("tedi-feedback-text"))
+          .map((el) => el.nativeElement.textContent.trim());
+
+      it("shows it, marks the field invalid and describes the button by it", () => {
+        fixture.componentRef.setInput("error", "Serveri viga");
+        fixture.detectChanges();
+
+        const id = fileInput(fixture).id;
+
+        expect(feedback()).toEqual(["Serveri viga"]);
+        expect(fieldOf(fixture).classList).toContain(
+          "tedi-field-surface--invalid",
+        );
+        expect(addButton(fixture).getAttribute("aria-describedby")).toBe(
+          `${id}-error`,
+        );
+      });
+
+      it("joins the rejection message in one error, above the hint", () => {
+        fixture.componentRef.setInput("accept", ".pdf");
+        fixture.componentRef.setInput("error", "Serveri viga");
+        fixture.detectChanges();
+
+        selectFiles(fixture, [makeFile("notes.txt", 100, "text/plain")]);
+
+        expect(feedback()).toEqual([
+          "file-upload.extension-rejected:'notes.txt',1. Serveri viga",
+          "file-upload.accept .pdf",
+        ]);
+      });
+
+      it("leaves a bound control's validity alone", () => {
+        fixture.componentRef.setInput("error", "Serveri viga");
+        fixture.detectChanges();
+
+        expect(component.validate({ value: [] } as never)).toBeNull();
+      });
+    });
+
+    it("adds its own hint after the restrictions, in one hint", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("hint", "Lisa kõik leheküljed.");
+      fixture.detectChanges();
+
+      const hints = fixture.debugElement.queryAll(By.css("tedi-feedback-text"));
+
+      expect(hints.length).toBe(1);
+      expect(hints[0].nativeElement.textContent.trim()).toBe(
+        "file-upload.accept .pdf. Lisa kõik leheküljed.",
+      );
+    });
+
+    it("shows its own hint alone when showRestrictions is off", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("showRestrictions", false);
+      fixture.componentRef.setInput("hint", "Lisa kõik leheküljed.");
+      fixture.detectChanges();
+
+      expect(text("tedi-feedback-text")).toBe("Lisa kõik leheküljed.");
+      expect(addButton(fixture).getAttribute("aria-describedby")).toBe(
+        `${fileInput(fixture).id}-hint`,
+      );
+    });
+
     it("shows the restrictions hint and describes the button by it", () => {
       fixture.componentRef.setInput("accept", ".pdf,.txt");
       fixture.componentRef.setInput("maxSize", 500 * 1024);
@@ -701,6 +874,7 @@ describe("FileUploadComponent", () => {
     beforeEach(() => {
       fixture.componentRef.setInput("readOnly", true);
       fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("hint", "Lisa kõik leheküljed.");
       fixture.componentRef.setInput("files", [
         { id: "1", name: "a.pdf" },
         { id: "2", name: "b.pdf" },
@@ -925,6 +1099,7 @@ describe("FileUploadComponent with template-driven forms", () => {
         inputId="cv"
         aria-describedby="external-help"
         [files]="files"
+        [error]="error"
       />
       @if (feedback) {
         <tedi-feedback-text id="cv-feedback" [text]="feedback" [type]="type" />
@@ -936,6 +1111,7 @@ class FormFieldHostComponent {
   size: "default" | "small" = "default";
   clearable = true;
   files: FileUploadFile[] = [{ id: "1", name: "cv.pdf" }];
+  error: string | undefined = undefined;
   feedback = "";
   type: "hint" | "error" | "valid" = "hint";
 }
@@ -1003,6 +1179,22 @@ describe("FileUploadComponent inside tedi-form-field", () => {
     fixture.detectChanges();
 
     expect(clearButton(fixture)).toBeNull();
+  });
+
+  it("reports its own error and disabled state to the field", () => {
+    const formField = fixture.debugElement.query(
+      By.directive(FormFieldComponent),
+    ).componentInstance as FormFieldComponent;
+    const upload = fixture.debugElement.query(By.directive(FileUploadComponent))
+      .componentInstance as FileUploadComponent;
+
+    host.error = "Serveri viga";
+    fixture.detectChanges();
+    expect(formField.validationState()).toBe("invalid");
+
+    upload.setDisabledState(true);
+    fixture.detectChanges();
+    expect(formField.isDisabled()).toBe(true);
   });
 
   it("focuses the add button when the field's padding is clicked", () => {
@@ -1109,5 +1301,52 @@ describe("FileUploadComponent read-only list", () => {
     expect(addButton(fixture).getAttribute("aria-labelledby")).toBe(
       "docs-label docs-add",
     );
+  });
+});
+
+describe("FileUploadComponent with the real Estonian texts", () => {
+  let fixture: ComponentFixture<FileUploadComponent>;
+
+  const error = () =>
+    fixture.debugElement
+      .query(By.css(".tedi-feedback-text--error"))
+      ?.nativeElement.textContent.trim();
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [FileUploadComponent],
+      providers: [
+        { provide: ToastAnnouncerService, useValue: announcer },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        { provide: BreakpointService, useValue: breakpointMock },
+      ],
+    });
+    fixture = TestBed.createComponent(FileUploadComponent);
+    fixture.componentRef.setInput("multiple", true);
+    fixture.componentRef.setInput("accept", ".pdf");
+    fixture.componentRef.setInput("maxSize", 50);
+    fixture.detectChanges();
+  });
+
+  it("uses the singular for one file", async () => {
+    selectFiles(fixture, [makeFile("suur.pdf", 500)]);
+
+    expect(error()).toBe("Fail 'suur.pdf' on liiga suur");
+    expect(await announced()).toBe("Fail 'suur.pdf' on liiga suur");
+  });
+
+  it("uses the plural for several files", () => {
+    selectFiles(fixture, [
+      makeFile("a.png", 10, "image/png"),
+      makeFile("b.png", 10, "image/png"),
+    ]);
+
+    expect(error()).toBe("Failid 'a.png', 'b.png' on vale laiendiga");
+  });
+
+  it("counts added files", async () => {
+    selectFiles(fixture, [makeFile("a.pdf", 10), makeFile("b.pdf", 10)]);
+
+    expect(await announced()).toBe("Lisatud 2 faili");
   });
 });

@@ -57,6 +57,12 @@ import {
 
 type FileRejectionReason = "extension" | "size";
 
+interface FileRejection {
+  name: string;
+  reasons: FileRejectionReason[];
+  message?: string;
+}
+
 let fileUploadIdCounter = 0;
 
 /**
@@ -108,7 +114,7 @@ const fileIdentity = (file: FileUploadFile): string =>
   host: {
     class: "tedi-file-upload",
     "[class.tedi-file-upload--small]": "resolvedSize() === 'small'",
-    "[class.tedi-file-upload--disabled]": "isDisabled()",
+    "[class.tedi-file-upload--disabled]": "disabled()",
     "[class.tedi-file-upload--read-only]": "readOnly()",
     "[class.tedi-file-upload--empty]": "!files().length",
   },
@@ -179,15 +185,18 @@ export class FileUploadComponent
    */
   readonly maxSize = input<number>();
   /**
-   * A rule of your own for each selected file, run after `accept` and
-   * `maxSize` pass — a minimum size, a naming convention. Return the reason a
-   * file is rejected, or nothing to accept it. The reason joins the rejection
-   * summary under the field, followed by the names of the files it rejected.
+   * A rule of your own for each selected file, checked alongside `accept` and
+   * `maxSize` — a minimum size, a naming convention. Return the reason a file
+   * is rejected, or nothing to accept it. The reason joins the rejection
+   * summary under the field after the built-in ones, followed by the names of
+   * the files it rejected. It runs on every selected file, including ones
+   * `accept` or `maxSize` rejected, so it may receive a file of the wrong type
+   * or size.
    *
-   * It is not summarised in the restrictions hint, so describe the rule in a
-   * projected `tedi-feedback-text`. Applies to what is picked next, like
-   * `accept`. For checks that need a server round trip, set `isLoading` and
-   * then `isValid` on the file yourself instead.
+   * The automatic hint cannot describe it, so describe the rule in `hint`.
+   * Applies to what is picked next, like `accept`. For checks that need a
+   * server round trip, set `isLoading` and then `isValid` on the file yourself
+   * instead.
    */
   readonly validator = input<FileUploadValidator>();
   /**
@@ -198,18 +207,39 @@ export class FileUploadComponent
   readonly multiple = input(false, { transform: booleanAttribute });
   /**
    * Keeps rejected files in the list, marked invalid, so the user can see which
-   * of their files failed and remove it. Off, a rejected file is discarded.
-   * Either way every rejection is summarised in one message under the field.
+   * of their files failed and remove it; the message under the field then names
+   * every rejected file still listed. Off, a rejected file is discarded and the
+   * message describes the latest selection.
    * @default false
    */
   readonly keepRejectedFiles = input(false, { transform: booleanAttribute });
   /**
-   * Whether the allowed types and maximum size are summarised in a hint below
-   * the field. Turn it off when the same information is shown elsewhere — a
-   * projected `tedi-feedback-text`, say — rejection errors still render.
+   * Whether the allowed types and maximum size are summarised in the hint below
+   * the field. Turn it off when the same information is shown elsewhere; `hint`
+   * and rejection errors still render.
    * @default true
    */
   readonly showRestrictions = input(true, { transform: booleanAttribute });
+  /**
+   * Guidance of your own, such as what a `validator` checks, shown after the
+   * allowed types and maximum size in the field's hint. Use it instead of
+   * projecting a `tedi-feedback-text` hint, which would make a second one.
+   */
+  readonly hint = input<string>();
+  /**
+   * An error of your own, such as one the server returned for an uploaded file.
+   * Shown in the field's error text after its own rejection message, above the
+   * hint, and marks the field invalid. It does not change a bound control's
+   * validity. Use it instead of projecting an error `tedi-feedback-text`, which
+   * would show below the hint as a second error.
+   */
+  readonly error = input<string>();
+  /**
+   * A success message, shown in the error's place above the hint and painting
+   * the field's border green. Shown only while the field has no error: an error
+   * means the user still has something to fix.
+   */
+  readonly success = input<string>();
   /**
    * Whether a clear button removes every file at once while any is listed.
    * Falls back to the wrapping `tedi-form-field`'s `clearable` when not set
@@ -231,14 +261,22 @@ export class FileUploadComponent
    * reactive-forms disabled state and any input-group state.
    * @default false
    */
-  readonly disabled = input(false, { transform: booleanAttribute });
+  readonly disabledInput = input(false, {
+    // eslint-disable-next-line @angular-eslint/no-input-rename
+    alias: "disabled",
+    transform: booleanAttribute,
+  });
   /**
    * Marks the field as invalid. The error state is also derived from the bound
    * control, from a wrapping `tedi-form-field`'s error feedback and from
    * rejected files, so this only forces it on.
    * @default false
    */
-  readonly invalid = input(false, { transform: booleanAttribute });
+  readonly invalidInput = input(false, {
+    // eslint-disable-next-line @angular-eslint/no-input-rename
+    alias: "invalid",
+    transform: booleanAttribute,
+  });
   /**
    * Size of the field. Falls back to the size of a wrapping `tedi-form-field`
    * when not set here.
@@ -263,33 +301,57 @@ export class FileUploadComponent
    */
   protected readonly labelId = signal<string | undefined>(undefined);
   /**
-   * Summarises the rejections from the last selection. Describes files that
-   * may have been discarded rather than listed, so it cannot be derived from
-   * `files()` alone.
+   * Summarises the rejections from the last selection. Discarded files are no
+   * longer listed, so this is the only record of why they were refused.
    */
-  protected readonly rejectionError = signal<string | undefined>(undefined);
+  private readonly selectionError = signal<string | undefined>(undefined);
+  /** Why each rejected file was refused, kept for as long as it is listed. */
+  private readonly fileRejections = new WeakMap<
+    FileUploadFile,
+    FileRejection
+  >();
+
+  /**
+   * Kept rejected files are described from the list itself, so the summary
+   * names exactly the rejected files on screen through every later selection,
+   * removal or reset.
+   */
+  protected readonly rejectionError = computed(() => {
+    if (!this.keepRejectedFiles()) return this.selectionError();
+
+    return this.rejectionSummary(
+      this.files().flatMap((file) => this.fileRejections.get(file) ?? []),
+    );
+  });
   private readonly fallbackId = `tedi-file-upload-${fileUploadIdCounter++}`;
 
   readonly touched = this.derived.touched;
   readonly dirty = this.derived.dirty;
 
-  readonly isDisabled = computed(
+  /**
+   * The field's combined state, under the names `tedi-form-field` reads from
+   * its control, so the wrapper sees rejections, `error` and a form-disabled
+   * control too.
+   */
+  readonly disabled = computed(
     () =>
-      this.disabled() ||
+      this.disabledInput() ||
       this.formDisabled() ||
       (this.fieldContext?.disabled() ?? false),
   );
 
-  readonly isInvalid = computed(
+  readonly invalid = computed(
     () =>
-      this.invalid() ||
-      !!this.rejectionError() ||
+      this.invalidInput() ||
+      !!this.errorText() ||
       this.derived.invalid() ||
       (this.fieldContext?.invalid() ?? false),
   );
 
-  readonly isValid = computed(
-    () => !this.isInvalid() && (this.fieldContext?.valid() ?? false),
+  readonly valid = computed(
+    () =>
+      !this.invalid() &&
+      (!!this.success() || (this.fieldContext?.valid() ?? false)),
   );
 
   readonly resolvedSize = computed<FileUploadSize>(
@@ -326,7 +388,7 @@ export class FileUploadComponent
 
   protected readonly showClear = computed(
     () =>
-      this.clearableResolved() && this.files().length > 0 && !this.isDisabled(),
+      this.clearableResolved() && this.files().length > 0 && !this.disabled(),
   );
 
   protected readonly addLabel = this.translations.track("file-upload.add");
@@ -335,7 +397,7 @@ export class FileUploadComponent
     this.translations.track("file-upload.failed");
 
   protected readonly isEditable = computed(
-    () => !this.isDisabled() && !this.readOnly(),
+    () => !this.disabled() && !this.readOnly(),
   );
 
   private readonly acceptTokens = computed(
@@ -350,24 +412,40 @@ export class FileUploadComponent
    * Rendered alongside — not instead of — a rejection error, so an error never
    * hides the restrictions the user has to satisfy.
    */
-  protected readonly restrictionsHint = computed(() => {
-    if (!this.showRestrictions() || this.readOnly()) return undefined;
+  protected readonly hintText = computed(() => {
+    if (this.readOnly()) return undefined;
 
-    const accept = this.accept();
-    const maxSize = this.maxSize();
+    const accept = this.showRestrictions() && this.accept();
+    const maxSize = this.showRestrictions() && this.maxSize();
     const parts = [
       accept &&
         `${this.translations.translate("file-upload.accept")} ${accept.replaceAll(",", ", ")}`,
       maxSize &&
         `${this.translations.translate("file-upload.max-size")} ${formatFileSize(maxSize)}`,
+      this.hint(),
     ].filter(Boolean);
 
     return parts.join(". ") || undefined;
   });
 
+  /** The field shows at most one error, so both sources share one text. */
+  protected readonly errorText = computed(
+    () =>
+      [this.rejectionError(), this.error()].filter(Boolean).join(". ") ||
+      undefined,
+  );
+
+  protected readonly successText = computed(() =>
+    this.errorText() ? undefined : this.success(),
+  );
+
   protected readonly feedbackIds = computed(() => {
     const id = this.resolvedId();
-    return { error: `${id}-error`, hint: `${id}-hint` };
+    return {
+      error: `${id}-error`,
+      success: `${id}-success`,
+      hint: `${id}-hint`,
+    };
   });
 
   /**
@@ -386,8 +464,9 @@ export class FileUploadComponent
       this.describedBy.set(
         [
           ...this.fieldDescribedBy(),
-          this.rejectionError() ? ids.error : null,
-          this.restrictionsHint() ? ids.hint : null,
+          this.errorText() ? ids.error : null,
+          this.successText() ? ids.success : null,
+          this.hintText() ? ids.hint : null,
         ].filter((id): id is string => !!id),
       );
     });
@@ -451,7 +530,7 @@ export class FileUploadComponent
   }
 
   focus(): void {
-    if (!this.isDisabled()) {
+    if (!this.disabled()) {
       this.addButton()?.nativeElement.focus();
     }
   }
@@ -464,7 +543,7 @@ export class FileUploadComponent
     const removed = this.files();
     if (!removed.length) return;
 
-    this.rejectionError.set(undefined);
+    this.selectionError.set(undefined);
     this.removeFiles(
       removed,
       [],
@@ -473,7 +552,7 @@ export class FileUploadComponent
   }
 
   protected openPicker(): void {
-    if (!this.isDisabled()) {
+    if (!this.disabled()) {
       this.fileInput()?.nativeElement.click();
     }
   }
@@ -504,7 +583,7 @@ export class FileUploadComponent
   /** Drops the summary once no invalid file is left for it to describe. */
   private clearRejectionWhenResolved(files: FileUploadFile[]): void {
     if (!files.some((file) => file.isValid === false)) {
-      this.rejectionError.set(undefined);
+      this.selectionError.set(undefined);
     }
   }
 
@@ -551,32 +630,28 @@ export class FileUploadComponent
       (listed.has(fileIdentity(file)) ? duplicates : fresh).push(file);
     }
 
-    const rejectedNames: Record<FileRejectionReason, string[]> = {
-      extension: [],
-      size: [],
-    };
-    const customRejections = new Map<string, string[]>();
+    // Every rule a file breaks is reported, not just the first: fixing one
+    // reason only to be rejected for the next sends the user round twice.
+    const rejections: FileRejection[] = [];
     const candidates = fresh.map((file) => {
-      const reason = this.rejectionReason(file);
-      const message = reason
-        ? undefined
-        : this.validator()?.(file) || undefined;
-      const name = `'${file.name}'`;
-
-      if (reason) {
-        rejectedNames[reason].push(name);
-      } else if (message) {
-        customRejections.set(message, [
-          ...(customRejections.get(message) ?? []),
-          name,
-        ]);
-      }
-
-      return Object.assign(file, {
+      const rejection: FileRejection = {
+        name: file.name,
+        reasons: this.rejectionReasons(file),
+        message: this.validator()?.(file) || undefined,
+      };
+      const isValid = !rejection.reasons.length && !rejection.message;
+      const candidate = Object.assign(file, {
         id: generateUUID(),
         isLoading: false,
-        isValid: !reason && !message,
+        isValid,
       }) as FileUploadFile;
+
+      if (!isValid) {
+        rejections.push(rejection);
+        this.fileRejections.set(candidate, rejection);
+      }
+
+      return candidate;
     });
 
     const kept = this.keepRejectedFiles()
@@ -590,23 +665,9 @@ export class FileUploadComponent
 
     const messages: string[] = [];
 
-    const rejection =
-      [
-        ...Object.entries(rejectedNames)
-          .filter(([, names]) => names.length)
-          .map(([reason, names]) =>
-            this.translations.translate(
-              `file-upload.${reason}-rejected`,
-              names.join(", "),
-            ),
-          ),
-        ...Array.from(
-          customRejections,
-          ([message, names]) =>
-            `${message.replace(/[\s.]+$/, "")}: ${names.join(", ")}`,
-        ),
-      ].join(". ") || undefined;
-    this.rejectionError.set(rejection);
+    // Announced: only what this selection rejected, not every kept file again.
+    const rejection = this.rejectionSummary(rejections);
+    this.selectionError.set(rejection);
     if (rejection) messages.push(rejection);
 
     if (duplicates.length) {
@@ -614,6 +675,7 @@ export class FileUploadComponent
         this.translations.translate(
           "file-upload.duplicates-skipped",
           duplicates.map((file) => `'${file.name}'`).join(", "),
+          String(duplicates.length),
         ),
       );
     }
@@ -638,6 +700,44 @@ export class FileUploadComponent
     this.addAnnounceTimeout = setTimeout(
       () => this.announce(messages.join(". "), "assertive"),
       ADD_ANNOUNCE_DELAY,
+    );
+  }
+
+  /**
+   * One message for every rejection: built-in reasons first, grouped by
+   * reason, then each validator message followed by the files it refused.
+   */
+  private rejectionSummary(rejections: FileRejection[]): string | undefined {
+    const builtIn: Record<FileRejectionReason, string[]> = {
+      extension: [],
+      size: [],
+    };
+    const custom = new Map<string, string[]>();
+
+    for (const { name, reasons, message } of rejections) {
+      const quoted = `'${name}'`;
+      reasons.forEach((reason) => builtIn[reason].push(quoted));
+      if (message)
+        custom.set(message, [...(custom.get(message) ?? []), quoted]);
+    }
+
+    return (
+      [
+        ...Object.entries(builtIn)
+          .filter(([, names]) => names.length)
+          .map(([reason, names]) =>
+            this.translations.translate(
+              `file-upload.${reason}-rejected`,
+              names.join(", "),
+              String(names.length),
+            ),
+          ),
+        ...Array.from(
+          custom,
+          ([message, names]) =>
+            `${message.replace(/[\s.]+$/, "")}: ${names.join(", ")}`,
+        ),
+      ].join(". ") || undefined
     );
   }
 
@@ -667,13 +767,14 @@ export class FileUploadComponent
     });
   }
 
-  private rejectionReason(file: File): FileRejectionReason | undefined {
+  private rejectionReasons(file: File): FileRejectionReason[] {
     const maxSize = this.maxSize();
+    const reasons: FileRejectionReason[] = [];
 
-    if (!this.isAcceptedType(file)) return "extension";
-    if (maxSize && file.size > maxSize) return "size";
+    if (!this.isAcceptedType(file)) reasons.push("extension");
+    if (maxSize && file.size > maxSize) reasons.push("size");
 
-    return undefined;
+    return reasons;
   }
 
   /**

@@ -208,21 +208,24 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   picker, and the field finds the label by its `for`, gives it an id if it has none, and names the add
   button by the label *and* its own text. Nothing else can name the button, so a field without a label
   announces only "Add attachment".
-- **`tedi-file-upload` has no separate "default" input and no feedback input.** `[files]` seeds the
+- **`tedi-file-upload` has no separate "default" input, and owns its hint.** `[files]` seeds the
   list, `[(files)]` keeps the parent in sync, `[formControl]` hands it to the form — bind a stable
-  reference, an inline literal is written back on every check. Hints and errors are projected
-  `tedi-feedback-text` on the wrapping `tedi-form-field`, which links and reads only the first one, so
-  project one. The field adds its own restrictions hint (from `accept` / `maxSize`, off with
-  `showRestrictions`) and a rejection summary, rendered above the projected text.
+  reference, an inline literal is written back on every check. The field owns one hint: the allowed
+  types and size (from `accept` / `maxSize`, off with `showRestrictions`) followed by your `hint`
+  text. Put guidance there rather than projecting a `tedi-feedback-text` hint, which would make a
+  second one. It owns one validation message the same way, shown above the hint: pass an error of
+  your own, a server error say, through `error`, where it joins the field's rejection message, or a
+  confirmation through `success`, shown only while there is no error. A projected error or success
+  text would show below the hint as a second message.
 - **`tedi-file-upload` validates itself.** It registers on `NG_VALIDATORS`, so a bound control fails
   with a `rejectedFiles` error while any `isValid: false` file is listed. By default a file that
   fails `accept`, `maxSize` or `validator` is discarded and only the summary under the field remains;
   `keepRejectedFiles` keeps it in the list, marked invalid, instead. It shows as a danger tag only
   while two or more files are listed; a single file shows just its name. Filter on `isValid` before
   uploading either way.
-- **A `tedi-file-upload` `validator` adds a rule but no hint.** Its reason joins the rejection
-  summary after the built-in ones, and it only runs on files that already passed `accept` and
-  `maxSize`. The restrictions hint cannot describe it, so project a `tedi-feedback-text` that does.
+- **A `tedi-file-upload` `validator` adds a rule but no hint.** It runs on every selected file, and
+  every rule a file breaks is reported in the one rejection summary, built-in reasons first. The
+  automatic hint cannot describe it, so describe the rule in `hint`.
 - **`maxSize` is in bytes**, the unit `File.size` is in — not megabytes as in React. The hint renders
   it in whichever unit reads best.
 - **It selects files, it does not upload them.** `fileRemove` emits the single entry the user removed,
@@ -238,10 +241,10 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   leaves the add button within the page. Opening the dialog moves focus out of the page, and that blur
   is ignored, so a `required` error does not appear behind the open dialog.
 - **It works without `tedi-form-field`**: it paints its own surface, clear button and restrictions
-  hint, and a sibling label still names the add button. You lose the success border and the error
-  state from a projected error text — set `invalid` yourself. Put your own hint's id in a static
-  `aria-describedby` on the component, but not one ending in `-hint` or `-error` after `inputId`:
-  the field uses `<inputId>-hint` and `<inputId>-error` for its own messages.
+  hint, and a sibling label still names the add button. `error`, `success` and `hint` work the same
+  either way. For any other
+  describing element, put its id in a static `aria-describedby` on the component, but not one ending
+  in `-hint`, `-error` or `-success` after `inputId`: the field uses those ids for its own messages.
 
 ### Clear buttons
 
