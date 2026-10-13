@@ -256,7 +256,7 @@ export default {
 
 type Story = StoryObj<FileUploadComponent>;
 
-export const Default: Story = {
+export const Default: StoryObj = {
   parameters: { controls: { disable: false } },
   args: {
     multiple: false,
