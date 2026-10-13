@@ -10,6 +10,11 @@ export type FileDropzoneValidator = (file: File) => string | null | undefined;
  */
 export interface FileDropzoneFile extends Partial<File> {
   /**
+   * File name shown in the list and used in the remove button's label and the
+   * announcements, so the user can tell the files apart.
+   */
+  name: string;
+  /**
    * Stable identifier, used to track the file across re-renders. Generated for
    * files the user selects.
    */

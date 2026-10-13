@@ -23,14 +23,10 @@ const breakpointMock = {
   isBelowBreakpoint: () => signal(false).asReadonly(),
 };
 
-// `lastModified` is pinned because it defaults to `Date.now()`, which would make
-// two fabricated files differ by milliseconds — a real file picked twice carries
-// the same mtime, which is what the duplicate check relies on.
 const announcer = { announce: jest.fn(), clear: jest.fn(), destroy: jest.fn() };
 
 beforeEach(() => announcer.announce.mockClear());
 
-/** Last message handed to the root-level announcer. */
 /** Waits past the add-path delay, then reads the last announced message. */
 const announced = async (): Promise<string> => {
   // Mirrors ADD_ANNOUNCE_DELAY in the component, which is deliberately private.
@@ -47,6 +43,9 @@ const zoneOf = (fixture: ComponentFixture<unknown>): HTMLElement =>
   fixture.debugElement.query(By.css('[role="button"].tedi-file-dropzone__zone'))
     .nativeElement as HTMLElement;
 
+// `lastModified` is pinned because it defaults to `Date.now()`, which would make
+// two fabricated files differ by milliseconds — a real file picked twice carries
+// the same mtime, which is what the duplicate check relies on.
 const makeFile = (
   name: string,
   size = 100,
@@ -945,7 +944,7 @@ describe("FileDropzoneComponent", () => {
 
     it("emits the removed file, and only for a real removal", () => {
       const removed: string[] = [];
-      component.fileRemove.subscribe((file) => removed.push(file.name ?? ""));
+      component.fileRemove.subscribe((file) => removed.push(file.name));
 
       selectFiles(fixture, [makeFile("second.pdf")]);
       expect(removed).toEqual([]);
@@ -1139,31 +1138,6 @@ describe("FileDropzoneComponent", () => {
 
       expect(component.files()).toEqual([]);
       expect(dropEvent.defaultPrevented).toBe(true);
-    });
-
-    it("renders a file that has no name", () => {
-      fixture.componentRef.setInput("files", [{ id: "1" }]);
-      fixture.detectChanges();
-
-      expect(text(".tedi-attachment__title")).toBe("");
-      expect(
-        fixture.debugElement
-          .query(By.css(".tedi-attachment__actions button"))
-          .nativeElement.getAttribute("aria-label"),
-      ).toBe("remove ");
-    });
-
-    it("announces a removal for a file that has no name", async () => {
-      fixture.componentRef.setInput("files", [{ id: "1" }]);
-      fixture.detectChanges();
-
-      (
-        fixture.debugElement.query(By.css(".tedi-attachment__actions button"))
-          .nativeElement as HTMLButtonElement
-      ).click();
-      fixture.detectChanges();
-
-      expect(await announced()).toBe("file-upload.removed:");
     });
 
     it("matches an extensionless file on its MIME type", () => {

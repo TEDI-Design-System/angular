@@ -293,12 +293,11 @@ export class FileDropzoneComponent
     const removeLabel = this.translations.translate("remove");
 
     return this.files().map((file) => {
-      const name = file.name ?? "";
-      const label = `${removeLabel} ${name}`;
+      const label = `${removeLabel} ${file.name}`;
 
       return {
         file,
-        name,
+        name: file.name,
         removeLabel: label,
         size:
           showSize && typeof file.size === "number"
@@ -497,7 +496,7 @@ export class FileDropzoneComponent
     // announce the two in the wrong order.
     clearTimeout(this.addAnnounceTimeout);
     this.announce(
-      this.translations.translate("file-upload.removed", file.name ?? ""),
+      this.translations.translate("file-upload.removed", file.name),
     );
     this.restoreFocus(removedIndex);
   }
