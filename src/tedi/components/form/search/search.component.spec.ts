@@ -737,6 +737,16 @@ describe("SearchComponent", () => {
       expect(getInput().getAttribute("aria-activedescendant")).toBeNull();
     });
 
+    it("ArrowDown opens a closed panel without activating an option", () => {
+      component.closePanel();
+      fixture.detectChanges();
+
+      press("ArrowDown");
+
+      expect(component.panelOpen()).toBe(true);
+      expect(getInput().getAttribute("aria-activedescendant")).toBeNull();
+    });
+
     it("ArrowDown activates the first option", () => {
       press("ArrowDown");
 
@@ -948,6 +958,16 @@ describe("SearchComponent", () => {
       component.onFocusOut(
         new FocusEvent("focusout", { relatedTarget: document.body }),
       );
+      fixture.detectChanges();
+
+      expect(component.panelOpen()).toBe(false);
+    });
+
+    it("closes when focus leaves the page", () => {
+      component.openPanel();
+      fixture.detectChanges();
+
+      component.onFocusOut(new FocusEvent("focusout", { relatedTarget: null }));
       fixture.detectChanges();
 
       expect(component.panelOpen()).toBe(false);
