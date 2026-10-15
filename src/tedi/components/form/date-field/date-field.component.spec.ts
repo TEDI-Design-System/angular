@@ -367,6 +367,20 @@ describe("DateFieldComponent", () => {
       expect(input.type).toBe("date");
     });
 
+    it("bounds the native input by minDate and maxDate", () => {
+      const { el } = createField({
+        useNativePicker: true,
+        minDate: new Date(2026, 4, 1),
+        maxDate: new Date(2026, 4, 31),
+      });
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.getAttribute("min")).toBe("2026-05-01");
+      expect(input.getAttribute("max")).toBe("2026-05-31");
+      expect(input.hasAttribute("step")).toBe(false);
+    });
+
     it("does NOT switch to native picker when mode is multiple", () => {
       const { el } = createField({
         useNativePicker: true,

@@ -62,8 +62,10 @@ import {
   formatLocaleDate,
   formatLocaleDateHint,
   isSameDay,
+  nativeDateBounds,
   parseLocaleDate,
   startOfMonth,
+  toNativeDate,
 } from "../../../utils/date.util";
 import { matchAny, Matcher } from "../../../utils/matchers.util";
 import { ModalService } from "../../overlay/modal/modal.service";
@@ -531,7 +533,26 @@ export class DateFieldComponent
     if (!this.useNativePickerEffective()) return "";
     const v = this.value();
     if (!(v instanceof Date)) return "";
-    return this.toIsoDate(v);
+    return toNativeDate(v);
+  });
+
+  private readonly nativeBounds = computed(() =>
+    nativeDateBounds({
+      minDate: this.minDate(),
+      maxDate: this.maxDate(),
+      disablePast: this.disablePast(),
+      disableFuture: this.disableFuture(),
+    }),
+  );
+
+  readonly nativeMin = computed(() => {
+    const min = this.nativeBounds().min;
+    return min ? toNativeDate(min) : undefined;
+  });
+
+  readonly nativeMax = computed(() => {
+    const max = this.nativeBounds().max;
+    return max ? toNativeDate(max) : undefined;
   });
 
   readonly effectivePlaceholder = computed(() => {
@@ -1025,13 +1046,6 @@ export class DateFieldComponent
   private startOfToday(): Date {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  }
-
-  private toIsoDate(date: Date): string {
-    const y = date.getFullYear().toString().padStart(4, "0");
-    const m = (date.getMonth() + 1).toString().padStart(2, "0");
-    const d = date.getDate().toString().padStart(2, "0");
-    return `${y}-${m}-${d}`;
   }
 
   private queryNativeInput(): HTMLInputElement | null {

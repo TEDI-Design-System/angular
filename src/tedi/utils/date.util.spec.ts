@@ -18,11 +18,13 @@ import {
   isSameDay,
   isSameMonth,
   isSameYear,
+  nativeDateBounds,
   parseDate,
   parseLocaleDate,
   startOfMonth,
   startOfWeek,
   toggleDateInArray,
+  toNativeDate,
 } from "./date.util";
 
 describe("date.util", () => {
@@ -647,5 +649,46 @@ describe("date.util", () => {
       const grid = buildMonthGrid(new Date(2025, 1, 1), 1, true);
       expect(grid[5][6]).toEqual(new Date(2025, 2, 9));
     });
+  });
+});
+
+describe("toNativeDate", () => {
+  it("formats a zero-padded YYYY-MM-DD", () => {
+    expect(toNativeDate(new Date(987, 0, 5))).toBe("0987-01-05");
+  });
+});
+
+describe("nativeDateBounds", () => {
+  const today = () => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  };
+
+  it("is unbounded without constraints", () => {
+    expect(nativeDateBounds({})).toEqual({ min: undefined, max: undefined });
+  });
+
+  it("takes the later minimum and the earlier maximum", () => {
+    const { min, max } = nativeDateBounds({
+      minDate: new Date(2000, 0, 1),
+      maxDate: new Date(2999, 0, 1),
+      disablePast: true,
+      disableFuture: true,
+    });
+    expect(min).toEqual(today());
+    expect(max).toEqual(today());
+  });
+
+  it("keeps explicit dates tighter than today", () => {
+    const minDate = new Date(2999, 0, 1);
+    const maxDate = new Date(2000, 0, 1);
+    expect(
+      nativeDateBounds({
+        minDate,
+        maxDate,
+        disablePast: true,
+        disableFuture: true,
+      }),
+    ).toEqual({ min: minDate, max: maxDate });
   });
 });

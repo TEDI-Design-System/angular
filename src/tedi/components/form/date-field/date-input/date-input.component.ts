@@ -90,6 +90,12 @@ export class DateInputComponent implements AfterViewChecked {
   /** Native input type used when `useNativePicker` is `true`. `date` for date-only fields, `datetime-local` for date-and-time fields. */
   readonly nativeInputType = input<"date" | "datetime-local">("date");
   readonly nativeIsoValue = input<string>("");
+  /** `min` of the native input, in its `nativeInputType` format. */
+  readonly nativeMin = input<string | undefined>(undefined);
+  /** `max` of the native input, in its `nativeInputType` format. */
+  readonly nativeMax = input<string | undefined>(undefined);
+  /** `step` of the native input, in seconds for `datetime-local` and days for `date`. */
+  readonly nativeStep = input<number | undefined>(undefined);
   /** Whether to show the clear button. Independent of `readOnly`, like `removable`. */
   readonly clearable = input<boolean>(false);
 
