@@ -3,12 +3,14 @@ import {
   Component,
   computed,
   inject,
+  Signal,
   signal,
   viewChild,
   ViewEncapsulation,
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
 import { ButtonComponent } from "../../../buttons/button/button.component";
+import { IconComponent } from "../../../base/icon/icon.component";
 import { ModalComponent } from "../../../overlay/modal/modal.component";
 import { ModalContentComponent } from "../../../overlay/modal/modal-content/modal-content.component";
 import { ModalFooterComponent } from "../../../overlay/modal/modal-footer/modal-footer.component";
@@ -21,12 +23,12 @@ import { TimePickerComponent } from "../../time-picker/time-picker.component";
 import { TimeFieldComponent } from "../../time-field/time-field.component";
 import { FormFieldComponent } from "../../form-field/form-field.component";
 import { InputSize } from "../../form-field/field-context.token";
-import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
 import { CalendarView, DateRange } from "../../../content/calendar/types";
 import { Matcher } from "../../../../utils/matchers.util";
-import { formatLocaleDate } from "../../../../utils/date.util";
 import {
+  DateTimeFieldLayout,
   DateTimeFieldMode,
+  DateTimeFieldStep,
   DateTimeFieldTimeGridVariant,
   DateTimeFieldValue,
 } from "../date-time-field.component";
@@ -61,6 +63,8 @@ export interface DateTimeFieldModalData {
   unavailableDays: DayAvailabilityInput;
   shouldDisableMonth: MonthPredicate | undefined;
   shouldDisableYear: YearPredicate | undefined;
+  layout: DateTimeFieldLayout;
+  useNativeTimeInput: Signal<boolean>;
   minuteStep: number;
   slotColumns: number;
   gridVariant: DateTimeFieldTimeGridVariant;
@@ -77,6 +81,7 @@ export interface DateTimeFieldModalData {
   imports: [
     NgTemplateOutlet,
     ButtonComponent,
+    IconComponent,
     CalendarComponent,
     TimePickerComponent,
     TimeFieldComponent,
@@ -93,19 +98,25 @@ export interface DateTimeFieldModalData {
 export class DateTimeFieldModalComponent {
   readonly data = inject(MODAL_DATA) as DateTimeFieldModalData;
   private readonly ref = inject(ModalRef<DateTimeFieldValue>);
-  private readonly breakpointService = inject(BreakpointService);
 
   readonly calendar = viewChild<CalendarComponent>("calendar");
-
-  // See date-time-field.component.ts: swap the scroll wheels for a native
-  // `type="time"` input on phones/small tablets, and why `rangeTimeTpl`
-  // deliberately takes the native input at every width instead.
-  readonly useNativeTimeInput = this.breakpointService.isBelowBreakpoint("md");
 
   readonly draft = signal<DateTimeFieldValue>(this.data.value);
   readonly month = signal<Date>(this.data.currentMonth);
 
   readonly isRange = this.data.mode === "range";
+  readonly multiStep = this.data.layout === "multi-step";
+  readonly singleMonthRange = this.isRange && this.data.numberOfMonths === 1;
+  readonly step = signal<DateTimeFieldStep>("date");
+  readonly titleKey = computed(() => {
+    if (!this.multiStep) return "date-time-field.modal-title";
+    return this.step() === "date"
+      ? "date-field.modal-title"
+      : "date-time-field.time-heading";
+  });
+  readonly canAdvance = computed(() =>
+    this.isRange ? !!this.rangeValue().to : !!this.singleValue(),
+  );
 
   readonly singleValue = computed(() => toSingle(this.draft()));
   readonly rangeValue = computed<RangeParts>(() => toRangeParts(this.draft()));
@@ -115,10 +126,10 @@ export class DateTimeFieldModalComponent {
   readonly toTime = computed(() => getTimeOf(this.rangeValue().to));
 
   readonly fromDateLabel = computed(() =>
-    this.formatRangeDate(this.rangeValue().from),
+    this.formatRangeEnd(this.rangeValue().from),
   );
   readonly toDateLabel = computed(() =>
-    this.formatRangeDate(this.rangeValue().to),
+    this.formatRangeEnd(this.rangeValue().to),
   );
 
   readonly singleSlots = computed(() =>
@@ -137,6 +148,14 @@ export class DateTimeFieldModalComponent {
 
   confirm(): void {
     this.ref.close(this.draft());
+  }
+
+  goToTimeStep(): void {
+    this.step.set("time");
+  }
+
+  goToDateStep(): void {
+    this.step.set("date");
   }
 
   handleCalendarSelect(): void {
@@ -165,7 +184,14 @@ export class DateTimeFieldModalComponent {
     );
   }
 
-  private formatRangeDate(date: Date | undefined): string {
-    return date ? formatLocaleDate(date, this.data.localeCode) : "";
+  private readonly shortDateFormatter = new Intl.DateTimeFormat(
+    this.data.localeCode,
+    { day: "2-digit", month: "2-digit", year: "2-digit" },
+  );
+
+  private formatRangeEnd(date: Date | undefined): string {
+    return date
+      ? `${this.shortDateFormatter.format(date)} - ${getTimeOf(date)}`
+      : "";
   }
 }

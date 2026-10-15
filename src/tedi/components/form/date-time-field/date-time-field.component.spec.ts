@@ -237,12 +237,55 @@ describe("DateTimeFieldComponent", () => {
   });
 
   describe("range", () => {
-    it("forces the side-by-side layout", () => {
+    it("walks the multi-step layout from the calendar to both time pickers", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        layout: "multi-step",
+        availableTimes: ["09:00", "10:00"],
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(document.querySelector("tedi-calendar")).toBeTruthy();
+      expect(document.querySelector("tedi-time-picker")).toBeNull();
+
+      component.goToTimeStep();
+      fixture.detectChanges();
+      expect(document.querySelector("tedi-calendar")).toBeNull();
+      expect(document.querySelectorAll(".tedi-time-picker--slots").length).toBe(
+        2,
+      );
+
+      component.goToDateStep();
+      fixture.detectChanges();
+      expect(document.querySelector("tedi-calendar")).toBeTruthy();
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("keeps the overlay open after a range slot pick in multi-step", () => {
       const { component } = createField({
         mode: "range",
         layout: "multi-step",
+        availableTimes: ["09:00", "10:00"],
       });
-      expect(component.effectiveLayout()).toBe("side-by-side");
+      component.handleIconClick();
+      component.goToTimeStep();
+      component.handleRangeTimeSelect("from", "09:00");
+      expect(component.overlayOpen()).toBe(true);
+    });
+
+    it("places the time pickers beside a single-month calendar", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        numberOfMonths: 1,
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(
+        document.querySelector(".tedi-date-time-field__range--single-month"),
+      ).toBeTruthy();
+      component.closeOverlay();
+      fixture.detectChanges();
     });
 
     it("combines the from time into the range", () => {
@@ -333,6 +376,69 @@ describe("DateTimeFieldComponent", () => {
   });
 
   describe("native picker", () => {
+    it("bounds the native input by the date constraints and minute step", () => {
+      const { el } = createField({
+        useNativePicker: true,
+        minDate: new Date(2025, 8, 1, 14, 0),
+        maxDate: new Date(2025, 8, 30),
+        minuteStep: 15,
+      });
+      const input = el.querySelector<HTMLInputElement>(
+        "input.tedi-date-input__input",
+      )!;
+      expect(input.getAttribute("min")).toBe("2025-09-01T00:00");
+      expect(input.getAttribute("max")).toBe("2025-09-30T23:59");
+      expect(input.getAttribute("step")).toBe("900");
+    });
+
+    it("uses the tighter of minDate and disablePast", () => {
+      const { component } = createField({
+        useNativePicker: true,
+        minDate: new Date(2000, 0, 1),
+        disablePast: true,
+        disableFuture: true,
+      });
+      const today = new Date();
+      const iso = `${today.getFullYear()}-${pad2(today.getMonth() + 1)}-${pad2(today.getDate())}`;
+      expect(component.nativeMin()).toBe(`${iso}T00:00`);
+      expect(component.nativeMax()).toBe(`${iso}T23:59`);
+    });
+
+    it("leaves the native input unbounded without constraints", () => {
+      const { component } = createField({ useNativePicker: true });
+      expect(component.nativeMin()).toBeUndefined();
+      expect(component.nativeMax()).toBeUndefined();
+      expect(component.nativeStep()).toBeUndefined();
+    });
+
+    it("sets a native step only for a minuteStep above 1", () => {
+      const { component, fixture } = createField();
+      expect(component.nativeStep()).toBeUndefined();
+      fixture.componentRef.setInput("minuteStep", 5);
+      expect(component.nativeStep()).toBe(300);
+    });
+
+    it("passes an explicit minuteStep to the native time inputs only", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        useNativeTimePicker: true,
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      const steps = () =>
+        Array.from(
+          document.querySelectorAll<HTMLInputElement>(
+            ".tedi-time-field__input",
+          ),
+        ).map((i) => i.getAttribute("step"));
+      expect(steps()).toEqual([null, null]);
+      fixture.componentRef.setInput("minuteStep", 10);
+      fixture.detectChanges();
+      expect(steps()).toEqual(["600", "600"]);
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
     it("renders a datetime-local input and ISO value", () => {
       const { component, el } = createField({
         useNativePicker: true,
@@ -759,6 +865,40 @@ describe("DateTimeFieldComponent", () => {
       expect(component.useNativeTimeInput()).toBe(true);
     });
 
+    it("resolves the layout per breakpoint", () => {
+      const { component, breakpoint } = createField({
+        layout: { xs: "multi-step", md: "side-by-side" },
+      });
+      expect(component.resolvedLayout()).toBe("side-by-side");
+      breakpoint.setBreakpoint("sm");
+      expect(component.resolvedLayout()).toBe("multi-step");
+    });
+
+    it("owns its clear button and honours clearable", () => {
+      const { component, fixture } = createField({
+        value: new Date(2025, 8, 1, 9, 0),
+      });
+      expect(component.ownsClearButton).toBe(true);
+      expect(component.canClear()).toBe(true);
+      fixture.componentRef.setInput("clearable", false);
+      expect(component.canClear()).toBe(false);
+    });
+
+    it("keeps the wheel below md in multi-step", () => {
+      const { component, breakpoint } = createField({ layout: "multi-step" });
+      breakpoint.setBreakpoint("xs");
+      expect(component.useNativeTimeInput()).toBe(false);
+    });
+
+    it("resolves an explicit useNativeTimePicker per breakpoint", () => {
+      const { component, breakpoint } = createField({
+        useNativeTimePicker: { xs: false, lg: true },
+      });
+      expect(component.useNativeTimeInput()).toBe(true);
+      breakpoint.setBreakpoint("xs");
+      expect(component.useNativeTimeInput()).toBe(false);
+    });
+
     it("renders a native time-field in the popover below md", () => {
       const { component, breakpoint, fixture } = createField();
       breakpoint.setBreakpoint("sm");
@@ -808,9 +948,23 @@ describe("DateTimeFieldComponent", () => {
       fixture.detectChanges();
     });
 
-    it("uses native time inputs (not scroll wheels) for both ends even on desktop", () => {
+    it("uses scroll wheels for both ends from md up", () => {
       const { component, fixture } = createField({ mode: "range" });
-      expect(component.useNativeTimeInput()).toBe(false);
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(document.querySelector("tedi-time-field")).toBeNull();
+      expect(
+        document.querySelectorAll(".tedi-time-picker--scroll").length,
+      ).toBe(2);
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("uses native time inputs for both ends when useNativeTimePicker is set", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        useNativeTimePicker: true,
+      });
       component.handleIconClick();
       fixture.detectChanges();
       expect(document.querySelectorAll("tedi-time-field").length).toBe(2);

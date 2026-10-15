@@ -1,3 +1,4 @@
+import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import {
   DateTimeFieldModalComponent,
@@ -37,6 +38,8 @@ function makeData(
     unavailableDays: undefined,
     shouldDisableMonth: undefined,
     shouldDisableYear: undefined,
+    layout: "side-by-side",
+    useNativeTimeInput: signal(false),
     minuteStep: 15,
     slotColumns: 3,
     gridVariant: "button",
@@ -213,5 +216,71 @@ describe("DateTimeFieldModalComponent", () => {
     component.handleTimeSelect(null);
     component.handleRangeTimeSelect("from", null);
     expect((component.draft() as Date).getHours()).toBe(9);
+  });
+
+  describe("multi-step", () => {
+    const query = (selector: string) =>
+      fixture.nativeElement.querySelector(selector);
+
+    it("shows the calendar first and blocks advancing until the range is complete", () => {
+      setup(makeData({ mode: "range", layout: "multi-step" }));
+      expect(component.titleKey()).toBe("date-field.modal-title");
+      expect(query("tedi-calendar")).toBeTruthy();
+      expect(component.canAdvance()).toBe(false);
+
+      component.draft.set({
+        from: new Date(2026, 4, 14),
+        to: new Date(2026, 4, 16),
+      } as DateRange);
+      expect(component.canAdvance()).toBe(true);
+    });
+
+    it("swaps the calendar for both time pickers on the time step", () => {
+      setup(
+        makeData({
+          mode: "range",
+          layout: "multi-step",
+          value: {
+            from: new Date(2026, 4, 14, 9, 0),
+            to: new Date(2026, 4, 16, 17, 0),
+          } as DateRange,
+        }),
+      );
+      component.goToTimeStep();
+      fixture.detectChanges();
+      expect(component.titleKey()).toBe("date-time-field.time-heading");
+      expect(query("tedi-calendar")).toBeNull();
+      expect(
+        fixture.nativeElement.querySelectorAll(".tedi-time-picker--scroll")
+          .length,
+      ).toBe(2);
+      expect(query(".tedi-date-time-field-modal__back")).toBeTruthy();
+
+      component.goToDateStep();
+      fixture.detectChanges();
+      expect(query("tedi-calendar")).toBeTruthy();
+    });
+
+    it("renders native time inputs when requested", () => {
+      setup(
+        makeData({
+          mode: "range",
+          layout: "multi-step",
+          useNativeTimeInput: signal(true),
+        }),
+      );
+      component.goToTimeStep();
+      fixture.detectChanges();
+      expect(
+        fixture.nativeElement.querySelectorAll("tedi-time-field").length,
+      ).toBe(2);
+    });
+
+    it("advances a single value once a date is picked", () => {
+      setup(makeData({ layout: "multi-step" }));
+      expect(component.canAdvance()).toBe(false);
+      component.draft.set(new Date(2026, 4, 14));
+      expect(component.canAdvance()).toBe(true);
+    });
   });
 });

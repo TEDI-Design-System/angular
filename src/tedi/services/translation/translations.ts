@@ -1395,6 +1395,14 @@ export const translationsMap = {
     en: "Back",
     ru: "Назад",
   },
+  "date-time-field.next": {
+    description:
+      "Button in the multi-step date-time field modal that advances from the calendar to the time step.",
+    components: ["DateTimeField"],
+    et: "Edasi",
+    en: "Next",
+    ru: "Далее",
+  },
   "date-time-field.modal-title": {
     description: "Title shown in the mobile date-time picker modal header.",
     components: ["DateTimeField"],

@@ -1,4 +1,6 @@
 import {
+  afterNextRender,
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -7,6 +9,7 @@ import {
   ElementRef,
   forwardRef,
   inject,
+  Injector,
   input,
   model,
   OnInit,
@@ -48,8 +51,10 @@ import {
 import {
   formatLocaleDate,
   formatLocaleDateHint,
+  nativeDateBounds,
   parseLocaleDate,
   startOfMonth,
+  toNativeDate,
 } from "../../../utils/date.util";
 import { matchAny, Matcher } from "../../../utils/matchers.util";
 import { ModalService } from "../../overlay/modal/modal.service";
@@ -158,8 +163,18 @@ export class DateTimeFieldComponent
   readonly value = model<DateTimeFieldValue>(null);
   /** Selection mode. `single` picks one date+time, `range` builds a `{ from, to }` pair. */
   readonly mode = input<DateTimeFieldMode>("single");
-  /** Popover layout. `side-by-side` shows the calendar and time picker together; `multi-step` picks the date first, then advances to a separate time step. `range` always uses `side-by-side`. */
-  readonly layout = input<DateTimeFieldLayout>("side-by-side");
+  /**
+   * Picker layout. `side-by-side` shows the calendar and time picker together; `multi-step`
+   * picks the date first, then advances to a separate time step. Accepts a
+   * `BreakpointInput<DateTimeFieldLayout>`, e.g. `{ xs: "multi-step", md: "side-by-side" }`.
+   */
+  readonly layout = input(
+    { xs: "side-by-side" as DateTimeFieldLayout },
+    {
+      transform: (v: BreakpointInput<DateTimeFieldLayout>) =>
+        breakpointInput(v),
+    },
+  );
   /** Placeholder rendered in the input when there is no value. */
   readonly placeholder = input<string>("");
   /**
@@ -172,8 +187,17 @@ export class DateTimeFieldComponent
   readonly timeGridVariant = input<DateTimeFieldTimeGridVariant | undefined>(
     undefined,
   );
-  /** Minute interval for the scroll-wheel time picker. Ignored when `availableTimes` is set. */
-  readonly minuteStep = input<number>(15);
+  /**
+   * Render a native `type="time"` input instead of the scroll-wheel. Ignored when
+   * `availableTimes` is set. Accepts a `BreakpointInput<boolean>`. When unset, `side-by-side`
+   * uses the native input below `md` (the wheel doesn't fit beside or under the calendar
+   * there) and `multi-step` always uses the wheel.
+   */
+  readonly useNativeTimePicker = input<BreakpointInput<boolean> | undefined>(
+    undefined,
+  );
+  /** Minute interval for the scroll-wheel and the native inputs' `step`. Ignored when `availableTimes` is set. */
+  readonly minuteStep = input<number>(1);
   /** Number of columns in the slot grid. */
   readonly slotColumns = input<number>(3);
   /** Heading above the time picker. Falls back to the `date-time-field.time-heading` label. */
@@ -199,6 +223,13 @@ export class DateTimeFieldComponent
    * set here.
    */
   readonly size = input<DateTimeFieldSize | undefined>();
+  /**
+   * Whether the clear button shows once the field has a value. Falls back to the
+   * wrapping `tedi-form-field`'s `clearable` when not set here.
+   */
+  readonly clearable = input<boolean | undefined, unknown>(undefined, {
+    transform: (v: unknown) => (v == null ? undefined : booleanAttribute(v)),
+  });
   /**
    * Forces the error state on, or off, regardless of the reactive-forms state.
    * Leave unset to let the control derive it.
@@ -234,8 +265,9 @@ export class DateTimeFieldComponent
   /** Render an ISO week-number column in the day grid. */
   readonly showWeekNumbers = input<boolean>(false);
   /**
-   * Months shown side by side in `range` mode (ignored in `single`). Accepts a
-   * `BreakpointInput<number>` — defaults to one month on `xs`, two from `md` up.
+   * Months shown in `range` mode (ignored in `single`). Accepts a `BreakpointInput<number>`.
+   * With one month from `md` up, the time pickers sit beside the calendar instead of below it.
+   * @default { xs: 1, md: 2 }
    */
   readonly numberOfMonths = input(
     { xs: 1, md: 2 },
@@ -260,10 +292,12 @@ export class DateTimeFieldComponent
   private readonly modalService = inject(ModalService);
   private readonly hostEl = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
 
   readonly dateInput = viewChild.required<DateInputComponent>("dateInput");
   readonly calendar = viewChild<CalendarComponent>("calendar");
   readonly stepTimePicker = viewChild<TimePickerComponent>("stepTimePicker");
+  readonly timeStep = viewChild<ElementRef<HTMLElement>>("timeStep");
 
   readonly currentMonth = signal<Date>(new Date());
   readonly overlayOpen = signal<boolean>(false);
@@ -342,34 +376,38 @@ export class DateTimeFieldComponent
     invalid: computed(() => this.invalid()),
     valid: computed(() => this.valid()),
     disabled: computed(() => this.disabled()),
+    clearable: computed(() => this.clearableResolved()),
   };
+
+  readonly ownsClearButton = true;
+
+  readonly clearableResolved = computed(
+    () => this.clearable() ?? this.fieldContext?.clearable() ?? true,
+  );
 
   ngOnInit(): void {
     this.derived.connect();
   }
 
-  readonly effectiveLayout = computed<DateTimeFieldLayout>(() =>
-    this.mode() === "range" ? "side-by-side" : this.layout(),
+  readonly resolvedLayout = computed(() =>
+    this.resolveBreakpointInput(this.layout()),
   );
 
-  // Below `md` the hour/minute scroll wheels are cramped and, stacked in range
-  // mode, force the popover to scroll — so swap them for a native `type="time"`
-  // input on phones/small tablets. Predefined slot grids stay as-is (they're
-  // already touch-friendly buttons).
-  //
-  // Single mode is the only caller: range takes the native input at every
-  // width, so `rangeTimeTpl` deliberately omits this check. Two wheels side by
-  // side under the calendar would dwarf it on desktop too, and the range layout
-  // (`__range-times`) is built around the inputs. Its `@else` branch covers the
-  // predefined-slots case alone and would render an empty grid without them.
-  readonly useNativeTimeInput = computed(() =>
-    this.breakpointService.isBelowBreakpoint("md")(),
-  );
+  readonly useNativeTimeInput = computed(() => {
+    const explicit = this.useNativeTimePicker();
+    if (explicit !== undefined) {
+      return this.resolveBreakpointInput(breakpointInput(explicit));
+    }
+    return (
+      this.resolvedLayout() === "side-by-side" &&
+      this.breakpointService.isBelowBreakpoint("md")()
+    );
+  });
 
   readonly resolvedGridVariant = computed<DateTimeFieldTimeGridVariant>(
     () =>
       this.timeGridVariant() ??
-      (this.effectiveLayout() === "multi-step" ? "radio" : "button"),
+      (this.resolvedLayout() === "multi-step" ? "radio" : "button"),
   );
 
   readonly resolvedDisabledMatchers = computed<Matcher[]>(() => {
@@ -432,10 +470,10 @@ export class DateTimeFieldComponent
   readonly toTime = computed(() => getTimeOf(this.rangeValue().to));
 
   readonly fromDateLabel = computed(() =>
-    this.formatRangeDate(this.rangeValue().from),
+    this.formatRangeEnd(this.rangeValue().from),
   );
   readonly toDateLabel = computed(() =>
-    this.formatRangeDate(this.rangeValue().to),
+    this.formatRangeEnd(this.rangeValue().to),
   );
 
   readonly singleAvailableTimes = computed(() =>
@@ -451,9 +489,33 @@ export class DateTimeFieldComponent
   readonly nativeIsoValue = computed(() => {
     if (!this.useNativePickerEffective()) return "";
     const v = this.singleValue();
-    if (!v) return "";
-    return `${v.getFullYear().toString().padStart(4, "0")}-${pad(v.getMonth() + 1)}-${pad(v.getDate())}T${pad(v.getHours())}:${pad(v.getMinutes())}`;
+    return v ? `${toNativeDate(v)}T${getTimeOf(v)}` : "";
   });
+
+  private readonly nativeBounds = computed(() =>
+    nativeDateBounds({
+      minDate: this.minDate(),
+      maxDate: this.maxDate(),
+      disablePast: this.disablePast(),
+      disableFuture: this.disableFuture(),
+    }),
+  );
+
+  // The date bounds are whole days, so the native bounds open at the first
+  // minute of the earliest allowed day and close at the last of the latest.
+  readonly nativeMin = computed(() => {
+    const min = this.nativeBounds().min;
+    return min ? `${toNativeDate(min)}T00:00` : undefined;
+  });
+
+  readonly nativeMax = computed(() => {
+    const max = this.nativeBounds().max;
+    return max ? `${toNativeDate(max)}T23:59` : undefined;
+  });
+
+  readonly nativeStep = computed(() =>
+    this.minuteStep() > 1 ? this.minuteStep() * 60 : undefined,
+  );
 
   readonly effectivePlaceholder = computed(() => {
     const explicit = this.placeholder();
@@ -485,8 +547,16 @@ export class DateTimeFieldComponent
     this.shortDateFormatter().format(this.singleValue() ?? new Date()),
   );
 
+  readonly singleMonthRange = computed(
+    () => this.mode() === "range" && this.numberOfMonthsResolved() === 1,
+  );
+
   readonly canClear = computed(
-    () => !!this.value() && !this.fieldDisabled() && !this.readOnly(),
+    () =>
+      this.clearableResolved() &&
+      !!this.value() &&
+      !this.fieldDisabled() &&
+      !this.readOnly(),
   );
 
   private initialOpenEmit = true;
@@ -508,10 +578,11 @@ export class DateTimeFieldComponent
     });
 
     effect(() => {
-      // A breakpoint flip can switch between popover, modal and native picker.
-      // Close any open picker so two strategies never render at once.
+      // A breakpoint flip can switch between popover, modal and native picker,
+      // or between layouts. Close any open picker so two never render at once.
       this.usePopover();
       this.useModal();
+      this.resolvedLayout();
       this.useNativePickerEffective();
       untracked(() => {
         if (!this.overlayOpen()) return;
@@ -614,7 +685,7 @@ export class DateTimeFieldComponent
     const baseDate = this.singleValue() ?? new Date();
     this.commitValue(combineDateTime(baseDate, time));
     if (
-      this.effectiveLayout() === "multi-step" &&
+      this.resolvedLayout() === "multi-step" &&
       resolveAvailableTimes(this.availableTimes(), baseDate)
     ) {
       this.closeOverlay();
@@ -630,10 +701,14 @@ export class DateTimeFieldComponent
 
   goToTimeStep(): void {
     this.step.set("time");
+    afterNextRender(() => this.focusTimeStep(), { injector: this.injector });
   }
 
   goToDateStep(): void {
     this.step.set("date");
+    afterNextRender(() => this.calendar()?.focusActiveCell(), {
+      injector: this.injector,
+    });
   }
 
   handleCurrentMonthChange(month: Date): void {
@@ -661,10 +736,22 @@ export class DateTimeFieldComponent
   handleOverlayAttached(): void {
     this.updateOverlayMaxHeight();
     if (this.step() === "time") {
-      this.stepTimePicker()?.focusActiveItem();
+      this.focusTimeStep();
       return;
     }
     this.calendar()?.focusActiveCell();
+  }
+
+  // The step's trigger button is gone after the swap, so move focus into the
+  // new step rather than letting it fall back to the overlay root. Native time
+  // inputs have no picker instance, hence the DOM fallback.
+  private focusTimeStep(): void {
+    const picker = this.stepTimePicker();
+    if (picker) {
+      picker.focusActiveItem();
+      return;
+    }
+    this.timeStep()?.nativeElement.querySelector<HTMLElement>("input")?.focus();
   }
 
   // Cap the popover to whichever side of the trigger has more room and let it
@@ -729,7 +816,9 @@ export class DateTimeFieldComponent
       shouldDisableYear: this.shouldDisableYear(),
       minuteStep: this.minuteStep(),
       slotColumns: this.slotColumns(),
-      gridVariant: this.resolvedGridVariant(),
+      layout: this.resolvedLayout(),
+      gridVariant: this.timeGridVariant() ?? "button",
+      useNativeTimeInput: this.useNativeTimeInput,
       timeHeading: this.timeHeading(),
       availableTimes: this.availableTimes(),
       size: this.resolvedSize(),
@@ -824,8 +913,10 @@ export class DateTimeFieldComponent
     return `${formatLocaleDate(date, this.localeCode())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
   }
 
-  private formatRangeDate(date: Date | undefined): string {
-    return date ? formatLocaleDate(date, this.localeCode()) : "";
+  private formatRangeEnd(date: Date | undefined): string {
+    return date
+      ? `${this.shortDateFormatter().format(date)} - ${getTimeOf(date)}`
+      : "";
   }
 
   private deriveAnchor(value: DateTimeFieldValue): Date | null {

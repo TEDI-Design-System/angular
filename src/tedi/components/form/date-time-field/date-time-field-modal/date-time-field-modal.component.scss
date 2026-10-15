@@ -31,6 +31,13 @@
     align-items: center;
   }
 
+  .tedi-date-time-field-modal__content--single-month.tedi-modal-content {
+    @include breakpoints.media-breakpoint-up(md) {
+      flex-direction: row;
+      align-items: stretch;
+    }
+  }
+
   &__calendar {
     flex-shrink: 0;
   }
@@ -78,12 +85,63 @@
     border-top: var(--tedi-borders-01) solid var(--general-separator-primary);
   }
 
+  &__content--single-month {
+    @include breakpoints.media-breakpoint-up(md) {
+      .tedi-date-time-field-modal__separator {
+        display: flex;
+      }
+
+      .tedi-date-time-field-modal__times {
+        flex-direction: column;
+        gap: 0;
+        width: var(--tedi-containers-03);
+        padding-top: 0;
+        border-top: none;
+      }
+
+      .tedi-date-time-field-modal__time + .tedi-date-time-field-modal__time {
+        border-top: var(--tedi-borders-01) solid
+          var(--general-separator-primary);
+      }
+    }
+  }
+
+  &__content--step &__times {
+    flex-direction: column;
+    gap: 0;
+    width: var(--tedi-containers-03);
+    max-width: 100%;
+  }
+
+  &__times &__time {
+    align-self: stretch;
+  }
+
+  &__times &__native-time {
+    max-width: none;
+  }
+
+  &__times .tedi-time-picker--scroll {
+    --tedi-time-picker-width: 100%;
+    --tedi-time-picker-columns-height: calc(
+      var(--tedi-time-picker-item-height) * 3
+    );
+
+    width: 100%;
+  }
+
+  &__back {
+    margin-right: auto;
+  }
+
   // Groups the heading with its start/end date so they read as one label, and
   // owns the gap down to the picker (same spacing whether or not a date shows).
   &__time-header {
     display: flex;
-    flex-direction: column;
+    gap: var(--layout-grid-gutters-08);
+    align-items: baseline;
     align-self: stretch;
+    justify-content: space-between;
     padding-top: var(--card-padding-md-default);
     padding-bottom: var(--card-padding-xs);
   }
@@ -92,12 +150,12 @@
     padding: 0;
   }
 
-  // Echoes the start/end date under each heading so it stays clear which
+  // Echoes the start/end date beside each heading so it stays clear which
   // calendar end the picker below drives.
   &__date {
-    font-size: var(--body-small-regular-size);
-    color: var(--general-text-secondary);
-    text-align: center;
+    font-size: var(--body-regular-size);
+    line-height: var(--body-regular-line-height);
+    color: var(--general-text-primary);
   }
 
   &__time {
@@ -105,6 +163,12 @@
     flex-direction: column;
     align-items: center;
     padding: 0 var(--card-padding-md-default) var(--card-padding-md-default);
+
+    // Matches the calendar's narrow-screen side padding so the headings and
+    // pickers line up with the day grid.
+    @media (width < 360px) {
+      padding-inline: var(--card-padding-xs);
+    }
   }
 
   &__native-time {

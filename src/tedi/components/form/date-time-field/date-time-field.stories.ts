@@ -2,7 +2,7 @@ import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
 import { FormControl, ReactiveFormsModule, Validators } from "@angular/forms";
 import { DateTimeFieldComponent } from "./date-time-field.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
@@ -47,14 +47,17 @@ const renderSingle: NonNullable<StoryObj<DateTimeFieldStoryArgs>["render"]> = (
           [placeholder]="placeholder"
           [availableTimes]="availableTimes"
           [timeGridVariant]="timeGridVariant"
+          [useNativeTimePicker]="useNativeTimePicker"
           [minuteStep]="minuteStep"
           [slotColumns]="slotColumns"
+          [numberOfMonths]="numberOfMonths"
           [selectionLevel]="selectionLevel"
           [monthYearSelectType]="monthYearSelectType"
           [localeCode]="localeCode"
           [inputDisabled]="inputDisabled"
           [readOnly]="readOnly"
           [required]="required"
+          [clearable]="clearable"
           [disablePast]="disablePast"
           [disableFuture]="disableFuture"
           [minDate]="minDate"
@@ -102,6 +105,7 @@ const meta: Meta<DateTimeFieldStoryArgs> = {
     placeholder: "pp.kk.aaaa tt:mm",
     minuteStep: 1,
     slotColumns: 3,
+    numberOfMonths: { xs: 1, md: 2 },
     selectionLevel: "days",
     monthYearSelectType: "dropdown",
     localeCode: "et-EE",
@@ -125,7 +129,17 @@ const meta: Meta<DateTimeFieldStoryArgs> = {
       control: { type: "radio" },
       options: ["side-by-side", "multi-step"],
       description:
-        "Popover layout. `range` always renders `side-by-side` regardless of this value.",
+        "`side-by-side` shows the calendar and time together; `multi-step` picks the date first. Accepts a `BreakpointInput`.",
+    },
+    useNativeTimePicker: {
+      control: { type: "boolean" },
+      description:
+        "Native time input instead of the scroll-wheel. When unset, native below `md` in `side-by-side` only.",
+    },
+    numberOfMonths: {
+      control: { type: "object" },
+      description:
+        "Months shown in `range` mode. With one month from `md` up, the times sit beside the calendar.",
     },
     timeGridVariant: {
       control: { type: "radio" },
@@ -136,7 +150,12 @@ const meta: Meta<DateTimeFieldStoryArgs> = {
     minuteStep: {
       control: { type: "number" },
       description:
-        "Minute interval for the scroll-wheel. Ignored with `availableTimes`.",
+        "Minute interval for the scroll-wheel and the native inputs' `step`. Ignored with `availableTimes`.",
+    },
+    clearable: {
+      control: { type: "boolean" },
+      description:
+        "Shows the clear button once there is a value. When unset, follows the wrapping `tedi-form-field`.",
     },
     availableTimes: { control: false },
     minDate: { control: false },
@@ -264,24 +283,76 @@ export const MultiSteps: Story = {
   },
 };
 
-/** A `{ from, to }` range — a two-month calendar with a time picker for each end. */
 export const Range: Story = {
   args: {
-    inputId: "date-time-range",
-    label: "Kuupäevavahemik",
     mode: "range",
     placeholder: "pp.kk.aaaa tt:mm – pp.kk.aaaa tt:mm",
+    layout: { xs: "multi-step", md: "side-by-side" },
+    modal: "md",
   },
-};
-
-export const RangePredefinedTimeSlots: Story = {
-  args: {
-    inputId: "date-time-range-predefined",
-    label: "Kuupäevavahemik",
-    mode: "range",
-    placeholder: "pp.kk.aaaa tt:mm – pp.kk.aaaa tt:mm",
-    availableTimes: ["09:30", "10:00", "11:30", "15:30", "18:30", "20:30"],
-    timeGridVariant: "button",
+  render: (args) => {
+    const examples = [
+      { id: "dtf-range-default", label: "Kaks kuud" },
+      { id: "dtf-range-one-month", label: "Üks kuu", numberOfMonths: 1 },
+      {
+        id: "dtf-range-slots",
+        label: "Etteantud ajad",
+        numberOfMonths: 1,
+        availableTimes: ["09:30", "10:00", "11:30", "15:30", "18:30", "20:30"],
+      },
+      {
+        id: "dtf-range-native",
+        label: "Natiivne kellaaja valik",
+        useNativeTimePicker: true,
+      },
+      {
+        id: "dtf-range-multi-step",
+        label: "Mitmesammuline kõigil ekraanidel",
+        layout: "multi-step",
+      },
+    ].map((example) => ({
+      ...example,
+      control: new FormControl<DateTimeFieldValue>(null),
+    }));
+    return {
+      props: { ...args, examples },
+      template: `
+        <tedi-row [cols]="1" [gap]="5">
+          @for (example of examples; track example.id) {
+            <tedi-col>
+              <tedi-form-field [size]="size">
+                <label tedi-label [for]="example.id">{{ example.label }}</label>
+                <tedi-date-time-field
+                  [inputId]="example.id"
+                  [formControl]="example.control"
+                  mode="range"
+                  [layout]="example.layout ?? layout"
+                  [numberOfMonths]="example.numberOfMonths ?? numberOfMonths"
+                  [availableTimes]="example.availableTimes ?? availableTimes"
+                  [useNativeTimePicker]="example.useNativeTimePicker ?? useNativeTimePicker"
+                  [size]="size"
+                  [placeholder]="placeholder"
+                  [timeGridVariant]="timeGridVariant"
+                  [minuteStep]="minuteStep"
+                  [slotColumns]="slotColumns"
+                  [monthYearSelectType]="monthYearSelectType"
+                  [localeCode]="localeCode"
+                  [inputDisabled]="inputDisabled"
+                  [readOnly]="readOnly"
+                  [required]="required"
+                  [clearable]="clearable"
+                  [disablePast]="disablePast"
+                  [disableFuture]="disableFuture"
+                  [showOutsideDays]="showOutsideDays"
+                  [modal]="modal"
+                  [fullscreen]="fullscreen"
+                />
+              </tedi-form-field>
+            </tedi-col>
+          }
+        </tedi-row>
+      `,
+    };
   },
 };
 

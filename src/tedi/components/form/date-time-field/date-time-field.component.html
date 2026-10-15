@@ -12,6 +12,9 @@
   [useNativePicker]="useNativePickerEffective()"
   nativeInputType="datetime-local"
   [nativeIsoValue]="nativeIsoValue()"
+  [nativeMin]="nativeMin()"
+  [nativeMax]="nativeMax()"
+  [nativeStep]="nativeStep()"
   [clearable]="canClear()"
   (inputChange)="handleInputChange($event)"
   (iconClick)="handleIconClick()"
@@ -38,8 +41,56 @@
       cdkTrapFocus
       (keydown)="handleOverlayKeydown($event)"
     >
-      @if (mode() === "range") {
-        <div class="tedi-date-time-field__range">
+      @if (resolvedLayout() === "multi-step") {
+        @if (step() === "date") {
+          <ng-container
+            [ngTemplateOutlet]="calendarTpl"
+            [ngTemplateOutletContext]="{ footer: footerTpl }"
+          />
+        } @else if (mode() === "range") {
+          <div #timeStep class="tedi-date-time-field__time-step">
+            <div class="tedi-date-time-field__range-times">
+              <ng-container [ngTemplateOutlet]="rangeEndsTpl" />
+            </div>
+            <div class="tedi-date-time-field__time-footer">
+              <button
+                tedi-button
+                type="button"
+                variant="neutral"
+                size="small"
+                (click)="goToDateStep()"
+              >
+                <tedi-icon name="arrow_back" [size]="18" color="inherit" />
+                {{ backLabel() ?? ("date-time-field.back" | tediTranslate) }}
+              </button>
+            </div>
+          </div>
+        } @else {
+          <div #timeStep class="tedi-date-time-field__time-step">
+            <header class="tedi-date-time-field__time-header">
+              <button
+                tedi-button
+                type="button"
+                variant="neutral"
+                size="small"
+                class="tedi-date-time-field__time-back"
+                (click)="goToDateStep()"
+              >
+                <tedi-icon name="arrow_back" [size]="18" color="inherit" />
+                {{ backLabel() ?? ("date-time-field.back" | tediTranslate) }}
+              </button>
+              <span class="tedi-date-time-field__time-date">{{
+                shortSelectedDate()
+              }}</span>
+            </header>
+            <ng-container [ngTemplateOutlet]="singleTimePickerTpl" />
+          </div>
+        }
+      } @else if (mode() === "range") {
+        <div
+          class="tedi-date-time-field__range"
+          [class.tedi-date-time-field__range--single-month]="singleMonthRange()"
+        >
           <ng-container
             [ngTemplateOutlet]="calendarTpl"
             [ngTemplateOutletContext]="{ footer: null }"
@@ -49,33 +100,10 @@
             aria-hidden="true"
           ></div>
           <div class="tedi-date-time-field__range-times">
-            <ng-container
-              [ngTemplateOutlet]="rangeTimeTpl"
-              [ngTemplateOutletContext]="{
-                kind: 'from',
-                time: fromTime(),
-                slots: fromAvailableTimes(),
-                heading:
-                  timeHeading() ??
-                  ('date-time-field.time-heading-from' | tediTranslate),
-                dateLabel: fromDateLabel(),
-              }"
-            />
-            <ng-container
-              [ngTemplateOutlet]="rangeTimeTpl"
-              [ngTemplateOutletContext]="{
-                kind: 'to',
-                time: toTime(),
-                slots: toAvailableTimes(),
-                heading:
-                  timeHeading() ??
-                  ('date-time-field.time-heading-to' | tediTranslate),
-                dateLabel: toDateLabel(),
-              }"
-            />
+            <ng-container [ngTemplateOutlet]="rangeEndsTpl" />
           </div>
         </div>
-      } @else if (effectiveLayout() === "side-by-side") {
+      } @else {
         <div class="tedi-date-time-field__split">
           <ng-container
             [ngTemplateOutlet]="calendarTpl"
@@ -94,31 +122,6 @@
             </span>
             <ng-container [ngTemplateOutlet]="singleTimePickerTpl" />
           </div>
-        </div>
-      } @else if (step() === "date") {
-        <ng-container
-          [ngTemplateOutlet]="calendarTpl"
-          [ngTemplateOutletContext]="{ footer: footerTpl }"
-        />
-      } @else {
-        <div class="tedi-date-time-field__time-step">
-          <header class="tedi-date-time-field__time-header">
-            <button
-              tedi-button
-              type="button"
-              variant="neutral"
-              size="small"
-              class="tedi-date-time-field__time-back"
-              (click)="goToDateStep()"
-            >
-              <tedi-icon name="arrow_back" [size]="18" color="inherit" />
-              {{ backLabel() ?? ("date-time-field.back" | tediTranslate) }}
-            </button>
-            <span class="tedi-date-time-field__time-date">{{
-              shortSelectedDate()
-            }}</span>
-          </header>
-          <ng-container [ngTemplateOutlet]="singleTimePickerTpl" />
         </div>
       }
     </div>
@@ -178,6 +181,7 @@
       <tedi-time-field
         [inputId]="inputId() + '-time'"
         [useNativePicker]="true"
+        [minuteStep]="minuteStep()"
         [clearable]="false"
         [value]="singleTime()"
         (valueChange)="handleTimeSelect($event)"
@@ -198,6 +202,31 @@
   }
 </ng-template>
 
+<ng-template #rangeEndsTpl>
+  <ng-container
+    [ngTemplateOutlet]="rangeTimeTpl"
+    [ngTemplateOutletContext]="{
+      kind: 'from',
+      time: fromTime(),
+      slots: fromAvailableTimes(),
+      heading:
+        timeHeading() ?? ('date-time-field.time-heading-from' | tediTranslate),
+      dateLabel: fromDateLabel(),
+    }"
+  />
+  <ng-container
+    [ngTemplateOutlet]="rangeTimeTpl"
+    [ngTemplateOutletContext]="{
+      kind: 'to',
+      time: toTime(),
+      slots: toAvailableTimes(),
+      heading:
+        timeHeading() ?? ('date-time-field.time-heading-to' | tediTranslate),
+      dateLabel: toDateLabel(),
+    }"
+  />
+</ng-template>
+
 <ng-template
   #rangeTimeTpl
   let-kind="kind"
@@ -213,8 +242,19 @@
         <span class="tedi-date-time-field__range-date">{{ dateLabel }}</span>
       }
     </div>
-    <!-- No `useNativeTimeInput()` check here on purpose — see its doc comment. -->
-    @if (!slots?.length) {
+    @if (slots?.length) {
+      <tedi-time-picker
+        #stepTimePicker
+        [value]="time"
+        variant="slots"
+        [timeSlots]="slots"
+        [showSlotIndicator]="resolvedGridVariant() === 'radio'"
+        [columns]="slotColumns()"
+        [minuteStep]="minuteStep()"
+        [trapFocus]="true"
+        (valueChange)="handleRangeTimeSelect(kind, $event)"
+      />
+    } @else if (useNativeTimeInput()) {
       <tedi-form-field
         class="tedi-date-time-field__native-time"
         [size]="resolvedSize()"
@@ -222,6 +262,7 @@
         <tedi-time-field
           [inputId]="inputId() + '-time-' + kind"
           [useNativePicker]="true"
+          [minuteStep]="minuteStep()"
           [clearable]="false"
           [value]="time"
           (valueChange)="handleRangeTimeSelect(kind, $event)"
@@ -229,11 +270,10 @@
       </tedi-form-field>
     } @else {
       <tedi-time-picker
+        #stepTimePicker
         [value]="time"
-        variant="slots"
-        [timeSlots]="slots"
-        [showSlotIndicator]="resolvedGridVariant() === 'radio'"
-        [columns]="slotColumns()"
+        variant="scroll"
+        [border]="true"
         [minuteStep]="minuteStep()"
         [trapFocus]="true"
         (valueChange)="handleRangeTimeSelect(kind, $event)"
