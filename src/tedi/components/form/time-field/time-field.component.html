@@ -108,6 +108,7 @@
     class="tedi-time-field__input"
     inputmode="numeric"
     [type]="inputType()"
+    [attr.step]="nativeStep()"
     [id]="inputId()"
     [attr.placeholder]="placeholder()"
     [value]="inputValue()"

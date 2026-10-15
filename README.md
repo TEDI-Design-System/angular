@@ -64,7 +64,13 @@ This project ships with AI agent skills to help both contributors and consumers 
 
 ### For consumers — `tedi-angular`
 
-Helps you build UIs with `@tedi-design-system/angular`: component usage, forms integration, theming, and translation setup.
+Helps you build UIs with `@tedi-design-system/angular`: component usage, forms integration, theming, and translation setup. Lives in [`skills/tedi-angular`](./skills/tedi-angular).
+
+Install it into your agent (Claude Code, Cursor, Codex, and others) with the [`skills`](https://www.skills.sh/tedi-design-system/angular/tedi-angular) CLI:
+
+```bash
+npx skills add https://github.com/tedi-design-system/angular --skill tedi-angular
+```
 
 ### For contributors — `contributing`
 

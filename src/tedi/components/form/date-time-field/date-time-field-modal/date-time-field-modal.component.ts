@@ -1,0 +1,197 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  Signal,
+  signal,
+  viewChild,
+  ViewEncapsulation,
+} from "@angular/core";
+import { NgTemplateOutlet } from "@angular/common";
+import { ButtonComponent } from "../../../buttons/button/button.component";
+import { IconComponent } from "../../../base/icon/icon.component";
+import { ModalComponent } from "../../../overlay/modal/modal.component";
+import { ModalContentComponent } from "../../../overlay/modal/modal-content/modal-content.component";
+import { ModalFooterComponent } from "../../../overlay/modal/modal-footer/modal-footer.component";
+import { ModalHeaderComponent } from "../../../overlay/modal/modal-header/modal-header.component";
+import { ModalRef } from "../../../overlay/modal/modal-ref";
+import { MODAL_DATA } from "../../../overlay/modal/modal.types";
+import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
+import { CalendarComponent } from "../../../content/calendar/calendar.component";
+import { TimePickerComponent } from "../../time-picker/time-picker.component";
+import { TimeFieldComponent } from "../../time-field/time-field.component";
+import { FormFieldComponent } from "../../form-field/form-field.component";
+import { InputSize } from "../../form-field/field-context.token";
+import { CalendarView, DateRange } from "../../../content/calendar/types";
+import { Matcher } from "../../../../utils/matchers.util";
+import {
+  DateTimeFieldLayout,
+  DateTimeFieldMode,
+  DateTimeFieldStep,
+  DateTimeFieldTimeGridVariant,
+  DateTimeFieldValue,
+} from "../date-time-field.component";
+import {
+  applyRangeTime,
+  combineCalendarSelection,
+  combineDateTime,
+  DateTimeFieldAvailableTimes,
+  DayAvailabilityInput,
+  getTimeOf,
+  MonthPredicate,
+  RangeParts,
+  resolveAvailableTimes,
+  toRangeParts,
+  toSingle,
+  YearPredicate,
+} from "../date-time-field.util";
+
+export interface DateTimeFieldModalData {
+  value: DateTimeFieldValue;
+  currentMonth: Date;
+  mode: DateTimeFieldMode;
+  selectionLevel: CalendarView;
+  localeCode: string;
+  showOutsideDays: boolean;
+  showWeekNumbers: boolean;
+  numberOfMonths: number;
+  monthYearSelectType: "dropdown" | "grid";
+  required: boolean;
+  disabledMatchers: Matcher[];
+  availableDays: DayAvailabilityInput;
+  unavailableDays: DayAvailabilityInput;
+  shouldDisableMonth: MonthPredicate | undefined;
+  shouldDisableYear: YearPredicate | undefined;
+  layout: DateTimeFieldLayout;
+  useNativeTimeInput: Signal<boolean>;
+  minuteStep: number;
+  slotColumns: number;
+  gridVariant: DateTimeFieldTimeGridVariant;
+  timeHeading: string | undefined;
+  availableTimes: DateTimeFieldAvailableTimes;
+  size: InputSize;
+}
+
+@Component({
+  selector: "tedi-date-time-field-modal",
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  imports: [
+    NgTemplateOutlet,
+    ButtonComponent,
+    IconComponent,
+    CalendarComponent,
+    TimePickerComponent,
+    TimeFieldComponent,
+    FormFieldComponent,
+    ModalComponent,
+    ModalContentComponent,
+    ModalFooterComponent,
+    ModalHeaderComponent,
+    TediTranslationPipe,
+  ],
+  templateUrl: "./date-time-field-modal.component.html",
+  styleUrl: "./date-time-field-modal.component.scss",
+})
+export class DateTimeFieldModalComponent {
+  readonly data = inject(MODAL_DATA) as DateTimeFieldModalData;
+  private readonly ref = inject(ModalRef<DateTimeFieldValue>);
+
+  readonly calendar = viewChild<CalendarComponent>("calendar");
+
+  readonly draft = signal<DateTimeFieldValue>(this.data.value);
+  readonly month = signal<Date>(this.data.currentMonth);
+
+  readonly isRange = this.data.mode === "range";
+  readonly multiStep = this.data.layout === "multi-step";
+  readonly singleMonthRange = this.isRange && this.data.numberOfMonths === 1;
+  readonly step = signal<DateTimeFieldStep>("date");
+  readonly titleKey = computed(() => {
+    if (!this.multiStep) return "date-time-field.modal-title";
+    return this.step() === "date"
+      ? "date-field.modal-title"
+      : "date-time-field.time-heading";
+  });
+  readonly canAdvance = computed(() =>
+    this.isRange ? !!this.rangeValue().to : !!this.singleValue(),
+  );
+
+  readonly singleValue = computed(() => toSingle(this.draft()));
+  readonly rangeValue = computed<RangeParts>(() => toRangeParts(this.draft()));
+
+  readonly singleTime = computed(() => getTimeOf(this.singleValue()));
+  readonly fromTime = computed(() => getTimeOf(this.rangeValue().from));
+  readonly toTime = computed(() => getTimeOf(this.rangeValue().to));
+
+  readonly fromDateLabel = computed(() =>
+    this.formatRangeEnd(this.rangeValue().from),
+  );
+  readonly toDateLabel = computed(() =>
+    this.formatRangeEnd(this.rangeValue().to),
+  );
+
+  readonly singleSlots = computed(() =>
+    resolveAvailableTimes(this.data.availableTimes, this.singleValue()),
+  );
+  readonly fromSlots = computed(() =>
+    resolveAvailableTimes(this.data.availableTimes, this.rangeValue().from),
+  );
+  readonly toSlots = computed(() =>
+    resolveAvailableTimes(this.data.availableTimes, this.rangeValue().to),
+  );
+
+  cancel(): void {
+    this.ref.close(undefined);
+  }
+
+  confirm(): void {
+    this.ref.close(this.draft());
+  }
+
+  goToTimeStep(): void {
+    this.step.set("time");
+  }
+
+  goToDateStep(): void {
+    this.step.set("date");
+  }
+
+  handleCalendarSelect(): void {
+    const calendar = this.calendar();
+    if (!calendar) return;
+    this.draft.set(
+      combineCalendarSelection(
+        calendar.value() as Date | RangeParts | null,
+        this.isRange,
+        this.draft(),
+        this.data.availableTimes,
+      ) as DateTimeFieldValue,
+    );
+  }
+
+  handleTimeSelect(time: string | null): void {
+    if (!time) return;
+    const base = this.singleValue() ?? new Date();
+    this.draft.set(combineDateTime(base, time));
+  }
+
+  handleRangeTimeSelect(kind: "from" | "to", time: string | null): void {
+    if (!time) return;
+    this.draft.set(
+      applyRangeTime(kind, time, this.rangeValue(), new Date()) as DateRange,
+    );
+  }
+
+  private readonly shortDateFormatter = new Intl.DateTimeFormat(
+    this.data.localeCode,
+    { day: "2-digit", month: "2-digit", year: "2-digit" },
+  );
+
+  private formatRangeEnd(date: Date | undefined): string {
+    return date
+      ? `${this.shortDateFormatter.format(date)} - ${getTimeOf(date)}`
+      : "";
+  }
+}
