@@ -55,8 +55,7 @@ When an Angular major reaches end-of-life (e.g. v20):
 
 ## Contributing
 
-Check the [wiki](https://github.com/TEDI-Design-System/general) for component guidelines and coding standards.
-Report issues or contribute via [GitHub Issues](https://github.com/TEDI-Design-System/angular/issues).
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for how to report issues, set up the repository and open a pull request. Component guidelines and coding standards are in the [wiki](https://github.com/TEDI-Design-System/general/wiki).
 
 ## AI Skills
 
