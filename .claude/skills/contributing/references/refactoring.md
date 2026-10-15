@@ -60,7 +60,9 @@ callers can see but the types cannot express. See **SKILL.md → Consumer-Facing
 contract.
 
 1. **Update the JSDoc** on every input you renamed, retyped, or whose default changed. Add
-   `@deprecated` with the replacement to anything you deprecated rather than removed.
+   `@deprecated` with the replacement to anything you deprecated rather than removed. A deprecated
+   component or directive also needs a runtime warning and the rest of step 1 in
+   [deprecation.md](deprecation.md).
 2. **Renamed a selector?** That is the highest-risk change in this library, because a stale selector
    in a consumer template renders nothing with no error. Check whether the new selector collides with
    a Community one, and grep `skills/tedi-angular/references/` for the old selector string.

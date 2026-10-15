@@ -12,7 +12,7 @@ import { TextFieldComponent } from "../text-field/text-field.component";
 import { SelectComponent } from "../select/select.component";
 import { DateFieldComponent } from "../date-field/date-field.component";
 import { TimeFieldComponent } from "../time-field/time-field.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";

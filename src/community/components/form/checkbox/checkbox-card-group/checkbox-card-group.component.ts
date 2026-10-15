@@ -11,7 +11,11 @@ import {
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { ChoiceGroupDirective } from "../../choicegroup/choicegroup.directive";
-import { LabelComponent, FeedbackTextComponent } from "@tedi-design-system/angular/tedi";
+import {
+  LabelComponent,
+  FeedbackTextComponent,
+  warnDeprecated,
+} from "@tedi-design-system/angular/tedi";
 import { CheckboxGroupComponent } from "../checkbox-group/checkbox-group.component";
 import { CheckboxComponent } from "../checkbox/checkbox.component";
 
@@ -73,6 +77,14 @@ export class CheckboxCardGroupComponent
   override groupDisabled = computed(() => {
     return this.disabled() || this._controlDisabled();
   });
+
+  constructor() {
+    super();
+    warnDeprecated(
+      "Community tedi-checkbox-card-group",
+      "Use Checkbox with CheckboxCard label from TEDI-ready instead.",
+    );
+  }
 
   writeValue(value: string[]): void {
     this.value.set(value);

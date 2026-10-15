@@ -17,7 +17,7 @@ import { BreadcrumbSeparatorDirective } from "./breadcrumb-separator.directive";
  * Breadcrumbs show the user's location within the page hierarchy.
  * - Mark each crumb with `*tediBreadcrumbItem`, in order from the root to the current page.
  * - Use `a tedi-link` for navigable crumbs and a plain element (e.g. `span`) for the current page — add `aria-current="page"` to it yourself.
- * - Crumb links are underlined by default; set `[underline]="false"` on the `tedi-link` for non-underlined crumbs (recommended for the `short` back-link). Crumbs collapsed into the ellipsis dropdown are always non-underlined.
+ * - Crumb links are underlined by default; set `[underline]="false"` on the `tedi-link` for non-underlined crumbs (recommended for the `short` back-link). A collapsed crumb keeps its own setting, so it looks the same in the ellipsis dropdown as in the trail.
  * - `long` shows the full trail; `short` shows only the parent crumb as a back-link (mobile).
  * - Set `maxItems` to collapse the middle of a long trail into an ellipsis dropdown.
  */

@@ -1,4 +1,10 @@
 <ng-content />
-<ul [attr.role]="dropdownRole()">
+<ul
+  class="tedi-dropdown-content__list"
+  [class.tedi-dropdown-content__list--plain]="!isWidget()"
+  [id]="containerId()"
+  [attr.role]="dropdownRole()"
+  [attr.aria-labelledby]="containerId() + '_trigger'"
+>
   <ng-content select="li[tedi-dropdown-item]" />
 </ul>

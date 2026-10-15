@@ -5,7 +5,7 @@ import { InputGroupPrefixDirective } from "./input-group-prefix.directive";
 import { InputGroupSuffixDirective } from "./input-group-suffix.directive";
 import { FormFieldComponent } from "../form-field/form-field.component";
 import { TextFieldComponent } from "../text-field/text-field.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { LabelRowComponent } from "../label-row/label-row.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";

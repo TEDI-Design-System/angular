@@ -7,7 +7,7 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { TediTranslationPipe } from "../../../services";
-import { TEDI_FIELD_CONTEXT } from "../form-field/field-context.token";
+import { TEDI_FIELD_CONTEXT } from "../../form/form-field/field-context.token";
 
 export type LabelSize = "small" | "default";
 export type LabelColor = "primary" | "secondary";

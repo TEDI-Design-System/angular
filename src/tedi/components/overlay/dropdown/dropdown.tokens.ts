@@ -1,5 +1,18 @@
 import { InjectionToken, Signal, WritableSignal } from "@angular/core";
 
+/**
+ * How the dropdown panel is exposed to assistive technology.
+ *
+ * - `menu`: a menu of actions. Composite widget, so it is a single tab stop
+ *   with arrow-key navigation and its items are `menuitem`s.
+ * - `listbox`: a list of options, one of which can be selected. Composite
+ *   widget, like `menu`, and its items are `option`s.
+ * - `list`: a plain list, not a widget. Items keep their own semantics, so
+ *   navigation links stay links and each is its own tab stop. Use this
+ *   whenever the panel is a set of links.
+ */
+export type DropdownRole = "menu" | "listbox" | "list";
+
 export interface DropdownApi {
   /** Current value of the dropdown. Used to track the selected option in listbox mode. */
   value: WritableSignal<string | undefined>;
@@ -31,7 +44,9 @@ export const DROPDOWN_API = new InjectionToken<DropdownApi>("DropdownApi");
 
 export interface DropdownContentApi {
   /** The ARIA role of the dropdown content. Determines keyboard interaction and accessibility semantics. */
-  dropdownRole: Signal<"menu" | "listbox">;
+  dropdownRole: Signal<DropdownRole>;
+  /** Whether the content is a composite widget (`menu`, `listbox`) rather than a plain `list`. Widgets own focus management and key handling; a plain list leaves both to the items' own controls. */
+  isWidget: Signal<boolean>;
 }
 
 export const DROPDOWN_CONTENT_API = new InjectionToken<DropdownContentApi>(

@@ -249,3 +249,27 @@ describe("TextareaComponent", () => {
     });
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [TextareaComponent],
+  template: `<textarea tedi-textarea readonly></textarea>`,
+})
+class ReadOnlyTextareaHostComponent {}
+
+describe("TextareaComponent readOnly", () => {
+  it("reads the readonly attribute and keeps it on the textarea", () => {
+    TestBed.configureTestingModule({
+      imports: [ReadOnlyTextareaHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    const fixture = TestBed.createComponent(ReadOnlyTextareaHostComponent);
+    fixture.detectChanges();
+
+    const textarea = fixture.debugElement.query(
+      By.directive(TextareaComponent),
+    );
+    expect(textarea.injector.get(TextareaComponent).readOnly()).toBe(true);
+    expect((textarea.nativeElement as HTMLTextAreaElement).readOnly).toBe(true);
+  });
+});

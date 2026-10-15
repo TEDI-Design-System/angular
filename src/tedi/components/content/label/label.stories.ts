@@ -5,11 +5,11 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { LabelComponent } from "./label.component";
-import { LabelRowComponent } from "../label-row/label-row.component";
+import { LabelRowComponent } from "../../form/label-row/label-row.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
-import { TextFieldComponent } from "../text-field/text-field.component";
+import { TextFieldComponent } from "../../form/text-field/text-field.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=2137-19322&m=dev" target="_blank">Figma ↗</a><br />
@@ -17,7 +17,7 @@ import { TextFieldComponent } from "../text-field/text-field.component";
  */
 
 export default {
-  title: "TEDI-Ready/Components/Form/Label",
+  title: "TEDI-Ready/Content/Label",
   component: LabelComponent,
   decorators: [
     moduleMetadata({

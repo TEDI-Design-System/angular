@@ -35,7 +35,7 @@ import { LinkComponent } from "../../navigation/link/link.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
-import { LabelComponent } from "../../form/label/label.component";
+import { LabelComponent } from "../label/label.component";
 import { DateFieldComponent } from "../../form/date-field/date-field.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import {
@@ -60,7 +60,7 @@ import { DropdownComponent } from "../../overlay/dropdown/dropdown.component";
 import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-content/dropdown-content.component";
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
 import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
-import { EmptyStateComponent } from "../../helpers/empty-state/empty-state.component";
+import { EmptyStateComponent } from "../empty-state/empty-state.component";
 import {
   BreakpointService,
   type Breakpoint,
@@ -177,6 +177,8 @@ type TediTableStoryArgs = {
   columns?: unknown[];
   id?: string;
   caption?: unknown;
+  ariaLabel?: string;
+  ariaLabelledby?: string;
   renderSubComponent?: unknown;
   getRowCanExpand?: unknown;
   getSubRows?: unknown;
@@ -509,6 +511,18 @@ const meta: Meta<TediTableStoryArgs> = {
       description: "Caption rendered above the table.",
       control: false,
       table: { category: "data", type: { summary: "string | TemplateRef" } },
+    },
+    ariaLabel: {
+      description:
+        "Accessible name for the `<table>` when no visible `caption` is rendered. Overrides `caption` as the accessible name; ignored when `ariaLabelledby` is set.",
+      control: false,
+      table: { category: "data", type: { summary: "string" } },
+    },
+    ariaLabelledby: {
+      description:
+        "ID of an external element that names the `<table>`, e.g. a heading above it. Takes precedence over `ariaLabel` and `caption`.",
+      control: false,
+      table: { category: "data", type: { summary: "string" } },
     },
     renderSubComponent: {
       description:
@@ -4903,8 +4917,10 @@ export const PaginationCustomResults: Story = {
         story:
           'Replace the default `"X results"` label with arbitrary content ' +
           "by projecting an `<ng-template tediPaginationResults>` inside " +
-          "`<tedi-table>`. The table captures the template and routes it to " +
-          "whichever paginator slot is currently displaying results.",
+          "`<tedi-table>`. The table captures the template and renders it " +
+          "in every paginator slot that displays results — with both " +
+          "`pagination` and `paginationTop` set, the top and bottom " +
+          "paginators show the same content.",
       },
       source: {
         language: "html",

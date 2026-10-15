@@ -288,10 +288,11 @@ import { ToastService } from '@tedi-design-system/angular/tedi';
 
 // Toast — ToastService is root-provided and manages its own CDK overlay
 const toast = inject(ToastService);
-toast.open({ type: 'success', title: 'Done', /* … */ });
+toast.success('Done', 'Changes saved.', { duration: 6000 });
+toast.show({ type: 'success', title: 'Done', /* … */ });
 ```
 
-Verify the exact `ToastService.open` config and `tedi-alert` inputs against the source at the pinned tag.
+Verify the exact `ToastService` config and `tedi-alert` inputs against the source at the pinned tag.
 
 ## Common Pitfalls
 

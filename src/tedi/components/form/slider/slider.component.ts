@@ -10,7 +10,10 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
-import { LabelComponent, LabelVisuallyHidden } from "../label/label.component";
+import {
+  LabelComponent,
+  LabelVisuallyHidden,
+} from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { ComponentInputs } from "../../../types/inputs.type";
 import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";

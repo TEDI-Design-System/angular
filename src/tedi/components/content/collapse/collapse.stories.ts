@@ -10,7 +10,7 @@ import { CollapseComponent } from "./collapse.component";
  */
 
 export default {
-  title: "TEDI Ready/Components/Buttons/Collapse",
+  title: "TEDI-Ready/Content/Collapse",
   component: CollapseComponent,
   args: {
     defaultOpen: false,

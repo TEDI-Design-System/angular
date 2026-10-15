@@ -5,6 +5,7 @@ import {
   input,
   ViewEncapsulation,
 } from "@angular/core";
+import { warnDeprecated } from "@tedi-design-system/angular/tedi";
 import { CardColorsDirective } from "./card-colors.directive";
 import { CardPaddingDirective } from "./card-padding.directive";
 
@@ -70,4 +71,8 @@ export class CardComponent {
     }
     return modifiers.join(" ");
   });
+
+  constructor() {
+    warnDeprecated("Community tedi-card", "Use Card from TEDI-ready instead.");
+  }
 }

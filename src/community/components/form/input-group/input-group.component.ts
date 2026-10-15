@@ -1,5 +1,10 @@
 import { Component, input, ViewEncapsulation } from "@angular/core";
-import { ComponentInputs, LabelComponent, FeedbackTextComponent } from "@tedi-design-system/angular/tedi";
+import {
+  ComponentInputs,
+  LabelComponent,
+  FeedbackTextComponent,
+  warnDeprecated,
+} from "@tedi-design-system/angular/tedi";
 
 /**
  * InputGroupComponent is a component that allows you to group multiple input elements together.
@@ -13,6 +18,7 @@ import { ComponentInputs, LabelComponent, FeedbackTextComponent } from "@tedi-de
  *   <input></input>
  * </tedi-input-group>
  *
+ * @deprecated Use the TEDI-Ready `tedi-input-group` from `@tedi-design-system/angular/tedi` instead. This component will be removed from future versions.
  */
 @Component({
   selector: "tedi-input-group",
@@ -44,4 +50,11 @@ export class InputGroupComponent {
    * FeedbackText component inputs, displayed below the input group.
    */
   readonly feedback = input<ComponentInputs<FeedbackTextComponent>>();
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-input-group",
+      "Use the TEDI-Ready `tedi-input-group` from `@tedi-design-system/angular/tedi` instead.",
+    );
+  }
 }

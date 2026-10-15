@@ -10,7 +10,6 @@
     "./libs/react-components/",
     "./libs/angular-components/"
   ],
-  "eslint.useFlatConfig": false,
   "editor.detectIndentation": true,
   "typescript.validate.enable": true,
   "editor.formatOnSave": true,

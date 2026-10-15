@@ -1,5 +1,7 @@
 import { TestBed } from "@angular/core/testing";
-import { Component, inject } from "@angular/core";
+import { Component, ErrorHandler, inject } from "@angular/core";
+import { Dialog } from "@angular/cdk/dialog";
+import { EMPTY, Observable, Subject, throwError } from "rxjs";
 import { ModalService } from "./modal.service";
 import { ModalRef } from "./modal-ref";
 import { MODAL_DATA } from "./modal.types";
@@ -435,5 +437,266 @@ describe("ModalService accessible name", () => {
     TestBed.tick();
 
     expect(container().getAttribute("aria-labelledby")).toBeNull();
+  });
+});
+
+describe("ModalService canClose guard", () => {
+  @Component({
+    standalone: true,
+    imports: [ModalComponent, ModalHeaderComponent],
+    template: `
+      <tedi-modal>
+        <tedi-modal-header>
+          <h1>Muuda andmeid</h1>
+        </tedi-modal-header>
+      </tedi-modal>
+    `,
+  })
+  class GuardedContentComponent {
+    readonly ref = inject(ModalRef);
+  }
+
+  let service: ModalService;
+  let dialog: Dialog;
+  let errorHandler: { handleError: jest.Mock };
+
+  const isOpen = () => !!document.querySelector("cdk-dialog-container");
+
+  const flushPromises = () => new Promise((resolve) => setTimeout(resolve));
+
+  const pressEscape = () =>
+    document.body.dispatchEvent(
+      new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+    );
+
+  const clickBackdrop = () =>
+    (
+      document.querySelector(".tedi-modal-backdrop") as HTMLElement
+    ).dispatchEvent(new MouseEvent("click", { bubbles: true }));
+
+  const clickCloseButton = () =>
+    (
+      document.querySelector(".tedi-modal-header__close") as HTMLElement
+    ).click();
+
+  beforeEach(() => {
+    errorHandler = { handleError: jest.fn() };
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        { provide: ErrorHandler, useValue: errorHandler },
+      ],
+    });
+    service = TestBed.inject(ModalService);
+    dialog = TestBed.inject(Dialog);
+  });
+
+  afterEach(() => {
+    service.closeAll();
+    TestBed.tick();
+  });
+
+  it("injects the same ModalRef into the content that open() returns", () => {
+    const ref = service.open(GuardedContentComponent);
+    const content = dialog.openDialogs[0]
+      .componentInstance as GuardedContentComponent;
+
+    expect(content.ref).toBe(ref);
+  });
+
+  it("keeps the modal open when the guard refuses close()", () => {
+    const ref = service.open<string>(GuardedContentComponent);
+    const closed = jest.fn();
+    const guard = jest.fn(() => false);
+    ref.closed.subscribe(closed);
+    ref.canClose = guard;
+
+    ref.close("saved");
+
+    expect(guard).toHaveBeenCalledWith("saved", "programmatic");
+    expect(closed).not.toHaveBeenCalled();
+    expect(isOpen()).toBe(true);
+  });
+
+  it("closes synchronously with the result when the guard allows it", () => {
+    const ref = service.open<string>(GuardedContentComponent);
+    const closed = jest.fn();
+    ref.closed.subscribe(closed);
+    ref.canClose = () => true;
+
+    ref.close("saved");
+
+    expect(closed).toHaveBeenCalledWith("saved");
+    expect(isOpen()).toBe(false);
+  });
+
+  it("applies a guard set by the content", () => {
+    const ref = service.open(GuardedContentComponent);
+    const content = dialog.openDialogs[0]
+      .componentInstance as GuardedContentComponent;
+    content.ref.canClose = () => false;
+
+    ref.close();
+
+    expect(isOpen()).toBe(true);
+  });
+
+  it.each([
+    ["escape", pressEscape],
+    ["backdrop", clickBackdrop],
+  ] as const)("asks the guard on %s", (reason, trigger) => {
+    const ref = service.open(GuardedContentComponent);
+    const guard = jest.fn(() => false);
+    ref.canClose = guard;
+
+    trigger();
+
+    expect(guard).toHaveBeenCalledWith(undefined, reason);
+    expect(isOpen()).toBe(true);
+
+    ref.canClose = () => true;
+    trigger();
+
+    expect(isOpen()).toBe(false);
+  });
+
+  it("asks the guard when the header close button is clicked", () => {
+    const ref = service.open(GuardedContentComponent);
+    TestBed.tick();
+    const guard = jest.fn(() => false);
+    ref.canClose = guard;
+
+    clickCloseButton();
+
+    expect(guard).toHaveBeenCalledWith(undefined, "close-button");
+    expect(isOpen()).toBe(true);
+  });
+
+  it("does not ask the guard for a close path that is switched off", () => {
+    const ref = service.open(GuardedContentComponent, {
+      closeOnEscape: false,
+      closeOnBackdropClick: false,
+    });
+    const guard = jest.fn(() => true);
+    ref.canClose = guard;
+
+    pressEscape();
+    clickBackdrop();
+
+    expect(guard).not.toHaveBeenCalled();
+    expect(isOpen()).toBe(true);
+  });
+
+  it("waits for a Promise and closes when it resolves true", async () => {
+    const ref = service.open<string>(GuardedContentComponent);
+    const closed = jest.fn();
+    let answer!: (allowed: boolean) => void;
+    ref.closed.subscribe(closed);
+    ref.canClose = () => new Promise<boolean>((resolve) => (answer = resolve));
+
+    ref.close("saved");
+    expect(isOpen()).toBe(true);
+
+    answer(true);
+    await flushPromises();
+
+    expect(closed).toHaveBeenCalledWith("saved");
+    expect(isOpen()).toBe(false);
+  });
+
+  it("stays open when the Promise resolves false", async () => {
+    const ref = service.open(GuardedContentComponent);
+    ref.canClose = () => Promise.resolve(false);
+
+    ref.close();
+    await flushPromises();
+
+    expect(isOpen()).toBe(true);
+  });
+
+  it("uses the first value of an Observable", async () => {
+    const ref = service.open(GuardedContentComponent);
+    const answer = new Subject<boolean>();
+    ref.canClose = () => answer;
+
+    ref.close();
+    answer.next(true);
+    await flushPromises();
+
+    expect(isOpen()).toBe(false);
+  });
+
+  it("stays open when the Observable completes without a value", async () => {
+    const ref = service.open(GuardedContentComponent);
+    ref.canClose = () => EMPTY;
+
+    ref.close();
+    await flushPromises();
+
+    expect(isOpen()).toBe(true);
+  });
+
+  it("ignores repeat requests while an async guard is deciding", async () => {
+    const ref = service.open(GuardedContentComponent);
+    let answer!: (allowed: boolean) => void;
+    const guard = jest.fn(
+      () => new Promise<boolean>((resolve) => (answer = resolve)),
+    );
+    ref.canClose = guard;
+
+    ref.close();
+    pressEscape();
+    clickBackdrop();
+    expect(guard).toHaveBeenCalledTimes(1);
+
+    answer(false);
+    await flushPromises();
+
+    ref.close();
+    expect(guard).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    ["Promise rejects", () => Promise.reject(new Error("offline"))],
+    ["Observable errors", () => throwError(() => new Error("offline"))],
+  ])(
+    "stays open when a %s, and reports it to ErrorHandler",
+    async (_, guard: () => Promise<boolean> | Observable<boolean>) => {
+      const ref = service.open(GuardedContentComponent);
+      ref.canClose = guard;
+
+      ref.close();
+      await flushPromises();
+
+      expect(isOpen()).toBe(true);
+      expect(errorHandler.handleError).toHaveBeenCalledWith(
+        new Error("offline"),
+      );
+
+      ref.canClose = () => true;
+      ref.close();
+      expect(isOpen()).toBe(false);
+    },
+  );
+
+  it("stays open when the guard throws, and reports it to ErrorHandler", () => {
+    const ref = service.open(GuardedContentComponent);
+    ref.canClose = () => {
+      throw new Error("offline");
+    };
+
+    expect(() => ref.close()).not.toThrow();
+    expect(isOpen()).toBe(true);
+    expect(errorHandler.handleError).toHaveBeenCalledWith(new Error("offline"));
+  });
+
+  it("is bypassed by closeAll()", () => {
+    const ref = service.open(GuardedContentComponent);
+    ref.canClose = () => false;
+
+    service.closeAll();
+
+    expect(isOpen()).toBe(false);
   });
 });

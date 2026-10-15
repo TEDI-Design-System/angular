@@ -6,13 +6,21 @@ import {
   OnInit,
   inject,
 } from "@angular/core";
-import { BaseButtonDirective } from "@tedi-design-system/angular/tedi";
+import {
+  BaseButtonDirective,
+  warnDeprecated,
+} from "@tedi-design-system/angular/tedi";
 
 export type FloatingButtonVariant = "primary" | "secondary";
 
 export type FloatingButtonSize = "default" | "large";
 export type FloatingButtonAxis = "horizontal" | "vertical";
 
+/**
+ * @deprecated Use `FloatingButtonComponent` from `@tedi-design-system/angular/tedi`.
+ * Both components use the same selector, so update the TypeScript import to use
+ * the TEDI-Ready component.
+ */
 @Component({
   selector: "[tedi-floating-button]",
   template: `<ng-content />`,
@@ -45,6 +53,13 @@ export class FloatingButtonComponent implements OnInit {
   axis = input<FloatingButtonAxis>("horizontal");
 
   buttonDirective = inject(BaseButtonDirective);
+
+  constructor() {
+    warnDeprecated(
+      "Community [tedi-floating-button]",
+      "Use `FloatingButtonComponent` from `@tedi-design-system/angular/tedi` instead.",
+    );
+  }
 
   ngOnInit() {
     this.buttonDirective.classNamePrefix.set("tedi-floating-button");

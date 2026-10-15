@@ -56,6 +56,13 @@ export interface DateInputTag {
 })
 export class DateInputComponent implements AfterViewChecked {
   readonly inputId = input.required<string>();
+  /** `name` attribute of the text input; omitted from the DOM when not set. */
+  readonly name = input<string>();
+  /**
+   * `aria-describedby` ids for the input. Handed to the `tedi-text-field`
+   * directive, which owns the input's `aria-describedby` attribute.
+   */
+  readonly ariaDescribedby = input<string | null>(null);
   readonly value = input<string>("");
   readonly tags = input<readonly DateInputTag[]>([]);
   readonly mode = input<DateFieldMode>("single");
@@ -67,7 +74,11 @@ export class DateInputComponent implements AfterViewChecked {
   readonly multiRow = input<boolean>(true);
   /** Which end the tag labels truncate from when they don't fit (`false` = no truncation). */
   readonly ellipsis = input<TagEllipsis>(false);
-  /** Whether the tags show a remove (close) button. */
+  /**
+   * Whether the tags show a remove (close) button. Independent of `readOnly`,
+   * which only locks the text input — the parent decides whether the value can
+   * still change (e.g. through the calendar).
+   */
   readonly removable = input<boolean>(true);
   readonly placeholder = input<string>("");
   readonly disabled = input<boolean>(false);
@@ -79,6 +90,7 @@ export class DateInputComponent implements AfterViewChecked {
   /** Native input type used when `useNativePicker` is `true`. `date` for date-only fields, `datetime-local` for date-and-time fields. */
   readonly nativeInputType = input<"date" | "datetime-local">("date");
   readonly nativeIsoValue = input<string>("");
+  /** Whether to show the clear button. Independent of `readOnly`, like `removable`. */
   readonly clearable = input<boolean>(false);
 
   readonly inputChange = output<string>();
@@ -98,6 +110,8 @@ export class DateInputComponent implements AfterViewChecked {
     read: ElementRef,
   });
 
+  private readonly textField = viewChild(TextFieldComponent);
+
   /** Number of tags that fit on a single row; `null` until measured. */
   readonly visibleTagsCount = signal<number | null>(null);
 
@@ -106,6 +120,13 @@ export class DateInputComponent implements AfterViewChecked {
       // Re-measure whenever the tag set changes.
       this.tags();
       this.visibleTagsCount.set(null);
+    });
+
+    effect(() => {
+      const ids = this.ariaDescribedby();
+      this.textField()?.setDescribedBy(
+        ids ? ids.split(/\s+/).filter(Boolean) : [],
+      );
     });
   }
 
@@ -153,7 +174,6 @@ export class DateInputComponent implements AfterViewChecked {
     () =>
       this.clearable() &&
       !this.disabled() &&
-      !this.readOnly() &&
       (this.inputValue() !== "" || this.hasTags()),
   );
 
@@ -183,12 +203,12 @@ export class DateInputComponent implements AfterViewChecked {
   }
 
   handleTagRemove(id: string): void {
-    if (this.disabled() || this.readOnly()) return;
+    if (this.disabled()) return;
     this.tagRemove.emit(id);
   }
 
   handleClear(): void {
-    if (this.disabled() || this.readOnly()) return;
+    if (this.disabled()) return;
     this.clear.emit();
   }
 
