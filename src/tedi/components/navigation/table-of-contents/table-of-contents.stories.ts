@@ -193,7 +193,7 @@ const meta = {
     },
     stickyMaxHeight: {
       description:
-        "Overrides the sticky height cap. The default keeps the TOC within the viewport (`calc(100dvh - offset - 1.5rem)`); set it when the TOC scrolls inside a fixed-height container rather than the window, e.g. `calc(30rem - 3rem)`. Only applies while `sticky` is `true`.",
+        "Overrides the sticky max height. The default keeps the TOC within the viewport (`calc(100dvh - offset - 1.5rem)`); set it when the TOC scrolls inside a fixed-height container rather than the window, e.g. `calc(30rem - 3rem)`. Only applies while `sticky` is `true`.",
       control: "text",
       table: {
         category: "Table of Contents",
@@ -579,11 +579,11 @@ const CHAPTERS: DemoSection[] = Array.from({ length: 30 }, (_, i) => {
 
 /**
  * Example for the StickyInLayout story: a documentation page with a sticky
- * table-of-contents sidebar inside a fixed-height scrollable region. The page
- * scrolls, the sticky TOC stays alongside it — heading pinned, list scrolling on
- * its own when taller than the space available. The component is controlled via
- * `activeId`: an `IntersectionObserver` highlights the section in view (scroll-spy)
- * and clicking an item smooth-scrolls the page to it.
+ * table-of-contents sidebar. The window scrolls, the sticky TOC stays alongside
+ * it and scrolls on its own when taller than the viewport. Below `lg` the
+ * sidebar collapses into `tedi-table-of-contents-collapsible`. The component is
+ * controlled via `activeId`: an `IntersectionObserver` highlights the section in
+ * view (scroll-spy) and clicking an item smooth-scrolls the page to it.
  */
 @Component({
   selector: "toc-sticky-demo",
@@ -616,7 +616,7 @@ const CHAPTERS: DemoSection[] = Array.from({ length: 30 }, (_, i) => {
       }
     </ng-template>
 
-    <!-- Desktop (lg and up): sticky sidebar inside a bounded scroll region. -->
+    <!-- Desktop (lg and up): sticky sidebar next to the content. -->
     <div *showAt="'lg'" #page class="scroll-page">
       <div class="scroll-page__grid">
         <article>
@@ -626,7 +626,6 @@ const CHAPTERS: DemoSection[] = Array.from({ length: 30 }, (_, i) => {
           heading="Sisukord"
           [activeId]="activeId()"
           [scrollActiveIntoView]="true"
-          stickyMaxHeight="calc(30rem - 3rem)"
         >
           @for (chapter of chapters; track chapter.id) {
             <tedi-table-of-contents-item [itemId]="chapter.id">
@@ -656,7 +655,7 @@ const CHAPTERS: DemoSection[] = Array.from({ length: 30 }, (_, i) => {
 
     <!-- Below lg: the sidebar collapses into a bottom bar + sheet. -->
     <div *hideAt="'lg'" class="mobile-shell">
-      <div #page class="mobile-scroll">
+      <div #page #scroller class="mobile-scroll">
         <article>
           <ng-container [ngTemplateOutlet]="articleTpl" />
         </article>
@@ -693,12 +692,6 @@ const CHAPTERS: DemoSection[] = Array.from({ length: 30 }, (_, i) => {
   `,
   styles: [
     `
-      .scroll-page {
-        height: 30rem;
-        overflow-y: auto;
-        border: var(--tedi-borders-01) solid var(--card-border-primary);
-        border-radius: var(--card-radius-rounded);
-      }
       .scroll-page__grid {
         display: grid;
         grid-template-columns: 1fr 16rem;
@@ -715,6 +708,8 @@ const CHAPTERS: DemoSection[] = Array.from({ length: 30 }, (_, i) => {
       .scroll-page__section p {
         margin: 0.25rem 0 0;
       }
+      /* The content scrolls above the static bar, so the scrollbar ends
+         before it. */
       .mobile-shell {
         display: flex;
         flex-direction: column;
@@ -734,22 +729,25 @@ class TocStickyDemoComponent implements OnDestroy {
   readonly lorem = LOREM;
   readonly activeId = signal(CHAPTERS[0].id);
 
-  // Resolves to whichever layout is rendered — the desktop scroll box or the
-  // mobile scroll area.
+  // Resolves to whichever layout is rendered — the desktop grid or the mobile
+  // scroll area.
   private readonly page = viewChild<ElementRef<HTMLDivElement>>("page");
+  // Mobile scroll area; on desktop the window scrolls, so this is undefined.
+  private readonly scroller = viewChild<ElementRef<HTMLDivElement>>("scroller");
   private readonly platformId = inject(PLATFORM_ID);
   private seeking = false;
   private seekTimeout?: ReturnType<typeof setTimeout>;
   private observer?: IntersectionObserver;
 
   constructor() {
-    // Re-attach the scroll-spy to the active scroll container whenever the
-    // layout swaps between the desktop sidebar and the mobile collapsible.
+    // Re-attach the scroll-spy to the rendered sections whenever the layout
+    // swaps between the desktop sidebar and the mobile collapsible.
     effect(() => {
-      const root = this.page()?.nativeElement;
+      const page = this.page()?.nativeElement;
+      const root = this.scroller()?.nativeElement ?? null;
       this.observer?.disconnect();
-      if (root && isPlatformBrowser(this.platformId)) {
-        this.observeSections(root);
+      if (page && isPlatformBrowser(this.platformId)) {
+        this.observeSections(page, root);
       }
     });
   }
@@ -759,28 +757,35 @@ class TocStickyDemoComponent implements OnDestroy {
     clearTimeout(this.seekTimeout);
   }
 
-  // Smooth-scroll the active scroll container to the clicked section; guard the
-  // observer during the scroll so the marker doesn't flicker through sections.
+  // Smooth-scroll the window (desktop) or the scroll area (mobile) to the clicked
+  // section; guard the observer during the scroll so the marker doesn't flicker
+  // through sections. `scrollTo` rather than `scrollIntoView`, which would also
+  // scroll the Storybook docs page around the iframe.
   selectSection(id: string, event: Event): void {
     event.preventDefault();
-    const root = this.page()?.nativeElement;
-    const target = root?.querySelector<HTMLElement>(`#${id}`);
-    if (!root || !target) return;
+    const target = this.page()?.nativeElement.querySelector<HTMLElement>(
+      `#${id}`,
+    );
+    if (!target) return;
     this.seeking = true;
     this.activeId.set(id);
     clearTimeout(this.seekTimeout);
     this.seekTimeout = setTimeout(() => (this.seeking = false), 700);
-    root.scrollTo({
-      top:
-        root.scrollTop +
-        target.getBoundingClientRect().top -
-        root.getBoundingClientRect().top,
-      behavior: "smooth",
-    });
+    const root = this.scroller()?.nativeElement;
+    const offset = target.getBoundingClientRect().top;
+    if (root) {
+      root.scrollTo({
+        top: root.scrollTop + offset - root.getBoundingClientRect().top,
+        behavior: "smooth",
+      });
+    } else {
+      window.scrollTo({ top: window.scrollY + offset, behavior: "smooth" });
+    }
   }
 
-  // Scroll-spy: highlight the chapter currently in view within `root`.
-  private observeSections(root: HTMLElement): void {
+  // Scroll-spy: highlight the chapter currently in view within `root` (the
+  // viewport when null).
+  private observeSections(page: HTMLElement, root: HTMLElement | null): void {
     const ids = this.chapters.flatMap((c) => [
       c.id,
       ...(c.children ?? []).map((child) => child.id),
@@ -789,8 +794,10 @@ class TocStickyDemoComponent implements OnDestroy {
 
     const pickActive = () => {
       if (this.seeking) return;
-      const atBottom =
-        root.scrollTop + root.clientHeight >= root.scrollHeight - 2;
+      const atBottom = root
+        ? root.scrollTop + root.clientHeight >= root.scrollHeight - 2
+        : window.innerHeight + window.scrollY >=
+          document.documentElement.scrollHeight - 2;
       if (atBottom) {
         this.activeId.set(ids[ids.length - 1]);
         return;
@@ -813,7 +820,7 @@ class TocStickyDemoComponent implements OnDestroy {
     );
     this.observer = observer;
     ids.forEach((id) => {
-      const el = root.querySelector(`#${id}`);
+      const el = page.querySelector(`#${id}`);
       if (el) observer.observe(el);
     });
   }
@@ -830,8 +837,8 @@ const STICKY_LAYOUT_SOURCE = `@Component({
     TextComponent,
   ],
   template: \`
-    <!-- A fixed-height scroll region: the page scrolls, the TOC sticks and (when
-         the list is taller than the space) scrolls on its own. -->
+    <!-- The page scrolls, the TOC sticks and (when the list is taller than the
+         viewport) scrolls on its own. -->
     <div #page class="doc-page">
       <article>
         @for (chapter of chapters; track chapter.id) {
@@ -841,14 +848,7 @@ const STICKY_LAYOUT_SOURCE = `@Component({
           </section>
         }
       </article>
-      <!-- The scroll region is 30rem, not the viewport, so cap the sticky
-           height to it via stickyMaxHeight (the 100dvh default is the wrong
-           basis here). -->
-      <tedi-table-of-contents
-        heading="Sisukord"
-        [activeId]="activeId()"
-        stickyMaxHeight="calc(30rem - 3rem)"
-      >
+      <tedi-table-of-contents heading="Sisukord" [activeId]="activeId()">
         @for (chapter of chapters; track chapter.id) {
           <tedi-table-of-contents-item [itemId]="chapter.id">
             <a tedi-link [href]="'#' + chapter.id" [underline]="false"
@@ -863,8 +863,6 @@ const STICKY_LAYOUT_SOURCE = `@Component({
       display: grid;
       grid-template-columns: 1fr 16rem;
       gap: 2rem;
-      height: 30rem;
-      overflow-y: auto;
     }
   \`,
 })
@@ -894,58 +892,57 @@ export class DocPageComponent implements OnDestroy {
   // scroll so the active marker doesn't flicker through the sections it passes.
   selectSection(id: string, event: Event): void {
     event.preventDefault();
-    const root = this.page().nativeElement;
-    const target = root.querySelector<HTMLElement>("#" + id);
+    const target = this.page().nativeElement.querySelector<HTMLElement>("#" + id);
     if (!target) return;
     this.seeking = true;
     this.activeId.set(id);
     clearTimeout(this.seekTimeout);
     this.seekTimeout = setTimeout(() => (this.seeking = false), 700);
-    root.scrollTo({
-      top:
-        root.scrollTop +
-        target.getBoundingClientRect().top -
-        root.getBoundingClientRect().top,
-      behavior: "smooth",
-    });
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   // Scroll-spy: highlight the section currently in view.
   private trackActiveSection(): void {
-    const root = this.page().nativeElement;
+    const page = this.page().nativeElement;
     const observer = new IntersectionObserver(
       (entries) => {
         if (this.seeking) return;
         const visible = entries.find((entry) => entry.isIntersecting);
         if (visible) this.activeId.set((visible.target as HTMLElement).id);
       },
-      { root, rootMargin: "0px 0px -55% 0px" },
+      { rootMargin: "0px 0px -55% 0px" },
     );
     this.observer = observer;
     this.chapters.forEach((chapter) => {
-      const el = root.querySelector("#" + chapter.id);
+      const el = page.querySelector("#" + chapter.id);
       if (el) observer.observe(el);
     });
   }
 }`;
 
 /**
- * A documentation page with a sticky table-of-contents sidebar. The page scrolls
- * inside a fixed-height region, and the sticky TOC stays alongside it — its
- * heading pinned while the list scrolls on its own when it is taller than the
- * space available. The component is controlled via `activeId`, so the consumer
+ * A documentation page with a sticky table-of-contents sidebar. The page scrolls,
+ * and the sticky TOC stays alongside it, scrolling on its own when it is taller
+ * than the viewport. The component is controlled via `activeId`, so the consumer
  * owns scroll behavior: this demo wires an `IntersectionObserver` to highlight the
  * section in view (scroll-spy) and smooth-scrolls the page to a section when its
  * item is clicked.
  *
  * Tune the gap the sticky sidebar leaves above the viewport bottom with the
  * `--tedi-table-of-contents-sticky-bottom` CSS custom property (default `1.5rem`).
+ * When the TOC scrolls inside a fixed-height container rather than the window,
+ * set `stickyMaxHeight` to that container's height minus the top offset and
+ * bottom gap, e.g. `calc(30rem - 3rem)` for a 30rem container.
  */
 export const StickyInLayout: Story = {
   parameters: {
     layout: "fullscreen",
     fullWidth: true,
-    docs: { source: { language: "typescript", code: STICKY_LAYOUT_SOURCE } },
+    docs: {
+      // Own iframe, so the window scrolls and the default 100dvh max height applies.
+      story: { inline: false, height: "30rem" },
+      source: { language: "typescript", code: STICKY_LAYOUT_SOURCE },
+    },
     a11y: { config: { rules: [{ id: "color-contrast", enabled: false }] } },
   },
   render: () => ({
