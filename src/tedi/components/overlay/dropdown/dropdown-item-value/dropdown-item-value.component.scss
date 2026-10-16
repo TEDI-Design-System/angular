@@ -127,7 +127,8 @@ li[tedi-dropdown-item],
     }
   }
 
-  &:hover:not(.tedi-dropdown-item--disabled, [aria-disabled="true"]) {
+  &:hover:not(.tedi-dropdown-item--disabled, [aria-disabled="true"]),
+  &:active:not(.tedi-dropdown-item--disabled, [aria-disabled="true"]) {
 
     .tedi-dropdown-item-value__label,
     .tedi-dropdown-item-value__meta {

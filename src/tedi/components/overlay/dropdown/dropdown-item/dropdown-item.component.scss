@@ -11,20 +11,128 @@
 
   // A selected item keeps its active styling on hover — hover must not override
   // the active state, so selected items are excluded from the hover rule.
-  &:hover:not(.tedi-dropdown-item--disabled, [aria-disabled="true"], .tedi-dropdown-item--selected, [aria-selected="true"]) {
+  &:hover:not(
+      .tedi-dropdown-item--disabled,
+      [aria-disabled="true"],
+      .tedi-dropdown-item--selected,
+      [aria-selected="true"]
+    ) {
     color: var(--dropdown-item-hover-text);
     background: var(--dropdown-item-hover-background);
+
+    .tedi-icon {
+      color: inherit;
+    }
   }
 
   &:focus-visible {
-    outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+    outline: var(--tedi-borders-02) solid transparent;
     outline-offset: calc(-1 * var(--tedi-borders-02));
+    border-radius: var(--dropdown-item-radius);
+    box-shadow:
+      inset 0 0 0 var(--tedi-borders-02)
+        var(--general-effect-colors-focus-outset-outer-shadow),
+      inset 0 0 0 var(--tedi-borders-03)
+        var(--general-effect-colors-focus-outset-inner-shadow);
   }
 
   &[aria-selected="true"],
   &.tedi-dropdown-item--selected {
     color: var(--dropdown-item-active-text);
     background: var(--dropdown-item-active-background);
+
+    .tedi-icon {
+      color: inherit;
+    }
+  }
+
+  &:active:not(.tedi-dropdown-item--disabled, [aria-disabled="true"]) {
+    color: var(--dropdown-item-active-text);
+    background: var(--dropdown-item-active-background);
+
+    .tedi-icon {
+      color: inherit;
+    }
+  }
+
+  &.tedi-dropdown-item--indent {
+    padding-left: calc(
+      var(--_tedi-dropdown-item-indent) + var(--dropdown-item-padding-x)
+    );
+  }
+
+  &.tedi-dropdown-item--tree-item,
+  &.tedi-dropdown-item--tree-parent {
+    --_tedi-dropdown-tree-line: var(--tedi-borders-02); // trunk and branch thickness
+    --_tedi-dropdown-tree-branch: 0.75rem; // branch length, also the gap before the text
+    --_tedi-dropdown-tree-bullet: 0.5rem; // parent bullet diameter
+    --_tedi-dropdown-tree-color: var(--navigation-vertical-tree-neutral-default);
+    --_tedi-dropdown-tree-x: calc(var(--dropdown-item-padding-x) * 1.5);
+
+    position: relative;
+
+    &::before {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: var(--_tedi-dropdown-tree-x);
+      width: var(--_tedi-dropdown-tree-line);
+      content: "";
+      background-color: var(--_tedi-dropdown-tree-color);
+    }
+  }
+
+  &.tedi-dropdown-item--indent:is(
+      .tedi-dropdown-item--tree-item,
+      .tedi-dropdown-item--tree-parent
+    ) {
+    padding-left: calc(
+      var(--dropdown-item-padding-x) + var(--_tedi-dropdown-tree-branch) +
+        var(--_tedi-dropdown-item-indent)
+    );
+  }
+
+  &.tedi-dropdown-item--tree-item::after {
+    position: absolute;
+    top: calc(50% - var(--_tedi-dropdown-tree-line) / 2);
+    left: var(--_tedi-dropdown-tree-x);
+    width: var(--_tedi-dropdown-tree-branch);
+    height: var(--_tedi-dropdown-tree-line);
+    content: "";
+    background-color: var(--_tedi-dropdown-tree-color);
+    border-radius: 0 var(--button-radius-sm) var(--button-radius-sm) 0;
+  }
+
+  // The last item of a group ends the trunk at its branch. A following parent starts a new group.
+  &.tedi-dropdown-item--tree-item:not(
+      :has(+ .tedi-dropdown-item--tree-item:not(.tedi-dropdown-item--tree-parent))
+    )::before {
+    bottom: calc(50% - var(--_tedi-dropdown-tree-line) / 2);
+  }
+
+  // A parent starts the trunk from its bullet.
+  &.tedi-dropdown-item--tree-parent {
+    &::before {
+      top: 50%;
+    }
+
+    &::after {
+      position: absolute;
+      top: 50%;
+      left: calc(
+        var(--_tedi-dropdown-tree-x) +
+          (
+            var(--_tedi-dropdown-tree-line) - var(--_tedi-dropdown-tree-bullet)
+          ) /
+          2
+      );
+      width: var(--_tedi-dropdown-tree-bullet);
+      height: var(--_tedi-dropdown-tree-bullet);
+      content: "";
+      background-color: var(--_tedi-dropdown-tree-color);
+      border-radius: 50%;
+      transform: translateY(-50%);
+    }
   }
 
   &[aria-disabled="true"],
@@ -32,6 +140,10 @@
     color: var(--general-text-disabled);
     cursor: not-allowed;
     background: var(--dropdown-item-disabled-background);
+
+    .tedi-icon {
+      color: inherit;
+    }
   }
 }
 

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChild,
   contentChildren,
   ElementRef,
   forwardRef,
@@ -10,13 +11,15 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { DropdownItemComponent } from "../dropdown-item/dropdown-item.component";
+import { DropdownHeaderDirective } from "../dropdown-header/dropdown-header.directive";
 import {
   DROPDOWN_API,
   DROPDOWN_CONTENT_API,
   DropdownRole,
+  DropdownVariant,
 } from "../dropdown.tokens";
 
-export type { DropdownRole };
+export type { DropdownRole, DropdownVariant };
 
 @Component({
   selector: "tedi-dropdown-content",
@@ -28,6 +31,7 @@ export type { DropdownRole };
   host: {
     class: "tedi-dropdown-content",
     role: "presentation",
+    "[class.tedi-dropdown-content--divided]": "divided()",
   },
   providers: [
     {
@@ -56,10 +60,33 @@ export class DropdownContentComponent {
    */
   readonly dropdownRole = input<DropdownRole>("menu");
 
+  /**
+   * Draws a line between every item. For lines between groups only, use
+   * `li[tedi-dropdown-separator]` instead.
+   * @default false
+   */
+  readonly divided = input(false);
+
+  /**
+   * Visual variant. `tree` draws connector lines from indented items
+   * (`indent`) to their parent; mark a parent sitting on the line with
+   * `isParent`.
+   * @default default
+   */
+  readonly variant = input<DropdownVariant>("default");
+
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly dropdownApi = inject(DROPDOWN_API);
   readonly containerId = computed(() => this.dropdownApi.containerId());
   readonly items = contentChildren(DropdownItemComponent);
+  readonly header = contentChild(DropdownHeaderDirective);
 
   readonly isWidget = computed(() => this.dropdownRole() !== "list");
+
+  /** A listbox of checkbox items allows more than one selected option. */
+  readonly multiselectable = computed(
+    () =>
+      this.dropdownRole() === "listbox" &&
+      this.items().some((item) => item.checkable()?.type === "checkbox"),
+  );
 }

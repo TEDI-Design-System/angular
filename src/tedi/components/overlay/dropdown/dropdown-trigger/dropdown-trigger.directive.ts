@@ -18,6 +18,12 @@ export type DropdownTriggerAriaHasPopup =
 
 const FOCUSABLE_SELECTOR = "button, a[href], [tabindex]";
 
+/**
+ * Opens the dropdown. Place it on a `<button>`, or on a component that wraps one
+ * (e.g. `<app-button tedi-dropdown-trigger>`): the inner button then receives the
+ * trigger's `id`, ARIA attributes, focus and keyboard handling, so there is a
+ * single tab stop.
+ */
 @Directive({
   standalone: true,
   selector: "[tedi-dropdown-trigger]",

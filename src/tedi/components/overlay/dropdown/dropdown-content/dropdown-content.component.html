@@ -1,3 +1,4 @@
+<ng-content select="[tedi-dropdown-header]" />
 <ng-content />
 <ul
   class="tedi-dropdown-content__list"
@@ -5,6 +6,7 @@
   [id]="containerId()"
   [attr.role]="dropdownRole()"
   [attr.aria-labelledby]="containerId() + '_trigger'"
+  [attr.aria-multiselectable]="multiselectable() || null"
 >
-  <ng-content select="li[tedi-dropdown-item]" />
+  <ng-content select="li[tedi-dropdown-item], li[tedi-dropdown-separator]" />
 </ul>
