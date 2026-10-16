@@ -853,12 +853,12 @@ describe("FilterComponent", () => {
       expect(options.nativeElement.getAttribute("tabindex")).toBe("0");
     });
 
-    it("should not have tabbable checkbox inputs inside dropdown-item-value", () => {
+    it("should not have focusable checkbox inputs inside dropdown-item-value", () => {
       const checkboxes = fixture.debugElement.queryAll(
         By.css(".tedi-filter-dropdown__options input[type='checkbox']"),
       );
       checkboxes.forEach((cb) => {
-        expect(cb.nativeElement.getAttribute("tabindex")).toBe("-1");
+        expect(cb.nativeElement.hasAttribute("inert")).toBe(true);
       });
     });
   });

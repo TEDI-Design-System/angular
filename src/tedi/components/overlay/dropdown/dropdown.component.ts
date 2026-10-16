@@ -309,9 +309,7 @@ export class DropdownComponent implements OnDestroy {
 
   setActiveToSelectedOrFirst() {
     const items = this.dropdownContent().items();
-    const selectedIndex = items.findIndex(
-      (item) => item.value() === this.value(),
-    );
+    const selectedIndex = items.findIndex((item) => item.isSelected());
 
     if (selectedIndex !== -1 && !items[selectedIndex].disabled()) {
       this.activeIndex.set(selectedIndex);

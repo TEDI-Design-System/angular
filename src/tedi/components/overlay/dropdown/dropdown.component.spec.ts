@@ -1609,6 +1609,27 @@ class SelectionHostComponent {
   value?: string;
 }
 
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content dropdownRole="listbox">
+        <li tedi-dropdown-item value="a">Item A</li>
+        <li tedi-dropdown-item>No value</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class UnsetValueHostComponent {}
+
 describe("DropdownItemComponent selection", () => {
   let fixture: ComponentFixture<SelectionHostComponent>;
   let dropdown: DropdownComponent;
@@ -1646,6 +1667,24 @@ describe("DropdownItemComponent selection", () => {
     fixture.detectChanges();
 
     expect(openAndGetSelected()).toEqual(["false", "true"]);
+  });
+
+  it("starts on the first item, not a value-less one, when no value is set", () => {
+    const unsetFixture = TestBed.createComponent(UnsetValueHostComponent);
+    unsetFixture.detectChanges();
+    const unsetDropdown = unsetFixture.debugElement.query(
+      By.directive(DropdownComponent),
+    ).componentInstance as DropdownComponent;
+
+    unsetDropdown.showDropdown();
+    unsetFixture.detectChanges();
+
+    const tabindexes = Array.from(
+      overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+    ).map((li) => li.getAttribute("tabindex"));
+    unsetDropdown.hideDropdown();
+
+    expect(tabindexes).toEqual(["0", "-1"]);
   });
 });
 

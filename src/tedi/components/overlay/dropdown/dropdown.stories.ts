@@ -702,7 +702,7 @@ export const HideOnScroll: Story = {
   }),
 };
 
-export const WithDecription: Story = {
+export const WithDescription: Story = {
   parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     props: {
