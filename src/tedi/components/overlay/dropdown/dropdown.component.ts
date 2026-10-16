@@ -29,6 +29,18 @@ export type DropdownPosition = OverlayPosition;
 
 let dropdownIdCounter = 0;
 
+/**
+ * Width of the dropdown panel: `auto` sizes to content (never narrower than the
+ * trigger), `trigger` matches the trigger, a number is px, a string any CSS width.
+ */
+export type DropdownWidth = "auto" | "trigger" | number | string;
+
+/** Numbers and numeric strings (e.g. `"240"`) are px; other strings are CSS lengths. */
+const toCssLength = (value: number | string): string => {
+  const length = typeof value === "number" ? String(value) : value.trim();
+  return /^\d+(\.\d+)?$/.test(length) ? `${length}px` : length;
+};
+
 @Component({
   standalone: true,
   selector: "tedi-dropdown",
@@ -77,6 +89,22 @@ export class DropdownComponent implements OnDestroy {
    */
   readonly hideOnScroll = input(false);
 
+  /**
+   * Width of the dropdown panel. `auto` sizes to content, never narrower than
+   * the trigger; `trigger` matches the trigger width; a number is px; a string
+   * is any CSS width (e.g. `"20rem"`).
+   * @default auto
+   */
+  readonly width = input<DropdownWidth>("auto");
+
+  /**
+   * Limits the height of the dropdown panel; the items scroll when they are
+   * taller. A number is px, a string is any CSS length (e.g. `"20rem"`). Prefer
+   * rem, so the maximum height scales with the user's font size. A header
+   * (`tedi-dropdown-header`) stays in place above the scrolling items.
+   */
+  readonly maxHeight = input<number | string>();
+
   readonly dropdownTrigger = contentChild.required(DropdownTriggerDirective);
   readonly dropdownContent = contentChild.required(DropdownContentComponent);
 
@@ -101,6 +129,21 @@ export class DropdownComponent implements OnDestroy {
   readonly triggerWidthVar = computed(() => {
     const w = this.triggerWidth();
     return w ? `${w}px` : null;
+  });
+
+  /** Panel maximum height, or `null` when unrestricted. */
+  readonly panelMaxHeight = computed(() => {
+    const maxHeight = this.maxHeight();
+    if (maxHeight == null || maxHeight === "") return null;
+    return toCssLength(maxHeight);
+  });
+
+  /** Explicit panel width, or `null` when sized by content. */
+  readonly panelWidth = computed(() => {
+    const width = this.width();
+    if (width == null || width === "auto" || width === "") return null;
+    if (width === "trigger") return this.triggerWidthVar();
+    return toCssLength(width);
   });
 
   private readonly platformId = inject(PLATFORM_ID);
@@ -155,6 +198,8 @@ export class DropdownComponent implements OnDestroy {
 
     // Deferred so the overlay content is attached before focusing
     setTimeout(() => {
+      if (this.dropdownContent().header()?.focus()) return;
+
       if (initialFocus === "first") {
         this.focusFirstItem();
       } else if (initialFocus === "last") {
@@ -264,9 +309,7 @@ export class DropdownComponent implements OnDestroy {
 
   setActiveToSelectedOrFirst() {
     const items = this.dropdownContent().items();
-    const selectedIndex = items.findIndex(
-      (item) => item.value() === this.value(),
-    );
+    const selectedIndex = items.findIndex((item) => item.isSelected());
 
     if (selectedIndex !== -1 && !items[selectedIndex].disabled()) {
       this.activeIndex.set(selectedIndex);
@@ -315,7 +358,11 @@ export class DropdownComponent implements OnDestroy {
     if (fromIndex === -1) return;
 
     const prevIndex = this.getPrevEnabledIndex(fromIndex);
-    if (prevIndex == null) return;
+    if (prevIndex == null) {
+      // Up from the first item goes back to a header control, e.g. a search field.
+      this.dropdownContent().header()?.focus();
+      return;
+    }
 
     const items = this.dropdownContent().items();
     this.activeIndex.set(prevIndex);
@@ -360,7 +407,7 @@ export class DropdownComponent implements OnDestroy {
     return getFocusableElements(this.dropdownContent().host.nativeElement);
   }
 
-  private closeAndFocusTrigger() {
+  closeAndFocusTrigger() {
     this.moveFocusOut(this.dropdownTrigger().focusableElement);
   }
 

@@ -2,6 +2,7 @@ import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  computed,
   contentChild,
   DestroyRef,
   ElementRef,
@@ -34,8 +35,13 @@ const INTERACTIVE_CONTENT_SELECTOR = "a[href], button";
   host: {
     "[attr.role]": "hostRole()",
     "[attr.aria-selected]": "hostAriaSelected()",
+    "[attr.aria-checked]": "hostAriaChecked()",
     "[attr.aria-disabled]": "hostAriaDisabled()",
     "[attr.tabindex]": "hostTabindex()",
+    "[class.tedi-dropdown-item--indent]": "indentVar()",
+    "[class.tedi-dropdown-item--tree-item]": "isTree() && !!indentVar()",
+    "[class.tedi-dropdown-item--tree-parent]": "isTree() && isParent()",
+    "[style.--_tedi-dropdown-item-indent]": "indentVar()",
   },
 })
 export class DropdownItemComponent {
@@ -77,6 +83,27 @@ export class DropdownItemComponent {
   readonly closeOnSelect = input(true);
 
   /**
+   * Indentation level in rem, for nested / hierarchical items, e.g. children
+   * under a "select all" item. `0` or unset means no indentation.
+   */
+  readonly indent = input<number>();
+
+  /**
+   * Marks the item as a parent in a `tree` dropdown: it gets a bullet on the
+   * connector line, and the line starts from it. Use with `indent` so it
+   * lines up with its children. Ignored outside the `tree` variant.
+   * @default false
+   */
+  readonly isParent = input(false);
+
+  readonly isTree = computed(() => this.dropdownContent.variant() === "tree");
+
+  readonly indentVar = computed(() => {
+    const indent = this.indent();
+    return indent && indent > 0 ? `${indent}rem` : null;
+  });
+
+  /**
    * Fires when the item is activated via click or keyboard (Enter / Space).
    * Use to react to selection without depending on click event ordering with
    * the host's built-in `onClick` handler.
@@ -89,6 +116,24 @@ export class DropdownItemComponent {
 
   /** Check if custom dropdown-item-value is provided */
   readonly customItemValue = contentChild(DropdownItemValueComponent);
+
+  /**
+   * Type and state of a checkbox / radio `tedi-dropdown-item-value`, or `null`
+   * for other content. The item exposes this state to screen readers, because
+   * the checkbox / radio itself is hidden from them.
+   */
+  readonly checkable = computed(() => {
+    const itemValue = this.customItemValue();
+    const type = itemValue?.type();
+    if (type !== "checkbox" && type !== "radio") return null;
+
+    const mixed = type === "checkbox" && itemValue!.indeterminate();
+    return {
+      type,
+      selected: itemValue!.selected(),
+      checked: mixed ? "mixed" : String(itemValue!.selected()),
+    };
+  });
 
   private readonly renderer = inject(Renderer2);
   private readonly destroyRef = inject(DestroyRef);
@@ -127,22 +172,31 @@ export class DropdownItemComponent {
 
       control.setAttribute("role", role);
 
-      // The control carries `role="option"` in a listbox, so the selection
-      // state has to travel with it instead of staying on the presentational
-      // host `li`.
-      if (this.dropdownContent.dropdownRole() === "listbox") {
-        control.setAttribute("aria-selected", String(this.isSelected()));
-      } else {
-        control.removeAttribute("aria-selected");
+      // The control carries the item role, so the selection state has to
+      // travel with it instead of staying on the presentational host `li`.
+      const selected = this.ariaSelected();
+      const checked = this.ariaChecked();
+      for (const [name, value] of [
+        ["aria-selected", selected],
+        ["aria-checked", checked],
+      ] as const) {
+        if (value === null) {
+          control.removeAttribute(name);
+        } else {
+          control.setAttribute(name, value);
+        }
       }
     });
   }
 
   /** The widget role for this item, or `null` in a plain `list`. */
-  itemRole(): "menuitem" | "option" | null {
+  itemRole():
+    "menuitem" | "menuitemcheckbox" | "menuitemradio" | "option" | null {
     switch (this.dropdownContent.dropdownRole()) {
-      case "menu":
-        return "menuitem";
+      case "menu": {
+        const type = this.checkable()?.type;
+        return type ? `menuitem${type}` : "menuitem";
+      }
       case "listbox":
         return "option";
       default:
@@ -157,11 +211,25 @@ export class DropdownItemComponent {
   }
 
   hostAriaSelected() {
-    if (this.controlOwnsSemantics()) return null;
+    return this.controlOwnsSemantics() ? null : this.ariaSelected();
+  }
 
-    return this.dropdownContent.dropdownRole() === "listbox"
-      ? this.isSelected()
-      : null;
+  hostAriaChecked() {
+    return this.controlOwnsSemantics() ? null : this.ariaChecked();
+  }
+
+  /** `aria-selected` of an option: a checkbox / radio's own state, else the dropdown value. */
+  private ariaSelected(): string | null {
+    if (this.dropdownContent.dropdownRole() !== "listbox") return null;
+
+    return String(this.checkable()?.selected ?? this.isSelected());
+  }
+
+  /** `aria-checked` of a `menuitemcheckbox` / `menuitemradio`. */
+  private ariaChecked(): string | null {
+    if (this.dropdownContent.dropdownRole() !== "menu") return null;
+
+    return this.checkable()?.checked ?? null;
   }
 
   hostAriaDisabled() {
@@ -191,7 +259,10 @@ export class DropdownItemComponent {
   }
 
   isSelected() {
-    return this.dropdown.value() === this.value();
+    // An item without a value is never selected; otherwise it would match an
+    // unset dropdown value (`undefined === undefined`).
+    const value = this.value();
+    return value !== undefined && this.dropdown.value() === value;
   }
 
   /**

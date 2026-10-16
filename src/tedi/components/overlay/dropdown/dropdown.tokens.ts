@@ -13,6 +13,12 @@ import { InjectionToken, Signal, WritableSignal } from "@angular/core";
  */
 export type DropdownRole = "menu" | "listbox" | "list";
 
+/**
+ * Visual variant of the dropdown content. `tree` draws connector lines from
+ * indented items to their parent.
+ */
+export type DropdownVariant = "default" | "tree";
+
 export interface DropdownApi {
   /** Current value of the dropdown. Used to track the selected option in listbox mode. */
   value: WritableSignal<string | undefined>;
@@ -28,6 +34,8 @@ export interface DropdownApi {
   focusLastItem(): void;
   /** Close the dropdown and reset active item state. */
   hideDropdown(): void;
+  /** Move focus to the trigger, then close the dropdown. */
+  closeAndFocusTrigger(): void;
   /** Close the dropdown and move focus to the element before (Shift+Tab) or after (Tab) the trigger in document tab order, so tabbing exits the menu as if it weren't there. */
   tabOutOfDropdown(shiftKey: boolean): void;
   /** Reference to the dropdown trigger directive. `host` is the element the directive sits on (used for positioning and dimensions); `focus()` moves focus to the actual interactive trigger element, which may be a button nested inside a wrapping component; `focusableElement` is that same interactive element. */
@@ -47,6 +55,8 @@ export interface DropdownContentApi {
   dropdownRole: Signal<DropdownRole>;
   /** Whether the content is a composite widget (`menu`, `listbox`) rather than a plain `list`. Widgets own focus management and key handling; a plain list leaves both to the items' own controls. */
   isWidget: Signal<boolean>;
+  /** Visual variant. `tree` makes indented items draw connector lines to their parent. */
+  variant: Signal<DropdownVariant>;
 }
 
 export const DROPDOWN_CONTENT_API = new InjectionToken<DropdownContentApi>(

@@ -3,7 +3,7 @@
     type="checkbox"
     tedi-checkbox
     class="tedi-dropdown-item-value__checkbox"
-    tabindex="-1"
+    inert
     aria-hidden="true"
     [checked]="selected()"
     [indeterminate]="indeterminate()"
@@ -14,11 +14,20 @@
   <input
     type="radio"
     class="tedi-dropdown-item-value__radio"
-    tabindex="-1"
+    inert
     aria-hidden="true"
     [checked]="selected()"
     [disabled]="disabled()"
     (click)="onIndicatorClick($event)"
+  />
+}
+@if (resolvedIcon(); as icon) {
+  <tedi-icon
+    [name]="icon.name"
+    [size]="icon.size"
+    [color]="icon.color"
+    [type]="icon.type ?? 'outlined'"
+    [variant]="icon.variant ?? 'outlined'"
   />
 }
 <ng-content select="tedi-icon, [tediIcon]" />

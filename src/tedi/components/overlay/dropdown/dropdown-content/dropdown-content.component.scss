@@ -17,4 +17,12 @@
     // `list` mode writes out role="list" rather than relying on the <ul>.
     list-style: none;
   }
+
+  .tedi-dropdown-header {
+    padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
+  }
+
+  &--divided li[tedi-dropdown-item]:not(:last-child) {
+    border-bottom: 1px solid var(--general-border-primary);
+  }
 }
