@@ -1,0 +1,200 @@
+@use "@tedi-design-system/core/mixins";
+
+.tedi-table-card {
+  display: block;
+
+  /* Clip section backgrounds to the card's rounded corners. */
+  &__card {
+    overflow: hidden;
+  }
+
+  /* Override CardContent's display without depending on stylesheet order. */
+  & &__header {
+    display: flex;
+    gap: var(--layout-grid-gutters-12);
+    align-items: center;
+  }
+
+  &__select {
+    flex-shrink: 0;
+  }
+
+  &__heading {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font: inherit;
+  }
+
+  &__toggle {
+    @include mixins.button-reset;
+
+    display: flex;
+    flex: 1;
+    gap: var(--layout-grid-gutters-16);
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-width: 0;
+    text-align: left;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: var(--tedi-borders-02) solid var(--general-border-brand);
+      outline-offset: 2px;
+      border-radius: var(--table-radius);
+    }
+  }
+
+  &__toggle:hover &__chevron {
+    color: var(--link-primary-hover);
+  }
+
+  &__toggle:active &__chevron {
+    color: var(--link-primary-active);
+  }
+
+  &__toggle:focus-visible &__chevron {
+    color: var(--link-primary-focus);
+  }
+
+  &__title-group {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0;
+    overflow-wrap: break-word;
+
+    &:is(label) {
+      cursor: pointer;
+    }
+
+    &--body {
+      font-size: var(--body-regular-size);
+      font-weight: var(--body-regular-weight);
+      line-height: var(--body-regular-line-height);
+    }
+  }
+
+  &__end-slot {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+  }
+
+  &__chevron {
+    display: inline-flex;
+    flex-shrink: 0;
+    color: var(--link-primary-default);
+    transition:
+      color 0.2s ease-in-out,
+      transform 0.2s ease-in-out;
+
+    &--open {
+      transform: rotate(-180deg);
+    }
+  }
+
+  &__body[hidden] {
+    display: none;
+  }
+
+  /* Keep the header separator when the body contains only groups. */
+  &__body--separator {
+    border-top: 1px solid var(--card-border-primary);
+  }
+
+  &__rows-content[hidden] {
+    display: none;
+  }
+
+  /* Avoid an extra top border when a group is the first body section. */
+  &__body--no-rows
+    > .tedi-table-card-group:first-of-type
+    .tedi-table-card-group__rows-content {
+    border-top: 0;
+  }
+}
+
+/* Shared row layout for cards and groups. */
+.tedi-table-card-rows {
+  --_tedi-table-card-columns: 1;
+  --_tedi-table-card-label-width: auto;
+  --_tedi-table-card-row-gap: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--_tedi-table-card-row-gap);
+  margin: 0;
+
+  &--columns {
+    display: grid;
+    grid-template-columns: repeat(
+      var(--_tedi-table-card-columns),
+      minmax(0, 1fr)
+    );
+    column-gap: var(--layout-grid-gutters-16);
+  }
+
+  &--columns-auto {
+    grid-template-columns: repeat(var(--_tedi-table-card-columns), auto);
+  }
+
+  &--horizontal > .tedi-table-card-row {
+    flex-direction: row;
+    gap: var(--layout-grid-gutters-08);
+    align-items: flex-start;
+  }
+
+  /* Allow the label column to shrink when space is limited. */
+  &--horizontal > .tedi-table-card-row > .tedi-table-card-row__label {
+    flex: 0 1 var(--_tedi-table-card-label-width);
+    min-width: 0;
+  }
+
+  &--row-align-center > .tedi-table-card-row {
+    align-items: center;
+  }
+
+  &--label-align-right > .tedi-table-card-row > .tedi-table-card-row__label {
+    justify-content: flex-end;
+    text-align: right;
+  }
+
+  &--value-align-right > .tedi-table-card-row > .tedi-table-card-row__value {
+    flex: 1;
+    justify-content: flex-end;
+    text-align: right;
+  }
+}
+
+.tedi-table-card-row {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  &__label {
+    display: flex;
+    gap: var(--content-label-inner-spacing-x);
+    align-items: flex-start;
+    margin: 0;
+  }
+
+  &__value {
+    display: flex;
+    gap: var(--text-group-value-inner-spacing);
+    align-items: center;
+    min-width: 0;
+    margin: 0;
+    color: var(--general-text-primary);
+    overflow-wrap: break-word;
+  }
+
+  &--bold > &__value {
+    font-weight: var(--body-bold-weight);
+  }
+}
