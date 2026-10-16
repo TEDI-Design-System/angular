@@ -23,6 +23,11 @@ import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.compo
 export default {
   title: "Community/Navigation/VerticalStepper",
   component: VerticalStepperComponent,
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
   decorators: [
     moduleMetadata({
       imports: [

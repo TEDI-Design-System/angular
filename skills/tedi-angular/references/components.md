@@ -110,10 +110,11 @@ the part of this document worth maintaining by hand.
 
 ### The `/tedi` and `/community` entry points collide
 
-This is the highest-value trap in the Angular library and it has no React equivalent. **25 selectors
+This is the highest-value trap in the Angular library and it has no React equivalent. **29 selectors
 are declared in both entry points, under identical class names**, including `tedi-card`,
 `tedi-modal`, `tedi-accordion`, `tedi-tabs`, `tedi-dropdown`, `tedi-form-field`, `tedi-pagination`,
-`tedi-search`, `tedi-tag`, `[tedi-floating-button]`, and the checkbox/radio group family.
+`tedi-search`, `tedi-tag`, `[tedi-floating-button]`, `tedi-vertical-stepper`, `tedi-vertical-stepper-item`, and the
+checkbox/radio group family.
 
 `CardComponent` from `/community` and `CardComponent` from `/tedi` are different components with
 different input APIs behind the same `<tedi-card>` tag. Consequences:
@@ -170,6 +171,12 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 **deprecated**: it has only `variant` / `size` / `axis`. The TEDI-Ready one adds `position`,
 `placement`, `offset` and `zIndex`. Import from `/tedi`.
 
+The two vertical steppers differ in shape, not just in inputs: Community nests
+`tedi-vertical-stepper-item` inside another item to make a sub-step, while TEDI-Ready has a separate
+`tedi-vertical-stepper-sub-item` (no Community equivalent, so that one tag is unambiguous). A
+Community template moved to `/tedi` still compiles, but its nested items land in the related-asset
+slot instead of the sub-step list.
+
 ### Composition constraints
 
 - **`[tedi-card-button]` projects a `tedi-card` and nothing else.** Other content is not projected.
@@ -177,6 +184,10 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   and the disabled state.
 - **`button[tedi-collapse-button]` goes on a native `<button>`.** The host *is* the button, so don't
   nest another one inside.
+- **`tedi-vertical-stepper-sub-item` must be projected straight into its step**, not wrapped in an
+  element. Anything else an item receives is treated as the step's related asset (status badge,
+  button, link) and rendered under the label. `@for` / `@if` around either tag is fine — items are
+  still numbered in source order and sub-steps still reach the sub-list.
 - **`tedi-table-columns-menu` must be a descendant of `<tedi-table>`.** It finds the table through
   DI (`TEDI_TABLE_CONTEXT`), so rendering it outside the table gives you nothing useful.
 - **`tedi-card` does not clip its content.** Tooltips, popovers, select dropdowns and absolutely

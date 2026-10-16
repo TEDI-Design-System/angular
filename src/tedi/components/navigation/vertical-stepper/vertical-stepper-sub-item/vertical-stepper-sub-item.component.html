@@ -1,0 +1,76 @@
+<span class="tedi-vertical-stepper-sub-item__indicator" aria-hidden="true">
+  <span class="tedi-vertical-stepper-sub-item__dot"></span>
+</span>
+<div class="tedi-vertical-stepper-sub-item__content">
+  @switch (element()) {
+    @case ("a") {
+      <a
+        class="tedi-vertical-stepper-sub-item__link"
+        [href]="href()"
+        [attr.aria-current]="current() ? 'step' : null"
+        (click)="onSelect($event)"
+      >
+        <ng-container [ngTemplateOutlet]="labelTemplate" />
+      </a>
+    }
+    @case ("button") {
+      <button
+        type="button"
+        class="tedi-vertical-stepper-sub-item__link"
+        [attr.aria-current]="current() ? 'step' : null"
+        (click)="onSelect($event)"
+      >
+        <ng-container [ngTemplateOutlet]="labelTemplate" />
+      </button>
+    }
+    @default {
+      <ng-container [ngTemplateOutlet]="labelTemplate" />
+    }
+  }
+  <div class="tedi-vertical-stepper-sub-item__end"><ng-content /></div>
+</div>
+
+<ng-template #labelTemplate>
+  <span
+    tedi-text
+    class="tedi-vertical-stepper-sub-item__label"
+    [modifiers]="state() === 'informative' ? 'small' : undefined"
+  >
+    <span class="tedi-vertical-stepper-sub-item__label-text">{{
+      label()
+    }}</span>
+    @if (state() === "completed") {
+      <tedi-icon
+        class="tedi-vertical-stepper-sub-item__label-icon"
+        name="check"
+        color="success"
+        [size]="16"
+      />
+    }
+    @if (state() === "error") {
+      <tedi-icon
+        class="tedi-vertical-stepper-sub-item__label-icon"
+        name="error"
+        color="danger"
+        [size]="16"
+      />
+    }
+    @switch (state()) {
+      @case ("completed") {
+        <span class="sr-only">
+          ({{ "vertical-stepper.completed" | tediTranslate }})</span
+        >
+      }
+      @case ("error") {
+        <span class="sr-only">
+          ({{ "vertical-stepper.error" | tediTranslate }})</span
+        >
+      }
+      @case ("disabled") {
+        <span class="sr-only">
+          ({{ "vertical-stepper.disabled" | tediTranslate }})</span
+        >
+      }
+    }
+  </span>
+</ng-template>
