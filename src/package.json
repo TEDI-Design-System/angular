@@ -7,6 +7,12 @@
   "exports": {
     "./index.css": {
       "default": "./index.css"
+    },
+    "./index-without-icons.css": {
+      "default": "./index-without-icons.css"
+    },
+    "./icons/*.css": {
+      "default": "./icons/*.css"
     }
   },
   "peerDependencies": {
@@ -28,7 +34,7 @@
   },
   "dependencies": {
     "@tanstack/angular-table": "^8.21.4",
-    "@tedi-design-system/core": "^6.8.1"
+    "@tedi-design-system/core": "6.11.2"
   },
   "publishConfig": {
     "access": "public"
