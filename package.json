@@ -1,6 +1,7 @@
 {
   "name": "@tedi-design-system/angular",
   "version": "0.0.0-semantic-version",
+  "license": "MIT",
   "type": "module",
   "main": "community.mjs",
   "module": "community.mjs",
