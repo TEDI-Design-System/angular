@@ -136,7 +136,9 @@ const meta: Meta<SelectComponent> = {
     },
     clearable: {
       control: "boolean",
-      description: "Whether to show a clear button when a value is selected.",
+      description:
+        "Whether to show a clear button when a value is selected. Set `false` to opt out.",
+      table: { defaultValue: { summary: "true" } },
     },
     showClearOnInteraction: {
       control: "boolean",
@@ -262,7 +264,7 @@ const meta: Meta<SelectComponent> = {
     placeholder: "Vali...",
     state: "default",
     size: "default",
-    clearable: false,
+    clearable: true,
     showClearOnInteraction: false,
     allowMultiple: false,
     showSelectAll: false,

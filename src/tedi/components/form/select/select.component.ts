@@ -10,6 +10,7 @@ import {
 } from "@angular/cdk/scrolling";
 import {
   AfterContentChecked,
+  booleanAttribute,
   AfterViewChecked,
   ChangeDetectionStrategy,
   Component,
@@ -190,9 +191,9 @@ export class SelectComponent<T = unknown>
 
   /**
    * Whether to show a clear button when a value is selected.
-   * @default false
+   * @default true
    */
-  clearable = input<boolean>(false);
+  clearable = input(true, { transform: booleanAttribute });
   /**
    * Show the clear button only while the filled select is hovered or focused.
    * Requires `clearable`.
@@ -242,6 +243,10 @@ export class SelectComponent<T = unknown>
    * Selected value, for use without a form directive. An array in multi-select
    * mode, the bare value otherwise. Unlike `[ngModel]` it applies on the first
    * render rather than a frame later. Do not combine with a form directive.
+   *
+   * `null`, `undefined` and `''` all mean nothing is selected, so
+   * `new FormControl('')` and `new FormControl(null)` both start the select empty,
+   * showing its placeholder.
    */
   value = input<unknown>(undefined);
 
@@ -676,7 +681,7 @@ export class SelectComponent<T = unknown>
     const options = this.searchTerm().trim()
       ? this.filteredOptions()
       : this.normalizedOptions();
-    const enabledOptions = options.filter((o) => !o.disabled);
+    const enabledOptions = this.bulkSelectable(options);
     if (enabledOptions.length === 0) return false;
 
     if (this.usesDefaultCompare()) {
@@ -695,7 +700,7 @@ export class SelectComponent<T = unknown>
     const options = this.searchTerm().trim()
       ? this.filteredOptions()
       : this.normalizedOptions();
-    const enabledOptions = options.filter((o) => !o.disabled);
+    const enabledOptions = this.bulkSelectable(options);
     if (enabledOptions.length === 0) return false;
 
     let selectedCount: number;
@@ -1198,9 +1203,12 @@ export class SelectComponent<T = unknown>
     const compareWith = this.compareWith();
     const selected = this.selectedValues();
     const isSelected = selected.some((v) => compareWith(v, value));
-    const newSelection = isSelected
-      ? selected.filter((v) => !compareWith(v, value))
-      : [...selected, value];
+    const newSelection = this.toSelection(
+      isSelected
+        ? selected.filter((v) => !compareWith(v, value))
+        : [...selected, value],
+      true,
+    );
 
     this.selectedValues.set(newSelection);
     this.onChange(newSelection);
@@ -1210,8 +1218,9 @@ export class SelectComponent<T = unknown>
     this.onTouched();
   }
 
+  /** Selects `value` in single-select mode, notifies the form and closes the dropdown. */
   private selectSingleValue(value: unknown): void {
-    this.selectedValues.set([value]);
+    this.selectedValues.set(this.toSelection(value, false));
     this.onChange(value);
     this.selectionChange.emit(value as T);
     if (this.clearSearchOnSelect()) this.searchTerm.set("");
@@ -1313,6 +1322,10 @@ export class SelectComponent<T = unknown>
     }
   }
 
+  /**
+   * Handles a selection change from the listbox: the select-all and group rows, or
+   * the new selection, which is emitted and written to the form.
+   */
   handleValueChange(event: { value: readonly unknown[] }): void {
     const values = event.value;
 
@@ -1353,6 +1366,7 @@ export class SelectComponent<T = unknown>
       } else {
         newSelection = [...values];
       }
+      newSelection = this.toSelection(newSelection, true);
       this.selectedValues.set(newSelection);
       this.onChange(newSelection);
       this.selectionChange.emit(newSelection as T[]);
@@ -1364,7 +1378,7 @@ export class SelectComponent<T = unknown>
       }
     } else {
       const selected = values[0] ?? null;
-      this.selectedValues.set(selected != null ? [selected] : []);
+      this.selectedValues.set(this.toSelection(selected, false));
       this.onChange(selected);
       this.selectionChange.emit(selected as T | null);
       if (this.clearSearchOnSelect()) {
@@ -1480,7 +1494,7 @@ export class SelectComponent<T = unknown>
     const group = this.optionGroups().find((g) => g.label === groupLabel);
     if (!group) return false;
 
-    const enabledGroupOptions = group.options.filter((o) => !o.disabled);
+    const enabledGroupOptions = this.bulkSelectable(group.options);
     if (enabledGroupOptions.length === 0) return false;
 
     const compareWith = this.compareWith();
@@ -1495,7 +1509,7 @@ export class SelectComponent<T = unknown>
     const group = this.optionGroups().find((g) => g.label === groupLabel);
     if (!group) return false;
 
-    const enabledGroupOptions = group.options.filter((o) => !o.disabled);
+    const enabledGroupOptions = this.bulkSelectable(group.options);
     if (enabledGroupOptions.length === 0) return false;
 
     const compareWith = this.compareWith();
@@ -1582,7 +1596,7 @@ export class SelectComponent<T = unknown>
     const options = isSearching
       ? this.filteredOptions()
       : this.normalizedOptions();
-    const enabledOptions = options.filter((o) => !o.disabled);
+    const enabledOptions = this.bulkSelectable(options);
     const deselecting = this.allOptionsSelected();
 
     let newSelection: unknown[];
@@ -1630,7 +1644,7 @@ export class SelectComponent<T = unknown>
     const group = this.optionGroups().find((g) => g.label === groupLabel);
     if (!group) return;
 
-    const enabledGroupOptions = group.options.filter((o) => !o.disabled);
+    const enabledGroupOptions = this.bulkSelectable(group.options);
     const groupValues = enabledGroupOptions.map((o) => o.value);
     const isGroupSelected = this.isGroupSelected(groupLabel);
     const compareWith = this.compareWith();
@@ -1658,11 +1672,21 @@ export class SelectComponent<T = unknown>
   onChange: (value: unknown) => void = () => {};
   onTouched: () => void = () => {};
 
+  /** Options that can take part in select-all and group selection: enabled, not `''`. */
+  private bulkSelectable(options: SelectOption<T>[]): SelectOption<T>[] {
+    return options.filter((o) => !o.disabled && o.value !== "");
+  }
+
+  /**
+   * `null`, `undefined` and `''` all mean nothing is selected, since `''` is a common
+   * form default for "no value" (`new FormControl('')`). Picking an option whose
+   * value is `''` therefore leaves nothing selected too.
+   */
   private toSelection(value: unknown, allowMultiple: boolean): unknown[] {
     if (allowMultiple) {
-      return Array.isArray(value) ? value : [];
+      return Array.isArray(value) ? value.filter((v) => v !== "") : [];
     }
-    return value != null ? [value] : [];
+    return value != null && value !== "" ? [value] : [];
   }
 
   writeValue(value: unknown): void {

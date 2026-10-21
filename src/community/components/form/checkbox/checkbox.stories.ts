@@ -20,7 +20,7 @@ export default {
   component: CheckboxComponent,
   parameters: {
     status: {
-      type: ["existsInTediReady"],
+      type: ["existsInTediReady", "deprecated"],
     },
   },
   args: {

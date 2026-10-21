@@ -1,3 +1,41 @@
+# [9.0.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.4...angular-9.0.0-rc.5) (2026-10-19)
+
+
+### Features
+
+* **icon:** Allow Loading A Single Icon Font Style [#774](https://github.com/TEDI-Design-System/angular/issues/774) ([#775](https://github.com/TEDI-Design-System/angular/issues/775)) ([74f906c](https://github.com/TEDI-Design-System/angular/commit/74f906cd8e558e305a50ef3e412f8c2934fcd8f8))
+
+# [9.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.3...angular-9.0.0-rc.4) (2026-10-09)
+
+
+### Bug Fixes
+
+* **time-picker:** correct item height and ignore engine-driven scrolls [#678](https://github.com/TEDI-Design-System/angular/issues/678) ([#681](https://github.com/TEDI-Design-System/angular/issues/681)) ([ee0d698](https://github.com/TEDI-Design-System/angular/commit/ee0d6983754a1180d0f8024da1c43bc92aedbb70))
+
+# [9.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.2...angular-9.0.0-rc.3) (2026-10-09)
+
+
+### Features
+
+* **input-group:** mark community InputGroup as deprecated [#762](https://github.com/TEDI-Design-System/angular/issues/762) ([#771](https://github.com/TEDI-Design-System/angular/issues/771)) ([8824272](https://github.com/TEDI-Design-System/angular/commit/8824272c4c98d3c3586fdcff4960cd62e627f785))
+
+# [9.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.1...angular-9.0.0-rc.2) (2026-10-07)
+
+
+### Features
+
+* **select:** clearable defaults to true [#745](https://github.com/TEDI-Design-System/angular/issues/745) ([#753](https://github.com/TEDI-Design-System/angular/issues/753)) ([78c907a](https://github.com/TEDI-Design-System/angular/commit/78c907a3dd9bd2fba7d6bbc0d182544f4244d728))
+
+
+### BREAKING CHANGES
+
+* **select:** tedi-select's clearable now defaults to true, so selects
+that showed no clear button now show one once they have a value. Pass
+[clearable]="false" to opt out.
+* **select:** an option with value '' now leaves the select empty
+instead of showing as selected. Use showSelectAll for "select all" in a
+multiselect, or the placeholder to label the empty state.
+
 # [9.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-8.2.0-rc.7...angular-9.0.0-rc.1) (2026-10-01)
 
 
