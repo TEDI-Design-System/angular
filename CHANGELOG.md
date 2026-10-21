@@ -1,3 +1,10 @@
+# [9.0.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.4...angular-9.0.0-rc.5) (2026-10-19)
+
+
+### Features
+
+* **icon:** Allow Loading A Single Icon Font Style [#774](https://github.com/TEDI-Design-System/angular/issues/774) ([#775](https://github.com/TEDI-Design-System/angular/issues/775)) ([74f906c](https://github.com/TEDI-Design-System/angular/commit/74f906cd8e558e305a50ef3e412f8c2934fcd8f8))
+
 # [9.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.3...angular-9.0.0-rc.4) (2026-10-09)
 
 
