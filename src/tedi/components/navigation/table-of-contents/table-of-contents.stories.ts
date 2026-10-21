@@ -22,6 +22,10 @@ import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-
 import { TableOfContentsItemSuffixDirective } from "./table-of-contents-item/table-of-contents-item-suffix.directive";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { TagComponent } from "../../tags/tag/tag.component";
+import { ButtonComponent } from "../../buttons/button/button.component";
+import { PopoverComponent } from "../../overlay/popover/popover.component";
+import { PopoverTriggerDirective } from "../../overlay/popover/popover-trigger/popover-trigger.directive";
+import { PopoverContentComponent } from "../../overlay/popover/popover-content/popover-content.component";
 
 const LOREM =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor " +
@@ -553,6 +557,43 @@ export const Bordered: Story = {
       <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [bordered]="true">
         ${items({ icon: true })}
       </tedi-table-of-contents>
+    `,
+  }),
+};
+
+/**
+ * The table of contents inside a popover, opened by a button. Use the
+ * `transparent` variant so the list doesn't add a second card inside the
+ * popover, and set `sticky` to `false` — the popover positions the list. Without
+ * the arrow and with `bottom-start` the popover lines up with the button like a
+ * dropdown.
+ */
+export const InPopover: Story = {
+  render: () => ({
+    moduleMetadata: {
+      imports: [
+        ButtonComponent,
+        PopoverComponent,
+        PopoverTriggerDirective,
+        PopoverContentComponent,
+      ],
+    },
+    template: `
+      <tedi-popover #popover position="bottom-start" [withArrow]="false">
+        <button tedi-button variant="neutral" tedi-popover-trigger>
+          {{ popover.isOpen() ? "Sulge sisukord" : "Ava sisukord" }}
+          <tedi-icon name="list" />
+        </button>
+        <tedi-popover-content>
+          <tedi-table-of-contents
+            variant="transparent"
+            [sticky]="false"
+            activeId="methods"
+          >
+            ${items()}
+          </tedi-table-of-contents>
+        </tedi-popover-content>
+      </tedi-popover>
     `,
   }),
 };
