@@ -669,7 +669,7 @@ export default {
     },
     calendarFullWidth: {
       description:
-        "Stretch the calendar across the modal body while keeping ordinary date buttons at their usual size. Only applies in modal mode.",
+        "Stretch the calendar across the modal body; cells keep a square aspect ratio and scale with the modal width (see Calendar `fullWidth`). Only applies in modal mode.",
       control: { type: "boolean" },
       table: {
         category: "inputs",

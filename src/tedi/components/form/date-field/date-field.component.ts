@@ -333,7 +333,7 @@ export class DateFieldComponent
   readonly modal = input<DateFieldModalInput>(false);
   /** Make the modal fullscreen: `true` always, `false` never, breakpoint name → fullscreen below that breakpoint. Only applies when the calendar actually opens as a modal. */
   readonly fullscreen = input<ModalFullscreen>(false);
-  /** Stretch the calendar across the modal body. Only applies in modal mode. */
+  /** Stretch the calendar across the modal body, scaling its cells (Calendar `fullWidth`). Only applies in modal mode. */
   readonly calendarFullWidth = input(false);
   /**
    * Custom formatter for the input's display string. Overrides the locale-aware

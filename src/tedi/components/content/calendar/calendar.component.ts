@@ -126,7 +126,10 @@ export class CalendarComponent implements ControlValueAccessor {
    * DateField overlay).
    */
   readonly bordered = input<boolean>(true);
-  /** Fill the available container width, distributing day columns evenly. */
+  /**
+   * Grow to fill the container's width instead of a fixed width; cells keep a
+   * square aspect ratio. Wrap in a sized container to control the scale.
+   */
   readonly fullWidth = input<boolean>(false);
   /**
    * Matchers that mark dates as disabled. Each matcher can be a `Date`, `Date[]`,
