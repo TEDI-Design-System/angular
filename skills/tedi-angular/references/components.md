@@ -201,6 +201,51 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
   name — if the icon carries meaning the text doesn't, compose a heading and an icon yourself.
 
+### File upload
+
+- **`tedi-file-upload`'s `inputId` names the hidden file input, but the add button is the control.**
+  Bind `<label tedi-label [for]>` to `inputId` as for any other control: clicking the label opens the
+  picker, and the field finds the label by its `for`, gives it an id if it has none, and names the add
+  button by the label *and* its own text. Nothing else can name the button, so a field without a label
+  announces only "Add attachment".
+- **`tedi-file-upload` has no separate "default" input, and owns its hint.** `[files]` seeds the
+  list, `[(files)]` keeps the parent in sync, `[formControl]` hands it to the form — bind a stable
+  reference, an inline literal is written back on every check. The field owns one hint: the allowed
+  types and size (from `accept` / `maxSize`, off with `showRestrictions`) followed by your `hint`
+  text. Put guidance there rather than projecting a `tedi-feedback-text` hint, which would make a
+  second one. It owns one validation message the same way, shown above the hint: pass an error of
+  your own, a server error say, through `error`, where it joins the field's rejection message, or a
+  confirmation through `success`, shown only while there is no error. A projected error or success
+  text would show below the hint as a second message.
+- **`tedi-file-upload` validates itself.** It registers on `NG_VALIDATORS`, so a bound control fails
+  with a `rejectedFiles` error while any `isValid: false` file is listed. By default a file that
+  fails `accept`, `maxSize` or `validator` is discarded and only the summary under the field remains;
+  `keepRejectedFiles` keeps it in the list, marked invalid, instead. It shows as a danger tag only
+  while two or more files are listed; a single file shows just its name. Filter on `isValid` before
+  uploading either way.
+- **A `tedi-file-upload` `validator` adds a rule but no hint.** It runs on every selected file, and
+  every rule a file breaks is reported in the one rejection summary, built-in reasons first. The
+  automatic hint cannot describe it, so describe the rule in `hint`.
+- **`maxSize` is in bytes**, the unit `File.size` is in — not megabytes as in React. The hint renders
+  it in whichever unit reads best.
+- **It selects files, it does not upload them.** `fileRemove` emits the single entry the user removed,
+  one event per file when clearing, so an in-flight upload can be aborted without diffing
+  `filesChange`. Set `isLoading` on a file yourself while it uploads: the tag shows a spinner and
+  loses its remove button.
+- **Below `md` it stacks**: files above a full-width button row, and the clear button becomes a text
+  button. There is no input for this.
+- **`readOnly` renders the files as a list named by the label**, even a single file, which is a list of
+  one. Keep the `<label tedi-label [for]>`: the hidden file input stays rendered, disabled, so the label
+  still has its target and clicking it opens nothing.
+- **The control turns touched when the file dialog closes**, by picking or cancelling, or when focus
+  leaves the add button within the page. Opening the dialog moves focus out of the page, and that blur
+  is ignored, so a `required` error does not appear behind the open dialog.
+- **It works without `tedi-form-field`**: it paints its own surface, clear button and restrictions
+  hint, and a sibling label still names the add button. `error`, `success` and `hint` work the same
+  either way. For any other
+  describing element, put its id in a static `aria-describedby` on the component, but not one ending
+  in `-hint`, `-error` or `-success` after `inputId`: the field uses those ids for its own messages.
+
 ### Clear buttons
 
 - **`showClearOnInteraction` belongs on the component that renders the clear button.** For a text
