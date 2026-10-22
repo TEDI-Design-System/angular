@@ -1,3 +1,10 @@
+# [9.0.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.6...angular-9.0.0-rc.7) (2026-10-22)
+
+
+### Bug Fixes
+
+* **dropdown:** keep checkbox trigger semantics and open on Enter [#669](https://github.com/TEDI-Design-System/angular/issues/669) ([#703](https://github.com/TEDI-Design-System/angular/issues/703)) ([5f7a52c](https://github.com/TEDI-Design-System/angular/commit/5f7a52c7c9d1f233af14aa2efb73d756f1e408c8))
+
 # [9.0.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.5...angular-9.0.0-rc.6) (2026-10-22)
 
 
