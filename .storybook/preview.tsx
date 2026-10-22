@@ -1,3 +1,4 @@
+import "./fixed-date";
 import { applicationConfig, Preview, StoryContext } from "@storybook/angular";
 import { provideRouter, withDisabledInitialNavigation } from "@angular/router";
 import { Theme } from "../src/tedi/services/theme/theme.service";
