@@ -1,3 +1,10 @@
+# [9.0.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.7...angular-9.0.0-rc.8) (2026-10-22)
+
+
+### Features
+
+* **popover:** add offset input [#802](https://github.com/TEDI-Design-System/angular/issues/802) ([#803](https://github.com/TEDI-Design-System/angular/issues/803)) ([710ef72](https://github.com/TEDI-Design-System/angular/commit/710ef722f50c1e600fec6a8444e8c8965fb092e3))
+
 # [9.0.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.6...angular-9.0.0-rc.7) (2026-10-22)
 
 
