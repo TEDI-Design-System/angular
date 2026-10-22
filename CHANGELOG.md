@@ -1,3 +1,10 @@
+# [9.0.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.5...angular-9.0.0-rc.6) (2026-10-22)
+
+
+### Features
+
+* **print:** add tediPrint directive [#651](https://github.com/TEDI-Design-System/angular/issues/651) ([#671](https://github.com/TEDI-Design-System/angular/issues/671)) ([8f2877f](https://github.com/TEDI-Design-System/angular/commit/8f2877f843e916a44635ce550dcf3839deb4c1f0))
+
 # [9.0.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.4...angular-9.0.0-rc.5) (2026-10-19)
 
 
