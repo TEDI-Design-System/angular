@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { DropdownItemValueComponent } from "./dropdown-item-value.component";
+import { OptionContentComponent } from "./option-content.component";
 
-describe("DropdownItemValueComponent", () => {
-  let fixture: ComponentFixture<DropdownItemValueComponent>;
+describe("OptionContentComponent", () => {
+  let fixture: ComponentFixture<OptionContentComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [DropdownItemValueComponent],
+      imports: [OptionContentComponent],
     });
 
-    fixture = TestBed.createComponent(DropdownItemValueComponent);
+    fixture = TestBed.createComponent(OptionContentComponent);
     fixture.detectChanges();
   });
 
@@ -23,7 +23,7 @@ describe("DropdownItemValueComponent", () => {
     fixture.detectChanges();
 
     const input = fixture.debugElement.query(
-      By.css(".tedi-dropdown-item-value__checkbox"),
+      By.css(".tedi-option-content__checkbox"),
     ).nativeElement as HTMLInputElement;
 
     expect(input.getAttribute("aria-hidden")).toBe("true");
@@ -35,7 +35,7 @@ describe("DropdownItemValueComponent", () => {
     fixture.detectChanges();
 
     const input = fixture.debugElement.query(
-      By.css(".tedi-dropdown-item-value__radio"),
+      By.css(".tedi-option-content__radio"),
     ).nativeElement as HTMLInputElement;
 
     expect(input.getAttribute("aria-hidden")).toBe("true");
