@@ -419,4 +419,12 @@ describe("Breadcrumbs", () => {
       expect(separators(fixture)).toHaveLength(2);
     });
   });
+
+  it("stays printable — breadcrumbs are context, not a control", () => {
+    const fixture = setup();
+    const breadcrumbs = fixture.debugElement.query(By.css("tedi-breadcrumbs"))
+      .nativeElement as HTMLElement;
+
+    expect(breadcrumbs.classList).not.toContain("no-print");
+  });
 });

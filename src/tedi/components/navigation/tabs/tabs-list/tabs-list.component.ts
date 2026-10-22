@@ -26,6 +26,7 @@ import { TediTranslationPipe } from "../../../../services/translation/translatio
 import { TabsComponent } from "../tabs.component";
 import { TabsTriggerComponent } from "../tabs-trigger/tabs-trigger.component";
 import { TabsOverflowContentDirective } from "./tabs-overflow-content.directive";
+import { PrintVisibility } from "../../../../directives/print";
 
 export type TabsOverflowMode = "dropdown" | "scroll";
 
@@ -57,6 +58,7 @@ interface OverflowItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: "tedi-tabs-list",
+    "[class.no-print]": "printVisibility() === 'hide'",
     "[class.tedi-tabs-list--fade-start]":
       "overflowMode() === 'scroll' && canScrollStart()",
     "[class.tedi-tabs-list--fade-end]":
@@ -83,6 +85,15 @@ export class TabsListComponent implements AfterViewInit, OnDestroy {
   readonly overflowMode = input<TabsOverflowMode>("dropdown");
   /** Label for the overflow dropdown trigger. Defaults to the `more` translation. */
   readonly dropdownLabel = input<string>();
+  /**
+   * Controls the visibility of the tablist when printing.
+   * - `show`: the tablist is printed (default), no print class is applied
+   * - `hide`: the tablist is left out of the printed output
+   *
+   * `tediPrint` on the same element composes with this: `tediPrint="show"`
+   * wins over `printVisibility="hide"`, matching the core `show-print` rule.
+   */
+  readonly printVisibility = input<PrintVisibility>("show");
 
   private readonly listRef =
     viewChild.required<ElementRef<HTMLDivElement>>("list");
