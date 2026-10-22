@@ -61,7 +61,7 @@ function releaseDrag(
 /**
  * Drives the real pointer handlers: presses at the first `[x, timeStamp]` point, moves
  * through the rest, then ends with `end` at `endAt` ms (a `pointerup` at `endX`, which
- * defaults to the last point).
+ * defaults to the last point). The pointer is a finger unless `pointerType` says otherwise.
  */
 function gesture(
   component: CarouselContentComponent,
@@ -69,11 +69,13 @@ function gesture(
   end: "pointerup" | "pointercancel" | "lostpointercapture",
   endAt: number,
   endX = points[points.length - 1][0],
+  pointerType = "touch",
 ) {
   const [[x0, t0], ...moves] = points;
   component.onPointerDown({
     clientX: x0,
     pointerId: 1,
+    pointerType,
     timeStamp: t0,
   } as PointerEvent);
   for (const [x, t] of moves) {
@@ -525,6 +527,58 @@ describe("CarouselContentComponent", () => {
         );
 
         expect(component.trackIndex()).toBe(0);
+      });
+
+      // 6px in 3ms is ~2 slides per second.
+      const shortFlick: [number, number][] = [
+        [500, 0],
+        [494, 2],
+      ];
+
+      it("moves on a short quick flick with a mouse", () => {
+        gesture(component, shortFlick, "pointerup", 3, 494, "mouse");
+
+        expect(component.trackIndex()).toBe(1);
+      });
+
+      it.each(["touch", "pen"])(
+        "ignores a short quick flick with %s, which can slip on press",
+        (pointerType) => {
+          gesture(component, shortFlick, "pointerup", 3, 494, pointerType);
+
+          expect(component.trackIndex()).toBe(0);
+        },
+      );
+
+      it("ignores mouse jitter under 4px, even when quick", () => {
+        gesture(
+          component,
+          [
+            [500, 0],
+            [497, 1],
+          ],
+          "pointerup",
+          2,
+          497,
+          "mouse",
+        );
+
+        expect(component.trackIndex()).toBe(0);
+      });
+
+      it("uses the touch distance again for a touch drag after a mouse drag", () => {
+        gesture(component, shortFlick, "pointerup", 3, 494, "mouse");
+        gesture(
+          component,
+          [
+            [500, 10],
+            [494, 12],
+          ],
+          "pointerup",
+          13,
+        );
+
+        expect(component.trackIndex()).toBe(1);
       });
     });
 

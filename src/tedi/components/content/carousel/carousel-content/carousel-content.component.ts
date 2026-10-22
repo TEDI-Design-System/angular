@@ -40,6 +40,9 @@ const FLICK_WINDOW = 100;
 /** Drags shorter than this (px) never move the carousel, so taps and jitter stay put. */
 const MIN_SWIPE_DISTANCE = 10;
 
+/** A mouse holds still while clicking, so a shorter drag is already deliberate. */
+const MIN_MOUSE_SWIPE_DISTANCE = 4;
+
 @Component({
   standalone: true,
   selector: "tedi-carousel-content",
@@ -334,6 +337,8 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   private lastTime = 0;
   /** Recent pointer positions, for measuring flick speed at release. */
   private samples: { x: number; t: number }[] = [];
+  /** The current drag's minimum swipe distance (px), set by its pointer type. */
+  private minSwipeDistance = MIN_SWIPE_DISTANCE;
   private ro?: ResizeObserver;
   private wheelTimeout?: ReturnType<typeof setTimeout>;
   private scrollDelta = 0;
@@ -461,6 +466,10 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
     this.lastX = ev.clientX;
     this.lastTime = ev.timeStamp;
     this.samples = [{ x: ev.clientX, t: ev.timeStamp }];
+    this.minSwipeDistance =
+      ev.pointerType === "mouse"
+        ? MIN_MOUSE_SWIPE_DISTANCE
+        : MIN_SWIPE_DISTANCE;
 
     if (this.loop()) {
       this.windowBase.set(Math.floor(this.startIndex));
@@ -540,7 +549,7 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   private swipeTarget(releasedAt: number): number {
     const dx = this.lastX - this.startX;
 
-    if (Math.abs(dx) < MIN_SWIPE_DISTANCE) {
+    if (Math.abs(dx) < this.minSwipeDistance) {
       return this.snap(this.startIndex);
     }
 
@@ -591,7 +600,7 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Whether the drag ended in a flick: at least `MIN_SWIPE_DISTANCE` of movement in the
+   * Whether the drag ended in a flick: at least `minSwipeDistance` of movement in the
    * drag direction within the last `FLICK_WINDOW` ms before release, fast enough. Measuring
    * up to the release lets a pause before the swipe pass and a hold after it slow it down.
    */
@@ -615,9 +624,9 @@ export class CarouselContentComponent implements AfterViewInit, OnDestroy {
       Math.sign(distance) === Math.sign(this.lastX - this.startX);
 
     if (
-      !(elapsed > 0) ||
+      elapsed <= 0 ||
       !sameDirection ||
-      Math.abs(distance) < MIN_SWIPE_DISTANCE
+      Math.abs(distance) < this.minSwipeDistance
     ) {
       return false;
     }
