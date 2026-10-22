@@ -121,6 +121,14 @@ describe("CalendarComponent", () => {
       expect(grids.length).toBe(1);
     });
 
+    it("only applies the full-width layout when requested", () => {
+      const host = fixture.nativeElement as HTMLElement;
+      expect(host.classList).not.toContain("tedi-calendar--full-width");
+      fixture.componentRef.setInput("fullWidth", true);
+      fixture.detectChanges();
+      expect(host.classList).toContain("tedi-calendar--full-width");
+    });
+
     it("renders the header", () => {
       const header = fixture.debugElement.query(
         By.css(".tedi-calendar-header"),
