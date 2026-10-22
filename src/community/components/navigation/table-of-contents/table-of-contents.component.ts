@@ -18,6 +18,7 @@ import {
   TediTranslationPipe,
   CardComponent,
   CardContentComponent,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 import { Dialog, DialogRef } from "@angular/cdk/dialog";
 import { NgTemplateOutlet } from "@angular/common";
@@ -145,6 +146,10 @@ export class TableOfContentsComponent implements OnDestroy, AfterContentInit {
   });
 
   constructor() {
+    warnDeprecated(
+      "Community tedi-table-of-contents",
+      "Use TableOfContents from TEDI-ready instead.",
+    );
     effect(() => {
       const items = this.tableItems();
       this.itemsChanged$.next();

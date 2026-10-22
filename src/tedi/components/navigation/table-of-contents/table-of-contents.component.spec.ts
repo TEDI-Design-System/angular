@@ -24,6 +24,7 @@ import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-
       [bordered]="bordered()"
       [sticky]="sticky()"
       [ariaLabel]="ariaLabel()"
+      [scrollActiveIntoView]="scrollActiveIntoView()"
     >
       <tedi-table-of-contents-item itemId="a">
         <a href="#a">Alpha</a>
@@ -53,6 +54,7 @@ class TreeHostComponent {
   readonly bordered = input(false);
   readonly sticky = input(true);
   readonly ariaLabel = input<string>();
+  readonly scrollActiveIntoView = input(false);
 }
 
 const setup = async (component: unknown) => {
@@ -237,5 +239,61 @@ describe("TableOfContentsComponent", () => {
     expect(
       fixture.debugElement.query(By.css(".tedi-table-of-contents--bordered")),
     ).toBeTruthy();
+  });
+
+  describe("scrollActiveIntoView", () => {
+    const rect = (top: number, bottom: number) => ({ top, bottom }) as DOMRect;
+
+    const createScrollableTree = async (rowTops: Record<string, number>) => {
+      await createTree();
+      fixture.componentRef.setInput("scrollActiveIntoView", true);
+      const scroller = fixture.debugElement.query(
+        By.css(".tedi-table-of-contents--sticky"),
+      ).nativeElement as HTMLElement;
+      scroller.style.overflowY = "auto";
+      Object.defineProperty(scroller, "scrollHeight", { value: 500 });
+      Object.defineProperty(scroller, "clientHeight", { value: 100 });
+      scroller.getBoundingClientRect = () => rect(0, 100);
+      scroller.scrollTo = jest.fn();
+      scroller.scrollBy = jest.fn();
+      Object.entries(rowTops).forEach(([label, top]) => {
+        const row = itemByLabel(label)?.querySelector<HTMLElement>(
+          ":scope > .tedi-table-of-contents__row",
+        );
+        if (row) row.getBoundingClientRect = () => rect(top, top + 20);
+      });
+      return scroller;
+    };
+
+    it("scrolls to the top when the first item becomes active", async () => {
+      const scroller = await createScrollableTree({ Alpha: 10 });
+      fixture.componentRef.setInput("activeId", "a");
+      fixture.detectChanges();
+
+      expect(scroller.scrollTo).toHaveBeenCalledWith(
+        expect.objectContaining({ top: 0 }),
+      );
+      expect(scroller.scrollBy).not.toHaveBeenCalled();
+    });
+
+    it("scrolls just enough to reveal another item above the visible area", async () => {
+      const scroller = await createScrollableTree({ Bravo: -40 });
+      fixture.componentRef.setInput("activeId", "b");
+      fixture.detectChanges();
+
+      expect(scroller.scrollBy).toHaveBeenCalledWith(
+        expect.objectContaining({ top: -48 }),
+      );
+      expect(scroller.scrollTo).not.toHaveBeenCalled();
+    });
+
+    it("does not scroll when the active item is already visible", async () => {
+      const scroller = await createScrollableTree({ Charlie: 40 });
+      fixture.componentRef.setInput("activeId", "c");
+      fixture.detectChanges();
+
+      expect(scroller.scrollBy).not.toHaveBeenCalled();
+      expect(scroller.scrollTo).not.toHaveBeenCalled();
+    });
   });
 });
