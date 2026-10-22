@@ -17,6 +17,7 @@ import { CheckboxCardGroupComponent } from "../checkbox-card-group/checkbox-card
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
 import { TextareaComponent } from "../textarea/textarea.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.76.92?node-id=15548-139124&m=dev" target="_blank">Figma ↗</a>
@@ -52,6 +53,7 @@ export default {
         FeedbackTextComponent,
         FormFieldComponent,
         TextareaComponent,
+        RowComponent,
       ],
     }),
   ],
@@ -173,7 +175,7 @@ export const States: Story = {
     },
   },
   render: () => ({
-    // One table (as in Figma) so every state row lines up across the three types.
+    // One table per type, side by side from md up and stacked on mobile so nothing scrolls sideways.
     props: {
       types: ["star", "number", "icon"],
       rows: [
@@ -185,53 +187,46 @@ export const States: Story = {
       capitalize: (type: string) => type[0].toUpperCase() + type.slice(1),
     },
     template: `
-      <div style="overflow-x: auto">
-        <table style="border-collapse: collapse">
-          <thead>
-            <tr>
-              <td></td>
-              @for (type of types; track type) {
-                <th colspan="2" scope="colgroup" style="padding: 0.5rem 1rem; text-align: left">
-                  <h3 tedi-text modifiers="h5">{{ capitalize(type) }}</h3>
-                </th>
-              }
-            </tr>
-            <tr>
-              <th><span class="sr-only">State</span></th>
-              @for (type of types; track type) {
-                @for (column of ["Default", "Selected"]; track column) {
-                  <th scope="col" style="padding: 0.5rem 1rem; text-align: left">
-                    <span tedi-text modifiers="bold">{{ column }}</span>
-                  </th>
-                }
-              }
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of rows; track row.label) {
-              <tr [attr.id]="row.state ? 'rating-' + row.state : null">
-                <th scope="row" style="padding: 0.5rem 1rem 0.5rem 0; text-align: left">
-                  <span tedi-text modifiers="bold">{{ row.label }}</span>
-                </th>
-                @for (type of types; track type) {
-                  @for (selected of [0, 1]; track selected) {
-                    <td style="padding: 0.5rem 1rem; vertical-align: middle">
-                      <tedi-rating
-                        [type]="type"
-                        [count]="1"
-                        [value]="selected"
-                        [disabled]="!!row.disabled"
-                        [icons]="type === 'icon' ? ['sentiment_satisfied'] : undefined"
-                        [label]="type + ' ' + row.label + ' ' + (selected ? 'selected' : 'default')"
-                      />
-                    </td>
+      <tedi-row [cols]="1" [md]="{ cols: 3 }" [gapY]="5">
+        @for (type of types; track type) {
+          <div>
+            <h3 tedi-text modifiers="h5">{{ capitalize(type) }}</h3>
+            <table style="border-collapse: collapse">
+              <thead>
+                <tr>
+                  <th><span class="sr-only">State</span></th>
+                  @for (column of ["Default", "Selected"]; track column) {
+                    <th scope="col" style="padding: 0.5rem 1rem; text-align: left">
+                      <span tedi-text modifiers="bold">{{ column }}</span>
+                    </th>
                   }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of rows; track row.label) {
+                  <tr [attr.id]="row.state ? 'rating-' + row.state + '-' + type : null">
+                    <th scope="row" style="padding: 0.5rem 1rem 0.5rem 0; text-align: left">
+                      <span tedi-text modifiers="bold">{{ row.label }}</span>
+                    </th>
+                    @for (selected of [0, 1]; track selected) {
+                      <td style="padding: 0.5rem 1rem; vertical-align: middle">
+                        <tedi-rating
+                          [type]="type"
+                          [count]="1"
+                          [value]="selected"
+                          [disabled]="!!row.disabled"
+                          [icons]="type === 'icon' ? ['sentiment_satisfied'] : undefined"
+                          [label]="type + ' ' + row.label + ' ' + (selected ? 'selected' : 'default')"
+                        />
+                      </td>
+                    }
+                  </tr>
                 }
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+              </tbody>
+            </table>
+          </div>
+        }
+      </tedi-row>
     `,
   }),
 };

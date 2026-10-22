@@ -83,9 +83,49 @@ describe("RatingComponent", () => {
       type: "number",
       itemLabels: ["Low", "", "", "", "", "", "", "", "", "High"],
     });
-    expect(radio("Low")).toBeTruthy();
-    expect(radio("High")).toBeTruthy();
+    expect(radio("1, Low")).toBeTruthy();
+    expect(radio("10, High")).toBeTruthy();
     expect(radio("5/10")).toBeTruthy();
+  });
+
+  it("keeps the selected radio checked through a native form reset", () => {
+    const form = document.createElement("form");
+    document.body.appendChild(form);
+    form.appendChild(el);
+    radio("4/5").click();
+    fixture.detectChanges();
+
+    form.reset();
+
+    expect(radio("4/5").checked).toBe(true);
+    expect(component.value()).toBe(4);
+    form.remove();
+  });
+
+  it("uses itemLabels alone as accessible names for the icon type", () => {
+    setInputs({
+      type: "icon",
+      itemLabels: ["Bad", "Meh", "Ok", "Good", "Great"],
+    });
+    expect(radio("Good")).toBeTruthy();
+  });
+
+  it("ignores non-array itemLabels and icons instead of crashing", () => {
+    const notArray = {} as unknown as string[];
+    setInputs({ type: "icon", itemLabels: notArray, icons: notArray });
+    expect(radios()).toHaveLength(5);
+    expect(radio("1/5")).toBeTruthy();
+  });
+
+  it("warns when type='icon' has no icons for a count other than 5", () => {
+    const warn = jest
+      .spyOn(console, "warn")
+      .mockImplementation(() => undefined);
+    setInputs({ type: "icon", count: 3 });
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("Pass `icons` for count=3"),
+    );
+    warn.mockRestore();
   });
 
   it("shows captions only at the endpoints of the number scale", () => {

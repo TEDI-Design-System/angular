@@ -3,9 +3,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   forwardRef,
   inject,
   input,
+  isDevMode,
   model,
   signal,
   ViewEncapsulation,
@@ -30,11 +32,11 @@ const STAR_ICON_SIZE: IconSize = 24;
 const CIRCLE_ICON_SIZE: IconSize = 18;
 
 const DEFAULT_ICONS = [
-  "sentiment_very_dissatisfied",
+  "sentiment_sad",
   "sentiment_dissatisfied",
   "sentiment_neutral",
   "sentiment_satisfied",
-  "sentiment_very_satisfied",
+  "mood",
 ];
 
 interface RatingItem {
@@ -192,11 +194,16 @@ export class RatingComponent implements ControlValueAccessor {
     return value.xs;
   });
 
+  private readonly labels = computed(() => {
+    const labels = this.itemLabels();
+    return Array.isArray(labels) ? labels : undefined;
+  });
+
   private readonly iconList = computed(() => {
     const icons = this.icons();
     return Array.isArray(icons)
       ? icons
-      : icons !== undefined
+      : typeof icons === "string"
         ? [icons]
         : undefined;
   });
@@ -215,7 +222,7 @@ export class RatingComponent implements ControlValueAccessor {
     const current = this.value();
     const hovering = this.isHovering();
     const hover = this.hoverValue() ?? 0;
-    const labels = this.itemLabels();
+    const labels = this.labels();
     const icons = this.resolvedIcons();
 
     return Array.from({ length: total }, (_, index) => {
@@ -235,8 +242,7 @@ export class RatingComponent implements ControlValueAccessor {
         selected,
         previewed,
         icon: icons?.[index] ?? "circle",
-        // Language-neutral fallback (matches the read-only `value/total` summary format).
-        accessibleName: label || `${position}/${total}`,
+        accessibleName: this.accessibleName(position, total, label),
         caption:
           label && (type === "icon" || (type === "number" && isEndpoint))
             ? label
@@ -246,11 +252,11 @@ export class RatingComponent implements ControlValueAccessor {
   });
 
   readonly hasCaptions = computed(
-    () => this.type() !== "star" && !!this.itemLabels()?.some(Boolean),
+    () => this.type() !== "star" && !!this.labels()?.some(Boolean),
   );
 
   readonly starCaption = computed(() => {
-    const labels = this.itemLabels();
+    const labels = this.labels();
     if (this.type() !== "star" || !labels?.some(Boolean)) return undefined;
     const display = this.isHovering() ? this.hoverValue()! : this.value();
     return display > 0 ? (labels[display - 1] ?? "") : "";
@@ -300,6 +306,22 @@ export class RatingComponent implements ControlValueAccessor {
     return classList.join(" ");
   });
 
+  constructor() {
+    effect(() => {
+      const total = this.total();
+      if (
+        isDevMode() &&
+        this.type() === "icon" &&
+        !this.iconList() &&
+        total !== DEFAULT_ICONS.length
+      ) {
+        console.warn(
+          `tedi-rating: type="icon" provides default icons only for count=${DEFAULT_ICONS.length}. Pass \`icons\` for count=${total}.`,
+        );
+      }
+    });
+  }
+
   writeValue(value: number | null): void {
     this.value.set(value ?? 0);
   }
@@ -328,6 +350,17 @@ export class RatingComponent implements ControlValueAccessor {
 
   handleBlur(): void {
     this.onTouched();
+  }
+
+  // Language-neutral fallback (matches the read-only `value/total` summary format). The number scale
+  // shows the digit, so it leads the name for speech users targeting the visible text.
+  private accessibleName(
+    position: number,
+    total: number,
+    label: string | undefined,
+  ): string {
+    if (!label) return `${position}/${total}`;
+    return this.type() === "number" ? `${position}, ${label}` : label;
   }
 
   private isInRange(position: number, target: number): boolean {

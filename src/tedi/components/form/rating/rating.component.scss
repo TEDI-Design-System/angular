@@ -20,6 +20,10 @@
   gap: var(--layout-grid-gutters-08);
 }
 
+.tedi-rating--number .tedi-rating__items {
+  column-gap: var(--layout-grid-gutters-24);
+}
+
 .tedi-rating__item {
   position: relative;
   display: inline-flex;
@@ -66,7 +70,9 @@
 .tedi-rating .tedi-rating__star {
   position: relative; // paint above the absolutely positioned backdrop
   line-height: 1;
-  color: var(--general-text-brand);
+
+  // TODO: --form-rating-unselected-text-default (core update #784)
+  color: var(--button-main-secondary-text-default);
   text-align: center;
 }
 
@@ -102,11 +108,11 @@
 }
 
 .tedi-rating:not(.tedi-rating--disabled) {
-
   .tedi-rating__visual--hover,
-  .tedi-rating__item:hover>.tedi-rating__visual {
+  .tedi-rating__item:hover > .tedi-rating__visual {
     .tedi-rating__star {
-      color: var(--general-icon-brand-dark);
+      // TODO: --form-rating-selected-border-hover (core update #784)
+      color: var(--button-main-primary-background-hover);
     }
 
     .tedi-rating__star-backdrop {
@@ -127,7 +133,7 @@
   }
 }
 
-.tedi-rating__input:focus-visible+.tedi-rating__visual::after {
+.tedi-rating__input:focus-visible + .tedi-rating__visual::after {
   position: absolute;
   inset: -3px;
   pointer-events: none;
@@ -136,6 +142,13 @@
   box-shadow:
     inset 0 0 0 2px var(--general-effect-colors-focus-outset-outer-shadow),
     inset 0 0 0 3px var(--general-effect-colors-focus-outset-inner-shadow);
+}
+
+// The star visual carries padding around the glyph; the ring hugs the glyph itself.
+.tedi-rating--star
+  .tedi-rating__input:focus-visible
+  + .tedi-rating__visual::after {
+  inset: calc(var(--feedback-star-inner-spacing) - 3px);
 }
 
 .tedi-rating__caption {
@@ -228,7 +241,8 @@
 }
 
 @include breakpoints.media-breakpoint-down(md) {
-  .tedi-rating--number:not(.tedi-rating--readonly, .tedi-rating--vertical) .tedi-rating__items {
+  .tedi-rating--number:not(.tedi-rating--readonly, .tedi-rating--vertical)
+    .tedi-rating__items {
     column-gap: var(--layout-grid-gutters-04);
   }
 }

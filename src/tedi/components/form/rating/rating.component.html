@@ -60,6 +60,7 @@
           [name]="groupName()"
           [value]="item.position"
           [checked]="value() === item.position"
+          [attr.checked]="value() === item.position ? '' : null"
           [disabled]="isDisabled()"
           [attr.aria-label]="item.accessibleName"
           (change)="select(item.position)"
