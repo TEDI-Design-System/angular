@@ -781,7 +781,8 @@ export const Default: StoryObj = {
     },
     scrollBehavior: { control: "select", options: ["content", "page"] },
     fullscreen: {
-      control: "text",
+      control: "select",
+      options: [false, true, "sm", "md", "lg", "xl", "xxl"],
       description:
         "Set `true` for always fullscreen or a breakpoint string (`sm`, `md`, `lg`, `xl`, `xxl`).",
     },
