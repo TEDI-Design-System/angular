@@ -1,3 +1,10 @@
+# [9.0.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.8...angular-9.0.0-rc.9) (2026-10-22)
+
+
+### Bug Fixes
+
+* **modal:** support left and right footer content [#668](https://github.com/TEDI-Design-System/angular/issues/668) ([#711](https://github.com/TEDI-Design-System/angular/issues/711)) ([d0bd5da](https://github.com/TEDI-Design-System/angular/commit/d0bd5dade98ef910843c817353ad2e4c918b4377))
+
 # [9.0.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.7...angular-9.0.0-rc.8) (2026-10-22)
 
 
