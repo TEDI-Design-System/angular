@@ -1,3 +1,10 @@
+# [9.0.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.9...angular-9.0.0-rc.10) (2026-10-23)
+
+
+### Features
+
+* **carousel:** add swipeThreshold input and improve swipe navigation [#187](https://github.com/TEDI-Design-System/angular/issues/187) ([#733](https://github.com/TEDI-Design-System/angular/issues/733)) ([834fa55](https://github.com/TEDI-Design-System/angular/commit/834fa55bbaf181bfeb284c9d7176fac3177cdb8d))
+
 # [9.0.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.8...angular-9.0.0-rc.9) (2026-10-22)
 
 
