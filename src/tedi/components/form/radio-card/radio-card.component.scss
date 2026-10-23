@@ -274,7 +274,7 @@ label[tedi-radio-card] {
 
       &:has(input:disabled:not(:checked)) {
         --_card-border: var(
-          --form-choice-card-secondary-unselected-border-disabled
+          --form-choice-card-primary-unselected-border-disabled
         );
       }
 

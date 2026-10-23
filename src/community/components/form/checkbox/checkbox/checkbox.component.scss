@@ -68,6 +68,9 @@
 
   &:has(input:active) {
     --_checkbox-border: var(--form-choice-checkbox-unselected-border-active);
+  }
+
+  &:has(input:checked:active, input:indeterminate:active) {
     --_checkbox-bg: var(--form-choice-checkbox-selected-active);
   }
 

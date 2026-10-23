@@ -117,6 +117,20 @@ export default {
         },
       },
     },
+    bordered: {
+      control: "boolean",
+      description:
+        "Show a border on an unselected primary card. Has no effect on grouped cards, which always have a border.",
+      table: {
+        category: "Radio Card",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: {
+          summary: "false",
+        },
+      },
+    },
     showIndicator: {
       control: "boolean",
       description:

@@ -156,9 +156,22 @@ li[tedi-dropdown-item],
 
   &:hover:not(.tedi-dropdown-item--disabled, [aria-disabled="true"]) {
     .tedi-dropdown-item-value__radio {
-      background-color: var(--form-choice-radio-unselected-background-default);
-      border-color: var(--form-choice-radio-unselected-border-hover);
       border-width: var(--tedi-borders-02);
+
+      &:not(:checked) {
+        background-color: var(
+          --form-choice-radio-unselected-background-default
+        );
+        border-color: var(--form-choice-radio-unselected-border-hover);
+      }
+
+      &:checked {
+        border-color: var(--form-choice-radio-selected-border-hover);
+
+        &::before {
+          background: var(--form-choice-radio-selected-indicator-hover);
+        }
+      }
     }
   }
 }
