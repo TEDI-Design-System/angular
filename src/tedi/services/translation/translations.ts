@@ -1565,6 +1565,14 @@ export const translationsMap = {
     en: "Error",
     ru: "Oшибка",
   },
+  "vertical-stepper.disabled": {
+    description:
+      "Label for screen-reader that this step is not available (visually hidden)",
+    components: ["VerticalStepper"],
+    et: "Pole saadaval",
+    en: "Not available",
+    ru: "Недоступно",
+  },
 };
 
 export type TediTranslationsMap<L extends Language> = {

@@ -1,0 +1,237 @@
+@use "../vertical-stepper.mixins" as *;
+
+.tedi-vertical-stepper-item {
+  --tedi-vertical-stepper-item-fill: var(--stepper-step-default-bg);
+  --tedi-vertical-stepper-item-stroke: var(--stepper-step-default-border);
+
+  display: block;
+}
+
+.tedi-vertical-stepper-item__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--tedi-vertical-stepper-step-size) minmax(0, 1fr);
+  column-gap: var(--tedi-vertical-stepper-gap);
+  min-height: var(--tedi-vertical-stepper-min-height);
+  padding-top: var(--tedi-vertical-stepper-padding-top);
+
+  &::before {
+    @include stepper-line;
+  }
+}
+
+.tedi-vertical-stepper-item:first-child .tedi-vertical-stepper-item__row {
+  min-height: var(--tedi-vertical-stepper-min-height-first);
+  padding-top: 0;
+
+  &::before {
+    top: calc(var(--body-regular-line-height) / 2);
+  }
+}
+
+.tedi-vertical-stepper-item:last-child:not(
+    .tedi-vertical-stepper-item--expanded
+  )
+  .tedi-vertical-stepper-item__row::before {
+  bottom: auto;
+  height: calc(
+    var(--tedi-vertical-stepper-padding-top) + var(--body-regular-line-height) /
+      2
+  );
+}
+
+.tedi-vertical-stepper-item:only-child:not(
+    .tedi-vertical-stepper-item--expanded
+  )
+  .tedi-vertical-stepper-item__row::before {
+  display: none;
+}
+
+.tedi-vertical-stepper-item__indicator {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  align-self: start;
+  justify-content: center;
+  width: var(--tedi-vertical-stepper-step-size);
+  height: var(--tedi-vertical-stepper-step-size);
+  margin-top: calc(
+    (var(--body-regular-line-height) - var(--tedi-vertical-stepper-step-size)) /
+      2
+  );
+  background-color: var(--tedi-vertical-stepper-item-fill);
+  border: var(--tedi-borders-01) solid var(--tedi-vertical-stepper-item-stroke);
+  border-radius: 50%;
+}
+
+.tedi-vertical-stepper-item__number {
+  font-size: var(--body-small-regular-size);
+  font-weight: var(--body-bold-weight);
+  line-height: 1;
+  color: var(--general-text-secondary);
+}
+
+.tedi-vertical-stepper-item__content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.tedi-vertical-stepper-item__header {
+  display: flex;
+  gap: var(--tedi-vertical-stepper-gap);
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.tedi-vertical-stepper-item__toggle {
+  flex-shrink: 0;
+  margin-top: calc(
+    (var(--body-regular-line-height) - var(--button-sm-icon-size)) / 2
+  );
+
+  .tedi-collapse-button__icon {
+    color: var(--link-primary-default);
+  }
+}
+
+.tedi-vertical-stepper-item__link {
+  @include stepper-link(".tedi-vertical-stepper-item__label-text");
+}
+
+.tedi-vertical-stepper-item__label {
+  min-width: 0;
+  color: var(--stepper-item-vertical-text-default);
+  overflow-wrap: anywhere;
+}
+
+.tedi-vertical-stepper-item__number-prefix {
+  text-align: right;
+}
+
+.tedi-vertical-stepper-item__label-content {
+  display: flex;
+  gap: var(--layout-grid-gutters-08);
+  align-items: center;
+  min-width: 0;
+}
+
+.tedi-vertical-stepper-item__label-icon {
+  flex-shrink: 0;
+}
+
+.tedi-vertical-stepper-item__end:not(:empty) {
+  @include stepper-related-content;
+}
+
+.tedi-vertical-stepper-item__sub-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.tedi-vertical-stepper-item--completed {
+  --tedi-vertical-stepper-item-fill: var(--stepper-step-completed-bg);
+  --tedi-vertical-stepper-item-stroke: var(--stepper-step-completed-bg);
+
+  .tedi-vertical-stepper-item__number {
+    color: var(--general-text-white);
+  }
+}
+
+.tedi-vertical-stepper-item--error {
+  --tedi-vertical-stepper-item-fill: var(--stepper-step-danger-bg);
+  --tedi-vertical-stepper-item-stroke: var(--stepper-step-danger-bg);
+
+  .tedi-vertical-stepper-item__number {
+    color: var(--general-text-white);
+  }
+}
+
+.tedi-vertical-stepper-item--current {
+  --tedi-vertical-stepper-item-fill: var(--stepper-step-selected-bg);
+  --tedi-vertical-stepper-item-stroke: var(--stepper-step-selected-border);
+
+  .tedi-vertical-stepper-item__indicator {
+    border-width: var(--tedi-borders-02);
+  }
+
+  .tedi-vertical-stepper-item__number,
+  .tedi-vertical-stepper-item__label {
+    font-weight: var(--body-bold-weight);
+    color: var(--stepper-item-vertical-text-selected);
+  }
+}
+
+.tedi-vertical-stepper-item--disabled {
+  --tedi-vertical-stepper-item-fill: var(--stepper-step-disabled-bg);
+  --tedi-vertical-stepper-item-stroke: var(--stepper-step-disabled-border);
+
+  .tedi-vertical-stepper-item__number,
+  .tedi-vertical-stepper-item__label {
+    color: var(--stepper-item-vertical-text-disabled);
+  }
+}
+
+.tedi-vertical-stepper-item--default:not(
+    .tedi-vertical-stepper-item--current
+  ):has(.tedi-vertical-stepper-item__link:hover) {
+  --tedi-vertical-stepper-item-stroke: var(--stepper-step-default-border-hover);
+}
+
+.tedi-vertical-stepper-item--completed:not(
+    .tedi-vertical-stepper-item--current
+  ):has(.tedi-vertical-stepper-item__link:hover) {
+  --tedi-vertical-stepper-item-fill: var(--stepper-step-completed-bg-hover);
+  --tedi-vertical-stepper-item-stroke: var(--stepper-step-completed-bg-hover);
+}
+
+.tedi-vertical-stepper-item--error:not(
+    .tedi-vertical-stepper-item--current
+  ):has(.tedi-vertical-stepper-item__link:hover) {
+  --tedi-vertical-stepper-item-fill: var(--stepper-step-danger-bg-hover);
+  --tedi-vertical-stepper-item-stroke: var(--stepper-step-danger-bg-hover);
+}
+
+.tedi-vertical-stepper-item--current:has(
+  .tedi-vertical-stepper-item__link:hover
+) {
+  --tedi-vertical-stepper-item-stroke: var(
+    --stepper-step-selected-border-hover
+  );
+}
+
+.tedi-vertical-stepper--compact {
+  .tedi-vertical-stepper-item--completed:not(
+      .tedi-vertical-stepper-item--current
+    )
+    .tedi-vertical-stepper-item__indicator,
+  .tedi-vertical-stepper-item--error:not(.tedi-vertical-stepper-item--current)
+    .tedi-vertical-stepper-item__indicator {
+    color: var(--general-text-white);
+    border: 0;
+  }
+
+  .tedi-vertical-stepper-item--current .tedi-vertical-stepper-item__indicator {
+    border-width: var(--tedi-borders-04);
+  }
+}
+
+.tedi-vertical-stepper-item--numbered {
+  .tedi-vertical-stepper-item__label {
+    display: grid;
+    grid-template-columns: var(--tedi-dimensions-13) minmax(0, 1fr);
+    column-gap: var(--layout-grid-gutters-02);
+  }
+
+  .tedi-vertical-stepper-item__description,
+  .tedi-vertical-stepper-item__end {
+    margin-left: calc(
+      var(--tedi-dimensions-13) + var(--layout-grid-gutters-02)
+    );
+  }
+}
