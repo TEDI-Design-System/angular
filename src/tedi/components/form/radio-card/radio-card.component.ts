@@ -22,6 +22,7 @@ export type RadioCardVariant = "primary" | "secondary";
     "[class.tedi-radio-card--primary]": "variant() === 'primary'",
     "[class.tedi-radio-card--secondary]": "variant() === 'secondary'",
     "[class.tedi-radio-card--grouped]": "isGrouped()",
+    "[class.tedi-radio-card--bordered]": "isBordered()",
     "[class.tedi-radio-card--hide-indicator]": "!showIndicator()",
   },
 })
@@ -32,7 +33,7 @@ export class RadioCardComponent {
    */
   readonly variant = input<RadioCardVariant>("primary");
   /**
-   * Whether the card is part of a button-group style layout. Prefer setting
+   * Show the card as part of a button-group style layout. Prefer setting
    * `grouped` on the enclosing `tedi-radio-card-group` instead; this input
    * is retained for standalone cards outside a group.
    *
@@ -44,8 +45,16 @@ export class RadioCardComponent {
   readonly grouped = input(false);
 
   /**
-   * Whether to show the radio indicator.
-   * When false, the radio is visually hidden but remains functional.
+   * Gives a primary card a border in the unselected state. Can also be set on
+   * the enclosing `tedi-radio-card-group`. Only applies to `variant="primary"`;
+   * has no effect on grouped cards, which always have a border.
+   * @default false
+   */
+  readonly bordered = input(false);
+
+  /**
+   * Show the radio indicator.
+   * When false, the radio is visually hidden but stays functional.
    * @default true
    */
   readonly showIndicator = input<boolean>(true);
@@ -56,5 +65,9 @@ export class RadioCardComponent {
 
   readonly isGrouped = computed(
     () => this.grouped() || (this.cardGroup?.grouped() ?? false),
+  );
+
+  readonly isBordered = computed(
+    () => this.bordered() || (this.cardGroup?.bordered() ?? false),
   );
 }
