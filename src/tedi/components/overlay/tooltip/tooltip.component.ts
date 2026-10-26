@@ -20,6 +20,7 @@ import {
   CdkConnectedOverlay,
   ConnectedOverlayPositionChange,
 } from "@angular/cdk/overlay";
+import { FloatingOverlayDirective } from "../floating-overlay/floating-overlay.directive";
 import {
   OverlayPosition,
   OverlaySide,
@@ -39,7 +40,7 @@ let tooltipIdCounter = 0;
 @Component({
   standalone: true,
   selector: "tedi-tooltip",
-  imports: [OverlayModule],
+  imports: [OverlayModule, FloatingOverlayDirective],
   templateUrl: "./tooltip.component.html",
   styleUrl: "./tooltip.component.scss",
   encapsulation: ViewEncapsulation.None,

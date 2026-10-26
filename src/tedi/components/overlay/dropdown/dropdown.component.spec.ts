@@ -250,7 +250,7 @@ describe("DropdownComponent", () => {
 
   const getItems = () =>
     Array.from(
-      overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+      document.querySelectorAll("li[tedi-dropdown-item]"),
     ) as HTMLLIElement[];
 
   const openDropdown = () => {
@@ -943,9 +943,7 @@ describe("DropdownComponent", () => {
       expect(trigger.getAttribute("aria-controls")).toBe(
         dropdown.containerId(),
       );
-      expect(overlayContainerElement.querySelector("ul")?.id).toBe(
-        dropdown.containerId(),
-      );
+      expect(document.querySelector("ul")?.id).toBe(dropdown.containerId());
 
       dropdown.hideDropdown();
       fixture.detectChanges();
@@ -1190,7 +1188,7 @@ describe("DropdownComponent", () => {
       interactiveFixture.detectChanges();
 
       itemEls = Array.from(
-        overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+        document.querySelectorAll("li[tedi-dropdown-item]"),
       ) as HTMLLIElement[];
       links = itemEls.map((el) => el.querySelector("a") as HTMLAnchorElement);
     });
@@ -1314,7 +1312,7 @@ describe("DropdownComponent", () => {
 
     it("moves the option selection contract onto the control", () => {
       const itemEls = Array.from(
-        overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+        document.querySelectorAll("li[tedi-dropdown-item]"),
       ) as HTMLLIElement[];
       const optionLinks = itemEls.map(
         (el) => el.querySelector("a") as HTMLAnchorElement,

@@ -14,6 +14,7 @@ import {
   Renderer2,
 } from "@angular/core";
 import { OverlayContainer, OverlayModule } from "@angular/cdk/overlay";
+import { FloatingOverlayDirective } from "../floating-overlay/floating-overlay.directive";
 import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
@@ -32,7 +33,7 @@ let dropdownIdCounter = 0;
 @Component({
   standalone: true,
   selector: "tedi-dropdown",
-  imports: [OverlayModule],
+  imports: [OverlayModule, FloatingOverlayDirective],
   templateUrl: "./dropdown.component.html",
   styleUrl: "./dropdown.component.scss",
   encapsulation: ViewEncapsulation.None,

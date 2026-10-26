@@ -8,9 +8,14 @@ import {
 } from "@angular/core";
 import { Dialog, DialogRef } from "@angular/cdk/dialog";
 import { _IdGenerator } from "@angular/cdk/a11y";
-import { GlobalPositionStrategy, Overlay } from "@angular/cdk/overlay";
+import {
+  GlobalPositionStrategy,
+  Overlay,
+  OverlayContainer,
+} from "@angular/cdk/overlay";
 import { ComponentType } from "@angular/cdk/portal";
 import { ModalRef } from "./modal-ref";
+import { raiseOverlayContainer } from "../floating-overlay/floating-position-strategy";
 import { resolveModalHeadingId } from "./modal-label";
 import {
   ModalConfig,
@@ -27,6 +32,7 @@ const WIDTH_PRESETS: readonly string[] = ["xs", "sm", "md", "lg", "xl"];
 export class ModalService {
   private readonly dialog = inject(Dialog);
   private readonly overlay = inject(Overlay);
+  private readonly overlayContainer = inject(OverlayContainer);
   private readonly injector = inject(Injector);
   private readonly idGenerator = inject(_IdGenerator);
   private readonly errorHandler = inject(ErrorHandler);
@@ -77,6 +83,8 @@ export class ModalService {
     const isPresetWidth = WIDTH_PRESETS.includes(width);
 
     let modalRef!: ModalRef<R>;
+
+    raiseOverlayContainer(this.overlayContainer.getContainerElement());
 
     const dialogRef = this.dialog.open<R, D>(component, {
       data,

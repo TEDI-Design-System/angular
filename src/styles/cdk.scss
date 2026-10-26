@@ -7,3 +7,16 @@
 .cdk-overlay-container {
   z-index: var(--z-index-modal);
 }
+
+// Connected overlays float in the document next to the container, so they
+// scroll with their trigger; see FloatingPositionStrategy. Sized like the
+// container so CDK's `max-width/height: 100%` on panes keeps meaning the viewport.
+.tedi-overlay-host {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: var(--z-index-modal);
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
