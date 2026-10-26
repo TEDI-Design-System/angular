@@ -34,6 +34,7 @@
     (detach)="closeOverlay()"
   >
     <div
+      #overlayPanel
       class="tedi-date-time-field__overlay"
       role="dialog"
       [attr.aria-label]="'date-field.calendar-dialog' | tediTranslate"
@@ -48,7 +49,14 @@
             [ngTemplateOutletContext]="{ footer: footerTpl }"
           />
         } @else if (mode() === "range") {
-          <div #timeStep class="tedi-date-time-field__time-step">
+          <div
+            #timeStep
+            class="tedi-date-time-field__time-step"
+            [class.tedi-date-time-field__time-step--wide]="
+              numberOfMonthsResolved() > 1
+            "
+            [style.--_tedi-date-time-field-step-width]="dateStepWidth()"
+          >
             <div class="tedi-date-time-field__range-times">
               <ng-container [ngTemplateOutlet]="rangeEndsTpl" />
             </div>

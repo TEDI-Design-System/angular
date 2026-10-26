@@ -3,12 +3,17 @@
     <h2>{{ titleKey() | tediTranslate }}</h2>
   </tedi-modal-header>
   <tedi-modal-content
+    #content
     class="tedi-date-time-field-modal__content"
     [class.tedi-date-time-field-modal__content--range]="isRange && !multiStep"
     [class.tedi-date-time-field-modal__content--single-month]="
       singleMonthRange && !multiStep
     "
     [class.tedi-date-time-field-modal__content--step]="multiStep"
+    [class.tedi-date-time-field-modal__content--wide-step]="
+      wideStep && multiStep
+    "
+    [style.--_tedi-date-time-field-modal-step-width]="dateStepWidth()"
   >
     @if (!multiStep || step() === "date") {
       <tedi-calendar
@@ -125,9 +130,6 @@
         <tedi-icon name="arrow_back" color="inherit" />
       </button>
     }
-    <button tedi-button type="button" variant="secondary" (click)="cancel()">
-      {{ "date-field.cancel" | tediTranslate }}
-    </button>
     @if (multiStep && step() === "date") {
       <button
         tedi-button

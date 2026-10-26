@@ -78,12 +78,6 @@ describe("DateTimeFieldModalComponent", () => {
     expect(component.draft()).toBe(value);
   });
 
-  it("cancel closes with undefined", () => {
-    setup();
-    component.cancel();
-    expect(close).toHaveBeenCalledWith(undefined);
-  });
-
   it("confirm closes with the current draft", () => {
     setup();
     const next = new Date(2026, 4, 14, 9, 0);

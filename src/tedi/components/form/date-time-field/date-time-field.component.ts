@@ -198,8 +198,8 @@ export class DateTimeFieldComponent
   );
   /** Minute interval for the scroll-wheel and the native inputs' `step`. Ignored when `availableTimes` is set. */
   readonly minuteStep = input<number>(1);
-  /** Number of columns in the slot grid. */
-  readonly slotColumns = input<number>(3);
+  /** Maximum number of columns in the slot grid; fewer fit when the panel is narrower. */
+  readonly slotColumns = input<number>(4);
   /** Heading above the time picker. Falls back to the `date-time-field.time-heading` label. */
   readonly timeHeading = input<string | undefined>(undefined);
   /** Footer link label in the multi-step calendar. Falls back to `date-time-field.select-time`. */
@@ -298,11 +298,13 @@ export class DateTimeFieldComponent
   readonly calendar = viewChild<CalendarComponent>("calendar");
   readonly stepTimePicker = viewChild<TimePickerComponent>("stepTimePicker");
   readonly timeStep = viewChild<ElementRef<HTMLElement>>("timeStep");
+  readonly overlayPanel = viewChild<ElementRef<HTMLElement>>("overlayPanel");
 
   readonly currentMonth = signal<Date>(new Date());
   readonly overlayOpen = signal<boolean>(false);
   readonly step = signal<DateTimeFieldStep>("date");
   readonly overlayMaxHeight = signal<number | null>(null);
+  readonly dateStepWidth = signal<string | null>(null);
 
   readonly overlayPositions = computed<ConnectedPosition[]>(() => [
     {
@@ -700,6 +702,8 @@ export class DateTimeFieldComponent
   }
 
   goToTimeStep(): void {
+    const width = this.overlayPanel()?.nativeElement.offsetWidth;
+    this.dateStepWidth.set(width ? `${width}px` : null);
     this.step.set("time");
     afterNextRender(() => this.focusTimeStep(), { injector: this.injector });
   }

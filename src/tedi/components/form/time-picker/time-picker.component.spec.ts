@@ -535,7 +535,9 @@ describe("TimePickerComponent", () => {
 
       const grid = el.querySelector(".tedi-time-picker__grid") as HTMLElement;
       expect(getComputedStyle(grid).display).toBe("grid");
-      expect(grid.style.gridTemplateColumns).toBe("repeat(2, 1fr)");
+      expect(
+        grid.style.getPropertyValue("--tedi-time-picker-grid-columns"),
+      ).toBe("2");
     });
 
     it("should have radiogroup role on grid", () => {

@@ -75,6 +75,17 @@
     }
   }
 
+  // A fixed panel width (as designed) gives the slot grid a definite width to
+  // fit its columns into; once stacked it spans the calendar instead.
+  &__split > &__split-time {
+    width: var(--tedi-containers-03);
+
+    @include breakpoints.media-breakpoint-down(sm) {
+      align-self: stretch;
+      width: auto;
+    }
+  }
+
   &__split-time {
     display: flex;
     flex-direction: column;
@@ -88,15 +99,43 @@
     }
   }
 
+  &__overlay .tedi-time-picker--slots {
+    align-self: stretch;
+    width: auto;
+  }
+
   // The time picker's slot grid declares `display: grid`, but tedi-radio-card-group's
   // own `display: flex` can win by stylesheet-injection order, collapsing the grid to a
-  // single flex row. Re-assert grid here (higher specificity) so the picker's
-  // `grid-template-columns` honours the configured column count. The grid's own padding
-  // is dropped — `&__split-time` already provides the surrounding padding (avoids
-  // doubling it).
+  // single flex row, so grid is re-asserted here. Slots stretch edge to edge, up to
+  // `slotColumns` per row, dropping a column whenever a slot would get narrower than
+  // its minimum (wider with the radio indicator). The grid's own padding is dropped:
+  // `&__split-time` already provides it.
   &__overlay .tedi-time-picker__grid {
+    --_tedi-date-time-field-slot-min-width: var(--tedi-dimensions-21);
+    --_tedi-date-time-field-slot-max-columns: var(--tedi-time-picker-grid-columns);
+
     display: grid;
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(
+        max(
+          var(--_tedi-date-time-field-slot-min-width),
+          (
+              100% - (var(--_tedi-date-time-field-slot-max-columns) - 1) *
+                var(--layout-grid-gutters-08)
+            ) /
+            var(--_tedi-date-time-field-slot-max-columns)
+        ),
+        1fr
+      )
+    );
     padding: 0;
+
+    &:has(.tedi-radio-card:not(.tedi-radio-card--hide-indicator)) {
+      --_tedi-date-time-field-slot-min-width: calc(
+        var(--tedi-dimensions-23) + var(--tedi-dimensions-05)
+      );
+    }
   }
 
   &__native-time {
@@ -228,10 +267,30 @@
     flex-direction: column;
   }
 
+  // Two-month range: the ends sit side by side at the width the calendar step
+  // had, so the popover doesn't jump in size between the steps.
+  &__time-step--wide {
+    @include breakpoints.media-breakpoint-up(md) {
+      width: var(--_tedi-date-time-field-step-width);
+
+      .tedi-date-time-field__range-times {
+        flex-direction: row;
+        align-items: stretch;
+      }
+
+      .tedi-time-picker--scroll {
+        --tedi-time-picker-columns-height: calc(
+          var(--tedi-time-picker-item-height) * 5
+        );
+      }
+    }
+  }
+
   &__time-footer {
     display: flex;
-    justify-content: center;
-    padding: 0 var(--card-padding-md-default) var(--card-padding-md-default);
+    padding-top: var(--layout-grid-gutters-08);
+    margin: 0 var(--card-padding-md-default) var(--card-padding-xs);
+    border-top: var(--tedi-borders-01) solid var(--general-border-primary);
   }
 
   &__time-step > .tedi-time-picker {

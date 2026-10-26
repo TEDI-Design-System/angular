@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   inject,
   Signal,
   signal,
@@ -100,6 +101,7 @@ export class DateTimeFieldModalComponent {
   private readonly ref = inject(ModalRef<DateTimeFieldValue>);
 
   readonly calendar = viewChild<CalendarComponent>("calendar");
+  readonly content = viewChild("content", { read: ElementRef<HTMLElement> });
 
   readonly draft = signal<DateTimeFieldValue>(this.data.value);
   readonly month = signal<Date>(this.data.currentMonth);
@@ -107,7 +109,9 @@ export class DateTimeFieldModalComponent {
   readonly isRange = this.data.mode === "range";
   readonly multiStep = this.data.layout === "multi-step";
   readonly singleMonthRange = this.isRange && this.data.numberOfMonths === 1;
+  readonly wideStep = this.isRange && this.data.numberOfMonths > 1;
   readonly step = signal<DateTimeFieldStep>("date");
+  readonly dateStepWidth = signal<string | null>(null);
   readonly titleKey = computed(() => {
     if (!this.multiStep) return "date-time-field.modal-title";
     return this.step() === "date"
@@ -142,15 +146,13 @@ export class DateTimeFieldModalComponent {
     resolveAvailableTimes(this.data.availableTimes, this.rangeValue().to),
   );
 
-  cancel(): void {
-    this.ref.close(undefined);
-  }
-
   confirm(): void {
     this.ref.close(this.draft());
   }
 
   goToTimeStep(): void {
+    const width = this.content()?.nativeElement.offsetWidth;
+    this.dateStepWidth.set(width ? `${width}px` : null);
     this.step.set("time");
   }
 

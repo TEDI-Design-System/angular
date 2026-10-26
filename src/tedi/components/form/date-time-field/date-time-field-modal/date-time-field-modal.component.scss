@@ -113,8 +113,24 @@
     max-width: 100%;
   }
 
+  // Two-month range: the ends sit side by side at the width the calendar step
+  // had, so the modal doesn't jump in size between the steps.
+  &__content--wide-step &__times {
+    @include breakpoints.media-breakpoint-up(md) {
+      flex-direction: row;
+      width: var(--_tedi-date-time-field-modal-step-width);
+    }
+  }
+
   &__times &__time {
+    flex: 1 1 0;
     align-self: stretch;
+  }
+
+  // A definite width for the slot grid to fit its columns into.
+  &__content > &__time {
+    width: var(--tedi-containers-03);
+    max-width: 100%;
   }
 
   &__times &__native-time {
@@ -187,11 +203,37 @@
     text-align: center;
   }
 
-  // See date-time-field.component.scss: re-assert the slot grid's `display: grid` (which
-  // tedi-radio-card-group's flex can override by injection order) and drop its own
-  // padding since `&__time` already provides it.
+  .tedi-time-picker--slots {
+    align-self: stretch;
+    width: auto;
+  }
+
+  // See date-time-field.component.scss `&__overlay .tedi-time-picker__grid`.
   .tedi-time-picker__grid {
+    --_tedi-date-time-field-slot-min-width: var(--tedi-dimensions-21);
+    --_tedi-date-time-field-slot-max-columns: var(--tedi-time-picker-grid-columns);
+
     display: grid;
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(
+        max(
+          var(--_tedi-date-time-field-slot-min-width),
+          (
+              100% - (var(--_tedi-date-time-field-slot-max-columns) - 1) *
+                var(--layout-grid-gutters-08)
+            ) /
+            var(--_tedi-date-time-field-slot-max-columns)
+        ),
+        1fr
+      )
+    );
     padding: 0;
+
+    &:has(.tedi-radio-card:not(.tedi-radio-card--hide-indicator)) {
+      --_tedi-date-time-field-slot-min-width: calc(
+        var(--tedi-dimensions-23) + var(--tedi-dimensions-05)
+      );
+    }
   }
 }
