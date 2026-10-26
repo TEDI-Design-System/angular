@@ -105,7 +105,11 @@ export class SideNavComponent {
   }
 
   classes = computed(() => {
-    const classList = ["tedi-sidenav", `tedi-sidenav--${this.size()}`];
+    const classList = [
+      "tedi-sidenav",
+      "no-print",
+      `tedi-sidenav--${this.size()}`,
+    ];
 
     if (this.dividers()) {
       classList.push("tedi-sidenav--dividers");

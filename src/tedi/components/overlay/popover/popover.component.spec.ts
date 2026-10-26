@@ -17,9 +17,10 @@ import { PopoverContentComponent } from "./popover-content/popover-content.compo
       [withBorder]="withBorder"
       [withArrow]="withArrow"
       [lockScroll]="lockScroll"
+      [offset]="offset"
     >
       <button tedi-popover-trigger>Open Popover</button>
-      <tedi-popover-content>
+      <tedi-popover-content [title]="title">
         <p>Popover content</p>
       </tedi-popover-content>
     </tedi-popover>
@@ -33,7 +34,15 @@ class TestHostComponent {
   withBorder = false;
   withArrow = true;
   lockScroll = false;
+  offset = 8;
+  title = "";
 }
+
+type PopoverInternals = {
+  updateArrowPosition: () => void;
+  isInsideOverlay: (target: Node | null) => boolean;
+  keydownListener?: () => void;
+};
 
 describe("PopoverComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
@@ -141,6 +150,34 @@ describe("PopoverComponent", () => {
     fixture.detectChanges();
 
     expect(component.panelClasses()).not.toContain("arrow");
+  });
+
+  it("should place the popover 8px plus the arrow gap from the trigger by default", () => {
+    hostComponent.position = "bottom";
+    fixture.detectChanges();
+
+    expect(component.overlayPositions()[0].offsetY).toBe(20);
+  });
+
+  it("should use the offset as the gap when there is no arrow", () => {
+    hostComponent.position = "bottom-start";
+    hostComponent.preventOverflow = true;
+    hostComponent.withArrow = false;
+    hostComponent.offset = 4;
+    fixture.detectChanges();
+
+    const offsets = component.overlayPositions().map((pos) => pos.offsetY);
+    expect(offsets).toContain(4);
+    expect(offsets).toContain(-4);
+    expect(offsets.every((offset) => Math.abs(offset ?? 0) === 4)).toBe(true);
+  });
+
+  it("should add the arrow gap on top of a custom offset", () => {
+    hostComponent.position = "right";
+    hostComponent.offset = 4;
+    fixture.detectChanges();
+
+    expect(component.overlayPositions()[0].offsetX).toBe(16);
   });
 
   it("should update position when input changes", () => {
@@ -423,6 +460,135 @@ describe("PopoverComponent", () => {
 
         button.remove();
       }
+    });
+  });
+
+  describe("Tab out of the popover", () => {
+    let before: HTMLButtonElement;
+    let after: HTMLButtonElement;
+    let container: HTMLElement;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      const trigger = component.popoverTrigger().host.nativeElement;
+      before = document.createElement("button");
+      after = document.createElement("button");
+      trigger.before(before);
+      trigger.after(after);
+
+      component.showPopover();
+      fixture.detectChanges();
+      component.onOverlayAttach();
+      container = overlayContainerElement.querySelector(
+        ".tedi-popover__container",
+      ) as HTMLElement;
+      container.focus();
+    });
+
+    afterEach(() => {
+      before.remove();
+      after.remove();
+      jest.useRealTimers();
+    });
+
+    it("closes and focuses the element after the trigger on Tab", () => {
+      container.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab" }));
+      jest.runOnlyPendingTimers();
+
+      expect(component.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(after);
+    });
+
+    it("closes and focuses the element before the trigger on Shift+Tab", () => {
+      container.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Tab", shiftKey: true }),
+      );
+      jest.runOnlyPendingTimers();
+
+      expect(component.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(before);
+    });
+  });
+
+  it("updates the arrow position after a window resize", () => {
+    jest.useFakeTimers();
+    component.showPopover();
+    fixture.detectChanges();
+    component.onOverlayAttach();
+    const updateArrow = jest.spyOn(
+      component as unknown as { updateArrowPosition: () => void },
+      "updateArrowPosition",
+    );
+
+    window.dispatchEvent(new Event("resize"));
+    jest.runOnlyPendingTimers();
+
+    expect(updateArrow).toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  describe("Edge cases", () => {
+    const internals = () => component as unknown as PopoverInternals;
+
+    const open = () => {
+      component.showPopover();
+      fixture.detectChanges();
+      component.onOverlayAttach();
+    };
+
+    it("labels the popover by its title when it has one", () => {
+      hostComponent.title = "Pealkiri";
+      fixture.detectChanges();
+
+      expect(component.ariaLabelledBy()).toMatch(/^popover-title-/);
+    });
+
+    it("does nothing on overlay attach when the overlay isn't rendered", () => {
+      component.onOverlayAttach();
+
+      expect(internals().keydownListener).toBeUndefined();
+    });
+
+    it("skips the arrow position without an arrow", () => {
+      hostComponent.withArrow = false;
+      fixture.detectChanges();
+      open();
+
+      expect(component.arrowLeft()).toBeNull();
+      expect(component.arrowTop()).toBeNull();
+    });
+
+    it("skips the arrow position while closed", () => {
+      internals().updateArrowPosition();
+
+      expect(component.arrowLeft()).toBeNull();
+    });
+
+    it("skips the arrow position when the arrow isn't rendered yet", () => {
+      open();
+      expect(component.arrowLeft()).not.toBeNull();
+
+      component.arrowLeft.set(null);
+      overlayContainerElement.querySelector(".tedi-popover__arrow")?.remove();
+      internals().updateArrowPosition();
+
+      expect(component.arrowLeft()).toBeNull();
+    });
+
+    it("ignores scroll events after the popover has closed", () => {
+      hostComponent.hideOnScroll = true;
+      fixture.detectChanges();
+      open();
+      component.isOpen.set(false);
+      const hideSpy = jest.spyOn(component, "hidePopover");
+
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
+    it("treats nothing as inside the overlay while closed", () => {
+      expect(internals().isInsideOverlay(document.body)).toBe(false);
     });
   });
 

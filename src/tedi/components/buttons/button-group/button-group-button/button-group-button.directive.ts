@@ -84,6 +84,7 @@ export class ButtonGroupButtonDirective implements AfterViewInit {
     [
       "tedi-button",
       "tedi-button-group-button",
+      "no-print",
       `tedi-button--${this.effectiveVariant()}`,
       `tedi-button--${this.effectiveSize()}`,
     ].join(" "),
