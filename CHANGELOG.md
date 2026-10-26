@@ -1,3 +1,59 @@
+# [9.0.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.9...angular-9.0.0-rc.10) (2026-10-23)
+
+
+### Features
+
+* **carousel:** add swipeThreshold input and improve swipe navigation [#187](https://github.com/TEDI-Design-System/angular/issues/187) ([#733](https://github.com/TEDI-Design-System/angular/issues/733)) ([834fa55](https://github.com/TEDI-Design-System/angular/commit/834fa55bbaf181bfeb284c9d7176fac3177cdb8d))
+
+# [9.0.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.8...angular-9.0.0-rc.9) (2026-10-22)
+
+
+### Bug Fixes
+
+* **modal:** support left and right footer content [#668](https://github.com/TEDI-Design-System/angular/issues/668) ([#711](https://github.com/TEDI-Design-System/angular/issues/711)) ([d0bd5da](https://github.com/TEDI-Design-System/angular/commit/d0bd5dade98ef910843c817353ad2e4c918b4377))
+
+# [9.0.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.7...angular-9.0.0-rc.8) (2026-10-22)
+
+
+### Features
+
+* **popover:** add offset input [#802](https://github.com/TEDI-Design-System/angular/issues/802) ([#803](https://github.com/TEDI-Design-System/angular/issues/803)) ([710ef72](https://github.com/TEDI-Design-System/angular/commit/710ef722f50c1e600fec6a8444e8c8965fb092e3))
+
+# [9.0.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.6...angular-9.0.0-rc.7) (2026-10-22)
+
+
+### Bug Fixes
+
+* **dropdown:** keep checkbox trigger semantics and open on Enter [#669](https://github.com/TEDI-Design-System/angular/issues/669) ([#703](https://github.com/TEDI-Design-System/angular/issues/703)) ([5f7a52c](https://github.com/TEDI-Design-System/angular/commit/5f7a52c7c9d1f233af14aa2efb73d756f1e408c8))
+
+# [9.0.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.5...angular-9.0.0-rc.6) (2026-10-22)
+
+
+### Features
+
+* **print:** add tediPrint directive [#651](https://github.com/TEDI-Design-System/angular/issues/651) ([#671](https://github.com/TEDI-Design-System/angular/issues/671)) ([8f2877f](https://github.com/TEDI-Design-System/angular/commit/8f2877f843e916a44635ce550dcf3839deb4c1f0))
+
+# [9.0.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.4...angular-9.0.0-rc.5) (2026-10-19)
+
+
+### Features
+
+* **icon:** Allow Loading A Single Icon Font Style [#774](https://github.com/TEDI-Design-System/angular/issues/774) ([#775](https://github.com/TEDI-Design-System/angular/issues/775)) ([74f906c](https://github.com/TEDI-Design-System/angular/commit/74f906cd8e558e305a50ef3e412f8c2934fcd8f8))
+
+# [9.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.3...angular-9.0.0-rc.4) (2026-10-09)
+
+
+### Bug Fixes
+
+* **time-picker:** correct item height and ignore engine-driven scrolls [#678](https://github.com/TEDI-Design-System/angular/issues/678) ([#681](https://github.com/TEDI-Design-System/angular/issues/681)) ([ee0d698](https://github.com/TEDI-Design-System/angular/commit/ee0d6983754a1180d0f8024da1c43bc92aedbb70))
+
+# [9.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.2...angular-9.0.0-rc.3) (2026-10-09)
+
+
+### Features
+
+* **input-group:** mark community InputGroup as deprecated [#762](https://github.com/TEDI-Design-System/angular/issues/762) ([#771](https://github.com/TEDI-Design-System/angular/issues/771)) ([8824272](https://github.com/TEDI-Design-System/angular/commit/8824272c4c98d3c3586fdcff4960cd62e627f785))
+
 # [9.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.1...angular-9.0.0-rc.2) (2026-10-07)
 
 

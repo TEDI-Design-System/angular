@@ -168,4 +168,9 @@ describe("CollapseButtonComponent", () => {
     const button: HTMLButtonElement = fixture.nativeElement;
     expect(button.getAttribute("type")).toBe("button");
   });
+
+  it("should hide the collapse button when printing", () => {
+    const button: HTMLButtonElement = fixture.nativeElement;
+    expect(button.classList).toContain("no-print");
+  });
 });
