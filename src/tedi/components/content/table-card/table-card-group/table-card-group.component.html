@@ -1,0 +1,11 @@
+<tedi-card-content
+  class="tedi-table-card-group__rows-content"
+  [background]="background()"
+  [padding]="resolvedPadding()"
+>
+  <dl [class]="rowsClasses()" [style]="rowsStyles()">
+    <ng-content select="[tedi-table-card-row]"></ng-content>
+  </dl>
+</tedi-card-content>
+
+<ng-content select="tedi-table-card-actions"></ng-content>
