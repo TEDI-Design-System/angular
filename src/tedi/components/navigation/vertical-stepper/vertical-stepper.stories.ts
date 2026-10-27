@@ -24,6 +24,13 @@ const ITEM_STATES = [
   { label: "Has error", state: "error", current: false, hover: true },
   { label: "Default", state: "default", current: false, hover: true },
   { label: "Selected", state: "default", current: true, hover: true },
+  {
+    label: "Selected + completed",
+    state: "completed",
+    current: true,
+    hover: true,
+  },
+  { label: "Selected + has error", state: "error", current: true, hover: true },
   { label: "Disabled", state: "disabled", current: false, hover: false },
 ];
 
@@ -335,6 +342,12 @@ export const Compact: Story = {
 
 export const States: Story = {
   parameters: {
+    docs: {
+      description: {
+        story:
+          "Each example shows two consecutive steps to display the connecting line. Both steps share the same progress state; in selected examples, only the first step is selected. Selection is independent of progress, so a selected step can also be completed or have an error.",
+      },
+    },
     controls: { disable: true },
     pseudo: {
       hover: [
