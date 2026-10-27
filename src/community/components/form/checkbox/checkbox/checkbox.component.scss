@@ -81,12 +81,13 @@
     --_checkbox-border: var(--form-input-border-disabled);
   }
 
-  &:has(input:disabled:checked) {
+  &:has(input:disabled:checked, input:disabled:indeterminate) {
     --_checkbox-bg: var(--form-choice-checkbox-selected-disabled);
     --_checkbox-border: var(--form-choice-checkbox-selected-border-disabled);
   }
 
-  &--error {
+  // Error colours apply to unselected boxes only; selected ones keep their fill
+  &--error:has(input:not(:checked, :indeterminate, :disabled)) {
     --_checkbox-bg: var(--form-choice-checkbox-unselected-default);
     --_checkbox-border: var(--form-general-feedback-error-border);
   }
