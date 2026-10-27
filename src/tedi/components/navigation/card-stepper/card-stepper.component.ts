@@ -26,6 +26,7 @@ import {
   CardStepperListSelection,
 } from "./card-stepper-list-modal/card-stepper-list-modal.component";
 import { CardStepperStepComponent } from "./card-stepper-step/card-stepper-step.component";
+import { VerticalStepNumberComponent } from "../vertical-stepper/vertical-step-number/vertical-step-number.component";
 
 export type CardStepperDescriptionPosition = "top" | "bottom";
 export type CardStepperCounterPosition = "inline" | "top" | "bottom";
@@ -40,6 +41,7 @@ export type CardStepperHeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
     TextComponent,
     ButtonComponent,
     TediTranslationPipe,
+    VerticalStepNumberComponent,
   ],
   templateUrl: "./card-stepper.component.html",
   styleUrl: "./card-stepper.component.scss",
