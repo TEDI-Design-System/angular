@@ -69,20 +69,8 @@
   align-items: center;
 }
 
-.tedi-card-stepper__indicator {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  font-size: var(--body-small-regular-size);
-  font-weight: var(--body-bold-weight);
-  line-height: 1;
-  color: var(--stepper-item-vertical-text-selected);
-  background-color: var(--stepper-step-selected-bg);
-  border: var(--tedi-borders-02) solid var(--stepper-step-selected-border);
-  border-radius: 50%;
+.tedi-card-stepper .tedi-card-stepper__indicator {
+  --tedi-vertical-step-number-size: 1.75rem;
 }
 
 .tedi-card-stepper__title {
