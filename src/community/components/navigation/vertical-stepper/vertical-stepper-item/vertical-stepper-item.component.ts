@@ -22,8 +22,8 @@ import {
 
 /**
  * @deprecated Use the TEDI-Ready `tedi-vertical-stepper-item` from
- * `@tedi-design-system/angular/tedi` instead, with
- * `tedi-vertical-stepper-sub-item` for sub-steps rather than a nested item.
+ * `@tedi-design-system/angular/tedi` instead. The TEDI-Ready component
+ * supports the same inputs, content slots, and nested item composition.
  * This community component will be removed in a future release.
  */
 @Component({

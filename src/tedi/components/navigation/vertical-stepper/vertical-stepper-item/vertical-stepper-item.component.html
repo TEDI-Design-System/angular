@@ -1,68 +1,117 @@
 <div class="tedi-vertical-stepper-item__row">
-  <span class="tedi-vertical-stepper-item__indicator">
-    @if (!_compact()) {
-      <span class="tedi-vertical-stepper-item__number">{{
-        _stepNumber()
-      }}</span>
-    } @else if (!current() && state() === "completed") {
-      <tedi-icon name="check" variant="filled" color="inherit" [size]="16" />
-    } @else if (!current() && state() === "error") {
-      <tedi-icon
-        name="priority_high"
-        variant="filled"
-        color="inherit"
-        [size]="16"
-      />
-    }
-  </span>
+  <div class="tedi-vertical-stepper-item__indicator-container">
+    <span class="tedi-vertical-stepper-item__indicator">
+      @if (isSubItem) {
+        <span class="tedi-vertical-stepper-item__dot"></span>
+      } @else if (!_compact()) {
+        <span class="tedi-vertical-stepper-item__number">{{
+          _stepNumber()
+        }}</span>
+      } @else if (!selected() && progressState() === "completed") {
+        <tedi-icon name="check" variant="filled" color="inherit" [size]="16" />
+      } @else if (!selected() && progressState() === "error") {
+        <tedi-icon
+          name="priority_high"
+          variant="filled"
+          color="inherit"
+          [size]="16"
+        />
+      }
+    </span>
+  </div>
   <div class="tedi-vertical-stepper-item__content">
     <div class="tedi-vertical-stepper-item__header">
-      @switch (element()) {
-        @case ("a") {
-          <a
-            class="tedi-vertical-stepper-item__link"
-            [href]="href()"
-            [attr.aria-current]="current() ? 'step' : null"
-            (click)="onSelect($event)"
-          >
-            <ng-container [ngTemplateOutlet]="labelTemplate" />
-          </a>
+      <div class="tedi-vertical-stepper-item__title">
+        <ng-content select="[item-title]">
+          @switch (element()) {
+            @case ("a") {
+              <!-- RouterLinkActive clears aria-current on its host, so it observes the link from a wrapper. -->
+              <span
+                class="tedi-vertical-stepper-item__route"
+                routerLinkActive
+                (isActiveChange)="onRouteActiveChange($event)"
+              >
+                <a
+                  class="tedi-vertical-stepper-item__link"
+                  [routerLink]="route()"
+                  [attr.aria-describedby]="statusId"
+                  [attr.aria-current]="selected() ? 'step' : null"
+                >
+                  <ng-container [ngTemplateOutlet]="labelTemplate" />
+                </a>
+              </span>
+            }
+            @case ("button") {
+              <button
+                type="button"
+                class="tedi-vertical-stepper-item__link"
+                [attr.aria-describedby]="statusId"
+                [attr.aria-current]="selected() ? 'step' : null"
+                (click)="itemSelect.emit()"
+              >
+                <ng-container [ngTemplateOutlet]="labelTemplate" />
+              </button>
+            }
+            @default {
+              <ng-container [ngTemplateOutlet]="labelTemplate" />
+            }
+          }
+        </ng-content>
+        @if (
+          (isSubItem || !_compact() || selected()) &&
+          progressState() === "completed"
+        ) {
+          <tedi-icon
+            class="tedi-vertical-stepper-item__label-icon"
+            name="check"
+            color="success"
+            [size]="16"
+          />
         }
-        @case ("button") {
-          <button
-            type="button"
-            class="tedi-vertical-stepper-item__link"
-            [attr.aria-current]="current() ? 'step' : null"
-            (click)="onSelect($event)"
-          >
-            <ng-container [ngTemplateOutlet]="labelTemplate" />
-          </button>
+        @if (
+          (isSubItem || !_compact() || selected()) &&
+          progressState() === "error"
+        ) {
+          <tedi-icon
+            class="tedi-vertical-stepper-item__label-icon"
+            name="error"
+            color="danger"
+            [size]="16"
+          />
         }
-        @default {
-          <ng-container [ngTemplateOutlet]="labelTemplate" />
-        }
-      }
+        <span class="sr-only" [id]="statusId">
+          @if (progressState() === "completed") {
+            ({{ "vertical-stepper.completed" | tediTranslate }})
+          }
+          @if (progressState() === "error") {
+            ({{ "vertical-stepper.error" | tediTranslate }})
+          }
+          @if (disabled()) {
+            ({{ "vertical-stepper.disabled" | tediTranslate }})
+          }
+        </span>
+      </div>
       @if (expandable()) {
         <button
           tedi-collapse-button
           class="tedi-vertical-stepper-item__toggle"
           [hideText]="true"
-          [open]="open()"
+          [open]="opened()"
           [ariaControls]="subListId"
-          [ariaLabel]="label()"
-          (openChange)="open.set($event)"
+          [ariaLabel]="title()"
+          [disabled]="disabled()"
+          (openChange)="opened.set($event)"
         ></button>
       }
     </div>
-    @if (description()) {
-      <span
-        tedi-text
-        modifiers="small"
-        color="tertiary"
-        class="tedi-vertical-stepper-item__description"
-        >{{ description() }}</span
-      >
-    }
+    <div
+      tedi-text
+      modifiers="small"
+      color="tertiary"
+      class="tedi-vertical-stepper-item__description"
+    >
+      <ng-content select="[item-description]" />
+    </div>
     <div class="tedi-vertical-stepper-item__end"><ng-content /></div>
   </div>
 </div>
@@ -71,54 +120,23 @@
     class="tedi-vertical-stepper-item__sub-list"
     role="list"
     [id]="subListId"
-    [hidden]="!open()"
+    [hidden]="!opened()"
   >
-    <ng-content select="tedi-vertical-stepper-sub-item" />
+    <ng-content select="tedi-vertical-stepper-item" />
   </ul>
 }
 
 <ng-template #labelTemplate>
-  <span tedi-text class="tedi-vertical-stepper-item__label">
-    @if (_compact() && _showNumber()) {
+  <span
+    tedi-text
+    class="tedi-vertical-stepper-item__label"
+    [modifiers]="informative() ? 'small' : undefined"
+  >
+    @if (!isSubItem && _compact() && _enumerated()) {
       <span class="tedi-vertical-stepper-item__number-prefix"
         >{{ _stepNumber() }}.</span
       >
     }
-    <span class="tedi-vertical-stepper-item__label-content">
-      <span class="tedi-vertical-stepper-item__label-text">{{ label() }}</span>
-      @if ((!_compact() || current()) && state() === "completed") {
-        <tedi-icon
-          class="tedi-vertical-stepper-item__label-icon"
-          name="check"
-          color="success"
-          [size]="16"
-        />
-      }
-      @if ((!_compact() || current()) && state() === "error") {
-        <tedi-icon
-          class="tedi-vertical-stepper-item__label-icon"
-          name="error"
-          color="danger"
-          [size]="16"
-        />
-      }
-      @switch (state()) {
-        @case ("completed") {
-          <span class="sr-only">
-            ({{ "vertical-stepper.completed" | tediTranslate }})</span
-          >
-        }
-        @case ("error") {
-          <span class="sr-only">
-            ({{ "vertical-stepper.error" | tediTranslate }})</span
-          >
-        }
-        @case ("disabled") {
-          <span class="sr-only">
-            ({{ "vertical-stepper.disabled" | tediTranslate }})</span
-          >
-        }
-      }
-    </span>
+    <span class="tedi-vertical-stepper-item__label-text">{{ title() }}</span>
   </span>
 </ng-template>

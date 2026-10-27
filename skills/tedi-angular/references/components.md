@@ -171,11 +171,16 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 **deprecated**: it has only `variant` / `size` / `axis`. The TEDI-Ready one adds `position`,
 `placement`, `offset` and `zIndex`. Import from `/tedi`.
 
-The two vertical steppers differ in shape, not just in inputs: Community nests
-`tedi-vertical-stepper-item` inside another item to make a sub-step, while TEDI-Ready has a separate
-`tedi-vertical-stepper-sub-item` (no Community equivalent, so that one tag is unambiguous). A
-Community template moved to `/tedi` still compiles, but its nested items land in the related-asset
-slot instead of the sub-step list.
+Both entry points declare `tedi-vertical-stepper` and `tedi-vertical-stepper-item`. The Community
+pair is **deprecated**; the TEDI-Ready one takes the same template, so switching is an import change.
+Import from `/tedi`.
+
+`tedi-vertical-stepper-item` never selects itself: `itemSelect` fires when the label button is
+pressed or when its `route` becomes active (programmatic navigation included), and you bind
+`selected` in response. A parent step without a `route` keeps its title as text and expands only
+through its toggle. `opened` is a `model()`, so a bare `opened` attribute passes `""` and leaves the
+step collapsed — write `[opened]="true"`. Controls projected into `[item-title]` own their events,
+routing, disabled state and ARIA attributes.
 
 ### Composition constraints
 
@@ -184,10 +189,9 @@ slot instead of the sub-step list.
   and the disabled state.
 - **`button[tedi-collapse-button]` goes on a native `<button>`.** The host *is* the button, so don't
   nest another one inside.
-- **`tedi-vertical-stepper-sub-item` must be projected straight into its step**, not wrapped in an
-  element. Anything else an item receives is treated as the step's related asset (status badge,
-  button, link) and rendered under the label. `@for` / `@if` around either tag is fine — items are
-  still numbered in source order and sub-steps still reach the sub-list.
+- **Nested `tedi-vertical-stepper-item`s must be projected straight into their parent step**, not
+  wrapped in an element, or they are treated as related assets. `@for` / `@if` around them is fine —
+  items are still numbered in source order and sub-steps still reach the sub-list.
 - **`tedi-table-columns-menu` must be a descendant of `<tedi-table>`.** It finds the table through
   DI (`TEDI_TABLE_CONTEXT`), so rendering it outside the table gives you nothing useful.
 - **`tedi-card` does not clip its content.** Tooltips, popovers, select dropdowns and absolutely
