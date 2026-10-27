@@ -106,6 +106,8 @@ const FRAME = "max-width: 377px;";
  * at a breakpoint for wider screens.
  *
  * Declare steps with `tedi-card-stepper-step` children.
+ *
+ * To show each step as its own card instead, see <a href="?path=/docs/tedi-ready-components-buttons-cardbutton--card-stepper-button">CardButton → Card stepper button</a>.
  */
 export default {
   title: "TEDI-Ready/Components/Navigation/CardStepper",
