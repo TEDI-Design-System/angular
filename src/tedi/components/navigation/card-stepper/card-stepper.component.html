@@ -18,11 +18,12 @@
     }
 
     @if (showIndicator()) {
-      <span
+      <tedi-vertical-step-number
         class="tedi-card-stepper__lead tedi-card-stepper__indicator"
         aria-hidden="true"
-        >{{ active() + 1 }}</span
-      >
+        type="selected"
+        [number]="active() + 1"
+      />
     }
 
     <div class="tedi-card-stepper__body">
