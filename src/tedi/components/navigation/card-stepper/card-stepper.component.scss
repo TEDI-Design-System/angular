@@ -4,8 +4,13 @@
   padding: 0 var(--card-padding-md-default);
   background-color: var(--card-background-primary);
   border: var(--tedi-borders-01) solid var(--card-border-primary);
+  border-radius: var(--card-radius-rounded);
+}
+
+.tedi-card-stepper--progress-flush {
   border-bottom: 0;
-  border-radius: var(--card-radius-rounded) var(--card-radius-rounded) 0 0;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
 }
 
 .tedi-card-stepper__main {

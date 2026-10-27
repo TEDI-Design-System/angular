@@ -1,4 +1,4 @@
-import { Component, signal } from "@angular/core";
+import { Component, signal, viewChildren } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TediTranslationService } from "../../../services/translation/translation.service";
@@ -50,6 +50,7 @@ class TranslationMock {
         label="Dokumendid"
         description="Täidab ametnik"
         [state]="secondState()"
+        [expanded]="secondExpanded()"
       >
         @if (withBottomSlot()) {
           <ng-template tediCardStepperStepContent>
@@ -79,6 +80,8 @@ class TestHostComponent {
   withSubSteps = signal(false);
   withLastStep = signal(true);
   secondState = signal<"default" | "completed" | "error">("default");
+  secondExpanded = signal<boolean | undefined>(undefined);
+  steps = viewChildren(CardStepperStepComponent);
   descriptionPosition = signal<CardStepperDescriptionPosition>("bottom");
   counterPosition = signal<CardStepperCounterPosition>("inline");
   allowJump = signal<CardStepperAllowJump>(true);
@@ -245,6 +248,36 @@ describe("CardStepperComponent", () => {
     expect(query('[role="status"]')?.textContent?.trim()).toBe(
       "card-stepper.status:4,4",
     );
+  });
+
+  describe("bottom edge", () => {
+    function stepper(): HTMLElement {
+      return query("tedi-card-stepper")!;
+    }
+
+    it("should let the progress bar form the bottom edge", () => {
+      expect(stepper().classList).toContain(
+        "tedi-card-stepper--progress-flush",
+      );
+    });
+
+    it("should close the card with a border when a bottom slot follows the progress bar", () => {
+      host.withBottomSlot.set(true);
+      fixture.detectChanges();
+
+      expect(stepper().classList).not.toContain(
+        "tedi-card-stepper--progress-flush",
+      );
+    });
+
+    it("should close the card with a border without a progress bar", () => {
+      host.showProgress.set(false);
+      fixture.detectChanges();
+
+      expect(stepper().classList).not.toContain(
+        "tedi-card-stepper--progress-flush",
+      );
+    });
   });
 
   describe("activeStep clamping", () => {
@@ -491,6 +524,58 @@ describe("CardStepperComponent", () => {
       expect(listItems()[1].classList).not.toContain(
         "tedi-vertical-stepper-item--selected",
       );
+    });
+
+    it("should size the sheet to the page, not the viewport with its scrollbar", async () => {
+      await openList();
+
+      const pane = queryModal("tedi-card-stepper-list-modal")!.closest(
+        ".cdk-overlay-pane",
+      ) as HTMLElement;
+
+      expect(pane.style.width).toBe("100%");
+    });
+
+    it("should treat an explicit undefined expanded as the default", () => {
+      const step = host.steps()[1];
+
+      host.secondExpanded.set(undefined);
+      fixture.detectChanges();
+      expect(step.expanded()).toBeUndefined();
+
+      host.secondExpanded.set(false);
+      fixture.detectChanges();
+      expect(step.expanded()).toBe(false);
+    });
+
+    it("should disable sub-steps of a step allowJump excludes", async () => {
+      host.withSubSteps.set(true);
+      host.activeStep.set(0);
+      host.allowJump.set("completed");
+      fixture.detectChanges();
+      await openList();
+
+      const subItems = queryAllModal(".tedi-vertical-stepper-item--sub-item");
+
+      expect(subItems.length).toBe(2);
+      expect(
+        subItems.every((item) =>
+          item.classList.contains("tedi-vertical-stepper-item--disabled"),
+        ),
+      ).toBe(true);
+    });
+
+    it("should keep the active step's sub-steps selectable when jumping is off", async () => {
+      host.withSubSteps.set(true);
+      host.allowJump.set(false);
+      fixture.detectChanges();
+      await openList();
+
+      const subItems = queryAllModal(".tedi-vertical-stepper-item--sub-item");
+
+      expect(
+        subItems.every((item) => item.querySelector("button") !== null),
+      ).toBe(true);
     });
 
     it("should drop the list button when disabled", () => {
@@ -771,6 +856,16 @@ describe("CardStepperComponent when the steps change while the list is open", ()
     fixture.detectChanges();
 
     await clickInList("Alam kaks");
+
+    expect(host.picked()).toBeNull();
+  });
+
+  it("should not emit for a sub-step whose step allowJump no longer permits", async () => {
+    // "Kolmas" is not active and not completed, so `completed` excludes it.
+    host.allowJump.set("completed");
+    fixture.detectChanges();
+
+    await clickInList("Alam üks");
 
     expect(host.picked()).toBeNull();
   });
