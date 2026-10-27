@@ -560,6 +560,7 @@ export const CardsWithDescription: StoryObj<RadioComponent> = {
       `
         .cards-with-description tedi-radio-card-group {
           display: flex;
+          align-items: stretch;
         }
 
         .cards-with-description label[tedi-radio-card] {
@@ -664,6 +665,7 @@ export const CardsWithIcons: StoryObj<RadioComponent> = {
       `
         .cards-with-icons__stretch {
           display: flex;
+          align-items: stretch;
         }
 
         .cards-with-icons__stretch label[tedi-radio-card] {

@@ -538,6 +538,7 @@ export const CardsWithDescription: StoryObj<CheckboxComponent> = {
       `
         .cards-with-description__stretch {
           display: flex;
+          align-items: stretch;
         }
 
         .cards-with-description__stretch label[tedi-checkbox-card] {
@@ -602,6 +603,7 @@ export const CardsWithIcons: StoryObj<CheckboxComponent> = {
       `
         .cards-with-icons__stretch {
           display: flex;
+          align-items: stretch;
         }
 
         .cards-with-icons__stretch label[tedi-checkbox-card] {
