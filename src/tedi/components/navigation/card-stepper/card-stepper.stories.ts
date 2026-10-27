@@ -9,7 +9,7 @@ import {
 import { AlertComponent } from "../../notifications/alert/alert.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
-import { CollapseComponent } from "../../buttons/collapse/collapse.component";
+import { CollapseComponent } from "../../content/collapse/collapse.component";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { LinkComponent } from "../link/link.component";
 import { CardStepperComponent } from "./card-stepper.component";
@@ -82,27 +82,16 @@ const subStepArgTypes: ArgTypes = {
     type: "boolean",
     table: { category: "inputs", defaultValue: { summary: "false" } },
   },
-  href: {
-    name: "href",
-    description: "Navigation target. Renders the sub-step as a link.",
-    type: "string",
-    table: { category: "inputs" },
-  },
   disabled: {
     name: "disabled",
     description: "Renders the sub-step as disabled and non-interactive.",
     type: "boolean",
     table: { category: "inputs", defaultValue: { summary: "false" } },
   },
-  labelAs: {
-    name: "labelAs",
-    description:
-      'Label element. An anchor with `href`, plain text otherwise — set "button" with `subStepSelect` to act without navigating.',
-    table: { category: "inputs", type: { summary: '"a" | "button" | "text"' } },
-  },
   subStepSelect: {
     name: "subStepSelect",
-    description: "Emitted when the sub-step is picked; also closes the list.",
+    description:
+      "Emitted when the sub-step is picked; also closes the list. Disabled and informative sub-steps cannot be picked.",
     table: { category: "outputs", type: { summary: "void" } },
   },
 };
@@ -582,8 +571,8 @@ export const ManySteps: Story = {
 };
 
 /**
- * Sub-steps appear in an expandable list. Set `href` for a link or use
- * `labelAs="button"` with `subStepSelect` for an action. Other sub-steps render as text.
+ * Sub-steps appear in an expandable list. Picking one emits `subStepSelect` and
+ * closes the list.
  */
 export const WithSubSteps: Story = {
   play: async ({ canvasElement }) => {
@@ -592,19 +581,20 @@ export const WithSubSteps: Story = {
 
     await userEvent.click(canvas.getByRole("button", { name: "Ava sammud" }));
     await waitFor(() =>
-      expect(page.getByRole("link", { name: /Sõbrad/ })).toBeVisible(),
+      expect(page.getByRole("button", { name: /Sõbrad/ })).toBeVisible(),
     );
-    // "Kolleegid" has no target, so it stays plain text rather than a control.
-    await expect(page.queryByRole("button", { name: /Kolleegid/ })).toBeNull();
-    await expect(page.queryByRole("link", { name: /Kolleegid/ })).toBeNull();
+    await expect(page.getByRole("button", { name: /Pere/ })).toHaveAttribute(
+      "aria-current",
+      "step",
+    );
   },
   render: () => ({
     template: `
       <tedi-card-stepper style="${FRAME}" ariaLabel="Hindamise edenemine" [activeStep]="1">
         <tedi-card-stepper-step label="Sotsiaalne võrgustik" state="completed" />
         <tedi-card-stepper-step label="Sotsiaalsed suhted">
-          <tedi-card-stepper-sub-step label="Sõbrad" state="completed" href="#sobrad" />
-          <tedi-card-stepper-sub-step label="Pere" current href="#pere" />
+          <tedi-card-stepper-sub-step label="Sõbrad" state="completed" />
+          <tedi-card-stepper-sub-step label="Pere" current />
           <tedi-card-stepper-sub-step label="Kolleegid" />
         </tedi-card-stepper-step>
         <tedi-card-stepper-step label="Vaimne tervis" />
@@ -626,8 +616,7 @@ export const WithLimitedJumping: Story = {
           {
             id: "color-contrast",
             // Only the list's disabled rows are exempt from WCAG 1.4.3.
-            selector:
-              ":not(.tedi-vertical-stepper-item--disabled *, .tedi-vertical-stepper-sub-item--disabled *)",
+            selector: ":not(.tedi-vertical-stepper-item--disabled *)",
           },
         ],
       },
