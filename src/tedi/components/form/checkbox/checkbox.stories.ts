@@ -26,7 +26,8 @@ type StoryCheckboxComponent = CheckboxComponent & {
 };
 
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.41.64?node-id=4228-72936&m=dev" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.102.102?node-id=65246-120117&m=dev" target="_blank">Checkbox Figma ↗</a><br />
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.102.102?node-id=65246-120490&m=dev" target="_blank">Checkbox card Figma ↗</a><br />
  * <a href="https://www.tedi.ee/1ee8444b7/p/796203-checkbox" target="_blank">Zeroheight ↗</a>
  */
 export default {
@@ -482,6 +483,52 @@ export const CardsDefault: StoryObj<CheckboxComponent> = {
 };
 
 /**
+ * Checkbox cards inside a labelled `tedi-checkbox-group`, with and without an error message.
+ */
+export const CardsWithLabel: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    template: `
+      <div class="flex flex-wrap gap-4">
+        <tedi-checkbox-group label="Juurvili">
+          <tedi-checkbox-card-group>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" name="cards-label" checked />
+              Kartul
+            </label>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" name="cards-label" />
+              Peet
+            </label>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" name="cards-label" />
+              Kapsas
+            </label>
+          </tedi-checkbox-card-group>
+        </tedi-checkbox-group>
+        <tedi-checkbox-group label="Juurvili">
+          <tedi-checkbox-card-group>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" name="cards-label-error" />
+              Kartul
+            </label>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" name="cards-label-error" />
+              Peet
+            </label>
+            <label tedi-checkbox-card variant="primary">
+              <input tedi-checkbox type="checkbox" name="cards-label-error" />
+              Kapsas
+            </label>
+          </tedi-checkbox-card-group>
+          <tedi-feedback-text text="Valik on kohustuslik" type="error" />
+        </tedi-checkbox-group>
+      </div>
+    `,
+  }),
+};
+
+/**
  * Checkbox cards with a description below the label text.
  */
 export const CardsWithDescription: StoryObj<CheckboxComponent> = {
@@ -664,7 +711,8 @@ type GridPlace = [row: number, column: number | string];
  * Every item gets a desktop and a mobile grid position, swapped below `md`:
  * `mobileLayout="rows"` puts each row label on its own line above cells that
  * share the width;
- * `mobileLayout="columns"` splits the matrix into one section per column.
+ * `mobileLayout="columns"` splits the matrix into one section per column, and
+ * leaves out rows that have no cell in that column.
  * Each cell is rendered once, so input ids and radio names stay unique. Card
  * groups in error cells (`.state-matrix__error`) keep their natural width, while
  * the message may widen the column to stay on one line, and wraps only when the
@@ -690,8 +738,25 @@ const stateMatrix = ({
   };
 }) => {
   const columns = headers.length;
-  const sectionSize = rows.length + 1;
   const byColumns = mobileLayout === "columns";
+
+  const columnRows = headers.map((_, c) => {
+    let next = 0;
+    return rows.map(({ cells }) => (cells[c] ? next++ : null));
+  });
+  const sectionStart = headers.map((_, c) =>
+    columnRows
+      .slice(0, c)
+      .reduce(
+        (start, column) =>
+          start + column.filter((row) => row !== null).length + 1,
+        1,
+      ),
+  );
+  const mobileRow = (c: number, r: number) => {
+    const row = columnRows[c][r];
+    return row === null ? null : sectionStart[c] + row + 1;
+  };
 
   const item = (
     tag: string,
@@ -717,19 +782,21 @@ const stateMatrix = ({
       "strong",
       header,
       [1, c + 2],
-      byColumns ? [c * sectionSize + 1, "1 / -1"] : [1, c + 1],
+      byColumns ? [sectionStart[c], "1 / -1"] : [1, c + 1],
       byColumns && c > 0 ? "state-matrix__section-title" : "",
     ),
   );
 
   const rowItems = rows.map(({ label, cells }, r) => {
     const labels = byColumns
-      ? headers.map((_, c) =>
-          item("strong", label, c === 0 ? [r + 2, 1] : null, [
-            c * sectionSize + r + 2,
-            1,
-          ]),
-        )
+      ? headers.map((_, c) => {
+          const desktop: GridPlace | null = c === 0 ? [r + 2, 1] : null;
+          const row = mobileRow(c, r);
+          const mobile: GridPlace | null = row === null ? null : [row, 1];
+          return desktop || mobile
+            ? item("strong", label, desktop, mobile)
+            : "";
+        })
       : [
           item(
             "strong",
@@ -739,14 +806,15 @@ const stateMatrix = ({
             "state-matrix__row-label",
           ),
         ];
-    const cellItems = cells.map((cell, c) =>
-      item(
+    const cellItems = cells.map((cell, c) => {
+      const row = byColumns ? mobileRow(c, r) : 2 * r + 3;
+      return item(
         "div",
         cell,
         [r + 2, c + 2],
-        byColumns ? [c * sectionSize + r + 2, 2] : [2 * r + 3, c + 1],
-      ),
-    );
+        row === null ? null : [row, byColumns ? 2 : c + 1],
+      );
+    });
     return [...labels, ...cellItems].join("");
   });
 
@@ -830,35 +898,49 @@ const stateRows: {
   id: string;
   attrs?: string;
   labelAttrs?: string;
-  feedback?: boolean;
   unselected?: boolean;
+  error?: boolean;
 }[] = [
   { label: "Default", id: "Default" },
   { label: "Hover", id: "Hover" },
   { label: "Active", id: "Active" },
   { label: "Focus", id: "Focus" },
   { label: "Disabled", id: "Disabled", attrs: "disabled" },
-  { label: "Error", id: "Error", attrs: '[invalid]="true"', feedback: true },
-  { label: "Mandatory", id: "Mandatory", labelAttrs: '[required]="true"' },
+  {
+    label: "Mandatory",
+    id: "Mandatory",
+    labelAttrs: '[required]="true"',
+    error: false,
+  },
   {
     label: "Indeterminate",
     id: "Indeterminate",
     attrs: '[indeterminate]="true"',
     unselected: false,
+    error: false,
   },
 ];
 
+const stateId = (id: string, selected: boolean, error: boolean) =>
+  `${id}${error ? "Error" : ""}${selected ? "Selected" : "Unselected"}`;
+
 const stateCell = (
-  { id, attrs = "", labelAttrs = "", feedback }: (typeof stateRows)[number],
+  { id, attrs = "", labelAttrs = "" }: (typeof stateRows)[number],
   selected: boolean,
+  error = false,
 ) => `
   <div>
     <label tedi-label color="primary" class="flex align-items-center" ${labelAttrs}>
-      <input tedi-checkbox type="checkbox" style="margin-right: var(--form-checkbox-radio-inner-spacing)" id="${id}${selected ? "Selected" : "Unselected"}" ${selected ? "checked" : ""} ${attrs} />
+      <input tedi-checkbox type="checkbox" style="margin-right: var(--form-checkbox-radio-inner-spacing)" id="${stateId(id, selected, error)}" ${selected ? "checked" : ""} ${error ? '[invalid]="true"' : ""} ${attrs} />
       Tekst
     </label>
-    ${feedback ? '<tedi-feedback-text text="Kohustuslik väli" type="error" />' : ""}
+    ${error ? '<tedi-feedback-text text="Kohustuslik väli" type="error" />' : ""}
   </div>`;
+
+const statePseudoIds = (id: string) =>
+  [false, true].flatMap((error) =>
+    [false, true].map((selected) => `#${stateId(id, selected, error)}`),
+  );
 
 /** Gives the States matrix more room between columns and rows on desktop. */
 const statesDesktopGrid = {
@@ -871,22 +953,25 @@ const statesDesktopGrid = {
 export const States: StoryObj<CheckboxComponent> = {
   parameters: {
     pseudo: {
-      hover: ["#HoverUnselected", "#HoverSelected"],
-      active: ["#ActiveUnselected", "#ActiveSelected"],
-      focusVisible: ["#FocusUnselected", "#FocusSelected"],
+      hover: statePseudoIds("Hover"),
+      active: statePseudoIds("Active"),
+      focusVisible: statePseudoIds("Focus"),
     },
   },
   render: (args) => ({
     props: args,
     template: stateMatrix({
-      headers: ["Unselected", "Selected"],
+      headers: ["Unselected", "Selected", "Error unselected", "Error selected"],
       alignItems: "center",
+      mobileLayout: "columns",
       desktopGrid: statesDesktopGrid,
       rows: stateRows.map((row) => ({
         label: row.label,
         cells: [
           row.unselected === false ? "" : stateCell(row, false),
           stateCell(row, true),
+          row.error === false ? "" : stateCell(row, false, true),
+          row.error === false ? "" : stateCell(row, true, true),
         ],
       })),
     }),

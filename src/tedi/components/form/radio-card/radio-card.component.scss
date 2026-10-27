@@ -45,6 +45,14 @@ label[tedi-radio-card] {
     flex-shrink: 0;
   }
 
+  // The pointer always targets the card label, so the browser keeps forwarding
+  // hover and active to the input. If the input itself could be hovered, moving
+  // from the input back onto the card would drop the input's :hover and the
+  // card's hover styles with it.
+  input[tedi-radio] {
+    pointer-events: none;
+  }
+
   .tedi-radio-card__content {
     display: flex;
     gap: var(--form-checkbox-radio-card-inner-spacing);
