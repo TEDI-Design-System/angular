@@ -1,23 +1,32 @@
 <div class="tedi-vertical-stepper-item__row">
   <div class="tedi-vertical-stepper-item__indicator-container">
-    <span class="tedi-vertical-stepper-item__indicator">
-      @if (isSubItem) {
-        <span class="tedi-vertical-stepper-item__dot"></span>
-      } @else if (!_compact()) {
-        <span class="tedi-vertical-stepper-item__number">{{
-          _stepNumber()
-        }}</span>
-      } @else if (!selected() && progressState() === "completed") {
-        <tedi-icon name="check" variant="filled" color="inherit" [size]="16" />
-      } @else if (!selected() && progressState() === "error") {
-        <tedi-icon
-          name="priority_high"
-          variant="filled"
-          color="inherit"
-          [size]="16"
-        />
-      }
-    </span>
+    @if (!isSubItem && !_compact()) {
+      <tedi-vertical-step-number
+        class="tedi-vertical-stepper-item__step-number"
+        [number]="_stepNumber()"
+        [type]="stepNumberType()"
+      />
+    } @else {
+      <span class="tedi-vertical-stepper-item__indicator">
+        @if (isSubItem) {
+          <span class="tedi-vertical-stepper-item__dot"></span>
+        } @else if (!selected() && progressState() === "completed") {
+          <tedi-icon
+            name="check"
+            variant="filled"
+            color="inherit"
+            [size]="16"
+          />
+        } @else if (!selected() && progressState() === "error") {
+          <tedi-icon
+            name="priority_high"
+            variant="filled"
+            color="inherit"
+            [size]="16"
+          />
+        }
+      </span>
+    }
   </div>
   <div class="tedi-vertical-stepper-item__content">
     <div class="tedi-vertical-stepper-item__header">
