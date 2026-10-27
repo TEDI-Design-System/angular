@@ -48,6 +48,7 @@ export type CardStepperHeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
   host: {
     class: "tedi-card-stepper",
     "[class.tedi-card-stepper--reserve-description]": "reserveDescription()",
+    "[class.tedi-card-stepper--progress-flush]": "progressFlush()",
     role: "group",
     "[attr.aria-label]": "ariaLabel()",
   },
@@ -171,6 +172,9 @@ export class CardStepperComponent {
     this.adjacentEnabled(this.active() + 1, 1),
   );
 
+  protected readonly progressFlush = computed(
+    () => this.showProgress() && !this.current()?.content(),
+  );
   /**
    * Reserve one description line when any step has a bottom description.
    */
@@ -215,8 +219,8 @@ export class CardStepperComponent {
       CardStepperListModalData
     >(CardStepperListModalComponent, {
       data: { title, steps: this.listSteps() },
-      width: "100vw",
-      maxWidth: "100vw",
+      width: "100%",
+      maxWidth: "100%",
       position: "bottom",
       ariaLabel: title,
     });
@@ -244,6 +248,7 @@ export class CardStepperComponent {
 
       if (!subStep || !picked.step.subSteps().includes(subStep)) return;
       if (subStep.disabled() || subStep.state() === "informative") return;
+      if (!this.hasSelectableSubSteps(stepIndex)) return;
 
       subStep.subStepSelect.emit();
     });
@@ -263,7 +268,7 @@ export class CardStepperComponent {
         label: subStep.label(),
         state: subStep.state(),
         current: subStep.current(),
-        disabled: subStep.disabled(),
+        disabled: subStep.disabled() || !this.hasSelectableSubSteps(index),
       })),
     }));
   }
@@ -279,6 +284,17 @@ export class CardStepperComponent {
     if (allowJump === "completed") return step.state() === "completed";
 
     return step.state() === "completed" || index === this.active() + 1;
+  }
+
+  /**
+   * Sub-steps follow their step's availability, except on the active step: its
+   * sub-steps stay selectable even when `allowJump` makes the step itself
+   * non-navigable, since they are where the user is working.
+   */
+  private hasSelectableSubSteps(index: number): boolean {
+    const step = this.steps()[index];
+    if (!step || step.disabled()) return false;
+    return index === this.active() || this.isNavigable(index);
   }
 
   private isExpanded(step: CardStepperStepComponent, index: number): boolean {

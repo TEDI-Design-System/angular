@@ -53,7 +53,9 @@ export class CardStepperStepComponent {
    * Whether this step's sub-steps start expanded in the modal. Defaults to
    * expanded for the active step.
    */
-  expanded = input(undefined, { transform: booleanAttribute });
+  expanded = input(undefined, {
+    transform: (v: unknown) => (v == null ? undefined : booleanAttribute(v)),
+  });
 
   readonly subSteps = contentChildren(CardStepperSubStepComponent, {
     descendants: false,
