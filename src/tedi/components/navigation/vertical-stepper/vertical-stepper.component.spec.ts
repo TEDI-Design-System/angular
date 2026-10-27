@@ -4,7 +4,6 @@ import { TediTranslationService } from "../../../services/translation/translatio
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { VerticalStepperComponent } from "./vertical-stepper.component";
 import { VerticalStepperItemComponent } from "./vertical-stepper-item/vertical-stepper-item.component";
-import { VerticalStepperSubItemComponent } from "./vertical-stepper-sub-item/vertical-stepper-sub-item.component";
 
 class TranslationMock {
   translate(key: string) {
@@ -18,45 +17,37 @@ class TranslationMock {
 
 @Component({
   standalone: true,
-  imports: [
-    VerticalStepperComponent,
-    VerticalStepperItemComponent,
-    VerticalStepperSubItemComponent,
-  ],
+  imports: [VerticalStepperComponent, VerticalStepperItemComponent],
   template: `
     <tedi-vertical-stepper
       [ariaLabel]="ariaLabel()"
       [compact]="compact()"
-      [showNumbers]="showNumbers()"
+      [enumerated]="enumerated()"
     >
-      <tedi-vertical-stepper-item label="Kutse" state="completed" href="#1" />
-      <tedi-vertical-stepper-item label="Tahteavaldus" [open]="true">
-        <tedi-vertical-stepper-sub-item label="Sõbrad" state="completed" />
-        <tedi-vertical-stepper-sub-item label="Pere" href="#2" />
+      <tedi-vertical-stepper-item title="Kutse" completed />
+      <tedi-vertical-stepper-item title="Tahteavaldus" [opened]="true">
+        <tedi-vertical-stepper-item title="Sõbrad" completed />
+        <tedi-vertical-stepper-item title="Pere" />
       </tedi-vertical-stepper-item>
-      <tedi-vertical-stepper-item label="Vastus" current href="#3" />
+      <tedi-vertical-stepper-item title="Vastus" selected />
     </tedi-vertical-stepper>
   `,
 })
 class TestHostComponent {
   ariaLabel = signal("Taotluse menetlus");
   compact = signal(false);
-  showNumbers = signal(false);
+  enumerated = signal(false);
 }
 
 @Component({
   standalone: true,
-  imports: [
-    VerticalStepperComponent,
-    VerticalStepperItemComponent,
-    VerticalStepperSubItemComponent,
-  ],
+  imports: [VerticalStepperComponent, VerticalStepperItemComponent],
   template: `
     <tedi-vertical-stepper>
       @for (step of steps; track step) {
-        <tedi-vertical-stepper-item [label]="step" [open]="true">
+        <tedi-vertical-stepper-item [title]="step" [opened]="true">
           @for (sub of subSteps; track sub) {
-            <tedi-vertical-stepper-sub-item [label]="sub" />
+            <tedi-vertical-stepper-item [title]="sub" />
           }
         </tedi-vertical-stepper-item>
       }
@@ -112,8 +103,8 @@ describe("VerticalStepperComponent", () => {
 
     expect(list?.getAttribute("role")).toBe("list");
     expect(
-      fixture.nativeElement.querySelectorAll(
-        'tedi-vertical-stepper-item[role="listitem"]',
+      list?.querySelectorAll(
+        ':scope > tedi-vertical-stepper-item[role="listitem"]',
       ).length,
     ).toBe(3);
   });
@@ -125,7 +116,7 @@ describe("VerticalStepperComponent", () => {
   it("should not number the sub-steps", () => {
     expect(
       fixture.nativeElement.querySelectorAll(
-        ".tedi-vertical-stepper-sub-item .tedi-vertical-stepper-item__number",
+        ".tedi-vertical-stepper-item--sub-item .tedi-vertical-stepper-item__number",
       ).length,
     ).toBe(0);
   });
@@ -146,7 +137,7 @@ describe("VerticalStepperComponent", () => {
 
   it("should print numbers in front of compact labels when asked", () => {
     host.compact.set(true);
-    host.showNumbers.set(true);
+    host.enumerated.set(true);
     fixture.detectChanges();
 
     const prefixes = Array.from(
@@ -159,7 +150,7 @@ describe("VerticalStepperComponent", () => {
   });
 
   it("should not print number prefixes at the default density", () => {
-    host.showNumbers.set(true);
+    host.enumerated.set(true);
     fixture.detectChanges();
 
     expect(
@@ -199,7 +190,7 @@ describe("VerticalStepperComponent in a loop", () => {
   it("should collect looped sub-steps into their step's sub-list", () => {
     expect(
       fixture.nativeElement.querySelectorAll(
-        ".tedi-vertical-stepper-item__sub-list tedi-vertical-stepper-sub-item",
+        ".tedi-vertical-stepper-item__sub-list > .tedi-vertical-stepper-item--sub-item",
       ).length,
     ).toBe(6);
     expect(
