@@ -13,8 +13,8 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { ToggleComponent } from "../../form/toggle/toggle.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
-import { EmptyStateComponent } from "../../helpers/empty-state/empty-state.component";
-import { LabelComponent } from "../../form/label/label.component";
+import { EmptyStateComponent } from "../../content/empty-state/empty-state.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { DropdownItemValueComponent } from "../dropdown/dropdown-item-value/dropdown-item-value.component";
 import { DropdownItemValueLabelComponent } from "../dropdown/dropdown-item-value/dropdown-item-value-label.component";
 import { SearchComponent } from "../../form/search/search.component";
@@ -129,7 +129,7 @@ export default {
     preventOverflow: {
       control: "boolean",
       description:
-        "Should position flip to opposite direction when overflowing screen?",
+        "Flip to the opposite side when the popover would overflow the screen.",
       defaultValue: {
         summary: "false",
       },
@@ -142,7 +142,7 @@ export default {
     },
     dismissible: {
       control: "boolean",
-      description: "Is dismissible by clicking outside of content?",
+      description: "Close the popover when clicking outside its content.",
       defaultValue: {
         summary: "true",
       },
@@ -155,7 +155,7 @@ export default {
     },
     hideOnScroll: {
       control: "boolean",
-      description: "Does popover content hide on scroll?",
+      description: "Close the popover when the page scrolls.",
       defaultValue: {
         summary: "false",
       },
@@ -168,7 +168,7 @@ export default {
     },
     withBorder: {
       control: "boolean",
-      description: "Does popover have illustrative border on the arrow side?",
+      description: "Show an illustrative border on the arrow side.",
       defaultValue: {
         summary: "false",
       },
@@ -179,9 +179,23 @@ export default {
         },
       },
     },
+    withArrow: {
+      control: "boolean",
+      description: "Show the arrow pointing to the trigger.",
+      defaultValue: {
+        summary: "true",
+      },
+      table: {
+        category: "popover inputs",
+        type: {
+          summary: "boolean",
+        },
+      },
+    },
     lockScroll: {
       control: "boolean",
-      description: "Lock scrolling on rest of the page?",
+      description:
+        "Lock scrolling on the rest of the page while the popover is open.",
       defaultValue: {
         summary: "false",
       },
@@ -195,7 +209,7 @@ export default {
     timeoutDelay: {
       control: "number",
       description:
-        "Delay time (in ms) for closing popover when not hovering trigger or content.",
+        "Delay in ms before the popover closes when neither the trigger nor the content is hovered.",
       table: {
         category: "popover inputs",
         type: {
@@ -203,6 +217,20 @@ export default {
         },
         defaultValue: {
           summary: "100",
+        },
+      },
+    },
+    offset: {
+      control: "number",
+      description:
+        "Gap in px between the trigger and the popover. The arrow's gap is added on top when `withArrow` is `true`.",
+      table: {
+        category: "popover inputs",
+        type: {
+          summary: "number",
+        },
+        defaultValue: {
+          summary: "8",
         },
       },
     },
@@ -223,7 +251,7 @@ export default {
     },
     title: {
       control: "text",
-      description: "Heading title of the content",
+      description: "Title shown at the top of the content.",
       table: {
         category: "popover-content inputs",
         type: {
@@ -233,7 +261,7 @@ export default {
     },
     showClose: {
       control: "boolean",
-      description: "Should content show close button?",
+      description: "Show a close button in the content.",
       defaultValue: {
         summary: "false",
       },
@@ -245,7 +273,7 @@ export default {
       },
     },
     underline: {
-      description: "Should add underline class to trigger element?",
+      description: "Underline the trigger element.",
       defaultValue: {
         summary: "false",
       },
@@ -288,8 +316,10 @@ export const Default: Story = {
     dismissible: true,
     hideOnScroll: false,
     withBorder: false,
+    withArrow: true,
     lockScroll: false,
     timeoutDelay: 100,
+    offset: 8,
     maxWidth: "small",
     title: "Pealkiri",
     showClose: true,
@@ -298,7 +328,7 @@ export const Default: Story = {
   render: (args) => ({
     props: args,
     template: `
-      <tedi-popover [position]="position" [preventOverflow]="preventOverflow" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay">
+      <tedi-popover [position]="position" [preventOverflow]="preventOverflow" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [withArrow]="withArrow" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay" [offset]="offset">
         <button tedi-button tedi-popover-trigger [interactive]="interactive">
           Popover Trigger
         </button>

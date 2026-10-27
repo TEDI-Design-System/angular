@@ -8,7 +8,7 @@
   <div [ngClass]="boxClasses()" (mousedown)="handleBoxMouseDown($event)">
     <ng-container [ngTemplateOutlet]="controlSlot"></ng-container>
 
-    @if (clearable()) {
+    @if (renderClearButton()) {
       <div
         class="tedi-form-field__buttons"
         [class.tedi-form-field__buttons--hidden]="!showClearButton()"

@@ -11,6 +11,8 @@ import {
 import { TextEditorComponent } from "./text-editor.component";
 
 /**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.77.99?node-id=9938-87562&m=dev" target="_blank">Figma ↗</a>
+ *
  * Rich text editor built on <a href="https://github.com/KillerCodeMonkey/ngx-quill" target="_blank">ngx-quill ↗</a>.
  *
  * Install `ngx-quill` and `quill` yourself — they are optional peer dependencies

@@ -52,38 +52,47 @@ export class PopoverComponent {
    */
   readonly position = input<PopoverPosition>("top");
   /**
-   * Should position flip to opposite direction when overflowing screen?
+   * Flip to the opposite side when the popover would overflow the screen.
    * @default false
    */
   readonly preventOverflow = input(false);
   /**
-   * Is dismissible by clicking outside of content?
+   * Close the popover when clicking outside its content.
    * @default true
    */
   readonly dismissible = input(true);
   /**
-   * Does popover content hide on scroll?
+   * Close the popover when the page scrolls.
    * @default false
    */
   readonly hideOnScroll = input(false);
   /**
-   * Does popover have illustrative border on the arrow side?
+   * Show an illustrative border on the arrow side.
    * @default false
    */
   readonly withBorder = input(false);
   /**
-   * Should show arrow?
+   * Show the arrow pointing to the trigger.
+   * @default true
    */
   readonly withArrow = input(true);
   /**
-   * Lock scrolling on rest of the page?
+   * Lock scrolling on the rest of the page while the popover is open.
    * @default false
    */
   readonly lockScroll = input(false);
-  /** Delay time (in ms) for closing popover when not hovering trigger or content.
+  /**
+   * Delay in ms before the popover closes when neither the trigger nor the
+   * content is hovered.
    * @default 100
    */
   readonly timeoutDelay = input(100);
+  /**
+   * Gap in px between the trigger and the popover. The arrow's gap is added on
+   * top when `withArrow` is `true`.
+   * @default 8
+   */
+  readonly offset = input(8);
 
   private readonly document = inject(DOCUMENT);
   private readonly renderer = inject(Renderer2);
@@ -104,13 +113,16 @@ export class PopoverComponent {
   readonly overlayOrigin = computed(() => this.popoverTrigger().overlayOrigin);
   private readonly arrowOffset = computed(() => (this.withArrow() ? 12 : 0));
 
-  readonly overlayPositions = computed(() =>
-    toConnectedPositions(
-      this.position(),
-      this.preventOverflow(),
-      this.arrowOffset(),
-    ),
-  );
+  readonly overlayPositions = computed(() => {
+    const gap = this.offset() + this.arrowOffset();
+    return toConnectedPositions(this.position(), this.preventOverflow()).map(
+      (pos) => ({
+        ...pos,
+        offsetX: pos.offsetX ? Math.sign(pos.offsetX) * gap : pos.offsetX,
+        offsetY: pos.offsetY ? Math.sign(pos.offsetY) * gap : pos.offsetY,
+      }),
+    );
+  });
 
   readonly panelClasses = computed(() => {
     const classList = ["tedi-popover__container"];

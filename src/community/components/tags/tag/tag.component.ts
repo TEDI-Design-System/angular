@@ -10,6 +10,7 @@ import {
   IconComponent,
   SpinnerComponent,
   TediTranslationPipe,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 
 export type TagType = "primary" | "secondary" | "danger";
@@ -66,6 +67,10 @@ export class TagComponent {
     }
     return classList.join(" ");
   });
+
+  constructor() {
+    warnDeprecated("Community tedi-tag", "Use Tag from TEDI-ready instead.");
+  }
 
   handleClose(event: Event) {
     this.closed.emit(event);

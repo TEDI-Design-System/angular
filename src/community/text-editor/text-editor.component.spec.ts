@@ -5,6 +5,7 @@ import { By } from "@angular/platform-browser";
 import { QuillModules } from "ngx-quill";
 import type Quill from "quill";
 import {
+  FormFieldComponent,
   TEDI_TRANSLATION_DEFAULT_TOKEN,
   TediTranslationService,
 } from "@tedi-design-system/angular/tedi";
@@ -371,5 +372,36 @@ describe("TextEditorComponent", () => {
         ariaLabel: "formula",
       });
     });
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextEditorComponent, ReactiveFormsModule],
+  template: `
+    <tedi-form-field [clearable]="true">
+      <tedi-text-editor [formControl]="control" inputId="in-field" />
+    </tedi-form-field>
+  `,
+})
+class FormFieldHostComponent {
+  control = new FormControl<string>("<p>Text</p>", { nonNullable: true });
+}
+
+describe("TextEditorComponent inside tedi-form-field", () => {
+  it("gets no clear button or field box, even when clearable", () => {
+    TestBed.configureTestingModule({
+      imports: [FormFieldHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    });
+    const fixture = TestBed.createComponent(FormFieldHostComponent);
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector(".tedi-form-field__clear")).toBeNull();
+    expect(el.querySelector(".tedi-form-field__box")).toBeNull();
   });
 });

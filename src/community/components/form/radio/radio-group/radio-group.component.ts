@@ -10,7 +10,12 @@ import {
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { RadioValue } from "../radio/radio.component";
-import { ComponentInputs, LabelComponent, FeedbackTextComponent } from "@tedi-design-system/angular/tedi";
+import {
+  ComponentInputs,
+  LabelComponent,
+  FeedbackTextComponent,
+  warnDeprecated,
+} from "@tedi-design-system/angular/tedi";
 
 export type RadioGroupSize = "default" | "large";
 
@@ -92,6 +97,14 @@ export class RadioGroupComponent implements ControlValueAccessor {
 
   private _onChange: (val: RadioValue) => void = () => { };
   private _onTouched: (val: boolean) => void = () => { };
+
+  constructor() {
+    if (new.target !== RadioGroupComponent) return;
+    warnDeprecated(
+      "Community tedi-radio-group",
+      "Use Radio from TEDI-ready instead.",
+    );
+  }
 
   writeValue(value: RadioValue | null): void {
     this._value.set(value);

@@ -9,4 +9,8 @@ import { Component } from "@angular/core";
   selector: "tedi-table-of-contents-nested-wrapper",
   template: `<ng-content></ng-content>`,
 })
+/**
+ * @deprecated Use the TEDI-Ready TableOfContents from `@tedi-design-system/angular` instead:
+ * nest `tedi-table-of-contents-item` elements directly, no wrapper needed.
+ */
 export class TableOfContentsNestedWrapperComponent {}

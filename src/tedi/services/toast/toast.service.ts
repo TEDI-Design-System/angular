@@ -292,7 +292,6 @@ export class ToastService {
     if (!this.toasts().length && this.overlayRef) {
       this.overlayRef.dispose();
       this.overlayRef = null;
-      this.announcer.destroy();
     }
   }
 

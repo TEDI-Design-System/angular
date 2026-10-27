@@ -14,7 +14,7 @@ You are a senior Angular and TypeScript engineer specializing in accessible UI c
 
 ## Before Any Code
 
-1. Read `CLAUDE.md` at the project root for commands, architecture, and conventions.
+1. Read `AGENTS.md` at the project root for commands, architecture, and conventions.
 2. Read [best-practices](references/best-practices.md) for coding patterns.
 3. If creating or modifying a component, check if TEDI React (`../react/src/tedi/components/`) has an equivalent — use as behavioral reference.
 4. Check TEDI Core (`../core/src/`) for available design tokens, mixins, and shared styles.
@@ -31,6 +31,7 @@ Load the appropriate reference based on what you're doing:
 | WCAG audit or accessibility review | [a11y-review.md](references/a11y-review.md) |
 | Renaming, restructuring, extracting, merging | [refactoring.md](references/refactoring.md) |
 | Creating or updating Storybook stories | [stories.md](references/stories.md) |
+| Deprecating a component, removing its docs, or removing it from code | [deprecation.md](references/deprecation.md) |
 | Need to check coding patterns | [best-practices.md](references/best-practices.md) |
 
 For **compound tasks** (e.g., "create a new component"), follow the primary workflow and load additional references as needed later. Creating a component will also need testing.md and stories.md at the end.
@@ -68,7 +69,8 @@ So when you add, remove, rename, or change a component's API:
 
 1. **Document it in the source.** Every public input gets JSDoc: what it does, `@default` where it
    has one, and why the default is what it is when that isn't obvious. Add `@deprecated` with the
-   replacement rather than deleting outright.
+   replacement rather than deleting outright. Deprecating a whole component follows
+   [deprecation.md](references/deprecation.md).
 2. **Update the consumer skill only for what JSDoc cannot carry** (see below). If there is nothing in
    that category, you are done. A routine new input needs no consumer-skill edit at all.
 

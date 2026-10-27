@@ -5,7 +5,7 @@ import { By } from "@angular/platform-browser";
 import { DateFieldComponent } from "./date-field.component";
 import { TextFieldComponent } from "../text-field/text-field.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { DateRange } from "../../content/calendar/types";
 import { TediTranslationService } from "../../../services/translation/translation.service";
@@ -109,6 +109,30 @@ describe("DateFieldComponent", () => {
       const { el } = createField();
       const input = el.querySelector("input.tedi-date-input__input");
       expect(input?.id).toBe("test-date-field");
+    });
+
+    it("assigns the name to the date-input", () => {
+      const { el } = createField({ name: "birth-date" });
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.getAttribute("name")).toBe("birth-date");
+    });
+
+    it("omits the name attribute when no name is set", () => {
+      const { el } = createField();
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.hasAttribute("name")).toBe(false);
+    });
+
+    it("sets no aria-describedby when nothing describes the field", () => {
+      const { el } = createField();
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.hasAttribute("aria-describedby")).toBe(false);
     });
 
     it("shows placeholder", () => {
@@ -352,6 +376,21 @@ describe("DateFieldComponent", () => {
         "input.tedi-date-input__input",
       ) as HTMLInputElement;
       expect(input.type).toBe("text");
+    });
+
+    it("uses the custom calendar when readOnly, even if native picker is requested", () => {
+      const { component, el } = createField({
+        readOnly: true,
+        useNativePicker: true,
+      });
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.type).toBe("text");
+      expect(input.readOnly).toBe(true);
+      expect(component.usePopover()).toBe(true);
+      component.handleIconClick();
+      expect(component.overlayOpen()).toBe(true);
     });
 
     it("renders nativeIsoValue from value() when in native-picker mode", () => {
@@ -834,6 +873,32 @@ describe("DateFieldComponent", () => {
       expect(el.querySelector("tedi-tag .tedi-closing-button")).toBeNull();
     });
 
+    it("removes a date through the tag when readOnly, since the calendar can still change the value (#726)", () => {
+      const { el, component, fixture } = createField({
+        mode: "multiple",
+        readOnly: true,
+      });
+      component.value.set([new Date(2026, 4, 14), new Date(2026, 5, 1)]);
+      fixture.detectChanges();
+      const removeBtn = el.querySelector(
+        "tedi-tag .tedi-closing-button",
+      ) as HTMLButtonElement;
+      removeBtn.click();
+      expect((component.value() as Date[]).length).toBe(1);
+    });
+
+    it("renders tags without a close button when readOnly and the calendar is disabled", () => {
+      const { el, component, fixture } = createField({
+        mode: "multiple",
+        readOnly: true,
+        enableCalendar: false,
+      });
+      component.value.set([new Date(2026, 4, 14), new Date(2026, 5, 1)]);
+      fixture.detectChanges();
+      expect(el.querySelectorAll("tedi-tag").length).toBe(2);
+      expect(el.querySelector("tedi-tag .tedi-closing-button")).toBeNull();
+    });
+
     it("forwards tagEllipsis to the rendered tags", () => {
       const { el, component, fixture } = createField({
         mode: "multiple",
@@ -1148,6 +1213,28 @@ describe("DateFieldComponent", () => {
       fixture.detectChanges();
       expect(component.overlayOpen()).toBe(false);
     });
+
+    it("keeps the custom calendar available at native breakpoints when readOnly", () => {
+      const { component, el, fixture, breakpoint } = createField({
+        readOnly: true,
+        useNativePicker: "md",
+        value: new Date(2026, 4, 14),
+      });
+      breakpoint.setBreakpoint("sm");
+      fixture.detectChanges();
+
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.type).toBe("text");
+      expect(component.usePopover()).toBe(true);
+      const clear = el.querySelector(
+        ".tedi-date-input__clear",
+      ) as HTMLButtonElement;
+      expect(clear).not.toBeNull();
+      clear.click();
+      expect(component.value()).toBeNull();
+    });
   });
 
   describe("modal commit", () => {
@@ -1223,7 +1310,77 @@ describe("DateFieldComponent", () => {
     });
   });
 
-  describe("reset behavior", () => {
+  describe("uncommitted text and reset behavior", () => {
+    function typeUnparsableText(
+      el: HTMLElement,
+      fixture: ComponentFixture<DateFieldComponent>,
+    ): HTMLInputElement {
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      input.value = "abc";
+      input.dispatchEvent(new Event("input"));
+      fixture.detectChanges();
+      return input;
+    }
+
+    it("clears typed text on reset() when the value was already null", () => {
+      const { component, el, fixture } = createField({ mode: "single" });
+      const input = typeUnparsableText(el, fixture);
+
+      expect(component.value()).toBeNull();
+      expect(input.value).toBe("abc");
+
+      component.reset();
+      fixture.detectChanges();
+
+      expect(input.value).toBe("");
+    });
+
+    it("clears typed text on writeValue(null) when the value was already null", () => {
+      const { component, el, fixture } = createField({ mode: "single" });
+      const input = typeUnparsableText(el, fixture);
+
+      component.writeValue(null);
+      fixture.detectChanges();
+
+      expect(input.value).toBe("");
+    });
+
+    it("replaces typed text when the value input changes", () => {
+      const { component, el, fixture } = createField({ mode: "single" });
+      const input = typeUnparsableText(el, fixture);
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+
+      fixture.componentRef.setInput("value", new Date(2026, 4, 14));
+      fixture.detectChanges();
+
+      expect(input.value).toBe("14.05.2026");
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it.each([false, true])(
+      "replaces typed text on calendar selection (same value: %s)",
+      (sameValue) => {
+        const date = new Date(2026, 4, 14);
+        const { component, el, fixture } = createField({
+          mode: "single",
+          value: sameValue ? date : null,
+        });
+        const input = typeUnparsableText(el, fixture);
+        const fakeCalendar = { value: () => date };
+        (
+          component as unknown as { calendar: () => typeof fakeCalendar }
+        ).calendar = () => fakeCalendar;
+
+        component.handleCalendarSelect();
+        fixture.detectChanges();
+
+        expect(input.value).toBe("14.05.2026");
+      },
+    );
+
     it("does nothing when disabled", () => {
       const { component } = createField({ inputDisabled: true });
       component.value.set(new Date(2026, 4, 14));
@@ -1234,8 +1391,11 @@ describe("DateFieldComponent", () => {
       expect(onChange).not.toHaveBeenCalled();
     });
 
-    it("does nothing when readOnly", () => {
-      const { component } = createField({ readOnly: true });
+    it("does nothing when readOnly and the calendar is disabled", () => {
+      const { component } = createField({
+        readOnly: true,
+        enableCalendar: false,
+      });
       component.value.set(new Date(2026, 4, 14));
       const onChange = jest.fn();
       component.registerOnChange(onChange);
@@ -1243,18 +1403,98 @@ describe("DateFieldComponent", () => {
       expect(component.value()).toBeInstanceOf(Date);
       expect(onChange).not.toHaveBeenCalled();
     });
+
+    it("clears when readOnly but the calendar is available (#726)", () => {
+      const { component } = createField({ readOnly: true });
+      component.value.set(new Date(2026, 4, 14));
+      const onChange = jest.fn();
+      component.registerOnChange(onChange);
+      component.reset();
+      expect(component.value()).toBeNull();
+      expect(onChange).toHaveBeenCalledWith(null);
+    });
   });
 
   describe("clear button", () => {
+    const getClear = (el: HTMLElement) =>
+      el.querySelector(".tedi-date-input__clear") as HTMLButtonElement | null;
+
     it("renders once the field has a value", () => {
       const { component, el, fixture } = createField();
-      expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
+      expect(getClear(el)).toBeNull();
 
       fixture.componentRef.setInput("value", new Date(2026, 4, 14));
       fixture.detectChanges();
 
+      expect(component.clearableResolved()).toBe(true);
       expect(component.canClear()).toBe(true);
-      expect(el.querySelector(".tedi-date-input__clear")).not.toBeNull();
+      expect(getClear(el)).not.toBeNull();
+    });
+
+    it("renders and clears when readOnly, since the calendar can still change the value (#726)", () => {
+      const { component, el } = createField({
+        readOnly: true,
+        value: new Date(2026, 4, 14),
+      });
+      const clear = getClear(el);
+      expect(clear).not.toBeNull();
+      clear!.click();
+      expect(component.value()).toBeNull();
+    });
+
+    it("renders and clears when calendarTrigger=input (#726)", () => {
+      const { component, el } = createField({
+        calendarTrigger: "input",
+        value: new Date(2026, 4, 14),
+      });
+      const clear = getClear(el);
+      expect(clear).not.toBeNull();
+      clear!.click();
+      expect(component.value()).toBeNull();
+    });
+
+    it("does not render when readOnly and the calendar is disabled", () => {
+      const { el } = createField({
+        readOnly: true,
+        enableCalendar: false,
+        value: new Date(2026, 4, 14),
+      });
+      expect(getClear(el)).toBeNull();
+    });
+
+    it("renders when readOnly requests the native picker, using the custom calendar", () => {
+      const { el, component } = createField({
+        readOnly: true,
+        useNativePicker: true,
+        value: new Date(2026, 4, 14),
+      });
+      expect(component.useNativePickerEffective()).toBe(false);
+      expect(getClear(el)).not.toBeNull();
+    });
+
+    it("converts static attribute values to booleans", () => {
+      const { component, fixture } = createField();
+      fixture.componentRef.setInput("value", new Date(2026, 4, 14));
+
+      fixture.componentRef.setInput("clearable", "false");
+      fixture.detectChanges();
+      expect(component.clearable()).toBe(false);
+      expect(component.canClear()).toBe(false);
+
+      fixture.componentRef.setInput("clearable", "");
+      fixture.detectChanges();
+      expect(component.clearable()).toBe(true);
+      expect(component.canClear()).toBe(true);
+    });
+
+    it("hides the clear button when a standalone field opts out", () => {
+      const { component, el, fixture } = createField();
+      fixture.componentRef.setInput("clearable", false);
+      fixture.componentRef.setInput("value", new Date(2026, 4, 14));
+      fixture.detectChanges();
+
+      expect(component.canClear()).toBe(false);
+      expect(el.querySelector(".tedi-date-input__clear")).toBeNull();
     });
   });
 
@@ -1481,15 +1721,21 @@ describe("DateFieldComponent with ReactiveFormsModule", () => {
     ReactiveFormsModule,
   ],
   template: `
-    <tedi-form-field>
+    <tedi-form-field [clearable]="clearable">
       <label tedi-label for="composite-date">Date</label>
-      <tedi-date-field inputId="composite-date" [formControl]="control" />
+      <tedi-date-field
+        inputId="composite-date"
+        [formControl]="control"
+        [clearable]="fieldClearable"
+      />
       <tedi-feedback-text text="Error" type="error" />
     </tedi-form-field>
   `,
 })
 class CompositeHostComponent {
   control = new FormControl<Date | Date[] | DateRange | null>(null);
+  clearable = false;
+  fieldClearable?: boolean;
 }
 
 describe("DateFieldComponent inside FormFieldComponent", () => {
@@ -1522,6 +1768,113 @@ describe("DateFieldComponent inside FormFieldComponent", () => {
 
   it("renders feedback text", () => {
     expect(el.querySelector("tedi-feedback-text")).toBeTruthy();
+  });
+
+  describe("clearable driven by the form field", () => {
+    const seed = (clearable: boolean) => {
+      fixture.componentInstance.clearable = clearable;
+      fixture.componentInstance.control.setValue(new Date(2026, 4, 14));
+      fixture.detectChanges();
+    };
+
+    it("renders none when the form field opts out", () => {
+      seed(false);
+      expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(0);
+      expect(el.querySelectorAll(".tedi-form-field__clear")).toHaveLength(0);
+    });
+
+    it("renders exactly one when the form field opts in", () => {
+      seed(true);
+      expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(1);
+      expect(el.querySelectorAll(".tedi-form-field__clear")).toHaveLength(0);
+    });
+
+    it("lets the date field's own clearable override the form field", () => {
+      fixture.componentInstance.fieldClearable = true;
+      seed(false);
+      expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(1);
+
+      fixture.componentInstance.fieldClearable = false;
+      seed(true);
+      expect(el.querySelectorAll(".tedi-date-input__clear")).toHaveLength(0);
+    });
+
+    it("still clears programmatically when opted out", () => {
+      seed(false);
+      const component = fixture.debugElement.query(
+        By.directive(DateFieldComponent),
+      ).componentInstance as DateFieldComponent;
+
+      component.reset();
+      expect(component.value()).toBeNull();
+    });
+  });
+
+  it("associates the feedback text with the input via aria-describedby", () => {
+    const input = el.querySelector(
+      "input.tedi-date-input__input",
+    ) as HTMLInputElement;
+    const feedbackId = el
+      .querySelector("tedi-feedback-text")
+      ?.getAttribute("id");
+
+    expect(feedbackId).toBeTruthy();
+    expect(input.getAttribute("aria-describedby")).toBe(feedbackId);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [
+    DateFieldComponent,
+    FormFieldComponent,
+    LabelComponent,
+    FeedbackTextComponent,
+  ],
+  template: `
+    <p id="own-hint">Own hint</p>
+    <tedi-form-field>
+      <label tedi-label for="described-date">Date</label>
+      <tedi-date-field inputId="described-date" aria-describedby="own-hint" />
+      @if (showFeedback) {
+        <tedi-feedback-text id="fb" text="Error" type="error" />
+      }
+    </tedi-form-field>
+  `,
+})
+class DescribedByHostComponent {
+  showFeedback = false;
+}
+
+describe("DateFieldComponent aria-describedby", () => {
+  function createHost(showFeedback: boolean): HTMLElement {
+    TestBed.configureTestingModule({
+      imports: [DescribedByHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    });
+    const fixture = TestBed.createComponent(DescribedByHostComponent);
+    fixture.componentInstance.showFeedback = showFeedback;
+    fixture.detectChanges();
+    return fixture.nativeElement;
+  }
+
+  function describedBy(el: HTMLElement): string | null {
+    return (
+      el.querySelector("input.tedi-date-input__input") as HTMLInputElement
+    ).getAttribute("aria-describedby");
+  }
+
+  it("forwards an aria-describedby set on the host to the input", () => {
+    expect(describedBy(createHost(false))).toBe("own-hint");
+  });
+
+  it("merges the host's own ids with the ones form-field pushes", () => {
+    const ids = describedBy(createHost(true))?.split(" ") ?? [];
+    expect(ids).toContain("own-hint");
+    expect(ids).toContain("fb");
   });
 });
 

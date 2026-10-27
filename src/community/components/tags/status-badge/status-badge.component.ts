@@ -1,5 +1,9 @@
 import { Component, computed, input, ViewEncapsulation } from "@angular/core";
-import { IconColor, IconComponent } from "@tedi-design-system/angular/tedi";
+import {
+  IconColor,
+  IconComponent,
+  warnDeprecated,
+} from "@tedi-design-system/angular/tedi";
 
 // StatusBadgeColor, StatusBadgeVariant, StatusBadgeSize, StatusBadgeStatus are identical to libs/react-components/src/tedi/components/tags/status-badge/status-badge.tsx,
 // redo to use shared constants when possible
@@ -136,4 +140,11 @@ export class StatusBadgeComponent {
         return "primary";
     }
   });
+
+  constructor() {
+    warnDeprecated(
+      "Community [tedi-status-badge]",
+      "Use StatusBadge from TEDI-ready instead.",
+    );
+  }
 }

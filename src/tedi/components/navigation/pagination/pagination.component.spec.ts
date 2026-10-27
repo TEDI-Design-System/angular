@@ -318,6 +318,20 @@ describe("PaginationComponent", () => {
     expect(label?.textContent?.trim()).toBe("25");
   });
 
+  it("never offers to clear the page size, which must always have a value", () => {
+    const fixture = setup({
+      pageCount: 5,
+      pageSize: 25,
+      pageSizeOptions: [10, 25, 50],
+    });
+
+    expect(
+      fixture.nativeElement.querySelector(
+        ".tedi-pagination__page-size-select .tedi-select__clear",
+      ),
+    ).toBeNull();
+  });
+
   it("renders a labelled page-size option's text on the first change-detection pass", () => {
     const fixture = setup({
       pageCount: 5,

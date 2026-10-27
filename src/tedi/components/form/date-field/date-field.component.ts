@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -8,6 +9,7 @@ import {
   forwardRef,
   inject,
   input,
+  linkedSignal,
   model,
   OnInit,
   output,
@@ -46,6 +48,7 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { deriveControlState } from "../form-field/derive-control-state";
+import { controlDescribedBy } from "../form-field/control-described-by";
 import {
   breakpointInput,
   BreakpointInput,
@@ -67,7 +70,6 @@ import {
   DateFieldModalComponent,
   DateFieldModalData,
 } from "./date-field-modal/date-field-modal.component";
-import { ButtonComponent } from "../../buttons";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 
 type DateFieldValue = Date | Date[] | DateRange | null;
@@ -91,7 +93,6 @@ export type DateFieldSize = "default" | "small";
   imports: [
     CalendarComponent,
     DateInputComponent,
-    ButtonComponent,
     OverlayModule,
     A11yModule,
     TediTranslationPipe,
@@ -136,6 +137,11 @@ export class DateFieldComponent
    */
   readonly inputId = input.required<string>();
   /**
+   * `name` attribute of the underlying text input, used by native form
+   * submission. Omitted from the DOM when not set.
+   */
+  readonly name = input<string>();
+  /**
    * The selected value (two-way / `ControlValueAccessor`). Shape follows `mode`:
    * `single` → `Date | null`, `multiple` → `Date[]`, `range` → `{ from, to }`.
    */
@@ -178,7 +184,8 @@ export class DateFieldComponent
   readonly inputDisabled = input<boolean>(false);
   /**
    * Blocks typing into the input but leaves the calendar interactive — useful
-   * for guided picking.
+   * for guided picking. The value can still be cleared while the calendar is
+   * available, since the user can change it there anyway.
    */
   readonly readOnly = input<boolean>(false);
   /**
@@ -193,6 +200,15 @@ export class DateFieldComponent
    * set here.
    */
   readonly size = input<DateFieldSize | undefined>();
+  /**
+   * Whether the clear button shows once the field has a value. Falls back to the
+   * wrapping `tedi-form-field`'s `clearable` when not set here — set it on the
+   * wrapper, and use this only for a standalone field.
+   */
+  readonly clearable = input<boolean | undefined, unknown>(undefined, {
+    // Unset stays `undefined` so the wrapper's `clearable` still applies.
+    transform: (v: unknown) => (v == null ? undefined : booleanAttribute(v)),
+  });
   /**
    * Forces the error state on, or off, regardless of the reactive-forms state.
    * Leave unset to let the control derive it.
@@ -303,7 +319,8 @@ export class DateFieldComponent
   /**
    * Use the OS native date picker instead of the custom popover (single mode only).
    * `true` always, `false` never, breakpoint name → native below that breakpoint
-   * (custom popover from that breakpoint up).
+   * (custom popover from that breakpoint up). `readOnly` uses the custom
+   * calendar so picking and clearing remain available without manual input.
    */
   readonly useNativePicker = input<DateFieldUseNativePicker>(false);
   /**
@@ -363,7 +380,22 @@ export class DateFieldComponent
     ];
   });
 
+  /**
+   * `aria-describedby` ids for the inner input — the wrapping form-field's
+   * feedback text, plus any set on `<tedi-date-field>` itself.
+   */
+  readonly describedBy = controlDescribedBy();
+
   private readonly cvaDisabled = signal(false);
+  /**
+   * Uncommitted input text, tracked separately so resets clear it even when
+   * `value` is unchanged. Value changes discard it; `null` shows the formatted value.
+   */
+  private readonly typedText = linkedSignal<DateFieldValue, string | null>({
+    source: this.value,
+    computation: () => null,
+  });
+
   private modalRef: ModalRef<DateFieldValue> | null = null;
   private scrollListener?: () => void;
 
@@ -406,11 +438,20 @@ export class DateFieldComponent
     invalid: computed(() => this.invalid()),
     valid: computed(() => this.valid()),
     disabled: computed(() => this.disabled()),
+    clearable: computed(() => this.clearableResolved()),
   };
 
   ngOnInit(): void {
     this.derived.connect();
   }
+
+  /** The clear button sits in the date input's action row, beside the calendar. */
+  readonly ownsClearButton = true;
+
+  /** Own `clearable` wins, then the wrapping `tedi-form-field`'s. */
+  readonly clearableResolved = computed(
+    () => this.clearable() ?? this.fieldContext?.clearable() ?? true,
+  );
 
   readonly resolvedDisabledMatchers = computed<Matcher[]>(() => {
     const result: Matcher[] = [];
@@ -444,7 +485,8 @@ export class DateFieldComponent
     () =>
       this.useNativePickerResolved() &&
       this.mode() === "single" &&
-      !this.modalEnabled(),
+      !this.modalEnabled() &&
+      !this.readOnly(),
   );
 
   readonly numberOfMonthsResolved = computed(() =>
@@ -508,6 +550,12 @@ export class DateFieldComponent
     return this.defaultFormat(v);
   });
 
+  /**
+   * What the text input actually shows: uncommitted typed text when there is
+   * any, otherwise the formatted `value`.
+   */
+  readonly inputText = computed(() => this.typedText() ?? this.displayValue());
+
   readonly tagsForMultipleMode = computed<DateInputTag[]>(() => {
     if (this.mode() !== "multiple") return [];
     const v = this.value();
@@ -519,8 +567,17 @@ export class DateFieldComponent
     }));
   });
 
+  /**
+   * Whether the user can change the value at all. `readOnly` only locks the
+   * text input: while the calendar is available the user can still pick dates,
+   * so they must also be able to remove them (clear button, tag close).
+   */
+  readonly valueEditable = computed(
+    () => !this.fieldDisabled() && (!this.readOnly() || this.showCalendar()),
+  );
+
   readonly canClear = computed(
-    () => !!this.value() && !this.fieldDisabled() && !this.readOnly(),
+    () => this.clearableResolved() && !!this.value() && this.valueEditable(),
   );
 
   readonly inputIsTrigger = computed(
@@ -567,6 +624,7 @@ export class DateFieldComponent
   }
 
   writeValue(value: DateFieldValue): void {
+    this.typedText.set(null);
     this.value.set(value);
   }
 
@@ -582,13 +640,17 @@ export class DateFieldComponent
     this.cvaDisabled.set(isDisabled);
   }
 
+  setDescribedBy(ids: string[]): void {
+    this.describedBy.set(ids);
+  }
+
   focus(): void {
     if (this.fieldDisabled()) return;
     this.dateInput().focusInput();
   }
 
   reset(): void {
-    if (this.fieldDisabled() || this.readOnly()) return;
+    if (!this.valueEditable()) return;
     this.commitValue(null);
   }
 
@@ -635,6 +697,8 @@ export class DateFieldComponent
       return;
     }
 
+    this.typedText.set(value);
+
     if (value === "") {
       this.commitValue(null);
       return;
@@ -654,7 +718,7 @@ export class DateFieldComponent
   }
 
   handleTagRemove(id: string): void {
-    if (this.fieldDisabled() || this.readOnly()) return;
+    if (!this.valueEditable()) return;
     const v = this.value();
     if (!Array.isArray(v)) return;
 
@@ -679,6 +743,7 @@ export class DateFieldComponent
     const calendar = this.calendar();
     if (!calendar) return;
     const newValue = calendar.value();
+    this.typedText.set(null);
     this.value.set(newValue);
     this.onChange(newValue);
     this.onTouched();
@@ -893,6 +958,7 @@ export class DateFieldComponent
   }
 
   private commitValue(next: DateFieldValue): void {
+    this.typedText.set(null);
     this.value.set(next);
     this.onChange(next);
     this.onTouched();

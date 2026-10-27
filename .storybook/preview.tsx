@@ -1,3 +1,4 @@
+import "./fixed-date";
 import { applicationConfig, Preview, StoryContext } from "@storybook/angular";
 import { provideRouter, withDisabledInitialNavigation } from "@angular/router";
 import { Theme } from "../src/tedi/services/theme/theme.service";
@@ -21,8 +22,8 @@ export const globalTypes = {
     toolbar: {
       icon: "paintbrush",
       items: [
-        { value: "default", title: "Default" },
-        { value: "dark", title: "Dark" },
+        { value: "default", title: "Light mode (default)" },
+        { value: "dark", title: "Dark mode" },
       ],
       showName: true,
     },
@@ -75,17 +76,18 @@ const preview: Preview = {
     viewMode: "docs",
     a11y: {
       test: "error",
+      // axe leaves target-size (WCAG 2.2, 2.5.8) off by default. Set via options.rules, not
+      // config.rules, so stories that override config.rules don't drop it. To turn it off in a
+      // story, use options.rules too: config.rules can't override it.
+      options: {
+        rules: { "target-size": { enabled: true } },
+      },
     },
     backgrounds: {
       options: {
-        default: { name: "default", value: "var(--general-surface-primary)" },
-        muted: { name: "muted", value: "var(--general-surface-secondary)" },
-        subtle: { name: "subtle", value: "var(--general-surface-tertiary)" },
-        disabled: { name: "disabled", value: "var(--general-surface-disabled)" },
-        black: { name: "black", value: "var(--tedi-neutral-900)" },
-        inverted: { name: "inverted", value: "var(--general-surface-inverted-primary)" },
-        "inverted-contrast": { name: "inverted-contrast", value: "var(--general-surface-inverted-secondary)" },
-        brand: { name: "brand", value: "var(--general-surface-brand-primary)" },
+        default: { name: "Default", value: "var(--general-surface-primary)" },
+        inverted: { name: "Inverted", value: "var(--general-surface-inverted-primary)" },
+        brand: { name: "Brand", value: "var(--general-surface-brand-primary)" },
       },
     },
     docs: {

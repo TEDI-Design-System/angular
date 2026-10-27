@@ -18,7 +18,7 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
-import { CollapseComponent } from "../../buttons/collapse/collapse.component";
+import { CollapseComponent } from "../collapse/collapse.component";
 import { LinkComponent } from "../../navigation/link/link.component";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";

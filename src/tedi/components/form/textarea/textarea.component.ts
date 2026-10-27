@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -57,6 +58,7 @@ export type TextareaSize = Exclude<InputSize, "large">;
     "[style.max-height]": "maxHeightStyle()",
     "[attr.aria-invalid]": "invalid() || null",
     "[attr.aria-describedby]": "describedBy.attribute()",
+    "[readOnly]": "readOnly()",
     "(input)": "handleInputChange($event)",
     "(blur)": "handleBlur()",
   },
@@ -174,6 +176,26 @@ export class TextareaComponent
 
     return limits.length === 1 ? limits[0] : `min(${limits.join(", ")})`;
   });
+
+  // Native `readonly`, under both the attribute (`readonly`) and the property
+  // (`[readOnly]`) spelling, so a wrapping `tedi-form-field` can hide its clear
+  // button while the value cannot be edited.
+  readonly readOnlyAttribute = input(false, {
+    // eslint-disable-next-line @angular-eslint/no-input-rename
+    alias: "readonly",
+    transform: booleanAttribute,
+  });
+  readonly readOnlyProperty = input(false, {
+    // eslint-disable-next-line @angular-eslint/no-input-rename
+    alias: "readOnly",
+    transform: booleanAttribute,
+  });
+  readonly readOnly = computed(
+    () => this.readOnlyAttribute() || this.readOnlyProperty(),
+  );
+
+  /** Textareas take no clear button, even inside a `clearable` form field. */
+  readonly clearButton = false;
 
   readonly disabled = computed(
     () => this.formDisabled() || (this.fieldContext?.disabled() ?? false),

@@ -13,6 +13,8 @@ export interface FieldContext {
   valid: Signal<boolean>;
   /** From an input group that disables everything inside it. */
   disabled: Signal<boolean>;
+  /** Whether the field shows a clear button — controls read it instead of declaring their own. */
+  clearable: Signal<boolean>;
 }
 
 export const TEDI_FIELD_CONTEXT = new InjectionToken<FieldContext>(

@@ -260,6 +260,9 @@ export class TextEditorComponent
   readonly touched = this.derived.touched;
   readonly dirty = this.derived.dirty;
 
+  /** Rich text takes no clear button, even inside a `clearable` form field. */
+  readonly clearButton = false;
+
   readonly disabled = computed(
     () => this.formDisabled() || (this.fieldContext?.disabled() ?? false),
   );

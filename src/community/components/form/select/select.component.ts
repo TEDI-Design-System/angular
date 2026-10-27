@@ -35,6 +35,7 @@ import {
   TextComponent,
   CardComponent,
   CardContentComponent,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 
 /**
@@ -140,6 +141,13 @@ export class SelectComponent
     });
     return groups;
   });
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-select",
+      "Use Select from TEDI-ready instead.",
+    );
+  }
 
   ngAfterContentChecked(): void {
     this.setDropdownWidth();

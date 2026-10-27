@@ -14,6 +14,7 @@ import { RadioGroupComponent } from "../radio-group/radio-group.component";
 import {
   ComponentInputs,
   FeedbackTextComponent,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 import { generateUUID } from "@tedi-design-system/angular/tedi";
 
@@ -82,6 +83,13 @@ export class RadioComponent implements OnInit {
     }
     return;
   });
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-radio",
+      "Use Radio from TEDI-ready instead.",
+    );
+  }
 
   focus() {
     this._inputEl().nativeElement.focus();
