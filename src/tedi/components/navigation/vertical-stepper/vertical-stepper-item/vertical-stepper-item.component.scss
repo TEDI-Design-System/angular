@@ -1,3 +1,5 @@
+@use "../vertical-step-number/vertical-step-number.mixins" as *;
+
 .tedi-vertical-stepper-item {
   --tedi-vertical-stepper-item-fill: var(--stepper-step-default-bg);
   --tedi-vertical-stepper-item-stroke: var(--stepper-step-default-border);
@@ -84,11 +86,9 @@
   border-radius: 50%;
 }
 
-.tedi-vertical-stepper-item__number {
-  font-size: var(--body-small-regular-size);
-  font-weight: var(--body-bold-weight);
-  line-height: 1;
-  color: var(--general-text-secondary);
+.tedi-vertical-stepper-item__step-number {
+  position: relative;
+  z-index: 1;
 }
 
 .tedi-vertical-stepper-item__content {
@@ -174,19 +174,11 @@
 .tedi-vertical-stepper-item--completed {
   --tedi-vertical-stepper-item-fill: var(--stepper-step-completed-bg);
   --tedi-vertical-stepper-item-stroke: var(--stepper-step-completed-bg);
-
-  > .tedi-vertical-stepper-item__row .tedi-vertical-stepper-item__number {
-    color: var(--general-text-white);
-  }
 }
 
 .tedi-vertical-stepper-item--error {
   --tedi-vertical-stepper-item-fill: var(--stepper-step-danger-bg);
   --tedi-vertical-stepper-item-stroke: var(--stepper-step-danger-bg);
-
-  > .tedi-vertical-stepper-item__row .tedi-vertical-stepper-item__number {
-    color: var(--general-text-white);
-  }
 }
 
 .tedi-vertical-stepper-item--selected {
@@ -197,7 +189,6 @@
     border-width: var(--tedi-borders-02);
   }
 
-  > .tedi-vertical-stepper-item__row .tedi-vertical-stepper-item__number,
   > .tedi-vertical-stepper-item__row .tedi-vertical-stepper-item__label {
     font-weight: var(--body-bold-weight);
     color: var(--stepper-item-vertical-text-selected);
@@ -208,10 +199,19 @@
   --tedi-vertical-stepper-item-fill: var(--stepper-step-disabled-bg);
   --tedi-vertical-stepper-item-stroke: var(--stepper-step-disabled-border);
 
-  > .tedi-vertical-stepper-item__row .tedi-vertical-stepper-item__number,
   > .tedi-vertical-stepper-item__row .tedi-vertical-stepper-item__label {
     color: var(--stepper-item-vertical-text-disabled);
   }
+}
+
+.tedi-vertical-stepper-item:not(.tedi-vertical-stepper-item--disabled):has(
+    > .tedi-vertical-stepper-item__row
+      .tedi-vertical-stepper-item__title
+      :is(a, button):hover
+  )
+  > .tedi-vertical-stepper-item__row
+  .tedi-vertical-stepper-item__step-number {
+  @include vertical-step-number-hover;
 }
 
 .tedi-vertical-stepper-item--default:not(

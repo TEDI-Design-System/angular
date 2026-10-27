@@ -241,6 +241,43 @@ describe("VerticalStepperItemComponent", () => {
     expect(query(".tedi-vertical-stepper-item__label-icon")).toBeTruthy();
   });
 
+  it.each([
+    ["default", {}],
+    ["success", { completed: true }],
+    ["danger", { error: true }],
+    ["selected", { selected: true, completed: true }],
+    ["disabled", { disabled: true, selected: true, completed: true }],
+    ["disabled", { informative: true }],
+  ] as const)(
+    "should show a %s step number for %p",
+    (
+      type,
+      states: Partial<
+        Record<
+          "completed" | "error" | "selected" | "disabled" | "informative",
+          boolean
+        >
+      >,
+    ) => {
+      for (const [state, value] of Object.entries(states)) {
+        host[state as keyof typeof states].set(value);
+      }
+      fixture.detectChanges();
+
+      expect(query(".tedi-vertical-step-number")?.classList).toContain(
+        `tedi-vertical-step-number--${type}`,
+      );
+    },
+  );
+
+  it("should not use the step number when compact", () => {
+    host.compact.set(true);
+    fixture.detectChanges();
+
+    expect(query(".tedi-vertical-step-number")).toBeNull();
+    expect(query(".tedi-vertical-stepper-item__indicator")).toBeTruthy();
+  });
+
   describe("nested items", () => {
     beforeEach(() => {
       host.withNestedItems.set(true);
