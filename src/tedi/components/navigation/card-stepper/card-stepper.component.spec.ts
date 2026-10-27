@@ -375,7 +375,9 @@ describe("CardStepperComponent", () => {
     }
 
     function listItems(): HTMLElement[] {
-      return queryAllModal("tedi-vertical-stepper-item");
+      return queryAllModal(
+        ".tedi-vertical-stepper__list > tedi-vertical-stepper-item",
+      );
     }
 
     it("should not render the list before it is asked for", () => {
@@ -392,7 +394,7 @@ describe("CardStepperComponent", () => {
       await openList();
 
       expect(listItems()[1].classList).toContain(
-        "tedi-vertical-stepper-item--current",
+        "tedi-vertical-stepper-item--selected",
       );
       expect(listItems()[2].classList).toContain(
         "tedi-vertical-stepper-item--disabled",
@@ -424,6 +426,12 @@ describe("CardStepperComponent", () => {
           "tedi-vertical-stepper-item .tedi-vertical-stepper-item__link",
         ).length,
       ).toBe(0);
+      expect(queryAllModal("button[item-title]").length).toBe(0);
+      expect(
+        listItems()[1]
+          .querySelector("[item-title]")
+          ?.getAttribute("aria-current"),
+      ).toBe("step");
     });
 
     it("should only offer completed steps when jumping is restricted", async () => {
@@ -439,17 +447,40 @@ describe("CardStepperComponent", () => {
       expect(links[0].textContent).toContain("Isikuandmed");
     });
 
-    it("should leave sub-steps without a target as plain text", async () => {
+    it("should offer sub-steps as selection buttons", async () => {
       host.withSubSteps.set(true);
       fixture.detectChanges();
       await openList();
 
-      const subItems = queryAllModal("tedi-vertical-stepper-sub-item");
+      const subItems = queryAllModal(".tedi-vertical-stepper-item--sub-item");
 
       expect(subItems.length).toBe(2);
       expect(
-        subItems.every((item) => item.querySelector("button, a") === null),
+        subItems.every((item) => item.querySelector("button") !== null),
       ).toBe(true);
+    });
+
+    it("should keep a navigable step with sub-steps selectable alongside its toggle", async () => {
+      host.withSubSteps.set(true);
+      host.activeStep.set(0);
+      fixture.detectChanges();
+      await openList();
+
+      const parent = listItems()[1];
+      const title =
+        parent.querySelector<HTMLButtonElement>("button[item-title]");
+
+      expect(title?.textContent?.trim()).toBe("Dokumendid");
+      expect(
+        parent.querySelector(".tedi-vertical-stepper-item__toggle"),
+      ).toBeTruthy();
+
+      title!.click();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      fixture.detectChanges();
+
+      expect(host.activeStep()).toBe(1);
+      expect(queryModal("tedi-card-stepper-list-modal")).toBeNull();
     });
 
     it("should defer current to a sub-step that claims it", async () => {
@@ -458,7 +489,7 @@ describe("CardStepperComponent", () => {
       await openList();
 
       expect(listItems()[1].classList).not.toContain(
-        "tedi-vertical-stepper-item--current",
+        "tedi-vertical-stepper-item--selected",
       );
     });
 
@@ -645,12 +676,10 @@ describe("CardStepperComponent destroyed with the step list open", () => {
       <tedi-card-stepper-step label="Kolmas" expanded>
         <tedi-card-stepper-sub-step
           label="Alam üks"
-          labelAs="button"
           (subStepSelect)="picked.set('Alam üks')"
         />
         <tedi-card-stepper-sub-step
           label="Alam kaks"
-          labelAs="button"
           [disabled]="subStepsDisabled()"
           (subStepSelect)="picked.set('Alam kaks')"
         />

@@ -264,8 +264,6 @@ export class CardStepperComponent {
         state: subStep.state(),
         current: subStep.current(),
         disabled: subStep.disabled(),
-        href: subStep.href(),
-        labelAs: subStep.labelAs(),
       })),
     }));
   }

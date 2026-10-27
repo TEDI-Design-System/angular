@@ -6,16 +6,14 @@ import {
   output,
   ViewEncapsulation,
 } from "@angular/core";
-import type { VerticalStepperLabelElement } from "../../vertical-stepper/vertical-stepper-item/vertical-stepper-item.component";
-import type { VerticalStepperSubItemState } from "../../vertical-stepper/vertical-stepper-sub-item/vertical-stepper-sub-item.component";
 
 /**
- * Progress state. Use the separate `disabled` input to prevent navigation.
+ * Progress state. `informative` marks a sub-step someone else completes, such as
+ * an official; it renders as secondary text. Use the separate `disabled` input to
+ * prevent navigation.
  */
-export type CardStepperSubStepState = Exclude<
-  VerticalStepperSubItemState,
-  "disabled"
->;
+export type CardStepperSubStepState =
+  "default" | "completed" | "error" | "informative";
 
 /**
  * Sub-step configuration for the step-list modal; renders no content itself.
@@ -42,23 +40,13 @@ export class CardStepperSubStepComponent {
    */
   current = input(false, { transform: booleanAttribute });
   /**
-   * Link destination in the modal. See `labelAs` for element overrides.
-   */
-  href = input<string>();
-  /**
    * Excludes the sub-step from navigation and renders it as disabled.
    * @default false
    */
   disabled = input(false, { transform: booleanAttribute });
   /**
-   * Label element in the step list. Defaults to a link with `href`, otherwise text.
-   * Use `"button"` with `subStepSelect` for an action without a link.
-   * Disabled and informative sub-steps always render as text.
-   */
-  labelAs = input<VerticalStepperLabelElement>();
-
-  /**
-   * Emits when the sub-step link or button is activated. Also closes the list.
+   * Emits when the sub-step is picked in the step list, which then closes.
+   * Disabled and informative sub-steps render as text and cannot be picked.
    */
   subStepSelect = output<void>();
 }

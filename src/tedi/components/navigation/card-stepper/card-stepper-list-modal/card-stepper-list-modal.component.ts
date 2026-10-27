@@ -12,8 +12,6 @@ import { ModalHeaderComponent } from "../../../overlay/modal/modal-header/modal-
 import { TextComponent } from "../../../base/text/text.component";
 import { VerticalStepperComponent } from "../../vertical-stepper/vertical-stepper.component";
 import { VerticalStepperItemComponent } from "../../vertical-stepper/vertical-stepper-item/vertical-stepper-item.component";
-import { VerticalStepperSubItemComponent } from "../../vertical-stepper/vertical-stepper-sub-item/vertical-stepper-sub-item.component";
-import type { VerticalStepperLabelElement } from "../../vertical-stepper/vertical-stepper-item/vertical-stepper-item.component";
 import type { CardStepperStepState } from "../card-stepper-step/card-stepper-step.component";
 import type { CardStepperSubStepState } from "../card-stepper-sub-step/card-stepper-sub-step.component";
 
@@ -22,8 +20,6 @@ export interface CardStepperListSubStep {
   state: CardStepperSubStepState;
   current: boolean;
   disabled: boolean;
-  href?: string;
-  labelAs?: VerticalStepperLabelElement;
 }
 
 export interface CardStepperListStep {
@@ -63,7 +59,6 @@ export interface CardStepperListSelection {
     TextComponent,
     VerticalStepperComponent,
     VerticalStepperItemComponent,
-    VerticalStepperSubItemComponent,
   ],
   templateUrl: "./card-stepper-list-modal.component.html",
   styleUrl: "./card-stepper-list-modal.component.scss",
@@ -77,6 +72,18 @@ export class CardStepperListModalComponent {
   private readonly modalRef =
     inject<ModalRef<CardStepperListSelection>>(ModalRef);
   protected readonly data = inject<CardStepperListModalData>(MODAL_DATA);
+
+  /**
+   * Title control for a step whose selectability differs from the item's own
+   * default (a button for a leaf, text for a parent), or `null` when it matches.
+   */
+  protected ownTitle(step: CardStepperListStep): "button" | "text" | null {
+    if (step.disabled) return null;
+    const isParent = step.subSteps.length > 0;
+    if (step.navigable && isParent) return "button";
+    if (!step.navigable && !isParent) return "text";
+    return null;
+  }
 
   protected selectStep(stepIndex: number): void {
     this.modalRef.close({ stepIndex });

@@ -8,7 +8,6 @@ import {
   input,
   ViewEncapsulation,
 } from "@angular/core";
-import type { VerticalStepperItemState } from "../../vertical-stepper/vertical-stepper-item/vertical-stepper-item.component";
 import { CardStepperSubStepComponent } from "../card-stepper-sub-step/card-stepper-sub-step.component";
 import { CardStepperStepContentDirective } from "./card-stepper-step-content.directive";
 
@@ -16,10 +15,7 @@ import { CardStepperStepContentDirective } from "./card-stepper-step-content.dir
  * Progress state. Use the separate `disabled` input to exclude a step from
  * arrow and list navigation.
  */
-export type CardStepperStepState = Exclude<
-  VerticalStepperItemState,
-  "disabled"
->;
+export type CardStepperStepState = "default" | "completed" | "error";
 
 /**
  * Step configuration read by `tedi-card-stepper`; renders no content itself.
