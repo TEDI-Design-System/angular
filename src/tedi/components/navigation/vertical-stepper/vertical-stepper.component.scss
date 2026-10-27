@@ -5,11 +5,23 @@
     --stepper-item-vertical-lg-min-height
   );
   --tedi-vertical-stepper-min-height-first: var(
-    --stepper-item-vertical-lg-min-height-first-item
+    --stepper-item-vertical-lg-min-height
   );
   --tedi-vertical-stepper-padding-top: var(
     --stepper-item-vertical-lg-padding-top
   );
+  --tedi-vertical-stepper-padding-top-first: var(
+    --stepper-item-vertical-lg-padding-top
+  );
+  --tedi-vertical-stepper-indicator-top-max: var(--tedi-dimensions-06);
+  --tedi-vertical-stepper-line-end: min(
+    50%,
+    calc(
+      var(--tedi-vertical-stepper-indicator-top-max) +
+        var(--tedi-vertical-stepper-step-size) / 2
+    )
+  );
+  --tedi-vertical-stepper-line-start: var(--tedi-vertical-stepper-line-end);
   --tedi-vertical-stepper-dot-size: var(--stepper-item-vertical-step-size-sm);
   --tedi-vertical-stepper-line-x: calc(
     var(--tedi-vertical-stepper-step-size) / 2 - var(--tedi-borders-01) / 2
@@ -30,8 +42,11 @@
     --tedi-vertical-stepper-min-height-first: var(
       --stepper-item-vertical-compact-min-height-first-item
     );
-    --tedi-vertical-stepper-padding-top: var(
-      --stepper-item-vertical-compact-padding-top
+    --tedi-vertical-stepper-padding-top: var(--layout-grid-gutters-04);
+    --tedi-vertical-stepper-padding-top-first: var(--layout-grid-gutters-02);
+    --tedi-vertical-stepper-indicator-top-max: var(--layout-grid-gutters-08);
+    --tedi-vertical-stepper-line-start: calc(
+      var(--layout-grid-gutters-04) + var(--tedi-vertical-stepper-step-size) / 2
     );
   }
 }
