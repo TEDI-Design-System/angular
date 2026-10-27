@@ -1,0 +1,59 @@
+.tedi-vertical-step-number {
+  --tedi-vertical-step-number-size: var(--stepper-item-vertical-step-size-lg);
+  --tedi-vertical-step-number-background: var(--stepper-step-default-bg);
+  --tedi-vertical-step-number-border-color: var(--stepper-step-default-border);
+  --tedi-vertical-step-number-border-hover: var(
+    --stepper-step-default-border-hover
+  );
+  --tedi-vertical-step-number-border-width: var(--tedi-borders-01);
+  --tedi-vertical-step-number-color: var(--general-text-secondary);
+
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: var(--tedi-vertical-step-number-size);
+  height: var(--tedi-vertical-step-number-size);
+  font-size: var(--body-small-bold-size);
+  font-weight: var(--body-small-bold-weight);
+  line-height: 1;
+  color: var(--tedi-vertical-step-number-color);
+  background-color: var(--tedi-vertical-step-number-background);
+  border: var(--tedi-vertical-step-number-border-width) solid
+    var(--tedi-vertical-step-number-border-color);
+  border-radius: 50%;
+}
+
+.tedi-vertical-step-number--success {
+  --tedi-vertical-step-number-background: var(--stepper-step-completed-bg);
+  --tedi-vertical-step-number-background-hover: var(
+    --stepper-step-completed-bg-hover
+  );
+  --tedi-vertical-step-number-border-color: var(--stepper-step-completed-bg);
+  --tedi-vertical-step-number-color: var(--general-text-white);
+}
+
+.tedi-vertical-step-number--danger {
+  --tedi-vertical-step-number-background: var(--stepper-step-danger-bg);
+  --tedi-vertical-step-number-background-hover: var(
+    --stepper-step-danger-bg-hover
+  );
+  --tedi-vertical-step-number-border-color: var(--stepper-step-danger-bg);
+  --tedi-vertical-step-number-color: var(--general-text-white);
+}
+
+.tedi-vertical-step-number--selected {
+  --tedi-vertical-step-number-background: var(--stepper-step-selected-bg);
+  --tedi-vertical-step-number-border-color: var(--stepper-step-selected-border);
+  --tedi-vertical-step-number-border-hover: var(
+    --stepper-step-selected-border-hover
+  );
+  --tedi-vertical-step-number-border-width: var(--tedi-borders-02);
+  --tedi-vertical-step-number-color: var(--stepper-item-vertical-text-selected);
+}
+
+.tedi-vertical-step-number--disabled {
+  --tedi-vertical-step-number-background: var(--stepper-step-disabled-bg);
+  --tedi-vertical-step-number-border-color: var(--stepper-step-disabled-border);
+  --tedi-vertical-step-number-color: var(--stepper-item-vertical-text-disabled);
+}
