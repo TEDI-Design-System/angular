@@ -15,11 +15,6 @@ import { expect, userEvent, waitFor } from "storybook/test";
 
 const PSEUDO_STATE = ["Default", "Hover", "Focus", "Active", "Disabled"];
 
-/**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.41.64?node-id=4662-91741&m=dev" target="_blank">Figma ↗</a><br />
- * <a href="https://www.tedi.ee/1ee8444b7/p/73629d-time-field" target="_blank">Zeroheight ↗</a>
- */
-
 type TimeFieldStoryArgs = TimeFieldComponent & {
   /** Story-only: size applied to the wrapping `tedi-form-field`. */
   formFieldSize?: InputSize;
@@ -27,6 +22,10 @@ type TimeFieldStoryArgs = TimeFieldComponent & {
   formFieldClearable?: boolean;
 };
 
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.103.102?node-id=8769-68905&m=dev" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.tedi.ee/1ee8444b7/p/73629d-time-field" target="_blank">Zeroheight ↗</a>
+ */
 export default {
   title: "TEDI-Ready/Components/Form/TimeField",
   component: TimeFieldComponent,

@@ -231,6 +231,14 @@ describe("TimeFieldComponent", () => {
       expect(el.querySelector(".tedi-time-field__clear")).toBeTruthy();
     });
 
+    it("should hide clear button while disabled", () => {
+      component.writeValue("14:30");
+      component.setDisabledState(true);
+      fixture.detectChanges();
+
+      expect(el.querySelector(".tedi-time-field__clear")).toBeNull();
+    });
+
     it("should clear value on click", () => {
       const onChange = jest.fn();
       component.registerOnChange(onChange);

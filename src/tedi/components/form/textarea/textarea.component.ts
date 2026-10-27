@@ -6,9 +6,11 @@ import {
   effect,
   ElementRef,
   forwardRef,
+  HostAttributeToken,
   inject,
   input,
   model,
+  OnDestroy,
   OnInit,
   Renderer2,
   signal,
@@ -55,16 +57,18 @@ export type TextareaSize = Exclude<InputSize, "large">;
     "[class.tedi-textarea--auto-grow]": "autoGrow()",
     "[style.height]": "heightStyle()",
     "[style.min-height]": "minHeightStyle()",
+    "[rows]": "resolvedRows()",
     "[style.max-height]": "maxHeightStyle()",
     "[attr.aria-invalid]": "invalid() || null",
     "[attr.aria-describedby]": "describedBy.attribute()",
     "[readOnly]": "readOnly()",
+    "[disabled]": "disabled()",
     "(input)": "handleInputChange($event)",
     "(blur)": "handleBlur()",
   },
 })
 export class TextareaComponent
-  implements OnInit, ControlValueAccessor, FormFieldControl
+  implements OnInit, OnDestroy, ControlValueAccessor, FormFieldControl
 {
   private el = inject<ElementRef<HTMLTextAreaElement>>(ElementRef);
   private renderer = inject(Renderer2);
@@ -110,18 +114,17 @@ export class TextareaComponent
    * Number of rows the field rests at, and the fewest it can ever show. With no
    * `height` set this is what sizes the textarea, so it is the input to reach
    * for when a field needs to be taller or shorter — in every mode, not just
-   * while `autoGrow` is on.
+   * while `autoGrow` is on. Values below 1 are treated as 1.
    *
    * @default 3
    */
   minRows = input<number>(3);
   /**
    * Most rows the field shows before it starts scrolling. Caps `autoGrow`'s
-   * growth and how far the resize grip can be dragged.
-   *
-   * @default 12
+   * growth and how far the resize grip can be dragged. Unset, neither has a
+   * row limit.
    */
-  maxRows = input<number>(12);
+  maxRows = input<number | undefined>();
   /**
    * Exact resting height (e.g. `'7.5rem'`, `200` → `200px`), for the rare field
    * that has to match something other than a whole number of rows. Prefer
@@ -160,20 +163,42 @@ export class TextareaComponent
     return this.toCssSize(height);
   });
 
+  // Below one row the field is shorter than its own line of text and scrolls
+  // while empty.
+  readonly resolvedMinRows = computed(() => Math.max(1, this.minRows()));
+
+  private readonly rowsAttribute = inject(new HostAttributeToken("rows"), {
+    optional: true,
+  });
+
+  /**
+   * The native `rows` sets the natural height, and the field rests at whichever
+   * is taller, that or `minRows`. Left at the browser's default of two, it would
+   * hold a `minRows` of 1 at two rows, so it follows `minRows` — unless the
+   * consumer set `rows` themselves, which keeps working as it always has.
+   */
+  readonly resolvedRows = computed(() => {
+    const rows = Number(this.rowsAttribute);
+    return rows > 0 ? rows : this.resolvedMinRows();
+  });
+
   /**
    * `minRows` is the resting height as much as it is the floor: with no `height`
    * the textarea has nothing else to size to, so the floor is what it settles
    * at. That makes it the one number a consumer has to change.
    */
   readonly minHeightStyle = computed<string>(() =>
-    this.rowsToHeight(this.minRows()),
+    this.rowsToHeight(this.resolvedMinRows()),
   );
 
-  readonly maxHeightStyle = computed<string>(() => {
-    const limits = [this.rowsToHeight(this.maxRows())];
+  readonly maxHeightStyle = computed<string | null>(() => {
+    const limits: string[] = [];
+    const maxRows = this.maxRows();
     const maxHeight = this.maxHeight();
+    if (maxRows != null) limits.push(this.rowsToHeight(maxRows));
     if (maxHeight != null) limits.push(this.toCssSize(maxHeight));
 
+    if (limits.length === 0) return null;
     return limits.length === 1 ? limits[0] : `min(${limits.join(", ")})`;
   });
 
@@ -194,11 +219,22 @@ export class TextareaComponent
     () => this.readOnlyAttribute() || this.readOnlyProperty(),
   );
 
-  /** Textareas take no clear button, even inside a `clearable` form field. */
-  readonly clearButton = false;
+  /**
+   * Disables the textarea from a parent template. Combined with the
+   * reactive-forms disabled state and any input-group state, so a wrapping
+   * `tedi-form-field` sees it too.
+   */
+  readonly disabledInput = input(false, {
+    // eslint-disable-next-line @angular-eslint/no-input-rename
+    alias: "disabled",
+    transform: booleanAttribute,
+  });
 
   readonly disabled = computed(
-    () => this.formDisabled() || (this.fieldContext?.disabled() ?? false),
+    () =>
+      this.disabledInput() ||
+      this.formDisabled() ||
+      (this.fieldContext?.disabled() ?? false),
   );
 
   private readonly derived = deriveControlState();
@@ -216,8 +252,40 @@ export class TextareaComponent
       (this.fieldContext?.invalid() ?? false),
   );
 
+  /**
+   * The textarea reaches under a wrapping field's clear button and icon, so a
+   * classic scrollbar would land beneath them. Reported so the field can move
+   * them clear of it; overlay scrollbars take no room and stay at 0.
+   */
+  readonly scrollbarWidth = signal(0);
+
+  private resizeObserver: ResizeObserver | null = null;
+
   ngOnInit() {
     this.derived.connect();
+
+    // The content box narrows when a scrollbar appears, so this also catches
+    // overflow starting or stopping, not just resizes.
+    if (typeof ResizeObserver !== "undefined") {
+      this.resizeObserver = new ResizeObserver(() =>
+        this.measureScrollbarWidth(),
+      );
+      this.resizeObserver.observe(this.el.nativeElement);
+    }
+  }
+
+  ngOnDestroy() {
+    this.resizeObserver?.disconnect();
+  }
+
+  private measureScrollbarWidth() {
+    const el = this.el.nativeElement;
+    const style = getComputedStyle(el);
+    const borders =
+      parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth);
+    this.scrollbarWidth.set(
+      Math.max(0, el.offsetWidth - el.clientWidth - borders),
+    );
   }
 
   setDescribedBy(ids: string[]) {
@@ -255,7 +323,6 @@ export class TextareaComponent
 
   setDisabledState(isDisabled: boolean): void {
     this.formDisabled.set(isDisabled);
-    this.renderer.setProperty(this.el.nativeElement, "disabled", isDisabled);
   }
 
   handleInputChange(event: Event) {

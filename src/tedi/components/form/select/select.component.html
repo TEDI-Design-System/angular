@@ -115,7 +115,7 @@
     </span>
   }
 
-  @if (clearable() && selectedValues().length) {
+  @if (clearable() && !disabled() && selectedValues().length) {
     <button
       class="tedi-select__clear"
       tedi-closing-button

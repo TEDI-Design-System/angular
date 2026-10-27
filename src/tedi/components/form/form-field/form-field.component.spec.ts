@@ -1,6 +1,7 @@
-import { Component, signal, ViewChild } from "@angular/core";
+import { Component, signal, ViewChild, viewChild } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
+import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import {
   FormFieldComponent,
   FormFieldIcon,
@@ -542,7 +543,7 @@ describe("FormFieldComponent", () => {
   standalone: true,
   imports: [FormFieldComponent, TextareaComponent],
   template: `
-    <tedi-form-field #formField>
+    <tedi-form-field #formField [clearable]="false">
       <textarea tedi-textarea [value]="'hello'"></textarea>
     </tedi-form-field>
   `,
@@ -577,7 +578,7 @@ class FixedHeightTextareaInBoxHostComponent {}
   standalone: true,
   imports: [FormFieldComponent, TextareaComponent],
   template: `
-    <tedi-form-field [clearable]="true">
+    <tedi-form-field>
       <textarea tedi-textarea [value]="'hello'"></textarea>
     </tedi-form-field>
   `,
@@ -648,18 +649,63 @@ describe("FormFieldComponent wrapping a textarea", () => {
     );
   });
 
-  it("gives the textarea no clear button, even when clearable", () => {
+  it("gives the textarea a clear button by default", () => {
     const clearFixture = TestBed.createComponent(
       ClearableTextareaHostComponent,
     );
     clearFixture.detectChanges();
 
+    const box = clearFixture.nativeElement.querySelector(
+      ".tedi-form-field__box",
+    );
     expect(
-      clearFixture.nativeElement.querySelector(".tedi-form-field__clear"),
-    ).toBeNull();
+      box.contains(clearFixture.nativeElement.querySelector("textarea")),
+    ).toBe(true);
+    expect(box.querySelector(".tedi-form-field__clear")).not.toBeNull();
+  });
+
+  it("gives the textarea no clear button when clearable is false", () => {
     expect(
-      clearFixture.nativeElement.querySelector(".tedi-form-field__box"),
+      fixture.nativeElement.querySelector(".tedi-form-field__clear"),
     ).toBeNull();
+  });
+
+  it("clears the textarea from the clear button", () => {
+    const clearFixture = TestBed.createComponent(
+      ClearableTextareaHostComponent,
+    );
+    clearFixture.detectChanges();
+
+    clearFixture.nativeElement.querySelector(".tedi-form-field__clear").click();
+    clearFixture.detectChanges();
+
+    const textarea = clearFixture.nativeElement.querySelector("textarea");
+    expect(textarea.value).toBe("");
+    expect(document.activeElement).toBe(textarea);
+  });
+
+  it("passes the textarea's scrollbar width to the box", () => {
+    const clearFixture = TestBed.createComponent(
+      ClearableTextareaHostComponent,
+    );
+    clearFixture.detectChanges();
+
+    const textarea = clearFixture.debugElement
+      .query(By.directive(TextareaComponent))
+      .injector.get(TextareaComponent);
+    const box = clearFixture.nativeElement.querySelector(
+      ".tedi-form-field__box",
+    ) as HTMLElement;
+    expect(
+      box.style.getPropertyValue("--tedi-form-field-control-scrollbar"),
+    ).toBe("0px");
+
+    textarea.scrollbarWidth.set(15);
+    clearFixture.detectChanges();
+
+    expect(
+      box.style.getPropertyValue("--tedi-form-field-control-scrollbar"),
+    ).toBe("15px");
   });
 
   it("still clears the textarea on a programmatic reset", () => {
@@ -1028,6 +1074,107 @@ class ReadOnlyTextFieldHostComponent {
   textField!: TextFieldComponent;
   readOnly = true;
 }
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextareaComponent, ReactiveFormsModule],
+  template: `
+    <tedi-form-field #formField>
+      <textarea tedi-textarea [formControl]="control"></textarea>
+    </tedi-form-field>
+  `,
+})
+class DisabledTextareaHostComponent {
+  formField = viewChild.required<FormFieldComponent>("formField");
+  control = new FormControl({ value: "hello", disabled: true });
+}
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextareaComponent],
+  template: `
+    <tedi-form-field #formField>
+      <textarea tedi-textarea [value]="'hello'" [disabled]="true"></textarea>
+    </tedi-form-field>
+  `,
+})
+class TemplateDisabledTextareaHostComponent {
+  formField = viewChild.required<FormFieldComponent>("formField");
+}
+
+describe("FormFieldComponent with a disabled control", () => {
+  it("paints the box disabled for a textarea disabled from the template", () => {
+    TestBed.configureTestingModule({
+      imports: [TemplateDisabledTextareaHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    const fixture = TestBed.createComponent(
+      TemplateDisabledTextareaHostComponent,
+    );
+    fixture.detectChanges();
+
+    const box = fixture.nativeElement.querySelector(".tedi-form-field__box");
+    expect(box.classList.contains("tedi-field-surface--disabled")).toBe(true);
+    expect(fixture.nativeElement.querySelector("textarea").disabled).toBe(true);
+    expect(fixture.componentInstance.formField().showClearButton()).toBe(false);
+  });
+
+  it("hides the clear button while disabled and shows it once enabled", () => {
+    TestBed.configureTestingModule({
+      imports: [DisabledTextareaHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    const fixture = TestBed.createComponent(DisabledTextareaHostComponent);
+    fixture.detectChanges();
+
+    const host = fixture.componentInstance;
+    const clearButton = () =>
+      fixture.nativeElement.querySelector(
+        ".tedi-form-field__clear",
+      ) as HTMLButtonElement;
+
+    expect(host.formField().showClearButton()).toBe(false);
+    expect(clearButton().disabled).toBe(true);
+    expect(
+      fixture.nativeElement.querySelector(".tedi-form-field__buttons--hidden"),
+    ).toBeTruthy();
+
+    host.control.enable();
+    fixture.detectChanges();
+
+    expect(host.formField().showClearButton()).toBe(true);
+    expect(clearButton().disabled).toBe(false);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextFieldComponent],
+  template: `
+    <tedi-form-field>
+      <input tedi-text-field [value]="'hello'" />
+    </tedi-form-field>
+  `,
+})
+class ClearableTextFieldHostComponent {}
+
+describe("FormFieldComponent clearing a text field", () => {
+  it("empties the input and focuses it again", () => {
+    TestBed.configureTestingModule({
+      imports: [ClearableTextFieldHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    const fixture = TestBed.createComponent(ClearableTextFieldHostComponent);
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector(".tedi-form-field__clear").click();
+    fixture.detectChanges();
+
+    const input = fixture.nativeElement.querySelector("input");
+    expect(input.value).toBe("");
+    expect(document.activeElement).toBe(input);
+  });
+});
 
 describe("FormFieldComponent with a read-only text field", () => {
   let fixture: ComponentFixture<ReadOnlyTextFieldHostComponent>;
