@@ -36,20 +36,22 @@ export class VerticalStepperComponent {
    * Number compact labels. Regular indicators are always numbered.
    * @default false
    */
-  showNumbers = input(false, { transform: booleanAttribute });
+  enumerated = input(false, { transform: booleanAttribute });
 
   private readonly items = contentChildren(VerticalStepperItemComponent, {
     descendants: false,
   });
 
-  private readonly syncItems = effect(() => {
-    const compact = this.compact();
-    const showNumber = this.showNumbers();
+  constructor() {
+    effect(() => {
+      const compact = this.compact();
+      const enumerated = this.enumerated();
 
-    this.items().forEach((item, index) => {
-      item._stepNumber.set(index + 1);
-      item._compact.set(compact);
-      item._showNumber.set(showNumber);
+      this.items().forEach((item, index) => {
+        item._stepNumber.set(index + 1);
+        item._compact.set(compact);
+        item._enumerated.set(enumerated);
+      });
     });
-  });
+  }
 }

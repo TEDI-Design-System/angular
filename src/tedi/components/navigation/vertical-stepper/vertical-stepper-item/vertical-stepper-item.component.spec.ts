@@ -2,12 +2,7 @@ import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TediTranslationService } from "../../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
-import {
-  VerticalStepperItemComponent,
-  VerticalStepperLabelElement,
-  VerticalStepperItemState,
-} from "./vertical-stepper-item.component";
-import { VerticalStepperSubItemComponent } from "../vertical-stepper-sub-item/vertical-stepper-sub-item.component";
+import { VerticalStepperItemComponent } from "./vertical-stepper-item.component";
 import { VerticalStepperComponent } from "../vertical-stepper.component";
 
 class TranslationMock {
@@ -22,52 +17,51 @@ class TranslationMock {
 
 @Component({
   standalone: true,
-  imports: [
-    VerticalStepperComponent,
-    VerticalStepperItemComponent,
-    VerticalStepperSubItemComponent,
-  ],
+  imports: [VerticalStepperComponent, VerticalStepperItemComponent],
   template: `
     <tedi-vertical-stepper [compact]="compact()">
       <tedi-vertical-stepper-item
-        [label]="label()"
-        [description]="description()"
-        [state]="state()"
-        [current]="current()"
-        [href]="href()"
-        [labelAs]="elementType()"
-        [(open)]="open"
-        (stepSelect)="selected = selected + 1"
+        title="Tahteavaldus"
+        [completed]="completed()"
+        [error]="error()"
+        [selected]="selected()"
+        [disabled]="disabled()"
+        [informative]="informative()"
+        [(opened)]="opened"
+        (itemSelect)="selections = selections + 1"
       >
-        @if (withSubItems()) {
-          <tedi-vertical-stepper-sub-item label="Sõbrad" />
+        @if (withDescription()) {
+          <span item-description>Ülevaatamine võtab kuni 30 päeva</span>
         }
-        @if (withWrappedSubItem()) {
+        @if (withNestedItems()) {
+          <tedi-vertical-stepper-item title="Sõbrad" />
+        }
+        @if (withWrappedNestedItem()) {
           <div class="wrapper">
-            <tedi-vertical-stepper-sub-item label="Pere" />
+            <tedi-vertical-stepper-item title="Pere" />
           </div>
         }
         @if (withEndSlot()) {
           <span class="end-slot">Täidab ametnik</span>
         }
       </tedi-vertical-stepper-item>
-      <tedi-vertical-stepper-item label="Viimane" />
+      <tedi-vertical-stepper-item title="Viimane" />
     </tedi-vertical-stepper>
   `,
 })
 class TestHostComponent {
-  label = signal("Tahteavaldus");
-  description = signal<string | undefined>(undefined);
-  state = signal<VerticalStepperItemState>("default");
-  current = signal(false);
-  href = signal<string | undefined>(undefined);
-  elementType = signal<VerticalStepperLabelElement | undefined>(undefined);
+  completed = signal(false);
+  error = signal(false);
+  selected = signal(false);
+  disabled = signal(false);
+  informative = signal(false);
   compact = signal(false);
-  withSubItems = signal(false);
-  withWrappedSubItem = signal(false);
+  withDescription = signal(false);
+  withNestedItems = signal(false);
+  withWrappedNestedItem = signal(false);
   withEndSlot = signal(false);
-  open = signal(false);
-  selected = 0;
+  opened = signal(false);
+  selections = 0;
 }
 
 describe("VerticalStepperItemComponent", () => {
@@ -96,87 +90,61 @@ describe("VerticalStepperItemComponent", () => {
     fixture.detectChanges();
   });
 
-  it("should render plain text without href or labelAs", () => {
+  it("should render the title as a selection button without a route", () => {
     expect(query(".tedi-vertical-stepper-item__label-text")?.textContent).toBe(
       "Tahteavaldus",
     );
-    expect(query(".tedi-vertical-stepper-item__link")).toBeNull();
-  });
-
-  it("should keep an anchor without a destination non-interactive", () => {
-    host.elementType.set("a");
-    host.current.set(true);
-    fixture.detectChanges();
-
-    expect(query(".tedi-vertical-stepper-item__link")).toBeNull();
-    expect(getItem().getAttribute("aria-current")).toBe("step");
-
-    host.href.set("");
-    fixture.detectChanges();
-    expect(
-      query("a.tedi-vertical-stepper-item__link")?.getAttribute("href"),
-    ).toBe("");
-  });
-
-  it("should render an anchor when href is set", () => {
-    host.href.set("#step");
-    fixture.detectChanges();
-
-    const link = query("a.tedi-vertical-stepper-item__link");
-
-    expect(link?.getAttribute("href")).toBe("#step");
-  });
-
-  it("should render a button when labelAs is button", () => {
-    host.elementType.set("button");
-    fixture.detectChanges();
-
     expect(query("button.tedi-vertical-stepper-item__link")).toBeTruthy();
   });
 
-  it("should emit stepSelect when the label is activated", () => {
-    host.elementType.set("button");
-    fixture.detectChanges();
-
-    query("button.tedi-vertical-stepper-item__link")?.click();
-
-    expect(host.selected).toBe(1);
+  it("should not leave the title as a native tooltip on the host", () => {
+    expect(getItem().hasAttribute("title")).toBe(false);
   });
 
-  it("should render disabled labels as text regardless of labelAs", () => {
-    host.elementType.set("button");
-    host.state.set("disabled");
+  it("should emit itemSelect when the label button is activated", () => {
+    query("button.tedi-vertical-stepper-item__link")?.click();
+
+    expect(host.selections).toBe(1);
+  });
+
+  it("should render disabled labels as text", () => {
+    host.disabled.set(true);
     fixture.detectChanges();
 
     expect(query(".tedi-vertical-stepper-item__link")).toBeNull();
     expect(getItem().classList).toContain(
       "tedi-vertical-stepper-item--disabled",
     );
+    expect(getItem().getAttribute("aria-disabled")).toBe("true");
     expect(query(".sr-only")?.textContent).toContain(
       "vertical-stepper.disabled",
     );
   });
 
-  it("should put aria-current on the link when interactive", () => {
-    host.href.set("#step");
-    host.current.set(true);
+  it("should put aria-current on the button when interactive", () => {
+    host.selected.set(true);
     fixture.detectChanges();
 
     expect(
       query(".tedi-vertical-stepper-item__link")?.getAttribute("aria-current"),
     ).toBe("step");
+    expect(getItem().classList).toContain(
+      "tedi-vertical-stepper-item--selected",
+    );
     expect(getItem().getAttribute("aria-current")).toBeNull();
   });
 
   it("should put aria-current on the item itself when not interactive", () => {
-    host.current.set(true);
+    host.informative.set(true);
+    host.selected.set(true);
     fixture.detectChanges();
 
+    expect(query(".tedi-vertical-stepper-item__link")).toBeNull();
     expect(getItem().getAttribute("aria-current")).toBe("step");
   });
 
-  it("should render the description", () => {
-    host.description.set("Ülevaatamine võtab kuni 30 päeva");
+  it("should project the description", () => {
+    host.withDescription.set(true);
     fixture.detectChanges();
 
     expect(
@@ -193,15 +161,29 @@ describe("VerticalStepperItemComponent", () => {
     ).toBe("Täidab ametnik");
   });
 
-  it("should include status text in compact links", () => {
+  it("should prefer completed over error", () => {
+    host.completed.set(true);
+    host.error.set(true);
+    fixture.detectChanges();
+
+    expect(getItem().classList).toContain(
+      "tedi-vertical-stepper-item--completed",
+    );
+    expect(getItem().classList).not.toContain(
+      "tedi-vertical-stepper-item--error",
+    );
+  });
+
+  it("should include status text in compact labels", () => {
     host.compact.set(true);
-    host.state.set("completed");
-    host.href.set("#step");
+    host.completed.set(true);
     fixture.detectChanges();
 
     const link = query(".tedi-vertical-stepper-item__link");
 
-    expect(link?.textContent).toContain("vertical-stepper.completed");
+    const status = query(".sr-only");
+    expect(link?.getAttribute("aria-describedby")).toBe(status?.id);
+    expect(status?.textContent).toContain("vertical-stepper.completed");
     expect(
       query(".tedi-vertical-stepper-item__indicator tedi-icon")?.getAttribute(
         "aria-hidden",
@@ -210,23 +192,24 @@ describe("VerticalStepperItemComponent", () => {
   });
 
   it("should include status text and hide the decorative icon", () => {
-    host.state.set("completed");
-    host.href.set("#step");
+    host.completed.set(true);
     fixture.detectChanges();
 
     const link = query(".tedi-vertical-stepper-item__link");
 
-    expect(link?.textContent).toContain("vertical-stepper.completed");
+    const status = query(".sr-only");
+    expect(link?.getAttribute("aria-describedby")).toBe(status?.id);
+    expect(status?.textContent).toContain("vertical-stepper.completed");
     expect(
       query(".tedi-vertical-stepper-item__label-icon")?.getAttribute(
         "aria-hidden",
       ),
     ).toBe("true");
-    expect(link?.querySelectorAll(".sr-only").length).toBe(1);
+    expect(getItem().querySelectorAll(".sr-only").length).toBe(1);
   });
 
   it("should show the state icon after the label at the default density", () => {
-    host.state.set("completed");
+    host.completed.set(true);
     fixture.detectChanges();
 
     expect(query(".tedi-vertical-stepper-item__label-icon")).toBeTruthy();
@@ -237,7 +220,7 @@ describe("VerticalStepperItemComponent", () => {
 
   it("should move the state icon into the indicator when compact", () => {
     host.compact.set(true);
-    host.state.set("completed");
+    host.completed.set(true);
     fixture.detectChanges();
 
     expect(
@@ -246,10 +229,10 @@ describe("VerticalStepperItemComponent", () => {
     expect(query(".tedi-vertical-stepper-item__label-icon")).toBeNull();
   });
 
-  it("should place the status icon after the current compact label", () => {
+  it("should place the status icon after the selected compact label", () => {
     host.compact.set(true);
-    host.state.set("completed");
-    host.current.set(true);
+    host.completed.set(true);
+    host.selected.set(true);
     fixture.detectChanges();
 
     expect(
@@ -258,26 +241,32 @@ describe("VerticalStepperItemComponent", () => {
     expect(query(".tedi-vertical-stepper-item__label-icon")).toBeTruthy();
   });
 
-  describe("sub-steps", () => {
+  describe("nested items", () => {
     beforeEach(() => {
-      host.withSubItems.set(true);
+      host.withNestedItems.set(true);
       fixture.detectChanges();
     });
 
-    it("should render a toggle wired to the sub-list", () => {
+    it("should render a single toggle wired to the sub-list", () => {
       const toggle = query(".tedi-vertical-stepper-item__toggle");
       const list = query(".tedi-vertical-stepper-item__sub-list");
 
       expect(toggle?.getAttribute("aria-controls")).toBe(list?.id);
       expect(toggle?.getAttribute("aria-expanded")).toBe("false");
+      expect(toggle?.getAttribute("aria-label")).toBe("Tahteavaldus");
       expect(list?.hasAttribute("hidden")).toBe(true);
+      expect(
+        query(
+          ":scope > .tedi-vertical-stepper-item__row .tedi-vertical-stepper-item__link",
+        ),
+      ).toBeNull();
     });
 
     it("should reveal the sub-list when the toggle is pressed", () => {
       query(".tedi-vertical-stepper-item__toggle")?.click();
       fixture.detectChanges();
 
-      expect(host.open()).toBe(true);
+      expect(host.opened()).toBe(true);
       expect(
         query(".tedi-vertical-stepper-item__sub-list")?.hasAttribute("hidden"),
       ).toBe(false);
@@ -286,23 +275,23 @@ describe("VerticalStepperItemComponent", () => {
       );
     });
 
-    it("should not render a toggle without sub-steps", () => {
-      host.withSubItems.set(false);
+    it("should not render a toggle without nested items", () => {
+      host.withNestedItems.set(false);
       fixture.detectChanges();
 
       expect(query(".tedi-vertical-stepper-item__toggle")).toBeNull();
     });
 
-    it("should omit the sub-list without sub-steps", () => {
-      host.withSubItems.set(false);
+    it("should omit the sub-list without nested items", () => {
+      host.withNestedItems.set(false);
       fixture.detectChanges();
 
       expect(query(".tedi-vertical-stepper-item__sub-list")).toBeNull();
     });
 
-    it("should ignore sub-steps that are not projected directly", () => {
-      host.withSubItems.set(false);
-      host.withWrappedSubItem.set(true);
+    it("should ignore nested items that are not projected directly", () => {
+      host.withNestedItems.set(false);
+      host.withWrappedNestedItem.set(true);
       fixture.detectChanges();
 
       expect(query(".tedi-vertical-stepper-item__toggle")).toBeNull();
