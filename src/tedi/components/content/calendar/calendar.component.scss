@@ -38,9 +38,9 @@
     min-width: 0;
 
     .tedi-calendar__month {
-      box-sizing: border-box;
       flex: 1 1 var(--_tedi-calendar-month-width);
       min-width: min(100%, var(--_tedi-calendar-month-width));
+      max-width: none;
     }
   }
 
@@ -52,8 +52,10 @@
   }
 
   &__month {
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
+    max-width: var(--_tedi-calendar-month-width);
     padding: var(--card-padding-md-default);
   }
 
