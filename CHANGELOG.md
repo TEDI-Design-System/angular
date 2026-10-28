@@ -1,3 +1,16 @@
+# [9.0.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.10...angular-9.0.0-rc.11) (2026-10-28)
+
+
+### Code Refactoring
+
+* **dropdown-item-value:** rename to OptionContent [#491](https://github.com/TEDI-Design-System/angular/issues/491) ([#741](https://github.com/TEDI-Design-System/angular/issues/741)) ([c6adb30](https://github.com/TEDI-Design-System/angular/commit/c6adb3039dd0a22cb003321be6a6886f6818b634))
+
+
+### BREAKING CHANGES
+
+* **dropdown-item-value:** DropdownItemValue is now OptionContent.
+Update Angular imports, component/label/meta elements, and custom CSS selectors.
+
 # [9.0.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.9...angular-9.0.0-rc.10) (2026-10-23)
 
 
