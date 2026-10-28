@@ -8,6 +8,7 @@ $selected-border-inset: calc(
 );
 
 label[tedi-radio-card] {
+  --form-checkbox-radio-size-responsive: var(--form-checkbox-radio-size-fixed);
   --_card-bg: transparent;
   --_card-text: inherit;
   --_card-border: transparent;
@@ -78,8 +79,7 @@ label[tedi-radio-card] {
   }
 
   // An icon before the label pushes the label text right by the icon and one more
-  // gap, so the description lines up with the text instead of the icon. The icon
-  // keeps its 18px size while the indicator grows on small screens
+  // gap, so the description lines up with the text instead of the icon
   &:has(> .tedi-radio-card__content > tedi-icon) > .tedi-feedback-text {
     padding-left: calc(
       var(--form-checkbox-radio-size-responsive) + var(--icon-03) +
