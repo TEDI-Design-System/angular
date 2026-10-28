@@ -110,10 +110,11 @@ the part of this document worth maintaining by hand.
 
 ### The `/tedi` and `/community` entry points collide
 
-This is the highest-value trap in the Angular library and it has no React equivalent. **25 selectors
+This is the highest-value trap in the Angular library and it has no React equivalent. **29 selectors
 are declared in both entry points, under identical class names**, including `tedi-card`,
 `tedi-modal`, `tedi-accordion`, `tedi-tabs`, `tedi-dropdown`, `tedi-form-field`, `tedi-pagination`,
-`tedi-search`, `tedi-tag`, `[tedi-floating-button]`, and the checkbox/radio group family.
+`tedi-search`, `tedi-tag`, `[tedi-floating-button]`, `tedi-vertical-stepper`, `tedi-vertical-stepper-item`, and the
+checkbox/radio group family.
 
 `CardComponent` from `/community` and `CardComponent` from `/tedi` are different components with
 different input APIs behind the same `<tedi-card>` tag. Consequences:
@@ -170,6 +171,17 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 **deprecated**: it has only `variant` / `size` / `axis`. The TEDI-Ready one adds `position`,
 `placement`, `offset` and `zIndex`. Import from `/tedi`.
 
+Both entry points declare `tedi-vertical-stepper` and `tedi-vertical-stepper-item`. The Community
+pair is **deprecated**; the TEDI-Ready one takes the same template, so switching is an import change.
+Import from `/tedi`.
+
+`tedi-vertical-stepper-item` never selects itself: `itemSelect` fires when the label button is
+pressed or when its `route` becomes active (programmatic navigation included), and you bind
+`selected` in response. A parent step without a `route` keeps its title as text and expands only
+through its toggle. `opened` is a `model()`, so a bare `opened` attribute passes `""` and leaves the
+step collapsed — write `[opened]="true"`. Controls projected into `[item-title]` own their events,
+routing, disabled state and ARIA attributes.
+
 ### Composition constraints
 
 - **`[tedi-card-button]` projects a `tedi-card` and nothing else.** Other content is not projected.
@@ -177,6 +189,9 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   and the disabled state.
 - **`button[tedi-collapse-button]` goes on a native `<button>`.** The host *is* the button, so don't
   nest another one inside.
+- **Nested `tedi-vertical-stepper-item`s must be projected straight into their parent step**, not
+  wrapped in an element, or they are treated as related assets. `@for` / `@if` around them is fine —
+  items are still numbered in source order and sub-steps still reach the sub-list.
 - **`tedi-table-columns-menu` must be a descendant of `<tedi-table>`.** It finds the table through
   DI (`TEDI_TABLE_CONTEXT`), so rendering it outside the table gives you nothing useful.
 - **`tedi-card` does not clip its content.** Tooltips, popovers, select dropdowns and absolutely
