@@ -35,7 +35,7 @@ export class RadioComponent implements OnInit, OnDestroy {
    */
   readonly size = input<RadioSize>("default");
   /**
-   * Is radio invalid?
+   * Show the radio in an invalid state.
    * @default false
    */
   readonly invalid = input(false);
@@ -46,7 +46,7 @@ export class RadioComponent implements OnInit, OnDestroy {
    */
   readonly value = input<string>();
   /**
-   * Disables this radio. An enclosing disabled `<tedi-radio-group>` forces
+   * Disable this radio. An enclosing disabled `<tedi-radio-group>` forces
    * disabled regardless of this input.
    * @default false
    */
