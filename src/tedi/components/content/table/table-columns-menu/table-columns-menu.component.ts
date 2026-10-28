@@ -13,8 +13,8 @@ import { DropdownComponent } from "../../../overlay/dropdown/dropdown.component"
 import { DropdownContentComponent } from "../../../overlay/dropdown/dropdown-content/dropdown-content.component";
 import { DropdownItemComponent } from "../../../overlay/dropdown/dropdown-item/dropdown-item.component";
 import { DropdownTriggerDirective } from "../../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
-import { DropdownItemValueComponent } from "../../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "../../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
+import { OptionContentComponent } from "../../../helpers/option-content/option-content.component";
+import { OptionContentLabelComponent } from "../../../helpers/option-content/option-content-label.component";
 import { TediTranslationService } from "../../../../services/translation/translation.service";
 import { TEDI_TABLE_CONTEXT } from "../table.context";
 import type { TediTableContextValue } from "../table.types";
@@ -29,8 +29,8 @@ import type { TediTableContextValue } from "../table.types";
     DropdownContentComponent,
     DropdownItemComponent,
     DropdownTriggerDirective,
-    DropdownItemValueComponent,
-    DropdownItemValueLabelComponent,
+    OptionContentComponent,
+    OptionContentLabelComponent,
   ],
   templateUrl: "./table-columns-menu.component.html",
   styleUrl: "./table-columns-menu.component.scss",
