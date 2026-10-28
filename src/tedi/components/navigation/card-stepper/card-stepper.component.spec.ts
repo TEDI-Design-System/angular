@@ -45,12 +45,13 @@ class TranslationMock {
       [counterPosition]="counterPosition()"
       [allowJump]="allowJump()"
     >
-      <tedi-card-stepper-step label="Isikuandmed" state="completed" />
+      <tedi-card-stepper-step title="Isikuandmed" completed />
       <tedi-card-stepper-step
-        label="Dokumendid"
+        title="Dokumendid"
         description="Täidab ametnik"
-        [state]="secondState()"
-        [expanded]="secondExpanded()"
+        [completed]="secondCompleted()"
+        [error]="secondError()"
+        [opened]="secondOpened()"
       >
         @if (withBottomSlot()) {
           <ng-template tediCardStepperStepContent>
@@ -58,13 +59,13 @@ class TranslationMock {
           </ng-template>
         }
         @if (withSubSteps()) {
-          <tedi-card-stepper-sub-step label="Pass" state="completed" />
-          <tedi-card-stepper-sub-step label="Foto" current />
+          <tedi-card-stepper-sub-step title="Pass" completed />
+          <tedi-card-stepper-sub-step title="Foto" selected />
         }
       </tedi-card-stepper-step>
-      <tedi-card-stepper-step label="Puudub" [disabled]="true" />
+      <tedi-card-stepper-step title="Puudub" [disabled]="true" />
       @if (withLastStep()) {
-        <tedi-card-stepper-step label="Ülevaade" />
+        <tedi-card-stepper-step title="Ülevaade" />
       }
     </tedi-card-stepper>
   `,
@@ -79,8 +80,9 @@ class TestHostComponent {
   withBottomSlot = signal(false);
   withSubSteps = signal(false);
   withLastStep = signal(true);
-  secondState = signal<"default" | "completed" | "error">("default");
-  secondExpanded = signal<boolean | undefined>(undefined);
+  secondCompleted = signal(false);
+  secondError = signal(false);
+  secondOpened = signal<boolean | undefined>(undefined);
   steps = viewChildren(CardStepperStepComponent);
   descriptionPosition = signal<CardStepperDescriptionPosition>("bottom");
   counterPosition = signal<CardStepperCounterPosition>("inline");
@@ -214,13 +216,27 @@ describe("CardStepperComponent", () => {
 
   it("should announce the status icon", () => {
     host.showStatusIcon.set(true);
-    host.secondState.set("completed");
+    host.secondCompleted.set(true);
     fixture.detectChanges();
 
     expect(query(".tedi-card-stepper__status-icon")).toBeTruthy();
     expect(query(".tedi-card-stepper__title .sr-only")?.textContent).toContain(
       "vertical-stepper.completed",
     );
+  });
+
+  it("should show the completed icon when a step is both completed and in error", () => {
+    host.showStatusIcon.set(true);
+    host.secondCompleted.set(true);
+    host.secondError.set(true);
+    fixture.detectChanges();
+
+    const icons = Array.from(
+      fixture.nativeElement.querySelectorAll(".tedi-card-stepper__status-icon"),
+      (icon: Element) => icon.textContent?.trim(),
+    );
+
+    expect(icons).toEqual(["check"]);
   });
 
   it("should project the step's bottom content only for the active step", () => {
@@ -536,16 +552,16 @@ describe("CardStepperComponent", () => {
       expect(pane.style.width).toBe("100%");
     });
 
-    it("should treat an explicit undefined expanded as the default", () => {
+    it("should treat an explicit undefined opened as the default", () => {
       const step = host.steps()[1];
 
-      host.secondExpanded.set(undefined);
+      host.secondOpened.set(undefined);
       fixture.detectChanges();
-      expect(step.expanded()).toBeUndefined();
+      expect(step.opened()).toBeUndefined();
 
-      host.secondExpanded.set(false);
+      host.secondOpened.set(false);
       fixture.detectChanges();
-      expect(step.expanded()).toBe(false);
+      expect(step.opened()).toBe(false);
     });
 
     it("should disable sub-steps of a step allowJump excludes", async () => {
@@ -592,8 +608,8 @@ describe("CardStepperComponent", () => {
   imports: [CardStepperComponent, CardStepperStepComponent],
   template: `
     <tedi-card-stepper ariaLabel="Sammud">
-      <tedi-card-stepper-step label="Isikuandmed" />
-      <tedi-card-stepper-step label="Ülevaade" />
+      <tedi-card-stepper-step title="Isikuandmed" />
+      <tedi-card-stepper-step title="Ülevaade" />
     </tedi-card-stepper>
   `,
 })
@@ -679,8 +695,8 @@ describe("CardStepperComponent without steps", () => {
   template: `
     @if (show()) {
       <tedi-card-stepper ariaLabel="Sammud">
-        <tedi-card-stepper-step label="Isikuandmed" />
-        <tedi-card-stepper-step label="Dokumendid" />
+        <tedi-card-stepper-step title="Isikuandmed" />
+        <tedi-card-stepper-step title="Dokumendid" />
       </tedi-card-stepper>
     }
   `,
@@ -755,18 +771,18 @@ describe("CardStepperComponent destroyed with the step list open", () => {
       ariaLabel="Sammud"
     >
       @if (withFirst()) {
-        <tedi-card-stepper-step label="Esimene" />
+        <tedi-card-stepper-step title="Esimene" />
       }
-      <tedi-card-stepper-step label="Teine" />
-      <tedi-card-stepper-step label="Kolmas" expanded>
+      <tedi-card-stepper-step title="Teine" />
+      <tedi-card-stepper-step title="Kolmas" opened>
         <tedi-card-stepper-sub-step
-          label="Alam üks"
-          (subStepSelect)="picked.set('Alam üks')"
+          title="Alam üks"
+          (itemSelect)="picked.set('Alam üks')"
         />
         <tedi-card-stepper-sub-step
-          label="Alam kaks"
+          title="Alam kaks"
           [disabled]="subStepsDisabled()"
-          (subStepSelect)="picked.set('Alam kaks')"
+          (itemSelect)="picked.set('Alam kaks')"
         />
       </tedi-card-stepper-step>
     </tedi-card-stepper>

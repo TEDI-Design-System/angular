@@ -12,25 +12,26 @@ import { ModalHeaderComponent } from "../../../overlay/modal/modal-header/modal-
 import { TextComponent } from "../../../base/text/text.component";
 import { VerticalStepperComponent } from "../../vertical-stepper/vertical-stepper.component";
 import { VerticalStepperItemComponent } from "../../vertical-stepper/vertical-stepper-item/vertical-stepper-item.component";
-import type { CardStepperStepState } from "../card-stepper-step/card-stepper-step.component";
-import type { CardStepperSubStepState } from "../card-stepper-sub-step/card-stepper-sub-step.component";
 
 export interface CardStepperListSubStep {
-  label: string;
-  state: CardStepperSubStepState;
-  current: boolean;
+  title: string;
+  completed: boolean;
+  error: boolean;
+  informative: boolean;
+  selected: boolean;
   disabled: boolean;
 }
 
 export interface CardStepperListStep {
-  label: string;
+  title: string;
   description?: string;
-  state: CardStepperStepState;
+  completed: boolean;
+  error: boolean;
   disabled: boolean;
   /** Whether `allowJump` lets this step be picked. */
   navigable: boolean;
-  current: boolean;
-  expanded: boolean;
+  selected: boolean;
+  opened: boolean;
   subSteps: CardStepperListSubStep[];
 }
 

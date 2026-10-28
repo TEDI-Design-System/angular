@@ -249,27 +249,30 @@ export class CardStepperComponent {
       const subStep = picked.subSteps[selection.subStepIndex];
 
       if (!subStep || !picked.step.subSteps().includes(subStep)) return;
-      if (subStep.disabled() || subStep.state() === "informative") return;
+      if (subStep.disabled() || subStep.informative()) return;
       if (!this.hasSelectableSubSteps(stepIndex)) return;
 
-      subStep.subStepSelect.emit();
+      subStep.itemSelect.emit();
     });
   }
 
   /** Snapshot of the steps for the list, which renders in its own dialog. */
   private listSteps(): CardStepperListModalData["steps"] {
     return this.steps().map((step, index) => ({
-      label: step.label(),
+      title: step.title(),
       description: step.description(),
-      state: step.state(),
+      completed: step.completed(),
+      error: step.error(),
       disabled: step.disabled(),
       navigable: this.isNavigable(index),
-      current: index === this.active() && !step.hasCurrentSubStep(),
-      expanded: this.isExpanded(step, index),
+      selected: index === this.active() && !step.hasSelectedSubStep(),
+      opened: this.isOpened(step, index),
       subSteps: step.subSteps().map((subStep) => ({
-        label: subStep.label(),
-        state: subStep.state(),
-        current: subStep.current(),
+        title: subStep.title(),
+        completed: subStep.completed(),
+        error: subStep.error(),
+        informative: subStep.informative(),
+        selected: subStep.selected(),
         disabled: subStep.disabled() || !this.hasSelectableSubSteps(index),
       })),
     }));
@@ -283,9 +286,9 @@ export class CardStepperComponent {
 
     if (allowJump === true) return true;
     if (allowJump === false) return false;
-    if (allowJump === "completed") return step.state() === "completed";
+    if (allowJump === "completed") return step.completed();
 
-    return step.state() === "completed" || index === this.active() + 1;
+    return step.completed() || index === this.active() + 1;
   }
 
   /**
@@ -299,8 +302,8 @@ export class CardStepperComponent {
     return index === this.active() || this.isNavigable(index);
   }
 
-  private isExpanded(step: CardStepperStepComponent, index: number): boolean {
-    return step.expanded() ?? index === this.active();
+  private isOpened(step: CardStepperStepComponent, index: number): boolean {
+    return step.opened() ?? index === this.active();
   }
 
   /**
