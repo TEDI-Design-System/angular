@@ -431,4 +431,8 @@ describe("ButtonGroupComponent", () => {
       expect(getRoot().getAttribute("role")).toBe("group");
     }));
   });
+
+  it("should hide button group buttons when printing", () => {
+    getItems().forEach((item) => expect(item.classList).toContain("no-print"));
+  });
 });

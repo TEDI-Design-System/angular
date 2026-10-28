@@ -51,18 +51,18 @@
   }
 
   &--primary-button-group {
-    --_btn-text: var(--button-group-primary-inactive-text);
-    --_btn-bg: var(--button-group-primary-inactive-background);
-    --_btn-border: var(--button-group-primary-inactive-border);
+    --_btn-text: var(--button-group-primary-unselected-text);
+    --_btn-bg: var(--button-group-primary-unselected-background);
+    --_btn-border: var(--button-group-primary-unselected-border);
     --_btn-hover-text: var(--button-group-primary-hover-text);
     --_btn-hover-bg: var(--button-group-primary-hover-background);
     --_btn-hover-border: var(--button-group-primary-hover-border);
     --_btn-active-text: var(--button-group-primary-selected-text);
     --_btn-active-bg: var(--button-group-primary-selected-background);
     --_btn-active-border: var(--button-group-primary-selected-border);
-    --_btn-focus-text: var(--button-group-primary-inactive-text);
-    --_btn-focus-bg: var(--button-group-primary-inactive-background);
-    --_btn-focus-border: var(--button-group-primary-inactive-border);
+    --_btn-focus-text: var(--button-group-primary-unselected-text);
+    --_btn-focus-bg: var(--button-group-primary-unselected-background);
+    --_btn-focus-border: var(--button-group-primary-unselected-border);
     --_btn-disabled-text: var(--button-group-primary-disabled-text);
     --_btn-disabled-bg: var(--button-group-primary-disabled-background);
     --_btn-disabled-border: var(--button-group-primary-disabled-border);
@@ -79,18 +79,18 @@
   }
 
   &--secondary-button-group {
-    --_btn-text: var(--button-group-secondary-inactive-text);
-    --_btn-bg: var(--button-group-secondary-inactive-background);
-    --_btn-border: var(--button-group-secondary-inactive-border);
+    --_btn-text: var(--button-group-secondary-unselected-text);
+    --_btn-bg: var(--button-group-secondary-unselected-background);
+    --_btn-border: var(--button-group-secondary-unselected-border);
     --_btn-hover-text: var(--button-group-secondary-hover-text);
     --_btn-hover-bg: var(--button-group-secondary-hover-background);
     --_btn-hover-border: var(--button-group-secondary-hover-border);
     --_btn-active-text: var(--button-group-secondary-selected-text);
     --_btn-active-bg: var(--button-group-secondary-selected-background);
     --_btn-active-border: var(--button-group-secondary-selected-border);
-    --_btn-focus-text: var(--button-group-secondary-inactive-text);
-    --_btn-focus-bg: var(--button-group-secondary-inactive-background);
-    --_btn-focus-border: var(--button-group-secondary-inactive-border);
+    --_btn-focus-text: var(--button-group-secondary-unselected-text);
+    --_btn-focus-bg: var(--button-group-secondary-unselected-background);
+    --_btn-focus-border: var(--button-group-secondary-unselected-border);
     --_btn-disabled-text: var(--button-group-secondary-disabled-text);
     --_btn-disabled-bg: var(--button-group-secondary-disabled-background);
     --_btn-disabled-border: var(--button-group-secondary-disabled-border);

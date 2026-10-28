@@ -69,4 +69,8 @@ describe("Link Component", () => {
 
     expect(linkElement.classList).toContain("tedi-link--no-underline");
   });
+
+  it("should stay printable, unlike buttons", () => {
+    expect(linkElement.classList).not.toContain("no-print");
+  });
 });

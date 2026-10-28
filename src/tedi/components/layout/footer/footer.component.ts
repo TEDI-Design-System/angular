@@ -13,6 +13,9 @@ import { BreakpointService } from "../../../services/breakpoint/breakpoint.servi
   selector: "tedi-footer",
   templateUrl: "./footer.component.html",
   styleUrl: "./footer.component.scss",
+  host: {
+    class: "no-print",
+  },
 })
 export class FooterComponent {
   breakpointService = inject(BreakpointService);
