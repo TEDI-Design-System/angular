@@ -270,7 +270,9 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
   readonly suggestionTemplate = contentChild(SearchSuggestionTemplateDirective);
   readonly footerTemplate = contentChild(SearchFooterTemplateDirective);
 
-  private readonly inputRef = viewChild("searchInput", { read: ElementRef });
+  private readonly inputRef = viewChild.required("searchInput", {
+    read: ElementRef<HTMLInputElement>,
+  });
   private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
   private readonly suggestionRows = viewChildren(SearchSuggestionComponent);
 
@@ -335,9 +337,7 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
     return button?.ariaLabel ?? this.translationService.translate("search");
   });
 
-  readonly feedbackId = computed(() =>
-    this.feedbackText() ? `${this.inputId()}-feedback` : null,
-  );
+  readonly feedbackId = computed(() => `${this.inputId()}-feedback`);
 
   readonly searchAriaLabel = computed(
     () =>
@@ -510,13 +510,9 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
 
   /** The box wrapping input and icons, or the input itself when it owns the surface. */
   private fieldSurface(): Element {
-    const input = this.inputRef()?.nativeElement as HTMLElement | undefined;
+    const input = this.inputRef().nativeElement;
 
-    return (
-      input?.closest(".tedi-form-field__box") ??
-      input ??
-      this.hostElement.nativeElement
-    );
+    return input.closest(".tedi-form-field__box") ?? input;
   }
 
   closePanel(): void {
@@ -660,9 +656,7 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
   }
 
   private focusAfterField(): void {
-    const input = this.inputRef()?.nativeElement as HTMLElement | undefined;
-    if (!input) return;
-
+    const input = this.inputRef().nativeElement;
     const panel = this.panelElement();
     const focusables = getFocusableElements(
       this.hostElement.nativeElement.ownerDocument.body,
@@ -708,9 +702,7 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
   }
 
   focus(): void {
-    const input = this.inputRef()?.nativeElement as
-      HTMLInputElement | undefined;
-    input?.focus();
+    this.inputRef().nativeElement.focus();
   }
 
   writeValue(value: string | null): void {

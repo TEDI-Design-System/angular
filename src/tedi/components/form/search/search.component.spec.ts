@@ -386,6 +386,14 @@ describe("SearchComponent", () => {
     });
   });
 
+  it("falls back to the item itself when the bindLabel property is missing", () => {
+    fixture.componentRef.setInput("suggestions", [{ code: 1 }]);
+    fixture.componentRef.setInput("bindLabel", "name");
+    fixture.detectChanges();
+
+    expect(component.resolvedSuggestions()[0].label).toBe("[object Object]");
+  });
+
   describe("suggestion panel", () => {
     const panel = () =>
       document.querySelector(".tedi-search__panel") as HTMLElement | null;
@@ -458,6 +466,16 @@ describe("SearchComponent", () => {
       expect(
         row?.querySelector(".tedi-search-suggestion__description")?.textContent,
       ).toContain("49501234567");
+    });
+
+    it("leaves the description empty when the item lacks the bound property", () => {
+      fixture.componentRef.setInput("bindDescription", "code");
+      openWith([{ label: "Mari Maasikas" }]);
+
+      expect(component.resolvedSuggestions()[0].description).toBe("");
+      expect(
+        document.querySelector(".tedi-search-suggestion__description"),
+      ).toBeNull();
     });
 
     it("leaves the description out when bindDescription is unset", () => {
@@ -567,6 +585,17 @@ describe("SearchComponent", () => {
       fixture.detectChanges();
 
       expect(component.panelVisible()).toBe(true);
+    });
+
+    it("ignores scrolls while the open panel is hidden", () => {
+      fixture.componentRef.setInput("hideOnScroll", true);
+      open();
+      fixture.componentRef.setInput("minQueryLength", 10);
+      expect(component.panelVisible()).toBe(false);
+
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(component.panelOpen()).toBe(true);
     });
 
     it("keeps the panel open when the option list itself is scrolled", () => {
@@ -985,6 +1014,40 @@ describe("SearchComponent", () => {
       expect(component.panelOpen()).toBe(true);
     });
 
+    it("anchors the panel to the field box", () => {
+      component.openPanel();
+      fixture.detectChanges();
+
+      expect(component.panelOrigin()).toBe(
+        el.querySelector(".tedi-form-field__box"),
+      );
+    });
+
+    it("anchors the panel to the input when the field has no box", () => {
+      fixture.componentRef.setInput("button", {});
+      fixture.componentRef.setInput("clearable", false);
+      fixture.detectChanges();
+
+      component.openPanel();
+      fixture.detectChanges();
+
+      expect(el.querySelector(".tedi-form-field__box")).toBeNull();
+      expect(component.panelOrigin()).toBe(getInput());
+    });
+
+    it("leaves Tab to the browser when there is no footer", () => {
+      component.openPanel();
+      fixture.detectChanges();
+
+      const tab = new KeyboardEvent("keydown", {
+        key: "Tab",
+        cancelable: true,
+      });
+      getInput().dispatchEvent(tab);
+
+      expect(tab.defaultPrevented).toBe(false);
+    });
+
     it("records the host width so the panel matches the field", () => {
       Object.defineProperty(el, "offsetWidth", {
         configurable: true,
@@ -1239,6 +1302,37 @@ describe("SearchComponent with a footer", () => {
     fixture.detectChanges();
 
     expect(search.panelOpen()).toBe(false);
+  });
+
+  it("leaves Shift+Tab from the input to the browser", () => {
+    const tab = new KeyboardEvent("keydown", {
+      key: "Tab",
+      shiftKey: true,
+      cancelable: true,
+    });
+    getInput().dispatchEvent(tab);
+
+    expect(tab.defaultPrevented).toBe(false);
+  });
+
+  it("leaves Tab from the input to the browser while the panel is closed", () => {
+    search.closePanel();
+    fixture.detectChanges();
+
+    const tab = new KeyboardEvent("keydown", { key: "Tab", cancelable: true });
+    getInput().dispatchEvent(tab);
+
+    expect(tab.defaultPrevented).toBe(false);
+  });
+
+  it("ignores other keys inside the footer", () => {
+    const first = footer()?.querySelector(".footer-action-a") as HTMLElement;
+    first.focus();
+    press(first, "a");
+    fixture.detectChanges();
+
+    expect(search.panelOpen()).toBe(true);
+    expect(document.activeElement).toBe(first);
   });
 
   it("Escape inside the footer closes and restores focus", () => {
