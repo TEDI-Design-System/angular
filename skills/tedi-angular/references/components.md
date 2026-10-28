@@ -189,6 +189,10 @@ routing, disabled state and ARIA attributes.
   and the disabled state.
 - **`button[tedi-collapse-button]` goes on a native `<button>`.** The host *is* the button, so don't
   nest another one inside.
+- **`tedi-card-stepper-step` and `tedi-card-stepper-sub-step` render nothing themselves.** They are
+  configuration the stepper reads to build the card, the progress bar and the step-list modal, so
+  their host elements never reach the DOM. A step's own bottom content goes in an
+  `<ng-template tediCardStepperStepContent>` inside it, and renders only while that step is active.
 - **Nested `tedi-vertical-stepper-item`s must be projected straight into their parent step**, not
   wrapped in an element, or they are treated as related assets. `@for` / `@if` around them is fine —
   items are still numbered in source order and sub-steps still reach the sub-list.
