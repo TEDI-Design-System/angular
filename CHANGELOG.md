@@ -1,3 +1,10 @@
+# [9.0.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.11...angular-9.0.0-rc.12) (2026-10-28)
+
+
+### Features
+
+* **checkbox,radio:** apply new variables to Checkbox and Radio [#784](https://github.com/TEDI-Design-System/angular/issues/784) ([#808](https://github.com/TEDI-Design-System/angular/issues/808)) ([92eaf7b](https://github.com/TEDI-Design-System/angular/commit/92eaf7b3a9249b4bb7bc834b3cc069b0016b4fb5))
+
 # [9.0.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.10...angular-9.0.0-rc.11) (2026-10-28)
 
 
