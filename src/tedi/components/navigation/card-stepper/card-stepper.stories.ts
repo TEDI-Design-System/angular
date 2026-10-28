@@ -17,40 +17,41 @@ import { CardStepperStepComponent } from "./card-stepper-step/card-stepper-step.
 import { CardStepperStepContentDirective } from "./card-stepper-step/card-stepper-step-content.directive";
 import { CardStepperSubStepComponent } from "./card-stepper-sub-step/card-stepper-sub-step.component";
 
+const booleanArgType = (name: string, description: string) => ({
+  name,
+  description,
+  type: "boolean" as const,
+  table: { category: "inputs", defaultValue: { summary: "false" } },
+});
+
 const stepArgTypes: ArgTypes = {
-  label: {
-    name: "label",
-    description: "Step label, shown as the card heading while active.",
+  title: {
+    name: "title",
+    description: "Step title, shown as the card heading while active.",
     type: { name: "string", required: true },
     table: { category: "inputs" },
   },
   description: {
     name: "description",
     description:
-      "Secondary line placed by `descriptionPosition` on the card, and under the label in the list.",
+      "Secondary line placed by `descriptionPosition` on the card, and under the title in the list.",
     type: "string",
     table: { category: "inputs" },
   },
-  state: {
-    name: "state",
-    description:
-      "Progress state. Use `disabled` to exclude a step from arrow and list navigation.",
-    options: ["default", "completed", "error"],
-    table: {
-      category: "inputs",
-      type: { summary: '"default" | "completed" | "error"' },
-      defaultValue: { summary: '"default"' },
-    },
-  },
-  disabled: {
-    name: "disabled",
-    description:
-      "Excludes the step from the arrows and the step list, and renders it as disabled.",
-    type: "boolean",
-    table: { category: "inputs", defaultValue: { summary: "false" } },
-  },
-  expanded: {
-    name: "expanded",
+  completed: booleanArgType(
+    "completed",
+    "Completed progress state, independent of `disabled`. Takes precedence over `error`.",
+  ),
+  error: booleanArgType(
+    "error",
+    "Error progress state, independent of `disabled`.",
+  ),
+  disabled: booleanArgType(
+    "disabled",
+    "Excludes the step from the arrows and the step list, and renders it as disabled.",
+  ),
+  opened: {
+    name: "opened",
     description:
       "Whether this step's sub-steps start expanded. Defaults to expanded for the active step.",
     type: "boolean",
@@ -59,37 +60,31 @@ const stepArgTypes: ArgTypes = {
 };
 
 const subStepArgTypes: ArgTypes = {
-  label: {
-    name: "label",
-    description: "Sub-step label.",
+  title: {
+    name: "title",
+    description: "Sub-step title.",
     type: { name: "string", required: true },
     table: { category: "inputs" },
   },
-  state: {
-    name: "state",
-    description:
-      "Progress state. `informative` marks a read-only row; use `disabled` for unreachable.",
-    options: ["default", "completed", "error", "informative"],
-    table: {
-      category: "inputs",
-      type: { summary: '"default" | "completed" | "error" | "informative"' },
-      defaultValue: { summary: '"default"' },
-    },
-  },
-  current: {
-    name: "current",
-    description: "Marks the sub-step the user is on.",
-    type: "boolean",
-    table: { category: "inputs", defaultValue: { summary: "false" } },
-  },
-  disabled: {
-    name: "disabled",
-    description: "Renders the sub-step as disabled and non-interactive.",
-    type: "boolean",
-    table: { category: "inputs", defaultValue: { summary: "false" } },
-  },
-  subStepSelect: {
-    name: "subStepSelect",
+  completed: booleanArgType(
+    "completed",
+    "Completed progress state, independent of `disabled`. Takes precedence over `error`.",
+  ),
+  error: booleanArgType(
+    "error",
+    "Error progress state, independent of `disabled`.",
+  ),
+  selected: booleanArgType("selected", "Marks the sub-step the user is on."),
+  disabled: booleanArgType(
+    "disabled",
+    "Renders the sub-step as disabled and non-interactive.",
+  ),
+  informative: booleanArgType(
+    "informative",
+    "Non-interactive, secondary text treatment, e.g. for a sub-step filled in by an official.",
+  ),
+  itemSelect: {
+    name: "itemSelect",
     description:
       "Emitted when the sub-step is picked; also closes the list. Disabled and informative sub-steps cannot be picked.",
     table: { category: "outputs", type: { summary: "void" } },
@@ -282,10 +277,10 @@ export const Default: Story = {
     props: { ...args },
     template: `
       <tedi-card-stepper style="${FRAME}" ${argsToTemplate(args)}>
-        <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-        <tedi-card-stepper-step label="Dokumendid" state="completed" />
-        <tedi-card-stepper-step label="Elukoht" />
-        <tedi-card-stepper-step label="Ülevaade" />
+        <tedi-card-stepper-step title="Taotleja andmed" completed />
+        <tedi-card-stepper-step title="Dokumendid" completed />
+        <tedi-card-stepper-step title="Elukoht" />
+        <tedi-card-stepper-step title="Ülevaade" />
       </tedi-card-stepper>
     `,
   }),
@@ -295,10 +290,10 @@ export const WithoutStepNumber: Story = {
   render: () => ({
     template: `
       <tedi-card-stepper style="${FRAME}" ariaLabel="Tervisetõendi taotlemine" [activeStep]="2" [showStepNumber]="false">
-        <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-        <tedi-card-stepper-step label="Dokumendid" state="completed" />
-        <tedi-card-stepper-step label="Elukoht" />
-        <tedi-card-stepper-step label="Ülevaade" />
+        <tedi-card-stepper-step title="Taotleja andmed" completed />
+        <tedi-card-stepper-step title="Dokumendid" completed />
+        <tedi-card-stepper-step title="Elukoht" />
+        <tedi-card-stepper-step title="Ülevaade" />
       </tedi-card-stepper>
     `,
   }),
@@ -309,16 +304,16 @@ export const WithStatusIcon: Story = {
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <tedi-card-stepper style="${FRAME}" ariaLabel="Lõpetatud samm" [activeStep]="2" [showStatusIcon]="true">
-          <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-          <tedi-card-stepper-step label="Dokumendid" state="completed" />
-          <tedi-card-stepper-step label="Elukoht" state="completed" />
-          <tedi-card-stepper-step label="Ülevaade" />
+          <tedi-card-stepper-step title="Taotleja andmed" completed />
+          <tedi-card-stepper-step title="Dokumendid" completed />
+          <tedi-card-stepper-step title="Elukoht" completed />
+          <tedi-card-stepper-step title="Ülevaade" />
         </tedi-card-stepper>
         <tedi-card-stepper style="${FRAME}" ariaLabel="Vigane samm" [activeStep]="2" [showStatusIcon]="true">
-          <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-          <tedi-card-stepper-step label="Dokumendid" state="completed" />
-          <tedi-card-stepper-step label="Elukoht" state="error" />
-          <tedi-card-stepper-step label="Ülevaade" />
+          <tedi-card-stepper-step title="Taotleja andmed" completed />
+          <tedi-card-stepper-step title="Dokumendid" completed />
+          <tedi-card-stepper-step title="Elukoht" error />
+          <tedi-card-stepper-step title="Ülevaade" />
         </tedi-card-stepper>
       </div>
     `,
@@ -330,10 +325,10 @@ export const WithInfoBottom: Story = {
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <tedi-card-stepper style="${FRAME}" ariaLabel="Ilma numbrita" [activeStep]="2" [showStepNumber]="false">
-          <tedi-card-stepper-step label="Isikuandmed" description="Taotleja või esindatav" state="completed" />
-          <tedi-card-stepper-step label="Üldandmed" description="Taotleja või esindatav" state="completed" />
-          <tedi-card-stepper-step label="Taotleja andmed" description="Taotleja või esindatav" />
-          <tedi-card-stepper-step label="Ülevaade" description="Taotleja või esindatav" />
+          <tedi-card-stepper-step title="Isikuandmed" description="Taotleja või esindatav" completed />
+          <tedi-card-stepper-step title="Üldandmed" description="Taotleja või esindatav" completed />
+          <tedi-card-stepper-step title="Taotleja andmed" description="Taotleja või esindatav" />
+          <tedi-card-stepper-step title="Ülevaade" description="Taotleja või esindatav" />
         </tedi-card-stepper>
         <tedi-card-stepper
           style="${FRAME}"
@@ -342,16 +337,16 @@ export const WithInfoBottom: Story = {
           [showNavigation]="true"
           counterPosition="bottom"
         >
-          <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-          <tedi-card-stepper-step label="Dokumendid" state="completed" />
-          <tedi-card-stepper-step label="Elukoht" />
-          <tedi-card-stepper-step label="Ülevaade" />
+          <tedi-card-stepper-step title="Taotleja andmed" completed />
+          <tedi-card-stepper-step title="Dokumendid" completed />
+          <tedi-card-stepper-step title="Elukoht" />
+          <tedi-card-stepper-step title="Ülevaade" />
         </tedi-card-stepper>
         <tedi-card-stepper style="${FRAME}" ariaLabel="Numbriga" [activeStep]="2">
-          <tedi-card-stepper-step label="Isikuandmed" description="Taotleja või esindatav" state="completed" />
-          <tedi-card-stepper-step label="Üldandmed" description="Taotleja või esindatav" state="completed" />
-          <tedi-card-stepper-step label="Taotleja andmed" description="Taotleja või esindatav" />
-          <tedi-card-stepper-step label="Ülevaade" description="Taotleja või esindatav" />
+          <tedi-card-stepper-step title="Isikuandmed" description="Taotleja või esindatav" completed />
+          <tedi-card-stepper-step title="Üldandmed" description="Taotleja või esindatav" completed />
+          <tedi-card-stepper-step title="Taotleja andmed" description="Taotleja või esindatav" />
+          <tedi-card-stepper-step title="Ülevaade" description="Taotleja või esindatav" />
         </tedi-card-stepper>
       </div>
     `,
@@ -369,16 +364,16 @@ export const WithInfoTop: Story = {
           counterPosition="top"
           [showStepNumber]="false"
         >
-          <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-          <tedi-card-stepper-step label="Dokumendid" state="completed" />
-          <tedi-card-stepper-step label="Elukoht" />
-          <tedi-card-stepper-step label="Ülevaade" />
+          <tedi-card-stepper-step title="Taotleja andmed" completed />
+          <tedi-card-stepper-step title="Dokumendid" completed />
+          <tedi-card-stepper-step title="Elukoht" />
+          <tedi-card-stepper-step title="Ülevaade" />
         </tedi-card-stepper>
         <tedi-card-stepper style="${FRAME}" ariaLabel="Numbriga" [activeStep]="2" descriptionPosition="top">
-          <tedi-card-stepper-step label="Isikuandmed" description="Taotleja või esindatav" state="completed" />
-          <tedi-card-stepper-step label="Üldandmed" description="Taotleja või esindatav" state="completed" />
-          <tedi-card-stepper-step label="Taotleja andmed" description="Taotleja või esindatav" />
-          <tedi-card-stepper-step label="Ülevaade" description="Taotleja või esindatav" />
+          <tedi-card-stepper-step title="Isikuandmed" description="Taotleja või esindatav" completed />
+          <tedi-card-stepper-step title="Üldandmed" description="Taotleja või esindatav" completed />
+          <tedi-card-stepper-step title="Taotleja andmed" description="Taotleja või esindatav" />
+          <tedi-card-stepper-step title="Ülevaade" description="Taotleja või esindatav" />
         </tedi-card-stepper>
         <tedi-card-stepper
           style="${FRAME}"
@@ -387,10 +382,10 @@ export const WithInfoTop: Story = {
           descriptionPosition="top"
           [showNavigation]="true"
         >
-          <tedi-card-stepper-step label="Isikuandmed" description="Taotleja või esindatav" state="completed" />
-          <tedi-card-stepper-step label="Üldandmed" description="Taotleja või esindatav" state="completed" />
-          <tedi-card-stepper-step label="Taotleja andmed" description="Taotleja või esindatav" />
-          <tedi-card-stepper-step label="Ülevaade" description="Taotleja või esindatav" />
+          <tedi-card-stepper-step title="Isikuandmed" description="Taotleja või esindatav" completed />
+          <tedi-card-stepper-step title="Üldandmed" description="Taotleja või esindatav" completed />
+          <tedi-card-stepper-step title="Taotleja andmed" description="Taotleja või esindatav" />
+          <tedi-card-stepper-step title="Ülevaade" description="Taotleja või esindatav" />
         </tedi-card-stepper>
         <tedi-card-stepper
           style="${FRAME}"
@@ -399,10 +394,10 @@ export const WithInfoTop: Story = {
           descriptionPosition="top"
           [showStepNumber]="false"
         >
-          <tedi-card-stepper-step label="Isikuandmed" description="Taotleja või esindatav" state="completed" />
-          <tedi-card-stepper-step label="Üldandmed" description="Taotleja või esindatav" state="completed" />
-          <tedi-card-stepper-step label="Taotleja andmed" description="Taotleja või esindatav" />
-          <tedi-card-stepper-step label="Ülevaade" description="Taotleja või esindatav" />
+          <tedi-card-stepper-step title="Isikuandmed" description="Taotleja või esindatav" completed />
+          <tedi-card-stepper-step title="Üldandmed" description="Taotleja või esindatav" completed />
+          <tedi-card-stepper-step title="Taotleja andmed" description="Taotleja või esindatav" />
+          <tedi-card-stepper-step title="Ülevaade" description="Taotleja või esindatav" />
         </tedi-card-stepper>
       </div>
     `,
@@ -434,10 +429,10 @@ export const HasNavigation: Story = {
   render: () => ({
     template: `
       <tedi-card-stepper style="${FRAME}" ariaLabel="Tervisetõendi taotlemine" [activeStep]="2" [showNavigation]="true">
-        <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-        <tedi-card-stepper-step label="Dokumendid" state="completed" />
-        <tedi-card-stepper-step label="Elukoht" />
-        <tedi-card-stepper-step label="Ülevaade" />
+        <tedi-card-stepper-step title="Taotleja andmed" completed />
+        <tedi-card-stepper-step title="Dokumendid" completed />
+        <tedi-card-stepper-step title="Elukoht" />
+        <tedi-card-stepper-step title="Ülevaade" />
       </tedi-card-stepper>
     `,
   }),
@@ -448,10 +443,10 @@ export const WithoutProgressbar: Story = {
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <tedi-card-stepper style="${FRAME}" ariaLabel="Ilma edenemisribata" [activeStep]="2" [showProgress]="false">
-          <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-          <tedi-card-stepper-step label="Dokumendid" state="completed" />
-          <tedi-card-stepper-step label="Elukoht" />
-          <tedi-card-stepper-step label="Ülevaade" />
+          <tedi-card-stepper-step title="Taotleja andmed" completed />
+          <tedi-card-stepper-step title="Dokumendid" completed />
+          <tedi-card-stepper-step title="Elukoht" />
+          <tedi-card-stepper-step title="Ülevaade" />
         </tedi-card-stepper>
         <tedi-card-stepper
           style="${FRAME}"
@@ -460,10 +455,10 @@ export const WithoutProgressbar: Story = {
           [showProgress]="false"
           [showNavigation]="true"
         >
-          <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-          <tedi-card-stepper-step label="Dokumendid" state="completed" />
-          <tedi-card-stepper-step label="Elukoht" />
-          <tedi-card-stepper-step label="Ülevaade" />
+          <tedi-card-stepper-step title="Taotleja andmed" completed />
+          <tedi-card-stepper-step title="Dokumendid" completed />
+          <tedi-card-stepper-step title="Elukoht" />
+          <tedi-card-stepper-step title="Ülevaade" />
         </tedi-card-stepper>
       </div>
     `,
@@ -479,22 +474,22 @@ export const WithBottomSlot: Story = {
     template: `
       <div style="display: flex; flex-direction: column; gap: 16px;">
         <tedi-card-stepper style="${FRAME}" ariaLabel="Hoiatusega samm" [activeStep]="2" [showProgress]="false">
-          <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-          <tedi-card-stepper-step label="Üldandmed" state="completed" />
-          <tedi-card-stepper-step label="Dokumendid">
+          <tedi-card-stepper-step title="Taotleja andmed" completed />
+          <tedi-card-stepper-step title="Üldandmed" completed />
+          <tedi-card-stepper-step title="Dokumendid">
             <ng-template tediCardStepperStepContent>
               <tedi-alert type="warning" icon="warning" size="small">
                 Andmeväljad sisaldavad ebatäpseid väärtuseid
               </tedi-alert>
             </ng-template>
           </tedi-card-stepper-step>
-          <tedi-card-stepper-step label="Ülevaade" />
+          <tedi-card-stepper-step title="Ülevaade" />
         </tedi-card-stepper>
 
         <tedi-card-stepper style="${FRAME}" ariaLabel="Õnnestumisega samm" [activeStep]="2">
-          <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-          <tedi-card-stepper-step label="Üldandmed" state="completed" />
-          <tedi-card-stepper-step label="Minu andmed">
+          <tedi-card-stepper-step title="Taotleja andmed" completed />
+          <tedi-card-stepper-step title="Üldandmed" completed />
+          <tedi-card-stepper-step title="Minu andmed">
             <ng-template tediCardStepperStepContent>
               <tedi-status-badge
                 color="success"
@@ -503,7 +498,7 @@ export const WithBottomSlot: Story = {
               />
             </ng-template>
           </tedi-card-stepper-step>
-          <tedi-card-stepper-step label="Ülevaade" />
+          <tedi-card-stepper-step title="Ülevaade" />
         </tedi-card-stepper>
 
         <tedi-card-stepper
@@ -513,16 +508,16 @@ export const WithBottomSlot: Story = {
           [showProgress]="false"
           [showNavigation]="true"
         >
-          <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-          <tedi-card-stepper-step label="Üldandmed" state="completed" />
-          <tedi-card-stepper-step label="Dokumendid">
+          <tedi-card-stepper-step title="Taotleja andmed" completed />
+          <tedi-card-stepper-step title="Üldandmed" completed />
+          <tedi-card-stepper-step title="Dokumendid">
             <ng-template tediCardStepperStepContent>
               <tedi-collapse openText="Loe lähemalt" closeText="Sulge">
                 <p tedi-text>Lisainfo dokumentide kohta, mida selles sammus on vaja esitada.</p>
               </tedi-collapse>
             </ng-template>
           </tedi-card-stepper-step>
-          <tedi-card-stepper-step label="Ülevaade" />
+          <tedi-card-stepper-step title="Ülevaade" />
         </tedi-card-stepper>
 
         <tedi-card-stepper
@@ -532,9 +527,9 @@ export const WithBottomSlot: Story = {
           [showProgress]="false"
           [showNavigation]="true"
         >
-          <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-          <tedi-card-stepper-step label="Üldandmed" state="completed" />
-          <tedi-card-stepper-step label="Dokumendid">
+          <tedi-card-stepper-step title="Taotleja andmed" completed />
+          <tedi-card-stepper-step title="Üldandmed" completed />
+          <tedi-card-stepper-step title="Dokumendid">
             <ng-template tediCardStepperStepContent>
               <div>
                 <button tedi-button variant="secondary">
@@ -544,7 +539,7 @@ export const WithBottomSlot: Story = {
               </div>
             </ng-template>
           </tedi-card-stepper-step>
-          <tedi-card-stepper-step label="Ülevaade" />
+          <tedi-card-stepper-step title="Ülevaade" />
         </tedi-card-stepper>
       </div>
     `,
@@ -555,25 +550,25 @@ export const ManySteps: Story = {
   render: () => ({
     template: `
       <tedi-card-stepper style="${FRAME}" ariaLabel="Geeniuuring" [activeStep]="2">
-        <tedi-card-stepper-step label="Isikuandmed" state="completed" />
-        <tedi-card-stepper-step label="Tahteavaldus" state="completed" />
-        <tedi-card-stepper-step label="Geeniuuring" />
-        <tedi-card-stepper-step label="Järeltestimine" />
-        <tedi-card-stepper-step label="Tervise ajalugu" />
-        <tedi-card-stepper-step label="Küsitlus" />
-        <tedi-card-stepper-step label="Analüüs" />
-        <tedi-card-stepper-step label="Testid" />
-        <tedi-card-stepper-step label="Uuringud" />
-        <tedi-card-stepper-step label="Dokumenteerimine" />
-        <tedi-card-stepper-step label="Korduv geeniuuring" />
-        <tedi-card-stepper-step label="Vastused" />
+        <tedi-card-stepper-step title="Isikuandmed" completed />
+        <tedi-card-stepper-step title="Tahteavaldus" completed />
+        <tedi-card-stepper-step title="Geeniuuring" />
+        <tedi-card-stepper-step title="Järeltestimine" />
+        <tedi-card-stepper-step title="Tervise ajalugu" />
+        <tedi-card-stepper-step title="Küsitlus" />
+        <tedi-card-stepper-step title="Analüüs" />
+        <tedi-card-stepper-step title="Testid" />
+        <tedi-card-stepper-step title="Uuringud" />
+        <tedi-card-stepper-step title="Dokumenteerimine" />
+        <tedi-card-stepper-step title="Korduv geeniuuring" />
+        <tedi-card-stepper-step title="Vastused" />
       </tedi-card-stepper>
     `,
   }),
 };
 
 /**
- * Sub-steps appear in an expandable list. Picking one emits `subStepSelect` and
+ * Sub-steps appear in an expandable list. Picking one emits `itemSelect` and
  * closes the list.
  */
 export const WithSubSteps: Story = {
@@ -593,14 +588,14 @@ export const WithSubSteps: Story = {
   render: () => ({
     template: `
       <tedi-card-stepper style="${FRAME}" ariaLabel="Hindamise edenemine" [activeStep]="1">
-        <tedi-card-stepper-step label="Sotsiaalne võrgustik" state="completed" />
-        <tedi-card-stepper-step label="Sotsiaalsed suhted">
-          <tedi-card-stepper-sub-step label="Sõbrad" state="completed" />
-          <tedi-card-stepper-sub-step label="Pere" current />
-          <tedi-card-stepper-sub-step label="Kolleegid" />
+        <tedi-card-stepper-step title="Sotsiaalne võrgustik" completed />
+        <tedi-card-stepper-step title="Sotsiaalsed suhted">
+          <tedi-card-stepper-sub-step title="Sõbrad" completed />
+          <tedi-card-stepper-sub-step title="Pere" selected />
+          <tedi-card-stepper-sub-step title="Kolleegid" />
         </tedi-card-stepper-step>
-        <tedi-card-stepper-step label="Vaimne tervis" />
-        <tedi-card-stepper-step label="Ülevaade" />
+        <tedi-card-stepper-step title="Vaimne tervis" />
+        <tedi-card-stepper-step title="Ülevaade" />
       </tedi-card-stepper>
     `,
   }),
@@ -648,11 +643,11 @@ export const WithLimitedJumping: Story = {
         [showNavigation]="true"
         allowJump="completed-or-next"
       >
-        <tedi-card-stepper-step label="Taotleja andmed" state="completed" />
-        <tedi-card-stepper-step label="Dokumendid" state="completed" />
-        <tedi-card-stepper-step label="Elukoht" description="Täidab ametnik" />
-        <tedi-card-stepper-step label="Lisadokumendid" [disabled]="true" />
-        <tedi-card-stepper-step label="Ülevaade" />
+        <tedi-card-stepper-step title="Taotleja andmed" completed />
+        <tedi-card-stepper-step title="Dokumendid" completed />
+        <tedi-card-stepper-step title="Elukoht" description="Täidab ametnik" />
+        <tedi-card-stepper-step title="Lisadokumendid" [disabled]="true" />
+        <tedi-card-stepper-step title="Ülevaade" />
       </tedi-card-stepper>
     `,
   }),

@@ -7,27 +7,27 @@
       @for (step of data.steps; track $index; let stepIndex = $index) {
         @if (ownTitle(step); as title) {
           <tedi-vertical-stepper-item
-            [title]="step.label"
-            [completed]="step.state === 'completed'"
-            [error]="step.state === 'error'"
-            [selected]="step.current"
-            [opened]="step.expanded"
+            [title]="step.title"
+            [completed]="step.completed"
+            [error]="step.error"
+            [selected]="step.selected"
+            [opened]="step.opened"
           >
             @if (title === "button") {
               <button
                 item-title
                 type="button"
-                [attr.aria-current]="step.current ? 'step' : null"
+                [attr.aria-current]="step.selected ? 'step' : null"
                 (click)="selectStep(stepIndex)"
               >
-                {{ step.label }}
+                {{ step.title }}
               </button>
             } @else {
               <span
                 item-title
-                [attr.aria-current]="step.current ? 'step' : null"
+                [attr.aria-current]="step.selected ? 'step' : null"
               >
-                {{ step.label }}
+                {{ step.title }}
               </span>
             }
             @if (step.description) {
@@ -39,24 +39,24 @@
               let subIndex = $index
             ) {
               <tedi-vertical-stepper-item
-                [title]="subStep.label"
-                [completed]="subStep.state === 'completed'"
-                [error]="subStep.state === 'error'"
-                [informative]="subStep.state === 'informative'"
+                [title]="subStep.title"
+                [completed]="subStep.completed"
+                [error]="subStep.error"
+                [informative]="subStep.informative"
                 [disabled]="subStep.disabled"
-                [selected]="subStep.current"
+                [selected]="subStep.selected"
                 (itemSelect)="selectSubStep(stepIndex, subIndex)"
               />
             }
           </tedi-vertical-stepper-item>
         } @else {
           <tedi-vertical-stepper-item
-            [title]="step.label"
-            [completed]="step.state === 'completed'"
-            [error]="step.state === 'error'"
+            [title]="step.title"
+            [completed]="step.completed"
+            [error]="step.error"
             [disabled]="step.disabled"
-            [selected]="step.current"
-            [opened]="step.expanded"
+            [selected]="step.selected"
+            [opened]="step.opened"
             (itemSelect)="selectStep(stepIndex)"
           >
             @if (step.description) {
@@ -68,12 +68,12 @@
               let subIndex = $index
             ) {
               <tedi-vertical-stepper-item
-                [title]="subStep.label"
-                [completed]="subStep.state === 'completed'"
-                [error]="subStep.state === 'error'"
-                [informative]="subStep.state === 'informative'"
+                [title]="subStep.title"
+                [completed]="subStep.completed"
+                [error]="subStep.error"
+                [informative]="subStep.informative"
                 [disabled]="subStep.disabled"
-                [selected]="subStep.current"
+                [selected]="subStep.selected"
                 (itemSelect)="selectSubStep(stepIndex, subIndex)"
               />
             }

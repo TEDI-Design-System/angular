@@ -2,18 +2,11 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   output,
   ViewEncapsulation,
 } from "@angular/core";
-
-/**
- * Progress state. `informative` marks a sub-step someone else completes, such as
- * an official; it renders as secondary text. Use the separate `disabled` input to
- * prevent navigation.
- */
-export type CardStepperSubStepState =
-  "default" | "completed" | "error" | "informative";
 
 /**
  * Sub-step configuration for the step-list modal; renders no content itself.
@@ -26,27 +19,52 @@ export type CardStepperSubStepState =
 })
 export class CardStepperSubStepComponent {
   /**
-   * Sub-step label.
+   * Sub-step title.
    */
-  label = input.required<string>();
+  title = input.required<string>();
   /**
-   * Progress state shown in the step-list modal.
-   * @default "default"
+   * Completed progress state, independent of `disabled`. Takes precedence over
+   * `error`.
+   * @default false
    */
-  state = input<CardStepperSubStepState>("default");
+  completed = input(false, { transform: booleanAttribute });
+  /**
+   * Error progress state, independent of `disabled`.
+   * @default false
+   */
+  error = input(false, { transform: booleanAttribute });
   /**
    * Marks the sub-step as the one the user is on.
    * @default false
    */
-  current = input(false, { transform: booleanAttribute });
+  selected = input(false, { transform: booleanAttribute });
   /**
    * Excludes the sub-step from navigation and renders it as disabled.
    * @default false
    */
   disabled = input(false, { transform: booleanAttribute });
   /**
+   * Non-interactive, secondary text treatment, e.g. for a sub-step filled in by
+   * an official.
+   * @default false
+   */
+  informative = input(false, { transform: booleanAttribute });
+  /**
    * Emits when the sub-step is picked in the step list, which then closes.
    * Disabled and informative sub-steps render as text and cannot be picked.
    */
-  subStepSelect = output<void>();
+  itemSelect = output<void>();
+
+  /** @internal Completed wins over error, as in `tedi-vertical-stepper-item`. */
+  readonly progressState = computed(() => {
+    if (this.completed()) {
+      return "completed";
+    }
+
+    if (this.error()) {
+      return "error";
+    }
+
+    return "default";
+  });
 }
