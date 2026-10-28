@@ -12,12 +12,6 @@ import { CardStepperSubStepComponent } from "../card-stepper-sub-step/card-stepp
 import { CardStepperStepContentDirective } from "./card-stepper-step-content.directive";
 
 /**
- * Progress state. Use the separate `disabled` input to exclude a step from
- * arrow and list navigation.
- */
-export type CardStepperStepState = "default" | "completed" | "error";
-
-/**
  * Step configuration read by `tedi-card-stepper`; renders no content itself.
  */
 @Component({
@@ -28,19 +22,24 @@ export type CardStepperStepState = "default" | "completed" | "error";
 })
 export class CardStepperStepComponent {
   /**
-   * Step label, shown as the card heading while the step is active.
+   * Step title, shown as the card heading while the step is active.
    */
-  label = input.required<string>();
+  title = input.required<string>();
   /**
-   * Secondary text on the card and below the label in the step-list modal.
+   * Secondary text on the card and below the title in the step-list modal.
    */
   description = input<string>();
   /**
-   * Progress state shown in the step-list modal and by the status icon. Use the
-   * `disabled` input to exclude a step from arrow and list navigation.
-   * @default "default"
+   * Completed progress state, independent of `disabled`. Takes precedence over
+   * `error`.
+   * @default false
    */
-  state = input<CardStepperStepState>("default");
+  completed = input(false, { transform: booleanAttribute });
+  /**
+   * Error progress state, independent of `disabled`.
+   * @default false
+   */
+  error = input(false, { transform: booleanAttribute });
   /**
    * Remove the step from the stepper's own navigation: the arrows skip it and
    * the step list renders it as non-selectable. Setting `activeStep` to it
@@ -53,7 +52,7 @@ export class CardStepperStepComponent {
    * Whether this step's sub-steps start expanded in the modal. Defaults to
    * expanded for the active step.
    */
-  expanded = input(undefined, {
+  opened = input(undefined, {
     transform: (v: unknown) => (v == null ? undefined : booleanAttribute(v)),
   });
 
@@ -62,7 +61,11 @@ export class CardStepperStepComponent {
   });
   readonly content = contentChild(CardStepperStepContentDirective);
 
-  readonly hasCurrentSubStep = computed(() =>
-    this.subSteps().some((subStep) => subStep.current()),
+  readonly hasSelectedSubStep = computed(() =>
+    this.subSteps().some((subStep) => subStep.selected()),
+  );
+  /** @internal Completed wins over error, as in `tedi-vertical-stepper-item`. */
+  readonly progressState = computed(() =>
+    this.completed() ? "completed" : this.error() ? "error" : "default",
   );
 }
