@@ -6,7 +6,6 @@ import {
   effect,
   ElementRef,
   forwardRef,
-  HostAttributeToken,
   inject,
   input,
   model,
@@ -57,7 +56,6 @@ export type TextareaSize = Exclude<InputSize, "large">;
     "[class.tedi-textarea--auto-grow]": "autoGrow()",
     "[style.height]": "heightStyle()",
     "[style.min-height]": "minHeightStyle()",
-    "[rows]": "resolvedRows()",
     "[style.max-height]": "maxHeightStyle()",
     "[attr.aria-invalid]": "invalid() || null",
     "[attr.aria-describedby]": "describedBy.attribute()",
@@ -114,7 +112,9 @@ export class TextareaComponent
    * Number of rows the field rests at, and the fewest it can ever show. With no
    * `height` set this is what sizes the textarea, so it is the input to reach
    * for when a field needs to be taller or shorter — in every mode, not just
-   * while `autoGrow` is on. Values below 1 are treated as 1.
+   * while `autoGrow` is on. Values below 1 are treated as 1. It never rests
+   * below the native `rows` (2 by default), so set `rows="1"` for a single-row
+   * field.
    *
    * @default 3
    */
@@ -166,21 +166,6 @@ export class TextareaComponent
   // Below one row the field is shorter than its own line of text and scrolls
   // while empty.
   readonly resolvedMinRows = computed(() => Math.max(1, this.minRows()));
-
-  private readonly rowsAttribute = inject(new HostAttributeToken("rows"), {
-    optional: true,
-  });
-
-  /**
-   * The native `rows` sets the natural height, and the field rests at whichever
-   * is taller, that or `minRows`. Left at the browser's default of two, it would
-   * hold a `minRows` of 1 at two rows, so it follows `minRows` — unless the
-   * consumer set `rows` themselves, which keeps working as it always has.
-   */
-  readonly resolvedRows = computed(() => {
-    const rows = Number(this.rowsAttribute);
-    return rows > 0 ? rows : this.resolvedMinRows();
-  });
 
   /**
    * `minRows` is the resting height as much as it is the floor: with no `height`

@@ -301,11 +301,11 @@ describe("SelectComponent", () => {
     });
 
     it("should hide the clear button when disabled", () => {
-      select.writeValue("Option 1");
+      host.control.setValue("Option 1");
       fixture.detectChanges();
       expect(getClearButton()).toBeTruthy();
 
-      select.setDisabledState(true);
+      host.control.disable();
       fixture.detectChanges();
 
       expect(getClearButton()).toBeNull();

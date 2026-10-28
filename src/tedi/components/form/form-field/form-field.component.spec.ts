@@ -585,6 +585,19 @@ class FixedHeightTextareaInBoxHostComponent {}
 })
 class ClearableTextareaHostComponent {}
 
+@Component({
+  standalone: true,
+  imports: [FormFieldComponent, TextareaComponent, ReactiveFormsModule],
+  template: `
+    <tedi-form-field>
+      <textarea tedi-textarea [formControl]="control"></textarea>
+    </tedi-form-field>
+  `,
+})
+class ClearableTextareaFormControlHostComponent {
+  control = new FormControl("hello");
+}
+
 describe("FormFieldComponent wrapping a textarea", () => {
   let fixture: ComponentFixture<TextareaHostComponent>;
 
@@ -595,6 +608,7 @@ describe("FormFieldComponent wrapping a textarea", () => {
         TextareaInBoxHostComponent,
         FixedHeightTextareaInBoxHostComponent,
         ClearableTextareaHostComponent,
+        ClearableTextareaFormControlHostComponent,
       ],
       providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
     }).compileComponents();
@@ -672,7 +686,7 @@ describe("FormFieldComponent wrapping a textarea", () => {
 
   it("clears the textarea from the clear button", () => {
     const clearFixture = TestBed.createComponent(
-      ClearableTextareaHostComponent,
+      ClearableTextareaFormControlHostComponent,
     );
     clearFixture.detectChanges();
 
@@ -680,6 +694,7 @@ describe("FormFieldComponent wrapping a textarea", () => {
     clearFixture.detectChanges();
 
     const textarea = clearFixture.nativeElement.querySelector("textarea");
+    expect(clearFixture.componentInstance.control.value).toBe("");
     expect(textarea.value).toBe("");
     expect(document.activeElement).toBe(textarea);
   });

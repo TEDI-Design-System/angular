@@ -179,30 +179,6 @@ describe("TextareaComponent", () => {
       expect(f.componentInstance.minHeightStyle()).toBe(
         "calc(1 * 1lh + 2 * var(--_field-padding-y))",
       );
-      expect((f.nativeElement as HTMLTextAreaElement).rows).toBe(1);
-    });
-
-    it("keeps a rows attribute the consumer set", () => {
-      @Component({
-        standalone: true,
-        imports: [TextareaComponent],
-        template: `<textarea tedi-textarea rows="5"></textarea>`,
-      })
-      class RowsHostComponent {}
-
-      const f = TestBed.createComponent(RowsHostComponent);
-      f.detectChanges();
-
-      const textarea = f.nativeElement.querySelector("textarea");
-      expect(textarea.rows).toBe(5);
-    });
-
-    it("sets the native rows from minRows", () => {
-      const f = TestBed.createComponent(TextareaComponent);
-      f.componentRef.setInput("minRows", 5);
-      f.detectChanges();
-
-      expect((f.nativeElement as HTMLTextAreaElement).rows).toBe(5);
     });
 
     it("rests at minRows when no height is set", () => {
@@ -321,10 +297,11 @@ describe("TextareaComponent readOnly", () => {
 
 describe("TextareaComponent scrollbarWidth", () => {
   let observerCallback: ResizeObserverCallback;
-  const disconnect = jest.fn();
+  let disconnect: jest.Mock;
   const originalResizeObserver = globalThis.ResizeObserver;
 
   beforeEach(() => {
+    disconnect = jest.fn();
     globalThis.ResizeObserver = jest.fn((callback: ResizeObserverCallback) => {
       observerCallback = callback;
       return { observe: jest.fn(), unobserve: jest.fn(), disconnect };
@@ -358,8 +335,10 @@ describe("TextareaComponent scrollbarWidth", () => {
   it("stops observing on destroy", () => {
     const fixture = TestBed.createComponent(TextareaComponent);
     fixture.detectChanges();
+    expect(disconnect).not.toHaveBeenCalled();
+
     fixture.destroy();
 
-    expect(disconnect).toHaveBeenCalled();
+    expect(disconnect).toHaveBeenCalledTimes(1);
   });
 });

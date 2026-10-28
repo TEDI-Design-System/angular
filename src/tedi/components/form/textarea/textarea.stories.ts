@@ -117,6 +117,18 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    disabled: {
+      description:
+        "Disables the textarea. Combines with the reactive-forms disabled state.",
+      control: {
+        type: "boolean",
+      },
+      table: {
+        category: "Textarea inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     placeholder: {
       control: "text",
       description: "Placeholder text shown when the textarea is empty.",
@@ -152,7 +164,7 @@ export default {
     minRows: {
       control: "number",
       description:
-        "Rows the field rests at, and the fewest it can ever show. With no `height` set this is what sizes the textarea, in every mode — reach for it first when a field needs to be taller or shorter. Values below 1 are treated as 1.",
+        'Rows the field rests at, and the fewest it can ever show. With no `height` set this is what sizes the textarea, in every mode — reach for it first when a field needs to be taller or shorter. Values below 1 are treated as 1; set `rows="1"` for a single-row field.',
       table: {
         category: "Textarea inputs",
         type: { summary: "number" },
@@ -198,9 +210,11 @@ export const Default: StoryObj = {
     autoGrow: false,
     minRows: 3,
     readOnly: false,
+    disabled: false,
   },
   render: ({
     readOnly,
+    disabled,
     resizable,
     placeholder,
     autoGrow,
@@ -212,6 +226,7 @@ export const Default: StoryObj = {
   }) => ({
     props: {
       readOnly,
+      disabled,
       resizable,
       placeholder,
       autoGrow,
@@ -234,6 +249,7 @@ export const Default: StoryObj = {
           [height]="height"
           [maxHeight]="maxHeight"
           [readOnly]="readOnly"
+          [disabled]="disabled"
           [attr.placeholder]="placeholder"
         ></textarea>
       </tedi-form-field>

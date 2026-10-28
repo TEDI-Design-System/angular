@@ -231,14 +231,6 @@ describe("TimeFieldComponent", () => {
       expect(el.querySelector(".tedi-time-field__clear")).toBeTruthy();
     });
 
-    it("should hide clear button while disabled", () => {
-      component.writeValue("14:30");
-      component.setDisabledState(true);
-      fixture.detectChanges();
-
-      expect(el.querySelector(".tedi-time-field__clear")).toBeNull();
-    });
-
     it("should clear value on click", () => {
       const onChange = jest.fn();
       component.registerOnChange(onChange);
@@ -1093,6 +1085,21 @@ describe("TimeFieldComponent with ReactiveFormsModule", () => {
     fixture.detectChanges();
 
     expect(host.control.value).toBe("15:45");
+  });
+
+  it("should hide the clear button when FormControl is disabled", () => {
+    host.control.setValue("14:30");
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(".tedi-time-field__clear"),
+    ).not.toBeNull();
+
+    host.control.disable();
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector(".tedi-time-field__clear"),
+    ).toBeNull();
   });
 
   it("should disable component when FormControl is disabled", () => {
