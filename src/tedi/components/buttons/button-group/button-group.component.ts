@@ -26,8 +26,8 @@ import { DropdownComponent } from "../../overlay/dropdown/dropdown.component";
 import { DropdownTriggerDirective } from "../../overlay/dropdown/dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "../../overlay/dropdown/dropdown-content/dropdown-content.component";
 import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
-import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
+import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
+import { OptionContentLabelComponent } from "../../helpers/option-content/option-content-label.component";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 
 export type ButtonGroupDropdownLabelMode = "selected" | "static";
@@ -42,8 +42,8 @@ export type ButtonGroupDropdownLabelMode = "selected" | "static";
     DropdownTriggerDirective,
     DropdownContentComponent,
     DropdownItemComponent,
-    DropdownItemValueComponent,
-    DropdownItemValueLabelComponent,
+    OptionContentComponent,
+    OptionContentLabelComponent,
   ],
   templateUrl: "./button-group.component.html",
   styleUrl: "./button-group.component.scss",
