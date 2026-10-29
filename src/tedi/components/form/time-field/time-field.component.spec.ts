@@ -384,6 +384,16 @@ describe("TimeFieldComponent", () => {
       expect(input.type).toBe("time");
     });
 
+    it("should set the native step from minuteStep", () => {
+      const input = el.querySelector(
+        ".tedi-time-field__input",
+      ) as HTMLInputElement;
+      expect(input.hasAttribute("step")).toBe(false);
+      fixture.componentRef.setInput("minuteStep", 15);
+      fixture.detectChanges();
+      expect(input.getAttribute("step")).toBe("900");
+    });
+
     it("should render trigger button without popover", () => {
       expect(el.querySelector("tedi-popover")).toBeNull();
       const btn = el.querySelector(

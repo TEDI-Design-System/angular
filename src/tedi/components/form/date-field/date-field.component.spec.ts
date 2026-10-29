@@ -367,6 +367,20 @@ describe("DateFieldComponent", () => {
       expect(input.type).toBe("date");
     });
 
+    it("bounds the native input by minDate and maxDate", () => {
+      const { el } = createField({
+        useNativePicker: true,
+        minDate: new Date(2026, 4, 1),
+        maxDate: new Date(2026, 4, 31),
+      });
+      const input = el.querySelector(
+        "input.tedi-date-input__input",
+      ) as HTMLInputElement;
+      expect(input.getAttribute("min")).toBe("2026-05-01");
+      expect(input.getAttribute("max")).toBe("2026-05-31");
+      expect(input.hasAttribute("step")).toBe(false);
+    });
+
     it("does NOT switch to native picker when mode is multiple", () => {
       const { el } = createField({
         useNativePicker: true,
@@ -660,6 +674,42 @@ describe("DateFieldComponent", () => {
     it("does nothing on attach when the calendar is not present", () => {
       const { component } = createField();
       expect(() => component.handleOverlayAttached()).not.toThrow();
+    });
+
+    it("caps the popover to the roomier side of the trigger so a tall calendar scrolls", () => {
+      const { fixture, component } = createField();
+      openOverlay(component);
+      fixture.detectChanges();
+
+      jest
+        .spyOn(component["hostEl"].nativeElement, "getBoundingClientRect")
+        .mockReturnValue({ top: 600, bottom: 640 } as DOMRect);
+      const originalHeight = window.innerHeight;
+      Object.defineProperty(window, "innerHeight", {
+        value: 800,
+        configurable: true,
+      });
+
+      try {
+        component.handleOverlayAttached();
+        fixture.detectChanges();
+
+        // More room above (600 - 8) than below (800 - 640 - 8).
+        expect(component.overlayMaxHeight()).toBe(592);
+
+        const overlay = document.querySelector<HTMLElement>(
+          ".tedi-date-field__overlay",
+        );
+        expect(overlay?.style.maxHeight).toBe("592px");
+      } finally {
+        Object.defineProperty(window, "innerHeight", {
+          value: originalHeight,
+          configurable: true,
+        });
+      }
+
+      component.overlayOpen.set(false);
+      fixture.detectChanges();
     });
 
     it("moves DOM focus into the calendar when opened via the icon (real flow)", () => {
