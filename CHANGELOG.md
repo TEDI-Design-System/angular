@@ -1,3 +1,57 @@
+# [9.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.1...angular-9.0.0) (2026-10-29)
+
+
+### Bug Fixes
+
+* **date-field:** allow clearing the value in readOnly mode [#726](https://github.com/TEDI-Design-System/angular/issues/726) ([#728](https://github.com/TEDI-Design-System/angular/issues/728)) ([9eca712](https://github.com/TEDI-Design-System/angular/commit/9eca712e8f413e33b94134d2e5b80da8cbcacbc8))
+* **dropdown:** keep checkbox trigger semantics and open on Enter [#669](https://github.com/TEDI-Design-System/angular/issues/669) ([#703](https://github.com/TEDI-Design-System/angular/issues/703)) ([5f7a52c](https://github.com/TEDI-Design-System/angular/commit/5f7a52c7c9d1f233af14aa2efb73d756f1e408c8))
+* **modal:** let modals confirm before closing [#674](https://github.com/TEDI-Design-System/angular/issues/674) ([#709](https://github.com/TEDI-Design-System/angular/issues/709)) ([393e050](https://github.com/TEDI-Design-System/angular/commit/393e05048d2ac9eefd8984436cd8998efb81b52b))
+* **modal:** support left and right footer content [#668](https://github.com/TEDI-Design-System/angular/issues/668) ([#711](https://github.com/TEDI-Design-System/angular/issues/711)) ([d0bd5da](https://github.com/TEDI-Design-System/angular/commit/d0bd5dade98ef910843c817353ad2e4c918b4377))
+* **select:** remove core's focus outline from the trigger [#713](https://github.com/TEDI-Design-System/angular/issues/713) ([#724](https://github.com/TEDI-Design-System/angular/issues/724)) ([0c7ade0](https://github.com/TEDI-Design-System/angular/commit/0c7ade05ec110d9df59e696b59b773b40b1d1e9f))
+* **table:** show custom pagination results in both paginators [#667](https://github.com/TEDI-Design-System/angular/issues/667) ([#720](https://github.com/TEDI-Design-System/angular/issues/720)) ([bdf68ea](https://github.com/TEDI-Design-System/angular/commit/bdf68eab049c5ef8e043e9f1bd3e1b32242dc38c))
+* **time-picker:** correct item height and ignore engine-driven scrolls [#678](https://github.com/TEDI-Design-System/angular/issues/678) ([#681](https://github.com/TEDI-Design-System/angular/issues/681)) ([ee0d698](https://github.com/TEDI-Design-System/angular/commit/ee0d6983754a1180d0f8024da1c43bc92aedbb70))
+
+
+### Code Refactoring
+
+* **dropdown-item-value:** rename to OptionContent [#491](https://github.com/TEDI-Design-System/angular/issues/491) ([#741](https://github.com/TEDI-Design-System/angular/issues/741)) ([c6adb30](https://github.com/TEDI-Design-System/angular/commit/c6adb3039dd0a22cb003321be6a6886f6818b634))
+
+
+### Features
+
+* **carousel:** add floating buttons and bounded navigation [#528](https://github.com/TEDI-Design-System/angular/issues/528) ([#732](https://github.com/TEDI-Design-System/angular/issues/732)) ([d36eddd](https://github.com/TEDI-Design-System/angular/commit/d36eddd55ae5e80ba4ed14f558658c405f1fba55))
+* **carousel:** add swipeThreshold input and improve swipe navigation [#187](https://github.com/TEDI-Design-System/angular/issues/187) ([#733](https://github.com/TEDI-Design-System/angular/issues/733)) ([834fa55](https://github.com/TEDI-Design-System/angular/commit/834fa55bbaf181bfeb284c9d7176fac3177cdb8d))
+* **checkbox,radio:** apply new variables to Checkbox and Radio [#784](https://github.com/TEDI-Design-System/angular/issues/784) ([#808](https://github.com/TEDI-Design-System/angular/issues/808)) ([92eaf7b](https://github.com/TEDI-Design-System/angular/commit/92eaf7b3a9249b4bb7bc834b3cc069b0016b4fb5))
+* **form-field,date-field,time-field:** clearable set once on the form field [#572](https://github.com/TEDI-Design-System/angular/issues/572) ([#573](https://github.com/TEDI-Design-System/angular/issues/573)) ([8c98710](https://github.com/TEDI-Design-System/angular/commit/8c98710e1afecefe2518a53bd9f8c6dc6934631d))
+* **form-field,select,search:** add clear button interaction option [#569](https://github.com/TEDI-Design-System/angular/issues/569) ([#737](https://github.com/TEDI-Design-System/angular/issues/737)) ([4f0f119](https://github.com/TEDI-Design-System/angular/commit/4f0f1197df899581d853626a15bce6f18c104bd1))
+* **icon:** Allow Loading A Single Icon Font Style [#774](https://github.com/TEDI-Design-System/angular/issues/774) ([#775](https://github.com/TEDI-Design-System/angular/issues/775)) ([74f906c](https://github.com/TEDI-Design-System/angular/commit/74f906cd8e558e305a50ef3e412f8c2934fcd8f8))
+* **input-group:** mark community InputGroup as deprecated [#762](https://github.com/TEDI-Design-System/angular/issues/762) ([#771](https://github.com/TEDI-Design-System/angular/issues/771)) ([8824272](https://github.com/TEDI-Design-System/angular/commit/8824272c4c98d3c3586fdcff4960cd62e627f785))
+* **popover:** add offset input [#802](https://github.com/TEDI-Design-System/angular/issues/802) ([#803](https://github.com/TEDI-Design-System/angular/issues/803)) ([710ef72](https://github.com/TEDI-Design-System/angular/commit/710ef722f50c1e600fec6a8444e8c8965fb092e3))
+* **print:** add tediPrint directive [#651](https://github.com/TEDI-Design-System/angular/issues/651) ([#671](https://github.com/TEDI-Design-System/angular/issues/671)) ([8f2877f](https://github.com/TEDI-Design-System/angular/commit/8f2877f843e916a44635ce550dcf3839deb4c1f0))
+* **select:** clearable defaults to true [#745](https://github.com/TEDI-Design-System/angular/issues/745) ([#753](https://github.com/TEDI-Design-System/angular/issues/753)) ([78c907a](https://github.com/TEDI-Design-System/angular/commit/78c907a3dd9bd2fba7d6bbc0d182544f4244d728))
+* **table:** allow an accessible name on tables with no caption [#656](https://github.com/TEDI-Design-System/angular/issues/656) ([#721](https://github.com/TEDI-Design-System/angular/issues/721)) ([73712e9](https://github.com/TEDI-Design-System/angular/commit/73712e91956c8c07471c59c8df337cdf21dabb59))
+* **table:** allow header alignment separate from column cells [#670](https://github.com/TEDI-Design-System/angular/issues/670) ([#718](https://github.com/TEDI-Design-System/angular/issues/718)) ([6165dcc](https://github.com/TEDI-Design-System/angular/commit/6165dcce746312c765b1da16c6754f99238b91a0))
+* **textarea:** make Textarea clearable and drop the maxRows default [#751](https://github.com/TEDI-Design-System/angular/issues/751) ([#811](https://github.com/TEDI-Design-System/angular/issues/811)) ([31e7f13](https://github.com/TEDI-Design-System/angular/commit/31e7f13d1bc1348b97183240ac01208116fbe541))
+
+
+### BREAKING CHANGES
+
+* **textarea:** tedi-textarea now shows the form field's clear button once it has a value. Pass
+[clearable]="false" on the form field to opt out.
+* **textarea:** tedi-textarea's maxRows no longer defaults to 12, so an autoGrow textarea grows
+without a row limit. Set maxRows or maxHeight to cap it.
+* **dropdown-item-value:** DropdownItemValue is now OptionContent.
+Update Angular imports, component/label/meta elements, and custom CSS selectors.
+* **select:** tedi-select's clearable now defaults to true, so selects
+that showed no clear button now show one once they have a value. Pass
+[clearable]="false" to opt out.
+* **select:** an option with value '' now leaves the select empty
+instead of showing as selected. Use showSelectAll for "select all" in a
+multiselect, or the placeholder to label the empty state.
+* **form-field,date-field,time-field:** tedi-form-field's clearable now defaults to true, so text
+fields that previously showed no clear button now show one once they have a
+value. Textareas never show one. Pass [clearable]="false" to opt out.
+
 # [9.0.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.13...angular-9.0.0-rc.14) (2026-10-29)
 
 
