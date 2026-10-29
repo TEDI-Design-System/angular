@@ -8,7 +8,10 @@ import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.toke
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
 import { TextFieldComponent } from "../text-field/text-field.component";
-import { InlineEditControlDirective } from "./inline-edit-control.directive";
+import {
+  InlineEditControlDirective,
+  InlineEditValueDirective,
+} from "./inline-edit-control.directive";
 import { InlineEditComponent } from "./inline-edit.component";
 
 class TranslationMock {
@@ -35,9 +38,8 @@ class TranslationMock {
       [size]="size()"
       [disabled]="disabled()"
       [invalid]="invalid()"
-      [hideEditIcon]="hideEditIcon()"
       [readOnly]="readOnly()"
-      [fullWidth]="fullWidth()"
+      [contentWidth]="contentWidth()"
       [editIconPosition]="editIconPosition()"
       [closeOnEnter]="closeOnEnter()"
       [closeOnEscape]="closeOnEscape()"
@@ -62,9 +64,8 @@ class TestHostComponent {
   size = signal<"default" | "small">("default");
   disabled = signal(false);
   invalid = signal(false);
-  hideEditIcon = signal(false);
   readOnly = signal(false);
-  fullWidth = signal(false);
+  contentWidth = signal(false);
   editIconPosition = signal<"inline" | "end">("inline");
   closeOnEnter = signal(true);
   closeOnEscape = signal(true);
@@ -220,10 +221,14 @@ describe("InlineEditComponent", () => {
       expect(host.cancels).toBe(0);
     });
 
-    it("shows the edit icon by default and hides it on request", () => {
-      expect(dom().querySelector("tedi-icon")).toBeTruthy();
+    it("shows the edit icon", () => {
+      expect(dom().querySelector("tedi-icon")?.textContent?.trim()).toBe(
+        "edit",
+      );
+    });
 
-      host.hideEditIcon.set(true);
+    it("hides the edit icon while invalid", () => {
+      host.invalid.set(true);
       fixture.detectChanges();
 
       expect(dom().querySelector("tedi-icon")).toBeNull();
@@ -249,13 +254,13 @@ describe("InlineEditComponent", () => {
       expect(trigger()!.disabled).toBe(true);
     });
 
-    it("reflects full width only when it is turned on", () => {
-      expect(root().classList).not.toContain("tedi-inline-edit--full-width");
+    it("fills its container until content width is turned on", () => {
+      expect(root().classList).not.toContain("tedi-inline-edit--content-width");
 
-      host.fullWidth.set(true);
+      host.contentWidth.set(true);
       fixture.detectChanges();
 
-      expect(root().classList).toContain("tedi-inline-edit--full-width");
+      expect(root().classList).toContain("tedi-inline-edit--content-width");
     });
   });
 
@@ -554,6 +559,85 @@ describe("InlineEditComponent", () => {
       expect(host.editing()).toBe(true);
       expect(host.commits).toBe(0);
     });
+  });
+});
+
+describe("InlineEditComponent custom read view", () => {
+  @Component({
+    standalone: true,
+    imports: [
+      InlineEditComponent,
+      InlineEditControlDirective,
+      InlineEditValueDirective,
+      TextFieldComponent,
+    ],
+    template: `
+      <tedi-inline-edit displayValue="done" label="Olek">
+        <ng-template tediInlineEditValue>
+          <b class="custom-value">Lõpetatud</b>
+        </ng-template>
+        <ng-template tediInlineEditControl>
+          <input tedi-text-field value="done" aria-label="Olek" />
+        </ng-template>
+      </tedi-inline-edit>
+    `,
+  })
+  class ValueHostComponent {}
+
+  it("renders the value template instead of displayValue", async () => {
+    await TestBed.configureTestingModule({
+      imports: [ValueHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(ValueHostComponent);
+    fixture.detectChanges();
+
+    const dom = fixture.nativeElement as HTMLElement;
+    expect(dom.querySelector(".custom-value")!.textContent).toBe("Lõpetatud");
+    expect(
+      dom.querySelector(".tedi-inline-edit__value")!.textContent,
+    ).not.toContain("done");
+  });
+});
+
+describe("InlineEditComponent defaults", () => {
+  @Component({
+    standalone: true,
+    imports: [
+      InlineEditComponent,
+      InlineEditControlDirective,
+      TextFieldComponent,
+    ],
+    template: `
+      <tedi-inline-edit displayValue="Mari" label="Nimi">
+        <ng-template tediInlineEditControl>
+          <input tedi-text-field value="Mari" />
+        </ng-template>
+      </tedi-inline-edit>
+    `,
+  })
+  class DefaultsHostComponent {}
+
+  it("puts the edit icon at the end of the row", async () => {
+    await TestBed.configureTestingModule({
+      imports: [DefaultsHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(DefaultsHostComponent);
+    fixture.detectChanges();
+
+    const root = (fixture.nativeElement as HTMLElement).querySelector(
+      "tedi-inline-edit",
+    )!;
+    expect(root.classList).toContain("tedi-inline-edit--icon-end");
   });
 });
 

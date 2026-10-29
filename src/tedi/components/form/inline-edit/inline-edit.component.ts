@@ -26,7 +26,10 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
-import { InlineEditControlDirective } from "./inline-edit-control.directive";
+import {
+  InlineEditControlDirective,
+  InlineEditValueDirective,
+} from "./inline-edit-control.directive";
 
 let inlineEditIdCounter = 0;
 
@@ -61,7 +64,7 @@ export type InlineEditExitReason = "commit" | "cancel";
   host: {
     class: "tedi-inline-edit",
     "[class.tedi-inline-edit--small]": "size() === 'small'",
-    "[class.tedi-inline-edit--full-width]": "fullWidth()",
+    "[class.tedi-inline-edit--content-width]": "contentWidth()",
     "[class.tedi-inline-edit--icon-end]": "editIconPosition() === 'end'",
     "[class.tedi-inline-edit--invalid]": "invalid()",
     "[class.tedi-inline-edit--editing]": "editing()",
@@ -94,36 +97,33 @@ export class InlineEditComponent {
    * Text size and row spacing. The editor defaults to `small` for either
    * variant unless it sets its own size.
    *
-   * Both sizes use increased vertical padding on mobile. Use `fullWidth`
-   * to make the entire row tappable.
+   * Both sizes use increased vertical padding on mobile; the row fills its
+   * container, so the whole row is tappable.
    * @default "default"
    */
   readonly size = input<InlineEditSize>("default");
   /**
-   * Renders the value as static text with no edit affordance — the read-only
-   * equivalent of a text group. Differs from `disabled`, which keeps the
-   * greyed trigger and icon for transient states such as saving.
+   * Renders the value as plain text with no edit affordance, keeping the row's
+   * inset so a fixed value lines up among editable ones. For a block that is
+   * entirely read-only, use a text group instead. Differs from `disabled`,
+   * which keeps the greyed trigger and icon for transient states such as saving.
    * @default false
    */
   readonly readOnly = input(false, { transform: booleanAttribute });
   /**
-   * Hides the edit icon. Use only when another visible cue identifies the
-   * value as editable. The read trigger remains a button.
+   * Places the edit icon at the end of the row (`end`), lining icons up down a
+   * column, or straight after the value (`inline`). Hidden while the row is
+   * invalid.
+   * @default "end"
+   */
+  readonly editIconPosition = input<InlineEditIconPosition>("end");
+  /**
+   * Sizes the row to its value rather than filling its container. The row then
+   * changes width when the editor opens, because the control brings its own
+   * width — use it only for a value edited inside running text.
    * @default false
    */
-  readonly hideEditIcon = input(false, { transform: booleanAttribute });
-  /**
-   * Places the edit icon after the value (`inline`) or at the end of the
-   * row (`end`). Use `end` with `fullWidth` to align icons across rows.
-   * @default "inline"
-   */
-  readonly editIconPosition = input<InlineEditIconPosition>("inline");
-  /**
-   * Makes the read trigger and editor fill their container rather than sizing
-   * to their content.
-   * @default false
-   */
-  readonly fullWidth = input(false, { transform: booleanAttribute });
+  readonly contentWidth = input(false, { transform: booleanAttribute });
   /**
    * Toggles the editor. Supports `[(editing)]`.
    * Entry emits `editStart`. The control receives focus unless initially open.
@@ -164,7 +164,8 @@ export class InlineEditComponent {
   readonly closeOnEscape = input(true, { transform: booleanAttribute });
   /**
    * Commits when focus leaves the editor. Linked overlays and CDK overlay
-   * panes created during the edit count as part of the editor.
+   * panes created during the edit count as part of the editor; anywhere else,
+   * including back into a surrounding modal, commits.
    * @default true
    */
   readonly closeOnBlur = input(true, { transform: booleanAttribute });
@@ -194,6 +195,7 @@ export class InlineEditComponent {
   private swappingToControl = false;
 
   private readonly controlTemplate = contentChild(InlineEditControlDirective);
+  private readonly valueDirective = contentChild(InlineEditValueDirective);
   private readonly feedback = contentChild(FeedbackTextComponent);
   private readonly editorRef = viewChild<ElementRef<HTMLElement>>("editor");
   private readonly triggerRef =
@@ -219,6 +221,9 @@ export class InlineEditComponent {
   readonly hasFeedback = computed(() => this.feedback() !== undefined);
 
   readonly template = computed(() => this.controlTemplate()?.template);
+
+  /** Optional custom read view; falls back to `displayValue` as text. */
+  readonly valueTemplate = computed(() => this.valueDirective()?.template);
 
   readonly hasValue = computed(() => this.displayValue().trim().length > 0);
 
