@@ -1,8 +1,8 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { LabelComponent } from "./label.component";
-import { FormFieldComponent } from "../form-field/form-field.component";
-import { TextFieldComponent } from "../text-field/text-field.component";
+import { FormFieldComponent } from "../../form/form-field/form-field.component";
+import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 describe("LabelComponent", () => {

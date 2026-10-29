@@ -74,7 +74,11 @@ export class DateInputComponent implements AfterViewChecked {
   readonly multiRow = input<boolean>(true);
   /** Which end the tag labels truncate from when they don't fit (`false` = no truncation). */
   readonly ellipsis = input<TagEllipsis>(false);
-  /** Whether the tags show a remove (close) button. */
+  /**
+   * Whether the tags show a remove (close) button. Independent of `readOnly`,
+   * which only locks the text input — the parent decides whether the value can
+   * still change (e.g. through the calendar).
+   */
   readonly removable = input<boolean>(true);
   readonly placeholder = input<string>("");
   readonly disabled = input<boolean>(false);
@@ -84,6 +88,7 @@ export class DateInputComponent implements AfterViewChecked {
   readonly iconDisabled = input<boolean>(false);
   readonly useNativePicker = input<boolean>(false);
   readonly nativeIsoValue = input<string>("");
+  /** Whether to show the clear button. Independent of `readOnly`, like `removable`. */
   readonly clearable = input<boolean>(false);
 
   readonly inputChange = output<string>();
@@ -167,7 +172,6 @@ export class DateInputComponent implements AfterViewChecked {
     () =>
       this.clearable() &&
       !this.disabled() &&
-      !this.readOnly() &&
       (this.inputValue() !== "" || this.hasTags()),
   );
 
@@ -197,12 +201,12 @@ export class DateInputComponent implements AfterViewChecked {
   }
 
   handleTagRemove(id: string): void {
-    if (this.disabled() || this.readOnly()) return;
+    if (this.disabled()) return;
     this.tagRemove.emit(id);
   }
 
   handleClear(): void {
-    if (this.disabled() || this.readOnly()) return;
+    if (this.disabled()) return;
     this.clear.emit();
   }
 

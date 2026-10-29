@@ -15,7 +15,7 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.20.28?node-id=26296-151359&m=dev" target="_BLANK">Figma ↗</a><br/>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.76.92?node-id=27896-171684&m=dev" target="_BLANK">Figma ↗</a><br/>
  */
 
 export default {
@@ -96,6 +96,37 @@ export default {
         defaultValue: { summary: "400" },
       },
     },
+    swipeThreshold: {
+      description:
+        "How far a drag must go to move on, as a fraction (0–1) of the distance to the next position, which is one slide except for a shorter final step when not looping. Each position fully dragged past counts; a quick flick moves one position.",
+      control: {
+        type: "number",
+        min: 0,
+        max: 1,
+        step: 0.05,
+      },
+      table: {
+        category: "Carousel Content",
+        type: {
+          summary: "number",
+        },
+        defaultValue: { summary: "0.3" },
+      },
+    },
+    loop: {
+      description:
+        "Whether navigation wraps around at the ends. When `false`, it stops at the first and last reachable positions and disables the corresponding arrow.",
+      control: {
+        type: "boolean",
+      },
+      table: {
+        category: "Carousel Content",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: { summary: "true" },
+      },
+    },
     ariaLabel: {
       name: "ariaLabel",
       description:
@@ -104,6 +135,19 @@ export default {
       table: {
         category: "Carousel Content",
         type: { summary: "string" },
+      },
+    },
+    overlay: {
+      description:
+        "Shows floating navigation buttons over the slides. Place navigation directly inside `tedi-carousel`, outside the header and footer.",
+      // Documented only: without `overlay`, a navigation placed directly inside the carousel has no designed layout.
+      control: false,
+      table: {
+        category: "Carousel Navigation",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: { summary: "false" },
       },
     },
     withArrows: {
@@ -141,6 +185,8 @@ type CarouselType = CarouselComponent & {
   gap: BreakpointInput<number>;
   fade: boolean;
   transitionMs: number;
+  swipeThreshold: number;
+  loop: boolean;
   withArrows: boolean;
   variant: CarouselIndicatorsVariant;
 };
@@ -151,6 +197,7 @@ export const Default: StoryObj<CarouselType> = {
     gap: { xs: 16 },
     fade: false,
     transitionMs: 400,
+    swipeThreshold: 0.3,
     withArrows: false,
     variant: "dots",
   },
@@ -165,7 +212,7 @@ export const Default: StoryObj<CarouselType> = {
           </div>
           <tedi-carousel-navigation />
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView" [gap]="gap" [fade]="fade">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [gap]="gap" [fade]="fade" [swipeThreshold]="swipeThreshold">
          @for (i of [0, 1, 2, 3, 4]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -370,6 +417,44 @@ export const CombinationsTopNavigationBottomDots: StoryObj<CarouselType> = {
             </ng-template>
           }
         </tedi-carousel-content>
+        <tedi-carousel-footer style="justify-content: center;">
+          <tedi-carousel-indicators />
+        </tedi-carousel-footer>
+      </tedi-carousel>
+    `,
+  }),
+};
+
+/**
+ * Add `overlay` to `tedi-carousel-navigation` and place it directly inside `tedi-carousel`
+ * to show the arrows as floating buttons over the slides.
+ */
+export const FloatingButtons: StoryObj<CarouselType> = {
+  name: "Floating buttons",
+  args: {
+    slidesPerView: { xs: 1, sm: 2, md: 2.5, lg: 3, xl: 3.5, xxl: 4 },
+    loop: true,
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-carousel>
+        <tedi-carousel-header>
+          <h2 tedi-text modifiers="h1">Title</h2>
+        </tedi-carousel-header>
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [loop]="loop">
+          @for (i of [0, 1, 2, 3, 4]; track $index) {
+            <ng-template tediCarouselSlide>
+              <div
+                style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--general-border-primary); border-radius: 4px; height: 10rem; padding: 1rem 3.5rem; flex: 1;"
+              >
+                <tedi-icon name="spa" [size]="36" color="tertiary" />
+                <div tedi-text color="secondary" style="text-align: center;">Replace with your own content</div>
+              </div>
+            </ng-template>
+          }
+        </tedi-carousel-content>
+        <tedi-carousel-navigation overlay />
         <tedi-carousel-footer style="justify-content: center;">
           <tedi-carousel-indicators />
         </tedi-carousel-footer>

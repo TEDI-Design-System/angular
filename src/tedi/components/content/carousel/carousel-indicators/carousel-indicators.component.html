@@ -4,6 +4,7 @@
     type="button"
     variant="neutral"
     [attr.aria-label]="translationService.track('carousel.moveBack')()"
+    [disabled]="!carousel.carouselContent().canPrev()"
     (click)="handlePrev()"
   >
     <tedi-icon name="arrow_back" [size]="18" />
@@ -22,7 +23,7 @@
       (click)="handleIndicatorClick(indicator.index)"
     ></button>
   }
-} @else if (activeSlideNumber()) {
+} @else if (indicatorsArray().length) {
   <div>
     <b tedi-text color="brand">{{ activeSlideNumber() }}</b>
     <span tedi-text color="tertiary"> / {{ indicatorsArray().length }}</span>
@@ -35,6 +36,7 @@
     type="button"
     variant="neutral"
     [attr.aria-label]="translationService.track('carousel.moveForward')()"
+    [disabled]="!carousel.carouselContent().canNext()"
     (click)="handleNext()"
   >
     <tedi-icon name="arrow_forward" [size]="18" />

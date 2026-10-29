@@ -48,7 +48,7 @@ import {
   InputSize,
 } from "../form-field/form-field.component";
 import { TextFieldComponent } from "../text-field/text-field.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { SearchSuggestionComponent } from "./search-suggestion.component";
 import {
@@ -160,6 +160,12 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
    * @default true
    */
   clearable = input<boolean>(true);
+  /**
+   * Show the clear button only while the filled search field is hovered or focused.
+   * Requires `clearable`.
+   * @default false
+   */
+  showClearOnInteraction = input<boolean>(false);
   /**
    * Icon shown inside the input. Ignored when `button` is set.
    * @default "search"

@@ -10,7 +10,7 @@
   [mode]="mode()"
   [multiRow]="multiRow()"
   [ellipsis]="tagEllipsis()"
-  [removable]="isTagRemovable()"
+  [removable]="isTagRemovable() && valueEditable()"
   [placeholder]="effectivePlaceholder()"
   [disabled]="fieldDisabled()"
   [readOnly]="readOnly() || inputIsTrigger()"

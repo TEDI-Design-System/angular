@@ -1,4 +1,5 @@
 import {
+  ErrorHandler,
   Injectable,
   Injector,
   afterNextRender,
@@ -28,6 +29,7 @@ export class ModalService {
   private readonly overlay = inject(Overlay);
   private readonly injector = inject(Injector);
   private readonly idGenerator = inject(_IdGenerator);
+  private readonly errorHandler = inject(ErrorHandler);
 
   /**
    * Open a modal dialog with the given component as content.
@@ -74,6 +76,8 @@ export class ModalService {
     );
     const isPresetWidth = WIDTH_PRESETS.includes(width);
 
+    let modalRef!: ModalRef<R>;
+
     const dialogRef = this.dialog.open<R, D>(component, {
       data,
       panelClass: panelClasses,
@@ -88,7 +92,10 @@ export class ModalService {
       positionStrategy: this.buildPositionStrategy(position, scrollBehavior),
       scrollStrategy: this.overlay.scrollStrategies.block(),
       providers: (ref) => [
-        { provide: ModalRef, useValue: new ModalRef<R>(ref) },
+        {
+          provide: ModalRef,
+          useValue: (modalRef = new ModalRef<R>(ref, this.errorHandler)),
+        },
         { provide: MODAL_DATA, useValue: data },
         { provide: MODAL_SIZE, useValue: signal(size) },
       ],
@@ -107,6 +114,7 @@ export class ModalService {
 
     this.setupDialogBehavior(
       dialogRef,
+      modalRef,
       scrollBehavior,
       closeOnBackdropClick,
       closeOnEscape,
@@ -116,10 +124,10 @@ export class ModalService {
       this.labelFromHeading(dialogRef);
     }
 
-    return new ModalRef<R>(dialogRef);
+    return modalRef;
   }
 
-  /** Close all open modals. */
+  /** Close all open modals, ignoring `canClose`. */
   closeAll(): void {
     this.dialog.closeAll();
   }
@@ -137,8 +145,9 @@ export class ModalService {
     afterNextRender(
       () => {
         // The container, not the pane, is what carries role="dialog".
+        // The pane is null if the modal closed before rendering.
         const container =
-          dialogRef.overlayRef.overlayElement.querySelector<HTMLElement>(
+          dialogRef.overlayRef.overlayElement?.querySelector<HTMLElement>(
             "cdk-dialog-container",
           );
 
@@ -191,6 +200,7 @@ export class ModalService {
 
   private setupDialogBehavior<R>(
     dialogRef: DialogRef<R>,
+    modalRef: ModalRef<R>,
     scrollBehavior: ModalScrollBehavior,
     closeOnBackdropClick: boolean,
     closeOnEscape: boolean,
@@ -202,13 +212,15 @@ export class ModalService {
     }
 
     if (closeOnBackdropClick) {
-      dialogRef.backdropClick.subscribe(() => dialogRef.close());
+      dialogRef.backdropClick.subscribe(() =>
+        modalRef.requestClose("backdrop"),
+      );
     }
 
     if (closeOnEscape) {
       dialogRef.keydownEvents.subscribe((event) => {
         if (event.key === "Escape") {
-          dialogRef.close();
+          modalRef.requestClose("escape");
         }
       });
     }

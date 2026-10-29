@@ -12,7 +12,7 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { _IdGenerator } from "@angular/cdk/a11y";
-import { LabelComponent } from "../../form/label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
 
 export type ProgressBarSize = "default" | "small";

@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { OverlayContainer } from "@angular/cdk/overlay";
 import { LabelRowComponent } from "./label-row.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 import { TediTranslationService } from "../../../services";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";

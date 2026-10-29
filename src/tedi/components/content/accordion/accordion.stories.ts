@@ -8,7 +8,7 @@ import { TextComponent } from "../../base/text/text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
-import { LabelComponent } from "../../form/label/label.component";
+import { LabelComponent } from "../label/label.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
@@ -1175,7 +1175,7 @@ hasn't met yet (incomplete prerequisites, missing permissions, etc.).
 
         .step-number--disabled {
           border-color: var(--stepper-step-disabled-border);
-          background: var(--stepper-step-disabled-bg);
+          background: var(--stepper-step-disabled-background);
         }
 
         .step-body {

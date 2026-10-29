@@ -93,10 +93,10 @@ describe("ModalHeaderComponent (service mode)", () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let host: TestHostComponent;
   let component: ModalHeaderComponent;
-  let mockModalRef: { close: jest.Mock };
+  let mockModalRef: { requestClose: jest.Mock };
 
   beforeEach(() => {
-    mockModalRef = { close: jest.fn() };
+    mockModalRef = { requestClose: jest.fn() };
 
     TestBed.configureTestingModule({
       imports: [TestHostComponent],
@@ -116,6 +116,6 @@ describe("ModalHeaderComponent (service mode)", () => {
 
   it("should close via ModalRef when in service mode", () => {
     component.closeModal();
-    expect(mockModalRef.close).toHaveBeenCalled();
+    expect(mockModalRef.requestClose).toHaveBeenCalledWith("close-button");
   });
 });

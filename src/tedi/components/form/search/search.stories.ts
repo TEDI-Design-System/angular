@@ -19,9 +19,9 @@ import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { TextComponent } from "../../base/text/text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
-import { DropdownItemValueComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-label.component";
-import { DropdownItemValueMetaComponent } from "../../overlay/dropdown/dropdown-item-value/dropdown-item-value-meta.component";
+import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
+import { OptionContentLabelComponent } from "../../helpers/option-content/option-content-label.component";
+import { OptionContentMetaComponent } from "../../helpers/option-content/option-content-meta.component";
 
 const SIZES = ["small", "default", "large"] as const;
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
@@ -129,9 +129,9 @@ export default {
         SearchFooterActionsComponent,
         SeparatorComponent,
         ButtonComponent,
-        DropdownItemValueComponent,
-        DropdownItemValueLabelComponent,
-        DropdownItemValueMetaComponent,
+        OptionContentComponent,
+        OptionContentLabelComponent,
+        OptionContentMetaComponent,
       ],
     }),
   ],
@@ -181,6 +181,16 @@ export default {
         category: "inputs",
         type: { summary: "boolean" },
         defaultValue: { summary: "true" },
+      },
+    },
+    showClearOnInteraction: {
+      description:
+        "Show the clear button only on hover or focus when the search field has a value. Requires clearable.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
       },
     },
     searchIcon: {
@@ -481,6 +491,20 @@ export const Clearable: Story = {
   }),
 };
 
+/** The clear button appears while the filled search field is hovered or focused. */
+export const ClearButtonOnInteraction: Story = {
+  render: () => ({
+    template: `
+      <tedi-search
+        inputId="search-clear-on-interaction"
+        label="Otsing"
+        value="Lorem ipsum"
+        [showClearOnInteraction]="true"
+      />
+    `,
+  }),
+};
+
 /**
  * Clearable field paired with a search button — the clear (×) empties the field;
  * the button runs the search.
@@ -586,10 +610,10 @@ export const AutocompleteCustomRow: Story = {
           (valueChange)="value.set($event)"
         >
           <ng-template tediSearchSuggestion let-item>
-            <tedi-dropdown-item-value>
-              <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>{{ item.code }}</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+            <tedi-option-content>
+              <tedi-option-content-label>{{ item.name }}</tedi-option-content-label>
+              <tedi-option-content-meta>{{ item.code }}</tedi-option-content-meta>
+            </tedi-option-content>
           </ng-template>
         </tedi-search>
       `,
@@ -602,10 +626,10 @@ export const AutocompleteCustomRow: Story = {
         code: `<tedi-search inputId="search" label="Otsi" bindLabel="name" [minQueryLength]="3"
   [value]="value()" [suggestions]="suggestions()" (valueChange)="value.set($event)">
   <ng-template tediSearchSuggestion let-item>
-    <tedi-dropdown-item-value>
-      <tedi-dropdown-item-value-label>{{ item.name }}</tedi-dropdown-item-value-label>
-      <tedi-dropdown-item-value-meta>{{ item.code }}</tedi-dropdown-item-value-meta>
-    </tedi-dropdown-item-value>
+    <tedi-option-content>
+      <tedi-option-content-label>{{ item.name }}</tedi-option-content-label>
+      <tedi-option-content-meta>{{ item.code }}</tedi-option-content-meta>
+    </tedi-option-content>
   </ng-template>
 </tedi-search>`,
       },

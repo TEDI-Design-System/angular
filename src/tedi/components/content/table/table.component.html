@@ -7,7 +7,7 @@
     [id]="liveRegionId"
     aria-live="polite"
     aria-atomic="true"
-    class="tedi-table__sr-only"
+    class="sr-only"
   ></div>
 }
 
@@ -70,6 +70,8 @@
     #tableElement
     class="tedi-table__table"
     [attr.id]="id() || null"
+    [attr.aria-label]="ariaLabel() || null"
+    [attr.aria-labelledby]="ariaLabelledby() || null"
     [attr.aria-rowcount]="ariaRowCount()"
     [attr.aria-colcount]="leafColumnCount() > 0 ? leafColumnCount() : null"
   >
@@ -104,6 +106,7 @@
               @let ariaSort = getHeaderAriaSort(header.column);
               @let srHeaderLabel = getSrOnlyHeaderLabel(header.column);
               @let rowSpan = getHeaderRowSpan(header, rowIndex);
+              @let headerAlign = meta?.headerAlign ?? meta?.align;
               <th
                 scope="col"
                 cdkDrag
@@ -120,8 +123,8 @@
                   (isHeaderGroup(header)
                     ? ' tedi-table__header-cell--group'
                     : '') +
-                  (meta?.align
-                    ? ' tedi-table__cell--align-' + meta?.align
+                  (headerAlign
+                    ? ' tedi-table__cell--align-' + headerAlign
                     : '') +
                   (meta?.vAlign
                     ? ' tedi-table__cell--valign-' + meta?.vAlign
@@ -143,7 +146,7 @@
                 [style.right.px]="stickyRight(header.column.id)"
               >
                 @if (srHeaderLabel) {
-                  <span class="tedi-table__sr-only">{{ srHeaderLabel }}</span>
+                  <span class="sr-only">{{ srHeaderLabel }}</span>
                 }
                 @if (header.column.id === SELECT_COLUMN_ID) {
                   @if (selectionMode() === "multiple") {
@@ -323,6 +326,7 @@
                     (input)="
                       handleColumnFilter(column, $any($event.target).value)
                     "
+                    (clear)="handleColumnFilter(column, '')"
                   />
                 </tedi-form-field>
               }

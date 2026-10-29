@@ -46,6 +46,29 @@ export interface FormFieldControl<T = unknown> {
    * `aria-describedby`; nothing is pushed when the control stands alone.
    */
   setDescribedBy?(ids: string[]): void;
+  /**
+   * Set by controls that render their own clear button — date and time put one in
+   * their action row beside the picker button, which cannot leave the control
+   * because the overlay anchors to it. The field then skips its generic clear
+   * button so a single `clearable` never yields two.
+   */
+  readonly ownsClearButton?: boolean;
+  /**
+   * Whether the control is read-only. The field hides its clear button while it
+   * is, since the user cannot edit the value; a programmatic `reset()` still works.
+   */
+  readOnly?: Signal<boolean>;
+  /**
+   * Width in pixels of the control's own vertical scrollbar, 0 when it has none.
+   * Reported by controls that reach under the field's additions — a textarea —
+   * so the field can move them clear of the scrollbar.
+   */
+  scrollbarWidth?: Signal<number>;
+  /**
+   * Set to `false` by controls that never take a clear button. The field then
+   * skips its button whatever `clearable` says.
+   */
+  readonly clearButton?: false;
 }
 
 /**

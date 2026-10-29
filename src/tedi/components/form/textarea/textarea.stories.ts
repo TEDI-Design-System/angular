@@ -16,14 +16,14 @@ import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { TextComponent } from "../../base/text/text.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.65.83?node-id=3486-37618&m=dev" target="_blank">Figma ↗</a><br />
- * <a href="https://www.tedi.ee/1ee8444b7/p/25f281-text-area" target="_blank">Zeroheight ↗</a>
+ * <a href="https://www.tedi.ee/1ee8444b7/p/25f281-textarea" target="_blank">Zeroheight ↗</a>
  *
  * Can be used with <a href="https://angular.dev/guide/forms/reactive-forms" target="_blank">Reactive forms</a> and with <a href="https://angular.dev/guide/forms/template-driven-forms" target="_blank">Template-driven forms</a>
  */
@@ -83,6 +83,52 @@ export default {
         type: { summary: "number | undefined" },
       },
     },
+    clearable: {
+      description:
+        "Whether the field shows a clear button once it has a value. Set `false` to opt out. Hidden while the textarea is read-only.",
+      control: {
+        type: "boolean",
+      },
+      table: {
+        category: "Form Field inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    showClearOnInteraction: {
+      description:
+        "Show the clear button only on hover or focus when the field has a value. Requires clearable.",
+      control: { type: "boolean" },
+      table: {
+        category: "Form Field inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    readOnly: {
+      description:
+        "Makes the field read-only, like the native `readonly` attribute, which is also accepted. The value can still be selected and submitted, but not edited, and a wrapping form field hides its clear button.",
+      control: {
+        type: "boolean",
+      },
+      table: {
+        category: "Textarea inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    disabled: {
+      description:
+        "Disables the textarea. Combines with the reactive-forms disabled state.",
+      control: {
+        type: "boolean",
+      },
+      table: {
+        category: "Textarea inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     placeholder: {
       control: "text",
       description: "Placeholder text shown when the textarea is empty.",
@@ -118,7 +164,7 @@ export default {
     minRows: {
       control: "number",
       description:
-        "Rows the field rests at, and the fewest it can ever show. With no `height` set this is what sizes the textarea, in every mode — reach for it first when a field needs to be taller or shorter.",
+        'Rows the field rests at, and the fewest it can ever show. With no `height` set this is what sizes the textarea, in every mode — reach for it first when a field needs to be taller or shorter. Values below 1 are treated as 1; set `rows="1"` for a single-row field.',
       table: {
         category: "Textarea inputs",
         type: { summary: "number" },
@@ -128,11 +174,10 @@ export default {
     maxRows: {
       control: "number",
       description:
-        "Most rows the field shows before it scrolls. Caps `autoGrow`'s growth and how far the resize grip can be dragged.",
+        "Most rows the field shows before it scrolls. Caps `autoGrow`'s growth and how far the resize grip can be dragged. Unset, neither has a row limit.",
       table: {
         category: "Textarea inputs",
-        type: { summary: "number" },
-        defaultValue: { summary: "12" },
+        type: { summary: "number | undefined" },
       },
     },
     height: {
@@ -160,12 +205,16 @@ export const Default: StoryObj = {
   parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
+    clearable: true,
     resizable: true,
     autoGrow: false,
     minRows: 3,
-    maxRows: 12,
+    readOnly: false,
+    disabled: false,
   },
   render: ({
+    readOnly,
+    disabled,
     resizable,
     placeholder,
     autoGrow,
@@ -176,6 +225,8 @@ export const Default: StoryObj = {
     ...formFieldArgs
   }) => ({
     props: {
+      readOnly,
+      disabled,
       resizable,
       placeholder,
       autoGrow,
@@ -197,6 +248,8 @@ export const Default: StoryObj = {
           [maxRows]="maxRows"
           [height]="height"
           [maxHeight]="maxHeight"
+          [readOnly]="readOnly"
+          [disabled]="disabled"
           [attr.placeholder]="placeholder"
         ></textarea>
       </tedi-form-field>
@@ -324,6 +377,21 @@ export const CharacterCount: StoryObj<TextareaComponent> = {
   }),
 };
 
+export const ClearButtonOnInteraction: StoryObj<TextareaComponent> = {
+  render: () => ({
+    props: {
+      value:
+        "Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid. Rebane toitub peamiselt närilistest. Ta on ettevaatlik ja oskab hästi põgeneda. Rebase urul on alati mitu väljapääsu. Urud on põhiliselt kutsikate kasvatamiseks. Ta kaevab urud ise või kohendab mägra urge.",
+    },
+    template: `
+      <tedi-form-field [clearable]="true" [showClearOnInteraction]="true">
+        <label tedi-label for="clear-on-interaction">Label</label>
+        <textarea tedi-textarea id="clear-on-interaction" [value]="value"></textarea>
+      </tedi-form-field>
+    `,
+  }),
+};
+
 export const Placeholder: StoryObj<TextareaComponent> = {
   render: () => ({
     template: `
@@ -340,7 +408,7 @@ export const HeightExamples: StoryObj<TextareaComponent> = {
     docs: {
       description: {
         story:
-          "`minRows` is the field's resting height — it sizes the textarea whether or not `autoGrow` is on, and is the floor a resize drag stops at. `maxRows` is the ceiling, for the drag and for `autoGrow` alike. `height` is the escape hatch for a field that has to match an exact measurement.",
+          "`minRows` is the field's resting height — it sizes the textarea whether or not `autoGrow` is on, and is the floor a resize drag stops at. `maxRows` is the ceiling, for the drag and for `autoGrow` alike; leave it unset for no row limit. `height` is the escape hatch for a field that has to match an exact measurement.",
       },
     },
   },
@@ -350,7 +418,7 @@ export const HeightExamples: StoryObj<TextareaComponent> = {
         {
           label: "Default (minRows 3)",
           id: "sizing-default",
-          placeholder: "Rests at three rows, drag to grow",
+          placeholder: "Rests at three rows, drag to resize",
         },
         {
           label: "Taller (minRows 6)",
@@ -369,13 +437,20 @@ export const HeightExamples: StoryObj<TextareaComponent> = {
           id: "sizing-exact",
           height: "10rem",
           resizable: false,
-          placeholder: "Only when a row count will not do",
+          placeholder: "Rests at 10rem",
         },
         {
-          label: "Auto grow (minRows 3 to maxRows 12)",
+          label: "Auto grow (defaults: minRows 3, no row limit)",
           id: "sizing-auto-grow",
           autoGrow: true,
           placeholder: "Type multiple lines to see it grow",
+        },
+        {
+          label: "Auto grow (minRows 3, maxRows 8)",
+          id: "sizing-auto-grow-bounded",
+          autoGrow: true,
+          maxRows: 8,
+          placeholder: "Grows up to eight rows, then scrolls",
         },
         {
           label: "Auto grow, capped at 200px",
@@ -401,7 +476,7 @@ export const HeightExamples: StoryObj<TextareaComponent> = {
                 [resizable]="example.resizable ?? true"
                 [autoGrow]="example.autoGrow || false"
                 [minRows]="example.minRows ?? 3"
-                [maxRows]="example.maxRows ?? 12"
+                [maxRows]="example.maxRows"
                 [height]="example.height"
                 [maxHeight]="example.maxHeight"
                 [attr.placeholder]="example.placeholder"
@@ -480,9 +555,9 @@ export const WithReactiveForms: StoryObj<TextareaComponent> = {
 };
 
 /**
- * The textarea paints its own surface, so it renders correctly with no wrapper
- * at all. A `tedi-form-field` is only needed for a label, feedback text or a
- * character counter.
+ * The textarea paints its own surface, so it renders correctly with no wrapper.
+ * Wrap it in a `tedi-form-field` when it needs a label, feedback text, a
+ * character counter or a clear button.
  */
 export const Standalone: StoryObj<TextareaComponent> = {
   render: () => ({

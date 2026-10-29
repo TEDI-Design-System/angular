@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import {
   CheckboxGroupComponent,
@@ -8,7 +9,7 @@ import {
 import { CheckboxComponent } from "../checkbox/checkbox.component";
 import { CheckboxCardComponent } from "../checkbox-card/checkbox-card.component";
 import { CheckboxCardGroupComponent } from "../checkbox-card-group/checkbox-card-group.component";
-import { LabelComponent } from "../label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 
 @Component({
@@ -513,5 +514,56 @@ describe("CheckboxGroupComponent — missing child value", () => {
     expect(fixture.componentInstance.control.value).toEqual([]);
 
     warnSpy.mockRestore();
+  });
+});
+
+describe("CheckboxGroupComponent — selection checks", () => {
+  let fixture: ComponentFixture<FormControlHostComponent>;
+  let group: CheckboxGroupComponent;
+  let inputs: HTMLInputElement[];
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [FormControlHostComponent],
+    });
+
+    fixture = TestBed.createComponent(FormControlHostComponent);
+    fixture.detectChanges();
+    group = fixture.debugElement.query(
+      By.directive(CheckboxGroupComponent),
+    ).componentInstance;
+    inputs = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'input[type="checkbox"]',
+      ),
+    ) as HTMLInputElement[];
+  });
+
+  it("should not emit when a change does not alter the values", () => {
+    fixture.componentInstance.control.setValue(["urgent"]);
+    fixture.detectChanges();
+    const emitted: (string[] | null)[] = [];
+    fixture.componentInstance.control.valueChanges.subscribe((v) =>
+      emitted.push(v),
+    );
+
+    inputs[0].checked = true;
+    inputs[0].dispatchEvent(new Event("change", { bubbles: true }));
+    inputs[1].checked = false;
+    inputs[1].dispatchEvent(new Event("change", { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(emitted).toEqual([]);
+    expect(fixture.componentInstance.control.value).toEqual(["urgent"]);
+    expect(fixture.componentInstance.control.dirty).toBe(false);
+  });
+
+  it("should report whether a value is selected", () => {
+    fixture.componentInstance.control.setValue(["urgent"]);
+    fixture.detectChanges();
+
+    expect(group.isSelected("urgent")).toBe(true);
+    expect(group.isSelected("review")).toBe(false);
+    expect(group.isSelected(undefined)).toBe(false);
   });
 });

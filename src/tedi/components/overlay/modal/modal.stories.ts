@@ -1,6 +1,9 @@
 import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Component, inject, Input, signal } from "@angular/core";
+import { FormControl, FormGroup, ReactiveFormsModule } from "@angular/forms";
+import { map } from "rxjs";
+import { ComponentType } from "@angular/cdk/portal";
 import { ModalComponent } from "./modal.component";
 import { ModalHeaderComponent } from "./modal-header/modal-header.component";
 import { ModalContentComponent } from "./modal-content/modal-content.component";
@@ -9,7 +12,7 @@ import { ModalService } from "./modal.service";
 import { ModalRef } from "./modal-ref";
 import { MODAL_DATA, ModalConfig, ModalFullscreen } from "./modal.types";
 import { ButtonComponent } from "../../buttons/button/button.component";
-import { LabelComponent } from "../../form/label/label.component";
+import { LabelComponent } from "../../content/label/label.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { ScrollFadeComponent } from "../../helpers/scroll-fade/scroll-fade.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
@@ -352,8 +355,13 @@ class StoryScrollableFadeContentComponent {
           <input tedi-text-field id="field-1" />
         </tedi-form-field>
       </tedi-modal-content>
-      <tedi-modal-footer style="justify-content: space-between;">
-        <button tedi-button variant="secondary" (click)="ref.close()">
+      <tedi-modal-footer>
+        <button
+          tedi-button
+          tedi-modal-footer-start
+          variant="secondary"
+          (click)="ref.close()"
+        >
           Cancel
         </button>
         <button tedi-button (click)="ref.close()">Continue</button>
@@ -381,17 +389,20 @@ class StoryFooterLeftRightComponent {
           <input tedi-text-field id="field-1" />
         </tedi-form-field>
       </tedi-modal-content>
-      <tedi-modal-footer style="justify-content: space-between;">
-        <button tedi-button variant="neutral" (click)="ref.close()">
+      <tedi-modal-footer>
+        <button
+          tedi-button
+          tedi-modal-footer-start
+          variant="neutral"
+          (click)="ref.close()"
+        >
           <tedi-icon name="arrow_back" />
           Back
         </button>
-        <div class="flex gap-3">
-          <button tedi-button variant="secondary" (click)="ref.close()">
-            Cancel
-          </button>
-          <button tedi-button (click)="ref.close()">Continue</button>
-        </div>
+        <button tedi-button variant="secondary" (click)="ref.close()">
+          Cancel
+        </button>
+        <button tedi-button (click)="ref.close()">Continue</button>
       </tedi-modal-footer>
     </tedi-modal>
   `,
@@ -469,6 +480,95 @@ class StoryModalWithToastComponent {
     const formatted = date ? formatDate(date) : "no date selected";
     this.toastService.success("Saved", `Selected date: ${formatted}`);
     this.ref.close();
+  }
+}
+
+@Component({
+  standalone: true,
+  selector: "story-discard-changes",
+  imports: [
+    ModalComponent,
+    ModalHeaderComponent,
+    ModalFooterComponent,
+    ButtonComponent,
+  ],
+  template: `
+    <tedi-modal>
+      <tedi-modal-header [showClose]="false">
+        <h2>Discard changes?</h2>
+        <p tedi-modal-description>Your edits will be lost.</p>
+      </tedi-modal-header>
+      <tedi-modal-footer>
+        <button tedi-button variant="secondary" (click)="ref.close(false)">
+          Keep editing
+        </button>
+        <button tedi-button variant="danger" (click)="ref.close(true)">
+          Discard
+        </button>
+      </tedi-modal-footer>
+    </tedi-modal>
+  `,
+})
+class StoryDiscardChangesComponent {
+  readonly ref = inject<ModalRef<boolean>>(ModalRef);
+}
+
+@Component({
+  standalone: true,
+  selector: "story-guarded-form",
+  imports: [...sharedModalImports, ReactiveFormsModule],
+  template: `
+    <tedi-modal>
+      <tedi-modal-header>
+        <h1>Edit contact</h1>
+        <p tedi-modal-description>Edit a field, then close the modal.</p>
+      </tedi-modal-header>
+      <tedi-modal-content>
+        <form [formGroup]="form" id="guarded-form" (ngSubmit)="save()">
+          <tedi-form-field>
+            <label tedi-label for="guarded-name">Name</label>
+            <input tedi-text-field id="guarded-name" formControlName="name" />
+          </tedi-form-field>
+          <tedi-form-field>
+            <label tedi-label for="guarded-email">E-mail</label>
+            <input
+              tedi-text-field
+              id="guarded-email"
+              type="email"
+              formControlName="email"
+            />
+          </tedi-form-field>
+        </form>
+      </tedi-modal-content>
+      <tedi-modal-footer>
+        <button tedi-button variant="secondary" (click)="ref.close()">
+          Cancel
+        </button>
+        <button tedi-button type="submit" form="guarded-form">Save</button>
+      </tedi-modal-footer>
+    </tedi-modal>
+  `,
+})
+class StoryGuardedFormComponent {
+  readonly ref = inject(ModalRef);
+  private readonly modalService = inject(ModalService);
+
+  readonly form = new FormGroup({
+    name: new FormControl("Mari Maasikas"),
+    email: new FormControl("mari@example.com"),
+  });
+
+  constructor() {
+    this.ref.canClose = () =>
+      this.form.pristine ||
+      this.modalService
+        .open<boolean>(StoryDiscardChangesComponent, { size: "small" })
+        .closed.pipe(map(Boolean));
+  }
+
+  save() {
+    this.form.markAsPristine();
+    this.ref.close(this.form.getRawValue());
   }
 }
 
@@ -681,7 +781,8 @@ export const Default: StoryObj = {
     },
     scrollBehavior: { control: "select", options: ["content", "page"] },
     fullscreen: {
-      control: "text",
+      control: "select",
+      options: [false, true, "sm", "md", "lg", "xl", "xxl"],
       description:
         "Set `true` for always fullscreen or a breakpoint string (`sm`, `md`, `lg`, `xl`, `xxl`).",
     },
@@ -1509,22 +1610,20 @@ export const FooterVariants: StoryObj = {
 //   <button tedi-button (click)="ref.close()">Continue</button>
 // </tedi-modal-footer>
 
-// Left-right footer — space-between alignment
-// <tedi-modal-footer style="justify-content: space-between;">
-//   <button tedi-button variant="secondary" (click)="ref.close()">Cancel</button>
+// Left-right footer — tedi-modal-footer-start moves a button to the left
+// <tedi-modal-footer>
+//   <button tedi-button tedi-modal-footer-start variant="secondary" (click)="ref.close()">Cancel</button>
 //   <button tedi-button (click)="ref.close()">Continue</button>
 // </tedi-modal-footer>
 
 // Three buttons — back button on the left, cancel + continue on the right
-// <tedi-modal-footer style="justify-content: space-between;">
-//   <button tedi-button variant="neutral" (click)="ref.close()">
+// <tedi-modal-footer>
+//   <button tedi-button tedi-modal-footer-start variant="neutral" (click)="ref.close()">
 //     <tedi-icon name="arrow_back" />
 //     Back
 //   </button>
-//   <div class="flex gap-3">
-//     <button tedi-button variant="secondary" (click)="ref.close()">Cancel</button>
-//     <button tedi-button (click)="ref.close()">Continue</button>
-//   </div>
+//   <button tedi-button variant="secondary" (click)="ref.close()">Cancel</button>
+//   <button tedi-button (click)="ref.close()">Continue</button>
 // </tedi-modal-footer>
 
 // No footer — simply omit <tedi-modal-footer>
@@ -1695,6 +1794,116 @@ this.modalService.open(MyModalContent, {
   },
 };
 
+export const ConfirmBeforeClosing: StoryObj = {
+  name: "Confirm before closing",
+  parameters: {
+    chromatic: { disableSnapshot: true },
+    docs: {
+      description: {
+        story:
+          "Set `ModalRef.canClose` to keep the modal open until the user confirms. It runs on every close except `ModalService.closeAll()` and browser navigation, which needs a `canDeactivate` route guard.",
+      },
+      source: {
+        code: `
+class EditContactComponent {
+  ref = inject(ModalRef);
+  private modalService = inject(ModalService);
+
+  form = new FormGroup({
+    name: new FormControl('Mari Maasikas'),
+    email: new FormControl('mari@example.com'),
+  });
+
+  constructor() {
+    this.ref.canClose = () =>
+      this.form.pristine ||
+      this.modalService
+        .open<boolean>(DiscardChangesComponent, { size: 'small' })
+        .closed.pipe(map(Boolean));
+  }
+
+  save() {
+    this.form.markAsPristine();
+    this.ref.close(this.form.getRawValue());
+  }
+}
+
+class DiscardChangesComponent {
+  ref = inject<ModalRef<boolean>>(ModalRef);
+  // Keep editing → ref.close(false), Discard → ref.close(true)
+}`,
+        language: "typescript",
+        type: "code",
+      },
+    },
+  },
+  decorators: [
+    moduleMetadata({
+      imports: [ButtonComponent, StoryGuardedFormComponent],
+    }),
+  ],
+  render: () => {
+    @Component({
+      standalone: true,
+      selector: "story-confirm-close-demo",
+      imports: [ButtonComponent],
+      template: `
+        <button tedi-button variant="secondary" (click)="open()">
+          Edit contact
+        </button>
+      `,
+    })
+    class ConfirmCloseDemoComponent {
+      private readonly modalService = inject(ModalService);
+
+      open() {
+        this.modalService.open(StoryGuardedFormComponent, { width: "md" });
+      }
+    }
+
+    return {
+      template: "<story-confirm-close-demo />",
+      moduleMetadata: {
+        imports: [ConfirmCloseDemoComponent],
+      },
+    };
+  },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(
+      await within(canvasElement).findByRole("button", {
+        name: "Edit contact",
+      }),
+    );
+    const dialog = within(
+      await within(document.body).findByRole("dialog", {
+        name: "Edit contact",
+      }),
+    );
+
+    const confirmDialog = () =>
+      within(document.body).findByRole("dialog", { name: "Discard changes?" });
+    const openDialogs = () => document.querySelectorAll("cdk-dialog-container");
+
+    await userEvent.type(dialog.getByLabelText("Name"), " Jr");
+    await userEvent.keyboard("{Escape}");
+    await userEvent.click(
+      within(await confirmDialog()).getByRole("button", {
+        name: "Keep editing",
+      }),
+    );
+
+    await waitFor(() => expect(openDialogs()).toHaveLength(1));
+    await expect(dialog.getByLabelText("Name")).toHaveValue("Mari Maasikas Jr");
+
+    await userEvent.keyboard("{Escape}");
+    await userEvent.click(
+      within(await confirmDialog()).getByRole("button", { name: "Discard" }),
+    );
+
+    await waitFor(() => expect(openDialogs()).toHaveLength(0));
+  },
+};
+
 export const TemplateBased: StoryObj<ModalComponent> = {
   name: "Template-based (deprecated)",
   parameters: {
@@ -1771,30 +1980,35 @@ const VR_CONFIG = { data: VR_DATA, ariaLabel: VR_DATA.title } as const;
  * Every variant below differs only in that config, so the component is built per story rather
  * than copied.
  */
-const vrRender = (config: ModalConfig<StoryModalData>) => () => {
-  @Component({
-    standalone: true,
-    selector: "story-open-vr-demo",
-    imports: [ButtonComponent],
-    template: `
-      <button tedi-button variant="secondary" (click)="open()">
-        Open modal
-      </button>
-    `,
-  })
-  class OpenVrDemoComponent {
-    private readonly modalService = inject(ModalService);
+const vrRender =
+  (
+    config: ModalConfig<StoryModalData>,
+    content: ComponentType<unknown> = StoryModalContentComponent,
+  ) =>
+  () => {
+    @Component({
+      standalone: true,
+      selector: "story-open-vr-demo",
+      imports: [ButtonComponent],
+      template: `
+        <button tedi-button variant="secondary" (click)="open()">
+          Open modal
+        </button>
+      `,
+    })
+    class OpenVrDemoComponent {
+      private readonly modalService = inject(ModalService);
 
-    open() {
-      this.modalService.open(StoryModalContentComponent, config);
+      open() {
+        this.modalService.open(content, config);
+      }
     }
-  }
 
-  return {
-    template: `<story-open-vr-demo />`,
-    moduleMetadata: { imports: [OpenVrDemoComponent] },
+    return {
+      template: `<story-open-vr-demo />`,
+      moduleMetadata: { imports: [OpenVrDemoComponent] },
+    };
   };
-};
 
 const VR_DECORATORS = [
   moduleMetadata({ imports: [ButtonComponent, StoryModalContentComponent] }),
@@ -1881,5 +2095,15 @@ export const OpenWidePageScrollForVisualTest: StoryObj = {
   tags: ["!dev", "!autodocs"],
   decorators: VR_DECORATORS,
   render: vrRender({ ...VR_CONFIG, width: "xl", scrollBehavior: "page" }),
+  play: vrPlay,
+};
+
+export const OpenFooterStartForVisualTest: StoryObj = {
+  tags: ["!dev", "!autodocs"],
+  decorators: VR_DECORATORS,
+  render: vrRender(
+    { ...VR_CONFIG, width: "md" },
+    StoryFooterThreeButtonsComponent,
+  ),
   play: vrPlay,
 };

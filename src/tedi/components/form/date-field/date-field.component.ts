@@ -1,4 +1,5 @@
 import {
+  booleanAttribute,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -69,7 +70,6 @@ import {
   DateFieldModalComponent,
   DateFieldModalData,
 } from "./date-field-modal/date-field-modal.component";
-import { ButtonComponent } from "../../buttons";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
 
 type DateFieldValue = Date | Date[] | DateRange | null;
@@ -93,7 +93,6 @@ export type DateFieldSize = "default" | "small";
   imports: [
     CalendarComponent,
     DateInputComponent,
-    ButtonComponent,
     OverlayModule,
     A11yModule,
     TediTranslationPipe,
@@ -185,7 +184,8 @@ export class DateFieldComponent
   readonly inputDisabled = input<boolean>(false);
   /**
    * Blocks typing into the input but leaves the calendar interactive — useful
-   * for guided picking.
+   * for guided picking. The value can still be cleared while the calendar is
+   * available, since the user can change it there anyway.
    */
   readonly readOnly = input<boolean>(false);
   /**
@@ -200,6 +200,15 @@ export class DateFieldComponent
    * set here.
    */
   readonly size = input<DateFieldSize | undefined>();
+  /**
+   * Whether the clear button shows once the field has a value. Falls back to the
+   * wrapping `tedi-form-field`'s `clearable` when not set here — set it on the
+   * wrapper, and use this only for a standalone field.
+   */
+  readonly clearable = input<boolean | undefined, unknown>(undefined, {
+    // Unset stays `undefined` so the wrapper's `clearable` still applies.
+    transform: (v: unknown) => (v == null ? undefined : booleanAttribute(v)),
+  });
   /**
    * Forces the error state on, or off, regardless of the reactive-forms state.
    * Leave unset to let the control derive it.
@@ -310,7 +319,8 @@ export class DateFieldComponent
   /**
    * Use the OS native date picker instead of the custom popover (single mode only).
    * `true` always, `false` never, breakpoint name → native below that breakpoint
-   * (custom popover from that breakpoint up).
+   * (custom popover from that breakpoint up). `readOnly` uses the custom
+   * calendar so picking and clearing remain available without manual input.
    */
   readonly useNativePicker = input<DateFieldUseNativePicker>(false);
   /**
@@ -428,11 +438,20 @@ export class DateFieldComponent
     invalid: computed(() => this.invalid()),
     valid: computed(() => this.valid()),
     disabled: computed(() => this.disabled()),
+    clearable: computed(() => this.clearableResolved()),
   };
 
   ngOnInit(): void {
     this.derived.connect();
   }
+
+  /** The clear button sits in the date input's action row, beside the calendar. */
+  readonly ownsClearButton = true;
+
+  /** Own `clearable` wins, then the wrapping `tedi-form-field`'s. */
+  readonly clearableResolved = computed(
+    () => this.clearable() ?? this.fieldContext?.clearable() ?? true,
+  );
 
   readonly resolvedDisabledMatchers = computed<Matcher[]>(() => {
     const result: Matcher[] = [];
@@ -466,7 +485,8 @@ export class DateFieldComponent
     () =>
       this.useNativePickerResolved() &&
       this.mode() === "single" &&
-      !this.modalEnabled(),
+      !this.modalEnabled() &&
+      !this.readOnly(),
   );
 
   readonly numberOfMonthsResolved = computed(() =>
@@ -547,8 +567,17 @@ export class DateFieldComponent
     }));
   });
 
+  /**
+   * Whether the user can change the value at all. `readOnly` only locks the
+   * text input: while the calendar is available the user can still pick dates,
+   * so they must also be able to remove them (clear button, tag close).
+   */
+  readonly valueEditable = computed(
+    () => !this.fieldDisabled() && (!this.readOnly() || this.showCalendar()),
+  );
+
   readonly canClear = computed(
-    () => !!this.value() && !this.fieldDisabled() && !this.readOnly(),
+    () => this.clearableResolved() && !!this.value() && this.valueEditable(),
   );
 
   readonly inputIsTrigger = computed(
@@ -621,7 +650,7 @@ export class DateFieldComponent
   }
 
   reset(): void {
-    if (this.fieldDisabled() || this.readOnly()) return;
+    if (!this.valueEditable()) return;
     this.commitValue(null);
   }
 
@@ -689,7 +718,7 @@ export class DateFieldComponent
   }
 
   handleTagRemove(id: string): void {
-    if (this.fieldDisabled() || this.readOnly()) return;
+    if (!this.valueEditable()) return;
     const v = this.value();
     if (!Array.isArray(v)) return;
 
