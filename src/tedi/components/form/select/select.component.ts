@@ -114,7 +114,7 @@ export enum SpecialOptionControls {
     class: "tedi-select",
     "[class.tedi-select--multiselect]": "allowMultiple()",
     "[class.tedi-select--clear-on-interaction]":
-      "showClearOnInteraction() && clearable() && !!selectedValues().length",
+      "showClearOnInteraction() && clearable() && !disabled() && !!selectedValues().length",
   },
   providers: [
     {

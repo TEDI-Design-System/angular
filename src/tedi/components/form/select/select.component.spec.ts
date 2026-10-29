@@ -300,6 +300,17 @@ describe("SelectComponent", () => {
       expect(trigger.classList).toContain("tedi-input--disabled");
     });
 
+    it("should hide the clear button when disabled", () => {
+      host.control.setValue("Option 1");
+      fixture.detectChanges();
+      expect(getClearButton()).toBeTruthy();
+
+      host.control.disable();
+      fixture.detectChanges();
+
+      expect(getClearButton()).toBeNull();
+    });
+
     it("should not open dropdown when disabled", () => {
       select.setDisabledState(true);
       fixture.detectChanges();
