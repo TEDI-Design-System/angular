@@ -1,5 +1,23 @@
 import { Language } from "./translation.service";
 
+const ruPluralRules = new Intl.PluralRules("ru");
+
+/**
+ * Picks the Russian plural form for `count` (1 файл, 2 файла, 5 файлов; 21 → one, 11–14 → many).
+ * Fractions (`other`) take the genitive singular, the same as `few`.
+ */
+const pluralizeRu = (
+  count: number,
+  forms: { one: string; few: string; many: string },
+): string => {
+  const category = ruPluralRules.select(count);
+  return category === "one"
+    ? forms.one
+    : category === "many"
+      ? forms.many
+      : forms.few;
+};
+
 export const translationsMap = {
   close: {
     description: "Used for closing",
@@ -23,6 +41,19 @@ export const translationsMap = {
     et: "Ava",
     en: "Open",
     ru: "Открыть",
+  },
+  "rating.raters": {
+    description:
+      'Suffix in the read-only Rating summary showing how many people rated, e.g. "271 hindajat"',
+    components: ["Rating"],
+    et: (count: number) => `${count} ${count === 1 ? "hindaja" : "hindajat"}`,
+    en: (count: number) => `${count} ${count === 1 ? "rating" : "ratings"}`,
+    ru: (count: number) =>
+      pluralizeRu(count, {
+        one: `${count} оценка`,
+        few: `${count} оценки`,
+        many: `${count} оценок`,
+      }),
   },
   remove: {
     description: "Used for removing",
