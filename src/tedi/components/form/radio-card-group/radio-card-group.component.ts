@@ -25,4 +25,12 @@ export class RadioCardGroupComponent {
    * @default false
    */
   readonly grouped = input<boolean>(false);
+
+  /**
+   * Gives primary cards a border in the unselected state. Child
+   * `tedi-radio-card` instances inherit this. Has no effect on grouped cards,
+   * which always have a border.
+   * @default false
+   */
+  readonly bordered = input<boolean>(false);
 }

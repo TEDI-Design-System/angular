@@ -97,4 +97,9 @@ describe("CardButtonComponent", () => {
     fixture.detectChanges();
     expect(button().disabled).toBe(true);
   });
+
+  it("should stay printable, matching React's CardButton", () => {
+    expect(anchor().classList).not.toContain("no-print");
+    expect(button().classList).not.toContain("no-print");
+  });
 });

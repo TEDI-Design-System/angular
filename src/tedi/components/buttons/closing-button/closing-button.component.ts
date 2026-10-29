@@ -22,6 +22,7 @@ export type ClosingButtonIconSize = 18 | 24;
   host: {
     "[attr.title]": "showTitle() ? ariaLabel() || _defaultLabel() : null",
     "[attr.aria-label]": "ariaLabel() || _defaultLabel()",
+    class: "no-print",
     "[class.tedi-closing-button]": "true",
     "[class.tedi-closing-button--small]": "size() === 'small'",
   },
