@@ -1,3 +1,18 @@
+# [9.0.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.13...angular-9.0.0-rc.14) (2026-10-29)
+
+
+### Features
+
+* **textarea:** make Textarea clearable and drop the maxRows default [#751](https://github.com/TEDI-Design-System/angular/issues/751) ([#811](https://github.com/TEDI-Design-System/angular/issues/811)) ([31e7f13](https://github.com/TEDI-Design-System/angular/commit/31e7f13d1bc1348b97183240ac01208116fbe541))
+
+
+### BREAKING CHANGES
+
+* **textarea:** tedi-textarea now shows the form field's clear button once it has a value. Pass
+[clearable]="false" on the form field to opt out.
+* **textarea:** tedi-textarea's maxRows no longer defaults to 12, so an autoGrow textarea grows
+without a row limit. Set maxRows or maxHeight to cap it.
+
 # [9.0.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.12...angular-9.0.0-rc.13) (2026-10-29)
 
 
