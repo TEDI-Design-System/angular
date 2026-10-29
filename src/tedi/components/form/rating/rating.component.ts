@@ -67,6 +67,7 @@ interface RatingItem {
     "[class]": "classes()",
     "[attr.role]": "readOnly() ? 'img' : 'radiogroup'",
     "[attr.aria-label]": "readOnly() ? label() + ': ' + summary() : label()",
+    "[style.--tedi-rating-columns]": "mobileColumns()",
   },
 })
 export class RatingComponent implements ControlValueAccessor {
@@ -120,6 +121,8 @@ export class RatingComponent implements ControlValueAccessor {
    * @default summary
    */
   readonly readOnlyVariant = input<RatingReadOnlyVariant>("summary");
+  /** `name` for the radio inputs. Defaults to a generated id. */
+  readonly name = input<string>();
   /**
    * Lay the scale out horizontally or stack it vertically (icon + caption per row). Use `vertical` on
    * narrow layouts for `type="icon"` with long `itemLabels`. Accepts a `BreakpointInput`, e.g.
@@ -132,8 +135,6 @@ export class RatingComponent implements ControlValueAccessor {
       transform: (v: BreakpointInput<RatingOrientation>) => breakpointInput(v),
     },
   );
-  /** `name` for the radio inputs. Defaults to a generated id. */
-  readonly name = input<string>();
 
   protected readonly starIconSize = STAR_ICON_SIZE;
   protected readonly circleIconSize = CIRCLE_ICON_SIZE;
@@ -194,7 +195,7 @@ export class RatingComponent implements ControlValueAccessor {
     return value.xs;
   });
 
-  private readonly labels = computed(() => {
+  private readonly itemLabelList = computed(() => {
     const labels = this.itemLabels();
     return Array.isArray(labels) ? labels : undefined;
   });
@@ -222,7 +223,7 @@ export class RatingComponent implements ControlValueAccessor {
     const current = this.value();
     const hovering = this.isHovering();
     const hover = this.hoverValue() ?? 0;
-    const labels = this.labels();
+    const labels = this.itemLabelList();
     const icons = this.resolvedIcons();
 
     return Array.from({ length: total }, (_, index) => {
@@ -251,12 +252,19 @@ export class RatingComponent implements ControlValueAccessor {
     });
   });
 
+  /** Narrow screens split a number scale longer than 6 evenly over two rows (see the SCSS). */
+  readonly mobileColumns = computed(() => {
+    if (this.type() !== "number") return null;
+    const total = this.total();
+    return total > 6 ? Math.ceil(total / 2) : total;
+  });
+
   readonly hasCaptions = computed(
-    () => this.type() !== "star" && !!this.labels()?.some(Boolean),
+    () => this.type() !== "star" && !!this.itemLabelList()?.some(Boolean),
   );
 
   readonly starCaption = computed(() => {
-    const labels = this.labels();
+    const labels = this.itemLabelList();
     if (this.type() !== "star" || !labels?.some(Boolean)) return undefined;
     const display = this.isHovering() ? this.hoverValue()! : this.value();
     return display > 0 ? (labels[display - 1] ?? "") : "";

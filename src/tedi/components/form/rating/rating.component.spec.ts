@@ -55,6 +55,18 @@ describe("RatingComponent", () => {
     expect(radios()).toHaveLength(10);
   });
 
+  it.each([
+    [6, "6"],
+    [7, "4"],
+    [10, "5"],
+  ])(
+    "splits a %i-item number scale into %s mobile columns",
+    (count, columns) => {
+      setInputs({ type: "number", count });
+      expect(el.style.getPropertyValue("--tedi-rating-columns")).toBe(columns);
+    },
+  );
+
   it("falls back to the type default when count is not a positive integer", () => {
     for (const count of [0, -3, 3.5]) {
       setInputs({ count });

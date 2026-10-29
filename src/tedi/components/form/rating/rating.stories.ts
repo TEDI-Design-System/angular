@@ -64,14 +64,21 @@ export default {
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.76.92?node-id=15548-139124&m=dev",
     },
   },
+  // Storybook orders the docs table by `args` keys first, so every input is listed here in the React
+  // prop order (unset ones as `undefined`, which `argsToTemplate` skips).
   args: {
     label: "Hinnang",
     type: "star",
+    count: undefined,
     value: 0,
+    itemLabels: undefined,
+    icons: undefined,
     disabled: false,
     readOnly: false,
+    ratingsCount: undefined,
     showRatingsCountLabel: true,
     readOnlyVariant: "summary",
+    name: undefined,
     orientation: "horizontal",
   },
   argTypes: {
@@ -100,8 +107,8 @@ export default {
       description: "Number of ratings shown in the `readOnly` summary.",
     },
     showRatingsCountLabel: { control: "boolean" },
-    name: { control: "text" },
     readOnlyVariant: { control: "radio", options: ["summary", "scale"] },
+    name: { control: "text" },
     orientation: {
       control: "radio",
       options: ["horizontal", "vertical"],
