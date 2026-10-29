@@ -86,7 +86,7 @@ export class FormFieldComponent implements FieldContext {
   /**
    * Whether the field shows a clear button once the control holds a value. The
    * single source of truth for every control inside it — date and time fields
-   * read it too instead of declaring their own input. A textarea never gets one.
+   * read it too instead of declaring their own input.
    * @default true
    */
   clearable = input(true, { transform: booleanAttribute });
@@ -147,6 +147,10 @@ export class FormFieldComponent implements FieldContext {
   });
 
   readonly ownsSurface = computed(() => this.hasBox());
+
+  readonly controlScrollbarWidth = computed(
+    () => `${this.control()?.scrollbarWidth?.() ?? 0}px`,
+  );
 
   readonly disabled = computed(() => this.inputGroup?.disabled() ?? false);
 
@@ -230,12 +234,19 @@ export class FormFieldComponent implements FieldContext {
   readonly showClearButton = computed(
     () =>
       this.renderClearButton() &&
+      !this.isDisabled() &&
       !!this.control()?.value() &&
       !this.control()?.readOnly?.(),
   );
 
+  /**
+   * Focus goes back to the control: the button hides once the value is gone, so
+   * it would otherwise drop to the page.
+   */
   clear() {
-    this.control()?.reset?.();
+    const control = this.control();
+    control?.reset?.();
+    control?.focus?.();
   }
 
   /**

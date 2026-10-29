@@ -5,13 +5,13 @@ import {
 } from "@angular/core";
 
 @Component({
-  selector: "tedi-dropdown-item-value-meta",
+  selector: "tedi-option-content-meta",
   template: `<ng-content />`,
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: "tedi-dropdown-item-value__meta",
+    class: "tedi-option-content__meta",
   },
 })
-export class DropdownItemValueMetaComponent {}
+export class OptionContentMetaComponent {}

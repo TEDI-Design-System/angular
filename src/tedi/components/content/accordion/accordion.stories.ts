@@ -1175,7 +1175,7 @@ hasn't met yet (incomplete prerequisites, missing permissions, etc.).
 
         .step-number--disabled {
           border-color: var(--stepper-step-disabled-border);
-          background: var(--stepper-step-disabled-bg);
+          background: var(--stepper-step-disabled-background);
         }
 
         .step-body {

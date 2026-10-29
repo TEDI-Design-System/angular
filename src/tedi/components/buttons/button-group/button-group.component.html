@@ -27,7 +27,7 @@
           [class.tedi-dropdown-item--selected]="item.selected()"
           (itemSelect)="onDropdownItemSelect(item)"
         >
-          <tedi-dropdown-item-value>
+          <tedi-option-content>
             @if (item.iconLeft()) {
               <tedi-icon
                 [name]="item.iconLeft()!"
@@ -37,9 +37,9 @@
             } @else if (item.icon()) {
               <tedi-icon [name]="item.icon()!" color="inherit" [size]="18" />
             }
-            <tedi-dropdown-item-value-label>{{
+            <tedi-option-content-label>{{
               item.label()
-            }}</tedi-dropdown-item-value-label>
+            }}</tedi-option-content-label>
             @if (item.iconRight()) {
               <tedi-icon
                 [name]="item.iconRight()!"
@@ -47,7 +47,7 @@
                 [size]="18"
               />
             }
-          </tedi-dropdown-item-value>
+          </tedi-option-content>
         </li>
       }
     </tedi-dropdown-content>

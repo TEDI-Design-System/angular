@@ -1,3 +1,45 @@
+# [9.0.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.13...angular-9.0.0-rc.14) (2026-10-29)
+
+
+### Features
+
+* **textarea:** make Textarea clearable and drop the maxRows default [#751](https://github.com/TEDI-Design-System/angular/issues/751) ([#811](https://github.com/TEDI-Design-System/angular/issues/811)) ([31e7f13](https://github.com/TEDI-Design-System/angular/commit/31e7f13d1bc1348b97183240ac01208116fbe541))
+
+
+### BREAKING CHANGES
+
+* **textarea:** tedi-textarea now shows the form field's clear button once it has a value. Pass
+[clearable]="false" on the form field to opt out.
+* **textarea:** tedi-textarea's maxRows no longer defaults to 12, so an autoGrow textarea grows
+without a row limit. Set maxRows or maxHeight to cap it.
+
+# [9.0.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.12...angular-9.0.0-rc.13) (2026-10-29)
+
+
+### Bug Fixes
+
+* **select:** remove core's focus outline from the trigger [#713](https://github.com/TEDI-Design-System/angular/issues/713) ([#724](https://github.com/TEDI-Design-System/angular/issues/724)) ([0c7ade0](https://github.com/TEDI-Design-System/angular/commit/0c7ade05ec110d9df59e696b59b773b40b1d1e9f))
+
+# [9.0.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.11...angular-9.0.0-rc.12) (2026-10-28)
+
+
+### Features
+
+* **checkbox,radio:** apply new variables to Checkbox and Radio [#784](https://github.com/TEDI-Design-System/angular/issues/784) ([#808](https://github.com/TEDI-Design-System/angular/issues/808)) ([92eaf7b](https://github.com/TEDI-Design-System/angular/commit/92eaf7b3a9249b4bb7bc834b3cc069b0016b4fb5))
+
+# [9.0.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.10...angular-9.0.0-rc.11) (2026-10-28)
+
+
+### Code Refactoring
+
+* **dropdown-item-value:** rename to OptionContent [#491](https://github.com/TEDI-Design-System/angular/issues/491) ([#741](https://github.com/TEDI-Design-System/angular/issues/741)) ([c6adb30](https://github.com/TEDI-Design-System/angular/commit/c6adb3039dd0a22cb003321be6a6886f6818b634))
+
+
+### BREAKING CHANGES
+
+* **dropdown-item-value:** DropdownItemValue is now OptionContent.
+Update Angular imports, component/label/meta elements, and custom CSS selectors.
+
 # [9.0.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.9...angular-9.0.0-rc.10) (2026-10-23)
 
 
