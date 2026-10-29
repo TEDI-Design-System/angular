@@ -1,3 +1,10 @@
+# [9.0.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.12...angular-9.0.0-rc.13) (2026-10-29)
+
+
+### Bug Fixes
+
+* **select:** remove core's focus outline from the trigger [#713](https://github.com/TEDI-Design-System/angular/issues/713) ([#724](https://github.com/TEDI-Design-System/angular/issues/724)) ([0c7ade0](https://github.com/TEDI-Design-System/angular/commit/0c7ade05ec110d9df59e696b59b773b40b1d1e9f))
+
 # [9.0.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0-rc.11...angular-9.0.0-rc.12) (2026-10-28)
 
 
