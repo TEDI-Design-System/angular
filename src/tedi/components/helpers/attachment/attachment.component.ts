@@ -15,6 +15,7 @@ import {
   Breakpoint,
   BreakpointService,
 } from "../../../services/breakpoint/breakpoint.service";
+import { TediTranslationService } from "../../../services/translation/translation.service";
 
 export type AttachmentDirection = "horizontal" | "vertical";
 
@@ -36,6 +37,9 @@ export type AttachmentDirection = "horizontal" | "vertical";
 export class AttachmentComponent {
   protected projectedProgress = contentChild(ProgressBarComponent);
   private breakpointService = inject(BreakpointService);
+  private translations = inject(TediTranslationService);
+
+  protected invalidLabel = this.translations.track("file-attachment.invalid");
 
   /**
    * File name to display.
