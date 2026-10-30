@@ -199,7 +199,7 @@ export class TimeFieldComponent
     () => this.value() !== null && this.value() !== "",
   );
   readonly showClear = computed(
-    () => this.hasValue() && this.clearableResolved(),
+    () => this.hasValue() && this.clearableResolved() && !this.isDisabled(),
   );
   /** The clear button sits in the time field's action row, beside the picker. */
   readonly ownsClearButton = true;

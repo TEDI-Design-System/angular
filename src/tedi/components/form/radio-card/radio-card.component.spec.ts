@@ -150,3 +150,50 @@ describe("RadioCardComponent — grouped inheritance", () => {
     expect(labelElement.classList).toContain("tedi-radio-card--grouped");
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [RadioCardComponent, RadioCardGroupComponent, RadioComponent],
+  template: `
+    <tedi-radio-card-group [bordered]="groupBordered">
+      <label tedi-radio-card [bordered]="cardBordered">
+        <input tedi-radio type="radio" name="bordered-test" />
+        Option
+      </label>
+    </tedi-radio-card-group>
+  `,
+})
+class BorderedHostComponent {
+  groupBordered = false;
+  cardBordered = false;
+}
+
+describe("RadioCardComponent — bordered", () => {
+  let fixture: ComponentFixture<BorderedHostComponent>;
+  let labelElement: HTMLLabelElement;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [BorderedHostComponent] });
+    fixture = TestBed.createComponent(BorderedHostComponent);
+    fixture.detectChanges();
+    labelElement = fixture.nativeElement.querySelector(
+      "label[tedi-radio-card]",
+    );
+  });
+
+  it("should not be bordered by default", () => {
+    expect(labelElement.classList).not.toContain("tedi-radio-card--bordered");
+  });
+
+  it("should be bordered when parent group is bordered", () => {
+    fixture.componentInstance.groupBordered = true;
+    fixture.detectChanges();
+    expect(labelElement.classList).toContain("tedi-radio-card--bordered");
+  });
+
+  it("should be bordered when card's own input is set", () => {
+    fixture.componentInstance.cardBordered = true;
+    fixture.detectChanges();
+    expect(labelElement.classList).toContain("tedi-radio-card--bordered");
+  });
+});

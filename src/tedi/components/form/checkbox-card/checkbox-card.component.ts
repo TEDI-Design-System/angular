@@ -29,8 +29,8 @@ export class CheckboxCardComponent {
   readonly variant = input<CheckboxCardVariant>("primary");
 
   /**
-   * Whether to show the checkbox indicator.
-   * When false, the checkbox is visually hidden but remains functional.
+   * Show the checkbox indicator.
+   * When false, the checkbox is visually hidden but stays functional.
    * @default true
    */
   readonly showIndicator = input<boolean>(true);
