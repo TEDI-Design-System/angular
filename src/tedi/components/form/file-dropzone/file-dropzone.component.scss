@@ -6,13 +6,13 @@
 
 .tedi-file-dropzone__zone {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   width: 100%;
   padding: var(--file-dropzone-padding-y) var(--file-dropzone-padding-x);
   font: inherit;
   color: var(--file-dropzone-text-default);
-  text-align: center;
+  text-align: left;
   cursor: pointer;
   background-color: var(--file-dropzone-background-default);
   border: var(--tedi-borders-02) dotted var(--file-dropzone-border-default);
@@ -23,15 +23,19 @@
     border-color 0.2s ease-in-out;
 
   &:hover {
+    color: var(--file-dropzone-text-hover);
     background-color: var(--file-dropzone-background-hover);
     border-color: var(--file-dropzone-border-hover);
   }
 
   &:active {
+    color: var(--file-dropzone-text-active);
+    background-color: var(--file-dropzone-background-active);
     border-color: var(--file-dropzone-border-active);
   }
 
   &:focus-visible {
+    color: var(--file-dropzone-text-focus);
     outline: var(--tedi-borders-02) solid var(--file-dropzone-border-focus);
     outline-offset: var(--tedi-borders-01);
     border-color: var(--file-dropzone-border-focus);
@@ -53,7 +57,7 @@
 }
 
 .tedi-file-dropzone--disabled .tedi-file-dropzone__zone {
-  color: var(--general-text-disabled);
+  color: var(--file-dropzone-text-disabled);
   cursor: not-allowed;
   background-color: var(--file-dropzone-background-disabled);
   border-color: var(--file-dropzone-border-disabled);

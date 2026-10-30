@@ -21,7 +21,7 @@
     class="tedi-file-dropzone__icon"
     name="attach_file"
     [size]="24"
-    [color]="isDisabled() ? 'inherit' : 'secondary'"
+    color="inherit"
   />
   <span class="tedi-file-dropzone__label">{{ resolvedLabel() }}</span>
 </div>
@@ -35,6 +35,7 @@
   [id]="resolvedId()"
   [attr.name]="name()"
   [attr.accept]="accept()"
+  [attr.webkitdirectory]="uploadFolder() ? '' : null"
   [multiple]="multiple()"
   [disabled]="isDisabled()"
   (change)="handleSelection($event)"
@@ -84,7 +85,11 @@
                 [attr.aria-label]="row.removeLabel"
                 (click)="removeFile(row.file)"
               >
-                <tedi-icon name="delete" [size]="18" color="inherit" />
+                <tedi-icon
+                  [name]="row.removeIcon"
+                  [size]="18"
+                  color="inherit"
+                />
               </button>
             </tedi-attachment-actions>
           </tedi-attachment>

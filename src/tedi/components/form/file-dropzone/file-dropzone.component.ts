@@ -46,7 +46,11 @@ import {
   FileDropzoneFileContext,
   FileDropzoneFileDirective,
 } from "./file-dropzone-file.directive";
-import { FileDropzoneFile, FileDropzoneValidator } from "./file-dropzone.types";
+import {
+  FileDropzoneDuplicates,
+  FileDropzoneFile,
+  FileDropzoneValidator,
+} from "./file-dropzone.types";
 
 type FileRejectionReason = "extension" | "size";
 
@@ -74,6 +78,44 @@ const FOCUSABLE =
  */
 const fileIdentity = (file: FileDropzoneFile): string =>
   `${file.name}:${file.size}:${file.lastModified}`;
+
+/**
+ * Renames an incoming file until its name is free, so both copies can be
+ * listed and told apart. Splits on the last dot, which leaves names carrying
+ * dots of their own, and those without an extension, intact.
+ */
+const withFreeNames = (
+  listed: FileDropzoneFile[],
+  incoming: File[],
+): File[] => {
+  const taken = new Set(listed.map((file) => file.name.toLowerCase()));
+
+  return incoming.map((file) => {
+    if (!taken.has(file.name.toLowerCase())) {
+      taken.add(file.name.toLowerCase());
+      return file;
+    }
+
+    const dot = file.name.lastIndexOf(".");
+    const stem = dot > 0 ? file.name.slice(0, dot) : file.name;
+    const extension = dot > 0 ? file.name.slice(dot) : "";
+
+    let counter = 1;
+    let name = `${stem} (${counter})${extension}`;
+
+    while (taken.has(name.toLowerCase())) {
+      counter += 1;
+      name = `${stem} (${counter})${extension}`;
+    }
+
+    taken.add(name.toLowerCase());
+
+    return new File([file], name, {
+      type: file.type,
+      lastModified: file.lastModified,
+    });
+  });
+};
 
 @Component({
   selector: "tedi-file-dropzone",
@@ -129,6 +171,10 @@ export class FileDropzoneComponent
    * Bind a stable reference — a field or a signal. An inline literal
    * (`[files]="[{ name: 'a.pdf' }]"`) is a new array on every check, so it is
    * written back each time and discards whatever the user added.
+   *
+   * The value keeps the order the files arrived in. The rendered list differs:
+   * files marked `isValid: false` are shown first, so a failure cannot sit out
+   * of sight further down.
    */
   readonly files = model<FileDropzoneFile[]>([]);
   /**
@@ -193,9 +239,32 @@ export class FileDropzoneComponent
    * can see which of their files failed and remove it. Left off, a rejected
    * file is discarded and every rejection is summarised in one message under
    * the dropzone instead.
+   *
+   * A kept file stays in the value as well, marked `isValid: false`. In a form
+   * the control fails while one is listed, so it cannot be submitted; reading
+   * the files directly, filter on `isValid` before uploading.
    * @default false
    */
   readonly keepRejectedFiles = input(false, { transform: booleanAttribute });
+  /**
+   * What happens when a file the list already holds is picked again: `skip`
+   * leaves the list alone and says so, `rename` keeps both with the newcomer
+   * renamed `scan (1).pdf`, `replace` swaps the listed file for the newcomer.
+   *
+   * Only a file that passes displaces its namesake. A rejected newcomer leaves
+   * the listed file alone, and with `keepRejectedFiles` the two are listed
+   * side by side so the user can see which one failed.
+   * @default "skip"
+   */
+  readonly duplicates = input<FileDropzoneDuplicates>("skip");
+  /**
+   * Lets the user pick a whole folder, which the browser hands over as the
+   * files inside it. Each one is still checked against `accept`, `maxSize`
+   * and `validator`. Applies to the file picker; dragging a folder in is up
+   * to the browser and generally does not work.
+   * @default false
+   */
+  readonly uploadFolder = input(false, { transform: booleanAttribute });
   /**
    * Whether the allowed types and maximum size are summarised in the hint below
    * the dropzone. Turn it off when the same information is shown elsewhere;
@@ -292,26 +361,39 @@ export class FileDropzoneComponent
     const showSize = this.showFileSize();
     const removeLabel = this.translations.translate("remove");
 
-    return this.files().map((file) => {
+    const rows = this.files().map((file) => {
       const label = `${removeLabel} ${file.name}`;
+      const isRejected = file.isValid === false;
+      const removeIcon = isRejected ? "close" : "delete";
 
       return {
         file,
         name: file.name,
         removeLabel: label,
+        isRejected,
+        removeIcon,
         size:
           showSize && typeof file.size === "number"
-            ? formatFileSize(file.size)
+            ? formatFileSize(file.size, this.translations.getLanguage())
             : undefined,
         context: template
           ? ({
               $implicit: file,
               remove: () => this.removeFile(file),
               removeLabel: label,
+              removeIcon,
             } satisfies FileDropzoneFileContext)
           : undefined,
       };
     });
+
+    // Rejected files lead the list: they are the ones asking to be dealt with.
+    // That covers files the consumer handed over already marked invalid as
+    // much as the ones `keepRejectedFiles` held on to.
+    return [
+      ...rows.filter((row) => row.isRejected),
+      ...rows.filter((row) => !row.isRejected),
+    ];
   });
 
   private readonly acceptTokens = computed(
@@ -333,7 +415,7 @@ export class FileDropzoneComponent
       accept &&
         `${this.translations.translate("file-upload.accept")} ${accept.replaceAll(",", ", ")}`,
       maxSize &&
-        `${this.translations.translate("file-upload.max-size")} ${formatFileSize(maxSize)}`,
+        `${this.translations.translate("file-upload.max-size")} ${formatFileSize(maxSize, this.translations.getLanguage())}`,
       this.hint(),
     ].filter(Boolean);
 
@@ -532,20 +614,60 @@ export class FileDropzoneComponent
     );
   }
 
+  /**
+   * Splits a selection according to `duplicates`. Picking the same file twice
+   * almost always means the user lost track of what they had already added, so
+   * by default the repeat is skipped rather than listed twice — and matched on
+   * more than the name, since two genuinely different files sharing one are
+   * common. `rename` and `replace` resolve the collision instead, both by name,
+   * which is what the user sees repeated.
+   */
+  private resolveDuplicates(selected: File[]): {
+    duplicates: File[];
+    fresh: File[];
+  } {
+    const strategy = this.duplicates();
+
+    if (strategy === "rename") {
+      return { duplicates: [], fresh: withFreeNames(this.files(), selected) };
+    }
+
+    if (strategy === "replace") {
+      return { duplicates: [], fresh: selected };
+    }
+
+    const listed = new Set(this.files().map(fileIdentity));
+
+    return {
+      duplicates: selected.filter((file) => listed.has(fileIdentity(file))),
+      fresh: selected.filter((file) => !listed.has(fileIdentity(file))),
+    };
+  }
+
+  /**
+   * The listed files a commit keeps. Under `replace` only a file that passed
+   * displaces its namesake — a rejected newcomer must never be able to delete
+   * a file the user already has, whether it is dropped or kept on the list.
+   */
+  private retained(kept: FileDropzoneFile[]): FileDropzoneFile[] {
+    if (this.duplicates() !== "replace") return this.files();
+
+    const displaced = new Set(
+      kept
+        .filter((file) => file.isValid !== false)
+        .map((file) => file.name.toLowerCase()),
+    );
+
+    return this.files().filter(
+      (file) => !displaced.has(file.name.toLowerCase()),
+    );
+  }
+
   private addFiles(selected: File[]): void {
     if (!selected.length) return;
 
     const keepRejected = this.keepRejectedFiles();
-
-    // Picking the same file twice almost always means the user lost track of
-    // what they had already added, so the repeat is skipped rather than listed
-    // twice. Matching on more than the name keeps two genuinely different files
-    // that share one — scans and camera exports collide constantly.
-    const listed = new Set(this.files().map(fileIdentity));
-    const duplicates = selected.filter((file) =>
-      listed.has(fileIdentity(file)),
-    );
-    const fresh = selected.filter((file) => !listed.has(fileIdentity(file)));
+    const { duplicates, fresh } = this.resolveDuplicates(selected);
 
     // Every rule a file breaks is reported, not just the first: fixing one
     // reason only to be rejected for the next sends the user round twice.
@@ -585,7 +707,7 @@ export class FileDropzoneComponent
     const multiple = this.multiple();
 
     if (kept.length) {
-      this.commit(multiple ? [...this.files(), ...kept] : [kept[0]]);
+      this.commit(multiple ? [...this.retained(kept), ...kept] : [kept[0]]);
     }
 
     // One selection can reject, skip and add all at once. The live region holds

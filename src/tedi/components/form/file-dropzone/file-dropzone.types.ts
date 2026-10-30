@@ -41,3 +41,17 @@ export interface FileDropzoneFile extends Partial<File> {
    */
   error?: string;
 }
+
+/**
+ * What the dropzone does when a file it already lists is picked again.
+ *
+ * - `skip` — leave the list as it is and tell the user the file is already
+ *   there. A repeat is matched on name, size and modification time, so two
+ *   genuinely different files that share a name are both kept.
+ * - `rename` — keep both, the newcomer renamed `scan (1).pdf`.
+ * - `replace` — swap the listed file for the newcomer.
+ *
+ * `rename` and `replace` match on the file name alone, since the collision
+ * they resolve is the one the user sees in the list.
+ */
+export type FileDropzoneDuplicates = "skip" | "rename" | "replace";

@@ -17,6 +17,9 @@ class TranslationMock {
   track(key: string) {
     return () => key;
   }
+  getLanguage() {
+    return "et" as const;
+  }
 }
 
 const breakpointMock = {
@@ -319,6 +322,108 @@ describe("FileDropzoneComponent", () => {
       );
     });
 
+    it("asks the picker for a folder with uploadFolder", () => {
+      expect(fileInput(fixture).hasAttribute("webkitdirectory")).toBe(false);
+
+      fixture.componentRef.setInput("uploadFolder", true);
+      fixture.detectChanges();
+
+      expect(fileInput(fixture).hasAttribute("webkitdirectory")).toBe(true);
+    });
+
+    it("renames a repeat instead of skipping it with duplicates=rename", () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("duplicates", "rename");
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("report.pdf")]);
+      selectFiles(fixture, [makeFile("report.pdf")]);
+      selectFiles(fixture, [makeFile("report.pdf")]);
+
+      expect(component.files().map((file) => file.name)).toEqual([
+        "report.pdf",
+        "report (1).pdf",
+        "report (2).pdf",
+      ]);
+    });
+
+    it("renames on the last dot, leaving the extension intact", () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("duplicates", "rename");
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("aruanne.2025.pdf")]);
+      selectFiles(fixture, [makeFile("aruanne.2025.pdf")]);
+
+      expect(component.files().map((file) => file.name)).toEqual([
+        "aruanne.2025.pdf",
+        "aruanne.2025 (1).pdf",
+      ]);
+    });
+
+    it("swaps the listed file with duplicates=replace", () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("duplicates", "replace");
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("report.pdf", 100), makeFile("muu.pdf")]);
+      selectFiles(fixture, [makeFile("report.pdf", 900)]);
+
+      expect(component.files().map((file) => [file.name, file.size])).toEqual([
+        ["muu.pdf", 100],
+        ["report.pdf", 900],
+      ]);
+    });
+
+    it("keeps the listed file when a kept rejection shares its name", () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("duplicates", "replace");
+      fixture.componentRef.setInput("keepRejectedFiles", true);
+      fixture.componentRef.setInput("maxSize", 500);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("report.pdf", 100)]);
+      selectFiles(fixture, [makeFile("report.pdf", 900)]);
+
+      expect(
+        component.files().map((file) => [file.name, file.size, file.isValid]),
+      ).toEqual([
+        ["report.pdf", 100, true],
+        ["report.pdf", 900, false],
+      ]);
+    });
+
+    it("renames a different file that shares a listed name", () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("duplicates", "rename");
+      fixture.detectChanges();
+
+      // `skip` would keep both under one name, matching on size and mtime too.
+      // `rename` goes by the name alone, because that is the collision the
+      // user sees in the list.
+      selectFiles(fixture, [makeFile("IMG_0001.jpg", 100)]);
+      selectFiles(fixture, [makeFile("IMG_0001.jpg", 900)]);
+
+      expect(component.files().map((file) => file.name)).toEqual([
+        "IMG_0001.jpg",
+        "IMG_0001 (1).jpg",
+      ]);
+    });
+
+    it("keeps the listed file when the replacement is rejected", () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("duplicates", "replace");
+      fixture.componentRef.setInput("maxSize", 500);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("report.pdf", 100)]);
+      selectFiles(fixture, [makeFile("report.pdf", 900)]);
+
+      expect(component.files().map((file) => [file.name, file.size])).toEqual([
+        ["report.pdf", 100],
+      ]);
+    });
+
     it("keeps a same-named file that differs in size", () => {
       fixture.componentRef.setInput("multiple", true);
       fixture.detectChanges();
@@ -421,6 +526,64 @@ describe("FileDropzoneComponent", () => {
       expect(
         fixture.debugElement.queryAll(By.css(".tedi-attachment--error")).length,
       ).toBe(1);
+    });
+
+    it("lists rejected files first with keepRejectedFiles", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("keepRejectedFiles", true);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [
+        makeFile("first.pdf"),
+        makeFile("bad.txt", 100, "text/plain"),
+        makeFile("second.pdf"),
+      ]);
+
+      // The value keeps the order they were picked in; only the list reorders.
+      expect(component.files().map((file) => file.name)).toEqual([
+        "first.pdf",
+        "bad.txt",
+        "second.pdf",
+      ]);
+      expect(
+        fixture.debugElement
+          .queryAll(By.css(".tedi-attachment__title"))
+          .map((el) => el.nativeElement.textContent.trim()),
+      ).toEqual(["bad.txt", "first.pdf", "second.pdf"]);
+    });
+
+    it("lists a rejected file first even without keepRejectedFiles", () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("files", [
+        { id: "1", name: "ok.pdf" },
+        { id: "2", name: "bad.png", isValid: false, error: "Vale laiend" },
+      ]);
+      fixture.detectChanges();
+
+      expect(
+        fixture.debugElement
+          .queryAll(By.css(".tedi-attachment__title"))
+          .map((el) => el.nativeElement.textContent.trim()),
+      ).toEqual(["bad.png", "ok.pdf"]);
+    });
+
+    it("offers a rejected file a dismiss icon rather than a bin", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("keepRejectedFiles", true);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [
+        makeFile("ok.pdf"),
+        makeFile("bad.txt", 100, "text/plain"),
+      ]);
+
+      expect(
+        fixture.debugElement
+          .queryAll(By.css(".tedi-attachment__actions tedi-icon"))
+          .map((el) => el.nativeElement.textContent.trim()),
+      ).toEqual(["close", "delete"]);
     });
 
     it("gives each individually rejected file its own message", () => {
@@ -722,7 +885,7 @@ describe("FileDropzoneComponent", () => {
       fixture.componentRef.setInput("maxSize", 500 * 1024);
       fixture.detectChanges();
 
-      expect(text("tedi-feedback-text")).toContain("500 KB");
+      expect(text("tedi-feedback-text")).toContain("500 kB");
 
       fixture.componentRef.setInput("maxSize", 10 * 1024 ** 2);
       fixture.detectChanges();
@@ -939,7 +1102,7 @@ describe("FileDropzoneComponent", () => {
       fixture.componentRef.setInput("showFileSize", true);
       fixture.detectChanges();
 
-      expect(text(".tedi-attachment__size")).toBe("1 KB");
+      expect(text(".tedi-attachment__size")).toBe("1 kB");
     });
 
     it("emits the removed file, and only for a real removal", () => {
@@ -1140,7 +1303,7 @@ describe("FileDropzoneComponent", () => {
       expect(dropEvent.defaultPrevented).toBe(true);
     });
 
-    it("matches an extensionless file on its MIME type", () => {
+    it("matches a file without an extension on its MIME type", () => {
       fixture.componentRef.setInput("accept", "text/plain");
       fixture.detectChanges();
 
@@ -1149,7 +1312,7 @@ describe("FileDropzoneComponent", () => {
       expect(component.files().map((file) => file.isValid)).toEqual([true]);
     });
 
-    it("rejects an extensionless file when accept lists extensions", () => {
+    it("rejects a file without an extension when accept lists extensions", () => {
       fixture.componentRef.setInput("accept", ".txt");
       fixture.componentRef.setInput("keepRejectedFiles", false);
       fixture.detectChanges();

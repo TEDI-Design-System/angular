@@ -126,7 +126,8 @@ export default {
   argTypes: {
     files: {
       description:
-        "Files held by the dropzone, and the value written by `formControl` / `ngModel`. Bind one-way to seed the list and leave the dropzone owning it, two-way to stay in sync. Bind a stable reference — an inline literal is a new array on every check and discards what the user added.",
+        "Files held by the dropzone, and the value written by `formControl` / `ngModel`. Bind one-way to seed the list and leave the dropzone owning it, two-way to stay in sync. Bind a stable reference — an inline literal is a new array on every check and discards what the user added." +
+        " The value keeps the order the files arrived in; the rendered list differs, showing files marked `isValid: false` first.",
       control: false,
       table: {
         category: "inputs",
@@ -185,9 +186,32 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    duplicates: {
+      description:
+        "What happens when a file the list already holds is picked again. `skip` leaves the list alone and says so, matching on name, size and modification time. `rename` keeps both, the newcomer renamed `scan (1).pdf`. `replace` swaps the listed file for the newcomer, and only a file that passes displaces its namesake." +
+        " `rename` and `replace` match on the name alone, since that is the collision the user sees.",
+      control: "inline-radio",
+      options: ["skip", "rename", "replace"],
+      table: {
+        category: "inputs",
+        type: { summary: '"skip" | "rename" | "replace"' },
+        defaultValue: { summary: '"skip"' },
+      },
+    },
+    uploadFolder: {
+      description:
+        "Lets the user pick a whole folder, which the browser hands over as the files inside it. Each one is still checked against `accept`, `maxSize` and `validator`. Applies to the file picker — dragging a folder in is up to the browser and generally does not work.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     keepRejectedFiles: {
       description:
-        "Keeps rejected files in the list, each carrying its own reason. Left off, a rejected file is discarded and every rejection is summarised in one message under the dropzone instead.",
+        "Keeps rejected files in the list, each carrying its own reason. Left off, a rejected file is discarded and every rejection is summarised in one message under the dropzone instead." +
+        " A kept file stays in the value too, marked `isValid: false`. A form control fails while one is listed, so it cannot be submitted; reading the files directly, filter on `isValid` before uploading.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -258,7 +282,8 @@ export default {
       table: { category: "outputs", type: { summary: "FileDropzoneFile" } },
     },
     filesChange: {
-      description: "Emits the new list whenever files are added or removed.",
+      description:
+        "Emits the new list whenever files are added or removed, in the order the files arrived in. It can include files marked `isValid: false` — see `keepRejectedFiles`.",
       table: { category: "outputs", type: { summary: "FileDropzoneFile[]" } },
     },
   },
@@ -350,6 +375,13 @@ export const DiscardingRejectedFiles: Story = {
  * The opt-in. A rejected file stays in the list carrying its own reason, so the
  * user can see which file failed and remove it. The dropzone's border stays
  * neutral — the failure belongs to the file, not the field.
+ *
+ * Rejected files lead the list and offer a dismiss icon instead of a bin. Only
+ * the display order changes: the value keeps the order the files arrived in.
+ *
+ * They stay in the value too, marked `isValid: false`. A form control fails
+ * while one is listed, so nothing can be submitted with it; if you read the
+ * files yourself, filter on `isValid` before uploading.
  */
 export const KeepingRejectedFiles: Story = {
   name: "Validation: keeping rejected files",
@@ -359,6 +391,12 @@ export const KeepingRejectedFiles: Story = {
     accept: ".pdf,.txt",
     files: [
       { id: "1", name: "Kodukülastusakt_Triin.pdf" },
+      {
+        id: "5",
+        name: "Kodukülastusakt_Triin_4.pdf",
+        isValid: false,
+        error: "Fail on liiga suur",
+      },
       { id: "2", name: "Kodukülastusakt_Triin_2.pdf" },
       { id: "3", name: "Kodukülastusakt_Triin_3.pdf" },
       {
@@ -399,9 +437,13 @@ export const WithValidator: Story = {
 
 /**
  * An `*tediFileDropzoneFile` template replaces the built-in attachment row. It
- * receives each file and a `remove` callback, so anything the `tedi-attachment`
- * supports — a leading icon, a progress bar, per-file feedback, extra
- * actions — can be composed per file.
+ * receives each file along with `remove`, `removeLabel` and `removeIcon`, so a
+ * custom row can carry the same remove control as the built-in one while
+ * composing anything `tedi-attachment` supports — a leading icon, a progress
+ * bar, per-file feedback, extra actions.
+ *
+ * Ordering stays with the dropzone: rejected files lead the list whichever
+ * template renders them.
  */
 export const WithCustomFileTemplate: Story = {
   render: () => {
@@ -416,7 +458,7 @@ export const WithCustomFileTemplate: Story = {
       template: `
       <div style="max-width: 420px">
         <tedi-file-dropzone multiple [files]="files" accept=".pdf,.mp4">
-          <ng-template tediFileDropzoneFile let-file let-remove="remove" let-removeLabel="removeLabel">
+          <ng-template tediFileDropzoneFile let-file let-remove="remove" let-removeLabel="removeLabel" let-removeIcon="removeIcon">
             <tedi-attachment
               [name]="file.name"
               icon="description"
@@ -426,8 +468,13 @@ export const WithCustomFileTemplate: Story = {
                 <tedi-progress-bar [value]="progress" />
               }
               <tedi-attachment-actions>
+                @if (file.isValid !== false && !file.isLoading) {
+                  <button tedi-button variant="neutral" [attr.aria-label]="'Laadi alla ' + file.name">
+                    <tedi-icon name="download" [size]="18" color="inherit" />
+                  </button>
+                }
                 <button tedi-button variant="neutral" [attr.aria-label]="removeLabel" (click)="remove()">
-                  <tedi-icon name="delete" [size]="18" color="inherit" />
+                  <tedi-icon [name]="removeIcon" [size]="18" color="inherit" />
                 </button>
               </tedi-attachment-actions>
             </tedi-attachment>

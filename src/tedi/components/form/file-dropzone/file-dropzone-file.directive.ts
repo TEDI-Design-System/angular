@@ -8,6 +8,8 @@ export interface FileDropzoneFileContext {
   remove: () => void;
   /** Translated accessible name for the remove control, including the file name. */
   removeLabel: string;
+  /** Icon the built-in row would use for the remove control. */
+  removeIcon: string;
 }
 
 /**
@@ -17,14 +19,14 @@ export interface FileDropzoneFileContext {
  * @example
  * ```html
  * <tedi-file-dropzone multiple [(files)]="files">
- *   <ng-template tediFileDropzoneFile let-file let-remove="remove" let-removeLabel="removeLabel">
+ *   <ng-template tediFileDropzoneFile let-file let-remove="remove" let-removeLabel="removeLabel" let-removeIcon="removeIcon">
  *     <tedi-attachment [name]="file.name" icon="description">
  *       @if (file.isLoading) {
  *         <tedi-progress-bar [value]="progressFor(file)" />
  *       }
  *       <tedi-attachment-actions>
  *         <button tedi-button variant="neutral" [attr.aria-label]="removeLabel" (click)="remove()">
- *           <tedi-icon name="delete" [size]="18" color="inherit" />
+ *           <tedi-icon [name]="removeIcon" [size]="18" color="inherit" />
  *         </button>
  *       </tedi-attachment-actions>
  *     </tedi-attachment>
