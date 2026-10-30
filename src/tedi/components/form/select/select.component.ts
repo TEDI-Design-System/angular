@@ -3,6 +3,7 @@ import {
   ConnectedPosition,
   OverlayModule,
 } from "@angular/cdk/overlay";
+import { FloatingOverlayDirective } from "../../overlay/floating-overlay/floating-overlay.directive";
 import { CdkListbox, CdkListboxModule } from "@angular/cdk/listbox";
 import {
   CdkVirtualScrollViewport,
@@ -90,6 +91,7 @@ export enum SpecialOptionControls {
   imports: [
     CommonModule,
     OverlayModule,
+    FloatingOverlayDirective,
     CdkListboxModule,
     ScrollingModule,
     ClosingButtonComponent,

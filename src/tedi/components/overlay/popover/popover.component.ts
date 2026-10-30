@@ -17,6 +17,8 @@ import {
   CdkConnectedOverlay,
   ConnectedOverlayPositionChange,
 } from "@angular/cdk/overlay";
+import { OVERLAY_ROOT_SELECTOR } from "../floating-overlay/floating-position-strategy";
+import { FloatingOverlayDirective } from "../floating-overlay/floating-overlay.directive";
 import {
   OverlayPosition,
   OverlaySide,
@@ -36,7 +38,7 @@ let popoverIdCounter = 0;
 @Component({
   standalone: true,
   selector: "tedi-popover",
-  imports: [OverlayModule],
+  imports: [OverlayModule, FloatingOverlayDirective],
   templateUrl: "./popover.component.html",
   styleUrl: "./popover.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -393,10 +395,10 @@ export class PopoverComponent {
    * Whether the target is inside this popover's own overlay or a child overlay
    * opened from within it — such interactions must not dismiss the popover.
    *
-   * Child overlays (e.g. a date-picker month dropdown) share the CDK overlay
-   * container but render in their own pane, stacked ON TOP (after this pane in
-   * DOM order). An overlay stacked BELOW (e.g. a tedi-modal hosting this
-   * popover) precedes this pane, so clicking it must dismiss.
+   * Child overlays (e.g. a date-picker month dropdown) render in their own pane,
+   * stacked ON TOP (after this pane in DOM order). An overlay stacked BELOW
+   * (e.g. a tedi-modal hosting this popover) precedes this pane, so clicking it
+   * must dismiss.
    */
   private isInsideOverlay(target: Node | null): boolean {
     if (!target || !(target instanceof Element)) return false;
@@ -405,7 +407,7 @@ export class PopoverComponent {
     if (!overlayEl) return false;
     if (overlayEl.contains(target)) return true;
 
-    if (!target.closest(".cdk-overlay-container")) return false;
+    if (!target.closest(OVERLAY_ROOT_SELECTOR)) return false;
 
     return !!(
       overlayEl.compareDocumentPosition(target) &

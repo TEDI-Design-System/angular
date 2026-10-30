@@ -25,6 +25,8 @@ import {
   ConnectedPosition,
   OverlayModule,
 } from "@angular/cdk/overlay";
+import { OVERLAY_ROOT_SELECTOR } from "../../overlay/floating-overlay/floating-position-strategy";
+import { FloatingOverlayDirective } from "../../overlay/floating-overlay/floating-overlay.directive";
 import { A11yModule } from "@angular/cdk/a11y";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import {
@@ -94,6 +96,7 @@ export type DateFieldSize = "default" | "small";
     CalendarComponent,
     DateInputComponent,
     OverlayModule,
+    FloatingOverlayDirective,
     A11yModule,
     TediTranslationPipe,
   ],
@@ -824,9 +827,9 @@ export class DateFieldComponent
   /**
    * Whether the scroll target is inside this field's own calendar overlay or a
    * nested overlay opened from within it (e.g. the year/month dropdown). Nested
-   * overlays share the CDK overlay container but render in their own pane
-   * stacked after this one in DOM order, so a `DOCUMENT_POSITION_FOLLOWING`
-   * check distinguishes them from unrelated ancestors that should dismiss.
+   * overlays render in their own pane stacked after this one in DOM order, so a
+   * `DOCUMENT_POSITION_FOLLOWING` check distinguishes them from unrelated
+   * ancestors that should dismiss.
    */
   private isInsideOverlay(target: Node | null): boolean {
     if (!target || !(target instanceof Element)) return false;
@@ -835,7 +838,7 @@ export class DateFieldComponent
     if (!overlayEl) return false;
     if (overlayEl.contains(target)) return true;
 
-    if (!target.closest(".cdk-overlay-container")) return false;
+    if (!target.closest(OVERLAY_ROOT_SELECTOR)) return false;
 
     return !!(
       overlayEl.compareDocumentPosition(target) &

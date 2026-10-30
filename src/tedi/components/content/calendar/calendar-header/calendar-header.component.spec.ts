@@ -85,7 +85,7 @@ describe("CalendarHeaderComponent", () => {
     overlayContainerElement.innerHTML = "";
   });
 
-  // The dropdown content renders inside the CDK overlay container, so the
+  // The dropdown content renders in an overlay outside the fixture, so the
   // dropdown must be opened via its trigger before its items can be queried.
   function openDropdown(triggerIndex: number): void {
     selectTriggers()[triggerIndex].click();
@@ -193,7 +193,7 @@ describe("CalendarHeaderComponent", () => {
   describe("dropdown selection emission", () => {
     function monthItems(): HTMLLIElement[] {
       return Array.from(
-        overlayContainerElement.querySelectorAll<HTMLLIElement>(
+        document.querySelectorAll<HTMLLIElement>(
           ".tedi-calendar-header__dropdown--month li[tedi-dropdown-item]",
         ),
       );
@@ -201,7 +201,7 @@ describe("CalendarHeaderComponent", () => {
 
     function yearItems(): HTMLLIElement[] {
       return Array.from(
-        overlayContainerElement.querySelectorAll<HTMLLIElement>(
+        document.querySelectorAll<HTMLLIElement>(
           ".tedi-calendar-header__dropdown--year li[tedi-dropdown-item]",
         ),
       );
@@ -279,7 +279,7 @@ describe("CalendarHeaderComponent", () => {
   describe("fully-disabled-month detection (dropdown items)", () => {
     function disabledMonthIndices(): number[] {
       return Array.from(
-        overlayContainerElement.querySelectorAll<HTMLElement>(
+        document.querySelectorAll<HTMLElement>(
           ".tedi-calendar-header__dropdown--month li",
         ),
       )
@@ -328,7 +328,7 @@ describe("CalendarHeaderComponent", () => {
   describe("fully-disabled-year detection (dropdown items)", () => {
     function yearItems(): HTMLElement[] {
       return Array.from(
-        overlayContainerElement.querySelectorAll<HTMLElement>(
+        document.querySelectorAll<HTMLElement>(
           ".tedi-calendar-header__dropdown--year li",
         ),
       );

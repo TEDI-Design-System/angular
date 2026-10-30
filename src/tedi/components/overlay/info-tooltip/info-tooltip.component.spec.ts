@@ -4,6 +4,7 @@ import { OverlayContainer } from "@angular/cdk/overlay";
 import { InfoTooltipComponent } from "./info-tooltip.component";
 import { TediTranslationService } from "../../../services";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
+import { OVERLAY_HOST_CLASS } from "../floating-overlay/floating-position-strategy";
 
 class TranslationMock {
   translate(key: string) {
@@ -80,7 +81,7 @@ describe("InfoTooltipComponent", () => {
     fixture.detectChanges();
 
     const overlayText =
-      overlayContainer.getContainerElement().textContent ?? "";
+      document.querySelector(`.${OVERLAY_HOST_CLASS}`)?.textContent ?? "";
     expect(overlayText).toContain("Tooltip content");
   });
 });

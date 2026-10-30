@@ -12,6 +12,7 @@ import { TediTranslationService } from "../../../services/translation/translatio
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
 import { ModalService } from "../../overlay/modal/modal.service";
+import { OVERLAY_HOST_CLASS } from "../../overlay/floating-overlay/floating-position-strategy";
 
 class TranslationMock {
   translate(key: string): string {
@@ -585,17 +586,16 @@ describe("DateFieldComponent", () => {
       const { component, fixture } = createField({ hideOnScroll: true });
       openAndAttach(component, fixture);
 
-      const container = document.querySelector(".cdk-overlay-container");
-      expect(container).toBeTruthy();
       const nestedPane = document.createElement("div");
+      nestedPane.classList.add(OVERLAY_HOST_CLASS);
       const nestedTarget = document.createElement("div");
       nestedPane.appendChild(nestedTarget);
-      container!.appendChild(nestedPane);
+      document.body.appendChild(nestedPane);
 
       nestedTarget.dispatchEvent(new Event("scroll", { bubbles: false }));
 
       expect(component.overlayOpen()).toBe(true);
-      container!.removeChild(nestedPane);
+      nestedPane.remove();
       closeAndDetach(component, fixture);
     });
 

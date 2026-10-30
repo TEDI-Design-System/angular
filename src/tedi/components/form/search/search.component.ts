@@ -31,6 +31,7 @@ import {
   ConnectedPosition,
   OverlayModule,
 } from "@angular/cdk/overlay";
+import { FloatingOverlayDirective } from "../../overlay/floating-overlay/floating-overlay.directive";
 import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
   ButtonComponent,
@@ -114,6 +115,7 @@ const SEARCH_OVERLAY_POSITIONS: ConnectedPosition[] = [
     SpinnerComponent,
     SearchSuggestionComponent,
     OverlayModule,
+    FloatingOverlayDirective,
     NgTemplateOutlet,
   ],
   providers: [
@@ -668,8 +670,9 @@ export class SearchComponent<T = unknown> implements ControlValueAccessor {
   }
 
   /**
-   * The panel is portalled into the overlay container, so it is not a descendant
-   * of the host — both roots have to be consulted before deciding focus left.
+   * The panel is portalled into an overlay outside the host, so it is not a
+   * descendant of it — both roots have to be consulted before deciding focus
+   * left.
    */
   onFocusOut(event: FocusEvent): void {
     const next = event.relatedTarget as Node | null;

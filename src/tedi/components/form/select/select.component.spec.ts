@@ -8,7 +8,7 @@ import {
 } from "@angular/core/testing";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
-import { OverlayContainer } from "@angular/cdk/overlay";
+import { OVERLAY_HOST_CLASS } from "../../overlay/floating-overlay/floating-position-strategy";
 import {
   SelectComponent,
   SelectInputSize,
@@ -1277,7 +1277,7 @@ describe("SelectComponent", () => {
       trigger.dispatchEvent(new MouseEvent("mouseenter"));
       fixture.detectChanges();
       return (
-        TestBed.inject(OverlayContainer).getContainerElement().textContent ?? ""
+        document.querySelector(`.${OVERLAY_HOST_CLASS}`)?.textContent ?? ""
       );
     };
 

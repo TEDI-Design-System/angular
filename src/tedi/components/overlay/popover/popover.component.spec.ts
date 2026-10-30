@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { OverlayContainer } from "@angular/cdk/overlay";
+import { OVERLAY_HOST_CLASS } from "../floating-overlay/floating-position-strategy";
 import { PopoverComponent, PopoverPosition } from "./popover.component";
 import { PopoverTriggerDirective } from "./popover-trigger/popover-trigger.directive";
 import { PopoverContentComponent } from "./popover-content/popover-content.component";
@@ -116,9 +117,7 @@ describe("PopoverComponent", () => {
 
     const containerId = component.containerId();
     expect(trigger?.getAttribute("aria-controls")).toBe(containerId);
-    expect(
-      overlayContainerElement.querySelector(`#${containerId}`),
-    ).toBeTruthy();
+    expect(document.querySelector(`#${containerId}`)).toBeTruthy();
 
     component.hidePopover();
     fixture.detectChanges();
@@ -400,7 +399,7 @@ describe("PopoverComponent", () => {
     });
 
     it("should close popover and focus trigger on Escape key", () => {
-      const container = overlayContainerElement.querySelector(
+      const container = document.querySelector(
         ".tedi-popover__container",
       ) as HTMLElement;
       const trigger = component.popoverTrigger().host.nativeElement;
@@ -416,7 +415,7 @@ describe("PopoverComponent", () => {
     });
 
     it("should handle Tab key when at last focusable element", () => {
-      const container = overlayContainerElement.querySelector(
+      const container = document.querySelector(
         ".tedi-popover__container",
       ) as HTMLElement;
 
@@ -438,7 +437,7 @@ describe("PopoverComponent", () => {
     });
 
     it("should handle Shift+Tab when at first focusable element", () => {
-      const container = overlayContainerElement.querySelector(
+      const container = document.querySelector(
         ".tedi-popover__container",
       ) as HTMLElement;
 
@@ -479,7 +478,7 @@ describe("PopoverComponent", () => {
       component.showPopover();
       fixture.detectChanges();
       component.onOverlayAttach();
-      container = overlayContainerElement.querySelector(
+      container = document.querySelector(
         ".tedi-popover__container",
       ) as HTMLElement;
       container.focus();
@@ -569,7 +568,7 @@ describe("PopoverComponent", () => {
       expect(component.arrowLeft()).not.toBeNull();
 
       component.arrowLeft.set(null);
-      overlayContainerElement.querySelector(".tedi-popover__arrow")?.remove();
+      document.querySelector(".tedi-popover__arrow")?.remove();
       internals().updateArrowPosition();
 
       expect(component.arrowLeft()).toBeNull();
@@ -619,7 +618,7 @@ describe("PopoverComponent", () => {
       fixture.detectChanges();
       component.onOverlayAttach();
 
-      const container = overlayContainerElement.querySelector(
+      const container = document.querySelector(
         ".tedi-popover__container",
       ) as HTMLElement;
       expect(container).toBeTruthy();
@@ -641,7 +640,8 @@ describe("PopoverComponent", () => {
       component.onOverlayAttach();
 
       const nestedOverlayItem = document.createElement("div");
-      overlayContainerElement.appendChild(nestedOverlayItem);
+      nestedOverlayItem.classList.add(OVERLAY_HOST_CLASS);
+      document.body.appendChild(nestedOverlayItem);
 
       const hideSpy = jest.spyOn(component, "hidePopover");
       nestedOverlayItem.dispatchEvent(new Event("scroll", { bubbles: false }));
@@ -689,7 +689,7 @@ describe("PopoverComponent", () => {
 
     it("should NOT close popover on mousedown inside container", () => {
       const hideSpy = jest.spyOn(component, "hidePopover");
-      const container = overlayContainerElement.querySelector(
+      const container = document.querySelector(
         ".tedi-popover__container",
       ) as HTMLElement;
 
@@ -701,11 +701,11 @@ describe("PopoverComponent", () => {
 
     it("should NOT close popover on mousedown in a nested overlay (e.g. a dropdown opened inside the popover)", () => {
       const hideSpy = jest.spyOn(component, "hidePopover");
-      // A child overlay (dropdown/select/tooltip) renders in its own pane
-      // within the shared CDK overlay container, not inside this popover's
-      // overlay element. Interacting with it must not dismiss the popover.
+      // A child overlay (dropdown/select/tooltip) renders in its own host
+      // after this popover's, not inside this popover's overlay element. Interacting with it must not dismiss the popover.
       const nestedOverlayItem = document.createElement("div");
-      overlayContainerElement.appendChild(nestedOverlayItem);
+      nestedOverlayItem.classList.add(OVERLAY_HOST_CLASS);
+      document.body.appendChild(nestedOverlayItem);
 
       const event = new MouseEvent("mousedown", { bubbles: true });
       nestedOverlayItem.dispatchEvent(event);
@@ -717,9 +717,9 @@ describe("PopoverComponent", () => {
 
     it("should close popover on mousedown in a parent overlay hosting it (e.g. inside a modal)", () => {
       const hideSpy = jest.spyOn(component, "hidePopover");
-      // A parent overlay (e.g. a tedi-modal that hosts this popover) shares the
-      // CDK overlay container but is stacked BELOW — its pane precedes this
-      // popover's pane in DOM order. Clicking it must dismiss the popover.
+      // A parent overlay (e.g. a tedi-modal that hosts this popover) lives in
+      // the CDK overlay container, which precedes this popover's pane in DOM
+      // order, so it is stacked BELOW. Clicking it must dismiss the popover.
       const parentOverlayItem = document.createElement("div");
       overlayContainerElement.insertBefore(
         parentOverlayItem,
@@ -736,8 +736,11 @@ describe("PopoverComponent", () => {
 
     it("should NOT close popover on focusin from a nested overlay", () => {
       const hideSpy = jest.spyOn(component, "hidePopover");
+      const nestedOverlayHost = document.createElement("div");
+      nestedOverlayHost.classList.add(OVERLAY_HOST_CLASS);
       const nestedOverlayItem = document.createElement("button");
-      overlayContainerElement.appendChild(nestedOverlayItem);
+      nestedOverlayHost.appendChild(nestedOverlayItem);
+      document.body.appendChild(nestedOverlayHost);
 
       const event = new FocusEvent("focusin", { bubbles: true });
       Object.defineProperty(event, "target", {
@@ -748,7 +751,7 @@ describe("PopoverComponent", () => {
 
       expect(hideSpy).not.toHaveBeenCalled();
 
-      nestedOverlayItem.remove();
+      nestedOverlayHost.remove();
     });
 
     it("should close popover on focusin outside", () => {
