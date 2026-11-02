@@ -493,6 +493,7 @@ export const Clearable: Story = {
 
 /** The clear button appears while the filled search field is hovered or focused. */
 export const ClearButtonOnInteraction: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     template: `
       <tedi-search

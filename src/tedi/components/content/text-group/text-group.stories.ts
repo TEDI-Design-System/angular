@@ -12,7 +12,7 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
-import { StatusBadgeComponent } from "@tedi-design-system/angular/community";
+import { StatusBadgeComponent } from "../../../../community/components/tags/status-badge/status-badge.component";
 import { StatusBadgeComponent as TediStatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 
