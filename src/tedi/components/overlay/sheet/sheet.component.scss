@@ -1,0 +1,279 @@
+$sheet-enter-duration: 0.35s;
+$sheet-enter-easing: cubic-bezier(0.32, 0.72, 0, 1);
+$sheet-fade-duration: 200ms;
+
+.tedi-sheet {
+  display: contents;
+}
+
+// The pane covers the viewport; only the backdrop and the panel take clicks.
+.cdk-overlay-pane.tedi-sheet-pane {
+  pointer-events: none;
+}
+
+.tedi-sheet__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: clip;
+  pointer-events: auto;
+
+  &::before {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background: var(--general-surface-overlay);
+    opacity: 0;
+    transition: opacity $sheet-fade-duration ease-out;
+  }
+
+  &[data-status="open"]::before {
+    opacity: 1;
+  }
+
+  &[hidden] {
+    display: none;
+  }
+
+  &--no-overlay {
+    pointer-events: none;
+
+    &::before {
+      content: none;
+    }
+
+    .tedi-sheet__panel {
+      pointer-events: auto;
+    }
+  }
+}
+
+.tedi-sheet__panel {
+  --tedi-sheet-radius: var(--sheet-header-radius-md);
+  --tedi-sheet-padding-x: var(--sheet-header-padding-md);
+  --tedi-sheet-padding-y: var(--sheet-header-padding-sm);
+  --tedi-sheet-header-min-height: var(--sheet-header-height);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 90dvh;
+  overflow: hidden;
+  outline: none;
+  background: var(--sheet-body-default);
+  border-top-left-radius: var(--tedi-sheet-radius);
+  border-top-right-radius: var(--tedi-sheet-radius);
+  box-shadow: 0 1px 5px 0 var(--general-effect-colors-elevation-general-primary);
+  transform: translateY(100%);
+  transition:
+    transform $sheet-enter-duration $sheet-enter-easing,
+    height $sheet-enter-duration $sheet-enter-easing;
+
+  &[data-status="open"] {
+    transform: translateY(0);
+  }
+
+  &--padding-small {
+    --tedi-sheet-padding-x: var(--sheet-header-padding-sm);
+  }
+
+  &--radius-card {
+    --tedi-sheet-radius: var(--card-radius-rounded);
+  }
+
+  &--radius-none {
+    --tedi-sheet-radius: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tedi-sheet__overlay::before,
+  .tedi-sheet__panel {
+    transition: none;
+  }
+}
+
+.tedi-sheet__handle-zone {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 6rem;
+  height: var(--tedi-dimensions-13);
+  padding-top: var(--tedi-dimensions-04);
+  touch-action: none;
+  cursor: grab;
+  transform: translateX(-50%);
+}
+
+.tedi-sheet__handle {
+  width: 2rem;
+  height: var(--tedi-borders-04);
+  background: var(--drag-indicator-light);
+  border-radius: var(--tedi-dimensions-13);
+}
+
+.tedi-sheet-header {
+  display: flex;
+  gap: var(--layout-grid-gutters-08);
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--tedi-sheet-header-min-height);
+  padding: var(--tedi-sheet-padding-y) var(--tedi-sheet-padding-x);
+  border-top-left-radius: var(--tedi-sheet-radius);
+  border-top-right-radius: var(--tedi-sheet-radius);
+
+  &--brand {
+    color: var(--general-text-white);
+    background: var(--sheet-header-background-brand);
+
+    .tedi-sheet-header__close {
+      --general-icon-primary: var(--button-main-neutral-inverted-text-default);
+
+      background-color: var(
+        --button-main-neutral-inverted-icon-only-background-default
+      );
+      border-color: transparent;
+
+      @each $state in hover, active {
+        &:#{$state} {
+          --general-icon-primary: var(
+            --button-main-neutral-inverted-text-#{$state}
+          );
+
+          background-color: var(
+            --button-main-neutral-inverted-icon-only-background-#{$state}
+          );
+        }
+      }
+
+      &:focus-visible {
+        outline-color: var(--button-main-neutral-inverted-border-focus);
+      }
+    }
+  }
+
+  &--default {
+    color: var(--general-text-primary);
+    background: var(--sheet-header-background-default);
+    border-bottom: var(--tedi-borders-01) solid var(--sheet-border);
+  }
+
+  &--center {
+    position: relative;
+
+    .tedi-sheet-header__title {
+      text-align: center;
+    }
+
+    .tedi-sheet-header__start,
+    .tedi-sheet-header__actions {
+      position: absolute;
+      inset-block-start: 50%;
+      transform: translateY(-50%);
+    }
+
+    .tedi-sheet-header__start {
+      inset-inline-start: var(--tedi-sheet-padding-x);
+    }
+
+    .tedi-sheet-header__actions {
+      inset-inline-end: var(--tedi-sheet-padding-x);
+    }
+  }
+
+  &__title {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__content {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &__start,
+  &__actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: var(--layout-grid-gutters-08);
+    align-items: center;
+  }
+
+  &__start:empty {
+    display: none;
+  }
+
+  // Flipped: on a bottom sheet, expanding moves up.
+  &__collapse-toggle > * {
+    scale: 1 -1;
+  }
+}
+
+.tedi-sheet__panel--draggable .tedi-sheet-header {
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+
+// The panel holds the pointer capture from the press, so its cursor is the one shown.
+.tedi-sheet__panel--grabbing,
+.tedi-sheet__panel.tedi-sheet__panel--grabbing * {
+  cursor: grabbing;
+}
+
+.tedi-sheet-body {
+  flex: 1 1 auto;
+  padding: var(--tedi-sheet-padding-x);
+  overflow-y: auto;
+  background: var(--sheet-body-default);
+
+  &--no-padding {
+    padding: 0;
+  }
+}
+
+.tedi-sheet-footer {
+  display: flex;
+  gap: var(--button-gutter-x);
+  align-items: center;
+  padding: var(--tedi-sheet-padding-x);
+  background: var(--sheet-footer-background);
+  border-top: var(--tedi-borders-01) solid var(--sheet-border);
+
+  &[hidden] {
+    display: none;
+  }
+
+  &--center {
+    justify-content: center;
+  }
+
+  &--right {
+    justify-content: flex-end;
+  }
+
+  &:has(> [tedi-sheet-footer-end]) {
+    justify-content: flex-start;
+  }
+
+  > [tedi-sheet-footer-end]:not(
+      [tedi-sheet-footer-end] ~ [tedi-sheet-footer-end]
+    ) {
+    margin-inline-start: auto;
+  }
+
+  &--full-width > :not([tedi-sheet-footer-end]) {
+    flex: 1 1 0;
+  }
+}

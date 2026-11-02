@@ -200,6 +200,15 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   `icon` input, not from projection, so you cannot swap in your own `tedi-icon` or add trailing
   content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
   name — if the icon carries meaning the text doesn't, compose a heading and an icon yourself.
+- **`tedi-sheet` content goes in `<ng-template tediSheetContent>`.** The sheet renders it into an
+  overlay only while open, so content placed directly in `<tedi-sheet>` stays on the page. The
+  header, body, footer, `tediSheetTrigger` and `tediSheetClose` find the sheet through DI and must be
+  inside it. Header slots are attributes on the projected elements (`tedi-sheet-header-start`,
+  `tedi-sheet-header-end`, `tedi-sheet-header-actions`), and so is the footer's end edge
+  (`tedi-sheet-footer-end`). The exception is `tedi-sheet-header-content`, which replaces the whole
+  header layout: it is a directive, so import `SheetHeaderContentDirective` or the element is
+  silently dropped, and the sheet is then unlabelled until you set `ariaLabelledBy` or `ariaLabel`
+  on `tediSheetContent`.
 
 ### Clear buttons
 
@@ -258,6 +267,10 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   can wrap: it centres the icon on the *first line* rather than the middle of the block. A heading
   value in `modifiers` overrides `element`'s typography and the icon follows it, so
   `element="h2" modifiers="h4"` is an `<h2>` that looks like an `h4` throughout.
+- **`tedi-sheet` for mobile bottom sheets, not `ModalService` with `position: 'bottom'`.** The sheet
+  adds drag to close, snap points and a collapsed state, and with `showOverlay`, `trapFocus` and
+  `lockScroll` off (plus `closeOnBackdropClick` off) it stays docked while the page behind remains
+  usable.
 
 ### Responsive behaviour that isn't an input
 

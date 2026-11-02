@@ -59,4 +59,26 @@ describe("BreakpointService", () => {
     expect(service.isBelowBreakpoint("lg")()).toBe(true);
     expect(service.isBelowBreakpoint("md")()).toBe(false);
   });
+
+  it("resolves a breakpoint object to the nearest value at or below the current breakpoint", () => {
+    const service = TestBed.inject(BreakpointService);
+    const value = { xs: "a", md: "b", xl: "c" };
+
+    expect(service.resolveBreakpointInput(value)).toBe("a");
+
+    state$.next({
+      matches: true,
+      breakpoints: {
+        "(min-width: 0rem)": true,
+        "(min-width: 36rem)": true,
+        "(min-width: 48rem)": true,
+        "(min-width: 62rem)": true,
+        "(min-width: 75rem)": false,
+        "(min-width: 87.5rem)": false,
+      },
+    });
+
+    expect(service.resolveBreakpointInput(value)).toBe("b");
+    expect(service.resolveBreakpointInput({ xs: 0, sm: undefined })).toBe(0);
+  });
 });

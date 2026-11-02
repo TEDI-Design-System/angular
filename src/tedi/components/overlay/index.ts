@@ -4,3 +4,4 @@ export * from "./modal";
 export * from "./tooltip";
 export * from "./info-tooltip";
 export * from "./popover";
+export * from "./sheet";
