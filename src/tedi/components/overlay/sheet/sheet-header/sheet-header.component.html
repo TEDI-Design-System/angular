@@ -1,0 +1,99 @@
+@if (customContent()) {
+  <ng-content select="[tedi-sheet-header-content]" />
+} @else {
+  <div class="tedi-sheet-header__start">
+    <ng-content select="[tedi-sheet-header-start]" />
+  </div>
+  @if (title()) {
+    @switch (headingLevel()) {
+      @case ("h1") {
+        <h1
+          tedi-text
+          modifiers="h6"
+          color="inherit"
+          class="tedi-sheet-header__title"
+          [id]="sheet.titleId"
+        >
+          {{ title() }}
+        </h1>
+      }
+      @case ("h2") {
+        <h2
+          tedi-text
+          modifiers="h6"
+          color="inherit"
+          class="tedi-sheet-header__title"
+          [id]="sheet.titleId"
+        >
+          {{ title() }}
+        </h2>
+      }
+      @case ("h4") {
+        <h4
+          tedi-text
+          modifiers="h6"
+          color="inherit"
+          class="tedi-sheet-header__title"
+          [id]="sheet.titleId"
+        >
+          {{ title() }}
+        </h4>
+      }
+      @case ("h5") {
+        <h5
+          tedi-text
+          modifiers="h6"
+          color="inherit"
+          class="tedi-sheet-header__title"
+          [id]="sheet.titleId"
+        >
+          {{ title() }}
+        </h5>
+      }
+      @case ("h6") {
+        <h6
+          tedi-text
+          modifiers="h6"
+          color="inherit"
+          class="tedi-sheet-header__title"
+          [id]="sheet.titleId"
+        >
+          {{ title() }}
+        </h6>
+      }
+      @default {
+        <h3
+          tedi-text
+          modifiers="h6"
+          color="inherit"
+          class="tedi-sheet-header__title"
+          [id]="sheet.titleId"
+        >
+          {{ title() }}
+        </h3>
+      }
+    }
+  }
+  <div class="tedi-sheet-header__actions">
+    <ng-content select="[tedi-sheet-header-end]" />
+    @if (collapsible()) {
+      <button
+        tedi-collapse-button
+        class="tedi-sheet-header__collapse-toggle"
+        [hideText]="true"
+        [open]="!sheet.collapsed()"
+        [inverted]="variant() === 'brand'"
+        [ariaLabel]="collapseToggleLabel()"
+        (openChange)="sheet.collapsed.set(!$event)"
+      ></button>
+    }
+    <ng-content select="[tedi-sheet-header-actions]" />
+    @if (closeButton()) {
+      <button
+        tedi-closing-button
+        class="tedi-sheet-header__close"
+        (click)="sheet.close()"
+      ></button>
+    }
+  </div>
+}
