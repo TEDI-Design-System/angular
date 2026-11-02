@@ -1,6 +1,6 @@
 # Create TEDI Angular Storybook Stories
 
-Target component: `$ARGUMENTS`
+Target: the component given in the task.
 
 ## Workflow
 
@@ -8,7 +8,7 @@ Target component: `$ARGUMENTS`
 
 1. Read the component's `.component.ts` to understand all inputs, outputs, types, and variants.
 2. Read the component's `.component.html` for content projection slots.
-3. **Figma is the source of truth for stories.** If the component or its stories file contains a Figma link, use `figma-desktop` MCP to fetch the design. If no link exists, ask the user for one.
+3. **Figma is the source of truth for stories.** If the component or its stories file contains a Figma link, use the Figma MCP server to fetch the design. If no link exists, ask the user for one.
 4. Check if TEDI React (`../react/src/tedi/components/`) has stories for the equivalent component — use as reference for story coverage.
 
 ### 2. Map Figma Sections to Stories
@@ -31,7 +31,7 @@ Rules:
 
   Required imports: `RowComponent`, `ColComponent`, `TextComponent` from `@tedi-design-system/angular/tedi`.
 
-  Define states as a constant and iterate with `*ngFor`:
+  Define states as a constant and iterate with `@for`:
   ```typescript
   const PSEUDO_STATE = ['Default', 'Hover', 'Active', 'Focus', 'Disabled'];
 
@@ -47,17 +47,19 @@ Rules:
       props: { PSEUDO_STATE },
       template: `
         <tedi-row [cols]="1" [gapY]="3">
-          <tedi-row cols="1" [sm]="{ cols: 6 }" *ngFor="let state of PSEUDO_STATE;" alignItems="center">
-            <tedi-col width="1">
-              <p tedi-text modifiers="bold">{{ state }}</p>
-            </tedi-col>
-            <tedi-col width="5">
-              <tedi-component
-                [id]="state"
-                [disabled]="state === 'Disabled'"
-              />
-            </tedi-col>
-          </tedi-row>
+          @for (state of PSEUDO_STATE; track state) {
+            <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+              <tedi-col width="1">
+                <p tedi-text modifiers="bold">{{ state }}</p>
+              </tedi-col>
+              <tedi-col width="5">
+                <tedi-component
+                  [id]="state"
+                  [disabled]="state === 'Disabled'"
+                />
+              </tedi-col>
+            </tedi-row>
+          }
         </tedi-row>
       `,
     }),
@@ -87,6 +89,21 @@ Rules:
     <!-- one row per state -->
   </tedi-row>
   ```
+
+- **Composition, not inline styles.** Lay out examples with core utility classes (`flex`,
+  `align-items-center`, `gap-3`), `tedi-row`/`tedi-col` or `[tediVerticalSpacing]`, never
+  `style="..."`. Compose with the TEDI components the Figma example instances (a label/value pair is
+  `tedi-text-group`). If the same layout keeps coming back, the component is missing a sub-component.
+  Wide responsive content (tabs, tables) goes in a flex `div`, not a `tedi-col`: a grid track can't
+  shrink below its content, so the component never gets a narrow width to collapse into.
+- **No component machinery in a stories file.** If a story needs hand-written ARIA wiring, keyboard
+  handling, overlay positioning or focus management, the component is missing that behaviour. Raise
+  it instead of building it in the story: stories have no tests or API review. Never put a code
+  snippet in `docs.source` that you haven't run.
+- **Reactive forms state.** Show `value` / `touched` / `dirty` in a `<tedi-alert type="info">` with a
+  `<pre tedi-text modifiers="small">` and the `json` pipe, laid out with `tedi-row`/`tedi-col`. Import
+  `RowComponent`, `ColComponent`, `AlertComponent` and `TextComponent` in
+  `moduleMetadata`.
 
 ### 3. Determine the Story Category
 
@@ -130,6 +147,13 @@ export default {
   },
 } as Meta<ComponentName>;
 ```
+
+**Status badges** (`parameters.status.type`, registered in `.storybook/preview.tsx`): TEDI-Ready
+stories get no readiness badge. Add `breakpointSupport` for breakpoint-aware inputs,
+`mobileViewDifference` when the mobile layout differs, `devComponent` for dev-only components,
+`partiallyTediReady` when a dependency isn't built yet, and `deprecated` when deprecating
+([deprecation.md](deprecation.md)). `existsInTediReady` marks community stories that have a
+TEDI-Ready replacement, and `internalComponent` components not exported to consumers.
 
 **Figma link (required).** Place the link as a JSDoc anchor directly above `export default` — Storybook renders it at the top of the Docs page. This is the convention used by every TEDI-Ready story. Format:
 
@@ -218,6 +242,8 @@ render: (args) => ({
 - [ ] Figma link is in the JSDoc comment above `export default` (format: `<a href="..." target="_blank">Figma ↗</a>`)
 - [ ] Every `argTypes` description is one sentence; every story docblock either says something invisible in the rendered story or does not exist (see section 8)
 - [ ] No public input is missing an `argTypes` entry — aliased inputs are keyed by their alias (`invalid`, not `invalidInput`)
+- [ ] No inline `style` in story markup, and no hand-written ARIA, keyboard or overlay code in the stories file (see section 2)
+- [ ] Disabled, loading, error and empty states the component supports have a story, even if Figma omits them; place these after the Figma-ordered stories
 
 ### 7. argTypes Convention
 
@@ -262,9 +288,9 @@ themselves on screen. Add a docblock only for behaviour the reader cannot see: a
 appears after an interaction, a value that replaces rather than extends, a required input with no
 visible consequence. One sentence, two at the absolute most.
 
-Before writing any docblock, apply the deletion test: *if I delete this, what does the reader get
-wrong?* No concrete answer means delete it. The same test decides how long an `argTypes` description
-is — never whether it exists.
+Apply the deletion test ([best-practices.md → Comments and JSDoc](best-practices.md#comments-and-jsdoc))
+before writing any docblock. It also decides how long an `argTypes` description is, never whether
+it exists.
 
 Specific things not to write, all of which have shipped and been sent back:
 

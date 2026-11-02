@@ -69,6 +69,15 @@ export class MyControlComponent implements ControlValueAccessor {
 - Effects in constructor auto-clean up — no need for takeUntilDestroyed
 - Use effects for syncing derived state (e.g., selected date → input display value)
 
+### Forwarding Slots Through a Wrapper
+Don't re-project consumer content through a wrapper's `<ng-content>` into an inner component.
+`select` slots are resolved at compile time (with two slots for the same selector, only the first
+claims the content, even inside an inactive `@if`), and the inner component's `contentChild()` does
+not see re-projected content. Capture the consumer's content as a `TemplateRef` with a structural
+directive on the wrapper, then either pass it to a `TemplateRef` input or render it with
+`ngTemplateOutlet` into the inner component's own slot.
+`tedi-table` does the latter for `tediPaginationResults` → `tedi-pagination`.
+
 ## Responsive Inputs (Breakpoint Support)
 
 **Always check the TEDI React equivalent before settling on an API.** If the React component uses `BreakpointSupport<T>` / `useBreakpointProps` on a prop, the Angular component should expose breakpoint support on the equivalent input. Skipping this leaves the Angular library behind on responsive behavior and forces consumers to recreate it manually.
@@ -77,7 +86,7 @@ Two patterns exist for this — pick by need:
 
 ### Pattern A: Per-input `BreakpointInput<T>` (preferred when one or two inputs need to be responsive)
 
-Use this when a single input (e.g., a flag, count, or variant) should vary by breakpoint without restating sibling inputs. Reference: `src/tedi/components/content/carousel/carousel-content/carousel-content.component.ts:46-55`, `src/tedi/components/form/time-field/time-field.component.ts` (`useNativePicker`).
+Use this when a single input (e.g., a flag, count, or variant) should vary by breakpoint without restating sibling inputs. Reference: `src/tedi/components/form/date-field/date-field.component.ts` (`numberOfMonths`, `enableCalendar`), `src/tedi/components/content/carousel/carousel-content/carousel-content.component.ts`.
 
 ```typescript
 import {
@@ -86,15 +95,15 @@ import {
   BreakpointService,
 } from "../../../services/breakpoint/breakpoint.service";
 
-readonly useNativePicker = input(
-  { xs: false },
+readonly enableCalendar = input(
+  { xs: true },
   { transform: (v: BreakpointInput<boolean>) => breakpointInput(v) },
 );
 
 private readonly breakpointService = inject(BreakpointService);
 
-readonly useNativePickerResolved = computed(() => {
-  const v = this.useNativePicker();
+readonly enableCalendarResolved = computed(() => {
+  const v = this.enableCalendar();
   if (v.xxl !== undefined && this.breakpointService.isAboveBreakpoint("xxl")()) return v.xxl;
   if (v.xl  !== undefined && this.breakpointService.isAboveBreakpoint("xl")())  return v.xl;
   if (v.lg  !== undefined && this.breakpointService.isAboveBreakpoint("lg")())  return v.lg;
@@ -107,8 +116,8 @@ readonly useNativePickerResolved = computed(() => {
 Consumer side:
 
 ```html
-<tedi-time-field [useNativePicker]="{ xs: true, md: false }" />
-<tedi-time-field [useNativePicker]="true" />
+<tedi-date-field [enableCalendar]="{ xs: false, md: true }" />
+<tedi-date-field [enableCalendar]="false" />
 ```
 
 Notes:
@@ -170,7 +179,7 @@ Consumer side:
 
 ### Storybook
 
-- Add `parameters.status: { type: ["breakpointSupport"] }` to the meta so the badge shows up.
+- Add the `breakpointSupport` status badge ([stories.md](stories.md) section 4).
 - For pattern A inputs, set the argType `type.summary` to `"BreakpointInput<T>"` with a detail listing both shapes.
 - For pattern B, document the per-breakpoint inputs (`xs`, `sm`, `md`, `lg`, `xl`, `xxl`) in argTypes and category them under `"breakpoint inputs"`.
 - Add at least one story that demonstrates a responsive case (e.g., `WithResponsiveX`).
@@ -178,22 +187,21 @@ Consumer side:
 ### Documenting it for consumers
 
 Breakpoint-aware inputs are documented in the **JSDoc**, not in the consumer skill, because that is
-what ships in the type bundle. Say which shapes the input accepts and give the object form once:
+what ships in the type bundle. Mention the breakpoint object in the same sentence:
 
 ```ts
 /**
- * Use the OS-native picker instead of the custom calendar.
- * Accepts a plain value or a breakpoint object, e.g. `{ xs: true, md: false }`.
- * @default false
+ * Shows the calendar picker; accepts a breakpoint object such as `{ xs: false, md: true }`.
+ * @default true
  */
-readonly useNativePicker = input(
-  { xs: false },
+readonly enableCalendar = input(
+  { xs: true },
   { transform: (v: BreakpointInput<boolean>) => breakpointInput(v) },
 );
 ```
 
 Keep the `breakpointInput()` transform from Pattern A. Declaring the input as a bare
-`input<BreakpointInput<boolean>>(false)` skips normalization, so a consumer passing a plain `true`
+`input<BreakpointInput<boolean>>(true)` skips normalization, so a consumer passing a plain `false`
 leaves the value un-normalized and the resolver's `v.xs` lookup reads `undefined`.
 
 The consumer skill covers the *pattern* once (SKILL.md → Component Patterns) and does not repeat it
@@ -211,6 +219,64 @@ per component. See **contributing SKILL.md → Consumer-Facing Docs**.
 | CSS classes | BEM with `tedi-` prefix | `.tedi-button__icon--large` |
 | Enums/Types | PascalCase | `ButtonVariant` |
 
+## Input API
+
+Check every public `input()` / `model()` / `output()` before it ships. Each one is API that consumers
+will depend on, so removing it later is a breaking change.
+
+- **Every input has a consumer who needs it.** If its own JSDoc has to explain that it does nothing
+  useful, delete the input.
+- **Match sibling controls.** Compare with components in the same category: aliases and spelling
+  (`readonly` attribute *and* `[readOnly]`, as on `tedi-text-field`), `size` / `disabled` / `invalid`
+  inheritance from `tedi-form-field`, and how feedback is composed. A form control that takes
+  `error` / `hint` strings while its siblings take a projected `tedi-feedback-text` needs a reason
+  in the PR description.
+- **Check parity with TEDI React** (`../react/src/tedi/components/`) for names, units and defaults.
+  Read the React source before writing down any claim about how React differs.
+- **The documented `@default` is the real default.** An input that defaults to `undefined` so it can
+  inherit is documented as inheriting, not with the value it ends up resolving to.
+
+## Comments and JSDoc
+
+Apply the deletion test to every line: *if I delete this, what does the reader get wrong?* No
+concrete answer means delete it.
+
+**Input JSDoc** is one sentence, at most three lines not counting block tags (`@default`,
+`@deprecated`). A non-obvious default may get one clause of why. Leave out:
+
+- How it works inside ("prepended to the button's accessible name", "rendered in whichever unit
+  reads best").
+- Advice that applies to every Angular input ("bind a stable reference").
+- The same caveat repeated on several inputs. If it applies to more than one, it belongs in the
+  consumer skill once.
+- Telling the consumer to use something else ("use this instead of projecting a
+  `tedi-feedback-text`"). That is composition guidance (`@deprecated` naming the replacement is the exception), so it
+  goes in the consumer skill.
+- Behaviour that is logically necessary ("counts characters, not markup"), comparisons to other
+  components, and restating the member's name (`/** Toggles the value. */` above `toggle()`).
+
+```typescript
+// ❌
+/**
+ * Allowed file types as a comma-separated list of extensions and MIME types
+ * (`".pdf,.txt"`, `"image/png"`, `"image/*"`). Forwarded to the input's
+ * `accept` attribute and re-checked on selection.
+ *
+ * Applies to what is picked next. Files already listed keep the verdict they
+ * were given, so clear them yourself if you tighten this while they are
+ * listed.
+ */
+readonly accept = input<string>();
+
+// ✅
+/** Allowed file types as comma-separated extensions and MIME types (`.pdf`, `image/*`). */
+readonly accept = input<string>();
+```
+
+**Comments in code, templates and SCSS** explain a *why* the code can't show, in one line where
+possible. Don't comment a member whose name already says what it does (`isStacked`,
+`clearRejectionWhenResolved`), describe private wiring, or explain why something is private.
+
 ## Styling
 
 ### SCSS Rules
@@ -221,7 +287,7 @@ per component. See **contributing SKILL.md → Consumer-Facing Docs**.
 - Use design tokens from `@tedi-design-system/core` for colors, spacing, typography.
 - Never use hardcoded color values — always reference tokens.
 - Never use fallback values in CSS `var()` — write `var(--token-name)`, not `var(--token-name, fallback)`.
-- No obvious comments — do not add comments that restate what a selector, class name, or variable already says (e.g., `// Primary variant` above `&--primary`, or `// Disabled state` above `&:disabled`). Only comment when the logic isn't self-evident.
+- No obvious comments: do not add comments that restate what a selector, class name, or variable already says (e.g., `// Primary variant` above `&--primary`, or `// Disabled state` above `&:disabled`). Only comment when the logic isn't self-evident. See [Comments and JSDoc](#comments-and-jsdoc).
 - Use `ViewEncapsulation.None` — scope styles via BEM naming, not Angular encapsulation.
 
 ### Style Targeting: Classes Over Element Selectors
@@ -252,6 +318,24 @@ tedi-modal-header { padding: var(--token); }
 // OK: cdk-dialog-container is from Angular CDK, we can't add classes to its host
 cdk-dialog-container { outline: none; }
 ```
+
+### Component Styles Load Only When the Component Renders
+Angular injects a component's stylesheet when the component is first instantiated, and
+`src/styles/index.scss` doesn't bundle component styles. So:
+
+- **Don't borrow another component's BEM classes** (`tedi-button tedi-button--neutral` on your
+  host). If that component isn't on the page, its rules don't exist. Reuse its look through the same
+  core tokens in your own SCSS, or compose the component itself.
+- **`.cdk-overlay-container` defaults to `z-index: 1000`**, below every `--z-index-*` token.
+  `src/styles/cdk.scss` raises it to `var(--z-index-modal)` globally; don't repeat the rule in
+  component SCSS.
+
+### Custom Properties Resolve Where They Are Declared
+A `var()` or relative unit inside a custom property is resolved on the element that declares it. A
+host binding like `[style.--_min-height]="'calc(' + rows + ' * 1lh + var(--_padding-y))'"` resolves
+`--_padding-y` on the host, where it doesn't exist. Bind the raw number from the host
+(`[style.--_min-rows]`) and do the `calc()` in the descendant's SCSS, where the other values are in
+scope.
 
 ### Icon Color Inheritance Inside Parent Components
 
@@ -284,157 +368,22 @@ This lets the consumer's chosen color (e.g., `color="brand"`) apply in the defau
 .tedi-button {
   display: inline-flex;
   align-items: center;
-  gap: var(--tedi-spacing-2);
+  gap: var(--layout-grid-gutters-04);
 
   &__icon {
     flex-shrink: 0;
   }
 
   &--primary {
-    background-color: var(--tedi-color-primary);
+    background-color: var(--button-main-primary-background-default);
   }
 }
 ```
 
-## Testing Patterns
+## Testing and Storybook
 
-### Basic Component Test
-```typescript
-describe('ComponentNameComponent', () => {
-  let fixture: ComponentFixture<ComponentNameComponent>;
-  let component: ComponentNameComponent;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [ComponentNameComponent],
-      providers: [
-        { provide: TediTranslationService, useClass: TranslationMock },
-        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: 'et' },
-      ],
-    });
-    fixture = TestBed.createComponent(ComponentNameComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-});
-```
-
-### Testing Inputs
-```typescript
-fixture.componentRef.setInput('variant', 'secondary');
-fixture.detectChanges();
-```
-
-### Testing Form Controls
-Use a test host component:
-```typescript
-@Component({
-  standalone: true,
-  imports: [MyControlComponent, ReactiveFormsModule],
-  template: `<tedi-my-control [formControl]="control" />`
-})
-class TestHostComponent {
-  control = new FormControl<string>('');
-}
-```
-
-### Testing Keyboard Navigation
-```typescript
-const el = fixture.debugElement.query(By.css('.tedi-component'));
-el.triggerEventHandler('keydown', new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-fixture.detectChanges();
-```
-
-### Testing Accessibility
-- Verify ARIA attributes are set correctly.
-- Verify role attributes on interactive elements.
-- Verify focus moves correctly on keyboard events.
-- Verify `aria-live` regions update on state changes.
-
-### Required Providers
-- `TediTranslationService` → mock with `TranslationMock` class (translate returns key, track returns () => key)
-- `TEDI_TRANSLATION_DEFAULT_TOKEN` → provide `'et'` as value
-- `LiveAnnouncer` → mock when component uses screen reader announcements (e.g., number-field)
-- CDK Overlay → mock completely for overlay/toast service tests
-
-### Common Pitfalls
-- Services with static state (e.g., ToastService) need reset in `beforeEach`
-- Use `fixture.componentRef.setInput()` to set signal inputs, NOT direct property assignment
-- Use `fakeAsync`/`tick` for components with setTimeout or animations, clean up in `afterEach`
-- Import all child components in TestBed `imports` array
-
-## Storybook Stories
-
-### Structure
-```typescript
-export default {
-  title: 'TEDI-Ready/Components/Category/ComponentName', // Content/Layout/Base groups skip the Components/ segment
-  component: ComponentNameComponent,
-  decorators: [
-    moduleMetadata({
-      imports: [ComponentNameComponent, /* dependencies */],
-    }),
-  ],
-  parameters: {},
-  argTypes: {
-    // Every public input/model must have an entry
-    inputName: {
-      description: 'What this input does',
-      control: { type: 'radio' },
-      options: ['option1', 'option2'],
-      table: {
-        category: 'inputs',
-        type: { summary: 'TypeName' },
-        defaultValue: { summary: 'option1' },
-      },
-    },
-  },
-} as Meta<ComponentNameComponent>;
-
-export const Default: StoryObj<ComponentNameComponent> = {
-  args: { inputName: 'option1' },
-};
-
-export const WithReactiveForms: StoryObj<ComponentNameComponent> = {
-  render: () => {
-    const control = new FormControl('');
-
-    return {
-      props: { control },
-      template: `
-        <tedi-row cols="1" [gapY]="3">
-          <tedi-col>
-            <tedi-my-control [formControl]="control" />
-          </tedi-col>
-          <tedi-col>
-            <tedi-alert type="info" [showClose]="false">
-              <pre tedi-text modifiers="small">{{ {
-  value: control.value,
-  touched: control.touched,
-  dirty: control.dirty
-} | json }}</pre>
-            </tedi-alert>
-          </tedi-col>
-        </tedi-row>
-      `,
-    };
-  },
-};
-```
-
-> **Note:** Always display reactive form state using `tedi-row`/`tedi-col` for layout, a `<tedi-alert type="info">` with a `<pre tedi-text modifiers="small">` block and the `json` pipe. This provides a consistent, scannable debug output across all form component stories. Import `RowComponent`, `ColComponent`, `AlertComponent`, and `TextComponent` in the story's `moduleMetadata`.
-
-### Story Coverage
-Every story file must include:
-- **Default** — component with default props
-- One story **per visual variant** (e.g., primary, secondary, ghost)
-- One story **per significant state** (disabled, loading, error, empty)
-- **Interactive examples** — form controls with reactive forms
-- Stories matching **all variants visible in Figma**
+Test patterns and required providers are in [testing.md](testing.md); story structure, argTypes and
+composition rules are in [stories.md](stories.md).
 
 ## Barrel Exports
 
@@ -468,6 +417,6 @@ Add the new component export to the parent category barrel file (e.g., `src/tedi
 - UUID generation: `src/tedi/helpers/generate-uuid.ts`
 
 ## Known Quirks
-- `toggle.component.ts` still uses old `@ViewChild` decorator — should be migrated to `viewChild()` signal
+- `toggle.component.ts`, `number-field.component.ts` and `footer-bottom.component.ts` still use the `@ViewChild` decorator. Migrate to `viewChild()` when you touch them, don't copy the pattern
 - Translations support both simple strings and parameterized functions: `(key: string) => string`
 - Do NOT reference `community/` components as examples — they are community-contributed and not always reviewed

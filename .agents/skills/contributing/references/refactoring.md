@@ -1,12 +1,12 @@
 # Safe Refactor TEDI Component
 
-Target: `$ARGUMENTS`
+Target: the component given in the task.
 
 ## Step 1: Understand the Blast Radius
 
 1. Read the component being refactored — all files (`.ts`, `.html`, `.scss`, `.spec.ts`, `.stories.ts`).
 2. Find all consumers:
-   - Search for imports of the component across `tedi/` and `src/`.
+   - Search for imports of the component across `src/tedi/` and `src/community/`.
    - Search for the component selector in templates.
    - Check barrel exports (`index.ts` files) that re-export it.
 3. List all affected files before making any changes.
@@ -22,7 +22,7 @@ If any tests fail before your changes, note them — they are pre-existing failu
 
 ## Step 3: Plan
 
-Enter plan mode. The plan must cover:
+Write a plan and get it approved before changing code. It covers:
 
 - **What changes** — exact files and what changes in each
 - **Consumer impact** — which files need updating and why
@@ -40,20 +40,14 @@ Apply changes in this order:
 5. **Tests** — update spec files to match new API/behavior
 6. **Stories** — update Storybook stories to match new API
 
-## Step 5: Code Review
-
-Run `/simplify` — a Claude Code skill available in this repository that reviews the changed code for reuse opportunities, simplification, efficiency, and altitude cleanups, then proposes fixes. Fix all valid findings before proceeding.
-
-A finding is **valid** when it is confirmed against the current code (not stale or already addressed), preserves behavior and the public API, and aligns with `best-practices.md`. Skip findings that are speculative, purely stylistic against project conventions, or would change behavior — note briefly why a finding was skipped.
-
-## Step 6: Verify
+## Step 5: Verify
 
 1. Run the specific component test: `npm test -- <component-path> --coverage=false`
 2. Run the full test suite: `npm test`
 3. Run lint: `npm run lint`
 4. Compare test results with the baseline from Step 2 — no new failures allowed.
 
-## Step 7: Update Consumer-Facing Docs
+## Step 6: Update Consumer-Facing Docs
 
 Only if the refactor changed anything a consumer can observe — the public API, or behavior that
 callers can see but the types cannot express. See **SKILL.md → Consumer-Facing Docs** for the
@@ -74,6 +68,11 @@ contract.
    - **You created one.** A behaviour change callers cannot see in the types needs a new entry.
 4. **Renamed or removed a token?** Update `references/theming.md`.
 5. **Breaking change?** It also needs a consumer migration guide rather than a buried reference edit.
+
+## Step 7: Code Review
+
+Run [pr-review.md](pr-review.md). Fix every finding confirmed against the current code that keeps
+behaviour and the public API, note why you skipped any other, then repeat Step 5.
 
 ## Step 8: Report
 
