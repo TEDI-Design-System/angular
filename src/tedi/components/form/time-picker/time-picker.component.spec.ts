@@ -278,6 +278,21 @@ describe("TimePickerComponent", () => {
         expect(spy).toHaveBeenCalledTimes(1);
       });
 
+      it("should select the highlighted minute before committing on Enter", () => {
+        const onChange = jest.fn();
+        component.registerOnChange(onChange);
+        let valueAtCommit: string | null = null;
+        component.selectionCommitted.subscribe(
+          () => (valueAtCommit = component.value()),
+        );
+        const columns = el.querySelectorAll(".tedi-time-picker__column");
+
+        dispatchKey(columns[1], "Enter");
+
+        expect(valueAtCommit).toBe("12:00");
+        expect(onChange).toHaveBeenCalledWith("12:00");
+      });
+
       it("should NOT emit selectionCommitted on arrow keys", () => {
         const spy = jest.fn();
         component.selectionCommitted.subscribe(spy);

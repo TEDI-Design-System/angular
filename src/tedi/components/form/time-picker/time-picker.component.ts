@@ -419,8 +419,15 @@ export class TimePickerComponent
 
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      if (type === "hour") this.focusOtherColumn("hour");
-      else this.selectionCommitted.emit();
+      if (type === "hour") {
+        this.focusOtherColumn("hour");
+      } else {
+        // The highlight can be ahead of the value (no value yet, or a scroll
+        // still in its debounce), so commit what the user sees.
+        const minute = this.minutes()[this.highlightedMinuteIndex()];
+        if (minute !== undefined) this.selectMinute(minute);
+        this.selectionCommitted.emit();
+      }
       return;
     }
 
