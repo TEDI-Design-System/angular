@@ -854,6 +854,39 @@ describe("CalendarComponent", () => {
       );
       expect(grids.length).toBe(2);
     });
+
+    it("re-measures the fitting columns when fullWidth changes", () => {
+      // jsdom has no layout: stub the viewport and the month width the
+      // measurement reads.
+      const viewport = jest
+        .spyOn(document.documentElement, "clientWidth", "get")
+        .mockReturnValue(1000);
+      let monthWidth = 600;
+      const rect = jest
+        .spyOn(HTMLElement.prototype, "getBoundingClientRect")
+        .mockImplementation(() => ({ width: monthWidth }) as DOMRect);
+
+      const fixture = createComponent();
+      const host = fixture.nativeElement as HTMLElement;
+      fixture.componentRef.setInput("fullWidth", true);
+      fixture.componentRef.setInput("numberOfMonths", 2);
+      fixture.detectChanges();
+      TestBed.tick();
+      expect(host.style.getPropertyValue("--_tedi-calendar-fit-columns")).toBe(
+        "1",
+      );
+
+      monthWidth = 312;
+      fixture.componentRef.setInput("fullWidth", false);
+      fixture.detectChanges();
+      TestBed.tick();
+      expect(host.style.getPropertyValue("--_tedi-calendar-fit-columns")).toBe(
+        "2",
+      );
+
+      viewport.mockRestore();
+      rect.mockRestore();
+    });
   });
 
   describe("more keyboard navigation", () => {

@@ -239,12 +239,13 @@ export class CalendarComponent implements ControlValueAccessor {
     });
 
     // Re-measure after every render that changes the month count, the
-    // week-number column, the active view, or the viewport. We write the CSS
-    // custom property imperatively (not via a template binding) so updating it
-    // never re-triggers change detection.
+    // week-number column, the full-width layout, the active view, or the
+    // viewport. We write the CSS custom property imperatively (not via a
+    // template binding) so updating it never re-triggers change detection.
     afterRenderEffect(() => {
       this.numberOfMonths();
       this.showWeekNumbers();
+      this.fullWidth();
       this.view();
       this.viewportWidth();
       this.updateFitColumns();

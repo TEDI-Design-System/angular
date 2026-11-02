@@ -35,7 +35,6 @@
   &--full-width {
     box-sizing: border-box;
     width: 100%;
-    min-width: 0;
 
     .tedi-calendar__month {
       flex: 1 1 var(--_tedi-calendar-month-width);
