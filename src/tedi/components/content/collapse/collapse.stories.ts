@@ -1,6 +1,13 @@
-import { argsToTemplate, type Meta, type StoryObj } from "@storybook/angular";
+import {
+  argsToTemplate,
+  moduleMetadata,
+  type Meta,
+  type StoryObj,
+} from "@storybook/angular";
 
 import { CollapseComponent } from "./collapse.component";
+import { TextComponent } from "../../base/text/text.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.0.4-(work-in-progress)?node-id=15433-138256&amp;m=dev" target="_BLANK" class="sbdocs sbdocs-a css-ajfpqr">Figma ↗</a><br>
@@ -12,6 +19,7 @@ import { CollapseComponent } from "./collapse.component";
 export default {
   title: "TEDI-Ready/Content/Collapse",
   component: CollapseComponent,
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     defaultOpen: false,
     hideCollapseText: false,
@@ -115,6 +123,7 @@ export const IconSecondaryButton: Story = {
 };
 
 export const InitiallyOpen: Story = {
+  parameters: { chromatic: { disableSnapshot: false } },
   args: {
     defaultOpen: true,
     openText: "Open",
@@ -155,4 +164,54 @@ export const IconOnlyInverted: Story = {
       value: "brand",
     },
   },
+};
+
+/** Chromatic snapshot for Collapse: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    controls: { disable: true },
+  },
+  decorators: [
+    moduleMetadata({
+      imports: [TextComponent, VerticalSpacingDirective],
+    }),
+  ],
+  render: () => ({
+    template: `
+      <div [tediVerticalSpacing]="2">
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">Default</p>
+          <tedi-collapse openText="Open" closeText="Close">Lorem ipsum dolor sit amet.</tedi-collapse>
+        </div>
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">Icon neutral button</p>
+          <tedi-collapse [hideCollapseText]="true">Lorem ipsum dolor sit amet.</tedi-collapse>
+        </div>
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">Icon secondary button</p>
+          <tedi-collapse arrowType="secondary" [hideCollapseText]="true">Lorem ipsum dolor sit amet.</tedi-collapse>
+        </div>
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">Small</p>
+          <tedi-collapse size="small" openText="Open" closeText="Close">Lorem ipsum dolor sit amet.</tedi-collapse>
+        </div>
+        <div class="bg bg-primary">
+          <div class="w-100" [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold" color="white">With text inverted</p>
+            <tedi-collapse [inverted]="true" openText="Open" closeText="Close">Lorem ipsum dolor sit amet.</tedi-collapse>
+          </div>
+        </div>
+        <div class="bg bg-primary">
+          <div class="w-100" [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold" color="white">Icon only inverted</p>
+            <tedi-collapse [inverted]="true" [hideCollapseText]="true" openText="Open" closeText="Close">
+              Lorem ipsum dolor sit amet.
+            </tedi-collapse>
+          </div>
+        </div>
+      </div>
+    `,
+  }),
 };

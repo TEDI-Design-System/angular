@@ -25,6 +25,9 @@ export default {
       imports: [ToggleComponent, RowComponent, ColComponent, LabelComponent],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     inputId: {
       description:
@@ -134,7 +137,6 @@ export default {
 } as Meta<ToggleComponent>;
 
 export const Default: StoryObj<ToggleComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     inputId: "example-toggle-1",
     variant: "primary",
@@ -266,4 +268,65 @@ export const ColoredOutlined: StoryObj<ToggleComponent> = {
     variant: "colored",
   },
   render: Template,
+};
+
+/** Chromatic snapshot for Toggle: add every new visual variant here too. */
+export const VisualTest: StoryObj<ToggleComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    pseudo: {
+      hover: '[id^="vt-hover-"]',
+      active: '[id^="vt-active-"]',
+      focusVisible: '[id^="vt-focus-"]',
+    },
+  },
+  render: () => ({
+    props: {
+      pseudoState: PSEUDO_STATE,
+      variants: [
+        { label: "Primary filled", variant: "primary", type: "filled" },
+        { label: "Primary outlined", variant: "primary", type: "outlined" },
+        { label: "Colored filled", variant: "colored", type: "filled" },
+        { label: "Colored outlined", variant: "colored", type: "outlined" },
+      ],
+    },
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        <tedi-row *ngFor="let v of variants" [cols]="1" [gapY]="4">
+          <b>{{ v.label }}</b>
+          <tedi-row *ngFor="let state of pseudoState" cols="4" alignItems="center">
+            <b>{{ state }}</b>
+            <tedi-col [width]="3" style="display: flex; flex-wrap: wrap; align-items: center; column-gap: 2rem; row-gap: 0.75rem;">
+              <ng-container *ngIf="'vt-' + state.toLowerCase() + '-' + v.variant + '-' + v.type as id">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <tedi-toggle [variant]="v.variant" [type]="v.type" [inputId]="id + '-1'" ariaLabel="Vaikimisi lüliti, väljas" />
+                  <tedi-toggle [variant]="v.variant" [type]="v.type" [inputId]="id + '-2'" ariaLabel="Vaikimisi lüliti, sees" [checked]="true" />
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <tedi-toggle [variant]="v.variant" [type]="v.type" [inputId]="id + '-3'" size="large" ariaLabel="Suur lüliti, väljas" />
+                  <tedi-toggle [variant]="v.variant" [type]="v.type" [inputId]="id + '-4'" size="large" ariaLabel="Suur lüliti, sees" [checked]="true" />
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <tedi-toggle [variant]="v.variant" [type]="v.type" [inputId]="id + '-5'" size="large" [icon]="true" ariaLabel="Suur lüliti ikooniga, väljas" />
+                  <tedi-toggle [variant]="v.variant" [type]="v.type" [inputId]="id + '-6'" size="large" [icon]="true" ariaLabel="Suur lüliti ikooniga, sees" [checked]="true" />
+                </div>
+              </ng-container>
+            </tedi-col>
+          </tedi-row>
+        </tedi-row>
+        <tedi-row [cols]="1" [gapY]="3">
+          <b>Label position</b>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label tedi-label for="vt-label-start">Toggle button</label>
+            <tedi-toggle inputId="vt-label-start" />
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <tedi-toggle inputId="vt-label-end" />
+            <label tedi-label for="vt-label-end">Toggle button</label>
+          </div>
+        </tedi-row>
+      </tedi-row>
+    `,
+  }),
 };

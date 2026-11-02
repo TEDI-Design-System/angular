@@ -51,6 +51,9 @@ export default {
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     size: {
       control: "radio",
@@ -175,7 +178,6 @@ export default {
 } as Meta<RadioComponent>;
 
 export const Default: StoryObj<RadioComponent & { disabled: boolean }> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     invalid: false,
@@ -192,14 +194,7 @@ export const Default: StoryObj<RadioComponent & { disabled: boolean }> = {
   }),
 };
 
-/**
- * Default size is used on desktop, large size is applied automatically on mobile screen sizes.
- * Use in tables where the radio has no text. **Otherwise, prefer using default size.**
- */
-export const Size: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const SIZE_TEMPLATE = `
       <tedi-row [cols]="12" [gapY]="3">
         <tedi-col width="9" [md]="{ width: 6 }">
           <p tedi-text modifiers="bold">Default</p>
@@ -220,14 +215,20 @@ export const Size: StoryObj<RadioComponent> = {
           <input tedi-radio type="radio" name="size-demo" size="large" aria-label="Suur" />
         </tedi-col>
       </tedi-row>
-    `,
+    `;
+
+/**
+ * Default size is used on desktop, large size is applied automatically on mobile screen sizes.
+ * Use in tables where the radio has no text. **Otherwise, prefer using default size.**
+ */
+export const Size: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: SIZE_TEMPLATE,
   }),
 };
 
-export const Vertical: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const VERTICAL_TEMPLATE = `
       <tedi-radio-group label="Tooraine" direction="vertical">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-radio type="radio" name="vertical-demo" />
@@ -242,14 +243,16 @@ export const Vertical: StoryObj<RadioComponent> = {
           Peet
         </label>
       </tedi-radio-group>
-    `,
+    `;
+
+export const Vertical: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: VERTICAL_TEMPLATE,
   }),
 };
 
-export const Horizontal: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const HORIZONTAL_TEMPLATE = `
       <tedi-radio-group label="Tooraine">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-radio type="radio" name="horizontal-demo" />
@@ -264,14 +267,16 @@ export const Horizontal: StoryObj<RadioComponent> = {
           Peet
         </label>
       </tedi-radio-group>
-    `,
+    `;
+
+export const Horizontal: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: HORIZONTAL_TEMPLATE,
   }),
 };
 
-export const Separate: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const SEPARATE_TEMPLATE = `
       <tedi-row [cols]="1" [gapY]="4">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-radio type="radio" name="separate-demo" />
@@ -303,14 +308,16 @@ export const Separate: StoryObj<RadioComponent> = {
           <tedi-feedback-text text="Kirjeldus" />
         </div>
       </tedi-row>
-    `,
+    `;
+
+export const Separate: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: SEPARATE_TEMPLATE,
   }),
 };
 
-export const Group: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const GROUP_TEMPLATE = `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
         <tedi-radio-group label="Tooraine" direction="vertical">
           <label tedi-label color="primary" class="flex align-items-center gap-2">
@@ -373,17 +380,16 @@ export const Group: StoryObj<RadioComponent> = {
           <tedi-feedback-text text="Vähemalt 1 tooraine on kohustuslik valida" type="error" />
         </tedi-radio-group>
       </tedi-row>
-    `,
+    `;
+
+export const Group: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: GROUP_TEMPLATE,
   }),
 };
 
-/**
- * Radio cards with primary and secondary variants side by side. Primary uses a filled background when selected, secondary uses an outline border.
- */
-export const CardsSeparate: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const CARDS_SEPARATE_TEMPLATE = `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
         <tedi-col class="flex flex-column gap-2">
           <p tedi-text modifiers="bold">Primary</p>
@@ -420,17 +426,19 @@ export const CardsSeparate: StoryObj<RadioComponent> = {
           </tedi-radio-card-group>
         </tedi-col>
       </tedi-row>
-    `,
+    `;
+
+/**
+ * Radio cards with primary and secondary variants side by side. Primary uses a filled background when selected, secondary uses an outline border.
+ */
+export const CardsSeparate: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: CARDS_SEPARATE_TEMPLATE,
   }),
 };
 
-/**
- * Radio cards inside a labelled `tedi-radio-group`, with and without an error message.
- */
-export const CardsWithLabel: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const CARDS_WITH_LABEL_TEMPLATE = `
       <div class="flex flex-wrap gap-4">
         <tedi-radio-group label="Juurvili">
           <tedi-radio-card-group>
@@ -466,17 +474,19 @@ export const CardsWithLabel: StoryObj<RadioComponent> = {
           <tedi-feedback-text text="Valik on kohustuslik" type="error" />
         </tedi-radio-group>
       </div>
-    `,
+    `;
+
+/**
+ * Radio cards inside a labelled `tedi-radio-group`, with and without an error message.
+ */
+export const CardsWithLabel: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: CARDS_WITH_LABEL_TEMPLATE,
   }),
 };
 
-/**
- * `bordered` gives separated primary cards a border in the unselected state.
- */
-export const CardsHasBorder: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const CARDS_HAS_BORDER_TEMPLATE = `
       <tedi-radio-card-group [bordered]="true">
         <label tedi-radio-card variant="primary">
           <input tedi-radio type="radio" name="card-bordered" />
@@ -491,17 +501,19 @@ export const CardsHasBorder: StoryObj<RadioComponent> = {
           Peet
         </label>
       </tedi-radio-card-group>
-    `,
+    `;
+
+/**
+ * `bordered` gives separated primary cards a border in the unselected state.
+ */
+export const CardsHasBorder: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: CARDS_HAS_BORDER_TEMPLATE,
   }),
 };
 
-/**
- * Radio cards in a grouped layout, joined like a button group with shared borders and no gap.
- */
-export const CardsGrouped: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const CARDS_GROUPED_TEMPLATE = `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
         <tedi-col class="flex flex-column gap-2">
           <p tedi-text modifiers="bold">Primary</p>
@@ -546,18 +558,19 @@ export const CardsGrouped: StoryObj<RadioComponent> = {
           </tedi-radio-card-group>
         </tedi-col>
       </tedi-row>
-    `,
+    `;
+
+/**
+ * Radio cards in a grouped layout, joined like a button group with shared borders and no gap.
+ */
+export const CardsGrouped: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    template: CARDS_GROUPED_TEMPLATE,
   }),
 };
 
-/**
- * Radio cards with a description below the label text, shown separate and grouped for both variants.
- */
-export const CardsWithDescription: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    styles: [
-      `
+const CARDS_WITH_DESCRIPTION_STYLES = `
         .cards-with-description tedi-radio-card-group {
           display: flex;
           align-items: stretch;
@@ -566,9 +579,9 @@ export const CardsWithDescription: StoryObj<RadioComponent> = {
         .cards-with-description label[tedi-radio-card] {
           flex: 1 1 12rem;
         }
-      `,
-    ],
-    template: `
+      `;
+
+const CARDS_WITH_DESCRIPTION_TEMPLATE = `
     <div class="cards-with-description flex flex-column gap-4">
       <div class="flex flex-column gap-2">
         <p tedi-text modifiers="bold">Primary</p>
@@ -651,18 +664,20 @@ export const CardsWithDescription: StoryObj<RadioComponent> = {
         </tedi-radio-card-group>
       </div>
     </div>
-    `,
+    `;
+
+/**
+ * Radio cards with a description below the label text, shown separate and grouped for both variants.
+ */
+export const CardsWithDescription: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    styles: [CARDS_WITH_DESCRIPTION_STYLES],
+    template: CARDS_WITH_DESCRIPTION_TEMPLATE,
   }),
 };
 
-/**
- * Radio cards with icons before the label text, with and without a description.
- */
-export const CardsWithIcons: StoryObj<RadioComponent> = {
-  render: (args) => ({
-    props: args,
-    styles: [
-      `
+const CARDS_WITH_ICONS_STYLES = `
         .cards-with-icons__stretch {
           display: flex;
           align-items: stretch;
@@ -671,9 +686,9 @@ export const CardsWithIcons: StoryObj<RadioComponent> = {
         .cards-with-icons__stretch label[tedi-radio-card] {
           flex: 1 1 12rem;
         }
-      `,
-    ],
-    template: `
+      `;
+
+const CARDS_WITH_ICONS_TEMPLATE = `
     <div class="flex flex-column gap-4">
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
         <tedi-col class="flex flex-column gap-2">
@@ -764,7 +779,16 @@ export const CardsWithIcons: StoryObj<RadioComponent> = {
         </tedi-radio-card-group>
       </div>
     </div>
-    `,
+    `;
+
+/**
+ * Radio cards with icons before the label text, with and without a description.
+ */
+export const CardsWithIcons: StoryObj<RadioComponent> = {
+  render: (args) => ({
+    props: args,
+    styles: [CARDS_WITH_ICONS_STYLES],
+    template: CARDS_WITH_ICONS_TEMPLATE,
   }),
 };
 
@@ -1009,6 +1033,22 @@ const statesDesktopGrid = {
   rowGap: "var(--layout-grid-gutters-08)",
 };
 
+const STATES_TEMPLATE = stateMatrix({
+  headers: ["Unselected", "Selected", "Error unselected", "Error selected"],
+  alignItems: "center",
+  mobileLayout: "columns",
+  desktopGrid: statesDesktopGrid,
+  rows: stateRows.map((row) => ({
+    label: row.label,
+    cells: [
+      stateCell(row, false),
+      stateCell(row, true),
+      row.error === false ? "" : stateCell(row, false, true),
+      row.error === false ? "" : stateCell(row, true, true),
+    ],
+  })),
+});
+
 export const States: StoryObj<RadioComponent> = {
   parameters: {
     pseudo: {
@@ -1019,21 +1059,7 @@ export const States: StoryObj<RadioComponent> = {
   },
   render: (args) => ({
     props: args,
-    template: stateMatrix({
-      headers: ["Unselected", "Selected", "Error unselected", "Error selected"],
-      alignItems: "center",
-      mobileLayout: "columns",
-      desktopGrid: statesDesktopGrid,
-      rows: stateRows.map((row) => ({
-        label: row.label,
-        cells: [
-          stateCell(row, false),
-          stateCell(row, true),
-          row.error === false ? "" : stateCell(row, false, true),
-          row.error === false ? "" : stateCell(row, true, true),
-        ],
-      })),
-    }),
+    template: STATES_TEMPLATE,
     styles: stateMatrixStyles,
   }),
 };
@@ -1161,7 +1187,6 @@ export const CardStatesSecondary: StoryObj<RadioComponent> = {
  *   All radios sharing the same control coordinate via their `name` attribute.
  */
 export const WithReactiveForms: StoryObj<RadioComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const statusControl = new FormControl<string | null>("active");
     const planControl = new FormControl<string | null>("pro");
@@ -1249,4 +1274,96 @@ export const WithReactiveForms: StoryObj<RadioComponent> = {
       `,
     };
   },
+};
+
+/** Chromatic snapshot for Radio: add every new visual variant here too. */
+export const VisualTest: StoryObj<RadioComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    pseudo: {
+      hover: [
+        ...statePseudoIds("Hover"),
+        ...cardStatesPseudo("primary").hover,
+        ...cardStatesPseudo("secondary").hover,
+      ],
+      active: [
+        ...statePseudoIds("Active"),
+        ...cardStatesPseudo("primary").active,
+        ...cardStatesPseudo("secondary").active,
+      ],
+      focusVisible: [
+        ...statePseudoIds("Focus"),
+        ...cardStatesPseudo("primary").focusVisible,
+        ...cardStatesPseudo("secondary").focusVisible,
+      ],
+    },
+  },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        <tedi-col>
+          <p tedi-text modifiers="bold">Size</p>
+          ${SIZE_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Vertical</p>
+          ${VERTICAL_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Horizontal</p>
+          ${HORIZONTAL_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Separate</p>
+          ${SEPARATE_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Group</p>
+          ${GROUP_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Cards separate</p>
+          ${CARDS_SEPARATE_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Cards with label</p>
+          ${CARDS_WITH_LABEL_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Cards has border</p>
+          ${CARDS_HAS_BORDER_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Cards grouped</p>
+          ${CARDS_GROUPED_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Cards with description</p>
+          ${CARDS_WITH_DESCRIPTION_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Cards with icons</p>
+          ${CARDS_WITH_ICONS_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">States</p>
+          ${STATES_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Card states primary</p>
+          ${cardStatesTemplate("primary")}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Card states secondary</p>
+          ${cardStatesTemplate("secondary")}
+        </tedi-col>
+      </tedi-row>
+    `,
+    styles: [
+      ...stateMatrixStyles,
+      CARDS_WITH_DESCRIPTION_STYLES,
+      CARDS_WITH_ICONS_STYLES,
+    ],
+  }),
 };

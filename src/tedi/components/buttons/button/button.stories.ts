@@ -14,6 +14,7 @@ import { BaseButtonDirective } from "./base-button.directive";
 import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
 import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
 import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus", "Disabled"];
 
@@ -28,6 +29,7 @@ export default {
   decorators: [
     moduleMetadata({
       imports: [
+        VerticalSpacingDirective,
         ButtonComponent,
         RowComponent,
         ColComponent,
@@ -39,6 +41,7 @@ export default {
       ],
     }),
   ],
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     variant: "primary",
@@ -92,7 +95,6 @@ export default {
 type ButtonType = ButtonComponent & { ngContent: string };
 
 export const Default: StoryObj<ButtonType> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     ngContent: "Button",
   },
@@ -336,5 +338,107 @@ export const LinkAsButton: ButtonStory = {
     template: `
         <a tedi-button>Link</a>
       `,
+  }),
+};
+
+const VISUAL_BUTTON_ROWS = (color: TextColor) => `
+  @for (size of sizes; track size) {
+    @for (state of states; track state) {
+      <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+        <tedi-col width="1">
+          <p tedi-text color="${color}">{{ size }}, {{ state }}</p>
+        </tedi-col>
+        <tedi-col width="5">
+          <div class="flex flex-wrap align-items-center gap-3">
+            <button tedi-button [variant]="variant" [size]="size" [attr.data-state]="state" [disabled]="state === 'Disabled'">Create</button>
+            <button tedi-button [variant]="variant" [size]="size" [attr.data-state]="state" [disabled]="state === 'Disabled'">
+              Continue
+              <tedi-icon name="arrow_right_alt" />
+            </button>
+            <button tedi-button [variant]="variant" [size]="size" [attr.data-state]="state" [disabled]="state === 'Disabled'">
+              <tedi-icon name="edit" />
+              Edit
+            </button>
+            <tedi-tooltip>
+              <tedi-tooltip-trigger>
+                <button tedi-button [variant]="variant" [size]="size" [attr.data-state]="state" [disabled]="state === 'Disabled'" aria-label="Edasi">
+                  <tedi-icon name="arrow_forward" />
+                </button>
+              </tedi-tooltip-trigger>
+              <tedi-tooltip-content>Edasi</tedi-tooltip-content>
+            </tedi-tooltip>
+          </div>
+        </tedi-col>
+      </tedi-row>
+    }
+  }
+`;
+
+/** Chromatic snapshot for Button: add every new visual variant here too. */
+export const VisualTest: StoryObj<ButtonType> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    controls: { disable: true },
+    pseudo: {
+      hover: '[data-state="Hover"]',
+      active: '[data-state="Active"]',
+      focusVisible: '[data-state="Focus"]',
+    },
+  },
+  render: () => ({
+    props: {
+      variants: [
+        "primary",
+        "secondary",
+        "neutral",
+        "success",
+        "danger",
+        "danger-neutral",
+      ],
+      invertedVariants: [
+        "primary-inverted",
+        "secondary-inverted",
+        "neutral-inverted",
+      ],
+      sizes: ["default", "small"],
+      states: PSEUDO_STATE,
+    },
+    template: `
+      <tedi-row [cols]="1" [gapY]="4">
+        @for (variant of variants; track variant) {
+          <tedi-col>
+            <tedi-row [cols]="1" [gapY]="2">
+              <p tedi-text modifiers="bold">{{ variant }}</p>
+              ${VISUAL_BUTTON_ROWS("primary")}
+            </tedi-row>
+          </tedi-col>
+        }
+        @for (variant of invertedVariants; track variant) {
+          <tedi-col>
+            <div class="bg bg-primary">
+              <div class="w-100">
+                <tedi-row [cols]="1" [gapY]="2">
+                  <p tedi-text modifiers="bold" color="white">{{ variant }}</p>
+                  ${VISUAL_BUTTON_ROWS("white")}
+                </tedi-row>
+              </div>
+            </div>
+          </tedi-col>
+        }
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Full width</p>
+            <button tedi-button class="w-100">Full Width Button</button>
+          </div>
+        </tedi-col>
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Link as button</p>
+            <a tedi-button>Link</a>
+          </div>
+        </tedi-col>
+      </tedi-row>
+    `,
   }),
 };

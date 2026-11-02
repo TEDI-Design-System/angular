@@ -26,6 +26,7 @@ import {
   TextGroupValueComponent,
 } from "../../content/text-group";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 
@@ -53,6 +54,7 @@ export default {
         "Color variant. Use `inverted` on dark or colored backgrounds.",
     },
   },
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     "aria-label": undefined,
     color: "primary",
@@ -61,6 +63,7 @@ export default {
   decorators: [
     moduleMetadata({
       imports: [
+        VerticalSpacingDirective,
         InfoButtonComponent,
         RowComponent,
         ColComponent,
@@ -83,7 +86,6 @@ export default {
 } as Meta<InfoButtonComponent>;
 
 export const Default: StoryObj<InfoButtonComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -183,6 +185,83 @@ export const UsageWithTooltipAndPopover: StoryObj<InfoButtonComponent> = {
           <tedi-text-group-value>24€</tedi-text-group-value>
         </tedi-text-group>
       </div>
+    `,
+  }),
+};
+
+/** Chromatic snapshot for InfoButton: add every new visual variant here too. */
+export const VisualTest: StoryObj<InfoButtonComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    controls: { disable: true },
+    pseudo: {
+      hover: '[data-state="Hover"]',
+      active: '[data-state="Active"]',
+      focusVisible: '[data-state="Focus"]',
+    },
+  },
+  render: () => ({
+    props: { states: PSEUDO_STATE },
+    template: `
+      <tedi-row [cols]="1" [gapY]="4">
+        <tedi-col>
+          <tedi-row [cols]="3" [gapY]="3" alignItems="center">
+            <tedi-col><p tedi-text modifiers="bold">State</p></tedi-col>
+            <tedi-col><p tedi-text modifiers="bold">Primary</p></tedi-col>
+            <tedi-col><p tedi-text modifiers="bold">Inverted</p></tedi-col>
+            @for (state of states; track state) {
+              <tedi-col><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
+              <tedi-col>
+                <button tedi-info-button [attr.data-state]="state"></button>
+              </tedi-col>
+              <tedi-col>
+                <div class="bg bg-primary">
+                  <button tedi-info-button color="inverted" [attr.data-state]="state"></button>
+                </div>
+              </tedi-col>
+            }
+          </tedi-row>
+        </tedi-col>
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Usage with tooltip and popover</p>
+            <div class="flex">
+              <tedi-text-group type="vertical">
+                <tedi-text-group-label>
+                  <span class="flex align-items-center gap-1">
+                    Veregrupp
+                    <tedi-tooltip>
+                      <tedi-tooltip-trigger>
+                        <button tedi-info-button></button>
+                      </tedi-tooltip-trigger>
+                      <tedi-tooltip-content>
+                        Veregrupp määratakse vereanalüüsiga ning see ei muutu elu jooksul.
+                      </tedi-tooltip-content>
+                    </tedi-tooltip>
+                  </span>
+                </tedi-text-group-label>
+                <tedi-text-group-value>AB-</tedi-text-group-value>
+              </tedi-text-group>
+              <tedi-separator axis="vertical" size="auto" [spacing]="{ x: 1.5, y: 0.25 }" />
+              <tedi-text-group type="vertical">
+                <tedi-text-group-label>
+                  <span class="flex align-items-center gap-1">
+                    Hambaravihüvitise jääk
+                    <tedi-popover>
+                      <button tedi-info-button tedi-popover-trigger></button>
+                      <tedi-popover-content [maxWidth]="'medium'">
+                        <p tedi-text>Hambaravihüvitist saab kasutada jooksva kalendriaasta jooksul. Kasutamata jääk järgmisesse aastasse ei kandu.</p>
+                      </tedi-popover-content>
+                    </tedi-popover>
+                  </span>
+                </tedi-text-group-label>
+                <tedi-text-group-value>24€</tedi-text-group-value>
+              </tedi-text-group>
+            </div>
+          </div>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };

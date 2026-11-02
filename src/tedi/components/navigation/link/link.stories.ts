@@ -37,6 +37,7 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     ngContent: {
@@ -88,7 +89,6 @@ export default {
 type LinkType = LinkComponent & { ngContent: string };
 
 export const Default: StoryObj<LinkType> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     ngContent: "Link",
   },
@@ -300,6 +300,161 @@ export const WithIcons: StoryObj<LinkComponent> = {
           </div>
         </tedi-row>
       </div>
+    `,
+  }),
+};
+
+const VT_STATE_VARIANTS = [
+  { key: "default-underlined", label: "Default, underlined", attrs: "" },
+  {
+    key: "default-no-underline",
+    label: "Default, no underline",
+    attrs: '[underline]="false"',
+  },
+  {
+    key: "inverted-underlined",
+    label: "Inverted, underlined",
+    attrs: 'variant="inverted"',
+  },
+  {
+    key: "inverted-no-underline",
+    label: "Inverted, no underline",
+    attrs: 'variant="inverted" [underline]="false"',
+  },
+];
+
+const vtStateId = (key: string, size: string, state: string, n: number) =>
+  `vt-${key}-${size}-${state.toLowerCase()}-${n}`;
+
+const vtStateSelectors = (state: string) =>
+  VT_STATE_VARIANTS.flatMap(({ key }) =>
+    ["default", "small"].flatMap((size) =>
+      [1, 2, 3].map((n) => `#${vtStateId(key, size, state, n)}`),
+    ),
+  );
+
+const vtStatesTemplate = (key: string, attrs: string, inverted: boolean) => {
+  const color = inverted ? "white" : "primary";
+  const column = (size: string, title: string) => `
+      <tedi-col class="tedi-vertical-spacing" style="--vertical-spacing-internal: 1em;">
+        <p tedi-text modifiers="bold" color="${color}">${title}</p>
+        ${PSEUDO_STATE.map(
+          (state) => `
+        <tedi-row [cols]="4">
+          <p tedi-text color="${color}">${state}</p>
+          <tedi-col>
+            <a tedi-link href="#" id="${vtStateId(key, size, state, 1)}" size="${size}" ${attrs}>View result</a>
+          </tedi-col>
+          <tedi-col>
+            <a tedi-link href="#" id="${vtStateId(key, size, state, 2)}" size="${size}" ${attrs}>
+              Continue
+              <tedi-icon name="arrow_forward" />
+            </a>
+          </tedi-col>
+          <tedi-col>
+            <a tedi-link href="#" id="${vtStateId(key, size, state, 3)}" size="${size}" ${attrs}>
+              <tedi-icon name="arrow_back" />
+              Back
+            </a>
+          </tedi-col>
+        </tedi-row>`,
+        ).join("")}
+      </tedi-col>`;
+  return `
+    <tedi-row [cols]="1" [xl]="{ cols: 2 }" [gapY]="5">
+      ${column("default", "Default size")}
+      ${column("small", "Small size")}
+    </tedi-row>`;
+};
+
+/** Chromatic snapshot for Link: add every new visual variant here too. */
+export const VisualTest: StoryObj<LinkComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    pseudo: {
+      hover: vtStateSelectors("Hover"),
+      active: vtStateSelectors("Active"),
+      focusVisible: vtStateSelectors("Focus"),
+    },
+  },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        <tedi-col>
+          <p tedi-text modifiers="bold">Sizes</p>
+          <div class="example-list">
+            <tedi-row [cols]="2" class="padding-14-16 border-bottom">
+              <b>Default</b>
+              <a tedi-link href="#">View result</a>
+            </tedi-row>
+            <tedi-row [cols]="2" class="padding-14-16">
+              <b>Small</b>
+              <a tedi-link href="#" size="small">View result</a>
+            </tedi-row>
+          </div>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Colors</p>
+          <tedi-row [cols]="1" [gapY]="3">
+            <a tedi-link href="#">
+              Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid.
+            </a>
+            <a tedi-link href="#" [underline]="false">
+              Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid.
+            </a>
+            <tedi-row [cols]="1" [gapY]="3" style="background: var(--general-icon-background-brand-primary); border-radius: 4px; padding: 1rem;">
+              <a tedi-link href="#" variant="inverted">
+                Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid.
+              </a>
+              <a tedi-link href="#" variant="inverted" [underline]="false">
+                Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid.
+              </a>
+            </tedi-row>
+          </tedi-row>
+        </tedi-col>
+        ${VT_STATE_VARIANTS.map(({ key, label, attrs }) => {
+          const inverted = key.startsWith("inverted");
+          const states = vtStatesTemplate(key, attrs, inverted);
+          return `
+        <tedi-col>
+          <p tedi-text modifiers="bold">${label}</p>
+          ${inverted ? `<div class="bg bg-primary"><div class="w-100">${states}</div></div>` : states}
+        </tedi-col>`;
+        }).join("")}
+        <tedi-col>
+          <p tedi-text modifiers="bold">With icons</p>
+          <div class="example-list">
+            <tedi-row [cols]="2" class="padding-14-16 border-bottom">
+              <b>Multiple icons</b>
+              <a tedi-link href="#">
+                <tedi-icon name="notifications" />
+                This text contains
+                <tedi-icon name="notifications" />
+                multiple icons
+              </a>
+            </tedi-row>
+            <tedi-row [cols]="2" class="padding-14-16 border-bottom">
+              <b>Long Text Icon Inline</b>
+              <div style="max-width: 200px;">
+                <a tedi-link href="#">
+                  <tedi-icon name="notifications" />
+                  This is very long text with inline icon
+                </a>
+              </div>
+            </tedi-row>
+            <tedi-row [cols]="2" class="padding-14-16">
+              <b>Long Text Icon Flexed</b>
+              <div style="max-width: 200px;">
+                <a tedi-link href="#" style="display: inline-flex;">
+                  <tedi-icon name="notifications" />
+                  This is very long text with flexed icon
+                </a>
+              </div>
+            </tedi-row>
+          </div>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };

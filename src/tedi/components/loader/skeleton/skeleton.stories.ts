@@ -166,6 +166,9 @@ export default {
         SkeletonComponent,
         SkeletonBlockComponent,
         AccessibilityDemoComponent,
+        RowComponent,
+        ColComponent,
+        TextComponent,
       ],
     }),
   ],
@@ -173,6 +176,7 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     label: {
@@ -306,7 +310,10 @@ export const Width: Story = {
  * taller.
  */
 export const Responsive: Story = {
-  parameters: { controls: { disable: true } },
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false },
+  },
   render: () => ({
     template: `
       <tedi-skeleton label="Loading something">
@@ -330,5 +337,45 @@ export const Accessibility: Story = {
   parameters: { controls: { disable: true } },
   render: () => ({
     template: `<tedi-skeleton-accessibility-demo />`,
+  }),
+};
+
+/** Chromatic snapshot for Skeleton: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false },
+  },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="4">
+        <tedi-col>
+          <p tedi-text modifiers="bold">Default</p>
+          <tedi-skeleton label="Loading something">
+            <tedi-skeleton-block [width]="50" height="h2" />
+          </tedi-skeleton>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Height</p>
+          <tedi-skeleton label="Loading something">
+            <tedi-skeleton-block height="p" />
+            <tedi-skeleton-block height="h3" />
+            <tedi-skeleton-block height="h2" />
+            <tedi-skeleton-block height="h1" />
+            <tedi-skeleton-block [height]="100" />
+          </tedi-skeleton>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Width</p>
+          <tedi-skeleton label="Loading something">
+            <tedi-skeleton-block [width]="50" height="p" />
+            <tedi-skeleton-block [width]="75" height="h3" />
+            <tedi-skeleton-block width="36px" height="h2" />
+            <tedi-skeleton-block width="auto" height="h1" />
+          </tedi-skeleton>
+        </tedi-col>
+      </tedi-row>
+    `,
   }),
 };
