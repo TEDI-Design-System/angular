@@ -58,7 +58,7 @@
 
   &__separator-line {
     width: var(--tedi-borders-01);
-    background: var(--general-separator-primary);
+    background: var(--general-border-primary);
   }
 
   // The vertical separator belongs to the single side-by-side layout; range
@@ -82,7 +82,7 @@
   &__content--range &__times {
     align-self: stretch;
     padding-top: var(--card-padding-md-default);
-    border-top: var(--tedi-borders-01) solid var(--general-separator-primary);
+    border-top: var(--tedi-borders-01) solid var(--general-border-primary);
   }
 
   &__content--single-month {
@@ -100,8 +100,7 @@
       }
 
       .tedi-date-time-field-modal__time + .tedi-date-time-field-modal__time {
-        border-top: var(--tedi-borders-01) solid
-          var(--general-separator-primary);
+        border-top: var(--tedi-borders-01) solid var(--general-border-primary);
       }
     }
   }
