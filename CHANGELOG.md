@@ -1,3 +1,10 @@
+## [9.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0...angular-9.0.1-rc.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **search:** add autocomplete design review fixes [#727](https://github.com/TEDI-Design-System/angular/issues/727) ([#777](https://github.com/TEDI-Design-System/angular/issues/777)) ([1e07b9d](https://github.com/TEDI-Design-System/angular/commit/1e07b9d8a584933802218e6761cceb04c39def10))
+
 # [9.0.0](https://github.com/TEDI-Design-System/angular/compare/angular-8.1.1...angular-9.0.0) (2026-10-29)
 
 
