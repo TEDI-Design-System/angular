@@ -1,5 +1,13 @@
-import { argsToTemplate, Meta, StoryObj } from "@storybook/angular";
+import {
+  argsToTemplate,
+  Meta,
+  moduleMetadata,
+  StoryObj,
+} from "@storybook/angular";
 import { SpinnerComponent } from "./spinner.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
+import { TextComponent } from "../../base/text/text.component";
 
 const SIZES = [10, 16, 48];
 const COLORS = ["primary", "secondary"];
@@ -12,6 +20,14 @@ const COLORS = ["primary", "secondary"];
 export default {
   title: "TEDI-Ready/Components/Loader/Spinner",
   component: SpinnerComponent,
+  decorators: [
+    moduleMetadata({
+      imports: [RowComponent, ColComponent, TextComponent],
+    }),
+  ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     size: {
       control: "radio",
@@ -123,6 +139,45 @@ export const Color: StoryObj<SpinnerComponent> = {
           <tedi-spinner ${argsToTemplate(args)} color="secondary" />
         </div>
       </div>
+    `,
+  }),
+};
+
+/** Chromatic snapshot for Spinner: add every new visual variant here too. */
+export const VisualTest: StoryObj<SpinnerComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false } },
+  render: () => ({
+    props: { sizes: SIZES },
+    template: `
+      <tedi-row [cols]="1" [gapY]="4">
+        <tedi-col>
+          <p tedi-text modifiers="bold">Sizes</p>
+          <tedi-row [cols]="3" [gapX]="4" alignItems="center">
+            @for (size of sizes; track size) {
+              <tedi-col>
+                <p tedi-text>{{ size }}</p>
+                <tedi-spinner [size]="size" color="primary" label="Loading..." />
+              </tedi-col>
+            }
+          </tedi-row>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Colors</p>
+          <div class="flex align-items-center gap-4">
+            <tedi-spinner [size]="48" label="Loading..." color="primary" />
+            <div class="bg bg-primary">
+              <tedi-spinner [size]="48" label="Loading..." color="secondary" />
+            </div>
+            <div class="bg bg-danger">
+              <tedi-spinner [size]="48" label="Loading..." color="secondary" />
+            </div>
+            <div class="bg bg-success">
+              <tedi-spinner [size]="48" label="Loading..." color="secondary" />
+            </div>
+          </div>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };

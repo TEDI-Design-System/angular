@@ -2,6 +2,9 @@ import { Meta, StoryObj } from "@storybook/angular";
 import { moduleMetadata } from "@storybook/angular";
 
 import { EllipsisComponent } from "./index";
+import { RowComponent } from "../grid/row/row.component";
+import { ColComponent } from "../grid/col/col.component";
+import { TextComponent } from "../../base/text/text.component";
 
 /**
  * <a href="https://www.tedi.ee/1ee8444b7/p/87ef9b-ellipsis" target="_BLANK">Zeroheight ↗</a>
@@ -11,13 +14,14 @@ export default {
   component: EllipsisComponent,
   decorators: [
     moduleMetadata({
-      imports: [EllipsisComponent],
+      imports: [EllipsisComponent, RowComponent, ColComponent, TextComponent],
     }),
   ],
   parameters: {
     status: {
       type: ["devComponent"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     lineClamp: {
@@ -79,6 +83,7 @@ export const Default: StoryObj<EllipsisComponent> = {
  * Resize the window to see that the ellipsis and tooltip appear only when content doesn't fit.
  */
 export const ResponsiveEnd: StoryObj<EllipsisComponent> = {
+  parameters: { chromatic: { disableSnapshot: false } },
   render: (args) => ({
     props: args,
     template: `
@@ -109,7 +114,6 @@ export const LeadingStart: StoryObj<EllipsisComponent> = {
 };
 
 export const NoTooltip: StoryObj<EllipsisComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   render: (args) => ({
     props: args,
     template: `
@@ -123,4 +127,28 @@ export const NoTooltip: StoryObj<EllipsisComponent> = {
   args: {
     tooltip: false,
   },
+};
+
+/** Chromatic snapshot for Ellipsis: add every new visual variant here too. */
+export const VisualTest: StoryObj<EllipsisComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false } },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="3">
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1"><p tedi-text modifiers="bold">End</p></tedi-col>
+          <tedi-col width="1">
+            <tedi-ellipsis [lineClamp]="2" position="end">${CONTENT}</tedi-ellipsis>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Leading start</p></tedi-col>
+          <tedi-col width="1">
+            <tedi-ellipsis position="start">${CONTENT}</tedi-ellipsis>
+          </tedi-col>
+        </tedi-row>
+      </tedi-row>
+    `,
+  }),
 };

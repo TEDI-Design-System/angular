@@ -9,6 +9,7 @@ import { ClosingButtonComponent } from "./closing-button.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
+import { TextComponent } from "../../base/text/text.component";
 import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
 import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
 import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
@@ -33,6 +34,7 @@ export default {
         IconComponent,
         RowComponent,
         ColComponent,
+        TextComponent,
         TooltipComponent,
         TooltipTriggerComponent,
         TooltipContentComponent,
@@ -85,13 +87,13 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
   },
 } as Meta<ClosingButtonComponent>;
 
 type Story = StoryObj<ClosingButtonComponent>;
 
 export const Default: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     iconSize: 24,
@@ -222,6 +224,51 @@ export const States: Story = {
           <b>{{ state }}</b>
           <button tedi-closing-button ${argsToTemplate(args)} [id]="state"></button>
         </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/** Chromatic snapshot for ClosingButton: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    pseudo: {
+      hover: "#vt-hover",
+      active: "#vt-active",
+      focusVisible: "#vt-focus",
+    },
+  },
+  render: () => ({
+    props: { states: PSEUDO_STATE },
+    template: `
+      <tedi-row [cols]="1" [gapY]="3">
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Small</p></tedi-col>
+          <tedi-col width="5"><button tedi-closing-button size="small"></button></tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Small, 18px icon</p></tedi-col>
+          <tedi-col width="5"><button tedi-closing-button size="small" [iconSize]="18"></button></tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Custom icon</p></tedi-col>
+          <tedi-col width="5">
+            <div class="flex gap-2">
+              <button tedi-closing-button icon="delete" ariaLabel="Kustuta"></button>
+              <button tedi-closing-button icon="delete_forever" ariaLabel="Kustuta jäädavalt"></button>
+            </div>
+          </tedi-col>
+        </tedi-row>
+        @for (state of states; track state) {
+          <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+            <tedi-col width="1"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
+            <tedi-col width="5">
+              <button tedi-closing-button [id]="'vt-' + state.toLowerCase()"></button>
+            </tedi-col>
+          </tedi-row>
+        }
       </tedi-row>
     `,
   }),

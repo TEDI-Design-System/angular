@@ -8,6 +8,7 @@ import {
 import { AlertComponent } from "./alert.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
 import { IconComponent } from "../../base";
 import { TextComponent } from "../../base/text/text.component";
 
@@ -25,11 +26,15 @@ export default {
         AlertComponent,
         ButtonComponent,
         RowComponent,
+        ColComponent,
         IconComponent,
         TextComponent,
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     title: {
       control: "text",
@@ -300,6 +305,130 @@ export const WithActionButton: Story = {
         Teie profiililt puudub foto — lisage see, et kolleegid saaksid teid jagatud dokumentides ära tunda.
         <button tedi-button tedi-alert-action variant="secondary">Ava profiil <tedi-icon name="arrow_forward" [size]="24" /></button>
       </tedi-alert>
+    `,
+  }),
+};
+
+/** Chromatic snapshot for Alert: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false },
+  },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        <tedi-col>
+          <p tedi-text modifiers="bold">Default</p>
+          <tedi-alert title="Pealkiri" type="info">
+            Sisu kirjeldus. <a href="#">Tekstisisene lingi näide</a>
+          </tedi-alert>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Size: default (headless)</p>
+          <tedi-alert type="info" size="default">
+            Sisu kirjeldus
+          </tedi-alert>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Size: small</p>
+          <tedi-alert type="info" size="small">
+            Sisu kirjeldus
+          </tedi-alert>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Global</p>
+          <tedi-row [cols]="1" [gap]="3">
+            <tedi-alert title="Pealkiri" variant="global">
+              Sisu kirjeldus
+            </tedi-alert>
+            <tedi-alert variant="global">
+              Sisu kirjeldus
+            </tedi-alert>
+          </tedi-row>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Without side borders</p>
+          <tedi-row [cols]="1" [gap]="3">
+            <tedi-alert variant="noSideBorders" title="Pealkiri">
+              Sisu kirjeldus
+            </tedi-alert>
+            <tedi-alert variant="noSideBorders">
+              Sisu kirjeldus
+            </tedi-alert>
+          </tedi-row>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">With icon</p>
+          <tedi-row [cols]="1" [gap]="3">
+            <tedi-alert title="Pealkiri" icon="check_circle">
+              Sisu kirjeldus
+            </tedi-alert>
+            <tedi-alert icon="check_circle">
+              Sisu kirjeldus
+            </tedi-alert>
+          </tedi-row>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">With close button</p>
+          <tedi-row [cols]="1" [gap]="3">
+            <tedi-alert title="Pealkiri" [showClose]="true">
+              Sisu kirjeldus
+            </tedi-alert>
+            <tedi-alert [showClose]="true">
+              Sisu kirjeldus
+            </tedi-alert>
+          </tedi-row>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Alert types</p>
+          <tedi-row [cols]="1" [gap]="3">
+            <tedi-alert type="info" icon="info">
+              See on infoteade.
+            </tedi-alert>
+            <tedi-alert type="success" icon="check_circle">
+              See on õnnestumisteade.
+            </tedi-alert>
+            <tedi-alert type="warning" icon="warning">
+              See on hoiatusteade.
+            </tedi-alert>
+            <tedi-alert type="danger" icon="error">
+              See on veateade.
+            </tedi-alert>
+          </tedi-row>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Long text</p>
+          <tedi-row [cols]="1" [gap]="3">
+            <tedi-alert type="warning" icon="warning">
+              Teie kontol on mitu lahendamata teadet, mis vajavad tähelepanu. Palun vaadake üle oma profiili andmed ja kinnitage need enne jätkamist.
+              Süsteem salvestab muudatused automaatselt, kuid soovitame need siiski üle kontrollida.
+              Mõned väljad võivad olla puudulikud või vananenud ning vajavad täiendamist.
+              Kui teil on küsimusi, võtke palun ühendust klienditoega.
+            </tedi-alert>
+            <tedi-alert type="info" icon="info" [showClose]="true">
+              Teie kontol on mitu lahendamata teadet, mis vajavad tähelepanu. Palun vaadake üle oma profiili andmed ja kinnitage need enne jätkamist.
+              Süsteem salvestab muudatused automaatselt, kuid soovitame need siiski üle kontrollida.
+              Mõned väljad võivad olla puudulikud või vananenud ning vajavad täiendamist.
+              Kui teil on küsimusi, võtke palun ühendust klienditoega.
+            </tedi-alert>
+            <tedi-alert type="danger" icon="error" [showClose]="true" title="Pealkiri">
+              Teie kontol on mitu lahendamata teadet, mis vajavad tähelepanu. Palun vaadake üle oma profiili andmed ja kinnitage need enne jätkamist.
+              Süsteem salvestab muudatused automaatselt, kuid soovitame need siiski üle kontrollida.
+              Mõned väljad võivad olla puudulikud või vananenud ning vajavad täiendamist.
+              Kui teil on küsimusi, võtke palun ühendust klienditoega.
+            </tedi-alert>
+          </tedi-row>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">With action button</p>
+          <tedi-alert type="warning" icon="warning">
+            Teie profiililt puudub foto, lisage see, et kolleegid saaksid teid jagatud dokumentides ära tunda.
+            <button tedi-button tedi-alert-action variant="secondary">Ava profiil <tedi-icon name="arrow_forward" [size]="24" /></button>
+          </tedi-alert>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };

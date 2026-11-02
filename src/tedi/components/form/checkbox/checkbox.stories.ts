@@ -55,6 +55,9 @@ export default {
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     size: {
       control: "radio",
@@ -161,7 +164,6 @@ export default {
 
 export const Default: StoryObj<StoryCheckboxComponent & { disabled: boolean }> =
   {
-    parameters: { chromatic: { disableSnapshot: true } },
     args: {
       size: "default",
       invalid: false,
@@ -179,14 +181,7 @@ export const Default: StoryObj<StoryCheckboxComponent & { disabled: boolean }> =
     }),
   };
 
-/**
- * Default size is used on desktop, large size is applied automatically on mobile screen sizes.
- * Use in tables where the checkbox has no text. **Otherwise, prefer using default size.**
- */
-export const Size: StoryObj<CheckboxComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const SIZE_TEMPLATE = `
       <tedi-row [cols]="12" [gapY]="3">
         <tedi-col width="9" [md]="{ width: 6 }">
           <p tedi-text modifiers="bold">Default</p>
@@ -207,14 +202,20 @@ export const Size: StoryObj<CheckboxComponent> = {
           <input tedi-checkbox type="checkbox" size="large" aria-label="Suur" />
         </tedi-col>
       </tedi-row>
-    `,
+    `;
+
+/**
+ * Default size is used on desktop, large size is applied automatically on mobile screen sizes.
+ * Use in tables where the checkbox has no text. **Otherwise, prefer using default size.**
+ */
+export const Size: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    template: SIZE_TEMPLATE,
   }),
 };
 
-export const Vertical: StoryObj<CheckboxComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const VERTICAL_TEMPLATE = `
       <tedi-checkbox-group label="Vali tooraine" direction="vertical">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" checked />
@@ -229,14 +230,16 @@ export const Vertical: StoryObj<CheckboxComponent> = {
           Kapsas
         </label>
       </tedi-checkbox-group>
-    `,
+    `;
+
+export const Vertical: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    template: VERTICAL_TEMPLATE,
   }),
 };
 
-export const Horizontal: StoryObj<CheckboxComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const HORIZONTAL_TEMPLATE = `
       <tedi-checkbox-group label="Vali tooraine">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" checked />
@@ -251,11 +254,17 @@ export const Horizontal: StoryObj<CheckboxComponent> = {
           Kapsas
         </label>
       </tedi-checkbox-group>
-    `,
+    `;
+
+export const Horizontal: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    template: HORIZONTAL_TEMPLATE,
   }),
 };
 
 export const VerticalTree: StoryObj<CheckboxComponent> = {
+  parameters: { chromatic: { disableSnapshot: false } },
   render: (args) => {
     setTimeout(() => {
       const parent = document.querySelector(
@@ -321,10 +330,7 @@ export const VerticalTree: StoryObj<CheckboxComponent> = {
   },
 };
 
-export const Separate: StoryObj<CheckboxComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const SEPARATE_TEMPLATE = `
       <tedi-row [cols]="1" [gapY]="4">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-checkbox type="checkbox" />
@@ -361,14 +367,16 @@ export const Separate: StoryObj<CheckboxComponent> = {
           <tedi-feedback-text text="Valik tagab vereanalüüside võtmise ning tulemuste tõlgendamise" />
         </div>
       </tedi-row>
-    `,
+    `;
+
+export const Separate: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    template: SEPARATE_TEMPLATE,
   }),
 };
 
-export const Group: StoryObj<CheckboxComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const GROUP_TEMPLATE = `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
         <tedi-checkbox-group label="Tooraine" direction="vertical">
           <label tedi-label color="primary" class="flex align-items-center gap-2">
@@ -431,17 +439,16 @@ export const Group: StoryObj<CheckboxComponent> = {
           <tedi-feedback-text text="Vähemalt 1 tooraine on kohustuslik valida" type="error" />
         </tedi-checkbox-group>
       </tedi-row>
-    `,
+    `;
+
+export const Group: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    template: GROUP_TEMPLATE,
   }),
 };
 
-/**
- * Checkbox cards with primary and secondary variants. Primary uses a filled background when selected, secondary uses an outline border.
- */
-export const CardsDefault: StoryObj<CheckboxComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const CARDS_DEFAULT_TEMPLATE = `
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
         <tedi-col class="flex flex-column gap-2">
           <p tedi-text modifiers="bold">Primary</p>
@@ -478,17 +485,19 @@ export const CardsDefault: StoryObj<CheckboxComponent> = {
           </tedi-checkbox-card-group>
         </tedi-col>
       </tedi-row>
-    `,
+    `;
+
+/**
+ * Checkbox cards with primary and secondary variants. Primary uses a filled background when selected, secondary uses an outline border.
+ */
+export const CardsDefault: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    template: CARDS_DEFAULT_TEMPLATE,
   }),
 };
 
-/**
- * Checkbox cards inside a labelled `tedi-checkbox-group`, with and without an error message.
- */
-export const CardsWithLabel: StoryObj<CheckboxComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const CARDS_WITH_LABEL_TEMPLATE = `
       <div class="flex flex-wrap gap-4">
         <tedi-checkbox-group label="Juurvili">
           <tedi-checkbox-card-group>
@@ -524,18 +533,19 @@ export const CardsWithLabel: StoryObj<CheckboxComponent> = {
           <tedi-feedback-text text="Valik on kohustuslik" type="error" />
         </tedi-checkbox-group>
       </div>
-    `,
+    `;
+
+/**
+ * Checkbox cards inside a labelled `tedi-checkbox-group`, with and without an error message.
+ */
+export const CardsWithLabel: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    template: CARDS_WITH_LABEL_TEMPLATE,
   }),
 };
 
-/**
- * Checkbox cards with a description below the label text.
- */
-export const CardsWithDescription: StoryObj<CheckboxComponent> = {
-  render: (args) => ({
-    props: args,
-    styles: [
-      `
+const CARDS_WITH_DESCRIPTION_STYLES = `
         .cards-with-description__stretch {
           display: flex;
           align-items: stretch;
@@ -544,9 +554,9 @@ export const CardsWithDescription: StoryObj<CheckboxComponent> = {
         .cards-with-description__stretch label[tedi-checkbox-card] {
           flex: 1 1 12rem;
         }
-      `,
-    ],
-    template: `
+      `;
+
+const CARDS_WITH_DESCRIPTION_TEMPLATE = `
     <div class="flex flex-column gap-4">
       <div class="flex flex-column gap-2">
         <p tedi-text modifiers="bold">Primary</p>
@@ -589,18 +599,20 @@ export const CardsWithDescription: StoryObj<CheckboxComponent> = {
         </tedi-checkbox-card-group>
       </div>
     </div>
-    `,
+    `;
+
+/**
+ * Checkbox cards with a description below the label text.
+ */
+export const CardsWithDescription: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    styles: [CARDS_WITH_DESCRIPTION_STYLES],
+    template: CARDS_WITH_DESCRIPTION_TEMPLATE,
   }),
 };
 
-/**
- * Checkbox cards with icons before the label text, with and without a description.
- */
-export const CardsWithIcons: StoryObj<CheckboxComponent> = {
-  render: (args) => ({
-    props: args,
-    styles: [
-      `
+const CARDS_WITH_ICONS_STYLES = `
         .cards-with-icons__stretch {
           display: flex;
           align-items: stretch;
@@ -609,9 +621,9 @@ export const CardsWithIcons: StoryObj<CheckboxComponent> = {
         .cards-with-icons__stretch label[tedi-checkbox-card] {
           flex: 1 1 12rem;
         }
-      `,
-    ],
-    template: `
+      `;
+
+const CARDS_WITH_ICONS_TEMPLATE = `
     <div class="flex flex-column gap-4">
       <tedi-row [gapY]="3" [xs]="{cols: 1}" [md]="{cols: 2}">
         <tedi-col class="flex flex-column gap-2">
@@ -702,7 +714,16 @@ export const CardsWithIcons: StoryObj<CheckboxComponent> = {
         </tedi-checkbox-card-group>
       </div>
     </div>
-    `,
+    `;
+
+/**
+ * Checkbox cards with icons before the label text, with and without a description.
+ */
+export const CardsWithIcons: StoryObj<CheckboxComponent> = {
+  render: (args) => ({
+    props: args,
+    styles: [CARDS_WITH_ICONS_STYLES],
+    template: CARDS_WITH_ICONS_TEMPLATE,
   }),
 };
 
@@ -952,6 +973,22 @@ const statesDesktopGrid = {
   rowGap: "var(--layout-grid-gutters-08)",
 };
 
+const STATES_TEMPLATE = stateMatrix({
+  headers: ["Unselected", "Selected", "Error unselected", "Error selected"],
+  alignItems: "center",
+  mobileLayout: "columns",
+  desktopGrid: statesDesktopGrid,
+  rows: stateRows.map((row) => ({
+    label: row.label,
+    cells: [
+      row.unselected === false ? "" : stateCell(row, false),
+      stateCell(row, true),
+      row.error === false ? "" : stateCell(row, false, true),
+      row.error === false ? "" : stateCell(row, true, true),
+    ],
+  })),
+});
+
 export const States: StoryObj<CheckboxComponent> = {
   parameters: {
     pseudo: {
@@ -962,21 +999,7 @@ export const States: StoryObj<CheckboxComponent> = {
   },
   render: (args) => ({
     props: args,
-    template: stateMatrix({
-      headers: ["Unselected", "Selected", "Error unselected", "Error selected"],
-      alignItems: "center",
-      mobileLayout: "columns",
-      desktopGrid: statesDesktopGrid,
-      rows: stateRows.map((row) => ({
-        label: row.label,
-        cells: [
-          row.unselected === false ? "" : stateCell(row, false),
-          stateCell(row, true),
-          row.error === false ? "" : stateCell(row, false, true),
-          row.error === false ? "" : stateCell(row, true, true),
-        ],
-      })),
-    }),
+    template: STATES_TEMPLATE,
     styles: stateMatrixStyles,
   }),
 };
@@ -1074,7 +1097,6 @@ export const CardStatesSecondary: StoryObj<CheckboxComponent> = {
  *   `CheckboxControlValueAccessor`. Each control holds a boolean.
  */
 export const WithReactiveForms: StoryObj<CheckboxComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const tagsControl = new FormControl<string[]>(["urgent"]);
     const featuresControl = new FormControl<string[]>(["analytics", "export"]);
@@ -1170,4 +1192,88 @@ export const WithReactiveForms: StoryObj<CheckboxComponent> = {
       `,
     };
   },
+};
+
+/** Chromatic snapshot for Checkbox: add every new visual variant here too. */
+export const VisualTest: StoryObj<CheckboxComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    pseudo: {
+      hover: [
+        ...statePseudoIds("Hover"),
+        ...cardStatesPseudo("Primary").hover,
+        ...cardStatesPseudo("Secondary").hover,
+      ],
+      active: [
+        ...statePseudoIds("Active"),
+        ...cardStatesPseudo("Primary").active,
+        ...cardStatesPseudo("Secondary").active,
+      ],
+      focusVisible: [
+        ...statePseudoIds("Focus"),
+        ...cardStatesPseudo("Primary").focusVisible,
+        ...cardStatesPseudo("Secondary").focusVisible,
+      ],
+    },
+  },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        <tedi-col>
+          <p tedi-text modifiers="bold">Size</p>
+          ${SIZE_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Vertical</p>
+          ${VERTICAL_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Horizontal</p>
+          ${HORIZONTAL_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Separate</p>
+          ${SEPARATE_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Group</p>
+          ${GROUP_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Cards default</p>
+          ${CARDS_DEFAULT_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Cards with label</p>
+          ${CARDS_WITH_LABEL_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Cards with description</p>
+          ${CARDS_WITH_DESCRIPTION_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Cards with icons</p>
+          ${CARDS_WITH_ICONS_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">States</p>
+          ${STATES_TEMPLATE}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Card states primary</p>
+          ${cardStatesTemplate("primary")}
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Card states secondary</p>
+          ${cardStatesTemplate("secondary")}
+        </tedi-col>
+      </tedi-row>
+    `,
+    styles: [
+      ...stateMatrixStyles,
+      CARDS_WITH_DESCRIPTION_STYLES,
+      CARDS_WITH_ICONS_STYLES,
+    ],
+  }),
 };

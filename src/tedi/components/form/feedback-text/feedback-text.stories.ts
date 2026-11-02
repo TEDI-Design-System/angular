@@ -6,6 +6,9 @@ import {
   StoryFn,
 } from "@storybook/angular";
 import { FeedbackTextComponent } from "./feedback-text.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
+import { TextComponent } from "../../base/text/text.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.65.83?node-id=9165-62054&m=dev" target="_blank">Figma ↗</a><br />
@@ -17,13 +20,19 @@ export default {
   component: FeedbackTextComponent,
   decorators: [
     moduleMetadata({
-      imports: [FeedbackTextComponent],
+      imports: [
+        FeedbackTextComponent,
+        RowComponent,
+        ColComponent,
+        TextComponent,
+      ],
     }),
   ],
   parameters: {
     status: {
       type: ["devComponent"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     text: {
@@ -89,7 +98,6 @@ export const Valid: StoryObj<FeedbackTextComponent> = {
 };
 
 export const PositionLeft: StoryObj<FeedbackTextComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     text: "I am a hint text",
     position: "left",
@@ -103,4 +111,32 @@ export const PositionRight: StoryObj<FeedbackTextComponent> = {
     position: "right",
   },
   render: Template,
+};
+
+/** Chromatic snapshot for FeedbackText: add every new visual variant here too. */
+export const VisualTest: StoryObj<FeedbackTextComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false } },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="3">
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Hint</p></tedi-col>
+          <tedi-col width="5"><tedi-feedback-text text="I am a hint text" /></tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Error</p></tedi-col>
+          <tedi-col width="5"><tedi-feedback-text text="I am an error text" type="error" /></tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Valid</p></tedi-col>
+          <tedi-col width="5"><tedi-feedback-text text="I am a valid text" type="valid" /></tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Position right</p></tedi-col>
+          <tedi-col width="5"><tedi-feedback-text text="I am a hint text" position="right" /></tedi-col>
+        </tedi-row>
+      </tedi-row>
+    `,
+  }),
 };

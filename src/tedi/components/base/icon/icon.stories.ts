@@ -6,6 +6,7 @@ import {
 } from "@storybook/angular";
 import { IconComponent } from "./icon.component";
 import { TextComponent } from "../text/text.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 
 const SIZES = [8, 12, 16, 18, 24, 36, 48, "inherit"];
 const SIZES_WITH_BG = [16, 24];
@@ -46,9 +47,10 @@ export default {
   component: IconComponent,
   decorators: [
     moduleMetadata({
-      imports: [IconComponent, TextComponent],
+      imports: [IconComponent, TextComponent, VerticalSpacingDirective],
     }),
   ],
+  parameters: { chromatic: { disableSnapshot: true } },
   argTypes: {
     name: {
       description:
@@ -134,7 +136,6 @@ export default {
 } as Meta<IconComponent>;
 
 export const Default: StoryObj<IconComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     name: "account_circle",
   },
@@ -347,6 +348,165 @@ export const UsedInsideText: StoryObj<IconComponent> = {
           icon
         </small>
       </div>
+    `,
+  }),
+};
+
+/** Chromatic snapshot for Icon: add every new visual variant here too. */
+export const VisualTest: StoryObj<IconComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false } },
+  render: () => ({
+    props: {
+      sizes: SIZES,
+      sizesWithBg: SIZES_WITH_BG,
+      colors: COLORS,
+      variants: ["outlined", "filled"],
+    },
+    styles: [".icon-vt-inherit { font-size: 60px; }"],
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Size</p>
+            <div class="example-list">
+              @for (size of sizes; track size; let last = $last) {
+                <div class="padding-14-16" [class.border-bottom]="!last">
+                  <tedi-row [cols]="2" alignItems="center">
+                    <tedi-col>
+                      {{ size }}
+                      @if (size === 24) {
+                        <small tedi-text color="secondary">default</small>
+                      }
+                    </tedi-col>
+                    <tedi-col>
+                      <div class="display-flex" [class.icon-vt-inherit]="size === 'inherit'">
+                        <tedi-icon name="account_circle" [size]="size" />
+                        <tedi-icon name="account_circle" [size]="size" variant="filled" />
+                      </div>
+                    </tedi-col>
+                  </tedi-row>
+                </div>
+              }
+            </div>
+          </div>
+        </tedi-col>
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Size inside background</p>
+            <div class="example-list">
+              @for (size of sizesWithBg; track size; let last = $last) {
+                <div class="padding-14-16" [class.border-bottom]="!last">
+                  <tedi-row [cols]="2" alignItems="center">
+                    <tedi-col>
+                      {{ size }}
+                      @if (size === 24) {
+                        <small tedi-text color="secondary">default</small>
+                      }
+                    </tedi-col>
+                    <tedi-col>
+                      <div class="display-flex gap-1">
+                        <tedi-icon [name]="size === 16 ? 'info' : 'vaccines'" [size]="size" background="brand-secondary" color="brand" />
+                        <tedi-icon [name]="size === 16 ? 'info' : 'vaccines'" [size]="size" background="brand-secondary" color="brand" variant="filled" />
+                      </div>
+                    </tedi-col>
+                  </tedi-row>
+                </div>
+              }
+            </div>
+          </div>
+        </tedi-col>
+        @for (variant of variants; track variant) {
+          <tedi-col>
+            <div [tediVerticalSpacing]="0.5">
+              <p tedi-text modifiers="bold">Colors, {{ variant }}</p>
+              <div class="flex align-items-center gap-3">
+                @for (color of colors; track color) {
+                  @if (color === 'white') {
+                    <div class="bg bg-primary">
+                      <tedi-icon name="account_circle" [size]="48" [variant]="variant" [color]="color" />
+                    </div>
+                  } @else {
+                    <tedi-icon name="account_circle" [size]="48" [variant]="variant" [color]="color" />
+                  }
+                }
+              </div>
+            </div>
+          </tedi-col>
+        }
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Background colors</p>
+            <div class="flex align-items-center gap-4">
+              <tedi-icon name="vaccines" color="white" background="brand-primary" [size]="24" />
+              <tedi-icon name="info" color="white" background="brand-primary" [size]="16" />
+              <tedi-icon name="vaccines" color="brand" background="brand-secondary" [size]="24" />
+              <tedi-icon name="info" color="brand" background="brand-secondary" [size]="16" />
+              <div class="bg bg-primary gap-3">
+                <tedi-icon name="vaccines" color="brand" background="primary" [size]="24" />
+                <tedi-icon name="info" color="brand" background="primary" [size]="16" />
+                <tedi-icon name="vaccines" color="white" background="secondary" [size]="24" />
+                <tedi-icon name="info" color="white" background="secondary" [size]="16" />
+              </div>
+            </div>
+          </div>
+        </tedi-col>
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Used inside text</p>
+            <div class="flex flex-column gap-1">
+              <h1 tedi-text class="display-flex gap-1">
+                <tedi-icon name="account_circle" size="inherit" />
+                This is level 1 heading with inline
+                <tedi-icon name="account_circle" size="inherit" color="brand" />
+                icon
+              </h1>
+              <h2 tedi-text class="display-flex gap-1">
+                <tedi-icon name="account_circle" size="inherit" />
+                This is level 2 heading with inline
+                <tedi-icon name="account_circle" size="inherit" color="brand" />
+                icon
+              </h2>
+              <h3 tedi-text class="display-flex gap-1">
+                <tedi-icon name="account_circle" size="inherit" />
+                This is level 3 heading with inline
+                <tedi-icon name="account_circle" size="inherit" color="brand" />
+                icon
+              </h3>
+              <h4 tedi-text class="display-flex gap-1">
+                <tedi-icon name="account_circle" size="inherit" />
+                This is level 4 heading with inline
+                <tedi-icon name="account_circle" size="inherit" color="brand" />
+                icon
+              </h4>
+              <h5 tedi-text class="display-flex gap-1">
+                <tedi-icon name="account_circle" size="inherit" />
+                This is level 5 heading with inline
+                <tedi-icon name="account_circle" size="inherit" color="brand" />
+                icon
+              </h5>
+              <h6 tedi-text class="display-flex gap-1">
+                <tedi-icon name="account_circle" size="inherit" />
+                This is level 6 heading with inline
+                <tedi-icon name="account_circle" size="inherit" color="brand" />
+                icon
+              </h6>
+              <p tedi-text class="display-flex gap-1">
+                <tedi-icon name="account_circle" size="inherit" />
+                This is paragraph text with inline
+                <tedi-icon name="account_circle" size="inherit" color="brand" />
+                icon
+              </p>
+              <small class="display-flex gap-1">
+                <tedi-icon name="account_circle" size="inherit" />
+                This is small text with inline
+                <tedi-icon name="account_circle" size="inherit" color="brand" />
+                icon
+              </small>
+            </div>
+          </div>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };

@@ -7,6 +7,9 @@ import {
 import { PaginationComponent } from "./pagination.component";
 import { TediPaginationResultsDirective } from "./pagination-results.directive";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
+import { TextComponent } from "../../base/text/text.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
 
 /**
  * Navigation between paginated sets of content. Renders a row of page buttons
@@ -20,13 +23,20 @@ export default {
   component: PaginationComponent,
   decorators: [
     moduleMetadata({
-      imports: [PaginationComponent, TediPaginationResultsDirective],
+      imports: [
+        PaginationComponent,
+        TediPaginationResultsDirective,
+        TextComponent,
+        RowComponent,
+        ColComponent,
+      ],
     }),
   ],
   parameters: {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
     design: {
       type: "figma",
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=8478-72385&m=dev",
@@ -322,7 +332,6 @@ export const WithoutDropdown: Story = {
 };
 
 export const ControlledPage: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: { pageCount: 10, page: 3 },
   render: (args) => ({
     props: args,
@@ -459,6 +468,7 @@ export const ResponsiveAlign: Story = {
     `,
   }),
   parameters: {
+    chromatic: { disableSnapshot: false },
     docs: {
       description: {
         story:
@@ -482,6 +492,7 @@ export const ResponsiveVisibility: Story = {
     template: `<tedi-pagination ${argsToTemplate(args)} />`,
   }),
   parameters: {
+    chromatic: { disableSnapshot: false },
     docs: {
       description: {
         story:
@@ -629,7 +640,6 @@ export const CustomResultsSlot: Story = {
     `,
   }),
   parameters: {
-    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -673,7 +683,6 @@ export const ShowAll: Story = {
     `,
   }),
   parameters: {
-    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -705,5 +714,168 @@ export const CustomLabels: Story = {
   render: (args) => ({
     props: args,
     template: `<tedi-pagination ${argsToTemplate(args)} />`,
+  }),
+};
+
+const VT_FULL = {
+  pageCount: 10,
+  page: 3,
+  totalItems: 97,
+  pageSize: 10,
+  pageSizeOptions: [10, 25, 50, 100],
+};
+
+const VT_CONTENT = `<div style="padding: 24px 0; color: var(--general-text-tertiary); text-align: center;">table content goes here</div>`;
+
+type VtPagination = {
+  label: string;
+  args: Record<string, unknown>;
+  wrap?: (pagination: string) => string;
+};
+
+const VT_PAGINATIONS: VtPagination[] = (
+  [
+    { label: "Default", args: { pageCount: 10, page: 3 } },
+    { label: "First", args: { pageCount: 10, page: 1 } },
+    { label: "Last", args: { pageCount: 10, page: 10 } },
+    { label: "All properties shown", args: VT_FULL },
+    {
+      label: "Without results number",
+      args: {
+        pageCount: 10,
+        page: 3,
+        pageSize: 10,
+        pageSizeOptions: [10, 25, 50, 100],
+      },
+    },
+    {
+      label: "Without dropdown",
+      args: { pageCount: 10, page: 3, totalItems: 97 },
+    },
+    { label: "Few pages", args: { pageCount: 4, page: 2 } },
+    { label: "Many pages ellipsis", args: { pageCount: 50, page: 12 } },
+    { label: "Huge page count", args: { pageCount: 5000, page: 2500 } },
+    {
+      label: "Wider siblings",
+      args: { pageCount: 40, page: 20, boundaryCount: 2, siblingCount: 2 },
+    },
+    {
+      label: "Transparent",
+      args: { ...VT_FULL, background: "transparent" },
+      wrap: (pagination) =>
+        `<div style="background: var(--general-surface-secondary); padding: 16px;">${pagination}</div>`,
+    },
+    {
+      label: "Top and bottom split: top",
+      args: { ...VT_FULL, hidePager: true, dividerPosition: "bottom" },
+      wrap: (pagination) => `${pagination}${VT_CONTENT}`,
+    },
+    {
+      label: "Top and bottom split: bottom",
+      args: { ...VT_FULL, hideResults: true, hidePageSize: true },
+    },
+    {
+      label: "Left aligned",
+      args: {
+        ...VT_FULL,
+        align: "left",
+        hidePager: true,
+        dividerPosition: "bottom",
+      },
+      wrap: (pagination) => `${pagination}${VT_CONTENT}`,
+    },
+    {
+      label: "Divider bottom",
+      args: { ...VT_FULL, dividerPosition: "bottom" },
+      wrap: (pagination) => `${pagination}${VT_CONTENT}`,
+    },
+    {
+      label: "Disabled boundary arrows",
+      args: { ...VT_FULL, page: 1, disableArrowsAtBoundary: true },
+    },
+    {
+      label: "Arrows with labels",
+      args: {
+        ...VT_FULL,
+        showArrowLabels: false,
+        md: { showArrowLabels: true },
+      },
+    },
+    {
+      label: "Custom arrow icons",
+      args: {
+        ...VT_FULL,
+        previousIcon: "chevron_left",
+        nextIcon: "chevron_right",
+      },
+    },
+    {
+      label: "Arrows primary variant",
+      args: {
+        ...VT_FULL,
+        arrowVariant: "primary",
+        showArrowLabels: false,
+        md: { showArrowLabels: true },
+      },
+    },
+    {
+      label: "Custom labels",
+      args: {
+        pageCount: 10,
+        page: 1,
+        totalItems: 97,
+        pageSize: 10,
+        pageSizeOptions: [10, 25, 50],
+        labels: {
+          ariaLabel: "Lehekülgede sirvimine",
+          previous: "Eelmine lehekülg",
+          next: "Järgmine lehekülg",
+          pageAriaLabel: (page: number) => `Mine leheküljele ${page}`,
+          currentPageAriaLabel: (page: number) =>
+            `Praegune lehekülg, lehekülg ${page}`,
+          results: (count: number) => `${count} rida`,
+          pageSize: "Kirjete arv lehel",
+          pageTitle: "Vali lehekülg",
+          pageSizeTitle: "Kirjete arv lehel",
+        },
+      },
+    },
+  ] as VtPagination[]
+).map((entry) =>
+  entry.args["labels"]
+    ? entry
+    : {
+        ...entry,
+        args: {
+          ...entry.args,
+          labels: { ariaLabel: `Lehekülgede sirvimine: ${entry.label}` },
+        },
+      },
+);
+
+/** Chromatic snapshot for Pagination: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false },
+  },
+  render: () => ({
+    props: { vt: VT_PAGINATIONS },
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        ${VT_PAGINATIONS.map(({ label, args, wrap }, i) => {
+          const bindings = Object.keys(args)
+            .map((key) => `[${key}]="vt[${i}].args.${key}"`)
+            .join(" ");
+          const pagination = `<tedi-pagination ${bindings} />`;
+          return `
+        <tedi-col>
+          <p tedi-text modifiers="bold">${label}</p>
+          ${wrap ? wrap(pagination) : pagination}
+        </tedi-col>`;
+        }).join("")}
+      </tedi-row>
+    `,
   }),
 };

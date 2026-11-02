@@ -5,6 +5,9 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { TruncateComponent } from "./truncate.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
+import { TextComponent } from "../../base/text/text.component";
 
 const LOREM_IPSUM = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras quam sapien, ultrices quis suscipit in, sodales vel justo. Curabitur lobortis quam dolor, vel dapibus dui pellentesque in. Maecenas auctor lacus elit, a vulputate ante cursus vitae. Proin mollis auctor ipsum nec malesuada. Aliquam turpis dui, dictum sit amet eros ac, iaculis mollis diam. Vivamus sed nulla ut justo fermentum ornare. Nam iaculis accumsan euismod. Sed efficitur risus a nisl interdum, placerat tincidunt velit sollicitudin. Donec ac tincidunt lorem, id ornare felis. Vestibulum sed lacinia diam. Donec vehicula mi maximus purus sollicitudin, at pulvinar lacus placerat.`;
 
@@ -18,13 +21,14 @@ export default {
   component: TruncateComponent,
   decorators: [
     moduleMetadata({
-      imports: [TruncateComponent],
+      imports: [TruncateComponent, RowComponent, ColComponent, TextComponent],
     }),
   ],
   parameters: {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     text: {
@@ -118,9 +122,37 @@ export const NotExpandable: Story = {
  * viewports. Resize the preview to see the collapsed length change.
  */
 export const ResponsiveMaxLength: Story = {
-  parameters: { controls: { disable: true } },
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false },
+  },
   render: () => ({
     props: { text: LOREM_IPSUM },
     template: `<tedi-truncate [text]="text" [maxLength]="{ xs: 80, md: 200, xl: 400 }" />`,
+  }),
+};
+
+/** Chromatic snapshot for Truncate: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false } },
+  render: () => ({
+    props: { text: LOREM_IPSUM },
+    template: `
+      <tedi-row [cols]="1" [gapY]="3">
+        <tedi-row cols="1" [sm]="{ cols: 6 }">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Collapsed</p></tedi-col>
+          <tedi-col width="5"><tedi-truncate [text]="text" [maxLength]="{ xs: 200 }" /></tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Expanded</p></tedi-col>
+          <tedi-col width="5"><tedi-truncate [text]="text" [expanded]="true" /></tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Not expandable</p></tedi-col>
+          <tedi-col width="5"><tedi-truncate [text]="text" [expandable]="false" /></tedi-col>
+        </tedi-row>
+      </tedi-row>
+    `,
   }),
 };

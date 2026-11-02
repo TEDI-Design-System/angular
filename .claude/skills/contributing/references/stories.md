@@ -218,6 +218,7 @@ render: (args) => ({
 - [ ] Figma link is in the JSDoc comment above `export default` (format: `<a href="..." target="_blank">Figma ↗</a>`)
 - [ ] Every `argTypes` description is one sentence; every story docblock either says something invisible in the rendered story or does not exist (see section 8)
 - [ ] No public input is missing an `argTypes` entry — aliased inputs are keyed by their alias (`invalid`, not `invalidInput`)
+- [ ] If the component has a `VisualTest` story, a new visual story also adds its variant to `VisualTest` (see section 9)
 
 ### 7. argTypes Convention
 
@@ -281,7 +282,31 @@ Keep in the meta docblock only what a consumer cannot discover from the types: r
 dependencies, a global stylesheet import, and accessibility wiring that silently does nothing if
 done the usual way.
 
-### 9. Verify
+### 9. Chromatic snapshots (`VisualTest`)
+
+Chromatic bills per snapshot, so a simple component keeps its snapshots in one hidden composite
+story instead of one per docs story. When a stories file has a `VisualTest` story:
+
+- The meta sets `parameters: { chromatic: { disableSnapshot: true } }`, so docs stories are not
+  snapshotted.
+- `VisualTest` is the last export, with `tags: ["!dev", "!autodocs"]` (hidden from the sidebar and
+  docs, still run by Chromatic and the test-runner) and `parameters: { chromatic: { disableSnapshot: false } }`.
+  It renders every visual variant with fixed values, each block under a short bold label, using
+  the same grid and spacing as the docs stories.
+- A story whose state needs a `play` function, a viewport, an open overlay, animation, scrolling or
+  page-level positioning stays a separate snapshot: it sets `chromatic: { disableSnapshot: false }`
+  itself and is not copied into `VisualTest`.
+- Everything in the composite must be unique within the story: `id`, `for`, `aria-labelledby`,
+  radio `name`, and the accessible name of every landmark or group. Pseudo-state selectors must be
+  unique too: use a list (`hover: ["#vt-hover-primary", "#vt-hover-secondary"]`) or a data attribute
+  (`[data-state="Hover"]`) rather than a repeated `#Hover`.
+- Inverted variants that the docs story puts on the `brand` background go inside
+  `<div class="bg bg-primary">` in the composite.
+
+**A new visual story on a component with `VisualTest` must also add its variant to `VisualTest`**,
+otherwise Chromatic never sees it.
+
+### 10. Verify
 
 Run Storybook to visually confirm stories render correctly:
 ```bash
