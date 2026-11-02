@@ -96,6 +96,15 @@ describe("TimePickerComponent", () => {
       expect(onChange).toHaveBeenCalledWith("14:30");
     });
 
+    it("should keep the parked 12 hour when picking a minute with no value", () => {
+      const minuteItems = el
+        .querySelectorAll(".tedi-time-picker__column")[1]
+        .querySelectorAll(".tedi-time-picker__item");
+      (minuteItems[5] as HTMLButtonElement).click();
+
+      expect(component.value()).toBe("12:05");
+    });
+
     it("should highlight selected hour and minute", () => {
       component.writeValue("09:15");
       fixture.detectChanges();
@@ -255,6 +264,48 @@ describe("TimePickerComponent", () => {
         dispatchKey(columns[0], "Enter");
 
         expect(document.activeElement).toBe(columns[1]);
+      });
+
+      it("should emit selectionCommitted on Enter from minute column only", () => {
+        const spy = jest.fn();
+        component.selectionCommitted.subscribe(spy);
+        const columns = el.querySelectorAll(".tedi-time-picker__column");
+
+        dispatchKey(columns[0], "Enter");
+        expect(spy).not.toHaveBeenCalled();
+
+        dispatchKey(columns[1], "Enter");
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+
+      it("should NOT emit selectionCommitted on arrow keys", () => {
+        const spy = jest.fn();
+        component.selectionCommitted.subscribe(spy);
+        const columns = el.querySelectorAll(".tedi-time-picker__column");
+
+        dispatchKey(columns[1], "ArrowDown");
+
+        expect(spy).not.toHaveBeenCalled();
+      });
+
+      it("should emit selectionCommitted on minute click but not hour click", () => {
+        const spy = jest.fn();
+        component.selectionCommitted.subscribe(spy);
+        const columns = el.querySelectorAll(".tedi-time-picker__column");
+
+        (
+          columns[0].querySelectorAll(
+            ".tedi-time-picker__item",
+          )[3] as HTMLElement
+        ).click();
+        expect(spy).not.toHaveBeenCalled();
+
+        (
+          columns[1].querySelectorAll(
+            ".tedi-time-picker__item",
+          )[3] as HTMLElement
+        ).click();
+        expect(spy).toHaveBeenCalledTimes(1);
       });
 
       it("should wrap to last hour on ArrowUp at first", () => {
@@ -722,6 +773,29 @@ describe("TimePickerComponent", () => {
       fixture.detectChanges();
 
       expect(() => component.scrollToSelected()).not.toThrow();
+    });
+
+    it("should realign a column whose smooth scroll was cut short", () => {
+      component.writeValue("05:00");
+      fixture.detectChanges();
+      const minuteColumn = el.querySelectorAll(
+        ".tedi-time-picker__column",
+      )[1] as HTMLElement;
+      const minuteItems = minuteColumn.querySelectorAll(
+        ".tedi-time-picker__item",
+      );
+      (minuteItems[43] as HTMLElement).click();
+      // Hiding the popover drops the column's offset.
+      minuteColumn.scrollTop = 0;
+
+      const scrollTo = jest.fn();
+      minuteColumn.scrollTo = scrollTo;
+      component.scrollToSelected();
+
+      expect(scrollTo).toHaveBeenCalledWith(
+        expect.objectContaining({ behavior: "instant" }),
+      );
+      expect(component.highlightedMinuteIndex()).toBe(43);
     });
   });
 

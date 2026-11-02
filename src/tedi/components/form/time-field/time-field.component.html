@@ -147,6 +147,7 @@
     [trapFocus]="true"
     [style.--tedi-time-picker-dropdown-min-width.px]="dropdownMinWidth()"
     (valueChange)="onPickerValueChange($event)"
+    (selectionCommitted)="onPickerSelectionCommitted()"
     (closeRequested)="closePopover()"
   />
 </ng-template>
