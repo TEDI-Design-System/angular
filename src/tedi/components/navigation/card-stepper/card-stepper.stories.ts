@@ -602,8 +602,9 @@ export const WithSubSteps: Story = {
 };
 
 /**
- * `allowJump="completed-or-next"` allows completed steps and the next step
- * in the list. Arrows remain sequential and skip disabled steps.
+ * `allowJump="completed-or-next"` allows completed steps and the next available
+ * step in the list; the steps it excludes show as disabled there. Arrows remain
+ * sequential and skip disabled steps.
  */
 export const WithLimitedJumping: Story = {
   parameters: {
@@ -632,6 +633,10 @@ export const WithLimitedJumping: Story = {
       page.queryByRole("button", { name: /Lisadokumendid/ }),
     ).toBeNull();
     await expect(page.queryByRole("button", { name: /Ülevaade/ })).toBeNull();
+    // A step allowJump excludes looks like a disabled one.
+    await expect(
+      page.getByText("Ülevaade").closest(".tedi-vertical-stepper-item"),
+    ).toHaveClass("tedi-vertical-stepper-item--disabled");
     // Leave the list open for the accessibility scan.
   },
   render: () => ({

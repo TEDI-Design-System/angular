@@ -97,8 +97,9 @@ export class CardStepperComponent {
    */
   showStepList = input(true, { transform: booleanAttribute });
   /**
-   * Allow selection of any, no, completed, or completed plus the next step
-   * in the modal. Disabled steps remain unavailable. Does not restrict arrows.
+   * Allow selection of any, no, completed, or completed plus the next
+   * available step in the modal, where the excluded steps show as disabled. Disabled steps
+   * remain unavailable. Does not restrict arrows.
    * @default true
    */
   allowJump = input<CardStepperAllowJump>(true);
@@ -250,7 +251,7 @@ export class CardStepperComponent {
 
       if (!subStep || !picked.step.subSteps().includes(subStep)) return;
       if (subStep.disabled() || subStep.informative()) return;
-      if (!this.hasSelectableSubSteps(stepIndex)) return;
+      if (!this.isAvailableInList(stepIndex)) return;
 
       subStep.itemSelect.emit();
     });
@@ -263,7 +264,7 @@ export class CardStepperComponent {
       description: step.description(),
       completed: step.completed(),
       error: step.error(),
-      disabled: step.disabled(),
+      disabled: !this.isAvailableInList(index),
       navigable: this.isNavigable(index),
       selected: index === this.active() && !step.hasSelectedSubStep(),
       opened: this.isOpened(step, index),
@@ -273,7 +274,7 @@ export class CardStepperComponent {
         error: subStep.error(),
         informative: subStep.informative(),
         selected: subStep.selected(),
-        disabled: subStep.disabled() || !this.hasSelectableSubSteps(index),
+        disabled: subStep.disabled() || !this.isAvailableInList(index),
       })),
     }));
   }
@@ -288,15 +289,17 @@ export class CardStepperComponent {
     if (allowJump === false) return false;
     if (allowJump === "completed") return step.completed();
 
-    return step.completed() || index === this.active() + 1;
+    // "Next" is the step the next arrow goes to, which skips disabled steps.
+    return step.completed() || index === this.nextIndex();
   }
 
   /**
-   * Sub-steps follow their step's availability, except on the active step: its
-   * sub-steps stay selectable even when `allowJump` makes the step itself
-   * non-navigable, since they are where the user is working.
+   * A step, and with it its sub-steps, can be picked in the list when it is not
+   * disabled and is either the active step or one `allowJump` permits. The
+   * active step stays available even when `allowJump` excludes it, since the
+   * user is on it. Unavailable steps render as disabled.
    */
-  private hasSelectableSubSteps(index: number): boolean {
+  private isAvailableInList(index: number): boolean {
     const step = this.steps()[index];
     if (!step || step.disabled()) return false;
     return index === this.active() || this.isNavigable(index);

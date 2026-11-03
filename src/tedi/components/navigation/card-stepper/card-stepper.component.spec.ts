@@ -496,6 +496,50 @@ describe("CardStepperComponent", () => {
       expect(links[0].textContent).toContain("Isikuandmed");
     });
 
+    it("should show steps allowJump excludes as disabled, but never the active step", async () => {
+      host.activeStep.set(0);
+      host.allowJump.set("completed-or-next");
+      fixture.detectChanges();
+      await openList();
+
+      const disabled = listItems().map((item) =>
+        item.classList.contains("tedi-vertical-stepper-item--disabled"),
+      );
+
+      // Isikuandmed (active), Dokumendid (next), Puudub (disabled), Ülevaade (excluded)
+      expect(disabled).toEqual([false, false, true, true]);
+    });
+
+    it("should treat the step the next arrow goes to as next, skipping disabled steps", async () => {
+      host.allowJump.set("completed-or-next");
+      fixture.detectChanges();
+      await openList();
+
+      // From Dokumendid, the next arrow skips Puudub (disabled) and lands on Ülevaade.
+      const last = listItems()[3];
+
+      expect(last.classList).not.toContain(
+        "tedi-vertical-stepper-item--disabled",
+      );
+      expect(last.querySelector("button")?.textContent).toContain("Ülevaade");
+    });
+
+    it("should keep a completed step's status while jumping is off", async () => {
+      host.allowJump.set(false);
+      fixture.detectChanges();
+      await openList();
+
+      const first = listItems()[0];
+
+      expect(first.classList).toContain("tedi-vertical-stepper-item--disabled");
+      expect(first.classList).toContain(
+        "tedi-vertical-stepper-item--completed",
+      );
+      expect(listItems()[1].classList).not.toContain(
+        "tedi-vertical-stepper-item--disabled",
+      );
+    });
+
     it("should offer sub-steps as selection buttons", async () => {
       host.withSubSteps.set(true);
       fixture.detectChanges();
