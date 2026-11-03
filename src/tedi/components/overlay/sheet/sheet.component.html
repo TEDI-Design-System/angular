@@ -1,0 +1,64 @@
+<ng-content />
+<ng-template #panelTemplate>
+  @if (content(); as config) {
+    <div
+      class="tedi-sheet__overlay"
+      [class.tedi-sheet__overlay--no-overlay]="!config.showOverlay()"
+      [hidden]="status() === 'closed'"
+      [attr.inert]="status() === 'close' ? '' : null"
+      [attr.data-status]="status()"
+      (click)="onOverlayClick($event)"
+    >
+      <div
+        #panel
+        tabindex="-1"
+        class="tedi-sheet__panel"
+        [class]="config.panelClass()"
+        [class.tedi-sheet__panel--padding-small]="config.padding() === 'small'"
+        [class.tedi-sheet__panel--draggable]="config.showHandle()"
+        [class.tedi-sheet__panel--grabbing]="grabbing()"
+        [class.tedi-sheet__panel--radius-card]="
+          config.resolvedRadius() === 'card'
+        "
+        [class.tedi-sheet__panel--radius-none]="
+          config.resolvedRadius() === 'none'
+        "
+        [id]="panelId"
+        [attr.role]="role()"
+        [attr.aria-modal]="config.trapFocus()"
+        [attr.aria-labelledby]="labelledBy()"
+        [attr.aria-label]="ariaLabel()"
+        [attr.data-status]="status()"
+        [style]="panelStyle()"
+        (pointerdown)="onDragStart($event)"
+        (contextmenu)="resetDrag()"
+      >
+        @let showDismiss = config.trapFocus() && config.visuallyHiddenDismiss();
+        @if (showDismiss) {
+          <ng-container [ngTemplateOutlet]="dismiss" />
+        }
+        @if (config.showHandle()) {
+          <div class="tedi-sheet__handle-zone" aria-hidden="true">
+            <span class="tedi-sheet__handle"></span>
+          </div>
+        }
+        <ng-container [ngTemplateOutlet]="config.templateRef" />
+        @if (showDismiss) {
+          <ng-container [ngTemplateOutlet]="dismiss" />
+        }
+      </div>
+    </div>
+  }
+</ng-template>
+
+<!-- For touch screen reader users, who have no Escape key; kept out of the Tab order. -->
+<ng-template #dismiss>
+  <button
+    type="button"
+    tabindex="-1"
+    class="tedi-sheet__dismiss sr-only"
+    (click)="close()"
+  >
+    {{ closeLabel() }}
+  </button>
+</ng-template>
