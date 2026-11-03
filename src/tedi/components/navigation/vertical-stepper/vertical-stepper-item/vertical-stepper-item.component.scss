@@ -205,7 +205,7 @@
 }
 
 .tedi-vertical-stepper-item--disabled {
-  --tedi-vertical-stepper-item-fill: var(--stepper-step-disabled-bg);
+  --tedi-vertical-stepper-item-fill: var(--stepper-step-disabled-background);
   --tedi-vertical-stepper-item-stroke: var(--stepper-step-disabled-border);
 
   > .tedi-vertical-stepper-item__row .tedi-vertical-stepper-item__number,
@@ -391,7 +391,7 @@
 }
 
 .tedi-vertical-stepper-item--informative {
-  --tedi-vertical-stepper-item-fill: var(--stepper-step-disabled-bg);
+  --tedi-vertical-stepper-item-fill: var(--stepper-step-disabled-background);
   --tedi-vertical-stepper-item-stroke: var(--stepper-step-disabled-border);
 
   > .tedi-vertical-stepper-item__row
