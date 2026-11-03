@@ -877,6 +877,101 @@ describe("TimePickerComponent", () => {
       expect(onChange).toHaveBeenCalled();
     });
 
+    const scrollColumnTo = (column: HTMLElement, index: number) => {
+      Object.defineProperty(column, "scrollTop", {
+        value: index * 40,
+        configurable: true,
+        writable: true,
+      });
+      column.dispatchEvent(new Event("wheel", { bubbles: true }));
+      column.dispatchEvent(new Event("scroll"));
+    };
+    const dispatchKeyOn = (element: Element, key: string) =>
+      element.dispatchEvent(
+        new KeyboardEvent("keydown", { key, bubbles: true }),
+      );
+
+    it("should not let a pending minute scroll overwrite the value after an Enter commit", () => {
+      component.writeValue("12:00");
+      fixture.detectChanges();
+      const minuteColumn = el.querySelectorAll(
+        ".tedi-time-picker__column",
+      )[1] as HTMLElement;
+
+      scrollColumnTo(minuteColumn, 35);
+      dispatchKeyOn(minuteColumn, "Enter");
+      expect(component.value()).toBe("12:35");
+
+      // The closed popover's column reads 0 when the debounce would fire.
+      minuteColumn.scrollTop = 0;
+      jest.advanceTimersByTime(500);
+
+      expect(component.value()).toBe("12:35");
+    });
+
+    it("should not let a pending minute scroll overwrite a clicked minute", () => {
+      component.writeValue("12:00");
+      fixture.detectChanges();
+      const minuteColumn = el.querySelectorAll(
+        ".tedi-time-picker__column",
+      )[1] as HTMLElement;
+
+      scrollColumnTo(minuteColumn, 10);
+      (
+        minuteColumn.querySelectorAll(
+          ".tedi-time-picker__item",
+        )[35] as HTMLElement
+      ).click();
+      minuteColumn.scrollTop = 0;
+      jest.advanceTimersByTime(500);
+
+      expect(component.value()).toBe("12:35");
+    });
+
+    it("should apply a pending hour scroll before committing a minute", () => {
+      component.writeValue("12:00");
+      fixture.detectChanges();
+      const committed = jest.fn();
+      component.selectionCommitted.subscribe(() =>
+        committed(component.value()),
+      );
+      const [hourColumn, minuteColumn] = Array.from(
+        el.querySelectorAll(".tedi-time-picker__column"),
+      ) as HTMLElement[];
+
+      scrollColumnTo(hourColumn, 14);
+      (
+        minuteColumn.querySelectorAll(
+          ".tedi-time-picker__item",
+        )[35] as HTMLElement
+      ).click();
+      hourColumn.scrollTop = 0;
+      jest.advanceTimersByTime(500);
+
+      expect(committed).toHaveBeenCalledWith("14:35");
+      expect(component.value()).toBe("14:35");
+    });
+
+    it("should apply a pending hour scroll before an Enter commit", () => {
+      component.writeValue("12:30");
+      fixture.detectChanges();
+      const committed = jest.fn();
+      component.selectionCommitted.subscribe(() =>
+        committed(component.value()),
+      );
+      const [hourColumn, minuteColumn] = Array.from(
+        el.querySelectorAll(".tedi-time-picker__column"),
+      ) as HTMLElement[];
+
+      scrollColumnTo(hourColumn, 14);
+      dispatchKeyOn(minuteColumn, "Enter");
+      hourColumn.scrollTop = 0;
+      jest.advanceTimersByTime(500);
+
+      expect(committed).toHaveBeenCalledWith("14:30");
+      expect(component.value()).toBe("14:30");
+    });
+
     it("should clear pending debounce timers on destroy", () => {
       const hourColumn = el.querySelectorAll(
         ".tedi-time-picker__column",

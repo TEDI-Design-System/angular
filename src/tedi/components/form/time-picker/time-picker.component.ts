@@ -395,6 +395,7 @@ export class TimePickerComponent
 
   onMinuteClick(minute: string): void {
     if (this.isDisabled()) return;
+    this.settlePendingScrollSelection();
     this.hasUserGesture.minute = false;
     this.clearGestureTimer("minute");
     const list = this.minutes();
@@ -423,7 +424,8 @@ export class TimePickerComponent
         this.focusOtherColumn("hour");
       } else {
         // The highlight can be ahead of the value (no value yet, or a scroll
-        // still in its debounce), so commit what the user sees.
+        // still in its debounce), so commit the highlighted hour and minute.
+        this.settlePendingScrollSelection();
         const minute = this.minutes()[this.highlightedMinuteIndex()];
         if (minute !== undefined) this.selectMinute(minute);
         this.selectionCommitted.emit();
@@ -594,6 +596,24 @@ export class TimePickerComponent
       if (type === "hour") this.selectHour(list[index]);
       else this.selectMinute(list[index]);
     }, SCROLL_DEBOUNCE_MS);
+  }
+
+  /**
+   * Called before a minute commit, which may close the picker. A debounce left
+   * running would fire on the closed column, read scrollTop 0 and overwrite the
+   * value. The pending hour is applied from its highlighted row; the pending
+   * minute is dropped, as the commit picks the minute itself.
+   */
+  private settlePendingScrollSelection(): void {
+    (["hour", "minute"] as WheelType[]).forEach((type) => {
+      const timer = this.scrollDebounceTimer[type];
+      if (!timer) return;
+      clearTimeout(timer);
+      delete this.scrollDebounceTimer[type];
+      this.hasUserGesture[type] = false;
+      this.clearGestureTimer(type);
+      if (type === "hour") this.selectHour(this.hours[this.hourScrollIndex()]);
+    });
   }
 
   /**
