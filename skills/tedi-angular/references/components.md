@@ -204,10 +204,10 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 ### Clear buttons
 
 - **`showClearOnInteraction` belongs on the component that renders the clear button.** For a text
-  field wrapped in `<tedi-form-field>`, set it on the form field, not the control (a textarea
-  never gets a clear button). `<tedi-search>` owns its form field and exposes the input itself;
-  `<tedi-select>` exposes it for its own clear button. In each case, `clearable` must be true and
-  the field must have a value.
+  field or textarea wrapped in `<tedi-form-field>`, set it on the form field, not the control.
+  `<tedi-search>` owns its form field and exposes the input itself; `<tedi-select>` exposes it for
+  its own clear button. In each case, `clearable` must be true and the field must have a value and
+  not be disabled or read-only.
 - With the option enabled, the clear button appears while the field is hovered, active, or contains
   focus (including keyboard focus). The default is false, which keeps the clear button visible
   whenever the clearable field has a value.

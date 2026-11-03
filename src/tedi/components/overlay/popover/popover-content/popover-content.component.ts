@@ -42,11 +42,11 @@ export class PopoverContentComponent {
    */
   maxWidth = input<PopoverWidth>("small");
   /**
-   * Heading title of the content
+   * Title shown at the top of the content.
    */
   title = input("");
   /**
-   * Should content show close button?
+   * Show a close button in the content.
    * @default false
    */
   showClose = input(false);

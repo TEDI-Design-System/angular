@@ -16,8 +16,9 @@ import {
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
 import { DropdownRole, DropdownVariant } from "./dropdown.tokens";
 import { DropdownItemComponent } from "./dropdown-item/dropdown-item.component";
-import { DropdownItemValueComponent } from "./dropdown-item-value/dropdown-item-value.component";
+import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
 import { getFocusableElements } from "../../../utils/elements.util";
+import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 
 @Component({
   standalone: true,
@@ -76,26 +77,6 @@ class MockButtonComponent {}
   ],
 })
 class WrappingButtonHostComponent {}
-
-@Component({
-  standalone: true,
-  template: `
-    <tedi-dropdown>
-      <span tedi-dropdown-trigger>Trigger</span>
-
-      <tedi-dropdown-content>
-        <li tedi-dropdown-item value="a">Item A</li>
-      </tedi-dropdown-content>
-    </tedi-dropdown>
-  `,
-  imports: [
-    DropdownComponent,
-    DropdownTriggerDirective,
-    DropdownContentComponent,
-    DropdownItemComponent,
-  ],
-})
-class NonFocusableTriggerHostComponent {}
 
 @Component({
   standalone: true,
@@ -171,6 +152,62 @@ class InteractiveListboxHostComponent {}
   ],
 })
 class ListRoleHostComponent {}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <input
+        data-testid="checkbox"
+        tedi-checkbox
+        tedi-dropdown-trigger
+        type="checkbox"
+        aria-label="Select rows"
+        (click)="$event.preventDefault()"
+      />
+      <tedi-dropdown-content dropdownRole="menu">
+        <li tedi-dropdown-item>Select page</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+
+    <tedi-dropdown>
+      <div data-testid="generic" tedi-dropdown-trigger>Trigger</div>
+      <tedi-dropdown-content dropdownRole="menu">
+        <li tedi-dropdown-item>Item</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+
+    <tedi-dropdown>
+      <div
+        data-testid="custom-role"
+        tedi-dropdown-trigger
+        role="checkbox"
+        aria-checked="mixed"
+        tabindex="-1"
+      >
+        Trigger
+      </div>
+      <tedi-dropdown-content dropdownRole="menu">
+        <li tedi-dropdown-item>Item</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+
+    <tedi-dropdown>
+      <input data-testid="text" tedi-dropdown-trigger type="text" />
+      <tedi-dropdown-content dropdownRole="listbox">
+        <li tedi-dropdown-item value="a">Item</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+    CheckboxComponent,
+  ],
+})
+class NonButtonTriggerHostComponent {}
 
 describe("DropdownComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
@@ -877,6 +914,19 @@ describe("DropdownComponent", () => {
       expect(focusSpy).toHaveBeenCalled();
     });
 
+    it("does not synthesize keyboard clicks for a native button", () => {
+      const spy = jest.spyOn(dropdown, "toggleDropdown");
+
+      for (const key of ["Enter", " "]) {
+        const event = new KeyboardEvent("keydown", { key, cancelable: true });
+        trigger.dispatchEvent(event);
+        trigger.dispatchEvent(new KeyboardEvent("keyup", { key }));
+        expect(event.defaultPrevented).toBe(false);
+      }
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
     it("Escape should hide dropdown and return focus to trigger", () => {
       openDropdown();
 
@@ -987,19 +1037,161 @@ describe("DropdownComponent", () => {
     });
   });
 
-  describe("DropdownTriggerDirective on a non-focusable element", () => {
-    it("makes the element a focusable button", () => {
-      const spanFixture = TestBed.createComponent(
-        NonFocusableTriggerHostComponent,
-      );
-      spanFixture.detectChanges();
+  describe("DropdownTriggerDirective on a non-button host", () => {
+    let nbFixture: ComponentFixture<NonButtonTriggerHostComponent>;
 
-      const triggerEl = spanFixture.nativeElement.querySelector(
-        "[tedi-dropdown-trigger]",
+    beforeEach(() => {
+      nbFixture = TestBed.createComponent(NonButtonTriggerHostComponent);
+      nbFixture.detectChanges();
+    });
+
+    const el = (id: string) =>
+      nbFixture.nativeElement.querySelector(
+        `[data-testid="${id}"]`,
       ) as HTMLElement;
 
-      expect(triggerEl.getAttribute("role")).toBe("button");
-      expect(triggerEl.getAttribute("tabindex")).toBe("0");
+    const dropdownOf = (id: string) =>
+      nbFixture.debugElement
+        .queryAll(By.directive(DropdownComponent))
+        .map((d) => d.componentInstance as DropdownComponent)
+        .find((d) => d.dropdownTrigger().host.nativeElement === el(id))!;
+
+    const press = (target: HTMLElement, type: string, key: string) => {
+      const event = new KeyboardEvent(type, {
+        key,
+        bubbles: true,
+        cancelable: true,
+      });
+      target.dispatchEvent(event);
+      nbFixture.detectChanges();
+      return event;
+    };
+
+    afterEach(() => {
+      nbFixture.debugElement
+        .queryAll(By.directive(DropdownComponent))
+        .forEach((d) =>
+          (d.componentInstance as DropdownComponent).hideDropdown(),
+        );
+    });
+
+    describe("checkbox", () => {
+      it("keeps its native checkbox semantics", () => {
+        const checkbox = el("checkbox");
+
+        expect(checkbox.getAttribute("role")).toBeNull();
+        expect(checkbox.getAttribute("tabindex")).toBeNull();
+        expect(checkbox.getAttribute("aria-haspopup")).toBe("menu");
+        expect(checkbox.getAttribute("aria-expanded")).toBe("false");
+      });
+
+      it("handles Enter and prevents its native action", () => {
+        const checkbox = el("checkbox");
+        const dropdown = dropdownOf("checkbox");
+
+        const event = press(checkbox, "keydown", "Enter");
+
+        expect(event.defaultPrevented).toBe(true);
+        expect(dropdown.isOpen()).toBe(true);
+        expect(checkbox.getAttribute("aria-expanded")).toBe("true");
+
+        press(checkbox, "keydown", "Enter");
+        expect(dropdown.isOpen()).toBe(false);
+      });
+
+      it("leaves Space to the checkbox and opens on click", () => {
+        const checkbox = el("checkbox") as HTMLInputElement;
+        const dropdown = dropdownOf("checkbox");
+
+        const event = press(checkbox, "keydown", " ");
+        press(checkbox, "keyup", " ");
+
+        expect(event.defaultPrevented).toBe(false);
+        expect(dropdown.isOpen()).toBe(false);
+
+        checkbox.click();
+        nbFixture.detectChanges();
+
+        expect(dropdown.isOpen()).toBe(true);
+        expect(checkbox.checked).toBe(false);
+      });
+    });
+
+    describe("generic element", () => {
+      it("gets button semantics", () => {
+        expect(el("generic").getAttribute("role")).toBe("button");
+        expect(el("generic").getAttribute("tabindex")).toBe("0");
+      });
+
+      it("Enter toggles the dropdown", () => {
+        const dropdown = dropdownOf("generic");
+
+        press(el("generic"), "keydown", "Enter");
+        expect(dropdown.isOpen()).toBe(true);
+
+        press(el("generic"), "keydown", "Enter");
+        expect(dropdown.isOpen()).toBe(false);
+      });
+
+      it("Space toggles the dropdown on keyup, like a native button", () => {
+        const dropdown = dropdownOf("generic");
+
+        const event = press(el("generic"), "keydown", " ");
+        expect(event.defaultPrevented).toBe(true);
+        expect(dropdown.isOpen()).toBe(false);
+
+        press(el("generic"), "keyup", " ");
+        expect(dropdown.isOpen()).toBe(true);
+      });
+
+      it("ignores the keyup of a Space press that started elsewhere", () => {
+        const dropdown = dropdownOf("generic");
+
+        press(el("generic"), "keyup", " ");
+
+        expect(dropdown.isOpen()).toBe(false);
+      });
+
+      it("does not activate when Space is released on a child", () => {
+        const trigger = el("generic");
+        const child = document.createElement("span");
+        trigger.append(child);
+
+        press(trigger, "keydown", " ");
+        press(child, "keyup", " ");
+
+        expect(dropdownOf("generic").isOpen()).toBe(false);
+      });
+
+      it("forgets a Space press when focus leaves the trigger", () => {
+        const trigger = el("generic");
+
+        press(trigger, "keydown", " ");
+        trigger.dispatchEvent(new FocusEvent("focusout", { bubbles: true }));
+        press(trigger, "keyup", " ");
+
+        expect(dropdownOf("generic").isOpen()).toBe(false);
+      });
+    });
+
+    it("keeps a role and tabindex the consumer set", () => {
+      expect(el("custom-role").getAttribute("role")).toBe("checkbox");
+      expect(el("custom-role").getAttribute("tabindex")).toBe("-1");
+    });
+
+    it("leaves Enter and Space to a text field", () => {
+      const input = el("text");
+      const dropdown = dropdownOf("text");
+
+      expect(input.getAttribute("role")).toBeNull();
+
+      const enter = press(input, "keydown", "Enter");
+      const space = press(input, "keydown", " ");
+      press(input, "keyup", " ");
+
+      expect(enter.defaultPrevented).toBe(false);
+      expect(space.defaultPrevented).toBe(false);
+      expect(dropdown.isOpen()).toBe(false);
     });
   });
 
@@ -1696,24 +1888,22 @@ describe("DropdownItemComponent selection", () => {
 
       <tedi-dropdown-content [dropdownRole]="role">
         <li tedi-dropdown-item>
-          <tedi-dropdown-item-value type="checkbox" [selected]="true">
+          <tedi-option-content type="checkbox" [selected]="true">
             Checked
-          </tedi-dropdown-item-value>
+          </tedi-option-content>
         </li>
         <li tedi-dropdown-item>
-          <tedi-dropdown-item-value type="checkbox"
-            >Unchecked</tedi-dropdown-item-value
-          >
+          <tedi-option-content type="checkbox">Unchecked</tedi-option-content>
         </li>
         <li tedi-dropdown-item>
-          <tedi-dropdown-item-value type="checkbox" [indeterminate]="true">
+          <tedi-option-content type="checkbox" [indeterminate]="true">
             Mixed
-          </tedi-dropdown-item-value>
+          </tedi-option-content>
         </li>
         <li tedi-dropdown-item>
-          <tedi-dropdown-item-value type="radio" [selected]="true">
+          <tedi-option-content type="radio" [selected]="true">
             Radio
-          </tedi-dropdown-item-value>
+          </tedi-option-content>
         </li>
         <li tedi-dropdown-item>Plain</li>
       </tedi-dropdown-content>
@@ -1724,7 +1914,7 @@ describe("DropdownItemComponent selection", () => {
     DropdownTriggerDirective,
     DropdownContentComponent,
     DropdownItemComponent,
-    DropdownItemValueComponent,
+    OptionContentComponent,
   ],
 })
 class CheckableHostComponent {

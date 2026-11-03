@@ -19,15 +19,15 @@ import {
   DropdownApi,
   DropdownContentApi,
 } from "../dropdown.tokens";
-import { DropdownItemValueComponent } from "../dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "../dropdown-item-value/dropdown-item-value-label.component";
+import { OptionContentComponent } from "../../../helpers/option-content/option-content.component";
+import { OptionContentLabelComponent } from "../../../helpers/option-content/option-content-label.component";
 
 const INTERACTIVE_CONTENT_SELECTOR = "a[href], button";
 
 @Component({
   selector: "li[tedi-dropdown-item]",
   standalone: true,
-  imports: [DropdownItemValueComponent, DropdownItemValueLabelComponent],
+  imports: [OptionContentComponent, OptionContentLabelComponent],
   templateUrl: "./dropdown-item.component.html",
   styleUrl: "./dropdown-item.component.scss",
   encapsulation: ViewEncapsulation.None,
@@ -114,16 +114,16 @@ export class DropdownItemComponent {
   readonly dropdown = inject<DropdownApi>(DROPDOWN_API);
   readonly dropdownContent = inject<DropdownContentApi>(DROPDOWN_CONTENT_API);
 
-  /** Check if custom dropdown-item-value is provided */
-  readonly customItemValue = contentChild(DropdownItemValueComponent);
+  /** Check if custom option content is provided */
+  readonly customOptionContent = contentChild(OptionContentComponent);
 
   /**
-   * Type and state of a checkbox / radio `tedi-dropdown-item-value`, or `null`
+   * Type and state of a checkbox / radio `tedi-option-content`, or `null`
    * for other content. The item exposes this state to screen readers, because
    * the checkbox / radio itself is hidden from them.
    */
   readonly checkable = computed(() => {
-    const itemValue = this.customItemValue();
+    const itemValue = this.customOptionContent();
     const type = itemValue?.type();
     if (type !== "checkbox" && type !== "radio") return null;
 

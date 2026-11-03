@@ -18,7 +18,7 @@ import { TediTranslationService } from "../../../services";
   encapsulation: ViewEncapsulation.None,
   host: {
     type: "button",
-    class: "tedi-info-button",
+    class: "tedi-info-button no-print",
     "[class.tedi-info-button--inverted]": "color() === 'inverted'",
     "[attr.aria-label]": "ariaLabel() || _defaultLabel()",
   },

@@ -7,11 +7,11 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
-import { DropdownItemValueComponent } from "./dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "./dropdown-item-value-label.component";
-import { DropdownItemValueMetaComponent } from "./dropdown-item-value-meta.component";
-import { IconComponent } from "../../../base";
-import { DropdownItemComponent } from "../dropdown-item/dropdown-item.component";
+import { OptionContentComponent } from "./option-content.component";
+import { OptionContentLabelComponent } from "./option-content-label.component";
+import { OptionContentMetaComponent } from "./option-content-meta.component";
+import { IconComponent } from "../../base";
+import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/dropdown-item.component";
 import {
   DROPDOWN_API,
   DROPDOWN_CONTENT_API,
@@ -19,9 +19,9 @@ import {
   DropdownContentApi,
   DropdownRole,
   DropdownVariant,
-} from "../dropdown.tokens";
-import { RowComponent } from "../../../helpers/grid/row/row.component";
-import { ColComponent } from "../../../helpers/grid/col/col.component";
+} from "../../overlay/dropdown/dropdown.tokens";
+import { RowComponent } from "../grid/row/row.component";
+import { ColComponent } from "../grid/col/col.component";
 
 const noop = () => undefined;
 
@@ -93,14 +93,14 @@ const SOURCE = {
   <button tedi-button tedi-dropdown-trigger>Ava menüü</button>
   <tedi-dropdown-content>
     <li tedi-dropdown-item>
-      <tedi-dropdown-item-value>
-        <tedi-dropdown-item-value-label>Juurdepääs terviseandmetele</tedi-dropdown-item-value-label>
-      </tedi-dropdown-item-value>
+      <tedi-option-content>
+        <tedi-option-content-label>Juurdepääs terviseandmetele</tedi-option-content-label>
+      </tedi-option-content>
     </li>
     <li tedi-dropdown-item [indent]="2">
-      <tedi-dropdown-item-value>
-        <tedi-dropdown-item-value-label>2nd level</tedi-dropdown-item-value-label>
-      </tedi-dropdown-item-value>
+      <tedi-option-content>
+        <tedi-option-content-label>2nd level</tedi-option-content-label>
+      </tedi-option-content>
     </li>
   </tedi-dropdown-content>
 </tedi-dropdown>`,
@@ -109,15 +109,15 @@ const SOURCE = {
   <button tedi-button tedi-dropdown-trigger>Asukoht ({{ selectedCount }})</button>
   <tedi-dropdown-content>
     <li tedi-dropdown-item [closeOnSelect]="false" (itemSelect)="toggleAll()">
-      <tedi-dropdown-item-value type="checkbox" [selected]="allSelected" [indeterminate]="someSelected">
-        <tedi-dropdown-item-value-label>Asukohad</tedi-dropdown-item-value-label>
-      </tedi-dropdown-item-value>
+      <tedi-option-content type="checkbox" [selected]="allSelected" [indeterminate]="someSelected">
+        <tedi-option-content-label>Asukohad</tedi-option-content-label>
+      </tedi-option-content>
     </li>
     @for (city of cities; track city) {
       <li tedi-dropdown-item [indent]="2" [closeOnSelect]="false" (itemSelect)="toggle(city)">
-        <tedi-dropdown-item-value type="checkbox" [selected]="isSelected(city)">
-          <tedi-dropdown-item-value-label>{{ city }}</tedi-dropdown-item-value-label>
-        </tedi-dropdown-item-value>
+        <tedi-option-content type="checkbox" [selected]="isSelected(city)">
+          <tedi-option-content-label>{{ city }}</tedi-option-content-label>
+        </tedi-option-content>
       </li>
     }
   </tedi-dropdown-content>
@@ -128,9 +128,9 @@ const SOURCE = {
   <tedi-dropdown-content dropdownRole="listbox">
     @for (option of cities; track option) {
       <li tedi-dropdown-item [value]="option">
-        <tedi-dropdown-item-value type="radio" [selected]="city === option">
-          <tedi-dropdown-item-value-label>{{ option }}</tedi-dropdown-item-value-label>
-        </tedi-dropdown-item-value>
+        <tedi-option-content type="radio" [selected]="city === option">
+          <tedi-option-content-label>{{ option }}</tedi-option-content-label>
+        </tedi-option-content>
       </li>
     }
   </tedi-dropdown-content>
@@ -140,17 +140,17 @@ const SOURCE = {
   <button tedi-button tedi-dropdown-trigger>Ava menüü</button>
   <tedi-dropdown-content>
     <li tedi-dropdown-item>
-      <tedi-dropdown-item-value icon="download">
-        <tedi-dropdown-item-value-label>Laadi alla</tedi-dropdown-item-value-label>
-      </tedi-dropdown-item-value>
+      <tedi-option-content icon="download">
+        <tedi-option-content-label>Laadi alla</tedi-option-content-label>
+      </tedi-option-content>
     </li>
     <li tedi-dropdown-item>
-      <tedi-dropdown-item-value>
-        <tedi-dropdown-item-value-label>Kontaktid</tedi-dropdown-item-value-label>
-        <tedi-dropdown-item-value-meta>
+      <tedi-option-content>
+        <tedi-option-content-label>Kontaktid</tedi-option-content-label>
+        <tedi-option-content-meta>
           <tedi-icon name="arrow_forward" [size]="16" color="secondary" />
-        </tedi-dropdown-item-value-meta>
-      </tedi-dropdown-item-value>
+        </tedi-option-content-meta>
+      </tedi-option-content>
     </li>
   </tedi-dropdown-content>
 </tedi-dropdown>`,
@@ -159,16 +159,16 @@ const SOURCE = {
   <button tedi-button tedi-dropdown-trigger>Ava menüü</button>
   <tedi-dropdown-content>
     <li tedi-dropdown-item>
-      <tedi-dropdown-item-value layout="vertical">
-        <tedi-dropdown-item-value-label>Juurdepääs terviseandmetele</tedi-dropdown-item-value-label>
-        <tedi-dropdown-item-value-meta>Arstid näevad sinu terviseandmeid</tedi-dropdown-item-value-meta>
-      </tedi-dropdown-item-value>
+      <tedi-option-content layout="vertical">
+        <tedi-option-content-label>Juurdepääs terviseandmetele</tedi-option-content-label>
+        <tedi-option-content-meta>Arstid näevad sinu terviseandmeid</tedi-option-content-meta>
+      </tedi-option-content>
     </li>
     <li tedi-dropdown-item>
-      <tedi-dropdown-item-value>
-        <tedi-dropdown-item-value-label>Tallinn</tedi-dropdown-item-value-label>
-        <tedi-dropdown-item-value-meta>3 vaba aega saadaval</tedi-dropdown-item-value-meta>
-      </tedi-dropdown-item-value>
+      <tedi-option-content>
+        <tedi-option-content-label>Tallinn</tedi-option-content-label>
+        <tedi-option-content-meta>3 vaba aega saadaval</tedi-option-content-meta>
+      </tedi-option-content>
     </li>
   </tedi-dropdown-content>
 </tedi-dropdown>`,
@@ -177,14 +177,14 @@ const SOURCE = {
   <button tedi-button tedi-dropdown-trigger>Ava menüü</button>
   <tedi-dropdown-content variant="tree">
     <li tedi-dropdown-item [indent]="1" [isParent]="true">
-      <tedi-dropdown-item-value>
-        <tedi-dropdown-item-value-label>Parent</tedi-dropdown-item-value-label>
-      </tedi-dropdown-item-value>
+      <tedi-option-content>
+        <tedi-option-content-label>Parent</tedi-option-content-label>
+      </tedi-option-content>
     </li>
     <li tedi-dropdown-item [indent]="1">
-      <tedi-dropdown-item-value>
-        <tedi-dropdown-item-value-label>Child 1</tedi-dropdown-item-value-label>
-      </tedi-dropdown-item-value>
+      <tedi-option-content>
+        <tedi-option-content-label>Child 1</tedi-option-content-label>
+      </tedi-option-content>
     </li>
   </tedi-dropdown-content>
 </tedi-dropdown>`,
@@ -193,14 +193,14 @@ const SOURCE = {
   <button tedi-button tedi-dropdown-trigger>Ava menüü</button>
   <tedi-dropdown-content dropdownRole="listbox">
     <li tedi-dropdown-item value="selected">
-      <tedi-dropdown-item-value>
-        <tedi-dropdown-item-value-label>Tekst</tedi-dropdown-item-value-label>
-      </tedi-dropdown-item-value>
+      <tedi-option-content>
+        <tedi-option-content-label>Tekst</tedi-option-content-label>
+      </tedi-option-content>
     </li>
     <li tedi-dropdown-item value="disabled" [disabled]="true">
-      <tedi-dropdown-item-value>
-        <tedi-dropdown-item-value-label>Tekst</tedi-dropdown-item-value-label>
-      </tedi-dropdown-item-value>
+      <tedi-option-content>
+        <tedi-option-content-label>Tekst</tedi-option-content-label>
+      </tedi-option-content>
     </li>
   </tedi-dropdown-content>
 </tedi-dropdown>`,
@@ -209,19 +209,19 @@ const SOURCE = {
   <button tedi-button tedi-dropdown-trigger>Ava menüü</button>
   <tedi-dropdown-content>
     <li tedi-dropdown-item>
-      <tedi-dropdown-item-value>
-        <tedi-dropdown-item-value-label>Top</tedi-dropdown-item-value-label>
-      </tedi-dropdown-item-value>
+      <tedi-option-content>
+        <tedi-option-content-label>Top</tedi-option-content-label>
+      </tedi-option-content>
     </li>
     <li tedi-dropdown-item>
-      <tedi-dropdown-item-value>
-        <tedi-dropdown-item-value-label>Middle</tedi-dropdown-item-value-label>
-      </tedi-dropdown-item-value>
+      <tedi-option-content>
+        <tedi-option-content-label>Middle</tedi-option-content-label>
+      </tedi-option-content>
     </li>
     <li tedi-dropdown-item>
-      <tedi-dropdown-item-value>
-        <tedi-dropdown-item-value-label>Bottom</tedi-dropdown-item-value-label>
-      </tedi-dropdown-item-value>
+      <tedi-option-content>
+        <tedi-option-content-label>Bottom</tedi-option-content-label>
+      </tedi-option-content>
     </li>
   </tedi-dropdown-content>
 </tedi-dropdown>`,
@@ -237,14 +237,14 @@ const sourceParams = (code: string) => ({
  */
 
 export default {
-  title: "TEDI-Ready/Components/Overlay/DropdownItemValue",
-  component: DropdownItemValueComponent,
+  title: "TEDI-Ready/Components/Helpers/OptionContent",
+  component: OptionContentComponent,
   decorators: [
     moduleMetadata({
       imports: [
-        DropdownItemValueComponent,
-        DropdownItemValueLabelComponent,
-        DropdownItemValueMetaComponent,
+        OptionContentComponent,
+        OptionContentLabelComponent,
+        OptionContentMetaComponent,
         IconComponent,
         DropdownItemComponent,
         DropdownItemShowcaseComponent,
@@ -259,7 +259,7 @@ export default {
       options: ["default", "checkbox", "radio"],
       description: "Type of selection indicator",
       table: {
-        type: { summary: "DropdownItemValueType" },
+        type: { summary: "OptionContentType" },
         defaultValue: { summary: "default" },
       },
     },
@@ -268,7 +268,7 @@ export default {
       options: ["horizontal", "vertical"],
       description: "Whether the label and meta sit side by side or stacked.",
       table: {
-        type: { summary: "DropdownItemValueLayout" },
+        type: { summary: "OptionContentLayout" },
         defaultValue: { summary: "horizontal" },
       },
     },
@@ -301,13 +301,13 @@ export default {
       description:
         "Leading icon name, or an object to override its size, colour, type or variant.",
       table: {
-        type: { summary: "string | DropdownItemValueIcon" },
+        type: { summary: "string | OptionContentIcon" },
       },
     },
     clipContent: {
       control: "boolean",
       description:
-        "`tedi-dropdown-item-value-label` input. Whether the label clips overflowing content for text ellipsis. Set `false` when the label holds decorations that sit outside the line box (e.g. status indicator), so they are not cut off.",
+        "`tedi-option-content-label` input. Whether the label clips overflowing content for text ellipsis. Set `false` when the label holds decorations that sit outside the line box (e.g. status indicator), so they are not cut off.",
       table: {
         type: { summary: "boolean" },
         defaultValue: { summary: "true" },
@@ -322,9 +322,9 @@ export default {
     disabled: false,
     clipContent: true,
   },
-} as Meta<DropdownItemValueComponent>;
+} as Meta<OptionContentComponent>;
 
-type Story = StoryObj<DropdownItemValueComponent>;
+type Story = StoryObj<OptionContentComponent>;
 
 export const Default: Story = {
   parameters: {
@@ -332,7 +332,7 @@ export const Default: Story = {
     docs: {
       description: {
         story: `
-The DropdownItemValue component provides a reusable structure for rendering option content
+The OptionContent component provides a reusable structure for rendering option content
 in both Select and Dropdown components. It supports built-in checkbox/radio indicators
 and flexible layouts for label and meta text.
 
@@ -348,9 +348,9 @@ examples in context.
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown-item-value [type]="type" [layout]="layout" [selected]="selected" [indeterminate]="indeterminate" [disabled]="disabled" [icon]="icon">
-        <tedi-dropdown-item-value-label [clipContent]="clipContent">Valik 1</tedi-dropdown-item-value-label>
-      </tedi-dropdown-item-value>
+      <tedi-option-content [type]="type" [layout]="layout" [selected]="selected" [indeterminate]="indeterminate" [disabled]="disabled" [icon]="icon">
+        <tedi-option-content-label [clipContent]="clipContent">Valik 1</tedi-option-content-label>
+      </tedi-option-content>
     `,
   }),
 };
@@ -377,18 +377,18 @@ export const Items: Story = {
         <ul app-dropdown-item-showcase [style]="menuStyle">
           @for (item of items; track item) {
             <li tedi-dropdown-item [value]="item">
-              <tedi-dropdown-item-value>
-                <tedi-dropdown-item-value-label>{{ item }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+              <tedi-option-content>
+                <tedi-option-content-label>{{ item }}</tedi-option-content-label>
+              </tedi-option-content>
             </li>
           }
         </ul>
         <ul app-dropdown-item-showcase [style]="menuStyle">
           @for (level of levels; track $index) {
             <li tedi-dropdown-item [value]="'level-' + $index" [indent]="level.indent">
-              <tedi-dropdown-item-value>
-                <tedi-dropdown-item-value-label>{{ level.label }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+              <tedi-option-content>
+                <tedi-option-content-label>{{ level.label }}</tedi-option-content-label>
+              </tedi-option-content>
             </li>
           }
         </ul>
@@ -444,19 +444,19 @@ export const WithCheckbox: Story = {
           <ul app-dropdown-item-showcase [style]="menuStyle">
             @for (group of groups; track group.label) {
               <li tedi-dropdown-item [value]="group.label" [closeOnSelect]="false" (itemSelect)="toggleAll(group.children)">
-                <tedi-dropdown-item-value
+                <tedi-option-content
                   type="checkbox"
                   [selected]="allChecked(group.children)"
                   [indeterminate]="someChecked(group.children)"
                 >
-                  <tedi-dropdown-item-value-label>{{ group.label }}</tedi-dropdown-item-value-label>
-                </tedi-dropdown-item-value>
+                  <tedi-option-content-label>{{ group.label }}</tedi-option-content-label>
+                </tedi-option-content>
               </li>
               @for (child of group.children; track child) {
                 <li tedi-dropdown-item [value]="child" [indent]="2" [closeOnSelect]="false" (itemSelect)="toggle(child)">
-                  <tedi-dropdown-item-value type="checkbox" [selected]="isChecked(child)">
-                    <tedi-dropdown-item-value-label>{{ child }}</tedi-dropdown-item-value-label>
-                  </tedi-dropdown-item-value>
+                  <tedi-option-content type="checkbox" [selected]="isChecked(child)">
+                    <tedi-option-content-label>{{ child }}</tedi-option-content-label>
+                  </tedi-option-content>
                 </li>
               }
             }
@@ -464,18 +464,18 @@ export const WithCheckbox: Story = {
           <ul app-dropdown-item-showcase [style]="menuStyle">
             @for (group of groups; track group.label) {
               <li tedi-dropdown-item [value]="'flat-' + group.label" [closeOnSelect]="false" (itemSelect)="toggle('flat-' + group.label)">
-                <tedi-dropdown-item-value type="checkbox" [selected]="isChecked('flat-' + group.label)">
-                  <tedi-dropdown-item-value-label>{{ group.label }}</tedi-dropdown-item-value-label>
-                </tedi-dropdown-item-value>
+                <tedi-option-content type="checkbox" [selected]="isChecked('flat-' + group.label)">
+                  <tedi-option-content-label>{{ group.label }}</tedi-option-content-label>
+                </tedi-option-content>
               </li>
             }
           </ul>
           <ul app-dropdown-item-showcase [style]="menuStyle">
             @for (level of levels; track $index) {
               <li tedi-dropdown-item [value]="'level-' + $index" [indent]="$index * 2" [closeOnSelect]="false" (itemSelect)="toggle('level-' + $index)">
-                <tedi-dropdown-item-value type="checkbox" [selected]="isChecked('level-' + $index)">
-                  <tedi-dropdown-item-value-label>{{ level }}</tedi-dropdown-item-value-label>
-                </tedi-dropdown-item-value>
+                <tedi-option-content type="checkbox" [selected]="isChecked('level-' + $index)">
+                  <tedi-option-content-label>{{ level }}</tedi-option-content-label>
+                </tedi-option-content>
               </li>
             }
           </ul>
@@ -500,9 +500,9 @@ export const WithRadio: Story = {
         <ul app-dropdown-item-showcase [style]="menuStyle">
           @for (city of cities; track city) {
             <li tedi-dropdown-item [value]="city" [closeOnSelect]="false" (itemSelect)="selected.set(city)">
-              <tedi-dropdown-item-value type="radio" [selected]="selected() === city">
-                <tedi-dropdown-item-value-label>{{ city }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+              <tedi-option-content type="radio" [selected]="selected() === city">
+                <tedi-option-content-label>{{ city }}</tedi-option-content-label>
+              </tedi-option-content>
             </li>
           }
         </ul>
@@ -528,21 +528,21 @@ export const WithIcon: Story = {
         <ul app-dropdown-item-showcase [style]="menuStyle">
           @for (link of links; track link) {
             <li tedi-dropdown-item [value]="link">
-              <tedi-dropdown-item-value>
-                <tedi-dropdown-item-value-label>{{ link }}</tedi-dropdown-item-value-label>
-                <tedi-dropdown-item-value-meta>
+              <tedi-option-content>
+                <tedi-option-content-label>{{ link }}</tedi-option-content-label>
+                <tedi-option-content-meta>
                   <tedi-icon name="arrow_forward" [size]="16" color="secondary" />
-                </tedi-dropdown-item-value-meta>
-              </tedi-dropdown-item-value>
+                </tedi-option-content-meta>
+              </tedi-option-content>
             </li>
           }
         </ul>
         <ul app-dropdown-item-showcase [style]="menuStyle">
           @for (action of actions; track action.label) {
             <li tedi-dropdown-item [value]="action.label">
-              <tedi-dropdown-item-value [icon]="action.icon">
-                <tedi-dropdown-item-value-label>{{ action.label }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+              <tedi-option-content [icon]="action.icon">
+                <tedi-option-content-label>{{ action.label }}</tedi-option-content-label>
+              </tedi-option-content>
             </li>
           }
         </ul>
@@ -586,20 +586,20 @@ export const WithDescription: Story = {
         <ul app-dropdown-item-showcase selectedValue="selected" [style]="menuStyle">
           @for (option of accessOptions; track option.value) {
             <li tedi-dropdown-item [value]="option.value">
-              <tedi-dropdown-item-value layout="vertical">
-                <tedi-dropdown-item-value-label>{{ option.label }}</tedi-dropdown-item-value-label>
-                <tedi-dropdown-item-value-meta>{{ option.description }}</tedi-dropdown-item-value-meta>
-              </tedi-dropdown-item-value>
+              <tedi-option-content layout="vertical">
+                <tedi-option-content-label>{{ option.label }}</tedi-option-content-label>
+                <tedi-option-content-meta>{{ option.description }}</tedi-option-content-meta>
+              </tedi-option-content>
             </li>
           }
         </ul>
         <ul app-dropdown-item-showcase [style]="menuStyle">
           @for (location of locations; track location.label) {
             <li tedi-dropdown-item [value]="location.label">
-              <tedi-dropdown-item-value>
-                <tedi-dropdown-item-value-label>{{ location.label }}</tedi-dropdown-item-value-label>
-                <tedi-dropdown-item-value-meta>{{ location.meta }}</tedi-dropdown-item-value-meta>
-              </tedi-dropdown-item-value>
+              <tedi-option-content>
+                <tedi-option-content-label>{{ location.label }}</tedi-option-content-label>
+                <tedi-option-content-meta>{{ location.meta }}</tedi-option-content-meta>
+              </tedi-option-content>
             </li>
           }
         </ul>
@@ -625,30 +625,30 @@ export const WithTree: Story = {
       <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start">
         <ul app-dropdown-item-showcase variant="tree" [style]="menuStyle">
           <li tedi-dropdown-item value="parent">
-            <tedi-dropdown-item-value>
-              <tedi-dropdown-item-value-label>Parent</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+            <tedi-option-content>
+              <tedi-option-content-label>Parent</tedi-option-content-label>
+            </tedi-option-content>
           </li>
           @for (child of children; track child) {
             <li tedi-dropdown-item [value]="child" [indent]="1">
-              <tedi-dropdown-item-value>
-                <tedi-dropdown-item-value-label>{{ child }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+              <tedi-option-content>
+                <tedi-option-content-label>{{ child }}</tedi-option-content-label>
+              </tedi-option-content>
             </li>
           }
         </ul>
         <ul app-dropdown-item-showcase variant="tree" [style]="menuStyle">
           @for (group of groups; track group) {
             <li tedi-dropdown-item [value]="group + '-parent'" [indent]="1" [isParent]="true">
-              <tedi-dropdown-item-value>
-                <tedi-dropdown-item-value-label>Parent</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+              <tedi-option-content>
+                <tedi-option-content-label>Parent</tedi-option-content-label>
+              </tedi-option-content>
             </li>
             @for (child of children; track child) {
               <li tedi-dropdown-item [value]="group + '-' + child" [indent]="1">
-                <tedi-dropdown-item-value>
-                  <tedi-dropdown-item-value-label>{{ child }}</tedi-dropdown-item-value-label>
-                </tedi-dropdown-item-value>
+                <tedi-option-content>
+                  <tedi-option-content-label>{{ child }}</tedi-option-content-label>
+                </tedi-option-content>
               </li>
             }
           }
@@ -684,9 +684,9 @@ export const Position: Story = {
       >
         @for (position of positions; track position.id) {
           <li tedi-dropdown-item [id]="'Position-' + position.id" [value]="position.id">
-            <tedi-dropdown-item-value>
-              <tedi-dropdown-item-value-label>{{ position.label }}</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+            <tedi-option-content>
+              <tedi-option-content-label>{{ position.label }}</tedi-option-content-label>
+            </tedi-option-content>
           </li>
         }
       </ul>
@@ -717,9 +717,9 @@ export const States: Story = {
                 [value]="state === 'Selected' ? 'selected' : state + '-label'"
                 [disabled]="state === 'Disabled'"
               >
-                <tedi-dropdown-item-value>
-                  <tedi-dropdown-item-value-label>Tekst</tedi-dropdown-item-value-label>
-                </tedi-dropdown-item-value>
+                <tedi-option-content>
+                  <tedi-option-content-label>Tekst</tedi-option-content-label>
+                </tedi-option-content>
               </li>
             </ul>
           </tedi-col>
@@ -731,9 +731,9 @@ export const States: Story = {
                 [value]="state === 'Selected' ? 'selected' : state + '-icon'"
                 [disabled]="state === 'Disabled'"
               >
-                <tedi-dropdown-item-value icon="download">
-                  <tedi-dropdown-item-value-label>Tekst</tedi-dropdown-item-value-label>
-                </tedi-dropdown-item-value>
+                <tedi-option-content icon="download">
+                  <tedi-option-content-label>Tekst</tedi-option-content-label>
+                </tedi-option-content>
               </li>
             </ul>
           </tedi-col>
@@ -745,10 +745,10 @@ export const States: Story = {
                 [value]="state === 'Selected' ? 'selected' : state + '-meta'"
                 [disabled]="state === 'Disabled'"
               >
-                <tedi-dropdown-item-value>
-                  <tedi-dropdown-item-value-label>Tekst</tedi-dropdown-item-value-label>
-                  <tedi-dropdown-item-value-meta>Tekst</tedi-dropdown-item-value-meta>
-                </tedi-dropdown-item-value>
+                <tedi-option-content>
+                  <tedi-option-content-label>Tekst</tedi-option-content-label>
+                  <tedi-option-content-meta>Tekst</tedi-option-content-meta>
+                </tedi-option-content>
               </li>
             </ul>
           </tedi-col>

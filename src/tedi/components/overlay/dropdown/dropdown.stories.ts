@@ -14,13 +14,14 @@ import { DropdownHeaderDirective } from "./dropdown-header/dropdown-header.direc
 import { SearchComponent } from "../../form/search/search.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { TextComponent } from "../../base/text/text.component";
-import { DropdownItemValueComponent } from "./dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "./dropdown-item-value/dropdown-item-value-label.component";
-import { DropdownItemValueMetaComponent } from "./dropdown-item-value/dropdown-item-value-meta.component";
+import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
+import { OptionContentLabelComponent } from "../../helpers/option-content/option-content-label.component";
+import { OptionContentMetaComponent } from "../../helpers/option-content/option-content-meta.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
+import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
 const POSITIONS: DropdownPosition[] = [
@@ -77,13 +78,14 @@ export default {
         SearchComponent,
         SeparatorComponent,
         TextComponent,
-        DropdownItemValueComponent,
-        DropdownItemValueLabelComponent,
-        DropdownItemValueMetaComponent,
+        OptionContentComponent,
+        OptionContentLabelComponent,
+        OptionContentMetaComponent,
         ButtonComponent,
         IconComponent,
         RowComponent,
         ColComponent,
+        CheckboxComponent,
       ],
     }),
   ],
@@ -451,19 +453,19 @@ export const WithIcons: Story = {
         </button>
         <tedi-dropdown-content [dropdownRole]="dropdownRole">
           <li tedi-dropdown-item>
-            <tedi-dropdown-item-value icon="download">
-              <tedi-dropdown-item-value-label>Laadi alla</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+            <tedi-option-content icon="download">
+              <tedi-option-content-label>Laadi alla</tedi-option-content-label>
+            </tedi-option-content>
           </li>
           <li tedi-dropdown-item>
-            <tedi-dropdown-item-value icon="add">
-              <tedi-dropdown-item-value-label>Lisa</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+            <tedi-option-content icon="add">
+              <tedi-option-content-label>Lisa</tedi-option-content-label>
+            </tedi-option-content>
           </li>
           <li tedi-dropdown-item>
-            <tedi-dropdown-item-value icon="delete">
-              <tedi-dropdown-item-value-label>Kustuta</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+            <tedi-option-content icon="delete">
+              <tedi-option-content-label>Kustuta</tedi-option-content-label>
+            </tedi-option-content>
           </li>
         </tedi-dropdown-content>
       </tedi-dropdown>
@@ -502,9 +504,9 @@ export const WithCheckbox: Story = {
         <tedi-dropdown-content dropdownRole="menu">
           @for (location of locations; track location.id) {
             <li tedi-dropdown-item [closeOnSelect]="false" (itemSelect)="toggleOption(locations, location.id)">
-              <tedi-dropdown-item-value type="checkbox" [selected]="location.selected">
-                <tedi-dropdown-item-value-label>{{ location.label }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+              <tedi-option-content type="checkbox" [selected]="location.selected">
+                <tedi-option-content-label>{{ location.label }}</tedi-option-content-label>
+              </tedi-option-content>
             </li>
           }
         </tedi-dropdown-content>
@@ -537,13 +539,13 @@ export const WithIndentedItems: Story = {
         </button>
         <tedi-dropdown-content dropdownRole="menu">
           <li tedi-dropdown-item [closeOnSelect]="false" (itemSelect)="toggleAll(locations)">
-            <tedi-dropdown-item-value
+            <tedi-option-content
               type="checkbox"
               [selected]="countSelected(locations) === locations.length"
               [indeterminate]="countSelected(locations) > 0 && countSelected(locations) < locations.length"
             >
-              <tedi-dropdown-item-value-label>Kõik asukohad</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+              <tedi-option-content-label>Kõik asukohad</tedi-option-content-label>
+            </tedi-option-content>
           </li>
           @for (location of locations; track location.id) {
             <li
@@ -552,9 +554,9 @@ export const WithIndentedItems: Story = {
               [closeOnSelect]="false"
               (itemSelect)="toggleOption(locations, location.id)"
             >
-              <tedi-dropdown-item-value type="checkbox" [selected]="location.selected">
-                <tedi-dropdown-item-value-label>{{ location.label }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+              <tedi-option-content type="checkbox" [selected]="location.selected">
+                <tedi-option-content-label>{{ location.label }}</tedi-option-content-label>
+              </tedi-option-content>
             </li>
           }
         </tedi-dropdown-content>
@@ -579,9 +581,9 @@ export const WithRadio: Story = {
         <tedi-dropdown-content dropdownRole="listbox">
           @for (option of cities; track option) {
             <li tedi-dropdown-item [value]="option">
-              <tedi-dropdown-item-value type="radio" [selected]="city === option">
-                <tedi-dropdown-item-value-label>{{ option }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+              <tedi-option-content type="radio" [selected]="city === option">
+                <tedi-option-content-label>{{ option }}</tedi-option-content-label>
+              </tedi-option-content>
             </li>
           }
         </tedi-dropdown-content>
@@ -744,10 +746,10 @@ export const WithDescription: Story = {
             <tedi-dropdown-content dropdownRole="listbox">
               @for (option of accessOptions; track option.value) {
                 <li tedi-dropdown-item [value]="option.value">
-                  <tedi-dropdown-item-value layout="vertical">
-                    <tedi-dropdown-item-value-label>{{ option.label }}</tedi-dropdown-item-value-label>
-                    <tedi-dropdown-item-value-meta>{{ option.description }}</tedi-dropdown-item-value-meta>
-                  </tedi-dropdown-item-value>
+                  <tedi-option-content layout="vertical">
+                    <tedi-option-content-label>{{ option.label }}</tedi-option-content-label>
+                    <tedi-option-content-meta>{{ option.description }}</tedi-option-content-meta>
+                  </tedi-option-content>
                 </li>
               }
             </tedi-dropdown-content>
@@ -762,10 +764,10 @@ export const WithDescription: Story = {
             <tedi-dropdown-content dropdownRole="listbox">
               @for (location of locations; track location.value) {
                 <li tedi-dropdown-item [value]="location.value">
-                  <tedi-dropdown-item-value>
-                    <tedi-dropdown-item-value-label>{{ location.label }}</tedi-dropdown-item-value-label>
-                    <tedi-dropdown-item-value-meta>{{ location.meta }}</tedi-dropdown-item-value-meta>
-                  </tedi-dropdown-item-value>
+                  <tedi-option-content>
+                    <tedi-option-content-label>{{ location.label }}</tedi-option-content-label>
+                    <tedi-option-content-meta>{{ location.meta }}</tedi-option-content-meta>
+                  </tedi-option-content>
                 </li>
               }
             </tedi-dropdown-content>
@@ -791,9 +793,9 @@ export const Divided: Story = {
           <li tedi-dropdown-item>Juurdepääsud</li>
           <li tedi-dropdown-item>Arveldamine</li>
           <li tedi-dropdown-item>
-            <tedi-dropdown-item-value icon="logout">
-              <tedi-dropdown-item-value-label>Logi välja</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+            <tedi-option-content icon="logout">
+              <tedi-option-content-label>Logi välja</tedi-option-content-label>
+            </tedi-option-content>
           </li>
         </tedi-dropdown-content>
       </tedi-dropdown>
@@ -816,25 +818,25 @@ export const WithSeparator: Story = {
         </button>
         <tedi-dropdown-content dropdownRole="menu">
           <li tedi-dropdown-item>
-            <tedi-dropdown-item-value icon="edit">
-              <tedi-dropdown-item-value-label>Redigeeri</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+            <tedi-option-content icon="edit">
+              <tedi-option-content-label>Redigeeri</tedi-option-content-label>
+            </tedi-option-content>
           </li>
           <li tedi-dropdown-item>
-            <tedi-dropdown-item-value icon="content_copy">
-              <tedi-dropdown-item-value-label>Kopeeri</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+            <tedi-option-content icon="content_copy">
+              <tedi-option-content-label>Kopeeri</tedi-option-content-label>
+            </tedi-option-content>
           </li>
           <li tedi-dropdown-separator></li>
           <li tedi-dropdown-item>
-            <tedi-dropdown-item-value icon="archive">
-              <tedi-dropdown-item-value-label>Arhiiv</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+            <tedi-option-content icon="archive">
+              <tedi-option-content-label>Arhiiv</tedi-option-content-label>
+            </tedi-option-content>
           </li>
           <li tedi-dropdown-item>
-            <tedi-dropdown-item-value icon="delete">
-              <tedi-dropdown-item-value-label>Kustuta</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+            <tedi-option-content icon="delete">
+              <tedi-option-content-label>Kustuta</tedi-option-content-label>
+            </tedi-option-content>
           </li>
         </tedi-dropdown-content>
       </tedi-dropdown>
@@ -898,6 +900,46 @@ export const CustomContent: Story = {
 };
 
 /**
+ * A checkbox trigger keeps its native role and checked or mixed state. Enter
+ * opens the menu; Space uses the checkbox's native click. The click is cancelled
+ * so selection changes only through menu actions.
+ */
+export const WithCheckboxTrigger: Story = {
+  name: "Checkbox Trigger",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+  },
+  render: (args) => ({
+    props: {
+      ...args,
+      selection: { count: 3 },
+      total: 10,
+      pageSize: 5,
+    },
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <input
+          tedi-checkbox
+          tedi-dropdown-trigger
+          type="checkbox"
+          aria-label="Select rows"
+          [checked]="selection.count === total"
+          [indeterminate]="selection.count > 0 && selection.count < total"
+          (click)="$event.preventDefault()"
+        />
+        <tedi-dropdown-content dropdownRole="menu">
+          <li tedi-dropdown-item (itemSelect)="selection.count = pageSize">Select page</li>
+          <li tedi-dropdown-item (itemSelect)="selection.count = total">Select all</li>
+          <li tedi-dropdown-item (itemSelect)="selection.count = 0">Clear selection</li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+      <p>{{ selection.count }} of {{ total }} rows selected</p>
+    `,
+  }),
+};
+
+/**
  * Items with `[closeOnSelect]="false"` keep the dropdown open after activation
  * and emit `(itemSelect)` for both mouse click and keyboard (Enter / Space).
  * Useful for multi-select checkbox menus where the user toggles several
@@ -944,9 +986,9 @@ export const KeepOpenOnSelect: Story = {
               [closeOnSelect]="false"
               (itemSelect)="toggleFilter(filters, filter.id)"
             >
-              <tedi-dropdown-item-value type="checkbox" [selected]="filter.selected">
-                <tedi-dropdown-item-value-label>{{ filter.label }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+              <tedi-option-content type="checkbox" [selected]="filter.selected">
+                <tedi-option-content-label>{{ filter.label }}</tedi-option-content-label>
+              </tedi-option-content>
             </li>
           }
         </tedi-dropdown-content>
@@ -1001,19 +1043,19 @@ export const OpenWithIconsForVisualTest: Story = {
     <button tedi-button tedi-dropdown-trigger ariaHaspopup="menu">Tegevused</button>
     <tedi-dropdown-content dropdownRole="menu">
       <li tedi-dropdown-item>
-        <tedi-dropdown-item-value icon="edit">
-          <tedi-dropdown-item-value-label>Muuda</tedi-dropdown-item-value-label>
-        </tedi-dropdown-item-value>
+        <tedi-option-content icon="edit">
+          <tedi-option-content-label>Muuda</tedi-option-content-label>
+        </tedi-option-content>
       </li>
       <li tedi-dropdown-item>
-        <tedi-dropdown-item-value icon="content_copy">
-          <tedi-dropdown-item-value-label>Tee koopia</tedi-dropdown-item-value-label>
-        </tedi-dropdown-item-value>
+        <tedi-option-content icon="content_copy">
+          <tedi-option-content-label>Tee koopia</tedi-option-content-label>
+        </tedi-option-content>
       </li>
       <li tedi-dropdown-item [disabled]="true">
-        <tedi-dropdown-item-value icon="delete">
-          <tedi-dropdown-item-value-label>Kustuta</tedi-dropdown-item-value-label>
-        </tedi-dropdown-item-value>
+        <tedi-option-content icon="delete">
+          <tedi-option-content-label>Kustuta</tedi-option-content-label>
+        </tedi-option-content>
       </li>
     </tedi-dropdown-content>
   </tedi-dropdown>
@@ -1051,22 +1093,22 @@ export const OpenListboxMetaForVisualTest: Story = {
     <button tedi-button tedi-dropdown-trigger ariaHaspopup="listbox">Vali asukoht</button>
     <tedi-dropdown-content dropdownRole="listbox">
       <li tedi-dropdown-item value="tallinn">
-        <tedi-dropdown-item-value>
-          <tedi-dropdown-item-value-label>Tallinn</tedi-dropdown-item-value-label>
-          <tedi-dropdown-item-value-meta>3 vaba aega</tedi-dropdown-item-value-meta>
-        </tedi-dropdown-item-value>
+        <tedi-option-content>
+          <tedi-option-content-label>Tallinn</tedi-option-content-label>
+          <tedi-option-content-meta>3 vaba aega</tedi-option-content-meta>
+        </tedi-option-content>
       </li>
       <li tedi-dropdown-item value="tartu">
-        <tedi-dropdown-item-value>
-          <tedi-dropdown-item-value-label>Tartu</tedi-dropdown-item-value-label>
-          <tedi-dropdown-item-value-meta>5 vaba aega</tedi-dropdown-item-value-meta>
-        </tedi-dropdown-item-value>
+        <tedi-option-content>
+          <tedi-option-content-label>Tartu</tedi-option-content-label>
+          <tedi-option-content-meta>5 vaba aega</tedi-option-content-meta>
+        </tedi-option-content>
       </li>
       <li tedi-dropdown-item value="parnu">
-        <tedi-dropdown-item-value>
-          <tedi-dropdown-item-value-label>Pärnu</tedi-dropdown-item-value-label>
-          <tedi-dropdown-item-value-meta>2 vaba aega</tedi-dropdown-item-value-meta>
-        </tedi-dropdown-item-value>
+        <tedi-option-content>
+          <tedi-option-content-label>Pärnu</tedi-option-content-label>
+          <tedi-option-content-meta>2 vaba aega</tedi-option-content-meta>
+        </tedi-option-content>
       </li>
     </tedi-dropdown-content>
   </tedi-dropdown>
@@ -1131,9 +1173,9 @@ export const OpenDividedForVisualTest: Story = {
       <li tedi-dropdown-item>Juurdepääsud</li>
       <li tedi-dropdown-item>Arveldamine</li>
       <li tedi-dropdown-item>
-        <tedi-dropdown-item-value icon="logout">
-          <tedi-dropdown-item-value-label>Logi välja</tedi-dropdown-item-value-label>
-        </tedi-dropdown-item-value>
+        <tedi-option-content icon="logout">
+          <tedi-option-content-label>Logi välja</tedi-option-content-label>
+        </tedi-option-content>
       </li>
     </tedi-dropdown-content>
   </tedi-dropdown>

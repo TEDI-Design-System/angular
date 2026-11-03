@@ -59,8 +59,14 @@ export interface FormFieldControl<T = unknown> {
    */
   readOnly?: Signal<boolean>;
   /**
-   * Set to `false` by controls that never take a clear button — a textarea, per
-   * the design. The field then skips its button whatever `clearable` says.
+   * Width in pixels of the control's own vertical scrollbar, 0 when it has none.
+   * Reported by controls that reach under the field's additions — a textarea —
+   * so the field can move them clear of the scrollbar.
+   */
+  scrollbarWidth?: Signal<number>;
+  /**
+   * Set to `false` by controls that never take a clear button. The field then
+   * skips its button whatever `clearable` says.
    */
   readonly clearButton?: false;
 }

@@ -1,6 +1,6 @@
 .tedi-radio {
-  --_radio-bg: var(--form-checkbox-radio-default-background-default);
-  --_radio-border: var(--form-checkbox-radio-default-border-default);
+  --_radio-bg: var(--form-choice-radio-unselected-background-default);
+  --_radio-border: var(--form-choice-radio-unselected-border-default);
   --_radio-label-color: var(--general-text-primary);
   --_radio-dot-bg: var(--_radio-border);
   --_radio-dot-size: 12px;
@@ -63,18 +63,18 @@
     .tedi-radio__indicator::after {
       display: block;
     }
-    --_radio-border: var(--form-checkbox-radio-default-border-selected);
+    --_radio-border: var(--form-choice-radio-selected-border-default);
   }
 
   &:has(input:hover, input:focus-visible) {
     .tedi-radio__indicator {
       outline: 1px solid var(--_radio-border);
     }
-    --_radio-border: var(--form-checkbox-radio-default-border-hover);
+    --_radio-border: var(--form-choice-radio-unselected-border-hover);
   }
 
   &:has(input:active) {
-    --_radio-border: var(--form-checkbox-radio-default-border-active);
+    --_radio-border: var(--form-choice-radio-unselected-border-active);
   }
 
   &:has(input:disabled) {
@@ -85,16 +85,12 @@
   }
 
   &:has(input:disabled:checked) {
-    --_radio-dot-bg: var(
-      --form-checkbox-radio-default-background-selected-disabled
-    );
-    --_radio-border: var(
-      --form-checkbox-radio-default-border-selected-disabled
-    );
+    --_radio-dot-bg: var(--form-choice-radio-selected-indicator-disabled);
+    --_radio-border: var(--form-choice-radio-selected-border-disabled);
   }
 
   &--error {
-    --_radio-bg: var(--form-checkbox-radio-default-background-error);
+    --_radio-bg: var(--form-choice-radio-unselected-background-default);
     --_radio-border: var(--form-general-feedback-error-border);
   }
 

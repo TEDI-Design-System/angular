@@ -12,7 +12,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: "tedi-header",
+    class: "tedi-header no-print",
   },
 })
 export class HeaderComponent {}

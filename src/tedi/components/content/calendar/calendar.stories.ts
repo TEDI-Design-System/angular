@@ -24,39 +24,7 @@ import type { Matcher } from "../../../utils/matchers.util";
  * footer projection slot (`tediCalendarFooter`).
  */
 
-// Lock "today" for Chromatic stability. Patches the global Date constructor
-// for this stories module so the calendar's internal `new Date()` checks
-// (today indicator, focusable-day fallback) resolve to a fixed reference.
-//
-// Guard against double-patching: Storybook HMR re-evaluates this module, and
-// without the guard each reload would wrap the previous MockDate in another
-// subclass — every `new Date()` would then traverse a growing prototype chain,
-// pegging CPU once enough reloads have happened (especially in Docs view
-// where many calendars instantiate at once).
-const FIXED_TODAY_MS = new Date(2026, 4, 16).getTime();
-const GLOBAL_MARK = "__tediCalendarMockDate";
-const globalScope = globalThis as unknown as Record<string, unknown> & {
-  Date: typeof Date;
-};
-if (!globalScope[GLOBAL_MARK]) {
-  const RealDate = Date;
-  class MockDate extends RealDate {
-    constructor(...args: unknown[]) {
-      if (args.length === 0) {
-        super(FIXED_TODAY_MS);
-        return;
-      }
-      super(...(args as ConstructorParameters<typeof Date>));
-    }
-    static override now(): number {
-      return FIXED_TODAY_MS;
-    }
-  }
-  globalScope.Date = MockDate as typeof Date;
-  globalScope[GLOBAL_MARK] = true;
-}
-
-const today = new Date(2026, 4, 16);
+const today = new Date();
 const startOfThisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 const inThreeDays = new Date(
   today.getFullYear(),

@@ -96,6 +96,23 @@ export default {
         defaultValue: { summary: "400" },
       },
     },
+    swipeThreshold: {
+      description:
+        "How far a drag must go to move on, as a fraction (0–1) of the distance to the next position, which is one slide except for a shorter final step when not looping. Each position fully dragged past counts; a quick flick moves one position.",
+      control: {
+        type: "number",
+        min: 0,
+        max: 1,
+        step: 0.05,
+      },
+      table: {
+        category: "Carousel Content",
+        type: {
+          summary: "number",
+        },
+        defaultValue: { summary: "0.3" },
+      },
+    },
     loop: {
       description:
         "Whether navigation wraps around at the ends. When `false`, it stops at the first and last reachable positions and disables the corresponding arrow.",
@@ -168,6 +185,7 @@ type CarouselType = CarouselComponent & {
   gap: BreakpointInput<number>;
   fade: boolean;
   transitionMs: number;
+  swipeThreshold: number;
   loop: boolean;
   withArrows: boolean;
   variant: CarouselIndicatorsVariant;
@@ -179,6 +197,7 @@ export const Default: StoryObj<CarouselType> = {
     gap: { xs: 16 },
     fade: false,
     transitionMs: 400,
+    swipeThreshold: 0.3,
     withArrows: false,
     variant: "dots",
   },
@@ -193,7 +212,7 @@ export const Default: StoryObj<CarouselType> = {
           </div>
           <tedi-carousel-navigation />
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView" [gap]="gap" [fade]="fade">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [gap]="gap" [fade]="fade" [swipeThreshold]="swipeThreshold">
          @for (i of [0, 1, 2, 3, 4]; track $index) {
             <ng-template tediCarouselSlide>
               <div

@@ -5,19 +5,19 @@ import {
   input,
   ViewEncapsulation,
 } from "@angular/core";
-import { CheckboxComponent } from "../../../form/checkbox/checkbox.component";
+import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import {
   IconColor,
   IconComponent,
   IconSize,
   IconType,
   IconVariant,
-} from "../../../base/icon/icon.component";
+} from "../../base/icon/icon.component";
 
-export type DropdownItemValueType = "default" | "checkbox" | "radio";
-export type DropdownItemValueLayout = "horizontal" | "vertical";
+export type OptionContentType = "default" | "checkbox" | "radio";
+export type OptionContentLayout = "horizontal" | "vertical";
 
-export interface DropdownItemValueIcon {
+export interface OptionContentIcon {
   name: string;
   size?: IconSize;
   color?: IconColor;
@@ -26,36 +26,36 @@ export interface DropdownItemValueIcon {
 }
 
 @Component({
-  selector: "tedi-dropdown-item-value",
-  templateUrl: "./dropdown-item-value.component.html",
-  styleUrl: "./dropdown-item-value.component.scss",
+  selector: "tedi-option-content",
+  templateUrl: "./option-content.component.html",
+  styleUrl: "./option-content.component.scss",
   standalone: true,
   imports: [CheckboxComponent, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
-    class: "tedi-dropdown-item-value",
-    "[class.tedi-dropdown-item-value--vertical]": "layout() === 'vertical'",
-    "[class.tedi-dropdown-item-value--horizontal]": "layout() === 'horizontal'",
-    "[class.tedi-dropdown-item-value--checkbox]": "type() === 'checkbox'",
-    "[class.tedi-dropdown-item-value--radio]": "type() === 'radio'",
+    class: "tedi-option-content",
+    "[class.tedi-option-content--vertical]": "layout() === 'vertical'",
+    "[class.tedi-option-content--horizontal]": "layout() === 'horizontal'",
+    "[class.tedi-option-content--checkbox]": "type() === 'checkbox'",
+    "[class.tedi-option-content--radio]": "type() === 'radio'",
   },
 })
-export class DropdownItemValueComponent {
+export class OptionContentComponent {
   /**
-   * Type of item value - controls selection indicator
+   * Type of option content - controls selection indicator
    * - 'default': No selection indicator
    * - 'checkbox': Shows checkbox (for multiselect)
    * - 'radio': Shows radio button (for single select listbox)
    * @default 'default'
    */
-  readonly type = input<DropdownItemValueType>("default");
+  readonly type = input<OptionContentType>("default");
 
   /**
    * Layout: 'horizontal' (side-by-side) or 'vertical' (stacked)
    * @default 'horizontal'
    */
-  readonly layout = input<DropdownItemValueLayout>("horizontal");
+  readonly layout = input<OptionContentLayout>("horizontal");
 
   /**
    * Whether the item is selected (controls checkbox/radio state)
@@ -81,7 +81,7 @@ export class DropdownItemValueComponent {
    * follows the item's text colour on hover, active, selected and disabled.
    * For anything custom, project a `tedi-icon` instead.
    */
-  readonly icon = input<string | DropdownItemValueIcon>();
+  readonly icon = input<string | OptionContentIcon>();
 
   readonly resolvedIcon = computed(() => {
     const icon = this.icon();
