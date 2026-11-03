@@ -2810,6 +2810,83 @@ export const CollapsibleRowsExpandedByDefault: Story = {
   },
 };
 
+// ---------- NestedTable ----------
+@Component({
+  standalone: true,
+  selector: "tedi-nested-table-story",
+  imports: [TediTableComponent],
+  template: `
+    <tedi-table
+      id="tedi-table-nested"
+      [data]="data"
+      [columns]="columns"
+      [renderSubComponent]="nestedTable"
+      [getRowCanExpand]="getRowCanExpand"
+      [defaultState]="{ expanded: true }"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+    <ng-template #nestedTable let-row>
+      <tedi-table
+        [id]="'tedi-table-nested-' + row.id"
+        [data]="row.original.subRows"
+        [columns]="nestedColumns"
+      />
+    </ng-template>
+  `,
+})
+class NestedTableStoryHostComponent extends TableStoryHostBase {
+  data = collapsiblePeople;
+  pagination = SHOWCASE_PAGINATION_4;
+  getRowCanExpand = (row: Row<CollapsibleRecord>) => !!row.original.subRows;
+
+  columns: TediColumnDef<CollapsibleRecord>[] = [
+    { id: "name", header: "Isik", accessorKey: "name" },
+    { id: "age", header: "Vanus", accessorKey: "age" },
+    { id: "visits", header: "Külastuste arv", accessorKey: "visits" },
+  ];
+
+  nestedColumns: TediColumnDef<CollapsibleRecord>[] = [
+    { id: "visits", header: "Külastuste arv", accessorKey: "visits" },
+    { id: "status", header: "Tõendi staatus", accessorKey: "status" },
+  ];
+}
+
+export const NestedTable: Story = {
+  args: { striped: true, verticalBorders: true, size: "small" },
+  render: (args) => ({
+    moduleMetadata: { imports: [NestedTableStoryHostComponent] },
+    props: args,
+    template: `<tedi-nested-table-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A `tedi-table` rendered inside `renderSubComponent` follows only " +
+          "its own inputs. The outer table here is striped, small and has " +
+          "vertical borders; the nested tables keep the default look.",
+      },
+      source: {
+        language: "html",
+        code: `<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [renderSubComponent]="nestedTable"
+  [getRowCanExpand]="getRowCanExpand"
+  striped
+  verticalBorders
+  size="small"
+/>
+
+<ng-template #nestedTable let-row>
+  <tedi-table [data]="row.original.subRows" [columns]="nestedColumns" />
+</ng-template>`,
+      },
+    },
+  },
+};
+
 // ---------- SelectableRows ----------
 @Component({
   standalone: true,
