@@ -166,25 +166,23 @@ $sheet-fade-duration: 200ms;
   }
 
   &--center {
-    position: relative;
+    // Equal side columns keep a short title centred; a long one stops short of the start content and actions.
+    display: grid;
+    grid-template-columns: 1fr minmax(0, auto) 1fr;
+
+    .tedi-sheet-header__start {
+      grid-column: 1;
+      justify-self: start;
+    }
 
     .tedi-sheet-header__title {
+      grid-column: 2;
       text-align: center;
     }
 
-    .tedi-sheet-header__start,
     .tedi-sheet-header__actions {
-      position: absolute;
-      inset-block-start: 50%;
-      transform: translateY(-50%);
-    }
-
-    .tedi-sheet-header__start {
-      inset-inline-start: var(--tedi-sheet-padding-x);
-    }
-
-    .tedi-sheet-header__actions {
-      inset-inline-end: var(--tedi-sheet-padding-x);
+      grid-column: 3;
+      justify-self: end;
     }
   }
 
