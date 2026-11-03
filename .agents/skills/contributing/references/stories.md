@@ -155,7 +155,10 @@ stories get no readiness badge. Add `breakpointSupport` for breakpoint-aware inp
 ([deprecation.md](deprecation.md)). `existsInTediReady` marks community stories that have a
 TEDI-Ready replacement, and `internalComponent` components not exported to consumers.
 
-**Figma link (required).** Place the link as a JSDoc anchor directly above `export default` — Storybook renders it at the top of the Docs page. This is the convention used by every TEDI-Ready story. Format:
+**Figma link (TEDI file only).** Add it only when the design is in the TEDI Figma file
+(`figma.com/design/jWiRIXhHRxwVdMSimKX2FF/...`). A design in another team's or project's Figma file
+can't be opened by readers of the docs, so that story gets no Figma link. Place the link as a JSDoc
+anchor directly above `export default`; Storybook renders it at the top of the Docs page. Format:
 
 ```typescript
 /**
@@ -172,7 +175,7 @@ If the component also has a Zeroheight page, add it on the next line with `<br>`
  */
 ```
 
-Applies equally to new components and retrofits — if an existing story lacks the link, add it.
+Applies equally to new components and retrofits: if an existing story lacks a TEDI Figma link, add it.
 
 ### 5. Make the `Default` Story's Controls Functional
 
@@ -239,7 +242,8 @@ render: (args) => ({
 - [ ] States story covers all visual states shown in Figma (default, hover, active, focus, disabled)
 - [ ] Every icon-only control shown in a story has both an `aria-label` and a `tedi-tooltip` — the label names it for screen readers, the tooltip shows the same wording on hover or keyboard focus
 - [ ] Reactive forms example included if the component implements ControlValueAccessor
-- [ ] Figma link is in the JSDoc comment above `export default` (format: `<a href="..." target="_blank">Figma ↗</a>`)
+- [ ] Figma link is in the JSDoc comment above `export default` (format: `<a href="..." target="_blank">Figma ↗</a>`),
+      and only when it points to the TEDI Figma file
 - [ ] Every `argTypes` description is one sentence; every story docblock either says something invisible in the rendered story or does not exist (see section 8)
 - [ ] No public input is missing an `argTypes` entry — aliased inputs are keyed by their alias (`invalid`, not `invalidInput`)
 - [ ] No inline `style` in story markup, and no hand-written ARIA, keyboard or overlay code in the stories file (see section 2)
