@@ -215,14 +215,16 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   text. Put guidance there rather than projecting a `tedi-feedback-text` hint, which would make a
   second one. It owns one validation message the same way, shown above the hint: pass an error of
   your own, a server error say, through `error`, where it joins the field's rejection message, or a
-  confirmation through `success`, shown only while there is no error. A projected error or success
+  confirmation through `success`, shown only while there is no error. `error` paints the field but
+  does not change a bound control's validity. A projected error or success
   text would show below the hint as a second message.
 - **`tedi-file-upload` validates itself.** It registers on `NG_VALIDATORS`, so a bound control fails
   with a `rejectedFiles` error while any `isValid: false` file is listed. By default a file that
   fails `accept`, `maxSize` or `validator` is discarded and only the summary under the field remains;
   `keepRejectedFiles` keeps it in the list, marked invalid, instead. It shows as a danger tag only
   while two or more files are listed; a single file shows just its name. Filter on `isValid` before
-  uploading either way.
+  uploading either way. `accept`, `maxSize` and `validator` apply to the next selection; files already
+  listed keep their verdict, so clear them yourself if you tighten a rule.
 - **A `tedi-file-upload` `validator` adds a rule but no hint.** It runs on every selected file, and
   every rule a file breaks is reported in the one rejection summary, built-in reasons first. The
   automatic hint cannot describe it, so describe the rule in `hint`.
@@ -230,8 +232,9 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   it in whichever unit reads best.
 - **It selects files, it does not upload them.** `fileRemove` emits the single entry the user removed,
   one event per file when clearing, so an in-flight upload can be aborted without diffing
-  `filesChange`. Set `isLoading` on a file yourself while it uploads: the tag shows a spinner and
-  loses its remove button.
+  `filesChange`. Set `isLoading` on a file yourself while it uploads: in a list of several, its tag
+  shows a spinner and loses its remove button. The clear button still removes it, so a stuck upload is
+  never stranded; clear `isLoading` and set `isValid: false` on failure or timeout.
 - **Below `md` it stacks**: files above a full-width button row, and the clear button becomes a text
   button. There is no input for this.
 - **`readOnly` renders the files as a list named by the label**, even a single file, which is a list of

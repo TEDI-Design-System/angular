@@ -9,9 +9,8 @@ export interface FileUploadFile extends Partial<File> {
    */
   id?: string;
   /**
-   * Whether an upload is in flight for this file. Left to the consumer to set
-   * and clear — the field only selects files, it does not upload them. A
-   * loading file is shown with a spinner and cannot be removed.
+   * Whether the file is uploading. In a list of several files, its tag shows a
+   * spinner and has no remove button; the clear button still removes it.
    */
   isLoading?: boolean;
   /**

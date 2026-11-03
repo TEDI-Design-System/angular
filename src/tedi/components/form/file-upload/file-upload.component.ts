@@ -141,109 +141,68 @@ export class FileUploadComponent
   private addAnnounceTimeout?: ReturnType<typeof setTimeout>;
 
   /**
-   * Files held by the field, and the value written by `formControl` /
-   * `ngModel`. Bind it one-way to seed the list and leave the field owning it
-   * from there, or two-way to stay in sync with it. Every change emits on the
-   * `filesChange` output this `model()` generates.
-   *
-   * Bind a stable reference — a field or a signal. An inline literal
-   * (`[files]="[{ name: 'a.pdf' }]"`) is a new array on every check, so it is
-   * written back each time and discards whatever the user added.
+   * Selected files, and the value of a bound form control. Bind a stable
+   * reference: an inline array literal resets the list on every check.
    */
   readonly files = model<FileUploadFile[]>([]);
   /**
-   * Id of the file input. Generated when not set. Bind the sibling
-   * `<label tedi-label [for]>` to the same value: clicking the label opens the
-   * file picker, and the label's text is prepended to the add button's
-   * accessible name so a screen reader hears which field the button belongs to.
+   * Id of the file input, which the field label's `for` points to. Generated
+   * when not set.
    */
   readonly inputId = input<string>();
   /**
-   * `name` attribute of the file input. The files do not travel with a native
-   * form submit: the input's value is cleared after each selection so the same
-   * file can be picked again. Read them from `files` or the bound control.
+   * `name` attribute of the file input. The files are not sent with a native
+   * form submit.
    */
   readonly name = input<string>();
   /**
-   * Allowed file types as a comma-separated list of extensions and MIME types
-   * (`".pdf,.txt"`, `"image/png"`, `"image/*"`). Forwarded to the input's
-   * `accept` attribute and re-checked on selection.
-   *
-   * Applies to what is picked next. Files already listed keep the verdict they
-   * were given, so clear them yourself if you tighten this while they are
-   * listed.
+   * Allowed file types as comma-separated extensions and MIME types, e.g.
+   * `".pdf,image/*"`. Changing it does not recheck files already listed.
    */
   readonly accept = input<string>();
   /**
-   * Largest accepted file size, in bytes — the unit `File.size` is in. The
-   * restrictions hint renders it in whichever unit reads best, so a sub-megabyte
-   * limit still shows as e.g. `500 KB`.
-   *
-   * Applies to what is picked next. Files already listed keep the verdict they
-   * were given, so clear them yourself if you tighten this while they are
-   * listed.
+   * Largest accepted file size, in bytes. Changing it does not recheck files
+   * already listed.
    */
   readonly maxSize = input<number>();
   /**
-   * A rule of your own for each selected file, checked alongside `accept` and
-   * `maxSize` — a minimum size, a naming convention. Return the reason a file
-   * is rejected, or nothing to accept it. The reason joins the rejection
-   * summary under the field after the built-in ones, followed by the names of
-   * the files it rejected. It runs on every selected file, including ones
-   * `accept` or `maxSize` rejected, so it may receive a file of the wrong type
-   * or size.
-   *
-   * The automatic hint cannot describe it, so describe the rule in `hint`.
-   * Applies to what is picked next, like `accept`. For checks that need a
-   * server round trip, set `isLoading` and then `isValid` on the file yourself
-   * instead.
+   * Custom rule for each selected file, including ones `accept` or `maxSize`
+   * rejected, returning the rejection reason, if any. Changing it does not
+   * recheck files already listed.
    */
   readonly validator = input<FileUploadValidator>();
   /**
-   * Whether more than one file can be held at a time. A single-file field
-   * replaces its file on the next selection.
+   * Whether more than one file can be selected; a single-file field replaces
+   * its file on the next selection.
    * @default false
    */
   readonly multiple = input(false, { transform: booleanAttribute });
   /**
-   * Keeps rejected files in the list, marked invalid, so the user can see which
-   * of their files failed and remove it; the message under the field then names
-   * every rejected file still listed. Off, a rejected file is discarded and the
-   * message describes the latest selection.
+   * Keeps rejected files in the list, marked invalid, instead of discarding
+   * them.
    * @default false
    */
   readonly keepRejectedFiles = input(false, { transform: booleanAttribute });
   /**
-   * Whether the allowed types and maximum size are summarised in the hint below
-   * the field. Turn it off when the same information is shown elsewhere; `hint`
-   * and rejection errors still render.
+   * Shows the allowed types and maximum size in the hint.
    * @default true
    */
   readonly showRestrictions = input(true, { transform: booleanAttribute });
   /**
-   * Guidance of your own, such as what a `validator` checks, shown after the
-   * allowed types and maximum size in the field's hint. Use it instead of
-   * projecting a `tedi-feedback-text` hint, which would make a second one.
+   * Hint text, shown after the allowed types and maximum size. Use it instead
+   * of a projected `tedi-feedback-text`, which would add a second hint.
    */
   readonly hint = input<string>();
   /**
-   * An error of your own, such as one the server returned for an uploaded file.
-   * Shown in the field's error text after its own rejection message, above the
-   * hint, and marks the field invalid. It does not change a bound control's
-   * validity. Use it instead of projecting an error `tedi-feedback-text`, which
-   * would show below the hint as a second error.
+   * Error text, shown after the field's own rejection message. Does not change
+   * a bound control's validity.
    */
   readonly error = input<string>();
-  /**
-   * A success message, shown in the error's place above the hint and painting
-   * the field's border green. Shown only while the field has no error: an error
-   * means the user still has something to fix.
-   */
+  /** Success text, shown while the field has no error. */
   readonly success = input<string>();
   /**
-   * Whether a clear button removes every file at once while any is listed.
-   * Falls back to the wrapping `tedi-form-field`'s `clearable` when not set
-   * here — set it on the wrapper, and use this only for a standalone field.
+   * Whether the clear button shows while files are listed. Falls back to the
+   * wrapping `tedi-form-field`'s `clearable`.
    * @default true
    */
   readonly clearable = input<boolean | undefined, unknown>(undefined, {
@@ -251,14 +210,12 @@ export class FileUploadComponent
     transform: (v: unknown) => (v == null ? undefined : booleanAttribute(v)),
   });
   /**
-   * Renders only the file list: no border, no add or clear button, no remove
-   * button on the tags.
+   * Shows only the file list, without buttons.
    * @default false
    */
   readonly readOnly = input(false, { transform: booleanAttribute });
   /**
-   * Disables the field from a parent template. Combined with the
-   * reactive-forms disabled state and any input-group state.
+   * Disables the field. Combines with the form control's disabled state.
    * @default false
    */
   readonly disabledInput = input(false, {
@@ -267,9 +224,8 @@ export class FileUploadComponent
     transform: booleanAttribute,
   });
   /**
-   * Marks the field as invalid. The error state is also derived from the bound
-   * control, from a wrapping `tedi-form-field`'s error feedback and from
-   * rejected files, so this only forces it on.
+   * Marks the field as invalid. Combines with the state derived from the form
+   * control and rejected files.
    * @default false
    */
   readonly invalidInput = input(false, {
@@ -277,15 +233,11 @@ export class FileUploadComponent
     alias: "invalid",
     transform: booleanAttribute,
   });
-  /**
-   * Size of the field. Falls back to the size of a wrapping `tedi-form-field`
-   * when not set here.
-   */
+  /** Field size. Falls back to the size of a wrapping `tedi-form-field`. */
   readonly size = input<FileUploadSize | undefined>();
   /**
-   * Emits each file the user removed, one event per file when clearing.
-   * `filesChange` carries the new list; this says which entry left it, so an
-   * in-flight upload can be aborted without diffing the two.
+   * Emits each file the user removes, one event per file when clearing, so its
+   * upload can be aborted.
    */
   readonly fileRemove = output<FileUploadFile>();
 

@@ -91,7 +91,7 @@ export default {
   argTypes: {
     files: {
       description:
-        "Files held by the field, and the value written by `formControl` / `ngModel`. Bind one-way to seed the list and leave the field owning it, two-way to stay in sync. Bind a stable reference — an inline literal is a new array on every check and discards what the user added.",
+        "Selected files, and the value of a bound form control. Bind a stable reference: an inline array literal resets the list on every check.",
       control: false,
       table: {
         category: "inputs",
@@ -101,31 +101,31 @@ export default {
     },
     inputId: {
       description:
-        "Id of the hidden file input, generated when not set; point the field's `<label tedi-label [for]>` at it so the label opens the picker and names the add button.",
+        "Id of the file input, which the field label's `for` points to. Generated when not set.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     name: {
       description:
-        "`name` attribute of the file input. The files do not travel with a native form submit — read them from `files` or the bound control.",
+        "`name` attribute of the file input. The files are not sent with a native form submit.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     accept: {
       description:
-        "Allowed file types as a comma-separated list of extensions and MIME types. Applies to what is picked next — files already listed keep the verdict they were given.",
+        'Allowed file types as comma-separated extensions and MIME types, e.g. `".pdf,image/*"`. Changing it does not recheck files already listed.',
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     maxSize: {
       description:
-        "Largest accepted file size, in bytes. The restrictions hint renders it in whichever unit reads best. Applies to what is picked next.",
+        "Largest accepted file size, in bytes. Changing it does not recheck files already listed.",
       control: "number",
       table: { category: "inputs", type: { summary: "number" } },
     },
     multiple: {
       description:
-        "Whether more than one file can be held. A single-file field replaces its file on the next selection.",
+        "Whether more than one file can be selected; a single-file field replaces its file on the next selection.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -135,7 +135,7 @@ export default {
     },
     keepRejectedFiles: {
       description:
-        "Keeps rejected files in the list, marked invalid, instead of discarding them. The rejection is summarised under the field either way.",
+        "Keeps rejected files in the list, marked invalid, instead of discarding them.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -145,7 +145,7 @@ export default {
     },
     validator: {
       description:
-        "A rule of your own for each selected file, checked alongside `accept` and `maxSize`. Return the reason a file is rejected, or nothing to accept it.",
+        "Custom rule for each selected file, including ones `accept` or `maxSize` rejected, returning the rejection reason, if any. Changing it does not recheck files already listed.",
       control: false,
       table: {
         category: "inputs",
@@ -156,8 +156,7 @@ export default {
       },
     },
     showRestrictions: {
-      description:
-        "Whether the allowed types and maximum size are summarised in the hint below the field. `hint` and rejection errors render either way.",
+      description: "Shows the allowed types and maximum size in the hint.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -167,25 +166,24 @@ export default {
     },
     error: {
       description:
-        "An error of your own, such as a server error, shown after the field's rejection message and above the hint.",
+        "Error text, shown after the field's own rejection message. Does not change a bound control's validity.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     success: {
-      description:
-        "A success message, shown in the error's place above the hint while the field has no error.",
+      description: "Success text, shown while the field has no error.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     hint: {
       description:
-        "Guidance of your own, shown after the allowed types and maximum size in the field's hint.",
+        "Hint text, shown after the allowed types and maximum size. Use it instead of a projected `tedi-feedback-text`, which would add a second hint.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     clearable: {
       description:
-        "Whether a clear button removes every file at once. Overrides the wrapping `tedi-form-field`'s `clearable` for this field. Leave unset to inherit it — set `clearable` on the form field instead. Use it for a standalone file upload, where it defaults to `true`.",
+        "Whether the clear button shows while files are listed. Falls back to the wrapping `tedi-form-field`'s `clearable`.",
       control: { type: "boolean" },
       table: {
         category: "inputs",
@@ -194,8 +192,7 @@ export default {
       },
     },
     readOnly: {
-      description:
-        "Renders only the file list: no border, no add or clear button, no remove button on the tags.",
+      description: "Shows only the file list, without buttons.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -205,7 +202,7 @@ export default {
     },
     disabled: {
       description:
-        "Disables the field from a parent template. Combined with the reactive-forms disabled state.",
+        "Disables the field. Combines with the form control's disabled state.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -215,7 +212,7 @@ export default {
     },
     invalid: {
       description:
-        "Forces the error state on. Combines with the state derived from reactive forms, the wrapping form field and rejected files.",
+        "Marks the field as invalid. Combines with the state derived from the form control and rejected files.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -225,7 +222,7 @@ export default {
     },
     size: {
       description:
-        "Overrides the wrapping `tedi-form-field`'s `size` for this field. Leave unset to inherit it — set `size` on the form field instead, so the label scales too. Use it for a standalone file upload, where it defaults to `default`.",
+        "Field size. Falls back to the size of a wrapping `tedi-form-field`.",
       control: { type: "radio" },
       options: [undefined, "default", "small"],
       table: {
@@ -239,7 +236,7 @@ export default {
     },
     fileRemove: {
       description:
-        "Emits each file the user removed, one event per file when clearing. `filesChange` carries the new list.",
+        "Emits each file the user removes, one event per file when clearing, so its upload can be aborted.",
       table: { category: "outputs", type: { summary: "FileUploadFile" } },
     },
     filesChange: {
