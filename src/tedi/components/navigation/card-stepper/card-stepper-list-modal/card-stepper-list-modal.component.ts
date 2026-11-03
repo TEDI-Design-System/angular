@@ -27,6 +27,7 @@ export interface CardStepperListStep {
   description?: string;
   completed: boolean;
   error: boolean;
+  /** Not available in the list: disabled, or excluded by `allowJump`. */
   disabled: boolean;
   /** Whether `allowJump` lets this step be picked. */
   navigable: boolean;
