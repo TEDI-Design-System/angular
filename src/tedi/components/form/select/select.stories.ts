@@ -1507,7 +1507,6 @@ export const OpenForVisualTest: Story = {
 
 /** The clear button appears while the selected field is hovered or focused. */
 export const ClearButtonOnInteraction: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     props: { options: simpleOptions },
     template: `

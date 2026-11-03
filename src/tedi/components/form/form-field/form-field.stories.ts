@@ -78,7 +78,6 @@ export const WithTextField: Story = {
 
 /** The clear button appears when the filled field is hovered or focused. */
 export const ClearButtonOnInteraction: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     clearable: true,
     showClearOnInteraction: true,
