@@ -260,6 +260,8 @@ describe("SearchComponent", () => {
     expect(feedback?.className).not.toContain("undefined");
     expect(feedback?.classList).toContain("tedi-feedback-text--hint");
     expect(feedback?.classList).toContain("tedi-feedback-text--left");
+    expect(feedback?.getAttribute("role")).toBeNull();
+    expect(feedback?.getAttribute("aria-live")).toBe("polite");
   });
 
   it("should not set aria-describedby without feedbackText", () => {

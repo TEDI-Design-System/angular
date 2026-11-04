@@ -43,6 +43,7 @@ describe("FeedbackTextComponent", () => {
     expect(element.className).not.toContain("undefined");
     expect(element.classList).toContain("tedi-feedback-text--hint");
     expect(element.classList).toContain("tedi-feedback-text--left");
+    expect(element.getAttribute("role")).toBeNull();
     expect(element.getAttribute("aria-live")).toBe("polite");
   });
 
