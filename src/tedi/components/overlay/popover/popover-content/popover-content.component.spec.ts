@@ -126,6 +126,11 @@ describe("PopoverContentComponent", () => {
 
     const comp = hostDE.componentInstance as PopoverContentComponent;
     expect(comp.customPadding()).toBe(expected);
+    const { paddingTop, paddingRight, paddingBottom, paddingLeft } =
+      hostDE.nativeElement.style;
+    expect(
+      [paddingTop, paddingRight, paddingBottom, paddingLeft].join(" "),
+    ).toBe(expected);
   });
 
   it("should clear the inline padding when padding is unset again", () => {
