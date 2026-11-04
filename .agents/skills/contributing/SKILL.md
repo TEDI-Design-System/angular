@@ -4,21 +4,16 @@ description: >
   Guide for contributing to TEDI Design System Angular. Covers creating new components (Figma-driven),
   running tests and lint, WCAG accessibility audits, safe refactoring, and Storybook story creation.
   Use when developing, reviewing, or modifying TEDI components in this codebase.
-user-invocable: true
-argument-hint: "task description or component path"
 ---
 
 # TEDI Angular Contributing
 
-You are a senior Angular and TypeScript engineer specializing in accessible UI component libraries. You have expert-level knowledge of WCAG 2.1/2.2 guidelines (A, AA, AAA), WAI-ARIA authoring practices, and Angular best practices.
-
 ## Before Any Code
 
-1. Read `AGENTS.md` at the project root for commands, architecture, and conventions.
-2. Read [best-practices](references/best-practices.md) for coding patterns.
-3. If creating or modifying a component, check if TEDI React (`../react/src/tedi/components/`) has an equivalent — use as behavioral reference.
-4. Check TEDI Core (`../core/src/`) for available design tokens, mixins, and shared styles.
-5. Check `package.json` before considering any new dependency.
+1. Read [best-practices](references/best-practices.md) for coding patterns.
+2. If creating or modifying a component, check if TEDI React (`../react/src/tedi/components/`) has an equivalent; use it as a behavioural reference.
+3. Check TEDI Core (`../core/src/`) for available design tokens, mixins, and shared styles.
+4. Check `package.json` before considering any new dependency.
 
 ## Task Router
 
@@ -33,13 +28,14 @@ Load the appropriate reference based on what you're doing:
 | Creating or updating Storybook stories | [stories.md](references/stories.md) |
 | Deprecating a component, removing its docs, or removing it from code | [deprecation.md](references/deprecation.md) |
 | Need to check coding patterns | [best-practices.md](references/best-practices.md) |
+| Reviewing a PR, or finishing work before opening one | [pr-review.md](references/pr-review.md) |
 
 For **compound tasks** (e.g., "create a new component"), follow the primary workflow and load additional references as needed later. Creating a component will also need testing.md and stories.md at the end.
 
 ## Cross-Cutting Rules
 
 ### Figma Integration
-Use `figma-desktop` MCP tools to fetch design context, screenshots, and metadata from provided Figma links. Extract spacing, colors, typography, and states for pixel-accurate implementation.
+Use the Figma MCP server (desktop or remote) to fetch design context, screenshots, and metadata from provided Figma links. Extract spacing, colors, typography, and states for pixel-accurate implementation.
 
 ### Third-Party Libraries
 Always prefer existing dependencies. When a new one is needed, **stop and ask for permission** with: library name, why it's needed, alternatives considered, and bundle size impact.
@@ -56,21 +52,21 @@ directives are all machine-readable at the version the consumer installed.
 
 | Layer | Where | Who maintains it |
 |---|---|---|
-| Input names, types, defaults, rationale | JSDoc on `input()` / `model()` / `output()` | **You, in the source** |
+| Input names, types, defaults | JSDoc on `input()` / `model()` / `output()` | **You, in the source** |
 | Selector, required inputs, host directives | `@Component` metadata, emitted into the `.d.ts` | Automatic |
 | Behaviour the types can't express | `skills/tedi-angular/references/*.md` | **You, by hand** |
 
-**The rule: if it can go in JSDoc, it goes in JSDoc.** A documented input is documented for every
-consuming agent, at their exact version. Do not copy input tables into the consumer skill; that is
-what made the old catalog rot. There is no regeneration step to run: the roster is derived from the
-type bundle at read time.
+**The rule: what an input does goes in its JSDoc, not in the consumer skill.** A documented input is
+documented for every consuming agent, at their exact version. Do not copy input tables into the
+consumer skill; that is what made the old catalog rot. There is no regeneration step to run: the
+roster is derived from the type bundle at read time.
 
 So when you add, remove, rename, or change a component's API:
 
-1. **Document it in the source.** Every public input gets JSDoc: what it does, `@default` where it
-   has one, and why the default is what it is when that isn't obvious. Add `@deprecated` with the
-   replacement rather than deleting outright. Deprecating a whole component follows
-   [deprecation.md](references/deprecation.md).
+1. **Document it in the source.** Every public input gets JSDoc and `@default` where it has one
+   (rules: [best-practices.md → Comments and JSDoc](references/best-practices.md#comments-and-jsdoc)).
+   Add `@deprecated` with the replacement rather than deleting outright. Deprecating a whole component
+   follows [deprecation.md](references/deprecation.md).
 2. **Update the consumer skill only for what JSDoc cannot carry** (see below). If there is nothing in
    that category, you are done. A routine new input needs no consumer-skill edit at all.
 
@@ -80,10 +76,11 @@ So when you add, remove, rename, or change a component's API:
 Add an entry there only when the fact is invisible in, or spread across, the declarations:
 
 - **A new `/tedi` selector that also exists in `/community`.** This is the one Angular-specific case
-  you must not miss: the two entry points already share 24 selectors under identical class names, so
+  you must not miss: the two entry points already share many selectors under identical class names, so
   a template gives no hint which component it resolved. Add the new collision to the list.
 - **Composition constraints**: what may be projected into what, which host element a selector needs,
   which components require an ancestor via DI.
+- **A caveat shared by several inputs**, written once instead of on each input.
 - **Choosing between components**: this one is the low-level primitive, reach for that one instead.
 - **Responsive behaviour that isn't an input**: layout that restacks or hides itself at a breakpoint.
 - **Accessibility requirements a declaration won't convey**: an input that is optional in the types
@@ -102,16 +99,7 @@ as well as grows.
 
 ### Communication
 - Be direct and concise.
-- **Never add self-explanatory comments** — code should be self-documenting. Do not add comments that restate what a selector, class name, variable, function, or method already says (e.g., `// Secondary variant` above `&.tedi-checkbox-card--secondary`, or `/** Toggles the value. */` above a `toggle()` method). This applies to styles, templates, code, and JSDoc equally. Only comment when the logic isn't self-evident, and when you do, keep it short and on point.
-- **Prose defaults to nothing.** Apply the deletion test to every comment, JSDoc line and story docblock you are about to write: *if I delete this, what does the reader get wrong?* If there is no concrete answer, do not write it — a story docblock is usually zero lines. The exception is `argTypes`: every public input keeps a description, because nothing falls back to fill an empty one, but it is one sentence. Never state behaviour that is logically necessary ("counts characters, not markup"), compare the component to another one, describe internal wiring, or restate the name of the thing you are annotating. Over-describing is the single most common note on this repo's reviews — when in doubt, cut it. See [stories.md](references/stories.md) section 8.
+- **Prose defaults to nothing.** Over-describing is the most common note on this repo's reviews. Rules
+  for comments and JSDoc: [best-practices.md → Comments and JSDoc](references/best-practices.md#comments-and-jsdoc).
+  For stories: [stories.md](references/stories.md) section 8.
 - When explaining decisions, focus on the "why" not the "what".
-
-## Commands
-
-```bash
-npm start              # Storybook dev server (port 6006)
-npm test               # Run all tests (Jest)
-npm test -- path/to/file --coverage=false  # Run a single test file
-npm run lint           # Stylelint + ESLint with --fix
-npm run build          # Build library to dist/
-```

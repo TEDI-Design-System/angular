@@ -10,7 +10,7 @@ import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/t
 import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
 
 /**
- * <a href="https://www.figma.com/design/ze9LXyoxEdGV8vpEdat7Oi/Button-group-buttons?node-id=136-19706&m=dev" target="_blank">Figma ↗</a><br>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.107.103?node-id=3506-29547&m=dev" target="_blank">Figma ↗</a><br>
  * <a href="https://www.tedi.ee/1ee8444b7/p/82e9cf-button-group" target="_blank">Zeroheight ↗</a><br>
  *
  * Group of toggle buttons used as a view switcher (an alternative to tabs).
