@@ -1,3 +1,10 @@
+## [9.0.1-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.1-rc.2...angular-9.0.1-rc.3) (2026-11-04)
+
+
+### Bug Fixes
+
+* **table:** scope modifier styles to their own table [#731](https://github.com/TEDI-Design-System/angular/issues/731) ([#832](https://github.com/TEDI-Design-System/angular/issues/832)) ([2368eae](https://github.com/TEDI-Design-System/angular/commit/2368eaecd833e602c0846ce2883f3270b372c74b))
+
 ## [9.0.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.1-rc.1...angular-9.0.1-rc.2) (2026-11-04)
 
 
