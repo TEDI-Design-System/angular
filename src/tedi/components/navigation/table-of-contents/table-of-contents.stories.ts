@@ -161,7 +161,7 @@ const meta = {
         defaultValue: { summary: "false" },
       },
     },
-    bordered: {
+    divided: {
       description:
         "Draw a divider under each item except the last (sub-items included) so the list reads as separated rows.",
       control: "boolean",
@@ -320,7 +320,7 @@ export const Default: Story = {
     numbered: false,
     sticky: false,
     separator: false,
-    bordered: false,
+    divided: false,
   },
   render: (args) => ({
     props: args,
@@ -333,7 +333,7 @@ export const Default: Story = {
         [defaultOpen]="defaultOpen"
         [numbered]="numbered"
         [sticky]="sticky"
-        [bordered]="bordered"
+        [divided]="divided"
       >
         ${controllableItems}
       </tedi-table-of-contents>
@@ -387,8 +387,8 @@ const ITEM_STATES_SOURCE = `<!-- Selected: mark the item's id as active. Hover i
   </tedi-table-of-contents-item>
 </tedi-table-of-contents>
 
-<!-- With border: enable bordered for a full-width divider under every row. -->
-<tedi-table-of-contents [heading]="null" [bordered]="true" activeId="selected">
+<!-- Divided: enable divided for a full-width divider under every row. -->
+<tedi-table-of-contents [heading]="null" [divided]="true" activeId="selected">
   <tedi-table-of-contents-item itemId="default">
     <a tedi-link href="#default" [underline]="false">Default</a>
   </tedi-table-of-contents-item>
@@ -411,35 +411,35 @@ export const ItemStates: Story = {
           numbered: false,
           icon: false,
           separator: false,
-          bordered: false,
+          divided: false,
         },
         {
           header: "With number",
           numbered: true,
           icon: false,
           separator: false,
-          bordered: false,
+          divided: false,
         },
         {
           header: "With icon",
           numbered: false,
           icon: true,
           separator: false,
-          bordered: false,
+          divided: false,
         },
         {
           header: "With separator",
           numbered: false,
           icon: false,
           separator: true,
-          bordered: false,
+          divided: false,
         },
         {
-          header: "With border",
+          header: "Divided",
           numbered: false,
           icon: false,
           separator: false,
-          bordered: true,
+          divided: true,
         },
       ],
       states: [
@@ -457,7 +457,7 @@ export const ItemStates: Story = {
               [heading]="null"
               [sticky]="false"
               [numbered]="variant.numbered"
-              [bordered]="variant.bordered"
+              [divided]="variant.divided"
               activeId="selected"
               [ariaLabel]="variant.header + ' states'"
             >
@@ -471,9 +471,9 @@ export const ItemStates: Story = {
                   </a>
                 </tedi-table-of-contents-item>
               }
-              @if (variant.bordered) {
+              @if (variant.divided) {
                 <!--
-                  'bordered' drops the divider under the last item (the card supplies
+                  'divided' drops the divider under the last item (the card supplies
                   that edge in real use). This inert trailing row keeps the Selected
                   state above it non-last, so it shows its real divider like the design.
                 -->
@@ -547,10 +547,14 @@ export const WithSeparator: Story = {
   }),
 };
 
-export const Bordered: Story = {
+/**
+ * `divided` draws a divider between items, sub-items included, so the list reads as
+ * separated rows.
+ */
+export const Divided: Story = {
   render: () => ({
     template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [bordered]="true">
+      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [divided]="true">
         ${items({ icon: true })}
       </tedi-table-of-contents>
     `,
@@ -987,7 +991,7 @@ const controllableNestedItems = `
  * bottom-sheet overlay. Resize the canvas to switch between the two.
  *
  * `tedi-table-of-contents-collapsible` shares the list-level inputs with the root
- * component — `heading`, `activeId`, `defaultOpen`, `numbered`, `bordered`,
+ * component — `heading`, `activeId`, `defaultOpen`, `numbered`, `divided`,
  * `sticky` and `ariaLabel` — so the controls above apply here too. It leaves out
  * the desktop-card-only inputs (`variant`, `headingLevel`, `stickyOffset`,
  * `stickyMaxHeight`) and adds `hideOnScroll` + `scrollContainer` (see the
@@ -1003,7 +1007,7 @@ export const Collapsible: Story = {
     heading: "Sisukord",
     activeId: "methods",
     numbered: false,
-    bordered: false,
+    divided: false,
     sticky: false,
     hideOnScroll: false,
     separator: false,
@@ -1024,7 +1028,7 @@ export const Collapsible: Story = {
             [sticky]="false"
             [activeId]="activeId"
             [numbered]="numbered"
-            [bordered]="bordered"
+            [divided]="divided"
             [ariaLabel]="ariaLabel"
           >
             ${controllableNestedItems}
@@ -1055,7 +1059,7 @@ export const Collapsible: Story = {
           [heading]="heading"
           [activeId]="activeId"
           [numbered]="numbered"
-          [bordered]="bordered"
+          [divided]="divided"
           [sticky]="sticky"
           [hideOnScroll]="hideOnScroll"
           [ariaLabel]="ariaLabel"

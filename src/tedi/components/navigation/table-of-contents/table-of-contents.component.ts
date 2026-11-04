@@ -55,7 +55,7 @@ let nextUniqueId = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: "tedi-table-of-contents",
-    "[class.tedi-table-of-contents--bordered]": "bordered()",
+    "[class.tedi-table-of-contents--divided]": "divided()",
     "[attr.data-name]": "'table-of-contents'",
     "[style.--tedi-table-of-contents-sticky-top]": "stickyOffset()",
     "[style.--tedi-table-of-contents-sticky-max-height]": "stickyMaxHeight()",
@@ -86,7 +86,7 @@ export class TableOfContentsComponent {
    * list reads as a set of separated rows.
    * @default false
    */
-  readonly bordered = input<boolean>(false);
+  readonly divided = input<boolean>(false);
   /** Id of the currently active item. */
   readonly activeId = input<string>();
   /**

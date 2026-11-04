@@ -75,7 +75,7 @@ export class TableOfContentsCollapsibleComponent implements OnDestroy {
    * sheet's list reads as a set of separated rows. Mirrors `tedi-table-of-contents`.
    * @default false
    */
-  readonly bordered = input<boolean>(false);
+  readonly divided = input<boolean>(false);
   /**
    * Pin the bar to the bottom of the viewport. Set `false` to render it inline.
    */
