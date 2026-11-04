@@ -331,7 +331,7 @@ Angular injects a component's stylesheet when the component is first instantiate
   component SCSS.
 
 ### Custom Properties Resolve Where They Are Declared
-A `var()` or relative unit inside a custom property is resolved on the element that declares it. A
+A `var()` inside a custom property is resolved on the element that declares it. A
 host binding like `[style.--_min-height]="'calc(' + rows + ' * 1lh + var(--_padding-y))'"` resolves
 `--_padding-y` on the host, where it doesn't exist. Bind the raw number from the host
 (`[style.--_min-rows]`) and do the `calc()` in the descendant's SCSS, where the other values are in

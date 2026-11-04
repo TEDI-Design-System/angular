@@ -8,11 +8,13 @@ Target: the component path given in the task, or the whole suite.
 
 For one component:
 ```bash
-npm test -- <component-path> --coverage=false
+npx jest <component-path> --coverage=false
 ```
 
 `--coverage=false` is required for a narrow run: coverage is on by default and measured against the
 whole library, so a single-component run would always trip the 80% global threshold and exit 1.
+Call `npx jest` rather than `npm test --`: the npm script adds `--passWithNoTests`, so a mistyped
+path exits 0 without running anything.
 
 For the whole suite:
 ```bash

@@ -16,7 +16,7 @@ TEDI Design System Angular component library (`@tedi-design-system/angular`). An
 npm start              # Start Storybook dev server (port 6006)
 npm test               # Run all tests (Jest)
 npm run test:watch     # Run tests in watch mode
-npm test -- path/to/file --coverage=false  # Run a single test file
+npx jest path/to/file --coverage=false   # Run a single test file (npm test passes on a typo'd path)
 npm run lint           # Stylelint (SCSS) + ESLint (TS/HTML) with --fix
 npm run build          # Build library to dist/
 ```

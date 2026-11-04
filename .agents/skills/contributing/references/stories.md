@@ -175,7 +175,7 @@ If the component also has a Zeroheight page, add it on the next line with `<br>`
  */
 ```
 
-Applies equally to new components and retrofits: if an existing story lacks a TEDI Figma link, add it.
+If an existing story's design is in the TEDI Figma file and the story lacks a link, add it.
 
 ### 5. Make the `Default` Story's Controls Functional
 

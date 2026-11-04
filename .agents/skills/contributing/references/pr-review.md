@@ -26,7 +26,8 @@ breaks.
 - [ ] Each new input has a consumer who needs it. Flag any input whose JSDoc says it has no effect.
 - [ ] Names, aliases and inheritance match the sibling components in the same category.
 - [ ] Names, units and defaults match TEDI React, and every claim about React matches its source.
-- [ ] Each `@default` and argTypes `defaultValue` matches the code.
+- [ ] Each input with a default has an `@default`, and each `@default` and argTypes `defaultValue`
+      matches the code.
 
 ### Prose ([best-practices.md → Comments and JSDoc](best-practices.md#comments-and-jsdoc))
 
@@ -50,7 +51,7 @@ breaks.
 
 ### Tests, a11y, stories
 
-- [ ] Tests pass (`npm test -- <component-path> --coverage=false`) and lint is clean without fixing
+- [ ] Tests pass (`npx jest <component-path> --coverage=false`) and lint is clean without fixing
       (`npx stylelint "src/tedi/**/*.scss" && npx ng lint angular-components`).
 - [ ] Interactive components or changed ARIA/keyboard behaviour pass [a11y-review.md](a11y-review.md).
 - [ ] Changed stories pass the [stories.md](stories.md) checklist (section 6).

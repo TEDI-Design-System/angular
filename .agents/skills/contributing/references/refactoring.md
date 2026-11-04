@@ -42,7 +42,7 @@ Apply changes in this order:
 
 ## Step 5: Verify
 
-1. Run the specific component test: `npm test -- <component-path> --coverage=false`
+1. Run the specific component test: `npx jest <component-path> --coverage=false`
 2. Run the full test suite: `npm test`
 3. Run lint: `npm run lint`
 4. Compare test results with the baseline from Step 2 — no new failures allowed.
