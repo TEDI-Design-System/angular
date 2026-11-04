@@ -1,3 +1,10 @@
+# [9.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.1-rc.3...angular-9.1.0-rc.1) (2026-11-04)
+
+
+### Features
+
+* **popover:** add padding input to Popover content [#838](https://github.com/TEDI-Design-System/angular/issues/838) ([#840](https://github.com/TEDI-Design-System/angular/issues/840)) ([266f092](https://github.com/TEDI-Design-System/angular/commit/266f0929ce9a34108dd4c5112a37bd200c80775b))
+
 ## [9.0.1-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.1-rc.2...angular-9.0.1-rc.3) (2026-11-04)
 
 

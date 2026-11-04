@@ -5,6 +5,7 @@ import {
   PopoverContentComponent,
   PopoverWidth,
 } from "./popover-content.component";
+import { CardPadding } from "../../../content/card/card.utils";
 import { PopoverComponent } from "../popover.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
 
@@ -14,6 +15,7 @@ import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.t
       [maxWidth]="width"
       [title]="title"
       [showClose]="showClose"
+      [padding]="padding"
     >
       <span class="projected">Hello!</span>
     </tedi-popover-content>
@@ -25,6 +27,7 @@ class TestHostComponent {
   width: PopoverWidth = "small";
   title = "";
   showClose = false;
+  padding?: CardPadding;
 }
 
 describe("PopoverContentComponent", () => {
@@ -107,6 +110,36 @@ describe("PopoverContentComponent", () => {
     expect(hostDE.nativeElement.className).not.toMatch(
       /tedi-popover-content--/,
     );
+  });
+
+  it("should keep the default padding when padding isn't set", () => {
+    expect(hostDE.nativeElement.style.padding).toBe("");
+  });
+
+  it.each<[CardPadding, string]>([
+    [0, "0rem 0rem 0rem 0rem"],
+    [{ vertical: 0.5, horizontal: 1 }, "0.5rem 1rem 0.5rem 1rem"],
+    [{ top: 1 }, "1rem 0rem 0rem 0rem"],
+  ])("should apply padding %j inline", (padding, expected) => {
+    fixture.componentInstance.padding = padding;
+    fixture.detectChanges();
+
+    const comp = hostDE.componentInstance as PopoverContentComponent;
+    expect(comp.customPadding()).toBe(expected);
+    const { paddingTop, paddingRight, paddingBottom, paddingLeft } =
+      hostDE.nativeElement.style;
+    expect(
+      [paddingTop, paddingRight, paddingBottom, paddingLeft].join(" "),
+    ).toBe(expected);
+  });
+
+  it("should clear the inline padding when padding is unset again", () => {
+    fixture.componentInstance.padding = 0;
+    fixture.detectChanges();
+    fixture.componentInstance.padding = undefined;
+    fixture.detectChanges();
+
+    expect(hostDE.nativeElement.style.padding).toBe("");
   });
 
   it("should clear the inline width when switching back to a preset", () => {
