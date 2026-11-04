@@ -1,63 +1,129 @@
-import { TestBed } from "@angular/core/testing";
+import { Component, signal } from "@angular/core";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FooterComponent } from "./footer.component";
-import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
-import { signal } from "@angular/core";
+import { FooterBodyComponent } from "./footer-body/footer-body.component";
+import { FooterSideComponent } from "./footer-side/footer-side.component";
+import { FooterBottomComponent } from "./footer-bottom/footer-bottom.component";
+import {
+  Breakpoint,
+  BreakpointService,
+} from "../../../services/breakpoint/breakpoint.service";
+
+class BreakpointServiceMock {
+  readonly _currentBreakpoint = signal<Breakpoint | undefined>("md");
+  readonly isBelowBreakpoint = BreakpointService.prototype.isBelowBreakpoint;
+  readonly getBreakpointInputs =
+    BreakpointService.prototype.getBreakpointInputs;
+}
+
+@Component({
+  standalone: true,
+  imports: [
+    FooterComponent,
+    FooterBodyComponent,
+    FooterSideComponent,
+    FooterBottomComponent,
+  ],
+  template: `
+    <tedi-footer
+      [mobileBreakpoint]="mobileBreakpoint()"
+      [maxWidth]="maxWidth()"
+    >
+      <tedi-footer-side placement="end">Logo</tedi-footer-side>
+      <tedi-footer-body>Body</tedi-footer-body>
+      <tedi-footer-bottom>Bottom</tedi-footer-bottom>
+    </tedi-footer>
+  `,
+})
+class TestHostComponent {
+  readonly mobileBreakpoint = signal<Breakpoint>("sm");
+  readonly maxWidth = signal<number | string | undefined>(undefined);
+}
 
 describe("FooterComponent", () => {
-  let mockBreakpointService: jest.Mocked<BreakpointService>;
+  let fixture: ComponentFixture<TestHostComponent>;
+  let breakpoint: BreakpointServiceMock;
+  let element: HTMLElement;
+
+  const container = () =>
+    element.querySelector<HTMLElement>(".tedi-footer__container")!;
 
   beforeEach(async () => {
-    mockBreakpointService = {
-      isBelowBreakpoint: jest.fn(),
-    } as unknown as jest.Mocked<BreakpointService>;
+    breakpoint = new BreakpointServiceMock();
 
     await TestBed.configureTestingModule({
-      imports: [FooterComponent],
-      providers: [
-        { provide: BreakpointService, useValue: mockBreakpointService },
-      ],
+      imports: [TestHostComponent],
+      providers: [{ provide: BreakpointService, useValue: breakpoint }],
     }).compileComponents();
+
+    fixture = TestBed.createComponent(TestHostComponent);
+    element = fixture.nativeElement;
+    fixture.detectChanges();
   });
 
-  it("should create component", () => {
-    mockBreakpointService.isBelowBreakpoint.mockReturnValue(signal(true));
-    const fixture = TestBed.createComponent(FooterComponent);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
-    expect(component).toBeTruthy();
+  it("styles its host and renders a footer landmark that is hidden when printing", () => {
+    const host = element.querySelector("tedi-footer")!;
+    expect(host.classList).toContain("tedi-footer");
+    expect(host.classList).toContain("no-print");
+    expect(host.querySelector("footer")).not.toBeNull();
   });
 
-  it("should return true for mobileLayout when isBelowBreakpoint returns true", () => {
-    mockBreakpointService.isBelowBreakpoint.mockReturnValue(signal(true));
-    const fixture = TestBed.createComponent(FooterComponent);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
-    expect(component.mobileLayout()).toBe(true);
+  it("projects the sides and body into the container and the bottom after it", () => {
+    expect(container().querySelector("tedi-footer-side")).not.toBeNull();
+    expect(container().querySelector("tedi-footer-body")).not.toBeNull();
+    expect(container().querySelector("tedi-footer-bottom")).toBeNull();
+    expect(element.querySelector("footer > tedi-footer-bottom")).not.toBeNull();
   });
 
-  it("should return false for mobileLayout when isBelowBreakpoint returns false", () => {
-    mockBreakpointService.isBelowBreakpoint.mockReturnValue(signal(false));
-    const fixture = TestBed.createComponent(FooterComponent);
-    const component = fixture.componentInstance;
-    fixture.detectChanges();
-    expect(component.mobileLayout()).toBe(false);
-  });
-
-  it("should add mobile class to container when isBelowBreakpoint returns true", () => {
-    mockBreakpointService.isBelowBreakpoint.mockReturnValue(signal(true));
-    const fixture = TestBed.createComponent(FooterComponent);
-    fixture.detectChanges();
-    const containerElement = fixture.nativeElement.querySelector(
-      ".tedi-footer__container",
+  it("stacks below mobileBreakpoint and shares that state with its parts", () => {
+    expect(container().classList).not.toContain(
+      "tedi-footer__container--mobile",
     );
-    expect(containerElement.classList).toContain("tedi-footer--mobile");
-  });
 
-  it("should hide the footer when printing", () => {
-    mockBreakpointService.isBelowBreakpoint.mockReturnValue(signal(false));
-    const fixture = TestBed.createComponent(FooterComponent);
+    fixture.componentInstance.mobileBreakpoint.set("lg");
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.classList).toContain("no-print");
+    expect(container().classList).toContain("tedi-footer__container--mobile");
+    expect(element.querySelector("tedi-footer-body")!.classList).toContain(
+      "tedi-footer-body--mobile",
+    );
+    expect(element.querySelector("tedi-footer-side")!.classList).toContain(
+      "tedi-footer-side--mobile",
+    );
+    expect(element.querySelector("tedi-footer-bottom")!.classList).toContain(
+      "tedi-footer-bottom--mobile",
+    );
+  });
+
+  it("follows the viewport breakpoint", () => {
+    breakpoint._currentBreakpoint.set("xs");
+    fixture.detectChanges();
+    expect(container().classList).toContain("tedi-footer__container--mobile");
+  });
+
+  it.each([
+    { maxWidth: 1280, expected: "1280px" },
+    { maxWidth: "1280", expected: "1280px" },
+    { maxWidth: "80rem", expected: "80rem" },
+  ])(
+    "caps the container and bottom content to maxWidth $maxWidth",
+    ({ maxWidth, expected }) => {
+      fixture.componentInstance.maxWidth.set(maxWidth);
+      fixture.detectChanges();
+
+      expect(container().style.maxWidth).toBe(expected);
+      expect(
+        element.querySelector<HTMLElement>(".tedi-footer-bottom__inner")!.style
+          .maxWidth,
+      ).toBe(expected);
+    },
+  );
+
+  it("does not cap the width by default or when emptied", () => {
+    expect(container().style.maxWidth).toBe("");
+
+    fixture.componentInstance.maxWidth.set("");
+    fixture.detectChanges();
+    expect(container().style.maxWidth).toBe("");
   });
 });

@@ -1,17 +1,25 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
+  HostAttributeToken,
   inject,
   input,
-  signal,
   ViewEncapsulation,
-  HostBinding,
-  HostAttributeToken,
 } from "@angular/core";
-import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
+import {
+  BreakpointInputs,
+  BreakpointService,
+} from "../../../../services/breakpoint/breakpoint.service";
+import { injectFooter } from "../footer-context";
 
 export type FooterSidePlacement = "start" | "end";
 export type FooterSidePosition = "start" | "center" | "end";
+
+export type FooterSideInputs = {
+  placement?: FooterSidePlacement;
+  position?: FooterSidePosition;
+};
 
 @Component({
   standalone: true,
@@ -20,42 +28,60 @@ export type FooterSidePosition = "start" | "center" | "end";
   styleUrl: "./footer-side.component.scss",
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
+  host: {
+    "[class]": "classes()",
+  },
 })
-export class FooterSideComponent {
-  isStart = inject(new HostAttributeToken("tedi-footer-start"), {
-    optional: true,
-  });
-  isEnd = inject(new HostAttributeToken("tedi-footer-end"), { optional: true });
+export class FooterSideComponent implements BreakpointInputs<FooterSideInputs> {
+  private readonly breakpointService = inject(BreakpointService);
+  private readonly legacyPlacement: FooterSidePlacement | undefined =
+    inject(new HostAttributeToken("tedi-footer-end"), { optional: true }) !==
+    null
+      ? "end"
+      : undefined;
 
   /**
-   * Specifies the position of the footer internal content.
+   * Side of the body the slot sits on; `end` also puts it below the sections once the footer stacks.
+   * The `tedi-footer-start` and `tedi-footer-end` attributes are deprecated in favour of this input.
+   * @default start
+   */
+  readonly placement = input<FooterSidePlacement>();
+  /**
+   * Vertical alignment of the slot's content.
    * @default center
    */
-  position = input<FooterSidePosition>("center");
-  placement = signal<FooterSidePlacement | null>(null);
-  breakpointService = inject(BreakpointService);
+  readonly position = input<FooterSidePosition | undefined>("center");
 
-  mobileLayout = this.breakpointService.isBelowBreakpoint("sm");
+  readonly xs = input<FooterSideInputs>();
+  readonly sm = input<FooterSideInputs>();
+  readonly md = input<FooterSideInputs>();
+  readonly lg = input<FooterSideInputs>();
+  readonly xl = input<FooterSideInputs>();
+  readonly xxl = input<FooterSideInputs>();
 
-  constructor() {
-    const side =
-      this.isStart !== null ? "start" : this.isEnd !== null ? "end" : null;
-    if (side) this.placement.set(side as FooterSidePlacement);
-    else
-      console.warn(
-        '[TediFooterSide] No placement detected. Use "tedi-footer-start" or "tedi-footer-end" attribute to define where this component should be rendered.',
-      );
-  }
+  readonly isMobile = injectFooter().isMobile;
 
-  @HostBinding("class")
-  get hostClasses(): string {
-    const classes = ["tedi-footer-side"];
+  readonly breakpointInputs = computed(() =>
+    this.breakpointService.getBreakpointInputs<FooterSideInputs>({
+      placement: this.placement() ?? this.legacyPlacement ?? "start",
+      position: this.position(),
+      xs: this.xs(),
+      sm: this.sm(),
+      md: this.md(),
+      lg: this.lg(),
+      xl: this.xl(),
+      xxl: this.xxl(),
+    }),
+  );
 
-    if (this.mobileLayout()) classes.push("tedi-footer-side--mobile");
-
-    classes.push(`tedi-footer-side--${this.placement()}`);
-    classes.push(`tedi-footer-side--vertical-${this.position()}`);
-
+  readonly classes = computed(() => {
+    const { placement, position } = this.breakpointInputs();
+    const classes = [
+      "tedi-footer-side",
+      `tedi-footer-side--${placement}`,
+      `tedi-footer-side--vertical-${position}`,
+    ];
+    if (this.isMobile()) classes.push("tedi-footer-side--mobile");
     return classes.join(" ");
-  }
+  });
 }

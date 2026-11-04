@@ -1,133 +1,105 @@
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import {
   FooterSideComponent,
-  type FooterSidePosition,
+  FooterSideInputs,
+  FooterSidePlacement,
+  FooterSidePosition,
 } from "./footer-side.component";
-import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
-import { signal } from "@angular/core";
-
-type TestCase = {
-  attribute: string;
-  expectedClass: string;
-};
-
-type PositionTestCase = {
-  position: FooterSidePosition;
-  expectedClass: string;
-};
-
-const testCases: TestCase[] = [
-  { attribute: "tedi-footer-start", expectedClass: "tedi-footer-side--start" },
-  { attribute: "tedi-footer-end", expectedClass: "tedi-footer-side--end" },
-];
-
-const positionCases: PositionTestCase[] = [
-  { position: "start", expectedClass: "tedi-footer-side--vertical-start" },
-  { position: "center", expectedClass: "tedi-footer-side--vertical-center" },
-  { position: "end", expectedClass: "tedi-footer-side--vertical-end" },
-];
+import {
+  Breakpoint,
+  BreakpointService,
+} from "../../../../services/breakpoint/breakpoint.service";
 
 class BreakpointServiceMock {
-  isMobile = false;
-  isBelowBreakpoint() {
-    return signal(this.isMobile);
-  }
+  readonly _currentBreakpoint = signal<Breakpoint | undefined>("xl");
+  readonly isBelowBreakpoint = BreakpointService.prototype.isBelowBreakpoint;
+  readonly getBreakpointInputs =
+    BreakpointService.prototype.getBreakpointInputs;
 }
 
-describe.each(testCases)(
-  "FooterSideComponent with attribute '$attribute'",
-  ({ attribute, expectedClass }) => {
-    @Component({
-      standalone: true,
-      imports: [FooterSideComponent],
-      template: `<tedi-footer-side ${attribute}
-        >Test Content</tedi-footer-side
-      >`,
-    })
-    class TestHostComponent {}
+@Component({
+  standalone: true,
+  imports: [FooterSideComponent],
+  template: `
+    <tedi-footer-side
+      [placement]="placement()"
+      [position]="position()"
+      [lg]="lg()"
+    >
+      Logo
+    </tedi-footer-side>
+    <tedi-footer-side tedi-footer-end>Legacy end</tedi-footer-side>
+    <tedi-footer-side tedi-footer-start>Legacy start</tedi-footer-side>
+  `,
+})
+class TestHostComponent {
+  readonly placement = signal<FooterSidePlacement | undefined>(undefined);
+  readonly position = signal<FooterSidePosition | undefined>("center");
+  readonly lg = signal<FooterSideInputs | undefined>(undefined);
+}
 
-    let fixture: ComponentFixture<TestHostComponent>;
-    let element: HTMLElement;
-    let breakpointServiceMock: BreakpointServiceMock;
+describe("FooterSideComponent", () => {
+  let fixture: ComponentFixture<TestHostComponent>;
+  let host: TestHostComponent;
+  let breakpoint: BreakpointServiceMock;
+  let sides: HTMLElement[];
 
-    beforeEach(async () => {
-      breakpointServiceMock = new BreakpointServiceMock();
+  beforeEach(async () => {
+    breakpoint = new BreakpointServiceMock();
 
-      await TestBed.configureTestingModule({
-        imports: [TestHostComponent],
-        providers: [
-          {
-            provide: BreakpointService,
-            useValue: breakpointServiceMock,
-          },
-        ],
-      }).compileComponents();
+    await TestBed.configureTestingModule({
+      imports: [TestHostComponent],
+      providers: [{ provide: BreakpointService, useValue: breakpoint }],
+    }).compileComponents();
 
-      fixture = TestBed.createComponent(TestHostComponent);
+    fixture = TestBed.createComponent(TestHostComponent);
+    host = fixture.componentInstance;
+    fixture.detectChanges();
+    sides = Array.from(
+      fixture.nativeElement.querySelectorAll("tedi-footer-side"),
+    );
+  });
+
+  it("is placed at the start and centred by default", () => {
+    expect(sides[0].classList).toContain("tedi-footer-side");
+    expect(sides[0].classList).toContain("tedi-footer-side--start");
+    expect(sides[0].classList).toContain("tedi-footer-side--vertical-center");
+  });
+
+  it("still reads the deprecated placement attributes", () => {
+    expect(sides[1].classList).toContain("tedi-footer-side--end");
+    expect(sides[2].classList).toContain("tedi-footer-side--start");
+  });
+
+  it.each(["start", "center", "end"] as const)(
+    "aligns content to position '%s'",
+    (position) => {
+      host.position.set(position);
       fixture.detectChanges();
-      element = fixture.nativeElement.querySelector("tedi-footer-side")!;
-    });
+      expect(sides[0].classList).toContain(
+        `tedi-footer-side--vertical-${position}`,
+      );
+    },
+  );
 
-    it(`should apply class '${expectedClass}'`, () => {
-      expect(element.classList.contains(expectedClass)).toBe(true);
-    });
+  it("applies breakpoint overrides from that breakpoint up", () => {
+    host.placement.set("end");
+    host.lg.set({ placement: "start", position: "start" });
+    fixture.detectChanges();
+    expect(sides[0].classList).toContain("tedi-footer-side--start");
+    expect(sides[0].classList).toContain("tedi-footer-side--vertical-start");
 
-    it("should apply class 'tedi-footer-side--mobile' if isBelowBreakpoint returns true", () => {
-      breakpointServiceMock.isMobile = true;
-      fixture = TestBed.createComponent(TestHostComponent);
-      fixture.detectChanges();
+    breakpoint._currentBreakpoint.set("md");
+    fixture.detectChanges();
+    expect(sides[0].classList).toContain("tedi-footer-side--end");
+    expect(sides[0].classList).toContain("tedi-footer-side--vertical-center");
+  });
 
-      element = fixture.nativeElement.querySelector("tedi-footer-side")!;
-
-      expect(element.classList.contains("tedi-footer-side--mobile")).toBe(true);
-    });
-
-    it("should be positioned to center by default", () => {
-      expect(
-        element.classList.contains("tedi-footer-side--vertical-center"),
-      ).toBe(true);
-    });
-  },
-);
-
-describe.each(positionCases)(
-  "FooterSideComponent with position '$position'",
-  ({ position, expectedClass }) => {
-    @Component({
-      standalone: true,
-      imports: [FooterSideComponent],
-      template: `<tedi-footer-side tedi-footer-start [position]="'${position}'">
-        Test Content
-      </tedi-footer-side>`,
-    })
-    class PositionHostComponent {}
-
-    let fixture: ComponentFixture<PositionHostComponent>;
-    let element: HTMLElement;
-    let breakpointServiceMock: BreakpointServiceMock;
-
-    beforeEach(async () => {
-      breakpointServiceMock = new BreakpointServiceMock();
-
-      await TestBed.configureTestingModule({
-        imports: [PositionHostComponent],
-        providers: [
-          {
-            provide: BreakpointService,
-            useValue: breakpointServiceMock,
-          },
-        ],
-      }).compileComponents();
-
-      fixture = TestBed.createComponent(PositionHostComponent);
-      fixture.detectChanges();
-
-      element = fixture.nativeElement.querySelector("tedi-footer-side")!;
-    });
-
-    it(`should apply class '${expectedClass}'`, () => {
-      expect(element.classList.contains(expectedClass)).toBe(true);
-    });
-  },
-);
+  it("marks itself as mobile below the mobile breakpoint", () => {
+    expect(sides[0].classList).not.toContain("tedi-footer-side--mobile");
+    breakpoint._currentBreakpoint.set("xs");
+    fixture.detectChanges();
+    expect(sides[0].classList).toContain("tedi-footer-side--mobile");
+  });
+});

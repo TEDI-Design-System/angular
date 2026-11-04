@@ -1,37 +1,29 @@
+<ng-template #content><ng-content /></ng-template>
+
 @if (icon() && !hideIcon()) {
   <tedi-icon class="tedi-footer-section__icon" [name]="icon()!" color="white" />
 }
 
-<div
-  class="tedi-footer-section__container"
-  [class.tedi-footer-section__container--mobile]="mobileLayout()"
->
+<div class="tedi-footer-section__container">
   @if (applyCollapse()) {
-    <button
-      class="tedi-footer-section__button"
-      [attr.aria-expanded]="collapseOpen()"
-      (click)="toggleCollapse()"
+    <tedi-collapse
+      class="tedi-footer-section__collapse"
+      [openText]="heading()"
+      [closeText]="heading()"
+      [inverted]="true"
+      [underline]="false"
+      [defaultOpen]="defaultOpen()"
     >
-      {{ heading() }}
-      <tedi-icon
-        class="collapse__icon"
-        color="white"
-        [name]="collapseOpen() ? 'expand_less' : 'expand_more'"
-      />
-    </button>
+      <div class="tedi-footer-section__content">
+        <ng-container [ngTemplateOutlet]="content" />
+      </div>
+    </tedi-collapse>
   } @else {
     <strong tedi-text class="tedi-footer-section__heading" color="white">
       {{ heading() }}
     </strong>
-  }
-  <div
-    class="tedi-footer-section__content-wrapper"
-    [class.tedi-footer-section__content-wrapper--collapsed]="
-      applyCollapse() && !collapseOpen()
-    "
-  >
     <div class="tedi-footer-section__content">
-      <ng-content></ng-content>
+      <ng-container [ngTemplateOutlet]="content" />
     </div>
-  </div>
+  }
 </div>

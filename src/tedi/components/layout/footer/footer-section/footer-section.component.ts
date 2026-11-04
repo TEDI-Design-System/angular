@@ -4,55 +4,71 @@ import {
   computed,
   inject,
   input,
-  signal,
   ViewEncapsulation,
 } from "@angular/core";
+import { NgTemplateOutlet } from "@angular/common";
 import { TextComponent } from "../../../base/text/text.component";
 import { IconComponent } from "../../../base/icon/icon.component";
-import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
+import { CollapseComponent } from "../../../content/collapse/collapse.component";
+import {
+  Breakpoint,
+  BreakpointService,
+} from "../../../../services/breakpoint/breakpoint.service";
+import { injectFooter } from "../footer-context";
 
 @Component({
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   selector: "tedi-footer-section",
-  imports: [IconComponent, TextComponent],
+  imports: [IconComponent, TextComponent, CollapseComponent, NgTemplateOutlet],
   templateUrl: "./footer-section.component.html",
   styleUrl: "./footer-section.component.scss",
   host: {
     class: "tedi-footer-section",
-    "[class.tedi-footer-section--collapse]": "applyCollapse()",
+    "[class.tedi-footer-section--mobile]": "isMobile()",
+    "[class.tedi-footer-section--collapsible]": "applyCollapse()",
   },
 })
 export class FooterSectionComponent {
+  private readonly breakpointService = inject(BreakpointService);
+
   /**
-   * Specifies the icon to be displayed in the footer links.
+   * Section heading; on mobile it is also the accordion toggle's label.
    */
-  icon = input<string>();
+  readonly heading = input<string>();
   /**
-   * Specifies the heading text for the footer links.
+   * Material Symbols icon shown in a tinted circle beside the heading.
    */
-  heading = input<string>();
+  readonly icon = input<string>();
   /**
-   * Enables the collapse functionality for the footer links.
-   * When set to true, the footer links will be collapsible on mobile devices.
-   * @default "false"
+   * Turns the section into an accordion below the footer's `mobileBreakpoint`.
+   * @default false
    */
-  collapse = input<boolean>(false);
-  collapseOpen = signal<boolean>(false);
-  private breakpointService = inject(BreakpointService);
+  readonly collapsible = input<boolean>(false);
+  /**
+   * @deprecated Use `collapsible` instead.
+   * @default false
+   */
+  readonly collapse = input<boolean>(false);
+  /**
+   * Opens the accordion initially.
+   * @default false
+   */
+  readonly defaultOpen = input<boolean>(false);
+  /**
+   * The icon is hidden below this breakpoint.
+   * @default lg
+   */
+  readonly iconBreakpoint = input<Breakpoint>("lg");
 
-  applyCollapse = computed(() => {
-    return this.collapse() && this.mobileLayout();
-  });
+  readonly isMobile = injectFooter().isMobile;
 
-  hideIcon = this.breakpointService.isBelowBreakpoint("lg");
+  readonly applyCollapse = computed(
+    () => (this.collapsible() || this.collapse()) && this.isMobile(),
+  );
 
-  mobileLayout = this.breakpointService.isBelowBreakpoint("sm");
-
-  toggleCollapse() {
-    if (this.collapse()) {
-      this.collapseOpen.update((value) => !value);
-    }
-  }
+  readonly hideIcon = this.breakpointService.isBelowBreakpoint(
+    this.iconBreakpoint,
+  );
 }
