@@ -207,7 +207,7 @@ export default {
     },
     minuteStep: {
       description:
-        "Minute step for the scroll variant — e.g. 5 renders 00, 05, 10…",
+        "Minute step for the scroll variant (5 renders 00, 05, 10…) and the native input's `step`.",
       control: { type: "number" },
       table: {
         category: "Time Field inputs",
@@ -567,6 +567,12 @@ export const CustomStep: StoryObj = {
             <tedi-time-field inputId="scroll-picker-step" value="14:30" pickerVariant="scroll" [minuteStep]="15" />
           </tedi-form-field>
         </tedi-col>
+        <tedi-col>
+          <tedi-form-field>
+            <label tedi-label for="native-picker-step">Aeg (natiivne)</label>
+            <tedi-time-field inputId="native-picker-step" value="14:30" [useNativePicker]="true" [minuteStep]="15" />
+          </tedi-form-field>
+        </tedi-col>
       </tedi-row>
     `,
   }),
@@ -575,7 +581,7 @@ export const CustomStep: StoryObj = {
     docs: {
       description: {
         story:
-          '`minuteStep` sets the increment between minute values on the scroll wheel. `[minuteStep]="15"` renders the minute wheel as `00, 15, 30, 45`. Any divisor of 60 works (`1`, `5`, `10`, `15`, `20`, `30`).',
+          '`minuteStep` sets the increment between minute values on the scroll wheel. `[minuteStep]="15"` renders the minute wheel as `00, 15, 30, 45`. Any divisor of 60 works (`1`, `5`, `10`, `15`, `20`, `30`). With the native picker it becomes the input\'s `step`.',
       },
     },
   },

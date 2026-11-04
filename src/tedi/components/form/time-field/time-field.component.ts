@@ -144,7 +144,7 @@ export class TimeFieldComponent
   readonly columns = input<number>(3);
   /** Show the radio indicator dot on each card in the `slots` variant. */
   readonly showSlotIndicator = input<boolean>(false);
-  /** Minute step for the `scroll` variant — e.g. `5` renders `00, 05, 10…`. */
+  /** Minute step for the `scroll` variant (e.g. `5` renders `00, 05, 10…`) and the native input's `step`. */
   readonly minuteStep = input<number>(1);
   /** Open the picker in a modal: `true` always, `false` never, breakpoint name → modal below that breakpoint. */
   readonly modal = input<TimeFieldModal>("md");
@@ -220,6 +220,12 @@ export class TimeFieldComponent
   readonly customPickerVariant = computed(
     () => this.pickerVariant() as TimePickerVariant,
   );
+  readonly nativeStep = computed(() =>
+    this.useNativePickerResolved() && this.minuteStep() > 1
+      ? this.minuteStep() * 60
+      : null,
+  );
+
   readonly inputType = computed(() =>
     this.useNativePickerResolved() ? "time" : "text",
   );

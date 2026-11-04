@@ -81,6 +81,21 @@ describe("DateInputComponent", () => {
     expect(input.value).toBe("2026-05-14");
   });
 
+  it("applies native min, max and step only while the native picker is on", () => {
+    fixture.componentRef.setInput("nativeMin", "2026-05-01");
+    fixture.componentRef.setInput("nativeMax", "2026-05-31");
+    fixture.componentRef.setInput("nativeStep", 7);
+    fixture.detectChanges();
+    expect(getInput().hasAttribute("min")).toBe(false);
+
+    fixture.componentRef.setInput("useNativePicker", true);
+    fixture.detectChanges();
+    const input = getInput();
+    expect(input.getAttribute("min")).toBe("2026-05-01");
+    expect(input.getAttribute("max")).toBe("2026-05-31");
+    expect(input.getAttribute("step")).toBe("7");
+  });
+
   it("does not render tags when mode is single, even with tags provided", () => {
     fixture.componentRef.setInput("mode", "single");
     fixture.componentRef.setInput("tags", [{ id: "a", label: "01.01.2026" }]);
