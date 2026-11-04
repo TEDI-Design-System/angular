@@ -87,5 +87,6 @@ sure that bundle says the right thing. See **SKILL.md → Consumer-Facing Docs**
 
 ## Step 8: Code Review
 
-Run [pr-review.md](pr-review.md). Fix every finding confirmed against the current code that keeps
-behaviour and the public API, note why you skipped any other, then repeat Step 6.
+Run [pr-review.md](pr-review.md). Fix every finding confirmed against the current code, including
+ones that change behaviour or the API: the component isn't released yet. If you leave one unfixed,
+give the reason and raise it with the user. Then repeat Step 6.

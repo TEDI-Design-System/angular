@@ -7,14 +7,16 @@ files; whoever ran it fixes the findings afterwards.
 
 ## Input
 
-Everything on the branch since `rc`, committed or not. Run `git fetch origin rc` first.
+Everything on the branch since its base, committed or not. The base is the PR's target branch
+(`gh pr view --json baseRefName -q .baseRefName`), or `rc` when there is no PR yet. Run
+`git fetch origin <base>` first.
 
-- `git diff $(git merge-base origin/rc HEAD)` for tracked files.
+- `git diff $(git merge-base origin/<base> HEAD)` for tracked files.
 - `git ls-files --others --exclude-standard` for new files. Skip untracked files that won't be in
   the PR; ask if unsure.
 - A moved file shows as a deletion plus an untracked file. Diff it against the old version in git,
   not on disk (the old path may be gone or a symlink to the new one):
-  `git show $(git merge-base origin/rc HEAD):<old> | git diff --no-index - <new>`.
+  `git show $(git merge-base origin/<base> HEAD):<old> | git diff --no-index - <new>`.
 
 Read [best-practices.md](best-practices.md) first. Every finding cites `file:line` and the rule it
 breaks.
