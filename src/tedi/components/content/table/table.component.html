@@ -553,11 +553,11 @@
                   (isExpanded ? ' tedi-table__row--sub-component-open' : '')
                 "
               >
+                <!-- No region role: one landmark per open row would pile up
+                     (axe landmark-unique). The toggle's aria-controls points here. -->
                 <td
                   class="tedi-table__cell tedi-table__cell--sub-component"
                   [attr.id]="subRowId"
-                  [attr.role]="isExpanded ? 'region' : null"
-                  [attr.aria-label]="isExpanded ? rowDetailsLabel() : null"
                   [attr.inert]="isExpanded ? null : ''"
                   [attr.colspan]="leafColumnCount() > 0 ? leafColumnCount() : 1"
                 >

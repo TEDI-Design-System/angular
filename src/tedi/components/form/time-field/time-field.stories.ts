@@ -178,7 +178,8 @@ export default {
       },
     },
     closeOnSelect: {
-      description: "Close the popover/modal as soon as the user picks a value.",
+      description:
+        "Close the popover as soon as the user picks a value. In the `scroll` variant only a minute click or Enter in the minute column closes it — scrolling or arrowing the wheels does not. The mobile modal always closes via its own buttons.",
       control: { type: "boolean" },
       table: {
         category: "Time Field inputs",

@@ -1,3 +1,25 @@
+# [9.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.1-rc.3...angular-9.1.0-rc.1) (2026-11-04)
+
+
+### Features
+
+* **popover:** add padding input to Popover content [#838](https://github.com/TEDI-Design-System/angular/issues/838) ([#840](https://github.com/TEDI-Design-System/angular/issues/840)) ([266f092](https://github.com/TEDI-Design-System/angular/commit/266f0929ce9a34108dd4c5112a37bd200c80775b))
+
+## [9.0.1-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.1-rc.2...angular-9.0.1-rc.3) (2026-11-04)
+
+
+### Bug Fixes
+
+* **table:** scope modifier styles to their own table [#731](https://github.com/TEDI-Design-System/angular/issues/731) ([#832](https://github.com/TEDI-Design-System/angular/issues/832)) ([2368eae](https://github.com/TEDI-Design-System/angular/commit/2368eaecd833e602c0846ce2883f3270b372c74b))
+
+## [9.0.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.1-rc.1...angular-9.0.1-rc.2) (2026-11-04)
+
+
+### Bug Fixes
+
+* **time-field:** keep scroll picker open while scrolling with closeOnSelect [#812](https://github.com/TEDI-Design-System/angular/issues/812) ([#826](https://github.com/TEDI-Design-System/angular/issues/826)) ([48efc6f](https://github.com/TEDI-Design-System/angular/commit/48efc6f3a29543a25e6ee6b4f4fa2fe567e4c101))
+* **timeline:** collapse empty title, description and content slots [#735](https://github.com/TEDI-Design-System/angular/issues/735) ([#831](https://github.com/TEDI-Design-System/angular/issues/831)) ([6e7ad24](https://github.com/TEDI-Design-System/angular/commit/6e7ad244374b94ad652d5cee1c530cfea7a73bbb))
+
 ## [9.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0...angular-9.0.1-rc.1) (2026-11-02)
 
 

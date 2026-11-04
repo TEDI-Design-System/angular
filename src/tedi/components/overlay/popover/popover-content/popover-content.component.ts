@@ -8,6 +8,10 @@ import {
   ViewEncapsulation,
 } from "@angular/core";
 import { ClosingButtonComponent } from "../../../buttons/closing-button/closing-button.component";
+import {
+  CardPadding,
+  getPaddingCssVariables,
+} from "../../../content/card/card.utils";
 import { PopoverComponent } from "../popover.component";
 
 export type PopoverWidthPreset = "none" | "small" | "medium" | "large";
@@ -32,6 +36,7 @@ let popoverTitleId = 0;
   host: {
     "[class]": "classes()",
     "[style.width]": "customWidth()",
+    "[style.padding]": "customPadding()",
   },
 })
 export class PopoverContentComponent {
@@ -50,6 +55,11 @@ export class PopoverContentComponent {
    * @default false
    */
   showClose = input(false);
+  /**
+   * Inner padding on the `tedi-card` scale: rems, `{ vertical, horizontal }` or
+   * `{ top, right, bottom, left }` (missing sides are 0); defaults to the popover padding.
+   */
+  padding = input<CardPadding>();
 
   private readonly popover = inject(PopoverComponent);
   titleId = `popover-title-${popoverTitleId++}`;
@@ -64,6 +74,18 @@ export class PopoverContentComponent {
   readonly customWidth = computed(() =>
     this.isPresetWidth() ? null : this.maxWidth(),
   );
+
+  readonly customPadding = computed(() => {
+    const padding = this.padding();
+    if (padding === undefined) return null;
+    const vars = getPaddingCssVariables(padding);
+    return [
+      vars["--card-content-padding-top"],
+      vars["--card-content-padding-right"],
+      vars["--card-content-padding-bottom"],
+      vars["--card-content-padding-left"],
+    ].join(" ");
+  });
 
   classes = computed(() => {
     const classList = ["tedi-popover-content"];
