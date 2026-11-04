@@ -222,7 +222,7 @@ const meta: Meta<DialogData> = {
   ],
   parameters: {
     status: {
-      type: ["existsInTediReady"],
+      type: ["existsInTediReady", "deprecated"],
     },
   },
   argTypes: {

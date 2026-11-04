@@ -24,6 +24,11 @@ export default {
       ],
     }),
   ],
+  parameters: {
+    status: {
+      type: ["existsInTediReady", "deprecated"],
+    },
+  },
   argTypes: {
     required: { control: "boolean" },
     label: { control: "text" },

@@ -9,7 +9,10 @@ import {
 import { DIALOG_DATA, DialogModule, DialogRef } from "@angular/cdk/dialog";
 import { ModalHeaderComponent } from "./header/modal-header.component";
 import { ModalFooterComponent } from "./footer/modal-footer.component";
-import { ComponentInputs } from "@tedi-design-system/angular/tedi";
+import {
+  ComponentInputs,
+  warnDeprecated,
+} from "@tedi-design-system/angular/tedi";
 import { CdkScrollable } from "@angular/cdk/scrolling";
 
 export type DialogData = ComponentInputs<
@@ -22,6 +25,9 @@ export type DialogData = ComponentInputs<
 export const modalBreakpoints = ["xs", "sm", "md", "lg", "xl"] as const;
 export type ModalBreakpoint = "xs" | "sm" | "md" | "lg" | "xl";
 
+/**
+ * @deprecated Use Modal with `ModalService` from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-modal",
   templateUrl: "./modal.component.html",
@@ -40,6 +46,13 @@ export class ModalComponent implements OnInit {
   readonly dialogData = inject(DIALOG_DATA, {
     optional: true,
   });
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-modal",
+      "Use Modal with ModalService from TEDI-ready instead.",
+    );
+  }
 
   // host classes
   readonly hostClasses = computed(() => {
