@@ -32,17 +32,8 @@ const LOREM =
   "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud " +
   "exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
 
-const SECTIONS = [
-  "Sissejuhatus",
-  "Taust",
-  "Meetodid",
-  "Tulemused",
-  "Arutelu",
-  "Kokkuvõte",
-];
-
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.66.83?node-id=8469-72329&m=dev" target="_blank">Figma ↗</a><br/>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.108.103?m=dev&node-id=8826-63667" target="_blank">Figma ↗</a><br/>
  * <a href="https://www.tedi.ee/1ee8444b7/p/467bb3-table-of-contents" target="_blank">Zeroheight ↗</a>
  *
  * Compose the list from `tedi-table-of-contents-item` elements. Each item's
@@ -88,7 +79,7 @@ const meta = {
     layout: "fullscreen",
     design: {
       type: "figma",
-      url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.66.83?node-id=8469-72329&m=dev",
+      url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.108.103?m=dev&node-id=8826-63667",
     },
   },
   argTypes: {
@@ -295,31 +286,36 @@ const items = ({
   </tedi-table-of-contents-item>
 `;
 
-const controllableItems = SECTIONS.map((label, index) => {
-  const id = `section-${index + 1}`;
-
-  const subItems =
-    label === "Meetodid"
-      ? `
-        <tedi-table-of-contents-item itemId="${id}-1" [separator]="separator">
-          <a tedi-link href="#${id}-1" [underline]="false">Andmete kogumine</a>
-        </tedi-table-of-contents-item>
-        <tedi-table-of-contents-item itemId="${id}-2" [separator]="separator">
-          <a tedi-link href="#${id}-2" [underline]="false">Analüüs</a>
-        </tedi-table-of-contents-item>`
-      : "";
-  return `
-      <tedi-table-of-contents-item itemId="${id}" [separator]="separator">
-        <a tedi-link href="#${id}" [underline]="false">${label}</a>${subItems}
-      </tedi-table-of-contents-item>`;
-}).join("");
+const controllableNestedItems = `
+  <tedi-table-of-contents-item itemId="intro" [separator]="separator">
+    <a tedi-link href="#intro" [underline]="false">Sissejuhatus</a>
+  </tedi-table-of-contents-item>
+  <tedi-table-of-contents-item itemId="methods" [separator]="separator">
+    <a tedi-link href="#methods" [underline]="false">Meetodid</a>
+    <tedi-table-of-contents-item itemId="methods-1" [separator]="separator">
+      <a tedi-link href="#methods-1" [underline]="false">Andmete kogumine</a>
+    </tedi-table-of-contents-item>
+    <tedi-table-of-contents-item itemId="methods-2" [separator]="separator">
+      <a tedi-link href="#methods-2" [underline]="false">Analüüs</a>
+    </tedi-table-of-contents-item>
+  </tedi-table-of-contents-item>
+  <tedi-table-of-contents-item itemId="results" [separator]="separator">
+    <a tedi-link href="#results" [underline]="false">Tulemused</a>
+  </tedi-table-of-contents-item>
+  <tedi-table-of-contents-item itemId="discussion" [separator]="separator">
+    <a tedi-link href="#discussion" [underline]="false">Arutelu</a>
+  </tedi-table-of-contents-item>
+  <tedi-table-of-contents-item itemId="conclusion" [separator]="separator">
+    <a tedi-link href="#conclusion" [underline]="false">Kokkuvõte</a>
+  </tedi-table-of-contents-item>
+`;
 
 export const Default: Story = {
   args: {
     heading: "Sisukord",
     headingLevel: "h3",
     variant: "default",
-    activeId: "section-3",
+    activeId: "methods",
     defaultOpen: true,
     numbered: false,
     sticky: false,
@@ -339,7 +335,7 @@ export const Default: Story = {
         [sticky]="sticky"
         [bordered]="bordered"
       >
-        ${controllableItems}
+        ${controllableNestedItems}
       </tedi-table-of-contents>
     `,
   }),
@@ -579,12 +575,17 @@ export const InPopover: Story = {
       ],
     },
     template: `
-      <tedi-popover #popover position="bottom-start" [withArrow]="false">
+      <tedi-popover
+        #popover
+        position="bottom-start"
+        [withArrow]="false"
+        [offset]="4"
+      >
         <button tedi-button variant="neutral" tedi-popover-trigger>
-          {{ popover.isOpen() ? "Sulge sisukord" : "Ava sisukord" }}
           <tedi-icon name="list" />
+          {{ popover.isOpen() ? "Sulge sisukord" : "Ava sisukord" }}
         </button>
-        <tedi-popover-content>
+        <tedi-popover-content [padding]="{ right: 1, bottom: 1, left: 1 }">
           <tedi-table-of-contents
             variant="transparent"
             [sticky]="false"
@@ -991,32 +992,6 @@ export const StickyInLayout: Story = {
     template: `<toc-sticky-demo />`,
   }),
 };
-
-// Nested items whose `separator` input is bound to the story args, so the
-// "Table of Contents Item" control drives the Collapsible story too.
-const controllableNestedItems = `
-  <tedi-table-of-contents-item itemId="intro" [separator]="separator">
-    <a tedi-link href="#intro" [underline]="false">Sissejuhatus</a>
-  </tedi-table-of-contents-item>
-  <tedi-table-of-contents-item itemId="methods" [separator]="separator">
-    <a tedi-link href="#methods" [underline]="false">Meetodid</a>
-    <tedi-table-of-contents-item itemId="methods-1" [separator]="separator">
-      <a tedi-link href="#methods-1" [underline]="false">Andmete kogumine</a>
-    </tedi-table-of-contents-item>
-    <tedi-table-of-contents-item itemId="methods-2" [separator]="separator">
-      <a tedi-link href="#methods-2" [underline]="false">Analüüs</a>
-    </tedi-table-of-contents-item>
-  </tedi-table-of-contents-item>
-  <tedi-table-of-contents-item itemId="results" [separator]="separator">
-    <a tedi-link href="#results" [underline]="false">Tulemused</a>
-  </tedi-table-of-contents-item>
-  <tedi-table-of-contents-item itemId="discussion" [separator]="separator">
-    <a tedi-link href="#discussion" [underline]="false">Arutelu</a>
-  </tedi-table-of-contents-item>
-  <tedi-table-of-contents-item itemId="conclusion" [separator]="separator">
-    <a tedi-link href="#conclusion" [underline]="false">Kokkuvõte</a>
-  </tedi-table-of-contents-item>
-`;
 
 /**
  * Responsive page usage. On desktop (`lg` and up) the table of contents is a
