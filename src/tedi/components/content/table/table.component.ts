@@ -681,8 +681,6 @@ export class TediTableComponent<TData> {
   );
 
   protected readonly placeholderLabel = this.translation.track("table.no-data");
-  protected readonly rowDetailsLabel =
-    this.translation.track("table.row-details");
   protected readonly dragColumnLabel =
     this.translation.track("table.drag-column");
   protected readonly dragRowLabel = this.translation.track("table.drag-row");
