@@ -1,3 +1,11 @@
+## [9.0.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.1-rc.1...angular-9.0.1-rc.2) (2026-11-04)
+
+
+### Bug Fixes
+
+* **time-field:** keep scroll picker open while scrolling with closeOnSelect [#812](https://github.com/TEDI-Design-System/angular/issues/812) ([#826](https://github.com/TEDI-Design-System/angular/issues/826)) ([48efc6f](https://github.com/TEDI-Design-System/angular/commit/48efc6f3a29543a25e6ee6b4f4fa2fe567e4c101))
+* **timeline:** collapse empty title, description and content slots [#735](https://github.com/TEDI-Design-System/angular/issues/735) ([#831](https://github.com/TEDI-Design-System/angular/issues/831)) ([6e7ad24](https://github.com/TEDI-Design-System/angular/commit/6e7ad244374b94ad652d5cee1c530cfea7a73bbb))
+
 ## [9.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0...angular-9.0.1-rc.1) (2026-11-02)
 
 
