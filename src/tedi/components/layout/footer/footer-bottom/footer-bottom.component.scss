@@ -1,14 +1,28 @@
 .tedi-footer-bottom {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--layout-grid-gutters-24);
-  align-items: center;
   justify-content: center;
-  padding: var(--layout-footer-bottom-padding-y)
-    var(--layout-footer-bottom-padding-x);
+  padding-block: var(--layout-footer-bottom-padding-y);
   background-color: var(--footer-bottom-background);
 
-  &--mobile {
+  &__inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--layout-grid-gutters-24);
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding-inline: var(--layout-footer-bottom-padding-x);
+  }
+
+  &--mobile &__inner {
     gap: var(--layout-grid-gutters-16);
+  }
+
+  &__dot {
+    flex-shrink: 0;
+    width: var(--separator-dot-size-sm);
+    height: var(--separator-dot-size-sm);
+    background-color: var(--general-border-secondary);
+    border-radius: 50%;
   }
 }

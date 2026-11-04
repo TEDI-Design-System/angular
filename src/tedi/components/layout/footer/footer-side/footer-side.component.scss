@@ -13,24 +13,17 @@
     justify-content: flex-end;
   }
 
-  &--mobile {
-    width: 100%;
-    padding: 16px;
-  }
-
   &--start {
+    order: -1;
     padding-left: var(--layout-footer-padding-x);
-
-    &.tedi-footer-side--mobile {
-      padding-bottom: 0;
-    }
   }
 
   &--end {
+    order: 1;
     padding-right: var(--layout-footer-padding-x);
+  }
 
-    &.tedi-footer-side--mobile {
-      padding-top: 0;
-    }
+  &--mobile {
+    padding: 0;
   }
 }
