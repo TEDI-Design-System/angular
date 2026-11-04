@@ -1,16 +1,15 @@
 .tedi-footer {
+  display: block;
   background-color: var(--footer-background);
 
   &__container {
     display: flex;
-  }
+    margin-inline: auto;
 
-  &__center {
-    width: 100%;
-  }
-
-  &--mobile {
-    display: flex;
-    flex-direction: column;
+    &--mobile {
+      flex-direction: column;
+      gap: var(--layout-grid-gutters-24);
+      padding: var(--layout-footer-padding-y) var(--layout-footer-padding-x);
+    }
   }
 }
