@@ -129,7 +129,6 @@
       class="tedi-time-field__clear"
       [iconSize]="18"
       [ariaLabel]="'time-field.clear' | tediTranslate"
-      [disabled]="isDisabled()"
       (click)="onClearClick($event)"
     ></button>
     <tedi-separator axis="vertical" size="1rem" />
@@ -148,6 +147,7 @@
     [trapFocus]="true"
     [style.--tedi-time-picker-dropdown-min-width.px]="dropdownMinWidth()"
     (valueChange)="onPickerValueChange($event)"
+    (selectionCommitted)="onPickerSelectionCommitted()"
     (closeRequested)="closePopover()"
   />
 </ng-template>

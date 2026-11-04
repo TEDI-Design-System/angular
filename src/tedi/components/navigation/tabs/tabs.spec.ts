@@ -10,6 +10,7 @@ import {
 } from "./tabs-list/tabs-list.component";
 import { TabsTriggerComponent } from "./tabs-trigger/tabs-trigger.component";
 import { TabsContentComponent } from "./tabs-content/tabs-content.component";
+import { PrintDirective, PrintVisibility } from "../../../directives/print";
 
 const mockAfterNextRender: { callback: (() => void) | null } = {
   callback: null,
@@ -74,7 +75,11 @@ afterAll(() => {
       [defaultValue]="defaultValue()"
       (valueChange)="onChange($event)"
     >
-      <tedi-tabs-list aria-label="Test tabs" [overflowMode]="overflowMode()">
+      <tedi-tabs-list
+        aria-label="Test tabs"
+        [overflowMode]="overflowMode()"
+        [printVisibility]="printVisibility()"
+      >
         <button tedi-tabs-trigger id="tab-1">Tab 1</button>
         <button tedi-tabs-trigger id="tab-2">Tab 2</button>
         <button tedi-tabs-trigger id="tab-3" [disabled]="true">Tab 3</button>
@@ -89,8 +94,27 @@ class HostComponent {
   value = input<string>();
   defaultValue = input("tab-1");
   overflowMode = input<TabsOverflowMode>("dropdown");
+  printVisibility = input<PrintVisibility>("show");
   onChange = jest.fn();
 }
+
+@Component({
+  standalone: true,
+  imports: [
+    TabsComponent,
+    TabsListComponent,
+    TabsTriggerComponent,
+    PrintDirective,
+  ],
+  template: `
+    <tedi-tabs defaultValue="tab-1">
+      <tedi-tabs-list aria-label="Print tabs" tediPrint="hide">
+        <button tedi-tabs-trigger id="tab-1">Tab 1</button>
+      </tedi-tabs-list>
+    </tedi-tabs>
+  `,
+})
+class PrintHost {}
 
 const setup = () => {
   TestBed.configureTestingModule({
@@ -693,6 +717,48 @@ describe("Tabs", () => {
         true,
       );
       expect(wrapper.classList.contains("tedi-tabs-list--fade-end")).toBe(true);
+    });
+  });
+
+  describe("printing", () => {
+    it("keeps the tablist in the printed output by default", () => {
+      const fixture = setup();
+      const list = fixture.debugElement.query(By.css("tedi-tabs-list"))
+        .nativeElement as HTMLElement;
+
+      expect(list.classList).not.toContain("no-print");
+      expect(list.classList).not.toContain("show-print");
+    });
+
+    it("hides the tablist when printVisibility is hide", () => {
+      const fixture = setup();
+      fixture.componentRef.setInput("printVisibility", "hide");
+      fixture.detectChanges();
+
+      const list = fixture.debugElement.query(By.css("tedi-tabs-list"))
+        .nativeElement as HTMLElement;
+
+      expect(list.classList).toContain("no-print");
+      expect(list.classList).not.toContain("show-print");
+    });
+
+    it("hides the tablist when tediPrint is set to hide", () => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [PrintHost],
+        providers: [
+          { provide: TediTranslationService, useClass: TranslationMock },
+          { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        ],
+      });
+      const fixture = TestBed.createComponent(PrintHost);
+      fixture.detectChanges();
+
+      const list = fixture.debugElement.query(By.css("tedi-tabs-list"))
+        .nativeElement as HTMLElement;
+
+      expect(list.classList).toContain("no-print");
+      expect(list.classList).not.toContain("show-print");
     });
   });
 });

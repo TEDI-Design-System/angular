@@ -25,7 +25,7 @@ import { PopoverComponent } from "../popover.component";
 })
 export class PopoverTriggerDirective {
   /**
-   * Should add underline class to trigger element?
+   * Underline the trigger element.
    * @default false
    */
   readonly underline = input(false);

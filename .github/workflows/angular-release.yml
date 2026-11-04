@@ -89,7 +89,7 @@ jobs:
       # (this resolves correctly for squash merges) and leave a sticky comment
       # there, which is the page the author was last looking at.
       - name: Comment the result on the merged pull request
-        if: steps.chromatic.outputs.changeCount != '0' && steps.chromatic.outputs.changeCount != ''
+        if: steps.chromatic.outputs.changeCount != '0' && steps.chromatic.outputs.changeCount != '' && steps.chromatic.outputs.buildUrl != '' && steps.chromatic.outputs.buildUrl != 'undefined'
         continue-on-error: true
         uses: actions/github-script@v7
         env:

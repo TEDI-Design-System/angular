@@ -35,7 +35,7 @@ export class CheckboxComponent implements OnInit, OnDestroy {
    */
   readonly size = input<CheckboxSize>("default");
   /**
-   * Is checkbox invalid?
+   * Show the checkbox in an invalid state.
    * @default false
    */
   readonly invalid = input(false);
@@ -46,7 +46,7 @@ export class CheckboxComponent implements OnInit, OnDestroy {
    */
   readonly value = input<string>();
   /**
-   * Disables this checkbox. An enclosing disabled `<tedi-checkbox-group>`
+   * Disable this checkbox. An enclosing disabled `<tedi-checkbox-group>`
    * forces disabled regardless of this input.
    * @default false
    */

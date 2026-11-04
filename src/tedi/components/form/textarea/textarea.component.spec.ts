@@ -171,6 +171,16 @@ describe("TextareaComponent", () => {
       ).toBe("calc(4 * 1lh + 2 * var(--_field-padding-y))");
     });
 
+    it("treats minRows below 1 as 1", () => {
+      const f = TestBed.createComponent(TextareaComponent);
+      f.componentRef.setInput("minRows", 0);
+      f.detectChanges();
+
+      expect(f.componentInstance.minHeightStyle()).toBe(
+        "calc(1 * 1lh + 2 * var(--_field-padding-y))",
+      );
+    });
+
     it("rests at minRows when no height is set", () => {
       const component = makeFixture({});
 
@@ -187,6 +197,17 @@ describe("TextareaComponent", () => {
       expect(
         makeFixture({ autoGrow: false, maxRows: 10 }).maxHeightStyle(),
       ).toBe("calc(10 * 1lh + 2 * var(--_field-padding-y))");
+    });
+
+    it("sets no max-height without maxRows or maxHeight", () => {
+      expect(makeFixture({ autoGrow: true }).maxHeightStyle()).toBeNull();
+      expect(makeFixture({}).maxHeightStyle()).toBeNull();
+    });
+
+    it("caps at maxHeight alone without maxRows", () => {
+      expect(
+        makeFixture({ autoGrow: true, maxHeight: 200 }).maxHeightStyle(),
+      ).toBe("200px");
     });
 
     it("combines maxRows and maxHeight with min()", () => {
@@ -271,5 +292,53 @@ describe("TextareaComponent readOnly", () => {
     );
     expect(textarea.injector.get(TextareaComponent).readOnly()).toBe(true);
     expect((textarea.nativeElement as HTMLTextAreaElement).readOnly).toBe(true);
+  });
+});
+
+describe("TextareaComponent scrollbarWidth", () => {
+  let observerCallback: ResizeObserverCallback;
+  let disconnect: jest.Mock;
+  const originalResizeObserver = globalThis.ResizeObserver;
+
+  beforeEach(() => {
+    disconnect = jest.fn();
+    globalThis.ResizeObserver = jest.fn((callback: ResizeObserverCallback) => {
+      observerCallback = callback;
+      return { observe: jest.fn(), unobserve: jest.fn(), disconnect };
+    }) as unknown as typeof ResizeObserver;
+    TestBed.configureTestingModule({ imports: [TextareaComponent] });
+  });
+
+  afterEach(() => {
+    globalThis.ResizeObserver = originalResizeObserver;
+  });
+
+  it("reports the vertical scrollbar width, borders excluded", () => {
+    const fixture = TestBed.createComponent(TextareaComponent);
+    fixture.detectChanges();
+
+    const el = fixture.nativeElement as HTMLTextAreaElement;
+    el.style.border = "1px solid";
+    Object.defineProperty(el, "offsetWidth", {
+      configurable: true,
+      value: 217,
+    });
+    Object.defineProperty(el, "clientWidth", {
+      configurable: true,
+      value: 200,
+    });
+    observerCallback([], {} as ResizeObserver);
+
+    expect(fixture.componentInstance.scrollbarWidth()).toBe(15);
+  });
+
+  it("stops observing on destroy", () => {
+    const fixture = TestBed.createComponent(TextareaComponent);
+    fixture.detectChanges();
+    expect(disconnect).not.toHaveBeenCalled();
+
+    fixture.destroy();
+
+    expect(disconnect).toHaveBeenCalledTimes(1);
   });
 });

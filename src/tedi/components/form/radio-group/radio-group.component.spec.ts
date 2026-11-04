@@ -1,5 +1,6 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import {
   RadioGroupComponent,
@@ -399,5 +400,62 @@ describe("RadioGroupComponent — card children", () => {
     inputs[0].dispatchEvent(new Event("change", { bubbles: true }));
     fixture.detectChanges();
     expect(fixture.componentInstance.control.value).toBe("basic");
+  });
+});
+
+describe("RadioGroupComponent — selection checks", () => {
+  it("should report whether a value is selected", () => {
+    TestBed.configureTestingModule({ imports: [FormControlHostComponent] });
+    const fixture = TestBed.createComponent(FormControlHostComponent);
+    fixture.componentInstance.control.setValue("active");
+    fixture.detectChanges();
+    const group: RadioGroupComponent = fixture.debugElement.query(
+      By.directive(RadioGroupComponent),
+    ).componentInstance;
+
+    expect(group.isSelected("active")).toBe(true);
+    expect(group.isSelected("done")).toBe(false);
+    expect(group.isSelected(undefined)).toBe(false);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [RadioGroupComponent, RadioComponent, ReactiveFormsModule],
+  template: `
+    <tedi-radio-group [formControl]="control">
+      <input tedi-radio type="radio" />
+    </tedi-radio-group>
+  `,
+})
+class MissingValueHostComponent {
+  control = new FormControl<string | null>(null);
+}
+
+describe("RadioGroupComponent — missing child value", () => {
+  it("should warn once per instance and drop the change", () => {
+    TestBed.configureTestingModule({ imports: [MissingValueHostComponent] });
+    const fixture = TestBed.createComponent(MissingValueHostComponent);
+    fixture.detectChanges();
+    const input = (
+      fixture.nativeElement as HTMLElement
+    ).querySelector<HTMLInputElement>('input[type="radio"]')!;
+    const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
+
+    input.checked = true;
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    fixture.detectChanges();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining("[tedi-radio-group]"),
+    );
+    expect(fixture.componentInstance.control.value).toBeNull();
+
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+    fixture.detectChanges();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.control.value).toBeNull();
+
+    warnSpy.mockRestore();
   });
 });

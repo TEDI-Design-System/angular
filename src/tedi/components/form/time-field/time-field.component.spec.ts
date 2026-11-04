@@ -916,7 +916,7 @@ describe("TimeFieldComponent", () => {
       expect(onChange).not.toHaveBeenCalled();
     });
 
-    it("should close the popover when closeOnSelect is true", () => {
+    it("should NOT close the popover on a value change alone", () => {
       fixture.componentRef.setInput("closeOnSelect", true);
       fixture.detectChanges();
 
@@ -926,6 +926,21 @@ describe("TimeFieldComponent", () => {
 
       component.onPickerValueChange("09:15");
 
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("onPickerSelectionCommitted", () => {
+    it("should close the popover when closeOnSelect is true", () => {
+      fixture.componentRef.setInput("closeOnSelect", true);
+      fixture.detectChanges();
+
+      const hideSpy = jest
+        .spyOn(component.popover()!, "hidePopover")
+        .mockImplementation(() => {});
+
+      component.onPickerSelectionCommitted();
+
       expect(hideSpy).toHaveBeenCalled();
     });
 
@@ -934,7 +949,7 @@ describe("TimeFieldComponent", () => {
         .spyOn(component.popover()!, "hidePopover")
         .mockImplementation(() => {});
 
-      component.onPickerValueChange("09:15");
+      component.onPickerSelectionCommitted();
 
       expect(hideSpy).not.toHaveBeenCalled();
     });
@@ -994,6 +1009,32 @@ describe("TimeFieldComponent", () => {
       component.onPickerOpen();
 
       expect(component.dropdownMinWidth()).toBe(240);
+    });
+
+    it("should align the picker, then focus it, after render", () => {
+      component.popover()!.showPopover();
+      fixture.detectChanges();
+      const picker = component.timePicker()!;
+      const scrollSpy = jest
+        .spyOn(picker, "scrollToSelected")
+        .mockImplementation(() => {});
+      // A real focus inside TestBed.tick re-enters tick (NG0101).
+      const focusSpy = jest
+        .spyOn(picker, "focusActiveItem")
+        .mockImplementation(() => {});
+
+      component.onPickerOpen();
+      expect(scrollSpy).not.toHaveBeenCalled();
+
+      TestBed.tick();
+
+      expect(scrollSpy).toHaveBeenCalledTimes(1);
+      expect(focusSpy).toHaveBeenCalledTimes(1);
+      expect(scrollSpy.mock.invocationCallOrder[0]).toBeLessThan(
+        focusSpy.mock.invocationCallOrder[0],
+      );
+
+      component.popover()!.hidePopover();
     });
 
     it("should reset dropdown min-width for non-dropdown variants", () => {
@@ -1085,6 +1126,21 @@ describe("TimeFieldComponent with ReactiveFormsModule", () => {
     fixture.detectChanges();
 
     expect(host.control.value).toBe("15:45");
+  });
+
+  it("should hide the clear button when FormControl is disabled", () => {
+    host.control.setValue("14:30");
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(".tedi-time-field__clear"),
+    ).not.toBeNull();
+
+    host.control.disable();
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector(".tedi-time-field__clear"),
+    ).toBeNull();
   });
 
   it("should disable component when FormControl is disabled", () => {

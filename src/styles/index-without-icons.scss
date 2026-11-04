@@ -1,0 +1,5 @@
+// index.scss without the Material Symbols icon fonts. Pair with one of the icons/<style>.css
+// entries to load a single icon font instead of all three. See angular#774.
+@use "@tedi-design-system/core/index-without-icons";
+@use "vertical-spacing";
+@use "cdk";

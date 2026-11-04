@@ -10,11 +10,12 @@ import {
   DropdownRole,
 } from "./dropdown-content/dropdown-content.component";
 import { DropdownItemComponent } from "./dropdown-item/dropdown-item.component";
-import { DropdownItemValueComponent } from "./dropdown-item-value/dropdown-item-value.component";
-import { DropdownItemValueLabelComponent } from "./dropdown-item-value/dropdown-item-value-label.component";
-import { DropdownItemValueMetaComponent } from "./dropdown-item-value/dropdown-item-value-meta.component";
+import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
+import { OptionContentLabelComponent } from "../../helpers/option-content/option-content-label.component";
+import { OptionContentMetaComponent } from "../../helpers/option-content/option-content-meta.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base";
+import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
 @Component({
@@ -59,12 +60,13 @@ export default {
         DropdownTriggerDirective,
         DropdownContentComponent,
         DropdownItemComponent,
-        DropdownItemValueComponent,
-        DropdownItemValueLabelComponent,
-        DropdownItemValueMetaComponent,
+        OptionContentComponent,
+        OptionContentLabelComponent,
+        OptionContentMetaComponent,
         ButtonComponent,
         IconComponent,
         DemoWrappingButtonComponent,
+        CheckboxComponent,
       ],
     }),
   ],
@@ -237,22 +239,22 @@ export const WithMeta: Story = {
         </button>
         <tedi-dropdown-content [dropdownRole]="dropdownRole">
           <li tedi-dropdown-item value="tallinn">
-            <tedi-dropdown-item-value>
-              <tedi-dropdown-item-value-label>Tallinn</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>3 timeslots</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+            <tedi-option-content>
+              <tedi-option-content-label>Tallinn</tedi-option-content-label>
+              <tedi-option-content-meta>3 timeslots</tedi-option-content-meta>
+            </tedi-option-content>
           </li>
           <li tedi-dropdown-item value="tartu">
-            <tedi-dropdown-item-value>
-              <tedi-dropdown-item-value-label>Tartu</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>5 timeslots</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+            <tedi-option-content>
+              <tedi-option-content-label>Tartu</tedi-option-content-label>
+              <tedi-option-content-meta>5 timeslots</tedi-option-content-meta>
+            </tedi-option-content>
           </li>
           <li tedi-dropdown-item value="parnu">
-            <tedi-dropdown-item-value>
-              <tedi-dropdown-item-value-label>Pärnu</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>2 timeslots</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+            <tedi-option-content>
+              <tedi-option-content-label>Pärnu</tedi-option-content-label>
+              <tedi-option-content-meta>2 timeslots</tedi-option-content-meta>
+            </tedi-option-content>
           </li>
         </tedi-dropdown-content>
       </tedi-dropdown>
@@ -278,22 +280,22 @@ export const WithIcons: Story = {
         </button>
         <tedi-dropdown-content [dropdownRole]="dropdownRole">
           <li tedi-dropdown-item>
-            <tedi-dropdown-item-value>
+            <tedi-option-content>
               <tedi-icon name="edit" [size]="18" />
-              <tedi-dropdown-item-value-label>Edit</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+              <tedi-option-content-label>Edit</tedi-option-content-label>
+            </tedi-option-content>
           </li>
           <li tedi-dropdown-item>
-            <tedi-dropdown-item-value>
+            <tedi-option-content>
               <tedi-icon name="content_copy" [size]="18" />
-              <tedi-dropdown-item-value-label>Duplicate</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+              <tedi-option-content-label>Duplicate</tedi-option-content-label>
+            </tedi-option-content>
           </li>
           <li tedi-dropdown-item>
-            <tedi-dropdown-item-value>
+            <tedi-option-content>
               <tedi-icon name="delete" [size]="18" />
-              <tedi-dropdown-item-value-label>Delete</tedi-dropdown-item-value-label>
-            </tedi-dropdown-item-value>
+              <tedi-option-content-label>Delete</tedi-option-content-label>
+            </tedi-option-content>
           </li>
         </tedi-dropdown-content>
       </tedi-dropdown>
@@ -319,22 +321,22 @@ export const VerticalLayout: Story = {
         </button>
         <tedi-dropdown-content [dropdownRole]="dropdownRole">
           <li tedi-dropdown-item value="health">
-            <tedi-dropdown-item-value layout="vertical">
-              <tedi-dropdown-item-value-label>Access to health data</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>Doctors will be able to see your health data</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+            <tedi-option-content layout="vertical">
+              <tedi-option-content-label>Access to health data</tedi-option-content-label>
+              <tedi-option-content-meta>Doctors will be able to see your health data</tedi-option-content-meta>
+            </tedi-option-content>
           </li>
           <li tedi-dropdown-item value="medications">
-            <tedi-dropdown-item-value layout="vertical">
-              <tedi-dropdown-item-value-label>Access to medications</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>Doctors will be able to see your medications</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+            <tedi-option-content layout="vertical">
+              <tedi-option-content-label>Access to medications</tedi-option-content-label>
+              <tedi-option-content-meta>Doctors will be able to see your medications</tedi-option-content-meta>
+            </tedi-option-content>
           </li>
           <li tedi-dropdown-item value="all">
-            <tedi-dropdown-item-value layout="vertical">
-              <tedi-dropdown-item-value-label>Access to all</tedi-dropdown-item-value-label>
-              <tedi-dropdown-item-value-meta>Doctors will be able to see all your information</tedi-dropdown-item-value-meta>
-            </tedi-dropdown-item-value>
+            <tedi-option-content layout="vertical">
+              <tedi-option-content-label>Access to all</tedi-option-content-label>
+              <tedi-option-content-meta>Doctors will be able to see all your information</tedi-option-content-meta>
+            </tedi-option-content>
           </li>
         </tedi-dropdown-content>
       </tedi-dropdown>
@@ -369,6 +371,46 @@ export const WithWrappingButtonComponent: Story = {
           <li tedi-dropdown-item>Contacts</li>
         </tedi-dropdown-content>
       </tedi-dropdown>
+    `,
+  }),
+};
+
+/**
+ * A checkbox trigger keeps its native role and checked or mixed state. Enter
+ * opens the menu; Space uses the checkbox's native click. The click is cancelled
+ * so selection changes only through menu actions.
+ */
+export const WithCheckboxTrigger: Story = {
+  name: "Checkbox Trigger",
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
+  },
+  render: (args) => ({
+    props: {
+      ...args,
+      selection: { count: 3 },
+      total: 10,
+      pageSize: 5,
+    },
+    template: `
+      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
+        <input
+          tedi-checkbox
+          tedi-dropdown-trigger
+          type="checkbox"
+          aria-label="Select rows"
+          [checked]="selection.count === total"
+          [indeterminate]="selection.count > 0 && selection.count < total"
+          (click)="$event.preventDefault()"
+        />
+        <tedi-dropdown-content dropdownRole="menu">
+          <li tedi-dropdown-item (itemSelect)="selection.count = pageSize">Select page</li>
+          <li tedi-dropdown-item (itemSelect)="selection.count = total">Select all</li>
+          <li tedi-dropdown-item (itemSelect)="selection.count = 0">Clear selection</li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+      <p>{{ selection.count }} of {{ total }} rows selected</p>
     `,
   }),
 };
@@ -426,13 +468,13 @@ export const KeepOpenOnSelect: Story = {
               [closeOnSelect]="false"
               (itemSelect)="toggleFilter(filters, filter.id)"
             >
-              <tedi-dropdown-item-value
+              <tedi-option-content
                 type="checkbox"
                 [selected]="filter.selected"
                 [disabled]="!!filter.disabled"
               >
-                <tedi-dropdown-item-value-label>{{ filter.label }}</tedi-dropdown-item-value-label>
-              </tedi-dropdown-item-value>
+                <tedi-option-content-label>{{ filter.label }}</tedi-option-content-label>
+              </tedi-option-content>
             </li>
           }
         </tedi-dropdown-content>
@@ -487,22 +529,22 @@ export const OpenWithIconsForVisualTest: Story = {
     <button tedi-button tedi-dropdown-trigger ariaHaspopup="menu">Actions</button>
     <tedi-dropdown-content dropdownRole="menu">
       <li tedi-dropdown-item>
-        <tedi-dropdown-item-value>
+        <tedi-option-content>
           <tedi-icon name="edit" [size]="18" />
-          <tedi-dropdown-item-value-label>Edit</tedi-dropdown-item-value-label>
-        </tedi-dropdown-item-value>
+          <tedi-option-content-label>Edit</tedi-option-content-label>
+        </tedi-option-content>
       </li>
       <li tedi-dropdown-item>
-        <tedi-dropdown-item-value>
+        <tedi-option-content>
           <tedi-icon name="content_copy" [size]="18" />
-          <tedi-dropdown-item-value-label>Duplicate</tedi-dropdown-item-value-label>
-        </tedi-dropdown-item-value>
+          <tedi-option-content-label>Duplicate</tedi-option-content-label>
+        </tedi-option-content>
       </li>
       <li tedi-dropdown-item [disabled]="true">
-        <tedi-dropdown-item-value>
+        <tedi-option-content>
           <tedi-icon name="delete" [size]="18" />
-          <tedi-dropdown-item-value-label>Delete</tedi-dropdown-item-value-label>
-        </tedi-dropdown-item-value>
+          <tedi-option-content-label>Delete</tedi-option-content-label>
+        </tedi-option-content>
       </li>
     </tedi-dropdown-content>
   </tedi-dropdown>
@@ -539,22 +581,22 @@ export const OpenListboxMetaForVisualTest: Story = {
     <button tedi-button tedi-dropdown-trigger ariaHaspopup="listbox">Select location</button>
     <tedi-dropdown-content dropdownRole="listbox">
       <li tedi-dropdown-item value="tallinn">
-        <tedi-dropdown-item-value>
-          <tedi-dropdown-item-value-label>Tallinn</tedi-dropdown-item-value-label>
-          <tedi-dropdown-item-value-meta>3 timeslots</tedi-dropdown-item-value-meta>
-        </tedi-dropdown-item-value>
+        <tedi-option-content>
+          <tedi-option-content-label>Tallinn</tedi-option-content-label>
+          <tedi-option-content-meta>3 timeslots</tedi-option-content-meta>
+        </tedi-option-content>
       </li>
       <li tedi-dropdown-item value="tartu">
-        <tedi-dropdown-item-value>
-          <tedi-dropdown-item-value-label>Tartu</tedi-dropdown-item-value-label>
-          <tedi-dropdown-item-value-meta>5 timeslots</tedi-dropdown-item-value-meta>
-        </tedi-dropdown-item-value>
+        <tedi-option-content>
+          <tedi-option-content-label>Tartu</tedi-option-content-label>
+          <tedi-option-content-meta>5 timeslots</tedi-option-content-meta>
+        </tedi-option-content>
       </li>
       <li tedi-dropdown-item value="parnu">
-        <tedi-dropdown-item-value>
-          <tedi-dropdown-item-value-label>Pärnu</tedi-dropdown-item-value-label>
-          <tedi-dropdown-item-value-meta>2 timeslots</tedi-dropdown-item-value-meta>
-        </tedi-dropdown-item-value>
+        <tedi-option-content>
+          <tedi-option-content-label>Pärnu</tedi-option-content-label>
+          <tedi-option-content-meta>2 timeslots</tedi-option-content-meta>
+        </tedi-option-content>
       </li>
     </tedi-dropdown-content>
   </tedi-dropdown>

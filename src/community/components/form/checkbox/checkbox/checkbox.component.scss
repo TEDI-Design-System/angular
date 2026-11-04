@@ -1,6 +1,6 @@
 .tedi-checkbox {
-  --_checkbox-bg: var(--form-checkbox-radio-default-background-default);
-  --_checkbox-border: var(--form-checkbox-radio-default-border-default);
+  --_checkbox-bg: var(--form-choice-checkbox-unselected-default);
+  --_checkbox-border: var(--form-choice-checkbox-unselected-border-default);
   --_checkbox-label-color: var(--general-text-primary);
   --_checkbox-check-color: var(--_checkbox-border);
   --_checkbox-inner-spacing: var(--form-checkbox-radio-inner-spacing);
@@ -55,20 +55,23 @@
   }
 
   &:has(input:checked, input:indeterminate) {
-    --_checkbox-bg: var(--form-checkbox-radio-default-background-selected);
-    --_checkbox-border: var(--form-checkbox-radio-default-border-selected);
+    --_checkbox-bg: var(--form-choice-checkbox-selected-default);
+    --_checkbox-border: var(--form-choice-checkbox-selected-border-default);
   }
 
   &:has(input:hover, input:focus-visible) {
     .tedi-checkbox__indicator {
       outline: 1px solid var(--_checkbox-border);
     }
-    --_checkbox-border: var(--form-checkbox-radio-default-border-hover);
+    --_checkbox-border: var(--form-choice-checkbox-unselected-border-hover);
   }
 
   &:has(input:active) {
-    --_checkbox-border: var(--form-checkbox-radio-default-border-active);
-    --_checkbox-bg: var(--form-checkbox-radio-default-background-active);
+    --_checkbox-border: var(--form-choice-checkbox-unselected-border-active);
+  }
+
+  &:has(input:checked:active, input:indeterminate:active) {
+    --_checkbox-bg: var(--form-choice-checkbox-selected-active);
   }
 
   &:has(input:disabled) {
@@ -78,17 +81,14 @@
     --_checkbox-border: var(--form-input-border-disabled);
   }
 
-  &:has(input:disabled:checked) {
-    --_checkbox-bg: var(
-      --form-checkbox-radio-default-background-selected-disabled
-    );
-    --_checkbox-border: var(
-      --form-checkbox-radio-default-border-selected-disabled
-    );
+  &:has(input:disabled:checked, input:disabled:indeterminate) {
+    --_checkbox-bg: var(--form-choice-checkbox-selected-disabled);
+    --_checkbox-border: var(--form-choice-checkbox-selected-border-disabled);
   }
 
-  &--error {
-    --_checkbox-bg: var(--form-checkbox-radio-default-background-error);
+  // Error colours apply to unselected boxes only; selected ones keep their fill
+  &--error:has(input:not(:checked, :indeterminate, :disabled)) {
+    --_checkbox-bg: var(--form-choice-checkbox-unselected-default);
     --_checkbox-border: var(--form-general-feedback-error-border);
   }
 

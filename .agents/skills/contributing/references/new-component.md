@@ -2,19 +2,23 @@
 
 ## Prerequisites
 
-A Figma link MUST be provided: `$ARGUMENTS`
+A Figma link MUST be provided with the task.
 
 If no Figma link was provided, stop immediately and ask the user for one. Do not proceed without design reference.
 
+Only links to the TEDI Figma file (`figma.com/design/jWiRIXhHRxwVdMSimKX2FF/...`) go into the stories.
+A design in any other Figma file can't be opened by readers of the docs: use it for implementation
+and leave the Figma link out of the stories ([stories.md](stories.md)).
+
 ## Step 1: Gather Context
 
-1. Use `figma-desktop` MCP to fetch design context, screenshots, and metadata from the Figma link.
+1. Use the Figma MCP server to fetch design context, screenshots, and metadata from the Figma link.
 2. Check if TEDI React (`../react/src/tedi/components/`) has an equivalent component — use as behavioral reference.
 3. Check TEDI Core (`../core/src/`) for available design tokens and shared styles.
 
 ## Step 2: Plan
 
-Enter plan mode and create a detailed plan covering:
+Write a plan and get it approved before writing code. It covers:
 
 - **Component name** and selector (`tedi-` prefix)
 - **Category** — which folder under `src/tedi/components/` it belongs to
@@ -55,26 +59,21 @@ Follow all patterns from best-practices:
 1. Create barrel export in `index.ts`
 2. Add export to the parent category `index.ts` (e.g., `src/tedi/components/form/index.ts`)
 
-## Step 6: Code Review
+## Step 6: Verify
 
-Run `/simplify` — a Claude Code skill available in this repository that reviews the changed code for reuse opportunities, simplification, efficiency, and altitude cleanups, then proposes fixes. Fix all valid findings before proceeding.
-
-A finding is **valid** when it is confirmed against the current code (not stale or already addressed), preserves behavior and the public API, and aligns with `best-practices.md`. Skip findings that are speculative, purely stylistic against project conventions, or would change behavior — note briefly why a finding was skipped.
-
-## Step 7: Verify
-
-1. Run tests: `npm test -- src/tedi/components/<category>/<component-name>/ --coverage=false`
+1. Run tests: `npx jest src/tedi/components/<category>/<component-name>/ --coverage=false`
 2. Fix any failures.
 3. Run lint: `npm run lint`
 4. Fix any lint errors.
 
-## Step 8: Publish It to Consumers
+## Step 7: Publish It to Consumers
 
 Consumers read the component out of the published type bundle, so most of the work here is making
 sure that bundle says the right thing. See **SKILL.md → Consumer-Facing Docs** for the full contract.
 
 1. **Check the JSDoc is complete** before anything else. Every public `input()` / `model()` /
-   `output()` needs a one-line description and an `@default` where it has a default. This JSDoc is
+   `output()` needs JSDoc and an `@default` where it has a default
+   ([best-practices.md → Comments and JSDoc](best-practices.md#comments-and-jsdoc)). This JSDoc is
    what a consuming agent reads to write correct code, so an undocumented input is an invisible one.
 2. **Check the selector for a collision with `/community`.** If a Community component already uses
    the same selector, you have created an ambiguity that no template reveals; add it to the collision
@@ -85,3 +84,9 @@ sure that bundle says the right thing. See **SKILL.md → Consumer-Facing Docs**
    well-documented component with no surprises needs **no** entry. Do not add an input table.
 4. **If it is a form control**, add its selector and value shape to `references/forms.md`, and say
    whether it implements `ControlValueAccessor` itself.
+
+## Step 8: Code Review
+
+Run [pr-review.md](pr-review.md). Fix every finding confirmed against the current code, including
+ones that change behaviour or the API: the component isn't released yet. If you leave one unfixed,
+give the reason and raise it with the user. Then repeat Step 6.

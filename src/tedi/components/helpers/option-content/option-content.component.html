@@ -2,7 +2,7 @@
   <input
     type="checkbox"
     tedi-checkbox
-    class="tedi-dropdown-item-value__checkbox"
+    class="tedi-option-content__checkbox"
     tabindex="-1"
     aria-hidden="true"
     [checked]="selected()"
@@ -13,7 +13,7 @@
 } @else if (type() === "radio") {
   <input
     type="radio"
-    class="tedi-dropdown-item-value__radio"
+    class="tedi-option-content__radio"
     tabindex="-1"
     aria-hidden="true"
     [checked]="selected()"
@@ -22,8 +22,8 @@
   />
 }
 <ng-content select="tedi-icon, [tediIcon]" />
-<div class="tedi-dropdown-item-value__content">
-  <ng-content select="tedi-dropdown-item-value-label" />
-  <ng-content select="tedi-dropdown-item-value-meta" />
+<div class="tedi-option-content__content">
+  <ng-content select="tedi-option-content-label" />
+  <ng-content select="tedi-option-content-meta" />
 </div>
 <ng-content />

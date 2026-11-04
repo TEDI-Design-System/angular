@@ -109,7 +109,7 @@ export class TimeFieldComponent
    * the error styling. Combines with the state derived from reactive forms.
    */
   // eslint-disable-next-line @angular-eslint/no-input-rename
-  protected readonly invalidInput = input<boolean>(false, { alias: "invalid" });
+  readonly invalidInput = input<boolean>(false, { alias: "invalid" });
   /** Disables interaction. Combines with the form-control disabled state. */
   // eslint-disable-next-line @angular-eslint/no-input-rename
   readonly disabledInput = input<boolean>(false, { alias: "disabled" });
@@ -136,7 +136,10 @@ export class TimeFieldComponent
   readonly useNativePicker = input<TimeFieldUseNativePicker>(false);
   /** What opens the picker: only the icon (`button`) or also clicking the input (`input`). */
   readonly pickerTrigger = input<TimeFieldPickerTrigger>("button");
-  /** Close the popover/modal as soon as the user picks a value. */
+  /**
+   * Close the popover as soon as the user picks a value. In the `scroll` variant only a minute click or
+   * Enter in the minute column closes it — scrolling or arrowing the wheels does not.
+   */
   readonly closeOnSelect = input<boolean>(false);
   /** Predefined `HH:mm` strings for the `slots` and `dropdown` variants. */
   readonly timeSlots = input<string[]>([]);
@@ -199,7 +202,7 @@ export class TimeFieldComponent
     () => this.value() !== null && this.value() !== "",
   );
   readonly showClear = computed(
-    () => this.hasValue() && this.clearableResolved(),
+    () => this.hasValue() && this.clearableResolved() && !this.isDisabled(),
   );
   /** The clear button sits in the time field's action row, beside the picker. */
   readonly ownsClearButton = true;
@@ -474,7 +477,9 @@ export class TimeFieldComponent
       this.onTouched();
       this.onChange(newValue);
     }
+  }
 
+  onPickerSelectionCommitted() {
     if (this.closeOnSelect()) {
       this.closePopover();
     }

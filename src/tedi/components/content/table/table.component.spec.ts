@@ -532,6 +532,19 @@ describe("TediTableComponent", () => {
       expect(expandButton).not.toBeNull();
     });
 
+    it("does not turn open sub-component rows into landmarks", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.subTemplate.set(
+        fixture.componentInstance.subTemplateRef()!,
+      );
+      fixture.componentInstance.state.set({ expanded: true });
+      fixture.detectChanges();
+      expect(
+        fixture.nativeElement.querySelectorAll(".sub-content").length,
+      ).toBe(data.length);
+      expect(fixture.nativeElement.querySelector('[role="region"]')).toBeNull();
+    });
+
     it("marks the icon-only expand cell with tedi-table__cell--control", () => {
       const fixture = setupHost();
       fixture.componentInstance.subTemplate.set(

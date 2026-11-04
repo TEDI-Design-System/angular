@@ -5,7 +5,11 @@
 </ng-template>
 
 @if (hasBox()) {
-  <div [ngClass]="boxClasses()" (mousedown)="handleBoxMouseDown($event)">
+  <div
+    [ngClass]="boxClasses()"
+    [style.--tedi-form-field-control-scrollbar]="controlScrollbarWidth()"
+    (mousedown)="handleBoxMouseDown($event)"
+  >
     <ng-container [ngTemplateOutlet]="controlSlot"></ng-container>
 
     @if (renderClearButton()) {
@@ -22,7 +26,7 @@
           [ariaLabel]="'clear' | tediTranslate"
           [iconSize]="18"
           [tabIndex]="showClearButton() ? 0 : -1"
-          [disabled]="isDisabled() || !showClearButton()"
+          [disabled]="!showClearButton()"
           (click)="clear()"
         ></button>
 

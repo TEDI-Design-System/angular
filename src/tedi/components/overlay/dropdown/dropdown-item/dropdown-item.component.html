@@ -1,9 +1,9 @@
-<ng-content select="tedi-dropdown-item-value" />
+<ng-content select="tedi-option-content" />
 
-@if (!customItemValue()) {
-  <tedi-dropdown-item-value>
-    <tedi-dropdown-item-value-label [clipContent]="clipContent()">
+@if (!customOptionContent()) {
+  <tedi-option-content>
+    <tedi-option-content-label [clipContent]="clipContent()">
       <ng-content />
-    </tedi-dropdown-item-value-label>
-  </tedi-dropdown-item-value>
+    </tedi-option-content-label>
+  </tedi-option-content>
 }
