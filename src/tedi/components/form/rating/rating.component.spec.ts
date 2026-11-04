@@ -177,8 +177,13 @@ describe("RatingComponent", () => {
   });
 
   it("applies the vertical orientation", () => {
-    setInputs({ orientation: "vertical" });
+    setInputs({ type: "icon", orientation: "vertical" });
     expect(el.classList).toContain("tedi-rating--vertical");
+  });
+
+  it("keeps the star scale horizontal", () => {
+    setInputs({ type: "star", orientation: "vertical" });
+    expect(el.classList).not.toContain("tedi-rating--vertical");
   });
 
   describe("hover preview", () => {

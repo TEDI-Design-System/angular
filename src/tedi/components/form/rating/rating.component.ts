@@ -125,7 +125,8 @@ export class RatingComponent implements ControlValueAccessor {
   readonly name = input<string>();
   /**
    * Lay the scale out horizontally or stack it vertically (icon + caption per row). Use `vertical` on
-   * narrow layouts for `type="icon"` with long `itemLabels`. Accepts a `BreakpointInput`, e.g.
+   * narrow layouts for `type="icon"` with long `itemLabels`. Ignored for `type="star"`, which is always
+   * horizontal. Accepts a `BreakpointInput`, e.g.
    * `{ xs: 'vertical', md: 'horizontal' }`.
    * @default horizontal
    */
@@ -307,7 +308,7 @@ export class RatingComponent implements ControlValueAccessor {
     if (this.readOnly()) {
       classList.push("tedi-rating--readonly");
     } else {
-      if (this.resolvedOrientation() === "vertical")
+      if (this.type() !== "star" && this.resolvedOrientation() === "vertical")
         classList.push("tedi-rating--vertical");
       if (this.isDisabled()) classList.push("tedi-rating--disabled");
     }
