@@ -1,23 +1,18 @@
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
-  ContentChildren,
+  DestroyRef,
   ElementRef,
   inject,
-  QueryList,
+  input,
   Renderer2,
-  TemplateRef,
-  ViewChild,
+  viewChild,
   ViewEncapsulation,
-  AfterContentInit,
-  effect,
-  Injector,
-  runInInjectionContext,
-  ViewContainerRef,
-  EmbeddedViewRef,
 } from "@angular/core";
-import { LinkComponent } from "../../../navigation/link/link.component";
-import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
+import { injectFooter } from "../footer-context";
+
+const DOT_CLASS = "tedi-footer-bottom__dot";
 
 @Component({
   standalone: true,
@@ -28,76 +23,52 @@ import { BreakpointService } from "../../../../services/breakpoint/breakpoint.se
   styleUrl: "./footer-bottom.component.scss",
   host: {
     class: "tedi-footer-bottom",
-    "[class.tedi-footer-bottom--mobile]": "mobileLayout()",
+    "[class.tedi-footer-bottom--mobile]": "isMobile()",
   },
 })
-export class FooterBottomComponent implements AfterContentInit {
-  private injector = inject(Injector);
-  private renderer = inject(Renderer2);
-  private breakpointService = inject(BreakpointService);
-  private hostRef = inject(ElementRef<HTMLElement>);
-  private viewContainerRef = inject(ViewContainerRef);
-  private ellipsisViews: Array<EmbeddedViewRef<void>> = [];
+export class FooterBottomComponent {
+  private readonly renderer = inject(Renderer2);
+  private readonly context = injectFooter();
 
-  @ViewChild("ellipsis", { static: true }) ellipsis!: TemplateRef<void>;
-  @ContentChildren(LinkComponent, { descendants: true, read: ElementRef })
-  links!: QueryList<ElementRef>;
+  /**
+   * Shows a dot between items.
+   * @default false
+   */
+  readonly separator = input<boolean>(false);
 
-  mobileLayout = this.breakpointService.isBelowBreakpoint("sm");
+  readonly isMobile = this.context.isMobile;
+  readonly maxWidth = this.context.footer?.maxWidthValue;
 
-  ngAfterContentInit(): void {
-    runInInjectionContext(this.injector, () => {
-      effect(() => {
-        if (this.mobileLayout()) {
-          this.addEllipsisElements();
-        } else {
-          this.removeEllipsisElements();
-        }
-      });
-    });
+  private readonly inner = viewChild.required<ElementRef<HTMLElement>>("inner");
+  private observer?: MutationObserver;
+
+  constructor() {
+    afterRenderEffect(() => this.syncDots(this.separator()));
+    inject(DestroyRef).onDestroy(() => this.observer?.disconnect());
   }
 
-  private addEllipsisElements() {
-    if (!this.links || this.links.length === 0) return;
-    const linksArray = this.links.toArray();
-    this.removeEllipsisElements();
-
-    linksArray.forEach((link, index) => {
-      const nativeElement = link.nativeElement;
-
-      if (index < linksArray.length - 1) {
-        const parent = nativeElement.parentNode;
-        if (!parent) return;
-
-        const embeddedView = this.viewContainerRef.createEmbeddedView(
-          this.ellipsis,
-        );
-        embeddedView.detectChanges();
-        this.ellipsisViews.push(embeddedView);
-        const ellipsisElement = embeddedView.rootNodes[0];
-        this.renderer.addClass(ellipsisElement, "tedi-footer-bottom__ellipsis");
-
-        this.renderer.insertBefore(
-          parent,
-          ellipsisElement,
-          nativeElement.nextSibling,
-        );
-      }
-    });
-  }
-
-  private removeEllipsisElements(): void {
-    const ellipsisEls = this.hostRef.nativeElement.querySelectorAll(
-      ".tedi-footer-bottom__ellipsis",
+  private syncDots(separator: boolean): void {
+    const inner = this.inner().nativeElement;
+    this.observer ??= new MutationObserver(() =>
+      this.syncDots(this.separator()),
     );
+    this.observer.disconnect();
 
-    ellipsisEls.forEach((el: HTMLElement) => {
-      const parent = el.parentNode;
-      if (parent) {
-        this.renderer.removeChild(parent, el);
-      }
-    });
-    this.ellipsisViews.forEach((view) => view.destroy());
-    this.ellipsisViews = [];
+    inner
+      .querySelectorAll(`:scope > .${DOT_CLASS}`)
+      .forEach((dot) => this.renderer.removeChild(inner, dot));
+
+    if (separator) {
+      Array.from(inner.children)
+        .slice(0, -1)
+        .forEach((item) => {
+          const dot = this.renderer.createElement("span");
+          this.renderer.addClass(dot, DOT_CLASS);
+          this.renderer.setAttribute(dot, "aria-hidden", "true");
+          this.renderer.insertBefore(inner, dot, item.nextSibling);
+        });
+    }
+
+    this.observer.observe(inner, { childList: true });
   }
 }

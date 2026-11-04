@@ -1,119 +1,153 @@
+import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FooterSectionComponent } from "./footer-section.component";
-import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
-import { signal } from "@angular/core";
+import {
+  Breakpoint,
+  BreakpointService,
+} from "../../../../services/breakpoint/breakpoint.service";
+import { TediTranslationService } from "../../../../services/translation/translation.service";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
+
+class BreakpointServiceMock {
+  readonly _currentBreakpoint = signal<Breakpoint | undefined>("xl");
+  readonly isBelowBreakpoint = BreakpointService.prototype.isBelowBreakpoint;
+}
+
+class TranslationMock {
+  translate(key: string) {
+    return key;
+  }
+  track(key: string) {
+    return () => key;
+  }
+}
+
+@Component({
+  standalone: true,
+  imports: [FooterSectionComponent],
+  template: `
+    <tedi-footer-section
+      heading="Kontakt"
+      [icon]="icon()"
+      [iconBreakpoint]="iconBreakpoint()"
+      [collapsible]="collapsible()"
+      [collapse]="collapse()"
+      [defaultOpen]="defaultOpen()"
+    >
+      <a class="test-link" href="#">+372 555 5555</a>
+    </tedi-footer-section>
+  `,
+})
+class TestHostComponent {
+  readonly icon = signal<string | undefined>("call");
+  readonly iconBreakpoint = signal<Breakpoint>("lg");
+  readonly collapsible = signal(false);
+  readonly collapse = signal(false);
+  readonly defaultOpen = signal(false);
+}
 
 describe("FooterSectionComponent", () => {
-  let component: FooterSectionComponent;
-  let fixture: ComponentFixture<FooterSectionComponent>;
-  let mockBreakpointService: { isBelowBreakpoint: jest.Mock };
+  let fixture: ComponentFixture<TestHostComponent>;
+  let host: TestHostComponent;
+  let breakpoint: BreakpointServiceMock;
+  let section: HTMLElement;
+
+  const toggle = () =>
+    section.querySelector<HTMLButtonElement>("button[tedi-collapse-button]");
 
   beforeEach(async () => {
-    mockBreakpointService = {
-      isBelowBreakpoint: jest.fn((breakpoint) => {
-        if (breakpoint === "lg") return signal(false);
-        if (breakpoint === "sm") return signal(false);
-        return signal(false);
-      }),
-    };
+    breakpoint = new BreakpointServiceMock();
 
     await TestBed.configureTestingModule({
-      imports: [FooterSectionComponent],
+      imports: [TestHostComponent],
       providers: [
-        {
-          provide: BreakpointService,
-          useValue: mockBreakpointService,
-        },
+        { provide: BreakpointService, useValue: breakpoint },
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(FooterSectionComponent);
-    component = fixture.componentInstance;
+    fixture = TestBed.createComponent(TestHostComponent);
+    host = fixture.componentInstance;
     fixture.detectChanges();
+    section = fixture.nativeElement.querySelector("tedi-footer-section");
   });
 
-  it("should create component", () => {
-    expect(component).toBeTruthy();
+  it("renders the heading, icon and content on desktop", () => {
+    expect(
+      section.querySelector(".tedi-footer-section__heading")?.textContent,
+    ).toContain("Kontakt");
+    expect(section.querySelector(".tedi-footer-section__icon")).not.toBeNull();
+    expect(section.querySelectorAll(".test-link")).toHaveLength(1);
+    expect(toggle()).toBeNull();
   });
 
-  it("should set default input values", () => {
-    expect(component.icon()).toBeUndefined();
-    expect(component.heading()).toBeUndefined();
-    expect(component.collapse()).toBe(false);
-  });
-
-  it("should set custom input values", () => {
-    fixture.componentRef.setInput("icon", "test-icon");
-    fixture.componentRef.setInput("heading", "Test Heading");
-    fixture.componentRef.setInput("collapse", true);
+  it("hides the icon below iconBreakpoint", () => {
+    breakpoint._currentBreakpoint.set("md");
     fixture.detectChanges();
+    expect(section.querySelector(".tedi-footer-section__icon")).toBeNull();
 
-    expect(component.icon()).toBe("test-icon");
-    expect(component.heading()).toBe("Test Heading");
-    expect(component.collapse()).toBe(true);
-  });
-
-  it("should show icon when icon is provided", () => {
-    fixture.componentRef.setInput("icon", "test-icon");
+    host.iconBreakpoint.set("md");
     fixture.detectChanges();
-
-    const iconElement = fixture.nativeElement.querySelector(
-      ".tedi-footer-section__icon",
-    );
-    expect(iconElement).toBeTruthy();
-    expect(component.icon()).toBe("test-icon");
+    expect(section.querySelector(".tedi-footer-section__icon")).not.toBeNull();
   });
 
-  it("should hide icon when below large breakpoint", () => {
-    fixture.componentRef.setInput("icon", "test-icon");
-    mockBreakpointService.isBelowBreakpoint.mockImplementation((breakpoint) => {
-      if (breakpoint === "lg") return signal(true);
-      if (breakpoint === "sm") return signal(false);
-      return signal(false);
-    });
-    fixture = TestBed.createComponent(FooterSectionComponent);
-    component = fixture.componentInstance;
+  it("stays a plain section on mobile unless collapsible", () => {
+    breakpoint._currentBreakpoint.set("xs");
     fixture.detectChanges();
 
-    const iconElement = fixture.nativeElement.querySelector(
-      ".tedi-footer-section__icon",
-    );
-    expect(iconElement).toBeFalsy();
+    expect(section.classList).toContain("tedi-footer-section--mobile");
+    expect(section.classList).not.toContain("tedi-footer-section--collapsible");
+    expect(toggle()).toBeNull();
   });
 
-  it("should toggle collapse state when collapse is enabled and mobile", () => {
-    mockBreakpointService.isBelowBreakpoint.mockImplementation((breakpoint) =>
-      signal(breakpoint === "sm"),
-    );
-    fixture = TestBed.createComponent(FooterSectionComponent);
-    fixture.componentRef.setInput("heading", "test-heading");
-    fixture.componentRef.setInput("collapse", true);
+  it("becomes an accordion labelled by the heading on mobile when collapsible", () => {
+    host.collapsible.set(true);
+    breakpoint._currentBreakpoint.set("xs");
     fixture.detectChanges();
 
-    const wrapper = fixture.nativeElement.querySelector(
-      ".tedi-footer-section__content-wrapper",
-    );
-    const button = fixture.nativeElement.querySelector(
-      ".tedi-footer-section__button",
-    );
-
-    expect(wrapper.classList).toContain(
-      "tedi-footer-section__content-wrapper--collapsed",
-    );
+    const button = toggle()!;
+    expect(section.classList).toContain("tedi-footer-section--collapsible");
+    expect(button.textContent).toContain("Kontakt");
     expect(button.getAttribute("aria-expanded")).toBe("false");
+    expect(
+      section.querySelector(
+        `#${button.getAttribute("aria-controls")} .test-link`,
+      ),
+    ).not.toBeNull();
+    expect(section.querySelectorAll(".test-link")).toHaveLength(1);
 
     button.click();
     fixture.detectChanges();
-    expect(wrapper.classList).not.toContain(
-      "tedi-footer-section__content-wrapper--collapsed",
-    );
     expect(button.getAttribute("aria-expanded")).toBe("true");
+  });
 
-    button.click();
+  it("keeps the projected content when switching between layouts", () => {
+    host.collapsible.set(true);
+    breakpoint._currentBreakpoint.set("xs");
     fixture.detectChanges();
-    expect(wrapper.classList).toContain(
-      "tedi-footer-section__content-wrapper--collapsed",
-    );
-    expect(button.getAttribute("aria-expanded")).toBe("false");
+    breakpoint._currentBreakpoint.set("xl");
+    fixture.detectChanges();
+
+    expect(toggle()).toBeNull();
+    expect(section.querySelectorAll(".test-link")).toHaveLength(1);
+  });
+
+  it("opens the accordion initially with defaultOpen", () => {
+    host.collapsible.set(true);
+    host.defaultOpen.set(true);
+    breakpoint._currentBreakpoint.set("xs");
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    expect(toggle()!.getAttribute("aria-expanded")).toBe("true");
+  });
+
+  it("still supports the deprecated collapse input", () => {
+    host.collapse.set(true);
+    breakpoint._currentBreakpoint.set("xs");
+    fixture.detectChanges();
+
+    expect(toggle()).not.toBeNull();
   });
 });
