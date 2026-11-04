@@ -65,6 +65,11 @@ export class CollapseComponent implements AfterViewInit {
    * @default false
    */
   inverted = input<boolean>(false);
+  /**
+   * Underlines the toggle text. Has no effect with `hideCollapseText`.
+   * @default true
+   */
+  underline = input<boolean>(true);
 
   collapseContentId: string = `collapse-content-${generateUUID()}`;
   isOpen = signal<boolean>(false);

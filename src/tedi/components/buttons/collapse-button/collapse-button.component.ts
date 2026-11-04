@@ -90,9 +90,10 @@ export class CollapseButtonComponent {
 
   openChange = output<boolean>();
 
-  protected readonly iconSize = computed<IconSize>(() =>
-    this.hideText() ? 24 : 16,
-  );
+  protected readonly iconSize = computed<IconSize>(() => {
+    if (this.hideText()) return 24;
+    return this.size() === "small" ? 16 : 18;
+  });
 
   protected readonly iconVariant = computed(() =>
     this.hideText() ? "filled" : "outlined",
