@@ -410,9 +410,7 @@
             [attr.aria-label]="rowAriaLabelFor(row)"
             [attr.aria-rowindex]="ariaRowIndex"
             [attr.aria-current]="isActiveRow ? 'true' : null"
-            (click)="
-              (interactive() || expandsOnClick) && handleRowClick($event, row)
-            "
+            (click)="handleRowClick($event, row)"
             (keydown)="handleRowKeydown($event, row)"
             (mouseenter)="handleRowMouseEnter(row)"
             (mouseleave)="handleRowMouseLeave()"
