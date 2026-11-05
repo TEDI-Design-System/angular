@@ -248,6 +248,22 @@ describe("SearchComponent", () => {
     expect(feedback?.textContent?.trim()).toBe("Tagasiside tekst");
   });
 
+  it("should apply default feedback classes when only text is given", () => {
+    const freshFixture = TestBed.createComponent(SearchComponent);
+    freshFixture.componentRef.setInput("inputId", "test-id");
+    freshFixture.componentRef.setInput("feedbackText", { text: "Vihjetekst" });
+    freshFixture.detectChanges();
+    const feedback = (freshFixture.nativeElement as HTMLElement).querySelector(
+      "tedi-feedback-text",
+    );
+
+    expect(feedback?.className).not.toContain("undefined");
+    expect(feedback?.classList).toContain("tedi-feedback-text--hint");
+    expect(feedback?.classList).toContain("tedi-feedback-text--left");
+    expect(feedback?.getAttribute("role")).toBeNull();
+    expect(feedback?.getAttribute("aria-live")).toBe("polite");
+  });
+
   it("should not set aria-describedby without feedbackText", () => {
     expect(getInput().getAttribute("aria-describedby")).toBeNull();
   });
