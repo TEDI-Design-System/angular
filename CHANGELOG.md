@@ -1,3 +1,10 @@
+# [10.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.1...angular-10.0.0-rc.2) (2026-11-05)
+
+
+### Features
+
+* **form-field, modal:** deprecate community FormField and Modal [#792](https://github.com/TEDI-Design-System/angular/issues/792) ([#847](https://github.com/TEDI-Design-System/angular/issues/847)) ([0aa3136](https://github.com/TEDI-Design-System/angular/commit/0aa3136092221c6ac05c57e96d5e6008214cc82c))
+
 # [10.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-9.1.0-rc.2...angular-10.0.0-rc.1) (2026-11-05)
 
 
