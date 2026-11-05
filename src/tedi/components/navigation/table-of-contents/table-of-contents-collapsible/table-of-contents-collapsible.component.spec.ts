@@ -17,6 +17,7 @@ import { TableOfContentsItemComponent } from "../table-of-contents-item/table-of
   template: `
     <tedi-table-of-contents-collapsible
       [heading]="heading()"
+      [divided]="divided()"
       activeId="methods"
     >
       <tedi-table-of-contents-item itemId="intro">
@@ -36,6 +37,7 @@ import { TableOfContentsItemComponent } from "../table-of-contents-item/table-of
 })
 class HostComponent {
   readonly heading = input<string | null | undefined>("Sisukord");
+  readonly divided = input(false);
 }
 
 describe("TableOfContentsCollapsibleComponent", () => {
@@ -99,6 +101,18 @@ describe("TableOfContentsCollapsibleComponent", () => {
     );
     expect(links).toContain("Sissejuhatus");
     expect(links).toContain("Andmete kogumine");
+  }));
+
+  it("does not apply the divided modifier to the sheet by default", fakeAsync(() => {
+    openSheet();
+    expect(sheet()!.classList).not.toContain("tedi-table-of-contents--divided");
+  }));
+
+  it("applies the divided modifier to the sheet when divided", fakeAsync(() => {
+    fixture.componentRef.setInput("divided", true);
+    fixture.detectChanges();
+    openSheet();
+    expect(sheet()!.classList).toContain("tedi-table-of-contents--divided");
   }));
 
   it("closes the sheet from the sheet header", fakeAsync(() => {
