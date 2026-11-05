@@ -1,3 +1,10 @@
+# [9.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-9.1.0-rc.1...angular-9.1.0-rc.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* **vertical-spacing:** keep host inline styles and react to input changes [#843](https://github.com/TEDI-Design-System/angular/issues/843) ([#845](https://github.com/TEDI-Design-System/angular/issues/845)) ([3cc5903](https://github.com/TEDI-Design-System/angular/commit/3cc5903c07b58409e1c1383a82389e477df87ad8))
+
 # [9.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.1-rc.3...angular-9.1.0-rc.1) (2026-11-04)
 
 
