@@ -1,3 +1,10 @@
+# [10.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.2...angular-10.0.0-rc.3) (2026-11-05)
+
+
+### Bug Fixes
+
+* **feedback-text:** fall back to defaults when type or position is undefined [#848](https://github.com/TEDI-Design-System/angular/issues/848) ([#849](https://github.com/TEDI-Design-System/angular/issues/849)) ([3a9829a](https://github.com/TEDI-Design-System/angular/commit/3a9829ae4e8aad0d55d70bd4622a36b7a86a5097))
+
 # [10.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.1...angular-10.0.0-rc.2) (2026-11-05)
 
 
