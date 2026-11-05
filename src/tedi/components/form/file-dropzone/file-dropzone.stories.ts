@@ -1,0 +1,578 @@
+import {
+  AfterViewInit,
+  Directive,
+  ElementRef,
+  inject,
+  input,
+} from "@angular/core";
+import { FormControl, ReactiveFormsModule, Validators } from "@angular/forms";
+import { CommonModule } from "@angular/common";
+import {
+  argsToTemplate,
+  Meta,
+  moduleMetadata,
+  StoryObj,
+} from "@storybook/angular";
+import { FileDropzoneComponent } from "./file-dropzone.component";
+import { FileDropzoneFileDirective } from "./file-dropzone-file.directive";
+import { FileDropzoneFile } from "./file-dropzone.types";
+import { AlertComponent } from "../../notifications/alert/alert.component";
+import { AttachmentComponent } from "../../helpers/attachment/attachment.component";
+import { AttachmentActionsComponent } from "../../helpers/attachment/attachment-actions.component";
+import { ButtonComponent } from "../../buttons/button/button.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { IconComponent } from "../../base/icon/icon.component";
+import { ProgressBarComponent } from "../../loader/progress-bar/progress-bar.component";
+import { TextComponent } from "../../base/text/text.component";
+
+const STATES = [
+  { id: "Default", label: "Default" },
+  { id: "Hover", label: "Hover" },
+  { id: "Active", label: "Active" },
+  {
+    id: "Error",
+    label: "Error",
+    error: "Fail on liiga suur. Valige mõni teine fail või vähendage suurust.",
+  },
+  { id: "DropOver", label: "Drop over", dropOver: true },
+  { id: "Disabled", label: "Disabled", disabled: true },
+  { id: "Focus", label: "Focus" },
+];
+
+/**
+ * `drop-over` is live drag state, not an input — the showcase row has to raise a
+ * real `dragenter` carrying files for the dropzone to react to it.
+ */
+@Directive({ selector: "[storyDropOver]", standalone: true })
+class StoryDropOverDirective implements AfterViewInit {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  readonly storyDropOver = input(false);
+
+  ngAfterViewInit(): void {
+    if (!this.storyDropOver()) return;
+
+    const zone = this.host.nativeElement.querySelector(
+      ".tedi-file-dropzone__zone",
+    );
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(new File([""], "example.pdf"));
+    zone?.dispatchEvent(
+      new DragEvent("dragenter", {
+        dataTransfer,
+        bubbles: true,
+        cancelable: true,
+      }),
+    );
+  }
+}
+
+/**
+ * Lets a story show the summary the dropzone writes for itself, by actually
+ * dropping a file it will reject. A hardcoded `error` would stay on screen
+ * after the user has fixed the selection.
+ */
+@Directive({ selector: "[storyRejectedDrop]", standalone: true })
+class StoryRejectedDropDirective implements AfterViewInit {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  readonly storyRejectedDrop = input<string>();
+
+  ngAfterViewInit(): void {
+    const name = this.storyRejectedDrop();
+    if (!name) return;
+
+    const zone = this.host.nativeElement.querySelector(
+      ".tedi-file-dropzone__zone",
+    );
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(new File([""], name));
+    ["dragenter", "dragover", "drop"].forEach((type) =>
+      zone?.dispatchEvent(
+        new DragEvent(type, { dataTransfer, bubbles: true, cancelable: true }),
+      ),
+    );
+  }
+}
+
+/**
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.75.90?node-id=11335-185781&m=dev" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.tedi.ee/1ee8444b7/p/70876f-file-dropzone" target="_blank">Zeroheight ↗</a>
+ */
+export default {
+  title: "TEDI-Ready/Components/Form/FileDropzone",
+  component: FileDropzoneComponent,
+  decorators: [
+    moduleMetadata({
+      imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FileDropzoneFileDirective,
+        AlertComponent,
+        AttachmentComponent,
+        AttachmentActionsComponent,
+        ButtonComponent,
+        ProgressBarComponent,
+        IconComponent,
+        RowComponent,
+        ColComponent,
+        TextComponent,
+        StoryDropOverDirective,
+        StoryRejectedDropDirective,
+      ],
+    }),
+  ],
+  argTypes: {
+    files: {
+      description:
+        "Files held by the dropzone, and the value written by `formControl` / `ngModel`. Bind one-way to seed the list and leave the dropzone owning it, two-way to stay in sync. Bind a stable reference — an inline literal is a new array on every check and discards what the user added." +
+        " The value keeps the order the files arrived in; the rendered list differs, showing files marked `isValid: false` first.",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "FileDropzoneFile[]" },
+        defaultValue: { summary: "[]" },
+      },
+    },
+    inputId: {
+      description: "Id of the file input. Generated when not set.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    name: {
+      description:
+        "`name` attribute of the file input. The files do not travel with a native form submit: dropped files never reach the input, and its value is cleared after each selection so the same file can be picked again. Read them from `files` or the bound control.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    label: {
+      description:
+        "Text inside the dropzone, which also names the file input. Falls back to the translated `file-dropzone.label`.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    accept: {
+      description:
+        "Allowed file types as a comma-separated list of extensions and MIME types. Re-checked on drop, which bypasses the `accept` attribute." +
+        " Applies to what is picked next — files already listed keep the verdict they were given.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    maxSize: {
+      description:
+        "Largest accepted file size, in bytes. The restrictions hint renders it in whichever unit reads best." +
+        " Applies to what is picked next — files already listed keep the verdict they were given.",
+      control: "number",
+      table: { category: "inputs", type: { summary: "number" } },
+    },
+    validator: {
+      description:
+        "A rule of your own for each selected file, checked alongside `accept` and `maxSize`. Return the reason a file is rejected, or nothing to accept it. The reason lands on that file's `error` after the built-in ones and joins the rejection summary. It runs on every selected file, including ones `accept` or `maxSize` rejected." +
+        " The automatic hint cannot describe it, so describe the rule in `hint`.",
+      control: false,
+      table: {
+        category: "inputs",
+        type: { summary: "(file: File) => string | null | undefined" },
+      },
+    },
+    multiple: {
+      description:
+        "Whether more than one file can be held. A single-file dropzone replaces its file on the next selection.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    duplicates: {
+      description:
+        "What happens when a file the list already holds is picked again. `skip` leaves the list alone and says so, matching on name, size and modification time. `rename` keeps both, the newcomer renamed `scan (1).pdf`. `replace` swaps the listed file for the newcomer, and only a file that passes displaces its namesake." +
+        " `rename` and `replace` match on the name alone, since that is the collision the user sees.",
+      control: "inline-radio",
+      options: ["skip", "rename", "replace"],
+      table: {
+        category: "inputs",
+        type: { summary: '"skip" | "rename" | "replace"' },
+        defaultValue: { summary: '"skip"' },
+      },
+    },
+    uploadFolder: {
+      description:
+        "Lets the user pick a whole folder, which the browser hands over as the files inside it. Each one is still checked against `accept`, `maxSize` and `validator`. Applies to the file picker — dragging a folder in is up to the browser and generally does not work.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    keepRejectedFiles: {
+      description:
+        "Keeps rejected files in the list, each carrying its own reason. Left off, a rejected file is discarded and every rejection is summarised in one message under the dropzone instead." +
+        " A kept file stays in the value too, marked `isValid: false`. A form control fails while one is listed, so it cannot be submitted; reading the files directly, filter on `isValid` before uploading.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    showRestrictions: {
+      description:
+        "Whether the allowed types and maximum size are summarised in the hint below the dropzone. `hint` and rejection errors render either way.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "true" },
+      },
+    },
+    showFileSize: {
+      description: "Whether each file's size is shown next to its name.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    hint: {
+      description:
+        "Guidance of your own, such as what a `validator` checks, shown after the allowed types and maximum size in the dropzone's hint.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    error: {
+      description:
+        "An error of your own, such as one the server returned. Shown after the dropzone's own rejection message in one error text, above the hint, and paints the border red. It does not change a bound control's validity.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    success: {
+      description:
+        "A success message, shown in the error's place above the hint and painting the border green. Shown only while the dropzone has no error.",
+      control: "text",
+      table: { category: "inputs", type: { summary: "string" } },
+    },
+    disabled: {
+      description:
+        "Disables the dropzone from a parent template. Combined with the reactive-forms disabled state, so this only forces it on.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    invalid: {
+      description:
+        "Marks the dropzone as invalid. The error state is also derived from the bound control and from rejected files, so this only forces it on.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    fileRemove: {
+      description:
+        "Emits the file the user removed — `filesChange` carries the new list, this says which entry left it.",
+      table: { category: "outputs", type: { summary: "FileDropzoneFile" } },
+    },
+    filesChange: {
+      description:
+        "Emits the new list whenever files are added or removed, in the order the files arrived in. It can include files marked `isValid: false` — see `keepRejectedFiles`.",
+      table: { category: "outputs", type: { summary: "FileDropzoneFile[]" } },
+    },
+  },
+  args: {
+    name: "file-dropzone",
+  },
+  parameters: { controls: { disable: true } },
+  render: (args) => ({
+    props: { ...args },
+    template: `
+      <div style="max-width: 420px">
+        <tedi-file-dropzone ${argsToTemplate(args)} />
+      </div>
+    `,
+  }),
+} as Meta<FileDropzoneComponent>;
+
+type Story = StoryObj<FileDropzoneComponent>;
+
+export const Default: Story = {
+  parameters: { controls: { disable: false } },
+};
+
+/**
+ * `accept` and `maxSize` are summarised in a hint below the dropzone, and
+ * `hint` adds guidance of your own after them. Set `showRestrictions` to
+ * `false` when the same information is already shown elsewhere.
+ */
+export const WithHint: Story = {
+  args: {
+    accept: ".jpg,.png,.pdf",
+    maxSize: 1024 ** 2,
+    hint: "Lisa allkirjastatud avalduse koopia.",
+  },
+};
+
+export const Multiple: Story = {
+  args: {
+    multiple: true,
+    accept: ".jpg,.png,.pdf",
+    maxSize: 1024 ** 2,
+    files: [
+      { id: "1", name: "report.pdf" },
+      { id: "2", name: "report_1.pdf" },
+      { id: "3", name: "report_2.pdf" },
+    ],
+  },
+};
+
+export const WithFileSize: Story = {
+  args: {
+    multiple: true,
+    showFileSize: true,
+    files: [
+      { id: "1", name: "arve_2026_06.pdf", size: 1_200_000 },
+      { id: "2", name: "aastaaruanne_2025.pdf", size: 5_400_000 },
+    ],
+  },
+};
+
+/**
+ * The default. A rejected file is discarded, so only the files that passed
+ * remain and the failure is reported once under the dropzone, which turns its
+ * border red.
+ */
+export const DiscardingRejectedFiles: Story = {
+  name: "Validation: discarding rejected files",
+  args: {
+    accept: ".pdf,.txt",
+    maxSize: 1024 ** 2,
+    multiple: true,
+    keepRejectedFiles: false,
+    files: [
+      { id: "1", name: "Kodukülastusakt_Triin.pdf" },
+      { id: "2", name: "Kodukülastusakt_Triin_2.pdf" },
+    ],
+  },
+  render: (args) => ({
+    props: { ...args },
+    template: `
+      <div style="max-width: 420px">
+        <tedi-file-dropzone ${argsToTemplate(args)} storyRejectedDrop="Kodukülastusakt_Triin.png" />
+      </div>
+    `,
+  }),
+};
+
+/**
+ * The opt-in. A rejected file stays in the list carrying its own reason, so the
+ * user can see which file failed and remove it. The dropzone's border stays
+ * neutral — the failure belongs to the file, not the field.
+ *
+ * Rejected files lead the list and offer a dismiss icon instead of a bin. Only
+ * the display order changes: the value keeps the order the files arrived in.
+ *
+ * They stay in the value too, marked `isValid: false`. A form control fails
+ * while one is listed, so nothing can be submitted with it; if you read the
+ * files yourself, filter on `isValid` before uploading.
+ */
+export const KeepingRejectedFiles: Story = {
+  name: "Validation: keeping rejected files",
+  args: {
+    multiple: true,
+    keepRejectedFiles: true,
+    accept: ".pdf,.txt",
+    files: [
+      { id: "1", name: "Kodukülastusakt_Triin.pdf" },
+      {
+        id: "5",
+        name: "Kodukülastusakt_Triin_4.pdf",
+        isValid: false,
+        error: "Fail on liiga suur",
+      },
+      { id: "2", name: "Kodukülastusakt_Triin_2.pdf" },
+      { id: "3", name: "Kodukülastusakt_Triin_3.pdf" },
+      {
+        id: "4",
+        name: "Kodukülastusakt_Triin.png",
+        isValid: false,
+        error: "Failiformaat ei ole lubatud",
+      },
+    ],
+  },
+};
+
+/**
+ * Describe the validator's rule in `hint`; the dropzone shows it after the
+ * allowed types. Pick a file with a space in its name to try it.
+ */
+export const WithValidator: Story = {
+  render: () => ({
+    props: {
+      files: [],
+      noSpaces: (file: File) =>
+        file.name.includes(" ") ? "Failinimes ei tohi olla tühikuid" : null,
+    },
+    template: `
+      <div style="max-width: 420px">
+        <tedi-file-dropzone
+          multiple
+          keepRejectedFiles
+          accept=".pdf,.txt"
+          [validator]="noSpaces"
+          hint="Failinimes ei tohi olla tühikuid."
+          [files]="files"
+        />
+      </div>
+    `,
+  }),
+};
+
+/**
+ * An `*tediFileDropzoneFile` template replaces the built-in attachment row. It
+ * receives each file along with `remove`, `removeLabel` and `removeIcon`, so a
+ * custom row can carry the same remove control as the built-in one while
+ * composing anything `tedi-attachment` supports — a leading icon, a progress
+ * bar, per-file feedback, extra actions.
+ *
+ * Ordering stays with the dropzone: rejected files lead the list whichever
+ * template renders them.
+ */
+export const WithCustomFileTemplate: Story = {
+  render: () => {
+    const files: FileDropzoneFile[] = [
+      { id: "1", name: "arve_2026_06.pdf", size: 1_200_000 },
+      { id: "2", name: "aastaaruanne_2025.pdf", size: 24_500, isValid: false },
+      { id: "3", name: "esitlus.mp4", size: 140_000_000, isLoading: true },
+    ];
+
+    return {
+      props: { files, progress: 64 },
+      template: `
+      <div style="max-width: 420px">
+        <tedi-file-dropzone multiple [files]="files" accept=".pdf,.mp4">
+          <ng-template tediFileDropzoneFile let-file let-remove="remove" let-removeLabel="removeLabel" let-removeIcon="removeIcon">
+            <tedi-attachment
+              [name]="file.name"
+              icon="description"
+              [error]="file.isValid === false ? 'Fail on liiga suur. Lubatud on failid suurusega kuni 1 MB' : undefined"
+            >
+              @if (file.isLoading) {
+                <tedi-progress-bar [value]="progress" />
+              }
+              <tedi-attachment-actions>
+                @if (file.isValid !== false && !file.isLoading) {
+                  <button tedi-button variant="neutral" [attr.aria-label]="'Laadi alla ' + file.name">
+                    <tedi-icon name="download" [size]="18" color="inherit" />
+                  </button>
+                }
+                <button tedi-button variant="neutral" [attr.aria-label]="removeLabel" (click)="remove()">
+                  <tedi-icon [name]="removeIcon" [size]="18" color="inherit" />
+                </button>
+              </tedi-attachment-actions>
+            </tedi-attachment>
+          </ng-template>
+        </tedi-file-dropzone>
+      </div>
+      `,
+    };
+  },
+};
+
+export const States: Story = {
+  parameters: {
+    // The states live on the drop zone, not on the component host, and the addon
+    // only rewrites a pseudo-class to a class on the styled element itself — so
+    // every selector has to reach the zone. It is also the focusable element:
+    // the file input is `display: none` and out of the tab order.
+    pseudo: {
+      hover: "#Hover .tedi-file-dropzone__zone",
+      active: "#Active .tedi-file-dropzone__zone",
+      focusVisible: "#Focus .tedi-file-dropzone__zone",
+    },
+  },
+  render: () => ({
+    props: { STATES },
+    template: `
+      <tedi-row [cols]="1" [gapY]="4">
+        @for (state of STATES; track state.id) {
+          <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+            <tedi-col width="1">
+              <p tedi-text modifiers="bold">{{ state.label }}</p>
+            </tedi-col>
+            <tedi-col width="5">
+              <div style="max-width: 420px">
+                <tedi-file-dropzone
+                  [id]="state.id"
+                  [inputId]="state.id + '-input'"
+                  [maxSize]="30 * 1024 ** 2"
+                  [disabled]="!!state.disabled"
+                  [error]="state.error"
+                  [storyDropOver]="!!state.dropOver"
+                />
+              </div>
+            </tedi-col>
+          </tedi-row>
+        }
+      </tedi-row>
+    `,
+  }),
+};
+
+/**
+ * Rejected files stay in the value with `isValid: false`, so the control holds
+ * what the user picked rather than a silently filtered subset. The dropzone
+ * validates itself, so the control fails with a `rejectedFiles` error while one
+ * is listed — no validator of your own needed. Still filter on `isValid` before
+ * uploading.
+ */
+export const WithReactiveForms: Story = {
+  render: () => {
+    const control = new FormControl<FileDropzoneFile[]>([], {
+      nonNullable: true,
+      validators: [Validators.required],
+    });
+
+    return {
+      props: {
+        control,
+        invalidCount: () =>
+          control.value.filter((file) => file.isValid === false).length,
+      },
+      template: `
+        <div style="max-width: 420px">
+        <tedi-row [cols]="1" [gapY]="3">
+          <tedi-col>
+            <tedi-file-dropzone
+              multiple
+              accept=".pdf,.txt"
+              [maxSize]="1024 ** 2"
+              [formControl]="control"
+            />
+          </tedi-col>
+          <tedi-col>
+            <tedi-alert type="info" [showClose]="false">
+              <pre tedi-text modifiers="small">{{
+                  {
+                    files: control.value.length,
+                    invalidFiles: invalidCount(),
+                    touched: control.touched,
+                    dirty: control.dirty,
+                    invalid: control.invalid
+                  } | json
+                }}</pre>
+            </tedi-alert>
+          </tedi-col>
+        </tedi-row>
+        </div>
+      `,
+    };
+  },
+};

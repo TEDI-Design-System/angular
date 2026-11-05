@@ -40,6 +40,11 @@ const meta: Meta<FileDropzoneComponent> = {
     },
   ],
   title: "Community/Form/FileDropzone",
+  parameters: {
+    status: {
+      type: ["existsInTediReady", "deprecated"],
+    },
+  },
   args: {
     accept: "",
     maxSize: 0,

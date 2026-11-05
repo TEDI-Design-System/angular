@@ -31,6 +31,7 @@ import {
   TooltipContentComponent,
   TooltipTriggerComponent,
   VerticalSpacingDirective,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 import {
   DropzoneValidatorFunction,
@@ -49,6 +50,10 @@ import {
 } from "./utils";
 import { FileService } from "./file.service";
 
+/**
+ * @deprecated Use FileDropzone from TEDI-ready instead. This component will be
+ * removed from future versions.
+ */
 @Component({
   selector: "tedi-file-dropzone",
   templateUrl: "./file-dropzone.component.html",
@@ -223,6 +228,10 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
   }));
 
   constructor() {
+    warnDeprecated(
+      "Community tedi-file-dropzone",
+      "Use FileDropzone from TEDI-ready instead.",
+    );
     this._ngControl.valueAccessor = this;
   }
 
