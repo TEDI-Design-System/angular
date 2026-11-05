@@ -502,6 +502,22 @@ describe("Tabs", () => {
       expect(document.activeElement).toBe(anchors[0]);
     });
 
+    it("follows the link once when an anchor tab is chosen from the overflow dropdown", () => {
+      const { fixture, anchors } = setupAnchors();
+      const linkClick = jest.fn();
+      anchors[1].addEventListener("click", linkClick);
+      const list = fixture.debugElement.query(By.directive(TabsListComponent))
+        .componentInstance as TabsListComponent;
+
+      list.selectTab("/b");
+      fixture.detectChanges();
+
+      expect(linkClick).toHaveBeenCalledTimes(1);
+      expect(fixture.componentInstance.onChange).toHaveBeenCalledTimes(1);
+      expect(fixture.componentInstance.onChange).toHaveBeenCalledWith("/b");
+      expect(anchors[1].getAttribute("aria-selected")).toBe("true");
+    });
+
     it("arrow navigation moves focus without activating an anchor (manual activation)", () => {
       const { fixture, anchors } = setupAnchors();
       anchors[0].focus();
@@ -538,6 +554,18 @@ describe("Tabs", () => {
       const list = fixture.debugElement.query(By.directive(TabsListComponent))
         .componentInstance as TabsListComponent;
       expect(list.dropdownItems().map((i) => i.id)).toEqual(["tab-2", "tab-3"]);
+    });
+
+    it("selects a button tab chosen from the overflow dropdown", () => {
+      const fixture = setup();
+      simulateOverflow(fixture);
+      const list = fixture.debugElement.query(By.directive(TabsListComponent))
+        .componentInstance as TabsListComponent;
+
+      list.selectTab("tab-2");
+      fixture.detectChanges();
+
+      expect(tabs(fixture)[1].getAttribute("aria-selected")).toBe("true");
     });
 
     it("removes the More button when the container grows", () => {

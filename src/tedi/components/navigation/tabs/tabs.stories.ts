@@ -283,7 +283,7 @@ export const AsLinks: Story = {
     docs: {
       description: {
         story:
-          'Render triggers as `<a>` instead of `<button>` when a tab navigates to a route — this gives real link affordances (open in new tab, copy address, works without JS) as WCAG expects for navigation. The anchor keeps `role="tab"` semantics. Unlike button tabs (automatic activation), anchor tabs use **manual activation**: arrow keys only move focus and Enter/Space follows the link, so arrowing across route-links doesn\'t navigate on every keypress. Use `routerLink` for Angular routing and bind `[value]` to the current route; this demo uses plain `href` hash links with in-page panels.',
+          "Render triggers as `<a>` instead of `<button>` when a tab navigates to a route — this gives real link affordances (open in new tab, copy address, works without JS) as WCAG expects for navigation. The anchor keeps `role=\"tab\"` semantics. Unlike button tabs (automatic activation), anchor tabs use **manual activation**: arrow keys only move focus and Enter/Space follows the link, so arrowing across route-links doesn't navigate on every keypress. The link does the navigating, also when the tab is chosen from the overflow dropdown, so `valueChange` only reports the new active tab: don't navigate from it, or every click navigates twice. Use `routerLink` for Angular routing and bind `[value]` to the current route; this demo uses plain `href` hash links with in-page panels.",
       },
     },
   },
