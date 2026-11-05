@@ -1,3 +1,17 @@
+# [10.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-9.1.0-rc.2...angular-10.0.0-rc.1) (2026-11-05)
+
+
+### Features
+
+* **table-of-contents:** rename bordered input to divided [#842](https://github.com/TEDI-Design-System/angular/issues/842) ([#844](https://github.com/TEDI-Design-System/angular/issues/844)) ([22aa663](https://github.com/TEDI-Design-System/angular/commit/22aa6630db7fd0d835aeeebb4afcb332384105af))
+
+
+### BREAKING CHANGES
+
+* **table-of-contents:** `bordered` on tedi-table-of-contents and
+tedi-table-of-contents-collapsible is renamed to `divided`, and the
+`tedi-table-of-contents--bordered` class to `tedi-table-of-contents--divided`.
+
 # [9.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-9.1.0-rc.1...angular-9.1.0-rc.2) (2026-11-05)
 
 
