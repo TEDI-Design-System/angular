@@ -99,6 +99,7 @@ const COMMON_INPUTS = [
   "hideOnScroll",
   "modal",
   "fullscreen",
+  "calendarFullWidth",
   "calendarTrigger",
   "numberOfMonths",
   "clearable",
@@ -169,6 +170,7 @@ const renderSingle: NonNullable<StoryObj<DateFieldStoryArgs>["render"]> = (
           [hideOnScroll]="hideOnScroll"
           [modal]="modal"
           [fullscreen]="fullscreen"
+          [calendarFullWidth]="calendarFullWidth"
           [calendarTrigger]="calendarTrigger"
           [numberOfMonths]="numberOfMonths"
           [clearable]="clearable"
@@ -256,6 +258,7 @@ export default {
     hideOnScroll: false,
     modal: false,
     fullscreen: false,
+    calendarFullWidth: false,
     calendarTrigger: "button",
     numberOfMonths: 1,
     minYear: null,
@@ -661,6 +664,16 @@ export default {
           summary: "ModalFullscreen",
           detail: 'boolean \n"sm" | "md" | "lg" | "xl"',
         },
+        defaultValue: { summary: "false" },
+      },
+    },
+    calendarFullWidth: {
+      description:
+        "Stretch the calendar across the modal body; cells keep a square aspect ratio and scale with the modal width (see Calendar `fullWidth`). Only applies in modal mode.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
     },
@@ -1280,7 +1293,7 @@ export const MobileModal: Story = {
             </tedi-form-field>
           </tedi-col>
           <tedi-col>
-            <p tedi-text>Fullscreen modal (modal=true, fullscreen=true)</p>
+            <p tedi-text modifiers="small bold">Fullscreen modal with full-width calendar</p>
             <tedi-form-field>
               <label tedi-label for="date-modal-fullscreen">Kuupäev</label>
               <tedi-date-field
@@ -1288,6 +1301,7 @@ export const MobileModal: Story = {
                 [formControl]="fullscreenControl"
                 [modal]="true"
                 [fullscreen]="true"
+                [calendarFullWidth]="true"
                 [useNativePicker]="false"
               />
             </tedi-form-field>
@@ -1301,7 +1315,7 @@ export const MobileModal: Story = {
     docs: {
       description: {
         story:
-          '`[modal]="true"` opens the calendar in a modal (with explicit Cancel/Confirm) instead of the popover, holding the selection as a draft until Confirm. By default the modal is centered; add `[fullscreen]="true"` to make it fill the screen — useful on small phones where vertical space is tight. Both `modal` and `fullscreen` accept the same union (`true | false | sm | md | lg | xl`), so e.g. `fullscreen="md"` only goes fullscreen below `md`.',
+          '`[modal]="true"` opens the calendar in a modal with Cancel/Confirm. The first field uses the compact centered layout; the second combines `[fullscreen]="true"` with `[calendarFullWidth]="true"` to spread the calendar across the fullscreen modal. Both `modal` and `fullscreen` accept `true | false | sm | md | lg | xl`.',
       },
     },
   },

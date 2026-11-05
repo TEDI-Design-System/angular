@@ -29,6 +29,7 @@ function makeData(
     showOutsideDays: true,
     showWeekNumbers: false,
     numberOfMonths: 1,
+    calendarFullWidth: false,
     monthYearSelectType: "dropdown",
     required: false,
     disabledMatchers: [],
@@ -68,6 +69,14 @@ describe("DateFieldModalComponent", () => {
   it("renders", () => {
     setup();
     expect(component).toBeTruthy();
+  });
+
+  it("enables the full-width layout on the modal calendar", () => {
+    setup(makeData({ calendarFullWidth: true }));
+    const modal = fixture.nativeElement.querySelector(".tedi-date-field-modal");
+    const calendar = fixture.nativeElement.querySelector(".tedi-calendar");
+    expect(modal.classList).toContain("tedi-date-field-modal--full-width");
+    expect(calendar.classList).toContain("tedi-calendar--full-width");
   });
 
   it("seeds draft from data.value", () => {

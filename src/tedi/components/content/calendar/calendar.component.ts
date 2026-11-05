@@ -74,6 +74,7 @@ const YEAR_PAGE_SIZE = 12;
     "[class.tedi-calendar--multi-month]": "numberOfMonths() > 1",
     "[class.tedi-calendar--with-week-numbers]": "showWeekNumbers()",
     "[class.tedi-calendar--bordered]": "bordered()",
+    "[class.tedi-calendar--full-width]": "fullWidth()",
     "[style.--_tedi-calendar-month-count]": "numberOfMonths()",
   },
 })
@@ -125,6 +126,11 @@ export class CalendarComponent implements ControlValueAccessor {
    * DateField overlay).
    */
   readonly bordered = input<boolean>(true);
+  /**
+   * Grow to fill the container's width instead of a fixed width; cells keep a
+   * square aspect ratio. Wrap in a sized container to control the scale.
+   */
+  readonly fullWidth = input<boolean>(false);
   /**
    * Matchers that mark dates as disabled. Each matcher can be a `Date`, `Date[]`,
    * `{ before }`, `{ after }`, `{ before, after }`, `{ from, to? }`,
@@ -233,12 +239,13 @@ export class CalendarComponent implements ControlValueAccessor {
     });
 
     // Re-measure after every render that changes the month count, the
-    // week-number column, the active view, or the viewport. We write the CSS
-    // custom property imperatively (not via a template binding) so updating it
-    // never re-triggers change detection.
+    // week-number column, the full-width layout, the active view, or the
+    // viewport. We write the CSS custom property imperatively (not via a
+    // template binding) so updating it never re-triggers change detection.
     afterRenderEffect(() => {
       this.numberOfMonths();
       this.showWeekNumbers();
+      this.fullWidth();
       this.view();
       this.viewportWidth();
       this.updateFitColumns();

@@ -190,6 +190,16 @@ export default {
         defaultValue: { summary: "true" },
       },
     },
+    fullWidth: {
+      description:
+        "Grow to fill the container's width instead of a fixed width; cells keep a square aspect ratio. Wrap in a sized container to control the scale.",
+      control: { type: "boolean" },
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     numberOfMonths: {
       description:
         "How many consecutive months to render side by side. Useful for date-range selection.",
@@ -333,6 +343,7 @@ export const Default: Story = {
     showWeekNumbers: false,
     showNavigation: true,
     numberOfMonths: 1,
+    fullWidth: false,
     required: false,
     inputDisabled: false,
   },
@@ -596,6 +607,44 @@ export const WithWeeksCount: Story = {
       description: {
         story:
           "Set `showWeekNumbers=true` to render ISO 8601 week numbers in a leading column. Combines with `numberOfMonths` for multi-month range pickers.",
+      },
+    },
+  },
+};
+
+export const FullWidthSizes: Story = {
+  render: () => ({
+    props: {
+      currentMonth: startOfThisMonth,
+      sizes: [
+        { label: "Medium — 480px", width: 480 },
+        { label: "Large — 640px", width: 640 },
+        { label: "Extra large — 800px", width: 800 },
+      ],
+    },
+    template: `
+      <div style="display: flex; flex-direction: column; gap: 2rem;">
+        @for (size of sizes; track size.width) {
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <p tedi-text color="secondary" modifiers="small">{{ size.label }}</p>
+            <div [style.width]="'100%'" [style.max-width.px]="size.width">
+              <tedi-calendar
+                [currentMonth]="currentMonth"
+                [fullWidth]="true"
+                monthYearSelectType="static"
+                [showNavigation]="false"
+              />
+            </div>
+          </div>
+        }
+      </div>
+    `,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`fullWidth` fills the parent container, scaling cells to match its width.",
       },
     },
   },
