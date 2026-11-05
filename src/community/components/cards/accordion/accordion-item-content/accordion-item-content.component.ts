@@ -9,6 +9,9 @@ import { CardColors } from "../../card/card-colors.directive";
 import { CardContentComponent } from "@tedi-design-system/angular/tedi";
 import { AccordionItemComponent } from "../accordion-item/accordion-item.component";
 
+/**
+ * @deprecated Use AccordionItemContent from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-accordion-item-content",
   standalone: true,

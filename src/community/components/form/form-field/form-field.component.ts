@@ -3,6 +3,11 @@ import {
   Component,
   ViewEncapsulation,
 } from "@angular/core";
+import { warnDeprecated } from "@tedi-design-system/angular/tedi";
+
+/**
+ * @deprecated Use FormField from TEDI-ready instead. This component will be removed from future versions.
+ */
 
 @Component({
   selector: "tedi-form-field",
@@ -15,4 +20,11 @@ import {
     "[class.tedi-form-field]": "true",
   },
 })
-export class FormFieldComponent {}
+export class FormFieldComponent {
+  constructor() {
+    warnDeprecated(
+      "Community tedi-form-field",
+      "Use FormField from TEDI-ready instead.",
+    );
+  }
+}
