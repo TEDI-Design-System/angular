@@ -1,3 +1,10 @@
+# [10.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.3...angular-10.0.0-rc.4) (2026-11-05)
+
+
+### Features
+
+* **calendar,date-field:** support full-width modal calendar [#505](https://github.com/TEDI-Design-System/angular/issues/505) ([#744](https://github.com/TEDI-Design-System/angular/issues/744)) ([feb552b](https://github.com/TEDI-Design-System/angular/commit/feb552b15dd8e2942b8afe0aa1aae17ac5d1131a))
+
 # [10.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.2...angular-10.0.0-rc.3) (2026-11-05)
 
 
