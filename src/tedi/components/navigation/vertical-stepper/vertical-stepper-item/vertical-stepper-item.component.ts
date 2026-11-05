@@ -20,6 +20,10 @@ import { TextComponent } from "../../../base/text/text.component";
 import { CollapseButtonComponent } from "../../../buttons/collapse-button/collapse-button.component";
 import { TediTranslationPipe } from "../../../../services/translation/translation.pipe";
 import { generateUUID } from "../../../../helpers/generate-uuid";
+import {
+  VerticalStepNumberComponent,
+  VerticalStepNumberType,
+} from "../vertical-step-number/vertical-step-number.component";
 
 @Component({
   selector: "tedi-vertical-stepper-item",
@@ -31,6 +35,7 @@ import { generateUUID } from "../../../../helpers/generate-uuid";
     TextComponent,
     CollapseButtonComponent,
     TediTranslationPipe,
+    VerticalStepNumberComponent,
   ],
   templateUrl: "./vertical-stepper-item.component.html",
   styleUrl: "./vertical-stepper-item.component.scss",
@@ -118,6 +123,16 @@ export class VerticalStepperItemComponent {
   protected readonly progressState = computed(() =>
     this.completed() ? "completed" : this.error() ? "error" : "default",
   );
+  protected readonly stepNumberType = computed<VerticalStepNumberType>(() => {
+    if (this.disabled() || this.informative()) return "disabled";
+    if (this.selected()) return "selected";
+
+    const progress = this.progressState();
+    if (progress === "completed") return "success";
+    if (progress === "error") return "danger";
+
+    return "default";
+  });
   protected readonly nestedItems = contentChildren(
     VerticalStepperItemComponent,
     { descendants: false },
