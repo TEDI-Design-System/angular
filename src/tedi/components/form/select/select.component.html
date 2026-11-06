@@ -374,61 +374,90 @@
             </li>
           }
 
-          @for (group of optionGroups(); track group.label) {
-            @if (group.label.length > 0) {
-              @if (allowMultiple() && selectableGroups()) {
-                <li
-                  class="tedi-dropdown-item tedi-select__group-name tedi-select__group-name--selectable"
-                  [cdkOption]="SpecialOptionControls.SELECT_GROUP + group.label"
-                >
-                  <tedi-option-content
-                    type="checkbox"
-                    [selected]="isGroupSelected(group.label)"
-                    [indeterminate]="isGroupIndeterminate(group.label)"
-                  >
-                    <tedi-option-content-label>{{
-                      group.label
-                    }}</tedi-option-content-label>
-                  </tedi-option-content>
-                </li>
-              } @else {
-                <li class="tedi-select__group-name" role="presentation">
-                  <span tedi-text color="tertiary">
-                    {{ group.label }}
-                  </span>
-                </li>
-              }
-            }
-
-            @for (option of group.options; track option.value; let i = $index) {
-              <li
-                class="tedi-dropdown-item"
-                [class.tedi-dropdown-item--selected]="
-                  !allowMultiple() && isOptionSelected(option.value)
+          @for (
+            group of optionGroups();
+            track group.label;
+            let groupIndex = $index
+          ) {
+            <li
+              class="tedi-select__group"
+              [class.tedi-select__group--unlabelled]="!group.label"
+              role="presentation"
+            >
+              <ul
+                class="tedi-select__group-options"
+                [attr.role]="group.label ? 'group' : 'presentation'"
+                [attr.aria-labelledby]="
+                  group.label ? groupHeadingId(groupIndex) : null
                 "
-                [class.tedi-dropdown-item--disabled]="option.disabled"
-                [class.tedi-dropdown-item--custom]="optionTemplate()"
-                [cdkOption]="option.value"
-                [cdkOptionDisabled]="option.disabled"
               >
-                @if (optionTemplate(); as tpl) {
-                  <ng-container
-                    [ngTemplateOutlet]="tpl.template"
-                    [ngTemplateOutletContext]="getOptionContext(option, i)"
-                  />
-                } @else {
-                  <tedi-option-content
-                    [type]="allowMultiple() ? 'checkbox' : 'default'"
-                    [selected]="isOptionSelected(option.value)"
-                    [disabled]="!!option.disabled"
-                  >
-                    <tedi-option-content-label>{{
-                      option.label
-                    }}</tedi-option-content-label>
-                  </tedi-option-content>
+                @if (group.label) {
+                  @if (allowMultiple() && selectableGroups()) {
+                    <li
+                      class="tedi-dropdown-item tedi-select__group-name tedi-select__group-name--selectable"
+                      [id]="groupHeadingId(groupIndex)"
+                      [cdkOption]="
+                        SpecialOptionControls.SELECT_GROUP + group.label
+                      "
+                    >
+                      <tedi-option-content
+                        type="checkbox"
+                        [selected]="isGroupSelected(group.label)"
+                        [indeterminate]="isGroupIndeterminate(group.label)"
+                      >
+                        <tedi-option-content-label>{{
+                          group.label
+                        }}</tedi-option-content-label>
+                      </tedi-option-content>
+                    </li>
+                  } @else {
+                    <li
+                      class="tedi-select__group-name"
+                      role="presentation"
+                      [id]="groupHeadingId(groupIndex)"
+                    >
+                      <span tedi-text color="tertiary">
+                        {{ group.label }}
+                      </span>
+                    </li>
+                  }
                 }
-              </li>
-            }
+
+                @for (
+                  option of group.options;
+                  track option.value;
+                  let i = $index
+                ) {
+                  <li
+                    class="tedi-dropdown-item"
+                    [class.tedi-dropdown-item--selected]="
+                      !allowMultiple() && isOptionSelected(option.value)
+                    "
+                    [class.tedi-dropdown-item--disabled]="option.disabled"
+                    [class.tedi-dropdown-item--custom]="optionTemplate()"
+                    [cdkOption]="option.value"
+                    [cdkOptionDisabled]="option.disabled"
+                  >
+                    @if (optionTemplate(); as tpl) {
+                      <ng-container
+                        [ngTemplateOutlet]="tpl.template"
+                        [ngTemplateOutletContext]="getOptionContext(option, i)"
+                      />
+                    } @else {
+                      <tedi-option-content
+                        [type]="allowMultiple() ? 'checkbox' : 'default'"
+                        [selected]="isOptionSelected(option.value)"
+                        [disabled]="!!option.disabled"
+                      >
+                        <tedi-option-content-label>{{
+                          option.label
+                        }}</tedi-option-content-label>
+                      </tedi-option-content>
+                    }
+                  </li>
+                }
+              </ul>
+            </li>
           }
         } @else {
           <li class="tedi-dropdown-item tedi-select__no-options">
