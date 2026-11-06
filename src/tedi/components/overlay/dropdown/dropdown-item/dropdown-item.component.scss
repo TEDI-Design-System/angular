@@ -9,6 +9,16 @@
   cursor: pointer;
   background: var(--dropdown-item-default-background);
 
+  &:first-child {
+    border-top-left-radius: var(--dropdown-item-radius);
+    border-top-right-radius: var(--dropdown-item-radius);
+  }
+
+  &:last-child {
+    border-bottom-right-radius: var(--dropdown-item-radius);
+    border-bottom-left-radius: var(--dropdown-item-radius);
+  }
+
   // A selected item keeps its active styling on hover — hover must not override
   // the active state, so selected items are excluded from the hover rule.
   &:hover:not(
@@ -28,7 +38,6 @@
   &:focus-visible {
     outline: var(--tedi-borders-02) solid transparent;
     outline-offset: calc(-1 * var(--tedi-borders-02));
-    border-radius: var(--dropdown-item-radius);
     box-shadow:
       inset 0 0 0 var(--tedi-borders-02)
         var(--general-effect-colors-focus-outset-outer-shadow),
@@ -46,16 +55,12 @@
     }
   }
 
-  &:active:not(.tedi-dropdown-item--disabled, [aria-disabled="true"]) {
-    color: var(--dropdown-item-active-text);
-    background: var(--dropdown-item-active-background);
-
-    .tedi-icon {
-      color: inherit;
-    }
-  }
-
   &.tedi-dropdown-item--indent {
+    // TODO: remove this definition once @tedi-design-system/core adds
+    // `--dropdown-item-indent` (32px).
+    --dropdown-item-indent: 2rem;
+    --_tedi-dropdown-indent-step: var(--dropdown-item-indent);
+
     padding-left: calc(
       var(--_tedi-dropdown-item-indent) + var(--dropdown-item-padding-x)
     );
@@ -86,6 +91,8 @@
       .tedi-dropdown-item--tree-item,
       .tedi-dropdown-item--tree-parent
     ) {
+    --_tedi-dropdown-indent-step: 1rem;
+
     padding-left: calc(
       var(--dropdown-item-padding-x) + var(--_tedi-dropdown-tree-branch) +
         var(--_tedi-dropdown-item-indent)
@@ -158,7 +165,7 @@ li[tedi-dropdown-item],
 // click that lands beside the text would only close the panel. The overlay is
 // transparent and belongs to the control, so a real link click still carries
 // modifier keys, middle-click and the link context menu.
-.tedi-dropdown-content__list--plain > li[tedi-dropdown-item] {
+.tedi-dropdown-content__list--plain li[tedi-dropdown-item] {
   position: relative;
 
   a[href]::after,

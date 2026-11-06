@@ -1,4 +1,4 @@
-tedi-dropdown {
+.tedi-dropdown {
   display: inline-flex;
 }
 
@@ -17,13 +17,18 @@ tedi-dropdown {
     min-width: 0;
   }
 
-  &--max-height .tedi-dropdown-content {
-    max-height: var(--_tedi-dropdown-max-height);
-  }
-
+  // Caps the items only, so a header and a footer add to the panel's height.
   &--max-height .tedi-dropdown-content__list {
-    flex: 1 1 auto;
-    min-height: 0;
+    max-height: var(--_tedi-dropdown-max-height);
     overflow-y: auto;
+
+    > li[tedi-dropdown-item]:first-child {
+      border-start-end-radius: 0;
+    }
+
+    > li[tedi-dropdown-item]:last-child,
+    > .tedi-dropdown-group:last-child li[tedi-dropdown-item]:last-child {
+      border-end-end-radius: 0;
+    }
   }
 }

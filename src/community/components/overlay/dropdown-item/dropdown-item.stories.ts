@@ -2,9 +2,18 @@ import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 import { DropdownItemComponent } from "./dropdown-item.component";
 import { IconComponent } from "@tedi-design-system/angular/tedi";
 
+/**
+ * <strong>Deprecated.</strong> Use the TEDI-Ready <code>li[tedi-dropdown-item]</code> from
+ * <code>@tedi-design-system/angular/tedi</code> instead.
+ */
 const meta: Meta<DropdownItemComponent> = {
   title: "Community/Overlay/Dropdown Item",
   component: DropdownItemComponent,
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
   decorators: [
     moduleMetadata({
       imports: [DropdownItemComponent, IconComponent],

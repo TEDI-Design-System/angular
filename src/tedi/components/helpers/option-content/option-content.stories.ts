@@ -66,6 +66,7 @@ class DropdownItemShowcaseComponent implements DropdownApi, DropdownContentApi {
   focusPrevItem = noop;
   focusFirstItem = noop;
   focusLastItem = noop;
+  focusActiveItem = (): boolean => false;
   hideDropdown = noop;
   closeAndFocusTrigger = noop;
   tabOutOfDropdown = noop;
@@ -77,14 +78,7 @@ const MENU_STYLE =
   "background: var(--dropdown-item-default-background); border: 1px solid var(--card-border-primary); " +
   "border-radius: var(--form-select-area-radius); box-shadow: 0 1px 5px 0 var(--tedi-alpha-20)";
 
-const STATES = [
-  "Default",
-  "Hover",
-  "Active",
-  "Selected",
-  "Disabled",
-  "Focus",
-] as const;
+const STATES = ["Default", "Hover", "Selected", "Disabled", "Focus"] as const;
 
 // "Show code" snippets. The stories render items in a stand-in menu so they can be shown side by
 // side; these show how the same items are used in a real dropdown.
@@ -94,12 +88,22 @@ const SOURCE = {
   <tedi-dropdown-content>
     <li tedi-dropdown-item>
       <tedi-option-content>
-        <tedi-option-content-label>Juurdepääs terviseandmetele</tedi-option-content-label>
+        <tedi-option-content-label>1st level</tedi-option-content-label>
+      </tedi-option-content>
+    </li>
+    <li tedi-dropdown-item [indent]="1">
+      <tedi-option-content>
+        <tedi-option-content-label>2nd level</tedi-option-content-label>
       </tedi-option-content>
     </li>
     <li tedi-dropdown-item [indent]="2">
       <tedi-option-content>
-        <tedi-option-content-label>2nd level</tedi-option-content-label>
+        <tedi-option-content-label>3rd level</tedi-option-content-label>
+      </tedi-option-content>
+    </li>
+    <li tedi-dropdown-item [indent]="3">
+      <tedi-option-content>
+        <tedi-option-content-label>4th level</tedi-option-content-label>
       </tedi-option-content>
     </li>
   </tedi-dropdown-content>
@@ -114,7 +118,7 @@ const SOURCE = {
       </tedi-option-content>
     </li>
     @for (city of cities; track city) {
-      <li tedi-dropdown-item [indent]="2" [closeOnSelect]="false" (itemSelect)="toggle(city)">
+      <li tedi-dropdown-item [indent]="1" [closeOnSelect]="false" (itemSelect)="toggle(city)">
         <tedi-option-content type="checkbox" [selected]="isSelected(city)">
           <tedi-option-content-label>{{ city }}</tedi-option-content-label>
         </tedi-option-content>
@@ -232,7 +236,7 @@ const sourceParams = (code: string) => ({
 });
 
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.56.78?node-id=9542-70948&m=dev" target="_blank">Figma ↗</a><br />
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.108.103?m=dev&node-id=12185-156201" target="_blank">Figma ↗</a><br />
  * <a href="https://www.tedi.ee/1ee8444b7/p/0930a9-dropdown-item" target="_blank">Zeroheight ↗</a>
  */
 
@@ -307,7 +311,7 @@ export default {
     clipContent: {
       control: "boolean",
       description:
-        "`tedi-option-content-label` input. Whether the label clips overflowing content for text ellipsis. Set `false` when the label holds decorations that sit outside the line box (e.g. status indicator), so they are not cut off.",
+        "`tedi-option-content-label` input. Cuts a label too long for the item off with an ellipsis; `false` lets it wrap and keeps decorations outside the line box, such as a status indicator, visible.",
       table: {
         type: { summary: "boolean" },
         defaultValue: { summary: "true" },
@@ -366,10 +370,10 @@ export const Items: Story = {
       items: ["Juurdepääs terviseandmetele", "Tahteavaldus", "Kontaktid"],
       levels: [
         { label: "1st level", indent: 0 },
-        { label: "2nd level", indent: 2 },
-        { label: "3rd level", indent: 4 },
-        { label: "3rd level", indent: 4 },
-        { label: "4th level", indent: 6 },
+        { label: "2nd level", indent: 1 },
+        { label: "3rd level", indent: 2 },
+        { label: "3rd level", indent: 2 },
+        { label: "4th level", indent: 3 },
       ],
     },
     template: `
@@ -453,7 +457,7 @@ export const WithCheckbox: Story = {
                 </tedi-option-content>
               </li>
               @for (child of group.children; track child) {
-                <li tedi-dropdown-item [value]="child" [indent]="2" [closeOnSelect]="false" (itemSelect)="toggle(child)">
+                <li tedi-dropdown-item [value]="child" [indent]="1" [closeOnSelect]="false" (itemSelect)="toggle(child)">
                   <tedi-option-content type="checkbox" [selected]="isChecked(child)">
                     <tedi-option-content-label>{{ child }}</tedi-option-content-label>
                   </tedi-option-content>
@@ -472,7 +476,7 @@ export const WithCheckbox: Story = {
           </ul>
           <ul app-dropdown-item-showcase [style]="menuStyle">
             @for (level of levels; track $index) {
-              <li tedi-dropdown-item [value]="'level-' + $index" [indent]="$index * 2" [closeOnSelect]="false" (itemSelect)="toggle('level-' + $index)">
+              <li tedi-dropdown-item [value]="'level-' + $index" [indent]="$index" [closeOnSelect]="false" (itemSelect)="toggle('level-' + $index)">
                 <tedi-option-content type="checkbox" [selected]="isChecked('level-' + $index)">
                   <tedi-option-content-label>{{ level }}</tedi-option-content-label>
                 </tedi-option-content>
@@ -699,7 +703,6 @@ export const States: Story = {
     ...sourceParams(SOURCE.states),
     pseudo: {
       hover: ["#Hover-label", "#Hover-icon", "#Hover-meta"],
-      active: ["#Active-label", "#Active-icon", "#Active-meta"],
       focusVisible: ["#Focus-label", "#Focus-icon", "#Focus-meta"],
     },
   },

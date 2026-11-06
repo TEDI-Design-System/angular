@@ -49,6 +49,9 @@ const toCssLength = (value: number | string): string => {
   styleUrl: "./dropdown.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: "tedi-dropdown",
+  },
   providers: [
     {
       provide: DROPDOWN_API,
@@ -98,10 +101,9 @@ export class DropdownComponent implements OnDestroy {
   readonly width = input<DropdownWidth>("auto");
 
   /**
-   * Limits the height of the dropdown panel; the items scroll when they are
-   * taller. A number is px, a string is any CSS length (e.g. `"20rem"`). Prefer
-   * rem, so the maximum height scales with the user's font size. A header
-   * (`tedi-dropdown-header`) stays in place above the scrolling items.
+   * Maximum height of the items, which scroll when taller (a number is px, a
+   * string any CSS length, preferably rem); a `tedi-dropdown-header` and
+   * `tedi-dropdown-footer` stay in place outside it.
    */
   readonly maxHeight = input<number | string>();
 
@@ -255,6 +257,13 @@ export class DropdownComponent implements OnDestroy {
   };
 
   tabOutOfDropdown(shiftKey: boolean) {
+    const fromItem = this.dropdownContent()
+      .items()
+      .some((item) => item.focusTarget().contains(this.document.activeElement));
+    if (!shiftKey && fromItem && this.dropdownContent().footer()?.focus()) {
+      return;
+    }
+
     const triggerEl = this.dropdownTrigger().focusableElement;
     const contentEl = this.dropdownContent().host.nativeElement;
 
@@ -325,12 +334,13 @@ export class DropdownComponent implements OnDestroy {
     }
   }
 
-  focusActiveItem() {
+  /** Focuses the active item. Returns whether there was one to focus. */
+  focusActiveItem(): boolean {
     const index = this.activeIndex();
-    if (index == null) return;
+    if (index == null) return false;
 
     const items = this.dropdownContent().items();
-    if (!items[index]) return;
+    if (!items[index]) return false;
 
     const el = items[index].focusTarget();
     el.focus();
@@ -338,6 +348,7 @@ export class DropdownComponent implements OnDestroy {
       block: "nearest",
       inline: "nearest",
     });
+    return true;
   }
 
   focusNextItem(fromEl: HTMLLIElement) {
@@ -345,7 +356,10 @@ export class DropdownComponent implements OnDestroy {
     if (fromIndex === -1) return;
 
     const nextIndex = this.getNextEnabledIndex(fromIndex);
-    if (nextIndex == null) return;
+    if (nextIndex == null) {
+      this.dropdownContent().footer()?.focus();
+      return;
+    }
 
     const items = this.dropdownContent().items();
     this.activeIndex.set(nextIndex);
@@ -359,7 +373,6 @@ export class DropdownComponent implements OnDestroy {
 
     const prevIndex = this.getPrevEnabledIndex(fromIndex);
     if (prevIndex == null) {
-      // Up from the first item goes back to a header control, e.g. a search field.
       this.dropdownContent().header()?.focus();
       return;
     }
@@ -397,7 +410,13 @@ export class DropdownComponent implements OnDestroy {
     // Widget content is driven by its items' own key handling, and a plain
     // `list` renders in document order, so Tab out of it belongs to the
     // browser.
-    if (this.dropdownContent().isWidget() || event.key !== "Escape") return;
+    if (
+      this.dropdownContent().isWidget() ||
+      event.key !== "Escape" ||
+      event.defaultPrevented
+    ) {
+      return;
+    }
 
     event.preventDefault();
     this.closeAndFocusTrigger();

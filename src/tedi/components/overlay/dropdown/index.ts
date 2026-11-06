@@ -3,5 +3,7 @@ export * from "./dropdown-content/dropdown-content.component";
 export * from "./dropdown-item/dropdown-item.component";
 export * from "./dropdown-separator";
 export * from "./dropdown-header";
+export * from "./dropdown-footer";
+export * from "./dropdown-group";
 export * from "./dropdown-trigger/dropdown-trigger.directive";
 export * from "./dropdown.component";

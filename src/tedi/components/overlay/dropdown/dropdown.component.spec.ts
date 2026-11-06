@@ -8,7 +8,11 @@ import {
 } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { OverlayContainer } from "@angular/cdk/overlay";
-import { DropdownComponent, DropdownWidth } from "./dropdown.component";
+import {
+  DropdownComponent,
+  DropdownPosition,
+  DropdownWidth,
+} from "./dropdown.component";
 import {
   DropdownTriggerAriaHasPopup,
   DropdownTriggerDirective,
@@ -344,6 +348,18 @@ describe("DropdownComponent", () => {
       expect(dropdown.isOpen()).toBe(true);
     });
 
+    it("ignores a scroll that arrives after the dropdown has closed", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      dropdown.showDropdown();
+      dropdown.isOpen.set(false);
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
     it("cleans up the scroll listener on destroy", () => {
       host.hideOnScroll = true;
       fixture.detectChanges();
@@ -405,6 +421,41 @@ describe("DropdownComponent", () => {
     dropdown.focusPrevItem(items[1]);
     fixture.detectChanges();
     expect(document.activeElement).toBe(items[0]);
+  });
+
+  it("showDropdown() does nothing when already open", () => {
+    openDropdown();
+    (dropdown as any).activeIndex.set(0);
+
+    dropdown.showDropdown();
+
+    expect((dropdown as any).activeIndex()).toBe(0);
+  });
+
+  it("focusActiveItem() does nothing without a usable active item", () => {
+    openDropdown();
+    const trigger = getTrigger();
+    trigger.focus();
+
+    (dropdown as any).activeIndex.set(null);
+    dropdown.focusActiveItem();
+    expect(document.activeElement).toBe(trigger);
+
+    (dropdown as any).activeIndex.set(99);
+    dropdown.focusActiveItem();
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it("focusNextItem() and focusPrevItem() ignore an element that is not an item", () => {
+    openDropdown();
+    const trigger = getTrigger();
+    trigger.focus();
+    const stranger = document.createElement("li");
+
+    dropdown.focusNextItem(stranger);
+    dropdown.focusPrevItem(stranger);
+
+    expect(document.activeElement).toBe(trigger);
   });
 
   it("DropdownTrigger: ArrowDown should open dropdown and focus first item", () => {
@@ -689,6 +740,20 @@ describe("DropdownComponent", () => {
       itemC = items[2];
     });
 
+    it("onClick() does nothing on a disabled item", () => {
+      const disabledItem = fixture.debugElement
+        .queryAll(By.directive(DropdownItemComponent))
+        .map((de) => de.componentInstance as DropdownItemComponent)
+        .find((item) => item.disabled()) as DropdownItemComponent;
+      const emitSpy = jest.spyOn(disabledItem.itemSelect, "emit");
+      const setSpy = jest.spyOn(dropdown.value, "set");
+
+      disabledItem.onClick();
+
+      expect(emitSpy).not.toHaveBeenCalled();
+      expect(setSpy).not.toHaveBeenCalled();
+    });
+
     it("onClick: enabled item should call onItemSelect()", () => {
       const hideSpy = jest.spyOn(dropdown, "hideDropdown");
       const focusSpy = jest.spyOn(getTrigger(), "focus");
@@ -835,6 +900,15 @@ describe("DropdownComponent", () => {
 
     beforeEach(() => {
       trigger = getTrigger();
+    });
+
+    it("falls back to the host before the trigger element resolves", () => {
+      const directive = fixture.debugElement
+        .query(By.directive(DropdownTriggerDirective))
+        .injector.get(DropdownTriggerDirective);
+      (directive as any).triggerElement.set(null);
+
+      expect(directive.focusableElement).toBe(trigger);
     });
 
     it("click should call dropdown.toggleDropdown()", () => {
@@ -1010,6 +1084,19 @@ describe("DropdownComponent", () => {
 
       expect(innerButton.getAttribute("role")).toBeNull();
       expect(innerButton.getAttribute("tabindex")).toBeNull();
+    });
+
+    it("leaves Enter from an element other than the inner button alone", () => {
+      const event = new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+      });
+      wrapperEl.dispatchEvent(event);
+      wrappedFixture.detectChanges();
+
+      expect(event.defaultPrevented).toBe(false);
+      expect(wrappedDropdown.isOpen()).toBe(false);
     });
 
     it("does not turn the wrapper into a second tab stop", () => {
@@ -1411,6 +1498,21 @@ describe("DropdownComponent", () => {
       listFixture.nativeElement.remove();
     });
 
+    it.each(["ArrowDown", "ArrowUp"])(
+      "leaves %s on the trigger to the browser",
+      (key) => {
+        const event = new KeyboardEvent("keydown", {
+          key,
+          bubbles: true,
+          cancelable: true,
+        });
+        listTrigger.dispatchEvent(event);
+
+        expect(event.defaultPrevented).toBe(false);
+        expect(listDropdown.isOpen()).toBe(false);
+      },
+    );
+
     it("exposes the panel as a plain list that the trigger points at", () => {
       expect(listTrigger.getAttribute("aria-haspopup")).toBeNull();
       expect(listTrigger.getAttribute("aria-controls")).toBeNull();
@@ -1672,7 +1774,7 @@ describe("DropdownComponent sizing", () => {
     [240, "240px"],
     ["240", "240px"],
     ["20rem", "20rem"],
-  ])("limits the panel height for %p", (maxHeight, expected) => {
+  ])("limits the items' height for %p", (maxHeight, expected) => {
     fixture.componentInstance.maxHeight = maxHeight;
     fixture.detectChanges();
     open();
@@ -1685,13 +1787,13 @@ describe("DropdownComponent sizing", () => {
     ).toBe(expected);
   });
 
-  it("indents an item by the given rem", () => {
+  it("indents an item by its level", () => {
     open();
     const [parent, child] = getItems();
 
     expect(child.classList.contains("tedi-dropdown-item--indent")).toBe(true);
     expect(child.style.getPropertyValue("--_tedi-dropdown-item-indent")).toBe(
-      "1rem",
+      "calc(1 * var(--_tedi-dropdown-indent-step))",
     );
     expect(parent.classList.contains("tedi-dropdown-item--indent")).toBe(false);
   });
@@ -1989,5 +2091,105 @@ describe("DropdownItemComponent checkable state", () => {
         .querySelector(".tedi-dropdown-content__list")
         ?.getAttribute("aria-multiselectable"),
     ).toBeNull();
+  });
+});
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown [position]="position">
+      <button tedi-dropdown-trigger>Trigger</button>
+      <tedi-dropdown-content dropdownRole="menu">
+        <li tedi-dropdown-item>Item</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class PositionHostComponent {
+  position: DropdownPosition = "bottom-start";
+}
+
+describe("DropdownComponent overlay positions", () => {
+  it.each([
+    ["bottom-start", undefined, 4],
+    ["top-start", undefined, -4],
+    ["right", 4, undefined],
+    ["left", -4, undefined],
+  ] as const)(
+    "offsets %p by the gap on its own axis only",
+    (position, offsetX, offsetY) => {
+      TestBed.configureTestingModule({ imports: [PositionHostComponent] });
+      const fixture = TestBed.createComponent(PositionHostComponent);
+      fixture.componentInstance.position = position;
+      fixture.detectChanges();
+      const dropdown = fixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      const [primary] = dropdown.overlayPositions();
+
+      expect(primary.offsetX || undefined).toBe(offsetX);
+      expect(primary.offsetY || undefined).toBe(offsetY);
+    },
+  );
+});
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <button tedi-dropdown-trigger>Trigger</button>
+      <tedi-dropdown-content dropdownRole="menu">
+        <li
+          tedi-dropdown-item
+          [closeOnSelect]="false"
+          (itemSelect)="selected = selected + 1"
+        >
+          Keep open
+        </li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class KeepOpenHostComponent {
+  selected = 0;
+}
+
+describe("DropdownItemComponent closeOnSelect", () => {
+  it("emits itemSelect and keeps the dropdown open when closeOnSelect is false", () => {
+    TestBed.configureTestingModule({ imports: [KeepOpenHostComponent] });
+    const fixture = TestBed.createComponent(KeepOpenHostComponent);
+    fixture.detectChanges();
+    const dropdown = fixture.debugElement.query(By.directive(DropdownComponent))
+      .componentInstance as DropdownComponent;
+    const overlayContainerElement =
+      TestBed.inject(OverlayContainer).getContainerElement();
+
+    dropdown.showDropdown();
+    fixture.detectChanges();
+    (
+      overlayContainerElement.querySelector(
+        "li[tedi-dropdown-item]",
+      ) as HTMLLIElement
+    ).click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.selected).toBe(1);
+    expect(dropdown.isOpen()).toBe(true);
+
+    dropdown.hideDropdown();
+    overlayContainerElement.innerHTML = "";
   });
 });

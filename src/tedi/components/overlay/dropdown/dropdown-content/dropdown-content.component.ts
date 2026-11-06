@@ -12,6 +12,7 @@ import {
 } from "@angular/core";
 import { DropdownItemComponent } from "../dropdown-item/dropdown-item.component";
 import { DropdownHeaderDirective } from "../dropdown-header/dropdown-header.directive";
+import { DropdownFooterDirective } from "../dropdown-footer/dropdown-footer.directive";
 import {
   DROPDOWN_API,
   DROPDOWN_CONTENT_API,
@@ -32,6 +33,8 @@ export type { DropdownRole, DropdownVariant };
     class: "tedi-dropdown-content",
     role: "presentation",
     "[class.tedi-dropdown-content--divided]": "divided()",
+    "[class.tedi-dropdown-content--with-header]": "!!header()",
+    "[class.tedi-dropdown-content--with-footer]": "!!footer()",
   },
   providers: [
     {
@@ -78,8 +81,12 @@ export class DropdownContentComponent {
   readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly dropdownApi = inject(DROPDOWN_API);
   readonly containerId = computed(() => this.dropdownApi.containerId());
-  readonly items = contentChildren(DropdownItemComponent);
+  // Descendants, so the items inside a `tedi-dropdown-group` are found too.
+  readonly items = contentChildren(DropdownItemComponent, {
+    descendants: true,
+  });
   readonly header = contentChild(DropdownHeaderDirective);
+  readonly footer = contentChild(DropdownFooterDirective);
 
   readonly isWidget = computed(() => this.dropdownRole() !== "list");
 

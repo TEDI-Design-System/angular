@@ -99,6 +99,10 @@ describe("DropdownHeaderDirective", () => {
     expect(header.classList).toContain("tedi-dropdown-header");
     expect(header.nextElementSibling?.tagName).toBe("UL");
     expect(header.closest("[role='menu']")).toBeNull();
+    expect(
+      overlayContainerElement.querySelector(".tedi-dropdown-content")
+        ?.classList,
+    ).toContain("tedi-dropdown-content--with-header");
   }));
 
   it("focuses the header control on open", fakeAsync(() => {

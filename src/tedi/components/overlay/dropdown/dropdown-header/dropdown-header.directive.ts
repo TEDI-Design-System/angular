@@ -1,6 +1,6 @@
 import { Directive, ElementRef, inject } from "@angular/core";
 import { DROPDOWN_API } from "../dropdown.tokens";
-import { getFocusableElements } from "../../../../utils/elements.util";
+import { focusFirstFocusable } from "../../../../utils/elements.util";
 
 /**
  * Content above the items, such as a search field that filters them. It is not
@@ -24,9 +24,7 @@ export class DropdownHeaderDirective {
 
   /** Focuses the first focusable control. Returns whether there was one. */
   focus(): boolean {
-    const target = getFocusableElements(this.host.nativeElement)[0];
-    target?.focus();
-    return !!target;
+    return focusFirstFocusable(this.host.nativeElement);
   }
 
   onKeydown(event: KeyboardEvent) {

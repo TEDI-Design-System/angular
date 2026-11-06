@@ -67,9 +67,9 @@ export class DropdownItemComponent {
   readonly interactiveContent = input(false);
 
   /**
-   * Whether the item's label clips overflowing content (for text ellipsis).
-   * Set `false` when projecting content with decorations that intentionally
-   * sit outside the line box, e.g. status indicator.
+   * Cuts a label too long for the item off with an ellipsis; `false` lets it
+   * wrap and keeps decorations outside the line box, such as a status
+   * indicator, visible.
    * @default true
    */
   readonly clipContent = input(true);
@@ -83,10 +83,11 @@ export class DropdownItemComponent {
   readonly closeOnSelect = input(true);
 
   /**
-   * Indentation level in rem, for nested / hierarchical items, e.g. children
-   * under a "select all" item. `0` or unset means no indentation.
+   * Nesting level; each level indents the item by `--dropdown-item-indent`
+   * (32px), or by 1rem in a `tree` dropdown.
+   * @default 0
    */
-  readonly indent = input<number>();
+  readonly indent = input<number | undefined>(0);
 
   /**
    * Marks the item as a parent in a `tree` dropdown: it gets a bullet on the
@@ -100,7 +101,9 @@ export class DropdownItemComponent {
 
   readonly indentVar = computed(() => {
     const indent = this.indent();
-    return indent && indent > 0 ? `${indent}rem` : null;
+    return indent && indent > 0
+      ? `calc(${indent} * var(--_tedi-dropdown-indent-step))`
+      : null;
   });
 
   /**

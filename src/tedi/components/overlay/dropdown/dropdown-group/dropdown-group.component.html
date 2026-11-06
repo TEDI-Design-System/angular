@@ -1,0 +1,12 @@
+<li class="tedi-dropdown-group__item" role="none">
+  <ul
+    class="tedi-dropdown-group__list"
+    [attr.role]="isWidget() ? 'group' : 'list'"
+    [attr.aria-labelledby]="titleId"
+  >
+    <li class="tedi-dropdown-group__title" role="none" [id]="titleId">
+      {{ label() }}
+    </li>
+    <ng-content select="li[tedi-dropdown-item], li[tedi-dropdown-separator]" />
+  </ul>
+</li>
