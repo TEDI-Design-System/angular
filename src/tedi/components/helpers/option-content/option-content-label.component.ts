@@ -18,9 +18,9 @@ import {
 })
 export class OptionContentLabelComponent {
   /**
-   * Whether the label clips overflowing content for text ellipsis. Set `false`
-   * when the label holds content with decorations that intentionally sit
-   * outside the line box (e.g. status indicator), so they are not cut off.
+   * Cuts a label too long for the item off with an ellipsis; `false` lets it
+   * wrap and keeps decorations outside the line box, such as a status
+   * indicator, visible.
    * @default true
    */
   readonly clipContent = input(true);
