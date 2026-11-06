@@ -38,6 +38,7 @@
   [attr.aria-label]="!searchable() ? resolvedAriaLabel() : null"
   [attr.aria-invalid]="!searchable() ? isInvalid() || null : null"
   [attr.aria-describedby]="!searchable() ? feedbackId() : null"
+  [attr.aria-disabled]="disabled() || null"
   [tabindex]="searchable() || disabled() ? -1 : 0"
   (click)="onTriggerClick()"
   (keydown.enter)="onTriggerEnter()"
