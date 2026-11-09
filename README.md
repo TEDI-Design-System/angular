@@ -29,7 +29,7 @@ Add the stylesheet (fonts, tokens and component styles) to `angular.json`, next 
 "styles": ["node_modules/@tedi-design-system/angular/index.css", "src/styles.scss"]
 ```
 
-To load only one Material Symbols style, use `index-without-icons.css` together with one of `icons/outlined.css`, `icons/rounded.css`, `icons/sharp.css` or `icons/all.css`.
+To load only one Material Symbols style, use `index-without-icons.css` together with one of `icons/outlined.css`, `icons/rounded.css` or `icons/sharp.css`.
 
 Provide the theme and language in your application config, and start `ThemeService` with the app:
 
