@@ -19,6 +19,7 @@
   column-gap: var(--layout-grid-gutters-08);
   align-items: center;
   min-height: var(--stepper-card-min-height);
+  padding-block: var(--card-padding-xs);
 }
 
 .tedi-card-stepper__main--no-lead {
@@ -65,7 +66,7 @@
 .tedi-card-stepper__trail {
   display: flex;
   grid-column: 3;
-  gap: var(--layout-grid-gutters-08);
+  gap: var(--layout-grid-gutters-04);
   align-items: center;
 }
 
@@ -75,7 +76,7 @@
 
 .tedi-card-stepper__title {
   display: flex;
-  gap: var(--layout-grid-gutters-04);
+  gap: var(--layout-grid-gutters-08);
   align-items: center;
   min-width: 0;
   margin: 0;
@@ -140,7 +141,7 @@
   flex: 1;
   height: var(--tedi-borders-04);
   background-color: var(--stepper-item-vertical-mobile-progressbar-default);
-  border-radius: var(--tedi-borders-02);
+  border-radius: var(--card-radius-rounded);
 }
 
 .tedi-card-stepper__segment--done {
