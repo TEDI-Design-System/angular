@@ -31,17 +31,24 @@ Add the stylesheet (fonts, tokens and component styles) to `angular.json`, next 
 
 To load only one Material Symbols style, use `index-without-icons.css` together with one of `icons/outlined.css`, `icons/rounded.css`, `icons/sharp.css` or `icons/all.css`.
 
-Provide the theme and language in your application config:
+Provide the theme and language in your application config, and start `ThemeService` with the app:
 
 ```ts
 // app.config.ts
-import { ApplicationConfig } from "@angular/core";
-import { provideTedi } from "@tedi-design-system/angular/tedi";
+import { ApplicationConfig, inject, provideAppInitializer } from "@angular/core";
+import { provideTedi, ThemeService } from "@tedi-design-system/angular/tedi";
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideTedi({ language: "et", theme: "default" })],
+  providers: [
+    provideTedi({ language: "et", theme: "default" }),
+    provideAppInitializer(() => {
+      inject(ThemeService);
+    }),
+  ],
 };
 ```
+
+`ThemeService` sets the theme class on `<html>`. It is created only when something injects it, so without the initializer a theme other than `default`, or one saved in the `tedi-theme` cookie, is not applied on load.
 
 ### Usage
 
