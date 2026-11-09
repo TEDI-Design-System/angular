@@ -238,6 +238,9 @@ const sourceParams = (code: string) => ({
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.108.103?m=dev&node-id=12185-156201" target="_blank">Figma ↗</a><br />
  * <a href="https://www.tedi.ee/1ee8444b7/p/0930a9-dropdown-item" target="_blank">Zeroheight ↗</a>
+ *
+ * Layout only: place it inside an interactive parent such as `li[tedi-dropdown-item]`, which owns
+ * the role, selection and keyboard handling.
  */
 
 export default {
@@ -333,21 +336,6 @@ type Story = StoryObj<OptionContentComponent>;
 export const Default: Story = {
   parameters: {
     chromatic: { disableSnapshot: true },
-    docs: {
-      description: {
-        story: `
-The OptionContent component provides a reusable structure for rendering option content
-in both Select and Dropdown components. It supports built-in checkbox/radio indicators
-and flexible layouts for label and meta text.
-
-Used in [Dropdown](/docs/tedi-ready-components-overlay-dropdown--docs),
-[Select](/docs/tedi-ready-components-form-select--docs),
-[Search](/docs/tedi-ready-components-form-search--docs) and
-[Popover](/docs/tedi-ready-components-overlay-popover--docs) — see their stories for
-examples in context.
-`,
-      },
-    },
   },
   render: (args) => ({
     props: args,

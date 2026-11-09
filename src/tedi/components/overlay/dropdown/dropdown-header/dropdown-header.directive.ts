@@ -1,6 +1,9 @@
 import { Directive, ElementRef, inject } from "@angular/core";
 import { DROPDOWN_API } from "../dropdown.tokens";
-import { focusFirstFocusable } from "../../../../utils/elements.util";
+import {
+  focusFirstFocusable,
+  getFocusableElements,
+} from "../../../../utils/elements.util";
 
 /**
  * Content above the items, such as a search field that filters them. It is not
@@ -39,8 +42,13 @@ export class DropdownHeaderDirective {
         this.dropdown.closeAndFocusTrigger();
         break;
 
+      // Shift+Tab out of the first control leaves the dropdown; between the
+      // header's own controls it stays with the browser.
       case "Tab":
         if (!event.shiftKey) break;
+        if (event.target !== getFocusableElements(this.host.nativeElement)[0]) {
+          break;
+        }
         event.preventDefault();
         this.dropdown.closeAndFocusTrigger();
         break;

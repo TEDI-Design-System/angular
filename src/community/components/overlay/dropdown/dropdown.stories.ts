@@ -6,10 +6,6 @@ import { ButtonComponent } from "@tedi-design-system/angular/tedi";
 
 /**
  * <p>Dropdown can be used to display hidden menus on selectable items. Use `[tedi-dropdown-trigger]` directive on element that opens the dropwdown</p>
- *
- * <strong>Deprecated.</strong> Use the TEDI-Ready <code>tedi-dropdown</code> from
- * <code>@tedi-design-system/angular/tedi</code> instead. Its items go in a
- * <code>tedi-dropdown-content</code> as <code>li[tedi-dropdown-item]</code>s.
  */
 const meta: Meta<DropdownComponent> = {
   title: "Community/Overlay/Dropdown",

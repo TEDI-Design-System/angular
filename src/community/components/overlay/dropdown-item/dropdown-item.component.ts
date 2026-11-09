@@ -19,7 +19,8 @@ const itemRole = {
 };
 
 /**
- * @deprecated Use the TEDI-Ready `li[tedi-dropdown-item]` from `@tedi-design-system/angular/tedi` instead.
+ * @deprecated Use the TEDI-Ready `li[tedi-dropdown-item]` from `@tedi-design-system/angular/tedi` instead,
+ * inside a `tedi-dropdown` and `tedi-dropdown-content` (it can't be used on its own).
  * This component will be removed from future versions.
  */
 @Component({
@@ -96,7 +97,7 @@ export class DropdownItemComponent implements FocusableOption {
   constructor() {
     warnDeprecated(
       "Community [tedi-dropdown-item]",
-      "Use the TEDI-Ready `li[tedi-dropdown-item]` from `@tedi-design-system/angular/tedi` instead.",
+      "Use the TEDI-Ready `li[tedi-dropdown-item]` from `@tedi-design-system/angular/tedi` instead, inside a `tedi-dropdown` and `tedi-dropdown-content`.",
     );
     effect(() => {
       this.disabled = this.disabledInput();

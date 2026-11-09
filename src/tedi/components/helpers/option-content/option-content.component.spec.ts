@@ -68,6 +68,21 @@ describe("OptionContentComponent", () => {
       });
     });
 
+    it("keeps the defaults when an icon object passes undefined", () => {
+      fixture.componentRef.setInput("icon", {
+        name: "delete",
+        size: undefined,
+        color: undefined,
+      });
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.resolvedIcon()).toEqual({
+        name: "delete",
+        size: 16,
+        color: "secondary",
+      });
+    });
+
     it("lets an icon object override the defaults", () => {
       fixture.componentRef.setInput("icon", {
         name: "delete",

@@ -22,6 +22,7 @@ import { DropdownHeaderDirective } from "./dropdown-header.directive";
       <tedi-dropdown-content>
         <div tedi-dropdown-header>
           <input aria-label="Search" />
+          <button>Clear</button>
         </div>
         <li tedi-dropdown-item value="a">Item A</li>
         <li tedi-dropdown-item value="b">Item B</li>
@@ -141,6 +142,18 @@ describe("DropdownHeaderDirective", () => {
       expect(document.activeElement).toBe(getTrigger());
     }),
   );
+
+  it("leaves Shift+Tab between header controls to the browser", fakeAsync(() => {
+    open();
+    const clear = overlayContainerElement.querySelector(
+      "[tedi-dropdown-header] button",
+    ) as HTMLButtonElement;
+
+    const event = keydown(clear, { key: "Tab", shiftKey: true });
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(dropdown.isOpen()).toBe(true);
+  }));
 
   it("leaves other keys to the control", fakeAsync(() => {
     open();

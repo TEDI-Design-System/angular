@@ -86,12 +86,13 @@ export class OptionContentComponent {
   readonly resolvedIcon = computed(() => {
     const icon = this.icon();
     if (!icon) return null;
-    const { name, ...options } =
+    const { name, size, color, ...options } =
       typeof icon === "string" ? { name: icon } : icon;
+    // An explicit `undefined` keeps the default instead of spreading over it.
     return {
-      size: 16 as IconSize,
-      color: "secondary" as IconColor,
       ...options,
+      size: size ?? (16 as IconSize),
+      color: color ?? ("secondary" as IconColor),
       name,
     };
   });

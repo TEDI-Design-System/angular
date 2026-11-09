@@ -13,6 +13,7 @@ import { DropdownSeparatorComponent } from "./dropdown-separator/dropdown-separa
 import { DropdownHeaderDirective } from "./dropdown-header/dropdown-header.directive";
 import { DropdownFooterDirective } from "./dropdown-footer/dropdown-footer.directive";
 import { DropdownGroupComponent } from "./dropdown-group/dropdown-group.component";
+import { DropdownVariant } from "./dropdown.tokens";
 import { SearchComponent } from "../../form/search/search.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { TextComponent } from "../../base/text/text.component";
@@ -299,6 +300,8 @@ type Story = StoryObj<
   DropdownComponent & {
     dropdownRole: DropdownRole;
     ariaHaspopup: DropdownTriggerAriaHasPopup;
+    divided: boolean;
+    variant: DropdownVariant;
   }
 >;
 
@@ -310,6 +313,8 @@ export const Default: Story = {
     offset: 4,
     dropdownRole: "menu",
     ariaHaspopup: "menu",
+    divided: false,
+    variant: "default",
   },
   render: (args) => ({
     props: args,
@@ -326,7 +331,7 @@ export const Default: Story = {
           Võimalda ligipääs
           <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
         </button>
-        <tedi-dropdown-content [dropdownRole]="dropdownRole">
+        <tedi-dropdown-content [dropdownRole]="dropdownRole" [divided]="divided" [variant]="variant">
           <li tedi-dropdown-item>Juurdepääs terviseandmetele</li>
           <li tedi-dropdown-item>Juurdepääs isikuandmetele</li>
           <li tedi-dropdown-item>Juurdepääs kontaktandmetele</li>
