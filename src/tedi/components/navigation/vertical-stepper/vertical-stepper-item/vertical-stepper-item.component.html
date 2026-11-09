@@ -8,12 +8,12 @@
           _stepNumber()
         }}</span>
       } @else if (!selected() && progressState() === "completed") {
-        <tedi-icon name="check" variant="filled" color="inherit" [size]="16" />
+        <tedi-icon name="check" variant="filled" color="white" [size]="16" />
       } @else if (!selected() && progressState() === "error") {
         <tedi-icon
           name="priority_high"
           variant="filled"
-          color="inherit"
+          color="white"
           [size]="16"
         />
       }
