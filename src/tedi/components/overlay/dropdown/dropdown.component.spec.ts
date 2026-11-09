@@ -8,14 +8,19 @@ import {
 } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
 import { OverlayContainer } from "@angular/cdk/overlay";
-import { DropdownComponent } from "./dropdown.component";
+import {
+  DropdownComponent,
+  DropdownPosition,
+  DropdownWidth,
+} from "./dropdown.component";
 import {
   DropdownTriggerAriaHasPopup,
   DropdownTriggerDirective,
 } from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
-import { DropdownRole } from "./dropdown.tokens";
+import { DropdownRole, DropdownVariant } from "./dropdown.tokens";
 import { DropdownItemComponent } from "./dropdown-item/dropdown-item.component";
+import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
 import { getFocusableElements } from "../../../utils/elements.util";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 
@@ -343,6 +348,18 @@ describe("DropdownComponent", () => {
       expect(dropdown.isOpen()).toBe(true);
     });
 
+    it("ignores a scroll that arrives after the dropdown has closed", () => {
+      host.hideOnScroll = true;
+      fixture.detectChanges();
+      dropdown.showDropdown();
+      dropdown.isOpen.set(false);
+
+      const hideSpy = jest.spyOn(dropdown, "hideDropdown");
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+
     it("cleans up the scroll listener on destroy", () => {
       host.hideOnScroll = true;
       fixture.detectChanges();
@@ -387,6 +404,16 @@ describe("DropdownComponent", () => {
     expect(document.activeElement).toBe(items[1]);
   });
 
+  it("focusNextItem() keeps focus when only disabled items follow", () => {
+    openDropdown();
+    const items = getItems();
+    items[1].focus();
+
+    dropdown.focusNextItem(items[1]);
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(items[1]);
+  });
+
   it("focusPrevItem() should move focus to previous enabled item", () => {
     openDropdown();
     const items = getItems();
@@ -394,6 +421,41 @@ describe("DropdownComponent", () => {
     dropdown.focusPrevItem(items[1]);
     fixture.detectChanges();
     expect(document.activeElement).toBe(items[0]);
+  });
+
+  it("showDropdown() does nothing when already open", () => {
+    openDropdown();
+    (dropdown as any).activeIndex.set(0);
+
+    dropdown.showDropdown();
+
+    expect((dropdown as any).activeIndex()).toBe(0);
+  });
+
+  it("focusActiveItem() does nothing without a usable active item", () => {
+    openDropdown();
+    const trigger = getTrigger();
+    trigger.focus();
+
+    (dropdown as any).activeIndex.set(null);
+    dropdown.focusActiveItem();
+    expect(document.activeElement).toBe(trigger);
+
+    (dropdown as any).activeIndex.set(99);
+    dropdown.focusActiveItem();
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it("focusNextItem() and focusPrevItem() ignore an element that is not an item", () => {
+    openDropdown();
+    const trigger = getTrigger();
+    trigger.focus();
+    const stranger = document.createElement("li");
+
+    dropdown.focusNextItem(stranger);
+    dropdown.focusPrevItem(stranger);
+
+    expect(document.activeElement).toBe(trigger);
   });
 
   it("DropdownTrigger: ArrowDown should open dropdown and focus first item", () => {
@@ -678,6 +740,20 @@ describe("DropdownComponent", () => {
       itemC = items[2];
     });
 
+    it("onClick() does nothing on a disabled item", () => {
+      const disabledItem = fixture.debugElement
+        .queryAll(By.directive(DropdownItemComponent))
+        .map((de) => de.componentInstance as DropdownItemComponent)
+        .find((item) => item.disabled()) as DropdownItemComponent;
+      const emitSpy = jest.spyOn(disabledItem.itemSelect, "emit");
+      const setSpy = jest.spyOn(dropdown.value, "set");
+
+      disabledItem.onClick();
+
+      expect(emitSpy).not.toHaveBeenCalled();
+      expect(setSpy).not.toHaveBeenCalled();
+    });
+
     it("onClick: enabled item should call onItemSelect()", () => {
       const hideSpy = jest.spyOn(dropdown, "hideDropdown");
       const focusSpy = jest.spyOn(getTrigger(), "focus");
@@ -700,6 +776,20 @@ describe("DropdownComponent", () => {
 
       expect(setSpy).not.toHaveBeenCalled();
       expect(hideSpy).not.toHaveBeenCalled();
+    });
+
+    it("mousedown: disabled item prevents focus", () => {
+      const event = new MouseEvent("mousedown", { cancelable: true });
+      itemC.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it("mousedown: enabled item keeps the default behaviour", () => {
+      const event = new MouseEvent("mousedown", { cancelable: true });
+      itemA.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(false);
     });
 
     it("keydown: ArrowDown should call dropdown.focusNextItem()", () => {
@@ -810,6 +900,15 @@ describe("DropdownComponent", () => {
 
     beforeEach(() => {
       trigger = getTrigger();
+    });
+
+    it("falls back to the host before the trigger element resolves", () => {
+      const directive = fixture.debugElement
+        .query(By.directive(DropdownTriggerDirective))
+        .injector.get(DropdownTriggerDirective);
+      (directive as any).triggerElement.set(null);
+
+      expect(directive.focusableElement).toBe(trigger);
     });
 
     it("click should call dropdown.toggleDropdown()", () => {
@@ -985,6 +1084,19 @@ describe("DropdownComponent", () => {
 
       expect(innerButton.getAttribute("role")).toBeNull();
       expect(innerButton.getAttribute("tabindex")).toBeNull();
+    });
+
+    it("leaves Enter from an element other than the inner button alone", () => {
+      const event = new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+      });
+      wrapperEl.dispatchEvent(event);
+      wrappedFixture.detectChanges();
+
+      expect(event.defaultPrevented).toBe(false);
+      expect(wrappedDropdown.isOpen()).toBe(false);
     });
 
     it("does not turn the wrapper into a second tab stop", () => {
@@ -1386,6 +1498,21 @@ describe("DropdownComponent", () => {
       listFixture.nativeElement.remove();
     });
 
+    it.each(["ArrowDown", "ArrowUp"])(
+      "leaves %s on the trigger to the browser",
+      (key) => {
+        const event = new KeyboardEvent("keydown", {
+          key,
+          bubbles: true,
+          cancelable: true,
+        });
+        listTrigger.dispatchEvent(event);
+
+        expect(event.defaultPrevented).toBe(false);
+        expect(listDropdown.isOpen()).toBe(false);
+      },
+    );
+
     it("exposes the panel as a plain list that the trigger points at", () => {
       expect(listTrigger.getAttribute("aria-haspopup")).toBeNull();
       expect(listTrigger.getAttribute("aria-controls")).toBeNull();
@@ -1525,5 +1652,544 @@ describe("DropdownComponent", () => {
       expect(event.defaultPrevented).toBe(true);
       expect(listDropdown.isOpen()).toBe(true);
     });
+  });
+});
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown [width]="width" [maxHeight]="maxHeight">
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content>
+        <li tedi-dropdown-item>Parent</li>
+        <li tedi-dropdown-item [indent]="indent">Child</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class SizingHostComponent {
+  width: DropdownWidth = "auto";
+  maxHeight?: number | string;
+  indent?: number = 1;
+}
+
+describe("DropdownComponent sizing", () => {
+  let fixture: ComponentFixture<SizingHostComponent>;
+  let dropdown: DropdownComponent;
+  let overlayContainerElement: HTMLElement;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [SizingHostComponent] });
+    fixture = TestBed.createComponent(SizingHostComponent);
+    overlayContainerElement =
+      TestBed.inject(OverlayContainer).getContainerElement();
+    fixture.detectChanges();
+    dropdown = fixture.debugElement.query(By.directive(DropdownComponent))
+      .componentInstance as DropdownComponent;
+  });
+
+  afterEach(() => {
+    dropdown.hideDropdown();
+    overlayContainerElement.innerHTML = "";
+  });
+
+  const open = () => {
+    dropdown.showDropdown();
+    fixture.detectChanges();
+  };
+
+  const getPanel = () =>
+    overlayContainerElement.querySelector(
+      ".tedi-dropdown__panel",
+    ) as HTMLElement;
+
+  const getItems = () =>
+    Array.from(
+      overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+    ) as HTMLLIElement[];
+
+  it("leaves the panel sized by content when width is auto", () => {
+    open();
+
+    expect(getPanel().style.width).toBe("");
+    expect(
+      getPanel().classList.contains("tedi-dropdown__panel--fixed-width"),
+    ).toBe(false);
+  });
+
+  it.each([
+    [320, "320px"],
+    ["320", "320px"],
+    ["20rem", "20rem"],
+  ])("sets an explicit panel width for %p", (width, expected) => {
+    fixture.componentInstance.width = width;
+    fixture.detectChanges();
+    open();
+
+    expect(getPanel().style.width).toBe(expected);
+    expect(
+      getPanel().classList.contains("tedi-dropdown__panel--fixed-width"),
+    ).toBe(true);
+  });
+
+  it("matches the trigger width when width is trigger", () => {
+    fixture.componentInstance.width = "trigger";
+    fixture.detectChanges();
+    const trigger = fixture.nativeElement.querySelector(
+      "[tedi-dropdown-trigger]",
+    ) as HTMLElement;
+    Object.defineProperty(trigger, "offsetWidth", { value: 150 });
+    open();
+
+    expect(getPanel().style.width).toBe("150px");
+  });
+
+  it("treats an unset bound width as auto", () => {
+    fixture.componentInstance.width = undefined as unknown as DropdownWidth;
+    fixture.detectChanges();
+
+    expect(() => open()).not.toThrow();
+    expect(getPanel().style.width).toBe("");
+  });
+
+  it("leaves the panel height unrestricted by default", () => {
+    open();
+
+    expect(
+      getPanel().classList.contains("tedi-dropdown__panel--max-height"),
+    ).toBe(false);
+    expect(
+      getPanel().style.getPropertyValue("--_tedi-dropdown-max-height"),
+    ).toBe("");
+  });
+
+  it.each([
+    [240, "240px"],
+    ["240", "240px"],
+    ["20rem", "20rem"],
+  ])("limits the items' height for %p", (maxHeight, expected) => {
+    fixture.componentInstance.maxHeight = maxHeight;
+    fixture.detectChanges();
+    open();
+
+    expect(
+      getPanel().classList.contains("tedi-dropdown__panel--max-height"),
+    ).toBe(true);
+    expect(
+      getPanel().style.getPropertyValue("--_tedi-dropdown-max-height"),
+    ).toBe(expected);
+  });
+
+  it("indents an item by its level", () => {
+    open();
+    const [parent, child] = getItems();
+
+    expect(child.classList.contains("tedi-dropdown-item--indent")).toBe(true);
+    expect(child.style.getPropertyValue("--_tedi-dropdown-item-indent")).toBe(
+      "calc(1 * var(--_tedi-dropdown-indent-step))",
+    );
+    expect(parent.classList.contains("tedi-dropdown-item--indent")).toBe(false);
+  });
+
+  it.each([0, undefined])("does not indent for %p", (indent) => {
+    fixture.componentInstance.indent = indent;
+    fixture.detectChanges();
+    open();
+
+    expect(getItems()[1].classList.contains("tedi-dropdown-item--indent")).toBe(
+      false,
+    );
+  });
+});
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content [variant]="variant">
+        <li tedi-dropdown-item [indent]="1" [isParent]="true">Parent</li>
+        <li tedi-dropdown-item [indent]="1">Child</li>
+        <li tedi-dropdown-item>Plain</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class TreeHostComponent {
+  variant: DropdownVariant = "tree";
+}
+
+describe("DropdownComponent tree variant", () => {
+  let fixture: ComponentFixture<TreeHostComponent>;
+  let dropdown: DropdownComponent;
+  let overlayContainerElement: HTMLElement;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [TreeHostComponent] });
+    fixture = TestBed.createComponent(TreeHostComponent);
+    overlayContainerElement =
+      TestBed.inject(OverlayContainer).getContainerElement();
+    fixture.detectChanges();
+    dropdown = fixture.debugElement.query(By.directive(DropdownComponent))
+      .componentInstance as DropdownComponent;
+  });
+
+  afterEach(() => {
+    dropdown.hideDropdown();
+    overlayContainerElement.innerHTML = "";
+  });
+
+  const openAndGetItems = () => {
+    dropdown.showDropdown();
+    fixture.detectChanges();
+    return Array.from(
+      overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+    ) as HTMLLIElement[];
+  };
+
+  it("marks indented items and parents in a tree", () => {
+    const [parent, child, plain] = openAndGetItems();
+
+    expect(parent.classList).toContain("tedi-dropdown-item--tree-parent");
+    expect(child.classList).toContain("tedi-dropdown-item--tree-item");
+    expect(child.classList).not.toContain("tedi-dropdown-item--tree-parent");
+    expect(plain.classList).not.toContain("tedi-dropdown-item--tree-item");
+  });
+
+  it("adds no tree classes outside the tree variant", () => {
+    fixture.componentInstance.variant = "default";
+    fixture.detectChanges();
+    const [parent, child] = openAndGetItems();
+
+    expect(parent.classList).not.toContain("tedi-dropdown-item--tree-parent");
+    expect(child.classList).not.toContain("tedi-dropdown-item--tree-item");
+  });
+});
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown [value]="value">
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content dropdownRole="listbox">
+        <li tedi-dropdown-item>No value</li>
+        <li tedi-dropdown-item value="a">Item A</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class SelectionHostComponent {
+  value?: string;
+}
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content dropdownRole="listbox">
+        <li tedi-dropdown-item value="a">Item A</li>
+        <li tedi-dropdown-item>No value</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class UnsetValueHostComponent {}
+
+describe("DropdownItemComponent selection", () => {
+  let fixture: ComponentFixture<SelectionHostComponent>;
+  let dropdown: DropdownComponent;
+  let overlayContainerElement: HTMLElement;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ imports: [SelectionHostComponent] });
+    fixture = TestBed.createComponent(SelectionHostComponent);
+    overlayContainerElement =
+      TestBed.inject(OverlayContainer).getContainerElement();
+    fixture.detectChanges();
+    dropdown = fixture.debugElement.query(By.directive(DropdownComponent))
+      .componentInstance as DropdownComponent;
+  });
+
+  afterEach(() => {
+    dropdown.hideDropdown();
+    overlayContainerElement.innerHTML = "";
+  });
+
+  const openAndGetSelected = () => {
+    dropdown.showDropdown();
+    fixture.detectChanges();
+    return Array.from(
+      overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+    ).map((li) => li.getAttribute("aria-selected"));
+  };
+
+  it("selects nothing when neither the dropdown nor the items have a value", () => {
+    expect(openAndGetSelected()).toEqual(["false", "false"]);
+  });
+
+  it("never selects an item without a value", () => {
+    fixture.componentInstance.value = "a";
+    fixture.detectChanges();
+
+    expect(openAndGetSelected()).toEqual(["false", "true"]);
+  });
+
+  it("starts on the first item, not a value-less one, when no value is set", () => {
+    const unsetFixture = TestBed.createComponent(UnsetValueHostComponent);
+    unsetFixture.detectChanges();
+    const unsetDropdown = unsetFixture.debugElement.query(
+      By.directive(DropdownComponent),
+    ).componentInstance as DropdownComponent;
+
+    unsetDropdown.showDropdown();
+    unsetFixture.detectChanges();
+
+    const tabindexes = Array.from(
+      overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+    ).map((li) => li.getAttribute("tabindex"));
+    unsetDropdown.hideDropdown();
+
+    expect(tabindexes).toEqual(["0", "-1"]);
+  });
+});
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <button tedi-dropdown-trigger>Trigger</button>
+
+      <tedi-dropdown-content [dropdownRole]="role">
+        <li tedi-dropdown-item>
+          <tedi-option-content type="checkbox" [selected]="true">
+            Checked
+          </tedi-option-content>
+        </li>
+        <li tedi-dropdown-item>
+          <tedi-option-content type="checkbox">Unchecked</tedi-option-content>
+        </li>
+        <li tedi-dropdown-item>
+          <tedi-option-content type="checkbox" [indeterminate]="true">
+            Mixed
+          </tedi-option-content>
+        </li>
+        <li tedi-dropdown-item>
+          <tedi-option-content type="radio" [selected]="true">
+            Radio
+          </tedi-option-content>
+        </li>
+        <li tedi-dropdown-item>Plain</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+    OptionContentComponent,
+  ],
+})
+class CheckableHostComponent {
+  role: DropdownRole = "menu";
+}
+
+describe("DropdownItemComponent checkable state", () => {
+  let fixture: ComponentFixture<CheckableHostComponent>;
+  let dropdown: DropdownComponent;
+  let overlayContainerElement: HTMLElement;
+
+  const open = (role: DropdownRole) => {
+    fixture = TestBed.createComponent(CheckableHostComponent);
+    fixture.componentInstance.role = role;
+    fixture.detectChanges();
+    overlayContainerElement =
+      TestBed.inject(OverlayContainer).getContainerElement();
+    dropdown = fixture.debugElement.query(By.directive(DropdownComponent))
+      .componentInstance as DropdownComponent;
+    dropdown.showDropdown();
+    fixture.detectChanges();
+  };
+
+  const getItems = () =>
+    Array.from(
+      overlayContainerElement.querySelectorAll("li[tedi-dropdown-item]"),
+    ) as HTMLLIElement[];
+
+  afterEach(() => {
+    dropdown.hideDropdown();
+    overlayContainerElement.innerHTML = "";
+  });
+
+  it("announces checkbox and radio items in a menu as checkable", () => {
+    open("menu");
+    const [checked, unchecked, mixed, radio, plain] = getItems();
+
+    expect(checked.getAttribute("role")).toBe("menuitemcheckbox");
+    expect(checked.getAttribute("aria-checked")).toBe("true");
+    expect(unchecked.getAttribute("aria-checked")).toBe("false");
+    expect(mixed.getAttribute("aria-checked")).toBe("mixed");
+    expect(radio.getAttribute("role")).toBe("menuitemradio");
+    expect(radio.getAttribute("aria-checked")).toBe("true");
+    expect(plain.getAttribute("role")).toBe("menuitem");
+    expect(plain.getAttribute("aria-checked")).toBeNull();
+  });
+
+  it("uses the checkbox state for options in a multiselectable listbox", () => {
+    open("listbox");
+    const [checked, unchecked] = getItems();
+
+    expect(
+      overlayContainerElement
+        .querySelector('[role="listbox"]')
+        ?.getAttribute("aria-multiselectable"),
+    ).toBe("true");
+    expect(checked.getAttribute("role")).toBe("option");
+    expect(checked.getAttribute("aria-selected")).toBe("true");
+    expect(checked.getAttribute("aria-checked")).toBeNull();
+    expect(unchecked.getAttribute("aria-selected")).toBe("false");
+  });
+
+  it("adds no state in a plain list", () => {
+    open("list");
+    const host = fixture.nativeElement as HTMLElement;
+    const checked = host.querySelector("li[tedi-dropdown-item]") as HTMLElement;
+
+    expect(checked.getAttribute("role")).toBeNull();
+    expect(checked.getAttribute("aria-checked")).toBeNull();
+    expect(
+      host
+        .querySelector(".tedi-dropdown-content__list")
+        ?.getAttribute("aria-multiselectable"),
+    ).toBeNull();
+  });
+});
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown [position]="position">
+      <button tedi-dropdown-trigger>Trigger</button>
+      <tedi-dropdown-content dropdownRole="menu">
+        <li tedi-dropdown-item>Item</li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class PositionHostComponent {
+  position: DropdownPosition = "bottom-start";
+}
+
+describe("DropdownComponent overlay positions", () => {
+  it.each([
+    ["bottom-start", undefined, 4],
+    ["top-start", undefined, -4],
+    ["right", 4, undefined],
+    ["left", -4, undefined],
+  ] as const)(
+    "offsets %p by the gap on its own axis only",
+    (position, offsetX, offsetY) => {
+      TestBed.configureTestingModule({ imports: [PositionHostComponent] });
+      const fixture = TestBed.createComponent(PositionHostComponent);
+      fixture.componentInstance.position = position;
+      fixture.detectChanges();
+      const dropdown = fixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      const [primary] = dropdown.overlayPositions();
+
+      expect(primary.offsetX || undefined).toBe(offsetX);
+      expect(primary.offsetY || undefined).toBe(offsetY);
+    },
+  );
+});
+
+@Component({
+  standalone: true,
+  template: `
+    <tedi-dropdown>
+      <button tedi-dropdown-trigger>Trigger</button>
+      <tedi-dropdown-content dropdownRole="menu">
+        <li
+          tedi-dropdown-item
+          [closeOnSelect]="false"
+          (itemSelect)="selected = selected + 1"
+        >
+          Keep open
+        </li>
+      </tedi-dropdown-content>
+    </tedi-dropdown>
+  `,
+  imports: [
+    DropdownComponent,
+    DropdownTriggerDirective,
+    DropdownContentComponent,
+    DropdownItemComponent,
+  ],
+})
+class KeepOpenHostComponent {
+  selected = 0;
+}
+
+describe("DropdownItemComponent closeOnSelect", () => {
+  it("emits itemSelect and keeps the dropdown open when closeOnSelect is false", () => {
+    TestBed.configureTestingModule({ imports: [KeepOpenHostComponent] });
+    const fixture = TestBed.createComponent(KeepOpenHostComponent);
+    fixture.detectChanges();
+    const dropdown = fixture.debugElement.query(By.directive(DropdownComponent))
+      .componentInstance as DropdownComponent;
+    const overlayContainerElement =
+      TestBed.inject(OverlayContainer).getContainerElement();
+
+    dropdown.showDropdown();
+    fixture.detectChanges();
+    (
+      overlayContainerElement.querySelector(
+        "li[tedi-dropdown-item]",
+      ) as HTMLLIElement
+    ).click();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.selected).toBe(1);
+    expect(dropdown.isOpen()).toBe(true);
+
+    dropdown.hideDropdown();
+    overlayContainerElement.innerHTML = "";
   });
 });

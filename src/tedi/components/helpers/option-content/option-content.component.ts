@@ -1,20 +1,36 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   input,
   ViewEncapsulation,
 } from "@angular/core";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
+import {
+  IconColor,
+  IconComponent,
+  IconSize,
+  IconType,
+  IconVariant,
+} from "../../base/icon/icon.component";
 
 export type OptionContentType = "default" | "checkbox" | "radio";
 export type OptionContentLayout = "horizontal" | "vertical";
+
+export interface OptionContentIcon {
+  name: string;
+  size?: IconSize;
+  color?: IconColor;
+  type?: IconType;
+  variant?: IconVariant;
+}
 
 @Component({
   selector: "tedi-option-content",
   templateUrl: "./option-content.component.html",
   styleUrl: "./option-content.component.scss",
   standalone: true,
-  imports: [CheckboxComponent],
+  imports: [CheckboxComponent, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
@@ -58,6 +74,28 @@ export class OptionContentComponent {
    * @default false
    */
   readonly disabled = input<boolean>(false);
+
+  /**
+   * Leading icon: a Material Symbols name, or an object to override its size,
+   * colour, type or variant. Rendered at 16px in the secondary colour; it
+   * follows the item's text colour on hover, active, selected and disabled.
+   * For anything custom, project a `tedi-icon` instead.
+   */
+  readonly icon = input<string | OptionContentIcon>();
+
+  readonly resolvedIcon = computed(() => {
+    const icon = this.icon();
+    if (!icon) return null;
+    const { name, size, color, ...options } =
+      typeof icon === "string" ? { name: icon } : icon;
+    // An explicit `undefined` keeps the default instead of spreading over it.
+    return {
+      ...options,
+      size: size ?? (16 as IconSize),
+      color: color ?? ("secondary" as IconColor),
+      name,
+    };
+  });
 
   /**
    * The checkbox/radio only pictures the item's state — the item itself owns the

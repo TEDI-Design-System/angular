@@ -1,7 +1,34 @@
-tedi-dropdown {
+.tedi-dropdown {
   display: inline-flex;
 }
 
 .tedi-dropdown__panel {
   z-index: var(--z-index-dropdown);
+
+  // Never wider than the viewport minus the page's side padding, even with a fixed `width`.
+  max-width: calc(100vw - 2 * var(--layout-page-spacing-x));
+
+  .tedi-dropdown-content {
+    max-width: 100%;
+  }
+
+  &--fixed-width .tedi-dropdown-content {
+    width: 100%;
+    min-width: 0;
+  }
+
+  // Caps the items only, so a header and a footer add to the panel's height.
+  &--max-height .tedi-dropdown-content__list {
+    max-height: var(--_tedi-dropdown-max-height);
+    overflow-y: auto;
+
+    > li[tedi-dropdown-item]:first-child {
+      border-start-end-radius: 0;
+    }
+
+    > li[tedi-dropdown-item]:last-child,
+    > .tedi-dropdown-group:last-child li[tedi-dropdown-item]:last-child {
+      border-end-end-radius: 0;
+    }
+  }
 }

@@ -5,6 +5,11 @@ import { IconComponent } from "@tedi-design-system/angular/tedi";
 const meta: Meta<DropdownItemComponent> = {
   title: "Community/Overlay/Dropdown Item",
   component: DropdownItemComponent,
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
   decorators: [
     moduleMetadata({
       imports: [DropdownItemComponent, IconComponent],

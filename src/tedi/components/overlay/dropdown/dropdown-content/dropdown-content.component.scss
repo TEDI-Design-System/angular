@@ -17,4 +17,30 @@
     // `list` mode writes out role="list" rather than relying on the <ul>.
     list-style: none;
   }
+
+  .tedi-dropdown-header {
+    padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
+  }
+
+  .tedi-dropdown-footer {
+    flex-shrink: 0;
+    padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
+    border-top: 1px solid var(--general-border-primary);
+  }
+
+  &--with-header li[tedi-dropdown-item]:first-child {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  &--with-footer li[tedi-dropdown-item]:last-child,
+  .tedi-dropdown-group:not(:last-child) li[tedi-dropdown-item]:last-child {
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  &--divided li[tedi-dropdown-item]:not(:last-child),
+  &--divided .tedi-dropdown-group:not(:last-child) li[tedi-dropdown-item] {
+    border-bottom: 1px solid var(--general-border-primary);
+  }
 }

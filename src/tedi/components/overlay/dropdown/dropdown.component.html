@@ -8,6 +8,10 @@
 >
   <div
     class="tedi-dropdown__panel"
+    [class.tedi-dropdown__panel--fixed-width]="panelWidth()"
+    [style.width]="panelWidth()"
+    [class.tedi-dropdown__panel--max-height]="panelMaxHeight()"
+    [style.--_tedi-dropdown-max-height]="panelMaxHeight()"
     [style.--_tedi-dropdown-trigger-width]="triggerWidthVar()"
     (keydown)="onPanelKeydown($event)"
   >

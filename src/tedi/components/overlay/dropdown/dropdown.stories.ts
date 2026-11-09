@@ -1,4 +1,3 @@
-import { Component, ViewEncapsulation } from "@angular/core";
 import { type Meta, type StoryObj, moduleMetadata } from "@storybook/angular";
 import { DropdownComponent, DropdownPosition } from "./dropdown.component";
 import {
@@ -10,22 +9,23 @@ import {
   DropdownRole,
 } from "./dropdown-content/dropdown-content.component";
 import { DropdownItemComponent } from "./dropdown-item/dropdown-item.component";
+import { DropdownSeparatorComponent } from "./dropdown-separator/dropdown-separator.component";
+import { DropdownHeaderDirective } from "./dropdown-header/dropdown-header.directive";
+import { DropdownFooterDirective } from "./dropdown-footer/dropdown-footer.directive";
+import { DropdownGroupComponent } from "./dropdown-group/dropdown-group.component";
+import { DropdownVariant } from "./dropdown.tokens";
+import { SearchComponent } from "../../form/search/search.component";
+import { SeparatorComponent } from "../../helpers/separator/separator.component";
+import { TextComponent } from "../../base/text/text.component";
 import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
 import { OptionContentLabelComponent } from "../../helpers/option-content/option-content-label.component";
 import { OptionContentMetaComponent } from "../../helpers/option-content/option-content-meta.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import { expect, userEvent, waitFor, within } from "storybook/test";
-
-@Component({
-  selector: "app-demo-button",
-  standalone: true,
-  imports: [ButtonComponent],
-  template: `<button tedi-button><ng-content /></button>`,
-  encapsulation: ViewEncapsulation.None,
-})
-class DemoWrappingButtonComponent {}
 
 const POSITIONS: DropdownPosition[] = [
   "auto",
@@ -45,8 +45,24 @@ const POSITIONS: DropdownPosition[] = [
   "left-end",
 ];
 
+const POSITION_EXAMPLES: { position: DropdownPosition; label: string }[] = [
+  { position: "bottom-start", label: "Bottom start" },
+  { position: "bottom", label: "Bottom center" },
+  { position: "bottom-end", label: "Bottom end" },
+  { position: "top-start", label: "Top start" },
+  { position: "top", label: "Top center" },
+  { position: "top-end", label: "Top end" },
+  { position: "right-start", label: "Right start" },
+  { position: "right", label: "Right center" },
+  { position: "right-end", label: "Right end" },
+  { position: "left-start", label: "Left start" },
+  { position: "left", label: "Left center" },
+  { position: "left-end", label: "Left end" },
+];
+
 /**
- * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.23.39?node-id=2319-64439&m=dev" target="_blank">Figma ↗</a><br>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.108.103?m=dev&node-id=40253-113443" target="_blank">Dropdown Figma ↗</a><br>
+ * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.108.103?m=dev&node-id=12185-156201" target="_blank">DropdownItem Figma ↗</a><br>
  * <a href="https://www.tedi.ee/1ee8444b7/p/0930a9-dropdown-item" target="_blank">Zeroheight ↗</a>
  */
 
@@ -60,12 +76,20 @@ export default {
         DropdownTriggerDirective,
         DropdownContentComponent,
         DropdownItemComponent,
+        DropdownSeparatorComponent,
+        DropdownHeaderDirective,
+        DropdownFooterDirective,
+        DropdownGroupComponent,
+        SearchComponent,
+        SeparatorComponent,
+        TextComponent,
         OptionContentComponent,
         OptionContentLabelComponent,
         OptionContentMetaComponent,
         ButtonComponent,
         IconComponent,
-        DemoWrappingButtonComponent,
+        RowComponent,
+        ColComponent,
         CheckboxComponent,
       ],
     }),
@@ -73,7 +97,8 @@ export default {
   argTypes: {
     value: {
       control: "text",
-      description: "Current value of dropdown (used with listbox)",
+      description:
+        "Selected value in a `listbox` dropdown. Supports two-way binding.",
       table: {
         category: "dropdown",
         type: { summary: "string" },
@@ -82,8 +107,7 @@ export default {
     position: {
       control: "select",
       options: POSITIONS,
-      description:
-        "The position of the dropdown relative to the trigger element.",
+      description: "Position of the panel relative to the trigger.",
       table: {
         category: "dropdown",
         type: { summary: "DropdownPosition" },
@@ -93,7 +117,7 @@ export default {
     preventOverflow: {
       control: "boolean",
       description:
-        "Should position to opposite direction when overflowing screen?",
+        "Whether the panel flips to the opposite side when it would overflow the screen.",
       table: {
         category: "dropdown",
         type: { summary: "boolean" },
@@ -102,22 +126,75 @@ export default {
     },
     hideOnScroll: {
       control: "boolean",
-      description: "Does the dropdown hide when the page scrolls?",
+      description:
+        "Whether the dropdown closes when the page or a scrollable ancestor scrolls.",
       table: {
         category: "dropdown",
         type: { summary: "boolean" },
         defaultValue: { summary: "false" },
       },
     },
+    offset: {
+      control: "number",
+      description: "Gap between the trigger and the panel, in px.",
+      table: {
+        category: "dropdown",
+        type: { summary: "number" },
+        defaultValue: { summary: "4" },
+      },
+    },
+    width: {
+      control: "text",
+      description:
+        "Width of the panel: `auto` fits the content (at least the trigger width), `trigger` matches the trigger, a number is px, a string is any CSS width.",
+      table: {
+        category: "dropdown",
+        type: {
+          summary: "DropdownWidth",
+          detail: "auto \ntrigger \nnumber \nstring",
+        },
+        defaultValue: { summary: "auto" },
+      },
+    },
     dropdownRole: {
       control: "radio",
       options: ["menu", "listbox", "list"],
       description:
-        "How the panel is exposed to assistive technology: `menu` for actions, `listbox` for selectable options, `list` for a plain list of links. `menu` and `listbox` are composite widgets (one tab stop, arrow-key navigation, `menuitem` / `option` items); `list` adds no roles or key handling, so projected links stay links and stay in the tab order. Every role moves focus into the panel when it opens, so the panel is not read last because of where the overlay renders.",
+        "Accessibility role of the panel: `menu` for actions, `listbox` for selectable options, `list` for links (they stay links and keep their tab stops).",
       table: {
         category: "dropdown-content",
         type: { summary: "DropdownRole", detail: "menu \nlistbox \nlist" },
         defaultValue: { summary: "menu" },
+      },
+    },
+    maxHeight: {
+      control: "text",
+      description:
+        "Maximum height of the items, which scroll when taller (a number is px, a string any CSS length, preferably rem); a `tedi-dropdown-header` and `tedi-dropdown-footer` stay in place outside it.",
+      table: {
+        category: "dropdown",
+        type: { summary: "number | string" },
+      },
+    },
+    divided: {
+      control: "boolean",
+      description:
+        "Whether to draw a line between items. For lines between groups only, use `li[tedi-dropdown-separator]`.",
+      table: {
+        category: "dropdown-content",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
+    variant: {
+      control: "radio",
+      options: ["default", "tree"],
+      description:
+        "`tree` draws connector lines from indented items to their parent.",
+      table: {
+        category: "dropdown-content",
+        type: { summary: "DropdownVariant", detail: "default \ntree" },
+        defaultValue: { summary: "default" },
       },
     },
     ariaHaspopup: {
@@ -136,14 +213,15 @@ export default {
     },
     itemValue: {
       name: "value",
-      description: "Item value",
+      description:
+        "Value of the item. In a `listbox`, the item matching the dropdown's `value` is selected.",
       table: {
         category: "dropdown-item",
         type: { summary: "string" },
       },
     },
     disabled: {
-      description: "Is item disabled?",
+      description: "Whether the item is disabled.",
       table: {
         category: "dropdown-item",
         type: { summary: "boolean" },
@@ -151,7 +229,7 @@ export default {
     },
     closeOnSelect: {
       description:
-        "Whether activating this item closes the dropdown. Set `false` for items that should keep the dropdown open after selection (e.g. multi-select checkboxes).",
+        "Whether selecting the item closes the dropdown. Set `false` for multi-select items.",
       control: "boolean",
       table: {
         category: "dropdown-item",
@@ -161,12 +239,41 @@ export default {
     },
     clipContent: {
       description:
-        "Whether the item's label clips overflowing content for text ellipsis. Set `false` when projecting content with decorations that intentionally sit outside the line box (e.g. status indicator), so they are not cut off.",
+        "Cuts a label too long for the item off with an ellipsis; `false` lets it wrap and keeps decorations outside the line box, such as a status indicator, visible.",
       control: "boolean",
       table: {
         category: "dropdown-item",
         type: { summary: "boolean" },
         defaultValue: { summary: "true" },
+      },
+    },
+    label: {
+      control: "text",
+      description:
+        "Title above the group's items, also used as the group's accessible name.",
+      table: {
+        category: "dropdown-group",
+        type: { summary: "string" },
+      },
+    },
+    indent: {
+      description:
+        "Nesting level; each level indents the item by `--dropdown-item-indent` (32px), or by 1rem in a `tree` dropdown.",
+      control: "number",
+      table: {
+        category: "dropdown-item",
+        type: { summary: "number" },
+        defaultValue: { summary: "0" },
+      },
+    },
+    isParent: {
+      control: "boolean",
+      description:
+        "Whether the item is a parent in a `tree` dropdown: it gets a bullet and starts the connector line.",
+      table: {
+        category: "dropdown-item",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
       },
     },
     interactiveContent: {
@@ -193,6 +300,8 @@ type Story = StoryObj<
   DropdownComponent & {
     dropdownRole: DropdownRole;
     ariaHaspopup: DropdownTriggerAriaHasPopup;
+    divided: boolean;
+    variant: DropdownVariant;
   }
 >;
 
@@ -201,70 +310,152 @@ export const Default: Story = {
     position: "bottom-start",
     preventOverflow: true,
     hideOnScroll: false,
+    offset: 4,
+    dropdownRole: "menu",
+    ariaHaspopup: "menu",
+    divided: false,
+    variant: "default",
+  },
+  render: (args) => ({
+    props: args,
+    template: `
+      <tedi-dropdown
+        [position]="position"
+        [preventOverflow]="preventOverflow"
+        [hideOnScroll]="hideOnScroll"
+        [offset]="offset"
+        [width]="width"
+        [maxHeight]="maxHeight"
+      >
+        <button tedi-button tedi-dropdown-trigger variant="secondary" [ariaHaspopup]="ariaHaspopup">
+          Võimalda ligipääs
+          <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+        </button>
+        <tedi-dropdown-content [dropdownRole]="dropdownRole" [divided]="divided" [variant]="variant">
+          <li tedi-dropdown-item>Juurdepääs terviseandmetele</li>
+          <li tedi-dropdown-item>Juurdepääs isikuandmetele</li>
+          <li tedi-dropdown-item>Juurdepääs kontaktandmetele</li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+export const Position: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: (args) => ({
+    props: {
+      ...args,
+      examples: POSITION_EXAMPLES,
+    },
+    template: `
+      <tedi-row [cols]="1" [md]="{ cols: 3 }" [gapY]="3" justifyItems="center">
+        @for (example of examples; track example.position) {
+          <tedi-col>
+            <tedi-dropdown [position]="example.position" [preventOverflow]="preventOverflow">
+              <button tedi-button tedi-dropdown-trigger variant="secondary" [ariaHaspopup]="ariaHaspopup">
+                {{ example.label }}
+                <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+              </button>
+              <tedi-dropdown-content [dropdownRole]="dropdownRole">
+                <li tedi-dropdown-item>Juurdepääs terviseandmetele</li>
+                <li tedi-dropdown-item>Juurdepääs isikuandmetele</li>
+                <li tedi-dropdown-item>Juurdepääs kontaktandmetele</li>
+              </tedi-dropdown-content>
+            </tedi-dropdown>
+          </tedi-col>
+        }
+      </tedi-row>
+    `,
+  }),
+  args: {
+    preventOverflow: true,
+    dropdownRole: "menu",
+    ariaHaspopup: "menu",
+  },
+  argTypes: {
+    position: { table: { disable: true } },
+  },
+};
+
+/**
+ * In a `listbox` dropdown the item whose `value` matches the dropdown's `value` is shown as
+ * selected. Bind `[(value)]` to keep the selection in sync with the trigger label.
+ */
+export const WithSelectedItem: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => ({
+    props: {
+      lang: "EST",
+      languages: ["EST", "ENG", "RUS"],
+      sort: "Uuemad ees",
+      sortOptions: [
+        "Uuemad ees",
+        "Vanemad ees",
+        "Taotluse nimi A–Ü",
+        "Taotluse nimi Ü–A",
+      ],
+    },
+    template: `
+      <div class="flex flex-wrap gap-3">
+        <div>
+          <tedi-dropdown [(value)]="lang">
+            <button tedi-button tedi-dropdown-trigger variant="neutral" ariaHaspopup="listbox">
+              {{ lang }}
+              <tedi-icon name="expand_more" [size]="18" color="inherit" />
+            </button>
+            <tedi-dropdown-content dropdownRole="listbox">
+              @for (option of languages; track option) {
+                <li tedi-dropdown-item [value]="option">{{ option }}</li>
+              }
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        </div>
+        <div>
+          <tedi-dropdown [(value)]="sort">
+            <button tedi-button tedi-dropdown-trigger variant="neutral" ariaHaspopup="listbox">
+              Sorteeri: {{ sort }}
+              <tedi-icon name="expand_more" [size]="18" color="inherit" />
+            </button>
+            <tedi-dropdown-content dropdownRole="listbox">
+              @for (option of sortOptions; track option) {
+                <li tedi-dropdown-item [value]="option">{{ option }}</li>
+              }
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        </div>
+      </div>
+    `,
+  }),
+};
+
+export const WithActions: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  args: {
+    position: "bottom-start",
+    preventOverflow: true,
     dropdownRole: "menu",
     ariaHaspopup: "menu",
   },
   render: (args) => ({
     props: args,
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow" [hideOnScroll]="hideOnScroll">
-        <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
-          Trigger
-        </button>
-        <tedi-dropdown-content [dropdownRole]="dropdownRole">
-          <li tedi-dropdown-item>Access to health data</li>
-          <li tedi-dropdown-item [disabled]="true">Declaration of intent</li>
-          <li tedi-dropdown-item>Contacts</li>
-        </tedi-dropdown-content>
-      </tedi-dropdown>
-    `,
-  }),
-};
-
-export const WithMeta: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
-  name: "With Meta Text",
-  args: {
-    position: "bottom-start",
-    preventOverflow: true,
-    dropdownRole: "listbox",
-    ariaHaspopup: "listbox",
-  },
-  render: (args) => ({
-    props: args,
-    template: `
       <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
-        <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
-          Select location
+        <button tedi-button tedi-dropdown-trigger variant="secondary" aria-label="Lisa" [ariaHaspopup]="ariaHaspopup">
+          <tedi-icon name="add" />
         </button>
         <tedi-dropdown-content [dropdownRole]="dropdownRole">
-          <li tedi-dropdown-item value="tallinn">
-            <tedi-option-content>
-              <tedi-option-content-label>Tallinn</tedi-option-content-label>
-              <tedi-option-content-meta>3 timeslots</tedi-option-content-meta>
-            </tedi-option-content>
-          </li>
-          <li tedi-dropdown-item value="tartu">
-            <tedi-option-content>
-              <tedi-option-content-label>Tartu</tedi-option-content-label>
-              <tedi-option-content-meta>5 timeslots</tedi-option-content-meta>
-            </tedi-option-content>
-          </li>
-          <li tedi-dropdown-item value="parnu">
-            <tedi-option-content>
-              <tedi-option-content-label>Pärnu</tedi-option-content-label>
-              <tedi-option-content-meta>2 timeslots</tedi-option-content-meta>
-            </tedi-option-content>
-          </li>
+          <li tedi-dropdown-item>Loo kontakt</li>
+          <li tedi-dropdown-item>Loo rakendus</li>
+          <li tedi-dropdown-item>Loo arve</li>
         </tedi-dropdown-content>
       </tedi-dropdown>
     `,
   }),
 };
 
-export const WithIcons: Story = {
+export const ActionsWithIcons: Story = {
   parameters: { chromatic: { disableSnapshot: true } },
-  name: "With Icons",
   args: {
     position: "bottom-start",
     preventOverflow: true,
@@ -275,26 +466,24 @@ export const WithIcons: Story = {
     props: args,
     template: `
       <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
-        <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
-          Actions
+        <button tedi-button tedi-dropdown-trigger variant="secondary" [ariaHaspopup]="ariaHaspopup">
+          <tedi-icon name="more_vert" [size]="18" color="inherit" />
+          Rohkem
         </button>
         <tedi-dropdown-content [dropdownRole]="dropdownRole">
           <li tedi-dropdown-item>
-            <tedi-option-content>
-              <tedi-icon name="edit" [size]="18" />
-              <tedi-option-content-label>Edit</tedi-option-content-label>
+            <tedi-option-content icon="download">
+              <tedi-option-content-label>Laadi alla</tedi-option-content-label>
             </tedi-option-content>
           </li>
           <li tedi-dropdown-item>
-            <tedi-option-content>
-              <tedi-icon name="content_copy" [size]="18" />
-              <tedi-option-content-label>Duplicate</tedi-option-content-label>
+            <tedi-option-content icon="add">
+              <tedi-option-content-label>Lisa</tedi-option-content-label>
             </tedi-option-content>
           </li>
           <li tedi-dropdown-item>
-            <tedi-option-content>
-              <tedi-icon name="delete" [size]="18" />
-              <tedi-option-content-label>Delete</tedi-option-content-label>
+            <tedi-option-content icon="delete">
+              <tedi-option-content-label>Kustuta</tedi-option-content-label>
             </tedi-option-content>
           </li>
         </tedi-dropdown-content>
@@ -303,39 +492,247 @@ export const WithIcons: Story = {
   }),
 };
 
-export const VerticalLayout: Story = {
+type LocationOption = { id: string; label: string; selected: boolean };
+
+const countSelected = (options: LocationOption[]) =>
+  options.filter((option) => option.selected).length;
+
+const toggleOption = (options: LocationOption[], id: string) => {
+  const target = options.find((option) => option.id === id);
+  if (target) target.selected = !target.selected;
+};
+
+export const WithCheckbox: Story = {
   parameters: { chromatic: { disableSnapshot: true } },
-  name: "Vertical Layout",
+  render: () => ({
+    props: {
+      locations: [
+        { id: "tallinn", label: "Tallinn", selected: true },
+        { id: "tartu", label: "Tartu", selected: true },
+        { id: "parnu", label: "Pärnu", selected: false },
+      ] as LocationOption[],
+      countSelected,
+      toggleOption,
+    },
+    template: `
+      <tedi-dropdown>
+        <button tedi-button tedi-dropdown-trigger ariaHaspopup="menu">
+          Asukoht ({{ countSelected(locations) }})
+          <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+        </button>
+        <tedi-dropdown-content dropdownRole="menu">
+          @for (location of locations; track location.id) {
+            <li tedi-dropdown-item [closeOnSelect]="false" (itemSelect)="toggleOption(locations, location.id)">
+              <tedi-option-content type="checkbox" [selected]="location.selected">
+                <tedi-option-content-label>{{ location.label }}</tedi-option-content-label>
+              </tedi-option-content>
+            </li>
+          }
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+export const WithIndentedItems: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => ({
+    props: {
+      locations: [
+        { id: "tallinn", label: "Tallinn", selected: false },
+        { id: "tartu", label: "Tartu", selected: true },
+        { id: "parnu", label: "Pärnu", selected: false },
+      ] as LocationOption[],
+      countSelected,
+      toggleOption,
+      toggleAll(options: LocationOption[]) {
+        const select = countSelected(options) !== options.length;
+        options.forEach((option) => (option.selected = select));
+      },
+    },
+    template: `
+      <tedi-dropdown>
+        <button tedi-button tedi-dropdown-trigger ariaHaspopup="menu">
+          Asukoht ({{ countSelected(locations) }})
+          <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+        </button>
+        <tedi-dropdown-content dropdownRole="menu">
+          <li tedi-dropdown-item [closeOnSelect]="false" (itemSelect)="toggleAll(locations)">
+            <tedi-option-content
+              type="checkbox"
+              [selected]="countSelected(locations) === locations.length"
+              [indeterminate]="countSelected(locations) > 0 && countSelected(locations) < locations.length"
+            >
+              <tedi-option-content-label>Kõik asukohad</tedi-option-content-label>
+            </tedi-option-content>
+          </li>
+          @for (location of locations; track location.id) {
+            <li
+              tedi-dropdown-item
+              [indent]="1"
+              [closeOnSelect]="false"
+              (itemSelect)="toggleOption(locations, location.id)"
+            >
+              <tedi-option-content type="checkbox" [selected]="location.selected">
+                <tedi-option-content-label>{{ location.label }}</tedi-option-content-label>
+              </tedi-option-content>
+            </li>
+          }
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+export const WithRadio: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => ({
+    props: {
+      city: "Tallinn",
+      cities: ["Tallinn", "Tartu", "Elva", "Rakvere"],
+    },
+    template: `
+      <tedi-dropdown [(value)]="city">
+        <button tedi-button tedi-dropdown-trigger variant="neutral" ariaHaspopup="listbox">
+          Linn: {{ city }}
+          <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+        </button>
+        <tedi-dropdown-content dropdownRole="listbox">
+          @for (option of cities; track option) {
+            <li tedi-dropdown-item [value]="option">
+              <tedi-option-content type="radio" [selected]="city === option">
+                <tedi-option-content-label>{{ option }}</tedi-option-content-label>
+              </tedi-option-content>
+            </li>
+          }
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+export const CustomWidth: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   args: {
-    position: "bottom-start",
-    preventOverflow: true,
-    dropdownRole: "listbox",
-    ariaHaspopup: "listbox",
+    width: "326",
   },
   render: (args) => ({
-    props: args,
+    props: {
+      ...args,
+      items: ["Juurdepääs terviseandmetele", "Tahteavaldused", "Kontaktid"],
+    },
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
-        <button tedi-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
-          Select access level
+      <tedi-dropdown [width]="width">
+        <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="menu">
+          Rohkem
+          <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
         </button>
-        <tedi-dropdown-content [dropdownRole]="dropdownRole">
-          <li tedi-dropdown-item value="health">
-            <tedi-option-content layout="vertical">
-              <tedi-option-content-label>Access to health data</tedi-option-content-label>
-              <tedi-option-content-meta>Doctors will be able to see your health data</tedi-option-content-meta>
-            </tedi-option-content>
-          </li>
-          <li tedi-dropdown-item value="medications">
-            <tedi-option-content layout="vertical">
-              <tedi-option-content-label>Access to medications</tedi-option-content-label>
-              <tedi-option-content-meta>Doctors will be able to see your medications</tedi-option-content-meta>
-            </tedi-option-content>
-          </li>
-          <li tedi-dropdown-item value="all">
-            <tedi-option-content layout="vertical">
-              <tedi-option-content-label>Access to all</tedi-option-content-label>
-              <tedi-option-content-meta>Doctors will be able to see all your information</tedi-option-content-meta>
+        <tedi-dropdown-content dropdownRole="menu">
+          @for (item of items; track item) {
+            <li tedi-dropdown-item>
+              <span class="flex flex-grow-1 justify-content-between align-items-center">
+                {{ item }}
+                <tedi-icon name="arrow_forward" [size]="16" color="secondary" />
+              </span>
+            </li>
+          }
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+export const WithDescription: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => ({
+    props: {
+      access: "health",
+      accessOptions: [
+        {
+          value: "health",
+          label: "Juurdepääs terviseandmetele",
+          description: "Arstid saavad näha teie terviseandmeid",
+        },
+        {
+          value: "medications",
+          label: "Juurdepääs ravimitele ja terviseandmetele",
+          description: "Arstid saavad näha teie ravimeid ja terviseandmeid",
+        },
+        {
+          value: "all",
+          label: "Juurdepääs kõigele",
+          description:
+            "Arstid saavad näha kogu teie teavet, sealhulgas tervise deklaratsiooni ja muid meditsiinilisi andmeid",
+        },
+      ],
+      locations: [
+        { value: "tallinn", label: "Tallinn", meta: "3 aega vaba" },
+        { value: "tartu", label: "Tartu", meta: "4 aega vaba" },
+        { value: "elva", label: "Elva", meta: "7 aega vaba" },
+        { value: "rakvere", label: "Rakvere", meta: "3 aega vaba" },
+      ],
+    },
+    template: `
+      <div class="flex flex-wrap gap-3">
+        <div>
+          <tedi-dropdown [(value)]="access" [width]="304">
+            <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="listbox">
+              <tedi-icon name="share" [size]="18" color="inherit" />
+              Jaga ligipääs
+              <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+            </button>
+            <tedi-dropdown-content dropdownRole="listbox">
+              @for (option of accessOptions; track option.value) {
+                <li tedi-dropdown-item [value]="option.value">
+                  <tedi-option-content layout="vertical">
+                    <tedi-option-content-label>{{ option.label }}</tedi-option-content-label>
+                    <tedi-option-content-meta>{{ option.description }}</tedi-option-content-meta>
+                  </tedi-option-content>
+                </li>
+              }
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        </div>
+        <div>
+          <tedi-dropdown [width]="304">
+            <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="listbox">
+              Vali asukoht
+              <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+            </button>
+            <tedi-dropdown-content dropdownRole="listbox">
+              @for (location of locations; track location.value) {
+                <li tedi-dropdown-item [value]="location.value">
+                  <tedi-option-content>
+                    <tedi-option-content-label>{{ location.label }}</tedi-option-content-label>
+                    <tedi-option-content-meta>{{ location.meta }}</tedi-option-content-meta>
+                  </tedi-option-content>
+                </li>
+              }
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        </div>
+      </div>
+    `,
+  }),
+};
+
+export const Divided: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => ({
+    template: `
+      <tedi-dropdown>
+        <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="menu">
+          <tedi-icon name="account_circle" variant="filled" [size]="18" color="inherit" />
+          Profiil
+          <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+        </button>
+        <tedi-dropdown-content dropdownRole="menu" [divided]="true">
+          <li tedi-dropdown-item>Profiil</li>
+          <li tedi-dropdown-item>Juurdepääsud</li>
+          <li tedi-dropdown-item>Arveldamine</li>
+          <li tedi-dropdown-item>
+            <tedi-option-content icon="logout">
+              <tedi-option-content-label>Logi välja</tedi-option-content-label>
             </tedi-option-content>
           </li>
         </tedi-dropdown-content>
@@ -345,30 +742,377 @@ export const VerticalLayout: Story = {
 };
 
 /**
- * When the trigger sits on a component that wraps its own `<button>` (here
- * `<app-demo-button>`), the directive resolves that inner button and applies the
- * `id`, `aria-*`, focus, and keyboard handling there — keeping a single tab stop
- * with correct screen-reader announcements.
+ * `li[tedi-dropdown-separator]` draws a line between groups of items. It is announced as a
+ * separator in a `menu` and skipped by arrow-key navigation.
  */
-export const WithWrappingButtonComponent: Story = {
-  name: "Trigger on a Wrapping Button Component",
-  args: {
-    position: "bottom-start",
-    preventOverflow: true,
-    dropdownRole: "menu",
-    ariaHaspopup: "menu",
-  },
-  render: (args) => ({
-    props: args,
+export const WithSeparator: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => ({
     template: `
-      <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
-        <app-demo-button tedi-dropdown-trigger [ariaHaspopup]="ariaHaspopup">
-          Actions
-        </app-demo-button>
-        <tedi-dropdown-content [dropdownRole]="dropdownRole">
-          <li tedi-dropdown-item>Access to health data</li>
-          <li tedi-dropdown-item [disabled]="true">Declaration of intent</li>
-          <li tedi-dropdown-item>Contacts</li>
+      <tedi-dropdown>
+        <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="menu">
+          Rohkem toiminguid
+          <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+        </button>
+        <tedi-dropdown-content dropdownRole="menu">
+          <li tedi-dropdown-item>
+            <tedi-option-content icon="edit">
+              <tedi-option-content-label>Redigeeri</tedi-option-content-label>
+            </tedi-option-content>
+          </li>
+          <li tedi-dropdown-item>
+            <tedi-option-content icon="content_copy">
+              <tedi-option-content-label>Kopeeri</tedi-option-content-label>
+            </tedi-option-content>
+          </li>
+          <li tedi-dropdown-separator></li>
+          <li tedi-dropdown-item>
+            <tedi-option-content icon="archive">
+              <tedi-option-content-label>Arhiiv</tedi-option-content-label>
+            </tedi-option-content>
+          </li>
+          <li tedi-dropdown-item>
+            <tedi-option-content icon="delete">
+              <tedi-option-content-label>Kustuta</tedi-option-content-label>
+            </tedi-option-content>
+          </li>
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+/**
+ * `[tedi-dropdown-footer]` holds content below the items, such as a "Log out" button. It is not
+ * part of the menu, so Tab reaches it from the items. With `maxHeight` (second example) the items
+ * scroll and the footer stays in place below them.
+ */
+export const WithStickyFooter: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => ({
+    props: {
+      items: [
+        "Profiil",
+        "Ligipääsud",
+        "Arveldamine",
+        "Teavitused",
+        "Seaded",
+        "Privaatsus",
+        "Turvalisus",
+        "Abi",
+      ],
+    },
+    template: `
+      <div class="flex flex-wrap gap-3">
+        <div>
+          <tedi-dropdown>
+            <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="menu">
+              <tedi-icon name="account_circle" variant="filled" [size]="18" color="inherit" />
+              Profiil
+              <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+            </button>
+            <tedi-dropdown-content dropdownRole="menu" [divided]="true">
+              <li tedi-dropdown-item>Profiil</li>
+              <li tedi-dropdown-item>Ligipääsud</li>
+              <li tedi-dropdown-item>Arveldamine</li>
+              <div tedi-dropdown-footer class="flex">
+                <button tedi-button variant="neutral" size="small" class="flex-fill">
+                  <tedi-icon name="logout" [size]="18" color="inherit" />
+                  Logi välja
+                </button>
+              </div>
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        </div>
+        <div>
+          <tedi-dropdown maxHeight="10rem">
+            <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="menu">
+              <tedi-icon name="account_circle" variant="filled" [size]="18" color="inherit" />
+              Profiil
+              <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+            </button>
+            <tedi-dropdown-content dropdownRole="menu" [divided]="true">
+              @for (label of items; track label) {
+                <li tedi-dropdown-item>{{ label }}</li>
+              }
+              <div tedi-dropdown-footer class="flex">
+                <button tedi-button variant="neutral" size="small" class="flex-fill">
+                  <tedi-icon name="logout" [size]="18" color="inherit" />
+                  Logi välja
+                </button>
+              </div>
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        </div>
+      </div>
+    `,
+  }),
+};
+
+/**
+ * `variant="tree"` draws connector lines from indented items to the item above them. Mark an item
+ * with `isParent` (and give it the same `indent` as its children) to draw a bullet on the line.
+ */
+export const Tree: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => ({
+    props: {
+      people: [
+        { name: "Maarika Mets", indent: 0 },
+        { name: "Kadri Mets", relation: "Laps", indent: 1 },
+        { name: "Mart Mets", relation: "Laps", indent: 1 },
+        { name: "Oliver Mets", relation: "Laps", indent: 1 },
+        { name: "Veiko Mets", relation: "Abikaasa", indent: 0 },
+      ],
+      fields: [
+        { label: "Infotehnoloogia teaduskond", isParent: true },
+        { label: "Informaatika ja tehisintellekt" },
+        { label: "IT-süsteemide administreerimine" },
+        { label: "IT-süsteemide arendus" },
+        { label: "Loodusteaduskond", isParent: true },
+        { label: "Maa süsteemid, kliima ja tehnoloogiad" },
+        { label: "Rakendusfüüsika" },
+      ],
+    },
+    template: `
+      <div class="flex flex-wrap gap-3">
+        <div>
+          <tedi-dropdown>
+            <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="menu">
+              <tedi-icon name="account_circle" variant="filled" [size]="18" color="inherit" />
+              Vali esindatav
+              <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+            </button>
+            <tedi-dropdown-content dropdownRole="menu" variant="tree">
+              @for (person of people; track person.name) {
+                <li tedi-dropdown-item [indent]="person.indent">
+                  <tedi-option-content>
+                    <tedi-option-content-label>{{ person.name }}</tedi-option-content-label>
+                    @if (person.relation) {
+                      <tedi-option-content-meta>{{ person.relation }}</tedi-option-content-meta>
+                    }
+                  </tedi-option-content>
+                </li>
+              }
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        </div>
+        <div>
+          <tedi-dropdown>
+            <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="menu">
+              Vali eriala
+              <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+            </button>
+            <tedi-dropdown-content dropdownRole="menu" variant="tree">
+              @for (field of fields; track field.label) {
+                <li tedi-dropdown-item [indent]="1" [isParent]="!!field.isParent">{{ field.label }}</li>
+              }
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        </div>
+      </div>
+    `,
+  }),
+};
+
+/**
+ * `tedi-dropdown-group` shows a title above related items and names the group for screen readers.
+ */
+export const WithGroupSubtitle: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => ({
+    props: {
+      faculties: [
+        {
+          name: "Infotehnoloogia teaduskond",
+          fields: [
+            "Informaatika ja tehisintellekt",
+            "IT-süsteemide administreerimine",
+            "IT-süsteemide arendus",
+          ],
+        },
+        {
+          name: "Loodusteaduskond",
+          fields: ["Maa süsteemid, kliima ja tehnoloogiad", "Rakendusfüüsika"],
+        },
+      ],
+    },
+    template: `
+      <div class="flex flex-wrap gap-3">
+        <div>
+          <tedi-dropdown>
+            <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="menu">
+              <tedi-icon name="account_circle" variant="filled" [size]="18" color="inherit" />
+              Esindatav
+              <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+            </button>
+            <tedi-dropdown-content dropdownRole="menu">
+              <li tedi-dropdown-item>Maarika Mets</li>
+              <tedi-dropdown-group label="Esindatavad">
+                @for (name of ["Kadri Mets", "Mart Mets", "Oliver Mets"]; track name) {
+                  <li tedi-dropdown-item>
+                    <tedi-option-content>
+                      <tedi-option-content-label>{{ name }}</tedi-option-content-label>
+                      <tedi-option-content-meta>Laps</tedi-option-content-meta>
+                    </tedi-option-content>
+                  </li>
+                }
+              </tedi-dropdown-group>
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        </div>
+        <div>
+          <tedi-dropdown>
+            <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="menu">
+              Eriala
+              <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+            </button>
+            <tedi-dropdown-content dropdownRole="menu">
+              @for (faculty of faculties; track faculty.name) {
+                <tedi-dropdown-group [label]="faculty.name">
+                  @for (field of faculty.fields; track field) {
+                    <li tedi-dropdown-item>{{ field }}</li>
+                  }
+                </tedi-dropdown-group>
+              }
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        </div>
+      </div>
+    `,
+  }),
+};
+
+/**
+ * Set `maxHeight` to limit the height of the dropdown's scrollable body. When the content is taller,
+ * the items scroll; accepts a `number` (px) or any CSS length string (e.g. `'20rem'`, `'50vh'`).
+ * Prefer rem, so the maximum height scales with the user's font size.
+ */
+export const MaxHeight: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => ({
+    props: {
+      institutions: [
+        "Fertilitas",
+        "Ida-Tallinna Keskhaigla",
+        "Lääne-Tallinna Keskhaigla",
+        "Põhja-Eesti Regionaalhaigla",
+        "Tallinna Lastehaigla",
+        "Tartu Ülikooli Kliinikum",
+        "Pärnu Haigla",
+        "Narva Haigla",
+        "Viljandi Haigla",
+        "Kuressaare Haigla",
+      ],
+    },
+    template: `
+      <tedi-dropdown maxHeight="15rem" [width]="280">
+        <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="menu">
+          Vali raviasutus
+          <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+        </button>
+        <tedi-dropdown-content dropdownRole="menu">
+          @for (institution of institutions; track institution) {
+            <li tedi-dropdown-item>{{ institution }}</li>
+          }
+        </tedi-dropdown-content>
+      </tedi-dropdown>
+    `,
+  }),
+};
+
+/**
+ * With `hideOnScroll`, scrolling the page or any scrollable ancestor closes the dropdown; scrolling
+ * the dropdown's own items keeps it open.
+ */
+export const HideOnScroll: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => ({
+    props: {
+      institutions: [
+        "Fertilitas",
+        "Ida-Tallinna Keskhaigla",
+        "Lääne-Tallinna Keskhaigla",
+        "Põhja-Eesti Regionaalhaigla",
+        "Tallinna Lastehaigla",
+        "Tartu Ülikooli Kliinikum",
+        "Pärnu Haigla",
+        "Narva Haigla",
+        "Viljandi Haigla",
+        "Kuressaare Haigla",
+      ],
+    },
+    template: `
+      <div
+        style="height: 15rem; overflow-y: auto; border: 1px solid var(--general-border-primary); border-radius: var(--card-radius-rounded)"
+      >
+        <div style="padding: 1rem 1rem 30rem">
+          <tedi-dropdown [hideOnScroll]="true" maxHeight="10rem" [width]="280">
+            <button tedi-button tedi-dropdown-trigger variant="secondary" ariaHaspopup="menu">
+              Vali raviasutus
+              <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+            </button>
+            <tedi-dropdown-content dropdownRole="menu">
+              @for (institution of institutions; track institution) {
+                <li tedi-dropdown-item>{{ institution }}</li>
+              }
+            </tedi-dropdown-content>
+          </tedi-dropdown>
+        </div>
+      </div>
+    `,
+  }),
+};
+
+type Representative = { name: string; code: string };
+
+/**
+ * Put a search field (or other controls) in an element with `tedi-dropdown-header`. It sits above
+ * the items, outside the menu, so the field keeps its own semantics and gets focus when the
+ * dropdown opens.
+ */
+export const CustomContent: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
+  render: () => ({
+    props: {
+      query: "",
+      representatives: [
+        { name: "Lauri Lepp", code: "49504080254" },
+        { name: "Mart Mardivere", code: "39504080254" },
+        { name: "Madis Mets", code: "39504080254" },
+        { name: "Kalle Kaasik", code: "39504080254" },
+        { name: "Pille Porgand", code: "49504080254" },
+        { name: "Kert Kasemets", code: "39504080254" },
+      ] as Representative[],
+      filterRepresentatives(list: Representative[], query: string) {
+        const q = query.trim().toLowerCase();
+        return q
+          ? list.filter(
+              (rep) =>
+                rep.name.toLowerCase().includes(q) || rep.code.includes(q),
+            )
+          : list;
+      },
+    },
+    template: `
+      <tedi-dropdown [width]="300">
+        <button tedi-button tedi-dropdown-trigger variant="neutral" ariaHaspopup="menu">
+          Vali esindatav
+          <tedi-icon name="keyboard_arrow_down" [size]="18" color="inherit" />
+        </button>
+        <tedi-dropdown-content dropdownRole="menu">
+          <div tedi-dropdown-header>
+            <tedi-search inputId="dropdown-search" label="Otsi" [(value)]="query" />
+          </div>
+          @for (rep of filterRepresentatives(representatives, query); track rep.name) {
+            <li tedi-dropdown-item>
+              <span>
+                <span tedi-text modifiers="bold">{{ rep.name }}</span>
+                <tedi-separator axis="vertical" variant="dot-only" dotSize="small" color="secondary" [spacing]="0.5" />
+                {{ rep.code }}
+              </span>
+            </li>
+          }
         </tedi-dropdown-content>
       </tedi-dropdown>
     `,
@@ -435,16 +1179,11 @@ export const KeepOpenOnSelect: Story = {
     props: {
       ...args,
       filters: [
-        { id: "active", label: "Active", selected: true },
-        { id: "inactive", label: "Inactive", selected: false },
-        { id: "archived", label: "Archived", selected: false },
-        { id: "drafts", label: "Drafts", selected: true, disabled: true },
-      ] as Array<{
-        id: string;
-        label: string;
-        selected: boolean;
-        disabled?: boolean;
-      }>,
+        { id: "active", label: "Aktiivne", selected: true },
+        { id: "inactive", label: "Mitteaktiivne", selected: false },
+        { id: "archived", label: "Arhiveeritud", selected: false },
+        { id: "drafts", label: "Mustandid", selected: true },
+      ] as Array<{ id: string; label: string; selected: boolean }>,
       toggleFilter(
         filters: Array<{ id: string; selected: boolean }>,
         id: string,
@@ -457,22 +1196,17 @@ export const KeepOpenOnSelect: Story = {
       <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
         <button tedi-button tedi-dropdown-trigger variant="neutral" [ariaHaspopup]="ariaHaspopup">
           <tedi-icon name="filter_list" [size]="18" color="inherit" />
-          Filters
+          Filtrid
         </button>
         <tedi-dropdown-content [dropdownRole]="dropdownRole">
           @for (filter of filters; track filter.id) {
             <li
               tedi-dropdown-item
               [value]="filter.id"
-              [disabled]="!!filter.disabled"
               [closeOnSelect]="false"
               (itemSelect)="toggleFilter(filters, filter.id)"
             >
-              <tedi-option-content
-                type="checkbox"
-                [selected]="filter.selected"
-                [disabled]="!!filter.disabled"
-              >
+              <tedi-option-content type="checkbox" [selected]="filter.selected">
                 <tedi-option-content-label>{{ filter.label }}</tedi-option-content-label>
               </tedi-option-content>
             </li>
@@ -510,11 +1244,11 @@ export const OpenForVisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   render: vrRender(`
   <tedi-dropdown position="bottom-start">
-    <button tedi-button tedi-dropdown-trigger>Trigger</button>
+    <button tedi-button tedi-dropdown-trigger>Ava menüü</button>
     <tedi-dropdown-content dropdownRole="menu">
-      <li tedi-dropdown-item>Access to health data</li>
-      <li tedi-dropdown-item [disabled]="true">Declaration of intent</li>
-      <li tedi-dropdown-item>Contacts</li>
+      <li tedi-dropdown-item>Juurdepääs terviseandmetele</li>
+      <li tedi-dropdown-item [disabled]="true">Tahteavaldus</li>
+      <li tedi-dropdown-item>Kontaktid</li>
     </tedi-dropdown-content>
   </tedi-dropdown>
 `),
@@ -526,24 +1260,21 @@ export const OpenWithIconsForVisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   render: vrRender(`
   <tedi-dropdown position="bottom-start">
-    <button tedi-button tedi-dropdown-trigger ariaHaspopup="menu">Actions</button>
+    <button tedi-button tedi-dropdown-trigger ariaHaspopup="menu">Tegevused</button>
     <tedi-dropdown-content dropdownRole="menu">
       <li tedi-dropdown-item>
-        <tedi-option-content>
-          <tedi-icon name="edit" [size]="18" />
-          <tedi-option-content-label>Edit</tedi-option-content-label>
+        <tedi-option-content icon="edit">
+          <tedi-option-content-label>Muuda</tedi-option-content-label>
         </tedi-option-content>
       </li>
       <li tedi-dropdown-item>
-        <tedi-option-content>
-          <tedi-icon name="content_copy" [size]="18" />
-          <tedi-option-content-label>Duplicate</tedi-option-content-label>
+        <tedi-option-content icon="content_copy">
+          <tedi-option-content-label>Tee koopia</tedi-option-content-label>
         </tedi-option-content>
       </li>
       <li tedi-dropdown-item [disabled]="true">
-        <tedi-option-content>
-          <tedi-icon name="delete" [size]="18" />
-          <tedi-option-content-label>Delete</tedi-option-content-label>
+        <tedi-option-content icon="delete">
+          <tedi-option-content-label>Kustuta</tedi-option-content-label>
         </tedi-option-content>
       </li>
     </tedi-dropdown-content>
@@ -554,7 +1285,8 @@ export const OpenWithIconsForVisualTest: Story = {
 
 /**
  * Visual-regression only. A `listbox` menu with meta text: the meta column is what sets the
- * item's two-line height and the panel's width.
+ * item's two-line height and the panel's width. The first item is selected, which also shows
+ * its corners clipped by the panel.
  */
 export const OpenListboxMetaForVisualTest: Story = {
   tags: ["!dev", "!autodocs"],
@@ -577,25 +1309,25 @@ export const OpenListboxMetaForVisualTest: Story = {
     },
   },
   render: vrRender(`
-  <tedi-dropdown position="bottom-start">
-    <button tedi-button tedi-dropdown-trigger ariaHaspopup="listbox">Select location</button>
+  <tedi-dropdown position="bottom-start" value="tallinn">
+    <button tedi-button tedi-dropdown-trigger ariaHaspopup="listbox">Vali asukoht</button>
     <tedi-dropdown-content dropdownRole="listbox">
       <li tedi-dropdown-item value="tallinn">
         <tedi-option-content>
           <tedi-option-content-label>Tallinn</tedi-option-content-label>
-          <tedi-option-content-meta>3 timeslots</tedi-option-content-meta>
+          <tedi-option-content-meta>3 vaba aega</tedi-option-content-meta>
         </tedi-option-content>
       </li>
       <li tedi-dropdown-item value="tartu">
         <tedi-option-content>
           <tedi-option-content-label>Tartu</tedi-option-content-label>
-          <tedi-option-content-meta>5 timeslots</tedi-option-content-meta>
+          <tedi-option-content-meta>5 vaba aega</tedi-option-content-meta>
         </tedi-option-content>
       </li>
       <li tedi-dropdown-item value="parnu">
         <tedi-option-content>
           <tedi-option-content-label>Pärnu</tedi-option-content-label>
-          <tedi-option-content-meta>2 timeslots</tedi-option-content-meta>
+          <tedi-option-content-meta>2 vaba aega</tedi-option-content-meta>
         </tedi-option-content>
       </li>
     </tedi-dropdown-content>
@@ -606,7 +1338,7 @@ export const OpenListboxMetaForVisualTest: Story = {
 
 /**
  * Visual-regression only. A long list is where the panel's max height and its scrollbar show,
- * and `clipContent` is what decides whether a long label truncates or wraps.
+ * and the long label shows how labels wrap at a fixed width.
  */
 export const OpenScrollingForVisualTest: Story = {
   tags: ["!dev", "!autodocs"],
@@ -629,7 +1361,7 @@ export const OpenScrollingForVisualTest: Story = {
     },
   },
   render: vrRender(`
-  <tedi-dropdown position="bottom-start">
+  <tedi-dropdown position="bottom-start" maxHeight="15rem" [width]="280">
     <button tedi-button tedi-dropdown-trigger>Long list</button>
     <tedi-dropdown-content dropdownRole="listbox">
       <li tedi-dropdown-item [clipContent]="true">
@@ -644,6 +1376,51 @@ export const OpenScrollingForVisualTest: Story = {
       <li tedi-dropdown-item>Kaheksas valik</li>
       <li tedi-dropdown-item>Üheksas valik</li>
       <li tedi-dropdown-item>Kümnes valik</li>
+    </tedi-dropdown-content>
+  </tedi-dropdown>
+`),
+  play: vrPlay,
+};
+
+/** Visual-regression only. `divided` draws its lines from the content, so only an open menu shows them. */
+export const OpenDividedForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  render: vrRender(`
+  <tedi-dropdown position="bottom-start">
+    <button tedi-button tedi-dropdown-trigger>Profiil</button>
+    <tedi-dropdown-content dropdownRole="menu" [divided]="true">
+      <li tedi-dropdown-item>Profiil</li>
+      <li tedi-dropdown-item>Juurdepääsud</li>
+      <li tedi-dropdown-item>Arveldamine</li>
+      <li tedi-dropdown-item>
+        <tedi-option-content icon="logout">
+          <tedi-option-content-label>Logi välja</tedi-option-content-label>
+        </tedi-option-content>
+      </li>
+    </tedi-dropdown-content>
+  </tedi-dropdown>
+`),
+  play: vrPlay,
+};
+
+/**
+ * Visual-regression only. A header (here a search field) sits above the items with its own
+ * padding, and a separator splits the items into groups; both show only in an open menu.
+ */
+export const OpenWithHeaderForVisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  render: vrRender(`
+  <tedi-dropdown position="bottom-start" [width]="300">
+    <button tedi-button tedi-dropdown-trigger>Vali esindatav</button>
+    <tedi-dropdown-content dropdownRole="menu">
+      <div tedi-dropdown-header>
+        <tedi-search inputId="vr-dropdown-search" label="Otsi" />
+      </div>
+      <li tedi-dropdown-item>Lauri Lepp</li>
+      <li tedi-dropdown-item>Mart Mardivere</li>
+      <li tedi-dropdown-separator></li>
+      <li tedi-dropdown-item>Madis Mets</li>
+      <li tedi-dropdown-item>Kalle Kaasik</li>
     </tedi-dropdown-content>
   </tedi-dropdown>
 `),

@@ -11,12 +11,18 @@ import {
 } from "@angular/core";
 import { DropdownComponent } from "../dropdown/dropdown.component";
 import { FocusableOption } from "@angular/cdk/a11y";
+import { warnDeprecated } from "@tedi-design-system/angular/tedi";
 
 const itemRole = {
   menu: "menuitem",
   listbox: "option",
 };
 
+/**
+ * @deprecated Use the TEDI-Ready `li[tedi-dropdown-item]` from `@tedi-design-system/angular/tedi` instead,
+ * inside a `tedi-dropdown` and `tedi-dropdown-content` (it can't be used on its own).
+ * This component will be removed from future versions.
+ */
 @Component({
   selector: "[tedi-dropdown-item]",
   template: "<ng-content />",
@@ -89,6 +95,10 @@ export class DropdownItemComponent implements FocusableOption {
   }
 
   constructor() {
+    warnDeprecated(
+      "Community [tedi-dropdown-item]",
+      "Use the TEDI-Ready `li[tedi-dropdown-item]` from `@tedi-design-system/angular/tedi` instead, inside a `tedi-dropdown` and `tedi-dropdown-content`.",
+    );
     effect(() => {
       this.disabled = this.disabledInput();
     });
