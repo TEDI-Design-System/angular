@@ -12,6 +12,7 @@ export const translationsMap = {
       "Dropdown",
       "Tooltip",
       "HeaderRole",
+      "Sheet",
     ],
     et: "Sulge",
     en: "Close",
@@ -326,6 +327,22 @@ export const translationsMap = {
     et: "Sulge modaal",
     en: "Close modal",
     ru: "Закрыть модальное окно",
+  },
+  "sheet.collapse": {
+    description:
+      "Label for the Sheet collapse toggle when the sheet is expanded",
+    components: ["Sheet"],
+    et: "Ahenda",
+    en: "Collapse",
+    ru: "Свернуть",
+  },
+  "sheet.expand": {
+    description:
+      "Label for the Sheet collapse toggle when the sheet is collapsed",
+    components: ["Sheet"],
+    et: "Laienda",
+    en: "Expand",
+    ru: "Развернуть",
   },
   "select.loading": {
     description: "Text when select options are loading",
