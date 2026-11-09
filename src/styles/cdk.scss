@@ -2,9 +2,8 @@
 
 @include cdk.a11y-visually-hidden;
 
-// TEDI paints fixed layers (modal, mobile sidenav) above CDK's default container
-// z-index of 1000, so overlay content has to outrank them. `body` keeps this ahead
-// of CDK's own `.cdk-overlay-container` rule, whichever stylesheet loads last.
-body .cdk-overlay-container {
+// Lifts overlay content above TEDI's modal and mobile sidenav. The doubled class
+// outranks CDK's own `.cdk-overlay-container` rule in any load order.
+.cdk-overlay-container.cdk-overlay-container {
   z-index: var(--z-index-modal);
 }
