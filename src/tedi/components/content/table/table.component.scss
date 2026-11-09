@@ -220,6 +220,7 @@ $own-rows: ":where(.tedi-table__scroll) > :where(.tedi-table__table) > * > *";
 }
 
 .tedi-table__sub-component-content {
+  position: relative;
   min-height: 0;
   overflow: hidden;
 }
