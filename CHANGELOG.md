@@ -1,3 +1,13 @@
+# [10.0.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.4...angular-10.0.0-rc.5) (2026-11-09)
+
+
+### Bug Fixes
+
+* **accordion, table, collapse:** stop collapsed content from adding empty space below the page [#836](https://github.com/TEDI-Design-System/angular/issues/836) ([#852](https://github.com/TEDI-Design-System/angular/issues/852)) ([9859d2c](https://github.com/TEDI-Design-System/angular/commit/9859d2c69a9d757a0d043767df343b8b4c4c3ccf))
+* **table:** stop non-interactive rows cancelling link and checkbox clicks [#835](https://github.com/TEDI-Design-System/angular/issues/835) ([#850](https://github.com/TEDI-Design-System/angular/issues/850)) ([f69bc27](https://github.com/TEDI-Design-System/angular/commit/f69bc275d4cace0054ed3389f4efe0f5cf384f7b))
+* **tabs:** follow the link when an anchor tab is chosen from the overflow dropdown [#754](https://github.com/TEDI-Design-System/angular/issues/754) ([#851](https://github.com/TEDI-Design-System/angular/issues/851)) ([b72767d](https://github.com/TEDI-Design-System/angular/commit/b72767d5809fd59228c873de353ea06e57b66c62))
+* **time-field:** link form-field feedback to the input and add a name input [#801](https://github.com/TEDI-Design-System/angular/issues/801) ([#858](https://github.com/TEDI-Design-System/angular/issues/858)) ([befe1f7](https://github.com/TEDI-Design-System/angular/commit/befe1f7ffb908e9097095ba128f7ab06625c5b7a))
+
 # [10.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.3...angular-10.0.0-rc.4) (2026-11-05)
 
 
