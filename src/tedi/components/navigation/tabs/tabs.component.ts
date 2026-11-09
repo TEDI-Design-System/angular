@@ -34,7 +34,11 @@ export class TabsComponent {
   readonly value = input<string>();
   /** Initial active tab id for uncontrolled usage. */
   readonly defaultValue = input<string>("");
-  /** Emitted when the active tab changes. */
+  /**
+   * Emitted with the id of the tab the user selected. In controlled mode the
+   * active tab changes once the bound `value` is updated. With anchor triggers
+   * the link already navigates, so don't navigate from this event.
+   */
   readonly valueChange = output<string>();
 
   /** Currently active tab id, read by the list, triggers and panels. */
