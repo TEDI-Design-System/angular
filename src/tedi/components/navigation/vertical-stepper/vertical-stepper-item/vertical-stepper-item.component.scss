@@ -1,3 +1,5 @@
+@use "@tedi-design-system/core/mixins";
+
 .tedi-vertical-stepper-item {
   --tedi-vertical-stepper-item-fill: var(--stepper-step-default-bg);
   --tedi-vertical-stepper-item-stroke: var(--stepper-step-default-border);
@@ -136,8 +138,7 @@
   }
 
   &:focus-visible {
-    outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
-    outline-offset: var(--tedi-borders-01);
+    @include mixins.focus-element;
   }
 }
 
@@ -327,8 +328,7 @@
     }
 
     &:focus-visible {
-      outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
-      outline-offset: var(--tedi-borders-01);
+      @include mixins.focus-element;
     }
   }
 }
