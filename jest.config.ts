@@ -9,7 +9,7 @@ export default {
     prefix: "<rootDir>",
   }),
   setupFilesAfterEnv: ["<rootDir>/setup-jest.ts"],
-  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
+  testPathIgnorePatterns: ["/node_modules/", "/dist/", "/\\.claude/worktrees/"],
   moduleFileExtensions: ["ts", "html", "js", "json"],
   resolver: "jest-preset-angular/build/resolvers/ng-jest-resolver.js",
   testEnvironment: "<rootDir>/jest-jsdom-env.ts",
