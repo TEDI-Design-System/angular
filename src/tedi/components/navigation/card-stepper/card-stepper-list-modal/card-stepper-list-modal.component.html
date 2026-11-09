@@ -1,0 +1,85 @@
+<tedi-modal>
+  <tedi-modal-header>
+    <h2 tedi-text modifiers="h5">{{ data.title }}</h2>
+  </tedi-modal-header>
+  <tedi-modal-content>
+    <tedi-vertical-stepper [ariaLabel]="data.title">
+      @for (step of data.steps; track $index; let stepIndex = $index) {
+        @if (ownTitle(step); as title) {
+          <tedi-vertical-stepper-item
+            [title]="step.title"
+            [completed]="step.completed"
+            [error]="step.error"
+            [selected]="step.selected"
+            [opened]="step.opened"
+          >
+            @if (title === "button") {
+              <button
+                item-title
+                type="button"
+                [attr.aria-current]="step.selected ? 'step' : null"
+                (click)="selectStep(stepIndex)"
+              >
+                {{ step.title }}
+              </button>
+            } @else {
+              <span
+                item-title
+                [attr.aria-current]="step.selected ? 'step' : null"
+              >
+                {{ step.title }}
+              </span>
+            }
+            @if (step.description) {
+              <span item-description>{{ step.description }}</span>
+            }
+            @for (
+              subStep of step.subSteps;
+              track $index;
+              let subIndex = $index
+            ) {
+              <tedi-vertical-stepper-item
+                [title]="subStep.title"
+                [completed]="subStep.completed"
+                [error]="subStep.error"
+                [informative]="subStep.informative"
+                [disabled]="subStep.disabled"
+                [selected]="subStep.selected"
+                (itemSelect)="selectSubStep(stepIndex, subIndex)"
+              />
+            }
+          </tedi-vertical-stepper-item>
+        } @else {
+          <tedi-vertical-stepper-item
+            [title]="step.title"
+            [completed]="step.completed"
+            [error]="step.error"
+            [disabled]="step.disabled"
+            [selected]="step.selected"
+            [opened]="step.opened"
+            (itemSelect)="selectStep(stepIndex)"
+          >
+            @if (step.description) {
+              <span item-description>{{ step.description }}</span>
+            }
+            @for (
+              subStep of step.subSteps;
+              track $index;
+              let subIndex = $index
+            ) {
+              <tedi-vertical-stepper-item
+                [title]="subStep.title"
+                [completed]="subStep.completed"
+                [error]="subStep.error"
+                [informative]="subStep.informative"
+                [disabled]="subStep.disabled"
+                [selected]="subStep.selected"
+                (itemSelect)="selectSubStep(stepIndex, subIndex)"
+              />
+            }
+          </tedi-vertical-stepper-item>
+        }
+      }
+    </tedi-vertical-stepper>
+  </tedi-modal-content>
+</tedi-modal>
