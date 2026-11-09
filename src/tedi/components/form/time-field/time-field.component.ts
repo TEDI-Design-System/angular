@@ -42,6 +42,7 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { deriveControlState } from "../form-field/derive-control-state";
+import { controlDescribedBy } from "../form-field/control-described-by";
 import {
   TimePickerModalComponent,
   TimePickerModalData,
@@ -98,8 +99,19 @@ export class TimeFieldComponent
   });
   private readonly derived = deriveControlState();
 
+  /**
+   * `aria-describedby` ids for the input — the wrapping form-field's feedback
+   * text, plus any set on `<tedi-time-field>` itself.
+   */
+  readonly describedBy = controlDescribedBy();
+
   /** Unique ID for label association and accessibility. */
   readonly inputId = input.required<string>();
+  /**
+   * `name` attribute of the input, used by native form submission. Omitted
+   * from the DOM when not set.
+   */
+  readonly name = input<string>();
   /** Selected time in `HH:mm` format. Two-way bindable. */
   readonly value = model<string | null>(null);
   /** Placeholder shown when the input is empty. */
@@ -282,6 +294,10 @@ export class TimeFieldComponent
 
   setDisabledState(disabled: boolean): void {
     this.formDisabled.set(disabled);
+  }
+
+  setDescribedBy(ids: string[]): void {
+    this.describedBy.set(ids);
   }
 
   handleInput(event: Event) {
