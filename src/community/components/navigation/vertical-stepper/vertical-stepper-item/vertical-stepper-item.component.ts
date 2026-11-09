@@ -20,6 +20,12 @@ import {
   TediTranslationPipe,
 } from "@tedi-design-system/angular/tedi";
 
+/**
+ * @deprecated Use the TEDI-Ready `tedi-vertical-stepper-item` from
+ * `@tedi-design-system/angular/tedi` instead. The TEDI-Ready component
+ * supports the same inputs, content slots, and nested item composition.
+ * This community component will be removed in a future release.
+ */
 @Component({
   selector: "tedi-vertical-stepper-item",
   imports: [
