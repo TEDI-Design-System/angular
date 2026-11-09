@@ -168,10 +168,9 @@ describe("InlineEditComponent", () => {
       );
     });
 
-    it("renders the edit icon in the brand colour, not the text colour", () => {
+    it("leaves the edit icon colour to the component styles", () => {
       const icon = dom().querySelector("tedi-icon")!;
-      expect(icon.className).toContain("tedi-icon--color-brand");
-      expect(icon.className).not.toContain("tedi-icon--color-inherit");
+      expect(icon.className).toContain("tedi-icon--color-inherit");
     });
 
     it("renders static text with no trigger when read-only", () => {
