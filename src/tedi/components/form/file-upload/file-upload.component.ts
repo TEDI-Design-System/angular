@@ -350,6 +350,14 @@ export class FileUploadComponent
   protected readonly failedLabel =
     this.translations.track("file-upload.failed");
 
+  /**
+   * A multiple field shows even one file as a tag, so without a clear button
+   * the last file can still be removed.
+   */
+  protected readonly showTags = computed(
+    () => this.multiple() || this.files().length > 1,
+  );
+
   protected readonly isEditable = computed(
     () => !this.disabled() && !this.readOnly(),
   );

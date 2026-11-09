@@ -9,15 +9,13 @@ export interface FileUploadFile extends Partial<File> {
    */
   id?: string;
   /**
-   * Whether the file is uploading. In a list of several files, its tag shows a
-   * spinner and has no remove button; the clear button still removes it.
+   * Whether the file is uploading. Its tag shows a spinner and has no remove
+   * button; the clear button still removes it.
    */
   isLoading?: boolean;
   /**
-   * Whether the file passed the `accept`, `maxSize` and `validator` checks. A
-   * file marked `false` is shown as a danger tag while two or more files are
-   * listed; a single file shows only its name. To change it, set a new array
-   * on `files` or the bound control — the field does not see an in-place edit.
+   * Whether the file is valid. An invalid file shows as a danger tag, but one
+   * the field rejects itself is listed only with `keepRejectedFiles`.
    */
   isValid?: boolean;
 }

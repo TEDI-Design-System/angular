@@ -210,7 +210,8 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   announces only "Add attachment".
 - **`tedi-file-upload` has no separate "default" input, and owns its hint.** `[files]` seeds the
   list, `[(files)]` keeps the parent in sync, `[formControl]` hands it to the form — bind a stable
-  reference, an inline literal is written back on every check. The field owns one hint: the allowed
+  reference, an inline literal is written back on every check. Change a file's `isLoading` or
+  `isValid` by setting a new array, as the field does not see an edit in place. The field owns one hint: the allowed
   types and size (from `accept` / `maxSize`, off with `showRestrictions`) followed by your `hint`
   text. Put guidance there rather than projecting a `tedi-feedback-text` hint, which would make a
   second one. It owns one validation message the same way, shown above the hint: pass an error of
@@ -221,8 +222,8 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 - **`tedi-file-upload` validates itself.** It registers on `NG_VALIDATORS`, so a bound control fails
   with a `rejectedFiles` error while any `isValid: false` file is listed. By default a file that
   fails `accept`, `maxSize` or `validator` is discarded and only the summary under the field remains;
-  `keepRejectedFiles` keeps it in the list, marked invalid, instead. It shows as a danger tag only
-  while two or more files are listed; a single file shows just its name. Filter on `isValid` before
+  `keepRejectedFiles` keeps it in the list, marked invalid, instead. It shows as a danger tag; only a
+  single file in a field without `multiple` shows just its name. Filter on `isValid` before
   uploading either way. `accept`, `maxSize` and `validator` apply to the next selection; files already
   listed keep their verdict, so clear them yourself if you tighten a rule.
 - **A `tedi-file-upload` `validator` adds a rule but no hint.** It runs on every selected file, and
@@ -232,8 +233,8 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   it in whichever unit reads best.
 - **It selects files, it does not upload them.** `fileRemove` emits the single entry the user removed,
   one event per file when clearing, so an in-flight upload can be aborted without diffing
-  `filesChange`. Set `isLoading` on a file yourself while it uploads: in a list of several, its tag
-  shows a spinner and loses its remove button. The clear button still removes it, so a stuck upload is
+  `filesChange`. Set `isLoading` on a file yourself while it uploads: its tag shows a spinner and
+  loses its remove button. The clear button still removes it, so a stuck upload is
   never stranded; clear `isLoading` and set `isValid: false` on failure or timeout.
 - **Below `md` it stacks**: files above a full-width button row, and the clear button becomes a text
   button. There is no input for this.

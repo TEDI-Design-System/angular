@@ -739,6 +739,18 @@ describe("FileUploadComponent", () => {
       expect(fixture.debugElement.query(By.css("tedi-tag"))).toBeNull();
     });
 
+    it("renders a single file as a tag when multiple", () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("files", [{ id: "1", name: "report.pdf" }]);
+      fixture.detectChanges();
+
+      expect(fixture.debugElement.queryAll(By.css("tedi-tag")).length).toBe(1);
+      expect(tagRemoveButtons(fixture).length).toBe(1);
+      expect(
+        fixture.debugElement.query(By.css(".tedi-file-upload__name")),
+      ).toBeNull();
+    });
+
     it("renders several files as closable tags", () => {
       fixture.componentRef.setInput("files", [
         { id: "1", name: "a.pdf" },
@@ -974,8 +986,7 @@ describe("FileUploadComponent with reactive forms", () => {
     fixture.detectChanges();
 
     expect(
-      fixture.debugElement.query(By.css(".tedi-file-upload__name"))
-        .nativeElement.textContent,
+      fixture.debugElement.query(By.css("tedi-tag")).nativeElement.textContent,
     ).toContain("preloaded.pdf");
   });
 
@@ -1234,7 +1245,7 @@ describe("FileUploadComponent inside tedi-form-field", () => {
       <label tedi-label for="docs">Failid</label>
       <tedi-file-upload
         inputId="docs"
-        multiple
+        [multiple]="multiple"
         [readOnly]="readOnly"
         [files]="files"
       />
@@ -1243,6 +1254,7 @@ describe("FileUploadComponent inside tedi-form-field", () => {
 })
 class ReadOnlyHostComponent {
   readOnly = true;
+  multiple = true;
   files: FileUploadFile[] = [
     { id: "1", name: "a.pdf" },
     { id: "2", name: "b.pdf" },
@@ -1286,6 +1298,7 @@ describe("FileUploadComponent read-only list", () => {
 
   it("names a single file by the field label as a list of one", () => {
     fixture.componentInstance.files = [{ id: "1", name: "a.pdf" }];
+    fixture.componentInstance.multiple = false;
     fixture.detectChanges();
 
     expect(list().getAttribute("role")).toBe("list");
@@ -1297,8 +1310,17 @@ describe("FileUploadComponent read-only list", () => {
     expect(list().querySelector("tedi-tag")).toBeNull();
   });
 
+  it("shows a single read-only file as a tag when multiple", () => {
+    fixture.componentInstance.files = [{ id: "1", name: "a.pdf" }];
+    fixture.detectChanges();
+
+    expect(list().getAttribute("aria-labelledby")).toBe("docs-label");
+    expect(list().querySelectorAll("tedi-tag").length).toBe(1);
+  });
+
   it("shows a single editable file as plain text, outside a list", () => {
     fixture.componentInstance.files = [{ id: "1", name: "a.pdf" }];
+    fixture.componentInstance.multiple = false;
     fixture.componentInstance.readOnly = false;
     fixture.detectChanges();
 
