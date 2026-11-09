@@ -1353,6 +1353,8 @@ export class TediTableComponent<TData> {
   }
 
   protected handleRowClick(event: Event, row: Row<TData>): void {
+    // Clicks on rows that are neither interactive nor expand on click are ignored.
+    if (!this.interactive() && !this.rowExpandsOnClick(row)) return;
     // Clicks that land on an interactive control inside a cell (checkbox,
     // link, button, form field, …) must not also activate the row or toggle
     // its expansion — so consumers don't need to add `stopPropagation` by hand.

@@ -1546,15 +1546,17 @@ describe("TediTableComponent", () => {
         <tedi-table
           [data]="data"
           [columns]="columns()"
-          [interactive]="true"
+          [interactive]="interactive()"
           (rowClick)="onRowClick($event)"
         />
         <ng-template #linkCell>
           <a class="cell-link" href="#">link</a>
+          <input class="cell-checkbox" type="checkbox" />
         </ng-template>
       `,
     })
     class ClickGuardHostComponent {
+      readonly interactive = signal(true);
       readonly data: Person[] = [{ id: "1", name: "Anna", role: "Eng" }];
       readonly linkTpl = viewChild<TemplateRef<unknown>>("linkCell");
       readonly onRowClick = jest.fn();
@@ -1568,7 +1570,9 @@ describe("TediTableComponent", () => {
       ]);
     }
 
-    function setupGuard(): ComponentFixture<ClickGuardHostComponent> {
+    function setupGuard(
+      interactive = true,
+    ): ComponentFixture<ClickGuardHostComponent> {
       TestBed.configureTestingModule({
         imports: [ClickGuardHostComponent],
         providers: [
@@ -1577,9 +1581,37 @@ describe("TediTableComponent", () => {
         ],
       });
       const fixture = TestBed.createComponent(ClickGuardHostComponent);
+      fixture.componentInstance.interactive.set(interactive);
       fixture.detectChanges();
       return fixture;
     }
+
+    describe.each([
+      ["interactive", true],
+      ["non-interactive", false],
+    ])("in a %s table", (_label, interactive) => {
+      it("does not cancel the default action of a link in a cell", () => {
+        const fixture = setupGuard(interactive);
+        const link = fixture.nativeElement.querySelector(
+          ".cell-link",
+        ) as HTMLAnchorElement;
+        const click = new MouseEvent("click", {
+          bubbles: true,
+          cancelable: true,
+        });
+        link.dispatchEvent(click);
+        expect(click.defaultPrevented).toBe(false);
+      });
+
+      it("lets a checkbox in a cell toggle", () => {
+        const fixture = setupGuard(interactive);
+        const checkbox = fixture.nativeElement.querySelector(
+          ".cell-checkbox",
+        ) as HTMLInputElement;
+        checkbox.click();
+        expect(checkbox.checked).toBe(true);
+      });
+    });
 
     it("does not activate the row when an interactive control in a cell is clicked", () => {
       const fixture = setupGuard();
