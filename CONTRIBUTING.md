@@ -65,6 +65,23 @@ A story with a known, tracked accessibility issue can be marked with `parameters
 
 The automated check catches only part of the problems. TEDI-READY components also need manual testing (keyboard, screen reader, zoom), as listed in the Definition of Done.
 
+## Angular version support
+
+The library supports the three latest Angular majors (see [Supported versions](https://github.com/TEDI-Design-System/general/wiki/Supported-versions) in the wiki). It is built and tested against the base version pinned in `devDependencies`, and the `compatibility` job in CI installs the built package into a fresh app for every supported major to verify it is consumable.
+
+When a new Angular major is released (e.g. v23):
+
+1. **`package.json`** and **`src/package.json`** (the published manifest, whose peer ranges consumers install against): add `|| ^23.0.0` to every Angular peer dependency, and add the `ngx-quill` major that supports Angular 23 to the `ngx-quill` peer (each `ngx-quill` major supports a single Angular major; check its `peerDependencies` on npm).
+2. **`.github/workflows/angular-test-and-lint.yml`**: add `23` to the `angular-version` matrix in the `compatibility` job.
+3. **`README.md`**: update the supported versions under _Getting Started_.
+
+When an Angular major reaches end-of-life (e.g. v20):
+
+1. **`package.json`** and **`src/package.json`**: remove `^20.0.0 ||` from every Angular peer dependency, and drop the `ngx-quill` majors that only support Angular 20 from the `ngx-quill` peer.
+2. **`.github/workflows/angular-test-and-lint.yml`**: remove `20` from the `angular-version` matrix in the `compatibility` job.
+3. Bump `devDependencies` to the new minimum supported Angular version, so the library is always built and developed against a supported release.
+4. **`README.md`**: update the supported versions under _Getting Started_.
+
 ## AI tooling
 
 The repository ships a `contributing` skill for AI coding agents, available as `/contributing`. It covers creating components, tests, lint, accessibility audits and stories.
