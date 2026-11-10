@@ -1,3 +1,10 @@
+# [10.0.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.5...angular-10.0.0-rc.6) (2026-11-10)
+
+
+### Bug Fixes
+
+* **overlay:** keep the overlay container above cdk's own z-index rule [#781](https://github.com/TEDI-Design-System/angular/issues/781) ([#859](https://github.com/TEDI-Design-System/angular/issues/859)) ([9d690eb](https://github.com/TEDI-Design-System/angular/commit/9d690ebfe24133677e520ca0ac11e25667a2da6c))
+
 # [10.0.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.4...angular-10.0.0-rc.5) (2026-11-09)
 
 
