@@ -12,8 +12,7 @@ import { IconComponent } from "../../base/icon/icon.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
-import { StatusBadgeComponent } from "../../../../community/components/tags/status-badge/status-badge.component";
-import { StatusBadgeComponent as TediStatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
+import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 
 /**
@@ -42,7 +41,6 @@ export default {
         IconComponent,
         RowComponent,
         StatusBadgeComponent,
-        TediStatusBadgeComponent,
         InfoTooltipComponent,
       ],
     }),
@@ -158,7 +156,7 @@ export const Types: Story = {
                   {{ group.value }}
                 }
                 @if (group.statusBadge) {
-                  <span tedi-status-badge color="brand" status="none">{{ group.statusBadge }}</span>
+                  <tedi-status-badge color="brand" [text]="group.statusBadge" />
                 }
               </div>
             </tedi-text-group-value>

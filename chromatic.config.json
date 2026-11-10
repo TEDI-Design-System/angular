@@ -4,6 +4,7 @@
   "autoAcceptChanges": "main",
   "skip": "dependabot/**",
   "onlyChanged": true,
+  "externals": ["angular.json", "src/styles/**"],
   "untraced": [
     "CHANGELOG.md",
     "src/tedi/index.ts",
