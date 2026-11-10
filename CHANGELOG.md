@@ -1,3 +1,10 @@
+# [10.0.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.7...angular-10.0.0-rc.8) (2026-11-10)
+
+
+### Bug Fixes
+
+* **select:** expose disabled state to assistive technology [#839](https://github.com/TEDI-Design-System/angular/issues/839) ([#855](https://github.com/TEDI-Design-System/angular/issues/855)) ([63c5cb9](https://github.com/TEDI-Design-System/angular/commit/63c5cb9dfa317ba34e53c015b8d5763046fc0463))
+
 # [10.0.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.6...angular-10.0.0-rc.7) (2026-11-10)
 
 
