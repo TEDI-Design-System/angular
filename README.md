@@ -18,7 +18,7 @@ Component documentation, examples and APIs are in [Storybook](https://storybook.
 npm install @tedi-design-system/angular
 ```
 
-Peer dependencies: `@angular/core`, `@angular/common`, `@angular/forms`, `@angular/platform-browser` and `@angular/cdk` 20, 21 or 22, plus `ngx-quill` and `quill` for the text editor. Design tokens, fonts and icons come from `@tedi-design-system/core`, which is installed with the package.
+Peer dependencies: `@angular/core`, `@angular/common`, `@angular/forms`, `@angular/platform-browser` and `@angular/cdk` 20, 21 or 22. The text editor also needs `quill` and the `ngx-quill` major that matches your Angular version: 28 for Angular 20, 30 for 21 and 31 for 22. Design tokens, fonts and icons come from `@tedi-design-system/core`, which is installed with the package.
 
 ### Setup
 
@@ -30,6 +30,14 @@ Add the stylesheet (fonts, tokens and component styles) to `angular.json`, next 
 ```
 
 To load only one Material Symbols style, use `index-without-icons.css` together with one of `icons/outlined.css`, `icons/rounded.css` or `icons/sharp.css`.
+
+The text editor also needs Quill's stylesheets in your global styles:
+
+```scss
+// src/styles.scss
+@forward "quill/dist/quill.core.css";
+@forward "quill/dist/quill.snow.css";
+```
 
 Provide the theme and language in your application config, and start `ThemeService` with the app:
 
@@ -66,7 +74,7 @@ import { ButtonComponent } from "@tedi-design-system/angular/tedi";
 export class AppComponent {}
 ```
 
-TEDI-Ready components are exported from `@tedi-design-system/angular/tedi`, community components from `@tedi-design-system/angular/community`. Prefer a TEDI-Ready component where one exists. Browse all components in [Storybook](https://storybook.tedi.ee/angular/main/?path=/docs/documentation-get-started--get-started).
+TEDI-Ready components are exported from `@tedi-design-system/angular/tedi`, community components from `@tedi-design-system/angular/community`. The text editor has its own entry point, `@tedi-design-system/angular/community/text-editor`, so apps that don't use it don't need Quill. Prefer a TEDI-Ready component where one exists. Browse all components in [Storybook](https://storybook.tedi.ee/angular/main/?path=/docs/documentation-get-started--get-started).
 
 ### Supported versions
 

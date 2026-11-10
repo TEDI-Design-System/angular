@@ -71,13 +71,13 @@ The library supports the three latest Angular majors (see [Supported versions](h
 
 When a new Angular major is released (e.g. v23):
 
-1. **`package.json`** and **`src/package.json`** (the published manifest, whose peer ranges consumers install against): add `|| ^23.0.0` to every Angular peer dependency.
+1. **`package.json`** and **`src/package.json`** (the published manifest, whose peer ranges consumers install against): add `|| ^23.0.0` to every Angular peer dependency, and add the `ngx-quill` major that supports Angular 23 to the `ngx-quill` peer (each `ngx-quill` major supports a single Angular major; check its `peerDependencies` on npm).
 2. **`.github/workflows/angular-test-and-lint.yml`**: add `23` to the `angular-version` matrix in the `compatibility` job.
 3. **`README.md`**: update the supported versions under _Getting Started_.
 
 When an Angular major reaches end-of-life (e.g. v20):
 
-1. **`package.json`** and **`src/package.json`**: remove `^20.0.0 ||` from every Angular peer dependency.
+1. **`package.json`** and **`src/package.json`**: remove `^20.0.0 ||` from every Angular peer dependency, and drop the `ngx-quill` majors that only support Angular 20 from the `ngx-quill` peer.
 2. **`.github/workflows/angular-test-and-lint.yml`**: remove `20` from the `angular-version` matrix in the `compatibility` job.
 3. Bump `devDependencies` to the new minimum supported Angular version, so the library is always built and developed against a supported release.
 4. **`README.md`**: update the supported versions under _Getting Started_.
