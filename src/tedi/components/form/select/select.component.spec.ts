@@ -1093,6 +1093,29 @@ describe("SelectComponent", () => {
       expect(trigger.getAttribute("aria-expanded")).toBe("true");
     });
 
+    it("trigger should not have aria-disabled when enabled", () => {
+      expect(getTrigger().hasAttribute("aria-disabled")).toBe(false);
+    });
+
+    it("trigger should have aria-disabled when disabled", () => {
+      select.setDisabledState(true);
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-disabled")).toBe("true");
+    });
+
+    it("trigger should follow the form control's disabled state in aria-disabled", () => {
+      host.control.disable();
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-disabled")).toBe("true");
+
+      host.control.enable();
+      fixture.detectChanges();
+
+      expect(getTrigger().hasAttribute("aria-disabled")).toBe(false);
+    });
+
     it("trigger should have aria-haspopup", () => {
       const trigger = getTrigger();
       expect(trigger.getAttribute("aria-haspopup")).toBe("listbox");
