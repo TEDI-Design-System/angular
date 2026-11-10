@@ -12,8 +12,9 @@ $transition-duration: 300ms;
   &__extender {
     visibility: hidden;
     min-height: 0;
-    padding-top: var(--tedi-dimensions-05);
-    transition: visibility $transition-duration;
+    transition:
+      visibility $transition-duration,
+      padding-top $transition-duration;
   }
 
   &__content {
@@ -28,6 +29,7 @@ $transition-duration: 300ms;
 
       .tedi-collapse__extender {
         visibility: visible;
+        padding-top: var(--tedi-dimensions-05);
       }
     }
   }
@@ -46,5 +48,6 @@ $transition-duration: 300ms;
 
   .tedi-collapse__extender {
     visibility: visible;
+    padding-top: var(--tedi-dimensions-05);
   }
 }

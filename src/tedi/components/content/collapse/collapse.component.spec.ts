@@ -48,6 +48,19 @@ describe("CollapseComponent", () => {
     expect(component.isOpen()).toBe(true);
   });
 
+  it("forwards underline to the toggle button", () => {
+    const button: HTMLButtonElement = fixture.nativeElement.querySelector(
+      "button[tedi-collapse-button]",
+    );
+    expect(button.classList).not.toContain(
+      "tedi-collapse-button--no-underline",
+    );
+
+    fixture.componentRef.setInput("underline", false);
+    fixture.detectChanges();
+    expect(button.classList).toContain("tedi-collapse-button--no-underline");
+  });
+
   it("should generate a unique collapseContentId", () => {
     expect(component.collapseContentId).toBe(
       "collapse-content-mocked-random-uuid",

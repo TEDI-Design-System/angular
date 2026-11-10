@@ -1,82 +1,103 @@
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FooterBottomComponent } from "./footer-bottom.component";
-import { LinkComponent } from "../../../navigation/link/link.component";
-import { BreakpointService } from "../../../../services/breakpoint/breakpoint.service";
-import { By } from "@angular/platform-browser";
-import { signal } from "@angular/core";
+import {
+  Breakpoint,
+  BreakpointService,
+} from "../../../../services/breakpoint/breakpoint.service";
+
+class BreakpointServiceMock {
+  readonly _currentBreakpoint = signal<Breakpoint | undefined>("xl");
+  readonly isBelowBreakpoint = BreakpointService.prototype.isBelowBreakpoint;
+}
 
 @Component({
   standalone: true,
-  imports: [FooterBottomComponent, LinkComponent],
+  imports: [FooterBottomComponent],
   template: `
-    <tedi-footer-bottom>
-      <a tedi-link href="#">Link 1</a>
-      <a tedi-link href="#">Link 2</a>
-      <a tedi-link href="#">Link 3</a>
+    <tedi-footer-bottom [separator]="separator()">
+      @for (item of items(); track item) {
+        <a href="#">{{ item }}</a>
+      }
     </tedi-footer-bottom>
   `,
 })
-class TestHostComponent {}
-
-@Component({
-  standalone: true,
-  imports: [FooterBottomComponent, LinkComponent],
-  template: `
-    <tedi-footer-bottom>
-      <a tedi-link href="#">Link 1</a>
-    </tedi-footer-bottom>
-  `,
-})
-class TestHostSingleLinkComponent {}
+class TestHostComponent {
+  readonly separator = signal(false);
+  readonly items = signal(["Facebook", "Instagram", "LinkedIn"]);
+}
 
 describe("FooterBottomComponent", () => {
   let fixture: ComponentFixture<TestHostComponent>;
-  let mockBreakpointService: {
-    isBelowBreakpoint: jest.Mock;
-    getBreakpointInputs: jest.Mock;
-  };
+  let host: TestHostComponent;
+  let breakpoint: BreakpointServiceMock;
+  let inner: HTMLElement;
+
+  const dots = () => inner.querySelectorAll(".tedi-footer-bottom__dot");
+  const flushMutations = () => new Promise((resolve) => setTimeout(resolve));
 
   beforeEach(async () => {
-    mockBreakpointService = {
-      isBelowBreakpoint: jest.fn().mockReturnValue(signal(false)),
-      getBreakpointInputs: jest.fn().mockReturnValue({}),
-    };
+    breakpoint = new BreakpointServiceMock();
 
     await TestBed.configureTestingModule({
-      imports: [TestHostComponent, TestHostSingleLinkComponent],
-      providers: [
-        { provide: BreakpointService, useValue: mockBreakpointService },
-      ],
+      imports: [TestHostComponent],
+      providers: [{ provide: BreakpointService, useValue: breakpoint }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TestHostComponent);
+    host = fixture.componentInstance;
     fixture.detectChanges();
+    inner = fixture.nativeElement.querySelector(".tedi-footer-bottom__inner");
   });
 
-  it("should create component", () => {
-    expect(fixture.componentInstance).toBeTruthy();
-  });
-
-  it("should add ellipsis elements when in mobile layout", () => {
-    mockBreakpointService.isBelowBreakpoint.mockReturnValue(signal(true));
-    fixture = TestBed.createComponent(TestHostComponent);
+  it("has no dots by default, also on mobile", () => {
+    breakpoint._currentBreakpoint.set("xs");
     fixture.detectChanges();
-    const ellipsisEls = fixture.debugElement.queryAll(
-      By.css(".tedi-footer-bottom__ellipsis"),
-    );
-    expect(ellipsisEls.length).toBe(2);
+
+    expect(
+      fixture.nativeElement.querySelector("tedi-footer-bottom").classList,
+    ).toContain("tedi-footer-bottom--mobile");
+    expect(dots()).toHaveLength(0);
   });
 
-  it("should not add ellipsis elements if there is only one link", () => {
-    mockBreakpointService.isBelowBreakpoint.mockReturnValue(signal(true));
-    const singleLinkFixture = TestBed.createComponent(
-      TestHostSingleLinkComponent,
+  it("puts a decorative dot between items with separator", () => {
+    host.separator.set(true);
+    fixture.detectChanges();
+
+    const children = Array.from(inner.children);
+    expect(children.map((child) => child.tagName)).toEqual([
+      "A",
+      "SPAN",
+      "A",
+      "SPAN",
+      "A",
+    ]);
+    dots().forEach((dot) =>
+      expect(dot.getAttribute("aria-hidden")).toBe("true"),
     );
-    singleLinkFixture.detectChanges();
-    const ellipsisEls = singleLinkFixture.debugElement.queryAll(
-      By.css(".tedi-footer-bottom__ellipsis"),
-    );
-    expect(ellipsisEls.length).toBe(0);
+  });
+
+  it("removes the dots when separator is turned off", () => {
+    host.separator.set(true);
+    fixture.detectChanges();
+    host.separator.set(false);
+    fixture.detectChanges();
+
+    expect(dots()).toHaveLength(0);
+  });
+
+  it("keeps the dots in sync when items change", async () => {
+    host.separator.set(true);
+    fixture.detectChanges();
+
+    host.items.set(["Facebook", "Instagram", "LinkedIn", "YouTube"]);
+    fixture.detectChanges();
+    await flushMutations();
+    expect(dots()).toHaveLength(3);
+
+    host.items.set(["Facebook"]);
+    fixture.detectChanges();
+    await flushMutations();
+    expect(dots()).toHaveLength(0);
   });
 });

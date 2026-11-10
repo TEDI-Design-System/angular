@@ -200,6 +200,10 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   `icon` input, not from projection, so you cannot swap in your own `tedi-icon` or add trailing
   content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
   name — if the icon carries meaning the text doesn't, compose a heading and an icon yourself.
+- **Footer parts belong inside `<tedi-footer>`.** `tedi-footer-body`, `-side`, `-section` and
+  `-bottom` read the footer's `mobileBreakpoint` through DI and fall back to `sm` outside one.
+  Template order doesn't position them: sides go where their `placement` says, and
+  `tedi-footer-bottom` always renders below the row.
 
 ### Clear buttons
 

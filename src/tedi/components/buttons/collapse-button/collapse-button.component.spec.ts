@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import { CollapseButtonComponent } from "./collapse-button.component";
+import { IconComponent } from "../../base/icon/icon.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 
@@ -108,6 +110,22 @@ describe("CollapseButtonComponent", () => {
     const button: HTMLButtonElement = fixture.nativeElement;
     expect(button.classList.contains("tedi-collapse-button--small")).toBe(true);
   });
+
+  it.each([
+    { size: "default", hideText: false, expected: 18 },
+    { size: "small", hideText: false, expected: 16 },
+    { size: "default", hideText: true, expected: 24 },
+  ] as const)(
+    "renders a $expected px chevron for size '$size' with hideText $hideText",
+    ({ size, hideText, expected }) => {
+      fixture.componentRef.setInput("size", size);
+      fixture.componentRef.setInput("hideText", hideText);
+      fixture.detectChanges();
+      const icon = fixture.debugElement.query(By.directive(IconComponent))
+        .componentInstance as IconComponent;
+      expect(icon.size()).toBe(expected);
+    },
+  );
 
   it("applies the --neutral modifier on the host when icon-only with arrowType 'default'", () => {
     fixture.componentRef.setInput("hideText", true);
