@@ -218,6 +218,15 @@
                         {{ content }}
                       }
                     </ng-container>
+                    @if (shouldRenderSortButtonAfterHeader(header)) {
+                      <button
+                        tedi-table-header-button
+                        [icon]="sortIcon(header.column)"
+                        [selected]="!!header.column.getIsSorted()"
+                        [aria-label]="sortAriaLabel(header.column)"
+                        (click)="handleSortToggle(header.column)"
+                      ></button>
+                    }
                     @if (shouldRenderFilterButton(header.column)) {
                       @if (filterUsesModal()) {
                         <button

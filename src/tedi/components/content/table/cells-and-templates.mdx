@@ -129,9 +129,9 @@ columns: TediColumnDef<Person>[] = [
 (see the dedicated section below). Pair it with `manualSorting` for
 server-side sort — clicks emit `(stateChange)` and the parent re-fetches.
 
-When the shorthand isn't enough (combined filter + sort headers, tooltips
-inside the title, etc.) drop the flag and provide a custom `header` template
-instead — see the next section.
+A column with a custom `header` template (an info button after the title,
+etc.) keeps `sortable: true` and gets a separate sort button after the header —
+see the Header templates section below.
 
 ---
 
@@ -192,8 +192,9 @@ needs more room than a text field. Both take a preset (`"none" | "small" |
 length (`"20rem"`, `"min(90vw, 30rem)"`).
 
 Combined sort + filter is supported by setting both `sortable: true` and
-`filterable: true` on the same column. The title becomes the sort target and
-the filter trigger renders next to it.
+`filterable: true` on the same column. A string title becomes the sort target
+and the filter trigger renders next to it; a custom header is followed by the
+sort button, then the filter trigger.
 
 For filter UIs that need cross-column awareness or fully custom popover
 chrome, drop `filterable` and supply a custom `header` template instead.
@@ -202,10 +203,35 @@ chrome, drop `filterable` and supply a custom `header` template instead.
 
 ## Header templates (full control)
 
-For headers that need more than a sort button — a filter popover, an info
-tooltip, custom layout — provide a `TemplateRef` for `header`. The
-`sortable: true` shorthand bows out the moment the rendered header is not a
-plain string, so the template owns the whole UI:
+For headers that need more than a title — an info button, custom layout —
+provide a `TemplateRef` for `header`. `sortable: true` and `filterable: true`
+keep working: the template renders as-is and the table adds an icon-only sort
+button and the filter trigger after it, in that order. The custom content is
+not placed inside the sort button, so it can hold its own interactive elements.
+Set `meta.label` so both buttons can name the column for screen readers
+(otherwise the column id is used):
+
+```html
+<ng-template #statusHeader>
+  Staatus
+  <tedi-popover>
+    <button tedi-info-button tedi-popover-trigger aria-label="Staatuse selgitus"></button>
+    <tedi-popover-content>…</tedi-popover-content>
+  </tedi-popover>
+</ng-template>
+```
+
+```ts
+{
+  id: "status",
+  accessorKey: "status",
+  header: this.statusHeaderTpl() ?? "Staatus",
+  meta: { label: "Staatus" },
+  sortable: true,
+}
+```
+
+To own the sort UI as well, leave `sortable` off and build it in the template:
 
 ```html
 <tedi-table [data]="data" [columns]="columns()" />
@@ -232,7 +258,7 @@ columns = computed<TediColumnDef<Person>[]>(() => {
 });
 ```
 
-`meta.label` is read by the table for filter `aria-label`s, the columns menu,
+`meta.label` is read by the table for sort and filter `aria-label`s, the columns menu,
 etc., so keep it set on every column whose header is a non-string template.
 
 ---

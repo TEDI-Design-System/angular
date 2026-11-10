@@ -63,7 +63,10 @@ export type TableExpandTrigger = "button" | "row";
  * - align the header cell separately from the body (`headerAlign`).
  */
 export interface TableColumnMeta {
-  /** Accessible label used when the column header isn't a plain string. */
+  /**
+   * Accessible label for a column whose header isn't a plain string. Names
+   * the column in the built-in sort and filter buttons.
+   */
   label?: string;
   /**
    * Horizontal alignment applied to every body / footer cell, and to the
@@ -232,15 +235,17 @@ export type TediColumnDef<TData, TValue = unknown> = ColumnDef<
    */
   groupBy?: boolean | ((row: Row<TData>) => unknown);
   /**
-   * Opts the column into the built-in sort affordance. When `true` and the
-   * column's `header` is a string, the table renders a clickable sort button
-   * around the header title — the entire title becomes the affordance, an
-   * icon reflects the current sort direction, `aria-sort` is wired, and
-   * clicking toggles `asc → desc → none`.
+   * Opts the column into the built-in sort affordance: an icon reflects the
+   * current sort direction, `aria-sort` is wired, and clicking toggles
+   * `asc → desc → none`.
    *
-   * For fully custom sort UIs (e.g. combined sort + filter), provide a
-   * `TemplateRef` for `header` and call `column.toggleSorting()` yourself —
-   * the shorthand bows out when a non-string header is rendered.
+   * - String header: the whole title becomes the sort button.
+   * - Custom header (template or component): the header renders as-is,
+   *   followed by an icon-only sort button. Set `meta.label` so the button can
+   *   name the column (otherwise the column id is used).
+   *
+   * For a fully custom sort UI, leave `sortable` off, provide a `TemplateRef`
+   * for `header` and call `column.toggleSorting()` yourself.
    *
    * Pair with `sortingFn` on the same column to override the comparator
    * (built-in: `'alphanumeric'`, `'text'`, `'datetime'`, `'basic'`, `'auto'`,

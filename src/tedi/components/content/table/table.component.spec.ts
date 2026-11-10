@@ -46,6 +46,8 @@ const TRANSLATIONS: Record<string, Translator> = {
   "table.filter-apply": () => "Apply",
   "table.filter-clear": () => "Clear",
   "table.filter-button-aria": (col) => `Filter ${col ?? ""}`.trim(),
+  "table.sort": (dir, col) =>
+    `${dir === "asc" ? "Sort descending" : dir === "desc" ? "Remove sorting" : "Sort ascending"} ${col ?? ""}`.trim(),
   "table.columns": () => "Columns",
   "table.select-column": () => "Select",
   "table.expand-column": () => "Expand",
@@ -1729,6 +1731,162 @@ describe("TediTableComponent", () => {
         "button.tedi-table-header-button",
       );
       expect(button).toBeNull();
+    });
+  });
+
+  describe("sortable with a custom header", () => {
+    @Component({
+      standalone: true,
+      imports: [TediTableComponent],
+      template: `
+        <tedi-table [data]="data()" [columns]="columns()" />
+        <ng-template #statusHeader>
+          <span class="custom-header">Status</span>
+          <button type="button" class="custom-header-info">i</button>
+        </ng-template>
+        <ng-template #filter let-ctx
+          ><input class="filter-input"
+        /></ng-template>
+      `,
+    })
+    class CustomHeaderHostComponent {
+      readonly data = signal<Person[]>(data);
+      readonly headerTpl = viewChild<TemplateRef<unknown>>("statusHeader");
+      readonly filterTpl =
+        viewChild<TemplateRef<TediTableFilterContext<unknown, Person>>>(
+          "filter",
+        );
+      readonly columnOverrides = signal<Partial<TediColumnDef<Person>>>({});
+      readonly headerAsFunction = signal(false);
+      readonly columns = computed<TediColumnDef<Person>[]>(() => [
+        {
+          id: "role",
+          accessorKey: "role",
+          header: this.headerAsFunction()
+            ? () => this.headerTpl()
+            : (this.headerTpl() ?? ""),
+          meta: { label: "Status" },
+          sortable: true,
+          ...this.columnOverrides(),
+        } as TediColumnDef<Person>,
+      ]);
+    }
+
+    function setupCustomHeader() {
+      TestBed.configureTestingModule({
+        imports: [CustomHeaderHostComponent],
+        providers: [
+          { provide: TediTranslationService, useClass: TranslationMock },
+          { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        ],
+      });
+      const fixture = TestBed.createComponent(CustomHeaderHostComponent);
+      fixture.detectChanges();
+      fixture.detectChanges();
+      return fixture;
+    }
+
+    const headerCell = (fixture: ComponentFixture<unknown>): HTMLElement =>
+      fixture.nativeElement.querySelector(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+
+    it("renders the custom header followed by an icon-only sort button", () => {
+      const fixture = setupCustomHeader();
+      const th = headerCell(fixture);
+      const custom = th.querySelector(".custom-header-info") as HTMLElement;
+      const sort = th.querySelector(
+        "button.tedi-table-header-button",
+      ) as HTMLElement;
+      expect(custom).not.toBeNull();
+      expect(sort).not.toBeNull();
+      expect(sort.contains(custom)).toBe(false);
+      expect(sort.textContent?.trim()).toBe("unfold_more");
+      expect(
+        custom.compareDocumentPosition(sort) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    });
+
+    it("names the sort button after the column and the next sort action", () => {
+      const fixture = setupCustomHeader();
+      const th = headerCell(fixture);
+      const sort = th.querySelector(
+        "button.tedi-table-header-button",
+      ) as HTMLButtonElement;
+      expect(sort.getAttribute("aria-label")).toBe("Sort ascending Status");
+      sort.click();
+      fixture.detectChanges();
+      expect(th.getAttribute("aria-sort")).toBe("ascending");
+      expect(sort.getAttribute("aria-label")).toBe("Sort descending Status");
+      expect(sort.classList).toContain("tedi-table-header-button--selected");
+      sort.click();
+      fixture.detectChanges();
+      expect(th.getAttribute("aria-sort")).toBe("descending");
+      expect(sort.getAttribute("aria-label")).toBe("Remove sorting Status");
+    });
+
+    it("falls back to the column id when meta.label is not set", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.columnOverrides.set({ meta: undefined });
+      fixture.detectChanges();
+      const sort = headerCell(fixture).querySelector(
+        "button.tedi-table-header-button",
+      );
+      expect(sort?.getAttribute("aria-label")).toBe("Sort ascending role");
+    });
+
+    it("renders the sort button for a header function returning a template", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.headerAsFunction.set(true);
+      fixture.detectChanges();
+      const th = headerCell(fixture);
+      expect(th.querySelector(".custom-header")).not.toBeNull();
+      expect(
+        th.querySelectorAll("button.tedi-table-header-button").length,
+      ).toBe(1);
+    });
+
+    it("places the filter trigger after the sort button", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.columnOverrides.set({
+        filterable: true,
+        filterTemplate: fixture.componentInstance.filterTpl(),
+      });
+      fixture.detectChanges();
+      const buttons = headerCell(fixture).querySelectorAll(
+        "button.tedi-table-header-button",
+      );
+      expect(buttons.length).toBe(2);
+      expect(buttons[0].getAttribute("aria-label")).toBe(
+        "Sort ascending Status",
+      );
+      expect(buttons[1].getAttribute("aria-label")).toBe("Filter Status");
+    });
+
+    it("renders no sort button when sortable is off or sorting is disabled", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.columnOverrides.set({ sortable: false });
+      fixture.detectChanges();
+      expect(
+        headerCell(fixture).querySelector("button.tedi-table-header-button"),
+      ).toBeNull();
+      fixture.componentInstance.columnOverrides.set({ enableSorting: false });
+      fixture.detectChanges();
+      expect(
+        headerCell(fixture).querySelector("button.tedi-table-header-button"),
+      ).toBeNull();
+    });
+
+    it("renders a single sort button around a function header returning a string", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.columnOverrides.set({ header: () => "Status" });
+      fixture.detectChanges();
+      const buttons = headerCell(fixture).querySelectorAll(
+        "button.tedi-table-header-button",
+      );
+      expect(buttons.length).toBe(1);
+      expect(buttons[0].textContent).toContain("Status");
+      expect(buttons[0].hasAttribute("aria-label")).toBe(false);
     });
   });
 

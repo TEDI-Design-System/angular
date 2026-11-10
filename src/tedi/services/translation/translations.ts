@@ -526,26 +526,27 @@ export const translationsMap = {
       isSelected ? "Отменить выбор строки" : "Выбрать ряд",
   },
   "table.sort": {
-    description: "Label for sort button",
+    description:
+      "Accessible label for a column sort button. Receives the current sort direction and, optionally, the column label so screen readers announce which column is sorted.",
     components: ["Table"],
-    et: (direction: "asc" | "desc" | false) =>
-      direction === "asc"
-        ? "Sorteeri kahanevalt"
-        : direction === "desc"
-          ? "Eemalda sorteerimine"
-          : "Sorteeri kasvavalt",
-    en: (direction: "asc" | "desc" | false) =>
-      direction === "asc"
-        ? "Sort decending"
-        : direction === "desc"
-          ? "Remove sorting"
-          : "Sort ascending",
-    ru: (direction: "asc" | "desc" | false) =>
-      direction === "asc"
-        ? "Сортировать по убыванию"
-        : direction === "desc"
-          ? "Отменить сортировку"
-          : "Сортировать по возрастанию",
+    et: (direction: "asc" | "desc" | false, columnLabel?: string) => {
+      const col = columnLabel ? ` veergu ${columnLabel}` : "";
+      if (direction === "asc") return `Sorteeri${col} kahanevalt`;
+      if (direction === "desc") return `Eemalda${col} sorteerimine`;
+      return `Sorteeri${col} kasvavalt`;
+    },
+    en: (direction: "asc" | "desc" | false, columnLabel?: string) => {
+      const by = columnLabel ? ` by ${columnLabel}` : "";
+      if (direction === "asc") return `Sort${by} descending`;
+      if (direction === "desc") return `Remove sorting${by}`;
+      return `Sort${by} ascending`;
+    },
+    ru: (direction: "asc" | "desc" | false, columnLabel?: string) => {
+      const col = columnLabel ? ` по столбцу ${columnLabel}` : "";
+      if (direction === "asc") return `Сортировать${col} по убыванию`;
+      if (direction === "desc") return `Отменить сортировку${col}`;
+      return `Сортировать${col} по возрастанию`;
+    },
   },
   "table.no-data": {
     description: "Default placeholder when table data is empty",

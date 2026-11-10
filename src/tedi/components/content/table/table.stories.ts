@@ -2050,6 +2050,143 @@ export const Sortable: Story = {
   },
 };
 
+// ---------- SortableCustomHeader ----------
+@Component({
+  standalone: true,
+  selector: "tedi-sortable-custom-header-story",
+  imports: [
+    TediTableComponent,
+    FormsModule,
+    LabelComponent,
+    FormFieldComponent,
+    TextFieldComponent,
+    InfoButtonComponent,
+    PopoverComponent,
+    PopoverContentComponent,
+    PopoverTriggerDirective,
+  ],
+  template: `
+    <tedi-table
+      id="tedi-table-sortable-custom-header"
+      [data]="data"
+      [columns]="columns()"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+
+    <ng-template #roleHeader>
+      Roll
+      <tedi-popover position="bottom-start" [preventOverflow]="true">
+        <button
+          tedi-info-button
+          tedi-popover-trigger
+          aria-label="Rolli selgitus"
+        ></button>
+        <tedi-popover-content>
+          Töötaja põhiroll organisatsioonis.
+        </tedi-popover-content>
+      </tedi-popover>
+    </ng-template>
+
+    <ng-template #textFilter let-ctx>
+      <label tedi-label size="small" [attr.for]="ctx.column.id + '-filter'">
+        {{ ctx.column.columnDef.meta?.label }}
+      </label>
+      <tedi-form-field size="small">
+        <input
+          tedi-text-field
+          [id]="ctx.column.id + '-filter'"
+          type="text"
+          [ngModel]="ctx.value ?? ''"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="ctx.setValue($event)"
+        />
+      </tedi-form-field>
+    </ng-template>
+  `,
+})
+class SortableCustomHeaderStoryHostComponent extends TableStoryHostBase {
+  data = people;
+  pagination = DEFAULT_PAGINATION;
+
+  roleHeaderTpl = viewChild<TemplateRef<unknown>>("roleHeader");
+  textFilterTpl =
+    viewChild<TemplateRef<TediTableFilterContext<string, Person>>>(
+      "textFilter",
+    );
+
+  columns = computed<TediColumnDef<Person>[]>(() => [
+    { id: "name", header: "Nimi", accessorKey: "name", sortable: true },
+    {
+      id: "role",
+      header: this.roleHeaderTpl() ?? "Roll",
+      accessorKey: "role",
+      meta: { label: "Roll" },
+      sortable: true,
+      filterable: true,
+      filterFn: "includesString",
+      filterTemplate: this.textFilterTpl() ?? undefined,
+    } as TediColumnDef<Person>,
+    {
+      id: "location",
+      header: "Asukoht",
+      accessorKey: "location",
+      sortable: true,
+    },
+  ]);
+}
+
+/**
+ * Set `meta.label` on a column with a custom header: the sort and filter
+ * buttons use it to name the column for screen readers.
+ */
+export const SortableCustomHeader: Story = {
+  render: (args) => ({
+    moduleMetadata: { imports: [SortableCustomHeaderStoryHostComponent] },
+    props: args,
+    template: `<tedi-sortable-custom-header-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!--
+  columns:
+    - id 'name' header 'Nimi' sortable: true
+    - id 'role' header roleHeaderTpl meta: { label: 'Roll' }
+        sortable: true filterable: true filterTemplate: textFilterTpl
+    - id 'location' header 'Asukoht' sortable: true
+-->
+<tedi-table [data]="data" [columns]="columns()" [pagination]="pagination" />
+
+<ng-template #roleHeader>
+  Roll
+  <tedi-popover position="bottom-start">
+    <button tedi-info-button tedi-popover-trigger aria-label="Rolli selgitus"></button>
+    <tedi-popover-content>Töötaja põhiroll organisatsioonis.</tedi-popover-content>
+  </tedi-popover>
+</ng-template>
+
+<ng-template #textFilter let-ctx>
+  <label tedi-label size="small" [attr.for]="ctx.column.id + '-filter'">
+    {{ ctx.column.columnDef.meta?.label }}
+  </label>
+  <tedi-form-field size="small">
+    <input
+      tedi-text-field
+      type="text"
+      [id]="ctx.column.id + '-filter'"
+      [ngModel]="ctx.value ?? ''"
+      [ngModelOptions]="{ standalone: true }"
+      (ngModelChange)="ctx.setValue($event)"
+    />
+  </tedi-form-field>
+</ng-template>`,
+      },
+    },
+  },
+};
+
 // ---------- Filters (built-in filter popover via `filterable: true`) ----------
 @Component({
   standalone: true,
