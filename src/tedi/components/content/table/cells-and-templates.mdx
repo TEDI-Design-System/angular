@@ -140,7 +140,8 @@ instead — see the next section.
 Opt a column into the built-in filter popover with `filterable: true` and
 pass the input UI through `filterTemplate`. The table renders the trigger
 button, positions the popover, owns the draft state, and renders translated
-**Apply** / **Clear** buttons in the popover footer. The consumer supplies
+**Apply** / **Clear** buttons in the popover footer (configurable through
+`filterActions`, see below). The consumer supplies
 only the input.
 
 ```ts
@@ -178,11 +179,43 @@ The template context exposes:
 - `setValue(next)` — write to the draft; does not apply yet
 - `apply()` — commit the draft to `column.setFilterValue` and close the popover
 - `clear()` — reset the filter to undefined and close the popover
+- `cancel()` — close the popover and keep the applied filter; the draft is
+  reset to the applied value
 - `column` — the TanStack `Column<TData>` for advanced cases
 
 Pass `filterable: { clearOnClose: true }` to discard in-progress drafts every
 time the popover closes — useful for filters where stale draft state would
 confuse the user.
+
+### Footer actions
+
+`filterActions` sets the footer buttons of every filter popover (and of the
+filter modal on small screens), in display order. The default is
+`["clear", "apply"]`.
+
+| Action   | Applied filter      | Draft                      |
+| -------- | ------------------- | -------------------------- |
+| `apply`  | set to the draft    | kept                       |
+| `clear`  | removed             | emptied                    |
+| `cancel` | unchanged           | reset to the applied value |
+
+```html
+<tedi-table
+  [data]="data"
+  [columns]="columns()"
+  [filterActions]="['cancel', 'apply']"
+/>
+```
+
+One column can use its own list with
+`filterable: { actions: ["clear", "cancel", "apply"] }`. An empty list hides
+the footer; the filter template then closes the popover itself through
+`apply()`, `clear()` or `cancel()`.
+
+The buttons use the `table.filter-apply`, `table.filter-clear` and
+`table.filter-cancel` translation keys.
+
+### Popover width
 
 The popover is `small` by default. Widen it for the whole table with
 `filterPopoverWidth`, or for one column with

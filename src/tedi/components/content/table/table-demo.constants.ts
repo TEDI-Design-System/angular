@@ -273,6 +273,7 @@ const TABLE_APPEARANCE_BINDINGS = `
   [filterModalBreakpoint]="filterModalBreakpoint()"
   [filterModalFullscreen]="filterModalFullscreen()"
   [filterPopoverWidth]="filterPopoverWidth()"
+  [filterActions]="filterActions()"
   [maxHeight]="maxHeight()"
   [activeRowId]="activeRowId()"
   [placeholderRole]="placeholderRole()"

@@ -22,6 +22,7 @@ import { TediPaginationResultsDirective } from "../../navigation/pagination/pagi
 import type {
   TableControlColumnOrder,
   TableExpandTrigger,
+  TableFilterAction,
   TableSelectionMode,
   TableSize,
   TableState,
@@ -141,6 +142,7 @@ abstract class TableStoryHostBase {
   readonly filterModalBreakpoint = input<Breakpoint | false>("sm");
   readonly filterModalFullscreen = input<boolean | Breakpoint>(false);
   readonly filterPopoverWidth = input<PopoverWidth>("small");
+  readonly filterActions = input<TableFilterAction[]>(["clear", "apply"]);
   readonly maxHeight = input<number | undefined>(undefined);
   readonly activeRowId = input<string | undefined>(undefined);
   readonly placeholderRole = input<"alert" | "status" | undefined>(undefined);
@@ -167,6 +169,7 @@ type TediTableStoryArgs = {
   filterModalBreakpoint: Breakpoint | false;
   filterModalFullscreen: boolean | Breakpoint;
   filterPopoverWidth: PopoverWidth;
+  filterActions: TableFilterAction[];
   maxHeight: number | undefined;
   activeRowId: string | undefined;
   placeholderRole: "alert" | "status" | undefined;
@@ -251,6 +254,7 @@ const meta: Meta<TediTableStoryArgs> = {
     filterModalBreakpoint: "sm",
     filterModalFullscreen: false,
     filterPopoverWidth: "small",
+    filterActions: ["clear", "apply"],
     maxHeight: undefined,
     activeRowId: undefined,
     placeholderRole: undefined,
@@ -459,6 +463,16 @@ const meta: Meta<TediTableStoryArgs> = {
         category: "behavior",
         type: { summary: "boolean | Breakpoint" },
         defaultValue: { summary: "false" },
+      },
+    },
+    filterActions: {
+      description:
+        "Footer buttons of the column filter popover and modal, in display order. `apply` commits the draft, `clear` removes the filter, `cancel` closes and keeps the applied filter. A single column overrides it through `filterable: { actions }`.",
+      control: { type: "object" },
+      table: {
+        category: "behavior",
+        type: { summary: "('apply' | 'clear' | 'cancel')[]" },
+        defaultValue: { summary: '["clear", "apply"]' },
       },
     },
     filterPopoverWidth: {
@@ -2477,6 +2491,41 @@ export const Filters: Story = {
     </label>
   }
 </ng-template>`,
+      },
+    },
+  },
+};
+
+export const FilterActions: Story = {
+  ...Filters,
+  args: { maxHeight: 480, filterActions: ["cancel", "apply"] },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`filterActions` picks the footer buttons of every filter popover " +
+          "and modal, in display order. `apply` commits the draft, `clear` " +
+          "removes the column filter, and `cancel` closes and keeps the " +
+          "applied filter as it was, discarding the unapplied draft. The " +
+          'default is `["clear", "apply"]`; this table uses ' +
+          '`["cancel", "apply"]`. \n\n' +
+          "`filterable: { actions }` overrides the list for one column, and " +
+          "an empty list hides the footer. The filter template also receives " +
+          "`cancel()` next to `apply()` and `clear()`, so a custom control can " +
+          "close the popover the same way.",
+      },
+      source: {
+        language: "html",
+        code: `<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [filterActions]="['cancel', 'apply']"
+/>
+
+<!--
+  One column can use its own list:
+    filterable: { actions: ['clear', 'cancel', 'apply'] }
+-->`,
       },
     },
   },

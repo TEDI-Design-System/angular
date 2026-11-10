@@ -261,36 +261,33 @@
                                   />
                                 }
                               </div>
-                              <div class="tedi-table__filter-actions">
-                                <button
-                                  tedi-button
-                                  variant="secondary"
-                                  size="small"
-                                  type="button"
-                                  (click)="
-                                    handleFilterClear(
-                                      header.column,
-                                      filterPopover
-                                    )
-                                  "
-                                >
-                                  {{ filterClearLabel() }}
-                                </button>
-                                <button
-                                  tedi-button
-                                  variant="primary"
-                                  size="small"
-                                  type="button"
-                                  (click)="
-                                    handleFilterApply(
-                                      header.column,
-                                      filterPopover
-                                    )
-                                  "
-                                >
-                                  {{ filterApplyLabel() }}
-                                </button>
-                              </div>
+                              @let filterActions =
+                                filterActionsFor(header.column);
+                              @if (filterActions.length) {
+                                <div class="tedi-table__filter-actions">
+                                  @for (action of filterActions; track action) {
+                                    <button
+                                      tedi-button
+                                      size="small"
+                                      type="button"
+                                      [variant]="
+                                        action === 'apply'
+                                          ? 'primary'
+                                          : 'secondary'
+                                      "
+                                      (click)="
+                                        handleFilterAction(
+                                          action,
+                                          header.column,
+                                          filterPopover
+                                        )
+                                      "
+                                    >
+                                      {{ filterActionLabel(action) }}
+                                    </button>
+                                  }
+                                </div>
+                              }
                             </div>
                           </tedi-popover-content>
                         </tedi-popover>
