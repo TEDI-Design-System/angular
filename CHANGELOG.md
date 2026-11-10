@@ -1,3 +1,10 @@
+# [10.0.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.6...angular-10.0.0-rc.7) (2026-11-10)
+
+
+### Bug Fixes
+
+* **dropdown:** keep the list reset ahead of host page list styles [#780](https://github.com/TEDI-Design-System/angular/issues/780) ([#853](https://github.com/TEDI-Design-System/angular/issues/853)) ([90d3422](https://github.com/TEDI-Design-System/angular/commit/90d342282ea3a92e44d1eb700259041613562709))
+
 # [10.0.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.5...angular-10.0.0-rc.6) (2026-11-10)
 
 
