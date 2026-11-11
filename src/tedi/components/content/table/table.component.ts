@@ -12,6 +12,7 @@ import {
   Injector,
   input,
   PLATFORM_ID,
+  runInInjectionContext,
   signal,
   Signal,
   TemplateRef,
@@ -39,6 +40,7 @@ import {
   createAngularTable,
   type ExpandedState,
   type FilterFn,
+  type Header,
   FlexRenderDirective,
   getCoreRowModel,
   getExpandedRowModel,
@@ -2318,21 +2320,47 @@ export class TediTableComponent<TData> {
     return typeof value === "number";
   }
 
+  /** True when the column sets `sortable: true` and TanStack can sort it. */
+  private hasBuiltInSort(column: Column<TData, unknown>): boolean {
+    const def = column.columnDef as TediColumnDef<TData>;
+    return def.sortable === true && column.getCanSort();
+  }
+
   /**
-   * Returns true when the column opted into the built-in sort affordance
-   * (`sortable: true` on its `TediColumnDef`), TanStack reports it can sort
-   * (`enableSorting !== false`), and the rendered header content is a plain
-   * string / number. Custom header `TemplateRef`s and functions bow out of
-   * the shorthand and render via `flexRender` as-is.
+   * True for a sortable column with a plain string / number header: the title
+   * itself becomes the sort button.
    */
   protected shouldRenderSortableHeader(
     column: Column<TData, unknown>,
     content: unknown,
   ): boolean {
-    const def = column.columnDef as TediColumnDef<TData>;
-    if (def.sortable !== true) return false;
-    if (!column.getCanSort()) return false;
+    if (!this.hasBuiltInSort(column)) return false;
     return typeof content === "string" || typeof content === "number";
+  }
+
+  /**
+   * True for a sortable column with a custom header (template or component):
+   * the header renders as-is and an icon-only sort button follows it.
+   */
+  protected shouldRenderSortButtonAfterHeader(
+    header: Header<TData, unknown>,
+  ): boolean {
+    if (!this.hasBuiltInSort(header.column)) return false;
+    const def = header.column.columnDef.header;
+    const content =
+      typeof def === "function"
+        ? runInInjectionContext(this.injector, () => def(header.getContext()))
+        : def;
+    return typeof content !== "string" && typeof content !== "number";
+  }
+
+  /** Accessible name of the icon-only sort button: next action + column. */
+  protected sortAriaLabel(column: Column<TData, unknown>): string {
+    return this.translation.translate(
+      "table.sort",
+      column.getIsSorted(),
+      this.resolveColumnLabel(column),
+    );
   }
 
   /**
