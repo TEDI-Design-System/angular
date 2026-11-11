@@ -1310,8 +1310,8 @@ export const MobileModal: Story = {
       `,
     };
   },
+  globals: { viewport: { value: "mobile1" } },
   parameters: {
-    viewport: { defaultViewport: "mobile1" },
     docs: {
       description: {
         story:

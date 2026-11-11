@@ -667,8 +667,8 @@ export const MobileModal: StoryObj = {
       </tedi-row>
     `,
   }),
+  globals: { viewport: { value: "mobile1" } },
   parameters: {
-    viewport: { defaultViewport: "mobile1" },
     docs: {
       description: {
         story:
