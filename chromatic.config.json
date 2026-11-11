@@ -4,6 +4,12 @@
   "autoAcceptChanges": "main",
   "skip": "dependabot/**",
   "onlyChanged": true,
-  "untraced": ["CHANGELOG.md"],
+  "externals": ["angular.json", "src/styles/**"],
+  "untraced": [
+    "CHANGELOG.md",
+    "src/tedi/index.ts",
+    "src/tedi/components/index.ts",
+    "src/community/index.ts"
+  ],
   "zip": true
 }
