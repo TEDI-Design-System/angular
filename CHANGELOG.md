@@ -1,3 +1,16 @@
+# [10.0.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.8...angular-10.0.0-rc.9) (2026-11-11)
+
+
+### Bug Fixes
+
+* **date-field, time-field:** use viewport globals in MobileModal stories [#756](https://github.com/TEDI-Design-System/angular/issues/756) ([#864](https://github.com/TEDI-Design-System/angular/issues/864)) ([257074c](https://github.com/TEDI-Design-System/angular/commit/257074c60238474bd0df2c4729ffdcd71db93709))
+
+
+### Features
+
+* **table:** add a cancel action and configurable filter footer actions [#787](https://github.com/TEDI-Design-System/angular/issues/787) ([#863](https://github.com/TEDI-Design-System/angular/issues/863)) ([9fe8b4c](https://github.com/TEDI-Design-System/angular/commit/9fe8b4c7d99dbdb49e270cab2ebe31e94882bceb))
+* **table:** keep the sort button when a sortable column has a custom header [#817](https://github.com/TEDI-Design-System/angular/issues/817) ([#861](https://github.com/TEDI-Design-System/angular/issues/861)) ([81c58bf](https://github.com/TEDI-Design-System/angular/commit/81c58bf99b7eb8e4adb60bbacd2f9937921005f4))
+
 # [10.0.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.7...angular-10.0.0-rc.8) (2026-11-10)
 
 
