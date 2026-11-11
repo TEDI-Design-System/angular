@@ -14,7 +14,7 @@ export type ButtonVariant =
   | "primary-button-group"
   | "secondary-button-group";
 
-export type ButtonSize = "default" | "small";
+export type ButtonSize = "default" | "small" | "xs";
 
 @Component({
   selector: "[tedi-button]",
@@ -42,7 +42,7 @@ export class ButtonComponent {
    */
   variant = input<ButtonVariant>("primary");
   /**
-   * Defines the size of the button.
+   * Defines the size of the button. The `xs` size is only intended for icon-only buttons.
    * @default default
    */
   size = input<ButtonSize>("default");

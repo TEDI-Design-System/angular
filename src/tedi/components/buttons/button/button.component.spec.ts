@@ -66,7 +66,7 @@ describe("ButtonComponent", () => {
   });
 
   it("should apply correct sizes", () => {
-    const sizes: ButtonSize[] = ["default", "small"];
+    const sizes: ButtonSize[] = ["default", "small", "xs"];
 
     for (const size of sizes) {
       fixture.componentRef.setInput("size", size);

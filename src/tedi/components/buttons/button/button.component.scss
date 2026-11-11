@@ -131,5 +131,11 @@
     &.tedi-button--small {
       @include button-icon-size("sm");
     }
+
+    &.tedi-button--xs {
+      width: var(--button-xs-icon-size);
+      height: var(--button-xs-icon-size);
+      padding: 0;
+    }
   }
 }

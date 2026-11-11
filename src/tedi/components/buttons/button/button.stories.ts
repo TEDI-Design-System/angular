@@ -75,14 +75,15 @@ export default {
     },
     size: {
       control: "radio",
-      options: ["default", "small"],
-      description: "Defines the size of the button.",
+      options: ["default", "small", "xs"],
+      description:
+        "Defines the size of the button. The `xs` size is only intended for icon-only buttons.",
       table: {
         category: "inputs",
         defaultValue: { summary: "default" },
         type: {
           summary: "ButtonSize",
-          detail: "default \nsmall",
+          detail: "default \nsmall \nxs",
         },
       },
     },
@@ -321,6 +322,22 @@ export const DangerNeutral: StoryObj<TemplateType> = {
     variant: "danger-neutral",
   },
   render: ButtonTemplate,
+};
+
+/**
+ * The extra small size is only available for icon-only buttons. It does not grow on mobile.
+ */
+export const ExtraSmallIconOnly: ButtonStory = {
+  render: () => ({
+    template: `
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <button tedi-button size="xs" aria-label="Close"><tedi-icon name="close" /></button>
+        <button tedi-button variant="secondary" size="xs" aria-label="Edit"><tedi-icon name="edit" /></button>
+        <button tedi-button variant="neutral" size="xs" aria-label="More"><tedi-icon name="more_vert" /></button>
+        <button tedi-button size="xs" aria-label="Close" disabled><tedi-icon name="close" /></button>
+      </div>
+    `,
+  }),
 };
 
 export const FullWidth: ButtonStory = {
