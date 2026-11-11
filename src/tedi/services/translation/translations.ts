@@ -586,9 +586,17 @@ export const translationsMap = {
   "table.filter-clear": {
     description: "Clear action in the built-in column filter popover footer",
     components: ["Table"],
-    et: "Tühista",
+    et: "Tühjenda",
     en: "Clear",
     ru: "Сбросить",
+  },
+  "table.filter-cancel": {
+    description:
+      "Cancel action in the built-in column filter popover footer: closes without changing the filter",
+    components: ["Table"],
+    et: "Tühista",
+    en: "Cancel",
+    ru: "Отмена",
   },
   "table.filter-button-aria": {
     description:

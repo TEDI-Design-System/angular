@@ -15,6 +15,8 @@ import { TediTableComponent } from "./table.component";
 import { TediTableColumnsMenuComponent } from "./table-columns-menu/table-columns-menu.component";
 import { groupRowSpan } from "./row-span.utils";
 import type {
+  TableFilterAction,
+  TableFilterModalData,
   TableFilterOptions,
   TablePaginationOptions,
   TableState,
@@ -45,6 +47,7 @@ const TRANSLATIONS: Record<string, Translator> = {
   "table.filter-placeholder": () => "Filter…",
   "table.filter-apply": () => "Apply",
   "table.filter-clear": () => "Clear",
+  "table.filter-cancel": () => "Cancel",
   "table.filter-button-aria": (col) => `Filter ${col ?? ""}`.trim(),
   "table.sort": (dir, col) =>
     `${dir === "asc" ? "Sort descending" : dir === "desc" ? "Remove sorting" : "Sort ascending"} ${col ?? ""}`.trim(),
@@ -1899,6 +1902,7 @@ describe("TediTableComponent", () => {
           [data]="data()"
           [columns]="columns()"
           [filterPopoverWidth]="popoverWidth()"
+          [filterActions]="filterActions()"
         />
         <ng-template #textFilter let-ctx>
           <tedi-form-field size="small">
@@ -1907,6 +1911,7 @@ describe("TediTableComponent", () => {
               type="text"
               [value]="ctx.value ?? ''"
               (input)="ctx.setValue($any($event.target).value)"
+              (keydown.escape)="ctx.cancel()"
               aria-label="Name filter input"
             />
           </tedi-form-field>
@@ -1921,6 +1926,7 @@ describe("TediTableComponent", () => {
         );
       readonly filterableOption = signal<boolean | TableFilterOptions>(true);
       readonly popoverWidth = signal<PopoverWidth>("small");
+      readonly filterActions = signal<TableFilterAction[]>(["clear", "apply"]);
 
       readonly columns = signal<TediColumnDef<Person>[]>([]);
 
@@ -2240,6 +2246,119 @@ describe("TediTableComponent", () => {
       expect(column.getFilterValue()).toBeUndefined();
     });
 
+    describe("footer actions", () => {
+      function footerButtons(): HTMLButtonElement[] {
+        return Array.from(
+          getPopoverContent()?.querySelectorAll<HTMLButtonElement>(
+            ".tedi-table__filter-actions button",
+          ) ?? [],
+        );
+      }
+
+      function footerLabels(): (string | undefined)[] {
+        return footerButtons().map((b) => b.textContent?.trim());
+      }
+
+      function clickFooter(label: string): void {
+        footerButtons()
+          .find((b) => b.textContent?.trim() === label)
+          ?.click();
+      }
+
+      function typeDraft(value: string): void {
+        const input = getPopoverContent()!.querySelector(
+          'input[aria-label="Name filter input"]',
+        ) as HTMLInputElement;
+        input.value = value;
+        input.dispatchEvent(new Event("input"));
+      }
+
+      function draftInputValue(): string {
+        return (
+          getPopoverContent()!.querySelector(
+            'input[aria-label="Name filter input"]',
+          ) as HTMLInputElement
+        ).value;
+      }
+
+      it("renders Clear then Apply by default", () => {
+        const fixture = setupFilterableHost();
+        openFilterPanel(fixture);
+        expect(footerLabels()).toEqual(["Clear", "Apply"]);
+      });
+
+      it("renders the table's filterActions in the given order", () => {
+        const fixture = setupFilterableHost((host) =>
+          host.filterActions.set(["cancel", "apply"]),
+        );
+        openFilterPanel(fixture);
+        expect(footerLabels()).toEqual(["Cancel", "Apply"]);
+        const variants = footerButtons().map((b) =>
+          b.classList.contains("tedi-button--primary"),
+        );
+        expect(variants).toEqual([false, true]);
+      });
+
+      it("lets a column override the table's filterActions", () => {
+        const fixture = setupFilterableHost();
+        fixture.componentInstance.build({
+          actions: ["apply", "cancel", "clear", "cancel"],
+        });
+        fixture.detectChanges();
+        openFilterPanel(fixture);
+        expect(footerLabels()).toEqual(["Apply", "Cancel", "Clear"]);
+      });
+
+      it("hides the footer when the actions list is empty", () => {
+        const fixture = setupFilterableHost((host) =>
+          host.filterActions.set([]),
+        );
+        openFilterPanel(fixture);
+        expect(
+          getPopoverContent()?.querySelector(".tedi-table__filter-actions"),
+        ).toBeNull();
+      });
+
+      it("Cancel keeps the applied filter and discards the draft", () => {
+        const fixture = setupFilterableHost((host) =>
+          host.filterActions.set(["cancel", "apply"]),
+        );
+        const column = getTableComponent(fixture)["table"].getColumn("name")!;
+        column.setFilterValue("Anna");
+        fixture.detectChanges();
+
+        openFilterPanel(fixture);
+        typeDraft("Stale draft");
+        fixture.detectChanges();
+        clickFooter("Cancel");
+        fixture.detectChanges();
+
+        expect(column.getFilterValue()).toBe("Anna");
+        // Reopen — the draft is back at the applied value.
+        openFilterPanel(fixture);
+        expect(draftInputValue()).toBe("Anna");
+      });
+
+      it("cancel() from the template context behaves like the Cancel button", () => {
+        const fixture = setupFilterableHost();
+        const column = getTableComponent(fixture)["table"].getColumn("name")!;
+        column.setFilterValue("Anna");
+        fixture.detectChanges();
+
+        openFilterPanel(fixture);
+        typeDraft("Stale draft");
+        fixture.detectChanges();
+        getPopoverContent()!
+          .querySelector('input[aria-label="Name filter input"]')!
+          .dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+        fixture.detectChanges();
+
+        expect(column.getFilterValue()).toBe("Anna");
+        openFilterPanel(fixture);
+        expect(draftInputValue()).toBe("Anna");
+      });
+    });
+
     it("clearFilters() resets the popover draft so a reopened popover shows empty inputs", () => {
       const fixture = setupFilterableHost();
       const table = getTableComponent(fixture);
@@ -2469,6 +2588,31 @@ describe("Table: filter modal", () => {
     expect(modalOpen.mock.calls[0][1].data.columnLabel).toBe("Name");
   });
 
+  it("passes the footer actions and a cancelling context to the modal", () => {
+    const fixture = setup("xs");
+    const column = (
+      fixture.debugElement.query(By.directive(TediTableComponent))
+        .componentInstance as TediTableComponent<Person>
+    )["table"].getColumn("name")!;
+    column.setFilterValue("Anna");
+    fixture.detectChanges();
+    trigger(fixture).click();
+    fixture.detectChanges();
+
+    const data = modalOpen.mock.calls[0][1].data as TableFilterModalData;
+    expect(data.actions).toEqual([
+      { action: "clear", label: "Clear" },
+      { action: "apply", label: "Apply" },
+    ]);
+
+    const close = jest.fn();
+    data.buildContext(close).setValue("Stale draft");
+    data.buildContext(close).cancel();
+    expect(close).toHaveBeenCalledTimes(1);
+    expect(column.getFilterValue()).toBe("Anna");
+    expect(data.buildContext(close).value).toBe("Anna");
+  });
+
   it("uses the popover (no modal) at or above the breakpoint", () => {
     const fixture = setup("lg");
     trigger(fixture).click();
@@ -2492,6 +2636,7 @@ describe("TableFilterModalComponent", () => {
           draft.set(undefined);
           close();
         },
+        cancel: () => close(),
         column: {},
       } as unknown as TediTableFilterContext<unknown, unknown>;
       (ctx as { $implicit: unknown }).$implicit = ctx;
@@ -2503,8 +2648,10 @@ describe("TableFilterModalComponent", () => {
           provide: MODAL_DATA,
           useValue: {
             columnLabel: "Status",
-            applyLabel: "Apply",
-            clearLabel: "Clear",
+            actions: [
+              { action: "cancel", label: "Cancel" },
+              { action: "apply", label: "Apply" },
+            ],
             template: null,
             buildContext,
           },
@@ -2532,6 +2679,69 @@ describe("TableFilterModalComponent", () => {
     modal.context.setValue([...((modal.context.value as string[]) ?? []), "a"]);
     modal.context.setValue([...((modal.context.value as string[]) ?? []), "b"]);
     expect(draft()).toEqual(["a", "b"]);
+  });
+
+  it("renders the footer actions in order and runs each one's context method", () => {
+    @Component({
+      standalone: true,
+      template: `<ng-template #tpl />`,
+    })
+    class TemplateHostComponent {
+      readonly tpl =
+        viewChild.required<
+          TemplateRef<TediTableFilterContext<unknown, unknown>>
+        >("tpl");
+    }
+
+    const calls: string[] = [];
+    const context = {
+      value: undefined,
+      setValue: () => undefined,
+      apply: () => calls.push("apply"),
+      clear: () => calls.push("clear"),
+      cancel: () => calls.push("cancel"),
+      column: {},
+    } as unknown as TediTableFilterContext<unknown, unknown>;
+    const data: Partial<TableFilterModalData> = {
+      columnLabel: "Status",
+      actions: [
+        { action: "apply", label: "Apply" },
+        { action: "cancel", label: "Cancel" },
+        { action: "clear", label: "Clear" },
+      ],
+      buildContext: () => context,
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: MODAL_DATA, useValue: data },
+        { provide: ModalRef, useValue: { close: jest.fn() } },
+      ],
+    });
+    const templateHost = TestBed.createComponent(TemplateHostComponent);
+    templateHost.detectChanges();
+    data.template = templateHost.componentInstance.tpl();
+
+    const fixture = TestBed.createComponent(TableFilterModalComponent);
+    fixture.detectChanges();
+
+    const buttons = Array.from(
+      (
+        fixture.nativeElement as HTMLElement
+      ).querySelectorAll<HTMLButtonElement>("tedi-modal-footer button"),
+    );
+    expect(buttons.map((b) => b.textContent?.trim())).toEqual([
+      "Apply",
+      "Cancel",
+      "Clear",
+    ]);
+    expect(
+      buttons.map((b) => b.classList.contains("tedi-button--primary")),
+    ).toEqual([true, false, false]);
+
+    buttons.forEach((b) => b.click());
+    expect(calls).toEqual(["apply", "cancel", "clear"]);
   });
 });
 

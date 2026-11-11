@@ -95,6 +95,7 @@ import type {
   TableControlColumn,
   TableControlColumnOrder,
   TableExpandTrigger,
+  TableFilterAction,
   TableFilterModalData,
   TableFilterOptions,
   TablePaginationOptions,
@@ -523,6 +524,14 @@ export class TediTableComponent<TData> {
    * @default "small"
    */
   readonly filterPopoverWidth = input<PopoverWidth>("small");
+  /**
+   * Footer buttons of the column filter popover and modal, in display order:
+   * `"apply"` commits the draft, `"clear"` removes the filter, `"cancel"`
+   * closes and keeps the applied filter. A single column can override it
+   * through `filterable: { actions }`.
+   * @default ["clear", "apply"]
+   */
+  readonly filterActions = input<TableFilterAction[]>(["clear", "apply"]);
   /**
    * Enables pagination and configures the bottom paginator slot. This is also
    * the source of truth for `pageSize` / `pageSizeOptions` — the top slot
@@ -2452,12 +2461,16 @@ export class TediTableComponent<TData> {
     return this.translation.translate("table.filter-button-aria", label);
   }
 
-  protected filterApplyLabel(): string {
-    return this.translation.translate("table.filter-apply");
+  /** Footer buttons for the column's filter: the column's own `actions`, or
+   *  the table's `filterActions`. Repeated entries are dropped. */
+  protected filterActionsFor(col: Column<TData, unknown>): TableFilterAction[] {
+    const actions =
+      this.resolveFilterOptions(col)?.actions ?? this.filterActions();
+    return [...new Set(actions)];
   }
 
-  protected filterClearLabel(): string {
-    return this.translation.translate("table.filter-clear");
+  protected filterActionLabel(action: TableFilterAction): string {
+    return this.translation.translate(`table.filter-${action}`);
   }
 
   private getFilterDraft(
@@ -2534,7 +2547,7 @@ export class TediTableComponent<TData> {
    * Builds the per-column context object handed to the consumer's
    * `filterTemplate`. `$implicit` is wired to the context itself so
    * `<ng-template let-ctx>` resolves `ctx.value`, `ctx.setValue`,
-   * `ctx.apply()`, `ctx.clear()` and `ctx.column` without extra `let-*`
+   * `ctx.apply()`, `ctx.clear()`, `ctx.cancel()` and `ctx.column` without extra `let-*`
    * destructuring.
    */
   protected filterContextFor(
@@ -2545,8 +2558,8 @@ export class TediTableComponent<TData> {
   }
 
   /**
-   * Builds the filter context, wiring `apply` / `clear` to commit the draft and
-   * then run `close` (hide the popover, or close the modal — whichever opened
+   * Builds the filter context, wiring `apply` / `clear` / `cancel` to update
+   * the draft and the applied filter and then run `close` (hide the popover, or close the modal — whichever opened
    * the filter). Shared by the popover and the modal renderers.
    */
   private buildFilterContext(
@@ -2564,6 +2577,10 @@ export class TediTableComponent<TData> {
       clear: () => {
         draft.set(undefined);
         col.setFilterValue(undefined);
+        close();
+      },
+      cancel: () => {
+        draft.set(col.getFilterValue());
         close();
       },
       column: col,
@@ -2600,8 +2617,10 @@ export class TediTableComponent<TData> {
       ariaLabel: this.filterAriaLabel(col),
       data: {
         columnLabel: this.resolveColumnLabel(col),
-        applyLabel: this.filterApplyLabel(),
-        clearLabel: this.filterClearLabel(),
+        actions: this.filterActionsFor(col).map((action) => ({
+          action,
+          label: this.filterActionLabel(action),
+        })),
         template: tpl as TemplateRef<TediTableFilterContext<unknown, unknown>>,
         buildContext: (close: () => void) =>
           this.buildFilterContext(col, close) as TediTableFilterContext<
@@ -2612,22 +2631,12 @@ export class TediTableComponent<TData> {
     });
   }
 
-  protected handleFilterApply(
+  protected handleFilterAction(
+    action: TableFilterAction,
     col: Column<TData, unknown>,
     popover: PopoverComponent,
   ): void {
-    const draft = this.getFilterDraft(col.id, col.getFilterValue());
-    col.setFilterValue(draft());
-    popover.hidePopover(true);
-  }
-
-  protected handleFilterClear(
-    col: Column<TData, unknown>,
-    popover: PopoverComponent,
-  ): void {
-    this.getFilterDraft(col.id, col.getFilterValue()).set(undefined);
-    col.setFilterValue(undefined);
-    popover.hidePopover(true);
+    this.filterContextFor(col, popover)[action]();
   }
 
   /**

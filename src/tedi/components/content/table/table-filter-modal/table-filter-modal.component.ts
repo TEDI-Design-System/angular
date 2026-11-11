@@ -18,7 +18,7 @@ import type { TableFilterModalData } from "../table.types";
  * Renders a column filter inside a modal — the below-`filterModalBreakpoint`
  * alternative to the desktop filter popover. Opened by the table via
  * `ModalService.open()`; reads its payload from `MODAL_DATA` and reuses the
- * same filter context (draft, apply, clear) so behavior matches the popover.
+ * same filter context (draft, apply, clear, cancel) so behavior matches the popover.
  */
 @Component({
   selector: "tedi-table-filter-modal",
