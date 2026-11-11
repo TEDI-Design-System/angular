@@ -25,6 +25,8 @@ import { RowComponent } from "../../helpers/grid/row/row.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { ProgressBarComponent } from "../../loader/progress-bar/progress-bar.component";
 import { TextComponent } from "../../base/text/text.component";
+import { LabelComponent } from "../../content/label/label.component";
+import { FormFieldComponent } from "../form-field/form-field.component";
 
 const STATES = [
   { id: "Default", label: "Default" },
@@ -118,6 +120,8 @@ export default {
         RowComponent,
         ColComponent,
         TextComponent,
+        LabelComponent,
+        FormFieldComponent,
         StoryDropOverDirective,
         StoryRejectedDropDirective,
       ],
@@ -146,9 +150,9 @@ export default {
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
-    label: {
+    instructions: {
       description:
-        "Text inside the dropzone, which also names the file input. Falls back to the translated `file-dropzone.label`.",
+        "The sentence inside the dropzone. Falls back to the translated `file-dropzone.instructions`. Not the field's label — name the field with a `tedi-label` whose `for` matches `inputId`, and the dropzone announces it first.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
@@ -342,6 +346,25 @@ export const WithFileSize: Story = {
       { id: "2", name: "aastaaruanne_2025.pdf", size: 5_400_000 },
     ],
   },
+};
+
+/**
+ * A `tedi-label` whose `for` matches `inputId` names the field, and the
+ * dropzone announces it ahead of its own instructions.
+ */
+export const WithLabel: Story = {
+  args: { inputId: "avaldus", maxSize: 30 * 1024 ** 2 },
+  render: (args) => ({
+    props: { ...args },
+    template: `
+      <div style="max-width: 420px">
+        <tedi-form-field>
+          <label tedi-label for="avaldus" [required]="true">Avalduse failid</label>
+          <tedi-file-dropzone ${argsToTemplate(args)} />
+        </tedi-form-field>
+      </div>
+    `,
+  }),
 };
 
 /**

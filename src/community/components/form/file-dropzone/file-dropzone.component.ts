@@ -130,7 +130,7 @@ export class FileDropzoneComponent implements ControlValueAccessor, OnInit {
   /**
    * The text label displayed for the file dropzone, providing context for users.
    */
-  label = input<string>("file-dropzone.label");
+  label = input<string>("file-dropzone.instructions");
   /**
    * Additional CSS class names to apply to the dropzone for custom styling
    */

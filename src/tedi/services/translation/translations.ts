@@ -308,8 +308,8 @@ export const translationsMap = {
     ru: (files: string, validTypes: string) =>
       `Файл(ы) ${files} имеют неправильное расширение. Разрешенные расширения: ${validTypes}`,
   },
-  "file-dropzone.label": {
-    description: "Default label for dropzone",
+  "file-dropzone.instructions": {
+    description: "Default instructions inside the dropzone",
     components: ["FileDropzone"],
     et: "Lohista failid siia või klõpsa failide valimiseks",
     en: "Drop files here, or click to browse",

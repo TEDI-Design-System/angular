@@ -1,6 +1,7 @@
 import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import {
   afterNextRender,
+  afterRenderEffect,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
@@ -189,10 +190,11 @@ export class FileDropzoneComponent
    */
   readonly name = input<string>();
   /**
-   * Text inside the dropzone, which also names the file input. Falls back to
-   * the translated `file-dropzone.label`.
+   * The sentence inside the dropzone. Falls back to the translated
+   * `file-dropzone.instructions`. Not the field's label — name the field with a
+   * `tedi-label` whose `for` matches `inputId`.
    */
-  readonly label = input<string>();
+  readonly instructions = input<string>();
   /**
    * Allowed file types as a comma-separated list of extensions and MIME types
    * (`".pdf,.txt"`, `"image/png"`, `"image/*"`). Forwarded to the input's
@@ -341,9 +343,29 @@ export class FileDropzoneComponent
     () => this.inputId() ?? this.fallbackId,
   );
 
-  protected readonly resolvedLabel = computed(
-    () => this.label() ?? this.translations.translate("file-dropzone.label"),
+  protected readonly resolvedInstructions = computed(
+    () =>
+      this.instructions() ??
+      this.translations.translate("file-dropzone.instructions"),
   );
+
+  /** Id of the element holding the instructions, for the zone to be named by. */
+  protected readonly instructionsId = computed(
+    () => `${this.resolvedId()}-instructions`,
+  );
+
+  /** Id of the `tedi-label` naming this field, once one is found. */
+  private readonly labelId = signal<string | undefined>(undefined);
+
+  /**
+   * A `<label for>` cannot name the zone — it is a button, and the input the
+   * label points at is hidden. Naming it from both keeps the field's name and
+   * its visible text in the accessible name.
+   */
+  protected readonly labelledBy = computed(() => {
+    const labelId = this.labelId();
+    return labelId ? `${labelId} ${this.instructionsId()}` : null;
+  });
 
   protected readonly isDragActive = computed(() => this.dragDepth() > 0);
 
@@ -453,6 +475,15 @@ export class FileDropzoneComponent
   private onTouched: () => void = () => {};
 
   constructor() {
+    afterRenderEffect(() => {
+      const id = this.resolvedId();
+      const label = Array.from(this.document.querySelectorAll("label")).find(
+        (candidate) => candidate.htmlFor === id,
+      );
+      if (label) label.id ||= `${id}-label`;
+      this.labelId.set(label?.id);
+    });
+
     effect(() => {
       const ids = this.feedbackIds();
       this.describedBy.set(

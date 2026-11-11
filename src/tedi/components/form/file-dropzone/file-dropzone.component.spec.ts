@@ -6,6 +6,7 @@ import { ToastAnnouncerService } from "../../../services/toast/toast-announcer.s
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
+import { LabelComponent } from "../../content/label/label.component";
 import { FileDropzoneComponent } from "./file-dropzone.component";
 import { FileDropzoneFileDirective } from "./file-dropzone-file.directive";
 import { FileDropzoneFile } from "./file-dropzone.types";
@@ -104,6 +105,26 @@ const baseProviders = [
 })
 class DescribedByHostComponent {}
 
+@Component({
+  standalone: true,
+  imports: [FileDropzoneComponent, LabelComponent],
+  template: `
+    <label tedi-label for="avaldus">Avalduse failid</label>
+    <tedi-file-dropzone inputId="avaldus" />
+  `,
+})
+class LabelledHostComponent {}
+
+@Component({
+  standalone: true,
+  imports: [FileDropzoneComponent, LabelComponent],
+  template: `
+    <label tedi-label id="minu-silt" for="pre-id">Avalduse failid</label>
+    <tedi-file-dropzone inputId="pre-id" />
+  `,
+})
+class PreIdLabelledHostComponent {}
+
 describe("FileDropzoneComponent", () => {
   let fixture: ComponentFixture<FileDropzoneComponent>;
   let component: FileDropzoneComponent;
@@ -123,23 +144,29 @@ describe("FileDropzoneComponent", () => {
       .query(By.css(selector))
       ?.nativeElement.textContent.trim();
 
-  it("creates and shows the translated label", () => {
+  it("creates and shows the translated instructions", () => {
     expect(component).toBeTruthy();
-    expect(text(".tedi-file-dropzone__label")).toBe("file-dropzone.label");
+    expect(text(".tedi-file-dropzone__instructions")).toBe(
+      "file-dropzone.instructions",
+    );
   });
 
-  it("uses a custom label when given", () => {
-    fixture.componentRef.setInput("label", "Lohista failid siia");
+  it("uses custom instructions when given", () => {
+    fixture.componentRef.setInput("instructions", "Lohista failid siia");
     fixture.detectChanges();
 
-    expect(text(".tedi-file-dropzone__label")).toBe("Lohista failid siia");
+    expect(text(".tedi-file-dropzone__instructions")).toBe(
+      "Lohista failid siia",
+    );
   });
 
-  it("names the drop zone from the dropzone label", () => {
+  it("names the drop zone from its instructions", () => {
     const zone = zoneOf(fixture);
     const input = fileInput(fixture);
 
-    expect(zone.textContent).toContain("file-dropzone.label");
+    expect(zone.textContent).toContain("file-dropzone.instructions");
+    // Nothing names the field, so the zone is left to its own content.
+    expect(zone.getAttribute("aria-labelledby")).toBeNull();
     expect(zone.getAttribute("tabindex")).toBe("0");
     // The input stays out of the tab order so that closing the file dialog
     // cannot hand focus back to it — the button is the control.
@@ -991,6 +1018,33 @@ describe("FileDropzoneComponent", () => {
       ).toBeNull();
       expect(zoneOf(fixture).classList).not.toContain(
         "tedi-file-dropzone__zone--valid",
+      );
+    });
+
+    it("names the zone by the field label and its instructions", () => {
+      const host = TestBed.createComponent(LabelledHostComponent);
+      host.detectChanges();
+      // The label is found after the first render, so the binding it feeds
+      // lands on the next pass.
+      host.detectChanges();
+
+      const label = host.debugElement.query(By.css("label")).nativeElement;
+
+      // The label gets an id so the zone can point at it. A `for` alone could
+      // not name the zone: it is a button, and the input it names is hidden.
+      expect(label.id).toBe("avaldus-label");
+      expect(zoneOf(host).getAttribute("aria-labelledby")).toBe(
+        "avaldus-label avaldus-instructions",
+      );
+    });
+
+    it("keeps a label's own id when it has one", () => {
+      const host = TestBed.createComponent(PreIdLabelledHostComponent);
+      host.detectChanges();
+      host.detectChanges();
+
+      expect(zoneOf(host).getAttribute("aria-labelledby")).toBe(
+        "minu-silt pre-id-instructions",
       );
     });
 

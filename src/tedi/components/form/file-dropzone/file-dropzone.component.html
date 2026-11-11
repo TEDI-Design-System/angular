@@ -8,6 +8,7 @@
   [attr.tabindex]="isDisabled() ? -1 : 0"
   [attr.aria-disabled]="isDisabled() || null"
   [attr.aria-invalid]="isInvalid() || null"
+  [attr.aria-labelledby]="labelledBy()"
   [attr.aria-describedby]="describedBy.attribute()"
   (click)="openPicker()"
   (keydown)="handleKeydown($event)"
@@ -23,7 +24,9 @@
     [size]="24"
     color="inherit"
   />
-  <span class="tedi-file-dropzone__label">{{ resolvedLabel() }}</span>
+  <span class="tedi-file-dropzone__instructions" [id]="instructionsId()">{{
+    resolvedInstructions()
+  }}</span>
 </div>
 
 <input
