@@ -76,7 +76,7 @@
               type="button"
               variant="neutral"
               class="tedi-file-upload__clear"
-              (click)="reset()"
+              (click)="clearFiles()"
             >
               <tedi-icon name="close" [size]="18" color="inherit" />
               {{ clearLabel() }}
@@ -89,7 +89,7 @@
               class="tedi-file-upload__clear"
               [iconSize]="18"
               [ariaLabel]="clearLabel()"
-              (click)="reset()"
+              (click)="clearFiles()"
             ></button>
           }
           <tedi-separator axis="vertical" size="1.5rem" />

@@ -799,7 +799,32 @@ describe("FileUploadComponent", () => {
       expect(document.activeElement).toBe(addButton(fixture));
     });
 
-    it("clears every file at once, emitting each", () => {
+    it("emits the file a single-file field replaces", () => {
+      const removed: string[] = [];
+      component.fileRemove.subscribe((file) => removed.push(file.name ?? ""));
+
+      selectFiles(fixture, [makeFile("first.pdf")]);
+      selectFiles(fixture, [makeFile("second.pdf")]);
+
+      expect(names()).toEqual(["second.pdf"]);
+      expect(removed).toEqual(["first.pdf"]);
+    });
+
+    it("keeps the listed file when a single-file pick is rejected", () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.detectChanges();
+
+      const removed: string[] = [];
+      component.fileRemove.subscribe((file) => removed.push(file.name ?? ""));
+
+      selectFiles(fixture, [makeFile("first.pdf")]);
+      selectFiles(fixture, [makeFile("notes.txt", 100, "text/plain")]);
+
+      expect(names()).toEqual(["first.pdf"]);
+      expect(removed).toEqual([]);
+    });
+
+    it("clears every file at once, emitting each", async () => {
       fixture.componentRef.setInput("files", [
         { id: "1", name: "a.pdf" },
         { id: "2", name: "b.pdf" },
@@ -813,6 +838,7 @@ describe("FileUploadComponent", () => {
       expect(clear.getAttribute("aria-label")).toBe("clear");
 
       clear.click();
+      await fixture.whenStable();
       fixture.detectChanges();
 
       expect(component.files()).toEqual([]);
@@ -822,6 +848,7 @@ describe("FileUploadComponent", () => {
         "file-upload.cleared",
         "polite",
       );
+      expect(document.activeElement).toBe(addButton(fixture));
     });
 
     it("hides the clear button when clearable is off or the field is disabled", () => {
@@ -874,6 +901,23 @@ describe("FileUploadComponent", () => {
       expect(clearButton(fixture)).not.toBeNull();
     });
 
+    it("resets without announcing or moving focus", async () => {
+      fixture.componentRef.setInput("files", [{ id: "1", name: "a.pdf" }]);
+      fixture.detectChanges();
+
+      const removed: string[] = [];
+      component.fileRemove.subscribe((file) => removed.push(file.name ?? ""));
+
+      component.reset();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.files()).toEqual([]);
+      expect(removed).toEqual(["a.pdf"]);
+      expect(announcer.announce).not.toHaveBeenCalled();
+      expect(document.activeElement).not.toBe(addButton(fixture));
+    });
+
     it("does nothing when reset with no files", () => {
       const removed: FileUploadFile[] = [];
       component.fileRemove.subscribe((file) => removed.push(file));
@@ -924,10 +968,10 @@ describe("FileUploadComponent", () => {
       ).toBeNull();
     });
 
-    it("ignores reset", () => {
+    it("still empties the list on a programmatic reset", () => {
       component.reset();
 
-      expect(component.files().length).toBe(2);
+      expect(component.files()).toEqual([]);
     });
   });
 });

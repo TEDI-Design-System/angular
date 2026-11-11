@@ -236,8 +236,8 @@ export class FileUploadComponent
   /** Field size. Falls back to the size of a wrapping `tedi-form-field`. */
   readonly size = input<FileUploadSize | undefined>();
   /**
-   * Emits each file the user removes, one event per file when clearing, so its
-   * upload can be aborted.
+   * Emits each file that leaves the list, whether removed, cleared or replaced,
+   * so its upload can be aborted.
    */
   readonly fileRemove = output<FileUploadFile>();
 
@@ -498,19 +498,23 @@ export class FileUploadComponent
   }
 
   /**
-   * Removes every file. Also what `tedi-form-field`'s and this field's own
-   * clear button call.
+   * Removes every file, without moving focus or announcing it, so an app can
+   * call it, e.g. after a submit.
    */
   reset(): void {
     const removed = this.files();
-    if (!removed.length) return;
+    if (this.disabled() || !removed.length) return;
 
     this.selectionError.set(undefined);
-    this.removeFiles(
-      removed,
-      [],
-      this.translations.translate("file-upload.cleared"),
-    );
+    this.commit([]);
+    removed.forEach((file) => this.fileRemove.emit(file));
+    this.onTouched();
+  }
+
+  /** The clear button's handler: `reset()`, plus what a user's click needs. */
+  protected clearFiles(): void {
+    this.reset();
+    this.afterUserRemoval(this.translations.translate("file-upload.cleared"));
   }
 
   protected openPicker(): void {
@@ -550,32 +554,26 @@ export class FileUploadComponent
   }
 
   protected removeFile(file: FileUploadFile): void {
+    if (!this.isEditable()) return;
+
     const remaining = this.files().filter((current) => current !== file);
 
     this.clearRejectionWhenResolved(remaining);
 
-    this.removeFiles(
-      [file],
-      remaining,
+    this.commit(remaining);
+    this.fileRemove.emit(file);
+    this.onTouched();
+    this.afterUserRemoval(
       this.translations.translate("file-upload.removed", file.name ?? ""),
     );
   }
 
   /**
-   * Focus goes to the add button because the remove button the user just
-   * pressed leaves the DOM with its tag, and the add button is the one control
-   * that is always there.
+   * Focus goes to the add button because the button the user just pressed
+   * leaves the DOM, and the add button is the one control that is always
+   * there.
    */
-  private removeFiles(
-    removed: FileUploadFile[],
-    remaining: FileUploadFile[],
-    message: string,
-  ): void {
-    if (!this.isEditable()) return;
-
-    this.commit(remaining);
-    removed.forEach((file) => this.fileRemove.emit(file));
-    this.onTouched();
+  private afterUserRemoval(message: string): void {
     this.announce(message);
     afterNextRender(() => this.addButton()?.nativeElement.focus(), {
       injector: this.injector,
@@ -621,8 +619,12 @@ export class FileUploadComponent
       : candidates.filter((file) => file.isValid);
     const multiple = this.multiple();
 
-    if (kept.length) {
-      this.commit(multiple ? [...this.files(), ...kept] : [kept[0]]);
+    if (kept.length && multiple) {
+      this.commit([...this.files(), ...kept]);
+    } else if (kept.length) {
+      const replaced = this.files();
+      this.commit([kept[0]]);
+      replaced.forEach((file) => this.fileRemove.emit(file));
     }
 
     const messages: string[] = [];

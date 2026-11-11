@@ -236,11 +236,13 @@ export default {
     },
     fileRemove: {
       description:
-        "Emits each file the user removes, one event per file when clearing, so its upload can be aborted.",
+        "Emits each file that leaves the list, whether removed, cleared or replaced, so its upload can be aborted.",
+      action: "fileRemove",
       table: { category: "outputs", type: { summary: "FileUploadFile" } },
     },
     filesChange: {
       description: "Emits the new list whenever files are added or removed.",
+      action: "filesChange",
       table: { category: "outputs", type: { summary: "FileUploadFile[]" } },
     },
   },

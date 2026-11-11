@@ -231,8 +231,8 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   automatic hint cannot describe it, so describe the rule in `hint`.
 - **`maxSize` is in bytes**, the unit `File.size` is in — not megabytes as in React. The hint renders
   it in whichever unit reads best.
-- **It selects files, it does not upload them.** `fileRemove` emits the single entry the user removed,
-  one event per file when clearing, so an in-flight upload can be aborted without diffing
+- **It selects files, it does not upload them.** `fileRemove` emits each file that leaves the list,
+  whether removed, cleared or replaced by the next pick in a single-file field, so an in-flight upload can be aborted without diffing
   `filesChange`. Set `isLoading` on a file yourself while it uploads: its tag shows a spinner and
   loses its remove button. The clear button still removes it, so a stuck upload is
   never stranded; clear `isLoading` and set `isValid: false` on failure or timeout.
