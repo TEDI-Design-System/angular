@@ -6,3 +6,4 @@ export * from "./components/overlay";
 export * from "./components/tags";
 export * from "./components/table";
 export * from "./components/helpers";
+export * from "./components/layout";

@@ -1,0 +1,55 @@
+<div class="tedi-questionnaire__header">
+  @if (showBack()) {
+    <button
+      tedi-button
+      type="button"
+      variant="secondary"
+      [attr.aria-label]="'questionnaire.back' | tediTranslate"
+      (click)="back.emit()"
+    >
+      <tedi-icon name="arrow_back" />
+    </button>
+  }
+  <h1 class="tedi-questionnaire__heading">{{ heading() }}</h1>
+</div>
+
+<tedi-segmented-progress
+  class="tedi-questionnaire__progress"
+  [segments]="steps().length"
+  [value]="resolvedProgress()"
+  [label]="progressLabel()"
+  [valueLabel]="progressValueLabel()"
+  [ariaLabel]="progressLabel() ? undefined : heading()"
+/>
+
+<div class="tedi-questionnaire__body">
+  <nav
+    class="tedi-questionnaire__nav"
+    [attr.aria-label]="'questionnaire.steps' | tediTranslate"
+  >
+    <ol class="tedi-questionnaire__steps">
+      @for (step of steps(); track $index; let i = $index) {
+        <li>
+          <button
+            type="button"
+            class="tedi-questionnaire__step"
+            [class.tedi-questionnaire__step--active]="i === activeStep()"
+            [disabled]="step.disabled"
+            [attr.aria-current]="i === activeStep() ? 'step' : null"
+            (click)="selectStep(i)"
+          >
+            <span class="tedi-questionnaire__step-number">{{ i + 1 }}</span>
+            <span class="tedi-questionnaire__step-label">{{ step.label }}</span>
+          </button>
+        </li>
+      }
+    </ol>
+  </nav>
+
+  <div class="tedi-questionnaire__content">
+    <ng-content />
+    <div class="tedi-questionnaire__actions">
+      <ng-content select="[questionnaire-actions]" />
+    </div>
+  </div>
+</div>

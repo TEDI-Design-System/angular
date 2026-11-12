@@ -1566,6 +1566,20 @@ export const translationsMap = {
     en: "Completed",
     ru: "Завершено",
   },
+  "questionnaire.back": {
+    description: "Accessible label for the questionnaire's back button",
+    components: ["Questionnaire"],
+    et: "Tagasi",
+    en: "Back",
+    ru: "Назад",
+  },
+  "questionnaire.steps": {
+    description: "Accessible label for the questionnaire's step navigation",
+    components: ["Questionnaire"],
+    et: "Küsimustiku sammud",
+    en: "Questionnaire steps",
+    ru: "Шаги анкеты",
+  },
   "vertical-stepper.error": {
     description:
       "Label for screen-reader that this step has error (visually hidden)",

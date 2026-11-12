@@ -1,0 +1,134 @@
+@use "@tedi-design-system/core/bootstrap-utility/breakpoints";
+
+.tedi-questionnaire {
+  display: flex;
+  flex-direction: column;
+  gap: var(--layout-grid-gutters-24);
+  padding: var(--card-padding-lg);
+  background: var(--general-surface-primary);
+  border-radius: var(--card-radius-rounded);
+
+  &__header {
+    display: flex;
+    gap: var(--layout-grid-gutters-16);
+    align-items: center;
+  }
+
+  &__heading {
+    margin: 0;
+    font-size: var(--heading-h1-size);
+    font-weight: var(--heading-h1-weight);
+    line-height: var(--heading-h1-line-height);
+    color: var(--general-text-brand);
+  }
+
+  &__progress {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding-block: var(--layout-grid-gutters-08);
+    background: var(--general-surface-primary);
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--layout-grid-gutters-16);
+
+    @include breakpoints.media-breakpoint-up(md) {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+  }
+
+  &__nav {
+    flex-shrink: 0;
+
+    @include breakpoints.media-breakpoint-up(md) {
+      position: sticky;
+      top: 0;
+      width: 300px;
+    }
+  }
+
+  &__steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--layout-grid-gutters-08);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  &__step {
+    display: flex;
+    gap: var(--layout-grid-gutters-08);
+    align-items: center;
+    width: 100%;
+    padding: var(--layout-grid-gutters-08);
+    font: inherit;
+    font-size: var(--body-bold-size);
+    font-weight: var(--body-bold-weight);
+    line-height: var(--body-bold-line-height);
+    color: var(--general-text-primary);
+    text-align: start;
+    cursor: pointer;
+    background: var(--general-surface-secondary);
+    border: var(--general-border-width-default) solid transparent;
+    border-radius: var(--card-radius-rounded);
+
+    &:hover:not(:disabled) {
+      background: var(--general-surface-tertiary);
+    }
+
+    &:focus-visible {
+      outline: var(--tedi-borders-02) solid var(--tedi-primary-500);
+      outline-offset: var(--tedi-borders-01);
+    }
+
+    &:disabled {
+      color: var(--general-text-disabled);
+      cursor: not-allowed;
+    }
+
+    &--active,
+    &--active:hover:not(:disabled) {
+      background: var(--card-background-brand-tertiary);
+      border-color: var(--general-border-brand);
+    }
+  }
+
+  &__step-number {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    color: var(--general-text-secondary);
+    background: var(--general-surface-primary);
+    border-radius: var(--button-radius-sm);
+  }
+
+  &__content {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: var(--layout-grid-gutters-24);
+    min-width: 0;
+    padding: var(--card-padding-md-default);
+    background: var(--general-surface-secondary);
+    border-radius: var(--card-radius-rounded);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--layout-grid-gutters-12);
+    justify-content: flex-end;
+
+    &:empty {
+      display: none;
+    }
+  }
+}

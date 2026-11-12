@@ -1,0 +1,24 @@
+@if (label() || valueLabel()) {
+  <div class="tedi-segmented-progress__header" aria-hidden="true">
+    <span class="tedi-segmented-progress__label">{{ label() }}</span>
+    <span class="tedi-segmented-progress__value">{{ valueLabel() }}</span>
+  </div>
+}
+<div
+  class="tedi-segmented-progress__bar"
+  role="progressbar"
+  aria-valuemin="0"
+  [attr.aria-valuemax]="segments()"
+  [attr.aria-valuenow]="valueNow()"
+  [attr.aria-valuetext]="valueLabel()"
+  [attr.aria-label]="ariaLabel() || label()"
+>
+  @for (fill of fills(); track $index) {
+    <div class="tedi-segmented-progress__segment">
+      <div
+        class="tedi-segmented-progress__fill"
+        [style.width.%]="fill"
+      ></div>
+    </div>
+  }
+</div>
