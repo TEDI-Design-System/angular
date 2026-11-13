@@ -1,17 +1,18 @@
 import { isPlatformBrowser } from "@angular/common";
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
   contentChildren,
   DestroyRef,
-  effect,
   ElementRef,
   forwardRef,
   inject,
   input,
   PLATFORM_ID,
   signal,
+  untracked,
   ViewEncapsulation,
 } from "@angular/core";
 import {
@@ -27,6 +28,10 @@ import {
   ProcessTimelineContext,
   ProcessTimelineOrientation,
 } from "./process-timeline.token";
+
+const VERTICAL_CLASS = "tedi-process-timeline--vertical";
+const HORIZONTAL_CLASS = "tedi-process-timeline--horizontal";
+const ITEM_VERTICAL_CLASS = "tedi-process-timeline-item--vertical";
 
 @Component({
   standalone: true,
@@ -92,8 +97,8 @@ export class ProcessTimelineComponent implements ProcessTimelineContext {
     },
   );
 
+  /** True while horizontal is resolved but the stages don't fit the container's width. */
   private readonly overflowing = signal(false);
-  private widthNeeded = 0;
 
   readonly vertical = computed(
     () => this.resolvedOrientation() === "vertical" || this.overflowing(),
@@ -107,32 +112,77 @@ export class ProcessTimelineComponent implements ProcessTimelineContext {
       return;
     }
 
-    const observer = new ResizeObserver(() => this.checkFit());
-    inject(DestroyRef).onDestroy(() => observer.disconnect());
+    const el = this.host.nativeElement;
+    // The container or a stage changed size.
+    const resizeObserver = new ResizeObserver(() => this.checkFit());
+    // Stage text changed or stages were added/removed. Class and attribute changes, including
+    // the ones checkFit makes while measuring, are not observed.
+    const mutationObserver =
+      typeof MutationObserver === "undefined"
+        ? undefined
+        : new MutationObserver(() => this.checkFit());
+    mutationObserver?.observe(el, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
 
-    effect(() => {
+    inject(DestroyRef).onDestroy(() => {
+      resizeObserver.disconnect();
+      mutationObserver?.disconnect();
+    });
+
+    afterRenderEffect(() => {
       this.items();
-      const el = this.host.nativeElement;
-      observer.disconnect();
-      observer.observe(el);
-      Array.from(el.children).forEach((child) => observer.observe(child));
+      this.resolvedOrientation();
+      untracked(() => {
+        resizeObserver.disconnect();
+        resizeObserver.observe(el);
+        Array.from(el.children).forEach((child) =>
+          resizeObserver.observe(child),
+        );
+        this.checkFit();
+      });
     });
   }
 
+  /**
+   * Decides the fallback from the width the stages need in the horizontal layout, measured fresh
+   * every time. The result depends only on the content and the container, not on the current
+   * layout, so switching the layout can't make it flip back and forth.
+   */
   private checkFit() {
     if (this.resolvedOrientation() === "vertical") {
+      this.overflowing.set(false);
       return;
     }
 
     const el = this.host.nativeElement;
+    this.overflowing.set(this.horizontalWidth() > el.clientWidth);
+  }
 
-    if (this.overflowing()) {
-      if (el.clientWidth >= this.widthNeeded) {
-        this.overflowing.set(false);
-      }
-    } else if (el.scrollWidth > el.clientWidth) {
-      this.widthNeeded = el.scrollWidth;
-      this.overflowing.set(true);
+  /**
+   * Width the stages need side by side. While the fallback is on, the horizontal classes are
+   * applied for the synchronous measurement and restored before the browser paints.
+   */
+  private horizontalWidth(): number {
+    const el = this.host.nativeElement;
+
+    if (!el.classList.contains(VERTICAL_CLASS)) {
+      return el.scrollWidth;
     }
+
+    const items = Array.from(
+      el.querySelectorAll(`:scope > .${ITEM_VERTICAL_CLASS}`),
+    );
+    el.classList.replace(VERTICAL_CLASS, HORIZONTAL_CLASS);
+    items.forEach((item) => item.classList.remove(ITEM_VERTICAL_CLASS));
+
+    const width = el.scrollWidth;
+
+    el.classList.replace(HORIZONTAL_CLASS, VERTICAL_CLASS);
+    items.forEach((item) => item.classList.add(ITEM_VERTICAL_CLASS));
+
+    return width;
   }
 }

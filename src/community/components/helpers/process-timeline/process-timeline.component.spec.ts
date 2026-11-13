@@ -265,23 +265,47 @@ describe("ProcessTimelineComponent", () => {
 });
 
 describe("ProcessTimelineComponent when the stages don't fit", () => {
-  let callback: () => void;
+  let resize: () => void;
   let fixture: ComponentFixture<HostComponent>;
+  let host: HostComponent;
   let list: HTMLOListElement;
+  let containerWidth: number;
+  let widthReads: number;
   const originalResizeObserver = globalThis.ResizeObserver;
 
-  const setSize = (clientWidth: number, scrollWidth: number) => {
-    Object.defineProperty(list, "clientWidth", { value: clientWidth, configurable: true });
-    Object.defineProperty(list, "scrollWidth", { value: scrollWidth, configurable: true });
-    callback();
+  // jsdom has no layout. Side by side, each stage needs 10px per character of its title and
+  // description; a vertical timeline never overflows. The checks must measure the horizontal
+  // layout to see the real need.
+  const horizontalNeed = () =>
+    Array.from(
+      list.querySelectorAll(
+        ".tedi-process-timeline-title, .tedi-process-timeline-description",
+      ),
+    ).reduce((sum, node) => sum + (node.textContent ?? "").trim().length * 10, 0);
+
+  const isVertical = () =>
+    list.classList.contains("tedi-process-timeline--vertical");
+
+  const settle = async () => {
+    fixture.detectChanges();
+    await Promise.resolve();
     fixture.detectChanges();
   };
+
+  const fiveStages = [
+    { state: "completed" as const, title: "Esitatud" },
+    { state: "completed" as const, title: "Kvalifitseerimine" },
+    { state: "active" as const, title: "Hindamine" },
+    { state: "upcoming" as const, title: "Läbirääkimised" },
+    { state: "upcoming" as const, title: "Tulemused" },
+  ];
+  const twoStages = fiveStages.slice(0, 2);
 
   beforeEach(() => {
     aboveMd.set(true);
     globalThis.ResizeObserver = class {
       constructor(cb: () => void) {
-        callback = cb;
+        resize = cb;
       }
       observe() {}
       disconnect() {}
@@ -297,35 +321,113 @@ describe("ProcessTimelineComponent when the stages don't fit", () => {
       ],
     });
     fixture = TestBed.createComponent(HostComponent);
-    fixture.detectChanges();
+    host = fixture.componentInstance;
     list = fixture.nativeElement.querySelector("ol");
+
+    containerWidth = 400;
+    widthReads = 0;
+    Object.defineProperty(list, "clientWidth", {
+      configurable: true,
+      get: () => containerWidth,
+    });
+    Object.defineProperty(list, "scrollWidth", {
+      configurable: true,
+      get: () => {
+        widthReads++;
+        return isVertical()
+          ? containerWidth
+          : Math.max(containerWidth, horizontalNeed());
+      },
+    });
   });
 
   afterEach(() => {
     globalThis.ResizeObserver = originalResizeObserver;
   });
 
-  it("falls back to vertical and returns to horizontal once there is room", () => {
-    setSize(800, 800);
-    expect(list.classList).toContain("tedi-process-timeline--horizontal");
+  it("switches from five stages to two and back", async () => {
+    host.stages.set(fiveStages);
+    await settle();
+    expect(isVertical()).toBe(true);
 
-    setSize(800, 860);
-    expect(list.classList).toContain("tedi-process-timeline--vertical");
+    host.stages.set(twoStages);
+    await settle();
+    expect(isVertical()).toBe(false);
 
-    setSize(840, 840);
-    expect(list.classList).toContain("tedi-process-timeline--vertical");
-
-    setSize(860, 860);
-    expect(list.classList).toContain("tedi-process-timeline--horizontal");
+    host.stages.set(fiveStages);
+    await settle();
+    expect(isVertical()).toBe(true);
   });
 
-  it("doesn't measure when the orientation is vertical", () => {
-    fixture.componentInstance.orientation.set("vertical");
-    fixture.detectChanges();
-    setSize(300, 900);
-    fixture.componentInstance.orientation.set("horizontal");
-    fixture.detectChanges();
-    expect(list.classList).toContain("tedi-process-timeline--horizontal");
+  it("remeasures when the content of a stage changes", async () => {
+    host.stages.set([
+      { state: "completed", title: "Esitatud" },
+      { state: "active", title: "Hindamine", description: "Lühike." },
+    ]);
+    await settle();
+    expect(isVertical()).toBe(false);
+
+    host.stages.update(([first, second]) => [
+      first,
+      { ...second, description: "Hankija kontrollib kõiki esitatud dokumente." },
+    ]);
+    await settle();
+    expect(isVertical()).toBe(true);
+
+    host.stages.update(([first, second]) => [
+      first,
+      { ...second, description: "Lühike." },
+    ]);
+    await settle();
+    expect(isVertical()).toBe(false);
+  });
+
+  it("follows the container width in both directions", async () => {
+    host.stages.set(fiveStages);
+    await settle();
+    expect(isVertical()).toBe(true);
+
+    containerWidth = horizontalNeed();
+    resize();
+    await settle();
+    expect(isVertical()).toBe(false);
+
+    containerWidth -= 1;
+    resize();
+    await settle();
+    expect(isVertical()).toBe(true);
+  });
+
+  it("restores the vertical classes after measuring and doesn't trigger itself again", async () => {
+    host.stages.set(fiveStages);
+    await settle();
+    expect(isVertical()).toBe(true);
+
+    const items = Array.from(list.querySelectorAll("li"));
+    resize();
+    expect(isVertical()).toBe(true);
+    items.forEach((li) =>
+      expect(li.classList).toContain("tedi-process-timeline-item--vertical"),
+    );
+
+    const reads = widthReads;
+    await settle();
+    await settle();
+    expect(widthReads).toBe(reads);
+    expect(isVertical()).toBe(true);
+  });
+
+  it("doesn't fall back while the orientation is vertical and re-checks when it turns horizontal", async () => {
+    host.orientation.set("vertical");
+    host.stages.set(fiveStages);
+    await settle();
+    const reads = widthReads;
+    resize();
+    expect(widthReads).toBe(reads);
+
+    host.orientation.set("horizontal");
+    await settle();
+    expect(isVertical()).toBe(true);
   });
 });
 
