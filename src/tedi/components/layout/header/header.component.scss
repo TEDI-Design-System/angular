@@ -5,6 +5,11 @@
   display: block;
   box-shadow: 0 1px 5px 0 var(--tedi-alpha-20);
 
+  // The open mobile menu starts at the header's bottom edge, so the shadow would fall on it.
+  &:has(.tedi-sidenav-toggle[aria-expanded="true"]) {
+    box-shadow: none;
+  }
+
   &__main {
     display: flex;
     min-height: var(--layout-header-height);
