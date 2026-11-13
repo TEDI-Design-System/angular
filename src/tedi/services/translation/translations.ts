@@ -355,6 +355,22 @@ export const translationsMap = {
     en: "Search...",
     ru: "Искать...",
   },
+  "process-timeline.completed": {
+    description:
+      "Label for screen-reader that this process stage is completed (visually hidden)",
+    components: ["ProcessTimeline"],
+    et: "Lõpetatud",
+    en: "Completed",
+    ru: "Завершено",
+  },
+  "process-timeline.upcoming": {
+    description:
+      "Label for screen-reader that this process stage is upcoming (visually hidden)",
+    components: ["ProcessTimeline"],
+    et: "Tulemas",
+    en: "Upcoming",
+    ru: "Предстоит",
+  },
   "stepper.completed": {
     description:
       "Label for screen-reader that this step is completed (visually hidden)",

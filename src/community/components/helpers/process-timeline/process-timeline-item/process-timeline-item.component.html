@@ -1,0 +1,20 @@
+<span class="tedi-process-timeline-item__indicator" aria-hidden="true">
+  {{ index() + 1 }}
+</span>
+@if (!isLast()) {
+  <span class="tedi-process-timeline-item__connector" aria-hidden="true">
+    <tedi-separator
+      [axis]="vertical() ? 'vertical' : 'horizontal'"
+      [thickness]="connectorThickness()"
+      color="primary"
+    />
+  </span>
+}
+<div class="tedi-process-timeline-item__body">
+  <ng-content select="tedi-process-timeline-title" />
+  @if (stateLabelKey(); as key) {
+    <span class="sr-only">{{ key | tediTranslate }}</span>
+  }
+  <ng-content select="tedi-process-timeline-description" />
+  <div class="tedi-process-timeline-item__content"><ng-content /></div>
+</div>
