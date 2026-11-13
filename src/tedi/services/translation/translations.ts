@@ -228,6 +228,14 @@ export const translationsMap = {
     en: "Search",
     ru: "Поиск",
   },
+  "skip-links.main-content": {
+    description:
+      "Default label for the skip link that moves focus to the main content",
+    components: ["SkipLinks"],
+    et: "Liigu edasi põhisisu juurde",
+    en: "Skip to main content",
+    ru: "Перейти к основному содержанию",
+  },
   "file-upload.add": {
     description: "Label for add file button",
     components: ["FileUpload"],

@@ -23,6 +23,7 @@ import { TediTranslationService } from "../../../../services/translation/transla
   host: {
     "[class]": "classes()",
     "[attr.aria-label]": "ariaLabel()",
+    "[attr.aria-expanded]": "sidenavService.isMobileOpen()",
   },
 })
 export class SideNavToggleComponent {

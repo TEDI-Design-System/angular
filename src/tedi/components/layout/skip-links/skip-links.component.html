@@ -1,0 +1,13 @@
+<ul class="tedi-skip-links__list">
+  @for (link of links(); track link) {
+    <li>
+      <ng-container [ngTemplateOutlet]="link.templateRef" />
+    </li>
+  } @empty {
+    <li>
+      <a tedi-link href="#main-content">{{
+        "skip-links.main-content" | tediTranslate
+      }}</a>
+    </li>
+  }
+</ul>

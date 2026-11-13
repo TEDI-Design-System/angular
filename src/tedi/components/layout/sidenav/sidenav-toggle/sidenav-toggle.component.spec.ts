@@ -87,4 +87,13 @@ describe("SideNavToggleComponent", () => {
     expect(sidenavService.isMobileOpen()).toBe(false);
     expect(sidenavService.handleGoToMainMenu).toHaveBeenCalledTimes(2);
   });
+
+  it("should reflect the mobile menu state in aria-expanded", () => {
+    expect(toggleElement.getAttribute("aria-expanded")).toBe("false");
+
+    toggleElement.click();
+    fixture.detectChanges();
+
+    expect(toggleElement.getAttribute("aria-expanded")).toBe("true");
+  });
 });
