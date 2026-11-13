@@ -12,7 +12,7 @@ describe("SideNavDropdownItemComponent", () => {
 
     fixture = TestBed.createComponent(SideNavDropdownItemComponent);
     fixture.detectChanges();
-    liElement = fixture.nativeElement.querySelector("li");
+    liElement = fixture.nativeElement;
   });
 
   it("should create the component", () => {
