@@ -147,6 +147,9 @@
     position: fixed;
     bottom: 0;
     left: 0;
+
+    // Above the header so the drawer, which starts at the header's bottom edge, covers its shadow.
+    z-index: calc(var(--z-index-header) + 2);
     min-height: 0;
     overflow-y: auto;
 

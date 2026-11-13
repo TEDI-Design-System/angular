@@ -153,8 +153,7 @@ export default {
     },
   },
   parameters: {
-    // Sidenav accessibility fixes are tracked in
-    // https://github.com/TEDI-Design-System/angular/issues/307
+    // TODO(a11y): sidenav items are projected straight into a <ul>, failing the "list" rule; fixed by #307.
     a11y: { test: "todo" },
   },
 } as Meta<SideNavComponent>;

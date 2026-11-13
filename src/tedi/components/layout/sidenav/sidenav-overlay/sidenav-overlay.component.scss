@@ -4,7 +4,9 @@
   &--visible {
     position: fixed;
     inset: 0;
-    z-index: calc(var(--z-index-sidenav) - 1);
+
+    // Starts at the header's bottom edge; above the header to cover its shadow, below the drawer.
+    z-index: calc(var(--z-index-header) + 1);
     display: block;
     background: rgb(0 0 0 / 25%);
   }
