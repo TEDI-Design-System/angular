@@ -789,6 +789,102 @@ describe("SelectComponent", () => {
       expect(options.length).toBe(4);
     }));
 
+    const expectOptionsGroupedByLabel = () => {
+      const groups = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '[role="listbox"] [role="group"]',
+        ),
+      );
+      expect(groups.length).toBe(2);
+
+      const groupNames = groups.map((group) =>
+        document
+          .getElementById(group.getAttribute("aria-labelledby")!)!
+          .textContent!.trim(),
+      );
+      expect(groupNames).toEqual(["Fruits", "Vegetables"]);
+
+      const optionsPerGroup = groups.map((group) =>
+        Array.from(
+          group.querySelectorAll(
+            '[role="option"]:not(.tedi-select__group-name)',
+          ),
+        ).map((option) => option.textContent!.trim()),
+      );
+      expect(optionsPerGroup).toEqual([
+        ["Apple", "Banana"],
+        ["Carrot", "Broccoli"],
+      ]);
+    };
+
+    it("should expose each group as a named group of the listbox", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expectOptionsGroupedByLabel();
+    }));
+
+    it("should name selectable groups by their heading option", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.selectableGroups = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expectOptionsGroupedByLabel();
+      document
+        .querySelectorAll('[role="listbox"] [role="group"]')
+        .forEach((group) => {
+          const heading = document.getElementById(
+            group.getAttribute("aria-labelledby")!,
+          )!;
+          expect(heading.getAttribute("role")).toBe("option");
+          expect(group.contains(heading)).toBe(true);
+        });
+    }));
+
+    it("should not wrap ungrouped options in a group", fakeAsync(() => {
+      host.groupBy = undefined;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(
+        document.querySelectorAll('[role="listbox"] [role="group"]').length,
+      ).toBe(0);
+      expect(getOptions().length).toBe(4);
+    }));
+
+    it("should navigate across groups with the arrow keys", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const listbox = document.querySelector<HTMLElement>('[role="listbox"]')!;
+      const press = (key: string, keyCode: number) => {
+        listbox.dispatchEvent(
+          new KeyboardEvent("keydown", { key, keyCode, bubbles: true }),
+        );
+        fixture.detectChanges();
+        tick();
+      };
+      const activeLabel = () =>
+        document
+          .getElementById(listbox.getAttribute("aria-activedescendant")!)
+          ?.textContent?.trim();
+
+      press("Home", 36);
+      expect(activeLabel()).toBe("Apple");
+      press("ArrowDown", 40);
+      press("ArrowDown", 40);
+      expect(activeLabel()).toBe("Carrot");
+    }));
+
     it("should select group options when selectableGroups=true", fakeAsync(() => {
       host.allowMultiple = true;
       host.selectableGroups = true;
