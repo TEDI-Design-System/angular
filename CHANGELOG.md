@@ -1,3 +1,10 @@
+# [10.0.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.10...angular-10.0.0-rc.11) (2026-11-13)
+
+
+### Features
+
+* **process-timeline:** add community process timeline [#868](https://github.com/TEDI-Design-System/angular/issues/868) ([#874](https://github.com/TEDI-Design-System/angular/issues/874)) ([637c12d](https://github.com/TEDI-Design-System/angular/commit/637c12da49a1e7cfebd7ddf699c49beaca6c9bb6))
+
 # [10.0.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.9...angular-10.0.0-rc.10) (2026-11-13)
 
 
