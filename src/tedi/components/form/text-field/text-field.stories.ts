@@ -170,7 +170,7 @@ export const Size: StoryObj<TextFieldComponent> = {
     template: `
       <tedi-row class="example-list" cols="1" gapY="3">
         <tedi-row cols="1" [sm]="{ cols: 3 }" gap="3" alignItems="center" class="padding-14-16 border-bottom">
-          <p tedi-text>Default</p>
+          <p tedi-text modifiers="bold">Default</p>
           <tedi-form-field>
             <label tedi-label [for]="'size-default'">Label</label>
             <input tedi-text-field id="size-default" />
@@ -181,7 +181,7 @@ export const Size: StoryObj<TextFieldComponent> = {
           </tedi-form-field>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 3 }" gap="3" alignItems="center" class="padding-14-16">
-          <p tedi-text>Small</p>
+          <p tedi-text modifiers="bold">Small</p>
           <tedi-form-field size="small">
             <label tedi-label [for]="'size-small'">Label</label>
             <input tedi-text-field id="size-small" />
