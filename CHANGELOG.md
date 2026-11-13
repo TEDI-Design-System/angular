@@ -1,3 +1,10 @@
+# [10.0.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.9...angular-10.0.0-rc.10) (2026-11-13)
+
+
+### Bug Fixes
+
+* **closing-button:** match hover transition to button and fade icon [#814](https://github.com/TEDI-Design-System/angular/issues/814) ([#870](https://github.com/TEDI-Design-System/angular/issues/870)) ([8acbc4f](https://github.com/TEDI-Design-System/angular/commit/8acbc4f689e66a7171b75ed5d5afa2f7ff746b84))
+
 # [10.0.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.8...angular-10.0.0-rc.9) (2026-11-11)
 
 
