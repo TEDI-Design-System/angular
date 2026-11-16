@@ -330,7 +330,7 @@ export const HorizontalLabelLength: Story = {
  * to see the layout adapt.
  */
 export const Responsive: Story = {
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: { chromatic: { disableSnapshot: false, viewports: [375, 1280] } },
   render: () => {
     const rows = [
       { label: "Patsient", value: "Mari Maasikas" },

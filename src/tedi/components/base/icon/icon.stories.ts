@@ -7,6 +7,8 @@ import {
 import { IconComponent } from "./icon.component";
 import { TextComponent } from "../text/text.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
 
 const SIZES = [8, 12, 16, 18, 24, 36, 48, "inherit"];
 const SIZES_WITH_BG = [16, 24];
@@ -47,7 +49,13 @@ export default {
   component: IconComponent,
   decorators: [
     moduleMetadata({
-      imports: [IconComponent, TextComponent, VerticalSpacingDirective],
+      imports: [
+        IconComponent,
+        TextComponent,
+        VerticalSpacingDirective,
+        RowComponent,
+        ColComponent,
+      ],
     }),
   ],
   parameters: { chromatic: { disableSnapshot: true } },

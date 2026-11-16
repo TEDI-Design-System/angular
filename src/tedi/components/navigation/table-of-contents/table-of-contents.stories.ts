@@ -22,6 +22,8 @@ import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-
 import { TableOfContentsItemSuffixDirective } from "./table-of-contents-item/table-of-contents-item-suffix.directive";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { TagComponent } from "../../tags/tag/tag.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
 
 const LOREM =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor " +
@@ -64,6 +66,8 @@ const meta = {
         HideAtDirective,
         SeparatorComponent,
         TagComponent,
+        RowComponent,
+        ColComponent,
       ],
     }),
     (story, context) => {
@@ -949,7 +953,7 @@ export class DocPageComponent implements OnDestroy {
 export const StickyInLayout: Story = {
   parameters: {
     layout: "fullscreen",
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     fullWidth: true,
     docs: { source: { language: "typescript", code: STICKY_LAYOUT_SOURCE } },
     a11y: { config: { rules: [{ id: "color-contrast", enabled: false }] } },
@@ -1002,7 +1006,7 @@ const controllableNestedItems = `
 export const Collapsible: Story = {
   parameters: {
     layout: "fullscreen",
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     fullWidth: true,
     controls: { exclude: ["variant", "itemId", "headingLevel"] },
   },
@@ -1084,7 +1088,7 @@ export const CollapsibleHideOnScroll: Story = {
   name: "Collapsible: hide on scroll",
   parameters: {
     layout: "fullscreen",
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     fullWidth: true,
     controls: { exclude: ["variant", "itemId", "headingLevel"] },
   },

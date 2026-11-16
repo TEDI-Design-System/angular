@@ -380,7 +380,7 @@ export const ValueHidden: Story = {
  * preview to see the switch.
  */
 export const Responsive: Story = {
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: { chromatic: { disableSnapshot: false, viewports: [375, 1280] } },
   render: () => ({
     template: `
       <tedi-progress-bar

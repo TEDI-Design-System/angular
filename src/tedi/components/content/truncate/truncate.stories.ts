@@ -124,7 +124,7 @@ export const NotExpandable: Story = {
 export const ResponsiveMaxLength: Story = {
   parameters: {
     controls: { disable: true },
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
   },
   render: () => ({
     props: { text: LOREM_IPSUM },

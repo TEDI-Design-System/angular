@@ -83,7 +83,7 @@ export const Default: StoryObj<EllipsisComponent> = {
  * Resize the window to see that the ellipsis and tooltip appear only when content doesn't fit.
  */
 export const ResponsiveEnd: StoryObj<EllipsisComponent> = {
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: { chromatic: { disableSnapshot: false, viewports: [375, 1280] } },
   render: (args) => ({
     props: args,
     template: `

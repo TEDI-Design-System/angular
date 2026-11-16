@@ -468,7 +468,7 @@ export const ResponsiveAlign: Story = {
     `,
   }),
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     docs: {
       description: {
         story:
@@ -492,7 +492,7 @@ export const ResponsiveVisibility: Story = {
     template: `<tedi-pagination ${argsToTemplate(args)} />`,
   }),
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     docs: {
       description: {
         story:

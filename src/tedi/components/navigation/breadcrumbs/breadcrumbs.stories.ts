@@ -172,7 +172,7 @@ export const Collapsed: Story = {
  * `md`, full trail from `md` up — resize the viewport to see it switch.
  */
 export const ResponsiveVariant: Story = {
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: { chromatic: { disableSnapshot: false, viewports: [375, 1280] } },
   args: {
     variant: "short",
     md: { variant: "long" },
