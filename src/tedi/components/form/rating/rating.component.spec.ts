@@ -244,6 +244,23 @@ describe("RatingComponent", () => {
       ]);
     });
 
+    it("drops the preview when readOnly removes the hovered item", () => {
+      setInputs({ value: 1 });
+      hover("4/5");
+
+      setInputs({ readOnly: true });
+      setInputs({ readOnly: false });
+
+      expect(visuals().some(isHovered)).toBe(false);
+      expect(visuals().map(isSelected)).toEqual([
+        true,
+        false,
+        false,
+        false,
+        false,
+      ]);
+    });
+
     it("does not preview while disabled", () => {
       setInputs({ disabled: true });
       hover("3/5");
