@@ -1,4 +1,8 @@
 import "./fixed-date";
+// Core's styles load through `angular.json`, which TurboSnap can't trace.
+// Importing its manifest here puts core in the preview's graph, so a core bump
+// forces a full Chromatic build instead of copying every baseline.
+import "@tedi-design-system/core/package.json";
 import { applicationConfig, Preview, StoryContext } from "@storybook/angular";
 import { provideRouter, withDisabledInitialNavigation } from "@angular/router";
 import { Theme } from "../src/tedi/services/theme/theme.service";
@@ -86,7 +90,10 @@ const preview: Preview = {
     backgrounds: {
       options: {
         default: { name: "Default", value: "var(--general-surface-primary)" },
-        inverted: { name: "Inverted", value: "var(--general-surface-inverted-primary)" },
+        inverted: {
+          name: "Inverted",
+          value: "var(--general-surface-inverted-primary)",
+        },
         brand: { name: "Brand", value: "var(--general-surface-brand-primary)" },
       },
     },
