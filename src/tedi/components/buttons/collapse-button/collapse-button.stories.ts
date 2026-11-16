@@ -180,6 +180,7 @@ export default {
     status: {
       type: ["devComponent"],
     },
+    chromatic: { disableSnapshot: true },
   },
   args: {
     openText: "Open",
@@ -326,4 +327,112 @@ export const IconOnlyInverted: StoryObj<StatesArgs> = {
     ariaLabel: "Toggle details",
   },
   render: StatesTemplate,
+};
+
+const VISUAL_COLLAPSE_BUTTON_ROWS = (color: TextColor) => `
+  @for (size of sizes; track size) {
+    @for (state of states; track state) {
+      <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+        <tedi-col width="1">
+          <p tedi-text color="${color}">{{ size }}, {{ state }}</p>
+        </tedi-col>
+        <tedi-col width="5">
+          <div class="flex align-items-center gap-3">
+            @for (open of [false, true]; track open) {
+              <button
+                tedi-collapse-button
+                [attr.data-state]="state"
+                [open]="open"
+                [size]="size"
+                openText="Open"
+                closeText="Close"
+                [hideText]="config.hideText"
+                [arrowType]="config.arrowType"
+                [inverted]="config.inverted"
+                ariaLabel="Toggle details"
+              ></button>
+            }
+          </div>
+        </tedi-col>
+      </tedi-row>
+    }
+  }
+`;
+
+/** Chromatic snapshot for CollapseButton: add every new visual variant here too. */
+export const VisualTest: StoryObj<StatesArgs> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    controls: { disable: true },
+    pseudo: {
+      hover: '[data-state="Hover"]',
+      active: '[data-state="Active"]',
+      focusVisible: '[data-state="Focus"]',
+    },
+  },
+  render: () => ({
+    props: {
+      sizes: ["default", "small"],
+      states: PSEUDO_STATE,
+      configs: [
+        {
+          label: "With text",
+          hideText: false,
+          arrowType: "default",
+          inverted: false,
+        },
+        {
+          label: "Icon only",
+          hideText: true,
+          arrowType: "default",
+          inverted: false,
+        },
+        {
+          label: "Secondary button",
+          hideText: true,
+          arrowType: "secondary",
+          inverted: false,
+        },
+      ],
+      invertedConfigs: [
+        {
+          label: "With text inverted",
+          hideText: false,
+          arrowType: "default",
+          inverted: true,
+        },
+        {
+          label: "Icon only inverted",
+          hideText: true,
+          arrowType: "default",
+          inverted: true,
+        },
+      ],
+    },
+    template: `
+      <tedi-row [cols]="1" [gapY]="4">
+        @for (config of configs; track config.label) {
+          <tedi-col>
+            <tedi-row [cols]="1" [gapY]="2">
+              <p tedi-text modifiers="bold">{{ config.label }}</p>
+              ${VISUAL_COLLAPSE_BUTTON_ROWS("primary")}
+            </tedi-row>
+          </tedi-col>
+        }
+        @for (config of invertedConfigs; track config.label) {
+          <tedi-col>
+            <div class="bg bg-primary">
+              <div class="w-100">
+                <tedi-row [cols]="1" [gapY]="2">
+                  <p tedi-text modifiers="bold" color="white">{{ config.label }}</p>
+                  ${VISUAL_COLLAPSE_BUTTON_ROWS("white")}
+                </tedi-row>
+              </div>
+            </div>
+          </tedi-col>
+        }
+      </tedi-row>
+    `,
+  }),
 };

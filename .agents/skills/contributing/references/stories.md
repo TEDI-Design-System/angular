@@ -246,6 +246,7 @@ render: (args) => ({
       and only when it points to the TEDI Figma file
 - [ ] Every `argTypes` description is one sentence; every story docblock either says something invisible in the rendered story or does not exist (see section 8)
 - [ ] No public input is missing an `argTypes` entry — aliased inputs are keyed by their alias (`invalid`, not `invalidInput`)
+- [ ] If the component has a `VisualTest` story, a new visual story also adds its variant to `VisualTest` (see section 9)
 - [ ] No inline `style` in story markup, and no hand-written ARIA, keyboard or overlay code in the stories file (see section 2)
 - [ ] Disabled, loading, error and empty states the component supports have a story, even if Figma omits them; place these after the Figma-ordered stories
 
@@ -311,7 +312,39 @@ Keep in the meta docblock only what a consumer cannot discover from the types: r
 dependencies, a global stylesheet import, and accessibility wiring that silently does nothing if
 done the usual way.
 
-### 9. Verify
+### 9. Chromatic snapshots (`VisualTest`)
+
+Chromatic bills per snapshot, so a simple component keeps its snapshots in one hidden composite
+story instead of one per docs story. When a stories file has a `VisualTest` story:
+
+- The meta sets `parameters: { chromatic: { disableSnapshot: true } }`, so docs stories are not
+  snapshotted.
+- `VisualTest` is the last export, with `tags: ["!dev", "!autodocs"]` (hidden from the sidebar and
+  docs, still run by Chromatic and the test-runner) and `parameters: { chromatic: { disableSnapshot: false } }`.
+  It renders every visual variant, each block under a short bold label.
+- Reuse the docs stories, never copy their markup, so a later change to a docs story reaches
+  Chromatic. Build the render with `visualTest([...blocks], { args: meta.args })` from
+  `.storybook/visual-test-story`. Each block is `{ label, story, args? }`: `args` override the
+  story's own, e.g. a unique `ariaLabel`. Blocks may bind the same prop name to different values:
+  the helper then scopes that prop per block with `@let`, which is read-only, so a two-way binding
+  (`[(x)]`) only works on a prop name no other block binds differently. Where hard-coded ids collide, move the story's
+  render into a function that takes an `idPrefix` and pass `{ render: () => fn("vt-…-") }` as the
+  story. The helper throws when a story renders nothing.
+- A story whose state needs a `play` function, a viewport, an open overlay, animation, scrolling or
+  page-level positioning stays a separate snapshot: it sets `chromatic: { disableSnapshot: false }`
+  itself and is not copied into `VisualTest`. A story kept separate for its breakpoints also sets
+  `viewports: [375, 1280]`, otherwise Chromatic only captures desktop.
+- Everything in the composite must be unique within the story: `id`, `for`, `aria-labelledby`,
+  radio `name`, and the accessible name of every landmark or group. Pseudo-state selectors must be
+  unique too: use a list (`hover: ["#vt-hover-primary", "#vt-hover-secondary"]`) or a data attribute
+  (`[data-state="Hover"]`) rather than a repeated `#Hover`.
+- Inverted variants that the docs story puts on the `brand` background go inside
+  `<div class="bg bg-primary">` in the composite.
+
+**A new visual story on a component with `VisualTest` must also add its variant to `VisualTest`**,
+otherwise Chromatic never sees it.
+
+### 10. Verify
 
 Run Storybook to visually confirm stories render correctly:
 ```bash

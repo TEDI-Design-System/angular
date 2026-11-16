@@ -49,6 +49,9 @@ export default {
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     size: {
       description:
@@ -143,7 +146,6 @@ export default {
 } as Meta<TextFieldComponent>;
 
 export const Default: StoryObj = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     size: "default",
     clearable: true,
@@ -287,7 +289,6 @@ export const Placeholder: StoryObj<TextFieldComponent> = {
 };
 
 export const WithTemplateDrivenForms: StoryObj<TextFieldComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   render: () => ({
     props: {
       inputValue: "",
@@ -320,7 +321,6 @@ export const WithTemplateDrivenForms: StoryObj<TextFieldComponent> = {
 };
 
 export const WithReactiveForms: StoryObj<TextFieldComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   render: () => {
     const control = new FormControl("", {
       nonNullable: true,
@@ -399,6 +399,207 @@ export const WithLabelTooltip: StoryObj<TextFieldComponent> = {
             <input tedi-text-field id="tooltip-box" />
           </tedi-form-field>
         </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/** Chromatic snapshot for TextField: add every new visual variant here too. */
+export const VisualTest: StoryObj<TextFieldComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    pseudo: {
+      hover: "#vt-hover",
+      active: "#vt-active",
+      focusVisible: "#vt-focus",
+    },
+  },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="3">
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Default</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field>
+              <label tedi-label for="vt-default">Label</label>
+              <input tedi-text-field id="vt-default" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Hover</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field>
+              <label tedi-label for="vt-hover">Label</label>
+              <input tedi-text-field id="vt-hover" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Active</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field>
+              <label tedi-label for="vt-active">Label</label>
+              <input tedi-text-field id="vt-active" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Disabled</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field>
+              <label tedi-label for="vt-disabled">Label</label>
+              <input tedi-text-field id="vt-disabled" value="Text value" [disabled]="true" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Focus</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field>
+              <label tedi-label for="vt-focus">Label</label>
+              <input tedi-text-field id="vt-focus" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Error</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field>
+              <label tedi-label for="vt-error">Label</label>
+              <input tedi-text-field id="vt-error" />
+              <tedi-feedback-text [text]="'Feedback text'" [type]="'error'" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Success</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field>
+              <label tedi-label for="vt-success">Label</label>
+              <input tedi-text-field id="vt-success" />
+              <tedi-feedback-text [text]="'Feedback text'" [type]="'valid'" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">With icon</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field icon="person">
+              <label tedi-label for="vt-icon">Label</label>
+              <input tedi-text-field id="vt-icon" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Small</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field size="small">
+              <label tedi-label for="vt-small">Label</label>
+              <input tedi-text-field id="vt-small" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Small with icon</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field size="small" icon="person">
+              <label tedi-label for="vt-small-icon">Label</label>
+              <input tedi-text-field id="vt-small-icon" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">With hint</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field>
+              <label tedi-label for="vt-hint">Label</label>
+              <input tedi-text-field id="vt-hint" />
+              <tedi-feedback-text [text]="'Hint text'" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Password</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field>
+              <label tedi-label for="vt-password">Label</label>
+              <input tedi-text-field id="vt-password" type="password" value="123456789" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Placeholder</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field>
+              <label tedi-label for="vt-placeholder">Label</label>
+              <input tedi-text-field id="vt-placeholder" placeholder="Placeholder" />
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">Standalone</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <input tedi-text-field placeholder="No wrapper" />
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">With label tooltip</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-row cols="1" [gapY]="3">
+              <tedi-col>
+                <tedi-form-field>
+                  <tedi-label-row>
+                    <label tedi-label for="vt-tooltip-plain" [required]="true">Toimeaine</label>
+                    <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
+                  </tedi-label-row>
+                  <input tedi-text-field id="vt-tooltip-plain" />
+                  <tedi-feedback-text [text]="'Vihjetekst'" />
+                </tedi-form-field>
+              </tedi-col>
+              <tedi-col>
+                <tedi-form-field icon="search" [clearable]="true">
+                  <tedi-label-row>
+                    <label tedi-label for="vt-tooltip-box">Otsi</label>
+                    <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
+                  </tedi-label-row>
+                  <input tedi-text-field id="vt-tooltip-box" />
+                </tedi-form-field>
+              </tedi-col>
+            </tedi-row>
+          </tedi-col>
+        </tedi-row>
       </tedi-row>
     `,
   }),

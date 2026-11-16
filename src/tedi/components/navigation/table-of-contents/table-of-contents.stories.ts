@@ -22,6 +22,8 @@ import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-
 import { TableOfContentsItemSuffixDirective } from "./table-of-contents-item/table-of-contents-item-suffix.directive";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { TagComponent } from "../../tags/tag/tag.component";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
 
 const LOREM =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor " +
@@ -64,6 +66,8 @@ const meta = {
         HideAtDirective,
         SeparatorComponent,
         TagComponent,
+        RowComponent,
+        ColComponent,
       ],
     }),
     (story, context) => {
@@ -82,6 +86,7 @@ const meta = {
   ],
   parameters: {
     layout: "fullscreen",
+    chromatic: { disableSnapshot: true },
     design: {
       type: "figma",
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.66.83?node-id=8469-72329&m=dev",
@@ -397,58 +402,52 @@ const ITEM_STATES_SOURCE = `<!-- Selected: mark the item's id as active. Hover i
   </tedi-table-of-contents-item>
 </tedi-table-of-contents>`;
 
-export const ItemStates: Story = {
-  parameters: {
-    fullWidth: true,
-    pseudo: { hover: ".toc-item-states__hover" },
-    docs: { source: { language: "html", code: ITEM_STATES_SOURCE } },
-  },
-  render: () => ({
-    props: {
-      variants: [
-        {
-          header: "Default",
-          numbered: false,
-          icon: false,
-          separator: false,
-          divided: false,
-        },
-        {
-          header: "With number",
-          numbered: true,
-          icon: false,
-          separator: false,
-          divided: false,
-        },
-        {
-          header: "With icon",
-          numbered: false,
-          icon: true,
-          separator: false,
-          divided: false,
-        },
-        {
-          header: "With separator",
-          numbered: false,
-          icon: false,
-          separator: true,
-          divided: false,
-        },
-        {
-          header: "Divided",
-          numbered: false,
-          icon: false,
-          separator: false,
-          divided: true,
-        },
-      ],
-      states: [
-        { id: "default", label: "Default", hover: false },
-        { id: "hover", label: "Hover", hover: true },
-        { id: "selected", label: "Selected", hover: false },
-      ],
+const ITEM_STATES_PROPS = {
+  variants: [
+    {
+      header: "Default",
+      numbered: false,
+      icon: false,
+      separator: false,
+      divided: false,
     },
-    template: `
+    {
+      header: "With number",
+      numbered: true,
+      icon: false,
+      separator: false,
+      divided: false,
+    },
+    {
+      header: "With icon",
+      numbered: false,
+      icon: true,
+      separator: false,
+      divided: false,
+    },
+    {
+      header: "With separator",
+      numbered: false,
+      icon: false,
+      separator: true,
+      divided: false,
+    },
+    {
+      header: "Divided",
+      numbered: false,
+      icon: false,
+      separator: false,
+      divided: true,
+    },
+  ],
+  states: [
+    { id: "default", label: "Default", hover: false },
+    { id: "hover", label: "Hover", hover: true },
+    { id: "selected", label: "Selected", hover: false },
+  ],
+};
+
+const ITEM_STATES_TEMPLATE = `
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1.5rem; padding: 1rem;">
         @for (variant of variants; track variant.header) {
           <div style="display: flex; flex-direction: column; gap: 0.5rem;">
@@ -483,7 +482,17 @@ export const ItemStates: Story = {
           </div>
         }
       </div>
-    `,
+    `;
+
+export const ItemStates: Story = {
+  parameters: {
+    fullWidth: true,
+    pseudo: { hover: ".toc-item-states__hover" },
+    docs: { source: { language: "html", code: ITEM_STATES_SOURCE } },
+  },
+  render: () => ({
+    props: ITEM_STATES_PROPS,
+    template: ITEM_STATES_TEMPLATE,
   }),
 };
 
@@ -948,6 +957,7 @@ export class DocPageComponent implements OnDestroy {
 export const StickyInLayout: Story = {
   parameters: {
     layout: "fullscreen",
+    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     fullWidth: true,
     docs: { source: { language: "typescript", code: STICKY_LAYOUT_SOURCE } },
     a11y: { config: { rules: [{ id: "color-contrast", enabled: false }] } },
@@ -1000,6 +1010,7 @@ const controllableNestedItems = `
 export const Collapsible: Story = {
   parameters: {
     layout: "fullscreen",
+    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     fullWidth: true,
     controls: { exclude: ["variant", "itemId", "headingLevel"] },
   },
@@ -1081,6 +1092,7 @@ export const CollapsibleHideOnScroll: Story = {
   name: "Collapsible: hide on scroll",
   parameters: {
     layout: "fullscreen",
+    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     fullWidth: true,
     controls: { exclude: ["variant", "itemId", "headingLevel"] },
   },
@@ -1126,6 +1138,83 @@ export const CollapsibleHideOnScroll: Story = {
           ${controllableNestedItems}
         </tedi-table-of-contents-collapsible>
       </div>
+    `,
+  }),
+};
+
+const VT_CARD = (label: string, toc: string) => `
+  <tedi-col>
+    <p tedi-text modifiers="bold">${label}</p>
+    <div style="max-width: 390px; padding: 1.5rem;">
+      ${toc}
+    </div>
+  </tedi-col>`;
+
+/** Chromatic snapshot for TableOfContents: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    fullWidth: true,
+    chromatic: { disableSnapshot: false },
+    pseudo: { hover: ".toc-item-states__hover" },
+  },
+  render: () => ({
+    props: { ...ITEM_STATES_PROPS, separator: false },
+    template: `
+      <tedi-row [cols]="1" [gapY]="4">
+        ${VT_CARD(
+          "Default",
+          `<tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="section-3" ariaLabel="Sisukord (vaikimisi)">
+            ${controllableItems}
+          </tedi-table-of-contents>`,
+        )}
+        <tedi-col>
+          <p tedi-text modifiers="bold">Item states</p>
+          ${ITEM_STATES_TEMPLATE}
+        </tedi-col>
+        ${VT_CARD(
+          "Transparent",
+          `<tedi-table-of-contents heading="Sisukord" variant="transparent" [sticky]="false" activeId="methods" ariaLabel="Sisukord (läbipaistev)">
+            ${items()}
+          </tedi-table-of-contents>`,
+        )}
+        ${VT_CARD(
+          "With slot",
+          `<tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" ariaLabel="Sisukord (lisasisuga)">
+            ${items({ slot: true })}
+          </tedi-table-of-contents>`,
+        )}
+        ${VT_CARD(
+          "Numbered",
+          `<tedi-table-of-contents heading="Sisukord" [sticky]="false" [numbered]="true" activeId="methods" ariaLabel="Sisukord (nummerdatud)">
+            ${items()}
+          </tedi-table-of-contents>`,
+        )}
+        ${VT_CARD(
+          "With icon",
+          `<tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" ariaLabel="Sisukord (ikooniga)">
+            ${items({ icon: true })}
+          </tedi-table-of-contents>`,
+        )}
+        ${VT_CARD(
+          "Headless",
+          `<tedi-table-of-contents [heading]="null" [sticky]="false" [numbered]="true" activeId="methods" ariaLabel="Sisukord (pealkirjata)">
+            ${items()}
+          </tedi-table-of-contents>`,
+        )}
+        ${VT_CARD(
+          "With separator",
+          `<tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" ariaLabel="Sisukord (eraldajaga)">
+            ${items({ icon: true, separator: true })}
+          </tedi-table-of-contents>`,
+        )}
+        ${VT_CARD(
+          "Divided",
+          `<tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [divided]="true" ariaLabel="Sisukord (ridadeks jaotatud)">
+            ${items({ icon: true })}
+          </tedi-table-of-contents>`,
+        )}
+      </tedi-row>
     `,
   }),
 };

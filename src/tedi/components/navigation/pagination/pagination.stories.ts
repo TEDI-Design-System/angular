@@ -7,6 +7,10 @@ import {
 import { PaginationComponent } from "./pagination.component";
 import { TediPaginationResultsDirective } from "./pagination-results.directive";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
+import {
+  visualTest,
+  VisualTestBlock,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * Navigation between paginated sets of content. Renders a row of page buttons
@@ -15,7 +19,7 @@ import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpoint
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=8478-72385&m=dev" target="_BLANK">Figma ↗</a><br/>
  * <a href="https://www.tedi.ee/1ee8444b7/p/35aad8-pagination" target="_BLANK">Zeroheight ↗</a>
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Navigation/Pagination",
   component: PaginationComponent,
   decorators: [
@@ -27,6 +31,7 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
     design: {
       type: "figma",
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=8478-72385&m=dev",
@@ -261,6 +266,8 @@ export default {
   },
 } as Meta<PaginationComponent>;
 
+export default meta;
+
 type Story = StoryObj<PaginationComponent>;
 
 export const Default: Story = {
@@ -322,7 +329,6 @@ export const WithoutDropdown: Story = {
 };
 
 export const ControlledPage: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: { pageCount: 10, page: 3 },
   render: (args) => ({
     props: args,
@@ -459,6 +465,7 @@ export const ResponsiveAlign: Story = {
     `,
   }),
   parameters: {
+    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     docs: {
       description: {
         story:
@@ -482,6 +489,7 @@ export const ResponsiveVisibility: Story = {
     template: `<tedi-pagination ${argsToTemplate(args)} />`,
   }),
   parameters: {
+    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     docs: {
       description: {
         story:
@@ -629,7 +637,6 @@ export const CustomResultsSlot: Story = {
     `,
   }),
   parameters: {
-    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -673,7 +680,6 @@ export const ShowAll: Story = {
     `,
   }),
   parameters: {
-    chromatic: { disableSnapshot: true },
     docs: {
       description: {
         story:
@@ -706,4 +712,69 @@ export const CustomLabels: Story = {
     props: args,
     template: `<tedi-pagination ${argsToTemplate(args)} />`,
   }),
+};
+
+const VT_CONTENT = `<div style="padding: 24px 0; color: var(--general-text-tertiary); text-align: center;">table content goes here</div>`;
+
+/** A unique landmark label per block, since every pagination is a `nav`. */
+const vtLabels = (label: string) => ({
+  labels: { ariaLabel: `Lehekülgede sirvimine: ${label}` },
+});
+
+const vtBlock = (label: string, story: Story): VisualTestBlock => ({
+  label,
+  story,
+  args: vtLabels(label),
+});
+
+/** Chromatic snapshot for Pagination: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false },
+  },
+  render: () =>
+    visualTest(
+      [
+        vtBlock("Default", Default),
+        vtBlock("First", First),
+        vtBlock("Last", Last),
+        vtBlock("All properties shown", AllPropertiesShown),
+        vtBlock("Without results number", WithoutResultsNumber),
+        vtBlock("Without dropdown", WithoutDropdown),
+        vtBlock("Few pages", FewPages),
+        vtBlock("Many pages ellipsis", ManyPagesEllipsis),
+        vtBlock("Huge page count", HugePageCount),
+        vtBlock("Wider siblings", WiderSiblings),
+        vtBlock("Transparent", Transparent),
+        {
+          // The docs story renders both paginations from the same args, so they'd share a label.
+          label: "Top and bottom split",
+          story: {
+            args: TopBottomSplit.args,
+            render: (args: Partial<PaginationComponent>) => ({
+              props: {
+                ...args,
+                top: vtLabels("Top split").labels,
+                bottom: vtLabels("Bottom split").labels,
+              },
+              template: `
+                <tedi-pagination ${argsToTemplate(args)} [labels]="top" [hidePager]="true" dividerPosition="bottom" />
+                ${VT_CONTENT}
+                <tedi-pagination ${argsToTemplate(args)} [labels]="bottom" [hideResults]="true" [hidePageSize]="true" />
+              `,
+            }),
+          },
+        },
+        vtBlock("Left aligned", LeftAligned),
+        vtBlock("Divider bottom", DividerBottom),
+        vtBlock("Disabled boundary arrows", DisabledBoundaryArrows),
+        vtBlock("Arrows with labels", ArrowsWithLabels),
+        vtBlock("Custom arrow icons", CustomArrowIcons),
+        vtBlock("Arrows primary variant", ArrowsPrimaryVariant),
+        { label: "Custom labels", story: CustomLabels },
+      ],
+      { args: meta.args },
+    ),
 };

@@ -19,6 +19,9 @@ export default {
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     type: {
       description: "The status type, which determines the indicator color",
@@ -73,7 +76,6 @@ export default {
 } as Meta<StatusIndicatorComponent>;
 
 export const Default: StoryObj<StatusIndicatorComponent> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     type: "success",
     size: "sm",
@@ -138,6 +140,65 @@ export const Examples: StoryObj<StatusIndicatorComponent> = {
         Lugemata teated&nbsp;
         <tedi-status-indicator type="danger" position="top-right" />
       </span>
+    `,
+  }),
+};
+
+/** Chromatic snapshot for StatusIndicator: add every new visual variant here too. */
+export const VisualTest: StoryObj<StatusIndicatorComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false } },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="4">
+        <tedi-col>
+          <p tedi-text modifiers="bold">All variants</p>
+      <div style="background: var(--general-surface-tertiary); padding: 16px; width: 100%;">
+        <tedi-row [cols]="2" [gapY]="3" alignItems="center">
+          <tedi-col><p tedi-text modifiers="bold">Small</p></tedi-col>
+          <tedi-col class="flex gap-3 align-items-center">
+            <tedi-status-indicator type="success" />
+            <tedi-status-indicator type="danger" />
+            <tedi-status-indicator type="warning" />
+            <tedi-status-indicator type="inactive" />
+          </tedi-col>
+
+          <tedi-col><p tedi-text modifiers="bold">Large</p></tedi-col>
+          <tedi-col class="flex gap-3 align-items-center">
+            <tedi-status-indicator type="success" size="lg" />
+            <tedi-status-indicator type="danger" size="lg" />
+            <tedi-status-indicator type="warning" size="lg" />
+            <tedi-status-indicator type="inactive" size="lg" />
+          </tedi-col>
+
+          <tedi-col><p tedi-text modifiers="bold">Small bordered</p></tedi-col>
+          <tedi-col class="flex gap-3 align-items-center">
+            <tedi-status-indicator type="success" [hasBorder]="true" />
+            <tedi-status-indicator type="danger" [hasBorder]="true" />
+            <tedi-status-indicator type="warning" [hasBorder]="true" />
+            <tedi-status-indicator type="inactive" [hasBorder]="true" />
+          </tedi-col>
+
+          <tedi-col><p tedi-text modifiers="bold">Large bordered</p></tedi-col>
+          <tedi-col class="flex gap-3 align-items-center">
+            <tedi-status-indicator type="success" size="lg" [hasBorder]="true" />
+            <tedi-status-indicator type="danger" size="lg" [hasBorder]="true" />
+            <tedi-status-indicator type="warning" size="lg" [hasBorder]="true" />
+            <tedi-status-indicator type="inactive" size="lg" [hasBorder]="true" />
+          </tedi-col>
+        </tedi-row>
+      </div>
+    
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Examples</p>
+      <span style="position: relative">
+        Lugemata teated&nbsp;
+        <tedi-status-indicator type="danger" position="top-right" />
+      </span>
+    
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };

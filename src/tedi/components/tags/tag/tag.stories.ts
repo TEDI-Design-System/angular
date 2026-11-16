@@ -4,6 +4,7 @@ import { SeparatorComponent } from "../../helpers/separator/separator.component"
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
+import { TextComponent } from "../../base/text/text.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.30.44?node-id=5784-114505&m=dev" target="_blank">Figma ↗</a><br>
@@ -21,9 +22,13 @@ export default {
         RowComponent,
         ColComponent,
         VerticalSpacingDirective,
+        TextComponent,
       ],
     }),
   ],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   render: (props) => ({
     props,
     template: `
@@ -91,9 +96,7 @@ export default {
 
 type Story = StoryObj<TagComponent & { content: string }>;
 
-export const Default: Story = {
-  parameters: { chromatic: { disableSnapshot: true } },
-};
+export const Default: Story = {};
 
 export const Ellipsis: Story = {
   render: () => ({
@@ -227,4 +230,57 @@ export const Danger: Story = {
   args: {
     type: "danger",
   },
+};
+
+/** Chromatic snapshot for Tag: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false } },
+  render: () => ({
+    props: { types: ["primary", "secondary", "danger"] },
+    template: `
+      <tedi-row [cols]="1" [gapY]="4">
+        @for (type of types; track type) {
+          <tedi-col>
+            <p tedi-text modifiers="bold">{{ type }}</p>
+            <tedi-row [gap]="2" cols="auto">
+              <tedi-col>
+                <tedi-tag [type]="type">
+                  Tag
+                </tedi-tag>
+              </tedi-col>
+              <tedi-col>
+                <tedi-tag [type]="type" [closable]="true">
+                  Tag
+                </tedi-tag>
+              </tedi-col>
+              <tedi-col>
+                <tedi-tag [type]="type" [loading]="true">
+                  taotlus_scan_lk_1.pdf
+                </tedi-tag>
+              </tedi-col>
+              <tedi-col style="max-width: 150px;">
+                <tedi-tag [type]="type" [closable]="true">
+                  Tag with a very long text but little room
+                </tedi-tag>
+              </tedi-col>
+              <tedi-col style="max-width: 150px;">
+                <tedi-tag [type]="type" [loading]="true">
+                  Tag with a very long text but little room
+                </tedi-tag>
+              </tedi-col>
+            </tedi-row>
+          </tedi-col>
+        }
+        <tedi-col>
+          <p tedi-text modifiers="bold">Ellipsis</p>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 7rem;">
+            <tedi-tag [closable]="true">A fairly long tag label that wraps</tedi-tag>
+            <tedi-tag [closable]="true" ellipsis="end">A fairly long tag label, end</tedi-tag>
+            <tedi-tag [closable]="true" ellipsis="start">start, a fairly long tag label</tedi-tag>
+          </div>
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
 };

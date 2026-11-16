@@ -31,6 +31,7 @@ export default {
     status: {
       type: ["mobileViewDifference"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     ngContent: {
@@ -119,7 +120,6 @@ export default {
 } as Meta<TextComponent>;
 
 export const Default: StoryObj<TextComponent & { ngContent: string }> = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     ngContent: "Text",
   },
@@ -129,10 +129,7 @@ export const Default: StoryObj<TextComponent & { ngContent: string }> = {
   }),
 };
 
-export const Headings: StoryObj<TextComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const HEADINGS_TEMPLATE = `
       <div class="example-list">
         <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
           <h1 tedi-text>Heading H1</h1>
@@ -153,14 +150,16 @@ export const Headings: StoryObj<TextComponent> = {
           <h6 tedi-text>Heading H6</h6>
         </tedi-row>
       </div>
-    `,
+    `;
+
+export const Headings: StoryObj<TextComponent> = {
+  render: (args) => ({
+    props: args,
+    template: HEADINGS_TEMPLATE,
   }),
 };
 
-export const Subtitles: StoryObj<TextComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const SUBTITLES_TEMPLATE = `
       <div class="example-list">
         <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom'">
           <p tedi-text modifiers="subtitle">Subtitle</p>
@@ -175,14 +174,16 @@ export const Subtitles: StoryObj<TextComponent> = {
           <label tedi-text modifiers="bold">Label bold</label>
         </tedi-row>
       </div>
-    `,
+    `;
+
+export const Subtitles: StoryObj<TextComponent> = {
+  render: (args) => ({
+    props: args,
+    template: SUBTITLES_TEMPLATE,
   }),
 };
 
-export const Body: StoryObj<TextComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const BODY_TEMPLATE = `
       <div class="example-list">
         <tedi-row [cols]="2" [class]="'padding-14-16 border-bottom border-bottom--3x'">
           <b>Native element</b>
@@ -227,14 +228,16 @@ export const Body: StoryObj<TextComponent> = {
           <span tedi-text [modifiers]="['extra-small', 'bold']">Extra small bold</span>
         </tedi-row>
       </div>
-    `,
+    `;
+
+export const Body: StoryObj<TextComponent> = {
+  render: (args) => ({
+    props: args,
+    template: BODY_TEMPLATE,
   }),
 };
 
-export const GeneralTextColors: StoryObj<TextComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const GENERAL_TEXT_COLORS_TEMPLATE = `
       <div [tediVerticalSpacing]="1">
         <p tedi-text>
           Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid.
@@ -252,14 +255,16 @@ export const GeneralTextColors: StoryObj<TextComponent> = {
           Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid.
         </p>
       </div>
-    `,
+    `;
+
+export const GeneralTextColors: StoryObj<TextComponent> = {
+  render: (args) => ({
+    props: args,
+    template: GENERAL_TEXT_COLORS_TEMPLATE,
   }),
 };
 
-export const InheritedTextColor: StoryObj<TextComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const INHERITED_TEXT_COLOR_TEMPLATE = `
       <div [tediVerticalSpacing]="1">
         <p tedi-text color="brand">
           This paragraph is brand-colored. <span tedi-text color="inherit" modifiers="bold">This bold span inherits the brand color from its parent.</span>
@@ -271,14 +276,16 @@ export const InheritedTextColor: StoryObj<TextComponent> = {
           This paragraph sits on a primary background and uses white text. <span tedi-text color="inherit" modifiers="bold">This bold span inherits the white color from its parent.</span>
         </p>
       </div>
-    `,
+    `;
+
+export const InheritedTextColor: StoryObj<TextComponent> = {
+  render: (args) => ({
+    props: args,
+    template: INHERITED_TEXT_COLOR_TEMPLATE,
   }),
 };
 
-export const StatusTextColors: StoryObj<TextComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const STATUS_TEXT_COLORS_TEMPLATE = `
       <div [tediVerticalSpacing]="1">
         <p tedi-text color="success">
           Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid.
@@ -296,6 +303,59 @@ export const StatusTextColors: StoryObj<TextComponent> = {
           Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid.
         </p>
       </div>
+    `;
+
+export const StatusTextColors: StoryObj<TextComponent> = {
+  render: (args) => ({
+    props: args,
+    template: STATUS_TEXT_COLORS_TEMPLATE,
+  }),
+};
+
+/** Chromatic snapshot for Text: add every new visual variant here too. */
+export const VisualTest: StoryObj<TextComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false } },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Headings</p>
+            ${HEADINGS_TEMPLATE}
+          </div>
+        </tedi-col>
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Subtitles</p>
+            ${SUBTITLES_TEMPLATE}
+          </div>
+        </tedi-col>
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Body</p>
+            ${BODY_TEMPLATE}
+          </div>
+        </tedi-col>
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">General text colors</p>
+            ${GENERAL_TEXT_COLORS_TEMPLATE}
+          </div>
+        </tedi-col>
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Inherited text color</p>
+            ${INHERITED_TEXT_COLOR_TEMPLATE}
+          </div>
+        </tedi-col>
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Status text colors</p>
+            ${STATUS_TEXT_COLORS_TEMPLATE}
+          </div>
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };

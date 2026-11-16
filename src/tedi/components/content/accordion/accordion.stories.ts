@@ -73,6 +73,7 @@ export default {
     status: {
       type: ["breakpointSupport"],
     },
+    chromatic: { disableSnapshot: true },
   },
   argTypes: {
     allowMultiple: {
@@ -476,9 +477,7 @@ The accordion item is composed of three parts, each owning its own configuration
   }),
 };
 
-export const Variants: StoryObj = {
-  render: () => ({
-    template: `
+const VARIANTS_TEMPLATE = `
       <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
         <tedi-accordion>
           <tedi-accordion-item>
@@ -604,7 +603,11 @@ export const Variants: StoryObj = {
           </tedi-accordion-item>
         </tedi-accordion>
       </div>
-    `,
+    `;
+
+export const Variants: StoryObj = {
+  render: () => ({
+    template: VARIANTS_TEMPLATE,
     props: {
       selectedA: false,
       selectedB: true,
@@ -618,9 +621,7 @@ export const Variants: StoryObj = {
   }),
 };
 
-export const ActionTypes: StoryObj = {
-  render: () => ({
-    template: `
+const ACTION_TYPES_TEMPLATE = `
       <style>
         .story-row {
           display: flex;
@@ -786,7 +787,11 @@ export const ActionTypes: StoryObj = {
           </tedi-accordion>
         </div>
       </div>
-    `,
+    `;
+
+export const ActionTypes: StoryObj = {
+  render: () => ({
+    template: ACTION_TYPES_TEMPLATE,
     props: {
       selectedA: false,
       selectedB: false,
@@ -809,9 +814,7 @@ export const ActionTypes: StoryObj = {
   }),
 };
 
-export const WithIconCard: StoryObj = {
-  render: () => ({
-    template: `
+const WITH_ICON_CARD_TEMPLATE = `
       <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-16);">
         <div style="display: flex; flex-direction: column; gap: var(--layout-grid-gutters-08);">
           <tedi-accordion>
@@ -919,7 +922,11 @@ export const WithIconCard: StoryObj = {
           </tedi-accordion>
         </div>
       </div>
-    `,
+    `;
+
+export const WithIconCard: StoryObj = {
+  render: () => ({
+    template: WITH_ICON_CARD_TEMPLATE,
     props: {
       selectedA: false,
       selectedB: false,
@@ -942,16 +949,7 @@ export const WithIconCard: StoryObj = {
   }),
 };
 
-export const Customized: StoryObj = {
-  render: () => ({
-    props: {
-      selectedState: false,
-      toggleSelect(event: Event) {
-        const checkbox = event.target as HTMLInputElement;
-        this["selectedState"] = checkbox.checked;
-      },
-    },
-    template: `
+const CUSTOMIZED_TEMPLATE = `
       <style>
         ::ng-deep .tedi-accordion-item-header.custom-header,
         ::ng-deep .tedi-accordion-item-content.custom-content {
@@ -1099,7 +1097,18 @@ export const Customized: StoryObj = {
           </tedi-accordion-item>
         </tedi-accordion>
       </div>
-    `,
+    `;
+
+export const Customized: StoryObj = {
+  render: () => ({
+    props: {
+      selectedState: false,
+      toggleSelect(event: Event) {
+        const checkbox = event.target as HTMLInputElement;
+        this["selectedState"] = checkbox.checked;
+      },
+    },
+    template: CUSTOMIZED_TEMPLATE,
   }),
 };
 
@@ -1143,24 +1152,7 @@ export const AccordionBehavior: StoryObj = {
   }),
 };
 
-export const Disabled: StoryObj = {
-  parameters: {
-    docs: {
-      description: {
-        story: `
-Disabled items keep their current expanded state but reject user interaction.
-The header trigger renders as a native \`<button disabled>\` (or with
-\`aria-disabled\` for the non-clickable-header variant), so browsers handle
-focus, keyboard, and screen-reader announcements for free.
-
-Use \`disabled\` for items whose content is locked behind a state the user
-hasn't met yet (incomplete prerequisites, missing permissions, etc.).
-        `,
-      },
-    },
-  },
-  render: () => ({
-    template: `
+const DISABLED_TEMPLATE = `
       <style>
         .step-number {
           display: flex;
@@ -1256,7 +1248,26 @@ hasn't met yet (incomplete prerequisites, missing permissions, etc.).
           <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
         </tedi-accordion-item>
       </tedi-accordion>
-    `,
+    `;
+
+export const Disabled: StoryObj = {
+  parameters: {
+    docs: {
+      description: {
+        story: `
+Disabled items keep their current expanded state but reject user interaction.
+The header trigger renders as a native \`<button disabled>\` (or with
+\`aria-disabled\` for the non-clickable-header variant), so browsers handle
+focus, keyboard, and screen-reader announcements for free.
+
+Use \`disabled\` for items whose content is locked behind a state the user
+hasn't met yet (incomplete prerequisites, missing permissions, etc.).
+        `,
+      },
+    },
+  },
+  render: () => ({
+    template: DISABLED_TEMPLATE,
   }),
 };
 
@@ -1374,6 +1385,79 @@ but the rendered look matches the surrounding accordion items exactly.
           </tedi-accordion-item>
         </tedi-accordion>
       </section>
+    `,
+  }),
+};
+
+/** Chromatic snapshot for Accordion: add every new visual variant here too. */
+export const VisualTest: StoryObj = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false } },
+  render: () => ({
+    props: {
+      selectedA: false,
+      selectedB: false,
+      selectedC: true,
+      selectedD: true,
+      selectedState: false,
+      toggleA(selected: boolean) {
+        this["selectedA"] = selected;
+      },
+      toggleB(selected: boolean) {
+        this["selectedB"] = selected;
+      },
+      toggleC(selected: boolean) {
+        this["selectedC"] = selected;
+      },
+      toggleD(selected: boolean) {
+        this["selectedD"] = selected;
+      },
+      toggleSelect(event: Event) {
+        this["selectedState"] = (event.target as HTMLInputElement).checked;
+      },
+    },
+    template: `
+      <div class="flex flex-column gap-4">
+        <div>
+          <p tedi-text modifiers="bold">Default</p>
+          <tedi-accordion>
+            <tedi-accordion-item>
+              <tedi-accordion-item-header>
+                <span tedi-accordion-title>Pealkiri</span>
+                <tedi-status-badge tedi-accordion-after-title color="success" text="Kinnitatud" />
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
+            </tedi-accordion-item>
+            <tedi-accordion-item>
+              <tedi-accordion-item-header [expandActionPosition]="'end'">
+                <span tedi-accordion-title>Pealkiri 2</span>
+              </tedi-accordion-item-header>
+              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
+            </tedi-accordion-item>
+          </tedi-accordion>
+        </div>
+        <div>
+          <p tedi-text modifiers="bold">Variants</p>
+          <ng-container *ngTemplateOutlet="variants; context: { selectedA: false, selectedB: true }" />
+        </div>
+        <div>
+          <p tedi-text modifiers="bold">Action types</p>
+          ${ACTION_TYPES_TEMPLATE}
+        </div>
+        <div>
+          <p tedi-text modifiers="bold">With icon card</p>
+          ${WITH_ICON_CARD_TEMPLATE}
+        </div>
+        <div>
+          <p tedi-text modifiers="bold">Customized</p>
+          ${CUSTOMIZED_TEMPLATE}
+        </div>
+        <div>
+          <p tedi-text modifiers="bold">Disabled</p>
+          ${DISABLED_TEMPLATE}
+        </div>
+      </div>
+      <ng-template #variants let-selectedA="selectedA" let-selectedB="selectedB">${VARIANTS_TEMPLATE}</ng-template>
     `,
   }),
 };

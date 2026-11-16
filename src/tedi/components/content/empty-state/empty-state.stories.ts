@@ -12,6 +12,8 @@ import {
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { LinkComponent } from "../../navigation/link/link.component";
+import { TextComponent } from "../../base/text/text.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 
 /**
  * EmptyState communicates that there is nothing to display — empty search
@@ -27,6 +29,8 @@ export default {
   decorators: [
     moduleMetadata({
       imports: [
+        VerticalSpacingDirective,
+        TextComponent,
         EmptyStateComponent,
         ButtonComponent,
         IconComponent,
@@ -39,6 +43,7 @@ export default {
       type: "figma",
       url: "https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.70?node-id=5784-114507&m=dev",
     },
+    chromatic: { disableSnapshot: true },
   },
   args: {
     type: "separate" as EmptyStateType,
@@ -199,9 +204,7 @@ export const Separate: Story = {
   }),
 };
 
-export const AttachedToComponent: Story = {
-  render: () => ({
-    template: `
+const ATTACHED_TEMPLATE = `
       <div style="
         padding: 16px;
         background: var(--card-background-primary);
@@ -211,13 +214,15 @@ export const AttachedToComponent: Story = {
         border-top-right-radius: var(--card-radius);
       ">Previous content</div>
       <tedi-empty-state type="attached">You have no data to display</tedi-empty-state>
-    `,
+    `;
+
+export const AttachedToComponent: Story = {
+  render: () => ({
+    template: ATTACHED_TEMPLATE,
   }),
 };
 
-export const InsideComponent: Story = {
-  render: () => ({
-    template: `
+const INSIDE_TEMPLATE = `
       <div style="
         padding: 16px;
         background: var(--card-background-primary);
@@ -226,7 +231,11 @@ export const InsideComponent: Story = {
       ">
         <tedi-empty-state type="inside">You have no data to display</tedi-empty-state>
       </div>
-    `,
+    `;
+
+export const InsideComponent: Story = {
+  render: () => ({
+    template: INSIDE_TEMPLATE,
   }),
 };
 
@@ -235,5 +244,91 @@ export const CustomIcon: Story = {
   render: (args) => ({
     props: args,
     template: `<tedi-empty-state ${argsToTemplate(args)}>No products in your cart</tedi-empty-state>`,
+  }),
+};
+
+/** Chromatic snapshot for EmptyState: add every new visual variant here too. */
+export const VisualTest: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false },
+    controls: { disable: true },
+  },
+  render: () => ({
+    template: `
+      <div [tediVerticalSpacing]="2">
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">Default</p>
+          <tedi-empty-state>You have no data to display</tedi-empty-state>
+        </div>
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">With primary action</p>
+          <tedi-empty-state>
+            You have no data to display
+            <button tedi-button tedi-empty-state-actions type="button">
+              <tedi-icon name="add" [size]="18" color="inherit" />
+              Create new
+            </button>
+          </tedi-empty-state>
+        </div>
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">With secondary action</p>
+          <tedi-empty-state>
+            You have no data to display
+            <button tedi-button variant="secondary" tedi-empty-state-actions type="button">
+              <tedi-icon name="add" [size]="18" color="inherit" />
+              Create new
+            </button>
+          </tedi-empty-state>
+        </div>
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">With link</p>
+          <tedi-empty-state>
+            You have no data to display
+            <a tedi-link href="#" tedi-empty-state-actions>
+              Read more
+              <tedi-icon name="arrow_forward" [size]="18" color="inherit" />
+            </a>
+          </tedi-empty-state>
+        </div>
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">With heading</p>
+          <tedi-empty-state icon="event_busy" heading="Choose new time">
+            You have no data to display
+            <button tedi-button tedi-empty-state-actions type="button">Choose time</button>
+          </tedi-empty-state>
+        </div>
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">Minimal</p>
+          <tedi-empty-state [icon]="null">You have no data to display</tedi-empty-state>
+        </div>
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">Small padding</p>
+          <tedi-empty-state size="small">
+            You have no data to display
+            <button tedi-button tedi-empty-state-actions type="button">
+              <tedi-icon name="add" [size]="18" color="inherit" />
+              Create new
+            </button>
+            <button tedi-button variant="secondary" tedi-empty-state-actions type="button">
+              Read more
+              <tedi-icon name="arrow_forward" [size]="18" color="inherit" />
+            </button>
+          </tedi-empty-state>
+        </div>
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">Attached to component</p>
+          ${ATTACHED_TEMPLATE}
+        </div>
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">Inside component</p>
+          ${INSIDE_TEMPLATE}
+        </div>
+        <div [tediVerticalSpacing]="0.5">
+          <p tedi-text modifiers="bold">Custom icon</p>
+          <tedi-empty-state icon="shopping_cart_off">No products in your cart</tedi-empty-state>
+        </div>
+      </div>
+    `,
   }),
 };

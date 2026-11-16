@@ -10,6 +10,8 @@ import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
+import { TextComponent } from "../../base/text/text.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=2137-19322&m=dev" target="_blank">Figma ↗</a><br />
@@ -22,6 +24,8 @@ export default {
   decorators: [
     moduleMetadata({
       imports: [
+        VerticalSpacingDirective,
+        TextComponent,
         LabelComponent,
         LabelRowComponent,
         RowComponent,
@@ -31,6 +35,7 @@ export default {
       ],
     }),
   ],
+  parameters: { chromatic: { disableSnapshot: true } },
   argTypes: {
     ngContent: {
       name: "ng-content",
@@ -94,7 +99,6 @@ export default {
 type LabelStory = StoryObj<LabelComponent & { ngContent: string }>;
 
 export const Default: LabelStory = {
-  parameters: { chromatic: { disableSnapshot: true } },
   args: {
     ngContent: "Label",
     size: "default",
@@ -108,37 +112,33 @@ export const Default: LabelStory = {
   }),
 };
 
-export const Size: StoryObj<LabelComponent> = {
-  render: (args) => ({
-    props: args,
-    template: `
+const SIZE_TEMPLATE = `
       <tedi-row [cols]="2" [gapY]="3">
         <b>Default</b>
-        <div style="display: flex; gap: 1rem;">
+        <div class="flex gap-3">
           <label tedi-label>Label</label>
           <label tedi-label>
             <b>Label</b>
           </label>
         </div>
         <b>Small</b>
-        <div style="display: flex; gap: 1rem;">
+        <div class="flex gap-3">
           <label tedi-label size="small">Label</label>
           <label tedi-label size="small">
             <b>Label</b>
           </label>
         </div>
       </tedi-row>
-    `,
+    `;
+
+export const Size: StoryObj<LabelComponent> = {
+  render: (args) => ({
+    props: args,
+    template: SIZE_TEMPLATE,
   }),
 };
 
-/**
- * If a tooltip is needed, use the `tedi-label-row` component together with `tedi-info-tooltip`.
- */
-export const Structure: LabelStory = {
-  render: (args) => ({
-    props: args,
-    template: `
+const STRUCTURE_TEMPLATE = `
       <tedi-row [cols]="1" [gapY]="3">
         <tedi-col>
           <label tedi-label for="ingredient-1">Toimeaine</label>
@@ -159,20 +159,19 @@ export const Structure: LabelStory = {
           </tedi-label-row>
         </tedi-col>
       </tedi-row>
-    `,
+    `;
+
+/**
+ * If a tooltip is needed, use the `tedi-label-row` component together with `tedi-info-tooltip`.
+ */
+export const Structure: LabelStory = {
+  render: (args) => ({
+    props: args,
+    template: STRUCTURE_TEMPLATE,
   }),
 };
 
-/**
- * A label that should not be shown must still name its control, so it is hidden
- * visually rather than removed — the control keeps its accessible name.
- *
- * `"reserve-space"` hides the text but holds the line the label would occupy, which
- * keeps a field aligned with labelled siblings in the same row.
- */
-export const VisuallyHidden: LabelStory = {
-  render: () => ({
-    template: `
+const VISUALLY_HIDDEN_TEMPLATE = `
       <tedi-row cols="1" [gapY]="3">
         <tedi-col>
           <label tedi-label for="vh-visible">Nähtav silt</label>
@@ -185,6 +184,47 @@ export const VisuallyHidden: LabelStory = {
         <tedi-col>
           <label tedi-label for="vh-reserved" visuallyHidden="reserve-space">Peidetud silt</label>
           <input tedi-text-field id="vh-reserved" placeholder="Silt peidetud, rida alles" />
+        </tedi-col>
+      </tedi-row>
+    `;
+
+/**
+ * A label that should not be shown must still name its control, so it is hidden
+ * visually rather than removed — the control keeps its accessible name.
+ *
+ * `"reserve-space"` hides the text but holds the line the label would occupy, which
+ * keeps a field aligned with labelled siblings in the same row.
+ */
+export const VisuallyHidden: LabelStory = {
+  render: () => ({
+    template: VISUALLY_HIDDEN_TEMPLATE,
+  }),
+};
+
+/** Chromatic snapshot for Label: add every new visual variant here too. */
+export const VisualTest: StoryObj<LabelComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false } },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Size</p>
+            ${SIZE_TEMPLATE}
+          </div>
+        </tedi-col>
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Structure</p>
+            ${STRUCTURE_TEMPLATE}
+          </div>
+        </tedi-col>
+        <tedi-col>
+          <div [tediVerticalSpacing]="0.5">
+            <p tedi-text modifiers="bold">Visually hidden</p>
+            ${VISUALLY_HIDDEN_TEMPLATE}
+          </div>
         </tedi-col>
       </tedi-row>
     `,
