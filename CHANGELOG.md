@@ -1,3 +1,15 @@
+# [10.0.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.13...angular-10.0.0-rc.14) (2026-11-16)
+
+
+### Bug Fixes
+
+* **rating:** clear hover preview when rating stops being interactive [#330](https://github.com/TEDI-Design-System/angular/issues/330) ([#880](https://github.com/TEDI-Design-System/angular/issues/880)) ([5389886](https://github.com/TEDI-Design-System/angular/commit/53898865b1104f4e534761dd521465ecf45e22f5))
+
+
+### Features
+
+* **rating:** new TEDI-ready component [#330](https://github.com/TEDI-Design-System/angular/issues/330) ([#773](https://github.com/TEDI-Design-System/angular/issues/773)) ([342f82e](https://github.com/TEDI-Design-System/angular/commit/342f82e7193499185c0e227d20d45a79a9aee9a9))
+
 # [10.0.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.12...angular-10.0.0-rc.13) (2026-11-16)
 
 
