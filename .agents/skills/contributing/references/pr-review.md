@@ -58,6 +58,13 @@ breaks.
 - [ ] Interactive components or changed ARIA/keyboard behaviour pass [a11y-review.md](a11y-review.md).
 - [ ] Changed stories pass the [stories.md](stories.md) checklist (section 6).
 
+### TEDI React
+
+- [ ] A feature or fix in an existing component has a linked TEDI React issue when React has the
+      same component and needs the same change (search
+      `gh issue list -R TEDI-Design-System/react --search <component>` first). Flag it if the PR
+      doesn't link one.
+
 ### Translations (`src/tedi/services/translation/translations.ts`)
 
 - [ ] Each key's `components` list names only components that use it.
