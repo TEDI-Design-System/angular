@@ -119,8 +119,9 @@
   &--loading {
     position: relative;
 
+    // Visually hidden, not `display: none`: a labelled icon may be the button's name.
     > .tedi-icon {
-      display: none;
+      @include mixins.visually-hidden;
     }
 
     .tedi-button__spinner {

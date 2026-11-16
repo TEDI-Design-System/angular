@@ -116,18 +116,22 @@ export class ButtonComponent {
   protected readonly loadingDescriptionId = `tedi-button-loading-${++loadingDescriptionCounter}`;
   private wasLoading = false;
   private initialized = false;
+  private consumerAriaDisabled: string | null = null;
 
   constructor() {
     // Capture phase: at the target it runs before the consumer's `(click)`,
     // which Angular registers first.
     const element = this.elementRef.nativeElement;
     element.addEventListener("click", this.handleClick, true);
-    inject(DestroyRef).onDestroy(() =>
-      element.removeEventListener("click", this.handleClick, true),
-    );
+    // A middle-click opens a link without firing `click`.
+    element.addEventListener("auxclick", this.handleClick, true);
+    inject(DestroyRef).onDestroy(() => {
+      element.removeEventListener("click", this.handleClick, true);
+      element.removeEventListener("auxclick", this.handleClick, true);
+    });
 
     // Set imperatively rather than as host bindings, so a consumer's own
-    // `aria-disabled` survives while the button isn't loading.
+    // `aria-disabled` survives while the button isn't loading and is restored after.
     effect(() => {
       const loading = this.loading();
       untracked(() => this.applyLoadingState(loading));
@@ -157,14 +161,24 @@ export class ButtonComponent {
 
     // Other ids (e.g. a tooltip's) can share `aria-describedby`, so only this id is toggled.
     const describedBy = (element.getAttribute("aria-describedby") ?? "")
-      .split(" ")
+      .split(/\s+/)
       .filter((id) => id && id !== this.loadingDescriptionId);
 
     if (!loading) {
-      this.renderer.removeAttribute(element, "aria-disabled");
+      if (this.consumerAriaDisabled === null) {
+        this.renderer.removeAttribute(element, "aria-disabled");
+      } else {
+        this.renderer.setAttribute(
+          element,
+          "aria-disabled",
+          this.consumerAriaDisabled,
+        );
+      }
       this.setDescribedBy(element, describedBy);
       return;
     }
+
+    this.consumerAriaDisabled = element.getAttribute("aria-disabled");
 
     // No `aria-busy`: screen readers don't announce it on a button, and JAWS may
     // suppress the busy element's own name and description (TEDI-Design-System/react#70).

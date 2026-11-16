@@ -349,6 +349,7 @@ export const DangerNeutral: StoryObj<TemplateType> = {
 
 export const Loading: StoryObj<ButtonType> = {
   parameters: {
+    controls: { exclude: ["size"] },
     pseudo: {
       focusVisible: "#Focus",
     },

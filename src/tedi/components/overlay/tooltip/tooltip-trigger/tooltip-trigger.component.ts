@@ -54,7 +54,7 @@ export class TooltipTriggerComponent implements AfterContentChecked {
       // Only this tooltip's id is toggled: the element may have other descriptions
       // (e.g. a loading button's).
       const ids = (element.getAttribute("aria-describedby") ?? "")
-        .split(" ")
+        .split(/\s+/)
         .filter((id) => id && id !== this.tooltip.descriptionId);
       if (!this.tooltip.isVisualOnly()) {
         ids.push(this.tooltip.descriptionId);

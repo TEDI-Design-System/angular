@@ -380,6 +380,19 @@ describe("TooltipTriggerComponent", () => {
       expect(btn.getAttribute("aria-describedby")).toBe("hint");
     });
 
+    it("should remove its id from a whitespace-separated aria-describedby list", () => {
+      const tooltip = TestBed.inject(
+        TooltipComponent,
+      ) as unknown as MockTooltipComponent;
+      tooltip.isVisualOnly.set(true);
+      hostEl.innerHTML = `<button aria-describedby="hint\tmock-tooltip-id">Click me</button>`;
+      const btn = hostEl.querySelector("button")!;
+      component.ngAfterContentChecked();
+      fixture.detectChanges();
+
+      expect(btn.getAttribute("aria-describedby")).toBe("hint");
+    });
+
     it("should resolve the first focusable descendant when the child is a non-focusable wrapper", () => {
       hostEl.innerHTML = `<div class="wrapper"><button>Inner</button></div>`;
       const wrapper = hostEl.querySelector(".wrapper")!;

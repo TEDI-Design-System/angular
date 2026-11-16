@@ -222,7 +222,7 @@ describe("ButtonComponent loading", () => {
     setLoading(false);
 
     expect(button.classList).not.toContain("tedi-button--loading");
-    expect(button.hasAttribute("aria-disabled")).toBe(false);
+    expect(button.getAttribute("aria-disabled")).toBe("true");
     expect(button.querySelector(".tedi-button__spinner")).toBeNull();
   });
 
@@ -255,6 +255,28 @@ describe("ButtonComponent loading", () => {
 
   it("keeps the consumer's aria-disabled until loading starts", () => {
     expect(button.getAttribute("aria-disabled")).toBe("true");
+  });
+
+  it("removes aria-disabled after loading when the consumer didn't set it", () => {
+    const iconOnly = fixture.nativeElement.querySelector("#icon-only");
+
+    setLoading(true);
+    expect(iconOnly.getAttribute("aria-disabled")).toBe("true");
+
+    setLoading(false);
+    expect(iconOnly.hasAttribute("aria-disabled")).toBe(false);
+  });
+
+  it("blocks middle-clicks while loading", () => {
+    setLoading(true);
+    const loadingClick = new MouseEvent("auxclick", { cancelable: true });
+    button.dispatchEvent(loadingClick);
+    expect(loadingClick.defaultPrevented).toBe(true);
+
+    setLoading(false);
+    const idleClick = new MouseEvent("auxclick", { cancelable: true });
+    button.dispatchEvent(idleClick);
+    expect(idleClick.defaultPrevented).toBe(false);
   });
 
   it("keeps the icon position classes while the spinner is shown", () => {
