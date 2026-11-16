@@ -1,11 +1,9 @@
-import { Component, signal } from "@angular/core";
+import { Component, input, signal } from "@angular/core";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { HorizontalStepperComponent } from "./horizontal-stepper.component";
 import { HorizontalStepperItemComponent } from "./horizontal-stepper-item/horizontal-stepper-item.component";
-import { TextComponent } from "../../base/text/text.component";
-import { RowComponent } from "../../helpers/grid/row/row.component";
-import { ColComponent } from "../../helpers/grid/col/col.component";
 
 const STEPS = ["Kutse", "Tahteavaldus", "Geenianalüüs", "Vastus"];
 
@@ -37,7 +35,7 @@ class StepClickNavigationDemoComponent {
   imports: [HorizontalStepperComponent, HorizontalStepperItemComponent],
   template: `
     <div style="max-width: 480px;">
-      <tedi-horizontal-stepper [ariaLabel]="'Vormi edenemine'" [compact]="true">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel()" [compact]="true">
         @for (label of steps; track label; let i = $index) {
           <tedi-horizontal-stepper-item
             [label]="label"
@@ -52,6 +50,7 @@ class StepClickNavigationDemoComponent {
   `,
 })
 class CompactNavigationDemoComponent {
+  ariaLabel = input("Vormi edenemine");
   steps = STEPS;
   current = signal(1);
 }
@@ -121,18 +120,12 @@ class ExternalNavigationDemoComponent {
  * A horizontal stepper component for displaying multi-step progress flows.
  * Each step can be in default, selected, completed, or error state.
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Navigation/HorizontalStepper",
   component: HorizontalStepperComponent,
   decorators: [
     moduleMetadata({
-      imports: [
-        HorizontalStepperComponent,
-        HorizontalStepperItemComponent,
-        TextComponent,
-        RowComponent,
-        ColComponent,
-      ],
+      imports: [HorizontalStepperComponent, HorizontalStepperItemComponent],
     }),
   ],
   parameters: {
@@ -172,6 +165,8 @@ export default {
   },
 } as Meta<HorizontalStepperComponent>;
 
+export default meta;
+
 type Story = StoryObj<HorizontalStepperComponent>;
 
 export const Default: Story = {
@@ -197,7 +192,7 @@ export const SecondStep: Story = {
   render: (props) => ({
     props,
     template: `
-      <tedi-horizontal-stepper [ariaLabel]="'Vormi edenemine'" [background]="background">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" [background]="background">
         <tedi-horizontal-stepper-item label="Kutse" completed />
         <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
         <tedi-horizontal-stepper-item label="Geenianalüüs" />
@@ -206,6 +201,7 @@ export const SecondStep: Story = {
     `,
   }),
   args: {
+    ariaLabel: "Vormi edenemine",
     background: "default",
   },
 };
@@ -214,7 +210,7 @@ export const ThirdStep: Story = {
   render: (props) => ({
     props,
     template: `
-      <tedi-horizontal-stepper [ariaLabel]="'Vormi edenemine'" [background]="background">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" [background]="background">
         <tedi-horizontal-stepper-item label="Kutse" completed />
         <tedi-horizontal-stepper-item label="Tahteavaldus" completed />
         <tedi-horizontal-stepper-item label="Geenianalüüs" selected />
@@ -223,6 +219,7 @@ export const ThirdStep: Story = {
     `,
   }),
   args: {
+    ariaLabel: "Vormi edenemine",
     background: "default",
   },
 };
@@ -293,7 +290,7 @@ export const TransparentBackground: Story = {
   render: (props) => ({
     props,
     template: `
-      <tedi-horizontal-stepper [ariaLabel]="'Vormi edenemine'" background="transparent">
+      <tedi-horizontal-stepper [ariaLabel]="ariaLabel" background="transparent">
         <tedi-horizontal-stepper-item label="Kutse" completed />
         <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
         <tedi-horizontal-stepper-item label="Geenianalüüs" />
@@ -301,6 +298,9 @@ export const TransparentBackground: Story = {
       </tedi-horizontal-stepper>
     `,
   }),
+  args: {
+    ariaLabel: "Vormi edenemine",
+  },
 };
 
 /**
@@ -310,9 +310,10 @@ export const TransparentBackground: Story = {
  * user can jump between steps.
  */
 export const Compact: Story = {
-  render: () => ({
+  render: (args) => ({
     moduleMetadata: { imports: [CompactNavigationDemoComponent] },
-    template: `<story-compact-navigation />`,
+    props: { ariaLabel: args.ariaLabel },
+    template: `<story-compact-navigation [ariaLabel]="ariaLabel" />`,
   }),
   parameters: {
     docs: {
@@ -341,6 +342,9 @@ export class FormWizardComponent {
 }`,
       },
     },
+  },
+  args: {
+    ariaLabel: "Vormi edenemine",
   },
 };
 
@@ -448,103 +452,37 @@ export const VisualTest: Story = {
     controls: { disable: true },
     chromatic: { disableSnapshot: false },
   },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="4">
-        <tedi-col>
-          <p tedi-text modifiers="bold">First step</p>
-          <tedi-horizontal-stepper ariaLabel="Vormi edenemine (samm 1)">
-            <tedi-horizontal-stepper-item label="Kutse" selected />
-            <tedi-horizontal-stepper-item label="Tahteavaldus" />
-            <tedi-horizontal-stepper-item label="Geenianalüüs" />
-            <tedi-horizontal-stepper-item label="Vastus" />
-          </tedi-horizontal-stepper>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Second step</p>
-          <tedi-horizontal-stepper ariaLabel="Vormi edenemine (samm 2)">
-            <tedi-horizontal-stepper-item label="Kutse" completed />
-            <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
-            <tedi-horizontal-stepper-item label="Geenianalüüs" />
-            <tedi-horizontal-stepper-item label="Vastus" />
-          </tedi-horizontal-stepper>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Third step</p>
-          <tedi-horizontal-stepper ariaLabel="Vormi edenemine (samm 3)">
-            <tedi-horizontal-stepper-item label="Kutse" completed />
-            <tedi-horizontal-stepper-item label="Tahteavaldus" completed />
-            <tedi-horizontal-stepper-item label="Geenianalüüs" selected />
-            <tedi-horizontal-stepper-item label="Vastus" />
-          </tedi-horizontal-stepper>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With errors</p>
-          <div style="display: flex; flex-direction: column; gap: 16px;">
-            <tedi-horizontal-stepper ariaLabel="Veaga vorm">
-              <tedi-horizontal-stepper-item label="Kutse" error />
-              <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
-              <tedi-horizontal-stepper-item label="Geenianalüüs" />
-              <tedi-horizontal-stepper-item label="Vastus" />
-            </tedi-horizontal-stepper>
-            <tedi-horizontal-stepper ariaLabel="Vorm vea kirjeldusega">
-              <tedi-horizontal-stepper-item label="Kutse" completed />
-              <tedi-horizontal-stepper-item label="Tahteavaldus" error description="Sammus esinevad vead" />
-              <tedi-horizontal-stepper-item label="Geenianalüüs" selected />
-              <tedi-horizontal-stepper-item label="Vastus" />
-            </tedi-horizontal-stepper>
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With descriptions</p>
-          <div style="display: flex; flex-direction: column; gap: 16px;">
-            <tedi-horizontal-stepper ariaLabel="Kirjeldustega sammud (samm 1)">
-              <tedi-horizontal-stepper-item label="Kutse" selected />
-              <tedi-horizontal-stepper-item label="Tahteavaldus" />
-              <tedi-horizontal-stepper-item label="Geenianalüüs" description="Ametnik täidab" />
-              <tedi-horizontal-stepper-item label="Vastus" description="Ametnik täidab" />
-            </tedi-horizontal-stepper>
-            <tedi-horizontal-stepper ariaLabel="Kirjeldustega sammud (samm 2)">
-              <tedi-horizontal-stepper-item label="Kutse" completed />
-              <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
-              <tedi-horizontal-stepper-item label="Geenianalüüs" description="Ametnik täidab" />
-              <tedi-horizontal-stepper-item label="Vastus" description="Ametnik täidab" />
-            </tedi-horizontal-stepper>
-            <tedi-horizontal-stepper ariaLabel="Kirjeldustega sammud (samm 3)">
-              <tedi-horizontal-stepper-item label="Kutse" completed />
-              <tedi-horizontal-stepper-item label="Tahteavaldus" completed />
-              <tedi-horizontal-stepper-item label="Geenianalüüs" selected description="Ametnik täidab" />
-              <tedi-horizontal-stepper-item label="Vastus" description="Ametnik täidab" />
-            </tedi-horizontal-stepper>
-            <tedi-horizontal-stepper ariaLabel="Kirjeldustega sammud (samm 4)">
-              <tedi-horizontal-stepper-item label="Kutse" completed />
-              <tedi-horizontal-stepper-item label="Tahteavaldus" completed />
-              <tedi-horizontal-stepper-item label="Geenianalüüs" completed description="Ametnik täidab" />
-              <tedi-horizontal-stepper-item label="Vastus" selected description="Ametnik täidab" />
-            </tedi-horizontal-stepper>
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Transparent background</p>
-          <tedi-horizontal-stepper ariaLabel="Vormi edenemine (läbipaistev)" background="transparent">
-            <tedi-horizontal-stepper-item label="Kutse" completed />
-            <tedi-horizontal-stepper-item label="Tahteavaldus" selected />
-            <tedi-horizontal-stepper-item label="Geenianalüüs" />
-            <tedi-horizontal-stepper-item label="Vastus" />
-          </tedi-horizontal-stepper>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Compact</p>
-          <div style="max-width: 480px;">
-            <tedi-horizontal-stepper ariaLabel="Vormi edenemine (kompaktne)" [compact]="true">
-              <tedi-horizontal-stepper-item label="Kutse" description="Ametnik täidab" completed />
-              <tedi-horizontal-stepper-item label="Tahteavaldus" description="Ametnik täidab" selected />
-              <tedi-horizontal-stepper-item label="Geenianalüüs" description="Ametnik täidab" />
-              <tedi-horizontal-stepper-item label="Vastus" description="Ametnik täidab" />
-            </tedi-horizontal-stepper>
-          </div>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest(
+      [
+        {
+          label: "First step",
+          story: Default,
+          args: { ariaLabel: "Vormi edenemine (samm 1)" },
+        },
+        {
+          label: "Second step",
+          story: SecondStep,
+          args: { ariaLabel: "Vormi edenemine (samm 2)" },
+        },
+        {
+          label: "Third step",
+          story: ThirdStep,
+          args: { ariaLabel: "Vormi edenemine (samm 3)" },
+        },
+        { label: "With errors", story: WithErrors },
+        { label: "With descriptions", story: WithDescriptions },
+        {
+          label: "Transparent background",
+          story: TransparentBackground,
+          args: { ariaLabel: "Vormi edenemine (läbipaistev)" },
+        },
+        {
+          label: "Compact",
+          story: Compact,
+          args: { ariaLabel: "Vormi edenemine (kompaktne)" },
+        },
+      ],
+      { args: meta.args },
+    ),
 };

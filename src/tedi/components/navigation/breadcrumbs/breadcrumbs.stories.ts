@@ -4,11 +4,9 @@ import {
   moduleMetadata,
   StoryObj,
 } from "@storybook/angular";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { LinkComponent } from "../link/link.component";
 import { IconComponent } from "../../base/icon/icon.component";
-import { TextComponent } from "../../base/text/text.component";
-import { RowComponent } from "../../helpers/grid/row/row.component";
-import { ColComponent } from "../../helpers/grid/col/col.component";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
 import { BreadcrumbsComponent } from "./breadcrumbs.component";
 import { BreadcrumbItemDirective } from "./breadcrumb-item.directive";
@@ -24,7 +22,7 @@ import { BreadcrumbSeparatorDirective } from "./breadcrumb-separator.directive";
  * - `long` shows the full trail; `short` shows only the parent crumb as a back-link (mobile).
  * - Set `maxItems` to collapse the middle of a long trail into an ellipsis dropdown.
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Navigation/Breadcrumbs",
   component: BreadcrumbsComponent,
   decorators: [
@@ -34,9 +32,6 @@ export default {
         BreadcrumbSeparatorDirective,
         LinkComponent,
         IconComponent,
-        TextComponent,
-        RowComponent,
-        ColComponent,
       ],
     }),
   ],
@@ -105,6 +100,8 @@ export default {
     ...createBreakpointArgTypes("BreadcrumbsInputs"),
   },
 } as Meta<BreadcrumbsComponent>;
+
+export default meta;
 
 type Story = StoryObj<BreadcrumbsComponent>;
 
@@ -243,65 +240,31 @@ export const VisualTest: Story = {
     controls: { disable: true },
     chromatic: { disableSnapshot: false },
   },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="4">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Default</p>
-          <tedi-breadcrumbs ariaLabel="Liikumistee (vaikimisi)">
-            <a *tediBreadcrumbItem tedi-link href="#">Töölaud</a>
-            <a *tediBreadcrumbItem tedi-link href="#">Taotlused</a>
-            <span *tediBreadcrumbItem aria-current="page">Taotlus nr 506</span>
-          </tedi-breadcrumbs>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Short</p>
-          <tedi-breadcrumbs variant="short" ariaLabel="Liikumistee (lühike)">
-            <a *tediBreadcrumbItem tedi-link [underline]="false" href="#">Töölaud</a>
-            <span *tediBreadcrumbItem aria-current="page">Taotlus nr 506</span>
-          </tedi-breadcrumbs>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Collapsed</p>
-          <tedi-breadcrumbs
-            [maxItems]="4"
-            [itemsBeforeCollapse]="1"
-            [itemsAfterCollapse]="2"
-            ariaLabel="Liikumistee (kokku volditud)"
-          >
-            <a *tediBreadcrumbItem tedi-link href="#">Töölaud</a>
-            <a *tediBreadcrumbItem tedi-link href="#">Patsiendid</a>
-            <a *tediBreadcrumbItem tedi-link href="#">Anna Tamm</a>
-            <a *tediBreadcrumbItem tedi-link href="#">Visiidid</a>
-            <a *tediBreadcrumbItem tedi-link href="#">2024-05-12</a>
-            <span *tediBreadcrumbItem aria-current="page">Piirangud</span>
-          </tedi-breadcrumbs>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Custom separator</p>
-          <div class="flex flex-column gap-3">
-            <tedi-breadcrumbs separator="/" ariaLabel="Liikumistee (eraldatud kaldkriipsuga)">
-              <a *tediBreadcrumbItem tedi-link href="#">Töölaud</a>
-              <a *tediBreadcrumbItem tedi-link href="#">Dokumendid</a>
-              <span *tediBreadcrumbItem aria-current="page">Piirangud</span>
-            </tedi-breadcrumbs>
-            <tedi-breadcrumbs ariaLabel="Liikumistee (eraldatud noolega)">
-              <a *tediBreadcrumbItem tedi-link href="#">Töölaud</a>
-              <a *tediBreadcrumbItem tedi-link href="#">Dokumendid</a>
-              <span *tediBreadcrumbItem aria-current="page">Piirangud</span>
-              <tedi-icon *tediBreadcrumbSeparator name="arrow_forward" [size]="16" color="brand" />
-            </tedi-breadcrumbs>
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Button crumbs</p>
-          <tedi-breadcrumbs ariaLabel="Liikumistee (nupud)">
-            <button *tediBreadcrumbItem tedi-link type="button">Töölaud</button>
-            <button *tediBreadcrumbItem tedi-link type="button">Taotlused</button>
-            <span *tediBreadcrumbItem aria-current="page">Taotlus nr 506</span>
-          </tedi-breadcrumbs>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest(
+      [
+        {
+          label: "Default",
+          story: Default,
+          args: { ariaLabel: "Liikumistee (vaikimisi)" },
+        },
+        {
+          label: "Short",
+          story: Short,
+          args: { ariaLabel: "Liikumistee (lühike)" },
+        },
+        {
+          label: "Collapsed",
+          story: Collapsed,
+          args: { ariaLabel: "Liikumistee (kokku volditud)" },
+        },
+        { label: "Custom separator", story: CustomSeparator },
+        {
+          label: "Button crumbs",
+          story: ButtonCrumbs,
+          args: { ariaLabel: "Liikumistee (nupud)" },
+        },
+      ],
+      { args: meta.args },
+    ),
 };

@@ -1,5 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { TextComponent } from "../../base/text/text.component";
@@ -164,64 +165,94 @@ export default {
 
 type Story = StoryObj<TabsComponent>;
 
-export const Default: Story = {
-  render: () => ({
-    props: { content },
-    template: `
-      <tedi-tabs defaultValue="tab-1">
+/** Markup of the `Default` story; `idPrefix` keeps its ids unique where it repeats. */
+const defaultTabs = (idPrefix = "") => ({
+  props: { content },
+  template: `
+      <tedi-tabs defaultValue="${idPrefix}tab-1">
         <tedi-tabs-list aria-label="Tervise sakid">
-          <button tedi-tabs-trigger id="tab-1">Terviseteekond</button>
-          <button tedi-tabs-trigger id="tab-2">Haiguste kulg</button>
-          <button tedi-tabs-trigger id="tab-3">Ravimite ajalugu</button>
+          <button tedi-tabs-trigger id="${idPrefix}tab-1">Terviseteekond</button>
+          <button tedi-tabs-trigger id="${idPrefix}tab-2">Haiguste kulg</button>
+          <button tedi-tabs-trigger id="${idPrefix}tab-3">Ravimite ajalugu</button>
         </tedi-tabs-list>
-        <tedi-tabs-content id="tab-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
-        <tedi-tabs-content id="tab-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
-        <tedi-tabs-content id="tab-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
       </tedi-tabs>
     `,
-  }),
+});
+
+export const Default: Story = {
+  render: () => defaultTabs(),
 };
+
+/** Markup of the `WithIcons` story; `idPrefix` keeps its ids unique where it repeats. */
+const withIconsTabs = (idPrefix = "") => ({
+  props: { content },
+  template: `
+      <tedi-tabs defaultValue="${idPrefix}tab-1">
+        <tedi-tabs-list aria-label="Ikoonidega sakid">
+          <button tedi-tabs-trigger id="${idPrefix}tab-1" icon="table_chart">Tabel</button>
+          <button tedi-tabs-trigger id="${idPrefix}tab-2" icon="grid_on">Ruudustik</button>
+        </tedi-tabs-list>
+        <tedi-tabs-content id="${idPrefix}tab-1"><tedi-card-content><p tedi-text>{{ content.table }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-2"><tedi-card-content><p tedi-text>{{ content.grid }}</p></tedi-card-content></tedi-tabs-content>
+      </tedi-tabs>
+    `,
+});
 
 export const WithIcons: Story = {
-  render: () => ({
-    props: { content },
-    template: `
-      <tedi-tabs defaultValue="tab-1">
-        <tedi-tabs-list aria-label="Ikoonidega sakid">
-          <button tedi-tabs-trigger id="tab-1" icon="table_chart">Tabel</button>
-          <button tedi-tabs-trigger id="tab-2" icon="grid_on">Ruudustik</button>
-        </tedi-tabs-list>
-        <tedi-tabs-content id="tab-1"><tedi-card-content><p tedi-text>{{ content.table }}</p></tedi-card-content></tedi-tabs-content>
-        <tedi-tabs-content id="tab-2"><tedi-card-content><p tedi-text>{{ content.grid }}</p></tedi-card-content></tedi-tabs-content>
-      </tedi-tabs>
-    `,
-  }),
+  render: () => withIconsTabs(),
 };
 
-export const WithStatusBadge: Story = {
-  render: () => ({
-    props: { content },
-    template: `
-      <tedi-tabs defaultValue="tab-1">
+/** Markup of the `WithStatusBadge` story; `idPrefix` keeps its ids unique where it repeats. */
+const withStatusBadgeTabs = (idPrefix = "") => ({
+  props: { content },
+  template: `
+      <tedi-tabs defaultValue="${idPrefix}tab-1">
         <tedi-tabs-list aria-label="Olekumärgisega sakid">
-          <button tedi-tabs-trigger id="tab-1">
+          <button tedi-tabs-trigger id="${idPrefix}tab-1">
             <tedi-ellipsis [lineClamp]="1" [tooltip]="false">Terviseteekond</tedi-ellipsis>
             <tedi-status-badge color="brand" text="Esitatud" />
           </button>
-          <button tedi-tabs-trigger id="tab-2">
+          <button tedi-tabs-trigger id="${idPrefix}tab-2">
             <span style="position: relative">
               Lugemata teated&nbsp;<tedi-status-indicator type="danger" position="top-right" />
             </span>
           </button>
-          <button tedi-tabs-trigger id="tab-3">Ravimite ajalugu</button>
+          <button tedi-tabs-trigger id="${idPrefix}tab-3">Ravimite ajalugu</button>
         </tedi-tabs-list>
-        <tedi-tabs-content id="tab-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
-        <tedi-tabs-content id="tab-2"><tedi-card-content><p tedi-text>{{ content.unreadMessages }}</p></tedi-card-content></tedi-tabs-content>
-        <tedi-tabs-content id="tab-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-2"><tedi-card-content><p tedi-text>{{ content.unreadMessages }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
       </tedi-tabs>
     `,
-  }),
+});
+
+export const WithStatusBadge: Story = {
+  render: () => withStatusBadgeTabs(),
 };
+
+/** Markup of the `States` story; `idPrefix` keeps its ids unique where it repeats. */
+const statesTabs = (idPrefix = "") => ({
+  props: { PSEUDO_STATE, idPrefix },
+  template: `
+      <tedi-row [cols]="1" [gapY]="3">
+        <tedi-row cols="1" [sm]="{ cols: 6 }" *ngFor="let state of PSEUDO_STATE" alignItems="center">
+          <tedi-col [width]="1">
+            <p tedi-text [modifiers]="'bold'">{{ state }}</p>
+          </tedi-col>
+          <tedi-col [width]="5">
+            <tedi-tabs [defaultValue]="state === 'Selected' ? idPrefix + state : ''">
+              <tedi-tabs-list aria-label="Oleku näide">
+                <button tedi-tabs-trigger [id]="idPrefix + state">Terviseteekond</button>
+              </tedi-tabs-list>
+            </tedi-tabs>
+          </tedi-col>
+        </tedi-row>
+      </tedi-row>
+    `,
+});
 
 export const States: Story = {
   parameters: {
@@ -237,25 +268,7 @@ export const States: Story = {
       config: { rules: [{ id: "aria-valid-attr-value", enabled: false }] },
     },
   },
-  render: () => ({
-    props: { PSEUDO_STATE },
-    template: `
-      <tedi-row [cols]="1" [gapY]="3">
-        <tedi-row cols="1" [sm]="{ cols: 6 }" *ngFor="let state of PSEUDO_STATE" alignItems="center">
-          <tedi-col [width]="1">
-            <p tedi-text [modifiers]="'bold'">{{ state }}</p>
-          </tedi-col>
-          <tedi-col [width]="5">
-            <tedi-tabs [defaultValue]="state === 'Selected' ? state : ''">
-              <tedi-tabs-list aria-label="Oleku näide">
-                <button tedi-tabs-trigger [id]="state">Terviseteekond</button>
-              </tedi-tabs-list>
-            </tedi-tabs>
-          </tedi-col>
-        </tedi-row>
-      </tedi-row>
-    `,
-  }),
+  render: () => statesTabs(),
 };
 
 export const Controlled: Story = {
@@ -305,22 +318,25 @@ export const AsLinks: Story = {
   }),
 };
 
-export const WithDisabledTab: Story = {
-  render: () => ({
-    props: { content },
-    template: `
-      <tedi-tabs defaultValue="tab-1">
+/** Markup of the `WithDisabledTab` story; `idPrefix` keeps its ids unique where it repeats. */
+const withDisabledTabTabs = (idPrefix = "") => ({
+  props: { content },
+  template: `
+      <tedi-tabs defaultValue="${idPrefix}tab-1">
         <tedi-tabs-list aria-label="Keelatud sakiga sakid">
-          <button tedi-tabs-trigger id="tab-1">Terviseteekond</button>
-          <button tedi-tabs-trigger id="tab-2">Haiguste kulg</button>
-          <button tedi-tabs-trigger id="tab-3" [disabled]="true">Ravimite ajalugu</button>
+          <button tedi-tabs-trigger id="${idPrefix}tab-1">Terviseteekond</button>
+          <button tedi-tabs-trigger id="${idPrefix}tab-2">Haiguste kulg</button>
+          <button tedi-tabs-trigger id="${idPrefix}tab-3" [disabled]="true">Ravimite ajalugu</button>
         </tedi-tabs-list>
-        <tedi-tabs-content id="tab-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
-        <tedi-tabs-content id="tab-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
-        <tedi-tabs-content id="tab-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
       </tedi-tabs>
     `,
-  }),
+});
+
+export const WithDisabledTab: Story = {
+  render: () => withDisabledTabTabs(),
 };
 
 export const OverflowBehavior: Story = {
@@ -365,20 +381,20 @@ export const OverflowBehavior: Story = {
   }),
 };
 
-export const WithSubTabs: Story = {
-  render: () => ({
-    props: { content, subTabContent, activeSubTab: "work-accidents" },
-    template: `
-      <tedi-tabs defaultValue="tab-3">
+/** Markup of the `WithSubTabs` story; `idPrefix` keeps its ids unique where it repeats. */
+const withSubTabsTabs = (idPrefix = "") => ({
+  props: { content, subTabContent, activeSubTab: "work-accidents" },
+  template: `
+      <tedi-tabs defaultValue="${idPrefix}tab-3">
         <tedi-tabs-list aria-label="Töötervishoiu ja -ohutuse sakid">
-          <button tedi-tabs-trigger id="tab-1">Käimasolevad menetlused</button>
-          <button tedi-tabs-trigger id="tab-2">Planeeritavad menetlused</button>
-          <button tedi-tabs-trigger id="tab-3">Õnnetused ja haigused</button>
-          <button tedi-tabs-trigger id="tab-4">Kalender</button>
+          <button tedi-tabs-trigger id="${idPrefix}tab-1">Käimasolevad menetlused</button>
+          <button tedi-tabs-trigger id="${idPrefix}tab-2">Planeeritavad menetlused</button>
+          <button tedi-tabs-trigger id="${idPrefix}tab-3">Õnnetused ja haigused</button>
+          <button tedi-tabs-trigger id="${idPrefix}tab-4">Kalender</button>
         </tedi-tabs-list>
-        <tedi-tabs-content id="tab-1"><tedi-card-content><p tedi-text>{{ content.proceduresInProgress }}</p></tedi-card-content></tedi-tabs-content>
-        <tedi-tabs-content id="tab-2"><tedi-card-content><p tedi-text>{{ content.proceduresInPlanning }}</p></tedi-card-content></tedi-tabs-content>
-        <tedi-tabs-content id="tab-3">
+        <tedi-tabs-content id="${idPrefix}tab-1"><tedi-card-content><p tedi-text>{{ content.proceduresInProgress }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-2"><tedi-card-content><p tedi-text>{{ content.proceduresInPlanning }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-3">
           <tedi-card-content>
             <div class="flex flex-column gap-2">
               <tedi-button-group
@@ -396,10 +412,13 @@ export const WithSubTabs: Story = {
             </div>
           </tedi-card-content>
         </tedi-tabs-content>
-        <tedi-tabs-content id="tab-4"><tedi-card-content><p tedi-text>{{ content.calendar }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}tab-4"><tedi-card-content><p tedi-text>{{ content.calendar }}</p></tedi-card-content></tedi-tabs-content>
       </tedi-tabs>
     `,
-  }),
+});
+
+export const WithSubTabs: Story = {
+  render: () => withSubTabsTabs(),
 };
 
 /** Chromatic snapshot for Tabs: add every new visual variant here too. */
@@ -408,130 +427,33 @@ export const VisualTest: Story = {
   parameters: {
     chromatic: { disableSnapshot: false },
     pseudo: {
-      hover: "#vt-state-hover",
-      active: "#vt-state-active",
-      focusVisible: "#vt-state-focus",
+      hover: "#vt-state-Hover",
+      active: "#vt-state-Active",
+      focusVisible: "#vt-state-Focus",
     },
     a11y: {
       config: { rules: [{ id: "aria-valid-attr-value", enabled: false }] },
     },
   },
-  render: () => ({
-    props: {
-      PSEUDO_STATE,
-      content,
-      subTabContent,
-      activeSubTab: "work-accidents",
-    },
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Default</p>
-          <tedi-tabs defaultValue="vt-default-1">
-            <tedi-tabs-list aria-label="Tervise sakid">
-              <button tedi-tabs-trigger id="vt-default-1">Terviseteekond</button>
-              <button tedi-tabs-trigger id="vt-default-2">Haiguste kulg</button>
-              <button tedi-tabs-trigger id="vt-default-3">Ravimite ajalugu</button>
-            </tedi-tabs-list>
-            <tedi-tabs-content id="vt-default-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
-            <tedi-tabs-content id="vt-default-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
-            <tedi-tabs-content id="vt-default-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
-          </tedi-tabs>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With icons</p>
-          <tedi-tabs defaultValue="vt-icons-1">
-            <tedi-tabs-list aria-label="Ikoonidega sakid">
-              <button tedi-tabs-trigger id="vt-icons-1" icon="table_chart">Tabel</button>
-              <button tedi-tabs-trigger id="vt-icons-2" icon="grid_on">Ruudustik</button>
-            </tedi-tabs-list>
-            <tedi-tabs-content id="vt-icons-1"><tedi-card-content><p tedi-text>{{ content.table }}</p></tedi-card-content></tedi-tabs-content>
-            <tedi-tabs-content id="vt-icons-2"><tedi-card-content><p tedi-text>{{ content.grid }}</p></tedi-card-content></tedi-tabs-content>
-          </tedi-tabs>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With status badge</p>
-          <tedi-tabs defaultValue="vt-badge-1">
-            <tedi-tabs-list aria-label="Olekumärgisega sakid">
-              <button tedi-tabs-trigger id="vt-badge-1">
-                <tedi-ellipsis [lineClamp]="1" [tooltip]="false">Terviseteekond</tedi-ellipsis>
-                <tedi-status-badge color="brand" text="Esitatud" />
-              </button>
-              <button tedi-tabs-trigger id="vt-badge-2">
-                <span style="position: relative">
-                  Lugemata teated&nbsp;<tedi-status-indicator type="danger" position="top-right" />
-                </span>
-              </button>
-              <button tedi-tabs-trigger id="vt-badge-3">Ravimite ajalugu</button>
-            </tedi-tabs-list>
-            <tedi-tabs-content id="vt-badge-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
-            <tedi-tabs-content id="vt-badge-2"><tedi-card-content><p tedi-text>{{ content.unreadMessages }}</p></tedi-card-content></tedi-tabs-content>
-            <tedi-tabs-content id="vt-badge-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
-          </tedi-tabs>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">States</p>
-          <tedi-row [cols]="1" [gapY]="3">
-            <tedi-row cols="1" [sm]="{ cols: 6 }" *ngFor="let state of PSEUDO_STATE" alignItems="center">
-              <tedi-col [width]="1">
-                <p tedi-text>{{ state }}</p>
-              </tedi-col>
-              <tedi-col [width]="5">
-                <tedi-tabs [defaultValue]="state === 'Selected' ? 'vt-state-selected' : ''">
-                  <tedi-tabs-list [aria-label]="'Oleku näide: ' + state">
-                    <button tedi-tabs-trigger [id]="'vt-state-' + state.toLowerCase()">Terviseteekond</button>
-                  </tedi-tabs-list>
-                </tedi-tabs>
-              </tedi-col>
-            </tedi-row>
-          </tedi-row>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With disabled tab</p>
-          <tedi-tabs defaultValue="vt-disabled-1">
-            <tedi-tabs-list aria-label="Keelatud sakiga sakid">
-              <button tedi-tabs-trigger id="vt-disabled-1">Terviseteekond</button>
-              <button tedi-tabs-trigger id="vt-disabled-2">Haiguste kulg</button>
-              <button tedi-tabs-trigger id="vt-disabled-3" [disabled]="true">Ravimite ajalugu</button>
-            </tedi-tabs-list>
-            <tedi-tabs-content id="vt-disabled-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
-            <tedi-tabs-content id="vt-disabled-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
-            <tedi-tabs-content id="vt-disabled-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
-          </tedi-tabs>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With sub tabs</p>
-          <tedi-tabs defaultValue="vt-sub-3">
-            <tedi-tabs-list aria-label="Töötervishoiu ja -ohutuse sakid">
-              <button tedi-tabs-trigger id="vt-sub-1">Käimasolevad menetlused</button>
-              <button tedi-tabs-trigger id="vt-sub-2">Planeeritavad menetlused</button>
-              <button tedi-tabs-trigger id="vt-sub-3">Õnnetused ja haigused</button>
-              <button tedi-tabs-trigger id="vt-sub-4">Kalender</button>
-            </tedi-tabs-list>
-            <tedi-tabs-content id="vt-sub-1"><tedi-card-content><p tedi-text>{{ content.proceduresInProgress }}</p></tedi-card-content></tedi-tabs-content>
-            <tedi-tabs-content id="vt-sub-2"><tedi-card-content><p tedi-text>{{ content.proceduresInPlanning }}</p></tedi-card-content></tedi-tabs-content>
-            <tedi-tabs-content id="vt-sub-3">
-              <tedi-card-content>
-                <div class="flex flex-column gap-2">
-                  <tedi-button-group
-                    variant="secondary-button-group"
-                    ariaLabel="Õnnetuste ja haiguste alamnavigatsioon"
-                    [enableMobileDropdown]="true"
-                    dropdownLabelMode="selected"
-                    [(value)]="activeSubTab"
-                  >
-                    <button tedi-button-group-button value="work-accidents" label="Tööõnnetused">Tööõnnetused</button>
-                    <button tedi-button-group-button value="occupational-diseases" label="Kutsehaigused">Kutsehaigused</button>
-                    <button tedi-button-group-button value="work-related-illnesses" label="Tööga seotud haigused">Tööga seotud haigused</button>
-                  </tedi-button-group>
-                  <p tedi-text>{{ subTabContent[activeSubTab] }}</p>
-                </div>
-              </tedi-card-content>
-            </tedi-tabs-content>
-            <tedi-tabs-content id="vt-sub-4"><tedi-card-content><p tedi-text>{{ content.calendar }}</p></tedi-card-content></tedi-tabs-content>
-          </tedi-tabs>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest([
+      { label: "Default", story: { render: () => defaultTabs("vt-default-") } },
+      {
+        label: "With icons",
+        story: { render: () => withIconsTabs("vt-icons-") },
+      },
+      {
+        label: "With status badge",
+        story: { render: () => withStatusBadgeTabs("vt-badge-") },
+      },
+      { label: "States", story: { render: () => statesTabs("vt-state-") } },
+      {
+        label: "With disabled tab",
+        story: { render: () => withDisabledTabTabs("vt-disabled-") },
+      },
+      {
+        label: "With sub tabs",
+        story: { render: () => withSubTabsTabs("vt-sub-") },
+      },
+    ]),
 };
