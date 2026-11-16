@@ -1,3 +1,10 @@
+# [10.0.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.11...angular-10.0.0-rc.12) (2026-11-16)
+
+
+### Bug Fixes
+
+* **file-dropzone:** add type button to dropzone [#66](https://github.com/TEDI-Design-System/angular/issues/66) ([ea42edb](https://github.com/TEDI-Design-System/angular/commit/ea42edb8bc011bcdbf48316da35b5126f359326c))
+
 # [10.0.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.10...angular-10.0.0-rc.11) (2026-11-13)
 
 
