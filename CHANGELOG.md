@@ -1,3 +1,10 @@
+# [10.0.0-rc.13](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.12...angular-10.0.0-rc.13) (2026-11-16)
+
+
+### Bug Fixes
+
+* **select:** keep focus on the clicked element when the dropdown closes [#860](https://github.com/TEDI-Design-System/angular/issues/860) ([#869](https://github.com/TEDI-Design-System/angular/issues/869)) ([6a8d578](https://github.com/TEDI-Design-System/angular/commit/6a8d578b77e672fb565c3ed775fa94031828ce4e))
+
 # [10.0.0-rc.12](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.11...angular-10.0.0-rc.12) (2026-11-16)
 
 
