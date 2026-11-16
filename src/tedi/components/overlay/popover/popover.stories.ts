@@ -6,6 +6,7 @@ import {
   PopoverWidth,
 } from "./popover-content/popover-content.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
+import { CardPadding } from "../../content/card/card.utils";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { LinkComponent } from "../../navigation/link/link.component";
@@ -272,6 +273,23 @@ export default {
         },
       },
     },
+    padding: {
+      control: { type: "select" },
+      options: [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3],
+      description:
+        "Inner padding on the `tedi-card` scale: rems, `{ vertical, horizontal }` or `{ top, right, bottom, left }` (missing sides are 0).",
+      table: {
+        category: "popover-content inputs",
+        type: {
+          summary: "CardPadding",
+          detail:
+            "0 | 0.25 | 0.5 | 0.75 | 1 | 1.25 | 1.5 | 2 | 2.5 | 3\n{ vertical, horizontal }\n{ top?, right?, bottom?, left? }",
+        },
+        defaultValue: {
+          summary: "1",
+        },
+      },
+    },
     underline: {
       description: "Underline the trigger element.",
       defaultValue: {
@@ -305,6 +323,7 @@ type Story = StoryObj<
     maxWidth: PopoverWidth;
     title: string;
     showClose: boolean;
+    padding?: CardPadding;
     interactive: boolean;
   }
 >;
@@ -332,7 +351,7 @@ export const Default: Story = {
         <button tedi-button tedi-popover-trigger [interactive]="interactive">
           Popover Trigger
         </button>
-        <tedi-popover-content [maxWidth]="maxWidth" [title]="title" [showClose]="showClose">
+        <tedi-popover-content [maxWidth]="maxWidth" [title]="title" [showClose]="showClose" [padding]="padding">
             ${POLAR_BEAR_TEXT}
         </tedi-popover-content>
       </tedi-popover>

@@ -107,6 +107,11 @@ export class TimePickerComponent
   readonly trapFocus = input<boolean>(false);
   /** Emitted when the picker requests to be closed (Tab while `trapFocus` is `true`). */
   readonly closeRequested = output<void>();
+  /**
+   * Emitted when the user explicitly picks a value: a minute click or Enter on the minute column (`scroll`),
+   * or a slot/item selection (`slots`/`dropdown`). Scrolling or arrowing the wheels does not emit.
+   */
+  readonly selectionCommitted = output<void>();
 
   private readonly el = inject(ElementRef<HTMLElement>);
   private readonly uniqueId = inject(_IdGenerator).getId("tedi-time-picker-");
@@ -356,8 +361,8 @@ export class TimePickerComponent
 
   selectMinute(minute: string): void {
     if (this.isDisabled()) return;
-    const hour = this.selectedHour();
-    const hourStr = hour !== null ? String(hour).padStart(2, "0") : "00";
+    // With no value, use the hour the wheel is parked on.
+    const hourStr = String(this.selectedHourIndex()).padStart(2, "0");
     const newValue = `${hourStr}:${minute}`;
     if (this.value() === newValue) return;
     this.value.set(newValue);
@@ -370,6 +375,7 @@ export class TimePickerComponent
     this.value.set(slot);
     this.onTouched();
     this.onChange(slot);
+    this.selectionCommitted.emit();
   }
 
   isSlotSelected(slot: string): boolean {
@@ -389,6 +395,7 @@ export class TimePickerComponent
 
   onMinuteClick(minute: string): void {
     if (this.isDisabled()) return;
+    this.settlePendingScrollSelection();
     this.hasUserGesture.minute = false;
     this.clearGestureTimer("minute");
     const list = this.minutes();
@@ -396,6 +403,7 @@ export class TimePickerComponent
     if (idx >= 0) this.scrollColumnToIndex("minute", idx, "smooth");
     this.selectMinute(minute);
     this.minuteColumns()[0]?.nativeElement.focus({ preventScroll: true });
+    this.selectionCommitted.emit();
   }
 
   onColumnKeydown(event: KeyboardEvent, type: WheelType): void {
@@ -412,7 +420,16 @@ export class TimePickerComponent
 
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      if (type === "hour") this.focusOtherColumn("hour");
+      if (type === "hour") {
+        this.focusOtherColumn("hour");
+      } else {
+        // The highlight can be ahead of the value (no value yet, or a scroll
+        // still in its debounce), so commit the highlighted hour and minute.
+        this.settlePendingScrollSelection();
+        const minute = this.minutes()[this.highlightedMinuteIndex()];
+        if (minute !== undefined) this.selectMinute(minute);
+        this.selectionCommitted.emit();
+      }
       return;
     }
 
@@ -582,6 +599,24 @@ export class TimePickerComponent
   }
 
   /**
+   * Called before a minute commit, which may close the picker. A debounce left
+   * running would fire on the closed column, read scrollTop 0 and overwrite the
+   * value. The pending hour is applied from its highlighted row; the pending
+   * minute is dropped, as the commit picks the minute itself.
+   */
+  private settlePendingScrollSelection(): void {
+    (["hour", "minute"] as WheelType[]).forEach((type) => {
+      const timer = this.scrollDebounceTimer[type];
+      if (!timer) return;
+      clearTimeout(timer);
+      delete this.scrollDebounceTimer[type];
+      this.hasUserGesture[type] = false;
+      this.clearGestureTimer(type);
+      if (type === "hour") this.selectHour(this.hours[this.hourScrollIndex()]);
+    });
+  }
+
+  /**
    * Gecko hands a torn-down scroll container's offset to the one replacing it
    * in the same position, so a picker can arrive already scrolled to the
    * previous picker's row. Nothing marks that as not-the-user, which is how
@@ -695,6 +730,10 @@ export class TimePickerComponent
   }
 
   scrollToSelected(): void {
+    // A smooth scroll cut short by the picker closing (closeOnSelect) would
+    // otherwise keep its lock and stop alignScroll from moving the column.
+    this.clearProgrammaticScroll("hour");
+    this.clearProgrammaticScroll("minute");
     this.alignScroll("instant");
   }
 

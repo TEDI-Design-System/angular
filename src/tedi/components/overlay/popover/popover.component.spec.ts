@@ -543,6 +543,40 @@ describe("PopoverComponent", () => {
       expect(component.ariaLabelledBy()).toMatch(/^popover-title-/);
     });
 
+    it("focuses the container on attach", () => {
+      jest.useFakeTimers();
+      open();
+      const container = document.querySelector(
+        ".tedi-popover__container",
+      ) as HTMLElement;
+      const focusSpy = jest.spyOn(container, "focus");
+
+      jest.runOnlyPendingTimers();
+
+      expect(focusSpy).toHaveBeenCalled();
+      jest.useRealTimers();
+      component.hidePopover();
+    });
+
+    it("keeps focus that the content already moved inside the container", () => {
+      jest.useFakeTimers();
+      open();
+      const container = document.querySelector(
+        ".tedi-popover__container",
+      ) as HTMLElement;
+      const inner = document.createElement("button");
+      container.appendChild(inner);
+      inner.focus();
+      const focusSpy = jest.spyOn(container, "focus");
+
+      jest.runOnlyPendingTimers();
+
+      expect(focusSpy).not.toHaveBeenCalled();
+      expect(document.activeElement).toBe(inner);
+      jest.useRealTimers();
+      component.hidePopover();
+    });
+
     it("does nothing on overlay attach when the overlay isn't rendered", () => {
       component.onOverlayAttach();
 

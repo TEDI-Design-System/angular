@@ -15,6 +15,8 @@ import { TediTableComponent } from "./table.component";
 import { TediTableColumnsMenuComponent } from "./table-columns-menu/table-columns-menu.component";
 import { groupRowSpan } from "./row-span.utils";
 import type {
+  TableFilterAction,
+  TableFilterModalData,
   TableFilterOptions,
   TablePaginationOptions,
   TableState,
@@ -45,7 +47,10 @@ const TRANSLATIONS: Record<string, Translator> = {
   "table.filter-placeholder": () => "Filter…",
   "table.filter-apply": () => "Apply",
   "table.filter-clear": () => "Clear",
+  "table.filter-cancel": () => "Cancel",
   "table.filter-button-aria": (col) => `Filter ${col ?? ""}`.trim(),
+  "table.sort": (dir, col) =>
+    `${dir === "asc" ? "Sort descending" : dir === "desc" ? "Remove sorting" : "Sort ascending"} ${col ?? ""}`.trim(),
   "table.columns": () => "Columns",
   "table.select-column": () => "Select",
   "table.expand-column": () => "Expand",
@@ -530,6 +535,19 @@ describe("TediTableComponent", () => {
         'button[aria-label="Expand row"]',
       );
       expect(expandButton).not.toBeNull();
+    });
+
+    it("does not turn open sub-component rows into landmarks", () => {
+      const fixture = setupHost();
+      fixture.componentInstance.subTemplate.set(
+        fixture.componentInstance.subTemplateRef()!,
+      );
+      fixture.componentInstance.state.set({ expanded: true });
+      fixture.detectChanges();
+      expect(
+        fixture.nativeElement.querySelectorAll(".sub-content").length,
+      ).toBe(data.length);
+      expect(fixture.nativeElement.querySelector('[role="region"]')).toBeNull();
     });
 
     it("marks the icon-only expand cell with tedi-table__cell--control", () => {
@@ -1533,15 +1551,17 @@ describe("TediTableComponent", () => {
         <tedi-table
           [data]="data"
           [columns]="columns()"
-          [interactive]="true"
+          [interactive]="interactive()"
           (rowClick)="onRowClick($event)"
         />
         <ng-template #linkCell>
           <a class="cell-link" href="#">link</a>
+          <input class="cell-checkbox" type="checkbox" />
         </ng-template>
       `,
     })
     class ClickGuardHostComponent {
+      readonly interactive = signal(true);
       readonly data: Person[] = [{ id: "1", name: "Anna", role: "Eng" }];
       readonly linkTpl = viewChild<TemplateRef<unknown>>("linkCell");
       readonly onRowClick = jest.fn();
@@ -1555,7 +1575,9 @@ describe("TediTableComponent", () => {
       ]);
     }
 
-    function setupGuard(): ComponentFixture<ClickGuardHostComponent> {
+    function setupGuard(
+      interactive = true,
+    ): ComponentFixture<ClickGuardHostComponent> {
       TestBed.configureTestingModule({
         imports: [ClickGuardHostComponent],
         providers: [
@@ -1564,9 +1586,37 @@ describe("TediTableComponent", () => {
         ],
       });
       const fixture = TestBed.createComponent(ClickGuardHostComponent);
+      fixture.componentInstance.interactive.set(interactive);
       fixture.detectChanges();
       return fixture;
     }
+
+    describe.each([
+      ["interactive", true],
+      ["non-interactive", false],
+    ])("in a %s table", (_label, interactive) => {
+      it("does not cancel the default action of a link in a cell", () => {
+        const fixture = setupGuard(interactive);
+        const link = fixture.nativeElement.querySelector(
+          ".cell-link",
+        ) as HTMLAnchorElement;
+        const click = new MouseEvent("click", {
+          bubbles: true,
+          cancelable: true,
+        });
+        link.dispatchEvent(click);
+        expect(click.defaultPrevented).toBe(false);
+      });
+
+      it("lets a checkbox in a cell toggle", () => {
+        const fixture = setupGuard(interactive);
+        const checkbox = fixture.nativeElement.querySelector(
+          ".cell-checkbox",
+        ) as HTMLInputElement;
+        checkbox.click();
+        expect(checkbox.checked).toBe(true);
+      });
+    });
 
     it("does not activate the row when an interactive control in a cell is clicked", () => {
       const fixture = setupGuard();
@@ -1687,6 +1737,162 @@ describe("TediTableComponent", () => {
     });
   });
 
+  describe("sortable with a custom header", () => {
+    @Component({
+      standalone: true,
+      imports: [TediTableComponent],
+      template: `
+        <tedi-table [data]="data()" [columns]="columns()" />
+        <ng-template #statusHeader>
+          <span class="custom-header">Status</span>
+          <button type="button" class="custom-header-info">i</button>
+        </ng-template>
+        <ng-template #filter let-ctx
+          ><input class="filter-input"
+        /></ng-template>
+      `,
+    })
+    class CustomHeaderHostComponent {
+      readonly data = signal<Person[]>(data);
+      readonly headerTpl = viewChild<TemplateRef<unknown>>("statusHeader");
+      readonly filterTpl =
+        viewChild<TemplateRef<TediTableFilterContext<unknown, Person>>>(
+          "filter",
+        );
+      readonly columnOverrides = signal<Partial<TediColumnDef<Person>>>({});
+      readonly headerAsFunction = signal(false);
+      readonly columns = computed<TediColumnDef<Person>[]>(() => [
+        {
+          id: "role",
+          accessorKey: "role",
+          header: this.headerAsFunction()
+            ? () => this.headerTpl()
+            : (this.headerTpl() ?? ""),
+          meta: { label: "Status" },
+          sortable: true,
+          ...this.columnOverrides(),
+        } as TediColumnDef<Person>,
+      ]);
+    }
+
+    function setupCustomHeader() {
+      TestBed.configureTestingModule({
+        imports: [CustomHeaderHostComponent],
+        providers: [
+          { provide: TediTranslationService, useClass: TranslationMock },
+          { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        ],
+      });
+      const fixture = TestBed.createComponent(CustomHeaderHostComponent);
+      fixture.detectChanges();
+      fixture.detectChanges();
+      return fixture;
+    }
+
+    const headerCell = (fixture: ComponentFixture<unknown>): HTMLElement =>
+      fixture.nativeElement.querySelector(
+        ".tedi-table__head .tedi-table__header-cell",
+      );
+
+    it("renders the custom header followed by an icon-only sort button", () => {
+      const fixture = setupCustomHeader();
+      const th = headerCell(fixture);
+      const custom = th.querySelector(".custom-header-info") as HTMLElement;
+      const sort = th.querySelector(
+        "button.tedi-table-header-button",
+      ) as HTMLElement;
+      expect(custom).not.toBeNull();
+      expect(sort).not.toBeNull();
+      expect(sort.contains(custom)).toBe(false);
+      expect(sort.textContent?.trim()).toBe("unfold_more");
+      expect(
+        custom.compareDocumentPosition(sort) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    });
+
+    it("names the sort button after the column and the next sort action", () => {
+      const fixture = setupCustomHeader();
+      const th = headerCell(fixture);
+      const sort = th.querySelector(
+        "button.tedi-table-header-button",
+      ) as HTMLButtonElement;
+      expect(sort.getAttribute("aria-label")).toBe("Sort ascending Status");
+      sort.click();
+      fixture.detectChanges();
+      expect(th.getAttribute("aria-sort")).toBe("ascending");
+      expect(sort.getAttribute("aria-label")).toBe("Sort descending Status");
+      expect(sort.classList).toContain("tedi-table-header-button--selected");
+      sort.click();
+      fixture.detectChanges();
+      expect(th.getAttribute("aria-sort")).toBe("descending");
+      expect(sort.getAttribute("aria-label")).toBe("Remove sorting Status");
+    });
+
+    it("falls back to the column id when meta.label is not set", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.columnOverrides.set({ meta: undefined });
+      fixture.detectChanges();
+      const sort = headerCell(fixture).querySelector(
+        "button.tedi-table-header-button",
+      );
+      expect(sort?.getAttribute("aria-label")).toBe("Sort ascending role");
+    });
+
+    it("renders the sort button for a header function returning a template", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.headerAsFunction.set(true);
+      fixture.detectChanges();
+      const th = headerCell(fixture);
+      expect(th.querySelector(".custom-header")).not.toBeNull();
+      expect(
+        th.querySelectorAll("button.tedi-table-header-button").length,
+      ).toBe(1);
+    });
+
+    it("places the filter trigger after the sort button", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.columnOverrides.set({
+        filterable: true,
+        filterTemplate: fixture.componentInstance.filterTpl(),
+      });
+      fixture.detectChanges();
+      const buttons = headerCell(fixture).querySelectorAll(
+        "button.tedi-table-header-button",
+      );
+      expect(buttons.length).toBe(2);
+      expect(buttons[0].getAttribute("aria-label")).toBe(
+        "Sort ascending Status",
+      );
+      expect(buttons[1].getAttribute("aria-label")).toBe("Filter Status");
+    });
+
+    it("renders no sort button when sortable is off or sorting is disabled", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.columnOverrides.set({ sortable: false });
+      fixture.detectChanges();
+      expect(
+        headerCell(fixture).querySelector("button.tedi-table-header-button"),
+      ).toBeNull();
+      fixture.componentInstance.columnOverrides.set({ enableSorting: false });
+      fixture.detectChanges();
+      expect(
+        headerCell(fixture).querySelector("button.tedi-table-header-button"),
+      ).toBeNull();
+    });
+
+    it("renders a single sort button around a function header returning a string", () => {
+      const fixture = setupCustomHeader();
+      fixture.componentInstance.columnOverrides.set({ header: () => "Status" });
+      fixture.detectChanges();
+      const buttons = headerCell(fixture).querySelectorAll(
+        "button.tedi-table-header-button",
+      );
+      expect(buttons.length).toBe(1);
+      expect(buttons[0].textContent).toContain("Status");
+      expect(buttons[0].hasAttribute("aria-label")).toBe(false);
+    });
+  });
+
   describe("filterable shorthand", () => {
     @Component({
       standalone: true,
@@ -1696,6 +1902,7 @@ describe("TediTableComponent", () => {
           [data]="data()"
           [columns]="columns()"
           [filterPopoverWidth]="popoverWidth()"
+          [filterActions]="filterActions()"
         />
         <ng-template #textFilter let-ctx>
           <tedi-form-field size="small">
@@ -1704,6 +1911,7 @@ describe("TediTableComponent", () => {
               type="text"
               [value]="ctx.value ?? ''"
               (input)="ctx.setValue($any($event.target).value)"
+              (keydown.escape)="ctx.cancel()"
               aria-label="Name filter input"
             />
           </tedi-form-field>
@@ -1718,6 +1926,7 @@ describe("TediTableComponent", () => {
         );
       readonly filterableOption = signal<boolean | TableFilterOptions>(true);
       readonly popoverWidth = signal<PopoverWidth>("small");
+      readonly filterActions = signal<TableFilterAction[]>(["clear", "apply"]);
 
       readonly columns = signal<TediColumnDef<Person>[]>([]);
 
@@ -2037,6 +2246,119 @@ describe("TediTableComponent", () => {
       expect(column.getFilterValue()).toBeUndefined();
     });
 
+    describe("footer actions", () => {
+      function footerButtons(): HTMLButtonElement[] {
+        return Array.from(
+          getPopoverContent()?.querySelectorAll<HTMLButtonElement>(
+            ".tedi-table__filter-actions button",
+          ) ?? [],
+        );
+      }
+
+      function footerLabels(): (string | undefined)[] {
+        return footerButtons().map((b) => b.textContent?.trim());
+      }
+
+      function clickFooter(label: string): void {
+        footerButtons()
+          .find((b) => b.textContent?.trim() === label)
+          ?.click();
+      }
+
+      function typeDraft(value: string): void {
+        const input = getPopoverContent()!.querySelector(
+          'input[aria-label="Name filter input"]',
+        ) as HTMLInputElement;
+        input.value = value;
+        input.dispatchEvent(new Event("input"));
+      }
+
+      function draftInputValue(): string {
+        return (
+          getPopoverContent()!.querySelector(
+            'input[aria-label="Name filter input"]',
+          ) as HTMLInputElement
+        ).value;
+      }
+
+      it("renders Clear then Apply by default", () => {
+        const fixture = setupFilterableHost();
+        openFilterPanel(fixture);
+        expect(footerLabels()).toEqual(["Clear", "Apply"]);
+      });
+
+      it("renders the table's filterActions in the given order", () => {
+        const fixture = setupFilterableHost((host) =>
+          host.filterActions.set(["cancel", "apply"]),
+        );
+        openFilterPanel(fixture);
+        expect(footerLabels()).toEqual(["Cancel", "Apply"]);
+        const variants = footerButtons().map((b) =>
+          b.classList.contains("tedi-button--primary"),
+        );
+        expect(variants).toEqual([false, true]);
+      });
+
+      it("lets a column override the table's filterActions", () => {
+        const fixture = setupFilterableHost();
+        fixture.componentInstance.build({
+          actions: ["apply", "cancel", "clear", "cancel"],
+        });
+        fixture.detectChanges();
+        openFilterPanel(fixture);
+        expect(footerLabels()).toEqual(["Apply", "Cancel", "Clear"]);
+      });
+
+      it("hides the footer when the actions list is empty", () => {
+        const fixture = setupFilterableHost((host) =>
+          host.filterActions.set([]),
+        );
+        openFilterPanel(fixture);
+        expect(
+          getPopoverContent()?.querySelector(".tedi-table__filter-actions"),
+        ).toBeNull();
+      });
+
+      it("Cancel keeps the applied filter and discards the draft", () => {
+        const fixture = setupFilterableHost((host) =>
+          host.filterActions.set(["cancel", "apply"]),
+        );
+        const column = getTableComponent(fixture)["table"].getColumn("name")!;
+        column.setFilterValue("Anna");
+        fixture.detectChanges();
+
+        openFilterPanel(fixture);
+        typeDraft("Stale draft");
+        fixture.detectChanges();
+        clickFooter("Cancel");
+        fixture.detectChanges();
+
+        expect(column.getFilterValue()).toBe("Anna");
+        // Reopen — the draft is back at the applied value.
+        openFilterPanel(fixture);
+        expect(draftInputValue()).toBe("Anna");
+      });
+
+      it("cancel() from the template context behaves like the Cancel button", () => {
+        const fixture = setupFilterableHost();
+        const column = getTableComponent(fixture)["table"].getColumn("name")!;
+        column.setFilterValue("Anna");
+        fixture.detectChanges();
+
+        openFilterPanel(fixture);
+        typeDraft("Stale draft");
+        fixture.detectChanges();
+        getPopoverContent()!
+          .querySelector('input[aria-label="Name filter input"]')!
+          .dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+        fixture.detectChanges();
+
+        expect(column.getFilterValue()).toBe("Anna");
+        openFilterPanel(fixture);
+        expect(draftInputValue()).toBe("Anna");
+      });
+    });
+
     it("clearFilters() resets the popover draft so a reopened popover shows empty inputs", () => {
       const fixture = setupFilterableHost();
       const table = getTableComponent(fixture);
@@ -2266,6 +2588,31 @@ describe("Table: filter modal", () => {
     expect(modalOpen.mock.calls[0][1].data.columnLabel).toBe("Name");
   });
 
+  it("passes the footer actions and a cancelling context to the modal", () => {
+    const fixture = setup("xs");
+    const column = (
+      fixture.debugElement.query(By.directive(TediTableComponent))
+        .componentInstance as TediTableComponent<Person>
+    )["table"].getColumn("name")!;
+    column.setFilterValue("Anna");
+    fixture.detectChanges();
+    trigger(fixture).click();
+    fixture.detectChanges();
+
+    const data = modalOpen.mock.calls[0][1].data as TableFilterModalData;
+    expect(data.actions).toEqual([
+      { action: "clear", label: "Clear" },
+      { action: "apply", label: "Apply" },
+    ]);
+
+    const close = jest.fn();
+    data.buildContext(close).setValue("Stale draft");
+    data.buildContext(close).cancel();
+    expect(close).toHaveBeenCalledTimes(1);
+    expect(column.getFilterValue()).toBe("Anna");
+    expect(data.buildContext(close).value).toBe("Anna");
+  });
+
   it("uses the popover (no modal) at or above the breakpoint", () => {
     const fixture = setup("lg");
     trigger(fixture).click();
@@ -2289,6 +2636,7 @@ describe("TableFilterModalComponent", () => {
           draft.set(undefined);
           close();
         },
+        cancel: () => close(),
         column: {},
       } as unknown as TediTableFilterContext<unknown, unknown>;
       (ctx as { $implicit: unknown }).$implicit = ctx;
@@ -2300,8 +2648,10 @@ describe("TableFilterModalComponent", () => {
           provide: MODAL_DATA,
           useValue: {
             columnLabel: "Status",
-            applyLabel: "Apply",
-            clearLabel: "Clear",
+            actions: [
+              { action: "cancel", label: "Cancel" },
+              { action: "apply", label: "Apply" },
+            ],
             template: null,
             buildContext,
           },
@@ -2329,6 +2679,69 @@ describe("TableFilterModalComponent", () => {
     modal.context.setValue([...((modal.context.value as string[]) ?? []), "a"]);
     modal.context.setValue([...((modal.context.value as string[]) ?? []), "b"]);
     expect(draft()).toEqual(["a", "b"]);
+  });
+
+  it("renders the footer actions in order and runs each one's context method", () => {
+    @Component({
+      standalone: true,
+      template: `<ng-template #tpl />`,
+    })
+    class TemplateHostComponent {
+      readonly tpl =
+        viewChild.required<
+          TemplateRef<TediTableFilterContext<unknown, unknown>>
+        >("tpl");
+    }
+
+    const calls: string[] = [];
+    const context = {
+      value: undefined,
+      setValue: () => undefined,
+      apply: () => calls.push("apply"),
+      clear: () => calls.push("clear"),
+      cancel: () => calls.push("cancel"),
+      column: {},
+    } as unknown as TediTableFilterContext<unknown, unknown>;
+    const data: Partial<TableFilterModalData> = {
+      columnLabel: "Status",
+      actions: [
+        { action: "apply", label: "Apply" },
+        { action: "cancel", label: "Cancel" },
+        { action: "clear", label: "Clear" },
+      ],
+      buildContext: () => context,
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: MODAL_DATA, useValue: data },
+        { provide: ModalRef, useValue: { close: jest.fn() } },
+      ],
+    });
+    const templateHost = TestBed.createComponent(TemplateHostComponent);
+    templateHost.detectChanges();
+    data.template = templateHost.componentInstance.tpl();
+
+    const fixture = TestBed.createComponent(TableFilterModalComponent);
+    fixture.detectChanges();
+
+    const buttons = Array.from(
+      (
+        fixture.nativeElement as HTMLElement
+      ).querySelectorAll<HTMLButtonElement>("tedi-modal-footer button"),
+    );
+    expect(buttons.map((b) => b.textContent?.trim())).toEqual([
+      "Apply",
+      "Cancel",
+      "Clear",
+    ]);
+    expect(
+      buttons.map((b) => b.classList.contains("tedi-button--primary")),
+    ).toEqual([true, false, false]);
+
+    buttons.forEach((b) => b.click());
+    expect(calls).toEqual(["apply", "cancel", "clear"]);
   });
 });
 

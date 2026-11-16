@@ -113,16 +113,19 @@ npm install @tedi-design-system/angular @tedi-design-system/core
 
 ### 1. Provide TEDI configuration
 
-Add `provideTedi` to your application providers. It sets the default theme and language; all TEDI services (`ThemeService`, `TediTranslationService`, `BreakpointService`, `ToastService`, `ModalService`) are `providedIn: 'root'`, so there is no further wiring.
+Add `provideTedi` to your application providers. It sets the default theme and language; all TEDI services (`ThemeService`, `TediTranslationService`, `BreakpointService`, `ToastService`, `ModalService`) are `providedIn: 'root'`. They are created lazily, though, and only `ThemeService` puts the theme class on `<html>`: start it with the app, or a theme other than `default` (or one saved in the `tedi-theme` cookie) is not applied on load.
 
 ```ts
 // app.config.ts
-import { ApplicationConfig } from '@angular/core';
-import { provideTedi } from '@tedi-design-system/angular/tedi';
+import { ApplicationConfig, inject, provideAppInitializer } from '@angular/core';
+import { provideTedi, ThemeService } from '@tedi-design-system/angular/tedi';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideTedi({ language: 'et', theme: 'default' }),
+    provideAppInitializer(() => {
+      inject(ThemeService);
+    }),
   ],
 };
 ```

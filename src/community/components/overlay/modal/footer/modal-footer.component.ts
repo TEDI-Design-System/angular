@@ -22,6 +22,9 @@ export interface ModalFooterButton {
 
 export type ModalIconPosition = "start" | "end";
 
+/**
+ * @deprecated Use ModalFooter from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-modal-footer",
   templateUrl: "./modal-footer.component.html",

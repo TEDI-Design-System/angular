@@ -1,3 +1,125 @@
+# [10.0.0-rc.11](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.10...angular-10.0.0-rc.11) (2026-11-13)
+
+
+### Features
+
+* **process-timeline:** add community process timeline [#868](https://github.com/TEDI-Design-System/angular/issues/868) ([#874](https://github.com/TEDI-Design-System/angular/issues/874)) ([637c12d](https://github.com/TEDI-Design-System/angular/commit/637c12da49a1e7cfebd7ddf699c49beaca6c9bb6))
+
+# [10.0.0-rc.10](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.9...angular-10.0.0-rc.10) (2026-11-13)
+
+
+### Bug Fixes
+
+* **closing-button:** match hover transition to button and fade icon [#814](https://github.com/TEDI-Design-System/angular/issues/814) ([#870](https://github.com/TEDI-Design-System/angular/issues/870)) ([8acbc4f](https://github.com/TEDI-Design-System/angular/commit/8acbc4f689e66a7171b75ed5d5afa2f7ff746b84))
+
+# [10.0.0-rc.9](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.8...angular-10.0.0-rc.9) (2026-11-11)
+
+
+### Bug Fixes
+
+* **date-field, time-field:** use viewport globals in MobileModal stories [#756](https://github.com/TEDI-Design-System/angular/issues/756) ([#864](https://github.com/TEDI-Design-System/angular/issues/864)) ([257074c](https://github.com/TEDI-Design-System/angular/commit/257074c60238474bd0df2c4729ffdcd71db93709))
+
+
+### Features
+
+* **table:** add a cancel action and configurable filter footer actions [#787](https://github.com/TEDI-Design-System/angular/issues/787) ([#863](https://github.com/TEDI-Design-System/angular/issues/863)) ([9fe8b4c](https://github.com/TEDI-Design-System/angular/commit/9fe8b4c7d99dbdb49e270cab2ebe31e94882bceb))
+* **table:** keep the sort button when a sortable column has a custom header [#817](https://github.com/TEDI-Design-System/angular/issues/817) ([#861](https://github.com/TEDI-Design-System/angular/issues/861)) ([81c58bf](https://github.com/TEDI-Design-System/angular/commit/81c58bf99b7eb8e4adb60bbacd2f9937921005f4))
+
+# [10.0.0-rc.8](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.7...angular-10.0.0-rc.8) (2026-11-10)
+
+
+### Bug Fixes
+
+* **select:** expose disabled state to assistive technology [#839](https://github.com/TEDI-Design-System/angular/issues/839) ([#855](https://github.com/TEDI-Design-System/angular/issues/855)) ([63c5cb9](https://github.com/TEDI-Design-System/angular/commit/63c5cb9dfa317ba34e53c015b8d5763046fc0463))
+
+# [10.0.0-rc.7](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.6...angular-10.0.0-rc.7) (2026-11-10)
+
+
+### Bug Fixes
+
+* **dropdown:** keep the list reset ahead of host page list styles [#780](https://github.com/TEDI-Design-System/angular/issues/780) ([#853](https://github.com/TEDI-Design-System/angular/issues/853)) ([90d3422](https://github.com/TEDI-Design-System/angular/commit/90d342282ea3a92e44d1eb700259041613562709))
+
+# [10.0.0-rc.6](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.5...angular-10.0.0-rc.6) (2026-11-10)
+
+
+### Bug Fixes
+
+* **overlay:** keep the overlay container above cdk's own z-index rule [#781](https://github.com/TEDI-Design-System/angular/issues/781) ([#859](https://github.com/TEDI-Design-System/angular/issues/859)) ([9d690eb](https://github.com/TEDI-Design-System/angular/commit/9d690ebfe24133677e520ca0ac11e25667a2da6c))
+
+# [10.0.0-rc.5](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.4...angular-10.0.0-rc.5) (2026-11-09)
+
+
+### Bug Fixes
+
+* **accordion, table, collapse:** stop collapsed content from adding empty space below the page [#836](https://github.com/TEDI-Design-System/angular/issues/836) ([#852](https://github.com/TEDI-Design-System/angular/issues/852)) ([9859d2c](https://github.com/TEDI-Design-System/angular/commit/9859d2c69a9d757a0d043767df343b8b4c4c3ccf))
+* **table:** stop non-interactive rows cancelling link and checkbox clicks [#835](https://github.com/TEDI-Design-System/angular/issues/835) ([#850](https://github.com/TEDI-Design-System/angular/issues/850)) ([f69bc27](https://github.com/TEDI-Design-System/angular/commit/f69bc275d4cace0054ed3389f4efe0f5cf384f7b))
+* **tabs:** follow the link when an anchor tab is chosen from the overflow dropdown [#754](https://github.com/TEDI-Design-System/angular/issues/754) ([#851](https://github.com/TEDI-Design-System/angular/issues/851)) ([b72767d](https://github.com/TEDI-Design-System/angular/commit/b72767d5809fd59228c873de353ea06e57b66c62))
+* **time-field:** link form-field feedback to the input and add a name input [#801](https://github.com/TEDI-Design-System/angular/issues/801) ([#858](https://github.com/TEDI-Design-System/angular/issues/858)) ([befe1f7](https://github.com/TEDI-Design-System/angular/commit/befe1f7ffb908e9097095ba128f7ab06625c5b7a))
+
+# [10.0.0-rc.4](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.3...angular-10.0.0-rc.4) (2026-11-05)
+
+
+### Features
+
+* **calendar,date-field:** support full-width modal calendar [#505](https://github.com/TEDI-Design-System/angular/issues/505) ([#744](https://github.com/TEDI-Design-System/angular/issues/744)) ([feb552b](https://github.com/TEDI-Design-System/angular/commit/feb552b15dd8e2942b8afe0aa1aae17ac5d1131a))
+
+# [10.0.0-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.2...angular-10.0.0-rc.3) (2026-11-05)
+
+
+### Bug Fixes
+
+* **feedback-text:** fall back to defaults when type or position is undefined [#848](https://github.com/TEDI-Design-System/angular/issues/848) ([#849](https://github.com/TEDI-Design-System/angular/issues/849)) ([3a9829a](https://github.com/TEDI-Design-System/angular/commit/3a9829ae4e8aad0d55d70bd4622a36b7a86a5097))
+
+# [10.0.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.1...angular-10.0.0-rc.2) (2026-11-05)
+
+
+### Features
+
+* **form-field, modal:** deprecate community FormField and Modal [#792](https://github.com/TEDI-Design-System/angular/issues/792) ([#847](https://github.com/TEDI-Design-System/angular/issues/847)) ([0aa3136](https://github.com/TEDI-Design-System/angular/commit/0aa3136092221c6ac05c57e96d5e6008214cc82c))
+
+# [10.0.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-9.1.0-rc.2...angular-10.0.0-rc.1) (2026-11-05)
+
+
+### Features
+
+* **table-of-contents:** rename bordered input to divided [#842](https://github.com/TEDI-Design-System/angular/issues/842) ([#844](https://github.com/TEDI-Design-System/angular/issues/844)) ([22aa663](https://github.com/TEDI-Design-System/angular/commit/22aa6630db7fd0d835aeeebb4afcb332384105af))
+
+
+### BREAKING CHANGES
+
+* **table-of-contents:** `bordered` on tedi-table-of-contents and
+tedi-table-of-contents-collapsible is renamed to `divided`, and the
+`tedi-table-of-contents--bordered` class to `tedi-table-of-contents--divided`.
+
+# [9.1.0-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-9.1.0-rc.1...angular-9.1.0-rc.2) (2026-11-05)
+
+
+### Bug Fixes
+
+* **vertical-spacing:** keep host inline styles and react to input changes [#843](https://github.com/TEDI-Design-System/angular/issues/843) ([#845](https://github.com/TEDI-Design-System/angular/issues/845)) ([3cc5903](https://github.com/TEDI-Design-System/angular/commit/3cc5903c07b58409e1c1383a82389e477df87ad8))
+
+# [9.1.0-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.1-rc.3...angular-9.1.0-rc.1) (2026-11-04)
+
+
+### Features
+
+* **popover:** add padding input to Popover content [#838](https://github.com/TEDI-Design-System/angular/issues/838) ([#840](https://github.com/TEDI-Design-System/angular/issues/840)) ([266f092](https://github.com/TEDI-Design-System/angular/commit/266f0929ce9a34108dd4c5112a37bd200c80775b))
+
+## [9.0.1-rc.3](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.1-rc.2...angular-9.0.1-rc.3) (2026-11-04)
+
+
+### Bug Fixes
+
+* **table:** scope modifier styles to their own table [#731](https://github.com/TEDI-Design-System/angular/issues/731) ([#832](https://github.com/TEDI-Design-System/angular/issues/832)) ([2368eae](https://github.com/TEDI-Design-System/angular/commit/2368eaecd833e602c0846ce2883f3270b372c74b))
+
+## [9.0.1-rc.2](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.1-rc.1...angular-9.0.1-rc.2) (2026-11-04)
+
+
+### Bug Fixes
+
+* **time-field:** keep scroll picker open while scrolling with closeOnSelect [#812](https://github.com/TEDI-Design-System/angular/issues/812) ([#826](https://github.com/TEDI-Design-System/angular/issues/826)) ([48efc6f](https://github.com/TEDI-Design-System/angular/commit/48efc6f3a29543a25e6ee6b4f4fa2fe567e4c101))
+* **timeline:** collapse empty title, description and content slots [#735](https://github.com/TEDI-Design-System/angular/issues/735) ([#831](https://github.com/TEDI-Design-System/angular/issues/831)) ([6e7ad24](https://github.com/TEDI-Design-System/angular/commit/6e7ad244374b94ad652d5cee1c530cfea7a73bbb))
+
 ## [9.0.1-rc.1](https://github.com/TEDI-Design-System/angular/compare/angular-9.0.0...angular-9.0.1-rc.1) (2026-11-02)
 
 

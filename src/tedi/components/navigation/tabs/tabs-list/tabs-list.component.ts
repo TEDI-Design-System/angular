@@ -173,7 +173,13 @@ export class TabsListComponent implements AfterViewInit, OnDestroy {
   }
 
   selectTab(id: string): void {
-    this.tabs.select(id);
+    const trigger = this.triggers().find((t) => t.id() === id);
+
+    if (trigger) {
+      trigger.activate();
+    } else {
+      this.tabs.select(id);
+    }
   }
 
   // Horizontal fade is implemented inline because the shared ScrollFadeComponent

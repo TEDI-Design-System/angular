@@ -63,7 +63,10 @@ export type TableExpandTrigger = "button" | "row";
  * - align the header cell separately from the body (`headerAlign`).
  */
 export interface TableColumnMeta {
-  /** Accessible label used when the column header isn't a plain string. */
+  /**
+   * Accessible label for a column whose header isn't a plain string. Names
+   * the column in the built-in sort and filter buttons.
+   */
   label?: string;
   /**
    * Horizontal alignment applied to every body / footer cell, and to the
@@ -139,6 +142,15 @@ export type TablePaginationOptions = Partial<
 };
 
 /**
+ * A button in the footer of the built-in filter popover (or modal):
+ * - `"apply"` commits the draft as the column filter and closes.
+ * - `"clear"` removes the column filter and closes.
+ * - `"cancel"` closes and leaves the applied filter as it was; the unapplied
+ *   draft is discarded.
+ */
+export type TableFilterAction = "apply" | "clear" | "cancel";
+
+/**
  * Tuning knobs for the built-in filter popover. Forwarded by `filterable`
  * when the consumer needs more than just "on / off".
  */
@@ -156,13 +168,21 @@ export interface TableFilterOptions {
    * the rest (a date range, a wide option list).
    */
   popoverWidth?: PopoverWidth;
+  /**
+   * Footer buttons for this column's filter, in display order, overriding the
+   * table's `filterActions`. An empty array hides the footer — the filter
+   * template then closes the popover itself through `apply()` / `clear()` /
+   * `cancel()`.
+   */
+  actions?: TableFilterAction[];
 }
 
 /**
  * Context exposed by the built-in filter popover to the consumer's
  * `filterTemplate`. The consumer binds inputs to `value` / `setValue` and
- * optionally calls `apply()` / `clear()` (e.g. on Enter / Escape) — the
- * popover's footer already wires Apply / Clear buttons.
+ * optionally calls `apply()` / `clear()` / `cancel()` (e.g. on Enter /
+ * Escape) — the popover's footer already wires the buttons chosen through
+ * `filterActions`.
  *
  * `$implicit` aliases the context itself, so `<ng-template let-ctx>` binds
  * `ctx` to a full `TediTableFilterContext` (the consumer reads `ctx.value`,
@@ -183,6 +203,11 @@ export interface TediTableFilterContext<TValue = unknown, TData = unknown> {
   apply: () => void;
   /** Reset the filter (calls `setFilterValue(undefined)`) and close. */
   clear: () => void;
+  /**
+   * Close the popover without changing the applied filter. The draft is reset
+   * to the applied value.
+   */
+  cancel: () => void;
   /** TanStack `Column` for the column whose filter popover is open. */
   column: Column<TData>;
 }
@@ -195,11 +220,11 @@ export interface TediTableFilterContext<TValue = unknown, TData = unknown> {
 export interface TableFilterModalData {
   /** Column label shown as the modal title. */
   columnLabel: string;
-  applyLabel: string;
-  clearLabel: string;
+  /** Footer buttons to render, in display order, with their translated labels. */
+  actions: { action: TableFilterAction; label: string }[];
   /** Consumer-provided filter template. */
   template: TemplateRef<TediTableFilterContext<unknown, unknown>>;
-  /** Builds the filter context, wiring `apply` / `clear` to close the modal. */
+  /** Builds the filter context, wiring `apply` / `clear` / `cancel` to close the modal. */
   buildContext: (close: () => void) => TediTableFilterContext<unknown, unknown>;
 }
 
@@ -232,15 +257,17 @@ export type TediColumnDef<TData, TValue = unknown> = ColumnDef<
    */
   groupBy?: boolean | ((row: Row<TData>) => unknown);
   /**
-   * Opts the column into the built-in sort affordance. When `true` and the
-   * column's `header` is a string, the table renders a clickable sort button
-   * around the header title — the entire title becomes the affordance, an
-   * icon reflects the current sort direction, `aria-sort` is wired, and
-   * clicking toggles `asc → desc → none`.
+   * Opts the column into the built-in sort affordance: an icon reflects the
+   * current sort direction, `aria-sort` is wired, and clicking toggles
+   * `asc → desc → none`.
    *
-   * For fully custom sort UIs (e.g. combined sort + filter), provide a
-   * `TemplateRef` for `header` and call `column.toggleSorting()` yourself —
-   * the shorthand bows out when a non-string header is rendered.
+   * - String header: the whole title becomes the sort button.
+   * - Custom header (template or component): the header renders as-is,
+   *   followed by an icon-only sort button. Set `meta.label` so the button can
+   *   name the column (otherwise the column id is used).
+   *
+   * For a fully custom sort UI, leave `sortable` off, provide a `TemplateRef`
+   * for `header` and call `column.toggleSorting()` yourself.
    *
    * Pair with `sortingFn` on the same column to override the comparator
    * (built-in: `'alphanumeric'`, `'text'`, `'datetime'`, `'basic'`, `'auto'`,

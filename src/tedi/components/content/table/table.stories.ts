@@ -22,6 +22,7 @@ import { TediPaginationResultsDirective } from "../../navigation/pagination/pagi
 import type {
   TableControlColumnOrder,
   TableExpandTrigger,
+  TableFilterAction,
   TableSelectionMode,
   TableSize,
   TableState,
@@ -141,6 +142,7 @@ abstract class TableStoryHostBase {
   readonly filterModalBreakpoint = input<Breakpoint | false>("sm");
   readonly filterModalFullscreen = input<boolean | Breakpoint>(false);
   readonly filterPopoverWidth = input<PopoverWidth>("small");
+  readonly filterActions = input<TableFilterAction[]>(["clear", "apply"]);
   readonly maxHeight = input<number | undefined>(undefined);
   readonly activeRowId = input<string | undefined>(undefined);
   readonly placeholderRole = input<"alert" | "status" | undefined>(undefined);
@@ -167,6 +169,7 @@ type TediTableStoryArgs = {
   filterModalBreakpoint: Breakpoint | false;
   filterModalFullscreen: boolean | Breakpoint;
   filterPopoverWidth: PopoverWidth;
+  filterActions: TableFilterAction[];
   maxHeight: number | undefined;
   activeRowId: string | undefined;
   placeholderRole: "alert" | "status" | undefined;
@@ -251,6 +254,7 @@ const meta: Meta<TediTableStoryArgs> = {
     filterModalBreakpoint: "sm",
     filterModalFullscreen: false,
     filterPopoverWidth: "small",
+    filterActions: ["clear", "apply"],
     maxHeight: undefined,
     activeRowId: undefined,
     placeholderRole: undefined,
@@ -459,6 +463,16 @@ const meta: Meta<TediTableStoryArgs> = {
         category: "behavior",
         type: { summary: "boolean | Breakpoint" },
         defaultValue: { summary: "false" },
+      },
+    },
+    filterActions: {
+      description:
+        "Footer buttons of the column filter popover and modal, in display order. `apply` commits the draft, `clear` removes the filter, `cancel` closes and keeps the applied filter. A single column overrides it through `filterable: { actions }`.",
+      control: { type: "object" },
+      table: {
+        category: "behavior",
+        type: { summary: "('apply' | 'clear' | 'cancel')[]" },
+        defaultValue: { summary: '["clear", "apply"]' },
       },
     },
     filterPopoverWidth: {
@@ -2050,6 +2064,143 @@ export const Sortable: Story = {
   },
 };
 
+// ---------- SortableCustomHeader ----------
+@Component({
+  standalone: true,
+  selector: "tedi-sortable-custom-header-story",
+  imports: [
+    TediTableComponent,
+    FormsModule,
+    LabelComponent,
+    FormFieldComponent,
+    TextFieldComponent,
+    InfoButtonComponent,
+    PopoverComponent,
+    PopoverContentComponent,
+    PopoverTriggerDirective,
+  ],
+  template: `
+    <tedi-table
+      id="tedi-table-sortable-custom-header"
+      [data]="data"
+      [columns]="columns()"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+
+    <ng-template #roleHeader>
+      Roll
+      <tedi-popover position="bottom-start" [preventOverflow]="true">
+        <button
+          tedi-info-button
+          tedi-popover-trigger
+          aria-label="Rolli selgitus"
+        ></button>
+        <tedi-popover-content>
+          Töötaja põhiroll organisatsioonis.
+        </tedi-popover-content>
+      </tedi-popover>
+    </ng-template>
+
+    <ng-template #textFilter let-ctx>
+      <label tedi-label size="small" [attr.for]="ctx.column.id + '-filter'">
+        {{ ctx.column.columnDef.meta?.label }}
+      </label>
+      <tedi-form-field size="small">
+        <input
+          tedi-text-field
+          [id]="ctx.column.id + '-filter'"
+          type="text"
+          [ngModel]="ctx.value ?? ''"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="ctx.setValue($event)"
+        />
+      </tedi-form-field>
+    </ng-template>
+  `,
+})
+class SortableCustomHeaderStoryHostComponent extends TableStoryHostBase {
+  data = people;
+  pagination = DEFAULT_PAGINATION;
+
+  roleHeaderTpl = viewChild<TemplateRef<unknown>>("roleHeader");
+  textFilterTpl =
+    viewChild<TemplateRef<TediTableFilterContext<string, Person>>>(
+      "textFilter",
+    );
+
+  columns = computed<TediColumnDef<Person>[]>(() => [
+    { id: "name", header: "Nimi", accessorKey: "name", sortable: true },
+    {
+      id: "role",
+      header: this.roleHeaderTpl() ?? "Roll",
+      accessorKey: "role",
+      meta: { label: "Roll" },
+      sortable: true,
+      filterable: true,
+      filterFn: "includesString",
+      filterTemplate: this.textFilterTpl() ?? undefined,
+    } as TediColumnDef<Person>,
+    {
+      id: "location",
+      header: "Asukoht",
+      accessorKey: "location",
+      sortable: true,
+    },
+  ]);
+}
+
+/**
+ * Set `meta.label` on a column with a custom header: the sort and filter
+ * buttons use it to name the column for screen readers.
+ */
+export const SortableCustomHeader: Story = {
+  render: (args) => ({
+    moduleMetadata: { imports: [SortableCustomHeaderStoryHostComponent] },
+    props: args,
+    template: `<tedi-sortable-custom-header-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      source: {
+        language: "html",
+        code: `<!--
+  columns:
+    - id 'name' header 'Nimi' sortable: true
+    - id 'role' header roleHeaderTpl meta: { label: 'Roll' }
+        sortable: true filterable: true filterTemplate: textFilterTpl
+    - id 'location' header 'Asukoht' sortable: true
+-->
+<tedi-table [data]="data" [columns]="columns()" [pagination]="pagination" />
+
+<ng-template #roleHeader>
+  Roll
+  <tedi-popover position="bottom-start">
+    <button tedi-info-button tedi-popover-trigger aria-label="Rolli selgitus"></button>
+    <tedi-popover-content>Töötaja põhiroll organisatsioonis.</tedi-popover-content>
+  </tedi-popover>
+</ng-template>
+
+<ng-template #textFilter let-ctx>
+  <label tedi-label size="small" [attr.for]="ctx.column.id + '-filter'">
+    {{ ctx.column.columnDef.meta?.label }}
+  </label>
+  <tedi-form-field size="small">
+    <input
+      tedi-text-field
+      type="text"
+      [id]="ctx.column.id + '-filter'"
+      [ngModel]="ctx.value ?? ''"
+      [ngModelOptions]="{ standalone: true }"
+      (ngModelChange)="ctx.setValue($event)"
+    />
+  </tedi-form-field>
+</ng-template>`,
+      },
+    },
+  },
+};
+
 // ---------- Filters (built-in filter popover via `filterable: true`) ----------
 @Component({
   standalone: true,
@@ -2482,6 +2633,41 @@ export const Filters: Story = {
   },
 };
 
+export const FilterActions: Story = {
+  ...Filters,
+  args: { maxHeight: 480, filterActions: ["cancel", "apply"] },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`filterActions` picks the footer buttons of every filter popover " +
+          "and modal, in display order. `apply` commits the draft, `clear` " +
+          "removes the column filter, and `cancel` closes and keeps the " +
+          "applied filter as it was, discarding the unapplied draft. The " +
+          'default is `["clear", "apply"]`; this table uses ' +
+          '`["cancel", "apply"]`. \n\n' +
+          "`filterable: { actions }` overrides the list for one column, and " +
+          "an empty list hides the footer. The filter template also receives " +
+          "`cancel()` next to `apply()` and `clear()`, so a custom control can " +
+          "close the popover the same way.",
+      },
+      source: {
+        language: "html",
+        code: `<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [filterActions]="['cancel', 'apply']"
+/>
+
+<!--
+  One column can use its own list:
+    filterable: { actions: ['clear', 'cancel', 'apply'] }
+-->`,
+      },
+    },
+  },
+};
+
 // ---------- CollapsibleRows (nested sub-rows) ----------
 @Component({
   standalone: true,
@@ -2805,6 +2991,83 @@ export const CollapsibleRowsExpandedByDefault: Story = {
   [defaultState]="{ expanded: true }"
   [pagination]="pagination"
 />`,
+      },
+    },
+  },
+};
+
+// ---------- NestedTable ----------
+@Component({
+  standalone: true,
+  selector: "tedi-nested-table-story",
+  imports: [TediTableComponent],
+  template: `
+    <tedi-table
+      id="tedi-table-nested"
+      [data]="data"
+      [columns]="columns"
+      [renderSubComponent]="nestedTable"
+      [getRowCanExpand]="getRowCanExpand"
+      [defaultState]="{ expanded: true }"
+      [pagination]="pagination"
+      ${TABLE_APPEARANCE_BINDINGS}
+    />
+    <ng-template #nestedTable let-row>
+      <tedi-table
+        [id]="'tedi-table-nested-' + row.id"
+        [data]="row.original.subRows"
+        [columns]="nestedColumns"
+      />
+    </ng-template>
+  `,
+})
+class NestedTableStoryHostComponent extends TableStoryHostBase {
+  data = collapsiblePeople;
+  pagination = SHOWCASE_PAGINATION_4;
+  getRowCanExpand = (row: Row<CollapsibleRecord>) => !!row.original.subRows;
+
+  columns: TediColumnDef<CollapsibleRecord>[] = [
+    { id: "name", header: "Isik", accessorKey: "name" },
+    { id: "age", header: "Vanus", accessorKey: "age" },
+    { id: "visits", header: "Külastuste arv", accessorKey: "visits" },
+  ];
+
+  nestedColumns: TediColumnDef<CollapsibleRecord>[] = [
+    { id: "visits", header: "Külastuste arv", accessorKey: "visits" },
+    { id: "status", header: "Tõendi staatus", accessorKey: "status" },
+  ];
+}
+
+export const NestedTable: Story = {
+  args: { striped: true, verticalBorders: true, size: "small" },
+  render: (args) => ({
+    moduleMetadata: { imports: [NestedTableStoryHostComponent] },
+    props: args,
+    template: `<tedi-nested-table-story ${argsToTemplate(args)} />`,
+  }),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A `tedi-table` rendered inside `renderSubComponent` follows only " +
+          "its own inputs. The outer table here is striped, small and has " +
+          "vertical borders; the nested tables keep the default look.",
+      },
+      source: {
+        language: "html",
+        code: `<tedi-table
+  [data]="data"
+  [columns]="columns"
+  [renderSubComponent]="nestedTable"
+  [getRowCanExpand]="getRowCanExpand"
+  striped
+  verticalBorders
+  size="small"
+/>
+
+<ng-template #nestedTable let-row>
+  <tedi-table [data]="row.original.subRows" [columns]="nestedColumns" />
+</ng-template>`,
       },
     },
   },

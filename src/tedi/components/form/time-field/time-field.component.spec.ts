@@ -58,6 +58,25 @@ describe("TimeFieldComponent", () => {
       expect(input?.id).toBe("test-id");
     });
 
+    it("sets the name attribute when provided", () => {
+      fixture.componentRef.setInput("name", "start-time");
+      fixture.detectChanges();
+
+      expect(el.querySelector("input")?.getAttribute("name")).toBe(
+        "start-time",
+      );
+    });
+
+    it("omits the name attribute when not set", () => {
+      expect(el.querySelector("input")?.hasAttribute("name")).toBe(false);
+    });
+
+    it("sets no aria-describedby when nothing describes the field", () => {
+      expect(el.querySelector("input")?.hasAttribute("aria-describedby")).toBe(
+        false,
+      );
+    });
+
     it("should show placeholder when provided", () => {
       fixture.componentRef.setInput("placeholder", "hh:mm");
       fixture.detectChanges();
@@ -916,7 +935,7 @@ describe("TimeFieldComponent", () => {
       expect(onChange).not.toHaveBeenCalled();
     });
 
-    it("should close the popover when closeOnSelect is true", () => {
+    it("should NOT close the popover on a value change alone", () => {
       fixture.componentRef.setInput("closeOnSelect", true);
       fixture.detectChanges();
 
@@ -926,6 +945,21 @@ describe("TimeFieldComponent", () => {
 
       component.onPickerValueChange("09:15");
 
+      expect(hideSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("onPickerSelectionCommitted", () => {
+    it("should close the popover when closeOnSelect is true", () => {
+      fixture.componentRef.setInput("closeOnSelect", true);
+      fixture.detectChanges();
+
+      const hideSpy = jest
+        .spyOn(component.popover()!, "hidePopover")
+        .mockImplementation(() => {});
+
+      component.onPickerSelectionCommitted();
+
       expect(hideSpy).toHaveBeenCalled();
     });
 
@@ -934,7 +968,7 @@ describe("TimeFieldComponent", () => {
         .spyOn(component.popover()!, "hidePopover")
         .mockImplementation(() => {});
 
-      component.onPickerValueChange("09:15");
+      component.onPickerSelectionCommitted();
 
       expect(hideSpy).not.toHaveBeenCalled();
     });
@@ -994,6 +1028,32 @@ describe("TimeFieldComponent", () => {
       component.onPickerOpen();
 
       expect(component.dropdownMinWidth()).toBe(240);
+    });
+
+    it("should align the picker, then focus it, after render", () => {
+      component.popover()!.showPopover();
+      fixture.detectChanges();
+      const picker = component.timePicker()!;
+      const scrollSpy = jest
+        .spyOn(picker, "scrollToSelected")
+        .mockImplementation(() => {});
+      // A real focus inside TestBed.tick re-enters tick (NG0101).
+      const focusSpy = jest
+        .spyOn(picker, "focusActiveItem")
+        .mockImplementation(() => {});
+
+      component.onPickerOpen();
+      expect(scrollSpy).not.toHaveBeenCalled();
+
+      TestBed.tick();
+
+      expect(scrollSpy).toHaveBeenCalledTimes(1);
+      expect(focusSpy).toHaveBeenCalledTimes(1);
+      expect(scrollSpy.mock.invocationCallOrder[0]).toBeLessThan(
+        focusSpy.mock.invocationCallOrder[0],
+      );
+
+      component.popover()!.hidePopover();
     });
 
     it("should reset dropdown min-width for non-dropdown variants", () => {
@@ -1207,12 +1267,75 @@ describe("TimeFieldComponent inside FormFieldComponent", () => {
     expect(el.querySelector("tedi-feedback-text")).toBeTruthy();
   });
 
+  it("associates the feedback text with the input via aria-describedby", () => {
+    const feedbackId = el
+      .querySelector("tedi-feedback-text")
+      ?.getAttribute("id");
+
+    expect(feedbackId).toBeTruthy();
+    expect(el.querySelector("input")?.getAttribute("aria-describedby")).toBe(
+      feedbackId,
+    );
+  });
+
   it("should sync FormControl value", () => {
     host.control.setValue("09:00");
     fixture.detectChanges();
 
     const input = el.querySelector("input");
     expect(input?.value).toBe("09:00");
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [
+    TimeFieldComponent,
+    FormFieldComponent,
+    LabelComponent,
+    FeedbackTextComponent,
+  ],
+  template: `
+    <p id="own-hint">Own hint</p>
+    <tedi-form-field>
+      <label tedi-label for="described-time">Time</label>
+      <tedi-time-field inputId="described-time" aria-describedby="own-hint" />
+      @if (showFeedback) {
+        <tedi-feedback-text id="fb" text="Error" type="error" />
+      }
+    </tedi-form-field>
+  `,
+})
+class DescribedByHostComponent {
+  showFeedback = false;
+}
+
+describe("TimeFieldComponent aria-describedby", () => {
+  function createHost(showFeedback: boolean): HTMLElement {
+    TestBed.configureTestingModule({
+      imports: [DescribedByHostComponent],
+      providers: [{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" }],
+    });
+    const fixture = TestBed.createComponent(DescribedByHostComponent);
+    fixture.componentInstance.showFeedback = showFeedback;
+    fixture.detectChanges();
+    return fixture.nativeElement;
+  }
+
+  function describedBy(el: HTMLElement): string | null {
+    return (
+      el.querySelector("input.tedi-time-field__input") as HTMLInputElement
+    ).getAttribute("aria-describedby");
+  }
+
+  it("forwards an aria-describedby set on the host to the input", () => {
+    expect(describedBy(createHost(false))).toBe("own-hint");
+  });
+
+  it("merges the host's own ids with the ones form-field pushes", () => {
+    const ids = describedBy(createHost(true))?.split(" ") ?? [];
+    expect(ids).toContain("own-hint");
+    expect(ids).toContain("fb");
   });
 });
 

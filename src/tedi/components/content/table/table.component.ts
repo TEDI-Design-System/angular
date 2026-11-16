@@ -12,6 +12,7 @@ import {
   Injector,
   input,
   PLATFORM_ID,
+  runInInjectionContext,
   signal,
   Signal,
   TemplateRef,
@@ -39,6 +40,7 @@ import {
   createAngularTable,
   type ExpandedState,
   type FilterFn,
+  type Header,
   FlexRenderDirective,
   getCoreRowModel,
   getExpandedRowModel,
@@ -93,6 +95,7 @@ import type {
   TableControlColumn,
   TableControlColumnOrder,
   TableExpandTrigger,
+  TableFilterAction,
   TableFilterModalData,
   TableFilterOptions,
   TablePaginationOptions,
@@ -522,6 +525,14 @@ export class TediTableComponent<TData> {
    */
   readonly filterPopoverWidth = input<PopoverWidth>("small");
   /**
+   * Footer buttons of the column filter popover and modal, in display order:
+   * `"apply"` commits the draft, `"clear"` removes the filter, `"cancel"`
+   * closes and keeps the applied filter. A single column can override it
+   * through `filterable: { actions }`.
+   * @default ["clear", "apply"]
+   */
+  readonly filterActions = input<TableFilterAction[]>(["clear", "apply"]);
+  /**
    * Enables pagination and configures the bottom paginator slot. This is also
    * the source of truth for `pageSize` / `pageSizeOptions` — the top slot
    * (if any) shares the same state. Pass `true` to enable with defaults,
@@ -681,8 +692,6 @@ export class TediTableComponent<TData> {
   );
 
   protected readonly placeholderLabel = this.translation.track("table.no-data");
-  protected readonly rowDetailsLabel =
-    this.translation.track("table.row-details");
   protected readonly dragColumnLabel =
     this.translation.track("table.drag-column");
   protected readonly dragRowLabel = this.translation.track("table.drag-row");
@@ -1355,6 +1364,8 @@ export class TediTableComponent<TData> {
   }
 
   protected handleRowClick(event: Event, row: Row<TData>): void {
+    // Clicks on rows that are neither interactive nor expand on click are ignored.
+    if (!this.interactive() && !this.rowExpandsOnClick(row)) return;
     // Clicks that land on an interactive control inside a cell (checkbox,
     // link, button, form field, …) must not also activate the row or toggle
     // its expansion — so consumers don't need to add `stopPropagation` by hand.
@@ -2318,21 +2329,47 @@ export class TediTableComponent<TData> {
     return typeof value === "number";
   }
 
+  /** True when the column sets `sortable: true` and TanStack can sort it. */
+  private hasBuiltInSort(column: Column<TData, unknown>): boolean {
+    const def = column.columnDef as TediColumnDef<TData>;
+    return def.sortable === true && column.getCanSort();
+  }
+
   /**
-   * Returns true when the column opted into the built-in sort affordance
-   * (`sortable: true` on its `TediColumnDef`), TanStack reports it can sort
-   * (`enableSorting !== false`), and the rendered header content is a plain
-   * string / number. Custom header `TemplateRef`s and functions bow out of
-   * the shorthand and render via `flexRender` as-is.
+   * True for a sortable column with a plain string / number header: the title
+   * itself becomes the sort button.
    */
   protected shouldRenderSortableHeader(
     column: Column<TData, unknown>,
     content: unknown,
   ): boolean {
-    const def = column.columnDef as TediColumnDef<TData>;
-    if (def.sortable !== true) return false;
-    if (!column.getCanSort()) return false;
+    if (!this.hasBuiltInSort(column)) return false;
     return typeof content === "string" || typeof content === "number";
+  }
+
+  /**
+   * True for a sortable column with a custom header (template or component):
+   * the header renders as-is and an icon-only sort button follows it.
+   */
+  protected shouldRenderSortButtonAfterHeader(
+    header: Header<TData, unknown>,
+  ): boolean {
+    if (!this.hasBuiltInSort(header.column)) return false;
+    const def = header.column.columnDef.header;
+    const content =
+      typeof def === "function"
+        ? runInInjectionContext(this.injector, () => def(header.getContext()))
+        : def;
+    return typeof content !== "string" && typeof content !== "number";
+  }
+
+  /** Accessible name of the icon-only sort button: next action + column. */
+  protected sortAriaLabel(column: Column<TData, unknown>): string {
+    return this.translation.translate(
+      "table.sort",
+      column.getIsSorted(),
+      this.resolveColumnLabel(column),
+    );
   }
 
   /**
@@ -2424,12 +2461,16 @@ export class TediTableComponent<TData> {
     return this.translation.translate("table.filter-button-aria", label);
   }
 
-  protected filterApplyLabel(): string {
-    return this.translation.translate("table.filter-apply");
+  /** Footer buttons for the column's filter: the column's own `actions`, or
+   *  the table's `filterActions`. Repeated entries are dropped. */
+  protected filterActionsFor(col: Column<TData, unknown>): TableFilterAction[] {
+    const actions =
+      this.resolveFilterOptions(col)?.actions ?? this.filterActions();
+    return [...new Set(actions)];
   }
 
-  protected filterClearLabel(): string {
-    return this.translation.translate("table.filter-clear");
+  protected filterActionLabel(action: TableFilterAction): string {
+    return this.translation.translate(`table.filter-${action}`);
   }
 
   private getFilterDraft(
@@ -2506,7 +2547,7 @@ export class TediTableComponent<TData> {
    * Builds the per-column context object handed to the consumer's
    * `filterTemplate`. `$implicit` is wired to the context itself so
    * `<ng-template let-ctx>` resolves `ctx.value`, `ctx.setValue`,
-   * `ctx.apply()`, `ctx.clear()` and `ctx.column` without extra `let-*`
+   * `ctx.apply()`, `ctx.clear()`, `ctx.cancel()` and `ctx.column` without extra `let-*`
    * destructuring.
    */
   protected filterContextFor(
@@ -2517,8 +2558,8 @@ export class TediTableComponent<TData> {
   }
 
   /**
-   * Builds the filter context, wiring `apply` / `clear` to commit the draft and
-   * then run `close` (hide the popover, or close the modal — whichever opened
+   * Builds the filter context, wiring `apply` / `clear` / `cancel` to update
+   * the draft and the applied filter and then run `close` (hide the popover, or close the modal — whichever opened
    * the filter). Shared by the popover and the modal renderers.
    */
   private buildFilterContext(
@@ -2536,6 +2577,10 @@ export class TediTableComponent<TData> {
       clear: () => {
         draft.set(undefined);
         col.setFilterValue(undefined);
+        close();
+      },
+      cancel: () => {
+        draft.set(col.getFilterValue());
         close();
       },
       column: col,
@@ -2572,8 +2617,10 @@ export class TediTableComponent<TData> {
       ariaLabel: this.filterAriaLabel(col),
       data: {
         columnLabel: this.resolveColumnLabel(col),
-        applyLabel: this.filterApplyLabel(),
-        clearLabel: this.filterClearLabel(),
+        actions: this.filterActionsFor(col).map((action) => ({
+          action,
+          label: this.filterActionLabel(action),
+        })),
         template: tpl as TemplateRef<TediTableFilterContext<unknown, unknown>>,
         buildContext: (close: () => void) =>
           this.buildFilterContext(col, close) as TediTableFilterContext<
@@ -2584,22 +2631,12 @@ export class TediTableComponent<TData> {
     });
   }
 
-  protected handleFilterApply(
+  protected handleFilterAction(
+    action: TableFilterAction,
     col: Column<TData, unknown>,
     popover: PopoverComponent,
   ): void {
-    const draft = this.getFilterDraft(col.id, col.getFilterValue());
-    col.setFilterValue(draft());
-    popover.hidePopover(true);
-  }
-
-  protected handleFilterClear(
-    col: Column<TData, unknown>,
-    popover: PopoverComponent,
-  ): void {
-    this.getFilterDraft(col.id, col.getFilterValue()).set(undefined);
-    col.setFilterValue(undefined);
-    popover.hidePopover(true);
+    this.filterContextFor(col, popover)[action]();
   }
 
   /**
