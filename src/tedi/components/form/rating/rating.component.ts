@@ -329,6 +329,11 @@ export class RatingComponent implements ControlValueAccessor {
         );
       }
     });
+
+    // The items' `mouseleave` can't fire once readOnly removes them, so drop a stale preview here.
+    effect(() => {
+      if (!this.interactive()) this.hoverValue.set(null);
+    });
   }
 
   writeValue(value: number | null): void {
