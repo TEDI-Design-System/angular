@@ -2538,6 +2538,44 @@ describe("SelectComponent", () => {
       expect(select.triggerRef()?.nativeElement).toBe(getTrigger());
       expect(document.activeElement).toBe(getTrigger());
     }));
+
+    it("should keep focus on another element that was clicked while the dropdown was open", fakeAsync(() => {
+      const other = document.createElement("button");
+      document.body.appendChild(other);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(true);
+
+      other.focus();
+      other.click();
+      fixture.detectChanges();
+      tick(500);
+      fixture.detectChanges();
+
+      expect(select.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(other);
+
+      other.remove();
+    }));
+
+    it("should restore focus to the trigger when closing with Escape", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const listbox = document.querySelector("[cdkListbox]") as HTMLElement;
+      listbox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+      );
+      fixture.detectChanges();
+      tick(500);
+      fixture.detectChanges();
+
+      expect(select.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(getTrigger());
+    }));
   });
 
   describe("external label association", () => {
