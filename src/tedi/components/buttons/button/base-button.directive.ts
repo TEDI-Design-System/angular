@@ -27,7 +27,10 @@ export class BaseButtonDirective implements AfterContentChecked {
     const hostElement = this.host.nativeElement as HTMLElement;
     const nodes = Array.from(hostElement.childNodes).filter(
       (node) =>
-        node.nodeType === Node.ELEMENT_NODE ||
+        (node.nodeType === Node.ELEMENT_NODE &&
+          !(node as Element).matches(
+            ".tedi-button__spinner, .tedi-button__loading-description",
+          )) ||
         (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()),
     );
     const nodeCount = nodes.length;

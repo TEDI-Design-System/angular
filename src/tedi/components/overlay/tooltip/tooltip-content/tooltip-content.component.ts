@@ -22,6 +22,7 @@ export type TooltipWidth = "none" | "small" | "medium" | "large";
     "[class]": "classes()",
     "[id]": "tooltip.descriptionId",
     role: "tooltip",
+    "[attr.aria-hidden]": "ariaHidden() || null",
   },
 })
 export class TooltipContentComponent {
@@ -30,6 +31,13 @@ export class TooltipContentComponent {
    * @default medium
    */
   maxWidth = input<TooltipWidth>("medium");
+  /**
+   * Makes the tooltip visual-only: screen readers skip this content and the trigger is not
+   * described by it. Use when it repeats the trigger's accessible name, e.g. on an icon-only
+   * button whose `aria-label` matches the tooltip text.
+   * @default false
+   */
+  ariaHidden = input(false);
 
   protected readonly tooltip = inject(TooltipComponent);
 

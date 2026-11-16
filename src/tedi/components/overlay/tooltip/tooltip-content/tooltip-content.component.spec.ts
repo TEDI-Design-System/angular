@@ -20,10 +20,12 @@ class MockTooltipComponent {
   imports: [TooltipContentComponent],
   template: `<tedi-tooltip-content
     [maxWidth]="width()"
+    [ariaHidden]="hidden()"
   ></tedi-tooltip-content>`,
 })
 class TestHostComponent {
   width = input<TooltipWidth>("medium");
+  hidden = input(false);
   content = viewChild.required(TooltipContentComponent);
 }
 
@@ -53,6 +55,15 @@ describe("TooltipContentComponent", () => {
 
   it("should create component", () => {
     expect(component).toBeTruthy();
+  });
+
+  it("should hide the content from screen readers when ariaHidden is set", () => {
+    expect(hostEl.hasAttribute("aria-hidden")).toBe(false);
+
+    fixture.componentRef.setInput("hidden", true);
+    fixture.detectChanges();
+
+    expect(hostEl.getAttribute("aria-hidden")).toBe("true");
   });
 
   it("should have default maxWidth value", () => {

@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TooltipTriggerComponent } from "./tooltip-trigger.component";
 import { TooltipComponent } from "../tooltip.component";
-import { Component, viewChild } from "@angular/core";
+import { Component, signal, viewChild } from "@angular/core";
 import { Renderer2 } from "@angular/core";
 
 class MockTooltipComponent {
   descriptionId = "mock-tooltip-id";
+  isVisualOnly = signal(false);
   isContentHovered = jest.fn(() => false);
   timeoutDelay = jest.fn(() => 100);
   hideTimeout?: ReturnType<typeof setTimeout>;
@@ -355,6 +356,28 @@ describe("TooltipTriggerComponent", () => {
       fixture.detectChanges();
 
       expect(btn.getAttribute("aria-describedby")).toBe("mock-tooltip-id");
+    });
+
+    it("should keep existing aria-describedby ids", () => {
+      hostEl.innerHTML = `<button aria-describedby="hint">Click me</button>`;
+      const btn = hostEl.querySelector("button")!;
+      component.ngAfterContentChecked();
+      fixture.detectChanges();
+
+      expect(btn.getAttribute("aria-describedby")).toBe("hint mock-tooltip-id");
+    });
+
+    it("should not describe the element when the tooltip is aria-hidden", () => {
+      const tooltip = TestBed.inject(
+        TooltipComponent,
+      ) as unknown as MockTooltipComponent;
+      tooltip.isVisualOnly.set(true);
+      hostEl.innerHTML = `<button aria-describedby="hint">Click me</button>`;
+      const btn = hostEl.querySelector("button")!;
+      component.ngAfterContentChecked();
+      fixture.detectChanges();
+
+      expect(btn.getAttribute("aria-describedby")).toBe("hint");
     });
 
     it("should resolve the first focusable descendant when the child is a non-focusable wrapper", () => {
