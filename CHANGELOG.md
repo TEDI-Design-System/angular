@@ -1,3 +1,12 @@
+# [10.0.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.17...angular-10.0.0-rc.18) (2026-11-17)
+
+
+### Bug Fixes
+
+* **closing-button:** render label once as title or aria-label [#900](https://github.com/TEDI-Design-System/angular/issues/900) ([#912](https://github.com/TEDI-Design-System/angular/issues/912)) ([e023558](https://github.com/TEDI-Design-System/angular/commit/e023558c85901e11ec7c77b3f76d22a9e6eca2fb))
+* **label:** announce required state once [#889](https://github.com/TEDI-Design-System/angular/issues/889) ([#902](https://github.com/TEDI-Design-System/angular/issues/902)) ([8fd009c](https://github.com/TEDI-Design-System/angular/commit/8fd009c809a589100a6f883750d334340dbd966c))
+* **table:** keep control labels stable and name headers by text [#893](https://github.com/TEDI-Design-System/angular/issues/893) [#894](https://github.com/TEDI-Design-System/angular/issues/894) ([#907](https://github.com/TEDI-Design-System/angular/issues/907)) ([4f4dece](https://github.com/TEDI-Design-System/angular/commit/4f4dece387a3351a2467f5614d1a0924a1aff890))
+
 # [10.0.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.16...angular-10.0.0-rc.17) (2026-11-17)
 
 
