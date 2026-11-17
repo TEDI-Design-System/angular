@@ -247,11 +247,11 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 - **`tedi-file-dropzone` is named by a `tedi-label`, not by its own text.** `instructions` is the
   sentence inside the zone; the field's name comes from a `<label tedi-label>` whose `for` matches
   `inputId`, which the zone references with `aria-labelledby` so both are announced, label first. A
-  required dropzone needs that label to be visible and marked `[required]`: the zone is a button,
-  which ARIA gives no `aria-required`, and the file input behind it is hidden from assistive
-  technology, so the label is the only place the required state can be announced from. Don't wrap it
-  in `tedi-form-field` — that would place projected feedback after the file list rather than under
-  the dropzone.
+  required dropzone is marked in two places: `[required]` on the label draws the asterisk, which is
+  `aria-hidden`, and `[required]` on the dropzone adds the word to the zone's accessible name. The
+  zone is a button, which ARIA gives no `aria-required`, and the file input behind it is hidden from
+  assistive technology, so the name is the only carrier left. Don't wrap it in `tedi-form-field` —
+  that would place projected feedback after the file list rather than under the dropzone.
 - **The drop zone is a `div[role="button"]`, not a `<label>` or a native `<button>`** — the same shape
   React and react-dropzone use, and the reason is screen readers, not styling. The file input is
   `display: none` and out of the tab order: while it was the focus target, closing the file dialog

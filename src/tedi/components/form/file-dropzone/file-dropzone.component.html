@@ -27,6 +27,9 @@
   <span class="tedi-file-dropzone__instructions" [id]="instructionsId()">{{
     resolvedInstructions()
   }}</span>
+  @if (required()) {
+    <span class="sr-only" [id]="requiredId()">{{ requiredLabel() }}</span>
+  }
 </div>
 
 <input

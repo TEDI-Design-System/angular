@@ -347,6 +347,14 @@ export const translationsMap = {
     en: "All files removed",
     ru: "Все файлы удалены",
   },
+  "file-dropzone.required": {
+    description:
+      "Appended to the dropzone's accessible name when the field is required",
+    components: ["FileDropzone"],
+    et: "Kohustuslik väli",
+    en: "Required field",
+    ru: "Обязательное поле",
+  },
   "file-dropzone.instructions": {
     description: "Default instructions inside the dropzone",
     components: ["FileDropzone"],

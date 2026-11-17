@@ -129,10 +129,8 @@ class PreIdLabelledHostComponent {}
   standalone: true,
   imports: [FileDropzoneComponent, LabelComponent],
   template: `
-    <label tedi-label for="kohustuslik" [required]="true"
-      >Avalduse failid</label
-    >
-    <tedi-file-dropzone inputId="kohustuslik" />
+    <label tedi-label for="taotlus" [required]="true">Avalduse failid</label>
+    <tedi-file-dropzone inputId="taotlus" [required]="true" />
   `,
 })
 class RequiredLabelHostComponent {}
@@ -1060,23 +1058,32 @@ describe("FileDropzoneComponent", () => {
       );
     });
 
-    it("announces the required state through the label", () => {
+    it("names the zone as required when the field is", () => {
       const host = TestBed.createComponent(RequiredLabelHostComponent);
       host.detectChanges();
       host.detectChanges();
 
-      const label = host.debugElement.query(By.css("label")).nativeElement;
-
       // The zone is a button, which ARIA gives no `aria-required`, and the file
-      // input behind it is hidden — so naming the zone from the label is what
-      // carries the required state. The asterisk is `aria-hidden`; the word
-      // beside it is not.
-      expect(label.querySelector(".sr-only")?.textContent).toContain(
-        "required",
-      );
+      // input behind it is hidden from assistive technology — so the word joins
+      // the accessible name instead. The label's asterisk is `aria-hidden`.
       expect(zoneOf(host).getAttribute("aria-labelledby")).toBe(
-        "kohustuslik-label kohustuslik-instructions",
+        "taotlus-label taotlus-instructions taotlus-required",
       );
+      expect(
+        host.debugElement.query(By.css("#taotlus-required")).nativeElement
+          .textContent,
+      ).toBe("file-dropzone.required");
+    });
+
+    it("leaves the name alone when the field is not required", () => {
+      const host = TestBed.createComponent(LabelledHostComponent);
+      host.detectChanges();
+      host.detectChanges();
+
+      expect(zoneOf(host).getAttribute("aria-labelledby")).toBe(
+        "avaldus-label avaldus-instructions",
+      );
+      expect(host.debugElement.query(By.css(".sr-only"))).toBeNull();
     });
 
     it("merges a consumer's own aria-describedby with its own ids", () => {

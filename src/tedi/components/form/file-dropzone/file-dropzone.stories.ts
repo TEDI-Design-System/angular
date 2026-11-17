@@ -154,6 +154,16 @@ export default {
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
+    required: {
+      description:
+        "Announces the field as required. The zone is a button, which ARIA gives no `aria-required`, so the word joins its accessible name — mark the `tedi-label` `[required]` too for the asterisk.",
+      control: "boolean",
+      table: {
+        category: "inputs",
+        type: { summary: "boolean" },
+        defaultValue: { summary: "false" },
+      },
+    },
     accept: {
       description:
         "Allowed file types as comma-separated extensions and MIME types (`.pdf`, `image/*`).",
@@ -342,7 +352,7 @@ export const WithFileSize: Story = {
  * dropzone announces it ahead of its own instructions.
  */
 export const WithLabel: Story = {
-  args: { inputId: "avaldus", maxSize: 30 * 1024 ** 2 },
+  args: { inputId: "avaldus", maxSize: 30 * 1024 ** 2, required: true },
   render: (args) => ({
     props: { ...args },
     template: `

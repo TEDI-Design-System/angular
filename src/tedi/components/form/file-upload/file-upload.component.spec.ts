@@ -683,7 +683,7 @@ describe("FileUploadComponent", () => {
       const id = fileInput(fixture).id;
 
       expect(text("tedi-feedback-text")).toBe(
-        "file-upload.accept .pdf, .txt. file-upload.max-size 500 KB",
+        "file-upload.accept .pdf, .txt. file-upload.max-size 500 kB",
       );
       expect(addButton(fixture).getAttribute("aria-describedby")).toBe(
         `${id}-hint`,
@@ -835,7 +835,9 @@ describe("FileUploadComponent", () => {
       component.fileRemove.subscribe((file) => removed.push(file.name ?? ""));
 
       const clear = clearButton(fixture)!;
-      expect(clear.getAttribute("aria-label")).toBe("clear");
+      // `tedi-closing-button` renders its label as `title` unless `showTitle`
+      // is off, and the title names the button.
+      expect(clear.getAttribute("title")).toBe("clear");
 
       clear.click();
       await fixture.whenStable();

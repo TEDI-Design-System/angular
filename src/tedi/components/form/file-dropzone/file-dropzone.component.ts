@@ -171,6 +171,13 @@ export class FileDropzoneComponent
    */
   readonly instructions = input<string>();
   /**
+   * Announces the field as required. The zone is a button, which ARIA gives no
+   * `aria-required`, so the word joins its accessible name — mark the
+   * `tedi-label` `[required]` too for the asterisk.
+   * @default false
+   */
+  readonly required = input(false, { transform: booleanAttribute });
+  /**
    * Allowed file types as comma-separated extensions and MIME types (`.pdf`,
    * `image/*`).
    */
@@ -275,6 +282,10 @@ export class FileDropzoneComponent
     () => `${this.resolvedId()}-instructions`,
   );
 
+  protected readonly requiredId = computed(
+    () => `${this.resolvedId()}-required`,
+  );
+
   /** Id of the `tedi-label` naming this field, once one is found. */
   private readonly labelId = signal<string | undefined>(undefined);
 
@@ -282,8 +293,16 @@ export class FileDropzoneComponent
   // label points at is hidden.
   protected readonly labelledBy = computed(() => {
     const labelId = this.labelId();
-    return labelId ? `${labelId} ${this.instructionsId()}` : null;
+    const ids = [labelId, this.instructionsId()];
+
+    if (this.required()) ids.push(this.requiredId());
+
+    return labelId ? ids.join(" ") : null;
   });
+
+  protected readonly requiredLabel = this.translations.track(
+    "file-dropzone.required",
+  );
 
   protected readonly isDragActive = computed(() => this.dragDepth() > 0);
 
