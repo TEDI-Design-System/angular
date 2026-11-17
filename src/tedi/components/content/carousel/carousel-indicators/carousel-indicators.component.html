@@ -19,6 +19,7 @@
       [attr.aria-label]="
         translationService.track('carousel.showSlide', indicator.index + 1)()
       "
+      [attr.aria-current]="indicator.active ? 'true' : null"
       [ngClass]="indicator.active ? 'tedi-carousel__indicator--active' : null"
       (click)="handleIndicatorClick(indicator.index)"
     ></button>
