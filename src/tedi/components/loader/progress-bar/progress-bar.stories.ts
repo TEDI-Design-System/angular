@@ -111,7 +111,7 @@ export default {
     },
     required: {
       description:
-        "@deprecated A progress bar is not a form field. Renders a red `*` after the label.",
+        "Renders a red `*` after the label to mark the field required. Ignored when `label` is not set.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -257,6 +257,7 @@ export const Sizes: Story = {
       <tedi-progress-bar
         [value]="20"
         label="Edenemisriba pealkiri"
+        [required]="true"
         labelPosition="top"
         valuePosition="horizontal"
       >
@@ -271,6 +272,7 @@ export const Sizes: Story = {
       <tedi-progress-bar
         [value]="20"
         label="Edenemisriba pealkiri"
+        [required]="true"
         labelPosition="top"
         valuePosition="bottom"
       >
@@ -285,6 +287,7 @@ export const Sizes: Story = {
       <tedi-progress-bar
         [value]="20"
         label="Edenemisriba pealkiri"
+        [required]="true"
         labelPosition="horizontal"
         valuePosition="horizontal"
       >
@@ -299,6 +302,7 @@ export const Sizes: Story = {
       <tedi-progress-bar
         [value]="20"
         label="Edenemisriba pealkiri"
+        [required]="true"
         labelPosition="horizontal"
         valuePosition="bottom"
       >
@@ -324,7 +328,7 @@ export const WithLabel: Story = {
   render: () => ({
     template: `
       <tedi-row [cols]="1" [gapY]="4">
-        <tedi-progress-bar [value]="40" label="Progress" valuePosition="bottom">
+        <tedi-progress-bar [value]="40" label="Progress" [required]="true" valuePosition="bottom">
           <tedi-feedback-text text="Üleslaadimine" type="hint" />
         </tedi-progress-bar>
         <tedi-progress-bar [value]="40" label="Küsitluses osalenutest olid vanuses 15-18" labelPosition="top" [md]="{ labelPosition: 'horizontal' }" />
@@ -380,6 +384,7 @@ export const Responsive: Story = {
       <tedi-progress-bar
         [value]="40"
         label="Edenemisriba pealkiri"
+        [required]="true"
         labelPosition="top"
         valuePosition="bottom"
         [md]="{ labelPosition: 'horizontal', valuePosition: 'horizontal' }"

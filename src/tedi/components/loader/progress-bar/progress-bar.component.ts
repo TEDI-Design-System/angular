@@ -86,11 +86,9 @@ export class ProgressBarComponent {
    */
   labelPosition = input<ProgressBarLabelPosition>("top");
   /**
-   * Renders a red `*` after the label.
+   * Render a red `*` after the label to indicate a required field.
    * Has no effect when `label` is not set.
    * @default false
-   * @deprecated A progress bar is not a form field, so it has no replacement.
-   * This input will be removed from future versions.
    */
   required = input(false, { transform: booleanAttribute });
   /**
