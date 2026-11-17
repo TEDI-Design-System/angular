@@ -1,3 +1,10 @@
+# [10.0.0-rc.21](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.20...angular-10.0.0-rc.21) (2026-11-17)
+
+
+### Bug Fixes
+
+* **calendar:** shorten day labels and hide weekday headers [#895](https://github.com/TEDI-Design-System/angular/issues/895) ([#908](https://github.com/TEDI-Design-System/angular/issues/908)) ([34b05ed](https://github.com/TEDI-Design-System/angular/commit/34b05eda897a2e86ab28656a9a03e22725cf3f14))
+
 # [10.0.0-rc.20](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.19...angular-10.0.0-rc.20) (2026-11-17)
 
 
