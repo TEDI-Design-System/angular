@@ -586,29 +586,79 @@ describe("CalendarDayGridComponent", () => {
       expect(gridTable().getAttribute("aria-multiselectable")).toBe("true");
     });
 
-    it("exposes a long aria-label on each weekday header", () => {
-      const headers = fixture.debugElement.queryAll(
-        By.css(".tedi-calendar-day-grid__weekday"),
-      );
-      const labels = headers.map((h) =>
-        (h.nativeElement as HTMLElement).getAttribute("aria-label"),
-      );
-      // Estonian locale "et" returns "esmaspäev" .. "pühapäev" for `long`.
-      for (const label of labels) {
-        expect(label && label.length > 3).toBe(true);
-      }
-    });
-
-    it("keeps the narrow weekday abbreviation as visible header text (not aria-hidden) so headers aren't empty, while the full name is the accessible name via aria-label", () => {
+    it("hides the weekday header row from assistive technology", () => {
+      const thead = gridTable().querySelector("thead") as HTMLElement;
+      expect(thead.getAttribute("aria-hidden")).toBe("true");
+      expect(thead.querySelector("[aria-label]")).toBeNull();
       const headers = fixture.debugElement.queryAll(
         By.css(".tedi-calendar-day-grid__weekday"),
       );
       for (const h of headers) {
-        const el = h.nativeElement as HTMLElement;
-        expect(el.textContent?.trim().length).toBeGreaterThan(0);
-        expect(el.querySelector("[aria-hidden='true']")).toBeNull();
-        expect((el.getAttribute("aria-label") ?? "").length).toBeGreaterThan(3);
+        expect(
+          (h.nativeElement as HTMLElement).textContent?.trim().length,
+        ).toBeGreaterThan(0);
       }
+    });
+
+    it("names each day with weekday, day and month but no year", () => {
+      expect(
+        buttonForDay(new Date(2024, 4, 13))?.getAttribute("aria-label"),
+      ).toBe("esmaspäev, 13. mai");
+    });
+
+    it("names outside-month days with their own month", () => {
+      expect(
+        buttonForDay(new Date(2024, 3, 29))?.getAttribute("aria-label"),
+      ).toBe("esmaspäev, 29. aprill");
+    });
+
+    it("adds the year only to outside days from another year than the grid", () => {
+      fixture.componentRef.setInput("month", new Date(2027, 0, 1));
+      fixture.detectChanges();
+      expect(
+        buttonForDay(new Date(2027, 0, 1))?.getAttribute("aria-label"),
+      ).toBe("reede, 1. jaanuar");
+      expect(
+        buttonForDay(new Date(2026, 11, 30))?.getAttribute("aria-label"),
+      ).toBe("kolmapäev, 30. detsember 2026");
+
+      fixture.componentRef.setInput("month", new Date(2026, 11, 1));
+      fixture.detectChanges();
+      expect(
+        buttonForDay(new Date(2026, 11, 31))?.getAttribute("aria-label"),
+      ).toBe("neljapäev, 31. detsember");
+      expect(
+        buttonForDay(new Date(2027, 0, 1))?.getAttribute("aria-label"),
+      ).toBe("reede, 1. jaanuar 2027");
+    });
+
+    it("prefixes today and appends the status label", () => {
+      jest.useFakeTimers().setSystemTime(new Date(2024, 4, 13, 12));
+      try {
+        fixture.componentRef.setInput("dayStatus", (d: Date) =>
+          d.getDate() === 13 ? { type: "danger", label: "Broneeritud" } : null,
+        );
+        fixture.detectChanges();
+        expect(
+          buttonForDay(new Date(2024, 4, 13))?.getAttribute("aria-label"),
+        ).toBe("date-picker.today, esmaspäev, 13. mai, Broneeritud");
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it("keeps selected and disabled state on ARIA attributes, not in the name", () => {
+      fixture.componentRef.setInput("value", new Date(2024, 4, 15));
+      fixture.componentRef.setInput("disabledMatchers", [
+        new Date(2024, 4, 16),
+      ]);
+      fixture.detectChanges();
+      const selected = buttonForDay(new Date(2024, 4, 15));
+      const disabled = buttonForDay(new Date(2024, 4, 16));
+      expect(selected?.getAttribute("aria-selected")).toBe("true");
+      expect(selected?.getAttribute("aria-label")).toBe("kolmapäev, 15. mai");
+      expect(disabled?.getAttribute("aria-disabled")).toBe("true");
+      expect(disabled?.getAttribute("aria-label")).toBe("neljapäev, 16. mai");
     });
 
     it("selected state is exposed on the interactive day (role=gridcell button), not a plain button", () => {
@@ -634,20 +684,6 @@ describe("CalendarDayGridComponent", () => {
       expect(
         (cell.nativeElement.textContent as string).trim().length,
       ).toBeGreaterThan(0);
-    });
-
-    it("week number column header has scope=col and a visually hidden translated label", () => {
-      fixture.componentRef.setInput("showWeekNumbers", true);
-      fixture.detectChanges();
-      const header = fixture.debugElement.query(
-        By.css(".tedi-calendar-day-grid__week-number-header"),
-      );
-      expect(header.nativeElement.getAttribute("scope")).toBe("col");
-      const srOnly = header.nativeElement.querySelector(
-        ".sr-only",
-      ) as HTMLElement;
-      expect(srOnly).not.toBeNull();
-      expect(srOnly.textContent?.trim()).toBe("date-picker.week-number-header");
     });
   });
 });

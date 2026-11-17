@@ -11,7 +11,7 @@ import {
 import {
   buildMonthGrid,
   DateRange,
-  formatLocaleDateLong,
+  formatLocaleDayLabel,
   formatMonthYear,
   getISOWeek,
   getWeekdayNames,
@@ -75,20 +75,12 @@ export class CalendarDayGridComponent {
     getWeekdayNames(this.localeCode(), "narrow", this.firstDayOfWeek()),
   );
 
-  readonly weekdayFullNames = computed(() =>
-    getWeekdayNames(this.localeCode(), "long", this.firstDayOfWeek()),
-  );
-
   readonly gridAriaLabel = computed(() =>
     formatMonthYear(this.month(), this.localeCode()),
   );
 
   readonly multiselectable = computed(
     () => this.mode() === "multiple" || this.mode() === "range",
-  );
-
-  readonly weekNumberHeaderLabel = computed(() =>
-    this.translation.translate("date-picker.week-number-header"),
   );
 
   weekNumberLabel(row: (Date | null)[]): string | null {
@@ -138,7 +130,9 @@ export class CalendarDayGridComponent {
     if (isSameDay(day, new Date())) {
       parts.push(this.translation.translate("date-picker.today"));
     }
-    parts.push(formatLocaleDateLong(day, this.localeCode()));
+    // The grid name carries the year, so only days from another year repeat it.
+    const otherYear = day.getFullYear() !== this.month().getFullYear();
+    parts.push(formatLocaleDayLabel(day, this.localeCode(), otherYear));
     const status = this.statusForDay(day);
     if (status?.label) parts.push(status.label);
     return parts.join(", ");

@@ -7,6 +7,7 @@ import {
   formatDate,
   formatLocaleDate,
   formatLocaleDateHint,
+  formatLocaleDayLabel,
   getDaysInMonth,
   getFirstDayOfWeek,
   getISOWeek,
@@ -418,6 +419,30 @@ describe("date.util", () => {
       const names = getMonthNames("ja-JP", "long");
       expect(names).toHaveLength(12);
       expect(names[0]).toContain("1");
+    });
+  });
+
+  describe("formatLocaleDayLabel", () => {
+    it("formats weekday, day and month without the year", () => {
+      expect(formatLocaleDayLabel(new Date(2026, 10, 16), "et-EE")).toBe(
+        "esmaspäev, 16. november",
+      );
+      expect(formatLocaleDayLabel(new Date(2026, 10, 16), "en-US")).toBe(
+        "Monday, November 16",
+      );
+    });
+
+    it("appends the year in the locale's format when asked", () => {
+      const date = new Date(2026, 11, 30);
+      expect(formatLocaleDayLabel(date, "et-EE", true)).toBe(
+        "kolmapäev, 30. detsember 2026",
+      );
+      expect(formatLocaleDayLabel(date, "en-US", true)).toBe(
+        "Wednesday, December 30, 2026",
+      );
+      expect(formatLocaleDayLabel(date, "ru-RU", true)).toBe(
+        "среда, 30 декабря 2026 г.",
+      );
     });
   });
 

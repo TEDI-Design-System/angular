@@ -1341,7 +1341,7 @@ export const translationsMap = {
   },
   "date-picker.today": {
     description:
-      'Prefix announced by assistive tech before the date when a day cell represents today (e.g., "Today, Friday, 16 May 2026").',
+      'Prefix announced by assistive tech before the date when a day cell represents today (e.g., "Today, Friday, 16 May").',
     components: ["DatePicker"],
     et: "Täna",
     en: "Today",
@@ -1383,14 +1383,6 @@ export const translationsMap = {
     et: (n: number) => `Nädal ${n}`,
     en: (n: number) => `Week ${n}`,
     ru: (n: number) => `Неделя ${n}`,
-  },
-  "date-picker.week-number-header": {
-    description:
-      'ARIA label announced for the week-number column header (e.g., "Week").',
-    components: ["DatePicker"],
-    et: "Nädal",
-    en: "Week",
-    ru: "Неделя",
   },
   "date-picker.go-prev-month": {
     description: "Label for previous month navigation",
