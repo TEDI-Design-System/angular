@@ -17,6 +17,7 @@ import {
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../src/tedi/tokens/translation.token";
 import { TEDI_THEME_DEFAULT_TOKEN } from "../src/tedi/tokens/theme.token";
 import { THEME_FALLBACK_VALUE } from "../src/tedi/services/theme/theme.service";
+import { provideStorybookLocale } from "./locale";
 
 export const globalTypes = {
   theme: {
@@ -68,6 +69,7 @@ const preview: Preview = {
       providers: [
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
         { provide: TEDI_THEME_DEFAULT_TOKEN, useValue: THEME_FALLBACK_VALUE },
+        provideStorybookLocale(),
         // Replaces storybook-addon-angular-router (Storybook 8 only):
         // provides Router/ActivatedRoute for stories using routerLink.
         // Initial navigation must stay disabled — the router cannot match
