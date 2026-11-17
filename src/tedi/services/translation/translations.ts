@@ -324,7 +324,7 @@ export const translationsMap = {
   "file-dropzone.label": {
     description: "Default label for dropzone",
     components: ["FileDropzone"],
-    et: "Lohista failid siia või klõpsa, et sirvida",
+    et: "Lohista failid siia või klõpsa failide valimiseks",
     en: "Drop files here, or click to browse",
     ru: "Перетащите файлы сюда или нажмите, чтобы выбрать",
   },
@@ -342,14 +342,6 @@ export const translationsMap = {
     et: "Üleslaadimine",
     en: "Uploading",
     ru: "Загрузка",
-  },
-  "toast.close": {
-    description:
-      "Accessible label for a toast's close button, naming which toast it closes",
-    components: ["Toast"],
-    et: (title: string) => `Sulge teavitus: ${title}`,
-    en: (title: string) => `Close notification: ${title}`,
-    ru: (title: string) => `Закрыть уведомление: ${title}`,
   },
   "modal.close": {
     description: "Label for modals close button",
@@ -916,24 +908,27 @@ export const translationsMap = {
   "numberField.decrement": {
     description: "Label for screen-reader for number field decrease button",
     components: ["NumberField"],
-    et: (count: string | number) => `Vähenda ${count} võrra`,
-    en: (count: string | number) => `Decrease by ${count}`,
-    ru: (count: string | number) => `Уменьшить на ${count}`,
+    et: (_count: string | number) => "Vähenda",
+    en: (_count: string | number) => "Decrease",
+    ru: (_count: string | number) => "Уменьшить",
   },
   "numberField.increment": {
     description: "Label for screen-reader for number field increase button",
     components: ["NumberField"],
-    et: (count: string | number) => `Suurenda ${count} võrra`,
-    en: (count: string | number) => `Increase by ${count}`,
-    ru: (count: string | number) => `Увеличить на ${count}`,
+    et: (_count: string | number) => "Suurenda",
+    en: (_count: string | number) => "Increase",
+    ru: (_count: string | number) => "Увеличить",
   },
   "numberField.quantityUpdated": {
     description:
       "Label for screen-reader when quantity get updated by button click",
     components: ["NumberField"],
-    et: (count: string | number) => `Uuendatud. Uus väärtus ${count}`,
-    en: (count: string | number) => `Updated. New value ${count}`,
-    ru: (count: string | number) => `Ууэндатуд. Уус вяэртус ${count}`,
+    et: (count: string | number, suffix?: string) =>
+      suffix ? `${count} ${suffix}` : `${count}`,
+    en: (count: string | number, suffix?: string) =>
+      suffix ? `${count} ${suffix}` : `${count}`,
+    ru: (count: string | number, suffix?: string) =>
+      suffix ? `${count} ${suffix}` : `${count}`,
   },
   "sidenav.backToMainMenu": {
     description: "Side navigation label",
