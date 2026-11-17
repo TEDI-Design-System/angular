@@ -1,3 +1,10 @@
+# [10.0.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.15...angular-10.0.0-rc.16) (2026-11-17)
+
+
+### Bug Fixes
+
+* **number-field:** shorten number field, toast and dropzone announcements [#896](https://github.com/TEDI-Design-System/angular/issues/896) ([#909](https://github.com/TEDI-Design-System/angular/issues/909)) ([301d6e4](https://github.com/TEDI-Design-System/angular/commit/301d6e4d9bc2d88eddc72591bb881382f9b93f2e))
+
 # [10.0.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.14...angular-10.0.0-rc.15) (2026-11-17)
 
 
