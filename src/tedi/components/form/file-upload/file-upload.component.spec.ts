@@ -835,7 +835,9 @@ describe("FileUploadComponent", () => {
       component.fileRemove.subscribe((file) => removed.push(file.name ?? ""));
 
       const clear = clearButton(fixture)!;
-      expect(clear.getAttribute("aria-label")).toBe("clear");
+      // `tedi-closing-button` renders its label as `title` unless `showTitle`
+      // is off, and the title names the button.
+      expect(clear.getAttribute("title")).toBe("clear");
 
       clear.click();
       await fixture.whenStable();
