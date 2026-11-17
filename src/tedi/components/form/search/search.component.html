@@ -6,7 +6,7 @@
   [showClearOnInteraction]="showClearOnInteraction()"
 >
   @if (label()) {
-    <label tedi-label [for]="inputId()">
+    <label tedi-label [for]="inputId()" [visuallyHidden]="hideLabel()">
       {{ label() }}
     </label>
   }
