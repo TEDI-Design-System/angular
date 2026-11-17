@@ -332,7 +332,7 @@ describe("AlertComponent", () => {
         By.css(".tedi-alert__close"),
       ).nativeElement as HTMLButtonElement;
 
-      expect(closeButton.getAttribute("aria-label")).toBe("Sulge");
+      expect(closeButton.getAttribute("title")).toBe("Sulge");
     });
 
     it("should name the close button with the provided label", () => {
@@ -344,7 +344,7 @@ describe("AlertComponent", () => {
         By.css(".tedi-alert__close"),
       ).nativeElement as HTMLButtonElement;
 
-      expect(closeButton.getAttribute("aria-label")).toBe("Sulge hoiatus");
+      expect(closeButton.getAttribute("title")).toBe("Sulge hoiatus");
     });
   });
 
