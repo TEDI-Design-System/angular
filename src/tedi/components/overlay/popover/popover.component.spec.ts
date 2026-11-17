@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { OverlayContainer } from "@angular/cdk/overlay";
 import {
   PopoverComponent,
+  PopoverDelay,
   PopoverOpenWith,
   PopoverPosition,
 } from "./popover.component";
@@ -23,6 +24,7 @@ import { PopoverContentComponent } from "./popover-content/popover-content.compo
       [lockScroll]="lockScroll"
       [offset]="offset"
       [openWith]="openWith"
+      [delay]="delay"
     >
       <button tedi-popover-trigger>Open Popover</button>
       <tedi-popover-content [title]="title">
@@ -42,6 +44,7 @@ class TestHostComponent {
   offset = 8;
   title = "";
   openWith: PopoverOpenWith = "click";
+  delay: PopoverDelay = 0;
 }
 
 type PopoverInternals = {
@@ -809,8 +812,9 @@ describe("PopoverComponent", () => {
     });
   });
 
-  it("should default to opening with click", () => {
+  it("should default to opening with click and no delay", () => {
     expect(component.openWith()).toBe("click");
+    expect(component.delay()).toBe(0);
   });
 
   describe("openWith hover", () => {
@@ -835,13 +839,40 @@ describe("PopoverComponent", () => {
       expect(component.isOpen()).toBe(false);
     });
 
-    it("should open on hover", () => {
+    it("should open on hover right away without a delay", () => {
       trigger.dispatchEvent(new Event("mouseenter"));
 
       expect(component.isOpen()).toBe(true);
     });
 
+    it("should open on hover only after the delay has passed", () => {
+      hostComponent.delay = 200;
+      fixture.detectChanges();
+
+      trigger.dispatchEvent(new Event("mouseenter"));
+      jest.advanceTimersByTime(199);
+      expect(component.isOpen()).toBe(false);
+
+      jest.advanceTimersByTime(1);
+      expect(component.isOpen()).toBe(true);
+    });
+
+    it("should not open when the pointer leaves before the delay has passed", () => {
+      hostComponent.delay = 300;
+      fixture.detectChanges();
+
+      trigger.dispatchEvent(new Event("mouseenter"));
+      jest.advanceTimersByTime(100);
+      trigger.dispatchEvent(new Event("mouseleave"));
+      jest.advanceTimersByTime(500);
+
+      expect(component.isOpen()).toBe(false);
+    });
+
     it("should open on focus right away", () => {
+      hostComponent.delay = 300;
+      fixture.detectChanges();
+
       trigger.dispatchEvent(new Event("focusin"));
 
       expect(component.isOpen()).toBe(true);
@@ -854,6 +885,8 @@ describe("PopoverComponent", () => {
     });
 
     it("should close after timeoutDelay when the pointer leaves", () => {
+      hostComponent.delay = 300;
+      fixture.detectChanges();
       component.showPopover();
 
       trigger.dispatchEvent(new Event("mouseleave"));

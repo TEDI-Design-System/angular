@@ -33,6 +33,7 @@ import { TooltipContentComponent } from "./tooltip-content/tooltip-content.compo
 
 export type TooltipPosition = OverlayPosition;
 export type TooltipOpenWith = "hover" | "click" | "both" | "none";
+export type TooltipDelay = 0 | 100 | 200 | 300;
 
 let tooltipIdCounter = 0;
 
@@ -80,6 +81,13 @@ export class TooltipComponent {
    */
   readonly trackPosition = input(false);
 
+  /**
+   * Time in ms the pointer has to stay over the trigger before the tooltip opens on hover.
+   * Focus and click open it right away, and closing is not affected.
+   * @default 0
+   */
+  readonly delay = input<TooltipDelay>(0);
+
   /** Delay time (in ms) for closing tooltip when not hovering trigger or content.
    * @default 100
    */
@@ -124,6 +132,7 @@ export class TooltipComponent {
 
   readonly isContentHovered = signal(false);
   hideTimeout?: ReturnType<typeof setTimeout>;
+  private showTimeout?: ReturnType<typeof setTimeout>;
 
   private readonly ngZone = inject(NgZone);
   private readonly document = inject(DOCUMENT);
@@ -143,6 +152,7 @@ export class TooltipComponent {
   constructor() {
     inject(DestroyRef).onDestroy(() => {
       clearTimeout(this.hideTimeout);
+      clearTimeout(this.showTimeout);
       this.horizontalPush.detach();
       this.stopTracking();
       this.document.removeEventListener("keydown", this.onDocumentKeydown);
@@ -168,13 +178,36 @@ export class TooltipComponent {
   showTooltip() {
     if (this.open() !== undefined) return;
     clearTimeout(this.hideTimeout);
+    clearTimeout(this.showTimeout);
     if (!this.isOpen()) {
       this.internalOpen.set(true);
     }
   }
 
+  /** Opens the tooltip for a pointer hover, after the `delay` has passed. */
+  showTooltipOnHover() {
+    const delay = this.delay();
+    if (!delay) {
+      this.showTooltip();
+      return;
+    }
+
+    if (this.open() !== undefined || this.isOpen()) return;
+
+    clearTimeout(this.hideTimeout);
+    clearTimeout(this.showTimeout);
+
+    this.showTimeout = setTimeout(() => this.showTooltip(), delay);
+  }
+
+  /** Cancels an opening that is still waiting for the hover `delay`. */
+  cancelPendingShow() {
+    clearTimeout(this.showTimeout);
+  }
+
   hideTooltip() {
     if (this.open() !== undefined) return;
+    clearTimeout(this.showTimeout);
     if (this.isOpen()) {
       clearTimeout(this.hideTimeout);
       this.internalOpen.set(false);

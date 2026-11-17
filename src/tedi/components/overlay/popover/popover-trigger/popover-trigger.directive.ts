@@ -51,7 +51,7 @@ export class PopoverTriggerDirective {
   @HostListener("mouseenter")
   onMouseEnter() {
     if (this.popover.openWith() !== "hover") return;
-    this.popover.showPopover();
+    this.popover.showPopoverOnHover();
   }
 
   @HostListener("mouseleave")

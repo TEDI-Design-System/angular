@@ -222,6 +222,21 @@ export default {
         },
       },
     },
+    delay: {
+      control: "select",
+      description:
+        'Time in ms the pointer has to stay over the trigger before the popover opens on hover. Only applies with `openWith="hover"`.',
+      options: [0, 100, 200, 300],
+      table: {
+        category: "popover inputs",
+        type: {
+          summary: "PopoverDelay",
+        },
+        defaultValue: {
+          summary: "0",
+        },
+      },
+    },
     timeoutDelay: {
       control: "number",
       description:
@@ -353,6 +368,7 @@ export const Default: Story = {
     withArrow: true,
     lockScroll: false,
     openWith: "click",
+    delay: 0,
     timeoutDelay: 100,
     offset: 8,
     maxWidth: "small",
@@ -363,7 +379,7 @@ export const Default: Story = {
   render: (args) => ({
     props: args,
     template: `
-      <tedi-popover [position]="position" [openWith]="openWith" [preventOverflow]="preventOverflow" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [withArrow]="withArrow" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay" [offset]="offset">
+      <tedi-popover [position]="position" [openWith]="openWith" [delay]="delay" [preventOverflow]="preventOverflow" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [withArrow]="withArrow" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay" [offset]="offset">
         <button tedi-button tedi-popover-trigger [interactive]="interactive">
           Popover Trigger
         </button>

@@ -31,6 +31,7 @@ import { PopoverContentComponent } from "./popover-content/popover-content.compo
 
 export type PopoverPosition = OverlayPosition;
 export type PopoverOpenWith = "click" | "hover";
+export type PopoverDelay = 0 | 100 | 200 | 300;
 
 let popoverIdCounter = 0;
 
@@ -58,6 +59,12 @@ export class PopoverComponent {
    * @default click
    */
   readonly openWith = input<PopoverOpenWith>("click");
+  /**
+   * Time in ms the pointer has to stay over the trigger before the popover opens on hover.
+   * Only applies with `openWith="hover"`. Focus opens it right away, and closing is not affected.
+   * @default 0
+   */
+  readonly delay = input<PopoverDelay>(0);
   /**
    * Flip to the opposite side when the popover would overflow the screen.
    * @default false
@@ -145,6 +152,7 @@ export class PopoverComponent {
   });
 
   hideTimeout?: ReturnType<typeof setTimeout>;
+  private showTimeout?: ReturnType<typeof setTimeout>;
   /** Whether this popover locked body scroll when it opened — read on close
    * so a mid-open change to the lockScroll input can't leave the lock stuck. */
   private lockedScrollAtOpen = false;
@@ -161,6 +169,7 @@ export class PopoverComponent {
   constructor() {
     inject(DestroyRef).onDestroy(() => {
       clearTimeout(this.hideTimeout);
+      clearTimeout(this.showTimeout);
       this.horizontalPush.detach();
       this.cleanupKeyboardNavigation();
       this.cleanupScrollListener();
@@ -172,6 +181,7 @@ export class PopoverComponent {
     if (this.isOpen()) return;
 
     clearTimeout(this.hideTimeout);
+    clearTimeout(this.showTimeout);
     this.isOpen.set(true);
 
     this.lockedScrollAtOpen = this.lockScroll();
@@ -180,8 +190,25 @@ export class PopoverComponent {
     }
   }
 
+  /** Opens the popover for a pointer hover, after the `delay` has passed. */
+  showPopoverOnHover() {
+    const delay = this.delay();
+    if (!delay) {
+      this.showPopover();
+      return;
+    }
+
+    if (this.isOpen()) return;
+
+    clearTimeout(this.hideTimeout);
+    clearTimeout(this.showTimeout);
+
+    this.showTimeout = setTimeout(() => this.showPopover(), delay);
+  }
+
   /** Closes the popover after `timeoutDelay`, unless the pointer moves onto the content. */
   scheduleHide() {
+    clearTimeout(this.showTimeout);
     clearTimeout(this.hideTimeout);
 
     this.hideTimeout = setTimeout(
@@ -229,6 +256,8 @@ export class PopoverComponent {
   }
 
   hidePopover(focusTrigger?: boolean) {
+    clearTimeout(this.showTimeout);
+
     if (!this.isOpen()) return;
 
     this.cleanupKeyboardNavigation();

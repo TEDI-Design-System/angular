@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { TooltipComponent, TooltipPosition } from "./tooltip.component";
+import {
+  TooltipComponent,
+  TooltipDelay,
+  TooltipPosition,
+} from "./tooltip.component";
 import { Component, input, viewChild } from "@angular/core";
 import { OverlayContainer } from "@angular/cdk/overlay";
 import { TooltipTriggerComponent } from "./tooltip-trigger/tooltip-trigger.component";
@@ -13,6 +17,7 @@ import { TooltipContentComponent } from "./tooltip-content/tooltip-content.compo
       [position]="position()"
       [preventOverflow]="preventOverflow()"
       [timeoutDelay]="timeoutDelay()"
+      [delay]="delay()"
     >
       <tedi-tooltip-trigger>Trigger</tedi-tooltip-trigger>
       <tedi-tooltip-content>Content</tedi-tooltip-content>
@@ -23,6 +28,7 @@ class TestTooltipComponent {
   position = input<TooltipPosition>("top");
   preventOverflow = input(true);
   timeoutDelay = input(100);
+  delay = input<TooltipDelay>(0);
 
   tooltip = viewChild.required(TooltipComponent);
 }
@@ -189,6 +195,69 @@ describe("TooltipComponent", () => {
     const hideSpy = jest.spyOn(tooltip, "hideTooltip");
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     expect(hideSpy).not.toHaveBeenCalled();
+  });
+
+  describe("delay", () => {
+    let trigger: HTMLElement;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      trigger = fixture.nativeElement.querySelector("tedi-tooltip-trigger");
+    });
+
+    afterEach(() => jest.useRealTimers());
+
+    it("should default to 0 and open on hover right away", () => {
+      expect(component.delay()).toBe(0);
+
+      trigger.dispatchEvent(new Event("mouseenter"));
+
+      expect(component.tooltip().isOpen()).toBe(true);
+    });
+
+    it("should open on hover only after the delay has passed", () => {
+      fixture.componentRef.setInput("delay", 200);
+      fixture.detectChanges();
+
+      trigger.dispatchEvent(new Event("mouseenter"));
+      jest.advanceTimersByTime(199);
+      expect(component.tooltip().isOpen()).toBe(false);
+
+      jest.advanceTimersByTime(1);
+      expect(component.tooltip().isOpen()).toBe(true);
+    });
+
+    it("should not open when the pointer leaves before the delay has passed", () => {
+      fixture.componentRef.setInput("delay", 300);
+      fixture.detectChanges();
+
+      trigger.dispatchEvent(new Event("mouseenter"));
+      jest.advanceTimersByTime(100);
+      trigger.dispatchEvent(new Event("mouseleave"));
+      jest.advanceTimersByTime(500);
+
+      expect(component.tooltip().isOpen()).toBe(false);
+    });
+
+    it("should open on focus right away", () => {
+      fixture.componentRef.setInput("delay", 300);
+      fixture.detectChanges();
+
+      trigger.dispatchEvent(new Event("focusin"));
+
+      expect(component.tooltip().isOpen()).toBe(true);
+    });
+
+    it("should not delay closing", () => {
+      fixture.componentRef.setInput("delay", 300);
+      fixture.detectChanges();
+      component.tooltip().showTooltip();
+
+      trigger.dispatchEvent(new Event("mouseleave"));
+      jest.advanceTimersByTime(100);
+
+      expect(component.tooltip().isOpen()).toBe(false);
+    });
   });
 });
 
