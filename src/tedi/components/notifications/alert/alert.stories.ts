@@ -69,13 +69,13 @@ export default {
     closeAriaLabel: {
       control: "text",
       description:
-        "Accessible name for the close button, replacing the generic default when several alerts can be on screen at once.",
+        "Accessible name for the close button. The title, when set, is its description.",
     },
     role: {
       control: "select",
       options: ["alert", "status", "none"],
       description:
-        "The ARIA role of the alert, informing screen readers about the alert's purpose. Options: \n - <b>alert</b> for high-priority messages that demand immediate attention. \n - <b>status</b> for less urgent messages providing feedback or updates.\n - <b>none</b> used when no ARIA role is needed.",
+        'Live-region role of the message. \n - <b>alert</b>: urgent message that appears later (error, needs action). Announced assertively. \n - <b>status</b>: non-urgent message that appears later (saved, info). Announced politely. \n - <b>none</b>: content already on the page when it loads. Some screen readers read a <code>role="alert"</code> present at load immediately.',
       defaultValue: {
         summary: "alert",
       },

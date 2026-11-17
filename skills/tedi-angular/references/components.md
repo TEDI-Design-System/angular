@@ -305,6 +305,11 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   on itself and hosts the `role="status"` live region, but it is removed the moment content arrives,
   so it cannot report its own completion. Bind `[attr.aria-busy]="loading()"` on the region that
   swaps skeleton for content; without it a screen reader may announce the region mid-update.
+- **Pick the `tedi-alert` `role` by when the alert appears, not by how it looks.** The default
+  `alert` is for urgent messages that appear later (an error, something that needs action). Use
+  `status` for non-urgent messages that appear later (saved, info). Use `none` for an alert that is
+  already on the page when it loads: some screen readers (JAWS, and NVDA in some browsers) read a
+  `role="alert"` present at load immediately.
 - **Icon-only controls need an accessible name**, and don't signal state by colour alone. Sorting,
   pagination, expansion and reordering controls all need labels; those come from
   `TediTranslationService`, so check the translation keys rather than hardcoding Estonian.
