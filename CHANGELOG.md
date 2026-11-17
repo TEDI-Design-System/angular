@@ -1,3 +1,10 @@
+# [10.0.0-rc.19](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.18...angular-10.0.0-rc.19) (2026-11-17)
+
+
+### Bug Fixes
+
+* **button:** upgrade core to 6.13.0 and align state tokens [#865](https://github.com/TEDI-Design-System/angular/issues/865) ([#877](https://github.com/TEDI-Design-System/angular/issues/877)) ([75d31e3](https://github.com/TEDI-Design-System/angular/commit/75d31e31d13a202dec9439ff26a2685051e7378c))
+
 # [10.0.0-rc.18](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.17...angular-10.0.0-rc.18) (2026-11-17)
 
 
