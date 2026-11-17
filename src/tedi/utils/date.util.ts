@@ -252,7 +252,6 @@ export function formatLocaleDate(date: Date, localeCode: string): string {
  * Formats a Date as a long-form, locale-aware string suitable for
  * `aria-label` use — e.g. for `en-US` produces "Friday, May 16, 2026" and for
  * `et-EE` "reede, 16. mai 2026". Matches react-day-picker's `labelDay` shape.
- * @deprecated Use `formatLocaleDayLabel` instead.
  */
 export function formatLocaleDateLong(date: Date, localeCode: string): string {
   const fmt = new Intl.DateTimeFormat(localeCode, {

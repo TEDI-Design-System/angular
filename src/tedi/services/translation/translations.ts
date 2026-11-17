@@ -1315,14 +1315,6 @@ export const translationsMap = {
     en: (n: number) => `Week ${n}`,
     ru: (n: number) => `Неделя ${n}`,
   },
-  "date-picker.week-number-header": {
-    description:
-      "Deprecated and unused: the calendar header row is aria-hidden. Kept so consumer overrides keep compiling.",
-    components: ["DatePicker"],
-    et: "Nädal",
-    en: "Week",
-    ru: "Неделя",
-  },
   "date-picker.go-prev-month": {
     description: "Label for previous month navigation",
     components: ["DatePicker"],
