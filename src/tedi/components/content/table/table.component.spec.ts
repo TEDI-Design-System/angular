@@ -72,11 +72,10 @@ const TRANSLATIONS: Record<string, Translator> = {
   "table.row-reorder.drop": (pos) =>
     `Row dropped at position ${pos ?? ""}`.trim(),
   "table.row-reorder.cancel": () => "Row reordering cancelled",
-  "pagination.title": () => "Pagination",
+  "pagination.title": () => "Pages",
   "pagination.prev-page": () => "Previous page",
   "pagination.next-page": () => "Next page",
-  "pagination.page": (page, isCurrent) =>
-    isCurrent ? `Current page, page ${page}` : `Go to page ${page}`,
+  "pagination.page": (page) => `Page ${page}`,
   "pagination.results": (count) =>
     `${count} ${count === 1 ? "result" : "results"}`,
   "pagination.page-size": () => "Show per page",
