@@ -413,17 +413,20 @@ export const Sizes: Story = {
               [inputId]="'size-' + size + '-plain'"
               [size]="size"
               label="Otsing"
+              [ariaLabel]="(size | titlecase) + ', lihtne'"
             />
             <tedi-search
               [inputId]="'size-' + size + '-icon'"
               [size]="size"
               label="Otsing"
+              [ariaLabel]="(size | titlecase) + ', ikooniga'"
               [button]="{ ariaLabel: 'Otsi' }"
             />
             <tedi-search
               [inputId]="'size-' + size + '-button'"
               [size]="size"
               label="Otsing"
+              [ariaLabel]="(size | titlecase) + ', tekstiga'"
               [button]="{ text: 'Otsi' }"
             />
           </div>
@@ -451,25 +454,26 @@ export const States: Story = {
             <tedi-search
               [inputId]="'search-states-' + state"
               label="Otsing"
+              [ariaLabel]="state"
             />
           </tedi-col>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">Disabled</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search inputId="search-states-disabled" label="Otsing" [disabled]="true" />
+            <tedi-search inputId="search-states-disabled" label="Otsing" ariaLabel="Disabled" [disabled]="true" />
           </tedi-col>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">Success</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search inputId="search-states-success" label="Otsing" [feedbackText]="{ text: 'Tagasiside tekst', type: 'valid' }" />
+            <tedi-search inputId="search-states-success" label="Otsing" ariaLabel="Success" [feedbackText]="{ text: 'Tagasiside tekst', type: 'valid' }" />
           </tedi-col>
         </tedi-row>
         <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
           <tedi-col width="1"><p tedi-text modifiers="bold">Error</p></tedi-col>
           <tedi-col width="1" [sm]="{ width: 5 }">
-            <tedi-search inputId="search-states-error" label="Otsing" [feedbackText]="{ text: 'Tagasiside tekst', type: 'error' }" />
+            <tedi-search inputId="search-states-error" label="Otsing" ariaLabel="Error" [feedbackText]="{ text: 'Tagasiside tekst', type: 'error' }" />
           </tedi-col>
         </tedi-row>
       </tedi-row>
