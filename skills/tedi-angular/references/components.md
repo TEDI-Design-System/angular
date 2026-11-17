@@ -269,6 +269,14 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 
 ### Accessibility that the types won't get right for you
 
+- **`tedi-label`'s `required` is visual only.** It draws an `aria-hidden` asterisk, so screen readers
+  hear "required" only from the control. Put `required` on a native `<input tedi-text-field>` or
+  `<textarea tedi-textarea>` (or give its form control `Validators.required`, which sets
+  `aria-required`), and bind the `required` input of `tedi-number-field`, `tedi-slider`,
+  `tedi-toggle`, `tedi-select`, `tedi-date-field` and `tedi-time-field`. The label used to append a
+  hidden "Kohustuslik väli", so a field marked required only on its label was announced; it no
+  longer is. Don't add hidden text to the label yourself: it becomes part of the control's name and
+  the field is announced as required twice.
 - **Give each `tedi-search` on a page a distinct `ariaLabel`.** The host is a `role="search"`
   landmark whose name falls back to `ariaLabel`, then `label`, then `placeholder`, then the
   translated default. Two identically named landmarks of the same type fail axe's `landmark-unique`.

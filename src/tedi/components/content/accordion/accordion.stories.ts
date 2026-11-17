@@ -1216,15 +1216,15 @@ hasn't met yet (incomplete prerequisites, missing permissions, etc.).
               <div class="step-form">
                 <tedi-form-field>
                   <label tedi-label [required]="true" for="first-name">Eesnimi</label>
-                  <input tedi-text-field id="first-name" />
+                  <input tedi-text-field id="first-name" required />
                 </tedi-form-field>
                 <tedi-form-field>
                   <label tedi-label [required]="true" for="last-name">Perenimi</label>
-                  <input tedi-text-field id="last-name" />
+                  <input tedi-text-field id="last-name" required />
                 </tedi-form-field>
                 <tedi-form-field>
                   <label tedi-label [required]="true" for="id-code">Isikukood</label>
-                  <input tedi-text-field id="id-code" />
+                  <input tedi-text-field id="id-code" required />
                 </tedi-form-field>
               </div>
               <tedi-separator />

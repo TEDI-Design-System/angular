@@ -117,6 +117,11 @@ export class TimeFieldComponent
   /** Placeholder shown when the input is empty. */
   readonly placeholder = input<string>();
   /**
+   * Marks the input as required.
+   * @default false
+   */
+  readonly required = input<boolean>(false);
+  /**
    * Marks the field as invalid. Sets `aria-invalid` on the input and triggers
    * the error styling. Combines with the state derived from reactive forms.
    */

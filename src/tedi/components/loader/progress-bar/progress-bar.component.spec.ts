@@ -179,6 +179,7 @@ describe("ProgressBarComponent", () => {
     fixture.detectChanges();
 
     expect(host.querySelector(".tedi-label--required")).toBeTruthy();
+    expect(host.querySelector("label")?.textContent?.trim()).toBe("Upload *");
   });
 
   it("should leave the hint-row empty when no feedback is projected and no bottom value", () => {

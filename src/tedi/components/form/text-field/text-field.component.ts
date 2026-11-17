@@ -52,6 +52,7 @@ import { controlDescribedBy } from "../form-field/control-described-by";
     "[class.tedi-text-field--large]": "resolvedSize() === 'large'",
     "[class.tedi-text-field--arrows-hidden]": "arrowsHidden()",
     "[attr.aria-invalid]": "invalid() || null",
+    "[attr.aria-required]": "required() || null",
     "[attr.aria-describedby]": "describedBy.attribute()",
     "[disabled]": "disabled()",
     "[readOnly]": "readOnly()",
@@ -133,6 +134,8 @@ export class TextFieldComponent
   readonly touched = this.derived.touched;
 
   readonly dirty = this.derived.dirty;
+
+  readonly required = this.derived.required;
 
   readonly invalid = computed(
     () =>

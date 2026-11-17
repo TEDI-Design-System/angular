@@ -58,6 +58,7 @@ export type TextareaSize = Exclude<InputSize, "large">;
     "[style.min-height]": "minHeightStyle()",
     "[style.max-height]": "maxHeightStyle()",
     "[attr.aria-invalid]": "invalid() || null",
+    "[attr.aria-required]": "required() || null",
     "[attr.aria-describedby]": "describedBy.attribute()",
     "[readOnly]": "readOnly()",
     "[disabled]": "disabled()",
@@ -229,6 +230,8 @@ export class TextareaComponent
   readonly touched = this.derived.touched;
 
   readonly dirty = this.derived.dirty;
+
+  readonly required = this.derived.required;
 
   readonly invalid = computed(
     () =>

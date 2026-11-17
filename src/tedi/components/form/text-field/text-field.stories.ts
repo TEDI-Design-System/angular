@@ -386,7 +386,7 @@ export const WithLabelTooltip: StoryObj<TextFieldComponent> = {
               <label tedi-label for="tooltip-plain" [required]="true">Toimeaine</label>
               <tedi-info-tooltip>Vihje sisu</tedi-info-tooltip>
             </tedi-label-row>
-            <input tedi-text-field id="tooltip-plain" />
+            <input tedi-text-field id="tooltip-plain" required />
             <tedi-feedback-text [text]="'Vihjetekst'" />
           </tedi-form-field>
         </tedi-col>

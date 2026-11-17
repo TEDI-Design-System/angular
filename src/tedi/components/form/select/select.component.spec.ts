@@ -213,6 +213,34 @@ describe("SelectComponent", () => {
       expect(requiredIndicator?.textContent).toBe("*");
     });
 
+    it("sets aria-required on the combobox only when required", () => {
+      expect(getTrigger().hasAttribute("aria-required")).toBe(false);
+
+      host.required = true;
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-required")).toBe("true");
+    });
+
+    it("moves aria-required to the search input when searchable", () => {
+      host.required = true;
+      host.searchable = true;
+      fixture.detectChanges();
+
+      expect(getTrigger().hasAttribute("aria-required")).toBe(false);
+      expect(getSearchInput().getAttribute("aria-required")).toBe("true");
+    });
+
+    it("sets aria-required on the search input of a searchable multiselect", () => {
+      host.required = true;
+      host.searchable = true;
+      host.allowMultiple = true;
+      host.control.setValue(["Option 1"]);
+      fixture.detectChanges();
+
+      expect(getSearchInput().getAttribute("aria-required")).toBe("true");
+    });
+
     it("should apply small size class", () => {
       host.size = "small";
       fixture.detectChanges();

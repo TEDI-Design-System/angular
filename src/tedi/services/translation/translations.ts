@@ -112,13 +112,6 @@ export const translationsMap = {
     en: (count: number) => `${count} ${count === 1 ? "result" : "results"}`,
     ru: (count: number) => `Совпадений: ${count}`,
   },
-  required: {
-    description: "Required field",
-    components: ["TableFilter"],
-    et: "Kohustuslik väli",
-    en: "Required field",
-    ru: "Обязательное поле",
-  },
   breadcrumbs: {
     description: "Breadcrumbs navigation label",
     components: ["Breadcrumbs"],

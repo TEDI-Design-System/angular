@@ -73,6 +73,15 @@ describe("ToggleComponent", () => {
     expect(inputEl.hasAttribute("aria-label")).toBe(false);
   });
 
+  it("marks the switch required", () => {
+    expect(inputEl.required).toBe(false);
+
+    fixture.componentRef.setInput("required", true);
+    fixture.detectChanges();
+
+    expect(inputEl.required).toBe(true);
+  });
+
   it("should render aria-label on the input when ariaLabel is set", () => {
     fixture.componentRef.setInput("ariaLabel", "Teavituste lüliti");
     fixture.detectChanges();
