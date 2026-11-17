@@ -957,14 +957,21 @@ export const translationsMap = {
     ru: "Меню",
   },
   carousel: {
-    description: "Label for carousel",
+    description: "Role description for the carousel region",
+    components: ["CarouselContent"],
+    et: "karussell",
+    en: "carousel",
+    ru: "карусель",
+  },
+  "carousel.label": {
+    description: "Default label for the carousel region",
     components: ["CarouselContent"],
     et: "Karussell",
     en: "Carousel",
     ru: "Карусель",
   },
   "carousel.slide": {
-    description: "Label for carousel slide",
+    description: "Live announcement when the carousel moves to another slide",
     components: ["CarouselContent"],
     et: (slideNumber: number, totalNumber: number) =>
       `Slaid ${slideNumber} / ${totalNumber}`,
@@ -972,6 +979,30 @@ export const translationsMap = {
       `Slide ${slideNumber} of ${totalNumber}`,
     ru: (slideNumber: number, totalNumber: number) =>
       `Слайд ${slideNumber} из ${totalNumber}`,
+  },
+  "carousel.slideLabel": {
+    description: "Label for carousel slide",
+    components: ["CarouselContent"],
+    et: (slideNumber: number, totalNumber: number) =>
+      `${slideNumber} / ${totalNumber}`,
+    en: (slideNumber: number, totalNumber: number) =>
+      `${slideNumber} of ${totalNumber}`,
+    ru: (slideNumber: number, totalNumber: number) =>
+      `${slideNumber} из ${totalNumber}`,
+  },
+  "carousel.slideRoleDescription": {
+    description: "Role description for carousel slide",
+    components: ["CarouselContent"],
+    et: "slaid",
+    en: "slide",
+    ru: "слайд",
+  },
+  "carousel.slides": {
+    description: "Label for the carousel indicators group",
+    components: ["CarouselIndicators"],
+    et: "Slaidid",
+    en: "Slides",
+    ru: "Слайды",
   },
   "carousel.moveForward": {
     description: "Label for carousel next button",
@@ -990,9 +1021,9 @@ export const translationsMap = {
   "carousel.showSlide": {
     description: "Label for carousel slide indicator",
     components: ["CarouselIndicators"],
-    et: (slideNumber: number) => `Vaata slaidi ${slideNumber}`,
-    en: (slideNumber: number) => `Show slide ${slideNumber}`,
-    ru: (slideNumber: number) => `Показать слайд ${slideNumber}`,
+    et: (slideNumber: number) => `Slaid ${slideNumber}`,
+    en: (slideNumber: number) => `Slide ${slideNumber}`,
+    ru: (slideNumber: number) => `Слайд ${slideNumber}`,
   },
   "date-picker.january": {
     description: "Label for january month",

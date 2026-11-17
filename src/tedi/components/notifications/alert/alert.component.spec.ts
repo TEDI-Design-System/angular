@@ -58,6 +58,20 @@ describe("AlertComponent", () => {
     expect(closeButton).toBeTruthy();
   });
 
+  it("should describe the close button with the title", () => {
+    fixture.componentRef.setInput("title", "Pealkiri");
+    fixture.componentRef.setInput("showClose", true);
+    fixture.detectChanges();
+
+    const title = element.querySelector(".tedi-alert__title") as HTMLElement;
+    const closeButton = element.querySelector(
+      ".tedi-alert__close",
+    ) as HTMLElement;
+
+    expect(title.id).toMatch(/^tedi-alert-title-/);
+    expect(closeButton.getAttribute("aria-describedby")).toBe(title.id);
+  });
+
   it("should not display the close button when showClose is false", () => {
     fixture.componentRef.setInput("showClose", false);
     fixture.detectChanges();
@@ -69,18 +83,16 @@ describe("AlertComponent", () => {
     expect(closeButton).toBeNull();
   });
 
-  it("should set the correct ARIA role based on the role input", () => {
+  it("should set the ARIA role on the body, not on the host", () => {
     const roles: AlertRole[] = ["alert", "none", "status"];
+    const body = element.querySelector(".tedi-alert__body") as HTMLElement;
 
     for (const role of roles) {
       fixture.componentRef.setInput("role", role);
       fixture.detectChanges();
 
-      if (role === "none") {
-        expect(element.getAttribute("role")).toBe(null);
-      } else {
-        expect(element.getAttribute("role")).toBe(role);
-      }
+      expect(element.getAttribute("role")).toBeNull();
+      expect(body.getAttribute("role")).toBe(role === "none" ? null : role);
     }
   });
 
@@ -91,8 +103,18 @@ describe("AlertComponent", () => {
       fixture.componentRef.setInput("role", role);
       fixture.detectChanges();
 
-      expect(element.getAttribute("aria-live")).toBeNull();
+      expect(element.querySelector("[aria-live]")).toBeNull();
     }
+  });
+
+  it("should keep the close button outside the live region", () => {
+    fixture.componentRef.setInput("showClose", true);
+    fixture.detectChanges();
+
+    const liveRegion = element.querySelector('[role="alert"]') as HTMLElement;
+
+    expect(liveRegion.querySelector("button")).toBeNull();
+    expect(element.querySelector(".tedi-alert__close")).toBeTruthy();
   });
 
   it("should apply the global variant class when variant is set to global", () => {
@@ -315,19 +337,14 @@ describe("AlertComponent", () => {
 
     it("should name the close button with the provided label", () => {
       fixture.componentRef.setInput("showClose", true);
-      fixture.componentRef.setInput(
-        "closeAriaLabel",
-        "Sulge teavitus: Salvestatud",
-      );
+      fixture.componentRef.setInput("closeAriaLabel", "Sulge hoiatus");
       fixture.detectChanges();
 
       const closeButton = fixture.debugElement.query(
         By.css(".tedi-alert__close"),
       ).nativeElement as HTMLButtonElement;
 
-      expect(closeButton.getAttribute("title")).toBe(
-        "Sulge teavitus: Salvestatud",
-      );
+      expect(closeButton.getAttribute("title")).toBe("Sulge hoiatus");
     });
   });
 
@@ -382,6 +399,61 @@ describe("AlertComponent", () => {
       expect(
         actionSlot.querySelector("button[tedi-alert-action]"),
       ).toBeTruthy();
+    });
+
+    it("keeps the action and close buttons outside the live region, after the message", () => {
+      const hostFixture = createHost();
+      hostFixture.componentInstance.showClose = true;
+      hostFixture.changeDetectorRef.markForCheck();
+      hostFixture.detectChanges();
+
+      const alert = hostFixture.nativeElement.querySelector(
+        "tedi-alert",
+      ) as HTMLElement;
+      const liveRegion = alert.querySelector('[role="alert"]') as HTMLElement;
+      const buttons = Array.from(alert.querySelectorAll("button"));
+
+      expect(liveRegion.textContent?.trim()).toBe("Content");
+      expect(liveRegion.querySelector("button")).toBeNull();
+      expect(buttons).toHaveLength(2);
+      expect(buttons[0].hasAttribute("tedi-alert-action")).toBe(true);
+      expect(buttons[1].classList).toContain("tedi-alert__close");
+      for (const button of buttons) {
+        expect(
+          liveRegion.compareDocumentPosition(button) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+        ).toBeTruthy();
+      }
+    });
+
+    it("removes a static role attribute from the host", () => {
+      @Component({
+        standalone: true,
+        imports: [AlertComponent],
+        template: `<tedi-alert role="status" [showClose]="true"
+          >Content</tedi-alert
+        >`,
+      })
+      class StaticRoleHostComponent {}
+
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [StaticRoleHostComponent],
+        providers: [
+          { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        ],
+      });
+      const hostFixture = TestBed.createComponent(StaticRoleHostComponent);
+      hostFixture.detectChanges();
+
+      const alert = hostFixture.nativeElement.querySelector(
+        "tedi-alert",
+      ) as HTMLElement;
+
+      expect(alert.getAttribute("role")).toBeNull();
+      expect(
+        alert.querySelector(".tedi-alert__body")?.getAttribute("role"),
+      ).toBe("status");
     });
 
     it("renders the action slot even without showClose", () => {
