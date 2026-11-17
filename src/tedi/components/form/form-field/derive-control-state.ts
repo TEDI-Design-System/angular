@@ -6,8 +6,8 @@ import {
   inject,
   signal,
 } from "@angular/core";
-import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { NgControl, Validators } from "@angular/forms";
+import { AbstractControl, NgControl, Validators } from "@angular/forms";
+import { Subscription } from "rxjs";
 
 export interface DerivedControlState {
   invalid: Signal<boolean>;
@@ -21,6 +21,11 @@ export interface DerivedControlState {
    * `NgControl` depends on.
    */
   connect(): void;
+  /**
+   * Call from `ngDoCheck`: Angular swaps in a new `[formControl]` instance
+   * without emitting events, so the state is re-read only when this notices it.
+   */
+  sync(): void;
 }
 
 export function deriveControlState(): DerivedControlState {
@@ -28,6 +33,20 @@ export function deriveControlState(): DerivedControlState {
   const destroyRef = inject(DestroyRef);
   const ngControl = signal<NgControl | null>(null);
   const revision = signal(0);
+
+  let current: AbstractControl | null = null;
+  let subscription: Subscription | undefined;
+
+  const track = () => {
+    const control = ngControl()?.control ?? null;
+    if (control === current) return;
+    current = control;
+    subscription?.unsubscribe();
+    subscription = control?.events.subscribe(() =>
+      revision.update((value) => value + 1),
+    );
+    revision.update((value) => value + 1);
+  };
 
   const read = <T>(
     pick: (control: NgControl) => T | null | undefined,
@@ -56,14 +75,12 @@ export function deriveControlState(): DerivedControlState {
       // walks the whole element-injector chain and a control picks up the
       // `NgControl` of a composite above it (a `tedi-search`'s own form control,
       // say), reporting an error state for a value it does not hold.
-      const control = injector.get(NgControl, null, {
-        optional: true,
-        self: true,
-      });
-      ngControl.set(control);
-      control?.control?.events
-        ?.pipe(takeUntilDestroyed(destroyRef))
-        .subscribe(() => revision.update((value) => value + 1));
+      ngControl.set(
+        injector.get(NgControl, null, { optional: true, self: true }),
+      );
+      destroyRef.onDestroy(() => subscription?.unsubscribe());
+      track();
     },
+    sync: () => track(),
   };
 }

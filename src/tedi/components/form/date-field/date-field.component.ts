@@ -11,6 +11,7 @@ import {
   input,
   linkedSignal,
   model,
+  DoCheck,
   OnInit,
   output,
   Renderer2,
@@ -125,7 +126,11 @@ export type DateFieldSize = "default" | "small";
   },
 })
 export class DateFieldComponent
-  implements OnInit, ControlValueAccessor, FormFieldControl<DateFieldValue>
+  implements
+    OnInit,
+    DoCheck,
+    ControlValueAccessor,
+    FormFieldControl<DateFieldValue>
 {
   private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
     optional: true,
@@ -644,6 +649,10 @@ export class DateFieldComponent
         this.overlayOpen.set(false);
       });
     });
+  }
+
+  ngDoCheck(): void {
+    this.derived.sync();
   }
 
   writeValue(value: DateFieldValue): void {

@@ -67,6 +67,16 @@ describe("NumberFieldComponent", () => {
     expect(input.hasAttribute("aria-label")).toBe(false);
   });
 
+  it("marks the input required and names it from the label alone", () => {
+    fixture.componentRef.setInput("label", "Kogus");
+    fixture.componentRef.setInput("required", true);
+    fixture.detectChanges();
+
+    const input = el.querySelector("input") as HTMLInputElement;
+    expect(input.required).toBe(true);
+    expect(input.labels?.[0].textContent?.trim()).toBe("Kogus *");
+  });
+
   it("should increment the value on increment button click", () => {
     const onChange = jest.fn<number, [number]>();
     const onTouched = jest.fn();

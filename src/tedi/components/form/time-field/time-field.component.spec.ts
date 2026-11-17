@@ -77,6 +77,15 @@ describe("TimeFieldComponent", () => {
       );
     });
 
+    it("marks the input required", () => {
+      expect(el.querySelector("input")?.required).toBe(false);
+
+      fixture.componentRef.setInput("required", true);
+      fixture.detectChanges();
+
+      expect(el.querySelector("input")?.required).toBe(true);
+    });
+
     it("should show placeholder when provided", () => {
       fixture.componentRef.setInput("placeholder", "hh:mm");
       fixture.detectChanges();

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TextareaComponent } from "./textarea.component";
-import { FormControl, ReactiveFormsModule } from "@angular/forms";
+import { FormControl, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Component } from "@angular/core";
 import { By } from "@angular/platform-browser";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
@@ -267,6 +267,26 @@ describe("TextareaComponent", () => {
 
       expect(fcComponent.disabled()).toBe(true);
       expect(fcTextarea.disabled).toBe(true);
+    });
+
+    it("sets aria-required while the control has Validators.required", () => {
+      expect(fcTextarea.hasAttribute("aria-required")).toBe(false);
+
+      control.addValidators(Validators.required);
+      control.updateValueAndValidity();
+      fcFixture.detectChanges();
+
+      expect(fcTextarea.getAttribute("aria-required")).toBe("true");
+    });
+
+    it("updates aria-required when the bound FormControl is replaced", () => {
+      fcFixture.componentInstance.control = new FormControl("", {
+        nonNullable: true,
+        validators: Validators.required,
+      });
+      fcFixture.detectChanges();
+
+      expect(fcTextarea.getAttribute("aria-required")).toBe("true");
     });
   });
 });
