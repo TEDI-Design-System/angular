@@ -280,6 +280,8 @@ t.addTranslations({ /* map */ });          // add or override copy
 
 In templates, the `tediTranslate` pipe resolves keys reactively.
 
+Keep `<html lang>` equal to the TEDI language, and update it when the language changes. TEDI does not set it. Screen readers choose the voice and pronunciation from `lang`, so Estonian labels under `lang="en"` are read with English pronunciation (WCAG 3.1.1).
+
 ## Notifications
 
 ```ts

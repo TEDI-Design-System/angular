@@ -84,17 +84,25 @@ describe("NumberFieldComponent", () => {
     expect(onTouched).toHaveBeenCalled();
   });
 
-  it("should announce value change on increment button click", () => {
+  it("should announce only the new value on increment button click", () => {
     const buttons = el.querySelectorAll("button");
     const incrementBtn = buttons[1] as HTMLButtonElement;
 
     incrementBtn.click();
     fixture.detectChanges();
 
-    expect(mockLiveAnnouncer.announce).toHaveBeenCalledWith(
-      expect.any(String),
-      "polite",
-    );
+    expect(mockLiveAnnouncer.announce).toHaveBeenCalledWith("1", "polite");
+  });
+
+  it("should announce the value with its suffix", () => {
+    fixture.componentRef.setInput("suffix", "kg");
+    component.writeValue(4);
+    fixture.detectChanges();
+
+    (el.querySelectorAll("button")[1] as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(mockLiveAnnouncer.announce).toHaveBeenCalledWith("5 kg", "polite");
   });
 
   it("should decrement the value on decrement button click", () => {
@@ -123,21 +131,18 @@ describe("NumberFieldComponent", () => {
     decrementBtn.click();
     fixture.detectChanges();
 
-    expect(mockLiveAnnouncer.announce).toHaveBeenCalledWith(
-      expect.any(String),
-      "polite",
-    );
+    expect(mockLiveAnnouncer.announce).toHaveBeenCalledWith("4", "polite");
   });
 
   it("should have aria-label on decrement button", () => {
     const decrementBtn = el.querySelector("button") as HTMLButtonElement;
-    expect(decrementBtn.getAttribute("aria-label")).toBeTruthy();
+    expect(decrementBtn.getAttribute("aria-label")).toBe("Vähenda");
   });
 
   it("should have aria-label on increment button", () => {
     const buttons = el.querySelectorAll("button");
     const incrementBtn = buttons[1] as HTMLButtonElement;
-    expect(incrementBtn.getAttribute("aria-label")).toBeTruthy();
+    expect(incrementBtn.getAttribute("aria-label")).toBe("Suurenda");
   });
 
   it("should have aria-hidden icons inside buttons", () => {

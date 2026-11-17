@@ -149,6 +149,10 @@ Available languages are defined in your translation service, e.g.:
 - `en`
 - `ru`
 
+Keep `<html lang>` equal to the TEDI language, and update it when the language changes. TEDI does not
+set it. Screen readers choose the voice and pronunciation from `lang`, so Estonian labels under
+`lang="en"` are read with English pronunciation ([WCAG 3.1.1](https://www.w3.org/WAI/WCAG22/Understanding/language-of-page.html)).
+
 ---
 
 # Example of full ApplicationConfig

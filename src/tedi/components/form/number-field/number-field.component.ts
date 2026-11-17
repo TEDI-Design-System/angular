@@ -185,7 +185,11 @@ export class NumberFieldComponent implements ControlValueAccessor {
 
   announceValue(value: number) {
     this.liveAnnouncer.announce(
-      this.translationService.translate("numberField.quantityUpdated", value),
+      this.translationService.translate(
+        "numberField.quantityUpdated",
+        value,
+        this.suffix(),
+      ),
       "polite",
     );
   }

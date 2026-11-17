@@ -270,8 +270,9 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 ### Accessibility that the types won't get right for you
 
 - **Give each `tedi-search` on a page a distinct `ariaLabel`.** The host is a `role="search"`
-  landmark whose name falls back to `ariaLabel`, then `label`, then `placeholder`, then the
-  translated default. Two identically named landmarks of the same type fail axe's `landmark-unique`.
+  landmark, unnamed unless `ariaLabel` is set. Two identically named landmarks of the same type fail
+  axe's `landmark-unique`. `ariaLabel` does not name the field; use `label` (with `hideLabel` if it
+  must not show).
 - **Don't hand-roll a suggestion panel around `tedi-search`.** It owns the combobox wiring itself
   (see Search suggestions above), and a second panel bolted on top fights it. The rules below apply
   when you are building a combobox out of some *other* control: the input needs `role="combobox"`,

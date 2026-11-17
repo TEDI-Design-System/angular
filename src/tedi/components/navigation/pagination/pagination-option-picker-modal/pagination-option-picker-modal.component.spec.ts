@@ -18,8 +18,7 @@ const pageOptions = (count: number) =>
   Array.from({ length: count }, (_, i) => ({
     value: i + 1,
     label: String(i + 1),
-    ariaLabel:
-      i + 1 === 2 ? `Current page, page ${i + 1}` : `Go to page ${i + 1}`,
+    ariaLabel: `Page ${i + 1}`,
   }));
 
 // jsdom returns 0 for layout — stub the viewport size so CDK virtual scroll
@@ -121,7 +120,7 @@ describe("PaginationOptionPickerModalComponent", () => {
 
     const other = buttons[0].nativeElement as HTMLButtonElement;
     expect(other.getAttribute("aria-current")).toBeNull();
-    expect(other.getAttribute("aria-label")).toBe("Go to page 1");
+    expect(other.getAttribute("aria-label")).toBe("Page 1");
   });
 
   it("closes the modal with the chosen value when a button is clicked", async () => {

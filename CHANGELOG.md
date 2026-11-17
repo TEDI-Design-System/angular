@@ -1,3 +1,19 @@
+# [10.0.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.15...angular-10.0.0-rc.16) (2026-11-17)
+
+
+### Bug Fixes
+
+* **number-field:** shorten number field, toast and dropzone announcements [#896](https://github.com/TEDI-Design-System/angular/issues/896) ([#909](https://github.com/TEDI-Design-System/angular/issues/909)) ([301d6e4](https://github.com/TEDI-Design-System/angular/commit/301d6e4d9bc2d88eddc72591bb881382f9b93f2e))
+
+# [10.0.0-rc.15](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.14...angular-10.0.0-rc.15) (2026-11-17)
+
+
+### Bug Fixes
+
+* **pagination:** shorten page labels and drop current page text [#892](https://github.com/TEDI-Design-System/angular/issues/892) ([#906](https://github.com/TEDI-Design-System/angular/issues/906)) ([c172464](https://github.com/TEDI-Design-System/angular/commit/c172464fd149328a19ed122b8c9d723326154997))
+* **progress-bar:** hide visible value from screen readers [#890](https://github.com/TEDI-Design-System/angular/issues/890) ([#904](https://github.com/TEDI-Design-System/angular/issues/904)) ([04cabc2](https://github.com/TEDI-Design-System/angular/commit/04cabc2c99ef38fd749c68c24078d0cc5d5fcfbd))
+* **search:** leave search landmark unnamed by default [#891](https://github.com/TEDI-Design-System/angular/issues/891) ([#905](https://github.com/TEDI-Design-System/angular/issues/905)) ([df20031](https://github.com/TEDI-Design-System/angular/commit/df200319c7064725f12dc2e42ab939aff5bf2441))
+
 # [10.0.0-rc.14](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.13...angular-10.0.0-rc.14) (2026-11-16)
 
 

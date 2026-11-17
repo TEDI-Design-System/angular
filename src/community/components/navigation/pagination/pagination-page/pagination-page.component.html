@@ -6,7 +6,7 @@
     [class.tedi-pagination__page--active]="active()"
     type="button"
     [attr.aria-current]="active() ? 'page' : undefined"
-    [attr.aria-label]="'pagination.page' | tediTranslate: page() : active()"
+    [attr.aria-label]="'pagination.page' | tediTranslate: page()"
     (click)="selectPage()"
   >
     {{ page() }}
