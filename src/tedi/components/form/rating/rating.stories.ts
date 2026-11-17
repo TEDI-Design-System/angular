@@ -223,7 +223,7 @@ export const States: Story = {
                           [value]="selected"
                           [disabled]="!!row.disabled"
                           [icons]="type === 'icon' ? ['sentiment_satisfied'] : undefined"
-                          [label]="type + ' ' + row.label + ' ' + (selected ? 'selected' : 'default')"
+                          label="Hinnang"
                         />
                       </td>
                     }
