@@ -207,6 +207,21 @@ export default {
         },
       },
     },
+    openWith: {
+      control: "radio",
+      description:
+        "How the popover is opened. With `hover` it also opens on trigger focus and clicking the trigger does not toggle it.",
+      options: ["click", "hover"],
+      table: {
+        category: "popover inputs",
+        type: {
+          summary: "PopoverOpenWith",
+        },
+        defaultValue: {
+          summary: "click",
+        },
+      },
+    },
     timeoutDelay: {
       control: "number",
       description:
@@ -337,6 +352,7 @@ export const Default: Story = {
     withBorder: false,
     withArrow: true,
     lockScroll: false,
+    openWith: "click",
     timeoutDelay: 100,
     offset: 8,
     maxWidth: "small",
@@ -347,7 +363,7 @@ export const Default: Story = {
   render: (args) => ({
     props: args,
     template: `
-      <tedi-popover [position]="position" [preventOverflow]="preventOverflow" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [withArrow]="withArrow" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay" [offset]="offset">
+      <tedi-popover [position]="position" [openWith]="openWith" [preventOverflow]="preventOverflow" [dismissible]="dismissible" [hideOnScroll]="hideOnScroll" [withBorder]="withBorder" [withArrow]="withArrow" [lockScroll]="lockScroll" [timeoutDelay]="timeoutDelay" [offset]="offset">
         <button tedi-button tedi-popover-trigger [interactive]="interactive">
           Popover Trigger
         </button>

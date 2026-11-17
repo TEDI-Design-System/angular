@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  HostListener,
   inject,
   input,
   ViewEncapsulation,
@@ -95,6 +96,20 @@ export class PopoverContentComponent {
     }
     return classList.join(" ");
   });
+
+  @HostListener("mouseenter")
+  onMouseEnter() {
+    if (this.popover.openWith() !== "hover") return;
+    clearTimeout(this.popover.hideTimeout);
+    this.popover.isContentHovered.set(true);
+  }
+
+  @HostListener("mouseleave")
+  onMouseLeave() {
+    if (this.popover.openWith() !== "hover") return;
+    this.popover.isContentHovered.set(false);
+    this.popover.scheduleHide();
+  }
 
   handleClose() {
     this.popover.hidePopover(true);

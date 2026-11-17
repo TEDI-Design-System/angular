@@ -1,7 +1,11 @@
 import { Component } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { OverlayContainer } from "@angular/cdk/overlay";
-import { PopoverComponent, PopoverPosition } from "./popover.component";
+import {
+  PopoverComponent,
+  PopoverOpenWith,
+  PopoverPosition,
+} from "./popover.component";
 import { PopoverTriggerDirective } from "./popover-trigger/popover-trigger.directive";
 import { PopoverContentComponent } from "./popover-content/popover-content.component";
 
@@ -18,6 +22,7 @@ import { PopoverContentComponent } from "./popover-content/popover-content.compo
       [withArrow]="withArrow"
       [lockScroll]="lockScroll"
       [offset]="offset"
+      [openWith]="openWith"
     >
       <button tedi-popover-trigger>Open Popover</button>
       <tedi-popover-content [title]="title">
@@ -36,6 +41,7 @@ class TestHostComponent {
   lockScroll = false;
   offset = 8;
   title = "";
+  openWith: PopoverOpenWith = "click";
 }
 
 type PopoverInternals = {
@@ -800,6 +806,101 @@ describe("PopoverComponent", () => {
       expect(hideSpy).toHaveBeenCalledWith(true);
 
       outsideElement.remove();
+    });
+  });
+
+  it("should default to opening with click", () => {
+    expect(component.openWith()).toBe("click");
+  });
+
+  describe("openWith hover", () => {
+    let trigger: HTMLElement;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      hostComponent.openWith = "hover";
+      fixture.detectChanges();
+      trigger = hostEl.querySelector("[tedi-popover-trigger]") as HTMLElement;
+    });
+
+    afterEach(() => jest.useRealTimers());
+
+    it("should not open on hover when opening with click", () => {
+      hostComponent.openWith = "click";
+      fixture.detectChanges();
+
+      trigger.dispatchEvent(new Event("mouseenter"));
+      jest.advanceTimersByTime(500);
+
+      expect(component.isOpen()).toBe(false);
+    });
+
+    it("should open on hover", () => {
+      trigger.dispatchEvent(new Event("mouseenter"));
+
+      expect(component.isOpen()).toBe(true);
+    });
+
+    it("should open on focus right away", () => {
+      trigger.dispatchEvent(new Event("focusin"));
+
+      expect(component.isOpen()).toBe(true);
+    });
+
+    it("should not toggle on click", () => {
+      trigger.click();
+
+      expect(component.isOpen()).toBe(false);
+    });
+
+    it("should close after timeoutDelay when the pointer leaves", () => {
+      component.showPopover();
+
+      trigger.dispatchEvent(new Event("mouseleave"));
+      jest.advanceTimersByTime(99);
+      expect(component.isOpen()).toBe(true);
+
+      jest.advanceTimersByTime(1);
+      expect(component.isOpen()).toBe(false);
+    });
+
+    it("should stay open while the pointer moves onto the content", () => {
+      component.showPopover();
+      fixture.detectChanges();
+      const content = overlayContainerElement.querySelector(
+        "tedi-popover-content",
+      ) as HTMLElement;
+
+      trigger.dispatchEvent(new Event("mouseleave"));
+      content.dispatchEvent(new Event("mouseenter"));
+      jest.advanceTimersByTime(500);
+      expect(component.isOpen()).toBe(true);
+
+      content.dispatchEvent(new Event("mouseleave"));
+      jest.advanceTimersByTime(100);
+      expect(component.isOpen()).toBe(false);
+    });
+
+    it("should close on focusout and Escape", () => {
+      component.showPopover();
+      trigger.dispatchEvent(new Event("focusout"));
+      expect(component.isOpen()).toBe(false);
+
+      component.showPopover();
+      trigger.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+      );
+      expect(component.isOpen()).toBe(false);
+    });
+
+    it("should not move focus into the content", () => {
+      component.showPopover();
+      fixture.detectChanges();
+      jest.advanceTimersByTime(10);
+
+      expect(overlayContainerElement.contains(document.activeElement)).toBe(
+        false,
+      );
     });
   });
 });

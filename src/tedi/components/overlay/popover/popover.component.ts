@@ -30,6 +30,7 @@ import { getFocusableElements } from "../../../utils/elements.util";
 import { PopoverContentComponent } from "./popover-content/popover-content.component";
 
 export type PopoverPosition = OverlayPosition;
+export type PopoverOpenWith = "click" | "hover";
 
 let popoverIdCounter = 0;
 
@@ -51,6 +52,12 @@ export class PopoverComponent {
    * @default top
    */
   readonly position = input<PopoverPosition>("top");
+  /**
+   * How the popover is opened. With `hover` it also opens on trigger focus, and
+   * clicking the trigger does not toggle it.
+   * @default click
+   */
+  readonly openWith = input<PopoverOpenWith>("click");
   /**
    * Flip to the opposite side when the popover would overflow the screen.
    * @default false
@@ -83,7 +90,7 @@ export class PopoverComponent {
   readonly lockScroll = input(false);
   /**
    * Delay in ms before the popover closes when neither the trigger nor the
-   * content is hovered.
+   * content is hovered. Only applies with `openWith="hover"`.
    * @default 100
    */
   readonly timeoutDelay = input(100);
@@ -173,6 +180,16 @@ export class PopoverComponent {
     }
   }
 
+  /** Closes the popover after `timeoutDelay`, unless the pointer moves onto the content. */
+  scheduleHide() {
+    clearTimeout(this.hideTimeout);
+
+    this.hideTimeout = setTimeout(
+      () => this.hidePopover(),
+      this.timeoutDelay(),
+    );
+  }
+
   onOverlayAttach() {
     const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
     if (!overlayEl) return;
@@ -182,11 +199,14 @@ export class PopoverComponent {
     ) as HTMLElement;
     if (container) {
       // Leave focus alone if the content already moved it inside (e.g. time picker column).
-      setTimeout(() => {
-        if (!container.contains(this.document.activeElement)) {
-          container.focus({ preventScroll: true });
-        }
-      });
+      // A hover-opened popover never takes focus away from the page.
+      if (this.openWith() === "click") {
+        setTimeout(() => {
+          if (!container.contains(this.document.activeElement)) {
+            container.focus({ preventScroll: true });
+          }
+        });
+      }
       this.setupKeyboardNavigation(container);
     }
 
@@ -215,6 +235,7 @@ export class PopoverComponent {
     this.cleanupScrollListener();
     this.horizontalPush.detach();
     this.cleanupDismissListeners();
+    this.isContentHovered.set(false);
     this.isOpen.set(false);
 
     if (this.lockedScrollAtOpen) {
