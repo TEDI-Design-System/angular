@@ -283,19 +283,19 @@ export const IconOnly: Story = {
           <tedi-tooltip-trigger>
             <button tedi-button-group-button value="table" label="Tabel" icon="table"></button>
           </tedi-tooltip-trigger>
-          <tedi-tooltip-content>Tabel</tedi-tooltip-content>
+          <tedi-tooltip-content [ariaHidden]="true">Tabel</tedi-tooltip-content>
         </tedi-tooltip>
         <tedi-tooltip>
           <tedi-tooltip-trigger>
             <button tedi-button-group-button value="list" label="Loend" icon="list"></button>
           </tedi-tooltip-trigger>
-          <tedi-tooltip-content>Loend</tedi-tooltip-content>
+          <tedi-tooltip-content [ariaHidden]="true">Loend</tedi-tooltip-content>
         </tedi-tooltip>
         <tedi-tooltip>
           <tedi-tooltip-trigger>
             <button tedi-button-group-button value="calendar" label="Kalender" icon="calendar_month"></button>
           </tedi-tooltip-trigger>
-          <tedi-tooltip-content>Kalender</tedi-tooltip-content>
+          <tedi-tooltip-content [ariaHidden]="true">Kalender</tedi-tooltip-content>
         </tedi-tooltip>
       </tedi-button-group>
     `,

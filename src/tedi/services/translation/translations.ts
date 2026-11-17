@@ -64,7 +64,7 @@ export const translationsMap = {
   },
   loading: {
     description: "Announces a loading state to assistive technology",
-    components: ["Tag", "Spinner"],
+    components: ["Tag", "Spinner", "Button"],
     et: "Laadimine",
     en: "Loading",
     ru: "Загрузка",

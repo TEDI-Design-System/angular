@@ -176,6 +176,20 @@ export default {
         },
       },
     },
+    ariaHidden: {
+      control: "boolean",
+      description:
+        "Visual-only tooltip: screen readers skip this content and the trigger is not described by it. Use when it repeats the trigger's accessible name, e.g. on an icon-only button. Set on tedi-tooltip-content.",
+      table: {
+        category: "tooltip-content inputs",
+        type: {
+          summary: "boolean",
+        },
+        defaultValue: {
+          summary: "false",
+        },
+      },
+    },
     interactive: {
       control: "boolean",
       description:
@@ -212,6 +226,7 @@ type Story = StoryObj<
   TooltipComponent & {
     maxWidth: TooltipWidth;
     interactive: boolean;
+    ariaHidden: boolean;
   }
 >;
 
@@ -221,6 +236,7 @@ export const Default: Story = {
     preventOverflow: true,
     timeoutDelay: 100,
     offset: 4,
+    ariaHidden: false,
     interactive: true,
     maxWidth: "medium",
     openWith: "both",
@@ -232,7 +248,7 @@ export const Default: Story = {
         <tedi-tooltip-trigger [interactive]="interactive">
           <button tedi-info-button></button>
         </tedi-tooltip-trigger>
-        <tedi-tooltip-content [maxWidth]="maxWidth">
+        <tedi-tooltip-content [maxWidth]="maxWidth" [ariaHidden]="ariaHidden">
           This is tooltip content. The quick brown fox jumps over the lazy dog.
         </tedi-tooltip-content>
       </tedi-tooltip>

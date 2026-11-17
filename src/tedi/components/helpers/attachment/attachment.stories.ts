@@ -128,7 +128,7 @@ const action = (icon: string, label: string, size?: "small") => `
         <tedi-icon name="${icon}" [size]="18" />
       </button>
     </tedi-tooltip-trigger>
-    <tedi-tooltip-content>${label}</tedi-tooltip-content>
+    <tedi-tooltip-content [ariaHidden]="true">${label}</tedi-tooltip-content>
   </tedi-tooltip>
 `;
 
@@ -317,7 +317,7 @@ export const Vertical: Story = {
                   </tedi-dropdown-content>
                 </tedi-dropdown>
               </tedi-tooltip-trigger>
-              <tedi-tooltip-content>Rohkem valikuid</tedi-tooltip-content>
+              <tedi-tooltip-content [ariaHidden]="true">Rohkem valikuid</tedi-tooltip-content>
             </tedi-tooltip>
           </tedi-attachment-actions>
         </tedi-attachment>

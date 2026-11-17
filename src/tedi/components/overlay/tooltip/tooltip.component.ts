@@ -101,6 +101,15 @@ export class TooltipComponent {
     read: ElementRef,
   });
 
+  private readonly tooltipContentComponent = contentChild.required(
+    TooltipContentComponent,
+  );
+
+  /** Whether the trigger skips `aria-describedby`, set by `tedi-tooltip-content`'s `ariaHidden`. */
+  readonly isVisualOnly = computed(() =>
+    this.tooltipContentComponent().ariaHidden(),
+  );
+
   private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
 
   readonly descriptionId = `tedi-tooltip-${++tooltipIdCounter}`;

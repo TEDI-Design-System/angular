@@ -5,7 +5,9 @@ import {
   StoryFn,
   StoryObj,
 } from "@storybook/angular";
+import { signal, WritableSignal } from "@angular/core";
 import { ButtonComponent } from "./button.component";
+import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 import { TextColor, TextComponent } from "../../base/text/text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
@@ -36,12 +38,14 @@ export default {
         TooltipComponent,
         TooltipTriggerComponent,
         TooltipContentComponent,
+        VerticalSpacingDirective,
       ],
     }),
   ],
   args: {
     size: "default",
     variant: "primary",
+    loading: false,
   },
   argTypes: {
     ngContent: {
@@ -84,6 +88,26 @@ export default {
           summary: "ButtonSize",
           detail: "default \nsmall",
         },
+      },
+    },
+    loading: {
+      control: "boolean",
+      description:
+        "Shows a spinner in place of the icons and blocks activation. Unlike `disabled`, the button keeps focus.",
+      table: {
+        category: "inputs",
+        defaultValue: { summary: "false" },
+        type: { summary: "boolean" },
+      },
+    },
+    loadingLabel: {
+      control: "text",
+      description:
+        'What screen readers hear while `loading`. Say what is happening, e.g. "Saving".',
+      table: {
+        category: "inputs",
+        defaultValue: { summary: "the translated `loading` label" },
+        type: { summary: "string" },
       },
     },
   },
@@ -132,7 +156,7 @@ const ButtonTemplate: StoryFn<TemplateType> = ({
                   <tedi-icon name="arrow_forward" />
                 </button>
               </tedi-tooltip-trigger>
-              <tedi-tooltip-content>Edasi</tedi-tooltip-content>
+              <tedi-tooltip-content [ariaHidden]="true">Edasi</tedi-tooltip-content>
             </tedi-tooltip>
           </tedi-col>
         </tedi-row>
@@ -159,7 +183,7 @@ const ButtonTemplate: StoryFn<TemplateType> = ({
                   <tedi-icon name="arrow_forward" />
                 </button>
               </tedi-tooltip-trigger>
-              <tedi-tooltip-content>Edasi</tedi-tooltip-content>
+              <tedi-tooltip-content [ariaHidden]="true">Edasi</tedi-tooltip-content>
             </tedi-tooltip>
           </tedi-col>
         </tedi-row>
@@ -321,6 +345,69 @@ export const DangerNeutral: StoryObj<TemplateType> = {
     variant: "danger-neutral",
   },
   render: ButtonTemplate,
+};
+
+export const Loading: StoryObj<ButtonType> = {
+  parameters: {
+    controls: { exclude: ["size"] },
+    pseudo: {
+      focusVisible: "#Focus",
+    },
+  },
+  args: {
+    loading: true,
+  },
+  render: (args) => ({
+    props: {
+      ...args,
+      saving: signal(false),
+      save(this: { saving: WritableSignal<boolean> }) {
+        this.saving.set(true);
+        setTimeout(() => this.saving.set(false), 3000);
+      },
+    },
+    template: `
+      <div [tediVerticalSpacing]="4">
+      <tedi-row [cols]="1" [gapY]="5">
+        @for (size of ["default", "small"]; track size) {
+          <tedi-col class="flex flex-column gap-3">
+            <p tedi-text modifiers="bold">{{ size === "default" ? "Default" : "Small" }}</p>
+            @for (state of ["Default", "Focus"]; track state) {
+              <tedi-row [cols]="5" alignItems="center" [gapX]="2">
+                <p tedi-text>{{ state }}</p>
+                <tedi-col [width]="4" class="flex flex-wrap align-items-center gap-3">
+                  <button tedi-button ${argsToTemplate(args, { exclude: ["size"] })} [id]="state" [size]="size">Create</button>
+                  <button tedi-button ${argsToTemplate(args, { exclude: ["size"] })} [id]="state" [size]="size">
+                    Continue
+                    <tedi-icon name="arrow_right_alt" />
+                  </button>
+                  <button tedi-button ${argsToTemplate(args, { exclude: ["size"] })} [id]="state" [size]="size">
+                    <tedi-icon name="edit" />
+                    Edit
+                  </button>
+                  <tedi-tooltip>
+                    <tedi-tooltip-trigger>
+                      <button tedi-button ${argsToTemplate(args, { exclude: ["size"] })} [id]="state" [size]="size" aria-label="Edasi">
+                        <tedi-icon name="arrow_forward" />
+                      </button>
+                    </tedi-tooltip-trigger>
+                    <tedi-tooltip-content [ariaHidden]="true">Edasi</tedi-tooltip-content>
+                  </tedi-tooltip>
+                </tedi-col>
+              </tedi-row>
+            }
+          </tedi-col>
+        }
+      </tedi-row>
+      <tedi-row [cols]="5" alignItems="center" [gapX]="2">
+        <p tedi-text modifiers="bold">On click</p>
+        <tedi-col [width]="4">
+          <button tedi-button loadingLabel="Salvestamine" [loading]="saving()" (click)="save()">Salvesta</button>
+        </tedi-col>
+      </tedi-row>
+      </div>
+    `,
+  }),
 };
 
 export const FullWidth: ButtonStory = {

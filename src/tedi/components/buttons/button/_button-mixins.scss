@@ -147,7 +147,8 @@ $neutral-variants: "neutral", "neutral-inverted", "danger-neutral";
       border-color: var(--_btn-focus-border);
     }
 
-    &:disabled {
+    &:disabled,
+    &[aria-disabled="true"] {
       color: var(--_btn-disabled-text);
       cursor: not-allowed;
       background: var(--_btn-disabled-bg);

@@ -382,7 +382,7 @@ export const HeaderTypes: Story = {
                       <span *showAt="'sm'">Jaga</span>
                     </button>
                   </tedi-tooltip-trigger>
-                  <tedi-tooltip-content>Jaga</tedi-tooltip-content>
+                  <tedi-tooltip-content [ariaHidden]="true">Jaga</tedi-tooltip-content>
                 </tedi-tooltip>
                 <tedi-tooltip>
                   <tedi-tooltip-trigger>
@@ -391,7 +391,7 @@ export const HeaderTypes: Story = {
                       <span *showAt="'sm'">Prindi</span>
                     </button>
                   </tedi-tooltip-trigger>
-                  <tedi-tooltip-content>Prindi</tedi-tooltip-content>
+                  <tedi-tooltip-content [ariaHidden]="true">Prindi</tedi-tooltip-content>
                 </tedi-tooltip>
               </div>
             </div>

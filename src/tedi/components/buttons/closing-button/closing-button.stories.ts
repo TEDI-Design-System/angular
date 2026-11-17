@@ -188,7 +188,7 @@ export const WithTooltip: Story = {
           <tedi-tooltip-trigger>
             <button tedi-closing-button [showTitle]="false"></button>
           </tedi-tooltip-trigger>
-          <tedi-tooltip-content>Sulge</tedi-tooltip-content>
+          <tedi-tooltip-content [ariaHidden]="true">Sulge</tedi-tooltip-content>
         </tedi-tooltip>
         <tedi-tooltip>
           <tedi-tooltip-trigger>
@@ -199,7 +199,7 @@ export const WithTooltip: Story = {
               ariaLabel="Kustuta"
             ></button>
           </tedi-tooltip-trigger>
-          <tedi-tooltip-content>Kustuta</tedi-tooltip-content>
+          <tedi-tooltip-content [ariaHidden]="true">Kustuta</tedi-tooltip-content>
         </tedi-tooltip>
       </div>
     `,

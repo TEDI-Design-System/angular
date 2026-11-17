@@ -218,7 +218,7 @@ export const Horizontal: StoryObj<FloatingButtonType> = {
                   <tedi-icon name="arrow_upward" />
                 </button>
               </tedi-tooltip-trigger>
-              <tedi-tooltip-content>Mine üles</tedi-tooltip-content>
+              <tedi-tooltip-content [ariaHidden]="true">Mine üles</tedi-tooltip-content>
             </tedi-tooltip>
           </div>
         </tedi-col>
@@ -294,7 +294,7 @@ export const Sizes: StoryObj<FloatingButtonType> = {
                   <tedi-icon name="arrow_upward" />
                 </button>
               </tedi-tooltip-trigger>
-              <tedi-tooltip-content>Mine üles</tedi-tooltip-content>
+              <tedi-tooltip-content [ariaHidden]="true">Mine üles</tedi-tooltip-content>
             </tedi-tooltip>
           </div>
         </tedi-col>
@@ -320,7 +320,7 @@ const StatesTemplate: StoryFn = () => ({
                 <tedi-icon name="arrow_upward" />
               </button>
             </tedi-tooltip-trigger>
-            <tedi-tooltip-content>Mine üles</tedi-tooltip-content>
+            <tedi-tooltip-content [ariaHidden]="true">Mine üles</tedi-tooltip-content>
           </tedi-tooltip>
         </tedi-col>
         <tedi-col style="display: flex; flex-wrap: wrap; align-items: center; gap: 1rem;">
@@ -331,7 +331,7 @@ const StatesTemplate: StoryFn = () => ({
                 <tedi-icon name="arrow_upward" />
               </button>
             </tedi-tooltip-trigger>
-            <tedi-tooltip-content>Mine üles</tedi-tooltip-content>
+            <tedi-tooltip-content [ariaHidden]="true">Mine üles</tedi-tooltip-content>
           </tedi-tooltip>
         </tedi-col>
       </ng-container>
