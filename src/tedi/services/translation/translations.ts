@@ -551,18 +551,16 @@ export const translationsMap = {
   "table.select-all": {
     description: "Row selection - Label for check in table header",
     components: ["Table"],
-    et: (isSelected: boolean) => (isSelected ? "Eemalda kõik" : "Vali kõik"),
-    en: (isSelected: boolean) => (isSelected ? "Deselect all" : "Select all"),
-    ru: (isSelected: boolean) =>
-      isSelected ? "Убрать выделение со всего" : "Выбрать все",
+    et: "Vali kõik read",
+    en: "Select all rows",
+    ru: "Выбрать все строки",
   },
   "table.select-row": {
     description: "Row selection - Label for check in table row",
     components: ["Table"],
-    et: (isSelected: boolean) => (isSelected ? "Eemalda rida" : "Vali rida"),
-    en: (isSelected: boolean) => (isSelected ? "Deselect row" : "Select row"),
-    ru: (isSelected: boolean) =>
-      isSelected ? "Отменить выбор строки" : "Выбрать ряд",
+    et: "Vali rida",
+    en: "Select row",
+    ru: "Выбрать строку",
   },
   "table.sort": {
     description:
@@ -595,11 +593,11 @@ export const translationsMap = {
     ru: "Нет данных",
   },
   "table.row-details": {
-    description: "Accessible label for the expanded row details region",
+    description: "Accessible label of the expand row toggle",
     components: ["Table"],
     et: "Rea üksikasjad",
     en: "Row details",
-    ru: "Подробности строки",
+    ru: "Сведения о строке",
   },
   "table.filter-input": {
     description: "Accessible label for a column filter input",
@@ -680,20 +678,6 @@ export const translationsMap = {
     en: "Table content",
     ru: "Содержимое таблицы",
   },
-  "table.expand-row": {
-    description: "Label for the expand row toggle (collapsed state)",
-    components: ["Table"],
-    et: "Laienda rida",
-    en: "Expand row",
-    ru: "Развернуть строку",
-  },
-  "table.collapse-row": {
-    description: "Label for the expand row toggle (expanded state)",
-    components: ["Table"],
-    et: "Ahenda rida",
-    en: "Collapse row",
-    ru: "Свернуть строку",
-  },
   "table.drag-column": {
     description: "Accessible label of the column reorder drag handle",
     components: ["Table"],
@@ -712,12 +696,16 @@ export const translationsMap = {
     description:
       "Live region message when a column is picked up for keyboard reordering",
     components: ["Table"],
-    et: (column: string) =>
-      `Veerg ${column} on valitud. Kasuta vasakut/paremat noolt liigutamiseks ja Tühikut või Sisestust kinnitamiseks. Vajuta Escape tühistamiseks.`,
-    en: (column: string) =>
-      `Column ${column} picked up. Use Left/Right arrow to move, Space or Enter to drop. Press Escape to cancel.`,
-    ru: (column: string) =>
-      `Столбец ${column} взят. Используйте стрелки влево/вправо для перемещения, Пробел или Enter для подтверждения. Нажмите Escape для отмены.`,
+    et: (column: string) => `${column} valitud.`,
+    en: (column: string) => `${column} picked up.`,
+    ru: (column: string) => `${column} взят.`,
+  },
+  "table.reorder.instructions": {
+    description: "Description of the column reorder drag handle",
+    components: ["Table"],
+    et: "Tühik või Enter valib ja paigutab, vasak- ja paremnool liigutavad, Escape tühistab.",
+    en: "Space or Enter picks up and drops, Left and Right arrows move, Escape cancels.",
+    ru: "Пробел или Enter берёт и ставит, стрелки влево и вправо перемещают, Escape отменяет.",
   },
   "table.reorder.move": {
     description:
@@ -751,12 +739,16 @@ export const translationsMap = {
     description:
       "Live region message when a row is picked up for keyboard reordering",
     components: ["Table"],
-    et: (position: number) =>
-      `Rida ${position} on valitud. Kasuta üles-/allanoolt liigutamiseks ja Tühikut või Sisestust kinnitamiseks. Vajuta Escape tühistamiseks.`,
-    en: (position: number) =>
-      `Row ${position} picked up. Use Up/Down arrow to move, Space or Enter to drop. Press Escape to cancel.`,
-    ru: (position: number) =>
-      `Строка ${position} взята. Используйте стрелки вверх/вниз для перемещения, Пробел или Enter для подтверждения. Нажмите Escape для отмены.`,
+    et: (position: number) => `Rida ${position} valitud.`,
+    en: (position: number) => `Row ${position} picked up.`,
+    ru: (position: number) => `Строка ${position} взята.`,
+  },
+  "table.row-reorder.instructions": {
+    description: "Description of the row reorder drag handle",
+    components: ["Table"],
+    et: "Tühik või Enter valib ja paigutab, üles- ja allanool liigutavad, Escape tühistab.",
+    en: "Space or Enter picks up and drops, Up and Down arrows move, Escape cancels.",
+    ru: "Пробел или Enter берёт и ставит, стрелки вверх и вниз перемещают, Escape отменяет.",
   },
   "table.row-reorder.move": {
     description:
@@ -942,12 +934,9 @@ export const translationsMap = {
   "sidenav.toggleSubmenu": {
     description: "Label for sidenav submenu toggle",
     components: ["Sidenav"],
-    et: (value: string, isOpen: boolean) =>
-      `${isOpen ? "Sulge" : "Ava"} ${value} alammenüü`,
-    en: (value: string, isOpen: boolean) =>
-      `${isOpen ? "Close" : "Open"} ${value} submenu`,
-    ru: (value: string, isOpen: boolean) =>
-      `${isOpen ? "Закрыть" : "Открыть"} ${value} подменю`,
+    et: (value: string) => `${value} alammenüü`,
+    en: (value: string) => `${value} submenu`,
+    ru: (value: string) => `Подменю ${value}`,
   },
   "buttonGroup.menu": {
     description: "Fallback label for ButtonGroup mobile dropdown trigger",
