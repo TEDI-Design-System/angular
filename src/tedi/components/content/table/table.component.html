@@ -425,27 +425,43 @@
               @let cellMeta = getColumnMeta(cell.column);
               @let cellContext = cell.getContext();
               @let resolvedSpan = resolveRowSpan(cell, cellContext);
-              @if (resolvedSpan !== 0) {
-                <td
-                  [class]="
-                    'tedi-table__cell' +
-                    (cellMeta?.align
-                      ? ' tedi-table__cell--align-' + cellMeta?.align
-                      : '') +
-                    (cellMeta?.vAlign
-                      ? ' tedi-table__cell--valign-' + cellMeta?.vAlign
-                      : '') +
-                    controlCellClass(cell.column.id) +
-                    stickyLeftClass(cell.column.id) +
-                    stickyRightClass(cell.column.id)
-                  "
+              @let cellClass =
+                "tedi-table__cell" +
+                (cellMeta?.align
+                  ? " tedi-table__cell--align-" + cellMeta?.align
+                  : "") +
+                (cellMeta?.vAlign
+                  ? " tedi-table__cell--valign-" + cellMeta?.vAlign
+                  : "") +
+                controlCellClass(cell.column.id) +
+                stickyLeftClass(cell.column.id) +
+                stickyRightClass(cell.column.id);
+              @let cellRowSpan =
+                resolvedSpan !== null && resolvedSpan > 1 ? resolvedSpan : null;
+              @if (resolvedSpan !== 0 && cellMeta?.rowHeader) {
+                <th
+                  scope="row"
+                  [class]="cellClass"
                   [style.left.px]="stickyLeft(cell.column.id)"
                   [style.right.px]="stickyRight(cell.column.id)"
-                  [attr.rowspan]="
-                    resolvedSpan !== null && resolvedSpan > 1
-                      ? resolvedSpan
-                      : null
-                  "
+                  [attr.rowspan]="cellRowSpan"
+                >
+                  <ng-container
+                    *flexRender="
+                      cell.column.columnDef.cell;
+                      props: cellContext;
+                      let content
+                    "
+                  >
+                    {{ content }}
+                  </ng-container>
+                </th>
+              } @else if (resolvedSpan !== 0) {
+                <td
+                  [class]="cellClass"
+                  [style.left.px]="stickyLeft(cell.column.id)"
+                  [style.right.px]="stickyRight(cell.column.id)"
+                  [attr.rowspan]="cellRowSpan"
                 >
                   @if (cell.column.id === DRAG_COLUMN_ID) {
                     <button

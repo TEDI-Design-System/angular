@@ -362,6 +362,104 @@ describe("TediTableComponent", () => {
     });
   });
 
+  describe("row header column", () => {
+    function setupRowHeader(beforeFirstRender?: (host: HostComponent) => void) {
+      return setupHost((host) => {
+        host.columns.set([
+          {
+            id: "name",
+            header: "Name",
+            accessorKey: "name",
+            meta: { rowHeader: true },
+          },
+          { id: "role", header: "Role", accessorKey: "role" },
+        ]);
+        beforeFirstRender?.(host);
+      });
+    }
+
+    function bodyRows(fixture: ComponentFixture<HostComponent>) {
+      return Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+          "tbody > .tedi-table__row",
+        ),
+      );
+    }
+
+    it("renders the column's body cells as th scope=row and the rest as td", () => {
+      const rows = bodyRows(setupRowHeader());
+      expect(rows).toHaveLength(2);
+      rows.forEach((row) => {
+        const [nameCell, roleCell] = Array.from(row.children) as HTMLElement[];
+        expect(nameCell.tagName).toBe("TH");
+        expect(nameCell.getAttribute("scope")).toBe("row");
+        expect(nameCell.classList).toContain("tedi-table__cell");
+        expect(roleCell.tagName).toBe("TD");
+        expect(roleCell.hasAttribute("scope")).toBe(false);
+      });
+      expect(rows[0].querySelector("th")?.textContent?.trim()).toBe("Anna");
+    });
+
+    it("keeps the column's header cell a column header", () => {
+      const fixture = setupRowHeader();
+      const header = (fixture.nativeElement as HTMLElement).querySelector(
+        "thead .tedi-table__header-cell",
+      );
+      expect(header?.tagName).toBe("TH");
+      expect(header?.getAttribute("scope")).toBe("col");
+    });
+
+    it("renders every body cell as td without the option", () => {
+      bodyRows(setupHost()).forEach((row) =>
+        expect(row.querySelector("th")).toBeNull(),
+      );
+    });
+
+    it("keeps control columns as td and applies sticky classes to the row header", () => {
+      const rows = bodyRows(
+        setupRowHeader((host) => {
+          host.enableRowSelection.set(true);
+          host.stickyFirstColumn.set(true);
+        }),
+      );
+      const [selectCell, nameCell] = Array.from(
+        rows[0].children,
+      ) as HTMLElement[];
+      expect(selectCell.tagName).toBe("TD");
+      expect(nameCell.tagName).toBe("TH");
+      expect(nameCell.classList).toContain("tedi-table__cell--sticky-left");
+    });
+
+    it("renders one spanning th when the row header column is grouped", () => {
+      const fixture = setupHost((host) => {
+        host.data.set([
+          { id: "a", name: "Anna", role: "Engineer" },
+          { id: "b", name: "Anna", role: "Designer" },
+          { id: "c", name: "Bob", role: "Designer" },
+        ]);
+        host.groupRowsBy.set((row: Row<Person>) => row.original.name);
+        host.columns.set([
+          {
+            id: "name",
+            header: "Name",
+            accessorKey: "name",
+            groupBy: true,
+            meta: { rowHeader: true },
+          },
+          { id: "role", header: "Role", accessorKey: "role" },
+        ]);
+      });
+      const rows = bodyRows(fixture);
+      const rowHeaders = rows.map((row) => row.querySelectorAll("th"));
+      expect(rowHeaders[0]).toHaveLength(1);
+      expect(rowHeaders[0][0].getAttribute("scope")).toBe("row");
+      expect(rowHeaders[0][0].getAttribute("rowspan")).toBe("2");
+      expect(rowHeaders[1]).toHaveLength(0);
+      expect(rows[1].children).toHaveLength(1);
+      expect(rowHeaders[2][0].hasAttribute("rowspan")).toBe(false);
+    });
+  });
+
   describe("sticky columns", () => {
     it("marks no cell sticky by default", () => {
       const fixture = setupHost();

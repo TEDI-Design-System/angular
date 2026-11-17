@@ -153,18 +153,19 @@ const EDITABLE_ACTIONS_TEMPLATE = `
 <ng-template #editActions let-ctx>
   <span style="display:inline-flex; gap:8px; justify-content:flex-end; align-items:center; width:100%;">
     @if (editor.isEditing(ctx.row.original.id)) {
-      <button tedi-closing-button type="button" ariaLabel="Tühista"
+      <button tedi-closing-button type="button"
+        [ariaLabel]="'Tühista ' + formatDateRange(ctx.row.original.dateRange)"
         (click)="editor.cancelEdit()"></button>
       <button tedi-button variant="primary" size="small" type="button"
         (click)="editor.commitEdit()">
         <tedi-icon name="check" [size]="16" color="inherit" />
-        Kinnita
+        Kinnita<span class="sr-only"> {{ formatDateRange(ctx.row.original.dateRange) }}</span>
       </button>
     } @else {
       <button tedi-button variant="neutral" size="small" type="button"
         (click)="editor.beginEdit(ctx.row.original)">
         <tedi-icon name="edit" [size]="16" color="inherit" />
-        Muuda
+        Muuda<span class="sr-only"> {{ formatDateRange(ctx.row.original.dateRange) }}</span>
       </button>
     }
   </span>
