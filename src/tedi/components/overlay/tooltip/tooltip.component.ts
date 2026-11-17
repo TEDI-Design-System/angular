@@ -192,9 +192,13 @@ export class TooltipComponent {
       return;
     }
 
-    if (this.open() !== undefined || this.isOpen()) return;
+    if (this.open() !== undefined) return;
 
+    // Coming back cancels a close that is still pending, even if already open.
     clearTimeout(this.hideTimeout);
+
+    if (this.isOpen()) return;
+
     clearTimeout(this.showTimeout);
 
     this.showTimeout = setTimeout(() => this.showTooltip(), delay);

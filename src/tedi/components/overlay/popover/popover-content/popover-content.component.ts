@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ElementRef,
   HostListener,
   inject,
   input,
@@ -63,6 +64,7 @@ export class PopoverContentComponent {
   padding = input<CardPadding>();
 
   private readonly popover = inject(PopoverComponent);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   titleId = `popover-title-${popoverTitleId++}`;
 
   private readonly isPresetWidth = computed(() =>
@@ -109,6 +111,28 @@ export class PopoverContentComponent {
     if (this.popover.openWith() !== "hover") return;
     this.popover.isContentHovered.set(false);
     this.popover.scheduleHide();
+  }
+
+  @HostListener("focusin")
+  onFocusIn() {
+    if (this.popover.openWith() !== "hover") return;
+    clearTimeout(this.popover.hideTimeout);
+  }
+
+  @HostListener("focusout", ["$event"])
+  onFocusOut(event: FocusEvent) {
+    if (this.popover.openWith() !== "hover") return;
+
+    const next = event.relatedTarget as Node | null;
+    const trigger = this.popover.popoverTrigger().host.nativeElement;
+    if (
+      this.popover.isContentHovered() ||
+      this.host.nativeElement.contains(next) ||
+      trigger.contains(next)
+    ) {
+      return;
+    }
+    this.popover.hidePopover();
   }
 
   handleClose() {

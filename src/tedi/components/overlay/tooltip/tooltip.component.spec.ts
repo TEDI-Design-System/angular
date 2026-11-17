@@ -248,6 +248,19 @@ describe("TooltipComponent", () => {
       expect(component.tooltip().isOpen()).toBe(true);
     });
 
+    it("should stay open when the pointer leaves and comes back before timeoutDelay", () => {
+      fixture.componentRef.setInput("delay", 200);
+      fixture.detectChanges();
+      component.tooltip().showTooltip();
+
+      trigger.dispatchEvent(new Event("mouseleave"));
+      jest.advanceTimersByTime(50);
+      trigger.dispatchEvent(new Event("mouseenter"));
+      jest.advanceTimersByTime(500);
+
+      expect(component.tooltip().isOpen()).toBe(true);
+    });
+
     it("should not delay closing", () => {
       fixture.componentRef.setInput("delay", 300);
       fixture.detectChanges();

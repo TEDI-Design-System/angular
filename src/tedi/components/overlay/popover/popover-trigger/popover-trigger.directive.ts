@@ -63,13 +63,14 @@ export class PopoverTriggerDirective {
   @HostListener("focusin")
   onFocusIn() {
     if (this.popover.openWith() !== "hover") return;
-    this.popover.showPopover();
+    this.popover.showPopoverOnFocus();
   }
 
-  @HostListener("focusout")
-  onFocusOut() {
+  @HostListener("focusout", ["$event"])
+  onFocusOut(event: FocusEvent) {
     if (this.popover.openWith() !== "hover") return;
     if (this.popover.isContentHovered()) return;
+    if (this.popover.isInOwnOverlay(event.relatedTarget as Node | null)) return;
     this.popover.hidePopover();
   }
 

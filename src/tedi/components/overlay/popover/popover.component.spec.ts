@@ -926,6 +926,85 @@ describe("PopoverComponent", () => {
       expect(component.isOpen()).toBe(false);
     });
 
+    it("should not reopen when focus is handed back to the trigger on close", () => {
+      component.showPopover();
+      fixture.detectChanges();
+
+      component.hidePopover(true);
+      fixture.detectChanges();
+
+      expect(document.activeElement).toBe(trigger);
+      expect(component.isOpen()).toBe(false);
+    });
+
+    it("should stay open when the pointer leaves and comes back before timeoutDelay", () => {
+      component.showPopover();
+
+      trigger.dispatchEvent(new Event("mouseleave"));
+      jest.advanceTimersByTime(50);
+      trigger.dispatchEvent(new Event("mouseenter"));
+      jest.advanceTimersByTime(500);
+
+      expect(component.isOpen()).toBe(true);
+    });
+
+    it("should stay open when the pointer comes back with a delay set", () => {
+      hostComponent.delay = 200;
+      fixture.detectChanges();
+      component.showPopover();
+
+      trigger.dispatchEvent(new Event("mouseleave"));
+      jest.advanceTimersByTime(50);
+      trigger.dispatchEvent(new Event("mouseenter"));
+      jest.advanceTimersByTime(500);
+
+      expect(component.isOpen()).toBe(true);
+    });
+
+    it("should stay open when focus moves from the trigger into the content", () => {
+      component.showPopover();
+      fixture.detectChanges();
+      const content = overlayContainerElement.querySelector(
+        "tedi-popover-content",
+      ) as HTMLElement;
+
+      trigger.dispatchEvent(
+        new FocusEvent("focusout", { bubbles: true, relatedTarget: content }),
+      );
+
+      expect(component.isOpen()).toBe(true);
+    });
+
+    it("should not close on pointer leave while focus is inside the content", () => {
+      component.showPopover();
+      fixture.detectChanges();
+      const content = overlayContainerElement.querySelector(
+        "tedi-popover-content",
+      ) as HTMLElement;
+      const input = document.createElement("input");
+      content.appendChild(input);
+      input.focus();
+
+      content.dispatchEvent(new Event("mouseleave"));
+      jest.advanceTimersByTime(500);
+
+      expect(component.isOpen()).toBe(true);
+    });
+
+    it("should close when focus leaves the content for the page", () => {
+      component.showPopover();
+      fixture.detectChanges();
+      const content = overlayContainerElement.querySelector(
+        "tedi-popover-content",
+      ) as HTMLElement;
+
+      content.dispatchEvent(
+        new FocusEvent("focusout", { bubbles: true, relatedTarget: null }),
+      );
+
+      expect(component.isOpen()).toBe(false);
+    });
+
     it("should not move focus into the content", () => {
       component.showPopover();
       fixture.detectChanges();

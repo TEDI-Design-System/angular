@@ -153,9 +153,13 @@ export class PopoverComponent {
 
   hideTimeout?: ReturnType<typeof setTimeout>;
   private showTimeout?: ReturnType<typeof setTimeout>;
+
   /** Whether this popover locked body scroll when it opened — read on close
    * so a mid-open change to the lockScroll input can't leave the lock stuck. */
   private lockedScrollAtOpen = false;
+  /** True while `hidePopover` hands focus back to the trigger. */
+  private restoringFocus = false;
+
   private keydownListener?: () => void;
   private scrollListener?: () => void;
   private focusinListener?: () => void;
@@ -178,10 +182,11 @@ export class PopoverComponent {
   }
 
   showPopover() {
-    if (this.isOpen()) return;
-
+    // A pointer or focus coming back cancels a close that is still pending.
     clearTimeout(this.hideTimeout);
     clearTimeout(this.showTimeout);
+
+    if (this.isOpen()) return;
     this.isOpen.set(true);
 
     this.lockedScrollAtOpen = this.lockScroll();
@@ -198,18 +203,34 @@ export class PopoverComponent {
       return;
     }
 
+    clearTimeout(this.hideTimeout);
     if (this.isOpen()) return;
 
-    clearTimeout(this.hideTimeout);
     clearTimeout(this.showTimeout);
 
     this.showTimeout = setTimeout(() => this.showPopover(), delay);
   }
 
-  /** Closes the popover after `timeoutDelay`, unless the pointer moves onto the content. */
+  /** Opens the popover because the trigger got focus, unless focus is only being handed back by a close. */
+  showPopoverOnFocus() {
+    if (this.restoringFocus) return;
+    this.showPopover();
+  }
+
+  /** Whether the node is inside this popover's own overlay. */
+  isInOwnOverlay(node: Node | null): boolean {
+    const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+    return !!node && !!overlayEl?.contains(node);
+  }
+
+  /**
+   * Closes the popover after `timeoutDelay`, unless the pointer moves onto the
+   * content or focus is inside it.
+   */
   scheduleHide() {
     clearTimeout(this.showTimeout);
     clearTimeout(this.hideTimeout);
+    if (this.isInOwnOverlay(this.document.activeElement)) return;
 
     this.hideTimeout = setTimeout(
       () => this.hidePopover(),
@@ -273,7 +294,12 @@ export class PopoverComponent {
     }
 
     if (focusTrigger) {
-      this.popoverTrigger().host.nativeElement.focus({ preventScroll: true });
+      this.restoringFocus = true;
+      try {
+        this.popoverTrigger().host.nativeElement.focus({ preventScroll: true });
+      } finally {
+        this.restoringFocus = false;
+      }
     }
   }
 
