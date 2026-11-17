@@ -252,6 +252,7 @@ export function formatLocaleDate(date: Date, localeCode: string): string {
  * Formats a Date as a long-form, locale-aware string suitable for
  * `aria-label` use — e.g. for `en-US` produces "Friday, May 16, 2026" and for
  * `et-EE` "reede, 16. mai 2026". Matches react-day-picker's `labelDay` shape.
+ * @deprecated Use `formatLocaleDayLabel` instead.
  */
 export function formatLocaleDateLong(date: Date, localeCode: string): string {
   const fmt = new Intl.DateTimeFormat(localeCode, {
@@ -259,6 +260,24 @@ export function formatLocaleDateLong(date: Date, localeCode: string): string {
     day: "numeric",
     month: "long",
     year: "numeric",
+  });
+  return fmt.format(date);
+}
+
+/**
+ * Formats a Date as weekday, day and month, e.g. "esmaspäev, 16. november" for
+ * `et-EE`. `withYear` appends the year: "esmaspäev, 16. november 2026".
+ */
+export function formatLocaleDayLabel(
+  date: Date,
+  localeCode: string,
+  withYear = false,
+): string {
+  const fmt = new Intl.DateTimeFormat(localeCode, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: withYear ? "numeric" : undefined,
   });
   return fmt.format(date);
 }

@@ -1272,7 +1272,7 @@ export const translationsMap = {
   },
   "date-picker.today": {
     description:
-      'Prefix announced by assistive tech before the date when a day cell represents today (e.g., "Today, Friday, 16 May 2026").',
+      'Prefix announced by assistive tech before the date when a day cell represents today (e.g., "Today, Friday, 16 May").',
     components: ["DatePicker"],
     et: "Täna",
     en: "Today",
@@ -1317,7 +1317,7 @@ export const translationsMap = {
   },
   "date-picker.week-number-header": {
     description:
-      'ARIA label announced for the week-number column header (e.g., "Week").',
+      "Deprecated and unused: the calendar header row is aria-hidden. Kept so consumer overrides keep compiling.",
     components: ["DatePicker"],
     et: "Nädal",
     en: "Week",
