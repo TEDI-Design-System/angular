@@ -5,6 +5,6 @@
     "emitDecoratorMetadata": true,
     "outDir": ""
   },
-  "exclude": ["main.ts"],
+  "exclude": ["main.ts", "*.spec.ts"],
   "include": ["../**/*.stories.ts", "./**/*.ts", "preview.tsx"]
 }

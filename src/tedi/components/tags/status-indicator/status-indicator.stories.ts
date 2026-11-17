@@ -1,7 +1,8 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 import { StatusIndicatorComponent } from "./status-indicator.component";
 import { TextComponent } from "../../base/text/text.component";
-import { RowComponent, ColComponent } from "@tedi-design-system/angular/tedi";
+import { RowComponent } from "../../helpers/grid/row/row.component";
+import { ColComponent } from "../../helpers/grid/col/col.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.45.68?node-id=2405-53326&m=dev" target="_blank">Figma ↗</a>

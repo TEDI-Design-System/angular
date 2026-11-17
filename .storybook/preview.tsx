@@ -1,4 +1,8 @@
 import "./fixed-date";
+// Core's styles load through `angular.json`, which TurboSnap can't trace.
+// Importing its manifest here puts core in the preview's graph, so a core bump
+// forces a full Chromatic build instead of copying every baseline.
+import "@tedi-design-system/core/package.json";
 import { applicationConfig, Preview, StoryContext } from "@storybook/angular";
 import { provideRouter, withDisabledInitialNavigation } from "@angular/router";
 import { Theme } from "../src/tedi/services/theme/theme.service";
@@ -13,6 +17,7 @@ import {
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../src/tedi/tokens/translation.token";
 import { TEDI_THEME_DEFAULT_TOKEN } from "../src/tedi/tokens/theme.token";
 import { THEME_FALLBACK_VALUE } from "../src/tedi/services/theme/theme.service";
+import { provideStorybookLocale } from "./locale";
 
 export const globalTypes = {
   theme: {
@@ -64,6 +69,7 @@ const preview: Preview = {
       providers: [
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
         { provide: TEDI_THEME_DEFAULT_TOKEN, useValue: THEME_FALLBACK_VALUE },
+        provideStorybookLocale(),
         // Replaces storybook-addon-angular-router (Storybook 8 only):
         // provides Router/ActivatedRoute for stories using routerLink.
         // Initial navigation must stay disabled — the router cannot match
@@ -86,7 +92,10 @@ const preview: Preview = {
     backgrounds: {
       options: {
         default: { name: "Default", value: "var(--general-surface-primary)" },
-        inverted: { name: "Inverted", value: "var(--general-surface-inverted-primary)" },
+        inverted: {
+          name: "Inverted",
+          value: "var(--general-surface-inverted-primary)",
+        },
         brand: { name: "Brand", value: "var(--general-surface-brand-primary)" },
       },
     },

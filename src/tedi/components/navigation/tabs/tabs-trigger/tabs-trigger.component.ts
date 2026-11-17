@@ -85,6 +85,16 @@ export class TabsTriggerComponent {
     });
   }
 
+  /** Activates the tab the way a click on it does: an anchor follows its link, a button selects its panel. */
+  activate(): void {
+    if (this.isAnchor) {
+      this.host.nativeElement.click();
+      return;
+    }
+
+    this.tabs.select(this.id());
+  }
+
   handleClick(event?: Event): void {
     if (this.disabled()) {
       // Buttons are inert via the disabled attribute; a disabled anchor is kept

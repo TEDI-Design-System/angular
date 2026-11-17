@@ -37,7 +37,9 @@
   [attr.aria-labelledby]="!searchable() ? resolvedAriaLabelledby() : null"
   [attr.aria-label]="!searchable() ? resolvedAriaLabel() : null"
   [attr.aria-invalid]="!searchable() ? isInvalid() || null : null"
+  [attr.aria-required]="!searchable() ? required() || null : null"
   [attr.aria-describedby]="!searchable() ? feedbackId() : null"
+  [attr.aria-disabled]="disabled() || null"
   [tabindex]="searchable() || disabled() ? -1 : 0"
   (click)="onTriggerClick()"
   (keydown.enter)="onTriggerEnter()"
@@ -88,6 +90,7 @@
           [attr.aria-labelledby]="resolvedAriaLabelledby()"
           [attr.aria-label]="resolvedAriaLabel()"
           [attr.aria-invalid]="isInvalid() || null"
+          [attr.aria-required]="required() || null"
           [attr.aria-describedby]="feedbackId()"
         />
       }
@@ -228,6 +231,7 @@
         [attr.aria-labelledby]="resolvedAriaLabelledby()"
         [attr.aria-label]="resolvedAriaLabel()"
         [attr.aria-invalid]="isInvalid() || null"
+        [attr.aria-required]="required() || null"
         [attr.aria-describedby]="feedbackId()"
       />
     }
@@ -242,7 +246,7 @@
   [cdkConnectedOverlayFlexibleDimensions]="true"
   [cdkConnectedOverlayGrowAfterOpen]="true"
   (attach)="onOverlayAttached()"
-  (detach)="toggleIsOpen(true)"
+  (detach)="onOverlayDetached()"
 >
   <div
     class="tedi-select__dropdown"

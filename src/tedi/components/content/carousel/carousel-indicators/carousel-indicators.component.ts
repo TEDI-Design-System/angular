@@ -23,6 +23,10 @@ export type CarouselIndicatorsVariant = "dots" | "numbers";
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   imports: [NgClass, ButtonComponent, IconComponent, TextComponent],
+  host: {
+    "[attr.role]": "isGroup() ? 'group' : null",
+    "[attr.aria-label]": "isGroup() ? groupLabel() : null",
+  },
 })
 export class CarouselIndicatorsComponent {
   /** Should show indicators with arrows? If yes, don't use carousel-navigation component */
@@ -33,6 +37,12 @@ export class CarouselIndicatorsComponent {
 
   readonly translationService = inject(TediTranslationService);
   readonly carousel = inject(CarouselComponent);
+
+  readonly groupLabel = this.translationService.track("carousel.slides");
+
+  readonly isGroup = computed(
+    () => this.variant() === "dots" || this.withArrows(),
+  );
 
   readonly indicatorsArray = computed(() =>
     Array.from(

@@ -213,6 +213,34 @@ describe("SelectComponent", () => {
       expect(requiredIndicator?.textContent).toBe("*");
     });
 
+    it("sets aria-required on the combobox only when required", () => {
+      expect(getTrigger().hasAttribute("aria-required")).toBe(false);
+
+      host.required = true;
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-required")).toBe("true");
+    });
+
+    it("moves aria-required to the search input when searchable", () => {
+      host.required = true;
+      host.searchable = true;
+      fixture.detectChanges();
+
+      expect(getTrigger().hasAttribute("aria-required")).toBe(false);
+      expect(getSearchInput().getAttribute("aria-required")).toBe("true");
+    });
+
+    it("sets aria-required on the search input of a searchable multiselect", () => {
+      host.required = true;
+      host.searchable = true;
+      host.allowMultiple = true;
+      host.control.setValue(["Option 1"]);
+      fixture.detectChanges();
+
+      expect(getSearchInput().getAttribute("aria-required")).toBe("true");
+    });
+
     it("should apply small size class", () => {
       host.size = "small";
       fixture.detectChanges();
@@ -1091,6 +1119,29 @@ describe("SelectComponent", () => {
       fixture.detectChanges();
 
       expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    });
+
+    it("trigger should not have aria-disabled when enabled", () => {
+      expect(getTrigger().hasAttribute("aria-disabled")).toBe(false);
+    });
+
+    it("trigger should have aria-disabled when disabled", () => {
+      select.setDisabledState(true);
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-disabled")).toBe("true");
+    });
+
+    it("trigger should follow the form control's disabled state in aria-disabled", () => {
+      host.control.disable();
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-disabled")).toBe("true");
+
+      host.control.enable();
+      fixture.detectChanges();
+
+      expect(getTrigger().hasAttribute("aria-disabled")).toBe(false);
     });
 
     it("trigger should have aria-haspopup", () => {
@@ -2513,6 +2564,44 @@ describe("SelectComponent", () => {
       tick();
 
       expect(select.triggerRef()?.nativeElement).toBe(getTrigger());
+      expect(document.activeElement).toBe(getTrigger());
+    }));
+
+    it("should keep focus on another element that was clicked while the dropdown was open", fakeAsync(() => {
+      const other = document.createElement("button");
+      document.body.appendChild(other);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(true);
+
+      other.focus();
+      other.click();
+      fixture.detectChanges();
+      tick(500);
+      fixture.detectChanges();
+
+      expect(select.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(other);
+
+      other.remove();
+    }));
+
+    it("should restore focus to the trigger when closing with Escape", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const listbox = document.querySelector("[cdkListbox]") as HTMLElement;
+      listbox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+      );
+      fixture.detectChanges();
+      tick(500);
+      fixture.detectChanges();
+
+      expect(select.isOpen()).toBe(false);
       expect(document.activeElement).toBe(getTrigger());
     }));
   });

@@ -1137,6 +1137,20 @@ export class SelectComponent<T = unknown>
     });
   }
 
+  /**
+   * Syncs the closed state when the overlay detaches. Focus goes back to the
+   * trigger only when it would otherwise be lost to the page, so a click or
+   * Tab that already moved focus elsewhere keeps it there.
+   */
+  onOverlayDetached(): void {
+    this.closeDropdown();
+
+    const active = this.document.activeElement;
+    if (!active || active === this.document.body) {
+      this.focusTrigger();
+    }
+  }
+
   /** Set the active row on open: the first selected option, else the first navigable row. */
   private initVirtualActive(): void {
     const rows = this.virtualRows();

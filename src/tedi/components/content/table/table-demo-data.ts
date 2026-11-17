@@ -101,14 +101,14 @@ interface Booking {
   location: string;
 }
 
-const bookingDateRange: DateRange = {
-  from: new Date(2029, 2, 22),
-  to: new Date(2029, 2, 29),
-};
+const bookingDateRange = (index: number): DateRange => ({
+  from: new Date(2029, 2, 22 + index),
+  to: new Date(2029, 2, 29 + index),
+});
 
 const bookings: Booking[] = Array.from({ length: 28 }, (_, index) => ({
   id: String(index + 1),
-  dateRange: { ...bookingDateRange },
+  dateRange: bookingDateRange(index),
   hour: "11:14",
   duration: "6 min",
   location: "Harjumaa",
@@ -617,7 +617,6 @@ const errorRows = buildErrorRows(errorSource);
 export {
   people,
   personColumns,
-  bookingDateRange,
   bookings,
   formatBookingDateRange,
   bookingDateRangeCell,

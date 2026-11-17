@@ -267,7 +267,7 @@ describe("state-management.mdx claims", () => {
         host.state.set({ sorting: [] }); // sorting controlled, expanded not
       });
       const expandButton = fixture.nativeElement.querySelector(
-        '.tedi-table__body button[aria-label="table.expand-row"]',
+        '.tedi-table__body button[aria-label="table.row-details"]',
       ) as HTMLButtonElement;
       expandButton.click();
       fixture.detectChanges();

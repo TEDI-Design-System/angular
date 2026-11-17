@@ -181,7 +181,12 @@ export class PopoverComponent {
       ".tedi-popover__container",
     ) as HTMLElement;
     if (container) {
-      setTimeout(() => container.focus({ preventScroll: true }));
+      // Leave focus alone if the content already moved it inside (e.g. time picker column).
+      setTimeout(() => {
+        if (!container.contains(this.document.activeElement)) {
+          container.focus({ preventScroll: true });
+        }
+      });
       this.setupKeyboardNavigation(container);
     }
 

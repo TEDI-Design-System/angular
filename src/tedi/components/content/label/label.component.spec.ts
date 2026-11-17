@@ -58,16 +58,6 @@ describe("LabelComponent", () => {
       expect(element.classList).not.toContain("sr-only");
     });
 
-    it("keeps the required announcement when hidden visually", () => {
-      fixture.componentRef.setInput("required", true);
-      fixture.componentRef.setInput("visuallyHidden", true);
-      fixture.detectChanges();
-
-      expect(element.querySelector(".sr-only")?.textContent).toContain(
-        "Kohustuslik väli",
-      );
-    });
-
     it("keeps the size class alongside the hidden state", () => {
       fixture.componentRef.setInput("size", "small");
       fixture.componentRef.setInput("visuallyHidden", "reserve-space");
@@ -78,16 +68,15 @@ describe("LabelComponent", () => {
     });
   });
 
-  it("should handle required input", () => {
+  it("shows only an aria-hidden asterisk when required, leaving the announcement to the control", () => {
     fixture.componentRef.setInput("required", true);
     fixture.detectChanges();
 
     const requiredSpan = element.querySelector(".tedi-label--required");
     expect(requiredSpan).toBeTruthy();
     expect(requiredSpan?.getAttribute("aria-hidden")).toBe("true");
-
-    const srOnlySpan = element.querySelector(".sr-only");
-    expect(srOnlySpan).toBeTruthy();
+    expect(element.querySelector(".sr-only")).toBeNull();
+    expect(element.textContent?.trim()).toBe("*");
   });
 });
 

@@ -63,15 +63,19 @@ export interface PaginationItem {
 }
 
 export interface PaginationLabels {
-  /** Accessible label for the nav wrapper. @default 'Pagination' */
+  /** Accessible label for the nav wrapper. @default 'Pages' */
   ariaLabel: string;
   /** Previous button label (icon-only, used as aria-label). @default 'Previous page' */
   previous: string;
   /** Next button label (icon-only, used as aria-label). @default 'Next page' */
   next: string;
-  /** aria-label for a numeric page button. @default (page) => 'Go to page {page}' */
+  /** aria-label for a numeric page button. The current page also gets `aria-current="page"`. @default (page) => 'Page {page}' */
   pageAriaLabel: (page: number) => string;
-  /** aria-label for the currently active page. @default (page) => 'Current page, page {page}' */
+  /**
+   * aria-label for the current page.
+   * @default pageAriaLabel
+   * @deprecated The current page is conveyed by `aria-current="page"`; a different label makes screen readers announce it twice. Use `pageAriaLabel`.
+   */
   currentPageAriaLabel: (page: number) => string;
   /** Rendered to the left of the nav when `totalItems` is set. @default (count) => '{count} results' */
   results: (count: number) => string;

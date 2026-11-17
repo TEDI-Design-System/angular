@@ -2,9 +2,13 @@
 
 Guidance for AI coding agents working in this repository.
 
+**Before working on components, read `.agents/skills/contributing/SKILL.md`.** It routes to the
+references for new components, tests, a11y, stories, refactoring and PR review. Harnesses with skill
+support load it from `.agents/skills/` (Claude Code through the `.claude/skills/contributing` symlink).
+
 ## Project Overview
 
-TEDI Design System Angular component library (`@tedi-design-system/angular`). Angular 19 standalone component library published via ng-packagr, with Storybook for documentation.
+TEDI Design System Angular component library (`@tedi-design-system/angular`). Angular 20 standalone component library published via ng-packagr, with Storybook for documentation.
 
 ## Commands
 
@@ -12,7 +16,7 @@ TEDI Design System Angular component library (`@tedi-design-system/angular`). An
 npm start              # Start Storybook dev server (port 6006)
 npm test               # Run all tests (Jest)
 npm run test:watch     # Run tests in watch mode
-npx jest path/to/file  # Run a single test file
+npx jest path/to/file --coverage=false   # Run a single test file (npm test passes on a typo'd path)
 npm run lint           # Stylelint (SCSS) + ESLint (TS/HTML) with --fix
 npm run build          # Build library to dist/
 ```
@@ -71,21 +75,12 @@ Path aliases:
 - Max nesting depth: 4
 - **Target CSS classes, not Angular element selectors** — add classes to component hosts and style those. Only style element selectors directly for third-party components where you can't control the host (e.g., `cdk-dialog-container`).
 
-## Testing
+## Testing and Storybook
 
-- Jest with `jest-preset-angular`, jsdom environment
-- Coverage thresholds: 80% on branches/functions/lines/statements
-- Test inputs via `fixture.componentRef.setInput('propName', value)`
-- Mock `TediTranslationService` in tests that use translated components
-- For form controls, use a test host component with `ReactiveFormsModule` and `FormControl`
-
-## Storybook
-
-- Stories at `src/tedi/**/*.stories.ts`
-- Title format: `"TEDI-Ready/Components/<Category>/<ComponentName>"` (e.g. `Buttons`, `Form`, `Navigation`). Top-level groups `Content`, `Layout`, and `Base` skip the `Components` segment — `"TEDI-Ready/Content/<ComponentName>"`, etc. Check sibling stories in the same folder to confirm the prefix.
-- Uses `moduleMetadata` decorator for imports
-- Status parameters: `partiallyTediReady`, `existsInTediReady`, `devComponent`, etc.
-- Compodoc integration enabled for auto-generated docs
+- Jest with `jest-preset-angular`, jsdom environment, 80% coverage threshold. Setup and patterns:
+  `.agents/skills/contributing/references/testing.md`.
+- Stories at `src/tedi/**/*.stories.ts`. Titles, argTypes and composition rules:
+  `.agents/skills/contributing/references/stories.md`.
 
 ## Commits
 
@@ -123,38 +118,13 @@ Path aliases:
 - Forget to add `.parent__button:hover .tedi-icon { color: inherit; }` (and similar for selected/active states) in components that contain icons and change text color on state — without this, the icon's color modifier class wins over the parent's color. Use `color="inherit"` for component-owned icons; for projected icons, the CSS override ensures the consumer's color applies in default state but inherits on hover/selected
 - Style Angular element selectors directly (e.g., `tedi-modal-header { ... }`) — add a CSS class to the host and style the class instead. Exception: third-party elements you can't add classes to (e.g., `cdk-dialog-container`)
 
-## Common Test Setup
-
-Tests that use translated components need:
-```typescript
-class TranslationMock {
-  translate(key: string) { return key; }
-  track(key: string) { return () => key; }
-}
-
-// In TestBed providers:
-{ provide: TediTranslationService, useClass: TranslationMock },
-{ provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: 'et' },
-```
-
-Form control tests need a host component:
-```typescript
-@Component({
-  standalone: true,
-  imports: [MyComponent, ReactiveFormsModule],
-  template: `<tedi-my-component [formControl]="control" />`
-})
-class TestHostComponent {
-  control = new FormControl<ValueType>(defaultValue);
-}
-```
-
 ## For Code Review Agents (CodeRabbit, etc.)
 
-Read `.claude/skills/contributing/references/best-practices.md` for the full set of coding patterns and rules to enforce during review.
+Read `.agents/skills/contributing/references/best-practices.md` for the full set of coding patterns and rules to enforce during review, and apply the Input API and Prose sections of `.agents/skills/contributing/references/pr-review.md`.
 
 Key things to **not** flag:
 - `ViewEncapsulation.None` — intentional, not a security concern.
 - Missing CSS `var()` fallback values — intentionally omitted.
+- `src/community/` code not following TEDI patterns: community components have lighter standards.
 - CdkListbox private API access (`_setNextFocusToSelectedOption`, `_handleKeydown`) in the select component — intentional workarounds, no public CDK alternative exists.
 - `parameters.status: { type: ["breakpointSupport"] }` on a story — this is a valid, registered status badge (see `.storybook/preview.tsx` and `best-practices.md`). Keep it on components with breakpoint-dependent behavior or inputs that accept breakpoint values. Do not suggest removing it.
