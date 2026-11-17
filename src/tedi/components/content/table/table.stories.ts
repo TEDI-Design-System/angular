@@ -3084,6 +3084,7 @@ export const NestedTable: Story = {
       [data]="data"
       [columns]="columns()"
       [getRowId]="getRowId"
+      [rowSelectionLabel]="rowSelectionLabel"
       [pagination]="pagination"
       ${TABLE_APPEARANCE_BINDINGS}
     />
@@ -3108,6 +3109,7 @@ class SelectableRowsStoryHostComponent extends TableStoryHostBase {
   // Key selection by a stable entity id instead of the row index, so
   // rowSelection survives sorting / filtering / data changes.
   getRowId = (row: PersonRecord) => row.id;
+  rowSelectionLabel = (row: Row<PersonRecord>) => "Vali " + row.original.name;
 
   personNameTpl =
     viewChild<TemplateRef<CellContext<PersonRecord, unknown>>>("personName");
@@ -3166,10 +3168,12 @@ export const SelectableRows: Story = {
   [enableRowSelection]="true"
   [selectedRowHighlight]="false"
   [getRowId]="getRowId"
+  [rowSelectionLabel]="rowSelectionLabel"
   [pagination]="pagination"
 />
 
-<!-- getRowId = (row) => row.id; -->
+<!-- getRowId = (row) => row.id;
+     rowSelectionLabel = (row) => "Vali " + row.original.name; -->
 
 
 <ng-template #personStatus let-ctx>

@@ -434,8 +434,7 @@ export class TediTableComponent<TData> {
    * button. Pass a single string to use the same label in both states, or an
    * `{ open, close }` pair for distinct collapsed / expanded labels (`open` is
    * shown while collapsed, `close` while expanded). When unset, the button is
-   * icon-only and its accessible name comes from the translated
-   * expand/collapse-row labels.
+   * icon-only and named "Rea üksikasjad".
    * @default undefined
    */
   readonly expandButtonLabel = input<
@@ -626,6 +625,14 @@ export class TediTableComponent<TData> {
     undefined,
   );
   /**
+   * Accessible name of each row's selection checkbox or radio, e.g.
+   * `(row) => row.original.name`.
+   * @default "Vali rida"
+   */
+  readonly rowSelectionLabel = input<((row: Row<TData>) => string) | undefined>(
+    undefined,
+  );
+  /**
    * Makes data rows reorderable by **mouse drag and keyboard**. Mouse: drag a
    * row by its handle. Keyboard: `Tab` to a row's reorder handle, `Space`/`Enter`
    * to pick it up, Up/Down arrows to move it one position (clamped to the
@@ -695,6 +702,12 @@ export class TediTableComponent<TData> {
   protected readonly dragColumnLabel =
     this.translation.track("table.drag-column");
   protected readonly dragRowLabel = this.translation.track("table.drag-row");
+  protected readonly columnReorderInstructions = this.translation.track(
+    "table.reorder.instructions",
+  );
+  protected readonly rowReorderInstructions = this.translation.track(
+    "table.row-reorder.instructions",
+  );
   protected readonly selectColumnLabel = this.translation.track(
     "table.select-column",
   );
@@ -2156,21 +2169,44 @@ export class TediTableComponent<TData> {
     return this.translation.translate("table.filter-placeholder");
   }
 
-  protected selectAllLabel(): string {
-    return this.translation.translate(
-      "table.select-all",
-      untracked(() => this.table.getIsAllPageRowsSelected()),
+  protected readonly selectAllLabel =
+    this.translation.track("table.select-all");
+  protected readonly expandRowLabel =
+    this.translation.track("table.row-details");
+
+  protected selectRowLabel(row: Row<TData>): string {
+    return (
+      this.rowSelectionLabel()?.(row) ??
+      this.translation.translate("table.select-row")
     );
   }
 
-  protected selectRowLabel(row: Row<TData>): string {
-    return this.translation.translate("table.select-row", row.getIsSelected());
+  protected headerLabelId(header: Header<TData, unknown>): string {
+    return `${this.resolvedId()}-header-${header.id}`;
   }
 
-  protected expandRowLabel(isOpen: boolean): string {
-    return isOpen
-      ? this.translation.translate("table.collapse-row")
-      : this.translation.translate("table.expand-row");
+  // Keeps the sort, filter and drag buttons out of the column header's name.
+  protected headerLabelledBy(
+    header: Header<TData, unknown>,
+    rowIndex: number,
+    srHeaderLabel: string | null,
+  ): string | null {
+    if (
+      [SELECT_COLUMN_ID, EXPAND_COLUMN_ID, DRAG_COLUMN_ID].includes(
+        header.column.id,
+      )
+    ) {
+      return null;
+    }
+    const hasControls =
+      (this.reorderableColumns() &&
+        rowIndex === 0 &&
+        !this.isHeaderGroup(header)) ||
+      this.shouldRenderSortButtonAfterHeader(header) ||
+      this.shouldRenderFilterButton(header.column);
+    if (!hasControls) return null;
+    const labelId = this.headerLabelId(header);
+    return srHeaderLabel ? `${labelId}-sr ${labelId}` : labelId;
   }
 
   /** Whether the consumer opted the expand button into visible-label mode. */

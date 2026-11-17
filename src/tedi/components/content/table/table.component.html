@@ -9,6 +9,16 @@
     aria-atomic="true"
     class="sr-only"
   ></div>
+  @if (reorderableColumns()) {
+    <span [id]="resolvedId() + '-reorder-hint'" hidden>{{
+      columnReorderInstructions()
+    }}</span>
+  }
+  @if (reorderableRows()) {
+    <span [id]="resolvedId() + '-row-reorder-hint'" hidden>{{
+      rowReorderInstructions()
+    }}</span>
+  }
 }
 
 @if (resolvedTopSlot(); as top) {
@@ -139,6 +149,9 @@
                 [attr.colspan]="header.colSpan > 1 ? header.colSpan : null"
                 [attr.rowspan]="rowSpan"
                 [attr.aria-sort]="ariaSort"
+                [attr.aria-labelledby]="
+                  headerLabelledBy(header, rowIndex, srHeaderLabel)
+                "
                 [style.width.px]="headerCellWidth(header.column)"
                 [style.min-width.px]="columnMinWidth(header.column)"
                 [style.max-width.px]="columnMaxWidth(header.column)"
@@ -146,7 +159,9 @@
                 [style.right.px]="stickyRight(header.column.id)"
               >
                 @if (srHeaderLabel) {
-                  <span class="sr-only">{{ srHeaderLabel }}</span>
+                  <span class="sr-only" [id]="headerLabelId(header) + '-sr'">{{
+                    srHeaderLabel
+                  }}</span>
                 }
                 @if (header.column.id === SELECT_COLUMN_ID) {
                   @if (selectionMode() === "multiple") {
@@ -183,6 +198,7 @@
                         "
                         [id]="reorderHandleId(header.column.id)"
                         [attr.aria-label]="dragColumnLabel()"
+                        [attr.aria-describedby]="resolvedId() + '-reorder-hint'"
                         [attr.aria-pressed]="
                           reorderableColumns()
                             ? pickedUpColumnId() === header.column.id
@@ -196,28 +212,35 @@
                         />
                       </button>
                     }
-                    <ng-container
-                      *flexRender="
-                        header.column.columnDef.header;
-                        props: header.getContext();
-                        let content
-                      "
+                    <span
+                      class="tedi-table__header-label"
+                      [id]="headerLabelId(header)"
                     >
-                      @if (shouldRenderSortableHeader(header.column, content)) {
-                        <button
-                          tedi-table-header-button
-                          [icon]="sortIcon(header.column)"
-                          [selected]="!!header.column.getIsSorted()"
-                          (click)="handleSortToggle(header.column)"
-                        >
+                      <ng-container
+                        *flexRender="
+                          header.column.columnDef.header;
+                          props: header.getContext();
+                          let content
+                        "
+                      >
+                        @if (
+                          shouldRenderSortableHeader(header.column, content)
+                        ) {
+                          <button
+                            tedi-table-header-button
+                            [icon]="sortIcon(header.column)"
+                            [selected]="!!header.column.getIsSorted()"
+                            (click)="handleSortToggle(header.column)"
+                          >
+                            {{ content }}
+                          </button>
+                        } @else if (isString(content) || isNumber(content)) {
                           {{ content }}
-                        </button>
-                      } @else if (isString(content) || isNumber(content)) {
-                        {{ content }}
-                      } @else {
-                        {{ content }}
-                      }
-                    </ng-container>
+                        } @else {
+                          {{ content }}
+                        }
+                      </ng-container>
+                    </span>
                     @if (shouldRenderSortButtonAfterHeader(header)) {
                       <button
                         tedi-table-header-button
@@ -457,6 +480,9 @@
                       "
                       [id]="rowReorderHandleId(row.id)"
                       [attr.aria-label]="dragRowLabel()"
+                      [attr.aria-describedby]="
+                        resolvedId() + '-row-reorder-hint'
+                      "
                       [attr.aria-pressed]="
                         reorderableRows()
                           ? pickedUpRow() === row.original
@@ -525,7 +551,7 @@
                           [ariaLabel]="
                             expandButtonHasLabel()
                               ? undefined
-                              : expandRowLabel(expandOpen)
+                              : expandRowLabel()
                           "
                           (openChange)="handleExpandToggle(row)"
                           (click)="$event.stopPropagation()"
