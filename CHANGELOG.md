@@ -1,3 +1,16 @@
+# [10.0.0-rc.17](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.16...angular-10.0.0-rc.17) (2026-11-17)
+
+
+### Bug Fixes
+
+* **alert:** keep close and action buttons outside the live region [#898](https://github.com/TEDI-Design-System/angular/issues/898) ([#910](https://github.com/TEDI-Design-System/angular/issues/910)) ([91302c1](https://github.com/TEDI-Design-System/angular/commit/91302c12d9930a86dc5a513272931ac2a4f6e7e3))
+* **carousel:** announce role once and shorten indicator labels [#888](https://github.com/TEDI-Design-System/angular/issues/888) ([#903](https://github.com/TEDI-Design-System/angular/issues/903)) ([e4c574b](https://github.com/TEDI-Design-System/angular/commit/e4c574b3dba8482ba15e8fff4bcfb4d79566e63d))
+
+
+### Features
+
+* **table:** add row header column option [#876](https://github.com/TEDI-Design-System/angular/issues/876) ([#913](https://github.com/TEDI-Design-System/angular/issues/913)) ([4625ecb](https://github.com/TEDI-Design-System/angular/commit/4625ecb40571a0d8394fc84c6fa09061c107de35))
+
 # [10.0.0-rc.16](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.15...angular-10.0.0-rc.16) (2026-11-17)
 
 
