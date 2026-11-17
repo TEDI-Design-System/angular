@@ -10,19 +10,20 @@ import { BreakpointService } from "../../../services/breakpoint/breakpoint.servi
 import { ModalService } from "../../overlay/modal/modal.service";
 import { ModalRef } from "../../overlay/modal/modal-ref";
 import { Subject } from "rxjs";
+import { translationsMap } from "../../../services/translation/translations";
 
 class TranslationMock {
   translate(key: string, ...args: unknown[]): string {
     switch (key) {
       case "pagination.title":
-        return "Pagination";
+        return "Pages";
       case "pagination.prev-page":
         return "Previous page";
       case "pagination.next-page":
         return "Next page";
       case "pagination.page": {
-        const [page, isCurrent] = args as [number, boolean];
-        return isCurrent ? `Current page, page ${page}` : `Go to page ${page}`;
+        const [page] = args as [number];
+        return `Page ${page}`;
       }
       case "pagination.results": {
         const [count] = args as [number];
@@ -86,9 +87,44 @@ describe("PaginationComponent", () => {
       (b) => b.nativeElement.getAttribute("aria-current") === "page",
     );
     expect(current?.nativeElement.textContent.trim()).toBe("3");
-    expect(current?.nativeElement.getAttribute("aria-label")).toBe(
-      "Current page, page 3",
-    );
+    expect(current?.nativeElement.getAttribute("aria-label")).toBe("Page 3");
+    const others = buttons.filter((b) => b !== current);
+    expect(others.length).toBeGreaterThan(0);
+    for (const b of others) {
+      expect(b.nativeElement.getAttribute("aria-current")).toBeNull();
+      expect(b.nativeElement.getAttribute("aria-label")).toBe(
+        `Page ${b.nativeElement.textContent.trim()}`,
+      );
+    }
+  });
+
+  it("names the nav landmark and announces the current page in the live region", () => {
+    const fixture = setup({ pageCount: 10, page: 4 });
+    const nav: HTMLElement = fixture.nativeElement.querySelector("nav");
+    expect(nav.getAttribute("aria-label")).toBe("Pages");
+    const status: HTMLElement =
+      fixture.nativeElement.querySelector('[role="status"]');
+    expect(status.textContent?.trim()).toBe("Page 4 of 10");
+  });
+
+  it("names the current page with pageAriaLabel unless currentPageAriaLabel is overridden", () => {
+    const fixture = setup({ pageCount: 5, page: 3 });
+    const current = () =>
+      fixture.nativeElement.querySelector(
+        '.tedi-pagination__page[aria-current="page"]',
+      ) as HTMLElement;
+
+    fixture.componentRef.setInput("labels", {
+      pageAriaLabel: (page: number) => `Lehekülg ${page}`,
+    });
+    fixture.detectChanges();
+    expect(current().getAttribute("aria-label")).toBe("Lehekülg 3");
+
+    fixture.componentRef.setInput("labels", {
+      currentPageAriaLabel: (page: number) => `Praegune ${page}`,
+    });
+    fixture.detectChanges();
+    expect(current().getAttribute("aria-label")).toBe("Praegune 3");
   });
 
   it("renders Previous + Next nav buttons", () => {
@@ -662,7 +698,7 @@ describe("PaginationComponent mobile layout", () => {
     expect(config.data.options[2]).toMatchObject({
       value: 3,
       label: "3",
-      ariaLabel: "Current page, page 3",
+      ariaLabel: "Page 3",
     });
   });
 
@@ -895,5 +931,17 @@ describe("PaginationComponent two-way binding", () => {
     next?.click();
     fixture.detectChanges();
     expect(fixture.componentInstance.page).toBe(2);
+  });
+});
+
+describe("pagination translations", () => {
+  it("uses the agreed Estonian wording", () => {
+    expect(translationsMap["pagination.title"].et).toBe("Lehed");
+    expect(translationsMap["pagination.page"].et(3)).toBe("Leht 3");
+    expect(translationsMap["pagination.page-status"].et(4, 10)).toBe(
+      "Leht 4 / 10",
+    );
+    expect(translationsMap["pagination.prev-page"].et).toBe("Eelmine leht");
+    expect(translationsMap["pagination.next-page"].et).toBe("Järgmine leht");
   });
 });

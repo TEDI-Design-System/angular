@@ -303,16 +303,14 @@ export class PaginationComponent {
   protected readonly mergedLabels = computed<PaginationLabels>(() => {
     const t = this.translationService;
     const overrides = this.labels() ?? {};
+    const pageAriaLabel =
+      overrides.pageAriaLabel ?? ((p) => t.translate("pagination.page", p));
     return {
       ariaLabel: overrides.ariaLabel ?? t.translate("pagination.title"),
       previous: overrides.previous ?? t.translate("pagination.prev-page"),
       next: overrides.next ?? t.translate("pagination.next-page"),
-      pageAriaLabel:
-        overrides.pageAriaLabel ??
-        ((p) => t.translate("pagination.page", p, false)),
-      currentPageAriaLabel:
-        overrides.currentPageAriaLabel ??
-        ((p) => t.translate("pagination.page", p, true)),
+      pageAriaLabel,
+      currentPageAriaLabel: overrides.currentPageAriaLabel ?? pageAriaLabel,
       results:
         overrides.results ??
         ((count) => t.translate("pagination.results", count)),
