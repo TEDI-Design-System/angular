@@ -10,6 +10,7 @@ import {
   Injector,
   input,
   model,
+  DoCheck,
   OnInit,
   signal,
   ViewEncapsulation,
@@ -92,7 +93,11 @@ export type TimeFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
   },
 })
 export class TimeFieldComponent
-  implements OnInit, ControlValueAccessor, FormFieldControl<string | null>
+  implements
+    OnInit,
+    DoCheck,
+    ControlValueAccessor,
+    FormFieldControl<string | null>
 {
   private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
     optional: true,
@@ -268,6 +273,10 @@ export class TimeFieldComponent
   );
   popoverIsOpen(): boolean {
     return !!this.popover()?.isOpen();
+  }
+
+  ngDoCheck(): void {
+    this.derived.sync();
   }
 
   constructor() {

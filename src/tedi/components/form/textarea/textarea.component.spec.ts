@@ -278,6 +278,16 @@ describe("TextareaComponent", () => {
 
       expect(fcTextarea.getAttribute("aria-required")).toBe("true");
     });
+
+    it("updates aria-required when the bound FormControl is replaced", () => {
+      fcFixture.componentInstance.control = new FormControl("", {
+        nonNullable: true,
+        validators: Validators.required,
+      });
+      fcFixture.detectChanges();
+
+      expect(fcTextarea.getAttribute("aria-required")).toBe("true");
+    });
   });
 });
 

@@ -10,6 +10,7 @@ import {
   input,
   model,
   OnDestroy,
+  DoCheck,
   OnInit,
   Renderer2,
   signal,
@@ -67,7 +68,7 @@ export type TextareaSize = Exclude<InputSize, "large">;
   },
 })
 export class TextareaComponent
-  implements OnInit, OnDestroy, ControlValueAccessor, FormFieldControl
+  implements OnInit, DoCheck, OnDestroy, ControlValueAccessor, FormFieldControl
 {
   private el = inject<ElementRef<HTMLTextAreaElement>>(ElementRef);
   private renderer = inject(Renderer2);
@@ -260,6 +261,10 @@ export class TextareaComponent
       );
       this.resizeObserver.observe(this.el.nativeElement);
     }
+  }
+
+  ngDoCheck(): void {
+    this.derived.sync();
   }
 
   ngOnDestroy() {

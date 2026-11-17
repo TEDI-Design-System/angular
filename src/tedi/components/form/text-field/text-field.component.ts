@@ -8,6 +8,7 @@ import {
   model,
   ViewEncapsulation,
   forwardRef,
+  DoCheck,
   OnInit,
   signal,
   output,
@@ -61,7 +62,7 @@ import { controlDescribedBy } from "../form-field/control-described-by";
   },
 })
 export class TextFieldComponent
-  implements OnInit, ControlValueAccessor, FormFieldControl
+  implements OnInit, DoCheck, ControlValueAccessor, FormFieldControl
 {
   private el = inject<ElementRef<HTMLInputElement>>(ElementRef);
   private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
@@ -160,6 +161,10 @@ export class TextFieldComponent
 
   setDescribedBy(ids: string[]) {
     this.describedBy.set(ids);
+  }
+
+  ngDoCheck(): void {
+    this.derived.sync();
   }
 
   private formDisabled = signal(false);
