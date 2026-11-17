@@ -9,9 +9,13 @@
       #slide
       class="tedi-carousel__slide"
       [attr.role]="isSlideVisible($index) ? 'group' : 'presentation'"
-      aria-roledescription="slide"
+      [attr.aria-roledescription]="slideRoleDescription()"
       [attr.aria-label]="
-        translationService.track('carousel.slide', idx + 1, slides().length)()
+        translationService.track(
+          'carousel.slideLabel',
+          idx + 1,
+          slides().length
+        )()
       "
       [attr.aria-current]="$index === renderedActiveIndex() ? 'true' : null"
       [attr.aria-hidden]="isSlideVisible($index) ? null : 'true'"
