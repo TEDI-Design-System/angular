@@ -99,6 +99,12 @@ export class SideNavService {
     }
   }
 
+  closeMobileDrawer() {
+    this.isMobileOpen.set(false);
+    this.handleGoToMainMenu();
+    this.toggle()?.focus();
+  }
+
   handleGoToMainMenu() {
     this.items().forEach((item) => item.dropdown?.open.set(false));
   }

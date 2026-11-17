@@ -36,6 +36,7 @@ describe("SideNavComponent", () => {
     unregisterItem: jest.Mock;
     handleGoToMainMenu: jest.Mock;
     handleCollapse: jest.Mock;
+    closeMobileDrawer: jest.Mock;
   };
 
   beforeEach(() => {
@@ -56,6 +57,7 @@ describe("SideNavComponent", () => {
       unregisterItem: jest.fn(),
       handleGoToMainMenu: jest.fn(),
       handleCollapse: jest.fn(),
+      closeMobileDrawer: jest.fn(),
     };
 
     TestBed.configureTestingModule({
@@ -236,6 +238,71 @@ describe("SideNavComponent", () => {
       fixture.destroy();
 
       expect(document.body.style.overflow).toBe("");
+    });
+
+    describe("focus management", () => {
+      const openDrawer = () => {
+        sidenavService.isMobile.set(true);
+        sidenavService.isMobileOpen.set(true);
+        fixture.detectChanges();
+      };
+
+      it("should hide the content outside the drawer from assistive technology while open", () => {
+        const page = document.createElement("main");
+        document.body.appendChild(page);
+
+        openDrawer();
+
+        expect(page.getAttribute("aria-hidden")).toBe("true");
+        expect(sidenavElement.getAttribute("aria-hidden")).toBeNull();
+
+        sidenavService.isMobileOpen.set(false);
+        fixture.detectChanges();
+
+        expect(page.getAttribute("aria-hidden")).toBeNull();
+        page.remove();
+      });
+
+      it("should leave content that already has aria-hidden untouched", () => {
+        const page = document.createElement("div");
+        page.setAttribute("aria-hidden", "true");
+        document.body.appendChild(page);
+
+        openDrawer();
+        sidenavService.isMobileOpen.set(false);
+        fixture.detectChanges();
+
+        expect(page.getAttribute("aria-hidden")).toBe("true");
+        page.remove();
+      });
+
+      it("should add focus trap anchors around the drawer while open", () => {
+        openDrawer();
+
+        expect(
+          document.querySelectorAll(".cdk-focus-trap-anchor").length,
+        ).toBeGreaterThan(0);
+
+        fixture.destroy();
+
+        expect(document.querySelectorAll(".cdk-focus-trap-anchor").length).toBe(
+          0,
+        );
+      });
+
+      it("should close the drawer on Escape while open", () => {
+        openDrawer();
+
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+        expect(sidenavService.closeMobileDrawer).toHaveBeenCalled();
+      });
+
+      it("should ignore Escape while the drawer is closed", () => {
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+
+        expect(sidenavService.closeMobileDrawer).not.toHaveBeenCalled();
+      });
     });
   });
 
