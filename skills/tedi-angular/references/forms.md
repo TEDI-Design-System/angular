@@ -109,7 +109,7 @@ A `[disabled]` template input also exists on most controls for non-form usage. D
 <tedi-search inputId="search" label="Otsing" [formControl]="query" (searchEvent)="run($event)" />
 ```
 
-The host is a `role="search"` landmark whose accessible name falls back to `ariaLabel` → `label` → `placeholder` → the translated "search". **When a page renders more than one `tedi-search`, give each a distinct `ariaLabel`** — identically named landmarks of the same type fail axe's `landmark-unique` rule. The visible `<label>` is unaffected; `ariaLabel` names only the landmark.
+The host is a `role="search"` landmark, unnamed unless you set `ariaLabel`. **When a page renders more than one `tedi-search`, give each a distinct `ariaLabel`**: identically named landmarks of the same type fail axe's `landmark-unique` rule. `ariaLabel` names only the landmark. Always give the field a `label`, with `hideLabel` when it must not be visible; without one the field falls back to `placeholder`, then the translated "search", which repeats the icon-only button's name.
 
 ### Suggestions
 
