@@ -130,8 +130,7 @@ export default {
   argTypes: {
     files: {
       description:
-        "Files held by the dropzone, and the value written by `formControl` / `ngModel`. Bind one-way to seed the list and leave the dropzone owning it, two-way to stay in sync. Bind a stable reference — an inline literal is a new array on every check and discards what the user added." +
-        " The value keeps the order the files arrived in; the rendered list differs, showing files marked `isValid: false` first.",
+        "Files held by the dropzone, and the value written by `formControl` / `ngModel`.",
       control: false,
       table: {
         category: "inputs",
@@ -140,40 +139,35 @@ export default {
       },
     },
     inputId: {
-      description: "Id of the file input. Generated when not set.",
+      description: "Id of the file input, generated when not set.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     name: {
-      description:
-        "`name` attribute of the file input. The files do not travel with a native form submit: dropped files never reach the input, and its value is cleared after each selection so the same file can be picked again. Read them from `files` or the bound control.",
+      description: "`name` attribute of the file input.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     instructions: {
       description:
-        "The sentence inside the dropzone. Falls back to the translated `file-dropzone.instructions`. Not the field's label — name the field with a `tedi-label` whose `for` matches `inputId`, and the dropzone announces it first.",
+        "The sentence inside the dropzone, falling back to the translated `file-dropzone.instructions`. Not the field's label.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     accept: {
       description:
-        "Allowed file types as a comma-separated list of extensions and MIME types. Re-checked on drop, which bypasses the `accept` attribute." +
-        " Applies to what is picked next — files already listed keep the verdict they were given.",
+        "Allowed file types as comma-separated extensions and MIME types (`.pdf`, `image/*`).",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     maxSize: {
-      description:
-        "Largest accepted file size, in bytes. The restrictions hint renders it in whichever unit reads best." +
-        " Applies to what is picked next — files already listed keep the verdict they were given.",
+      description: "Largest accepted file size, in bytes.",
       control: "number",
       table: { category: "inputs", type: { summary: "number" } },
     },
     validator: {
       description:
-        "A rule of your own for each selected file, checked alongside `accept` and `maxSize`. Return the reason a file is rejected, or nothing to accept it. The reason lands on that file's `error` after the built-in ones and joins the rejection summary. It runs on every selected file, including ones `accept` or `maxSize` rejected." +
-        " The automatic hint cannot describe it, so describe the rule in `hint`.",
+        "A rule of your own for each selected file, returning the reason it is rejected or nothing to accept it.",
       control: false,
       table: {
         category: "inputs",
@@ -181,8 +175,7 @@ export default {
       },
     },
     multiple: {
-      description:
-        "Whether more than one file can be held. A single-file dropzone replaces its file on the next selection.",
+      description: "Whether more than one file can be held at a time.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -192,8 +185,7 @@ export default {
     },
     duplicates: {
       description:
-        "What happens when a file the list already holds is picked again. `skip` leaves the list alone and says so, matching on name, size and modification time. `rename` keeps both, the newcomer renamed `scan (1).pdf`. `replace` swaps the listed file for the newcomer, and only a file that passes displaces its namesake." +
-        " `rename` and `replace` match on the name alone, since that is the collision the user sees.",
+        "What happens when a file the list already holds is picked again: `skip` leaves the list alone, `rename` keeps both, `replace` swaps them.",
       control: "inline-radio",
       options: ["skip", "rename", "replace"],
       table: {
@@ -204,7 +196,7 @@ export default {
     },
     uploadFolder: {
       description:
-        "Lets the user pick a whole folder, which the browser hands over as the files inside it. Each one is still checked against `accept`, `maxSize` and `validator`. Applies to the file picker — dragging a folder in is up to the browser and generally does not work.",
+        "Lets the user pick a whole folder, which the browser hands over as the files inside it.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -214,8 +206,7 @@ export default {
     },
     keepRejectedFiles: {
       description:
-        "Keeps rejected files in the list, each carrying its own reason. Left off, a rejected file is discarded and every rejection is summarised in one message under the dropzone instead." +
-        " A kept file stays in the value too, marked `isValid: false`. A form control fails while one is listed, so it cannot be submitted; reading the files directly, filter on `isValid` before uploading.",
+        "Keeps rejected files in the list, each carrying its own reason, instead of discarding them and summarising every rejection under the dropzone.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -225,7 +216,7 @@ export default {
     },
     showRestrictions: {
       description:
-        "Whether the allowed types and maximum size are summarised in the hint below the dropzone. `hint` and rejection errors render either way.",
+        "Whether the allowed types and maximum size are summarised in the hint below the dropzone.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -244,25 +235,25 @@ export default {
     },
     hint: {
       description:
-        "Guidance of your own, such as what a `validator` checks, shown after the allowed types and maximum size in the dropzone's hint.",
+        "Guidance of your own, shown after the allowed types and maximum size.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     error: {
       description:
-        "An error of your own, such as one the server returned. Shown after the dropzone's own rejection message in one error text, above the hint, and paints the border red. It does not change a bound control's validity.",
+        "An error of your own, added to the dropzone's error text after its own rejection message.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     success: {
       description:
-        "A success message, shown in the error's place above the hint and painting the border green. Shown only while the dropzone has no error.",
+        "A success message, shown only while the dropzone has no error.",
       control: "text",
       table: { category: "inputs", type: { summary: "string" } },
     },
     disabled: {
       description:
-        "Disables the dropzone from a parent template. Combined with the reactive-forms disabled state, so this only forces it on.",
+        "Disables the dropzone from a parent template, combined with the reactive-forms disabled state.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -272,7 +263,7 @@ export default {
     },
     invalid: {
       description:
-        "Marks the dropzone as invalid. The error state is also derived from the bound control and from rejected files, so this only forces it on.",
+        "Marks the dropzone as invalid, on top of the state derived from the bound control and from rejected files.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -281,13 +272,11 @@ export default {
       },
     },
     fileRemove: {
-      description:
-        "Emits the file the user removed — `filesChange` carries the new list, this says which entry left it.",
+      description: "Emits the file the user removed.",
       table: { category: "outputs", type: { summary: "FileDropzoneFile" } },
     },
     filesChange: {
-      description:
-        "Emits the new list whenever files are added or removed, in the order the files arrived in. It can include files marked `isValid: false` — see `keepRejectedFiles`.",
+      description: "Emits the new list whenever files are added or removed.",
       table: { category: "outputs", type: { summary: "FileDropzoneFile[]" } },
     },
   },

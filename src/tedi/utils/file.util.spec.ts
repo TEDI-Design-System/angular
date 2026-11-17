@@ -2,7 +2,7 @@ import { formatFileSize } from "./file.util";
 
 describe("formatFileSize", () => {
   it("steps up through the units as the count grows", () => {
-    expect(formatFileSize(512, "en")).toBe("512 byte");
+    expect(formatFileSize(512, "en")).toBe("512B");
     expect(formatFileSize(1024, "en")).toBe("1 kB");
     expect(formatFileSize(1024 ** 2, "en")).toBe("1 MB");
     expect(formatFileSize(1024 ** 3, "en")).toBe("1 GB");
@@ -15,6 +15,12 @@ describe("formatFileSize", () => {
     expect(formatFileSize(bytes, "en")).toBe("1.5 MB");
     // Russian abbreviates in Cyrillic, as Windows and macOS do.
     expect(formatFileSize(bytes, "ru")).toBe("1,5 МБ");
+  });
+
+  it("abbreviates bytes rather than spelling them out", () => {
+    // `short` would read "100 baiti" beside the `kB` one magnitude up.
+    expect(formatFileSize(100, "et")).toBe("100 B");
+    expect(formatFileSize(100, "ru")).toBe("100 Б");
   });
 
   it("falls back to Estonian, like the translation service", () => {

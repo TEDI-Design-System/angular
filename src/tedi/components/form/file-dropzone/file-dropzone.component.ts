@@ -63,11 +63,8 @@ interface FileRejection {
 
 let fileDropzoneIdCounter = 0;
 
-/**
- * Closing the file dialog leaves the screen reader busy, and a message inserted
- * during it is dropped rather than queued — even an assertive one. Kept private
- * so it stays out of the published API; the spec mirrors it.
- */
+// Closing the file dialog leaves the screen reader busy, and a message inserted
+// during it is dropped rather than queued — even an assertive one.
 const ADD_ANNOUNCE_DELAY = 300;
 
 const FOCUSABLE =
@@ -80,11 +77,8 @@ const FOCUSABLE =
 const fileIdentity = (file: FileDropzoneFile): string =>
   `${file.name}:${file.size}:${file.lastModified}`;
 
-/**
- * Renames an incoming file until its name is free, so both copies can be
- * listed and told apart. Splits on the last dot, which leaves names carrying
- * dots of their own, and those without an extension, intact.
- */
+// Splits on the last dot, which leaves names carrying dots of their own, and
+// those without an extension, intact.
 const withFreeNames = (
   listed: FileDropzoneFile[],
   incoming: File[],
@@ -164,113 +158,56 @@ export class FileDropzoneComponent
   private readonly dropZone = viewChild<ElementRef<HTMLElement>>("zone");
 
   /**
-   * Files held by the dropzone, and the value written by `formControl` /
-   * `ngModel`. Bind it one-way to seed the list and leave the dropzone owning
-   * it from there, or two-way to stay in sync with it. Every change emits on
-   * the `filesChange` output this `model()` generates.
-   *
-   * Bind a stable reference — a field or a signal. An inline literal
-   * (`[files]="[{ name: 'a.pdf' }]"`) is a new array on every check, so it is
-   * written back each time and discards whatever the user added.
-   *
-   * The value keeps the order the files arrived in. The rendered list differs:
-   * files marked `isValid: false` are shown first, so a failure cannot sit out
-   * of sight further down.
+   * Files held by the dropzone, and the value written by `formControl` / `ngModel`.
    */
   readonly files = model<FileDropzoneFile[]>([]);
-  /**
-   * Id of the file input. Generated when not set.
-   */
+  /** Id of the file input, generated when not set. */
   readonly inputId = input<string>();
-  /**
-   * `name` attribute of the file input. The files do not travel with a native
-   * form submit: dropped files never reach the input, and its value is cleared
-   * after each selection so the same file can be picked again. Read them from
-   * `files` or the bound control.
-   */
+  /** `name` attribute of the file input. */
   readonly name = input<string>();
   /**
-   * The sentence inside the dropzone. Falls back to the translated
-   * `file-dropzone.instructions`. Not the field's label — name the field with a
-   * `tedi-label` whose `for` matches `inputId`.
+   * The sentence inside the dropzone, falling back to the translated
+   * `file-dropzone.instructions`. Not the field's label.
    */
   readonly instructions = input<string>();
   /**
-   * Allowed file types as a comma-separated list of extensions and MIME types
-   * (`".pdf,.txt"`, `"image/png"`, `"image/*"`). Forwarded to the input's
-   * `accept` attribute and re-checked on drop, which bypasses it.
-   *
-   * Applies to what is picked next. Files already listed keep the verdict they
-   * were given, so clear them yourself if you tighten this while they are
-   * listed.
+   * Allowed file types as comma-separated extensions and MIME types (`.pdf`,
+   * `image/*`).
    */
   readonly accept = input<string>();
-  /**
-   * Largest accepted file size, in bytes — the unit `File.size` is in. The
-   * restrictions hint renders it in whichever unit reads best, so a sub-megabyte
-   * limit still shows as e.g. `500 KB`.
-   *
-   * Applies to what is picked next. Files already listed keep the verdict they
-   * were given, so clear them yourself if you tighten this while they are
-   * listed.
-   */
+  /** Largest accepted file size, in bytes. */
   readonly maxSize = input<number>();
   /**
-   * A rule of your own for each selected file, checked alongside `accept` and
-   * `maxSize` — a minimum size, a naming convention. Return the reason a file
-   * is rejected, or nothing to accept it. The reason lands on that file's
-   * `error` after the built-in ones, and joins the rejection summary followed
-   * by the names of the files it rejected. It runs on every selected file,
-   * including ones `accept` or `maxSize` rejected, so it may receive a file of
-   * the wrong type or size.
-   *
-   * The automatic hint cannot describe it, so describe the rule in `hint`.
-   * Applies to what is picked next, like `accept`. For checks that need a
-   * server round trip, set `isLoading` and then `isValid` on the file yourself
-   * instead.
+   * A rule of your own for each selected file, returning the reason it is
+   * rejected or nothing to accept it.
    */
   readonly validator = input<FileDropzoneValidator>();
   /**
-   * Whether more than one file can be held at a time. A single-file dropzone
-   * replaces its file on the next selection.
+   * Whether more than one file can be held at a time.
    * @default false
    */
   readonly multiple = input(false, { transform: booleanAttribute });
   /**
-   * Keeps rejected files in the list, each carrying its own reason, so the user
-   * can see which of their files failed and remove it. Left off, a rejected
-   * file is discarded and every rejection is summarised in one message under
-   * the dropzone instead.
-   *
-   * A kept file stays in the value as well, marked `isValid: false`. In a form
-   * the control fails while one is listed, so it cannot be submitted; reading
-   * the files directly, filter on `isValid` before uploading.
+   * Keeps rejected files in the list, each carrying its own reason, instead of
+   * discarding them and summarising every rejection under the dropzone.
    * @default false
    */
   readonly keepRejectedFiles = input(false, { transform: booleanAttribute });
   /**
    * What happens when a file the list already holds is picked again: `skip`
-   * leaves the list alone and says so, `rename` keeps both with the newcomer
-   * renamed `scan (1).pdf`, `replace` swaps the listed file for the newcomer.
-   *
-   * Only a file that passes displaces its namesake. A rejected newcomer leaves
-   * the listed file alone, and with `keepRejectedFiles` the two are listed
-   * side by side so the user can see which one failed.
+   * leaves the list alone, `rename` keeps both, `replace` swaps them.
    * @default "skip"
    */
   readonly duplicates = input<FileDropzoneDuplicates>("skip");
   /**
    * Lets the user pick a whole folder, which the browser hands over as the
-   * files inside it. Each one is still checked against `accept`, `maxSize`
-   * and `validator`. Applies to the file picker; dragging a folder in is up
-   * to the browser and generally does not work.
+   * files inside it.
    * @default false
    */
   readonly uploadFolder = input(false, { transform: booleanAttribute });
   /**
    * Whether the allowed types and maximum size are summarised in the hint below
-   * the dropzone. Turn it off when the same information is shown elsewhere;
-   * `hint` and rejection errors still render.
+   * the dropzone.
    * @default true
    */
   readonly showRestrictions = input(true, { transform: booleanAttribute });
@@ -279,49 +216,33 @@ export class FileDropzoneComponent
    * @default false
    */
   readonly showFileSize = input(false, { transform: booleanAttribute });
-  /**
-   * Guidance of your own, such as what a `validator` checks, shown after the
-   * allowed types and maximum size in the dropzone's hint.
-   */
+  /** Guidance of your own, shown after the allowed types and maximum size. */
   readonly hint = input<string>();
   /**
-   * An error of your own, such as one the server returned. Shown in the
-   * dropzone's error text after its own rejection message, above the hint, and
-   * paints the border red. It does not change a bound control's validity. For
-   * an error that belongs to one file, set that file's `error` instead.
+   * An error of your own, added to the dropzone's error text after its own
+   * rejection message.
    */
   readonly error = input<string>();
-  /**
-   * A success message, shown in the error's place above the hint and painting
-   * the border green. Shown only while the dropzone has no error: an error
-   * means the user still has something to fix.
-   */
+  /** A success message, shown only while the dropzone has no error. */
   readonly success = input<string>();
   /**
-   * Disables the dropzone from a parent template. Combined with the
+   * Disables the dropzone from a parent template, combined with the
    * reactive-forms disabled state.
    */
   readonly disabled = input(false, { transform: booleanAttribute });
   /**
-   * Marks the dropzone as invalid. The error state is also derived from the
-   * bound control and from rejected files, so this only forces it on.
+   * Marks the dropzone as invalid, on top of the state derived from the bound
+   * control and from rejected files.
    * @default false
    */
   readonly invalid = input(false, { transform: booleanAttribute });
-  /**
-   * Emits the file the user removed. `filesChange` carries the new list; this
-   * says which entry left it, so an in-flight upload can be aborted or a blob
-   * URL revoked without diffing the two.
-   */
+  /** Emits the file the user removed. */
   readonly fileRemove = output<FileDropzoneFile>();
 
   private readonly derived = deriveControlState();
   private readonly formDisabled = signal(false);
   private readonly dragDepth = signal(0);
-  /**
-   * Summarises the rejections from the last selection. Describes files that
-   * were discarded rather than listed, so it cannot be derived from `files()`.
-   */
+  // Describes discarded files too, so it cannot be derived from `files()`.
   protected readonly rejectionError = signal<string | undefined>(undefined);
   private readonly fallbackId = `tedi-file-dropzone-${fileDropzoneIdCounter++}`;
 
@@ -357,11 +278,8 @@ export class FileDropzoneComponent
   /** Id of the `tedi-label` naming this field, once one is found. */
   private readonly labelId = signal<string | undefined>(undefined);
 
-  /**
-   * A `<label for>` cannot name the zone — it is a button, and the input the
-   * label points at is hidden. Naming it from both keeps the field's name and
-   * its visible text in the accessible name.
-   */
+  // A `<label for>` cannot name the zone: it is a button, and the input the
+  // label points at is hidden.
   protected readonly labelledBy = computed(() => {
     const labelId = this.labelId();
     return labelId ? `${labelId} ${this.instructionsId()}` : null;
@@ -373,11 +291,6 @@ export class FileDropzoneComponent
     "file-dropzone.selected-files",
   );
 
-  /**
-   * Everything the file list binds, resolved once per `files()` change. Keeps
-   * the template free of calls that would re-run — and re-allocate strings — on
-   * every check.
-   */
   protected readonly fileRows = computed(() => {
     const template = this.fileTemplate();
     const showSize = this.showFileSize();
@@ -464,11 +377,8 @@ export class FileDropzoneComponent
     };
   });
 
-  /**
-   * The ids are pushed through `controlDescribedBy` rather than bound directly,
-   * so a consumer's own `aria-describedby` on the host is merged in instead of
-   * being stranded on a wrapper the input never references.
-   */
+  // Merges a consumer's own `aria-describedby` on the host rather than
+  // stranding it on a wrapper the zone never references.
   readonly describedBy = controlDescribedBy();
 
   private onChange: (files: FileDropzoneFile[]) => void = () => {};
@@ -509,11 +419,8 @@ export class FileDropzoneComponent
     this.onChange = fn;
   }
 
-  /**
-   * Fails the control while any rejected file is still listed. Without it a
-   * `Validators.required` control reports valid on a list of visibly broken
-   * files, which `keepRejectedFiles` leaves in the value.
-   */
+  // Without this a `Validators.required` control reports valid on a list of
+  // visibly broken files, which `keepRejectedFiles` leaves in the value.
   validate(control: AbstractControl): ValidationErrors | null {
     const rejected = ((control.value ?? []) as FileDropzoneFile[]).filter(
       (file) => file.isValid === false,
@@ -614,14 +521,9 @@ export class FileDropzoneComponent
     this.restoreFocus(removedIndex);
   }
 
-  /**
-   * The button the user just pressed leaves the DOM with its row, so focus would
-   * fall to `<body>`, losing the user's place. Move it to the *previous* file's
-   * remove button rather than the next one, so repeated presses cannot walk
-   * destructively down the list. Removing the first file has no previous row, so
-   * focus goes to the one that replaced it; removing the last goes to the drop
-   * zone.
-   */
+  // The pressed button leaves the DOM with its row, so focus would fall to
+  // `<body>`. It goes to the *previous* row rather than the next, so repeated
+  // presses cannot walk destructively down the list.
   private restoreFocus(removedIndex: number): void {
     afterNextRender(
       () => {
@@ -645,14 +547,9 @@ export class FileDropzoneComponent
     );
   }
 
-  /**
-   * Splits a selection according to `duplicates`. Picking the same file twice
-   * almost always means the user lost track of what they had already added, so
-   * by default the repeat is skipped rather than listed twice — and matched on
-   * more than the name, since two genuinely different files sharing one are
-   * common. `rename` and `replace` resolve the collision instead, both by name,
-   * which is what the user sees repeated.
-   */
+  // `skip` matches on more than the name, since two different files sharing
+  // one are common; `rename` and `replace` go by the name alone, which is the
+  // collision the user sees.
   private resolveDuplicates(selected: File[]): {
     duplicates: File[];
     fresh: File[];
@@ -675,11 +572,8 @@ export class FileDropzoneComponent
     };
   }
 
-  /**
-   * The listed files a commit keeps. Under `replace` only a file that passed
-   * displaces its namesake — a rejected newcomer must never be able to delete
-   * a file the user already has, whether it is dropped or kept on the list.
-   */
+  // Only a file that passed displaces its namesake: a rejected newcomer must
+  // never delete a file the user already has.
   private retained(kept: FileDropzoneFile[]): FileDropzoneFile[] {
     if (this.duplicates() !== "replace") return this.files();
 
@@ -788,11 +682,8 @@ export class FileDropzoneComponent
     clearTimeout(this.addAnnounceTimeout);
   }
 
-  /**
-   * The summary names files that were never listed, so only emptying the field
-   * makes it stale — otherwise it lingers under an empty dropzone, holding the
-   * border red.
-   */
+  // The summary names files that were never listed, so only emptying the field
+  // makes it stale.
   private clearRejectionWhenEmpty(): void {
     if (!this.files().length) {
       this.rejectionError.set(undefined);
@@ -813,11 +704,8 @@ export class FileDropzoneComponent
     return !maxSize || file.size <= maxSize;
   }
 
-  /**
-   * Mirrors how the browser reads the `accept` attribute, so a dropped file is
-   * held to the same rule as a picked one: an extension, an exact MIME type, or
-   * a `type/*` group.
-   */
+  // Mirrors how the browser reads `accept`, so a dropped file is held to the
+  // same rule as a picked one.
   private isAcceptedType(file: File): boolean {
     const tokens = this.acceptTokens();
     if (!tokens.length) return true;
@@ -837,11 +725,8 @@ export class FileDropzoneComponent
     });
   }
 
-  /**
-   * Every restriction the file breaks, not just the first. A file can be both
-   * the wrong format and too large; reporting one reason at a time sends the
-   * user away to fix it, only to reject it again for the other.
-   */
+  // Every restriction the file breaks: reporting one at a time sends the user
+  // away to fix it, only to reject it again for the next.
   private reasonsFor(file: FileDropzoneFile): FileRejectionReason[] {
     const reasons: FileRejectionReason[] = [];
 
@@ -889,12 +774,9 @@ export class FileDropzoneComponent
     );
   }
 
-  /**
-   * Announced from the root-level regions, not a node of this component's own.
-   * Adding files rebuilds the rows beside such a node — wholesale when
-   * `multiple` is off and the row is replaced — and a live region updated in
-   * the same breath as the subtree around it is dropped by screen readers.
-   */
+  // Announced from the root-level regions: adding files rebuilds the rows, and
+  // a live region updated in the same breath as the subtree around it is
+  // dropped by screen readers.
   private announce(text: string, politeness: ToastPoliteness = "polite"): void {
     if (text) {
       this.announcer.announce(text, politeness);

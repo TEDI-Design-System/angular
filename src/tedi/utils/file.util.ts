@@ -32,7 +32,9 @@ export function formatFileSize(bytes: number, lang: Language = "et"): string {
   return new Intl.NumberFormat(lang, {
     style: "unit",
     unit,
-    unitDisplay: "short",
+    // Short spells bytes out in most languages (`100 baiti`), which reads
+    // oddly beside the `kB` and `MB` one magnitude up.
+    unitDisplay: unit === "byte" ? "narrow" : "short",
     maximumFractionDigits: 1,
   }).format(value);
 }

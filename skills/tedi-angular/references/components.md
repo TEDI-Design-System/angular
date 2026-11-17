@@ -232,15 +232,26 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   own text through `hint`, `error` and `success`, not projected `tedi-feedback-text`. `error` joins
   the dropzone's own rejection summary in one error, and `success` takes the error's place while
   there is none.
-- **Selecting a file that is already listed is skipped**, matched on name, size and mtime — so two
-  different files sharing a name still both land. Project an `*tediFileDropzoneFile` template to
-  replace the built-in `tedi-attachment` row when a file needs a progress bar, an icon or its own
-  feedback.
-- **`tedi-file-dropzone`'s `label` is the text inside the drop zone**, not a field label above it. It is
-  the accessible name of the zone, so the control is never nameless. Don't add a `<label tedi-label>`
-  for `inputId` and don't wrap it in `tedi-form-field`: the file input is `display: none` and cannot be
-  labelled, and `tedi-form-field` would also place its projected feedback after the file list rather
-  than under the dropzone. Fold the field name into `label` instead.
+- **Selecting a file that is already listed is skipped by default**, matched on name, size and mtime
+  — so two different files sharing a name still both land. `duplicates` changes that: `rename` keeps
+  both with the newcomer as `scan (1).pdf`, `replace` swaps the listed file for it. Those two match on
+  the name alone, since that is the collision the user sees, and only a file that passes displaces its
+  namesake. Project an `*tediFileDropzoneFile` template to replace the built-in `tedi-attachment` row
+  when a file needs a progress bar, an icon or its own feedback.
+- **`accept`, `maxSize` and `validator` apply to what is picked next.** Files already listed keep the
+  verdict they were given, so clear them yourself if you tighten a restriction while they are listed.
+  For a check that needs a server round trip, set `isLoading` and then `isValid` on the file instead of
+  reaching for `validator`.
+- **`uploadFolder` applies to the file picker only.** Dragging a folder in is up to the browser and
+  generally does not work, so keep the picker path usable when you turn it on.
+- **`tedi-file-dropzone` is named by a `tedi-label`, not by its own text.** `instructions` is the
+  sentence inside the zone; the field's name comes from a `<label tedi-label>` whose `for` matches
+  `inputId`, which the zone references with `aria-labelledby` so both are announced, label first. A
+  required dropzone needs that label to be visible and marked `[required]`: the zone is a button,
+  which ARIA gives no `aria-required`, and the file input behind it is hidden from assistive
+  technology, so the label is the only place the required state can be announced from. Don't wrap it
+  in `tedi-form-field` — that would place projected feedback after the file list rather than under
+  the dropzone.
 - **The drop zone is a `div[role="button"]`, not a `<label>` or a native `<button>`** — the same shape
   React and react-dropzone use, and the reason is screen readers, not styling. The file input is
   `display: none` and out of the tab order: while it was the focus target, closing the file dialog

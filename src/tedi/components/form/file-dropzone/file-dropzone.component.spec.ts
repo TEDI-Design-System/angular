@@ -125,6 +125,18 @@ class LabelledHostComponent {}
 })
 class PreIdLabelledHostComponent {}
 
+@Component({
+  standalone: true,
+  imports: [FileDropzoneComponent, LabelComponent],
+  template: `
+    <label tedi-label for="kohustuslik" [required]="true"
+      >Avalduse failid</label
+    >
+    <tedi-file-dropzone inputId="kohustuslik" />
+  `,
+})
+class RequiredLabelHostComponent {}
+
 describe("FileDropzoneComponent", () => {
   let fixture: ComponentFixture<FileDropzoneComponent>;
   let component: FileDropzoneComponent;
@@ -1045,6 +1057,25 @@ describe("FileDropzoneComponent", () => {
 
       expect(zoneOf(host).getAttribute("aria-labelledby")).toBe(
         "minu-silt pre-id-instructions",
+      );
+    });
+
+    it("announces the required state through the label", () => {
+      const host = TestBed.createComponent(RequiredLabelHostComponent);
+      host.detectChanges();
+      host.detectChanges();
+
+      const label = host.debugElement.query(By.css("label")).nativeElement;
+
+      // The zone is a button, which ARIA gives no `aria-required`, and the file
+      // input behind it is hidden — so naming the zone from the label is what
+      // carries the required state. The asterisk is `aria-hidden`; the word
+      // beside it is not.
+      expect(label.querySelector(".sr-only")?.textContent).toContain(
+        "required",
+      );
+      expect(zoneOf(host).getAttribute("aria-labelledby")).toBe(
+        "kohustuslik-label kohustuslik-instructions",
       );
     });
 
