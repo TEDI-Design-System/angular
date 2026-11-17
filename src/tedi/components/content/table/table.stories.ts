@@ -763,19 +763,22 @@ type Story = StoryObj<TediTableStoryArgs>;
       [pagination]="pagination"
       ${TABLE_APPEARANCE_BINDINGS}
     />
-    <ng-template #actions>
+    <ng-template #actions let-ctx>
       <span
         style="display:inline-flex; gap:8px; justify-content:flex-end; width:100%;"
       >
         <button tedi-button variant="neutral" size="small" type="button">
           <tedi-icon name="edit" [size]="16" color="inherit" />
-          Muuda
+          Muuda<span class="sr-only">
+            {{ formatDateRange(ctx.row.original.dateRange) }}</span
+          >
         </button>
       </span>
     </ng-template>
   `,
 })
 class DefaultStoryHostComponent extends TableStoryHostBase {
+  protected readonly formatDateRange = formatBookingDateRange;
   data = bookings;
   pagination = SHOWCASE_PAGINATION_3;
   actionsTpl = viewChild<TemplateRef<CellContext<Booking, unknown>>>("actions");
@@ -787,6 +790,7 @@ class DefaultStoryHostComponent extends TableStoryHostBase {
       accessorKey: "dateRange",
       minSize: 210,
       cell: bookingDateRangeCell,
+      meta: { rowHeader: true },
     } as TediColumnDef<Booking>,
     { id: "hour", header: "Kellaaeg", accessorKey: "hour" },
     { id: "duration", header: "Kestus", accessorKey: "duration" },
@@ -1849,6 +1853,7 @@ class EditableValuesStoryHostComponent extends TableStoryHostBase {
       accessorKey: "dateRange",
       minSize: 260,
       cell: this.dateRangeCellTpl() ?? "",
+      meta: { rowHeader: true },
     } as TediColumnDef<Booking>,
     {
       id: "hour",
@@ -1894,7 +1899,9 @@ export const EditableValues: Story = {
         code: `<!-- Each editable column points its 'cell' at a template that
   toggles between a read-only value and a form control based on
   editor.isEditing(rowId). The last column renders save / cancel
-  via the editActions template.
+  via the editActions template. The date column has
+  meta: { rowHeader: true }, so its cells render as <th scope="row">,
+  and each action button carries the date as hidden row context.
 -->
 <tedi-table
   [data]="editor.rows()"
@@ -1920,13 +1927,18 @@ export const EditableValues: Story = {
 
 <ng-template #editActions let-ctx>
   @if (editor.isEditing(ctx.row.original.id)) {
-    <button tedi-closing-button aria-label="Tühista"
+    <button tedi-closing-button
+      [ariaLabel]="'Tühista ' + formatDateRange(ctx.row.original.dateRange)"
       (click)="editor.cancelEdit()"></button>
     <button tedi-button variant="primary" size="small"
-      (click)="editor.commitEdit()">Kinnita</button>
+      (click)="editor.commitEdit()">
+      Kinnita<span class="sr-only"> {{ formatDateRange(ctx.row.original.dateRange) }}</span>
+    </button>
   } @else {
     <button tedi-button variant="neutral" size="small"
-      (click)="editor.beginEdit(ctx.row.original)">Muuda</button>
+      (click)="editor.beginEdit(ctx.row.original)">
+      Muuda<span class="sr-only"> {{ formatDateRange(ctx.row.original.dateRange) }}</span>
+    </button>
   }
 </ng-template>`,
       },
@@ -3636,7 +3648,7 @@ export const StickyFirstColumn: Story = {
     <ng-template #actionsCell let-ctx>
       <a tedi-link href="#" (click)="$event.preventDefault()">
         <tedi-icon name="edit" [size]="16" color="inherit" />
-        Muuda
+        Muuda<span class="sr-only"> {{ ctx.row.original.name }}</span>
       </a>
     </ng-template>
   `,
@@ -3654,6 +3666,7 @@ class StickyLastColumnStoryHostComponent extends TableStoryHostBase {
       accessorKey: "name",
       size: 220,
       minSize: 144,
+      meta: { rowHeader: true },
     },
     { id: "specialty", header: "Eriala", accessorKey: "specialty", size: 240 },
     {
@@ -3882,7 +3895,7 @@ export const StickyHeaderAndFirstColumn: Story = {
     <ng-template #actionsCell let-ctx>
       <a tedi-link href="#" (click)="$event.preventDefault()">
         <tedi-icon name="edit" [size]="16" color="inherit" />
-        Muuda
+        Muuda<span class="sr-only"> {{ ctx.row.original.name }}</span>
       </a>
     </ng-template>
   `,
@@ -3899,6 +3912,7 @@ class StickyHeaderAndLastColumnStoryHostComponent extends TableStoryHostBase {
       accessorKey: "name",
       size: 220,
       minSize: 144,
+      meta: { rowHeader: true },
     },
     { id: "specialty", header: "Eriala", accessorKey: "specialty", size: 240 },
     {

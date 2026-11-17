@@ -317,6 +317,13 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 - **`groupRowSpan(rows, keyFn)` needs the currently-rendered rows.** Pass
   `table.getRowModel().rows` so spans are computed after filtering and sorting. Prefer the column's
   `groupBy` where it fits.
+- **Set `meta.label` on a column whose header is blank or not plain text** (an actions column, say).
+  It names the header for screen readers. Without it a blank header has no name, and the sort,
+  filter and column-reorder labels and announcements fall back to the column id, a developer string
+  such as `"actions"` (or to `""` when the header is an empty string).
+- **Set `meta: { rowHeader: true }` on the column that identifies a row** (a name, say). Its cells
+  render as `<th scope="row">`, so screen readers announce that value as row context. Give row
+  action buttons the same context, e.g. `Muuda<span class="sr-only"> {{ row.name }}</span>`.
 - **`tedi-tabs` `overflowMode`** decides what happens when tabs don't fit: `"dropdown"` (default)
   collapses the overflow into a More menu, `"scroll"` gives horizontal scrolling with fade
   indicators.

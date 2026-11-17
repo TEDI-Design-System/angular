@@ -60,12 +60,14 @@ export type TableExpandTrigger = "button" | "row";
  * - drive the column-filter aria-label when the header is non-textual (`label`),
  * - align the column's `<th>` / `<td>` content horizontally (`align`) or vertically
  *   (`vAlign`) without wrapping every cell render in a styled span,
- * - align the header cell separately from the body (`headerAlign`).
+ * - align the header cell separately from the body (`headerAlign`),
+ * - mark the column whose body cells head their row (`rowHeader`).
  */
 export interface TableColumnMeta {
   /**
-   * Accessible label for a column whose header isn't a plain string. Names
-   * the column in the built-in sort and filter buttons.
+   * Names a blank or non-text header (e.g. an actions column) for screen readers and in sort,
+   * filter and reorder labels; without it a blank header has no name and those labels use the
+   * column id, a developer string such as "actions" (or `""` for an empty-string header).
    */
   label?: string;
   /**
@@ -77,6 +79,13 @@ export interface TableColumnMeta {
   headerAlign?: "left" | "center" | "right";
   /** Vertical alignment applied to every header / body / footer cell. */
   vAlign?: "top" | "middle" | "bottom";
+  /**
+   * Renders the column's body cells as `<th scope="row">`, so screen readers
+   * announce the cell as the row's header when moving through the row. Styled
+   * the same as other body cells. Set it on the one column that names the row.
+   * @default false
+   */
+  rowHeader?: boolean;
 }
 
 /**
