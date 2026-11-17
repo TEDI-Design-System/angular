@@ -78,7 +78,7 @@ describe("ToastComponent", () => {
     const closeButton =
       fixture.nativeElement.querySelector(".tedi-alert__close");
 
-    expect(closeButton.getAttribute("aria-label")).toBe(
+    expect(closeButton.getAttribute("title")).toBe(
       "Sulge teavitus: Test Title",
     );
   });
@@ -90,7 +90,7 @@ describe("ToastComponent", () => {
     const closeButton =
       fixture.nativeElement.querySelector(".tedi-alert__close");
 
-    expect(closeButton.getAttribute("aria-label")).toBe("Sulge");
+    expect(closeButton.getAttribute("title")).toBe("Sulge");
   });
 
   it("should emit closed event when close button is clicked", () => {

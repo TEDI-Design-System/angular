@@ -1920,7 +1920,7 @@ export const EditableValues: Story = {
 
 <ng-template #editActions let-ctx>
   @if (editor.isEditing(ctx.row.original.id)) {
-    <button tedi-closing-button aria-label="Tühista"
+    <button tedi-closing-button ariaLabel="Tühista"
       (click)="editor.cancelEdit()"></button>
     <button tedi-button variant="primary" size="small"
       (click)="editor.commitEdit()">Kinnita</button>

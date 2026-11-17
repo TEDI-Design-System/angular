@@ -59,7 +59,7 @@ export default {
     ariaLabel: {
       control: "text",
       description:
-        'ARIA label (and native `title`) of the button. Overrides the translated default label "close".',
+        'Accessible label of the button, rendered as `title` or `aria-label` depending on `showTitle`. Overrides the translated default label "close".',
       table: {
         defaultValue: { summary: "close" },
       },
@@ -75,7 +75,7 @@ export default {
     showTitle: {
       control: "boolean",
       description:
-        "Render the label as a native `title` attribute. Set to `false` when the button is wrapped in a `tedi-tooltip` so the native tooltip does not double the custom one.",
+        "Render the label as a native `title` attribute, which also names the button. When `false`, the label is set as `aria-label` instead. Set to `false` when the button is wrapped in a `tedi-tooltip` so the native tooltip does not double the custom one.",
       table: {
         defaultValue: { summary: "true" },
       },
@@ -178,7 +178,7 @@ export const CustomIcon: Story = {
 /**
  * Wrap the button in a `tedi-tooltip` to show a custom tooltip on hover.
  * Set `[showTitle]="false"` so the native browser tooltip (the `title`
- * attribute) does not double the custom one — the `aria-label` is kept.
+ * attribute) does not double the custom one: the label then moves to `aria-label`.
  */
 export const WithTooltip: Story = {
   render: () => ({

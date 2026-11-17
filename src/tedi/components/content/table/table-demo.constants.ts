@@ -153,7 +153,7 @@ const EDITABLE_ACTIONS_TEMPLATE = `
 <ng-template #editActions let-ctx>
   <span style="display:inline-flex; gap:8px; justify-content:flex-end; align-items:center; width:100%;">
     @if (editor.isEditing(ctx.row.original.id)) {
-      <button tedi-closing-button type="button" aria-label="Tühista"
+      <button tedi-closing-button type="button" ariaLabel="Tühista"
         (click)="editor.cancelEdit()"></button>
       <button tedi-button variant="primary" size="small" type="button"
         (click)="editor.commitEdit()">
