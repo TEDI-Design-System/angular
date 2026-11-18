@@ -514,7 +514,7 @@ export const ActionsSlot: Story = {
     <p tedi-text modifiers="small" color="secondary">Without footer</p>
     <tedi-sheet>
       <button tedi-button variant="secondary" tediSheetTrigger>
-        <tedi-icon name="menu_book" />
+        <tedi-icon name="info" />
         Loe lähemalt
       </button>
       <ng-template tediSheetContent>
@@ -660,9 +660,8 @@ const HEADER_TYPE_SOURCE = `<!-- Default -->
 
 <!-- With custom button -->
 <tedi-sheet-header title="Seaded" variant="default" titlePosition="center" [closeButton]="false">
-  <button tedi-button variant="secondary" tedi-sheet-header-actions tediSheetClose>
+  <button tedi-button variant="secondary" tedi-sheet-header-actions tediSheetClose aria-label="Sulge">
     <tedi-icon name="close" />
-    Sulge
   </button>
 </tedi-sheet-header>
 
@@ -743,13 +742,13 @@ export const HeaderType: Story = {
 <div [tediVerticalSpacing]="2">
   @for (group of groups; track group.label) {
     <div [tediVerticalSpacing]="0.75">
-      @if (group.examples.length > 1 || group.examples[0].caption !== group.label) {
-        <p tedi-text modifiers="bold">{{ group.label }}</p>
-      }
+      <p tedi-text modifiers="bold">{{ group.label }}</p>
       <div class="flex flex-wrap gap-3 align-items-start">
         @for (example of group.examples; track example.caption) {
           <div [tediVerticalSpacing]="0.25">
-            <p tedi-text modifiers="small" color="secondary">{{ example.caption }}</p>
+            @if (example.caption !== group.label) {
+              <p tedi-text modifiers="small" color="secondary">{{ example.caption }}</p>
+            }
             <tedi-sheet>
               <button tedi-button variant="secondary" tediSheetTrigger>
                 <tedi-icon name="tune" />
@@ -794,9 +793,8 @@ export const HeaderType: Story = {
         </button>
         <ng-template tediSheetContent>
           <tedi-sheet-header title="Seaded" variant="default" titlePosition="center" [closeButton]="false">
-            <button tedi-button variant="secondary" tedi-sheet-header-actions tediSheetClose>
+            <button tedi-button variant="secondary" tedi-sheet-header-actions tediSheetClose aria-label="Sulge">
               <tedi-icon name="close" />
-              Sulge
             </button>
           </tedi-sheet-header>
           <tedi-sheet-body>
@@ -938,112 +936,6 @@ export const HeaderType: Story = {
       </tedi-sheet>
     </div>
   </div>
-</div>
-`,
-  }),
-};
-
-/**
- * `padding` on `tediSheetContent` tightens the header, body and footer together.
- * For edge-to-edge body content, use `padding="none"` on `<tedi-sheet-body>` instead.
- */
-export const Padding: Story = {
-  render: () => ({
-    props: { paddings: ["default", "small"] },
-    template: `
-<div class="flex flex-wrap gap-3 align-items-start">
-  @for (padding of paddings; track padding) {
-    <div [tediVerticalSpacing]="0.25">
-      <p tedi-text modifiers="small" color="secondary">padding="{{ padding }}"</p>
-      <tedi-sheet>
-        <button tedi-button variant="secondary" tediSheetTrigger>
-          <tedi-icon name="tune" />
-          Seaded
-        </button>
-        <ng-template tediSheetContent [padding]="padding">
-          <tedi-sheet-header title="Seaded" variant="default" />
-          <tedi-sheet-body>
-            <div [tediVerticalSpacing]="0.5">
-              <label tedi-label color="primary" class="flex align-items-center gap-2">
-                <input tedi-checkbox type="checkbox" checked />
-                Näita pikkusi
-              </label>
-              <label tedi-label color="primary" class="flex align-items-center gap-2">
-                <input tedi-checkbox type="checkbox" />
-                Näita nurki
-              </label>
-            </div>
-          </tedi-sheet-body>
-          <tedi-sheet-footer fullWidth>
-            <button tedi-button variant="secondary" tediSheetClose>Tühista</button>
-            <button tedi-button>Rakenda</button>
-            <button tedi-button variant="secondary" tedi-sheet-footer-end aria-label="Rohkem valikuid">
-              <tedi-icon name="more_vert" />
-            </button>
-          </tedi-sheet-footer>
-        </ng-template>
-      </tedi-sheet>
-    </div>
-  }
-</div>
-`,
-  }),
-};
-
-export const FooterAlignment: Story = {
-  name: "Footer alignment",
-  render: () => ({
-    props: {
-      examples: [
-        { caption: 'align="left"', align: "left" },
-        { caption: 'align="center"', align: "center" },
-        { caption: 'align="right"', align: "right" },
-        { caption: "fullWidth", align: "left", fullWidth: true },
-        {
-          caption: "fullWidth + end",
-          align: "left",
-          fullWidth: true,
-          end: true,
-        },
-      ],
-    },
-    template: `
-<div class="flex flex-wrap gap-3 align-items-start">
-  @for (example of examples; track example.caption) {
-    <div [tediVerticalSpacing]="0.25">
-      <p tedi-text modifiers="small" color="secondary">{{ example.caption }}</p>
-      <tedi-sheet>
-        <button tedi-button variant="secondary" tediSheetTrigger>
-          <tedi-icon name="tune" />
-          Seaded
-        </button>
-        <ng-template tediSheetContent>
-          <tedi-sheet-header title="Seaded" variant="default" />
-          <tedi-sheet-body>
-            <div [tediVerticalSpacing]="0.5">
-              <label tedi-label color="primary" class="flex align-items-center gap-2">
-                <input tedi-checkbox type="checkbox" checked />
-                Näita pikkusi
-              </label>
-              <label tedi-label color="primary" class="flex align-items-center gap-2">
-                <input tedi-checkbox type="checkbox" />
-                Näita nurki
-              </label>
-            </div>
-          </tedi-sheet-body>
-          <tedi-sheet-footer [align]="example.align" [fullWidth]="example.fullWidth ?? false">
-            <button tedi-button variant="secondary" tediSheetClose>Tühista</button>
-            <button tedi-button>Rakenda</button>
-            @if (example.end) {
-              <button tedi-button variant="secondary" tedi-sheet-footer-end aria-label="Rohkem valikuid">
-                <tedi-icon name="more_vert" />
-              </button>
-            }
-          </tedi-sheet-footer>
-        </ng-template>
-      </tedi-sheet>
-    </div>
-  }
 </div>
 `,
   }),
@@ -1343,6 +1235,112 @@ export const ScrollableContent: Story = {
   }),
 };
 
+/**
+ * `padding` on `tediSheetContent` tightens the header, body and footer together.
+ * For edge-to-edge body content, use `padding="none"` on `<tedi-sheet-body>` instead.
+ */
+export const Padding: Story = {
+  render: () => ({
+    props: { paddings: ["default", "small"] },
+    template: `
+<div class="flex flex-wrap gap-3 align-items-start">
+  @for (padding of paddings; track padding) {
+    <div [tediVerticalSpacing]="0.25">
+      <p tedi-text modifiers="small" color="secondary">padding="{{ padding }}"</p>
+      <tedi-sheet>
+        <button tedi-button variant="secondary" tediSheetTrigger>
+          <tedi-icon name="tune" />
+          Seaded
+        </button>
+        <ng-template tediSheetContent [padding]="padding">
+          <tedi-sheet-header title="Seaded" variant="default" />
+          <tedi-sheet-body>
+            <div [tediVerticalSpacing]="0.5">
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" checked />
+                Näita pikkusi
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" />
+                Näita nurki
+              </label>
+            </div>
+          </tedi-sheet-body>
+          <tedi-sheet-footer fullWidth>
+            <button tedi-button variant="secondary" tediSheetClose>Tühista</button>
+            <button tedi-button>Rakenda</button>
+            <button tedi-button variant="secondary" tedi-sheet-footer-end aria-label="Rohkem valikuid">
+              <tedi-icon name="more_vert" />
+            </button>
+          </tedi-sheet-footer>
+        </ng-template>
+      </tedi-sheet>
+    </div>
+  }
+</div>
+`,
+  }),
+};
+
+export const FooterAlignment: Story = {
+  name: "Footer alignment",
+  render: () => ({
+    props: {
+      examples: [
+        { caption: 'align="left"', align: "left" },
+        { caption: 'align="center"', align: "center" },
+        { caption: 'align="right"', align: "right" },
+        { caption: "fullWidth", align: "left", fullWidth: true },
+        {
+          caption: "fullWidth + end",
+          align: "left",
+          fullWidth: true,
+          end: true,
+        },
+      ],
+    },
+    template: `
+<div class="flex flex-wrap gap-3 align-items-start">
+  @for (example of examples; track example.caption) {
+    <div [tediVerticalSpacing]="0.25">
+      <p tedi-text modifiers="small" color="secondary">{{ example.caption }}</p>
+      <tedi-sheet>
+        <button tedi-button variant="secondary" tediSheetTrigger>
+          <tedi-icon name="tune" />
+          Seaded
+        </button>
+        <ng-template tediSheetContent>
+          <tedi-sheet-header title="Seaded" variant="default" />
+          <tedi-sheet-body>
+            <div [tediVerticalSpacing]="0.5">
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" checked />
+                Näita pikkusi
+              </label>
+              <label tedi-label color="primary" class="flex align-items-center gap-2">
+                <input tedi-checkbox type="checkbox" />
+                Näita nurki
+              </label>
+            </div>
+          </tedi-sheet-body>
+          <tedi-sheet-footer [align]="example.align" [fullWidth]="example.fullWidth ?? false">
+            <button tedi-button variant="secondary" tediSheetClose>Tühista</button>
+            <button tedi-button>Rakenda</button>
+            @if (example.end) {
+              <button tedi-button variant="secondary" tedi-sheet-footer-end aria-label="Rohkem valikuid">
+                <tedi-icon name="more_vert" />
+              </button>
+            }
+          </tedi-sheet-footer>
+        </ng-template>
+      </tedi-sheet>
+    </div>
+  }
+</div>
+`,
+  }),
+};
+
 export const OpenForVisualTest: Story = {
   ...visualTest,
   render: () => ({
@@ -1458,9 +1456,8 @@ export const OpenWithoutHandleForVisualTest: Story = {
 <tedi-sheet [open]="true">
   <ng-template tediSheetContent [showHandle]="false" radius="none">
     <tedi-sheet-header title="Seaded" variant="default" titlePosition="center" [closeButton]="false">
-      <button tedi-button variant="secondary" tedi-sheet-header-actions tediSheetClose>
+      <button tedi-button variant="secondary" tedi-sheet-header-actions tediSheetClose aria-label="Sulge">
         <tedi-icon name="close" />
-        Sulge
       </button>
     </tedi-sheet-header>
     <tedi-sheet-body>
