@@ -8,8 +8,8 @@ import {
   tick,
 } from "@angular/core/testing";
 import { By } from "@angular/platform-browser";
-import { InteractivityChecker } from "@angular/cdk/a11y";
-import { OverlayContainer } from "@angular/cdk/overlay";
+import { FocusTrapFactory, InteractivityChecker } from "@angular/cdk/a11y";
+import { Overlay, OverlayContainer } from "@angular/cdk/overlay";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { SheetComponent } from "./sheet.component";
@@ -69,6 +69,7 @@ class TranslationMock {
         [radius]="radius()"
         [showOverlay]="showOverlay()"
         [trapFocus]="trapFocus()"
+        [lockScroll]="lockScroll()"
         [padding]="padding()"
         [minHeight]="minHeight()"
         [maxHeight]="maxHeight()"
@@ -107,6 +108,7 @@ class TestHostComponent {
   radius = signal<"default" | "card" | "none">("default");
   showOverlay = signal(true);
   trapFocus = signal(true);
+  lockScroll = signal(true);
   padding = signal<"default" | "small">("default");
   minHeight = signal<string | undefined>(undefined);
   maxHeight = signal<string | undefined>(undefined);
@@ -280,6 +282,40 @@ describe("SheetComponent", () => {
     fixture.detectChanges();
 
     expect(document.activeElement).toBe(trigger());
+    flush();
+  }));
+
+  it("focuses the panel itself when nothing inside can take focus", fakeAsync(() => {
+    jest.spyOn(TestBed.inject(FocusTrapFactory), "create").mockReturnValue({
+      enabled: true,
+      focusInitialElement: () => false,
+      destroy: () => undefined,
+    } as unknown as ReturnType<FocusTrapFactory["create"]>);
+    trigger().focus();
+    trigger().click();
+    fixture.detectChanges();
+    tick(16);
+    fixture.detectChanges();
+
+    expect(document.activeElement).toBe(panel());
+    flush();
+  }));
+
+  it("blocks page scroll only with lockScroll", fakeAsync(() => {
+    const strategies = TestBed.inject(Overlay).scrollStrategies;
+    const block = jest.spyOn(strategies, "block");
+
+    openSheet();
+    expect(block).toHaveBeenCalled();
+
+    host.open.set(false);
+    fixture.detectChanges();
+    flush();
+    block.mockClear();
+    host.lockScroll.set(false);
+    openSheet();
+
+    expect(block).not.toHaveBeenCalled();
     flush();
   }));
 
@@ -710,6 +746,44 @@ describe("SheetComponent", () => {
       fixture.detectChanges();
 
       expect(panel()!.style.transform).toBe("");
+      flush();
+    }));
+
+    it("ends the drag when the browser cancels the pointer", fakeAsync(() => {
+      openSheet();
+      const handle = overlayElement.querySelector<HTMLElement>(
+        ".tedi-sheet__handle-zone",
+      )!;
+
+      handle.dispatchEvent(
+        pointer("pointerdown", { y: 0, pointerType: "mouse" }),
+      );
+      handle.dispatchEvent(
+        pointer("pointermove", { y: 50, pointerType: "mouse" }),
+      );
+      fixture.detectChanges();
+      expect(panel()!.style.transform).toBe("translateY(50px)");
+
+      handle.dispatchEvent(pointer("pointercancel", { y: 50 }));
+      fixture.detectChanges();
+      expect(panel()!.style.transform).toBe("");
+
+      handle.dispatchEvent(
+        pointer("pointermove", { y: 90, pointerType: "mouse" }),
+      );
+      fixture.detectChanges();
+      expect(panel()!.style.transform).toBe("");
+      flush();
+    }));
+
+    it("releases the pointer capture when the drag ends", fakeAsync(() => {
+      openSheet();
+      jest.spyOn(panel()!, "hasPointerCapture").mockReturnValue(true);
+      const release = jest.spyOn(panel()!, "releasePointerCapture");
+
+      drag(header(), [{ y: 20 }]);
+
+      expect(release).toHaveBeenCalledWith(1);
       flush();
     }));
 
