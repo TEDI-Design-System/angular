@@ -212,6 +212,11 @@ $sheet-fade-duration: 200ms;
     display: none;
   }
 
+  &__actions {
+    // Stays at the end edge when the header has no title to push it there.
+    margin-inline-start: auto;
+  }
+
   // Flipped: on a bottom sheet, expanding moves up.
   &__collapse-toggle > * {
     scale: 1 -1;
