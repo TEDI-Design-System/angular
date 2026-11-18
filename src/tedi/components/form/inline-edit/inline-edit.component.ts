@@ -104,9 +104,9 @@ export class InlineEditComponent {
   readonly size = input<InlineEditSize>("default");
   /**
    * Renders the value as plain text with no edit affordance, keeping the row's
-   * inset so a fixed value lines up among editable ones. For a block that is
-   * entirely read-only, use a text group instead. Differs from `disabled`,
-   * which keeps the greyed trigger and icon for transient states such as saving.
+   * inset so it lines up with editable rows. For a block that is entirely
+   * read-only, use a text group instead. Differs from `disabled`, which keeps
+   * the greyed trigger and icon for transient states such as saving.
    * @default false
    */
   readonly readOnly = input(false, { transform: booleanAttribute });

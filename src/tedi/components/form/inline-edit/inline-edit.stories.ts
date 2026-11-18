@@ -23,6 +23,7 @@ import { CheckboxGroupComponent } from "../checkbox-group/checkbox-group.compone
 import { CheckboxComponent } from "../checkbox/checkbox.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { LabelComponent } from "../../content/label/label.component";
+import { TextComponent } from "../../base/text/text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { ShowAtDirective } from "../../../directives/show-at/show-at.directive";
@@ -80,6 +81,7 @@ export default {
         CheckboxComponent,
         FeedbackTextComponent,
         LabelComponent,
+        TextComponent,
         RowComponent,
         ColComponent,
         ShowAtDirective,
@@ -219,6 +221,20 @@ export default {
   },
 } as Meta<InlineEditComponent>;
 
+/** Places a story in a column of the given desktop width; full width on mobile. */
+const column = (width: number, content: string) => `
+  <tedi-row cols="12">
+    <tedi-col [width]="12" [md]="{ width: ${width} }">${content}
+    </tedi-col>
+  </tedi-row>
+`;
+
+/** Label and value columns, aligned on their first line of text. */
+const fields = (content: string) => `
+  <tedi-row cols="12" gapX="3" gapY="0" class="align-items-baseline">${content}
+  </tedi-row>
+`;
+
 export const Default: InlineEditStory = {
   parameters: { controls: { disable: false } },
   args: {
@@ -238,21 +254,21 @@ export const Default: InlineEditStory = {
   },
   render: (args) => ({
     props: { ...args },
-    template: `
-      <div style="max-width: 218px;">
-        <tedi-inline-edit #defaultEdit ${argsToTemplate(args)}>
-          <ng-template tediInlineEditControl>
-            <input
-              tedi-text-field
-              [(value)]="displayValue"
-              [attr.aria-label]="label || 'Nimi'"
-              [attr.aria-describedby]="invalid ? defaultEdit.feedbackId : null"
-            />
-          </ng-template>
-          <tedi-feedback-text *ngIf="invalid" text="Sisesta korrektne väärtus" type="error" />
-        </tedi-inline-edit>
-      </div>
-    `,
+    template: column(
+      3,
+      `
+      <tedi-inline-edit #defaultEdit ${argsToTemplate(args)}>
+        <ng-template tediInlineEditControl>
+          <input
+            tedi-text-field
+            [(value)]="displayValue"
+            [attr.aria-label]="label || 'Nimi'"
+            [attr.aria-describedby]="invalid ? defaultEdit.feedbackId : null"
+          />
+        </ng-template>
+        <tedi-feedback-text *ngIf="invalid" text="Sisesta korrektne väärtus" type="error" />
+      </tedi-inline-edit>`,
+    ),
   }),
 };
 
@@ -281,27 +297,27 @@ export const Type: StoryObj<InlineEditComponent> = {
           }) as Record<string, string>
         )[value] ?? "",
     },
-    template: `
-      <div style="display: grid; gap: 8px;">
-        <div style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 218px); max-width: 338px; gap: 16px; align-items: center;">
-          <b>Text field</b>
+    template: column(
+      5,
+      fields(`
+        <tedi-col [width]="4"><p tedi-text modifiers="bold">Text field</p></tedi-col>
+        <tedi-col [width]="8">
           <tedi-inline-edit [displayValue]="state.name" label="Nimi">
             <ng-template tediInlineEditControl>
               <input tedi-text-field [(value)]="state.name" aria-label="Nimi" />
             </ng-template>
           </tedi-inline-edit>
-        </div>
-        <div style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 218px); max-width: 338px; gap: 16px; align-items: center;">
-          <b>Select</b>
+        </tedi-col>
+        <tedi-col [width]="4"><p tedi-text modifiers="bold">Select</p></tedi-col>
+        <tedi-col [width]="8">
           <tedi-inline-edit [displayValue]="typeLabel(state.type)" label="Tüüp" [closeOnEnter]="false">
             <ng-template tediInlineEditControl>
               <tedi-select inputId="ie-type-select" ariaLabel="Tüüp" [options]="typeOptions"
                 bindLabel="label" bindValue="value" [clearable]="false" [(ngModel)]="state.type" />
             </ng-template>
           </tedi-inline-edit>
-        </div>
-      </div>
-    `,
+        </tedi-col>`),
+    ),
   }),
 };
 
@@ -313,18 +329,20 @@ export const Sizes: StoryObj<InlineEditComponent> = {
         { name: "Small", size: "small", value: "22.03.2026" },
       ],
     },
-    template: `
-      <div style="display: grid; gap: 8px;">
-        <div *ngFor="let row of rows" style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 218px); max-width: 338px; gap: 16px; align-items: center;">
-          <b>{{ row.name }}</b>
-          <tedi-inline-edit [displayValue]="row.value" [size]="row.size" label="Kuupäev">
-            <ng-template tediInlineEditControl>
-              <input tedi-text-field [(value)]="row.value" aria-label="Kuupäev" />
-            </ng-template>
-          </tedi-inline-edit>
-        </div>
-      </div>
-    `,
+    template: column(
+      5,
+      fields(`
+        <ng-container *ngFor="let row of rows">
+          <tedi-col [width]="4"><p tedi-text modifiers="bold">{{ row.name }}</p></tedi-col>
+          <tedi-col [width]="8">
+            <tedi-inline-edit [displayValue]="row.value" [size]="row.size" label="Kuupäev">
+              <ng-template tediInlineEditControl>
+                <input tedi-text-field [(value)]="row.value" aria-label="Kuupäev" />
+              </ng-template>
+            </tedi-inline-edit>
+          </tedi-col>
+        </ng-container>`),
+    ),
   }),
 };
 
@@ -381,10 +399,11 @@ export const ValueType: StoryObj<InlineEditComponent> = {
         keywordLabel: (value: string) =>
           keywordOptions.find((o) => o.value === value)?.label ?? value,
       },
-      template: `
-        <div style="display: grid; gap: 8px; max-width: 28rem;">
-          <div style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 1fr); gap: 16px; align-items: start;">
-            <label tedi-label>Tüüp</label>
+      template: column(
+        5,
+        fields(`
+          <tedi-col [width]="4"><label tedi-label>Tüüp</label></tedi-col>
+          <tedi-col [width]="8">
             <tedi-inline-edit [displayValue]="state.type.label" label="Tüüp" [closeOnEnter]="false">
               <ng-template tediInlineEditControl>
                 <tedi-select inputId="ie-value-type" ariaLabel="Tüüp" [options]="typeOptions"
@@ -392,10 +411,10 @@ export const ValueType: StoryObj<InlineEditComponent> = {
                   (selectionChange)="state.type = pick(typeOptions, $event) ?? state.type" />
               </ng-template>
             </tedi-inline-edit>
-          </div>
+          </tedi-col>
 
-          <div style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 1fr); gap: 16px; align-items: start;">
-            <label tedi-label>Aadress</label>
+          <tedi-col [width]="4"><label tedi-label>Aadress</label></tedi-col>
+          <tedi-col [width]="8">
             <tedi-inline-edit [displayValue]="state.address?.label ?? ''" label="Aadress" placeholder="Sisesta aadress" [closeOnEnter]="false">
               <ng-template tediInlineEditControl>
                 <tedi-select inputId="ie-value-address" ariaLabel="Aadress" [options]="addressOptions"
@@ -403,13 +422,13 @@ export const ValueType: StoryObj<InlineEditComponent> = {
                   (selectionChange)="state.address = pick(addressOptions, $event)" />
               </ng-template>
             </tedi-inline-edit>
-          </div>
+          </tedi-col>
 
-          <div style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 1fr); gap: 16px; align-items: start;">
-            <label tedi-label>Märksõnad</label>
+          <tedi-col [width]="4"><label tedi-label>Märksõnad</label></tedi-col>
+          <tedi-col [width]="8">
             <tedi-inline-edit [displayValue]="state.keywords.length ? 'valitud' : ''" label="Märksõnad" placeholder="—" [closeOnEnter]="false">
               <ng-template tediInlineEditValue>
-                <span style="display: flex; flex-wrap: wrap; gap: 4px;">
+                <span class="flex flex-wrap gap-1">
                   <tedi-tag *ngFor="let k of state.keywords" color="primary">{{ keywordLabel(k) }}</tedi-tag>
                 </span>
               </ng-template>
@@ -419,10 +438,10 @@ export const ValueType: StoryObj<InlineEditComponent> = {
                   [(ngModel)]="state.keywords" />
               </ng-template>
             </tedi-inline-edit>
-          </div>
+          </tedi-col>
 
-          <div style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 1fr); gap: 16px; align-items: start;">
-            <label tedi-label>Olek</label>
+          <tedi-col [width]="4"><label tedi-label>Olek</label></tedi-col>
+          <tedi-col [width]="8">
             <tedi-inline-edit [displayValue]="state.olek.label" label="Olek" [closeOnEnter]="false">
               <ng-template tediInlineEditValue>
                 <tedi-status-badge [color]="olekColor[state.olek.value]" [text]="state.olek.label" />
@@ -433,9 +452,8 @@ export const ValueType: StoryObj<InlineEditComponent> = {
                   (selectionChange)="state.olek = pick(olekOptions, $event) ?? state.olek" />
               </ng-template>
             </tedi-inline-edit>
-          </div>
-        </div>
-      `,
+          </tedi-col>`),
+      ),
     };
   },
 };
@@ -460,23 +478,27 @@ export const EditIconPosition: StoryObj<InlineEditComponent> = {
           { name: "End", align: "end", rows: rows() },
         ],
       },
-      template: `
-        <div style="display: grid; gap: 24px;">
-          <div *ngFor="let group of groups" style="display: grid; gap: 8px;">
-            <b>{{ group.name }}</b>
-            <div style="display: grid; gap: 0;">
-              <div *ngFor="let row of group.rows" style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 218px); max-width: 338px; gap: 16px; align-items: center;">
-                <label tedi-label>{{ row.label }}</label>
-                <tedi-inline-edit [displayValue]="row.value" [label]="row.label" [editIconPosition]="group.align">
-                  <ng-template tediInlineEditControl>
-                    <input tedi-text-field [(value)]="row.value" [attr.aria-label]="row.label" />
-                  </ng-template>
-                </tedi-inline-edit>
-              </div>
-            </div>
-          </div>
-        </div>
-      `,
+      template: column(
+        6,
+        `
+        <tedi-row cols="12" gapX="3" gapY="4" alignItems="center">
+          <ng-container *ngFor="let group of groups">
+            <tedi-col [width]="2"><p tedi-text modifiers="bold">{{ group.name }}</p></tedi-col>
+            <tedi-col [width]="10">${fields(`
+              <ng-container *ngFor="let row of group.rows">
+                <tedi-col [width]="4"><label tedi-label>{{ row.label }}</label></tedi-col>
+                <tedi-col [width]="8">
+                  <tedi-inline-edit [displayValue]="row.value" [label]="row.label" [editIconPosition]="group.align">
+                    <ng-template tediInlineEditControl>
+                      <input tedi-text-field [(value)]="row.value" [attr.aria-label]="row.label" />
+                    </ng-template>
+                  </tedi-inline-edit>
+                </tedi-col>
+              </ng-container>`)}
+            </tedi-col>
+          </ng-container>
+        </tedi-row>`,
+      ),
     };
   },
 };
@@ -541,15 +563,17 @@ export const States: StoryObj<InlineEditComponent> = {
           ({ ee: "Eesti", fi: "Soome", se: "Rootsi" }) as Record<string, string>
         )[value] ?? "",
     },
-    template: `
-      <tedi-row cols="1" gapY="3" style="max-width: 640px;">
+    template: column(
+      8,
+      `
+      <tedi-row cols="1" gapY="3">
         <tedi-row cols="12" gapX="3" showAt="md">
-          <tedi-col width="2" />
-          <tedi-col width="5"><b>Text field</b></tedi-col>
-          <tedi-col width="5"><b>Select</b></tedi-col>
+          <tedi-col [width]="2" />
+          <tedi-col [width]="5"><p tedi-text modifiers="bold">Text field</p></tedi-col>
+          <tedi-col [width]="5"><p tedi-text modifiers="bold">Select</p></tedi-col>
         </tedi-row>
         <tedi-row *ngFor="let state of states" cols="1" gap="2" [md]="{ cols: 12, gapX: 3, gapY: 0 }">
-          <tedi-col [md]="{ width: 2 }"><b>{{ state.name }}</b></tedi-col>
+          <tedi-col [md]="{ width: 2 }"><p tedi-text modifiers="bold">{{ state.name }}</p></tedi-col>
           <tedi-col [md]="{ width: 5 }">
             <tedi-inline-edit #textEdit
               [id]="'ie-state-' + state.key + '-text'"
@@ -592,19 +616,12 @@ export const States: StoryObj<InlineEditComponent> = {
             </tedi-inline-edit>
           </tedi-col>
         </tedi-row>
-      </tedi-row>
-    `,
+      </tedi-row>`,
+    ),
   }),
 };
 
 /**
- * `readOnly` renders the value as static text with no edit affordance. It
- * keeps an editable row's inset so it still lines up when mixed in with
- * editable ones, which is what it is for — the odd fixed value among the rest.
- * When a whole block is fixed, reach for
- * <a href="./?path=/docs/tedi-ready-content-textgroup--docs" target="_top"><code>tedi-text-group</code></a>
- * instead.
- *
  * Differs from `disabled`, which keeps the greyed trigger and icon for
  * transient states such as saving.
  */
@@ -613,23 +630,25 @@ export const ReadOnly: StoryObj<InlineEditComponent> = {
   render: () => ({
     props: {
       rows: [
-        { label: "Kuupäev", value: "22.03.2026", fixed: false },
-        { label: "Kellaaeg", value: "08:00", fixed: true },
-        { label: "Kohtade arv", value: "2", fixed: false },
+        { label: "Kuupäev", value: "22.03.2026" },
+        { label: "Kellaaeg", value: "08:00" },
+        { label: "Kohtade arv", value: "2" },
       ],
     },
-    template: `
-      <div style="display: grid; gap: 0;">
-        <div *ngFor="let row of rows" style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 218px); max-width: 338px; gap: 16px; align-items: center;">
-          <b>{{ row.label }}</b>
-          <tedi-inline-edit [displayValue]="row.value" [label]="row.label" [readOnly]="row.fixed">
-            <ng-template tediInlineEditControl>
-              <input tedi-text-field [(value)]="row.value" [attr.aria-label]="row.label" />
-            </ng-template>
-          </tedi-inline-edit>
-        </div>
-      </div>
-    `,
+    template: column(
+      5,
+      fields(`
+        <ng-container *ngFor="let row of rows">
+          <tedi-col [width]="4"><label tedi-label>{{ row.label }}</label></tedi-col>
+          <tedi-col [width]="8">
+            <tedi-inline-edit [displayValue]="row.value" [label]="row.label" readOnly>
+              <ng-template tediInlineEditControl>
+                <input tedi-text-field [(value)]="row.value" [attr.aria-label]="row.label" />
+              </ng-template>
+            </tedi-inline-edit>
+          </tedi-col>
+        </ng-container>`),
+    ),
   }),
 };
 
@@ -648,31 +667,44 @@ export const CancelEdit: StoryObj<InlineEditComponent> = {
           state.name = state.previousName;
         },
       },
-      template: `
-        <div style="width: 100%; max-width: 218px;">
-          <tedi-inline-edit [displayValue]="state.name" label="Nimi" (editStart)="onStart()" (editCancel)="onCancel()">
-            <ng-template tediInlineEditControl>
-              <input tedi-text-field [(value)]="state.name" aria-label="Nimi" />
-            </ng-template>
-          </tedi-inline-edit>
-        </div>
-      `,
+      template: column(
+        5,
+        fields(`
+          <tedi-col [width]="4"><label tedi-label for="ie-cancel-name">Nimi</label></tedi-col>
+          <tedi-col [width]="8">
+            <tedi-inline-edit [displayValue]="state.name" label="Nimi" (editStart)="onStart()" (editCancel)="onCancel()">
+              <ng-template tediInlineEditControl>
+                <input tedi-text-field id="ie-cancel-name" [(value)]="state.name" />
+              </ng-template>
+            </tedi-inline-edit>
+          </tedi-col>`),
+      ),
     };
   },
 };
 
 export const Disabled: StoryObj<InlineEditComponent> = {
   render: () => ({
-    props: { code: "EE47101010033" },
-    template: `
-      <div style="width: 100%; max-width: 218px;">
-        <tedi-inline-edit [displayValue]="code" label="Isikukood" disabled>
-          <ng-template tediInlineEditControl>
-            <input tedi-text-field [(value)]="code" aria-label="Isikukood" />
-          </ng-template>
-        </tedi-inline-edit>
-      </div>
-    `,
+    props: {
+      rows: [
+        { label: "Kuupäev", value: "22.03.2026" },
+        { label: "Kellaaeg", value: "08:00" },
+      ],
+    },
+    template: column(
+      5,
+      fields(`
+        <ng-container *ngFor="let row of rows">
+          <tedi-col [width]="4"><label tedi-label>{{ row.label }}</label></tedi-col>
+          <tedi-col [width]="8">
+            <tedi-inline-edit [displayValue]="row.value" [label]="row.label" disabled>
+              <ng-template tediInlineEditControl>
+                <input tedi-text-field [(value)]="row.value" [attr.aria-label]="row.label" />
+              </ng-template>
+            </tedi-inline-edit>
+          </tedi-col>
+        </ng-container>`),
+    ),
   }),
 };
 
@@ -684,32 +716,63 @@ export const Disabled: StoryObj<InlineEditComponent> = {
 export const Invalid: StoryObj<InlineEditComponent> = {
   render: () => ({
     props: { email: "mari.maasikas" },
-    template: `
-      <div style="width: 100%; max-width: 218px;">
-        <tedi-inline-edit #emailEdit [displayValue]="email" label="E-post" invalid>
-          <ng-template tediInlineEditControl>
-            <input tedi-text-field [(value)]="email" aria-label="E-post" [attr.aria-describedby]="emailEdit.feedbackId" />
-          </ng-template>
-          <tedi-feedback-text text="Sisesta korrektne e-posti aadress" type="error" />
-        </tedi-inline-edit>
-      </div>
-    `,
+    template: column(
+      5,
+      fields(`
+        <tedi-col [width]="4"><label tedi-label for="ie-invalid-email">E-post</label></tedi-col>
+        <tedi-col [width]="8">
+          <tedi-inline-edit #emailEdit [displayValue]="email" label="E-post" invalid>
+            <ng-template tediInlineEditControl>
+              <input tedi-text-field id="ie-invalid-email" [(value)]="email" [attr.aria-describedby]="emailEdit.feedbackId" />
+            </ng-template>
+            <tedi-feedback-text text="Sisesta korrektne e-posti aadress" type="error" />
+          </tedi-inline-edit>
+        </tedi-col>`),
+    ),
   }),
 };
 
 export const Placeholder: StoryObj<InlineEditComponent> = {
-  render: () => ({
-    props: { address: "" },
-    template: `
-      <div style="width: 100%; max-width: 218px;">
-        <tedi-inline-edit [displayValue]="address" placeholder="Sisesta aadress" label="Aadress">
-          <ng-template tediInlineEditControl>
-            <input tedi-text-field [(value)]="address" aria-label="Aadress" />
-          </ng-template>
-        </tedi-inline-edit>
-      </div>
-    `,
-  }),
+  render: () => {
+    const addressOptions = [
+      { value: "tallinn", label: "Tulbi tn 6, Tallinn" },
+      { value: "tartu", label: "Riia 12, Tartu" },
+    ];
+    const state = {
+      name: "",
+      address: null as { value: string; label: string } | null,
+    };
+    return {
+      props: {
+        state,
+        addressOptions,
+        pick: (value: string) =>
+          addressOptions.find((o) => o.value === value) ?? null,
+      },
+      template: column(
+        5,
+        fields(`
+          <tedi-col [width]="4"><label tedi-label for="ie-placeholder-name">Nimi</label></tedi-col>
+          <tedi-col [width]="8">
+            <tedi-inline-edit [displayValue]="state.name" placeholder="Sisesta nimi" label="Nimi">
+              <ng-template tediInlineEditControl>
+                <input tedi-text-field id="ie-placeholder-name" [(value)]="state.name" />
+              </ng-template>
+            </tedi-inline-edit>
+          </tedi-col>
+          <tedi-col [width]="4"><label tedi-label>Aadress</label></tedi-col>
+          <tedi-col [width]="8">
+            <tedi-inline-edit [displayValue]="state.address?.label ?? ''" placeholder="Sisesta aadress" label="Aadress" [closeOnEnter]="false">
+              <ng-template tediInlineEditControl>
+                <tedi-select inputId="ie-placeholder-address" ariaLabel="Aadress" [options]="addressOptions"
+                  bindLabel="label" bindValue="value" [ngModel]="state.address?.value"
+                  (selectionChange)="state.address = pick($event)" />
+              </ng-template>
+            </tedi-inline-edit>
+          </tedi-col>`),
+      ),
+    };
+  },
 };
 
 /**
@@ -753,34 +816,35 @@ export const SupportedControls: StoryObj<InlineEditComponent> = {
             .map((x) => ({ breakfast: "Hommikusöök", parking: "Parkimine" })[x])
             .join(", "),
       },
-      template: `
-        <div style="display: grid; gap: 8px;">
-          <div style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 260px); gap: 16px; align-items: center;">
-            <label tedi-label for="inline-edit-date">Kuupäev</label>
+      template: column(
+        5,
+        fields(`
+          <tedi-col [width]="4"><label tedi-label for="inline-edit-date">Kuupäev</label></tedi-col>
+          <tedi-col [width]="8">
             <tedi-inline-edit [displayValue]="formatDate(state.date)" label="Kuupäev">
               <ng-template tediInlineEditControl>
                 <tedi-date-field inputId="inline-edit-date" [(value)]="state.date" />
               </ng-template>
             </tedi-inline-edit>
-          </div>
-          <div style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 260px); gap: 16px; align-items: center;">
-            <label tedi-label for="inline-edit-seats">Kohtade arv</label>
+          </tedi-col>
+          <tedi-col [width]="4"><label tedi-label for="inline-edit-seats">Kohtade arv</label></tedi-col>
+          <tedi-col [width]="8">
             <tedi-inline-edit [displayValue]="state.seats + ''" label="Kohtade arv">
               <ng-template tediInlineEditControl>
                 <tedi-number-field inputId="inline-edit-seats" [(value)]="state.seats" />
               </ng-template>
             </tedi-inline-edit>
-          </div>
-          <div style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 260px); gap: 16px; align-items: start;">
-            <label tedi-label for="inline-edit-note">Märkus</label>
+          </tedi-col>
+          <tedi-col [width]="4"><label tedi-label for="inline-edit-note">Märkus</label></tedi-col>
+          <tedi-col [width]="8">
             <tedi-inline-edit [displayValue]="state.note" label="Märkus" [closeOnEnter]="false">
               <ng-template tediInlineEditControl>
                 <textarea tedi-textarea id="inline-edit-note" [(value)]="state.note"></textarea>
               </ng-template>
             </tedi-inline-edit>
-          </div>
-          <div style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 260px); gap: 16px; align-items: start;">
-            <b>Transport</b>
+          </tedi-col>
+          <tedi-col [width]="4"><label tedi-label>Transport</label></tedi-col>
+          <tedi-col [width]="8">
             <tedi-inline-edit [displayValue]="transportLabel(state.transport)" label="Transport" [closeOnEnter]="false">
               <ng-template tediInlineEditControl>
                 <tedi-radio-group ariaLabel="Transport" direction="vertical" [(value)]="state.transport">
@@ -795,9 +859,9 @@ export const SupportedControls: StoryObj<InlineEditComponent> = {
                 </tedi-radio-group>
               </ng-template>
             </tedi-inline-edit>
-          </div>
-          <div style="display: grid; grid-template-columns: minmax(0, 104px) minmax(0, 260px); gap: 16px; align-items: start;">
-            <b>Lisad</b>
+          </tedi-col>
+          <tedi-col [width]="4"><label tedi-label>Lisad</label></tedi-col>
+          <tedi-col [width]="8">
             <tedi-inline-edit [displayValue]="extrasLabel(state.extras)" label="Lisad" [closeOnEnter]="false">
               <ng-template tediInlineEditControl>
                 <tedi-checkbox-group ariaLabel="Lisad" direction="vertical" [(value)]="state.extras">
@@ -812,9 +876,8 @@ export const SupportedControls: StoryObj<InlineEditComponent> = {
                 </tedi-checkbox-group>
               </ng-template>
             </tedi-inline-edit>
-          </div>
-        </div>
-      `,
+          </tedi-col>`),
+      ),
     };
   },
 };
