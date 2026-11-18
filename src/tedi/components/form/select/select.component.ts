@@ -1022,6 +1022,10 @@ export class SelectComponent<T = unknown>
     }
   }
 
+  groupHeadingId(groupIndex: number): string {
+    return this.listboxId() + "-group-" + groupIndex;
+  }
+
   // ---- Virtual scroll listbox (opt-in, replaces cdkListbox for flat menus) ----
 
   virtualOptionId(index: number): string {
