@@ -1,3 +1,10 @@
+# [10.0.0-rc.25](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.24...angular-10.0.0-rc.25) (2026-11-18)
+
+
+### Features
+
+* **button:** add extra-small size for icon-only buttons [#785](https://github.com/TEDI-Design-System/angular/issues/785) ([#871](https://github.com/TEDI-Design-System/angular/issues/871)) ([380f35c](https://github.com/TEDI-Design-System/angular/commit/380f35c595ee8ee7c29790302b97b7c8ed6fcd8d))
+
 # [10.0.0-rc.24](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.23...angular-10.0.0-rc.24) (2026-11-18)
 
 
