@@ -25,8 +25,7 @@ export class SideNavOverlayComponent {
 
   @HostListener("click")
   onClick() {
-    this.sidenavService.isMobileOpen.set(false);
-    this.sidenavService.handleGoToMainMenu();
+    this.sidenavService.closeMobileDrawer();
   }
 
   classes = computed(() => {
