@@ -139,8 +139,7 @@ $sheet-fade-duration: 200ms;
     background: var(--sheet-header-background-brand);
 
     .tedi-sheet-header__close {
-      --general-icon-primary: var(--button-main-neutral-inverted-text-default);
-
+      color: var(--button-main-neutral-inverted-text-default);
       background-color: var(
         --button-main-neutral-inverted-icon-only-background-default
       );
@@ -148,10 +147,7 @@ $sheet-fade-duration: 200ms;
 
       @each $state in hover, active {
         &:#{$state} {
-          --general-icon-primary: var(
-            --button-main-neutral-inverted-text-#{$state}
-          );
-
+          color: var(--button-main-neutral-inverted-text-#{$state});
           background-color: var(
             --button-main-neutral-inverted-icon-only-background-#{$state}
           );
