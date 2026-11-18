@@ -32,12 +32,14 @@
           <ng-container *ngTemplateOutlet="toggle"></ng-container>
         }
       } @else {
-        @if (hasTitleGroup()) {
-          <ng-container
-            *ngTemplateOutlet="heading; context: { $implicit: titleGroup }"
-          ></ng-container>
-        }
-        <ng-container *ngTemplateOutlet="endSlot"></ng-container>
+        <div class="tedi-table-card__header-main">
+          @if (hasTitleGroup()) {
+            <ng-container
+              *ngTemplateOutlet="heading; context: { $implicit: titleGroup }"
+            ></ng-container>
+          }
+          <ng-container *ngTemplateOutlet="endSlot"></ng-container>
+        </div>
       }
     </tedi-card-content>
   }
@@ -105,8 +107,10 @@
     [attr.aria-label]="title() ? null : toggleLabel()"
     (click)="handleToggle()"
   >
-    <ng-container *ngTemplateOutlet="titleGroup"></ng-container>
-    <ng-container *ngTemplateOutlet="endSlot"></ng-container>
+    <span class="tedi-table-card__header-main">
+      <ng-container *ngTemplateOutlet="titleGroup"></ng-container>
+      <ng-container *ngTemplateOutlet="endSlot"></ng-container>
+    </span>
     <span
       class="tedi-table-card__chevron"
       [class.tedi-table-card__chevron--open]="open()"

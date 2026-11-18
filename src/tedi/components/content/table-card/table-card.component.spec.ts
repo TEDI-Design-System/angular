@@ -452,6 +452,25 @@ describe("TableCardComponent", () => {
       expect(query(".tedi-table-card__end-slot .end-slot")).toBeTruthy();
     });
 
+    it("keeps the title and end slot in one wrapping group, apart from the chevron", () => {
+      host.title = "Kadri Kaasik";
+      fixture.detectChanges();
+
+      const main = () => query(".tedi-table-card__header-main")!;
+      expect(main().querySelector(".tedi-table-card__heading")).toBeTruthy();
+      expect(main().querySelector(".tedi-table-card__end-slot")).toBeTruthy();
+
+      host.collapsible = true;
+      fixture.detectChanges();
+
+      expect(
+        main().querySelector(".tedi-table-card__title-group"),
+      ).toBeTruthy();
+      expect(main().querySelector(".tedi-table-card__end-slot")).toBeTruthy();
+      expect(main().querySelector(".tedi-table-card__chevron")).toBeNull();
+      expect(query(".tedi-table-card__chevron")).toBeTruthy();
+    });
+
     it("labels the card region only when an ariaLabel is given", () => {
       const card = () => query(".tedi-table-card__card")!;
 

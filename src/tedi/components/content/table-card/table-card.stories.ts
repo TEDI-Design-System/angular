@@ -333,6 +333,21 @@ export const SimpleCard: Story = {
           <div tedi-table-card-row label="Sugu" value="Naine"></div>
         </tedi-table-card>
 
+        <tedi-table-card
+          title="Mari-Liis Maasikas-Tamm Kaasik"
+          titleElement="h4"
+          titleModifiers="h4"
+          layout="vertical"
+          labelSize="small"
+          [columns]="2"
+        >
+          <tedi-status-badge tediTableCardEndSlot color="success" text="Kehtib 13.08.2027" />
+          <div tedi-table-card-row label="Eesnimi" value="Mari-Liis"></div>
+          <div tedi-table-card-row label="Sünniaeg" value="15.08.1987"></div>
+          <div tedi-table-card-row label="Perenimi" value="Maasikas-Tamm Kaasik"></div>
+          <div tedi-table-card-row label="Isikukood" value="41234567891"></div>
+        </tedi-table-card>
+
         <tedi-table-card title="4. juuli 2026" layout="vertical" labelSize="small">
           <div tedi-table-card-row label="Päringu teostaja" value="EE4800234675"></div>
           <div tedi-table-card-row label="Päringu nimetus" value="Inimeste arv kohalikus omavalitsuses"></div>
@@ -716,11 +731,11 @@ export const WithActions: Story = {
               <button
                 tedi-button
                 variant="neutral"
-                [attr.aria-label]="compactActions() ? action.label : null"
-                [attr.title]="compactActions() ? action.label : null"
+                [attr.aria-label]="iconOnly(action) ? action.label : null"
+                [attr.title]="iconOnly(action) ? action.label : null"
               >
                 <tedi-icon [name]="action.icon" [size]="18" />
-                @if (!compactActions()) {
+                @if (!iconOnly(action)) {
                   {{ action.label }}
                 }
               </button>
@@ -789,17 +804,20 @@ class TableCardAccordionStoryComponent {
   private readonly breakpoint = inject(BreakpointService);
 
   /**
-   * Below `sm` the three labelled actions no longer fit on one line, so they
-   * drop their text. A button left holding only an icon turns icon-only on its
-   * own, and keeps its accessible name through `aria-label`.
+   * Below `sm` the secondary action drops its text and keeps its accessible
+   * name through `aria-label`. The two primary actions keep their text.
    */
-  protected readonly compactActions = this.breakpoint.isBelowBreakpoint("sm");
+  private readonly compactActions = this.breakpoint.isBelowBreakpoint("sm");
 
   protected readonly actions = [
-    { icon: "edit", label: "Muuda" },
-    { icon: "close", label: "Tühista" },
-    { icon: "more_vert", label: "Rohkem" },
+    { icon: "edit", label: "Muuda", secondary: false },
+    { icon: "close", label: "Tühista", secondary: false },
+    { icon: "more_vert", label: "Rohkem", secondary: true },
   ];
+
+  protected iconOnly(action: { secondary: boolean }): boolean {
+    return action.secondary && this.compactActions();
+  }
 }
 
 /**
