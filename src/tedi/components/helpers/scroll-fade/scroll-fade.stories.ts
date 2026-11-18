@@ -2,6 +2,7 @@ import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
 import { ScrollFadeComponent } from "./scroll-fade.component";
 import { ColComponent } from "../grid/col/col.component";
 import { RowComponent } from "../grid/row/row.component";
+import { ButtonComponent } from "../../buttons/button/button.component";
 
 const loremIpsum = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
   magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris Lorem ipsum dolor sit amet,
@@ -17,14 +18,53 @@ export default {
   component: ScrollFadeComponent,
   decorators: [
     moduleMetadata({
-      imports: [ScrollFadeComponent, RowComponent, ColComponent],
+      imports: [
+        ScrollFadeComponent,
+        RowComponent,
+        ColComponent,
+        ButtonComponent,
+      ],
     }),
   ],
   argTypes: {
+    fadeSize: {
+      description: "Size of the fade gradient in percentages.",
+      control: { type: "radio" },
+      options: [0, 10, 20],
+      table: {
+        category: "inputs",
+        type: { summary: "ScrollFadeSize" },
+        defaultValue: { summary: "20" },
+      },
+    },
+    fadePosition: {
+      description: "Which edges show the fade.",
+      control: { type: "radio" },
+      options: ["top", "bottom", "both"],
+      table: {
+        category: "inputs",
+        type: { summary: "ScrollFadePosition" },
+        defaultValue: { summary: "both" },
+      },
+    },
+    scrollBar: {
+      description: "Scrollbar style.",
+      control: { type: "radio" },
+      options: ["default", "custom"],
+      table: {
+        category: "inputs",
+        type: { summary: "ScrollFadeScrollbar" },
+        defaultValue: { summary: "custom" },
+      },
+    },
     ariaLabel: {
       control: "text",
       description:
         "Accessible label for the scrollable region. Falls back to a translated default.",
+      table: {
+        category: "inputs",
+        type: { summary: "string" },
+      },
     },
   },
   parameters: {
@@ -163,17 +203,34 @@ export const DynamicContent: Story = {
         this["items"].pop();
       },
     },
+    styles: [
+      `
+        .dynamic-content-scroller {
+          max-width: 200px;
+          max-height: 150px;
+        }
+      `,
+    ],
     template: `
-      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-        <button type="button" (click)="add()">Add item</button>
-        <button type="button" (click)="remove()">Remove item</button>
-      </div>
-      <div style="max-width: 200px; max-height: 150px;">
-        <tedi-scroll-fade [scrollBar]="scrollBar" [fadeSize]="fadeSize" [fadePosition]="fadePosition">
-          @for (item of items; track item) {
-            <p style="margin: 0; padding: 8px 0;">Item {{ item }}</p>
-          }
-        </tedi-scroll-fade>
+      <div class="flex flex-column gap-3">
+        <div class="flex gap-3">
+          <button tedi-button (click)="add()">Add item</button>
+          <button tedi-button variant="secondary" (click)="remove()">Remove item</button>
+        </div>
+        <div class="dynamic-content-scroller">
+          <tedi-scroll-fade
+            [scrollBar]="scrollBar"
+            [fadeSize]="fadeSize"
+            [fadePosition]="fadePosition"
+            [ariaLabel]="ariaLabel"
+          >
+            <div class="flex flex-column gap-3">
+              @for (item of items; track item) {
+                <p>Item {{ item }}</p>
+              }
+            </div>
+          </tedi-scroll-fade>
+        </div>
       </div>
     `,
   }),
