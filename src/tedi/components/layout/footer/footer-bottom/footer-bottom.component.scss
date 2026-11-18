@@ -5,9 +5,12 @@
   background-color: var(--footer-bottom-background);
 
   &__inner {
+    --_footer-bottom-gap: var(--layout-grid-gutters-24);
+
+    position: relative;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--layout-grid-gutters-24);
+    gap: var(--_footer-bottom-gap);
     align-items: center;
     justify-content: center;
     width: 100%;
@@ -15,14 +18,27 @@
   }
 
   &--mobile &__inner {
-    gap: var(--layout-grid-gutters-16);
+    --_footer-bottom-gap: var(--layout-grid-gutters-16);
+  }
+
+  &__inner--with-separators {
+    // Only links on the same row reserve room for a dot.
+    column-gap: calc(
+      2 * var(--_footer-bottom-gap) + var(--separator-dot-size-sm)
+    );
   }
 
   &__dot {
-    flex-shrink: 0;
+    position: absolute;
+    visibility: hidden;
     width: var(--separator-dot-size-sm);
     height: var(--separator-dot-size-sm);
     background-color: var(--general-border-secondary);
     border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  &__dot--visible {
+    visibility: visible;
   }
 }
