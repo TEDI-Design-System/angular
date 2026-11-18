@@ -1193,6 +1193,73 @@ describe("SelectComponent", () => {
     });
   });
 
+  describe("aria-describedby", () => {
+    it("is absent without feedback text or external ids", () => {
+      expect(getTrigger().hasAttribute("aria-describedby")).toBe(false);
+    });
+
+    it("points to the feedback text", () => {
+      host.feedbackText = { text: "Required", type: "error" };
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-describedby")).toBe(
+        `${select.inputId()}-feedback`,
+      );
+    });
+
+    it("includes ids passed to setDescribedBy on the non-searchable combobox", () => {
+      select.setDescribedBy(["external-error"]);
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-describedby")).toBe(
+        "external-error",
+      );
+    });
+
+    it("lists external ids before the feedback text id", () => {
+      host.feedbackText = { text: "Required", type: "error" };
+      select.setDescribedBy(["external-error", "other"]);
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-describedby")).toBe(
+        `external-error other ${select.inputId()}-feedback`,
+      );
+    });
+
+    it("includes ids passed to setDescribedBy on the searchable combobox", () => {
+      host.searchable = true;
+      host.feedbackText = { text: "Required", type: "error" };
+      fixture.detectChanges();
+      select.setDescribedBy(["external-error"]);
+      fixture.detectChanges();
+
+      expect(getSearchInput().getAttribute("aria-describedby")).toBe(
+        `external-error ${select.inputId()}-feedback`,
+      );
+      expect(getTrigger().hasAttribute("aria-describedby")).toBe(false);
+    });
+
+    it("removes the ids when cleared", () => {
+      select.setDescribedBy(["external-error"]);
+      fixture.detectChanges();
+      select.setDescribedBy([]);
+      fixture.detectChanges();
+
+      expect(getTrigger().hasAttribute("aria-describedby")).toBe(false);
+    });
+
+    it("does not repeat an id that is also the feedback id", () => {
+      host.feedbackText = { text: "Required", type: "error" };
+      fixture.detectChanges();
+      select.setDescribedBy([`${select.inputId()}-feedback`]);
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-describedby")).toBe(
+        `${select.inputId()}-feedback`,
+      );
+    });
+  });
+
   describe("Accessibility", () => {
     it("trigger should have combobox role when not searchable", () => {
       const trigger = getTrigger();
