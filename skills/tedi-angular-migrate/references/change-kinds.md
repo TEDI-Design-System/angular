@@ -2,7 +2,9 @@
 
 Release notes say _what_ changed. This file says how to find each kind of change in an Angular project
 and how to apply it. Search with `rg` (or `grep -rn`) over the project's source, templates, styles and
-tests; exclude `node_modules`, `dist` and `.tedi-migrate`.
+tests; exclude `node_modules`, `dist` and `.tedi-migrate`. The commands below search `src`: replace it
+with the project's source roots (for example `apps libs` in an Nx workspace) and drop folders that don't
+exist.
 
 Import paths: `@tedi-design-system/angular/tedi` (TEDI-ready) and `@tedi-design-system/angular/community`.
 Selectors are `tedi-*` elements or attributes (`<button tedi-button>`, `<input tedi-text-field>`).
@@ -102,8 +104,9 @@ Example: Alert's `role` moved from the host to an inner element; button names ch
 Only when core comes in through `@tedi-design-system/angular` (`coreRange` is null in `detect-version`).
 
 - **Find:** the project's custom properties that set or read a removed or renamed core variable:
-  `rg -n --glob "*.{scss,css,html,ts}" -- "--old-name\b" src` for each name, and
-  `rg -n '\$old-scss-var\b' src` for SCSS variables when the project `@use`s core SCSS.
+  `rg -n --glob "*.{scss,css,html,ts}" -e '--old-name([^A-Za-z0-9_-]|$)' src` for each name, and
+  `rg -n '\$old-scss-var([^A-Za-z0-9_-]|$)' src` for SCSS variables when the project `@use`s core SCSS.
+  (`\b` would also match `--old-name-hover`.)
 - Documented rename → `auto`. Value-matched rename candidate from `diff-core-vars.mjs` that the notes don't
   confirm → `assisted`. Removed with no replacement → `manual`.
 
