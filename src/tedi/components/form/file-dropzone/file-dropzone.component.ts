@@ -525,7 +525,9 @@ export class FileDropzoneComponent
   protected removeFile(file: FileDropzoneFile): void {
     if (this.isDisabled()) return;
 
-    const removedIndex = this.files().indexOf(file);
+    // Read from the rendered order, not the value: rejected files lead the
+    // list, so the two part company as soon as one is held.
+    const removedIndex = this.fileRows().findIndex((row) => row.file === file);
 
     this.commit(this.files().filter((current) => current !== file));
     this.clearRejectionWhenEmpty();
@@ -650,8 +652,13 @@ export class FileDropzoneComponent
       : candidates.filter((file) => file.isValid);
     const multiple = this.multiple();
 
-    if (kept.length) {
-      this.commit(multiple ? [...this.retained(kept), ...kept] : [kept[0]]);
+    // A single-file zone holds one file, and it is the first that passed: a
+    // rejected file dropped alongside a good one must not take its place.
+    const single = kept.find((file) => file.isValid) ?? kept[0];
+    const landed = multiple ? kept : kept.length ? [single] : [];
+
+    if (landed.length) {
+      this.commit(multiple ? [...this.retained(landed), ...landed] : landed);
     }
 
     // One selection can reject, skip and add all at once. The live region holds
@@ -674,14 +681,13 @@ export class FileDropzoneComponent
       );
     }
 
-    const added = kept.filter((file) => file.isValid);
+    // Counted from what was committed, so a file that never made it into the
+    // list is never announced as added.
+    const added = landed.filter((file) => file.isValid);
 
     if (added.length) {
       messages.push(
-        this.translations.translate(
-          "file-upload.added",
-          String(multiple ? added.length : 1),
-        ),
+        this.translations.translate("file-upload.added", String(added.length)),
       );
     }
 

@@ -142,7 +142,7 @@ export class FileUploadComponent
 
   /**
    * Selected files, and the value of a bound form control. Bind a stable
-   * reference: an inline array literal resets the list on every check.
+   * reference: an expression that builds a new array on each check resets it.
    */
   readonly files = model<FileUploadFile[]>([]);
   /**
@@ -383,7 +383,7 @@ export class FileUploadComponent
       accept &&
         `${this.translations.translate("file-upload.accept")} ${accept.replaceAll(",", ", ")}`,
       maxSize &&
-        `${this.translations.translate("file-upload.max-size")} ${formatFileSize(maxSize)}`,
+        `${this.translations.translate("file-upload.max-size")} ${formatFileSize(maxSize, this.translations.getLanguage())}`,
       this.hint(),
     ].filter(Boolean);
 

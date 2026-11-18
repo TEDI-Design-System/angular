@@ -131,7 +131,7 @@ export default {
     files: {
       description:
         "Files held by the dropzone, and the value written by `formControl` / `ngModel`.",
-      control: false,
+      control: "object",
       table: {
         category: "inputs",
         type: { summary: "FileDropzoneFile[]" },
@@ -487,7 +487,7 @@ export const WithCustomFileTemplate: Story = {
               [error]="file.isValid === false ? 'Fail on liiga suur. Lubatud on failid suurusega kuni 1 MB' : undefined"
             >
               @if (file.isLoading) {
-                <tedi-progress-bar [value]="progress" />
+                <tedi-progress-bar [value]="progress" [ariaLabel]="file.name" />
               }
               <tedi-attachment-actions>
                 @if (file.isValid !== false && !file.isLoading) {
@@ -574,6 +574,7 @@ export const WithReactiveForms: Story = {
           <tedi-col>
             <tedi-file-dropzone
               multiple
+              keepRejectedFiles
               accept=".pdf,.txt"
               [maxSize]="1024 ** 2"
               [formControl]="control"

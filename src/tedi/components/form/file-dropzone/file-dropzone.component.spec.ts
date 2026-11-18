@@ -305,6 +305,24 @@ describe("FileDropzoneComponent", () => {
       ]);
     });
 
+    it("keeps the file that passed when one is dropped beside a rejected one", async () => {
+      fixture.componentRef.setInput("accept", ".pdf");
+      fixture.componentRef.setInput("keepRejectedFiles", true);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [
+        makeFile("notes.txt", 100, "text/plain"),
+        makeFile("report.pdf"),
+      ]);
+
+      expect(component.files().map((file) => file.name)).toEqual([
+        "report.pdf",
+      ]);
+      expect(await announced()).toBe(
+        "file-upload.extension-rejected:'notes.txt',1. file-upload.added:1",
+      );
+    });
+
     it("announces a skip alongside what was added", async () => {
       fixture.componentRef.setInput("multiple", true);
       fixture.detectChanges();
@@ -1260,6 +1278,28 @@ describe("FileDropzoneComponent", () => {
       fixture.detectChanges();
 
       expect(document.activeElement).toBe(buttons()[0]);
+    });
+
+    it("follows the rendered order, which a rejected file leads", async () => {
+      fixture.componentRef.setInput("files", [
+        { id: "1", name: "a.pdf" },
+        { id: "2", name: "b.pdf" },
+        { id: "3", name: "bad.png", isValid: false },
+      ]);
+      fixture.detectChanges();
+
+      const buttons = () =>
+        fixture.debugElement
+          .queryAll(By.css(".tedi-attachment__actions button"))
+          .map((el) => el.nativeElement as HTMLButtonElement);
+
+      // Rendered: bad.png, a.pdf, b.pdf — so the row before b.pdf is a.pdf.
+      buttons()[2].click();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(document.activeElement).toBe(buttons()[1]);
+      expect(buttons()[1].getAttribute("aria-label")).toBe("remove a.pdf");
     });
 
     it("moves focus to the new first row when the first file goes", async () => {

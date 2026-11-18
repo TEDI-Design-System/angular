@@ -91,7 +91,7 @@ export default {
   argTypes: {
     files: {
       description:
-        "Selected files, and the value of a bound form control. Bind a stable reference: an inline array literal resets the list on every check.",
+        "Selected files, and the value of a bound form control. Bind a stable reference: an expression that builds a new array on each check resets it.",
       control: false,
       table: {
         category: "inputs",

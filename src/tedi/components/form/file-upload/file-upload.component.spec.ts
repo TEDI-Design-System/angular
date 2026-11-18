@@ -19,6 +19,9 @@ class TranslationMock {
   track(key: string) {
     return () => key;
   }
+  getLanguage() {
+    return "et" as const;
+  }
 }
 
 const isBelowMd = signal(false);

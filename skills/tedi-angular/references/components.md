@@ -204,9 +204,9 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 - **`tedi-file-dropzone`'s `files` has no separate "default" input** — unlike the React version, which
   needs `defaultFiles` alongside `files` to distinguish uncontrolled from controlled. The binding
   picks the mode: `[files]` seeds the list and leaves the dropzone owning it, `[(files)]` keeps the
-  parent in sync, `[formControl]` hands it to the form. Bind a stable reference, though: an inline
-  literal (`[files]="[{ name: 'a.pdf' }]"`) is a new array on every check, so it is written back each
-  time and discards whatever the user added.
+  parent in sync, `[formControl]` hands it to the form. Bind a stable reference, though: an
+  expression that builds a new array on every check — a getter, `[files]="docs.filter(isReady)"` —
+  is written back each time and discards whatever the user added.
 - **`tedi-file-dropzone` validates itself.** It registers on `NG_VALIDATORS`, so a `formControl` bound
   to it fails with a `rejectedFiles` error (carrying the offending files) while any rejected file is
   still listed — you don't add a validator for that. `Validators.required` alone would pass on a list
@@ -225,8 +225,9 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   types and size in the one hint. `keepRejectedFiles` decides what happens to a file that
   fails `accept`, `maxSize` or `validator`: off (the default) discards it and summarises every rejection in one message under the
   dropzone, which paints the border red. On keeps it in the list with its reason in that file's
-  `error`, leaving the border neutral — so the form value holds it with `isValid: false` and you must
-  filter on `isValid` before uploading. `error` is writable, so a failure the upload
+  `error` and writes no summary of its own — so the form value holds it with `isValid: false` and
+  you must filter on `isValid` before uploading. The dropzone's own border stays neutral, but a
+  bound control fails on that file, so the border turns red once the control is touched or dirty. `error` is writable, so a failure the upload
   came back with lands on the file it belongs to.
 - **`tedi-file-dropzone` shows at most one hint and one validation message, error first.** Pass your
   own text through `hint`, `error` and `success`, not projected `tedi-feedback-text`. `error` joins
@@ -275,7 +276,7 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   announces only "Add attachment".
 - **`tedi-file-upload` has no separate "default" input, and owns its hint.** `[files]` seeds the
   list, `[(files)]` keeps the parent in sync, `[formControl]` hands it to the form — bind a stable
-  reference, an inline literal is written back on every check. Change a file's `isLoading` or
+  reference, as an expression that builds a new array on every check is written back each time. Change a file's `isLoading` or
   `isValid` by setting a new array, as the field does not see an edit in place. The field owns one hint: the allowed
   types and size (from `accept` / `maxSize`, off with `showRestrictions`) followed by your `hint`
   text. Put guidance there rather than projecting a `tedi-feedback-text` hint, which would make a
