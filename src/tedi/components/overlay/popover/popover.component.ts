@@ -30,6 +30,8 @@ import { getFocusableElements } from "../../../utils/elements.util";
 import { PopoverContentComponent } from "./popover-content/popover-content.component";
 
 export type PopoverPosition = OverlayPosition;
+export type PopoverOpenWith = "click" | "hover";
+export type PopoverDelay = 0 | 100 | 200 | 300;
 
 let popoverIdCounter = 0;
 
@@ -51,6 +53,18 @@ export class PopoverComponent {
    * @default top
    */
   readonly position = input<PopoverPosition>("top");
+  /**
+   * How the popover is opened. With `hover` it also opens on trigger focus, and
+   * clicking the trigger does not toggle it.
+   * @default click
+   */
+  readonly openWith = input<PopoverOpenWith>("click");
+  /**
+   * Time in ms the pointer has to stay over the trigger before the popover opens on hover.
+   * Only applies with `openWith="hover"`. Focus opens it right away, and closing is not affected.
+   * @default 0
+   */
+  readonly delay = input<PopoverDelay>(0);
   /**
    * Flip to the opposite side when the popover would overflow the screen.
    * @default false
@@ -83,7 +97,7 @@ export class PopoverComponent {
   readonly lockScroll = input(false);
   /**
    * Delay in ms before the popover closes when neither the trigger nor the
-   * content is hovered.
+   * content is hovered. Only applies with `openWith="hover"`.
    * @default 100
    */
   readonly timeoutDelay = input(100);
@@ -138,9 +152,14 @@ export class PopoverComponent {
   });
 
   hideTimeout?: ReturnType<typeof setTimeout>;
+  private showTimeout?: ReturnType<typeof setTimeout>;
+
   /** Whether this popover locked body scroll when it opened — read on close
    * so a mid-open change to the lockScroll input can't leave the lock stuck. */
   private lockedScrollAtOpen = false;
+  /** True while `hidePopover` hands focus back to the trigger. */
+  private restoringFocus = false;
+
   private keydownListener?: () => void;
   private scrollListener?: () => void;
   private focusinListener?: () => void;
@@ -154,6 +173,7 @@ export class PopoverComponent {
   constructor() {
     inject(DestroyRef).onDestroy(() => {
       clearTimeout(this.hideTimeout);
+      clearTimeout(this.showTimeout);
       this.horizontalPush.detach();
       this.cleanupKeyboardNavigation();
       this.cleanupScrollListener();
@@ -162,15 +182,60 @@ export class PopoverComponent {
   }
 
   showPopover() {
-    if (this.isOpen()) return;
-
+    // A pointer or focus coming back cancels a close that is still pending.
     clearTimeout(this.hideTimeout);
+    clearTimeout(this.showTimeout);
+
+    if (this.isOpen()) return;
     this.isOpen.set(true);
 
     this.lockedScrollAtOpen = this.lockScroll();
     if (this.lockedScrollAtOpen) {
       this.renderer.setStyle(this.document.body, "overflow", "hidden");
     }
+  }
+
+  /** Opens the popover for a pointer hover, after the `delay` has passed. */
+  showPopoverOnHover() {
+    const delay = this.delay();
+    if (!delay) {
+      this.showPopover();
+      return;
+    }
+
+    clearTimeout(this.hideTimeout);
+    if (this.isOpen()) return;
+
+    clearTimeout(this.showTimeout);
+
+    this.showTimeout = setTimeout(() => this.showPopover(), delay);
+  }
+
+  /** Opens the popover because the trigger got focus, unless focus is only being handed back by a close. */
+  showPopoverOnFocus() {
+    if (this.restoringFocus) return;
+    this.showPopover();
+  }
+
+  /** Whether the node is inside this popover's own overlay. */
+  isInOwnOverlay(node: Node | null): boolean {
+    const overlayEl = this.connectedOverlay()?.overlayRef?.overlayElement;
+    return !!node && !!overlayEl?.contains(node);
+  }
+
+  /**
+   * Closes the popover after `timeoutDelay`, unless the pointer moves onto the
+   * content or focus is inside it.
+   */
+  scheduleHide() {
+    clearTimeout(this.showTimeout);
+    clearTimeout(this.hideTimeout);
+    if (this.isInOwnOverlay(this.document.activeElement)) return;
+
+    this.hideTimeout = setTimeout(
+      () => this.hidePopover(),
+      this.timeoutDelay(),
+    );
   }
 
   onOverlayAttach() {
@@ -182,11 +247,14 @@ export class PopoverComponent {
     ) as HTMLElement;
     if (container) {
       // Leave focus alone if the content already moved it inside (e.g. time picker column).
-      setTimeout(() => {
-        if (!container.contains(this.document.activeElement)) {
-          container.focus({ preventScroll: true });
-        }
-      });
+      // A hover-opened popover never takes focus away from the page.
+      if (this.openWith() === "click") {
+        setTimeout(() => {
+          if (!container.contains(this.document.activeElement)) {
+            container.focus({ preventScroll: true });
+          }
+        });
+      }
       this.setupKeyboardNavigation(container);
     }
 
@@ -209,12 +277,15 @@ export class PopoverComponent {
   }
 
   hidePopover(focusTrigger?: boolean) {
+    clearTimeout(this.showTimeout);
+
     if (!this.isOpen()) return;
 
     this.cleanupKeyboardNavigation();
     this.cleanupScrollListener();
     this.horizontalPush.detach();
     this.cleanupDismissListeners();
+    this.isContentHovered.set(false);
     this.isOpen.set(false);
 
     if (this.lockedScrollAtOpen) {
@@ -223,7 +294,12 @@ export class PopoverComponent {
     }
 
     if (focusTrigger) {
-      this.popoverTrigger().host.nativeElement.focus({ preventScroll: true });
+      this.restoringFocus = true;
+      try {
+        this.popoverTrigger().host.nativeElement.focus({ preventScroll: true });
+      } finally {
+        this.restoringFocus = false;
+      }
     }
   }
 
