@@ -498,6 +498,11 @@ export class SheetComponent implements OnDestroy {
     if (this.dragState?.pointerId === event.pointerId) this.resetDrag();
   };
 
+  // A native drag, e.g. of selected text, sends `pointercancel`, which would end the sheet drag.
+  protected onNativeDragStart(event: DragEvent): void {
+    if (this.dragState) event.preventDefault();
+  }
+
   protected resetDrag(): void {
     const drag = this.dragState;
     if (!drag) return;

@@ -712,6 +712,33 @@ describe("SheetComponent", () => {
       expect(panel()!.style.transform).toBe("");
       flush();
     }));
+
+    it("blocks a native drag while the sheet is dragged, and only then", fakeAsync(() => {
+      openSheet();
+      const handle = overlayElement.querySelector<HTMLElement>(
+        ".tedi-sheet__handle-zone",
+      )!;
+      const body =
+        overlayElement.querySelector<HTMLElement>(".tedi-sheet-body")!;
+      // `dispatchEvent` returns false when a listener called `preventDefault()`.
+      const nativeDrag = (target: HTMLElement) =>
+        target.dispatchEvent(
+          new Event("dragstart", { bubbles: true, cancelable: true }),
+        );
+
+      expect(nativeDrag(body)).toBe(true);
+
+      handle.dispatchEvent(
+        pointer("pointerdown", { y: 0, pointerType: "mouse" }),
+      );
+      expect(nativeDrag(handle)).toBe(false);
+
+      handle.dispatchEvent(
+        pointer("pointerup", { y: 0, pointerType: "mouse", buttons: 0 }),
+      );
+      expect(nativeDrag(body)).toBe(true);
+      flush();
+    }));
   });
 
   describe("snap points", () => {
