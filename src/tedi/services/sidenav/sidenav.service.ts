@@ -32,6 +32,9 @@ export class SideNavService {
   private readonly toggle = signal<HTMLElement | null>(null);
   private readonly offsetTop = signal(0);
 
+  /** The registered toggle element, or `null` when none is registered. */
+  readonly toggleElement = this.toggle.asReadonly();
+
   /**
    * Distance in pixels from the top of the viewport where the mobile navigation and
    * its overlay start, so both open below the header that holds the toggle.

@@ -11,6 +11,7 @@ import {
   Injector,
   input,
   PLATFORM_ID,
+  untracked,
   ViewEncapsulation,
 } from "@angular/core";
 import { DOCUMENT, isPlatformBrowser } from "@angular/common";
@@ -23,23 +24,42 @@ import { Breakpoint } from "../../../services/breakpoint/breakpoint.service";
 export type SideNavItemSize = "small" | "medium" | "large";
 
 /**
- * Hides everything outside `element` from assistive technology by setting `aria-hidden` on the
- * siblings of `element` and of each of its ancestors. Elements that already have an `aria-hidden`
- * attribute are left alone. Returns a function that removes the attributes it set.
+ * Elements that must stay available while the drawer is open: the backdrop (it closes the drawer),
+ * the CDK overlay container (popovers, toasts) and the CDK live announcer.
  */
-const hideOutside = (element: HTMLElement): (() => void) => {
-  const hidden: Element[] = [];
+const KEEP_ACTIVE_SELECTOR =
+  "tedi-sidenav-overlay, .cdk-overlay-container, .cdk-live-announcer-element";
 
-  for (let node = element; node.parentElement; node = node.parentElement) {
-    for (const sibling of Array.from(node.parentElement.children)) {
-      if (sibling !== node && !sibling.hasAttribute("aria-hidden")) {
-        sibling.setAttribute("aria-hidden", "true");
-        hidden.push(sibling);
+/**
+ * Makes everything outside the `keep` elements inert, which also hides it from assistive
+ * technology. Elements that contain a `keep` element are walked into instead, since a descendant
+ * of an inert element cannot be made active again. Elements that are already inert and the ones
+ * matching `KEEP_ACTIVE_SELECTOR` are left alone. Returns a function that removes the attributes
+ * it set.
+ */
+const hideOutside = (keep: HTMLElement[]): (() => void) => {
+  const hidden: Element[] = [];
+  const isKept = (el: Element) =>
+    keep.includes(el as HTMLElement) || el.matches(KEEP_ACTIVE_SELECTOR);
+
+  const walk = (parent: ParentNode) => {
+    for (const child of Array.from(parent.children)) {
+      if (isKept(child)) {
+        continue;
+      }
+
+      if (keep.some((el) => child.contains(el))) {
+        walk(child);
+      } else if (!child.hasAttribute("inert")) {
+        child.setAttribute("inert", "");
+        hidden.push(child);
       }
     }
-  }
+  };
 
-  return () => hidden.forEach((el) => el.removeAttribute("aria-hidden"));
+  walk(keep[0].getRootNode() as ParentNode);
+
+  return () => hidden.forEach((el) => el.removeAttribute("inert"));
 };
 
 @Component({
@@ -107,7 +127,7 @@ export class SideNavComponent {
     });
 
     // While the mobile drawer is open, keep focus inside it, move focus in on open
-    // and hide the page behind it from assistive technology.
+    // and make the page behind it inert.
     effect((onCleanup) => {
       if (!this.sidenavService.isMobileDrawerOpen()) {
         return;
@@ -115,7 +135,9 @@ export class SideNavComponent {
 
       const element = this.host.nativeElement;
       const focusTrap = this.focusTrapFactory.create(element);
-      const showOutside = hideOutside(element);
+      // The toggle stays active so it can close the drawer and take focus back on close.
+      const toggle = untracked(this.sidenavService.toggleElement);
+      const showOutside = hideOutside(toggle ? [element, toggle] : [element]);
 
       void focusTrap.focusInitialElementWhenReady();
       onCleanup(() => {

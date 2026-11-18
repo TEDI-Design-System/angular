@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { SideNavComponent, SideNavItemSize } from "./sidenav.component";
 import { SideNavService } from "../../../services/sidenav/sidenav.service";
-import { computed, signal, Signal } from "@angular/core";
+import { computed, signal, Signal, WritableSignal } from "@angular/core";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 
 const mockCallbackHolder: { callback: (() => void) | null } = {
@@ -32,6 +32,7 @@ describe("SideNavComponent", () => {
     isMobileDrawerOpen: Signal<boolean>;
     drawerTop: ReturnType<typeof signal>;
     tooltipEnabled: ReturnType<typeof signal>;
+    toggleElement: WritableSignal<HTMLElement | null>;
     registerItem: jest.Mock;
     unregisterItem: jest.Mock;
     handleGoToMainMenu: jest.Mock;
@@ -53,6 +54,7 @@ describe("SideNavComponent", () => {
       isMobileDrawerOpen: computed(() => isMobile() && isMobileOpen()),
       drawerTop: signal<number | null>(null),
       tooltipEnabled: signal(false),
+      toggleElement: signal<HTMLElement | null>(null),
       registerItem: jest.fn(),
       unregisterItem: jest.fn(),
       handleGoToMainMenu: jest.fn(),
@@ -247,33 +249,75 @@ describe("SideNavComponent", () => {
         fixture.detectChanges();
       };
 
-      it("should hide the content outside the drawer from assistive technology while open", () => {
+      it("should make the content outside the drawer inert while open", () => {
         const page = document.createElement("main");
         document.body.appendChild(page);
 
         openDrawer();
 
-        expect(page.getAttribute("aria-hidden")).toBe("true");
-        expect(sidenavElement.getAttribute("aria-hidden")).toBeNull();
+        expect(page.hasAttribute("inert")).toBe(true);
+        expect(sidenavElement.hasAttribute("inert")).toBe(false);
 
         sidenavService.isMobileOpen.set(false);
         fixture.detectChanges();
 
-        expect(page.getAttribute("aria-hidden")).toBeNull();
+        expect(page.hasAttribute("inert")).toBe(false);
         page.remove();
       });
 
-      it("should leave content that already has aria-hidden untouched", () => {
+      it("should leave content that is already inert untouched", () => {
         const page = document.createElement("div");
-        page.setAttribute("aria-hidden", "true");
+        page.setAttribute("inert", "");
         document.body.appendChild(page);
 
         openDrawer();
         sidenavService.isMobileOpen.set(false);
         fixture.detectChanges();
 
-        expect(page.getAttribute("aria-hidden")).toBe("true");
+        expect(page.hasAttribute("inert")).toBe(true);
         page.remove();
+      });
+
+      it("should keep the toggle active while making the rest of its container inert", () => {
+        const header = document.createElement("header");
+        const toggle = document.createElement("button");
+        const logo = document.createElement("img");
+
+        header.append(toggle, logo);
+        document.body.appendChild(header);
+        sidenavService.toggleElement.set(toggle);
+
+        openDrawer();
+
+        expect(header.hasAttribute("inert")).toBe(false);
+        expect(toggle.hasAttribute("inert")).toBe(false);
+        expect(logo.hasAttribute("inert")).toBe(true);
+
+        sidenavService.isMobileOpen.set(false);
+        fixture.detectChanges();
+
+        expect(logo.hasAttribute("inert")).toBe(false);
+        header.remove();
+      });
+
+      it("should keep the backdrop, CDK overlay container and live announcer active", () => {
+        const kept = [
+          "tedi-sidenav-overlay",
+          "div.cdk-overlay-container",
+          "div.cdk-live-announcer-element",
+        ].map((selector) => {
+          const [tag, ...classes] = selector.split(".");
+          const el = document.createElement(tag);
+
+          el.className = classes.join(" ");
+          document.body.appendChild(el);
+          return el;
+        });
+
+        openDrawer();
+
+        kept.forEach((el) => expect(el.hasAttribute("inert")).toBe(false));
+        kept.forEach((el) => el.remove());
       });
 
       it("should add focus trap anchors around the drawer while open", () => {
