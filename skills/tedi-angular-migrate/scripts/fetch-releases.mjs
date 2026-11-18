@@ -74,7 +74,8 @@ const scanFile = (_path, entry, text) => {
       );
   for (const [, ns] of text.matchAll(NAMESPACE_IMPORT))
     for (const m of text.matchAll(
-      new RegExp(`\\b${escape(ns)}\\.([A-Za-z_$][\\w$]*)`, "g"),
+      // Not `\b`: an alias may start with `$` (`[$tedi.PaginationComponent]`).
+      new RegExp(`(?<![\\w$])${escape(ns)}\\.([A-Za-z_$][\\w$]*)`, "g"),
     ))
       terms.add(m[1]);
   // Element and attribute selectors (<tedi-alert>, <label tedi-label>) and BEM blocks.
@@ -176,7 +177,9 @@ async function collect(repo, prefix, lo, hi) {
     `releases/tag/(${escape(prefix)}[0-9][^)\\s"'#>]*)`,
     "g",
   );
-  for (const { release } of [...selected.values()]) {
+  // A live Map iterator also visits releases added during the loop, so links are followed past the
+  // first hop (7.1.0 → 7.1.0-rc.20 → 6.5.0-rc.18) until nothing new is linked.
+  for (const { release } of selected.values()) {
     for (const m of (release.body ?? "").matchAll(linkRe)) {
       const tag = m[1];
       if (selected.has(tag) || !byTag.has(tag)) continue;

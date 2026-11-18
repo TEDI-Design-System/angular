@@ -18,8 +18,10 @@ it) and read with `translate('key')`, `track('key')` or the `tediTranslate` pipe
   and, for keys that are valid identifiers, unquoted: `rg -n "['\"]toast\.close['\"]" src`,
   `rg -n "\bcarousel\s*:" src`.
 - **Removed key:** when the notes give a replacement key, move the override (and any read of the key) to
-  it, keeping the project's wording. Delete the override only when no replacement applies. If the mapping
-  is unclear, make it `manual`.
+  it, keeping the project's wording. If the project already overrides the replacement key too, don't
+  create a duplicate: when the two values differ, ask which wording to keep (`assisted`), then drop the
+  old entry. Delete the override only when no replacement applies. If the mapping is unclear, make it
+  `manual`.
 - **Reshaped key** (function ↔ string, arguments added or removed): rewrite the override to the new
   signature; keep the project's wording. Extra trailing arguments the library no longer passes are dropped.
   The typecheck does not catch every reshape: an override that still declares a removed optional
