@@ -19,8 +19,17 @@
     flex-shrink: 0;
   }
 
-  &__heading {
+  &__header-main {
+    display: flex;
     flex: 1;
+    flex-wrap: wrap;
+    gap: var(--layout-grid-gutters-08) var(--layout-grid-gutters-12);
+    align-items: center;
+    min-width: 0;
+  }
+
+  &__heading {
+    flex: 1 1 auto;
     min-width: 0;
     margin: 0;
     font: inherit;
@@ -60,7 +69,7 @@
 
   &__title-group {
     display: flex;
-    flex: 1;
+    flex: 1 1 auto;
     flex-direction: column;
     min-width: 0;
   }
@@ -84,6 +93,10 @@
     display: inline-flex;
     flex-shrink: 0;
     align-items: center;
+
+    &:empty {
+      display: none;
+    }
   }
 
   &__chevron {
