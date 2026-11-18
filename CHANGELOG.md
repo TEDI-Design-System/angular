@@ -1,3 +1,10 @@
+# [10.0.0-rc.24](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.23...angular-10.0.0-rc.24) (2026-11-18)
+
+
+### Features
+
+* **popover,tooltip:** add hover delay and popover hover mode [#879](https://github.com/TEDI-Design-System/angular/issues/879) ([#918](https://github.com/TEDI-Design-System/angular/issues/918)) ([c1baeb9](https://github.com/TEDI-Design-System/angular/commit/c1baeb938bf28ea49e803cd511b844f51e7eb4f7))
+
 # [10.0.0-rc.23](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.22...angular-10.0.0-rc.23) (2026-11-18)
 
 
