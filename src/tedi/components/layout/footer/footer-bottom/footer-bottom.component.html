@@ -1,3 +1,8 @@
-<div #inner class="tedi-footer-bottom__inner" [style.max-width]="maxWidth?.()">
+<div
+  #inner
+  class="tedi-footer-bottom__inner"
+  [class.tedi-footer-bottom__inner--with-separators]="separator()"
+  [style.max-width]="maxWidth?.()"
+>
   <ng-content />
 </div>

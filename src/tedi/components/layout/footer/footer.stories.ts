@@ -352,22 +352,22 @@ export default {
 type Story = StoryObj;
 
 const sectionsTemplate = (
-  contactIcon: "call" | "location_on",
+  contactIcon?: "call" | "location_on",
   bindings = "",
 ) => `
-  <tedi-footer-section heading="Uuri lähemalt" icon="info" ${bindings}>
+  <tedi-footer-section heading="Uuri lähemalt" ${contactIcon ? 'icon="info"' : ""} ${bindings}>
     <a tedi-link variant="inverted" href="#">Privaatsuspoliitika</a>
     <a tedi-link variant="inverted" href="#">Küpsised</a>
     <a tedi-link variant="inverted" href="#">Korduma kippuvad küsimused</a>
     <a tedi-link variant="inverted" href="#">Karjäärivõimalused</a>
   </tedi-footer-section>
-  <tedi-footer-section heading="Sotsiaalmeedia ja uuendused" icon="share" ${bindings}>
+  <tedi-footer-section heading="Sotsiaalmeedia ja uuendused" ${contactIcon ? 'icon="share"' : ""} ${bindings}>
     <a tedi-link variant="inverted" href="#">Uudiskirja tellimine</a>
     <a tedi-link variant="inverted" href="#">Jälgi meid Twitteris</a>
     <a tedi-link variant="inverted" href="#">Jälgi meid Facebookis</a>
     <a tedi-link variant="inverted" href="#">Liitu meie kogukonnaga</a>
   </tedi-footer-section>
-  <tedi-footer-section heading="Kontakt" icon="${contactIcon}" ${bindings}>
+  <tedi-footer-section heading="Kontakt" ${contactIcon ? `icon="${contactIcon}"` : ""} ${bindings}>
     <a tedi-link variant="inverted" href="#">+372 555 5555</a>
     <a tedi-link variant="inverted" href="#">tedi@tehik.ee</a>
     <a tedi-link variant="inverted" href="#">Pärnu mnt. 132, 11317 Tallinn</a>
@@ -615,6 +615,26 @@ export const WithBottomSection: Story = {
   }),
 };
 
+export const ShowIcons: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => ({
+    template: `
+      <section [tediVerticalSpacing]="1" aria-label="Footer icon examples">
+        <h4 tedi-text>With icons</h4>
+        <tedi-footer>
+          <tedi-footer-body>${sectionsTemplate("call")}</tedi-footer-body>
+          ${logoSide('placement="end"')}
+        </tedi-footer>
+        <h4 tedi-text>Without icons</h4>
+        <tedi-footer>
+          <tedi-footer-body>${sectionsTemplate()}</tedi-footer-body>
+          ${logoSide('placement="end"')}
+        </tedi-footer>
+      </section>
+    `,
+  }),
+};
+
 const facebookIcon = `
   <svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true">
     <path d="M24 12c0-6.627-5.373-12-12-12S0 5.373 0 12c0 5.99 4.388 10.954 10.125 11.854V15.47H7.078V12h3.047V9.356c0-3.007 1.792-4.668 4.533-4.668 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874V12h3.328l-.532 3.469h-2.796v8.385C19.612 22.954 24 17.99 24 12z" />
@@ -682,8 +702,8 @@ export const CustomContent: Story = {
             <tedi-footer-section heading="Osale meie terviseuuringus" class="align-self-center">
               <p tedi-text color="white">Liitu meie uuringuga ja avasta uut enda tervise kohta!</p>
             </tedi-footer-section>
-            <div class="flex align-items-start">
-              <img class="story-footer-avatar" src="https://picsum.photos/seed/tedi-footer/152" alt="" width="76" height="76" />
+            <div class="flex flex-wrap align-items-start story-footer-contact">
+              <img class="story-footer-avatar" src="custom_accordion_1.png" alt="" width="76" height="76" />
               <tedi-footer-section heading="Kontakt">
                 ${contactLinks}
               </tedi-footer-section>
@@ -693,6 +713,7 @@ export const CustomContent: Story = {
       </section>
     `,
     styles: [
+      ".story-footer-contact { row-gap: var(--layout-grid-gutters-16); }",
       ".story-footer-avatar { flex-shrink: 0; border-radius: 50%; object-fit: cover; }",
       ".story-footer-hug { flex: none; }",
     ],

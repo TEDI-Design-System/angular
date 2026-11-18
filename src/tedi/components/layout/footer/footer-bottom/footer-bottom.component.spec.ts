@@ -86,6 +86,44 @@ describe("FooterBottomComponent", () => {
     expect(dots()).toHaveLength(0);
   });
 
+  it("shows dots only between items on the same row, even with different heights", () => {
+    const [first, second, third] = Array.from(inner.querySelectorAll("a"));
+    const bounds = (
+      left: number,
+      top: number,
+      width: number,
+      height: number,
+    ) => ({
+      ...inner.getBoundingClientRect(),
+      left,
+      top,
+      width,
+      height,
+      right: left + width,
+      bottom: top + height,
+    });
+    jest
+      .spyOn(first, "getBoundingClientRect")
+      .mockReturnValue(bounds(10, 0, 80, 24));
+    jest
+      .spyOn(second, "getBoundingClientRect")
+      .mockReturnValue(bounds(126, 4, 90, 16));
+    jest
+      .spyOn(third, "getBoundingClientRect")
+      .mockReturnValue(bounds(50, 40, 90, 24));
+
+    host.separator.set(true);
+    fixture.detectChanges();
+
+    const [betweenLinks, atRowEnd] = Array.from(dots());
+    expect(betweenLinks.classList).toContain(
+      "tedi-footer-bottom__dot--visible",
+    );
+    expect(atRowEnd.classList).not.toContain(
+      "tedi-footer-bottom__dot--visible",
+    );
+  });
+
   it("keeps the dots in sync when items change", async () => {
     host.separator.set(true);
     fixture.detectChanges();
