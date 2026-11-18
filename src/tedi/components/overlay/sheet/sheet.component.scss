@@ -120,6 +120,10 @@ $sheet-fade-duration: 200ms;
   border-radius: var(--tedi-dimensions-13);
 }
 
+.tedi-sheet__panel:has(.tedi-sheet-header--brand) .tedi-sheet__handle {
+  background: var(--tedi-alpha-white-50);
+}
+
 .tedi-sheet-header {
   display: flex;
   gap: var(--layout-grid-gutters-08);
