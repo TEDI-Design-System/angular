@@ -1,3 +1,10 @@
+# [10.0.0-rc.22](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.21...angular-10.0.0-rc.22) (2026-11-18)
+
+
+### Bug Fixes
+
+* **select:** expose option groups to assistive technology [#854](https://github.com/TEDI-Design-System/angular/issues/854) ([#856](https://github.com/TEDI-Design-System/angular/issues/856)) ([c088fcb](https://github.com/TEDI-Design-System/angular/commit/c088fcbac7ed0552427ce7c7397438022118aad6))
+
 # [10.0.0-rc.21](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.20...angular-10.0.0-rc.21) (2026-11-17)
 
 
