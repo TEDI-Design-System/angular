@@ -150,3 +150,36 @@ export const NoFadeWithoutScrollbar: Story = {
     `,
   }),
 };
+
+export const DynamicContent: Story = {
+  render: (args) => ({
+    props: {
+      ...args,
+      items: [1, 2, 3, 4, 5, 6],
+      add() {
+        this["items"].push(this["items"].length + 1);
+      },
+      remove() {
+        this["items"].pop();
+      },
+    },
+    template: `
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button type="button" (click)="add()">Add item</button>
+        <button type="button" (click)="remove()">Remove item</button>
+      </div>
+      <div style="max-width: 200px; max-height: 150px;">
+        <tedi-scroll-fade [scrollBar]="scrollBar" [fadeSize]="fadeSize" [fadePosition]="fadePosition">
+          @for (item of items; track item) {
+            <p style="margin: 0; padding: 8px 0;">Item {{ item }}</p>
+          }
+        </tedi-scroll-fade>
+      </div>
+    `,
+  }),
+  args: {
+    scrollBar: "custom",
+    fadeSize: 20,
+    fadePosition: "both",
+  },
+};
