@@ -1,3 +1,11 @@
+# [10.0.0-rc.23](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.22...angular-10.0.0-rc.23) (2026-11-18)
+
+
+### Bug Fixes
+
+* **feedback-text:** use polite live region for valid and error texts [#901](https://github.com/TEDI-Design-System/angular/issues/901) ([#923](https://github.com/TEDI-Design-System/angular/issues/923)) ([3d3027b](https://github.com/TEDI-Design-System/angular/commit/3d3027b2c6a4c6efc73391fd611644024e514058))
+* **select:** accept external aria-describedby ids via setDescribedBy [#885](https://github.com/TEDI-Design-System/angular/issues/885) ([#921](https://github.com/TEDI-Design-System/angular/issues/921)) ([cd13fc6](https://github.com/TEDI-Design-System/angular/commit/cd13fc6ec404a5c9d58e26f5a0b765f04e9065e4))
+
 # [10.0.0-rc.22](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.21...angular-10.0.0-rc.22) (2026-11-18)
 
 
