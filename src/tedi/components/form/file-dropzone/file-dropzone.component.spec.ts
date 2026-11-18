@@ -1264,6 +1264,27 @@ describe("FileDropzoneComponent", () => {
       TestBed.inject(OverlayContainer).ngOnDestroy();
     });
 
+    it("keeps the rendered row when a file is replaced by an equal-id copy", () => {
+      fixture.componentRef.setInput("files", [{ id: "1", name: "report.pdf" }]);
+      fixture.detectChanges();
+
+      const removeButton = () =>
+        fixture.debugElement.query(By.css(".tedi-attachment__actions button"))
+          .nativeElement as HTMLButtonElement;
+
+      // Marks the node, so a rebuilt row is the one that loses it.
+      removeButton().dataset["kept"] = "yes";
+
+      // What a consumer writes to mark an upload finished.
+      fixture.componentRef.setInput(
+        "files",
+        component.files().map((file) => ({ ...file, isLoading: false })),
+      );
+      fixture.detectChanges();
+
+      expect(removeButton().dataset["kept"]).toBe("yes");
+    });
+
     it("does not emit while disabled", () => {
       const removed: FileDropzoneFile[] = [];
       component.fileRemove.subscribe((file) => removed.push(file));

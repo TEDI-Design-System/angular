@@ -68,7 +68,7 @@
     role="list"
     [attr.aria-label]="selectedFilesLabel()"
   >
-    @for (row of fileRows(); track row.file) {
+    @for (row of fileRows(); track row.file.id ?? row.file) {
       <li class="tedi-file-dropzone__file">
         @if (fileTemplate(); as template) {
           <ng-container

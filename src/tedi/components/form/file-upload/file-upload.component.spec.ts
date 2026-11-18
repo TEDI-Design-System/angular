@@ -778,6 +778,30 @@ describe("FileUploadComponent", () => {
       expect(tagRemoveButtons(fixture).length).toBe(1);
     });
 
+    it("keeps the rendered tag when a file is replaced by an equal-id copy", () => {
+      fixture.componentRef.setInput("files", [
+        { id: "1", name: "a.pdf", isLoading: true },
+        { id: "2", name: "b.pdf" },
+      ]);
+      fixture.detectChanges();
+
+      const tag = () =>
+        fixture.debugElement.query(By.css("tedi-tag"))
+          .nativeElement as HTMLElement;
+
+      // Marks the node, so a rebuilt tag is the one that loses it.
+      tag().dataset["kept"] = "yes";
+
+      // What a consumer writes when the upload finishes.
+      fixture.componentRef.setInput(
+        "files",
+        component.files().map((file) => ({ ...file, isLoading: false })),
+      );
+      fixture.detectChanges();
+
+      expect(tag().dataset["kept"]).toBe("yes");
+    });
+
     it("removes a file through its tag, emits it, announces and refocuses the add button", async () => {
       fixture.componentRef.setInput("files", [
         { id: "1", name: "a.pdf" },

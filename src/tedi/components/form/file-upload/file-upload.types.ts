@@ -4,8 +4,8 @@
  */
 export interface FileUploadFile extends Partial<File> {
   /**
-   * Stable identifier for the consumer's own bookkeeping. Generated for files
-   * the user selects.
+   * Stable identifier, used to track the file across re-renders. Generated for
+   * files the user selects.
    */
   id?: string;
   /**
