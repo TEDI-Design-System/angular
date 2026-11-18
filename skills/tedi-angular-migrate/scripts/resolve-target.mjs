@@ -10,6 +10,7 @@ import {
   npmMetadata,
   compareVersions,
   isPrerelease,
+  isExactVersion,
   coreVersionOf,
   printJson,
 } from "./lib.mjs";
@@ -17,17 +18,21 @@ import {
 const args = parseArgs();
 const from = args.from;
 if (!from) fail("--from <version> is required (from detect-version.mjs)");
+if (!isExactVersion(from))
+  fail(
+    `--from must be an exact version such as 9.4.0, got "${from}"; take it from the lockfile (detect-version history) or ask the developer`,
+  );
 const channel = args.channel ?? "auto";
 
 const meta = await npmMetadata(config.pkg);
 const tags = meta["dist-tags"] ?? {};
 let target = args.version;
+let rcUnavailable = false;
 if (!target) {
   const wantRc = channel === "rc" || (channel === "auto" && isPrerelease(from));
-  target =
-    wantRc && tags.rc && compareVersions(tags.rc, tags.latest) > 0
-      ? tags.rc
-      : tags.latest;
+  const rcNewer = Boolean(tags.rc && compareVersions(tags.rc, tags.latest) > 0);
+  target = wantRc && rcNewer ? tags.rc : tags.latest;
+  rcUnavailable = channel === "rc" && !rcNewer;
 }
 if (!meta.versions[target]) fail(`${config.pkg}@${target} is not published`);
 if (!meta.versions[from])
@@ -64,6 +69,9 @@ printJson({
   to: target,
   distTags: tags,
   channel: isPrerelease(target) ? "rc" : "stable",
+  ...(rcUnavailable && {
+    warning: `--channel rc was requested but no rc is newer than latest (${tags.latest}); the target is the stable release`,
+  }),
   upToDate: compareVersions(from, target) >= 0,
   versionsInRange: inRange.length,
   majorsCrossed: [

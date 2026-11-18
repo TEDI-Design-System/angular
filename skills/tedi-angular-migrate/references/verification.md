@@ -1,6 +1,7 @@
 # Verification
 
-Run after each major version step and at the end. Record each command and result in the plan.
+Run once all plan items up to the installed target are applied, and at the end. Record each command and
+result in the plan.
 
 ## Project checks
 
@@ -10,8 +11,12 @@ Find the commands in `package.json` scripts; ask once if it isn't clear which on
 2. Build.
 3. Lint.
 4. Unit tests. End-to-end tests only if the developer asks; they are slow and may need a running backend.
-5. **Render smoke test.** Add a throwaway test that renders the root component (`AppComponent` with its `app.config.ts` providers) once and fails on any
-   thrown error or `console.error`. Run it, record the result, then delete it (unless the developer wants
+5. **Render smoke test.** Add a throwaway test that renders the root component once with the app's root
+   providers and fails on any thrown error or `console.error`. Standalone app: `AppComponent` with the
+   `providers` of `app.config.ts` (or of `bootstrapApplication` in `main.ts`). `NgModule` app: import the
+   root module into the testing module (`TestBed.configureTestingModule({ imports: [AppModule] })`) and
+   create its bootstrap component. If no root can be identified, record the check as `not run` with the
+   reason and list it under **Needs you**. Run it, record the result, then delete it (unless the developer wants
    to keep it). Typecheck, build and the project's tests all pass when a component throws only at
    render time, for example because a provider it needs is missing.
 
@@ -20,7 +25,8 @@ missed. Fix the first two. Add the third to the plan as a new item (`manual` whe
 right fix is) with the error text.
 
 Never make a check pass by weakening it: no new `any`, `as unknown as`, `// @ts-ignore`, skipped tests or
-lint disables. After the run, `git diff` must not add any of those.
+lint disables. After the run, the migration's diff must not add any of those: check the lines `git diff`
+adds that are not already in `.tedi-migrate/start.diff` (the developer's uncommitted changes from step 0).
 
 ## Doctor checks
 
