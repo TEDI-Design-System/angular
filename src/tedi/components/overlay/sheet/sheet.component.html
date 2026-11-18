@@ -31,6 +31,7 @@
         [attr.data-status]="status()"
         [style]="panelStyle()"
         (pointerdown)="onDragStart($event)"
+        (dragstart)="onNativeDragStart($event)"
         (contextmenu)="resetDrag()"
       >
         @let showDismiss = config.trapFocus() && config.visuallyHiddenDismiss();
