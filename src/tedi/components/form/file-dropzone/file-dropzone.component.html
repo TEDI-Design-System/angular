@@ -76,6 +76,7 @@
             [ngTemplateOutletContext]="row.context"
           />
         } @else {
+          @let removeLabel = row.removeLabel;
           <tedi-attachment
             [name]="row.name"
             [fileSize]="row.size"
@@ -83,20 +84,29 @@
             [invalid]="row.file.isValid === false"
           >
             <tedi-attachment-actions>
-              <button
-                tedi-button
-                type="button"
-                variant="neutral"
-                [disabled]="isDisabled()"
-                [attr.aria-label]="row.removeLabel"
-                (click)="removeFile(row.file)"
-              >
-                <tedi-icon
-                  [name]="row.removeIcon"
-                  [size]="18"
-                  color="inherit"
-                />
-              </button>
+              <tedi-tooltip>
+                <!-- The tooltip repeats what the `aria-label` already says, so
+                     `interactive` off drops the `aria-describedby` that would
+                     have it announced twice. Hover and focus still open it.
+                     TODO(#928): swap for Tooltip's own `ariaHidden`. -->
+                <tedi-tooltip-trigger [interactive]="false">
+                  <button
+                    tedi-button
+                    type="button"
+                    variant="neutral"
+                    [disabled]="isDisabled()"
+                    [attr.aria-label]="removeLabel"
+                    (click)="removeFile(row.file)"
+                  >
+                    <tedi-icon
+                      [name]="row.removeIcon"
+                      [size]="18"
+                      color="inherit"
+                    />
+                  </button>
+                </tedi-tooltip-trigger>
+                <tedi-tooltip-content>{{ removeLabel }}</tedi-tooltip-content>
+              </tedi-tooltip>
             </tedi-attachment-actions>
           </tedi-attachment>
         }

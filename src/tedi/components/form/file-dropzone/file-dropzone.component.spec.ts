@@ -1,3 +1,4 @@
+import { OverlayContainer } from "@angular/cdk/overlay";
 import { Component, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { FormControl, FormsModule, ReactiveFormsModule } from "@angular/forms";
@@ -1229,6 +1230,38 @@ describe("FileDropzoneComponent", () => {
       fixture.detectChanges();
 
       expect(removed).toEqual(["report.pdf"]);
+    });
+
+    it("gives the remove button a tooltip without naming it twice", () => {
+      const trigger = fixture.debugElement.query(
+        By.css(".tedi-attachment__actions tedi-tooltip-trigger"),
+      );
+      const remove = trigger.query(By.css("button"))
+        .nativeElement as HTMLButtonElement;
+
+      expect(remove.getAttribute("aria-label")).toBe("remove report.pdf");
+      // The tooltip repeats the label on screen only: an `aria-describedby`
+      // carrying the same words has the name announced twice.
+      expect(remove.getAttribute("aria-describedby")).toBeNull();
+    });
+
+    // The trigger is non-interactive, which is what keeps the tooltip from
+    // describing a button its `aria-label` already names. Opening on focus is
+    // wired separately, and this pins that: a keyboard user has to be able to
+    // reach the text the mouse gets on hover.
+    it("opens the tooltip on focus, not on hover alone", () => {
+      const remove = fixture.debugElement.query(
+        By.css(".tedi-attachment__actions button"),
+      ).nativeElement as HTMLButtonElement;
+
+      remove.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+      fixture.detectChanges();
+
+      const content = document.querySelector(".tedi-tooltip-content");
+
+      expect(content?.textContent?.trim()).toBe("remove report.pdf");
+
+      TestBed.inject(OverlayContainer).ngOnDestroy();
     });
 
     it("does not emit while disabled", () => {

@@ -27,6 +27,9 @@ import { ProgressBarComponent } from "../../loader/progress-bar/progress-bar.com
 import { TextComponent } from "../../base/text/text.component";
 import { LabelComponent } from "../../content/label/label.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
+import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
+import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
+import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
 
 const STATES = [
   { id: "Default", label: "Default" },
@@ -122,6 +125,9 @@ export default {
         TextComponent,
         LabelComponent,
         FormFieldComponent,
+        TooltipComponent,
+        TooltipTriggerComponent,
+        TooltipContentComponent,
         StoryDropOverDirective,
         StoryRejectedDropDirective,
       ],
@@ -491,13 +497,23 @@ export const WithCustomFileTemplate: Story = {
               }
               <tedi-attachment-actions>
                 @if (file.isValid !== false && !file.isLoading) {
-                  <button tedi-button variant="neutral" [attr.aria-label]="'Laadi alla ' + file.name">
-                    <tedi-icon name="download" [size]="18" color="inherit" />
-                  </button>
+                  <tedi-tooltip>
+                    <tedi-tooltip-trigger [interactive]="false">
+                      <button tedi-button variant="neutral" [attr.aria-label]="'Laadi alla ' + file.name">
+                        <tedi-icon name="download" [size]="18" color="inherit" />
+                      </button>
+                    </tedi-tooltip-trigger>
+                    <tedi-tooltip-content>Laadi alla {{ file.name }}</tedi-tooltip-content>
+                  </tedi-tooltip>
                 }
-                <button tedi-button variant="neutral" [attr.aria-label]="removeLabel" (click)="remove()">
-                  <tedi-icon [name]="removeIcon" [size]="18" color="inherit" />
-                </button>
+                <tedi-tooltip>
+                  <tedi-tooltip-trigger [interactive]="false">
+                    <button tedi-button variant="neutral" [attr.aria-label]="removeLabel" (click)="remove()">
+                      <tedi-icon [name]="removeIcon" [size]="18" color="inherit" />
+                    </button>
+                  </tedi-tooltip-trigger>
+                  <tedi-tooltip-content>{{ removeLabel }}</tedi-tooltip-content>
+                </tedi-tooltip>
               </tedi-attachment-actions>
             </tedi-attachment>
           </ng-template>

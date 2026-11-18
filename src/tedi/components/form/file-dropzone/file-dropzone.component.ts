@@ -41,6 +41,9 @@ import { ButtonComponent } from "../../buttons/button/button.component";
 import { AttachmentComponent } from "../../helpers/attachment/attachment.component";
 import { AttachmentActionsComponent } from "../../helpers/attachment/attachment-actions.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
+import { TooltipComponent } from "../../overlay/tooltip/tooltip.component";
+import { TooltipTriggerComponent } from "../../overlay/tooltip/tooltip-trigger/tooltip-trigger.component";
+import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/tooltip-content.component";
 import { deriveControlState } from "../form-field/derive-control-state";
 import { controlDescribedBy } from "../form-field/control-described-by";
 import {
@@ -122,6 +125,9 @@ const withFreeNames = (
     AttachmentComponent,
     AttachmentActionsComponent,
     FeedbackTextComponent,
+    TooltipComponent,
+    TooltipTriggerComponent,
+    TooltipContentComponent,
   ],
   templateUrl: "./file-dropzone.component.html",
   styleUrl: "./file-dropzone.component.scss",
