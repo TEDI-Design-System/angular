@@ -7,5 +7,7 @@
   [attr.aria-label]="ariaLabel() || _defaultLabel()"
   (scroll)="onScroll()"
 >
-  <ng-content />
+  <div #content class="tedi-scroll-fade__content">
+    <ng-content />
+  </div>
 </div>

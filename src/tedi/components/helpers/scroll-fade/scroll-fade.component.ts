@@ -54,6 +54,8 @@ export class ScrollFadeComponent implements AfterViewInit, OnDestroy {
 
   private readonly innerRef =
     viewChild.required<ElementRef<HTMLDivElement>>("inner");
+  private readonly contentRef =
+    viewChild.required<ElementRef<HTMLDivElement>>("content");
   private resizeObserver: ResizeObserver | null = null;
 
   readonly _defaultLabel = this.translationService.track("scroll-fade.label");
@@ -101,6 +103,9 @@ export class ScrollFadeComponent implements AfterViewInit, OnDestroy {
         this.updateFade(el.scrollTop, el.scrollHeight, el.clientHeight);
       });
       this.resizeObserver.observe(el);
+      // The scroller keeps its size when content is added inside a capped
+      // max-height, so the content wrapper is observed to catch those changes.
+      this.resizeObserver.observe(this.contentRef().nativeElement);
     }
   }
 
