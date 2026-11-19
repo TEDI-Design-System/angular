@@ -31,6 +31,7 @@ import { CalendarView, DateRange } from "../../content/calendar/types";
 import { TimePickerComponent } from "../time-picker/time-picker.component";
 import { TimeFieldComponent } from "../time-field/time-field.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
+import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import {
@@ -114,6 +115,7 @@ export type DateTimeFieldFormatter = (value: DateTimeFieldValue) => string;
     TimePickerComponent,
     TimeFieldComponent,
     FormFieldComponent,
+    FeedbackTextComponent,
     ButtonComponent,
     IconComponent,
     DateTimeFieldRangeSwitchComponent,
@@ -593,6 +595,14 @@ export class DateTimeFieldComponent
 
   readonly singleMonthRange = computed(
     () => this.mode() === "range" && this.numberOfMonthsResolved() === 1,
+  );
+
+  readonly nativeRangeTimes = computed(
+    () =>
+      this.useNativeTimeInput() &&
+      !this.rangeSwitch() &&
+      !this.fromAvailableTimes()?.length &&
+      !this.toAvailableTimes()?.length,
   );
 
   readonly canClear = computed(

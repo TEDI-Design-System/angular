@@ -166,8 +166,10 @@
     background: var(--general-border-primary);
   }
 
+  // One month leaves room for the times beside the calendar well before `md`
+  // (two 312px columns); below this width the row would overflow the popover.
   &__range--single-month {
-    @include breakpoints.media-breakpoint-up(md) {
+    @media (width >= 656px) {
       flex-direction: row;
 
       .tedi-date-time-field__range-times {
@@ -192,6 +194,12 @@
       flex-direction: column;
       align-items: center;
     }
+  }
+
+  // Two time inputs fit side by side under the calendar even on a phone.
+  &__range-times--native {
+    flex-direction: row;
+    align-items: stretch;
   }
 
   &__range-times .tedi-date-time-field__split-time {
@@ -297,6 +305,11 @@
 
   &__time-step > .tedi-time-picker {
     padding: 0 var(--card-padding-md-default) var(--card-padding-md-default);
+  }
+
+  // The wheel is narrower than the step; slot grids fill it.
+  &__time-step > .tedi-time-picker--scroll {
+    align-self: center;
   }
 
   &__select-time-wrapper {

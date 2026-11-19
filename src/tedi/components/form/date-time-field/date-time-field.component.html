@@ -107,7 +107,12 @@
             class="tedi-date-time-field__range-separator"
             aria-hidden="true"
           ></div>
-          <div class="tedi-date-time-field__range-times">
+          <div
+            class="tedi-date-time-field__range-times"
+            [class.tedi-date-time-field__range-times--native]="
+              nativeRangeTimes()
+            "
+          >
             <ng-container [ngTemplateOutlet]="rangeEndsTpl" />
           </div>
         </div>
@@ -255,6 +260,7 @@
           timeHeading() ??
           ('date-time-field.time-heading-from' | tediTranslate),
         dateLabel: fromDateLabel(),
+        shortDate: fromShortDate(),
       }"
     />
     <ng-container
@@ -266,6 +272,7 @@
         heading:
           timeHeading() ?? ('date-time-field.time-heading-to' | tediTranslate),
         dateLabel: toDateLabel(),
+        shortDate: toShortDate(),
       }"
     />
   }
@@ -278,17 +285,24 @@
   let-slots="slots"
   let-heading="heading"
   let-dateLabel="dateLabel"
+  let-shortDate="shortDate"
 >
   <div class="tedi-date-time-field__split-time">
     <div class="tedi-date-time-field__range-time-header">
       <span class="tedi-date-time-field__split-heading">{{ heading }}</span>
-      @if (dateLabel) {
+      @if (dateLabel && !nativeRangeTimes()) {
         <span class="tedi-date-time-field__range-date">{{ dateLabel }}</span>
       }
     </div>
     <ng-container
       [ngTemplateOutlet]="rangePickerTpl"
-      [ngTemplateOutletContext]="{ kind, time, slots, label: heading }"
+      [ngTemplateOutletContext]="{
+        kind,
+        time,
+        slots,
+        label: heading,
+        hint: nativeRangeTimes() ? shortDate : null,
+      }"
     />
   </div>
 </ng-template>
@@ -299,6 +313,7 @@
   let-time="time"
   let-slots="slots"
   let-label="label"
+  let-hint="hint"
 >
   @if (slots?.length) {
     <tedi-time-picker
@@ -331,6 +346,9 @@
         [value]="time"
         (valueChange)="handleRangeTimeSelect(kind, $event)"
       />
+      @if (hint) {
+        <tedi-feedback-text [text]="hint" />
+      }
     </tedi-form-field>
   } @else {
     <tedi-time-picker

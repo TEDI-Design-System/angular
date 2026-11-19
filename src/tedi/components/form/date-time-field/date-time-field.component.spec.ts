@@ -1120,6 +1120,34 @@ describe("DateTimeFieldComponent", () => {
       component.closeOverlay();
       fixture.detectChanges();
     });
+
+    it("puts native time inputs in two columns with the date as their hint", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        useNativeTimePicker: true,
+        value: {
+          from: new Date(2025, 8, 1, 9, 0),
+          to: new Date(2025, 8, 5, 17, 0),
+        },
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(
+        document.querySelector(".tedi-date-time-field__range-times--native"),
+      ).not.toBeNull();
+      expect(
+        document.querySelector(".tedi-date-time-field__range-date"),
+      ).toBeNull();
+      const input = document.querySelector(
+        ".tedi-date-time-field__native-time input",
+      ) as HTMLInputElement;
+      const hint = document.getElementById(
+        input.getAttribute("aria-describedby") ?? "",
+      );
+      expect(hint?.textContent?.trim()).toBe(component.fromShortDate());
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
   });
 
   describe("range time button group", () => {
