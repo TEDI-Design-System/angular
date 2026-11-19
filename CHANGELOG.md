@@ -1,3 +1,11 @@
+# [10.0.0-rc.26](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.25...angular-10.0.0-rc.26) (2026-11-19)
+
+
+### Bug Fixes
+
+* **scroll-fade:** recompute fade when content changes [#924](https://github.com/TEDI-Design-System/angular/issues/924) ([#929](https://github.com/TEDI-Design-System/angular/issues/929)) ([c4d5259](https://github.com/TEDI-Design-System/angular/commit/c4d5259f132b66d8bb1c2368e112a2be14e7a609))
+* **sidenav:** trap focus and close on Escape in the open mobile menu [#916](https://github.com/TEDI-Design-System/angular/issues/916) ([#917](https://github.com/TEDI-Design-System/angular/issues/917)) ([33c2c2b](https://github.com/TEDI-Design-System/angular/commit/33c2c2bdc7118e729a1e975ccc8f8f7b69690656))
+
 # [10.0.0-rc.25](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.24...angular-10.0.0-rc.25) (2026-11-18)
 
 
