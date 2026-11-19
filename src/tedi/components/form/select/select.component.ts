@@ -56,7 +56,11 @@ import {
   SelectValueContext,
 } from "./select-templates.directive";
 import { InputSize, InputState } from "../form-field/form-field.component";
-import { controlDescribedBy } from "../form-field/control-described-by";
+import { TEDI_FIELD_CONTEXT } from "../form-field/field-context.token";
+import {
+  controlDescribedBy,
+  TEDI_DESCRIBABLE_CONTROL,
+} from "../form-field/control-described-by";
 export type SelectInputSize = Exclude<InputSize, "large">;
 
 export interface SelectOption<T = unknown> {
@@ -122,6 +126,10 @@ export enum SpecialOptionControls {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => SelectComponent),
       multi: true,
+    },
+    {
+      provide: TEDI_DESCRIBABLE_CONTROL,
+      useExisting: forwardRef(() => SelectComponent),
     },
   ],
 })
@@ -489,7 +497,9 @@ export class SelectComponent<T = unknown>
     return values.map((value) => (value == null ? "" : String(value)));
   });
 
-  readonly isInvalid = computed(() => this.state() === "error");
+  readonly isInvalid = computed(
+    () => this.state() === "error" || (this.fieldContext?.invalid() ?? false),
+  );
 
   readonly feedbackId = computed(() =>
     this.feedbackText() ? `${this.inputId()}-feedback` : null,
@@ -574,6 +584,9 @@ export class SelectComponent<T = unknown>
   multiselectContainerRef = viewChild<ElementRef>("multiselectContainer");
   tagRefs = viewChildren("tagElement", { read: ElementRef });
   hostRef = inject(ElementRef);
+  private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
+    optional: true,
+  });
   private ngZone = inject(NgZone);
   private renderer = inject(Renderer2);
   private document = inject(DOCUMENT);
