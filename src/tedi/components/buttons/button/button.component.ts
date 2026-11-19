@@ -37,7 +37,7 @@ export class ButtonComponent {
    *
    * `primary-button-group` and `secondary-button-group` are intended for items inside
    * `tedi-button-group`: they use the small (`button-radius-sm`) corner radius and show
-   * their selected state via `aria-pressed`.
+   * their selected state via `aria-pressed` (`aria-selected` as tabs).
    * @default primary
    */
   variant = input<ButtonVariant>("primary");

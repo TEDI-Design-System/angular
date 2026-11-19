@@ -48,6 +48,7 @@ class BreakpointObserverMock {
       [variant]="variant()"
       [size]="size()"
       [multiple]="multiple()"
+      [behavior]="behavior()"
       [value]="value()"
       (valueChange)="value.set($event)"
       [ariaLabel]="ariaLabel()"
@@ -57,7 +58,12 @@ class BreakpointObserverMock {
       [dropdownLabel]="dropdownLabel()"
       (selectionChange)="onSelect($event)"
     >
-      <button tedi-button-group-button value="1" label="Details">
+      <button
+        tedi-button-group-button
+        value="1"
+        label="Details"
+        controls="panel"
+      >
         Details
       </button>
       <button
@@ -85,6 +91,7 @@ class TestHostComponent {
   variant = signal<ButtonVariant>("primary-button-group");
   size = signal<ButtonSize>("default");
   multiple = signal(false);
+  behavior = signal<"toggle" | "tabs">("toggle");
   value = signal<string | string[] | undefined>("2");
   ariaLabel = signal<string | undefined>("Tabs");
   stretch = signal(false);
@@ -434,5 +441,96 @@ describe("ButtonGroupComponent", () => {
 
   it("should hide button group buttons when printing", () => {
     getItems().forEach((item) => expect(item.classList).toContain("no-print"));
+  });
+
+  describe("tabs behaviour", () => {
+    const key = (target: HTMLElement, k: string) => {
+      const event = new KeyboardEvent("keydown", {
+        key: k,
+        bubbles: true,
+        cancelable: true,
+      });
+      target.dispatchEvent(event);
+      fixture.detectChanges();
+      return event;
+    };
+
+    beforeEach(() => {
+      host.behavior.set("tabs");
+      fixture.detectChanges();
+    });
+
+    it("renders a tablist with the selected tab as the only Tab stop", () => {
+      expect(getRoot().getAttribute("role")).toBe("tablist");
+      const items = Array.from(getItems());
+      expect(items.map((i) => i.getAttribute("role"))).toEqual([
+        "tab",
+        "tab",
+        "tab",
+      ]);
+      expect(items.map((i) => i.getAttribute("aria-selected"))).toEqual([
+        "false",
+        "true",
+        "false",
+      ]);
+      expect(items.map((i) => i.getAttribute("tabindex"))).toEqual([
+        "-1",
+        "0",
+        "-1",
+      ]);
+      expect(items[0].hasAttribute("aria-pressed")).toBe(false);
+      expect(items[0].getAttribute("aria-controls")).toBe("panel");
+    });
+
+    it("keeps the selected tab selected when clicked again", () => {
+      getItems()[1].click();
+      fixture.detectChanges();
+      expect(host.value()).toBe("2");
+      expect(host.lastToggled()).toBeNull();
+    });
+
+    it("moves focus and selection with arrow keys, Home and End", () => {
+      const items = getItems();
+      const right = key(items[1], "ArrowRight");
+      expect(right.defaultPrevented).toBe(true);
+      expect(host.value()).toBe("3");
+      expect(document.activeElement).toBe(items[2]);
+
+      key(items[2], "ArrowRight");
+      expect(host.value()).toBe("1");
+
+      key(items[0], "End");
+      expect(host.value()).toBe("3");
+      key(items[2], "Home");
+      expect(host.value()).toBe("1");
+      expect(host.lastToggled()).toBe("1");
+    });
+
+    it("skips disabled tabs", () => {
+      host.disable3.set(true);
+      fixture.detectChanges();
+      key(getItems()[1], "ArrowRight");
+      expect(host.value()).toBe("1");
+    });
+
+    it("leaves Tab to the browser", () => {
+      expect(key(getItems()[1], "Tab").defaultPrevented).toBe(false);
+    });
+
+    it("makes the first enabled tab the Tab stop when nothing is selected", () => {
+      host.value.set(undefined);
+      fixture.detectChanges();
+      expect(
+        Array.from(getItems()).map((i) => i.getAttribute("tabindex")),
+      ).toEqual(["0", "-1", "-1"]);
+    });
+
+    it("ignores multiple", () => {
+      host.multiple.set(true);
+      fixture.detectChanges();
+      getItems()[0].click();
+      fixture.detectChanges();
+      expect(host.value()).toBe("1");
+    });
   });
 });

@@ -35,7 +35,11 @@ type IconSlot = "left" | "right" | "only";
   host: {
     "[class]": "hostClasses()",
     "[attr.disabled]": "disabled() ? '' : null",
-    "[attr.aria-pressed]": "selected()",
+    "[attr.role]": "isTab() ? 'tab' : null",
+    "[attr.aria-pressed]": "isTab() ? null : selected()",
+    "[attr.aria-selected]": "isTab() ? selected() : null",
+    "[attr.aria-controls]": "controls() || null",
+    "[attr.tabindex]": "tabIndex()",
     "[attr.aria-label]": "icon() ? label() : null",
   },
 })
@@ -64,6 +68,9 @@ export class ButtonGroupButtonDirective implements AfterViewInit {
   /** Overrides the group's `size` for this item. */
   readonly size = input<ButtonSize>();
 
+  /** Id of the element this item shows, such as the `role="tabpanel"` of a `tabs` group. */
+  readonly controls = input<string>();
+
   /** Fires on user activation (click). Disabled items don't emit. */
   readonly clicked = output<MouseEvent>();
 
@@ -78,6 +85,16 @@ export class ButtonGroupButtonDirective implements AfterViewInit {
     () => this.variant() ?? this.parent.variant(),
   );
   readonly effectiveSize = computed(() => this.size() ?? this.parent.size());
+
+  protected readonly isTab = computed(() => this.parent.isTabs());
+  protected readonly tabIndex = computed(() => {
+    if (!this.isTab()) return null;
+    return this.parent.tabStopValue() === this.value() ? 0 : -1;
+  });
+
+  get element(): HTMLButtonElement {
+    return this.host.nativeElement;
+  }
   readonly selected = computed(() => this.parent.isSelected(this.value()));
 
   protected readonly hostClasses = computed(() =>
@@ -145,6 +162,11 @@ export class ButtonGroupButtonDirective implements AfterViewInit {
     }
 
     this.iconRefs.set(slot, ref);
+  }
+
+  @HostListener("keydown", ["$event"])
+  protected onKeydown(event: KeyboardEvent) {
+    if (this.isTab()) this.parent.handleTabKeydown(event);
   }
 
   @HostListener("click", ["$event"])

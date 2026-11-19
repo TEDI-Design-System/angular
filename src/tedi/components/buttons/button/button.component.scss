@@ -70,7 +70,8 @@
 
     border-radius: var(--button-radius-sm);
 
-    &[aria-pressed="true"]:not(:disabled) {
+    &[aria-pressed="true"]:not(:disabled),
+    &[aria-selected="true"]:not(:disabled) {
       z-index: 1;
       color: var(--button-group-primary-selected-text);
       background: var(--button-group-primary-selected-background);
@@ -98,7 +99,8 @@
 
     border-radius: var(--button-radius-sm);
 
-    &[aria-pressed="true"]:not(:disabled) {
+    &[aria-pressed="true"]:not(:disabled),
+    &[aria-selected="true"]:not(:disabled) {
       z-index: 1;
       color: var(--button-group-secondary-selected-text);
       background: var(--button-group-secondary-selected-background);
