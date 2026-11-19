@@ -2,6 +2,10 @@ import { computed, Directive, inject } from "@angular/core";
 import { DropdownComponent } from "../dropdown.component";
 import { CdkOverlayOrigin } from "@angular/cdk/overlay";
 
+/**
+ * @deprecated Use the TEDI-Ready `[tedi-dropdown-trigger]` from `@tedi-design-system/angular/tedi` instead.
+ * This directive will be removed from future versions.
+ */
 @Directive({
   selector: "[tedi-dropdown-trigger]",
   host: {

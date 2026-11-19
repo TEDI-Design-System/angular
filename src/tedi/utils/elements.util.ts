@@ -45,3 +45,10 @@ export function getFocusableElements(container: HTMLElement): HTMLElement[] {
     return true;
   });
 }
+
+/** Focuses the first focusable element in `container`. Returns whether there was one. */
+export function focusFirstFocusable(container: HTMLElement): boolean {
+  const target = getFocusableElements(container)[0];
+  target?.focus();
+  return !!target;
+}

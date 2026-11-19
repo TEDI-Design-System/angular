@@ -20,9 +20,14 @@ import {
   ClosingButtonComponent,
   CardComponent,
   CardContentComponent,
+  warnDeprecated,
 } from "@tedi-design-system/angular/tedi";
 import { FocusKeyManager } from "@angular/cdk/a11y";
 
+/**
+ * @deprecated Use the TEDI-Ready `tedi-dropdown` from `@tedi-design-system/angular/tedi` instead. Its items go in a
+ * `tedi-dropdown-content` as `li[tedi-dropdown-item]`s. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-dropdown",
   imports: [
@@ -51,6 +56,13 @@ export class DropdownComponent implements OnInit {
   isMobile = inject(BreakpointService).isBelowBreakpoint("sm");
 
   private keyManager?: FocusKeyManager<DropdownItemComponent>;
+
+  constructor() {
+    warnDeprecated(
+      "Community tedi-dropdown",
+      "Use the TEDI-Ready `tedi-dropdown` from `@tedi-design-system/angular/tedi` instead.",
+    );
+  }
 
   overlayOrigin = computed(() => {
     return this.triggerDirective().overlayOrigin;

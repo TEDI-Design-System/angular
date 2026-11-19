@@ -29,6 +29,18 @@ export type DropdownPosition = OverlayPosition;
 
 let dropdownIdCounter = 0;
 
+/**
+ * Width of the dropdown panel: `auto` sizes to content (never narrower than the
+ * trigger), `trigger` matches the trigger, a number is px, a string any CSS width.
+ */
+export type DropdownWidth = "auto" | "trigger" | number | string;
+
+/** Numbers and numeric strings (e.g. `"240"`) are px; other strings are CSS lengths. */
+const toCssLength = (value: number | string): string => {
+  const length = typeof value === "number" ? String(value) : value.trim();
+  return /^\d+(\.\d+)?$/.test(length) ? `${length}px` : length;
+};
+
 @Component({
   standalone: true,
   selector: "tedi-dropdown",
@@ -37,6 +49,9 @@ let dropdownIdCounter = 0;
   styleUrl: "./dropdown.component.scss",
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: "tedi-dropdown",
+  },
   providers: [
     {
       provide: DROPDOWN_API,
@@ -77,6 +92,21 @@ export class DropdownComponent implements OnDestroy {
    */
   readonly hideOnScroll = input(false);
 
+  /**
+   * Width of the dropdown panel. `auto` sizes to content, never narrower than
+   * the trigger; `trigger` matches the trigger width; a number is px; a string
+   * is any CSS width (e.g. `"20rem"`).
+   * @default auto
+   */
+  readonly width = input<DropdownWidth>("auto");
+
+  /**
+   * Maximum height of the items, which scroll when taller (a number is px, a
+   * string any CSS length, preferably rem); a `tedi-dropdown-header` and
+   * `tedi-dropdown-footer` stay in place outside it.
+   */
+  readonly maxHeight = input<number | string>();
+
   readonly dropdownTrigger = contentChild.required(DropdownTriggerDirective);
   readonly dropdownContent = contentChild.required(DropdownContentComponent);
 
@@ -101,6 +131,21 @@ export class DropdownComponent implements OnDestroy {
   readonly triggerWidthVar = computed(() => {
     const w = this.triggerWidth();
     return w ? `${w}px` : null;
+  });
+
+  /** Panel maximum height, or `null` when unrestricted. */
+  readonly panelMaxHeight = computed(() => {
+    const maxHeight = this.maxHeight();
+    if (maxHeight == null || maxHeight === "") return null;
+    return toCssLength(maxHeight);
+  });
+
+  /** Explicit panel width, or `null` when sized by content. */
+  readonly panelWidth = computed(() => {
+    const width = this.width();
+    if (width == null || width === "auto" || width === "") return null;
+    if (width === "trigger") return this.triggerWidthVar();
+    return toCssLength(width);
   });
 
   private readonly platformId = inject(PLATFORM_ID);
@@ -155,6 +200,8 @@ export class DropdownComponent implements OnDestroy {
 
     // Deferred so the overlay content is attached before focusing
     setTimeout(() => {
+      if (this.dropdownContent().header()?.focus()) return;
+
       if (initialFocus === "first") {
         this.focusFirstItem();
       } else if (initialFocus === "last") {
@@ -210,6 +257,13 @@ export class DropdownComponent implements OnDestroy {
   };
 
   tabOutOfDropdown(shiftKey: boolean) {
+    const fromItem = this.dropdownContent()
+      .items()
+      .some((item) => item.focusTarget().contains(this.document.activeElement));
+    if (!shiftKey && fromItem && this.dropdownContent().footer()?.focus()) {
+      return;
+    }
+
     const triggerEl = this.dropdownTrigger().focusableElement;
     const contentEl = this.dropdownContent().host.nativeElement;
 
@@ -264,9 +318,7 @@ export class DropdownComponent implements OnDestroy {
 
   setActiveToSelectedOrFirst() {
     const items = this.dropdownContent().items();
-    const selectedIndex = items.findIndex(
-      (item) => item.value() === this.value(),
-    );
+    const selectedIndex = items.findIndex((item) => item.isSelected());
 
     if (selectedIndex !== -1 && !items[selectedIndex].disabled()) {
       this.activeIndex.set(selectedIndex);
@@ -282,12 +334,13 @@ export class DropdownComponent implements OnDestroy {
     }
   }
 
-  focusActiveItem() {
+  /** Focuses the active item. Returns whether there was one to focus. */
+  focusActiveItem(): boolean {
     const index = this.activeIndex();
-    if (index == null) return;
+    if (index == null) return false;
 
     const items = this.dropdownContent().items();
-    if (!items[index]) return;
+    if (!items[index]) return false;
 
     const el = items[index].focusTarget();
     el.focus();
@@ -295,6 +348,7 @@ export class DropdownComponent implements OnDestroy {
       block: "nearest",
       inline: "nearest",
     });
+    return true;
   }
 
   focusNextItem(fromEl: HTMLLIElement) {
@@ -302,7 +356,10 @@ export class DropdownComponent implements OnDestroy {
     if (fromIndex === -1) return;
 
     const nextIndex = this.getNextEnabledIndex(fromIndex);
-    if (nextIndex == null) return;
+    if (nextIndex == null) {
+      this.dropdownContent().footer()?.focus();
+      return;
+    }
 
     const items = this.dropdownContent().items();
     this.activeIndex.set(nextIndex);
@@ -315,7 +372,10 @@ export class DropdownComponent implements OnDestroy {
     if (fromIndex === -1) return;
 
     const prevIndex = this.getPrevEnabledIndex(fromIndex);
-    if (prevIndex == null) return;
+    if (prevIndex == null) {
+      this.dropdownContent().header()?.focus();
+      return;
+    }
 
     const items = this.dropdownContent().items();
     this.activeIndex.set(prevIndex);
@@ -350,7 +410,13 @@ export class DropdownComponent implements OnDestroy {
     // Widget content is driven by its items' own key handling, and a plain
     // `list` renders in document order, so Tab out of it belongs to the
     // browser.
-    if (this.dropdownContent().isWidget() || event.key !== "Escape") return;
+    if (
+      this.dropdownContent().isWidget() ||
+      event.key !== "Escape" ||
+      event.defaultPrevented
+    ) {
+      return;
+    }
 
     event.preventDefault();
     this.closeAndFocusTrigger();
@@ -360,7 +426,7 @@ export class DropdownComponent implements OnDestroy {
     return getFocusableElements(this.dropdownContent().host.nativeElement);
   }
 
-  private closeAndFocusTrigger() {
+  closeAndFocusTrigger() {
     this.moveFocusOut(this.dropdownTrigger().focusableElement);
   }
 

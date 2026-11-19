@@ -1,0 +1,21 @@
+.tedi-dropdown-group {
+  display: contents;
+}
+
+.tedi-dropdown-group__list {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.tedi-dropdown-group__title {
+  padding: var(--dropdown-group-label-padding-y)
+    var(--dropdown-group-label-padding-x) var(--layout-grid-gutters-04);
+  font-size: var(--heading-subtitle-small-size);
+  font-weight: var(--heading-subtitle-small-weight);
+  line-height: var(--heading-subtitle-small-line-height);
+  color: var(--general-text-tertiary);
+  text-transform: uppercase;
+}

@@ -25,6 +25,12 @@ const FOCUSABLE_SELECTOR = `${NATIVE_INTERACTIVE_SELECTOR}, [tabindex]`;
 /** Native controls that fire `click` on Space but not on Enter. */
 const SPACE_ACTIVATED_SELECTOR = 'input[type="checkbox"], input[type="radio"]';
 
+/**
+ * Opens the dropdown. Place it on a `<button>`, or on a component that wraps one
+ * (e.g. `<app-button tedi-dropdown-trigger>`): the inner button then receives the
+ * trigger's `id`, ARIA attributes, focus and keyboard handling, so there is a
+ * single tab stop.
+ */
 @Directive({
   standalone: true,
   selector: "[tedi-dropdown-trigger]",

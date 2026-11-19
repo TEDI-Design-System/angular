@@ -10,6 +10,11 @@ import { ButtonComponent } from "@tedi-design-system/angular/tedi";
 const meta: Meta<DropdownComponent> = {
   title: "Community/Overlay/Dropdown",
   component: DropdownComponent,
+  parameters: {
+    status: {
+      type: ["deprecated", "existsInTediReady"],
+    },
+  },
   decorators: [
     moduleMetadata({
       imports: [
