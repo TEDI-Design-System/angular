@@ -1,0 +1,52 @@
+@if (fromDate() || toDate()) {
+  <div class="tedi-date-time-field-range-switch__summary">
+    <span class="tedi-date-time-field-range-switch__end">
+      @if (fromDate()) {
+        {{ fromDate() }}
+        <strong class="tedi-date-time-field-range-switch__time">{{
+          fromTime()
+        }}</strong>
+      }
+    </span>
+    <span class="tedi-date-time-field-range-switch__end">
+      @if (toDate()) {
+        {{ toDate() }}
+        <strong class="tedi-date-time-field-range-switch__time">{{
+          toTime()
+        }}</strong>
+      }
+    </span>
+  </div>
+}
+<tedi-button-group
+  class="tedi-date-time-field-range-switch__group"
+  variant="secondary-button-group"
+  behavior="tabs"
+  [stretch]="true"
+  [ariaLabel]="'date-time-field.range-time-switch' | tediTranslate"
+  [value]="active()"
+  (valueChange)="handleValueChange($event)"
+>
+  @for (end of ends; track end) {
+    <button
+      tedi-button-group-button
+      type="button"
+      [id]="tabId(end)"
+      [value]="end"
+      [controls]="panelId()"
+      [label]="
+        (end === 'from'
+          ? 'date-time-field.time-heading-from'
+          : 'date-time-field.time-heading-to'
+        ) | tediTranslate
+      "
+    >
+      {{
+        (end === "from"
+          ? "date-time-field.time-heading-from"
+          : "date-time-field.time-heading-to"
+        ) | tediTranslate
+      }}
+    </button>
+  }
+</tedi-button-group>

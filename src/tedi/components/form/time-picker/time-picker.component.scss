@@ -195,6 +195,11 @@
 }
 
 .tedi-time-picker__grid {
+  grid-template-columns: repeat(var(--tedi-time-picker-grid-columns), 1fr);
   gap: var(--layout-grid-gutters-08);
   padding: var(--card-padding-md-default);
+}
+
+.tedi-time-picker__grid .tedi-time-picker__slot {
+  align-items: center;
 }

@@ -294,6 +294,9 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 
 - **`tedi-date-field`, not `tedi-date-picker`.** DatePicker is deprecated; DateField wraps a typed
   input with a popover or modal calendar and supports `single`, `multiple` and `range`.
+- **`tedi-date-time-field` when the value needs a date *and* a time.** It pairs the same typed
+  input with a calendar plus a TimePicker (side by side, or as a two-step date-then-time flow), in
+  `single` or `range` mode. Don't compose a DateField and a TimeField by hand.
 - **`tedi-time-field`, not `tedi-time-picker`.** TimePicker is the bare picker surface behind
   TimeField. On its own, with no value, the `scroll` wheel parks on `12:00` as display only, and
   nothing is selected until the user picks.
@@ -342,6 +345,10 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 - **Tabs activate differently depending on the host element.** `<button>` tabs use automatic
   activation (arrow keys select), anchor tabs use manual. Arrow Left/Right wrap, Home/End jump, only
   the active tab is in the tab order, and disabled tabs are skipped.
+- **A `tedi-button-group` that switches content needs `behavior="tabs"` and a panel you wire.**
+  Give each item an `id` and `controls="<panel id>"`, and the content a `role="tabpanel"` with that
+  `id` and `aria-labelledby` set to the selected item's `id`. Leave `enableMobileDropdown` off: the
+  dropdown hides the tabs the panel is named by.
 - **A dropdown of links belongs in `dropdownRole="list"`, not `menu`.** `menu` and `listbox` are
   composite widget roles, and the `menuitem` / `option` role replaces the role of the control it
   lands on, so a projected link stops being announced as a link. `list` adds no roles and no key

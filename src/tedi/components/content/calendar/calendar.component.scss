@@ -6,9 +6,10 @@
   // the months into a column when they fit. Control the count per screen size
   // with a BreakpointInput (e.g. [numberOfMonths]="{ xs: 1, lg: 2 }").
   --_tedi-calendar-day-columns: 7;
+  --_tedi-calendar-padding-x: var(--card-padding-md-default);
   --_tedi-calendar-month-width: calc(
     var(--_tedi-calendar-day-columns) * var(--form-calendar-date-width) + 2 *
-      var(--card-padding-md-default)
+      var(--_tedi-calendar-padding-x)
   );
 
   display: flex;
@@ -30,6 +31,12 @@
 
   &--with-week-numbers {
     --_tedi-calendar-day-columns: 8;
+  }
+
+  // A month grid with the default padding is 312px, wider than a dialog or
+  // popover can be on a 320px phone. Tighten the sides there, as in Figma.
+  @media (width < 360px) {
+    --_tedi-calendar-padding-x: var(--card-padding-xs);
   }
 
   &--full-width {
@@ -55,12 +62,17 @@
     display: flex;
     flex-direction: column;
     max-width: var(--_tedi-calendar-month-width);
-    padding: var(--card-padding-md-default);
+    padding: var(--card-padding-md-default) var(--_tedi-calendar-padding-x);
+  }
+
+  &__month .tedi-calendar-header {
+    margin-right: calc(-1 * var(--layout-grid-gutters-08));
+    margin-left: calc(-1 * var(--layout-grid-gutters-08));
   }
 
   &__footer {
     padding-top: var(--layout-grid-gutters-08);
-    margin: 0 var(--card-padding-md-default) var(--card-padding-xs);
+    margin: 0 var(--_tedi-calendar-padding-x) var(--card-padding-xs);
     border-top: var(--tedi-borders-01) solid var(--general-border-primary);
 
     &:empty {

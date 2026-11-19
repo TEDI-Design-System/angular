@@ -87,6 +87,11 @@
       cursor: not-allowed;
     }
 
+    // iOS Safari centres a native time input's value.
+    &::-webkit-date-and-time-value {
+      text-align: start;
+    }
+
     &::-webkit-calendar-picker-indicator,
     &::-webkit-inner-spin-button,
     &::-webkit-outer-spin-button,
@@ -95,6 +100,37 @@
       display: none;
       margin: 0;
       appearance: none;
+    }
+  }
+
+  // iOS doesn't open the native time picker from `showPicker()`, so the icon
+  // can't open it there. The input runs underneath the actions instead, and on
+  // touch screens the icon lets taps through to it.
+  &__field--native {
+    display: grid;
+    grid-template-rows: 100%;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+
+    .tedi-time-field__input {
+      grid-row: 1;
+      grid-column: 1 / -1;
+    }
+
+    .tedi-time-field__actions {
+      grid-row: 1;
+      grid-column: 2;
+    }
+
+    @media (pointer: coarse) {
+      .tedi-time-field__actions,
+      .tedi-time-field__icon {
+        pointer-events: none;
+      }
+
+      .tedi-time-field__clear {
+        pointer-events: auto;
+      }
     }
   }
 

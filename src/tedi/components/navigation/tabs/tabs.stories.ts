@@ -363,6 +363,10 @@ export const OverflowBehavior: Story = {
   }),
 };
 
+/**
+ * Sub-tabs are a `tedi-button-group` with `behavior="tabs"`, so they behave like tabs. Each item's
+ * `controls` points at the `role="tabpanel"` element it shows.
+ */
 export const WithSubTabs: Story = {
   render: () => ({
     props: { content, subTabContent, activeSubTab: "work-accidents" },
@@ -382,15 +386,16 @@ export const WithSubTabs: Story = {
               <tedi-button-group
                 variant="secondary-button-group"
                 ariaLabel="Õnnetused ja haigused"
-                [enableMobileDropdown]="true"
-                dropdownLabelMode="selected"
+                behavior="tabs"
                 [(value)]="activeSubTab"
               >
-                <button tedi-button-group-button value="work-accidents" label="Tööõnnetused">Tööõnnetused</button>
-                <button tedi-button-group-button value="occupational-diseases" label="Kutsehaigused">Kutsehaigused</button>
-                <button tedi-button-group-button value="work-related-illnesses" label="Tööga seotud haigused">Tööga seotud haigused</button>
+                <button tedi-button-group-button id="sub-tab-work-accidents" controls="sub-tab-panel" value="work-accidents" label="Tööõnnetused">Tööõnnetused</button>
+                <button tedi-button-group-button id="sub-tab-occupational-diseases" controls="sub-tab-panel" value="occupational-diseases" label="Kutsehaigused">Kutsehaigused</button>
+                <button tedi-button-group-button id="sub-tab-work-related-illnesses" controls="sub-tab-panel" value="work-related-illnesses" label="Tööga seotud haigused">Tööga seotud haigused</button>
               </tedi-button-group>
-              <p tedi-text>{{ subTabContent[activeSubTab] }}</p>
+              <div id="sub-tab-panel" role="tabpanel" [attr.aria-labelledby]="'sub-tab-' + activeSubTab">
+                <p tedi-text>{{ subTabContent[activeSubTab] }}</p>
+              </div>
             </div>
           </tedi-card-content>
         </tedi-tabs-content>

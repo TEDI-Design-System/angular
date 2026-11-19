@@ -121,6 +121,48 @@ export function addYears(date: Date, n: number): Date {
 }
 
 /**
+ * Formats `date` as `YYYY-MM-DD`, the date part of native `date` and
+ * `datetime-local` input values.
+ */
+export function toNativeDate(date: Date): string {
+  const y = date.getFullYear().toString().padStart(4, "0");
+  const m = (date.getMonth() + 1).toString().padStart(2, "0");
+  const d = date.getDate().toString().padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+/**
+ * The first and last day a native date input may offer under whole-day
+ * constraints. When a date and its past/future flag are both set, the tighter
+ * one wins.
+ */
+export function nativeDateBounds(constraints: {
+  minDate?: Date;
+  maxDate?: Date;
+  disablePast?: boolean;
+  disableFuture?: boolean;
+}): { min?: Date; max?: Date } {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const mins = [
+    constraints.minDate,
+    constraints.disablePast ? today : undefined,
+  ]
+    .filter((d): d is Date => !!d)
+    .map((d) => d.getTime());
+  const maxes = [
+    constraints.maxDate,
+    constraints.disableFuture ? today : undefined,
+  ]
+    .filter((d): d is Date => !!d)
+    .map((d) => d.getTime());
+  return {
+    min: mins.length ? new Date(Math.max(...mins)) : undefined,
+    max: maxes.length ? new Date(Math.min(...maxes)) : undefined,
+  };
+}
+
+/**
  * Returns the first day of the month for `date` at 00:00 local time.
  */
 export function startOfMonth(date: Date): Date {

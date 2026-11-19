@@ -17,11 +17,13 @@
       z-index: 2;
     }
 
-    &[aria-pressed="true"] {
+    &[aria-pressed="true"],
+    &[aria-selected="true"] {
       z-index: 1;
     }
 
-    &[aria-pressed="true"]:not(:disabled) {
+    &[aria-pressed="true"]:not(:disabled),
+    &[aria-selected="true"]:not(:disabled) {
       color: var(--_btn-active-text);
       background: var(--_btn-active-bg);
       border-color: var(--_btn-active-border);
@@ -30,7 +32,7 @@
 
   // Connected geometry for bare strip items (direct children only, so the mobile
   // dropdown trigger inside `tedi-dropdown` keeps its own radius).
-  >.tedi-button {
+  > .tedi-button {
     &:not(:first-child) {
       margin-left: calc(var(--tedi-borders-01) * -1);
       border-top-left-radius: 0;
@@ -69,9 +71,8 @@
   }
 
   &--dropdown-mode {
-
-    >.tedi-button,
-    >tedi-tooltip {
+    > .tedi-button,
+    > tedi-tooltip {
       display: none;
     }
   }
@@ -98,7 +99,8 @@
   }
 
   &--segmented &__dropdown-trigger.tedi-button--secondary {
-    padding: calc(var(--_btn-padding-y) - var(--tedi-borders-02)) calc(var(--_btn-padding-x) - var(--tedi-borders-02));
+    padding: calc(var(--_btn-padding-y) - var(--tedi-borders-02))
+      calc(var(--_btn-padding-x) - var(--tedi-borders-02));
     border-width: var(--tedi-borders-02);
 
     &:not([aria-expanded="true"]) {

@@ -64,6 +64,8 @@ export class CalendarDayGridComponent {
   readonly unavailableDays = input<DayAvailabilityInput>(undefined);
   readonly inputDisabled = input<boolean>(false);
   readonly dayStatus = input<DayStatusFn | undefined>(undefined);
+  /** Months the calendar shows side by side; their days aren't marked selected as outside days here too. */
+  readonly shownMonths = input<Date[]>([]);
 
   private readonly translation = inject(TediTranslationService);
 
@@ -142,7 +144,7 @@ export class CalendarDayGridComponent {
     if (!day) return "";
     const modifiers: string[] = [];
     this.collectBaseModifiers(day, modifiers);
-    this.collectRangeModifiers(day, modifiers);
+    if (!this.isShownElsewhere(day)) this.collectRangeModifiers(day, modifiers);
     this.collectAvailabilityModifiers(day, modifiers);
     if (this.isDisabled(day)) modifiers.push("disabled");
     return [
@@ -214,8 +216,16 @@ export class CalendarDayGridComponent {
     }
   }
 
+  // An outside day whose own month has a grid of its own is selected there.
+  private isShownElsewhere(day: Date): boolean {
+    return (
+      !isSameMonth(day, this.month()) &&
+      this.shownMonths().some((month) => isSameMonth(day, month))
+    );
+  }
+
   isSelected(day: Date | null): boolean {
-    if (!day) return false;
+    if (!day || this.isShownElsewhere(day)) return false;
     const value = this.value();
     if (value === null) return false;
     const mode = this.mode();

@@ -45,6 +45,7 @@ export default {
     size: "default",
     stretch: false,
     multiple: false,
+    behavior: "toggle",
     enableMobileDropdown: false,
     mobileBreakpoint: "md",
     dropdownLabelMode: "static",
@@ -85,6 +86,17 @@ export default {
       table: {
         defaultValue: { summary: "false" },
         type: { summary: "boolean" },
+        category: "inputs",
+      },
+    },
+    behavior: {
+      control: "radio",
+      options: ["toggle", "tabs"],
+      description:
+        "`toggle` items are toggle buttons; `tabs` makes the group a tab list for `tabpanel` content.",
+      table: {
+        defaultValue: { summary: "toggle" },
+        type: { summary: "'toggle' | 'tabs'" },
         category: "inputs",
       },
     },
@@ -168,6 +180,7 @@ export const Default: Story = {
         [variant]="variant"
         [size]="size"
         [multiple]="multiple"
+        [behavior]="behavior"
         [stretch]="stretch"
         [ariaLabel]="ariaLabel"
         [enableMobileDropdown]="enableMobileDropdown"
@@ -458,6 +471,34 @@ export const Controlled: Story = {
         <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
       </tedi-button-group>
       <p style="margin-top: 8px;">Valitud: {{ selected() }}</p>
+    `,
+  }),
+};
+
+/**
+ * Use `behavior="tabs"` when the group should behave like tabs. Each item's `controls`
+ * points at the `role="tabpanel"` element it shows.
+ */
+export const Tabs: Story = {
+  render: (args) => ({
+    props: { ...args, value: signal<string>("table") },
+    template: `
+      <div class="flex flex-column gap-2">
+        <tedi-button-group
+          ariaLabel="Vaate valik"
+          behavior="tabs"
+          [variant]="variant"
+          [value]="value()"
+          (valueChange)="value.set($event)"
+        >
+          <button tedi-button-group-button id="view-table" controls="view-panel" value="table" label="Tabel">Tabel</button>
+          <button tedi-button-group-button id="view-list" controls="view-panel" value="list" label="Loend">Loend</button>
+          <button tedi-button-group-button id="view-calendar" controls="view-panel" value="calendar" label="Kalender">Kalender</button>
+        </tedi-button-group>
+        <div id="view-panel" role="tabpanel" [attr.aria-labelledby]="'view-' + value()">
+          <p tedi-text>Valitud vaade: {{ value() }}</p>
+        </div>
+      </div>
     `,
   }),
 };

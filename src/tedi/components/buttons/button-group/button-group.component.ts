@@ -29,8 +29,10 @@ import { DropdownItemComponent } from "../../overlay/dropdown/dropdown-item/drop
 import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
 import { OptionContentLabelComponent } from "../../helpers/option-content/option-content-label.component";
 import { TediTranslationService } from "../../../services/translation/translation.service";
+import { navigateTablist } from "../../navigation/tabs/tabs-helpers";
 
 export type ButtonGroupDropdownLabelMode = "selected" | "static";
+export type ButtonGroupBehavior = "toggle" | "tabs";
 
 @Component({
   selector: "tedi-button-group",
@@ -51,7 +53,7 @@ export type ButtonGroupDropdownLabelMode = "selected" | "static";
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     "[class]": "hostClasses()",
-    "[attr.role]": "isDropdownMode() ? null : 'group'",
+    "[attr.role]": "isDropdownMode() ? null : isTabs() ? 'tablist' : 'group'",
     "[attr.aria-label]": "ariaLabel() || null",
   },
 })
@@ -115,6 +117,15 @@ export class ButtonGroupComponent {
    */
   readonly dropdownLabelMode = input<ButtonGroupDropdownLabelMode>("static");
 
+  /**
+   * `toggle` items are toggle buttons. `tabs` makes the group a single-select tab list for
+   * `role="tabpanel"` content: arrow keys, Home and End move the selection, only the selected
+   * item is a Tab stop, and `multiple` is ignored. Don't combine with `enableMobileDropdown`:
+   * the dropdown hides the tabs that name the panel.
+   * @default toggle
+   */
+  readonly behavior = input<ButtonGroupBehavior>("toggle");
+
   /** Emits the value of the item the user toggled. */
   readonly selectionChange = output<string>();
 
@@ -129,9 +140,25 @@ export class ButtonGroupComponent {
     this.mobileBreakpoint,
   );
 
+  readonly isTabs = computed(() => this.behavior() === "tabs");
+
+  private readonly isMultiple = computed(
+    () => this.multiple() && !this.isTabs(),
+  );
+
   protected readonly isDropdownMode = computed(
     () => this.enableMobileDropdown() && this.isBelowMobile(),
   );
+
+  /** In `tabs` behaviour, the item reachable with Tab: the selected one, else the first enabled. */
+  readonly tabStopValue = computed(() => {
+    const enabled = this.items().filter((item) => !item.disabled());
+    const current = this.value();
+    return (
+      enabled.find((item) => item.value() === current)?.value() ??
+      enabled[0]?.value()
+    );
+  });
 
   /** Trigger variant derived from the group `variant` (button-group variants map
    * to their plain counterpart; any other variant is used as-is). */
@@ -162,13 +189,14 @@ export class ButtonGroupComponent {
   protected readonly triggerLabel = computed(() => {
     const fallback =
       this.dropdownLabel() ?? this.translations.translate("buttonGroup.menu");
-    if (this.dropdownLabelMode() === "static" || this.multiple())
+    if (this.dropdownLabelMode() === "static" || this.isMultiple())
       return fallback;
     return this.selectedItem()?.label() ?? fallback;
   });
 
   protected readonly triggerIcon = computed(() => {
-    if (this.dropdownLabelMode() === "static" || this.multiple()) return "menu";
+    if (this.dropdownLabelMode() === "static" || this.isMultiple())
+      return "menu";
     const selected = this.selectedItem();
     return selected?.iconLeft() ?? selected?.icon() ?? "menu";
   });
@@ -183,14 +211,20 @@ export class ButtonGroupComponent {
 
   isSelected(value: string): boolean {
     const current = this.value();
-    if (this.multiple()) {
+    if (this.isMultiple()) {
       return Array.isArray(current) && current.includes(value);
     }
     return current === value;
   }
 
   toggle(value: string) {
-    if (this.multiple()) {
+    if (this.isTabs()) {
+      if (this.value() === value) return;
+      this.value.set(value);
+      this.selectionChange.emit(value);
+      return;
+    }
+    if (this.isMultiple()) {
       const current = Array.isArray(this.value())
         ? [...(this.value() as string[])]
         : [];
@@ -205,6 +239,13 @@ export class ButtonGroupComponent {
       this.value.set(this.value() === value ? undefined : value);
     }
     this.selectionChange.emit(value);
+  }
+
+  handleTabKeydown(event: KeyboardEvent) {
+    const tab = navigateTablist(event);
+    if (!tab) return;
+    const item = this.items().find((i) => i.element === tab);
+    if (item) this.toggle(item.value());
   }
 
   protected onDropdownItemSelect(item: ButtonGroupButtonDirective) {

@@ -69,6 +69,36 @@ describe("CalendarDayGridComponent", () => {
     expect(component).toBeTruthy();
   });
 
+  describe("months shown side by side", () => {
+    const range: DateRange = {
+      from: new Date(2024, 3, 29),
+      to: new Date(2024, 4, 2),
+    };
+    const april29 = () => buttonForDay(new Date(2024, 3, 29)) as HTMLElement;
+
+    it("marks an outside day selected when its month has no grid", () => {
+      fixture.componentRef.setInput("mode", "range");
+      fixture.componentRef.setInput("value", range);
+      fixture.detectChanges();
+      expect(april29().getAttribute("aria-selected")).toBe("true");
+      expect(april29().className).toContain("--range-start");
+    });
+
+    it("leaves the selection to the grid of the day's own month", () => {
+      fixture.componentRef.setInput("mode", "range");
+      fixture.componentRef.setInput("value", range);
+      fixture.componentRef.setInput("shownMonths", [
+        new Date(2024, 3, 1),
+        MAY_2024,
+      ]);
+      fixture.detectChanges();
+      expect(april29().hasAttribute("aria-selected")).toBe(false);
+      expect(april29().className).not.toMatch(/--(selected|range-)/);
+      const may2 = buttonForDay(new Date(2024, 4, 2)) as HTMLElement;
+      expect(may2.className).toContain("--range-end");
+    });
+  });
+
   describe("grid layout", () => {
     it("renders 6 rows of 7 cells", () => {
       const rows = fixture.debugElement.queryAll(
