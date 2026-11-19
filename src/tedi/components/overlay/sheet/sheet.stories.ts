@@ -12,7 +12,6 @@ import { SheetCloseDirective } from "./sheet-close.directive";
 import { SheetHeaderComponent } from "./sheet-header/sheet-header.component";
 import { SheetBodyComponent } from "./sheet-body/sheet-body.component";
 import { SheetFooterComponent } from "./sheet-footer/sheet-footer.component";
-import { SheetHeaderContentDirective } from "./sheet-header/sheet-header-content.directive";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { ClosingButtonComponent } from "../../buttons/closing-button/closing-button.component";
 import { IconComponent } from "../../base/icon/icon.component";
@@ -20,6 +19,7 @@ import { TextComponent } from "../../base/text/text.component";
 import { TagComponent } from "../../tags/tag/tag.component";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
 import { RadioComponent } from "../../form/radio/radio.component";
+import { RadioGroupComponent } from "../../form/radio-group/radio-group.component";
 import { LabelComponent } from "../../content/label/label.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { FormFieldComponent } from "../../form/form-field/form-field.component";
@@ -56,20 +56,16 @@ const SENDERS = [
   "Riigi Infosüsteemide Amet",
 ];
 
-const STORY_STYLES = `
-.tedi-sheet-story__section {
-  padding: var(--tedi-sheet-padding-x);
-}
-
-/* A dropdown-style row without the dropdown's menu context. */
+// A dropdown-style row that spans the sheet, past the body's padding, as in Figma.
+const NAV_ROW_STYLES = `
 .tedi-sheet-story__nav-row {
   display: flex;
   gap: var(--layout-grid-gutters-08);
   align-items: center;
   justify-content: space-between;
-  width: calc(100% + 2 * var(--tedi-sheet-padding-x));
-  margin-inline: calc(-1 * var(--tedi-sheet-padding-x));
-  padding: var(--dropdown-item-padding-y) var(--tedi-sheet-padding-x);
+  width: calc(100% + 2 * var(--tedi-sheet-body-padding));
+  margin-inline: calc(-1 * var(--tedi-sheet-body-padding));
+  padding: var(--dropdown-item-padding-y) var(--tedi-sheet-body-padding);
   font: inherit;
   color: var(--dropdown-item-default-text);
   text-align: left;
@@ -83,6 +79,17 @@ const STORY_STYLES = `
   background: var(--dropdown-item-hover-background);
 }
 `;
+
+// Keeps the radios 8px apart at every width, as in Figma; the group's own gap is 4px on desktop.
+const RADIO_GROUP_GAP =
+  "--form-checkbox-radio-gutter-y: var(--tedi-dimensions-05)";
+
+// A divider that spans the whole sheet, past the body's padding, as in Figma.
+const FULL_WIDTH_SEPARATOR = `<tedi-separator
+  [spacing]="1"
+  size="calc(100% + 2 * var(--tedi-sheet-body-padding))"
+  style="margin-inline: calc(-1 * var(--tedi-sheet-body-padding))"
+/>`;
 
 const visualTest: StoryObj = {
   tags: ["!dev", "!autodocs"],
@@ -112,7 +119,6 @@ export default {
         SheetHeaderComponent,
         SheetBodyComponent,
         SheetFooterComponent,
-        SheetHeaderContentDirective,
         ButtonComponent,
         ClosingButtonComponent,
         IconComponent,
@@ -120,6 +126,7 @@ export default {
         TagComponent,
         CheckboxComponent,
         RadioComponent,
+        RadioGroupComponent,
         LabelComponent,
         SeparatorComponent,
         FormFieldComponent,
@@ -428,7 +435,6 @@ export const Default: Story = {
     fullWidth: true,
   },
   render: (args) => ({
-    styles: [STORY_STYLES],
     props: args,
     template: `
 <tedi-sheet ${argsToTemplate(args, { include: ["closeOnBackdropClick", "closeOnEscape", "role"] })}>
@@ -438,28 +444,28 @@ export const Default: Story = {
   </button>
   <ng-template tediSheetContent ${argsToTemplate(args, { include: ["showHandle", "padding", "radius"] })}>
     <tedi-sheet-header ${argsToTemplate(args, { include: ["title", "headingLevel", "variant", "titlePosition", "collapsible", "closeButton"] })} />
-    <tedi-sheet-body padding="none">
-      <div class="tedi-sheet-story__section" [tediVerticalSpacing]="0.5" role="radiogroup" aria-label="Kirjade olek">
+    <tedi-sheet-body>
+      <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Kirjade olek" value="option-1">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
-          <input tedi-radio type="radio" name="sheet-default-status" checked />
+          <input tedi-radio type="radio" value="option-1" />
           Kõik
         </label>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
-          <input tedi-radio type="radio" name="sheet-default-status" />
+          <input tedi-radio type="radio" value="option-2" />
           Ainult lugemata
         </label>
-      </div>
-      <tedi-separator />
-      <div class="tedi-sheet-story__section" [tediVerticalSpacing]="0.5" role="radiogroup" aria-label="Järjestus">
+      </tedi-radio-group>
+      ${FULL_WIDTH_SEPARATOR}
+      <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Järjestus" value="option-1">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
-          <input tedi-radio type="radio" name="sheet-default-sort" checked />
+          <input tedi-radio type="radio" value="option-1" />
           Lugemata kõige üleval
         </label>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
-          <input tedi-radio type="radio" name="sheet-default-sort" />
+          <input tedi-radio type="radio" value="option-2" />
           Kuupäeva järgi
         </label>
-      </div>
+      </tedi-radio-group>
     </tedi-sheet-body>
     <tedi-sheet-footer ${argsToTemplate(args, { include: ["align", "fullWidth"] })}>
       <button tedi-button variant="secondary" tediSheetClose>Tühista</button>
@@ -1113,7 +1119,7 @@ export const ControlledCollapse: Story = {
 export const ContentNavigation: Story = {
   name: "Content navigation",
   render: () => ({
-    styles: [STORY_STYLES],
+    styles: [NAV_ROW_STYLES],
     props: {
       step: "filters",
       senders: SENDERS,
@@ -1138,43 +1144,41 @@ export const ContentNavigation: Story = {
         </button>
       }
     </tedi-sheet-header>
-    <tedi-sheet-body padding="none">
+    <tedi-sheet-body>
       <div [hidden]="step !== 'filters'">
-        <div class="tedi-sheet-story__section">
-          <button type="button" class="tedi-sheet-story__nav-row" (click)="step = 'senders'">
-            <span tedi-text>Saatja</span>
-            <span class="flex align-items-center gap-2">
-              @if (selected.length) {
-                <tedi-tag type="primary">{{ selected.length }}</tedi-tag>
-              }
-              <tedi-icon name="arrow_forward" color="brand" />
-            </span>
-          </button>
-        </div>
-        <tedi-separator />
-        <div class="tedi-sheet-story__section" [tediVerticalSpacing]="0.5" role="radiogroup" aria-label="Kirjade olek">
+        <button type="button" class="tedi-sheet-story__nav-row" (click)="step = 'senders'">
+          <span tedi-text>Saatja</span>
+          <span class="flex align-items-center gap-2">
+            @if (selected.length) {
+              <tedi-tag type="primary">{{ selected.length }}</tedi-tag>
+            }
+            <tedi-icon name="arrow_forward" color="brand" />
+          </span>
+        </button>
+        ${FULL_WIDTH_SEPARATOR}
+        <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Kirjade olek" value="option-1">
           <label tedi-label color="primary" class="flex align-items-center gap-2">
-            <input tedi-radio type="radio" name="sheet-navigation-status" checked />
+            <input tedi-radio type="radio" value="option-1" />
             Kõik
           </label>
           <label tedi-label color="primary" class="flex align-items-center gap-2">
-            <input tedi-radio type="radio" name="sheet-navigation-status" />
+            <input tedi-radio type="radio" value="option-2" />
             Ainult lugemata
           </label>
-        </div>
-        <tedi-separator />
-        <div class="tedi-sheet-story__section" [tediVerticalSpacing]="0.5" role="radiogroup" aria-label="Järjestus">
+        </tedi-radio-group>
+        ${FULL_WIDTH_SEPARATOR}
+        <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Järjestus" value="option-1">
           <label tedi-label color="primary" class="flex align-items-center gap-2">
-            <input tedi-radio type="radio" name="sheet-navigation-sort" checked />
+            <input tedi-radio type="radio" value="option-1" />
             Lugemata kõige üleval
           </label>
           <label tedi-label color="primary" class="flex align-items-center gap-2">
-            <input tedi-radio type="radio" name="sheet-navigation-sort" />
+            <input tedi-radio type="radio" value="option-2" />
             Kuupäeva järgi
           </label>
-        </div>
+        </tedi-radio-group>
       </div>
-      <div [hidden]="step !== 'senders'" class="tedi-sheet-story__section">
+      <div [hidden]="step !== 'senders'">
         <div [tediVerticalSpacing]="0.5">
           @for (sender of senders; track sender) {
             <label tedi-label color="primary" class="flex align-items-center gap-2">
@@ -1344,33 +1348,32 @@ export const FooterAlignment: Story = {
 export const OpenForVisualTest: Story = {
   ...visualTest,
   render: () => ({
-    styles: [STORY_STYLES],
     template: `
 <tedi-sheet [open]="true">
   <ng-template tediSheetContent>
     <tedi-sheet-header title="Filtreerimine" variant="default" />
-    <tedi-sheet-body padding="none">
-      <div class="tedi-sheet-story__section" [tediVerticalSpacing]="0.5" role="radiogroup" aria-label="Kirjade olek">
+    <tedi-sheet-body>
+      <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Kirjade olek" value="option-1">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
-          <input tedi-radio type="radio" name="sheet-visual-status" checked />
+          <input tedi-radio type="radio" value="option-1" />
           Kõik
         </label>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
-          <input tedi-radio type="radio" name="sheet-visual-status" />
+          <input tedi-radio type="radio" value="option-2" />
           Ainult lugemata
         </label>
-      </div>
-      <tedi-separator />
-      <div class="tedi-sheet-story__section" [tediVerticalSpacing]="0.5" role="radiogroup" aria-label="Järjestus">
+      </tedi-radio-group>
+      ${FULL_WIDTH_SEPARATOR}
+      <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Järjestus" value="option-1">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
-          <input tedi-radio type="radio" name="sheet-visual-sort" checked />
+          <input tedi-radio type="radio" value="option-1" />
           Lugemata kõige üleval
         </label>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
-          <input tedi-radio type="radio" name="sheet-visual-sort" />
+          <input tedi-radio type="radio" value="option-2" />
           Kuupäeva järgi
         </label>
-      </div>
+      </tedi-radio-group>
     </tedi-sheet-body>
     <tedi-sheet-footer fullWidth>
       <button tedi-button variant="secondary" tediSheetClose>Tühista</button>
