@@ -975,7 +975,10 @@ export class SelectComponent<T = unknown>
   }
 
   onSearchKeydown(event: KeyboardEvent): void {
-    event.stopPropagation();
+    // Escape bubbles up while the dropdown is closed.
+    if (event.key !== "Escape" || this.isOpen()) {
+      event.stopPropagation();
+    }
 
     switch (event.key) {
       case "ArrowDown":

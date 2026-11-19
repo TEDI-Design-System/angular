@@ -1178,6 +1178,33 @@ describe("SelectComponent", () => {
         expect(select.isOpen()).toBe(false);
       }));
 
+      it("Escape should not reach ancestors while it closes the dropdown", fakeAsync(() => {
+        const onKeydown = jest.fn();
+        fixture.nativeElement.addEventListener("keydown", onKeydown);
+        getTrigger().click();
+        fixture.detectChanges();
+        tick();
+
+        getSearchInput().dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        );
+        fixture.detectChanges();
+        tick();
+
+        expect(onKeydown).not.toHaveBeenCalled();
+      }));
+
+      it("Escape should reach ancestors when the dropdown is already closed", fakeAsync(() => {
+        const onKeydown = jest.fn();
+        fixture.nativeElement.addEventListener("keydown", onKeydown);
+
+        getSearchInput().dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        );
+
+        expect(onKeydown).toHaveBeenCalledTimes(1);
+      }));
+
       it("Tab should close dropdown", fakeAsync(() => {
         getTrigger().click();
         fixture.detectChanges();
