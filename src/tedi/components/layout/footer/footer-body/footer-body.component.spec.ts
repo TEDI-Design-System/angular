@@ -72,7 +72,7 @@ describe("FooterBodyComponent", () => {
   it("is a filling row by default", () => {
     expect(body.classList).toContain("tedi-footer-body");
     expect(body.classList).not.toContain("tedi-footer-body--grid");
-    expect(body.style.gridTemplateColumns).toBe("");
+    expect(body.style.getPropertyValue("--_columns")).toBe("");
   });
 
   it("lays sections out in equal columns when columns is set", () => {
@@ -80,18 +80,18 @@ describe("FooterBodyComponent", () => {
     fixture.detectChanges();
 
     expect(body.classList).toContain("tedi-footer-body--grid");
-    expect(body.style.gridTemplateColumns).toBe("repeat(3, minmax(0, 1fr))");
+    expect(body.style.getPropertyValue("--_columns")).toBe("3");
   });
 
   it("applies breakpoint overrides from that breakpoint up", () => {
     fixture.componentInstance.columns.set(2);
     fixture.componentInstance.lg.set({ columns: 4 });
     fixture.detectChanges();
-    expect(body.style.gridTemplateColumns).toBe("repeat(4, minmax(0, 1fr))");
+    expect(body.style.getPropertyValue("--_columns")).toBe("4");
 
     breakpoint._currentBreakpoint.set("md");
     fixture.detectChanges();
-    expect(body.style.gridTemplateColumns).toBe("repeat(2, minmax(0, 1fr))");
+    expect(body.style.getPropertyValue("--_columns")).toBe("2");
   });
 
   it("stacks into one column below the mobile breakpoint, ignoring columns", () => {
