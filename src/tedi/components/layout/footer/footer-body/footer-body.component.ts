@@ -30,14 +30,14 @@ export type FooterBodyInputs = {
     "[class.tedi-footer-body--mobile]": "isMobile()",
     "[class.tedi-footer-body--compact]": "compact()",
     "[class.tedi-footer-body--grid]": "gridColumns() !== null",
-    "[style.grid-template-columns]": "gridColumns()",
+    "[style.--_columns]": "gridColumns()",
   },
 })
 export class FooterBodyComponent implements BreakpointInputs<FooterBodyInputs> {
   private readonly breakpointService = inject(BreakpointService);
 
   /**
-   * Lays sections out as a grid of this many equal columns instead of a filling row; ignored below the footer's `mobileBreakpoint`.
+   * Lays sections out as a grid of up to this many equal columns, fewer when the container is too narrow; ignored below the footer's `mobileBreakpoint`.
    */
   readonly columns = input<number>();
 
@@ -69,7 +69,7 @@ export class FooterBodyComponent implements BreakpointInputs<FooterBodyInputs> {
   readonly gridColumns = computed(() => {
     const { columns } = this.breakpointInputs();
     if (this.isMobile() || !columns || columns < 1) return null;
-    return `repeat(${columns}, minmax(0, 1fr))`;
+    return columns;
   });
 
   readonly compact = computed(() =>

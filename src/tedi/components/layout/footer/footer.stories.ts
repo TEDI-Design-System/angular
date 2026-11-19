@@ -674,7 +674,7 @@ export const CustomContent: Story = {
         </tedi-footer>
 
         <tedi-footer>
-          <tedi-footer-body>
+          <tedi-footer-body [columns]="4">
             <tedi-footer-section heading="Uuri lähemalt">
               <a tedi-link variant="inverted" href="#">Privaatsuspoliitika</a>
               <a tedi-link variant="inverted" href="#">Küpsised</a>
@@ -688,7 +688,7 @@ export const CustomContent: Story = {
             <tedi-footer-section heading="Uudised">
               <a tedi-link variant="inverted" href="#">Uudiskirja tellimine</a>
             </tedi-footer-section>
-            <tedi-footer-section heading="Kontakt" icon="call" class="story-footer-hug">
+            <tedi-footer-section heading="Kontakt" icon="call">
               ${contactLinks}
             </tedi-footer-section>
           </tedi-footer-body>
@@ -715,7 +715,6 @@ export const CustomContent: Story = {
     styles: [
       ".story-footer-contact { row-gap: var(--layout-grid-gutters-16); }",
       ".story-footer-avatar { flex-shrink: 0; border-radius: 50%; object-fit: cover; }",
-      ".story-footer-hug { flex: none; }",
     ],
   }),
 };
