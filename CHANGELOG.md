@@ -1,3 +1,10 @@
+# [10.0.0-rc.27](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.26...angular-10.0.0-rc.27) (2026-11-19)
+
+
+### Bug Fixes
+
+* **status-badge:** set vertical-align top on badge to drop baseline offset [#875](https://github.com/TEDI-Design-System/angular/issues/875) ([#930](https://github.com/TEDI-Design-System/angular/issues/930)) ([5908609](https://github.com/TEDI-Design-System/angular/commit/59086090044453c9897a9be288615a14857b9811))
+
 # [10.0.0-rc.26](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.25...angular-10.0.0-rc.26) (2026-11-19)
 
 
