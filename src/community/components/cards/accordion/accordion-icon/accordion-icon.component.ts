@@ -7,6 +7,9 @@ import {
 } from "@angular/core";
 import { CardColors } from "../../card/card-colors.directive";
 
+/**
+ * @deprecated No replacement: AccordionItemHeader from TEDI-ready renders its own toggle icon. This component will be removed from future versions.
+ */
 @Component({
   standalone: true,
   selector: "tedi-accordion-icon",

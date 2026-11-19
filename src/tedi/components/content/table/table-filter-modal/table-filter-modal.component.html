@@ -5,24 +5,19 @@
   <tedi-modal-content>
     <ng-container *ngTemplateOutlet="data.template; context: context" />
   </tedi-modal-content>
-  <tedi-modal-footer>
-    <button
-      tedi-button
-      variant="secondary"
-      size="small"
-      type="button"
-      (click)="context.clear()"
-    >
-      {{ data.clearLabel }}
-    </button>
-    <button
-      tedi-button
-      variant="primary"
-      size="small"
-      type="button"
-      (click)="context.apply()"
-    >
-      {{ data.applyLabel }}
-    </button>
-  </tedi-modal-footer>
+  @if (data.actions.length) {
+    <tedi-modal-footer>
+      @for (item of data.actions; track item.action) {
+        <button
+          tedi-button
+          size="small"
+          type="button"
+          [variant]="item.action === 'apply' ? 'primary' : 'secondary'"
+          (click)="context[item.action]()"
+        >
+          {{ item.label }}
+        </button>
+      }
+    </tedi-modal-footer>
+  }
 </tedi-modal>

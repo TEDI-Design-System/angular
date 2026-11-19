@@ -21,7 +21,7 @@ import { TableOfContentsItemComponent } from "./table-of-contents-item/table-of-
       [defaultOpen]="defaultOpen()"
       [variant]="variant()"
       [numbered]="numbered()"
-      [bordered]="bordered()"
+      [divided]="divided()"
       [sticky]="sticky()"
       [ariaLabel]="ariaLabel()"
     >
@@ -50,7 +50,7 @@ class TreeHostComponent {
   readonly defaultOpen = input(true);
   readonly variant = input<TableOfContentsVariant>("default");
   readonly numbered = input(false);
-  readonly bordered = input(false);
+  readonly divided = input(false);
   readonly sticky = input(true);
   readonly ariaLabel = input<string>();
 }
@@ -226,16 +226,16 @@ describe("TableOfContentsComponent", () => {
     ).toBeNull();
   });
 
-  it("applies the bordered modifier only when bordered", async () => {
+  it("applies the divided modifier only when divided", async () => {
     await createTree();
     expect(
-      fixture.debugElement.query(By.css(".tedi-table-of-contents--bordered")),
+      fixture.debugElement.query(By.css(".tedi-table-of-contents--divided")),
     ).toBeNull();
 
-    fixture.componentRef.setInput("bordered", true);
+    fixture.componentRef.setInput("divided", true);
     fixture.detectChanges();
     expect(
-      fixture.debugElement.query(By.css(".tedi-table-of-contents--bordered")),
+      fixture.debugElement.query(By.css(".tedi-table-of-contents--divided")),
     ).toBeTruthy();
   });
 });

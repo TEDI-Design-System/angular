@@ -306,6 +306,24 @@ export function formatLocaleDateLong(date: Date, localeCode: string): string {
 }
 
 /**
+ * Formats a Date as weekday, day and month, e.g. "esmaspäev, 16. november" for
+ * `et-EE`. `withYear` appends the year: "esmaspäev, 16. november 2026".
+ */
+export function formatLocaleDayLabel(
+  date: Date,
+  localeCode: string,
+  withYear = false,
+): string {
+  const fmt = new Intl.DateTimeFormat(localeCode, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: withYear ? "numeric" : undefined,
+  });
+  return fmt.format(date);
+}
+
+/**
  * Formats a Date as a locale-aware "Month Year" string — e.g. "May 2026" for
  * `en-US` and "mai 2026" for `et-EE`. Used as the aria-label for the day
  * grid and inside the calendar header's aria-live region so screen readers

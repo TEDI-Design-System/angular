@@ -1,6 +1,6 @@
 # WCAG Accessibility Review
 
-Target component: `$ARGUMENTS`
+Target: the component given in the task.
 
 ## Standard
 
@@ -26,6 +26,7 @@ Check against WAI-ARIA Authoring Practices for the component pattern:
 - [ ] Semantic HTML elements used where possible (`<button>`, `<input>`, `<nav>`, `<dialog>`) instead of ARIA on `<div>`/`<span>`
 - [ ] No redundant ARIA (e.g., `role="button"` on `<button>`)
 - [ ] `aria-hidden="true"` on decorative elements
+- [ ] Accessible names (built-in labels, translations and story examples) contain neither the role nor the state: the screen reader already announces both. "Terviseandmed" on a tablist, not "Tervise sakid"; "Teavitused" on a switch, not "Teavituste lüliti, sees"; state goes in `aria-checked`/`aria-expanded`/`aria-selected`/`aria-current`, not in the label
 
 ### 3. Keyboard Navigation
 

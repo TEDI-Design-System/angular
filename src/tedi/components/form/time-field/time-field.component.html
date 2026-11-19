@@ -111,11 +111,14 @@
     [type]="inputType()"
     [attr.step]="nativeStep()"
     [id]="inputId()"
+    [attr.name]="name()"
     [attr.placeholder]="placeholder()"
     [value]="inputValue()"
     [disabled]="isDisabled()"
     [readOnly]="inputIsTrigger()"
+    [required]="required()"
     [attr.aria-invalid]="invalid() || null"
+    [attr.aria-describedby]="describedBy.attribute()"
     (click)="onInputClick($event)"
     (input)="handleInput($event)"
     (blur)="handleBlur()"
@@ -149,6 +152,7 @@
     [trapFocus]="true"
     [style.--tedi-time-picker-dropdown-min-width.px]="dropdownMinWidth()"
     (valueChange)="onPickerValueChange($event)"
+    (selectionCommitted)="onPickerSelectionCommitted()"
     (closeRequested)="closePopover()"
   />
 </ng-template>

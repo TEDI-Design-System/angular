@@ -6,7 +6,6 @@ import {
   input,
   ViewEncapsulation,
 } from "@angular/core";
-import { TediTranslationPipe } from "../../../services";
 import { TEDI_FIELD_CONTEXT } from "../../form/form-field/field-context.token";
 
 export type LabelSize = "small" | "default";
@@ -20,7 +19,6 @@ export type LabelVisuallyHidden = boolean | "reserve-space";
   standalone: true,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TediTranslationPipe],
   host: {
     "[class]": "classes()",
   },
@@ -42,7 +40,8 @@ export class LabelComponent {
     return this.field?.size() === "small" ? "small" : "default";
   });
   /**
-   * Whether label is required.
+   * Shows the required asterisk. It is hidden from screen readers, so mark the
+   * control required too.
    * @default false
    */
   required = input<boolean>(false);

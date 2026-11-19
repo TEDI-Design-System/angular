@@ -56,6 +56,7 @@ import {
   SelectValueContext,
 } from "./select-templates.directive";
 import { InputSize, InputState } from "../form-field/form-field.component";
+import { controlDescribedBy } from "../form-field/control-described-by";
 export type SelectInputSize = Exclude<InputSize, "large">;
 
 export interface SelectOption<T = unknown> {
@@ -493,6 +494,33 @@ export class SelectComponent<T = unknown>
   readonly feedbackId = computed(() =>
     this.feedbackText() ? `${this.inputId()}-feedback` : null,
   );
+
+  /**
+   * External `aria-describedby` ids: the ones set on the host element plus
+   * those passed to `setDescribedBy`.
+   */
+  readonly describedBy = controlDescribedBy();
+
+  /**
+   * `aria-describedby` value for the combobox: the external ids followed by the
+   * feedback text id.
+   */
+  readonly describedByAttr = computed(() => {
+    const ids = new Set(
+      (this.describedBy.attribute() ?? "").split(/\s+/).filter(Boolean),
+    );
+    const feedbackId = this.feedbackId();
+    if (feedbackId) ids.add(feedbackId);
+    return ids.size ? [...ids].join(" ") : null;
+  });
+
+  /**
+   * Links elements rendered outside the select (for example an application's
+   * own error message) to the combobox through `aria-describedby`.
+   */
+  setDescribedBy(ids: string[]): void {
+    this.describedBy.set(ids);
+  }
 
   hiddenTagsCount = computed(() => {
     const visible = this.visibleTagsCount();
@@ -1022,6 +1050,10 @@ export class SelectComponent<T = unknown>
     }
   }
 
+  groupHeadingId(groupIndex: number): string {
+    return this.listboxId() + "-group-" + groupIndex;
+  }
+
   // ---- Virtual scroll listbox (opt-in, replaces cdkListbox for flat menus) ----
 
   virtualOptionId(index: number): string {
@@ -1135,6 +1167,20 @@ export class SelectComponent<T = unknown>
       this.viewport()?.checkViewportSize();
       this.scrollActiveIntoView();
     });
+  }
+
+  /**
+   * Syncs the closed state when the overlay detaches. Focus goes back to the
+   * trigger only when it would otherwise be lost to the page, so a click or
+   * Tab that already moved focus elsewhere keeps it there.
+   */
+  onOverlayDetached(): void {
+    this.closeDropdown();
+
+    const active = this.document.activeElement;
+    if (!active || active === this.document.body) {
+      this.focusTrigger();
+    }
   }
 
   /** Set the active row on open: the first selected option, else the first navigable row. */

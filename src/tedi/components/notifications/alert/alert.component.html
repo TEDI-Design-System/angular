@@ -1,4 +1,4 @@
-<div class="tedi-alert__body">
+<div class="tedi-alert__body" [attr.role]="role() === 'none' ? null : role()">
   @if (title()) {
     <div class="tedi-alert__head">
       @if (icon()) {
@@ -32,25 +32,26 @@
     size="small"
     [iconSize]="18"
     [ariaLabel]="closeAriaLabel()"
+    [attr.aria-describedby]="title() ? titleId : null"
     (click)="handleClose()"
   ></button>
 }
 
 <ng-template #heading>
   @if (titleElement() === "h1") {
-    <h1 class="tedi-alert__title">{{ title() }}</h1>
+    <h1 class="tedi-alert__title" [id]="titleId">{{ title() }}</h1>
   } @else if (titleElement() === "h2") {
-    <h2 class="tedi-alert__title">{{ title() }}</h2>
+    <h2 class="tedi-alert__title" [id]="titleId">{{ title() }}</h2>
   } @else if (titleElement() === "h3") {
-    <h3 class="tedi-alert__title">{{ title() }}</h3>
+    <h3 class="tedi-alert__title" [id]="titleId">{{ title() }}</h3>
   } @else if (titleElement() === "h4") {
-    <h4 class="tedi-alert__title">{{ title() }}</h4>
+    <h4 class="tedi-alert__title" [id]="titleId">{{ title() }}</h4>
   } @else if (titleElement() === "h5") {
-    <h5 class="tedi-alert__title">{{ title() }}</h5>
+    <h5 class="tedi-alert__title" [id]="titleId">{{ title() }}</h5>
   } @else if (titleElement() === "h6") {
-    <h6 class="tedi-alert__title">{{ title() }}</h6>
+    <h6 class="tedi-alert__title" [id]="titleId">{{ title() }}</h6>
   } @else {
-    <div class="tedi-alert__title">{{ title() }}</div>
+    <div class="tedi-alert__title" [id]="titleId">{{ title() }}</div>
   }
 </ng-template>
 

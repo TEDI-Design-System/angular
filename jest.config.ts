@@ -18,7 +18,10 @@ export default {
   workerIdleMemoryLimit: "1GB",
   collectCoverage: true,
   collectCoverageFrom: ["./src/tedi/components/**/*.{js,ts,tsx}"],
-  coveragePathIgnorePatterns: ["\\.stories\\.ts$"],
+  coveragePathIgnorePatterns: [
+    "\\.stories\\.ts$",
+    "-demo(-data|\\.constants)\\.ts$",
+  ],
   coverageThreshold: {
     global: {
       branches: 80,

@@ -26,6 +26,7 @@ component's `ɵɵComponentDeclaration` carries its real selector; see
 | ToggleComponent | `tedi-toggle` | `boolean` |
 | DateFieldComponent | `tedi-date-field` | `Date \| Date[] \| DateRange \| null` |
 | DateTimeFieldComponent | `tedi-date-time-field` | `Date \| DateRange \| null` (each end carries a time) |
+| FileUploadComponent | `tedi-file-upload` | `FileUploadFile[]` — also registers on `NG_VALIDATORS` |
 | DatePickerComponent | `tedi-date-picker` | `Date \| null` — **deprecated**, use `DateFieldComponent` |
 | TimeFieldComponent | `tedi-time-field` | `string \| null` (HH:mm) |
 | TimePickerComponent | `tedi-time-picker` | `string \| null` (HH:mm) |
@@ -59,7 +60,7 @@ form = new FormGroup({
 
 ## Form Field Structure
 
-Wrap a control with `tedi-form-field` to compose the label, control, and feedback text into one accessible field. `tedi-form-field` wires the feedback text to the control's `aria-describedby` for you. It does **not** associate the label: give the label a `for` and the control a matching `id` yourself.
+Wrap a control with `tedi-form-field` to compose the label, control, and feedback text into one accessible field. `tedi-form-field` wires the feedback text to the control's `aria-describedby` for you. An `aria-describedby` of your own on the control is merged in, but read only once, when the control is created: give it a static value, since a `[attr.aria-describedby]` binding is not picked up. It does **not** associate the label: give the label a `for` and the control a matching `id` yourself.
 
 `TextEditorComponent` is the exception to the `for`/`id` rule: its editing area is a `contenteditable` div, which `for` cannot target. Give the label an `id` and point the control's `ariaLabelledby` at it instead.
 
@@ -110,7 +111,7 @@ A `[disabled]` template input also exists on most controls for non-form usage. D
 <tedi-search inputId="search" label="Otsing" [formControl]="query" (searchEvent)="run($event)" />
 ```
 
-The host is a `role="search"` landmark whose accessible name falls back to `ariaLabel` → `label` → `placeholder` → the translated "search". **When a page renders more than one `tedi-search`, give each a distinct `ariaLabel`** — identically named landmarks of the same type fail axe's `landmark-unique` rule. The visible `<label>` is unaffected; `ariaLabel` names only the landmark.
+The host is a `role="search"` landmark, unnamed unless you set `ariaLabel`. **When a page renders more than one `tedi-search`, give each a distinct `ariaLabel`**: identically named landmarks of the same type fail axe's `landmark-unique` rule. `ariaLabel` names only the landmark. Always give the field a `label`, with `hideLabel` when it must not be visible; without one the field falls back to `placeholder`, then the translated "search", which repeats the icon-only button's name.
 
 ### Suggestions
 

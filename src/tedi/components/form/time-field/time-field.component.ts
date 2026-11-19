@@ -10,6 +10,7 @@ import {
   Injector,
   input,
   model,
+  DoCheck,
   OnInit,
   signal,
   ViewEncapsulation,
@@ -42,6 +43,7 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { deriveControlState } from "../form-field/derive-control-state";
+import { controlDescribedBy } from "../form-field/control-described-by";
 import {
   TimePickerModalComponent,
   TimePickerModalData,
@@ -91,25 +93,45 @@ export type TimeFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
   },
 })
 export class TimeFieldComponent
-  implements OnInit, ControlValueAccessor, FormFieldControl<string | null>
+  implements
+    OnInit,
+    DoCheck,
+    ControlValueAccessor,
+    FormFieldControl<string | null>
 {
   private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
     optional: true,
   });
   private readonly derived = deriveControlState();
 
+  /**
+   * `aria-describedby` ids for the input — the wrapping form-field's feedback
+   * text, plus any set on `<tedi-time-field>` itself.
+   */
+  readonly describedBy = controlDescribedBy();
+
   /** Unique ID for label association and accessibility. */
   readonly inputId = input.required<string>();
+  /**
+   * `name` attribute of the input, used by native form submission. Omitted
+   * from the DOM when not set.
+   */
+  readonly name = input<string>();
   /** Selected time in `HH:mm` format. Two-way bindable. */
   readonly value = model<string | null>(null);
   /** Placeholder shown when the input is empty. */
   readonly placeholder = input<string>();
   /**
+   * Marks the input as required.
+   * @default false
+   */
+  readonly required = input<boolean>(false);
+  /**
    * Marks the field as invalid. Sets `aria-invalid` on the input and triggers
    * the error styling. Combines with the state derived from reactive forms.
    */
   // eslint-disable-next-line @angular-eslint/no-input-rename
-  protected readonly invalidInput = input<boolean>(false, { alias: "invalid" });
+  readonly invalidInput = input<boolean>(false, { alias: "invalid" });
   /** Disables interaction. Combines with the form-control disabled state. */
   // eslint-disable-next-line @angular-eslint/no-input-rename
   readonly disabledInput = input<boolean>(false, { alias: "disabled" });
@@ -136,7 +158,10 @@ export class TimeFieldComponent
   readonly useNativePicker = input<TimeFieldUseNativePicker>(false);
   /** What opens the picker: only the icon (`button`) or also clicking the input (`input`). */
   readonly pickerTrigger = input<TimeFieldPickerTrigger>("button");
-  /** Close the popover/modal as soon as the user picks a value. */
+  /**
+   * Close the popover as soon as the user picks a value. In the `scroll` variant only a minute click or
+   * Enter in the minute column closes it — scrolling or arrowing the wheels does not.
+   */
   readonly closeOnSelect = input<boolean>(false);
   /** Predefined `HH:mm` strings for the `slots` and `dropdown` variants. */
   readonly timeSlots = input<string[]>([]);
@@ -256,6 +281,10 @@ export class TimeFieldComponent
     return !!this.popover()?.isOpen();
   }
 
+  ngDoCheck(): void {
+    this.derived.sync();
+  }
+
   constructor() {
     effect(() => {
       const val = this.value();
@@ -285,6 +314,10 @@ export class TimeFieldComponent
 
   setDisabledState(disabled: boolean): void {
     this.formDisabled.set(disabled);
+  }
+
+  setDescribedBy(ids: string[]): void {
+    this.describedBy.set(ids);
   }
 
   handleInput(event: Event) {
@@ -480,7 +513,9 @@ export class TimeFieldComponent
       this.onTouched();
       this.onChange(newValue);
     }
+  }
 
+  onPickerSelectionCommitted() {
     if (this.closeOnSelect()) {
       this.closePopover();
     }

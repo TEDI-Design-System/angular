@@ -299,7 +299,7 @@ export const WithLowWidth: StoryObj<DatePickerComponent> = {
             inputPlaceholder="Select a date..."
           />
             <div>
-              <label tedi-label [required]="true" [for]="'success'">Label</label>
+              <label tedi-label [for]="'success'">Label</label>
               <tedi-date-picker [inputId]="'success'" ${argsToTemplate(args)}
             inputPlaceholder="Select a date..."
           /></div>

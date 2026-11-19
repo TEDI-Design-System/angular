@@ -2,6 +2,7 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
   ViewEncapsulation,
@@ -20,8 +21,8 @@ export type ClosingButtonIconSize = 18 | 24;
   templateUrl: "./closing-button.component.html",
   styleUrl: "./closing-button.component.scss",
   host: {
-    "[attr.title]": "showTitle() ? ariaLabel() || _defaultLabel() : null",
-    "[attr.aria-label]": "ariaLabel() || _defaultLabel()",
+    "[attr.title]": "showTitle() ? _label() : null",
+    "[attr.aria-label]": "showTitle() ? null : _label()",
     class: "no-print",
     "[class.tedi-closing-button]": "true",
     "[class.tedi-closing-button--small]": "size() === 'small'",
@@ -52,18 +53,22 @@ export class ClosingButtonComponent {
   icon = input("close");
 
   /**
-   * ARIA label to override default label "close"
+   * Accessible label overriding the default "close". Rendered as `title`
+   * or `aria-label` depending on `showTitle`.
    */
   readonly ariaLabel = input<string | undefined>();
   /**
    * Render the label as a native `title` attribute (browser tooltip on
-   * hover). Set to `false` when the button is wrapped in a `tedi-tooltip`
-   * so the native tooltip does not double the custom one. The `aria-label`
-   * is kept either way.
+   * hover), which also names the button. When `false`, the label is set as
+   * `aria-label` instead. Set to `false` when the button is wrapped in a
+   * `tedi-tooltip` so the native tooltip does not double the custom one.
    * @default true
    */
   showTitle = input(true, { transform: booleanAttribute });
 
   private translationService = inject(TediTranslationService);
   private readonly _defaultLabel = this.translationService.track("close");
+  protected readonly _label = computed(
+    () => this.ariaLabel() || this._defaultLabel(),
+  );
 }

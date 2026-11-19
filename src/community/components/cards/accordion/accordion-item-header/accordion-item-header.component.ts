@@ -20,6 +20,9 @@ import { NgTemplateOutlet } from "@angular/common";
 
 const WHITE_ICON_VARIANTS = ["brand", "brand-dark"];
 
+/**
+ * @deprecated Use AccordionItemHeader from TEDI-ready instead. This component will be removed from future versions.
+ */
 @Component({
   selector: "tedi-accordion-item-header",
   standalone: true,

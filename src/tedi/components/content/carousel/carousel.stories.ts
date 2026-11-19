@@ -130,7 +130,17 @@ export default {
     ariaLabel: {
       name: "ariaLabel",
       description:
-        "Accessible label for the carousel region. Falls back to the `carousel` translation.",
+        "Accessible label for the carousel region. Defaults to the `carousel.label` translation.",
+      control: "text",
+      table: {
+        category: "Carousel Content",
+        type: { summary: "string" },
+      },
+    },
+    ariaLabelledby: {
+      name: "ariaLabelledby",
+      description:
+        "Id of the element that names the carousel region, e.g. its heading.",
       control: "text",
       table: {
         category: "Carousel Content",
@@ -187,6 +197,8 @@ type CarouselType = CarouselComponent & {
   transitionMs: number;
   swipeThreshold: number;
   loop: boolean;
+  ariaLabel: string;
+  ariaLabelledby: string;
   withArrows: boolean;
   variant: CarouselIndicatorsVariant;
 };
@@ -198,6 +210,7 @@ export const Default: StoryObj<CarouselType> = {
     fade: false,
     transitionMs: 400,
     swipeThreshold: 0.3,
+    ariaLabelledby: "carousel-default-title",
     withArrows: false,
     variant: "dots",
   },
@@ -207,12 +220,12 @@ export const Default: StoryObj<CarouselType> = {
       <tedi-carousel>
         <tedi-carousel-header>
           <div>
-            <h2 tedi-text modifiers="h1">Title</h2>
+            <h2 id="carousel-default-title" tedi-text modifiers="h1">Title</h2>
             <p tedi-text color="secondary">Description</p>
           </div>
           <tedi-carousel-navigation />
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView" [gap]="gap" [fade]="fade" [swipeThreshold]="swipeThreshold">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [gap]="gap" [fade]="fade" [swipeThreshold]="swipeThreshold" [ariaLabel]="ariaLabel" [ariaLabelledby]="ariaLabelledby">
          @for (i of [0, 1, 2, 3, 4]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -245,7 +258,7 @@ export const TopPaginationArrowsOnly: StoryObj<CarouselType> = {
           <h2 tedi-text modifiers="h1">Title</h2>
           <tedi-carousel-navigation />
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2, 3, 4]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -274,7 +287,7 @@ export const SeparatedBottomPaginationHasDots: StoryObj<CarouselType> = {
         <tedi-carousel-header>
           <h2 tedi-text modifiers="h1">Title</h2>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2, 3, 4]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -307,7 +320,7 @@ export const SeparatedBottomPaginationHasNumbers: StoryObj<CarouselType> = {
         <tedi-carousel-header>
           <h2 tedi-text modifiers="h1">Title</h2>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -340,7 +353,7 @@ export const CenteredBottomPaginationHasDots: StoryObj<CarouselType> = {
         <tedi-carousel-header>
           <h2 tedi-text modifiers="h1">Title</h2>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2, 3, 4, 5]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -372,7 +385,7 @@ export const CenteredBottomPaginationHasNumbers: StoryObj<CarouselType> = {
         <tedi-carousel-header>
           <h2 tedi-text modifiers="h1">Title</h2>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2, 3, 4, 5]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -405,7 +418,7 @@ export const CombinationsTopNavigationBottomDots: StoryObj<CarouselType> = {
           <h2 tedi-text modifiers="h1">Title</h2>
           <tedi-carousel-navigation />
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2, 3, 4, 5]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -442,7 +455,7 @@ export const FloatingButtons: StoryObj<CarouselType> = {
         <tedi-carousel-header>
           <h2 tedi-text modifiers="h1">Title</h2>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView" [loop]="loop">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [loop]="loop" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2, 3, 4]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -475,7 +488,7 @@ export const CenteredHasDots: StoryObj<CarouselType> = {
         <tedi-carousel-header>
           <h2 tedi-text modifiers="h1">Title</h2>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -507,7 +520,7 @@ export const CenteredHasNumbers: StoryObj<CarouselType> = {
         <tedi-carousel-header>
           <h2 tedi-text modifiers="h1">Title</h2>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -539,7 +552,7 @@ export const SeparatedHasDots: StoryObj<CarouselType> = {
         <tedi-carousel-header>
           <h2 tedi-text modifiers="h1">Title</h2>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -572,7 +585,7 @@ export const SeparatedHasNumbers: StoryObj<CarouselType> = {
         <tedi-carousel-header>
           <h2 tedi-text modifiers="h1">Title</h2>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -606,7 +619,7 @@ export const Combination: StoryObj<CarouselType> = {
           <h2 tedi-text modifiers="h1">Title</h2>
           <tedi-carousel-navigation />
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -640,7 +653,7 @@ export const Fade: StoryObj<CarouselType> = {
         <tedi-carousel-header>
           <h2 tedi-text modifiers="h1">Title</h2>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView" [fade]="fade" [ariaLabel]="'Karussell (mitu slaidi vaates)'">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [fade]="fade" [ariaLabel]="'Mitu slaidi vaates'">
           @for (i of [0, 1, 2, 3, 4]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -658,7 +671,7 @@ export const Fade: StoryObj<CarouselType> = {
         </tedi-carousel-footer>
       </tedi-carousel>
       <tedi-carousel style="max-width: 400px;">
-        <tedi-carousel-content [slidesPerView]="1" [fade]="fade" [ariaLabel]="'Karussell (üks slaid vaates)'">
+        <tedi-carousel-content [slidesPerView]="1" [fade]="fade" [ariaLabel]="'Üks slaid vaates'">
           @for (i of [0, 1, 2, 3, 4]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -692,7 +705,7 @@ export const WithTopNavigation: StoryObj<CarouselType> = {
           <h2 tedi-text modifiers="h1">Title</h2>
           <tedi-carousel-navigation />
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -725,7 +738,7 @@ export const WithTopAction: StoryObj<CarouselType> = {
             <tedi-icon name="arrow_forward" [size]="18" />
           </button>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2]; track $index) {
             <ng-template tediCarouselSlide>
               <div
@@ -765,7 +778,7 @@ export const WithDescription: StoryObj<CarouselType> = {
             <tedi-icon name="arrow_forward" [size]="18" />
           </button>
         </tedi-carousel-header>
-        <tedi-carousel-content [slidesPerView]="slidesPerView">
+        <tedi-carousel-content [slidesPerView]="slidesPerView" [ariaLabel]="'Title'">
           @for (i of [0, 1, 2]; track $index) {
             <ng-template tediCarouselSlide>
               <div

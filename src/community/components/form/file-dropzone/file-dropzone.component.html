@@ -10,7 +10,7 @@
   (change)="selectionChange($event)"
 />
 
-<button [className]="classes()" (click)="onContainerClick()">
+<button type="button" [className]="classes()" (click)="onContainerClick()">
   <div class="tedi-file-dropzone__label-wrapper">
     <tedi-icon
       [name]="isDragActive() ? 'file_upload' : 'attach_file'"

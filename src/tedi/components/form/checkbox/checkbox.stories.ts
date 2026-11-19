@@ -331,7 +331,7 @@ export const Separate: StoryObj<CheckboxComponent> = {
           Nõustun tingimustega
         </label>
         <label tedi-label color="primary" [required]="true" class="flex align-items-center">
-          <input tedi-checkbox type="checkbox" style="margin-right: var(--form-checkbox-radio-inner-spacing)" />
+          <input tedi-checkbox type="checkbox" style="margin-right: var(--form-checkbox-radio-inner-spacing)" required />
           Nõustun tingimustega
         </label>
         <label tedi-label color="primary" class="flex align-items-center gap-2">
@@ -911,6 +911,7 @@ const stateRows: {
   {
     label: "Mandatory",
     id: "Mandatory",
+    attrs: "required",
     labelAttrs: '[required]="true"',
     error: false,
   },

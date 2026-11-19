@@ -79,28 +79,25 @@ describe("SearchComponent", () => {
     expect(label.textContent?.trim()).toBe("Otsing");
   });
 
-  describe("accessible name", () => {
-    it("should use label when provided", () => {
+  describe("landmark accessible name", () => {
+    it("should leave the landmark unnamed by default", () => {
       fixture.componentRef.setInput("label", "Otsing");
-      fixture.detectChanges();
-      expect(el.getAttribute("aria-label")).toBe("Otsing");
-    });
-
-    it("should fall back to placeholder when no label", () => {
       fixture.componentRef.setInput("placeholder", "Otsi siit");
       fixture.detectChanges();
-      expect(el.getAttribute("aria-label")).toBe("Otsi siit");
+      expect(el.hasAttribute("aria-label")).toBe(false);
     });
 
-    it("should fall back to the translated search label", () => {
-      expect(el.getAttribute("aria-label")).toBe("Otsi");
-    });
-
-    it("should prefer explicit ariaLabel over label", () => {
+    it("should name the landmark with ariaLabel", () => {
       fixture.componentRef.setInput("label", "Otsing");
-      fixture.componentRef.setInput("ariaLabel", "Otsi tooteid");
+      fixture.componentRef.setInput("ariaLabel", "Tooteotsing");
       fixture.detectChanges();
-      expect(el.getAttribute("aria-label")).toBe("Otsi tooteid");
+      expect(el.getAttribute("aria-label")).toBe("Tooteotsing");
+    });
+
+    it("should ignore an empty ariaLabel", () => {
+      fixture.componentRef.setInput("ariaLabel", "");
+      fixture.detectChanges();
+      expect(el.hasAttribute("aria-label")).toBe(false);
     });
   });
 
@@ -109,10 +106,10 @@ describe("SearchComponent", () => {
       expect(getInput().getAttribute("aria-label")).toBe("Otsi");
     });
 
-    it("should use ariaLabel when there is no visible label", () => {
-      fixture.componentRef.setInput("ariaLabel", "Otsi tooteid");
+    it("should not take the landmark's ariaLabel", () => {
+      fixture.componentRef.setInput("ariaLabel", "Tooteotsing");
       fixture.detectChanges();
-      expect(getInput().getAttribute("aria-label")).toBe("Otsi tooteid");
+      expect(getInput().getAttribute("aria-label")).toBe("Otsi");
     });
 
     it("should fall back to the placeholder when that is all there is", () => {
@@ -121,19 +118,50 @@ describe("SearchComponent", () => {
       expect(getInput().getAttribute("aria-label")).toBe("Otsi siit");
     });
 
-    it("should leave naming to the visible label when one is rendered", () => {
+    it("should leave naming to the label when one is rendered", () => {
       fixture.componentRef.setInput("label", "Otsing");
+      fixture.componentRef.setInput("ariaLabel", "Tooteotsing");
       fixture.detectChanges();
       expect(getInput().getAttribute("aria-label")).toBeNull();
     });
 
-    it("should keep the visible label even when ariaLabel is also set", () => {
+    it("should keep a hidden label as the input's name", () => {
       fixture.componentRef.setInput("label", "Otsing");
-      fixture.componentRef.setInput("ariaLabel", "Otsi tooteid");
+      fixture.componentRef.setInput("hideLabel", true);
       fixture.detectChanges();
+
+      const label = el.querySelector("label") as HTMLLabelElement;
+      expect(label.classList).toContain("sr-only");
+      expect(label.getAttribute("for")).toBe("test-id");
       expect(getInput().getAttribute("aria-label")).toBeNull();
-      expect(el.getAttribute("aria-label")).toBe("Otsi tooteid");
     });
+  });
+
+  it("should keep the search button named Otsi", () => {
+    fixture.componentRef.setInput("button", {});
+    fixture.componentRef.setInput("ariaLabel", "Tooteotsing");
+    fixture.detectChanges();
+    const button = el.querySelector(".tedi-search__button") as HTMLElement;
+    expect(button.getAttribute("aria-label")).toBe("Otsi");
+  });
+
+  it("should name both field and button Otsi when there is no label or placeholder", () => {
+    fixture.componentRef.setInput("button", {});
+    fixture.detectChanges();
+    const button = el.querySelector(".tedi-search__button") as HTMLElement;
+    expect(getInput().getAttribute("aria-label")).toBe("Otsi");
+    expect(button.getAttribute("aria-label")).toBe("Otsi");
+  });
+
+  it("should name the field by its hidden label next to an Otsi button", () => {
+    fixture.componentRef.setInput("label", "Otsi tooteid");
+    fixture.componentRef.setInput("hideLabel", true);
+    fixture.componentRef.setInput("button", {});
+    fixture.detectChanges();
+    const button = el.querySelector(".tedi-search__button") as HTMLElement;
+    expect(getInput().getAttribute("aria-label")).toBeNull();
+    expect(getInput().labels?.[0]?.textContent?.trim()).toBe("Otsi tooteid");
+    expect(button.getAttribute("aria-label")).toBe("Otsi");
   });
 
   it("should show the search icon when there is no button", () => {
@@ -246,6 +274,22 @@ describe("SearchComponent", () => {
     const feedback = freshEl.querySelector("tedi-feedback-text");
     expect(feedback?.getAttribute("id")).toBe("test-id-feedback");
     expect(feedback?.textContent?.trim()).toBe("Tagasiside tekst");
+  });
+
+  it("should apply default feedback classes when only text is given", () => {
+    const freshFixture = TestBed.createComponent(SearchComponent);
+    freshFixture.componentRef.setInput("inputId", "test-id");
+    freshFixture.componentRef.setInput("feedbackText", { text: "Vihjetekst" });
+    freshFixture.detectChanges();
+    const feedback = (freshFixture.nativeElement as HTMLElement).querySelector(
+      "tedi-feedback-text",
+    );
+
+    expect(feedback?.className).not.toContain("undefined");
+    expect(feedback?.classList).toContain("tedi-feedback-text--hint");
+    expect(feedback?.classList).toContain("tedi-feedback-text--left");
+    expect(feedback?.getAttribute("role")).toBeNull();
+    expect(feedback?.getAttribute("aria-live")).toBeNull();
   });
 
   it("should not set aria-describedby without feedbackText", () => {
@@ -386,6 +430,14 @@ describe("SearchComponent", () => {
     });
   });
 
+  it("falls back to the item itself when the bindLabel property is missing", () => {
+    fixture.componentRef.setInput("suggestions", [{ code: 1 }]);
+    fixture.componentRef.setInput("bindLabel", "name");
+    fixture.detectChanges();
+
+    expect(component.resolvedSuggestions()[0].label).toBe("[object Object]");
+  });
+
   describe("suggestion panel", () => {
     const panel = () =>
       document.querySelector(".tedi-search__panel") as HTMLElement | null;
@@ -458,6 +510,16 @@ describe("SearchComponent", () => {
       expect(
         row?.querySelector(".tedi-search-suggestion__description")?.textContent,
       ).toContain("49501234567");
+    });
+
+    it("leaves the description empty when the item lacks the bound property", () => {
+      fixture.componentRef.setInput("bindDescription", "code");
+      openWith([{ label: "Mari Maasikas" }]);
+
+      expect(component.resolvedSuggestions()[0].description).toBe("");
+      expect(
+        document.querySelector(".tedi-search-suggestion__description"),
+      ).toBeNull();
     });
 
     it("leaves the description out when bindDescription is unset", () => {
@@ -567,6 +629,17 @@ describe("SearchComponent", () => {
       fixture.detectChanges();
 
       expect(component.panelVisible()).toBe(true);
+    });
+
+    it("ignores scrolls while the open panel is hidden", () => {
+      fixture.componentRef.setInput("hideOnScroll", true);
+      open();
+      fixture.componentRef.setInput("minQueryLength", 10);
+      expect(component.panelVisible()).toBe(false);
+
+      document.dispatchEvent(new Event("scroll"));
+
+      expect(component.panelOpen()).toBe(true);
     });
 
     it("keeps the panel open when the option list itself is scrolled", () => {
@@ -734,6 +807,16 @@ describe("SearchComponent", () => {
     });
 
     it("has no active option before navigating", () => {
+      expect(getInput().getAttribute("aria-activedescendant")).toBeNull();
+    });
+
+    it("ArrowDown opens a closed panel without activating an option", () => {
+      component.closePanel();
+      fixture.detectChanges();
+
+      press("ArrowDown");
+
+      expect(component.panelOpen()).toBe(true);
       expect(getInput().getAttribute("aria-activedescendant")).toBeNull();
     });
 
@@ -953,6 +1036,16 @@ describe("SearchComponent", () => {
       expect(component.panelOpen()).toBe(false);
     });
 
+    it("closes when focus leaves the page", () => {
+      component.openPanel();
+      fixture.detectChanges();
+
+      component.onFocusOut(new FocusEvent("focusout", { relatedTarget: null }));
+      fixture.detectChanges();
+
+      expect(component.panelOpen()).toBe(false);
+    });
+
     it("stays open when focus moves within the component", () => {
       component.openPanel();
       fixture.detectChanges();
@@ -963,6 +1056,40 @@ describe("SearchComponent", () => {
       fixture.detectChanges();
 
       expect(component.panelOpen()).toBe(true);
+    });
+
+    it("anchors the panel to the field box", () => {
+      component.openPanel();
+      fixture.detectChanges();
+
+      expect(component.panelOrigin()).toBe(
+        el.querySelector(".tedi-form-field__box"),
+      );
+    });
+
+    it("anchors the panel to the input when the field has no box", () => {
+      fixture.componentRef.setInput("button", {});
+      fixture.componentRef.setInput("clearable", false);
+      fixture.detectChanges();
+
+      component.openPanel();
+      fixture.detectChanges();
+
+      expect(el.querySelector(".tedi-form-field__box")).toBeNull();
+      expect(component.panelOrigin()).toBe(getInput());
+    });
+
+    it("leaves Tab to the browser when there is no footer", () => {
+      component.openPanel();
+      fixture.detectChanges();
+
+      const tab = new KeyboardEvent("keydown", {
+        key: "Tab",
+        cancelable: true,
+      });
+      getInput().dispatchEvent(tab);
+
+      expect(tab.defaultPrevented).toBe(false);
     });
 
     it("records the host width so the panel matches the field", () => {
@@ -1219,6 +1346,37 @@ describe("SearchComponent with a footer", () => {
     fixture.detectChanges();
 
     expect(search.panelOpen()).toBe(false);
+  });
+
+  it("leaves Shift+Tab from the input to the browser", () => {
+    const tab = new KeyboardEvent("keydown", {
+      key: "Tab",
+      shiftKey: true,
+      cancelable: true,
+    });
+    getInput().dispatchEvent(tab);
+
+    expect(tab.defaultPrevented).toBe(false);
+  });
+
+  it("leaves Tab from the input to the browser while the panel is closed", () => {
+    search.closePanel();
+    fixture.detectChanges();
+
+    const tab = new KeyboardEvent("keydown", { key: "Tab", cancelable: true });
+    getInput().dispatchEvent(tab);
+
+    expect(tab.defaultPrevented).toBe(false);
+  });
+
+  it("ignores other keys inside the footer", () => {
+    const first = footer()?.querySelector(".footer-action-a") as HTMLElement;
+    first.focus();
+    press(first, "a");
+    fixture.detectChanges();
+
+    expect(search.panelOpen()).toBe(true);
+    expect(document.activeElement).toBe(first);
   });
 
   it("Escape inside the footer closes and restores focus", () => {
