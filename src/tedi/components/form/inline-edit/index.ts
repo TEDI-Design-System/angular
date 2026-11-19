@@ -1,2 +1,2 @@
 export * from "./inline-edit.component";
-export * from "./inline-edit-control.directive";
+export * from "./inline-edit.directives";

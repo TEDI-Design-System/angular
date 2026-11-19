@@ -7,11 +7,12 @@ import { TediTranslationService } from "../../../services/translation/translatio
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { FormFieldComponent } from "../form-field/form-field.component";
+import { SelectComponent } from "../select/select.component";
 import { TextFieldComponent } from "../text-field/text-field.component";
 import {
   InlineEditControlDirective,
   InlineEditValueDirective,
-} from "./inline-edit-control.directive";
+} from "./inline-edit.directives";
 import { InlineEditComponent } from "./inline-edit.component";
 
 class TranslationMock {
@@ -39,7 +40,7 @@ class TranslationMock {
       [disabled]="disabled()"
       [invalid]="invalid()"
       [readOnly]="readOnly()"
-      [contentWidth]="contentWidth()"
+      [fitContent]="fitContent()"
       [editIconPosition]="editIconPosition()"
       [closeOnEnter]="closeOnEnter()"
       [closeOnEscape]="closeOnEscape()"
@@ -65,7 +66,7 @@ class TestHostComponent {
   disabled = signal(false);
   invalid = signal(false);
   readOnly = signal(false);
-  contentWidth = signal(false);
+  fitContent = signal(false);
   editIconPosition = signal<"inline" | "end">("inline");
   closeOnEnter = signal(true);
   closeOnEscape = signal(true);
@@ -136,12 +137,22 @@ describe("InlineEditComponent", () => {
       ).toBe(true);
     });
 
-    it.each(["", "   "])("rejects a blank label (%j)", (label) => {
-      host.label.set(label);
-      expect(() => fixture.detectChanges()).toThrow(
-        "[tedi-inline-edit] label must be a non-empty string.",
-      );
-    });
+    it.each(["", "   "])(
+      "warns about a blank label (%j) and leaves it out of the name",
+      (label) => {
+        const warn = jest.spyOn(console, "warn").mockImplementation();
+        host.label.set(label);
+        fixture.detectChanges();
+
+        expect(warn).toHaveBeenCalledWith(
+          expect.stringContaining("[tedi-inline-edit] `label` is empty"),
+        );
+        expect(trigger()!.getAttribute("aria-label")).toBe(
+          "Mari Maasikas, inline-edit.edit",
+        );
+        warn.mockRestore();
+      },
+    );
 
     it("names the trigger when the value and placeholder are empty", () => {
       host.displayValue.set("");
@@ -253,13 +264,13 @@ describe("InlineEditComponent", () => {
       expect(trigger()!.disabled).toBe(true);
     });
 
-    it("fills its container until content width is turned on", () => {
-      expect(root().classList).not.toContain("tedi-inline-edit--content-width");
+    it("fills its container until fit content is turned on", () => {
+      expect(root().classList).not.toContain("tedi-inline-edit--fit-content");
 
-      host.contentWidth.set(true);
+      host.fitContent.set(true);
       fixture.detectChanges();
 
-      expect(root().classList).toContain("tedi-inline-edit--content-width");
+      expect(root().classList).toContain("tedi-inline-edit--fit-content");
     });
   });
 
@@ -363,6 +374,28 @@ describe("InlineEditComponent", () => {
       expect(host.cancels).toBe(0);
       expect(host.editing()).toBe(false);
       expect(document.activeElement).toBe(trigger());
+    });
+
+    it("listens for focus leaving only while editing", async () => {
+      const add = jest.spyOn(document, "addEventListener");
+      const remove = jest.spyOn(document, "removeEventListener");
+      const focusOut = (spy: jest.SpyInstance) =>
+        spy.mock.calls.filter(([type]) => type === "focusout").length;
+
+      expect(focusOut(add)).toBe(0);
+
+      await enterEditMode();
+      expect(focusOut(add)).toBe(1);
+
+      editorInput()!.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+      );
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(focusOut(remove)).toBe(1);
+      add.mockRestore();
+      remove.mockRestore();
     });
 
     it("cancels on Escape", async () => {
@@ -680,6 +713,119 @@ describe("InlineEditComponent projected feedback", () => {
     expect(describedBy).toBeTruthy();
     expect(dom.querySelector(`#${describedBy}`)!.textContent).toContain(
       "Vigane väärtus",
+    );
+  });
+});
+
+describe("InlineEditComponent feedback on the editor", () => {
+  @Component({
+    standalone: true,
+    imports: [
+      InlineEditComponent,
+      InlineEditControlDirective,
+      TextFieldComponent,
+      FeedbackTextComponent,
+    ],
+    template: `
+      <tedi-inline-edit
+        displayValue="Mari"
+        label="Nimi"
+        invalid
+        [editing]="true"
+      >
+        <ng-template tediInlineEditControl>
+          <input tedi-text-field value="Mari" />
+        </ng-template>
+        <tedi-feedback-text text="Vigane väärtus" type="error" />
+      </tedi-inline-edit>
+    `,
+  })
+  class EditorFeedbackHostComponent {}
+
+  it("links the feedback text to the editor control", async () => {
+    await TestBed.configureTestingModule({
+      imports: [EditorFeedbackHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(EditorFeedbackHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const dom = fixture.nativeElement as HTMLElement;
+    const describedBy = dom
+      .querySelector(".tedi-inline-edit__editor input")!
+      .getAttribute("aria-describedby");
+
+    expect(describedBy).toBeTruthy();
+    expect(dom.querySelector(`#${describedBy}`)!.textContent).toContain(
+      "Vigane väärtus",
+    );
+  });
+});
+
+describe("InlineEditComponent feedback on a select editor", () => {
+  @Component({
+    standalone: true,
+    imports: [
+      InlineEditComponent,
+      InlineEditControlDirective,
+      SelectComponent,
+      FeedbackTextComponent,
+    ],
+    template: `
+      <tedi-inline-edit
+        displayValue="Eesti"
+        label="Riik"
+        invalid
+        [editing]="true"
+      >
+        <ng-template tediInlineEditControl>
+          <tedi-select
+            inputId="ie-select"
+            ariaLabel="Riik"
+            [options]="options"
+            bindLabel="label"
+            bindValue="value"
+          />
+        </ng-template>
+        <tedi-feedback-text text="Vali riik" type="error" />
+      </tedi-inline-edit>
+    `,
+  })
+  class SelectFeedbackHostComponent {
+    options = [
+      { value: "ee", label: "Eesti" },
+      { value: "fi", label: "Soome" },
+    ];
+  }
+
+  it("links the feedback text to the select", async () => {
+    await TestBed.configureTestingModule({
+      imports: [SelectFeedbackHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(SelectFeedbackHostComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const dom = fixture.nativeElement as HTMLElement;
+    const describedBy = dom
+      .querySelector(".tedi-inline-edit__editor [role=combobox]")!
+      .getAttribute("aria-describedby");
+
+    expect(describedBy).toBeTruthy();
+    expect(dom.querySelector(`#${describedBy}`)!.textContent).toContain(
+      "Vali riik",
     );
   });
 });

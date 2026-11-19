@@ -7,13 +7,16 @@ import {
   effect,
   untracked,
   contentChild,
+  DestroyRef,
   ElementRef,
   forwardRef,
   inject,
   Injector,
   input,
+  isDevMode,
   model,
   output,
+  Renderer2,
   viewChild,
   ViewEncapsulation,
 } from "@angular/core";
@@ -26,19 +29,24 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
+import { TEDI_DESCRIBABLE_CONTROL } from "../form-field/control-described-by";
 import {
   InlineEditControlDirective,
   InlineEditValueDirective,
-} from "./inline-edit-control.directive";
+} from "./inline-edit.directives";
 
 let inlineEditIdCounter = 0;
 
-function nonEmptyLabel(value: string): string {
-  if (typeof value !== "string" || !value.trim()) {
-    throw new Error("[tedi-inline-edit] label must be a non-empty string.");
+function trimmedLabel(value: string): string {
+  const label = typeof value === "string" ? value.trim() : "";
+
+  if (!label && isDevMode()) {
+    console.warn(
+      "[tedi-inline-edit] `label` is empty, so the trigger has no accessible name.",
+    );
   }
 
-  return value.trim();
+  return label;
 }
 
 export type InlineEditSize = "default" | "small";
@@ -64,17 +72,17 @@ export type InlineEditExitReason = "commit" | "cancel";
   host: {
     class: "tedi-inline-edit",
     "[class.tedi-inline-edit--small]": "size() === 'small'",
-    "[class.tedi-inline-edit--content-width]": "contentWidth()",
+    "[class.tedi-inline-edit--fit-content]": "fitContent()",
     "[class.tedi-inline-edit--icon-end]": "editIconPosition() === 'end'",
     "[class.tedi-inline-edit--invalid]": "invalid()",
     "[class.tedi-inline-edit--editing]": "editing()",
-    "(document:focusout)": "handleFocusOut($event)",
     "(keydown)": "handleKeydown($event)",
   },
 })
 export class InlineEditComponent {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
+  private readonly renderer = inject(Renderer2);
   private readonly translationService = inject(TediTranslationService);
   private readonly parentContext = inject(TEDI_FIELD_CONTEXT, {
     optional: true,
@@ -88,25 +96,16 @@ export class InlineEditComponent {
   /** Text shown when `displayValue` is empty or whitespace-only. */
   readonly placeholder = input<string>("");
   /**
-   * Non-blank label for the read trigger; blank values throw an error.
-   * Announced with the displayed value and translated Edit action.
-   * Give the editor its own label; host attributes are not forwarded.
+   * Accessible name of the read trigger, announced with the value and the Edit action.
    */
-  readonly label = input.required<string, string>({ transform: nonEmptyLabel });
+  readonly label = input.required<string, string>({ transform: trimmedLabel });
   /**
-   * Text size and row spacing. The editor defaults to `small` for either
-   * variant unless it sets its own size.
-   *
-   * Both sizes use increased vertical padding on mobile; the row fills its
-   * container, so the whole row is tappable.
+   * Text size and row spacing; the editor defaults to `small` unless it sets its own.
    * @default "default"
    */
   readonly size = input<InlineEditSize>("default");
   /**
-   * Renders the value as plain text with no edit affordance, keeping the row's
-   * inset so it lines up with editable rows. For a block that is entirely
-   * read-only, use a text group instead. Differs from `disabled`, which keeps
-   * the greyed trigger and icon for transient states such as saving.
+   * Renders the value as plain text with no edit affordance, lined up with editable rows.
    * @default false
    */
   readonly readOnly = input(false, { transform: booleanAttribute });
@@ -118,12 +117,11 @@ export class InlineEditComponent {
    */
   readonly editIconPosition = input<InlineEditIconPosition>("end");
   /**
-   * Sizes the row to its value rather than filling its container. The row then
-   * changes width when the editor opens, because the control brings its own
-   * width — use it only for a value edited inside running text.
+   * Sizes the row to its value instead of filling its container, so the row
+   * changes width when the editor opens.
    * @default false
    */
-  readonly contentWidth = input(false, { transform: booleanAttribute });
+  readonly fitContent = input(false, { transform: booleanAttribute });
   /**
    * Toggles the editor. Supports `[(editing)]`.
    * Entry emits `editStart`. The control receives focus unless initially open.
@@ -163,9 +161,7 @@ export class InlineEditComponent {
    */
   readonly closeOnEscape = input(true, { transform: booleanAttribute });
   /**
-   * Commits when focus leaves the editor. Linked overlays and CDK overlay
-   * panes created during the edit count as part of the editor; anywhere else,
-   * including back into a surrounding modal, commits.
+   * Commits when focus leaves the editor or the overlays it opens.
    * @default true
    */
   readonly closeOnBlur = input(true, { transform: booleanAttribute });
@@ -197,6 +193,9 @@ export class InlineEditComponent {
   private readonly controlTemplate = contentChild(InlineEditControlDirective);
   private readonly valueDirective = contentChild(InlineEditValueDirective);
   private readonly feedback = contentChild(FeedbackTextComponent);
+  private readonly editorControl = contentChild(TEDI_DESCRIBABLE_CONTROL, {
+    descendants: true,
+  });
   private readonly editorRef = viewChild<ElementRef<HTMLElement>>("editor");
   private readonly triggerRef =
     viewChild<ElementRef<HTMLButtonElement>>("trigger");
@@ -215,7 +214,7 @@ export class InlineEditComponent {
     clearable: computed(() => false),
   };
 
-  /** Links a projected feedback text to the trigger through `aria-describedby`. */
+  /** Id of the projected feedback text, linked to the trigger and to the editor. */
   readonly feedbackId = `tedi-inline-edit-feedback-${inlineEditIdCounter++}`;
 
   readonly hasFeedback = computed(() => this.feedback() !== undefined);
@@ -237,17 +236,28 @@ export class InlineEditComponent {
     const action = this.translationService.translate("inline-edit.edit");
     const value = this.displayText().trim();
 
-    return value ? `${label}: ${value}, ${action}` : `${label}, ${action}`;
+    return [label && value ? `${label}: ${value}` : label || value, action]
+      .filter(Boolean)
+      .join(", ");
   });
 
   private entered = false;
   private leaving = false;
+  private removeFocusOutListener: (() => void) | null = null;
   private readonly ownedOverlays = new Set<HTMLElement>();
   // Snapshot used to support unlinked picker overlays. New panes are assumed
   // to belong to the editor, which also includes unrelated panes opened later.
   private readonly foreignOverlays = new Set<HTMLElement>();
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.unlistenFocusOut());
+
+    effect(() => {
+      this.editorControl()?.setDescribedBy(
+        this.hasFeedback() ? [this.feedbackId] : [],
+      );
+    });
+
     let initialRender = true;
 
     effect(() => {
@@ -263,6 +273,7 @@ export class InlineEditComponent {
           this.enterEditMode(!initialRender);
         } else if (!editing || readOnly) {
           this.entered = false;
+          this.unlistenFocusOut();
           this.ownedOverlays.clear();
           this.foreignOverlays.clear();
         }
@@ -289,6 +300,7 @@ export class InlineEditComponent {
     this.entered = true;
     this.swappingToControl = true;
     this.snapshotForeignOverlays();
+    this.listenFocusOut();
     this.editStart.emit();
 
     afterNextRender(
@@ -335,6 +347,21 @@ export class InlineEditComponent {
     if (next && this.keepsFocusInside(next)) return;
 
     this.stopEditing("commit", false);
+  }
+
+  // Listens for focus leaving only while the editor is open.
+  private listenFocusOut() {
+    this.unlistenFocusOut();
+    this.removeFocusOutListener = this.renderer.listen(
+      "document",
+      "focusout",
+      (event: FocusEvent) => this.handleFocusOut(event),
+    );
+  }
+
+  private unlistenFocusOut() {
+    this.removeFocusOutListener?.();
+    this.removeFocusOutListener = null;
   }
 
   private snapshotForeignOverlays() {
@@ -396,6 +423,7 @@ export class InlineEditComponent {
 
     this.editing.set(false);
     this.entered = false;
+    this.unlistenFocusOut();
     this.ownedOverlays.clear();
     this.foreignOverlays.clear();
 

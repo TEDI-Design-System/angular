@@ -11,7 +11,7 @@
   max-width: 100%;
 }
 
-.tedi-inline-edit--content-width {
+.tedi-inline-edit--fit-content {
   display: inline-flex;
   align-items: flex-start;
   width: auto;
@@ -113,11 +113,6 @@
 
 .tedi-inline-edit__trigger:disabled .tedi-inline-edit__icon {
   color: var(--general-text-disabled);
-}
-
-.tedi-inline-edit--content-width .tedi-inline-edit__trigger,
-.tedi-inline-edit--content-width .tedi-inline-edit__editor {
-  width: auto;
 }
 
 .tedi-inline-edit--icon-end .tedi-inline-edit__value {

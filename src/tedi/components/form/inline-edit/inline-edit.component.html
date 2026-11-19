@@ -1,17 +1,21 @@
+<ng-template #valueContent>
+  <span
+    class="tedi-inline-edit__value"
+    [class.tedi-inline-edit__value--placeholder]="
+      !hasValue() && !valueTemplate()
+    "
+  >
+    @if (valueTemplate(); as value) {
+      <ng-container [ngTemplateOutlet]="value" />
+    } @else {
+      {{ displayText() }}
+    }
+  </span>
+</ng-template>
+
 @if (readOnly()) {
   <span class="tedi-inline-edit__static">
-    <span
-      class="tedi-inline-edit__value"
-      [class.tedi-inline-edit__value--placeholder]="
-        !hasValue() && !valueTemplate()
-      "
-    >
-      @if (valueTemplate(); as value) {
-        <ng-container [ngTemplateOutlet]="value" />
-      } @else {
-        {{ displayText() }}
-      }
-    </span>
+    <ng-container [ngTemplateOutlet]="valueContent" />
   </span>
 } @else if (editing() && template(); as controlTemplate) {
   <div #editor class="tedi-inline-edit__editor">
@@ -27,18 +31,7 @@
     [attr.aria-describedby]="hasFeedback() ? feedbackId : null"
     (click)="startEditing()"
   >
-    <span
-      class="tedi-inline-edit__value"
-      [class.tedi-inline-edit__value--placeholder]="
-        !hasValue() && !valueTemplate()
-      "
-    >
-      @if (valueTemplate(); as value) {
-        <ng-container [ngTemplateOutlet]="value" />
-      } @else {
-        {{ displayText() }}
-      }
-    </span>
+    <ng-container [ngTemplateOutlet]="valueContent" />
     @if (!invalid()) {
       <tedi-icon
         class="tedi-inline-edit__icon"
