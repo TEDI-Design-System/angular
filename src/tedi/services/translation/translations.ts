@@ -1496,9 +1496,25 @@ export const translationsMap = {
     en: "End time",
     ru: "Время окончания",
   },
+  "date-time-field.range-time-switch": {
+    description:
+      "Accessible name of the start/end tab list above the date-time field range time picker.",
+    components: ["DateTimeField"],
+    et: "Määratav aeg",
+    en: "Time to set",
+    ru: "Устанавливаемое время",
+  },
+  "date-time-field.range-end-active": {
+    description:
+      "Announced when picking a start time slot switches the date-time field range picker to the end time.",
+    components: ["DateTimeField"],
+    et: "Vali lõppaeg",
+    en: "Choose the end time",
+    ru: "Выберите время окончания",
+  },
   "date-time-field.select-time": {
     description:
-      "Footer link in the multi-step date-time field calendar that advances to the time picker.",
+      "Footer link in the multi-step date-time field calendar that advances to the time picker; also announced when the field moves there automatically.",
     components: ["DateTimeField"],
     et: "Vali kellaaeg",
     en: "Select time",

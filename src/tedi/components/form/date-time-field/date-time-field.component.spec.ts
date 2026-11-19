@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Subject } from "rxjs";
-import { Component, signal } from "@angular/core";
+import { ApplicationRef, Component, signal } from "@angular/core";
 import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { By } from "@angular/platform-browser";
+import { LiveAnnouncer } from "@angular/cdk/a11y";
 import {
   DateTimeFieldComponent,
   DateTimeFieldValue,
@@ -507,16 +508,129 @@ describe("DateTimeFieldComponent", () => {
   });
 
   describe("time selection details", () => {
-    it("closes the overlay after a slot pick in multi-step", () => {
-      const { component } = createField({
-        layout: "multi-step",
-        availableTimes: ["09:30", "10:00"],
-        value: new Date(2025, 8, 1, 0, 0),
+    describe("auto-advance to the time step", () => {
+      const pick = (
+        inputs: Record<string, unknown>,
+        value: DateTimeFieldValue,
+      ) => {
+        const { component, fixture } = createField({
+          layout: "multi-step",
+          ...inputs,
+        });
+        const announce = jest
+          .spyOn(TestBed.inject(LiveAnnouncer), "announce")
+          .mockResolvedValue();
+        component.handleIconClick();
+        fixture.detectChanges();
+        stubCalendar(component, value);
+        component.handleCalendarSelect();
+        fixture.detectChanges();
+        return { component, announce };
+      };
+
+      it("moves to the time step and announces it once a date is picked", async () => {
+        const { component, announce } = pick(
+          { autoAdvanceToTime: true, availableTimes: ["09:30", "10:00"] },
+          new Date(2025, 8, 2),
+        );
+        expect(component.step()).toBe("time");
+        await TestBed.inject(ApplicationRef).whenStable();
+        expect(
+          document
+            .querySelector(".tedi-time-picker")
+            ?.contains(document.activeElement),
+        ).toBe(true);
+        expect(announce).toHaveBeenCalledWith(
+          "date-time-field.select-time",
+          "polite",
+        );
+        component.closeOverlay();
       });
-      component.handleIconClick();
-      component.goToTimeStep();
-      component.handleTimeSelect("09:30");
-      expect(component.overlayOpen()).toBe(false);
+
+      it("waits for the end date in range mode", () => {
+        const { component } = pick({ mode: "range", autoAdvanceToTime: true }, {
+          from: new Date(2025, 8, 2),
+        } as DateRange);
+        expect(component.step()).toBe("date");
+        stubCalendar(component, {
+          from: new Date(2025, 8, 2),
+          to: new Date(2025, 8, 4),
+        } as DateRange);
+        component.handleCalendarSelect();
+        expect(component.step()).toBe("time");
+        component.closeOverlay();
+      });
+
+      it("stays on the calendar by default", () => {
+        const { component, announce } = pick({}, new Date(2025, 8, 2));
+        expect(component.step()).toBe("date");
+        expect(announce).not.toHaveBeenCalled();
+        component.closeOverlay();
+      });
+
+      it("announces a custom selectTimeLabel", () => {
+        const { component, announce } = pick(
+          { autoAdvanceToTime: true, selectTimeLabel: "Edasi" },
+          new Date(2025, 8, 2),
+        );
+        expect(announce).toHaveBeenCalledWith("Edasi", "polite");
+        component.closeOverlay();
+      });
+    });
+
+    describe("multi-step slot pick", () => {
+      const setup = () => {
+        const { component, fixture } = createField({
+          layout: "multi-step",
+          availableTimes: ["09:30", "10:00"],
+          value: new Date(2025, 8, 1, 0, 0),
+        });
+        component.handleIconClick();
+        fixture.detectChanges();
+        component.goToTimeStep();
+        fixture.detectChanges();
+        const picker = document.querySelector(
+          ".tedi-time-picker--slots",
+        ) as HTMLElement;
+        return { component, picker };
+      };
+      const press = (target: HTMLElement, key: string) => {
+        const event = new KeyboardEvent("keydown", {
+          key,
+          bubbles: true,
+          cancelable: true,
+        });
+        target.dispatchEvent(event);
+        return event;
+      };
+
+      it("closes after a click", () => {
+        const { component, picker } = setup();
+        picker.dispatchEvent(new Event("pointerdown"));
+        component.handleTimeSelect("09:30");
+        expect(component.overlayOpen()).toBe(false);
+      });
+
+      it("stays open while the arrow keys move the selection", () => {
+        const { component, picker } = setup();
+        const radio = picker.querySelector("input") as HTMLInputElement;
+        expect(press(radio, "ArrowDown").defaultPrevented).toBe(false);
+        component.handleTimeSelect("10:00");
+        expect(component.overlayOpen()).toBe(true);
+        expect((component.value() as Date).getHours()).toBe(10);
+        component.closeOverlay();
+      });
+
+      it.each(["Enter", " "])(
+        "confirms the focused slot and closes on %p",
+        (key) => {
+          const { component, picker } = setup();
+          const radio = picker.querySelectorAll("input")[1] as HTMLInputElement;
+          expect(press(radio, key).defaultPrevented).toBe(true);
+          expect((component.value() as Date).getHours()).toBe(10);
+          expect(component.overlayOpen()).toBe(false);
+        },
+      );
     });
 
     it("creates a value from today when no date is selected yet", () => {
@@ -1005,6 +1119,347 @@ describe("DateTimeFieldComponent", () => {
       expect(dates.every((d) => !!d)).toBe(true);
       component.closeOverlay();
       fixture.detectChanges();
+    });
+  });
+
+  describe("range time button group", () => {
+    const value = {
+      from: new Date(2025, 9, 12, 9, 30),
+      to: new Date(2025, 9, 28, 11, 30),
+    };
+    const slots = ["09:30", "10:00", "11:30", "15:30"];
+
+    const groupButtons = (): HTMLButtonElement[] =>
+      Array.from(
+        document.querySelectorAll<HTMLButtonElement>(
+          ".tedi-date-time-field-range-switch button",
+        ),
+      );
+
+    it("stacks both ends by default", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        availableTimes: slots,
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(
+        document.querySelector("tedi-date-time-field-range-switch"),
+      ).toBeNull();
+      expect(document.querySelectorAll(".tedi-time-picker--slots").length).toBe(
+        2,
+      );
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("shows one picker under a summary of both ends", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        availableTimes: slots,
+        value,
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(document.querySelectorAll(".tedi-time-picker--slots").length).toBe(
+        1,
+      );
+      const ends = Array.from(
+        document.querySelectorAll(".tedi-date-time-field-range-switch__end"),
+      ).map((e) => e.textContent?.replace(/\s+/g, " ").trim());
+      expect(ends).toEqual(["12.10.25 09:30", "28.10.25 11:30"]);
+      expect(
+        document.querySelector(".tedi-date-time-field__split-heading"),
+      ).toBeNull();
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("sets the end picked in the button group", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        availableTimes: slots,
+        value,
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      const [fromButton, toButton] = groupButtons();
+      expect(fromButton.getAttribute("aria-selected")).toBe("true");
+
+      toButton.click();
+      fixture.detectChanges();
+      expect(component.activeRangeEnd()).toBe("to");
+      expect(toButton.getAttribute("aria-selected")).toBe("true");
+
+      component.stepTimePicker()?.selectSlot("15:30");
+      fixture.detectChanges();
+      const range = component.value() as DateRange;
+      expect(range.from.getHours()).toBe(9);
+      expect(range.to?.getHours()).toBe(15);
+      expect(range.to?.getMinutes()).toBe(30);
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("keeps an end active when the pressed item is clicked again", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        value,
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      const [fromButton] = groupButtons();
+      fromButton.click();
+      fixture.detectChanges();
+      expect(component.activeRangeEnd()).toBe("from");
+      expect(fromButton.getAttribute("aria-selected")).toBe("true");
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("reopens on the start time", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      groupButtons()[1].click();
+      fixture.detectChanges();
+      component.closeOverlay();
+      fixture.detectChanges();
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(component.activeRangeEnd()).toBe("from");
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    const slotPicker = (): HTMLElement =>
+      document.querySelector(".tedi-time-picker--slots") as HTMLElement;
+
+    it("links the start/end tabs to the picker panel", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        availableTimes: slots,
+        value,
+        inputId: "booking",
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      const panel = document.querySelector('[role="tabpanel"]') as HTMLElement;
+      const [fromTab, toTab] = groupButtons();
+      expect(fromTab.getAttribute("role")).toBe("tab");
+      expect(fromTab.getAttribute("aria-controls")).toBe(panel.id);
+      expect(panel.getAttribute("aria-labelledby")).toBe(fromTab.id);
+      expect(panel.contains(slotPicker())).toBe(true);
+      expect(slotPicker().hasAttribute("role")).toBe(false);
+
+      fromTab.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }),
+      );
+      fixture.detectChanges();
+      expect(component.activeRangeEnd()).toBe("to");
+      expect(document.activeElement).toBe(toTab);
+      expect(panel.getAttribute("aria-labelledby")).toBe(toTab.id);
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("shows each end's own day slots", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        availableTimes: (date: Date) =>
+          date.getDate() === 12 ? ["09:30", "10:00"] : ["11:30", "12:00"],
+        value,
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      expect(component.fromAvailableTimes()).toEqual(["09:30", "10:00"]);
+      groupButtons()[1].click();
+      fixture.detectChanges();
+      expect(
+        Array.from(slotPicker().querySelectorAll("label")).map((l) =>
+          l.textContent?.trim(),
+        ),
+      ).toEqual(["11:30", "12:00"]);
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("keeps focus in the picker when the end day lacks the clicked slot", async () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        availableTimes: (date: Date) =>
+          date.getDate() === 12 ? ["09:30", "10:00"] : ["11:30", "12:00"],
+        value,
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      (slotPicker().querySelector("input") as HTMLInputElement).focus();
+      slotPicker().dispatchEvent(new Event("pointerdown"));
+      component.handleRangeSlotSelect("from", "09:30");
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.activeRangeEnd()).toBe("to");
+      expect(slotPicker().contains(document.activeElement)).toBe(true);
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("doesn't reuse a pointer pick for a later pick without one", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        availableTimes: slots,
+        value,
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      slotPicker().dispatchEvent(new Event("pointerdown"));
+      component.handleRangeSlotSelect("from", "10:00");
+      expect(component.activeRangeEnd()).toBe("to");
+      component.activeRangeEnd.set("from");
+      component.handleRangeSlotSelect("from", "11:30");
+      expect(component.activeRangeEnd()).toBe("from");
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("resolves the end slots from the start day until an end date is set", () => {
+      const { component } = createField({
+        mode: "range",
+        availableTimes: (date: Date) => [`${date.getDate()}:00`],
+        value: { from: new Date(2025, 9, 12) },
+      });
+      expect(component.toAvailableTimes()).toEqual(["12:00"]);
+    });
+
+    it("returns to the start time when the calendar starts a new range", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        availableTimes: slots,
+        value,
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      groupButtons()[1].click();
+      fixture.detectChanges();
+      (component as unknown as { calendar: () => unknown }).calendar = () => ({
+        value: () => ({ from: new Date(2025, 10, 1) }),
+      });
+      component.handleCalendarSelect();
+      expect(component.activeRangeEnd()).toBe("from");
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("switches to the end time after a start slot is clicked", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        availableTimes: slots,
+        value,
+      });
+      const announce = jest
+        .spyOn(TestBed.inject(LiveAnnouncer), "announce")
+        .mockResolvedValue();
+      component.handleIconClick();
+      fixture.detectChanges();
+      slotPicker().dispatchEvent(new Event("pointerdown"));
+      component.stepTimePicker()?.selectSlot("10:00");
+      fixture.detectChanges();
+      expect(component.activeRangeEnd()).toBe("to");
+      expect(announce).toHaveBeenCalledWith(
+        "date-time-field.range-end-active",
+        "polite",
+      );
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("stays on the start time when a slot is picked with the keyboard", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        availableTimes: slots,
+        value,
+      });
+      const announce = jest
+        .spyOn(TestBed.inject(LiveAnnouncer), "announce")
+        .mockResolvedValue();
+      component.handleIconClick();
+      fixture.detectChanges();
+      slotPicker().dispatchEvent(new Event("pointerdown"));
+      const arrow = new KeyboardEvent("keydown", {
+        key: "ArrowRight",
+        bubbles: true,
+        cancelable: true,
+      });
+      slotPicker().dispatchEvent(arrow);
+      expect(arrow.defaultPrevented).toBe(false);
+      component.stepTimePicker()?.selectSlot("10:00");
+      fixture.detectChanges();
+      expect(component.activeRangeEnd()).toBe("from");
+      expect((component.value() as DateRange).from.getHours()).toBe(10);
+      expect(announce).not.toHaveBeenCalled();
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("stays on the start time until an end date is set", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        availableTimes: slots,
+        value: { from: value.from },
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      slotPicker().dispatchEvent(new Event("pointerdown"));
+      component.stepTimePicker()?.selectSlot("10:00");
+      fixture.detectChanges();
+      expect(component.activeRangeEnd()).toBe("from");
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("stays on the start time when the auto switch is off", () => {
+      const { component, fixture } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        availableTimes: slots,
+        value,
+        rangeTimeAutoSwitch: false,
+      });
+      component.handleIconClick();
+      fixture.detectChanges();
+      slotPicker().dispatchEvent(new Event("pointerdown"));
+      component.stepTimePicker()?.selectSlot("10:00");
+      fixture.detectChanges();
+      expect(component.activeRangeEnd()).toBe("from");
+      component.closeOverlay();
+      fixture.detectChanges();
+    });
+
+    it("passes the layout to the modal", () => {
+      const { component, modalService } = createField({
+        mode: "range",
+        rangeTimeLayout: "button-group",
+        modal: true,
+      });
+      modalService.open.mockReturnValue(stubModalRef());
+      component.handleIconClick();
+      const data = modalService.open.mock.calls[0][1].data;
+      expect(data.rangeTimeLayout).toBe("button-group");
+      expect(data.rangeTimeAutoSwitch).toBe(true);
     });
   });
 });

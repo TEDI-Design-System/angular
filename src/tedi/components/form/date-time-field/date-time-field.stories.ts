@@ -50,6 +50,9 @@ const renderSingle: NonNullable<StoryObj<DateTimeFieldStoryArgs>["render"]> = (
           [useNativeTimePicker]="useNativeTimePicker"
           [minuteStep]="minuteStep"
           [slotColumns]="slotColumns"
+          [rangeTimeLayout]="rangeTimeLayout"
+          [rangeTimeAutoSwitch]="rangeTimeAutoSwitch"
+          [autoAdvanceToTime]="autoAdvanceToTime"
           [numberOfMonths]="numberOfMonths"
           [selectionLevel]="selectionLevel"
           [monthYearSelectType]="monthYearSelectType"
@@ -105,6 +108,9 @@ const meta: Meta<DateTimeFieldStoryArgs> = {
     placeholder: "pp.kk.aaaa tt:mm",
     minuteStep: 1,
     slotColumns: 4,
+    rangeTimeLayout: "stacked",
+    rangeTimeAutoSwitch: true,
+    autoAdvanceToTime: false,
     numberOfMonths: { xs: 1, md: 2 },
     selectionLevel: "days",
     monthYearSelectType: "dropdown",
@@ -146,6 +152,22 @@ const meta: Meta<DateTimeFieldStoryArgs> = {
       options: ["button", "radio"],
       description:
         "Slot grid style when `availableTimes` is set. Defaults per layout when unset.",
+    },
+    rangeTimeLayout: {
+      control: { type: "radio" },
+      options: ["stacked", "button-group"],
+      description:
+        "Range-mode time layout: both pickers stacked, or one behind start/end tabs.",
+    },
+    rangeTimeAutoSwitch: {
+      control: { type: "boolean" },
+      description:
+        "With `button-group`, clicking a start slot switches to the end time.",
+    },
+    autoAdvanceToTime: {
+      control: { type: "boolean" },
+      description:
+        "With `multi-step`, moves to the time step once the date or range is picked.",
     },
     minuteStep: {
       control: { type: "number" },
@@ -351,6 +373,9 @@ export const Range: Story = {
                   [timeGridVariant]="timeGridVariant"
                   [minuteStep]="minuteStep"
                   [slotColumns]="slotColumns"
+                  [rangeTimeLayout]="rangeTimeLayout"
+                  [rangeTimeAutoSwitch]="rangeTimeAutoSwitch"
+                  [autoAdvanceToTime]="autoAdvanceToTime"
                   [monthYearSelectType]="monthYearSelectType"
                   [localeCode]="localeCode"
                   [inputDisabled]="inputDisabled"
@@ -369,6 +394,39 @@ export const Range: Story = {
         </tedi-row>
       `,
     };
+  },
+};
+
+const quarterHourSlots = (fromHour: number, toHour: number) =>
+  Array.from({ length: (toHour - fromHour) * 4 + 1 }, (_, i) => {
+    const minutes = fromHour * 60 + i * 15;
+    const hh = String(Math.floor(minutes / 60)).padStart(2, "0");
+    const mm = String(minutes % 60).padStart(2, "0");
+    return `${hh}:${mm}`;
+  });
+
+// Opening hours per weekday, Sunday first, so the start and end grids differ.
+const openingHours: [number, number][] = [
+  [12, 16],
+  [8, 18],
+  [9, 17],
+  [8, 20],
+  [10, 18],
+  [8, 15],
+  [10, 14],
+];
+
+export const RangeWithButtonGroup: Story = {
+  args: {
+    inputId: "date-time-range-button-group",
+    label: "Broneeringu aeg",
+    mode: "range",
+    placeholder: "pp.kk.aaaa tt:mm – pp.kk.aaaa tt:mm",
+    layout: { xs: "multi-step", md: "side-by-side" },
+    modal: "md",
+    rangeTimeLayout: "button-group",
+    availableTimes: (date: Date) =>
+      quarterHourSlots(...openingHours[date.getDay()]),
   },
 };
 

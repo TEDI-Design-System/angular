@@ -1,0 +1,37 @@
+.tedi-date-time-field-range-switch {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  padding-top: var(--card-padding-md-default);
+  padding-bottom: var(--card-padding-md-default);
+
+  &__summary {
+    display: flex;
+    padding-bottom: var(--card-padding-xs);
+  }
+
+  &__end {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: var(--body-regular-size);
+    line-height: var(--body-regular-line-height);
+    color: var(--general-text-primary);
+    text-align: center;
+  }
+
+  &__time {
+    font-weight: var(--body-bold-weight);
+  }
+
+  &__group {
+    width: 100%;
+  }
+}
+
+// The time picker panel the tabs control, rendered by the parent.
+.tedi-date-time-field-range-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+}

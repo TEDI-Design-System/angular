@@ -3,6 +3,7 @@ export type {
   DateTimeFieldValue,
   DateTimeFieldMode,
   DateTimeFieldLayout,
+  DateTimeFieldRangeTimeLayout,
   DateTimeFieldStep,
   DateTimeFieldTimeGridVariant,
   DateTimeFieldUseNativePicker,

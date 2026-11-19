@@ -2,6 +2,7 @@ export type DateTimeFieldAvailableTimes =
   string[] | ((date: Date) => string[]) | undefined;
 
 export type RangeParts = { from?: Date; to?: Date };
+export type RangeEnd = "from" | "to";
 export type {
   DayAvailabilityInput,
   MonthPredicate,
@@ -98,7 +99,7 @@ export function combineCalendarSelection(
 
 /** Apply a new time to one end of a range, preserving the other end. */
 export function applyRangeTime(
-  kind: "from" | "to",
+  kind: RangeEnd,
   time: string,
   current: RangeParts,
   fallbackDate: Date,

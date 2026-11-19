@@ -9,6 +9,7 @@ import { MODAL_DATA } from "../../../overlay/modal/modal.types";
 import { TediTranslationService } from "../../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
 import { DateRange } from "../../../content/calendar/types";
+import { LiveAnnouncer } from "@angular/cdk/a11y";
 
 class TranslationMock {
   translate(key: string): string {
@@ -44,6 +45,9 @@ function makeData(
     slotColumns: 3,
     gridVariant: "button",
     timeHeading: undefined,
+    rangeTimeLayout: "stacked",
+    rangeTimeAutoSwitch: true,
+    autoAdvanceToTime: false,
     availableTimes: undefined,
     size: "default",
     ...overrides,
@@ -270,11 +274,182 @@ describe("DateTimeFieldModalComponent", () => {
       ).toBe(2);
     });
 
+    it("moves to the time step once the range is picked, when opted in", () => {
+      setup(
+        makeData({
+          mode: "range",
+          layout: "multi-step",
+          autoAdvanceToTime: true,
+        }),
+      );
+      const announce = jest
+        .spyOn(TestBed.inject(LiveAnnouncer), "announce")
+        .mockResolvedValue();
+      stubCalendar({ from: new Date(2026, 4, 14) } as DateRange);
+      component.handleCalendarSelect();
+      expect(component.step()).toBe("date");
+
+      stubCalendar({
+        from: new Date(2026, 4, 14),
+        to: new Date(2026, 4, 16),
+      } as DateRange);
+      component.handleCalendarSelect();
+      fixture.detectChanges();
+      expect(component.step()).toBe("time");
+      expect(announce).toHaveBeenCalledWith(
+        "date-time-field.select-time",
+        "polite",
+      );
+    });
+
+    it("moves focus into the time step", async () => {
+      setup(
+        makeData({ layout: "multi-step", availableTimes: ["09:00", "09:30"] }),
+      );
+      component.draft.set(new Date(2026, 4, 14));
+      component.goToTimeStep();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(
+        fixture.nativeElement
+          .querySelector(".tedi-time-picker")
+          ?.contains(document.activeElement),
+      ).toBe(true);
+    });
+
+    it("stays on the calendar by default", () => {
+      setup(makeData({ layout: "multi-step" }));
+      stubCalendar(new Date(2026, 4, 14));
+      component.handleCalendarSelect();
+      expect(component.step()).toBe("date");
+    });
+
     it("advances a single value once a date is picked", () => {
       setup(makeData({ layout: "multi-step" }));
       expect(component.canAdvance()).toBe(false);
       component.draft.set(new Date(2026, 4, 14));
       expect(component.canAdvance()).toBe(true);
+    });
+  });
+
+  describe("range time button group", () => {
+    const value = {
+      from: new Date(2026, 4, 14, 9, 30),
+      to: new Date(2026, 4, 20, 11, 0),
+    } as DateRange;
+    const availableTimes = ["09:30", "10:00", "11:00"];
+
+    it("stacks both ends by default", () => {
+      setup(makeData({ mode: "range", value, availableTimes }));
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector("tedi-date-time-field-range-switch")).toBeNull();
+      expect(el.querySelectorAll(".tedi-time-picker--slots").length).toBe(2);
+    });
+
+    it("shows only the active end's picker", () => {
+      setup(
+        makeData({
+          mode: "range",
+          value,
+          availableTimes,
+          rangeTimeLayout: "button-group",
+        }),
+      );
+      const el: HTMLElement = fixture.nativeElement;
+      expect(
+        el.querySelector("tedi-date-time-field-range-switch"),
+      ).toBeTruthy();
+      expect(el.querySelectorAll(".tedi-time-picker--slots").length).toBe(1);
+
+      const buttons = el.querySelectorAll<HTMLButtonElement>(
+        ".tedi-date-time-field-range-switch button",
+      );
+      buttons[1].click();
+      fixture.detectChanges();
+      expect(component.activeRangeEnd()).toBe("to");
+      expect(
+        el.querySelector('[role="tabpanel"]')?.getAttribute("aria-labelledby"),
+      ).toBe(buttons[1].id);
+
+      component.handleRangeSlotSelect("to", "10:00");
+      const draft = component.draft() as DateRange;
+      expect(draft.to?.getHours()).toBe(10);
+      expect(draft.from.getHours()).toBe(9);
+    });
+
+    it("switches to the end time after a start slot is clicked", () => {
+      setup(
+        makeData({
+          mode: "range",
+          value,
+          availableTimes,
+          rangeTimeLayout: "button-group",
+        }),
+      );
+      const picker = fixture.nativeElement.querySelector(
+        ".tedi-time-picker--slots",
+      ) as HTMLElement;
+      const arrow = new KeyboardEvent("keydown", {
+        key: "ArrowRight",
+        bubbles: true,
+        cancelable: true,
+      });
+      picker.dispatchEvent(arrow);
+      expect(arrow.defaultPrevented).toBe(false);
+      component.handleRangeSlotSelect("from", "10:00");
+      expect(component.activeRangeEnd()).toBe("from");
+
+      const announce = jest
+        .spyOn(TestBed.inject(LiveAnnouncer), "announce")
+        .mockResolvedValue();
+      picker.dispatchEvent(new Event("pointerdown"));
+      component.handleRangeSlotSelect("from", "11:00");
+      expect(component.activeRangeEnd()).toBe("to");
+      expect(announce).toHaveBeenCalledWith(
+        "date-time-field.range-end-active",
+        "polite",
+      );
+    });
+
+    it("does not switch when opted out", () => {
+      setup(
+        makeData({
+          mode: "range",
+          value,
+          availableTimes,
+          rangeTimeLayout: "button-group",
+          rangeTimeAutoSwitch: false,
+        }),
+      );
+      component.slotPickedByPointer = true;
+      component.handleRangeSlotSelect("from", "10:00");
+      expect(component.activeRangeEnd()).toBe("from");
+    });
+
+    it("returns to the start time when the calendar starts a new range", () => {
+      setup(
+        makeData({
+          mode: "range",
+          value,
+          availableTimes,
+          rangeTimeLayout: "button-group",
+        }),
+      );
+      component.activeRangeEnd.set("to");
+      stubCalendar({ from: new Date(2026, 4, 25) });
+      component.handleCalendarSelect();
+      expect(component.activeRangeEnd()).toBe("from");
+    });
+
+    it("resolves the end slots from the start day until an end date is set", () => {
+      setup(
+        makeData({
+          mode: "range",
+          value: { from: new Date(2026, 4, 14) } as DateRange,
+          availableTimes: (date: Date) => [`${date.getDate()}:00`],
+        }),
+      );
+      expect(component.toSlots()).toEqual(["14:00"]);
     });
   });
 });

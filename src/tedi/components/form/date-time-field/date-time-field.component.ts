@@ -19,8 +19,9 @@ import {
   viewChild,
   ViewEncapsulation,
 } from "@angular/core";
+import { TediTranslationService } from "../../../services/translation/translation.service";
 import { ConnectedPosition, OverlayModule } from "@angular/cdk/overlay";
-import { A11yModule } from "@angular/cdk/a11y";
+import { A11yModule, LiveAnnouncer } from "@angular/cdk/a11y";
 import { NgTemplateOutlet } from "@angular/common";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
@@ -70,6 +71,7 @@ import {
   getTimeOf,
   MonthPredicate,
   pad,
+  RangeEnd,
   RangeParts,
   resolveAvailableTimes,
   toRangeParts,
@@ -80,6 +82,7 @@ import {
   DateTimeFieldModalComponent,
   DateTimeFieldModalData,
 } from "./date-time-field-modal/date-time-field-modal.component";
+import { DateTimeFieldRangeSwitchComponent } from "./date-time-field-range-switch/date-time-field-range-switch.component";
 
 export type {
   DateTimeFieldAvailableTimes,
@@ -92,6 +95,7 @@ export type DateTimeFieldMode = "single" | "range";
 export type DateTimeFieldLayout = "side-by-side" | "multi-step";
 export type DateTimeFieldStep = "date" | "time";
 export type DateTimeFieldTimeGridVariant = "button" | "radio";
+export type DateTimeFieldRangeTimeLayout = "stacked" | "button-group";
 export type DateTimeFieldUseNativePicker = boolean | "sm" | "md" | "lg" | "xl";
 export type DateTimeFieldModalInput = boolean | "sm" | "md" | "lg" | "xl";
 export type DateTimeFieldSize = "default" | "small";
@@ -112,6 +116,7 @@ export type DateTimeFieldFormatter = (value: DateTimeFieldValue) => string;
     FormFieldComponent,
     ButtonComponent,
     IconComponent,
+    DateTimeFieldRangeSwitchComponent,
     NgTemplateOutlet,
     OverlayModule,
     A11yModule,
@@ -200,7 +205,27 @@ export class DateTimeFieldComponent
   readonly minuteStep = input<number>(1);
   /** Maximum number of columns in the slot grid; fewer fit when the panel is narrower. */
   readonly slotColumns = input<number>(4);
-  /** Heading above the time picker. Falls back to the `date-time-field.time-heading` label. */
+  /**
+   * Range-mode time layout: both pickers stacked, or one at a time behind start/end tabs.
+   * @default stacked
+   */
+  readonly rangeTimeLayout = input<DateTimeFieldRangeTimeLayout>("stacked");
+  /**
+   * With `rangeTimeLayout="button-group"`, clicking a start slot switches to the end time once
+   * an end date is set.
+   * @default true
+   */
+  readonly rangeTimeAutoSwitch = input<boolean>(true);
+  /**
+   * With `layout="multi-step"`, moves on to the time step once the date, or the whole range, is
+   * picked.
+   * @default false
+   */
+  readonly autoAdvanceToTime = input<boolean>(false);
+  /**
+   * Heading above the time picker. Falls back to the `date-time-field.time-heading` label. The
+   * `button-group` range tabs keep their start/end labels.
+   */
   readonly timeHeading = input<string | undefined>(undefined);
   /** Footer link label in the multi-step calendar. Falls back to `date-time-field.select-time`. */
   readonly selectTimeLabel = input<string | undefined>(undefined);
@@ -305,6 +330,7 @@ export class DateTimeFieldComponent
   readonly step = signal<DateTimeFieldStep>("date");
   readonly overlayMaxHeight = signal<number | null>(null);
   readonly dateStepWidth = signal<string | null>(null);
+  readonly activeRangeEnd = signal<RangeEnd>("from");
 
   readonly overlayPositions = computed<ConnectedPosition[]>(() => [
     {
@@ -484,8 +510,12 @@ export class DateTimeFieldComponent
   readonly fromAvailableTimes = computed(() =>
     resolveAvailableTimes(this.availableTimes(), this.rangeValue().from),
   );
+  // Until an end date is picked, the end time lands on the start day.
   readonly toAvailableTimes = computed(() =>
-    resolveAvailableTimes(this.availableTimes(), this.rangeValue().to),
+    resolveAvailableTimes(
+      this.availableTimes(),
+      this.rangeValue().to ?? this.rangeValue().from,
+    ),
   );
 
   readonly nativeIsoValue = computed(() => {
@@ -548,6 +578,18 @@ export class DateTimeFieldComponent
   readonly shortSelectedDate = computed(() =>
     this.shortDateFormatter().format(this.singleValue() ?? new Date()),
   );
+
+  readonly fromShortDate = computed(() =>
+    this.formatShortDate(this.rangeValue().from),
+  );
+  readonly toShortDate = computed(() =>
+    this.formatShortDate(this.rangeValue().to),
+  );
+
+  readonly rangeSwitch = computed(
+    () => this.rangeTimeLayout() === "button-group",
+  );
+  readonly rangePanelId = computed(() => `${this.inputId()}-range-time`);
 
   readonly singleMonthRange = computed(
     () => this.mode() === "range" && this.numberOfMonthsResolved() === 1,
@@ -644,6 +686,7 @@ export class DateTimeFieldComponent
       this.step.set("date");
       this.onTouched();
     } else {
+      this.activeRangeEnd.set("from");
       this.overlayOpen.set(true);
     }
   }
@@ -680,25 +723,103 @@ export class DateTimeFieldComponent
         this.availableTimes(),
       ) as DateTimeFieldValue,
     );
+    if (!this.rangeValue().to) this.activeRangeEnd.set("from");
+    const picked =
+      this.mode() === "range" ? !!this.rangeValue().to : !!this.singleValue();
+    if (
+      picked &&
+      this.autoAdvanceToTime() &&
+      this.resolvedLayout() === "multi-step"
+    ) {
+      this.goToTimeStep();
+      // The calendar is swapped out without warning; the moved focus alone
+      // doesn't say why.
+      this.liveAnnouncer.announce(
+        this.selectTimeLabel() ??
+          this.translationService.translate("date-time-field.select-time"),
+        "polite",
+      );
+    }
   }
 
   handleTimeSelect(time: string | null): void {
     if (!time) return;
     const baseDate = this.singleValue() ?? new Date();
     this.commitValue(combineDateTime(baseDate, time));
-    if (
-      this.resolvedLayout() === "multi-step" &&
-      resolveAvailableTimes(this.availableTimes(), baseDate)
-    ) {
+    if (this.takePointerPick() && this.closesOnSlotPick(baseDate)) {
       this.closeOverlay();
     }
   }
 
-  handleRangeTimeSelect(kind: "from" | "to", time: string | null): void {
+  // Arrow keys only move the selection; Enter or Space confirms the slot and
+  // closes, like a click does.
+  handleSingleSlotKeydown(event: KeyboardEvent): void {
+    this.setSlotPickSource(false);
+    const target = event.target as HTMLInputElement;
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const slot =
+      target.type === "radio" && target.closest("label")?.textContent?.trim();
+    if (!slot) return;
+    const baseDate = this.singleValue() ?? new Date();
+    if (!this.closesOnSlotPick(baseDate)) return;
+    event.preventDefault();
+    this.commitValue(combineDateTime(baseDate, slot));
+    this.closeOverlay();
+  }
+
+  private closesOnSlotPick(baseDate: Date): boolean {
+    return (
+      this.resolvedLayout() === "multi-step" &&
+      !!resolveAvailableTimes(this.availableTimes(), baseDate)?.length
+    );
+  }
+
+  handleRangeTimeSelect(kind: RangeEnd, time: string | null): void {
     if (!time) return;
     this.commitValue(
       applyRangeTime(kind, time, this.rangeValue(), new Date()) as DateRange,
     );
+  }
+
+  // Radio arrow keys select as they move, so only a pointer pick counts as
+  // a decision that may switch to the end time (WCAG 3.2.2).
+  slotPickedByPointer = false;
+  private readonly liveAnnouncer = inject(LiveAnnouncer);
+  private readonly translationService = inject(TediTranslationService);
+
+  // A method, not an inline assignment: a binding that evaluates to `false`
+  // makes Angular call preventDefault, which would swallow arrow keys and Tab.
+  setSlotPickSource(byPointer: boolean): void {
+    this.slotPickedByPointer = byPointer;
+  }
+
+  // Read once: a pick with neither a pointer nor a key event before it
+  // (screen reader browse mode, voice control) must not reuse a stale value.
+  private takePointerPick(): boolean {
+    const byPointer = this.slotPickedByPointer;
+    this.slotPickedByPointer = false;
+    return byPointer;
+  }
+
+  handleRangeSlotSelect(kind: RangeEnd, time: string | null): void {
+    this.handleRangeTimeSelect(kind, time);
+    if (
+      this.takePointerPick() &&
+      time &&
+      kind === "from" &&
+      this.rangeSwitch() &&
+      this.rangeTimeAutoSwitch() &&
+      this.rangeValue().to
+    ) {
+      this.activeRangeEnd.set("to");
+      // The end day may lack the clicked slot, which would take focus with it.
+      afterNextRender(() => this.focusTimeStep(), { injector: this.injector });
+      // The panel swap is silent otherwise; touch screen reader users trigger it too.
+      this.liveAnnouncer.announce(
+        this.translationService.translate("date-time-field.range-end-active"),
+        "polite",
+      );
+    }
   }
 
   goToTimeStep(): void {
@@ -824,6 +945,9 @@ export class DateTimeFieldComponent
       gridVariant: this.timeGridVariant() ?? "button",
       useNativeTimeInput: this.useNativeTimeInput,
       timeHeading: this.timeHeading(),
+      rangeTimeLayout: this.rangeTimeLayout(),
+      rangeTimeAutoSwitch: this.rangeTimeAutoSwitch(),
+      autoAdvanceToTime: this.autoAdvanceToTime(),
       availableTimes: this.availableTimes(),
       size: this.resolvedSize(),
     };
@@ -915,6 +1039,10 @@ export class DateTimeFieldComponent
 
   private formatSingle(date: Date): string {
     return `${formatLocaleDate(date, this.localeCode())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  }
+
+  private formatShortDate(date: Date | undefined): string {
+    return date ? this.shortDateFormatter().format(date) : "";
   }
 
   private formatRangeEnd(date: Date | undefined): string {

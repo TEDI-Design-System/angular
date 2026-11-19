@@ -112,7 +112,9 @@
   // `&__split-time` already provides it.
   &__overlay .tedi-time-picker__grid {
     --_tedi-date-time-field-slot-min-width: var(--tedi-dimensions-21);
-    --_tedi-date-time-field-slot-max-columns: var(--tedi-time-picker-grid-columns);
+    --_tedi-date-time-field-slot-max-columns: var(
+      --tedi-time-picker-grid-columns
+    );
 
     display: grid;
     grid-template-columns: repeat(

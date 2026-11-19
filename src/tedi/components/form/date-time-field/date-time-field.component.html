@@ -205,34 +205,70 @@
       [columns]="slotColumns()"
       [minuteStep]="minuteStep()"
       [trapFocus]="true"
+      (pointerdown)="setSlotPickSource(true)"
+      (keydown)="handleSingleSlotKeydown($event)"
       (valueChange)="handleTimeSelect($event)"
     />
   }
 </ng-template>
 
 <ng-template #rangeEndsTpl>
-  <ng-container
-    [ngTemplateOutlet]="rangeTimeTpl"
-    [ngTemplateOutletContext]="{
-      kind: 'from',
-      time: fromTime(),
-      slots: fromAvailableTimes(),
-      heading:
-        timeHeading() ?? ('date-time-field.time-heading-from' | tediTranslate),
-      dateLabel: fromDateLabel(),
-    }"
-  />
-  <ng-container
-    [ngTemplateOutlet]="rangeTimeTpl"
-    [ngTemplateOutletContext]="{
-      kind: 'to',
-      time: toTime(),
-      slots: toAvailableTimes(),
-      heading:
-        timeHeading() ?? ('date-time-field.time-heading-to' | tediTranslate),
-      dateLabel: toDateLabel(),
-    }"
-  />
+  @if (rangeSwitch()) {
+    <div class="tedi-date-time-field__split-time">
+      <tedi-date-time-field-range-switch
+        [fromDate]="fromShortDate()"
+        [fromTime]="fromTime()"
+        [toDate]="toShortDate()"
+        [toTime]="toTime()"
+        [panelId]="rangePanelId()"
+        [(active)]="activeRangeEnd"
+      />
+      <div
+        class="tedi-date-time-field-range-panel"
+        role="tabpanel"
+        [id]="rangePanelId()"
+        [attr.aria-labelledby]="
+          rangePanelId() + '-' + activeRangeEnd() + '-tab'
+        "
+      >
+        <ng-container
+          [ngTemplateOutlet]="rangePickerTpl"
+          [ngTemplateOutletContext]="{
+            kind: activeRangeEnd(),
+            time: activeRangeEnd() === 'from' ? fromTime() : toTime(),
+            slots:
+              activeRangeEnd() === 'from'
+                ? fromAvailableTimes()
+                : toAvailableTimes(),
+          }"
+        />
+      </div>
+    </div>
+  } @else {
+    <ng-container
+      [ngTemplateOutlet]="rangeTimeTpl"
+      [ngTemplateOutletContext]="{
+        kind: 'from',
+        time: fromTime(),
+        slots: fromAvailableTimes(),
+        heading:
+          timeHeading() ??
+          ('date-time-field.time-heading-from' | tediTranslate),
+        dateLabel: fromDateLabel(),
+      }"
+    />
+    <ng-container
+      [ngTemplateOutlet]="rangeTimeTpl"
+      [ngTemplateOutletContext]="{
+        kind: 'to',
+        time: toTime(),
+        slots: toAvailableTimes(),
+        heading:
+          timeHeading() ?? ('date-time-field.time-heading-to' | tediTranslate),
+        dateLabel: toDateLabel(),
+      }"
+    />
+  }
 </ng-template>
 
 <ng-template
@@ -250,42 +286,63 @@
         <span class="tedi-date-time-field__range-date">{{ dateLabel }}</span>
       }
     </div>
-    @if (slots?.length) {
-      <tedi-time-picker
-        #stepTimePicker
-        [value]="time"
-        variant="slots"
-        [timeSlots]="slots"
-        [showSlotIndicator]="resolvedGridVariant() === 'radio'"
-        [columns]="slotColumns()"
-        [minuteStep]="minuteStep()"
-        [trapFocus]="true"
-        (valueChange)="handleRangeTimeSelect(kind, $event)"
-      />
-    } @else if (useNativeTimeInput()) {
-      <tedi-form-field
-        class="tedi-date-time-field__native-time"
-        [size]="resolvedSize()"
-      >
-        <tedi-time-field
-          [inputId]="inputId() + '-time-' + kind"
-          [useNativePicker]="true"
-          [minuteStep]="minuteStep()"
-          [clearable]="false"
-          [value]="time"
-          (valueChange)="handleRangeTimeSelect(kind, $event)"
-        />
-      </tedi-form-field>
-    } @else {
-      <tedi-time-picker
-        #stepTimePicker
-        [value]="time"
-        variant="scroll"
-        [border]="true"
-        [minuteStep]="minuteStep()"
-        [trapFocus]="true"
-        (valueChange)="handleRangeTimeSelect(kind, $event)"
-      />
-    }
+    <ng-container
+      [ngTemplateOutlet]="rangePickerTpl"
+      [ngTemplateOutletContext]="{ kind, time, slots, label: heading }"
+    />
   </div>
+</ng-template>
+
+<ng-template
+  #rangePickerTpl
+  let-kind="kind"
+  let-time="time"
+  let-slots="slots"
+  let-label="label"
+>
+  @if (slots?.length) {
+    <tedi-time-picker
+      #stepTimePicker
+      [attr.role]="label ? 'group' : null"
+      [attr.aria-label]="label"
+      [value]="time"
+      variant="slots"
+      [timeSlots]="slots"
+      [showSlotIndicator]="resolvedGridVariant() === 'radio'"
+      [columns]="slotColumns()"
+      [minuteStep]="minuteStep()"
+      [trapFocus]="true"
+      (pointerdown)="setSlotPickSource(true)"
+      (keydown)="setSlotPickSource(false)"
+      (valueChange)="handleRangeSlotSelect(kind, $event)"
+    />
+  } @else if (useNativeTimeInput()) {
+    <tedi-form-field
+      class="tedi-date-time-field__native-time"
+      [attr.role]="label ? 'group' : null"
+      [attr.aria-label]="label"
+      [size]="resolvedSize()"
+    >
+      <tedi-time-field
+        [inputId]="inputId() + '-time-' + kind"
+        [useNativePicker]="true"
+        [minuteStep]="minuteStep()"
+        [clearable]="false"
+        [value]="time"
+        (valueChange)="handleRangeTimeSelect(kind, $event)"
+      />
+    </tedi-form-field>
+  } @else {
+    <tedi-time-picker
+      #stepTimePicker
+      [attr.role]="label ? 'group' : null"
+      [attr.aria-label]="label"
+      [value]="time"
+      variant="scroll"
+      [border]="true"
+      [minuteStep]="minuteStep()"
+      [trapFocus]="true"
+      (valueChange)="handleRangeTimeSelect(kind, $event)"
+    />
+  }
 </ng-template>
