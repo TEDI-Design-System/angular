@@ -22,7 +22,6 @@ import {
 } from "./sheet-header/sheet-header.component";
 import { SheetBodyComponent } from "./sheet-body/sheet-body.component";
 import { SheetFooterComponent } from "./sheet-footer/sheet-footer.component";
-import { SheetHeaderContentDirective } from "./sheet-header/sheet-header-content.directive";
 
 // jsdom has no layout, so CDK would treat every element as hidden and unfocusable.
 @Injectable()
@@ -523,6 +522,19 @@ describe("SheetComponent", () => {
       flush();
     }));
 
+    it("stays open on a click inside another overlay stacked above it", fakeAsync(() => {
+      openSheet();
+      const stacked = document.createElement("div");
+      overlayElement.appendChild(stacked);
+
+      stacked.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      fixture.detectChanges();
+
+      expect(host.open()).toBe(true);
+      stacked.remove();
+      flush();
+    }));
+
     it("stays open on a page click with closeOnBackdropClick false", fakeAsync(() => {
       host.closeOnBackdropClick.set(false);
       openSheet();
@@ -878,7 +890,6 @@ describe("SheetComponent", () => {
     SheetContentDirective,
     SheetCloseDirective,
     SheetHeaderComponent,
-    SheetHeaderContentDirective,
     SheetBodyComponent,
   ],
   template: `
@@ -924,12 +935,9 @@ describe("SheetHeaderComponent with custom content", () => {
   it("replaces the default layout with the custom content", fakeAsync(() => {
     const header = overlayElement.querySelector(".tedi-sheet-header")!;
 
-    expect(header.querySelector(".tedi-sheet-header__content")).not.toBeNull();
-    expect(header.querySelector(".tedi-sheet-header__title")).toBeNull();
-    expect(header.querySelector(".tedi-sheet-header__close")).toBeNull();
-    expect(
-      header.querySelector(".tedi-sheet-header__collapse-toggle"),
-    ).toBeNull();
+    expect(header.querySelector("[tedi-sheet-header-content]")).not.toBeNull();
+    // The default layout stays in the DOM; `:has([tedi-sheet-header-content])` hides it.
+    expect(header.querySelector(".tedi-sheet-header__layout")).not.toBeNull();
     flush();
   }));
 
@@ -955,4 +963,29 @@ describe("SheetHeaderComponent with custom content", () => {
     expect(sheet.open()).toBe(false);
     flush();
   }));
+});
+
+@Component({
+  standalone: true,
+  imports: [SheetComponent],
+  template: `<tedi-sheet role="alertdialog" [open]="false" />`,
+})
+class StaticRoleHostComponent {}
+
+describe("SheetComponent role", () => {
+  it("doesn't leave a static role on the host element", () => {
+    TestBed.configureTestingModule({
+      imports: [StaticRoleHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    });
+    const fixture = TestBed.createComponent(StaticRoleHostComponent);
+    fixture.detectChanges();
+
+    const sheet = fixture.debugElement.query(By.directive(SheetComponent));
+    expect(sheet.nativeElement.hasAttribute("role")).toBe(false);
+    expect(sheet.componentInstance.role()).toBe("alertdialog");
+  });
 });

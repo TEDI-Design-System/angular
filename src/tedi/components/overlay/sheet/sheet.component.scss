@@ -54,6 +54,8 @@ $sheet-fade-duration: 200ms;
   --tedi-sheet-radius: var(--sheet-header-radius-md);
   --tedi-sheet-padding-x: var(--sheet-header-padding-md);
   --tedi-sheet-padding-y: var(--sheet-header-padding-sm);
+  --tedi-sheet-body-padding: var(--sheet-body-padding-md);
+  --tedi-sheet-footer-padding: var(--sheet-footer-padding-md);
   --tedi-sheet-header-min-height: var(--sheet-header-height);
 
   position: relative;
@@ -78,14 +80,16 @@ $sheet-fade-duration: 200ms;
 
   &--padding-small {
     --tedi-sheet-padding-x: var(--sheet-header-padding-sm);
+    --tedi-sheet-body-padding: var(--sheet-body-padding-sm);
+    --tedi-sheet-footer-padding: var(--sheet-footer-padding-sm);
   }
 
   &--radius-card {
-    --tedi-sheet-radius: var(--card-radius-rounded);
+    --tedi-sheet-radius: var(--sheet-header-radius-sm);
   }
 
   &--radius-none {
-    --tedi-sheet-radius: 0;
+    --tedi-sheet-radius: var(--sheet-header-radius-none);
   }
 }
 
@@ -114,8 +118,8 @@ $sheet-fade-duration: 200ms;
 }
 
 .tedi-sheet__handle {
-  width: 2rem;
-  height: var(--tedi-borders-04);
+  width: var(--sheet-header-drag-indicator-width);
+  height: var(--sheet-header-drag-indicator-height);
   background: var(--drag-indicator-light);
   border-radius: var(--tedi-dimensions-13);
 }
@@ -196,7 +200,17 @@ $sheet-fade-duration: 200ms;
     white-space: nowrap;
   }
 
-  &__content {
+  // The wrapper keeps the default layout in the header's flex row.
+  &__layout {
+    display: contents;
+  }
+
+  // Custom content replaces the default layout.
+  &:has([tedi-sheet-header-content]) &__layout {
+    display: none;
+  }
+
+  [tedi-sheet-header-content] {
     flex: 1 1 auto;
     min-width: 0;
   }
@@ -238,7 +252,7 @@ $sheet-fade-duration: 200ms;
 
 .tedi-sheet-body {
   flex: 1 1 auto;
-  padding: var(--tedi-sheet-padding-x);
+  padding: var(--tedi-sheet-body-padding);
   overflow-y: auto;
   background: var(--sheet-body-default);
 
@@ -251,7 +265,7 @@ $sheet-fade-duration: 200ms;
   display: flex;
   gap: var(--button-gutter-x);
   align-items: center;
-  padding: var(--tedi-sheet-padding-x);
+  padding: var(--tedi-sheet-footer-padding);
   background: var(--sheet-footer-background);
   border-top: var(--tedi-borders-01) solid var(--sheet-border);
 

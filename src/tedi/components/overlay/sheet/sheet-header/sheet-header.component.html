@@ -1,6 +1,4 @@
-@if (customContent()) {
-  <ng-content select="[tedi-sheet-header-content]" />
-} @else {
+<div class="tedi-sheet-header__layout">
   <div class="tedi-sheet-header__start">
     <ng-content select="[tedi-sheet-header-start]" />
   </div>
@@ -96,4 +94,5 @@
       ></button>
     }
   </div>
-}
+</div>
+<ng-content select="[tedi-sheet-header-content]" />

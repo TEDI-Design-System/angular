@@ -80,6 +80,8 @@ interface DragState {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: "tedi-sheet",
+    // `role` is an input; Angular would also write a static `role` attribute to the host.
+    "[attr.role]": "null",
     "(window:blur)": "resetDrag()",
   },
 })
@@ -384,11 +386,19 @@ export class SheetComponent implements OnDestroy {
     // Without a backdrop the page receives the clicks, so they arrive here as outside the pane.
     overlayRef.outsidePointerEvents().subscribe((event) => {
       const target = event.target;
+
+      const onTrigger =
+        target instanceof Node &&
+        !!this.trigger()?.nativeElement.contains(target);
+      // A click inside an overlay stacked above the sheet, e.g. a confirmation modal.
+      const inOtherOverlay =
+        target instanceof Element && !!target.closest(".cdk-overlay-container");
+
       if (
         !this.open() ||
         !this.closeOnBackdropClick() ||
-        (target instanceof Node &&
-          this.trigger()?.nativeElement.contains(target))
+        onTrigger ||
+        inOtherOverlay
       ) {
         return;
       }

@@ -3,8 +3,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  contentChild,
   effect,
+  ElementRef,
+  afterRenderEffect,
+  signal,
   inject,
   input,
   OnDestroy,
@@ -18,7 +20,6 @@ import {
 import { ClosingButtonComponent } from "../../../buttons/closing-button/closing-button.component";
 import { CollapseButtonComponent } from "../../../buttons/collapse-button/collapse-button.component";
 import { SheetComponent } from "../sheet.component";
-import { SheetHeaderContentDirective } from "./sheet-header-content.directive";
 
 export type SheetHeaderVariant = "brand" | "default";
 export type SheetHeaderTitlePosition = "start" | "center";
@@ -28,7 +29,7 @@ export type SheetHeaderHeadingLevel = HeadingModifiers;
  * Sheet header. Project leading content with `tedi-sheet-header-start`,
  * trailing content with `tedi-sheet-header-end`, and extra icon buttons
  * (between the collapse and close buttons) with `tedi-sheet-header-actions`.
- * An element with `tedi-sheet-header-content` replaces the whole layout.
+ * An element with the `tedi-sheet-header-content` attribute replaces the whole layout.
  */
 @Component({
   standalone: true,
@@ -78,10 +79,12 @@ export class SheetHeaderComponent implements OnDestroy {
    */
   readonly closeButton = input(true, { transform: booleanAttribute });
 
-  protected readonly customContent = contentChild(SheetHeaderContentDirective);
-
   protected readonly sheet = inject(SheetComponent);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly translationService = inject(TediTranslationService);
+
+  /** Whether an element with `tedi-sheet-header-content` is projected. */
+  protected readonly customContent = signal(false);
 
   private readonly expandLabel = this.translationService.track("sheet.expand");
   private readonly collapseLabel =
@@ -92,6 +95,14 @@ export class SheetHeaderComponent implements OnDestroy {
   );
 
   constructor() {
+    afterRenderEffect(() =>
+      this.customContent.set(
+        !!this.host.nativeElement.querySelector(
+          ":scope > [tedi-sheet-header-content]",
+        ),
+      ),
+    );
+
     effect(() =>
       this.sheet.hasTitle.set(!!this.title() && !this.customContent()),
     );
