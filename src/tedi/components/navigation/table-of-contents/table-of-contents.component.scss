@@ -27,7 +27,6 @@
   // fixed-height container rather than the window (then 100dvh is the wrong basis).
   max-height: var(--tedi-table-of-contents-sticky-max-height);
   overflow-y: auto;
-  overscroll-behavior: contain;
 }
 
 .tedi-table-of-contents--transparent .tedi-table-of-contents__list {
