@@ -569,7 +569,7 @@ export const ManySteps: Story = {
 
 /**
  * Sub-steps appear in an expandable list. Picking one emits `itemSelect` and
- * closes the list.
+ * closes the list; update `activeStep` and `selected` in response.
  */
 export const WithSubSteps: Story = {
   play: async ({ canvasElement }) => {
@@ -584,17 +584,34 @@ export const WithSubSteps: Story = {
       "aria-current",
       "step",
     );
+
+    // Picking another sub-step moves the selection and closes the list.
+    await userEvent.click(page.getByRole("button", { name: /Kolleegid/ }));
+    await waitFor(() =>
+      expect(page.queryByRole("button", { name: /Kolleegid/ })).toBeNull(),
+    );
+    await userEvent.click(canvas.getByRole("button", { name: "Ava sammud" }));
+    await waitFor(() =>
+      expect(page.getByRole("button", { name: /Kolleegid/ })).toHaveAttribute(
+        "aria-current",
+        "step",
+      ),
+    );
+    await expect(
+      page.getByRole("button", { name: /Pere/ }),
+    ).not.toHaveAttribute("aria-current");
   },
   render: () => ({
+    props: { flowStep: 1, flowSub: 1 },
     template: `
-      <tedi-card-stepper style="${FRAME}" ariaLabel="Hindamise edenemine" [activeStep]="1">
-        <tedi-card-stepper-step title="Sotsiaalne võrgustik" completed />
-        <tedi-card-stepper-step title="Sotsiaalsed suhted">
-          <tedi-card-stepper-sub-step title="Sõbrad" completed />
-          <tedi-card-stepper-sub-step title="Pere" selected />
-          <tedi-card-stepper-sub-step title="Kolleegid" />
+      <tedi-card-stepper style="${FRAME}" ariaLabel="Hindamise edenemine" [(activeStep)]="flowStep">
+        <tedi-card-stepper-step title="Sotsiaalne võrgustik" [completed]="flowStep > 0" />
+        <tedi-card-stepper-step title="Sotsiaalsed suhted" [completed]="flowStep > 1">
+          <tedi-card-stepper-sub-step title="Sõbrad" [completed]="flowSub > 0" [selected]="flowStep === 1 && flowSub === 0" (itemSelect)="flowStep = 1; flowSub = 0" />
+          <tedi-card-stepper-sub-step title="Pere" [completed]="flowSub > 1" [selected]="flowStep === 1 && flowSub === 1" (itemSelect)="flowStep = 1; flowSub = 1" />
+          <tedi-card-stepper-sub-step title="Kolleegid" [selected]="flowStep === 1 && flowSub === 2" (itemSelect)="flowStep = 1; flowSub = 2" />
         </tedi-card-stepper-step>
-        <tedi-card-stepper-step title="Vaimne tervis" />
+        <tedi-card-stepper-step title="Vaimne tervis" [completed]="flowStep > 2" />
         <tedi-card-stepper-step title="Ülevaade" />
       </tedi-card-stepper>
     `,
@@ -602,9 +619,9 @@ export const WithSubSteps: Story = {
 };
 
 /**
- * `allowJump="completed-or-next"` allows completed steps and the next available
- * step in the list; the steps it excludes show as disabled there. Arrows remain
- * sequential and skip disabled steps.
+ * `allowJump="completed-or-next"` lets users pick completed steps and the next
+ * available step in the list; later steps show as disabled. Moving back keeps
+ * the steps already passed completed.
  */
 export const WithLimitedJumping: Story = {
   parameters: {
@@ -625,14 +642,13 @@ export const WithLimitedJumping: Story = {
     const page = within(document.body);
 
     await userEvent.click(canvas.getByRole("button", { name: "Ava sammud" }));
-    // The next step is selectable; disabled and later steps are not.
+    // The next step is selectable; later steps are not.
     await waitFor(() =>
       expect(page.getByRole("button", { name: /Elukoht/ })).toBeVisible(),
     );
     await expect(
-      page.queryByRole("button", { name: /Lisadokumendid/ }),
+      page.queryByRole("button", { name: /Kontaktandmed/ }),
     ).toBeNull();
-    await expect(page.queryByRole("button", { name: /Ülevaade/ })).toBeNull();
     // A step allowJump excludes looks like a disabled one.
     await expect(
       page.getByText("Ülevaade").closest(".tedi-vertical-stepper-item"),
@@ -640,19 +656,32 @@ export const WithLimitedJumping: Story = {
     // Leave the list open for the accessibility scan.
   },
   render: () => ({
+    props: {
+      flowStep: 1,
+      flowReached: 1,
+      flowSteps: [
+        { title: "Taotleja andmed" },
+        { title: "Dokumendid" },
+        { title: "Elukoht", description: "Täidab ametnik" },
+        { title: "Kontaktandmed" },
+        { title: "Leibkonna liikmed" },
+        { title: "Sissetulekud ja eluasemekulud" },
+        { title: "Lisadokumendid" },
+        { title: "Ülevaade" },
+      ],
+    },
     template: `
       <tedi-card-stepper
         style="${FRAME}"
         ariaLabel="Tervisetõendi taotlemine"
-        [activeStep]="1"
         [showNavigation]="true"
         allowJump="completed-or-next"
+        [activeStep]="flowStep"
+        (activeStepChange)="flowStep = $event; flowReached = $event > flowReached ? $event : flowReached"
       >
-        <tedi-card-stepper-step title="Taotleja andmed" completed />
-        <tedi-card-stepper-step title="Dokumendid" completed />
-        <tedi-card-stepper-step title="Elukoht" description="Täidab ametnik" />
-        <tedi-card-stepper-step title="Lisadokumendid" [disabled]="true" />
-        <tedi-card-stepper-step title="Ülevaade" />
+        @for (step of flowSteps; track step.title; let i = $index) {
+          <tedi-card-stepper-step [title]="step.title" [description]="step.description" [completed]="i < flowReached" />
+        }
       </tedi-card-stepper>
     `,
   }),
