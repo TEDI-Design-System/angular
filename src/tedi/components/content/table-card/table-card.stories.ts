@@ -4,7 +4,7 @@ import {
   type Meta,
   type StoryObj,
 } from "@storybook/angular";
-import { Component, inject } from "@angular/core";
+import { Component, inject, input } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
 import { BreakpointService } from "../../../services/breakpoint/breakpoint.service";
@@ -697,10 +697,10 @@ export const WithActions: Story = {
     <div style="max-width: 360px">
       <div [tediVerticalSpacing]="1">
         <tedi-table-card
-          title="Hambaarst"
-          subtitle="14.04.2026 15:30"
-          collapsible
-          [open]="false"
+          [title]="title()"
+          [subtitle]="subtitle()"
+          [collapsible]="collapsible()"
+          [open]="open()"
           labelAlign="left"
           valueAlign="left"
           rowAlign="center"
@@ -801,6 +801,11 @@ export const WithActions: Story = {
   `,
 })
 class TableCardAccordionStoryComponent {
+  readonly title = input<string>();
+  readonly subtitle = input<string>();
+  readonly collapsible = input(false);
+  readonly open = input(true);
+
   private readonly breakpoint = inject(BreakpointService);
 
   /**
@@ -826,9 +831,16 @@ class TableCardAccordionStoryComponent {
  * footer remains visible when collapsed; actions wrap when they no longer fit.
  */
 export const IsAccordion: Story = {
-  render: () => ({
+  args: {
+    title: "Hambaarst",
+    subtitle: "14.04.2026 15:30",
+    collapsible: true,
+    open: false,
+  },
+  render: (args) => ({
     moduleMetadata: { imports: [TableCardAccordionStoryComponent] },
-    template: `<tedi-table-card-accordion-story />`,
+    props: args,
+    template: `<tedi-table-card-accordion-story ${argsToTemplate(args)} />`,
   }),
 };
 
