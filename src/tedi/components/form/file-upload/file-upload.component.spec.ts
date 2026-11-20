@@ -315,6 +315,19 @@ describe("FileUploadComponent", () => {
       expect(summary()).toBe("file-upload.extension-rejected:'notes.txt',1");
     });
 
+    it("accepts a double extension, which the browser's own picker offers", () => {
+      fixture.componentRef.setInput("accept", ".tar.gz");
+      fixture.detectChanges();
+
+      selectFiles(fixture, [
+        makeFile("archive.tar.gz", 100, "application/gzip"),
+      ]);
+
+      expect(component.files().map((file) => file.name)).toEqual([
+        "archive.tar.gz",
+      ]);
+    });
+
     it("rejects a file over maxSize", () => {
       fixture.componentRef.setInput("maxSize", 1024 ** 2);
       fixture.detectChanges();
@@ -1052,6 +1065,24 @@ describe("FileUploadComponent with reactive forms", () => {
 
     expect(host.control.value).toBeNull();
     expect(summary()).toBeUndefined();
+  });
+
+  it("re-reads the state when the host swaps the control", () => {
+    const surface = () =>
+      fixture.debugElement.query(By.css(".tedi-field-surface"))
+        .nativeElement as HTMLElement;
+
+    host.control.setErrors({ required: true });
+    host.control.markAsTouched();
+    fixture.detectChanges();
+
+    expect(surface().classList).toContain("tedi-field-surface--invalid");
+
+    // Swapping the instance emits nothing, so only ngDoCheck notices.
+    host.control = new FormControl<FileUploadFile[]>([]);
+    fixture.detectChanges();
+
+    expect(surface().classList).not.toContain("tedi-field-surface--invalid");
   });
 
   it("writes the control value into the list", () => {

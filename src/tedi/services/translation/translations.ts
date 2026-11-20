@@ -385,6 +385,14 @@ export const translationsMap = {
     en: "File is too large",
     ru: "Файл слишком велик",
   },
+  "file-dropzone.single-file-kept": {
+    description:
+      "Announced when a selection brings more files than a single-file dropzone holds",
+    components: ["FileDropzone"],
+    et: (file: string) => `Lisada saab ainult ühe faili, lisatud ${file}`,
+    en: (file: string) => `Only one file can be added, added ${file}`,
+    ru: (file: string) => `Можно добавить только один файл, добавлен ${file}`,
+  },
   "file-upload.added": {
     description: "Announced to assistive technology when files are added",
     components: ["FileDropzone", "FileUpload"],

@@ -6,6 +6,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DoCheck,
   effect,
   ElementRef,
   forwardRef,
@@ -122,6 +123,7 @@ const fileIdentity = (file: FileUploadFile): string =>
 export class FileUploadComponent
   implements
     OnInit,
+    DoCheck,
     OnDestroy,
     ControlValueAccessor,
     Validator,
@@ -447,6 +449,10 @@ export class FileUploadComponent
     this.derived.connect();
   }
 
+  ngDoCheck(): void {
+    this.derived.sync();
+  }
+
   ngOnDestroy(): void {
     clearTimeout(this.addAnnounceTimeout);
   }
@@ -622,6 +628,8 @@ export class FileUploadComponent
     if (kept.length && multiple) {
       this.commit([...this.files(), ...kept]);
     } else if (kept.length) {
+      // No trim to report, unlike the dropzone: the picker returns one file
+      // when `multiple` is off, and nothing can be dropped on this field.
       const replaced = this.files();
       this.commit([kept[0]]);
       replaced.forEach((file) => this.fileRemove.emit(file));
@@ -718,13 +726,11 @@ export class FileUploadComponent
     const tokens = this.acceptTokens();
     if (!tokens.length) return true;
 
-    const extension = file.name.includes(".")
-      ? `.${file.name.split(".").pop()?.toLowerCase()}`
-      : "";
+    const name = file.name.toLowerCase();
     const mimeType = file.type.toLowerCase();
 
     return tokens.some((token) => {
-      if (token.startsWith(".")) return token === extension;
+      if (token.startsWith(".")) return name.endsWith(token);
       if (token.endsWith("/*")) return mimeType.startsWith(token.slice(0, -1));
 
       return token === mimeType;

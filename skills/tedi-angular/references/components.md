@@ -243,8 +243,11 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   verdict they were given, so clear them yourself if you tighten a restriction while they are listed.
   For a check that needs a server round trip, set `isLoading` and then `isValid` on the file instead of
   reaching for `validator`.
-- **`uploadFolder` applies to the file picker only.** Dragging a folder in is up to the browser and
-  generally does not work, so keep the picker path usable when you turn it on.
+- **`uploadFolder` applies to the file picker only, and belongs with `multiple`.** The browser
+  returns every file in the chosen folder whatever `multiple` says, so a single-file dropzone keeps
+  the first that passes and announces that it kept one — which is also what a multi-file drop on a
+  single-file zone does. Dragging a folder in is up to the browser and generally does not work, so
+  keep the picker path usable when you turn it on.
 - **`tedi-file-dropzone` is named by a `tedi-label`, not by its own text.** `instructions` is the
   sentence inside the zone; the field's name comes from a `<label tedi-label>` whose `for` matches
   `inputId`, which the zone references with `aria-labelledby` so both are announced, label first. A

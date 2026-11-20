@@ -7,6 +7,7 @@ import {
   Component,
   computed,
   contentChild,
+  DoCheck,
   effect,
   ElementRef,
   forwardRef,
@@ -151,7 +152,7 @@ const withFreeNames = (
   },
 })
 export class FileDropzoneComponent
-  implements OnInit, ControlValueAccessor, Validator, OnDestroy
+  implements OnInit, DoCheck, ControlValueAccessor, Validator, OnDestroy
 {
   private readonly document = inject(DOCUMENT);
   private readonly translations = inject(TediTranslationService);
@@ -213,8 +214,8 @@ export class FileDropzoneComponent
    */
   readonly duplicates = input<FileDropzoneDuplicates>("skip");
   /**
-   * Lets the user pick a whole folder, which the browser hands over as the
-   * files inside it.
+   * Lets the user pick a whole folder. Use with `multiple` — the browser hands
+   * over every file inside it whatever `multiple` says.
    * @default false
    */
   readonly uploadFolder = input(false, { transform: booleanAttribute });
@@ -435,6 +436,10 @@ export class FileDropzoneComponent
     this.derived.connect();
   }
 
+  ngDoCheck(): void {
+    this.derived.sync();
+  }
+
   writeValue(files: FileDropzoneFile[] | null): void {
     this.files.set(files ?? []);
     this.clearRejectionWhenEmpty();
@@ -563,10 +568,13 @@ export class FileDropzoneComponent
           return;
         }
 
-        const row = rows[Math.max(removedIndex - 1, 0)];
+        // Clamped to what is left: a `fileRemove` handler can drop further
+        // files before this runs, leaving the index past the end of the list.
+        const row =
+          rows[Math.min(Math.max(removedIndex - 1, 0), rows.length - 1)];
 
         (
-          row.querySelector<HTMLElement>(FOCUSABLE) ??
+          row?.querySelector<HTMLElement>(FOCUSABLE) ??
           this.dropZone()?.nativeElement
         )?.focus();
       },
@@ -662,40 +670,29 @@ export class FileDropzoneComponent
     // rejected file dropped alongside a good one must not take its place.
     const single = kept.find((file) => file.isValid) ?? kept[0];
     const landed = multiple ? kept : kept.length ? [single] : [];
+    // The one file kept when a selection brought more than this zone holds —
+    // a folder always does, since `webkitdirectory` returns every file in it
+    // whatever `multiple` says. Counted over the files that passed, since a
+    // rejected one was turned away by the rules, not by the room left.
+    const trimmed =
+      !multiple && kept.filter((file) => file.isValid).length > 1
+        ? single
+        : undefined;
 
     if (landed.length) {
       this.commit(multiple ? [...this.retained(landed), ...landed] : landed);
     }
 
-    // One selection can reject, skip and add all at once. The live region holds
-    // a single message, so these are gathered and announced together —
-    // announcing them one by one overwrites all but the last.
-    const messages: string[] = [];
-
     const rejection = this.rejectionSummary(rejections);
 
     this.rejectionError.set(rejection && !keepRejected ? rejection : undefined);
-    if (rejection) messages.push(rejection);
 
-    if (duplicates.length) {
-      messages.push(
-        this.translations.translate(
-          "file-upload.duplicates-skipped",
-          duplicates.map((file) => `'${file.name}'`).join(", "),
-          String(duplicates.length),
-        ),
-      );
-    }
-
-    // Counted from what was committed, so a file that never made it into the
-    // list is never announced as added.
-    const added = landed.filter((file) => file.isValid);
-
-    if (added.length) {
-      messages.push(
-        this.translations.translate("file-upload.added", String(added.length)),
-      );
-    }
+    const messages = this.selectionMessages({
+      rejection,
+      duplicates,
+      added: landed.filter((file) => file.isValid),
+      trimmed,
+    });
 
     // Assertive and delayed, because the file dialog buries this twice over:
     // closing it leaves the screen reader reading the drop zone button for
@@ -711,6 +708,52 @@ export class FileDropzoneComponent
 
   ngOnDestroy(): void {
     clearTimeout(this.addAnnounceTimeout);
+  }
+
+  /**
+   * One selection can reject, skip and add all at once. The live region holds
+   * a single message, so these are gathered and announced together —
+   * announcing them one by one overwrites all but the last.
+   */
+  private selectionMessages({
+    rejection,
+    duplicates,
+    added,
+    trimmed,
+  }: {
+    rejection?: string;
+    duplicates: File[];
+    added: FileDropzoneFile[];
+    trimmed?: FileDropzoneFile;
+  }): string[] {
+    const messages: string[] = [];
+
+    if (rejection) messages.push(rejection);
+
+    if (duplicates.length) {
+      messages.push(
+        this.translations.translate(
+          "file-upload.duplicates-skipped",
+          duplicates.map((file) => `'${file.name}'`).join(", "),
+          String(duplicates.length),
+        ),
+      );
+    }
+
+    if (trimmed) {
+      messages.push(
+        this.translations.translate(
+          "file-dropzone.single-file-kept",
+          trimmed.name,
+        ),
+      );
+    } else if (added.length) {
+      messages.push(
+        this.translations.translate("file-upload.added", String(added.length)),
+      );
+    }
+
+    return messages;
   }
 
   // The summary names files that were never listed, so only emptying the field
@@ -741,13 +784,11 @@ export class FileDropzoneComponent
     const tokens = this.acceptTokens();
     if (!tokens.length) return true;
 
-    const extension = file.name.includes(".")
-      ? `.${file.name.split(".").pop()?.toLowerCase()}`
-      : "";
+    const name = file.name.toLowerCase();
     const mimeType = file.type.toLowerCase();
 
     return tokens.some((token) => {
-      if (token.startsWith(".")) return token === extension;
+      if (token.startsWith(".")) return name.endsWith(token);
       if (token.endsWith("/*")) {
         return !!mimeType && mimeType.startsWith(token.slice(0, -1));
       }

@@ -212,7 +212,7 @@ export default {
     },
     uploadFolder: {
       description:
-        "Lets the user pick a whole folder, which the browser hands over as the files inside it.",
+        "Lets the user pick a whole folder. Use with `multiple` — the browser hands over every file inside it whatever `multiple` says.",
       control: "boolean",
       table: {
         category: "inputs",

@@ -324,6 +324,13 @@ describe("FileDropzoneComponent", () => {
       );
     });
 
+    it("says it kept one when a selection brings more than one", async () => {
+      selectFiles(fixture, [makeFile("a.pdf"), makeFile("b.pdf")]);
+
+      expect(component.files().map((file) => file.name)).toEqual(["a.pdf"]);
+      expect(await announced()).toBe("file-dropzone.single-file-kept:a.pdf");
+    });
+
     it("announces a skip alongside what was added", async () => {
       fixture.componentRef.setInput("multiple", true);
       fixture.detectChanges();
@@ -529,6 +536,29 @@ describe("FileDropzoneComponent", () => {
       expect(text("tedi-feedback-text.tedi-feedback-text--error")).toContain(
         "file-upload.extension-rejected",
       );
+    });
+
+    it("accepts a double extension, which the browser's own picker offers", () => {
+      fixture.componentRef.setInput("accept", ".tar.gz");
+      fixture.detectChanges();
+
+      selectFiles(fixture, [
+        makeFile("archive.tar.gz", 100, "application/gzip"),
+      ]);
+
+      expect(component.files().map((file) => file.name)).toEqual([
+        "archive.tar.gz",
+      ]);
+    });
+
+    it("does not let a suffix match across the dot", () => {
+      fixture.componentRef.setInput("accept", ".js");
+      fixture.componentRef.setInput("keepRejectedFiles", false);
+      fixture.detectChanges();
+
+      selectFiles(fixture, [makeFile("bundle.mjs", 100, "text/javascript")]);
+
+      expect(component.files()).toEqual([]);
     });
 
     it("accepts a wildcard MIME group", () => {
@@ -1285,6 +1315,33 @@ describe("FileDropzoneComponent", () => {
       expect(removeButton().dataset["kept"]).toBe("yes");
     });
 
+    it("survives a fileRemove handler that drops another file", async () => {
+      fixture.componentRef.setInput("files", [
+        { id: "1", name: "a.pdf" },
+        { id: "2", name: "b.pdf" },
+        { id: "3", name: "c.pdf" },
+      ]);
+      fixture.detectChanges();
+
+      // The consumer removes a second file in the same breath, so the list is
+      // two shorter by the time focus is restored.
+      component.fileRemove.subscribe(() =>
+        component.files.set([{ id: "1", name: "a.pdf" }]),
+      );
+
+      fixture.debugElement
+        .queryAll(By.css(".tedi-attachment__actions button"))[2]
+        .nativeElement.click();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(component.files().map((file) => file.name)).toEqual(["a.pdf"]);
+      expect(document.activeElement).toBe(
+        fixture.debugElement.query(By.css(".tedi-attachment__actions button"))
+          .nativeElement,
+      );
+    });
+
     it("does not emit while disabled", () => {
       const removed: FileDropzoneFile[] = [];
       component.fileRemove.subscribe((file) => removed.push(file));
@@ -1546,6 +1603,20 @@ describe("FileDropzoneComponent with reactive forms", () => {
       fixture.debugElement.query(By.css(".tedi-attachment__title"))
         .nativeElement.textContent,
     ).toContain("preloaded.pdf");
+  });
+
+  it("re-reads the state when the host swaps the control", () => {
+    host.control.setErrors({ required: true });
+    host.control.markAsTouched();
+    fixture.detectChanges();
+
+    expect(zoneOf(fixture).getAttribute("aria-invalid")).toBe("true");
+
+    // Swapping the instance emits nothing, so only ngDoCheck notices.
+    host.control = new FormControl<FileDropzoneFile[]>([]);
+    fixture.detectChanges();
+
+    expect(zoneOf(fixture).getAttribute("aria-invalid")).toBeNull();
   });
 
   it("pushes picked files back to the control", () => {
