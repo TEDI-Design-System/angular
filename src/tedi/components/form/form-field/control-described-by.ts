@@ -1,5 +1,6 @@
 import {
   HostAttributeToken,
+  InjectionToken,
   Signal,
   computed,
   inject,
@@ -26,3 +27,16 @@ export function controlDescribedBy(): ControlDescribedBy {
     set: (ids) => pushed.set(ids),
   };
 }
+
+/** A control that accepts ids of elements describing it, such as its error text. */
+export interface DescribableControl {
+  setDescribedBy(ids: string[]): void;
+}
+
+/**
+ * Lets a container find the control inside it and link a description to it.
+ * Provided by controls that implement `setDescribedBy`.
+ */
+export const TEDI_DESCRIBABLE_CONTROL = new InjectionToken<DescribableControl>(
+  "TEDI_DESCRIBABLE_CONTROL",
+);

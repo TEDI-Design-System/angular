@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Component } from "@angular/core";
+import { Component, computed } from "@angular/core";
 import {
   ComponentFixture,
   TestBed,
@@ -23,6 +23,10 @@ import {
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { COUNTER_TAG_WIDTH, TAG_GAP } from "../../../utils/tag-overflow.util";
 import { InputState } from "../form-field/form-field.component";
+import {
+  FieldContext,
+  TEDI_FIELD_CONTEXT,
+} from "../form-field/field-context.token";
 
 @Component({
   standalone: true,
@@ -1176,6 +1180,33 @@ describe("SelectComponent", () => {
         tick();
 
         expect(select.isOpen()).toBe(false);
+      }));
+
+      it("Escape should not reach ancestors while it closes the dropdown", fakeAsync(() => {
+        const onKeydown = jest.fn();
+        fixture.nativeElement.addEventListener("keydown", onKeydown);
+        getTrigger().click();
+        fixture.detectChanges();
+        tick();
+
+        getSearchInput().dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        );
+        fixture.detectChanges();
+        tick();
+
+        expect(onKeydown).not.toHaveBeenCalled();
+      }));
+
+      it("Escape should reach ancestors when the dropdown is already closed", fakeAsync(() => {
+        const onKeydown = jest.fn();
+        fixture.nativeElement.addEventListener("keydown", onKeydown);
+
+        getSearchInput().dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        );
+
+        expect(onKeydown).toHaveBeenCalledTimes(1);
       }));
 
       it("Tab should close dropdown", fakeAsync(() => {
@@ -4333,4 +4364,51 @@ describe("SelectComponent multiselect with an option whose value is ''", () => {
     expect(select.isGroupSelected("A")).toBe(true);
     expect(select.isGroupIndeterminate("A")).toBe(false);
   }));
+});
+
+describe("SelectComponent in a field context", () => {
+  const context = (invalid: boolean): FieldContext => ({
+    size: computed(() => "default" as const),
+    ownsSurface: computed(() => false),
+    invalid: computed(() => invalid),
+    valid: computed(() => false),
+    disabled: computed(() => false),
+    clearable: computed(() => false),
+  });
+
+  @Component({
+    standalone: true,
+    imports: [SelectComponent],
+    template: `<tedi-select
+      inputId="ctx-select"
+      ariaLabel="Riik"
+      [options]="options"
+    />`,
+  })
+  class ContextHostComponent {
+    options = [{ value: "ee", label: "Eesti" }];
+  }
+
+  const render = (invalid: boolean) => {
+    TestBed.configureTestingModule({
+      imports: [ContextHostComponent],
+      providers: [
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        { provide: TEDI_FIELD_CONTEXT, useValue: context(invalid) },
+      ],
+    });
+    const fixture = TestBed.createComponent(ContextHostComponent);
+    fixture.detectChanges();
+    return fixture.nativeElement.querySelector(
+      '[role="combobox"]',
+    ) as HTMLElement;
+  };
+
+  it("marks the combobox invalid when the field context is invalid", () => {
+    expect(render(true).getAttribute("aria-invalid")).toBe("true");
+  });
+
+  it("leaves the combobox valid when the field context is valid", () => {
+    expect(render(false).hasAttribute("aria-invalid")).toBe(false);
+  });
 });

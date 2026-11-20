@@ -25,7 +25,10 @@ import {
   TEDI_FIELD_CONTEXT,
 } from "../form-field/field-context.token";
 import { deriveControlState } from "../form-field/derive-control-state";
-import { controlDescribedBy } from "../form-field/control-described-by";
+import {
+  controlDescribedBy,
+  TEDI_DESCRIBABLE_CONTROL,
+} from "../form-field/control-described-by";
 
 @Component({
   selector: "input[tedi-text-field]",
@@ -38,6 +41,10 @@ import { controlDescribedBy } from "../form-field/control-described-by";
     },
     {
       provide: TEDI_FORM_FIELD_CONTROL,
+      useExisting: forwardRef(() => TextFieldComponent),
+    },
+    {
+      provide: TEDI_DESCRIBABLE_CONTROL,
       useExisting: forwardRef(() => TextFieldComponent),
     },
   ],
