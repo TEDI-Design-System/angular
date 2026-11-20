@@ -196,6 +196,9 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   `tedi-row`/`tedi-col` grid inside the wrapper when blocks need to sit side by side. Use **one
   wrapper per loading region**, not one per block: the announcement is per wrapper, so several
   wrappers mounting together compete for the same live region.
+- **`tedi-skip-links` renders only links marked `*tediSkipLink`.** Anything else projected into it
+  is dropped. Without any marked links it renders one default link to `#main-content`, so the page
+  needs an element with `id="main-content"`.
 - **`tedi-heading-with-icon` projects the heading text and nothing else.** The icon comes from the
   `icon` input, not from projection, so you cannot swap in your own `tedi-icon` or add trailing
   content. It is decorative and `aria-hidden`, which means the projected text is the whole accessible
