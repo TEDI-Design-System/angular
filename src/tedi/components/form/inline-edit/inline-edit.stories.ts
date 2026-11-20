@@ -873,7 +873,7 @@ export const SupportedControls: StoryObj<InlineEditComponent> = {
           <tedi-col [width]="8">
             <tedi-inline-edit [displayValue]="extrasLabel(state.extras)" label="Lisad" [closeOnEnter]="false">
               <ng-template tediInlineEditControl>
-                <tedi-checkbox-group ariaLabel="Lisad" direction="vertical" [(value)]="state.extras">
+                <tedi-checkbox-group ariaLabel="Lisad" direction="vertical" [(values)]="state.extras">
                   <label tedi-label color="primary" class="flex align-items-center gap-2">
                     <input tedi-checkbox type="checkbox" name="ie-extras" value="breakfast" />
                     Hommikusöök
