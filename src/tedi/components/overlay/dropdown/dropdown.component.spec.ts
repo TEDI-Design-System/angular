@@ -23,6 +23,7 @@ import { DropdownItemComponent } from "./dropdown-item/dropdown-item.component";
 import { OptionContentComponent } from "../../helpers/option-content/option-content.component";
 import { getFocusableElements } from "../../../utils/elements.util";
 import { CheckboxComponent } from "../../form/checkbox/checkbox.component";
+import { HorizontalPushHandler } from "../overlay-position.util";
 
 @Component({
   standalone: true,
@@ -2097,7 +2098,7 @@ describe("DropdownItemComponent checkable state", () => {
 @Component({
   standalone: true,
   template: `
-    <tedi-dropdown [position]="position">
+    <tedi-dropdown [position]="position" [preventOverflow]="preventOverflow">
       <button tedi-dropdown-trigger>Trigger</button>
       <tedi-dropdown-content dropdownRole="menu">
         <li tedi-dropdown-item>Item</li>
@@ -2112,6 +2113,7 @@ describe("DropdownItemComponent checkable state", () => {
   ],
 })
 class PositionHostComponent {
+  preventOverflow = true;
   position: DropdownPosition = "bottom-start";
 }
 
@@ -2136,6 +2138,30 @@ describe("DropdownComponent overlay positions", () => {
 
       expect(primary.offsetX || undefined).toBe(offsetX);
       expect(primary.offsetY || undefined).toBe(offsetY);
+    },
+  );
+
+  it.each([
+    [true, 1],
+    [false, 0],
+  ])(
+    "keeps the panel inside the visible width when preventOverflow is %p",
+    (preventOverflow, calls) => {
+      const attach = jest.spyOn(HorizontalPushHandler.prototype, "attach");
+      TestBed.configureTestingModule({ imports: [PositionHostComponent] });
+      const fixture = TestBed.createComponent(PositionHostComponent);
+      fixture.componentInstance.preventOverflow = preventOverflow;
+      fixture.detectChanges();
+      const dropdown = fixture.debugElement.query(
+        By.directive(DropdownComponent),
+      ).componentInstance as DropdownComponent;
+
+      dropdown.showDropdown();
+      fixture.detectChanges();
+
+      expect(attach).toHaveBeenCalledTimes(calls);
+      dropdown.hideDropdown();
+      attach.mockRestore();
     },
   );
 });

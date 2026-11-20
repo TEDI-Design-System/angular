@@ -178,7 +178,26 @@ export function toConnectedPositions(
     }
   }
 
-  return positions;
+  return [
+    ...positions,
+    ...verticalFallbacks(direction, preventOverflow).map((key) =>
+      applyExtra(POSITION_MAP[key]),
+    ),
+  ];
+}
+
+/**
+ * On a narrow screen neither side may fit, so a side overlay that prevents
+ * overflow falls back below or above its trigger.
+ */
+function verticalFallbacks(
+  direction: string,
+  preventOverflow: boolean,
+): string[] {
+  const isSide = direction === "left" || direction === "right";
+  return preventOverflow && isSide
+    ? ["bottom-start", "bottom-end", "top-start", "top-end"]
+    : [];
 }
 
 /** The side of the trigger an overlay resolved to after positioning. */

@@ -4,6 +4,8 @@
   [cdkConnectedOverlayOrigin]="overlayOrigin()"
   [cdkConnectedOverlayOpen]="isOpen()"
   [cdkConnectedOverlayPositions]="overlayPositions()"
+  (attach)="onOverlayAttach()"
+  (positionChange)="onPositionChange()"
   (overlayOutsideClick)="onOutsideClick($event)"
 >
   <div

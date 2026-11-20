@@ -12,8 +12,13 @@ import {
   PLATFORM_ID,
   model,
   Renderer2,
+  viewChild,
 } from "@angular/core";
-import { OverlayContainer, OverlayModule } from "@angular/cdk/overlay";
+import {
+  CdkConnectedOverlay,
+  OverlayContainer,
+  OverlayModule,
+} from "@angular/cdk/overlay";
 import { DOCUMENT, isPlatformBrowser } from "@angular/common";
 import { DropdownTriggerDirective } from "./dropdown-trigger/dropdown-trigger.directive";
 import { DropdownContentComponent } from "./dropdown-content/dropdown-content.component";
@@ -21,6 +26,7 @@ import { DROPDOWN_API } from "./dropdown.tokens";
 import { DropdownOverlayContainer } from "./dropdown-overlay-container";
 import { getFocusableElements } from "../../../utils/elements.util";
 import {
+  HorizontalPushHandler,
   OverlayPosition,
   toConnectedPositions,
 } from "../overlay-position.util";
@@ -155,6 +161,13 @@ export class DropdownComponent implements OnDestroy {
   private scrollListener?: () => void;
   private skipNextGestureOutsideClick = false;
 
+  private readonly connectedOverlay = viewChild(CdkConnectedOverlay);
+
+  /** Keeps the panel inside the visible width, which CDK measures including the scrollbar. */
+  private readonly horizontalPush = new HorizontalPushHandler(
+    () => this.connectedOverlay()?.overlayRef?.overlayElement,
+  );
+
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
       document.addEventListener("focusin", this.handleFocusOut, true);
@@ -166,6 +179,7 @@ export class DropdownComponent implements OnDestroy {
       document.removeEventListener("focusin", this.handleFocusOut, true);
     }
     this.cleanupScrollListener();
+    this.horizontalPush.detach();
   }
 
   showDropdown(initialFocus: "selected" | "first" | "last" = "selected") {
@@ -212,9 +226,18 @@ export class DropdownComponent implements OnDestroy {
     });
   }
 
+  onOverlayAttach() {
+    if (this.preventOverflow()) this.horizontalPush.attach();
+  }
+
+  onPositionChange() {
+    if (this.preventOverflow()) this.horizontalPush.apply();
+  }
+
   hideDropdown() {
     if (this.isOpen()) {
       this.cleanupScrollListener();
+      this.horizontalPush.detach();
       this.isOpen.set(false);
       this.skipNextGestureOutsideClick = false;
       this.activeIndex.set(null);

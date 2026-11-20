@@ -78,7 +78,14 @@ const MENU_STYLE =
   "background: var(--dropdown-item-default-background); border: 1px solid var(--card-border-primary); " +
   "border-radius: var(--form-select-area-radius); box-shadow: 0 1px 5px 0 var(--tedi-alpha-20)";
 
-const STATES = ["Default", "Hover", "Selected", "Disabled", "Focus"] as const;
+const STATES = [
+  { id: "Default", label: "Default" },
+  { id: "Hover", label: "Hover" },
+  { id: "Selected", label: "Selected", selected: true },
+  { id: "Disabled", label: "Disabled", disabled: true },
+  { id: "Focus", label: "Focus" },
+  { id: "SelectedFocus", label: "Selected focus", selected: true },
+];
 
 // "Show code" snippets. The stories render items in a stand-in menu so they can be shown side by
 // side; these show how the same items are used in a real dropdown.
@@ -88,22 +95,22 @@ const SOURCE = {
   <tedi-dropdown-content>
     <li tedi-dropdown-item>
       <tedi-option-content>
-        <tedi-option-content-label>1st level</tedi-option-content-label>
+        <tedi-option-content-label>1. tase</tedi-option-content-label>
       </tedi-option-content>
     </li>
     <li tedi-dropdown-item [indent]="1">
       <tedi-option-content>
-        <tedi-option-content-label>2nd level</tedi-option-content-label>
+        <tedi-option-content-label>2. tase</tedi-option-content-label>
       </tedi-option-content>
     </li>
     <li tedi-dropdown-item [indent]="2">
       <tedi-option-content>
-        <tedi-option-content-label>3rd level</tedi-option-content-label>
+        <tedi-option-content-label>3. tase</tedi-option-content-label>
       </tedi-option-content>
     </li>
     <li tedi-dropdown-item [indent]="3">
       <tedi-option-content>
-        <tedi-option-content-label>4th level</tedi-option-content-label>
+        <tedi-option-content-label>4. tase</tedi-option-content-label>
       </tedi-option-content>
     </li>
   </tedi-dropdown-content>
@@ -180,14 +187,14 @@ const SOURCE = {
   tree: `<tedi-dropdown>
   <button tedi-button tedi-dropdown-trigger>Ava menüü</button>
   <tedi-dropdown-content variant="tree">
-    <li tedi-dropdown-item [indent]="1" [isParent]="true">
+    <li tedi-dropdown-item>
       <tedi-option-content>
-        <tedi-option-content-label>Parent</tedi-option-content-label>
+        <tedi-option-content-label>Ülemelement</tedi-option-content-label>
       </tedi-option-content>
     </li>
     <li tedi-dropdown-item [indent]="1">
       <tedi-option-content>
-        <tedi-option-content-label>Child 1</tedi-option-content-label>
+        <tedi-option-content-label>Alamelement 1</tedi-option-content-label>
       </tedi-option-content>
     </li>
   </tedi-dropdown-content>
@@ -355,20 +362,23 @@ export const Items: Story = {
   render: () => ({
     props: {
       menuStyle: MENU_STYLE,
-      items: ["Juurdepääs terviseandmetele", "Tahteavaldus", "Kontaktid"],
+      items: [
+        "Ligipääs terviseandmetele",
+        "Ligipääs isikuandmetele",
+        "Juurdepääs kontaktandmetele",
+      ],
       levels: [
-        { label: "1st level", indent: 0 },
-        { label: "2nd level", indent: 1 },
-        { label: "3rd level", indent: 2 },
-        { label: "3rd level", indent: 2 },
-        { label: "4th level", indent: 3 },
+        { label: "1. tase", indent: 0 },
+        { label: "2. tase", indent: 1 },
+        { label: "3. tase", indent: 2 },
+        { label: "4. tase", indent: 3 },
       ],
     },
     template: `
       <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start">
         <ul app-dropdown-item-showcase [style]="menuStyle">
-          @for (item of items; track item) {
-            <li tedi-dropdown-item [value]="item">
+          @for (item of items; track $index) {
+            <li tedi-dropdown-item [value]="'item-' + $index">
               <tedi-option-content>
                 <tedi-option-content-label>{{ item }}</tedi-option-content-label>
               </tedi-option-content>
@@ -395,7 +405,7 @@ const CHECKBOX_GROUPS = [
   { label: "Haiglad", children: ["PERH", "ITK", "Fertilitas"] },
 ];
 
-const CHECKBOX_LEVELS = ["1st level", "2nd level", "3rd level", "4th level"];
+const CHECKBOX_LEVELS = ["1. tase", "2. tase", "3. tase", "4. tase"];
 
 /**
  * Checkbox items for multi-select: groups whose checkbox reflects their items (checked, or
@@ -601,16 +611,14 @@ export const WithDescription: Story = {
 };
 
 /**
- * Tree variant: indented items draw connector lines to their parent. Left: the parent sits at
- * the top level; right: each parent is indented onto the line (`[indent]="1"` + `isParent`), so
- * the line branches from the parent's bullet.
+ * `Dropdown variant="tree"` draws connector lines for indented items.
  */
 export const WithTree: Story = {
   parameters: sourceParams(SOURCE.tree),
   render: () => ({
     props: {
       menuStyle: MENU_STYLE,
-      children: ["Child 1", "Child 2", "Child 3"],
+      children: ["Alamelement 1", "Alamelement 2", "Alamelement 3"],
       groups: ["first", "second"],
     },
     template: `
@@ -618,7 +626,7 @@ export const WithTree: Story = {
         <ul app-dropdown-item-showcase variant="tree" [style]="menuStyle">
           <li tedi-dropdown-item value="parent">
             <tedi-option-content>
-              <tedi-option-content-label>Parent</tedi-option-content-label>
+              <tedi-option-content-label>Ülemelement</tedi-option-content-label>
             </tedi-option-content>
           </li>
           @for (child of children; track child) {
@@ -631,9 +639,9 @@ export const WithTree: Story = {
         </ul>
         <ul app-dropdown-item-showcase variant="tree" [style]="menuStyle">
           @for (group of groups; track group) {
-            <li tedi-dropdown-item [value]="group + '-parent'" [indent]="1" [isParent]="true">
+            <li tedi-dropdown-item [value]="group + '-parent'">
               <tedi-option-content>
-                <tedi-option-content-label>Parent</tedi-option-content-label>
+                <tedi-option-content-label>Ülemelement</tedi-option-content-label>
               </tedi-option-content>
             </li>
             @for (child of children; track child) {
@@ -691,22 +699,29 @@ export const States: Story = {
     ...sourceParams(SOURCE.states),
     pseudo: {
       hover: ["#Hover-label", "#Hover-icon", "#Hover-meta"],
-      focusVisible: ["#Focus-label", "#Focus-icon", "#Focus-meta"],
+      focusVisible: [
+        "#Focus-label",
+        "#Focus-icon",
+        "#Focus-meta",
+        "#SelectedFocus-label",
+        "#SelectedFocus-icon",
+        "#SelectedFocus-meta",
+      ],
     },
   },
   render: () => ({
     props: { states: STATES },
     template: `
       <tedi-row [cols]="1" [md]="{ cols: 4 }" [gapX]="3" [gapY]="2" alignItems="center">
-        @for (state of states; track state) {
-          <tedi-col><strong>{{ state }}</strong></tedi-col>
+        @for (state of states; track state.id) {
+          <tedi-col><strong>{{ state.label }}</strong></tedi-col>
           <tedi-col>
             <ul app-dropdown-item-showcase selectedValue="selected" style="padding: 0; margin: 0">
               <li
                 tedi-dropdown-item
-                [id]="state + '-label'"
-                [value]="state === 'Selected' ? 'selected' : state + '-label'"
-                [disabled]="state === 'Disabled'"
+                [id]="state.id + '-label'"
+                [value]="state.selected ? 'selected' : state.id + '-label'"
+                [disabled]="!!state.disabled"
               >
                 <tedi-option-content>
                   <tedi-option-content-label>Tekst</tedi-option-content-label>
@@ -718,9 +733,9 @@ export const States: Story = {
             <ul app-dropdown-item-showcase selectedValue="selected" style="padding: 0; margin: 0">
               <li
                 tedi-dropdown-item
-                [id]="state + '-icon'"
-                [value]="state === 'Selected' ? 'selected' : state + '-icon'"
-                [disabled]="state === 'Disabled'"
+                [id]="state.id + '-icon'"
+                [value]="state.selected ? 'selected' : state.id + '-icon'"
+                [disabled]="!!state.disabled"
               >
                 <tedi-option-content icon="download">
                   <tedi-option-content-label>Tekst</tedi-option-content-label>
@@ -732,9 +747,9 @@ export const States: Story = {
             <ul app-dropdown-item-showcase selectedValue="selected" style="padding: 0; margin: 0">
               <li
                 tedi-dropdown-item
-                [id]="state + '-meta'"
-                [value]="state === 'Selected' ? 'selected' : state + '-meta'"
-                [disabled]="state === 'Disabled'"
+                [id]="state.id + '-meta'"
+                [value]="state.selected ? 'selected' : state.id + '-meta'"
+                [disabled]="!!state.disabled"
               >
                 <tedi-option-content>
                   <tedi-option-content-label>Tekst</tedi-option-content-label>
