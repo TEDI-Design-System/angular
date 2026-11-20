@@ -621,6 +621,13 @@ export const translationsMap = {
     en: "Select row",
     ru: "Выбрать строку",
   },
+  "table-card.select-row": {
+    description: "Accessible label for the TableCard selection checkbox",
+    components: ["TableCard"],
+    et: "Vali rida",
+    en: "Select row",
+    ru: "Выбрать строку",
+  },
   "table.sort": {
     description:
       "Accessible label for a column sort button. Receives the current sort direction and, optionally, the column label so screen readers announce which column is sorted.",
