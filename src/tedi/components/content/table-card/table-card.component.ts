@@ -7,8 +7,10 @@ import {
   computed,
   contentChild,
   contentChildren,
+  effect,
   inject,
   input,
+  isDevMode,
   model,
   ViewEncapsulation,
 } from "@angular/core";
@@ -86,10 +88,7 @@ export type TableCardInputs = {
    */
   labelSize?: TableCardLabelSize;
   /**
-   * Padding of the card. Takes the same values as `tedi-card-content`: a number
-   * in rems, or an object of vertical/horizontal or top/right/bottom/left
-   * numbers. Every block shares its horizontal padding, so the header, rows,
-   * groups, summary and footer all line up.
+   * Card padding; same values as `tedi-card-content`.
    * @default 1
    */
   padding?: CardPadding;
@@ -174,7 +173,7 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
    */
   collapsible = input(false, { transform: booleanAttribute });
   /**
-   * Whether the body is expanded when collapsible` is enabled.
+   * Whether the body is expanded when `collapsible` is set.
    * @default true
    */
   open = model(true);
@@ -195,7 +194,7 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
   selectionLabel = input<string>();
   /**
    * Accessible name of the card. Also names the collapse toggle
-   * when no title is provided.
+   * when there is no title or subtitle.
    */
   ariaLabel = input<string>();
 
@@ -264,16 +263,10 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
     getTableCardRowsStyles(this.breakpointInputs()),
   );
 
-  /**
-   * Detect end-slot content so it can render a header without a title.
-   */
   private readonly endSlot = contentChild(TableCardEndSlotDirective, {
     descendants: false,
   });
 
-  /**
-   * Avoid an empty padded rows section when the card contains only groups.
-   */
   private readonly rows = contentChildren(TableCardRowComponent, {
     descendants: false,
   });
@@ -290,17 +283,6 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
       !!this.endSlot(),
   );
 
-  readonly toggleLabel = computed(
-    () =>
-      this.ariaLabel() ??
-      this.translationService.translate(this.open() ? "close" : "open"),
-  );
-
-  /**
-   * Only collapsible headers are separated from the body.
-   */
-  readonly bodyHasSeparator = computed(() => this.collapsible());
-
   readonly resolvedPaddingSides = computed(() =>
     getTableCardPaddingSides(this.resolvedPadding()),
   );
@@ -309,11 +291,11 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
    * For headers without a separator, the body's top padding provides the gap.
    */
   readonly headerPadding = computed<CardPadding>(() => {
-    const { top, right, bottom, left } = this.resolvedPaddingSides();
+    if (this.collapsible()) return this.resolvedPadding();
 
-    return this.bodyHasSeparator()
-      ? { top, right, bottom, left }
-      : { top, right, bottom: 0, left };
+    const { top, right, left } = this.resolvedPaddingSides();
+
+    return { top, right, bottom: 0, left };
   });
 
   readonly resolvedSelectionLabel = computed(
@@ -343,6 +325,21 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
 
     return classList.join(" ");
   });
+
+  constructor() {
+    effect(() => {
+      if (
+        isDevMode() &&
+        this.collapsible() &&
+        !this.hasTitleGroup() &&
+        !this.ariaLabel()
+      ) {
+        console.warn(
+          "tedi-table-card: a `collapsible` card needs a `title`, `subtitle` or `ariaLabel` so its toggle has an accessible name.",
+        );
+      }
+    });
+  }
 
   handleToggle(): void {
     this.open.set(!this.open());
