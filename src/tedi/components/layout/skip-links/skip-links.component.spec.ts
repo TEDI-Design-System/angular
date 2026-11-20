@@ -1,8 +1,9 @@
-import { Component, input } from "@angular/core";
+import { Component, input, signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { TediTranslationService } from "../../../services/translation/translation.service";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../tokens/translation.token";
 import { LinkComponent } from "../../navigation/link/link.component";
+import { SideNavService } from "../../../services/sidenav/sidenav.service";
 import { SkipLinksComponent } from "./skip-links.component";
 import { SkipLinkDirective } from "./skip-link.directive";
 
@@ -35,6 +36,7 @@ class TranslationMock {
           Already handled
         </a>
         <a tedi-link *tediSkipLink href="#100%">Skip to malformed id</a>
+        <a tedi-link *tediSkipLink href="#menu-item">Skip to the menu</a>
       }
     </tedi-skip-links>
     <main id="main-content">Main</main>
@@ -42,6 +44,7 @@ class TranslationMock {
     <section id="section" tabindex="-1">Section</section>
     <div id="põhisisu">Encoded</div>
     <div id="100%" tabindex="0">Malformed</div>
+    <nav class="tedi-sidenav"><a id="menu-item" href="#">Menu item</a></nav>
   `,
 })
 class HostComponent {
@@ -51,13 +54,22 @@ class HostComponent {
 describe("SkipLinksComponent", () => {
   let fixture: ComponentFixture<HostComponent>;
   let host: HTMLElement;
+  let sidenav: {
+    isMobileDrawerOpen: ReturnType<typeof signal<boolean>>;
+    isMobileOpen: ReturnType<typeof signal<boolean>>;
+  };
 
   beforeEach(() => {
+    sidenav = {
+      isMobileDrawerOpen: signal(false),
+      isMobileOpen: signal(false),
+    };
     TestBed.configureTestingModule({
       imports: [HostComponent],
       providers: [
         { provide: TediTranslationService, useClass: TranslationMock },
         { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+        { provide: SideNavService, useValue: sidenav },
       ],
     });
     fixture = TestBed.createComponent(HostComponent);
@@ -78,7 +90,7 @@ describe("SkipLinksComponent", () => {
     fixture.componentRef.setInput("withLinks", true);
     fixture.detectChanges();
 
-    expect(host.querySelectorAll("ul > li")).toHaveLength(7);
+    expect(host.querySelectorAll("ul > li")).toHaveLength(8);
     expect(links().map((a) => a.getAttribute("href"))).toEqual([
       "#main-content",
       "#footer",
@@ -87,6 +99,7 @@ describe("SkipLinksComponent", () => {
       "#p%C3%B5hisisu",
       "#main-content",
       "#100%",
+      "#menu-item",
     ]);
   });
 
@@ -166,5 +179,26 @@ describe("SkipLinksComponent", () => {
 
     click(links()[6]);
     expect(document.activeElement?.id).toBe("100%");
+  });
+
+  it("closes an open mobile menu so focus doesn't land behind it", () => {
+    sidenav.isMobileDrawerOpen.set(true);
+    sidenav.isMobileOpen.set(true);
+
+    click(links()[0]);
+
+    expect(sidenav.isMobileOpen()).toBe(false);
+  });
+
+  it("keeps the mobile menu open when the target is in it", () => {
+    fixture.componentRef.setInput("withLinks", true);
+    fixture.detectChanges();
+    sidenav.isMobileDrawerOpen.set(true);
+    sidenav.isMobileOpen.set(true);
+
+    click(links()[7]);
+
+    expect(sidenav.isMobileOpen()).toBe(true);
+    expect(document.activeElement?.id).toBe("menu-item");
   });
 });

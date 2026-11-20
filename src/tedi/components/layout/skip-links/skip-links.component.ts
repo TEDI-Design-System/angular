@@ -8,6 +8,7 @@ import {
 import { DOCUMENT, NgTemplateOutlet } from "@angular/common";
 import { LinkComponent } from "../../navigation/link/link.component";
 import { TediTranslationPipe } from "../../../services/translation/translation.pipe";
+import { SideNavService } from "../../../services/sidenav/sidenav.service";
 import { SkipLinkDirective } from "./skip-link.directive";
 
 // Like the browser's own fragment navigation, so `#%C3%B5ige` finds `id="õige"`.
@@ -38,6 +39,7 @@ const decodeId = (id: string) => {
 })
 export class SkipLinksComponent {
   private readonly document = inject(DOCUMENT);
+  private readonly sidenavService = inject(SideNavService);
 
   /** Without any, a single link to `#main-content` is rendered. */
   readonly links = contentChildren(SkipLinkDirective);
@@ -59,6 +61,14 @@ export class SkipLinksComponent {
     }
 
     event.preventDefault();
+
+    // An open mobile menu covers the page, so close it unless the target is in the menu.
+    if (
+      this.sidenavService.isMobileDrawerOpen() &&
+      !target.closest(".tedi-sidenav")
+    ) {
+      this.sidenavService.isMobileOpen.set(false);
+    }
 
     // A non-interactive target takes focus only to move the Tab start point, so it gets no focus ring.
     if (target.tabIndex < 0) {
