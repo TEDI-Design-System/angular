@@ -347,12 +347,51 @@ export const translationsMap = {
     en: "All files removed",
     ru: "Все файлы удалены",
   },
-  "file-dropzone.label": {
-    description: "Default label for dropzone",
+  "file-dropzone.required": {
+    description:
+      "Appended to the dropzone's accessible name when the field is required",
+    components: ["FileDropzone"],
+    et: "Kohustuslik väli",
+    en: "Required field",
+    ru: "Обязательное поле",
+  },
+  "file-dropzone.instructions": {
+    description: "Default instructions inside the dropzone",
     components: ["FileDropzone"],
     et: "Lohista failid siia või klõpsa failide valimiseks",
     en: "Drop files here, or click to browse",
     ru: "Перетащите файлы сюда или нажмите, чтобы выбрать",
+  },
+  "file-dropzone.selected-files": {
+    description: "Accessible name for the list of selected files",
+    components: ["FileDropzone"],
+    et: "Valitud failid",
+    en: "Selected files",
+    ru: "Выбранные файлы",
+  },
+  "file-dropzone.file-rejected-extension": {
+    description:
+      "Validation message shown under a single file that has a disallowed type",
+    components: ["FileDropzone"],
+    et: "Failiformaat ei ole lubatud",
+    en: "File format is not allowed",
+    ru: "Формат файла не разрешен",
+  },
+  "file-dropzone.file-rejected-size": {
+    description:
+      "Validation message shown under a single file that is too large",
+    components: ["FileDropzone"],
+    et: "Fail on liiga suur",
+    en: "File is too large",
+    ru: "Файл слишком велик",
+  },
+  "file-dropzone.single-file-kept": {
+    description:
+      "Announced when a selection brings more files than a single-file dropzone holds",
+    components: ["FileDropzone"],
+    et: (file: string) => `Lisada saab ainult ühe faili, lisatud ${file}`,
+    en: (file: string) => `Only one file can be added, added ${file}`,
+    ru: (file: string) => `Можно добавить только один файл, добавлен ${file}`,
   },
   "file-upload.added": {
     description: "Announced to assistive technology when files are added",
@@ -393,6 +432,14 @@ export const translationsMap = {
     et: "Faili üleslaadimisel tekkis viga",
     en: "An error occurred while uploading the file",
     ru: "Произошла ошибка при загрузке файла",
+  },
+  "file-attachment.invalid": {
+    description:
+      "Accessible name of the error icon on an attachment marked invalid without a message of its own",
+    components: ["Attachment"],
+    et: "Sobimatu fail",
+    en: "Invalid file",
+    ru: "Недопустимый файл",
   },
   "file-attachment.uploading": {
     description:

@@ -6,6 +6,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DoCheck,
   effect,
   ElementRef,
   forwardRef,
@@ -122,6 +123,7 @@ const fileIdentity = (file: FileUploadFile): string =>
 export class FileUploadComponent
   implements
     OnInit,
+    DoCheck,
     OnDestroy,
     ControlValueAccessor,
     Validator,
@@ -142,7 +144,7 @@ export class FileUploadComponent
 
   /**
    * Selected files, and the value of a bound form control. Bind a stable
-   * reference: an inline array literal resets the list on every check.
+   * reference: an expression that builds a new array on each check resets it.
    */
   readonly files = model<FileUploadFile[]>([]);
   /**
@@ -383,7 +385,7 @@ export class FileUploadComponent
       accept &&
         `${this.translations.translate("file-upload.accept")} ${accept.replaceAll(",", ", ")}`,
       maxSize &&
-        `${this.translations.translate("file-upload.max-size")} ${formatFileSize(maxSize)}`,
+        `${this.translations.translate("file-upload.max-size")} ${formatFileSize(maxSize, this.translations.getLanguage())}`,
       this.hint(),
     ].filter(Boolean);
 
@@ -445,6 +447,10 @@ export class FileUploadComponent
 
   ngOnInit(): void {
     this.derived.connect();
+  }
+
+  ngDoCheck(): void {
+    this.derived.sync();
   }
 
   ngOnDestroy(): void {
@@ -622,6 +628,8 @@ export class FileUploadComponent
     if (kept.length && multiple) {
       this.commit([...this.files(), ...kept]);
     } else if (kept.length) {
+      // No trim to report, unlike the dropzone: the picker returns one file
+      // when `multiple` is off, and nothing can be dropped on this field.
       const replaced = this.files();
       this.commit([kept[0]]);
       replaced.forEach((file) => this.fileRemove.emit(file));
@@ -718,13 +726,11 @@ export class FileUploadComponent
     const tokens = this.acceptTokens();
     if (!tokens.length) return true;
 
-    const extension = file.name.includes(".")
-      ? `.${file.name.split(".").pop()?.toLowerCase()}`
-      : "";
+    const name = file.name.toLowerCase();
     const mimeType = file.type.toLowerCase();
 
     return tokens.some((token) => {
-      if (token.startsWith(".")) return token === extension;
+      if (token.startsWith(".")) return name.endsWith(token);
       if (token.endsWith("/*")) return mimeType.startsWith(token.slice(0, -1));
 
       return token === mimeType;

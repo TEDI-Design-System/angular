@@ -19,6 +19,9 @@ class TranslationMock {
   track(key: string) {
     return () => key;
   }
+  getLanguage() {
+    return "et" as const;
+  }
 }
 
 const isBelowMd = signal(false);
@@ -310,6 +313,19 @@ describe("FileUploadComponent", () => {
 
       expect(component.files()).toEqual([]);
       expect(summary()).toBe("file-upload.extension-rejected:'notes.txt',1");
+    });
+
+    it("accepts a double extension, which the browser's own picker offers", () => {
+      fixture.componentRef.setInput("accept", ".tar.gz");
+      fixture.detectChanges();
+
+      selectFiles(fixture, [
+        makeFile("archive.tar.gz", 100, "application/gzip"),
+      ]);
+
+      expect(component.files().map((file) => file.name)).toEqual([
+        "archive.tar.gz",
+      ]);
     });
 
     it("rejects a file over maxSize", () => {
@@ -683,7 +699,7 @@ describe("FileUploadComponent", () => {
       const id = fileInput(fixture).id;
 
       expect(text("tedi-feedback-text")).toBe(
-        "file-upload.accept .pdf, .txt. file-upload.max-size 500 KB",
+        "file-upload.accept .pdf, .txt. file-upload.max-size 500 kB",
       );
       expect(addButton(fixture).getAttribute("aria-describedby")).toBe(
         `${id}-hint`,
@@ -773,6 +789,30 @@ describe("FileUploadComponent", () => {
         fixture.debugElement.queryAll(By.css(".tedi-tag--loading")).length,
       ).toBe(1);
       expect(tagRemoveButtons(fixture).length).toBe(1);
+    });
+
+    it("keeps the rendered tag when a file is replaced by an equal-id copy", () => {
+      fixture.componentRef.setInput("files", [
+        { id: "1", name: "a.pdf", isLoading: true },
+        { id: "2", name: "b.pdf" },
+      ]);
+      fixture.detectChanges();
+
+      const tag = () =>
+        fixture.debugElement.query(By.css("tedi-tag"))
+          .nativeElement as HTMLElement;
+
+      // Marks the node, so a rebuilt tag is the one that loses it.
+      tag().dataset["kept"] = "yes";
+
+      // What a consumer writes when the upload finishes.
+      fixture.componentRef.setInput(
+        "files",
+        component.files().map((file) => ({ ...file, isLoading: false })),
+      );
+      fixture.detectChanges();
+
+      expect(tag().dataset["kept"]).toBe("yes");
     });
 
     it("removes a file through its tag, emits it, announces and refocuses the add button", async () => {
@@ -1025,6 +1065,24 @@ describe("FileUploadComponent with reactive forms", () => {
 
     expect(host.control.value).toBeNull();
     expect(summary()).toBeUndefined();
+  });
+
+  it("re-reads the state when the host swaps the control", () => {
+    const surface = () =>
+      fixture.debugElement.query(By.css(".tedi-field-surface"))
+        .nativeElement as HTMLElement;
+
+    host.control.setErrors({ required: true });
+    host.control.markAsTouched();
+    fixture.detectChanges();
+
+    expect(surface().classList).toContain("tedi-field-surface--invalid");
+
+    // Swapping the instance emits nothing, so only ngDoCheck notices.
+    host.control = new FormControl<FileUploadFile[]>([]);
+    fixture.detectChanges();
+
+    expect(surface().classList).not.toContain("tedi-field-surface--invalid");
   });
 
   it("writes the control value into the list", () => {
