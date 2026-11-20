@@ -152,9 +152,7 @@ describe("VerticalStepper nested item integration", () => {
     ).toBeTruthy();
     expect(
       Array.from(
-        fixture.nativeElement.querySelectorAll(
-          ".tedi-vertical-stepper-item__number",
-        ),
+        fixture.nativeElement.querySelectorAll(".tedi-vertical-step-number"),
         (el: Element) => el.textContent?.trim(),
       ),
     ).toEqual(["1", "2"]);

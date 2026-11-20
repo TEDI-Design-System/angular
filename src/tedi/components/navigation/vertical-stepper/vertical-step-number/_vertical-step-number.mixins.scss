@@ -1,0 +1,18 @@
+@mixin vertical-step-number-hover {
+  &.tedi-vertical-step-number--default,
+  &.tedi-vertical-step-number--selected {
+    --tedi-vertical-step-number-border-color: var(
+      --tedi-vertical-step-number-border-hover
+    );
+  }
+
+  &.tedi-vertical-step-number--success,
+  &.tedi-vertical-step-number--danger {
+    --tedi-vertical-step-number-background: var(
+      --tedi-vertical-step-number-background-hover
+    );
+    --tedi-vertical-step-number-border-color: var(
+      --tedi-vertical-step-number-background-hover
+    );
+  }
+}

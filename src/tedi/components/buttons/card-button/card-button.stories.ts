@@ -15,6 +15,10 @@ import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 import { ShowAtDirective } from "../../../directives/show-at/show-at.directive";
+import {
+  VerticalStepNumberComponent,
+  VerticalStepNumberType,
+} from "../../navigation/vertical-stepper/vertical-step-number/vertical-step-number.component";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.54.76?node-id=4620-85618&m=dev" target="_blank">Figma ↗</a><br />
@@ -48,6 +52,7 @@ export default {
         ColComponent,
         VerticalSpacingDirective,
         ShowAtDirective,
+        VerticalStepNumberComponent,
       ],
     }),
   ],
@@ -528,6 +533,78 @@ export const ComplexCard: Story = {
           </tedi-card-content>
         </tedi-card>
       </button>
+    `,
+  }),
+};
+
+const CARD_STEPPER_BUTTON_STEPS: {
+  title: string;
+  type: VerticalStepNumberType;
+  current?: boolean;
+  description?: string;
+  trailing?: string;
+}[] = [
+  { title: "Minu andmed", type: "success" },
+  { title: "Tervise ajalugu", type: "success" },
+  {
+    title: "Analüüside tulemused",
+    type: "default",
+    current: true,
+    description: "Täidab meditsiini töötaja",
+    trailing: "15p",
+  },
+  { title: "Harjumused", type: "disabled" },
+  { title: "Praegune terviseseisund", type: "disabled" },
+  { title: "Ülevaade", type: "disabled" },
+];
+
+/**
+ * Steps as separate card buttons, an alternative to the compact `CardStepper`.
+ */
+export const CardStepperButton: Story = {
+  name: "Card stepper button",
+  render: () => ({
+    props: { steps: CARD_STEPPER_BUTTON_STEPS },
+    template: `
+      <!-- The width goes on a wrapper: tediVerticalSpacing replaces the inline style of its host. -->
+      <div style="max-width: 360px;">
+        <div [tediVerticalSpacing]="0.5">
+          @for (step of steps; track step.title; let index = $index) {
+            <button
+              tedi-card-button
+              type="button"
+              [disabled]="step.type === 'disabled'"
+              [attr.aria-current]="step.current ? 'step' : null"
+            >
+              <tedi-card>
+                <tedi-card-content class="flex align-items-center gap-3">
+                  <tedi-vertical-step-number
+                    class="align-self-start"
+                    aria-hidden="true"
+                    [number]="index + 1"
+                    [type]="step.type"
+                  />
+                  <span class="flex-fill flex flex-column">
+                    <span tedi-text class="flex align-items-center gap-2">
+                      {{ step.title }}
+                      @if (step.type === "success") {
+                        <tedi-icon name="check" color="success" [size]="18" label="Lõpetatud" />
+                      }
+                    </span>
+                    @if (step.description) {
+                      <span tedi-text modifiers="small" color="tertiary">{{ step.description }}</span>
+                    }
+                  </span>
+                  @if (step.trailing) {
+                    <span tedi-text modifiers="small" color="tertiary">{{ step.trailing }}</span>
+                  }
+                  <tedi-icon name="arrow_right_alt" color="secondary" />
+                </tedi-card-content>
+              </tedi-card>
+            </button>
+          }
+        </div>
+      </div>
     `,
   }),
 };
