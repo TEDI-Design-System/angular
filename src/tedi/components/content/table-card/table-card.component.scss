@@ -49,9 +49,10 @@
     cursor: pointer;
 
     &:focus-visible {
-      outline: var(--tedi-borders-02) solid var(--general-border-brand);
-      outline-offset: 2px;
-      border-radius: var(--table-radius);
+      outline: var(--tedi-borders-02) solid
+        var(--button-main-neutral-text-default);
+      outline-offset: 0;
+      border-radius: 0;
     }
   }
 

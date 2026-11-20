@@ -311,13 +311,8 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 - **`tedi-table-card-actions` reads its footer from where it sits.** Inside a
   `tedi-table-card-group` it joins that group on the muted background; directly under the card it
   becomes the card's own footer. The card and each of its groups can have one each.
-- **`columns` splits the width equally; `columnSizing="auto"` sizes each column to its
-  content.** Equal columns can wrap a long label inside its share — `auto` keeps it on one
-  line and shares only the leftover space, at the cost of uneven columns.
-- **`tedi-table-card`'s layout inputs are the responsive ones.** `layout`, `columns`, `labelWidth`,
-  `labelAlign`, `valueAlign`, `rowAlign`, `labelSize`, `padding` and `rowGap` are all settable per
-  breakpoint (`[md]="{ columns: 2 }"`); a group inherits every one it does not set itself. Note that
-  `columns` needs the room for them — two horizontal columns want roughly `lg` and up.
+- **A `tedi-table-card-group` inherits every layout input it does not set itself.** Set one on the
+  group only when it should differ from the card.
 
 ### Choosing the right component
 

@@ -525,23 +525,76 @@ describe("TableCardComponent", () => {
       );
     });
 
-    it("names the toggle by its title, or falls back when there is none", () => {
-      expect(
-        query(".tedi-table-card__toggle")!.getAttribute("aria-label"),
-      ).toBeNull();
+    it("names the toggle by its content, and by ariaLabel only when it has none", () => {
+      const toggleLabel = () =>
+        query(".tedi-table-card__toggle")!.getAttribute("aria-label");
 
-      host.title = undefined;
+      expect(toggleLabel()).toBeNull();
+
       host.ariaLabel = "Töövõimetusleht";
       fixture.detectChanges();
-      expect(
-        query(".tedi-table-card__toggle")!.getAttribute("aria-label"),
-      ).toBe("Töövõimetusleht");
+      expect(toggleLabel()).toBeNull();
 
+      host.title = undefined;
+      host.subtitle = "14.04.2026 15:30";
+      fixture.detectChanges();
+      expect(toggleLabel()).toBeNull();
+
+      host.subtitle = undefined;
+      fixture.detectChanges();
+      expect(toggleLabel()).toBe("Töövõimetusleht");
+    });
+
+    it("does not name the toggle by whether the card is open", () => {
+      host.title = undefined;
       host.ariaLabel = undefined;
       fixture.detectChanges();
-      expect(
-        query(".tedi-table-card__toggle")!.getAttribute("aria-label"),
-      ).toBeTruthy();
+
+      const toggle = query(".tedi-table-card__toggle")!;
+      expect(toggle.getAttribute("aria-label")).toBeNull();
+      expect(toggle.getAttribute("aria-expanded")).toBe("true");
+
+      toggle.click();
+      fixture.detectChanges();
+      expect(toggle.getAttribute("aria-label")).toBeNull();
+      expect(toggle.getAttribute("aria-expanded")).toBe("false");
+    });
+
+    describe("without an accessible name", () => {
+      let warn: jest.SpyInstance;
+
+      beforeEach(() => {
+        warn = jest.spyOn(console, "warn").mockImplementation(() => undefined);
+      });
+
+      afterEach(() => warn.mockRestore());
+
+      const warnings = () =>
+        warn.mock.calls.filter(([message]) =>
+          String(message).includes("tedi-table-card"),
+        );
+
+      it("warns when a collapsible card has no title, subtitle or ariaLabel", () => {
+        host.title = undefined;
+        host.ariaLabel = undefined;
+        fixture.detectChanges();
+
+        expect(warnings()).toHaveLength(1);
+      });
+
+      it("stays quiet once the toggle can be named", () => {
+        host.title = undefined;
+        host.ariaLabel = "Töövõimetusleht";
+        fixture.detectChanges();
+
+        expect(warnings()).toHaveLength(0);
+
+        host.ariaLabel = undefined;
+        host.subtitle = "14.04.2026 15:30";
+        fixture.detectChanges();
+
+        expect(warnings()).toHaveLength(0);
+      });
     });
 
     it("keeps the body hidden but the card intact while collapsed", () => {
@@ -673,6 +726,28 @@ describe("TableCardComponent", () => {
       const checkbox = query(".tedi-table-card__select")!;
       expect(query(".tedi-table-card__title")!.tagName).not.toBe("LABEL");
       expect(checkbox.getAttribute("aria-label")).toBeTruthy();
+    });
+
+    it("points the generic checkbox name at the title so cards in a list differ", () => {
+      host.title = "Kadri Kaasik";
+      host.collapsible = true;
+      fixture.detectChanges();
+
+      const checkbox = query(".tedi-table-card__select")!;
+      const titleId = checkbox.getAttribute("aria-describedby")!;
+      expect(titleId).toBeTruthy();
+      expect(document.getElementById(titleId)!.textContent).toContain(
+        "Kadri Kaasik",
+      );
+    });
+
+    it("leaves the checkbox undescribed when the title already labels it, or there is none", () => {
+      const checkbox = query(".tedi-table-card__select")!;
+      expect(checkbox.getAttribute("aria-describedby")).toBeNull();
+
+      host.title = "Kadri Kaasik";
+      fixture.detectChanges();
+      expect(checkbox.getAttribute("aria-describedby")).toBeNull();
     });
   });
 });
