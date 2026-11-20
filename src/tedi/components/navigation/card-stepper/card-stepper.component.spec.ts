@@ -586,6 +586,25 @@ describe("CardStepperComponent", () => {
       );
     });
 
+    it("should not show a sub-step as selected once its step is no longer active", async () => {
+      host.withSubSteps.set(true);
+      host.activeStep.set(0);
+      fixture.detectChanges();
+      await openList();
+
+      const subItems = queryAllModal(".tedi-vertical-stepper-item--sub-item");
+
+      expect(subItems.length).toBe(2);
+      expect(
+        subItems.some((item) =>
+          item.classList.contains("tedi-vertical-stepper-item--selected"),
+        ),
+      ).toBe(false);
+      expect(listItems()[0].classList).toContain(
+        "tedi-vertical-stepper-item--selected",
+      );
+    });
+
     it("should size the sheet to the page, not the viewport with its scrollbar", async () => {
       await openList();
 

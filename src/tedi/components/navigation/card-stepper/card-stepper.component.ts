@@ -273,7 +273,8 @@ export class CardStepperComponent {
         completed: subStep.completed(),
         error: subStep.error(),
         informative: subStep.informative(),
-        selected: subStep.selected(),
+        // A sub-step can only be selected while its own step is active.
+        selected: subStep.selected() && index === this.active(),
         disabled: subStep.disabled() || !this.isAvailableInList(index),
       })),
     }));
