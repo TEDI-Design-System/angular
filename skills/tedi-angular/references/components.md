@@ -195,7 +195,8 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   source. `(editCancel)` only reports that Escape was pressed; restoring the previous value is
   yours to do. Set `[closeOnEnter]="false"` when Enter belongs to the control, such as a textarea or
   select. Give the editor its own accessible label. A projected `tedi-feedback-text` is linked to the
-  trigger and to the editor control. Use `updateOn: "change"` or
+  trigger, and to the control when it is a text field, textarea, select, date field, time field or
+  file upload; other controls are not linked automatically. Use `updateOn: "change"` or
   `"blur"` when persisting the bound value in `editCommit`; `"submit"` remains the parent form's
   responsibility.
 - **`tedi-attachment` has no built-in action buttons.** Project neutral `tedi-button`s inside a single
