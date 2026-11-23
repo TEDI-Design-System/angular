@@ -379,11 +379,13 @@ export const CharacterCount: StoryObj<TextareaComponent> = {
   }),
 };
 
+const LONG_VALUE =
+  "Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid. Rebane toitub peamiselt närilistest. Ta on ettevaatlik ja oskab hästi põgeneda. Rebase urul on alati mitu väljapääsu. Urud on põhiliselt kutsikate kasvatamiseks. Ta kaevab urud ise või kohendab mägra urge.";
+
 export const ClearButtonOnInteraction: StoryObj<TextareaComponent> = {
   render: () => ({
     props: {
-      value:
-        "Rebane on väikese koera suurune ja pika koheva sabaga. Joostes hoiab ta saba horisontaalselt. Tema selja karvad on oranžid. Eestis eelistab ta elupaigana metsatukkasid. Rebane toitub peamiselt närilistest. Ta on ettevaatlik ja oskab hästi põgeneda. Rebase urul on alati mitu väljapääsu. Urud on põhiliselt kutsikate kasvatamiseks. Ta kaevab urud ise või kohendab mägra urge.",
+      value: LONG_VALUE,
     },
     template: `
       <tedi-form-field [clearable]="true" [showClearOnInteraction]="true">
@@ -583,6 +585,7 @@ export const VisualTest: StoryObj<TextareaComponent> = {
       hintCountValue: "",
       countValue: "",
       heightExamples: HEIGHT_EXAMPLES,
+      longValue: LONG_VALUE,
     },
     template: `
       <tedi-row [cols]="1" [gapY]="3">
@@ -730,6 +733,17 @@ export const VisualTest: StoryObj<TextareaComponent> = {
             <tedi-form-field>
               <label tedi-label for="vt-placeholder">Label</label>
               <textarea tedi-textarea id="vt-placeholder" [minRows]="5" placeholder="Placeholder"></textarea>
+            </tedi-form-field>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1">
+            <p tedi-text modifiers="bold">With value</p>
+          </tedi-col>
+          <tedi-col width="5">
+            <tedi-form-field>
+              <label tedi-label for="vt-value">Label</label>
+              <textarea tedi-textarea id="vt-value" [minRows]="3" [value]="longValue"></textarea>
             </tedi-form-field>
           </tedi-col>
         </tedi-row>
