@@ -70,7 +70,7 @@ describe("VerticalStepperComponent", () => {
   function getNumbers(): string[] {
     return Array.from(
       fixture.nativeElement.querySelectorAll(
-        ".tedi-vertical-stepper-item__number",
+        ".tedi-vertical-step-number",
       ) as NodeListOf<HTMLElement>,
     ).map((element) => element.textContent?.trim() ?? "");
   }
@@ -116,7 +116,7 @@ describe("VerticalStepperComponent", () => {
   it("should not number the sub-steps", () => {
     expect(
       fixture.nativeElement.querySelectorAll(
-        ".tedi-vertical-stepper-item--sub-item .tedi-vertical-stepper-item__number",
+        ".tedi-vertical-stepper-item--sub-item .tedi-vertical-step-number",
       ).length,
     ).toBe(0);
   });
@@ -180,7 +180,7 @@ describe("VerticalStepperComponent in a loop", () => {
   it("should number steps rendered by a control flow block", () => {
     const numbers = Array.from(
       fixture.nativeElement.querySelectorAll(
-        ".tedi-vertical-stepper-item__number",
+        ".tedi-vertical-step-number",
       ) as NodeListOf<HTMLElement>,
     ).map((element) => element.textContent?.trim());
 
