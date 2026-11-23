@@ -4,3 +4,4 @@ export * from "./link/link.component";
 export * from "./pagination";
 export * from "./table-of-contents";
 export * from "./tabs";
+export * from "./vertical-stepper";
