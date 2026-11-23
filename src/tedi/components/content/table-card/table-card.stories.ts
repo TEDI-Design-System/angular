@@ -937,7 +937,6 @@ export const WithResponsiveLayout: Story = {
   render: () => ({
     template: `
       <tedi-table-card
-        style="max-width: 360px"
         title="ID kaart"
         titleElement="h4"
         titleModifiers="h4"
