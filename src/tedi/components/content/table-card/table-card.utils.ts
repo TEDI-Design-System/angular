@@ -9,6 +9,8 @@ export type TableCardRowAlign = "start" | "center";
 
 export type TableCardLabelSize = "small" | "default";
 
+export type TableCardArrowType = "default" | "secondary";
+
 /**
  * Layout settings shared by card, group and summary rows.
  */

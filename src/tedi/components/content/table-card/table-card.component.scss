@@ -1,5 +1,3 @@
-@use "@tedi-design-system/core/mixins";
-
 .tedi-table-card {
   display: block;
 
@@ -35,37 +33,13 @@
     font: inherit;
   }
 
-  &__toggle {
-    @include mixins.button-reset;
-
+  &__collapse-row {
     display: flex;
     flex: 1;
     gap: var(--layout-grid-gutters-16);
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
     min-width: 0;
-    text-align: left;
     cursor: pointer;
-
-    &:focus-visible {
-      outline: var(--tedi-borders-02) solid
-        var(--button-main-neutral-text-default);
-      outline-offset: 0;
-      border-radius: 0;
-    }
-  }
-
-  &__toggle:hover &__chevron {
-    color: var(--link-primary-hover);
-  }
-
-  &__toggle:active &__chevron {
-    color: var(--link-primary-active);
-  }
-
-  &__toggle:focus-visible &__chevron {
-    color: var(--link-primary-focus);
   }
 
   &__title-group {
@@ -97,19 +71,6 @@
 
     &:empty {
       display: none;
-    }
-  }
-
-  &__chevron {
-    display: inline-flex;
-    flex-shrink: 0;
-    color: var(--link-primary-default);
-    transition:
-      color 0.2s ease-in-out,
-      transform 0.2s ease-in-out;
-
-    &--open {
-      transform: rotate(-180deg);
     }
   }
 

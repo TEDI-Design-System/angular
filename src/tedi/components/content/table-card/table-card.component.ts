@@ -19,7 +19,7 @@ import {
   BreakpointService,
 } from "../../../services/breakpoint/breakpoint.service";
 import { TediTranslationService } from "../../../services/translation/translation.service";
-import { IconComponent } from "../../base/icon/icon.component";
+import { CollapseButtonComponent } from "../../buttons/collapse-button/collapse-button.component";
 import {
   TextColor,
   TextComponent,
@@ -36,6 +36,7 @@ import {
   getTableCardRowsClasses,
   getTableCardRowsStyles,
   TableCardAlign,
+  TableCardArrowType,
   TableCardLabelSize,
   TableCardLayout,
   TableCardRowAlign,
@@ -101,7 +102,7 @@ export type TableCardInputs = {
  * single `<dl>`. `tedi-table-card-group` adds nested groups of rows on a muted
  * background, `tedi-table-card-summary` an emphasised total,
  * `tedi-table-card-actions` a footer of buttons, and `[tediTableCardEndSlot]`
- * marks non-interactive content for the end of the header.
+ * marks content for the end of the header.
  *
  * ```html
  * <tedi-table-card title="Kadri Kaasik" collapsible>
@@ -125,7 +126,7 @@ export type TableCardInputs = {
     CardComponent,
     CardContentComponent,
     CheckboxComponent,
-    IconComponent,
+    CollapseButtonComponent,
     TextComponent,
   ],
   host: {
@@ -165,6 +166,12 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
    * @default false
    */
   collapsible = input(false, { transform: booleanAttribute });
+  /**
+   * Style of the collapse indicator when `collapsible`: a plain chevron, or a
+   * circular outlined arrow (`secondary`).
+   * @default default
+   */
+  arrowType = input<TableCardArrowType>("default");
   /**
    * Whether the body is expanded when `collapsible` is set.
    * @default true
@@ -214,6 +221,7 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
 
   readonly bodyId = this.idGenerator.getId("tedi-table-card-body");
   readonly titleId = this.idGenerator.getId("tedi-table-card-title");
+  readonly titleGroupId = this.idGenerator.getId("tedi-table-card-title-group");
   readonly selectId = this.idGenerator.getId("tedi-table-card-select");
 
   readonly breakpointInputs = computed(() =>
@@ -332,7 +340,11 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
     });
   }
 
-  handleToggle(): void {
+  handleHeaderClick(event: MouseEvent): void {
+    const target = event.target as Element | null;
+
+    if (target?.closest("a, button, input, select, textarea, label")) return;
+
     this.open.set(!this.open());
   }
 

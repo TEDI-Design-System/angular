@@ -118,6 +118,17 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    arrowType: {
+      control: "radio",
+      options: ["default", "secondary"],
+      description:
+        "Style of the collapse indicator when `collapsible`: a plain chevron, or a circular outlined arrow (`secondary`).",
+      table: {
+        category: "inputs",
+        type: { summary: "TableCardArrowType", detail: "default \nsecondary" },
+        defaultValue: { summary: "default" },
+      },
+    },
     open: {
       control: "boolean",
       description:
@@ -689,6 +700,7 @@ export const WithActions: Story = {
           [title]="title()"
           [subtitle]="subtitle()"
           [collapsible]="collapsible()"
+          [arrowType]="arrowType()"
           [open]="open()"
           labelAlign="left"
           valueAlign="left"
@@ -792,6 +804,7 @@ class TableCardAccordionStoryComponent {
   readonly title = input<string>();
   readonly subtitle = input<string>();
   readonly collapsible = input(false);
+  readonly arrowType = input<"default" | "secondary">("default");
   readonly open = input(true);
 
   private readonly breakpoint = inject(BreakpointService);

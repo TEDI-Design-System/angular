@@ -16,6 +16,7 @@ import {
   getTableCardRowsClasses,
   getTableCardRowsStyles,
   TableCardAlign,
+  TableCardArrowType,
   TableCardLabelSize,
   TableCardLayout,
 } from "./table-card.utils";
@@ -41,6 +42,7 @@ const breakpointObserverMock = {
       [subtitle]="subtitle"
       [titleElement]="titleElement"
       [collapsible]="collapsible"
+      [arrowType]="arrowType"
       [(open)]="open"
       [selectable]="selectable"
       [(selected)]="selected"
@@ -80,6 +82,7 @@ class TestHostComponent {
   subtitle?: string;
   titleElement: "h2" | "h3" | "h4" | "h5" | "h6" = "h3";
   collapsible = false;
+  arrowType: TableCardArrowType = "default";
   open = true;
   selectable = false;
   selected = false;
@@ -427,7 +430,7 @@ describe("TableCardComponent", () => {
       expect(query(".tedi-table-card__end-slot .end-slot")).toBeTruthy();
     });
 
-    it("keeps the title and end slot in one wrapping group, apart from the chevron", () => {
+    it("keeps the title and end slot in one wrapping group, apart from the collapse button", () => {
       host.title = "Kadri Kaasik";
       fixture.detectChanges();
 
@@ -442,8 +445,8 @@ describe("TableCardComponent", () => {
         main().querySelector(".tedi-table-card__title-group"),
       ).toBeTruthy();
       expect(main().querySelector(".tedi-table-card__end-slot")).toBeTruthy();
-      expect(main().querySelector(".tedi-table-card__chevron")).toBeNull();
-      expect(query(".tedi-table-card__chevron")).toBeTruthy();
+      expect(main().querySelector("button.tedi-collapse-button")).toBeNull();
+      expect(query("button.tedi-collapse-button")).toBeTruthy();
     });
 
     it("labels the card region only when an ariaLabel is given", () => {
@@ -465,74 +468,82 @@ describe("TableCardComponent", () => {
       fixture.detectChanges();
     });
 
-    it("points the toggle at the body it controls", () => {
-      const toggle = query(".tedi-table-card__toggle")!;
+    const collapseButton = () =>
+      query("button.tedi-collapse-button") as HTMLButtonElement;
+
+    it("points the collapse button at the body it controls", () => {
       const body = query(".tedi-table-card__body")!;
 
-      expect(toggle.getAttribute("aria-controls")).toBe(body.id);
+      expect(collapseButton().getAttribute("aria-controls")).toBe(body.id);
       expect(body.id).toBeTruthy();
     });
 
     it("toggles the body and writes the new state back to the binding", () => {
-      const toggle = query(".tedi-table-card__toggle")!;
       const body = () => query(".tedi-table-card__body")!;
 
-      expect(toggle.getAttribute("aria-expanded")).toBe("true");
+      expect(collapseButton().getAttribute("aria-expanded")).toBe("true");
       expect(body().hasAttribute("hidden")).toBe(false);
 
-      toggle.click();
+      collapseButton().click();
       fixture.detectChanges();
 
       expect(host.open).toBe(false);
-      expect(toggle.getAttribute("aria-expanded")).toBe("false");
+      expect(collapseButton().getAttribute("aria-expanded")).toBe("false");
       expect(body().hasAttribute("hidden")).toBe(true);
     });
 
-    it("turns the chevron over while the body is open", () => {
-      const chevron = () => query(".tedi-table-card__chevron")!;
-
-      expect(chevron().classList).toContain("tedi-table-card__chevron--open");
-
-      query(".tedi-table-card__toggle")!.click();
+    it("toggles when the header is clicked, but not when a link, button or input in it is", () => {
+      query(".tedi-table-card__title")!.click();
       fixture.detectChanges();
-      expect(chevron().classList).not.toContain(
-        "tedi-table-card__chevron--open",
+      expect(host.open).toBe(false);
+
+      query(".tedi-table-card__title")!.click();
+      fixture.detectChanges();
+      expect(host.open).toBe(true);
+
+      const link = document.createElement("a");
+      query(".end-slot")!.appendChild(link);
+      link.click();
+      fixture.detectChanges();
+      expect(host.open).toBe(true);
+
+      host.selectable = true;
+      fixture.detectChanges();
+      (query(".tedi-table-card__select") as HTMLInputElement).click();
+      fixture.detectChanges();
+      expect(host.open).toBe(true);
+    });
+
+    it("turns the arrow over while the body is open", () => {
+      expect(collapseButton().classList).toContain(
+        "tedi-collapse-button--open",
+      );
+
+      collapseButton().click();
+      fixture.detectChanges();
+      expect(collapseButton().classList).not.toContain(
+        "tedi-collapse-button--open",
       );
     });
 
-    it("names the toggle by its content, and by ariaLabel only when it has none", () => {
-      const toggleLabel = () =>
-        query(".tedi-table-card__toggle")!.getAttribute("aria-label");
+    it("names the collapse button by the title and subtitle, and by ariaLabel only when it has neither", () => {
+      const groupId = () => query(".tedi-table-card__title-group")!.id;
 
-      expect(toggleLabel()).toBeNull();
-
-      host.ariaLabel = "Töövõimetusleht";
-      fixture.detectChanges();
-      expect(toggleLabel()).toBeNull();
+      expect(groupId()).toBeTruthy();
+      expect(collapseButton().getAttribute("aria-labelledby")).toBe(groupId());
 
       host.title = undefined;
       host.subtitle = "14.04.2026 15:30";
       fixture.detectChanges();
-      expect(toggleLabel()).toBeNull();
+      expect(collapseButton().getAttribute("aria-labelledby")).toBe(groupId());
 
       host.subtitle = undefined;
+      host.ariaLabel = "Töövõimetusleht";
       fixture.detectChanges();
-      expect(toggleLabel()).toBe("Töövõimetusleht");
-    });
-
-    it("does not name the toggle by whether the card is open", () => {
-      host.title = undefined;
-      host.ariaLabel = undefined;
-      fixture.detectChanges();
-
-      const toggle = query(".tedi-table-card__toggle")!;
-      expect(toggle.getAttribute("aria-label")).toBeNull();
-      expect(toggle.getAttribute("aria-expanded")).toBe("true");
-
-      toggle.click();
-      fixture.detectChanges();
-      expect(toggle.getAttribute("aria-label")).toBeNull();
-      expect(toggle.getAttribute("aria-expanded")).toBe("false");
+      expect(collapseButton().getAttribute("aria-labelledby")).toBeNull();
+      expect(collapseButton().getAttribute("aria-label")).toBe(
+        "Töövõimetusleht",
+      );
     });
 
     describe("without an accessible name", () => {
@@ -570,6 +581,21 @@ describe("TableCardComponent", () => {
 
         expect(warnings()).toHaveLength(0);
       });
+    });
+
+    it("passes arrowType on to the collapse button", () => {
+      expect(collapseButton().classList).toContain(
+        "tedi-collapse-button--neutral",
+      );
+      expect(collapseButton().classList).not.toContain(
+        "tedi-collapse-button--secondary",
+      );
+
+      host.arrowType = "secondary";
+      fixture.detectChanges();
+      expect(collapseButton().classList).toContain(
+        "tedi-collapse-button--secondary",
+      );
     });
 
     it("keeps the body hidden but the card intact while collapsed", () => {

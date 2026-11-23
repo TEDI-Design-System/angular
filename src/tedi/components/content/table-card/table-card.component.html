@@ -27,22 +27,25 @@
       }
 
       @if (collapsible()) {
-        @if (hasTitleGroup()) {
-          <ng-container
-            *ngTemplateOutlet="heading; context: { $implicit: toggle }"
-          ></ng-container>
-        } @else {
-          <ng-container *ngTemplateOutlet="toggle"></ng-container>
-        }
-      } @else {
-        <div class="tedi-table-card__header-main">
-          @if (hasTitleGroup()) {
-            <ng-container
-              *ngTemplateOutlet="heading; context: { $implicit: titleGroup }"
-            ></ng-container>
-          }
-          <ng-container *ngTemplateOutlet="endSlot"></ng-container>
+        <div
+          class="tedi-table-card__collapse-row"
+          (click)="handleHeaderClick($event)"
+        >
+          <ng-container *ngTemplateOutlet="headerMain"></ng-container>
+          <button
+            tedi-collapse-button
+            [hideText]="true"
+            [arrowType]="arrowType()"
+            [size]="arrowType() === 'secondary' ? 'default' : 'small'"
+            [open]="open()"
+            [ariaControls]="bodyId"
+            [ariaLabel]="hasTitleGroup() ? undefined : ariaLabel()"
+            [attr.aria-labelledby]="hasTitleGroup() ? titleGroupId : null"
+            (openChange)="open.set($event)"
+          ></button>
         </div>
+      } @else {
+        <ng-container *ngTemplateOutlet="headerMain"></ng-container>
       }
     </tedi-card-content>
   }
@@ -101,30 +104,19 @@
   }
 </ng-template>
 
-<ng-template #toggle>
-  <button
-    type="button"
-    class="tedi-table-card__toggle"
-    [attr.aria-expanded]="open()"
-    [attr.aria-controls]="bodyId"
-    [attr.aria-label]="hasTitleGroup() ? null : ariaLabel()"
-    (click)="handleToggle()"
-  >
-    <span class="tedi-table-card__header-main">
-      <ng-container *ngTemplateOutlet="titleGroup"></ng-container>
-      <ng-container *ngTemplateOutlet="endSlot"></ng-container>
-    </span>
-    <span
-      class="tedi-table-card__chevron"
-      [class.tedi-table-card__chevron--open]="open()"
-    >
-      <tedi-icon name="expand_more" [size]="24" color="inherit" />
-    </span>
-  </button>
+<ng-template #headerMain>
+  <div class="tedi-table-card__header-main">
+    @if (hasTitleGroup()) {
+      <ng-container
+        *ngTemplateOutlet="heading; context: { $implicit: titleGroup }"
+      ></ng-container>
+    }
+    <ng-container *ngTemplateOutlet="endSlot"></ng-container>
+  </div>
 </ng-template>
 
 <ng-template #titleGroup>
-  <span class="tedi-table-card__title-group">
+  <span class="tedi-table-card__title-group" [id]="titleGroupId">
     @if (title()) {
       @if (titleLabelsSelection()) {
         <label

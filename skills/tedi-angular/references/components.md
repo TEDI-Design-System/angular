@@ -391,10 +391,6 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   `div[role="combobox"]`, set the row's `labelId` and reference it through the select's
   `ariaLabelledby`. These inputs apply to the row's `label` text; projected custom labels
   manage their own attributes. Use one visible label per control.
-- **`[tediTableCardEndSlot]` takes non-interactive content only.** A `collapsible` card renders
-  its header inside the toggle `<button>`, so a link or button in the end slot is nested
-  interactive content — invalid markup that keyboard and screen-reader users cannot reach. Badges,
-  tags and text are fine.
 - **`[tediTableCardEndSlot]` is a directive, not just a projection selector.** `tedi-table-card`
   queries for it to decide whether it has a header at all, so import
   `TableCardEndSlotDirective` wherever the attribute is used. Leave it out and a card whose header
