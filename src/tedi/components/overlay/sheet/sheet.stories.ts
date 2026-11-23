@@ -80,10 +80,6 @@ const NAV_ROW_STYLES = `
 }
 `;
 
-// Keeps the radios 8px apart at every width, as in Figma; the group's own gap is 4px on desktop.
-const RADIO_GROUP_GAP =
-  "--form-checkbox-radio-gutter-y: var(--tedi-dimensions-05)";
-
 // A divider that spans the whole sheet, past the body's padding, as in Figma.
 const FULL_WIDTH_SEPARATOR = `<tedi-separator
   [spacing]="1"
@@ -450,7 +446,7 @@ export const Default: Story = {
   <ng-template tediSheetContent ${argsToTemplate(args, { include: ["showHandle", "padding", "radius", "trapFocus", "returnFocus", "showOverlay", "lockScroll", "keepMounted", "visuallyHiddenDismiss", "snapPoints", "defaultSnapPoint", "minHeight", "maxHeight"] })}>
     <tedi-sheet-header ${argsToTemplate(args, { include: ["title", "headingLevel", "variant", "titlePosition", "collapsible", "closeButton"] })} />
     <tedi-sheet-body>
-      <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Kirjade olek" value="option-1">
+      <tedi-radio-group direction="vertical" ariaLabel="Kirjade olek" value="option-1">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-radio type="radio" value="option-1" />
           Kõik
@@ -461,7 +457,7 @@ export const Default: Story = {
         </label>
       </tedi-radio-group>
       ${FULL_WIDTH_SEPARATOR}
-      <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Järjestus" value="option-1">
+      <tedi-radio-group direction="vertical" ariaLabel="Järjestus" value="option-1">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-radio type="radio" value="option-1" />
           Lugemata kõige üleval
@@ -1166,7 +1162,7 @@ export const ContentNavigation: Story = {
           </span>
         </button>
         ${FULL_WIDTH_SEPARATOR}
-        <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Kirjade olek" value="option-1">
+        <tedi-radio-group direction="vertical" ariaLabel="Kirjade olek" value="option-1">
           <label tedi-label color="primary" class="flex align-items-center gap-2">
             <input tedi-radio type="radio" value="option-1" />
             Kõik
@@ -1177,7 +1173,7 @@ export const ContentNavigation: Story = {
           </label>
         </tedi-radio-group>
         ${FULL_WIDTH_SEPARATOR}
-        <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Järjestus" value="option-1">
+        <tedi-radio-group direction="vertical" ariaLabel="Järjestus" value="option-1">
           <label tedi-label color="primary" class="flex align-items-center gap-2">
             <input tedi-radio type="radio" value="option-1" />
             Lugemata kõige üleval
@@ -1364,7 +1360,7 @@ export const OpenForVisualTest: Story = {
   <ng-template tediSheetContent>
     <tedi-sheet-header closeButton title="Filtreerimine" variant="default" />
     <tedi-sheet-body>
-      <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Kirjade olek" value="option-1">
+      <tedi-radio-group direction="vertical" ariaLabel="Kirjade olek" value="option-1">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-radio type="radio" value="option-1" />
           Kõik
@@ -1375,7 +1371,7 @@ export const OpenForVisualTest: Story = {
         </label>
       </tedi-radio-group>
       ${FULL_WIDTH_SEPARATOR}
-      <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Järjestus" value="option-1">
+      <tedi-radio-group direction="vertical" ariaLabel="Järjestus" value="option-1">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
           <input tedi-radio type="radio" value="option-1" />
           Lugemata kõige üleval
