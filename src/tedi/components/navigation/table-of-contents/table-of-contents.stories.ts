@@ -1010,7 +1010,6 @@ const controllableNestedItems = `
 export const Collapsible: Story = {
   parameters: {
     layout: "fullscreen",
-    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     fullWidth: true,
     controls: { exclude: ["variant", "itemId", "headingLevel"] },
   },
@@ -1092,7 +1091,7 @@ export const CollapsibleHideOnScroll: Story = {
   name: "Collapsible: hide on scroll",
   parameters: {
     layout: "fullscreen",
-    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
+    chromatic: { disableSnapshot: false, viewports: [375] },
     fullWidth: true,
     controls: { exclude: ["variant", "itemId", "headingLevel"] },
   },
@@ -1214,6 +1213,12 @@ export const VisualTest: Story = {
             ${items({ icon: true })}
           </tedi-table-of-contents>`,
         )}
+        <tedi-col>
+          <p tedi-text modifiers="bold">Collapsible</p>
+          <tedi-table-of-contents-collapsible heading="Sisukord" activeId="methods" [sticky]="false" ariaLabel="Sisukord (kokkupandav)">
+            ${controllableNestedItems}
+          </tedi-table-of-contents-collapsible>
+        </tedi-col>
       </tedi-row>
     `,
   }),

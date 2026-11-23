@@ -433,3 +433,30 @@ export const VisualTest: Story = {
     `,
   }),
 };
+
+/** Chromatic mobile snapshot for Timeline: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        <tedi-col>
+          <p tedi-text modifiers="bold">Default</p>
+          <ng-container *ngTemplateOutlet="vt1; context: { activeIndex: 2, variant: 'default' }" />
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">With multiple dates</p>
+          <ng-container *ngTemplateOutlet="vt8; context: { activeIndex: 1 }" />
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Timeline card</p>
+          <ng-container *ngTemplateOutlet="vt9; context: { activeIndex: 1, variant: 'card' }" />
+        </tedi-col>
+      </tedi-row>
+      <ng-template #vt1 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${DEFAULT_TEMPLATE}</ng-template>
+      <ng-template #vt8 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${WITH_MULTIPLE_DATES_TEMPLATE}</ng-template>
+      <ng-template #vt9 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${TIMELINE_CARD_TEMPLATE}</ng-template>
+    `,
+  }),
+};

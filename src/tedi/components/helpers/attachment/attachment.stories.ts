@@ -441,3 +441,19 @@ export const VisualTest: Story = {
     `,
   }),
 };
+
+/** Chromatic mobile snapshot for Attachment: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        <tedi-col>
+          <p tedi-text modifiers="bold">Labeled actions</p>
+          ${LABELED_ACTIONS_TEMPLATE}
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};

@@ -13,6 +13,7 @@ import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { ShowAtDirective } from "../../../directives/show-at/show-at.directive";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.30.43?node-id=8048-69789&t=aqojgjkZcOYAN35p-0" target="_blank">Figma ↗</a><br />
@@ -1432,4 +1433,11 @@ export const VisualTest: StoryObj = {
       <ng-template #variants let-selectedA="selectedA" let-selectedB="selectedB">${VARIANTS_TEMPLATE}</ng-template>
     `,
   }),
+};
+
+/** Chromatic mobile snapshot for Accordion: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: StoryObj = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
+  render: () => visualTest([{ label: "Customized", story: Customized }]),
 };

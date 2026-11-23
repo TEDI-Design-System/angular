@@ -247,7 +247,7 @@ render: (args) => ({
       and only when it points to the TEDI Figma file
 - [ ] Every `argTypes` description is one sentence; every story docblock either says something invisible in the rendered story or does not exist (see section 8)
 - [ ] No public input is missing an `argTypes` entry — aliased inputs are keyed by their alias (`invalid`, not `invalidInput`)
-- [ ] If the component has a `VisualTest` story, a new visual story also adds its variant to `VisualTest` (see section 9)
+- [ ] If the component has a `VisualTest` story, a new visual story also adds its variant to `VisualTest`, and to `VisualTestMobile` if it renders differently below a breakpoint (see section 9)
 - [ ] No inline `style` in story markup, and no hand-written ARIA, keyboard or overlay code in the stories file (see section 2)
 - [ ] Disabled, loading, error and empty states the component supports have a story, even if Figma omits them; place these after the Figma-ordered stories
 
@@ -331,10 +331,17 @@ story instead of one per docs story. When a stories file has a `VisualTest` stor
   (`[(x)]`) only works on a prop name no other block binds differently. Where hard-coded ids collide, move the story's
   render into a function that takes an `idPrefix` and pass `{ render: () => fn("vt-…-") }` as the
   story. The helper throws when a story renders nothing.
-- A story whose state needs a `play` function, a viewport, an open overlay, animation, scrolling or
-  page-level positioning stays a separate snapshot: it sets `chromatic: { disableSnapshot: false }`
-  itself and is not copied into `VisualTest`. A story kept separate for its breakpoints also sets
-  `viewports: [375, 1280]`, otherwise Chromatic only captures desktop.
+- A component that renders differently below a breakpoint (breakpoint inputs such as `[md]`,
+  `*showAt` / `*hideAt`, a mobile dropdown or layout switch) also gets one `VisualTestMobile` story,
+  right after `VisualTest`. It is built the same way, sets
+  `chromatic: { disableSnapshot: false, viewports: [375] }`, and holds only the variants whose mobile
+  rendering differs. Their desktop rendering stays in `VisualTest`, which Chromatic captures at its
+  default desktop width. Don't give a responsive docs story its own snapshot.
+- A story whose state needs a `play` function, an open overlay, scrolling, or sticky / fixed
+  positioning against the page stays a separate snapshot: it sets `chromatic: { disableSnapshot: false }`
+  itself and is not copied into `VisualTest`. Add `viewports` only for the widths whose rendering
+  actually differs. CSS-animated content such as a spinner belongs in `VisualTest`, since Chromatic
+  pauses CSS animations before capturing.
 - Everything in the composite must be unique within the story: `id`, `for`, `aria-labelledby`,
   radio `name`, and the accessible name of every landmark or group. Pseudo-state selectors must be
   unique too: use a list (`hover: ["#vt-hover-primary", "#vt-hover-secondary"]`) or a data attribute
@@ -342,8 +349,21 @@ story instead of one per docs story. When a stories file has a `VisualTest` stor
 - Inverted variants that the docs story puts on the `brand` background go inside
   `<div class="bg bg-primary">` in the composite.
 
+```ts
+/** Chromatic mobile snapshot for Breadcrumbs: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
+  render: () =>
+    visualTest([{ label: "Responsive variant", story: ResponsiveVariant }], {
+      args: meta.args,
+    }),
+};
+```
+
 **A new visual story on a component with `VisualTest` must also add its variant to `VisualTest`**,
-otherwise Chromatic never sees it.
+and to `VisualTestMobile` when it renders differently below a breakpoint, otherwise Chromatic never
+sees it.
 
 ### 10. Verify
 

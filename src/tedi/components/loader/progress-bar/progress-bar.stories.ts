@@ -379,10 +379,7 @@ export const ValueHidden: Story = {
  * label moves inline to the left and the value sits next to the bar. Resize the
  * preview to see the switch.
  */
-export const Responsive: Story = {
-  parameters: { chromatic: { disableSnapshot: false, viewports: [375, 1280] } },
-  render: () => ({
-    template: `
+const RESPONSIVE_TEMPLATE = `
       <tedi-progress-bar
         [value]="40"
         label="Faili üleslaadimine"
@@ -393,7 +390,11 @@ export const Responsive: Story = {
       >
         <tedi-feedback-text text="Üleslaadimine" type="hint" />
       </tedi-progress-bar>
-    `,
+    `;
+
+export const Responsive: Story = {
+  render: () => ({
+    template: RESPONSIVE_TEMPLATE,
   }),
 };
 
@@ -554,6 +555,38 @@ export const VisualTest: Story = {
         <tedi-col>
           <p tedi-text modifiers="bold">Value hidden</p>
           <tedi-progress-bar [value]="60" [showValue]="false" ariaLabel="Edenemisriba pealkiri" />
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Responsive</p>
+          ${RESPONSIVE_TEMPLATE}
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/** Chromatic mobile snapshot for ProgressBar: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false, viewports: [375] },
+  },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        <tedi-col>
+          <p tedi-text modifiers="bold">With label</p>
+          <tedi-row [cols]="1" [gapY]="4">
+            <tedi-progress-bar [value]="40" label="Progress" [required]="true" valuePosition="bottom">
+              <tedi-feedback-text text="Üleslaadimine" type="hint" />
+            </tedi-progress-bar>
+            <tedi-progress-bar [value]="40" label="Küsitluses osalenutest olid vanuses 15-18" labelPosition="top" [md]="{ labelPosition: 'horizontal' }" />
+          </tedi-row>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Responsive</p>
+          ${RESPONSIVE_TEMPLATE}
         </tedi-col>
       </tedi-row>
     `,

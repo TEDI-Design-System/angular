@@ -309,19 +309,20 @@ export const Width: Story = {
  * Below `md` the blocks are full width; from `md` up they narrow and grow
  * taller.
  */
-export const Responsive: Story = {
-  parameters: {
-    controls: { disable: true },
-    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
-  },
-  render: () => ({
-    template: `
+const RESPONSIVE_TEMPLATE = `
       <tedi-skeleton label="Loading something">
         <tedi-skeleton-block [width]="100" height="h3" [md]="{ width: 44, height: 'h1' }" />
         <tedi-skeleton-block [width]="100" height="p" [md]="{ width: 75 }" />
         <tedi-skeleton-block [width]="100" [height]="60" [md]="{ width: 32, height: 100 }" />
       </tedi-skeleton>
-    `,
+    `;
+
+export const Responsive: Story = {
+  parameters: {
+    controls: { disable: true },
+  },
+  render: () => ({
+    template: RESPONSIVE_TEMPLATE,
   }),
 };
 
@@ -374,6 +375,29 @@ export const VisualTest: Story = {
             <tedi-skeleton-block width="36px" height="h2" />
             <tedi-skeleton-block width="auto" height="h1" />
           </tedi-skeleton>
+        </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Responsive</p>
+          ${RESPONSIVE_TEMPLATE}
+        </tedi-col>
+      </tedi-row>
+    `,
+  }),
+};
+
+/** Chromatic mobile snapshot for Skeleton: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false, viewports: [375] },
+  },
+  render: () => ({
+    template: `
+      <tedi-row [cols]="1" [gapY]="4">
+        <tedi-col>
+          <p tedi-text modifiers="bold">Responsive</p>
+          ${RESPONSIVE_TEMPLATE}
         </tedi-col>
       </tedi-row>
     `,

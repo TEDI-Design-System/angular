@@ -121,14 +121,15 @@ export const NotExpandable: Story = {
  * `maxLength` accepts a breakpoint object, so fewer characters can be shown on narrow
  * viewports. Resize the preview to see the collapsed length change.
  */
+const RESPONSIVE_MAX_LENGTH = `<tedi-truncate [text]="text" [maxLength]="{ xs: 80, md: 200, xl: 400 }" />`;
+
 export const ResponsiveMaxLength: Story = {
   parameters: {
     controls: { disable: true },
-    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
   },
   render: () => ({
     props: { text: LOREM_IPSUM },
-    template: `<tedi-truncate [text]="text" [maxLength]="{ xs: 80, md: 200, xl: 400 }" />`,
+    template: RESPONSIVE_MAX_LENGTH,
   }),
 };
 
@@ -152,6 +153,27 @@ export const VisualTest: Story = {
           <tedi-col width="1"><p tedi-text modifiers="bold">Not expandable</p></tedi-col>
           <tedi-col width="5"><tedi-truncate [text]="text" [expandable]="false" /></tedi-col>
         </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Responsive max length</p></tedi-col>
+          <tedi-col width="5">${RESPONSIVE_MAX_LENGTH}</tedi-col>
+        </tedi-row>
+      </tedi-row>
+    `,
+  }),
+};
+
+/** Chromatic mobile snapshot for Truncate: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
+  render: () => ({
+    props: { text: LOREM_IPSUM },
+    template: `
+      <tedi-row [cols]="1" [gapY]="3">
+        <tedi-col>
+          <p tedi-text modifiers="bold">Responsive max length</p>
+          ${RESPONSIVE_MAX_LENGTH}
+        </tedi-col>
       </tedi-row>
     `,
   }),

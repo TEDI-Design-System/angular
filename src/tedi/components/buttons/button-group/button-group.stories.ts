@@ -406,7 +406,6 @@ export const Stretched: Story = {
 };
 
 export const MobileDropdown: Story = {
-  parameters: { chromatic: { disableSnapshot: false } },
   args: {
     ariaLabel: "Vaate valik",
     enableMobileDropdown: true,
@@ -542,6 +541,17 @@ export const VisualTest: Story = {
                 <button tedi-button-group-button value="2" label="Loend">Loend</button>
                 <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
               </tedi-button-group>
+            </tedi-col>
+            <tedi-col [width]="2"><p tedi-text modifiers="bold">Mobile dropdown</p></tedi-col>
+            <tedi-col [width]="10">
+              <div style="max-width: 320px;">
+                <tedi-button-group ariaLabel="Mobiilne vaate valik" [enableMobileDropdown]="true" mobileBreakpoint="xxl"
+                  dropdownLabel="Vaade" dropdownLabelMode="static">
+                  <button tedi-button-group-button value="1" label="Tabel" iconLeft="table">Tabel</button>
+                  <button tedi-button-group-button value="2" label="Loend" iconLeft="list">Loend</button>
+                  <button tedi-button-group-button value="3" label="Kalender" iconLeft="calendar_month">Kalender</button>
+                </tedi-button-group>
+              </div>
             </tedi-col>
           </tedi-row>
         </tedi-col>

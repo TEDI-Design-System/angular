@@ -465,7 +465,6 @@ export const ResponsiveAlign: Story = {
     `,
   }),
   parameters: {
-    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     docs: {
       description: {
         story:
@@ -489,7 +488,6 @@ export const ResponsiveVisibility: Story = {
     template: `<tedi-pagination ${argsToTemplate(args)} />`,
   }),
   parameters: {
-    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
     docs: {
       description: {
         story:
@@ -767,12 +765,35 @@ export const VisualTest: Story = {
           },
         },
         vtBlock("Left aligned", LeftAligned),
+        vtBlock("Responsive align", ResponsiveAlign),
+        vtBlock("Responsive visibility", ResponsiveVisibility),
         vtBlock("Divider bottom", DividerBottom),
         vtBlock("Disabled boundary arrows", DisabledBoundaryArrows),
         vtBlock("Arrows with labels", ArrowsWithLabels),
         vtBlock("Custom arrow icons", CustomArrowIcons),
         vtBlock("Arrows primary variant", ArrowsPrimaryVariant),
         { label: "Custom labels", story: CustomLabels },
+      ],
+      { args: meta.args },
+    ),
+};
+
+/** Chromatic mobile snapshot for Pagination: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false, viewports: [375] },
+  },
+  render: () =>
+    visualTest(
+      [
+        vtBlock("Default", Default),
+        vtBlock("All properties shown", AllPropertiesShown),
+        vtBlock("Responsive align", ResponsiveAlign),
+        vtBlock("Responsive visibility", ResponsiveVisibility),
+        vtBlock("Arrows with labels", ArrowsWithLabels),
+        vtBlock("Arrows primary variant", ArrowsPrimaryVariant),
       ],
       { args: meta.args },
     ),

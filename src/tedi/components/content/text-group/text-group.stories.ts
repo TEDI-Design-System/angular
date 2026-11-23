@@ -327,24 +327,20 @@ export const HorizontalLabelLength: Story = {
  * Demonstrates overriding the label `type` and `labelWidth` per breakpoint. Resize the preview
  * to see the layout adapt.
  */
-export const Responsive: Story = {
-  parameters: { chromatic: { disableSnapshot: false, viewports: [375, 1280] } },
-  render: () => {
-    const rows = [
-      { label: "Patsient", value: "Mari Maasikas" },
-      { label: "Aadress", value: "Tulbi tn 4, Tallinn, 23562, Eesti" },
-      { label: "Vaktsiin", value: "Mari Maasikas" },
-      { label: "Järgmine vaktsineerimine", value: "Immuniseerimine lõpetatud" },
-      {
-        label: "Tervishoiuteenuse osutaja",
-        value: "SA Põhja-Eesti Regionaalhaigla",
-      },
-      { label: "Tervishoiutöötaja", value: "Mart Mets" },
-      { label: "Dokumendi loomise aeg", value: "16.08.2023 14:51:48" },
-    ];
-    return {
-      props: { rows },
-      template: `
+const RESPONSIVE_ROWS = [
+  { label: "Patsient", value: "Mari Maasikas" },
+  { label: "Aadress", value: "Tulbi tn 4, Tallinn, 23562, Eesti" },
+  { label: "Vaktsiin", value: "Mari Maasikas" },
+  { label: "Järgmine vaktsineerimine", value: "Immuniseerimine lõpetatud" },
+  {
+    label: "Tervishoiuteenuse osutaja",
+    value: "SA Põhja-Eesti Regionaalhaigla",
+  },
+  { label: "Tervishoiutöötaja", value: "Mart Mets" },
+  { label: "Dokumendi loomise aeg", value: "16.08.2023 14:51:48" },
+];
+
+const RESPONSIVE_TEMPLATE = `
         <div [tediVerticalSpacing]="0.25">
           <tedi-text-group
             *ngFor="let row of rows"
@@ -357,9 +353,13 @@ export const Responsive: Story = {
             <tedi-text-group-value>{{ row.value }}</tedi-text-group-value>
           </tedi-text-group>
         </div>
-      `,
-    };
-  },
+      `;
+
+export const Responsive: Story = {
+  render: () => ({
+    props: { rows: RESPONSIVE_ROWS },
+    template: RESPONSIVE_TEMPLATE,
+  }),
 };
 
 const LONG_TEXT_TEMPLATE = `
@@ -403,6 +403,7 @@ export const VisualTest: Story = {
     props: {
       typesGroups: TYPES_GROUPS,
       labelLengthSections: LABEL_LENGTH_SECTIONS,
+      rows: RESPONSIVE_ROWS,
     },
     template: `
       <tedi-row [cols]="1" [gapY]="5">
@@ -426,9 +427,33 @@ export const VisualTest: Story = {
           <p tedi-text modifiers="bold">Long text values</p>
           ${LONG_TEXT_TEMPLATE}
         </tedi-col>
+        <tedi-col>
+          <p tedi-text modifiers="bold">Responsive</p>
+          ${RESPONSIVE_TEMPLATE}
+        </tedi-col>
       </tedi-row>
       <ng-template #types let-textGroups="textGroups">${TYPES_TEMPLATE}</ng-template>
       <ng-template #labelLength let-textGroups="textGroups">${LABEL_LENGTH_TEMPLATE}</ng-template>
+    `,
+  }),
+};
+
+/** Chromatic mobile snapshot for TextGroup: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: [375] },
+    a11y: { test: "todo" },
+  },
+  render: () => ({
+    props: { rows: RESPONSIVE_ROWS },
+    template: `
+      <tedi-row [cols]="1" [gapY]="5">
+        <tedi-col>
+          <p tedi-text modifiers="bold">Responsive</p>
+          ${RESPONSIVE_TEMPLATE}
+        </tedi-col>
+      </tedi-row>
     `,
   }),
 };

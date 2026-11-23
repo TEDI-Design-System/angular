@@ -83,7 +83,6 @@ export const Default: StoryObj<EllipsisComponent> = {
  * Resize the window to see that the ellipsis and tooltip appear only when content doesn't fit.
  */
 export const ResponsiveEnd: StoryObj<EllipsisComponent> = {
-  parameters: { chromatic: { disableSnapshot: false, viewports: [375, 1280] } },
   render: (args) => ({
     props: args,
     template: `
@@ -146,6 +145,12 @@ export const VisualTest: StoryObj<EllipsisComponent> = {
           <tedi-col width="1"><p tedi-text modifiers="bold">Leading start</p></tedi-col>
           <tedi-col width="1">
             <tedi-ellipsis position="start">${CONTENT}</tedi-ellipsis>
+          </tedi-col>
+        </tedi-row>
+        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
+          <tedi-col width="1"><p tedi-text modifiers="bold">Fits, no ellipsis</p></tedi-col>
+          <tedi-col width="5">
+            <tedi-ellipsis [lineClamp]="1" position="end">${CONTENT}</tedi-ellipsis>
           </tedi-col>
         </tedi-row>
       </tedi-row>
