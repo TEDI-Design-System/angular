@@ -21,7 +21,6 @@ export type FeedbackTextPosition = "left" | "right";
   host: {
     "[class]": "classes()",
     "[attr.id]": "elementId()",
-    "[attr.role]": "role()",
     "[attr.aria-live]": "ariaLive()",
   },
 })
@@ -55,20 +54,12 @@ export class FeedbackTextComponent {
   private readonly resolvedType = computed(() => this.type() ?? "hint");
   private readonly resolvedPosition = computed(() => this.position() ?? "left");
 
-  role = computed(() => {
-    if (this.resolvedType() === "valid" || this.resolvedType() === "error") {
-      return "alert";
-    }
-
-    return undefined;
-  });
-
   ariaLive = computed(() => {
     if (this.resolvedType() === "error" || this.resolvedType() === "valid") {
-      return "assertive";
+      return "polite";
     }
 
-    return "polite";
+    return null;
   });
 
   classes = computed(() => {

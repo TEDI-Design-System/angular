@@ -85,6 +85,33 @@ describe("SideNavService", () => {
     });
   });
 
+  describe("closeMobileDrawer", () => {
+    it("should close the drawer, close open submenus and focus the toggle", () => {
+      const toggle = document.createElement("button");
+      document.body.appendChild(toggle);
+      service.registerToggle(toggle);
+      const open = signal(true);
+      service.registerItem({
+        dropdown: { open },
+      } as unknown as SideNavItemComponent);
+      service.isMobileOpen.set(true);
+
+      service.closeMobileDrawer();
+
+      expect(service.isMobileOpen()).toBe(false);
+      expect(open()).toBe(false);
+      expect(document.activeElement).toBe(toggle);
+      toggle.remove();
+    });
+
+    it("should not throw without a registered toggle", () => {
+      service.isMobileOpen.set(true);
+
+      expect(() => service.closeMobileDrawer()).not.toThrow();
+      expect(service.isMobileOpen()).toBe(false);
+    });
+  });
+
   describe("handleCollapse", () => {
     it("should toggle isCollapsed state", () => {
       expect(service.isCollapsed()).toBe(false);

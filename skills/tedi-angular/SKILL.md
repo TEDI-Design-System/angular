@@ -280,6 +280,8 @@ t.addTranslations({ /* map */ });          // add or override copy
 
 In templates, the `tediTranslate` pipe resolves keys reactively.
 
+Keep `<html lang>` equal to the TEDI language, and update it when the language changes. TEDI does not set it. Screen readers choose the voice and pronunciation from `lang`, so Estonian labels under `lang="en"` are read with English pronunciation (WCAG 3.1.1).
+
 ## Notifications
 
 ```ts
@@ -304,6 +306,7 @@ A handful of mistakes account for most TEDI integration issues. Avoid them up fr
 - **Import from `/tedi` or `/community`, never the package root.** `@tedi-design-system/angular` is not a valid runtime import path — the package has explicit entry points (`@tedi-design-system/angular/tedi`, `@tedi-design-system/angular/community`, `@tedi-design-system/angular/index.css`). Importing from the root will fail.
 - **Prefer TEDI-Ready over Community, and always write the entry point explicitly.** In Angular the two namespaces genuinely collide: 24 selectors are declared in *both*, under *identical class names* (`tedi-card`, `tedi-modal`, `tedi-accordion`, `tedi-tabs`, `tedi-dropdown`, `tedi-form-field`, `tedi-pagination`, `tedi-search`, `tedi-tag`, the checkbox/radio groups). `CardComponent` from `/community` and from `/tedi` are different components with different inputs behind the same `<tedi-card>` tag, so nothing at the usage site tells you which you got and it still compiles. An auto-import picks whichever it finds first. See [references/components.md](references/components.md).
 - **Match the selector style.** Attribute selectors go on native elements (`<button tedi-button>`, `<input tedi-text-field>`, `<label tedi-label>` — never `<tedi-label>`); element selectors are their own tags (`<tedi-modal>`, `<tedi-icon>`). Getting this wrong yields a silent no-op or a template error.
+- **Mark the control required, not only the label.** `<label tedi-label [required]="true">` draws an asterisk that screen readers skip; the control needs `required` too. See [references/components.md](references/components.md) → Accessibility.
 - **Use design tokens, not hardcoded colors.** Prefer the semantic roles (`var(--general-surface-primary)`, `var(--general-text-secondary)`) and drop to a `--tedi-*` primitive only when no semantic role fits. The legacy `--tedi-color-*` / `--tedi-spacing-*` names are gone: look names up in `node_modules/@tedi-design-system/core/tokens.json`, see [references/theming.md](references/theming.md).
 - **Do not add CSS `var()` fallbacks.** Write `var(--tedi-dimensions-04)`, not `var(--tedi-dimensions-04, 16px)`; fallbacks defeat token-driven theming.
 - **Override styles via BEM classes, not `::ng-deep`.** Components use `ViewEncapsulation.None`, so their BEM classes (`.tedi-button--primary`, `.tedi-form-field`) are globally targetable — no `::ng-deep` or `:host` piercing needed.

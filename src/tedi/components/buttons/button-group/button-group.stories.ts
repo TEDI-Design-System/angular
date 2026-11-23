@@ -325,7 +325,7 @@ export const Primary: Story = {
             <tedi-row cols="1" [md]="{ cols: 12 }" [gapY]="1" alignItems="center">
               <tedi-col [width]="2"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
               <tedi-col [width]="10">
-                <tedi-button-group variant="primary-button-group" [ariaLabel]="'Esmane ' + state"
+                <tedi-button-group variant="primary-button-group" ariaLabel="Esmane vaate valik"
                   [value]="state === 'Selected' ? '1' : undefined">
                   <button tedi-button-group-button [attr.id]="state.toLowerCase() + '-primary'"
                     value="1" label="Tabel" [disabled]="state === 'Disabled'">Tabel</button>
@@ -361,7 +361,7 @@ export const Secondary: Story = {
             <tedi-row cols="1" [md]="{ cols: 12 }" [gapY]="1" alignItems="center">
               <tedi-col [width]="2"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
               <tedi-col [width]="10">
-                <tedi-button-group variant="secondary-button-group" [ariaLabel]="'Teisene ' + state"
+                <tedi-button-group variant="secondary-button-group" ariaLabel="Teisene vaate valik"
                   [value]="state === 'Selected' ? '1' : undefined">
                   <button tedi-button-group-button [attr.id]="state.toLowerCase() + '-secondary'"
                     value="1" label="Tabel" [disabled]="state === 'Disabled'">Tabel</button>
@@ -381,7 +381,7 @@ export const DifferentWidthButtons: Story = {
   render: () => ({
     props: { value: signal<string>("1") },
     template: `
-      <tedi-button-group ariaLabel="Erineva laiusega nupud"
+      <tedi-button-group ariaLabel="Vaate valik"
         [value]="value()" (valueChange)="value.set($event)">
         <button tedi-button-group-button value="1" label="Tabel">Tabel</button>
         <button tedi-button-group-button value="2" label="Loend">Loend</button>
@@ -408,10 +408,10 @@ export const Stretched: Story = {
 export const MobileDropdown: Story = {
   parameters: { chromatic: { disableSnapshot: false } },
   args: {
-    ariaLabel: "Mobiilis koondub rippmenüüks",
+    ariaLabel: "Vaate valik",
     enableMobileDropdown: true,
     mobileBreakpoint: "xxl",
-    dropdownLabel: "Alammenüü",
+    dropdownLabel: "Vaade",
     dropdownLabelMode: "static",
   },
   render: (args) => ({

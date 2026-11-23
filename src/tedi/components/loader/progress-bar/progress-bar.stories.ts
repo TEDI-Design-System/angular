@@ -175,7 +175,7 @@ export default {
   },
   args: {
     value: 40,
-    ariaLabel: "Edenemisriba pealkiri",
+    ariaLabel: "Faili üleslaadimine",
   },
 } as Meta<ProgressBarComponent>;
 
@@ -210,14 +210,14 @@ export const Sizes: Story = {
       <tedi-row [cols]="4" [alignItems]="'center'" [gapX]="4" [gapY]="3">
         <p tedi-text [modifiers]="['small']">Default</p>
         <tedi-col [width]="3">
-          <tedi-progress-bar [value]="20" ariaLabel="Edenemisriba pealkiri">
+          <tedi-progress-bar [value]="20" ariaLabel="Faili üleslaadimine">
             <tedi-feedback-text text="Üleslaadimine" type="hint" />
           </tedi-progress-bar>
         </tedi-col>
 
         <p tedi-text [modifiers]="['small']">Small</p>
         <tedi-col [width]="3">
-          <tedi-progress-bar [value]="20" size="small" ariaLabel="Edenemisriba pealkiri">
+          <tedi-progress-bar [value]="20" size="small" ariaLabel="Faili üleslaadimine">
             <tedi-feedback-text text="Üleslaadimine" type="hint" />
           </tedi-progress-bar>
         </tedi-col>
@@ -257,7 +257,7 @@ export const Sizes: Story = {
       </div>
       <tedi-progress-bar
         [value]="20"
-        label="Edenemisriba pealkiri"
+        label="Faili üleslaadimine"
         [required]="true"
         labelPosition="top"
         valuePosition="horizontal"
@@ -272,7 +272,7 @@ export const Sizes: Story = {
       </div>
       <tedi-progress-bar
         [value]="20"
-        label="Edenemisriba pealkiri"
+        label="Faili üleslaadimine"
         [required]="true"
         labelPosition="top"
         valuePosition="bottom"
@@ -287,7 +287,7 @@ export const Sizes: Story = {
       </div>
       <tedi-progress-bar
         [value]="20"
-        label="Edenemisriba pealkiri"
+        label="Faili üleslaadimine"
         [required]="true"
         labelPosition="horizontal"
         valuePosition="horizontal"
@@ -302,7 +302,7 @@ export const Sizes: Story = {
       </div>
       <tedi-progress-bar
         [value]="20"
-        label="Edenemisriba pealkiri"
+        label="Faili üleslaadimine"
         [required]="true"
         labelPosition="horizontal"
         valuePosition="bottom"
@@ -342,9 +342,9 @@ export const Regular: Story = {
   render: () => ({
     template: `
       <tedi-row [cols]="1" [gapY]="4">
-        <tedi-progress-bar [value]="40" ariaLabel="Edenemisriba pealkiri" />
-        <tedi-progress-bar [value]="40" ariaLabel="Edenemisriba pealkiri" valueLabel="1 / 5" />
-        <tedi-progress-bar [value]="40" ariaLabel="Edenemisriba pealkiri" valuePosition="bottom" />
+        <tedi-progress-bar [value]="40" ariaLabel="Faili üleslaadimine" />
+        <tedi-progress-bar [value]="40" ariaLabel="Faili üleslaadimine" valueLabel="1 / 5" />
+        <tedi-progress-bar [value]="40" ariaLabel="Faili üleslaadimine" valuePosition="bottom" />
       </tedi-row>
     `,
   }),
@@ -385,7 +385,7 @@ export const Responsive: Story = {
     template: `
       <tedi-progress-bar
         [value]="40"
-        label="Edenemisriba pealkiri"
+        label="Faili üleslaadimine"
         [required]="true"
         labelPosition="top"
         valuePosition="bottom"

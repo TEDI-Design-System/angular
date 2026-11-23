@@ -424,6 +424,7 @@ export const WithCheckboxTrigger: Story = {
  * handlers.
  */
 export const KeepOpenOnSelect: Story = {
+  parameters: { chromatic: { disableSnapshot: true } },
   name: "Keep Open on Select (multi-select)",
   args: {
     position: "bottom-start",

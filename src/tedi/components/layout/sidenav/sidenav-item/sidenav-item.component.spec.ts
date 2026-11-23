@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { signal } from "@angular/core";
 import { SideNavItemComponent } from "./sidenav-item.component";
 import { SideNavService } from "../../../../services/sidenav/sidenav.service";
+import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
 
 const mockCallbackHolder: { callback: (() => void) | null } = {
   callback: null,
@@ -53,7 +54,10 @@ describe("SideNavItemComponent", () => {
 
     TestBed.configureTestingModule({
       imports: [SideNavItemComponent],
-      providers: [{ provide: SideNavService, useValue: sidenavService }],
+      providers: [
+        { provide: SideNavService, useValue: sidenavService },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
     });
 
     fixture = TestBed.createComponent(SideNavItemComponent);
@@ -112,6 +116,30 @@ describe("SideNavItemComponent", () => {
     expect(itemElement.classList.contains("tedi-sidenav-item--hidden")).toBe(
       false,
     );
+  });
+
+  it("submenu toggle keeps a stable name and exposes state via aria-expanded", () => {
+    const openSignal = signal(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fixture.componentInstance.dropdown = { open: openSignal } as any;
+    fixture.componentRef.setInput("href", "#");
+    fixture.componentInstance.textContent.set("Ravimid");
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector(
+      ".tedi-sidenav-item__caret-button",
+    ) as HTMLButtonElement;
+    expect(button.querySelector(".sr-only")?.textContent?.trim()).toBe(
+      "Ravimid alammenüü",
+    );
+    expect(button.getAttribute("aria-expanded")).toBe("false");
+
+    openSignal.set(true);
+    fixture.detectChanges();
+    expect(button.querySelector(".sr-only")?.textContent?.trim()).toBe(
+      "Ravimid alammenüü",
+    );
+    expect(button.getAttribute("aria-expanded")).toBe("true");
   });
 
   it("toggleDropdown should flip dropdown.open signal", () => {

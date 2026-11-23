@@ -5,22 +5,13 @@
   [attr.aria-label]="gridAriaLabel()"
   [attr.aria-multiselectable]="multiselectable() ? 'true' : null"
 >
-  <thead>
-    <tr class="tedi-calendar-day-grid__header" role="row">
+  <thead aria-hidden="true">
+    <tr class="tedi-calendar-day-grid__header">
       @if (showWeekNumbers()) {
-        <th class="tedi-calendar-day-grid__week-number-header" scope="col">
-          <span class="sr-only">{{ weekNumberHeaderLabel() }}</span>
-        </th>
+        <th class="tedi-calendar-day-grid__week-number-header"></th>
       }
-      @for (name of weekdayNames(); track $index; let i = $index) {
-        <th
-          class="tedi-calendar-day-grid__weekday"
-          role="columnheader"
-          scope="col"
-          [attr.aria-label]="weekdayFullNames()[i]"
-        >
-          {{ name }}
-        </th>
+      @for (name of weekdayNames(); track $index) {
+        <th class="tedi-calendar-day-grid__weekday">{{ name }}</th>
       }
     </tr>
   </thead>

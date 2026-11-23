@@ -213,6 +213,34 @@ describe("SelectComponent", () => {
       expect(requiredIndicator?.textContent).toBe("*");
     });
 
+    it("sets aria-required on the combobox only when required", () => {
+      expect(getTrigger().hasAttribute("aria-required")).toBe(false);
+
+      host.required = true;
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-required")).toBe("true");
+    });
+
+    it("moves aria-required to the search input when searchable", () => {
+      host.required = true;
+      host.searchable = true;
+      fixture.detectChanges();
+
+      expect(getTrigger().hasAttribute("aria-required")).toBe(false);
+      expect(getSearchInput().getAttribute("aria-required")).toBe("true");
+    });
+
+    it("sets aria-required on the search input of a searchable multiselect", () => {
+      host.required = true;
+      host.searchable = true;
+      host.allowMultiple = true;
+      host.control.setValue(["Option 1"]);
+      fixture.detectChanges();
+
+      expect(getSearchInput().getAttribute("aria-required")).toBe("true");
+    });
+
     it("should apply small size class", () => {
       host.size = "small";
       fixture.detectChanges();
@@ -789,6 +817,102 @@ describe("SelectComponent", () => {
       expect(options.length).toBe(4);
     }));
 
+    const expectOptionsGroupedByLabel = () => {
+      const groups = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '[role="listbox"] [role="group"]',
+        ),
+      );
+      expect(groups.length).toBe(2);
+
+      const groupNames = groups.map((group) =>
+        document
+          .getElementById(group.getAttribute("aria-labelledby")!)!
+          .textContent!.trim(),
+      );
+      expect(groupNames).toEqual(["Fruits", "Vegetables"]);
+
+      const optionsPerGroup = groups.map((group) =>
+        Array.from(
+          group.querySelectorAll(
+            '[role="option"]:not(.tedi-select__group-name)',
+          ),
+        ).map((option) => option.textContent!.trim()),
+      );
+      expect(optionsPerGroup).toEqual([
+        ["Apple", "Banana"],
+        ["Carrot", "Broccoli"],
+      ]);
+    };
+
+    it("should expose each group as a named group of the listbox", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expectOptionsGroupedByLabel();
+    }));
+
+    it("should name selectable groups by their heading option", fakeAsync(() => {
+      host.allowMultiple = true;
+      host.selectableGroups = true;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expectOptionsGroupedByLabel();
+      document
+        .querySelectorAll('[role="listbox"] [role="group"]')
+        .forEach((group) => {
+          const heading = document.getElementById(
+            group.getAttribute("aria-labelledby")!,
+          )!;
+          expect(heading.getAttribute("role")).toBe("option");
+          expect(group.contains(heading)).toBe(true);
+        });
+    }));
+
+    it("should not wrap ungrouped options in a group", fakeAsync(() => {
+      host.groupBy = undefined;
+      fixture.detectChanges();
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      expect(
+        document.querySelectorAll('[role="listbox"] [role="group"]').length,
+      ).toBe(0);
+      expect(getOptions().length).toBe(4);
+    }));
+
+    it("should navigate across groups with the arrow keys", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const listbox = document.querySelector<HTMLElement>('[role="listbox"]')!;
+      const press = (key: string, keyCode: number) => {
+        listbox.dispatchEvent(
+          new KeyboardEvent("keydown", { key, keyCode, bubbles: true }),
+        );
+        fixture.detectChanges();
+        tick();
+      };
+      const activeLabel = () =>
+        document
+          .getElementById(listbox.getAttribute("aria-activedescendant")!)
+          ?.textContent?.trim();
+
+      press("Home", 36);
+      expect(activeLabel()).toBe("Apple");
+      press("ArrowDown", 40);
+      press("ArrowDown", 40);
+      expect(activeLabel()).toBe("Carrot");
+    }));
+
     it("should select group options when selectableGroups=true", fakeAsync(() => {
       host.allowMultiple = true;
       host.selectableGroups = true;
@@ -1066,6 +1190,73 @@ describe("SelectComponent", () => {
 
         expect(select.isOpen()).toBe(false);
       }));
+    });
+  });
+
+  describe("aria-describedby", () => {
+    it("is absent without feedback text or external ids", () => {
+      expect(getTrigger().hasAttribute("aria-describedby")).toBe(false);
+    });
+
+    it("points to the feedback text", () => {
+      host.feedbackText = { text: "Required", type: "error" };
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-describedby")).toBe(
+        `${select.inputId()}-feedback`,
+      );
+    });
+
+    it("includes ids passed to setDescribedBy on the non-searchable combobox", () => {
+      select.setDescribedBy(["external-error"]);
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-describedby")).toBe(
+        "external-error",
+      );
+    });
+
+    it("lists external ids before the feedback text id", () => {
+      host.feedbackText = { text: "Required", type: "error" };
+      select.setDescribedBy(["external-error", "other"]);
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-describedby")).toBe(
+        `external-error other ${select.inputId()}-feedback`,
+      );
+    });
+
+    it("includes ids passed to setDescribedBy on the searchable combobox", () => {
+      host.searchable = true;
+      host.feedbackText = { text: "Required", type: "error" };
+      fixture.detectChanges();
+      select.setDescribedBy(["external-error"]);
+      fixture.detectChanges();
+
+      expect(getSearchInput().getAttribute("aria-describedby")).toBe(
+        `external-error ${select.inputId()}-feedback`,
+      );
+      expect(getTrigger().hasAttribute("aria-describedby")).toBe(false);
+    });
+
+    it("removes the ids when cleared", () => {
+      select.setDescribedBy(["external-error"]);
+      fixture.detectChanges();
+      select.setDescribedBy([]);
+      fixture.detectChanges();
+
+      expect(getTrigger().hasAttribute("aria-describedby")).toBe(false);
+    });
+
+    it("does not repeat an id that is also the feedback id", () => {
+      host.feedbackText = { text: "Required", type: "error" };
+      fixture.detectChanges();
+      select.setDescribedBy([`${select.inputId()}-feedback`]);
+      fixture.detectChanges();
+
+      expect(getTrigger().getAttribute("aria-describedby")).toBe(
+        `${select.inputId()}-feedback`,
+      );
     });
   });
 
@@ -2536,6 +2727,44 @@ describe("SelectComponent", () => {
       tick();
 
       expect(select.triggerRef()?.nativeElement).toBe(getTrigger());
+      expect(document.activeElement).toBe(getTrigger());
+    }));
+
+    it("should keep focus on another element that was clicked while the dropdown was open", fakeAsync(() => {
+      const other = document.createElement("button");
+      document.body.appendChild(other);
+
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+      expect(select.isOpen()).toBe(true);
+
+      other.focus();
+      other.click();
+      fixture.detectChanges();
+      tick(500);
+      fixture.detectChanges();
+
+      expect(select.isOpen()).toBe(false);
+      expect(document.activeElement).toBe(other);
+
+      other.remove();
+    }));
+
+    it("should restore focus to the trigger when closing with Escape", fakeAsync(() => {
+      getTrigger().click();
+      fixture.detectChanges();
+      tick();
+
+      const listbox = document.querySelector("[cdkListbox]") as HTMLElement;
+      listbox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+      );
+      fixture.detectChanges();
+      tick(500);
+      fixture.detectChanges();
+
+      expect(select.isOpen()).toBe(false);
       expect(document.activeElement).toBe(getTrigger());
     }));
   });

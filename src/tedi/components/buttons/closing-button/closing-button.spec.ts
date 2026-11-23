@@ -55,25 +55,29 @@ describe("ClosingButtonComponent", () => {
     expect(buttonElement.classList).toContain("tedi-closing-button--small");
   });
 
-  it("should have default title and aria-label as 'Sulge'", () => {
+  it("should name the button once through title by default", () => {
     expect(buttonElement.getAttribute("title")).toBe("Sulge");
-    expect(buttonElement.getAttribute("aria-label")).toBe("Sulge");
+    expect(buttonElement.hasAttribute("aria-label")).toBe(false);
+    expect(
+      buttonElement.querySelector(".tedi-icon")?.getAttribute("aria-hidden"),
+    ).toBe("true");
   });
 
-  it("should override default aria-label when provided", () => {
+  it("should use ariaLabel as the title when provided", () => {
     fixture.componentRef.setInput("ariaLabel", "Eemalda");
     fixture.detectChanges();
 
     expect(buttonElement.getAttribute("title")).toBe("Eemalda");
-    expect(buttonElement.getAttribute("aria-label")).toBe("Eemalda");
+    expect(buttonElement.hasAttribute("aria-label")).toBe(false);
   });
 
-  it("should drop the title attribute when showTitle=false but keep aria-label", () => {
+  it("should set only aria-label when showTitle=false", () => {
+    fixture.componentRef.setInput("ariaLabel", "Eemalda");
     fixture.componentRef.setInput("showTitle", false);
     fixture.detectChanges();
 
-    expect(buttonElement.getAttribute("title")).toBeNull();
-    expect(buttonElement.getAttribute("aria-label")).toBe("Sulge");
+    expect(buttonElement.hasAttribute("title")).toBe(false);
+    expect(buttonElement.getAttribute("aria-label")).toBe("Eemalda");
   });
 
   it("should hide the closing button when printing", () => {

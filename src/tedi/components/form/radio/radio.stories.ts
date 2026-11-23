@@ -283,7 +283,7 @@ const SEPARATE_TEMPLATE = `
           Tekst
         </label>
         <label tedi-label color="primary" [required]="true" class="flex align-items-center">
-          <input tedi-radio type="radio" style="margin-right: var(--form-checkbox-radio-inner-spacing)" name="separate-required" />
+          <input tedi-radio type="radio" style="margin-right: var(--form-checkbox-radio-inner-spacing)" name="separate-required" required />
           Tekst
         </label>
         <div class="flex align-items-center gap-1">
@@ -996,6 +996,7 @@ const stateRows: {
   {
     label: "Mandatory",
     id: "Mandatory",
+    attrs: "required",
     labelAttrs: '[required]="true"',
     error: false,
   },

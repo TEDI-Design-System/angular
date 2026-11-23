@@ -61,6 +61,10 @@ $own-rows: ":where(.tedi-table__scroll) > :where(.tedi-table__table) > * > *";
   align-items: center;
 }
 
+.tedi-table__header-label {
+  display: contents;
+}
+
 .tedi-table__filter-popover {
   display: inline-flex;
   align-items: center;
@@ -90,8 +94,10 @@ $own-rows: ":where(.tedi-table__scroll) > :where(.tedi-table__table) > * > *";
 
 .tedi-table__cell {
   padding: var(--table-data-padding-y) var(--table-data-padding-x);
+  font-weight: inherit;
   vertical-align: middle;
   color: var(--general-text-primary);
+  text-align: inherit;
 
   // Backgrounds live on cells (not <tr>/<tbody>) so they span the full scroll
   // width — table-section/row backgrounds clip to `width: 100%` on horizontal

@@ -14,8 +14,7 @@ import { ColComponent } from "../../helpers/grid/col/col.component";
 import { TextComponent } from "../../base/text/text.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
-import { StatusBadgeComponent } from "@tedi-design-system/angular/community";
-import { StatusBadgeComponent as TediStatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
+import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 
 /**
@@ -47,7 +46,6 @@ export default {
         ColComponent,
         TextComponent,
         StatusBadgeComponent,
-        TediStatusBadgeComponent,
         InfoTooltipComponent,
       ],
     }),
@@ -156,7 +154,7 @@ const TYPES_TEMPLATE = `
                   {{ group.value }}
                 }
                 @if (group.statusBadge) {
-                  <span tedi-status-badge color="brand" status="none">{{ group.statusBadge }}</span>
+                  <tedi-status-badge color="brand" [text]="group.statusBadge" />
                 }
               </div>
             </tedi-text-group-value>

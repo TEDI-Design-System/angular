@@ -10,6 +10,7 @@ import {
   input,
   model,
   OnDestroy,
+  DoCheck,
   OnInit,
   Renderer2,
   signal,
@@ -58,6 +59,7 @@ export type TextareaSize = Exclude<InputSize, "large">;
     "[style.min-height]": "minHeightStyle()",
     "[style.max-height]": "maxHeightStyle()",
     "[attr.aria-invalid]": "invalid() || null",
+    "[attr.aria-required]": "required() || null",
     "[attr.aria-describedby]": "describedBy.attribute()",
     "[readOnly]": "readOnly()",
     "[disabled]": "disabled()",
@@ -66,7 +68,7 @@ export type TextareaSize = Exclude<InputSize, "large">;
   },
 })
 export class TextareaComponent
-  implements OnInit, OnDestroy, ControlValueAccessor, FormFieldControl
+  implements OnInit, DoCheck, OnDestroy, ControlValueAccessor, FormFieldControl
 {
   private el = inject<ElementRef<HTMLTextAreaElement>>(ElementRef);
   private renderer = inject(Renderer2);
@@ -230,6 +232,8 @@ export class TextareaComponent
 
   readonly dirty = this.derived.dirty;
 
+  readonly required = this.derived.required;
+
   readonly invalid = computed(
     () =>
       this.invalidInput() ||
@@ -257,6 +261,10 @@ export class TextareaComponent
       );
       this.resizeObserver.observe(this.el.nativeElement);
     }
+  }
+
+  ngDoCheck(): void {
+    this.derived.sync();
   }
 
   ngOnDestroy() {

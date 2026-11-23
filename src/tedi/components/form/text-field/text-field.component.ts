@@ -8,6 +8,7 @@ import {
   model,
   ViewEncapsulation,
   forwardRef,
+  DoCheck,
   OnInit,
   signal,
   output,
@@ -52,6 +53,7 @@ import { controlDescribedBy } from "../form-field/control-described-by";
     "[class.tedi-text-field--large]": "resolvedSize() === 'large'",
     "[class.tedi-text-field--arrows-hidden]": "arrowsHidden()",
     "[attr.aria-invalid]": "invalid() || null",
+    "[attr.aria-required]": "required() || null",
     "[attr.aria-describedby]": "describedBy.attribute()",
     "[disabled]": "disabled()",
     "[readOnly]": "readOnly()",
@@ -60,7 +62,7 @@ import { controlDescribedBy } from "../form-field/control-described-by";
   },
 })
 export class TextFieldComponent
-  implements OnInit, ControlValueAccessor, FormFieldControl
+  implements OnInit, DoCheck, ControlValueAccessor, FormFieldControl
 {
   private el = inject<ElementRef<HTMLInputElement>>(ElementRef);
   private readonly fieldContext = inject(TEDI_FIELD_CONTEXT, {
@@ -134,6 +136,8 @@ export class TextFieldComponent
 
   readonly dirty = this.derived.dirty;
 
+  readonly required = this.derived.required;
+
   readonly invalid = computed(
     () =>
       this.invalidInput() ||
@@ -157,6 +161,10 @@ export class TextFieldComponent
 
   setDescribedBy(ids: string[]) {
     this.describedBy.set(ids);
+  }
+
+  ngDoCheck(): void {
+    this.derived.sync();
   }
 
   private formDisabled = signal(false);

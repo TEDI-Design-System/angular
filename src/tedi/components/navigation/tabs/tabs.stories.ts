@@ -170,7 +170,7 @@ const defaultTabs = (idPrefix = "") => ({
   props: { content },
   template: `
       <tedi-tabs defaultValue="${idPrefix}tab-1">
-        <tedi-tabs-list aria-label="Tervise sakid">
+        <tedi-tabs-list aria-label="Terviseandmed">
           <button tedi-tabs-trigger id="${idPrefix}tab-1">Terviseteekond</button>
           <button tedi-tabs-trigger id="${idPrefix}tab-2">Haiguste kulg</button>
           <button tedi-tabs-trigger id="${idPrefix}tab-3">Ravimite ajalugu</button>
@@ -191,7 +191,7 @@ const withIconsTabs = (idPrefix = "") => ({
   props: { content },
   template: `
       <tedi-tabs defaultValue="${idPrefix}tab-1">
-        <tedi-tabs-list aria-label="Ikoonidega sakid">
+        <tedi-tabs-list aria-label="Vaade">
           <button tedi-tabs-trigger id="${idPrefix}tab-1" icon="table_chart">Tabel</button>
           <button tedi-tabs-trigger id="${idPrefix}tab-2" icon="grid_on">Ruudustik</button>
         </tedi-tabs-list>
@@ -210,7 +210,7 @@ const withStatusBadgeTabs = (idPrefix = "") => ({
   props: { content },
   template: `
       <tedi-tabs defaultValue="${idPrefix}tab-1">
-        <tedi-tabs-list aria-label="Olekumärgisega sakid">
+        <tedi-tabs-list aria-label="Terviseandmed">
           <button tedi-tabs-trigger id="${idPrefix}tab-1">
             <tedi-ellipsis [lineClamp]="1" [tooltip]="false">Terviseteekond</tedi-ellipsis>
             <tedi-status-badge color="brand" text="Esitatud" />
@@ -278,7 +278,7 @@ export const Controlled: Story = {
       <div class="flex flex-column gap-2">
         <p tedi-text>Current tab: <strong>{{ currentTab }}</strong></p>
         <tedi-tabs [value]="currentTab" (valueChange)="currentTab = $event">
-          <tedi-tabs-list aria-label="Juhitavad sakid">
+          <tedi-tabs-list aria-label="Terviseandmed">
             <button tedi-tabs-trigger id="tab-1">Terviseteekond</button>
             <button tedi-tabs-trigger id="tab-2">Haiguste kulg</button>
             <button tedi-tabs-trigger id="tab-3">Ravimite ajalugu</button>
@@ -305,7 +305,7 @@ export const AsLinks: Story = {
     props: { content },
     template: `
       <tedi-tabs defaultValue="link-1">
-        <tedi-tabs-list aria-label="Lingina sakid">
+        <tedi-tabs-list aria-label="Terviseandmed">
           <a tedi-tabs-trigger id="link-1" href="#link-1-panel">Terviseteekond</a>
           <a tedi-tabs-trigger id="link-2" href="#link-2-panel">Haiguste kulg</a>
           <a tedi-tabs-trigger id="link-3" href="#link-3-panel">Ravimite ajalugu</a>
@@ -323,7 +323,7 @@ const withDisabledTabTabs = (idPrefix = "") => ({
   props: { content },
   template: `
       <tedi-tabs defaultValue="${idPrefix}tab-1">
-        <tedi-tabs-list aria-label="Keelatud sakiga sakid">
+        <tedi-tabs-list aria-label="Terviseandmed">
           <button tedi-tabs-trigger id="${idPrefix}tab-1">Terviseteekond</button>
           <button tedi-tabs-trigger id="${idPrefix}tab-2">Haiguste kulg</button>
           <button tedi-tabs-trigger id="${idPrefix}tab-3" [disabled]="true">Ravimite ajalugu</button>
@@ -349,7 +349,7 @@ export const OverflowBehavior: Story = {
         <p tedi-text [modifiers]="'bold'">Dropdown (default)</p>
         <div class="tedi-tabs-demo-overflow">
           <tedi-tabs defaultValue="more-1">
-            <tedi-tabs-list aria-label="Ületäituvad sakid rippmenüüga">
+            <tedi-tabs-list aria-label="Terviseandmed">
               <button tedi-tabs-trigger id="more-1">Terviseteekond</button>
               <button tedi-tabs-trigger id="more-2">Haiguste kulg</button>
               <button tedi-tabs-trigger id="more-3">Ravimite ajalugu</button>
@@ -364,7 +364,7 @@ export const OverflowBehavior: Story = {
         <p tedi-text [modifiers]="'bold'">Horizontal scroll</p>
         <div class="tedi-tabs-demo-overflow">
           <tedi-tabs defaultValue="scroll-1">
-            <tedi-tabs-list aria-label="Ületäituvad sakid kerimisega" overflowMode="scroll">
+            <tedi-tabs-list aria-label="Terviseandmed" overflowMode="scroll">
               <button tedi-tabs-trigger id="scroll-1">Terviseteekond</button>
               <button tedi-tabs-trigger id="scroll-2">Haiguste kulg</button>
               <button tedi-tabs-trigger id="scroll-3">Ravimite ajalugu</button>
@@ -386,7 +386,7 @@ const withSubTabsTabs = (idPrefix = "") => ({
   props: { content, subTabContent, activeSubTab: "work-accidents" },
   template: `
       <tedi-tabs defaultValue="${idPrefix}tab-3">
-        <tedi-tabs-list aria-label="Töötervishoiu ja -ohutuse sakid">
+        <tedi-tabs-list aria-label="Töötervishoid ja -ohutus">
           <button tedi-tabs-trigger id="${idPrefix}tab-1">Käimasolevad menetlused</button>
           <button tedi-tabs-trigger id="${idPrefix}tab-2">Planeeritavad menetlused</button>
           <button tedi-tabs-trigger id="${idPrefix}tab-3">Õnnetused ja haigused</button>
@@ -399,7 +399,7 @@ const withSubTabsTabs = (idPrefix = "") => ({
             <div class="flex flex-column gap-2">
               <tedi-button-group
                 variant="secondary-button-group"
-                ariaLabel="Õnnetuste ja haiguste alamnavigatsioon"
+                ariaLabel="Õnnetused ja haigused"
                 [enableMobileDropdown]="true"
                 dropdownLabelMode="selected"
                 [(value)]="activeSubTab"

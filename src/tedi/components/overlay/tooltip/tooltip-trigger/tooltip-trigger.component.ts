@@ -88,7 +88,7 @@ export class TooltipTriggerComponent implements AfterContentChecked {
       this.tooltip.openWith() === "both" ||
       this.tooltip.openWith() === "hover"
     ) {
-      this.tooltip.showTooltip();
+      this.tooltip.showTooltipOnHover();
     }
   }
 
@@ -101,6 +101,7 @@ export class TooltipTriggerComponent implements AfterContentChecked {
       this.tooltip.openWith() === "hover"
     ) {
       clearTimeout(this.tooltip.hideTimeout);
+      this.tooltip.cancelPendingShow();
 
       this.tooltip.hideTimeout = setTimeout(() => {
         this.tooltip.hideTooltip();
