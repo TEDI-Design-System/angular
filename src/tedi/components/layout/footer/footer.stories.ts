@@ -88,19 +88,15 @@ class StoryLogoPlaceholderComponent {
     @if (label()) {
       <h5 tedi-text color="secondary">{{ label() }}</h5>
     }
-    <div
-      class="story-device-frame__viewport"
-      [style.height.px]="height() * scale()"
-    >
+    <div class="story-device-frame__viewport" [style.height.px]="height()">
       <iframe
         #frame
         class="story-device-frame__iframe"
         scrolling="no"
         [title]="label() || 'Footer preview'"
         [src]="src()"
-        [style.width.px]="width()"
+        [style.width.px]="frameWidth()"
         [style.height.px]="height()"
-        [style.transform]="'scale(' + scale() + ')'"
         (load)="measure()"
       ></iframe>
     </div>
@@ -121,7 +117,6 @@ class StoryLogoPlaceholderComponent {
     .story-device-frame__iframe {
       display: block;
       border: 0;
-      transform-origin: top left;
     }
   `,
 })
@@ -135,7 +130,10 @@ class StoryDeviceFrameComponent {
   readonly label = input<string>();
 
   protected readonly height = signal(320);
-  protected readonly scale = signal(1);
+  private readonly available = signal<number | null>(null);
+  protected readonly frameWidth = computed(() =>
+    Math.min(this.width(), this.available() ?? this.width()),
+  );
   protected readonly src = computed(() =>
     this.sanitizer.bypassSecurityTrustResourceUrl(
       `iframe.html?id=${this.storyId()}&viewMode=story&globals=theme:${this.theme()}`,
@@ -151,7 +149,7 @@ class StoryDeviceFrameComponent {
     afterNextRender(() => {
       const host = this.host.nativeElement;
       this.hostObserver = new ResizeObserver(() =>
-        this.scale.set(Math.min(1, host.clientWidth / this.width())),
+        this.available.set(host.clientWidth),
       );
       this.hostObserver.observe(host);
     });
