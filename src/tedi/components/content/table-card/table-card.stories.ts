@@ -182,17 +182,6 @@ export default {
         defaultValue: { summary: "1" },
       },
     },
-    columnSizing: {
-      control: "radio",
-      options: ["equal", "auto"],
-      description:
-        "Column sizing in multi-column layouts. `equal` uses equal widths; `auto` sizes columns according to their content and distributes remaining space.",
-      table: {
-        category: "inputs",
-        type: { summary: "TableCardColumnSizing", detail: "equal \nauto" },
-        defaultValue: { summary: "equal" },
-      },
-    },
     labelWidth: {
       control: "text",
       description:
@@ -788,7 +777,6 @@ export const WithActions: Story = {
           collapsible
           layout="vertical"
           [columns]="3"
-          columnSizing="auto"
         >
           <div tedi-table-card-row label="Vanus" value="25"></div>
           <div tedi-table-card-row label="Külastuste arv" value="6"></div>

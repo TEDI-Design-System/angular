@@ -9,15 +9,12 @@ export type TableCardRowAlign = "start" | "center";
 
 export type TableCardLabelSize = "small" | "default";
 
-export type TableCardColumnSizing = "equal" | "auto";
-
 /**
  * Layout settings shared by card, group and summary rows.
  */
 export type TableCardRowsLayoutInputs = {
   layout?: TableCardLayout;
   columns?: number;
-  columnSizing?: TableCardColumnSizing;
   labelWidth?: string | number;
   labelAlign?: TableCardAlign;
   valueAlign?: TableCardAlign;
@@ -68,10 +65,6 @@ export function getTableCardRowsClasses(
 
   if (columns > 1) {
     classList.push("tedi-table-card-rows--columns");
-
-    if ((inputs.columnSizing ?? "equal") === "auto") {
-      classList.push("tedi-table-card-rows--columns-auto");
-    }
   }
 
   if (layout === "horizontal") {
@@ -100,9 +93,14 @@ export function getTableCardRowsStyles(
   const labelWidth = resolveLabelWidth(
     inputs.labelWidth ?? defaults.labelWidth,
   );
+  const columns = inputs.columns ?? 1;
 
   return {
-    "--_tedi-table-card-columns": `${inputs.columns ?? 1}`,
+    "--_tedi-table-card-columns": `${columns}`,
+    "--_tedi-table-card-column-gap":
+      columns >= 3
+        ? "var(--layout-grid-gutters-08)"
+        : "var(--layout-grid-gutters-16)",
     "--_tedi-table-card-label-width": labelWidth,
     "--_tedi-table-card-label-gap":
       labelWidth === "auto"

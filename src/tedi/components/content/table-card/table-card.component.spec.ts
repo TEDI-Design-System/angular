@@ -16,7 +16,6 @@ import {
   getTableCardRowsClasses,
   getTableCardRowsStyles,
   TableCardAlign,
-  TableCardColumnSizing,
   TableCardLabelSize,
   TableCardLayout,
 } from "./table-card.utils";
@@ -48,7 +47,6 @@ const breakpointObserverMock = {
       [ariaLabel]="ariaLabel"
       [layout]="layout"
       [columns]="columns"
-      [columnSizing]="columnSizing"
       [labelSize]="labelSize"
       [labelWidth]="labelWidth"
       [labelAlign]="labelAlign"
@@ -88,7 +86,6 @@ class TestHostComponent {
   ariaLabel?: string;
   layout: TableCardLayout = "horizontal";
   columns = 1;
-  columnSizing: TableCardColumnSizing = "equal";
   labelSize: TableCardLabelSize = "default";
   labelWidth?: string | number;
   labelAlign?: TableCardAlign;
@@ -345,28 +342,6 @@ describe("TableCardComponent", () => {
       expect(list().classList).toContain("tedi-table-card-rows--columns");
       expect(list().style.getPropertyValue("--_tedi-table-card-columns")).toBe(
         "2",
-      );
-    });
-
-    it("switches the grid to content-sized tracks on columnSizing auto", () => {
-      const list = () => query("dl.tedi-table-card-rows")!;
-
-      host.columns = 3;
-      fixture.detectChanges();
-      expect(list().classList).toContain("tedi-table-card-rows--columns");
-      expect(list().classList).not.toContain(
-        "tedi-table-card-rows--columns-auto",
-      );
-
-      host.columnSizing = "auto";
-      fixture.detectChanges();
-      expect(list().classList).toContain("tedi-table-card-rows--columns-auto");
-
-      // Only meaningful once there is more than one column.
-      host.columns = 1;
-      fixture.detectChanges();
-      expect(list().classList).not.toContain(
-        "tedi-table-card-rows--columns-auto",
       );
     });
 
@@ -1008,6 +983,18 @@ describe("table card rows layout helpers", () => {
     expect(
       getTableCardRowsClasses({ layout: "vertical", rowAlign: "center" }),
     ).not.toContain("tedi-table-card-rows--row-align-center");
+  });
+
+  it("uses the layout gutter between up to two columns and a tighter one from three", () => {
+    const columnGap = (columns: number) =>
+      getTableCardRowsStyles({ layout: "vertical", columns })[
+        "--_tedi-table-card-column-gap"
+      ];
+
+    expect(columnGap(1)).toBe("var(--layout-grid-gutters-16)");
+    expect(columnGap(2)).toBe("var(--layout-grid-gutters-16)");
+    expect(columnGap(3)).toBe("var(--layout-grid-gutters-08)");
+    expect(columnGap(4)).toBe("var(--layout-grid-gutters-08)");
   });
 
   it("keeps vertical labels and values left-aligned, matching React", () => {

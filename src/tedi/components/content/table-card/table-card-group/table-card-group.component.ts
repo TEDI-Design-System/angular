@@ -17,7 +17,6 @@ import {
   getTableCardRowsClasses,
   getTableCardRowsStyles,
   TableCardAlign,
-  TableCardColumnSizing,
   TableCardLabelSize,
   TableCardLayout,
   TableCardRowAlign,
@@ -66,7 +65,6 @@ export class TableCardGroupComponent implements BreakpointInputs<TableCardInputs
 
   layout = input<TableCardLayout>();
   columns = input<number>();
-  columnSizing = input<TableCardColumnSizing>();
   labelWidth = input<string | number>();
   labelAlign = input<TableCardAlign>();
   valueAlign = input<TableCardAlign>();
@@ -89,7 +87,6 @@ export class TableCardGroupComponent implements BreakpointInputs<TableCardInputs
     const own = this.breakpointService.getBreakpointInputs<TableCardInputs>({
       layout: this.layout(),
       columns: this.columns(),
-      columnSizing: this.columnSizing(),
       labelWidth: this.labelWidth(),
       labelAlign: this.labelAlign(),
       valueAlign: this.valueAlign(),

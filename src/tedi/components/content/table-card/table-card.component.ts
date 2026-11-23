@@ -36,7 +36,6 @@ import {
   getTableCardRowsClasses,
   getTableCardRowsStyles,
   TableCardAlign,
-  TableCardColumnSizing,
   TableCardLabelSize,
   TableCardLayout,
   TableCardRowAlign,
@@ -56,12 +55,6 @@ export type TableCardInputs = {
    * @default 1
    */
   columns?: number;
-  /**
-   * Column sizing in multi-column layouts. equal uses equal widths;
-   * auto sizes columns according to their content and distributes remaining space.
-   * @default equal
-   */
-  columnSizing?: TableCardColumnSizing;
   /**
    * Width of the label column in horizontal layout. A `number` is pixels.
    * @default var(--text-group-label-width-sm) horizontal, auto vertical
@@ -200,7 +193,6 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
 
   layout = input<TableCardLayout | undefined>("horizontal");
   columns = input<number | undefined>(1);
-  columnSizing = input<TableCardColumnSizing | undefined>("equal");
   labelWidth = input<string | number>();
   labelAlign = input<TableCardAlign>();
   valueAlign = input<TableCardAlign>();
@@ -228,7 +220,6 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
     this.breakpointService.getBreakpointInputs<TableCardInputs>({
       layout: this.layout(),
       columns: this.columns(),
-      columnSizing: this.columnSizing(),
       labelWidth: this.labelWidth(),
       labelAlign: this.labelAlign(),
       valueAlign: this.valueAlign(),

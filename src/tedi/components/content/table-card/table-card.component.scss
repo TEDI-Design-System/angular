@@ -137,6 +137,7 @@
 /* Shared row layout for cards and groups. */
 .tedi-table-card-rows {
   --_tedi-table-card-columns: 1;
+  --_tedi-table-card-column-gap: var(--layout-grid-gutters-16);
   --_tedi-table-card-label-width: auto;
   --_tedi-table-card-label-gap: var(--layout-grid-gutters-16);
   --_tedi-table-card-row-gap: 0;
@@ -152,11 +153,7 @@
       var(--_tedi-table-card-columns),
       minmax(0, 1fr)
     );
-    column-gap: var(--layout-grid-gutters-16);
-  }
-
-  &--columns-auto {
-    grid-template-columns: repeat(var(--_tedi-table-card-columns), auto);
+    column-gap: var(--_tedi-table-card-column-gap);
   }
 
   &--horizontal > .tedi-table-card-row {
