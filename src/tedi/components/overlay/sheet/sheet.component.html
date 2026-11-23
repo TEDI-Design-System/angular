@@ -3,7 +3,7 @@
   @if (content(); as config) {
     <div
       class="tedi-sheet__overlay"
-      [class.tedi-sheet__overlay--no-overlay]="!config.showOverlay()"
+      [class.tedi-sheet__overlay--no-overlay]="!showBackdrop()"
       [hidden]="status() === 'closed'"
       [attr.inert]="status() === 'close' ? '' : null"
       [attr.data-status]="status()"

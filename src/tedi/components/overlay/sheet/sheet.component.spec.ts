@@ -490,6 +490,23 @@ describe("SheetComponent", () => {
     flush();
   }));
 
+  it("hides the dimmed backdrop while collapsed", fakeAsync(() => {
+    openSheet();
+    const noOverlay = () =>
+      overlayElement.querySelector(".tedi-sheet__overlay--no-overlay");
+
+    expect(noOverlay()).toBeNull();
+
+    host.collapsed.set(true);
+    fixture.detectChanges();
+    expect(noOverlay()).not.toBeNull();
+
+    host.collapsed.set(false);
+    fixture.detectChanges();
+    expect(noOverlay()).toBeNull();
+    flush();
+  }));
+
   describe("docked", () => {
     beforeEach(() => {
       host.showOverlay.set(false);
@@ -909,6 +926,49 @@ describe("SheetComponent", () => {
   `,
 })
 class CustomHeaderHostComponent {}
+
+@Component({
+  imports: [
+    SheetComponent,
+    SheetContentDirective,
+    SheetHeaderComponent,
+    SheetBodyComponent,
+  ],
+  template: `
+    <tedi-sheet [open]="true">
+      <ng-template tediSheetContent>
+        <tedi-sheet-header title="Settings" />
+        <tedi-sheet-body>Body</tedi-sheet-body>
+      </ng-template>
+    </tedi-sheet>
+  `,
+})
+class DefaultHeaderHostComponent {}
+
+describe("SheetHeaderComponent defaults", () => {
+  it("is white and has no close button, as in Figma", fakeAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [DefaultHeaderHostComponent],
+      providers: [
+        { provide: TediTranslationService, useClass: TranslationMock },
+        { provide: TEDI_TRANSLATION_DEFAULT_TOKEN, useValue: "et" },
+      ],
+    });
+    const fixture = TestBed.createComponent(DefaultHeaderHostComponent);
+    const overlayElement =
+      TestBed.inject(OverlayContainer).getContainerElement();
+    fixture.detectChanges();
+    tick(16);
+    fixture.detectChanges();
+
+    const header = overlayElement.querySelector(".tedi-sheet-header")!;
+    expect(header.classList).toContain("tedi-sheet-header--default");
+    expect(header.querySelector(".tedi-sheet-header__close")).toBeNull();
+
+    fixture.destroy();
+    flush();
+  }));
+});
 
 describe("SheetHeaderComponent with custom content", () => {
   let fixture: ComponentFixture<CustomHeaderHostComponent>;

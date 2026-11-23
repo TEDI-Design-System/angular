@@ -164,6 +164,11 @@ export class SheetComponent implements OnDestroy {
     [...(this.content()?.snapPoints() ?? [])].sort((a, b) => a - b),
   );
 
+  // The page stays undimmed while the sheet is collapsed, so it can still be used.
+  protected readonly showBackdrop = computed(
+    () => !!this.content()?.showOverlay() && !this.collapsed(),
+  );
+
   // Snap points are suspended while collapsed, so the panel shrinks to its header and an upward drag expands it.
   private readonly hasSnaps = computed(
     () => this.snaps().length > 0 && !this.collapsed(),

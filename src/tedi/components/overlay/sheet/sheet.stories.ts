@@ -92,7 +92,6 @@ const FULL_WIDTH_SEPARATOR = `<tedi-separator
 />`;
 
 const visualTest: StoryObj = {
-  tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false, viewports: [375, 1280] } },
   play: async ({ canvasElement }) => {
     const body = within(canvasElement.ownerDocument.body);
@@ -214,7 +213,7 @@ export default {
       },
     },
     trapFocus: {
-      control: false,
+      control: "boolean",
       description: "Trap focus inside the sheet while it's open.",
       table: {
         category: "tediSheetContent",
@@ -223,7 +222,7 @@ export default {
       },
     },
     returnFocus: {
-      control: false,
+      control: "boolean",
       description:
         "Return focus to the element that had it before the sheet opened.",
       table: {
@@ -233,7 +232,7 @@ export default {
       },
     },
     showOverlay: {
-      control: false,
+      control: "boolean",
       description: "Show the dimmed backdrop.",
       table: {
         category: "tediSheetContent",
@@ -242,7 +241,7 @@ export default {
       },
     },
     lockScroll: {
-      control: false,
+      control: "boolean",
       description: "Block page scrolling while the sheet is open.",
       table: {
         category: "tediSheetContent",
@@ -251,7 +250,7 @@ export default {
       },
     },
     keepMounted: {
-      control: false,
+      control: "boolean",
       description:
         "Keep the content rendered while closed, so its state survives reopening.",
       table: {
@@ -261,7 +260,7 @@ export default {
       },
     },
     snapPoints: {
-      control: false,
+      control: "object",
       description:
         "Rest heights as fractions of the viewport height, e.g. `[0.4, 0.9]`.",
       table: {
@@ -270,7 +269,7 @@ export default {
       },
     },
     defaultSnapPoint: {
-      control: false,
+      control: "number",
       description: "Index into the sorted `snapPoints` to open at.",
       table: {
         category: "tediSheetContent",
@@ -287,7 +286,7 @@ export default {
       },
     },
     visuallyHiddenDismiss: {
-      control: false,
+      control: "boolean",
       description:
         "Render hidden close buttons for touch screen reader users while focus is trapped.",
       table: {
@@ -314,7 +313,7 @@ export default {
       },
     },
     minHeight: {
-      control: false,
+      control: "text",
       description:
         "Minimum panel height (any CSS length), not applied while collapsed.",
       table: {
@@ -323,7 +322,7 @@ export default {
       },
     },
     maxHeight: {
-      control: false,
+      control: "text",
       description:
         "Maximum panel height (any CSS length); the body scrolls past it.",
       table: {
@@ -430,9 +429,15 @@ export const Default: Story = {
     variant: "default",
     titlePosition: "start",
     collapsible: false,
-    closeButton: true,
+    closeButton: false,
     align: "left",
     fullWidth: true,
+    trapFocus: true,
+    returnFocus: true,
+    showOverlay: true,
+    lockScroll: true,
+    keepMounted: false,
+    visuallyHiddenDismiss: true,
   },
   render: (args) => ({
     props: args,
@@ -442,7 +447,7 @@ export const Default: Story = {
     <tedi-icon name="tune" />
     Filtreeri
   </button>
-  <ng-template tediSheetContent ${argsToTemplate(args, { include: ["showHandle", "padding", "radius"] })}>
+  <ng-template tediSheetContent ${argsToTemplate(args, { include: ["showHandle", "padding", "radius", "trapFocus", "returnFocus", "showOverlay", "lockScroll", "keepMounted", "visuallyHiddenDismiss", "snapPoints", "defaultSnapPoint", "minHeight", "maxHeight"] })}>
     <tedi-sheet-header ${argsToTemplate(args, { include: ["title", "headingLevel", "variant", "titlePosition", "collapsible", "closeButton"] })} />
     <tedi-sheet-body>
       <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Kirjade olek" value="option-1">
@@ -493,7 +498,7 @@ export const ActionsSlot: Story = {
         Seaded
       </button>
       <ng-template tediSheetContent>
-        <tedi-sheet-header title="Seaded" variant="default" />
+        <tedi-sheet-header closeButton title="Seaded" variant="default" />
         <tedi-sheet-body>
           <div [tediVerticalSpacing]="0.5">
             <label tedi-label color="primary" class="flex align-items-center gap-2">
@@ -524,7 +529,7 @@ export const ActionsSlot: Story = {
         Loe lähemalt
       </button>
       <ng-template tediSheetContent>
-        <tedi-sheet-header title="Loe lähemalt" variant="default" />
+        <tedi-sheet-header closeButton title="Loe lähemalt" variant="default" />
         <tedi-sheet-body>
           <p tedi-text>
             Orav ehk harilik orav ehk punaorav on oravlaste sugukonda kuuluv näriline. See on ainus Eestis
@@ -561,7 +566,7 @@ export const CornerRadius: Story = {
           Seaded
         </button>
         <ng-template tediSheetContent [radius]="example.radius">
-          <tedi-sheet-header title="Seaded" variant="default" />
+          <tedi-sheet-header closeButton title="Seaded" variant="default" />
           <tedi-sheet-body>
             <div [tediVerticalSpacing]="0.5">
               <label tedi-label color="primary" class="flex align-items-center gap-2">
@@ -586,7 +591,7 @@ export const CornerRadius: Story = {
         Seaded
       </button>
       <ng-template tediSheetContent [radius]="{ xs: 'none', md: 'card' }">
-        <tedi-sheet-header title="Seaded" variant="default" />
+        <tedi-sheet-header closeButton title="Seaded" variant="default" />
         <tedi-sheet-body>
           <div [tediVerticalSpacing]="0.5">
             <label tedi-label color="primary" class="flex align-items-center gap-2">
@@ -627,7 +632,7 @@ export const HeaderVariant: Story = {
           Seaded
         </button>
         <ng-template tediSheetContent>
-          <tedi-sheet-header title="Seaded" [variant]="example.variant" />
+          <tedi-sheet-header closeButton title="Seaded" [variant]="example.variant" />
           <tedi-sheet-body>
             <div [tediVerticalSpacing]="0.5">
               <label tedi-label color="primary" class="flex align-items-center gap-2">
@@ -650,13 +655,13 @@ export const HeaderVariant: Story = {
 };
 
 const HEADER_TYPE_SOURCE = `<!-- Default -->
-<tedi-sheet-header title="Seaded" variant="default" />
+<tedi-sheet-header closeButton title="Seaded" variant="default" />
 
 <!-- Collapsible -->
-<tedi-sheet-header title="Seaded" variant="default" collapsible />
+<tedi-sheet-header closeButton title="Seaded" variant="default" collapsible />
 
 <!-- Heading center -->
-<tedi-sheet-header title="Seaded" variant="default" titlePosition="center" />
+<tedi-sheet-header closeButton title="Seaded" variant="default" titlePosition="center" />
 
 <!-- Without closing button -->
 <tedi-sheet-header title="Seaded" variant="default" [closeButton]="false" />
@@ -672,7 +677,7 @@ const HEADER_TYPE_SOURCE = `<!-- Default -->
 </tedi-sheet-header>
 
 <!-- With slots -->
-<tedi-sheet-header title="Teated" variant="default" titlePosition="center">
+<tedi-sheet-header closeButton title="Teated" variant="default" titlePosition="center">
   <button tedi-button variant="neutral" size="small" tedi-sheet-header-start tediSheetClose aria-label="Tagasi">
     <tedi-icon name="arrow_back" />
   </button>
@@ -681,7 +686,7 @@ const HEADER_TYPE_SOURCE = `<!-- Default -->
 
 <!-- Custom header: label the sheet yourself -->
 <ng-template tediSheetContent ariaLabelledBy="settings-title">
-  <tedi-sheet-header variant="default">
+  <tedi-sheet-header closeButton variant="default">
     <div tedi-sheet-header-content class="flex align-items-center gap-2">
       <div class="flex-grow-1">
         <h3 tedi-text modifiers="h6" id="settings-title">Seaded</h3>
@@ -831,7 +836,7 @@ export const HeaderType: Story = {
             Teated
           </button>
           <ng-template tediSheetContent>
-            <tedi-sheet-header title="Teated" variant="default">
+            <tedi-sheet-header closeButton title="Teated" variant="default">
               <tedi-tag type="primary" tedi-sheet-header-end>2 uut teadet</tedi-tag>
             </tedi-sheet-header>
             <tedi-sheet-body>
@@ -857,7 +862,7 @@ export const HeaderType: Story = {
             Teated
           </button>
           <ng-template tediSheetContent>
-            <tedi-sheet-header title="Teated" variant="default">
+            <tedi-sheet-header closeButton title="Teated" variant="default">
               <tedi-tag type="primary" tedi-sheet-header-start>2</tedi-tag>
             </tedi-sheet-header>
             <tedi-sheet-body>
@@ -883,7 +888,7 @@ export const HeaderType: Story = {
             Teated
           </button>
           <ng-template tediSheetContent>
-            <tedi-sheet-header title="Teated" variant="default" titlePosition="center">
+            <tedi-sheet-header closeButton title="Teated" variant="default" titlePosition="center">
               <button tedi-button variant="neutral" size="small" tedi-sheet-header-start tediSheetClose aria-label="Tagasi">
                 <tedi-icon name="arrow_back" />
               </button>
@@ -917,7 +922,7 @@ export const HeaderType: Story = {
           Seaded
         </button>
         <ng-template tediSheetContent ariaLabelledBy="sheet-type-custom-title">
-          <tedi-sheet-header variant="default">
+          <tedi-sheet-header closeButton variant="default">
             <div tedi-sheet-header-content class="flex align-items-center gap-2">
               <div class="flex-grow-1">
                 <h3 tedi-text modifiers="h6" id="sheet-type-custom-title">Seaded</h3>
@@ -949,8 +954,8 @@ export const HeaderType: Story = {
 
 /**
  * The sheet collapses to its header while the page stays usable: `collapsible` on the header,
- * `showOverlay`, `trapFocus` and `lockScroll` off on `tediSheetContent`, and
- * `closeOnBackdropClick` off on the sheet.
+ * `trapFocus` and `lockScroll` off on `tediSheetContent`, and `closeOnBackdropClick` off on the
+ * sheet. The page is dimmed while the sheet is expanded and not while it's collapsed.
  */
 export const DockedPeek: Story = {
   name: "Docked peek",
@@ -961,8 +966,8 @@ export const DockedPeek: Story = {
     <tedi-icon name="calendar_month" />
     Vali aeg
   </button>
-  <ng-template tediSheetContent [showOverlay]="false" [trapFocus]="false" [lockScroll]="false">
-    <tedi-sheet-header title="Vali aeg" variant="brand" collapsible />
+  <ng-template tediSheetContent [trapFocus]="false" [lockScroll]="false">
+    <tedi-sheet-header closeButton title="Vali aeg" variant="brand" collapsible />
     <tedi-sheet-body>
       <div [tediVerticalSpacing]="1">
         <tedi-form-field>
@@ -1004,7 +1009,7 @@ export const SnapPoints: Story = {
     Kihid
   </button>
   <ng-template tediSheetContent [snapPoints]="[0.4, 0.9]">
-    <tedi-sheet-header title="Kihid" variant="default" collapsible />
+    <tedi-sheet-header closeButton title="Kihid" variant="default" collapsible />
     <tedi-sheet-body>
       <div [tediVerticalSpacing]="0.5">
         @for (layer of layers; track $index) {
@@ -1031,7 +1036,7 @@ export const KeepMounted: Story = {
     Märkmed
   </button>
   <ng-template tediSheetContent keepMounted>
-    <tedi-sheet-header title="Märkmed" variant="default" />
+    <tedi-sheet-header closeButton title="Märkmed" variant="default" />
     <tedi-sheet-body>
       <tedi-form-field>
         <label tedi-label for="sheet-persisted-note">Märkus</label>
@@ -1044,6 +1049,11 @@ export const KeepMounted: Story = {
   }),
 };
 
+/**
+ * Bind `[(open)]` two-way: when the sheet closes itself (Escape, backdrop, close button), `open` is
+ * set back to `false`, so the button can open it again. With a one-way `[open]` it would stay `true`.
+ * An external button like this one gets no `aria-expanded` or `aria-haspopup`; `tediSheetTrigger` adds those.
+ */
 export const Controlled: Story = {
   render: () => ({
     props: { open: false },
@@ -1051,7 +1061,7 @@ export const Controlled: Story = {
 <button tedi-button (click)="open = true">Ava seaded</button>
 <tedi-sheet [(open)]="open">
   <ng-template tediSheetContent>
-    <tedi-sheet-header title="Seaded" variant="default" />
+    <tedi-sheet-header closeButton title="Seaded" variant="default" />
     <tedi-sheet-body>
       <div [tediVerticalSpacing]="0.5">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
@@ -1095,7 +1105,7 @@ export const ControlledCollapse: Story = {
 </div>
 <tedi-sheet [(open)]="open" [(collapsed)]="collapsed" [closeOnBackdropClick]="false">
   <ng-template tediSheetContent [showOverlay]="false" [trapFocus]="false" [lockScroll]="false">
-    <tedi-sheet-header title="Uus ala" variant="brand" collapsible />
+    <tedi-sheet-header closeButton title="Uus ala" variant="brand" collapsible />
     <tedi-sheet-body>
       <tedi-form-field>
         <label tedi-label for="sheet-controlled-collapse-name">Ala nimi</label>
@@ -1137,7 +1147,7 @@ export const ContentNavigation: Story = {
     Filtreeri
   </button>
   <ng-template tediSheetContent>
-    <tedi-sheet-header variant="default" [title]="step === 'filters' ? 'Filtreerimine' : 'Saatja'">
+    <tedi-sheet-header closeButton variant="default" [title]="step === 'filters' ? 'Filtreerimine' : 'Saatja'">
       @if (step === "senders") {
         <button tedi-button variant="neutral" size="small" tedi-sheet-header-start aria-label="Tagasi" (click)="step = 'filters'">
           <tedi-icon name="arrow_back" />
@@ -1218,7 +1228,7 @@ export const ScrollableContent: Story = {
     Ava vorm
   </button>
   <ng-template tediSheetContent maxHeight="32rem">
-    <tedi-sheet-header title="Andmete sisestamine" variant="default" />
+    <tedi-sheet-header closeButton title="Andmete sisestamine" variant="default" />
     <tedi-sheet-body>
       <div [tediVerticalSpacing]="1">
         @for (field of fields; track field) {
@@ -1257,7 +1267,7 @@ export const Padding: Story = {
           Seaded
         </button>
         <ng-template tediSheetContent [padding]="padding">
-          <tedi-sheet-header title="Seaded" variant="default" />
+          <tedi-sheet-header closeButton title="Seaded" variant="default" />
           <tedi-sheet-body>
             <div [tediVerticalSpacing]="0.5">
               <label tedi-label color="primary" class="flex align-items-center gap-2">
@@ -1314,7 +1324,7 @@ export const FooterAlignment: Story = {
           Seaded
         </button>
         <ng-template tediSheetContent>
-          <tedi-sheet-header title="Seaded" variant="default" />
+          <tedi-sheet-header closeButton title="Seaded" variant="default" />
           <tedi-sheet-body>
             <div [tediVerticalSpacing]="0.5">
               <label tedi-label color="primary" class="flex align-items-center gap-2">
@@ -1347,11 +1357,12 @@ export const FooterAlignment: Story = {
 
 export const OpenForVisualTest: Story = {
   ...visualTest,
+  tags: ["!dev", "!autodocs"],
   render: () => ({
     template: `
 <tedi-sheet [open]="true">
   <ng-template tediSheetContent>
-    <tedi-sheet-header title="Filtreerimine" variant="default" />
+    <tedi-sheet-header closeButton title="Filtreerimine" variant="default" />
     <tedi-sheet-body>
       <tedi-radio-group direction="vertical" style="${RADIO_GROUP_GAP}" ariaLabel="Kirjade olek" value="option-1">
         <label tedi-label color="primary" class="flex align-items-center gap-2">
@@ -1390,11 +1401,12 @@ export const OpenForVisualTest: Story = {
 
 export const OpenBrandForVisualTest: Story = {
   ...visualTest,
+  tags: ["!dev", "!autodocs"],
   render: () => ({
     template: `
 <tedi-sheet [open]="true">
   <ng-template tediSheetContent>
-    <tedi-sheet-header title="Vali aeg" variant="brand" collapsible />
+    <tedi-sheet-header closeButton title="Vali aeg" variant="brand" collapsible />
     <tedi-sheet-body>
       <div [tediVerticalSpacing]="1">
         <tedi-form-field>
@@ -1423,11 +1435,12 @@ export const OpenBrandForVisualTest: Story = {
 
 export const OpenSmallForVisualTest: Story = {
   ...visualTest,
+  tags: ["!dev", "!autodocs"],
   render: () => ({
     template: `
 <tedi-sheet [open]="true">
   <ng-template tediSheetContent padding="small" radius="card">
-    <tedi-sheet-header title="Teated" variant="default">
+    <tedi-sheet-header closeButton title="Teated" variant="default">
       <tedi-tag type="primary" tedi-sheet-header-start>2</tedi-tag>
     </tedi-sheet-header>
     <tedi-sheet-body>
@@ -1454,6 +1467,7 @@ export const OpenSmallForVisualTest: Story = {
 
 export const OpenWithoutHandleForVisualTest: Story = {
   ...visualTest,
+  tags: ["!dev", "!autodocs"],
   render: () => ({
     template: `
 <tedi-sheet [open]="true">
@@ -1483,11 +1497,12 @@ export const OpenWithoutHandleForVisualTest: Story = {
 
 export const CollapsedForVisualTest: Story = {
   ...visualTest,
+  tags: ["!dev", "!autodocs"],
   render: () => ({
     template: `
 <tedi-sheet [open]="true" [collapsed]="true" [closeOnBackdropClick]="false">
   <ng-template tediSheetContent [showOverlay]="false" [trapFocus]="false" [lockScroll]="false">
-    <tedi-sheet-header title="Vali aeg" variant="brand" collapsible />
+    <tedi-sheet-header closeButton title="Vali aeg" variant="brand" collapsible />
     <tedi-sheet-body>
       <tedi-form-field>
         <label tedi-label for="sheet-visual-collapsed-date">Kuupäev</label>
@@ -1506,12 +1521,13 @@ export const CollapsedForVisualTest: Story = {
 
 export const OpenSnapPointForVisualTest: Story = {
   ...visualTest,
+  tags: ["!dev", "!autodocs"],
   render: () => ({
     props: { layers: [...MAP_LAYERS, ...MAP_LAYERS] },
     template: `
 <tedi-sheet [open]="true">
   <ng-template tediSheetContent [snapPoints]="[0.4, 0.9]" [defaultSnapPoint]="0">
-    <tedi-sheet-header title="Kihid" variant="default" collapsible />
+    <tedi-sheet-header closeButton title="Kihid" variant="default" collapsible />
     <tedi-sheet-body>
       <div [tediVerticalSpacing]="0.5">
         @for (layer of layers; track $index) {
@@ -1530,12 +1546,13 @@ export const OpenSnapPointForVisualTest: Story = {
 
 export const OpenScrollableForVisualTest: Story = {
   ...visualTest,
+  tags: ["!dev", "!autodocs"],
   render: () => ({
     props: { fields: SCROLL_FIELDS },
     template: `
 <tedi-sheet [open]="true">
   <ng-template tediSheetContent maxHeight="32rem">
-    <tedi-sheet-header title="Andmete sisestamine" variant="default" />
+    <tedi-sheet-header closeButton title="Andmete sisestamine" variant="default" />
     <tedi-sheet-body>
       <div [tediVerticalSpacing]="1">
         @for (field of fields; track field) {

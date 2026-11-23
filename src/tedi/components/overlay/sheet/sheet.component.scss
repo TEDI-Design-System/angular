@@ -219,8 +219,11 @@ $sheet-fade-duration: 200ms;
   &__actions {
     display: flex;
     flex-shrink: 0;
-    gap: var(--layout-grid-gutters-08);
     align-items: center;
+  }
+
+  &__start {
+    gap: var(--layout-grid-gutters-08);
   }
 
   &__start:empty {

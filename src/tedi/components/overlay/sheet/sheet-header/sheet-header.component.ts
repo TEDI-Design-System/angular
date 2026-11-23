@@ -57,9 +57,9 @@ export class SheetHeaderComponent implements OnDestroy {
 
   /**
    * `brand` is a brand-blue header with white content.
-   * @default brand
+   * @default default
    */
-  readonly variant = input<SheetHeaderVariant>("brand");
+  readonly variant = input<SheetHeaderVariant>("default");
 
   /**
    * With `center`, the start content and the buttons stay at the edges.
@@ -75,9 +75,9 @@ export class SheetHeaderComponent implements OnDestroy {
 
   /**
    * Show the close button.
-   * @default true
+   * @default false
    */
-  readonly closeButton = input(true, { transform: booleanAttribute });
+  readonly closeButton = input(false, { transform: booleanAttribute });
 
   protected readonly sheet = inject(SheetComponent);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
