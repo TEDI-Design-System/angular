@@ -793,9 +793,12 @@ export const VisualTestMobile: Story = {
       [
         vtBlock("Default", Default),
         vtBlock("All properties shown", AllPropertiesShown),
+        vtBlock("Huge page count", HugePageCount),
         vtBlock("Responsive align", ResponsiveAlign),
         vtBlock("Responsive visibility", ResponsiveVisibility),
+        vtBlock("Disabled boundary arrows", DisabledBoundaryArrows),
         vtBlock("Arrows with labels", ArrowsWithLabels),
+        vtBlock("Custom arrow icons", CustomArrowIcons),
         vtBlock("Arrows primary variant", ArrowsPrimaryVariant),
       ],
       { args: meta.args },

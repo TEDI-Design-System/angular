@@ -1327,3 +1327,19 @@ export const VisualTest: StoryObj<RadioComponent> = {
     ],
   }),
 };
+
+/** Chromatic mobile snapshot for Radio: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: StoryObj<RadioComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
+  render: () => ({
+    ...visualTest([
+      { label: "Size", story: Size },
+      { label: "Group", story: Group },
+      { label: "Cards separate", story: CardsSeparate },
+      { label: "Cards grouped", story: CardsGrouped },
+      { label: "Cards with icons", story: CardsWithIcons },
+    ]),
+    styles: [CARDS_WITH_ICONS_STYLES],
+  }),
+};

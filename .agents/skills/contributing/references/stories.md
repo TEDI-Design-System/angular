@@ -247,7 +247,7 @@ render: (args) => ({
       and only when it points to the TEDI Figma file
 - [ ] Every `argTypes` description is one sentence; every story docblock either says something invisible in the rendered story or does not exist (see section 8)
 - [ ] No public input is missing an `argTypes` entry — aliased inputs are keyed by their alias (`invalid`, not `invalidInput`)
-- [ ] If the component has a `VisualTest` story, a new visual story also adds its variant to `VisualTest`, and to `VisualTestMobile` if it renders differently below a breakpoint (see section 9)
+- [ ] If the component has a `VisualTest` story, a new visual story also adds its variant to `VisualTest`, and to `VisualTestMobile` if it renders differently below a breakpoint, unless it keeps its own snapshot (`play` function, open overlay, scrolling, sticky / fixed positioning; see section 9)
 - [ ] No inline `style` in story markup, and no hand-written ARIA, keyboard or overlay code in the stories file (see section 2)
 - [ ] Disabled, loading, error and empty states the component supports have a story, even if Figma omits them; place these after the Figma-ordered stories
 
@@ -366,7 +366,7 @@ export const VisualTestMobile: Story = {
 
 **A new visual story on a component with `VisualTest` must also add its variant to `VisualTest`**,
 and to `VisualTestMobile` when it renders differently below a breakpoint, otherwise Chromatic never
-sees it. `.storybook/visual-test-coverage.spec.ts` (run by `npm test`) fails when a docs story has
+sees it. A story that keeps its own snapshot (see above) is the exception. `.storybook/visual-test-coverage.spec.ts` (run by `npm test`) fails when a docs story has
 no block. A story that only demonstrates behaviour (form integration, a controlled-state demo, deep
 links) opts out with `parameters: { visualTest: false }`. A story that only seems to look like
 another block still gets its own block, so a later change to it reaches Chromatic.

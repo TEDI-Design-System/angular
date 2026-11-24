@@ -1243,3 +1243,18 @@ export const VisualTest: StoryObj<CheckboxComponent> = {
     ],
   }),
 };
+
+/** Chromatic mobile snapshot for Checkbox: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: StoryObj<CheckboxComponent> = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
+  render: () => ({
+    ...visualTest([
+      { label: "Size", story: Size },
+      { label: "Group", story: Group },
+      { label: "Cards default", story: CardsDefault },
+      { label: "Cards with icons", story: CardsWithIcons },
+    ]),
+    styles: [CARDS_WITH_ICONS_STYLES],
+  }),
+};
