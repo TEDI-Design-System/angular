@@ -86,7 +86,7 @@ class StoryLogoPlaceholderComponent {
   },
   template: `
     @if (label()) {
-      <h5 tedi-text color="secondary">{{ label() }}</h5>
+      <h3 tedi-text modifiers="h5" color="secondary">{{ label() }}</h3>
     }
     <div class="story-device-frame__viewport" [style.height.px]="height()">
       <iframe
@@ -564,7 +564,7 @@ export const LogoPosition: Story = {
   render: () => ({
     template: `
       <section [tediVerticalSpacing]="1.5" aria-label="Logo position examples">
-        <h4 tedi-text>Right</h4>
+        <h3 tedi-text modifiers="h4">Right</h3>
         <tedi-footer>
           <tedi-footer-body>${sectionsTemplate("location_on")}</tedi-footer-body>
           ${logoSide('placement="end"')}
@@ -573,7 +573,7 @@ export const LogoPosition: Story = {
           <tedi-footer-body>${sectionsTemplate("location_on")}</tedi-footer-body>
           ${logoSide('placement="end" position="start"')}
         </tedi-footer>
-        <h4 tedi-text>Left</h4>
+        <h3 tedi-text modifiers="h4">Left</h3>
         <tedi-footer>
           ${logoSide('placement="start"')}
           <tedi-footer-body>${sectionsTemplate("location_on")}</tedi-footer-body>
@@ -630,12 +630,12 @@ export const ShowIcons: Story = {
   render: () => ({
     template: `
       <section [tediVerticalSpacing]="1" aria-label="Footer icon examples">
-        <h4 tedi-text>With icons</h4>
+        <h3 tedi-text modifiers="h4">With icons</h3>
         <tedi-footer>
           <tedi-footer-body>${sectionsTemplate("call")}</tedi-footer-body>
           ${logoSide('placement="end"')}
         </tedi-footer>
-        <h4 tedi-text>Without icons</h4>
+        <h3 tedi-text modifiers="h4">Without icons</h3>
         <tedi-footer>
           <tedi-footer-body>${sectionsTemplate()}</tedi-footer-body>
           ${logoSide('placement="end"')}
