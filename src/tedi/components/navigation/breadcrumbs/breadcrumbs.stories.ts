@@ -4,7 +4,10 @@ import {
   moduleMetadata,
   StoryObj,
 } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { LinkComponent } from "../link/link.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
@@ -237,7 +240,7 @@ export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
     controls: { disable: true },
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
   },
   render: () =>
     visualTest(
@@ -263,26 +266,6 @@ export const VisualTest: Story = {
           story: ButtonCrumbs,
           args: { ariaLabel: "Liikumistee (nupud)" },
         },
-        {
-          label: "Responsive variant",
-          story: ResponsiveVariant,
-          args: { ariaLabel: "Liikumistee (kohanduv)" },
-        },
-      ],
-      { args: meta.args },
-    ),
-};
-
-/** Chromatic mobile snapshot for Breadcrumbs: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: Story = {
-  tags: ["!dev", "!autodocs"],
-  parameters: {
-    controls: { disable: true },
-    chromatic: { disableSnapshot: false, viewports: [375] },
-  },
-  render: () =>
-    visualTest(
-      [
         {
           label: "Responsive variant",
           story: ResponsiveVariant,

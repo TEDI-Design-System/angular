@@ -10,7 +10,10 @@ import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=2137-19322&m=dev" target="_blank">Figma ↗</a><br />
@@ -204,7 +207,9 @@ export const VisuallyHidden: LabelStory = {
 /** Chromatic snapshot for Label: add every new visual variant here too. */
 export const VisualTest: StoryObj<LabelComponent> = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest(
       [

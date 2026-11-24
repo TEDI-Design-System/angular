@@ -1,5 +1,8 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { StatusIndicatorComponent } from "./status-indicator.component";
 import { TextComponent } from "../../base/text/text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -149,7 +152,9 @@ export const Examples: StoryObj<StatusIndicatorComponent> = {
 /** Chromatic snapshot for StatusIndicator: add every new visual variant here too. */
 export const VisualTest: StoryObj<StatusIndicatorComponent> = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest([
       { label: "Default", story: Default },

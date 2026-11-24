@@ -6,7 +6,10 @@ import {
   moduleMetadata,
 } from "@storybook/angular";
 import isChromatic from "chromatic/isChromatic";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { ComponentInputs } from "../../../types/inputs.type";
 import { ProgressBarComponent } from "./progress-bar.component";
 import { FeedbackTextComponent } from "../../form/feedback-text/feedback-text.component";
@@ -507,7 +510,7 @@ export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
     controls: { disable: true },
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
   },
   render: () =>
     visualTest(
@@ -520,24 +523,6 @@ export const VisualTest: Story = {
         { label: "With hint", story: WithHint },
         { label: "With error", story: WithError },
         { label: "Value hidden", story: ValueHidden },
-        { label: "Responsive", story: Responsive },
-      ],
-      { args: meta.args },
-    ),
-};
-
-/** Chromatic mobile snapshot for ProgressBar: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: Story = {
-  tags: ["!dev", "!autodocs"],
-  parameters: {
-    controls: { disable: true },
-    chromatic: { disableSnapshot: false, viewports: [375] },
-  },
-  render: () =>
-    visualTest(
-      [
-        { label: "Position", story: Position },
-        { label: "With label", story: WithLabel },
         { label: "Responsive", story: Responsive },
       ],
       { args: meta.args },

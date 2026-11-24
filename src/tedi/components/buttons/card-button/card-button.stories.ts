@@ -1,5 +1,8 @@
 import { Meta, moduleMetadata, StoryObj } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { CardButtonComponent } from "./card-button.component";
 import { CardComponent } from "../../content/card/card.component";
 import { CardContentComponent } from "../../content/card/card-content/card-content.component";
@@ -549,7 +552,7 @@ export const ComplexCard: Story = {
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     pseudo: States.parameters?.["pseudo"],
   },
   render: () =>
@@ -562,11 +565,4 @@ export const VisualTest: Story = {
       { label: "As link", story: AsLink },
       { label: "Complex card", story: ComplexCard },
     ]),
-};
-
-/** Chromatic mobile snapshot for CardButton: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: Story = {
-  tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
-  render: () => visualTest([{ label: "Card rows", story: CardRows }]),
 };

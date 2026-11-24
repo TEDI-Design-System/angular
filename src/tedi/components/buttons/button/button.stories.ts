@@ -5,7 +5,10 @@ import {
   StoryFn,
   StoryObj,
 } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { ButtonComponent } from "./button.component";
 import { TextColor, TextComponent } from "../../base/text/text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -109,14 +112,16 @@ export const Default: StoryObj<ButtonType> = {
 };
 
 type TemplateType = ButtonType &
-  BaseButtonDirective & { titleColor?: TextColor };
+  BaseButtonDirective & { titleColor?: TextColor; stateAttr?: string };
 
-// VisualTest marks states with data-state: the docs stories repeat the same ids in every variant.
-const buttonTemplate =
-  (stateAttr = "id"): StoryFn<TemplateType> =>
-  ({ titleColor = "primary", ...args }) => ({
-    props: { ...args, titleColor: titleColor, pseudoState: PSEUDO_STATE },
-    template: `
+// VisualTest passes stateAttr "attr.data-state": the docs stories repeat the same ids in every variant.
+const buttonTemplate: StoryFn<TemplateType> = ({
+  titleColor = "primary",
+  stateAttr = "id",
+  ...args
+}) => ({
+  props: { ...args, titleColor: titleColor, pseudoState: PSEUDO_STATE },
+  template: `
     <tedi-row [cols]="1" [gapY]="5">
       <tedi-col [class]="'tedi-vertical-spacing'" style="--vertical-spacing-internal: 1em; overflow-x: auto;">
         <p tedi-text modifiers="bold" [color]="titleColor">Default</p>
@@ -172,7 +177,7 @@ const buttonTemplate =
       </tedi-col>
     </tedi-row>
   `,
-  });
+});
 
 type ButtonStory = StoryObj<ButtonType & { disabled: boolean }>;
 
@@ -187,7 +192,7 @@ export const Primary: StoryObj<TemplateType> = {
   args: {
     variant: "primary",
   },
-  render: buttonTemplate(),
+  render: buttonTemplate,
 };
 
 export const PrimaryInverted: StoryObj<TemplateType> = {
@@ -204,7 +209,7 @@ export const PrimaryInverted: StoryObj<TemplateType> = {
     variant: "primary-inverted",
   },
 
-  render: buttonTemplate(),
+  render: buttonTemplate,
 
   globals: {
     backgrounds: {
@@ -224,7 +229,7 @@ export const Secondary: StoryObj<TemplateType> = {
   args: {
     variant: "secondary",
   },
-  render: buttonTemplate(),
+  render: buttonTemplate,
 };
 
 export const SecondaryInverted: StoryObj<TemplateType> = {
@@ -241,7 +246,7 @@ export const SecondaryInverted: StoryObj<TemplateType> = {
     variant: "secondary-inverted",
   },
 
-  render: buttonTemplate(),
+  render: buttonTemplate,
 
   globals: {
     backgrounds: {
@@ -261,7 +266,7 @@ export const Neutral: StoryObj<TemplateType> = {
   args: {
     variant: "neutral",
   },
-  render: buttonTemplate(),
+  render: buttonTemplate,
 };
 
 export const NeutralInverted: StoryObj<TemplateType> = {
@@ -278,7 +283,7 @@ export const NeutralInverted: StoryObj<TemplateType> = {
     variant: "neutral-inverted",
   },
 
-  render: buttonTemplate(),
+  render: buttonTemplate,
 
   globals: {
     backgrounds: {
@@ -298,7 +303,7 @@ export const Success: StoryObj<TemplateType> = {
   args: {
     variant: "success",
   },
-  render: buttonTemplate(),
+  render: buttonTemplate,
 };
 
 export const Danger: StoryObj<TemplateType> = {
@@ -312,7 +317,7 @@ export const Danger: StoryObj<TemplateType> = {
   args: {
     variant: "danger",
   },
-  render: buttonTemplate(),
+  render: buttonTemplate,
 };
 
 export const DangerNeutral: StoryObj<TemplateType> = {
@@ -326,7 +331,7 @@ export const DangerNeutral: StoryObj<TemplateType> = {
   args: {
     variant: "danger-neutral",
   },
-  render: buttonTemplate(),
+  render: buttonTemplate,
 };
 
 /**
@@ -361,15 +366,12 @@ export const LinkAsButton: ButtonStory = {
   }),
 };
 
-const vtStates = (story: StoryObj<TemplateType>) => ({
-  args: story.args,
-  render: buttonTemplate("attr.data-state"),
-});
+const VT_STATES = { stateAttr: "attr.data-state" };
 
-const vtInverted = (story: StoryObj<TemplateType>) => ({
+const onBrand = (story: StoryObj<TemplateType>) => ({
   args: story.args,
-  render: (args: Parameters<StoryFn<TemplateType>>[0]) => {
-    const result = buttonTemplate("attr.data-state")(args, {} as never);
+  render: (args: never, context: never) => {
+    const result = (story.render as StoryFn<TemplateType>)(args, context);
     return {
       ...result,
       template: `<div class="bg bg-primary"><div class="w-100">${result.template}</div></div>`,
@@ -381,7 +383,7 @@ const vtInverted = (story: StoryObj<TemplateType>) => ({
 export const VisualTest: StoryObj<ButtonType> = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     controls: { disable: true },
     pseudo: {
       hover: '[data-state="Hover"]',
@@ -392,15 +394,28 @@ export const VisualTest: StoryObj<ButtonType> = {
   render: () =>
     visualTest(
       [
-        { label: "Primary", story: vtStates(Primary) },
-        { label: "Primary inverted", story: vtInverted(PrimaryInverted) },
-        { label: "Secondary", story: vtStates(Secondary) },
-        { label: "Secondary inverted", story: vtInverted(SecondaryInverted) },
-        { label: "Neutral", story: vtStates(Neutral) },
-        { label: "Neutral inverted", story: vtInverted(NeutralInverted) },
-        { label: "Success", story: vtStates(Success) },
-        { label: "Danger", story: vtStates(Danger) },
-        { label: "Danger neutral", story: vtStates(DangerNeutral) },
+        { label: "Default", story: Default },
+        { label: "Primary", story: Primary, args: VT_STATES },
+        {
+          label: "Primary inverted",
+          story: onBrand(PrimaryInverted),
+          args: VT_STATES,
+        },
+        { label: "Secondary", story: Secondary, args: VT_STATES },
+        {
+          label: "Secondary inverted",
+          story: onBrand(SecondaryInverted),
+          args: VT_STATES,
+        },
+        { label: "Neutral", story: Neutral, args: VT_STATES },
+        {
+          label: "Neutral inverted",
+          story: onBrand(NeutralInverted),
+          args: VT_STATES,
+        },
+        { label: "Success", story: Success, args: VT_STATES },
+        { label: "Danger", story: Danger, args: VT_STATES },
+        { label: "Danger neutral", story: DangerNeutral, args: VT_STATES },
         { label: "Extra small icon only", story: ExtraSmallIconOnly },
         { label: "Full width", story: FullWidth },
         { label: "Link as button", story: LinkAsButton },

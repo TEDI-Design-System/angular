@@ -4,7 +4,10 @@ import {
   StoryObj,
   moduleMetadata,
 } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { TextComponent } from "./text.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -316,7 +319,9 @@ export const StatusTextColors: StoryObj<TextComponent> = {
 /** Chromatic snapshot for Text: add every new visual variant here too. */
 export const VisualTest: StoryObj<TextComponent> = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest([
       { label: "Default", story: Default },

@@ -1,6 +1,9 @@
 import { Component, input, signal } from "@angular/core";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { HorizontalStepperComponent } from "./horizontal-stepper.component";
 import { HorizontalStepperItemComponent } from "./horizontal-stepper-item/horizontal-stepper-item.component";
@@ -451,7 +454,7 @@ export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
     controls: { disable: true },
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
   },
   render: () =>
     visualTest(
@@ -484,43 +487,6 @@ export const VisualTest: Story = {
           args: { ariaLabel: "Vormi edenemine (kompaktne)" },
         },
         { label: "External navigation", story: ExternalNavigation },
-      ],
-      { args: meta.args },
-    ),
-};
-
-/** Chromatic mobile snapshot for HorizontalStepper: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: Story = {
-  tags: ["!dev", "!autodocs"],
-  parameters: {
-    controls: { disable: true },
-    chromatic: { disableSnapshot: false, viewports: [375] },
-  },
-  render: () =>
-    visualTest(
-      [
-        {
-          label: "First step",
-          story: Default,
-          args: { ariaLabel: "Vormi edenemine (samm 1)" },
-        },
-        {
-          label: "Second step",
-          story: SecondStep,
-          args: { ariaLabel: "Vormi edenemine (samm 2)" },
-        },
-        {
-          label: "Third step",
-          story: ThirdStep,
-          args: { ariaLabel: "Vormi edenemine (samm 3)" },
-        },
-        { label: "With errors", story: WithErrors },
-        { label: "With descriptions", story: WithDescriptions },
-        {
-          label: "Transparent background",
-          story: TransparentBackground,
-          args: { ariaLabel: "Vormi edenemine (läbipaistev)" },
-        },
       ],
       { args: meta.args },
     ),

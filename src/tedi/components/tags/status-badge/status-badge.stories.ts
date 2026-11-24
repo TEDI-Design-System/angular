@@ -4,7 +4,10 @@ import {
   moduleMetadata,
   argsToTemplate,
 } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
@@ -343,7 +346,9 @@ export const WithTooltip: StoryObj<StatusBadgeComponent> = {
 /** Chromatic snapshot for StatusBadge: add every new visual variant here too. */
 export const VisualTest: StoryObj<StatusBadgeComponent> = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest([
       { label: "Default", story: Default },

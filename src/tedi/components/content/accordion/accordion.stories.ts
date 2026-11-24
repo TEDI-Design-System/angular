@@ -13,7 +13,10 @@ import { FormFieldComponent } from "../../form/form-field/form-field.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { ShowAtDirective } from "../../../directives/show-at/show-at.directive";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.30.43?node-id=8048-69789&t=aqojgjkZcOYAN35p-0" target="_blank">Figma ↗</a><br />
@@ -355,7 +358,6 @@ The accordion item is composed of three parts, each owning its own configuration
 - \`<tedi-accordion-item>\`: owns the item's state (\`expanded\`) and the inputs shared by header and content (\`selected\`, \`showIconCard\`, \`defaultExpanded\`).
 - \`<tedi-accordion-item-header>\`: owns header appearance and interaction (\`titleLayout\`, \`headerClickable\`, expand labels, \`headerClass\`, etc.). Put the title and any extras (action buttons, badges, descriptions) inside this element using the corresponding slot attributes.
 - \`<tedi-accordion-item-content>\`: owns content styling (\`contentClass\`). Wraps the collapsible content.
-
 
 | Selector | Description |
 |----------|------------|
@@ -982,7 +984,6 @@ const CUSTOMIZED_TEMPLATE = `
           </tedi-accordion-item>
         </tedi-accordion>
 
-
         <tedi-accordion>
           <tedi-accordion-item [selected]="selectedState">
             <tedi-accordion-item-header
@@ -1367,79 +1368,17 @@ but the rendered look matches the surrounding accordion items exactly.
 /** Chromatic snapshot for Accordion: add every new visual variant here too. */
 export const VisualTest: StoryObj = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
-  render: () => ({
-    props: {
-      selectedA: false,
-      selectedB: false,
-      selectedC: true,
-      selectedD: true,
-      selectedState: false,
-      toggleA(selected: boolean) {
-        this["selectedA"] = selected;
-      },
-      toggleB(selected: boolean) {
-        this["selectedB"] = selected;
-      },
-      toggleC(selected: boolean) {
-        this["selectedC"] = selected;
-      },
-      toggleD(selected: boolean) {
-        this["selectedD"] = selected;
-      },
-      toggleSelect(event: Event) {
-        this["selectedState"] = (event.target as HTMLInputElement).checked;
-      },
-    },
-    template: `
-      <div class="flex flex-column gap-4">
-        <div>
-          <p tedi-text modifiers="bold">Default</p>
-          <tedi-accordion>
-            <tedi-accordion-item>
-              <tedi-accordion-item-header>
-                <span tedi-accordion-title>Pealkiri</span>
-                <tedi-status-badge tedi-accordion-after-title color="success" text="Kinnitatud" />
-              </tedi-accordion-item-header>
-              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
-            </tedi-accordion-item>
-            <tedi-accordion-item>
-              <tedi-accordion-item-header [expandActionPosition]="'end'">
-                <span tedi-accordion-title>Pealkiri 2</span>
-              </tedi-accordion-item-header>
-              <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
-            </tedi-accordion-item>
-          </tedi-accordion>
-        </div>
-        <div>
-          <p tedi-text modifiers="bold">Variants</p>
-          <ng-container *ngTemplateOutlet="variants; context: { selectedA: false, selectedB: true }" />
-        </div>
-        <div>
-          <p tedi-text modifiers="bold">Action types</p>
-          ${ACTION_TYPES_TEMPLATE}
-        </div>
-        <div>
-          <p tedi-text modifiers="bold">With icon card</p>
-          ${WITH_ICON_CARD_TEMPLATE}
-        </div>
-        <div>
-          <p tedi-text modifiers="bold">Customized</p>
-          ${CUSTOMIZED_TEMPLATE}
-        </div>
-        <div>
-          <p tedi-text modifiers="bold">Disabled</p>
-          ${DISABLED_TEMPLATE}
-        </div>
-      </div>
-      <ng-template #variants let-selectedA="selectedA" let-selectedB="selectedB">${VARIANTS_TEMPLATE}</ng-template>
-    `,
-  }),
-};
-
-/** Chromatic mobile snapshot for Accordion: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: StoryObj = {
-  tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
-  render: () => visualTest([{ label: "Customized", story: Customized }]),
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Variants", story: Variants },
+      { label: "Action types", story: ActionTypes },
+      { label: "With icon card", story: WithIconCard },
+      { label: "Customized", story: Customized },
+      { label: "Accordion behavior", story: AccordionBehavior },
+      { label: "Disabled", story: Disabled },
+    ]),
 };

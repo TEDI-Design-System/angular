@@ -247,7 +247,7 @@ render: (args) => ({
       and only when it points to the TEDI Figma file
 - [ ] Every `argTypes` description is one sentence; every story docblock either says something invisible in the rendered story or does not exist (see section 8)
 - [ ] No public input is missing an `argTypes` entry — aliased inputs are keyed by their alias (`invalid`, not `invalidInput`)
-- [ ] If the component has a `VisualTest` story, a new visual story also adds its variant to `VisualTest`, and to `VisualTestMobile` if it renders differently below a breakpoint, unless it keeps its own snapshot (`play` function, open overlay, scrolling, sticky / fixed positioning; see section 9)
+- [ ] If the component has a `VisualTest` story, a new visual story also adds its variant to `VisualTest`, unless it keeps its own snapshot (`play` function, open overlay, scrolling, sticky / fixed positioning; see section 9)
 - [ ] No inline `style` in story markup, and no hand-written ARIA, keyboard or overlay code in the stories file (see section 2)
 - [ ] Disabled, loading, error and empty states the component supports have a story, even if Figma omits them; place these after the Figma-ordered stories
 
@@ -321,8 +321,11 @@ story instead of one per docs story. When a stories file has a `VisualTest` stor
 - The meta sets `parameters: { chromatic: { disableSnapshot: true } }`, so docs stories are not
   snapshotted.
 - `VisualTest` is the last export, with `tags: ["!dev", "!autodocs"]` (hidden from the sidebar and
-  docs, still run by Chromatic and the test-runner) and `parameters: { chromatic: { disableSnapshot: false } }`.
-  It renders every visual variant, each block under a short bold label.
+  docs, still run by Chromatic and the test-runner) and
+  `parameters: { chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS } }`.
+  It renders every visual variant, each block under a short bold label. `VISUAL_TEST_VIEWPORTS`
+  (375 and 1200) captures every block at mobile and desktop width, because core changes tokens
+  (text, buttons, form fields, cards) below 48rem as well as layouts at breakpoints.
 - Reuse the docs stories, never copy their markup, so a later change to a docs story reaches
   Chromatic. Build the render with `visualTest([...blocks], { args: meta.args })` from
   `.storybook/visual-test-story`, adding `render: meta.render` when docs stories inherit the meta's
@@ -332,12 +335,6 @@ story instead of one per docs story. When a stories file has a `VisualTest` stor
   (`[(x)]`) only works on a prop name no other block binds differently. Where hard-coded ids collide, move the story's
   render into a function that takes an `idPrefix` and pass `{ render: () => fn("vt-…-") }` as the
   story. The helper throws when a story renders nothing.
-- A component that renders differently below a breakpoint (breakpoint inputs such as `[md]`,
-  `*showAt` / `*hideAt`, a mobile dropdown or layout switch) also gets one `VisualTestMobile` story,
-  right after `VisualTest`. It is built the same way, sets
-  `chromatic: { disableSnapshot: false, viewports: [375] }`, and holds only the variants whose mobile
-  rendering differs. Their desktop rendering stays in `VisualTest`, which Chromatic captures at its
-  default desktop width. Don't give a responsive docs story its own snapshot.
 - A story whose state needs a `play` function, an open overlay, scrolling, or sticky / fixed
   positioning against the page stays a separate snapshot: it sets `chromatic: { disableSnapshot: false }`
   itself and is not copied into `VisualTest`. Add `viewports` only for the widths whose rendering
@@ -353,21 +350,24 @@ story instead of one per docs story. When a stories file has a `VisualTest` stor
   `<div class="bg bg-primary">` in the composite.
 
 ```ts
-/** Chromatic mobile snapshot for Breadcrumbs: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: Story = {
+/** Chromatic snapshot for Breadcrumbs: add every new visual variant here too. */
+export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
+  parameters: { chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS } },
   render: () =>
-    visualTest([{ label: "Responsive variant", story: ResponsiveVariant }], {
-      args: meta.args,
-    }),
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Responsive variant", story: ResponsiveVariant },
+      ],
+      { args: meta.args },
+    ),
 };
 ```
 
 **A new visual story on a component with `VisualTest` must also add its variant to `VisualTest`**,
-and to `VisualTestMobile` when it renders differently below a breakpoint, otherwise Chromatic never
-sees it. A story that keeps its own snapshot (see above) is the exception. `.storybook/visual-test-coverage.spec.ts` (run by `npm test`) fails when a docs story has
-no block. A story that only demonstrates behaviour (form integration, a controlled-state demo, deep
+otherwise Chromatic never sees it. A story that keeps its own snapshot (see above) is the exception. `.storybook/visual-test-coverage.spec.ts` (run by `npm test`) fails when a docs story has
+no block or `VisualTest` lacks `VISUAL_TEST_VIEWPORTS`. A story that only demonstrates behaviour (form integration, a controlled-state demo, deep
 links) opts out with `parameters: { visualTest: false }`. A story that only seems to look like
 another block still gets its own block, so a later change to it reaches Chromatic.
 

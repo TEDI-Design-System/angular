@@ -16,7 +16,10 @@ import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/v
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/file/jWiRIXhHRxwVdMSimKX2FF/TEDI-Design-System-(draft)?type=design&node-id=45-30752&mode=dev" target="_BLANK">Figma ↗</a><br/>
@@ -399,7 +402,7 @@ export const LongTextValues: Story = {
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     a11y: { test: "todo" },
   },
   render: () =>
@@ -415,17 +418,4 @@ export const VisualTest: Story = {
       ],
       { args: meta.args },
     ),
-};
-
-/** Chromatic mobile snapshot for TextGroup: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: Story = {
-  tags: ["!dev", "!autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: false, viewports: [375] },
-    a11y: { test: "todo" },
-  },
-  render: () =>
-    visualTest([{ label: "Responsive", story: Responsive }], {
-      args: meta.args,
-    }),
 };

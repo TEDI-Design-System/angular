@@ -9,7 +9,10 @@ import { ToggleComponent } from "./toggle.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { LabelComponent } from "../../content/label/label.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 
@@ -186,19 +189,22 @@ export const LabelPosition: StoryObj<ToggleComponent> = {
   }),
 };
 
+type StatesStory = StoryObj<ToggleComponent & { vtId?: string }>;
+
 /**
  * `vtId` gives every toggle a unique id where the matrix repeats in `VisualTest`; the docs stories
  * keep the state name as id so `#Hover` etc. match.
  */
-const pseudoStateTemplate =
-  (vtId?: string): StoryFn<ToggleComponent> =>
-  (args) => {
-    const id = (n: number) =>
-      vtId ? `'vt-' + state.toLowerCase() + '-${vtId}-${n}'` : "state";
+const pseudoStateTemplate: StoryFn<ToggleComponent & { vtId?: string }> = ({
+  vtId,
+  ...args
+}) => {
+  const id = (n: number) =>
+    vtId ? `'vt-' + state.toLowerCase() + '-${vtId}-${n}'` : "state";
 
-    return {
-      props: { ...args, pseudoState: PSEUDO_STATE },
-      template: `
+  return {
+    props: { ...args, pseudoState: PSEUDO_STATE },
+    template: `
     <tedi-row [cols]="1" [gapY]="4">
       <tedi-row *ngFor="let state of pseudoState;" cols="4" alignItems="center">
         <b>{{ state }}</b>
@@ -219,10 +225,10 @@ const pseudoStateTemplate =
       </tedi-row>
     </tedi-row>
   `,
-    };
   };
+};
 
-export const PrimaryFilled: StoryObj<ToggleComponent> = {
+export const PrimaryFilled: StatesStory = {
   parameters: {
     pseudo: {
       hover: "#Hover",
@@ -234,10 +240,10 @@ export const PrimaryFilled: StoryObj<ToggleComponent> = {
     type: "filled",
     variant: "primary",
   },
-  render: pseudoStateTemplate(),
+  render: pseudoStateTemplate,
 };
 
-export const PrimaryOutlined: StoryObj<ToggleComponent> = {
+export const PrimaryOutlined: StatesStory = {
   parameters: {
     pseudo: {
       hover: "#Hover",
@@ -249,10 +255,10 @@ export const PrimaryOutlined: StoryObj<ToggleComponent> = {
     type: "outlined",
     variant: "primary",
   },
-  render: pseudoStateTemplate(),
+  render: pseudoStateTemplate,
 };
 
-export const ColoredFilled: StoryObj<ToggleComponent> = {
+export const ColoredFilled: StatesStory = {
   parameters: {
     pseudo: {
       hover: "#Hover",
@@ -264,10 +270,10 @@ export const ColoredFilled: StoryObj<ToggleComponent> = {
     type: "filled",
     variant: "colored",
   },
-  render: pseudoStateTemplate(),
+  render: pseudoStateTemplate,
 };
 
-export const ColoredOutlined: StoryObj<ToggleComponent> = {
+export const ColoredOutlined: StatesStory = {
   parameters: {
     pseudo: {
       hover: "#Hover",
@@ -279,14 +285,14 @@ export const ColoredOutlined: StoryObj<ToggleComponent> = {
     type: "outlined",
     variant: "colored",
   },
-  render: pseudoStateTemplate(),
+  render: pseudoStateTemplate,
 };
 
 /** Chromatic snapshot for Toggle: add every new visual variant here too. */
 export const VisualTest: StoryObj<ToggleComponent> = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     pseudo: {
       hover: '[id^="vt-hover-"]',
       active: '[id^="vt-active-"]',
@@ -295,33 +301,26 @@ export const VisualTest: StoryObj<ToggleComponent> = {
   },
   render: () =>
     visualTest([
+      { label: "Default", story: Default },
       {
         label: "Primary filled",
-        story: {
-          ...PrimaryFilled,
-          render: pseudoStateTemplate("primary-filled"),
-        },
+        story: PrimaryFilled,
+        args: { vtId: "primary-filled" },
       },
       {
         label: "Primary outlined",
-        story: {
-          ...PrimaryOutlined,
-          render: pseudoStateTemplate("primary-outlined"),
-        },
+        story: PrimaryOutlined,
+        args: { vtId: "primary-outlined" },
       },
       {
         label: "Colored filled",
-        story: {
-          ...ColoredFilled,
-          render: pseudoStateTemplate("colored-filled"),
-        },
+        story: ColoredFilled,
+        args: { vtId: "colored-filled" },
       },
       {
         label: "Colored outlined",
-        story: {
-          ...ColoredOutlined,
-          render: pseudoStateTemplate("colored-outlined"),
-        },
+        story: ColoredOutlined,
+        args: { vtId: "colored-outlined" },
       },
       { label: "Label position", story: LabelPosition },
       { label: "Size", story: Size },

@@ -12,7 +12,10 @@ import { InfoButtonComponent } from "../../buttons/info-button/info-button.compo
 import { IconComponent } from "../../base/icon/icon.component";
 import { RowComponent } from "../grid/row/row.component";
 import { ColComponent } from "../grid/col/col.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.108.103?m=dev&node-id=25945-119670" target="_BLANK">Figma ↗</a><br />
@@ -381,7 +384,9 @@ export const TimelineCard: Story = {
 /** Chromatic snapshot for Timeline: add every new visual variant here too. */
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest([
       { label: "Default", story: Default },
@@ -391,18 +396,6 @@ export const VisualTest: Story = {
       { label: "Without title", story: WithoutTitle },
       { label: "With action", story: WithAction },
       { label: "With single date", story: WithSingleDate },
-      { label: "With multiple dates", story: WithMultipleDates },
-      { label: "Timeline card", story: TimelineCard },
-    ]),
-};
-
-/** Chromatic mobile snapshot for Timeline: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: Story = {
-  tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
-  render: () =>
-    visualTest([
-      { label: "Default", story: Default },
       { label: "With multiple dates", story: WithMultipleDates },
       { label: "Timeline card", story: TimelineCard },
     ]),

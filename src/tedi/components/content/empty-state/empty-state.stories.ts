@@ -12,7 +12,10 @@ import {
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { IconComponent } from "../../base/icon/icon.component";
 import { LinkComponent } from "../../navigation/link/link.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * EmptyState communicates that there is nothing to display — empty search
@@ -250,7 +253,7 @@ export const CustomIcon: Story = {
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     controls: { disable: true },
   },
   render: () =>

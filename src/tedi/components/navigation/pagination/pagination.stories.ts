@@ -8,6 +8,7 @@ import { PaginationComponent } from "./pagination.component";
 import { TediPaginationResultsDirective } from "./pagination-results.directive";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
 import {
+  VISUAL_TEST_VIEWPORTS,
   visualTest,
   VisualTestBlock,
 } from "../../../../../.storybook/visual-test-story";
@@ -392,7 +393,12 @@ export const Transparent: Story = {
   }),
 };
 
-export const TopBottomSplit: Story = {
+type Labels = ReturnType<PaginationComponent["labels"]>;
+
+/** VisualTest passes `splitLabels`, since both navs would otherwise share one landmark name. */
+export const TopBottomSplit: StoryObj<
+  PaginationComponent & { splitLabels?: { top: Labels; bottom: Labels } }
+> = {
   args: {
     pageCount: 10,
     page: 3,
@@ -400,14 +406,18 @@ export const TopBottomSplit: Story = {
     pageSize: 10,
     pageSizeOptions: [10, 25, 50, 100],
   },
-  render: (args) => ({
-    props: args,
-    template: `
-      <tedi-pagination ${argsToTemplate(args)} [hidePager]="true" dividerPosition="bottom" />
+  render: ({ splitLabels, ...args }) => {
+    const labels = (slot: "top" | "bottom") =>
+      splitLabels ? ` [labels]="splitLabels.${slot}"` : "";
+    return {
+      props: { ...args, splitLabels },
+      template: `
+      <tedi-pagination ${argsToTemplate(args)}${labels("top")} [hidePager]="true" dividerPosition="bottom" />
       <div style="padding: 24px 0; color: var(--general-text-tertiary); text-align: center;">— table content goes here —</div>
-      <tedi-pagination ${argsToTemplate(args)} [hideResults]="true" [hidePageSize]="true" />
+      <tedi-pagination ${argsToTemplate(args)}${labels("bottom")} [hideResults]="true" [hidePageSize]="true" />
     `,
-  }),
+    };
+  },
   parameters: {
     docs: {
       description: {
@@ -713,8 +723,6 @@ export const CustomLabels: Story = {
   }),
 };
 
-const VT_CONTENT = `<div style="padding: 24px 0; color: var(--general-text-tertiary); text-align: center;">table content goes here</div>`;
-
 /** A unique landmark label per block, since every pagination is a `nav`. */
 const vtLabels = (label: string) => ({
   labels: { ariaLabel: `Lehekülgede sirvimine: ${label}` },
@@ -731,7 +739,7 @@ export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
     controls: { disable: true },
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
   },
   render: () =>
     visualTest(
@@ -748,22 +756,13 @@ export const VisualTest: Story = {
         vtBlock("Wider siblings", WiderSiblings),
         vtBlock("Transparent", Transparent),
         {
-          // The docs story renders both paginations from the same args, so they'd share a label.
           label: "Top and bottom split",
-          story: {
-            args: TopBottomSplit.args,
-            render: (args: Partial<PaginationComponent>) => ({
-              props: {
-                ...args,
-                top: vtLabels("Top split").labels,
-                bottom: vtLabels("Bottom split").labels,
-              },
-              template: `
-                <tedi-pagination ${argsToTemplate(args)} [labels]="top" [hidePager]="true" dividerPosition="bottom" />
-                ${VT_CONTENT}
-                <tedi-pagination ${argsToTemplate(args)} [labels]="bottom" [hideResults]="true" [hidePageSize]="true" />
-              `,
-            }),
+          story: TopBottomSplit,
+          args: {
+            splitLabels: {
+              top: vtLabels("Top split").labels,
+              bottom: vtLabels("Bottom split").labels,
+            },
           },
         },
         vtBlock("Left aligned", LeftAligned),
@@ -776,30 +775,6 @@ export const VisualTest: Story = {
         vtBlock("Arrows primary variant", ArrowsPrimaryVariant),
         vtBlock("Custom results slot", CustomResultsSlot),
         { label: "Custom labels", story: CustomLabels },
-      ],
-      { args: meta.args },
-    ),
-};
-
-/** Chromatic mobile snapshot for Pagination: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: Story = {
-  tags: ["!dev", "!autodocs"],
-  parameters: {
-    controls: { disable: true },
-    chromatic: { disableSnapshot: false, viewports: [375] },
-  },
-  render: () =>
-    visualTest(
-      [
-        vtBlock("Default", Default),
-        vtBlock("All properties shown", AllPropertiesShown),
-        vtBlock("Huge page count", HugePageCount),
-        vtBlock("Responsive align", ResponsiveAlign),
-        vtBlock("Responsive visibility", ResponsiveVisibility),
-        vtBlock("Disabled boundary arrows", DisabledBoundaryArrows),
-        vtBlock("Arrows with labels", ArrowsWithLabels),
-        vtBlock("Custom arrow icons", CustomArrowIcons),
-        vtBlock("Arrows primary variant", ArrowsPrimaryVariant),
       ],
       { args: meta.args },
     ),

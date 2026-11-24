@@ -1,6 +1,9 @@
 import { signal } from "@angular/core";
 import { Meta, moduleMetadata, StoryObj } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { ButtonGroupComponent } from "./button-group.component";
 import { ButtonGroupButtonDirective } from "./button-group-button/button-group-button.directive";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -308,7 +311,9 @@ export const IconOnly: Story = {
 
 const STATES = ["Default", "Hover", "Selected", "Focus", "Disabled"];
 
-// VisualTest repeats these rows in one story, so each group's name gets its state appended.
+// VisualTest repeats these rows in one story, so it sets labelPerState to append each group's state to its name.
+type StatesStory = StoryObj<ButtonGroupComponent & { labelPerState?: boolean }>;
+
 const statesStory = (
   variant: "primary" | "secondary",
   ariaLabel: string,
@@ -345,7 +350,7 @@ const statesStory = (
 /**
  * Primary states. Showcase — controls are disabled.
  */
-export const Primary: Story = {
+export const Primary: StatesStory = {
   parameters: {
     controls: { disable: true },
     pseudo: {
@@ -353,13 +358,14 @@ export const Primary: Story = {
       focusVisible: ["#focus-primary"],
     },
   },
-  render: () => statesStory("primary", "Esmane vaate valik"),
+  render: ({ labelPerState }) =>
+    statesStory("primary", "Esmane vaate valik", labelPerState),
 };
 
 /**
  * Secondary states. Showcase — controls are disabled.
  */
-export const Secondary: Story = {
+export const Secondary: StatesStory = {
   parameters: {
     controls: { disable: true },
     pseudo: {
@@ -367,7 +373,8 @@ export const Secondary: Story = {
       focusVisible: ["#focus-secondary"],
     },
   },
-  render: () => statesStory("secondary", "Teisene vaate valik"),
+  render: ({ labelPerState }) =>
+    statesStory("secondary", "Teisene vaate valik", labelPerState),
 };
 
 /** Markup of the `DifferentWidthButtons` story; `ariaLabel` keeps the group name unique where it repeats. */
@@ -384,7 +391,7 @@ const differentWidthButtons = (ariaLabel = "Vaate valik") => ({
 });
 
 export const DifferentWidthButtons: Story = {
-  render: () => differentWidthButtons(),
+  render: ({ ariaLabel }) => differentWidthButtons(ariaLabel),
 };
 
 export const Stretched: Story = {
@@ -463,7 +470,7 @@ export const Controlled: Story = {
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     controls: { disable: true },
     pseudo: {
       hover: ["#hover-primary", "#hover-secondary"],
@@ -473,27 +480,29 @@ export const VisualTest: Story = {
   render: () =>
     visualTest(
       [
+        {
+          label: "Default",
+          story: Default,
+          args: { ariaLabel: "Vaate valik, vaikimisi" },
+        },
         { label: "Sizes", story: Sizes },
         { label: "Types", story: Types },
         {
           label: "Different width buttons",
-          story: {
-            render: () => differentWidthButtons("Vaate valik, eri laiusega"),
-          },
+          story: DifferentWidthButtons,
+          args: { ariaLabel: "Vaate valik, eri laiusega" },
         },
         { label: "With icon", story: WithIcon },
         { label: "Icon only", story: IconOnly },
         {
           label: "Primary states",
-          story: {
-            render: () => statesStory("primary", "Esmane vaate valik", true),
-          },
+          story: Primary,
+          args: { labelPerState: true },
         },
         {
           label: "Secondary states",
-          story: {
-            render: () => statesStory("secondary", "Teisene vaate valik", true),
-          },
+          story: Secondary,
+          args: { labelPerState: true },
         },
         { label: "Stretched", story: Stretched },
         {

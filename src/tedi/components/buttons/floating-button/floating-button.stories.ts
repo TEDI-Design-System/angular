@@ -9,7 +9,10 @@ import {
   FloatingButtonComponent,
   type FloatingButtonVariant,
 } from "./floating-button.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -415,7 +418,7 @@ export const Placement: StoryObj<FloatingButtonType> = {
 export const VisualTest: StoryObj = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     controls: { disable: true },
     pseudo: {
       hover: '[data-state="Hover"]',

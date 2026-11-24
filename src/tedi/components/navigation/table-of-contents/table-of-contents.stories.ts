@@ -10,7 +10,11 @@ import {
   viewChild,
 } from "@angular/core";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+  VisualTestStory,
+} from "../../../../../.storybook/visual-test-story";
 
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
@@ -323,7 +327,7 @@ const controllableItems = SECTIONS.map((label, index) => {
 const ariaLabelAttr = (ariaLabel?: string) =>
   ariaLabel ? ` ariaLabel="${ariaLabel}"` : "";
 
-const defaultToc = (ariaLabel?: string) => (args: Story["args"]) => ({
+const defaultToc = (args: Story["args"]) => ({
   props: args,
   template: `
       <tedi-table-of-contents
@@ -334,7 +338,7 @@ const defaultToc = (ariaLabel?: string) => (args: Story["args"]) => ({
         [defaultOpen]="defaultOpen"
         [numbered]="numbered"
         [sticky]="sticky"
-        [divided]="divided"${ariaLabelAttr(ariaLabel)}
+        [divided]="divided"${ariaLabelAttr(args?.ariaLabel)}
       >
         ${controllableItems}
       </tedi-table-of-contents>
@@ -353,7 +357,7 @@ export const Default: Story = {
     separator: false,
     divided: false,
   },
-  render: defaultToc(),
+  render: defaultToc,
 };
 
 // The story renders a private styleguide matrix, so surface how each state maps
@@ -515,7 +519,7 @@ const transparentToc = (ariaLabel?: string) => ({
 });
 
 export const Transparent: Story = {
-  render: () => transparentToc(),
+  render: ({ ariaLabel }) => transparentToc(ariaLabel),
 };
 
 const withSlotToc = (ariaLabel?: string) => ({
@@ -527,7 +531,7 @@ const withSlotToc = (ariaLabel?: string) => ({
 });
 
 export const WithSlot: Story = {
-  render: () => withSlotToc(),
+  render: ({ ariaLabel }) => withSlotToc(ariaLabel),
 };
 
 const numberedToc = (ariaLabel?: string) => ({
@@ -539,7 +543,7 @@ const numberedToc = (ariaLabel?: string) => ({
 });
 
 export const Numbered: Story = {
-  render: () => numberedToc(),
+  render: ({ ariaLabel }) => numberedToc(ariaLabel),
 };
 
 const withIconToc = (ariaLabel?: string) => ({
@@ -551,7 +555,7 @@ const withIconToc = (ariaLabel?: string) => ({
 });
 
 export const WithIcon: Story = {
-  render: () => withIconToc(),
+  render: ({ ariaLabel }) => withIconToc(ariaLabel),
 };
 
 const headlessToc = (ariaLabel?: string) => ({
@@ -563,7 +567,7 @@ const headlessToc = (ariaLabel?: string) => ({
 });
 
 export const Headless: Story = {
-  render: () => headlessToc(),
+  render: ({ ariaLabel }) => headlessToc(ariaLabel),
 };
 
 const withSeparatorToc = (ariaLabel?: string) => ({
@@ -575,7 +579,7 @@ const withSeparatorToc = (ariaLabel?: string) => ({
 });
 
 export const WithSeparator: Story = {
-  render: () => withSeparatorToc(),
+  render: ({ ariaLabel }) => withSeparatorToc(ariaLabel),
 };
 
 const dividedToc = (ariaLabel?: string) => ({
@@ -591,7 +595,7 @@ const dividedToc = (ariaLabel?: string) => ({
  * separated rows.
  */
 export const Divided: Story = {
-  render: () => dividedToc(),
+  render: ({ ariaLabel }) => dividedToc(ariaLabel),
 };
 
 interface DemoSection {
@@ -1165,13 +1169,11 @@ export const CollapsibleHideOnScroll: Story = {
   }),
 };
 
-type TocRender = (args: Story["args"]) => { props?: object; template: string };
-
 /** The meta decorator's card width, which `visualTest` doesn't apply. */
-const card = (render: TocRender, args?: Story["args"]) => ({
-  args,
-  render: (renderArgs: Story["args"]) => {
-    const { props, template } = render(renderArgs);
+const card = (story: Story): VisualTestStory => ({
+  args: story.args,
+  render: (args: never, context: never) => {
+    const { props, template } = story.render!(args, context);
     return {
       props,
       template: `<div style="${CARD_WRAPPER}">${template}</div>`,
@@ -1184,44 +1186,56 @@ export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
     fullWidth: true,
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     pseudo: { hover: ".toc-item-states__hover" },
   },
   render: () =>
     visualTest([
       {
         label: "Default",
-        story: card(defaultToc("Sisukord (vaikimisi)"), Default.args),
+        story: card(Default),
+        args: { ariaLabel: "Sisukord (vaikimisi)" },
       },
       { label: "Item states", story: ItemStates },
       {
         label: "Transparent",
-        story: card(() => transparentToc("Sisukord (läbipaistev)")),
+        story: card(Transparent),
+        args: { ariaLabel: "Sisukord (läbipaistev)" },
       },
       {
         label: "With slot",
-        story: card(() => withSlotToc("Sisukord (lisasisuga)")),
+        story: card(WithSlot),
+        args: { ariaLabel: "Sisukord (lisasisuga)" },
       },
       {
         label: "Numbered",
-        story: card(() => numberedToc("Sisukord (nummerdatud)")),
+        story: card(Numbered),
+        args: { ariaLabel: "Sisukord (nummerdatud)" },
       },
       {
         label: "With icon",
-        story: card(() => withIconToc("Sisukord (ikooniga)")),
+        story: card(WithIcon),
+        args: { ariaLabel: "Sisukord (ikooniga)" },
       },
       {
         label: "Headless",
-        story: card(() => headlessToc("Sisukord (pealkirjata)")),
+        story: card(Headless),
+        args: { ariaLabel: "Sisukord (pealkirjata)" },
       },
       {
         label: "With separator",
-        story: card(() => withSeparatorToc("Sisukord (eraldajaga)")),
+        story: card(WithSeparator),
+        args: { ariaLabel: "Sisukord (eraldajaga)" },
       },
       {
         label: "Divided",
-        story: card(() => dividedToc("Sisukord (ridadeks jaotatud)")),
+        story: card(Divided),
+        args: { ariaLabel: "Sisukord (ridadeks jaotatud)" },
       },
-      { label: "Collapsible", story: Collapsible },
+      {
+        label: "Collapsible",
+        story: Collapsible,
+        args: { ariaLabel: "Sisukord (ahendatav)" },
+      },
     ]),
 };

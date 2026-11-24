@@ -5,7 +5,10 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { ListComponent } from "./list.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/file/jWiRIXhHRxwVdMSimKX2FF/TEDI-Design-System-(draft)?type=design&node-id=2137-19322&m=dev" target="_BLANK">Figma ↗</a><br/>
@@ -173,7 +176,9 @@ export const NoStyleList: StoryObj<ListComponent> = {
 /** Chromatic snapshot for List: add every new visual variant here too. */
 export const VisualTest: StoryObj<ListComponent> = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest(
       [

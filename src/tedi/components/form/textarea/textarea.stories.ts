@@ -18,7 +18,10 @@ import { FeedbackTextComponent } from "../feedback-text/feedback-text.component"
 import { TextComponent } from "../../base/text/text.component";
 import { LabelComponent } from "../../content/label/label.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];
 
@@ -576,7 +579,7 @@ export const Standalone: StoryObj<TextareaComponent> = {
 export const VisualTest: StoryObj<TextareaComponent> = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     pseudo: {
       hover: "#Hover",
       active: "#Active",

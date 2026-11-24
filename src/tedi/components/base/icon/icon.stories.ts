@@ -4,7 +4,10 @@ import {
   StoryObj,
   moduleMetadata,
 } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { IconComponent } from "./icon.component";
 import { TextComponent } from "../text/text.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
@@ -364,7 +367,9 @@ export const UsedInsideText: StoryObj<IconComponent> = {
 /** Chromatic snapshot for Icon: add every new visual variant here too. */
 export const VisualTest: StoryObj<IconComponent> = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest([
       { label: "Default", story: Default },

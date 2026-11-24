@@ -20,7 +20,10 @@ import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/t
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.102.102?node-id=65724-11106&m=dev" target="_blank">Radio Figma ↗</a><br />
@@ -1283,7 +1286,7 @@ export const WithReactiveForms: StoryObj<RadioComponent> = {
 export const VisualTest: StoryObj<RadioComponent> = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     pseudo: {
       hover: [
         ...statePseudoIds("Hover"),
@@ -1325,21 +1328,5 @@ export const VisualTest: StoryObj<RadioComponent> = {
       CARDS_WITH_DESCRIPTION_STYLES,
       CARDS_WITH_ICONS_STYLES,
     ],
-  }),
-};
-
-/** Chromatic mobile snapshot for Radio: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: StoryObj<RadioComponent> = {
-  tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
-  render: () => ({
-    ...visualTest([
-      { label: "Size", story: Size },
-      { label: "Group", story: Group },
-      { label: "Cards separate", story: CardsSeparate },
-      { label: "Cards grouped", story: CardsGrouped },
-      { label: "Cards with icons", story: CardsWithIcons },
-    ]),
-    styles: [CARDS_WITH_ICONS_STYLES],
   }),
 };

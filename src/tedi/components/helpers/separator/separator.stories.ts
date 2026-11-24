@@ -1,5 +1,8 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { SeparatorComponent } from "./separator.component";
 import { ColComponent } from "../grid/col/col.component";
 import { RowComponent } from "../grid/row/row.component";
@@ -275,7 +278,7 @@ export const VerticalThick: StoryObj<SeparatorComponent> = {
             <div style="padding: 1rem;">12.12.2012</div>
             <tedi-separator axis="vertical" [spacing]="2" [thickness]="2" />
             <div style="padding: 1rem;">
-                <h6>Title</h6>
+                <h4 tedi-text modifiers="h6">Title</h4>
                 <p>
                     Lorem ipsum dolor sit, amet consectetur adipisicing elit.
                     Exercitationem rem nisi quae? Rem, amet! Veritatis laboriosam consectetur ipsum quae.
@@ -292,7 +295,7 @@ const VERTICAL_DOTTED_TEMPLATE = `
             <div style="padding: 1rem;">12.12.2012</div>
             <tedi-separator axis="vertical" [spacing]="2" color="accent" variant="dotted" />
             <div style="padding: 1rem;">
-                <h6>Title</h6>
+                <h4 tedi-text modifiers="h6">Title</h4>
                 <p>
                     Lorem ipsum dolor sit, amet consectetur adipisicing elit.
                     Exercitationem rem nisi quae? Rem, amet! Veritatis laboriosam consectetur ipsum quae.
@@ -317,7 +320,7 @@ const VERTICAL_DOTTED_SMALL_TEMPLATE = `
             <div style="padding: 1rem;">12.12.2012</div>
             <tedi-separator axis="vertical" [spacing]="2" color="accent" variant="dotted-small" />
             <div style="padding: 1rem;">
-                <h6>Title</h6>
+                <h4 tedi-text modifiers="h6">Title</h4>
                 <p>
                     Lorem ipsum dolor sit, amet consectetur adipisicing elit.
                     Exercitationem rem nisi quae? Rem, amet! Veritatis laboriosam consectetur ipsum quae.
@@ -416,7 +419,9 @@ export const InlineSeparatorUsedInText: StoryObj<SeparatorComponent> = {
 /** Chromatic snapshot for Separator: add every new visual variant here too. */
 export const VisualTest: StoryObj<SeparatorComponent> = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest([
       { label: "Default", story: Default },

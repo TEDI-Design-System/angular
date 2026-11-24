@@ -5,7 +5,10 @@ import {
   moduleMetadata,
 } from "@storybook/angular";
 
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { ClosingButtonComponent } from "./closing-button.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { IconComponent } from "../../base/icon/icon.component";
@@ -234,7 +237,7 @@ export const States: Story = {
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     pseudo: States.parameters?.["pseudo"],
   },
   render: () =>

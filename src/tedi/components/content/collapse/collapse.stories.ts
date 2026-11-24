@@ -2,6 +2,7 @@ import { argsToTemplate, type Meta, type StoryObj } from "@storybook/angular";
 
 import { CollapseComponent } from "./collapse.component";
 import {
+  VISUAL_TEST_VIEWPORTS,
   visualTest,
   VisualTestStory,
 } from "../../../../../.storybook/visual-test-story";
@@ -180,7 +181,7 @@ const onBrand = (story: Story): VisualTestStory => ({
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     controls: { disable: true },
   },
   render: () =>

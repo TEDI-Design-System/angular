@@ -5,7 +5,10 @@ import {
   moduleMetadata,
   StoryFn,
 } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { LinkComponent } from "./link.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -141,14 +144,19 @@ export const Colors: StoryObj<LinkComponent> = {
   }),
 };
 
-type TemplateType = LinkComponent & { titleColor?: TextColor };
+type TemplateType = LinkComponent & {
+  titleColor?: TextColor;
+  stateBinding?: string;
+};
 
 /** VisualTest repeats this matrix, so it marks the states with `[attr.data-state]` instead of an id. */
-const linkStates =
-  (stateBinding = "[id]"): StoryFn<TemplateType> =>
-  ({ titleColor = "primary", ...args }) => ({
-    props: { ...args, titleColor: titleColor, pseudoState: PSEUDO_STATE },
-    template: `
+const linkStates: StoryFn<TemplateType> = ({
+  titleColor = "primary",
+  stateBinding = "[id]",
+  ...args
+}) => ({
+  props: { ...args, titleColor: titleColor, pseudoState: PSEUDO_STATE },
+  template: `
     <tedi-row [cols]="1" [xl]="{ cols: 2 }" [gapY]="5">
       <tedi-col class="tedi-vertical-spacing" style="--vertical-spacing-internal: 1em;">
         <p tedi-text modifiers="bold" [color]="titleColor">Default size</p>
@@ -194,7 +202,7 @@ const linkStates =
       </tedi-col>
     </tedi-row>
   `,
-  });
+});
 
 export const DefaultUnderlined: StoryObj<TemplateType> = {
   parameters: {
@@ -204,7 +212,7 @@ export const DefaultUnderlined: StoryObj<TemplateType> = {
       focusVisible: "#Focus",
     },
   },
-  render: linkStates(),
+  render: linkStates,
 };
 
 export const DefaultNoUnderline: StoryObj<TemplateType> = {
@@ -218,7 +226,7 @@ export const DefaultNoUnderline: StoryObj<TemplateType> = {
   args: {
     underline: false,
   },
-  render: linkStates(),
+  render: linkStates,
 };
 
 export const InvertedUnderlined: StoryObj<TemplateType> = {
@@ -235,7 +243,7 @@ export const InvertedUnderlined: StoryObj<TemplateType> = {
     titleColor: "white",
   },
 
-  render: linkStates(),
+  render: linkStates,
 
   globals: {
     backgrounds: {
@@ -259,7 +267,7 @@ export const InvertedNoUnderline: StoryObj<TemplateType> = {
     titleColor: "white",
   },
 
-  render: linkStates(),
+  render: linkStates,
 
   globals: {
     backgrounds: {
@@ -305,12 +313,15 @@ export const WithIcons: StoryObj<LinkComponent> = {
   }),
 };
 
-const VT_STATES = linkStates("[attr.data-state]");
+const VT_STATES = { stateBinding: "[attr.data-state]" };
 
 const onPrimary = (story: StoryObj<TemplateType>) => ({
   args: story.args,
-  render: (args: Parameters<typeof VT_STATES>[0], context: never) => {
-    const { props, template } = VT_STATES(args, context);
+  render: (args: never, context: never) => {
+    const { props, template } = (story.render as StoryFn<TemplateType>)(
+      args,
+      context,
+    );
     return {
       props,
       template: `<div class="bg bg-primary"><div class="w-100">${template}</div></div>`,
@@ -322,7 +333,7 @@ const onPrimary = (story: StoryObj<TemplateType>) => ({
 export const VisualTest: StoryObj<LinkComponent> = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     pseudo: {
       hover: '[data-state="Hover"]',
       active: '[data-state="Active"]',
@@ -336,16 +347,23 @@ export const VisualTest: StoryObj<LinkComponent> = {
       { label: "Colors", story: Colors },
       {
         label: "Default, underlined",
-        story: { ...DefaultUnderlined, render: VT_STATES },
+        story: DefaultUnderlined,
+        args: VT_STATES,
       },
       {
         label: "Default, no underline",
-        story: { ...DefaultNoUnderline, render: VT_STATES },
+        story: DefaultNoUnderline,
+        args: VT_STATES,
       },
-      { label: "Inverted, underlined", story: onPrimary(InvertedUnderlined) },
+      {
+        label: "Inverted, underlined",
+        story: onPrimary(InvertedUnderlined),
+        args: VT_STATES,
+      },
       {
         label: "Inverted, no underline",
         story: onPrimary(InvertedNoUnderline),
+        args: VT_STATES,
       },
       { label: "With icons", story: WithIcons },
     ]),

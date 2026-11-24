@@ -8,7 +8,10 @@ import { NumberFieldComponent } from "./number-field.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=4536-78765&m=dev" target="_blank">Figma ↗</a><br />
@@ -311,7 +314,9 @@ export const CustomLabelAndFeedbackText: StoryObj<NumberFieldComponent> = {
 /** Chromatic snapshot for NumberField: add every new visual variant here too. */
 export const VisualTest: StoryObj<NumberFieldComponent> = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest([
       { label: "Default", story: Default },

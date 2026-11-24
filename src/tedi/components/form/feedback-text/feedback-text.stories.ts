@@ -6,7 +6,10 @@ import {
   StoryFn,
 } from "@storybook/angular";
 import { FeedbackTextComponent } from "./feedback-text.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.65.83?node-id=9165-62054&m=dev" target="_blank">Figma ↗</a><br />
@@ -109,7 +112,9 @@ export const PositionRight: StoryObj<FeedbackTextComponent> = {
 /** Chromatic snapshot for FeedbackText: add every new visual variant here too. */
 export const VisualTest: StoryObj<FeedbackTextComponent> = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest([
       { label: "Hint", story: Default },

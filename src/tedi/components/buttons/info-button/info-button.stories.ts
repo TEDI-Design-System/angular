@@ -28,6 +28,7 @@ import {
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 import {
+  VISUAL_TEST_VIEWPORTS,
   visualTest,
   VisualTestStory,
 } from "../../../../../.storybook/visual-test-story";
@@ -216,7 +217,7 @@ const onBrand = (story: StoryObj<TemplateType>): VisualTestStory => ({
 export const VisualTest: StoryObj<InfoButtonComponent> = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     controls: { disable: true },
     pseudo: {
       hover: ["#vt-primary-Hover", "#vt-inverted-Hover"],

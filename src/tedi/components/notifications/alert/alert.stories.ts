@@ -5,7 +5,10 @@ import {
   argsToTemplate,
 } from "@storybook/angular";
 
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { AlertComponent } from "./alert.component";
 import { ButtonComponent } from "../../buttons/button/button.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -315,7 +318,7 @@ export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
     controls: { disable: true },
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
   },
   render: () =>
     visualTest([

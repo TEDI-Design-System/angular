@@ -1,6 +1,9 @@
 import { CommonModule } from "@angular/common";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { TextComponent } from "../../base/text/text.component";
@@ -163,7 +166,7 @@ export default {
   },
 } as Meta<TabsComponent>;
 
-type Story = StoryObj<TabsComponent>;
+type Story = StoryObj<TabsComponent & { idPrefix?: string }>;
 
 /** Markup of the `Default` story; `idPrefix` keeps its ids unique where it repeats. */
 const defaultTabs = (idPrefix = "") => ({
@@ -183,7 +186,7 @@ const defaultTabs = (idPrefix = "") => ({
 });
 
 export const Default: Story = {
-  render: () => defaultTabs(),
+  render: ({ idPrefix }) => defaultTabs(idPrefix),
 };
 
 /** Markup of the `WithIcons` story; `idPrefix` keeps its ids unique where it repeats. */
@@ -202,7 +205,7 @@ const withIconsTabs = (idPrefix = "") => ({
 });
 
 export const WithIcons: Story = {
-  render: () => withIconsTabs(),
+  render: ({ idPrefix }) => withIconsTabs(idPrefix),
 };
 
 /** Markup of the `WithStatusBadge` story; `idPrefix` keeps its ids unique where it repeats. */
@@ -230,7 +233,7 @@ const withStatusBadgeTabs = (idPrefix = "") => ({
 });
 
 export const WithStatusBadge: Story = {
-  render: () => withStatusBadgeTabs(),
+  render: ({ idPrefix }) => withStatusBadgeTabs(idPrefix),
 };
 
 /** Markup of the `States` story; `idPrefix` keeps its ids unique where it repeats. */
@@ -268,7 +271,7 @@ export const States: Story = {
       config: { rules: [{ id: "aria-valid-attr-value", enabled: false }] },
     },
   },
-  render: () => statesTabs(),
+  render: ({ idPrefix }) => statesTabs(idPrefix),
 };
 
 export const Controlled: Story = {
@@ -319,7 +322,7 @@ export const AsLinks: Story = {
       },
     },
   },
-  render: () => asLinksTabs(),
+  render: ({ idPrefix }) => asLinksTabs(idPrefix),
 };
 
 /** Markup of the `WithDisabledTab` story; `idPrefix` keeps its ids unique where it repeats. */
@@ -340,7 +343,7 @@ const withDisabledTabTabs = (idPrefix = "") => ({
 });
 
 export const WithDisabledTab: Story = {
-  render: () => withDisabledTabTabs(),
+  render: ({ idPrefix }) => withDisabledTabTabs(idPrefix),
 };
 
 export const OverflowBehavior: Story = {
@@ -422,14 +425,14 @@ const withSubTabsTabs = (idPrefix = "") => ({
 });
 
 export const WithSubTabs: Story = {
-  render: () => withSubTabsTabs(),
+  render: ({ idPrefix }) => withSubTabsTabs(idPrefix),
 };
 
 /** Chromatic snapshot for Tabs: add every new visual variant here too. */
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     pseudo: {
       hover: "#vt-state-Hover",
       active: "#vt-state-Active",
@@ -441,37 +444,40 @@ export const VisualTest: Story = {
   },
   render: () =>
     visualTest([
-      { label: "Default", story: { render: () => defaultTabs("vt-default-") } },
+      {
+        label: "Default",
+        story: Default,
+        args: { idPrefix: "vt-default-" },
+      },
       {
         label: "With icons",
-        story: { render: () => withIconsTabs("vt-icons-") },
+        story: WithIcons,
+        args: { idPrefix: "vt-icons-" },
       },
       {
         label: "With status badge",
-        story: { render: () => withStatusBadgeTabs("vt-badge-") },
+        story: WithStatusBadge,
+        args: { idPrefix: "vt-badge-" },
       },
-      { label: "States", story: { render: () => statesTabs("vt-state-") } },
-      { label: "As links", story: { render: () => asLinksTabs("vt-links-") } },
+      {
+        label: "States",
+        story: States,
+        args: { idPrefix: "vt-state-" },
+      },
+      {
+        label: "As links",
+        story: AsLinks,
+        args: { idPrefix: "vt-links-" },
+      },
       {
         label: "With disabled tab",
-        story: { render: () => withDisabledTabTabs("vt-disabled-") },
+        story: WithDisabledTab,
+        args: { idPrefix: "vt-disabled-" },
       },
       {
         label: "With sub tabs",
-        story: { render: () => withSubTabsTabs("vt-sub-") },
-      },
-    ]),
-};
-
-/** Chromatic mobile snapshot for Tabs: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: Story = {
-  tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
-  render: () =>
-    visualTest([
-      {
-        label: "With sub tabs",
-        story: { render: () => withSubTabsTabs("vt-mobile-sub-") },
+        story: WithSubTabs,
+        args: { idPrefix: "vt-sub-" },
       },
     ]),
 };

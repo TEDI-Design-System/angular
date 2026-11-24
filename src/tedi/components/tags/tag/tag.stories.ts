@@ -1,5 +1,8 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { TagComponent } from "./tag.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -238,7 +241,9 @@ export const Danger: Story = {
 /** Chromatic snapshot for Tag: add every new visual variant here too. */
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest(
       [

@@ -5,7 +5,10 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { TruncateComponent } from "./truncate.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 const LOREM_IPSUM = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras quam sapien, ultrices quis suscipit in, sodales vel justo. Curabitur lobortis quam dolor, vel dapibus dui pellentesque in. Maecenas auctor lacus elit, a vulputate ante cursus vitae. Proin mollis auctor ipsum nec malesuada. Aliquam turpis dui, dictum sit amet eros ac, iaculis mollis diam. Vivamus sed nulla ut justo fermentum ornare. Nam iaculis accumsan euismod. Sed efficitur risus a nisl interdum, placerat tincidunt velit sollicitudin. Donec ac tincidunt lorem, id ornare felis. Vestibulum sed lacinia diam. Donec vehicula mi maximus purus sollicitudin, at pulvinar lacus placerat.`;
 
@@ -134,22 +137,14 @@ export const ResponsiveMaxLength: Story = {
 /** Chromatic snapshot for Truncate: add every new visual variant here too. */
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest([
       { label: "Collapsed", story: Default },
       { label: "Expanded", story: Expanded },
       { label: "Not expandable", story: NotExpandable },
-      { label: "Responsive max length", story: ResponsiveMaxLength },
-    ]),
-};
-
-/** Chromatic mobile snapshot for Truncate: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: Story = {
-  tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
-  render: () =>
-    visualTest([
       { label: "Responsive max length", story: ResponsiveMaxLength },
     ]),
 };

@@ -23,7 +23,10 @@ import { HideAtDirective } from "../../../directives/hide-at/hide-at.directive";
 import { RowComponent } from "../grid/row/row.component";
 import { ColComponent } from "../grid/col/col.component";
 import { TextComponent } from "../../base/text/text.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 type StoryArgs = ComponentInputs<AttachmentComponent>;
 
@@ -404,7 +407,9 @@ export const LabeledActions: Story = {
 /** Chromatic snapshot for Attachment: add every new visual variant here too. */
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest(
       [
@@ -421,14 +426,4 @@ export const VisualTest: Story = {
       ],
       { args: meta.args },
     ),
-};
-
-/** Chromatic mobile snapshot for Attachment: add every variant that renders differently below its breakpoint here too. */
-export const VisualTestMobile: Story = {
-  tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
-  render: () =>
-    visualTest([{ label: "Labeled actions", story: LabeledActions }], {
-      args: meta.args,
-    }),
 };

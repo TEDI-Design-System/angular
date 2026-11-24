@@ -28,6 +28,12 @@ export interface VisualTestOptions {
   render?: VisualTestStory["render"];
 }
 
+/**
+ * Chromatic widths for every `VisualTest`: 375 for the mobile tokens and layouts below the
+ * breakpoints, 1200 (Chromatic's default) for desktop.
+ */
+export const VISUAL_TEST_VIEWPORTS = [375, 1200];
+
 type Imports = NonNullable<NonNullable<IStory["moduleMetadata"]>["imports"]>;
 
 const IDENTIFIER = /^[A-Za-z_$][\w$]*$/;

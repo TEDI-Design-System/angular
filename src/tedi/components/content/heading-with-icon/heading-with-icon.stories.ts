@@ -11,7 +11,10 @@ import { TextComponent } from "../../base/text/text.component";
 import { CardComponent } from "../card/card.component";
 import { CardContentComponent } from "../card/card-content/card-content.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { HeadingWithIconComponent } from "./heading-with-icon.component";
 
 /**
@@ -243,7 +246,9 @@ export const Examples: StoryObj<HeadingWithIconComponent> = {
 /** Chromatic snapshot for HeadingWithIcon: add every new visual variant here too. */
 export const VisualTest: StoryObj<HeadingWithIconComponent> = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   decorators: Examples.decorators,
   render: () =>
     visualTest([

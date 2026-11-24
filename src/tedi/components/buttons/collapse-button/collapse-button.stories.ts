@@ -18,7 +18,10 @@ import {
   type CollapseButtonArrowType,
   type CollapseButtonSize,
 } from "./collapse-button.component";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { type TextColor, TextComponent } from "../../base/text/text.component";
@@ -64,14 +67,17 @@ type StatesArgs = {
   inverted?: boolean;
   ariaLabel?: string;
   titleColor?: TextColor;
+  stateAttr?: string;
 };
 
-// VisualTest marks states with data-state: the docs stories repeat the same ids in every variant.
-const statesTemplate =
-  (stateAttr = "id"): StoryFn<StatesArgs> =>
-  ({ titleColor = "primary", ...args }) => ({
-    props: { ...args, titleColor, pseudoState: PSEUDO_STATE },
-    template: `
+// VisualTest passes stateAttr "attr.data-state": the docs stories repeat the same ids in every variant.
+const statesTemplate: StoryFn<StatesArgs> = ({
+  titleColor = "primary",
+  stateAttr = "id",
+  ...args
+}) => ({
+  props: { ...args, titleColor, pseudoState: PSEUDO_STATE },
+  template: `
     <tedi-row [cols]="1" [gapY]="5">
       <tedi-col>
         <tedi-row [cols]="1" [gapY]="3">
@@ -143,7 +149,7 @@ const statesTemplate =
       </tedi-col>
     </tedi-row>
   `,
-  });
+});
 
 const PSEUDO_PARAMS = {
   pseudo: {
@@ -278,7 +284,7 @@ export const States: StoryObj<StatesArgs> = {
     openText: "Open",
     closeText: "Close",
   },
-  render: statesTemplate(),
+  render: statesTemplate,
 };
 
 export const IconOnly: StoryObj<StatesArgs> = {
@@ -288,7 +294,7 @@ export const IconOnly: StoryObj<StatesArgs> = {
     arrowType: "default",
     ariaLabel: "Toggle details",
   },
-  render: statesTemplate(),
+  render: statesTemplate,
 };
 
 export const SecondaryButton: StoryObj<StatesArgs> = {
@@ -298,7 +304,7 @@ export const SecondaryButton: StoryObj<StatesArgs> = {
     arrowType: "secondary",
     ariaLabel: "Toggle details",
   },
-  render: statesTemplate(),
+  render: statesTemplate,
 };
 
 export const WithTextInverted: StoryObj<StatesArgs> = {
@@ -314,7 +320,7 @@ export const WithTextInverted: StoryObj<StatesArgs> = {
     openText: "Open",
     closeText: "Close",
   },
-  render: statesTemplate(),
+  render: statesTemplate,
 };
 
 export const IconOnlyInverted: StoryObj<StatesArgs> = {
@@ -329,18 +335,15 @@ export const IconOnlyInverted: StoryObj<StatesArgs> = {
     titleColor: "white",
     ariaLabel: "Toggle details",
   },
-  render: statesTemplate(),
+  render: statesTemplate,
 };
 
-const vtStates = (story: StoryObj<StatesArgs>) => ({
-  args: story.args,
-  render: statesTemplate("attr.data-state"),
-});
+const VT_STATES = { stateAttr: "attr.data-state" };
 
-const vtInverted = (story: StoryObj<StatesArgs>) => ({
+const onBrand = (story: StoryObj<StatesArgs>) => ({
   args: story.args,
-  render: (args: StatesArgs) => {
-    const result = statesTemplate("attr.data-state")(args, {} as never);
+  render: (args: never, context: never) => {
+    const result = (story.render as StoryFn<StatesArgs>)(args, context);
     return {
       ...result,
       template: `<div class="bg bg-primary"><div class="w-100">${result.template}</div></div>`,
@@ -352,7 +355,7 @@ const vtInverted = (story: StoryObj<StatesArgs>) => ({
 export const VisualTest: StoryObj<StatesArgs> = {
   tags: ["!dev", "!autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: false },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     controls: { disable: true },
     pseudo: {
       hover: '[data-state="Hover"]',
@@ -363,11 +366,20 @@ export const VisualTest: StoryObj<StatesArgs> = {
   render: () =>
     visualTest(
       [
-        { label: "With text", story: vtStates(States) },
-        { label: "Icon only", story: vtStates(IconOnly) },
-        { label: "Secondary button", story: vtStates(SecondaryButton) },
-        { label: "With text inverted", story: vtInverted(WithTextInverted) },
-        { label: "Icon only inverted", story: vtInverted(IconOnlyInverted) },
+        { label: "Default", story: Default },
+        { label: "With text", story: States, args: VT_STATES },
+        { label: "Icon only", story: IconOnly, args: VT_STATES },
+        { label: "Secondary button", story: SecondaryButton, args: VT_STATES },
+        {
+          label: "With text inverted",
+          story: onBrand(WithTextInverted),
+          args: VT_STATES,
+        },
+        {
+          label: "Icon only inverted",
+          story: onBrand(IconOnlyInverted),
+          args: VT_STATES,
+        },
       ],
       { args: meta.args },
     ),

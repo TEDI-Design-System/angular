@@ -1,6 +1,9 @@
 import { Meta, StoryObj } from "@storybook/angular";
 import { moduleMetadata } from "@storybook/angular";
-import { visualTest } from "../../../../../.storybook/visual-test-story";
+import {
+  VISUAL_TEST_VIEWPORTS,
+  visualTest,
+} from "../../../../../.storybook/visual-test-story";
 
 import { EllipsisComponent } from "./index";
 import { RowComponent } from "../grid/row/row.component";
@@ -134,7 +137,9 @@ export const NoTooltip: StoryObj<EllipsisComponent> = {
 /** Chromatic snapshot for Ellipsis: add every new visual variant here too. */
 export const VisualTest: StoryObj<EllipsisComponent> = {
   tags: ["!dev", "!autodocs"],
-  parameters: { chromatic: { disableSnapshot: false } },
+  parameters: {
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
+  },
   render: () =>
     visualTest(
       [
