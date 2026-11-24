@@ -254,8 +254,6 @@ $sheet-fade-duration: 200ms;
 }
 
 .tedi-sheet-body {
-  --form-checkbox-radio-gutter-y: var(--tedi-dimensions-05);
-
   flex: 1 1 auto;
   padding: var(--tedi-sheet-body-padding);
   overflow-y: auto;
