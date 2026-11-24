@@ -6,8 +6,8 @@ import { Directive, TemplateRef, inject } from "@angular/core";
  * control is created on entry and destroyed on exit.
  *
  * The projected control keeps its own value binding and accessible label.
- * Configure exit keys for the control (for example, disable closeOnEnter for
- * a textarea). Overlays must be linked through aria-controls or aria-owns.
+ * Configure exit keys for the control (for example, disable closeOnEnter when
+ * Enter belongs to a custom control). Overlays must be linked through aria-controls or aria-owns.
  *
  * @example
  * ```html

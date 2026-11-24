@@ -322,12 +322,24 @@ export class InlineEditComponent {
     if (!this.editing() || event.defaultPrevented || event.isComposing) return;
 
     if (event.key === "Enter" && this.closeOnEnter()) {
+      if (event.shiftKey || this.enterBelongsToTarget(event.target)) return;
       event.preventDefault();
       this.stopEditing("commit", true);
     } else if (event.key === "Escape" && this.closeOnEscape()) {
       event.preventDefault();
       this.stopEditing("cancel", true);
     }
+  }
+
+  /** Enter already means something to a textarea, a select or a button. */
+  private enterBelongsToTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false;
+    return (
+      target.tagName === "TEXTAREA" ||
+      !!target.closest(
+        '[role="combobox"], [role="listbox"], button, a[href], [role="button"]',
+      )
+    );
   }
 
   handleFocusOut(event: FocusEvent) {

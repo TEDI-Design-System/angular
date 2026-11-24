@@ -376,6 +376,53 @@ describe("InlineEditComponent", () => {
       expect(document.activeElement).toBe(trigger());
     });
 
+    it("leaves Enter to a button inside the editor", async () => {
+      await enterEditMode();
+
+      const button = document.createElement("button");
+      dom().querySelector(".tedi-inline-edit__editor")!.appendChild(button);
+      const event = new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+      });
+      button.dispatchEvent(event);
+      fixture.detectChanges();
+
+      expect(event.defaultPrevented).toBe(false);
+      expect(host.editing()).toBe(true);
+      expect(host.commits).toBe(0);
+    });
+
+    it.each([
+      ["a textarea", "textarea", {}],
+      ["a combobox", 'div role="combobox"', {}],
+      ["a listbox option", 'div role="listbox"', {}],
+      ["Shift+Enter", "input", { shiftKey: true }],
+    ])("leaves Enter to %s", async (_name, markup, init) => {
+      await enterEditMode();
+
+      const [tag, attr] = markup.split(" ");
+      const el = document.createElement(tag);
+      if (attr) {
+        const [k, v] = attr.split("=");
+        el.setAttribute(k, v.replace(/"/g, ""));
+      }
+      dom().querySelector(".tedi-inline-edit__editor")!.appendChild(el);
+      const event = new KeyboardEvent("keydown", {
+        key: "Enter",
+        bubbles: true,
+        cancelable: true,
+        ...init,
+      });
+      el.dispatchEvent(event);
+      fixture.detectChanges();
+
+      expect(event.defaultPrevented).toBe(false);
+      expect(host.editing()).toBe(true);
+      expect(host.commits).toBe(0);
+    });
+
     it("listens for focus leaving only while editing", async () => {
       const add = jest.spyOn(document, "addEventListener");
       const remove = jest.spyOn(document, "removeEventListener");
