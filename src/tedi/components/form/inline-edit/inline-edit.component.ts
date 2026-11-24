@@ -150,7 +150,7 @@ export class InlineEditComponent {
     transform: booleanAttribute,
   });
   /**
-   * Commits on Enter, except in a textarea or select, on a button or link, or
+   * Commits on Enter, except in a textarea or combobox, on a button or link, or
    * with Shift held.
    * @default true
    */
@@ -331,7 +331,7 @@ export class InlineEditComponent {
     }
   }
 
-  /** Enter already means something to a textarea, a select or a button. */
+  /** Enter already means something to a textarea, a combobox or a button. */
   private enterBelongsToTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) return false;
     return (

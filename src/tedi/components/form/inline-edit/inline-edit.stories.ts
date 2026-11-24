@@ -179,7 +179,7 @@ export default {
     },
     closeOnEnter: {
       description:
-        "Whether Enter commits. Enter in a textarea, a select or on a button is left to that control.",
+        "Whether Enter commits. Enter in a textarea or combobox, or on a button, is left to that control.",
       control: { type: "boolean" },
       table: {
         category: "inputs",
