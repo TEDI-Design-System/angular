@@ -112,6 +112,8 @@ npx skills add https://github.com/TEDI-Design-System/angular --skill tedi-angula
 
 Then ask your agent to "upgrade TEDI to the latest version".
 
+npm projects are fully supported. With pnpm, Yarn or Bun the skill reads the lockfile where it can and asks you for any version it can't determine.
+
 ### For contributors: the `contributing` skill
 
 Guides development inside this repository: creating new components, running tests and lint, WCAG audits, refactoring and Storybook stories. Available as `/contributing` when working in this repository. Skills for contributing across the design system live in [TEDI-Design-System/ai-skills](https://github.com/TEDI-Design-System/ai-skills).
