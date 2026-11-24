@@ -49,9 +49,7 @@ export class SheetContentDirective {
   readonly returnFocus = input(true, { transform: booleanAttribute });
 
   /**
-   * Show the dimmed backdrop. It is hidden while the sheet is collapsed. For a
-   * docked sheet that leaves the page usable, also set `trapFocus` and `lockScroll` to `false`, and the sheet's
-   * `closeOnBackdropClick` to `false`.
+   * Show the dimmed backdrop. Hidden while the sheet is collapsed.
    * @default true
    */
   readonly showOverlay = input(true, { transform: booleanAttribute });

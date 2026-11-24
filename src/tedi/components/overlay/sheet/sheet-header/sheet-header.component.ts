@@ -62,7 +62,7 @@ export class SheetHeaderComponent implements OnDestroy {
   readonly variant = input<SheetHeaderVariant>("default");
 
   /**
-   * With `center`, the start content and the buttons stay at the edges.
+   * Title alignment. With `center`, the start content and buttons stay at the edges.
    * @default start
    */
   readonly titlePosition = input<SheetHeaderTitlePosition>("start");

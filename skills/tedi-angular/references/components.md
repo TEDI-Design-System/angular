@@ -203,11 +203,7 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
 - **`tedi-sheet` content goes in `<ng-template tediSheetContent>`.** The sheet renders it into an
   overlay only while open, so content placed directly in `<tedi-sheet>` stays on the page. The
   header, body, footer, `tediSheetTrigger` and `tediSheetClose` find the sheet through DI and must be
-  inside it. Header slots are attributes on the projected elements (`tedi-sheet-header-start`,
-  `tedi-sheet-header-end`, `tedi-sheet-header-actions`), and so is the footer's end edge
-  (`tedi-sheet-footer-end`). The exception is `tedi-sheet-header-content`, which replaces the whole
-  header layout. Without a title the sheet is unlabelled until you set `ariaLabelledBy` or
-  `ariaLabel` on `tediSheetContent`.
+  inside it.
 
 ### File upload
 
