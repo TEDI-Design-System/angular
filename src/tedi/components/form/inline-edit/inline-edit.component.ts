@@ -150,8 +150,8 @@ export class InlineEditComponent {
     transform: booleanAttribute,
   });
   /**
-   * Commits on Enter. Turn off when the editor uses Enter for a newline
-   * or to open a select dropdown.
+   * Commits on Enter, except in a textarea or select, on a button or link, or
+   * with Shift held.
    * @default true
    */
   readonly closeOnEnter = input(true, { transform: booleanAttribute });
