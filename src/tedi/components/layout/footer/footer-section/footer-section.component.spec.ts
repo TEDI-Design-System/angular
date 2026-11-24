@@ -33,12 +33,14 @@ class TranslationMock {
       [collapsible]="collapsible()"
       [collapse]="collapse()"
       [defaultOpen]="defaultOpen()"
+      [headingLevel]="headingLevel()"
     >
       <a class="test-link" href="#">+372 555 5555</a>
     </tedi-footer-section>
   `,
 })
 class TestHostComponent {
+  readonly headingLevel = signal<"h1" | "h2" | "h3" | "h4" | "h5" | "h6">("h2");
   readonly icon = signal<string | undefined>("call");
   readonly iconBreakpoint = signal<Breakpoint>("lg");
   readonly collapsible = signal(false);
@@ -80,6 +82,16 @@ describe("FooterSectionComponent", () => {
     expect(section.querySelector(".tedi-footer-section__icon")).not.toBeNull();
     expect(section.querySelectorAll(".test-link")).toHaveLength(1);
     expect(toggle()).toBeNull();
+  });
+
+  it("renders the heading as an h2 by default and at the requested headingLevel", () => {
+    const heading = () =>
+      section.querySelector(".tedi-footer-section__heading");
+    expect(heading()?.tagName).toBe("H2");
+
+    host.headingLevel.set("h4");
+    fixture.detectChanges();
+    expect(heading()?.tagName).toBe("H4");
   });
 
   it("hides the icon below iconBreakpoint", () => {

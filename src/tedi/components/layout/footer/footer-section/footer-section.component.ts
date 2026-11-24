@@ -16,6 +16,8 @@ import {
 } from "../../../../services/breakpoint/breakpoint.service";
 import { injectFooter } from "../footer-context";
 
+export type FooterSectionHeadingLevel = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+
 @Component({
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +39,12 @@ export class FooterSectionComponent {
    * Section heading; on mobile it is also the accordion toggle's label.
    */
   readonly heading = input<string>();
+  /**
+   * Semantic heading level of the section heading on desktop; the visual style stays the same
+   * regardless. Set it to fit the host page's heading outline (WCAG 1.3.1).
+   * @default h2
+   */
+  readonly headingLevel = input<FooterSectionHeadingLevel>("h2");
   /**
    * Material Symbols icon shown in a tinted circle beside the heading.
    */

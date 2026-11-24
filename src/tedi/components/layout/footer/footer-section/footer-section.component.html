@@ -19,9 +19,38 @@
       </div>
     </tedi-collapse>
   } @else {
-    <strong tedi-text class="tedi-footer-section__heading" color="white">
-      {{ heading() }}
-    </strong>
+    @switch (headingLevel()) {
+      @case ("h1") {
+        <h1 tedi-text class="tedi-footer-section__heading" color="white">
+          {{ heading() }}
+        </h1>
+      }
+      @case ("h3") {
+        <h3 tedi-text class="tedi-footer-section__heading" color="white">
+          {{ heading() }}
+        </h3>
+      }
+      @case ("h4") {
+        <h4 tedi-text class="tedi-footer-section__heading" color="white">
+          {{ heading() }}
+        </h4>
+      }
+      @case ("h5") {
+        <h5 tedi-text class="tedi-footer-section__heading" color="white">
+          {{ heading() }}
+        </h5>
+      }
+      @case ("h6") {
+        <h6 tedi-text class="tedi-footer-section__heading" color="white">
+          {{ heading() }}
+        </h6>
+      }
+      @default {
+        <h2 tedi-text class="tedi-footer-section__heading" color="white">
+          {{ heading() }}
+        </h2>
+      }
+    }
     <div class="tedi-footer-section__content">
       <ng-container [ngTemplateOutlet]="content" />
     </div>

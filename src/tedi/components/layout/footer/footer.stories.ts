@@ -296,6 +296,17 @@ export default {
         defaultValue: { summary: "false" },
       },
     },
+    headingLevel: {
+      control: "select",
+      options: ["h1", "h2", "h3", "h4", "h5", "h6"],
+      description:
+        "Semantic heading level of the section heading on desktop; the visual style stays the same.",
+      table: {
+        category: "footer-section inputs",
+        type: { summary: "h1 | h2 | h3 | h4 | h5 | h6" },
+        defaultValue: { summary: "h2" },
+      },
+    },
     iconBreakpoint: {
       control: "select",
       options: BREAKPOINTS,
@@ -395,6 +406,7 @@ export const Default: Story = {
     mobileBreakpoint: "sm",
     collapsible: false,
     defaultOpen: false,
+    headingLevel: "h2",
     iconBreakpoint: "lg",
     placement: "end",
     position: "center",
@@ -406,7 +418,7 @@ export const Default: Story = {
         <tedi-footer-body [columns]="columns">
           ${sectionsTemplate(
             "call",
-            `[collapsible]="collapsible" [defaultOpen]="defaultOpen" [iconBreakpoint]="iconBreakpoint"`,
+            `[collapsible]="collapsible" [defaultOpen]="defaultOpen" [headingLevel]="headingLevel" [iconBreakpoint]="iconBreakpoint"`,
           )}
         </tedi-footer-body>
         <tedi-footer-side [placement]="placement" [position]="position">

@@ -40,6 +40,13 @@
     @include footer-links;
   }
 
+  &__heading {
+    margin: 0;
+    font-size: inherit;
+    font-weight: var(--body-bold-weight);
+    line-height: inherit;
+  }
+
   &__collapse {
     display: block;
     width: 100%;
