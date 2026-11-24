@@ -361,20 +361,20 @@ const sectionsTemplate = (
   </tedi-footer-section>
   <tedi-footer-section heading="Sotsiaalmeedia ja uuendused" ${contactIcon ? 'icon="share"' : ""} ${bindings}>
     <a tedi-link variant="inverted" href="#">Uudiskirja tellimine</a>
-    <a tedi-link variant="inverted" href="#">Jälgi meid Twitteris</a>
-    <a tedi-link variant="inverted" href="#">Jälgi meid Facebookis</a>
+    <a tedi-link variant="inverted" href="https://x.com">Jälgi meid Twitteris</a>
+    <a tedi-link variant="inverted" href="https://www.facebook.com/TEHIK">Jälgi meid Facebookis</a>
     <a tedi-link variant="inverted" href="#">Liitu meie kogukonnaga</a>
   </tedi-footer-section>
   <tedi-footer-section heading="Kontakt" ${contactIcon ? `icon="${contactIcon}"` : ""} ${bindings}>
-    <a tedi-link variant="inverted" href="#">+372 555 5555</a>
-    <a tedi-link variant="inverted" href="#">tedi@tehik.ee</a>
+    <a tedi-link variant="inverted" href="tel:+3725555555">+372 555 5555</a>
+    <a tedi-link variant="inverted" href="mailto:tedi@tehik.ee">tedi@tehik.ee</a>
     <a tedi-link variant="inverted" href="#">Pärnu mnt. 132, 11317 Tallinn</a>
   </tedi-footer-section>
 `;
 
 const contactLinks = `
-  <a tedi-link variant="inverted" href="#">+372 555 5555</a>
-  <a tedi-link variant="inverted" href="#">tedi@tehik.ee</a>
+  <a tedi-link variant="inverted" href="tel:+3725555555">+372 555 5555</a>
+  <a tedi-link variant="inverted" href="mailto:tedi@tehik.ee">tedi@tehik.ee</a>
   <a tedi-link variant="inverted" href="#">Pärnu mnt. 132, 11317 Tallinn</a>
 `;
 
@@ -533,8 +533,8 @@ export const DeviceFrameSourceAccordionsOpen: Story = {
           </tedi-footer-section>
           <tedi-footer-section heading="Sotsiaalmeedia ja uuendused" icon="share" [collapsible]="true">
             <a tedi-link variant="inverted" href="#">Uudiskirja tellimine</a>
-            <a tedi-link variant="inverted" href="#">Jälgi meid Twitteris</a>
-            <a tedi-link variant="inverted" href="#">Jälgi meid Facebookis</a>
+            <a tedi-link variant="inverted" href="https://x.com">Jälgi meid Twitteris</a>
+            <a tedi-link variant="inverted" href="https://www.facebook.com/TEHIK">Jälgi meid Facebookis</a>
             <a tedi-link variant="inverted" href="#">Liitu meie kogukonnaga</a>
           </tedi-footer-section>
           <tedi-footer-section heading="Kontakt" icon="call" [collapsible]="true">
@@ -588,9 +588,9 @@ const bottomSections = `
 `;
 
 const bottomLinks = `
-  <a tedi-link variant="inverted" [underline]="false" href="#">Facebook</a>
-  <a tedi-link variant="inverted" [underline]="false" href="#">Instagram</a>
-  <a tedi-link variant="inverted" [underline]="false" href="#">LinkedIn</a>
+  <a tedi-link variant="inverted" [underline]="false" href="https://www.facebook.com/TEHIK">Facebook</a>
+  <a tedi-link variant="inverted" [underline]="false" href="https://www.instagram.com/nahtamatudkangelased/">Instagram</a>
+  <a tedi-link variant="inverted" [underline]="false" href="https://www.linkedin.com/showcase/tedi-disain/">LinkedIn</a>
 `;
 
 export const WithBottomSection: Story = {
@@ -645,10 +645,10 @@ const instagramIcon = `
   </svg>
 `;
 
-const socialLink = (label: string, icon: string) => `
+const socialLink = (label: string, icon: string, href: string) => `
   <tedi-tooltip>
     <tedi-tooltip-trigger>
-      <a tedi-link variant="inverted" href="#" aria-label="${label}">${icon}</a>
+      <a tedi-link variant="inverted" href="${href}" aria-label="${label}">${icon}</a>
     </tedi-tooltip-trigger>
     <tedi-tooltip-content>${label}</tedi-tooltip-content>
   </tedi-tooltip>
@@ -665,8 +665,8 @@ export const CustomContent: Story = {
               ${contactLinks}
             </tedi-footer-section>
             <div class="flex align-self-center gap-3">
-              ${socialLink("Facebook", facebookIcon)}
-              ${socialLink("Instagram", instagramIcon)}
+              ${socialLink("Facebook", facebookIcon, "https://www.facebook.com/TEHIK")}
+              ${socialLink("Instagram", instagramIcon, "https://www.instagram.com/nahtamatudkangelased/")}
             </div>
           </tedi-footer-body>
         </tedi-footer>
@@ -679,8 +679,8 @@ export const CustomContent: Story = {
               <a tedi-link variant="inverted" href="#">Korduma kippuvad küsimused</a>
             </tedi-footer-section>
             <tedi-footer-section heading="Sotsiaalmeedia">
-              <a tedi-link variant="inverted" href="#">Jälgi meid Twitteris</a>
-              <a tedi-link variant="inverted" href="#">Jälgi meid Facebookis</a>
+              <a tedi-link variant="inverted" href="https://x.com">Jälgi meid Twitteris</a>
+              <a tedi-link variant="inverted" href="https://www.facebook.com/TEHIK">Jälgi meid Facebookis</a>
               <a tedi-link variant="inverted" href="#">Liitu meie kogukonnaga</a>
             </tedi-footer-section>
             <tedi-footer-section heading="Uudised">
