@@ -332,13 +332,14 @@ story instead of one per docs story. When a stories file has a `VisualTest` stor
   render. Each block is `{ label, story, args? }`: `args` override the
   story's own, e.g. a unique `ariaLabel`. Blocks may bind the same prop name to different values:
   the helper then scopes that prop per block with `@let`, which is read-only, so a two-way binding
-  (`[(x)]`) only works on a prop name no other block binds differently. Where hard-coded ids collide, move the story's
-  render into a function that takes an `idPrefix` and pass `{ render: () => fn("vt-…-") }` as the
-  story. The helper throws when a story renders nothing.
+  (`[(x)]`) only works on a prop name no other block binds differently. Where hard-coded ids collide, give the
+  story's markup an `idPrefix` arg (`render: ({ idPrefix }) => fn(idPrefix)`) and pass
+  `args: { idPrefix: "vt-…-" }` on the block. The helper throws when a story renders nothing.
 - A story whose state needs a `play` function, an open overlay, scrolling, or sticky / fixed
   positioning against the page stays a separate snapshot: it sets `chromatic: { disableSnapshot: false }`
   itself and is not copied into `VisualTest`. Add `viewports` only for the widths whose rendering
-  actually differs. CSS-animated content such as a spinner belongs in `VisualTest`, since Chromatic
+  actually differs: `[375]` for mobile only, `VISUAL_TEST_VIEWPORTS` for both, so every desktop
+  baseline is captured at 1200. CSS-animated content such as a spinner belongs in `VisualTest`, since Chromatic
   pauses CSS animations before capturing. JS timers are not paused, so a timer-driven story is a
   separate snapshot that starts from a fixed value and skips its timer when `isChromatic()` (from
   `chromatic/isChromatic`) is true.

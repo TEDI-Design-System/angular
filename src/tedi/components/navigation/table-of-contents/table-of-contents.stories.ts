@@ -320,13 +320,6 @@ const controllableItems = SECTIONS.map((label, index) => {
       </tedi-table-of-contents-item>`;
 }).join("");
 
-/**
- * The docs stories' tables of contents are all named "Sisukord", so VisualTest
- * passes `ariaLabel` to give each landmark its own name.
- */
-const ariaLabelAttr = (ariaLabel?: string) =>
-  ariaLabel ? ` ariaLabel="${ariaLabel}"` : "";
-
 const defaultToc = (args: Story["args"]) => ({
   props: args,
   template: `
@@ -338,7 +331,8 @@ const defaultToc = (args: Story["args"]) => ({
         [defaultOpen]="defaultOpen"
         [numbered]="numbered"
         [sticky]="sticky"
-        [divided]="divided"${ariaLabelAttr(args?.ariaLabel)}
+        [divided]="divided"
+        [ariaLabel]="ariaLabel"
       >
         ${controllableItems}
       </tedi-table-of-contents>
@@ -510,92 +504,85 @@ export const ItemStates: Story = {
   }),
 };
 
-const transparentToc = (ariaLabel?: string) => ({
-  template: `
-      <tedi-table-of-contents heading="Sisukord" variant="transparent" [sticky]="false" activeId="methods"${ariaLabelAttr(ariaLabel)}>
-        ${items()}
-      </tedi-table-of-contents>
-    `,
-});
-
 export const Transparent: Story = {
-  render: ({ ariaLabel }) => transparentToc(ariaLabel),
-};
-
-const withSlotToc = (ariaLabel?: string) => ({
-  template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods"${ariaLabelAttr(ariaLabel)}>
-        ${items({ slot: true })}
-      </tedi-table-of-contents>
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
+    template: `
+        <tedi-table-of-contents heading="Sisukord" variant="transparent" [sticky]="false" activeId="methods" [ariaLabel]="ariaLabel">
+          ${items()}
+        </tedi-table-of-contents>
     `,
-});
+  }),
+};
 
 export const WithSlot: Story = {
-  render: ({ ariaLabel }) => withSlotToc(ariaLabel),
-};
-
-const numberedToc = (ariaLabel?: string) => ({
-  template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" [numbered]="true" activeId="methods"${ariaLabelAttr(ariaLabel)}>
-        ${items()}
-      </tedi-table-of-contents>
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
+    template: `
+        <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [ariaLabel]="ariaLabel">
+          ${items({ slot: true })}
+        </tedi-table-of-contents>
     `,
-});
+  }),
+};
 
 export const Numbered: Story = {
-  render: ({ ariaLabel }) => numberedToc(ariaLabel),
-};
-
-const withIconToc = (ariaLabel?: string) => ({
-  template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods"${ariaLabelAttr(ariaLabel)}>
-        ${items({ icon: true })}
-      </tedi-table-of-contents>
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
+    template: `
+        <tedi-table-of-contents heading="Sisukord" [sticky]="false" [numbered]="true" activeId="methods" [ariaLabel]="ariaLabel">
+          ${items()}
+        </tedi-table-of-contents>
     `,
-});
+  }),
+};
 
 export const WithIcon: Story = {
-  render: ({ ariaLabel }) => withIconToc(ariaLabel),
-};
-
-const headlessToc = (ariaLabel?: string) => ({
-  template: `
-      <tedi-table-of-contents [heading]="null" [sticky]="false" [numbered]="true" activeId="methods"${ariaLabelAttr(ariaLabel)}>
-        ${items()}
-      </tedi-table-of-contents>
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
+    template: `
+        <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [ariaLabel]="ariaLabel">
+          ${items({ icon: true })}
+        </tedi-table-of-contents>
     `,
-});
+  }),
+};
 
 export const Headless: Story = {
-  render: ({ ariaLabel }) => headlessToc(ariaLabel),
-};
-
-const withSeparatorToc = (ariaLabel?: string) => ({
-  template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods"${ariaLabelAttr(ariaLabel)}>
-        ${items({ icon: true, separator: true })}
-      </tedi-table-of-contents>
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
+    template: `
+        <tedi-table-of-contents [heading]="null" [sticky]="false" [numbered]="true" activeId="methods" [ariaLabel]="ariaLabel">
+          ${items()}
+        </tedi-table-of-contents>
     `,
-});
+  }),
+};
 
 export const WithSeparator: Story = {
-  render: ({ ariaLabel }) => withSeparatorToc(ariaLabel),
-};
-
-const dividedToc = (ariaLabel?: string) => ({
-  template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [divided]="true"${ariaLabelAttr(ariaLabel)}>
-        ${items({ icon: true })}
-      </tedi-table-of-contents>
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
+    template: `
+        <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [ariaLabel]="ariaLabel">
+          ${items({ icon: true, separator: true })}
+        </tedi-table-of-contents>
     `,
-});
+  }),
+};
 
 /**
  * `divided` draws a divider between items, sub-items included, so the list reads as
  * separated rows.
  */
 export const Divided: Story = {
-  render: ({ ariaLabel }) => dividedToc(ariaLabel),
+  render: ({ ariaLabel }) => ({
+    props: { ariaLabel },
+    template: `
+        <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [divided]="true" [ariaLabel]="ariaLabel">
+          ${items({ icon: true })}
+        </tedi-table-of-contents>
+    `,
+  }),
 };
 
 interface DemoSection {
@@ -985,7 +972,7 @@ export class DocPageComponent implements OnDestroy {
 export const StickyInLayout: Story = {
   parameters: {
     layout: "fullscreen",
-    chromatic: { disableSnapshot: false, viewports: [375, 1280] },
+    chromatic: { disableSnapshot: false, viewports: VISUAL_TEST_VIEWPORTS },
     fullWidth: true,
     docs: { source: { language: "typescript", code: STICKY_LAYOUT_SOURCE } },
     a11y: { config: { rules: [{ id: "color-contrast", enabled: false }] } },
