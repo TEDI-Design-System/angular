@@ -4,6 +4,7 @@ import {
   StoryObj,
   moduleMetadata,
 } from "@storybook/angular";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { TextComponent } from "./text.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -316,46 +317,14 @@ export const StatusTextColors: StoryObj<TextComponent> = {
 export const VisualTest: StoryObj<TextComponent> = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false } },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Headings</p>
-            ${HEADINGS_TEMPLATE}
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Subtitles</p>
-            ${SUBTITLES_TEMPLATE}
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Body</p>
-            ${BODY_TEMPLATE}
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">General text colors</p>
-            ${GENERAL_TEXT_COLORS_TEMPLATE}
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Inherited text color</p>
-            ${INHERITED_TEXT_COLOR_TEMPLATE}
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Status text colors</p>
-            ${STATUS_TEXT_COLORS_TEMPLATE}
-          </div>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Headings", story: Headings },
+      { label: "Subtitles", story: Subtitles },
+      { label: "Body", story: Body },
+      { label: "General text colors", story: GeneralTextColors },
+      { label: "Inherited text color", story: InheritedTextColor },
+      { label: "Status text colors", story: StatusTextColors },
+    ]),
 };

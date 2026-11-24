@@ -5,6 +5,7 @@ import {
   argsToTemplate,
   moduleMetadata,
 } from "@storybook/angular";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { ComponentInputs } from "../../../types/inputs.type";
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
 import { SkeletonComponent } from "./skeleton.component";
@@ -335,7 +336,7 @@ export const Responsive: Story = {
  * loading; the third button shows that.
  */
 export const Accessibility: Story = {
-  parameters: { controls: { disable: true } },
+  parameters: { visualTest: false, controls: { disable: true } },
   render: () => ({
     template: `<tedi-skeleton-accessibility-demo />`,
   }),
@@ -348,41 +349,13 @@ export const VisualTest: Story = {
     controls: { disable: true },
     chromatic: { disableSnapshot: false },
   },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="4">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Default</p>
-          <tedi-skeleton label="Loading something">
-            <tedi-skeleton-block [width]="50" height="h2" />
-          </tedi-skeleton>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Height</p>
-          <tedi-skeleton label="Loading something">
-            <tedi-skeleton-block height="p" />
-            <tedi-skeleton-block height="h3" />
-            <tedi-skeleton-block height="h2" />
-            <tedi-skeleton-block height="h1" />
-            <tedi-skeleton-block [height]="100" />
-          </tedi-skeleton>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Width</p>
-          <tedi-skeleton label="Loading something">
-            <tedi-skeleton-block [width]="50" height="p" />
-            <tedi-skeleton-block [width]="75" height="h3" />
-            <tedi-skeleton-block width="36px" height="h2" />
-            <tedi-skeleton-block width="auto" height="h1" />
-          </tedi-skeleton>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Responsive</p>
-          ${RESPONSIVE_TEMPLATE}
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Height", story: Height },
+      { label: "Width", story: Width },
+      { label: "Responsive", story: Responsive },
+    ]),
 };
 
 /** Chromatic mobile snapshot for Skeleton: add every variant that renders differently below its breakpoint here too. */
@@ -392,14 +365,5 @@ export const VisualTestMobile: Story = {
     controls: { disable: true },
     chromatic: { disableSnapshot: false, viewports: [375] },
   },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="4">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Responsive</p>
-          ${RESPONSIVE_TEMPLATE}
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () => visualTest([{ label: "Responsive", story: Responsive }]),
 };

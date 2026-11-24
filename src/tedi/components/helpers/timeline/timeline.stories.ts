@@ -12,6 +12,7 @@ import { InfoButtonComponent } from "../../buttons/info-button/info-button.compo
 import { IconComponent } from "../../base/icon/icon.component";
 import { RowComponent } from "../grid/row/row.component";
 import { ColComponent } from "../grid/col/col.component";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.108.103?m=dev&node-id=25945-119670" target="_BLANK">Figma ↗</a><br />
@@ -381,82 +382,28 @@ export const TimelineCard: Story = {
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false } },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Default</p>
-          <ng-container *ngTemplateOutlet="vt1; context: { activeIndex: 2, variant: 'default' }" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Title only</p>
-          <ng-container *ngTemplateOutlet="vt2; context: { activeIndex: 1 }" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With description</p>
-          <ng-container *ngTemplateOutlet="vt3; context: { activeIndex: 1 }" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With info button</p>
-          <ng-container *ngTemplateOutlet="vt4; context: { activeIndex: 1 }" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Without title</p>
-          <ng-container *ngTemplateOutlet="vt5; context: { activeIndex: 1 }" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With action</p>
-          <ng-container *ngTemplateOutlet="vt6; context: { activeIndex: 3 }" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With single date</p>
-          <ng-container *ngTemplateOutlet="vt7; context: { activeIndex: 1 }" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With multiple dates</p>
-          <ng-container *ngTemplateOutlet="vt8; context: { activeIndex: 1 }" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Timeline card</p>
-          <ng-container *ngTemplateOutlet="vt9; context: { activeIndex: 1, variant: 'card' }" />
-        </tedi-col>
-      </tedi-row>
-      <ng-template #vt1 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${DEFAULT_TEMPLATE}</ng-template>
-      <ng-template #vt2 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${TITLE_ONLY_TEMPLATE}</ng-template>
-      <ng-template #vt3 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${WITH_DESCRIPTION_TEMPLATE}</ng-template>
-      <ng-template #vt4 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${WITH_INFO_BUTTON_TEMPLATE}</ng-template>
-      <ng-template #vt5 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${WITHOUT_TITLE_TEMPLATE}</ng-template>
-      <ng-template #vt6 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${WITH_ACTION_TEMPLATE}</ng-template>
-      <ng-template #vt7 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${WITH_SINGLE_DATE_TEMPLATE}</ng-template>
-      <ng-template #vt8 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${WITH_MULTIPLE_DATES_TEMPLATE}</ng-template>
-      <ng-template #vt9 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${TIMELINE_CARD_TEMPLATE}</ng-template>
-    `,
-  }),
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Title only", story: TitleOnly },
+      { label: "With description", story: WithDescription },
+      { label: "With info button", story: WithInfoButton },
+      { label: "Without title", story: WithoutTitle },
+      { label: "With action", story: WithAction },
+      { label: "With single date", story: WithSingleDate },
+      { label: "With multiple dates", story: WithMultipleDates },
+      { label: "Timeline card", story: TimelineCard },
+    ]),
 };
 
 /** Chromatic mobile snapshot for Timeline: add every variant that renders differently below its breakpoint here too. */
 export const VisualTestMobile: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Default</p>
-          <ng-container *ngTemplateOutlet="vt1; context: { activeIndex: 2, variant: 'default' }" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With multiple dates</p>
-          <ng-container *ngTemplateOutlet="vt8; context: { activeIndex: 1 }" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Timeline card</p>
-          <ng-container *ngTemplateOutlet="vt9; context: { activeIndex: 1, variant: 'card' }" />
-        </tedi-col>
-      </tedi-row>
-      <ng-template #vt1 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${DEFAULT_TEMPLATE}</ng-template>
-      <ng-template #vt8 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${WITH_MULTIPLE_DATES_TEMPLATE}</ng-template>
-      <ng-template #vt9 let-activeIndex="activeIndex" let-variant="variant" let-cardPadding="cardPadding">${TIMELINE_CARD_TEMPLATE}</ng-template>
-    `,
-  }),
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "With multiple dates", story: WithMultipleDates },
+      { label: "Timeline card", story: TimelineCard },
+    ]),
 };

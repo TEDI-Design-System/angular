@@ -10,22 +10,19 @@ import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
 import { TextFieldComponent } from "../../form/text-field/text-field.component";
-import { TextComponent } from "../../base/text/text.component";
-import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=2137-19322&m=dev" target="_blank">Figma ↗</a><br />
  * <a href="https://www.tedi.ee/1ee8444b7/p/64479c-label" target="_blank">Zeroheight ↗</a>
  */
 
-export default {
+const meta = {
   title: "TEDI-Ready/Content/Label",
   component: LabelComponent,
   decorators: [
     moduleMetadata({
       imports: [
-        VerticalSpacingDirective,
-        TextComponent,
         LabelComponent,
         LabelRowComponent,
         RowComponent,
@@ -96,6 +93,8 @@ export default {
     },
   },
 } as Meta<LabelComponent>;
+
+export default meta;
 
 type LabelStory = StoryObj<LabelComponent & { ngContent: string }>;
 
@@ -206,28 +205,14 @@ export const VisuallyHidden: LabelStory = {
 export const VisualTest: StoryObj<LabelComponent> = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false } },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Size</p>
-            ${SIZE_TEMPLATE}
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Structure</p>
-            ${STRUCTURE_TEMPLATE}
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Visually hidden</p>
-            ${VISUALLY_HIDDEN_TEMPLATE}
-          </div>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Size", story: Size },
+        { label: "Structure", story: Structure },
+        { label: "Visually hidden", story: VisuallyHidden },
+      ],
+      { args: meta.args },
+    ),
 };

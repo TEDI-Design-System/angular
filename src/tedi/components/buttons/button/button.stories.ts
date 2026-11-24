@@ -5,6 +5,7 @@ import {
   StoryFn,
   StoryObj,
 } from "@storybook/angular";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { ButtonComponent } from "./button.component";
 import { TextColor, TextComponent } from "../../base/text/text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -23,7 +24,7 @@ const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus", "Disabled"];
  * <a href="https://www.tedi.ee/1ee8444b7/p/10984a-button" target="_blank">Zeroheight ↗</a>
  */
 
-export default {
+const meta: Meta<ButtonType> = {
   title: "TEDI-Ready/Components/Buttons/Button",
   component: ButtonComponent,
   decorators: [
@@ -91,7 +92,9 @@ export default {
       },
     },
   },
-} as Meta<ButtonType>;
+};
+
+export default meta;
 
 type ButtonType = ButtonComponent & { ngContent: string };
 
@@ -108,30 +111,30 @@ export const Default: StoryObj<ButtonType> = {
 type TemplateType = ButtonType &
   BaseButtonDirective & { titleColor?: TextColor };
 
-const ButtonTemplate: StoryFn<TemplateType> = ({
-  titleColor = "primary",
-  ...args
-}) => ({
-  props: { ...args, titleColor: titleColor, pseudoState: PSEUDO_STATE },
-  template: `
+// VisualTest marks states with data-state: the docs stories repeat the same ids in every variant.
+const buttonTemplate =
+  (stateAttr = "id"): StoryFn<TemplateType> =>
+  ({ titleColor = "primary", ...args }) => ({
+    props: { ...args, titleColor: titleColor, pseudoState: PSEUDO_STATE },
+    template: `
     <tedi-row [cols]="1" [gapY]="5">
       <tedi-col [class]="'tedi-vertical-spacing'" style="--vertical-spacing-internal: 1em; overflow-x: auto;">
         <p tedi-text modifiers="bold" [color]="titleColor">Default</p>
         <tedi-row *ngFor="let state of pseudoState;" [cols]="5" alignItems="center" [gapX]="2">
           <p tedi-text [color]="titleColor">{{ state }}</p>
           <tedi-col [width]="4" style="display: flex; gap: 1rem;">
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'">Create</button>
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'">
+            <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'">Create</button>
+            <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'">
               Continue
               <tedi-icon name="arrow_right_alt" />
             </button>
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'">
+            <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'">
               <tedi-icon name="edit" />
               Edit
             </button>
             <tedi-tooltip>
               <tedi-tooltip-trigger>
-                <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" aria-label="Edasi">
+                <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'" aria-label="Edasi">
                   <tedi-icon name="arrow_forward" />
                 </button>
               </tedi-tooltip-trigger>
@@ -147,18 +150,18 @@ const ButtonTemplate: StoryFn<TemplateType> = ({
             <p tedi-text [color]="titleColor">{{ state }}</p>
           </tedi-col>
           <tedi-col [width]="4" style="display: flex; gap: 1rem;">
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" [size]="'small'">Create</button>
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" [size]="'small'">
+            <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'" [size]="'small'">Create</button>
+            <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'" [size]="'small'">
               Continue
               <tedi-icon name="arrow_right_alt" />
             </button>
-            <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" [size]="'small'">
+            <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'" [size]="'small'">
               <tedi-icon name="edit" />
               Edit
             </button>
             <tedi-tooltip>
               <tedi-tooltip-trigger>
-                <button tedi-button ${argsToTemplate(args)} [id]="state" [disabled]="state === 'Disabled'" [size]="'small'" aria-label="Edasi">
+                <button tedi-button ${argsToTemplate(args)} [${stateAttr}]="state" [disabled]="state === 'Disabled'" [size]="'small'" aria-label="Edasi">
                   <tedi-icon name="arrow_forward" />
                 </button>
               </tedi-tooltip-trigger>
@@ -169,7 +172,7 @@ const ButtonTemplate: StoryFn<TemplateType> = ({
       </tedi-col>
     </tedi-row>
   `,
-});
+  });
 
 type ButtonStory = StoryObj<ButtonType & { disabled: boolean }>;
 
@@ -184,7 +187,7 @@ export const Primary: StoryObj<TemplateType> = {
   args: {
     variant: "primary",
   },
-  render: ButtonTemplate,
+  render: buttonTemplate(),
 };
 
 export const PrimaryInverted: StoryObj<TemplateType> = {
@@ -201,7 +204,7 @@ export const PrimaryInverted: StoryObj<TemplateType> = {
     variant: "primary-inverted",
   },
 
-  render: ButtonTemplate,
+  render: buttonTemplate(),
 
   globals: {
     backgrounds: {
@@ -221,7 +224,7 @@ export const Secondary: StoryObj<TemplateType> = {
   args: {
     variant: "secondary",
   },
-  render: ButtonTemplate,
+  render: buttonTemplate(),
 };
 
 export const SecondaryInverted: StoryObj<TemplateType> = {
@@ -238,7 +241,7 @@ export const SecondaryInverted: StoryObj<TemplateType> = {
     variant: "secondary-inverted",
   },
 
-  render: ButtonTemplate,
+  render: buttonTemplate(),
 
   globals: {
     backgrounds: {
@@ -258,7 +261,7 @@ export const Neutral: StoryObj<TemplateType> = {
   args: {
     variant: "neutral",
   },
-  render: ButtonTemplate,
+  render: buttonTemplate(),
 };
 
 export const NeutralInverted: StoryObj<TemplateType> = {
@@ -275,7 +278,7 @@ export const NeutralInverted: StoryObj<TemplateType> = {
     variant: "neutral-inverted",
   },
 
-  render: ButtonTemplate,
+  render: buttonTemplate(),
 
   globals: {
     backgrounds: {
@@ -295,7 +298,7 @@ export const Success: StoryObj<TemplateType> = {
   args: {
     variant: "success",
   },
-  render: ButtonTemplate,
+  render: buttonTemplate(),
 };
 
 export const Danger: StoryObj<TemplateType> = {
@@ -309,7 +312,7 @@ export const Danger: StoryObj<TemplateType> = {
   args: {
     variant: "danger",
   },
-  render: ButtonTemplate,
+  render: buttonTemplate(),
 };
 
 export const DangerNeutral: StoryObj<TemplateType> = {
@@ -323,7 +326,7 @@ export const DangerNeutral: StoryObj<TemplateType> = {
   args: {
     variant: "danger-neutral",
   },
-  render: ButtonTemplate,
+  render: buttonTemplate(),
 };
 
 /**
@@ -358,38 +361,21 @@ export const LinkAsButton: ButtonStory = {
   }),
 };
 
-const VISUAL_BUTTON_ROWS = (color: TextColor) => `
-  @for (size of sizes; track size) {
-    @for (state of states; track state) {
-      <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-        <tedi-col width="1">
-          <p tedi-text color="${color}">{{ size }}, {{ state }}</p>
-        </tedi-col>
-        <tedi-col width="5">
-          <div class="flex flex-wrap align-items-center gap-3">
-            <button tedi-button [variant]="variant" [size]="size" [attr.data-state]="state" [disabled]="state === 'Disabled'">Create</button>
-            <button tedi-button [variant]="variant" [size]="size" [attr.data-state]="state" [disabled]="state === 'Disabled'">
-              Continue
-              <tedi-icon name="arrow_right_alt" />
-            </button>
-            <button tedi-button [variant]="variant" [size]="size" [attr.data-state]="state" [disabled]="state === 'Disabled'">
-              <tedi-icon name="edit" />
-              Edit
-            </button>
-            <tedi-tooltip>
-              <tedi-tooltip-trigger>
-                <button tedi-button [variant]="variant" [size]="size" [attr.data-state]="state" [disabled]="state === 'Disabled'" aria-label="Edasi">
-                  <tedi-icon name="arrow_forward" />
-                </button>
-              </tedi-tooltip-trigger>
-              <tedi-tooltip-content>Edasi</tedi-tooltip-content>
-            </tedi-tooltip>
-          </div>
-        </tedi-col>
-      </tedi-row>
-    }
-  }
-`;
+const vtStates = (story: StoryObj<TemplateType>) => ({
+  args: story.args,
+  render: buttonTemplate("attr.data-state"),
+});
+
+const vtInverted = (story: StoryObj<TemplateType>) => ({
+  args: story.args,
+  render: (args: Parameters<StoryFn<TemplateType>>[0]) => {
+    const result = buttonTemplate("attr.data-state")(args, {} as never);
+    return {
+      ...result,
+      template: `<div class="bg bg-primary"><div class="w-100">${result.template}</div></div>`,
+    };
+  },
+});
 
 /** Chromatic snapshot for Button: add every new visual variant here too. */
 export const VisualTest: StoryObj<ButtonType> = {
@@ -403,59 +389,22 @@ export const VisualTest: StoryObj<ButtonType> = {
       focusVisible: '[data-state="Focus"]',
     },
   },
-  render: () => ({
-    props: {
-      variants: [
-        "primary",
-        "secondary",
-        "neutral",
-        "success",
-        "danger",
-        "danger-neutral",
+  render: () =>
+    visualTest(
+      [
+        { label: "Primary", story: vtStates(Primary) },
+        { label: "Primary inverted", story: vtInverted(PrimaryInverted) },
+        { label: "Secondary", story: vtStates(Secondary) },
+        { label: "Secondary inverted", story: vtInverted(SecondaryInverted) },
+        { label: "Neutral", story: vtStates(Neutral) },
+        { label: "Neutral inverted", story: vtInverted(NeutralInverted) },
+        { label: "Success", story: vtStates(Success) },
+        { label: "Danger", story: vtStates(Danger) },
+        { label: "Danger neutral", story: vtStates(DangerNeutral) },
+        { label: "Extra small icon only", story: ExtraSmallIconOnly },
+        { label: "Full width", story: FullWidth },
+        { label: "Link as button", story: LinkAsButton },
       ],
-      invertedVariants: [
-        "primary-inverted",
-        "secondary-inverted",
-        "neutral-inverted",
-      ],
-      sizes: ["default", "small"],
-      states: PSEUDO_STATE,
-    },
-    template: `
-      <tedi-row [cols]="1" [gapY]="4">
-        @for (variant of variants; track variant) {
-          <tedi-col>
-            <tedi-row [cols]="1" [gapY]="2">
-              <p tedi-text modifiers="bold">{{ variant }}</p>
-              ${VISUAL_BUTTON_ROWS("primary")}
-            </tedi-row>
-          </tedi-col>
-        }
-        @for (variant of invertedVariants; track variant) {
-          <tedi-col>
-            <div class="bg bg-primary">
-              <div class="w-100">
-                <tedi-row [cols]="1" [gapY]="2">
-                  <p tedi-text modifiers="bold" color="white">{{ variant }}</p>
-                  ${VISUAL_BUTTON_ROWS("white")}
-                </tedi-row>
-              </div>
-            </div>
-          </tedi-col>
-        }
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Full width</p>
-            <button tedi-button class="w-100">Full Width Button</button>
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Link as button</p>
-            <a tedi-button>Link</a>
-          </div>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+      { args: meta.args },
+    ),
 };

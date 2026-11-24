@@ -5,28 +5,19 @@ import {
   StoryObj,
 } from "@storybook/angular";
 import { ListComponent } from "./list.component";
-import { TextComponent } from "../../base/text/text.component";
-import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
-import { ColComponent } from "../../helpers/grid/col/col.component";
-import { RowComponent } from "../../helpers/grid/row/row.component";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/file/jWiRIXhHRxwVdMSimKX2FF/TEDI-Design-System-(draft)?type=design&node-id=2137-19322&m=dev" target="_BLANK">Figma ↗</a><br/>
  * <a href="https://www.tedi.ee/1ee8444b7/p/37b651-list" target="_BLANK">Zeroheight ↗</a>
  */
 
-export default {
+const meta = {
   title: "TEDI-Ready/Content/List",
   component: ListComponent,
   decorators: [
     moduleMetadata({
-      imports: [
-        RowComponent,
-        ColComponent,
-        VerticalSpacingDirective,
-        TextComponent,
-        ListComponent,
-      ],
+      imports: [ListComponent],
     }),
   ],
   parameters: { chromatic: { disableSnapshot: true } },
@@ -69,6 +60,8 @@ export default {
     },
   },
 } as Meta<ListComponent>;
+
+export default meta;
 
 export const Default: StoryObj<ListComponent> = {
   render: (args) => ({
@@ -181,76 +174,14 @@ export const NoStyleList: StoryObj<ListComponent> = {
 export const VisualTest: StoryObj<ListComponent> = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false } },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Unordered list</p>
-            <ul tedi-list>
-              <li>Potato</li>
-              <li>Caesar salad</li>
-              <li>
-                Caesar salad
-                <ul tedi-list>
-                  <li>
-                    Dressing
-                    <ul tedi-list>
-                      <li>Lemon juice</li>
-                      <li>Anchovies</li>
-                      <li>Parmesan cheese</li>
-                      <li>Worcestershire sauce</li>
-                      <li>Mustard</li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Ordered list</p>
-            <ol tedi-list>
-              <li>School homework</li>
-              <li>
-                Chores
-                <ol tedi-list>
-                  <li>Wash dishes</li>
-                  <li>
-                    Fold laundry
-                    <ol tedi-list>
-                      <li>Iron the sheets</li>
-                      <li>Hang dresses</li>
-                    </ol>
-                  </li>
-                </ol>
-              </li>
-              <li>Walk the dog</li>
-              <li>Water the flowers</li>
-            </ol>
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">No style</p>
-            <ul tedi-list [styled]="false">
-              <li>
-                Caesar salad
-                <ul tedi-list [styled]="false">
-                  <li>
-                    Dressing
-                    <ul tedi-list [styled]="false">
-                      <li>Lemon juice</li>
-                      <li>Anchovies</li>
-                    </ul>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Unordered list", story: UnorderedList },
+        { label: "Ordered list", story: OrderedList },
+        { label: "No style", story: NoStyleList },
+      ],
+      { args: meta.args },
+    ),
 };

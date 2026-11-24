@@ -272,6 +272,7 @@ export const States: Story = {
 };
 
 export const Controlled: Story = {
+  parameters: { visualTest: false },
   render: () => ({
     props: { currentTab: "tab-1", content },
     template: `
@@ -292,6 +293,23 @@ export const Controlled: Story = {
   }),
 };
 
+/** Markup of the `AsLinks` story; `idPrefix` keeps its ids unique where it repeats. */
+const asLinksTabs = (idPrefix = "") => ({
+  props: { content },
+  template: `
+      <tedi-tabs defaultValue="${idPrefix}link-1">
+        <tedi-tabs-list aria-label="Terviseandmed">
+          <a tedi-tabs-trigger id="${idPrefix}link-1" href="#${idPrefix}link-1-panel">Terviseteekond</a>
+          <a tedi-tabs-trigger id="${idPrefix}link-2" href="#${idPrefix}link-2-panel">Haiguste kulg</a>
+          <a tedi-tabs-trigger id="${idPrefix}link-3" href="#${idPrefix}link-3-panel">Ravimite ajalugu</a>
+        </tedi-tabs-list>
+        <tedi-tabs-content id="${idPrefix}link-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}link-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
+        <tedi-tabs-content id="${idPrefix}link-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
+      </tedi-tabs>
+    `,
+});
+
 export const AsLinks: Story = {
   parameters: {
     docs: {
@@ -301,21 +319,7 @@ export const AsLinks: Story = {
       },
     },
   },
-  render: () => ({
-    props: { content },
-    template: `
-      <tedi-tabs defaultValue="link-1">
-        <tedi-tabs-list aria-label="Terviseandmed">
-          <a tedi-tabs-trigger id="link-1" href="#link-1-panel">Terviseteekond</a>
-          <a tedi-tabs-trigger id="link-2" href="#link-2-panel">Haiguste kulg</a>
-          <a tedi-tabs-trigger id="link-3" href="#link-3-panel">Ravimite ajalugu</a>
-        </tedi-tabs-list>
-        <tedi-tabs-content id="link-1"><tedi-card-content><p tedi-text>{{ content.healthTimeline }}</p></tedi-card-content></tedi-tabs-content>
-        <tedi-tabs-content id="link-2"><tedi-card-content><p tedi-text>{{ content.diseaseCourse }}</p></tedi-card-content></tedi-tabs-content>
-        <tedi-tabs-content id="link-3"><tedi-card-content><p tedi-text>{{ content.medication }}</p></tedi-card-content></tedi-tabs-content>
-      </tedi-tabs>
-    `,
-  }),
+  render: () => asLinksTabs(),
 };
 
 /** Markup of the `WithDisabledTab` story; `idPrefix` keeps its ids unique where it repeats. */
@@ -447,6 +451,7 @@ export const VisualTest: Story = {
         story: { render: () => withStatusBadgeTabs("vt-badge-") },
       },
       { label: "States", story: { render: () => statesTabs("vt-state-") } },
+      { label: "As links", story: { render: () => asLinksTabs("vt-links-") } },
       {
         label: "With disabled tab",
         story: { render: () => withDisabledTabTabs("vt-disabled-") },
@@ -454,6 +459,19 @@ export const VisualTest: Story = {
       {
         label: "With sub tabs",
         story: { render: () => withSubTabsTabs("vt-sub-") },
+      },
+    ]),
+};
+
+/** Chromatic mobile snapshot for Tabs: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
+  render: () =>
+    visualTest([
+      {
+        label: "With sub tabs",
+        story: { render: () => withSubTabsTabs("vt-mobile-sub-") },
       },
     ]),
 };

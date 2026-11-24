@@ -5,6 +5,8 @@ import {
   argsToTemplate,
   moduleMetadata,
 } from "@storybook/angular";
+import isChromatic from "chromatic/isChromatic";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { ComponentInputs } from "../../../types/inputs.type";
 import { ProgressBarComponent } from "./progress-bar.component";
 import { FeedbackTextComponent } from "../../form/feedback-text/feedback-text.component";
@@ -44,7 +46,7 @@ type StoryArgs = ComponentInputs<ProgressBarComponent>;
  * />
  * ```
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Loader/ProgressBar",
   component: ProgressBarComponent,
   decorators: [
@@ -178,6 +180,8 @@ export default {
     ariaLabel: "Faili üleslaadimine",
   },
 } as Meta<ProgressBarComponent>;
+
+export default meta;
 
 type Story = StoryObj<ProgressBarComponent>;
 
@@ -405,10 +409,13 @@ export const Responsive: Story = {
   template: `<tedi-progress-bar [value]="value()" label="Üleslaadimine..." />`,
 })
 class AnimatedProgressBarDemo implements OnInit, OnDestroy {
-  protected value = signal(0);
+  protected value = signal(isChromatic() ? 40 : 0);
   private intervalId?: ReturnType<typeof setInterval>;
 
   ngOnInit() {
+    if (isChromatic()) {
+      return;
+    }
     this.intervalId = setInterval(() => {
       this.value.update((v) => (v >= 100 ? 0 : v + 5));
     }, 300);
@@ -488,9 +495,7 @@ class AnnouncedProgressBarDemo implements OnInit, OnDestroy {
  * Use a screen reader to check the announcements. The live region is visually hidden.
  */
 export const Announced: Story = {
-  parameters: {
-    controls: { disable: true },
-  },
+  parameters: { visualTest: false, controls: { disable: true } },
   render: () => ({
     moduleMetadata: { imports: [AnnouncedProgressBarDemo] },
     template: `<tedi-announced-progress-bar-demo />`,
@@ -504,65 +509,21 @@ export const VisualTest: Story = {
     controls: { disable: true },
     chromatic: { disableSnapshot: false },
   },
-  render: () => ({
-    moduleMetadata: { imports: [PositionMatrixDemo] },
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Sizes</p>
-          <tedi-row [cols]="4" [alignItems]="'center'" [gapX]="4" [gapY]="3">
-            <p tedi-text [modifiers]="['small']">Default</p>
-            <tedi-col [width]="3">
-              <tedi-progress-bar [value]="20" ariaLabel="Edenemisriba pealkiri">
-                <tedi-feedback-text text="Üleslaadimine" type="hint" />
-              </tedi-progress-bar>
-            </tedi-col>
-            <p tedi-text [modifiers]="['small']">Small</p>
-            <tedi-col [width]="3">
-              <tedi-progress-bar [value]="20" size="small" ariaLabel="Edenemisriba pealkiri">
-                <tedi-feedback-text text="Üleslaadimine" type="hint" />
-              </tedi-progress-bar>
-            </tedi-col>
-          </tedi-row>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Position</p>
-          <tedi-progress-bar-position-demo />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With label</p>
-          <tedi-row [cols]="1" [gapY]="4">
-            <tedi-progress-bar [value]="40" label="Progress" [required]="true" valuePosition="bottom">
-              <tedi-feedback-text text="Üleslaadimine" type="hint" />
-            </tedi-progress-bar>
-            <tedi-progress-bar [value]="40" label="Küsitluses osalenutest olid vanuses 15-18" labelPosition="top" [md]="{ labelPosition: 'horizontal' }" />
-          </tedi-row>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Regular</p>
-          <tedi-row [cols]="1" [gapY]="4">
-            <tedi-progress-bar [value]="40" ariaLabel="Edenemisriba pealkiri" />
-            <tedi-progress-bar [value]="40" ariaLabel="Edenemisriba pealkiri" valueLabel="1 / 5" />
-            <tedi-progress-bar [value]="40" ariaLabel="Edenemisriba pealkiri" valuePosition="bottom" />
-          </tedi-row>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With error</p>
-          <tedi-progress-bar [value]="40" ariaLabel="Edenemisriba pealkiri">
-            <tedi-feedback-text text="Üleslaadimine ebaõnnestus, fail on liiga suur" type="error" />
-          </tedi-progress-bar>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Value hidden</p>
-          <tedi-progress-bar [value]="60" [showValue]="false" ariaLabel="Edenemisriba pealkiri" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Responsive</p>
-          ${RESPONSIVE_TEMPLATE}
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Sizes", story: Sizes },
+        { label: "Position", story: Position },
+        { label: "With label", story: WithLabel },
+        { label: "Regular", story: Regular },
+        { label: "With hint", story: WithHint },
+        { label: "With error", story: WithError },
+        { label: "Value hidden", story: ValueHidden },
+        { label: "Responsive", story: Responsive },
+      ],
+      { args: meta.args },
+    ),
 };
 
 /** Chromatic mobile snapshot for ProgressBar: add every variant that renders differently below its breakpoint here too. */
@@ -572,23 +533,13 @@ export const VisualTestMobile: Story = {
     controls: { disable: true },
     chromatic: { disableSnapshot: false, viewports: [375] },
   },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <p tedi-text modifiers="bold">With label</p>
-          <tedi-row [cols]="1" [gapY]="4">
-            <tedi-progress-bar [value]="40" label="Progress" [required]="true" valuePosition="bottom">
-              <tedi-feedback-text text="Üleslaadimine" type="hint" />
-            </tedi-progress-bar>
-            <tedi-progress-bar [value]="40" label="Küsitluses osalenutest olid vanuses 15-18" labelPosition="top" [md]="{ labelPosition: 'horizontal' }" />
-          </tedi-row>
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Responsive</p>
-          ${RESPONSIVE_TEMPLATE}
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest(
+      [
+        { label: "Position", story: Position },
+        { label: "With label", story: WithLabel },
+        { label: "Responsive", story: Responsive },
+      ],
+      { args: meta.args },
+    ),
 };

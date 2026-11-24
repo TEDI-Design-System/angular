@@ -24,6 +24,8 @@ export interface VisualTestBlock {
 export interface VisualTestOptions {
   /** Args every block starts from, usually the meta's `args`. */
   args?: object;
+  /** Render for stories without their own, usually the meta's `render`. */
+  render?: VisualTestStory["render"];
 }
 
 type Imports = NonNullable<NonNullable<IStory["moduleMetadata"]>["imports"]>;
@@ -39,7 +41,7 @@ const IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
  * values is it re-declared with `@let` inside an `@if (true)` block, which scopes it to that block;
  * `@let` is read-only, so such a prop can't be two-way bound.
  *
- * Throws when a story has no `render` or its render returns no template, so the test-runner fails
+ * Throws when neither the story nor `options` has a `render`, or the render returns no template, so the test-runner fails
  * instead of Chromatic snapshotting an empty block.
  */
 export const visualTest = (
@@ -49,11 +51,12 @@ export const visualTest = (
   const imports: Imports = [RowComponent, ColComponent, TextComponent];
 
   const rendered = blocks.map(({ label, story, args }) => {
-    if (!story.render) {
+    const render = story.render ?? options.render;
+    if (!render) {
       throw new Error(`visualTest: "${label}" has no render.`);
     }
 
-    const result = story.render(
+    const result = render(
       { ...options.args, ...story.args, ...args } as never,
       {} as never,
     );

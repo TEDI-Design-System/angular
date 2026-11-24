@@ -329,6 +329,7 @@ export const WithoutDropdown: Story = {
 };
 
 export const ControlledPage: Story = {
+  parameters: { visualTest: false },
   args: { pageCount: 10, page: 3 },
   render: (args) => ({
     props: args,
@@ -678,6 +679,7 @@ export const ShowAll: Story = {
     `,
   }),
   parameters: {
+    visualTest: false,
     docs: {
       description: {
         story:
@@ -772,6 +774,7 @@ export const VisualTest: Story = {
         vtBlock("Arrows with labels", ArrowsWithLabels),
         vtBlock("Custom arrow icons", CustomArrowIcons),
         vtBlock("Arrows primary variant", ArrowsPrimaryVariant),
+        vtBlock("Custom results slot", CustomResultsSlot),
         { label: "Custom labels", story: CustomLabels },
       ],
       { args: meta.args },

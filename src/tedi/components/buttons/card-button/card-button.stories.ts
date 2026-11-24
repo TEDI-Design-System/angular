@@ -1,4 +1,5 @@
 import { Meta, moduleMetadata, StoryObj } from "@storybook/angular";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { CardButtonComponent } from "./card-button.component";
 import { CardComponent } from "../../content/card/card.component";
 import { CardContentComponent } from "../../content/card/card-content/card-content.component";
@@ -549,70 +550,23 @@ export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
     chromatic: { disableSnapshot: false },
-    pseudo: {
-      hover: "#Hover",
-      active: "#Active",
-      focusVisible: "#Focus",
-    },
+    pseudo: States.parameters?.["pseudo"],
   },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Card rows</p>
-            ${CARD_ROWS_TEMPLATE}
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Card shortcut</p>
-            ${CARD_SHORTCUT_TEMPLATE}
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">With icon card</p>
-            ${WITH_ICON_CARD_TEMPLATE}
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">States</p>
-            ${STATES_TEMPLATE}
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">As link</p>
-            ${AS_LINK_TEMPLATE}
-          </div>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Complex card</p>
-            ${COMPLEX_CARD_TEMPLATE}
-          </div>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Card rows", story: CardRows },
+      { label: "Card shortcut", story: CardShortcut },
+      { label: "With icon card", story: WithIconCard },
+      { label: "States", story: States },
+      { label: "As link", story: AsLink },
+      { label: "Complex card", story: ComplexCard },
+    ]),
 };
 
 /** Chromatic mobile snapshot for CardButton: add every variant that renders differently below its breakpoint here too. */
 export const VisualTestMobile: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Card rows</p>
-            ${CARD_ROWS_TEMPLATE}
-          </div>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () => visualTest([{ label: "Card rows", story: CardRows }]),
 };

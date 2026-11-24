@@ -105,7 +105,10 @@ jobs:
             // chromatic.config.json, and core reaches the preview through its
             // manifest import, so these force a full build too.
             const forcesFullBuild = (f) =>
-              f.filename.startsWith('.storybook/') ||
+              // Only stories import the VisualTest helper, so TurboSnap traces it like a story;
+              // its coverage spec isn't in the Storybook build at all.
+              (f.filename.startsWith('.storybook/') &&
+                !f.filename.startsWith('.storybook/visual-test-')) ||
               f.filename.startsWith('src/styles/') ||
               f.filename === 'angular.json' ||
               previewImports.includes(f.filename) ||

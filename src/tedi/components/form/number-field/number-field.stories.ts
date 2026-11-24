@@ -8,6 +8,7 @@ import { NumberFieldComponent } from "./number-field.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { LabelComponent } from "../../content/label/label.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=4536-78765&m=dev" target="_blank">Figma ↗</a><br />
@@ -311,54 +312,18 @@ export const CustomLabelAndFeedbackText: StoryObj<NumberFieldComponent> = {
 export const VisualTest: StoryObj<NumberFieldComponent> = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false } },
-  render: () => ({
-    template: `
-      <tedi-row cols="1" gapY="3">
-        <tedi-row cols="2" alignItems="center">
-          <b>Default</b>
-          <tedi-number-field label="Label" inputId="vt-default" />
-        </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>Small</b>
-          <tedi-number-field label="Label" inputId="vt-small" size="small" />
-        </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>Min value</b>
-          <tedi-number-field label="Label" inputId="vt-min-value" [min]="01" [value]="1" />
-        </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>Max value</b>
-          <tedi-number-field label="Label" inputId="vt-max-value" [max]="1" [value]="1" />
-        </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>Disabled</b>
-          <tedi-number-field label="Label" inputId="vt-disabled" [value]="1" [disabled]="true" />
-        </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>Error</b>
-          <tedi-number-field label="Label" inputId="vt-error" [value]="1" [invalid]="true" [feedbackText]="{ text: 'Feedback text', type: 'error', position: 'left' }" />
-        </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>With hint</b>
-          <tedi-number-field label="Label" inputId="vt-hint" [feedbackText]="{ text: 'Hint text', type: 'hint', position: 'left' }" />
-        </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>With unit</b>
-          <tedi-number-field label="Label" inputId="vt-unit" suffix="unit" [value]="2" />
-        </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>Full width</b>
-          <tedi-number-field label="Label" inputId="vt-full-width" suffix="unit" [fullWidth]="true" />
-        </tedi-row>
-        <tedi-row cols="2" alignItems="center">
-          <b>Custom label and feedback text</b>
-          <div>
-            <label tedi-label for="vt-custom">Label</label>
-            <tedi-number-field inputId="vt-custom" />
-            <tedi-feedback-text text="Error message" type="error" />
-          </div>
-        </tedi-row>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Sizes", story: Sizes },
+      { label: "States", story: States },
+      { label: "With hint", story: WithHint },
+      { label: "Decimal", story: Decimal },
+      { label: "With unit", story: WithUnit },
+      { label: "Full width", story: FullWidth },
+      {
+        label: "Custom label and feedback text",
+        story: CustomLabelAndFeedbackText,
+      },
+    ]),
 };

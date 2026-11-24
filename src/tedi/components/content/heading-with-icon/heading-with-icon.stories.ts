@@ -11,6 +11,7 @@ import { TextComponent } from "../../base/text/text.component";
 import { CardComponent } from "../card/card.component";
 import { CardContentComponent } from "../card/card-content/card-content.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { HeadingWithIconComponent } from "./heading-with-icon.component";
 
 /**
@@ -243,30 +244,11 @@ export const Examples: StoryObj<HeadingWithIconComponent> = {
 export const VisualTest: StoryObj<HeadingWithIconComponent> = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false } },
-  decorators: [
-    moduleMetadata({
-      imports: [
-        CardComponent,
-        CardContentComponent,
-        SeparatorComponent,
-        ButtonComponent,
-        IconComponent,
-        TextComponent,
-      ],
-    }),
-  ],
-  render: () => ({
-    template: `
-      <div [tediVerticalSpacing]="2">
-        <div [tediVerticalSpacing]="0.5">
-          <p tedi-text modifiers="bold">Colors</p>
-          ${COLORS_TEMPLATE}
-        </div>
-        <div [tediVerticalSpacing]="0.5">
-          <p tedi-text modifiers="bold">Examples</p>
-          ${EXAMPLES_TEMPLATE}
-        </div>
-      </div>
-    `,
-  }),
+  decorators: Examples.decorators,
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Colors", story: Colors },
+      { label: "Examples", story: Examples },
+    ]),
 };

@@ -16,13 +16,14 @@ import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/v
 import { createBreakpointArgTypes } from "../../../../dev-tools/createBreakpointArgTypes";
 import { StatusBadgeComponent } from "../../tags/status-badge/status-badge.component";
 import { InfoTooltipComponent } from "../../overlay/info-tooltip/info-tooltip.component";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/file/jWiRIXhHRxwVdMSimKX2FF/TEDI-Design-System-(draft)?type=design&node-id=45-30752&mode=dev" target="_BLANK">Figma ↗</a><br/>
  * <a href="https://www.tedi.ee/1ee8444b7/p/433820-text-group" target="_BLANK">Zeroheight ↗</a>
  */
 
-export default {
+const meta = {
   title: "TEDI-Ready/Content/TextGroup",
   component: TextGroupComponent,
   args: {
@@ -72,6 +73,8 @@ export default {
     ...createBreakpointArgTypes("TextGroup"),
   },
 } as Meta<TextGroupComponent>;
+
+export default meta;
 
 type Story = StoryObj<TextGroupComponent>;
 
@@ -399,43 +402,19 @@ export const VisualTest: Story = {
     chromatic: { disableSnapshot: false },
     a11y: { test: "todo" },
   },
-  render: () => ({
-    props: {
-      typesGroups: TYPES_GROUPS,
-      labelLengthSections: LABEL_LENGTH_SECTIONS,
-      rows: RESPONSIVE_ROWS,
-    },
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Types</p>
-          <ng-container *ngTemplateOutlet="types; context: { textGroups: typesGroups }" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Position type</p>
-          ${POSITION_TYPE_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Has slot</p>
-          ${HAS_SLOT_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Horizontal label length</p>
-          <ng-container *ngTemplateOutlet="labelLength; context: { textGroups: labelLengthSections }" />
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Long text values</p>
-          ${LONG_TEXT_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Responsive</p>
-          ${RESPONSIVE_TEMPLATE}
-        </tedi-col>
-      </tedi-row>
-      <ng-template #types let-textGroups="textGroups">${TYPES_TEMPLATE}</ng-template>
-      <ng-template #labelLength let-textGroups="textGroups">${LABEL_LENGTH_TEMPLATE}</ng-template>
-    `,
-  }),
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Types", story: Types },
+        { label: "Position type", story: PositionType },
+        { label: "Has slot", story: HasSlot },
+        { label: "Horizontal label length", story: HorizontalLabelLength },
+        { label: "Long text values", story: LongTextValues },
+        { label: "Responsive", story: Responsive },
+      ],
+      { args: meta.args },
+    ),
 };
 
 /** Chromatic mobile snapshot for TextGroup: add every variant that renders differently below its breakpoint here too. */
@@ -445,15 +424,8 @@ export const VisualTestMobile: Story = {
     chromatic: { disableSnapshot: false, viewports: [375] },
     a11y: { test: "todo" },
   },
-  render: () => ({
-    props: { rows: RESPONSIVE_ROWS },
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Responsive</p>
-          ${RESPONSIVE_TEMPLATE}
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest([{ label: "Responsive", story: Responsive }], {
+      args: meta.args,
+    }),
 };

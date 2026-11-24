@@ -10,6 +10,7 @@ import {
   viewChild,
 } from "@angular/core";
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
@@ -29,6 +30,8 @@ const LOREM =
   "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor " +
   "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud " +
   "exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+
+const CARD_WRAPPER = "max-width: 390px; padding: 1.5rem;";
 
 const SECTIONS = [
   "Sissejuhatus",
@@ -75,9 +78,7 @@ const meta = {
       // `fullscreen` layout avoids Storybook's padded-layout scrollbar at fixed
       // viewports; add the padding back here for the constrained card stories.
       // Full-width stories manage their own layout/padding.
-      const wrapper = context.parameters["fullWidth"]
-        ? ""
-        : "max-width: 390px; padding: 1.5rem;";
+      const wrapper = context.parameters["fullWidth"] ? "" : CARD_WRAPPER;
       return {
         ...rendered,
         template: `<div style="${wrapper}">${rendered.template}</div>`,
@@ -315,6 +316,31 @@ const controllableItems = SECTIONS.map((label, index) => {
       </tedi-table-of-contents-item>`;
 }).join("");
 
+/**
+ * The docs stories' tables of contents are all named "Sisukord", so VisualTest
+ * passes `ariaLabel` to give each landmark its own name.
+ */
+const ariaLabelAttr = (ariaLabel?: string) =>
+  ariaLabel ? ` ariaLabel="${ariaLabel}"` : "";
+
+const defaultToc = (ariaLabel?: string) => (args: Story["args"]) => ({
+  props: args,
+  template: `
+      <tedi-table-of-contents
+        [heading]="heading"
+        [headingLevel]="headingLevel"
+        [variant]="variant"
+        [activeId]="activeId"
+        [defaultOpen]="defaultOpen"
+        [numbered]="numbered"
+        [sticky]="sticky"
+        [divided]="divided"${ariaLabelAttr(ariaLabel)}
+      >
+        ${controllableItems}
+      </tedi-table-of-contents>
+    `,
+});
+
 export const Default: Story = {
   args: {
     heading: "Sisukord",
@@ -327,23 +353,7 @@ export const Default: Story = {
     separator: false,
     divided: false,
   },
-  render: (args) => ({
-    props: args,
-    template: `
-      <tedi-table-of-contents
-        [heading]="heading"
-        [headingLevel]="headingLevel"
-        [variant]="variant"
-        [activeId]="activeId"
-        [defaultOpen]="defaultOpen"
-        [numbered]="numbered"
-        [sticky]="sticky"
-        [divided]="divided"
-      >
-        ${controllableItems}
-      </tedi-table-of-contents>
-    `,
-  }),
+  render: defaultToc(),
 };
 
 // The story renders a private styleguide matrix, so surface how each state maps
@@ -496,78 +506,92 @@ export const ItemStates: Story = {
   }),
 };
 
-export const Transparent: Story = {
-  render: () => ({
-    template: `
-      <tedi-table-of-contents heading="Sisukord" variant="transparent" [sticky]="false" activeId="methods">
+const transparentToc = (ariaLabel?: string) => ({
+  template: `
+      <tedi-table-of-contents heading="Sisukord" variant="transparent" [sticky]="false" activeId="methods"${ariaLabelAttr(ariaLabel)}>
         ${items()}
       </tedi-table-of-contents>
     `,
-  }),
+});
+
+export const Transparent: Story = {
+  render: () => transparentToc(),
 };
 
-export const WithSlot: Story = {
-  render: () => ({
-    template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods">
+const withSlotToc = (ariaLabel?: string) => ({
+  template: `
+      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods"${ariaLabelAttr(ariaLabel)}>
         ${items({ slot: true })}
       </tedi-table-of-contents>
     `,
-  }),
+});
+
+export const WithSlot: Story = {
+  render: () => withSlotToc(),
 };
 
-export const Numbered: Story = {
-  render: () => ({
-    template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" [numbered]="true" activeId="methods">
+const numberedToc = (ariaLabel?: string) => ({
+  template: `
+      <tedi-table-of-contents heading="Sisukord" [sticky]="false" [numbered]="true" activeId="methods"${ariaLabelAttr(ariaLabel)}>
         ${items()}
       </tedi-table-of-contents>
     `,
-  }),
+});
+
+export const Numbered: Story = {
+  render: () => numberedToc(),
 };
 
-export const WithIcon: Story = {
-  render: () => ({
-    template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods">
+const withIconToc = (ariaLabel?: string) => ({
+  template: `
+      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods"${ariaLabelAttr(ariaLabel)}>
         ${items({ icon: true })}
       </tedi-table-of-contents>
     `,
-  }),
+});
+
+export const WithIcon: Story = {
+  render: () => withIconToc(),
 };
 
-export const Headless: Story = {
-  render: () => ({
-    template: `
-      <tedi-table-of-contents [heading]="null" [sticky]="false" [numbered]="true" activeId="methods">
+const headlessToc = (ariaLabel?: string) => ({
+  template: `
+      <tedi-table-of-contents [heading]="null" [sticky]="false" [numbered]="true" activeId="methods"${ariaLabelAttr(ariaLabel)}>
         ${items()}
       </tedi-table-of-contents>
     `,
-  }),
+});
+
+export const Headless: Story = {
+  render: () => headlessToc(),
 };
 
-export const WithSeparator: Story = {
-  render: () => ({
-    template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods">
+const withSeparatorToc = (ariaLabel?: string) => ({
+  template: `
+      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods"${ariaLabelAttr(ariaLabel)}>
         ${items({ icon: true, separator: true })}
       </tedi-table-of-contents>
     `,
-  }),
+});
+
+export const WithSeparator: Story = {
+  render: () => withSeparatorToc(),
 };
+
+const dividedToc = (ariaLabel?: string) => ({
+  template: `
+      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [divided]="true"${ariaLabelAttr(ariaLabel)}>
+        ${items({ icon: true })}
+      </tedi-table-of-contents>
+    `,
+});
 
 /**
  * `divided` draws a divider between items, sub-items included, so the list reads as
  * separated rows.
  */
 export const Divided: Story = {
-  render: () => ({
-    template: `
-      <tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [divided]="true">
-        ${items({ icon: true })}
-      </tedi-table-of-contents>
-    `,
-  }),
+  render: () => dividedToc(),
 };
 
 interface DemoSection {
@@ -1141,13 +1165,19 @@ export const CollapsibleHideOnScroll: Story = {
   }),
 };
 
-const VT_CARD = (label: string, toc: string) => `
-  <tedi-col>
-    <p tedi-text modifiers="bold">${label}</p>
-    <div style="max-width: 390px; padding: 1.5rem;">
-      ${toc}
-    </div>
-  </tedi-col>`;
+type TocRender = (args: Story["args"]) => { props?: object; template: string };
+
+/** The meta decorator's card width, which `visualTest` doesn't apply. */
+const card = (render: TocRender, args?: Story["args"]) => ({
+  args,
+  render: (renderArgs: Story["args"]) => {
+    const { props, template } = render(renderArgs);
+    return {
+      props,
+      template: `<div style="${CARD_WRAPPER}">${template}</div>`,
+    };
+  },
+});
 
 /** Chromatic snapshot for TableOfContents: add every new visual variant here too. */
 export const VisualTest: Story = {
@@ -1157,69 +1187,41 @@ export const VisualTest: Story = {
     chromatic: { disableSnapshot: false },
     pseudo: { hover: ".toc-item-states__hover" },
   },
-  render: () => ({
-    props: { ...ITEM_STATES_PROPS, separator: false },
-    template: `
-      <tedi-row [cols]="1" [gapY]="4">
-        ${VT_CARD(
-          "Default",
-          `<tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="section-3" ariaLabel="Sisukord (vaikimisi)">
-            ${controllableItems}
-          </tedi-table-of-contents>`,
-        )}
-        <tedi-col>
-          <p tedi-text modifiers="bold">Item states</p>
-          ${ITEM_STATES_TEMPLATE}
-        </tedi-col>
-        ${VT_CARD(
-          "Transparent",
-          `<tedi-table-of-contents heading="Sisukord" variant="transparent" [sticky]="false" activeId="methods" ariaLabel="Sisukord (läbipaistev)">
-            ${items()}
-          </tedi-table-of-contents>`,
-        )}
-        ${VT_CARD(
-          "With slot",
-          `<tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" ariaLabel="Sisukord (lisasisuga)">
-            ${items({ slot: true })}
-          </tedi-table-of-contents>`,
-        )}
-        ${VT_CARD(
-          "Numbered",
-          `<tedi-table-of-contents heading="Sisukord" [sticky]="false" [numbered]="true" activeId="methods" ariaLabel="Sisukord (nummerdatud)">
-            ${items()}
-          </tedi-table-of-contents>`,
-        )}
-        ${VT_CARD(
-          "With icon",
-          `<tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" ariaLabel="Sisukord (ikooniga)">
-            ${items({ icon: true })}
-          </tedi-table-of-contents>`,
-        )}
-        ${VT_CARD(
-          "Headless",
-          `<tedi-table-of-contents [heading]="null" [sticky]="false" [numbered]="true" activeId="methods" ariaLabel="Sisukord (pealkirjata)">
-            ${items()}
-          </tedi-table-of-contents>`,
-        )}
-        ${VT_CARD(
-          "With separator",
-          `<tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" ariaLabel="Sisukord (eraldajaga)">
-            ${items({ icon: true, separator: true })}
-          </tedi-table-of-contents>`,
-        )}
-        ${VT_CARD(
-          "Divided",
-          `<tedi-table-of-contents heading="Sisukord" [sticky]="false" activeId="methods" [divided]="true" ariaLabel="Sisukord (ridadeks jaotatud)">
-            ${items({ icon: true })}
-          </tedi-table-of-contents>`,
-        )}
-        <tedi-col>
-          <p tedi-text modifiers="bold">Collapsible</p>
-          <tedi-table-of-contents-collapsible heading="Sisukord" activeId="methods" [sticky]="false" ariaLabel="Sisukord (kokkupandav)">
-            ${controllableNestedItems}
-          </tedi-table-of-contents-collapsible>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest([
+      {
+        label: "Default",
+        story: card(defaultToc("Sisukord (vaikimisi)"), Default.args),
+      },
+      { label: "Item states", story: ItemStates },
+      {
+        label: "Transparent",
+        story: card(() => transparentToc("Sisukord (läbipaistev)")),
+      },
+      {
+        label: "With slot",
+        story: card(() => withSlotToc("Sisukord (lisasisuga)")),
+      },
+      {
+        label: "Numbered",
+        story: card(() => numberedToc("Sisukord (nummerdatud)")),
+      },
+      {
+        label: "With icon",
+        story: card(() => withIconToc("Sisukord (ikooniga)")),
+      },
+      {
+        label: "Headless",
+        story: card(() => headlessToc("Sisukord (pealkirjata)")),
+      },
+      {
+        label: "With separator",
+        story: card(() => withSeparatorToc("Sisukord (eraldajaga)")),
+      },
+      {
+        label: "Divided",
+        story: card(() => dividedToc("Sisukord (ridadeks jaotatud)")),
+      },
+      { label: "Collapsible", story: Collapsible },
+    ]),
 };

@@ -1,5 +1,6 @@
 import { Meta, StoryObj } from "@storybook/angular";
 import { moduleMetadata } from "@storybook/angular";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 
 import { EllipsisComponent } from "./index";
 import { RowComponent } from "../grid/row/row.component";
@@ -9,7 +10,7 @@ import { TextComponent } from "../../base/text/text.component";
 /**
  * <a href="https://www.tedi.ee/1ee8444b7/p/87ef9b-ellipsis" target="_BLANK">Zeroheight ↗</a>
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Helpers/Ellipsis",
   component: EllipsisComponent,
   decorators: [
@@ -62,6 +63,8 @@ export default {
     position: "end",
   },
 } as Meta<EllipsisComponent>;
+
+export default meta;
 
 const CONTENT =
   "Any inline <b>content (even bold)</b>, that is too long for the wrapper and dont fit in x number of rows";
@@ -132,28 +135,14 @@ export const NoTooltip: StoryObj<EllipsisComponent> = {
 export const VisualTest: StoryObj<EllipsisComponent> = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false } },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="3">
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1"><p tedi-text modifiers="bold">End</p></tedi-col>
-          <tedi-col width="1">
-            <tedi-ellipsis [lineClamp]="2" position="end">${CONTENT}</tedi-ellipsis>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1"><p tedi-text modifiers="bold">Leading start</p></tedi-col>
-          <tedi-col width="1">
-            <tedi-ellipsis position="start">${CONTENT}</tedi-ellipsis>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1"><p tedi-text modifiers="bold">Fits, no ellipsis</p></tedi-col>
-          <tedi-col width="5">
-            <tedi-ellipsis [lineClamp]="1" position="end">${CONTENT}</tedi-ellipsis>
-          </tedi-col>
-        </tedi-row>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest(
+      [
+        { label: "End", story: Default },
+        { label: "Leading start", story: LeadingStart },
+        { label: "No tooltip", story: NoTooltip },
+        { label: "Fits, no ellipsis", story: ResponsiveEnd },
+      ],
+      { args: meta.args },
+    ),
 };

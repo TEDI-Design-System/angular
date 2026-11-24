@@ -359,6 +359,7 @@ export const ClickToNavigate: Story = {
     template: `<story-step-click-navigation />`,
   }),
   parameters: {
+    visualTest: false,
     docs: {
       source: {
         type: "code",
@@ -481,6 +482,44 @@ export const VisualTest: Story = {
           label: "Compact",
           story: Compact,
           args: { ariaLabel: "Vormi edenemine (kompaktne)" },
+        },
+        { label: "External navigation", story: ExternalNavigation },
+      ],
+      { args: meta.args },
+    ),
+};
+
+/** Chromatic mobile snapshot for HorizontalStepper: add every variant that renders differently below its breakpoint here too. */
+export const VisualTestMobile: Story = {
+  tags: ["!dev", "!autodocs"],
+  parameters: {
+    controls: { disable: true },
+    chromatic: { disableSnapshot: false, viewports: [375] },
+  },
+  render: () =>
+    visualTest(
+      [
+        {
+          label: "First step",
+          story: Default,
+          args: { ariaLabel: "Vormi edenemine (samm 1)" },
+        },
+        {
+          label: "Second step",
+          story: SecondStep,
+          args: { ariaLabel: "Vormi edenemine (samm 2)" },
+        },
+        {
+          label: "Third step",
+          story: ThirdStep,
+          args: { ariaLabel: "Vormi edenemine (samm 3)" },
+        },
+        { label: "With errors", story: WithErrors },
+        { label: "With descriptions", story: WithDescriptions },
+        {
+          label: "Transparent background",
+          story: TransparentBackground,
+          args: { ariaLabel: "Vormi edenemine (läbipaistev)" },
         },
       ],
       { args: meta.args },

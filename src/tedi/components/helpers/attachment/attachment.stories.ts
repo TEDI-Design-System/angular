@@ -23,6 +23,7 @@ import { HideAtDirective } from "../../../directives/hide-at/hide-at.directive";
 import { RowComponent } from "../grid/row/row.component";
 import { ColComponent } from "../grid/col/col.component";
 import { TextComponent } from "../../base/text/text.component";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 
 type StoryArgs = ComponentInputs<AttachmentComponent>;
 
@@ -38,7 +39,7 @@ type StoryArgs = ComponentInputs<AttachmentComponent>;
  * Always give each button an `aria-label`. Wrap a button in a `tedi-tooltip`
  * (put `tedi-attachment-actions` on the `tedi-tooltip`) to surface a tooltip.
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Helpers/Attachment",
   component: AttachmentComponent,
   decorators: [
@@ -127,6 +128,8 @@ export default {
     name: "Kodukülastusakt_Triin.pdf",
   },
 } as Meta<AttachmentComponent>;
+
+export default meta;
 
 type Story = StoryObj<AttachmentComponent>;
 
@@ -402,58 +405,30 @@ export const LabeledActions: Story = {
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false } },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Read only</p>
-          ${READ_ONLY_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With progress</p>
-          ${WITH_PROGRESS_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With icon</p>
-          ${WITH_ICON_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Without delete button</p>
-          ${WITHOUT_DELETE_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With different actions</p>
-          ${DIFFERENT_ACTIONS_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Vertical</p>
-          ${VERTICAL_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">With error</p>
-          ${WITH_ERROR_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Labeled actions</p>
-          ${LABELED_ACTIONS_TEMPLATE}
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Read only", story: ReadOnly },
+        { label: "With progress", story: WithProgress },
+        { label: "With file size", story: WithFileSize },
+        { label: "With icon", story: WithIcon },
+        { label: "Without delete button", story: WithoutDeleteButton },
+        { label: "With different actions", story: WithDifferentActions },
+        { label: "Vertical", story: Vertical },
+        { label: "With error", story: WithError },
+        { label: "Labeled actions", story: LabeledActions },
+      ],
+      { args: meta.args },
+    ),
 };
 
 /** Chromatic mobile snapshot for Attachment: add every variant that renders differently below its breakpoint here too. */
 export const VisualTestMobile: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false, viewports: [375] } },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Labeled actions</p>
-          ${LABELED_ACTIONS_TEMPLATE}
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest([{ label: "Labeled actions", story: LabeledActions }], {
+      args: meta.args,
+    }),
 };

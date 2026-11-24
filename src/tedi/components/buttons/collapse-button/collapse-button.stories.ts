@@ -18,6 +18,7 @@ import {
   type CollapseButtonArrowType,
   type CollapseButtonSize,
 } from "./collapse-button.component";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { type TextColor, TextComponent } from "../../base/text/text.component";
@@ -65,12 +66,12 @@ type StatesArgs = {
   titleColor?: TextColor;
 };
 
-const StatesTemplate: StoryFn<StatesArgs> = ({
-  titleColor = "primary",
-  ...args
-}) => ({
-  props: { ...args, titleColor, pseudoState: PSEUDO_STATE },
-  template: `
+// VisualTest marks states with data-state: the docs stories repeat the same ids in every variant.
+const statesTemplate =
+  (stateAttr = "id"): StoryFn<StatesArgs> =>
+  ({ titleColor = "primary", ...args }) => ({
+    props: { ...args, titleColor, pseudoState: PSEUDO_STATE },
+    template: `
     <tedi-row [cols]="1" [gapY]="5">
       <tedi-col>
         <tedi-row [cols]="1" [gapY]="3">
@@ -81,7 +82,7 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
               <tedi-col [width]="4" style="display: flex; gap: 1rem; align-items: center;">
                 <button
                   tedi-collapse-button
-                  [id]="state"
+                  [${stateAttr}]="state"
                   [openText]="openText"
                   [closeText]="closeText"
                   [hideText]="hideText"
@@ -91,7 +92,7 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
                 ></button>
                 <button
                   tedi-collapse-button
-                  [id]="state"
+                  [${stateAttr}]="state"
                   [open]="true"
                   [openText]="openText"
                   [closeText]="closeText"
@@ -114,7 +115,7 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
               <tedi-col [width]="4" style="display: flex; gap: 1rem; align-items: center;">
                 <button
                   tedi-collapse-button
-                  [id]="state"
+                  [${stateAttr}]="state"
                   size="small"
                   [openText]="openText"
                   [closeText]="closeText"
@@ -125,7 +126,7 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
                 ></button>
                 <button
                   tedi-collapse-button
-                  [id]="state"
+                  [${stateAttr}]="state"
                   [open]="true"
                   size="small"
                   [openText]="openText"
@@ -142,7 +143,7 @@ const StatesTemplate: StoryFn<StatesArgs> = ({
       </tedi-col>
     </tedi-row>
   `,
-});
+  });
 
 const PSEUDO_PARAMS = {
   pseudo: {
@@ -162,7 +163,7 @@ const PSEUDO_PARAMS = {
  *   <code>openChange</code>.
  * </p>
  */
-export default {
+const meta: Meta<CollapseButtonDemoComponent> = {
   title: "TEDI-Ready/Components/Buttons/CollapseButton",
   component: CollapseButtonComponent,
   decorators: [
@@ -256,7 +257,9 @@ export default {
       },
     },
   },
-} as Meta<CollapseButtonDemoComponent>;
+};
+
+export default meta;
 
 type DemoStory = StoryObj<CollapseButtonDemoComponent>;
 
@@ -275,7 +278,7 @@ export const States: StoryObj<StatesArgs> = {
     openText: "Open",
     closeText: "Close",
   },
-  render: StatesTemplate,
+  render: statesTemplate(),
 };
 
 export const IconOnly: StoryObj<StatesArgs> = {
@@ -285,7 +288,7 @@ export const IconOnly: StoryObj<StatesArgs> = {
     arrowType: "default",
     ariaLabel: "Toggle details",
   },
-  render: StatesTemplate,
+  render: statesTemplate(),
 };
 
 export const SecondaryButton: StoryObj<StatesArgs> = {
@@ -295,7 +298,7 @@ export const SecondaryButton: StoryObj<StatesArgs> = {
     arrowType: "secondary",
     ariaLabel: "Toggle details",
   },
-  render: StatesTemplate,
+  render: statesTemplate(),
 };
 
 export const WithTextInverted: StoryObj<StatesArgs> = {
@@ -311,7 +314,7 @@ export const WithTextInverted: StoryObj<StatesArgs> = {
     openText: "Open",
     closeText: "Close",
   },
-  render: StatesTemplate,
+  render: statesTemplate(),
 };
 
 export const IconOnlyInverted: StoryObj<StatesArgs> = {
@@ -326,38 +329,24 @@ export const IconOnlyInverted: StoryObj<StatesArgs> = {
     titleColor: "white",
     ariaLabel: "Toggle details",
   },
-  render: StatesTemplate,
+  render: statesTemplate(),
 };
 
-const VISUAL_COLLAPSE_BUTTON_ROWS = (color: TextColor) => `
-  @for (size of sizes; track size) {
-    @for (state of states; track state) {
-      <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-        <tedi-col width="1">
-          <p tedi-text color="${color}">{{ size }}, {{ state }}</p>
-        </tedi-col>
-        <tedi-col width="5">
-          <div class="flex align-items-center gap-3">
-            @for (open of [false, true]; track open) {
-              <button
-                tedi-collapse-button
-                [attr.data-state]="state"
-                [open]="open"
-                [size]="size"
-                openText="Open"
-                closeText="Close"
-                [hideText]="config.hideText"
-                [arrowType]="config.arrowType"
-                [inverted]="config.inverted"
-                ariaLabel="Toggle details"
-              ></button>
-            }
-          </div>
-        </tedi-col>
-      </tedi-row>
-    }
-  }
-`;
+const vtStates = (story: StoryObj<StatesArgs>) => ({
+  args: story.args,
+  render: statesTemplate("attr.data-state"),
+});
+
+const vtInverted = (story: StoryObj<StatesArgs>) => ({
+  args: story.args,
+  render: (args: StatesArgs) => {
+    const result = statesTemplate("attr.data-state")(args, {} as never);
+    return {
+      ...result,
+      template: `<div class="bg bg-primary"><div class="w-100">${result.template}</div></div>`,
+    };
+  },
+});
 
 /** Chromatic snapshot for CollapseButton: add every new visual variant here too. */
 export const VisualTest: StoryObj<StatesArgs> = {
@@ -371,68 +360,15 @@ export const VisualTest: StoryObj<StatesArgs> = {
       focusVisible: '[data-state="Focus"]',
     },
   },
-  render: () => ({
-    props: {
-      sizes: ["default", "small"],
-      states: PSEUDO_STATE,
-      configs: [
-        {
-          label: "With text",
-          hideText: false,
-          arrowType: "default",
-          inverted: false,
-        },
-        {
-          label: "Icon only",
-          hideText: true,
-          arrowType: "default",
-          inverted: false,
-        },
-        {
-          label: "Secondary button",
-          hideText: true,
-          arrowType: "secondary",
-          inverted: false,
-        },
+  render: () =>
+    visualTest(
+      [
+        { label: "With text", story: vtStates(States) },
+        { label: "Icon only", story: vtStates(IconOnly) },
+        { label: "Secondary button", story: vtStates(SecondaryButton) },
+        { label: "With text inverted", story: vtInverted(WithTextInverted) },
+        { label: "Icon only inverted", story: vtInverted(IconOnlyInverted) },
       ],
-      invertedConfigs: [
-        {
-          label: "With text inverted",
-          hideText: false,
-          arrowType: "default",
-          inverted: true,
-        },
-        {
-          label: "Icon only inverted",
-          hideText: true,
-          arrowType: "default",
-          inverted: true,
-        },
-      ],
-    },
-    template: `
-      <tedi-row [cols]="1" [gapY]="4">
-        @for (config of configs; track config.label) {
-          <tedi-col>
-            <tedi-row [cols]="1" [gapY]="2">
-              <p tedi-text modifiers="bold">{{ config.label }}</p>
-              ${VISUAL_COLLAPSE_BUTTON_ROWS("primary")}
-            </tedi-row>
-          </tedi-col>
-        }
-        @for (config of invertedConfigs; track config.label) {
-          <tedi-col>
-            <div class="bg bg-primary">
-              <div class="w-100">
-                <tedi-row [cols]="1" [gapY]="2">
-                  <p tedi-text modifiers="bold" color="white">{{ config.label }}</p>
-                  ${VISUAL_COLLAPSE_BUTTON_ROWS("white")}
-                </tedi-row>
-              </div>
-            </div>
-          </tedi-col>
-        }
-      </tedi-row>
-    `,
-  }),
+      { args: meta.args },
+    ),
 };

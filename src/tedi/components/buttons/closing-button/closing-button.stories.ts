@@ -5,6 +5,7 @@ import {
   moduleMetadata,
 } from "@storybook/angular";
 
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { ClosingButtonComponent } from "./closing-button.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { IconComponent } from "../../base/icon/icon.component";
@@ -234,42 +235,15 @@ export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: {
     chromatic: { disableSnapshot: false },
-    pseudo: {
-      hover: "#vt-hover",
-      active: "#vt-active",
-      focusVisible: "#vt-focus",
-    },
+    pseudo: States.parameters?.["pseudo"],
   },
-  render: () => ({
-    props: { states: PSEUDO_STATE },
-    template: `
-      <tedi-row [cols]="1" [gapY]="3">
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1"><p tedi-text modifiers="bold">Small</p></tedi-col>
-          <tedi-col width="5"><button tedi-closing-button size="small"></button></tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1"><p tedi-text modifiers="bold">Small, 18px icon</p></tedi-col>
-          <tedi-col width="5"><button tedi-closing-button size="small" [iconSize]="18"></button></tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1"><p tedi-text modifiers="bold">Custom icon</p></tedi-col>
-          <tedi-col width="5">
-            <div class="flex gap-2">
-              <button tedi-closing-button icon="delete" ariaLabel="Kustuta"></button>
-              <button tedi-closing-button icon="delete_forever" ariaLabel="Kustuta jäädavalt"></button>
-            </div>
-          </tedi-col>
-        </tedi-row>
-        @for (state of states; track state) {
-          <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-            <tedi-col width="1"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
-            <tedi-col width="5">
-              <button tedi-closing-button [id]="'vt-' + state.toLowerCase()"></button>
-            </tedi-col>
-          </tedi-row>
-        }
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Size", story: Size },
+      { label: "Icon size", story: IconSize },
+      { label: "Custom icon", story: CustomIcon },
+      { label: "With tooltip", story: WithTooltip },
+      { label: "States", story: States },
+    ]),
 };

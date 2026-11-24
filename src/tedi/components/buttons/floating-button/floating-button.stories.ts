@@ -9,6 +9,7 @@ import {
   FloatingButtonComponent,
   type FloatingButtonVariant,
 } from "./floating-button.component";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { IconComponent } from "../../base/icon/icon.component";
 import { TextComponent } from "../../base/text/text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -19,6 +20,25 @@ import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/t
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus", "Disabled"];
+
+// The VisualTest helper keeps only templates, so it re-adds these styles itself.
+const VERTICAL_STYLES = `
+  .floating-vertical-example {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--button-md-icon-size);
+    height: 14rem;
+  }
+`;
+
+const PLACEMENT_STYLES = `
+  .floating-placement-side {
+    position: absolute; top: 50%; right: 0; translate: 0 -50%;
+    display: flex; align-items: center; justify-content: center;
+    width: var(--button-md-icon-size); height: 12rem;
+  }
+`;
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.75.90?node-id=4515-65391&m=dev" target="_blank">Figma ↗</a><br/>
@@ -241,17 +261,7 @@ export const Vertical: StoryObj<FloatingButtonType> = {
   },
   render: () => ({
     props: { variants: ["primary", "secondary"] as FloatingButtonVariant[] },
-    styles: [
-      `
-      .floating-vertical-example {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: var(--button-md-icon-size);
-        height: 14rem;
-      }
-    `,
-    ],
+    styles: [VERTICAL_STYLES],
     template: `
       <tedi-row [cols]="1" [gapY]="4">
         <tedi-col *ngFor="let variant of variants">
@@ -366,15 +376,7 @@ export const Placement: StoryObj<FloatingButtonType> = {
   },
   render: () => ({
     props: {},
-    styles: [
-      `
-      .floating-placement-side {
-        position: absolute; top: 50%; right: 0; translate: 0 -50%;
-        display: flex; align-items: center; justify-content: center;
-        width: var(--button-md-icon-size); height: 12rem;
-      }
-    `,
-    ],
+    styles: [PLACEMENT_STYLES],
     template: `
       <div style="position: relative; height: 20rem; border: 1px solid var(--general-border-primary);">
         <button
@@ -422,156 +424,14 @@ export const VisualTest: StoryObj = {
     },
   },
   render: () => ({
-    props: {
-      variants: ["primary", "secondary"] as FloatingButtonVariant[],
-      sizes: ["default", "large"],
-      states: PSEUDO_STATE,
-    },
-    styles: [
-      `
-      .floating-vertical-example {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: var(--button-md-icon-size);
-        height: 14rem;
-      }
-      .floating-placement-example {
-        position: relative;
-        height: 20rem;
-        border: 1px solid var(--general-border-primary);
-      }
-      .floating-placement-side {
-        position: absolute; top: 50%; right: 0; translate: 0 -50%;
-        display: flex; align-items: center; justify-content: center;
-        width: var(--button-md-icon-size); height: 12rem;
-      }
-    `,
-    ],
-    template: `
-      <tedi-row [cols]="1" [gapY]="4">
-        @for (variant of variants; track variant) {
-          <tedi-col>
-            <div [tediVerticalSpacing]="0.5">
-              <p tedi-text modifiers="bold">Horizontal, {{ variant }}</p>
-              <div class="flex flex-wrap align-items-center gap-3">
-                <button tedi-floating-button position="static" [variant]="variant">Jäta oma tagasiside</button>
-                <button tedi-floating-button position="static" [variant]="variant">
-                  Mine üles
-                  <tedi-icon name="arrow_upward" />
-                </button>
-                <button tedi-floating-button position="static" [variant]="variant">
-                  <tedi-icon name="chat" />
-                  Vestle meiega
-                </button>
-                <tedi-tooltip>
-                  <tedi-tooltip-trigger>
-                    <button tedi-floating-button position="static" [variant]="variant" aria-label="Mine üles">
-                      <tedi-icon name="arrow_upward" />
-                    </button>
-                  </tedi-tooltip-trigger>
-                  <tedi-tooltip-content>Mine üles</tedi-tooltip-content>
-                </tedi-tooltip>
-              </div>
-            </div>
-          </tedi-col>
-        }
-        @for (variant of variants; track variant) {
-          <tedi-col>
-            <div [tediVerticalSpacing]="0.5">
-              <p tedi-text modifiers="bold">Vertical, {{ variant }}</p>
-              <div class="flex flex-wrap align-items-center gap-3">
-                <div class="floating-vertical-example">
-                  <button tedi-floating-button position="static" axis="vertical" [variant]="variant">Anna tagasiside</button>
-                </div>
-                <div class="floating-vertical-example">
-                  <button tedi-floating-button position="static" axis="vertical" [variant]="variant">
-                    Anna tagasiside
-                    <tedi-icon name="news" />
-                  </button>
-                </div>
-                <div class="floating-vertical-example">
-                  <button tedi-floating-button position="static" axis="vertical" [variant]="variant">
-                    <tedi-icon name="news" />
-                    Anna tagasiside
-                  </button>
-                </div>
-              </div>
-            </div>
-          </tedi-col>
-        }
-        @for (size of sizes; track size) {
-          <tedi-col>
-            <div [tediVerticalSpacing]="0.5">
-              <p tedi-text modifiers="bold">Size {{ size }}</p>
-              <div class="flex flex-wrap align-items-center gap-3">
-                <button tedi-floating-button position="static" variant="secondary" [size]="size">Jäta oma tagasiside</button>
-                <tedi-tooltip>
-                  <tedi-tooltip-trigger>
-                    <button tedi-floating-button position="static" variant="secondary" [size]="size" aria-label="Mine üles">
-                      <tedi-icon name="arrow_upward" />
-                    </button>
-                  </tedi-tooltip-trigger>
-                  <tedi-tooltip-content>Mine üles</tedi-tooltip-content>
-                </tedi-tooltip>
-              </div>
-            </div>
-          </tedi-col>
-        }
-        <tedi-col>
-          <tedi-row [cols]="3" [gapY]="3" alignItems="center">
-            <tedi-col><p tedi-text modifiers="bold">State</p></tedi-col>
-            <tedi-col><p tedi-text modifiers="bold">Primary</p></tedi-col>
-            <tedi-col><p tedi-text modifiers="bold">Secondary</p></tedi-col>
-            @for (state of states; track state) {
-              <tedi-col><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
-              @for (variant of variants; track variant) {
-                <tedi-col>
-                  <div class="flex flex-wrap align-items-center gap-3">
-                    <button tedi-floating-button position="static" [variant]="variant" [attr.data-state]="state" [disabled]="state === 'Disabled'">Jäta oma tagasiside</button>
-                    <tedi-tooltip>
-                      <tedi-tooltip-trigger>
-                        <button tedi-floating-button position="static" [variant]="variant" [attr.data-state]="state" [disabled]="state === 'Disabled'" aria-label="Mine üles">
-                          <tedi-icon name="arrow_upward" />
-                        </button>
-                      </tedi-tooltip-trigger>
-                      <tedi-tooltip-content>Mine üles</tedi-tooltip-content>
-                    </tedi-tooltip>
-                  </div>
-                </tedi-col>
-              }
-            }
-          </tedi-row>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Placement</p>
-            <div class="floating-placement-example">
-              <button
-                tedi-floating-button
-                position="absolute"
-                variant="secondary"
-                [placement]="{ vertical: 'top', horizontal: 'left' }"
-                [offset]="{ top: 16, left: 16 }"
-              >
-                Üleval vasakul
-              </button>
-              <button
-                tedi-floating-button
-                position="absolute"
-                variant="secondary"
-                [placement]="{ vertical: 'bottom', horizontal: 'center' }"
-                [offset]="{ bottom: 16 }"
-              >
-                All keskel
-              </button>
-              <div class="floating-placement-side">
-                <button tedi-floating-button position="static" axis="vertical">Anna tagasiside</button>
-              </div>
-            </div>
-          </div>
-        </tedi-col>
-      </tedi-row>
-    `,
+    ...visualTest([
+      { label: "Default", story: Default },
+      { label: "Horizontal", story: Horizontal },
+      { label: "Vertical", story: Vertical },
+      { label: "Sizes", story: Sizes },
+      { label: "States", story: States },
+      { label: "Placement", story: Placement },
+    ]),
+    styles: [VERTICAL_STYLES, PLACEMENT_STYLES],
   }),
 };

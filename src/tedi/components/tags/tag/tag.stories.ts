@@ -1,4 +1,5 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { TagComponent } from "./tag.component";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -11,7 +12,7 @@ import { TextComponent } from "../../base/text/text.component";
  * <a href="https://www.tedi.ee/1ee8444b7/p/6524c4-tag" target="_blank">Zeroheight ↗</a>
  * The Tag component is used to label, categorize, or organize items using keywords.
  */
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Tags/Tag",
   component: TagComponent,
   decorators: [
@@ -93,6 +94,8 @@ export default {
     },
   },
 } as Meta<TagComponent & { content: string }>;
+
+export default meta;
 
 type Story = StoryObj<TagComponent & { content: string }>;
 
@@ -236,51 +239,15 @@ export const Danger: Story = {
 export const VisualTest: Story = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false } },
-  render: () => ({
-    props: { types: ["primary", "secondary", "danger"] },
-    template: `
-      <tedi-row [cols]="1" [gapY]="4">
-        @for (type of types; track type) {
-          <tedi-col>
-            <p tedi-text modifiers="bold">{{ type }}</p>
-            <tedi-row [gap]="2" cols="auto">
-              <tedi-col>
-                <tedi-tag [type]="type">
-                  Tag
-                </tedi-tag>
-              </tedi-col>
-              <tedi-col>
-                <tedi-tag [type]="type" [closable]="true">
-                  Tag
-                </tedi-tag>
-              </tedi-col>
-              <tedi-col>
-                <tedi-tag [type]="type" [loading]="true">
-                  taotlus_scan_lk_1.pdf
-                </tedi-tag>
-              </tedi-col>
-              <tedi-col style="max-width: 150px;">
-                <tedi-tag [type]="type" [closable]="true">
-                  Tag with a very long text but little room
-                </tedi-tag>
-              </tedi-col>
-              <tedi-col style="max-width: 150px;">
-                <tedi-tag [type]="type" [loading]="true">
-                  Tag with a very long text but little room
-                </tedi-tag>
-              </tedi-col>
-            </tedi-row>
-          </tedi-col>
-        }
-        <tedi-col>
-          <p tedi-text modifiers="bold">Ellipsis</p>
-          <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 7rem;">
-            <tedi-tag [closable]="true">A fairly long tag label that wraps</tedi-tag>
-            <tedi-tag [closable]="true" ellipsis="end">A fairly long tag label, end</tedi-tag>
-            <tedi-tag [closable]="true" ellipsis="start">start, a fairly long tag label</tedi-tag>
-          </div>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "Primary", story: Primary },
+        { label: "Secondary", story: Secondary },
+        { label: "Danger", story: Danger },
+        { label: "Ellipsis", story: Ellipsis },
+      ],
+      { args: meta.args, render: meta.render },
+    ),
 };

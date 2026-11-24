@@ -18,6 +18,7 @@ import { FeedbackTextComponent } from "../feedback-text/feedback-text.component"
 import { TextComponent } from "../../base/text/text.component";
 import { LabelComponent } from "../../content/label/label.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Disabled", "Focus"];
 
@@ -385,12 +386,12 @@ const LONG_VALUE =
 export const ClearButtonOnInteraction: StoryObj<TextareaComponent> = {
   render: () => ({
     props: {
-      value: LONG_VALUE,
+      longValue: LONG_VALUE,
     },
     template: `
       <tedi-form-field [clearable]="true" [showClearOnInteraction]="true">
         <label tedi-label for="clear-on-interaction">Label</label>
-        <textarea tedi-textarea id="clear-on-interaction" [value]="value"></textarea>
+        <textarea tedi-textarea id="clear-on-interaction" [value]="longValue"></textarea>
       </tedi-form-field>
     `,
   }),
@@ -496,6 +497,7 @@ export const HeightExamples: StoryObj<TextareaComponent> = {
 };
 
 export const WithTemplateDrivenForms: StoryObj<TextareaComponent> = {
+  parameters: { visualTest: false },
   render: () => ({
     props: {
       inputValue: "",
@@ -529,6 +531,7 @@ export const WithTemplateDrivenForms: StoryObj<TextareaComponent> = {
 };
 
 export const WithReactiveForms: StoryObj<TextareaComponent> = {
+  parameters: { visualTest: false },
   render: () => {
     const control = new FormControl("", {
       nonNullable: true,
@@ -575,208 +578,25 @@ export const VisualTest: StoryObj<TextareaComponent> = {
   parameters: {
     chromatic: { disableSnapshot: false },
     pseudo: {
-      hover: "#vt-hover",
-      active: "#vt-active",
-      focusVisible: "#vt-focus",
+      hover: "#Hover",
+      active: "#Active",
+      focusVisible: "#Focus",
     },
   },
-  render: () => ({
-    props: {
-      hintCountValue: "",
-      countValue: "",
-      heightExamples: HEIGHT_EXAMPLES,
-      longValue: LONG_VALUE,
-    },
-    template: `
-      <tedi-row [cols]="1" [gapY]="3">
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Default</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field>
-              <label tedi-label for="vt-default">Label</label>
-              <textarea tedi-textarea id="vt-default" [minRows]="3"></textarea>
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Hover</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field>
-              <label tedi-label for="vt-hover">Label</label>
-              <textarea tedi-textarea id="vt-hover" [minRows]="3"></textarea>
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Active</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field>
-              <label tedi-label for="vt-active">Label</label>
-              <textarea tedi-textarea id="vt-active" [minRows]="3"></textarea>
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Disabled</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field>
-              <label tedi-label for="vt-disabled">Label</label>
-              <textarea tedi-textarea id="vt-disabled" [minRows]="3" [disabled]="true"></textarea>
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Focus</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field>
-              <label tedi-label for="vt-focus">Label</label>
-              <textarea tedi-textarea id="vt-focus" [minRows]="3"></textarea>
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Error</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field>
-              <label tedi-label for="vt-error">Label</label>
-              <textarea tedi-textarea id="vt-error" [minRows]="3"></textarea>
-              <tedi-feedback-text [text]="'Tagasiside tekst'" [type]="'error'" />
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Success</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field>
-              <label tedi-label for="vt-success">Label</label>
-              <textarea tedi-textarea id="vt-success" [minRows]="3"></textarea>
-              <tedi-feedback-text [text]="'Tagasiside tekst'" [type]="'valid'" />
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Size default</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field>
-              <label tedi-label for="vt-size-default">Label</label>
-              <textarea tedi-textarea id="vt-size-default" [minRows]="5"></textarea>
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Size small</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field size="small">
-              <label tedi-label for="vt-size-small">Label</label>
-              <textarea tedi-textarea id="vt-size-small" [minRows]="5"></textarea>
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">With hint</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field>
-              <label tedi-label for="vt-hint">Label</label>
-              <textarea tedi-textarea id="vt-hint" [minRows]="5"></textarea>
-              <tedi-feedback-text [text]="'Vihjetekst'" />
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">With hint and character count</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field [characterLimit]="400">
-              <label tedi-label for="vt-hint-char-count">Label</label>
-              <textarea tedi-textarea id="vt-hint-char-count" [minRows]="5" [(ngModel)]="hintCountValue"></textarea>
-              <tedi-feedback-text [text]="'Vihjetekst'" />
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Character count</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field [characterLimit]="400">
-              <label tedi-label for="vt-char-count">Label</label>
-              <textarea tedi-textarea id="vt-char-count" [minRows]="5" [(ngModel)]="countValue"></textarea>
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Placeholder</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field>
-              <label tedi-label for="vt-placeholder">Label</label>
-              <textarea tedi-textarea id="vt-placeholder" [minRows]="5" placeholder="Placeholder"></textarea>
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">With value</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <tedi-form-field>
-              <label tedi-label for="vt-value">Label</label>
-              <textarea tedi-textarea id="vt-value" [minRows]="3" [value]="longValue"></textarea>
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 6 }" alignItems="center">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Standalone</p>
-          </tedi-col>
-          <tedi-col width="5">
-            <textarea tedi-textarea placeholder="No wrapper"></textarea>
-          </tedi-col>
-        </tedi-row>
-        <tedi-row cols="1" [sm]="{ cols: 2 }" *ngFor="let example of heightExamples" alignItems="start">
-          <tedi-col width="1">
-            <p tedi-text modifiers="bold">Height: {{ example.label }}</p>
-          </tedi-col>
-          <tedi-col width="1">
-            <tedi-form-field>
-              <label tedi-label [for]="'vt-' + example.id">Label</label>
-              <textarea
-                tedi-textarea
-                [id]="'vt-' + example.id"
-                [resizable]="example.resizable ?? true"
-                [autoGrow]="example.autoGrow || false"
-                [minRows]="example.minRows ?? 3"
-                [maxRows]="example.maxRows"
-                [height]="example.height"
-                [maxHeight]="example.maxHeight"
-                [attr.placeholder]="example.placeholder"
-              ></textarea>
-            </tedi-form-field>
-          </tedi-col>
-        </tedi-row>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Size", story: Size },
+      { label: "States", story: States },
+      { label: "With hint", story: WithHint },
+      {
+        label: "With hint and character count",
+        story: WithHintAndCharacterCount,
+      },
+      { label: "Character count", story: CharacterCount },
+      { label: "Placeholder", story: Placeholder },
+      { label: "With value", story: ClearButtonOnInteraction },
+      { label: "Standalone", story: Standalone },
+      { label: "Height examples", story: HeightExamples },
+    ]),
 };

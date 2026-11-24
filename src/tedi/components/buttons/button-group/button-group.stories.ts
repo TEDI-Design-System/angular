@@ -1,5 +1,6 @@
 import { signal } from "@angular/core";
 import { Meta, moduleMetadata, StoryObj } from "@storybook/angular";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { ButtonGroupComponent } from "./button-group.component";
 import { ButtonGroupButtonDirective } from "./button-group-button/button-group-button.directive";
 import { RowComponent } from "../../helpers/grid/row/row.component";
@@ -18,7 +19,7 @@ import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/t
  * values at once. Below the `mobileBreakpoint` (when `enableMobileDropdown` is
  * true) the group collapses into a dropdown menu.
  */
-export default {
+const meta: Meta<ButtonGroupComponent> = {
   title: "TEDI-Ready/Components/Buttons/ButtonGroup",
   component: ButtonGroupComponent,
   decorators: [
@@ -157,7 +158,9 @@ export default {
       },
     },
   },
-} as Meta<ButtonGroupComponent>;
+};
+
+export default meta;
 
 type Story = StoryObj<ButtonGroupComponent>;
 
@@ -305,6 +308,40 @@ export const IconOnly: Story = {
 
 const STATES = ["Default", "Hover", "Selected", "Focus", "Disabled"];
 
+// VisualTest repeats these rows in one story, so each group's name gets its state appended.
+const statesStory = (
+  variant: "primary" | "secondary",
+  ariaLabel: string,
+  labelPerState = false,
+) => {
+  const groupLabel = labelPerState
+    ? `[ariaLabel]="'${ariaLabel} ' + state"`
+    : `ariaLabel="${ariaLabel}"`;
+  return {
+    props: { states: STATES },
+    template: `
+      <tedi-row [cols]="1" [gapY]="2">
+        @for (state of states; track state) {
+          <tedi-col>
+            <tedi-row cols="1" [md]="{ cols: 12 }" [gapY]="1" alignItems="center">
+              <tedi-col [width]="2"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
+              <tedi-col [width]="10">
+                <tedi-button-group variant="${variant}-button-group" ${groupLabel}
+                  [value]="state === 'Selected' ? '1' : undefined">
+                  <button tedi-button-group-button [attr.id]="state.toLowerCase() + '-${variant}'"
+                    value="1" label="Tabel" [disabled]="state === 'Disabled'">Tabel</button>
+                  <button tedi-button-group-button value="2" label="Loend">Loend</button>
+                  <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
+                </tedi-button-group>
+              </tedi-col>
+            </tedi-row>
+          </tedi-col>
+        }
+      </tedi-row>
+    `,
+  };
+};
+
 /**
  * Primary states. Showcase — controls are disabled.
  */
@@ -316,29 +353,7 @@ export const Primary: Story = {
       focusVisible: ["#focus-primary"],
     },
   },
-  render: () => ({
-    props: { states: STATES },
-    template: `
-      <tedi-row [cols]="1" [gapY]="2">
-        @for (state of states; track state) {
-          <tedi-col>
-            <tedi-row cols="1" [md]="{ cols: 12 }" [gapY]="1" alignItems="center">
-              <tedi-col [width]="2"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
-              <tedi-col [width]="10">
-                <tedi-button-group variant="primary-button-group" ariaLabel="Esmane vaate valik"
-                  [value]="state === 'Selected' ? '1' : undefined">
-                  <button tedi-button-group-button [attr.id]="state.toLowerCase() + '-primary'"
-                    value="1" label="Tabel" [disabled]="state === 'Disabled'">Tabel</button>
-                  <button tedi-button-group-button value="2" label="Loend">Loend</button>
-                  <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
-                </tedi-button-group>
-              </tedi-col>
-            </tedi-row>
-          </tedi-col>
-        }
-      </tedi-row>
-    `,
-  }),
+  render: () => statesStory("primary", "Esmane vaate valik"),
 };
 
 /**
@@ -352,43 +367,24 @@ export const Secondary: Story = {
       focusVisible: ["#focus-secondary"],
     },
   },
-  render: () => ({
-    props: { states: STATES },
-    template: `
-      <tedi-row [cols]="1" [gapY]="2">
-        @for (state of states; track state) {
-          <tedi-col>
-            <tedi-row cols="1" [md]="{ cols: 12 }" [gapY]="1" alignItems="center">
-              <tedi-col [width]="2"><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
-              <tedi-col [width]="10">
-                <tedi-button-group variant="secondary-button-group" ariaLabel="Teisene vaate valik"
-                  [value]="state === 'Selected' ? '1' : undefined">
-                  <button tedi-button-group-button [attr.id]="state.toLowerCase() + '-secondary'"
-                    value="1" label="Tabel" [disabled]="state === 'Disabled'">Tabel</button>
-                  <button tedi-button-group-button value="2" label="Loend">Loend</button>
-                  <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
-                </tedi-button-group>
-              </tedi-col>
-            </tedi-row>
-          </tedi-col>
-        }
-      </tedi-row>
-    `,
-  }),
+  render: () => statesStory("secondary", "Teisene vaate valik"),
 };
 
-export const DifferentWidthButtons: Story = {
-  render: () => ({
-    props: { value: signal<string>("1") },
-    template: `
-      <tedi-button-group ariaLabel="Vaate valik"
+/** Markup of the `DifferentWidthButtons` story; `ariaLabel` keeps the group name unique where it repeats. */
+const differentWidthButtons = (ariaLabel = "Vaate valik") => ({
+  props: { value: signal<string>("1") },
+  template: `
+      <tedi-button-group ariaLabel="${ariaLabel}"
         [value]="value()" (valueChange)="value.set($event)">
         <button tedi-button-group-button value="1" label="Tabel">Tabel</button>
         <button tedi-button-group-button value="2" label="Loend">Loend</button>
         <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
       </tedi-button-group>
     `,
-  }),
+});
+
+export const DifferentWidthButtons: Story = {
+  render: () => differentWidthButtons(),
 };
 
 export const Stretched: Story = {
@@ -444,6 +440,7 @@ export const MobileDropdown: Story = {
  * Bind `[(value)]` to a string in single mode and read it back.
  */
 export const Controlled: Story = {
+  parameters: { visualTest: false },
   render: (args) => ({
     props: { ...args, selected: signal<string>("2") },
     template: `
@@ -469,114 +466,42 @@ export const VisualTest: Story = {
     chromatic: { disableSnapshot: false },
     controls: { disable: true },
     pseudo: {
-      hover: ["#vt-hover-primary", "#vt-hover-secondary"],
-      focusVisible: ["#vt-focus-primary", "#vt-focus-secondary"],
+      hover: ["#hover-primary", "#hover-secondary"],
+      focusVisible: ["#focus-primary", "#focus-secondary"],
     },
   },
-  render: () => ({
-    props: { states: STATES, variants: ["primary", "secondary"] },
-    template: `
-      <tedi-row [cols]="1" [gapY]="4">
-        <tedi-col>
-          <tedi-row cols="1" [md]="{ cols: 12 }" [gapY]="1" alignItems="center">
-            <tedi-col [width]="2"><p tedi-text modifiers="bold">Default size</p></tedi-col>
-            <tedi-col [width]="10">
-              <tedi-button-group ariaLabel="Vaikesuurus" value="2">
-                <button tedi-button-group-button value="1" label="Tabel">Tabel</button>
-                <button tedi-button-group-button value="2" label="Loend">Loend</button>
-                <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
-              </tedi-button-group>
-            </tedi-col>
-            <tedi-col [width]="2"><p tedi-text modifiers="bold">Small size</p></tedi-col>
-            <tedi-col [width]="10">
-              <tedi-button-group size="small" ariaLabel="Väike suurus" value="2">
-                <button tedi-button-group-button value="1" label="Tabel">Tabel</button>
-                <button tedi-button-group-button value="2" label="Loend">Loend</button>
-                <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
-              </tedi-button-group>
-            </tedi-col>
-            <tedi-col [width]="2"><p tedi-text modifiers="bold">Secondary type</p></tedi-col>
-            <tedi-col [width]="10">
-              <tedi-button-group variant="secondary-button-group" ariaLabel="Teisene vaate valik" value="2">
-                <button tedi-button-group-button value="1" label="Tabel">Tabel</button>
-                <button tedi-button-group-button value="2" label="Loend">Loend</button>
-                <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
-              </tedi-button-group>
-            </tedi-col>
-            <tedi-col [width]="2"><p tedi-text modifiers="bold">With icon</p></tedi-col>
-            <tedi-col [width]="10">
-              <tedi-button-group ariaLabel="Ikoonidega" value="2">
-                <button tedi-button-group-button value="1" label="Tabel" iconLeft="table">Tabel</button>
-                <button tedi-button-group-button value="2" label="Loend" iconLeft="list">Loend</button>
-                <button tedi-button-group-button value="3" label="Kalender" iconLeft="calendar_month">Kalender</button>
-              </tedi-button-group>
-            </tedi-col>
-            <tedi-col [width]="2"><p tedi-text modifiers="bold">Icon only</p></tedi-col>
-            <tedi-col [width]="10">
-              <tedi-button-group ariaLabel="Ainult ikoonid" value="table">
-                <tedi-tooltip>
-                  <tedi-tooltip-trigger>
-                    <button tedi-button-group-button value="table" label="Tabel" icon="table"></button>
-                  </tedi-tooltip-trigger>
-                  <tedi-tooltip-content>Tabel</tedi-tooltip-content>
-                </tedi-tooltip>
-                <tedi-tooltip>
-                  <tedi-tooltip-trigger>
-                    <button tedi-button-group-button value="list" label="Loend" icon="list"></button>
-                  </tedi-tooltip-trigger>
-                  <tedi-tooltip-content>Loend</tedi-tooltip-content>
-                </tedi-tooltip>
-                <tedi-tooltip>
-                  <tedi-tooltip-trigger>
-                    <button tedi-button-group-button value="calendar" label="Kalender" icon="calendar_month"></button>
-                  </tedi-tooltip-trigger>
-                  <tedi-tooltip-content>Kalender</tedi-tooltip-content>
-                </tedi-tooltip>
-              </tedi-button-group>
-            </tedi-col>
-            <tedi-col [width]="2"><p tedi-text modifiers="bold">Stretched</p></tedi-col>
-            <tedi-col [width]="10">
-              <tedi-button-group ariaLabel="Venitatud" [stretch]="true" value="2">
-                <button tedi-button-group-button value="1" label="Tabel">Tabel</button>
-                <button tedi-button-group-button value="2" label="Loend">Loend</button>
-                <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
-              </tedi-button-group>
-            </tedi-col>
-            <tedi-col [width]="2"><p tedi-text modifiers="bold">Mobile dropdown</p></tedi-col>
-            <tedi-col [width]="10">
-              <div style="max-width: 320px;">
-                <tedi-button-group ariaLabel="Mobiilne vaate valik" [enableMobileDropdown]="true" mobileBreakpoint="xxl"
-                  dropdownLabel="Vaade" dropdownLabelMode="static">
-                  <button tedi-button-group-button value="1" label="Tabel" iconLeft="table">Tabel</button>
-                  <button tedi-button-group-button value="2" label="Loend" iconLeft="list">Loend</button>
-                  <button tedi-button-group-button value="3" label="Kalender" iconLeft="calendar_month">Kalender</button>
-                </tedi-button-group>
-              </div>
-            </tedi-col>
-          </tedi-row>
-        </tedi-col>
-        <tedi-col>
-          <tedi-row [cols]="3" [gapY]="2" alignItems="center">
-            <tedi-col><p tedi-text modifiers="bold">State</p></tedi-col>
-            <tedi-col><p tedi-text modifiers="bold">Primary</p></tedi-col>
-            <tedi-col><p tedi-text modifiers="bold">Secondary</p></tedi-col>
-            @for (state of states; track state) {
-              <tedi-col><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
-              @for (variant of variants; track variant) {
-                <tedi-col>
-                  <tedi-button-group [variant]="variant + '-button-group'" [ariaLabel]="variant + ' ' + state"
-                    [value]="state === 'Selected' ? '1' : undefined">
-                    <button tedi-button-group-button [attr.id]="'vt-' + state.toLowerCase() + '-' + variant"
-                      value="1" label="Tabel" [disabled]="state === 'Disabled'">Tabel</button>
-                    <button tedi-button-group-button value="2" label="Loend">Loend</button>
-                    <button tedi-button-group-button value="3" label="Kalender">Kalender</button>
-                  </tedi-button-group>
-                </tedi-col>
-              }
-            }
-          </tedi-row>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest(
+      [
+        { label: "Sizes", story: Sizes },
+        { label: "Types", story: Types },
+        {
+          label: "Different width buttons",
+          story: {
+            render: () => differentWidthButtons("Vaate valik, eri laiusega"),
+          },
+        },
+        { label: "With icon", story: WithIcon },
+        { label: "Icon only", story: IconOnly },
+        {
+          label: "Primary states",
+          story: {
+            render: () => statesStory("primary", "Esmane vaate valik", true),
+          },
+        },
+        {
+          label: "Secondary states",
+          story: {
+            render: () => statesStory("secondary", "Teisene vaate valik", true),
+          },
+        },
+        { label: "Stretched", story: Stretched },
+        {
+          label: "Mobile dropdown",
+          story: MobileDropdown,
+          args: { ariaLabel: "Mobiilne vaate valik" },
+        },
+      ],
+      { args: meta.args },
+    ),
 };

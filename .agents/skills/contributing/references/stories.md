@@ -325,7 +325,8 @@ story instead of one per docs story. When a stories file has a `VisualTest` stor
   It renders every visual variant, each block under a short bold label.
 - Reuse the docs stories, never copy their markup, so a later change to a docs story reaches
   Chromatic. Build the render with `visualTest([...blocks], { args: meta.args })` from
-  `.storybook/visual-test-story`. Each block is `{ label, story, args? }`: `args` override the
+  `.storybook/visual-test-story`, adding `render: meta.render` when docs stories inherit the meta's
+  render. Each block is `{ label, story, args? }`: `args` override the
   story's own, e.g. a unique `ariaLabel`. Blocks may bind the same prop name to different values:
   the helper then scopes that prop per block with `@let`, which is read-only, so a two-way binding
   (`[(x)]`) only works on a prop name no other block binds differently. Where hard-coded ids collide, move the story's
@@ -341,7 +342,9 @@ story instead of one per docs story. When a stories file has a `VisualTest` stor
   positioning against the page stays a separate snapshot: it sets `chromatic: { disableSnapshot: false }`
   itself and is not copied into `VisualTest`. Add `viewports` only for the widths whose rendering
   actually differs. CSS-animated content such as a spinner belongs in `VisualTest`, since Chromatic
-  pauses CSS animations before capturing.
+  pauses CSS animations before capturing. JS timers are not paused, so a timer-driven story is a
+  separate snapshot that starts from a fixed value and skips its timer when `isChromatic()` (from
+  `chromatic/isChromatic`) is true.
 - Everything in the composite must be unique within the story: `id`, `for`, `aria-labelledby`,
   radio `name`, and the accessible name of every landmark or group. Pseudo-state selectors must be
   unique too: use a list (`hover: ["#vt-hover-primary", "#vt-hover-secondary"]`) or a data attribute
@@ -363,7 +366,10 @@ export const VisualTestMobile: Story = {
 
 **A new visual story on a component with `VisualTest` must also add its variant to `VisualTest`**,
 and to `VisualTestMobile` when it renders differently below a breakpoint, otherwise Chromatic never
-sees it.
+sees it. `.storybook/visual-test-coverage.spec.ts` (run by `npm test`) fails when a docs story has
+no block. A story that only demonstrates behaviour (form integration, a controlled-state demo, deep
+links) opts out with `parameters: { visualTest: false }`. A story that only seems to look like
+another block still gets its own block, so a later change to it reaches Chromatic.
 
 ### 10. Verify
 

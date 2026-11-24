@@ -27,10 +27,18 @@ import {
 } from "../../content/text-group";
 import { SeparatorComponent } from "../../helpers/separator/separator.component";
 import { VerticalSpacingDirective } from "../../../directives/vertical-spacing/vertical-spacing.directive";
+import {
+  visualTest,
+  VisualTestStory,
+} from "../../../../../.storybook/visual-test-story";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 
-type TemplateType = InfoButtonComponent & { titleColor?: TextColor };
+type TemplateType = InfoButtonComponent & {
+  titleColor?: TextColor;
+  /** Keeps the state ids unique where the template repeats. */
+  idPrefix?: string;
+};
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-(work-in-progress)?node-id=4514-72997&m=dev" target="_blank">Figma ↗</a><br/>
@@ -40,7 +48,7 @@ type TemplateType = InfoButtonComponent & { titleColor?: TextColor };
  * It can be used in various contexts, such as forms, dashboards, or any other UI where additional information is needed.
  */
 
-export default {
+const meta = {
   title: "TEDI-Ready/Components/Buttons/InfoButton",
   argTypes: {
     "aria-label": {
@@ -85,6 +93,8 @@ export default {
   ],
 } as Meta<InfoButtonComponent>;
 
+export default meta;
+
 export const Default: StoryObj<InfoButtonComponent> = {
   render: (args) => ({
     props: args,
@@ -96,6 +106,7 @@ export const Default: StoryObj<InfoButtonComponent> = {
 
 const StatesTemplate: StoryObj<TemplateType>["render"] = ({
   titleColor = "primary",
+  idPrefix = "",
   ...args
 }) => ({
   props: { ...args, titleColor, pseudoState: PSEUDO_STATE },
@@ -103,7 +114,7 @@ const StatesTemplate: StoryObj<TemplateType>["render"] = ({
     <tedi-row [cols]="1" [gapY]="5">
       <tedi-col *ngFor="let state of pseudoState;" style="max-width: 200px; display: grid; grid-template-columns: repeat(2, 1fr);">
         <p tedi-text modifiers="bold" [color]="titleColor">{{ state }}</p>
-        <button tedi-info-button ${argsToTemplate(args)} [id]="state"></button>
+        <button tedi-info-button ${argsToTemplate(args)} id="${idPrefix}{{ state }}"></button>
       </tedi-col>
     </tedi-row>
   `,
@@ -189,6 +200,18 @@ export const UsageWithTooltipAndPopover: StoryObj<InfoButtonComponent> = {
   }),
 };
 
+/** Renders a docs story that sits on the `brand` background inside `bg bg-primary`. */
+const onBrand = (story: StoryObj<TemplateType>): VisualTestStory => ({
+  args: story.args,
+  render: (args: never, context: never) => {
+    const result = story.render!(args, context);
+    return {
+      ...result,
+      template: `<div class="bg bg-primary">${result.template}</div>`,
+    };
+  },
+});
+
 /** Chromatic snapshot for InfoButton: add every new visual variant here too. */
 export const VisualTest: StoryObj<InfoButtonComponent> = {
   tags: ["!dev", "!autodocs"],
@@ -196,72 +219,26 @@ export const VisualTest: StoryObj<InfoButtonComponent> = {
     chromatic: { disableSnapshot: false },
     controls: { disable: true },
     pseudo: {
-      hover: '[data-state="Hover"]',
-      active: '[data-state="Active"]',
-      focusVisible: '[data-state="Focus"]',
+      hover: ["#vt-primary-Hover", "#vt-inverted-Hover"],
+      active: ["#vt-primary-Active", "#vt-inverted-Active"],
+      focusVisible: ["#vt-primary-Focus", "#vt-inverted-Focus"],
     },
   },
-  render: () => ({
-    props: { states: PSEUDO_STATE },
-    template: `
-      <tedi-row [cols]="1" [gapY]="4">
-        <tedi-col>
-          <tedi-row [cols]="3" [gapY]="3" alignItems="center">
-            <tedi-col><p tedi-text modifiers="bold">State</p></tedi-col>
-            <tedi-col><p tedi-text modifiers="bold">Primary</p></tedi-col>
-            <tedi-col><p tedi-text modifiers="bold">Inverted</p></tedi-col>
-            @for (state of states; track state) {
-              <tedi-col><p tedi-text modifiers="bold">{{ state }}</p></tedi-col>
-              <tedi-col>
-                <button tedi-info-button [attr.data-state]="state"></button>
-              </tedi-col>
-              <tedi-col>
-                <div class="bg bg-primary">
-                  <button tedi-info-button color="inverted" [attr.data-state]="state"></button>
-                </div>
-              </tedi-col>
-            }
-          </tedi-row>
-        </tedi-col>
-        <tedi-col>
-          <div [tediVerticalSpacing]="0.5">
-            <p tedi-text modifiers="bold">Usage with tooltip and popover</p>
-            <div class="flex">
-              <tedi-text-group type="vertical">
-                <tedi-text-group-label>
-                  <span class="flex align-items-center gap-1">
-                    Veregrupp
-                    <tedi-tooltip>
-                      <tedi-tooltip-trigger>
-                        <button tedi-info-button></button>
-                      </tedi-tooltip-trigger>
-                      <tedi-tooltip-content>
-                        Veregrupp määratakse vereanalüüsiga ning see ei muutu elu jooksul.
-                      </tedi-tooltip-content>
-                    </tedi-tooltip>
-                  </span>
-                </tedi-text-group-label>
-                <tedi-text-group-value>AB-</tedi-text-group-value>
-              </tedi-text-group>
-              <tedi-separator axis="vertical" size="auto" [spacing]="{ x: 1.5, y: 0.25 }" />
-              <tedi-text-group type="vertical">
-                <tedi-text-group-label>
-                  <span class="flex align-items-center gap-1">
-                    Hambaravihüvitise jääk
-                    <tedi-popover>
-                      <button tedi-info-button tedi-popover-trigger></button>
-                      <tedi-popover-content [maxWidth]="'medium'">
-                        <p tedi-text>Hambaravihüvitist saab kasutada jooksva kalendriaasta jooksul. Kasutamata jääk järgmisesse aastasse ei kandu.</p>
-                      </tedi-popover-content>
-                    </tedi-popover>
-                  </span>
-                </tedi-text-group-label>
-                <tedi-text-group-value>24€</tedi-text-group-value>
-              </tedi-text-group>
-            </div>
-          </div>
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest(
+      [
+        { label: "Default", story: Default },
+        { label: "States", story: States, args: { idPrefix: "vt-primary-" } },
+        {
+          label: "Inverted",
+          story: onBrand(Inverted),
+          args: { idPrefix: "vt-inverted-" },
+        },
+        {
+          label: "Usage with tooltip and popover",
+          story: UsageWithTooltipAndPopover,
+        },
+      ],
+      { args: meta.args },
+    ),
 };

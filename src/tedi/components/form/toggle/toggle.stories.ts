@@ -9,6 +9,7 @@ import { ToggleComponent } from "./toggle.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { LabelComponent } from "../../content/label/label.component";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 
 const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
 
@@ -185,30 +186,41 @@ export const LabelPosition: StoryObj<ToggleComponent> = {
   }),
 };
 
-const Template: StoryFn<ToggleComponent> = (args) => ({
-  props: { ...args, pseudoState: PSEUDO_STATE },
-  template: `
+/**
+ * `vtId` gives every toggle a unique id where the matrix repeats in `VisualTest`; the docs stories
+ * keep the state name as id so `#Hover` etc. match.
+ */
+const pseudoStateTemplate =
+  (vtId?: string): StoryFn<ToggleComponent> =>
+  (args) => {
+    const id = (n: number) =>
+      vtId ? `'vt-' + state.toLowerCase() + '-${vtId}-${n}'` : "state";
+
+    return {
+      props: { ...args, pseudoState: PSEUDO_STATE },
+      template: `
     <tedi-row [cols]="1" [gapY]="4">
       <tedi-row *ngFor="let state of pseudoState;" cols="4" alignItems="center">
         <b>{{ state }}</b>
         <tedi-col [width]="3" style="display: flex; flex-wrap: wrap; align-items: center; column-gap: 2rem; row-gap: 0.75rem;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" ariaLabel="E-posti teavitused" />
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" ariaLabel="SMS-teavitused" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="${id(1)}" ariaLabel="E-posti teavitused" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="${id(2)}" ariaLabel="SMS-teavitused" [checked]="true" />
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" ariaLabel="Meeldetuletused" />
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" ariaLabel="Uudiskiri" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="${id(3)}" size="large" ariaLabel="Meeldetuletused" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="${id(4)}" size="large" ariaLabel="Uudiskiri" [checked]="true" />
           </div>
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" ariaLabel="Asukoha jagamine" />
-            <tedi-toggle ${argsToTemplate(args)} [inputId]="state" size="large" [icon]="true" ariaLabel="Andmete jagamine arstiga" [checked]="true" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="${id(5)}" size="large" [icon]="true" ariaLabel="Asukoha jagamine" />
+            <tedi-toggle ${argsToTemplate(args)} [inputId]="${id(6)}" size="large" [icon]="true" ariaLabel="Andmete jagamine arstiga" [checked]="true" />
           </div>
         </tedi-col>
       </tedi-row>
     </tedi-row>
   `,
-});
+    };
+  };
 
 export const PrimaryFilled: StoryObj<ToggleComponent> = {
   parameters: {
@@ -222,7 +234,7 @@ export const PrimaryFilled: StoryObj<ToggleComponent> = {
     type: "filled",
     variant: "primary",
   },
-  render: Template,
+  render: pseudoStateTemplate(),
 };
 
 export const PrimaryOutlined: StoryObj<ToggleComponent> = {
@@ -237,7 +249,7 @@ export const PrimaryOutlined: StoryObj<ToggleComponent> = {
     type: "outlined",
     variant: "primary",
   },
-  render: Template,
+  render: pseudoStateTemplate(),
 };
 
 export const ColoredFilled: StoryObj<ToggleComponent> = {
@@ -252,7 +264,7 @@ export const ColoredFilled: StoryObj<ToggleComponent> = {
     type: "filled",
     variant: "colored",
   },
-  render: Template,
+  render: pseudoStateTemplate(),
 };
 
 export const ColoredOutlined: StoryObj<ToggleComponent> = {
@@ -267,7 +279,7 @@ export const ColoredOutlined: StoryObj<ToggleComponent> = {
     type: "outlined",
     variant: "colored",
   },
-  render: Template,
+  render: pseudoStateTemplate(),
 };
 
 /** Chromatic snapshot for Toggle: add every new visual variant here too. */
@@ -281,52 +293,37 @@ export const VisualTest: StoryObj<ToggleComponent> = {
       focusVisible: '[id^="vt-focus-"]',
     },
   },
-  render: () => ({
-    props: {
-      pseudoState: PSEUDO_STATE,
-      variants: [
-        { label: "Primary filled", variant: "primary", type: "filled" },
-        { label: "Primary outlined", variant: "primary", type: "outlined" },
-        { label: "Colored filled", variant: "colored", type: "filled" },
-        { label: "Colored outlined", variant: "colored", type: "outlined" },
-      ],
-    },
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-row *ngFor="let v of variants" [cols]="1" [gapY]="4">
-          <b>{{ v.label }}</b>
-          <tedi-row *ngFor="let state of pseudoState" cols="4" alignItems="center">
-            <b>{{ state }}</b>
-            <tedi-col [width]="3" style="display: flex; flex-wrap: wrap; align-items: center; column-gap: 2rem; row-gap: 0.75rem;">
-              <ng-container *ngIf="'vt-' + state.toLowerCase() + '-' + v.variant + '-' + v.type as id">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                  <tedi-toggle [variant]="v.variant" [type]="v.type" [inputId]="id + '-1'" ariaLabel="Vaikimisi lüliti, väljas" />
-                  <tedi-toggle [variant]="v.variant" [type]="v.type" [inputId]="id + '-2'" ariaLabel="Vaikimisi lüliti, sees" [checked]="true" />
-                </div>
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                  <tedi-toggle [variant]="v.variant" [type]="v.type" [inputId]="id + '-3'" size="large" ariaLabel="Suur lüliti, väljas" />
-                  <tedi-toggle [variant]="v.variant" [type]="v.type" [inputId]="id + '-4'" size="large" ariaLabel="Suur lüliti, sees" [checked]="true" />
-                </div>
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                  <tedi-toggle [variant]="v.variant" [type]="v.type" [inputId]="id + '-5'" size="large" [icon]="true" ariaLabel="Suur lüliti ikooniga, väljas" />
-                  <tedi-toggle [variant]="v.variant" [type]="v.type" [inputId]="id + '-6'" size="large" [icon]="true" ariaLabel="Suur lüliti ikooniga, sees" [checked]="true" />
-                </div>
-              </ng-container>
-            </tedi-col>
-          </tedi-row>
-        </tedi-row>
-        <tedi-row [cols]="1" [gapY]="3">
-          <b>Label position</b>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <label tedi-label for="vt-label-start">Toggle button</label>
-            <tedi-toggle inputId="vt-label-start" />
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <tedi-toggle inputId="vt-label-end" />
-            <label tedi-label for="vt-label-end">Toggle button</label>
-          </div>
-        </tedi-row>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest([
+      {
+        label: "Primary filled",
+        story: {
+          ...PrimaryFilled,
+          render: pseudoStateTemplate("primary-filled"),
+        },
+      },
+      {
+        label: "Primary outlined",
+        story: {
+          ...PrimaryOutlined,
+          render: pseudoStateTemplate("primary-outlined"),
+        },
+      },
+      {
+        label: "Colored filled",
+        story: {
+          ...ColoredFilled,
+          render: pseudoStateTemplate("colored-filled"),
+        },
+      },
+      {
+        label: "Colored outlined",
+        story: {
+          ...ColoredOutlined,
+          render: pseudoStateTemplate("colored-outlined"),
+        },
+      },
+      { label: "Label position", story: LabelPosition },
+      { label: "Size", story: Size },
+    ]),
 };

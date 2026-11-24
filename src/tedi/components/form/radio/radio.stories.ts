@@ -20,6 +20,7 @@ import { TooltipContentComponent } from "../../overlay/tooltip/tooltip-content/t
 import { InfoButtonComponent } from "../../buttons/info-button/info-button.component";
 import { FeedbackTextComponent } from "../feedback-text/feedback-text.component";
 import { AlertComponent } from "../../notifications/alert/alert.component";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 
 /**
  * <a href="https://www.figma.com/design/jWiRIXhHRxwVdMSimKX2FF/TEDI-READY-2.102.102?node-id=65724-11106&m=dev" target="_blank">Radio Figma ↗</a><br />
@@ -1188,6 +1189,7 @@ export const CardStatesSecondary: StoryObj<RadioComponent> = {
  *   All radios sharing the same control coordinate via their `name` attribute.
  */
 export const WithReactiveForms: StoryObj<RadioComponent> = {
+  parameters: { visualTest: false },
   render: () => {
     const statusControl = new FormControl<string | null>("active");
     const planControl = new FormControl<string | null>("pro");
@@ -1301,66 +1303,23 @@ export const VisualTest: StoryObj<RadioComponent> = {
     },
   },
   render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Size</p>
-          ${SIZE_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Vertical</p>
-          ${VERTICAL_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Horizontal</p>
-          ${HORIZONTAL_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Separate</p>
-          ${SEPARATE_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Group</p>
-          ${GROUP_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Cards separate</p>
-          ${CARDS_SEPARATE_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Cards with label</p>
-          ${CARDS_WITH_LABEL_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Cards has border</p>
-          ${CARDS_HAS_BORDER_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Cards grouped</p>
-          ${CARDS_GROUPED_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Cards with description</p>
-          ${CARDS_WITH_DESCRIPTION_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Cards with icons</p>
-          ${CARDS_WITH_ICONS_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">States</p>
-          ${STATES_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Card states primary</p>
-          ${cardStatesTemplate("primary")}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Card states secondary</p>
-          ${cardStatesTemplate("secondary")}
-        </tedi-col>
-      </tedi-row>
-    `,
+    ...visualTest([
+      { label: "Default", story: Default },
+      { label: "Size", story: Size },
+      { label: "Vertical", story: Vertical },
+      { label: "Horizontal", story: Horizontal },
+      { label: "Separate", story: Separate },
+      { label: "Group", story: Group },
+      { label: "Cards separate", story: CardsSeparate },
+      { label: "Cards with label", story: CardsWithLabel },
+      { label: "Cards has border", story: CardsHasBorder },
+      { label: "Cards grouped", story: CardsGrouped },
+      { label: "Cards with description", story: CardsWithDescription },
+      { label: "Cards with icons", story: CardsWithIcons },
+      { label: "States", story: States },
+      { label: "Card states primary", story: CardStatesPrimary },
+      { label: "Card states secondary", story: CardStatesSecondary },
+    ]),
     styles: [
       ...stateMatrixStyles,
       CARDS_WITH_DESCRIPTION_STYLES,

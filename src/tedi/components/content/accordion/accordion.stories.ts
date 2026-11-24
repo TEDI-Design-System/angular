@@ -1246,6 +1246,7 @@ hasn't met yet (incomplete prerequisites, missing permissions, etc.).
 
 export const HashDeepLinking: StoryObj = {
   parameters: {
+    visualTest: false,
     docs: {
       description: {
         story: `
@@ -1304,6 +1305,7 @@ no-op for items relying on the auto-generated header/content IDs.
 
 export const SemanticHeadings: StoryObj = {
   parameters: {
+    visualTest: false,
     docs: {
       description: {
         story: `

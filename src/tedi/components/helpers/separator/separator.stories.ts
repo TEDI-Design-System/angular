@@ -1,4 +1,5 @@
 import { Meta, StoryObj, moduleMetadata } from "@storybook/angular";
+import { visualTest } from "../../../../../.storybook/visual-test-story";
 import { SeparatorComponent } from "./separator.component";
 import { ColComponent } from "../grid/col/col.component";
 import { RowComponent } from "../grid/row/row.component";
@@ -416,46 +417,21 @@ export const InlineSeparatorUsedInText: StoryObj<SeparatorComponent> = {
 export const VisualTest: StoryObj<SeparatorComponent> = {
   tags: ["!dev", "!autodocs"],
   parameters: { chromatic: { disableSnapshot: false } },
-  render: () => ({
-    template: `
-      <tedi-row [cols]="1" [gapY]="5">
-        <tedi-col>
-          <p tedi-text modifiers="bold">Vertical dotted</p>
-          ${VERTICAL_DOTTED_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Vertical dotted small</p>
-          ${VERTICAL_DOTTED_SMALL_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Horizontal colors</p>
-          ${HORIZONTAL_COLORS_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Vertical colors</p>
-          ${VERTICAL_COLORS_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Padded even</p>
-          ${PADDED_EVEN_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Padded uneven</p>
-          ${PADDED_UNEVEN_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Horizontal dotted</p>
-          ${HORIZONTAL_DOTTED_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Dot only</p>
-          ${DOT_ONLY_TEMPLATE}
-        </tedi-col>
-        <tedi-col>
-          <p tedi-text modifiers="bold">Inline separator used in text</p>
-          ${INLINE_TEMPLATE}
-        </tedi-col>
-      </tedi-row>
-    `,
-  }),
+  render: () =>
+    visualTest([
+      { label: "Default", story: Default },
+      { label: "Horizontal colors", story: HorizontalColors },
+      { label: "Vertical colors", story: VerticalColors },
+      { label: "Padded even", story: PaddedEven },
+      { label: "Padded uneven", story: PaddedUneven },
+      { label: "Vertical thick", story: VerticalThick },
+      { label: "Vertical dotted", story: VerticalDotted },
+      { label: "Vertical dotted small", story: VerticalDottedSmall },
+      { label: "Horizontal dotted", story: HorizontalDottedSeparator },
+      { label: "Dot only", story: DotOnly },
+      {
+        label: "Inline separator used in text",
+        story: InlineSeparatorUsedInText,
+      },
+    ]),
 };
