@@ -386,12 +386,12 @@ export class FileUploadComponent
   protected readonly hintText = computed(() => {
     if (this.readOnly()) return undefined;
 
-    const accept = this.showRestrictions() && this.accept();
-    const maxSize = this.showRestrictions() && this.maxSize();
+    const accept = this.showRestrictions() ? this.accept() : undefined;
+    const maxSize = this.showRestrictions() ? this.maxSize() : undefined;
     const parts = [
       accept &&
         `${this.translations.translate("file-upload.accept")} ${accept.replaceAll(",", ", ")}`,
-      maxSize &&
+      maxSize != null &&
         `${this.translations.translate("file-upload.max-size")} ${formatFileSize(maxSize, this.translations.getLanguage())}`,
       this.hint(),
     ].filter(Boolean);
@@ -407,7 +407,7 @@ export class FileUploadComponent
   );
 
   protected readonly successText = computed(() =>
-    this.errorText() ? undefined : this.success(),
+    this.invalid() ? undefined : this.success(),
   );
 
   protected readonly feedbackIds = computed(() => {
@@ -749,7 +749,7 @@ export class FileUploadComponent
     const reasons: FileRejectionReason[] = [];
 
     if (!this.isAcceptedType(file)) reasons.push("extension");
-    if (maxSize && file.size > maxSize) reasons.push("size");
+    if (maxSize != null && file.size > maxSize) reasons.push("size");
 
     return reasons;
   }

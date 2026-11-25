@@ -237,7 +237,8 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   fails `accept`, `maxSize` or `validator`: off (the default) discards it and summarises every rejection in one message under the
   dropzone, which paints the border red. On keeps it in the list with its reason in that file's
   `error` and writes no summary of its own — so the form value holds it with `isValid: false` and
-  you must filter on `isValid` before uploading. The dropzone's own border stays neutral, but a
+  you must drop the files marked `isValid: false` before uploading. Filter on that, not on a truthy
+  `isValid`: a preloaded file leaves it unset, and such a file is eligible. The dropzone's own border stays neutral, but a
   bound control fails on that file, so the border turns red once the control is touched or dirty. `error` is writable, so a failure the upload
   came back with lands on the file it belongs to.
 - **`tedi-file-dropzone` shows at most one hint and one validation message, error first.** Pass your
@@ -252,8 +253,9 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   when a file needs a progress bar, an icon or its own feedback.
 - **`accept`, `maxSize` and `validator` apply to what is picked next.** Files already listed keep the
   verdict they were given, so clear them yourself if you tighten a restriction while they are listed.
-  For a check that needs a server round trip, set `isLoading` and then `isValid` on the file instead of
-  reaching for `validator`.
+  For a check that needs a server round trip, put the file back with `isLoading` and then `isValid`
+  set — a new array on `files` or the bound control, not an edit in place, which neither the rows nor
+  the control's validity would see — instead of reaching for `validator`.
 - **`uploadFolder` applies to the file picker only, and turns `multiple` on by itself.** A folder
   arrives as the files inside it, so `multiple` left unset follows `uploadFolder`; set `[multiple]`
   explicitly and your value wins, including `false`. A single-file zone handed several files keeps
@@ -304,8 +306,9 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   with a `rejectedFiles` error while any `isValid: false` file is listed. By default a file that
   fails `accept`, `maxSize` or `validator` is discarded and only the summary under the field remains;
   `keepRejectedFiles` keeps it in the list, marked invalid, instead. It shows as a danger tag; only a
-  single file in a field without `multiple` shows just its name. Filter on `isValid` before
-  uploading either way. `accept`, `maxSize` and `validator` apply to the next selection; files already
+  single file in a field without `multiple` shows just its name. Drop the files marked
+  `isValid: false` before uploading either way; a preloaded file leaves `isValid` unset and is
+  eligible. `accept`, `maxSize` and `validator` apply to the next selection; files already
   listed keep their verdict, so clear them yourself if you tighten a rule.
 - **A `tedi-file-upload` `validator` adds a rule but no hint.** It runs on every selected file, and
   every rule a file breaks is reported in the one rejection summary, built-in reasons first. The

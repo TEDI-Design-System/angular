@@ -76,16 +76,19 @@ const FOCUSABLE =
 
 /**
  * Identifies a file well enough to spot a repeat selection. Name alone is not
- * enough — `IMG_0001.jpg` collides across devices — so size and mtime join it.
+ * enough — `IMG_0001.jpg` collides across devices — so size and mtime join it,
+ * and the folder path keeps two such files from one folder upload apart.
  */
 const fileIdentity = (file: FileDropzoneFile): string =>
-  `${file.name}:${file.size}:${file.lastModified}`;
+  `${file.webkitRelativePath ?? ""}:${file.name}:${file.size}:${file.lastModified}`;
 
-// Splits on the last dot, which leaves names carrying dots of their own, and
-// those without an extension, intact.
+// Splits before the extension, which leaves names carrying dots of their own,
+// and those without an extension, intact. A configured double extension such as
+// `.tar.gz` counts as one, so the counter lands before all of it.
 const withFreeNames = (
   listed: FileDropzoneFile[],
   incoming: File[],
+  extensions: string[],
 ): File[] => {
   const taken = new Set(listed.map((file) => file.name.toLowerCase()));
 
@@ -95,7 +98,13 @@ const withFreeNames = (
       return file;
     }
 
-    const dot = file.name.lastIndexOf(".");
+    const lower = file.name.toLowerCase();
+    const configured = extensions
+      .filter((candidate) => lower.endsWith(candidate))
+      .sort((a, b) => b.length - a.length)[0];
+    const dot = configured
+      ? file.name.length - configured.length
+      : file.name.lastIndexOf(".");
     const stem = dot > 0 ? file.name.slice(0, dot) : file.name;
     const extension = dot > 0 ? file.name.slice(dot) : "";
 
@@ -199,7 +208,7 @@ export class FileDropzoneComponent
   /**
    * Whether more than one file can be held at a time. Left unset it follows
    * `uploadFolder`, since a folder arrives as the files inside it.
-   * @default false
+   * @default undefined — `false` unless `uploadFolder` is on
    */
   readonly multiple = input<boolean | undefined, unknown>(undefined, {
     // Unset stays `undefined`, so `uploadFolder` can decide instead.
@@ -247,6 +256,7 @@ export class FileDropzoneComponent
   /**
    * Disables the dropzone from a parent template, combined with the
    * reactive-forms disabled state.
+   * @default false
    */
   readonly disabled = input(false, { transform: booleanAttribute });
   /**
@@ -353,6 +363,7 @@ export class FileDropzoneComponent
               remove: () => this.removeFile(file),
               removeLabel: label,
               removeIcon,
+              disabled: this.isDisabled(),
             } satisfies FileDropzoneFileContext)
           : undefined,
       };
@@ -380,12 +391,12 @@ export class FileDropzoneComponent
    * hides the restrictions the user has to satisfy.
    */
   protected readonly hintText = computed(() => {
-    const accept = this.showRestrictions() && this.accept();
-    const maxSize = this.showRestrictions() && this.maxSize();
+    const accept = this.showRestrictions() ? this.accept() : undefined;
+    const maxSize = this.showRestrictions() ? this.maxSize() : undefined;
     const parts = [
       accept &&
         `${this.translations.translate("file-upload.accept")} ${accept.replaceAll(",", ", ")}`,
-      maxSize &&
+      maxSize != null &&
         `${this.translations.translate("file-upload.max-size")} ${formatFileSize(maxSize, this.translations.getLanguage())}`,
       this.hint(),
     ].filter(Boolean);
@@ -401,7 +412,7 @@ export class FileDropzoneComponent
   );
 
   protected readonly successText = computed(() =>
-    this.errorText() ? undefined : this.success(),
+    this.isInvalid() ? undefined : this.success(),
   );
 
   protected readonly feedbackIds = computed(() => {
@@ -452,7 +463,9 @@ export class FileDropzoneComponent
 
   writeValue(files: FileDropzoneFile[] | null): void {
     this.files.set(files ?? []);
-    this.clearRejectionWhenEmpty();
+    // The summary describes a selection the user made, so anything the form
+    // writes over it — a reset to preloaded files included — leaves it stale.
+    this.rejectionError.set(undefined);
   }
 
   registerOnChange(fn: (files: FileDropzoneFile[]) => void): void {
@@ -602,7 +615,14 @@ export class FileDropzoneComponent
     const strategy = this.duplicates();
 
     if (strategy === "rename") {
-      return { duplicates: [], fresh: withFreeNames(this.files(), selected) };
+      return {
+        duplicates: [],
+        fresh: withFreeNames(
+          this.files(),
+          selected,
+          this.acceptTokens().filter((token) => token.startsWith(".")),
+        ),
+      };
     }
 
     if (strategy === "replace") {
@@ -766,8 +786,8 @@ export class FileDropzoneComponent
     return messages;
   }
 
-  // The summary names files that were never listed, so only emptying the field
-  // makes it stale.
+  // The summary names files that were never listed, so removing the rows one by
+  // one never resolves it — it goes when the last one does.
   private clearRejectionWhenEmpty(): void {
     if (!this.files().length) {
       this.rejectionError.set(undefined);
@@ -785,7 +805,7 @@ export class FileDropzoneComponent
 
   private isAcceptedSize(file: File): boolean {
     const maxSize = this.maxSize();
-    return !maxSize || file.size <= maxSize;
+    return maxSize == null || file.size <= maxSize;
   }
 
   // Mirrors how the browser reads `accept`, so a dropped file is held to the

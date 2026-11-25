@@ -328,6 +328,34 @@ describe("FileUploadComponent", () => {
       ]);
     });
 
+    it("treats a maxSize of zero as a limit, not as unlimited", () => {
+      fixture.componentRef.setInput("maxSize", 0);
+      fixture.detectChanges();
+
+      expect(text("tedi-feedback-text")).toContain("file-upload.max-size");
+
+      selectFiles(fixture, [makeFile("report.pdf", 100)]);
+
+      expect(component.files()).toEqual([]);
+      expect(summary()).toBe("file-upload.size-rejected:'report.pdf',1");
+    });
+
+    it("hides a success message while the field is marked invalid", () => {
+      fixture.componentRef.setInput("success", "Kõik korras");
+      fixture.detectChanges();
+
+      expect(text("tedi-feedback-text.tedi-feedback-text--valid")).toBe(
+        "Kõik korras",
+      );
+
+      fixture.componentRef.setInput("invalid", true);
+      fixture.detectChanges();
+
+      expect(
+        text("tedi-feedback-text.tedi-feedback-text--valid"),
+      ).toBeUndefined();
+    });
+
     it("rejects a file over maxSize", () => {
       fixture.componentRef.setInput("maxSize", 1024 ** 2);
       fixture.detectChanges();

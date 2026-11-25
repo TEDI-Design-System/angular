@@ -10,6 +10,12 @@ export interface FileDropzoneFileContext {
   removeLabel: string;
   /** Icon the built-in row would use for the remove control. */
   removeIcon: string;
+  /**
+   * Whether the dropzone is disabled, by its own input or by the bound control.
+   * Bind it on the row's own controls: `remove` refuses while disabled, but
+   * nothing else tells the row.
+   */
+  disabled: boolean;
 }
 
 /**

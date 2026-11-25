@@ -196,8 +196,8 @@ export default {
       control: "boolean",
       table: {
         category: "inputs",
-        type: { summary: "boolean" },
-        defaultValue: { summary: "false" },
+        type: { summary: "boolean | undefined" },
+        defaultValue: { summary: "undefined (follows uploadFolder)" },
       },
     },
     duplicates: {
@@ -356,7 +356,9 @@ export const WithFileSize: Story = {
 
 /**
  * A `tedi-label` whose `for` matches `inputId` names the field, and the
- * dropzone announces it ahead of its own instructions.
+ * dropzone announces it ahead of its own instructions. The label is a sibling:
+ * wrapping the dropzone in `tedi-form-field` would put projected feedback after
+ * the file list instead of under the zone.
  */
 export const WithLabel: Story = {
   args: { inputId: "avaldus", maxSize: 30 * 1024 ** 2, required: true },
@@ -364,10 +366,8 @@ export const WithLabel: Story = {
     props: { ...args },
     template: `
       <div style="max-width: 420px">
-        <tedi-form-field>
-          <label tedi-label for="avaldus" [required]="true">Avalduse failid</label>
-          <tedi-file-dropzone ${argsToTemplate(args)} />
-        </tedi-form-field>
+        <label tedi-label for="avaldus" [required]="true">Avalduse failid</label>
+        <tedi-file-dropzone ${argsToTemplate(args)} />
       </div>
     `,
   }),
@@ -401,16 +401,10 @@ export const DiscardingRejectedFiles: Story = {
 };
 
 /**
- * The opt-in. A rejected file stays in the list carrying its own reason, so the
- * user can see which file failed and remove it. The dropzone's border stays
- * neutral — the failure belongs to the file, not the field.
- *
- * Rejected files lead the list and offer a dismiss icon instead of a bin. Only
- * the display order changes: the value keeps the order the files arrived in.
- *
- * They stay in the value too, marked `isValid: false`. A form control fails
- * while one is listed, so nothing can be submitted with it; if you read the
- * files yourself, filter on `isValid` before uploading.
+ * The value keeps every rejected file, marked `isValid: false`, and in arrival
+ * order — only the display puts them first. A bound control fails while one is
+ * listed, but that does not stop a submit handler: check validity yourself and
+ * skip the files marked `isValid: false`.
  */
 export const KeepingRejectedFiles: Story = {
   name: "Validation: keeping rejected files",
@@ -487,7 +481,7 @@ export const WithCustomFileTemplate: Story = {
       template: `
       <div style="max-width: 420px">
         <tedi-file-dropzone multiple [files]="files" accept=".pdf,.mp4">
-          <ng-template tediFileDropzoneFile let-file let-remove="remove" let-removeLabel="removeLabel" let-removeIcon="removeIcon">
+          <ng-template tediFileDropzoneFile let-file let-remove="remove" let-removeLabel="removeLabel" let-removeIcon="removeIcon" let-disabled="disabled">
             <tedi-attachment
               [name]="file.name"
               icon="description"
@@ -509,7 +503,7 @@ export const WithCustomFileTemplate: Story = {
                 }
                 <tedi-tooltip>
                   <tedi-tooltip-trigger [interactive]="false">
-                    <button tedi-button variant="neutral" [attr.aria-label]="removeLabel" (click)="remove()">
+                    <button tedi-button variant="neutral" [disabled]="disabled" [attr.aria-label]="removeLabel" (click)="remove()">
                       <tedi-icon [name]="removeIcon" [size]="18" color="inherit" />
                     </button>
                   </tedi-tooltip-trigger>

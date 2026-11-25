@@ -292,9 +292,11 @@ describe("FileDropzoneComponent", () => {
 
     it("clears the input value so the same file can be picked again", () => {
       const input = fileInput(fixture);
+      const value = jest.spyOn(input, "value", "set");
+
       selectFiles(fixture, [makeFile("report.pdf")]);
 
-      expect(input.value).toBe("");
+      expect(value).toHaveBeenCalledWith("");
     });
 
     it("replaces the file when not multiple", () => {
@@ -329,6 +331,43 @@ describe("FileDropzoneComponent", () => {
 
       expect(component.files().map((file) => file.name)).toEqual(["a.pdf"]);
       expect(await announced()).toBe("file-dropzone.single-file-kept:a.pdf");
+    });
+
+    it("renames before a configured double extension", () => {
+      fixture.componentRef.setInput("multiple", true);
+      fixture.componentRef.setInput("accept", ".tar.gz");
+      fixture.componentRef.setInput("duplicates", "rename");
+      fixture.detectChanges();
+
+      selectFiles(fixture, [
+        makeFile("archive.tar.gz", 100, "application/gzip"),
+      ]);
+      selectFiles(fixture, [
+        makeFile("archive.tar.gz", 100, "application/gzip"),
+      ]);
+
+      expect(component.files().map((file) => file.name)).toEqual([
+        "archive.tar.gz",
+        "archive (1).tar.gz",
+      ]);
+    });
+
+    it("keeps two same-named files from different folders", async () => {
+      fixture.componentRef.setInput("uploadFolder", true);
+      fixture.detectChanges();
+
+      const inFolder = (folder: string) => {
+        const file = makeFile("photo.jpg", 100, "image/jpeg");
+        Object.defineProperty(file, "webkitRelativePath", {
+          value: `${folder}/photo.jpg`,
+        });
+        return file;
+      };
+
+      selectFiles(fixture, [inFolder("jaanuar"), inFolder("veebruar")]);
+
+      expect(component.files().length).toBe(2);
+      expect(await announced()).toBe("file-upload.added:2");
     });
 
     it("announces a skip alongside what was added", async () => {
@@ -564,6 +603,34 @@ describe("FileDropzoneComponent", () => {
 
       expect(component.files().map((file) => file.name)).toEqual(["a.pdf"]);
       expect(await announced()).toBe("file-dropzone.single-file-kept:a.pdf");
+    });
+
+    it("treats a maxSize of zero as a limit, not as unlimited", () => {
+      fixture.componentRef.setInput("maxSize", 0);
+      fixture.componentRef.setInput("keepRejectedFiles", false);
+      fixture.detectChanges();
+
+      expect(text("tedi-feedback-text")).toContain("file-upload.max-size");
+
+      selectFiles(fixture, [makeFile("report.pdf", 100)]);
+
+      expect(component.files()).toEqual([]);
+    });
+
+    it("hides a success message while the zone is marked invalid", () => {
+      fixture.componentRef.setInput("success", "Kõik korras");
+      fixture.detectChanges();
+
+      expect(text("tedi-feedback-text.tedi-feedback-text--valid")).toBe(
+        "Kõik korras",
+      );
+
+      fixture.componentRef.setInput("invalid", true);
+      fixture.detectChanges();
+
+      expect(
+        text("tedi-feedback-text.tedi-feedback-text--valid"),
+      ).toBeUndefined();
     });
 
     it("accepts a double extension, which the browser's own picker offers", () => {
@@ -1697,6 +1764,25 @@ describe("FileDropzoneComponent with reactive forms", () => {
     expect(fixture.debugElement.query(By.css("tedi-attachment"))).toBeNull();
   });
 
+  it("drops the rejection summary when the form writes over the value", () => {
+    const summary = () =>
+      fixture.debugElement.query(
+        By.css("tedi-feedback-text.tedi-feedback-text--error"),
+      );
+
+    selectFiles(fixture, [makeFile("notes.txt", 100, "text/plain")]);
+    fixture.detectChanges();
+
+    expect(summary()).not.toBeNull();
+
+    // A reset to preloaded files leaves the list non-empty, so the summary
+    // would otherwise outlive the selection it describes.
+    host.control.reset([{ id: "1", name: "preloaded.pdf" }]);
+    fixture.detectChanges();
+
+    expect(summary()).toBeNull();
+  });
+
   it("fails the control while a rejected file is listed", () => {
     host.control.setValue([
       { id: "1", name: "ok.pdf" },
@@ -1797,7 +1883,7 @@ describe("FileDropzoneComponent with a custom file template", () => {
     ).toBe("remove report.pdf");
   });
 
-  it("accepts any context shape at compile time", () => {
+  it("returns true, which is all the guard does at runtime", () => {
     // The guard exists purely so `let-file` is typed inside the template; it is
     // never consulted at runtime, so nothing else would execute it.
     expect(
