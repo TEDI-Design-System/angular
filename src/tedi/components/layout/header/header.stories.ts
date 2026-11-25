@@ -1478,8 +1478,7 @@ const appShellStyles = `
 `;
 
 export const LoggedInWithSidenav: StoryObj<HeaderComponent> = {
-  // Renders the sidenav, whose accessibility fixes are tracked in
-  // https://github.com/TEDI-Design-System/angular/issues/307
+  // TODO(a11y): the sidenav projects its items straight into a <ul>, failing the "list" rule; fixed by #307.
   parameters: { a11y: { test: "todo" } },
   render: (args) => ({
     props: args,
