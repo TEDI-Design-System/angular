@@ -514,6 +514,20 @@ describe("TableCardComponent", () => {
       expect(host.open).toBe(true);
     });
 
+    it.each(["button", "combobox", "link"])(
+      "does not toggle when an element with role %s in the header is clicked",
+      (role) => {
+        const control = document.createElement("div");
+        control.setAttribute("role", role);
+        query(".end-slot")!.appendChild(control);
+
+        control.click();
+        fixture.detectChanges();
+
+        expect(host.open).toBe(true);
+      },
+    );
+
     it("turns the arrow over while the body is open", () => {
       expect(collapseButton().classList).toContain(
         "tedi-collapse-button--open",

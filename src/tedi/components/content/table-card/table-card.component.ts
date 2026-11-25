@@ -334,7 +334,7 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
         !this.ariaLabel()
       ) {
         console.warn(
-          "tedi-table-card: a `collapsible` card needs a `title`, `subtitle` or `ariaLabel` so its toggle has an accessible name.",
+          'tedi-table-card: a `collapsible` card needs a `title`, `subtitle` or `ariaLabel` so its toggle is named after the card, not just "open" / "close".',
         );
       }
     });
@@ -343,7 +343,13 @@ export class TableCardComponent implements BreakpointInputs<TableCardInputs> {
   handleHeaderClick(event: MouseEvent): void {
     const target = event.target as Element | null;
 
-    if (target?.closest("a, button, input, select, textarea, label")) return;
+    if (
+      target?.closest(
+        'a, button, input, select, textarea, label, [role="button"], [role="combobox"], [role="link"]',
+      )
+    ) {
+      return;
+    }
 
     this.open.set(!this.open());
   }
