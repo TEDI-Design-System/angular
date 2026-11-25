@@ -38,6 +38,48 @@ describe("CollapseButtonComponent", () => {
     expect(component.open()).toBe(false);
     expect(component.hideText()).toBe(false);
     expect(component.arrowType()).toBe("default");
+    expect(component.expandDirection()).toBe("down");
+  });
+
+  describe("expandDirection", () => {
+    const iconName = () =>
+      fixture.nativeElement
+        .querySelector(".tedi-collapse-button__icon")
+        .textContent.trim();
+
+    it("points the chevron down by default", () => {
+      expect(iconName()).toBe("expand_more");
+    });
+
+    it("points the chevron up when it expands upwards", () => {
+      fixture.componentRef.setInput("expandDirection", "up");
+      fixture.detectChanges();
+      expect(iconName()).toBe("expand_less");
+    });
+
+    it.each([
+      ["with text", {}],
+      ["icon only", { hideText: true }],
+      ["secondary icon only", { hideText: true, arrowType: "secondary" }],
+    ])("uses the direction %s", (_, inputs) => {
+      fixture.componentRef.setInput("expandDirection", "up");
+      Object.entries(inputs).forEach(([key, value]) =>
+        fixture.componentRef.setInput(key, value),
+      );
+      fixture.detectChanges();
+      expect(iconName()).toBe("expand_less");
+    });
+
+    it("keeps the icon and flips it with the open modifier", () => {
+      fixture.componentRef.setInput("expandDirection", "up");
+      fixture.componentRef.setInput("open", true);
+      fixture.detectChanges();
+      const button: HTMLButtonElement = fixture.nativeElement;
+      expect(button.classList.contains("tedi-collapse-button--open")).toBe(
+        true,
+      );
+      expect(iconName()).toBe("expand_less");
+    });
   });
 
   it("emits openChange with toggled value when clicked", () => {
