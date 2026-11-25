@@ -3,7 +3,7 @@
   <span class="tedi-collapse-button__icon-pad">
     <tedi-icon
       class="tedi-collapse-button__icon"
-      name="expand_more"
+      [name]="iconName()"
       color="inherit"
       [variant]="iconVariant()"
       [size]="iconSize()"
@@ -13,7 +13,7 @@
   <span class="tedi-collapse-button__icon-wrapper">
     <tedi-icon
       class="tedi-collapse-button__icon"
-      name="expand_more"
+      [name]="iconName()"
       color="inherit"
       [variant]="iconVariant()"
       [size]="iconSize()"
@@ -22,7 +22,7 @@
 } @else {
   <tedi-icon
     class="tedi-collapse-button__icon"
-    name="expand_more"
+    [name]="iconName()"
     color="inherit"
     [variant]="iconVariant()"
     [size]="iconSize()"

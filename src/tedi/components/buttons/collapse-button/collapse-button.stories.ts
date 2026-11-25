@@ -16,6 +16,7 @@ import {
 import {
   CollapseButtonComponent,
   type CollapseButtonArrowType,
+  type CollapseButtonExpandDirection,
   type CollapseButtonSize,
 } from "./collapse-button.component";
 import {
@@ -41,6 +42,7 @@ const PSEUDO_STATE = ["Default", "Hover", "Active", "Focus"];
       [closeText]="closeText()"
       [hideText]="hideText()"
       [arrowType]="arrowType()"
+      [expandDirection]="expandDirection()"
       [size]="size()"
       [inverted]="inverted()"
       [ariaLabel]="ariaLabel()"
@@ -54,6 +56,7 @@ class CollapseButtonDemoComponent {
   readonly closeText = input<string | undefined>(undefined);
   readonly hideText = input(false);
   readonly arrowType = input<CollapseButtonArrowType>("default");
+  readonly expandDirection = input<CollapseButtonExpandDirection>("down");
   readonly size = input<CollapseButtonSize>("default");
   readonly inverted = input(false);
   readonly ariaLabel = input<string | undefined>(undefined);
@@ -64,6 +67,7 @@ type StatesArgs = {
   closeText?: string;
   hideText?: boolean;
   arrowType?: CollapseButtonArrowType;
+  expandDirection?: CollapseButtonExpandDirection;
   inverted?: boolean;
   ariaLabel?: string;
   titleColor?: TextColor;
@@ -93,6 +97,7 @@ const statesTemplate: StoryFn<StatesArgs> = ({
                   [closeText]="closeText"
                   [hideText]="hideText"
                   [arrowType]="arrowType"
+                  [expandDirection]="expandDirection"
                   [inverted]="inverted"
                   [ariaLabel]="ariaLabel"
                 ></button>
@@ -104,6 +109,7 @@ const statesTemplate: StoryFn<StatesArgs> = ({
                   [closeText]="closeText"
                   [hideText]="hideText"
                   [arrowType]="arrowType"
+                  [expandDirection]="expandDirection"
                   [inverted]="inverted"
                   [ariaLabel]="ariaLabel"
                 ></button>
@@ -127,6 +133,7 @@ const statesTemplate: StoryFn<StatesArgs> = ({
                   [closeText]="closeText"
                   [hideText]="hideText"
                   [arrowType]="arrowType"
+                  [expandDirection]="expandDirection"
                   [inverted]="inverted"
                   [ariaLabel]="ariaLabel"
                 ></button>
@@ -139,6 +146,7 @@ const statesTemplate: StoryFn<StatesArgs> = ({
                   [closeText]="closeText"
                   [hideText]="hideText"
                   [arrowType]="arrowType"
+                  [expandDirection]="expandDirection"
                   [inverted]="inverted"
                   [ariaLabel]="ariaLabel"
                 ></button>
@@ -194,6 +202,7 @@ const meta: Meta<CollapseButtonDemoComponent> = {
     closeText: "Close",
     hideText: false,
     arrowType: "default",
+    expandDirection: "down",
     size: "default",
     inverted: false,
     ariaLabel: "Toggle details",
@@ -232,6 +241,17 @@ const meta: Meta<CollapseButtonDemoComponent> = {
         category: "inputs",
         type: { summary: "CollapseButtonArrowType" },
         defaultValue: { summary: "default" },
+      },
+    },
+    expandDirection: {
+      description:
+        "Direction the chevron points when collapsed; reverses when expanded.",
+      control: { type: "inline-radio" },
+      options: ["down", "up"],
+      table: {
+        category: "inputs",
+        type: { summary: "CollapseButtonExpandDirection" },
+        defaultValue: { summary: "down" },
       },
     },
     size: {
@@ -293,6 +313,19 @@ export const IconOnly: StoryObj<StatesArgs> = {
     hideText: true,
     arrowType: "default",
     ariaLabel: "Toggle details",
+  },
+  render: statesTemplate,
+};
+
+/** For content that opens upwards, such as a bottom-aligned `tedi-sheet`. */
+export const ExpandUp: StoryObj<StatesArgs> = {
+  parameters: PSEUDO_PARAMS,
+  args: {
+    hideText: false,
+    arrowType: "default",
+    expandDirection: "up",
+    openText: "Open",
+    closeText: "Close",
   },
   render: statesTemplate,
 };
@@ -369,6 +402,7 @@ export const VisualTest: StoryObj<StatesArgs> = {
         { label: "Default", story: Default },
         { label: "With text", story: States, args: VT_STATES },
         { label: "Icon only", story: IconOnly, args: VT_STATES },
+        { label: "Expand up", story: ExpandUp, args: VT_STATES },
         { label: "Secondary button", story: SecondaryButton, args: VT_STATES },
         {
           label: "With text inverted",

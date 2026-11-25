@@ -12,6 +12,7 @@ import { IconComponent, type IconSize } from "../../base/icon/icon.component";
 
 export type CollapseButtonArrowType = "default" | "secondary";
 export type CollapseButtonSize = "default" | "small";
+export type CollapseButtonExpandDirection = "down" | "up";
 
 @Component({
   standalone: true,
@@ -59,6 +60,11 @@ export class CollapseButtonComponent {
    */
   arrowType = input<CollapseButtonArrowType>("default");
   /**
+   * Direction the chevron points when collapsed; reverses when expanded.
+   * @default "down"
+   */
+  expandDirection = input<CollapseButtonExpandDirection>("down");
+  /**
    * Visual size.
    * @default "default"
    */
@@ -92,6 +98,10 @@ export class CollapseButtonComponent {
 
   protected readonly iconSize = computed<IconSize>(() =>
     this.hideText() ? 24 : 16,
+  );
+
+  protected readonly iconName = computed(() =>
+    this.expandDirection() === "up" ? "expand_less" : "expand_more",
   );
 
   protected readonly iconVariant = computed(() =>
