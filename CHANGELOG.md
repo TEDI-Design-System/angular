@@ -1,3 +1,10 @@
+# [10.0.0-rc.32](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.31...angular-10.0.0-rc.32) (2026-11-25)
+
+
+### Features
+
+* **skip-links:** add new TEDI-Ready component [#806](https://github.com/TEDI-Design-System/angular/issues/806) ([#873](https://github.com/TEDI-Design-System/angular/issues/873)) ([878f92c](https://github.com/TEDI-Design-System/angular/commit/878f92c5a694cfcd835a5361cd9ea88e0bd8c184))
+
 # [10.0.0-rc.31](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.30...angular-10.0.0-rc.31) (2026-11-25)
 
 
