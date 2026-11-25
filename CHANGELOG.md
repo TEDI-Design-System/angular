@@ -1,3 +1,10 @@
+# [10.0.0-rc.33](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.32...angular-10.0.0-rc.33) (2026-11-25)
+
+
+### Features
+
+* **file-dropzone:** add new TEDI-Ready component [#588](https://github.com/TEDI-Design-System/angular/issues/588) ([#697](https://github.com/TEDI-Design-System/angular/issues/697)) ([5ead106](https://github.com/TEDI-Design-System/angular/commit/5ead10682b090cc24ce0deb496dbafca197551e2))
+
 # [10.0.0-rc.32](https://github.com/TEDI-Design-System/angular/compare/angular-10.0.0-rc.31...angular-10.0.0-rc.32) (2026-11-25)
 
 
