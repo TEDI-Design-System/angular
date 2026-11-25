@@ -43,6 +43,12 @@ export default defineConfig([
     },
   },
   {
+    // Consumer skill scripts and their tests: plain Node ESM, no dependencies.
+    files: ["skills/**/*.mjs"],
+    extends: [eslint.configs.recommended],
+    languageOptions: { globals: globals.node },
+  },
+  {
     files: ["**/*.html"],
     extends: [angular.configs.templateRecommended],
     rules: {

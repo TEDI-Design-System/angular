@@ -14,12 +14,15 @@ import {
   writeFiles,
   ensureWorkDir,
   printJson,
+  isExactVersion,
+  projectArg,
 } from "./lib.mjs";
 
 const args = parseArgs();
 const version = args.version;
-if (!version) fail("--version is required");
-const project = args.project ?? process.cwd();
+if (!isExactVersion(version))
+  fail(`--version must be an exact version such as 9.4.0, got "${version}"`);
+const project = projectArg(args, process.cwd());
 
 const dir = join(
   ensureWorkDir(project),
