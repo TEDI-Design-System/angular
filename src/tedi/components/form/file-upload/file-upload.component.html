@@ -5,7 +5,7 @@
       role="list"
       [attr.aria-labelledby]="readOnly() ? labelId() : null"
     >
-      @for (file of files(); track file) {
+      @for (file of files(); track file.id ?? file) {
         <li class="tedi-file-upload__tag">
           <tedi-tag
             [type]="file.isValid === false ? 'danger' : 'primary'"

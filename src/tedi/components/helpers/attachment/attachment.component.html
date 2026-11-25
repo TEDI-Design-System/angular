@@ -10,7 +10,7 @@
           name="error"
           color="danger"
           [size]="18"
-          [label]="error()"
+          [label]="error() ? undefined : invalidLabel()"
           class="tedi-attachment__error-icon"
         />
       }
