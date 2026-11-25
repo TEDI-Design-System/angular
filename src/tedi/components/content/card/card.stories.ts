@@ -79,7 +79,7 @@ const named = (argTypes: Record<string, ReturnType<typeof inputArg>>) =>
   );
 
 const CARD_CONTENT_ARG_TYPES = named({
-  background: inputArg("CardBackground", "Background color.", "undefined"),
+  backgroundColor: inputArg("CardBackground", "Background color.", "undefined"),
   padding: inputArg(
     "CardPadding",
     "Content padding. A predefined rem number, or an object of vertical/horizontal or top/right/bottom/left rem values.",
@@ -122,7 +122,7 @@ const CARD_CONTENT_ARG_TYPES = named({
 
 const CARD_HEADER_ARG_TYPES = named({
   ...CARD_CONTENT_ARG_TYPES,
-  background: inputArg(
+  backgroundColor: inputArg(
     "CardBackground",
     "Background color. Unlike content blocks, the header does not inherit the card background.",
     "brand-primary",
@@ -140,7 +140,7 @@ const CARD_ICON_ARG_TYPES = named({
     "Size of the icon cell. Pair the small size with a 16px icon.",
     "default",
   ),
-  background: inputArg(
+  backgroundColor: inputArg(
     "CardBackground",
     "Background color. Defaults to brand-primary for the brand type, otherwise secondary.",
     "secondary",
@@ -242,7 +242,7 @@ export default {
     },
   },
   argTypes: {
-    background: {
+    backgroundColor: {
       description:
         "Default background color for child content blocks. Child blocks can override it with their own background input.",
       control: { type: "select" },
@@ -351,18 +351,18 @@ export const HeaderTypes: Story = {
     template: `
       <div [tediVerticalSpacing]="1">
         <tedi-card>
-          <tedi-card-header background="primary">
+          <tedi-card-header backgroundColor="primary">
             <h3 tedi-text>Pealkiri</h3>
           </tedi-card-header>
         </tedi-card>
         <tedi-card>
-          <tedi-card-header background="primary">
+          <tedi-card-header backgroundColor="primary">
             <h3 tedi-text>Pealkiri</h3>
             <p tedi-text color="secondary">Kirjeldus</p>
           </tedi-card-header>
         </tedi-card>
         <tedi-card>
-          <tedi-card-header background="primary">
+          <tedi-card-header backgroundColor="primary">
             <div class="flex align-items-center justify-content-between gap-3">
               <h3 tedi-text>Pealkiri</h3>
               <button tedi-button>Lisa uus</button>
@@ -371,7 +371,7 @@ export const HeaderTypes: Story = {
           </tedi-card-header>
         </tedi-card>
         <tedi-card>
-          <tedi-card-header background="primary">
+          <tedi-card-header backgroundColor="primary">
             <div class="flex align-items-center justify-content-between gap-3">
               <h3 tedi-text>Pealkiri</h3>
               <div class="flex gap-2">
@@ -399,7 +399,7 @@ export const HeaderTypes: Story = {
           </tedi-card-header>
         </tedi-card>
         <tedi-card>
-          <tedi-card-header background="primary">
+          <tedi-card-header backgroundColor="primary">
             <div class="flex align-items-center justify-content-between gap-3">
               <h3 tedi-text>Pealkiri</h3>
               <a tedi-link href="#">
@@ -411,7 +411,7 @@ export const HeaderTypes: Story = {
           </tedi-card-header>
         </tedi-card>
         <tedi-card>
-          <tedi-card-header background="primary">
+          <tedi-card-header backgroundColor="primary">
             <div class="flex align-items-center justify-content-between gap-3">
               <h3 tedi-text>Pealkiri</h3>
               <tedi-status-badge color="brand" text="Kinnitatud" />
@@ -420,7 +420,7 @@ export const HeaderTypes: Story = {
           </tedi-card-header>
         </tedi-card>
         <tedi-card>
-          <tedi-card-header background="secondary">
+          <tedi-card-header backgroundColor="secondary">
             <div class="flex align-items-center justify-content-between gap-3">
               <h3 tedi-text>Pealkiri</h3>
               <button tedi-button>Lisa uus</button>
@@ -429,7 +429,7 @@ export const HeaderTypes: Story = {
           </tedi-card-header>
         </tedi-card>
         <tedi-card>
-          <tedi-card-header background="tertiary">
+          <tedi-card-header backgroundColor="tertiary">
             <div class="flex align-items-center justify-content-between gap-3">
               <h3 tedi-text>Pealkiri</h3>
               <button tedi-button>Lisa uus</button>
@@ -438,7 +438,7 @@ export const HeaderTypes: Story = {
           </tedi-card-header>
         </tedi-card>
         <tedi-card>
-          <tedi-card-header background="brand-primary">
+          <tedi-card-header backgroundColor="brand-primary">
             <div class="flex align-items-center justify-content-between gap-3">
               <h3 tedi-text color="white">Pealkiri</h3>
               <button tedi-button variant="primary-inverted">Lisa uus</button>
@@ -447,7 +447,7 @@ export const HeaderTypes: Story = {
           </tedi-card-header>
         </tedi-card>
         <tedi-card>
-          <tedi-card-header background="brand-secondary">
+          <tedi-card-header backgroundColor="brand-secondary">
             <div class="flex align-items-center justify-content-between gap-3">
               <h3 tedi-text color="white">Pealkiri</h3>
               <button tedi-button variant="primary-inverted">Lisa uus</button>
@@ -541,9 +541,9 @@ export const CardInfo: Story = {
     template: `
       <div [tediVerticalSpacing]="1">
         <tedi-card [padding]="{ vertical: 0.75, horizontal: 1.25 }">
-          <tedi-card-content background="brand-tertiary">
+          <tedi-card-content backgroundColor="brand-tertiary">
             <div class="flex align-items-center gap-3">
-              <tedi-icon name="assignment_late" background="primary" />
+              <tedi-icon name="assignment_late" backgroundColor="primary" />
               <div>
                 <p tedi-text modifiers="bold">Pealkiri</p>
                 <p tedi-text color="secondary">Kirjeldus</p>
@@ -553,14 +553,14 @@ export const CardInfo: Story = {
         </tedi-card>
         <tedi-card [padding]="{ vertical: 0.75, horizontal: 1.25 }">
           <tedi-card-content
-            background="brand-tertiary"
+            backgroundColor="brand-tertiary"
             backgroundImage="card-background-example.svg"
             backgroundSize="75px"
             backgroundPosition="right center"
             backgroundRepeat="no-repeat"
           >
             <div class="flex align-items-center gap-3">
-              <tedi-icon name="assignment_late" background="primary" />
+              <tedi-icon name="assignment_late" backgroundColor="primary" />
               <div>
                 <p tedi-text modifiers="bold">Pealkiri</p>
                 <p tedi-text color="secondary">Kirjeldus</p>
@@ -569,9 +569,9 @@ export const CardInfo: Story = {
           </tedi-card-content>
         </tedi-card>
         <tedi-card border="accent" [padding]="{ vertical: 0.75, horizontal: 1.25 }">
-          <tedi-card-content background="accent">
+          <tedi-card-content backgroundColor="accent">
             <div class="flex align-items-center gap-3">
-              <tedi-icon name="assignment_late" background="primary" />
+              <tedi-icon name="assignment_late" backgroundColor="primary" />
               <div>
                 <p tedi-text modifiers="bold">Pealkiri</p>
                 <p tedi-text color="secondary">Kirjeldus</p>
@@ -580,9 +580,9 @@ export const CardInfo: Story = {
           </tedi-card-content>
         </tedi-card>
         <tedi-card border="neutral-primary" [padding]="{ vertical: 0.75, horizontal: 1.25 }">
-          <tedi-card-content background="neutral-primary">
+          <tedi-card-content backgroundColor="neutral-primary">
             <div class="flex align-items-center gap-3">
-              <tedi-icon name="calendar_today" background="primary" variant="filled" />
+              <tedi-icon name="calendar_today" backgroundColor="primary" variant="filled" />
               <p tedi-text color="secondary">Haigusleht: <strong>118.</strong> päev</p>
             </div>
           </tedi-card-content>
@@ -627,7 +627,7 @@ export const AlternativeCards: Story = {
           </tedi-col>
           <tedi-col>
             <tedi-card>
-              <tedi-card-header background="brand-primary">
+              <tedi-card-header backgroundColor="brand-primary">
                 <h3 tedi-text color="white">Lühike pealkiri</h3>
               </tedi-card-header>
               <tedi-card-content>
@@ -810,7 +810,7 @@ export const Backgrounds: Story = {
     template: `
       <tedi-row [cols]="1" [sm]="{ cols: 2 }" [lg]="{ cols: 3 }" [gap]="2">
         @for (bg of backgrounds; track bg.name) {
-          <tedi-card [background]="bg.name">
+          <tedi-card [backgroundColor]="bg.name">
             <tedi-card-content>
               <p tedi-text [color]="bg.light ? 'white' : 'primary'">{{ CABBAGE_TEXT }}</p>
             </tedi-card-content>
@@ -825,7 +825,7 @@ export const MultipleContent: Story = {
   render: () => ({
     template: `
       <tedi-card>
-        <tedi-card-header background="brand-primary">
+        <tedi-card-header backgroundColor="brand-primary">
           <h3 tedi-text color="white">Pealkiri</h3>
         </tedi-card-header>
         <tedi-card-content>
@@ -848,7 +848,7 @@ export const NestedCards: Story = {
   render: () => ({
     template: `
       <tedi-card>
-        <tedi-card-header background="brand-primary">
+        <tedi-card-header backgroundColor="brand-primary">
           <h3 tedi-text color="white">Pealkiri</h3>
         </tedi-card-header>
         <tedi-card-content>
@@ -857,7 +857,7 @@ export const NestedCards: Story = {
             <p tedi-text>Sinu püsiravimid ja meditsiiniseadmed, mis on väljastatud viimase 6 kuu jooksul.</p>
             <h5 tedi-text>Ravimid</h5>
             <tedi-card [borderless]="true">
-              <tedi-card-content background="brand-tertiary">
+              <tedi-card-content backgroundColor="brand-tertiary">
                 <tedi-row [cols]="1" [md]="{ cols: 3 }" [gap]="2">
                   <tedi-col>
                     <tedi-text-group type="vertical">
@@ -881,7 +881,7 @@ export const NestedCards: Story = {
               </tedi-card-content>
             </tedi-card>
             <tedi-card [borderless]="true">
-              <tedi-card-content background="brand-tertiary">
+              <tedi-card-content backgroundColor="brand-tertiary">
                 <tedi-row [cols]="1" [md]="{ cols: 3 }" [gap]="2">
                   <tedi-col>
                     <tedi-text-group type="vertical">
@@ -905,7 +905,7 @@ export const NestedCards: Story = {
               </tedi-card-content>
             </tedi-card>
             <tedi-card [borderless]="true">
-              <tedi-card-content background="brand-tertiary">
+              <tedi-card-content backgroundColor="brand-tertiary">
                 <tedi-row [cols]="1" [md]="{ cols: 3 }" [gap]="2">
                   <tedi-col>
                     <tedi-text-group type="vertical">
@@ -937,7 +937,7 @@ export const NestedCards: Story = {
             <p tedi-text>Sinu ravimid ja meditsiiniseadmed, mida kasutatakse vajadusel või teatud perioodil.</p>
             <h5 tedi-text>Ravimid</h5>
             <tedi-card [borderless]="true">
-              <tedi-card-content background="brand-tertiary">
+              <tedi-card-content backgroundColor="brand-tertiary">
                 <tedi-row [cols]="1" [md]="{ cols: 3 }" [gap]="2">
                   <tedi-col>
                     <tedi-text-group type="vertical">
@@ -961,7 +961,7 @@ export const NestedCards: Story = {
               </tedi-card-content>
             </tedi-card>
             <tedi-card [borderless]="true">
-              <tedi-card-content background="brand-tertiary">
+              <tedi-card-content backgroundColor="brand-tertiary">
                 <tedi-row [cols]="1" [md]="{ cols: 3 }" [gap]="2">
                   <tedi-col>
                     <tedi-text-group type="vertical">
@@ -1118,7 +1118,7 @@ export const CardIcon: Story = {
 export const PrescriptionExample: Story = {
   render: () => ({
     template: `
-      <tedi-card background="secondary">
+      <tedi-card backgroundColor="secondary">
         <tedi-card-row>
           <tedi-card-icon type="brand">
             <tedi-icon name="prescriptions" />
@@ -1227,7 +1227,7 @@ export const SplitCardBody: Story = {
               euismod non auctor sed, consequat in ligula.
             </p>
           </tedi-card-content>
-          <tedi-card-content background="secondary">
+          <tedi-card-content backgroundColor="secondary">
             <p tedi-text>Parem</p>
           </tedi-card-content>
         </tedi-card-row>
@@ -1264,7 +1264,7 @@ export const EqualHeight: Story = {
     template: `
       <tedi-row [cols]="1" [lg]="{ cols: 3 }" [gap]="2">
         <tedi-card>
-          <tedi-card-header background="brand-primary">
+          <tedi-card-header backgroundColor="brand-primary">
             <h2 tedi-text color="white">Pikema sisuga kaart</h2>
           </tedi-card-header>
           <tedi-card-content class="flex flex-column justify-content-between gap-3">
@@ -1279,7 +1279,7 @@ export const EqualHeight: Story = {
         </tedi-card>
         <tedi-col>
           <tedi-card>
-            <tedi-card-header background="brand-primary">
+            <tedi-card-header backgroundColor="brand-primary">
               <h2 tedi-text color="white">Venitamata kaart</h2>
             </tedi-card-header>
             <tedi-card-content class="flex flex-column justify-content-between gap-3">
@@ -1291,7 +1291,7 @@ export const EqualHeight: Story = {
           </tedi-card>
         </tedi-col>
         <tedi-card>
-          <tedi-card-header background="brand-primary">
+          <tedi-card-header backgroundColor="brand-primary">
             <h2 tedi-text color="white">Venitatud sisuga kaart</h2>
           </tedi-card-header>
           <tedi-card-content class="flex flex-column justify-content-between gap-3">
@@ -1310,7 +1310,7 @@ export const WithNotification: Story = {
   render: () => ({
     template: `
       <tedi-card [padding]="0.75">
-        <tedi-card-header background="primary">
+        <tedi-card-header backgroundColor="primary">
           <h3 tedi-text>Kaardi pealkiri</h3>
         </tedi-card-header>
         <tedi-alert variant="noSideBorders">
@@ -1338,8 +1338,8 @@ export const BreakpointProps: Story = {
     template: `
       <tedi-card
         [padding]="0.5"
-        [md]="{ padding: 1.5, background: 'brand-tertiary' }"
-        [lg]="{ padding: 2.5, background: 'success-primary' }"
+        [md]="{ padding: 1.5, backgroundColor: 'brand-tertiary' }"
+        [lg]="{ padding: 2.5, backgroundColor: 'success-primary' }"
       >
         <tedi-card-content>
           <p tedi-text>{{ CABBAGE_TEXT }}</p>

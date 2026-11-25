@@ -39,7 +39,7 @@ export interface PaginationBreakpointInputs {
   showArrowLabels?: boolean;
   arrowVariant?: ButtonVariant;
   dividerPosition?: PaginationDividerPosition;
-  background?: PaginationBackground;
+  backgroundColor?: PaginationBackground;
 }
 
 export type PaginationItemType = "page" | "previous" | "next" | "ellipsis";

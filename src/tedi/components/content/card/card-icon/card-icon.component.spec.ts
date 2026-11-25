@@ -13,7 +13,7 @@ import { CardBackground } from "../card.utils";
   standalone: true,
   imports: [CardIconComponent],
   template: `
-    <tedi-card-icon [type]="type" [size]="size" [background]="background">
+    <tedi-card-icon [type]="type" [size]="size" [backgroundColor]="background">
       <span class="projected">Icon</span>
     </tedi-card-icon>
   `,

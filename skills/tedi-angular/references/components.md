@@ -185,8 +185,8 @@ Both entry points declare `[tedi-floating-button]`. The Community component is
   or scrolling. Corner rounding is carried by the first and last block, not the card.
 - **`tedi-card-row` stacks via its `direction` input**, not a flex-direction utility class, because
   the row uses `direction` to decide which corners it rounds.
-- **`tedi-card-icon` does not inherit the card's background.** Its `background` defaults to
-  `brand-primary` independently.
+- **`tedi-card-icon` does not inherit the card's background.** Its `backgroundColor` defaults to
+  `secondary`, or `brand-primary` with `type="brand"`, independently.
 - **`[tedi-label-row]` projects your own `<label tedi-label>`** plus trailing affixes as siblings, so
   native label attributes (`for`, `id`, `aria-*`, handlers) keep working.
 - **`tedi-inline-edit` needs an `<ng-template tediInlineEditControl>`.** The control goes in that

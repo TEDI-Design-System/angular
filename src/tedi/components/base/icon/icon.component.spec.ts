@@ -106,7 +106,7 @@ describe("IconComponent", () => {
     ];
 
     for (const bg of backgrounds) {
-      fixture.componentRef.setInput("background", bg);
+      fixture.componentRef.setInput("backgroundColor", bg);
       fixture.detectChanges();
 
       expect(iconElement.classList).toContain("tedi-icon--bg");
@@ -115,7 +115,7 @@ describe("IconComponent", () => {
   });
 
   it("should clamp size and set padding for background icons", () => {
-    fixture.componentRef.setInput("background", "primary");
+    fixture.componentRef.setInput("backgroundColor", "primary");
 
     fixture.componentRef.setInput("size", 8);
     fixture.detectChanges();

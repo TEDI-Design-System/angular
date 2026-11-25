@@ -18,7 +18,7 @@ import {
 } from "../card.utils";
 
 export type CardContentInputs = {
-  background?: CardBackground;
+  backgroundColor?: CardBackground;
   padding?: CardPadding;
   backgroundImage?: string;
   backgroundPosition?: string;
@@ -28,7 +28,7 @@ export type CardContentInputs = {
 };
 
 /**
- * Content block of a card. Inherits unset `background` and `padding`
+ * Content block of a card. Inherits unset `backgroundColor` and `padding`
  * from the parent `tedi-card`.
  */
 @Component({
@@ -48,7 +48,7 @@ export class CardContentComponent implements BreakpointInputs<CardContentInputs>
    * Background color.
    * @default primary
    */
-  background = input<CardBackground>();
+  backgroundColor = input<CardBackground>();
   /**
    * Content padding.
    * Value is either a predefined number in rems or an object of
@@ -94,7 +94,7 @@ export class CardContentComponent implements BreakpointInputs<CardContentInputs>
 
   breakpointInputs = computed(() => {
     return this.breakpointService.getBreakpointInputs<CardContentInputs>({
-      background: this.background(),
+      backgroundColor: this.backgroundColor(),
       padding: this.padding(),
       backgroundImage: this.backgroundImage(),
       backgroundPosition: this.backgroundPosition(),
@@ -112,9 +112,9 @@ export class CardContentComponent implements BreakpointInputs<CardContentInputs>
   });
 
   classes = computed(() => {
-    const { background, autoWidth } = this.breakpointInputs();
+    const { backgroundColor, autoWidth } = this.breakpointInputs();
     const resolvedBackground =
-      background ?? this.inheritedBackground() ?? this.defaultBackground;
+      backgroundColor ?? this.inheritedBackground() ?? this.defaultBackground;
     const classList = [
       this.blockClass,
       `${this.blockClass}--background--${resolvedBackground}`,
@@ -160,7 +160,7 @@ export class CardContentComponent implements BreakpointInputs<CardContentInputs>
   });
 
   protected inheritedBackground(): CardBackground | undefined {
-    return this.card?.breakpointInputs().background;
+    return this.card?.breakpointInputs().backgroundColor;
   }
 
   protected defaultPadding(): CardPadding {

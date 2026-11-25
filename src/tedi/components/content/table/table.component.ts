@@ -158,7 +158,7 @@ interface ResolvedPaginationSlot {
   boundaryCount: number;
   siblingCount: number;
   labels: TablePaginationOptions["labels"];
-  background: NonNullable<TablePaginationOptions["background"]>;
+  backgroundColor: NonNullable<TablePaginationOptions["backgroundColor"]>;
   align: NonNullable<TablePaginationOptions["align"]>;
   dividerPosition: NonNullable<TablePaginationOptions["dividerPosition"]>;
   hideResults: NonNullable<TablePaginationOptions["hideResults"]>;
@@ -183,7 +183,7 @@ const SLOT_DEFAULTS_BOTTOM: ResolvedPaginationSlot = {
   boundaryCount: 1,
   siblingCount: 1,
   labels: undefined,
-  background: "white",
+  backgroundColor: "white",
   align: "between",
   dividerPosition: "top",
   hideResults: false,

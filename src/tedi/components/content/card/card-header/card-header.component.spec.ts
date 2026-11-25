@@ -10,8 +10,8 @@ import { CardBackground, CardPadding } from "../card.utils";
   standalone: true,
   imports: [CardComponent, CardHeaderComponent],
   template: `
-    <tedi-card [background]="cardBackground" [padding]="cardPadding">
-      <tedi-card-header [background]="background" [padding]="padding">
+    <tedi-card [backgroundColor]="cardBackground" [padding]="cardPadding">
+      <tedi-card-header [backgroundColor]="background" [padding]="padding">
         <span class="projected">Header</span>
       </tedi-card-header>
     </tedi-card>

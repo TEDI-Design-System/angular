@@ -487,7 +487,7 @@ const VARIANTS_TEMPLATE = `
           <tedi-accordion-item>
             <tedi-accordion-item-header>
               <span tedi-accordion-title>Pealkiri</span>
-              <tedi-icon tedi-accordion-before-title name="account_circle" color="brand" background="brand-secondary" [size]="16"></tedi-icon>
+              <tedi-icon tedi-accordion-before-title name="account_circle" color="brand" backgroundColor="brand-secondary" [size]="16"></tedi-icon>
             </tedi-accordion-item-header>
             <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>
           </tedi-accordion-item>
@@ -977,7 +977,7 @@ const CUSTOMIZED_TEMPLATE = `
               [headerClass]="'custom-icon-rotation'"
             >
               <span tedi-accordion-title>Pealkiri</span>
-              <tedi-icon tedi-accordion-before-title name="account_circle" color="brand" background="brand-secondary" [size]="16"></tedi-icon>
+              <tedi-icon tedi-accordion-before-title name="account_circle" color="brand" backgroundColor="brand-secondary" [size]="16"></tedi-icon>
               <tedi-status-badge tedi-accordion-after-title color="neutral" text="Uus" />
             </tedi-accordion-item-header>
             <tedi-accordion-item-content>${contentExample}</tedi-accordion-item-content>

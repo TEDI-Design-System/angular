@@ -306,7 +306,7 @@ export const SimpleCard: Story = {
       <div style="max-width: 360px"><div [tediVerticalSpacing]="1">
         <tedi-table-card labelSize="small">
           @for (benefit of benefits; track benefit) {
-            <tedi-table-card-group background="primary">
+            <tedi-table-card-group backgroundColor="primary">
               <div tedi-table-card-row label="Hüvitise arvutamine" value="Tervisekassa ei hüvita"></div>
               <div tedi-table-card-row label="Kogus" value="2 päeva"></div>
               <div tedi-table-card-row label="Ühe päeva hüvitis (€)" value="-"></div>
@@ -527,7 +527,7 @@ export const WithActions: Story = {
           <div tedi-table-card-row label="Arst" value="Pille Paunküla"></div>
           <div tedi-table-card-row label="Maksumus" value="45.50 €/h"></div>
           <tedi-table-card-group
-            background="primary"
+            backgroundColor="primary"
             layout="horizontal"
             labelAlign="left"
             valueAlign="left"

@@ -101,7 +101,7 @@ export default {
         defaultValue: { summary: "primary" },
       },
     },
-    background: {
+    backgroundColor: {
       description:
         "Background color for the icon (adds a circular background).",
       control: "select",
@@ -192,7 +192,7 @@ export const IconSize: StoryObj<IconComponent> = {
 
 export const IconSizeInsideBackground: StoryObj<IconComponent> = {
   args: {
-    background: "brand-secondary",
+    backgroundColor: "brand-secondary",
     color: "brand",
   },
   render: (args) => ({
@@ -280,10 +280,10 @@ export const IconBackgroundColors: StoryObj<IconComponent> = {
     props: args,
     template: `
       <div class="flex align-items-center gap-4">
-        <tedi-icon ${argsToTemplate(args)} [name]="'vaccines'" color="white" background="brand-primary" [size]="24" />
-        <tedi-icon ${argsToTemplate(args)} [name]="'info'" color="white" background="brand-primary" [size]="16" />
-        <tedi-icon ${argsToTemplate(args)} [name]="'vaccines'" color="brand" background="brand-secondary" [size]="24" />
-        <tedi-icon ${argsToTemplate(args)} [name]="'info'" color="brand" background="brand-secondary" [size]="16" />
+        <tedi-icon ${argsToTemplate(args)} [name]="'vaccines'" color="white" backgroundColor="brand-primary" [size]="24" />
+        <tedi-icon ${argsToTemplate(args)} [name]="'info'" color="white" backgroundColor="brand-primary" [size]="16" />
+        <tedi-icon ${argsToTemplate(args)} [name]="'vaccines'" color="brand" backgroundColor="brand-secondary" [size]="24" />
+        <tedi-icon ${argsToTemplate(args)} [name]="'info'" color="brand" backgroundColor="brand-secondary" [size]="16" />
         <div
           class="display-flex gap-3"
           [ngStyle]="{
@@ -292,10 +292,10 @@ export const IconBackgroundColors: StoryObj<IconComponent> = {
               'padding': '16px'
           }"
         >
-          <tedi-icon ${argsToTemplate(args)} [name]="'vaccines'" color="brand" background="primary" [size]="24" />
-          <tedi-icon ${argsToTemplate(args)} [name]="'info'" color="brand" background="primary" [size]="16" />
-          <tedi-icon ${argsToTemplate(args)} [name]="'vaccines'" color="white" background="secondary" [size]="24" />
-          <tedi-icon ${argsToTemplate(args)} [name]="'info'" color="white" background="secondary" [size]="16" />
+          <tedi-icon ${argsToTemplate(args)} [name]="'vaccines'" color="brand" backgroundColor="primary" [size]="24" />
+          <tedi-icon ${argsToTemplate(args)} [name]="'info'" color="brand" backgroundColor="primary" [size]="16" />
+          <tedi-icon ${argsToTemplate(args)} [name]="'vaccines'" color="white" backgroundColor="secondary" [size]="24" />
+          <tedi-icon ${argsToTemplate(args)} [name]="'info'" color="white" backgroundColor="secondary" [size]="16" />
         </div>
       </div>
     `,

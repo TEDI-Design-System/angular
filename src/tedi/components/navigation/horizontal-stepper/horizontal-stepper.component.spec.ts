@@ -22,7 +22,7 @@ class TranslationMock {
   template: `
     <tedi-horizontal-stepper
       [ariaLabel]="ariaLabel"
-      [background]="background"
+      [backgroundColor]="background"
       [compact]="compact"
     >
       <tedi-horizontal-stepper-item label="Request" completed />

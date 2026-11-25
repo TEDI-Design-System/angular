@@ -468,7 +468,7 @@ describe("PaginationComponent", () => {
 
   it("applies the transparent background class when set", () => {
     const fixture = setup();
-    fixture.componentRef.setInput("background", "transparent");
+    fixture.componentRef.setInput("backgroundColor", "transparent");
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).classList).toContain(
       "tedi-pagination--bg-transparent",
