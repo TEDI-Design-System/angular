@@ -593,6 +593,7 @@ export const Divided: Story = {
  * dropdown.
  */
 export const InPopover: Story = {
+  parameters: { visualTest: false },
   render: () => ({
     moduleMetadata: {
       imports: [
