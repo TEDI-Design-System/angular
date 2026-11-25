@@ -27,6 +27,7 @@ import { TextComponent } from "../../base/text/text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { ShowAtDirective } from "../../../directives/show-at/show-at.directive";
+import { formatLocaleDate } from "../../../utils/date.util";
 
 type InlineEditStory = StoryObj<
   Omit<InlineEditComponent, "disabled" | "invalid"> & {
@@ -179,7 +180,7 @@ export default {
     },
     closeOnEnter: {
       description:
-        "Whether Enter commits. Enter in a textarea or combobox, or on a button, is left to that control.",
+        "Commits on Enter, except in a textarea or combobox, on a button or link, or with Shift held.",
       control: { type: "boolean" },
       table: {
         category: "inputs",
@@ -793,8 +794,6 @@ export const Placeholder: StoryObj<InlineEditComponent> = {
  * Each editor keeps its own value binding. Bind `displayValue` to the same
  * source, formatting it for the read view, and give the editor its own
  * accessible label. The InlineEdit label names only the read trigger.
- * Enter in a textarea or a select, and on a button inside the editor, is left
- * to that control rather than committing.
  *
  * The examples below show date, number and multiline editors. For file
  * management, use `tedi-file-upload` or `tedi-file-dropzone` separately;
@@ -813,8 +812,7 @@ export const SupportedControls: StoryObj<InlineEditComponent> = {
     return {
       props: {
         state,
-        formatDate: (d: Date | null) =>
-          d ? d.toLocaleDateString("et-EE") : "",
+        formatDate: (d: Date | null) => (d ? formatLocaleDate(d, "et-EE") : ""),
         transportLabel: (v: string) =>
           ({ bus: "Buss", train: "Rong" })[v] ?? "",
         extrasLabel: (v: string[]) =>

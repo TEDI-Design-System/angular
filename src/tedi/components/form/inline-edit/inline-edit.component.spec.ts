@@ -395,19 +395,15 @@ describe("InlineEditComponent", () => {
     });
 
     it.each([
-      ["a textarea", "textarea", {}],
-      ["a combobox", 'div role="combobox"', {}],
-      ["a listbox option", 'div role="listbox"', {}],
-      ["Shift+Enter", "input", { shiftKey: true }],
-    ])("leaves Enter to %s", async (_name, markup, init) => {
+      ["a textarea", "textarea", {}, {}],
+      ["a combobox", "div", { role: "combobox" }, {}],
+      ["a listbox option", "div", { role: "listbox" }, {}],
+      ["Shift+Enter", "input", {}, { shiftKey: true }],
+    ])("leaves Enter to %s", async (_name, tag, attrs, init) => {
       await enterEditMode();
 
-      const [tag, attr] = markup.split(" ");
       const el = document.createElement(tag);
-      if (attr) {
-        const [k, v] = attr.split("=");
-        el.setAttribute(k, v.replace(/"/g, ""));
-      }
+      Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
       dom().querySelector(".tedi-inline-edit__editor")!.appendChild(el);
       const event = new KeyboardEvent("keydown", {
         key: "Enter",
