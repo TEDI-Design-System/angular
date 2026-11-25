@@ -42,7 +42,7 @@
   [attr.name]="name()"
   [attr.accept]="accept()"
   [attr.webkitdirectory]="uploadFolder() ? '' : null"
-  [multiple]="multiple()"
+  [multiple]="isMultiple()"
   [disabled]="isDisabled()"
   (change)="handleSelection($event)"
   (cancel)="handleDialogCancel()"

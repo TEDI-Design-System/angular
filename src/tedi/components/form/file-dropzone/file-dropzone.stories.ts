@@ -191,7 +191,8 @@ export default {
       },
     },
     multiple: {
-      description: "Whether more than one file can be held at a time.",
+      description:
+        "Whether more than one file can be held at a time. Left unset it follows `uploadFolder`, since a folder arrives as the files inside it.",
       control: "boolean",
       table: {
         category: "inputs",
@@ -212,7 +213,7 @@ export default {
     },
     uploadFolder: {
       description:
-        "Lets the user pick a whole folder. Use with `multiple` — the browser hands over every file inside it whatever `multiple` says.",
+        "Lets the user pick a whole folder, which the browser hands over as the files inside it — so this turns `multiple` on unless you set it yourself.",
       control: "boolean",
       table: {
         category: "inputs",

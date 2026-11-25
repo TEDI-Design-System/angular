@@ -197,10 +197,15 @@ export class FileDropzoneComponent
    */
   readonly validator = input<FileDropzoneValidator>();
   /**
-   * Whether more than one file can be held at a time.
+   * Whether more than one file can be held at a time. Left unset it follows
+   * `uploadFolder`, since a folder arrives as the files inside it.
    * @default false
    */
-  readonly multiple = input(false, { transform: booleanAttribute });
+  readonly multiple = input<boolean | undefined, unknown>(undefined, {
+    // Unset stays `undefined`, so `uploadFolder` can decide instead.
+    transform: (value: unknown) =>
+      value == null ? undefined : booleanAttribute(value),
+  });
   /**
    * Keeps rejected files in the list, each carrying its own reason, instead of
    * discarding them and summarising every rejection under the dropzone.
@@ -214,8 +219,8 @@ export class FileDropzoneComponent
    */
   readonly duplicates = input<FileDropzoneDuplicates>("skip");
   /**
-   * Lets the user pick a whole folder. Use with `multiple` — the browser hands
-   * over every file inside it whatever `multiple` says.
+   * Lets the user pick a whole folder, which the browser hands over as the
+   * files inside it — so this turns `multiple` on unless you set it yourself.
    * @default false
    */
   readonly uploadFolder = input(false, { transform: booleanAttribute });
@@ -264,6 +269,11 @@ export class FileDropzoneComponent
 
   protected readonly isDisabled = computed(
     () => this.disabled() || this.formDisabled(),
+  );
+
+  /** Own `multiple` wins; unset, a folder upload implies it. */
+  protected readonly isMultiple = computed(
+    () => this.multiple() ?? this.uploadFolder(),
   );
 
   protected readonly isInvalid = computed(
@@ -664,7 +674,7 @@ export class FileDropzoneComponent
     const kept = keepRejected
       ? candidates
       : candidates.filter((file) => file.isValid);
-    const multiple = this.multiple();
+    const multiple = this.isMultiple();
 
     // A single-file zone holds one file, and it is the first that passed: a
     // rejected file dropped alongside a good one must not take its place.

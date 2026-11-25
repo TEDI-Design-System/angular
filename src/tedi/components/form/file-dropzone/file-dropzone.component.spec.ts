@@ -538,6 +538,34 @@ describe("FileDropzoneComponent", () => {
       );
     });
 
+    it("keeps a whole folder when multiple is left unset", async () => {
+      fixture.componentRef.setInput("uploadFolder", true);
+      fixture.detectChanges();
+
+      expect(fileInput(fixture).multiple).toBe(true);
+
+      selectFiles(fixture, [makeFile("a.pdf"), makeFile("b.pdf")]);
+
+      expect(component.files().map((file) => file.name)).toEqual([
+        "a.pdf",
+        "b.pdf",
+      ]);
+      expect(await announced()).toBe("file-upload.added:2");
+    });
+
+    it("keeps one from a folder when multiple is set false", async () => {
+      fixture.componentRef.setInput("uploadFolder", true);
+      fixture.componentRef.setInput("multiple", false);
+      fixture.detectChanges();
+
+      expect(fileInput(fixture).multiple).toBe(false);
+
+      selectFiles(fixture, [makeFile("a.pdf"), makeFile("b.pdf")]);
+
+      expect(component.files().map((file) => file.name)).toEqual(["a.pdf"]);
+      expect(await announced()).toBe("file-dropzone.single-file-kept:a.pdf");
+    });
+
     it("accepts a double extension, which the browser's own picker offers", () => {
       fixture.componentRef.setInput("accept", ".tar.gz");
       fixture.detectChanges();
