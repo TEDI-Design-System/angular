@@ -1,11 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   input,
   ViewEncapsulation,
 } from "@angular/core";
 import { AccordionItemComponent } from "../accordion-item/accordion-item.component";
+import { CardBackground } from "../../card/card.utils";
 
 @Component({
   selector: "tedi-accordion-item-content",
@@ -19,7 +21,7 @@ import { AccordionItemComponent } from "../accordion-item/accordion-item.compone
     "[class.tedi-accordion-item-content]": "true",
     "[class.tedi-accordion-item-content--with-icon-card]":
       "item.showIconCard()",
-    "[class]": "contentClass() ?? ''",
+    "[class]": "hostClass()",
     "[id]": "contentId",
     "[attr.role]": "expanded() ? 'region' : null",
     "[attr.aria-labelledby]": "headerId",
@@ -34,6 +36,21 @@ export class AccordionItemContentComponent {
    * Custom CSS classes for the accordion content.
    */
   contentClass = input<string | null>(null);
+  /**
+   * Background color of the content. Uses the same values as `tedi-card-content`.
+   */
+  backgroundColor = input<CardBackground>();
+
+  readonly hostClass = computed(() => {
+    const backgroundColor = this.backgroundColor();
+    return [
+      backgroundColor &&
+        `tedi-accordion-item-content--background--${backgroundColor}`,
+      this.contentClass(),
+    ]
+      .filter(Boolean)
+      .join(" ");
+  });
 
   readonly headerId = this.item.headerId;
   readonly contentId = this.item.contentId;

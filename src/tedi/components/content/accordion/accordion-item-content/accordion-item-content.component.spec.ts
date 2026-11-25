@@ -5,6 +5,7 @@ import { AccordionItemComponent } from "../accordion-item/accordion-item.compone
 import { AccordionItemHeaderComponent } from "../accordion-item-header/accordion-item-header.component";
 import { AccordionItemContentComponent } from "./accordion-item-content.component";
 import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.token";
+import { CardBackground } from "../../card/card.utils";
 
 @Component({
   standalone: true,
@@ -19,7 +20,10 @@ import { TEDI_TRANSLATION_DEFAULT_TOKEN } from "../../../../tokens/translation.t
       [showIconCard]="showIconCard"
     >
       <tedi-accordion-item-header />
-      <tedi-accordion-item-content [contentClass]="contentClass">
+      <tedi-accordion-item-content
+        [contentClass]="contentClass"
+        [backgroundColor]="backgroundColor"
+      >
         Content
       </tedi-accordion-item-content>
     </tedi-accordion-item>
@@ -33,6 +37,7 @@ class TestHostComponent {
   defaultExpanded = false;
   showIconCard = false;
   contentClass: string | null = null;
+  backgroundColor: CardBackground | undefined = undefined;
 }
 
 describe("AccordionItemContentComponent", () => {
@@ -125,5 +130,20 @@ describe("AccordionItemContentComponent", () => {
     expect(contentEl.classList).toContain(
       "tedi-accordion-item-content--with-icon-card",
     );
+  });
+
+  it("should apply backgroundColor modifier alongside contentClass", () => {
+    fixture.componentInstance.backgroundColor = "warning-primary";
+    fixture.componentInstance.contentClass = "custom-content";
+    fixture.detectChanges();
+
+    const contentEl = fixture.debugElement.query(
+      By.directive(AccordionItemContentComponent),
+    ).nativeElement as HTMLElement;
+
+    expect(contentEl.classList).toContain(
+      "tedi-accordion-item-content--background--warning-primary",
+    );
+    expect(contentEl.classList).toContain("custom-content");
   });
 });

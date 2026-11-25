@@ -1,3 +1,5 @@
+@use "../../card/card-mixins";
+
 .tedi-accordion-item-content {
   position: relative;
   grid-row: 2;
@@ -9,3 +11,6 @@
 .tedi-accordion-item-content__inner {
   padding: var(--card-padding-md-default);
 }
+
+// After the base block so modifiers win over the default background.
+@include card-mixins.card-backgrounds("tedi-accordion-item-content");
