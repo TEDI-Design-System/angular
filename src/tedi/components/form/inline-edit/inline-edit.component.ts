@@ -150,8 +150,8 @@ export class InlineEditComponent {
     transform: booleanAttribute,
   });
   /**
-   * Commits on Enter. Turn off when the editor uses Enter for a newline
-   * or to open a select dropdown.
+   * Commits on Enter, except in a textarea or combobox, on a button or link, or
+   * with Shift held.
    * @default true
    */
   readonly closeOnEnter = input(true, { transform: booleanAttribute });
@@ -322,12 +322,24 @@ export class InlineEditComponent {
     if (!this.editing() || event.defaultPrevented || event.isComposing) return;
 
     if (event.key === "Enter" && this.closeOnEnter()) {
+      if (event.shiftKey || this.enterBelongsToTarget(event.target)) return;
       event.preventDefault();
       this.stopEditing("commit", true);
     } else if (event.key === "Escape" && this.closeOnEscape()) {
       event.preventDefault();
       this.stopEditing("cancel", true);
     }
+  }
+
+  /** Enter already means something to a textarea, a combobox or a button. */
+  private enterBelongsToTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false;
+    return (
+      target.tagName === "TEXTAREA" ||
+      !!target.closest(
+        '[role="combobox"], [role="listbox"], button, a[href], [role="button"]',
+      )
+    );
   }
 
   handleFocusOut(event: FocusEvent) {

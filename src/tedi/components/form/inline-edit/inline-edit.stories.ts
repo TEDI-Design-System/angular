@@ -27,6 +27,7 @@ import { TextComponent } from "../../base/text/text.component";
 import { RowComponent } from "../../helpers/grid/row/row.component";
 import { ColComponent } from "../../helpers/grid/col/col.component";
 import { ShowAtDirective } from "../../../directives/show-at/show-at.directive";
+import { formatLocaleDate } from "../../../utils/date.util";
 
 type InlineEditStory = StoryObj<
   Omit<InlineEditComponent, "disabled" | "invalid"> & {
@@ -179,7 +180,7 @@ export default {
     },
     closeOnEnter: {
       description:
-        "Whether Enter commits. Turn off when the control uses Enter, such as a textarea or select.",
+        "Commits on Enter, except in a textarea or combobox, on a button or link, or with Shift held.",
       control: { type: "boolean" },
       table: {
         category: "inputs",
@@ -276,9 +277,7 @@ export const Default: InlineEditStory = {
 /**
  * The editor is any TEDI form control, wired to its own value binding. Give it
  * its own accessible label — link a visible label with `for` and `id`, or use
- * `aria-label`. InlineEdit's `label` names only the read trigger. Set
- * `[closeOnEnter]="false"` on a select so Enter opens the dropdown instead of
- * committing.
+ * `aria-label`. InlineEdit's `label` names only the read trigger.
  */
 export const Type: StoryObj<InlineEditComponent> = {
   render: () => ({
@@ -311,7 +310,7 @@ export const Type: StoryObj<InlineEditComponent> = {
         </tedi-col>
         <tedi-col [width]="4"><p tedi-text modifiers="bold">Select</p></tedi-col>
         <tedi-col [width]="8">
-          <tedi-inline-edit [displayValue]="typeLabel(state.type)" label="Tüüp" [closeOnEnter]="false">
+          <tedi-inline-edit [displayValue]="typeLabel(state.type)" label="Tüüp">
             <ng-template tediInlineEditControl>
               <tedi-select inputId="ie-type-select" ariaLabel="Tüüp" [options]="typeOptions"
                 bindLabel="label" bindValue="value" [clearable]="false" [(ngModel)]="state.type" />
@@ -405,7 +404,7 @@ export const ValueType: StoryObj<InlineEditComponent> = {
         fields(`
           <tedi-col [width]="4"><label tedi-label>Tüüp</label></tedi-col>
           <tedi-col [width]="8">
-            <tedi-inline-edit [displayValue]="state.type.label" label="Tüüp" [closeOnEnter]="false">
+            <tedi-inline-edit [displayValue]="state.type.label" label="Tüüp">
               <ng-template tediInlineEditControl>
                 <tedi-select inputId="ie-value-type" ariaLabel="Tüüp" [options]="typeOptions"
                   bindLabel="label" bindValue="value" [ngModel]="state.type.value"
@@ -416,7 +415,7 @@ export const ValueType: StoryObj<InlineEditComponent> = {
 
           <tedi-col [width]="4"><label tedi-label>Aadress</label></tedi-col>
           <tedi-col [width]="8">
-            <tedi-inline-edit [displayValue]="state.address?.label ?? ''" label="Aadress" placeholder="Sisesta aadress" [closeOnEnter]="false">
+            <tedi-inline-edit [displayValue]="state.address?.label ?? ''" label="Aadress" placeholder="Sisesta aadress">
               <ng-template tediInlineEditControl>
                 <tedi-select inputId="ie-value-address" ariaLabel="Aadress" [options]="addressOptions"
                   bindLabel="label" bindValue="value" [ngModel]="state.address?.value"
@@ -427,7 +426,7 @@ export const ValueType: StoryObj<InlineEditComponent> = {
 
           <tedi-col [width]="4"><label tedi-label>Märksõnad</label></tedi-col>
           <tedi-col [width]="8">
-            <tedi-inline-edit [displayValue]="state.keywords.length ? 'valitud' : ''" label="Märksõnad" placeholder="—" [closeOnEnter]="false">
+            <tedi-inline-edit [displayValue]="state.keywords.length ? 'valitud' : ''" label="Märksõnad" placeholder="—">
               <ng-template tediInlineEditValue>
                 <span class="flex flex-wrap gap-1">
                   @for (k of state.keywords; track k) {
@@ -445,7 +444,7 @@ export const ValueType: StoryObj<InlineEditComponent> = {
 
           <tedi-col [width]="4"><label tedi-label>Olek</label></tedi-col>
           <tedi-col [width]="8">
-            <tedi-inline-edit [displayValue]="state.olek.label" label="Olek" [closeOnEnter]="false">
+            <tedi-inline-edit [displayValue]="state.olek.label" label="Olek">
               <ng-template tediInlineEditValue>
                 <tedi-status-badge [color]="olekColor[state.olek.value]" [text]="state.olek.label" />
               </ng-template>
@@ -601,7 +600,6 @@ export const States: StoryObj<InlineEditComponent> = {
               [id]="'ie-state-' + state.key + '-select'"
               [displayValue]="countryLabel(state.country)"
               label="Riik"
-              [closeOnEnter]="false"
               [editing]="!!state.editing"
               [invalid]="!!state.invalid"
               [disabled]="!!state.disabled"
@@ -771,7 +769,7 @@ export const Placeholder: StoryObj<InlineEditComponent> = {
           </tedi-col>
           <tedi-col [width]="4"><label tedi-label>Aadress</label></tedi-col>
           <tedi-col [width]="8">
-            <tedi-inline-edit [displayValue]="state.address?.label ?? ''" placeholder="Sisesta aadress" label="Aadress" [closeOnEnter]="false">
+            <tedi-inline-edit [displayValue]="state.address?.label ?? ''" placeholder="Sisesta aadress" label="Aadress">
               <ng-template tediInlineEditControl>
                 <tedi-select inputId="ie-placeholder-address" ariaLabel="Aadress" [options]="addressOptions"
                   bindLabel="label" bindValue="value" [ngModel]="state.address?.value"
@@ -796,8 +794,6 @@ export const Placeholder: StoryObj<InlineEditComponent> = {
  * Each editor keeps its own value binding. Bind `displayValue` to the same
  * source, formatting it for the read view, and give the editor its own
  * accessible label. The InlineEdit label names only the read trigger.
- * Set `closeOnEnter` to `false` when the editor uses Enter, such as a textarea
- * inserting a newline or a select opening its dropdown.
  *
  * The examples below show date, number and multiline editors. For file
  * management, use `tedi-file-upload` or `tedi-file-dropzone` separately;
@@ -816,8 +812,7 @@ export const SupportedControls: StoryObj<InlineEditComponent> = {
     return {
       props: {
         state,
-        formatDate: (d: Date | null) =>
-          d ? d.toLocaleDateString("et-EE") : "",
+        formatDate: (d: Date | null) => (d ? formatLocaleDate(d, "et-EE") : ""),
         transportLabel: (v: string) =>
           ({ bus: "Buss", train: "Rong" })[v] ?? "",
         extrasLabel: (v: string[]) =>
@@ -846,7 +841,7 @@ export const SupportedControls: StoryObj<InlineEditComponent> = {
           </tedi-col>
           <tedi-col [width]="4"><label tedi-label for="inline-edit-note">Märkus</label></tedi-col>
           <tedi-col [width]="8">
-            <tedi-inline-edit [displayValue]="state.note" label="Märkus" [closeOnEnter]="false">
+            <tedi-inline-edit [displayValue]="state.note" label="Märkus">
               <ng-template tediInlineEditControl>
                 <textarea tedi-textarea id="inline-edit-note" [(value)]="state.note"></textarea>
               </ng-template>
